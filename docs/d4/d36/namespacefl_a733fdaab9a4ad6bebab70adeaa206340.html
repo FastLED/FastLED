@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -107,7 +107,7 @@ $(function(){initNavTree('d4/d36/namespacefl_a733fdaab9a4ad6bebab70adeaa206340.h
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="../../df/d96/s16x16x4_8h_ad12102840a95770657e94a62c99a82ec.html#ad12102840a95770657e94a62c99a82ec">FL_OPTIMIZE_FUNCTION</a> <a class="el" href="../../df/d96/s16x16x4_8h_adcb7795cd6f85159b3087db18279685e.html#adcb7795cd6f85159b3087db18279685e">FL_IRAM</a> void fl::wave8Transpose_8_bf1 </td>
+          <td class="memname"><a class="el" href="../../d4/d54/compiler__control_8h_ad12102840a95770657e94a62c99a82ec.html#ad12102840a95770657e94a62c99a82ec">FL_OPTIMIZE_FUNCTION</a> <a class="el" href="../../d4/d54/compiler__control_8h_adcb7795cd6f85159b3087db18279685e.html#adcb7795cd6f85159b3087db18279685e">FL_IRAM</a> void fl::wave8Transpose_8_bf1 </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a>(&amp;)</td>          <td class="paramname"><span class="paramname"><em>lanes</em></span>[8], </td>
         </tr>
@@ -126,18 +126,18 @@ $(function(){initNavTree('d4/d36/namespacefl_a733fdaab9a4ad6bebab70adeaa206340.h
 
 <p>BF1 for 8-lane Wave8 (#2548 deep-dive followup). </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d8/d81/wave8_8cpp_8hpp_source.html#l00171">171</a> of file <a class="el" href="../../d8/d81/wave8_8cpp_8hpp_source.html">wave8.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  173</span>                                                                                 {</div>
-<div class="line"><span class="lineno">  174</span>    <span class="keyword">const</span> <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a> <a class="code hl_enumvalue" href="../../d4/d36/namespacefl_aedae725b3dd3e43aec65818e5c32c534.html#aedae725b3dd3e43aec65818e5c32c534ace65075f393b1916e66fa833cf299be0">W0</a> = lut.lut[0x00].symbols[0].data;</div>
-<div class="line"><span class="lineno">  175</span>    <span class="keyword">const</span> <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a> <a class="code hl_enumvalue" href="../../d4/d36/namespacefl_aedae725b3dd3e43aec65818e5c32c534.html#aedae725b3dd3e43aec65818e5c32c534a1e9944dfac1eac7a602d65620b492a48">W1</a> = lut.lut[0xFF].symbols[0].data;</div>
-<div class="line"><span class="lineno">  176</span>    <a class="code hl_function" href="../../df/d9e/namespacefl_1_1detail_a231be5f311080ab2a8fe4414ee17dcfd.html#a231be5f311080ab2a8fe4414ee17dcfd">detail::wave8_transpose_8_bf1</a>(lanes, <a class="code hl_enumvalue" href="../../d4/d36/namespacefl_aedae725b3dd3e43aec65818e5c32c534.html#aedae725b3dd3e43aec65818e5c32c534ace65075f393b1916e66fa833cf299be0">W0</a>, <a class="code hl_enumvalue" href="../../d4/d36/namespacefl_aedae725b3dd3e43aec65818e5c32c534.html#aedae725b3dd3e43aec65818e5c32c534a1e9944dfac1eac7a602d65620b492a48">W1</a>, output);</div>
-<div class="line"><span class="lineno">  177</span>}</div>
-<div class="ttc" id="anamespacefl_1_1detail_a231be5f311080ab2a8fe4414ee17dcfd_html_a231be5f311080ab2a8fe4414ee17dcfd"><div class="ttname"><a href="../../df/d9e/namespacefl_1_1detail_a231be5f311080ab2a8fe4414ee17dcfd.html#a231be5f311080ab2a8fe4414ee17dcfd">fl::detail::wave8_transpose_8_bf1</a></div><div class="ttdeci">FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION void wave8_transpose_8_bf1(const u8 lanes[8], u8 W0, u8 W1, u8 output[8 *sizeof(Wave8Byte)])</div><div class="ttdoc">BF1 for 8-lane Wave8 — same algebraic identity as 16-lane BF1.</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d4b/wave8_8hpp_source.html#l00345">wave8.hpp:345</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d8/d81/wave8_8cpp_8hpp_source.html#l00172">172</a> of file <a class="el" href="../../d8/d81/wave8_8cpp_8hpp_source.html">wave8.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  174</span>                                                                                 {</div>
+<div class="line"><span class="lineno">  175</span>    <span class="keyword">const</span> <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a> <a class="code hl_enumvalue" href="../../d4/d36/namespacefl_aedae725b3dd3e43aec65818e5c32c534.html#aedae725b3dd3e43aec65818e5c32c534ace65075f393b1916e66fa833cf299be0">W0</a> = lut.lut[0x00].symbols[0].data;</div>
+<div class="line"><span class="lineno">  176</span>    <span class="keyword">const</span> <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a> <a class="code hl_enumvalue" href="../../d4/d36/namespacefl_aedae725b3dd3e43aec65818e5c32c534.html#aedae725b3dd3e43aec65818e5c32c534a1e9944dfac1eac7a602d65620b492a48">W1</a> = lut.lut[0xFF].symbols[0].data;</div>
+<div class="line"><span class="lineno">  177</span>    <a class="code hl_function" href="../../df/d9e/namespacefl_1_1detail_a8e8d7e6c2826be5e6cb9ac7de5eaf9c4.html#a8e8d7e6c2826be5e6cb9ac7de5eaf9c4">detail::wave8_transpose_8_bf1</a>(lanes, <a class="code hl_enumvalue" href="../../d4/d36/namespacefl_aedae725b3dd3e43aec65818e5c32c534.html#aedae725b3dd3e43aec65818e5c32c534ace65075f393b1916e66fa833cf299be0">W0</a>, <a class="code hl_enumvalue" href="../../d4/d36/namespacefl_aedae725b3dd3e43aec65818e5c32c534.html#aedae725b3dd3e43aec65818e5c32c534a1e9944dfac1eac7a602d65620b492a48">W1</a>, output);</div>
+<div class="line"><span class="lineno">  178</span>}</div>
+<div class="ttc" id="anamespacefl_1_1detail_a8e8d7e6c2826be5e6cb9ac7de5eaf9c4_html_a8e8d7e6c2826be5e6cb9ac7de5eaf9c4"><div class="ttname"><a href="../../df/d9e/namespacefl_1_1detail_a8e8d7e6c2826be5e6cb9ac7de5eaf9c4.html#a8e8d7e6c2826be5e6cb9ac7de5eaf9c4">fl::detail::wave8_transpose_8_bf1</a></div><div class="ttdeci">FL_IRAM FL_OPTIMIZE_FUNCTION void wave8_transpose_8_bf1(const u8 lanes[8], u8 W0, u8 W1, u8 output[8 *sizeof(Wave8Byte)]) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d94/detail_2wave8_8cpp_8hpp_source.html#l00205">wave8.cpp.hpp:205</a></div></div>
 <div class="ttc" id="anamespacefl_a058ceeac48f181da463c2ba07401292c_html_a058ceeac48f181da463c2ba07401292c"><div class="ttname"><a href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a></div><div class="ttdeci">unsigned char u8</div><div class="ttdef"><b>Definition</b> <a href="../../df/dd8/stdint_8h_source.html#l00131">stdint.h:131</a></div></div>
 <div class="ttc" id="anamespacefl_aedae725b3dd3e43aec65818e5c32c534_html_aedae725b3dd3e43aec65818e5c32c534a1e9944dfac1eac7a602d65620b492a48"><div class="ttname"><a href="../../d4/d36/namespacefl_aedae725b3dd3e43aec65818e5c32c534.html#aedae725b3dd3e43aec65818e5c32c534a1e9944dfac1eac7a602d65620b492a48">fl::EOrderW::W1</a></div><div class="ttdeci">@ W1</div><div class="ttdoc">White is second.</div><div class="ttdef"><b>Definition</b> <a href="../../d3/dbc/fl_2gfx_2eorder_8h_source.html#l00026">eorder.h:26</a></div></div>
 <div class="ttc" id="anamespacefl_aedae725b3dd3e43aec65818e5c32c534_html_aedae725b3dd3e43aec65818e5c32c534ace65075f393b1916e66fa833cf299be0"><div class="ttname"><a href="../../d4/d36/namespacefl_aedae725b3dd3e43aec65818e5c32c534.html#aedae725b3dd3e43aec65818e5c32c534ace65075f393b1916e66fa833cf299be0">fl::EOrderW::W0</a></div><div class="ttdeci">@ W0</div><div class="ttdoc">White is first.</div><div class="ttdef"><b>Definition</b> <a href="../../d3/dbc/fl_2gfx_2eorder_8h_source.html#l00027">eorder.h:27</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../df/d96/s16x16x4_8h_aea8406f9f166028d3ae94a87230488ac.html#aea8406f9f166028d3ae94a87230488ac">FL_RESTRICT_PARAM</a>, <a class="el" href="../../d3/dbc/fl_2gfx_2eorder_8h_source.html#l00027">W0</a>, <a class="el" href="../../d3/dbc/fl_2gfx_2eorder_8h_source.html#l00026">W1</a>, and <a class="el" href="../../dd/d4b/wave8_8hpp_source.html#l00345">fl::detail::wave8_transpose_8_bf1()</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d54/compiler__control_8h_source.html#l00715">FL_RESTRICT_PARAM</a>, <a class="el" href="../../d3/dbc/fl_2gfx_2eorder_8h_source.html#l00027">W0</a>, <a class="el" href="../../d3/dbc/fl_2gfx_2eorder_8h_source.html#l00026">W1</a>, and <a class="el" href="../../dc/d94/detail_2wave8_8cpp_8hpp_source.html#l00205">fl::detail::wave8_transpose_8_bf1()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -155,7 +155,7 @@ $(function(){initNavTree('d4/d36/namespacefl_a733fdaab9a4ad6bebab70adeaa206340.h
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:04 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:08 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

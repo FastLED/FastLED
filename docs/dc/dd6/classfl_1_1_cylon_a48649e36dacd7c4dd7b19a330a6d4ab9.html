@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -124,7 +124,7 @@ $(function(){initNavTree('dc/dd6/classfl_1_1_cylon_a48649e36dacd7c4dd7b19a330a6d
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">now</td><td>The current time in milliseconds. <a class="el" href="../../da/d5d/classfl_1_1_fx.html">Fx</a> writers are encouraged to use this instead of <a class="el" href="../../d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a" title="Universal millisecond timer - returns milliseconds since system startup.">millis()</a> directly as this will more deterministic behavior. </td></tr>
+    <tr><td class="paramname">now</td><td>The current time in milliseconds. <a class="el" href="../../da/d5d/classfl_1_1_fx.html">Fx</a> writers are encouraged to use this instead of <a class="el" href="../../d4/d36/namespacefl_a3c0ba5842bfd029c404a38c8df2315f3.html#a3c0ba5842bfd029c404a38c8df2315f3" title="Universal millisecond timer - returns milliseconds since system startup.">millis()</a> directly as this will more deterministic behavior. </td></tr>
   </table>
   </dd>
 </dl>
@@ -137,14 +137,14 @@ $(function(){initNavTree('dc/dd6/classfl_1_1_cylon_a48649e36dacd7c4dd7b19a330a6d
 <div class="line"><span class="lineno">   19</span>            <span class="keywordflow">return</span>;</div>
 <div class="line"><span class="lineno">   20</span>        }</div>
 <div class="line"><span class="lineno">   21</span> </div>
-<div class="line"><span class="lineno">   22</span>        fl::span&lt;CRGB&gt; <a class="code hl_variable" href="../../d6/d05/_animartrix_8ino_a83a59cb1680f896fa1c411261436d4ad.html#a83a59cb1680f896fa1c411261436d4ad">leds</a> = context.leds;</div>
+<div class="line"><span class="lineno">   22</span>        fl::span&lt;CRGB&gt; <a class="code hl_variable" href="../../d5/d17/_analog_output_8ino_a1039e408783ef35dd94161e35efe8ee9.html#a1039e408783ef35dd94161e35efe8ee9">leds</a> = context.leds;</div>
 <div class="line"><span class="lineno">   23</span> </div>
 <div class="line"><span class="lineno">   24</span>        <span class="comment">// Set the current LED to the current hue</span></div>
-<div class="line"><span class="lineno">   25</span>        <a class="code hl_variable" href="../../d6/d05/_animartrix_8ino_a83a59cb1680f896fa1c411261436d4ad.html#a83a59cb1680f896fa1c411261436d4ad">leds</a>[<a class="code hl_variable" href="../../dc/dd6/classfl_1_1_cylon_a71f6434e53d4eb21c8ff125799e0fa1b.html#a71f6434e53d4eb21c8ff125799e0fa1b">position</a>] = <a class="code hl_typedef" href="../../dd/dc7/group___h_s_v2_r_g_b_ga259e6d3ae92ca32d2390e7d8eaa1c7ae.html#ga259e6d3ae92ca32d2390e7d8eaa1c7ae">CHSV</a>(<a class="code hl_variable" href="../../dc/dd6/classfl_1_1_cylon_a7d9a21f08b7b1502acf5bf198da98bca.html#a7d9a21f08b7b1502acf5bf198da98bca">hue</a>++, 255, 255);</div>
+<div class="line"><span class="lineno">   25</span>        <a class="code hl_variable" href="../../d5/d17/_analog_output_8ino_a1039e408783ef35dd94161e35efe8ee9.html#a1039e408783ef35dd94161e35efe8ee9">leds</a>[<a class="code hl_variable" href="../../dc/dd6/classfl_1_1_cylon_a71f6434e53d4eb21c8ff125799e0fa1b.html#a71f6434e53d4eb21c8ff125799e0fa1b">position</a>] = <a class="code hl_typedef" href="../../dd/dc7/group___h_s_v2_r_g_b_ga259e6d3ae92ca32d2390e7d8eaa1c7ae.html#ga259e6d3ae92ca32d2390e7d8eaa1c7ae">CHSV</a>(<a class="code hl_variable" href="../../dc/dd6/classfl_1_1_cylon_a7d9a21f08b7b1502acf5bf198da98bca.html#a7d9a21f08b7b1502acf5bf198da98bca">hue</a>++, 255, 255);</div>
 <div class="line"><span class="lineno">   26</span> </div>
 <div class="line"><span class="lineno">   27</span>        <span class="comment">// Fade all LEDs</span></div>
 <div class="line"><span class="lineno">   28</span>        <span class="keywordflow">for</span> (u16 i = 0; i &lt; <a class="code hl_variable" href="../../da/d5d/classfl_1_1_fx_a6835ef50b9ce8c56d889a56210a89749.html#a6835ef50b9ce8c56d889a56210a89749">mNumLeds</a>; i++) {</div>
-<div class="line"><span class="lineno">   29</span>            <a class="code hl_variable" href="../../d6/d05/_animartrix_8ino_a83a59cb1680f896fa1c411261436d4ad.html#a83a59cb1680f896fa1c411261436d4ad">leds</a>[i].<a class="code hl_function" href="../../da/dd6/structfl_1_1_c_r_g_b_aa272170bea8120f101f27ebd2c323b55.html#aa272170bea8120f101f27ebd2c323b55">nscale8</a>(<a class="code hl_variable" href="../../dc/dd6/classfl_1_1_cylon_a00329919fa9ce66635871f006c720c1b.html#a00329919fa9ce66635871f006c720c1b">fade_amount</a>);</div>
+<div class="line"><span class="lineno">   29</span>            <a class="code hl_variable" href="../../d5/d17/_analog_output_8ino_a1039e408783ef35dd94161e35efe8ee9.html#a1039e408783ef35dd94161e35efe8ee9">leds</a>[i].<a class="code hl_function" href="../../da/dd6/structfl_1_1_c_r_g_b_a88ec345b046910f4ddf5cd4d793e7e88.html#a88ec345b046910f4ddf5cd4d793e7e88">nscale8</a>(<a class="code hl_variable" href="../../dc/dd6/classfl_1_1_cylon_a00329919fa9ce66635871f006c720c1b.html#a00329919fa9ce66635871f006c720c1b">fade_amount</a>);</div>
 <div class="line"><span class="lineno">   30</span>        }</div>
 <div class="line"><span class="lineno">   31</span> </div>
 <div class="line"><span class="lineno">   32</span>        <span class="comment">// Move the position</span></div>
@@ -162,16 +162,16 @@ $(function(){initNavTree('dc/dd6/classfl_1_1_cylon_a48649e36dacd7c4dd7b19a330a6d
 <div class="line"><span class="lineno">   44</span>            }</div>
 <div class="line"><span class="lineno">   45</span>        }</div>
 <div class="line"><span class="lineno">   46</span>    }</div>
-<div class="ttc" id="a_animartrix_8ino_a83a59cb1680f896fa1c411261436d4ad_html_a83a59cb1680f896fa1c411261436d4ad"><div class="ttname"><a href="../../d6/d05/_animartrix_8ino_a83a59cb1680f896fa1c411261436d4ad.html#a83a59cb1680f896fa1c411261436d4ad">leds</a></div><div class="ttdeci">fl::CRGB leds[NUM_LEDS]</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d05/_animartrix_8ino_source.html#l00093">Animartrix.ino:93</a></div></div>
+<div class="ttc" id="a_analog_output_8ino_a1039e408783ef35dd94161e35efe8ee9_html_a1039e408783ef35dd94161e35efe8ee9"><div class="ttname"><a href="../../d5/d17/_analog_output_8ino_a1039e408783ef35dd94161e35efe8ee9.html#a1039e408783ef35dd94161e35efe8ee9">leds</a></div><div class="ttdeci">CRGB leds[1]</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d17/_analog_output_8ino_source.html#l00026">AnalogOutput.ino:26</a></div></div>
 <div class="ttc" id="aclassfl_1_1_cylon_a00329919fa9ce66635871f006c720c1b_html_a00329919fa9ce66635871f006c720c1b"><div class="ttname"><a href="../../dc/dd6/classfl_1_1_cylon_a00329919fa9ce66635871f006c720c1b.html#a00329919fa9ce66635871f006c720c1b">fl::Cylon::fade_amount</a></div><div class="ttdeci">u8 fade_amount</div><div class="ttdef"><b>Definition</b> <a href="../../db/d31/cylon_8h_source.html#l00053">cylon.h:53</a></div></div>
 <div class="ttc" id="aclassfl_1_1_cylon_a62e3b681b8d4079185686e503975476d_html_a62e3b681b8d4079185686e503975476d"><div class="ttname"><a href="../../dc/dd6/classfl_1_1_cylon_a62e3b681b8d4079185686e503975476d.html#a62e3b681b8d4079185686e503975476d">fl::Cylon::reverse</a></div><div class="ttdeci">bool reverse</div><div class="ttdef"><b>Definition</b> <a href="../../db/d31/cylon_8h_source.html#l00055">cylon.h:55</a></div></div>
 <div class="ttc" id="aclassfl_1_1_cylon_a71f6434e53d4eb21c8ff125799e0fa1b_html_a71f6434e53d4eb21c8ff125799e0fa1b"><div class="ttname"><a href="../../dc/dd6/classfl_1_1_cylon_a71f6434e53d4eb21c8ff125799e0fa1b.html#a71f6434e53d4eb21c8ff125799e0fa1b">fl::Cylon::position</a></div><div class="ttdeci">i16 position</div><div class="ttdef"><b>Definition</b> <a href="../../db/d31/cylon_8h_source.html#l00056">cylon.h:56</a></div></div>
 <div class="ttc" id="aclassfl_1_1_cylon_a7d9a21f08b7b1502acf5bf198da98bca_html_a7d9a21f08b7b1502acf5bf198da98bca"><div class="ttname"><a href="../../dc/dd6/classfl_1_1_cylon_a7d9a21f08b7b1502acf5bf198da98bca.html#a7d9a21f08b7b1502acf5bf198da98bca">fl::Cylon::hue</a></div><div class="ttdeci">u8 hue</div><div class="ttdef"><b>Definition</b> <a href="../../db/d31/cylon_8h_source.html#l00051">cylon.h:51</a></div></div>
 <div class="ttc" id="aclassfl_1_1_fx_a6835ef50b9ce8c56d889a56210a89749_html_a6835ef50b9ce8c56d889a56210a89749"><div class="ttname"><a href="../../da/d5d/classfl_1_1_fx_a6835ef50b9ce8c56d889a56210a89749.html#a6835ef50b9ce8c56d889a56210a89749">fl::Fx::mNumLeds</a></div><div class="ttdeci">u16 mNumLeds</div><div class="ttdef"><b>Definition</b> <a href="../../d2/d0c/fx_8h_source.html#l00053">fx.h:53</a></div></div>
 <div class="ttc" id="agroup___h_s_v2_r_g_b_ga259e6d3ae92ca32d2390e7d8eaa1c7ae_html_ga259e6d3ae92ca32d2390e7d8eaa1c7ae"><div class="ttname"><a href="../../dd/dc7/group___h_s_v2_r_g_b_ga259e6d3ae92ca32d2390e7d8eaa1c7ae.html#ga259e6d3ae92ca32d2390e7d8eaa1c7ae">CHSV</a></div><div class="ttdeci">fl::hsv8 CHSV</div><div class="ttdef"><b>Definition</b> <a href="../../d8/dd0/chsv_8h_source.html#l00011">chsv.h:11</a></div></div>
-<div class="ttc" id="astructfl_1_1_c_r_g_b_aa272170bea8120f101f27ebd2c323b55_html_aa272170bea8120f101f27ebd2c323b55"><div class="ttname"><a href="../../da/dd6/structfl_1_1_c_r_g_b_aa272170bea8120f101f27ebd2c323b55.html#aa272170bea8120f101f27ebd2c323b55">fl::CRGB::nscale8</a></div><div class="ttdeci">CRGB &amp; nscale8(u8 scaledown) FL_NOEXCEPT</div><div class="ttdoc">Scale down a RGB to N/256ths of its current brightness, using &quot;plain math&quot; dimming rules.</div><div class="ttdef"><b>Definition</b> <a href="../../d3/dd8/crgb_8cpp_8hpp_source.html#l00088">crgb.cpp.hpp:88</a></div></div>
+<div class="ttc" id="astructfl_1_1_c_r_g_b_a88ec345b046910f4ddf5cd4d793e7e88_html_a88ec345b046910f4ddf5cd4d793e7e88"><div class="ttname"><a href="../../da/dd6/structfl_1_1_c_r_g_b_a88ec345b046910f4ddf5cd4d793e7e88.html#a88ec345b046910f4ddf5cd4d793e7e88">fl::CRGB::nscale8</a></div><div class="ttdeci">CRGB &amp; nscale8(u8 scaledown) FL_NO_EXCEPT</div><div class="ttdoc">Scale down a RGB to N/256ths of its current brightness, using &quot;plain math&quot; dimming rules.</div><div class="ttdef"><b>Definition</b> <a href="../../d3/dd8/crgb_8cpp_8hpp_source.html#l00086">crgb.cpp.hpp:86</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../db/d31/cylon_8h_source.html#l00053">fade_amount</a>, <a class="el" href="../../db/d31/cylon_8h_source.html#l00051">hue</a>, <a class="el" href="../../db/ded/draw__context_8h_source.html#l00012">fl::DrawContext::leds</a>, <a class="el" href="../../d6/d05/_animartrix_8ino_source.html#l00093">leds</a>, <a class="el" href="../../d2/d0c/fx_8h_source.html#l00053">fl::Fx::mNumLeds</a>, <a class="el" href="../../db/d31/cylon_8h_source.html#l00056">position</a>, and <a class="el" href="../../db/d31/cylon_8h_source.html#l00055">reverse</a>.</p>
+<p class="reference">References <a class="el" href="../../db/d31/cylon_8h_source.html#l00053">fade_amount</a>, <a class="el" href="../../db/d31/cylon_8h_source.html#l00051">hue</a>, <a class="el" href="../../db/ded/draw__context_8h_source.html#l00012">fl::DrawContext::leds</a>, <a class="el" href="../../d5/d17/_analog_output_8ino_source.html#l00026">leds</a>, <a class="el" href="../../d2/d0c/fx_8h_source.html#l00053">fl::Fx::mNumLeds</a>, <a class="el" href="../../db/d31/cylon_8h_source.html#l00056">position</a>, and <a class="el" href="../../db/d31/cylon_8h_source.html#l00055">reverse</a>.</p>
 
 </div>
 </div>
@@ -182,7 +182,7 @@ $(function(){initNavTree('dc/dd6/classfl_1_1_cylon_a48649e36dacd7c4dd7b19a330a6d
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../dc/dd6/classfl_1_1_cylon.html">Cylon</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:04 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:08 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

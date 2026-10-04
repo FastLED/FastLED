@@ -1,0 +1,48 @@
+digraph "fl::task::Handle::Handle"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::task::Handle::Handle",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Constructs an empty, invalid handle."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::task::Handle::Handle",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/daf/classfl_1_1task_1_1_handle_a49d3fee3c8b242b20a98f90aba2bba25.html#a49d3fee3c8b242b20a98f90aba2bba25",tooltip="Copies a handle, sharing ownership of the underlying task."];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::task::Handle::Handle",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/daf/classfl_1_1task_1_1_handle_a214546ae4c9f7b80dcceef11f3aa3a20.html#a214546ae4c9f7b80dcceef11f3aa3a20",tooltip="Moves a handle without changing the underlying task."];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::task::Handle::cancel",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/daf/classfl_1_1task_1_1_handle_a92d4800720f04a504181112f766e83ad.html#a92d4800720f04a504181112f766e83ad",tooltip="Prevents future scheduled executions of the task."];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::task::Handle::operator=",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/daf/classfl_1_1task_1_1_handle_ae0269eb6707f449059862fd1c7f57739.html#ae0269eb6707f449059862fd1c7f57739",tooltip="Moves a handle without changing the underlying task."];
+  Node1 -> Node6 [id="edge5_Node000001_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::task::Handle::catch_",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/daf/classfl_1_1task_1_1_handle_a647839798f545f927e9e263b02e9ee8e.html#a647839798f545f927e9e263b02e9ee8e",tooltip="Sets the callback invoked when task execution reports an error."];
+  Node6 -> Node5 [id="edge6_Node000006_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node7 [id="edge7_Node000001_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::task::Handle::operator=",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/daf/classfl_1_1task_1_1_handle_a3e73a468b668a52580def00e701c1396.html#a3e73a468b668a52580def00e701c1396",tooltip="Copies a handle, sharing ownership of the underlying task."];
+  Node1 -> Node5 [id="edge8_Node000001_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node8 [id="edge9_Node000001_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl::task::Handle::then",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/daf/classfl_1_1task_1_1_handle_a0d96031ff5c53ece780698c5f39d9d2b.html#a0d96031ff5c53ece780698c5f39d9d2b",tooltip="Sets the callback invoked when the task runs successfully."];
+  Node8 -> Node9 [id="edge10_Node000008_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="fl::detail::AsyncLoggerService\lTask::AsyncLoggerServiceTask",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d06/classfl_1_1detail_1_1_async_logger_service_task_a76e22f26c5676ba890e783435db46aa6.html#a76e22f26c5676ba890e783435db46aa6",tooltip=" "];
+  Node9 -> Node10 [id="edge11_Node000009_Node000010",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="fl::detail::AsyncLoggerService\lTask::~AsyncLoggerServiceTask",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d06/classfl_1_1detail_1_1_async_logger_service_task_a82e728d22c5bcc164c62953f3e8d6e6f.html#a82e728d22c5bcc164c62953f3e8d6e6f",tooltip=" "];
+  Node9 -> Node11 [id="edge12_Node000009_Node000011",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="fl::detail::AsyncLoggerService\lTask::SingletonShared\< AsyncLogger\lServiceTask \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d06/classfl_1_1detail_1_1_async_logger_service_task_a90e57dbaf9bc274b5302c859efd53af3.html#a90e57dbaf9bc274b5302c859efd53af3",tooltip=" "];
+  Node9 -> Node12 [id="edge13_Node000009_Node000012",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node12 [id="Node000012",label="fl::detail::AsyncLoggerService\lTask::instance",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d5/d06/classfl_1_1detail_1_1_async_logger_service_task_acc200cb8837f82379821217fb4a6bc29.html#acc200cb8837f82379821217fb4a6bc29",tooltip=" "];
+  Node8 -> Node29 [id="edge14_Node000008_Node000029",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node29 [id="Node000029",label="fl::audio::Processor\l::createWithAutoInput",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d6b/classfl_1_1audio_1_1_processor_ac25ffea2d1abf227cecff4e4a7448a5a.html#ac25ffea2d1abf227cecff4e4a7448a5a",tooltip=" "];
+  Node29 -> Node30 [id="edge15_Node000029_Node000030",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node30 [id="Node000030",label="fl::audio::AudioManager::add",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d9d/classfl_1_1audio_1_1_audio_manager_a50a318328d3ab7153dd90b4f7c63c5c0.html#a50a318328d3ab7153dd90b4f7c63c5c0",tooltip=" "];
+  Node29 -> Node36 [id="edge16_Node000029_Node000036",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node36 [id="Node000036",label="fl::audio::AudioManager::add",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d9d/classfl_1_1audio_1_1_audio_manager_a836eb15d1067209d94b7e6108bb7ec97.html#a836eb15d1067209d94b7e6108bb7ec97",tooltip=" "];
+  Node29 -> Node29 [id="edge17_Node000029_Node000029",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node8 -> Node37 [id="edge18_Node000008_Node000037",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node37 [id="Node000037",label="autoresearch::maybeRegister\lStubAutorun",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/dc9/namespaceautoresearch_a1868ca9225c807cbaf571228e6629e34.html#a1868ca9225c807cbaf571228e6629e34",tooltip="On FL_IS_STUB: register a one-shot async task that drives autoresearch."];
+  Node8 -> Node5 [id="edge19_Node000008_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node8 -> Node38 [id="edge20_Node000008_Node000038",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node38 [id="Node000038",label="setup",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d3a/_async_8h_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d",tooltip=" "];
+  Node8 -> Node39 [id="edge21_Node000008_Node000039",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node39 [id="Node000039",label="autoresearch::setupRpcAsyncTask",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/dc9/namespaceautoresearch_a14b9dde802b1a01ef0d7f9ea258bd7f6.html#a14b9dde802b1a01ef0d7f9ea258bd7f6",tooltip="Setup async task for JSON-RPC processing."];
+}

@@ -1,0 +1,18 @@
+digraph "fl::detail::encodeUart2Bits"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::detail::encodeUart2Bits",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Encode 2 LED bits to 1 UART byte using a Wave10 LUT."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::detail::encodeUartByte",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d9e/namespacefl_1_1detail_a86cf1c8cc8ae6f4de67eb8e323381c88.html#a86cf1c8cc8ae6f4de67eb8e323381c88",tooltip="Legacy byte encoding using hardcoded WS2812 LUT (backward compat)"];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::detail::encodeUartByte",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d9e/namespacefl_1_1detail_a083e6747c4a84931e5eff49324f87f46.html#a083e6747c4a84931e5eff49324f87f46",tooltip="Encode 1 LED byte to 4 UART bytes using a Wave10 LUT."];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::encodeLedsToUart",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_ac642a2adbcc5e98ed8d2706fb0261cf2.html#ac642a2adbcc5e98ed8d2706fb0261cf2",tooltip="Legacy encoding using hardcoded WS2812 LUT (backward compat)"];
+  Node3 -> Node5 [id="edge4_Node000003_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::encodeLedsToUart",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a35ba822376bba4e27165aa902de56adb.html#a35ba822376bba4e27165aa902de56adb",tooltip="Encode LED pixel data to UART bytes using a Wave10 LUT."];
+}

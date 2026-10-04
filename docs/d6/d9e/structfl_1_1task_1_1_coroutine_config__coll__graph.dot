@@ -6,7 +6,7 @@ digraph "fl::task::CoroutineConfig"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node1 [id="Node000001",label="fl::task::CoroutineConfig",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Configuration for OS-level coroutine tasks."];
+  Node1 [id="Node000001",label="fl::task::CoroutineConfig",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Function and platform tuning for an OS-level coroutine task."];
   Node2 -> Node1 [id="edge1_Node000001_Node000002",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" trace",fontcolor="grey" ];
   Node2 [id="Node000002",label="fl::Optional\< fl::tuple\l\< const char *, int, fl\l::u32 \> \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$dd/dd8/classfl_1_1_optional.html",tooltip=" "];
   Node3 -> Node2 [id="edge2_Node000002_Node000003",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::tuple\< const\l char *, int, fl::u32 \> \>",fontcolor="grey" ];

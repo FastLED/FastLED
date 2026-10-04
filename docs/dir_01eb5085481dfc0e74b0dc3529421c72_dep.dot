@@ -11,5 +11,5 @@ digraph "/home/runner/work/FastLED/FastLED/examples/Fx/FxPacifica"
   dir_01eb5085481dfc0e74b0dc3529421c72 [label="FxPacifica", fillcolor="#edf0f7", color="grey25", style="filled,bold", URL="dir_01eb5085481dfc0e74b0dc3529421c72.html",tooltip=""];
   }
   dir_4d1829fa9bd13d7db71e765b2707b248 [label="fl", fillcolor="#edf0f7", color="red", style="filled", URL="dir_4d1829fa9bd13d7db71e765b2707b248.html",tooltip=""];
-  dir_01eb5085481dfc0e74b0dc3529421c72->dir_4d1829fa9bd13d7db71e765b2707b248 [headlabel="2", labeldistance=1.5 headhref="dir_000086_000074.html" href="dir_000086_000074.html" color="steelblue1" fontcolor="steelblue1"];
+  dir_01eb5085481dfc0e74b0dc3529421c72->dir_4d1829fa9bd13d7db71e765b2707b248 [headlabel="2", labeldistance=1.5 headhref="dir_000092_000077.html" href="dir_000092_000077.html" color="steelblue1" fontcolor="steelblue1"];
 }

@@ -8,7 +8,7 @@ digraph "fl::sin_impl_float"
   rankdir="LR";
   Node1 [id="Node000001",label="fl::sin_impl_float",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::detail::sin_reduce_",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d9e/namespacefl_1_1detail_a525aa6aacdb5d3d48ebe21adb14da430.html#a525aa6aacdb5d3d48ebe21adb14da430",tooltip=" "];
+  Node2 [id="Node000002",label="fl::detail::sin_reduce_",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d9e/namespacefl_1_1detail_a6a0079ec5177e72b0e64470ba18a332e.html#a6a0079ec5177e72b0e64470ba18a332e",tooltip=" "];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::detail::sin_poly\l_quarterturn_",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d9e/namespacefl_1_1detail_a6f9a96e28e8e39e983f75cbc209e9168.html#a6f9a96e28e8e39e983f75cbc209e9168",tooltip=" "];
+  Node3 [id="Node000003",label="fl::detail::sin_poly\l_quarterturn_",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d9e/namespacefl_1_1detail_aafe0e6f5ecf613c661dc909f733385d1.html#aafe0e6f5ecf613c661dc909f733385d1",tooltip=" "];
 }

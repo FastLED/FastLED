@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -112,22 +112,22 @@ $(function(){initNavTree('d0/da2/classfl_1_1third__party_1_1ez_w_s2812gpio_afc0f
         <tr>
           <td class="memname">void fl::third_party::ezWS2812gpio::set_pixel </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="../../d1/d86/namespacefl_1_1third__party_aca42f982f9f2fbca5c83378ddae9bb3a.html#aca42f982f9f2fbca5c83378ddae9bb3a">uint8_t</a></td>          <td class="paramname"><span class="paramname"><em>red</em></span>, </td>
+          <td class="paramtype"><a class="el" href="../../df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a></td>          <td class="paramname"><span class="paramname"><em>red</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="../../d1/d86/namespacefl_1_1third__party_aca42f982f9f2fbca5c83378ddae9bb3a.html#aca42f982f9f2fbca5c83378ddae9bb3a">uint8_t</a></td>          <td class="paramname"><span class="paramname"><em>green</em></span>, </td>
+          <td class="paramtype"><a class="el" href="../../df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a></td>          <td class="paramname"><span class="paramname"><em>green</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="../../d1/d86/namespacefl_1_1third__party_aca42f982f9f2fbca5c83378ddae9bb3a.html#aca42f982f9f2fbca5c83378ddae9bb3a">uint8_t</a></td>          <td class="paramname"><span class="paramname"><em>blue</em></span>, </td>
+          <td class="paramtype"><a class="el" href="../../df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a></td>          <td class="paramname"><span class="paramname"><em>blue</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="../../d1/d86/namespacefl_1_1third__party_a7d4a039632f7cb006dbccb45d90b540f.html#a7d4a039632f7cb006dbccb45d90b540f">uint16_t</a></td>          <td class="paramname"><span class="paramname"><em>count</em></span><span class="paramdefsep"> = </span><span class="paramdefval">1</span>&#160;)</td>
+          <td class="paramtype"><a class="el" href="../../df/dd8/stdint_8h_af8b57fa1249a1e2d5cd3c80296874419.html#af8b57fa1249a1e2d5cd3c80296874419">uint16_t</a></td>          <td class="paramname"><span class="paramname"><em>count</em></span><span class="paramdefsep"> = </span><span class="paramdefval">1</span>&#160;)</td>
         </tr>
       </table>
   </td>
@@ -147,7 +147,7 @@ $(function(){initNavTree('d0/da2/classfl_1_1third__party_1_1ez_w_s2812gpio_afc0f
 <div class="line"><span class="lineno">  303</span>        blue = (blue * <a class="code hl_variable" href="../../d0/da2/classfl_1_1third__party_1_1ez_w_s2812gpio_a7b033eb59e1a82267cf785caa2e23293.html#a7b033eb59e1a82267cf785caa2e23293">brightness_</a>) / 100;</div>
 <div class="line"><span class="lineno">  304</span> </div>
 <div class="line"><span class="lineno">  305</span>        noInterrupts();</div>
-<div class="line"><span class="lineno">  306</span>        <span class="keywordflow">for</span> (<a class="code hl_typedef" href="../../d1/d86/namespacefl_1_1third__party_a7d4a039632f7cb006dbccb45d90b540f.html#a7d4a039632f7cb006dbccb45d90b540f">uint16_t</a> i = 0; i &lt; count &amp;&amp; i &lt; <a class="code hl_variable" href="../../d0/da2/classfl_1_1third__party_1_1ez_w_s2812gpio_a069b871190cbe2e06c4b6cadc32bc21f.html#a069b871190cbe2e06c4b6cadc32bc21f">num_leds_</a>; i++) {</div>
+<div class="line"><span class="lineno">  306</span>        <span class="keywordflow">for</span> (<a class="code hl_typedef" href="../../df/dd8/stdint_8h_af8b57fa1249a1e2d5cd3c80296874419.html#af8b57fa1249a1e2d5cd3c80296874419">uint16_t</a> i = 0; i &lt; count &amp;&amp; i &lt; <a class="code hl_variable" href="../../d0/da2/classfl_1_1third__party_1_1ez_w_s2812gpio_a069b871190cbe2e06c4b6cadc32bc21f.html#a069b871190cbe2e06c4b6cadc32bc21f">num_leds_</a>; i++) {</div>
 <div class="line"><span class="lineno">  307</span>            <span class="comment">// Send in GRB order for WS2812</span></div>
 <div class="line"><span class="lineno">  308</span>            <a class="code hl_function" href="../../d0/da2/classfl_1_1third__party_1_1ez_w_s2812gpio_af70d139cd5e8cd618b563289129308d9.html#af70d139cd5e8cd618b563289129308d9">send_byte</a>(green);</div>
 <div class="line"><span class="lineno">  309</span>            <a class="code hl_function" href="../../d0/da2/classfl_1_1third__party_1_1ez_w_s2812gpio_af70d139cd5e8cd618b563289129308d9.html#af70d139cd5e8cd618b563289129308d9">send_byte</a>(red);</div>
@@ -158,7 +158,7 @@ $(function(){initNavTree('d0/da2/classfl_1_1third__party_1_1ez_w_s2812gpio_afc0f
 <div class="ttc" id="aclassfl_1_1third__party_1_1ez_w_s2812gpio_a069b871190cbe2e06c4b6cadc32bc21f_html_a069b871190cbe2e06c4b6cadc32bc21f"><div class="ttname"><a href="../../d0/da2/classfl_1_1third__party_1_1ez_w_s2812gpio_a069b871190cbe2e06c4b6cadc32bc21f.html#a069b871190cbe2e06c4b6cadc32bc21f">fl::third_party::ezWS2812gpio::num_leds_</a></div><div class="ttdeci">uint16_t num_leds_</div><div class="ttdef"><b>Definition</b> <a href="../../de/d0e/ez_w_s2812_8h_source.html#l00175">ezWS2812.h:175</a></div></div>
 <div class="ttc" id="aclassfl_1_1third__party_1_1ez_w_s2812gpio_a7b033eb59e1a82267cf785caa2e23293_html_a7b033eb59e1a82267cf785caa2e23293"><div class="ttname"><a href="../../d0/da2/classfl_1_1third__party_1_1ez_w_s2812gpio_a7b033eb59e1a82267cf785caa2e23293.html#a7b033eb59e1a82267cf785caa2e23293">fl::third_party::ezWS2812gpio::brightness_</a></div><div class="ttdeci">uint8_t brightness_</div><div class="ttdef"><b>Definition</b> <a href="../../de/d0e/ez_w_s2812_8h_source.html#l00177">ezWS2812.h:177</a></div></div>
 <div class="ttc" id="aclassfl_1_1third__party_1_1ez_w_s2812gpio_af70d139cd5e8cd618b563289129308d9_html_af70d139cd5e8cd618b563289129308d9"><div class="ttname"><a href="../../d0/da2/classfl_1_1third__party_1_1ez_w_s2812gpio_af70d139cd5e8cd618b563289129308d9.html#af70d139cd5e8cd618b563289129308d9">fl::third_party::ezWS2812gpio::send_byte</a></div><div class="ttdeci">void send_byte(uint8_t byte_value) const</div><div class="ttdoc">Send a byte (8 bits) with MSB first.</div><div class="ttdef"><b>Definition</b> <a href="../../de/d0e/ez_w_s2812_8h_source.html#l00261">ezWS2812.h:261</a></div></div>
-<div class="ttc" id="anamespacefl_1_1third__party_a7d4a039632f7cb006dbccb45d90b540f_html_a7d4a039632f7cb006dbccb45d90b540f"><div class="ttname"><a href="../../d1/d86/namespacefl_1_1third__party_a7d4a039632f7cb006dbccb45d90b540f.html#a7d4a039632f7cb006dbccb45d90b540f">fl::third_party::uint16_t</a></div><div class="ttdeci">fl::u16 uint16_t</div><div class="ttdef"><b>Definition</b> <a href="../../da/dbd/coder_8h_source.html#l00214">coder.h:214</a></div></div>
+<div class="ttc" id="astdint_8h_af8b57fa1249a1e2d5cd3c80296874419_html_af8b57fa1249a1e2d5cd3c80296874419"><div class="ttname"><a href="../../df/dd8/stdint_8h_af8b57fa1249a1e2d5cd3c80296874419.html#af8b57fa1249a1e2d5cd3c80296874419">uint16_t</a></div><div class="ttdeci">fl::u16 uint16_t</div><div class="ttdef"><b>Definition</b> <a href="../../df/dd8/stdint_8h_source.html#l00213">stdint.h:213</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../de/d0e/ez_w_s2812_8h_source.html#l00177">brightness_</a>, <a class="el" href="../../de/d0e/ez_w_s2812_8h_source.html#l00175">num_leds_</a>, and <a class="el" href="../../de/d0e/ez_w_s2812_8h_source.html#l00261">send_byte()</a>.</p>
 
@@ -187,7 +187,7 @@ $(function(){initNavTree('d0/da2/classfl_1_1third__party_1_1ez_w_s2812gpio_afc0f
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d1/d86/namespacefl_1_1third__party.html">third_party</a></li><li class="navelem"><a class="el" href="../../d0/da2/classfl_1_1third__party_1_1ez_w_s2812gpio.html">ezWS2812gpio</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:11 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:13 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

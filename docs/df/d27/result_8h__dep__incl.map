@@ -6,7 +6,7 @@
 <area shape="poly" id="edge13_Node000001_Node000020" title=" " alt="" coords="1083,44,1083,152,1077,152,1077,44"/>
 <area shape="rect" id="Node000022" href="$d0/db6/transaction_8h.html" title="Transaction class for asynchronous SPI operations." alt="" coords="1221,79,1425,104"/>
 <area shape="poly" id="edge14_Node000001_Node000022" title=" " alt="" coords="1133,32,1284,76,1283,81,1131,37"/>
-<area shape="rect" id="Node000003" href="$db/d97/_fast_l_e_d_8h.html" title="central include file for FastLED, defines the CFastLED class/object" alt="" coords="699,247,784,273"/>
+<area shape="rect" id="Node000003" href="$d6/d64/fastled_8h.html" title="central include file for FastLED, defines the CFastLED class/object" alt="" coords="699,247,784,273"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="857,113,828,131,801,154,782,178,767,204,748,248,743,246,762,202,778,175,797,150,825,126,854,108"/>
 <area shape="rect" id="Node000007" href="$de/d4c/rx_8cpp_8hpp.html" title="Implementation of RxDevice factory." alt="" coords="811,159,975,185"/>
 <area shape="poly" id="edge4_Node000002_Node000007" title=" " alt="" coords="896,118,896,159,891,159,891,118"/>

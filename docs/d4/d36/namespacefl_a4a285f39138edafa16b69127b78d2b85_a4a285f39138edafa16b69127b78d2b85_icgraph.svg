@@ -67,7 +67,7 @@ var sectionId = 'dynsection-1';
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../d4/d36/namespacefl_ac49a46650a34a831dbd4231a606a94d5.html#ac49a46650a34a831dbd4231a606a94d5" target="_top" xlink:title=" ">
+<g id="a_Node000002"><a xlink:href="../../d4/d36/namespacefl_a8a293458e2b70bedd92a81b80bc12594.html#a8a293458e2b70bedd92a81b80bc12594" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="428.5,-142 372.5,-142 372.5,-123 428.5,-123 428.5,-142"/>
 <text text-anchor="middle" x="400.5" y="-130" font-family="Helvetica,sans-Serif" font-size="10.00">fl::log10</text>
 </a>
@@ -85,7 +85,7 @@ var sectionId = 'dynsection-1';
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d4/d36/namespacefl_a59b2ca835c8aaa9e67a6dce355013b3d.html#a59b2ca835c8aaa9e67a6dce355013b3d" target="_top" xlink:title=" ">
+<g id="a_Node000003"><a xlink:href="../../d4/d36/namespacefl_a7eed97a0f3d02fc37abb90d14ea04429.html#a7eed97a0f3d02fc37abb90d14ea04429" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="430,-105 371,-105 371,-86 430,-86 430,-105"/>
 <text text-anchor="middle" x="400.5" y="-93" font-family="Helvetica,sans-Serif" font-size="10.00">fl::log10f</text>
 </a>
@@ -123,7 +123,7 @@ var sectionId = 'dynsection-1';
 <!-- Node7 -->
 <g id="Node000007" class="node">
 <title>Node7</title>
-<g id="a_Node000007"><a xlink:href="../../d6/d86/classfl_1_1audio_1_1fft_1_1_bins_a4df193ccc4b6e7e3453cbe3aca83b5c9.html#a4df193ccc4b6e7e3453cbe3aca83b5c9" target="_top" xlink:title=" ">
+<g id="a_Node000007"><a xlink:href="../../d6/d86/classfl_1_1audio_1_1fft_1_1_bins_a48afffaada921f98b94bf358e77771a0.html#a48afffaada921f98b94bf358e77771a0" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="310,-105 193,-105 193,-86 310,-86 310,-105"/>
 <text text-anchor="middle" x="251.5" y="-93" font-family="Helvetica,sans-Serif" font-size="10.00">fl::audio::fft::Bins::db</text>
 </a>
@@ -187,7 +187,7 @@ var sectionId = 'dynsection-1';
 <!-- Node8 -->
 <g id="Node000008" class="node">
 <title>Node8</title>
-<g id="a_Node000008"><a xlink:href="../../d2/db2/classfl_1_1string_a0978ca02550f22bdf5207a4cb50ed30a.html#a0978ca02550f22bdf5207a4cb50ed30a" target="_top" xlink:title=" ">
+<g id="a_Node000008"><a xlink:href="../../d2/db2/classfl_1_1string_a72e43831a367332933c06a5965671d46.html#a72e43831a367332933c06a5965671d46" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="115,-142 17,-142 17,-123 115,-123 115,-142"/>
 <text text-anchor="middle" x="66" y="-130" font-family="Helvetica,sans-Serif" font-size="10.00">fl::string::append</text>
 </a>
@@ -205,7 +205,7 @@ var sectionId = 'dynsection-1';
 <!-- Node9 -->
 <g id="Node000009" class="node">
 <title>Node9</title>
-<g id="a_Node000009"><a xlink:href="../../d1/d27/classfl_1_1sstream_a51db47086b79a135addd76d7093c0291.html#a51db47086b79a135addd76d7093c0291" target="_top" xlink:title=" ">
+<g id="a_Node000009"><a xlink:href="../../d1/d27/classfl_1_1sstream_ab985c480e2e7f0dd3223033be327162f.html#ab985c480e2e7f0dd3223033be327162f" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="132,-105 0,-105 0,-86 132,-86 132,-105"/>
 <text text-anchor="middle" x="66" y="-93" font-family="Helvetica,sans-Serif" font-size="10.00">fl::sstream::operator&lt;&lt;</text>
 </a>
@@ -223,7 +223,7 @@ var sectionId = 'dynsection-1';
 <!-- Node10 -->
 <g id="Node000010" class="node">
 <title>Node10</title>
-<g id="a_Node000010"><a xlink:href="../../d6/d86/classfl_1_1audio_1_1fft_1_1_bins_af5d45fe81553a1723d85435d6765a91a.html#af5d45fe81553a1723d85435d6765a91a" target="_top" xlink:title=" ">
+<g id="a_Node000010"><a xlink:href="../../d6/d86/classfl_1_1audio_1_1fft_1_1_bins_a50ee2731057542a6d9f61e73606a5097.html#a50ee2731057542a6d9f61e73606a5097" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="115.5,-67.5 16.5,-67.5 16.5,-37.5 115.5,-37.5 115.5,-67.5"/>
 <text text-anchor="start" x="24.5" y="-55.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::audio::fft::Bins</text>
 <text text-anchor="middle" x="66" y="-44.5" font-family="Helvetica,sans-Serif" font-size="10.00">::operator=</text>

@@ -1,0 +1,118 @@
+<map id="fl::step" name="fl::step">
+<area shape="rect" id="Node000001" title=" " alt="" coords="992,860,1059,885"/>
+<area shape="rect" id="Node000002" href="$df/d67/classfl_1_1_u_i_slider_impl_ad62fa294f715079405950755715a4b74.html#ad62fa294f715079405950755715a4b74" title=" " alt="" coords="725,55,931,80"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1022,846,1020,703,1011,493,1001,384,987,283,967,198,955,164,942,138,926,120,908,104,867,83,869,78,911,100,930,116,946,135,960,162,972,196,992,282,1006,383,1016,492,1025,702,1027,846"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a0bbd4600d1ada0552c6743d28a8683ea.html#a0bbd4600d1ada0552c6743d28a8683ea" title="Bind a four&#45;emitter map from an effective RGB solve and a white column already adapted into the same ..." alt="" coords="723,149,933,189"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="1021,846,1018,719,1007,537,997,443,983,356,965,284,942,233,918,209,889,191,892,187,922,205,946,230,970,282,988,355,1002,442,1012,536,1023,719,1027,846"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_afff4e9bb0e778bb7459488538fb1d86d.html#afff4e9bb0e778bb7459488538fb1d86d" title="Bind a five&#45;emitter map from one effective RGB solve and two white columns, all in the same D65 worki..." alt="" coords="717,243,939,283"/>
+<area shape="poly" id="edge9_Node000001_Node000008" title=" " alt="" coords="1021,846,1019,729,1009,564,999,480,985,403,966,340,955,316,942,297,929,286,932,282,946,294,959,313,971,338,990,402,1004,479,1014,564,1024,729,1027,846"/>
+<area shape="rect" id="Node000010" href="$d6/d31/classfl_1_1audio_1_1detector_1_1_vocal_aa35f5b55426a794b605ecb8766cd3571.html#aa35f5b55426a794b605ecb8766cd3571" title=" " alt="" coords="712,308,944,363"/>
+<area shape="poly" id="edge13_Node000001_Node000010" title=" " alt="" coords="1021,846,1015,744,1003,603,992,532,979,467,962,414,942,377,929,365,932,361,946,374,967,412,984,466,998,531,1008,603,1021,743,1026,846"/>
+<area shape="rect" id="Node000014" href="$d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper_ac00a1cd7e5df9094c6248051584e5329.html#ac00a1cd7e5df9094c6248051584e5329" title="Calculate linearly&#45;spaced frequency boundaries." alt="" coords="719,387,937,427"/>
+<area shape="poly" id="edge16_Node000001_Node000014" title=" " alt="" coords="1020,847,1013,758,998,638,975,523,960,478,942,448,919,429,922,425,946,444,965,476,980,522,1004,637,1018,757,1025,846"/>
+<area shape="rect" id="Node000021" href="$d2/d59/namespacefl_1_1third__party_1_1vorbis_aeffc575f567a9b9facc33c8f233a1ec4.html#aeffc575f567a9b9facc33c8f233a1ec4" title=" " alt="" coords="737,502,919,542"/>
+<area shape="poly" id="edge18_Node000001_Node000021" title=" " alt="" coords="1018,847,1008,778,992,691,970,609,956,577,942,556,918,539,921,535,946,552,961,575,975,607,997,690,1013,777,1023,846"/>
+<area shape="rect" id="Node000022" href="$d2/d59/namespacefl_1_1third__party_1_1vorbis_a8cd86d8a345faf8c707334ce8b6f8ec8.html#a8cd86d8a345faf8c707334ce8b6f8ec8" title=" " alt="" coords="477,465,633,505"/>
+<area shape="poly" id="edge62_Node000001_Node000022" title=" " alt="" coords="1020,846,1013,764,1000,656,989,602,976,555,961,516,942,492,906,468,865,453,821,445,777,443,690,451,617,467,616,462,689,445,777,437,822,440,866,448,908,464,946,488,965,514,981,553,995,601,1005,655,1019,763,1025,846"/>
+<area shape="rect" id="Node000045" href="$d2/d24/classfl_1_1_flow_field_f_p_ab375360e09a05bc70d6de116ccb9090d.html#ab375360e09a05bc70d6de116ccb9090d" title=" " alt="" coords="714,567,942,592"/>
+<area shape="poly" id="edge21_Node000001_Node000045" title=" " alt="" coords="1021,846,1017,797,1005,734,982,669,964,639,942,613,912,594,915,590,946,609,969,636,987,667,1011,732,1023,796,1026,846"/>
+<area shape="rect" id="Node000047" href="$d3/dfe/namespacefl_1_1anonymous__namespace_02gamut__map_8cpp_8hpp_03_afa155bfbd32ee5bf3a6c83b6187d3974.html#afa155bfbd32ee5bf3a6c83b6187d3974" title="The feasible chroma interval at the target&#39;s own lightness, as factors of the target&#39;s chroma." alt="" coords="730,692,926,747"/>
+<area shape="poly" id="edge23_Node000001_Node000047" title=" " alt="" coords="1010,849,983,804,964,780,942,760,925,749,928,745,946,756,968,777,988,801,1015,847"/>
+<area shape="rect" id="Node000048" href="$d3/dfe/namespacefl_1_1anonymous__namespace_02gamut__map_8cpp_8hpp_03_af702395fa5236acf87a3588a536c83d6.html#af702395fa5236acf87a3588a536c83d6" title="The highest lightness at or below requested whose feasible chroma interval the probe scan can still f..." alt="" coords="451,613,659,668"/>
+<area shape="poly" id="edge36_Node000001_Node000048" title=" " alt="" coords="1020,846,1016,803,1003,751,980,699,963,676,942,657,911,638,876,625,840,615,802,610,728,610,659,618,658,613,727,605,803,605,841,610,878,620,913,634,946,653,967,673,984,696,1008,749,1021,802,1026,846"/>
+<area shape="rect" id="Node000049" href="$d3/db6/slider_8cpp_8hpp_ade8043ede62066d1f4666a7eece358d1.html#ade8043ede62066d1f4666a7eece358d1" title=" " alt="" coords="743,771,913,796"/>
+<area shape="poly" id="edge27_Node000001_Node000049" title=" " alt="" coords="1000,852,974,830,943,811,908,799,910,794,945,806,977,826,1004,848"/>
+<area shape="rect" id="Node000050" href="$df/d9e/namespacefl_1_1detail_aa460d11ad03bf10ca559958d540256a3.html#aa460d11ad03bf10ca559958d540256a3" title=" " alt="" coords="758,821,898,861"/>
+<area shape="poly" id="edge28_Node000001_Node000050" title=" " alt="" coords="978,868,898,855,899,849,979,863"/>
+<area shape="rect" id="Node000053" href="$df/d9e/namespacefl_1_1detail_adf57a3f39857279e94410b7125f136bd.html#adf57a3f39857279e94410b7125f136bd" title=" " alt="" coords="758,885,898,925"/>
+<area shape="poly" id="edge31_Node000001_Node000053" title=" " alt="" coords="979,883,899,896,898,891,978,878"/>
+<area shape="rect" id="Node000056" href="$dd/d76/namespacefl_1_1third__party_1_1hexwave_a6ddfc96d0df884c137e6dbd8a0ace213.html#a6ddfc96d0df884c137e6dbd8a0ace213" title="Create and initialize a new HexWaveEngine." alt="" coords="734,949,922,989"/>
+<area shape="poly" id="edge34_Node000001_Node000056" title=" " alt="" coords="1003,897,976,919,945,939,917,951,915,946,943,934,973,915,999,893"/>
+<area shape="rect" id="Node000058" href="$d3/dfe/namespacefl_1_1anonymous__namespace_02gamut__map_8cpp_8hpp_03_acab6ba92f373afb8b7168f0c4d0cd038.html#acab6ba92f373afb8b7168f0c4d0cd038" title="Largest chroma factor the hull accepts, by a fixed count of halvings." alt="" coords="730,1037,926,1092"/>
+<area shape="poly" id="edge37_Node000001_Node000058" title=" " alt="" coords="1015,899,988,950,968,977,946,1003,920,1023,893,1040,890,1035,917,1019,942,999,964,974,983,947,1011,896"/>
+<area shape="rect" id="Node000059" href="$de/d0b/classfl_1_1flat__set_ae22ae86f9b854b0b7b48bde36d241b1f.html#ae22ae86f9b854b0b7b48bde36d241b1f" title=" " alt="" coords="763,1181,893,1221"/>
+<area shape="poly" id="edge39_Node000001_Node000059" title=" " alt="" coords="1028,899,1026,955,1015,1028,1005,1066,991,1104,971,1139,946,1171,922,1187,895,1197,893,1192,919,1183,942,1167,967,1136,986,1102,1000,1065,1010,1027,1020,955,1022,899"/>
+<area shape="rect" id="Node000066" href="$de/d0b/classfl_1_1flat__set_aa594618b232ec538df5663737a1770cc.html#aa594618b232ec538df5663737a1770cc" title=" " alt="" coords="763,1245,893,1285"/>
+<area shape="poly" id="edge48_Node000001_Node000066" title=" " alt="" coords="1024,899,1016,976,1000,1076,977,1171,963,1209,946,1235,922,1252,894,1262,893,1257,919,1247,942,1231,958,1206,972,1170,995,1075,1010,976,1019,899"/>
+<area shape="rect" id="Node000077" href="$df/d9e/namespacefl_1_1detail_a76f7efb5353c780971a10e52f93b3523.html#a76f7efb5353c780971a10e52f93b3523" title=" " alt="" coords="727,1367,929,1392"/>
+<area shape="poly" id="edge49_Node000001_Node000077" title=" " alt="" coords="1024,899,1015,987,999,1104,976,1218,962,1265,946,1298,927,1321,905,1341,859,1369,856,1364,901,1337,924,1318,942,1295,957,1263,970,1217,993,1103,1010,986,1019,899"/>
+<area shape="rect" id="Node000087" href="$db/d58/classfl_1_1_perlin_particle_punch_a62d1f2478549ae87a03cbe41d05467d8.html#a62d1f2478549ae87a03cbe41d05467d8" title=" " alt="" coords="747,1465,909,1505"/>
+<area shape="poly" id="edge54_Node000001_Node000087" title=" " alt="" coords="1025,900,1018,1006,1004,1155,981,1302,965,1362,946,1405,931,1424,913,1441,875,1467,872,1462,910,1437,927,1421,942,1402,960,1360,975,1301,999,1154,1013,1006,1020,899"/>
+<area shape="rect" id="Node000090" href="$d1/d86/namespacefl_1_1third__party_a5604e751de5836bc0302bf12a5d964d7.html#a5604e751de5836bc0302bf12a5d964d7" title=" " alt="" coords="225,1601,373,1641"/>
+<area shape="poly" id="edge56_Node000001_Node000090" title=" " alt="" coords="1025,899,1016,1038,1000,1234,976,1418,962,1483,946,1518,928,1533,905,1547,845,1569,770,1587,687,1600,516,1616,374,1622,373,1617,516,1611,686,1594,769,1581,843,1564,903,1542,925,1529,942,1515,957,1481,971,1417,994,1234,1011,1038,1020,899"/>
+<area shape="rect" id="Node000100" href="$d1/d86/namespacefl_1_1third__party_a17848305a0ebb11bfdcfa41ceb60ac67.html#a17848305a0ebb11bfdcfa41ceb60ac67" title="Get the next line for GIF decode." alt="" coords="754,1655,902,1695"/>
+<area shape="poly" id="edge58_Node000001_Node000100" title=" " alt="" coords="1026,899,1018,1060,1002,1294,978,1515,963,1594,955,1621,946,1638,927,1655,904,1667,901,1662,924,1651,942,1635,950,1619,958,1593,973,1514,996,1293,1012,1059,1020,899"/>
+<area shape="rect" id="Node000101" href="$d1/d86/namespacefl_1_1third__party_a6b4e347dc40898cf39868db8f3484f44.html#a6b4e347dc40898cf39868db8f3484f44" title="Get the next line for GIF decode." alt="" coords="481,1630,629,1670"/>
+<area shape="poly" id="edge61_Node000001_Node000101" title=" " alt="" coords="1026,900,1018,1052,1002,1270,979,1475,964,1548,955,1572,946,1588,924,1604,892,1616,809,1635,715,1646,629,1651,629,1645,714,1640,808,1629,890,1611,921,1599,942,1584,950,1570,958,1546,973,1474,997,1270,1012,1052,1020,899"/>
+<area shape="rect" id="Node000067" href="$de/d0b/classfl_1_1flat__set_a4ccec3c2e19fb245d24bbafa44fee098.html#a4ccec3c2e19fb245d24bbafa44fee098" title=" " alt="" coords="763,1117,893,1157"/>
+<area shape="poly" id="edge63_Node000001_Node000067" title=" " alt="" coords="1025,900,1019,944,1006,999,983,1056,966,1082,946,1105,922,1122,895,1132,893,1127,919,1117,942,1101,962,1079,978,1054,1001,998,1014,943,1020,899"/>
+<area shape="rect" id="Node000068" href="$de/d0b/classfl_1_1flat__set_acdcca768e649a4bc59b0fd5c8f43460e.html#acdcca768e649a4bc59b0fd5c8f43460e" title=" " alt="" coords="763,1719,893,1759"/>
+<area shape="poly" id="edge66_Node000001_Node000068" title=" " alt="" coords="1026,900,1019,1074,1005,1331,994,1460,981,1574,965,1661,956,1690,946,1709,922,1728,894,1738,892,1733,920,1723,942,1706,951,1688,960,1659,976,1573,989,1459,999,1330,1014,1074,1021,899"/>
+<area shape="rect" id="Node000003" href="$df/d67/classfl_1_1_u_i_slider_impl_a29f61a9971275a0fa3ee22fb159ac8b7.html#a29f61a9971275a0fa3ee22fb159ac8b7" title=" " alt="" coords="459,5,651,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="743,55,625,33,626,28,744,50"/>
+<area shape="rect" id="Node000004" href="$df/d67/classfl_1_1_u_i_slider_impl_a4f86b399485c0bcc4a2da7d60005a7dd.html#a4f86b399485c0bcc4a2da7d60005a7dd" title=" " alt="" coords="459,55,651,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="711,70,651,70,651,65,711,65"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_ac53a775b79932ae3fe7e03b287639d43.html#ac53a775b79932ae3fe7e03b287639d43" title="Derive the mapper for a three&#45;primary profile plus one white emitter." alt="" coords="453,156,657,181"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="709,171,657,171,657,166,709,166"/>
+<area shape="rect" id="Node000007" href="$db/d33/namespacefl_1_1anonymous__namespace_02pipeline_8cpp_8hpp_03_aece1643892391c10a9c9de9a2f21ab11.html#aece1643892391c10a9c9de9a2f21ab11" title=" " alt="" coords="201,167,397,221"/>
+<area shape="poly" id="edge8_Node000005_Node000007" title=" " alt="" coords="709,149,582,138,513,139,446,146,405,156,365,169,363,164,403,151,445,141,513,133,582,133,709,144"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="439,183,398,187,397,182,439,177"/>
+<area shape="poly" id="edge7_Node000007_Node000007" title=" " alt="" coords="336,156,323,148,299,145,280,147,267,152,262,158,262,167,256,167,257,156,264,148,279,142,299,140,324,143,338,151"/>
+<area shape="poly" id="edge12_Node000008_Node000007" title=" " alt="" coords="703,250,397,209,398,204,703,244"/>
+<area shape="rect" id="Node000009" href="$d4/d36/namespacefl_a948408716d579dc42f02ad68245c3450.html#a948408716d579dc42f02ad68245c3450" title="Derive the mapper for a three&#45;primary profile plus two white emitters." alt="" coords="447,257,662,283"/>
+<area shape="poly" id="edge10_Node000008_Node000009" title=" " alt="" coords="703,269,662,270,662,265,703,264"/>
+<area shape="poly" id="edge11_Node000009_Node000007" title=" " alt="" coords="496,256,445,241,390,224,391,219,446,235,498,251"/>
+<area shape="rect" id="Node000011" href="$d6/d31/classfl_1_1audio_1_1detector_1_1_vocal_ad68376503d426bb4aabe66ae0a07336e.html#ad68376503d426bb4aabe66ae0a07336e" title=" " alt="" coords="487,331,623,371"/>
+<area shape="poly" id="edge14_Node000010_Node000011" title=" " alt="" coords="698,346,623,350,623,345,698,340"/>
+<area shape="poly" id="edge15_Node000011_Node000011" title=" " alt="" coords="598,320,583,313,555,310,530,312,515,317,510,323,513,330,508,332,505,322,512,312,529,307,555,305,584,308,600,315"/>
+<area shape="rect" id="Node000015" href="$d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper_aca828d77220fdaf9492335d21480cb2a.html#aca828d77220fdaf9492335d21480cb2a" title="Calculate frequency bin boundaries (linear or logarithmic spacing)" alt="" coords="445,395,664,435"/>
+<area shape="poly" id="edge17_Node000014_Node000015" title=" " alt="" coords="705,414,664,415,664,409,705,408"/>
+<area shape="poly" id="edge19_Node000021_Node000022" title=" " alt="" coords="723,510,633,498,633,493,723,505"/>
+<area shape="rect" id="Node000023" href="$d2/d59/namespacefl_1_1third__party_1_1vorbis_a21db4619997d7d1dfbc185b8d9c22609.html#a21db4619997d7d1dfbc185b8d9c22609" title=" " alt="" coords="221,465,377,505"/>
+<area shape="poly" id="edge20_Node000022_Node000023" title=" " alt="" coords="463,487,378,487,378,482,463,482"/>
+<area shape="rect" id="Node000046" href="$d2/d24/classfl_1_1_flow_field_f_p_aa904e268491b4ec6071f18ff47a45151.html#aa904e268491b4ec6071f18ff47a45151" title="Subclasses implement rendering given the time delta and total time." alt="" coords="462,540,647,565"/>
+<area shape="poly" id="edge22_Node000045_Node000046" title=" " alt="" coords="700,570,647,564,648,559,701,564"/>
+<area shape="poly" id="edge24_Node000047_Node000047" title=" " alt="" coords="861,681,849,673,828,671,811,673,799,677,794,684,794,692,789,692,789,682,796,673,809,667,828,665,851,668,863,676"/>
+<area shape="poly" id="edge25_Node000047_Node000048" title=" " alt="" coords="718,691,650,671,651,666,720,686"/>
+<area shape="poly" id="edge26_Node000048_Node000048" title=" " alt="" coords="597,602,582,595,555,592,532,594,517,599,511,605,511,613,505,613,506,603,515,594,531,589,555,587,583,590,599,598"/>
+<area shape="rect" id="Node000051" href="$d2/d26/classfl_1_1flat__map_a46f36e49348e70eff385df284a3306f4.html#a46f36e49348e70eff385df284a3306f4" title=" " alt="" coords="471,693,638,733"/>
+<area shape="poly" id="edge29_Node000050_Node000051" title=" " alt="" coords="743,826,710,810,694,794,686,777,677,762,662,747,637,733,639,729,666,743,682,758,690,775,698,790,714,805,746,821"/>
+<area shape="rect" id="Node000052" href="$d2/d26/classfl_1_1flat__map_a9027e5d584eb100bfff8e31026d31c36.html#a9027e5d584eb100bfff8e31026d31c36" title=" " alt="" coords="471,757,638,797"/>
+<area shape="poly" id="edge30_Node000050_Node000052" title=" " alt="" coords="744,824,638,799,639,794,745,819"/>
+<area shape="rect" id="Node000054" href="$d2/d26/classfl_1_1flat__map_aa2acc3bae652b927ba81b46169b76e91.html#aa2acc3bae652b927ba81b46169b76e91" title=" " alt="" coords="471,821,638,861"/>
+<area shape="poly" id="edge32_Node000053_Node000054" title=" " alt="" coords="744,888,638,863,639,858,745,883"/>
+<area shape="rect" id="Node000055" href="$d2/d26/classfl_1_1flat__map_a473e8808a0c40c694e25fa92a7526406.html#a473e8808a0c40c694e25fa92a7526406" title=" " alt="" coords="471,885,638,925"/>
+<area shape="poly" id="edge33_Node000053_Node000055" title=" " alt="" coords="744,907,638,907,638,902,744,902"/>
+<area shape="rect" id="Node000057" href="$dd/d76/namespacefl_1_1third__party_1_1hexwave_acf75dfc3efad30e0203f2adfcf379f2a.html#acf75dfc3efad30e0203f2adfcf379f2a" title="Initialize the hexwave library (DEPRECATED &#45; use hexwave_engine_create)" alt="" coords="467,949,642,989"/>
+<area shape="poly" id="edge35_Node000056_Node000057" title=" " alt="" coords="720,971,642,971,642,966,720,966"/>
+<area shape="poly" id="edge38_Node000058_Node000058" title=" " alt="" coords="861,1026,849,1019,828,1016,811,1018,799,1023,794,1029,794,1037,789,1037,789,1027,796,1018,809,1013,828,1011,851,1014,863,1022"/>
+<area shape="rect" id="Node000060" href="$de/d0b/classfl_1_1flat__set_a389c1c770d7ef5ae54943fc3c8aef52d.html#a389c1c770d7ef5ae54943fc3c8aef52d" title=" " alt="" coords="489,1013,620,1053"/>
+<area shape="poly" id="edge40_Node000059_Node000060" title=" " alt="" coords="748,1191,728,1183,710,1171,698,1158,691,1144,685,1117,680,1091,673,1079,662,1067,642,1054,620,1045,621,1040,645,1049,666,1063,678,1076,685,1089,691,1116,696,1142,703,1155,714,1167,731,1178,750,1187"/>
+<area shape="rect" id="Node000061" href="$de/d0b/classfl_1_1flat__set_a64537c595f6192040d4614755654a043.html#a64537c595f6192040d4614755654a043" title=" " alt="" coords="489,1077,620,1117"/>
+<area shape="poly" id="edge41_Node000059_Node000061" title=" " alt="" coords="748,1185,711,1171,686,1155,663,1138,620,1119,622,1114,665,1133,689,1150,713,1166,750,1180"/>
+<area shape="rect" id="Node000062" href="$de/d0b/classfl_1_1flat__set_ac09f2053ba39b0f62c9e4a406a878d04.html#ac09f2053ba39b0f62c9e4a406a878d04" title=" " alt="" coords="495,1192,614,1217"/>
+<area shape="poly" id="edge42_Node000059_Node000062" title=" " alt="" coords="749,1204,614,1206,614,1201,749,1199"/>
+<area shape="rect" id="Node000070" href="$de/d0b/classfl_1_1flat__set_ad179209019728451dd536cd7bcfab8e7.html#ad179209019728451dd536cd7bcfab8e7" title=" " alt="" coords="234,1167,365,1192"/>
+<area shape="poly" id="edge46_Node000059_Node000070" title=" " alt="" coords="749,1191,664,1182,503,1177,365,1179,365,1174,503,1172,664,1177,749,1186"/>
+<area shape="rect" id="Node000075" href="$de/d0b/classfl_1_1flat__set_a07741933fa56a4ffe5bdcfaa3fef25f2.html#a07741933fa56a4ffe5bdcfaa3fef25f2" title=" " alt="" coords="234,1229,365,1255"/>
+<area shape="poly" id="edge47_Node000059_Node000075" title=" " alt="" coords="750,1219,664,1231,503,1242,365,1245,365,1240,503,1237,664,1226,749,1214"/>
+<area shape="rect" id="Node000076" href="$de/d0b/classfl_1_1flat__set_a06362ef6097292118395decf55e91bef.html#a06362ef6097292118395decf55e91bef" title=" " alt="" coords="495,1293,614,1319"/>
+<area shape="poly" id="edge45_Node000059_Node000076" title=" " alt="" coords="750,1220,713,1235,699,1245,690,1255,680,1266,665,1276,615,1296,613,1291,663,1272,677,1262,686,1251,696,1241,711,1230,748,1215"/>
+<area shape="poly" id="edge43_Node000062_Node000070" title=" " alt="" coords="481,1200,364,1188,365,1183,481,1195"/>
+<area shape="poly" id="edge44_Node000062_Node000075" title=" " alt="" coords="481,1218,365,1235,364,1230,481,1213"/>
+<area shape="rect" id="Node000078" href="$d4/d36/namespacefl_ad687a2ec502021170f58922c97be2091.html#ad687a2ec502021170f58922c97be2091" title=" " alt="" coords="494,1343,615,1368"/>
+<area shape="poly" id="edge50_Node000077_Node000078" title=" " alt="" coords="713,1372,615,1363,616,1358,713,1367"/>
+<area shape="rect" id="Node000079" href="$d4/d36/namespacefl_a22df60d2c2a8006731e4647aefa985ad.html#a22df60d2c2a8006731e4647aefa985ad" title=" " alt="" coords="494,1392,615,1417"/>
+<area shape="poly" id="edge51_Node000077_Node000079" title=" " alt="" coords="713,1393,616,1402,615,1396,713,1387"/>
+<area shape="rect" id="Node000083" href="$df/d9e/namespacefl_1_1detail_afefd6d5322865b9671cdc27fdf3a72cc.html#afefd6d5322865b9671cdc27fdf3a72cc" title=" " alt="" coords="465,1465,644,1491"/>
+<area shape="poly" id="edge52_Node000077_Node000083" title=" " alt="" coords="780,1399,592,1468,590,1463,778,1394"/>
+<area shape="poly" id="edge53_Node000083_Node000083" title=" " alt="" coords="600,1456,597,1451,589,1448,555,1444,527,1446,513,1451,510,1456,518,1463,514,1467,505,1457,509,1447,526,1441,555,1439,590,1443,601,1447,604,1453"/>
+<area shape="rect" id="Node000088" href="$db/d58/classfl_1_1_perlin_particle_punch_a7f51ebdff4fc251768c41089fbfb53e3.html#a7f51ebdff4fc251768c41089fbfb53e3" title=" " alt="" coords="473,1515,636,1555"/>
+<area shape="poly" id="edge55_Node000087_Node000088" title=" " alt="" coords="734,1505,637,1523,636,1518,733,1500"/>
+<area shape="rect" id="Node000091" href="$d1/d86/namespacefl_1_1third__party_ad5de61d6cfacc7de9fe139eaec46d1a5.html#ad5de61d6cfacc7de9fe139eaec46d1a5" title=" " alt="" coords="5,1601,153,1641"/>
+<area shape="poly" id="edge57_Node000090_Node000091" title=" " alt="" coords="211,1623,153,1623,153,1618,211,1618"/>
+<area shape="poly" id="edge59_Node000100_Node000101" title=" " alt="" coords="740,1670,629,1659,629,1654,741,1665"/>
+<area shape="poly" id="edge60_Node000101_Node000090" title=" " alt="" coords="467,1643,373,1632,374,1627,468,1637"/>
+<area shape="poly" id="edge64_Node000067_Node000060" title=" " alt="" coords="749,1121,711,1106,696,1096,686,1086,663,1067,619,1050,621,1045,665,1062,690,1082,699,1092,713,1101,751,1116"/>
+<area shape="poly" id="edge65_Node000067_Node000061" title=" " alt="" coords="749,1128,620,1109,621,1104,749,1123"/>
+</map>

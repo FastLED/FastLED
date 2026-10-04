@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -115,21 +115,21 @@ $(function(){initNavTree('d4/d36/namespacefl_aaf798853468937411e82193a589217ca.h
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d8/d02/math_8cpp_8hpp_source.html#l00588">588</a> of file <a class="el" href="../../d8/d02/math_8cpp_8hpp_source.html">math.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  588</span>                                  {</div>
-<div class="line"><span class="lineno">  589</span><span class="preprocessor">#if FL_MATH_USE_LIBM</span></div>
-<div class="line"><span class="lineno">  590</span>    return ::tanf(<a class="code hl_variable" href="../../d4/d36/namespacefl_a13766ae9e150185981f5096f90a439d7.html#a13766ae9e150185981f5096f90a439d7">value</a>);</div>
-<div class="line"><span class="lineno">  591</span><span class="preprocessor">#else</span></div>
-<div class="line"><span class="lineno">  592</span>    <span class="keyword">const</span> <span class="keywordtype">float</span> c = <a class="code hl_function" href="../../df/d9e/namespacefl_1_1detail_ab42e702a90f152dbad7d35ea9eab976a.html#ab42e702a90f152dbad7d35ea9eab976a">detail::cos_reduce_&lt;float&gt;</a>(<a class="code hl_variable" href="../../d4/d36/namespacefl_a13766ae9e150185981f5096f90a439d7.html#a13766ae9e150185981f5096f90a439d7">value</a>);</div>
-<div class="line"><span class="lineno">  593</span>    <span class="keywordflow">if</span> (c == 0.0f) <span class="keywordflow">return</span> 0.0f;</div>
-<div class="line"><span class="lineno">  594</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="../../df/d9e/namespacefl_1_1detail_a525aa6aacdb5d3d48ebe21adb14da430.html#a525aa6aacdb5d3d48ebe21adb14da430">detail::sin_reduce_&lt;float&gt;</a>(<a class="code hl_variable" href="../../d4/d36/namespacefl_a13766ae9e150185981f5096f90a439d7.html#a13766ae9e150185981f5096f90a439d7">value</a>) / c;</div>
-<div class="line"><span class="lineno">  595</span><span class="preprocessor">#endif</span></div>
-<div class="line"><span class="lineno">  596</span>}</div>
-<div class="ttc" id="anamespacefl_1_1detail_a525aa6aacdb5d3d48ebe21adb14da430_html_a525aa6aacdb5d3d48ebe21adb14da430"><div class="ttname"><a href="../../df/d9e/namespacefl_1_1detail_a525aa6aacdb5d3d48ebe21adb14da430.html#a525aa6aacdb5d3d48ebe21adb14da430">fl::detail::sin_reduce_</a></div><div class="ttdeci">F sin_reduce_(F x) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d02/math_8cpp_8hpp_source.html#l00184">math.cpp.hpp:184</a></div></div>
-<div class="ttc" id="anamespacefl_1_1detail_ab42e702a90f152dbad7d35ea9eab976a_html_ab42e702a90f152dbad7d35ea9eab976a"><div class="ttname"><a href="../../df/d9e/namespacefl_1_1detail_ab42e702a90f152dbad7d35ea9eab976a.html#ab42e702a90f152dbad7d35ea9eab976a">fl::detail::cos_reduce_</a></div><div class="ttdeci">F cos_reduce_(F x) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d02/math_8cpp_8hpp_source.html#l00202">math.cpp.hpp:202</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d8/d02/math_8cpp_8hpp_source.html#l00669">669</a> of file <a class="el" href="../../d8/d02/math_8cpp_8hpp_source.html">math.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  669</span>                                  {</div>
+<div class="line"><span class="lineno">  670</span><span class="preprocessor">#if FL_MATH_USE_LIBM</span></div>
+<div class="line"><span class="lineno">  671</span>    return ::tanf(<a class="code hl_variable" href="../../d4/d36/namespacefl_a13766ae9e150185981f5096f90a439d7.html#a13766ae9e150185981f5096f90a439d7">value</a>);</div>
+<div class="line"><span class="lineno">  672</span><span class="preprocessor">#else</span></div>
+<div class="line"><span class="lineno">  673</span>    <span class="keyword">const</span> <span class="keywordtype">float</span> c = <a class="code hl_function" href="../../df/d9e/namespacefl_1_1detail_ac2273fa1bad46159181e978dff14b9b2.html#ac2273fa1bad46159181e978dff14b9b2">detail::cos_reduce_&lt;float&gt;</a>(<a class="code hl_variable" href="../../d4/d36/namespacefl_a13766ae9e150185981f5096f90a439d7.html#a13766ae9e150185981f5096f90a439d7">value</a>);</div>
+<div class="line"><span class="lineno">  674</span>    <span class="keywordflow">if</span> (c == 0.0f) <span class="keywordflow">return</span> 0.0f;</div>
+<div class="line"><span class="lineno">  675</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="../../df/d9e/namespacefl_1_1detail_a6a0079ec5177e72b0e64470ba18a332e.html#a6a0079ec5177e72b0e64470ba18a332e">detail::sin_reduce_&lt;float&gt;</a>(<a class="code hl_variable" href="../../d4/d36/namespacefl_a13766ae9e150185981f5096f90a439d7.html#a13766ae9e150185981f5096f90a439d7">value</a>) / c;</div>
+<div class="line"><span class="lineno">  676</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">  677</span>}</div>
+<div class="ttc" id="anamespacefl_1_1detail_a6a0079ec5177e72b0e64470ba18a332e_html_a6a0079ec5177e72b0e64470ba18a332e"><div class="ttname"><a href="../../df/d9e/namespacefl_1_1detail_a6a0079ec5177e72b0e64470ba18a332e.html#a6a0079ec5177e72b0e64470ba18a332e">fl::detail::sin_reduce_</a></div><div class="ttdeci">F sin_reduce_(F x) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d02/math_8cpp_8hpp_source.html#l00265">math.cpp.hpp:265</a></div></div>
+<div class="ttc" id="anamespacefl_1_1detail_ac2273fa1bad46159181e978dff14b9b2_html_ac2273fa1bad46159181e978dff14b9b2"><div class="ttname"><a href="../../df/d9e/namespacefl_1_1detail_ac2273fa1bad46159181e978dff14b9b2.html#ac2273fa1bad46159181e978dff14b9b2">fl::detail::cos_reduce_</a></div><div class="ttdeci">F cos_reduce_(F x) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d02/math_8cpp_8hpp_source.html#l00283">math.cpp.hpp:283</a></div></div>
 <div class="ttc" id="anamespacefl_a13766ae9e150185981f5096f90a439d7_html_a13766ae9e150185981f5096f90a439d7"><div class="ttname"><a href="../../d4/d36/namespacefl_a13766ae9e150185981f5096f90a439d7.html#a13766ae9e150185981f5096f90a439d7">fl::value</a></div><div class="ttdeci">constexpr int type_rank&lt; T &gt;::value</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d37/static__constexpr__defs_8cpp_8hpp_source.html#l00082">static_constexpr_defs.cpp.hpp:82</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d8/d02/math_8cpp_8hpp_source.html#l00202">fl::detail::cos_reduce_()</a>, <a class="el" href="../../d8/d02/math_8cpp_8hpp_source.html#l00184">fl::detail::sin_reduce_()</a>, and <a class="el" href="../../dd/d37/static__constexpr__defs_8cpp_8hpp_source.html#l00082">type_rank&lt; T &gt;::value</a>.</p>
+<p class="reference">References <a class="el" href="../../d8/d02/math_8cpp_8hpp_source.html#l00283">fl::detail::cos_reduce_()</a>, <a class="el" href="../../d8/d02/math_8cpp_8hpp_source.html#l00265">fl::detail::sin_reduce_()</a>, and <a class="el" href="../../dd/d37/static__constexpr__defs_8cpp_8hpp_source.html#l00082">type_rank&lt; T &gt;::value</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../df/db1/math_8h_source.html#l00367">tan()</a>, and <a class="el" href="../../df/db1/math_8h_source.html#l00364">tanf()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
@@ -156,7 +156,7 @@ $(function(){initNavTree('d4/d36/namespacefl_aaf798853468937411e82193a589217ca.h
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:04 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:08 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

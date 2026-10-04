@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -132,56 +132,59 @@ $(function(){initNavTree('d8/df9/group___noise_generation_gae021f30d62fea75ea139
 </table>
 </div><div class="memdoc">
 
-<p></p>
+<p>16-bit, fixed point implementation of Perlin's noise without scaling.       </p>
+<p>Coordinates are 16.16 fixed point values, 32 bit integers with integral coordinates in the high 16-bits and fractional in the low 16-bits. </p><dl class="section return"><dt>Returns</dt><dd>unscaled noise value as a signed integer, roughly -18k to 18k </dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
+    <tr><td class="paramname">x</td><td>x-axis coordinate on noise map (1D)    </td></tr>
+    <tr><td class="paramname">y</td><td>y-axis coordinate on noise map (2D)    </td></tr>
     <tr><td class="paramname">z</td><td>z-axis coordinate on noise map (3D) </td></tr>
   </table>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="../../da/dca/noise_8cpp_8hpp_source.html#l00303">303</a> of file <a class="el" href="../../da/dca/noise_8cpp_8hpp_source.html">noise.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  304</span>{</div>
-<div class="line"><span class="lineno">  305</span>    <span class="comment">// Find the unit cube containing the point</span></div>
-<div class="line"><span class="lineno">  306</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> X = (<a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>&gt;&gt;16)&amp;0xFF;</div>
-<div class="line"><span class="lineno">  307</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> Y = (<a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a>&gt;&gt;16)&amp;0xFF;</div>
-<div class="line"><span class="lineno">  308</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> Z = (<a class="code hl_variable" href="../../de/d71/_fire2023_8h_a4e48336126ecdad27c0411a91b14bf5a.html#a4e48336126ecdad27c0411a91b14bf5a">z</a>&gt;&gt;16)&amp;0xFF;</div>
-<div class="line"><span class="lineno">  309</span> </div>
-<div class="line"><span class="lineno">  310</span>    <span class="comment">// Hash cube corner coordinates</span></div>
-<div class="line"><span class="lineno">  311</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> A = <a class="code hl_define" href="../../da/dca/noise_8cpp_8hpp_ae633137eb02a37d7d3c9d7b69be08f44.html#ae633137eb02a37d7d3c9d7b69be08f44">NOISE_P</a>(X)+Y;</div>
-<div class="line"><span class="lineno">  312</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> AA = <a class="code hl_define" href="../../da/dca/noise_8cpp_8hpp_ae633137eb02a37d7d3c9d7b69be08f44.html#ae633137eb02a37d7d3c9d7b69be08f44">NOISE_P</a>(A)+Z;</div>
-<div class="line"><span class="lineno">  313</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> AB = <a class="code hl_define" href="../../da/dca/noise_8cpp_8hpp_ae633137eb02a37d7d3c9d7b69be08f44.html#ae633137eb02a37d7d3c9d7b69be08f44">NOISE_P</a>(A+1)+Z;</div>
-<div class="line"><span class="lineno">  314</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> <a class="code hl_variable" href="../../d4/d36/namespacefl_a2c8142016256d0ba1b5fb744b6f9e205.html#a2c8142016256d0ba1b5fb744b6f9e205">B</a> = <a class="code hl_define" href="../../da/dca/noise_8cpp_8hpp_ae633137eb02a37d7d3c9d7b69be08f44.html#ae633137eb02a37d7d3c9d7b69be08f44">NOISE_P</a>(X+1)+Y;</div>
-<div class="line"><span class="lineno">  315</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> BA = <a class="code hl_define" href="../../da/dca/noise_8cpp_8hpp_ae633137eb02a37d7d3c9d7b69be08f44.html#ae633137eb02a37d7d3c9d7b69be08f44">NOISE_P</a>(B) + Z;</div>
-<div class="line"><span class="lineno">  316</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> BB = <a class="code hl_define" href="../../da/dca/noise_8cpp_8hpp_ae633137eb02a37d7d3c9d7b69be08f44.html#ae633137eb02a37d7d3c9d7b69be08f44">NOISE_P</a>(B+1)+Z;</div>
-<div class="line"><span class="lineno">  317</span> </div>
-<div class="line"><span class="lineno">  318</span>    <span class="comment">// Get the relative position of the point in the cube</span></div>
-<div class="line"><span class="lineno">  319</span>    fl::u16 u = <a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a> &amp; 0xFFFF;</div>
-<div class="line"><span class="lineno">  320</span>    fl::u16 v = <a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a> &amp; 0xFFFF;</div>
-<div class="line"><span class="lineno">  321</span>    fl::u16 w = <a class="code hl_variable" href="../../de/d71/_fire2023_8h_a4e48336126ecdad27c0411a91b14bf5a.html#a4e48336126ecdad27c0411a91b14bf5a">z</a> &amp; 0xFFFF;</div>
-<div class="line"><span class="lineno">  322</span> </div>
-<div class="line"><span class="lineno">  323</span>    <span class="comment">// Get a signed version of the above for the grad function</span></div>
-<div class="line"><span class="lineno">  324</span>    fl::i16 xx = (u &gt;&gt; 1) &amp; 0x7FFF;</div>
-<div class="line"><span class="lineno">  325</span>    fl::i16 yy = (v &gt;&gt; 1) &amp; 0x7FFF;</div>
-<div class="line"><span class="lineno">  326</span>    fl::i16 zz = (w &gt;&gt; 1) &amp; 0x7FFF;</div>
-<div class="line"><span class="lineno">  327</span>    fl::u16 N = 0x8000L;</div>
-<div class="line"><span class="lineno">  328</span> </div>
-<div class="line"><span class="lineno">  329</span>    u = EASE16(u); v = EASE16(v); w = EASE16(w);</div>
-<div class="line"><span class="lineno">  330</span> </div>
-<div class="line"><span class="lineno">  331</span>    <span class="comment">// skip the log fade adjustment for the moment, otherwise here we would</span></div>
-<div class="line"><span class="lineno">  332</span>    <span class="comment">// adjust fade values for u,v,w</span></div>
-<div class="line"><span class="lineno">  333</span>    fl::i16 X1 = LERP(<a class="code hl_function" href="../../da/dca/noise_8cpp_8hpp_aa1191276c67b1c0264857c9d802c665b.html#aa1191276c67b1c0264857c9d802c665b">grad16</a>(<a class="code hl_define" href="../../da/dca/noise_8cpp_8hpp_ae633137eb02a37d7d3c9d7b69be08f44.html#ae633137eb02a37d7d3c9d7b69be08f44">NOISE_P</a>(AA), xx, yy, zz), <a class="code hl_function" href="../../da/dca/noise_8cpp_8hpp_aa1191276c67b1c0264857c9d802c665b.html#aa1191276c67b1c0264857c9d802c665b">grad16</a>(<a class="code hl_define" href="../../da/dca/noise_8cpp_8hpp_ae633137eb02a37d7d3c9d7b69be08f44.html#ae633137eb02a37d7d3c9d7b69be08f44">NOISE_P</a>(BA), xx - N, yy, zz), u);</div>
-<div class="line"><span class="lineno">  334</span>    fl::i16 X2 = LERP(<a class="code hl_function" href="../../da/dca/noise_8cpp_8hpp_aa1191276c67b1c0264857c9d802c665b.html#aa1191276c67b1c0264857c9d802c665b">grad16</a>(<a class="code hl_define" href="../../da/dca/noise_8cpp_8hpp_ae633137eb02a37d7d3c9d7b69be08f44.html#ae633137eb02a37d7d3c9d7b69be08f44">NOISE_P</a>(AB), xx, yy-N, zz), <a class="code hl_function" href="../../da/dca/noise_8cpp_8hpp_aa1191276c67b1c0264857c9d802c665b.html#aa1191276c67b1c0264857c9d802c665b">grad16</a>(<a class="code hl_define" href="../../da/dca/noise_8cpp_8hpp_ae633137eb02a37d7d3c9d7b69be08f44.html#ae633137eb02a37d7d3c9d7b69be08f44">NOISE_P</a>(BB), xx - N, yy - N, zz), u);</div>
-<div class="line"><span class="lineno">  335</span>    fl::i16 X3 = LERP(<a class="code hl_function" href="../../da/dca/noise_8cpp_8hpp_aa1191276c67b1c0264857c9d802c665b.html#aa1191276c67b1c0264857c9d802c665b">grad16</a>(<a class="code hl_define" href="../../da/dca/noise_8cpp_8hpp_ae633137eb02a37d7d3c9d7b69be08f44.html#ae633137eb02a37d7d3c9d7b69be08f44">NOISE_P</a>(AA+1), xx, yy, zz-N), <a class="code hl_function" href="../../da/dca/noise_8cpp_8hpp_aa1191276c67b1c0264857c9d802c665b.html#aa1191276c67b1c0264857c9d802c665b">grad16</a>(<a class="code hl_define" href="../../da/dca/noise_8cpp_8hpp_ae633137eb02a37d7d3c9d7b69be08f44.html#ae633137eb02a37d7d3c9d7b69be08f44">NOISE_P</a>(BA+1), xx - N, yy, zz-N), u);</div>
-<div class="line"><span class="lineno">  336</span>    fl::i16 X4 = LERP(<a class="code hl_function" href="../../da/dca/noise_8cpp_8hpp_aa1191276c67b1c0264857c9d802c665b.html#aa1191276c67b1c0264857c9d802c665b">grad16</a>(<a class="code hl_define" href="../../da/dca/noise_8cpp_8hpp_ae633137eb02a37d7d3c9d7b69be08f44.html#ae633137eb02a37d7d3c9d7b69be08f44">NOISE_P</a>(AB+1), xx, yy-N, zz-N), <a class="code hl_function" href="../../da/dca/noise_8cpp_8hpp_aa1191276c67b1c0264857c9d802c665b.html#aa1191276c67b1c0264857c9d802c665b">grad16</a>(<a class="code hl_define" href="../../da/dca/noise_8cpp_8hpp_ae633137eb02a37d7d3c9d7b69be08f44.html#ae633137eb02a37d7d3c9d7b69be08f44">NOISE_P</a>(BB+1), xx - N, yy - N, zz - N), u);</div>
-<div class="line"><span class="lineno">  337</span> </div>
-<div class="line"><span class="lineno">  338</span>    fl::i16 Y1 = LERP(X1,X2,v);</div>
-<div class="line"><span class="lineno">  339</span>    fl::i16 Y2 = LERP(X3,X4,v);</div>
-<div class="line"><span class="lineno">  340</span> </div>
-<div class="line"><span class="lineno">  341</span>    fl::i16 ans = LERP(Y1,Y2,w);</div>
-<div class="line"><span class="lineno">  342</span> </div>
-<div class="line"><span class="lineno">  343</span>    <span class="keywordflow">return</span> ans;</div>
-<div class="line"><span class="lineno">  344</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../da/dca/noise_8cpp_8hpp_source.html#l00340">340</a> of file <a class="el" href="../../da/dca/noise_8cpp_8hpp_source.html">noise.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  341</span>{</div>
+<div class="line"><span class="lineno">  342</span>    <span class="comment">// Find the unit cube containing the point</span></div>
+<div class="line"><span class="lineno">  343</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> X = (<a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>&gt;&gt;16)&amp;0xFF;</div>
+<div class="line"><span class="lineno">  344</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> Y = (<a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a>&gt;&gt;16)&amp;0xFF;</div>
+<div class="line"><span class="lineno">  345</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> Z = (<a class="code hl_variable" href="../../de/d71/_fire2023_8h_a4e48336126ecdad27c0411a91b14bf5a.html#a4e48336126ecdad27c0411a91b14bf5a">z</a>&gt;&gt;16)&amp;0xFF;</div>
+<div class="line"><span class="lineno">  346</span> </div>
+<div class="line"><span class="lineno">  347</span>    <span class="comment">// Hash cube corner coordinates</span></div>
+<div class="line"><span class="lineno">  348</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> A = <a class="code hl_define" href="../../da/dca/noise_8cpp_8hpp_ae633137eb02a37d7d3c9d7b69be08f44.html#ae633137eb02a37d7d3c9d7b69be08f44">NOISE_P</a>(X)+Y;</div>
+<div class="line"><span class="lineno">  349</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> AA = <a class="code hl_define" href="../../da/dca/noise_8cpp_8hpp_ae633137eb02a37d7d3c9d7b69be08f44.html#ae633137eb02a37d7d3c9d7b69be08f44">NOISE_P</a>(A)+Z;</div>
+<div class="line"><span class="lineno">  350</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> AB = <a class="code hl_define" href="../../da/dca/noise_8cpp_8hpp_ae633137eb02a37d7d3c9d7b69be08f44.html#ae633137eb02a37d7d3c9d7b69be08f44">NOISE_P</a>(A+1)+Z;</div>
+<div class="line"><span class="lineno">  351</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> <a class="code hl_variable" href="../../d4/d36/namespacefl_a2c8142016256d0ba1b5fb744b6f9e205.html#a2c8142016256d0ba1b5fb744b6f9e205">B</a> = <a class="code hl_define" href="../../da/dca/noise_8cpp_8hpp_ae633137eb02a37d7d3c9d7b69be08f44.html#ae633137eb02a37d7d3c9d7b69be08f44">NOISE_P</a>(X+1)+Y;</div>
+<div class="line"><span class="lineno">  352</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> BA = <a class="code hl_define" href="../../da/dca/noise_8cpp_8hpp_ae633137eb02a37d7d3c9d7b69be08f44.html#ae633137eb02a37d7d3c9d7b69be08f44">NOISE_P</a>(B) + Z;</div>
+<div class="line"><span class="lineno">  353</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> BB = <a class="code hl_define" href="../../da/dca/noise_8cpp_8hpp_ae633137eb02a37d7d3c9d7b69be08f44.html#ae633137eb02a37d7d3c9d7b69be08f44">NOISE_P</a>(B+1)+Z;</div>
+<div class="line"><span class="lineno">  354</span> </div>
+<div class="line"><span class="lineno">  355</span>    <span class="comment">// Get the relative position of the point in the cube</span></div>
+<div class="line"><span class="lineno">  356</span>    fl::u16 u = <a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a> &amp; 0xFFFF;</div>
+<div class="line"><span class="lineno">  357</span>    fl::u16 v = <a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a> &amp; 0xFFFF;</div>
+<div class="line"><span class="lineno">  358</span>    fl::u16 w = <a class="code hl_variable" href="../../de/d71/_fire2023_8h_a4e48336126ecdad27c0411a91b14bf5a.html#a4e48336126ecdad27c0411a91b14bf5a">z</a> &amp; 0xFFFF;</div>
+<div class="line"><span class="lineno">  359</span> </div>
+<div class="line"><span class="lineno">  360</span>    <span class="comment">// Get a signed version of the above for the grad function</span></div>
+<div class="line"><span class="lineno">  361</span>    fl::i16 xx = (u &gt;&gt; 1) &amp; 0x7FFF;</div>
+<div class="line"><span class="lineno">  362</span>    fl::i16 yy = (v &gt;&gt; 1) &amp; 0x7FFF;</div>
+<div class="line"><span class="lineno">  363</span>    fl::i16 zz = (w &gt;&gt; 1) &amp; 0x7FFF;</div>
+<div class="line"><span class="lineno">  364</span>    fl::u16 N = 0x8000L;</div>
+<div class="line"><span class="lineno">  365</span> </div>
+<div class="line"><span class="lineno">  366</span>    u = EASE16(u); v = EASE16(v); w = EASE16(w);</div>
+<div class="line"><span class="lineno">  367</span> </div>
+<div class="line"><span class="lineno">  368</span>    <span class="comment">// skip the log fade adjustment for the moment, otherwise here we would</span></div>
+<div class="line"><span class="lineno">  369</span>    <span class="comment">// adjust fade values for u,v,w</span></div>
+<div class="line"><span class="lineno">  370</span>    fl::i16 X1 = LERP(<a class="code hl_function" href="../../da/dca/noise_8cpp_8hpp_aa1191276c67b1c0264857c9d802c665b.html#aa1191276c67b1c0264857c9d802c665b">grad16</a>(<a class="code hl_define" href="../../da/dca/noise_8cpp_8hpp_ae633137eb02a37d7d3c9d7b69be08f44.html#ae633137eb02a37d7d3c9d7b69be08f44">NOISE_P</a>(AA), xx, yy, zz), <a class="code hl_function" href="../../da/dca/noise_8cpp_8hpp_aa1191276c67b1c0264857c9d802c665b.html#aa1191276c67b1c0264857c9d802c665b">grad16</a>(<a class="code hl_define" href="../../da/dca/noise_8cpp_8hpp_ae633137eb02a37d7d3c9d7b69be08f44.html#ae633137eb02a37d7d3c9d7b69be08f44">NOISE_P</a>(BA), xx - N, yy, zz), u);</div>
+<div class="line"><span class="lineno">  371</span>    fl::i16 X2 = LERP(<a class="code hl_function" href="../../da/dca/noise_8cpp_8hpp_aa1191276c67b1c0264857c9d802c665b.html#aa1191276c67b1c0264857c9d802c665b">grad16</a>(<a class="code hl_define" href="../../da/dca/noise_8cpp_8hpp_ae633137eb02a37d7d3c9d7b69be08f44.html#ae633137eb02a37d7d3c9d7b69be08f44">NOISE_P</a>(AB), xx, yy-N, zz), <a class="code hl_function" href="../../da/dca/noise_8cpp_8hpp_aa1191276c67b1c0264857c9d802c665b.html#aa1191276c67b1c0264857c9d802c665b">grad16</a>(<a class="code hl_define" href="../../da/dca/noise_8cpp_8hpp_ae633137eb02a37d7d3c9d7b69be08f44.html#ae633137eb02a37d7d3c9d7b69be08f44">NOISE_P</a>(BB), xx - N, yy - N, zz), u);</div>
+<div class="line"><span class="lineno">  372</span>    fl::i16 X3 = LERP(<a class="code hl_function" href="../../da/dca/noise_8cpp_8hpp_aa1191276c67b1c0264857c9d802c665b.html#aa1191276c67b1c0264857c9d802c665b">grad16</a>(<a class="code hl_define" href="../../da/dca/noise_8cpp_8hpp_ae633137eb02a37d7d3c9d7b69be08f44.html#ae633137eb02a37d7d3c9d7b69be08f44">NOISE_P</a>(AA+1), xx, yy, zz-N), <a class="code hl_function" href="../../da/dca/noise_8cpp_8hpp_aa1191276c67b1c0264857c9d802c665b.html#aa1191276c67b1c0264857c9d802c665b">grad16</a>(<a class="code hl_define" href="../../da/dca/noise_8cpp_8hpp_ae633137eb02a37d7d3c9d7b69be08f44.html#ae633137eb02a37d7d3c9d7b69be08f44">NOISE_P</a>(BA+1), xx - N, yy, zz-N), u);</div>
+<div class="line"><span class="lineno">  373</span>    fl::i16 X4 = LERP(<a class="code hl_function" href="../../da/dca/noise_8cpp_8hpp_aa1191276c67b1c0264857c9d802c665b.html#aa1191276c67b1c0264857c9d802c665b">grad16</a>(<a class="code hl_define" href="../../da/dca/noise_8cpp_8hpp_ae633137eb02a37d7d3c9d7b69be08f44.html#ae633137eb02a37d7d3c9d7b69be08f44">NOISE_P</a>(AB+1), xx, yy-N, zz-N), <a class="code hl_function" href="../../da/dca/noise_8cpp_8hpp_aa1191276c67b1c0264857c9d802c665b.html#aa1191276c67b1c0264857c9d802c665b">grad16</a>(<a class="code hl_define" href="../../da/dca/noise_8cpp_8hpp_ae633137eb02a37d7d3c9d7b69be08f44.html#ae633137eb02a37d7d3c9d7b69be08f44">NOISE_P</a>(BB+1), xx - N, yy - N, zz - N), u);</div>
+<div class="line"><span class="lineno">  374</span> </div>
+<div class="line"><span class="lineno">  375</span>    fl::i16 Y1 = LERP(X1,X2,v);</div>
+<div class="line"><span class="lineno">  376</span>    fl::i16 Y2 = LERP(X3,X4,v);</div>
+<div class="line"><span class="lineno">  377</span> </div>
+<div class="line"><span class="lineno">  378</span>    fl::i16 ans = LERP(Y1,Y2,w);</div>
+<div class="line"><span class="lineno">  379</span> </div>
+<div class="line"><span class="lineno">  380</span>    <span class="keywordflow">return</span> ans;</div>
+<div class="line"><span class="lineno">  381</span>}</div>
 <div class="ttc" id="a_audio_2simple_2simple_8h_a0a2f84ed7838f07779ae24c5a9086d33_html_a0a2f84ed7838f07779ae24c5a9086d33"><div class="ttname"><a href="../../db/d49/_audio_2simple_2simple_8h_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a></div><div class="ttdeci">int y</div><div class="ttdef"><b>Definition</b> <a href="../../db/d49/_audio_2simple_2simple_8h_source.html#l00093">simple.h:93</a></div></div>
 <div class="ttc" id="a_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc_html_a6150e0515f7202e2fb518f7206ed97dc"><div class="ttname"><a href="../../db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a></div><div class="ttdeci">int x</div><div class="ttdef"><b>Definition</b> <a href="../../db/d49/_audio_2simple_2simple_8h_source.html#l00092">simple.h:92</a></div></div>
 <div class="ttc" id="a_fire2023_8h_a4e48336126ecdad27c0411a91b14bf5a_html_a4e48336126ecdad27c0411a91b14bf5a"><div class="ttname"><a href="../../de/d71/_fire2023_8h_a4e48336126ecdad27c0411a91b14bf5a.html#a4e48336126ecdad27c0411a91b14bf5a">z</a></div><div class="ttdeci">uint32_t z[NUM_LAYERS]</div><div class="ttdef"><b>Definition</b> <a href="../../de/d71/_fire2023_8h_source.html#l00093">Fire2023.h:93</a></div></div>
@@ -192,7 +195,7 @@ $(function(){initNavTree('d8/df9/group___noise_generation_gae021f30d62fea75ea139
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../da/dca/noise_8cpp_8hpp_source.html#l00116">grad16()</a>, <a class="el" href="../../da/dca/noise_8cpp_8hpp_source.html#l00032">NOISE_P</a>, <a class="el" href="../../db/d49/_audio_2simple_2simple_8h_source.html#l00092">x</a>, <a class="el" href="../../db/d49/_audio_2simple_2simple_8h_source.html#l00093">y</a>, and <a class="el" href="../../de/d71/_fire2023_8h_source.html#l00093">z</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../da/dca/noise_8cpp_8hpp_source.html#l00530">inoise16()</a>, <a class="el" href="../../da/dca/noise_8cpp_8hpp_source.html#l00490">inoise16()</a>, <a class="el" href="../../da/dca/noise_8cpp_8hpp_source.html#l00441">inoise16()</a>, and <a class="el" href="../../da/dca/noise_8cpp_8hpp_source.html#l00425">inoise16()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../da/dca/noise_8cpp_8hpp_source.html#l00567">inoise16()</a>, <a class="el" href="../../da/dca/noise_8cpp_8hpp_source.html#l00527">inoise16()</a>, <a class="el" href="../../da/dca/noise_8cpp_8hpp_source.html#l00478">inoise16()</a>, and <a class="el" href="../../da/dca/noise_8cpp_8hpp_source.html#l00462">inoise16()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -217,7 +220,7 @@ $(function(){initNavTree('d8/df9/group___noise_generation_gae021f30d62fea75ea139
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d8/df9/group___noise_generation.html">Noise Generation Functions</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:02 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

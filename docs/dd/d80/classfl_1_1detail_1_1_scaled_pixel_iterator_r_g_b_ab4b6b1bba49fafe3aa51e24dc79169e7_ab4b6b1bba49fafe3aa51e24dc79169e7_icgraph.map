@@ -1,0 +1,39 @@
+<map id="fl::detail::ScaledPixelIteratorRGB::advance" name="fl::detail::ScaledPixelIteratorRGB::advance">
+<area shape="rect" id="Node000001" title="Advance to next pixel (or mark as end)" alt="" coords="565,357,771,397"/>
+<area shape="rect" id="Node000002" href="$dd/d80/classfl_1_1detail_1_1_scaled_pixel_iterator_r_g_b_a03e54aff4f02ad1880b09afbf6f8ee88.html#a03e54aff4f02ad1880b09afbf6f8ee88" title="Construct from PixelIterator." alt="" coords="284,133,492,173"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="644,347,591,278,555,240,516,208,486,190,454,176,457,171,489,185,519,203,559,237,595,274,648,344"/>
+<area shape="rect" id="Node000004" href="$dd/d80/classfl_1_1detail_1_1_scaled_pixel_iterator_r_g_b_a6a3a85837dfb123029391fc27a777cf1.html#a6a3a85837dfb123029391fc27a777cf1" title="Pre&#45;increment operator." alt="" coords="5,5,211,45"/>
+<area shape="poly" id="edge16_Node000001_Node000004" title=" " alt="" coords="655,345,636,296,607,235,567,174,543,147,516,123,481,101,443,82,363,54,283,38,211,30,211,25,284,33,365,49,445,77,483,96,519,119,547,143,571,171,612,233,641,293,660,344"/>
+<area shape="rect" id="Node000005" href="$dd/d80/classfl_1_1detail_1_1_scaled_pixel_iterator_r_g_b_abf67e0207613cca4d70469e610a7673e.html#abf67e0207613cca4d70469e610a7673e" title="Post&#45;increment operator." alt="" coords="5,197,211,237"/>
+<area shape="poly" id="edge17_Node000001_Node000005" title=" " alt="" coords="617,353,569,330,516,309,437,285,357,265,210,236,211,230,358,260,439,280,518,304,571,325,619,349"/>
+<area shape="rect" id="Node000007" href="$d3/dc4/classfl_1_1detail_1_1_scaled_pixel_iterator_r_g_b_w_a3ac3e4d50dbd3bd944610f8532679973.html#a3ac3e4d50dbd3bd944610f8532679973" title="Construct from PixelIterator." alt="" coords="271,357,505,397"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="552,380,505,380,505,375,552,375"/>
+<area shape="rect" id="Node000009" href="$d3/dc4/classfl_1_1detail_1_1_scaled_pixel_iterator_r_g_b_w_afcd634069c54acd811a59c3e6c27196f.html#afcd634069c54acd811a59c3e6c27196f" title="Pre&#45;increment operator." alt="" coords="5,261,211,301"/>
+<area shape="poly" id="edge18_Node000001_Node000009" title=" " alt="" coords="563,357,517,348,211,298,211,293,518,343,564,352"/>
+<area shape="rect" id="Node000010" href="$d3/dc4/classfl_1_1detail_1_1_scaled_pixel_iterator_r_g_b_w_aa48141b96cbf76063cce4e246f150f0a.html#aa48141b96cbf76063cce4e246f150f0a" title="Post&#45;increment operator." alt="" coords="5,453,211,493"/>
+<area shape="poly" id="edge19_Node000001_Node000010" title=" " alt="" coords="564,403,518,412,211,462,211,456,517,407,563,398"/>
+<area shape="rect" id="Node000012" href="$da/df9/classfl_1_1detail_1_1_scaled_pixel_iterator_r_g_b_w_w_a1e3961f35f5d8eba27c5cecff80c3633.html#a1e3961f35f5d8eba27c5cecff80c3633" title=" " alt="" coords="259,581,517,621"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="639,409,585,462,519,518,424,584,421,579,516,514,581,458,635,405"/>
+<area shape="rect" id="Node000014" href="$da/df9/classfl_1_1detail_1_1_scaled_pixel_iterator_r_g_b_w_w_a1734632af17b7b80ad79a3c26a0ec587.html#a1734632af17b7b80ad79a3c26a0ec587" title=" " alt="" coords="5,517,211,557"/>
+<area shape="poly" id="edge20_Node000001_Node000014" title=" " alt="" coords="625,407,575,435,518,460,439,484,358,504,211,529,210,523,357,498,438,479,516,455,573,430,623,402"/>
+<area shape="rect" id="Node000015" href="$da/df9/classfl_1_1detail_1_1_scaled_pixel_iterator_r_g_b_w_w_ad4a968278d892261af638ac6fd6b0ccd.html#ad4a968278d892261af638ac6fd6b0ccd" title=" " alt="" coords="5,709,211,749"/>
+<area shape="poly" id="edge21_Node000001_Node000015" title=" " alt="" coords="660,411,641,461,612,522,571,584,547,611,519,635,483,658,445,678,365,705,284,722,211,730,211,725,283,717,363,700,443,673,481,654,516,631,543,608,567,580,607,520,636,459,655,409"/>
+<area shape="rect" id="Node000003" href="$dd/d80/classfl_1_1detail_1_1_scaled_pixel_iterator_r_g_b_a1c259a0114f89e7d526c5826b0a4a966.html#a1c259a0114f89e7d526c5826b0a4a966" title="Inequality comparison." alt="" coords="5,69,211,109"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="286,133,195,112,197,107,287,128"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="339,129,210,60,178,48,180,43,212,55,342,124"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="287,179,197,200,195,195,286,174"/>
+<area shape="rect" id="Node000006" href="$dd/d80/classfl_1_1detail_1_1_scaled_pixel_iterator_r_g_b_a903aa7bfbe4f04524a19b9b735b3c3eb.html#a903aa7bfbe4f04524a19b9b735b3c3eb" title="Equality comparison." alt="" coords="5,133,211,173"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="270,156,211,156,211,151,270,151"/>
+<area shape="rect" id="Node000008" href="$d3/dc4/classfl_1_1detail_1_1_scaled_pixel_iterator_r_g_b_w_a5ae2439cfaff4bb754d3d62b6968e0e5.html#a5ae2439cfaff4bb754d3d62b6968e0e5" title="Inequality comparison." alt="" coords="5,325,211,365"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="257,365,211,360,211,354,258,360"/>
+<area shape="poly" id="edge8_Node000007_Node000009" title=" " alt="" coords="320,355,210,316,174,304,175,299,212,311,322,350"/>
+<area shape="poly" id="edge9_Node000007_Node000010" title=" " alt="" coords="307,404,260,421,212,444,178,456,176,451,210,439,258,416,305,399"/>
+<area shape="rect" id="Node000011" href="$d3/dc4/classfl_1_1detail_1_1_scaled_pixel_iterator_r_g_b_w_a7c8ca3453dc1b0ccdfe3c73bb433af6e.html#a7c8ca3453dc1b0ccdfe3c73bb433af6e" title="Equality comparison." alt="" coords="5,389,211,429"/>
+<area shape="poly" id="edge10_Node000007_Node000011" title=" " alt="" coords="258,395,211,400,211,395,257,390"/>
+<area shape="rect" id="Node000013" href="$da/df9/classfl_1_1detail_1_1_scaled_pixel_iterator_r_g_b_w_w_a8f16424ffce4c088f020ecca74b4a9a6.html#a8f16424ffce4c088f020ecca74b4a9a6" title=" " alt="" coords="5,581,211,621"/>
+<area shape="poly" id="edge12_Node000012_Node000013" title=" " alt="" coords="245,604,211,604,211,599,245,599"/>
+<area shape="poly" id="edge13_Node000012_Node000014" title=" " alt="" coords="286,581,195,560,197,555,287,576"/>
+<area shape="poly" id="edge14_Node000012_Node000015" title=" " alt="" coords="342,630,212,700,180,712,178,707,210,695,339,626"/>
+<area shape="rect" id="Node000016" href="$da/df9/classfl_1_1detail_1_1_scaled_pixel_iterator_r_g_b_w_w_ad0654e0e8ccc70049df22dc2b913ac58.html#ad0654e0e8ccc70049df22dc2b913ac58" title=" " alt="" coords="5,645,211,685"/>
+<area shape="poly" id="edge15_Node000012_Node000016" title=" " alt="" coords="287,627,197,648,195,643,286,622"/>
+</map>

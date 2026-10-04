@@ -1,0 +1,15 @@
+<map id="fl::anonymous_namespace{pipeline_binding::cpp::hpp}::makeColorPipelineIterator" name="fl::anonymous_namespace{pipeline_binding::cpp::hpp}::makeColorPipelineIterator">
+<area shape="rect" id="Node000001" title="Builds the managed iterator in the caller&#39;s storage." alt="" coords="5,29,245,84"/>
+<area shape="poly" id="edge3_Node000001_Node000001" title=" " alt="" coords="73,29,73,19,83,10,100,5,125,3,156,6,173,14,171,18,154,11,125,8,101,10,85,15,78,21,78,29"/>
+<area shape="rect" id="Node000002" href="$d0/d69/classfl_1_1_flux_scalar_a376416b1aa03264d9affb67875bb1766.html#a376416b1aa03264d9affb67875bb1766" title="A limiter fraction already in s16.16, clamped to [0, 1]." alt="" coords="297,15,496,40"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="245,41,283,37,284,42,246,46"/>
+<area shape="rect" id="Node000004" href="$db/da5/classfl_1_1_color_managed_pixel_source_a840318a93b26254902901cdefd55cd35.html#a840318a93b26254902901cdefd55cd35" title="Frame&#45;local brightness is applied to the source&#39;s owned pipeline on shared tiers; only managed iterat..." alt="" coords="293,65,500,105"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="246,66,280,70,279,75,245,72"/>
+<area shape="rect" id="Node000003" href="$d0/d69/classfl_1_1_flux_scalar_a5a9296a2c583b737dad92df25efc0bc6.html#a5a9296a2c583b737dad92df25efc0bc6" title=" " alt="" coords="811,40,993,65"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="496,30,797,45,796,50,496,35"/>
+<area shape="rect" id="Node000005" href="$d0/d69/classfl_1_1_flux_scalar_aa0b3144c87fcec1496103e76d7977630.html#aa0b3144c87fcec1496103e76d7977630" title="setBrightness(b) as the linear flux scalar b/255." alt="" coords="548,65,763,91"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="500,79,534,78,534,84,500,85"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a53295036e598af5c2aab57e94d9cd3d1.html#a53295036e598af5c2aab57e94d9cd3d1" title="Set the composed brightness&#45;and&#45;power scalar for the frames that follow." alt="" coords="573,115,737,140"/>
+<area shape="poly" id="edge7_Node000004_Node000006" title=" " alt="" coords="501,99,565,110,564,115,500,104"/>
+<area shape="poly" id="edge6_Node000005_Node000003" title=" " alt="" coords="763,64,797,61,797,66,763,70"/>
+</map>

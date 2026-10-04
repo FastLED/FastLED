@@ -18,7 +18,7 @@ var dir_80b55e5ea7143e3a561e896c6c19b58f =
     [ "audio_processor.cpp.hpp", "db/d4b/audio__processor_8cpp_8hpp.html", "db/d4b/audio__processor_8cpp_8hpp" ],
     [ "audio_processor.h", "de/dd5/audio__processor_8h.html", "de/dd5/audio__processor_8h" ],
     [ "audio_reactive.cpp.hpp", "d5/dc5/audio__reactive_8cpp_8hpp.html", null ],
-    [ "audio_reactive.h", "dc/da8/src_2fl_2audio_2audio__reactive_8h.html", "dc/da8/src_2fl_2audio_2audio__reactive_8h" ],
+    [ "audio_reactive.h", "d1/d9a/audio__reactive_8h.html", "d1/d9a/audio__reactive_8h" ],
     [ "auto_gain.cpp.hpp", "df/def/auto__gain_8cpp_8hpp.html", null ],
     [ "auto_gain.h", "d9/d01/auto__gain_8h.html", "d9/d01/auto__gain_8h" ],
     [ "frequency_bin_mapper.cpp.hpp", "df/d6c/frequency__bin__mapper_8cpp_8hpp.html", null ],

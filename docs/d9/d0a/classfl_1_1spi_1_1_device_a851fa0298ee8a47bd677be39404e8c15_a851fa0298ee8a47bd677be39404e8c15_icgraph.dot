@@ -10,5 +10,5 @@ digraph "fl::spi::Device::waitComplete"
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node2 [id="Node000002",label="fl::spi::Device::end",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d0a/classfl_1_1spi_1_1_device_a1efb1bb9dd5c9626afaa071b58ec1972.html#a1efb1bb9dd5c9626afaa071b58ec1972",tooltip="Shutdown the SPI hardware and release resources."];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::spi::Device::~Device",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d0a/classfl_1_1spi_1_1_device_abfe19210e765c3b147865c530d48cccb.html#abfe19210e765c3b147865c530d48cccb",tooltip="Destructor - releases hardware resources."];
+  Node3 [id="Node000003",label="fl::spi::Device::~Device",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d0a/classfl_1_1spi_1_1_device_a9807e40b1dc5cd6e43ab6d05dfa39b93.html#a9807e40b1dc5cd6e43ab6d05dfa39b93",tooltip="Destructor - releases hardware resources."];
 }

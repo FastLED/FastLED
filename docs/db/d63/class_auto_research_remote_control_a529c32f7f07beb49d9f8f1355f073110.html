@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -117,20 +117,6 @@ $(function(){initNavTree('db/d63/class_auto_research_remote_control_a529c32f7f07
 
 <p>Constructor. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../db/dfb/_auto_research_remote_8cpp_source.html#l01291">1291</a> of file <a class="el" href="../../db/dfb/_auto_research_remote_8cpp_source.html">AutoResearchRemote.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno"> 1292</span>    : <a class="code hl_variable" href="../../db/d63/class_auto_research_remote_control_aee0104aa9968515a29408b4e4ed6873f.html#aee0104aa9968515a29408b4e4ed6873f">mRemote</a>(<a class="code hl_function" href="../../d4/d36/namespacefl_a3fd92c727664a77396403265415789d3.html#a3fd92c727664a77396403265415789d3">fl::make_unique&lt;fl::Remote&gt;</a>(</div>
-<div class="line"><span class="lineno"> 1293</span>        <a class="code hl_function" href="../../d4/d36/namespacefl_a6913bcc5545eb4b029ec170d48a14766.html#a6913bcc5545eb4b029ec170d48a14766">fl::createSerialRequestSource</a>(),</div>
-<div class="line"><span class="lineno"> 1294</span>        <a class="code hl_function" href="../../d4/d36/namespacefl_aaaad760134ff434244ec0bfb2740a8f7.html#aaaad760134ff434244ec0bfb2740a8f7">fl::createSerialResponseSink</a>(<span class="stringliteral">&quot;REMOTE: &quot;</span>)</div>
-<div class="line"><span class="lineno"> 1295</span>    )) {</div>
-<div class="line"><span class="lineno"> 1296</span>    <span class="comment">// mState will be set by registerFunctions()</span></div>
-<div class="line"><span class="lineno"> 1297</span>}</div>
-<div class="ttc" id="aclass_auto_research_remote_control_aee0104aa9968515a29408b4e4ed6873f_html_aee0104aa9968515a29408b4e4ed6873f"><div class="ttname"><a href="../../db/d63/class_auto_research_remote_control_aee0104aa9968515a29408b4e4ed6873f.html#aee0104aa9968515a29408b4e4ed6873f">AutoResearchRemoteControl::mRemote</a></div><div class="ttdeci">fl::unique_ptr&lt; fl::Remote &gt; mRemote</div><div class="ttdef"><b>Definition</b> <a href="../../df/d9e/_auto_research_remote_8h_source.html#l00094">AutoResearchRemote.h:94</a></div></div>
-<div class="ttc" id="anamespacefl_a3fd92c727664a77396403265415789d3_html_a3fd92c727664a77396403265415789d3"><div class="ttname"><a href="../../d4/d36/namespacefl_a3fd92c727664a77396403265415789d3.html#a3fd92c727664a77396403265415789d3">fl::make_unique</a></div><div class="ttdeci">fl::enable_if&lt;!fl::is_array&lt; T &gt;::value, unique_ptr&lt; T &gt; &gt;::type make_unique(Args &amp;&amp;... args) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../da/d4b/unique__ptr_8h_source.html#l00261">unique_ptr.h:261</a></div></div>
-<div class="ttc" id="anamespacefl_a6913bcc5545eb4b029ec170d48a14766_html_a6913bcc5545eb4b029ec170d48a14766"><div class="ttname"><a href="../../d4/d36/namespacefl_a6913bcc5545eb4b029ec170d48a14766.html#a6913bcc5545eb4b029ec170d48a14766">fl::createSerialRequestSource</a></div><div class="ttdeci">fl::function&lt; fl::optional&lt; fl::json &gt;()&gt; createSerialRequestSource(const char *prefix=&quot;&quot;)</div><div class="ttdoc">Create a JSON-RPC RequestSource that reads from fl:: serial input.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d51/remote_2transport_2serial_8h_source.html#l00109">serial.h:109</a></div></div>
-<div class="ttc" id="anamespacefl_aaaad760134ff434244ec0bfb2740a8f7_html_aaaad760134ff434244ec0bfb2740a8f7"><div class="ttname"><a href="../../d4/d36/namespacefl_aaaad760134ff434244ec0bfb2740a8f7.html#aaaad760134ff434244ec0bfb2740a8f7">fl::createSerialResponseSink</a></div><div class="ttdeci">fl::function&lt; void(const fl::json &amp;)&gt; createSerialResponseSink(const char *prefix=&quot;REMOTE: &quot;)</div><div class="ttdoc">Create a JSON-RPC ResponseSink that writes to fl:: serial output.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d51/remote_2transport_2serial_8h_source.html#l00162">serial.h:162</a></div></div>
-</div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../df/d9e/_auto_research_remote_8h_source.html#l00094">mRemote</a>.</p>
-
 </div>
 </div>
 </div><!-- contents -->
@@ -140,7 +126,7 @@ $(function(){initNavTree('db/d63/class_auto_research_remote_control_a529c32f7f07
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../db/d63/class_auto_research_remote_control.html">AutoResearchRemoteControl</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:03 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -31,7 +31,7 @@
 <text text-anchor="start" x="940.5" y="-364.5" font-family="Helvetica,sans-Serif" font-size="10.00">FiveBitGammaCorrectionMode</text>
 <text text-anchor="start" x="940.5" y="-353.5" font-family="Helvetica,sans-Serif" font-size="10.00">::kFiveBitGammaCorrectionMode</text>
 <text text-anchor="start" x="940.5" y="-342.5" font-family="Helvetica,sans-Serif" font-size="10.00">_BitShift, fl::u32(0x00000000)</text>
-<text text-anchor="middle" x="1022" y="-331.5" font-family="Helvetica,sans-Serif" font-size="10.00">, fl::u32(0x00000000)&gt;</text>
+<text text-anchor="middle" x="1022" y="-331.5" font-family="Helvetica,sans-Serif" font-size="10.00">, fl::u32(0xFFFFFFFF)&gt;</text>
 </a>
 </g>
 </g>
@@ -48,7 +48,7 @@
 <text text-anchor="start" x="714" y="-413" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey">, fl::FiveBitGammaCorrection</text>
 <text text-anchor="start" x="714" y="-402" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey">Mode::kFiveBitGammaCorrectionMode</text>
 <text text-anchor="start" x="714" y="-391" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey">_BitShift, fl::u32(0x00000000),</text>
-<text text-anchor="middle" x="809" y="-380" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> fl::u32(0x00000000)&gt;</text>
+<text text-anchor="middle" x="809" y="-380" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> fl::u32(0xFFFFFFFF)&gt;</text>
 </g>
 <!-- Node9 -->
 <g id="Node000009" class="node">
@@ -60,7 +60,7 @@
 <text text-anchor="start" x="937.5" y="-272" font-family="Helvetica,sans-Serif" font-size="10.00"> DATA_RATE_MHZ(40), fl</text>
 <text text-anchor="start" x="937.5" y="-261" font-family="Helvetica,sans-Serif" font-size="10.00">::FiveBitGammaCorrectionMode</text>
 <text text-anchor="start" x="937.5" y="-250" font-family="Helvetica,sans-Serif" font-size="10.00">::kFiveBitGammaCorrectionMode</text>
-<text text-anchor="middle" x="1022" y="-239" font-family="Helvetica,sans-Serif" font-size="10.00">_Null, 0x00000000, 0x00000000 &gt;</text>
+<text text-anchor="middle" x="1022" y="-239" font-family="Helvetica,sans-Serif" font-size="10.00">_Null, 0x00000000, 0xFFFFFFFF &gt;</text>
 </a>
 </g>
 </g>
@@ -76,7 +76,7 @@
 <text text-anchor="start" x="724.5" y="-318" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> RGB, DATA_RATE_MHZ(40)</text>
 <text text-anchor="start" x="724.5" y="-307" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey">, fl::FiveBitGammaCorrectionMode</text>
 <text text-anchor="start" x="724.5" y="-296" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey">::kFiveBitGammaCorrectionMode</text>
-<text text-anchor="middle" x="809" y="-285" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey">_Null, 0x00000000, 0x00000000 &gt;</text>
+<text text-anchor="middle" x="809" y="-285" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey">_Null, 0x00000000, 0xFFFFFFFF &gt;</text>
 </g>
 <!-- Node11 -->
 <g id="Node000011" class="node">
@@ -88,7 +88,7 @@
 <text text-anchor="start" x="1148" y="-208" font-family="Helvetica,sans-Serif" font-size="10.00"> SPI_SPEED, fl::FiveBitGammaCorrection</text>
 <text text-anchor="start" x="1148" y="-197" font-family="Helvetica,sans-Serif" font-size="10.00">Mode::kFiveBitGammaCorrectionMode</text>
 <text text-anchor="start" x="1148" y="-186" font-family="Helvetica,sans-Serif" font-size="10.00">_BitShift, fl::u32(0x00000000), fl</text>
-<text text-anchor="middle" x="1246" y="-175" font-family="Helvetica,sans-Serif" font-size="10.00">::u32(0x00000000)&gt;</text>
+<text text-anchor="middle" x="1246" y="-175" font-family="Helvetica,sans-Serif" font-size="10.00">::u32(0xFFFFFFFF)&gt;</text>
 </a>
 </g>
 </g>
@@ -105,7 +105,7 @@
 <text text-anchor="start" x="726" y="-233" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> fl::FiveBitGammaCorrectionMode</text>
 <text text-anchor="start" x="726" y="-222" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey">::kFiveBitGammaCorrectionMode</text>
 <text text-anchor="start" x="726" y="-211" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey">_BitShift, fl::u32(0x00000000)</text>
-<text text-anchor="middle" x="809" y="-200" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey">, fl::u32(0x00000000)&gt;</text>
+<text text-anchor="middle" x="809" y="-200" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey">, fl::u32(0xFFFFFFFF)&gt;</text>
 </g>
 <!-- Node12 -->
 <g id="Node000012" class="node">
@@ -117,7 +117,7 @@
 <text text-anchor="start" x="937.5" y="-132" font-family="Helvetica,sans-Serif" font-size="10.00"> DATA_RATE_MHZ(12), fl</text>
 <text text-anchor="start" x="937.5" y="-121" font-family="Helvetica,sans-Serif" font-size="10.00">::FiveBitGammaCorrectionMode</text>
 <text text-anchor="start" x="937.5" y="-110" font-family="Helvetica,sans-Serif" font-size="10.00">::kFiveBitGammaCorrectionMode</text>
-<text text-anchor="middle" x="1022" y="-99" font-family="Helvetica,sans-Serif" font-size="10.00">_Null, 0x00000000, 0x00000000 &gt;</text>
+<text text-anchor="middle" x="1022" y="-99" font-family="Helvetica,sans-Serif" font-size="10.00">_Null, 0x00000000, 0xFFFFFFFF &gt;</text>
 </a>
 </g>
 </g>
@@ -133,7 +133,7 @@
 <text text-anchor="start" x="724.5" y="-159" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> RGB, DATA_RATE_MHZ(12)</text>
 <text text-anchor="start" x="724.5" y="-148" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey">, fl::FiveBitGammaCorrectionMode</text>
 <text text-anchor="start" x="724.5" y="-137" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey">::kFiveBitGammaCorrectionMode</text>
-<text text-anchor="middle" x="809" y="-126" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey">_Null, 0x00000000, 0x00000000 &gt;</text>
+<text text-anchor="middle" x="809" y="-126" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey">_Null, 0x00000000, 0xFFFFFFFF &gt;</text>
 </g>
 <!-- Node14 -->
 <g id="Node000014" class="node">
@@ -145,7 +145,7 @@
 <text text-anchor="start" x="930" y="-40" font-family="Helvetica,sans-Serif" font-size="10.00"> DATA_RATE_MHZ(12), fl</text>
 <text text-anchor="start" x="930" y="-29" font-family="Helvetica,sans-Serif" font-size="10.00">::FiveBitGammaCorrectionMode</text>
 <text text-anchor="start" x="930" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">::kFiveBitGammaCorrectionMode</text>
-<text text-anchor="middle" x="1022" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">_BitShift, 0x00000000, 0x00000000 &gt;</text>
+<text text-anchor="middle" x="1022" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">_BitShift, 0x00000000, 0xFFFFFFFF &gt;</text>
 </a>
 </g>
 </g>
@@ -161,7 +161,7 @@
 <text text-anchor="start" x="717" y="-85" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> RGB, DATA_RATE_MHZ(12)</text>
 <text text-anchor="start" x="717" y="-74" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey">, fl::FiveBitGammaCorrectionMode</text>
 <text text-anchor="start" x="717" y="-63" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey">::kFiveBitGammaCorrectionMode</text>
-<text text-anchor="middle" x="809" y="-52" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey">_BitShift, 0x00000000, 0x00000000 &gt;</text>
+<text text-anchor="middle" x="809" y="-52" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey">_BitShift, 0x00000000, 0xFFFFFFFF &gt;</text>
 </g>
 <!-- Node2 -->
 <g id="Node000002" class="node">

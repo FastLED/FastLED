@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -111,6 +111,8 @@ $(function(){initNavTree('d6/d9d/fl_2channels_2cled__controller_8h.html','../../
 
 <p class="definition">Definition in file <a class="el" href="../../d6/d9d/fl_2channels_2cled__controller_8h_source.html">cled_controller.h</a>.</p>
 </div><div class="textblock"><code>#include &quot;color.h&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d3/d73/channels_2color__profile_8h_source.html">fl/channels/color_profile.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d5/d4d/pixel__controller_8h_source.html">pixel_controller.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d4/d54/compiler__control_8h_source.html">fl/stl/compiler_control.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d8/d90/dither__mode_8h_source.html">dither_mode.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../db/dc0/engine__events_8h_source.html">fl/system/engine_events.h</a>&quot;</code><br />
@@ -118,8 +120,11 @@ $(function(){initNavTree('d6/d9d/fl_2channels_2cled__controller_8h.html','../../
 <code>#include &quot;<a class="el" href="../../d3/d7e/int_8h_source.html">fl/stl/int.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../df/d72/bit__cast_8h_source.html">fl/stl/bit_cast.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d7/d5b/options_8h_source.html">fl/channels/options.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d7/d7f/log_8h_source.html">fl/log/log.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d4/d7a/span_8h_source.html">fl/stl/span.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../db/d01/noexcept_8h_source.html">fl/stl/noexcept.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d5/df0/spi__bus_8h_source.html">fl/spi_bus.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../df/d6a/shared__ptr_8h_source.html">fl/stl/shared_ptr.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for cled_controller.h:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -141,6 +146,9 @@ $(function(){initNavTree('d6/d9d/fl_2channels_2cled__controller_8h.html','../../
 Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d8/da0/classfl_1_1_c_l_e_d_controller.html">fl::CLEDController</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/dfd/classfl_1_1_static_profile_clockless_controller.html">fl::StaticProfileClocklessController&lt; Profile, Chipset, DataPin, RgbOrder &gt;</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A legacy-controller wrapper for a compile-time emitter profile.  <a href="../../d1/dfd/classfl_1_1_static_profile_clockless_controller.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
@@ -155,7 +163,7 @@ Namespaces</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_217dd1d1f80f936dd132dc9fc88b57d1.html">channels</a></li><li class="navelem"><a class="el" href="../../d6/d9d/fl_2channels_2cled__controller_8h.html">cled_controller.h</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:01 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:03 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -1,0 +1,19 @@
+<map id="fl::json::is_string" name="fl::json::is_string">
+<area shape="rect" id="Node000001" title=" " alt="" coords="699,84,827,109"/>
+<area shape="rect" id="Node000002" href="$d8/d90/structfl_1_1detail_1_1_json_to_type_3_01fl_1_1vector_3_01fl_1_1u8_01_4_00_01void_01_4_a190122f0d31e82490b868e78571d0012.html#a190122f0d31e82490b868e78571d0012" title=" " alt="" coords="468,5,624,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="705,83,623,58,625,53,706,77"/>
+<area shape="rect" id="Node000003" href="$dc/d75/namespacefl_1_1wled_a0e1b21aa8cf41f28a4973d7444282fce.html#a0e1b21aa8cf41f28a4973d7444282fce" title="Parse all fields from a segment JSON object into a WLEDSegment." alt="" coords="441,84,651,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="685,99,651,99,651,94,685,94"/>
+<area shape="rect" id="Node000005" href="$d2/dec/namespacefl_1_1fled_a70c2c11d86838827adae2071d3f74a98.html#a70c2c11d86838827adae2071d3f74a98" title=" " alt="" coords="451,152,641,177"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="709,116,588,154,587,149,707,111"/>
+<area shape="rect" id="Node000004" href="$d2/d9f/classfl_1_1_w_l_e_d_a073f5478071f0b32ea9ac80cf3fd236c.html#a073f5478071f0b32ea9ac80cf3fd236c" title="Set WLED state from JSON object." alt="" coords="229,65,368,91"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="428,90,368,86,368,81,428,85"/>
+<area shape="rect" id="Node000006" href="$d7/d7e/classfl_1_1video_1_1_pixel_stream_a2d2bc6715c9d04166f12a4d316bbfcd3.html#a2d2bc6715c9d04166f12a4d316bbfcd3" title=" " alt="" coords="219,115,379,155"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="437,154,378,147,379,142,438,149"/>
+<area shape="rect" id="Node000007" href="$d2/dec/namespacefl_1_1fled_aedd6037bff6e743643ad2f68e499a55f.html#aedd6037bff6e743643ad2f68e499a55f" title=" " alt="" coords="204,180,393,205"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="438,180,394,185,393,179,437,174"/>
+<area shape="rect" id="Node000008" href="$d3/d7d/classfl_1_1_fled_a82065df35839f5d0a45741b3a6358eba.html#a82065df35839f5d0a45741b3a6358eba" title=" " alt="" coords="227,229,371,255"/>
+<area shape="poly" id="edge7_Node000005_Node000008" title=" " alt="" coords="500,185,394,221,354,232,352,227,393,215,498,179"/>
+<area shape="rect" id="Node000009" href="$d3/d7d/classfl_1_1_fled_ac13c8d779ec4dca021c79fff351fb855.html#ac13c8d779ec4dca021c79fff351fb855" title=" " alt="" coords="5,229,156,255"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="213,245,156,245,156,239,213,239"/>
+</map>

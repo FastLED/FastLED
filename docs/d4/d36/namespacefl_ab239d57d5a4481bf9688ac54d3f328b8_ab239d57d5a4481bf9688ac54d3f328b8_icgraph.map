@@ -1,0 +1,19 @@
+<map id="fl::linearRgbToXyzQ16" name="fl::linearRgbToXyzQ16">
+<area shape="rect" id="Node000001" title="One pixel: u16 linear RGB &#45;&gt; s16.16 XYZ." alt="" coords="753,113,917,138"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a84551faf2eec485523c64ea69ec0c782.html#a84551faf2eec485523c64ea69ec0c782" title="Pre&#45;response linear emitter light for a power prepass." alt="" coords="503,81,689,106"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="740,115,688,108,689,103,740,110"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_aa231682eff63cbd83ee299e6079baeae.html#aa231682eff63cbd83ee299e6079baeae" title=" " alt="" coords="487,137,705,162"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="740,138,706,141,705,136,739,132"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_afb324195d9648e36d4074cd25ecccc92.html#afb324195d9648e36d4074cd25ecccc92" title="One pixel: an RGB8 code triple to three physical emitter drives in s16.16." alt="" coords="277,77,422,102"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="489,94,422,93,422,88,489,89"/>
+<area shape="rect" id="Node000004" href="$db/da5/classfl_1_1_color_managed_pixel_source_a07e179580f57628693c40d60c44ca7f4.html#a07e179580f57628693c40d60c44ca7f4" title="The colour&#45;managed path." alt="" coords="5,5,212,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="287,76,184,48,185,43,288,70"/>
+<area shape="rect" id="Node000005" href="$db/da5/classfl_1_1_color_managed_pixel_source_aa6493017bac09ea96dc19e61ee16fb18.html#aa6493017bac09ea96dc19e61ee16fb18" title="The same pixel, quantized once to 16 bits instead of to 8 (P8, #4042)." alt="" coords="5,69,212,109"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="263,92,212,92,212,87,263,87"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_ad0e379781735f3c39ad9cc2d724f08d4.html#ad0e379781735f3c39ad9cc2d724f08d4" title="Like processPixelQ16, but solves the physical 4/5&#45;emitter hull." alt="" coords="260,141,439,166"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="473,154,439,155,439,149,473,149"/>
+<area shape="rect" id="Node000008" href="$db/da5/classfl_1_1_color_managed_pixel_source_a5282ff6c865aba683ab2953135ca4c09.html#a5282ff6c865aba683ab2953135ca4c09" title="Physical RGBW solve when a matching profile is bound; otherwise the legacy RGB&#45;to&#45;RGBW conversion." alt="" coords="5,133,212,173"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="246,156,212,156,212,151,246,151"/>
+<area shape="rect" id="Node000009" href="$db/da5/classfl_1_1_color_managed_pixel_source_aefb49429ee466d02d5c2ece50524da34.html#aefb49429ee466d02d5c2ece50524da34" title="Physical two&#45;white solve when a matching RGBWW profile is bound; otherwise the legacy conversion." alt="" coords="5,197,212,237"/>
+<area shape="poly" id="edge8_Node000007_Node000009" title=" " alt="" coords="288,172,185,200,184,195,287,167"/>
+</map>

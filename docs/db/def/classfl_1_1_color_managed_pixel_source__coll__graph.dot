@@ -1,0 +1,44 @@
+digraph "fl::ColorManagedPixelSource"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::ColorManagedPixelSource",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Runs processPixelQ16 over a PixelController's pixels as they are read."];
+  Node2 -> Node1 [id="edge1_Node000001_Node000002",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mController",fontcolor="grey" ];
+  Node2 [id="Node000002",label="PixelController\< RGB \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d0/dee/struct_pixel_controller.html",tooltip=" "];
+  Node3 -> Node2 [id="edge2_Node000002_Node000003",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mColorAdjustment",fontcolor="grey" ];
+  Node3 [id="Node000003",label="ColorAdjustment",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d4/d7d/struct_color_adjustment.html",tooltip="Color adjustment structure for pixel output."];
+  Node4 -> Node3 [id="edge3_Node000003_Node000004",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" premixed",fontcolor="grey" ];
+  Node4 [id="Node000004",label="fl::CRGB",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$da/dd6/structfl_1_1_c_r_g_b.html",tooltip="Representation of an 8-bit RGB pixel (Red, Green, Blue)"];
+  Node5 -> Node2 [id="edge4_Node000002_Node000005",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< RGB \>",fontcolor="grey" ];
+  Node5 [id="Node000005",label="PixelController\< RGB\l_ORDER, LANES, MASK \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d0/dee/struct_pixel_controller.html",tooltip="Pixel controller class."];
+  Node3 -> Node5 [id="edge5_Node000005_Node000003",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mColorAdjustment",fontcolor="grey" ];
+  Node6 -> Node1 [id="edge6_Node000001_Node000006",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mPipeline",fontcolor="grey" ];
+  Node6 [id="Node000006",label="fl::StreamingPipelineQ16",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl.html#de/d4b/structfl_1_1_streaming_pipeline_q16",tooltip="Everything the per-pixel path needs, derived once when a profile binds."];
+  Node7 -> Node6 [id="edge7_Node000006_Node000007",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" source",fontcolor="grey" ];
+  Node7 [id="Node000007",label="fl::SourceMatrixQ16",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl.html#db/d1d/structfl_1_1_source_matrix_q16",tooltip="Source-primaries matrix in s16.16, rows ordered X, Y, Z."];
+  Node8 -> Node6 [id="edge8_Node000006_Node000008",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" gamut",fontcolor="grey" ];
+  Node8 [id="Node000008",label="fl::GamutMapQ16",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl.html#d3/dd2/structfl_1_1_gamut_map_q16",tooltip="Everything the per-pixel mapper needs, derived once when a profile binds."];
+  Node9 -> Node8 [id="edge9_Node000008_Node000009",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" solve",fontcolor="grey" ];
+  Node9 [id="Node000009",label="fl::EmitterSolveMatrixQ16",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl.html#d0/d89/structfl_1_1_emitter_solve_matrix_q16",tooltip="Inverse emitter matrix in s16.16, mapping XYZ to three emitter drives."];
+  Node10 -> Node6 [id="edge10_Node000006_Node000010",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" flux",fontcolor="grey" ];
+  Node10 [id="Node000010",label="fl::FluxScalar",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d0/d69/classfl_1_1_flux_scalar.html",tooltip="A linear flux scalar in s16.16."];
+  Node11 -> Node6 [id="edge11_Node000006_Node000011",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" response",fontcolor="grey" ];
+  Node11 [id="Node000011",label="fl::shared_ptr\< const\l fl::ResponseLutsQ16 \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d1/d74/classfl_1_1shared__ptr.html",tooltip=" "];
+  Node12 -> Node11 [id="edge12_Node000011_Node000012",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mPtr",fontcolor="grey" ];
+  Node12 [id="Node000012",label="fl::ResponseLutsQ16",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d36/namespacefl.html#de/d33/structfl_1_1_response_luts_q16",tooltip="Owned code-to-light samples for the three physical emitters."];
+  Node18 -> Node11 [id="edge13_Node000011_Node000018",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mControlBlock",fontcolor="grey" ];
+  Node18 [id="Node000018",label="fl::detail::ControlBlockBase",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/dc0/structfl_1_1detail_1_1_control_block_base.html",tooltip=" "];
+  Node21 -> Node11 [id="edge14_Node000011_Node000021",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< const fl::ResponseLuts\lQ16 \>",fontcolor="grey" ];
+  Node21 [id="Node000021",label="fl::shared_ptr\< T \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d1/d74/classfl_1_1shared__ptr.html",tooltip=" "];
+  Node18 -> Node21 [id="edge15_Node000021_Node000018",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mControlBlock",fontcolor="grey" ];
+  Node22 -> Node6 [id="edge16_Node000006_Node000022",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" wide",fontcolor="grey" ];
+  Node22 [id="Node000022",label="fl::shared_ptr\< const\l fl::WidePipelineQ16 \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d1/d74/classfl_1_1shared__ptr.html",tooltip=" "];
+  Node23 -> Node22 [id="edge17_Node000022_Node000023",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mPtr",fontcolor="grey" ];
+  Node23 [id="Node000023",label="fl::WidePipelineQ16",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d36/namespacefl.html#de/d8b/structfl_1_1_wide_pipeline_q16",tooltip="Allocated only for a bound four- or five-emitter profile."];
+  Node18 -> Node22 [id="edge18_Node000022_Node000018",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mControlBlock",fontcolor="grey" ];
+  Node21 -> Node22 [id="edge19_Node000022_Node000021",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< const fl::WidePipeline\lQ16 \>",fontcolor="grey" ];
+}

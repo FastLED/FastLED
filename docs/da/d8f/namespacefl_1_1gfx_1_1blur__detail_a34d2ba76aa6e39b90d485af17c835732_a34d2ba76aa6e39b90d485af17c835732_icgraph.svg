@@ -104,7 +104,7 @@ var sectionId = 'dynsection-0';
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d0/d8b/namespacefl_1_1gfx_a773e8c5d88d58ddd941bdfb1fe1043cf.html#a773e8c5d88d58ddd941bdfb1fe1043cf" target="_top" xlink:title="Higher&#45;precision dim overload (UNORM16).">
+<g id="a_Node000003"><a xlink:href="../../d0/d8b/namespacefl_1_1gfx_a15d9dd43b60330da909bac9402ce67e8.html#a15d9dd43b60330da909bac9402ce67e8" target="_top" xlink:title="Higher&#45;precision dim overload (UNORM16).">
 <polygon fill="white" stroke="#666666" points="336.5,-275 222.5,-275 222.5,-256 336.5,-256 336.5,-275"/>
 <text text-anchor="middle" x="279.5" y="-263" font-family="Helvetica,sans-Serif" font-size="10.00">fl::gfx::blurGaussian</text>
 </a>
@@ -122,7 +122,7 @@ var sectionId = 'dynsection-0';
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../d0/d8b/namespacefl_1_1gfx_a2d0276b48f273dfb519f75e12846b0d4.html#a2d0276b48f273dfb519f75e12846b0d4" target="_top" xlink:title="Compile&#45;time Gaussian blur with independent H/V radii.">
+<g id="a_Node000004"><a xlink:href="../../d0/d8b/namespacefl_1_1gfx_a45b1aab14593cbdfababf7e10bdf9696.html#a45b1aab14593cbdfababf7e10bdf9696" target="_top" xlink:title="Compile&#45;time Gaussian blur with independent H/V radii.">
 <polygon fill="white" stroke="#666666" points="336.5,-238 222.5,-238 222.5,-219 336.5,-219 336.5,-238"/>
 <text text-anchor="middle" x="279.5" y="-226" font-family="Helvetica,sans-Serif" font-size="10.00">fl::gfx::blurGaussian</text>
 </a>
@@ -167,7 +167,7 @@ var sectionId = 'dynsection-0';
 <!-- Node7 -->
 <g id="Node000007" class="node">
 <title>Node7</title>
-<g id="a_Node000007"><a xlink:href="../../d0/d8b/namespacefl_1_1gfx_a398db03848b3dac5189507a2c7913830.html#a398db03848b3dac5189507a2c7913830" target="_top" xlink:title="Convenience overload with no dimming.">
+<g id="a_Node000007"><a xlink:href="../../d0/d8b/namespacefl_1_1gfx_a6e0566ef725afec9aeb97f14227048cd.html#a6e0566ef725afec9aeb97f14227048cd" target="_top" xlink:title="Convenience overload with no dimming.">
 <polygon fill="white" stroke="#666666" points="135,-386 21,-386 21,-367 135,-367 135,-386"/>
 <text text-anchor="middle" x="78" y="-374" font-family="Helvetica,sans-Serif" font-size="10.00">fl::gfx::blurGaussian</text>
 </a>
@@ -185,7 +185,7 @@ var sectionId = 'dynsection-0';
 <!-- Node8 -->
 <g id="Node000008" class="node">
 <title>Node8</title>
-<g id="a_Node000008"><a xlink:href="../../d0/d8b/namespacefl_1_1gfx_a5b37407558051b83c4be485658e41e2f.html#a5b37407558051b83c4be485658e41e2f" target="_top" xlink:title=" ">
+<g id="a_Node000008"><a xlink:href="../../d0/d8b/namespacefl_1_1gfx_a8920da7e61b6a5f14a58f979d3807ecb.html#a8920da7e61b6a5f14a58f979d3807ecb" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="135,-349 21,-349 21,-330 135,-330 135,-349"/>
 <text text-anchor="middle" x="78" y="-337" font-family="Helvetica,sans-Serif" font-size="10.00">fl::gfx::blurGaussian</text>
 </a>
@@ -203,7 +203,7 @@ var sectionId = 'dynsection-0';
 <!-- Node9 -->
 <g id="Node000009" class="node">
 <title>Node9</title>
-<g id="a_Node000009"><a xlink:href="../../de/d5c/structfl_1_1gfx_1_1_canvas_a1c5611dcf8d5e2350fa0275d3caaabda.html#a1c5611dcf8d5e2350fa0275d3caaabda" target="_top" xlink:title=" ">
+<g id="a_Node000009"><a xlink:href="../../de/d5c/structfl_1_1gfx_1_1_canvas_a654fb4b5f606fb8d756f154459662176.html#a654fb4b5f606fb8d756f154459662176" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="156,-312 0,-312 0,-293 156,-293 156,-312"/>
 <text text-anchor="middle" x="78" y="-300" font-family="Helvetica,sans-Serif" font-size="10.00">fl::gfx::Canvas::blurGaussian</text>
 </a>
@@ -221,7 +221,7 @@ var sectionId = 'dynsection-0';
 <!-- Node10 -->
 <g id="Node000010" class="node">
 <title>Node10</title>
-<g id="a_Node000010"><a xlink:href="../../de/d5c/structfl_1_1gfx_1_1_canvas_a759c2ed1098af7351c242f4982488606.html#a759c2ed1098af7351c242f4982488606" target="_top" xlink:title=" ">
+<g id="a_Node000010"><a xlink:href="../../de/d5c/structfl_1_1gfx_1_1_canvas_ae95f7c416c228c719ed228cb97014ae9.html#ae95f7c416c228c719ed228cb97014ae9" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="156,-275 0,-275 0,-256 156,-256 156,-275"/>
 <text text-anchor="middle" x="78" y="-263" font-family="Helvetica,sans-Serif" font-size="10.00">fl::gfx::Canvas::blurGaussian</text>
 </a>
@@ -239,7 +239,7 @@ var sectionId = 'dynsection-0';
 <!-- Node11 -->
 <g id="Node000011" class="node">
 <title>Node11</title>
-<g id="a_Node000011"><a xlink:href="../../de/d5c/structfl_1_1gfx_1_1_canvas_aeddb2920f89f4e87e8d7a7eee6071d84.html#aeddb2920f89f4e87e8d7a7eee6071d84" target="_top" xlink:title=" ">
+<g id="a_Node000011"><a xlink:href="../../de/d5c/structfl_1_1gfx_1_1_canvas_a195c009508718fa4612ca7a1ba0fdb56.html#a195c009508718fa4612ca7a1ba0fdb56" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="156,-238 0,-238 0,-219 156,-219 156,-238"/>
 <text text-anchor="middle" x="78" y="-226" font-family="Helvetica,sans-Serif" font-size="10.00">fl::gfx::Canvas::blurGaussian</text>
 </a>
@@ -257,7 +257,7 @@ var sectionId = 'dynsection-0';
 <!-- Node12 -->
 <g id="Node000012" class="node">
 <title>Node12</title>
-<g id="a_Node000012"><a xlink:href="../../d5/de3/structfl_1_1gfx_1_1_canvas_mapped_a962ec29d733754201d27e4d571111044.html#a962ec29d733754201d27e4d571111044" target="_top" xlink:title=" ">
+<g id="a_Node000012"><a xlink:href="../../d5/de3/structfl_1_1gfx_1_1_canvas_mapped_a61fd599bff449335bd4a0bbefa62cf95.html#a61fd599bff449335bd4a0bbefa62cf95" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="140.5,-200.5 15.5,-200.5 15.5,-170.5 140.5,-170.5 140.5,-200.5"/>
 <text text-anchor="start" x="23.5" y="-188.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::gfx::CanvasMapped</text>
 <text text-anchor="middle" x="78" y="-177.5" font-family="Helvetica,sans-Serif" font-size="10.00">::blurGaussian</text>
@@ -276,7 +276,7 @@ var sectionId = 'dynsection-0';
 <!-- Node13 -->
 <g id="Node000013" class="node">
 <title>Node13</title>
-<g id="a_Node000013"><a xlink:href="../../d5/de3/structfl_1_1gfx_1_1_canvas_mapped_a15dde4d06dbfa19dcde47d5bd51f287a.html#a15dde4d06dbfa19dcde47d5bd51f287a" target="_top" xlink:title=" ">
+<g id="a_Node000013"><a xlink:href="../../d5/de3/structfl_1_1gfx_1_1_canvas_mapped_a0a5a1f47a05adce0871108f6efba3c40.html#a0a5a1f47a05adce0871108f6efba3c40" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="140.5,-152.5 15.5,-152.5 15.5,-122.5 140.5,-122.5 140.5,-152.5"/>
 <text text-anchor="start" x="23.5" y="-140.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::gfx::CanvasMapped</text>
 <text text-anchor="middle" x="78" y="-129.5" font-family="Helvetica,sans-Serif" font-size="10.00">::blurGaussian</text>
@@ -295,7 +295,7 @@ var sectionId = 'dynsection-0';
 <!-- Node14 -->
 <g id="Node000014" class="node">
 <title>Node14</title>
-<g id="a_Node000014"><a xlink:href="../../d5/de3/structfl_1_1gfx_1_1_canvas_mapped_a39c7309c7f6df84ef72fae885b91ba0c.html#a39c7309c7f6df84ef72fae885b91ba0c" target="_top" xlink:title=" ">
+<g id="a_Node000014"><a xlink:href="../../d5/de3/structfl_1_1gfx_1_1_canvas_mapped_a7d86558497e8f04e3a463de68f503702.html#a7d86558497e8f04e3a463de68f503702" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="140.5,-104.5 15.5,-104.5 15.5,-74.5 140.5,-74.5 140.5,-104.5"/>
 <text text-anchor="start" x="23.5" y="-92.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::gfx::CanvasMapped</text>
 <text text-anchor="middle" x="78" y="-81.5" font-family="Helvetica,sans-Serif" font-size="10.00">::blurGaussian</text>
@@ -314,7 +314,7 @@ var sectionId = 'dynsection-0';
 <!-- Node16 -->
 <g id="Node000016" class="node">
 <title>Node16</title>
-<g id="a_Node000016"><a xlink:href="../../d0/d8b/namespacefl_1_1gfx_a0cff613753b89f4d03fdb3cbb0b8c85d.html#a0cff613753b89f4d03fdb3cbb0b8c85d" target="_top" xlink:title="Higher&#45;precision dim overload for CanvasMapped (UNORM16).">
+<g id="a_Node000016"><a xlink:href="../../d0/d8b/namespacefl_1_1gfx_a0b9368df543fe5081aa85fcb3d9497ed.html#a0b9368df543fe5081aa85fcb3d9497ed" target="_top" xlink:title="Higher&#45;precision dim overload for CanvasMapped (UNORM16).">
 <polygon fill="white" stroke="#666666" points="135,-56 21,-56 21,-37 135,-37 135,-56"/>
 <text text-anchor="middle" x="78" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">fl::gfx::blurGaussian</text>
 </a>
@@ -332,7 +332,7 @@ var sectionId = 'dynsection-0';
 <!-- Node17 -->
 <g id="Node000017" class="node">
 <title>Node17</title>
-<g id="a_Node000017"><a xlink:href="../../d0/d8b/namespacefl_1_1gfx_a955705e50434d56764daab1cbd72d5ad.html#a955705e50434d56764daab1cbd72d5ad" target="_top" xlink:title="XYMap&#45;backed Gaussian blur (non&#45;optimized, per&#45;pixel path).">
+<g id="a_Node000017"><a xlink:href="../../d0/d8b/namespacefl_1_1gfx_a6d0a0dcf735c179c1ba1fe42a15a25e1.html#a6d0a0dcf735c179c1ba1fe42a15a25e1" target="_top" xlink:title="XYMap&#45;backed Gaussian blur (non&#45;optimized, per&#45;pixel path).">
 <polygon fill="white" stroke="#666666" points="135,-19 21,-19 21,0 135,0 135,-19"/>
 <text text-anchor="middle" x="78" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::gfx::blurGaussian</text>
 </a>

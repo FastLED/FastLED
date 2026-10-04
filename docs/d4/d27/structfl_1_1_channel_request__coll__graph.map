@@ -1,0 +1,15 @@
+<map id="fl::ChannelRequest" name="fl::ChannelRequest">
+<area shape="rect" id="Node000001" title=" " alt="" coords="683,95,827,120"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl.html#d4/d36/namespacefl" title=" " alt="" coords="357,14,534,54"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="545,55,701,92,699,97,543,60"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl.html#db/dd6/classfl_1_1bitset__fixed" title=" " alt="" coords="5,5,159,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="173,19,357,27,356,33,172,25"/>
+<area shape="rect" id="Node000004" href="$d2/d77/structfl_1_1_chipset_clockless_timing.html" title=" " alt="" coords="348,95,543,120"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="556,105,682,105,682,110,556,110"/>
+<area shape="rect" id="Node000005" href="$de/d52/structfl_1_1_nanos_range.html" title=" " alt="" coords="22,95,142,120"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="156,105,348,105,348,110,156,110"/>
+<area shape="rect" id="Node000006" href="$dd/dd8/classfl_1_1_optional.html" title=" " alt="" coords="364,144,527,169"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="540,143,658,125,696,117,697,123,659,130,541,148"/>
+<area shape="rect" id="Node000007" href="$dd/dd8/classfl_1_1_optional.html" title=" " alt="" coords="17,144,147,169"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="161,154,363,154,363,159,161,159"/>
+</map>

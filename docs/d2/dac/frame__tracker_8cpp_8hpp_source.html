@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -125,7 +125,7 @@ $(function(){initNavTree('d2/dac/frame__tracker_8cpp_8hpp_source.html','../../')
 <div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>    fl::u32 effectiveTime = now;</div>
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> </div>
 <div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>    <span class="comment">// Convert milliseconds to microseconds for precise calculation</span></div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_add3f775ccb36323b444c97c36b6bb694.html#add3f775ccb36323b444c97c36b6bb694">fl::u64</a> microseconds = <span class="keyword">static_cast&lt;</span><a class="code hl_typedef" href="../../d4/d36/namespacefl_add3f775ccb36323b444c97c36b6bb694.html#add3f775ccb36323b444c97c36b6bb694">fl::u64</a><span class="keyword">&gt;</span>(effectiveTime) * 1000ULL;</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>    fl::u64 microseconds = <span class="keyword">static_cast&lt;</span>fl::u64<span class="keyword">&gt;</span>(effectiveTime) * 1000ULL;</div>
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>    <span class="comment">// Calculate frame number with proper rounding</span></div>
 <div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>    *frameNumber = microseconds / <a class="code hl_variable" href="../../d6/dcf/classfl_1_1video_1_1_frame_tracker_a8d6820124f0eaee98e43f73542352e46.html#a8d6820124f0eaee98e43f73542352e46">mMicrosSecondsPerInterval</a>;</div>
@@ -133,26 +133,29 @@ $(function(){initNavTree('d2/dac/frame__tracker_8cpp_8hpp_source.html','../../')
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>    <span class="comment">// Calculate interpolation amount if requested</span></div>
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>    <span class="keywordflow">if</span> (amountOfNextFrame != <span class="keyword">nullptr</span>) {</div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>        <a class="code hl_typedef" href="../../d4/d36/namespacefl_add3f775ccb36323b444c97c36b6bb694.html#add3f775ccb36323b444c97c36b6bb694">fl::u64</a> frame1_start = (*frameNumber * <a class="code hl_variable" href="../../d6/dcf/classfl_1_1video_1_1_frame_tracker_a8d6820124f0eaee98e43f73542352e46.html#a8d6820124f0eaee98e43f73542352e46">mMicrosSecondsPerInterval</a>);</div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>        <a class="code hl_typedef" href="../../d4/d36/namespacefl_add3f775ccb36323b444c97c36b6bb694.html#add3f775ccb36323b444c97c36b6bb694">fl::u64</a> frame2_start = (*nextFrameNumber * <a class="code hl_variable" href="../../d6/dcf/classfl_1_1video_1_1_frame_tracker_a8d6820124f0eaee98e43f73542352e46.html#a8d6820124f0eaee98e43f73542352e46">mMicrosSecondsPerInterval</a>);</div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>        fl::u32 rel_time = microseconds - frame1_start;</div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>        fl::u32 frame_duration = frame2_start - frame1_start;</div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>        <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a> progress = <a class="code hl_function" href="../../d4/d36/namespacefl_a33fb57d527658d545f129f9fd7cf5860.html#a33fb57d527658d545f129f9fd7cf5860">map_range&lt;fl::u32, u8&gt;</a>(rel_time, 0, frame_duration, 0, 255);</div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>        *amountOfNextFrame = progress;</div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>    }</div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>}</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>        fl::u64 frame1_start =</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>            <span class="keyword">static_cast&lt;</span>fl::u64<span class="keyword">&gt;</span>(*frameNumber) * <a class="code hl_variable" href="../../d6/dcf/classfl_1_1video_1_1_frame_tracker_a8d6820124f0eaee98e43f73542352e46.html#a8d6820124f0eaee98e43f73542352e46">mMicrosSecondsPerInterval</a>;</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>        fl::u64 frame2_start =</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>            <span class="keyword">static_cast&lt;</span>fl::u64<span class="keyword">&gt;</span>(*nextFrameNumber) * <a class="code hl_variable" href="../../d6/dcf/classfl_1_1video_1_1_frame_tracker_a8d6820124f0eaee98e43f73542352e46.html#a8d6820124f0eaee98e43f73542352e46">mMicrosSecondsPerInterval</a>;</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>        fl::u32 rel_time = microseconds - frame1_start;</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>        fl::u32 frame_duration = frame2_start - frame1_start;</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>        <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a> progress = <a class="code hl_function" href="../../d4/d36/namespacefl_a5577faf0ab50486e75edec69ea890321.html#a5577faf0ab50486e75edec69ea890321">map_range&lt;fl::u32, u8&gt;</a>(rel_time, 0, frame_duration, 0, 255);</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>        *amountOfNextFrame = progress;</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    }</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>}</div>
 </div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
-<div class="foldopen" id="foldopen00037" data-start="{" data-end="}">
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno"><a class="line" href="../../d6/dcf/classfl_1_1video_1_1_frame_tracker_a03c429c3b873fe537f46bdacca89249b.html#a03c429c3b873fe537f46bdacca89249b">   37</a></span>fl::u32 <a class="code hl_function" href="../../d6/dcf/classfl_1_1video_1_1_frame_tracker_a03c429c3b873fe537f46bdacca89249b.html#a03c429c3b873fe537f46bdacca89249b">FrameTracker::get_exact_timestamp_ms</a>(fl::u32 frameNumber)<span class="keyword"> const </span>{</div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_add3f775ccb36323b444c97c36b6bb694.html#add3f775ccb36323b444c97c36b6bb694">fl::u64</a> microseconds = frameNumber * <a class="code hl_variable" href="../../d6/dcf/classfl_1_1video_1_1_frame_tracker_a8d6820124f0eaee98e43f73542352e46.html#a8d6820124f0eaee98e43f73542352e46">mMicrosSecondsPerInterval</a>;</div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    <span class="keywordflow">return</span> <span class="keyword">static_cast&lt;</span>fl::u32<span class="keyword">&gt;</span>(microseconds / 1000) + <a class="code hl_variable" href="../../d6/dcf/classfl_1_1video_1_1_frame_tracker_a15cd8ec3bec9c927fe563a1555c0c4eb.html#a15cd8ec3bec9c927fe563a1555c0c4eb">mStartTime</a>;</div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>}</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
+<div class="foldopen" id="foldopen00039" data-start="{" data-end="}">
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno"><a class="line" href="../../d6/dcf/classfl_1_1video_1_1_frame_tracker_a03c429c3b873fe537f46bdacca89249b.html#a03c429c3b873fe537f46bdacca89249b">   39</a></span>fl::u32 <a class="code hl_function" href="../../d6/dcf/classfl_1_1video_1_1_frame_tracker_a03c429c3b873fe537f46bdacca89249b.html#a03c429c3b873fe537f46bdacca89249b">FrameTracker::get_exact_timestamp_ms</a>(fl::u32 frameNumber)<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    fl::u64 microseconds =</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>        <span class="keyword">static_cast&lt;</span>fl::u64<span class="keyword">&gt;</span>(frameNumber) * <a class="code hl_variable" href="../../d6/dcf/classfl_1_1video_1_1_frame_tracker_a8d6820124f0eaee98e43f73542352e46.html#a8d6820124f0eaee98e43f73542352e46">mMicrosSecondsPerInterval</a>;</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    <span class="keywordflow">return</span> <span class="keyword">static_cast&lt;</span>fl::u32<span class="keyword">&gt;</span>(microseconds / 1000) + <a class="code hl_variable" href="../../d6/dcf/classfl_1_1video_1_1_frame_tracker_a15cd8ec3bec9c927fe563a1555c0c4eb.html#a15cd8ec3bec9c927fe563a1555c0c4eb">mStartTime</a>;</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>}</div>
 </div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span> </div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>} <span class="comment">// namespace video</span></div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>} <span class="comment">// namespace fl</span></div>
-<div class="ttc" id="aclassfl_1_1video_1_1_frame_tracker_a03c429c3b873fe537f46bdacca89249b_html_a03c429c3b873fe537f46bdacca89249b"><div class="ttname"><a href="../../d6/dcf/classfl_1_1video_1_1_frame_tracker_a03c429c3b873fe537f46bdacca89249b.html#a03c429c3b873fe537f46bdacca89249b">fl::video::FrameTracker::get_exact_timestamp_ms</a></div><div class="ttdeci">fl::u32 get_exact_timestamp_ms(fl::u32 frameNumber) const</div><div class="ttdef"><b>Definition</b> <a href="#l00037">frame_tracker.cpp.hpp:37</a></div></div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> </div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>} <span class="comment">// namespace video</span></div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>} <span class="comment">// namespace fl</span></div>
+<div class="ttc" id="aclassfl_1_1video_1_1_frame_tracker_a03c429c3b873fe537f46bdacca89249b_html_a03c429c3b873fe537f46bdacca89249b"><div class="ttname"><a href="../../d6/dcf/classfl_1_1video_1_1_frame_tracker_a03c429c3b873fe537f46bdacca89249b.html#a03c429c3b873fe537f46bdacca89249b">fl::video::FrameTracker::get_exact_timestamp_ms</a></div><div class="ttdeci">fl::u32 get_exact_timestamp_ms(fl::u32 frameNumber) const</div><div class="ttdef"><b>Definition</b> <a href="#l00039">frame_tracker.cpp.hpp:39</a></div></div>
 <div class="ttc" id="aclassfl_1_1video_1_1_frame_tracker_a15cd8ec3bec9c927fe563a1555c0c4eb_html_a15cd8ec3bec9c927fe563a1555c0c4eb"><div class="ttname"><a href="../../d6/dcf/classfl_1_1video_1_1_frame_tracker_a15cd8ec3bec9c927fe563a1555c0c4eb.html#a15cd8ec3bec9c927fe563a1555c0c4eb">fl::video::FrameTracker::mStartTime</a></div><div class="ttdeci">fl::u32 mStartTime</div><div class="ttdef"><b>Definition</b> <a href="../../d2/df7/frame__tracker_8h_source.html#l00031">frame_tracker.h:31</a></div></div>
 <div class="ttc" id="aclassfl_1_1video_1_1_frame_tracker_a5618f21c07d1aacc3d7b5c3850c7c8c4_html_a5618f21c07d1aacc3d7b5c3850c7c8c4"><div class="ttname"><a href="../../d6/dcf/classfl_1_1video_1_1_frame_tracker_a5618f21c07d1aacc3d7b5c3850c7c8c4.html#a5618f21c07d1aacc3d7b5c3850c7c8c4">fl::video::FrameTracker::FrameTracker</a></div><div class="ttdeci">FrameTracker(float fps)</div><div class="ttdef"><b>Definition</b> <a href="#l00008">frame_tracker.cpp.hpp:8</a></div></div>
 <div class="ttc" id="aclassfl_1_1video_1_1_frame_tracker_a8d6820124f0eaee98e43f73542352e46_html_a8d6820124f0eaee98e43f73542352e46"><div class="ttname"><a href="../../d6/dcf/classfl_1_1video_1_1_frame_tracker_a8d6820124f0eaee98e43f73542352e46.html#a8d6820124f0eaee98e43f73542352e46">fl::video::FrameTracker::mMicrosSecondsPerInterval</a></div><div class="ttdeci">fl::u32 mMicrosSecondsPerInterval</div><div class="ttdef"><b>Definition</b> <a href="../../d2/df7/frame__tracker_8h_source.html#l00030">frame_tracker.h:30</a></div></div>
@@ -160,10 +163,9 @@ $(function(){initNavTree('d2/dac/frame__tracker_8cpp_8hpp_source.html','../../')
 <div class="ttc" id="aframe__tracker_8h_html"><div class="ttname"><a href="../../d2/df7/frame__tracker_8h.html">frame_tracker.h</a></div></div>
 <div class="ttc" id="aint_8h_html"><div class="ttname"><a href="../../d3/d7e/int_8h.html">int.h</a></div></div>
 <div class="ttc" id="amath_8h_html"><div class="ttname"><a href="../../df/db1/math_8h.html">math.h</a></div></div>
-<div class="ttc" id="anamespacefl_1_1video_html"><div class="ttname"><a href="../../d7/dbc/namespacefl_1_1video.html">fl::video</a></div><div class="ttdef"><b>Definition</b> <a href="../../dd/d78/video_8h_source.html#l00024">video.h:24</a></div></div>
+<div class="ttc" id="anamespacefl_1_1video_html"><div class="ttname"><a href="../../d7/dbc/namespacefl_1_1video.html">fl::video</a></div><div class="ttdef"><b>Definition</b> <a href="../../dd/d78/video_8h_source.html#l00027">video.h:27</a></div></div>
 <div class="ttc" id="anamespacefl_a058ceeac48f181da463c2ba07401292c_html_a058ceeac48f181da463c2ba07401292c"><div class="ttname"><a href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a></div><div class="ttdeci">unsigned char u8</div><div class="ttdef"><b>Definition</b> <a href="../../df/dd8/stdint_8h_source.html#l00131">stdint.h:131</a></div></div>
-<div class="ttc" id="anamespacefl_a33fb57d527658d545f129f9fd7cf5860_html_a33fb57d527658d545f129f9fd7cf5860"><div class="ttname"><a href="../../d4/d36/namespacefl_a33fb57d527658d545f129f9fd7cf5860.html#a33fb57d527658d545f129f9fd7cf5860">fl::map_range</a></div><div class="ttdeci">FASTLED_FORCE_INLINE U map_range(T value, T in_min, T in_max, U out_min, U out_max) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00174">math.h:174</a></div></div>
-<div class="ttc" id="anamespacefl_add3f775ccb36323b444c97c36b6bb694_html_add3f775ccb36323b444c97c36b6bb694"><div class="ttname"><a href="../../d4/d36/namespacefl_add3f775ccb36323b444c97c36b6bb694.html#add3f775ccb36323b444c97c36b6bb694">fl::u64</a></div><div class="ttdeci">fl::u64 u64</div><div class="ttdef"><b>Definition</b> <a href="../../df/d96/s16x16x4_8h_source.html#l00221">s16x16x4.h:221</a></div></div>
+<div class="ttc" id="anamespacefl_a5577faf0ab50486e75edec69ea890321_html_a5577faf0ab50486e75edec69ea890321"><div class="ttname"><a href="../../d4/d36/namespacefl_a5577faf0ab50486e75edec69ea890321.html#a5577faf0ab50486e75edec69ea890321">fl::map_range</a></div><div class="ttdeci">FASTLED_FORCE_INLINE U map_range(T value, T in_min, T in_max, U out_min, U out_max) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00174">math.h:174</a></div></div>
 <div class="ttc" id="anamespacefl_html"><div class="ttname"><a href="../../d4/d36/namespacefl.html">fl</a></div><div class="ttdoc">Base definition for an LED controller.</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d4b/crgb_8hpp_source.html#l00179">crgb.hpp:179</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
@@ -172,7 +174,7 @@ $(function(){initNavTree('d2/dac/frame__tracker_8cpp_8hpp_source.html','../../')
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_454acf09c0e4fff6d624d6e8600905f6.html">video</a></li><li class="navelem"><a class="el" href="../../d2/dac/frame__tracker_8cpp_8hpp.html">frame_tracker.cpp.hpp</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:00 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:02 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

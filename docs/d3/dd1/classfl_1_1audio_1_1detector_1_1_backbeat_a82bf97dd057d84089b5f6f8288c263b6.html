@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -144,7 +144,7 @@ $(function(){initNavTree('d3/dd1/classfl_1_1audio_1_1detector_1_1_backbeat_a82bf
 <div class="line"><span class="lineno">  323</span>        <span class="keywordtype">float</span> separation = <a class="code hl_variable" href="../../d3/dd1/classfl_1_1audio_1_1detector_1_1_backbeat_a530a9dfd3886a5a9ecf74ac2c6520e2d.html#a530a9dfd3886a5a9ecf74ac2c6520e2d">mBackbeatMean</a> - <a class="code hl_variable" href="../../d3/dd1/classfl_1_1audio_1_1detector_1_1_backbeat_add631cf67873d7c557ec5b4eb72a9782.html#add631cf67873d7c557ec5b4eb72a9782">mNonBackbeatMean</a>;</div>
 <div class="line"><span class="lineno">  324</span>        <span class="keywordflow">if</span> (separation &gt; 1e-6f) {</div>
 <div class="line"><span class="lineno">  325</span>            accentConfidence = (accentStrength - <a class="code hl_variable" href="../../d3/dd1/classfl_1_1audio_1_1detector_1_1_backbeat_add631cf67873d7c557ec5b4eb72a9782.html#add631cf67873d7c557ec5b4eb72a9782">mNonBackbeatMean</a>) / separation;</div>
-<div class="line"><span class="lineno">  326</span>            accentConfidence = <a class="code hl_function" href="../../d4/d36/namespacefl_afb42d6eb6443afc7223ce9b1a812f350.html#afb42d6eb6443afc7223ce9b1a812f350">fl::clamp</a>(accentConfidence, 0.0f, 1.0f);</div>
+<div class="line"><span class="lineno">  326</span>            accentConfidence = <a class="code hl_function" href="../../d4/d36/namespacefl_a391721290a9307391d39a0a897d9b9f4.html#a391721290a9307391d39a0a897d9b9f4">fl::clamp</a>(accentConfidence, 0.0f, 1.0f);</div>
 <div class="line"><span class="lineno">  327</span>        }</div>
 <div class="line"><span class="lineno">  328</span>    } <span class="keywordflow">else</span> {</div>
 <div class="line"><span class="lineno">  329</span>        <span class="comment">// Use fixed threshold</span></div>
@@ -174,7 +174,7 @@ $(function(){initNavTree('d3/dd1/classfl_1_1audio_1_1detector_1_1_backbeat_a82bf
 <div class="ttc" id="aclassfl_1_1audio_1_1detector_1_1_backbeat_ad7bb12b461de2844e5303a77dec1d0b6_html_ad7bb12b461de2844e5303a77dec1d0b6"><div class="ttname"><a href="../../d3/dd1/classfl_1_1audio_1_1detector_1_1_backbeat_ad7bb12b461de2844e5303a77dec1d0b6.html#ad7bb12b461de2844e5303a77dec1d0b6">fl::audio::detector::Backbeat::mAdaptiveThreshold</a></div><div class="ttdeci">float mAdaptiveThreshold</div><div class="ttdef"><b>Definition</b> <a href="../../d1/ddf/backbeat_8h_source.html#l00156">backbeat.h:156</a></div></div>
 <div class="ttc" id="aclassfl_1_1audio_1_1detector_1_1_backbeat_add4d8e1dcf3bcca0ec8f1853d406aa9f_html_add4d8e1dcf3bcca0ec8f1853d406aa9f"><div class="ttname"><a href="../../d3/dd1/classfl_1_1audio_1_1detector_1_1_backbeat_add4d8e1dcf3bcca0ec8f1853d406aa9f.html#add4d8e1dcf3bcca0ec8f1853d406aa9f">fl::audio::detector::Backbeat::mAdaptive</a></div><div class="ttdeci">bool mAdaptive</div><div class="ttdef"><b>Definition</b> <a href="../../d1/ddf/backbeat_8h_source.html#l00140">backbeat.h:140</a></div></div>
 <div class="ttc" id="aclassfl_1_1audio_1_1detector_1_1_backbeat_add631cf67873d7c557ec5b4eb72a9782_html_add631cf67873d7c557ec5b4eb72a9782"><div class="ttname"><a href="../../d3/dd1/classfl_1_1audio_1_1detector_1_1_backbeat_add631cf67873d7c557ec5b4eb72a9782.html#add631cf67873d7c557ec5b4eb72a9782">fl::audio::detector::Backbeat::mNonBackbeatMean</a></div><div class="ttdeci">float mNonBackbeatMean</div><div class="ttdef"><b>Definition</b> <a href="../../d1/ddf/backbeat_8h_source.html#l00155">backbeat.h:155</a></div></div>
-<div class="ttc" id="anamespacefl_afb42d6eb6443afc7223ce9b1a812f350_html_afb42d6eb6443afc7223ce9b1a812f350"><div class="ttname"><a href="../../d4/d36/namespacefl_afb42d6eb6443afc7223ce9b1a812f350.html#afb42d6eb6443afc7223ce9b1a812f350">fl::clamp</a></div><div class="ttdeci">constexpr enable_if&lt; is_fixed_point&lt; T &gt;::value, T &gt;::type clamp(T x, T lo, T hi) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../de/d62/fixed__point_8h_source.html#l00542">fixed_point.h:542</a></div></div>
+<div class="ttc" id="anamespacefl_a391721290a9307391d39a0a897d9b9f4_html_a391721290a9307391d39a0a897d9b9f4"><div class="ttname"><a href="../../d4/d36/namespacefl_a391721290a9307391d39a0a897d9b9f4.html#a391721290a9307391d39a0a897d9b9f4">fl::clamp</a></div><div class="ttdeci">constexpr enable_if&lt; is_fixed_point&lt; T &gt;::value, T &gt;::type clamp(T x, T lo, T hi) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../de/d62/fixed__point_8h_source.html#l00542">fixed_point.h:542</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../dc/dc0/backbeat_8cpp_8hpp_source.html#l00394">calculatePatternConfidence()</a>, <a class="el" href="../../de/d62/fixed__point_8h_source.html#l00542">fl::clamp()</a>, <a class="el" href="../../dc/dc0/backbeat_8cpp_8hpp_source.html#l00299">isBackbeatPosition()</a>, <a class="el" href="../../d1/ddf/backbeat_8h_source.html#l00140">mAdaptive</a>, <a class="el" href="../../d1/ddf/backbeat_8h_source.html#l00156">mAdaptiveThreshold</a>, <a class="el" href="../../d1/ddf/backbeat_8h_source.html#l00154">mBackbeatMean</a>, <a class="el" href="../../d1/ddf/backbeat_8h_source.html#l00130">mConfidence</a>, <a class="el" href="../../d1/ddf/backbeat_8h_source.html#l00135">mConfidenceThreshold</a>, and <a class="el" href="../../d1/ddf/backbeat_8h_source.html#l00155">mNonBackbeatMean</a>.</p>
 
@@ -203,7 +203,7 @@ $(function(){initNavTree('d3/dd1/classfl_1_1audio_1_1detector_1_1_backbeat_a82bf
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../db/dbf/namespacefl_1_1audio.html">audio</a></li><li class="navelem"><a class="el" href="../../dd/d12/namespacefl_1_1audio_1_1detector.html">detector</a></li><li class="navelem"><a class="el" href="../../d3/dd1/classfl_1_1audio_1_1detector_1_1_backbeat.html">Backbeat</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:08 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:11 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

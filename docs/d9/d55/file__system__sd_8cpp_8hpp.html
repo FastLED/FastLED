@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.13.2"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>FastLED: fl/system/sd/file_system_sd.cpp.hpp File Reference</title>
+<title>FastLED: fl/fs/sd/file_system_sd.cpp.hpp File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../jquery.js"></script>
 <script type="text/javascript" src="../../dynsections.js"></script>
@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -108,15 +108,16 @@ $(function(){initNavTree('d9/d55/file__system__sd_8cpp_8hpp.html','../../'); ini
 </div><!--header-->
 <div class="contents">
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>SD-card support split off from <code><a class="el" href="../../da/d96/file__system_8cpp_8hpp.html">file_system.cpp.hpp</a></code> so the linker can tree-shake the entire SD chain when nobody calls <code>FileSystem::beginSd()</code>. </p>
+<div class="textblock"><p>SD-card support split off from <code>file_system.cpp.hpp</code> so the linker can tree-shake the entire SD chain when nobody calls <code>FileSystem::beginSd()</code>. </p>
 <p>Mechanism: this TU is compiled into its own <code>.o</code> file (<code>fl.system.sd+.cpp.o</code>, via <code>src/fl/build/fl.system.sd+.cpp</code>). <code>FileSystem::beginSd(int)</code> and <code>make_sdcard_filesystem(int)</code> are the only symbols this TU defines. The linker only pulls the <code>.o</code> into the final binary when one of those symbols is referenced — i.e. when the user's sketch actually calls <code>fs.beginSd(cs_pin)</code>. Sketches that only use <code>FileSystem::begin(platform_filesystem)</code> (or that don't touch <code>FileSystem</code> at all) see <code>fl.system.sd+.cpp.o</code> dropped outright, taking <code>libSD.a</code> / <code>libFS.a</code> / Arduino's <code>VFSImpl</code> chain (~16 KB on ESP32-S3 NEOPIXEL Blink) with it.</p>
 <p>This replaces the earlier <code>FASTLED_USE_SDCARD</code> macro-gate (#2778 v1) — no user opt-in required, the linker handles it.</p>
 <p>See FastLED #2773 item 1.2 for the original audit. </p>
 
 <p class="definition">Definition in file <a class="el" href="../../d9/d55/file__system__sd_8cpp_8hpp_source.html">file_system_sd.cpp.hpp</a>.</p>
-</div><div class="textblock"><code>#include &quot;<a class="el" href="../../d6/d8d/file__system_8h_source.html">fl/system/file_system.h</a>&quot;</code><br />
+</div><div class="textblock"><code>#include &quot;<a class="el" href="../../df/d26/fs_8h_source.html">fl/fs/fs.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../da/d99/has__include_8h_source.html">fl/stl/has_include.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d7/d7f/log_8h_source.html">fl/log/log.h</a>&quot;</code><br />
+<code>#include &quot;platforms/is_platform.h&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for file_system_sd.cpp.hpp:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -129,7 +130,7 @@ $(function(){initNavTree('d9/d55/file__system__sd_8cpp_8hpp.html','../../'); ini
 <div id="dynsection-1-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-1-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d9/d5a/file__system__sd_8cpp_8hpp__dep__incl.svg" width="210" height="198"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d9/d5a/file__system__sd_8cpp_8hpp__dep__incl.svg" width="174" height="198"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 </div>
 <p><a href="../../d9/d55/file__system__sd_8cpp_8hpp_source.html">Go to the source code of this file.</a></p>
@@ -156,8 +157,8 @@ Functions</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_c27a882fecb444156419346f13162968.html">system</a></li><li class="navelem"><a class="el" href="../../dir_f228f84acf982f0d5ea042cae8b3cbdb.html">sd</a></li><li class="navelem"><a class="el" href="../../d9/d55/file__system__sd_8cpp_8hpp.html">file_system_sd.cpp.hpp</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:02 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_defadf1938929596e66bcac4675bfead.html">fs</a></li><li class="navelem"><a class="el" href="../../dir_595faffe5d02f52436e2b832cd5363e5.html">sd</a></li><li class="navelem"><a class="el" href="../../d9/d55/file__system__sd_8cpp_8hpp.html">file_system_sd.cpp.hpp</a></li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:04 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

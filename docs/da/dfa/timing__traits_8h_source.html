@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -150,10 +150,10 @@ $(function(){initNavTree('da/dfa/timing__traits_8h_source.html','../../'); initR
 <div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span><span class="comment">// Note: parameter names avoid T0H/T0L/T1H/T1L which are hardware register</span></div>
 <div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span><span class="comment">// macros on ESP8266 (defined in esp8266_peri.h).</span></div>
 <div class="foldopen" id="foldopen00074" data-start="{" data-end="}">
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno"><a class="line" href="../../d4/d36/namespacefl_a1f223732e286d8f6b15577ceae1eec39.html#a1f223732e286d8f6b15577ceae1eec39">   74</a></span><span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a1f223732e286d8f6b15577ceae1eec39.html#a1f223732e286d8f6b15577ceae1eec39">convert_fastled_timings_to_timedeltas</a>(u16 t1_in, u16 t2_in,</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno"><a class="line" href="../../d4/d36/namespacefl_a6cbed46b7c405622f0c8446f82275918.html#a6cbed46b7c405622f0c8446f82275918">   74</a></span><span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a6cbed46b7c405622f0c8446f82275918.html#a6cbed46b7c405622f0c8446f82275918">convert_fastled_timings_to_timedeltas</a>(u16 t1_in, u16 t2_in,</div>
 <div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>                                                  u16 t3_in, u16 *out_t0h,</div>
 <div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>                                                  u16 *out_t0l, u16 *out_t1h,</div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>                                                  u16 *out_t1l) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>                                                  u16 *out_t1l) <a class="code hl_variable" href="../../d4/d36/namespacefl_aa317f89ca911371e798d08a93770402f.html#aa317f89ca911371e798d08a93770402f">FL_NO_EXCEPT</a> {</div>
 <div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    *out_t0h = t1_in;</div>
 <div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>    *out_t0l = t2_in + t3_in;</div>
 <div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>    *out_t1h = t1_in + t2_in;</div>
@@ -163,10 +163,10 @@ $(function(){initNavTree('da/dfa/timing__traits_8h_source.html','../../'); initR
 <div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span> </div>
 <div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>}  <span class="comment">// namespace fl</span></div>
 <div class="ttc" id="aint_8h_html"><div class="ttname"><a href="../../d3/d7e/int_8h.html">int.h</a></div></div>
-<div class="ttc" id="anamespacefl_a1f223732e286d8f6b15577ceae1eec39_html_a1f223732e286d8f6b15577ceae1eec39"><div class="ttname"><a href="../../d4/d36/namespacefl_a1f223732e286d8f6b15577ceae1eec39.html#a1f223732e286d8f6b15577ceae1eec39">fl::convert_fastled_timings_to_timedeltas</a></div><div class="ttdeci">void convert_fastled_timings_to_timedeltas(u16 t1_in, u16 t2_in, u16 t3_in, u16 *out_t0h, u16 *out_t0l, u16 *out_t1h, u16 *out_t1l) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="#l00074">timing_traits.h:74</a></div></div>
+<div class="ttc" id="anamespacefl_a6cbed46b7c405622f0c8446f82275918_html_a6cbed46b7c405622f0c8446f82275918"><div class="ttname"><a href="../../d4/d36/namespacefl_a6cbed46b7c405622f0c8446f82275918.html#a6cbed46b7c405622f0c8446f82275918">fl::convert_fastled_timings_to_timedeltas</a></div><div class="ttdeci">void convert_fastled_timings_to_timedeltas(u16 t1_in, u16 t2_in, u16 t3_in, u16 *out_t0h, u16 *out_t0l, u16 *out_t1h, u16 *out_t1l) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="#l00074">timing_traits.h:74</a></div></div>
+<div class="ttc" id="anamespacefl_aa317f89ca911371e798d08a93770402f_html_aa317f89ca911371e798d08a93770402f"><div class="ttname"><a href="../../d4/d36/namespacefl_aa317f89ca911371e798d08a93770402f.html#aa317f89ca911371e798d08a93770402f">fl::FL_NO_EXCEPT</a></div><div class="ttdeci">InputGamut g FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/df8/fl_2gfx_2rgbw_8h_source.html#l00121">rgbw.h:121</a></div></div>
 <div class="ttc" id="anamespacefl_html"><div class="ttname"><a href="../../d4/d36/namespacefl.html">fl</a></div><div class="ttdoc">Base definition for an LED controller.</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d4b/crgb_8hpp_source.html#l00179">crgb.hpp:179</a></div></div>
 <div class="ttc" id="anoexcept_8h_html"><div class="ttname"><a href="../../db/d01/noexcept_8h.html">noexcept.h</a></div></div>
-<div class="ttc" id="as16x16x4_8h_af54aac016b86a178940aca20946a8002_html_af54aac016b86a178940aca20946a8002"><div class="ttname"><a href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></div><div class="ttdeci">#define FL_NOEXCEPT</div></div>
 <div class="ttc" id="astructfl_1_1_custom_timing_traits_a38a8c127ef884d0ecf598878a39c686b_html_a38a8c127ef884d0ecf598878a39c686b"><div class="ttname"><a href="../../d5/df8/structfl_1_1_custom_timing_traits_a38a8c127ef884d0ecf598878a39c686b.html#a38a8c127ef884d0ecf598878a39c686b">fl::CustomTimingTraits::BIT_PERIOD</a></div><div class="ttdeci">static constexpr u32 BIT_PERIOD</div><div class="ttdef"><b>Definition</b> <a href="#l00068">timing_traits.h:68</a></div></div>
 <div class="ttc" id="astructfl_1_1_custom_timing_traits_a8424e2ac6818f0cc80f4910c51fa488d_html_a8424e2ac6818f0cc80f4910c51fa488d"><div class="ttname"><a href="../../d5/df8/structfl_1_1_custom_timing_traits_a8424e2ac6818f0cc80f4910c51fa488d.html#a8424e2ac6818f0cc80f4910c51fa488d">fl::CustomTimingTraits::T1</a></div><div class="ttdeci">static constexpr u32 T1</div><div class="ttdef"><b>Definition</b> <a href="#l00064">timing_traits.h:64</a></div></div>
 <div class="ttc" id="astructfl_1_1_custom_timing_traits_aa02004bc74b22bfb389e20981fff16fb_html_aa02004bc74b22bfb389e20981fff16fb"><div class="ttname"><a href="../../d5/df8/structfl_1_1_custom_timing_traits_aa02004bc74b22bfb389e20981fff16fb.html#aa02004bc74b22bfb389e20981fff16fb">fl::CustomTimingTraits::T2</a></div><div class="ttdeci">static constexpr u32 T2</div><div class="ttdef"><b>Definition</b> <a href="#l00065">timing_traits.h:65</a></div></div>
@@ -186,7 +186,7 @@ $(function(){initNavTree('da/dfa/timing__traits_8h_source.html','../../'); initR
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_4bca70778167b44495d699f593f26052.html">chipsets</a></li><li class="navelem"><a class="el" href="../../da/dfa/timing__traits_8h.html">timing_traits.h</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:06:59 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:00 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

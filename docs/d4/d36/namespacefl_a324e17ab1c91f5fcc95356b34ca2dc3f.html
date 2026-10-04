@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -119,26 +119,26 @@ $(function(){initNavTree('d4/d36/namespacefl_a324e17ab1c91f5fcc95356b34ca2dc3f.h
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d8/d02/math_8cpp_8hpp_source.html#l00338">338</a> of file <a class="el" href="../../d8/d02/math_8cpp_8hpp_source.html">math.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  338</span>                                                     {</div>
-<div class="line"><span class="lineno">  339</span><span class="preprocessor">#if FL_MATH_USE_LIBM</span></div>
-<div class="line"><span class="lineno">  340</span>    return ::pow(base, exponent);</div>
-<div class="line"><span class="lineno">  341</span><span class="preprocessor">#else</span></div>
-<div class="line"><span class="lineno">  342</span>    <span class="keywordflow">if</span> (exponent == 0.0) <span class="keywordflow">return</span> 1.0;</div>
-<div class="line"><span class="lineno">  343</span>    <span class="keywordtype">int</span> ie = <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(exponent);</div>
-<div class="line"><span class="lineno">  344</span>    <span class="keywordflow">if</span> (<span class="keyword">static_cast&lt;</span><span class="keywordtype">double</span><span class="keyword">&gt;</span>(ie) == exponent &amp;&amp; ie &gt;= -8 &amp;&amp; ie &lt;= 8) {</div>
-<div class="line"><span class="lineno">  345</span>        <span class="keywordtype">double</span> r = 1.0;</div>
-<div class="line"><span class="lineno">  346</span>        <span class="keywordflow">if</span> (ie &gt; 0)  { <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; ie; ++i) r *= base; <span class="keywordflow">return</span> r; }</div>
-<div class="line"><span class="lineno">  347</span>        <span class="keywordflow">if</span> (ie &lt; 0)  { <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; -ie; ++i) r *= base; <span class="keywordflow">return</span> 1.0 / r; }</div>
-<div class="line"><span class="lineno">  348</span>    }</div>
-<div class="line"><span class="lineno">  349</span>    <span class="keywordflow">if</span> (base &lt;= 0.0) <span class="keywordflow">return</span> 0.0;</div>
-<div class="line"><span class="lineno">  350</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="../../d4/d36/namespacefl_aef48fc52fe9e7def7e62ff46b5aea705.html#aef48fc52fe9e7def7e62ff46b5aea705">exp_impl_double</a>(exponent * <a class="code hl_function" href="../../df/d9e/namespacefl_1_1detail_aefd5cee30614d18a52adbf22fc83f4a8.html#aefd5cee30614d18a52adbf22fc83f4a8">detail::log_natural_&lt;double&gt;</a>(base));</div>
-<div class="line"><span class="lineno">  351</span><span class="preprocessor">#endif</span></div>
-<div class="line"><span class="lineno">  352</span>}</div>
-<div class="ttc" id="anamespacefl_1_1detail_aefd5cee30614d18a52adbf22fc83f4a8_html_aefd5cee30614d18a52adbf22fc83f4a8"><div class="ttname"><a href="../../df/d9e/namespacefl_1_1detail_aefd5cee30614d18a52adbf22fc83f4a8.html#aefd5cee30614d18a52adbf22fc83f4a8">fl::detail::log_natural_</a></div><div class="ttdeci">F log_natural_(F value) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d02/math_8cpp_8hpp_source.html#l00214">math.cpp.hpp:214</a></div></div>
-<div class="ttc" id="anamespacefl_aef48fc52fe9e7def7e62ff46b5aea705_html_aef48fc52fe9e7def7e62ff46b5aea705"><div class="ttname"><a href="../../d4/d36/namespacefl_aef48fc52fe9e7def7e62ff46b5aea705.html#aef48fc52fe9e7def7e62ff46b5aea705">fl::exp_impl_double</a></div><div class="ttdeci">double exp_impl_double(double value)</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d02/math_8cpp_8hpp_source.html#l00101">math.cpp.hpp:101</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d8/d02/math_8cpp_8hpp_source.html#l00419">419</a> of file <a class="el" href="../../d8/d02/math_8cpp_8hpp_source.html">math.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  419</span>                                                     {</div>
+<div class="line"><span class="lineno">  420</span><span class="preprocessor">#if FL_MATH_USE_LIBM</span></div>
+<div class="line"><span class="lineno">  421</span>    return ::pow(base, exponent);</div>
+<div class="line"><span class="lineno">  422</span><span class="preprocessor">#else</span></div>
+<div class="line"><span class="lineno">  423</span>    <span class="keywordflow">if</span> (exponent == 0.0) <span class="keywordflow">return</span> 1.0;</div>
+<div class="line"><span class="lineno">  424</span>    <span class="keywordtype">int</span> ie = <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(exponent);</div>
+<div class="line"><span class="lineno">  425</span>    <span class="keywordflow">if</span> (<span class="keyword">static_cast&lt;</span><span class="keywordtype">double</span><span class="keyword">&gt;</span>(ie) == exponent &amp;&amp; ie &gt;= -8 &amp;&amp; ie &lt;= 8) {</div>
+<div class="line"><span class="lineno">  426</span>        <span class="keywordtype">double</span> r = 1.0;</div>
+<div class="line"><span class="lineno">  427</span>        <span class="keywordflow">if</span> (ie &gt; 0)  { <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; ie; ++i) r *= base; <span class="keywordflow">return</span> r; }</div>
+<div class="line"><span class="lineno">  428</span>        <span class="keywordflow">if</span> (ie &lt; 0)  { <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; -ie; ++i) r *= base; <span class="keywordflow">return</span> 1.0 / r; }</div>
+<div class="line"><span class="lineno">  429</span>    }</div>
+<div class="line"><span class="lineno">  430</span>    <span class="keywordflow">if</span> (base &lt;= 0.0) <span class="keywordflow">return</span> 0.0;</div>
+<div class="line"><span class="lineno">  431</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="../../d4/d36/namespacefl_af4b70e362c359e45ce94ecd36e7760c1.html#af4b70e362c359e45ce94ecd36e7760c1">exp_impl_double</a>(exponent * <a class="code hl_function" href="../../df/d9e/namespacefl_1_1detail_ac8b57c29af1139c7ef72272fb8e62f32.html#ac8b57c29af1139c7ef72272fb8e62f32">detail::log_natural_&lt;double&gt;</a>(base));</div>
+<div class="line"><span class="lineno">  432</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">  433</span>}</div>
+<div class="ttc" id="anamespacefl_1_1detail_ac8b57c29af1139c7ef72272fb8e62f32_html_ac8b57c29af1139c7ef72272fb8e62f32"><div class="ttname"><a href="../../df/d9e/namespacefl_1_1detail_ac8b57c29af1139c7ef72272fb8e62f32.html#ac8b57c29af1139c7ef72272fb8e62f32">fl::detail::log_natural_</a></div><div class="ttdeci">F log_natural_(F value) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d02/math_8cpp_8hpp_source.html#l00295">math.cpp.hpp:295</a></div></div>
+<div class="ttc" id="anamespacefl_af4b70e362c359e45ce94ecd36e7760c1_html_af4b70e362c359e45ce94ecd36e7760c1"><div class="ttname"><a href="../../d4/d36/namespacefl_af4b70e362c359e45ce94ecd36e7760c1.html#af4b70e362c359e45ce94ecd36e7760c1">fl::exp_impl_double</a></div><div class="ttdeci">double exp_impl_double(double value) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d02/math_8cpp_8hpp_source.html#l00201">math.cpp.hpp:201</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d8/d02/math_8cpp_8hpp_source.html#l00101">exp_impl_double()</a>, and <a class="el" href="../../d8/d02/math_8cpp_8hpp_source.html#l00214">fl::detail::log_natural_()</a>.</p>
+<p class="reference">References <a class="el" href="../../d8/d02/math_8cpp_8hpp_source.html#l00201">exp_impl_double()</a>, and <a class="el" href="../../d8/d02/math_8cpp_8hpp_source.html#l00295">fl::detail::log_natural_()</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../df/db1/math_8h_source.html#l00437">pow()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
@@ -146,7 +146,7 @@ $(function(){initNavTree('d4/d36/namespacefl_a324e17ab1c91f5fcc95356b34ca2dc3f.h
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d4/d36/namespacefl_a324e17ab1c91f5fcc95356b34ca2dc3f_a324e17ab1c91f5fcc95356b34ca2dc3f_cgraph.svg" width="374" height="110"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d4/d36/namespacefl_a324e17ab1c91f5fcc95356b34ca2dc3f_a324e17ab1c91f5fcc95356b34ca2dc3f_cgraph.svg" width="100%" height="364"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 <div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
@@ -165,7 +165,7 @@ $(function(){initNavTree('d4/d36/namespacefl_a324e17ab1c91f5fcc95356b34ca2dc3f.h
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:04 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:08 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

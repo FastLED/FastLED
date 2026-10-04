@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -110,7 +110,7 @@ $(function(){initNavTree('d4/d8e/spi__channel__adapter_8h.html','../../'); initR
 <div class="textblock"><p>Adapter that wraps HW SPI controllers for ChannelManager. </p>
 <p>This adapter enables existing SpiHw1/2/4/8/16 controllers to work with the modern channel-based API while maintaining backward compatibility with SPIBusManager. It uses the Adapter pattern to wrap platform-specific hardware controllers without modification.</p>
 <p><b>Architecture Overview:</b></p>
-<div class="fragment"><div class="line">Application Code (<a class="code hl_enumvalue" href="../../db/d97/_fast_l_e_d_8h_ac06549dc4a351e2c8f1dda8ae81f7926.html#ac06549dc4a351e2c8f1dda8ae81f7926ab58884059d69c6f6fdb432cc53b5db48">APA102</a> strips)</div>
+<div class="fragment"><div class="line">Application Code (<a class="code hl_enumvalue" href="../../d6/d64/fastled_8h_ac06549dc4a351e2c8f1dda8ae81f7926.html#ac06549dc4a351e2c8f1dda8ae81f7926ab58884059d69c6f6fdb432cc53b5db48">APA102</a> strips)</div>
 <div class="line">         ↓</div>
 <div class="line">   ChannelManager (proxy)</div>
 <div class="line">         ↓</div>
@@ -119,7 +119,7 @@ $(function(){initNavTree('d4/d8e/spi__channel__adapter_8h.html','../../'); initR
 <div class="line">   SpiHw1/2/4/8/16 (existing, unchanged)</div>
 <div class="line">         ↓</div>
 <div class="line">   Platform Hardware (DMA, SPI peripheral)</div>
-<div class="ttc" id="a_fast_l_e_d_8h_ac06549dc4a351e2c8f1dda8ae81f7926_html_ac06549dc4a351e2c8f1dda8ae81f7926ab58884059d69c6f6fdb432cc53b5db48"><div class="ttname"><a href="../../db/d97/_fast_l_e_d_8h_ac06549dc4a351e2c8f1dda8ae81f7926.html#ac06549dc4a351e2c8f1dda8ae81f7926ab58884059d69c6f6fdb432cc53b5db48">APA102</a></div><div class="ttdeci">@ APA102</div><div class="ttdoc">APA102 LED chipset.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d97/_fast_l_e_d_8h_source.html#l00262">FastLED.h:262</a></div></div>
+<div class="ttc" id="afastled_8h_ac06549dc4a351e2c8f1dda8ae81f7926_html_ac06549dc4a351e2c8f1dda8ae81f7926ab58884059d69c6f6fdb432cc53b5db48"><div class="ttname"><a href="../../d6/d64/fastled_8h_ac06549dc4a351e2c8f1dda8ae81f7926.html#ac06549dc4a351e2c8f1dda8ae81f7926ab58884059d69c6f6fdb432cc53b5db48">APA102</a></div><div class="ttdeci">@ APA102</div><div class="ttdoc">APA102 LED chipset.</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d64/fastled_8h_source.html#l00304">FastLED.h:304</a></div></div>
 </div><!-- fragment --><p><b>Critical Distinction:</b> This adapter is for <b>TRUE SPI chipsets</b> (APA102, SK9822, HD108) that require synchronized clock signals. This is fundamentally different from ChannelEngineSpi, which implements clockless protocols (WS2812) using SPI hardware as a bit-banging driver.</p>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -210,6 +210,12 @@ clockPin</td>
 controllerIndex</td>
 <td class="fielddoc">
 Index into mControllers. </td></tr>
+<tr><td class="fieldtype">
+<a id="a1166a8da5943008952bf3b2d39c4eb8a" name="a1166a8da5943008952bf3b2d39c4eb8a"></a><a class="el" href="../../d4/d36/namespacefl_a05ee51aa52c98a3dbf6346878d60643c.html#a05ee51aa52c98a3dbf6346878d60643c">Esp32SpiBus</a></td>
+<td class="fieldname">
+requestedBus</td>
+<td class="fielddoc">
+</td></tr>
 </table>
 
 </div>
@@ -246,6 +252,12 @@ channels</td>
 clockPin</td>
 <td class="fielddoc">
 </td></tr>
+<tr><td class="fieldtype">
+<a id="adc05eeb2d648c2f193bf28c0fe47aea6" name="adc05eeb2d648c2f193bf28c0fe47aea6"></a><a class="el" href="../../d4/d36/namespacefl_a05ee51aa52c98a3dbf6346878d60643c.html#a05ee51aa52c98a3dbf6346878d60643c">Esp32SpiBus</a></td>
+<td class="fieldname">
+requestedBus = <a class="el" href="../../d4/d36/namespacefl_a05ee51aa52c98a3dbf6346878d60643c.html#a05ee51aa52c98a3dbf6346878d60643cae1f2d5134ed2543d38a0de9751cf75d9">Esp32SpiBus::AUTO</a></td>
+<td class="fielddoc">
+</td></tr>
 </table>
 
 </div>
@@ -257,7 +269,7 @@ clockPin</td>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_217dd1d1f80f936dd132dc9fc88b57d1.html">channels</a></li><li class="navelem"><a class="el" href="../../dir_bd10d362137496ae5c9f1d8f7dfb3063.html">adapters</a></li><li class="navelem"><a class="el" href="../../d4/d8e/spi__channel__adapter_8h.html">spi_channel_adapter.h</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:01 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:03 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

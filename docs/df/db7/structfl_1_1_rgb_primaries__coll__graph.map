@@ -1,0 +1,5 @@
+<map id="fl::RgbPrimaries" name="fl::RgbPrimaries">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,137,131,163"/>
+<area shape="rect" id="Node000002" href="$d2/d9c/structfl_1_1_chromaticity.html" title="CIE 1931 xy chromaticity, independent of encoded storage and chipset." alt="" coords="7,5,129,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="71,44,71,137,65,137,65,44"/>
+</map>

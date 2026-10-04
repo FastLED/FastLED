@@ -49,7 +49,7 @@
 <!-- Node7 -->
 <g id="Node000007" class="node">
 <title>Node7</title>
-<g id="a_Node000007"><a xlink:href="../../d2/d0d/group___random_gaaaff3e84c6ab2cf5f71400a4b6958beb.html#gaaaff3e84c6ab2cf5f71400a4b6958beb" target="_top" xlink:title="Generate a 16&#45;bit random number.">
+<g id="a_Node000007"><a xlink:href="../../d2/d0d/group___random_ga6f816735a0bd63bfc78bebbc7c5f12b9.html#ga6f816735a0bd63bfc78bebbc7c5f12b9" target="_top" xlink:title="Generate a 16&#45;bit random number.">
 <polygon fill="white" stroke="#666666" points="140,-56 74,-56 74,-37 140,-37 140,-56"/>
 <text text-anchor="middle" x="107" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">random16</text>
 </a>
@@ -85,7 +85,7 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d8/df9/group___noise_generation_gaeb72246ebd597b60a7e575173accf2fd.html#gaeb72246ebd597b60a7e575173accf2fd" target="_top" xlink:title=" ">
+<g id="a_Node000003"><a xlink:href="../../d8/df9/group___noise_generation_gaeb72246ebd597b60a7e575173accf2fd.html#gaeb72246ebd597b60a7e575173accf2fd" target="_top" xlink:title="8&#45;Bit, fixed point implementation of Perlin&#39;s noise.">
 <polygon fill="white" stroke="#666666" points="228,-93 176,-93 176,-74 228,-74 228,-93"/>
 <text text-anchor="middle" x="202" y="-81" font-family="Helvetica,sans-Serif" font-size="10.00">inoise8</text>
 </a>
@@ -103,7 +103,7 @@
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../d8/d5c/group___noise_gaa3db0f2f3777cf5bb7a4dd1359dba4fe.html#gaa3db0f2f3777cf5bb7a4dd1359dba4fe" target="_top" xlink:title=" ">
+<g id="a_Node000004"><a xlink:href="../../d8/d5c/group___noise_gaa3db0f2f3777cf5bb7a4dd1359dba4fe.html#gaa3db0f2f3777cf5bb7a4dd1359dba4fe" target="_top" xlink:title="8&#45;bit, fixed point implementation of Perlin&#39;s noise without scaling.">
 <polygon fill="#fff0f0" stroke="red" points="339,-93 264,-93 264,-74 339,-74 339,-93"/>
 <text text-anchor="middle" x="301.5" y="-81" font-family="Helvetica,sans-Serif" font-size="10.00">inoise8_raw</text>
 </a>

@@ -1,0 +1,9 @@
+<map id="fl::anonymous_namespace{gamut_map::cpp::hpp}::chromaCandidateXyz" name="fl::anonymous_namespace{gamut_map::cpp::hpp}::chromaCandidateXyz">
+<area shape="rect" id="Node000001" title="XYZ of the candidate at factor of the target&#39;s chroma." alt="" coords="5,35,201,89"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="56,35,56,24,65,16,81,10,103,8,131,11,146,19,144,24,129,16,103,13,82,15,68,20,61,26,61,35"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a47f3f2b8a91dec1b90ee2740550b6f0b.html#a47f3f2b8a91dec1b90ee2740550b6f0b" title="OKLab (s16.16) &#45;&gt; XYZ (s16.16)." alt="" coords="278,5,417,31"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="201,42,264,30,265,36,202,47"/>
+<area shape="rect" id="Node000003" href="$d3/dfe/namespacefl_1_1anonymous__namespace_02gamut__map_8cpp_8hpp_03_a1219e248ff1e6969080b93b1112e5fdc.html#a1219e248ff1e6969080b93b1112e5fdc" title="Scale an s16.16 value by an s16.16 factor, rounding to nearest." alt="" coords="249,79,445,133"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="202,77,236,83,235,89,201,82"/>
+<area shape="poly" id="edge4_Node000003_Node000003" title=" " alt="" coords="300,79,300,68,309,60,325,54,347,52,375,55,390,63,388,68,373,60,347,57,326,59,312,64,305,70,305,79"/>
+</map>

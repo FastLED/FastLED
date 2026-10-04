@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -120,9 +120,9 @@ $(function(){initNavTree('d1/d2c/structfl_1_1_particles1d_1_1_particle_a2a3d7e95
 <div class="fragment"><div class="line"><span class="lineno">   90</span>                                                 {</div>
 <div class="line"><span class="lineno">   91</span>    <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../d1/d2c/structfl_1_1_particles1d_1_1_particle_a4ab064b29f2c7d21f98ab475d080b030.html#a4ab064b29f2c7d21f98ab475d080b030">active</a> || !<a class="code hl_variable" href="../../d1/d2c/structfl_1_1_particles1d_1_1_particle_ab05e0d7788927b8c4a263bdbfcea7379.html#ab05e0d7788927b8c4a263bdbfcea7379">lifetime</a>) <span class="keywordflow">return</span> 0.0f;</div>
 <div class="line"><span class="lineno">   92</span>    <span class="keywordtype">float</span> power = 1.0f - (float)(now - <a class="code hl_variable" href="../../d1/d2c/structfl_1_1_particles1d_1_1_particle_abc87460250b9423e5d8ea97742dc726d.html#abc87460250b9423e5d8ea97742dc726d">birthTime</a>) / <a class="code hl_variable" href="../../d1/d2c/structfl_1_1_particles1d_1_1_particle_ab05e0d7788927b8c4a263bdbfcea7379.html#ab05e0d7788927b8c4a263bdbfcea7379">lifetime</a>;</div>
-<div class="line"><span class="lineno">   93</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="../../d4/d36/namespacefl_afb42d6eb6443afc7223ce9b1a812f350.html#afb42d6eb6443afc7223ce9b1a812f350">fl::clamp</a>(power, 0.0f, 1.0f);</div>
+<div class="line"><span class="lineno">   93</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a391721290a9307391d39a0a897d9b9f4.html#a391721290a9307391d39a0a897d9b9f4">fl::clamp</a>(power, 0.0f, 1.0f);</div>
 <div class="line"><span class="lineno">   94</span>}</div>
-<div class="ttc" id="anamespacefl_afb42d6eb6443afc7223ce9b1a812f350_html_afb42d6eb6443afc7223ce9b1a812f350"><div class="ttname"><a href="../../d4/d36/namespacefl_afb42d6eb6443afc7223ce9b1a812f350.html#afb42d6eb6443afc7223ce9b1a812f350">fl::clamp</a></div><div class="ttdeci">constexpr enable_if&lt; is_fixed_point&lt; T &gt;::value, T &gt;::type clamp(T x, T lo, T hi) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../de/d62/fixed__point_8h_source.html#l00542">fixed_point.h:542</a></div></div>
+<div class="ttc" id="anamespacefl_a391721290a9307391d39a0a897d9b9f4_html_a391721290a9307391d39a0a897d9b9f4"><div class="ttname"><a href="../../d4/d36/namespacefl_a391721290a9307391d39a0a897d9b9f4.html#a391721290a9307391d39a0a897d9b9f4">fl::clamp</a></div><div class="ttdeci">constexpr enable_if&lt; is_fixed_point&lt; T &gt;::value, T &gt;::type clamp(T x, T lo, T hi) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../de/d62/fixed__point_8h_source.html#l00542">fixed_point.h:542</a></div></div>
 <div class="ttc" id="astructfl_1_1_particles1d_1_1_particle_a4ab064b29f2c7d21f98ab475d080b030_html_a4ab064b29f2c7d21f98ab475d080b030"><div class="ttname"><a href="../../d1/d2c/structfl_1_1_particles1d_1_1_particle_a4ab064b29f2c7d21f98ab475d080b030.html#a4ab064b29f2c7d21f98ab475d080b030">fl::Particles1d::Particle::active</a></div><div class="ttdeci">bool active</div><div class="ttdoc">Active flag (false = available for reuse)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/dd9/particles_8h_source.html#l00108">particles.h:108</a></div></div>
 <div class="ttc" id="astructfl_1_1_particles1d_1_1_particle_ab05e0d7788927b8c4a263bdbfcea7379_html_ab05e0d7788927b8c4a263bdbfcea7379"><div class="ttname"><a href="../../d1/d2c/structfl_1_1_particles1d_1_1_particle_ab05e0d7788927b8c4a263bdbfcea7379.html#ab05e0d7788927b8c4a263bdbfcea7379">fl::Particles1d::Particle::lifetime</a></div><div class="ttdeci">u32 lifetime</div><div class="ttdoc">Lifespan in milliseconds.</div><div class="ttdef"><b>Definition</b> <a href="../../d7/dd9/particles_8h_source.html#l00107">particles.h:107</a></div></div>
 <div class="ttc" id="astructfl_1_1_particles1d_1_1_particle_abc87460250b9423e5d8ea97742dc726d_html_abc87460250b9423e5d8ea97742dc726d"><div class="ttname"><a href="../../d1/d2c/structfl_1_1_particles1d_1_1_particle_abc87460250b9423e5d8ea97742dc726d.html#abc87460250b9423e5d8ea97742dc726d">fl::Particles1d::Particle::birthTime</a></div><div class="ttdeci">u32 birthTime</div><div class="ttdoc">Spawn timestamp (ms)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/dd9/particles_8h_source.html#l00106">particles.h:106</a></div></div>
@@ -154,7 +154,7 @@ $(function(){initNavTree('d1/d2c/structfl_1_1_particles1d_1_1_particle_a2a3d7e95
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d5/d56/classfl_1_1_particles1d.html">Particles1d</a></li><li class="navelem"><a class="el" href="../../d1/d2c/structfl_1_1_particles1d_1_1_particle.html">Particle</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:09 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -1,0 +1,20 @@
+<map id="fl/channels/five_bit_semantics.h" name="fl/channels/five_bit_semantics.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="225,5,369,45"/>
+<area shape="rect" id="Node000002" href="$d7/de5/_fast_l_e_d_8cpp_8hpp.html" title=" " alt="" coords="69,101,197,126"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="250,54,156,103,153,98,248,49"/>
+<area shape="rect" id="Node000005" href="$d1/d41/five__bit__semantics_8cpp_8hpp.html" title=" " alt="" coords="221,93,372,133"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="299,59,299,93,294,93,294,59"/>
+<area shape="rect" id="Node000009" href="$d6/d09/pipeline__binding_8cpp_8hpp.html" title=" " alt="" coords="396,93,544,133"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="348,49,433,91,431,96,346,54"/>
+<area shape="rect" id="Node000003" href="$d7/dd5/__build_8cpp_8hpp.html" title=" " alt="" coords="5,181,121,207"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="115,138,76,183,72,179,111,135"/>
+<area shape="rect" id="Node000004" href="$dd/de2/src_8cpp.html" title="Unity build: flat includes from src/ root directory." alt="" coords="145,181,261,207"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="154,135,195,179,191,183,150,138"/>
+<area shape="rect" id="Node000006" href="$d1/d97/fl_2channels_2__build_8cpp_8hpp.html" title=" " alt="" coords="329,181,520,207"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="340,138,407,179,404,183,338,143"/>
+<area shape="rect" id="Node000007" href="$d1/deb/fl_2__build_8cpp_8hpp.html" title=" " alt="" coords="273,255,401,280"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="402,217,353,257,349,252,398,213"/>
+<area shape="rect" id="Node000008" href="$d7/d44/fl_8channels_09_8cpp.html" title="Unity build: recursive includes from src/fl/channels/." alt="" coords="425,255,603,280"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="451,213,501,252,498,257,448,217"/>
+<area shape="poly" id="edge9_Node000009_Node000006" title=" " alt="" coords="454,147,434,182,429,180,450,144"/>
+</map>

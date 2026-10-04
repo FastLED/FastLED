@@ -1,0 +1,12 @@
+digraph "autoresearch::flex_io::idfVersion"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="autoresearch::flex\l_io::idfVersion",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="ESP-IDF version string, or \"n/a\" on non-ESP32 targets."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="autoresearch::flex\l_io::buildDeviceInfo",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/de6/namespaceautoresearch_1_1flex__io_afbd0720b63a6ebead0ceddf3b3853538.html#afbd0720b63a6ebead0ceddf3b3853538",tooltip="Build the device-info JSON returned by the flexIoDeviceInfo RPC."];
+}

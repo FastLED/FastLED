@@ -38,7 +38,7 @@
 <!-- Node5 -->
 <g id="Node000005" class="node">
 <title>Node5</title>
-<g id="a_Node000005"><a xlink:href="../../d2/d0d/group___random_gaaaff3e84c6ab2cf5f71400a4b6958beb.html#gaaaff3e84c6ab2cf5f71400a4b6958beb" target="_top" xlink:title="Generate a 16&#45;bit random number.">
+<g id="a_Node000005"><a xlink:href="../../d2/d0d/group___random_ga6f816735a0bd63bfc78bebbc7c5f12b9.html#ga6f816735a0bd63bfc78bebbc7c5f12b9" target="_top" xlink:title="Generate a 16&#45;bit random number.">
 <polygon fill="white" stroke="#666666" points="173,-56 107,-56 107,-37 173,-37 173,-56"/>
 <text text-anchor="middle" x="140" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">random16</text>
 </a>
@@ -56,7 +56,7 @@
 <!-- Node6 -->
 <g id="Node000006" class="node">
 <title>Node6</title>
-<g id="a_Node000006"><a xlink:href="../../d2/d0d/group___random_ga0e666fa5d6f48dd714ff7a76102dd41b.html#ga0e666fa5d6f48dd714ff7a76102dd41b" target="_top" xlink:title="Add entropy into the random number generator.">
+<g id="a_Node000006"><a xlink:href="../../d2/d0d/group___random_gad94c82089c999a357b29f6a97fdcb95a.html#gad94c82089c999a357b29f6a97fdcb95a" target="_top" xlink:title="Add entropy into the random number generator.">
 <polygon fill="white" stroke="#666666" points="206,-19 74,-19 74,0 206,0 206,-19"/>
 <text text-anchor="middle" x="140" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">random16_add_entropy</text>
 </a>
@@ -92,7 +92,7 @@
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../d2/d0d/group___random_gadb05544426b14ef8d85fb2eb73cb8a0a.html#gadb05544426b14ef8d85fb2eb73cb8a0a" target="_top" xlink:title="Generate an 8&#45;bit random number.">
+<g id="a_Node000004"><a xlink:href="../../d2/d0d/group___random_gafb55d95e3e866dce182f149535903dd8.html#gafb55d95e3e866dce182f149535903dd8" target="_top" xlink:title="Generate an 8&#45;bit random number.">
 <polygon fill="white" stroke="#666666" points="322.5,-74 262.5,-74 262.5,-55 322.5,-55 322.5,-74"/>
 <text text-anchor="middle" x="292.5" y="-62" font-family="Helvetica,sans-Serif" font-size="10.00">random8</text>
 </a>

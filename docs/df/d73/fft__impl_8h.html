@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -102,7 +102,8 @@ $(function(){initNavTree('df/d73/fft__impl_8h.html','../../'); initResizable(tru
 <div class="header">
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
-<a href="#namespaces">Namespaces</a>  </div>
+<a href="#namespaces">Namespaces</a> &#124;
+<a href="#func-members">Functions</a>  </div>
   <div class="headertitle"><div class="title">fft_impl.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
@@ -110,6 +111,7 @@ $(function(){initNavTree('df/d73/fft__impl_8h.html','../../'); initResizable(tru
 <code>#include &quot;<a class="el" href="../../da/d66/string_8h_source.html">fl/stl/string.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../da/d4b/unique__ptr_8h_source.html">fl/stl/unique_ptr.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../db/d01/noexcept_8h_source.html">fl/stl/noexcept.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d3/d7e/int_8h_source.html">fl/stl/int.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for fft_impl.h:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -143,6 +145,14 @@ Namespaces</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/dee/namespacefl_1_1audio_1_1fft.html">fl::audio::fft</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/dbb/namespacefl_1_1audio_1_1fft_1_1detail.html">fl::audio::fft::detail</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:a6a7082da1497780e7b5a950cbeb3fa4e" id="r_a6a7082da1497780e7b5a950cbeb3fa4e"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/dbb/namespacefl_1_1audio_1_1fft_1_1detail_a6a7082da1497780e7b5a950cbeb3fa4e.html#a6a7082da1497780e7b5a950cbeb3fa4e">fl::audio::fft::detail::coverageFloorApplies</a> (u32 fftMag, u32 cqMag, u32 localCqMax) <a class="el" href="../../d4/d36/namespacefl_aa317f89ca911371e798d08a93770402f.html#aa317f89ca911371e798d08a93770402f">FL_NO_EXCEPT</a></td></tr>
+<tr class="memdesc:a6a7082da1497780e7b5a950cbeb3fa4e"><td class="mdescLeft">&#160;</td><td class="mdescRight">CQ_OCTAVE coverage supplement decision (FastLED#4301/#4540), integer form used in FIXED16: the full-rate <a class="el" href="../../db/df2/classfl_1_1audio_1_1fft_1_1_f_f_t.html">FFT</a> floor (<code>fftMag / 50</code>) replaces a CQ band's magnitude <code>cqMag</code> only when no CQ band within one <a class="el" href="../../db/df2/classfl_1_1audio_1_1fft_1_1_f_f_t.html">FFT</a> main lobe detected energy (<code>localCqMax &lt; 20</code>) and the floor is strictly larger.  <br /></td></tr>
+<tr class="separator:a6a7082da1497780e7b5a950cbeb3fa4e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -151,7 +161,7 @@ Namespaces</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_80b55e5ea7143e3a561e896c6c19b58f.html">audio</a></li><li class="navelem"><a class="el" href="../../dir_945806df7450bb6349c55f94e1489bef.html">fft</a></li><li class="navelem"><a class="el" href="../../df/d73/fft__impl_8h.html">fft_impl.h</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:01 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:03 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

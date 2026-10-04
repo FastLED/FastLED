@@ -16,9 +16,16 @@ digraph "fl/remote/types.cpp.hpp"
   Node8 [id="Node000008",label="fl/stl/string.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$da/d66/string_8h.html",tooltip=" "];
   Node8 -> Node11 [id="edge5_Node000008_Node000011",color="steelblue1",style="solid",tooltip=" "];
   Node11 [id="Node000011",label="fl/stl/noexcept.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d01/noexcept_8h.html",tooltip=" "];
-  Node4 -> Node11 [id="edge6_Node000004_Node000011",color="steelblue1",style="solid",tooltip=" "];
-  Node3 -> Node11 [id="edge7_Node000003_Node000011",color="steelblue1",style="solid",tooltip=" "];
-  Node2 -> Node6 [id="edge8_Node000002_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node4 -> Node24 [id="edge6_Node000004_Node000024",color="steelblue1",style="solid",tooltip=" "];
+  Node24 [id="Node000024",label="fl/stl/bit_cast.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$df/d72/bit__cast_8h.html",tooltip=" "];
+  Node24 -> Node11 [id="edge7_Node000024_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node24 -> Node16 [id="edge8_Node000024_Node000016",color="steelblue1",style="solid",tooltip=" "];
+  Node16 [id="Node000016",label="fl/stl/static_assert.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d1b/static__assert_8h.html",tooltip="Portable compile-time assertion wrapper."];
+  Node4 -> Node11 [id="edge9_Node000004_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node24 [id="edge10_Node000003_Node000024",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node11 [id="edge11_Node000003_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node16 [id="edge12_Node000003_Node000016",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node6 [id="edge13_Node000002_Node000006",color="steelblue1",style="solid",tooltip=" "];
   Node6 [id="Node000006",label="fl/stl/stdint.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$df/dd8/stdint_8h.html",tooltip=" "];
-  Node2 -> Node8 [id="edge9_Node000002_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node8 [id="edge14_Node000002_Node000008",color="steelblue1",style="solid",tooltip=" "];
 }

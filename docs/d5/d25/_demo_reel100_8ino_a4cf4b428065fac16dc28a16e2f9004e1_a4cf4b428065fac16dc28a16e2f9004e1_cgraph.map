@@ -1,6 +1,6 @@
 <map id="juggle" name="juggle">
 <area shape="rect" id="Node000001" title=" " alt="" coords="5,31,68,56"/>
-<area shape="rect" id="Node000002" href="$df/da5/lib8tion_8h_adf8e83564c52b94d0ff5594aede0be28.html#adf8e83564c52b94d0ff5594aede0be28" title="Generates a 16&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="132,5,219,31"/>
+<area shape="rect" id="Node000002" href="$df/da5/lib8tion_8h_ac869590ebed22301d9a08cf7406128b3.html#ac869590ebed22301d9a08cf7406128b3" title="Generates a 16&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="132,5,219,31"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="68,35,118,26,119,31,69,40"/>
 <area shape="rect" id="Node000003" href="$d1/dfb/colorutils_8h_a399e4e094995b8e97420b89a2dd6548b.html#a399e4e094995b8e97420b89a2dd6548b" title=" " alt="" coords="116,55,235,80"/>
 <area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="69,46,103,52,102,57,68,51"/>

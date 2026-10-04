@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -134,26 +134,26 @@ $(function(){initNavTree('dd/dbb/class_c_fast_l_e_d_a4b9554c79ac12669a804e715ec5
 <dl class="section note"><dt>Note</dt><dd>Safe to call multiple times - no error if channel not in list </dd>
 <dd>
 The channel object is not destroyed, only removed from the list</dd></dl>
-<p>Example: </p><div class="fragment"><div class="line"><span class="keyword">auto</span> channel = <a class="code hl_variable" href="../../db/d97/_fast_l_e_d_8h_a7077a6a69b1339a4c04f4bb9ecc0ad3f.html#a7077a6a69b1339a4c04f4bb9ecc0ad3f">FastLED</a>.add(config);</div>
+<p>Example: </p><div class="fragment"><div class="line"><span class="keyword">auto</span> channel = <a class="code hl_variable" href="../../d6/d64/fastled_8h_a7077a6a69b1339a4c04f4bb9ecc0ad3f.html#a7077a6a69b1339a4c04f4bb9ecc0ad3f">FastLED</a>.add(config);</div>
 <div class="line"><span class="comment">// ... use channel ...</span></div>
-<div class="line"><a class="code hl_variable" href="../../db/d97/_fast_l_e_d_8h_a7077a6a69b1339a4c04f4bb9ecc0ad3f.html#a7077a6a69b1339a4c04f4bb9ecc0ad3f">FastLED</a>.remove(channel);  <span class="comment">// Remove from controller list</span></div>
-<div class="ttc" id="a_fast_l_e_d_8h_a7077a6a69b1339a4c04f4bb9ecc0ad3f_html_a7077a6a69b1339a4c04f4bb9ecc0ad3f"><div class="ttname"><a href="../../db/d97/_fast_l_e_d_8h_a7077a6a69b1339a4c04f4bb9ecc0ad3f.html#a7077a6a69b1339a4c04f4bb9ecc0ad3f">FastLED</a></div><div class="ttdeci">CFastLED FastLED</div><div class="ttdoc">Global LED strip management instance.</div><div class="ttdef"><b>Definition</b> <a href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_source.html#l00075">FastLED.cpp.hpp:75</a></div></div>
+<div class="line"><a class="code hl_variable" href="../../d6/d64/fastled_8h_a7077a6a69b1339a4c04f4bb9ecc0ad3f.html#a7077a6a69b1339a4c04f4bb9ecc0ad3f">FastLED</a>.remove(channel);  <span class="comment">// Remove from controller list</span></div>
+<div class="ttc" id="afastled_8h_a7077a6a69b1339a4c04f4bb9ecc0ad3f_html_a7077a6a69b1339a4c04f4bb9ecc0ad3f"><div class="ttname"><a href="../../d6/d64/fastled_8h_a7077a6a69b1339a4c04f4bb9ecc0ad3f.html#a7077a6a69b1339a4c04f4bb9ecc0ad3f">FastLED</a></div><div class="ttdeci">CFastLED FastLED</div><div class="ttdoc">Global LED strip management instance.</div><div class="ttdef"><b>Definition</b> <a href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_source.html#l00090">FastLED.cpp.hpp:90</a></div></div>
 </div><!-- fragment --> 
-<p class="definition">Definition at line <a class="el" href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_source.html#l00151">151</a> of file <a class="el" href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_source.html">FastLED.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  151</span>                                          {</div>
-<div class="line"><span class="lineno">  152</span>    <span class="keywordflow">if</span> (!channel) {</div>
-<div class="line"><span class="lineno">  153</span>        <span class="keywordflow">return</span>;</div>
-<div class="line"><span class="lineno">  154</span>    }</div>
-<div class="line"><span class="lineno">  155</span>    <span class="comment">// Note: removeFromDrawList() now fires onChannelRemoved event</span></div>
-<div class="line"><span class="lineno">  156</span>    channel-&gt;removeFromDrawList();</div>
-<div class="line"><span class="lineno">  157</span>    <span class="comment">// Remove from internal storage (safe if not found - erase is a no-op)</span></div>
-<div class="line"><span class="lineno">  158</span>    <a class="code hl_function" href="../../dd/dbb/class_c_fast_l_e_d_a12da17ab4b0d4daed6ceb429d68ac5cf.html#a12da17ab4b0d4daed6ceb429d68ac5cf">channels</a>().erase(channel);</div>
-<div class="line"><span class="lineno">  159</span>}</div>
-<div class="ttc" id="aclass_c_fast_l_e_d_a12da17ab4b0d4daed6ceb429d68ac5cf_html_a12da17ab4b0d4daed6ceb429d68ac5cf"><div class="ttname"><a href="../../dd/dbb/class_c_fast_l_e_d_a12da17ab4b0d4daed6ceb429d68ac5cf.html#a12da17ab4b0d4daed6ceb429d68ac5cf">CFastLED::channels</a></div><div class="ttdeci">static fl::vector&lt; fl::ChannelPtr &gt; &amp; channels()</div><div class="ttdoc">stored ChannelPtrs to keep them alive</div><div class="ttdef"><b>Definition</b> <a href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_source.html#l00131">FastLED.cpp.hpp:131</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_source.html#l00217">217</a> of file <a class="el" href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_source.html">FastLED.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  217</span>                                          {</div>
+<div class="line"><span class="lineno">  218</span>    <span class="keywordflow">if</span> (!channel) {</div>
+<div class="line"><span class="lineno">  219</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">  220</span>    }</div>
+<div class="line"><span class="lineno">  221</span>    <span class="comment">// Note: removeFromDrawList() now fires onChannelRemoved event</span></div>
+<div class="line"><span class="lineno">  222</span>    channel-&gt;removeFromDrawList();</div>
+<div class="line"><span class="lineno">  223</span>    <span class="comment">// Remove from internal storage (safe if not found - erase is a no-op)</span></div>
+<div class="line"><span class="lineno">  224</span>    <a class="code hl_function" href="../../dd/dbb/class_c_fast_l_e_d_a12da17ab4b0d4daed6ceb429d68ac5cf.html#a12da17ab4b0d4daed6ceb429d68ac5cf">channels</a>().erase(channel);</div>
+<div class="line"><span class="lineno">  225</span>}</div>
+<div class="ttc" id="aclass_c_fast_l_e_d_a12da17ab4b0d4daed6ceb429d68ac5cf_html_a12da17ab4b0d4daed6ceb429d68ac5cf"><div class="ttname"><a href="../../dd/dbb/class_c_fast_l_e_d_a12da17ab4b0d4daed6ceb429d68ac5cf.html#a12da17ab4b0d4daed6ceb429d68ac5cf">CFastLED::channels</a></div><div class="ttdeci">static fl::vector&lt; fl::ChannelPtr &gt; &amp; channels()</div><div class="ttdoc">stored ChannelPtrs to keep them alive</div><div class="ttdef"><b>Definition</b> <a href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_source.html#l00155">FastLED.cpp.hpp:155</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_source.html#l00131">channels()</a>.</p>
+<p class="reference">References <a class="el" href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_source.html#l00155">channels()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_source.html#l00161">clear()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_source.html#l00227">clear()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -178,7 +178,7 @@ The channel object is not destroyed, only removed from the list</dd></dl>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dd/dbb/class_c_fast_l_e_d.html">CFastLED</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:03 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

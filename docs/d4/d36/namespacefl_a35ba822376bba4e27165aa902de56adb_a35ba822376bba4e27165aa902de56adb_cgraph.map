@@ -1,0 +1,7 @@
+<map id="fl::encodeLedsToUart" name="fl::encodeLedsToUart">
+<area shape="rect" id="Node000001" title="Encode LED pixel data to UART bytes using a Wave10 LUT." alt="" coords="5,5,163,31"/>
+<area shape="rect" id="Node000002" href="$df/d9e/namespacefl_1_1detail_a083e6747c4a84931e5eff49324f87f46.html#a083e6747c4a84931e5eff49324f87f46" title="Encode 1 LED byte to 4 UART bytes using a Wave10 LUT." alt="" coords="211,5,399,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="163,15,197,15,197,21,163,21"/>
+<area shape="rect" id="Node000003" href="$df/d9e/namespacefl_1_1detail_a122823aa51dc7b75ffae3026a0607cec.html#a122823aa51dc7b75ffae3026a0607cec" title="Encode 2 LED bits to 1 UART byte using a Wave10 LUT." alt="" coords="447,5,637,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="399,15,433,15,433,21,399,21"/>
+</map>

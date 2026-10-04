@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::PerlinParticlePunch\l::DebrisParticle",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d58/classfl_1_1_perlin_particle_punch.html#dc/dbd/structfl_1_1_perlin_particle_punch_1_1_debris_particle",tooltip=" "];
+  Node0 [id="Node000000",label="fl::ScopedLogDisable",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d62/classfl_1_1_scoped_log_disable.html",tooltip="RAII class to temporarily disable all logging output."];
 }

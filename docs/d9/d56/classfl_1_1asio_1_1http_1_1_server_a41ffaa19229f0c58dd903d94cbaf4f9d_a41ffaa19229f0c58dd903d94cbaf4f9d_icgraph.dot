@@ -8,5 +8,5 @@ digraph "fl::asio::http::Server::put"
   rankdir="RL";
   Node1 [id="Node000001",label="fl::asio::http::Server::put",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Convenience method for PUT routes."];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::asio::http::Server\l::operator=",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d56/classfl_1_1asio_1_1http_1_1_server_a2e6460a4ccc0e99ec593f8f503cab84a.html#a2e6460a4ccc0e99ec593f8f503cab84a",tooltip=" "];
+  Node2 [id="Node000002",label="fl::asio::http::Server\l::operator=",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d56/classfl_1_1asio_1_1http_1_1_server_a22af3b633456f94a52a33fda98089681.html#a22af3b633456f94a52a33fda98089681",tooltip=" "];
 }

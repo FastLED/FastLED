@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -124,12 +124,12 @@ Usage</h1>
 <div class="fragment"><div class="line"><span class="comment">// HTTP request with Promise-based API</span></div>
 <div class="line">fl::http_get(<span class="stringliteral">&quot;http://fastled.io&quot;</span>)</div>
 <div class="line">    .then([](<span class="keyword">const</span> Response&amp; resp) {</div>
-<div class="line">        <a class="code hl_define" href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;Success: &quot;</span> &lt;&lt; resp.text());</div>
+<div class="line">        <a class="code hl_define" href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;Success: &quot;</span> &lt;&lt; resp.text());</div>
 <div class="line">    })</div>
 <div class="line">    .catch_([](<span class="keyword">const</span> Error&amp; err) {</div>
-<div class="line">        <a class="code hl_define" href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;Error: &quot;</span> &lt;&lt; err.message());</div>
+<div class="line">        <a class="code hl_define" href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;Error: &quot;</span> &lt;&lt; err.message());</div>
 <div class="line">    });</div>
-<div class="ttc" id="alog_8h_a868b194fdb2234182e76042d9fde3062_html_a868b194fdb2234182e76042d9fde3062"><div class="ttname"><a href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a></div><div class="ttdeci">#define FL_WARN(X)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00276">log.h:276</a></div></div>
+<div class="ttc" id="alog_8h_a4804912fba6eed63e1afd84b8768aced_html_a4804912fba6eed63e1afd84b8768aced"><div class="ttname"><a href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a></div><div class="ttdeci">#define FL_WARN(...)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00440">log.h:440</a></div></div>
 </div><!-- fragment --> 
 <p class="definition">Definition in file <a class="el" href="../../d6/d17/promise_8h_source.html">promise.h</a>.</p>
 </div><div class="textblock"><code>#include &quot;<a class="el" href="../../dd/d67/function_8h_source.html">fl/stl/function.h</a>&quot;</code><br />
@@ -164,7 +164,7 @@ Classes</h2></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="../../d4/dda/structfl_1_1task_1_1_error.html" title="Error type for promises.">Error</a> type for promises.  <a href="../../d4/dda/structfl_1_1task_1_1_error.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d0/d34/classfl_1_1task_1_1_promise.html">fl::task::Promise&lt; T &gt;</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="../../d0/d34/classfl_1_1task_1_1_promise.html" title="Promise class that provides fluent .then() and .catch_() semantics This is a lightweight wrapper arou...">Promise</a> class that provides fluent .<a class="el" href="../../d0/d34/classfl_1_1task_1_1_promise_a6bf5459206f37ac5027db4f9a27a1b24.html#a6bf5459206f37ac5027db4f9a27a1b24" title="Register success callback - returns reference for chaining.">then()</a> and .<a class="el" href="../../d0/d34/classfl_1_1task_1_1_promise_a4cdb7be9121f0850c0714e09a594675c.html#a4cdb7be9121f0850c0714e09a594675c" title="Register error callback - returns reference for chaining.">catch_()</a> semantics This is a lightweight wrapper around a shared PromiseImpl for easy copying/sharing.  <a href="../../d0/d34/classfl_1_1task_1_1_promise.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="../../d0/d34/classfl_1_1task_1_1_promise.html" title="Promise class that provides fluent .then() and .catch_() semantics This is a lightweight wrapper arou...">Promise</a> class that provides fluent .<a class="el" href="../../d0/d34/classfl_1_1task_1_1_promise_afece636d50c5ade99c03dcc766864a7e.html#afece636d50c5ade99c03dcc766864a7e" title="Register success callback - returns reference for chaining.">then()</a> and .<a class="el" href="../../d0/d34/classfl_1_1task_1_1_promise_ae9e7eae2aa61b40e50c3705b7bf39655.html#ae9e7eae2aa61b40e50c3705b7bf39655" title="Register error callback - returns reference for chaining.">catch_()</a> semantics This is a lightweight wrapper around a shared PromiseImpl for easy copying/sharing.  <a href="../../d0/d34/classfl_1_1task_1_1_promise.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
@@ -188,18 +188,18 @@ Enumerations</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a0b58138871d6ab845d072723971b393d" id="r_a0b58138871d6ab845d072723971b393d"><td class="memTemplParams" colspan="2">template&lt;typename T&gt; </td></tr>
-<tr class="memitem:a0b58138871d6ab845d072723971b393d"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="../../d0/d34/classfl_1_1task_1_1_promise.html">Promise</a>&lt; T &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../db/d5c/namespacefl_1_1task_a0b58138871d6ab845d072723971b393d.html#a0b58138871d6ab845d072723971b393d">fl::task::make_rejected_promise</a> (const char *error_message) <a class="el" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></td></tr>
-<tr class="memdesc:a0b58138871d6ab845d072723971b393d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convenience function to create a rejected <a class="el" href="../../d0/d34/classfl_1_1task_1_1_promise.html" title="Promise class that provides fluent .then() and .catch_() semantics This is a lightweight wrapper arou...">Promise</a> (const char* overload)  <br /></td></tr>
-<tr class="separator:a0b58138871d6ab845d072723971b393d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af9b00b94fecdde360533514286ee0238" id="r_af9b00b94fecdde360533514286ee0238"><td class="memTemplParams" colspan="2">template&lt;typename T&gt; </td></tr>
-<tr class="memitem:af9b00b94fecdde360533514286ee0238"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="../../d0/d34/classfl_1_1task_1_1_promise.html">Promise</a>&lt; T &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../db/d5c/namespacefl_1_1task_af9b00b94fecdde360533514286ee0238.html#af9b00b94fecdde360533514286ee0238">fl::task::make_rejected_promise</a> (const <a class="el" href="../../d2/db2/classfl_1_1string.html">fl::string</a> &amp;error_message) <a class="el" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></td></tr>
-<tr class="memdesc:af9b00b94fecdde360533514286ee0238"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convenience function to create a rejected <a class="el" href="../../d0/d34/classfl_1_1task_1_1_promise.html" title="Promise class that provides fluent .then() and .catch_() semantics This is a lightweight wrapper arou...">Promise</a>.  <br /></td></tr>
-<tr class="separator:af9b00b94fecdde360533514286ee0238"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa3f17a59245199bde2c625c766db40f4" id="r_aa3f17a59245199bde2c625c766db40f4"><td class="memTemplParams" colspan="2">template&lt;typename T&gt; </td></tr>
-<tr class="memitem:aa3f17a59245199bde2c625c766db40f4"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="../../d0/d34/classfl_1_1task_1_1_promise.html">Promise</a>&lt; T &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../db/d5c/namespacefl_1_1task_aa3f17a59245199bde2c625c766db40f4.html#aa3f17a59245199bde2c625c766db40f4">fl::task::make_resolved_promise</a> (T <a class="el" href="../../d4/d36/namespacefl_a13766ae9e150185981f5096f90a439d7.html#a13766ae9e150185981f5096f90a439d7">value</a>) <a class="el" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></td></tr>
-<tr class="memdesc:aa3f17a59245199bde2c625c766db40f4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convenience function to create a resolved <a class="el" href="../../d0/d34/classfl_1_1task_1_1_promise.html" title="Promise class that provides fluent .then() and .catch_() semantics This is a lightweight wrapper arou...">Promise</a>.  <br /></td></tr>
-<tr class="separator:aa3f17a59245199bde2c625c766db40f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4db420b5c5a95086c5bb2af14528b2cc" id="r_a4db420b5c5a95086c5bb2af14528b2cc"><td class="memTemplParams" colspan="2">template&lt;typename T&gt; </td></tr>
+<tr class="memitem:a4db420b5c5a95086c5bb2af14528b2cc"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="../../d0/d34/classfl_1_1task_1_1_promise.html">Promise</a>&lt; T &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../db/d5c/namespacefl_1_1task_a4db420b5c5a95086c5bb2af14528b2cc.html#a4db420b5c5a95086c5bb2af14528b2cc">fl::task::make_rejected_promise</a> (const char *error_message) <a class="el" href="../../d4/d36/namespacefl_aa317f89ca911371e798d08a93770402f.html#aa317f89ca911371e798d08a93770402f">FL_NO_EXCEPT</a></td></tr>
+<tr class="memdesc:a4db420b5c5a95086c5bb2af14528b2cc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convenience function to create a rejected <a class="el" href="../../d0/d34/classfl_1_1task_1_1_promise.html" title="Promise class that provides fluent .then() and .catch_() semantics This is a lightweight wrapper arou...">Promise</a> (const char* overload)  <br /></td></tr>
+<tr class="separator:a4db420b5c5a95086c5bb2af14528b2cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a626a7fa700d62ff4bf48ece1ac33db19" id="r_a626a7fa700d62ff4bf48ece1ac33db19"><td class="memTemplParams" colspan="2">template&lt;typename T&gt; </td></tr>
+<tr class="memitem:a626a7fa700d62ff4bf48ece1ac33db19"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="../../d0/d34/classfl_1_1task_1_1_promise.html">Promise</a>&lt; T &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../db/d5c/namespacefl_1_1task_a626a7fa700d62ff4bf48ece1ac33db19.html#a626a7fa700d62ff4bf48ece1ac33db19">fl::task::make_rejected_promise</a> (const <a class="el" href="../../d2/db2/classfl_1_1string.html">fl::string</a> &amp;error_message) <a class="el" href="../../d4/d36/namespacefl_aa317f89ca911371e798d08a93770402f.html#aa317f89ca911371e798d08a93770402f">FL_NO_EXCEPT</a></td></tr>
+<tr class="memdesc:a626a7fa700d62ff4bf48ece1ac33db19"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convenience function to create a rejected <a class="el" href="../../d0/d34/classfl_1_1task_1_1_promise.html" title="Promise class that provides fluent .then() and .catch_() semantics This is a lightweight wrapper arou...">Promise</a>.  <br /></td></tr>
+<tr class="separator:a626a7fa700d62ff4bf48ece1ac33db19"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa07eea38975519ed11d9533b8ce59c21" id="r_aa07eea38975519ed11d9533b8ce59c21"><td class="memTemplParams" colspan="2">template&lt;typename T&gt; </td></tr>
+<tr class="memitem:aa07eea38975519ed11d9533b8ce59c21"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="../../d0/d34/classfl_1_1task_1_1_promise.html">Promise</a>&lt; T &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../db/d5c/namespacefl_1_1task_aa07eea38975519ed11d9533b8ce59c21.html#aa07eea38975519ed11d9533b8ce59c21">fl::task::make_resolved_promise</a> (T <a class="el" href="../../d4/d36/namespacefl_a13766ae9e150185981f5096f90a439d7.html#a13766ae9e150185981f5096f90a439d7">value</a>) <a class="el" href="../../d4/d36/namespacefl_aa317f89ca911371e798d08a93770402f.html#aa317f89ca911371e798d08a93770402f">FL_NO_EXCEPT</a></td></tr>
+<tr class="memdesc:aa07eea38975519ed11d9533b8ce59c21"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convenience function to create a resolved <a class="el" href="../../d0/d34/classfl_1_1task_1_1_promise.html" title="Promise class that provides fluent .then() and .catch_() semantics This is a lightweight wrapper arou...">Promise</a>.  <br /></td></tr>
+<tr class="separator:aa07eea38975519ed11d9533b8ce59c21"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -208,7 +208,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_3c55ea006e4dd4fc925403c373dc7c52.html">task</a></li><li class="navelem"><a class="el" href="../../d6/d17/promise_8h.html">promise.h</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:02 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:05 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

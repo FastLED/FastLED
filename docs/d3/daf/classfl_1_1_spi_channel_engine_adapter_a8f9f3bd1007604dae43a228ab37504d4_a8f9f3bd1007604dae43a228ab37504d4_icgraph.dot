@@ -8,5 +8,5 @@ digraph "fl::SpiChannelEngineAdapter::poll"
   rankdir="RL";
   Node1 [id="Node000001",label="fl::SpiChannelEngineAdapter\l::poll",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Query driver state and perform maintenance."];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::SpiChannelEngineAdapter\l::~SpiChannelEngineAdapter",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/daf/classfl_1_1_spi_channel_engine_adapter_a665259782ebfcae4f03180facaef66e6.html#a665259782ebfcae4f03180facaef66e6",tooltip="Destructor."];
+  Node2 [id="Node000002",label="fl::SpiChannelEngineAdapter\l::~SpiChannelEngineAdapter",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/daf/classfl_1_1_spi_channel_engine_adapter_ab313e1c443c73e1937fa8cd1fc3b9962.html#ab313e1c443c73e1937fa8cd1fc3b9962",tooltip="Destructor."];
 }

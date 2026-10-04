@@ -1,7 +1,7 @@
 var classfl_1_1_async_logger =
 [
-    [ "AsyncLogger", "d6/d35/classfl_1_1_async_logger_aa91931e705c6a1406f4e85ab591529eb.html#aa91931e705c6a1406f4e85ab591529eb", null ],
-    [ "~AsyncLogger", "d6/d35/classfl_1_1_async_logger_a55785739910a193b5b6dffeb455bd150.html#a55785739910a193b5b6dffeb455bd150", null ],
+    [ "AsyncLogger", "d6/d35/classfl_1_1_async_logger_a3087a48ef2ef5a3d8416a23122aaf406.html#a3087a48ef2ef5a3d8416a23122aaf406", null ],
+    [ "~AsyncLogger", "d6/d35/classfl_1_1_async_logger_a980ff44240839c88a4475e9283873ba0.html#a980ff44240839c88a4475e9283873ba0", null ],
     [ "clear", "d6/d35/classfl_1_1_async_logger_ad0c02e982df2c8946a54114e58ab1aea.html#ad0c02e982df2c8946a54114e58ab1aea", null ],
     [ "disableBackgroundFlush", "d6/d35/classfl_1_1_async_logger_ad95625ceb246ef889558a7f72d86b4fb.html#ad95625ceb246ef889558a7f72d86b4fb", null ],
     [ "droppedCount", "d6/d35/classfl_1_1_async_logger_a3c398c6c80747b1d74bb1a8a7ba297c9.html#a3c398c6c80747b1d74bb1a8a7ba297c9", null ],

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['⚠️_20beta_20preview_20warning_0',['⚠️ BETA PREVIEW WARNING',['..//home/runner/work/FastLED/FastLED/src/fl/font/README.md#autotoc_md150',1,'']]]
+  ['⏱️_20async_20tasks_20instead_20of_20delay_0',['⏱️ Async Tasks Instead of delay()',['../index.html#autotoc_md1077',1,'']]]
 ];

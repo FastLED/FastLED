@@ -1,14 +1,15 @@
 <map id="CFastLED::isDriverEnabled" name="CFastLED::isDriverEnabled">
-<area shape="rect" id="Node000001" title="Check if a driver is enabled by name." alt="" coords="5,95,199,121"/>
-<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a8aafd1d8ccf1aab536564352dd23d204.html#a8aafd1d8ccf1aab536564352dd23d204" title="Get the global ChannelManager singleton instance." alt="" coords="247,66,394,91"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="196,93,233,88,234,93,197,98"/>
-<area shape="rect" id="Node000009" href="$d2/d6b/classfl_1_1_channel_manager_a04b7846c6e3cd8c00586c2fb9a29ad59.html#a04b7846c6e3cd8c00586c2fb9a29ad59" title="Check if a driver is enabled by name." alt="" coords="247,116,395,156"/>
-<area shape="poly" id="edge6_Node000001_Node000009" title=" " alt="" coords="199,118,233,122,233,127,198,123"/>
-<area shape="rect" id="Node000003" href="$d2/d6b/classfl_1_1_channel_manager_aed1be386f6b38cabd478d1d9c11c240c.html#aed1be386f6b38cabd478d1d9c11c240c" title="Get the global singleton instance." alt="" coords="443,59,591,99"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="395,76,429,76,429,81,395,81"/>
-<area shape="rect" id="Node000004" href="$d2/d6b/classfl_1_1_channel_manager_addc4b631522a2d44151c6b7c23a26ca1.html#addc4b631522a2d44151c6b7c23a26ca1" title="Constructor." alt="" coords="646,29,794,69"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="591,65,632,59,633,65,591,71"/>
-<area shape="rect" id="Node000008" href="$d9/d5b/classfl_1_1_singleton_a47fdc044003ec27f9e9833f7f5418e01.html#a47fdc044003ec27f9e9833f7f5418e01" title=" " alt="" coords="639,94,801,119"/>
-<area shape="poly" id="edge5_Node000003_Node000008" title=" " alt="" coords="591,86,626,91,625,96,591,91"/>
-<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="682,30,680,20,686,11,699,5,720,3,744,6,757,13,754,18,742,11,720,8,701,10,689,15,685,21,687,28"/>
+<area shape="rect" id="Node000001" title="Check if a driver is enabled by name." alt="" coords="5,66,199,91"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a1cc01267f6bdd7251959883412b11bbb.html#a1cc01267f6bdd7251959883412b11bbb" title="Get the global ChannelManager singleton instance." alt="" coords="247,37,394,62"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="196,63,233,58,234,64,197,69"/>
+<area shape="rect" id="Node000011" href="$d2/d6b/classfl_1_1_channel_manager_ae70d9cebc1ac3a2f621d1d8e489bf818.html#ae70d9cebc1ac3a2f621d1d8e489bf818" title="Check if a driver is enabled by name." alt="" coords="247,87,395,127"/>
+<area shape="poly" id="edge7_Node000001_Node000011" title=" " alt="" coords="199,88,233,93,233,98,198,94"/>
+<area shape="rect" id="Node000003" href="$d2/d6b/classfl_1_1_channel_manager_a76013c6913045962ce5bb8d227e760b3.html#a76013c6913045962ce5bb8d227e760b3" title="Get the global singleton instance." alt="" coords="443,29,591,69"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="395,47,429,47,429,52,395,52"/>
+<area shape="rect" id="Node000004" href="$d2/d6b/classfl_1_1_channel_manager_a3f0e1823366151d87c97be78f4273755.html#a3f0e1823366151d87c97be78f4273755" title="Constructor." alt="" coords="835,29,983,69"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="591,44,639,43,787,43,821,43,821,49,787,48,639,48,591,49"/>
+<area shape="rect" id="Node000008" href="$d2/d6b/classfl_1_1_channel_manager_a58d12a4cf75bb181c7093141240bb94b.html#a58d12a4cf75bb181c7093141240bb94b" title="Get the singleton WITHOUT registering platform default drivers." alt="" coords="639,57,787,97"/>
+<area shape="poly" id="edge5_Node000003_Node000008" title=" " alt="" coords="591,57,625,62,624,67,591,63"/>
+<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="872,30,870,20,876,11,889,5,909,3,932,6,944,13,941,17,930,11,909,8,890,10,879,15,875,21,877,28"/>
+<area shape="poly" id="edge6_Node000008_Node000004" title=" " alt="" coords="787,64,820,59,821,65,787,69"/>
 </map>

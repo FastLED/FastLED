@@ -22,11 +22,11 @@ digraph "loop"
   Node5 -> Node8 [id="edge7_Node000005_Node000008",color="steelblue1",style="solid",tooltip=" "];
   Node8 [id="Node000008",label="coolLikeIncandescent",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/dd0/_twinkle_fox_8ino_a14cf156bb2b5669bf1cc2c4859c9f443.html#a14cf156bb2b5669bf1cc2c4859c9f443",tooltip=" "];
   Node3 -> Node9 [id="edge8_Node000003_Node000009",color="steelblue1",style="solid",tooltip=" "];
-  Node9 [id="Node000009",label="fl::CRGB::getAverageLight",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dd6/structfl_1_1_c_r_g_b_a8931f3bad3b656409122dc815850a000.html#a8931f3bad3b656409122dc815850a000",tooltip="Get the average of the R, G, and B values."];
+  Node9 [id="Node000009",label="fl::CRGB::getAverageLight",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dd6/structfl_1_1_c_r_g_b_a7fcc7eeff15c59ffcdb3ede8070d0fec.html#a7fcc7eeff15c59ffcdb3ede8070d0fec",tooltip="Get the average of the R, G, and B values."];
   Node3 -> Node10 [id="edge9_Node000003_Node000010",color="steelblue1",style="solid",tooltip=" "];
-  Node10 [id="Node000010",label="fl::CRGB::nscale8_video",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dd6/structfl_1_1_c_r_g_b_ae30b045e289d2de1bfb985bf048a130a.html#ae30b045e289d2de1bfb985bf048a130a",tooltip="Scale down a RGB to N/256ths of it's current brightness using \"video\" dimming rules."];
+  Node10 [id="Node000010",label="fl::CRGB::nscale8_video",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dd6/structfl_1_1_c_r_g_b_a5a5f3c7f22d9dc91d1ab6dba03f56194.html#a5a5f3c7f22d9dc91d1ab6dba03f56194",tooltip="Scale down a RGB to N/256ths of it's current brightness using \"video\" dimming rules."];
   Node10 -> Node11 [id="edge10_Node000010_Node000011",color="steelblue1",style="solid",tooltip=" "];
-  Node11 [id="Node000011",label="fl::CRGB::CRGB",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dd6/structfl_1_1_c_r_g_b_adb891cc4fe8f5ac2188d72c13c0256fd.html#adb891cc4fe8f5ac2188d72c13c0256fd",tooltip="Default constructor."];
+  Node11 [id="Node000011",label="fl::CRGB::CRGB",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dd6/structfl_1_1_c_r_g_b_a910ee467a963ad6805026ad83873e52b.html#a910ee467a963ad6805026ad83873e52b",tooltip="Default constructor."];
   Node1 -> Node12 [id="edge11_Node000001_Node000012",color="steelblue1",style="solid",tooltip=" "];
   Node12 [id="Node000012",label="nblendPaletteTowardPalette",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/dfb/colorutils_8h_ada525b8983539d793931dd074928bacd.html#ada525b8983539d793931dd074928bacd",tooltip=" "];
 }

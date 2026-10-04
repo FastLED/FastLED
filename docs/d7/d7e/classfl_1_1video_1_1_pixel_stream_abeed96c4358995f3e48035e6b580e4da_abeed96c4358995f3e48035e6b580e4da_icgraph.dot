@@ -8,5 +8,15 @@ digraph "fl::video::PixelStream::available"
   rankdir="RL";
   Node1 [id="Node000001",label="fl::video::PixelStream\l::available",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::video::PixelStream\l::readBytes",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d7e/classfl_1_1video_1_1_pixel_stream_aa192d9b6bbc7bc1acab0110e87b0d062.html#aa192d9b6bbc7bc1acab0110e87b0d062",tooltip=" "];
+  Node2 [id="Node000002",label="fl::video::PixelStream\l::probeStreamingMagic",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d7e/classfl_1_1video_1_1_pixel_stream_a2c599e14e779218ddbda706c55406458.html#a2c599e14e779218ddbda706c55406458",tooltip=" "];
+  Node2 -> Node1 [id="edge2_Node000002_Node000001",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node3 [id="edge3_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::video::PixelStream\l::begin",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d7e/classfl_1_1video_1_1_pixel_stream_a2d2bc6715c9d04166f12a4d316bbfcd3.html#a2d2bc6715c9d04166f12a4d316bbfcd3",tooltip=" "];
+  Node2 -> Node4 [id="edge4_Node000002_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::video::PixelStream\l::readBytes",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d7e/classfl_1_1video_1_1_pixel_stream_aa192d9b6bbc7bc1acab0110e87b0d062.html#aa192d9b6bbc7bc1acab0110e87b0d062",tooltip=" "];
+  Node4 -> Node5 [id="edge5_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::video::PixelStream\l::readPixel",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d7/d7e/classfl_1_1video_1_1_pixel_stream_ae5ab48636bc0fd92d8f07ae105067724.html#ae5ab48636bc0fd92d8f07ae105067724",tooltip=" "];
+  Node4 -> Node7 [id="edge6_Node000004_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::video::PixelStream\l::readSample",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d7e/classfl_1_1video_1_1_pixel_stream_a1f961e2f5aeecbf5e3c5ef38bf03eeba.html#a1f961e2f5aeecbf5e3c5ef38bf03eeba",tooltip=" "];
+  Node1 -> Node4 [id="edge7_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
 }

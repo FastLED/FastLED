@@ -1,0 +1,13 @@
+<map id="fl::audio::Processor::getMoodArousal" name="fl::audio::Processor::getMoodArousal">
+<area shape="rect" id="Node000001" title=" " alt="" coords="480,69,625,109"/>
+<area shape="poly" id="edge3_Node000001_Node000001" title=" " alt="" coords="589,58,576,51,553,48,532,50,520,55,515,61,518,68,513,70,510,60,517,50,531,45,553,43,578,46,591,53"/>
+<area shape="rect" id="Node000002" href="$dc/d25/classmood__ring_1_1_room_listener_a6675b5c8e716836ea18e1f3ea22705f0.html#a6675b5c8e716836ea18e1f3ea22705f0" title=" " alt="" coords="243,5,432,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="471,68,404,48,406,43,472,63"/>
+<area shape="rect" id="Node000004" href="$d8/dea/classfl_1_1audio_1_1_reactive_abb87257694541a069b81479727a19bd4.html#abb87257694541a069b81479727a19bd4" title=" " alt="" coords="268,69,407,109"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="466,92,407,92,407,87,466,87"/>
+<area shape="rect" id="Node000005" href="$d3/d6b/classfl_1_1audio_1_1_processor_a3209b620bdf4732030f5ed259cc7fce5.html#a3209b620bdf4732030f5ed259cc7fce5" title=" " alt="" coords="265,157,410,197"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="491,117,388,160,386,155,489,112"/>
+<area shape="rect" id="Node000003" href="$dc/d25/classmood__ring_1_1_room_listener_a101688d3da23eff686cdd2e709b3bc77.html#a101688d3da23eff686cdd2e709b3bc77" title="Poll the Processor and refresh sense(). Call once per frame." alt="" coords="5,5,195,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="229,28,195,28,195,23,229,23"/>
+<area shape="poly" id="edge6_Node000005_Node000005" title=" " alt="" coords="373,146,361,139,337,136,317,138,305,143,300,149,302,156,297,158,295,148,301,138,316,133,337,131,362,134,376,141"/>
+</map>

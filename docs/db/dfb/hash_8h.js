@@ -17,8 +17,8 @@ var hash_8h =
     [ "fl::Hash< u16 >", "d6/d11/structfl_1_1_hash_3_01u16_01_4.html", "d6/d11/structfl_1_1_hash_3_01u16_01_4" ],
     [ "fl::Hash< u32 >", "da/d7e/structfl_1_1_hash_3_01u32_01_4.html", "da/d7e/structfl_1_1_hash_3_01u32_01_4" ],
     [ "fl::Hash< vec2< T > >", "d2/d8c/structfl_1_1_hash_3_01vec2_3_01_t_01_4_01_4.html", "d2/d8c/structfl_1_1_hash_3_01vec2_3_01_t_01_4_01_4" ],
-    [ "fl::fast_hash32", "d4/d36/namespacefl_a0447d5222a2e6a2c6a39111855546ec8.html#a0447d5222a2e6a2c6a39111855546ec8", null ],
-    [ "fl::fast_hash64", "d4/d36/namespacefl_ab000b4e33ca914e65c55a43dc5e3d199.html#ab000b4e33ca914e65c55a43dc5e3d199", null ],
-    [ "fl::hash_pair", "d4/d36/namespacefl_a16f4d86601030a240ca3c33d326fef26.html#a16f4d86601030a240ca3c33d326fef26", null ],
+    [ "fl::fast_hash32", "d4/d36/namespacefl_abab07e64f8759c74677ab3cad845dc0b.html#abab07e64f8759c74677ab3cad845dc0b", null ],
+    [ "fl::fast_hash64", "d4/d36/namespacefl_a5c498dde4a42759a05258d5a26c19979.html#a5c498dde4a42759a05258d5a26c19979", null ],
+    [ "fl::hash_pair", "d4/d36/namespacefl_a5d2c7fa9150c190083548c385ae203d2.html#a5d2c7fa9150c190083548c385ae203d2", null ],
     [ "fl::MurmurHash3_x86_32", "d4/d36/namespacefl_a88285056a8ca55a31295982a9790efd2.html#a88285056a8ca55a31295982a9790efd2", null ]
 ];

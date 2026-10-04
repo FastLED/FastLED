@@ -2,7 +2,7 @@
 <area shape="rect" id="Node000001" title=" " alt="" coords="5,147,168,187"/>
 <area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a3d488dd1e2d27e99307310527e51cad3.html#a3d488dd1e2d27e99307310527e51cad3" title=" " alt="" coords="222,80,373,105"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="137,145,215,115,240,107,242,112,217,121,139,150"/>
-<area shape="rect" id="Node000007" href="$da/dd6/structfl_1_1_c_r_g_b_aa272170bea8120f101f27ebd2c323b55.html#aa272170bea8120f101f27ebd2c323b55" title="Scale down a RGB to N/256ths of its current brightness, using &quot;plain math&quot; dimming rules." alt="" coords="231,129,364,155"/>
+<area shape="rect" id="Node000007" href="$da/dd6/structfl_1_1_c_r_g_b_a88ec345b046910f4ddf5cd4d793e7e88.html#a88ec345b046910f4ddf5cd4d793e7e88" title="Scale down a RGB to N/256ths of its current brightness, using &quot;plain math&quot; dimming rules." alt="" coords="231,129,364,155"/>
 <area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="168,155,217,149,217,154,169,160"/>
 <area shape="rect" id="Node000009" href="$d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d" title=" " alt="" coords="268,179,327,204"/>
 <area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="169,174,254,184,254,189,168,179"/>
@@ -16,6 +16,6 @@
 <area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="373,100,444,109,443,114,373,105"/>
 <area shape="rect" id="Node000004" href="$d4/d36/namespacefl_aa1e0cd66825220bead12cfc1ab7f33c6.html#aa1e0cd66825220bead12cfc1ab7f33c6" title=" " alt="" coords="595,5,677,31"/>
 <area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="524,15,580,15,580,21,524,21"/>
-<area shape="rect" id="Node000008" href="$da/dd6/structfl_1_1_c_r_g_b_adb891cc4fe8f5ac2188d72c13c0256fd.html#adb891cc4fe8f5ac2188d72c13c0256fd" title="Default constructor." alt="" coords="427,153,547,179"/>
+<area shape="rect" id="Node000008" href="$da/dd6/structfl_1_1_c_r_g_b_a910ee467a963ad6805026ad83873e52b.html#a910ee467a963ad6805026ad83873e52b" title="Default constructor." alt="" coords="427,153,547,179"/>
 <area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="365,148,413,154,412,159,364,153"/>
 </map>

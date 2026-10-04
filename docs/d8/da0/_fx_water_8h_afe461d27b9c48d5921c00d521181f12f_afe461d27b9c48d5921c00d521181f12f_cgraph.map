@@ -1,8 +1,8 @@
 <map id="loop" name="loop">
 <area shape="rect" id="Node000001" title=" " alt="" coords="5,129,56,155"/>
-<area shape="rect" id="Node000002" href="$df/da5/lib8tion_8h_adf8e83564c52b94d0ff5594aede0be28.html#adf8e83564c52b94d0ff5594aede0be28" title="Generates a 16&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="168,5,255,31"/>
+<area shape="rect" id="Node000002" href="$df/da5/lib8tion_8h_ac869590ebed22301d9a08cf7406128b3.html#ac869590ebed22301d9a08cf7406128b3" title="Generates a 16&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="168,5,255,31"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="35,128,60,84,79,60,103,40,127,28,153,20,155,25,129,33,105,44,83,64,64,87,40,131"/>
-<area shape="rect" id="Node000003" href="$df/da5/lib8tion_8h_a696b9421eca961df0a68c7c6c3e983ab.html#a696b9421eca961df0a68c7c6c3e983ab" title="Generates an 8&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="172,55,251,80"/>
+<area shape="rect" id="Node000003" href="$df/da5/lib8tion_8h_aca012663c6c8fe9a7240bcbc76095ba9.html#aca012663c6c8fe9a7240bcbc76095ba9" title="Generates an 8&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="172,55,251,80"/>
 <area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="45,127,71,107,103,89,158,72,159,77,105,94,74,112,48,131"/>
 <area shape="rect" id="Node000004" href="$d8/da0/_fx_water_8h_a670576df9fad5345a1bde6cb513f6864.html#a670576df9fad5345a1bde6cb513f6864" title=" " alt="" coords="104,104,319,129"/>
 <area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="56,136,107,129,108,134,56,141"/>

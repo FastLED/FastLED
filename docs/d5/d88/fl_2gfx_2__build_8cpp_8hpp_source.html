@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -109,54 +109,76 @@ $(function(){initNavTree('d5/d88/fl_2gfx_2__build_8cpp_8hpp_source.html','../../
 <div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span> </div>
 <div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment">// begin current directory includes</span></div>
 <div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#include &quot;<a class="code" href="../../db/d8a/blur_8cpp_8hpp.html">fl/gfx/blur.cpp.hpp</a>&quot;</span></div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#include &quot;<a class="code" href="../../db/d4e/colorutils_8cpp_8hpp.html">fl/gfx/colorutils.cpp.hpp</a>&quot;</span></div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#include &quot;<a class="code" href="../../d0/da5/corkscrew_8cpp_8hpp.html">fl/gfx/corkscrew.cpp.hpp</a>&quot;</span></div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &quot;<a class="code" href="../../d2/d25/crgb__extra_8cpp_8hpp.html">fl/gfx/crgb_extra.cpp.hpp</a>&quot;</span></div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &quot;<a class="code" href="../../dd/d9e/downscale_8cpp_8hpp.html">fl/gfx/downscale.cpp.hpp</a>&quot;</span></div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &quot;<a class="code" href="../../d2/d78/fill_8cpp_8hpp.html">fl/gfx/fill.cpp.hpp</a>&quot;</span></div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &quot;<a class="code" href="../../d8/d89/five__bit__hd__gamma_8cpp_8hpp.html">fl/gfx/five_bit_hd_gamma.cpp.hpp</a>&quot;</span></div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &quot;<a class="code" href="../../dd/d85/gamma__lut_8cpp_8hpp.html">fl/gfx/gamma_lut.cpp.hpp</a>&quot;</span></div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#include &quot;<a class="code" href="../../dc/d33/gradient_8cpp_8hpp.html">fl/gfx/gradient.cpp.hpp</a>&quot;</span></div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#include &quot;<a class="code" href="../../d8/d2f/hsv16_8cpp_8hpp.html">fl/gfx/hsv16.cpp.hpp</a>&quot;</span></div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#include &quot;<a class="code" href="../../d0/deb/leds_8cpp_8hpp.html">fl/gfx/leds.cpp.hpp</a>&quot;</span></div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#include &quot;<a class="code" href="../../d7/de9/raster__sparse_8cpp_8hpp.html">fl/gfx/raster_sparse.cpp.hpp</a>&quot;</span></div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#include &quot;<a class="code" href="../../d0/d38/rectangular__draw__buffer_8cpp_8hpp.html">fl/gfx/rectangular_draw_buffer.cpp.hpp</a>&quot;</span></div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &quot;<a class="code" href="../../df/d5d/rgbw_8cpp_8hpp.html">fl/gfx/rgbw.cpp.hpp</a>&quot;</span></div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &quot;<a class="code" href="../../d9/d12/rgbw__colorimetric_8cpp_8hpp.html">fl/gfx/rgbw_colorimetric.cpp.hpp</a>&quot;</span></div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#include &quot;<a class="code" href="../../df/d0b/rgbww_8cpp_8hpp.html">fl/gfx/rgbww.cpp.hpp</a>&quot;</span></div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &quot;<a class="code" href="../../d5/d77/sample_8cpp_8hpp.html">fl/gfx/sample.cpp.hpp</a>&quot;</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &quot;<a class="code" href="../../d6/df1/splat_8cpp_8hpp.html">fl/gfx/splat.cpp.hpp</a>&quot;</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &quot;<a class="code" href="../../d9/d7d/tile2x2_8cpp_8hpp.html">fl/gfx/tile2x2.cpp.hpp</a>&quot;</span></div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &quot;<a class="code" href="../../df/dfb/upscale_8cpp_8hpp.html">fl/gfx/upscale.cpp.hpp</a>&quot;</span></div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#include &quot;<a class="code" href="../../d0/dd8/xypath_8cpp_8hpp.html">fl/gfx/xypath.cpp.hpp</a>&quot;</span></div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#include &quot;<a class="code" href="../../db/de0/xypath__impls_8cpp_8hpp.html">fl/gfx/xypath_impls.cpp.hpp</a>&quot;</span></div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#include &quot;<a class="code" href="../../df/dfa/xypath__renderer_8cpp_8hpp.html">fl/gfx/xypath_renderer.cpp.hpp</a>&quot;</span></div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span> </div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="comment">// begin sub directory includes</span></div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="preprocessor">#include &quot;<a class="code" href="../../da/d29/fl_2gfx_2detail_2__build_8cpp_8hpp.html">fl/gfx/detail/_build.cpp.hpp</a>&quot;</span></div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="preprocessor">#include &quot;<a class="code" href="../../d6/d17/fl_2gfx_2noise_2__build_8cpp_8hpp.html">fl/gfx/noise/_build.cpp.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#include &quot;<a class="code" href="../../d3/d80/chromatic__adaptation_8cpp_8hpp.html">fl/gfx/chromatic_adaptation.cpp.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#include &quot;<a class="code" href="../../d0/d70/colorimetric__response_8cpp_8hpp.html">fl/gfx/colorimetric_response.cpp.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &quot;<a class="code" href="../../db/d4e/colorutils_8cpp_8hpp.html">fl/gfx/colorutils.cpp.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &quot;<a class="code" href="../../d0/da5/corkscrew_8cpp_8hpp.html">fl/gfx/corkscrew.cpp.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &quot;<a class="code" href="../../d2/d25/crgb__extra_8cpp_8hpp.html">fl/gfx/crgb_extra.cpp.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &quot;<a class="code" href="../../dc/d7d/crgb__json_8cpp_8hpp.html">fl/gfx/crgb_json.cpp.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &quot;<a class="code" href="../../d4/da6/device__solve_8cpp_8hpp.html">fl/gfx/device_solve.cpp.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#include &quot;<a class="code" href="../../dd/d9e/downscale_8cpp_8hpp.html">fl/gfx/downscale.cpp.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#include &quot;<a class="code" href="../../d2/d78/fill_8cpp_8hpp.html">fl/gfx/fill.cpp.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#include &quot;<a class="code" href="../../d8/d89/five__bit__hd__gamma_8cpp_8hpp.html">fl/gfx/five_bit_hd_gamma.cpp.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#include &quot;<a class="code" href="../../d7/da2/flux__scalar_8cpp_8hpp.html">fl/gfx/flux_scalar.cpp.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#include &quot;<a class="code" href="../../dd/d85/gamma__lut_8cpp_8hpp.html">fl/gfx/gamma_lut.cpp.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &quot;<a class="code" href="../../d2/dc8/gamut__map_8cpp_8hpp.html">fl/gfx/gamut_map.cpp.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &quot;<a class="code" href="../../dc/d33/gradient_8cpp_8hpp.html">fl/gfx/gradient.cpp.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#include &quot;<a class="code" href="../../d8/d2f/hsv16_8cpp_8hpp.html">fl/gfx/hsv16.cpp.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &quot;<a class="code" href="../../d0/deb/leds_8cpp_8hpp.html">fl/gfx/leds.cpp.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &quot;<a class="code" href="../../d2/d41/oklab__q16_8cpp_8hpp.html">fl/gfx/oklab_q16.cpp.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &quot;<a class="code" href="../../d4/d9b/pipeline_8cpp_8hpp.html">fl/gfx/pipeline.cpp.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &quot;<a class="code" href="../../d7/de9/raster__sparse_8cpp_8hpp.html">fl/gfx/raster_sparse.cpp.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#include &quot;<a class="code" href="../../d0/d38/rectangular__draw__buffer_8cpp_8hpp.html">fl/gfx/rectangular_draw_buffer.cpp.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#include &quot;<a class="code" href="../../df/d5d/rgbw_8cpp_8hpp.html">fl/gfx/rgbw.cpp.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#include &quot;<a class="code" href="../../d9/d12/rgbw__colorimetric_8cpp_8hpp.html">fl/gfx/rgbw_colorimetric.cpp.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#include &quot;<a class="code" href="../../df/d0b/rgbww_8cpp_8hpp.html">fl/gfx/rgbww.cpp.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#include &quot;<a class="code" href="../../d5/d77/sample_8cpp_8hpp.html">fl/gfx/sample.cpp.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="preprocessor">#include &quot;<a class="code" href="../../d2/d31/source__xyz_8cpp_8hpp.html">fl/gfx/source_xyz.cpp.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="preprocessor">#include &quot;<a class="code" href="../../d6/df1/splat_8cpp_8hpp.html">fl/gfx/splat.cpp.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="preprocessor">#include &quot;<a class="code" href="../../d9/d7d/tile2x2_8cpp_8hpp.html">fl/gfx/tile2x2.cpp.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="preprocessor">#include &quot;<a class="code" href="../../d7/d5f/transfer_8cpp_8hpp.html">fl/gfx/transfer.cpp.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="preprocessor">#include &quot;<a class="code" href="../../df/dfb/upscale_8cpp_8hpp.html">fl/gfx/upscale.cpp.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="preprocessor">#include &quot;<a class="code" href="../../d3/d33/white__allocation_8cpp_8hpp.html">fl/gfx/white_allocation.cpp.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><span class="preprocessor">#include &quot;<a class="code" href="../../d0/dd8/xypath_8cpp_8hpp.html">fl/gfx/xypath.cpp.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="preprocessor">#include &quot;<a class="code" href="../../db/de0/xypath__impls_8cpp_8hpp.html">fl/gfx/xypath_impls.cpp.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="preprocessor">#include &quot;<a class="code" href="../../df/dfa/xypath__renderer_8cpp_8hpp.html">fl/gfx/xypath_renderer.cpp.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span> </div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="comment">// begin sub directory includes</span></div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="preprocessor">#include &quot;<a class="code" href="../../da/d29/fl_2gfx_2detail_2__build_8cpp_8hpp.html">fl/gfx/detail/_build.cpp.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="preprocessor">#include &quot;<a class="code" href="../../d6/d17/fl_2gfx_2noise_2__build_8cpp_8hpp.html">fl/gfx/noise/_build.cpp.hpp</a>&quot;</span></div>
 <div class="ttc" id="ablur_8cpp_8hpp_html"><div class="ttname"><a href="../../db/d8a/blur_8cpp_8hpp.html">blur.cpp.hpp</a></div></div>
+<div class="ttc" id="achromatic__adaptation_8cpp_8hpp_html"><div class="ttname"><a href="../../d3/d80/chromatic__adaptation_8cpp_8hpp.html">chromatic_adaptation.cpp.hpp</a></div></div>
+<div class="ttc" id="acolorimetric__response_8cpp_8hpp_html"><div class="ttname"><a href="../../d0/d70/colorimetric__response_8cpp_8hpp.html">colorimetric_response.cpp.hpp</a></div><div class="ttdoc">Reserved for the heavy implementations of the shared colorimetric response layer (issue #3255).</div></div>
 <div class="ttc" id="acolorutils_8cpp_8hpp_html"><div class="ttname"><a href="../../db/d4e/colorutils_8cpp_8hpp.html">colorutils.cpp.hpp</a></div></div>
 <div class="ttc" id="acorkscrew_8cpp_8hpp_html"><div class="ttname"><a href="../../d0/da5/corkscrew_8cpp_8hpp.html">corkscrew.cpp.hpp</a></div></div>
 <div class="ttc" id="acrgb__extra_8cpp_8hpp_html"><div class="ttname"><a href="../../d2/d25/crgb__extra_8cpp_8hpp.html">crgb_extra.cpp.hpp</a></div></div>
+<div class="ttc" id="acrgb__json_8cpp_8hpp_html"><div class="ttname"><a href="../../dc/d7d/crgb__json_8cpp_8hpp.html">crgb_json.cpp.hpp</a></div></div>
+<div class="ttc" id="adevice__solve_8cpp_8hpp_html"><div class="ttname"><a href="../../d4/da6/device__solve_8cpp_8hpp.html">device_solve.cpp.hpp</a></div></div>
 <div class="ttc" id="adownscale_8cpp_8hpp_html"><div class="ttname"><a href="../../dd/d9e/downscale_8cpp_8hpp.html">downscale.cpp.hpp</a></div></div>
 <div class="ttc" id="afill_8cpp_8hpp_html"><div class="ttname"><a href="../../d2/d78/fill_8cpp_8hpp.html">fill.cpp.hpp</a></div></div>
 <div class="ttc" id="afive__bit__hd__gamma_8cpp_8hpp_html"><div class="ttname"><a href="../../d8/d89/five__bit__hd__gamma_8cpp_8hpp.html">five_bit_hd_gamma.cpp.hpp</a></div></div>
 <div class="ttc" id="afl_2gfx_2detail_2__build_8cpp_8hpp_html"><div class="ttname"><a href="../../da/d29/fl_2gfx_2detail_2__build_8cpp_8hpp.html">_build.cpp.hpp</a></div><div class="ttdoc">Unity build for fl/gfx/detail/ — files moved to fl/math/.</div></div>
 <div class="ttc" id="afl_2gfx_2noise_2__build_8cpp_8hpp_html"><div class="ttname"><a href="../../d6/d17/fl_2gfx_2noise_2__build_8cpp_8hpp.html">_build.cpp.hpp</a></div><div class="ttdoc">Unity build header for fl/gfx/noise/ directory.</div></div>
+<div class="ttc" id="aflux__scalar_8cpp_8hpp_html"><div class="ttname"><a href="../../d7/da2/flux__scalar_8cpp_8hpp.html">flux_scalar.cpp.hpp</a></div></div>
 <div class="ttc" id="agamma__lut_8cpp_8hpp_html"><div class="ttname"><a href="../../dd/d85/gamma__lut_8cpp_8hpp.html">gamma_lut.cpp.hpp</a></div><div class="ttdoc">Explicit instantiation of gamma LUT templates.</div></div>
+<div class="ttc" id="agamut__map_8cpp_8hpp_html"><div class="ttname"><a href="../../d2/dc8/gamut__map_8cpp_8hpp.html">gamut_map.cpp.hpp</a></div></div>
 <div class="ttc" id="agradient_8cpp_8hpp_html"><div class="ttname"><a href="../../dc/d33/gradient_8cpp_8hpp.html">gradient.cpp.hpp</a></div></div>
 <div class="ttc" id="ahsv16_8cpp_8hpp_html"><div class="ttname"><a href="../../d8/d2f/hsv16_8cpp_8hpp.html">hsv16.cpp.hpp</a></div></div>
 <div class="ttc" id="aleds_8cpp_8hpp_html"><div class="ttname"><a href="../../d0/deb/leds_8cpp_8hpp.html">leds.cpp.hpp</a></div></div>
+<div class="ttc" id="aoklab__q16_8cpp_8hpp_html"><div class="ttname"><a href="../../d2/d41/oklab__q16_8cpp_8hpp.html">oklab_q16.cpp.hpp</a></div></div>
+<div class="ttc" id="apipeline_8cpp_8hpp_html"><div class="ttname"><a href="../../d4/d9b/pipeline_8cpp_8hpp.html">pipeline.cpp.hpp</a></div></div>
 <div class="ttc" id="araster__sparse_8cpp_8hpp_html"><div class="ttname"><a href="../../d7/de9/raster__sparse_8cpp_8hpp.html">raster_sparse.cpp.hpp</a></div></div>
 <div class="ttc" id="arectangular__draw__buffer_8cpp_8hpp_html"><div class="ttname"><a href="../../d0/d38/rectangular__draw__buffer_8cpp_8hpp.html">rectangular_draw_buffer.cpp.hpp</a></div></div>
 <div class="ttc" id="argbw_8cpp_8hpp_html"><div class="ttname"><a href="../../df/d5d/rgbw_8cpp_8hpp.html">rgbw.cpp.hpp</a></div></div>
 <div class="ttc" id="argbw__colorimetric_8cpp_8hpp_html"><div class="ttname"><a href="../../d9/d12/rgbw__colorimetric_8cpp_8hpp.html">rgbw_colorimetric.cpp.hpp</a></div><div class="ttdoc">Heavy implementations for the colorimetric RGBW solvers (issue #2545).</div></div>
 <div class="ttc" id="argbww_8cpp_8hpp_html"><div class="ttname"><a href="../../df/d0b/rgbww_8cpp_8hpp.html">rgbww.cpp.hpp</a></div><div class="ttdoc">Dispatch + implementations for the 5-channel RGB-&gt;RGBWW path (issue #2558, Phase 3 of #2545).</div></div>
 <div class="ttc" id="asample_8cpp_8hpp_html"><div class="ttname"><a href="../../d5/d77/sample_8cpp_8hpp.html">sample.cpp.hpp</a></div></div>
+<div class="ttc" id="asource__xyz_8cpp_8hpp_html"><div class="ttname"><a href="../../d2/d31/source__xyz_8cpp_8hpp.html">source_xyz.cpp.hpp</a></div></div>
 <div class="ttc" id="asplat_8cpp_8hpp_html"><div class="ttname"><a href="../../d6/df1/splat_8cpp_8hpp.html">splat.cpp.hpp</a></div></div>
 <div class="ttc" id="atile2x2_8cpp_8hpp_html"><div class="ttname"><a href="../../d9/d7d/tile2x2_8cpp_8hpp.html">tile2x2.cpp.hpp</a></div></div>
+<div class="ttc" id="atransfer_8cpp_8hpp_html"><div class="ttname"><a href="../../d7/d5f/transfer_8cpp_8hpp.html">transfer.cpp.hpp</a></div></div>
 <div class="ttc" id="aupscale_8cpp_8hpp_html"><div class="ttname"><a href="../../df/dfb/upscale_8cpp_8hpp.html">upscale.cpp.hpp</a></div></div>
+<div class="ttc" id="awhite__allocation_8cpp_8hpp_html"><div class="ttname"><a href="../../d3/d33/white__allocation_8cpp_8hpp.html">white_allocation.cpp.hpp</a></div></div>
 <div class="ttc" id="axypath_8cpp_8hpp_html"><div class="ttname"><a href="../../d0/dd8/xypath_8cpp_8hpp.html">xypath.cpp.hpp</a></div></div>
 <div class="ttc" id="axypath__impls_8cpp_8hpp_html"><div class="ttname"><a href="../../db/de0/xypath__impls_8cpp_8hpp.html">xypath_impls.cpp.hpp</a></div></div>
 <div class="ttc" id="axypath__renderer_8cpp_8hpp_html"><div class="ttname"><a href="../../df/dfa/xypath__renderer_8cpp_8hpp.html">xypath_renderer.cpp.hpp</a></div></div>
@@ -167,7 +189,7 @@ $(function(){initNavTree('d5/d88/fl_2gfx_2__build_8cpp_8hpp_source.html','../../
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_c9349635bab014644c82face402cd66f.html">gfx</a></li><li class="navelem"><a class="el" href="../../d5/d88/fl_2gfx_2__build_8cpp_8hpp.html">_build.cpp.hpp</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:00 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:08:59 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

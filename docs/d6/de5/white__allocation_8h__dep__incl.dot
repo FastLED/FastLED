@@ -1,0 +1,30 @@
+digraph "fl/gfx/white_allocation.h"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  Node1 [id="Node000001",label="fl/gfx/white_allocation.h",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl/gfx/gamut_map.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/ded/gamut__map_8h.html",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl/gfx/gamut_map.cpp.hpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/dc8/gamut__map_8cpp_8hpp.html",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl/gfx/_build.cpp.hpp",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d5/d88/fl_2gfx_2__build_8cpp_8hpp.html",tooltip="Unity build for fl/gfx/ — graphics types, primitives, and simulators."];
+  Node2 -> Node7 [id="edge4_Node000002_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl/gfx/pipeline.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d7a/pipeline_8h.html",tooltip=" "];
+  Node7 -> Node8 [id="edge5_Node000007_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl/channels/channel.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d5/d7b/channel_8h.html",tooltip="ESP32-P4 Parallel IO (PARLIO) LED channel."];
+  Node7 -> Node20 [id="edge6_Node000007_Node000020",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node20 [id="Node000020",label="fl/channels/color_managed\l_source.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$db/d8c/color__managed__source_8h.html",tooltip=" "];
+  Node20 -> Node23 [id="edge7_Node000020_Node000023",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node23 [id="Node000023",label="fl/channels/pipeline\l_binding.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d7/dcc/pipeline__binding_8h.html",tooltip=" "];
+  Node7 -> Node23 [id="edge8_Node000007_Node000023",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node7 -> Node25 [id="edge9_Node000007_Node000025",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node25 [id="Node000025",label="fl/gfx/pipeline.cpp.hpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d9b/pipeline_8cpp_8hpp.html",tooltip=" "];
+  Node25 -> Node4 [id="edge10_Node000025_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node26 [id="edge11_Node000001_Node000026",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node26 [id="Node000026",label="fl/gfx/white_allocation.cpp.hpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d33/white__allocation_8cpp_8hpp.html",tooltip=" "];
+  Node26 -> Node4 [id="edge12_Node000026_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+}

@@ -11,5 +11,5 @@ digraph "/home/runner/work/FastLED/FastLED/examples/ElPanelReactive"
   dir_c73ca20b17d8c03146b8f506d991c948 [label="ElPanelReactive", fillcolor="#edf0f7", color="grey25", style="filled,bold", URL="dir_c73ca20b17d8c03146b8f506d991c948.html",tooltip=""];
   }
   dir_4d1829fa9bd13d7db71e765b2707b248 [label="fl", fillcolor="#edf0f7", color="red", style="filled", URL="dir_4d1829fa9bd13d7db71e765b2707b248.html",tooltip=""];
-  dir_c73ca20b17d8c03146b8f506d991c948->dir_4d1829fa9bd13d7db71e765b2707b248 [headlabel="4", labeldistance=1.5 headhref="dir_000056_000074.html" href="dir_000056_000074.html" color="steelblue1" fontcolor="steelblue1"];
+  dir_c73ca20b17d8c03146b8f506d991c948->dir_4d1829fa9bd13d7db71e765b2707b248 [headlabel="4", labeldistance=1.5 headhref="dir_000058_000077.html" href="dir_000058_000077.html" color="steelblue1" fontcolor="steelblue1"];
 }

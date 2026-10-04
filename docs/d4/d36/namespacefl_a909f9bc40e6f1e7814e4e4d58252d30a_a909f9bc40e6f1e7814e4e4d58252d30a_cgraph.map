@@ -1,6 +1,6 @@
 <map id="fl::wave8Transpose_4_bf1" name="fl::wave8Transpose_4_bf1">
 <area shape="rect" id="Node000001" title="BF1 for 4&#45;lane Wave8 (#2548 deep&#45;dive followup)." alt="" coords="5,23,152,63"/>
-<area shape="rect" id="Node000002" href="$df/d9e/namespacefl_1_1detail_a0e57418c3c6a452bf97d32535eaf84d3.html#a0e57418c3c6a452bf97d32535eaf84d3" title="BF1 for 4&#45;lane Wave8." alt="" coords="200,23,397,63"/>
+<area shape="rect" id="Node000002" href="$df/d9e/namespacefl_1_1detail_a8c8ad126a88d2a88b8b3524ee264374e.html#a8c8ad126a88d2a88b8b3524ee264374e" title=" " alt="" coords="200,23,397,63"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="152,41,186,41,186,46,152,46"/>
 <area shape="rect" id="Node000003" href="$df/d9e/namespacefl_1_1detail_a85251852414197ed32d0dc54ab229984.html#a85251852414197ed32d0dc54ab229984" title="Pulses 7,6,5,4 of v (byte j = bit (7&#45;j)). Depends only on the high nibble." alt="" coords="445,5,581,31"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="398,29,431,25,432,30,398,34"/>

@@ -40,7 +40,7 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d7/de0/classfl_1_1spi_1_1_parallel_device_a7401728911c15f96eedba08dcf5544d6.html#a7401728911c15f96eedba08dcf5544d6" target="_top" xlink:title=" ">
+<g id="a_Node000003"><a xlink:href="../../d7/de0/classfl_1_1spi_1_1_parallel_device_a7b2885b8912f58bbe1995093352ef6de.html#a7b2885b8912f58bbe1995093352ef6de" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="119,-106 0,-106 0,-76 119,-76 119,-106"/>
 <text text-anchor="start" x="8" y="-94" font-family="Helvetica,sans-Serif" font-size="10.00">fl::spi::ParallelDevice</text>
 <text text-anchor="middle" x="59.5" y="-83" font-family="Helvetica,sans-Serif" font-size="10.00">::operator=</text>
@@ -142,7 +142,7 @@
 <!-- Node6 -->
 <g id="Node000006" class="node">
 <title>Node6</title>
-<g id="a_Node000006"><a xlink:href="../../d7/de0/classfl_1_1spi_1_1_parallel_device_a10aadeda61420eb31eb23685b9b3f0ed.html#a10aadeda61420eb31eb23685b9b3f0ed" target="_top" xlink:title="Destructor &#45; releases hardware resources.">
+<g id="a_Node000006"><a xlink:href="../../d7/de0/classfl_1_1spi_1_1_parallel_device_a746869223308784d5976a62d20d99d64.html#a746869223308784d5976a62d20d99d64" target="_top" xlink:title="Destructor &#45; releases hardware resources.">
 <polygon fill="white" stroke="#666666" points="119,-30 0,-30 0,0 119,0 119,-30"/>
 <text text-anchor="start" x="8" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">fl::spi::ParallelDevice</text>
 <text text-anchor="middle" x="59.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">::~ParallelDevice</text>

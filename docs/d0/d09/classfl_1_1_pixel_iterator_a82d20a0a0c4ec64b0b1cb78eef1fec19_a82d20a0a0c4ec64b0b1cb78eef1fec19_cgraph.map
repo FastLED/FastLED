@@ -1,0 +1,15 @@
+<map id="fl::PixelIterator::writeLPD6803Wide" name="fl::PixelIterator::writeLPD6803Wide">
+<area shape="rect" id="Node000001" title="LPD6803 over a colour&#45;managed channel&#39;s 16&#45;bit drives, quantized once to the chip&#39;s 5 bits per channe..." alt="" coords="5,92,151,132"/>
+<area shape="rect" id="Node000002" href="$d0/d09/classfl_1_1_pixel_iterator_a20b1f7f8de51f77507da920ebce3bf04.html#a20b1f7f8de51f77507da920ebce3bf04" title=" " alt="" coords="213,5,339,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="121,90,198,55,213,48,215,53,200,60,123,94"/>
+<area shape="rect" id="Node000003" href="$d0/d09/classfl_1_1_pixel_iterator_a8f6e7554cee021e8e08de34f887ff16a.html#a8f6e7554cee021e8e08de34f887ff16a" title=" " alt="" coords="202,70,350,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="151,99,188,93,189,98,151,104"/>
+<area shape="rect" id="Node000004" href="$d0/d09/classfl_1_1_pixel_iterator_a65edf3ee981db4bd3e380a418163147d.html#a65edf3ee981db4bd3e380a418163147d" title="One pixel at the source&#39;s own precision, wire&#45;ordered." alt="" coords="199,120,353,160"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="151,120,185,125,185,130,151,125"/>
+<area shape="rect" id="Node000007" href="$d0/d09/classfl_1_1_pixel_iterator_ae60759e41b9d52b25c3c711f38bfe494.html#ae60759e41b9d52b25c3c711f38bfe494" title=" " alt="" coords="213,184,339,224"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="119,130,200,170,214,176,212,181,198,174,117,135"/>
+<area shape="rect" id="Node000005" href="$d0/d09/classfl_1_1_pixel_iterator_a595227c01a4f21f3bcf375b1bbeec058.html#a595227c01a4f21f3bcf375b1bbeec058" title=" " alt="" coords="401,92,540,132"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="353,126,387,121,388,127,354,131"/>
+<area shape="rect" id="Node000006" href="$d1/d12/group__intmap_ga9129b84dce3a4e4359ce1117197ad2c3.html#ga9129b84dce3a4e4359ce1117197ad2c3" title=" " alt="" coords="411,157,530,182"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="354,149,398,156,397,161,353,154"/>
+</map>

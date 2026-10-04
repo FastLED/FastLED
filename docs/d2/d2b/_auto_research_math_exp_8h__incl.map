@@ -1,0 +1,36 @@
+<map id="/home/runner/work/FastLED/FastLED/examples/AutoResearch/AutoResearchMathExp.h" name="/home/runner/work/FastLED/FastLED/examples/AutoResearch/AutoResearchMathExp.h">
+<area shape="rect" id="Node000001" title="On&#45;device accuracy and speed of fl::exp against the toolchain libm (#4288)." alt="" coords="270,5,509,60"/>
+<area shape="rect" id="Node000002" href="$df/db1/math_8h.html" title=" " alt="" coords="330,108,449,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="392,60,392,94,387,94,387,60"/>
+<area shape="rect" id="Node000008" href="$d3/d7e/int_8h.html" title=" " alt="" coords="779,255,861,280"/>
+<area shape="poly" id="edge18_Node000001_Node000008" title=" " alt="" coords="475,58,602,107,671,140,736,179,774,210,804,242,800,246,770,214,733,184,668,145,600,112,473,63"/>
+<area shape="rect" id="Node000016" href="$d1/dbc/sketch__macros_8h.html" title=" " alt="" coords="5,108,200,133"/>
+<area shape="poly" id="edge19_Node000001_Node000016" title=" " alt="" coords="303,63,155,107,153,102,301,58"/>
+<area shape="rect" id="Node000003" href="$d4/d54/compiler__control_8h.html" title=" " alt="" coords="177,181,351,207"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="371,136,298,177,295,172,368,131"/>
+<area shape="rect" id="Node000007" href="$db/d01/noexcept_8h.html" title=" " alt="" coords="439,328,566,353"/>
+<area shape="poly" id="edge17_Node000002_Node000007" title=" " alt="" coords="391,133,392,199,400,240,417,279,438,302,464,319,461,324,435,306,412,281,395,242,387,199,386,133"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="449,124,565,141,631,157,694,179,752,210,798,243,794,248,749,214,692,184,629,162,564,147,449,129"/>
+<area shape="rect" id="Node000011" href="$df/d63/type__traits_8h.html" title=" " alt="" coords="545,181,681,207"/>
+<area shape="poly" id="edge9_Node000002_Node000011" title=" " alt="" coords="426,131,565,175,563,180,425,136"/>
+<area shape="rect" id="Node000014" href="$da/ded/undef_8h.html" title=" " alt="" coords="50,181,153,207"/>
+<area shape="poly" id="edge15_Node000002_Node000014" title=" " alt="" coords="344,136,162,181,161,175,342,131"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="129,328,303,353"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="262,208,244,256,225,315,220,314,239,254,257,206"/>
+<area shape="rect" id="Node000005" href="$d1/ddf/align_8h.html" title="Alignment macros and utilities for FastLED." alt="" coords="253,255,352,280"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="273,206,292,241,288,244,268,208"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="290,282,242,321,239,317,287,278"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="336,278,458,321,456,326,334,283"/>
+<area shape="rect" id="Node000009" href="$df/dd8/stdint_8h.html" title=" " alt="" coords="769,328,871,353"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="823,280,823,314,817,314,817,280"/>
+<area shape="poly" id="edge13_Node000011_Node000007" title=" " alt="" coords="615,207,608,242,601,263,590,282,567,305,541,323,538,319,564,301,586,278,596,260,603,241,610,206"/>
+<area shape="poly" id="edge12_Node000011_Node000008" title=" " alt="" coords="647,204,774,248,773,253,646,209"/>
+<area shape="rect" id="Node000012" href="$d9/d83/move_8h.html" title=" " alt="" coords="651,255,754,280"/>
+<area shape="poly" id="edge10_Node000011_Node000012" title=" " alt="" coords="629,205,679,244,676,248,626,209"/>
+<area shape="rect" id="Node000013" href="$d0/d1b/static__assert_8h.html" title="Portable compile&#45;time assertion wrapper." alt="" coords="427,255,576,280"/>
+<area shape="poly" id="edge14_Node000011_Node000013" title=" " alt="" coords="597,209,533,249,530,245,594,204"/>
+<area shape="poly" id="edge11_Node000012_Node000007" title=" " alt="" coords="671,283,549,326,548,321,670,278"/>
+<area shape="rect" id="Node000015" href="$da/d99/has__include_8h.html" title=" " alt="" coords="35,255,178,280"/>
+<area shape="poly" id="edge16_Node000014_Node000015" title=" " alt="" coords="105,207,107,241,102,241,100,207"/>
+<area shape="poly" id="edge20_Node000016_Node000004" title=" " alt="" coords="87,136,62,156,41,183,26,209,16,232,15,254,26,278,44,297,66,312,116,330,114,335,64,316,41,301,22,282,10,255,11,231,21,207,36,180,59,152,83,131"/>
+</map>

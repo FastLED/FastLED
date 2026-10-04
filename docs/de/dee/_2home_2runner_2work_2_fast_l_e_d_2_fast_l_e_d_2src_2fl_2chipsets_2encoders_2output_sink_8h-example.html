@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -117,16 +117,16 @@ $(function(){initNavTree('de/dee/_2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_
 <li>Should be lightweight (passed by reference, not value)</li>
 </ul>
 <p>Modern encoder pattern using output iterators</p>
-<p>Modern encoder functions use output iterators (like <a class="el" href="../../d4/d36/namespacefl_a403bd8d96e6625e5daef764daf780f26.html#a403bd8d96e6625e5daef764daf780f26" title="Helper function to create a back_insert_iterator.">fl::back_inserter</a>) instead of custom sink adapters. This provides better compatibility with standard algorithms and zero-overhead abstraction.</p>
+<p>Modern encoder functions use output iterators (like <a class="el" href="../../d4/d36/namespacefl_a021929c212e1cf2dcb7c11445c6c9744.html#a021929c212e1cf2dcb7c11445c6c9744" title="Helper function to create a back_insert_iterator.">fl::back_inserter</a>) instead of custom sink adapters. This provides better compatibility with standard algorithms and zero-overhead abstraction.</p>
 <div class="fragment"><div class="line"><a id="_a0" name="_a0"></a><a class="code hl_class" href="../../d2/d24/classfl_1_1vector.html">fl::vector&lt;u8&gt;</a> buffer;</div>
-<div class="line"><span class="keyword">auto</span> out = <a id="a1" name="a1"></a><a class="code hl_function" href="../../d4/d36/namespacefl_a403bd8d96e6625e5daef764daf780f26.html#a403bd8d96e6625e5daef764daf780f26">fl::back_inserter</a>(buffer);</div>
+<div class="line"><span class="keyword">auto</span> out = <a id="a1" name="a1"></a><a class="code hl_function" href="../../d4/d36/namespacefl_a021929c212e1cf2dcb7c11445c6c9744.html#a021929c212e1cf2dcb7c11445c6c9744">fl::back_inserter</a>(buffer);</div>
 <div class="line"><span class="keyword">auto</span> pixel_range = makeScaledPixelRangeRGB(&amp;pixelIterator);</div>
 <div class="line"><a id="a2" name="a2"></a><a class="code hl_function" href="../../d8/d18/ws2801__encoder__impl_8h_a435eaf6bc3ad6e3dddbd86473b9b5b7a.html#a435eaf6bc3ad6e3dddbd86473b9b5b7a">encodeWS2801</a>(pixel_range.first, pixel_range.second, out);</div>
 <div class="line"><span class="comment">// buffer now contains encoded data</span></div>
 <div class="ttc" id="aclassfl_1_1vector_html"><div class="ttname"><a href="../../d2/d24/classfl_1_1vector.html">fl::vector</a></div><div class="ttdef"><b>Definition</b> <a href="../../d6/d68/vector_8h_source.html#l00449">vector.h:449</a></div></div>
-<div class="ttc" id="anamespacefl_a403bd8d96e6625e5daef764daf780f26_html_a403bd8d96e6625e5daef764daf780f26"><div class="ttname"><a href="../../d4/d36/namespacefl_a403bd8d96e6625e5daef764daf780f26.html#a403bd8d96e6625e5daef764daf780f26">fl::back_inserter</a></div><div class="ttdeci">back_insert_iterator&lt; Container &gt; back_inserter(Container &amp;c) FL_NOEXCEPT</div><div class="ttdoc">Helper function to create a back_insert_iterator.</div><div class="ttdef"><b>Definition</b> <a href="../../df/d22/iterator_8h_source.html#l00139">iterator.h:139</a></div></div>
+<div class="ttc" id="anamespacefl_a021929c212e1cf2dcb7c11445c6c9744_html_a021929c212e1cf2dcb7c11445c6c9744"><div class="ttname"><a href="../../d4/d36/namespacefl_a021929c212e1cf2dcb7c11445c6c9744.html#a021929c212e1cf2dcb7c11445c6c9744">fl::back_inserter</a></div><div class="ttdeci">back_insert_iterator&lt; Container &gt; back_inserter(Container &amp;c) FL_NO_EXCEPT</div><div class="ttdoc">Helper function to create a back_insert_iterator.</div><div class="ttdef"><b>Definition</b> <a href="../../df/d22/iterator_8h_source.html#l00139">iterator.h:139</a></div></div>
 <div class="ttc" id="aws2801__encoder__impl_8h_a435eaf6bc3ad6e3dddbd86473b9b5b7a_html_a435eaf6bc3ad6e3dddbd86473b9b5b7a"><div class="ttname"><a href="../../d8/d18/ws2801__encoder__impl_8h_a435eaf6bc3ad6e3dddbd86473b9b5b7a.html#a435eaf6bc3ad6e3dddbd86473b9b5b7a">encodeWS2801</a></div><div class="ttdeci">void encodeWS2801(InputIterator first, InputIterator last, OutputIterator out)</div><div class="ttdoc">Encode pixel data in WS2801/WS2803 format using PixelIterator.</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d18/ws2801__encoder__impl_8h_source.html#l00036">ws2801_encoder_impl.h:36</a></div></div>
-</div><!-- fragment --><dl class="section note"><dt>Note</dt><dd><a class="el" href="../../d4/d36/namespacefl_a403bd8d96e6625e5daef764daf780f26.html#a403bd8d96e6625e5daef764daf780f26" title="Helper function to create a back_insert_iterator.">fl::back_inserter</a> is defined in <a class="el" href="../../df/d22/iterator_8h.html">fl/stl/iterator.h</a> </dd>
+</div><!-- fragment --><dl class="section note"><dt>Note</dt><dd><a class="el" href="../../d4/d36/namespacefl_a021929c212e1cf2dcb7c11445c6c9744.html#a021929c212e1cf2dcb7c11445c6c9744" title="Helper function to create a back_insert_iterator.">fl::back_inserter</a> is defined in <a class="el" href="../../df/d22/iterator_8h.html">fl/stl/iterator.h</a> </dd>
 <dd>
 Pixel iterator adapters are in <a class="el" href="../../db/d2b/pixel__iterator__adapters_8h.html" title="Adapter layer bridging PixelIterator to encoder input iterators.">fl/chipsets/encoders/pixel_iterator_adapters.h</a></dd></dl>
 <div class="fragment"><div class="line"><span class="preprocessor">#pragma once</span></div>
@@ -144,7 +144,7 @@ Pixel iterator adapters are in <a class="el" href="../../db/d2b/pixel__iterator_
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Tue Jun 16 2026 00:06:58 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:08:59 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

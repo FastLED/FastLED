@@ -1,0 +1,13 @@
+<map id="fl::buildRgbSolveMatrixQ16" name="fl::buildRgbSolveMatrixQ16">
+<area shape="rect" id="Node000001" title="Invert the emitter matrix for a three&#45;emitter profile." alt="" coords="5,31,204,56"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a0a7d1e6f0f08ff52ebc895eb553c23e2.html#a0a7d1e6f0f08ff52ebc895eb553c23e2" title="Build the inverse emitter matrix from a Q16 profile, without floats." alt="" coords="252,5,484,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="204,31,238,28,239,33,204,36"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_ae477fa69441dfe37f8fe3d7f4e2b9445.html#ae477fa69441dfe37f8fe3d7f4e2b9445" title="s16.16 of a float, rounded to nearest, computed from its IEEE&#45;754 bits with integer arithmetic only –..." alt="" coords="291,55,445,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="204,50,278,56,277,62,204,55"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_acc62e8cbc43e6a7b23c7e7f5ebf72a1a.html#acc62e8cbc43e6a7b23c7e7f5ebf72a1a" title="Inverse of an s16.16 3x3 matrix, in s16.16, computed without floats." alt="" coords="532,5,659,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="484,15,518,15,518,21,484,21"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_aab9d4e461519c66fc958efc9e9ba2efa.html#aab9d4e461519c66fc958efc9e9ba2efa" title=" " alt="" coords="551,55,640,80"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="445,65,537,65,537,70,445,70"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a35ff6755912c639a5e5bd35fc59e57ff.html#a35ff6755912c639a5e5bd35fc59e57ff" title=" " alt="" coords="707,55,801,80"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="640,65,693,65,693,70,640,70"/>
+</map>

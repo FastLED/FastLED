@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -127,168 +127,165 @@ Zero-padding is NOT performed - size validation prevents unreliable chipset-spec
 <dd>
 <a class="el" href="../../d7/d5d/classfl_1_1spi_1_1_transaction.html" title="Handle for asynchronous SPI operations.">Transaction</a> API not yet implemented - call <a class="el" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a44c55402b14a1d2962aaea6d0574b46a.html#a44c55402b14a1d2962aaea6d0574b46a" title="Wait for pending transmission to complete.">waitComplete()</a> manually after <a class="el" href="#a97018959f2c77546fa12f2a0adb2f540" title="Flush all lanes (transpose and transmit)">flush()</a> </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../dc/d95/multi__lane__device_8cpp_8hpp_source.html#l00301">301</a> of file <a class="el" href="../../dc/d95/multi__lane__device_8cpp_8hpp_source.html">multi_lane_device.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  301</span>                                    {</div>
-<div class="line"><span class="lineno">  302</span>    <span class="keywordflow">if</span> (!<a class="code hl_function" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a522448a9b9b59c86768f41c9498dbe5a.html#a522448a9b9b59c86768f41c9498dbe5a">isReady</a>()) {</div>
-<div class="line"><span class="lineno">  303</span>        <span class="keywordflow">return</span> <a class="code hl_function" href="../../d7/d93/classfl_1_1expected_abbee0bb98c9bf0a1391cb3e810ea4fd5.html#abbee0bb98c9bf0a1391cb3e810ea4fd5">Result&lt;void&gt;::failure</a>(SPIError::NOT_INITIALIZED,</div>
-<div class="line"><span class="lineno">  304</span>            <span class="stringliteral">&quot;Device not initialized&quot;</span>);</div>
-<div class="line"><span class="lineno">  305</span>    }</div>
-<div class="line"><span class="lineno">  306</span> </div>
-<div class="line"><span class="lineno">  307</span>    <span class="comment">// Find lane sizes and validate all non-empty lanes have the same size</span></div>
-<div class="line"><span class="lineno">  308</span>    <span class="keywordtype">size_t</span> expected_size = 0;</div>
-<div class="line"><span class="lineno">  309</span>    <span class="keywordtype">bool</span> found_first = <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">  310</span> </div>
-<div class="line"><span class="lineno">  311</span>    <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; <a class="code hl_variable" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a.html#a8bc84fc4f04afca27bd5746cc2c2b06a">pImpl</a>-&gt;lanes.size(); i++) {</div>
-<div class="line"><span class="lineno">  312</span>        <span class="keywordtype">size_t</span> lane_size = <a class="code hl_variable" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a.html#a8bc84fc4f04afca27bd5746cc2c2b06a">pImpl</a>-&gt;lanes[i].bufferSize();</div>
-<div class="line"><span class="lineno">  313</span> </div>
-<div class="line"><span class="lineno">  314</span>        <span class="keywordflow">if</span> (lane_size &gt; 0) {</div>
-<div class="line"><span class="lineno">  315</span>            <span class="keywordflow">if</span> (!found_first) {</div>
-<div class="line"><span class="lineno">  316</span>                <span class="comment">// First non-empty lane sets the expected size</span></div>
-<div class="line"><span class="lineno">  317</span>                expected_size = lane_size;</div>
-<div class="line"><span class="lineno">  318</span>                found_first = <span class="keyword">true</span>;</div>
-<div class="line"><span class="lineno">  319</span>            } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (lane_size != expected_size) {</div>
-<div class="line"><span class="lineno">  320</span>                <span class="comment">// Size mismatch detected</span></div>
-<div class="line"><span class="lineno">  321</span>                <a class="code hl_define" href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;MultiLaneDevice: Lane size mismatch - expected &quot;</span> &lt;&lt; expected_size</div>
-<div class="line"><span class="lineno">  322</span>                        &lt;&lt; <span class="stringliteral">&quot; bytes (lane 0), but lane &quot;</span> &lt;&lt; i &lt;&lt; <span class="stringliteral">&quot; has &quot;</span> &lt;&lt; lane_size &lt;&lt; <span class="stringliteral">&quot; bytes&quot;</span>);</div>
-<div class="line"><span class="lineno">  323</span>                <span class="keywordflow">return</span> <a class="code hl_function" href="../../d7/d93/classfl_1_1expected_abbee0bb98c9bf0a1391cb3e810ea4fd5.html#abbee0bb98c9bf0a1391cb3e810ea4fd5">Result&lt;void&gt;::failure</a>(SPIError::INVALID_PARAMETER,</div>
-<div class="line"><span class="lineno">  324</span>                    <span class="stringliteral">&quot;Lane size mismatch: all lanes must have identical sizes&quot;</span>);</div>
-<div class="line"><span class="lineno">  325</span>            }</div>
-<div class="line"><span class="lineno">  326</span>        }</div>
-<div class="line"><span class="lineno">  327</span>    }</div>
-<div class="line"><span class="lineno">  328</span> </div>
-<div class="line"><span class="lineno">  329</span>    <span class="keywordflow">if</span> (expected_size == 0) {</div>
-<div class="line"><span class="lineno">  330</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;MultiLaneDevice: No data to flush (all lanes empty)&quot;</span>);</div>
-<div class="line"><span class="lineno">  331</span>        <span class="keywordflow">return</span> <a class="code hl_function" href="../../d7/d93/classfl_1_1expected_abbee0bb98c9bf0a1391cb3e810ea4fd5.html#abbee0bb98c9bf0a1391cb3e810ea4fd5">Result&lt;void&gt;::failure</a>(SPIError::ALLOCATION_FAILED,</div>
-<div class="line"><span class="lineno">  332</span>            <span class="stringliteral">&quot;No data to transmit&quot;</span>);</div>
-<div class="line"><span class="lineno">  333</span>    }</div>
-<div class="line"><span class="lineno">  334</span> </div>
-<div class="line"><span class="lineno">  335</span>    <span class="comment">// Use expected_size for DMA buffer allocation (all lanes now guaranteed same size)</span></div>
-<div class="line"><span class="lineno">  336</span>    <span class="keywordtype">size_t</span> max_size = expected_size;</div>
-<div class="line"><span class="lineno">  337</span> </div>
-<div class="line"><span class="lineno">  338</span>    <span class="comment">// Acquire DMA buffer from hardware backend - use polymorphic interface</span></div>
-<div class="line"><span class="lineno">  339</span>    DMABuffer dma_buffer = <a class="code hl_variable" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a.html#a8bc84fc4f04afca27bd5746cc2c2b06a">pImpl</a>-&gt;backend-&gt;acquireDMABuffer(max_size);</div>
-<div class="line"><span class="lineno">  340</span> </div>
-<div class="line"><span class="lineno">  341</span>    <span class="keywordflow">if</span> (!dma_buffer.ok()) {</div>
-<div class="line"><span class="lineno">  342</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;MultiLaneDevice: Failed to acquire DMA buffer&quot;</span>);</div>
-<div class="line"><span class="lineno">  343</span>        <span class="keywordflow">return</span> <a class="code hl_function" href="../../d7/d93/classfl_1_1expected_abbee0bb98c9bf0a1391cb3e810ea4fd5.html#abbee0bb98c9bf0a1391cb3e810ea4fd5">Result&lt;void&gt;::failure</a>(dma_buffer.error(),</div>
-<div class="line"><span class="lineno">  344</span>            <span class="stringliteral">&quot;Failed to acquire DMA buffer&quot;</span>);</div>
-<div class="line"><span class="lineno">  345</span>    }</div>
-<div class="line"><span class="lineno">  346</span> </div>
-<div class="line"><span class="lineno">  347</span>    <span class="comment">// Transpose lanes into DMA buffer (or copy for single lane)</span></div>
-<div class="line"><span class="lineno">  348</span>    <span class="keyword">const</span> <span class="keywordtype">char</span>* error = <span class="keyword">nullptr</span>;</div>
-<div class="line"><span class="lineno">  349</span>    <span class="keywordtype">bool</span> transpose_ok = <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">  350</span> </div>
-<div class="line"><span class="lineno">  351</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a.html#a8bc84fc4f04afca27bd5746cc2c2b06a">pImpl</a>-&gt;backend_type == 1) {</div>
-<div class="line"><span class="lineno">  352</span>        <span class="comment">// Single lane - no transposition needed, just copy data directly</span></div>
-<div class="line"><span class="lineno">  353</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a.html#a8bc84fc4f04afca27bd5746cc2c2b06a">pImpl</a>-&gt;lanes.size() &gt; 0) {</div>
-<div class="line"><span class="lineno">  354</span>            fl::span&lt;const u8&gt; lane_data = <a class="code hl_variable" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a.html#a8bc84fc4f04afca27bd5746cc2c2b06a">pImpl</a>-&gt;lanes[0].data();</div>
-<div class="line"><span class="lineno">  355</span>            fl::span&lt;u8&gt; dma_data = dma_buffer.data();</div>
-<div class="line"><span class="lineno">  356</span> </div>
-<div class="line"><span class="lineno">  357</span>            <span class="comment">// Verify sizes match (DMA buffer should be exactly the size we requested)</span></div>
-<div class="line"><span class="lineno">  358</span>            <span class="keywordflow">if</span> (lane_data.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac">size</a>() != dma_data.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac">size</a>()) {</div>
-<div class="line"><span class="lineno">  359</span>                <a class="code hl_define" href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;MultiLaneDevice: DMA buffer size mismatch - expected &quot;</span> &lt;&lt; lane_data.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac">size</a>()</div>
-<div class="line"><span class="lineno">  360</span>                        &lt;&lt; <span class="stringliteral">&quot; bytes, got &quot;</span> &lt;&lt; dma_data.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac">size</a>() &lt;&lt; <span class="stringliteral">&quot; bytes&quot;</span>);</div>
-<div class="line"><span class="lineno">  361</span>                error = <span class="stringliteral">&quot;DMA buffer size mismatch&quot;</span>;</div>
-<div class="line"><span class="lineno">  362</span>                transpose_ok = <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">  363</span>            } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  364</span>                <span class="comment">// Copy lane data to DMA buffer</span></div>
-<div class="line"><span class="lineno">  365</span>                <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; lane_data.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac">size</a>(); i++) {</div>
-<div class="line"><span class="lineno">  366</span>                    dma_data[i] = lane_data[i];</div>
-<div class="line"><span class="lineno">  367</span>                }</div>
-<div class="line"><span class="lineno">  368</span>                transpose_ok = <span class="keyword">true</span>;</div>
-<div class="line"><span class="lineno">  369</span>            }</div>
-<div class="line"><span class="lineno">  370</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  371</span>            error = <span class="stringliteral">&quot;No lanes configured&quot;</span>;</div>
-<div class="line"><span class="lineno">  372</span>            transpose_ok = <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">  373</span>        }</div>
-<div class="line"><span class="lineno">  374</span> </div>
-<div class="line"><span class="lineno">  375</span>    } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a.html#a8bc84fc4f04afca27bd5746cc2c2b06a">pImpl</a>-&gt;backend_type == 2) {</div>
-<div class="line"><span class="lineno">  376</span>        <span class="comment">// Dual-SPI transposition</span></div>
-<div class="line"><span class="lineno">  377</span>        <a class="code hl_typedef" href="../../d4/d36/namespacefl_a451542d0bf4d13f0bc00e055c18e6726.html#a451542d0bf4d13f0bc00e055c18e6726">fl::optional&lt;SPITransposer::LaneData&gt;</a> lane0, lane1;</div>
-<div class="line"><span class="lineno">  378</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a.html#a8bc84fc4f04afca27bd5746cc2c2b06a">pImpl</a>-&gt;lanes.size() &gt; 0) {</div>
-<div class="line"><span class="lineno">  379</span>            lane0 = SPITransposer::LaneData{</div>
-<div class="line"><span class="lineno">  380</span>                <a class="code hl_variable" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a.html#a8bc84fc4f04afca27bd5746cc2c2b06a">pImpl</a>-&gt;lanes[0].data(),</div>
-<div class="line"><span class="lineno">  381</span>                fl::span&lt;const u8&gt;()  <span class="comment">// No padding</span></div>
-<div class="line"><span class="lineno">  382</span>            };</div>
-<div class="line"><span class="lineno">  383</span>        }</div>
-<div class="line"><span class="lineno">  384</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a.html#a8bc84fc4f04afca27bd5746cc2c2b06a">pImpl</a>-&gt;lanes.size() &gt; 1) {</div>
-<div class="line"><span class="lineno">  385</span>            lane1 = SPITransposer::LaneData{</div>
-<div class="line"><span class="lineno">  386</span>                <a class="code hl_variable" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a.html#a8bc84fc4f04afca27bd5746cc2c2b06a">pImpl</a>-&gt;lanes[1].data(),</div>
-<div class="line"><span class="lineno">  387</span>                fl::span&lt;const u8&gt;()  <span class="comment">// No padding</span></div>
-<div class="line"><span class="lineno">  388</span>            };</div>
-<div class="line"><span class="lineno">  389</span>        }</div>
-<div class="line"><span class="lineno">  390</span> </div>
-<div class="line"><span class="lineno">  391</span>        transpose_ok = <a class="code hl_function" href="../../d3/dfa/classfl_1_1_s_p_i_transposer_ab685cdd1edcc4b507a91d7dbfd5ba41b.html#ab685cdd1edcc4b507a91d7dbfd5ba41b">SPITransposer::transpose2</a>(lane0, lane1, dma_buffer.data(), &amp;error);</div>
-<div class="line"><span class="lineno">  392</span> </div>
-<div class="line"><span class="lineno">  393</span>    } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a.html#a8bc84fc4f04afca27bd5746cc2c2b06a">pImpl</a>-&gt;backend_type == 4) {</div>
-<div class="line"><span class="lineno">  394</span>        <span class="comment">// Quad-SPI transposition</span></div>
-<div class="line"><span class="lineno">  395</span>        <a class="code hl_typedef" href="../../d4/d36/namespacefl_a451542d0bf4d13f0bc00e055c18e6726.html#a451542d0bf4d13f0bc00e055c18e6726">fl::optional&lt;SPITransposer::LaneData&gt;</a> lanes[4];</div>
-<div class="line"><span class="lineno">  396</span>        <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; <a class="code hl_variable" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a.html#a8bc84fc4f04afca27bd5746cc2c2b06a">pImpl</a>-&gt;lanes.size() &amp;&amp; i &lt; 4; i++) {</div>
-<div class="line"><span class="lineno">  397</span>            lanes[i] = SPITransposer::LaneData{</div>
-<div class="line"><span class="lineno">  398</span>                <a class="code hl_variable" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a.html#a8bc84fc4f04afca27bd5746cc2c2b06a">pImpl</a>-&gt;lanes[i].data(),</div>
-<div class="line"><span class="lineno">  399</span>                fl::span&lt;const u8&gt;()  <span class="comment">// No padding</span></div>
-<div class="line"><span class="lineno">  400</span>            };</div>
-<div class="line"><span class="lineno">  401</span>        }</div>
+<p class="definition">Definition at line <a class="el" href="../../dc/d95/multi__lane__device_8cpp_8hpp_source.html#l00300">300</a> of file <a class="el" href="../../dc/d95/multi__lane__device_8cpp_8hpp_source.html">multi_lane_device.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  300</span>                                    {</div>
+<div class="line"><span class="lineno">  301</span>    <span class="keywordflow">if</span> (!<a class="code hl_function" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a522448a9b9b59c86768f41c9498dbe5a.html#a522448a9b9b59c86768f41c9498dbe5a">isReady</a>()) {</div>
+<div class="line"><span class="lineno">  302</span>        <span class="keywordflow">return</span> <a class="code hl_function" href="../../d7/d93/classfl_1_1expected_a5a61d98092eb4671f7add861bd663d2f.html#a5a61d98092eb4671f7add861bd663d2f">Result&lt;void&gt;::failure</a>(SPIError::NOT_INITIALIZED,</div>
+<div class="line"><span class="lineno">  303</span>            <span class="stringliteral">&quot;Device not initialized&quot;</span>);</div>
+<div class="line"><span class="lineno">  304</span>    }</div>
+<div class="line"><span class="lineno">  305</span> </div>
+<div class="line"><span class="lineno">  306</span>    <span class="comment">// Find lane sizes and validate all non-empty lanes have the same size</span></div>
+<div class="line"><span class="lineno">  307</span>    <span class="keywordtype">size_t</span> expected_size = 0;</div>
+<div class="line"><span class="lineno">  308</span>    <span class="keywordtype">bool</span> found_first = <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  309</span> </div>
+<div class="line"><span class="lineno">  310</span>    <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; <a class="code hl_variable" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a.html#a8bc84fc4f04afca27bd5746cc2c2b06a">pImpl</a>-&gt;lanes.size(); i++) {</div>
+<div class="line"><span class="lineno">  311</span>        <span class="keywordtype">size_t</span> lane_size = <a class="code hl_variable" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a.html#a8bc84fc4f04afca27bd5746cc2c2b06a">pImpl</a>-&gt;lanes[i].bufferSize();</div>
+<div class="line"><span class="lineno">  312</span> </div>
+<div class="line"><span class="lineno">  313</span>        <span class="keywordflow">if</span> (lane_size &gt; 0) {</div>
+<div class="line"><span class="lineno">  314</span>            <span class="keywordflow">if</span> (!found_first) {</div>
+<div class="line"><span class="lineno">  315</span>                <span class="comment">// First non-empty lane sets the expected size</span></div>
+<div class="line"><span class="lineno">  316</span>                expected_size = lane_size;</div>
+<div class="line"><span class="lineno">  317</span>                found_first = <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  318</span>            } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (lane_size != expected_size) {</div>
+<div class="line"><span class="lineno">  319</span>                <span class="comment">// Size mismatch detected</span></div>
+<div class="line"><span class="lineno">  320</span>                <a class="code hl_define" href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;MultiLaneDevice: Lane size mismatch - expected %s bytes (lane 0), but lane %s has %s bytes&quot;</span>, expected_size, i, lane_size);</div>
+<div class="line"><span class="lineno">  321</span>                <span class="keywordflow">return</span> <a class="code hl_function" href="../../d7/d93/classfl_1_1expected_a5a61d98092eb4671f7add861bd663d2f.html#a5a61d98092eb4671f7add861bd663d2f">Result&lt;void&gt;::failure</a>(SPIError::INVALID_PARAMETER,</div>
+<div class="line"><span class="lineno">  322</span>                    <span class="stringliteral">&quot;Lane size mismatch: all lanes must have identical sizes&quot;</span>);</div>
+<div class="line"><span class="lineno">  323</span>            }</div>
+<div class="line"><span class="lineno">  324</span>        }</div>
+<div class="line"><span class="lineno">  325</span>    }</div>
+<div class="line"><span class="lineno">  326</span> </div>
+<div class="line"><span class="lineno">  327</span>    <span class="keywordflow">if</span> (expected_size == 0) {</div>
+<div class="line"><span class="lineno">  328</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;MultiLaneDevice: No data to flush (all lanes empty)&quot;</span>);</div>
+<div class="line"><span class="lineno">  329</span>        <span class="keywordflow">return</span> <a class="code hl_function" href="../../d7/d93/classfl_1_1expected_a5a61d98092eb4671f7add861bd663d2f.html#a5a61d98092eb4671f7add861bd663d2f">Result&lt;void&gt;::failure</a>(SPIError::ALLOCATION_FAILED,</div>
+<div class="line"><span class="lineno">  330</span>            <span class="stringliteral">&quot;No data to transmit&quot;</span>);</div>
+<div class="line"><span class="lineno">  331</span>    }</div>
+<div class="line"><span class="lineno">  332</span> </div>
+<div class="line"><span class="lineno">  333</span>    <span class="comment">// Use expected_size for DMA buffer allocation (all lanes now guaranteed same size)</span></div>
+<div class="line"><span class="lineno">  334</span>    <span class="keywordtype">size_t</span> max_size = expected_size;</div>
+<div class="line"><span class="lineno">  335</span> </div>
+<div class="line"><span class="lineno">  336</span>    <span class="comment">// Acquire DMA buffer from hardware backend - use polymorphic interface</span></div>
+<div class="line"><span class="lineno">  337</span>    DMABuffer dma_buffer = <a class="code hl_variable" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a.html#a8bc84fc4f04afca27bd5746cc2c2b06a">pImpl</a>-&gt;backend-&gt;acquireDMABuffer(max_size);</div>
+<div class="line"><span class="lineno">  338</span> </div>
+<div class="line"><span class="lineno">  339</span>    <span class="keywordflow">if</span> (!dma_buffer.ok()) {</div>
+<div class="line"><span class="lineno">  340</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;MultiLaneDevice: Failed to acquire DMA buffer&quot;</span>);</div>
+<div class="line"><span class="lineno">  341</span>        <span class="keywordflow">return</span> <a class="code hl_function" href="../../d7/d93/classfl_1_1expected_a5a61d98092eb4671f7add861bd663d2f.html#a5a61d98092eb4671f7add861bd663d2f">Result&lt;void&gt;::failure</a>(dma_buffer.error(),</div>
+<div class="line"><span class="lineno">  342</span>            <span class="stringliteral">&quot;Failed to acquire DMA buffer&quot;</span>);</div>
+<div class="line"><span class="lineno">  343</span>    }</div>
+<div class="line"><span class="lineno">  344</span> </div>
+<div class="line"><span class="lineno">  345</span>    <span class="comment">// Transpose lanes into DMA buffer (or copy for single lane)</span></div>
+<div class="line"><span class="lineno">  346</span>    <span class="keyword">const</span> <span class="keywordtype">char</span>* error = <span class="keyword">nullptr</span>;</div>
+<div class="line"><span class="lineno">  347</span>    <span class="keywordtype">bool</span> transpose_ok = <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  348</span> </div>
+<div class="line"><span class="lineno">  349</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a.html#a8bc84fc4f04afca27bd5746cc2c2b06a">pImpl</a>-&gt;backend_type == 1) {</div>
+<div class="line"><span class="lineno">  350</span>        <span class="comment">// Single lane - no transposition needed, just copy data directly</span></div>
+<div class="line"><span class="lineno">  351</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a.html#a8bc84fc4f04afca27bd5746cc2c2b06a">pImpl</a>-&gt;lanes.size() &gt; 0) {</div>
+<div class="line"><span class="lineno">  352</span>            fl::span&lt;const u8&gt; lane_data = <a class="code hl_variable" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a.html#a8bc84fc4f04afca27bd5746cc2c2b06a">pImpl</a>-&gt;lanes[0].data();</div>
+<div class="line"><span class="lineno">  353</span>            fl::span&lt;u8&gt; dma_data = dma_buffer.data();</div>
+<div class="line"><span class="lineno">  354</span> </div>
+<div class="line"><span class="lineno">  355</span>            <span class="comment">// Verify sizes match (DMA buffer should be exactly the size we requested)</span></div>
+<div class="line"><span class="lineno">  356</span>            <span class="keywordflow">if</span> (lane_data.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa">size</a>() != dma_data.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa">size</a>()) {</div>
+<div class="line"><span class="lineno">  357</span>                <a class="code hl_define" href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;MultiLaneDevice: DMA buffer size mismatch - expected %s bytes, got %s bytes&quot;</span>, lane_data.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa">size</a>(), dma_data.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa">size</a>());</div>
+<div class="line"><span class="lineno">  358</span>                error = <span class="stringliteral">&quot;DMA buffer size mismatch&quot;</span>;</div>
+<div class="line"><span class="lineno">  359</span>                transpose_ok = <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  360</span>            } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  361</span>                <span class="comment">// Copy lane data to DMA buffer</span></div>
+<div class="line"><span class="lineno">  362</span>                <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; lane_data.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa">size</a>(); i++) {</div>
+<div class="line"><span class="lineno">  363</span>                    dma_data[i] = lane_data[i];</div>
+<div class="line"><span class="lineno">  364</span>                }</div>
+<div class="line"><span class="lineno">  365</span>                transpose_ok = <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  366</span>            }</div>
+<div class="line"><span class="lineno">  367</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  368</span>            error = <span class="stringliteral">&quot;No lanes configured&quot;</span>;</div>
+<div class="line"><span class="lineno">  369</span>            transpose_ok = <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  370</span>        }</div>
+<div class="line"><span class="lineno">  371</span> </div>
+<div class="line"><span class="lineno">  372</span>    } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a.html#a8bc84fc4f04afca27bd5746cc2c2b06a">pImpl</a>-&gt;backend_type == 2) {</div>
+<div class="line"><span class="lineno">  373</span>        <span class="comment">// Dual-SPI transposition</span></div>
+<div class="line"><span class="lineno">  374</span>        <a class="code hl_typedef" href="../../d4/d36/namespacefl_a451542d0bf4d13f0bc00e055c18e6726.html#a451542d0bf4d13f0bc00e055c18e6726">fl::optional&lt;SPITransposer::LaneData&gt;</a> lane0, lane1;</div>
+<div class="line"><span class="lineno">  375</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a.html#a8bc84fc4f04afca27bd5746cc2c2b06a">pImpl</a>-&gt;lanes.size() &gt; 0) {</div>
+<div class="line"><span class="lineno">  376</span>            lane0 = SPITransposer::LaneData{</div>
+<div class="line"><span class="lineno">  377</span>                <a class="code hl_variable" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a.html#a8bc84fc4f04afca27bd5746cc2c2b06a">pImpl</a>-&gt;lanes[0].data(),</div>
+<div class="line"><span class="lineno">  378</span>                fl::span&lt;const u8&gt;()  <span class="comment">// No padding</span></div>
+<div class="line"><span class="lineno">  379</span>            };</div>
+<div class="line"><span class="lineno">  380</span>        }</div>
+<div class="line"><span class="lineno">  381</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a.html#a8bc84fc4f04afca27bd5746cc2c2b06a">pImpl</a>-&gt;lanes.size() &gt; 1) {</div>
+<div class="line"><span class="lineno">  382</span>            lane1 = SPITransposer::LaneData{</div>
+<div class="line"><span class="lineno">  383</span>                <a class="code hl_variable" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a.html#a8bc84fc4f04afca27bd5746cc2c2b06a">pImpl</a>-&gt;lanes[1].data(),</div>
+<div class="line"><span class="lineno">  384</span>                fl::span&lt;const u8&gt;()  <span class="comment">// No padding</span></div>
+<div class="line"><span class="lineno">  385</span>            };</div>
+<div class="line"><span class="lineno">  386</span>        }</div>
+<div class="line"><span class="lineno">  387</span> </div>
+<div class="line"><span class="lineno">  388</span>        transpose_ok = <a class="code hl_function" href="../../d3/dfa/classfl_1_1_s_p_i_transposer_a685b1154e9612d603229bb9895a6e75e.html#a685b1154e9612d603229bb9895a6e75e">SPITransposer::transpose2</a>(lane0, lane1, dma_buffer.data(), &amp;error);</div>
+<div class="line"><span class="lineno">  389</span> </div>
+<div class="line"><span class="lineno">  390</span>    } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a.html#a8bc84fc4f04afca27bd5746cc2c2b06a">pImpl</a>-&gt;backend_type == 4) {</div>
+<div class="line"><span class="lineno">  391</span>        <span class="comment">// Quad-SPI transposition</span></div>
+<div class="line"><span class="lineno">  392</span>        <a class="code hl_typedef" href="../../d4/d36/namespacefl_a451542d0bf4d13f0bc00e055c18e6726.html#a451542d0bf4d13f0bc00e055c18e6726">fl::optional&lt;SPITransposer::LaneData&gt;</a> lanes[4];</div>
+<div class="line"><span class="lineno">  393</span>        <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; <a class="code hl_variable" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a.html#a8bc84fc4f04afca27bd5746cc2c2b06a">pImpl</a>-&gt;lanes.size() &amp;&amp; i &lt; 4; i++) {</div>
+<div class="line"><span class="lineno">  394</span>            lanes[i] = SPITransposer::LaneData{</div>
+<div class="line"><span class="lineno">  395</span>                <a class="code hl_variable" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a.html#a8bc84fc4f04afca27bd5746cc2c2b06a">pImpl</a>-&gt;lanes[i].data(),</div>
+<div class="line"><span class="lineno">  396</span>                fl::span&lt;const u8&gt;()  <span class="comment">// No padding</span></div>
+<div class="line"><span class="lineno">  397</span>            };</div>
+<div class="line"><span class="lineno">  398</span>        }</div>
+<div class="line"><span class="lineno">  399</span> </div>
+<div class="line"><span class="lineno">  400</span>        transpose_ok = <a class="code hl_function" href="../../d3/dfa/classfl_1_1_s_p_i_transposer_a3e0c7621e15a368bfe879182c97638fc.html#a3e0c7621e15a368bfe879182c97638fc">SPITransposer::transpose4</a>(lanes[0], lanes[1], lanes[2], lanes[3],</div>
+<div class="line"><span class="lineno">  401</span>                                                  dma_buffer.data(), &amp;error);</div>
 <div class="line"><span class="lineno">  402</span> </div>
-<div class="line"><span class="lineno">  403</span>        transpose_ok = <a class="code hl_function" href="../../d3/dfa/classfl_1_1_s_p_i_transposer_a409565f20b2d6f03c19989cc7a53b91d.html#a409565f20b2d6f03c19989cc7a53b91d">SPITransposer::transpose4</a>(lanes[0], lanes[1], lanes[2], lanes[3],</div>
-<div class="line"><span class="lineno">  404</span>                                                  dma_buffer.data(), &amp;error);</div>
-<div class="line"><span class="lineno">  405</span> </div>
-<div class="line"><span class="lineno">  406</span>    } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a.html#a8bc84fc4f04afca27bd5746cc2c2b06a">pImpl</a>-&gt;backend_type == 8) {</div>
-<div class="line"><span class="lineno">  407</span>        <span class="comment">// Octal-SPI transposition</span></div>
-<div class="line"><span class="lineno">  408</span>        <a class="code hl_typedef" href="../../d4/d36/namespacefl_a451542d0bf4d13f0bc00e055c18e6726.html#a451542d0bf4d13f0bc00e055c18e6726">fl::optional&lt;SPITransposer::LaneData&gt;</a> lanes[8];</div>
-<div class="line"><span class="lineno">  409</span>        <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; <a class="code hl_variable" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a.html#a8bc84fc4f04afca27bd5746cc2c2b06a">pImpl</a>-&gt;lanes.size() &amp;&amp; i &lt; 8; i++) {</div>
-<div class="line"><span class="lineno">  410</span>            lanes[i] = SPITransposer::LaneData{</div>
-<div class="line"><span class="lineno">  411</span>                <a class="code hl_variable" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a.html#a8bc84fc4f04afca27bd5746cc2c2b06a">pImpl</a>-&gt;lanes[i].data(),</div>
-<div class="line"><span class="lineno">  412</span>                fl::span&lt;const u8&gt;()  <span class="comment">// No padding</span></div>
-<div class="line"><span class="lineno">  413</span>            };</div>
-<div class="line"><span class="lineno">  414</span>        }</div>
+<div class="line"><span class="lineno">  403</span>    } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a.html#a8bc84fc4f04afca27bd5746cc2c2b06a">pImpl</a>-&gt;backend_type == 8) {</div>
+<div class="line"><span class="lineno">  404</span>        <span class="comment">// Octal-SPI transposition</span></div>
+<div class="line"><span class="lineno">  405</span>        <a class="code hl_typedef" href="../../d4/d36/namespacefl_a451542d0bf4d13f0bc00e055c18e6726.html#a451542d0bf4d13f0bc00e055c18e6726">fl::optional&lt;SPITransposer::LaneData&gt;</a> lanes[8];</div>
+<div class="line"><span class="lineno">  406</span>        <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; <a class="code hl_variable" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a.html#a8bc84fc4f04afca27bd5746cc2c2b06a">pImpl</a>-&gt;lanes.size() &amp;&amp; i &lt; 8; i++) {</div>
+<div class="line"><span class="lineno">  407</span>            lanes[i] = SPITransposer::LaneData{</div>
+<div class="line"><span class="lineno">  408</span>                <a class="code hl_variable" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a.html#a8bc84fc4f04afca27bd5746cc2c2b06a">pImpl</a>-&gt;lanes[i].data(),</div>
+<div class="line"><span class="lineno">  409</span>                fl::span&lt;const u8&gt;()  <span class="comment">// No padding</span></div>
+<div class="line"><span class="lineno">  410</span>            };</div>
+<div class="line"><span class="lineno">  411</span>        }</div>
+<div class="line"><span class="lineno">  412</span> </div>
+<div class="line"><span class="lineno">  413</span>        transpose_ok = <a class="code hl_function" href="../../d3/dfa/classfl_1_1_s_p_i_transposer_a2cf424ab57c25a1fa79f98ebb4d6c04a.html#a2cf424ab57c25a1fa79f98ebb4d6c04a">SPITransposer::transpose8</a>(lanes, dma_buffer.data(), &amp;error);</div>
+<div class="line"><span class="lineno">  414</span>    }</div>
 <div class="line"><span class="lineno">  415</span> </div>
-<div class="line"><span class="lineno">  416</span>        transpose_ok = <a class="code hl_function" href="../../d3/dfa/classfl_1_1_s_p_i_transposer_a33641c518e945549b98264fed476ff12.html#a33641c518e945549b98264fed476ff12">SPITransposer::transpose8</a>(lanes, dma_buffer.data(), &amp;error);</div>
-<div class="line"><span class="lineno">  417</span>    }</div>
-<div class="line"><span class="lineno">  418</span> </div>
-<div class="line"><span class="lineno">  419</span>    <span class="keywordflow">if</span> (!transpose_ok) {</div>
-<div class="line"><span class="lineno">  420</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;MultiLaneDevice: Transposition failed - &quot;</span> &lt;&lt; (error ? error : <span class="stringliteral">&quot;unknown error&quot;</span>));</div>
-<div class="line"><span class="lineno">  421</span>        <span class="keywordflow">return</span> <a class="code hl_function" href="../../d7/d93/classfl_1_1expected_abbee0bb98c9bf0a1391cb3e810ea4fd5.html#abbee0bb98c9bf0a1391cb3e810ea4fd5">Result&lt;void&gt;::failure</a>(SPIError::ALLOCATION_FAILED,</div>
-<div class="line"><span class="lineno">  422</span>            error ? error : <span class="stringliteral">&quot;Transposition failed&quot;</span>);</div>
-<div class="line"><span class="lineno">  423</span>    }</div>
+<div class="line"><span class="lineno">  416</span>    <span class="keywordflow">if</span> (!transpose_ok) {</div>
+<div class="line"><span class="lineno">  417</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;MultiLaneDevice: Transposition failed - %s&quot;</span>, (error ? error : <span class="stringliteral">&quot;unknown error&quot;</span>));</div>
+<div class="line"><span class="lineno">  418</span>        <span class="keywordflow">return</span> <a class="code hl_function" href="../../d7/d93/classfl_1_1expected_a5a61d98092eb4671f7add861bd663d2f.html#a5a61d98092eb4671f7add861bd663d2f">Result&lt;void&gt;::failure</a>(SPIError::ALLOCATION_FAILED,</div>
+<div class="line"><span class="lineno">  419</span>            error ? error : <span class="stringliteral">&quot;Transposition failed&quot;</span>);</div>
+<div class="line"><span class="lineno">  420</span>    }</div>
+<div class="line"><span class="lineno">  421</span> </div>
+<div class="line"><span class="lineno">  422</span>    <span class="comment">// Transmit via hardware backend - use polymorphic interface</span></div>
+<div class="line"><span class="lineno">  423</span>    <span class="keywordtype">bool</span> transmit_ok = <a class="code hl_variable" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a.html#a8bc84fc4f04afca27bd5746cc2c2b06a">pImpl</a>-&gt;backend-&gt;transmit(TransmitMode::ASYNC);</div>
 <div class="line"><span class="lineno">  424</span> </div>
-<div class="line"><span class="lineno">  425</span>    <span class="comment">// Transmit via hardware backend - use polymorphic interface</span></div>
-<div class="line"><span class="lineno">  426</span>    <span class="keywordtype">bool</span> transmit_ok = <a class="code hl_variable" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a.html#a8bc84fc4f04afca27bd5746cc2c2b06a">pImpl</a>-&gt;backend-&gt;transmit(TransmitMode::ASYNC);</div>
-<div class="line"><span class="lineno">  427</span> </div>
-<div class="line"><span class="lineno">  428</span>    <span class="keywordflow">if</span> (!transmit_ok) {</div>
-<div class="line"><span class="lineno">  429</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;MultiLaneDevice: Hardware transmit failed&quot;</span>);</div>
-<div class="line"><span class="lineno">  430</span>        <span class="keywordflow">return</span> <a class="code hl_function" href="../../d7/d93/classfl_1_1expected_abbee0bb98c9bf0a1391cb3e810ea4fd5.html#abbee0bb98c9bf0a1391cb3e810ea4fd5">Result&lt;void&gt;::failure</a>(SPIError::BUSY,</div>
-<div class="line"><span class="lineno">  431</span>            <span class="stringliteral">&quot;Hardware transmit failed&quot;</span>);</div>
-<div class="line"><span class="lineno">  432</span>    }</div>
-<div class="line"><span class="lineno">  433</span> </div>
-<div class="line"><span class="lineno">  434</span>    <span class="comment">// Clear lane buffers after starting transmission</span></div>
-<div class="line"><span class="lineno">  435</span>    <span class="keywordflow">for</span> (<span class="keyword">auto</span>&amp; <a class="code hl_function" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a66a4df428de2fc83a006ad0544e56b1b.html#a66a4df428de2fc83a006ad0544e56b1b">lane</a> : <a class="code hl_variable" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a.html#a8bc84fc4f04afca27bd5746cc2c2b06a">pImpl</a>-&gt;lanes) {</div>
-<div class="line"><span class="lineno">  436</span>        <a class="code hl_function" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a66a4df428de2fc83a006ad0544e56b1b.html#a66a4df428de2fc83a006ad0544e56b1b">lane</a>.clear();</div>
-<div class="line"><span class="lineno">  437</span>    }</div>
-<div class="line"><span class="lineno">  438</span> </div>
-<div class="line"><span class="lineno">  439</span>    <a class="code hl_define" href="../../d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a>(<span class="stringliteral">&quot;MultiLaneDevice: Flushed &quot;</span> &lt;&lt; <a class="code hl_variable" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a.html#a8bc84fc4f04afca27bd5746cc2c2b06a">pImpl</a>-&gt;lanes.size() &lt;&lt; <span class="stringliteral">&quot; lanes (&quot;</span></div>
-<div class="line"><span class="lineno">  440</span>           &lt;&lt; max_size &lt;&lt; <span class="stringliteral">&quot; bytes per lane)&quot;</span>);</div>
-<div class="line"><span class="lineno">  441</span> </div>
-<div class="line"><span class="lineno">  442</span>    <span class="comment">// Success - transmission started asynchronously</span></div>
-<div class="line"><span class="lineno">  443</span>    <span class="comment">// User must call waitComplete() manually to block until transmission completes</span></div>
-<div class="line"><span class="lineno">  444</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="../../d7/d93/classfl_1_1expected_ae712d6f5942009caa637e9181d47d40b.html#ae712d6f5942009caa637e9181d47d40b">Result&lt;void&gt;::success</a>();</div>
-<div class="line"><span class="lineno">  445</span>}</div>
-<div class="ttc" id="aclassfl_1_1_s_p_i_transposer_a33641c518e945549b98264fed476ff12_html_a33641c518e945549b98264fed476ff12"><div class="ttname"><a href="../../d3/dfa/classfl_1_1_s_p_i_transposer_a33641c518e945549b98264fed476ff12.html#a33641c518e945549b98264fed476ff12">fl::SPITransposer::transpose8</a></div><div class="ttdeci">static bool transpose8(const fl::optional&lt; LaneData &gt; lanes[8], fl::span&lt; u8 &gt; output, const char **error=nullptr) FL_NOEXCEPT</div><div class="ttdoc">Transpose 8 lanes of data into interleaved octal-SPI format.</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d91/transposition_8cpp_8hpp_source.html#l00180">transposition.cpp.hpp:180</a></div></div>
-<div class="ttc" id="aclassfl_1_1_s_p_i_transposer_a409565f20b2d6f03c19989cc7a53b91d_html_a409565f20b2d6f03c19989cc7a53b91d"><div class="ttname"><a href="../../d3/dfa/classfl_1_1_s_p_i_transposer_a409565f20b2d6f03c19989cc7a53b91d.html#a409565f20b2d6f03c19989cc7a53b91d">fl::SPITransposer::transpose4</a></div><div class="ttdeci">static bool transpose4(const fl::optional&lt; LaneData &gt; &amp;lane0, const fl::optional&lt; LaneData &gt; &amp;lane1, const fl::optional&lt; LaneData &gt; &amp;lane2, const fl::optional&lt; LaneData &gt; &amp;lane3, fl::span&lt; u8 &gt; output, const char **error=nullptr) FL_NOEXCEPT</div><div class="ttdoc">Transpose 4 lanes of data into interleaved quad-SPI format.</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d91/transposition_8cpp_8hpp_source.html#l00114">transposition.cpp.hpp:114</a></div></div>
-<div class="ttc" id="aclassfl_1_1_s_p_i_transposer_ab685cdd1edcc4b507a91d7dbfd5ba41b_html_ab685cdd1edcc4b507a91d7dbfd5ba41b"><div class="ttname"><a href="../../d3/dfa/classfl_1_1_s_p_i_transposer_ab685cdd1edcc4b507a91d7dbfd5ba41b.html#ab685cdd1edcc4b507a91d7dbfd5ba41b">fl::SPITransposer::transpose2</a></div><div class="ttdeci">static bool transpose2(const fl::optional&lt; LaneData &gt; &amp;lane0, const fl::optional&lt; LaneData &gt; &amp;lane1, fl::span&lt; u8 &gt; output, const char **error=nullptr) FL_NOEXCEPT</div><div class="ttdoc">Transpose 2 lanes of data into interleaved dual-SPI format.</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d91/transposition_8cpp_8hpp_source.html#l00053">transposition.cpp.hpp:53</a></div></div>
-<div class="ttc" id="aclassfl_1_1expected_abbee0bb98c9bf0a1391cb3e810ea4fd5_html_abbee0bb98c9bf0a1391cb3e810ea4fd5"><div class="ttname"><a href="../../d7/d93/classfl_1_1expected_abbee0bb98c9bf0a1391cb3e810ea4fd5.html#abbee0bb98c9bf0a1391cb3e810ea4fd5">fl::expected::failure</a></div><div class="ttdeci">static expected failure(E err, const char *msg=nullptr) FL_NOEXCEPT</div><div class="ttdoc">Create error result.</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d91/expected_8h_source.html#l00115">expected.h:115</a></div></div>
-<div class="ttc" id="aclassfl_1_1expected_ae712d6f5942009caa637e9181d47d40b_html_ae712d6f5942009caa637e9181d47d40b"><div class="ttname"><a href="../../d7/d93/classfl_1_1expected_ae712d6f5942009caa637e9181d47d40b.html#ae712d6f5942009caa637e9181d47d40b">fl::expected::success</a></div><div class="ttdeci">static expected success(T value) FL_NOEXCEPT</div><div class="ttdoc">Create successful result.</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d91/expected_8h_source.html#l00108">expected.h:108</a></div></div>
-<div class="ttc" id="aclassfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac_html_aef7ee7eb5254da1ba1eb4f3e0173d0ac"><div class="ttname"><a href="../../d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac">fl::span::size</a></div><div class="ttdeci">constexpr fl::size size() const FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d7a/span_8h_source.html#l00458">span.h:458</a></div></div>
-<div class="ttc" id="aclassfl_1_1spi_1_1_multi_lane_device_a522448a9b9b59c86768f41c9498dbe5a_html_a522448a9b9b59c86768f41c9498dbe5a"><div class="ttname"><a href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a522448a9b9b59c86768f41c9498dbe5a.html#a522448a9b9b59c86768f41c9498dbe5a">fl::spi::MultiLaneDevice::isReady</a></div><div class="ttdeci">bool isReady() const</div><div class="ttdoc">Check if device is initialized.</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d95/multi__lane__device_8cpp_8hpp_source.html#l00283">multi_lane_device.cpp.hpp:283</a></div></div>
-<div class="ttc" id="aclassfl_1_1spi_1_1_multi_lane_device_a66a4df428de2fc83a006ad0544e56b1b_html_a66a4df428de2fc83a006ad0544e56b1b"><div class="ttname"><a href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a66a4df428de2fc83a006ad0544e56b1b.html#a66a4df428de2fc83a006ad0544e56b1b">fl::spi::MultiLaneDevice::lane</a></div><div class="ttdeci">Lane &amp; lane(size_t lane_id)</div><div class="ttdoc">Get access to a specific lane.</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d95/multi__lane__device_8cpp_8hpp_source.html#l00287">multi_lane_device.cpp.hpp:287</a></div></div>
+<div class="line"><span class="lineno">  425</span>    <span class="keywordflow">if</span> (!transmit_ok) {</div>
+<div class="line"><span class="lineno">  426</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;MultiLaneDevice: Hardware transmit failed&quot;</span>);</div>
+<div class="line"><span class="lineno">  427</span>        <span class="keywordflow">return</span> <a class="code hl_function" href="../../d7/d93/classfl_1_1expected_a5a61d98092eb4671f7add861bd663d2f.html#a5a61d98092eb4671f7add861bd663d2f">Result&lt;void&gt;::failure</a>(SPIError::BUSY,</div>
+<div class="line"><span class="lineno">  428</span>            <span class="stringliteral">&quot;Hardware transmit failed&quot;</span>);</div>
+<div class="line"><span class="lineno">  429</span>    }</div>
+<div class="line"><span class="lineno">  430</span> </div>
+<div class="line"><span class="lineno">  431</span>    <span class="comment">// Clear lane buffers after starting transmission</span></div>
+<div class="line"><span class="lineno">  432</span>    <span class="keywordflow">for</span> (<span class="keyword">auto</span>&amp; <a class="code hl_function" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a66a4df428de2fc83a006ad0544e56b1b.html#a66a4df428de2fc83a006ad0544e56b1b">lane</a> : <a class="code hl_variable" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a.html#a8bc84fc4f04afca27bd5746cc2c2b06a">pImpl</a>-&gt;lanes) {</div>
+<div class="line"><span class="lineno">  433</span>        <a class="code hl_function" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a66a4df428de2fc83a006ad0544e56b1b.html#a66a4df428de2fc83a006ad0544e56b1b">lane</a>.clear();</div>
+<div class="line"><span class="lineno">  434</span>    }</div>
+<div class="line"><span class="lineno">  435</span> </div>
+<div class="line"><span class="lineno">  436</span>    <a class="code hl_define" href="../../d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a>(<span class="stringliteral">&quot;MultiLaneDevice: Flushed %s lanes (%s bytes per lane)&quot;</span>, <a class="code hl_variable" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a.html#a8bc84fc4f04afca27bd5746cc2c2b06a">pImpl</a>-&gt;lanes.size(), max_size);</div>
+<div class="line"><span class="lineno">  437</span> </div>
+<div class="line"><span class="lineno">  438</span>    <span class="comment">// Success - transmission started asynchronously</span></div>
+<div class="line"><span class="lineno">  439</span>    <span class="comment">// User must call waitComplete() manually to block until transmission completes</span></div>
+<div class="line"><span class="lineno">  440</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="../../d7/d93/classfl_1_1expected_aace779907e6f9b82b8480260eed069cf.html#aace779907e6f9b82b8480260eed069cf">Result&lt;void&gt;::success</a>();</div>
+<div class="line"><span class="lineno">  441</span>}</div>
+<div class="ttc" id="aclassfl_1_1_s_p_i_transposer_a2cf424ab57c25a1fa79f98ebb4d6c04a_html_a2cf424ab57c25a1fa79f98ebb4d6c04a"><div class="ttname"><a href="../../d3/dfa/classfl_1_1_s_p_i_transposer_a2cf424ab57c25a1fa79f98ebb4d6c04a.html#a2cf424ab57c25a1fa79f98ebb4d6c04a">fl::SPITransposer::transpose8</a></div><div class="ttdeci">static bool transpose8(const fl::optional&lt; LaneData &gt; lanes[8], fl::span&lt; u8 &gt; output, const char **error=nullptr) FL_NO_EXCEPT</div><div class="ttdoc">Transpose 8 lanes of data into interleaved octal-SPI format.</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d91/transposition_8cpp_8hpp_source.html#l00180">transposition.cpp.hpp:180</a></div></div>
+<div class="ttc" id="aclassfl_1_1_s_p_i_transposer_a3e0c7621e15a368bfe879182c97638fc_html_a3e0c7621e15a368bfe879182c97638fc"><div class="ttname"><a href="../../d3/dfa/classfl_1_1_s_p_i_transposer_a3e0c7621e15a368bfe879182c97638fc.html#a3e0c7621e15a368bfe879182c97638fc">fl::SPITransposer::transpose4</a></div><div class="ttdeci">static bool transpose4(const fl::optional&lt; LaneData &gt; &amp;lane0, const fl::optional&lt; LaneData &gt; &amp;lane1, const fl::optional&lt; LaneData &gt; &amp;lane2, const fl::optional&lt; LaneData &gt; &amp;lane3, fl::span&lt; u8 &gt; output, const char **error=nullptr) FL_NO_EXCEPT</div><div class="ttdoc">Transpose 4 lanes of data into interleaved quad-SPI format.</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d91/transposition_8cpp_8hpp_source.html#l00114">transposition.cpp.hpp:114</a></div></div>
+<div class="ttc" id="aclassfl_1_1_s_p_i_transposer_a685b1154e9612d603229bb9895a6e75e_html_a685b1154e9612d603229bb9895a6e75e"><div class="ttname"><a href="../../d3/dfa/classfl_1_1_s_p_i_transposer_a685b1154e9612d603229bb9895a6e75e.html#a685b1154e9612d603229bb9895a6e75e">fl::SPITransposer::transpose2</a></div><div class="ttdeci">static bool transpose2(const fl::optional&lt; LaneData &gt; &amp;lane0, const fl::optional&lt; LaneData &gt; &amp;lane1, fl::span&lt; u8 &gt; output, const char **error=nullptr) FL_NO_EXCEPT</div><div class="ttdoc">Transpose 2 lanes of data into interleaved dual-SPI format.</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d91/transposition_8cpp_8hpp_source.html#l00053">transposition.cpp.hpp:53</a></div></div>
+<div class="ttc" id="aclassfl_1_1expected_a5a61d98092eb4671f7add861bd663d2f_html_a5a61d98092eb4671f7add861bd663d2f"><div class="ttname"><a href="../../d7/d93/classfl_1_1expected_a5a61d98092eb4671f7add861bd663d2f.html#a5a61d98092eb4671f7add861bd663d2f">fl::expected::failure</a></div><div class="ttdeci">static expected failure(E err, const char *msg=nullptr) FL_NO_EXCEPT</div><div class="ttdoc">Create error result.</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d91/expected_8h_source.html#l00115">expected.h:115</a></div></div>
+<div class="ttc" id="aclassfl_1_1expected_aace779907e6f9b82b8480260eed069cf_html_aace779907e6f9b82b8480260eed069cf"><div class="ttname"><a href="../../d7/d93/classfl_1_1expected_aace779907e6f9b82b8480260eed069cf.html#aace779907e6f9b82b8480260eed069cf">fl::expected::success</a></div><div class="ttdeci">static expected success(T value) FL_NO_EXCEPT</div><div class="ttdoc">Create successful result.</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d91/expected_8h_source.html#l00108">expected.h:108</a></div></div>
+<div class="ttc" id="aclassfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa_html_aaf3daca1c2c8f93b2ac7b319989b22fa"><div class="ttname"><a href="../../d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa">fl::span::size</a></div><div class="ttdeci">constexpr fl::size size() const FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d7a/span_8h_source.html#l00483">span.h:483</a></div></div>
+<div class="ttc" id="aclassfl_1_1spi_1_1_multi_lane_device_a522448a9b9b59c86768f41c9498dbe5a_html_a522448a9b9b59c86768f41c9498dbe5a"><div class="ttname"><a href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a522448a9b9b59c86768f41c9498dbe5a.html#a522448a9b9b59c86768f41c9498dbe5a">fl::spi::MultiLaneDevice::isReady</a></div><div class="ttdeci">bool isReady() const</div><div class="ttdoc">Check if device is initialized.</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d95/multi__lane__device_8cpp_8hpp_source.html#l00282">multi_lane_device.cpp.hpp:282</a></div></div>
+<div class="ttc" id="aclassfl_1_1spi_1_1_multi_lane_device_a66a4df428de2fc83a006ad0544e56b1b_html_a66a4df428de2fc83a006ad0544e56b1b"><div class="ttname"><a href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a66a4df428de2fc83a006ad0544e56b1b.html#a66a4df428de2fc83a006ad0544e56b1b">fl::spi::MultiLaneDevice::lane</a></div><div class="ttdeci">Lane &amp; lane(size_t lane_id)</div><div class="ttdoc">Get access to a specific lane.</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d95/multi__lane__device_8cpp_8hpp_source.html#l00286">multi_lane_device.cpp.hpp:286</a></div></div>
 <div class="ttc" id="aclassfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a_html_a8bc84fc4f04afca27bd5746cc2c2b06a"><div class="ttname"><a href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a.html#a8bc84fc4f04afca27bd5746cc2c2b06a">fl::spi::MultiLaneDevice::pImpl</a></div><div class="ttdeci">fl::unique_ptr&lt; Impl &gt; pImpl</div><div class="ttdef"><b>Definition</b> <a href="../../da/dc3/multi__lane__device_8h_source.html#l00197">multi_lane_device.h:197</a></div></div>
-<div class="ttc" id="alog_8h_a868b194fdb2234182e76042d9fde3062_html_a868b194fdb2234182e76042d9fde3062"><div class="ttname"><a href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a></div><div class="ttdeci">#define FL_WARN(X)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00276">log.h:276</a></div></div>
-<div class="ttc" id="alog_8h_a8ccae77aa5fe30a41f19d233cb0de2c1_html_a8ccae77aa5fe30a41f19d233cb0de2c1"><div class="ttname"><a href="../../d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a></div><div class="ttdeci">#define FL_DBG</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00388">log.h:388</a></div></div>
+<div class="ttc" id="alog_8h_a4804912fba6eed63e1afd84b8768aced_html_a4804912fba6eed63e1afd84b8768aced"><div class="ttname"><a href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a></div><div class="ttdeci">#define FL_WARN(...)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00440">log.h:440</a></div></div>
+<div class="ttc" id="alog_8h_a8ccae77aa5fe30a41f19d233cb0de2c1_html_a8ccae77aa5fe30a41f19d233cb0de2c1"><div class="ttname"><a href="../../d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a></div><div class="ttdeci">#define FL_DBG</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00564">log.h:564</a></div></div>
 <div class="ttc" id="anamespacefl_a451542d0bf4d13f0bc00e055c18e6726_html_a451542d0bf4d13f0bc00e055c18e6726"><div class="ttname"><a href="../../d4/d36/namespacefl_a451542d0bf4d13f0bc00e055c18e6726.html#a451542d0bf4d13f0bc00e055c18e6726">fl::optional</a></div><div class="ttdeci">Optional&lt; T &gt; optional</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d62/optional_8h_source.html#l00016">optional.h:16</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d4/d7a/span_8h_source.html#l00461">fl::span&lt; T, Extent &gt;::data()</a>, <a class="el" href="../../d1/d91/expected_8h_source.html#l00115">fl::expected&lt; T, E &gt;::failure()</a>, <a class="el" href="../../d7/d7f/log_8h_source.html#l00388">FL_DBG</a>, <a class="el" href="../../d7/d7f/log_8h_source.html#l00276">FL_WARN</a>, <a class="el" href="../../dc/d95/multi__lane__device_8cpp_8hpp_source.html#l00283">isReady()</a>, <a class="el" href="../../dc/d95/multi__lane__device_8cpp_8hpp_source.html#l00287">lane()</a>, <a class="el" href="../../da/dc3/multi__lane__device_8h_source.html#l00197">pImpl</a>, <a class="el" href="../../d4/d7a/span_8h_source.html#l00458">fl::span&lt; T, Extent &gt;::size()</a>, <a class="el" href="../../d1/d91/expected_8h_source.html#l00108">fl::expected&lt; T, E &gt;::success()</a>, <a class="el" href="../../d7/d91/transposition_8cpp_8hpp_source.html#l00053">fl::SPITransposer::transpose2()</a>, <a class="el" href="../../d7/d91/transposition_8cpp_8hpp_source.html#l00114">fl::SPITransposer::transpose4()</a>, and <a class="el" href="../../d7/d91/transposition_8cpp_8hpp_source.html#l00180">fl::SPITransposer::transpose8()</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d7a/span_8h_source.html#l00486">fl::span&lt; T, Extent &gt;::data()</a>, <a class="el" href="../../d1/d91/expected_8h_source.html#l00115">fl::expected&lt; T, E &gt;::failure()</a>, <a class="el" href="../../d7/d7f/log_8h_source.html#l00564">FL_DBG</a>, <a class="el" href="../../d7/d7f/log_8h_source.html#l00440">FL_WARN</a>, <a class="el" href="../../dc/d95/multi__lane__device_8cpp_8hpp_source.html#l00282">isReady()</a>, <a class="el" href="../../dc/d95/multi__lane__device_8cpp_8hpp_source.html#l00286">lane()</a>, <a class="el" href="../../da/dc3/multi__lane__device_8h_source.html#l00197">pImpl</a>, <a class="el" href="../../d4/d7a/span_8h_source.html#l00483">fl::span&lt; T, Extent &gt;::size()</a>, <a class="el" href="../../d1/d91/expected_8h_source.html#l00108">fl::expected&lt; T, E &gt;::success()</a>, <a class="el" href="../../d7/d91/transposition_8cpp_8hpp_source.html#l00053">fl::SPITransposer::transpose2()</a>, <a class="el" href="../../d7/d91/transposition_8cpp_8hpp_source.html#l00114">fl::SPITransposer::transpose4()</a>, and <a class="el" href="../../d7/d91/transposition_8cpp_8hpp_source.html#l00180">fl::SPITransposer::transpose8()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a512a780a7050fa0e91e83c5dba1e17bc.html#a512a780a7050fa0e91e83c5dba1e17bc">operator=()</a>, and <a class="el" href="../../dc/d95/multi__lane__device_8cpp_8hpp_source.html#l00465">writeImpl()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a552f915191464193c98a7a385a6eb05b.html#a552f915191464193c98a7a385a6eb05b">operator=()</a>, and <a class="el" href="../../dc/d95/multi__lane__device_8cpp_8hpp_source.html#l00461">writeImpl()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -313,7 +310,7 @@ Zero-padding is NOT performed - size validation prevents unreliable chipset-spec
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d4/d68/namespacefl_1_1spi.html">spi</a></li><li class="navelem"><a class="el" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device.html">MultiLaneDevice</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:10 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:12 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

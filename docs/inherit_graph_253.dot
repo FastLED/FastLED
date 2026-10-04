@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::common_type_impl\l\< T, U, typename \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl.html#d4/d2b/structfl_1_1common__type__impl",tooltip=" "];
+  Node0 [id="Node000000",label="fl::Chromaticity",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d9c/structfl_1_1_chromaticity.html",tooltip="CIE 1931 xy chromaticity, independent of encoded storage and chipset."];
 }

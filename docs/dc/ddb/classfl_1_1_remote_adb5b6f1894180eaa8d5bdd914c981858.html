@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -117,19 +117,19 @@ $(function(){initNavTree('dc/ddb/classfl_1_1_remote_adb5b6f1894180eaa8d5bdd914c9
 
 <p>Unregister method by name. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../db/d04/remote_8cpp_8hpp_source.html#l00020">20</a> of file <a class="el" href="../../db/d04/remote_8cpp_8hpp_source.html">remote.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   20</span>                                        {</div>
-<div class="line"><span class="lineno">   21</span>    <span class="keywordtype">bool</span> removed = <a class="code hl_variable" href="../../dc/ddb/classfl_1_1_remote_ae45153c0f29b8f71a6eaf4318557b1d7.html#ae45153c0f29b8f71a6eaf4318557b1d7">mRpc</a>.unbind(name.<a class="code hl_function" href="../../de/d66/classfl_1_1basic__string_adc70863b5a29972d3e45c5e5b31e6686.html#adc70863b5a29972d3e45c5e5b31e6686">c_str</a>());</div>
-<div class="line"><span class="lineno">   22</span>    <span class="keywordflow">if</span> (removed) {</div>
-<div class="line"><span class="lineno">   23</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a>(<span class="stringliteral">&quot;Unregistered RPC function: &quot;</span> &lt;&lt; name);</div>
-<div class="line"><span class="lineno">   24</span>    }</div>
-<div class="line"><span class="lineno">   25</span>    <span class="keywordflow">return</span> removed;</div>
-<div class="line"><span class="lineno">   26</span>}</div>
-<div class="ttc" id="aclassfl_1_1_remote_ae45153c0f29b8f71a6eaf4318557b1d7_html_ae45153c0f29b8f71a6eaf4318557b1d7"><div class="ttname"><a href="../../dc/ddb/classfl_1_1_remote_ae45153c0f29b8f71a6eaf4318557b1d7.html#ae45153c0f29b8f71a6eaf4318557b1d7">fl::Remote::mRpc</a></div><div class="ttdeci">fl::Rpc mRpc</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d06/remote_8h_source.html#l00206">remote.h:206</a></div></div>
-<div class="ttc" id="aclassfl_1_1basic__string_adc70863b5a29972d3e45c5e5b31e6686_html_adc70863b5a29972d3e45c5e5b31e6686"><div class="ttname"><a href="../../de/d66/classfl_1_1basic__string_adc70863b5a29972d3e45c5e5b31e6686.html#adc70863b5a29972d3e45c5e5b31e6686">fl::basic_string::c_str</a></div><div class="ttdeci">const char * c_str() const FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d86/basic__string_8cpp_8hpp_source.html#l00032">basic_string.cpp.hpp:32</a></div></div>
-<div class="ttc" id="alog_8h_a8ccae77aa5fe30a41f19d233cb0de2c1_html_a8ccae77aa5fe30a41f19d233cb0de2c1"><div class="ttname"><a href="../../d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a></div><div class="ttdeci">#define FL_DBG</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00388">log.h:388</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../db/d04/remote_8cpp_8hpp_source.html#l00021">21</a> of file <a class="el" href="../../db/d04/remote_8cpp_8hpp_source.html">remote.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   21</span>                                        {</div>
+<div class="line"><span class="lineno">   22</span>    <span class="keywordtype">bool</span> removed = <a class="code hl_variable" href="../../dc/ddb/classfl_1_1_remote_ae45153c0f29b8f71a6eaf4318557b1d7.html#ae45153c0f29b8f71a6eaf4318557b1d7">mRpc</a>.unbind(name.<a class="code hl_function" href="../../de/d66/classfl_1_1basic__string_ac7b40587b637d254d009cc32f530fb83.html#ac7b40587b637d254d009cc32f530fb83">c_str</a>());</div>
+<div class="line"><span class="lineno">   23</span>    <span class="keywordflow">if</span> (removed) {</div>
+<div class="line"><span class="lineno">   24</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a>(<span class="stringliteral">&quot;Unregistered RPC function: %s&quot;</span>, name);</div>
+<div class="line"><span class="lineno">   25</span>    }</div>
+<div class="line"><span class="lineno">   26</span>    <span class="keywordflow">return</span> removed;</div>
+<div class="line"><span class="lineno">   27</span>}</div>
+<div class="ttc" id="aclassfl_1_1_remote_ae45153c0f29b8f71a6eaf4318557b1d7_html_ae45153c0f29b8f71a6eaf4318557b1d7"><div class="ttname"><a href="../../dc/ddb/classfl_1_1_remote_ae45153c0f29b8f71a6eaf4318557b1d7.html#ae45153c0f29b8f71a6eaf4318557b1d7">fl::Remote::mRpc</a></div><div class="ttdeci">fl::Rpc mRpc</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d06/remote_8h_source.html#l00225">remote.h:225</a></div></div>
+<div class="ttc" id="aclassfl_1_1basic__string_ac7b40587b637d254d009cc32f530fb83_html_ac7b40587b637d254d009cc32f530fb83"><div class="ttname"><a href="../../de/d66/classfl_1_1basic__string_ac7b40587b637d254d009cc32f530fb83.html#ac7b40587b637d254d009cc32f530fb83">fl::basic_string::c_str</a></div><div class="ttdeci">const char * c_str() const FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d86/basic__string_8cpp_8hpp_source.html#l00033">basic_string.cpp.hpp:33</a></div></div>
+<div class="ttc" id="alog_8h_a8ccae77aa5fe30a41f19d233cb0de2c1_html_a8ccae77aa5fe30a41f19d233cb0de2c1"><div class="ttname"><a href="../../d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a></div><div class="ttdeci">#define FL_DBG</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00564">log.h:564</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d1/d86/basic__string_8cpp_8hpp_source.html#l00032">fl::basic_string::c_str()</a>, <a class="el" href="../../d7/d7f/log_8h_source.html#l00388">FL_DBG</a>, and <a class="el" href="../../d6/d06/remote_8h_source.html#l00206">mRpc</a>.</p>
+<p class="reference">References <a class="el" href="../../d1/d86/basic__string_8cpp_8hpp_source.html#l00033">fl::basic_string::c_str()</a>, <a class="el" href="../../d7/d7f/log_8h_source.html#l00564">FL_DBG</a>, and <a class="el" href="../../d6/d06/remote_8h_source.html#l00225">mRpc</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -147,7 +147,7 @@ $(function(){initNavTree('dc/ddb/classfl_1_1_remote_adb5b6f1894180eaa8d5bdd914c9
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../dc/ddb/classfl_1_1_remote.html">Remote</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:09 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

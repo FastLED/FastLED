@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -111,7 +111,7 @@ $(function(){initNavTree('d2/ddc/test_8h_source.html','../../'); initResizable(t
 <div class="foldopen" id="foldopen00009" data-start="{" data-end="};">
 <div class="line"><a id="l00009" name="l00009"></a><span class="lineno"><a class="line" href="../../d2/ddc/test_8h.html">    9</a></span><span class="keyword">struct </span><a class="code hl_struct" href="../../d2/ddc/test_8h.html#d3/d2f/struct_pin_toggle">PinToggle</a> {</div>
 <div class="line"><a id="l00010" name="l00010"></a><span class="lineno"><a class="line" href="../../d2/ddc/test_8h.html#a60ef9e94a4b03029a8f62ffd8eb30cf6">   10</a></span>    <span class="keywordtype">bool</span> <a class="code hl_variable" href="../../d2/ddc/test_8h.html#a60ef9e94a4b03029a8f62ffd8eb30cf6">is_high</a>;       <span class="comment">// Pin state (HIGH or LOW)</span></div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno"><a class="line" href="../../d2/ddc/test_8h.html#a3ededade8c2295c2cdb0fa6599b0757d">   11</a></span>    uint32_t <a class="code hl_variable" href="../../d2/ddc/test_8h.html#a3ededade8c2295c2cdb0fa6599b0757d">delay_us</a>;  <span class="comment">// Delay in microseconds after setting state</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno"><a class="line" href="../../d2/ddc/test_8h.html#a3ededade8c2295c2cdb0fa6599b0757d">   11</a></span>    <a class="code hl_typedef" href="../../df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a> <a class="code hl_variable" href="../../d2/ddc/test_8h.html#a3ededade8c2295c2cdb0fa6599b0757d">delay_us</a>;  <span class="comment">// Delay in microseconds after setting state</span></div>
 <div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span>};</div>
 </div>
 <div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span></div>
@@ -122,17 +122,18 @@ $(function(){initNavTree('d2/ddc/test_8h_source.html','../../'); initResizable(t
 <div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span><span class="keywordtype">void</span> <a class="code hl_function" href="../../d2/ddc/test_8h_a18bbd716bb44e0b5a82f060f1f47dc11.html#a18bbd716bb44e0b5a82f060f1f47dc11">executeToggles</a>(<a class="code hl_class" href="../../d3/d2b/classfl_1_1_rx_channel.html">fl::RxChannel</a>&amp; rx,</div>
 <div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>                    <a class="code hl_class" href="../../d0/d08/classfl_1_1span.html">fl::span&lt;const PinToggle&gt;</a> toggles,</div>
 <div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>                    <span class="keywordtype">int</span> pin_tx,</div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>                    uint32_t wait_ms);</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>                    <a class="code hl_typedef" href="../../df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a> wait_ms);</div>
 <div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span></div>
 <div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span><span class="keywordtype">bool</span> <a class="code hl_function" href="../../d2/ddc/test_8h_a9283a643baad57f59ff1140bfab330e0.html#a9283a643baad57f59ff1140bfab330e0">validateEdgeTiming</a>(<a class="code hl_class" href="../../d0/d08/classfl_1_1span.html">fl::span&lt;const fl::EdgeTime&gt;</a> edges,</div>
 <div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>                        <span class="keywordtype">size_t</span> edge_count,</div>
 <div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>                        <a class="code hl_class" href="../../d0/d08/classfl_1_1span.html">fl::span&lt;const PinToggle&gt;</a> expected_pattern,</div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>                        uint32_t tolerance_percent);</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>                        <a class="code hl_typedef" href="../../df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a> tolerance_percent);</div>
 <div class="ttc" id="aclassfl_1_1_rx_channel_html"><div class="ttname"><a href="../../d3/d2b/classfl_1_1_rx_channel.html">fl::RxChannel</a></div><div class="ttdef"><b>Definition</b> <a href="../../da/d7b/rx_2channel_8h_source.html#l00016">channel.h:16</a></div></div>
 <div class="ttc" id="aclassfl_1_1shared__ptr_html"><div class="ttname"><a href="../../d1/d74/classfl_1_1shared__ptr.html">fl::shared_ptr</a></div><div class="ttdef"><b>Definition</b> <a href="../../df/d6a/shared__ptr_8h_source.html#l00155">shared_ptr.h:155</a></div></div>
-<div class="ttc" id="aclassfl_1_1span_html"><div class="ttname"><a href="../../d0/d08/classfl_1_1span.html">fl::span</a></div><div class="ttdef"><b>Definition</b> <a href="../../d4/d7a/span_8h_source.html#l00385">span.h:385</a></div></div>
+<div class="ttc" id="aclassfl_1_1span_html"><div class="ttname"><a href="../../d0/d08/classfl_1_1span.html">fl::span</a></div><div class="ttdef"><b>Definition</b> <a href="../../d4/d7a/span_8h_source.html#l00410">span.h:410</a></div></div>
 <div class="ttc" id="alog_8h_html"><div class="ttname"><a href="../../d7/d7f/log_8h.html">log.h</a></div><div class="ttdoc">Centralized logging categories for FastLED hardware interfaces and subsystems.</div></div>
 <div class="ttc" id="arx_2channel_8h_html"><div class="ttname"><a href="../../da/d7b/rx_2channel_8h.html">channel.h</a></div></div>
+<div class="ttc" id="astdint_8h_ae8a835bf6e050b01cc449644a343aa73_html_ae8a835bf6e050b01cc449644a343aa73"><div class="ttname"><a href="../../df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a></div><div class="ttdeci">fl::u32 uint32_t</div><div class="ttdef"><b>Definition</b> <a href="../../df/dd8/stdint_8h_source.html#l00218">stdint.h:218</a></div></div>
 <div class="ttc" id="atest_8h_a18bbd716bb44e0b5a82f060f1f47dc11_html_a18bbd716bb44e0b5a82f060f1f47dc11"><div class="ttname"><a href="../../d2/ddc/test_8h_a18bbd716bb44e0b5a82f060f1f47dc11.html#a18bbd716bb44e0b5a82f060f1f47dc11">executeToggles</a></div><div class="ttdeci">void executeToggles(fl::RxChannel &amp;rx, fl::span&lt; const PinToggle &gt; toggles, int pin_tx, uint32_t wait_ms)</div><div class="ttdoc">Execute pin toggles and initialize RX channel for capture.</div><div class="ttdef"><b>Definition</b> <a href="../../df/dac/test_8cpp_source.html#l00036">test.cpp:36</a></div></div>
 <div class="ttc" id="atest_8h_a2e8aa956c129f79502ef2a6ad020ba4c_html_a2e8aa956c129f79502ef2a6ad020ba4c"><div class="ttname"><a href="../../d2/ddc/test_8h_a2e8aa956c129f79502ef2a6ad020ba4c.html#a2e8aa956c129f79502ef2a6ad020ba4c">testRxChannelSanity</a></div><div class="ttdeci">bool testRxChannelSanity(fl::shared_ptr&lt; fl::RxChannel &gt; rx, int pin_tx)</div><div class="ttdoc">Test RX channel functionality with low-frequency pattern.</div><div class="ttdef"><b>Definition</b> <a href="../../df/dac/test_8cpp_source.html#l00160">test.cpp:160</a></div></div>
 <div class="ttc" id="atest_8h_a9283a643baad57f59ff1140bfab330e0_html_a9283a643baad57f59ff1140bfab330e0"><div class="ttname"><a href="../../d2/ddc/test_8h_a9283a643baad57f59ff1140bfab330e0.html#a9283a643baad57f59ff1140bfab330e0">validateEdgeTiming</a></div><div class="ttdeci">bool validateEdgeTiming(fl::span&lt; const fl::EdgeTime &gt; edges, size_t edge_count, fl::span&lt; const PinToggle &gt; expected_pattern, uint32_t tolerance_percent)</div><div class="ttdoc">Validate captured edge timings against expected pattern.</div><div class="ttdef"><b>Definition</b> <a href="../../df/dac/test_8cpp_source.html#l00060">test.cpp:60</a></div></div>
@@ -147,7 +148,7 @@ $(function(){initNavTree('d2/ddc/test_8h_source.html','../../'); initResizable(t
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_06d068aec9e4416f35d5578a9a40b41b.html">RX</a></li><li class="navelem"><a class="el" href="../../d2/ddc/test_8h.html">test.h</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:06:58 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:08:59 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

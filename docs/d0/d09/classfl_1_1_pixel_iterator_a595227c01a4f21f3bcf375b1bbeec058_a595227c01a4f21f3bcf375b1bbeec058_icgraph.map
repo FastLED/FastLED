@@ -1,0 +1,12 @@
+<map id="fl::PixelIterator::loadAndScaleRGB" name="fl::PixelIterator::loadAndScaleRGB">
+<area shape="rect" id="Node000001" title=" " alt="" coords="401,39,540,79"/>
+<area shape="rect" id="Node000002" href="$d0/d09/classfl_1_1_pixel_iterator_a65edf3ee981db4bd3e380a418163147d.html#a65edf3ee981db4bd3e380a418163147d" title="One pixel at the source&#39;s own precision, wire&#45;ordered." alt="" coords="199,68,353,108"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="388,74,354,79,353,74,387,69"/>
+<area shape="rect" id="Node000003" href="$d0/d09/classfl_1_1_pixel_iterator_a02a0090c88b4f5b4dde6805eefc017bc.html#a02a0090c88b4f5b4dde6805eefc017bc" title="Encode pixels in HD108 format (zero allocation)" alt="" coords="15,5,141,45"/>
+<area shape="poly" id="edge5_Node000001_Node000003" title=" " alt="" coords="387,54,141,33,141,28,388,49"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="198,66,140,48,142,42,200,61"/>
+<area shape="rect" id="Node000004" href="$d0/d09/classfl_1_1_pixel_iterator_a82d20a0a0c4ec64b0b1cb78eef1fec19.html#a82d20a0a0c4ec64b0b1cb78eef1fec19" title="LPD6803 over a colour&#45;managed channel&#39;s 16&#45;bit drives, quantized once to the chip&#39;s 5 bits per channe..." alt="" coords="5,69,151,109"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="185,91,151,92,151,86,185,86"/>
+<area shape="rect" id="Node000005" href="$d0/d09/classfl_1_1_pixel_iterator_afd142c84c03d9cd8cef98e1aaf01070c.html#afd142c84c03d9cd8cef98e1aaf01070c" title="LPD8806 over a colour&#45;managed channel&#39;s 16&#45;bit drives, quantized once to the chip&#39;s 7 bits (B3: one f..." alt="" coords="5,133,151,173"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="202,115,140,136,138,131,200,110"/>
+</map>

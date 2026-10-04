@@ -1,6 +1,10 @@
 <map id="fl::anonymous_namespace{pir::cpp::hpp}::getButtonName" name="fl::anonymous_namespace{pir::cpp::hpp}::getButtonName">
 <area shape="rect" id="Node000001" title=" " alt="" coords="5,29,235,69"/>
-<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="79,30,77,20,83,10,98,5,120,3,146,6,160,13,157,18,144,11,120,8,99,10,86,15,82,21,84,28"/>
-<area shape="rect" id="Node000002" href="$d1/d27/classfl_1_1sstream_a08170cac6eba7241f099ae16730f6f8e.html#a08170cac6eba7241f099ae16730f6f8e" title=" " alt="" coords="283,37,399,62"/>
-<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="235,47,269,47,269,52,235,52"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="75,30,72,20,79,10,95,5,120,3,148,6,164,13,161,18,147,11,120,8,97,10,82,15,77,21,80,28"/>
+<area shape="rect" id="Node000002" href="$d9/d5b/classfl_1_1_singleton_ad5cb1b704e17768f75802673abb0ff75.html#ad5cb1b704e17768f75802673abb0ff75" title=" " alt="" coords="283,11,445,37"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="235,35,269,31,269,36,235,40"/>
+<area shape="rect" id="Node000004" href="$d1/d27/classfl_1_1sstream_a904115dfd2a7e462177b6409c9b842d6.html#a904115dfd2a7e462177b6409c9b842d6" title=" " alt="" coords="306,61,422,86"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="235,58,292,64,292,69,235,63"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a1e67c0c24ebcd98fcf8554753d1639a6.html#a1e67c0c24ebcd98fcf8554753d1639a6" title=" " alt="" coords="493,11,632,37"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="446,21,479,21,479,27,446,27"/>
 </map>

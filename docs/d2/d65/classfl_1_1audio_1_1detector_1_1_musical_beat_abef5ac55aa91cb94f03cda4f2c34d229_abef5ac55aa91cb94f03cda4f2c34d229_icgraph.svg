@@ -87,7 +87,7 @@ var sectionId = 'dynsection-1';
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_a8ead4e67bdff0c0600d13fc942313879.html#a8ead4e67bdff0c0600d13fc942313879" target="_top" xlink:title=" ">
+<g id="a_Node000003"><a xlink:href="../../d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_aa4122c266cb3b2e9bcdf329ba856a4ae.html#aa4122c266cb3b2e9bcdf329ba856a4ae" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="157,-30 0,-30 0,0 157,0 157,-30"/>
 <text text-anchor="start" x="8" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">fl::audio::detector</text>
 <text text-anchor="middle" x="78.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">::MusicalBeat::~MusicalBeat</text>

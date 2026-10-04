@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -121,47 +121,13 @@ $(function(){initNavTree('dc/ddb/classfl_1_1_remote_aba1acb4e08a22e5dfe0d19bc4a1
 
 <p>Send async response for a previously-called async method The request ID is automatically retrieved from internal storage. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../db/d04/remote_8cpp_8hpp_source.html#l00034">34</a> of file <a class="el" href="../../db/d04/remote_8cpp_8hpp_source.html">remote.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   34</span>                                                                       {</div>
-<div class="line"><span class="lineno">   35</span>    fl::string methodName(method);</div>
-<div class="line"><span class="lineno">   36</span>    <span class="keyword">auto</span> it = <a class="code hl_variable" href="../../dc/ddb/classfl_1_1_remote_a9a3bde52689ae0ac0090d38ce527fffb.html#a9a3bde52689ae0ac0090d38ce527fffb">mAsyncRequests</a>.find(methodName);</div>
-<div class="line"><span class="lineno">   37</span>    <span class="keywordflow">if</span> (it == <a class="code hl_variable" href="../../dc/ddb/classfl_1_1_remote_a9a3bde52689ae0ac0090d38ce527fffb.html#a9a3bde52689ae0ac0090d38ce527fffb">mAsyncRequests</a>.end()) {</div>
-<div class="line"><span class="lineno">   38</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;No pending async request for method: &quot;</span> &lt;&lt; method);</div>
-<div class="line"><span class="lineno">   39</span>        <span class="keywordflow">return</span>;</div>
-<div class="line"><span class="lineno">   40</span>    }</div>
-<div class="line"><span class="lineno">   41</span> </div>
-<div class="line"><span class="lineno">   42</span>    <span class="keywordtype">int</span> <a class="code hl_variable" href="../../d7/d08/_rpc_bidirectional_8ino_a29069ed90dd5aeb496309302da4c4367.html#a29069ed90dd5aeb496309302da4c4367">requestId</a> = it-&gt;second.requestId;</div>
-<div class="line"><span class="lineno">   43</span>    <a class="code hl_variable" href="../../dc/ddb/classfl_1_1_remote_a9a3bde52689ae0ac0090d38ce527fffb.html#a9a3bde52689ae0ac0090d38ce527fffb">mAsyncRequests</a>.erase(it);</div>
-<div class="line"><span class="lineno">   44</span> </div>
-<div class="line"><span class="lineno">   45</span>    <span class="comment">// Build JSON-RPC response</span></div>
-<div class="line"><span class="lineno">   46</span>    fl::json <a class="code hl_variable" href="../../d8/d94/namespacetest__quick_a00071f2b3e01fb8d2b4e70970ed2d6ce.html#a00071f2b3e01fb8d2b4e70970ed2d6ce">response</a> = <a class="code hl_function" href="../../de/d40/classfl_1_1json_af8bc0968107152344bfa8468bba76f54.html#af8bc0968107152344bfa8468bba76f54">fl::json::object</a>();</div>
-<div class="line"><span class="lineno">   47</span>    <a class="code hl_variable" href="../../d8/d94/namespacetest__quick_a00071f2b3e01fb8d2b4e70970ed2d6ce.html#a00071f2b3e01fb8d2b4e70970ed2d6ce">response</a>.set(<span class="stringliteral">&quot;jsonrpc&quot;</span>, <span class="stringliteral">&quot;2.0&quot;</span>);</div>
-<div class="line"><span class="lineno">   48</span>    <a class="code hl_variable" href="../../d8/d94/namespacetest__quick_a00071f2b3e01fb8d2b4e70970ed2d6ce.html#a00071f2b3e01fb8d2b4e70970ed2d6ce">response</a>.set(<span class="stringliteral">&quot;id&quot;</span>, <a class="code hl_variable" href="../../d7/d08/_rpc_bidirectional_8ino_a29069ed90dd5aeb496309302da4c4367.html#a29069ed90dd5aeb496309302da4c4367">requestId</a>);</div>
-<div class="line"><span class="lineno">   49</span>    <a class="code hl_variable" href="../../d8/d94/namespacetest__quick_a00071f2b3e01fb8d2b4e70970ed2d6ce.html#a00071f2b3e01fb8d2b4e70970ed2d6ce">response</a>.set(<span class="stringliteral">&quot;result&quot;</span>, <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>);</div>
-<div class="line"><span class="lineno">   50</span> </div>
-<div class="line"><span class="lineno">   51</span>    <span class="comment">// Send via response sink</span></div>
-<div class="line"><span class="lineno">   52</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../dc/d00/classfl_1_1_server_af8bf9e37972cdf62f09595e7ca66e800.html#af8bf9e37972cdf62f09595e7ca66e800">mResponseSink</a>) {</div>
-<div class="line"><span class="lineno">   53</span>        <a class="code hl_variable" href="../../dc/d00/classfl_1_1_server_af8bf9e37972cdf62f09595e7ca66e800.html#af8bf9e37972cdf62f09595e7ca66e800">mResponseSink</a>(response);</div>
-<div class="line"><span class="lineno">   54</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a>(<span class="stringliteral">&quot;Sent async response for &quot;</span> &lt;&lt; method &lt;&lt; <span class="stringliteral">&quot; (id=&quot;</span> &lt;&lt; <a class="code hl_variable" href="../../d7/d08/_rpc_bidirectional_8ino_a29069ed90dd5aeb496309302da4c4367.html#a29069ed90dd5aeb496309302da4c4367">requestId</a> &lt;&lt; <span class="stringliteral">&quot;)&quot;</span>);</div>
-<div class="line"><span class="lineno">   55</span>    }</div>
-<div class="line"><span class="lineno">   56</span>}</div>
-<div class="ttc" id="a_rpc_bidirectional_8ino_a29069ed90dd5aeb496309302da4c4367_html_a29069ed90dd5aeb496309302da4c4367"><div class="ttname"><a href="../../d7/d08/_rpc_bidirectional_8ino_a29069ed90dd5aeb496309302da4c4367.html#a29069ed90dd5aeb496309302da4c4367">requestId</a></div><div class="ttdeci">int requestId</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d08/_rpc_bidirectional_8ino_source.html#l00087">RpcBidirectional.ino:87</a></div></div>
-<div class="ttc" id="aclassfl_1_1_remote_a9a3bde52689ae0ac0090d38ce527fffb_html_a9a3bde52689ae0ac0090d38ce527fffb"><div class="ttname"><a href="../../dc/ddb/classfl_1_1_remote_a9a3bde52689ae0ac0090d38ce527fffb.html#a9a3bde52689ae0ac0090d38ce527fffb">fl::Remote::mAsyncRequests</a></div><div class="ttdeci">fl::unordered_map&lt; fl::string, AsyncRequest &gt; mAsyncRequests</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d06/remote_8h_source.html#l00201">remote.h:201</a></div></div>
-<div class="ttc" id="aclassfl_1_1_server_af8bf9e37972cdf62f09595e7ca66e800_html_af8bf9e37972cdf62f09595e7ca66e800"><div class="ttname"><a href="../../dc/d00/classfl_1_1_server_af8bf9e37972cdf62f09595e7ca66e800.html#af8bf9e37972cdf62f09595e7ca66e800">fl::Server::mResponseSink</a></div><div class="ttdeci">ResponseSink mResponseSink</div><div class="ttdef"><b>Definition</b> <a href="../../da/dad/remote_2rpc_2server_8h_source.html#l00089">server.h:89</a></div></div>
-<div class="ttc" id="aclassfl_1_1json_af8bc0968107152344bfa8468bba76f54_html_af8bc0968107152344bfa8468bba76f54"><div class="ttname"><a href="../../de/d40/classfl_1_1json_af8bc0968107152344bfa8468bba76f54.html#af8bc0968107152344bfa8468bba76f54">fl::json::object</a></div><div class="ttdeci">static json object() FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d05/json_8h_source.html#l00692">json.h:692</a></div></div>
-<div class="ttc" id="alog_8h_a868b194fdb2234182e76042d9fde3062_html_a868b194fdb2234182e76042d9fde3062"><div class="ttname"><a href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a></div><div class="ttdeci">#define FL_WARN(X)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00276">log.h:276</a></div></div>
-<div class="ttc" id="alog_8h_a8ccae77aa5fe30a41f19d233cb0de2c1_html_a8ccae77aa5fe30a41f19d233cb0de2c1"><div class="ttname"><a href="../../d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a></div><div class="ttdeci">#define FL_DBG</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00388">log.h:388</a></div></div>
-<div class="ttc" id="anamespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99_html_a8fa65f6529fc3eb6a174cb304a4bfc99"><div class="ttname"><a href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">fl::result</a></div><div class="ttdeci">expected&lt; T, E &gt; result</div><div class="ttdoc">Alias for expected (Rust-style naming)</div><div class="ttdef"><b>Definition</b> <a href="../../de/d93/result_8h_source.html#l00031">result.h:31</a></div></div>
-<div class="ttc" id="anamespacetest__quick_a00071f2b3e01fb8d2b4e70970ed2d6ce_html_a00071f2b3e01fb8d2b4e70970ed2d6ce"><div class="ttname"><a href="../../d8/d94/namespacetest__quick_a00071f2b3e01fb8d2b4e70970ed2d6ce.html#a00071f2b3e01fb8d2b4e70970ed2d6ce">test_quick.response</a></div><div class="ttdeci">response</div><div class="ttdef"><b>Definition</b> <a href="../../d8/def/test__quick_8py_source.html#l00031">test_quick.py:31</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../db/d04/remote_8cpp_8hpp_source.html#l00121">121</a> of file <a class="el" href="../../db/d04/remote_8cpp_8hpp_source.html">remote.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  121</span>                                                             {</div>
+<div class="line"><span class="lineno">  122</span>    <a class="code hl_define" href="../../d7/d7f/log_8h_a770ead75437216fdd64b4d0c80e115e4.html#a770ead75437216fdd64b4d0c80e115e4">FL_WARN_LIT</a>(<span class="stringliteral">&quot;sendAsyncResponse: async dispatch not supported on Low-memory targets&quot;</span>);</div>
+<div class="line"><span class="lineno">  123</span>}</div>
+<div class="ttc" id="alog_8h_a770ead75437216fdd64b4d0c80e115e4_html_a770ead75437216fdd64b4d0c80e115e4"><div class="ttname"><a href="../../d7/d7f/log_8h_a770ead75437216fdd64b4d0c80e115e4.html#a770ead75437216fdd64b4d0c80e115e4">FL_WARN_LIT</a></div><div class="ttdeci">#define FL_WARN_LIT(LITERAL)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00458">log.h:458</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d7/d7f/log_8h_source.html#l00388">FL_DBG</a>, <a class="el" href="../../d7/d7f/log_8h_source.html#l00276">FL_WARN</a>, <a class="el" href="../../d6/d06/remote_8h_source.html#l00201">mAsyncRequests</a>, <a class="el" href="../../da/dad/remote_2rpc_2server_8h_source.html#l00089">fl::Server::mResponseSink</a>, <a class="el" href="../../d4/d05/json_8h_source.html#l00692">fl::json::object()</a>, and <a class="el" href="../../d7/d08/_rpc_bidirectional_8ino_source.html#l00087">requestId</a>.</p>
-<div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
-  <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
-<div id="dynsection-0-summary" class="dynsummary" style="display:block;">
-</div>
-<div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../dc/ddb/classfl_1_1_remote_aba1acb4e08a22e5dfe0d19bc4a15eda2_aba1acb4e08a22e5dfe0d19bc4a15eda2_cgraph.svg" width="403" height="36"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
-</div>
+<p class="reference">References <a class="el" href="../../d7/d7f/log_8h_source.html#l00458">FL_WARN_LIT</a>.</p>
 
 </div>
 </div>
@@ -172,7 +138,7 @@ $(function(){initNavTree('dc/ddb/classfl_1_1_remote_aba1acb4e08a22e5dfe0d19bc4a1
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../dc/ddb/classfl_1_1_remote.html">Remote</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:09 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

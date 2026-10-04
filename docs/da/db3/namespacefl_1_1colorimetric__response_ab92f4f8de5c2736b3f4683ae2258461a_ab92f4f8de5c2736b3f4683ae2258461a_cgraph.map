@@ -1,0 +1,10 @@
+<map id="fl::colorimetric_response::solve_rgb_colorimetric" name="fl::colorimetric_response::solve_rgb_colorimetric">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,17,188,57"/>
+<area shape="rect" id="Node000002" href="$da/db3/namespacefl_1_1colorimetric__response_a39d0dc3084f4ee0f0e7cc7caba1e090b.html#a39d0dc3084f4ee0f0e7cc7caba1e090b" title=" " alt="" coords="467,21,649,61"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="188,15,236,9,327,3,419,9,463,15,463,21,418,14,327,8,236,14,189,20"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a07c69292ef50aa1083046faff1c52ead.html#a07c69292ef50aa1083046faff1c52ead" title=" " alt="" coords="294,24,361,49"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="188,34,280,34,280,39,188,39"/>
+<area shape="rect" id="Node000004" href="$da/db3/namespacefl_1_1colorimetric__response_aa4bc8a3d9a3c71fb10cfaa837de0d1d3.html#aa4bc8a3d9a3c71fb10cfaa837de0d1d3" title=" " alt="" coords="236,74,419,114"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="178,54,234,68,232,73,177,59"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="414,71,457,61,458,66,415,77"/>
+</map>

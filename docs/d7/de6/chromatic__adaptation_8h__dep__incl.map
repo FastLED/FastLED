@@ -1,0 +1,14 @@
+<map id="fl/gfx/chromatic_adaptation.h" name="fl/gfx/chromatic_adaptation.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="144,5,357,31"/>
+<area shape="rect" id="Node000002" href="$d3/d80/chromatic__adaptation_8cpp_8hpp.html" title=" " alt="" coords="5,79,261,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="221,40,154,81,151,76,219,35"/>
+<area shape="rect" id="Node000006" href="$d4/d9b/pipeline_8cpp_8hpp.html" title=" " alt="" coords="286,79,453,104"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="283,35,351,76,349,81,280,40"/>
+<area shape="rect" id="Node000003" href="$d5/d88/fl_2gfx_2__build_8cpp_8hpp.html" title="Unity build for fl/gfx/ — graphics types, primitives, and simulators." alt="" coords="174,152,327,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="165,109,233,149,230,154,163,113"/>
+<area shape="rect" id="Node000004" href="$d1/deb/fl_2__build_8cpp_8hpp.html" title=" " alt="" coords="108,225,236,251"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="230,189,187,227,183,223,226,185"/>
+<area shape="rect" id="Node000005" href="$db/d06/fl_8gfx_09_8cpp.html" title="Unity build: recursive includes from src/fl/gfx/." alt="" coords="260,225,401,251"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="275,184,319,223,316,227,272,188"/>
+<area shape="poly" id="edge6_Node000006_Node000003" title=" " alt="" coords="340,113,271,154,269,149,337,109"/>
+</map>

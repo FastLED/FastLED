@@ -1,0 +1,16 @@
+<map id="fl::task::make_rejected_promise" name="fl::task::make_rejected_promise">
+<area shape="rect" id="Node000001" title="Convenience function to create a rejected Promise (const char* overload)" alt="" coords="5,63,176,103"/>
+<area shape="rect" id="Node000002" href="$d0/d34/classfl_1_1task_1_1_promise_a04643dcf8b825823fa3f033265c33b90.html#a04643dcf8b825823fa3f033265c33b90" title="Create a rejected Promise with error." alt="" coords="224,63,359,103"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="177,80,210,80,210,85,177,85"/>
+<area shape="rect" id="Node000003" href="$d0/d34/classfl_1_1task_1_1_promise_ae75706ae1089e184850eb571f0b8c3aa.html#ae75706ae1089e184850eb571f0b8c3aa" title="Default constructor &#45; creates invalid Promise." alt="" coords="589,5,724,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="356,60,406,48,493,35,575,27,576,33,494,40,407,53,357,65"/>
+<area shape="rect" id="Node000004" href="$d0/d34/classfl_1_1task_1_1_promise_abdb44418713e7f012b6860d6cf6aa69a.html#abdb44418713e7f012b6860d6cf6aa69a" title="Create a pending Promise." alt="" coords="407,63,541,103"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="359,80,392,80,392,85,359,85"/>
+<area shape="rect" id="Node000006" href="$d0/d34/classfl_1_1task_1_1_promise_a2d59ab585530b9bbc2ec94181c99a60d.html#a2d59ab585530b9bbc2ec94181c99a60d" title="Get the error (only valid if is_rejected() returns true)" alt="" coords="407,127,541,167"/>
+<area shape="poly" id="edge6_Node000002_Node000006" title=" " alt="" coords="350,100,404,120,403,125,348,105"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="537,60,578,47,580,52,539,65"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af" title=" " alt="" coords="594,70,719,95"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="541,80,580,80,580,85,541,85"/>
+<area shape="rect" id="Node000007" href="$d0/d34/classfl_1_1task_1_1_promise_a4df3cf33aa75a0482148e9d6bf1d34eb.html#a4df3cf33aa75a0482148e9d6bf1d34eb" title="Check if Promise is valid." alt="" coords="589,127,724,167"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="541,144,575,144,575,149,541,149"/>
+</map>

@@ -1,0 +1,7 @@
+<map id="fl::divide64By32" name="fl::divide64By32">
+<area shape="rect" id="Node000001" title="(hi:lo) / divisor, for a quotient that fits 32 bits." alt="" coords="207,31,333,56"/>
+<area shape="rect" id="Node000002" href="$d9/d9f/classfl_1_1s16x16_a5c9b3eafa0cfb512a10821a87587067e.html#a5c9b3eafa0cfb512a10821a87587067e" title=" " alt="" coords="6,5,158,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="192,36,158,31,159,26,193,30"/>
+<area shape="rect" id="Node000003" href="$db/d56/classfl_1_1u16x16_a43e583b280d3a83d23e16671fdb34582.html#a43e583b280d3a83d23e16671fdb34582" title=" " alt="" coords="5,55,159,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="193,56,160,60,159,55,193,50"/>
+</map>

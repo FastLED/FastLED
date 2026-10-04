@@ -1,12 +1,23 @@
 <map id="autoresearch::simd_check::benchS8x8_4" name="autoresearch::simd_check::benchS8x8_4">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,59,167,99"/>
-<area shape="rect" id="Node000002" href="$db/d64/classfl_1_1s8x8_adeb5029b72e9b9d6310bef95a732145f.html#adeb5029b72e9b9d6310bef95a732145f" title=" " alt="" coords="215,29,353,55"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="166,62,202,55,203,60,167,67"/>
-<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a95a89c7ba649b9bd2c9136c0f517d82f.html#a95a89c7ba649b9bd2c9136c0f517d82f" title="Universal microsecond timer &#45; returns microseconds since system startup." alt="" coords="243,103,325,128"/>
-<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="167,91,229,103,228,108,166,97"/>
-<area shape="rect" id="Node000003" href="$db/d64/classfl_1_1s8x8_a52b98c4d41c497848d46938ec749f394.html#a52b98c4d41c497848d46938ec749f394" title=" " alt="" coords="401,5,509,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="353,30,387,25,388,30,354,35"/>
-<area shape="rect" id="Node000004" href="$db/d64/classfl_1_1s8x8_a8ebd422c6626f34eba6ccbb6b17560b4.html#a8ebd422c6626f34eba6ccbb6b17560b4" title=" " alt="" coords="405,55,506,80"/>
-<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="354,50,391,55,390,60,353,55"/>
-<area shape="poly" id="edge5_Node000005_Node000005" title=" " alt="" coords="255,104,249,94,253,85,265,78,284,76,307,79,317,88,314,92,305,84,284,81,266,83,257,88,255,94,260,101"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,95,167,135"/>
+<area shape="rect" id="Node000002" href="$db/d64/classfl_1_1s8x8_aadf0bbcd407a8c3eb1cc7fc8b1230a2c.html#aadf0bbcd407a8c3eb1cc7fc8b1230a2c" title=" " alt="" coords="253,29,391,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="134,93,214,63,244,55,245,60,215,69,135,98"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a4cfbbd90ced1c04107934a3c05d3e679.html#a4cfbbd90ced1c04107934a3c05d3e679" title="Universal microsecond timer &#45; returns microseconds since system startup." alt="" coords="281,103,363,128"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="167,113,267,113,267,118,167,118"/>
+<area shape="rect" id="Node000006" href="$d9/d1a/namespaceautoresearch_1_1simd__check_a3597f8ae57d802ae5f1e2fe16bfdbe28.html#a3597f8ae57d802ae5f1e2fe16bfdbe28" title=" " alt="" coords="215,153,429,193"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="168,132,226,147,225,152,166,137"/>
+<area shape="rect" id="Node000003" href="$db/d64/classfl_1_1s8x8_af36202194507a278ea9f9629e3686748.html#af36202194507a278ea9f9629e3686748" title=" " alt="" coords="495,5,603,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="391,32,481,22,482,28,392,37"/>
+<area shape="rect" id="Node000004" href="$db/d64/classfl_1_1s8x8_a152c594d8430230962dfd1c6c2524222.html#a152c594d8430230962dfd1c6c2524222" title=" " alt="" coords="499,55,600,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="392,47,485,58,485,63,391,52"/>
+<area shape="poly" id="edge5_Node000005_Node000005" title=" " alt="" coords="285,104,277,94,281,84,297,78,322,76,354,80,366,89,363,93,352,85,322,81,298,83,285,88,282,94,289,101"/>
+<area shape="rect" id="Node000007" href="$db/d4a/classfl_1_1_singleton_shared_a1ec246efec2c46bc053a64fe7e8170ad.html#a1ec246efec2c46bc053a64fe7e8170ad" title=" " alt="" coords="477,153,621,193"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="430,170,464,170,464,175,430,175"/>
+<area shape="rect" id="Node000008" href="$db/d4a/classfl_1_1_singleton_shared_a03c9eb23cd0cb903d5ae8fd44b1a4984.html#a03c9eb23cd0cb903d5ae8fd44b1a4984" title=" " alt="" coords="669,89,813,129"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="609,150,667,131,669,136,611,155"/>
+<area shape="rect" id="Node000010" href="$df/d9e/namespacefl_1_1detail_a6bef973c17637a167f1f94d7db03905c.html#a6bef973c17637a167f1f94d7db03905c" title=" " alt="" coords="670,153,813,193"/>
+<area shape="poly" id="edge10_Node000007_Node000010" title=" " alt="" coords="622,170,656,170,656,175,622,175"/>
+<area shape="rect" id="Node000012" href="$df/d9e/namespacefl_1_1detail_af558e779ba2417d4cf14bdb1cbfd3d34.html#af558e779ba2417d4cf14bdb1cbfd3d34" title=" " alt="" coords="670,217,813,257"/>
+<area shape="poly" id="edge11_Node000007_Node000012" title=" " alt="" coords="611,190,669,210,667,215,609,195"/>
+<area shape="poly" id="edge9_Node000008_Node000008" title=" " alt="" coords="705,89,703,79,709,70,722,64,741,62,764,65,776,72,774,77,762,70,741,67,723,69,712,74,708,80,710,88"/>
 </map>

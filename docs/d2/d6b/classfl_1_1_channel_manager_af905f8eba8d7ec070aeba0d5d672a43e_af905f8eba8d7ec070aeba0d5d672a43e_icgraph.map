@@ -1,0 +1,9 @@
+<map id="fl::ChannelManager::getDriverInfos" name="fl::ChannelManager::getDriverInfos">
+<area shape="rect" id="Node000001" title="Get full state of all registered drivers." alt="" coords="239,55,387,95"/>
+<area shape="rect" id="Node000002" href="$dd/dbb/class_c_fast_l_e_d_af7b5072fd166010e669f75ea21c58c72.html#af7b5072fd166010e669f75ea21c58c72" title="Get full state of all registered channel drivers." alt="" coords="7,5,189,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="225,55,146,33,147,28,226,50"/>
+<area shape="rect" id="Node000003" href="$d8/d07/namespacefl_1_1validation_ac8e7ec799362b88cf653dc48935b458c.html#ac8e7ec799362b88cf653dc48935b458c" title="Print validation results (logs registered drivers and status)" alt="" coords="5,55,191,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="225,78,191,78,191,73,225,73"/>
+<area shape="rect" id="Node000004" href="$d8/d07/namespacefl_1_1validation_a99438082b6a6eb992c70949978692719.html#a99438082b6a6eb992c70949978692719" title="Validate that at least one driver is registered with ChannelManager." alt="" coords="16,119,180,159"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="232,102,166,122,165,117,231,97"/>
+</map>

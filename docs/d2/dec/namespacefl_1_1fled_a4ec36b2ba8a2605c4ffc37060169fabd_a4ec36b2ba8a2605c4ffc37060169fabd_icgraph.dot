@@ -1,0 +1,20 @@
+digraph "fl::fled::defaultVideoColor"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::fled::defaultVideoColor",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::fled::resolveVideoColor",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/dec/namespacefl_1_1fled_a70c2c11d86838827adae2071d3f74a98.html#a70c2c11d86838827adae2071d3f74a98",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::video::PixelStream\l::begin",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d7e/classfl_1_1video_1_1_pixel_stream_a2d2bc6715c9d04166f12a4d316bbfcd3.html#a2d2bc6715c9d04166f12a4d316bbfcd3",tooltip=" "];
+  Node2 -> Node4 [id="edge3_Node000002_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::fled::resolveVideoColor",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/dec/namespacefl_1_1fled_aedd6037bff6e743643ad2f68e499a55f.html#aedd6037bff6e743643ad2f68e499a55f",tooltip=" "];
+  Node2 -> Node5 [id="edge4_Node000002_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::Fled::videoColor",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d7d/classfl_1_1_fled_a82065df35839f5d0a45741b3a6358eba.html#a82065df35839f5d0a45741b3a6358eba",tooltip=" "];
+  Node5 -> Node6 [id="edge5_Node000005_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::Fled::videoFrame",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d7d/classfl_1_1_fled_ac13c8d779ec4dca021c79fff351fb855.html#ac13c8d779ec4dca021c79fff351fb855",tooltip=" "];
+}

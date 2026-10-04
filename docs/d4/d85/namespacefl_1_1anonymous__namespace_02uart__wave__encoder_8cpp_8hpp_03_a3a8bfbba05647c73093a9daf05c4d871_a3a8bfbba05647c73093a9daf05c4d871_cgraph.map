@@ -1,0 +1,7 @@
+<map id="fl::anonymous_namespace{uart_wave_encoder::cpp::hpp}::computePulseCount" name="fl::anonymous_namespace{uart_wave_encoder::cpp::hpp}::computePulseCount">
+<area shape="rect" id="Node000001" title="Compute HIGH pulse count for a given timing value." alt="" coords="5,29,205,84"/>
+<area shape="poly" id="edge3_Node000001_Node000001" title=" " alt="" coords="58,29,58,19,66,10,82,5,105,3,133,6,149,14,146,18,132,11,105,8,83,10,69,15,63,21,63,29"/>
+<area shape="rect" id="Node000002" href="$d4/d85/namespacefl_1_1anonymous__namespace_02uart__wave__encoder_8cpp_8hpp_03_aa2816818418ae1089aca605342874942.html#aa2816818418ae1089aca605342874942" title="Absolute value of difference (unsigned&#45;safe)" alt="" coords="253,29,449,84"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="206,54,239,54,239,59,206,59"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="304,29,304,19,312,10,328,5,351,3,379,6,395,14,392,18,378,11,351,8,329,10,315,15,309,21,309,29"/>
+</map>

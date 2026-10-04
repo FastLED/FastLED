@@ -1,0 +1,26 @@
+<map id="fl::busName" name="fl::busName">
+<area shape="rect" id="Node000001" title=" " alt="" coords="735,198,835,223"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a5c5f559ae1d1471f8e955679de86b08a.html#a5c5f559ae1d1471f8e955679de86b08a" title="Concrete ChannelManager driver name for a portable bus." alt="" coords="540,109,680,134"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="745,194,635,136,637,132,748,189"/>
+<area shape="rect" id="Node000008" href="$df/d9e/namespacefl_1_1detail_ae3b7c3bf636ea67cae77e9301c659ed5.html#ae3b7c3bf636ea67cae77e9301c659ed5" title=" " alt="" coords="538,198,682,223"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="721,213,682,213,682,208,721,208"/>
+<area shape="rect" id="Node000010" href="$df/d9e/namespacefl_1_1detail_aba4a7705df7c5d417012bcf74e429d4d.html#aba4a7705df7c5d417012bcf74e429d4d" title=" " alt="" coords="533,247,687,273"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="727,230,657,250,655,245,725,225"/>
+<area shape="rect" id="Node000003" href="$de/d07/classfl_1_1_slim_spi_bridge_controller_ad342cd44bd75c6d02679ca04b6d4f895.html#ad342cd44bd75c6d02679ca04b6d4f895" title="Resolve the driver for this frame." alt="" coords="269,5,463,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="574,104,532,81,484,60,450,48,451,43,486,55,535,77,577,99"/>
+<area shape="rect" id="Node000005" href="$d5/d8b/classfl_1_1_channel_a1ac53e5596ff3b71fd028a159eb542fb.html#a1ac53e5596ff3b71fd028a159eb542fb" title="Cold slow&#45;path helper for showPixels()." alt="" coords="263,69,469,109"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="525,113,469,105,469,100,526,108"/>
+<area shape="rect" id="Node000007" href="$d2/d6b/classfl_1_1_channel_manager_a987f60fa13c37e9d725e5541d04ce14e.html#a987f60fa13c37e9d725e5541d04ce14e" title="Enable only one driver exclusively, by fl::Bus enum (runtime form)." alt="" coords="290,133,442,173"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="526,135,443,146,442,141,526,130"/>
+<area shape="rect" id="Node000004" href="$de/d07/classfl_1_1_slim_spi_bridge_controller_abbd35c320bbde28d28f84e1014e0e77f.html#abbd35c320bbde28d28f84e1014e0e77f" title=" " alt="" coords="5,5,199,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="256,28,199,28,199,23,256,23"/>
+<area shape="rect" id="Node000006" href="$d5/d8b/classfl_1_1_channel_a44414e176c7d2ef65fcdd390f6852322.html#a44414e176c7d2ef65fcdd390f6852322" title=" " alt="" coords="17,77,187,102"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="250,92,187,92,187,87,250,87"/>
+<area shape="rect" id="Node000009" href="$d9/da0/structfl_1_1detail_1_1_device_info_resolver_3_01_bus_1_1_b_i_t___b_a_n_g_00_01_which_01_4_ab5147d9723b70c568a897616e3d9c89e.html#ab5147d9723b70c568a897616e3d9c89e" title=" " alt="" coords="253,197,479,237"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="524,216,480,217,480,212,524,210"/>
+<area shape="poly" id="edge12_Node000010_Node000009" title=" " alt="" coords="523,248,479,240,480,235,524,242"/>
+<area shape="rect" id="Node000011" href="$de/dc4/structfl_1_1detail_1_1_device_info_resolver_a40fc3ad3049f76d9b126511487b99af7.html#a40fc3ad3049f76d9b126511487b99af7" title=" " alt="" coords="247,262,485,287"/>
+<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="520,268,486,270,485,265,519,263"/>
+<area shape="rect" id="Node000012" href="$d4/d36/namespacefl_a99f7ce5a420817cfa2b96d4da51be9f0.html#a99f7ce5a420817cfa2b96d4da51be9f0" title=" " alt="" coords="49,262,155,287"/>
+<area shape="poly" id="edge11_Node000011_Node000012" title=" " alt="" coords="233,277,156,277,156,272,233,272"/>
+</map>

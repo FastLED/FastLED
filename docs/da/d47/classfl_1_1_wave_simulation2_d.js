@@ -1,7 +1,7 @@
 var classfl_1_1_wave_simulation2_d =
 [
     [ "WaveSimulation2D", "da/d47/classfl_1_1_wave_simulation2_d_a14fc79bc9156543ae8975f9aac2416ad.html#a14fc79bc9156543ae8975f9aac2416ad", null ],
-    [ "~WaveSimulation2D", "da/d47/classfl_1_1_wave_simulation2_d_a83534fadd8c4ab88a33d27f0b5f6e4cd.html#a83534fadd8c4ab88a33d27f0b5f6e4cd", null ],
+    [ "~WaveSimulation2D", "da/d47/classfl_1_1_wave_simulation2_d_aef8025311ac2aac1baee32d55244d70d.html#aef8025311ac2aac1baee32d55244d70d", null ],
     [ "getDampenening", "da/d47/classfl_1_1_wave_simulation2_d_a27248aa677576ca019d285e53455efa1.html#a27248aa677576ca019d285e53455efa1", null ],
     [ "getf", "da/d47/classfl_1_1_wave_simulation2_d_a4853b1a84ec6996850c6cc6df8fe72b9.html#a4853b1a84ec6996850c6cc6df8fe72b9", null ],
     [ "getHeight", "da/d47/classfl_1_1_wave_simulation2_d_a304c1eb4572152d0ccf12195d4994fde.html#a304c1eb4572152d0ccf12195d4994fde", null ],
@@ -10,7 +10,7 @@ var classfl_1_1_wave_simulation2_d =
     [ "geti16Previous", "da/d47/classfl_1_1_wave_simulation2_d_a55345f858b99dad0f6143251fb533651.html#a55345f858b99dad0f6143251fb533651", null ],
     [ "geti8", "da/d47/classfl_1_1_wave_simulation2_d_a0f3ab992853b6ce736d4c549a77f5046.html#a0f3ab992853b6ce736d4c549a77f5046", null ],
     [ "getSpeed", "da/d47/classfl_1_1_wave_simulation2_d_abb05d3ae788bc0a7e16d469b9e96bfc6.html#abb05d3ae788bc0a7e16d469b9e96bfc6", null ],
-    [ "getStencil", "da/d47/classfl_1_1_wave_simulation2_d_a3229f93b563ffe1294ed7a26978a06d5.html#a3229f93b563ffe1294ed7a26978a06d5", null ],
+    [ "getStencil", "da/d47/classfl_1_1_wave_simulation2_d_ad948c50e778ef162c888fd82d2cd0961.html#ad948c50e778ef162c888fd82d2cd0961", null ],
     [ "getu8", "da/d47/classfl_1_1_wave_simulation2_d_ae1ef6ad4bb760c06f8e3337206883555.html#ae1ef6ad4bb760c06f8e3337206883555", null ],
     [ "getUseChangeGrid", "da/d47/classfl_1_1_wave_simulation2_d_a4bed06e30a66d9ce2c06c73d6cb4831e.html#a4bed06e30a66d9ce2c06c73d6cb4831e", null ],
     [ "getWidth", "da/d47/classfl_1_1_wave_simulation2_d_ad7a351b7ffac7b9daa96c2475b5fdd86.html#ad7a351b7ffac7b9daa96c2475b5fdd86", null ],
@@ -24,7 +24,7 @@ var classfl_1_1_wave_simulation2_d =
     [ "setHalfDuplex", "da/d47/classfl_1_1_wave_simulation2_d_aff3bb897e77efd6a2f4332b4a9da4eea.html#aff3bb897e77efd6a2f4332b4a9da4eea", null ],
     [ "seti16", "da/d47/classfl_1_1_wave_simulation2_d_a20e603699773ea39419e3950103309f8.html#a20e603699773ea39419e3950103309f8", null ],
     [ "setSpeed", "da/d47/classfl_1_1_wave_simulation2_d_a614a159f66c77408c1cfedbd8644784c.html#a614a159f66c77408c1cfedbd8644784c", null ],
-    [ "setStencil", "da/d47/classfl_1_1_wave_simulation2_d_a2456e54374a0b2190c598e3d97df6919.html#a2456e54374a0b2190c598e3d97df6919", null ],
+    [ "setStencil", "da/d47/classfl_1_1_wave_simulation2_d_a0138852d849e728b75a30caaa3e57a91.html#a0138852d849e728b75a30caaa3e57a91", null ],
     [ "setSuperSample", "da/d47/classfl_1_1_wave_simulation2_d_a018b582b7a5830a2bdafdc52a4cd39d9.html#a018b582b7a5830a2bdafdc52a4cd39d9", null ],
     [ "setUseChangeGrid", "da/d47/classfl_1_1_wave_simulation2_d_af82c174b9a15691c46698ce5e4eb9acf.html#af82c174b9a15691c46698ce5e4eb9acf", null ],
     [ "setXCylindrical", "da/d47/classfl_1_1_wave_simulation2_d_a3e9083afb328803c446cc0ddec40cb3c.html#a3e9083afb328803c446cc0ddec40cb3c", null ],

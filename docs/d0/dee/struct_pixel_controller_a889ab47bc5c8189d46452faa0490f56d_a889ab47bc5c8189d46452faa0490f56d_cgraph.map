@@ -1,0 +1,5 @@
+<map id="PixelController::loadAndScaleChannel" name="PixelController::loadAndScaleChannel">
+<area shape="rect" id="Node000001" title="One source channel, loaded, dithered and scaled – loadAndScale&lt;SLOT&gt; with RO(SLOT) replaced by a runt..." alt="" coords="5,5,184,45"/>
+<area shape="rect" id="Node000002" href="$dd/d6c/structfl_1_1_binary_dither_a855eeda5bd1b617b06acd895eeba5b03.html#a855eeda5bd1b617b06acd895eeba5b03" title="Add the offset to a source byte, before scaling. Black is never lifted." alt="" coords="232,13,396,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="184,23,218,23,218,28,184,28"/>
+</map>

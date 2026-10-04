@@ -20,7 +20,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../d9/d5f/classfl_1_1_u_i_number_field_aac7df5d26fec1ee9ab057e98788d1f9d.html#aac7df5d26fec1ee9ab057e98788d1f9d" target="_top" xlink:title=" ">
+<g id="a_Node000002"><a xlink:href="../../d9/d5f/classfl_1_1_u_i_number_field_a12f6d6c75611692cc5351012a8f766a3.html#a12f6d6c75611692cc5351012a8f766a3" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="439,-174 332,-174 332,-144 439,-144 439,-174"/>
 <text text-anchor="start" x="340" y="-162" font-family="Helvetica,sans-Serif" font-size="10.00">fl::UINumberField::</text>
 <text text-anchor="middle" x="385.5" y="-151" font-family="Helvetica,sans-Serif" font-size="10.00">UINumberField</text>
@@ -39,7 +39,7 @@
 <!-- Node6 -->
 <g id="Node000006" class="node">
 <title>Node6</title>
-<g id="a_Node000006"><a xlink:href="../../d9/d5f/classfl_1_1_u_i_number_field_a52f885c9f9a1f3603e41e390086c8a64.html#a52f885c9f9a1f3603e41e390086c8a64" target="_top" xlink:title=" ">
+<g id="a_Node000006"><a xlink:href="../../d9/d5f/classfl_1_1_u_i_number_field_ae40c4388e596f4e5bf6498ec59abd5b8.html#ae40c4388e596f4e5bf6498ec59abd5b8" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="283.5,-153 176.5,-153 176.5,-123 283.5,-123 283.5,-153"/>
 <text text-anchor="start" x="184.5" y="-141" font-family="Helvetica,sans-Serif" font-size="10.00">fl::UINumberField::</text>
 <text text-anchor="middle" x="230" y="-130" font-family="Helvetica,sans-Serif" font-size="10.00">~UINumberField</text>
@@ -58,7 +58,7 @@
 <!-- Node7 -->
 <g id="Node000007" class="node">
 <title>Node7</title>
-<g id="a_Node000007"><a xlink:href="../../db/d97/_fast_l_e_d_8h_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909" target="_top" xlink:title=" ">
+<g id="a_Node000007"><a xlink:href="../../d6/d64/fastled_8h_a07c69292ef50aa1083046faff1c52ead.html#a07c69292ef50aa1083046faff1c52ead" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="249,-104.5 211,-104.5 211,-85.5 249,-85.5 249,-104.5"/>
 <text text-anchor="middle" x="230" y="-92.5" font-family="Helvetica,sans-Serif" font-size="10.00">max</text>
 </a>
@@ -76,7 +76,7 @@
 <!-- Node8 -->
 <g id="Node000008" class="node">
 <title>Node8</title>
-<g id="a_Node000008"><a xlink:href="../../db/d97/_fast_l_e_d_8h_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb" target="_top" xlink:title="Memory functions are available in fl:: namespace via fl/stl/cstring.h Using declarations cannot work ...">
+<g id="a_Node000008"><a xlink:href="../../d6/d64/fastled_8h_a2fdabb91a1f100dec8da21e4306aba05.html#a2fdabb91a1f100dec8da21e4306aba05" target="_top" xlink:title="Memory functions are available in fl:: namespace via fl/stl/cstring.h Using declarations cannot work ...">
 <polygon fill="white" stroke="#666666" points="247.5,-67.5 212.5,-67.5 212.5,-48.5 247.5,-48.5 247.5,-67.5"/>
 <text text-anchor="middle" x="230" y="-55.5" font-family="Helvetica,sans-Serif" font-size="10.00">min</text>
 </a>
@@ -94,7 +94,7 @@
 <!-- Node9 -->
 <g id="Node000009" class="node">
 <title>Node9</title>
-<g id="a_Node000009"><a xlink:href="../../d0/d0d/structfl_1_1_u_i_number_field_1_1_listener_add7a8f0b9cd0fc5dc4e0378bd7608a57.html#add7a8f0b9cd0fc5dc4e0378bd7608a57" target="_top" xlink:title=" ">
+<g id="a_Node000009"><a xlink:href="../../d0/d0d/structfl_1_1_u_i_number_field_1_1_listener_a529742c23aa4878533fc5111ce162b0c.html#a529742c23aa4878533fc5111ce162b0c" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="296,-30 164,-30 164,0 296,0 296,-30"/>
 <text text-anchor="start" x="172" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">fl::UINumberField::</text>
 <text text-anchor="middle" x="230" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">Listener::onBeginFrame</text>
@@ -113,7 +113,7 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909" target="_top" xlink:title=" ">
+<g id="a_Node000003"><a xlink:href="../../d4/d36/namespacefl_a07c69292ef50aa1083046faff1c52ead.html#a07c69292ef50aa1083046faff1c52ead" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="553.5,-205.5 503.5,-205.5 503.5,-186.5 553.5,-186.5 553.5,-205.5"/>
 <text text-anchor="middle" x="528.5" y="-193.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::max</text>
 </a>
@@ -131,7 +131,7 @@
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb" target="_top" xlink:title=" ">
+<g id="a_Node000004"><a xlink:href="../../d4/d36/namespacefl_a2fdabb91a1f100dec8da21e4306aba05.html#a2fdabb91a1f100dec8da21e4306aba05" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="552,-168.5 505,-168.5 505,-149.5 552,-149.5 552,-168.5"/>
 <text text-anchor="middle" x="528.5" y="-156.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::min</text>
 </a>
@@ -149,7 +149,7 @@
 <!-- Node5 -->
 <g id="Node000005" class="node">
 <title>Node5</title>
-<g id="a_Node000005"><a xlink:href="../../d9/d5f/classfl_1_1_u_i_number_field_a447e4417ef0d3d302f28efff5cd937d4.html#a447e4417ef0d3d302f28efff5cd937d4" target="_top" xlink:title=" ">
+<g id="a_Node000005"><a xlink:href="../../d9/d5f/classfl_1_1_u_i_number_field_a10d5f64b1740f2610af5cd80b636c005.html#a10d5f64b1740f2610af5cd80b636c005" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="582,-113 475,-113 475,-83 582,-83 582,-113"/>
 <text text-anchor="start" x="483" y="-101" font-family="Helvetica,sans-Serif" font-size="10.00">fl::UINumberField::</text>
 <text text-anchor="middle" x="528.5" y="-90" font-family="Helvetica,sans-Serif" font-size="10.00">value</text>

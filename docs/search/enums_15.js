@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['window_0',['Window',['../de/dee/namespacefl_1_1audio_1_1fft_aa036454af7be032ea4c5436153862487.html#aa036454af7be032ea4c5436153862487',1,'fl::audio::fft']]],
-  ['window_5ftype_1',['window_type',['../d1/dda/cq__kernel_8h_a4730a93b07f17fa824a2e42df3e0af6d.html#a4730a93b07f17fa824a2e42df3e0af6d',1,'cq_kernel.h']]]
+  ['value_0',['Value',['../d9/d94/structfl_1_1_i_channel_driver_1_1_driver_state_a97f46a6aca470ea25d69bb42e078577b.html#a97f46a6aca470ea25d69bb42e078577b',1,'fl::IChannelDriver::DriverState']]],
+  ['visstate_1',['VisState',['../dd/d45/struct_painter_a0457706d4c40cb4dcd9f3e2221a218ad.html#a0457706d4c40cb4dcd9f3e2221a218ad',1,'Painter']]]
 ];

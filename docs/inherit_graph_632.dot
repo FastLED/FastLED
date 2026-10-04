@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::fl::s0x32::RawTag",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/dfe/classfl_1_1fl_1_1s0x32.html#dd/d38/structfl_1_1fl_1_1s0x32_1_1_raw_tag",tooltip=" "];
+  Node0 [id="Node000000",label="fl::hsv8.__unnamed0\l__.__unnamed0__",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d87/group___pixel_types.html#d8/d19/structfl_1_1hsv8_8____unnamed0_____8____unnamed0____",tooltip=" "];
 }

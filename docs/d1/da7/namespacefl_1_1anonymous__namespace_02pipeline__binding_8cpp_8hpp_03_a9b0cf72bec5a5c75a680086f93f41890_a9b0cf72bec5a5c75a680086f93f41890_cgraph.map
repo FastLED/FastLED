@@ -1,0 +1,16 @@
+<map id="fl::anonymous_namespace{pipeline_binding::cpp::hpp}::encodeColorPipelineManagedSpi" name="fl::anonymous_namespace{pipeline_binding::cpp::hpp}::encodeColorPipelineManagedSpi">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,65,288,120"/>
+<area shape="poly" id="edge2_Node000001_Node000001" title=" " alt="" coords="94,65,94,55,104,46,121,41,147,39,177,42,195,50,192,54,176,47,147,44,122,46,106,51,99,57,99,65"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a021929c212e1cf2dcb7c11445c6c9744.html#a021929c212e1cf2dcb7c11445c6c9744" title="Helper function to create a back_insert_iterator." alt="" coords="357,5,483,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="247,63,359,32,360,37,248,68"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_af29c26f0e4e69895290d4edcbb61b93c.html#af29c26f0e4e69895290d4edcbb61b93c" title="The 5&#45;bit semantics for chip, with profile overriding the chip&#39;s default when it is not NotApplicable..." alt="" coords="336,55,504,80"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="288,77,322,74,323,79,288,82"/>
+<area shape="rect" id="Node000004" href="$df/d9e/namespacefl_1_1detail_a131805acd6fa1a23ac4211513c94eb02.html#a131805acd6fa1a23ac4211513c94eb02" title="Backing store for CFastLED::setHdFieldFloor()." alt="" coords="339,104,501,129"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="288,102,325,106,325,111,288,108"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_a633d8646b83951462c3c7a64fa555d72.html#a633d8646b83951462c3c7a64fa555d72" title="The lowest field the managed HD path may choose: the configured flicker floor for a secondary slow&#45;PW..." alt="" coords="347,153,493,179"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="250,118,359,147,358,152,248,123"/>
+<area shape="rect" id="Node000005" href="$d9/d5b/classfl_1_1_singleton_ad5cb1b704e17768f75802673abb0ff75.html#ad5cb1b704e17768f75802673abb0ff75" title=" " alt="" coords="552,104,715,129"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="502,114,538,114,538,119,502,119"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a1e67c0c24ebcd98fcf8554753d1639a6.html#a1e67c0c24ebcd98fcf8554753d1639a6" title=" " alt="" coords="763,104,901,129"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="715,114,749,114,749,119,715,119"/>
+</map>

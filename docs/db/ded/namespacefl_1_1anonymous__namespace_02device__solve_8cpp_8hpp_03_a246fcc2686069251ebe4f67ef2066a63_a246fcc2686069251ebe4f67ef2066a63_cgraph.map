@@ -1,0 +1,7 @@
+<map id="fl::anonymous_namespace{device_solve::cpp::hpp}::cofactorQ32" name="fl::anonymous_namespace{device_solve::cpp::hpp}::cofactorQ32">
+<area shape="rect" id="Node000001" title="e * i &#45; f * h, or false if any part of it leaves i64." alt="" coords="5,29,201,84"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="56,29,56,19,65,10,81,5,103,3,131,6,146,14,144,18,129,11,103,8,82,10,68,15,61,21,61,29"/>
+<area shape="rect" id="Node000002" href="$db/ded/namespacefl_1_1anonymous__namespace_02device__solve_8cpp_8hpp_03_a64529146b93dcad51a0f6c82d0853cd3.html#a64529146b93dcad51a0f6c82d0853cd3" title="Does a + b fit an i64, for operands already known to be in range?" alt="" coords="249,29,445,84"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="201,54,236,54,236,59,201,59"/>
+<area shape="poly" id="edge3_Node000002_Node000002" title=" " alt="" coords="300,29,300,19,309,10,325,5,347,3,375,6,390,14,388,18,373,11,347,8,326,10,312,15,305,21,305,29"/>
+</map>

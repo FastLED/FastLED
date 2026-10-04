@@ -1,0 +1,16 @@
+digraph "fl::ColorManagedPixelSource::temporalDitherEnabled"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::ColorManagedPixelSource\l::temporalDitherEnabled",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="True when the channel asked for dither this frame."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::ColorManagedPixelSource\l::loadAndScaleRGB",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/da5/classfl_1_1_color_managed_pixel_source_a07e179580f57628693c40d60c44ca7f4.html#a07e179580f57628693c40d60c44ca7f4",tooltip="The colour-managed path."];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::ColorManagedPixelSource\l::loadAndScaleRGBW",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/da5/classfl_1_1_color_managed_pixel_source_a5282ff6c865aba683ab2953135ca4c09.html#a5282ff6c865aba683ab2953135ca4c09",tooltip="Physical RGBW solve when a matching profile is bound; otherwise the legacy RGB-to-RGBW conversion."];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::ColorManagedPixelSource\l::loadAndScaleRGBWW",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/da5/classfl_1_1_color_managed_pixel_source_aefb49429ee466d02d5c2ece50524da34.html#aefb49429ee466d02d5c2ece50524da34",tooltip="Physical two-white solve when a matching RGBWW profile is bound; otherwise the legacy conversion."];
+}

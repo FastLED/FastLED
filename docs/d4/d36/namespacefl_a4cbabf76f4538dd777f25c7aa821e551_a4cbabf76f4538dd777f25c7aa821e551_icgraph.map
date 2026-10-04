@@ -1,11 +1,15 @@
 <map id="fl::fabs_impl_double" name="fl::fabs_impl_double">
-<area shape="rect" id="Node000001" title=" " alt="" coords="539,45,692,70"/>
-<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a11518c3c3c229b6f1e95dac2bef295ef.html#a11518c3c3c229b6f1e95dac2bef295ef" title=" " alt="" coords="424,45,491,70"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="525,60,491,60,491,55,525,55"/>
-<area shape="rect" id="Node000003" href="$d7/df0/namespacefl_1_1colorimetric__detail_aa1ae828879a2d482569745a6017e8508.html#aa1ae828879a2d482569745a6017e8508" title=" " alt="" coords="216,5,376,45"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="410,51,376,44,377,39,411,46"/>
-<area shape="rect" id="Node000004" href="$d7/df0/namespacefl_1_1colorimetric__detail_a9ec205eef98add93412ca4f94c20545f.html#a9ec205eef98add93412ca4f94c20545f" title=" " alt="" coords="216,69,376,109"/>
-<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="411,69,377,76,376,71,410,64"/>
-<area shape="rect" id="Node000005" href="$d7/df0/namespacefl_1_1colorimetric__detail_a2c7b3de180642cbf3dbe3d9bc370bb13.html#a2c7b3de180642cbf3dbe3d9bc370bb13" title=" " alt="" coords="5,69,168,109"/>
-<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="203,92,168,92,168,87,203,87"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="849,99,1003,125"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_ab4d4c93cb75e3d2abb59cf7893a0949d.html#ab4d4c93cb75e3d2abb59cf7893a0949d" title=" " alt="" coords="735,99,801,125"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="836,115,801,115,801,109,836,109"/>
+<area shape="rect" id="Node000003" href="$da/db3/namespacefl_1_1colorimetric__response_a562a056bd00762875586ce688324a4cf.html#a562a056bd00762875586ce688324a4cf" title=" " alt="" coords="504,5,687,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="734,94,685,66,646,48,648,43,688,62,737,90"/>
+<area shape="rect" id="Node000004" href="$da/db3/namespacefl_1_1colorimetric__response_ad982dbfa0b852b2299925730448099a7.html#ad982dbfa0b852b2299925730448099a7" title=" " alt="" coords="5,92,225,132"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="721,112,687,111,480,108,273,111,225,112,225,106,273,105,480,103,687,105,721,107"/>
+<area shape="rect" id="Node000005" href="$d1/d54/namespacefl_1_1colorimetric__response_1_1detail_a6473f7c3cd904a8cda13b9573ab0ffe4.html#a6473f7c3cd904a8cda13b9573ab0ffe4" title="Largest absolute entry of a column, which is its infinity norm." alt="" coords="504,120,687,160"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="721,122,687,128,687,122,721,117"/>
+<area shape="rect" id="Node000006" href="$da/db3/namespacefl_1_1colorimetric__response_a47bab90ae7cc342ef40e1f39ea5c6af9.html#a47bab90ae7cc342ef40e1f39ea5c6af9" title=" " alt="" coords="273,120,456,160"/>
+<area shape="poly" id="edge7_Node000002_Node000006" title=" " alt="" coords="747,137,720,158,688,174,653,183,618,188,547,187,481,177,424,163,426,158,482,172,548,182,618,183,652,178,686,170,717,153,743,132"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="491,143,456,143,456,137,491,137"/>
+<area shape="poly" id="edge6_Node000006_Node000004" title=" " alt="" coords="260,131,225,127,226,122,260,126"/>
 </map>

@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -134,8 +134,20 @@ Files</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top"><a href="d8/dcf/fl_8control_09_8cpp_source.html"><span class="icondoc"></span></a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="d8/dcf/fl_8control_09_8cpp.html">fl.control+.cpp</a></td></tr>
 <tr class="memdesc:d8/dcf/fl_8control_09_8cpp"><td class="mdescLeft">&#160;</td><td class="mdescRight">Unity build: recursive includes from src/fl/control/. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top"><a href="d0/db4/fl_8fled_09_8cpp_source.html"><span class="icondoc"></span></a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="d0/db4/fl_8fled_09_8cpp.html">fl.fled+.cpp</a></td></tr>
+<tr class="memdesc:d0/db4/fl_8fled_09_8cpp"><td class="mdescLeft">&#160;</td><td class="mdescRight">Unity build: recursive includes from src/fl/fled/. <br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top"><a href="dd/d82/fl_8font_09_8cpp_source.html"><span class="icondoc"></span></a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dd/d82/fl_8font_09_8cpp.html">fl.font+.cpp</a></td></tr>
 <tr class="memdesc:dd/d82/fl_8font_09_8cpp"><td class="mdescLeft">&#160;</td><td class="mdescRight">Unity build: recursive includes from src/fl/font/. <br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top"><a href="d4/dce/fl_8fs_09_8cpp_source.html"><span class="icondoc"></span></a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="d4/dce/fl_8fs_09_8cpp.html">fl.fs+.cpp</a></td></tr>
+<tr class="memdesc:d4/dce/fl_8fs_09_8cpp"><td class="mdescLeft">&#160;</td><td class="mdescRight">Unity build entry-point for the filesystem subsystem. <br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top"><a href="d0/d32/fl_8fs_8embedded_09_8cpp_source.html"><span class="icondoc"></span></a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="d0/d32/fl_8fs_8embedded_09_8cpp.html">fl.fs.embedded+.cpp</a></td></tr>
+<tr class="memdesc:d0/d32/fl_8fs_8embedded_09_8cpp"><td class="mdescLeft">&#160;</td><td class="mdescRight">Unity build entry-point for embedded (on-chip flash) storage, kept out of <code>fl.system+.cpp</code> so the linker can drop the filesystem chain when a sketch never calls <code><a class="el" href="d4/d36/namespacefl_a7a5a02465321b48e6e8da895e719a86d.html#a7a5a02465321b48e6e8da895e719a86d" title="Filesystem backed by the microcontroller&#39;s own flash, or null where the platform has none.">fl::getEmbeddedFs()</a></code>. <br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top"><a href="df/d01/fl_8fs_8sd_09_8cpp_source.html"><span class="icondoc"></span></a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="df/d01/fl_8fs_8sd_09_8cpp.html">fl.fs.sd+.cpp</a></td></tr>
+<tr class="memdesc:df/d01/fl_8fs_8sd_09_8cpp"><td class="mdescLeft">&#160;</td><td class="mdescRight">Unity build entry-point for SD-card support, split out of <code>fl.system+.cpp</code> so the linker can drop the entire SD chain (<code>libSD.a</code>, <code>libFS.a</code>, Arduino's <code>VFSImpl</code>, ~16 KB on ESP32-S3) when the user never calls <code>FileSystem::beginSd()</code>. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top"><a href="d4/d6a/fl_8fx_09_8cpp_source.html"><span class="icondoc"></span></a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="d4/d6a/fl_8fx_09_8cpp.html">fl.fx+.cpp</a></td></tr>
 <tr class="memdesc:d4/d6a/fl_8fx_09_8cpp"><td class="mdescLeft">&#160;</td><td class="mdescRight">Unity build: recursive includes from src/fl/fx/. <br /></td></tr>
@@ -163,9 +175,6 @@ Files</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top"><a href="de/da6/fl_8system_09_8cpp_source.html"><span class="icondoc"></span></a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="de/da6/fl_8system_09_8cpp.html">fl.system+.cpp</a></td></tr>
 <tr class="memdesc:de/da6/fl_8system_09_8cpp"><td class="mdescLeft">&#160;</td><td class="mdescRight">Unity build: recursive includes from src/fl/system/. <br /></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top"><a href="dd/dda/fl_8system_8sd_09_8cpp_source.html"><span class="icondoc"></span></a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dd/dda/fl_8system_8sd_09_8cpp.html">fl.system.sd+.cpp</a></td></tr>
-<tr class="memdesc:dd/dda/fl_8system_8sd_09_8cpp"><td class="mdescLeft">&#160;</td><td class="mdescRight">Unity build entry-point for SD-card support, split out of <code>fl.system+.cpp</code> so the linker can drop the entire SD chain (<code>libSD.a</code>, <code>libFS.a</code>, Arduino's <code>VFSImpl</code>, ~16 KB on ESP32-S3) when the user never calls <code>FileSystem::beginSd()</code>. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top"><a href="d2/dfe/fl_8task_09_8cpp_source.html"><span class="icondoc"></span></a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="d2/dfe/fl_8task_09_8cpp.html">fl.task+.cpp</a></td></tr>
 <tr class="memdesc:d2/dfe/fl_8task_09_8cpp"><td class="mdescLeft">&#160;</td><td class="mdescRight">Unity build: recursive includes from src/fl/task/. <br /></td></tr>
@@ -199,7 +208,7 @@ Files</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="dir_524c561824892d2100650ce5adc315f1.html">build</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:12 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:13 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

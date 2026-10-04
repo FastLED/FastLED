@@ -85,7 +85,7 @@
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../d8/df9/group___noise_generation_gae021f30d62fea75ea1397e1a81b28a59.html#gae021f30d62fea75ea1397e1a81b28a59" target="_top" xlink:title=" ">
+<g id="a_Node000004"><a xlink:href="../../d8/df9/group___noise_generation_gae021f30d62fea75ea1397e1a81b28a59.html#gae021f30d62fea75ea1397e1a81b28a59" target="_top" xlink:title="16&#45;bit, fixed point implementation of Perlin&#39;s noise without scaling.">
 <polygon fill="white" stroke="#666666" points="313,-56 232,-56 232,-37 313,-37 313,-56"/>
 <text text-anchor="middle" x="272.5" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">inoise16_raw</text>
 </a>

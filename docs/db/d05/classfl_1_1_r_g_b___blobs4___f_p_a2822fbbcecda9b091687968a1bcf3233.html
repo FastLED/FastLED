@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -130,8 +130,8 @@ $(function(){initNavTree('db/d05/classfl_1_1_r_g_b___blobs4___f_p_a2822fbbcecda9
 <div class="line"><span class="lineno">   71</span>    <span class="keyword">auto</span> *e = ctx.mEngine.get();</div>
 <div class="line"><span class="lineno">   72</span>    e-&gt;get_ready();</div>
 <div class="line"><span class="lineno">   73</span>    <a class="code hl_variable" href="../../db/d05/classfl_1_1_r_g_b___blobs4___f_p_a7e3dadfe87bf4f1f4f642a230975ea87.html#a7e3dadfe87bf4f1f4f642a230975ea87">mState</a>.ensureCache(e);</div>
-<div class="line"><span class="lineno">   74</span>    <span class="keyword">const</span> fl::i32 *fade_lut = <a class="code hl_function" href="../../da/d3c/namespacefl_1_1fl_ab4a4a89750bf923005084995e1de2f92.html#ab4a4a89750bf923005084995e1de2f92">fl::assume_aligned&lt;16&gt;</a>(<a class="code hl_variable" href="../../db/d05/classfl_1_1_r_g_b___blobs4___f_p_a7e3dadfe87bf4f1f4f642a230975ea87.html#a7e3dadfe87bf4f1f4f642a230975ea87">mState</a>.fade_lut);</div>
-<div class="line"><span class="lineno">   75</span>    <span class="keyword">const</span> <a class="code hl_typedef" href="../../da/d3c/namespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c.html#a7573a66f01c09f14a1ff0411f8e1153c">fl::u8</a> *perm = PERLIN_NOISE;</div>
+<div class="line"><span class="lineno">   74</span>    <span class="keyword">const</span> fl::i32 *fade_lut = <a class="code hl_function" href="../../da/d3c/namespacefl_1_1fl_a534ca7ae9d568ff7d45e8e978586d9cb.html#a534ca7ae9d568ff7d45e8e978586d9cb">fl::assume_aligned&lt;16&gt;</a>(<a class="code hl_variable" href="../../db/d05/classfl_1_1_r_g_b___blobs4___f_p_a7e3dadfe87bf4f1f4f642a230975ea87.html#a7e3dadfe87bf4f1f4f642a230975ea87">mState</a>.fade_lut);</div>
+<div class="line"><span class="lineno">   75</span>    <span class="keyword">const</span> <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> *perm = PERLIN_NOISE;</div>
 <div class="line"><span class="lineno">   76</span> </div>
 <div class="line"><span class="lineno">   77</span>    e-&gt;timings.master_speed = 0.02;</div>
 <div class="line"><span class="lineno">   78</span>    e-&gt;timings.ratio[0] = 0.0025;</div>
@@ -149,7 +149,7 @@ $(function(){initNavTree('db/d05/classfl_1_1_r_g_b___blobs4___f_p_a2822fbbcecda9
 <div class="line"><span class="lineno">   90</span>            e-&gt;animation.angle = e-&gt;polar_theta[<a class="code hl_variable" href="../../d4/d36/namespacefl_a01deac84db27d10f737f8a92973bea86.html#a01deac84db27d10f737f8a92973bea86">x</a>][<a class="code hl_variable" href="../../d4/d36/namespacefl_a19c81898aec29a20ef9d7e3be29eedfb.html#a19c81898aec29a20ef9d7e3be29eedfb">y</a>] + e-&gt;move.radial[0] +</div>
 <div class="line"><span class="lineno">   91</span>                                 e-&gt;move.noise_angle[0] + e-&gt;move.noise_angle[3] +</div>
 <div class="line"><span class="lineno">   92</span>                                 e-&gt;move.noise_angle[1];</div>
-<div class="line"><span class="lineno">   93</span>            e-&gt;animation.z = 3 + <a class="code hl_function" href="../../d4/d36/namespacefl_a0b5da884257d0f4003ead08f27915a2b.html#a0b5da884257d0f4003ead08f27915a2b">fl::sqrtf</a>(e-&gt;animation.dist);</div>
+<div class="line"><span class="lineno">   93</span>            e-&gt;animation.z = 3 + <a class="code hl_function" href="../../d4/d36/namespacefl_aa4ee5b2900fe7489cc2628422555eb62.html#aa4ee5b2900fe7489cc2628422555eb62">fl::sqrtf</a>(e-&gt;animation.dist);</div>
 <div class="line"><span class="lineno">   94</span>            e-&gt;animation.scale_x = 0.1;</div>
 <div class="line"><span class="lineno">   95</span>            e-&gt;animation.scale_y = 0.1;</div>
 <div class="line"><span class="lineno">   96</span>            e-&gt;animation.offset_z = 10;</div>
@@ -183,12 +183,12 @@ $(function(){initNavTree('db/d05/classfl_1_1_r_g_b___blobs4___f_p_a2822fbbcecda9
 <div class="line"><span class="lineno">  124</span>    }</div>
 <div class="line"><span class="lineno">  125</span>}</div>
 <div class="ttc" id="aclassfl_1_1_r_g_b___blobs4___f_p_a7e3dadfe87bf4f1f4f642a230975ea87_html_a7e3dadfe87bf4f1f4f642a230975ea87"><div class="ttname"><a href="../../db/d05/classfl_1_1_r_g_b___blobs4___f_p_a7e3dadfe87bf4f1f4f642a230975ea87.html#a7e3dadfe87bf4f1f4f642a230975ea87">fl::RGB_Blobs4_FP::mState</a></div><div class="ttdeci">FPVizState mState</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d1d/rgb__blobs4_8h_source.html#l00022">rgb_blobs4.h:22</a></div></div>
-<div class="ttc" id="anamespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c_html_a7573a66f01c09f14a1ff0411f8e1153c"><div class="ttname"><a href="../../da/d3c/namespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c.html#a7573a66f01c09f14a1ff0411f8e1153c">fl::fl::u8</a></div><div class="ttdeci">unsigned char u8</div><div class="ttdef"><b>Definition</b> <a href="../../df/d96/s16x16x4_8h_source.html#l00132">s16x16x4.h:132</a></div></div>
-<div class="ttc" id="anamespacefl_1_1fl_ab4a4a89750bf923005084995e1de2f92_html_ab4a4a89750bf923005084995e1de2f92"><div class="ttname"><a href="../../da/d3c/namespacefl_1_1fl_ab4a4a89750bf923005084995e1de2f92.html#ab4a4a89750bf923005084995e1de2f92">fl::fl::assume_aligned</a></div><div class="ttdeci">T * assume_aligned(T *ptr) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/d96/s16x16x4_8h_source.html#l00126">s16x16x4.h:126</a></div></div>
+<div class="ttc" id="anamespacefl_1_1fl_a534ca7ae9d568ff7d45e8e978586d9cb_html_a534ca7ae9d568ff7d45e8e978586d9cb"><div class="ttname"><a href="../../da/d3c/namespacefl_1_1fl_a534ca7ae9d568ff7d45e8e978586d9cb.html#a534ca7ae9d568ff7d45e8e978586d9cb">fl::fl::assume_aligned</a></div><div class="ttdeci">T * assume_aligned(T *ptr) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/d96/s16x16x4_8h_source.html#l00126">s16x16x4.h:126</a></div></div>
 <div class="ttc" id="anamespacefl_a01deac84db27d10f737f8a92973bea86_html_a01deac84db27d10f737f8a92973bea86"><div class="ttname"><a href="../../d4/d36/namespacefl_a01deac84db27d10f737f8a92973bea86.html#a01deac84db27d10f737f8a92973bea86">fl::x</a></div><div class="ttdeci">x</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d91/transposition_8cpp_8hpp_source.html#l00024">transposition.cpp.hpp:24</a></div></div>
-<div class="ttc" id="anamespacefl_a0b5da884257d0f4003ead08f27915a2b_html_a0b5da884257d0f4003ead08f27915a2b"><div class="ttname"><a href="../../d4/d36/namespacefl_a0b5da884257d0f4003ead08f27915a2b.html#a0b5da884257d0f4003ead08f27915a2b">fl::sqrtf</a></div><div class="ttdeci">float sqrtf(float value) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00453">math.h:453</a></div></div>
+<div class="ttc" id="anamespacefl_a058ceeac48f181da463c2ba07401292c_html_a058ceeac48f181da463c2ba07401292c"><div class="ttname"><a href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a></div><div class="ttdeci">unsigned char u8</div><div class="ttdef"><b>Definition</b> <a href="../../df/dd8/stdint_8h_source.html#l00131">stdint.h:131</a></div></div>
 <div class="ttc" id="anamespacefl_a19c81898aec29a20ef9d7e3be29eedfb_html_a19c81898aec29a20ef9d7e3be29eedfb"><div class="ttname"><a href="../../d4/d36/namespacefl_a19c81898aec29a20ef9d7e3be29eedfb.html#a19c81898aec29a20ef9d7e3be29eedfb">fl::y</a></div><div class="ttdeci">y</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d91/transposition_8cpp_8hpp_source.html#l00023">transposition.cpp.hpp:23</a></div></div>
 <div class="ttc" id="anamespacefl_a9b47c6dc4674f84aec1a4acfaa5732f9_html_a9b47c6dc4674f84aec1a4acfaa5732f9"><div class="ttname"><a href="../../d4/d36/namespacefl_a9b47c6dc4674f84aec1a4acfaa5732f9.html#a9b47c6dc4674f84aec1a4acfaa5732f9">fl::render_value_fp_from_float</a></div><div class="ttdeci">FASTLED_FORCE_INLINE fl::i32 render_value_fp_from_float(const render_parameters &amp;anim, const fl::i32 *fade_lut, const fl::u8 *perm)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/db2/render__value__fp_8h_source.html#l00180">render_value_fp.h:180</a></div></div>
+<div class="ttc" id="anamespacefl_aa4ee5b2900fe7489cc2628422555eb62_html_aa4ee5b2900fe7489cc2628422555eb62"><div class="ttname"><a href="../../d4/d36/namespacefl_aa4ee5b2900fe7489cc2628422555eb62.html#aa4ee5b2900fe7489cc2628422555eb62">fl::sqrtf</a></div><div class="ttdeci">float sqrtf(float value) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00453">math.h:453</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../df/d96/s16x16x4_8h_source.html#l00126">fl::fl::assume_aligned()</a>, <a class="el" href="../../dc/d1e/context_8h_source.html#l00038">fl::Context::mEngine</a>, <a class="el" href="../../d1/d1d/rgb__blobs4_8h_source.html#l00022">mState</a>, <a class="el" href="../../d7/db2/render__value__fp_8h_source.html#l00180">fl::render_value_fp_from_float()</a>, <a class="el" href="../../df/db1/math_8h_source.html#l00453">fl::sqrtf()</a>, <a class="el" href="../../d7/d91/transposition_8cpp_8hpp_source.html#l00024">fl::x</a>, and <a class="el" href="../../d7/d91/transposition_8cpp_8hpp_source.html#l00023">fl::y</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
@@ -208,7 +208,7 @@ $(function(){initNavTree('db/d05/classfl_1_1_r_g_b___blobs4___f_p_a2822fbbcecda9
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../db/d05/classfl_1_1_r_g_b___blobs4___f_p.html">RGB_Blobs4_FP</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:09 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

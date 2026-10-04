@@ -1,11 +1,15 @@
 <map id="fl::rgb_2_rgbw_user_function" name="fl::rgb_2_rgbw_user_function">
-<area shape="rect" id="Node000001" title=" " alt="" coords="631,35,779,75"/>
-<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a3003f962f976136b64f0e656e37742da.html#a3003f962f976136b64f0e656e37742da" title="Converts RGB to RGBW using one of the functions." alt="" coords="469,42,583,67"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="617,57,583,57,583,52,617,52"/>
-<area shape="rect" id="Node000003" href="$d0/dee/struct_pixel_controller_a650a6bebd28bdd32f404579c891ca98d.html#a650a6bebd28bdd32f404579c891ca98d" title=" " alt="" coords="243,5,421,45"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="456,47,421,41,422,36,456,41"/>
-<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_ae20004430e9197f538e3c8ad3e03a5db.html#ae20004430e9197f538e3c8ad3e03a5db" title=" " alt="" coords="275,70,389,95"/>
-<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="456,67,390,77,389,72,456,62"/>
-<area shape="rect" id="Node000004" href="$d4/d28/group___chipsets_gaba9a2f023f2950dbcdf3c2482f765350.html#gaba9a2f023f2950dbcdf3c2482f765350" title="Main rendering function that converts RGB to RGBW and shows pixels." alt="" coords="5,5,195,45"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="229,28,195,28,195,23,229,23"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="620,99,768,139"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a5d7f88cea77f862d6c24639b5a0cd916.html#a5d7f88cea77f862d6c24639b5a0cd916" title="Converts RGB to RGBW using one of the functions." alt="" coords="459,106,572,131"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="606,121,572,121,572,116,606,116"/>
+<area shape="rect" id="Node000003" href="$d3/d1d/group___power_ga01ec0d809cace073e7c92f323cbd38a1.html#ga01ec0d809cace073e7c92f323cbd38a1" title="Same, for a strip driven through the RGBW conversion." alt="" coords="248,5,395,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="482,101,409,60,381,48,383,43,412,55,485,96"/>
+<area shape="rect" id="Node000004" href="$d0/dee/struct_pixel_controller_af9320cb2184eab8cd1745e520c68ca62.html#af9320cb2184eab8cd1745e520c68ca62" title="loadAndScaleRGBW before its wire reorder: RGB in source order plus W." alt="" coords="232,69,411,109"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="445,111,410,105,411,100,446,105"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_af3542d7e69706a23e59f68a803550161.html#af3542d7e69706a23e59f68a803550161" title=" " alt="" coords="265,134,378,159"/>
+<area shape="poly" id="edge5_Node000002_Node000007" title=" " alt="" coords="446,131,379,141,378,136,445,126"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_a147010e2e1d4169b136516045ad0cbc0.html#a147010e2e1d4169b136516045ad0cbc0" title=" " alt="" coords="265,183,378,209"/>
+<area shape="poly" id="edge6_Node000002_Node000008" title=" " alt="" coords="481,140,412,173,374,186,372,181,410,168,478,136"/>
+<area shape="rect" id="Node000005" href="$d0/dee/struct_pixel_controller_a5aa57de8397b498ea587b5f0c049ced5.html#a5aa57de8397b498ea587b5f0c049ced5" title=" " alt="" coords="5,69,184,109"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="218,92,184,92,184,87,218,87"/>
 </map>

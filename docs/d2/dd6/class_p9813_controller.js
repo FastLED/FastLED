@@ -1,7 +1,7 @@
 var class_p9813_controller =
 [
     [ "SPI", "d2/dd6/class_p9813_controller_af92fb6ecdc84cf1a9fbd967a01a940a5.html#af92fb6ecdc84cf1a9fbd967a01a940a5", null ],
-    [ "P9813Controller", "d2/dd6/class_p9813_controller_ac4b07ff4cdce4e1539804425abf31c65.html#ac4b07ff4cdce4e1539804425abf31c65", null ],
+    [ "P9813Controller", "d2/dd6/class_p9813_controller_aecc69fa07ad5e39501e69ca45ffd9a24.html#aecc69fa07ad5e39501e69ca45ffd9a24", null ],
     [ "calculateBytes", "d2/dd6/class_p9813_controller_aa421bbad2f12832b0dfe5f338396a32c.html#aa421bbad2f12832b0dfe5f338396a32c", null ],
     [ "getPaddingByte", "d2/dd6/class_p9813_controller_a9dc6d53ebfd07ac1cf155f8f80111e86.html#a9dc6d53ebfd07ac1cf155f8f80111e86", null ],
     [ "getPaddingLEDFrame", "d2/dd6/class_p9813_controller_af119dd231227bae447461f3cc771389b.html#af119dd231227bae447461f3cc771389b", null ],

@@ -32,8 +32,10 @@ var group___power_model =
       [ "warm_white_mW", "db/d18/struct_power_model_r_g_b_w_w_a467d0fe640b7d3a65db99d7fcabe8604.html#a467d0fe640b7d3a65db99d7fcabe8604", null ],
       [ "white_mW", "db/d18/struct_power_model_r_g_b_w_w_a2bddeb117bcddc9a3ce6f995df02b8d6.html#a2bddeb117bcddc9a3ce6f995df02b8d6", null ]
     ] ],
+    [ "calculate_unscaled_emitter_power_mW", "d9/d5f/group___power_model_ga315379844ae2a3ff4212fe39ac1ade6c.html#ga315379844ae2a3ff4212fe39ac1ade6c", null ],
     [ "get_power_model", "d9/d5f/group___power_model_gaec3b3e44c2f5e7f70127ad76f480ccd0.html#gaec3b3e44c2f5e7f70127ad76f480ccd0", null ],
     [ "get_power_scaling_exponent", "d9/d5f/group___power_model_ga8aa9fd0df8e3e989b4907e9f703343b2.html#ga8aa9fd0df8e3e989b4907e9f703343b2", null ],
+    [ "get_white_emitter_mW", "d9/d5f/group___power_model_ga71d79c746ccde0fd719f37e76638a107.html#ga71d79c746ccde0fd719f37e76638a107", null ],
     [ "set_power_model", "d9/d5f/group___power_model_ga83d1cb7bfce9bd338765968bb40d54e5.html#ga83d1cb7bfce9bd338765968bb40d54e5", null ],
     [ "set_power_model", "d9/d5f/group___power_model_ga759a23d8dec6a2de0d5b89095014d4e6.html#ga759a23d8dec6a2de0d5b89095014d4e6", null ],
     [ "set_power_model", "d9/d5f/group___power_model_gad42f079a40ba5d5a0db04e14b645e49e.html#gad42f079a40ba5d5a0db04e14b645e49e", null ],

@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -114,17 +114,17 @@ $(function(){initNavTree('d4/d36/namespacefl_a89d1610d20acbbcacd58914afe4639d1.h
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="../../da/d3c/namespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c.html#a7573a66f01c09f14a1ff0411f8e1153c">fl::u8</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>r</em></span>, </td>
+          <td class="paramtype"><a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>r</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="../../da/d3c/namespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c.html#a7573a66f01c09f14a1ff0411f8e1153c">fl::u8</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>g</em></span>, </td>
+          <td class="paramtype"><a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>g</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="../../da/d3c/namespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c.html#a7573a66f01c09f14a1ff0411f8e1153c">fl::u8</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>b</em></span>&#160;)</td>
+          <td class="paramtype"><a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>b</em></span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -132,23 +132,24 @@ $(function(){initNavTree('d4/d36/namespacefl_a89d1610d20acbbcacd58914afe4639d1.h
 <p class="definition">Definition at line <a class="el" href="../../d8/d9d/pixel_8cpp_8hpp_source.html#l00023">23</a> of file <a class="el" href="../../d8/d9d/pixel_8cpp_8hpp_source.html">pixel.cpp.hpp</a>.</p>
 <div class="fragment"><div class="line"><span class="lineno">   23</span>                                                             {</div>
 <div class="line"><span class="lineno">   24</span>    <span class="comment">// Extract RGB components from RGB565</span></div>
-<div class="line"><span class="lineno">   25</span>    <a class="code hl_typedef" href="../../da/d3c/namespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c.html#a7573a66f01c09f14a1ff0411f8e1153c">fl::u8</a> r5 = (rgb565 &gt;&gt; 11) &amp; 0x1F;  <span class="comment">// 5-bit red</span></div>
-<div class="line"><span class="lineno">   26</span>    <a class="code hl_typedef" href="../../da/d3c/namespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c.html#a7573a66f01c09f14a1ff0411f8e1153c">fl::u8</a> g6 = (rgb565 &gt;&gt; 5) &amp; 0x3F;   <span class="comment">// 6-bit green</span></div>
-<div class="line"><span class="lineno">   27</span>    <a class="code hl_typedef" href="../../da/d3c/namespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c.html#a7573a66f01c09f14a1ff0411f8e1153c">fl::u8</a> b5 = rgb565 &amp; 0x1F;          <span class="comment">// 5-bit blue</span></div>
+<div class="line"><span class="lineno">   25</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> r5 = (rgb565 &gt;&gt; 11) &amp; 0x1F;  <span class="comment">// 5-bit red</span></div>
+<div class="line"><span class="lineno">   26</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> g6 = (rgb565 &gt;&gt; 5) &amp; 0x3F;   <span class="comment">// 6-bit green</span></div>
+<div class="line"><span class="lineno">   27</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> b5 = rgb565 &amp; 0x1F;          <span class="comment">// 5-bit blue</span></div>
 <div class="line"><span class="lineno">   28</span> </div>
 <div class="line"><span class="lineno">   29</span>    <span class="comment">// Use lookup tables for fast conversion</span></div>
 <div class="line"><span class="lineno">   30</span>    r = <a class="code hl_define" href="../../df/dab/fastled__progmem_8h_a51e5e652e8bbcebe0e0b04efd048bd74.html#a51e5e652e8bbcebe0e0b04efd048bd74">FL_PGM_READ_BYTE_NEAR</a>(&amp;<a class="code hl_variable" href="../../d4/d36/namespacefl_a3c5d0f37ea0678c533417dcdaee034e0.html#a3c5d0f37ea0678c533417dcdaee034e0">rgb565_5to8_table</a>[r5]);</div>
-<div class="line"><span class="lineno">   31</span>    g = <a class="code hl_define" href="../../df/dab/fastled__progmem_8h_a51e5e652e8bbcebe0e0b04efd048bd74.html#a51e5e652e8bbcebe0e0b04efd048bd74">FL_PGM_READ_BYTE_NEAR</a>(&amp;<a class="code hl_variable" href="../../d4/d36/namespacefl_a7982f2c80da71366d7386ef81fbb26ce.html#a7982f2c80da71366d7386ef81fbb26ce">rgb565_6to8_table</a>[g6]);</div>
+<div class="line"><span class="lineno">   31</span>    <a class="code hl_variable" href="../../d4/d36/namespacefl_abb8ff746cce2b11a90718afba1cfec1b.html#abb8ff746cce2b11a90718afba1cfec1b">g</a> = <a class="code hl_define" href="../../df/dab/fastled__progmem_8h_a51e5e652e8bbcebe0e0b04efd048bd74.html#a51e5e652e8bbcebe0e0b04efd048bd74">FL_PGM_READ_BYTE_NEAR</a>(&amp;<a class="code hl_variable" href="../../d4/d36/namespacefl_a7982f2c80da71366d7386ef81fbb26ce.html#a7982f2c80da71366d7386ef81fbb26ce">rgb565_6to8_table</a>[g6]);</div>
 <div class="line"><span class="lineno">   32</span>    b = <a class="code hl_define" href="../../df/dab/fastled__progmem_8h_a51e5e652e8bbcebe0e0b04efd048bd74.html#a51e5e652e8bbcebe0e0b04efd048bd74">FL_PGM_READ_BYTE_NEAR</a>(&amp;<a class="code hl_variable" href="../../d4/d36/namespacefl_a3c5d0f37ea0678c533417dcdaee034e0.html#a3c5d0f37ea0678c533417dcdaee034e0">rgb565_5to8_table</a>[b5]);</div>
 <div class="line"><span class="lineno">   33</span>}</div>
 <div class="ttc" id="afastled__progmem_8h_a51e5e652e8bbcebe0e0b04efd048bd74_html_a51e5e652e8bbcebe0e0b04efd048bd74"><div class="ttname"><a href="../../df/dab/fastled__progmem_8h_a51e5e652e8bbcebe0e0b04efd048bd74.html#a51e5e652e8bbcebe0e0b04efd048bd74">FL_PGM_READ_BYTE_NEAR</a></div><div class="ttdeci">#define FL_PGM_READ_BYTE_NEAR(x)</div><div class="ttdoc">Read a byte (8-bit) from PROGMEM memory.</div><div class="ttdef"><b>Definition</b> <a href="../../df/dab/fastled__progmem_8h_source.html#l00086">fastled_progmem.h:86</a></div></div>
-<div class="ttc" id="anamespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c_html_a7573a66f01c09f14a1ff0411f8e1153c"><div class="ttname"><a href="../../da/d3c/namespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c.html#a7573a66f01c09f14a1ff0411f8e1153c">fl::fl::u8</a></div><div class="ttdeci">unsigned char u8</div><div class="ttdef"><b>Definition</b> <a href="../../df/d96/s16x16x4_8h_source.html#l00132">s16x16x4.h:132</a></div></div>
+<div class="ttc" id="anamespacefl_a058ceeac48f181da463c2ba07401292c_html_a058ceeac48f181da463c2ba07401292c"><div class="ttname"><a href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a></div><div class="ttdeci">unsigned char u8</div><div class="ttdef"><b>Definition</b> <a href="../../df/dd8/stdint_8h_source.html#l00131">stdint.h:131</a></div></div>
 <div class="ttc" id="anamespacefl_a3c5d0f37ea0678c533417dcdaee034e0_html_a3c5d0f37ea0678c533417dcdaee034e0"><div class="ttname"><a href="../../d4/d36/namespacefl_a3c5d0f37ea0678c533417dcdaee034e0.html#a3c5d0f37ea0678c533417dcdaee034e0">fl::rgb565_5to8_table</a></div><div class="ttdeci">const fl::u8 rgb565_5to8_table[32]</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d9d/pixel_8cpp_8hpp_source.html#l00009">pixel.cpp.hpp:9</a></div></div>
 <div class="ttc" id="anamespacefl_a7982f2c80da71366d7386ef81fbb26ce_html_a7982f2c80da71366d7386ef81fbb26ce"><div class="ttname"><a href="../../d4/d36/namespacefl_a7982f2c80da71366d7386ef81fbb26ce.html#a7982f2c80da71366d7386ef81fbb26ce">fl::rgb565_6to8_table</a></div><div class="ttdeci">const fl::u8 rgb565_6to8_table[64]</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d9d/pixel_8cpp_8hpp_source.html#l00015">pixel.cpp.hpp:15</a></div></div>
+<div class="ttc" id="anamespacefl_abb8ff746cce2b11a90718afba1cfec1b_html_abb8ff746cce2b11a90718afba1cfec1b"><div class="ttname"><a href="../../d4/d36/namespacefl_abb8ff746cce2b11a90718afba1cfec1b.html#abb8ff746cce2b11a90718afba1cfec1b">fl::g</a></div><div class="ttdeci">InputGamut g</div><div class="ttdef"><b>Definition</b> <a href="../../df/df8/fl_2gfx_2rgbw_8h_source.html#l00124">rgbw.h:124</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../df/dab/fastled__progmem_8h_source.html#l00086">FL_PGM_READ_BYTE_NEAR</a>, <a class="el" href="../../d8/d9d/pixel_8cpp_8hpp_source.html#l00009">rgb565_5to8_table</a>, and <a class="el" href="../../d8/d9d/pixel_8cpp_8hpp_source.html#l00015">rgb565_6to8_table</a>.</p>
+<p class="reference">References <a class="el" href="../../df/dab/fastled__progmem_8h_source.html#l00086">FL_PGM_READ_BYTE_NEAR</a>, <a class="el" href="../../df/df8/fl_2gfx_2rgbw_8h_source.html#l00124">g</a>, <a class="el" href="../../d8/d9d/pixel_8cpp_8hpp_source.html#l00009">rgb565_5to8_table</a>, and <a class="el" href="../../d8/d9d/pixel_8cpp_8hpp_source.html#l00015">rgb565_6to8_table</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d67/frame_8cpp_8hpp_source.html#l00143">fl::Frame::convertPixelsToRgb()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d67/frame_8cpp_8hpp_source.html#l00141">fl::Frame::convertPixelsToRgb()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -166,7 +167,7 @@ $(function(){initNavTree('d4/d36/namespacefl_a89d1610d20acbbcacd58914afe4639d1.h
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:04 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:08 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -123,33 +123,32 @@ $(function(){initNavTree('db/d9c/classfl_1_1audio_1_1_spectral_equalizer_a569ebf
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="../../db/dea/spectral__equalizer_8cpp_8hpp_source.html#l00103">103</a> of file <a class="el" href="../../db/dea/spectral__equalizer_8cpp_8hpp_source.html">spectral_equalizer.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  103</span>                                                              {</div>
-<div class="line"><span class="lineno">  104</span>    <span class="keywordflow">if</span> (gains.size() != <a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_af4043dbd3a10668fa3eec1b3346f7db2.html#af4043dbd3a10668fa3eec1b3346f7db2">mConfig</a>.numBands) {</div>
-<div class="line"><span class="lineno">  105</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;SpectralEqualizer: custom gains size mismatch (&quot;</span></div>
-<div class="line"><span class="lineno">  106</span>                &lt;&lt; gains.size() &lt;&lt; <span class="stringliteral">&quot; != &quot;</span> &lt;&lt; <a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_af4043dbd3a10668fa3eec1b3346f7db2.html#af4043dbd3a10668fa3eec1b3346f7db2">mConfig</a>.numBands &lt;&lt; <span class="stringliteral">&quot;)&quot;</span>);</div>
-<div class="line"><span class="lineno">  107</span>        <span class="keywordflow">return</span>;</div>
-<div class="line"><span class="lineno">  108</span>    }</div>
-<div class="line"><span class="lineno">  109</span> </div>
-<div class="line"><span class="lineno">  110</span>    <span class="comment">// Copy custom gains</span></div>
-<div class="line"><span class="lineno">  111</span>    <a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_af4043dbd3a10668fa3eec1b3346f7db2.html#af4043dbd3a10668fa3eec1b3346f7db2">mConfig</a>.customGains.clear();</div>
-<div class="line"><span class="lineno">  112</span>    <a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_af4043dbd3a10668fa3eec1b3346f7db2.html#af4043dbd3a10668fa3eec1b3346f7db2">mConfig</a>.customGains.reserve(gains.size());</div>
-<div class="line"><span class="lineno">  113</span>    <span class="keywordflow">for</span> (size i = 0; i &lt; gains.size(); ++i) {</div>
-<div class="line"><span class="lineno">  114</span>        <a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_af4043dbd3a10668fa3eec1b3346f7db2.html#af4043dbd3a10668fa3eec1b3346f7db2">mConfig</a>.customGains.push_back(gains[i]);</div>
-<div class="line"><span class="lineno">  115</span>        <a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_af6ff0afeba839e05b74faf1c03a20ff4.html#af6ff0afeba839e05b74faf1c03a20ff4">mGains</a>[i] = gains[i];</div>
-<div class="line"><span class="lineno">  116</span>    }</div>
-<div class="line"><span class="lineno">  117</span> </div>
-<div class="line"><span class="lineno">  118</span>    <span class="comment">// Switch to custom curve</span></div>
-<div class="line"><span class="lineno">  119</span>    <a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_af4043dbd3a10668fa3eec1b3346f7db2.html#af4043dbd3a10668fa3eec1b3346f7db2">mConfig</a>.curve = <a class="code hl_enumvalue" href="../../db/dbf/namespacefl_1_1audio_afb2611adb4bc2c05bbd93eef903ede04.html#afb2611adb4bc2c05bbd93eef903ede04a90589c47f06eb971d548591f23c285af">EqualizationCurve::Custom</a>;</div>
-<div class="line"><span class="lineno">  120</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../db/dea/spectral__equalizer_8cpp_8hpp_source.html#l00100">100</a> of file <a class="el" href="../../db/dea/spectral__equalizer_8cpp_8hpp_source.html">spectral_equalizer.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  100</span>                                                              {</div>
+<div class="line"><span class="lineno">  101</span>    <span class="keywordflow">if</span> (gains.size() != <a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_af4043dbd3a10668fa3eec1b3346f7db2.html#af4043dbd3a10668fa3eec1b3346f7db2">mConfig</a>.numBands) {</div>
+<div class="line"><span class="lineno">  102</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;SpectralEqualizer: custom gains size mismatch (%s != %s)&quot;</span>, gains.size(), <a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_af4043dbd3a10668fa3eec1b3346f7db2.html#af4043dbd3a10668fa3eec1b3346f7db2">mConfig</a>.numBands);</div>
+<div class="line"><span class="lineno">  103</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">  104</span>    }</div>
+<div class="line"><span class="lineno">  105</span> </div>
+<div class="line"><span class="lineno">  106</span>    <span class="comment">// Copy custom gains</span></div>
+<div class="line"><span class="lineno">  107</span>    <a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_af4043dbd3a10668fa3eec1b3346f7db2.html#af4043dbd3a10668fa3eec1b3346f7db2">mConfig</a>.customGains.clear();</div>
+<div class="line"><span class="lineno">  108</span>    <a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_af4043dbd3a10668fa3eec1b3346f7db2.html#af4043dbd3a10668fa3eec1b3346f7db2">mConfig</a>.customGains.reserve(gains.size());</div>
+<div class="line"><span class="lineno">  109</span>    <span class="keywordflow">for</span> (size i = 0; i &lt; gains.size(); ++i) {</div>
+<div class="line"><span class="lineno">  110</span>        <a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_af4043dbd3a10668fa3eec1b3346f7db2.html#af4043dbd3a10668fa3eec1b3346f7db2">mConfig</a>.customGains.push_back(gains[i]);</div>
+<div class="line"><span class="lineno">  111</span>        <a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_af6ff0afeba839e05b74faf1c03a20ff4.html#af6ff0afeba839e05b74faf1c03a20ff4">mGains</a>[i] = gains[i];</div>
+<div class="line"><span class="lineno">  112</span>    }</div>
+<div class="line"><span class="lineno">  113</span> </div>
+<div class="line"><span class="lineno">  114</span>    <span class="comment">// Switch to custom curve</span></div>
+<div class="line"><span class="lineno">  115</span>    <a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_af4043dbd3a10668fa3eec1b3346f7db2.html#af4043dbd3a10668fa3eec1b3346f7db2">mConfig</a>.curve = <a class="code hl_enumvalue" href="../../db/dbf/namespacefl_1_1audio_afb2611adb4bc2c05bbd93eef903ede04.html#afb2611adb4bc2c05bbd93eef903ede04a90589c47f06eb971d548591f23c285af">EqualizationCurve::Custom</a>;</div>
+<div class="line"><span class="lineno">  116</span>}</div>
 <div class="ttc" id="aclassfl_1_1audio_1_1_spectral_equalizer_af4043dbd3a10668fa3eec1b3346f7db2_html_af4043dbd3a10668fa3eec1b3346f7db2"><div class="ttname"><a href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_af4043dbd3a10668fa3eec1b3346f7db2.html#af4043dbd3a10668fa3eec1b3346f7db2">fl::audio::SpectralEqualizer::mConfig</a></div><div class="ttdeci">SpectralEqualizerConfig mConfig</div><div class="ttdef"><b>Definition</b> <a href="../../d7/dda/spectral__equalizer_8h_source.html#l00138">spectral_equalizer.h:138</a></div></div>
 <div class="ttc" id="aclassfl_1_1audio_1_1_spectral_equalizer_af6ff0afeba839e05b74faf1c03a20ff4_html_af6ff0afeba839e05b74faf1c03a20ff4"><div class="ttname"><a href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_af6ff0afeba839e05b74faf1c03a20ff4.html#af6ff0afeba839e05b74faf1c03a20ff4">fl::audio::SpectralEqualizer::mGains</a></div><div class="ttdeci">vector&lt; float &gt; mGains</div><div class="ttdoc">Per-band gain multipliers.</div><div class="ttdef"><b>Definition</b> <a href="../../d7/dda/spectral__equalizer_8h_source.html#l00142">spectral_equalizer.h:142</a></div></div>
-<div class="ttc" id="alog_8h_a868b194fdb2234182e76042d9fde3062_html_a868b194fdb2234182e76042d9fde3062"><div class="ttname"><a href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a></div><div class="ttdeci">#define FL_WARN(X)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00276">log.h:276</a></div></div>
+<div class="ttc" id="alog_8h_a4804912fba6eed63e1afd84b8768aced_html_a4804912fba6eed63e1afd84b8768aced"><div class="ttname"><a href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a></div><div class="ttdeci">#define FL_WARN(...)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00440">log.h:440</a></div></div>
 <div class="ttc" id="anamespacefl_1_1audio_afb2611adb4bc2c05bbd93eef903ede04_html_afb2611adb4bc2c05bbd93eef903ede04a90589c47f06eb971d548591f23c285af"><div class="ttname"><a href="../../db/dbf/namespacefl_1_1audio_afb2611adb4bc2c05bbd93eef903ede04.html#afb2611adb4bc2c05bbd93eef903ede04a90589c47f06eb971d548591f23c285af">fl::audio::EqualizationCurve::Custom</a></div><div class="ttdeci">@ Custom</div><div class="ttdef"><b>Definition</b> <a href="../../d7/dda/spectral__equalizer_8h_source.html#l00015">spectral_equalizer.h:15</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d7/dda/spectral__equalizer_8h_source.html#l00015">fl::audio::Custom</a>, <a class="el" href="../../d7/d7f/log_8h_source.html#l00276">FL_WARN</a>, <a class="el" href="../../d7/dda/spectral__equalizer_8h_source.html#l00138">mConfig</a>, <a class="el" href="../../d7/dda/spectral__equalizer_8h_source.html#l00142">mGains</a>, and <a class="el" href="../../d4/d7a/span_8h_source.html#l00458">fl::span&lt; T, Extent &gt;::size()</a>.</p>
+<p class="reference">References <a class="el" href="../../d7/dda/spectral__equalizer_8h_source.html#l00015">fl::audio::Custom</a>, <a class="el" href="../../d7/d7f/log_8h_source.html#l00440">FL_WARN</a>, <a class="el" href="../../d7/dda/spectral__equalizer_8h_source.html#l00138">mConfig</a>, <a class="el" href="../../d7/dda/spectral__equalizer_8h_source.html#l00142">mGains</a>, and <a class="el" href="../../d4/d7a/span_8h_source.html#l00483">fl::span&lt; T, Extent &gt;::size()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_a6eed65351ec3db77b488db8a99322a48.html#a6eed65351ec3db77b488db8a99322a48">~SpectralEqualizer()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_a45b2d4283ec71907df32ffe7ea48c4b2.html#a45b2d4283ec71907df32ffe7ea48c4b2">~SpectralEqualizer()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -174,7 +173,7 @@ $(function(){initNavTree('db/d9c/classfl_1_1audio_1_1_spectral_equalizer_a569ebf
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../db/dbf/namespacefl_1_1audio.html">audio</a></li><li class="navelem"><a class="el" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer.html">SpectralEqualizer</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:08 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:11 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

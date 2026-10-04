@@ -1,7 +1,7 @@
 var classfl_1_1third__party_1_1_mp3_stream_decoder_impl =
 [
-    [ "Mp3StreamDecoderImpl", "de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_a2876d318389218bd3d57e739d4deeb8a.html#a2876d318389218bd3d57e739d4deeb8a", null ],
-    [ "~Mp3StreamDecoderImpl", "de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_ab2b0dd675d270568f4119f3c826c7f4c.html#ab2b0dd675d270568f4119f3c826c7f4c", null ],
+    [ "Mp3StreamDecoderImpl", "de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_ae5456d0d9726956279e3c12593642ae7.html#ae5456d0d9726956279e3c12593642ae7", null ],
+    [ "~Mp3StreamDecoderImpl", "de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_ae5b1fec74157d8bca9a851f388760e06.html#ae5b1fec74157d8bca9a851f388760e06", null ],
     [ "begin", "de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_a087f84cd334a81db9b263da856bab5ba.html#a087f84cd334a81db9b263da856bab5ba", null ],
     [ "decodeNextFrame", "de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_af0982d3b4ee0b814eaff23e1cc2fe33e.html#af0982d3b4ee0b814eaff23e1cc2fe33e", null ],
     [ "end", "de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_a815655514016dda0edb0ff056f676886.html#a815655514016dda0edb0ff056f676886", null ],
@@ -12,16 +12,20 @@ var classfl_1_1third__party_1_1_mp3_stream_decoder_impl =
     [ "hasError", "de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_ae5aa3bd3c3a617112af3040c03c3825e.html#ae5aa3bd3c3a617112af3040c03c3825e", null ],
     [ "isReady", "de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_afe1f17dc6a8bb4612d8e3e0ae5c25f54.html#afe1f17dc6a8bb4612d8e3e0ae5c25f54", null ],
     [ "reset", "de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_aca0edcfb8c70c5556699023310d1f570.html#aca0edcfb8c70c5556699023310d1f570", null ],
+    [ "resetVbrState", "de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_afde4378e251ba25d98eb2c72f2f5fd13.html#afde4378e251ba25d98eb2c72f2f5fd13", null ],
     [ "BUFFER_SIZE", "de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_a5d58ad780937b0d75dbab59b57b33e12.html#a5d58ad780937b0d75dbab59b57b33e12", null ],
-    [ "mBuffer", "de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_a93eb1b8aa224c55a893bf1fa6145eaa0.html#a93eb1b8aa224c55a893bf1fa6145eaa0", null ],
+    [ "mBuffer", "de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_a26a124def9b68f81a1228da4340851f4.html#a26a124def9b68f81a1228da4340851f4", null ],
     [ "mBufferFilled", "de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_a4ae99fe5c72432058556471bab7d7b41.html#a4ae99fe5c72432058556471bab7d7b41", null ],
     [ "mBufferPos", "de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_a776b7f4147f1c630aaae6bf4c9ac938c.html#a776b7f4147f1c630aaae6bf4c9ac938c", null ],
     [ "mBytesProcessed", "de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_a3b0de062022621efe32a79eb9f99fec4.html#a3b0de062022621efe32a79eb9f99fec4", null ],
-    [ "mDecoder", "de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_a87e7ed206f3ba6562e3e4e3384344795.html#a87e7ed206f3ba6562e3e4e3384344795", null ],
+    [ "mDecoder", "de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_a87ff0117cb32034728b3ae49e161a38a.html#a87ff0117cb32034728b3ae49e161a38a", null ],
     [ "mEndOfStream", "de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_adbcbacc03f4d59e0b39c852e3f5d743f.html#adbcbacc03f4d59e0b39c852e3f5d743f", null ],
     [ "mErrorMsg", "de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_a4490c83b238d9349b1fe0710ae342f2b.html#a4490c83b238d9349b1fe0710ae342f2b", null ],
     [ "mHasDecodedFirstFrame", "de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_a5156d95ddf8707a7b533d7a582fd261a.html#a5156d95ddf8707a7b533d7a582fd261a", null ],
     [ "mHasError", "de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_ac504e6a51a329a4bcfd40f4febd7a60c.html#ac504e6a51a329a4bcfd40f4febd7a60c", null ],
     [ "mInfo", "de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_af1006948a2957dad5a1f698398cef051.html#af1006948a2957dad5a1f698398cef051", null ],
+    [ "mInspectedFirstFrame", "de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_a843a585be08e353e6a501afea68002c3.html#a843a585be08e353e6a501afea68002c3", null ],
+    [ "mSkipSamples", "de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_a3d1bef6743615bbf920858a1a2ea957a.html#a3d1bef6743615bbf920858a1a2ea957a", null ],
+    [ "mSkipTagFrame", "de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_a092c143f7d34e25bab1e39350a5c4532.html#a092c143f7d34e25bab1e39350a5c4532", null ],
     [ "mStream", "de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_ad33afa09e0d5467885fd45536302eef6.html#ad33afa09e0d5467885fd45536302eef6", null ]
 ];

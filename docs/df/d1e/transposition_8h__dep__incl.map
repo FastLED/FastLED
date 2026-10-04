@@ -6,9 +6,9 @@
 <area shape="poly" id="edge59_Node000001_Node000060" title=" " alt="" coords="4156,45,4156,152,4151,152,4151,45"/>
 <area shape="rect" id="Node000061" href="$db/d8c/transpose8x1__noinline_8h.html" title="Declares the 8x1 transposition function." alt="" coords="4197,79,4379,104"/>
 <area shape="poly" id="edge61_Node000001_Node000061" title=" " alt="" coords="4188,35,4267,76,4265,81,4186,39"/>
-<area shape="rect" id="Node000003" href="$db/d97/_fast_l_e_d_8h.html" title="central include file for FastLED, defines the CFastLED class/object" alt="" coords="2816,313,2901,339"/>
+<area shape="rect" id="Node000003" href="$d6/d64/fastled_8h.html" title="central include file for FastLED, defines the CFastLED class/object" alt="" coords="2816,313,2901,339"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="2629,96,2074,105,1215,127,783,144,409,167,258,180,139,194,56,210,30,219,16,227,10,236,8,245,10,254,16,263,51,272,135,280,425,294,831,304,1303,312,2237,320,2816,322,2816,327,2237,325,1303,317,831,310,424,299,135,286,50,277,13,268,5,257,3,245,5,234,13,223,28,214,55,205,138,189,258,174,409,161,783,139,1215,122,2074,99,2629,91"/>
-<area shape="rect" id="Node000007" href="$d7/dc2/fl_2system_2_fast_l_e_d_8h.html" title="Internal FastLED header for implementation files." alt="" coords="2614,152,2757,177"/>
+<area shape="rect" id="Node000007" href="$d0/d69/fl_2system_2fastled_8h.html" title="Internal FastLED header for implementation files." alt="" coords="2614,152,2757,177"/>
 <area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="2688,118,2688,152,2683,152,2683,118"/>
 <area shape="rect" id="Node000004" href="$d7/de5/_fast_l_e_d_8cpp_8hpp.html" title=" " alt="" coords="2795,387,2923,412"/>
 <area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="2861,352,2861,387,2856,387,2856,352"/>

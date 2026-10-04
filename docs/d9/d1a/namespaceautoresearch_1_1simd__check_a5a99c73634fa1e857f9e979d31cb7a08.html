@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -125,9 +125,9 @@ $(function(){initNavTree('d9/d1a/namespaceautoresearch_1_1simd__check_a5a99c7363
 
 <p class="definition">Definition at line <a class="el" href="../../d7/dd1/_auto_research_simd_8h_source.html#l00872">872</a> of file <a class="el" href="../../d7/dd1/_auto_research_simd_8h_source.html">AutoResearchSimd.h</a>.</p>
 <div class="fragment"><div class="line"><span class="lineno">  872</span>                                      {</div>
-<div class="line"><span class="lineno">  873</span>    uint32_t v[4] = {0x80000000, 0xFFFFFFFF, 0x00000001, 0xDEADBEEF};</div>
+<div class="line"><span class="lineno">  873</span>    <a class="code hl_typedef" href="../../df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a> v[4] = {0x80000000, 0xFFFFFFFF, 0x00000001, 0xDEADBEEF};</div>
 <div class="line"><span class="lineno">  874</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> shift = 0; shift &lt;= 31; shift += 7) {</div>
-<div class="line"><span class="lineno">  875</span>        uint32_t expected[4], actual[4];</div>
+<div class="line"><span class="lineno">  875</span>        <a class="code hl_typedef" href="../../df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a> expected[4], actual[4];</div>
 <div class="line"><span class="lineno">  876</span>        <a class="code hl_function" href="../../d9/d1a/namespaceautoresearch_1_1simd__check_a03811e1c0ab353c46d28bbee680ef2ad.html#a03811e1c0ab353c46d28bbee680ef2ad">ref_srl_u32_4</a>(v, shift, expected);</div>
 <div class="line"><span class="lineno">  877</span>        store_u32_4(actual, srl_u32_4(load_u32_4(v), shift));</div>
 <div class="line"><span class="lineno">  878</span>        <span class="keywordflow">if</span> (!<a class="code hl_function" href="../../d9/d1a/namespaceautoresearch_1_1simd__check_a32deeea55a44818fc41455223c2e9599.html#a32deeea55a44818fc41455223c2e9599">compare_u32</a>(expected, actual, 4)) <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
@@ -136,10 +136,11 @@ $(function(){initNavTree('d9/d1a/namespaceautoresearch_1_1simd__check_a5a99c7363
 <div class="line"><span class="lineno">  881</span>}</div>
 <div class="ttc" id="anamespaceautoresearch_1_1simd__check_a03811e1c0ab353c46d28bbee680ef2ad_html_a03811e1c0ab353c46d28bbee680ef2ad"><div class="ttname"><a href="../../d9/d1a/namespaceautoresearch_1_1simd__check_a03811e1c0ab353c46d28bbee680ef2ad.html#a03811e1c0ab353c46d28bbee680ef2ad">autoresearch::simd_check::ref_srl_u32_4</a></div><div class="ttdeci">void ref_srl_u32_4(const uint32_t *v, int shift, uint32_t *out)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/dd1/_auto_research_simd_8h_source.html#l00862">AutoResearchSimd.h:862</a></div></div>
 <div class="ttc" id="anamespaceautoresearch_1_1simd__check_a32deeea55a44818fc41455223c2e9599_html_a32deeea55a44818fc41455223c2e9599"><div class="ttname"><a href="../../d9/d1a/namespaceautoresearch_1_1simd__check_a32deeea55a44818fc41455223c2e9599.html#a32deeea55a44818fc41455223c2e9599">autoresearch::simd_check::compare_u32</a></div><div class="ttdeci">bool compare_u32(const uint32_t *a, const uint32_t *b, size_t n)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/dd1/_auto_research_simd_8h_source.html#l00035">AutoResearchSimd.h:35</a></div></div>
+<div class="ttc" id="astdint_8h_ae8a835bf6e050b01cc449644a343aa73_html_ae8a835bf6e050b01cc449644a343aa73"><div class="ttname"><a href="../../df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a></div><div class="ttdeci">fl::u32 uint32_t</div><div class="ttdef"><b>Definition</b> <a href="../../df/dd8/stdint_8h_source.html#l00218">stdint.h:218</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../d7/dd1/_auto_research_simd_8h_source.html#l00035">compare_u32()</a>, and <a class="el" href="../../d7/dd1/_auto_research_simd_8h_source.html#l00862">ref_srl_u32_4()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d7/dd1/_auto_research_simd_8h_source.html#l01282">getTests()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d7/dd1/_auto_research_simd_8h_source.html#l01290">getTests()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -152,7 +153,7 @@ $(function(){initNavTree('d9/d1a/namespaceautoresearch_1_1simd__check_a5a99c7363
 <div id="dynsection-1-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-1-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d9/d1a/namespaceautoresearch_1_1simd__check_a5a99c73634fa1e857f9e979d31cb7a08_a5a99c73634fa1e857f9e979d31cb7a08_icgraph.svg" width="100%" height="386"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d9/d1a/namespaceautoresearch_1_1simd__check_a5a99c73634fa1e857f9e979d31cb7a08_a5a99c73634fa1e857f9e979d31cb7a08_icgraph.svg" width="578" height="66"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 
 </div>
@@ -164,7 +165,7 @@ $(function(){initNavTree('d9/d1a/namespaceautoresearch_1_1simd__check_a5a99c7363
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d1/dc9/namespaceautoresearch.html">autoresearch</a></li><li class="navelem"><a class="el" href="../../d9/d1a/namespaceautoresearch_1_1simd__check.html">simd_check</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:03 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

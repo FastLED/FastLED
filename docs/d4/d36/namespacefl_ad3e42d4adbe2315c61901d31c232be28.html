@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -109,7 +109,7 @@ $(function(){initNavTree('d4/d36/namespacefl_ad3e42d4adbe2315c61901d31c232be28.h
         <tr>
           <td class="memname"><a class="el" href="../../d2/db2/classfl_1_1string.html">fl::string</a> fl::base64_encode </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="../../d0/d08/classfl_1_1span.html">fl::span</a>&lt; const <a class="el" href="../../da/d3c/namespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c.html#a7573a66f01c09f14a1ff0411f8e1153c">fl::u8</a> &gt;</td>          <td class="paramname"><span class="paramname"><em>data</em></span></td><td>)</td>
+          <td class="paramtype"><a class="el" href="../../d0/d08/classfl_1_1span.html">fl::span</a>&lt; const <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> &gt;</td>          <td class="paramname"><span class="paramname"><em>data</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -118,13 +118,13 @@ $(function(){initNavTree('d4/d36/namespacefl_ad3e42d4adbe2315c61901d31c232be28.h
 <p class="definition">Definition at line <a class="el" href="../../db/d24/base64_8cpp_8hpp_source.html#l00022">22</a> of file <a class="el" href="../../db/d24/base64_8cpp_8hpp_source.html">base64.cpp.hpp</a>.</p>
 <div class="fragment"><div class="line"><span class="lineno">   22</span>                                                {</div>
 <div class="line"><span class="lineno">   23</span>    <a class="code hl_class" href="../../d2/db2/classfl_1_1string.html">fl::string</a> out;</div>
-<div class="line"><span class="lineno">   24</span>    <span class="keywordflow">if</span> (data.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_a1e467b483bfd364c93ae966e5bd4e427.html#a1e467b483bfd364c93ae966e5bd4e427">empty</a>()) <span class="keywordflow">return</span> out;</div>
+<div class="line"><span class="lineno">   24</span>    <span class="keywordflow">if</span> (data.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_a28135041ca9036a3efb34c1d0afe115b.html#a28135041ca9036a3efb34c1d0afe115b">empty</a>()) <span class="keywordflow">return</span> out;</div>
 <div class="line"><span class="lineno">   25</span> </div>
-<div class="line"><span class="lineno">   26</span>    fl::size encoded_len = 4 * ((data.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac">size</a>() + 2) / 3);</div>
-<div class="line"><span class="lineno">   27</span>    out.<a class="code hl_function" href="../../de/d66/classfl_1_1basic__string_a3177017ec80769a389ba53c0886f5a13.html#a3177017ec80769a389ba53c0886f5a13">reserve</a>(encoded_len);</div>
+<div class="line"><span class="lineno">   26</span>    fl::size encoded_len = 4 * ((data.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa">size</a>() + 2) / 3);</div>
+<div class="line"><span class="lineno">   27</span>    out.<a class="code hl_function" href="../../de/d66/classfl_1_1basic__string_a8925f81272fae0e7187ae92919787096.html#a8925f81272fae0e7187ae92919787096">reserve</a>(encoded_len);</div>
 <div class="line"><span class="lineno">   28</span> </div>
 <div class="line"><span class="lineno">   29</span>    fl::size i = 0;</div>
-<div class="line"><span class="lineno">   30</span>    fl::size len = data.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac">size</a>();</div>
+<div class="line"><span class="lineno">   30</span>    fl::size len = data.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa">size</a>();</div>
 <div class="line"><span class="lineno">   31</span> </div>
 <div class="line"><span class="lineno">   32</span>    <span class="keywordflow">while</span> (i + 2 &lt; len) {</div>
 <div class="line"><span class="lineno">   33</span>        fl::u32 triple = (fl::u32(data[i]) &lt;&lt; 16) |</div>
@@ -155,15 +155,15 @@ $(function(){initNavTree('d4/d36/namespacefl_ad3e42d4adbe2315c61901d31c232be28.h
 <div class="line"><span class="lineno">   58</span> </div>
 <div class="line"><span class="lineno">   59</span>    <span class="keywordflow">return</span> out;</div>
 <div class="line"><span class="lineno">   60</span>}</div>
-<div class="ttc" id="aclassfl_1_1basic__string_a3177017ec80769a389ba53c0886f5a13_html_a3177017ec80769a389ba53c0886f5a13"><div class="ttname"><a href="../../de/d66/classfl_1_1basic__string_a3177017ec80769a389ba53c0886f5a13.html#a3177017ec80769a389ba53c0886f5a13">fl::basic_string::reserve</a></div><div class="ttdeci">void reserve(fl::size newCapacity) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d86/basic__string_8cpp_8hpp_source.html#l00475">basic_string.cpp.hpp:475</a></div></div>
-<div class="ttc" id="aclassfl_1_1span_a1e467b483bfd364c93ae966e5bd4e427_html_a1e467b483bfd364c93ae966e5bd4e427"><div class="ttname"><a href="../../d0/d08/classfl_1_1span_a1e467b483bfd364c93ae966e5bd4e427.html#a1e467b483bfd364c93ae966e5bd4e427">fl::span::empty</a></div><div class="ttdeci">constexpr bool empty() const FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d7a/span_8h_source.html#l00510">span.h:510</a></div></div>
-<div class="ttc" id="aclassfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac_html_aef7ee7eb5254da1ba1eb4f3e0173d0ac"><div class="ttname"><a href="../../d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac">fl::span::size</a></div><div class="ttdeci">constexpr fl::size size() const FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d7a/span_8h_source.html#l00458">span.h:458</a></div></div>
-<div class="ttc" id="aclassfl_1_1string_html"><div class="ttname"><a href="../../d2/db2/classfl_1_1string.html">fl::string</a></div><div class="ttdef"><b>Definition</b> <a href="../../da/d66/string_8h_source.html#l00193">string.h:193</a></div></div>
+<div class="ttc" id="aclassfl_1_1basic__string_a8925f81272fae0e7187ae92919787096_html_a8925f81272fae0e7187ae92919787096"><div class="ttname"><a href="../../de/d66/classfl_1_1basic__string_a8925f81272fae0e7187ae92919787096.html#a8925f81272fae0e7187ae92919787096">fl::basic_string::reserve</a></div><div class="ttdeci">void reserve(fl::size newCapacity) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d86/basic__string_8cpp_8hpp_source.html#l00499">basic_string.cpp.hpp:499</a></div></div>
+<div class="ttc" id="aclassfl_1_1span_a28135041ca9036a3efb34c1d0afe115b_html_a28135041ca9036a3efb34c1d0afe115b"><div class="ttname"><a href="../../d0/d08/classfl_1_1span_a28135041ca9036a3efb34c1d0afe115b.html#a28135041ca9036a3efb34c1d0afe115b">fl::span::empty</a></div><div class="ttdeci">constexpr bool empty() const FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d7a/span_8h_source.html#l00535">span.h:535</a></div></div>
+<div class="ttc" id="aclassfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa_html_aaf3daca1c2c8f93b2ac7b319989b22fa"><div class="ttname"><a href="../../d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa">fl::span::size</a></div><div class="ttdeci">constexpr fl::size size() const FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d7a/span_8h_source.html#l00483">span.h:483</a></div></div>
+<div class="ttc" id="aclassfl_1_1string_html"><div class="ttname"><a href="../../d2/db2/classfl_1_1string.html">fl::string</a></div><div class="ttdef"><b>Definition</b> <a href="../../da/d66/string_8h_source.html#l00202">string.h:202</a></div></div>
 <div class="ttc" id="anamespacefl_1_1anonymous__namespace_02base64_8cpp_8hpp_03_a8fdff95e662ff039beb9ed70ff6fe6f5_html_a8fdff95e662ff039beb9ed70ff6fe6f5"><div class="ttname"><a href="../../d1/d84/namespacefl_1_1anonymous__namespace_02base64_8cpp_8hpp_03_a8fdff95e662ff039beb9ed70ff6fe6f5.html#a8fdff95e662ff039beb9ed70ff6fe6f5">fl::anonymous_namespace{base64.cpp.hpp}::kBase64Chars</a></div><div class="ttdeci">static const char kBase64Chars[]</div><div class="ttdef"><b>Definition</b> <a href="../../db/d24/base64_8cpp_8hpp_source.html#l00008">base64.cpp.hpp:8</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d4/d7a/span_8h_source.html#l00510">fl::span&lt; T, Extent &gt;::empty()</a>, <a class="el" href="../../d1/d86/basic__string_8cpp_8hpp_source.html#l00475">fl::basic_string::reserve()</a>, and <a class="el" href="../../d4/d7a/span_8h_source.html#l00458">fl::span&lt; T, Extent &gt;::size()</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d7a/span_8h_source.html#l00535">fl::span&lt; T, Extent &gt;::empty()</a>, <a class="el" href="../../d1/d86/basic__string_8cpp_8hpp_source.html#l00499">fl::basic_string::reserve()</a>, and <a class="el" href="../../d4/d7a/span_8h_source.html#l00483">fl::span&lt; T, Extent &gt;::size()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d5/da3/type__to__json_8h_source.html#l00039">fl::detail::TypeToJson&lt; fl::vector&lt; fl::u8 &gt; &gt;::convert()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d5/da3/type__to__json_8h_source.html#l00063">fl::detail::TypeToJson&lt; fl::vector&lt; fl::u8 &gt; &gt;::convert()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -188,7 +188,7 @@ $(function(){initNavTree('d4/d36/namespacefl_ad3e42d4adbe2315c61901d31c232be28.h
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:04 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:07 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

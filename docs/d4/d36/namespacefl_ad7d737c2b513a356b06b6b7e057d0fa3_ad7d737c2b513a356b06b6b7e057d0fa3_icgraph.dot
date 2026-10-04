@@ -9,4 +9,8 @@ digraph "fl::write_bytes"
   Node1 [id="Node000001",label="fl::write_bytes",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node2 [id="Node000002",label="fl::SerialPort::write",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d67/classfl_1_1_serial_port_ab382ef2d9597a0d90a0d2cee32bc2774.html#ab382ef2d9597a0d90a0d2cee32bc2774",tooltip="Write buffer to serial output."];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::SerialWriter::write",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d8c/structfl_1_1_serial_writer_a2f8049c23dc431094d4c09c92926d9c5.html#a2f8049c23dc431094d4c09c92926d9c5",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::createSerialResponse\lStreamSink",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a4c5381818ea42c674c16b43466bedef0.html#a4c5381818ea42c674c16b43466bedef0",tooltip="Create a streamed JSON-RPC ResponseSink that writes directly to serial."];
 }

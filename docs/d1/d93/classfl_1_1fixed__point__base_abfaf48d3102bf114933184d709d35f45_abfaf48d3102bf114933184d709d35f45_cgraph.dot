@@ -8,11 +8,11 @@ digraph "fl::fixed_point_base::sqrt_impl"
   rankdir="LR";
   Node1 [id="Node000001",label="fl::fixed_point_base\l::sqrt_impl",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::isqrt32",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_aef88a9667b8b893abab1e0e41a3e81d3.html#aef88a9667b8b893abab1e0e41a3e81d3",tooltip=" "];
+  Node2 [id="Node000002",label="fl::isqrt32",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a30f39f186ac9928192cafa0c13cb0cb3.html#a30f39f186ac9928192cafa0c13cb0cb3",tooltip=" "];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::_isqrt32_start",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a8f27048f2254fbf4acb9a3b00e7cb305.html#a8f27048f2254fbf4acb9a3b00e7cb305",tooltip=" "];
+  Node3 [id="Node000003",label="fl::_isqrt32_start",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a4e37a74bde6d1792d34e395fdafff5d4.html#a4e37a74bde6d1792d34e395fdafff5d4",tooltip=" "];
   Node3 -> Node3 [id="edge3_Node000003_Node000003",color="steelblue1",style="solid",tooltip=" "];
   Node2 -> Node4 [id="edge4_Node000002_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="fl::_isqrt32_step",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a033fb4e082027bb0756c5de35ddcbd98.html#a033fb4e082027bb0756c5de35ddcbd98",tooltip=" "];
+  Node4 [id="Node000004",label="fl::_isqrt32_step",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a80fe2035d8ebb21626502b253d188ab4.html#a80fe2035d8ebb21626502b253d188ab4",tooltip=" "];
   Node4 -> Node4 [id="edge5_Node000004_Node000004",color="steelblue1",style="solid",tooltip=" "];
 }

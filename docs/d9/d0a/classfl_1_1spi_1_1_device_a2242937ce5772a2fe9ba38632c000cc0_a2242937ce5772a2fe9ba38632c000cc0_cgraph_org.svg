@@ -57,7 +57,7 @@
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../d0/d08/classfl_1_1span_a326aa9f29859fe8a92833fd5db12c3bb.html#a326aa9f29859fe8a92833fd5db12c3bb" target="_top" xlink:title=" ">
+<g id="a_Node000004"><a xlink:href="../../d0/d08/classfl_1_1span_a45157f503f151e36c679f688f10e3511.html#a45157f503f151e36c679f688f10e3511" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="291,-316 211,-316 211,-297 291,-297 291,-316"/>
 <text text-anchor="middle" x="251" y="-304" font-family="Helvetica,sans-Serif" font-size="10.00">fl::span::data</text>
 </a>
@@ -75,7 +75,7 @@
 <!-- Node5 -->
 <g id="Node000005" class="node">
 <title>Node5</title>
-<g id="a_Node000005"><a xlink:href="../../d7/d93/classfl_1_1expected_abbee0bb98c9bf0a1391cb3e810ea4fd5.html#abbee0bb98c9bf0a1391cb3e810ea4fd5" target="_top" xlink:title="Create error result.">
+<g id="a_Node000005"><a xlink:href="../../d7/d93/classfl_1_1expected_a5a61d98092eb4671f7add861bd663d2f.html#a5a61d98092eb4671f7add861bd663d2f" target="_top" xlink:title="Create error result.">
 <polygon fill="white" stroke="#666666" points="306.5,-279 195.5,-279 195.5,-260 306.5,-260 306.5,-279"/>
 <text text-anchor="middle" x="251" y="-267" font-family="Helvetica,sans-Serif" font-size="10.00">fl::expected::failure</text>
 </a>
@@ -93,7 +93,7 @@
 <!-- Node7 -->
 <g id="Node000007" class="node">
 <title>Node7</title>
-<g id="a_Node000007"><a xlink:href="../../d4/d36/namespacefl_a3fd92c727664a77396403265415789d3.html#a3fd92c727664a77396403265415789d3" target="_top" xlink:title=" ">
+<g id="a_Node000007"><a xlink:href="../../d4/d36/namespacefl_a257ae39a291866e014a2eeb4abe2a29c.html#a257ae39a291866e014a2eeb4abe2a29c" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="298,-166 204,-166 204,-147 298,-147 298,-166"/>
 <text text-anchor="middle" x="251" y="-154" font-family="Helvetica,sans-Serif" font-size="10.00">fl::make_unique</text>
 </a>
@@ -111,7 +111,7 @@
 <!-- Node9 -->
 <g id="Node000009" class="node">
 <title>Node9</title>
-<g id="a_Node000009"><a xlink:href="../../d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a" target="_top" xlink:title="Universal millisecond timer &#45; returns milliseconds since system startup.">
+<g id="a_Node000009"><a xlink:href="../../d4/d36/namespacefl_a3c0ba5842bfd029c404a38c8df2315f3.html#a3c0ba5842bfd029c404a38c8df2315f3" target="_top" xlink:title="Universal millisecond timer &#45; returns milliseconds since system startup.">
 <polygon fill="white" stroke="#666666" points="279,-111 223,-111 223,-92 279,-92 279,-111"/>
 <text text-anchor="middle" x="251" y="-99" font-family="Helvetica,sans-Serif" font-size="10.00">fl::millis</text>
 </a>
@@ -129,9 +129,9 @@
 <!-- Node10 -->
 <g id="Node000010" class="node">
 <title>Node10</title>
-<g id="a_Node000010"><a xlink:href="../../da/d3c/namespacefl_1_1fl_a14315b21314f12a4c40dde841fcc4c8a.html#a14315b21314f12a4c40dde841fcc4c8a" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="457,-204 389,-204 389,-185 457,-185 457,-204"/>
-<text text-anchor="middle" x="423" y="-192" font-family="Helvetica,sans-Serif" font-size="10.00">fl::fl::move</text>
+<g id="a_Node000010"><a xlink:href="../../d4/d36/namespacefl_a0c8a67e528dcd96ee58216754a07a733.html#a0c8a67e528dcd96ee58216754a07a733" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="451,-204 395,-204 395,-185 451,-185 451,-204"/>
+<text text-anchor="middle" x="423" y="-192" font-family="Helvetica,sans-Serif" font-size="10.00">fl::move</text>
 </a>
 </g>
 </g>
@@ -139,15 +139,15 @@
 <g id="edge11_Node000001_Node000010" class="edge">
 <title>Node1&#45;&gt;Node10</title>
 <g id="a_edge11_Node000001_Node000010"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M120.06,-222.98C138.42,-219.58 159.63,-215.98 179,-213.5 248.61,-204.59 330,-199.25 378.7,-196.6"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="379.08,-200.08 388.88,-196.05 378.71,-193.09 379.08,-200.08"/>
+<path fill="none" stroke="#63b8ff" d="M120.06,-222.98C138.42,-219.58 159.63,-215.98 179,-213.5 251.58,-204.21 336.98,-198.8 384.77,-196.27"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="385.14,-199.76 394.94,-195.74 384.77,-192.76 385.14,-199.76"/>
 </a>
 </g>
 </g>
 <!-- Node11 -->
 <g id="Node000011" class="node">
 <title>Node11</title>
-<g id="a_Node000011"><a xlink:href="../../d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac" target="_top" xlink:title=" ">
+<g id="a_Node000011"><a xlink:href="../../d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="289.5,-74 212.5,-74 212.5,-55 289.5,-55 289.5,-74"/>
 <text text-anchor="middle" x="251" y="-62" font-family="Helvetica,sans-Serif" font-size="10.00">fl::span::size</text>
 </a>
@@ -165,7 +165,7 @@
 <!-- Node12 -->
 <g id="Node000012" class="node">
 <title>Node12</title>
-<g id="a_Node000012"><a xlink:href="../../d7/d93/classfl_1_1expected_ae712d6f5942009caa637e9181d47d40b.html#ae712d6f5942009caa637e9181d47d40b" target="_top" xlink:title="Create successful result.">
+<g id="a_Node000012"><a xlink:href="../../d7/d93/classfl_1_1expected_aace779907e6f9b82b8480260eed069cf.html#aace779907e6f9b82b8480260eed069cf" target="_top" xlink:title="Create successful result.">
 <polygon fill="white" stroke="#666666" points="310,-242 192,-242 192,-223 310,-223 310,-242"/>
 <text text-anchor="middle" x="251" y="-230" font-family="Helvetica,sans-Serif" font-size="10.00">fl::expected::success</text>
 </a>
@@ -228,7 +228,7 @@
 <!-- Node6 -->
 <g id="Node000006" class="node">
 <title>Node6</title>
-<g id="a_Node000006"><a xlink:href="../../d7/d93/classfl_1_1expected_a519c280d81d3683cfbfb758ed0198277.html#a519c280d81d3683cfbfb758ed0198277" target="_top" xlink:title="Default constructor (creates error state)">
+<g id="a_Node000006"><a xlink:href="../../d7/d93/classfl_1_1expected_a5aa20b7b90519f69e6441207124a02b5.html#a5aa20b7b90519f69e6441207124a02b5" target="_top" xlink:title="Default constructor (creates error state)">
 <polygon fill="white" stroke="#666666" points="485.5,-279 360.5,-279 360.5,-260 485.5,-260 485.5,-279"/>
 <text text-anchor="middle" x="423" y="-267" font-family="Helvetica,sans-Serif" font-size="10.00">fl::expected::expected</text>
 </a>
@@ -246,9 +246,9 @@
 <!-- Node8 -->
 <g id="Node000008" class="node">
 <title>Node8</title>
-<g id="a_Node000008"><a xlink:href="../../da/d3c/namespacefl_1_1fl_a0bddf371925d8c4e94b88e9d7b35d259.html#a0bddf371925d8c4e94b88e9d7b35d259" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="462,-166 384,-166 384,-147 462,-147 462,-166"/>
-<text text-anchor="middle" x="423" y="-154" font-family="Helvetica,sans-Serif" font-size="10.00">fl::fl::forward</text>
+<g id="a_Node000008"><a xlink:href="../../d4/d36/namespacefl_a94488336a5db985fbda1bbd317bffc6a.html#a94488336a5db985fbda1bbd317bffc6a" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="456,-166 390,-166 390,-147 456,-147 456,-166"/>
+<text text-anchor="middle" x="423" y="-154" font-family="Helvetica,sans-Serif" font-size="10.00">fl::forward</text>
 </a>
 </g>
 </g>
@@ -256,8 +256,8 @@
 <g id="edge8_Node000007_Node000008" class="edge">
 <title>Node7&#45;&gt;Node8</title>
 <g id="a_edge8_Node000007_Node000008"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M298,-156.5C321.47,-156.5 350.01,-156.5 373.78,-156.5"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="374,-160 384,-156.5 374,-153 374,-160"/>
+<path fill="none" stroke="#63b8ff" d="M298,-156.5C323.47,-156.5 354.9,-156.5 379.75,-156.5"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="379.96,-160 389.96,-156.5 379.96,-153 379.96,-160"/>
 </a>
 </g>
 </g>
@@ -283,15 +283,15 @@
 <g id="edge15_Node000012_Node000010" class="edge">
 <title>Node12&#45;&gt;Node10</title>
 <g id="a_edge15_Node000012_Node000010"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M294.9,-222.91C320.6,-217.17 353.18,-209.88 378.91,-204.13"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="379.77,-207.53 388.77,-201.93 378.25,-200.69 379.77,-207.53"/>
+<path fill="none" stroke="#63b8ff" d="M294.9,-222.91C322.6,-216.72 358.28,-208.74 384.78,-202.82"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="385.81,-206.17 394.81,-200.58 384.29,-199.34 385.81,-206.17"/>
 </a>
 </g>
 </g>
 <!-- Node13 -->
 <g id="Node000013" class="node">
 <title>Node13</title>
-<g id="a_Node000013"><a xlink:href="../../d7/d93/classfl_1_1expected_a85abd0dcb2c53b60f4ecb00c7cc31c6e.html#a85abd0dcb2c53b60f4ecb00c7cc31c6e" target="_top" xlink:title="Get value (only valid if ok() == true)">
+<g id="a_Node000013"><a xlink:href="../../d7/d93/classfl_1_1expected_ae5be98db18dfac3b70a118f4fbc3c79c.html#ae5be98db18dfac3b70a118f4fbc3c79c" target="_top" xlink:title="Get value (only valid if ok() == true)">
 <polygon fill="white" stroke="#666666" points="476.5,-242 369.5,-242 369.5,-223 476.5,-223 476.5,-242"/>
 <text text-anchor="middle" x="423" y="-230" font-family="Helvetica,sans-Serif" font-size="10.00">fl::expected::value</text>
 </a>
@@ -309,7 +309,7 @@
 <!-- Node14 -->
 <g id="Node000014" class="node">
 <title>Node14</title>
-<g id="a_Node000014"><a xlink:href="../../d4/d36/namespacefl_ad2bd3fbfa62b8cb135f8c67ce6bfeefe.html#ad2bd3fbfa62b8cb135f8c67ce6bfeefe" target="_top" xlink:title=" ">
+<g id="a_Node000014"><a xlink:href="../../d4/d36/namespacefl_aaea97025641d69c1e119f094f0276669.html#aaea97025641d69c1e119f094f0276669" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="567,-242 523,-242 523,-223 567,-223 567,-242"/>
 <text text-anchor="middle" x="545" y="-230" font-family="Helvetica,sans-Serif" font-size="10.00">fl::get</text>
 </a>

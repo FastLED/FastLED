@@ -1,0 +1,5 @@
+<map id="fl::detail::OnlyIf&lt; B &gt;" name="fl::detail::OnlyIf&lt; B &gt;">
+<area shape="rect" id="Node000001" title="type exists only when B is true: a self&#45;contained enable_if so the binder below can key on a constant..." alt="" coords="5,5,167,31"/>
+<area shape="rect" id="Node000002" href="$df/d9e/namespacefl_1_1detail.html#dc/d01/structfl_1_1detail_1_1_only_if_3_01true_01_4" title=" " alt="" coords="25,93,147,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="89,44,89,93,83,93,83,44"/>
+</map>

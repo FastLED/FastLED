@@ -10,11 +10,11 @@ digraph "loop"
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
   Node2 [id="Node000002",label="fillnoise8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d3d/_smart_matrix_sketch_8h_a695b396822bbfb2d9b29c121cf13e8f3.html#a695b396822bbfb2d9b29c121cf13e8f3",tooltip=" "];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="inoise8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/df9/group___noise_generation_gaeb72246ebd597b60a7e575173accf2fd.html#gaeb72246ebd597b60a7e575173accf2fd",tooltip=" "];
+  Node3 [id="Node000003",label="inoise8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/df9/group___noise_generation_gaeb72246ebd597b60a7e575173accf2fd.html#gaeb72246ebd597b60a7e575173accf2fd",tooltip="8-Bit, fixed point implementation of Perlin's noise."];
   Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="inoise8_raw",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d8/d5c/group___noise_gaa3db0f2f3777cf5bb7a4dd1359dba4fe.html#gaa3db0f2f3777cf5bb7a4dd1359dba4fe",tooltip=" "];
+  Node4 [id="Node000004",label="inoise8_raw",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d8/d5c/group___noise_gaa3db0f2f3777cf5bb7a4dd1359dba4fe.html#gaa3db0f2f3777cf5bb7a4dd1359dba4fe",tooltip="8-bit, fixed point implementation of Perlin's noise without scaling."];
   Node1 -> Node7 [id="edge4_Node000001_Node000007",color="steelblue1",style="solid",tooltip=" "];
-  Node7 [id="Node000007",label="random16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d0d/group___random_gaaaff3e84c6ab2cf5f71400a4b6958beb.html#gaaaff3e84c6ab2cf5f71400a4b6958beb",tooltip="Generate a 16-bit random number."];
+  Node7 [id="Node000007",label="random16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d0d/group___random_ga6f816735a0bd63bfc78bebbc7c5f12b9.html#ga6f816735a0bd63bfc78bebbc7c5f12b9",tooltip="Generate a 16-bit random number."];
   Node1 -> Node8 [id="edge5_Node000001_Node000008",color="steelblue1",style="solid",tooltip=" "];
   Node8 [id="Node000008",label="XY",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d3d/_smart_matrix_sketch_8h_a7aa2d780d14ccc2f3ce3c493e01999eb.html#a7aa2d780d14ccc2f3ce3c493e01999eb",tooltip=" "];
 }

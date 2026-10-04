@@ -8,9 +8,15 @@ digraph "fl::format_detail::format_float"
   rankdir="LR";
   Node1 [id="Node000001",label="fl::format_detail::\lformat_float",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::ftoa",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_adfaa5b18090b6c3e6c83fb49411e94a1.html#adfaa5b18090b6c3e6c83fb49411e94a1",tooltip="Convert floating point number to string buffer."];
+  Node2 [id="Node000002",label="fl::ftoa",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_ac989c29682fbeaa00f035d553618340c.html#ac989c29682fbeaa00f035d553618340c",tooltip="Convert floating point number to string buffer."];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::printf_detail::\lformat_float",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/de0/namespacefl_1_1printf__detail_a591e637254c01dab2e4eea75e058ccc3.html#a591e637254c01dab2e4eea75e058ccc3",tooltip=" "];
+  Node3 [id="Node000003",label="fl::printf_detail::\lformat_float",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/de0/namespacefl_1_1printf__detail_a5b3d38a2dd5df9b06bca627b30ab4c43.html#a5b3d38a2dd5df9b06bca627b30ab4c43",tooltip=" "];
   Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="fl::sstream::str",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d27/classfl_1_1sstream_a08170cac6eba7241f099ae16730f6f8e.html#a08170cac6eba7241f099ae16730f6f8e",tooltip=" "];
+  Node4 [id="Node000004",label="fl::printf_detail::\lfloat_is_finite",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/de0/namespacefl_1_1printf__detail_a779dee3217fc97683aeea217eac1b78a.html#a779dee3217fc97683aeea217eac1b78a",tooltip=" "];
+  Node3 -> Node5 [id="edge4_Node000003_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::printf_detail::\lformat_float_scientific",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/de0/namespacefl_1_1printf__detail_ac941b26565ba5c61672d0e5217fb1acc.html#ac941b26565ba5c61672d0e5217fb1acc",tooltip=" "];
+  Node5 -> Node3 [id="edge5_Node000005_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node5 -> Node6 [id="edge6_Node000005_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::sstream::str",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d27/classfl_1_1sstream_a904115dfd2a7e462177b6409c9b842d6.html#a904115dfd2a7e462177b6409c9b842d6",tooltip=" "];
+  Node3 -> Node6 [id="edge7_Node000003_Node000006",color="steelblue1",style="solid",tooltip=" "];
 }

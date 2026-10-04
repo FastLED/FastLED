@@ -8,15 +8,15 @@ digraph "createAudioConfig"
   rankdir="LR";
   Node1 [id="Node000001",label="createAudioConfig",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::audio::Config::\lCreateTeensyI2S",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d52/classfl_1_1audio_1_1_config_a2d5e36a3d0a95bd53a20e0152cec156c.html#a2d5e36a3d0a95bd53a20e0152cec156c",tooltip=" "];
+  Node2 [id="Node000002",label="fl::audio::Config::\lCreateTeensyI2S",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d52/classfl_1_1audio_1_1_config_a9f62720b84d3bbcb1920a89c55a79695.html#a9f62720b84d3bbcb1920a89c55a79695",tooltip=" "];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::audio::Config::\lConfig",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d52/classfl_1_1audio_1_1_config_aea6ac29e0ebdee4aadc8e38d9cb3a71f.html#aea6ac29e0ebdee4aadc8e38d9cb3a71f",tooltip=" "];
+  Node3 [id="Node000003",label="fl::audio::Config::\lConfig",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d52/classfl_1_1audio_1_1_config_a2d51ec335208f6ee67326eea0e7998ef.html#a2d51ec335208f6ee67326eea0e7998ef",tooltip=" "];
   Node2 -> Node4 [id="edge3_Node000002_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="fl::audio::TeensyI2S\l::getPinCLK",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d5b/namespacefl_1_1audio_1_1_teensy_i2_s_aaf0f048705bb3fc909d2dd1540052858.html#aaf0f048705bb3fc909d2dd1540052858",tooltip=" "];
+  Node4 [id="Node000004",label="fl::audio::TeensyI2S\l::getPinCLK",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d5b/namespacefl_1_1audio_1_1_teensy_i2_s_ac51a17187c429877df04e554dedd7980.html#ac51a17187c429877df04e554dedd7980",tooltip=" "];
   Node2 -> Node5 [id="edge4_Node000002_Node000005",color="steelblue1",style="solid",tooltip=" "];
-  Node5 [id="Node000005",label="fl::audio::TeensyI2S\l::getPinSD",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d5b/namespacefl_1_1audio_1_1_teensy_i2_s_a3a4595ecf32ef89e2c79900ddff859ef.html#a3a4595ecf32ef89e2c79900ddff859ef",tooltip=" "];
+  Node5 [id="Node000005",label="fl::audio::TeensyI2S\l::getPinSD",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d5b/namespacefl_1_1audio_1_1_teensy_i2_s_a7a47bb78863bd21923daed63ef05d8d5.html#a7a47bb78863bd21923daed63ef05d8d5",tooltip=" "];
   Node2 -> Node6 [id="edge5_Node000002_Node000006",color="steelblue1",style="solid",tooltip=" "];
-  Node6 [id="Node000006",label="fl::audio::TeensyI2S\l::getPinWS",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d5b/namespacefl_1_1audio_1_1_teensy_i2_s_a8ce1940f8366667991e3463ff0575805.html#a8ce1940f8366667991e3463ff0575805",tooltip=" "];
+  Node6 [id="Node000006",label="fl::audio::TeensyI2S\l::getPinWS",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d5b/namespacefl_1_1audio_1_1_teensy_i2_s_a0a940fa4fc70782117a3c718df55869b.html#a0a940fa4fc70782117a3c718df55869b",tooltip=" "];
   Node2 -> Node7 [id="edge6_Node000002_Node000007",color="steelblue1",style="solid",tooltip=" "];
-  Node7 [id="Node000007",label="fl::audio::Config::\lsetMicProfile",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d52/classfl_1_1audio_1_1_config_a80ce537820ee6d81e2ec9fc24aef7a87.html#a80ce537820ee6d81e2ec9fc24aef7a87",tooltip="Microphone pink noise correction profile."];
+  Node7 [id="Node000007",label="fl::audio::Config::\lsetMicProfile",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d52/classfl_1_1audio_1_1_config_ae05597722a3f363dac581308962464cd.html#ae05597722a3f363dac581308962464cd",tooltip="Microphone pink noise correction profile."];
 }

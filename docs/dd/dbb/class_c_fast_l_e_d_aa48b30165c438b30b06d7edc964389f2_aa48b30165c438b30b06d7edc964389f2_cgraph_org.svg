@@ -20,7 +20,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../d8/da0/classfl_1_1_c_l_e_d_controller_ad9e0dfb8b8b333d9e48c7695b202710c.html#ad9e0dfb8b8b333d9e48c7695b202710c" target="_top" xlink:title="Get the first LED controller in the linked list of controllers.">
+<g id="a_Node000002"><a xlink:href="../../d8/da0/classfl_1_1_c_l_e_d_controller_a4d10d41f89ce46d06fd504c2019dc291.html#a4d10d41f89ce46d06fd504c2019dc291" target="_top" xlink:title="Get the first LED controller in the linked list of controllers.">
 <polygon fill="white" stroke="#666666" points="251,-126 149,-126 149,-96 251,-96 251,-126"/>
 <text text-anchor="start" x="157" y="-114" font-family="Helvetica,sans-Serif" font-size="10.00">fl::CLEDController</text>
 <text text-anchor="middle" x="200" y="-103" font-family="Helvetica,sans-Serif" font-size="10.00">::head</text>
@@ -39,7 +39,7 @@
 <!-- Node6 -->
 <g id="Node000006" class="node">
 <title>Node6</title>
-<g id="a_Node000006"><a xlink:href="../../d8/da0/classfl_1_1_c_l_e_d_controller_a87abe437742b3f2b06943fafd4404aef.html#a87abe437742b3f2b06943fafd4404aef" target="_top" xlink:title="Get the next controller in the linked list after this one.">
+<g id="a_Node000006"><a xlink:href="../../d8/da0/classfl_1_1_c_l_e_d_controller_ad9abf4aa42ae3bb2876f82857514a7be.html#ad9abf4aa42ae3bb2876f82857514a7be" target="_top" xlink:title="Get the next controller in the linked list after this one.">
 <polygon fill="white" stroke="#666666" points="251,-78 149,-78 149,-48 251,-48 251,-78"/>
 <text text-anchor="start" x="157" y="-66" font-family="Helvetica,sans-Serif" font-size="10.00">fl::CLEDController</text>
 <text text-anchor="middle" x="200" y="-55" font-family="Helvetica,sans-Serif" font-size="10.00">::next</text>
@@ -58,7 +58,7 @@
 <!-- Node7 -->
 <g id="Node000007" class="node">
 <title>Node7</title>
-<g id="a_Node000007"><a xlink:href="../../d8/da0/classfl_1_1_c_l_e_d_controller_a83f37ea29f9b1009fadddb18c50c30c2.html#a83f37ea29f9b1009fadddb18c50c30c2" target="_top" xlink:title="Set the dithering mode for this controller to use.">
+<g id="a_Node000007"><a xlink:href="../../d8/da0/classfl_1_1_c_l_e_d_controller_ac6da605f844f65d778d05a9962fd327b.html#ac6da605f844f65d778d05a9962fd327b" target="_top" xlink:title="Set the dithering mode for this controller to use.">
 <polygon fill="white" stroke="#666666" points="251,-30 149,-30 149,0 251,0 251,-30"/>
 <text text-anchor="start" x="157" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">fl::CLEDController</text>
 <text text-anchor="middle" x="200" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">::setDither</text>
@@ -77,7 +77,7 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d8/da0/classfl_1_1_c_l_e_d_controller_a7e91fc8f83d62c9da5e5c3d6d1bc10ce.html#a7e91fc8f83d62c9da5e5c3d6d1bc10ce" target="_top" xlink:title="Protected constructor with registration mode.">
+<g id="a_Node000003"><a xlink:href="../../d8/da0/classfl_1_1_c_l_e_d_controller_ae0828dffacb43dca565ddf8145153ed0.html#ae0828dffacb43dca565ddf8145153ed0" target="_top" xlink:title="Protected constructor with registration mode.">
 <polygon fill="white" stroke="#666666" points="389,-78 287,-78 287,-48 389,-48 389,-78"/>
 <text text-anchor="start" x="295" y="-66" font-family="Helvetica,sans-Serif" font-size="10.00">fl::CLEDController</text>
 <text text-anchor="middle" x="338" y="-55" font-family="Helvetica,sans-Serif" font-size="10.00">::CLEDController</text>
@@ -96,7 +96,7 @@
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../d8/da0/classfl_1_1_c_l_e_d_controller_a9e51518d1427463dffd596c69c6f3e46.html#a9e51518d1427463dffd596c69c6f3e46" target="_top" xlink:title="Add this controller to the linked list.">
+<g id="a_Node000004"><a xlink:href="../../d8/da0/classfl_1_1_c_l_e_d_controller_af0c5f56a02ad4e919df8181d3b267390.html#af0c5f56a02ad4e919df8181d3b267390" target="_top" xlink:title="Add this controller to the linked list.">
 <polygon fill="#fff0f0" stroke="red" points="527,-78 425,-78 425,-48 527,-48 527,-78"/>
 <text text-anchor="start" x="433" y="-66" font-family="Helvetica,sans-Serif" font-size="10.00">fl::CLEDController</text>
 <text text-anchor="middle" x="476" y="-55" font-family="Helvetica,sans-Serif" font-size="10.00">::addToList</text>

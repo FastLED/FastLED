@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -125,7 +125,7 @@ $(function(){initNavTree('db/db0/classfl_1_1_gamma8_impl_a37ba658ac04593be68aa90
 
 <p class="definition">Definition at line <a class="el" href="../../df/d60/ease_8cpp_8hpp_source.html#l00446">446</a> of file <a class="el" href="../../df/d60/ease_8cpp_8hpp_source.html">ease.cpp.hpp</a>.</p>
 <div class="fragment"><div class="line"><span class="lineno">  446</span>                                                      {</div>
-<div class="line"><span class="lineno">  447</span>        u16 raw = fp.<a class="code hl_function" href="../../da/da0/classfl_1_1fixed__point_a9d36afd10d9febd73eb2f8196be3099e.html#a9d36afd10d9febd73eb2f8196be3099e">raw</a>();</div>
+<div class="line"><span class="lineno">  447</span>        u16 raw = fp.<a class="code hl_function" href="../../da/da0/classfl_1_1fixed__point_ae4968230572b5d3bfc93b1f36184c8d6.html#ae4968230572b5d3bfc93b1f36184c8d6">raw</a>();</div>
 <div class="line"><span class="lineno">  448</span>        <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a> idx = <span class="keyword">static_cast&lt;</span><a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a><span class="keyword">&gt;</span>(raw &gt;&gt; 8);    <span class="comment">// integer part (LUT index)</span></div>
 <div class="line"><span class="lineno">  449</span>        <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a> frac = <span class="keyword">static_cast&lt;</span><a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a><span class="keyword">&gt;</span>(raw &amp; 0xFF); <span class="comment">// fractional part (0-255)</span></div>
 <div class="line"><span class="lineno">  450</span>        u16 a = mLut[idx];</div>
@@ -133,7 +133,7 @@ $(function(){initNavTree('db/db0/classfl_1_1_gamma8_impl_a37ba658ac04593be68aa90
 <div class="line"><span class="lineno">  452</span>        i32 diff = <span class="keyword">static_cast&lt;</span>i32<span class="keyword">&gt;</span>(b) - <span class="keyword">static_cast&lt;</span>i32<span class="keyword">&gt;</span>(a);</div>
 <div class="line"><span class="lineno">  453</span>        <span class="keywordflow">return</span> <span class="keyword">static_cast&lt;</span>u16<span class="keyword">&gt;</span>(a + ((diff * frac) &gt;&gt; 8));</div>
 <div class="line"><span class="lineno">  454</span>    }</div>
-<div class="ttc" id="aclassfl_1_1fixed__point_a9d36afd10d9febd73eb2f8196be3099e_html_a9d36afd10d9febd73eb2f8196be3099e"><div class="ttname"><a href="../../da/da0/classfl_1_1fixed__point_a9d36afd10d9febd73eb2f8196be3099e.html#a9d36afd10d9febd73eb2f8196be3099e">fl::fixed_point::raw</a></div><div class="ttdeci">FASTLED_FORCE_INLINE constexpr RawType raw() const FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../de/d62/fixed__point_8h_source.html#l00206">fixed_point.h:206</a></div></div>
+<div class="ttc" id="aclassfl_1_1fixed__point_ae4968230572b5d3bfc93b1f36184c8d6_html_ae4968230572b5d3bfc93b1f36184c8d6"><div class="ttname"><a href="../../da/da0/classfl_1_1fixed__point_ae4968230572b5d3bfc93b1f36184c8d6.html#ae4968230572b5d3bfc93b1f36184c8d6">fl::fixed_point::raw</a></div><div class="ttdeci">FASTLED_FORCE_INLINE constexpr RawType raw() const FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../de/d62/fixed__point_8h_source.html#l00206">fixed_point.h:206</a></div></div>
 <div class="ttc" id="anamespacefl_a058ceeac48f181da463c2ba07401292c_html_a058ceeac48f181da463c2ba07401292c"><div class="ttname"><a href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a></div><div class="ttdeci">unsigned char u8</div><div class="ttdef"><b>Definition</b> <a href="../../df/dd8/stdint_8h_source.html#l00131">stdint.h:131</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../de/d62/fixed__point_8h_source.html#l00206">fl::fixed_point&lt; IntBits, FracBits, S &gt;::raw()</a>.</p>
@@ -163,7 +163,7 @@ $(function(){initNavTree('db/db0/classfl_1_1_gamma8_impl_a37ba658ac04593be68aa90
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../db/db0/classfl_1_1_gamma8_impl.html">Gamma8Impl</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:05 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:09 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

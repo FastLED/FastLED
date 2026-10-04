@@ -1,0 +1,5 @@
+<map id="fl::RgbwLoadBinder&lt; T, typename detail::OnlyIf&lt;(T::kColorOrder==RGB)&gt;::type &gt;" name="fl::RgbwLoadBinder&lt; T, typename detail::OnlyIf&lt;(T::kColorOrder==RGB)&gt;::type &gt;">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,137,184,207"/>
+<area shape="rect" id="Node000002" href="$d3/d8d/structfl_1_1_rgbw_load_binder.html" title="Binds exactly one RGBW thunk and one RGBWW thunk per source type, and names only that one,..." alt="" coords="21,5,168,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="97,59,97,137,92,137,92,59"/>
+</map>

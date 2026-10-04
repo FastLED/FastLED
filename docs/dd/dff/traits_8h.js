@@ -5,6 +5,6 @@ var traits_8h =
     [ "fl::detail::is_non_bool_integer< T >", "d1/d0b/structfl_1_1detail_1_1is__non__bool__integer.html", "d1/d0b/structfl_1_1detail_1_1is__non__bool__integer" ],
     [ "fl::fixed_point_traits< IntBits, FracBits >", "d3/d85/structfl_1_1fixed__point__traits.html", "d3/d85/structfl_1_1fixed__point__traits" ],
     [ "fl::detail::enable_if_integer_t", "df/d9e/namespacefl_1_1detail_a86aef221f1d77419881e118a7b98267f.html#a86aef221f1d77419881e118a7b98267f", null ],
-    [ "fl::detail::in_unsigned_range", "df/d9e/namespacefl_1_1detail_af654309bdae4414a275d7ad1b889b0b9.html#af654309bdae4414a275d7ad1b889b0b9", null ],
-    [ "fl::detail::integer_out_of_range_for_fixed_point_type", "df/d9e/namespacefl_1_1detail_a2fec89a49bf4c2a35e6b815ac068879f.html#a2fec89a49bf4c2a35e6b815ac068879f", null ]
+    [ "fl::detail::in_unsigned_range", "df/d9e/namespacefl_1_1detail_a8096ae5f3cc48241d67b0ab9f80dc45e.html#a8096ae5f3cc48241d67b0ab9f80dc45e", null ],
+    [ "fl::detail::integer_out_of_range_for_fixed_point_type", "df/d9e/namespacefl_1_1detail_ac9362e4627cc01c9d8f87264fe65c934.html#ac9362e4627cc01c9d8f87264fe65c934", null ]
 ];

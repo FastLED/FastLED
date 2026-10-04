@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -124,29 +124,29 @@ $(function(){initNavTree('df/d9e/namespacefl_1_1detail_adb3a6ac8bb85481a8f028e8e
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d1/dda/cstdlib_8cpp_8hpp_source.html#l00330">330</a> of file <a class="el" href="../../d1/dda/cstdlib_8cpp_8hpp_source.html">cstdlib.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  330</span>                                                     {</div>
-<div class="line"><span class="lineno">  331</span>    <span class="keywordflow">if</span> (a == b) <span class="keywordflow">return</span>;</div>
-<div class="line"><span class="lineno">  332</span>    <span class="keyword">constexpr</span> <span class="keywordtype">size_t</span> STACK_BUF_SIZE = 64;</div>
-<div class="line"><span class="lineno">  333</span>    <span class="keywordflow">if</span> (size &lt;= STACK_BUF_SIZE) {</div>
-<div class="line"><span class="lineno">  334</span>        <span class="keywordtype">char</span> tmp[STACK_BUF_SIZE];</div>
-<div class="line"><span class="lineno">  335</span>        <a class="code hl_function" href="../../d4/d36/namespacefl_a0393d1d09fff5bccc427802cc22e756d.html#a0393d1d09fff5bccc427802cc22e756d">memcpy</a>(tmp, a, size);</div>
-<div class="line"><span class="lineno">  336</span>        <a class="code hl_function" href="../../d4/d36/namespacefl_a0393d1d09fff5bccc427802cc22e756d.html#a0393d1d09fff5bccc427802cc22e756d">memcpy</a>(a, b, size);</div>
-<div class="line"><span class="lineno">  337</span>        <a class="code hl_function" href="../../d4/d36/namespacefl_a0393d1d09fff5bccc427802cc22e756d.html#a0393d1d09fff5bccc427802cc22e756d">memcpy</a>(b, tmp, size);</div>
-<div class="line"><span class="lineno">  338</span>    } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  339</span>        <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; size; ++i) {</div>
-<div class="line"><span class="lineno">  340</span>            <span class="keywordtype">char</span> <a class="code hl_variable" href="../../d4/d36/namespacefl_abbddb15aa2e7c8eb469d1dd56d6d2140.html#abbddb15aa2e7c8eb469d1dd56d6d2140">t</a> = a[i];</div>
-<div class="line"><span class="lineno">  341</span>            a[i] = b[i];</div>
-<div class="line"><span class="lineno">  342</span>            b[i] = <a class="code hl_variable" href="../../d4/d36/namespacefl_abbddb15aa2e7c8eb469d1dd56d6d2140.html#abbddb15aa2e7c8eb469d1dd56d6d2140">t</a>;</div>
-<div class="line"><span class="lineno">  343</span>        }</div>
-<div class="line"><span class="lineno">  344</span>    }</div>
-<div class="line"><span class="lineno">  345</span>}</div>
-<div class="ttc" id="anamespacefl_a0393d1d09fff5bccc427802cc22e756d_html_a0393d1d09fff5bccc427802cc22e756d"><div class="ttname"><a href="../../d4/d36/namespacefl_a0393d1d09fff5bccc427802cc22e756d.html#a0393d1d09fff5bccc427802cc22e756d">fl::memcpy</a></div><div class="ttdeci">void * memcpy(void *dest, const void *src, size_t n) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/da3/cstring_8cpp_8hpp_source.html#l00110">cstring.cpp.hpp:110</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d1/dda/cstdlib_8cpp_8hpp_source.html#l00332">332</a> of file <a class="el" href="../../d1/dda/cstdlib_8cpp_8hpp_source.html">cstdlib.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  332</span>                                                     {</div>
+<div class="line"><span class="lineno">  333</span>    <span class="keywordflow">if</span> (a == b) <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">  334</span>    <span class="keyword">constexpr</span> <span class="keywordtype">size_t</span> STACK_BUF_SIZE = 64;</div>
+<div class="line"><span class="lineno">  335</span>    <span class="keywordflow">if</span> (size &lt;= STACK_BUF_SIZE) {</div>
+<div class="line"><span class="lineno">  336</span>        <span class="keywordtype">char</span> tmp[STACK_BUF_SIZE];</div>
+<div class="line"><span class="lineno">  337</span>        <a class="code hl_function" href="../../d4/d36/namespacefl_a35ff6755912c639a5e5bd35fc59e57ff.html#a35ff6755912c639a5e5bd35fc59e57ff">memcpy</a>(tmp, a, size);</div>
+<div class="line"><span class="lineno">  338</span>        <a class="code hl_function" href="../../d4/d36/namespacefl_a35ff6755912c639a5e5bd35fc59e57ff.html#a35ff6755912c639a5e5bd35fc59e57ff">memcpy</a>(a, b, size);</div>
+<div class="line"><span class="lineno">  339</span>        <a class="code hl_function" href="../../d4/d36/namespacefl_a35ff6755912c639a5e5bd35fc59e57ff.html#a35ff6755912c639a5e5bd35fc59e57ff">memcpy</a>(b, tmp, size);</div>
+<div class="line"><span class="lineno">  340</span>    } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  341</span>        <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; size; ++i) {</div>
+<div class="line"><span class="lineno">  342</span>            <span class="keywordtype">char</span> <a class="code hl_variable" href="../../d4/d36/namespacefl_abbddb15aa2e7c8eb469d1dd56d6d2140.html#abbddb15aa2e7c8eb469d1dd56d6d2140">t</a> = a[i];</div>
+<div class="line"><span class="lineno">  343</span>            a[i] = b[i];</div>
+<div class="line"><span class="lineno">  344</span>            b[i] = <a class="code hl_variable" href="../../d4/d36/namespacefl_abbddb15aa2e7c8eb469d1dd56d6d2140.html#abbddb15aa2e7c8eb469d1dd56d6d2140">t</a>;</div>
+<div class="line"><span class="lineno">  345</span>        }</div>
+<div class="line"><span class="lineno">  346</span>    }</div>
+<div class="line"><span class="lineno">  347</span>}</div>
+<div class="ttc" id="anamespacefl_a35ff6755912c639a5e5bd35fc59e57ff_html_a35ff6755912c639a5e5bd35fc59e57ff"><div class="ttname"><a href="../../d4/d36/namespacefl_a35ff6755912c639a5e5bd35fc59e57ff.html#a35ff6755912c639a5e5bd35fc59e57ff">fl::memcpy</a></div><div class="ttdeci">void * memcpy(void *dest, const void *src, size_t n) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/da3/cstring_8cpp_8hpp_source.html#l00128">cstring.cpp.hpp:128</a></div></div>
 <div class="ttc" id="anamespacefl_abbddb15aa2e7c8eb469d1dd56d6d2140_html_abbddb15aa2e7c8eb469d1dd56d6d2140"><div class="ttname"><a href="../../d4/d36/namespacefl_abbddb15aa2e7c8eb469d1dd56d6d2140.html#abbddb15aa2e7c8eb469d1dd56d6d2140">fl::t</a></div><div class="ttdeci">t</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d91/transposition_8cpp_8hpp_source.html#l00027">transposition.cpp.hpp:27</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../df/da3/cstring_8cpp_8hpp_source.html#l00110">fl::memcpy()</a>, and <a class="el" href="../../d7/d91/transposition_8cpp_8hpp_source.html#l00027">fl::t</a>.</p>
+<p class="reference">References <a class="el" href="../../df/da3/cstring_8cpp_8hpp_source.html#l00128">fl::memcpy()</a>, and <a class="el" href="../../d7/d91/transposition_8cpp_8hpp_source.html#l00027">fl::t</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d1/dda/cstdlib_8cpp_8hpp_source.html#l00348">fl::qsort_insertion_sort()</a>, and <a class="el" href="../../d1/dda/cstdlib_8cpp_8hpp_source.html#l00376">fl::qsort_partition()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d1/dda/cstdlib_8cpp_8hpp_source.html#l00350">fl::qsort_insertion_sort()</a>, and <a class="el" href="../../d1/dda/cstdlib_8cpp_8hpp_source.html#l00378">fl::qsort_partition()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -171,7 +171,7 @@ $(function(){initNavTree('df/d9e/namespacefl_1_1detail_adb3a6ac8bb85481a8f028e8e
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../df/d9e/namespacefl_1_1detail.html">detail</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:09 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:11 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

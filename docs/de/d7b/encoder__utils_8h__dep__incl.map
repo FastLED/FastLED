@@ -1,32 +1,36 @@
 <map id="fl/chipsets/encoders/encoder_utils.h" name="fl/chipsets/encoders/encoder_utils.h">
-<area shape="rect" id="Node000001" title="Shared utilities for SPI chipset encoders." alt="" coords="453,5,604,45"/>
-<area shape="rect" id="Node000002" href="$db/d13/encoders_2apa102_8h.html" title="APA102/DOTSTAR SPI chipset encoder." alt="" coords="17,93,168,133"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="441,46,180,96,169,98,168,93,179,91,439,40"/>
-<area shape="rect" id="Node000086" href="$d7/dd3/encoders_2hd108_8h.html" title="HD108 SPI chipset encoder." alt="" coords="192,93,343,133"/>
-<area shape="poly" id="edge8_Node000001_Node000086" title=" " alt="" coords="459,52,325,96,324,91,457,47"/>
-<area shape="rect" id="Node000087" href="$de/db9/lpd6803_8h.html" title="LPD6803 SPI chipset encoder." alt="" coords="367,93,517,133"/>
-<area shape="poly" id="edge10_Node000001_Node000087" title=" " alt="" coords="502,57,463,95,459,91,498,53"/>
-<area shape="rect" id="Node000088" href="$d7/deb/lpd8806_8h.html" title="LPD8806 SPI chipset encoder." alt="" coords="541,93,692,133"/>
-<area shape="poly" id="edge12_Node000001_Node000088" title=" " alt="" coords="560,53,599,91,595,95,556,57"/>
-<area shape="rect" id="Node000089" href="$dd/d37/encoders_2p9813_8h.html" title="P9813 SPI chipset encoder." alt="" coords="716,93,867,133"/>
-<area shape="poly" id="edge14_Node000001_Node000089" title=" " alt="" coords="600,47,735,91,733,96,598,52"/>
-<area shape="rect" id="Node000090" href="$d5/df5/sk9822_8h.html" title="SK9822 SPI chipset encoder." alt="" coords="891,93,1041,133"/>
-<area shape="poly" id="edge16_Node000001_Node000090" title=" " alt="" coords="618,40,880,91,891,93,890,98,879,96,617,46"/>
-<area shape="rect" id="Node000003" href="$db/d65/fl_2chipsets_2encoders_2pixel__iterator_8h.html" title="Non&#45;templated low level pixel data writing class." alt="" coords="453,181,604,221"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="182,131,454,184,453,189,181,136"/>
-<area shape="rect" id="Node000004" href="$d4/df9/_auto_research_test_8cpp.html" title=" " alt="" coords="5,269,244,324"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="441,226,239,272,238,267,439,220"/>
-<area shape="rect" id="Node000005" href="$d0/d00/ucs7604_8h.html" title="UCS7604 LED chipset controller implementation for FastLED." alt="" coords="268,284,427,309"/>
-<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="481,230,371,286,368,282,479,225"/>
-<area shape="rect" id="Node000018" href="$d2/d82/fl_2gfx_2pixel__iterator_8h.html" title=" " alt="" coords="451,284,607,309"/>
-<area shape="poly" id="edge5_Node000003_Node000018" title=" " alt="" coords="531,235,531,284,526,284,526,235"/>
-<area shape="rect" id="Node000019" href="$d2/d1e/pixel__iterator__any_8h.html" title=" " alt="" coords="631,277,776,317"/>
-<area shape="poly" id="edge6_Node000003_Node000019" title=" " alt="" coords="577,225,669,274,667,279,575,230"/>
-<area shape="rect" id="Node000020" href="$d8/d6c/pixel__iterator_8h.html" title="Legacy header." alt="" coords="800,284,919,309"/>
-<area shape="poly" id="edge7_Node000003_Node000020" title=" " alt="" coords="618,221,789,267,831,281,829,286,788,272,617,226"/>
-<area shape="poly" id="edge9_Node000086_Node000003" title=" " alt="" coords="339,135,472,179,471,184,337,140"/>
-<area shape="poly" id="edge11_Node000087_Node000003" title=" " alt="" coords="473,141,511,179,508,183,469,145"/>
-<area shape="poly" id="edge13_Node000088_Node000003" title=" " alt="" coords="589,145,550,183,546,179,585,141"/>
-<area shape="poly" id="edge15_Node000089_Node000003" title=" " alt="" coords="722,140,587,184,585,179,720,135"/>
-<area shape="poly" id="edge17_Node000090_Node000003" title=" " alt="" coords="877,136,605,189,604,184,876,131"/>
+<area shape="rect" id="Node000001" title="Shared utilities for SPI chipset encoders." alt="" coords="552,5,703,45"/>
+<area shape="rect" id="Node000002" href="$db/d13/encoders_2apa102_8h.html" title="APA102/DOTSTAR SPI chipset encoder." alt="" coords="116,93,267,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="539,46,279,96,267,98,266,93,277,91,538,40"/>
+<area shape="rect" id="Node000093" href="$d7/dd3/encoders_2hd108_8h.html" title="HD108 SPI chipset encoder." alt="" coords="291,93,441,133"/>
+<area shape="poly" id="edge10_Node000001_Node000093" title=" " alt="" coords="558,52,424,96,422,91,556,47"/>
+<area shape="rect" id="Node000094" href="$de/db9/lpd6803_8h.html" title="LPD6803 SPI chipset encoder." alt="" coords="465,93,616,133"/>
+<area shape="poly" id="edge12_Node000001_Node000094" title=" " alt="" coords="600,57,562,95,558,91,597,53"/>
+<area shape="rect" id="Node000095" href="$d7/deb/lpd8806_8h.html" title="LPD8806 SPI chipset encoder." alt="" coords="640,93,791,133"/>
+<area shape="poly" id="edge14_Node000001_Node000095" title=" " alt="" coords="659,53,698,91,694,95,655,57"/>
+<area shape="rect" id="Node000096" href="$dd/d37/encoders_2p9813_8h.html" title="P9813 SPI chipset encoder." alt="" coords="815,93,965,133"/>
+<area shape="poly" id="edge16_Node000001_Node000096" title=" " alt="" coords="699,47,833,91,832,96,697,52"/>
+<area shape="rect" id="Node000097" href="$d5/df5/sk9822_8h.html" title="SK9822 SPI chipset encoder." alt="" coords="989,93,1140,133"/>
+<area shape="poly" id="edge18_Node000001_Node000097" title=" " alt="" coords="717,40,979,91,990,93,989,98,977,96,715,46"/>
+<area shape="rect" id="Node000003" href="$db/d65/fl_2chipsets_2encoders_2pixel__iterator_8h.html" title="Non&#45;templated low level pixel data writing class." alt="" coords="552,181,703,221"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="281,131,552,184,551,189,280,136"/>
+<area shape="rect" id="Node000004" href="$d7/dcc/pipeline__binding_8h.html" title=" " alt="" coords="5,269,153,309"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="539,216,365,240,165,272,154,274,153,269,164,267,365,234,538,211"/>
+<area shape="rect" id="Node000014" href="$df/d99/slim__bridge__controller_8h.html" title="Shared &quot;slim bridge&quot; legacy addLeds&lt;&gt;() controller for channel drivers." alt="" coords="177,269,349,309"/>
+<area shape="poly" id="edge4_Node000003_Node000014" title=" " alt="" coords="539,226,344,272,342,267,538,221"/>
+<area shape="rect" id="Node000015" href="$d5/d9b/slim__spi__bridge__controller_8h.html" title="Shared &quot;slim bridge&quot; legacy addLeds&lt;ESPIChipsets ...&gt;() controller for the SPI channel API – driver&#45;a..." alt="" coords="373,269,524,309"/>
+<area shape="poly" id="edge5_Node000003_Node000015" title=" " alt="" coords="577,230,489,272,487,267,575,225"/>
+<area shape="rect" id="Node000017" href="$d0/d00/ucs7604_8h.html" title="UCS7604 LED chipset controller implementation for FastLED." alt="" coords="548,277,707,302"/>
+<area shape="poly" id="edge6_Node000003_Node000017" title=" " alt="" coords="630,235,630,276,625,276,625,235"/>
+<area shape="rect" id="Node000022" href="$d2/d82/fl_2gfx_2pixel__iterator_8h.html" title=" " alt="" coords="731,277,887,302"/>
+<area shape="poly" id="edge7_Node000003_Node000022" title=" " alt="" coords="681,225,786,274,783,279,678,230"/>
+<area shape="rect" id="Node000023" href="$d2/d1e/pixel__iterator__any_8h.html" title=" " alt="" coords="911,269,1056,309"/>
+<area shape="poly" id="edge8_Node000003_Node000023" title=" " alt="" coords="717,221,911,268,910,273,715,227"/>
+<area shape="rect" id="Node000024" href="$d8/d6c/pixel__iterator_8h.html" title="Legacy header." alt="" coords="1080,277,1199,302"/>
+<area shape="poly" id="edge9_Node000003_Node000024" title=" " alt="" coords="716,211,881,233,1069,267,1100,274,1099,279,1068,272,880,239,716,216"/>
+<area shape="poly" id="edge11_Node000093_Node000003" title=" " alt="" coords="437,135,571,179,569,184,436,140"/>
+<area shape="poly" id="edge13_Node000094_Node000003" title=" " alt="" coords="571,141,610,179,606,183,568,145"/>
+<area shape="poly" id="edge15_Node000095_Node000003" title=" " alt="" coords="688,145,649,183,645,179,684,141"/>
+<area shape="poly" id="edge17_Node000096_Node000003" title=" " alt="" coords="820,140,686,184,684,179,819,135"/>
+<area shape="poly" id="edge19_Node000097_Node000003" title=" " alt="" coords="976,136,703,189,702,184,975,131"/>
 </map>

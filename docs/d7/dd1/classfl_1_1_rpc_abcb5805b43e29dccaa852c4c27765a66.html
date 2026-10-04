@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -128,24 +128,24 @@ template&lt;typename Callable&gt; </div>
 <p>Bind a method with configuration (name, function, optional metadata). </p>
 <p>Supports dot notation for namespacing: "led.setBrightness", "system.status" Use <a class="el" href="../../d7/dd1/classfl_1_1_rpc_abc0e75803d499c764cbf25b8affa0828.html#abc0e75803d499c764cbf25b8affa0828" title="Get a registered method by name.">get()</a> to retrieve a callable if you need to invoke the method from C++ code. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../df/d16/remote_2rpc_2rpc_8h_source.html#l00234">234</a> of file <a class="el" href="../../df/d16/remote_2rpc_2rpc_8h_source.html">rpc.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  234</span>                                              {</div>
-<div class="line"><span class="lineno">  235</span>        <span class="keyword">using </span>Sig = <span class="keyword">typename</span> callable_traits&lt;typename decay&lt;Callable&gt;::type&gt;::signature;</div>
-<div class="line"><span class="lineno">  236</span>        <a class="code hl_typedef" href="../../d4/d36/namespacefl_a329bf8d3a347e5a77611902783e74f05.html#a329bf8d3a347e5a77611902783e74f05">RpcFn&lt;Sig&gt;</a> wrapped(config.fn);</div>
-<div class="line"><span class="lineno">  237</span>        <a class="code hl_function" href="../../d7/dd1/classfl_1_1_rpc_a4178792373064445ef93bf68a2769ac3.html#a4178792373064445ef93bf68a2769ac3">registerMethod&lt;Sig&gt;</a>(config.name.c_str(), wrapped, config.params, config.description, config.tags, config.mode);</div>
-<div class="line"><span class="lineno">  238</span>    }</div>
-<div class="ttc" id="aclassfl_1_1_rpc_a4178792373064445ef93bf68a2769ac3_html_a4178792373064445ef93bf68a2769ac3"><div class="ttname"><a href="../../d7/dd1/classfl_1_1_rpc_a4178792373064445ef93bf68a2769ac3.html#a4178792373064445ef93bf68a2769ac3">fl::Rpc::registerMethod</a></div><div class="ttdeci">bool registerMethod(const char *name, RpcFn&lt; Sig &gt; fn, const fl::vector&lt; fl::string &gt; &amp;paramNames, const fl::string &amp;description, const fl::vector&lt; fl::string &gt; &amp;tags, fl::RpcMode mode=fl::RpcMode::SYNC)</div><div class="ttdef"><b>Definition</b> <a href="../../df/d16/remote_2rpc_2rpc_8h_source.html#l00346">rpc.h:346</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../df/d16/remote_2rpc_2rpc_8h_source.html#l00240">240</a> of file <a class="el" href="../../df/d16/remote_2rpc_2rpc_8h_source.html">rpc.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  240</span>                                              {</div>
+<div class="line"><span class="lineno">  241</span>        <span class="keyword">using </span>Sig = <span class="keyword">typename</span> callable_traits&lt;typename decay&lt;Callable&gt;::type&gt;::signature;</div>
+<div class="line"><span class="lineno">  242</span>        <a class="code hl_typedef" href="../../d4/d36/namespacefl_a329bf8d3a347e5a77611902783e74f05.html#a329bf8d3a347e5a77611902783e74f05">RpcFn&lt;Sig&gt;</a> wrapped(config.fn);</div>
+<div class="line"><span class="lineno">  243</span>        <a class="code hl_function" href="../../d7/dd1/classfl_1_1_rpc_a4178792373064445ef93bf68a2769ac3.html#a4178792373064445ef93bf68a2769ac3">registerMethod&lt;Sig&gt;</a>(config.name.c_str(), wrapped, config.params, config.description, config.tags, config.mode);</div>
+<div class="line"><span class="lineno">  244</span>    }</div>
+<div class="ttc" id="aclassfl_1_1_rpc_a4178792373064445ef93bf68a2769ac3_html_a4178792373064445ef93bf68a2769ac3"><div class="ttname"><a href="../../d7/dd1/classfl_1_1_rpc_a4178792373064445ef93bf68a2769ac3.html#a4178792373064445ef93bf68a2769ac3">fl::Rpc::registerMethod</a></div><div class="ttdeci">bool registerMethod(const char *name, RpcFn&lt; Sig &gt; fn, const fl::vector&lt; fl::string &gt; &amp;paramNames, const fl::string &amp;description, const fl::vector&lt; fl::string &gt; &amp;tags, fl::RpcMode mode=fl::RpcMode::SYNC)</div><div class="ttdef"><b>Definition</b> <a href="../../df/d16/remote_2rpc_2rpc_8h_source.html#l00357">rpc.h:357</a></div></div>
 <div class="ttc" id="anamespacefl_a329bf8d3a347e5a77611902783e74f05_html_a329bf8d3a347e5a77611902783e74f05"><div class="ttname"><a href="../../d4/d36/namespacefl_a329bf8d3a347e5a77611902783e74f05.html#a329bf8d3a347e5a77611902783e74f05">fl::RpcFn</a></div><div class="ttdeci">fl::function&lt; Sig &gt; RpcFn</div><div class="ttdef"><b>Definition</b> <a href="../../d2/d91/rpc__handle_8h_source.html#l00014">rpc_handle.h:14</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../df/d16/remote_2rpc_2rpc_8h_source.html#l00234">bind()</a>, and <a class="el" href="../../df/d16/remote_2rpc_2rpc_8h_source.html#l00346">registerMethod()</a>.</p>
+<p class="reference">References <a class="el" href="../../df/d16/remote_2rpc_2rpc_8h_source.html#l00240">bind()</a>, and <a class="el" href="../../df/d16/remote_2rpc_2rpc_8h_source.html#l00357">registerMethod()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../df/d16/remote_2rpc_2rpc_8h_source.html#l00242">bind()</a>, and <a class="el" href="../../df/d16/remote_2rpc_2rpc_8h_source.html#l00234">bind()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../df/d16/remote_2rpc_2rpc_8h_source.html#l00248">bind()</a>, and <a class="el" href="../../df/d16/remote_2rpc_2rpc_8h_source.html#l00240">bind()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d7/dd1/classfl_1_1_rpc_abcb5805b43e29dccaa852c4c27765a66_abcb5805b43e29dccaa852c4c27765a66_cgraph.svg" width="546" height="234"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d7/dd1/classfl_1_1_rpc_abcb5805b43e29dccaa852c4c27765a66_abcb5805b43e29dccaa852c4c27765a66_cgraph.svg" width="100%" height="540"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 <div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
@@ -164,7 +164,7 @@ template&lt;typename Callable&gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d7/dd1/classfl_1_1_rpc.html">Rpc</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:09 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

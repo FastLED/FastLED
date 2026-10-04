@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -107,7 +107,7 @@ $(function(){initNavTree('dd/d9e/downscale_8cpp_8hpp_afa8ab007ca6d842520360cebea
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="../../df/d96/s16x16x4_8h_a373eeaf762a6a66a0a6984bd204a72dd.html#a373eeaf762a6a66a0a6984bd204a72dd">FL_DISABLE_WARNING_PUSH</a> FL_DISABLE_WARNING </td>
+          <td class="memname"><a class="el" href="../../d4/d54/compiler__control_8h_a373eeaf762a6a66a0a6984bd204a72dd.html#a373eeaf762a6a66a0a6984bd204a72dd">FL_DISABLE_WARNING_PUSH</a> FL_DISABLE_WARNING </td>
           <td>(</td>
           <td class="paramtype">shift-count-</td>          <td class="paramname"><span class="paramname"><em>overflow</em></span></td><td>)</td>
           <td></td>
@@ -138,7 +138,7 @@ $(function(){initNavTree('dd/d9e/downscale_8cpp_8hpp_afa8ab007ca6d842520360cebea
 <div class="line"><span class="lineno">   36</span>            <span class="comment">// Average each color channel</span></div>
 <div class="line"><span class="lineno">   37</span>            fl::u16 r =</div>
 <div class="line"><span class="lineno">   38</span>                (p00.r + p10.r + p01.r + p11.r + 2) / 4; <span class="comment">// +2 for rounding</span></div>
-<div class="line"><span class="lineno">   39</span>            fl::u16 g = (p00.g + p10.g + p01.g + p11.g + 2) / 4;</div>
+<div class="line"><span class="lineno">   39</span>            fl::u16 <a class="code hl_variable" href="../../d4/d36/namespacefl_abb8ff746cce2b11a90718afba1cfec1b.html#abb8ff746cce2b11a90718afba1cfec1b">g</a> = (p00.g + p10.g + p01.g + p11.g + 2) / 4;</div>
 <div class="line"><span class="lineno">   40</span>            fl::u16 b = (p00.b + p10.b + p01.b + p11.b + 2) / 4;</div>
 <div class="line"><span class="lineno">   41</span> </div>
 <div class="line"><span class="lineno">   42</span>            <span class="comment">// Store result</span></div>
@@ -172,7 +172,7 @@ $(function(){initNavTree('dd/d9e/downscale_8cpp_8hpp_afa8ab007ca6d842520360cebea
 <div class="line"><span class="lineno">   70</span>            <span class="comment">// Average each color channel</span></div>
 <div class="line"><span class="lineno">   71</span>            fl::u16 r =</div>
 <div class="line"><span class="lineno">   72</span>                (p00.r + p10.r + p01.r + p11.r + 2) / 4; <span class="comment">// +2 for rounding</span></div>
-<div class="line"><span class="lineno">   73</span>            fl::u16 g = (p00.g + p10.g + p01.g + p11.g + 2) / 4;</div>
+<div class="line"><span class="lineno">   73</span>            fl::u16 <a class="code hl_variable" href="../../d4/d36/namespacefl_abb8ff746cce2b11a90718afba1cfec1b.html#abb8ff746cce2b11a90718afba1cfec1b">g</a> = (p00.g + p10.g + p01.g + p11.g + 2) / 4;</div>
 <div class="line"><span class="lineno">   74</span>            fl::u16 b = (p00.b + p10.b + p01.b + p11.b + 2) / 4;</div>
 <div class="line"><span class="lineno">   75</span> </div>
 <div class="line"><span class="lineno">   76</span>            <span class="comment">// Store result</span></div>
@@ -205,7 +205,7 @@ $(function(){initNavTree('dd/d9e/downscale_8cpp_8hpp_afa8ab007ca6d842520360cebea
 <div class="line"><span class="lineno">  103</span>            fl::u32 dstX0 = (dx * srcWidth * FP_ONE) / dstWidth;</div>
 <div class="line"><span class="lineno">  104</span>            fl::u32 dstX1 = ((dx + 1) * srcWidth * FP_ONE) / dstWidth;</div>
 <div class="line"><span class="lineno">  105</span> </div>
-<div class="line"><span class="lineno">  106</span>            <a class="code hl_typedef" href="../../d4/d36/namespacefl_add3f775ccb36323b444c97c36b6bb694.html#add3f775ccb36323b444c97c36b6bb694">fl::u64</a> rSum = 0, gSum = 0, bSum = 0;</div>
+<div class="line"><span class="lineno">  106</span>            fl::u64 rSum = 0, gSum = 0, bSum = 0;</div>
 <div class="line"><span class="lineno">  107</span>            fl::u32 totalWeight = 0;</div>
 <div class="line"><span class="lineno">  108</span> </div>
 <div class="line"><span class="lineno">  109</span>            <span class="comment">// Find covered source pixels</span></div>
@@ -219,14 +219,14 @@ $(function(){initNavTree('dd/d9e/downscale_8cpp_8hpp_afa8ab007ca6d842520360cebea
 <div class="line"><span class="lineno">  117</span>                <span class="comment">// Calculate vertical overlap in Q8.8</span></div>
 <div class="line"><span class="lineno">  118</span>                fl::u32 sy0 = sy * FP_ONE;</div>
 <div class="line"><span class="lineno">  119</span>                fl::u32 sy1 = (sy + 1) * FP_ONE;</div>
-<div class="line"><span class="lineno">  120</span>                fl::u32 y_overlap = <a class="code hl_function" href="../../d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb">fl::min</a>(dstY1, sy1) - <a class="code hl_function" href="../../d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909">fl::max</a>(dstY0, sy0);</div>
+<div class="line"><span class="lineno">  120</span>                fl::u32 y_overlap = <a class="code hl_function" href="../../d4/d36/namespacefl_a2fdabb91a1f100dec8da21e4306aba05.html#a2fdabb91a1f100dec8da21e4306aba05">fl::min</a>(dstY1, sy1) - <a class="code hl_function" href="../../d4/d36/namespacefl_a07c69292ef50aa1083046faff1c52ead.html#a07c69292ef50aa1083046faff1c52ead">fl::max</a>(dstY0, sy0);</div>
 <div class="line"><span class="lineno">  121</span>                <span class="keywordflow">if</span> (y_overlap == 0)</div>
 <div class="line"><span class="lineno">  122</span>                    <span class="keywordflow">continue</span>;</div>
 <div class="line"><span class="lineno">  123</span> </div>
 <div class="line"><span class="lineno">  124</span>                <span class="keywordflow">for</span> (fl::u16 sx = srcX_start; sx &lt; srcX_end; ++sx) {</div>
 <div class="line"><span class="lineno">  125</span>                    fl::u32 sx0 = sx * FP_ONE;</div>
 <div class="line"><span class="lineno">  126</span>                    fl::u32 sx1 = (sx + 1) * FP_ONE;</div>
-<div class="line"><span class="lineno">  127</span>                    fl::u32 x_overlap = <a class="code hl_function" href="../../d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb">fl::min</a>(dstX1, sx1) - <a class="code hl_function" href="../../d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909">fl::max</a>(dstX0, sx0);</div>
+<div class="line"><span class="lineno">  127</span>                    fl::u32 x_overlap = <a class="code hl_function" href="../../d4/d36/namespacefl_a2fdabb91a1f100dec8da21e4306aba05.html#a2fdabb91a1f100dec8da21e4306aba05">fl::min</a>(dstX1, sx1) - <a class="code hl_function" href="../../d4/d36/namespacefl_a07c69292ef50aa1083046faff1c52ead.html#a07c69292ef50aa1083046faff1c52ead">fl::max</a>(dstX0, sx0);</div>
 <div class="line"><span class="lineno">  128</span>                    <span class="keywordflow">if</span> (x_overlap == 0)</div>
 <div class="line"><span class="lineno">  129</span>                        <span class="keywordflow">continue</span>;</div>
 <div class="line"><span class="lineno">  130</span> </div>
@@ -244,7 +244,7 @@ $(function(){initNavTree('dd/d9e/downscale_8cpp_8hpp_afa8ab007ca6d842520360cebea
 <div class="line"><span class="lineno">  142</span>            <span class="comment">// Final division, rounding</span></div>
 <div class="line"><span class="lineno">  143</span>            <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> r =</div>
 <div class="line"><span class="lineno">  144</span>                totalWeight ? (rSum + (totalWeight &gt;&gt; 1)) / totalWeight : 0;</div>
-<div class="line"><span class="lineno">  145</span>            <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> g =</div>
+<div class="line"><span class="lineno">  145</span>            <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> <a class="code hl_variable" href="../../d4/d36/namespacefl_abb8ff746cce2b11a90718afba1cfec1b.html#abb8ff746cce2b11a90718afba1cfec1b">g</a> =</div>
 <div class="line"><span class="lineno">  146</span>                totalWeight ? (gSum + (totalWeight &gt;&gt; 1)) / totalWeight : 0;</div>
 <div class="line"><span class="lineno">  147</span>            <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> b =</div>
 <div class="line"><span class="lineno">  148</span>                totalWeight ? (bSum + (totalWeight &gt;&gt; 1)) / totalWeight : 0;</div>
@@ -290,15 +290,15 @@ $(function(){initNavTree('dd/d9e/downscale_8cpp_8hpp_afa8ab007ca6d842520360cebea
 <div class="ttc" id="a_audio_2simple_2simple_8h_a0a2f84ed7838f07779ae24c5a9086d33_html_a0a2f84ed7838f07779ae24c5a9086d33"><div class="ttname"><a href="../../db/d49/_audio_2simple_2simple_8h_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a></div><div class="ttdeci">int y</div><div class="ttdef"><b>Definition</b> <a href="../../db/d49/_audio_2simple_2simple_8h_source.html#l00093">simple.h:93</a></div></div>
 <div class="ttc" id="a_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc_html_a6150e0515f7202e2fb518f7206ed97dc"><div class="ttname"><a href="../../db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a></div><div class="ttdeci">int x</div><div class="ttdef"><b>Definition</b> <a href="../../db/d49/_audio_2simple_2simple_8h_source.html#l00092">simple.h:92</a></div></div>
 <div class="ttc" id="agroup___h_s_v2_r_g_b_ga65c1895006b38f8c5114118b6a170327_html_ga65c1895006b38f8c5114118b6a170327"><div class="ttname"><a href="../../dd/dc7/group___h_s_v2_r_g_b_ga65c1895006b38f8c5114118b6a170327.html#ga65c1895006b38f8c5114118b6a170327">CRGB</a></div><div class="ttdeci">fl::CRGB CRGB</div><div class="ttdef"><b>Definition</b> <a href="../../db/dd1/crgb_8h_source.html#l00025">crgb.h:25</a></div></div>
-<div class="ttc" id="anamespacefl_a0356f07fb7a8f25752385fd8208b47fb_html_a0356f07fb7a8f25752385fd8208b47fb"><div class="ttname"><a href="../../d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb">fl::min</a></div><div class="ttdeci">FL_DISABLE_WARNING_PUSH U constexpr common_type_t&lt; T, U &gt; min(T a, U b) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00071">math.h:71</a></div></div>
 <div class="ttc" id="anamespacefl_a058ceeac48f181da463c2ba07401292c_html_a058ceeac48f181da463c2ba07401292c"><div class="ttname"><a href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a></div><div class="ttdeci">unsigned char u8</div><div class="ttdef"><b>Definition</b> <a href="../../df/dd8/stdint_8h_source.html#l00131">stdint.h:131</a></div></div>
-<div class="ttc" id="anamespacefl_a19ba0dae8249e0cf164136846f85e909_html_a19ba0dae8249e0cf164136846f85e909"><div class="ttname"><a href="../../d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909">fl::max</a></div><div class="ttdeci">constexpr common_type_t&lt; T, U &gt; max(T a, U b) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00075">math.h:75</a></div></div>
+<div class="ttc" id="anamespacefl_a07c69292ef50aa1083046faff1c52ead_html_a07c69292ef50aa1083046faff1c52ead"><div class="ttname"><a href="../../d4/d36/namespacefl_a07c69292ef50aa1083046faff1c52ead.html#a07c69292ef50aa1083046faff1c52ead">fl::max</a></div><div class="ttdeci">constexpr common_type_t&lt; T, U &gt; max(T a, U b) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00075">math.h:75</a></div></div>
 <div class="ttc" id="anamespacefl_a2bd6c765c4dbccf31b10bddf7f22b5e4_html_a2bd6c765c4dbccf31b10bddf7f22b5e4"><div class="ttname"><a href="../../d4/d36/namespacefl_a2bd6c765c4dbccf31b10bddf7f22b5e4.html#a2bd6c765c4dbccf31b10bddf7f22b5e4">fl::downscale</a></div><div class="ttdeci">void downscale(const CRGB *src, const XYMap &amp;srcXY, CRGB *dst, const XYMap &amp;dstXY)</div></div>
+<div class="ttc" id="anamespacefl_a2fdabb91a1f100dec8da21e4306aba05_html_a2fdabb91a1f100dec8da21e4306aba05"><div class="ttname"><a href="../../d4/d36/namespacefl_a2fdabb91a1f100dec8da21e4306aba05.html#a2fdabb91a1f100dec8da21e4306aba05">fl::min</a></div><div class="ttdeci">FL_DISABLE_WARNING_PUSH U constexpr common_type_t&lt; T, U &gt; min(T a, U b) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00071">math.h:71</a></div></div>
 <div class="ttc" id="anamespacefl_a50f80745c984dcab9711ba181ca0680c_html_a50f80745c984dcab9711ba181ca0680c"><div class="ttname"><a href="../../d4/d36/namespacefl_a50f80745c984dcab9711ba181ca0680c.html#a50f80745c984dcab9711ba181ca0680c">fl::downscaleArbitrary</a></div><div class="ttdeci">void downscaleArbitrary(const CRGB *src, const XYMap &amp;srcXY, CRGB *dst, const XYMap &amp;dstXY)</div></div>
 <div class="ttc" id="anamespacefl_a964d9f51bd69ec7269946cefb6507088_html_a964d9f51bd69ec7269946cefb6507088"><div class="ttname"><a href="../../d4/d36/namespacefl_a964d9f51bd69ec7269946cefb6507088.html#a964d9f51bd69ec7269946cefb6507088">fl::downscaleHalf</a></div><div class="ttdeci">void downscaleHalf(const CRGB *src, fl::u16 srcWidth, fl::u16 srcHeight, CRGB *dst)</div></div>
-<div class="ttc" id="anamespacefl_add3f775ccb36323b444c97c36b6bb694_html_add3f775ccb36323b444c97c36b6bb694"><div class="ttname"><a href="../../d4/d36/namespacefl_add3f775ccb36323b444c97c36b6bb694.html#add3f775ccb36323b444c97c36b6bb694">fl::u64</a></div><div class="ttdeci">fl::u64 u64</div><div class="ttdef"><b>Definition</b> <a href="../../df/d96/s16x16x4_8h_source.html#l00221">s16x16x4.h:221</a></div></div>
+<div class="ttc" id="anamespacefl_abb8ff746cce2b11a90718afba1cfec1b_html_abb8ff746cce2b11a90718afba1cfec1b"><div class="ttname"><a href="../../d4/d36/namespacefl_abb8ff746cce2b11a90718afba1cfec1b.html#abb8ff746cce2b11a90718afba1cfec1b">fl::g</a></div><div class="ttdeci">InputGamut g</div><div class="ttdef"><b>Definition</b> <a href="../../df/df8/fl_2gfx_2rgbw_8h_source.html#l00124">rgbw.h:124</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d4/d36/namespacefl_a2bd6c765c4dbccf31b10bddf7f22b5e4.html#a2bd6c765c4dbccf31b10bddf7f22b5e4">fl::downscale()</a>, <a class="el" href="../../d4/d36/namespacefl_a50f80745c984dcab9711ba181ca0680c.html#a50f80745c984dcab9711ba181ca0680c">fl::downscaleArbitrary()</a>, <a class="el" href="../../d4/d36/namespacefl_a964d9f51bd69ec7269946cefb6507088.html#a964d9f51bd69ec7269946cefb6507088">fl::downscaleHalf()</a>, <a class="el" href="../../dd/dc3/flowfield_8cpp_8hpp_source.html#l00484">fl::FP_ONE</a>, <a class="el" href="../../da/d61/xymap_8h_source.html#l00043">fl::XYMap::kLineByLine</a>, <a class="el" href="../../df/db1/math_8h_source.html#l00075">fl::max()</a>, <a class="el" href="../../df/db1/math_8h_source.html#l00071">fl::min()</a>, <a class="el" href="../../db/d49/_audio_2simple_2simple_8h_source.html#l00092">x</a>, and <a class="el" href="../../db/d49/_audio_2simple_2simple_8h_source.html#l00093">y</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d36/namespacefl_a2bd6c765c4dbccf31b10bddf7f22b5e4.html#a2bd6c765c4dbccf31b10bddf7f22b5e4">fl::downscale()</a>, <a class="el" href="../../d4/d36/namespacefl_a50f80745c984dcab9711ba181ca0680c.html#a50f80745c984dcab9711ba181ca0680c">fl::downscaleArbitrary()</a>, <a class="el" href="../../d4/d36/namespacefl_a964d9f51bd69ec7269946cefb6507088.html#a964d9f51bd69ec7269946cefb6507088">fl::downscaleHalf()</a>, <a class="el" href="../../dd/dc3/flowfield_8cpp_8hpp_source.html#l00484">fl::FP_ONE</a>, <a class="el" href="../../df/df8/fl_2gfx_2rgbw_8h_source.html#l00124">fl::g</a>, <a class="el" href="../../da/d61/xymap_8h_source.html#l00043">fl::XYMap::kLineByLine</a>, <a class="el" href="../../df/db1/math_8h_source.html#l00075">fl::max()</a>, <a class="el" href="../../df/db1/math_8h_source.html#l00071">fl::min()</a>, <a class="el" href="../../db/d49/_audio_2simple_2simple_8h_source.html#l00092">x</a>, and <a class="el" href="../../db/d49/_audio_2simple_2simple_8h_source.html#l00093">y</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -316,7 +316,7 @@ $(function(){initNavTree('dd/d9e/downscale_8cpp_8hpp_afa8ab007ca6d842520360cebea
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_c9349635bab014644c82face402cd66f.html">gfx</a></li><li class="navelem"><a class="el" href="../../dd/d9e/downscale_8cpp_8hpp.html">downscale.cpp.hpp</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:01 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:04 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

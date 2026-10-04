@@ -1,0 +1,5 @@
+<map id="MY9221Controller::latch" name="MY9221Controller::latch">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,184,31"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_afd724068da70fdbc6a52b047d0d924e9.html#afd724068da70fdbc6a52b047d0d924e9" title="Delay for a given number of microseconds." alt="" coords="232,5,395,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="184,15,218,15,218,21,184,21"/>
+</map>

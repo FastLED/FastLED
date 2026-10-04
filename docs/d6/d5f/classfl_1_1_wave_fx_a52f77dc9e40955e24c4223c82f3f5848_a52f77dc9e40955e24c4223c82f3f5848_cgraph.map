@@ -1,0 +1,11 @@
+<map id="fl::WaveFx::draw" name="fl::WaveFx::draw">
+<area shape="rect" id="Node000001" title="Render wave to LED array." alt="" coords="5,31,136,56"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a297e1492a0d4d3959a013cc8225de491.html#a297e1492a0d4d3959a013cc8225de491" title=" " alt="" coords="184,31,263,56"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="136,41,170,41,170,46,136,46"/>
+<area shape="rect" id="Node000003" href="$d5/d3d/group___color_blurs_ga648b01339a6b68fecbcb933df57db297.html#ga648b01339a6b68fecbcb933df57db297" title="Two&#45;dimensional blur filter (span version)." alt="" coords="311,31,419,56"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="263,41,297,41,297,46,263,46"/>
+<area shape="rect" id="Node000004" href="$d5/d3d/group___color_blurs_gaf42765991cf5da9428fe3e7d1d104168.html#gaf42765991cf5da9428fe3e7d1d104168" title="Perform a blur1d() on every column of a rectangular matrix (span version)." alt="" coords="467,5,616,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="418,33,453,28,453,33,419,38"/>
+<area shape="rect" id="Node000007" href="$d5/d3d/group___color_blurs_gafe47df0af91421b253a945970c99f646.html#gafe47df0af91421b253a945970c99f646" title="Perform a blur1d() on every row of a rectangular matrix (span version)." alt="" coords="478,55,605,80"/>
+<area shape="poly" id="edge4_Node000003_Node000007" title=" " alt="" coords="419,48,465,54,464,60,418,53"/>
+</map>

@@ -1,0 +1,18 @@
+<map id="fl::prepare_rgbw_colorimetric" name="fl::prepare_rgbw_colorimetric">
+<area shape="rect" id="Node000001" title=" " alt="" coords="927,133,1139,158"/>
+<area shape="rect" id="Node000002" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a37429a6c10feb5f7159244d07bb27b21.html#a37429a6c10feb5f7159244d07bb27b21" title=" " alt="" coords="719,93,855,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="921,133,855,125,856,120,922,128"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_aadf9b0aff96f2fa548f7a12858f67cad.html#aadf9b0aff96f2fa548f7a12858f67cad" title=" " alt="" coords="696,157,879,197"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="922,162,879,168,879,163,921,157"/>
+<area shape="rect" id="Node000003" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a5deb7f24434255cda4210316a43b7507.html#a5deb7f24434255cda4210316a43b7507" title="Configure a chipset&#45;owned RGBW policy that public white&#45;channel setters cannot replace." alt="" coords="467,5,603,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="727,90,647,60,602,46,603,41,649,55,728,86"/>
+<area shape="rect" id="Node000004" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a364042729b1cf127821d255d67f0f91c.html#a364042729b1cf127821d255d67f0f91c" title=" " alt="" coords="467,93,603,133"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="706,116,603,116,603,111,706,111"/>
+<area shape="poly" id="edge6_Node000004_Node000004" title=" " alt="" coords="577,82,562,75,535,72,510,74,496,79,490,85,493,92,488,94,485,84,493,74,509,69,535,67,564,70,580,77"/>
+<area shape="rect" id="Node000005" href="$d4/d28/group___chipsets_gad119f2555688176da39dc9f8e18479c0.html#gad119f2555688176da39dc9f8e18479c0" title="Constructor with optional RGBW configuration." alt="" coords="91,51,288,91"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="453,106,288,85,289,80,453,101"/>
+<area shape="rect" id="Node000006" href="$dd/d78/classfl_1_1_u_c_s7604_controller_t_a5b824ab62c030a131878f46d505dfbc6.html#a5b824ab62c030a131878f46d505dfbc6" title=" " alt="" coords="5,115,373,199"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="453,126,374,137,373,131,453,121"/>
+<area shape="rect" id="Node000008" href="$dd/dbb/class_c_fast_l_e_d_aaf52aa204c937e8317f9506a0409de20.html#aaf52aa204c937e8317f9506a0409de20" title="Install a legacy fallback RGBW diode chromaticity profile for scalar colorimetric calls." alt="" coords="421,157,648,197"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="682,180,648,180,648,175,682,175"/>
+</map>

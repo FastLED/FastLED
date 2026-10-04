@@ -14,6 +14,8 @@ var _auto_research_net_8h =
     [ "AUTORESEARCH_NET_SERVER_PORT", "d5/d32/_auto_research_net_8h_ab6f76851b3d9b4385cede2374758ccc8.html#ab6f76851b3d9b4385cede2374758ccc8", null ],
     [ "AUTORESEARCH_NET_SSID", "d5/d32/_auto_research_net_8h_a02b700941fcb27b9ac96d49528611f3d.html#a02b700941fcb27b9ac96d49528611f3d", null ],
     [ "getNetState", "d5/d32/_auto_research_net_8h_a8dde55151bffdcf4f78d45f28cda751b.html#a8dde55151bffdcf4f78d45f28cda751b", null ],
+    [ "netServerStats", "d5/d32/_auto_research_net_8h_afe3d11d6eeebc80b8896a2af8a59787f.html#afe3d11d6eeebc80b8896a2af8a59787f", null ],
+    [ "pollNetServer", "d5/d32/_auto_research_net_8h_a3a246514863baeca0692e2a691abbd01.html#a3a246514863baeca0692e2a691abbd01", null ],
     [ "runNetClientTest", "d5/d32/_auto_research_net_8h_ab2f82fb395065bbd40b17fc512400a8f.html#ab2f82fb395065bbd40b17fc512400a8f", null ],
     [ "runNetLoopback", "d5/d32/_auto_research_net_8h_a63081184672530dd4f6919e2967fe693.html#a63081184672530dd4f6919e2967fe693", null ],
     [ "startNetClient", "d5/d32/_auto_research_net_8h_a7a4b49fe13c55a4ce6c4288bf845dd66.html#a7a4b49fe13c55a4ce6c4288bf845dd66", null ],

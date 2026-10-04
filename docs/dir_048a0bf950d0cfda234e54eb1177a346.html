@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -118,13 +118,13 @@ Files</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p>This directory contains the ezWS2812 driver from Silicon Labs, adapted for use with FastLED.</p>
-<h1><a class="anchor" id="autotoc_md627"></a>
+<h1><a class="anchor" id="autotoc_md664"></a>
 Origin</h1>
 <p>Based on the Silicon Labs ezWS2812 library version 2.2.0 by Tamas Jozsi.</p><ul>
 <li>Original repository: <a href="https://github.com/SiliconLabs/arduino">https://github.com/SiliconLabs/arduino</a></li>
 <li>Path: libraries/ezWS2812</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md628"></a>
+<h1><a class="anchor" id="autotoc_md665"></a>
 Purpose</h1>
 <p>Provides optimized WS2812 LED control for Silicon Labs EFR32MG24 series microcontrollers, including:</p><ul>
 <li>Arduino Nano Matter (MGM240)</li>
@@ -132,9 +132,9 @@ Purpose</h1>
 <li>Seeed Xiao MG24 Sense</li>
 <li>Other EFR32MG24-based boards</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md629"></a>
+<h1><a class="anchor" id="autotoc_md666"></a>
 Available Controllers</h1>
-<h2><a class="anchor" id="autotoc_md630"></a>
+<h2><a class="anchor" id="autotoc_md667"></a>
 1. EZWS2812_GPIO (Always Available)</h2>
 <ul>
 <li>Uses optimized GPIO bit-banging with precise timing</li>
@@ -142,7 +142,7 @@ Available Controllers</h1>
 <li>Does not consume any hardware peripherals</li>
 <li>Good performance with minimal resource usage</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md631"></a>
+<h2><a class="anchor" id="autotoc_md668"></a>
 2. EZWS2812_SPI (Optional)</h2>
 <ul>
 <li>Uses hardware SPI peripheral for WS2812 signal generation</li>
@@ -150,40 +150,40 @@ Available Controllers</h1>
 <li><b>Consumes one SPI peripheral</b></li>
 <li>Must be explicitly enabled with <code>#define FASTLED_USES_EZWS2812_SPI</code></li>
 </ul>
-<h1><a class="anchor" id="autotoc_md632"></a>
+<h1><a class="anchor" id="autotoc_md669"></a>
 Usage</h1>
-<h2><a class="anchor" id="autotoc_md633"></a>
+<h2><a class="anchor" id="autotoc_md670"></a>
 GPIO Controller (Default)</h2>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &lt;FastLED.h&gt;</span></div>
 <div class="line"> </div>
-<div class="line"><a class="code hl_typedef" href="dd/dc7/group___h_s_v2_r_g_b_ga65c1895006b38f8c5114118b6a170327.html#ga65c1895006b38f8c5114118b6a170327">CRGB</a> <a class="code hl_variable" href="d6/d05/_animartrix_8ino_a83a59cb1680f896fa1c411261436d4ad.html#a83a59cb1680f896fa1c411261436d4ad">leds</a>[<a class="code hl_define" href="d6/d05/_animartrix_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd">NUM_LEDS</a>];</div>
+<div class="line"><a class="code hl_typedef" href="dd/dc7/group___h_s_v2_r_g_b_ga65c1895006b38f8c5114118b6a170327.html#ga65c1895006b38f8c5114118b6a170327">CRGB</a> <a class="code hl_variable" href="d5/d17/_analog_output_8ino_a1039e408783ef35dd94161e35efe8ee9.html#a1039e408783ef35dd94161e35efe8ee9">leds</a>[<a class="code hl_define" href="d6/d05/_animartrix_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd">NUM_LEDS</a>];</div>
 <div class="line"> </div>
 <div class="line"><span class="keywordtype">void</span> <a class="code hl_function" href="d5/d17/_analog_output_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d">setup</a>() {</div>
 <div class="line">    <span class="comment">// GPIO-based controller on pin 7</span></div>
-<div class="line">    <a class="code hl_variable" href="d7/de5/_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a>.addLeds&lt;EZWS2812_GPIO, 7, <a class="code hl_variable" href="db/d07/eorder_8h_a61ef4a09022f540ce448c547ad15ee6a.html#a61ef4a09022f540ce448c547ad15ee6a">GRB</a>&gt;(<a class="code hl_variable" href="d6/d05/_animartrix_8ino_a83a59cb1680f896fa1c411261436d4ad.html#a83a59cb1680f896fa1c411261436d4ad">leds</a>, <a class="code hl_define" href="d6/d05/_animartrix_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd">NUM_LEDS</a>);</div>
+<div class="line">    <a class="code hl_variable" href="d7/de5/_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a>.addLeds&lt;EZWS2812_GPIO, 7, <a class="code hl_variable" href="db/d07/eorder_8h_a61ef4a09022f540ce448c547ad15ee6a.html#a61ef4a09022f540ce448c547ad15ee6a">GRB</a>&gt;(<a class="code hl_variable" href="d5/d17/_analog_output_8ino_a1039e408783ef35dd94161e35efe8ee9.html#a1039e408783ef35dd94161e35efe8ee9">leds</a>, <a class="code hl_define" href="d6/d05/_animartrix_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd">NUM_LEDS</a>);</div>
 <div class="line">}</div>
-<div class="ttc" id="a_analog_output_8ino_a4fc01d736fe50cf5b977f755b675f11d_html_a4fc01d736fe50cf5b977f755b675f11d"><div class="ttname"><a href="d5/d17/_analog_output_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d">setup</a></div><div class="ttdeci">void setup()</div><div class="ttdef"><b>Definition</b> <a href="d5/d17/_analog_output_8ino_source.html#l00065">AnalogOutput.ino:65</a></div></div>
+<div class="ttc" id="a_analog_output_8ino_a1039e408783ef35dd94161e35efe8ee9_html_a1039e408783ef35dd94161e35efe8ee9"><div class="ttname"><a href="d5/d17/_analog_output_8ino_a1039e408783ef35dd94161e35efe8ee9.html#a1039e408783ef35dd94161e35efe8ee9">leds</a></div><div class="ttdeci">CRGB leds[1]</div><div class="ttdef"><b>Definition</b> <a href="d5/d17/_analog_output_8ino_source.html#l00026">AnalogOutput.ino:26</a></div></div>
+<div class="ttc" id="a_analog_output_8ino_a4fc01d736fe50cf5b977f755b675f11d_html_a4fc01d736fe50cf5b977f755b675f11d"><div class="ttname"><a href="d5/d17/_analog_output_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d">setup</a></div><div class="ttdeci">void setup()</div><div class="ttdef"><b>Definition</b> <a href="d5/d17/_analog_output_8ino_source.html#l00058">AnalogOutput.ino:58</a></div></div>
 <div class="ttc" id="a_animartrix_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd_html_a4c4ae9a4146ce8d6a5debc90300d9abd"><div class="ttname"><a href="d6/d05/_animartrix_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd">NUM_LEDS</a></div><div class="ttdeci">#define NUM_LEDS</div><div class="ttdef"><b>Definition</b> <a href="d6/d05/_animartrix_8ino_source.html#l00079">Animartrix.ino:79</a></div></div>
-<div class="ttc" id="a_animartrix_8ino_a83a59cb1680f896fa1c411261436d4ad_html_a83a59cb1680f896fa1c411261436d4ad"><div class="ttname"><a href="d6/d05/_animartrix_8ino_a83a59cb1680f896fa1c411261436d4ad.html#a83a59cb1680f896fa1c411261436d4ad">leds</a></div><div class="ttdeci">fl::CRGB leds[NUM_LEDS]</div><div class="ttdef"><b>Definition</b> <a href="d6/d05/_animartrix_8ino_source.html#l00093">Animartrix.ino:93</a></div></div>
-<div class="ttc" id="a_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9_html_a8e94985674086ea368e1d51cbc0f82a9"><div class="ttname"><a href="d7/de5/_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a></div><div class="ttdeci">FL_DISABLE_WARNING_PUSH FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS CFastLED FastLED</div><div class="ttdoc">Global LED strip management instance.</div><div class="ttdef"><b>Definition</b> <a href="d7/de5/_fast_l_e_d_8cpp_8hpp_source.html#l00075">FastLED.cpp.hpp:75</a></div></div>
+<div class="ttc" id="a_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9_html_a8e94985674086ea368e1d51cbc0f82a9"><div class="ttname"><a href="d7/de5/_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a></div><div class="ttdeci">FL_DISABLE_WARNING_PUSH FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS CFastLED FastLED</div><div class="ttdoc">Global LED strip management instance.</div><div class="ttdef"><b>Definition</b> <a href="d7/de5/_fast_l_e_d_8cpp_8hpp_source.html#l00090">FastLED.cpp.hpp:90</a></div></div>
 <div class="ttc" id="aeorder_8h_a61ef4a09022f540ce448c547ad15ee6a_html_a61ef4a09022f540ce448c547ad15ee6a"><div class="ttname"><a href="db/d07/eorder_8h_a61ef4a09022f540ce448c547ad15ee6a.html#a61ef4a09022f540ce448c547ad15ee6a">GRB</a></div><div class="ttdeci">constexpr EOrder GRB</div><div class="ttdef"><b>Definition</b> <a href="db/d07/eorder_8h_source.html#l00019">eorder.h:19</a></div></div>
 <div class="ttc" id="agroup___h_s_v2_r_g_b_ga65c1895006b38f8c5114118b6a170327_html_ga65c1895006b38f8c5114118b6a170327"><div class="ttname"><a href="dd/dc7/group___h_s_v2_r_g_b_ga65c1895006b38f8c5114118b6a170327.html#ga65c1895006b38f8c5114118b6a170327">CRGB</a></div><div class="ttdeci">fl::CRGB CRGB</div><div class="ttdef"><b>Definition</b> <a href="db/dd1/crgb_8h_source.html#l00025">crgb.h:25</a></div></div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md634"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md671"></a>
 SPI Controller (Optional)</h2>
 <div class="fragment"><div class="line"><span class="comment">// IMPORTANT: Define this BEFORE including FastLED.h</span></div>
 <div class="line"><span class="preprocessor">#define FASTLED_USES_EZWS2812_SPI</span></div>
 <div class="line"><span class="preprocessor">#include &lt;FastLED.h&gt;</span></div>
 <div class="line"> </div>
-<div class="line"><a class="code hl_typedef" href="dd/dc7/group___h_s_v2_r_g_b_ga65c1895006b38f8c5114118b6a170327.html#ga65c1895006b38f8c5114118b6a170327">CRGB</a> <a class="code hl_variable" href="d6/d05/_animartrix_8ino_a83a59cb1680f896fa1c411261436d4ad.html#a83a59cb1680f896fa1c411261436d4ad">leds</a>[<a class="code hl_define" href="d6/d05/_animartrix_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd">NUM_LEDS</a>];</div>
+<div class="line"><a class="code hl_typedef" href="dd/dc7/group___h_s_v2_r_g_b_ga65c1895006b38f8c5114118b6a170327.html#ga65c1895006b38f8c5114118b6a170327">CRGB</a> <a class="code hl_variable" href="d5/d17/_analog_output_8ino_a1039e408783ef35dd94161e35efe8ee9.html#a1039e408783ef35dd94161e35efe8ee9">leds</a>[<a class="code hl_define" href="d6/d05/_animartrix_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd">NUM_LEDS</a>];</div>
 <div class="line"> </div>
 <div class="line"><span class="keywordtype">void</span> <a class="code hl_function" href="d5/d17/_analog_output_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d">setup</a>() {</div>
 <div class="line">    <span class="comment">// SPI-based controller (uses hardware SPI)</span></div>
-<div class="line">    <a class="code hl_variable" href="d7/de5/_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a>.addLeds&lt;EZWS2812_SPI, <a class="code hl_variable" href="db/d07/eorder_8h_a61ef4a09022f540ce448c547ad15ee6a.html#a61ef4a09022f540ce448c547ad15ee6a">GRB</a>&gt;(<a class="code hl_variable" href="d6/d05/_animartrix_8ino_a83a59cb1680f896fa1c411261436d4ad.html#a83a59cb1680f896fa1c411261436d4ad">leds</a>, <a class="code hl_define" href="d6/d05/_animartrix_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd">NUM_LEDS</a>);</div>
+<div class="line">    <a class="code hl_variable" href="d7/de5/_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a>.addLeds&lt;EZWS2812_SPI, <a class="code hl_variable" href="db/d07/eorder_8h_a61ef4a09022f540ce448c547ad15ee6a.html#a61ef4a09022f540ce448c547ad15ee6a">GRB</a>&gt;(<a class="code hl_variable" href="d5/d17/_analog_output_8ino_a1039e408783ef35dd94161e35efe8ee9.html#a1039e408783ef35dd94161e35efe8ee9">leds</a>, <a class="code hl_define" href="d6/d05/_animartrix_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd">NUM_LEDS</a>);</div>
 <div class="line">}</div>
-</div><!-- fragment --><h1><a class="anchor" id="autotoc_md635"></a>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md672"></a>
 Why SPI Requires Opt-In</h1>
 <p>The SPI controller consumes a hardware SPI peripheral, which may be needed for other purposes in your project (SD cards, displays, sensors, etc.). Following the same pattern as ObjectFLED for Teensy, the SPI controller must be explicitly enabled to prevent accidentally consuming the SPI peripheral.</p>
-<h1><a class="anchor" id="autotoc_md636"></a>
+<h1><a class="anchor" id="autotoc_md673"></a>
 Define Summary</h1>
 <ul>
 <li><b><code>FASTLED_USES_EZWS2812_SPI</code></b> - Enables SPI-based WS2812 controller for MG24 chips<ul>
@@ -193,9 +193,9 @@ Define Summary</h1>
 </ul>
 </li>
 </ul>
-<h1><a class="anchor" id="autotoc_md637"></a>
+<h1><a class="anchor" id="autotoc_md674"></a>
 Technical Details</h1>
-<h2><a class="anchor" id="autotoc_md638"></a>
+<h2><a class="anchor" id="autotoc_md675"></a>
 GPIO Controller</h2>
 <ul>
 <li>Timing generated using calibrated NOP delays</li>
@@ -203,7 +203,7 @@ GPIO Controller</h2>
 <li>Supports both 39MHz and 78MHz CPU frequencies</li>
 <li>~400Hz maximum refresh rate</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md639"></a>
+<h2><a class="anchor" id="autotoc_md676"></a>
 SPI Controller</h2>
 <ul>
 <li>Each WS2812 bit encoded as 8 SPI bits</li>
@@ -211,7 +211,7 @@ SPI Controller</h2>
 <li>Pattern: '1' bit = 0xFC, '0' bit = 0x80</li>
 <li>~1000Hz maximum refresh rate</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md640"></a>
+<h1><a class="anchor" id="autotoc_md677"></a>
 License</h1>
 <p>MIT License (see <a class="el" href="de/d0e/ez_w_s2812_8h.html">ezWS2812.h</a> for full text) Copyright (c) 2024 Silicon Laboratories Inc. </p>
 </div><!-- contents -->
@@ -221,7 +221,7 @@ License</h1>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_c30bdf76ce759a4eae8387be42921388.html">third_party</a></li><li class="navelem"><a class="el" href="dir_048a0bf950d0cfda234e54eb1177a346.html">ezws2812</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:12 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:13 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

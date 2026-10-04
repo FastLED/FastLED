@@ -1,0 +1,35 @@
+digraph "autoresearch::timing_drift::run"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="autoresearch::timing\l_drift::run",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="autoresearch::timing\l_drift::MillisDelay::\ljustFinished",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d67/structautoresearch_1_1timing__drift_1_1_millis_delay_a879b40d2e6f03800bc8e227dc1a8f8b7.html#a879b40d2e6f03800bc8e227dc1a8f8b7",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="autoresearch::timing\l_drift::MillisDelay::start",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d67/structautoresearch_1_1timing__drift_1_1_millis_delay_aea081c18776ddb13faca98e5d7eb8fc0.html#aea081c18776ddb13faca98e5d7eb8fc0",tooltip=" "];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="autoresearch::timing\l_drift::MillisDelay::stop",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d67/structautoresearch_1_1timing__drift_1_1_millis_delay_addcfa49412d0cf9d03a3ad7bd87c2c0c.html#addcfa49412d0cf9d03a3ad7bd87c2c0c",tooltip=" "];
+  Node1 -> Node5 [id="edge4_Node000001_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="autoresearch::timing\l_drift::timingDriftState",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d88/namespaceautoresearch_1_1timing__drift_a34959242582e673e76853b393aa8f302.html#a34959242582e673e76853b393aa8f302",tooltip=" "];
+  Node5 -> Node6 [id="edge5_Node000005_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::SingletonShared\l::instance",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d4a/classfl_1_1_singleton_shared_a1ec246efec2c46bc053a64fe7e8170ad.html#a1ec246efec2c46bc053a64fe7e8170ad",tooltip=" "];
+  Node6 -> Node7 [id="edge6_Node000006_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::SingletonShared\l::instanceInner",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$db/d4a/classfl_1_1_singleton_shared_a03c9eb23cd0cb903d5ae8fd44b1a4984.html#a03c9eb23cd0cb903d5ae8fd44b1a4984",tooltip=" "];
+  Node7 -> Node7 [id="edge7_Node000007_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node6 -> Node9 [id="edge8_Node000006_Node000009",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="fl::detail::singleton\l_registry_get",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$df/d9e/namespacefl_1_1detail_a6bef973c17637a167f1f94d7db03905c.html#a6bef973c17637a167f1f94d7db03905c",tooltip=" "];
+  Node6 -> Node11 [id="edge9_Node000006_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="fl::detail::singleton\l_registry_set",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$df/d9e/namespacefl_1_1detail_af558e779ba2417d4cf14bdb1cbfd3d34.html#af558e779ba2417d4cf14bdb1cbfd3d34",tooltip=" "];
+  Node1 -> Node12 [id="edge10_Node000001_Node000012",color="steelblue1",style="solid",tooltip=" "];
+  Node12 [id="Node000012",label="updateLEDs",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/dce/_client_validation_real_8h_ad9fa17f84176d024a7ccc2181af0aeb3.html#ad9fa17f84176d024a7ccc2181af0aeb3",tooltip=" "];
+  Node12 -> Node13 [id="edge11_Node000012_Node000013",color="steelblue1",style="solid",tooltip=" "];
+  Node13 [id="Node000013",label="beatsin8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/da5/lib8tion_8h_aca012663c6c8fe9a7240bcbc76095ba9.html#aca012663c6c8fe9a7240bcbc76095ba9",tooltip="Generates an 8-bit sine wave at a given BPM that oscillates within a given range."];
+  Node12 -> Node14 [id="edge12_Node000012_Node000014",color="steelblue1",style="solid",tooltip=" "];
+  Node14 [id="Node000014",label="fill_solid",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/dfb/colorutils_8h_a3198008d7f952f27c3c83aeefedec06b.html#a3198008d7f952f27c3c83aeefedec06b",tooltip="Fill a range of LEDs with a solid color."];
+  Node1 -> Node15 [id="edge13_Node000001_Node000015",color="steelblue1",style="solid",tooltip=" "];
+  Node15 [id="Node000015",label="LegacyClocklessProxy\l::valid",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/da1/class_legacy_clockless_proxy_ae6df4c9218e08e5cead2b4dde0e4baf9.html#ae6df4c9218e08e5cead2b4dde0e4baf9",tooltip="Check if the proxy was successfully created."];
+}

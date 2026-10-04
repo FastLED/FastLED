@@ -1,5 +1,10 @@
 <map id="CFastLED::onBeginFrame" name="CFastLED::onBeginFrame">
-<area shape="rect" id="Node000001" title="Manually trigger the begin frame event." alt="" coords="5,13,189,38"/>
-<area shape="rect" id="Node000002" href="$de/dca/classfl_1_1_engine_events_ab4d061cd06863ef497abefa72cf7226f.html#ab4d061cd06863ef497abefa72cf7226f" title=" " alt="" coords="237,5,424,45"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="190,23,224,23,224,28,190,28"/>
+<area shape="rect" id="Node000001" title="Manually trigger the begin frame event." alt="" coords="5,69,189,94"/>
+<area shape="rect" id="Node000002" href="$de/dca/classfl_1_1_engine_events_a0a5a3bb00e383055f035b9588f285a86.html#a0a5a3bb00e383055f035b9588f285a86" title=" " alt="" coords="237,61,424,101"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="190,79,224,79,224,84,190,84"/>
+<area shape="rect" id="Node000003" href="$df/d9e/namespacefl_1_1detail_a4ecf69a0759c119b930cc4690cc11e65.html#a4ecf69a0759c119b930cc4690cc11e65" title="Advance temporal dithering once per logical frame, not once per controller." alt="" coords="476,29,655,69"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="424,66,462,61,463,66,424,71"/>
+<area shape="rect" id="Node000004" href="$db/da2/classfl_1_1_engine_events_1_1_listener_a624b8203c73b6e8045801da3ee391713.html#a624b8203c73b6e8045801da3ee391713" title=" " alt="" coords="472,93,659,133"/>
+<area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="424,91,459,96,458,101,424,97"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="522,30,519,20,526,10,542,5,565,3,593,6,608,13,605,18,591,11,565,8,543,10,529,15,524,21,527,28"/>
 </map>

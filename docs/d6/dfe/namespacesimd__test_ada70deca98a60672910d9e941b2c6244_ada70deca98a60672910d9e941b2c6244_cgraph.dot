@@ -8,7 +8,7 @@ digraph "simd_test::print_summary"
   rankdir="LR";
   Node1 [id="Node000001",label="simd_test::print_summary",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Print summary table of all test results."];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::sstream::clear",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d27/classfl_1_1sstream_a2020a3513ae92ed435685030c3127194.html#a2020a3513ae92ed435685030c3127194",tooltip=" "];
+  Node2 [id="Node000002",label="fl::sstream::clear",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d27/classfl_1_1sstream_a6984c3b59302280dc6d30fdd158552a8.html#a6984c3b59302280dc6d30fdd158552a8",tooltip=" "];
   Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::sstream::str",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d27/classfl_1_1sstream_a08170cac6eba7241f099ae16730f6f8e.html#a08170cac6eba7241f099ae16730f6f8e",tooltip=" "];
+  Node3 [id="Node000003",label="fl::sstream::str",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d27/classfl_1_1sstream_a904115dfd2a7e462177b6409c9b842d6.html#a904115dfd2a7e462177b6409c9b842d6",tooltip=" "];
 }

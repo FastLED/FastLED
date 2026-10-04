@@ -1,0 +1,28 @@
+<map id="fl::IChannelDriver::canMatch" name="fl::IChannelDriver::canMatch">
+<area shape="rect" id="Node000001" title="Predicate: can this driver match a (single&#45; or multi&#45;pin) request?" alt="" coords="5,299,140,339"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a4d3b527a041380a497864c78c10388cf.html#a4d3b527a041380a497864c78c10388cf" title="Test a request (single&#45;pin OR multi&#45;pin ganged) against a driver&#39;s published capability data." alt="" coords="221,203,323,228"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="111,297,233,232,236,237,113,302"/>
+<area shape="rect" id="Node000012" href="$d3/da0/classfl_1_1_i_channel_driver_a5de2837b6cc91337ee549664b5007be5.html#a5de2837b6cc91337ee549664b5007be5" title="Driver&#45;wide capability descriptor (declarative form)." alt="" coords="188,299,356,339"/>
+<area shape="poly" id="edge10_Node000001_Node000012" title=" " alt="" coords="140,317,174,317,174,322,140,322"/>
+<area shape="rect" id="Node000014" href="$d3/da0/classfl_1_1_i_channel_driver_accff02d0ac107f532d52c16b46f0c998.html#accff02d0ac107f532d52c16b46f0c998" title="Per&#45;resource group enumeration." alt="" coords="205,363,339,403"/>
+<area shape="poly" id="edge13_Node000001_Node000014" title=" " alt="" coords="137,337,197,357,195,362,135,342"/>
+<area shape="rect" id="Node000003" href="$d9/d73/namespacefl_1_1can__match__detail_a2782ca55b5e55940659c993d592afb7b.html#a2782ca55b5e55940659c993d592afb7b" title=" " alt="" coords="404,119,557,159"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="307,200,411,162,413,167,309,205"/>
+<area shape="rect" id="Node000010" href="$d9/d73/namespacefl_1_1can__match__detail_a7a69dbc0bb55b86271f3e13d16da8679.html#a7a69dbc0bb55b86271f3e13d16da8679" title=" " alt="" coords="404,183,557,223"/>
+<area shape="poly" id="edge8_Node000002_Node000010" title=" " alt="" coords="323,210,390,206,390,211,323,215"/>
+<area shape="rect" id="Node000011" href="$d9/d73/namespacefl_1_1can__match__detail_ac9908d06f233632148fe77f9ceb0e038.html#ac9908d06f233632148fe77f9ceb0e038" title=" " alt="" coords="404,247,557,287"/>
+<area shape="poly" id="edge9_Node000002_Node000011" title=" " alt="" coords="323,225,391,242,390,247,322,230"/>
+<area shape="rect" id="Node000004" href="$d6/d12/structfl_1_1_freq_range_af02c05730f48a9764dfafc3b37065c81.html#af02c05730f48a9764dfafc3b37065c81" title=" " alt="" coords="631,5,802,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="500,117,545,78,574,58,604,41,626,32,628,37,606,46,577,63,549,82,504,121"/>
+<area shape="rect" id="Node000005" href="$d9/d73/namespacefl_1_1can__match__detail_a953f015f3c77806c4a3135eb298d1d18.html#a953f015f3c77806c4a3135eb298d1d18" title=" " alt="" coords="619,55,814,95"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="554,117,629,96,630,101,556,122"/>
+<area shape="rect" id="Node000006" href="$d9/d73/namespacefl_1_1can__match__detail_a71efa121191f543bbc596241531d38c2.html#a71efa121191f543bbc596241531d38c2" title=" " alt="" coords="605,119,828,159"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="558,137,592,137,592,142,558,142"/>
+<area shape="rect" id="Node000008" href="$d9/d73/namespacefl_1_1can__match__detail_a61e9b7211958d6428db556a38de0ece0.html#a61e9b7211958d6428db556a38de0ece0" title=" " alt="" coords="640,183,793,223"/>
+<area shape="poly" id="edge6_Node000003_Node000008" title=" " alt="" coords="556,157,630,177,629,182,554,162"/>
+<area shape="rect" id="Node000009" href="$d6/d12/structfl_1_1_freq_range_aedcf45139672ad9d7348670ffd21b578.html#aedcf45139672ad9d7348670ffd21b578" title=" " alt="" coords="615,248,818,273"/>
+<area shape="poly" id="edge7_Node000003_Node000009" title=" " alt="" coords="540,157,559,169,575,186,583,203,591,219,607,233,620,240,617,245,604,237,587,222,578,206,570,189,556,173,537,162"/>
+<area shape="poly" id="edge12_Node000012_Node000012" title=" " alt="" coords="235,300,233,290,238,281,252,275,272,273,295,276,308,283,305,288,294,281,272,278,253,280,242,285,238,291,240,298"/>
+<area shape="rect" id="Node000013" href="$d3/da0/classfl_1_1_i_channel_driver_a73d5ab2becbd3e1cc037b423498463cf.html#a73d5ab2becbd3e1cc037b423498463cf" title="Get driver capabilities (clockless, SPI, or both)" alt="" coords="413,311,548,351"/>
+<area shape="poly" id="edge11_Node000012_Node000013" title=" " alt="" coords="357,322,400,324,399,329,356,327"/>
+</map>

@@ -7,5 +7,7 @@ var structfl_1_1_channel_events =
     [ "onChannelCreated", "da/db7/structfl_1_1_channel_events_a25d4649fcbfdd637aa7933b06c9f92aa.html#a25d4649fcbfdd637aa7933b06c9f92aa", null ],
     [ "onChannelDataEncoded", "da/db7/structfl_1_1_channel_events_a3cbe53c9221c2773daa12ae7a370bc2e.html#a3cbe53c9221c2773daa12ae7a370bc2e", null ],
     [ "onChannelEnqueued", "da/db7/structfl_1_1_channel_events_a0d635688f1d6b54887b113b2c5bdd6dc.html#a0d635688f1d6b54887b113b2c5bdd6dc", null ],
-    [ "onChannelRemoved", "da/db7/structfl_1_1_channel_events_a6f026ee985cfe749d380ea07c3f1f311.html#a6f026ee985cfe749d380ea07c3f1f311", null ]
+    [ "onChannelRemoved", "da/db7/structfl_1_1_channel_events_a6f026ee985cfe749d380ea07c3f1f311.html#a6f026ee985cfe749d380ea07c3f1f311", null ],
+    [ "onColorProfileFallback", "da/db7/structfl_1_1_channel_events_a4de3d40971930399f4a4380bc35bd61e.html#a4de3d40971930399f4a4380bc35bd61e", null ],
+    [ "onColorProfileWarning", "da/db7/structfl_1_1_channel_events_a987d2254f6f9cb2e4236a8bc5199b817.html#a987d2254f6f9cb2e4236a8bc5199b817", null ]
 ];

@@ -11,12 +11,12 @@ digraph "fl::gfx::detail::drawStrokeLineCore"
   Node2 [id="Node000002",label="fl::gfx::detail::compute\lBandShift",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d9a/namespacefl_1_1gfx_1_1detail_ace632a8bd8b1b176f9f882b536fc486c.html#ace632a8bd8b1b176f9f882b536fc486c",tooltip="Precompute right-shift and reciprocal multiplier for AA division."];
   Node2 -> Node2 [id="edge2_Node000002_Node000002",color="steelblue1",style="solid",tooltip=" "];
   Node1 -> Node3 [id="edge3_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::isqrt32",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_aef88a9667b8b893abab1e0e41a3e81d3.html#aef88a9667b8b893abab1e0e41a3e81d3",tooltip=" "];
+  Node3 [id="Node000003",label="fl::isqrt32",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a30f39f186ac9928192cafa0c13cb0cb3.html#a30f39f186ac9928192cafa0c13cb0cb3",tooltip=" "];
   Node3 -> Node4 [id="edge4_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="fl::_isqrt32_start",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a8f27048f2254fbf4acb9a3b00e7cb305.html#a8f27048f2254fbf4acb9a3b00e7cb305",tooltip=" "];
+  Node4 [id="Node000004",label="fl::_isqrt32_start",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a4e37a74bde6d1792d34e395fdafff5d4.html#a4e37a74bde6d1792d34e395fdafff5d4",tooltip=" "];
   Node4 -> Node4 [id="edge5_Node000004_Node000004",color="steelblue1",style="solid",tooltip=" "];
   Node3 -> Node5 [id="edge6_Node000003_Node000005",color="steelblue1",style="solid",tooltip=" "];
-  Node5 [id="Node000005",label="fl::_isqrt32_step",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a033fb4e082027bb0756c5de35ddcbd98.html#a033fb4e082027bb0756c5de35ddcbd98",tooltip=" "];
+  Node5 [id="Node000005",label="fl::_isqrt32_step",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a80fe2035d8ebb21626502b253d188ab4.html#a80fe2035d8ebb21626502b253d188ab4",tooltip=" "];
   Node5 -> Node5 [id="edge7_Node000005_Node000005",color="steelblue1",style="solid",tooltip=" "];
   Node1 -> Node6 [id="edge8_Node000001_Node000006",color="steelblue1",style="solid",tooltip=" "];
   Node6 [id="Node000006",label="fl::gfx::detail::renderStrokeRow",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d9a/namespacefl_1_1gfx_1_1detail_a57e26c64aa843c6d1d1080fa16f4306a.html#a57e26c64aa843c6d1d1080fa16f4306a",tooltip="Render one scanline of a stroke line using phase-based scanning."];

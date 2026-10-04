@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -116,23 +116,23 @@ $(function(){initNavTree('dd/dbb/class_c_fast_l_e_d_aeb27e6f97287c4add5056c7218a
 </div><div class="memdoc">
 
 <p>Wait for all channel bus transmissions to complete. </p>
-<dl class="section note"><dt>Note</dt><dd>Polls the channel bus manager until it returns READY state </dd>
+<dl class="section note"><dt>Note</dt><dd>Normal animation code does not need to call this after <a class="el" href="../../dd/dbb/class_c_fast_l_e_d_a3adb23ec5f919524928d576002cb45de.html#a3adb23ec5f919524928d576002cb45de" title="Update all our controllers with the current led colors.">show()</a>; the next frame waits before reusing driver-owned data. </dd>
 <dd>
-Uses delayMicroseconds(100) between polls to prevent watchdog timeout </dd>
+This overload waits indefinitely while cooperatively running system work. Use wait(timeout_ms) when the caller needs a bounded wait. </dd>
 <dd>
-Safe to call on all platforms (no-op on platforms without channel bus) </dd></dl>
+Safe to call on all platforms (no-op on platforms without channel bus). </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_source.html#l00590">590</a> of file <a class="el" href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_source.html">FastLED.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  590</span>                    {</div>
-<div class="line"><span class="lineno">  591</span>    fl::ChannelManager&amp; manager = <a class="code hl_function" href="../../d4/d36/namespacefl_a8aafd1d8ccf1aab536564352dd23d204.html#a8aafd1d8ccf1aab536564352dd23d204">fl::channelManager</a>();</div>
-<div class="line"><span class="lineno">  592</span>    <span class="comment">// Wait for all drivers to become READY</span></div>
-<div class="line"><span class="lineno">  593</span>    <span class="comment">// Calls async_run() and uses time-based delays to avoid busy-waiting</span></div>
-<div class="line"><span class="lineno">  594</span>    manager.<a class="code hl_function" href="../../d2/d6b/classfl_1_1_channel_manager_aa50d7236c4ba7748aa21d88de539b1b9.html#aa50d7236c4ba7748aa21d88de539b1b9">waitForReady</a>();</div>
-<div class="line"><span class="lineno">  595</span>}</div>
-<div class="ttc" id="aclassfl_1_1_channel_manager_aa50d7236c4ba7748aa21d88de539b1b9_html_aa50d7236c4ba7748aa21d88de539b1b9"><div class="ttname"><a href="../../d2/d6b/classfl_1_1_channel_manager_aa50d7236c4ba7748aa21d88de539b1b9.html#aa50d7236c4ba7748aa21d88de539b1b9">fl::ChannelManager::waitForReady</a></div><div class="ttdeci">bool waitForReady(u32 timeoutMs=1000) FL_NOEXCEPT</div><div class="ttdoc">Wait for all drivers to become READY.</div><div class="ttdef"><b>Definition</b> <a href="../../d2/dd3/manager_8cpp_8hpp_source.html#l00527">manager.cpp.hpp:527</a></div></div>
-<div class="ttc" id="anamespacefl_a8aafd1d8ccf1aab536564352dd23d204_html_a8aafd1d8ccf1aab536564352dd23d204"><div class="ttname"><a href="../../d4/d36/namespacefl_a8aafd1d8ccf1aab536564352dd23d204.html#a8aafd1d8ccf1aab536564352dd23d204">fl::channelManager</a></div><div class="ttdeci">ChannelManager &amp; channelManager()</div><div class="ttdoc">Get the global ChannelManager singleton instance.</div><div class="ttdef"><b>Definition</b> <a href="../../d2/dd3/manager_8cpp_8hpp_source.html#l00575">manager.cpp.hpp:575</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_source.html#l00774">774</a> of file <a class="el" href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_source.html">FastLED.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  774</span>                    {</div>
+<div class="line"><span class="lineno">  775</span>    fl::ChannelManager&amp; manager = <a class="code hl_function" href="../../d4/d36/namespacefl_a1cc01267f6bdd7251959883412b11bbb.html#a1cc01267f6bdd7251959883412b11bbb">fl::channelManager</a>();</div>
+<div class="line"><span class="lineno">  776</span>    <span class="comment">// A zero timeout means wait indefinitely. The void API cannot report a</span></div>
+<div class="line"><span class="lineno">  777</span>    <span class="comment">// timeout, so returning early would violate its completion contract.</span></div>
+<div class="line"><span class="lineno">  778</span>    manager.<a class="code hl_function" href="../../d2/d6b/classfl_1_1_channel_manager_af3041b5d8b20269dc1909667d8714de6.html#af3041b5d8b20269dc1909667d8714de6">waitForReady</a>(0);</div>
+<div class="line"><span class="lineno">  779</span>}</div>
+<div class="ttc" id="aclassfl_1_1_channel_manager_af3041b5d8b20269dc1909667d8714de6_html_af3041b5d8b20269dc1909667d8714de6"><div class="ttname"><a href="../../d2/d6b/classfl_1_1_channel_manager_af3041b5d8b20269dc1909667d8714de6.html#af3041b5d8b20269dc1909667d8714de6">fl::ChannelManager::waitForReady</a></div><div class="ttdeci">bool waitForReady(u32 timeoutMs=1000) FL_NO_EXCEPT</div><div class="ttdoc">Wait for all drivers to become READY.</div><div class="ttdef"><b>Definition</b> <a href="../../d2/dd3/manager_8cpp_8hpp_source.html#l00553">manager.cpp.hpp:553</a></div></div>
+<div class="ttc" id="anamespacefl_a1cc01267f6bdd7251959883412b11bbb_html_a1cc01267f6bdd7251959883412b11bbb"><div class="ttname"><a href="../../d4/d36/namespacefl_a1cc01267f6bdd7251959883412b11bbb.html#a1cc01267f6bdd7251959883412b11bbb">fl::channelManager</a></div><div class="ttdeci">ChannelManager &amp; channelManager()</div><div class="ttdoc">Get the global ChannelManager singleton instance.</div><div class="ttdef"><b>Definition</b> <a href="../../d2/dd3/manager_8cpp_8hpp_source.html#l00601">manager.cpp.hpp:601</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d2/dd3/manager_8cpp_8hpp_source.html#l00575">fl::channelManager()</a>, and <a class="el" href="../../d2/dd3/manager_8cpp_8hpp_source.html#l00527">fl::ChannelManager::waitForReady()</a>.</p>
+<p class="reference">References <a class="el" href="../../d2/dd3/manager_8cpp_8hpp_source.html#l00601">fl::channelManager()</a>, and <a class="el" href="../../d2/dd3/manager_8cpp_8hpp_source.html#l00553">fl::ChannelManager::waitForReady()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -150,7 +150,7 @@ Safe to call on all platforms (no-op on platforms without channel bus) </dd></dl
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dd/dbb/class_c_fast_l_e_d.html">CFastLED</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:03 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -6,5 +6,6 @@ var dir_9fd6d0f25479d287126f3c6ad32d1d5b =
     [ "config.h", "dd/d5c/fl_2channels_2rx_2config_8h.html", "dd/d5c/fl_2channels_2rx_2config_8h" ],
     [ "decode_ws2812.cpp.hpp", "d9/db5/decode__ws2812_8cpp_8hpp.html", "d9/db5/decode__ws2812_8cpp_8hpp" ],
     [ "decode_ws2812.h", "dd/d09/decode__ws2812_8h.html", "dd/d09/decode__ws2812_8h" ],
+    [ "pio_geometry.h", "d1/d49/pio__geometry_8h.html", "d1/d49/pio__geometry_8h" ],
     [ "types.h", "d3/ded/fl_2channels_2rx_2types_8h.html", "d3/ded/fl_2channels_2rx_2types_8h" ]
 ];

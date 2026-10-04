@@ -12,7 +12,7 @@ digraph "fl::audio::detector::MusicalBeat::validateBeat"
   Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
   Node3 [id="Node000003",label="bpm",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d25/_demo_reel100_8ino_a4875f6d9a2b0f08d3cf221974234121b.html#a4875f6d9a2b0f08d3cf221974234121b",tooltip=" "];
   Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="beatsin8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/da5/lib8tion_8h_a696b9421eca961df0a68c7c6c3e983ab.html#a696b9421eca961df0a68c7c6c3e983ab",tooltip="Generates an 8-bit sine wave at a given BPM that oscillates within a given range."];
+  Node4 [id="Node000004",label="beatsin8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/da5/lib8tion_8h_aca012663c6c8fe9a7240bcbc76095ba9.html#aca012663c6c8fe9a7240bcbc76095ba9",tooltip="Generates an 8-bit sine wave at a given BPM that oscillates within a given range."];
   Node3 -> Node5 [id="edge4_Node000003_Node000005",color="steelblue1",style="solid",tooltip=" "];
   Node5 [id="Node000005",label="ColorFromPalette",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/dfb/colorutils_8h_a3d488dd1e2d27e99307310527e51cad3.html#a3d488dd1e2d27e99307310527e51cad3",tooltip=" "];
   Node3 -> Node6 [id="edge5_Node000003_Node000006",color="steelblue1",style="solid",tooltip=" "];

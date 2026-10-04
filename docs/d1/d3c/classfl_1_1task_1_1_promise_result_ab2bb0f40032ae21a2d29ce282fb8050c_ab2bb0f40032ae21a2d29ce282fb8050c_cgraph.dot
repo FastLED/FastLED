@@ -10,7 +10,7 @@ digraph "fl::task::PromiseResult::PromiseResult"
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
   Node2 [id="Node000002",label="fl::task::PromiseResult\l::error",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d3c/classfl_1_1task_1_1_promise_result_ad8e3cb24341101305cf81dae6469488a.html#ad8e3cb24341101305cf81dae6469488a",tooltip="Get the error value."];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::get",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_ad2bd3fbfa62b8cb135f8c67ce6bfeefe.html#ad2bd3fbfa62b8cb135f8c67ce6bfeefe",tooltip=" "];
+  Node3 [id="Node000003",label="fl::get",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_aaea97025641d69c1e119f094f0276669.html#aaea97025641d69c1e119f094f0276669",tooltip=" "];
   Node2 -> Node4 [id="edge3_Node000002_Node000004",color="steelblue1",style="solid",tooltip=" "];
   Node4 [id="Node000004",label="fl::task::PromiseResult::ok",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d3c/classfl_1_1task_1_1_promise_result_a47bdae0780409cda6b8e25bb47cc0ec6.html#a47bdae0780409cda6b8e25bb47cc0ec6",tooltip="Check if the result is successful."];
 }

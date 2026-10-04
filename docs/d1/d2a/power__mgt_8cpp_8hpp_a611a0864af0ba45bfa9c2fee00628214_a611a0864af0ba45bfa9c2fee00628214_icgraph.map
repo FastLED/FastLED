@@ -1,0 +1,12 @@
+<map id="max_power_step" name="max_power_step">
+<area shape="rect" id="Node000001" title="What one output code can cost at the steepest point of the response, in the 0&#45;255 scaled units calcul..." alt="" coords="735,45,868,70"/>
+<area shape="rect" id="Node000002" href="$d3/d1d/group___power_gaea016c9708cbd1fce10a90d8fced370a.html#gaea016c9708cbd1fce10a90d8fced370a" title="dither_reserve_mW() for a controller that dithers, and zero for one that does not: a mode other than ..." alt="" coords="271,45,489,70"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="721,60,489,60,489,55,721,55"/>
+<area shape="rect" id="Node000005" href="$d3/d1d/group___power_gaf1bc751ffa875570ed2e86fc38db5142.html#gaf1bc751ffa875570ed2e86fc38db5142" title="The most BINARY_DITHER can add to one latched frame of leds, in mW (#4342, contract R4: &quot;quantization..." alt="" coords="537,70,687,95"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="721,71,687,75,686,70,720,65"/>
+<area shape="rect" id="Node000003" href="$d3/d1d/group___power_gab33dbfb39f4368fffdc17807883c787e.html#gab33dbfb39f4368fffdc17807883c787e" title="Determines the highest brightness level you can use and still stay under the specified power budget f..." alt="" coords="18,5,210,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="260,46,210,40,211,34,261,40"/>
+<area shape="rect" id="Node000004" href="$dd/dbb/class_c_fast_l_e_d_a06a8bc368f2ef5816015b75ad54d1e6b.html#a06a8bc368f2ef5816015b75ad54d1e6b" title="Get estimated power consumption in milliwatts." alt="" coords="5,69,223,109"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="261,74,223,79,222,74,260,69"/>
+<area shape="poly" id="edge5_Node000005_Node000002" title=" " alt="" coords="523,76,489,72,490,67,524,70"/>
+</map>

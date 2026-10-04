@@ -19,7 +19,7 @@ digraph "fl/gfx/colorutils_misc.h"
   Node6 -> Node7 [id="edge6_Node000006_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node7 [id="Node000007",label="colorutils.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/dfb/colorutils_8h.html",tooltip=" "];
   Node7 -> Node8 [id="edge7_Node000007_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node8 [id="Node000008",label="FastLED.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$db/d97/_fast_l_e_d_8h.html",tooltip="central include file for FastLED, defines the CFastLED class/object"];
+  Node8 [id="Node000008",label="FastLED.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d6/d64/fastled_8h.html",tooltip="central include file for FastLED, defines the CFastLED class/object"];
   Node7 -> Node12 [id="edge8_Node000007_Node000012",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node12 [id="Node000012",label="colorpalettes.cpp.hpp",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d0/df9/colorpalettes_8cpp_8hpp.html",tooltip=" "];
   Node7 -> Node13 [id="edge9_Node000007_Node000013",dir="back",color="steelblue1",style="solid",tooltip=" "];
@@ -27,7 +27,7 @@ digraph "fl/gfx/colorutils_misc.h"
   Node13 -> Node8 [id="edge10_Node000013_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node13 -> Node12 [id="edge11_Node000013_Node000012",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node6 -> Node62 [id="edge12_Node000006_Node000062",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node62 [id="Node000062",label="fl/audio/audio_reactive.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/da8/src_2fl_2audio_2audio__reactive_8h.html",tooltip=" "];
+  Node62 [id="Node000062",label="fl/audio/audio_reactive.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d9a/audio__reactive_8h.html",tooltip=" "];
   Node62 -> Node63 [id="edge13_Node000062_Node000063",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node63 [id="Node000063",label="fl/audio/audio_reactive.cpp.hpp",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d5/dc5/audio__reactive_8cpp_8hpp.html",tooltip=" "];
   Node6 -> Node64 [id="edge14_Node000006_Node000064",dir="back",color="steelblue1",style="solid",tooltip=" "];

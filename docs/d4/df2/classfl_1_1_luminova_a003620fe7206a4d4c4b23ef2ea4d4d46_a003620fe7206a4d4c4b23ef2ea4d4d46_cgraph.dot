@@ -12,9 +12,9 @@ digraph "fl::Luminova::resetParticle"
   Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
   Node3 [id="Node000003",label="fl::Fx2d::getWidth",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d3e/classfl_1_1_fx2d_ac8815af5daab1c78876ecded7373a2f8.html#ac8815af5daab1c78876ecded7373a2f8",tooltip=" "];
   Node1 -> Node4 [id="edge3_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="inoise8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/df9/group___noise_generation_gaeb72246ebd597b60a7e575173accf2fd.html#gaeb72246ebd597b60a7e575173accf2fd",tooltip=" "];
+  Node4 [id="Node000004",label="inoise8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/df9/group___noise_generation_gaeb72246ebd597b60a7e575173accf2fd.html#gaeb72246ebd597b60a7e575173accf2fd",tooltip="8-Bit, fixed point implementation of Perlin's noise."];
   Node4 -> Node5 [id="edge4_Node000004_Node000005",color="steelblue1",style="solid",tooltip=" "];
-  Node5 [id="Node000005",label="inoise8_raw",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/d5c/group___noise_gaa3db0f2f3777cf5bb7a4dd1359dba4fe.html#gaa3db0f2f3777cf5bb7a4dd1359dba4fe",tooltip=" "];
+  Node5 [id="Node000005",label="inoise8_raw",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/d5c/group___noise_gaa3db0f2f3777cf5bb7a4dd1359dba4fe.html#gaa3db0f2f3777cf5bb7a4dd1359dba4fe",tooltip="8-bit, fixed point implementation of Perlin's noise without scaling."];
   Node5 -> Node6 [id="edge5_Node000005_Node000006",color="steelblue1",style="solid",tooltip=" "];
   Node6 [id="Node000006",label="grad8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dca/noise_8cpp_8hpp_aaef794781206db0a4d368d37e6ef6ee8.html#aaef794781206db0a4d368d37e6ef6ee8",tooltip=" "];
   Node5 -> Node7 [id="edge6_Node000005_Node000007",color="steelblue1",style="solid",tooltip=" "];

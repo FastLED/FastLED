@@ -1,39 +1,43 @@
 <map id="fl::Free" name="fl::Free">
-<area shape="rect" id="Node000001" title=" " alt="" coords="737,287,804,313"/>
-<area shape="rect" id="Node000002" href="$d9/d08/structfl_1_1_slab_allocator_1_1_slab_add13f2f1b1def2f6da20062ea475d81a.html#add13f2f1b1def2f6da20062ea475d81a" title=" " alt="" coords="507,5,639,45"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="765,274,759,229,746,173,723,116,707,89,688,66,665,50,639,39,641,34,668,45,691,62,712,86,728,113,752,172,765,228,770,273"/>
-<area shape="rect" id="Node000003" href="$d5/db8/classfl_1_1_slab_allocator_a0ff0f30e7a88389125a024d5624400aa.html#a0ff0f30e7a88389125a024d5624400aa" title=" " alt="" coords="269,19,401,59"/>
-<area shape="poly" id="edge7_Node000001_Node000003" title=" " alt="" coords="764,274,756,237,742,192,720,147,705,127,688,110,653,100,578,85,401,52,402,47,579,79,654,95,691,106,709,124,725,144,747,190,761,236,769,273"/>
-<area shape="rect" id="Node000006" href="$d5/db8/classfl_1_1_slab_allocator_a67f20bdd9e6d7da9bd43ca410585337f.html#a67f20bdd9e6d7da9bd43ca410585337f" title=" " alt="" coords="507,120,639,160"/>
-<area shape="poly" id="edge4_Node000001_Node000006" title=" " alt="" coords="758,276,731,224,712,197,688,174,665,161,639,152,641,147,667,156,691,170,716,193,736,221,762,273"/>
-<area shape="rect" id="Node000009" href="$d8/dcd/classfl_1_1allocator_a3a4de2a7027dbb3ab90b97f01b5ddadd.html#a3a4de2a7027dbb3ab90b97f01b5ddadd" title=" " alt="" coords="506,184,641,224"/>
-<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="745,280,719,258,688,238,640,220,642,215,691,234,722,254,748,275"/>
-<area shape="rect" id="Node000010" href="$de/d22/classfl_1_1allocator__realloc_ab6356a774ddfe90b2ded1764c8c6cb1f.html#ab6356a774ddfe90b2ded1764c8c6cb1f" title=" " alt="" coords="500,248,647,288"/>
-<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="723,295,646,283,647,277,724,290"/>
-<area shape="rect" id="Node000011" href="$d5/db8/classfl_1_1_slab_allocator_a6e46435ec70875b8d4a892bf6f16e244.html#a6e46435ec70875b8d4a892bf6f16e244" title=" " alt="" coords="507,312,639,352"/>
-<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="724,310,640,324,639,319,724,305"/>
-<area shape="rect" id="Node000012" href="$d0/d61/classfl_1_1anonymous__namespace_02memory__resource_8cpp_8hpp_03_1_1_default_memory_resource_aa60e200d4041a5c4980f081c809753e7.html#aa60e200d4041a5c4980f081c809753e7" title=" " alt="" coords="457,376,689,445"/>
-<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="747,324,691,366,668,378,666,373,688,362,744,320"/>
-<area shape="rect" id="Node000013" href="$d1/d86/namespacefl_1_1third__party_a0e2fe51788662540b076c3f31b01b7f3.html#a0e2fe51788662540b076c3f31b01b7f3" title="Destroy an LZW decompression context." alt="" coords="504,469,643,509"/>
-<area shape="poly" id="edge12_Node000001_Node000013" title=" " alt="" coords="766,327,756,357,741,393,719,429,691,459,668,473,644,483,642,478,666,469,688,455,715,426,736,391,751,356,761,325"/>
-<area shape="rect" id="Node000014" href="$d1/d86/namespacefl_1_1third__party_a8e95dd5bb7e610a8f61f20fb2b62a054.html#a8e95dd5bb7e610a8f61f20fb2b62a054" title="Free a NSGIF object." alt="" coords="261,495,409,535"/>
-<area shape="poly" id="edge19_Node000001_Node000014" title=" " alt="" coords="771,327,767,372,755,426,731,480,713,504,691,524,656,543,617,555,577,561,537,562,459,553,393,537,395,532,460,548,537,557,577,556,616,550,653,538,688,519,709,500,726,477,750,424,762,371,766,326"/>
-<area shape="rect" id="Node000018" href="$d1/d86/namespacefl_1_1third__party_abd0590cc8ea888da867f0b97e06e7c1c.html#abd0590cc8ea888da867f0b97e06e7c1c" title=" " alt="" coords="499,584,647,624"/>
-<area shape="poly" id="edge15_Node000001_Node000018" title=" " alt="" coords="772,327,767,377,755,441,731,508,714,539,691,567,671,583,648,593,646,589,668,578,687,563,709,536,727,506,750,440,762,376,766,326"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="494,32,402,38,401,32,493,27"/>
-<area shape="rect" id="Node000004" href="$d5/db8/classfl_1_1_slab_allocator_a2bded56f4c8e3c76c386c2387df716db.html#a2bded56f4c8e3c76c386c2387df716db" title=" " alt="" coords="42,19,177,59"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="255,41,177,41,177,36,255,36"/>
-<area shape="rect" id="Node000007" href="$d5/db8/classfl_1_1_slab_allocator_a609187c69e31910b91d4100d49251b44.html#a609187c69e31910b91d4100d49251b44" title=" " alt="" coords="269,95,401,135"/>
-<area shape="poly" id="edge5_Node000006_Node000007" title=" " alt="" coords="493,134,401,124,402,119,494,129"/>
-<area shape="rect" id="Node000008" href="$d5/db8/classfl_1_1_slab_allocator_afdad72e31fa13b05da038ce0dcca94f2.html#afdad72e31fa13b05da038ce0dcca94f2" title=" " alt="" coords="269,159,401,199"/>
-<area shape="poly" id="edge6_Node000006_Node000008" title=" " alt="" coords="494,156,402,171,401,165,493,150"/>
-<area shape="poly" id="edge13_Node000013_Node000014" title=" " alt="" coords="491,501,410,509,409,504,490,495"/>
-<area shape="rect" id="Node000015" href="$d3/d7a/classfl_1_1third__party_1_1_software_gif_decoder_a4d1c5e1d95fc0aa97179735b053c870a.html#a4d1c5e1d95fc0aa97179735b053c870a" title=" " alt="" coords="5,495,213,535"/>
-<area shape="poly" id="edge14_Node000014_Node000015" title=" " alt="" coords="248,517,214,517,214,512,248,512"/>
-<area shape="rect" id="Node000019" href="$d1/d86/namespacefl_1_1third__party_aa00bee5c0f7b53c8e9441d62f98c61b2.html#aa00bee5c0f7b53c8e9441d62f98c61b2" title="Attempts to initialise the next frame." alt="" coords="261,584,409,624"/>
-<area shape="poly" id="edge16_Node000018_Node000019" title=" " alt="" coords="485,607,409,607,409,601,485,601"/>
-<area shape="rect" id="Node000020" href="$d1/d86/namespacefl_1_1third__party_a34aa4d967d8ddaeefa12954d47fe7863.html#a34aa4d967d8ddaeefa12954d47fe7863" title="Scan the source image data." alt="" coords="35,571,183,611"/>
-<area shape="poly" id="edge17_Node000019_Node000020" title=" " alt="" coords="247,601,183,598,184,592,247,596"/>
-<area shape="rect" id="Node000024" href="$d1/d86/namespacefl_1_1third__party_a3f914f8fd903813b728ce719ad8b59c7.html#a3f914f8fd903813b728ce719ad8b59c7" title="Decodes a GIF frame." alt="" coords="35,635,183,675"/>
-<area shape="poly" id="edge18_Node000019_Node000024" title=" " alt="" coords="248,626,184,641,183,636,247,621"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="788,319,855,345"/>
+<area shape="rect" id="Node000002" href="$d9/d08/structfl_1_1_slab_allocator_1_1_slab_a0011444769cbc3291357f791d815367c.html#a0011444769cbc3291357f791d815367c" title=" " alt="" coords="558,5,690,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="817,306,813,255,801,191,778,124,760,93,738,66,716,49,689,38,691,33,718,45,742,62,764,90,782,122,806,190,818,254,822,305"/>
+<area shape="rect" id="Node000003" href="$d5/db8/classfl_1_1_slab_allocator_a174fd73c2cab77edd637e952cdf53da2.html#a174fd73c2cab77edd637e952cdf53da2" title=" " alt="" coords="295,19,427,59"/>
+<area shape="poly" id="edge7_Node000001_Node000003" title=" " alt="" coords="816,306,811,262,798,209,775,155,758,131,738,110,723,103,695,95,612,78,426,50,427,44,613,72,696,89,725,98,742,106,762,127,779,152,803,207,816,261,821,305"/>
+<area shape="rect" id="Node000006" href="$d5/db8/classfl_1_1_slab_allocator_a374f76171730b212cf2b4d02d54acf9f.html#a374f76171730b212cf2b4d02d54acf9f" title=" " alt="" coords="558,120,690,160"/>
+<area shape="poly" id="edge4_Node000001_Node000006" title=" " alt="" coords="812,307,802,276,787,240,766,204,738,174,715,160,690,151,691,146,718,155,742,170,770,201,792,238,807,274,817,305"/>
+<area shape="rect" id="Node000009" href="$d8/dcd/classfl_1_1allocator_a9fa9a66a63d46930b5f54c8867106a5c.html#a9fa9a66a63d46930b5f54c8867106a5c" title=" " alt="" coords="557,184,691,224"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="804,309,776,272,758,254,739,238,716,226,691,218,693,213,718,221,741,234,762,250,780,269,808,306"/>
+<area shape="rect" id="Node000010" href="$de/d22/classfl_1_1allocator__realloc_a83936dd74355d1260158fc796ba73d56.html#a83936dd74355d1260158fc796ba73d56" title=" " alt="" coords="551,248,697,288"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="777,317,739,303,697,290,699,284,741,297,779,312"/>
+<area shape="rect" id="Node000011" href="$d5/db8/classfl_1_1_slab_allocator_a8fedff430b756577374dc6d31db7795c.html#a8fedff430b756577374dc6d31db7795c" title=" " alt="" coords="558,312,690,352"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="774,335,690,335,690,329,774,329"/>
+<area shape="rect" id="Node000012" href="$d0/d61/classfl_1_1anonymous__namespace_02memory__resource_8cpp_8hpp_03_1_1_default_memory_resource_aa60e200d4041a5c4980f081c809753e7.html#aa60e200d4041a5c4980f081c809753e7" title=" " alt="" coords="508,376,740,445"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="777,352,712,378,710,373,775,347"/>
+<area shape="rect" id="Node000013" href="$d1/d86/namespacefl_1_1third__party_a0e97892003c8e5230d99e8532b4ceb63.html#a0e97892003c8e5230d99e8532b4ceb63" title="Destroy an LZW decompression context." alt="" coords="555,469,693,509"/>
+<area shape="poly" id="edge12_Node000001_Node000013" title=" " alt="" coords="813,359,786,410,766,437,742,459,719,473,694,482,692,477,717,468,738,455,762,433,781,407,808,356"/>
+<area shape="rect" id="Node000014" href="$d1/d86/namespacefl_1_1third__party_a58be7e637e37206ace88d6490753cfb1.html#a58be7e637e37206ace88d6490753cfb1" title="Free a NSGIF object." alt="" coords="287,489,435,529"/>
+<area shape="poly" id="edge21_Node000001_Node000014" title=" " alt="" coords="820,359,814,397,800,443,777,488,761,507,741,524,702,544,660,556,615,562,571,562,486,550,416,532,417,527,487,545,571,556,615,556,659,551,700,539,739,519,757,504,773,485,795,441,809,396,815,358"/>
+<area shape="rect" id="Node000018" href="$d1/d86/namespacefl_1_1third__party_af532cf6d52f5562fccd6a552d309973b.html#af532cf6d52f5562fccd6a552d309973b" title=" " alt="" coords="511,585,737,610"/>
+<area shape="poly" id="edge15_Node000001_Node000018" title=" " alt="" coords="821,359,816,404,803,460,779,517,762,544,742,567,710,587,707,582,738,563,758,541,775,515,798,458,810,403,816,358"/>
+<area shape="rect" id="Node000020" href="$d1/d86/namespacefl_1_1third__party_a48337e2b9e161fa3bfe1d81fe95e61a5.html#a48337e2b9e161fa3bfe1d81fe95e61a5" title=" " alt="" coords="550,636,698,676"/>
+<area shape="poly" id="edge17_Node000001_Node000020" title=" " alt="" coords="823,359,821,413,810,484,800,521,785,558,766,593,742,623,722,638,699,648,697,643,719,634,738,619,762,590,781,556,795,520,805,483,815,413,818,358"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="545,32,427,38,427,33,544,27"/>
+<area shape="rect" id="Node000004" href="$d5/db8/classfl_1_1_slab_allocator_a6f9f33c7da6c82f429c44f28ee17dd89.html#a6f9f33c7da6c82f429c44f28ee17dd89" title=" " alt="" coords="42,19,177,59"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="281,41,177,41,177,36,281,36"/>
+<area shape="rect" id="Node000007" href="$d5/db8/classfl_1_1_slab_allocator_aa13e21d2e262a4208e33f76c2cd274be.html#aa13e21d2e262a4208e33f76c2cd274be" title=" " alt="" coords="295,108,427,148"/>
+<area shape="poly" id="edge5_Node000006_Node000007" title=" " alt="" coords="544,139,427,134,427,128,545,134"/>
+<area shape="rect" id="Node000008" href="$d5/db8/classfl_1_1_slab_allocator_a4a203dc804e4531798bacef8f866eed5.html#a4a203dc804e4531798bacef8f866eed5" title=" " alt="" coords="295,172,427,212"/>
+<area shape="poly" id="edge6_Node000006_Node000008" title=" " alt="" coords="545,158,427,182,426,176,544,153"/>
+<area shape="poly" id="edge13_Node000013_Node000014" title=" " alt="" coords="541,498,435,506,435,501,541,493"/>
+<area shape="rect" id="Node000015" href="$d3/d7a/classfl_1_1third__party_1_1_software_gif_decoder_abb673d49fc57d4364d159253f34d17dc.html#abb673d49fc57d4364d159253f34d17dc" title=" " alt="" coords="5,489,213,529"/>
+<area shape="poly" id="edge14_Node000014_Node000015" title=" " alt="" coords="273,512,214,512,214,507,273,507"/>
+<area shape="rect" id="Node000019" href="$d2/db3/structfl_1_1third__party_1_1_mp3_memory_deleter_a0a38351d87ea12a443efd3f218a79cfd.html#a0a38351d87ea12a443efd3f218a79cfd" title=" " alt="" coords="261,575,460,615"/>
+<area shape="poly" id="edge16_Node000018_Node000019" title=" " alt="" coords="497,599,460,598,460,593,497,593"/>
+<area shape="rect" id="Node000021" href="$d1/d86/namespacefl_1_1third__party_a5544ea660bb409ce782aec2a3629f1fe.html#a5544ea660bb409ce782aec2a3629f1fe" title="Attempts to initialise the next frame." alt="" coords="287,639,435,679"/>
+<area shape="poly" id="edge18_Node000020_Node000021" title=" " alt="" coords="536,660,435,661,435,655,536,654"/>
+<area shape="rect" id="Node000022" href="$d1/d86/namespacefl_1_1third__party_ac0c0b97e37911e82ef3974b049784c33.html#ac0c0b97e37911e82ef3974b049784c33" title="Scan the source image data." alt="" coords="35,607,183,647"/>
+<area shape="poly" id="edge19_Node000021_Node000022" title=" " alt="" coords="272,650,183,639,184,633,273,645"/>
+<area shape="rect" id="Node000026" href="$d1/d86/namespacefl_1_1third__party_a9bb55311de3b833317f3e05229a2d7e2.html#a9bb55311de3b833317f3e05229a2d7e2" title="Decodes a GIF frame." alt="" coords="35,671,183,711"/>
+<area shape="poly" id="edge20_Node000021_Node000026" title=" " alt="" coords="273,672,184,684,183,679,272,667"/>
 </map>

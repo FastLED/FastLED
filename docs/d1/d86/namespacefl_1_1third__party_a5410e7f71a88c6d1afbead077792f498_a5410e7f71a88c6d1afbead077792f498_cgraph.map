@@ -1,0 +1,11 @@
+<map id="fl::third_party::nsgif__parse_frame_extensions" name="fl::third_party::nsgif__parse_frame_extensions">
+<area shape="rect" id="Node000001" title="Parse the frame&#39;s extensions." alt="" coords="5,41,201,81"/>
+<area shape="rect" id="Node000002" href="$d1/d86/namespacefl_1_1third__party_a74d8304a73af0f81a92a490ff1bf12f8.html#a74d8304a73af0f81a92a490ff1bf12f8" title="Parse the application extension." alt="" coords="249,5,472,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="201,45,235,40,236,45,202,50"/>
+<area shape="rect" id="Node000005" href="$d1/d86/namespacefl_1_1third__party_a009ffca1f6e1053f84214b747ac0d45b.html#a009ffca1f6e1053f84214b747ac0d45b" title="Parse the graphic control extension." alt="" coords="261,70,460,125"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="202,72,248,79,248,84,201,78"/>
+<area shape="rect" id="Node000003" href="$d1/d86/namespacefl_1_1third__party_a2e76ad5b35f23605308c7192db5882ad.html#a2e76ad5b35f23605308c7192db5882ad" title="Check an app ext identifier and authentication code for loop count extension." alt="" coords="520,5,704,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="472,23,506,23,506,28,472,28"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a9b6e249bbb99db8c4349d156189958c9.html#a9b6e249bbb99db8c4349d156189958c9" title=" " alt="" coords="752,13,843,38"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="704,23,739,23,739,28,704,28"/>
+</map>

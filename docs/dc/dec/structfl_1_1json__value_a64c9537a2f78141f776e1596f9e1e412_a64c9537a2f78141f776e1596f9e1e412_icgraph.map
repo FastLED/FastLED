@@ -1,0 +1,58 @@
+<map id="fl::json_value::parse2" name="fl::json_value::parse2">
+<area shape="rect" id="Node000001" title=" " alt="" coords="800,327,960,353"/>
+<area shape="rect" id="Node000002" href="$de/d40/classfl_1_1json_acfd0c418354f6fa20c838e2167ab9661.html#acfd0c418354f6fa20c838e2167ab9661" title=" " alt="" coords="609,278,718,303"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="810,327,718,306,719,300,811,322"/>
+<area shape="rect" id="Node000040" href="$dc/dec/structfl_1_1json__value_a1df5d2c7c15f5121861f03469fc14e20.html#a1df5d2c7c15f5121861f03469fc14e20" title=" " alt="" coords="583,327,743,353"/>
+<area shape="poly" id="edge27_Node000001_Node000040" title=" " alt="" coords="786,343,743,343,743,337,786,337"/>
+<area shape="rect" id="Node000041" href="$dc/dec/structfl_1_1json__value_a27d5ce4bb457c6c3669c87fe89160cbd.html#a27d5ce4bb457c6c3669c87fe89160cbd" title=" " alt="" coords="575,401,752,441"/>
+<area shape="poly" id="edge28_Node000001_Node000041" title=" " alt="" coords="833,360,718,404,716,399,832,355"/>
+<area shape="poly" id="edge9_Node000002_Node000002" title=" " alt="" coords="702,268,691,260,663,257,640,259,628,264,626,269,632,276,628,280,620,270,624,260,639,254,663,251,693,255,705,264"/>
+<area shape="rect" id="Node000003" href="$d7/d7e/classfl_1_1video_1_1_pixel_stream_a2d2bc6715c9d04166f12a4d316bbfcd3.html#a2d2bc6715c9d04166f12a4d316bbfcd3" title=" " alt="" coords="323,5,483,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="652,265,635,220,609,164,572,107,550,82,525,59,505,47,483,39,485,34,507,43,528,55,554,78,577,104,614,162,640,218,657,264"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a6913bcc5545eb4b029ec170d48a14766.html#a6913bcc5545eb4b029ec170d48a14766" title=" " alt="" coords="297,70,510,95"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="649,266,630,230,603,187,568,144,525,109,503,98,505,93,528,104,571,140,607,184,634,228,653,264"/>
+<area shape="rect" id="Node000006" href="$d7/dd1/classfl_1_1_rpc_a16bb9675b8d15f3713e49fbb5a8b05a3.html#a16bb9675b8d15f3713e49fbb5a8b05a3" title="Process a JSON&#45;RPC request." alt="" coords="346,119,461,145"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="641,269,592,217,560,189,525,166,493,152,460,143,462,138,495,147,528,162,563,185,596,213,645,265"/>
+<area shape="rect" id="Node000007" href="$d7/dd1/classfl_1_1_rpc_acfc87927e9e6affe54e4f2861adac5fd.html#acfc87927e9e6affe54e4f2861adac5fd" title="For notifications (no id), returns nullopt." alt="" coords="35,129,202,154"/>
+<area shape="poly" id="edge7_Node000002_Node000007" title=" " alt="" coords="633,272,585,240,526,210,465,194,380,179,202,154,203,148,381,174,466,189,528,206,587,235,636,267"/>
+<area shape="rect" id="Node000008" href="$d3/df6/_remote_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="378,221,429,246"/>
+<area shape="poly" id="edge8_Node000002_Node000008" title=" " alt="" coords="595,277,526,261,428,241,430,236,527,256,597,272"/>
+<area shape="rect" id="Node000009" href="$d0/dd1/classfl_1_1net_1_1http_1_1_response_aa7ab961e382572de8e991ea8bb6b5907.html#aa7ab961e382572de8e991ea8bb6b5907" title="Parse JSON from response body with error handling." alt="" coords="321,271,485,311"/>
+<area shape="poly" id="edge10_Node000002_Node000009" title=" " alt="" coords="595,293,485,293,485,288,595,288"/>
+<area shape="rect" id="Node000014" href="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_abcd0cfab5c8828fed71b4eb662761dc4.html#abcd0cfab5c8828fed71b4eb662761dc4" title=" " alt="" coords="280,335,527,375"/>
+<area shape="poly" id="edge12_Node000002_Node000014" title=" " alt="" coords="598,309,486,337,485,332,597,304"/>
+<area shape="rect" id="Node000024" href="$d2/dec/namespacefl_1_1fled_a1e87ed01d3ee9e4c4d0f7abe9b6cb312.html#a1e87ed01d3ee9e4c4d0f7abe9b6cb312" title=" " alt="" coords="314,399,493,439"/>
+<area shape="poly" id="edge15_Node000002_Node000024" title=" " alt="" coords="597,306,576,317,561,334,553,352,545,371,528,389,494,406,492,401,525,385,541,368,548,350,556,331,573,313,594,301"/>
+<area shape="rect" id="Node000030" href="$d2/d78/classfl_1_1_screen_map_a743a04622f1801c125fda4f0b06f0241.html#a743a04622f1801c125fda4f0b06f0241" title=" " alt="" coords="313,538,493,563"/>
+<area shape="poly" id="edge18_Node000002_Node000030" title=" " alt="" coords="597,304,576,317,563,332,555,348,550,380,546,414,540,433,529,452,505,480,478,505,428,540,425,536,475,500,502,476,524,449,535,430,540,413,544,379,550,346,558,329,573,313,594,299"/>
+<area shape="rect" id="Node000038" href="$df/d37/classfl_1_1_file_system_a5e985529e5c616ff32cfe940201ee5f6.html#a5e985529e5c616ff32cfe940201ee5f6" title=" " alt="" coords="316,587,491,613"/>
+<area shape="poly" id="edge25_Node000002_Node000038" title=" " alt="" coords="597,302,577,317,556,348,548,380,549,413,554,445,560,478,560,511,551,544,529,577,512,589,492,598,490,593,509,585,525,573,547,542,555,510,554,479,549,446,544,413,543,380,551,346,573,313,594,298"/>
+<area shape="rect" id="Node000039" href="$d3/d1f/_server_real_8h_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="374,637,433,662"/>
+<area shape="poly" id="edge26_Node000002_Node000039" title=" " alt="" coords="597,302,577,317,562,336,552,355,544,393,547,431,554,470,562,509,564,548,555,587,544,607,529,626,507,641,482,650,433,655,432,649,481,645,505,637,525,622,540,604,550,585,559,547,557,510,549,471,541,432,539,392,547,353,558,333,573,313,594,298"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a7167ab7d0c24c14e0576b7df33c212b6.html#a7167ab7d0c24c14e0576b7df33c212b6" title="Create RequestSource and ResponseSink pair for serial I/O." alt="" coords="31,70,207,95"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="283,85,207,85,207,80,283,80"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="333,137,202,141,202,136,332,132"/>
+<area shape="rect" id="Node000010" href="$d0/dd1/classfl_1_1net_1_1http_1_1_response_ab146220738b78d1340286c6e914ed666.html#ab146220738b78d1340286c6e914ed666" title="Response body parsed as JSON (JavaScript&#45;like API)" alt="" coords="37,197,201,237"/>
+<area shape="poly" id="edge11_Node000009_Node000010" title=" " alt="" coords="311,270,196,240,198,235,312,265"/>
+<area shape="rect" id="Node000015" href="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_aab4451d64b6a491f073f941fd22258c0.html#aab4451d64b6a491f073f941fd22258c0" title="Read next JSON&#45;RPC request from stream Non&#45;blocking, returns nullopt if no complete request available..." alt="" coords="31,261,207,301"/>
+<area shape="poly" id="edge13_Node000014_Node000015" title=" " alt="" coords="311,334,196,304,198,299,312,329"/>
+<area shape="rect" id="Node000018" href="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a57c01766a42aa6cbab3d0c6b7617a5ff.html#a57c01766a42aa6cbab3d0c6b7617a5ff" title="Update connection state (handles reconnection, heartbeat) Call this in main loop." alt="" coords="31,325,207,365"/>
+<area shape="poly" id="edge14_Node000014_Node000018" title=" " alt="" coords="266,353,207,351,207,346,266,348"/>
+<area shape="rect" id="Node000025" href="$d3/d7d/classfl_1_1_fled_a2f862bfef6ff0ff08d4a5653b357d0b7.html#a2f862bfef6ff0ff08d4a5653b357d0b7" title=" " alt="" coords="33,390,205,415"/>
+<area shape="poly" id="edge16_Node000024_Node000025" title=" " alt="" coords="300,416,205,410,205,405,300,410"/>
+<area shape="rect" id="Node000026" href="$d3/d7d/classfl_1_1_fled_af0b8a21dde072d6bb063bf7bac284b7f.html#af0b8a21dde072d6bb063bf7bac284b7f" title=" " alt="" coords="31,439,207,465"/>
+<area shape="poly" id="edge17_Node000024_Node000026" title=" " alt="" coords="301,433,207,444,207,439,300,428"/>
+<area shape="rect" id="Node000031" href="$d7/d35/_fx_sd_card_8ino_a31b8310bfbbef87ba721eb0104ea6119.html#a31b8310bfbbef87ba721eb0104ea6119" title=" " alt="" coords="31,489,206,514"/>
+<area shape="poly" id="edge19_Node000030_Node000031" title=" " alt="" coords="315,538,192,517,193,511,316,533"/>
+<area shape="rect" id="Node000033" href="$d2/d78/classfl_1_1_screen_map_ac2fe735edb33b2506307a638a769343e.html#ac2fe735edb33b2506307a638a769343e" title=" " alt="" coords="29,538,209,563"/>
+<area shape="poly" id="edge20_Node000030_Node000033" title=" " alt="" coords="300,553,209,553,209,548,300,548"/>
+<area shape="rect" id="Node000034" href="$df/d37/classfl_1_1_file_system_a76449b10863a3dee0631213504e817cc.html#a76449b10863a3dee0631213504e817cc" title=" " alt="" coords="9,587,228,613"/>
+<area shape="poly" id="edge21_Node000030_Node000034" title=" " alt="" coords="316,568,193,590,192,585,315,563"/>
+<area shape="rect" id="Node000035" href="$df/d37/classfl_1_1_file_system_ad9bf0f8a5e0afcbbb85575c9f8785fc9.html#ad9bf0f8a5e0afcbbb85575c9f8785fc9" title=" " alt="" coords="5,637,232,662"/>
+<area shape="poly" id="edge22_Node000030_Node000035" title=" " alt="" coords="301,568,281,577,267,588,258,601,249,614,233,626,203,639,201,634,231,622,245,610,254,598,263,585,279,572,299,563"/>
+<area shape="rect" id="Node000036" href="$d3/d7d/classfl_1_1_fled_ac2a1d5b10d2b60ff22e811e8d0683ea6.html#ac2a1d5b10d2b60ff22e811e8d0683ea6" title=" " alt="" coords="46,686,191,711"/>
+<area shape="poly" id="edge23_Node000030_Node000036" title=" " alt="" coords="302,565,282,577,271,588,264,599,258,624,253,650,246,663,234,675,214,687,193,695,191,690,212,682,230,671,241,660,248,648,253,623,259,597,266,585,278,573,299,560"/>
+<area shape="rect" id="Node000037" href="$d1/ddb/_chromancer_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="89,735,148,761"/>
+<area shape="poly" id="edge24_Node000030_Node000037" title=" " alt="" coords="302,564,282,577,267,594,260,612,259,649,257,688,249,707,234,726,214,739,192,747,149,752,148,747,190,742,212,734,230,722,244,705,251,687,253,649,255,610,263,591,278,573,299,559"/>
+<area shape="poly" id="edge29_Node000041_Node000041" title=" " alt="" coords="700,390,687,383,663,380,643,382,630,387,626,393,628,400,623,402,620,392,627,382,641,377,663,375,689,378,702,385"/>
+</map>

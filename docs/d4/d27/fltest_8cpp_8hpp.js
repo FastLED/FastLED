@@ -1,10 +1,13 @@
 var fltest_8cpp_8hpp =
 [
-    [ "fl::test::fail", "d1/d23/namespacefl_1_1test_a680c5f7e455b22f19fc10b5abd2f0a5a.html#a680c5f7e455b22f19fc10b5abd2f0a5a", null ],
-    [ "fl::test::isTestSkipped", "d1/d23/namespacefl_1_1test_ac4c7e978ce9c314d6af0c5ab3ef82199.html#ac4c7e978ce9c314d6af0c5ab3ef82199", null ],
-    [ "fl::test::outputCapture", "d1/d23/namespacefl_1_1test_ac9fef4e5d06e9f71acfbb3d810b0dece.html#ac9fef4e5d06e9f71acfbb3d810b0dece", null ],
-    [ "fl::test::outputMessage", "d1/d23/namespacefl_1_1test_af37984455a2feb521a23466ed74eed67.html#af37984455a2feb521a23466ed74eed67", null ],
-    [ "fl::test::skipTest", "d1/d23/namespacefl_1_1test_a62d05a4e42b7c15299018e58514c8dcc.html#a62d05a4e42b7c15299018e58514c8dcc", null ],
-    [ "fl::test::sCurrentTestSkipped", "d1/d23/namespacefl_1_1test_a1238b773fd230dcb5677b6f9662ee4cb.html#a1238b773fd230dcb5677b6f9662ee4cb", null ],
-    [ "fl::test::sSkipReason", "d1/d23/namespacefl_1_1test_af7c35d2eb0ca3ed37b02afd7cdb4aa62.html#af7c35d2eb0ca3ed37b02afd7cdb4aa62", null ]
+    [ "fl::test::SkipState", "d1/d23/namespacefl_1_1test.html#d3/d7d/structfl_1_1test_1_1_skip_state", [
+      [ "reason", "d1/d23/namespacefl_1_1test.html#a12c3c5bd0675de8b990915848865c412", null ],
+      [ "skipped", "d1/d23/namespacefl_1_1test.html#aaae890cf10bc95e4345ed630b5865d6d", null ]
+    ] ],
+    [ "fl::test::fail", "d1/d23/namespacefl_1_1test_aa13798bfbc09c08b5cbf628a2725b9de.html#aa13798bfbc09c08b5cbf628a2725b9de", null ],
+    [ "fl::test::isTestSkipped", "d1/d23/namespacefl_1_1test_ac6adecce20c2ac9ae2ed95b48a224887.html#ac6adecce20c2ac9ae2ed95b48a224887", null ],
+    [ "fl::test::outputCapture", "d1/d23/namespacefl_1_1test_a0eeefd10de97cf60b0eefc8c736cc240.html#a0eeefd10de97cf60b0eefc8c736cc240", null ],
+    [ "fl::test::outputMessage", "d1/d23/namespacefl_1_1test_a9fe3646dc3537b399b25d514538cefdf.html#a9fe3646dc3537b399b25d514538cefdf", null ],
+    [ "fl::test::skipState", "d1/d23/namespacefl_1_1test_a582891f3f2b5fff3c594c907e9807ce9.html#a582891f3f2b5fff3c594c907e9807ce9", null ],
+    [ "fl::test::skipTest", "d1/d23/namespacefl_1_1test_ac0bce4f7e43f1cc547f5da6f4356cbef.html#ac0bce4f7e43f1cc547f5da6f4356cbef", null ]
 ];

@@ -1,0 +1,12 @@
+<map id="fl::detail::hdFieldFloor" name="fl::detail::hdFieldFloor">
+<area shape="rect" id="Node000001" title="Backing store for CFastLED::setHdFieldFloor()." alt="" coords="336,133,499,159"/>
+<area shape="rect" id="Node000002" href="$d1/da7/namespacefl_1_1anonymous__namespace_02pipeline__binding_8cpp_8hpp_03_a9b0cf72bec5a5c75a680086f93f41890.html#a9b0cf72bec5a5c75a680086f93f41890" title=" " alt="" coords="5,29,288,84"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="373,130,287,98,251,87,253,81,289,93,375,125"/>
+<area shape="rect" id="Node000003" href="$dd/dbb/class_c_fast_l_e_d_a7609bb110bd558a099c4a0adf8127ef6.html#a7609bb110bd558a099c4a0adf8127ef6" title=" " alt="" coords="50,108,243,133"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="322,140,243,132,244,127,323,135"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_aba71524e25f179bf921dc7b760eb125d.html#aba71524e25f179bf921dc7b760eb125d" title="Identify the channel&#39;s final current/quantization choice without adding a virtual slot or storage to ..." alt="" coords="41,157,252,183"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="322,157,253,163,252,158,322,152"/>
+<area shape="rect" id="Node000005" href="$dd/dbb/class_c_fast_l_e_d_a1675410971c5d7f82eca1eb20fea6732.html#a1675410971c5d7f82eca1eb20fea6732" title="Lowest 5&#45;bit current field the colour&#45;managed APA102&#45;HD path may use (B1&#39;s flicker floor,..." alt="" coords="51,207,243,232"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="375,166,289,197,233,209,232,204,287,191,373,161"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="192,18,176,11,147,8,122,10,107,15,100,21,100,29,94,29,95,19,104,10,121,5,147,3,177,6,194,14"/>
+</map>

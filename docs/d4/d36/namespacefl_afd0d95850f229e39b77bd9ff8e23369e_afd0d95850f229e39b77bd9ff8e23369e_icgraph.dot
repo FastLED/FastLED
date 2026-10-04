@@ -1,0 +1,14 @@
+digraph "fl::lpd6803EncodeRGB"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::lpd6803EncodeRGB",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Convert RGB to LPD6803 16-bit format (1bbbbbgggggrrrrr)"];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::encodeLPD6803",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a521ddf0c9a6e682d5da736041c1cf78c.html#a521ddf0c9a6e682d5da736041c1cf78c",tooltip="Encode pixel data in LPD6803 format."];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::PixelIterator::\lwriteLPD6803",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d09/classfl_1_1_pixel_iterator_a07d906959ea2d0d4e3a279086d7216a4.html#a07d906959ea2d0d4e3a279086d7216a4",tooltip="Encode pixels in LPD6803 format (zero allocation)"];
+}

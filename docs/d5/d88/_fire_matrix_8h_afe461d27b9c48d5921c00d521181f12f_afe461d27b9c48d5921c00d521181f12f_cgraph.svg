@@ -85,7 +85,7 @@
 <!-- Node11 -->
 <g id="Node000011" class="node">
 <title>Node11</title>
-<g id="a_Node000011"><a xlink:href="../../d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a" target="_top" xlink:title="Universal millisecond timer &#45; returns milliseconds since system startup.">
+<g id="a_Node000011"><a xlink:href="../../d4/d36/namespacefl_a3c0ba5842bfd029c404a38c8df2315f3.html#a3c0ba5842bfd029c404a38c8df2315f3" target="_top" xlink:title="Universal millisecond timer &#45; returns milliseconds since system startup.">
 <polygon fill="white" stroke="#666666" points="152.5,-93 96.5,-93 96.5,-74 152.5,-74 152.5,-93"/>
 <text text-anchor="middle" x="124.5" y="-81" font-family="Helvetica,sans-Serif" font-size="10.00">fl::millis</text>
 </a>
@@ -211,7 +211,7 @@
 <!-- Node7 -->
 <g id="Node000007" class="node">
 <title>Node7</title>
-<g id="a_Node000007"><a xlink:href="../../d8/df9/group___noise_generation_gae021f30d62fea75ea1397e1a81b28a59.html#gae021f30d62fea75ea1397e1a81b28a59" target="_top" xlink:title=" ">
+<g id="a_Node000007"><a xlink:href="../../d8/df9/group___noise_generation_gae021f30d62fea75ea1397e1a81b28a59.html#gae021f30d62fea75ea1397e1a81b28a59" target="_top" xlink:title="16&#45;bit, fixed point implementation of Perlin&#39;s noise without scaling.">
 <polygon fill="#fff0f0" stroke="red" points="396,-166 315,-166 315,-147 396,-147 396,-166"/>
 <text text-anchor="middle" x="355.5" y="-154" font-family="Helvetica,sans-Serif" font-size="10.00">inoise16_raw</text>
 </a>

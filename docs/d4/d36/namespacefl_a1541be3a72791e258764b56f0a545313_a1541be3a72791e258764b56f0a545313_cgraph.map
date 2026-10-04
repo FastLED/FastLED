@@ -1,0 +1,5 @@
+<map id="fl::buildTwoWhiteAllocationFromSolveQ16" name="fl::buildTwoWhiteAllocationFromSolveQ16">
+<area shape="rect" id="Node000001" title="Bind two adapted white columns with an RGB solve in the same XYZ domain." alt="" coords="5,5,204,45"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_af5a0679639e0ad1db7feb7f9705df72f.html#af5a0679639e0ad1db7feb7f9705df72f" title="One pixel: XYZ in s16.16 to three emitter drives in s16.16." alt="" coords="252,13,419,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="204,23,238,23,238,28,204,28"/>
+</map>

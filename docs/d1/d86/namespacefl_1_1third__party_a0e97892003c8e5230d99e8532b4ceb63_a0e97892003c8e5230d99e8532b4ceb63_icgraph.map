@@ -1,0 +1,9 @@
+<map id="fl::third_party::lzw_context_destroy" name="fl::third_party::lzw_context_destroy">
+<area shape="rect" id="Node000001" title="Destroy an LZW decompression context." alt="" coords="679,5,817,45"/>
+<area shape="rect" id="Node000002" href="$d1/d86/namespacefl_1_1third__party_a58be7e637e37206ace88d6490753cfb1.html#a58be7e637e37206ace88d6490753cfb1" title="Free a NSGIF object." alt="" coords="483,5,631,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="665,28,631,28,631,23,665,23"/>
+<area shape="rect" id="Node000003" href="$d3/d7a/classfl_1_1third__party_1_1_software_gif_decoder_abb673d49fc57d4364d159253f34d17dc.html#abb673d49fc57d4364d159253f34d17dc" title=" " alt="" coords="227,5,435,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="469,28,435,28,435,23,469,23"/>
+<area shape="rect" id="Node000004" href="$d3/d7a/classfl_1_1third__party_1_1_software_gif_decoder_a4a70fe80004ef530eae21db6712bd2e1.html#a4a70fe80004ef530eae21db6712bd2e1" title=" " alt="" coords="5,5,179,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="213,28,179,28,179,23,213,23"/>
+</map>

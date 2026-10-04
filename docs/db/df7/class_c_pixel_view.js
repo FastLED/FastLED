@@ -59,7 +59,7 @@ var class_c_pixel_view =
     [ "operator|=", "db/df7/class_c_pixel_view_a367dc7ea6199d6794dd827c5c92a19e0.html#a367dc7ea6199d6794dd827c5c92a19e0", null ],
     [ "operator|=", "db/df7/class_c_pixel_view_a72761de85777a149bc2cdc3b0d969374.html#a72761de85777a149bc2cdc3b0d969374", null ],
     [ "reversed", "db/df7/class_c_pixel_view_a384417cfef1e38aa24fde4673fd8eaac.html#a384417cfef1e38aa24fde4673fd8eaac", null ],
-    [ "size", "db/df7/class_c_pixel_view_afe3500651fc4eb5770aeb01728aa0a1e.html#afe3500651fc4eb5770aeb01728aa0a1e", null ],
+    [ "size", "db/df7/class_c_pixel_view_ac69fd31def4a8cd6cb467d8a3c0a8772.html#ac69fd31def4a8cd6cb467d8a3c0a8772", null ],
     [ "subFromRGB", "db/df7/class_c_pixel_view_a591bdad3c85f583d48279a1e962960ec.html#a591bdad3c85f583d48279a1e962960ec", null ],
     [ "dir", "db/df7/class_c_pixel_view_adc4db33ac1cc063be48691ba34ee2da3.html#adc4db33ac1cc063be48691ba34ee2da3", null ],
     [ "end_pos", "db/df7/class_c_pixel_view_abfcab2974a78f644d27f2ba39bcd40f1.html#abfcab2974a78f644d27f2ba39bcd40f1", null ],

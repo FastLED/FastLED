@@ -21,7 +21,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../d3/df8/structfl_1_1spi_1_1_device_impl_base_a61b70199f1bdb5998ce710bd99f90be3.html#a61b70199f1bdb5998ce710bd99f90be3" target="_top" xlink:title="Constructor.">
+<g id="a_Node000002"><a xlink:href="../../d3/df8/structfl_1_1spi_1_1_device_impl_base_ac786422fc9401ba899b0276b93755ee9.html#ac786422fc9401ba899b0276b93755ee9" target="_top" xlink:title="Constructor.">
 <polygon fill="white" stroke="#666666" points="295,-30 167,-30 167,0 295,0 295,-30"/>
 <text text-anchor="start" x="175" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">fl::spi::DeviceImplBase</text>
 <text text-anchor="middle" x="231" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">::DeviceImplBase</text>

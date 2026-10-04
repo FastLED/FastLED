@@ -1,0 +1,7 @@
+<map id="fl::invoke" name="fl::invoke">
+<area shape="rect" id="Node000001" title=" " alt="" coords="219,31,300,56"/>
+<area shape="rect" id="Node000002" href="$d7/dd1/classfl_1_1_rpc_af0c0d7b6410f120603f256edfd27649a.html#af0c0d7b6410f120603f256edfd27649a" title="Bind async method with ResponseSend&amp; parameter (for ASYNC/ASYNC_STREAM modes) Signature: void(Respons..." alt="" coords="19,5,157,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="205,38,157,31,157,26,205,33"/>
+<area shape="rect" id="Node000003" href="$d7/dd1/classfl_1_1_rpc_a1b9905bf68ebe811f10ce891300bb9c4.html#a1b9905bf68ebe811f10ce891300bb9c4" title="Bind a method that streams its JSON&#45;RPC result directly to the transport." alt="" coords="5,55,171,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="206,53,171,58,170,53,205,48"/>
+</map>

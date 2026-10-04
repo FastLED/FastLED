@@ -23,7 +23,7 @@ digraph "fl/gfx/leds.h"
   Node8 -> Node9 [id="edge8_Node000008_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node9 [id="Node000009",label="/home/runner/work/FastLED\l/FastLED/examples/XYPath\l/XYPath.ino",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d9c/_x_y_path_8ino.html",tooltip=" "];
   Node1 -> Node10 [id="edge9_Node000001_Node000010",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node10 [id="Node000010",label="FastLED.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d97/_fast_l_e_d_8h.html",tooltip="central include file for FastLED, defines the CFastLED class/object"];
+  Node10 [id="Node000010",label="FastLED.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d64/fastled_8h.html",tooltip="central include file for FastLED, defines the CFastLED class/object"];
   Node10 -> Node11 [id="edge10_Node000010_Node000011",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node11 [id="Node000011",label="FastLED.cpp.hpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/de5/_fast_l_e_d_8cpp_8hpp.html",tooltip=" "];
   Node11 -> Node12 [id="edge11_Node000011_Node000012",dir="back",color="steelblue1",style="solid",tooltip=" "];

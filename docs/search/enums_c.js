@@ -1,6 +1,9 @@
 var searchData=
 [
-  ['nsgif_5fbitmap_5ffmt_0',['nsgif_bitmap_fmt',['../d1/d86/namespacefl_1_1third__party_a02c12d095b66fb57143227743c2d4050.html#a02c12d095b66fb57143227743c2d4050',1,'fl::third_party']]],
-  ['nsgif_5fdisposal_1',['nsgif_disposal',['../d1/d86/namespacefl_1_1third__party_a41398b0d1d41926d003834b0368e5aed.html#a41398b0d1d41926d003834b0368e5aed',1,'fl::third_party']]],
-  ['nsgif_5ferror_2',['nsgif_error',['../d1/d86/namespacefl_1_1third__party_a1992104116eb36e4aa17bbeb78119ca6.html#a1992104116eb36e4aa17bbeb78119ca6',1,'fl::third_party']]]
+  ['memory_5forder_0',['memory_order',['../d4/d36/namespacefl_a267004a7ccc7983ba23af5b6da02ccf5.html#a267004a7ccc7983ba23af5b6da02ccf5',1,'fl']]],
+  ['micprofile_1',['MicProfile',['../db/dbf/namespacefl_1_1audio_a5897660d585e758a3b9ec6dbbca1b538.html#a5897660d585e758a3b9ec6dbbca1b538',1,'fl::audio']]],
+  ['midicontrolchangenumber_2',['MidiControlChangeNumber',['../d8/dd0/midi___defs_8h_aa1cfd7d9d1fe50ec27b566e854e98263.html#aa1cfd7d9d1fe50ec27b566e854e98263',1,'midi_Defs.h']]],
+  ['miditype_3',['MidiType',['../d8/dd0/midi___defs_8h_ab8db39dcdc3eea8045b9c71b56bba84c.html#ab8db39dcdc3eea8045b9c71b56bba84c',1,'midi_Defs.h']]],
+  ['mode_4',['Mode',['../d0/d32/classfl_1_1_digital_pin_a311bcf896155643629be9f7c1b8a0c17.html#a311bcf896155643629be9f7c1b8a0c17',1,'fl::DigitalPin::Mode'],['../d8/d7f/struct_thru_ad19abe318ba3710100aefdea1895fbbb.html#ad19abe318ba3710100aefdea1895fbbb',1,'Thru::Mode'],['../de/dee/namespacefl_1_1audio_1_1fft_a6daa8d51b19c113e5318d12785c0f571.html#a6daa8d51b19c113e5318d12785c0f571',1,'fl::audio::fft::Mode']]],
+  ['mp3memorytag_5',['Mp3MemoryTag',['../d1/d86/namespacefl_1_1third__party_a82cc36c3cbb4e1437e96c72aeefbca1e.html#a82cc36c3cbb4e1437e96c72aeefbca1e',1,'fl::third_party']]]
 ];

@@ -31,7 +31,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_acc8cbf7c9dc2c0f426daeca181427671.html#acc8cbf7c9dc2c0f426daeca181427671" target="_top" xlink:title="Downscale a CRGB matrix (or strip) to the smaller size.">
+<g id="a_Node000002"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_aeabf6e1ef3780f5baac911570f42acdb.html#aeabf6e1ef3780f5baac911570f42acdb" target="_top" xlink:title="Downscale a CRGB matrix (or strip) to the smaller size.">
 <polygon fill="white" stroke="#666666" points="121,-56 7,-56 7,-37 121,-37 121,-56"/>
 <text text-anchor="middle" x="64" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">fl::CRGB::downscale</text>
 </a>

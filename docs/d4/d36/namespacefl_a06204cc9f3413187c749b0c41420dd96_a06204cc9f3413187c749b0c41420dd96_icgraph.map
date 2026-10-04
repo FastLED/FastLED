@@ -1,0 +1,5 @@
+<map id="fl::encodeTM1812_RGBWW" name="fl::encodeTM1812_RGBWW">
+<area shape="rect" id="Node000001" title="Pack 5&#45;channel RGBCCT pixels into TM1812 12&#45;channel frames." alt="" coords="215,13,413,38"/>
+<area shape="rect" id="Node000002" href="$d0/d09/classfl_1_1_pixel_iterator_a30435861daddaa6b7a3ba1d482f89418.html#a30435861daddaa6b7a3ba1d482f89418" title="Encode RGBWW pixels into 12&#45;channel TM1812 IC frames." alt="" coords="5,5,167,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="201,28,167,28,167,23,201,23"/>
+</map>

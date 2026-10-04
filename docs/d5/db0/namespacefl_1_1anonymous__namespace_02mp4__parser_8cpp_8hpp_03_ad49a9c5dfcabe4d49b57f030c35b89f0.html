@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -109,7 +109,7 @@ $(function(){initNavTree('d5/db0/namespacefl_1_1anonymous__namespace_02mp4__pars
         <tr>
           <td class="memname">fl::size fl::anonymous_namespace{mp4_parser.cpp.hpp}::findBox </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="../../d0/d08/classfl_1_1span.html">fl::span</a>&lt; const <a class="el" href="../../da/d3c/namespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c.html#a7573a66f01c09f14a1ff0411f8e1153c">fl::u8</a> &gt;</td>          <td class="paramname"><span class="paramname"><em>data</em></span>, </td>
+          <td class="paramtype"><a class="el" href="../../d0/d08/classfl_1_1span.html">fl::span</a>&lt; const <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> &gt;</td>          <td class="paramname"><span class="paramname"><em>data</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -132,7 +132,7 @@ $(function(){initNavTree('d5/db0/namespacefl_1_1anonymous__namespace_02mp4__pars
 <p class="definition">Definition at line <a class="el" href="../../d4/d97/mp4__parser_8cpp_8hpp_source.html#l00032">32</a> of file <a class="el" href="../../d4/d97/mp4__parser_8cpp_8hpp_source.html">mp4_parser.cpp.hpp</a>.</p>
 <div class="fragment"><div class="line"><span class="lineno">   32</span>                                                                                    {</div>
 <div class="line"><span class="lineno">   33</span>    fl::size <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a> = start;</div>
-<div class="line"><span class="lineno">   34</span>    <span class="keywordflow">while</span> (<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a> + 8 &lt;= <a class="code hl_function" href="../../d4/d36/namespacefl_a3cdd970ae1ac06323addaec93ae7d4b9.html#a3cdd970ae1ac06323addaec93ae7d4b9">end</a>) {</div>
+<div class="line"><span class="lineno">   34</span>    <span class="keywordflow">while</span> (<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a> + 8 &lt;= <a class="code hl_function" href="../../d4/d36/namespacefl_aa45736aab5ddedf688b0c3efaedbf0f7.html#aa45736aab5ddedf688b0c3efaedbf0f7">end</a>) {</div>
 <div class="line"><span class="lineno">   35</span>        <span class="keywordtype">bool</span> ok = <span class="keyword">true</span>;</div>
 <div class="line"><span class="lineno">   36</span>        fl::u32 boxSize = <a class="code hl_function" href="../../d5/db0/namespacefl_1_1anonymous__namespace_02mp4__parser_8cpp_8hpp_03_a1f7e432a75b3f4145be483642b478825.html#a1f7e432a75b3f4145be483642b478825">readU32BE</a>(data, <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>, ok);</div>
 <div class="line"><span class="lineno">   37</span>        <span class="keywordflow">if</span> (!ok || boxSize &lt; 8) <span class="keywordflow">break</span>;</div>
@@ -144,7 +144,7 @@ $(function(){initNavTree('d5/db0/namespacefl_1_1anonymous__namespace_02mp4__pars
 <div class="ttc" id="a_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae_html_a29716abd4f651ba9d6f1476ea79fa7ae"><div class="ttname"><a href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a></div><div class="ttdeci">uint8_t pos</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d0c/_blur_8ino_source.html#l00011">Blur.ino:11</a></div></div>
 <div class="ttc" id="anamespacefl_1_1anonymous__namespace_02mp4__parser_8cpp_8hpp_03_a1f7e432a75b3f4145be483642b478825_html_a1f7e432a75b3f4145be483642b478825"><div class="ttname"><a href="../../d5/db0/namespacefl_1_1anonymous__namespace_02mp4__parser_8cpp_8hpp_03_a1f7e432a75b3f4145be483642b478825.html#a1f7e432a75b3f4145be483642b478825">fl::anonymous_namespace{mp4_parser.cpp.hpp}::readU32BE</a></div><div class="ttdeci">fl::u32 readU32BE(fl::span&lt; const fl::u8 &gt; data, fl::size offset, bool &amp;ok)</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d97/mp4__parser_8cpp_8hpp_source.html#l00009">mp4_parser.cpp.hpp:9</a></div></div>
 <div class="ttc" id="anamespacefl_1_1anonymous__namespace_02mp4__parser_8cpp_8hpp_03_a20ba5d0402c957bfc616d2058edb00c4_html_a20ba5d0402c957bfc616d2058edb00c4"><div class="ttname"><a href="../../d5/db0/namespacefl_1_1anonymous__namespace_02mp4__parser_8cpp_8hpp_03_a20ba5d0402c957bfc616d2058edb00c4.html#a20ba5d0402c957bfc616d2058edb00c4">fl::anonymous_namespace{mp4_parser.cpp.hpp}::boxIs</a></div><div class="ttdeci">bool boxIs(fl::span&lt; const fl::u8 &gt; data, fl::size offset, const char *type)</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d97/mp4__parser_8cpp_8hpp_source.html#l00023">mp4_parser.cpp.hpp:23</a></div></div>
-<div class="ttc" id="anamespacefl_a3cdd970ae1ac06323addaec93ae7d4b9_html_a3cdd970ae1ac06323addaec93ae7d4b9"><div class="ttname"><a href="../../d4/d36/namespacefl_a3cdd970ae1ac06323addaec93ae7d4b9.html#a3cdd970ae1ac06323addaec93ae7d4b9">fl::end</a></div><div class="ttdeci">constexpr T * end(T(&amp;array)[N]) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d5/db6/range__access_8h_source.html#l00016">range_access.h:16</a></div></div>
+<div class="ttc" id="anamespacefl_aa45736aab5ddedf688b0c3efaedbf0f7_html_aa45736aab5ddedf688b0c3efaedbf0f7"><div class="ttname"><a href="../../d4/d36/namespacefl_aa45736aab5ddedf688b0c3efaedbf0f7.html#aa45736aab5ddedf688b0c3efaedbf0f7">fl::end</a></div><div class="ttdeci">constexpr T * end(T(&amp;array)[N]) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d5/db6/range__access_8h_source.html#l00016">range_access.h:16</a></div></div>
 <div class="ttc" id="anamespacefl_html_d4/d36/namespacefl"><div class="ttname"><a href="../../d4/d36/namespacefl.html#d4/d36/namespacefl">fl::type</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../d4/d97/mp4__parser_8cpp_8hpp_source.html#l00023">boxIs()</a>, <a class="el" href="../../d5/db6/range__access_8h_source.html#l00016">fl::end()</a>, <a class="el" href="../../d4/d97/mp4__parser_8cpp_8hpp_source.html#l00032">findBox()</a>, <a class="el" href="../../d4/d0c/_blur_8ino_source.html#l00011">pos</a>, and <a class="el" href="../../d4/d97/mp4__parser_8cpp_8hpp_source.html#l00009">readU32BE()</a>.</p>
@@ -174,7 +174,7 @@ $(function(){initNavTree('d5/db0/namespacefl_1_1anonymous__namespace_02mp4__pars
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d5/db0/namespacefl_1_1anonymous__namespace_02mp4__parser_8cpp_8hpp_03.html">anonymous_namespace{mp4_parser.cpp.hpp}</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:07 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:11 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

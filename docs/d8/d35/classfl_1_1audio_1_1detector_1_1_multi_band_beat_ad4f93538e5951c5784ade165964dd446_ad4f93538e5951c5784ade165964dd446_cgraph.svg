@@ -41,7 +41,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../d8/d35/classfl_1_1audio_1_1detector_1_1_multi_band_beat_a5e3bab39bf17461edc0caaf9d372f9f7.html#a5e3bab39bf17461edc0caaf9d372f9f7" target="_top" xlink:title=" ">
+<g id="a_Node000002"><a xlink:href="../../d8/d35/classfl_1_1audio_1_1detector_1_1_multi_band_beat_a470d0d0b8d6dbda6c6465971252a02ad.html#a470d0d0b8d6dbda6c6465971252a02ad" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="355,-78 182,-78 182,-48 355,-48 355,-78"/>
 <text text-anchor="start" x="190" y="-66" font-family="Helvetica,sans-Serif" font-size="10.00">fl::audio::detector</text>
 <text text-anchor="middle" x="268.5" y="-55" font-family="Helvetica,sans-Serif" font-size="10.00">::MultiBandBeat::MultiBandBeat</text>

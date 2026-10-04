@@ -20,7 +20,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../df/d9e/namespacefl_1_1detail_a6639ef5e7932062a12de7451f274b003.html#a6639ef5e7932062a12de7451f274b003" target="_top" xlink:title=" ">
+<g id="a_Node000002"><a xlink:href="../../df/d9e/namespacefl_1_1detail_af1eabc31dea86eb576dfdcfc0357c7ef.html#af1eabc31dea86eb576dfdcfc0357c7ef" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="250,-24.5 140,-24.5 140,-5.5 250,-5.5 250,-24.5"/>
 <text text-anchor="middle" x="195" y="-12.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::detail::atan_full_</text>
 </a>
@@ -38,7 +38,7 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../df/d9e/namespacefl_1_1detail_a3065609d49ae6603e01f385d43107a4c.html#a3065609d49ae6603e01f385d43107a4c" target="_top" xlink:title=" ">
+<g id="a_Node000003"><a xlink:href="../../df/d9e/namespacefl_1_1detail_a183d9d1e13b74ad2acebc355243283ff.html#a183d9d1e13b74ad2acebc355243283ff" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="396,-30 286,-30 286,0 396,0 396,-30"/>
 <text text-anchor="start" x="294" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">fl::detail::atan_poly</text>
 <text text-anchor="middle" x="341" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">_unit_</text>

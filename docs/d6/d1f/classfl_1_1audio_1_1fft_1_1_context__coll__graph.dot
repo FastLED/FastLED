@@ -56,4 +56,8 @@ digraph "fl::audio::fft::Context"
   Node18 [id="Node000018",label="fl::vector\< u8 \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d2/d24/classfl_1_1vector.html",tooltip=" "];
   Node9 -> Node18 [id="edge31_Node000018_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node12 -> Node18 [id="edge32_Node000018_Node000012",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< u8 \>",fontcolor="grey" ];
+  Node19 -> Node1 [id="edge33_Node000001_Node000019",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mCoverageFirst\nmCoverageLast",fontcolor="grey" ];
+  Node19 [id="Node000019",label="fl::vector\< u16 \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d2/d24/classfl_1_1vector.html",tooltip=" "];
+  Node9 -> Node19 [id="edge34_Node000019_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node12 -> Node19 [id="edge35_Node000019_Node000012",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< u16 \>",fontcolor="grey" ];
 }

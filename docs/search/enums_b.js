@@ -1,9 +1,12 @@
 var searchData=
 [
-  ['memory_5forder_0',['memory_order',['../d4/d36/namespacefl_a267004a7ccc7983ba23af5b6da02ccf5.html#a267004a7ccc7983ba23af5b6da02ccf5',1,'fl']]],
-  ['micprofile_1',['MicProfile',['../db/dbf/namespacefl_1_1audio_a5897660d585e758a3b9ec6dbbca1b538.html#a5897660d585e758a3b9ec6dbbca1b538',1,'fl::audio']]],
-  ['midicontrolchangenumber_2',['MidiControlChangeNumber',['../d8/dd0/midi___defs_8h_aa1cfd7d9d1fe50ec27b566e854e98263.html#aa1cfd7d9d1fe50ec27b566e854e98263',1,'midi_Defs.h']]],
-  ['miditype_3',['MidiType',['../d8/dd0/midi___defs_8h_ab8db39dcdc3eea8045b9c71b56bba84c.html#ab8db39dcdc3eea8045b9c71b56bba84c',1,'midi_Defs.h']]],
-  ['mode_4',['Mode',['../d0/d32/classfl_1_1_digital_pin_a311bcf896155643629be9f7c1b8a0c17.html#a311bcf896155643629be9f7c1b8a0c17',1,'fl::DigitalPin::Mode'],['../d8/d7f/struct_thru_ad19abe318ba3710100aefdea1895fbbb.html#ad19abe318ba3710100aefdea1895fbbb',1,'Thru::Mode'],['../de/dee/namespacefl_1_1audio_1_1fft_a6daa8d51b19c113e5318d12785c0f571.html#a6daa8d51b19c113e5318d12785c0f571',1,'fl::audio::fft::Mode']]],
-  ['mpegversion_5',['MPEGVersion',['../d5/db1/mp3dec_8h_ac2d41287c78fcc372e01a9ae30d5994a.html#ac2d41287c78fcc372e01a9ae30d5994a',1,'mp3dec.h']]]
+  ['laplacianstencil_0',['LaplacianStencil',['../d4/d36/namespacefl_acb5bac14369e1132c687c1dad13ed535.html#acb5bac14369e1132c687c1dad13ed535',1,'fl']]],
+  ['ledcolorcorrection_1',['LEDColorCorrection',['../d0/d89/group___color_enums_gadf6bcba67c9573665af20788c4431ae8.html#gadf6bcba67c9573665af20788c4431ae8',1,'color.h']]],
+  ['legacyclocklesschipset_2',['LegacyClocklessChipset',['../d0/d0f/_legacy_clockless_proxy_8h_a12b25163238c59b7077761e42efa1565.html#a12b25163238c59b7077761e42efa1565',1,'LegacyClocklessProxy.h']]],
+  ['linecap_3',['LineCap',['../d0/d8b/namespacefl_1_1gfx_a3ab410902dca5bf8f5f2641df759f72f.html#a3ab410902dca5bf8f5f2641df759f72f',1,'fl::gfx']]],
+  ['log_5fkind_4',['log_kind',['../df/d9e/namespacefl_1_1detail_a2353eb6669ac7da7bd477aff84a249f2.html#a2353eb6669ac7da7bd477aff84a249f2',1,'fl::detail']]],
+  ['logcategory_5',['LogCategory',['../d4/d36/namespacefl_a480c45ab6ae40f1f754f77bf858c1950.html#a480c45ab6ae40f1f754f77bf858c1950',1,'fl']]],
+  ['loglevel_6',['LogLevel',['../d4/d36/namespacefl_a78af44803b24729c16a4e492e2cfe8a1.html#a78af44803b24729c16a4e492e2cfe8a1',1,'fl']]],
+  ['lutinterp_7',['LutInterp',['../da/db3/namespacefl_1_1colorimetric__response_add56b47f73102f6df64cb3aeb8df9444.html#add56b47f73102f6df64cb3aeb8df9444',1,'fl::colorimetric_response::LutInterp'],['../d7/df0/namespacefl_1_1colorimetric__detail_add56b47f73102f6df64cb3aeb8df9444.html#add56b47f73102f6df64cb3aeb8df9444',1,'fl::colorimetric_detail::LutInterp']]],
+  ['lzw_5fresult_8',['lzw_result',['../d1/d86/namespacefl_1_1third__party_a3f8295c9b086f67f8dbdaa925a84479f.html#a3f8295c9b086f67f8dbdaa925a84479f',1,'fl::third_party']]]
 ];

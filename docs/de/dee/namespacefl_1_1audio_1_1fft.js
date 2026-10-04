@@ -1,5 +1,8 @@
 var namespacefl_1_1audio_1_1fft =
 [
+    [ "detail", "dc/dbb/namespacefl_1_1audio_1_1fft_1_1detail.html", [
+      [ "coverageFloorApplies", "dc/dbb/namespacefl_1_1audio_1_1fft_1_1detail_a6a7082da1497780e7b5a950cbeb3fa4e.html#a6a7082da1497780e7b5a950cbeb3fa4e", null ]
+    ] ],
     [ "Args", "d9/d76/structfl_1_1audio_1_1fft_1_1_args.html", "d9/d76/structfl_1_1audio_1_1fft_1_1_args" ],
     [ "Bins", "d6/d86/classfl_1_1audio_1_1fft_1_1_bins.html", "d6/d86/classfl_1_1audio_1_1fft_1_1_bins" ],
     [ "Context", "d6/dd2/classfl_1_1audio_1_1fft_1_1_context.html", "d6/dd2/classfl_1_1audio_1_1fft_1_1_context" ],
@@ -19,5 +22,5 @@ var namespacefl_1_1audio_1_1fft =
       [ "HANNING", "de/dee/namespacefl_1_1audio_1_1fft_aa036454af7be032ea4c5436153862487.html#aa036454af7be032ea4c5436153862487a0cc67b768345986318df7c23b7ec8c8e", null ],
       [ "BLACKMAN_HARRIS", "de/dee/namespacefl_1_1audio_1_1fft_aa036454af7be032ea4c5436153862487.html#aa036454af7be032ea4c5436153862487a571575ff930fc746f331e0f84155fac0", null ]
     ] ],
-    [ "fl_fft_real_forward", "de/dee/namespacefl_1_1audio_1_1fft_a814ca07f6409447e5174b73c548e2ca2.html#a814ca07f6409447e5174b73c548e2ca2", null ]
+    [ "fl_fft_real_forward", "de/dee/namespacefl_1_1audio_1_1fft_a7d97967547e7e1c7d01103861f92eefe.html#a7d97967547e7e1c7d01103861f92eefe", null ]
 ];

@@ -1,0 +1,15 @@
+digraph "mood_ring::RoomListener::begin"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="mood_ring::RoomListener\l::begin",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Install the event callbacks. Call once after the Processor exists."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="mood_ring::RoomListener\l::RoomListener",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d25/classmood__ring_1_1_room_listener_aa65b7aea6531835fdba11cb37ce9384c.html#aa65b7aea6531835fdba11cb37ce9384c",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::millis",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a3c0ba5842bfd029c404a38c8df2315f3.html#a3c0ba5842bfd029c404a38c8df2315f3",tooltip="Universal millisecond timer - returns milliseconds since system startup."];
+  Node3 -> Node3 [id="edge3_Node000003_Node000003",color="steelblue1",style="solid",tooltip=" "];
+}

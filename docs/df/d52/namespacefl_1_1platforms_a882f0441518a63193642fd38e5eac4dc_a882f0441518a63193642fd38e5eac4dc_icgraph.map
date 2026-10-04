@@ -1,0 +1,9 @@
+<map id="fl::platforms::writeHex" name="fl::platforms::writeHex">
+<area shape="rect" id="Node000001" title=" " alt="" coords="680,13,848,38"/>
+<area shape="rect" id="Node000002" href="$df/dbf/structfl_1_1_reset_info_a2aa6f03524fc878c308833697500c267.html#a2aa6f03524fc878c308833697500c267" title="Write a single&#45;line human&#45;readable description into the caller&#39;s buffer." alt="" coords="469,13,632,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="666,28,632,28,632,23,666,23"/>
+<area shape="rect" id="Node000003" href="$df/d52/namespacefl_1_1platforms_a9c4e6070f18f939c4c98717a242f4a89.html#a9c4e6070f18f939c4c98717a242f4a89" title=" " alt="" coords="203,5,421,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="455,28,421,28,421,23,455,23"/>
+<area shape="rect" id="Node000004" href="$d7/d76/classfl_1_1_scoped_watchdog_a9c36ed18662dc1deb74850e729e11a31.html#a9c36ed18662dc1deb74850e729e11a31" title="Construct with an explicit timeout." alt="" coords="5,5,155,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="189,28,155,28,155,23,189,23"/>
+</map>

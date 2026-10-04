@@ -8,5 +8,5 @@ digraph "CFastLED::enableAllDrivers"
   rankdir="LR";
   Node1 [id="Node000001",label="CFastLED::enableAllDrivers",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Enroll every channel driver available on this platform with ChannelManager."];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::enableAllDrivers",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_af7311066003d7e979ee864ea8e8c4b9b.html#af7311066003d7e979ee864ea8e8c4b9b",tooltip="Register every channel driver available on this platform with ChannelManager, restoring 3...."];
+  Node2 [id="Node000002",label="fl::enableAllDrivers",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a0a4ceb5b8c05ba1ddb3965b228aa5fe9.html#a0a4ceb5b8c05ba1ddb3965b228aa5fe9",tooltip="Register every channel driver available on this platform with ChannelManager, restoring 3...."];
 }

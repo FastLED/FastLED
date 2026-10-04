@@ -1,0 +1,20 @@
+<map id="fl::allocateTwoWhiteDrivesQ16" name="fl::allocateTwoWhiteDrivesQ16">
+<area shape="rect" id="Node000001" title="One pixel: XYZ in s16.16 to five drives – red, green, blue, white1, white2 – at whichever end of the ..." alt="" coords="787,128,1008,153"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_afff4e9bb0e778bb7459488538fb1d86d.html#afff4e9bb0e778bb7459488538fb1d86d" title="Bind a five&#45;emitter map from one effective RGB solve and two white columns, all in the same D65 worki..." alt="" coords="516,38,739,78"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="844,126,738,93,698,81,699,75,739,87,845,121"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a2145e99048b45f249d35f24940689595.html#a2145e99048b45f249d35f24940689595" title="One pixel: XYZ in s16.16 to five in&#45;gamut drives – red, green, blue, white1, white2." alt="" coords="518,103,737,128"/>
+<area shape="poly" id="edge6_Node000001_Node000005" title=" " alt="" coords="773,132,736,128,737,123,773,126"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_aa231682eff63cbd83ee299e6079baeae.html#aa231682eff63cbd83ee299e6079baeae" title=" " alt="" coords="249,127,468,152"/>
+<area shape="poly" id="edge10_Node000001_Node000006" title=" " alt="" coords="773,144,516,143,468,143,468,138,516,138,773,138"/>
+<area shape="rect" id="Node000010" href="$d4/db4/structfl_1_1anonymous__namespace_02gamut__map_8cpp_8hpp_03_1_1_rgbww_feasible_a1be51d919aafce3936a4ec9d90f3298d.html#a1be51d919aafce3936a4ec9d90f3298d" title=" " alt="" coords="525,204,729,259"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="846,160,711,206,709,201,845,155"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a948408716d579dc42f02ad68245c3450.html#a948408716d579dc42f02ad68245c3450" title="Derive the mapper for a three&#45;primary profile plus two white emitters." alt="" coords="251,23,466,48"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="502,50,466,47,466,42,503,45"/>
+<area shape="rect" id="Node000004" href="$db/d33/namespacefl_1_1anonymous__namespace_02pipeline_8cpp_8hpp_03_aece1643892391c10a9c9de9a2f21ab11.html#aece1643892391c10a9c9de9a2f21ab11" title=" " alt="" coords="5,29,201,84"/>
+<area shape="poly" id="edge5_Node000002_Node000004" title=" " alt="" coords="503,62,249,62,202,61,202,56,249,57,503,57"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="238,48,202,51,201,46,237,43"/>
+<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="146,18,130,11,103,8,81,10,66,15,59,21,59,29,54,29,54,19,63,10,80,5,103,3,132,6,148,14"/>
+<area shape="poly" id="edge7_Node000005_Node000006" title=" " alt="" coords="505,129,468,132,468,127,504,124"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_ad0e379781735f3c39ad9cc2d724f08d4.html#ad0e379781735f3c39ad9cc2d724f08d4" title="Like processPixelQ16, but solves the physical 4/5&#45;emitter hull." alt="" coords="14,127,193,152"/>
+<area shape="poly" id="edge8_Node000006_Node000007" title=" " alt="" coords="235,142,193,142,193,137,235,137"/>
+</map>

@@ -10,10 +10,8 @@ digraph "CFastLED::setPowerScalingExponent"
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
   Node2 [id="Node000002",label="set_power_scaling_exponent",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d5f/group___power_model_gad213f217079d1c8e2453b74bd3aec6de.html#gad213f217079d1c8e2453b74bd3aec6de",tooltip="Set a non-linear brightness-to-power response exponent."];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="gPowerModel",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d2a/power__mgt_8cpp_8hpp_afe71d257dc9aca526178a992761bb812.html#afe71d257dc9aca526178a992761bb812",tooltip="Global RGB power model (initialized to WS2812 @ 5V defaults, linear response)"];
+  Node3 [id="Node000003",label="apply_rgb_power_model",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d2a/power__mgt_8cpp_8hpp_aa482db0d85e7c33ad7ce4f3b77f4808e.html#aa482db0d85e7c33ad7ce4f3b77f4808e",tooltip=" "];
   Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="fl::Singleton::instance",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d5b/classfl_1_1_singleton_a47fdc044003ec27f9e9833f7f5418e01.html#a47fdc044003ec27f9e9833f7f5418e01",tooltip=" "];
-  Node2 -> Node5 [id="edge4_Node000002_Node000005",color="steelblue1",style="solid",tooltip=" "];
-  Node5 [id="Node000005",label="set_power_model",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d5f/group___power_model_ga83d1cb7bfce9bd338765968bb40d54e5.html#ga83d1cb7bfce9bd338765968bb40d54e5",tooltip="Set custom RGB LED power consumption model."];
-  Node5 -> Node3 [id="edge5_Node000005_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="gPowerModel",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d1/d2a/power__mgt_8cpp_8hpp_afe71d257dc9aca526178a992761bb812.html#afe71d257dc9aca526178a992761bb812",tooltip="Global RGB power model (initialized to WS2812 @ 5V defaults, linear response)"];
+  Node2 -> Node4 [id="edge4_Node000002_Node000004",color="steelblue1",style="solid",tooltip=" "];
 }

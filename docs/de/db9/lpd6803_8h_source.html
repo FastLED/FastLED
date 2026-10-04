@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -116,7 +116,7 @@ $(function(){initNavTree('de/db9/lpd6803_8h_source.html','../../'); initResizabl
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span></div>
 <div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> InputIterator, <span class="keyword">typename</span> OutputIterator&gt;</div>
 <div class="foldopen" id="foldopen00035" data-start="{" data-end="}">
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno"><a class="line" href="../../d4/d36/namespacefl_a7f94b05efe61af5a88eed5dedab21e9f.html#a7f94b05efe61af5a88eed5dedab21e9f">   35</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a7f94b05efe61af5a88eed5dedab21e9f.html#a7f94b05efe61af5a88eed5dedab21e9f">encodeLPD6803</a>(InputIterator first, InputIterator last, OutputIterator out) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno"><a class="line" href="../../d4/d36/namespacefl_a521ddf0c9a6e682d5da736041c1cf78c.html#a521ddf0c9a6e682d5da736041c1cf78c">   35</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a521ddf0c9a6e682d5da736041c1cf78c.html#a521ddf0c9a6e682d5da736041c1cf78c">encodeLPD6803</a>(InputIterator first, InputIterator last, OutputIterator out) <a class="code hl_variable" href="../../d4/d36/namespacefl_aa317f89ca911371e798d08a93770402f.html#aa317f89ca911371e798d08a93770402f">FL_NO_EXCEPT</a> {</div>
 <div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    <span class="comment">// Start boundary: 4 bytes of 0x00</span></div>
 <div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    *out++ = 0x00;</div>
 <div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    *out++ = 0x00;</div>
@@ -129,7 +129,7 @@ $(function(){initNavTree('de/db9/lpd6803_8h_source.html','../../'); initResizabl
 <div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>        <span class="keyword">const</span> <a class="code hl_class" href="../../d4/dca/classfl_1_1array.html">fl::array&lt;u8, BYTES_PER_PIXEL_RGB&gt;</a>&amp; pixel = *first;</div>
 <div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span> </div>
 <div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>        <span class="comment">// RGB order: 0=R, 1=G, 2=B</span></div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>        u16 command = <a class="code hl_function" href="../../d4/d36/namespacefl_a19bab8334f56dc92ffcd8277422519a4.html#a19bab8334f56dc92ffcd8277422519a4">lpd6803EncodeRGB</a>(pixel[0], pixel[1], pixel[2]);</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>        u16 command = <a class="code hl_function" href="../../d4/d36/namespacefl_afd0d95850f229e39b77bd9ff8e23369e.html#afd0d95850f229e39b77bd9ff8e23369e">lpd6803EncodeRGB</a>(pixel[0], pixel[1], pixel[2]);</div>
 <div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span> </div>
 <div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>        *out++ = <span class="keyword">static_cast&lt;</span><a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a><span class="keyword">&gt;</span>(command &gt;&gt; 8);   <span class="comment">// MSB</span></div>
 <div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>        *out++ = <span class="keyword">static_cast&lt;</span><a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a><span class="keyword">&gt;</span>(command &amp; 0xFF); <span class="comment">// LSB</span></div>
@@ -155,11 +155,11 @@ $(function(){initNavTree('de/db9/lpd6803_8h_source.html','../../'); initResizabl
 <div class="ttc" id="aencoder__constants_8h_html"><div class="ttname"><a href="../../d7/ddb/encoder__constants_8h.html">encoder_constants.h</a></div><div class="ttdoc">Constants for SPI chipset encoders.</div></div>
 <div class="ttc" id="aencoder__utils_8h_html"><div class="ttname"><a href="../../d5/d4f/encoder__utils_8h.html">encoder_utils.h</a></div><div class="ttdoc">Shared utilities for SPI chipset encoders.</div></div>
 <div class="ttc" id="anamespacefl_a058ceeac48f181da463c2ba07401292c_html_a058ceeac48f181da463c2ba07401292c"><div class="ttname"><a href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a></div><div class="ttdeci">unsigned char u8</div><div class="ttdef"><b>Definition</b> <a href="../../df/dd8/stdint_8h_source.html#l00131">stdint.h:131</a></div></div>
-<div class="ttc" id="anamespacefl_a19bab8334f56dc92ffcd8277422519a4_html_a19bab8334f56dc92ffcd8277422519a4"><div class="ttname"><a href="../../d4/d36/namespacefl_a19bab8334f56dc92ffcd8277422519a4.html#a19bab8334f56dc92ffcd8277422519a4">fl::lpd6803EncodeRGB</a></div><div class="ttdeci">u16 lpd6803EncodeRGB(u8 r, u8 g, u8 b) FL_NOEXCEPT</div><div class="ttdoc">Convert RGB to LPD6803 16-bit format (1bbbbbgggggrrrrr)</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d4f/encoder__utils_8h_source.html#l00102">encoder_utils.h:102</a></div></div>
-<div class="ttc" id="anamespacefl_a7f94b05efe61af5a88eed5dedab21e9f_html_a7f94b05efe61af5a88eed5dedab21e9f"><div class="ttname"><a href="../../d4/d36/namespacefl_a7f94b05efe61af5a88eed5dedab21e9f.html#a7f94b05efe61af5a88eed5dedab21e9f">fl::encodeLPD6803</a></div><div class="ttdeci">void encodeLPD6803(InputIterator first, InputIterator last, OutputIterator out) FL_NOEXCEPT</div><div class="ttdoc">Encode pixel data in LPD6803 format.</div><div class="ttdef"><b>Definition</b> <a href="#l00035">lpd6803.h:35</a></div></div>
+<div class="ttc" id="anamespacefl_a521ddf0c9a6e682d5da736041c1cf78c_html_a521ddf0c9a6e682d5da736041c1cf78c"><div class="ttname"><a href="../../d4/d36/namespacefl_a521ddf0c9a6e682d5da736041c1cf78c.html#a521ddf0c9a6e682d5da736041c1cf78c">fl::encodeLPD6803</a></div><div class="ttdeci">void encodeLPD6803(InputIterator first, InputIterator last, OutputIterator out) FL_NO_EXCEPT</div><div class="ttdoc">Encode pixel data in LPD6803 format.</div><div class="ttdef"><b>Definition</b> <a href="#l00035">lpd6803.h:35</a></div></div>
+<div class="ttc" id="anamespacefl_aa317f89ca911371e798d08a93770402f_html_aa317f89ca911371e798d08a93770402f"><div class="ttname"><a href="../../d4/d36/namespacefl_aa317f89ca911371e798d08a93770402f.html#aa317f89ca911371e798d08a93770402f">fl::FL_NO_EXCEPT</a></div><div class="ttdeci">InputGamut g FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/df8/fl_2gfx_2rgbw_8h_source.html#l00121">rgbw.h:121</a></div></div>
+<div class="ttc" id="anamespacefl_afd0d95850f229e39b77bd9ff8e23369e_html_afd0d95850f229e39b77bd9ff8e23369e"><div class="ttname"><a href="../../d4/d36/namespacefl_afd0d95850f229e39b77bd9ff8e23369e.html#afd0d95850f229e39b77bd9ff8e23369e">fl::lpd6803EncodeRGB</a></div><div class="ttdeci">u16 lpd6803EncodeRGB(u8 r, u8 g, u8 b) FL_NO_EXCEPT</div><div class="ttdoc">Convert RGB to LPD6803 16-bit format (1bbbbbgggggrrrrr)</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d4f/encoder__utils_8h_source.html#l00105">encoder_utils.h:105</a></div></div>
 <div class="ttc" id="anamespacefl_html"><div class="ttname"><a href="../../d4/d36/namespacefl.html">fl</a></div><div class="ttdoc">Base definition for an LED controller.</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d4b/crgb_8hpp_source.html#l00179">crgb.hpp:179</a></div></div>
 <div class="ttc" id="anoexcept_8h_html"><div class="ttname"><a href="../../db/d01/noexcept_8h.html">noexcept.h</a></div></div>
-<div class="ttc" id="as16x16x4_8h_af54aac016b86a178940aca20946a8002_html_af54aac016b86a178940aca20946a8002"><div class="ttname"><a href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></div><div class="ttdeci">#define FL_NOEXCEPT</div></div>
 <div class="ttc" id="astdint_8h_html"><div class="ttname"><a href="../../df/dd8/stdint_8h.html">stdint.h</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
@@ -168,7 +168,7 @@ $(function(){initNavTree('de/db9/lpd6803_8h_source.html','../../'); initResizabl
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_4bca70778167b44495d699f593f26052.html">chipsets</a></li><li class="navelem"><a class="el" href="../../dir_d192c7b937ee683426e0e6cba42a0235.html">encoders</a></li><li class="navelem"><a class="el" href="../../de/db9/lpd6803_8h.html">lpd6803.h</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:06:59 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:00 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

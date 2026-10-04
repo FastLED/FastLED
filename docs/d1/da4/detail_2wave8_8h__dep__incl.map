@@ -1,0 +1,16 @@
+<map id="fl/channels/detail/wave8.h" name="fl/channels/detail/wave8.h">
+<area shape="rect" id="Node000001" title="Out&#45;of&#45;line declarations for wave8 transposition internals." alt="" coords="426,5,559,45"/>
+<area shape="rect" id="Node000002" href="$d1/de7/_auto_research_parlio_encode_8h.html" title="Full PARLIO encode bench for ESP32&#45;P4 (post&#45;byte&#45;LUT, #2526 landed)." alt="" coords="5,93,244,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="413,49,229,96,227,91,412,44"/>
+<area shape="rect" id="Node000003" href="$d3/d03/_auto_research_wave8_expand_8h.html" title="Wave8 expansion micro&#45;benchmark for #2526." alt="" coords="268,93,507,148"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="463,56,419,95,415,91,459,52"/>
+<area shape="rect" id="Node000004" href="$dc/d94/detail_2wave8_8cpp_8hpp.html" title="Out&#45;of&#45;line definitions for wave8 transposition internals." alt="" coords="531,101,665,141"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="526,52,578,99,575,103,522,56"/>
+<area shape="rect" id="Node000009" href="$d8/d81/wave8_8cpp_8hpp.html" title=" " alt="" coords="667,203,862,229"/>
+<area shape="poly" id="edge6_Node000001_Node000009" title=" " alt="" coords="573,42,627,62,678,91,707,118,731,149,762,202,757,205,727,152,703,122,675,95,625,66,571,47"/>
+<area shape="rect" id="Node000005" href="$dc/df7/fl_2channels_2detail_2__build_8cpp_8hpp.html" title="Unity build header for fl/channels/detail/ directory." alt="" coords="510,196,643,236"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="593,154,584,197,578,195,588,153"/>
+<area shape="rect" id="Node000006" href="$d1/d97/fl_2channels_2__build_8cpp_8hpp.html" title=" " alt="" coords="575,284,765,309"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="611,243,658,282,654,286,608,247"/>
+<area shape="poly" id="edge7_Node000009_Node000006" title=" " alt="" coords="742,240,686,286,682,282,738,236"/>
+</map>

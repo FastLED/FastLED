@@ -67,8 +67,6 @@ digraph "fl::default_delete&lt; T &gt;"
   Node30 [id="Node000030",label="fl::default_delete\l\< fl::task::Coroutine \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d5/d2b/structfl_1_1default__delete.html",tooltip=" "];
   Node1 -> Node31 [id="edge30_Node000001_Node000031",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::u8 \>",fontcolor="grey" ];
   Node31 [id="Node000031",label="fl::default_delete\l\< fl::u8 \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d5/d2b/structfl_1_1default__delete.html",tooltip=" "];
-  Node1 -> Node32 [id="edge31_Node000001_Node000032",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::i16 \>",fontcolor="grey" ];
-  Node32 [id="Node000032",label="fl::default_delete\l\< fl::i16 \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d5/d2b/structfl_1_1default__delete.html",tooltip=" "];
-  Node1 -> Node33 [id="edge32_Node000001_Node000033",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::third_party::\lMp3HelixDecoder \>",fontcolor="grey" ];
-  Node33 [id="Node000033",label="fl::default_delete\l\< fl::third_party::Mp3Helix\lDecoder \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d5/d2b/structfl_1_1default__delete.html",tooltip=" "];
+  Node1 -> Node32 [id="edge31_Node000001_Node000032",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::third_party::\lMp3Minimp3Decoder \>",fontcolor="grey" ];
+  Node32 [id="Node000032",label="fl::default_delete\l\< fl::third_party::Mp3Minimp3\lDecoder \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d5/d2b/structfl_1_1default__delete.html",tooltip=" "];
 }

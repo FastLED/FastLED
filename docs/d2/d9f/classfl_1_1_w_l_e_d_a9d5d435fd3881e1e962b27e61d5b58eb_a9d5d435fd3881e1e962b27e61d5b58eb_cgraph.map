@@ -1,0 +1,10 @@
+<map id="fl::WLED::WLED" name="fl::WLED::WLED">
+<area shape="rect" id="Node000001" title="Construct WLED with default stub I/O callbacks." alt="" coords="5,55,128,80"/>
+<area shape="rect" id="Node000002" href="$dc/ddb/classfl_1_1_remote_a08b899cb7da0b773b422213aa7f91933.html#a08b899cb7da0b773b422213aa7f91933" title="Construct with I/O callbacks." alt="" coords="207,29,355,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="128,57,193,50,193,55,129,63"/>
+<area shape="rect" id="Node000004" href="$d2/d9f/classfl_1_1_w_l_e_d_a4dcff107faf5effe5ec160c3b81de81a.html#a4dcff107faf5effe5ec160c3b81de81a" title="Stub request source callback." alt="" coords="176,79,385,104"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="129,72,162,75,162,81,128,77"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="249,31,243,21,246,11,259,5,281,3,307,6,318,15,314,19,305,11,281,8,261,10,250,15,248,20,254,28"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a0c8a67e528dcd96ee58216754a07a733.html#a0c8a67e528dcd96ee58216754a07a733" title=" " alt="" coords="433,29,508,55"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="355,39,419,39,419,45,355,45"/>
+</map>

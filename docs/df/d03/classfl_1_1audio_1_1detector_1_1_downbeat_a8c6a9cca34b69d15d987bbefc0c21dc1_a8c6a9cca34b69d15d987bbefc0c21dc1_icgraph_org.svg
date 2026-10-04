@@ -21,7 +21,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../df/d03/classfl_1_1audio_1_1detector_1_1_downbeat_a98262bacf159fd5b500530dfd218b3fa.html#a98262bacf159fd5b500530dfd218b3fa" target="_top" xlink:title="Construct with standalone Beat.">
+<g id="a_Node000002"><a xlink:href="../../df/d03/classfl_1_1audio_1_1detector_1_1_downbeat_a989097392b2a80667304a9223d13a0ac.html#a989097392b2a80667304a9223d13a0ac" target="_top" xlink:title="Construct with standalone Beat.">
 <polygon fill="white" stroke="#666666" points="300,-96 172,-96 172,-66 300,-66 300,-96"/>
 <text text-anchor="start" x="180" y="-84" font-family="Helvetica,sans-Serif" font-size="10.00">fl::audio::detector</text>
 <text text-anchor="middle" x="236" y="-73" font-family="Helvetica,sans-Serif" font-size="10.00">::Downbeat::Downbeat</text>
@@ -68,7 +68,7 @@
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../df/d03/classfl_1_1audio_1_1detector_1_1_downbeat_a3cefcdea6afeb5fa150eff107a9d6718.html#a3cefcdea6afeb5fa150eff107a9d6718" target="_top" xlink:title=" ">
+<g id="a_Node000004"><a xlink:href="../../df/d03/classfl_1_1audio_1_1detector_1_1_downbeat_ace69a0a4de6cc2984c36416ebfd6c971.html#ace69a0a4de6cc2984c36416ebfd6c971" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="136,-30 0,-30 0,0 136,0 136,-30"/>
 <text text-anchor="start" x="8" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">fl::audio::detector</text>
 <text text-anchor="middle" x="68" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">::Downbeat::~Downbeat</text>

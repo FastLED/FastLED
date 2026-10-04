@@ -56,7 +56,7 @@
 <!-- Node7 -->
 <g id="Node000007" class="node">
 <title>Node7</title>
-<g id="a_Node000007"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_a8931f3bad3b656409122dc815850a000.html#a8931f3bad3b656409122dc815850a000" target="_top" xlink:title="Get the average of the R, G, and B values.">
+<g id="a_Node000007"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_a7fcc7eeff15c59ffcdb3ede8070d0fec.html#a7fcc7eeff15c59ffcdb3ede8070d0fec" target="_top" xlink:title="Get the average of the R, G, and B values.">
 <polygon fill="white" stroke="#666666" points="261,-56 119,-56 119,-37 261,-37 261,-56"/>
 <text text-anchor="middle" x="190" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">fl::CRGB::getAverageLight</text>
 </a>
@@ -74,7 +74,7 @@
 <!-- Node8 -->
 <g id="Node000008" class="node">
 <title>Node8</title>
-<g id="a_Node000008"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_ae30b045e289d2de1bfb985bf048a130a.html#ae30b045e289d2de1bfb985bf048a130a" target="_top" xlink:title="Scale down a RGB to N/256ths of it&#39;s current brightness using &quot;video&quot; dimming rules.">
+<g id="a_Node000008"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_a5a5f3c7f22d9dc91d1ab6dba03f56194.html#a5a5f3c7f22d9dc91d1ab6dba03f56194" target="_top" xlink:title="Scale down a RGB to N/256ths of it&#39;s current brightness using &quot;video&quot; dimming rules.">
 <polygon fill="white" stroke="#666666" points="256,-19 124,-19 124,0 256,0 256,-19"/>
 <text text-anchor="middle" x="190" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::CRGB::nscale8_video</text>
 </a>
@@ -146,7 +146,7 @@
 <!-- Node9 -->
 <g id="Node000009" class="node">
 <title>Node9</title>
-<g id="a_Node000009"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_adb891cc4fe8f5ac2188d72c13c0256fd.html#adb891cc4fe8f5ac2188d72c13c0256fd" target="_top" xlink:title="Default constructor.">
+<g id="a_Node000009"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_a910ee467a963ad6805026ad83873e52b.html#a910ee467a963ad6805026ad83873e52b" target="_top" xlink:title="Default constructor.">
 <polygon fill="white" stroke="#666666" points="402.5,-19 312.5,-19 312.5,0 402.5,0 402.5,-19"/>
 <text text-anchor="middle" x="357.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::CRGB::CRGB</text>
 </a>

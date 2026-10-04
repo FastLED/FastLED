@@ -12,4 +12,6 @@ digraph "PixelController::dither"
   Node2 -> Node2 [id="edge2_Node000002_Node000002",color="steelblue1",style="solid",tooltip=" "];
   Node2 -> Node3 [id="edge3_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
   Node3 [id="Node000003",label="PixelController::copy",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/dee/struct_pixel_controller_af3310e3a869dfeafae981291b76b572d.html#af3310e3a869dfeafae981291b76b572d",tooltip=" "];
+  Node1 -> Node4 [id="edge4_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::BinaryDither::apply",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d6c/structfl_1_1_binary_dither_a855eeda5bd1b617b06acd895eeba5b03.html#a855eeda5bd1b617b06acd895eeba5b03",tooltip="Add the offset to a source byte, before scaling. Black is never lifted."];
 }

@@ -42,9 +42,9 @@ digraph "fl/gfx/noise/noise.h"
   Node29 -> Node10 [id="edge22_Node000029_Node000010",color="steelblue1",style="solid",tooltip=" "];
   Node12 -> Node10 [id="edge23_Node000012_Node000010",color="steelblue1",style="solid",tooltip=" "];
   Node11 -> Node10 [id="edge24_Node000011_Node000010",color="steelblue1",style="solid",tooltip=" "];
-  Node1 -> Node57 [id="edge25_Node000001_Node000057",color="steelblue1",style="solid",tooltip=" "];
-  Node57 [id="Node000057",label="chsv.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/dd0/chsv_8h.html",tooltip="Defines the hue, saturation, and value (HSV) pixel struct."];
-  Node57 -> Node2 [id="edge26_Node000057_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node1 -> Node58 [id="edge27_Node000001_Node000058",color="steelblue1",style="solid",tooltip=" "];
-  Node58 [id="Node000058",label="crgb.h",height=0.2,width=0.4,color="grey60", fillcolor="#E0E0E0", style="filled",tooltip=" "];
+  Node1 -> Node50 [id="edge25_Node000001_Node000050",color="steelblue1",style="solid",tooltip=" "];
+  Node50 [id="Node000050",label="chsv.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/dd0/chsv_8h.html",tooltip="Defines the hue, saturation, and value (HSV) pixel struct."];
+  Node50 -> Node2 [id="edge26_Node000050_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node51 [id="edge27_Node000001_Node000051",color="steelblue1",style="solid",tooltip=" "];
+  Node51 [id="Node000051",label="crgb.h",height=0.2,width=0.4,color="grey60", fillcolor="#E0E0E0", style="filled",tooltip=" "];
 }

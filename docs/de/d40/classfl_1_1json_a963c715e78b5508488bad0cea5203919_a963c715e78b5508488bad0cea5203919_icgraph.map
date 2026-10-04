@@ -1,0 +1,41 @@
+<map id="fl::json::push_back" name="fl::json::push_back">
+<area shape="rect" id="Node000001" title=" " alt="" coords="861,362,1004,387"/>
+<area shape="rect" id="Node000002" href="$db/d6e/structfl_1_1detail_1_1_method_schema_3_01_r_07_args_8_8_8_08_4_a90f249403496098a3b9e4c84e34ab381.html#a90f249403496098a3b9e4c84e34ab381" title=" " alt="" coords="616,5,804,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="927,349,918,289,898,211,884,170,864,130,841,92,812,59,796,48,799,43,815,55,845,89,869,127,888,168,904,210,923,288,932,348"/>
+<area shape="rect" id="Node000003" href="$d8/dc7/structfl_1_1detail_1_1_method_schema_3_01void_07_args_8_8_8_08_4_a3afc2b37d5954992fceb6ded47792439.html#a3afc2b37d5954992fceb6ded47792439" title=" " alt="" coords="607,69,813,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="924,349,912,301,890,240,857,177,836,149,812,123,795,112,798,107,815,119,840,145,862,175,895,238,917,300,929,348"/>
+<area shape="rect" id="Node000004" href="$d6/de6/namespaceautoresearch_1_1flex__io_afbd0720b63a6ebead0ceddf3b3853538.html#afbd0720b63a6ebead0ceddf3b3853538" title="Build the device&#45;info JSON returned by the flexIoDeviceInfo RPC." alt="" coords="635,133,785,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="920,350,904,314,881,270,850,225,812,187,784,172,787,167,815,183,854,222,885,267,909,312,925,348"/>
+<area shape="rect" id="Node000005" href="$d8/d6d/structfl_1_1detail_1_1_type_to_json_3_01fl_1_1vector_3_01_t_01_4_01_4_a6338e0aa231fca7de7091b5abde6027f.html#a6338e0aa231fca7de7091b5abde6027f" title=" " alt="" coords="608,197,812,237"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="913,353,871,301,843,275,812,252,789,240,791,235,815,247,846,271,874,298,917,349"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a3efa7e455248fb5a75c7f92b3d6385a5.html#a3efa7e455248fb5a75c7f92b3d6385a5" title="Encode a CRGB pixel buffer as a versioned JSON object." alt="" coords="657,262,763,287"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="903,356,862,327,812,301,763,286,765,281,814,296,864,323,906,351"/>
+<area shape="rect" id="Node000007" href="$d2/d9f/classfl_1_1_w_l_e_d_a0532a8b184db05d8165dbd7beac74def.html#a0532a8b184db05d8165dbd7beac74def" title="Get playlist configuration." alt="" coords="613,311,807,337"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="862,361,766,339,767,334,863,356"/>
+<area shape="rect" id="Node000008" href="$d2/d9f/classfl_1_1_w_l_e_d_ac8c92c79b2fcb96c31fc00e19204ca7c.html#ac8c92c79b2fcb96c31fc00e19204ca7c" title="Get current WLED state as JSON object." alt="" coords="401,337,540,362"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="847,373,540,356,540,350,847,367"/>
+<area shape="rect" id="Node000009" href="$d7/dd1/classfl_1_1_rpc_a16bb9675b8d15f3713e49fbb5a8b05a3.html#a16bb9675b8d15f3713e49fbb5a8b05a3" title="Process a JSON&#45;RPC request." alt="" coords="220,438,335,463"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="848,387,335,447,334,441,847,382"/>
+<area shape="rect" id="Node000011" href="$d7/dd1/classfl_1_1_rpc_ad04541979c3a782a0612b3dbdb1c203c.html#ad04541979c3a782a0612b3dbdb1c203c" title="Returns flat method array: [[&quot;name&quot;, &quot;returnType&quot;, [[&quot;param1&quot;, &quot;type1&quot;], ...]], ....." alt="" coords="647,463,773,489"/>
+<area shape="poly" id="edge11_Node000001_Node000011" title=" " alt="" coords="903,397,862,422,814,446,761,466,759,461,812,442,859,417,900,392"/>
+<area shape="rect" id="Node000013" href="$d8/db9/_rpc_client_8ino_a730aaee8deb94b21a670a33d166923f2.html#a730aaee8deb94b21a670a33d166923f2" title=" " alt="" coords="637,513,783,538"/>
+<area shape="poly" id="edge14_Node000001_Node000013" title=" " alt="" coords="917,400,875,452,847,479,815,502,784,516,782,511,812,498,843,475,871,449,913,397"/>
+<area shape="rect" id="Node000015" href="$d8/db9/_rpc_client_8ino_abb32ee9f08bd0f7b860de50fd86fd20c.html#abb32ee9f08bd0f7b860de50fd86fd20c" title=" " alt="" coords="614,562,806,587"/>
+<area shape="poly" id="edge16_Node000001_Node000015" title=" " alt="" coords="924,401,908,435,884,476,853,517,815,552,790,564,788,559,812,547,849,513,879,473,903,433,919,399"/>
+<area shape="rect" id="Node000016" href="$d8/db9/_rpc_client_8ino_a9a36cba61ae52c4c531e98f11f136f3d.html#a9a36cba61ae52c4c531e98f11f136f3d" title=" " alt="" coords="641,611,779,637"/>
+<area shape="poly" id="edge18_Node000001_Node000016" title=" " alt="" coords="928,402,914,446,892,499,859,554,838,579,815,601,780,618,778,613,812,596,835,575,855,551,887,497,909,444,922,400"/>
+<area shape="rect" id="Node000017" href="$d2/d78/classfl_1_1_screen_map_aefdaeba4de49e66a586df8744ffd167a.html#aefdaeba4de49e66a586df8744ffd167a" title=" " alt="" coords="631,661,789,686"/>
+<area shape="poly" id="edge20_Node000001_Node000017" title=" " alt="" coords="931,401,920,454,899,522,884,557,865,592,842,624,815,651,791,665,788,661,812,647,838,620,861,589,879,555,894,520,915,453,925,400"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="599,338,541,345,540,339,598,333"/>
+<area shape="rect" id="Node000010" href="$d7/dd1/classfl_1_1_rpc_acfc87927e9e6affe54e4f2861adac5fd.html#acfc87927e9e6affe54e4f2861adac5fd" title="For notifications (no id), returns nullopt." alt="" coords="5,438,172,463"/>
+<area shape="poly" id="edge10_Node000009_Node000010" title=" " alt="" coords="206,453,172,453,172,448,206,448"/>
+<area shape="rect" id="Node000012" href="$d7/dd1/classfl_1_1_rpc_ac6f18db558acd4d13a36f34f6c26cd2d.html#ac6f18db558acd4d13a36f34f6c26cd2d" title="Returns flat schema document." alt="" coords="410,463,531,489"/>
+<area shape="poly" id="edge12_Node000011_Node000012" title=" " alt="" coords="633,479,532,479,532,473,633,473"/>
+<area shape="poly" id="edge13_Node000012_Node000009" title=" " alt="" coords="395,469,335,461,335,456,396,464"/>
+<area shape="rect" id="Node000014" href="$d8/db9/_rpc_client_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="445,562,496,587"/>
+<area shape="poly" id="edge15_Node000013_Node000014" title=" " alt="" coords="635,543,497,572,496,567,634,538"/>
+<area shape="poly" id="edge17_Node000015_Node000014" title=" " alt="" coords="600,577,496,577,496,572,600,572"/>
+<area shape="poly" id="edge19_Node000016_Node000014" title=" " alt="" coords="634,611,496,582,497,577,635,606"/>
+<area shape="rect" id="Node000018" href="$d2/d78/classfl_1_1_screen_map_a1317755bbee8fba69a97082ba87bba1e.html#a1317755bbee8fba69a97082ba87bba1e" title=" " alt="" coords="383,661,559,686"/>
+<area shape="poly" id="edge21_Node000017_Node000018" title=" " alt="" coords="617,676,559,676,559,671,617,671"/>
+</map>

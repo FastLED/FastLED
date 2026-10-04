@@ -1,0 +1,20 @@
+digraph "fl::third_party::vorbis::convert_samples_short"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::third_party::vorbis\l::convert_samples_short",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::third_party::vorbis\l::stb_vorbis_get_frame_short",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d59/namespacefl_1_1third__party_1_1vorbis_a1f85b40f2d9bfe670781c1bc938debc4.html#a1f85b40f2d9bfe670781c1bc938debc4",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::third_party::vorbis\l::stb_vorbis_get_frame\l_short_interleaved",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d59/namespacefl_1_1third__party_1_1vorbis_a462f35a936ed86b46dd417bc8fca5ce5.html#a462f35a936ed86b46dd417bc8fca5ce5",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::third_party::vorbis\l::stb_vorbis_decode_filename",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d59/namespacefl_1_1third__party_1_1vorbis_a8b3f9859a51ffdd92598d45797fdbdc8.html#a8b3f9859a51ffdd92598d45797fdbdc8",tooltip=" "];
+  Node3 -> Node5 [id="edge4_Node000003_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::third_party::vorbis\l::stb_vorbis_decode_memory",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d59/namespacefl_1_1third__party_1_1vorbis_a38afd1c4bb5d0251e3ac16fadf16f72c.html#a38afd1c4bb5d0251e3ac16fadf16f72c",tooltip=" "];
+  Node1 -> Node6 [id="edge5_Node000001_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::third_party::vorbis\l::stb_vorbis_get_samples_short",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d59/namespacefl_1_1third__party_1_1vorbis_a7579f54fbf0df3ae2b43fc4c3cd6efdc.html#a7579f54fbf0df3ae2b43fc4c3cd6efdc",tooltip=" "];
+}

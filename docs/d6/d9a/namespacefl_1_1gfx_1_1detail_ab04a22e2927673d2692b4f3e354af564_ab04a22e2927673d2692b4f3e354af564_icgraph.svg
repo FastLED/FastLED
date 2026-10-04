@@ -225,7 +225,7 @@ var sectionId = 'dynsection-1';
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d0/d8b/namespacefl_1_1gfx_a99e28c17bab90d96ecd6a950357fde83.html#a99e28c17bab90d96ecd6a950357fde83" target="_top" xlink:title=" ">
+<g id="a_Node000003"><a xlink:href="../../d0/d8b/namespacefl_1_1gfx_ae22a45cc68484f639900a88a7980921d.html#ae22a45cc68484f639900a88a7980921d" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="313,-333.5 218,-333.5 218,-314.5 313,-314.5 313,-333.5"/>
 <text text-anchor="middle" x="265.5" y="-321.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::gfx::drawDisc</text>
 </a>
@@ -243,7 +243,7 @@ var sectionId = 'dynsection-1';
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../de/d5c/structfl_1_1gfx_1_1_canvas_aba6d3279b2186afd2564efe7f71e9d8f.html#aba6d3279b2186afd2564efe7f71e9d8f" target="_top" xlink:title=" ">
+<g id="a_Node000004"><a xlink:href="../../de/d5c/structfl_1_1gfx_1_1_canvas_ad6aecd7f8a4bd7be2afc27d6468f5c2f.html#ad6aecd7f8a4bd7be2afc27d6468f5c2f" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="152,-333.5 15,-333.5 15,-314.5 152,-314.5 152,-333.5"/>
 <text text-anchor="middle" x="83.5" y="-321.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::gfx::Canvas::drawDisc</text>
 </a>
@@ -279,7 +279,7 @@ var sectionId = 'dynsection-1';
 <!-- Node7 -->
 <g id="Node000007" class="node">
 <title>Node7</title>
-<g id="a_Node000007"><a xlink:href="../../de/d5c/structfl_1_1gfx_1_1_canvas_a46c1a93cc0dabb74c6e25f50ba91bc3c.html#a46c1a93cc0dabb74c6e25f50ba91bc3c" target="_top" xlink:title=" ">
+<g id="a_Node000007"><a xlink:href="../../de/d5c/structfl_1_1gfx_1_1_canvas_a92a02182656e4980df7b8a54c4b7cfc9.html#a92a02182656e4980df7b8a54c4b7cfc9" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="152,-296.5 15,-296.5 15,-277.5 152,-277.5 152,-296.5"/>
 <text text-anchor="middle" x="83.5" y="-284.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::gfx::Canvas::drawLine</text>
 </a>
@@ -297,7 +297,7 @@ var sectionId = 'dynsection-1';
 <!-- Node9 -->
 <g id="Node000009" class="node">
 <title>Node9</title>
-<g id="a_Node000009"><a xlink:href="../../d0/d8b/namespacefl_1_1gfx_ab43aaa534398d0c1572e2ecbbffcd631.html#ab43aaa534398d0c1572e2ecbbffcd631" target="_top" xlink:title=" ">
+<g id="a_Node000009"><a xlink:href="../../d0/d8b/namespacefl_1_1gfx_a75d6dbe05ac9b2bf1f0e6c787e3fe1af.html#a75d6dbe05ac9b2bf1f0e6c787e3fe1af" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="313.5,-259.5 217.5,-259.5 217.5,-240.5 313.5,-240.5 313.5,-259.5"/>
 <text text-anchor="middle" x="265.5" y="-247.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::gfx::drawRing</text>
 </a>
@@ -315,7 +315,7 @@ var sectionId = 'dynsection-1';
 <!-- Node10 -->
 <g id="Node000010" class="node">
 <title>Node10</title>
-<g id="a_Node000010"><a xlink:href="../../de/d5c/structfl_1_1gfx_1_1_canvas_a4592348ee30cf7896ccbed4e9c2c5b95.html#a4592348ee30cf7896ccbed4e9c2c5b95" target="_top" xlink:title=" ">
+<g id="a_Node000010"><a xlink:href="../../de/d5c/structfl_1_1gfx_1_1_canvas_a73498bc5bbbd6aa66fe3b8c3e5b5fc09.html#a73498bc5bbbd6aa66fe3b8c3e5b5fc09" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="152.5,-259.5 14.5,-259.5 14.5,-240.5 152.5,-240.5 152.5,-259.5"/>
 <text text-anchor="middle" x="83.5" y="-247.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::gfx::Canvas::drawRing</text>
 </a>
@@ -333,7 +333,7 @@ var sectionId = 'dynsection-1';
 <!-- Node12 -->
 <g id="Node000012" class="node">
 <title>Node12</title>
-<g id="a_Node000012"><a xlink:href="../../d0/d8b/namespacefl_1_1gfx_abe30294359092a06f52b99a369bca3ec.html#abe30294359092a06f52b99a369bca3ec" target="_top" xlink:title=" ">
+<g id="a_Node000012"><a xlink:href="../../d0/d8b/namespacefl_1_1gfx_a2a77f17a63e8849d012891de310a2ec5.html#a2a77f17a63e8849d012891de310a2ec5" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="328,-216.5 203,-216.5 203,-197.5 328,-197.5 328,-216.5"/>
 <text text-anchor="middle" x="265.5" y="-204.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::gfx::drawStrokeLine</text>
 </a>
@@ -351,7 +351,7 @@ var sectionId = 'dynsection-1';
 <!-- Node13 -->
 <g id="Node000013" class="node">
 <title>Node13</title>
-<g id="a_Node000013"><a xlink:href="../../de/d5c/structfl_1_1gfx_1_1_canvas_ab3d4aedbb1e4bd95e5ef3f3c7b341e09.html#ab3d4aedbb1e4bd95e5ef3f3c7b341e09" target="_top" xlink:title=" ">
+<g id="a_Node000013"><a xlink:href="../../de/d5c/structfl_1_1gfx_1_1_canvas_a0b04ab96fb2f351cb8ebba5e2d5dd52e.html#a0b04ab96fb2f351cb8ebba5e2d5dd52e" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="167,-216.5 0,-216.5 0,-197.5 167,-197.5 167,-216.5"/>
 <text text-anchor="middle" x="83.5" y="-204.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::gfx::Canvas::drawStrokeLine</text>
 </a>

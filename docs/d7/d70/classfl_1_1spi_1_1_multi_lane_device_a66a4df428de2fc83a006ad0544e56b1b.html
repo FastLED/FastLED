@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -125,22 +125,22 @@ $(function(){initNavTree('d7/d70/classfl_1_1spi_1_1_multi_lane_device_a66a4df428
 <dl class="section return"><dt>Returns</dt><dd>Reference to <a class="el" href="../../d3/d3e/classfl_1_1spi_1_1_lane.html" title="Single lane in a multi-lane SPI device.">Lane</a> object </dd></dl>
 <dl class="section note"><dt>Note</dt><dd>Panics if lane_id is out of range </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../dc/d95/multi__lane__device_8cpp_8hpp_source.html#l00287">287</a> of file <a class="el" href="../../dc/d95/multi__lane__device_8cpp_8hpp_source.html">multi_lane_device.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  287</span>                                          {</div>
-<div class="line"><span class="lineno">  288</span>    <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a.html#a8bc84fc4f04afca27bd5746cc2c2b06a">pImpl</a> || lane_id &gt;= <a class="code hl_variable" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a.html#a8bc84fc4f04afca27bd5746cc2c2b06a">pImpl</a>-&gt;lanes.size()) {</div>
-<div class="line"><span class="lineno">  289</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;MultiLaneDevice: Invalid lane ID &quot;</span> &lt;&lt; lane_id);</div>
-<div class="line"><span class="lineno">  290</span>        <span class="comment">// Return first lane as fallback (avoid crash)</span></div>
-<div class="line"><span class="lineno">  291</span>        <span class="keyword">static</span> Lane dummy_lane(0, <span class="keyword">nullptr</span>); <span class="comment">// okay static in header</span></div>
-<div class="line"><span class="lineno">  292</span>        <span class="keywordflow">return</span> dummy_lane;</div>
-<div class="line"><span class="lineno">  293</span>    }</div>
-<div class="line"><span class="lineno">  294</span>    <span class="keywordflow">return</span> <a class="code hl_variable" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a.html#a8bc84fc4f04afca27bd5746cc2c2b06a">pImpl</a>-&gt;lanes[lane_id];</div>
-<div class="line"><span class="lineno">  295</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../dc/d95/multi__lane__device_8cpp_8hpp_source.html#l00286">286</a> of file <a class="el" href="../../dc/d95/multi__lane__device_8cpp_8hpp_source.html">multi_lane_device.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  286</span>                                          {</div>
+<div class="line"><span class="lineno">  287</span>    <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a.html#a8bc84fc4f04afca27bd5746cc2c2b06a">pImpl</a> || lane_id &gt;= <a class="code hl_variable" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a.html#a8bc84fc4f04afca27bd5746cc2c2b06a">pImpl</a>-&gt;lanes.size()) {</div>
+<div class="line"><span class="lineno">  288</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;MultiLaneDevice: Invalid lane ID %s&quot;</span>, lane_id);</div>
+<div class="line"><span class="lineno">  289</span>        <span class="comment">// Return first lane as fallback (avoid crash)</span></div>
+<div class="line"><span class="lineno">  290</span>        <span class="keyword">static</span> Lane dummy_lane(0, <span class="keyword">nullptr</span>); <span class="comment">// okay static in header</span></div>
+<div class="line"><span class="lineno">  291</span>        <span class="keywordflow">return</span> dummy_lane;</div>
+<div class="line"><span class="lineno">  292</span>    }</div>
+<div class="line"><span class="lineno">  293</span>    <span class="keywordflow">return</span> <a class="code hl_variable" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a.html#a8bc84fc4f04afca27bd5746cc2c2b06a">pImpl</a>-&gt;lanes[lane_id];</div>
+<div class="line"><span class="lineno">  294</span>}</div>
 <div class="ttc" id="aclassfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a_html_a8bc84fc4f04afca27bd5746cc2c2b06a"><div class="ttname"><a href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a.html#a8bc84fc4f04afca27bd5746cc2c2b06a">fl::spi::MultiLaneDevice::pImpl</a></div><div class="ttdeci">fl::unique_ptr&lt; Impl &gt; pImpl</div><div class="ttdef"><b>Definition</b> <a href="../../da/dc3/multi__lane__device_8h_source.html#l00197">multi_lane_device.h:197</a></div></div>
-<div class="ttc" id="alog_8h_a868b194fdb2234182e76042d9fde3062_html_a868b194fdb2234182e76042d9fde3062"><div class="ttname"><a href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a></div><div class="ttdeci">#define FL_WARN(X)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00276">log.h:276</a></div></div>
+<div class="ttc" id="alog_8h_a4804912fba6eed63e1afd84b8768aced_html_a4804912fba6eed63e1afd84b8768aced"><div class="ttname"><a href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a></div><div class="ttdeci">#define FL_WARN(...)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00440">log.h:440</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d7/d7f/log_8h_source.html#l00276">FL_WARN</a>, and <a class="el" href="../../da/dc3/multi__lane__device_8h_source.html#l00197">pImpl</a>.</p>
+<p class="reference">References <a class="el" href="../../d7/d7f/log_8h_source.html#l00440">FL_WARN</a>, and <a class="el" href="../../da/dc3/multi__lane__device_8h_source.html#l00197">pImpl</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dc/d95/multi__lane__device_8cpp_8hpp_source.html#l00264">end()</a>, <a class="el" href="../../dc/d95/multi__lane__device_8cpp_8hpp_source.html#l00301">flush()</a>, and <a class="el" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a512a780a7050fa0e91e83c5dba1e17bc.html#a512a780a7050fa0e91e83c5dba1e17bc">operator=()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dc/d95/multi__lane__device_8cpp_8hpp_source.html#l00263">end()</a>, <a class="el" href="../../dc/d95/multi__lane__device_8cpp_8hpp_source.html#l00300">flush()</a>, and <a class="el" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a552f915191464193c98a7a385a6eb05b.html#a552f915191464193c98a7a385a6eb05b">operator=()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -158,7 +158,7 @@ $(function(){initNavTree('d7/d70/classfl_1_1spi_1_1_multi_lane_device_a66a4df428
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d4/d68/namespacefl_1_1spi.html">spi</a></li><li class="navelem"><a class="el" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device.html">MultiLaneDevice</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:10 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:12 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -1,0 +1,7 @@
+<map id="fl::ColorManagedPixelSource::ColorManagedPixelSource" name="fl::ColorManagedPixelSource::ColorManagedPixelSource">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,35,212,75"/>
+<area shape="rect" id="Node000002" href="$db/da5/classfl_1_1_color_managed_pixel_source_a5f3ac9c833e22d30f4f6d88f59e2c51f.html#a5f3ac9c833e22d30f4f6d88f59e2c51f" title="dither_phase is where this frame sits in the temporal&#45;dither cycle." alt="" coords="260,5,467,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="212,40,246,36,247,41,212,45"/>
+<area shape="rect" id="Node000003" href="$df/d9e/namespacefl_1_1detail_ac2b3ef0a8182dc672f6e63a01ad622cf.html#ac2b3ef0a8182dc672f6e63a01ad622cf" title="Return the temporal&#45;dither phase shared by all controllers in this frame." alt="" coords="282,70,445,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="212,63,268,70,268,75,212,69"/>
+</map>

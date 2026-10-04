@@ -71,19 +71,19 @@
 </a>
 </g>
 </g>
-<!-- Node61 -->
-<g id="Node000061" class="node">
-<title>Node61</title>
-<g id="a_Node000061"><a xlink:href="../../d2/d0f/fl_2math_2lib8static_8h.html" target="_top" xlink:title="Defines static inlining macros for lib8tion functions.">
+<!-- Node54 -->
+<g id="Node000054" class="node">
+<title>Node54</title>
+<g id="a_Node000054"><a xlink:href="../../d2/d0f/fl_2math_2lib8static_8h.html" target="_top" xlink:title="Defines static inlining macros for lib8tion functions.">
 <polygon fill="white" stroke="#666666" points="108,-74 0,-74 0,-55 108,-55 108,-74"/>
 <text text-anchor="middle" x="54" y="-62" font-family="Helvetica,sans-Serif" font-size="10.00">fl/math/lib8static.h</text>
 </a>
 </g>
 </g>
-<!-- Node3&#45;&gt;Node61 -->
-<g id="edge7_Node000003_Node000061" class="edge">
-<title>Node3&#45;&gt;Node61</title>
-<g id="a_edge7_Node000003_Node000061"><a xlink:title=" ">
+<!-- Node3&#45;&gt;Node54 -->
+<g id="edge7_Node000003_Node000054" class="edge">
+<title>Node3&#45;&gt;Node54</title>
+<g id="a_edge7_Node000003_Node000054"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M142.24,-170.64C112.73,-166.16 76.83,-155.22 57,-129 47.44,-116.36 47.66,-97.92 49.7,-84.16"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="53.14,-84.81 51.57,-74.33 46.26,-83.5 53.14,-84.81"/>
 </a>
@@ -107,46 +107,46 @@
 </a>
 </g>
 </g>
-<!-- Node63 -->
-<g id="Node000063" class="node">
-<title>Node63</title>
-<g id="a_Node000063"><a xlink:href="../../db/d72/fl_2math_2intmap_8h.html" target="_top" xlink:title="Integer mapping functions between different integer sizes.">
+<!-- Node56 -->
+<g id="Node000056" class="node">
+<title>Node56</title>
+<g id="a_Node000056"><a xlink:href="../../db/d72/fl_2math_2intmap_8h.html" target="_top" xlink:title="Integer mapping functions between different integer sizes.">
 <polygon fill="#fff0f0" stroke="red" points="316,-129 218,-129 218,-110 316,-110 316,-129"/>
 <text text-anchor="middle" x="267" y="-117" font-family="Helvetica,sans-Serif" font-size="10.00">fl/math/intmap.h</text>
 </a>
 </g>
 </g>
-<!-- Node3&#45;&gt;Node63 -->
-<g id="edge8_Node000003_Node000063" class="edge">
-<title>Node3&#45;&gt;Node63</title>
-<g id="a_edge8_Node000003_Node000063"><a xlink:title=" ">
+<!-- Node3&#45;&gt;Node56 -->
+<g id="edge8_Node000003_Node000056" class="edge">
+<title>Node3&#45;&gt;Node56</title>
+<g id="a_edge8_Node000003_Node000056"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M202.37,-164.98C214.09,-156.92 231.92,-144.65 245.89,-135.03"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="248.15,-137.72 254.4,-129.17 244.18,-131.96 248.15,-137.72"/>
 </a>
 </g>
 </g>
-<!-- Node65 -->
-<g id="Node000065" class="node">
-<title>Node65</title>
-<g id="a_Node000065"><a xlink:title=" ">
+<!-- Node58 -->
+<g id="Node000058" class="node">
+<title>Node58</title>
+<g id="a_Node000058"><a xlink:title=" ">
 <polygon fill="#e0e0e0" stroke="#999999" points="441.5,-129 334.5,-129 334.5,-110 441.5,-110 441.5,-129"/>
 <text text-anchor="middle" x="388" y="-117" font-family="Helvetica,sans-Serif" font-size="10.00">platforms/math8.h</text>
 </a>
 </g>
 </g>
-<!-- Node3&#45;&gt;Node65 -->
-<g id="edge10_Node000003_Node000065" class="edge">
-<title>Node3&#45;&gt;Node65</title>
-<g id="a_edge10_Node000003_Node000065"><a xlink:title=" ">
+<!-- Node3&#45;&gt;Node58 -->
+<g id="edge10_Node000003_Node000058" class="edge">
+<title>Node3&#45;&gt;Node58</title>
+<g id="a_edge10_Node000003_Node000058"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M221.81,-164.98C255.49,-155.97 308.8,-141.7 345.92,-131.76"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="347.18,-135.05 355.94,-129.08 345.37,-128.29 347.18,-135.05"/>
 </a>
 </g>
 </g>
-<!-- Node4&#45;&gt;Node61 -->
-<g id="edge4_Node000004_Node000061" class="edge">
-<title>Node4&#45;&gt;Node61</title>
-<g id="a_edge4_Node000004_Node000061"><a xlink:title=" ">
+<!-- Node4&#45;&gt;Node54 -->
+<g id="edge4_Node000004_Node000054" class="edge">
+<title>Node4&#45;&gt;Node54</title>
+<g id="a_edge4_Node000004_Node000054"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M104.36,-109.98C95.49,-102.15 82.13,-90.34 71.39,-80.86"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="73.63,-78.17 63.82,-74.17 68.99,-83.41 73.63,-78.17"/>
 </a>
@@ -161,10 +161,10 @@
 </a>
 </g>
 </g>
-<!-- Node61&#45;&gt;Node9 -->
-<g id="edge5_Node000061_Node000009" class="edge">
-<title>Node61&#45;&gt;Node9</title>
-<g id="a_edge5_Node000061_Node000009"><a xlink:title=" ">
+<!-- Node54&#45;&gt;Node9 -->
+<g id="edge5_Node000054_Node000009" class="edge">
+<title>Node54&#45;&gt;Node9</title>
+<g id="a_edge5_Node000054_Node000009"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M67.17,-54.98C79.77,-46.84 99,-34.41 113.94,-24.76"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="116.09,-27.54 122.59,-19.17 112.29,-21.66 116.09,-27.54"/>
 </a>

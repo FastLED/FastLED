@@ -1,0 +1,9 @@
+<map id="makeRingScreenMap" name="makeRingScreenMap">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,55,164,80"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a2bda17f9c7e7ed8cc89536cfd39f35e2.html#a2bda17f9c7e7ed8cc89536cfd39f35e2" title=" " alt="" coords="213,5,273,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="125,52,200,29,201,34,127,57"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a2fdabb91a1f100dec8da21e4306aba05.html#a2fdabb91a1f100dec8da21e4306aba05" title=" " alt="" coords="212,55,275,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="164,65,198,65,198,70,164,70"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a080e32a9d5b39b1674c35757eaa2daf9.html#a080e32a9d5b39b1674c35757eaa2daf9" title=" " alt="" coords="215,104,272,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="127,77,202,101,201,106,125,83"/>
+</map>

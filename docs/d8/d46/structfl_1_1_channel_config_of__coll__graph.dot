@@ -29,7 +29,14 @@ digraph "fl::ChannelConfigOf&lt; Chipset &gt;"
   Node14 -> Node8 [id="edge11_Node000008_Node000014",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mSourceXYMap",fontcolor="grey" ];
   Node14 [id="Node000014",label="fl::shared_ptr\< XYMap \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d1/d74/classfl_1_1shared__ptr.html",tooltip=" "];
   Node10 -> Node14 [id="edge12_Node000014_Node000010",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< XYMap \>",fontcolor="grey" ];
-  Node15 -> Node1 [id="edge13_Node000001_Node000015",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mName",fontcolor="grey" ];
-  Node15 [id="Node000015",label="fl::Optional\< fl::string \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$dd/dd8/classfl_1_1_optional.html",tooltip=" "];
-  Node7 -> Node15 [id="edge14_Node000015_Node000007",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::string \>",fontcolor="grey" ];
+  Node15 -> Node8 [id="edge13_Node000008_Node000015",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mShapes",fontcolor="grey" ];
+  Node15 [id="Node000015",label="fl::vector\< fl::ScreenMap\l::Shape \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d2/d24/classfl_1_1vector.html",tooltip=" "];
+  Node16 -> Node15 [id="edge14_Node000015_Node000016",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node16 [id="Node000016",label="fl::vector_basic",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/dad/classfl_1_1vector__basic.html",tooltip="Type-erased vector base class."];
+  Node19 -> Node15 [id="edge15_Node000015_Node000019",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::ScreenMap::Shape \>",fontcolor="grey" ];
+  Node19 [id="Node000019",label="fl::vector\< T \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d2/d24/classfl_1_1vector.html",tooltip=" "];
+  Node16 -> Node19 [id="edge16_Node000019_Node000016",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node20 -> Node1 [id="edge17_Node000001_Node000020",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mName",fontcolor="grey" ];
+  Node20 [id="Node000020",label="fl::Optional\< fl::string \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$dd/dd8/classfl_1_1_optional.html",tooltip=" "];
+  Node7 -> Node20 [id="edge18_Node000020_Node000007",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::string \>",fontcolor="grey" ];
 }

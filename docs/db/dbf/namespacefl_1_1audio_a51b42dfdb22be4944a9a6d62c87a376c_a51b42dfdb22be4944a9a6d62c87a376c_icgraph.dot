@@ -12,6 +12,6 @@ digraph "fl::audio::downsampleMicResponse"
   Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node3 [id="Node000003",label="fl::audio::detector\l::EqualizerDetector\l::configure",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/ddf/classfl_1_1audio_1_1detector_1_1_equalizer_detector_a88188f71bc78dc8603f86597cec368a2.html#a88188f71bc78dc8603f86597cec368a2",tooltip="Reconfigure equalizer tuning parameters at runtime."];
   Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="fl::audio::detector\l::EqualizerDetector\l::~EqualizerDetector",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/ddf/classfl_1_1audio_1_1detector_1_1_equalizer_detector_a54bcd91a63476c263a89b1193d771535.html#a54bcd91a63476c263a89b1193d771535",tooltip=" "];
+  Node4 [id="Node000004",label="fl::audio::detector\l::EqualizerDetector\l::~EqualizerDetector",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/ddf/classfl_1_1audio_1_1detector_1_1_equalizer_detector_aa9caeacb31bb02777b86006317f4ead4.html#aa9caeacb31bb02777b86006317f4ead4",tooltip=" "];
   Node3 -> Node3 [id="edge4_Node000003_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
 }

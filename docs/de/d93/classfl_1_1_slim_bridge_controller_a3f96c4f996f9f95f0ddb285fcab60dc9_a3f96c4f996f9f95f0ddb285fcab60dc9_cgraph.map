@@ -1,0 +1,63 @@
+<map id="fl::SlimBridgeController::showPixels" name="fl::SlimBridgeController::showPixels">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,466,179,506"/>
+<area shape="rect" id="Node000002" href="$de/d66/classfl_1_1basic__string_ac7b40587b637d254d009cc32f530fb83.html#ac7b40587b637d254d009cc32f530fb83" title=" " alt="" coords="236,240,391,265"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="98,464,115,424,142,374,179,321,201,297,225,276,236,269,239,273,228,280,204,301,183,324,147,376,120,427,103,466"/>
+<area shape="rect" id="Node000012" href="$d3/da0/classfl_1_1_i_channel_driver_aadeb11a409eba0d6de2a2fe09d55ec5e.html#aadeb11a409eba0d6de2a2fe09d55ec5e" title="Enqueue channel data for transmission." alt="" coords="246,290,381,330"/>
+<area shape="poly" id="edge17_Node000001_Node000012" title=" " alt="" coords="105,464,154,403,188,370,225,340,235,334,238,338,228,344,191,374,158,407,109,467"/>
+<area shape="rect" id="Node000013" href="$d3/da0/classfl_1_1_i_channel_driver_a66728b096e0f2af593e8caa5180229b0.html#a66728b096e0f2af593e8caa5180229b0" title="Get the driver name for affinity binding." alt="" coords="246,378,381,418"/>
+<area shape="poly" id="edge18_Node000001_Node000013" title=" " alt="" coords="139,463,226,428,244,420,246,425,228,432,141,468"/>
+<area shape="rect" id="Node000015" href="$d8/da0/classfl_1_1_c_l_e_d_controller_aecc3faff509bcff7c673f374bd4a1f0c.html#aecc3faff509bcff7c673f374bd4a1f0c" title=" " alt="" coords="245,466,381,506"/>
+<area shape="poly" id="edge21_Node000001_Node000015" title=" " alt="" coords="179,483,232,483,232,489,179,489"/>
+<area shape="rect" id="Node000016" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a0e8bceabb4653371dfd1f84bfb139e5f.html#a0e8bceabb4653371dfd1f84bfb139e5f" title=" " alt="" coords="245,530,381,570"/>
+<area shape="poly" id="edge23_Node000001_Node000016" title=" " alt="" coords="163,504,233,524,231,529,161,509"/>
+<area shape="rect" id="Node000017" href="$de/d93/classfl_1_1_slim_bridge_controller_a0de1313e37de4cba5c655df7b1644837.html#a0de1313e37de4cba5c655df7b1644837" title="Called once per accepted frame, after the enabled/ready gates pass and BEFORE the frame is encoded an..." alt="" coords="227,594,400,634"/>
+<area shape="poly" id="edge24_Node000001_Node000017" title=" " alt="" coords="119,504,168,542,228,580,241,586,239,591,225,584,165,546,115,508"/>
+<area shape="rect" id="Node000018" href="$d3/da0/classfl_1_1_i_channel_driver_ae5607fcac412ea2dc9a63704862fb6dd.html#ae5607fcac412ea2dc9a63704862fb6dd" title="Wait for driver to become READY." alt="" coords="246,658,381,698"/>
+<area shape="poly" id="edge25_Node000001_Node000018" title=" " alt="" coords="107,505,155,572,189,610,228,644,237,649,234,654,225,648,185,614,151,576,103,508"/>
+<area shape="rect" id="Node000003" href="$de/d66/classfl_1_1basic__string_a8a58fba79da87be2d1783cd652afeadc.html#a8a58fba79da87be2d1783cd652afeadc" title=" " alt="" coords="468,318,627,358"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="361,263,401,275,489,310,487,315,399,281,360,268"/>
+<area shape="rect" id="Node000005" href="$de/d66/classfl_1_1basic__string_a0625094a763be3f500174030c18eff86.html#a0625094a763be3f500174030c18eff86" title=" " alt="" coords="452,193,643,219"/>
+<area shape="poly" id="edge5_Node000002_Node000005" title=" " alt="" coords="377,237,469,219,470,224,378,243"/>
+<area shape="rect" id="Node000009" href="$de/d66/classfl_1_1basic__string_a0fcfaea1e856f9a1fb0b73a2b19ff3bc.html#a0fcfaea1e856f9a1fb0b73a2b19ff3bc" title=" " alt="" coords="448,136,647,161"/>
+<area shape="poly" id="edge12_Node000002_Node000009" title=" " alt="" coords="334,238,385,209,447,178,488,163,490,168,449,183,387,214,337,242"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="504,318,501,308,508,299,524,293,547,291,574,294,589,301,587,306,573,299,547,297,525,299,512,303,507,309,509,317"/>
+<area shape="rect" id="Node000004" href="$de/d66/classfl_1_1basic__string_af8fe033f0ec1bd3567ffcc20ddb4e7fa.html#af8fe033f0ec1bd3567ffcc20ddb4e7fa" title=" " alt="" coords="731,325,882,351"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="627,335,717,335,717,341,627,341"/>
+<area shape="rect" id="Node000006" href="$de/d66/classfl_1_1basic__string_acb1645b653b243d463e321b3c0367e3c.html#acb1645b653b243d463e321b3c0367e3c" title=" " alt="" coords="730,267,883,292"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="594,216,748,260,747,265,593,221"/>
+<area shape="rect" id="Node000007" href="$de/d66/classfl_1_1basic__string_a8f1ed124471f133d9efee78fe4bb69b3.html#a8f1ed124471f133d9efee78fe4bb69b3" title=" " alt="" coords="727,129,887,169"/>
+<area shape="poly" id="edge9_Node000005_Node000007" title=" " alt="" coords="605,191,713,167,714,172,606,196"/>
+<area shape="rect" id="Node000008" href="$de/d66/classfl_1_1basic__string_aa0b7792704593e48b18d7ce909f4e7fa.html#aa0b7792704593e48b18d7ce909f4e7fa" title=" " alt="" coords="721,193,892,219"/>
+<area shape="poly" id="edge11_Node000005_Node000008" title=" " alt="" coords="643,203,707,203,707,209,643,209"/>
+<area shape="poly" id="edge7_Node000006_Node000002" title=" " alt="" coords="730,278,404,260,404,255,730,273"/>
+<area shape="poly" id="edge8_Node000006_Node000006" title=" " alt="" coords="774,268,767,258,770,248,784,242,807,240,835,244,846,253,842,257,832,249,807,245,785,247,774,252,772,258,778,265"/>
+<area shape="poly" id="edge10_Node000007_Node000007" title=" " alt="" coords="769,129,767,119,773,110,786,104,807,102,830,105,843,112,840,117,828,110,807,107,788,109,776,114,772,120,774,128"/>
+<area shape="poly" id="edge13_Node000009_Node000006" title=" " alt="" coords="605,159,648,178,663,191,673,203,682,215,696,228,726,245,756,259,754,264,723,250,693,232,678,219,669,206,660,195,645,183,603,164"/>
+<area shape="poly" id="edge14_Node000009_Node000007" title=" " alt="" coords="647,146,713,146,713,151,647,151"/>
+<area shape="rect" id="Node000010" href="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af" title=" " alt="" coords="744,5,869,31"/>
+<area shape="poly" id="edge15_Node000009_Node000010" title=" " alt="" coords="560,134,615,88,653,62,694,40,730,27,731,32,696,44,656,66,619,92,564,138"/>
+<area shape="rect" id="Node000011" href="$d4/d36/namespacefl_a35ff6755912c639a5e5bd35fc59e57ff.html#a35ff6755912c639a5e5bd35fc59e57ff" title=" " alt="" coords="759,55,854,80"/>
+<area shape="poly" id="edge16_Node000009_Node000011" title=" " alt="" coords="578,133,694,90,745,77,747,82,695,95,579,138"/>
+<area shape="poly" id="edge20_Node000013_Node000013" title=" " alt="" coords="272,378,269,368,276,359,291,353,313,351,339,354,353,362,351,366,338,359,313,357,292,359,279,363,275,369,277,377"/>
+<area shape="rect" id="Node000014" href="$d2/db2/classfl_1_1string_af72684ed7d6b211b41ace065de0bcfe7.html#af72684ed7d6b211b41ace065de0bcfe7" title=" " alt="" coords="468,385,627,411"/>
+<area shape="poly" id="edge19_Node000013_Node000014" title=" " alt="" coords="381,395,454,395,454,401,381,401"/>
+<area shape="poly" id="edge22_Node000015_Node000015" title=" " alt="" coords="272,466,269,456,276,447,291,441,313,439,339,442,353,450,351,454,338,447,313,445,292,447,279,451,275,457,277,465"/>
+<area shape="rect" id="Node000019" href="$d3/da0/classfl_1_1_i_channel_driver_ad32c1041bd75ed5e9d51167a06323ca7.html#ad32c1041bd75ed5e9d51167a06323ca7" title="Query driver state and perform maintenance." alt="" coords="480,702,615,742"/>
+<area shape="poly" id="edge26_Node000018_Node000019" title=" " alt="" coords="381,688,467,704,466,709,380,693"/>
+<area shape="rect" id="Node000020" href="$d3/da0/classfl_1_1_i_channel_driver_a699840e6b4d11e9215de9e4a7e8f8c3d.html#a699840e6b4d11e9215de9e4a7e8f8c3d" title=" " alt="" coords="477,614,617,654"/>
+<area shape="poly" id="edge28_Node000018_Node000020" title=" " alt="" coords="380,663,464,647,465,652,381,668"/>
+<area shape="poly" id="edge27_Node000019_Node000019" title=" " alt="" coords="504,702,501,692,508,683,524,677,547,675,574,678,589,685,587,690,573,683,547,681,525,683,512,687,507,693,509,701"/>
+<area shape="rect" id="Node000021" href="$df/d9e/namespacefl_1_1detail_a2bf09615d168159d311dffc0a5cb839d.html#a2bf09615d168159d311dffc0a5cb839d" title="Get the current tiered&#45;wait spin budget (microseconds)." alt="" coords="695,671,919,696"/>
+<area shape="poly" id="edge29_Node000020_Node000021" title=" " alt="" coords="618,645,726,665,725,671,617,650"/>
+<area shape="rect" id="Node000022" href="$da/d46/classfl_1_1net_1_1_network_detector_a9ea40d2d8c89bb85c40600bd521677cd.html#a9ea40d2d8c89bb85c40600bd521677cd" title=" " alt="" coords="717,721,896,761"/>
+<area shape="poly" id="edge30_Node000020_Node000022" title=" " alt="" coords="619,650,648,664,663,675,673,686,682,696,696,706,709,713,707,718,693,711,678,700,669,689,659,679,645,668,617,655"/>
+<area shape="rect" id="Node000023" href="$d4/d36/namespacefl_a4cfbbd90ced1c04107934a3c05d3e679.html#a4cfbbd90ced1c04107934a3c05d3e679" title="Universal microsecond timer &#45; returns microseconds since system startup." alt="" coords="967,521,1049,547"/>
+<area shape="poly" id="edge31_Node000020_Node000023" title=" " alt="" coords="600,611,694,582,833,554,953,537,953,543,834,559,695,587,602,616"/>
+<area shape="rect" id="Node000024" href="$d4/d36/namespacefl_a3c0ba5842bfd029c404a38c8df2315f3.html#a3c0ba5842bfd029c404a38c8df2315f3" title="Universal millisecond timer &#45; returns milliseconds since system startup." alt="" coords="769,621,844,647"/>
+<area shape="poly" id="edge33_Node000020_Node000024" title=" " alt="" coords="617,631,756,631,756,637,617,637"/>
+<area shape="rect" id="Node000025" href="$db/d5c/namespacefl_1_1task_a2d40b476742263a3fa212e24b722e3ef.html#a2d40b476742263a3fa212e24b722e3ef" title="Run selected task subsystems." alt="" coords="759,496,854,521"/>
+<area shape="poly" id="edge35_Node000020_Node000025" title=" " alt="" coords="574,611,628,575,694,538,745,520,747,525,696,543,630,579,577,616"/>
+<area shape="poly" id="edge32_Node000023_Node000023" title=" " alt="" coords="975,523,968,513,972,503,985,497,1008,495,1036,498,1047,508,1044,512,1034,503,1008,500,987,502,976,507,973,512,979,520"/>
+<area shape="poly" id="edge34_Node000024_Node000024" title=" " alt="" coords="774,623,767,613,770,603,784,597,807,595,835,598,846,608,842,612,832,603,807,600,785,602,774,607,772,612,778,620"/>
+<area shape="poly" id="edge36_Node000025_Node000023" title=" " alt="" coords="854,512,953,524,952,530,854,517"/>
+</map>

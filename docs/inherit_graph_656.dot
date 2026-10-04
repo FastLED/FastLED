@@ -6,5 +6,7 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::flat_map\< Key,\l Value, Less \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d26/classfl_1_1flat__map.html",tooltip=" "];
+  Node0 [id="Node000000",label="fl::IFastLED",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d8d/classfl_1_1_i_fast_l_e_d.html",tooltip="Pure virtual interface for FastLED operations."];
+  Node0 -> Node1 [id="edge317_Node000000_Node000001",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 [id="Node000001",label="fl::FastLEDAdapter",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/dac/classfl_1_1_fast_l_e_d_adapter.html",tooltip="Real FastLED implementation adapter."];
 }

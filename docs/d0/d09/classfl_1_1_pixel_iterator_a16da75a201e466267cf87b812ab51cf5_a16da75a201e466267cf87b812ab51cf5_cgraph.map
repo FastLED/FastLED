@@ -1,0 +1,14 @@
+<map id="fl::PixelIterator::writeSM16716" name="fl::PixelIterator::writeSM16716">
+<area shape="rect" id="Node000001" title="Encode pixels in SM16716 format (zero allocation)" alt="" coords="5,47,131,87"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a021929c212e1cf2dcb7c11445c6c9744.html#a021929c212e1cf2dcb7c11445c6c9744" title="Helper function to create a back_insert_iterator." alt="" coords="224,5,351,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="131,50,178,39,215,31,216,36,179,45,132,56"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a40103ddedd4d2cbe2e1892270c00f5f6.html#a40103ddedd4d2cbe2e1892270c00f5f6" title="Encode pixel data in SM16716 format." alt="" coords="215,55,360,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="131,65,201,65,201,70,131,70"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_adc2a6d67292f87361ce6d24c000d1ef0.html#adc2a6d67292f87361ce6d24c000d1ef0" title="Create RGB input iterator range from PixelIterator." alt="" coords="179,128,396,153"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="129,85,236,121,234,126,128,90"/>
+<area shape="poly" id="edge6_Node000004_Node000004" title=" " alt="" coords="253,130,246,120,250,110,264,104,287,101,316,105,328,114,324,118,314,110,287,107,265,109,253,113,251,119,257,126"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a53d5062c3cacc67b60ff5bc033333817.html#a53d5062c3cacc67b60ff5bc033333817" title=" " alt="" coords="444,128,551,153"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="397,138,430,138,430,143,397,143"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a94488336a5db985fbda1bbd317bffc6a.html#a94488336a5db985fbda1bbd317bffc6a" title=" " alt="" coords="599,128,687,153"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="551,138,585,138,585,143,551,143"/>
+</map>

@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -127,16 +127,18 @@ $(function(){initNavTree('d0/da7/not__null_8cpp_8hpp_source.html','../../'); ini
 <div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment">// Platform-specific implementation to avoid circular dependencies</span></div>
 <div class="foldopen" id="foldopen00024" data-start="{" data-end="}">
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno"><a class="line" href="../../df/d9e/namespacefl_1_1detail_add45438e006346f13897a1df32ad782a.html#add45438e006346f13897a1df32ad782a">   24</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="../../df/d9e/namespacefl_1_1detail_add45438e006346f13897a1df32ad782a.html#add45438e006346f13897a1df32ad782a">not_null_assert_failed</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* message) {</div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>    <a class="code hl_define" href="../../dc/da7/assert_8h_a9b0cc574ae8c34997b6ac88cd7cc8b91.html#a9b0cc574ae8c34997b6ac88cd7cc8b91">FL_ASSERT</a>(<span class="keyword">false</span>, message);</div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>}</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>    <a class="code hl_define" href="../../d4/d54/compiler__control_8h_a3600073df3d019f0b6288e9d59b3e883.html#a3600073df3d019f0b6288e9d59b3e883">FL_UNUSED</a>(message);  <span class="comment">// FL_ASSERT compiles to nothing in some builds</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>    <a class="code hl_define" href="../../dc/da7/assert_8h_a9b0cc574ae8c34997b6ac88cd7cc8b91.html#a9b0cc574ae8c34997b6ac88cd7cc8b91">FL_ASSERT</a>(<span class="keyword">false</span>, message);</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>}</div>
 </div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>} <span class="comment">// namespace detail</span></div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>} <span class="comment">// namespace fl</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>} <span class="comment">// namespace detail</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>} <span class="comment">// namespace fl</span></div>
 <div class="ttc" id="aassert_8h_a9b0cc574ae8c34997b6ac88cd7cc8b91_html_a9b0cc574ae8c34997b6ac88cd7cc8b91"><div class="ttname"><a href="../../dc/da7/assert_8h_a9b0cc574ae8c34997b6ac88cd7cc8b91.html#a9b0cc574ae8c34997b6ac88cd7cc8b91">FL_ASSERT</a></div><div class="ttdeci">#define FL_ASSERT(x, MSG)</div><div class="ttdef"><b>Definition</b> <a href="../../dc/da7/assert_8h_source.html#l00006">assert.h:6</a></div></div>
 <div class="ttc" id="aassert_8h_html"><div class="ttname"><a href="../../dc/da7/assert_8h.html">assert.h</a></div></div>
+<div class="ttc" id="acompiler__control_8h_a3600073df3d019f0b6288e9d59b3e883_html_a3600073df3d019f0b6288e9d59b3e883"><div class="ttname"><a href="../../d4/d54/compiler__control_8h_a3600073df3d019f0b6288e9d59b3e883.html#a3600073df3d019f0b6288e9d59b3e883">FL_UNUSED</a></div><div class="ttdeci">#define FL_UNUSED(x)</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d54/compiler__control_8h_source.html#l00905">compiler_control.h:905</a></div></div>
 <div class="ttc" id="anamespacefl_1_1detail_add45438e006346f13897a1df32ad782a_html_add45438e006346f13897a1df32ad782a"><div class="ttname"><a href="../../df/d9e/namespacefl_1_1detail_add45438e006346f13897a1df32ad782a.html#add45438e006346f13897a1df32ad782a">fl::detail::not_null_assert_failed</a></div><div class="ttdeci">void not_null_assert_failed(const char *message)</div><div class="ttdef"><b>Definition</b> <a href="#l00024">not_null.cpp.hpp:24</a></div></div>
-<div class="ttc" id="anamespacefl_1_1detail_html"><div class="ttname"><a href="../../df/d9e/namespacefl_1_1detail.html">fl::detail</a></div><div class="ttdoc">Compile-time linker keep-alive hook for a single fl::Bus.</div><div class="ttdef"><b>Definition</b> <a href="../../d5/dd5/bus__traits_8h_source.html#l00048">bus_traits.h:48</a></div></div>
+<div class="ttc" id="anamespacefl_1_1detail_html"><div class="ttname"><a href="../../df/d9e/namespacefl_1_1detail.html">fl::detail</a></div><div class="ttdoc">Compile-time linker keep-alive hook for a single fl::Bus.</div><div class="ttdef"><b>Definition</b> <a href="../../d1/db8/bus__info_8h_source.html#l00057">bus_info.h:57</a></div></div>
 <div class="ttc" id="anamespacefl_html"><div class="ttname"><a href="../../d4/d36/namespacefl.html">fl</a></div><div class="ttdoc">Base definition for an LED controller.</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d4b/crgb_8hpp_source.html#l00179">crgb.hpp:179</a></div></div>
 <div class="ttc" id="anot__null_8h_html"><div class="ttname"><a href="../../db/d69/not__null_8h.html">not_null.h</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
@@ -146,7 +148,7 @@ $(function(){initNavTree('d0/da7/not__null_8cpp_8hpp_source.html','../../'); ini
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_0dd6897a8ae40540acd9d694849e950e.html">stl</a></li><li class="navelem"><a class="el" href="../../d0/da7/not__null_8cpp_8hpp.html">not_null.cpp.hpp</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:00 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:01 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

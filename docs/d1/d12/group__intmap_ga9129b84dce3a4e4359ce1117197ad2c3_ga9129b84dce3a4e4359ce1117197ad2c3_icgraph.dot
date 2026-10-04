@@ -1,0 +1,42 @@
+digraph "fl::map8_to_16"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::map8_to_16",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::detail::ScaledPixelIterator\lRGB16::advance",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d4d/classfl_1_1detail_1_1_scaled_pixel_iterator_r_g_b16_a1c1f081622db55c8bf1b4d87c39dcb18.html#a1c1f081622db55c8bf1b4d87c39dcb18",tooltip="Advance to next pixel (or mark as end)"];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::detail::ScaledPixelIterator\lRGB16::ScaledPixelIteratorRGB16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d4d/classfl_1_1detail_1_1_scaled_pixel_iterator_r_g_b16_a4d98eed68f0aff426cc09f38f0b0d9c4.html#a4d98eed68f0aff426cc09f38f0b0d9c4",tooltip="Construct from PixelIterator."];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::detail::ScaledPixelIterator\lRGB16::operator!=",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d4d/classfl_1_1detail_1_1_scaled_pixel_iterator_r_g_b16_aba026e1323f9e8cf5e2393645bc44018.html#aba026e1323f9e8cf5e2393645bc44018",tooltip="Inequality comparison."];
+  Node3 -> Node5 [id="edge4_Node000003_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::detail::ScaledPixelIterator\lRGB16::operator++",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d4d/classfl_1_1detail_1_1_scaled_pixel_iterator_r_g_b16_ae66bc05d2254955d49f1d486a080e5da.html#ae66bc05d2254955d49f1d486a080e5da",tooltip="Pre-increment operator."];
+  Node3 -> Node6 [id="edge5_Node000003_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::detail::ScaledPixelIterator\lRGB16::operator++",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d4d/classfl_1_1detail_1_1_scaled_pixel_iterator_r_g_b16_a4e1a7b684bf087bebe07ea44639dc16e.html#a4e1a7b684bf087bebe07ea44639dc16e",tooltip="Post-increment operator."];
+  Node3 -> Node7 [id="edge6_Node000003_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::detail::ScaledPixelIterator\lRGB16::operator==",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d4d/classfl_1_1detail_1_1_scaled_pixel_iterator_r_g_b16_af2b587946fb876a6e17494d426af4d1f.html#af2b587946fb876a6e17494d426af4d1f",tooltip="Equality comparison."];
+  Node2 -> Node5 [id="edge7_Node000002_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node6 [id="edge8_Node000002_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node8 [id="edge9_Node000001_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl::easeInOutSine8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a7f3d2bfd0ca0b3d6e27a813106da80e4.html#a7f3d2bfd0ca0b3d6e27a813106da80e4",tooltip="8-bit sine ease-in/ease-out function Takes an input value 0-255 and returns an eased value 0-255 Smoo..."];
+  Node8 -> Node9 [id="edge10_Node000008_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="fl::ease8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a60453e4e0c40f23f4d56eda69d6024ff.html#a60453e4e0c40f23f4d56eda69d6024ff",tooltip=" "];
+  Node8 -> Node10 [id="edge11_Node000008_Node000010",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="fl::ease8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a60c85f456b05786aaf262a11a3b76bbc.html#a60c85f456b05786aaf262a11a3b76bbc",tooltip=" "];
+  Node1 -> Node11 [id="edge12_Node000001_Node000011",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="fl::easeOutSine8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_abab11f221ebf64df027ce9156e4e9562.html#abab11f221ebf64df027ce9156e4e9562",tooltip="8-bit sine ease-out function Takes an input value 0-255 and returns an eased value 0-255 Smooth sinus..."];
+  Node11 -> Node9 [id="edge13_Node000011_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node11 -> Node10 [id="edge14_Node000011_Node000010",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node12 [id="edge15_Node000001_Node000012",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node12 [id="Node000012",label="fl::PixelIterator::\lloadAndScaleRGB16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d09/classfl_1_1_pixel_iterator_a65edf3ee981db4bd3e380a418163147d.html#a65edf3ee981db4bd3e380a418163147d",tooltip="One pixel at the source's own precision, wire-ordered."];
+  Node12 -> Node13 [id="edge16_Node000012_Node000013",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node13 [id="Node000013",label="fl::PixelIterator::\lwriteHD108",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d09/classfl_1_1_pixel_iterator_a02a0090c88b4f5b4dde6805eefc017bc.html#a02a0090c88b4f5b4dde6805eefc017bc",tooltip="Encode pixels in HD108 format (zero allocation)"];
+  Node12 -> Node14 [id="edge17_Node000012_Node000014",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node14 [id="Node000014",label="fl::PixelIterator::\lwriteLPD6803Wide",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d09/classfl_1_1_pixel_iterator_a82d20a0a0c4ec64b0b1cb78eef1fec19.html#a82d20a0a0c4ec64b0b1cb78eef1fec19",tooltip="LPD6803 over a colour-managed channel's 16-bit drives, quantized once to the chip's 5 bits per channe..."];
+  Node12 -> Node15 [id="edge18_Node000012_Node000015",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node15 [id="Node000015",label="fl::PixelIterator::\lwriteLPD8806Wide",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d09/classfl_1_1_pixel_iterator_afd142c84c03d9cd8cef98e1aaf01070c.html#afd142c84c03d9cd8cef98e1aaf01070c",tooltip="LPD8806 over a colour-managed channel's 16-bit drives, quantized once to the chip's 7 bits (B3: one f..."];
+}

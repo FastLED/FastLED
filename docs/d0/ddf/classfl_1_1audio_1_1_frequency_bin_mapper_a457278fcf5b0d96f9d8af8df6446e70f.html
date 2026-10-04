@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -143,7 +143,7 @@ $(function(){initNavTree('d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper_a4572
 <div class="line"><span class="lineno">   89</span> </div>
 <div class="line"><span class="lineno">   90</span>        <span class="comment">// Round to integer fft::FFT bin indices</span></div>
 <div class="line"><span class="lineno">   91</span>        u32 startBin = <span class="keyword">static_cast&lt;</span>u32<span class="keyword">&gt;</span>(startBinFloat);</div>
-<div class="line"><span class="lineno">   92</span>        u32 endBin = <span class="keyword">static_cast&lt;</span>u32<span class="keyword">&gt;</span>(<a class="code hl_function" href="../../d4/d36/namespacefl_a680a4050712ddcb48b6107ce5294a82f.html#a680a4050712ddcb48b6107ce5294a82f">fl::ceilf</a>(endBinFloat));</div>
+<div class="line"><span class="lineno">   92</span>        u32 endBin = <span class="keyword">static_cast&lt;</span>u32<span class="keyword">&gt;</span>(<a class="code hl_function" href="../../d4/d36/namespacefl_adb63d3a6e58a41ac639c371abe6be324.html#adb63d3a6e58a41ac639c371abe6be324">fl::ceilf</a>(endBinFloat));</div>
 <div class="line"><span class="lineno">   93</span> </div>
 <div class="line"><span class="lineno">   94</span>        <span class="comment">// Clamp to valid fft::FFT bin range</span></div>
 <div class="line"><span class="lineno">   95</span>        <span class="keywordflow">if</span> (startBin &gt;= <a class="code hl_variable" href="../../d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper_aa7304a39ab49e33ae33735c0d92e2a35.html#aa7304a39ab49e33ae33735c0d92e2a35">mConfig</a>.fftBinCount) {</div>
@@ -170,7 +170,7 @@ $(function(){initNavTree('d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper_a4572
 <div class="ttc" id="aclassfl_1_1audio_1_1_frequency_bin_mapper_adc42129449e73acd0f567dfa8bc2a811_html_adc42129449e73acd0f567dfa8bc2a811"><div class="ttname"><a href="../../d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper_adc42129449e73acd0f567dfa8bc2a811.html#adc42129449e73acd0f567dfa8bc2a811">fl::audio::FrequencyBinMapper::mBinMappings</a></div><div class="ttdeci">vector&lt; BinMapping &gt; mBinMappings</div><div class="ttdef"><b>Definition</b> <a href="../../df/dfc/frequency__bin__mapper_8h_source.html#l00157">frequency_bin_mapper.h:157</a></div></div>
 <div class="ttc" id="aclassfl_1_1audio_1_1_frequency_bin_mapper_html_a3df8c2371937c4e899004a626c92641c"><div class="ttname"><a href="../../d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper.html#a3df8c2371937c4e899004a626c92641c">fl::audio::FrequencyBinMapper::BinMapping::startBin</a></div><div class="ttdeci">u32 startBin</div><div class="ttdef"><b>Definition</b> <a href="../../df/dfc/frequency__bin__mapper_8h_source.html#l00154">frequency_bin_mapper.h:154</a></div></div>
 <div class="ttc" id="aclassfl_1_1audio_1_1_frequency_bin_mapper_html_d5/d78/structfl_1_1audio_1_1_frequency_bin_mapper_1_1_bin_mapping"><div class="ttname"><a href="../../d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper.html#d5/d78/structfl_1_1audio_1_1_frequency_bin_mapper_1_1_bin_mapping">fl::audio::FrequencyBinMapper::BinMapping</a></div><div class="ttdoc">Mapping from output bins to FFT bin ranges Each entry contains (startBin, endBin) for averaging.</div><div class="ttdef"><b>Definition</b> <a href="../../df/dfc/frequency__bin__mapper_8h_source.html#l00153">frequency_bin_mapper.h:153</a></div></div>
-<div class="ttc" id="anamespacefl_a680a4050712ddcb48b6107ce5294a82f_html_a680a4050712ddcb48b6107ce5294a82f"><div class="ttname"><a href="../../d4/d36/namespacefl_a680a4050712ddcb48b6107ce5294a82f.html#a680a4050712ddcb48b6107ce5294a82f">fl::ceilf</a></div><div class="ttdeci">float ceilf(float value) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00310">math.h:310</a></div></div>
+<div class="ttc" id="anamespacefl_adb63d3a6e58a41ac639c371abe6be324_html_adb63d3a6e58a41ac639c371abe6be324"><div class="ttname"><a href="../../d4/d36/namespacefl_adb63d3a6e58a41ac639c371abe6be324.html#adb63d3a6e58a41ac639c371abe6be324">fl::ceilf</a></div><div class="ttdeci">float ceilf(float value) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00310">math.h:310</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../df/db1/math_8h_source.html#l00310">fl::ceilf()</a>, <a class="el" href="../../df/dfc/frequency__bin__mapper_8h_source.html#l00155">fl::audio::FrequencyBinMapper::BinMapping::endBin</a>, <a class="el" href="../../df/d6c/frequency__bin__mapper_8cpp_8hpp_source.html#l00114">frequencyToFFTBin()</a>, <a class="el" href="../../df/dfc/frequency__bin__mapper_8h_source.html#l00149">mBinFrequencies</a>, <a class="el" href="../../df/dfc/frequency__bin__mapper_8h_source.html#l00157">mBinMappings</a>, <a class="el" href="../../df/dfc/frequency__bin__mapper_8h_source.html#l00144">mConfig</a>, and <a class="el" href="../../df/dfc/frequency__bin__mapper_8h_source.html#l00154">fl::audio::FrequencyBinMapper::BinMapping::startBin</a>.</p>
 
@@ -199,7 +199,7 @@ $(function(){initNavTree('d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper_a4572
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../db/dbf/namespacefl_1_1audio.html">audio</a></li><li class="navelem"><a class="el" href="../../d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper.html">FrequencyBinMapper</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:08 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:11 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

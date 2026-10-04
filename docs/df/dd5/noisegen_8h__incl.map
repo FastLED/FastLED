@@ -11,24 +11,24 @@
 <area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="370,98,256,114,188,130,121,155,42,183,28,191,17,202,10,217,8,237,8,386,10,397,16,408,39,429,74,448,118,466,217,495,309,516,308,521,216,501,116,471,72,453,36,433,12,411,5,399,3,386,3,237,5,215,13,199,25,187,40,178,119,149,186,125,255,109,369,92"/>
 <area shape="rect" id="Node000005" href="$db/dd1/crgb_8h.html" title="Legacy header." alt="" coords="762,152,825,177"/>
 <area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="439,96,749,153,748,158,438,102"/>
-<area shape="rect" id="Node000059" href="$d8/dd0/chsv_8h.html" title="Defines the hue, saturation, and value (HSV) pixel struct." alt="" coords="861,225,923,251"/>
-<area shape="poly" id="edge21_Node000004_Node000059" title=" " alt="" coords="439,91,530,96,648,106,761,123,806,135,839,150,854,163,867,179,885,211,881,214,863,182,851,166,836,154,804,140,759,128,647,111,530,101,439,96"/>
-<area shape="rect" id="Node000062" href="$d0/d1a/hsv16_8h.html" title=" " alt="" coords="442,299,553,324"/>
-<area shape="poly" id="edge22_Node000004_Node000062" title=" " alt="" coords="411,103,489,285,484,287,407,105"/>
+<area shape="rect" id="Node000052" href="$d8/dd0/chsv_8h.html" title="Defines the hue, saturation, and value (HSV) pixel struct." alt="" coords="861,225,923,251"/>
+<area shape="poly" id="edge21_Node000004_Node000052" title=" " alt="" coords="439,91,530,96,648,106,761,123,806,135,839,150,854,163,867,179,885,211,881,214,863,182,851,166,836,154,804,140,759,128,647,111,530,101,439,96"/>
+<area shape="rect" id="Node000055" href="$d0/d1a/hsv16_8h.html" title=" " alt="" coords="442,299,553,324"/>
+<area shape="poly" id="edge22_Node000004_Node000055" title=" " alt="" coords="411,103,489,285,484,287,407,105"/>
 <area shape="poly" id="edge26_Node000004_Node000015" title=" " alt="" coords="370,106,317,126,260,154,215,186,177,218,174,214,211,182,257,150,315,121,368,101"/>
-<area shape="rect" id="Node000063" href="$dd/d0e/fl_2math_2qfx_8h.html" title=" " alt="" coords="57,372,162,397"/>
-<area shape="poly" id="edge29_Node000004_Node000063" title=" " alt="" coords="370,97,304,105,223,126,183,143,145,165,111,193,85,227,78,243,75,260,77,296,86,330,99,358,94,361,81,332,71,296,69,259,73,241,80,224,107,189,141,160,180,138,221,121,303,100,369,92"/>
-<area shape="rect" id="Node000064" href="$db/d72/fl_2math_2intmap_8h.html" title="Integer mapping functions between different integer sizes." alt="" coords="271,152,401,177"/>
-<area shape="poly" id="edge32_Node000004_Node000064" title=" " alt="" coords="395,106,359,144,355,140,391,102"/>
-<area shape="rect" id="Node000066" href="$de/d0b/fl_2gfx_2noise_2noise_8h.html" title="Functions to generate noise patterns on rings and spheres." alt="" coords="538,152,683,177"/>
-<area shape="poly" id="edge36_Node000004_Node000066" title=" " alt="" coords="438,101,565,145,563,150,436,107"/>
+<area shape="rect" id="Node000056" href="$dd/d0e/fl_2math_2qfx_8h.html" title=" " alt="" coords="57,372,162,397"/>
+<area shape="poly" id="edge29_Node000004_Node000056" title=" " alt="" coords="370,97,304,105,223,126,183,143,145,165,111,193,85,227,78,243,75,260,77,296,86,330,99,358,94,361,81,332,71,296,69,259,73,241,80,224,107,189,141,160,180,138,221,121,303,100,369,92"/>
+<area shape="rect" id="Node000057" href="$db/d72/fl_2math_2intmap_8h.html" title="Integer mapping functions between different integer sizes." alt="" coords="271,152,401,177"/>
+<area shape="poly" id="edge32_Node000004_Node000057" title=" " alt="" coords="395,106,359,144,355,140,391,102"/>
+<area shape="rect" id="Node000059" href="$de/d0b/fl_2gfx_2noise_2noise_8h.html" title="Functions to generate noise patterns on rings and spheres." alt="" coords="538,152,683,177"/>
+<area shape="poly" id="edge36_Node000004_Node000059" title=" " alt="" coords="438,101,565,145,563,150,436,107"/>
 <area shape="rect" id="Node000006" href="$df/dcc/fl_2gfx_2crgb_8h.html" title="Defines the 8&#45;bit red, green, and blue (RGB) pixel type in the fl namespace." alt="" coords="595,299,693,324"/>
 <area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="783,180,668,291,664,287,779,176"/>
-<area shape="poly" id="edge13_Node000005_Node000059" title=" " alt="" coords="811,175,866,215,863,219,808,180"/>
+<area shape="poly" id="edge13_Node000005_Node000052" title=" " alt="" coords="811,175,866,215,863,219,808,180"/>
 <area shape="rect" id="Node000009" title=" " alt="" coords="947,225,1122,251"/>
 <area shape="poly" id="edge17_Node000005_Node000009" title=" " alt="" coords="826,173,984,219,982,224,824,178"/>
-<area shape="rect" id="Node000061" href="$de/d9a/hsv2rgb_8h.html" title="Functions to convert from the HSV colorspace to the RGB colorspace." alt="" coords="750,225,837,251"/>
-<area shape="poly" id="edge18_Node000005_Node000061" title=" " alt="" coords="796,178,796,212,791,212,791,178"/>
+<area shape="rect" id="Node000054" href="$de/d9a/hsv2rgb_8h.html" title="Functions to convert from the HSV colorspace to the RGB colorspace." alt="" coords="750,225,837,251"/>
+<area shape="poly" id="edge18_Node000005_Node000054" title=" " alt="" coords="796,178,796,212,791,212,791,178"/>
 <area shape="rect" id="Node000007" href="$d3/d7e/int_8h.html" title=" " alt="" coords="503,445,585,471"/>
 <area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="639,326,589,399,563,436,558,433,584,396,634,323"/>
 <area shape="rect" id="Node000013" href="$db/d19/ease_8h.html" title=" " alt="" coords="440,372,555,397"/>
@@ -38,26 +38,26 @@
 <area shape="poly" id="edge8_Node000007_Node000002" title=" " alt="" coords="518,473,415,516,413,511,516,468"/>
 <area shape="poly" id="edge10_Node000013_Node000007" title=" " alt="" coords="507,396,531,432,527,435,503,399"/>
 <area shape="poly" id="edge11_Node000013_Node000012" title=" " alt="" coords="475,400,389,442,387,437,473,395"/>
-<area shape="rect" id="Node000060" href="$d2/d4f/hsv_8h.html" title="Defines the hue, saturation, and value (HSV) pixel struct." alt="" coords="717,299,811,324"/>
-<area shape="poly" id="edge14_Node000059_Node000060" title=" " alt="" coords="873,253,798,294,796,289,870,248"/>
-<area shape="poly" id="edge15_Node000060_Node000007" title=" " alt="" coords="748,326,574,440,572,435,745,322"/>
-<area shape="poly" id="edge16_Node000060_Node000012" title=" " alt="" coords="741,327,665,361,568,400,488,425,414,445,413,439,487,420,566,395,663,356,739,322"/>
-<area shape="poly" id="edge19_Node000061_Node000006" title=" " alt="" coords="770,253,682,295,680,290,768,248"/>
-<area shape="poly" id="edge20_Node000061_Node000060" title=" " alt="" coords="791,252,776,287,772,285,786,250"/>
-<area shape="poly" id="edge23_Node000062_Node000007" title=" " alt="" coords="520,322,547,342,569,371,573,387,572,404,561,434,556,433,567,403,568,388,564,373,543,346,517,326"/>
-<area shape="poly" id="edge24_Node000062_Node000013" title=" " alt="" coords="500,324,500,358,495,358,495,324"/>
-<area shape="poly" id="edge25_Node000062_Node000012" title=" " alt="" coords="462,326,422,345,403,358,386,374,369,402,359,433,354,431,364,400,382,370,400,354,420,341,460,322"/>
+<area shape="rect" id="Node000053" href="$d2/d4f/hsv_8h.html" title="Defines the hue, saturation, and value (HSV) pixel struct." alt="" coords="717,299,811,324"/>
+<area shape="poly" id="edge14_Node000052_Node000053" title=" " alt="" coords="873,253,798,294,796,289,870,248"/>
+<area shape="poly" id="edge15_Node000053_Node000007" title=" " alt="" coords="748,326,574,440,572,435,745,322"/>
+<area shape="poly" id="edge16_Node000053_Node000012" title=" " alt="" coords="741,327,665,361,568,400,488,425,414,445,413,439,487,420,566,395,663,356,739,322"/>
+<area shape="poly" id="edge19_Node000054_Node000006" title=" " alt="" coords="770,253,682,295,680,290,768,248"/>
+<area shape="poly" id="edge20_Node000054_Node000053" title=" " alt="" coords="791,252,776,287,772,285,786,250"/>
+<area shape="poly" id="edge23_Node000055_Node000007" title=" " alt="" coords="520,322,547,342,569,371,573,387,572,404,561,434,556,433,567,403,568,388,564,373,543,346,517,326"/>
+<area shape="poly" id="edge24_Node000055_Node000013" title=" " alt="" coords="500,324,500,358,495,358,495,324"/>
+<area shape="poly" id="edge25_Node000055_Node000012" title=" " alt="" coords="462,326,422,345,403,358,386,374,369,402,359,433,354,431,364,400,382,370,400,354,420,341,460,322"/>
 <area shape="poly" id="edge27_Node000015_Node000007" title=" " alt="" coords="174,248,429,395,510,437,508,442,427,400,171,253"/>
 <area shape="poly" id="edge28_Node000015_Node000012" title=" " alt="" coords="159,250,183,317,205,358,234,395,267,420,303,438,301,443,264,425,230,399,200,361,178,319,154,252"/>
-<area shape="poly" id="edge30_Node000063_Node000002" title=" " alt="" coords="132,395,342,510,339,515,129,400"/>
-<area shape="poly" id="edge31_Node000063_Node000012" title=" " alt="" coords="149,395,301,439,299,444,148,400"/>
-<area shape="poly" id="edge35_Node000064_Node000012" title=" " alt="" coords="320,180,297,200,278,226,276,238,279,250,291,302,308,353,343,432,338,434,303,355,286,304,273,251,271,238,274,224,293,196,316,176"/>
-<area shape="poly" id="edge34_Node000064_Node000015" title=" " alt="" coords="308,180,197,223,195,218,306,175"/>
-<area shape="rect" id="Node000065" title=" " alt="" coords="288,225,435,251"/>
-<area shape="poly" id="edge33_Node000064_Node000065" title=" " alt="" coords="343,177,355,212,350,213,338,179"/>
-<area shape="poly" id="edge39_Node000066_Node000059" title=" " alt="" coords="658,175,848,222,847,227,657,180"/>
-<area shape="poly" id="edge37_Node000066_Node000060" title=" " alt="" coords="625,176,744,287,740,291,621,180"/>
-<area shape="poly" id="edge38_Node000066_Node000062" title=" " alt="" coords="612,178,606,213,598,233,587,252,564,276,537,294,534,290,560,272,583,249,593,231,600,211,607,177"/>
-<area shape="rect" id="Node000067" title=" " alt="" coords="510,225,573,251"/>
-<area shape="poly" id="edge40_Node000066_Node000067" title=" " alt="" coords="601,180,564,217,560,214,597,176"/>
+<area shape="poly" id="edge30_Node000056_Node000002" title=" " alt="" coords="132,395,342,510,339,515,129,400"/>
+<area shape="poly" id="edge31_Node000056_Node000012" title=" " alt="" coords="149,395,301,439,299,444,148,400"/>
+<area shape="poly" id="edge35_Node000057_Node000012" title=" " alt="" coords="320,180,297,200,278,226,276,238,279,250,291,302,308,353,343,432,338,434,303,355,286,304,273,251,271,238,274,224,293,196,316,176"/>
+<area shape="poly" id="edge34_Node000057_Node000015" title=" " alt="" coords="308,180,197,223,195,218,306,175"/>
+<area shape="rect" id="Node000058" title=" " alt="" coords="288,225,435,251"/>
+<area shape="poly" id="edge33_Node000057_Node000058" title=" " alt="" coords="343,177,355,212,350,213,338,179"/>
+<area shape="poly" id="edge39_Node000059_Node000052" title=" " alt="" coords="658,175,848,222,847,227,657,180"/>
+<area shape="poly" id="edge37_Node000059_Node000053" title=" " alt="" coords="625,176,744,287,740,291,621,180"/>
+<area shape="poly" id="edge38_Node000059_Node000055" title=" " alt="" coords="612,178,606,213,598,233,587,252,564,276,537,294,534,290,560,272,583,249,593,231,600,211,607,177"/>
+<area shape="rect" id="Node000060" title=" " alt="" coords="510,225,573,251"/>
+<area shape="poly" id="edge40_Node000059_Node000060" title=" " alt="" coords="601,180,564,217,560,214,597,176"/>
 </map>

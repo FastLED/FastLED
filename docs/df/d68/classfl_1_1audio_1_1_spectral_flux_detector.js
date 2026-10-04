@@ -1,7 +1,7 @@
 var classfl_1_1audio_1_1_spectral_flux_detector =
 [
-    [ "SpectralFluxDetector", "df/d68/classfl_1_1audio_1_1_spectral_flux_detector_a21809fa7dd37f4250be8d30a461417cf.html#a21809fa7dd37f4250be8d30a461417cf", null ],
-    [ "~SpectralFluxDetector", "df/d68/classfl_1_1audio_1_1_spectral_flux_detector_a8e0f6473708a56c3d828b19ab9e05840.html#a8e0f6473708a56c3d828b19ab9e05840", null ],
+    [ "SpectralFluxDetector", "df/d68/classfl_1_1audio_1_1_spectral_flux_detector_adeb8180a2f2c3547570d4c1bc2637ab7.html#adeb8180a2f2c3547570d4c1bc2637ab7", null ],
+    [ "~SpectralFluxDetector", "df/d68/classfl_1_1audio_1_1_spectral_flux_detector_a10b9bf92079b60c64226e91bdf335dba.html#a10b9bf92079b60c64226e91bdf335dba", null ],
     [ "calculateSpectralFlux", "df/d68/classfl_1_1audio_1_1_spectral_flux_detector_aafd53f207e19737176de810add35c468.html#aafd53f207e19737176de810add35c468", null ],
     [ "detectOnset", "df/d68/classfl_1_1audio_1_1_spectral_flux_detector_ad9150f6d8238fa0d3899214f94281ec0.html#ad9150f6d8238fa0d3899214f94281ec0", null ],
     [ "getThreshold", "df/d68/classfl_1_1audio_1_1_spectral_flux_detector_adf6cdc7292f80a62d8a625b70a13be12.html#adf6cdc7292f80a62d8a625b70a13be12", null ],

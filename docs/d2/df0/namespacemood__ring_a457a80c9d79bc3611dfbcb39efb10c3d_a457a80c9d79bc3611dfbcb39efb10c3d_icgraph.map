@@ -1,0 +1,17 @@
+<map id="mood_ring::ringDistance" name="mood_ring::ringDistance">
+<area shape="rect" id="Node000001" title="Shortest distance between two ring positions, in turns, in [0, 0.5]." alt="" coords="688,141,869,166"/>
+<area shape="rect" id="Node000002" href="$d7/d17/classmood__ring_1_1_ring_canvas_a8ce8023931622ce858d582d136bdb0aa.html#a8ce8023931622ce858d582d136bdb0aa" title="Add a smooth lobe centred at pos (turns) with half&#45;width sigma (turns)." alt="" coords="464,85,640,125"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="704,140,639,127,641,121,705,135"/>
+<area shape="rect" id="Node000006" href="$d7/d17/classmood__ring_1_1_ring_canvas_ac69fa8258949bc23b3b565289846f512.html#ac69fa8258949bc23b3b565289846f512" title="Add a band at distance radius (turns, 0..0.5) from origin, on both sides of it at once: an expanding ..." alt="" coords="464,165,640,205"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="675,171,640,176,640,170,674,165"/>
+<area shape="rect" id="Node000003" href="$da/d3e/classmood__ring_1_1_breath_layer_a4e746520582685543301d68be868d8c7.html#a4e746520582685543301d68be868d8c7" title=" " alt="" coords="235,5,414,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="481,83,415,60,382,48,384,43,417,55,482,78"/>
+<area shape="rect" id="Node000004" href="$db/deb/classmood__ring_1_1_flow_layer_aec6052ddb304be2560793529421b4d13.html#aec6052ddb304be2560793529421b4d13" title=" " alt="" coords="241,69,408,109"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="450,101,408,98,408,93,451,96"/>
+<area shape="rect" id="Node000005" href="$d6/dee/classmood__ring_1_1_groove_layer_a085e540e0a3ae1223ee96f965982b9ba.html#a085e540e0a3ae1223ee96f965982b9ba" title=" " alt="" coords="233,133,416,173"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="451,129,417,137,416,131,450,124"/>
+<area shape="rect" id="Node000007" href="$d7/d06/classmood__ring_1_1_mood_painter_a2d39cdac14d69c9bb9dbed6e676d61ae.html#a2d39cdac14d69c9bb9dbed6e676d61ae" title=" " alt="" coords="235,197,415,237"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="451,202,415,207,414,202,450,197"/>
+<area shape="rect" id="Node000008" href="$d7/d06/classmood__ring_1_1_mood_painter_ac3fb619def2fc2ffc2c906e65e8bb214.html#ac3fb619def2fc2ffc2c906e65e8bb214" title="Render one frame into out." alt="" coords="5,197,185,237"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="221,220,185,220,185,215,221,215"/>
+</map>

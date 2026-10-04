@@ -1,20 +1,20 @@
 <map id="fl::Blend2d::draw" name="fl::Blend2d::draw">
 <area shape="rect" id="Node000001" title=" " alt="" coords="5,104,136,129"/>
-<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_aca219e4ecfa76d0476e9f553f4066548.html#aca219e4ecfa76d0476e9f553f4066548" title=" " alt="" coords="273,29,351,55"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a297e1492a0d4d3959a013cc8225de491.html#a297e1492a0d4d3959a013cc8225de491" title=" " alt="" coords="273,29,351,55"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="95,101,135,82,183,63,258,46,259,52,185,69,137,87,97,106"/>
-<area shape="rect" id="Node000008" href="$d0/dce/classfl_1_1_x_y_map_afa8bebe89b4ba6869deb9ae6c5dd5efe.html#afa8bebe89b4ba6869deb9ae6c5dd5efe" title=" " alt="" coords="184,79,440,104"/>
+<area shape="rect" id="Node000008" href="$d0/dce/classfl_1_1_x_y_map_abfdce050f9fd1ca4083bedc9316f9455.html#abfdce050f9fd1ca4083bedc9316f9455" title=" " alt="" coords="184,79,440,104"/>
 <area shape="poly" id="edge5_Node000001_Node000008" title=" " alt="" coords="136,107,177,103,178,108,137,112"/>
-<area shape="rect" id="Node000011" href="$d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909" title=" " alt="" coords="279,128,345,153"/>
+<area shape="rect" id="Node000011" href="$d4/d36/namespacefl_a07c69292ef50aa1083046faff1c52ead.html#a07c69292ef50aa1083046faff1c52ead" title=" " alt="" coords="279,128,345,153"/>
 <area shape="poly" id="edge9_Node000001_Node000011" title=" " alt="" coords="137,121,265,133,264,139,136,126"/>
 <area shape="rect" id="Node000012" href="$d7/d3e/classfl_1_1_fx2d_ad6e9c311d2db1b04b46921ba869cb48f.html#ad6e9c311d2db1b04b46921ba869cb48f" title=" " alt="" coords="251,177,373,203"/>
 <area shape="poly" id="edge10_Node000001_Node000012" title=" " alt="" coords="98,127,138,146,185,163,238,176,236,182,183,169,136,151,96,132"/>
-<area shape="rect" id="Node000003" href="$d5/d3d/group___color_blurs_ga0699f1dd2dc72d5e683bd148378050a9.html#ga0699f1dd2dc72d5e683bd148378050a9" title="Two&#45;dimensional blur filter (span version)." alt="" coords="502,29,610,55"/>
+<area shape="rect" id="Node000003" href="$d5/d3d/group___color_blurs_ga648b01339a6b68fecbcb933df57db297.html#ga648b01339a6b68fecbcb933df57db297" title="Two&#45;dimensional blur filter (span version)." alt="" coords="502,29,610,55"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="352,39,488,39,488,45,352,45"/>
-<area shape="rect" id="Node000004" href="$d5/d3d/group___color_blurs_gaf6b4765e82578c70df7b3d12ca4b6c71.html#gaf6b4765e82578c70df7b3d12ca4b6c71" title="Perform a blur1d() on every column of a rectangular matrix (span version)." alt="" coords="672,5,821,31"/>
+<area shape="rect" id="Node000004" href="$d5/d3d/group___color_blurs_gaf42765991cf5da9428fe3e7d1d104168.html#gaf42765991cf5da9428fe3e7d1d104168" title="Perform a blur1d() on every column of a rectangular matrix (span version)." alt="" coords="672,5,821,31"/>
 <area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="610,33,658,26,659,32,611,38"/>
-<area shape="rect" id="Node000007" href="$d5/d3d/group___color_blurs_ga83bb8ebe9bd3ab749bcb42aaa0fc7df5.html#ga83bb8ebe9bd3ab749bcb42aaa0fc7df5" title="Perform a blur1d() on every row of a rectangular matrix (span version)." alt="" coords="683,55,810,80"/>
+<area shape="rect" id="Node000007" href="$d5/d3d/group___color_blurs_gafe47df0af91421b253a945970c99f646.html#gafe47df0af91421b253a945970c99f646" title="Perform a blur1d() on every row of a rectangular matrix (span version)." alt="" coords="683,55,810,80"/>
 <area shape="poly" id="edge4_Node000003_Node000007" title=" " alt="" coords="611,46,670,54,669,60,610,52"/>
-<area shape="rect" id="Node000009" href="$d0/dce/classfl_1_1_x_y_map_afcc485be5a44a487d265eb6af9f89a40.html#afcc485be5a44a487d265eb6af9f89a40" title=" " alt="" coords="488,79,624,104"/>
+<area shape="rect" id="Node000009" href="$d0/dce/classfl_1_1_x_y_map_af5f45741fbb525e77c07d96f699e4ebc.html#af5f45741fbb525e77c07d96f699e4ebc" title=" " alt="" coords="488,79,624,104"/>
 <area shape="poly" id="edge6_Node000008_Node000009" title=" " alt="" coords="440,89,474,89,474,94,440,94"/>
 <area shape="rect" id="Node000010" href="$d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d" title=" " alt="" coords="717,104,776,129"/>
 <area shape="poly" id="edge8_Node000008_Node000010" title=" " alt="" coords="385,101,488,114,605,118,703,116,703,121,605,123,488,119,384,107"/>

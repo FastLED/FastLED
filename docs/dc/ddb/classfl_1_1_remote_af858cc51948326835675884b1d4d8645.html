@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -117,27 +117,27 @@ $(function(){initNavTree('dc/ddb/classfl_1_1_remote_af858cc51948326835675884b1d4
 
 <p>Clear state (bitwise OR of <a class="el" href="../../dc/ddb/classfl_1_1_remote_aa91b1eb21c420050853111ac788cbcb0.html#aa91b1eb21c420050853111ac788cbcb0">ClearFlags</a>) </p>
 
-<p class="definition">Definition at line <a class="el" href="../../db/d04/remote_8cpp_8hpp_source.html#l00236">236</a> of file <a class="el" href="../../db/d04/remote_8cpp_8hpp_source.html">remote.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  236</span>                                   {</div>
-<div class="line"><span class="lineno">  237</span>    <span class="keywordflow">if</span> ((flags &amp; ClearFlags::Results) != ClearFlags::None) {</div>
-<div class="line"><span class="lineno">  238</span>        <a class="code hl_variable" href="../../dc/ddb/classfl_1_1_remote_ad1314a8fd6e6394dac7019ddd5b5c7ef.html#ad1314a8fd6e6394dac7019ddd5b5c7ef">mResults</a>.clear();</div>
-<div class="line"><span class="lineno">  239</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a>(<span class="stringliteral">&quot;Cleared RPC results&quot;</span>);</div>
-<div class="line"><span class="lineno">  240</span>    }</div>
-<div class="line"><span class="lineno">  241</span>    <span class="keywordflow">if</span> ((flags &amp; ClearFlags::Scheduled) != ClearFlags::None) {</div>
-<div class="line"><span class="lineno">  242</span>        <a class="code hl_variable" href="../../dc/ddb/classfl_1_1_remote_a4d6c8de19c2556eaf16c0c14a42d22bc.html#a4d6c8de19c2556eaf16c0c14a42d22bc">mScheduler</a>.clear();</div>
-<div class="line"><span class="lineno">  243</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a>(<span class="stringliteral">&quot;Cleared scheduled RPC calls&quot;</span>);</div>
-<div class="line"><span class="lineno">  244</span>    }</div>
-<div class="line"><span class="lineno">  245</span>    <span class="keywordflow">if</span> ((flags &amp; ClearFlags::Functions) != ClearFlags::None) {</div>
-<div class="line"><span class="lineno">  246</span>        <a class="code hl_variable" href="../../dc/ddb/classfl_1_1_remote_ae45153c0f29b8f71a6eaf4318557b1d7.html#ae45153c0f29b8f71a6eaf4318557b1d7">mRpc</a>.clear();</div>
-<div class="line"><span class="lineno">  247</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a>(<span class="stringliteral">&quot;Cleared registered RPC functions&quot;</span>);</div>
-<div class="line"><span class="lineno">  248</span>    }</div>
-<div class="line"><span class="lineno">  249</span>}</div>
-<div class="ttc" id="aclassfl_1_1_remote_a4d6c8de19c2556eaf16c0c14a42d22bc_html_a4d6c8de19c2556eaf16c0c14a42d22bc"><div class="ttname"><a href="../../dc/ddb/classfl_1_1_remote_a4d6c8de19c2556eaf16c0c14a42d22bc.html#a4d6c8de19c2556eaf16c0c14a42d22bc">fl::Remote::mScheduler</a></div><div class="ttdeci">fl::net::RpcScheduler mScheduler</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d06/remote_8h_source.html#l00209">remote.h:209</a></div></div>
-<div class="ttc" id="aclassfl_1_1_remote_ad1314a8fd6e6394dac7019ddd5b5c7ef_html_ad1314a8fd6e6394dac7019ddd5b5c7ef"><div class="ttname"><a href="../../dc/ddb/classfl_1_1_remote_ad1314a8fd6e6394dac7019ddd5b5c7ef.html#ad1314a8fd6e6394dac7019ddd5b5c7ef">fl::Remote::mResults</a></div><div class="ttdeci">fl::vector&lt; RpcResult &gt; mResults</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d06/remote_8h_source.html#l00212">remote.h:212</a></div></div>
-<div class="ttc" id="aclassfl_1_1_remote_ae45153c0f29b8f71a6eaf4318557b1d7_html_ae45153c0f29b8f71a6eaf4318557b1d7"><div class="ttname"><a href="../../dc/ddb/classfl_1_1_remote_ae45153c0f29b8f71a6eaf4318557b1d7.html#ae45153c0f29b8f71a6eaf4318557b1d7">fl::Remote::mRpc</a></div><div class="ttdeci">fl::Rpc mRpc</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d06/remote_8h_source.html#l00206">remote.h:206</a></div></div>
-<div class="ttc" id="alog_8h_a8ccae77aa5fe30a41f19d233cb0de2c1_html_a8ccae77aa5fe30a41f19d233cb0de2c1"><div class="ttname"><a href="../../d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a></div><div class="ttdeci">#define FL_DBG</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00388">log.h:388</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../db/d04/remote_8cpp_8hpp_source.html#l00291">291</a> of file <a class="el" href="../../db/d04/remote_8cpp_8hpp_source.html">remote.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  291</span>                                   {</div>
+<div class="line"><span class="lineno">  292</span><span class="preprocessor">#if FL_PLATFORM_HAS_LARGE_MEMORY</span></div>
+<div class="line"><span class="lineno">  293</span>    <span class="keywordflow">if</span> ((flags &amp; ClearFlags::Results) != ClearFlags::None) {</div>
+<div class="line"><span class="lineno">  294</span>        mResults.clear();</div>
+<div class="line"><span class="lineno">  295</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a>(<span class="stringliteral">&quot;Cleared RPC results&quot;</span>);</div>
+<div class="line"><span class="lineno">  296</span>    }</div>
+<div class="line"><span class="lineno">  297</span>    <span class="keywordflow">if</span> ((flags &amp; ClearFlags::Scheduled) != ClearFlags::None) {</div>
+<div class="line"><span class="lineno">  298</span>        mScheduler.clear();</div>
+<div class="line"><span class="lineno">  299</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a>(<span class="stringliteral">&quot;Cleared scheduled RPC calls&quot;</span>);</div>
+<div class="line"><span class="lineno">  300</span>    }</div>
+<div class="line"><span class="lineno">  301</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">  302</span>    <span class="keywordflow">if</span> ((flags &amp; ClearFlags::Functions) != ClearFlags::None) {</div>
+<div class="line"><span class="lineno">  303</span>        <a class="code hl_variable" href="../../dc/ddb/classfl_1_1_remote_ae45153c0f29b8f71a6eaf4318557b1d7.html#ae45153c0f29b8f71a6eaf4318557b1d7">mRpc</a>.clear();</div>
+<div class="line"><span class="lineno">  304</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a>(<span class="stringliteral">&quot;Cleared registered RPC functions&quot;</span>);</div>
+<div class="line"><span class="lineno">  305</span>    }</div>
+<div class="line"><span class="lineno">  306</span>}</div>
+<div class="ttc" id="aclassfl_1_1_remote_ae45153c0f29b8f71a6eaf4318557b1d7_html_ae45153c0f29b8f71a6eaf4318557b1d7"><div class="ttname"><a href="../../dc/ddb/classfl_1_1_remote_ae45153c0f29b8f71a6eaf4318557b1d7.html#ae45153c0f29b8f71a6eaf4318557b1d7">fl::Remote::mRpc</a></div><div class="ttdeci">fl::Rpc mRpc</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d06/remote_8h_source.html#l00225">remote.h:225</a></div></div>
+<div class="ttc" id="alog_8h_a8ccae77aa5fe30a41f19d233cb0de2c1_html_a8ccae77aa5fe30a41f19d233cb0de2c1"><div class="ttname"><a href="../../d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a></div><div class="ttdeci">#define FL_DBG</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00564">log.h:564</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d7/d7f/log_8h_source.html#l00388">FL_DBG</a>, <a class="el" href="../../d6/d06/remote_8h_source.html#l00212">mResults</a>, <a class="el" href="../../d6/d06/remote_8h_source.html#l00206">mRpc</a>, and <a class="el" href="../../d6/d06/remote_8h_source.html#l00209">mScheduler</a>.</p>
+<p class="reference">References <a class="el" href="../../d7/d7f/log_8h_source.html#l00564">FL_DBG</a>, and <a class="el" href="../../d6/d06/remote_8h_source.html#l00225">mRpc</a>.</p>
 
 </div>
 </div>
@@ -148,7 +148,7 @@ $(function(){initNavTree('dc/ddb/classfl_1_1_remote_af858cc51948326835675884b1d4
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../dc/ddb/classfl_1_1_remote.html">Remote</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:09 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

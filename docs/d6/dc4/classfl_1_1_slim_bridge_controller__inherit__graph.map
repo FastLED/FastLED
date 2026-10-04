@@ -1,0 +1,7 @@
+<map id="fl::SlimBridgeController&lt; DATA_PIN, TIMING, RGB_ORDER, WAIT_TIME, DriverTraits, XTRA0, DIRECT_SHOW &gt;" name="fl::SlimBridgeController&lt; DATA_PIN, TIMING, RGB_ORDER, WAIT_TIME, DriverTraits, XTRA0, DIRECT_SHOW &gt;">
+<area shape="rect" id="Node000001" title="Shared legacy addLeds&lt;&gt;() bridge controller over an IChannelDriver." alt="" coords="5,181,248,251"/>
+<area shape="rect" id="Node000002" href="$d0/dc9/class_c_pixel_l_e_d_controller.html" title="Template extension of the CLEDController class." alt="" coords="40,79,213,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="129,147,129,181,124,181,124,147"/>
+<area shape="rect" id="Node000003" href="$d8/da0/classfl_1_1_c_l_e_d_controller.html" title=" " alt="" coords="67,5,187,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="129,44,129,79,124,79,124,44"/>
+</map>

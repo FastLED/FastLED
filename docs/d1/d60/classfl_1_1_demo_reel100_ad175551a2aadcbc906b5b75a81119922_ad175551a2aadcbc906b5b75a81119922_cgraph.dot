@@ -8,11 +8,11 @@ digraph "fl::DemoReel100::bpm"
   rankdir="LR";
   Node1 [id="Node000001",label="fl::DemoReel100::bpm",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::beatsin8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d6c/group___beat_generators_ga696b9421eca961df0a68c7c6c3e983ab.html#ga696b9421eca961df0a68c7c6c3e983ab",tooltip="Generates an 8-bit sine wave at a given BPM that oscillates within a given range."];
+  Node2 [id="Node000002",label="fl::beatsin8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d6c/group___beat_generators_gaca012663c6c8fe9a7240bcbc76095ba9.html#gaca012663c6c8fe9a7240bcbc76095ba9",tooltip="Generates an 8-bit sine wave at a given BPM that oscillates within a given range."];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::beat8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d6c/group___beat_generators_ga7195cd79b30358b151154623586631aa.html#ga7195cd79b30358b151154623586631aa",tooltip="Generates an 8-bit \"sawtooth\" wave at a given BPM."];
+  Node3 [id="Node000003",label="fl::beat8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d6c/group___beat_generators_ga6931d7f79bebd9c76e29fb41aafe5e9e.html#ga6931d7f79bebd9c76e29fb41aafe5e9e",tooltip="Generates an 8-bit \"sawtooth\" wave at a given BPM."];
   Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="fl::beat16",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d6/d6c/group___beat_generators_ga120dfa6dac7fa3d3958ae1e30b64e1d7.html#ga120dfa6dac7fa3d3958ae1e30b64e1d7",tooltip="Generates a 16-bit \"sawtooth\" wave at a given BPM."];
+  Node4 [id="Node000004",label="fl::beat16",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d6/d6c/group___beat_generators_gad335b2b96f9dd59cac724dc1177b6373.html#gad335b2b96f9dd59cac724dc1177b6373",tooltip="Generates a 16-bit \"sawtooth\" wave at a given BPM."];
   Node1 -> Node7 [id="edge4_Node000001_Node000007",color="steelblue1",style="solid",tooltip=" "];
   Node7 [id="Node000007",label="fl::ColorFromPalette",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a3d488dd1e2d27e99307310527e51cad3.html#a3d488dd1e2d27e99307310527e51cad3",tooltip=" "];
   Node7 -> Node8 [id="edge5_Node000007_Node000008",color="steelblue1",style="solid",tooltip=" "];

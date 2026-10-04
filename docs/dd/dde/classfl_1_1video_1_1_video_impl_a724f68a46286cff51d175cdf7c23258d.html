@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -115,23 +115,23 @@ $(function(){initNavTree('dd/dde/classfl_1_1video_1_1_video_impl_a724f68a46286cf
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d6/db7/video__impl_8cpp_8hpp_source.html#l00076">76</a> of file <a class="el" href="../../d6/db7/video__impl_8cpp_8hpp_source.html">video_impl.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   76</span>                                    {</div>
-<div class="line"><span class="lineno">   77</span>    <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../dd/dde/classfl_1_1video_1_1_video_impl_ad45a9c57b751ba9d0925501ff982b266.html#ad45a9c57b751ba9d0925501ff982b266">mStream</a>) {</div>
-<div class="line"><span class="lineno">   78</span>        <span class="keywordflow">return</span> -1;</div>
-<div class="line"><span class="lineno">   79</span>    }</div>
-<div class="line"><span class="lineno">   80</span>    i32 frames = <a class="code hl_variable" href="../../dd/dde/classfl_1_1video_1_1_video_impl_ad45a9c57b751ba9d0925501ff982b266.html#ad45a9c57b751ba9d0925501ff982b266">mStream</a>-&gt;framesRemaining();</div>
-<div class="line"><span class="lineno">   81</span>    <span class="keywordflow">if</span> (frames &lt; 0) {</div>
-<div class="line"><span class="lineno">   82</span>        <span class="keywordflow">return</span> -1; <span class="comment">// Stream case, duration unknown</span></div>
-<div class="line"><span class="lineno">   83</span>    }</div>
-<div class="line"><span class="lineno">   84</span>    fl::u32 micros_per_frame =</div>
-<div class="line"><span class="lineno">   85</span>        <a class="code hl_variable" href="../../dd/dde/classfl_1_1video_1_1_video_impl_a8ae0ed6d6df280e91dd0aadb5a8961cb.html#a8ae0ed6d6df280e91dd0aadb5a8961cb">mFrameInterpolator</a>-&gt;getFrameTracker().microsecondsPerFrame();</div>
-<div class="line"><span class="lineno">   86</span>    <span class="keywordflow">return</span> (frames * micros_per_frame); <span class="comment">// Convert to milliseconds</span></div>
-<div class="line"><span class="lineno">   87</span>}</div>
-<div class="ttc" id="aclassfl_1_1video_1_1_video_impl_a8ae0ed6d6df280e91dd0aadb5a8961cb_html_a8ae0ed6d6df280e91dd0aadb5a8961cb"><div class="ttname"><a href="../../dd/dde/classfl_1_1video_1_1_video_impl_a8ae0ed6d6df280e91dd0aadb5a8961cb.html#a8ae0ed6d6df280e91dd0aadb5a8961cb">fl::video::VideoImpl::mFrameInterpolator</a></div><div class="ttdeci">FrameInterpolatorPtr mFrameInterpolator</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d82/video__impl_8h_source.html#l00069">video_impl.h:69</a></div></div>
-<div class="ttc" id="aclassfl_1_1video_1_1_video_impl_ad45a9c57b751ba9d0925501ff982b266_html_ad45a9c57b751ba9d0925501ff982b266"><div class="ttname"><a href="../../dd/dde/classfl_1_1video_1_1_video_impl_ad45a9c57b751ba9d0925501ff982b266.html#ad45a9c57b751ba9d0925501ff982b266">fl::video::VideoImpl::mStream</a></div><div class="ttdeci">PixelStreamPtr mStream</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d82/video__impl_8h_source.html#l00067">video_impl.h:67</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d6/db7/video__impl_8cpp_8hpp_source.html#l00081">81</a> of file <a class="el" href="../../d6/db7/video__impl_8cpp_8hpp_source.html">video_impl.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   81</span>                                    {</div>
+<div class="line"><span class="lineno">   82</span>    <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../dd/dde/classfl_1_1video_1_1_video_impl_ad45a9c57b751ba9d0925501ff982b266.html#ad45a9c57b751ba9d0925501ff982b266">mStream</a>) {</div>
+<div class="line"><span class="lineno">   83</span>        <span class="keywordflow">return</span> -1;</div>
+<div class="line"><span class="lineno">   84</span>    }</div>
+<div class="line"><span class="lineno">   85</span>    i32 frames = <a class="code hl_variable" href="../../dd/dde/classfl_1_1video_1_1_video_impl_ad45a9c57b751ba9d0925501ff982b266.html#ad45a9c57b751ba9d0925501ff982b266">mStream</a>-&gt;framesRemaining();</div>
+<div class="line"><span class="lineno">   86</span>    <span class="keywordflow">if</span> (frames &lt; 0) {</div>
+<div class="line"><span class="lineno">   87</span>        <span class="keywordflow">return</span> -1; <span class="comment">// Stream case, duration unknown</span></div>
+<div class="line"><span class="lineno">   88</span>    }</div>
+<div class="line"><span class="lineno">   89</span>    fl::u32 micros_per_frame =</div>
+<div class="line"><span class="lineno">   90</span>        <a class="code hl_variable" href="../../dd/dde/classfl_1_1video_1_1_video_impl_a8ae0ed6d6df280e91dd0aadb5a8961cb.html#a8ae0ed6d6df280e91dd0aadb5a8961cb">mFrameInterpolator</a>-&gt;getFrameTracker().microsecondsPerFrame();</div>
+<div class="line"><span class="lineno">   91</span>    <span class="keywordflow">return</span> (frames * micros_per_frame); <span class="comment">// Convert to milliseconds</span></div>
+<div class="line"><span class="lineno">   92</span>}</div>
+<div class="ttc" id="aclassfl_1_1video_1_1_video_impl_a8ae0ed6d6df280e91dd0aadb5a8961cb_html_a8ae0ed6d6df280e91dd0aadb5a8961cb"><div class="ttname"><a href="../../dd/dde/classfl_1_1video_1_1_video_impl_a8ae0ed6d6df280e91dd0aadb5a8961cb.html#a8ae0ed6d6df280e91dd0aadb5a8961cb">fl::video::VideoImpl::mFrameInterpolator</a></div><div class="ttdeci">FrameInterpolatorPtr mFrameInterpolator</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d82/video__impl_8h_source.html#l00074">video_impl.h:74</a></div></div>
+<div class="ttc" id="aclassfl_1_1video_1_1_video_impl_ad45a9c57b751ba9d0925501ff982b266_html_ad45a9c57b751ba9d0925501ff982b266"><div class="ttname"><a href="../../dd/dde/classfl_1_1video_1_1_video_impl_ad45a9c57b751ba9d0925501ff982b266.html#ad45a9c57b751ba9d0925501ff982b266">fl::video::VideoImpl::mStream</a></div><div class="ttdeci">PixelStreamPtr mStream</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d82/video__impl_8h_source.html#l00072">video_impl.h:72</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d5/d82/video__impl_8h_source.html#l00069">mFrameInterpolator</a>, and <a class="el" href="../../d5/d82/video__impl_8h_source.html#l00067">mStream</a>.</p>
+<p class="reference">References <a class="el" href="../../d5/d82/video__impl_8h_source.html#l00074">mFrameInterpolator</a>, and <a class="el" href="../../d5/d82/video__impl_8h_source.html#l00072">mStream</a>.</p>
 
 </div>
 </div>
@@ -142,7 +142,7 @@ $(function(){initNavTree('dd/dde/classfl_1_1video_1_1_video_impl_a724f68a46286cf
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d7/dbc/namespacefl_1_1video.html">video</a></li><li class="navelem"><a class="el" href="../../dd/dde/classfl_1_1video_1_1_video_impl.html">VideoImpl</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:12 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:13 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

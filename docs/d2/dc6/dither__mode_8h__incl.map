@@ -1,10 +1,26 @@
 <map id="dither_mode.h" name="dither_mode.h">
-<area shape="rect" id="Node000001" title="Declares dithering options and types." alt="" coords="7,5,123,31"/>
-<area shape="rect" id="Node000002" href="$df/dd8/stdint_8h.html" title=" " alt="" coords="13,152,116,177"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="63,31,56,64,54,104,60,138,55,139,49,104,51,63,58,30"/>
-<area shape="rect" id="Node000004" href="$d3/d7e/int_8h.html" title=" " alt="" coords="63,79,146,104"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="74,30,94,65,89,68,69,32"/>
-<area shape="rect" id="Node000003" title=" " alt="" coords="5,225,124,251"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="67,178,67,212,62,212,62,178"/>
-<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="100,106,80,141,76,139,96,103"/>
+<area shape="rect" id="Node000001" title="Declares dithering options and types." alt="" coords="112,5,228,31"/>
+<area shape="rect" id="Node000002" href="$df/dd8/stdint_8h.html" title=" " alt="" coords="13,240,116,265"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="163,32,122,88,99,127,81,168,73,198,69,226,63,226,67,197,75,166,94,124,117,85,158,29"/>
+<area shape="rect" id="Node000004" href="$d3/d7e/int_8h.html" title=" " alt="" coords="90,167,173,192"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="166,32,146,79,138,118,135,153,130,152,133,117,141,78,161,30"/>
+<area shape="rect" id="Node000005" href="$d1/dbc/sketch__macros_8h.html" title=" " alt="" coords="346,86,541,111"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="210,28,391,80,390,85,209,33"/>
+<area shape="rect" id="Node000007" href="$d2/d17/dither__frame_8h.html" title="Shared temporal&#45;dither phase tracking." alt="" coords="156,79,291,119"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="180,29,205,66,201,69,176,32"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,313,124,339"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="67,266,67,300,62,300,62,266"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="122,194,87,232,83,228,118,191"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="311,313,485,339"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="446,112,438,192,424,251,409,301,404,300,419,250,433,192,440,111"/>
+<area shape="poly" id="edge8_Node000007_Node000004" title=" " alt="" coords="203,121,157,160,154,155,199,117"/>
+<area shape="rect" id="Node000008" href="$db/d01/noexcept_8h.html" title=" " alt="" coords="153,313,280,339"/>
+<area shape="poly" id="edge9_Node000007_Node000008" title=" " alt="" coords="225,119,220,300,215,300,220,119"/>
+<area shape="rect" id="Node000009" href="$d4/d54/compiler__control_8h.html" title=" " alt="" coords="248,167,423,192"/>
+<area shape="poly" id="edge10_Node000007_Node000009" title=" " alt="" coords="252,117,309,156,306,161,249,121"/>
+<area shape="poly" id="edge11_Node000009_Node000006" title=" " alt="" coords="346,191,375,239,395,299,390,300,370,241,342,194"/>
+<area shape="rect" id="Node000010" href="$d1/ddf/align_8h.html" title="Alignment macros and utilities for FastLED." alt="" coords="262,240,361,265"/>
+<area shape="poly" id="edge12_Node000009_Node000010" title=" " alt="" coords="334,193,322,228,317,226,329,191"/>
+<area shape="poly" id="edge13_Node000010_Node000006" title=" " alt="" coords="327,263,375,302,372,307,324,267"/>
+<area shape="poly" id="edge14_Node000010_Node000008" title=" " alt="" coords="298,267,245,307,242,303,295,263"/>
 </map>

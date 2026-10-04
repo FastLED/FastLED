@@ -8,5 +8,7 @@ digraph "get_power_model"
   rankdir="RL";
   Node1 [id="Node000001",label="get_power_model",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Get current RGB power model."];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="CFastLED::getPowerModel",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dbb/class_c_fast_l_e_d_add8d88cb11f7e09c627de99ba78e69d3.html#add8d88cb11f7e09c627de99ba78e69d3",tooltip="Get current RGB power model."];
+  Node2 [id="Node000002",label="CFastLED::getEstimatedPower\lInMilliWatts",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dbb/class_c_fast_l_e_d_a06a8bc368f2ef5816015b75ad54d1e6b.html#a06a8bc368f2ef5816015b75ad54d1e6b",tooltip="Get estimated power consumption in milliwatts."];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="CFastLED::getPowerModel",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dbb/class_c_fast_l_e_d_add8d88cb11f7e09c627de99ba78e69d3.html#add8d88cb11f7e09c627de99ba78e69d3",tooltip="Get current RGB power model."];
 }

@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -134,21 +134,43 @@ $(function(){initNavTree('d6/d5f/classfl_1_1_wave_fx_a52f77dc9e40955e24c4223c82f
 
 <p>Implements <a class="el" href="../../da/d5d/classfl_1_1_fx_acd7594f99b0d75c1a14fce90f0219fd7.html#acd7594f99b0d75c1a14fce90f0219fd7">fl::Fx</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="../../d2/d50/src_2fl_2fx_22d_2wave_8h_source.html#l00341">341</a> of file <a class="el" href="../../d2/d50/src_2fl_2fx_22d_2wave_8h_source.html">wave.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  341</span>                                            {</div>
-<div class="line"><span class="lineno">  342</span>        <span class="comment">// Update the wave simulation.</span></div>
-<div class="line"><span class="lineno">  343</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d6/d5f/classfl_1_1_wave_fx_ad294cd3059b32df4c6d60f7b5627a8cb.html#ad294cd3059b32df4c6d60f7b5627a8cb">mAutoUpdates</a>) {</div>
-<div class="line"><span class="lineno">  344</span>            <a class="code hl_variable" href="../../d6/d5f/classfl_1_1_wave_fx_af926598e0297888ebc5801a120ed17ff.html#af926598e0297888ebc5801a120ed17ff">mWaveSim</a>.update();</div>
-<div class="line"><span class="lineno">  345</span>        }</div>
-<div class="line"><span class="lineno">  346</span>        <span class="comment">// Map the wave values to the LEDs.</span></div>
-<div class="line"><span class="lineno">  347</span>        <a class="code hl_variable" href="../../d6/d5f/classfl_1_1_wave_fx_a74a5fbc02845853f595005992ac6758c.html#a74a5fbc02845853f595005992ac6758c">mCrgbMap</a>-&gt;mapWaveToLEDs(<a class="code hl_variable" href="../../d7/d3e/classfl_1_1_fx2d_a41281e1cc9f103940b5812c7a4ba7141.html#a41281e1cc9f103940b5812c7a4ba7141">mXyMap</a>, <a class="code hl_variable" href="../../d6/d5f/classfl_1_1_wave_fx_af926598e0297888ebc5801a120ed17ff.html#af926598e0297888ebc5801a120ed17ff">mWaveSim</a>, context.leds);</div>
-<div class="line"><span class="lineno">  348</span>    }</div>
+<p class="definition">Definition at line <a class="el" href="../../d2/d50/src_2fl_2fx_22d_2wave_8h_source.html#l00370">370</a> of file <a class="el" href="../../d2/d50/src_2fl_2fx_22d_2wave_8h_source.html">wave.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  370</span>                                            {</div>
+<div class="line"><span class="lineno">  371</span>        <span class="comment">// Update the wave simulation.</span></div>
+<div class="line"><span class="lineno">  372</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d6/d5f/classfl_1_1_wave_fx_ad294cd3059b32df4c6d60f7b5627a8cb.html#ad294cd3059b32df4c6d60f7b5627a8cb">mAutoUpdates</a>) {</div>
+<div class="line"><span class="lineno">  373</span>            <a class="code hl_variable" href="../../d6/d5f/classfl_1_1_wave_fx_af926598e0297888ebc5801a120ed17ff.html#af926598e0297888ebc5801a120ed17ff">mWaveSim</a>.update();</div>
+<div class="line"><span class="lineno">  374</span>        }</div>
+<div class="line"><span class="lineno">  375</span>        <span class="comment">// Map the wave values to the LEDs.</span></div>
+<div class="line"><span class="lineno">  376</span>        <a class="code hl_variable" href="../../d6/d5f/classfl_1_1_wave_fx_a74a5fbc02845853f595005992ac6758c.html#a74a5fbc02845853f595005992ac6758c">mCrgbMap</a>-&gt;mapWaveToLEDs(<a class="code hl_variable" href="../../d7/d3e/classfl_1_1_fx2d_a41281e1cc9f103940b5812c7a4ba7141.html#a41281e1cc9f103940b5812c7a4ba7141">mXyMap</a>, <a class="code hl_variable" href="../../d6/d5f/classfl_1_1_wave_fx_af926598e0297888ebc5801a120ed17ff.html#af926598e0297888ebc5801a120ed17ff">mWaveSim</a>, context.leds);</div>
+<div class="line"><span class="lineno">  377</span>        <span class="comment">// #3122 A4 — post-process output blur as a cheaper alternative</span></div>
+<div class="line"><span class="lineno">  378</span>        <span class="comment">// to SuperSample. Skipped entirely when amount == 0.</span></div>
+<div class="line"><span class="lineno">  379</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d6/d5f/classfl_1_1_wave_fx_ad238ef23084073eb68dcc6056709dd5c.html#ad238ef23084073eb68dcc6056709dd5c">mOutputBlurAmount</a> &gt; 0) {</div>
+<div class="line"><span class="lineno">  380</span>            <span class="keyword">const</span> fl::u32 w = <a class="code hl_variable" href="../../d6/d5f/classfl_1_1_wave_fx_af926598e0297888ebc5801a120ed17ff.html#af926598e0297888ebc5801a120ed17ff">mWaveSim</a>.getWidth();</div>
+<div class="line"><span class="lineno">  381</span>            <span class="keyword">const</span> fl::u32 h = <a class="code hl_variable" href="../../d6/d5f/classfl_1_1_wave_fx_af926598e0297888ebc5801a120ed17ff.html#af926598e0297888ebc5801a120ed17ff">mWaveSim</a>.getHeight();</div>
+<div class="line"><span class="lineno">  382</span>            <span class="keywordflow">for</span> (<a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> pass = 0; pass &lt; <a class="code hl_variable" href="../../d6/d5f/classfl_1_1_wave_fx_aa8a821470ac64c700a341e7016e99283.html#aa8a821470ac64c700a341e7016e99283">mOutputBlurPasses</a>; ++pass) {</div>
+<div class="line"><span class="lineno">  383</span>                <a class="code hl_function" href="../../d4/d36/namespacefl_a297e1492a0d4d3959a013cc8225de491.html#a297e1492a0d4d3959a013cc8225de491">fl::blur2d</a>(context.leds, <span class="keyword">static_cast&lt;</span><a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a><span class="keyword">&gt;</span>(w),</div>
+<div class="line"><span class="lineno">  384</span>                           <span class="keyword">static_cast&lt;</span><a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a><span class="keyword">&gt;</span>(h), <a class="code hl_variable" href="../../d6/d5f/classfl_1_1_wave_fx_ad238ef23084073eb68dcc6056709dd5c.html#ad238ef23084073eb68dcc6056709dd5c">mOutputBlurAmount</a>,</div>
+<div class="line"><span class="lineno">  385</span>                           <a class="code hl_variable" href="../../d7/d3e/classfl_1_1_fx2d_a41281e1cc9f103940b5812c7a4ba7141.html#a41281e1cc9f103940b5812c7a4ba7141">mXyMap</a>);</div>
+<div class="line"><span class="lineno">  386</span>            }</div>
+<div class="line"><span class="lineno">  387</span>        }</div>
+<div class="line"><span class="lineno">  388</span>    }</div>
 <div class="ttc" id="aclassfl_1_1_fx2d_a41281e1cc9f103940b5812c7a4ba7141_html_a41281e1cc9f103940b5812c7a4ba7141"><div class="ttname"><a href="../../d7/d3e/classfl_1_1_fx2d_a41281e1cc9f103940b5812c7a4ba7141.html#a41281e1cc9f103940b5812c7a4ba7141">fl::Fx2d::mXyMap</a></div><div class="ttdeci">XYMap mXyMap</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d43/fx2d_8h_source.html#l00030">fx2d.h:30</a></div></div>
-<div class="ttc" id="aclassfl_1_1_wave_fx_a74a5fbc02845853f595005992ac6758c_html_a74a5fbc02845853f595005992ac6758c"><div class="ttname"><a href="../../d6/d5f/classfl_1_1_wave_fx_a74a5fbc02845853f595005992ac6758c.html#a74a5fbc02845853f595005992ac6758c">fl::WaveFx::mCrgbMap</a></div><div class="ttdeci">WaveCrgbMapPtr mCrgbMap</div><div class="ttdef"><b>Definition</b> <a href="../../d2/d50/src_2fl_2fx_22d_2wave_8h_source.html#l00377">wave.h:377</a></div></div>
-<div class="ttc" id="aclassfl_1_1_wave_fx_ad294cd3059b32df4c6d60f7b5627a8cb_html_ad294cd3059b32df4c6d60f7b5627a8cb"><div class="ttname"><a href="../../d6/d5f/classfl_1_1_wave_fx_ad294cd3059b32df4c6d60f7b5627a8cb.html#ad294cd3059b32df4c6d60f7b5627a8cb">fl::WaveFx::mAutoUpdates</a></div><div class="ttdeci">bool mAutoUpdates</div><div class="ttdef"><b>Definition</b> <a href="../../d2/d50/src_2fl_2fx_22d_2wave_8h_source.html#l00378">wave.h:378</a></div></div>
-<div class="ttc" id="aclassfl_1_1_wave_fx_af926598e0297888ebc5801a120ed17ff_html_af926598e0297888ebc5801a120ed17ff"><div class="ttname"><a href="../../d6/d5f/classfl_1_1_wave_fx_af926598e0297888ebc5801a120ed17ff.html#af926598e0297888ebc5801a120ed17ff">fl::WaveFx::mWaveSim</a></div><div class="ttdeci">WaveSimulation2D mWaveSim</div><div class="ttdef"><b>Definition</b> <a href="../../d2/d50/src_2fl_2fx_22d_2wave_8h_source.html#l00376">wave.h:376</a></div></div>
+<div class="ttc" id="aclassfl_1_1_wave_fx_a74a5fbc02845853f595005992ac6758c_html_a74a5fbc02845853f595005992ac6758c"><div class="ttname"><a href="../../d6/d5f/classfl_1_1_wave_fx_a74a5fbc02845853f595005992ac6758c.html#a74a5fbc02845853f595005992ac6758c">fl::WaveFx::mCrgbMap</a></div><div class="ttdeci">WaveCrgbMapPtr mCrgbMap</div><div class="ttdef"><b>Definition</b> <a href="../../d2/d50/src_2fl_2fx_22d_2wave_8h_source.html#l00417">wave.h:417</a></div></div>
+<div class="ttc" id="aclassfl_1_1_wave_fx_aa8a821470ac64c700a341e7016e99283_html_aa8a821470ac64c700a341e7016e99283"><div class="ttname"><a href="../../d6/d5f/classfl_1_1_wave_fx_aa8a821470ac64c700a341e7016e99283.html#aa8a821470ac64c700a341e7016e99283">fl::WaveFx::mOutputBlurPasses</a></div><div class="ttdeci">fl::u8 mOutputBlurPasses</div><div class="ttdef"><b>Definition</b> <a href="../../d2/d50/src_2fl_2fx_22d_2wave_8h_source.html#l00420">wave.h:420</a></div></div>
+<div class="ttc" id="aclassfl_1_1_wave_fx_ad238ef23084073eb68dcc6056709dd5c_html_ad238ef23084073eb68dcc6056709dd5c"><div class="ttname"><a href="../../d6/d5f/classfl_1_1_wave_fx_ad238ef23084073eb68dcc6056709dd5c.html#ad238ef23084073eb68dcc6056709dd5c">fl::WaveFx::mOutputBlurAmount</a></div><div class="ttdeci">fl::u8 mOutputBlurAmount</div><div class="ttdef"><b>Definition</b> <a href="../../d2/d50/src_2fl_2fx_22d_2wave_8h_source.html#l00419">wave.h:419</a></div></div>
+<div class="ttc" id="aclassfl_1_1_wave_fx_ad294cd3059b32df4c6d60f7b5627a8cb_html_ad294cd3059b32df4c6d60f7b5627a8cb"><div class="ttname"><a href="../../d6/d5f/classfl_1_1_wave_fx_ad294cd3059b32df4c6d60f7b5627a8cb.html#ad294cd3059b32df4c6d60f7b5627a8cb">fl::WaveFx::mAutoUpdates</a></div><div class="ttdeci">bool mAutoUpdates</div><div class="ttdef"><b>Definition</b> <a href="../../d2/d50/src_2fl_2fx_22d_2wave_8h_source.html#l00418">wave.h:418</a></div></div>
+<div class="ttc" id="aclassfl_1_1_wave_fx_af926598e0297888ebc5801a120ed17ff_html_af926598e0297888ebc5801a120ed17ff"><div class="ttname"><a href="../../d6/d5f/classfl_1_1_wave_fx_af926598e0297888ebc5801a120ed17ff.html#af926598e0297888ebc5801a120ed17ff">fl::WaveFx::mWaveSim</a></div><div class="ttdeci">WaveSimulation2D mWaveSim</div><div class="ttdef"><b>Definition</b> <a href="../../d2/d50/src_2fl_2fx_22d_2wave_8h_source.html#l00416">wave.h:416</a></div></div>
+<div class="ttc" id="anamespacefl_a058ceeac48f181da463c2ba07401292c_html_a058ceeac48f181da463c2ba07401292c"><div class="ttname"><a href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a></div><div class="ttdeci">unsigned char u8</div><div class="ttdef"><b>Definition</b> <a href="../../df/dd8/stdint_8h_source.html#l00131">stdint.h:131</a></div></div>
+<div class="ttc" id="anamespacefl_a297e1492a0d4d3959a013cc8225de491_html_a297e1492a0d4d3959a013cc8225de491"><div class="ttname"><a href="../../d4/d36/namespacefl_a297e1492a0d4d3959a013cc8225de491.html#a297e1492a0d4d3959a013cc8225de491">fl::blur2d</a></div><div class="ttdeci">void blur2d(fl::span&lt; CRGB &gt; leds, u8 width, u8 height, fract8 blur_amount, const XYMap &amp;xymap) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/df5/blur_8h_source.html#l00153">blur.h:153</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../db/ded/draw__context_8h_source.html#l00012">fl::DrawContext::leds</a>, <a class="el" href="../../d2/d50/src_2fl_2fx_22d_2wave_8h_source.html#l00378">mAutoUpdates</a>, <a class="el" href="../../d2/d50/src_2fl_2fx_22d_2wave_8h_source.html#l00377">mCrgbMap</a>, <a class="el" href="../../d2/d50/src_2fl_2fx_22d_2wave_8h_source.html#l00376">mWaveSim</a>, and <a class="el" href="../../d9/d43/fx2d_8h_source.html#l00030">fl::Fx2d::mXyMap</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/df5/blur_8h_source.html#l00153">fl::blur2d()</a>, <a class="el" href="../../db/ded/draw__context_8h_source.html#l00012">fl::DrawContext::leds</a>, <a class="el" href="../../d2/d50/src_2fl_2fx_22d_2wave_8h_source.html#l00418">mAutoUpdates</a>, <a class="el" href="../../d2/d50/src_2fl_2fx_22d_2wave_8h_source.html#l00417">mCrgbMap</a>, <a class="el" href="../../d2/d50/src_2fl_2fx_22d_2wave_8h_source.html#l00419">mOutputBlurAmount</a>, <a class="el" href="../../d2/d50/src_2fl_2fx_22d_2wave_8h_source.html#l00420">mOutputBlurPasses</a>, <a class="el" href="../../d2/d50/src_2fl_2fx_22d_2wave_8h_source.html#l00416">mWaveSim</a>, and <a class="el" href="../../d9/d43/fx2d_8h_source.html#l00030">fl::Fx2d::mXyMap</a>.</p>
+<div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
+<div id="dynsection-0-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-0-content" class="dyncontent" style="display:none;">
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d6/d5f/classfl_1_1_wave_fx_a52f77dc9e40955e24c4223c82f3f5848_a52f77dc9e40955e24c4223c82f3f5848_cgraph.svg" width="622" height="86"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
 
 </div>
 </div>
@@ -159,7 +181,7 @@ $(function(){initNavTree('d6/d5f/classfl_1_1_wave_fx_a52f77dc9e40955e24c4223c82f
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d6/d5f/classfl_1_1_wave_fx.html">WaveFx</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:07 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:10 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

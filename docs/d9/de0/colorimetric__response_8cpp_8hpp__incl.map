@@ -1,0 +1,26 @@
+<map id="fl/gfx/colorimetric_response.cpp.hpp" name="fl/gfx/colorimetric_response.cpp.hpp">
+<area shape="rect" id="Node000001" title="Reserved for the heavy implementations of the shared colorimetric response layer (issue #3255)." alt="" coords="375,5,517,45"/>
+<area shape="rect" id="Node000002" href="$d0/d2a/colorimetric__response_8h.html" title="Shared colorimetric primitives reusable by the RGBW and (future) RGB colorimetric paths (issue #3255)..." alt="" coords="377,93,515,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="449,46,449,79,443,79,443,46"/>
+<area shape="rect" id="Node000003" href="$df/db1/math_8h.html" title=" " alt="" coords="387,181,505,207"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="449,134,449,167,443,167,443,134"/>
+<area shape="rect" id="Node000010" href="$df/dd8/stdint_8h.html" title=" " alt="" coords="613,401,716,427"/>
+<area shape="poly" id="edge14_Node000002_Node000010" title=" " alt="" coords="516,125,571,141,630,167,686,204,710,227,730,253,735,272,735,297,731,326,720,354,707,376,691,394,687,390,703,373,716,352,725,324,730,297,730,272,725,256,706,230,683,208,628,172,569,146,514,130"/>
+<area shape="rect" id="Node000017" href="$d3/dd6/gfx_2color__profile_8h.html" title=" " alt="" coords="5,255,156,280"/>
+<area shape="poly" id="edge11_Node000002_Node000017" title=" " alt="" coords="402,136,122,252,120,247,400,131"/>
+<area shape="rect" id="Node000004" href="$d4/d54/compiler__control_8h.html" title=" " alt="" coords="359,255,533,280"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="449,207,449,241,443,241,443,207"/>
+<area shape="rect" id="Node000009" href="$d3/d7e/int_8h.html" title=" " alt="" coords="623,328,706,353"/>
+<area shape="poly" id="edge4_Node000003_Node000009" title=" " alt="" coords="506,198,563,205,623,216,675,232,695,242,708,253,715,270,711,288,690,319,686,316,706,286,709,270,704,256,692,246,673,237,622,221,562,210,505,203"/>
+<area shape="rect" id="Node000012" href="$df/d63/type__traits_8h.html" title=" " alt="" coords="558,255,694,280"/>
+<area shape="poly" id="edge6_Node000003_Node000012" title=" " alt="" coords="476,204,585,247,583,252,474,209"/>
+<area shape="rect" id="Node000008" href="$db/d01/noexcept_8h.html" title=" " alt="" coords="131,328,257,353"/>
+<area shape="poly" id="edge10_Node000003_Node000008" title=" " alt="" coords="386,198,346,203,302,213,259,230,223,257,213,269,205,284,198,315,193,314,200,282,208,266,219,253,257,226,300,208,345,198,386,193"/>
+<area shape="rect" id="Node000015" href="$da/ded/undef_8h.html" title=" " alt="" coords="232,255,335,280"/>
+<area shape="poly" id="edge9_Node000003_Node000015" title=" " alt="" coords="421,209,324,251,321,247,419,204"/>
+<area shape="poly" id="edge5_Node000009_Node000010" title=" " alt="" coords="667,354,667,388,662,388,662,354"/>
+<area shape="poly" id="edge7_Node000012_Node000009" title=" " alt="" coords="635,279,654,315,650,317,630,282"/>
+<area shape="poly" id="edge8_Node000012_Node000008" title=" " alt="" coords="558,282,272,329,271,324,557,277"/>
+<area shape="poly" id="edge13_Node000017_Node000010" title=" " alt="" coords="85,280,95,316,105,336,120,351,156,369,208,383,270,394,339,402,481,409,600,411,600,416,481,415,339,407,269,399,206,389,154,374,116,355,100,339,90,318,80,281"/>
+<area shape="poly" id="edge12_Node000017_Node000008" title=" " alt="" coords="100,278,166,318,163,323,97,282"/>
+</map>

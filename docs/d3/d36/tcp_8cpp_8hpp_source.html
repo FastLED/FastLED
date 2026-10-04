@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -259,14 +259,14 @@ $(function(){initNavTree('d3/d36/tcp_8cpp_8hpp_source.html','../../'); initResiz
 <div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span> </div>
 <div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>socket::socket() : mFd(-1), mNonBlocking(false) {}</div>
 <div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span> </div>
-<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span>socket::~socket() <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> { close_fd(); }</div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span>socket::~socket() <a class="code hl_define" href="../../df/d96/s16x16x4_8h_abae81a69398c715960350e0a571b754a.html#abae81a69398c715960350e0a571b754a">FL_NO_EXCEPT</a> { close_fd(); }</div>
 <div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span> </div>
 <div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>socket::socket(socket &amp;&amp;other) : mFd(other.mFd), mNonBlocking(other.mNonBlocking) {</div>
 <div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>    other.mFd = -1;</div>
 <div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>    other.mNonBlocking = <span class="keyword">false</span>;</div>
 <div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>}</div>
 <div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span> </div>
-<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>socket &amp;socket::operator=(socket &amp;&amp;other) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>socket &amp;socket::operator=(socket &amp;&amp;other) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_abae81a69398c715960350e0a571b754a.html#abae81a69398c715960350e0a571b754a">FL_NO_EXCEPT</a> {</div>
 <div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>    <span class="keywordflow">if</span> (<span class="keyword">this</span> != &amp;other) {</div>
 <div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>        close_fd();</div>
 <div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>        mFd = other.mFd;</div>
@@ -298,7 +298,7 @@ $(function(){initNavTree('d3/d36/tcp_8cpp_8hpp_source.html','../../'); initResiz
 <div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span>    hints.ai_protocol = IPPROTO_TCP;</div>
 <div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span> </div>
 <div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>    <span class="keywordtype">char</span> portStr[16];</div>
-<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span>    <a class="code hl_function" href="../../d4/d36/namespacefl_a57cbbc0e3769d2f6c4a7919e29646708.html#a57cbbc0e3769d2f6c4a7919e29646708">fl::snprintf</a>(portStr, <span class="keyword">sizeof</span>(portStr), <span class="stringliteral">&quot;%u&quot;</span>, ep.port);</div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span>    <a class="code hl_function" href="../../d4/d36/namespacefl_a17646782eea1132270233120225036ac.html#a17646782eea1132270233120225036ac">fl::snprintf</a>(portStr, <span class="keyword">sizeof</span>(portStr), <span class="stringliteral">&quot;%u&quot;</span>, ep.port);</div>
 <div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span> </div>
 <div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span>    <span class="keywordtype">int</span> ret = getaddrinfo(ep.host.c_str(), portStr, &amp;hints, &amp;result);</div>
 <div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>    <span class="keywordflow">if</span> (ret != 0 || result == <span class="keyword">nullptr</span>) {</div>
@@ -358,7 +358,7 @@ $(function(){initNavTree('d3/d36/tcp_8cpp_8hpp_source.html','../../'); initResiz
 <div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span>    }</div>
 <div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span> </div>
 <div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span>    ssize_t <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a> =</div>
-<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span>        plat_recv(mFd, (<span class="keywordtype">char</span> *)buffer.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_a326aa9f29859fe8a92833fd5db12c3bb.html#a326aa9f29859fe8a92833fd5db12c3bb">data</a>(), buffer.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac">size</a>(), 0);</div>
+<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span>        plat_recv(mFd, (<span class="keywordtype">char</span> *)buffer.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_a45157f503f151e36c679f688f10e3511.html#a45157f503f151e36c679f688f10e3511">data</a>(), buffer.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa">size</a>(), 0);</div>
 <div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span> </div>
 <div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span>    <span class="keywordflow">if</span> (result &lt; 0) {</div>
 <div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span>        <span class="keywordflow">if</span> (is_would_block()) {</div>
@@ -388,8 +388,8 @@ $(function(){initNavTree('d3/d36/tcp_8cpp_8hpp_source.html','../../'); initResiz
 <div class="line"><a id="l00283" name="l00283"></a><span class="lineno">  283</span>        <span class="keywordflow">return</span> 0;</div>
 <div class="line"><a id="l00284" name="l00284"></a><span class="lineno">  284</span>    }</div>
 <div class="line"><a id="l00285" name="l00285"></a><span class="lineno">  285</span> </div>
-<div class="line"><a id="l00286" name="l00286"></a><span class="lineno">  286</span>    ssize_t <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a> = plat_send(mFd, (<span class="keyword">const</span> <span class="keywordtype">char</span> *)buffer.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_a326aa9f29859fe8a92833fd5db12c3bb.html#a326aa9f29859fe8a92833fd5db12c3bb">data</a>(),</div>
-<div class="line"><a id="l00287" name="l00287"></a><span class="lineno">  287</span>                               buffer.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac">size</a>(), MSG_NOSIGNAL);</div>
+<div class="line"><a id="l00286" name="l00286"></a><span class="lineno">  286</span>    ssize_t <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a> = plat_send(mFd, (<span class="keyword">const</span> <span class="keywordtype">char</span> *)buffer.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_a45157f503f151e36c679f688f10e3511.html#a45157f503f151e36c679f688f10e3511">data</a>(),</div>
+<div class="line"><a id="l00287" name="l00287"></a><span class="lineno">  287</span>                               buffer.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa">size</a>(), MSG_NOSIGNAL);</div>
 <div class="line"><a id="l00288" name="l00288"></a><span class="lineno">  288</span> </div>
 <div class="line"><a id="l00289" name="l00289"></a><span class="lineno">  289</span>    <span class="keywordflow">if</span> (result &lt; 0) {</div>
 <div class="line"><a id="l00290" name="l00290"></a><span class="lineno">  290</span>        <span class="keywordflow">if</span> (is_would_block()) {</div>
@@ -460,7 +460,7 @@ $(function(){initNavTree('d3/d36/tcp_8cpp_8hpp_source.html','../../'); initResiz
 <div class="line"><a id="l00355" name="l00355"></a><span class="lineno">  355</span> </div>
 <div class="line"><a id="l00356" name="l00356"></a><span class="lineno">  356</span>acceptor::acceptor() : mFd(-1), mPort(0) {}</div>
 <div class="line"><a id="l00357" name="l00357"></a><span class="lineno">  357</span> </div>
-<div class="line"><a id="l00358" name="l00358"></a><span class="lineno">  358</span>acceptor::~acceptor() <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> { close(); }</div>
+<div class="line"><a id="l00358" name="l00358"></a><span class="lineno">  358</span>acceptor::~acceptor() <a class="code hl_define" href="../../df/d96/s16x16x4_8h_abae81a69398c715960350e0a571b754a.html#abae81a69398c715960350e0a571b754a">FL_NO_EXCEPT</a> { close(); }</div>
 <div class="line"><a id="l00359" name="l00359"></a><span class="lineno">  359</span> </div>
 <div class="line"><a id="l00360" name="l00360"></a><span class="lineno">  360</span>error_code acceptor::open(u16 port) {</div>
 <div class="line"><a id="l00361" name="l00361"></a><span class="lineno">  361</span>    close();</div>
@@ -584,17 +584,17 @@ $(function(){initNavTree('d3/d36/tcp_8cpp_8hpp_source.html','../../'); initResiz
 <div class="line"><a id="l00479" name="l00479"></a><span class="lineno">  479</span>} <span class="comment">// namespace fl</span></div>
 <div class="line"><a id="l00480" name="l00480"></a><span class="lineno">  480</span> </div>
 <div class="line"><a id="l00481" name="l00481"></a><span class="lineno">  481</span><span class="preprocessor">#endif </span><span class="comment">// FASTLED_HAS_NETWORKING</span></div>
-<div class="ttc" id="aclassfl_1_1span_a326aa9f29859fe8a92833fd5db12c3bb_html_a326aa9f29859fe8a92833fd5db12c3bb"><div class="ttname"><a href="../../d0/d08/classfl_1_1span_a326aa9f29859fe8a92833fd5db12c3bb.html#a326aa9f29859fe8a92833fd5db12c3bb">fl::span::data</a></div><div class="ttdeci">const T * data() const FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d7a/span_8h_source.html#l00461">span.h:461</a></div></div>
-<div class="ttc" id="aclassfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac_html_aef7ee7eb5254da1ba1eb4f3e0173d0ac"><div class="ttname"><a href="../../d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac">fl::span::size</a></div><div class="ttdeci">constexpr fl::size size() const FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d7a/span_8h_source.html#l00458">span.h:458</a></div></div>
-<div class="ttc" id="aclassfl_1_1span_html"><div class="ttname"><a href="../../d0/d08/classfl_1_1span.html">fl::span</a></div><div class="ttdef"><b>Definition</b> <a href="../../d4/d7a/span_8h_source.html#l00385">span.h:385</a></div></div>
+<div class="ttc" id="aclassfl_1_1span_a45157f503f151e36c679f688f10e3511_html_a45157f503f151e36c679f688f10e3511"><div class="ttname"><a href="../../d0/d08/classfl_1_1span_a45157f503f151e36c679f688f10e3511.html#a45157f503f151e36c679f688f10e3511">fl::span::data</a></div><div class="ttdeci">const T * data() const FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d7a/span_8h_source.html#l00486">span.h:486</a></div></div>
+<div class="ttc" id="aclassfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa_html_aaf3daca1c2c8f93b2ac7b319989b22fa"><div class="ttname"><a href="../../d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa">fl::span::size</a></div><div class="ttdeci">constexpr fl::size size() const FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d7a/span_8h_source.html#l00483">span.h:483</a></div></div>
+<div class="ttc" id="aclassfl_1_1span_html"><div class="ttname"><a href="../../d0/d08/classfl_1_1span.html">fl::span</a></div><div class="ttdef"><b>Definition</b> <a href="../../d4/d7a/span_8h_source.html#l00410">span.h:410</a></div></div>
 <div class="ttc" id="anamespacefl_1_1asio_1_1ip_1_1tcp_html"><div class="ttname"><a href="../../d8/d72/namespacefl_1_1asio_1_1ip_1_1tcp.html">fl::asio::ip::tcp</a></div><div class="ttdef"><b>Definition</b> <a href="../../d8/da5/tcp_8h_source.html#l00017">tcp.h:17</a></div></div>
 <div class="ttc" id="anamespacefl_1_1asio_1_1ip_html"><div class="ttname"><a href="../../db/dc1/namespacefl_1_1asio_1_1ip.html">fl::asio::ip</a></div><div class="ttdef"><b>Definition</b> <a href="../../d8/da5/tcp_8h_source.html#l00016">tcp.h:16</a></div></div>
 <div class="ttc" id="anamespacefl_1_1asio_html"><div class="ttname"><a href="../../da/dba/namespacefl_1_1asio.html">fl::asio</a></div><div class="ttdef"><b>Definition</b> <a href="../../d2/dac/completion__handler_8h_source.html#l00007">completion_handler.h:7</a></div></div>
-<div class="ttc" id="anamespacefl_a57cbbc0e3769d2f6c4a7919e29646708_html_a57cbbc0e3769d2f6c4a7919e29646708"><div class="ttname"><a href="../../d4/d36/namespacefl_a57cbbc0e3769d2f6c4a7919e29646708.html#a57cbbc0e3769d2f6c4a7919e29646708">fl::snprintf</a></div><div class="ttdeci">int snprintf(char *buffer, fl::size size, const char *format, const Args &amp;... args) FL_NOEXCEPT</div><div class="ttdoc">Snprintf-like formatting function that writes to a buffer.</div><div class="ttdef"><b>Definition</b> <a href="../../d6/dd1/stdio_8h_source.html#l00666">stdio.h:666</a></div></div>
+<div class="ttc" id="anamespacefl_a17646782eea1132270233120225036ac_html_a17646782eea1132270233120225036ac"><div class="ttname"><a href="../../d4/d36/namespacefl_a17646782eea1132270233120225036ac.html#a17646782eea1132270233120225036ac">fl::snprintf</a></div><div class="ttdeci">int snprintf(char *buffer, fl::size size, const char *format) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/d5f/stdio_8cpp_8hpp_source.html#l00292">stdio.cpp.hpp:292</a></div></div>
 <div class="ttc" id="anamespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99_html_a8fa65f6529fc3eb6a174cb304a4bfc99"><div class="ttname"><a href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">fl::result</a></div><div class="ttdeci">expected&lt; T, E &gt; result</div><div class="ttdoc">Alias for expected (Rust-style naming)</div><div class="ttdef"><b>Definition</b> <a href="../../de/d93/result_8h_source.html#l00031">result.h:31</a></div></div>
 <div class="ttc" id="anamespacefl_html"><div class="ttname"><a href="../../d4/d36/namespacefl.html">fl</a></div><div class="ttdoc">Base definition for an LED controller.</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d4b/crgb_8hpp_source.html#l00179">crgb.hpp:179</a></div></div>
 <div class="ttc" id="anoexcept_8h_html"><div class="ttname"><a href="../../db/d01/noexcept_8h.html">noexcept.h</a></div></div>
-<div class="ttc" id="as16x16x4_8h_af54aac016b86a178940aca20946a8002_html_af54aac016b86a178940aca20946a8002"><div class="ttname"><a href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></div><div class="ttdeci">#define FL_NOEXCEPT</div></div>
+<div class="ttc" id="as16x16x4_8h_abae81a69398c715960350e0a571b754a_html_abae81a69398c715960350e0a571b754a"><div class="ttname"><a href="../../df/d96/s16x16x4_8h_abae81a69398c715960350e0a571b754a.html#abae81a69398c715960350e0a571b754a">FL_NO_EXCEPT</a></div><div class="ttdeci">#define FL_NO_EXCEPT</div></div>
 <div class="ttc" id="astdio_8h_html"><div class="ttname"><a href="../../d6/dd1/stdio_8h.html">stdio.h</a></div></div>
 <div class="ttc" id="atcp_8h_html"><div class="ttname"><a href="../../d8/da5/tcp_8h.html">tcp.h</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
@@ -604,7 +604,7 @@ $(function(){initNavTree('d3/d36/tcp_8cpp_8hpp_source.html','../../'); initResiz
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_0dd6897a8ae40540acd9d694849e950e.html">stl</a></li><li class="navelem"><a class="el" href="../../dir_cdaac7ba5e9caead7c80e2b832ad4a37.html">asio</a></li><li class="navelem"><a class="el" href="../../dir_407839370a2e85592d3b791a09070fd8.html">ip</a></li><li class="navelem"><a class="el" href="../../d3/d36/tcp_8cpp_8hpp.html">tcp.cpp.hpp</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:06:59 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:01 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

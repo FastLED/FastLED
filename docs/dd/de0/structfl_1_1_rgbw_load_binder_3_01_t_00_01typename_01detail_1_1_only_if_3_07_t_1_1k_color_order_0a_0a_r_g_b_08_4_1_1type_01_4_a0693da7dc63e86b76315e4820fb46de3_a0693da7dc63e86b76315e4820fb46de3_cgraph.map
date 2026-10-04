@@ -1,0 +1,5 @@
+<map id="fl::RgbwLoadBinder&lt; T, typename detail::OnlyIf&lt;(T::kColorOrder==RGB)&gt;::type &gt;::unorderedWW" name="fl::RgbwLoadBinder&lt; T, typename detail::OnlyIf&lt;(T::kColorOrder==RGB)&gt;::type &gt;::unorderedWW">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,245,75"/>
+<area shape="rect" id="Node000002" href="$d3/d9a/structfl_1_1_pixel_controller_vtable_af154ba529585d36cfa0f9e3eae34a22f.html#af154ba529585d36cfa0f9e3eae34a22f" title=" " alt="" coords="293,20,533,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="246,37,280,37,280,43,246,43"/>
+</map>

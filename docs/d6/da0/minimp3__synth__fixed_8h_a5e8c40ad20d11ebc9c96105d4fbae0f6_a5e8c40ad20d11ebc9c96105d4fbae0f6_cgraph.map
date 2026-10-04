@@ -1,0 +1,8 @@
+<map id="mp3d_synth" name="mp3d_synth">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,108,31"/>
+<area shape="rect" id="Node000002" href="$d6/da0/minimp3__synth__fixed_8h_ae2e45da3974839a55352e86204519654.html#ae2e45da3974839a55352e86204519654" title=" " alt="" coords="339,5,473,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="108,15,325,15,325,21,108,21"/>
+<area shape="rect" id="Node000003" href="$d6/da0/minimp3__synth__fixed_8h_aa984adb924d02fb8553fc60b937c4a8b.html#aa984adb924d02fb8553fc60b937c4a8b" title=" " alt="" coords="156,31,291,56"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="109,23,143,28,142,34,108,28"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="290,31,324,27,325,32,291,37"/>
+</map>

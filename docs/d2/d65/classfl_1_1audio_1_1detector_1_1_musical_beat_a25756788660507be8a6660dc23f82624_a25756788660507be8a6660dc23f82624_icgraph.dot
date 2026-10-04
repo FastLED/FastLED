@@ -10,5 +10,5 @@ digraph "fl::audio::detector::MusicalBeat::calculateBeatConfidence"
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node2 [id="Node000002",label="fl::audio::detector\l::MusicalBeat::processSample",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_a14368f704c7c67d888b81f70c7004dcb.html#a14368f704c7c67d888b81f70c7004dcb",tooltip="Process one audio frame."];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::audio::detector\l::MusicalBeat::~MusicalBeat",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_a8ead4e67bdff0c0600d13fc942313879.html#a8ead4e67bdff0c0600d13fc942313879",tooltip=" "];
+  Node3 [id="Node000003",label="fl::audio::detector\l::MusicalBeat::~MusicalBeat",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_aa4122c266cb3b2e9bcdf329ba856a4ae.html#aa4122c266cb3b2e9bcdf329ba856a4ae",tooltip=" "];
 }

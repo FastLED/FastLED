@@ -1,0 +1,5 @@
+<map id="fl::s16x16x4::lerp" name="fl::s16x16x4::lerp">
+<area shape="rect" id="Node000001" title="Linear interpolation: a + (b &#45; a) * t (using Q16 multiply) t: s16x16 interpolation factor in [0,..." alt="" coords="5,5,140,31"/>
+<area shape="rect" id="Node000002" href="$d1/d7f/structfl_1_1s16x16x4_ad759beffb69df92a0f986fa2c56d3527.html#ad759beffb69df92a0f986fa2c56d3527" title=" " alt="" coords="188,5,325,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="140,15,174,15,174,21,140,21"/>
+</map>

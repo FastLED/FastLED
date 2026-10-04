@@ -56,7 +56,7 @@
 <!-- Node8 -->
 <g id="Node000008" class="node">
 <title>Node8</title>
-<g id="a_Node000008"><a xlink:href="../../d4/d36/namespacefl_a44a195439ac7fa303b4b0b0c956605be.html#a44a195439ac7fa303b4b0b0c956605be" target="_top" xlink:title=" ">
+<g id="a_Node000008"><a xlink:href="../../d4/d36/namespacefl_a9416b2c34c489ae11032cb58c2d3c58c.html#a9416b2c34c489ae11032cb58c2d3c58c" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="199,-19 130,-19 130,0 199,0 199,-19"/>
 <text text-anchor="middle" x="164.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::memset</text>
 </a>
@@ -83,7 +83,7 @@
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../d8/df9/group___noise_generation_gaeb72246ebd597b60a7e575173accf2fd.html#gaeb72246ebd597b60a7e575173accf2fd" target="_top" xlink:title=" ">
+<g id="a_Node000004"><a xlink:href="../../d8/df9/group___noise_generation_gaeb72246ebd597b60a7e575173accf2fd.html#gaeb72246ebd597b60a7e575173accf2fd" target="_top" xlink:title="8&#45;Bit, fixed point implementation of Perlin&#39;s noise.">
 <polygon fill="white" stroke="#666666" points="303,-56 251,-56 251,-37 303,-37 303,-56"/>
 <text text-anchor="middle" x="277" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">inoise8</text>
 </a>
@@ -101,7 +101,7 @@
 <!-- Node5 -->
 <g id="Node000005" class="node">
 <title>Node5</title>
-<g id="a_Node000005"><a xlink:href="../../d8/d5c/group___noise_gaa3db0f2f3777cf5bb7a4dd1359dba4fe.html#gaa3db0f2f3777cf5bb7a4dd1359dba4fe" target="_top" xlink:title=" ">
+<g id="a_Node000005"><a xlink:href="../../d8/d5c/group___noise_gaa3db0f2f3777cf5bb7a4dd1359dba4fe.html#gaa3db0f2f3777cf5bb7a4dd1359dba4fe" target="_top" xlink:title="8&#45;bit, fixed point implementation of Perlin&#39;s noise without scaling.">
 <polygon fill="#fff0f0" stroke="red" points="414,-56 339,-56 339,-37 414,-37 414,-56"/>
 <text text-anchor="middle" x="376.5" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">inoise8_raw</text>
 </a>

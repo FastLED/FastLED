@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::RedBlackTree\< T,\l Compare, Allocator\l \>::RBNode",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d6c/structfl_1_1_red_black_tree_1_1_r_b_node.html",tooltip=" "];
+  Node0 [id="Node000000",label="fl::spi::Device",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d0a/classfl_1_1spi_1_1_device.html",tooltip="Single-channel SPI device interface (TX-only, transaction-based, optimized for FastLED)"];
 }

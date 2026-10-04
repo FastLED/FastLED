@@ -1,0 +1,32 @@
+<map id="fl::RxChannel::config" name="fl::RxChannel::config">
+<area shape="rect" id="Node000001" title=" " alt="" coords="573,301,728,327"/>
+<area shape="poly" id="edge11_Node000001_Node000001" title=" " alt="" coords="690,292,679,283,651,280,627,282,615,287,612,292,619,300,615,303,607,293,611,283,626,277,651,275,681,278,693,287"/>
+<area shape="rect" id="Node000002" href="$d3/d2b/classfl_1_1_rx_channel_ae02fcd5e35e79edfb1b699bac468558d.html#ae02fcd5e35e79edfb1b699bac468558d" title=" " alt="" coords="339,152,525,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="624,294,579,256,524,215,460,180,463,175,527,210,582,251,627,290"/>
+<area shape="rect" id="Node000008" href="$d3/d2b/classfl_1_1_rx_channel_af50489dde7e5e30d637440a2825ccff1.html#af50489dde7e5e30d637440a2825ccff1" title=" " alt="" coords="356,225,508,251"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="600,299,524,273,469,253,471,248,526,267,602,294"/>
+<area shape="rect" id="Node000009" href="$df/dac/test_8cpp_a18bbd716bb44e0b5a82f060f1f47dc11.html#a18bbd716bb44e0b5a82f060f1f47dc11" title="Execute pin toggles and initialize RX channel for capture." alt="" coords="136,276,259,301"/>
+<area shape="poly" id="edge14_Node000001_Node000009" title=" " alt="" coords="559,312,259,295,259,289,560,306"/>
+<area shape="rect" id="Node000011" href="$d3/d2b/classfl_1_1_rx_channel_a8c02137a33a53471af2073ca82364164.html#a8c02137a33a53471af2073ca82364164" title=" " alt="" coords="353,327,511,352"/>
+<area shape="poly" id="edge12_Node000001_Node000011" title=" " alt="" coords="560,327,511,333,511,328,559,322"/>
+<area shape="rect" id="Node000013" href="$d3/d2b/classfl_1_1_rx_channel_a78ea2c5dff0ccc827b588262275077d9.html#a78ea2c5dff0ccc827b588262275077d9" title=" " alt="" coords="356,377,508,417"/>
+<area shape="poly" id="edge15_Node000001_Node000013" title=" " alt="" coords="608,334,526,367,493,379,491,374,524,362,606,330"/>
+<area shape="rect" id="Node000014" href="$d3/d2b/classfl_1_1_rx_channel_aa40e3f90bf6da79b07ed8e6c9b723188.html#aa40e3f90bf6da79b07ed8e6c9b723188" title=" " alt="" coords="343,441,521,467"/>
+<area shape="poly" id="edge16_Node000001_Node000014" title=" " alt="" coords="632,339,587,386,558,410,527,431,496,444,494,439,524,426,555,406,584,382,628,335"/>
+<area shape="rect" id="Node000003" href="$d3/d2b/classfl_1_1_rx_channel_a560f7663cba8d3c679115fd31180f244.html#a560f7663cba8d3c679115fd31180f244" title=" " alt="" coords="104,5,291,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="409,144,358,93,325,67,289,44,262,33,264,28,292,40,328,62,361,89,413,140"/>
+<area shape="rect" id="Node000004" href="$d3/d2b/classfl_1_1_rx_channel_a7beb0731c518ae65957137553e5d1d39.html#a7beb0731c518ae65957137553e5d1d39" title=" " alt="" coords="104,55,291,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="397,147,347,120,290,94,255,83,257,78,292,89,350,115,400,143"/>
+<area shape="rect" id="Node000005" href="$d3/d2b/classfl_1_1_rx_channel_a966313a9f7e1163b38106138f5c6cd5a.html#a966313a9f7e1163b38106138f5c6cd5a" title=" " alt="" coords="119,128,276,153"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="325,156,276,151,276,146,325,151"/>
+<area shape="rect" id="Node000006" href="$d3/d2b/classfl_1_1_rx_channel_ad7e0b0ab0ed0137566aee649aeb56fc5.html#ad7e0b0ab0ed0137566aee649aeb56fc5" title=" " alt="" coords="106,177,289,203"/>
+<area shape="poly" id="edge6_Node000002_Node000006" title=" " alt="" coords="325,179,289,183,288,178,325,174"/>
+<area shape="rect" id="Node000007" href="$d3/d2b/classfl_1_1_rx_channel_a1b092b84450764fd984fe36ab19eb7e0.html#a1b092b84450764fd984fe36ab19eb7e0" title=" " alt="" coords="106,227,289,252"/>
+<area shape="poly" id="edge7_Node000002_Node000007" title=" " alt="" coords="385,185,291,217,248,229,247,224,290,211,383,180"/>
+<area shape="poly" id="edge5_Node000005_Node000005" title=" " alt="" coords="226,117,218,110,197,107,180,109,171,113,169,119,174,126,170,129,164,120,167,110,178,104,197,101,220,105,230,113"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="359,256,257,279,256,273,358,251"/>
+<area shape="rect" id="Node000010" href="$df/d05/_r_x_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,276,56,301"/>
+<area shape="poly" id="edge10_Node000009_Node000010" title=" " alt="" coords="122,291,56,291,56,286,122,286"/>
+<area shape="rect" id="Node000012" href="$dd/dbb/class_c_fast_l_e_d_a2fe45c808814d7f107077f9c5f114d4b.html#a2fe45c808814d7f107077f9c5f114d4b" title="Add an RX channel with runtime configuration." alt="" coords="132,327,263,352"/>
+<area shape="poly" id="edge13_Node000011_Node000012" title=" " alt="" coords="339,342,263,342,263,337,339,337"/>
+</map>

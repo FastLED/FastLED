@@ -1,0 +1,12 @@
+<map id="ANALOG_RGB&lt; RED_PIN, GREEN_PIN, BLUE_PIN &gt;" name="ANALOG_RGB&lt; RED_PIN, GREEN_PIN, BLUE_PIN &gt;">
+<area shape="rect" id="Node000001" title="FastLED chipset&#45;style wrapper for three&#45;pin PWM RGB output." alt="" coords="5,391,192,431"/>
+<area shape="rect" id="Node000002" href="$d0/d5a/classfl_1_1_analog_r_g_b_controller.html" title="Drives one non&#45;addressable RGB LED or strip from three PWM pins." alt="" coords="9,287,188,341"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="101,355,101,390,96,390,96,355"/>
+<area shape="rect" id="Node000003" href="$d0/dc9/class_c_pixel_l_e_d_controller.html" title=" " alt="" coords="23,197,174,237"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="101,251,101,287,96,287,96,251"/>
+<area shape="rect" id="Node000004" href="$d8/da0/classfl_1_1_c_l_e_d_controller.html" title=" " alt="" coords="33,5,153,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="97,45,101,197,95,197,91,45"/>
+<area shape="rect" id="Node000012" href="$d0/dc9/class_c_pixel_l_e_d_controller.html" title="Template extension of the CLEDController class." alt="" coords="115,80,288,135"/>
+<area shape="poly" id="edge5_Node000012_Node000004" title=" " alt="" coords="120,37,171,78,167,82,117,42"/>
+<area shape="poly" id="edge4_Node000003_Node000012" title=" " alt="" coords="168,147,119,199,115,195,165,143"/>
+</map>

@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -126,20 +126,20 @@ $(function(){initNavTree('d7/d5f/classfl_1_1_http_connection_a5771485770bb65873b
 <p class="definition">Definition at line <a class="el" href="../../df/de0/connection_8cpp_8hpp_source.html#l00213">213</a> of file <a class="el" href="../../df/de0/connection_8cpp_8hpp_source.html">connection.cpp.hpp</a>.</p>
 <div class="fragment"><div class="line"><span class="lineno">  213</span>                                                {</div>
 <div class="line"><span class="lineno">  214</span>    <span class="comment">// Exponential backoff: delay = initial * (multiplier ^ attempts)</span></div>
-<div class="line"><span class="lineno">  215</span>    u32 <a class="code hl_function" href="../../d4/d36/namespacefl_a50131c41da2f619067d98360de35fa27.html#a50131c41da2f619067d98360de35fa27">delay</a> = <a class="code hl_variable" href="../../d7/d5f/classfl_1_1_http_connection_a82bb40bb0f3efde709b343c4c9a5f0e0.html#a82bb40bb0f3efde709b343c4c9a5f0e0">mConfig</a>.reconnectInitialDelayMs;</div>
+<div class="line"><span class="lineno">  215</span>    u32 <a class="code hl_function" href="../../d4/d36/namespacefl_a19da680141593b475c4d1d3c1c0a8409.html#a19da680141593b475c4d1d3c1c0a8409">delay</a> = <a class="code hl_variable" href="../../d7/d5f/classfl_1_1_http_connection_a82bb40bb0f3efde709b343c4c9a5f0e0.html#a82bb40bb0f3efde709b343c4c9a5f0e0">mConfig</a>.reconnectInitialDelayMs;</div>
 <div class="line"><span class="lineno">  216</span>    <span class="keywordflow">for</span> (u32 i = 0; i &lt; <a class="code hl_variable" href="../../d7/d5f/classfl_1_1_http_connection_aa0892b7696733bf538ade4711478f3d6.html#aa0892b7696733bf538ade4711478f3d6">mReconnectAttempts</a>; i++) {</div>
-<div class="line"><span class="lineno">  217</span>        <a class="code hl_function" href="../../d4/d36/namespacefl_a50131c41da2f619067d98360de35fa27.html#a50131c41da2f619067d98360de35fa27">delay</a> *= <a class="code hl_variable" href="../../d7/d5f/classfl_1_1_http_connection_a82bb40bb0f3efde709b343c4c9a5f0e0.html#a82bb40bb0f3efde709b343c4c9a5f0e0">mConfig</a>.reconnectBackoffMultiplier;</div>
-<div class="line"><span class="lineno">  218</span>        <span class="keywordflow">if</span> (<a class="code hl_function" href="../../d4/d36/namespacefl_a50131c41da2f619067d98360de35fa27.html#a50131c41da2f619067d98360de35fa27">delay</a> &gt; <a class="code hl_variable" href="../../d7/d5f/classfl_1_1_http_connection_a82bb40bb0f3efde709b343c4c9a5f0e0.html#a82bb40bb0f3efde709b343c4c9a5f0e0">mConfig</a>.reconnectMaxDelayMs) {</div>
-<div class="line"><span class="lineno">  219</span>            <a class="code hl_function" href="../../d4/d36/namespacefl_a50131c41da2f619067d98360de35fa27.html#a50131c41da2f619067d98360de35fa27">delay</a> = <a class="code hl_variable" href="../../d7/d5f/classfl_1_1_http_connection_a82bb40bb0f3efde709b343c4c9a5f0e0.html#a82bb40bb0f3efde709b343c4c9a5f0e0">mConfig</a>.reconnectMaxDelayMs;</div>
+<div class="line"><span class="lineno">  217</span>        <a class="code hl_function" href="../../d4/d36/namespacefl_a19da680141593b475c4d1d3c1c0a8409.html#a19da680141593b475c4d1d3c1c0a8409">delay</a> *= <a class="code hl_variable" href="../../d7/d5f/classfl_1_1_http_connection_a82bb40bb0f3efde709b343c4c9a5f0e0.html#a82bb40bb0f3efde709b343c4c9a5f0e0">mConfig</a>.reconnectBackoffMultiplier;</div>
+<div class="line"><span class="lineno">  218</span>        <span class="keywordflow">if</span> (<a class="code hl_function" href="../../d4/d36/namespacefl_a19da680141593b475c4d1d3c1c0a8409.html#a19da680141593b475c4d1d3c1c0a8409">delay</a> &gt; <a class="code hl_variable" href="../../d7/d5f/classfl_1_1_http_connection_a82bb40bb0f3efde709b343c4c9a5f0e0.html#a82bb40bb0f3efde709b343c4c9a5f0e0">mConfig</a>.reconnectMaxDelayMs) {</div>
+<div class="line"><span class="lineno">  219</span>            <a class="code hl_function" href="../../d4/d36/namespacefl_a19da680141593b475c4d1d3c1c0a8409.html#a19da680141593b475c4d1d3c1c0a8409">delay</a> = <a class="code hl_variable" href="../../d7/d5f/classfl_1_1_http_connection_a82bb40bb0f3efde709b343c4c9a5f0e0.html#a82bb40bb0f3efde709b343c4c9a5f0e0">mConfig</a>.reconnectMaxDelayMs;</div>
 <div class="line"><span class="lineno">  220</span>            <span class="keywordflow">break</span>;</div>
 <div class="line"><span class="lineno">  221</span>        }</div>
 <div class="line"><span class="lineno">  222</span>    }</div>
 <div class="line"><span class="lineno">  223</span> </div>
-<div class="line"><span class="lineno">  224</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a50131c41da2f619067d98360de35fa27.html#a50131c41da2f619067d98360de35fa27">delay</a>;</div>
+<div class="line"><span class="lineno">  224</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a19da680141593b475c4d1d3c1c0a8409.html#a19da680141593b475c4d1d3c1c0a8409">delay</a>;</div>
 <div class="line"><span class="lineno">  225</span>}</div>
 <div class="ttc" id="aclassfl_1_1_http_connection_a82bb40bb0f3efde709b343c4c9a5f0e0_html_a82bb40bb0f3efde709b343c4c9a5f0e0"><div class="ttname"><a href="../../d7/d5f/classfl_1_1_http_connection_a82bb40bb0f3efde709b343c4c9a5f0e0.html#a82bb40bb0f3efde709b343c4c9a5f0e0">fl::HttpConnection::mConfig</a></div><div class="ttdeci">ConnectionConfig mConfig</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d67/connection_8h_source.html#l00074">connection.h:74</a></div></div>
 <div class="ttc" id="aclassfl_1_1_http_connection_aa0892b7696733bf538ade4711478f3d6_html_aa0892b7696733bf538ade4711478f3d6"><div class="ttname"><a href="../../d7/d5f/classfl_1_1_http_connection_aa0892b7696733bf538ade4711478f3d6.html#aa0892b7696733bf538ade4711478f3d6">fl::HttpConnection::mReconnectAttempts</a></div><div class="ttdeci">u32 mReconnectAttempts</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d67/connection_8h_source.html#l00078">connection.h:78</a></div></div>
-<div class="ttc" id="anamespacefl_a50131c41da2f619067d98360de35fa27_html_a50131c41da2f619067d98360de35fa27"><div class="ttname"><a href="../../d4/d36/namespacefl_a50131c41da2f619067d98360de35fa27.html#a50131c41da2f619067d98360de35fa27">fl::delay</a></div><div class="ttdeci">void delay(u32 ms, bool run_async=true) FL_NOEXCEPT</div><div class="ttdoc">Public delay wrapper that keeps bare Arduino delay() preferred after using fl::delay; while still all...</div><div class="ttdef"><b>Definition</b> <a href="../../dd/dee/delay_8h_source.html#l00098">delay.h:98</a></div></div>
+<div class="ttc" id="anamespacefl_a19da680141593b475c4d1d3c1c0a8409_html_a19da680141593b475c4d1d3c1c0a8409"><div class="ttname"><a href="../../d4/d36/namespacefl_a19da680141593b475c4d1d3c1c0a8409.html#a19da680141593b475c4d1d3c1c0a8409">fl::delay</a></div><div class="ttdeci">void delay(u32 ms, bool run_async=true) FL_NO_EXCEPT</div><div class="ttdoc">Public delay wrapper that keeps bare Arduino delay() preferred after using fl::delay; while still all...</div><div class="ttdef"><b>Definition</b> <a href="../../dd/dee/delay_8h_source.html#l00098">delay.h:98</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../dd/dee/delay_8h_source.html#l00098">fl::delay()</a>, <a class="el" href="../../d4/d67/connection_8h_source.html#l00074">mConfig</a>, and <a class="el" href="../../d4/d67/connection_8h_source.html#l00078">mReconnectAttempts</a>.</p>
 
@@ -168,7 +168,7 @@ $(function(){initNavTree('d7/d5f/classfl_1_1_http_connection_a5771485770bb65873b
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d7/d5f/classfl_1_1_http_connection.html">HttpConnection</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:05 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:09 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

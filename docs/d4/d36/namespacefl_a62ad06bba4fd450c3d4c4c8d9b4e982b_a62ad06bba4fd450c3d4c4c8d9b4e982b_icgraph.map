@@ -1,0 +1,9 @@
+<map id="fl::encodeWS2801" name="fl::encodeWS2801">
+<area shape="rect" id="Node000001" title="Encode pixel data in WS2801/WS2803 format." alt="" coords="365,42,504,67"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a3a29f599c7edec8cb7026f329dfaa739.html#a3a29f599c7edec8cb7026f329dfaa739" title="Encode pixel data in WS2803 format (alias for WS2801)" alt="" coords="179,13,317,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="351,44,317,39,318,34,352,39"/>
+<area shape="rect" id="Node000004" href="$d0/d09/classfl_1_1_pixel_iterator_a89656a999ae23d22f1fea46efe5caa5c.html#a89656a999ae23d22f1fea46efe5caa5c" title="Encode pixels in WS2801 format (zero allocation)" alt="" coords="185,63,311,103"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="352,70,312,76,311,71,351,64"/>
+<area shape="rect" id="Node000003" href="$d0/d09/classfl_1_1_pixel_iterator_a1721f5b7254da8f849cd9be3a6c7fc16.html#a1721f5b7254da8f849cd9be3a6c7fc16" title="Encode pixels in WS2803 format (zero allocation)" alt="" coords="5,5,131,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="165,28,131,28,131,23,165,23"/>
+</map>

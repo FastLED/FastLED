@@ -161,7 +161,7 @@ var sectionId = 'dynsection-1';
 <!-- Node7 -->
 <g id="Node000007" class="node">
 <title>Node7</title>
-<g id="a_Node000007"><a xlink:href="../../dd/db4/_h_d107_8ino.html" target="_top" xlink:title="Example showing how to use the HD107 and HD which has built in gamma correction.">
+<g id="a_Node000007"><a xlink:href="../../dd/db4/_h_d107_8ino.html" target="_top" xlink:title="Example showing how to use the HD107S (also named HD107).">
 <polygon fill="white" stroke="#666666" points="878,-316 728,-316 728,-275 878,-275 878,-316"/>
 <text text-anchor="start" x="736" y="-304" font-family="Helvetica,sans-Serif" font-size="10.00">/home/runner/work/FastLED</text>
 <text text-anchor="start" x="736" y="-293" font-family="Helvetica,sans-Serif" font-size="10.00">/FastLED/examples/HD107</text>
@@ -181,7 +181,7 @@ var sectionId = 'dynsection-1';
 <!-- Node8 -->
 <g id="Node000008" class="node">
 <title>Node8</title>
-<g id="a_Node000008"><a xlink:href="../../db/d97/_fast_l_e_d_8h.html" target="_top" xlink:title="central include file for FastLED, defines the CFastLED class/object">
+<g id="a_Node000008"><a xlink:href="../../d6/d64/fastled_8h.html" target="_top" xlink:title="central include file for FastLED, defines the CFastLED class/object">
 <polygon fill="white" stroke="#666666" points="226,-74 162,-74 162,-55 226,-55 226,-74"/>
 <text text-anchor="middle" x="194" y="-62" font-family="Helvetica,sans-Serif" font-size="10.00">FastLED.h</text>
 </a>
@@ -235,7 +235,7 @@ var sectionId = 'dynsection-1';
 <!-- Node20 -->
 <g id="Node000020" class="node">
 <title>Node20</title>
-<g id="a_Node000020"><a xlink:href="../../d7/dc2/fl_2system_2_fast_l_e_d_8h.html" target="_top" xlink:title="Internal FastLED header for implementation files.">
+<g id="a_Node000020"><a xlink:href="../../d0/d69/fl_2system_2fastled_8h.html" target="_top" xlink:title="Internal FastLED header for implementation files.">
 <polygon fill="#fff0f0" stroke="red" points="238.5,-184 131.5,-184 131.5,-165 238.5,-165 238.5,-184"/>
 <text text-anchor="middle" x="185" y="-172" font-family="Helvetica,sans-Serif" font-size="10.00">fl/system/fastled.h</text>
 </a>

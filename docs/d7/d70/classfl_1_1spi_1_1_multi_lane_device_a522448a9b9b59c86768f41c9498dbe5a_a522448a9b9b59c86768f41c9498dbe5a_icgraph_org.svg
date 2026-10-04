@@ -40,7 +40,7 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a512a780a7050fa0e91e83c5dba1e17bc.html#a512a780a7050fa0e91e83c5dba1e17bc" target="_top" xlink:title=" ">
+<g id="a_Node000003"><a xlink:href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a552f915191464193c98a7a385a6eb05b.html#a552f915191464193c98a7a385a6eb05b" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="131,-187 0,-187 0,-157 131,-157 131,-187"/>
 <text text-anchor="start" x="8" y="-175" font-family="Helvetica,sans-Serif" font-size="10.00">fl::spi::MultiLaneDevice</text>
 <text text-anchor="middle" x="65.5" y="-164" font-family="Helvetica,sans-Serif" font-size="10.00">::operator=</text>
@@ -217,7 +217,7 @@
 <!-- Node9 -->
 <g id="Node000009" class="node">
 <title>Node9</title>
-<g id="a_Node000009"><a xlink:href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a2bc918c56583453aec7f6c3e8af8d7e7.html#a2bc918c56583453aec7f6c3e8af8d7e7" target="_top" xlink:title="Destructor &#45; releases hardware resources.">
+<g id="a_Node000009"><a xlink:href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_ac79b2d7a46e44ebe0e0858f8a1f63877.html#ac79b2d7a46e44ebe0e0858f8a1f63877" target="_top" xlink:title="Destructor &#45; releases hardware resources.">
 <polygon fill="white" stroke="#666666" points="131,-111 0,-111 0,-81 131,-81 131,-111"/>
 <text text-anchor="start" x="8" y="-99" font-family="Helvetica,sans-Serif" font-size="10.00">fl::spi::MultiLaneDevice</text>
 <text text-anchor="middle" x="65.5" y="-88" font-family="Helvetica,sans-Serif" font-size="10.00">::~MultiLaneDevice</text>

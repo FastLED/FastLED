@@ -8,7 +8,7 @@ digraph "fl::wave8Transpose_4_bf1"
   rankdir="LR";
   Node1 [id="Node000001",label="fl::wave8Transpose\l_4_bf1",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="BF1 for 4-lane Wave8 (#2548 deep-dive followup)."];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::detail::wave8_transpose\l_4_bf1",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d9e/namespacefl_1_1detail_a0e57418c3c6a452bf97d32535eaf84d3.html#a0e57418c3c6a452bf97d32535eaf84d3",tooltip="BF1 for 4-lane Wave8."];
+  Node2 [id="Node000002",label="fl::detail::wave8_transpose\l_4_bf1",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d9e/namespacefl_1_1detail_a8c8ad126a88d2a88b8b3524ee264374e.html#a8c8ad126a88d2a88b8b3524ee264374e",tooltip=" "];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
   Node3 [id="Node000003",label="fl::detail::spreadA",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d9e/namespacefl_1_1detail_a85251852414197ed32d0dc54ab229984.html#a85251852414197ed32d0dc54ab229984",tooltip="Pulses 7,6,5,4 of v (byte j = bit (7-j)). Depends only on the high nibble."];
   Node2 -> Node4 [id="edge3_Node000002_Node000004",color="steelblue1",style="solid",tooltip=" "];

@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::task::Coroutine",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/dd9/classfl_1_1task_1_1_coroutine.html",tooltip=" "];
+  Node0 [id="Node000000",label="fl::third_party::truetype\l::stbtt_pack_range",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d41/namespacefl_1_1third__party_1_1truetype.html#da/de2/structfl_1_1third__party_1_1truetype_1_1stbtt__pack__range",tooltip=" "];
 }

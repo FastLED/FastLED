@@ -1,0 +1,26 @@
+<map id="fl/gfx/transfer.cpp.hpp" name="fl/gfx/transfer.cpp.hpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="260,5,424,31"/>
+<area shape="rect" id="Node000002" href="$d3/dc8/transfer_8h.html" title=" " alt="" coords="94,79,215,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="313,33,199,76,197,71,311,28"/>
+<area shape="rect" id="Node000008" href="$df/dab/fastled__progmem_8h.html" title="Wrapper definitions to allow seamless use of PROGMEM in environments that have it." alt="" coords="268,79,417,104"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="345,31,345,65,340,65,340,31"/>
+<area shape="rect" id="Node000010" href="$d1/ddf/align_8h.html" title="Alignment macros and utilities for FastLED." alt="" coords="454,79,553,104"/>
+<area shape="poly" id="edge11_Node000001_Node000010" title=" " alt="" coords="369,28,466,71,464,75,367,33"/>
+<area shape="rect" id="Node000003" href="$d3/dd6/gfx_2color__profile_8h.html" title=" " alt="" coords="23,152,174,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="147,106,118,143,114,140,143,103"/>
+<area shape="rect" id="Node000004" href="$db/d01/noexcept_8h.html" title=" " alt="" coords="35,225,162,251"/>
+<area shape="poly" id="edge7_Node000002_Node000004" title=" " alt="" coords="95,104,49,122,29,136,13,153,9,162,9,171,18,188,36,204,59,217,56,221,33,208,14,191,3,172,3,161,8,151,25,132,46,117,93,99"/>
+<area shape="rect" id="Node000007" href="$d3/d7e/int_8h.html" title=" " alt="" coords="198,152,281,177"/>
+<area shape="poly" id="edge5_Node000002_Node000007" title=" " alt="" coords="170,102,217,141,214,145,166,106"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="101,178,101,212,96,212,96,178"/>
+<area shape="rect" id="Node000005" href="$df/dd8/stdint_8h.html" title=" " alt="" coords="187,225,290,251"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="122,175,205,217,202,221,120,180"/>
+<area shape="poly" id="edge6_Node000007_Node000005" title=" " alt="" coords="242,178,242,212,236,212,237,178"/>
+<area shape="poly" id="edge10_Node000008_Node000007" title=" " alt="" coords="327,106,269,146,266,142,324,102"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="306,152,480,177"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="353,103,379,139,375,142,349,106"/>
+<area shape="poly" id="edge14_Node000010_Node000004" title=" " alt="" coords="509,104,511,141,506,161,495,180,176,228,175,223,492,175,501,159,505,140,504,104"/>
+<area shape="poly" id="edge13_Node000010_Node000009" title=" " alt="" coords="487,106,424,147,421,142,485,102"/>
+<area shape="rect" id="Node000011" href="$d7/d84/cstddef_8h.html" title=" " alt="" coords="556,152,670,177"/>
+<area shape="poly" id="edge12_Node000010_Node000011" title=" " alt="" coords="523,102,585,142,582,147,520,106"/>
+</map>

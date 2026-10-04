@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -101,6 +101,7 @@ $(function(){initNavTree('d1/d2a/power__mgt_8cpp_8hpp.html','../../'); initResiz
 
 <div class="header">
   <div class="summary">
+<a href="#nested-classes">Classes</a> &#124;
 <a href="#define-members">Macros</a> &#124;
 <a href="#func-members">Functions</a> &#124;
 <a href="#var-members">Variables</a>  </div>
@@ -112,9 +113,15 @@ $(function(){initNavTree('d1/d2a/power__mgt_8cpp_8hpp.html','../../'); initResiz
 <code>#include &quot;<a class="el" href="../../d2/dd9/controller_8h_source.html">controller.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../db/d65/fastpin_8h_source.html">fastpin.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d1/dbc/sketch__macros_8h_source.html">fl/system/sketch_macros.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d4/d54/compiler__control_8h_source.html">fl/stl/compiler_control.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d3/d7e/int_8h_source.html">fl/stl/int.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../dc/d5b/power__mgt_8h_source.html">power_mgt.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d7/dcc/pipeline__binding_8h_source.html">fl/channels/pipeline_binding.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../dc/d2d/power__prepass_8h_source.html">fl/channels/power_prepass.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../db/dc0/engine__events_8h_source.html">fl/system/engine_events.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d5/d4d/pixel__controller_8h_source.html">pixel_controller.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d4/d0b/singleton_8h_source.html">fl/stl/singleton.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../df/df8/fl_2gfx_2rgbw_8h_source.html">fl/gfx/rgbw.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for power_mgt.cpp.hpp:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -132,6 +139,14 @@ $(function(){initNavTree('d1/d2a/power__mgt_8cpp_8hpp.html','../../'); initResiz
 </div>
 <p><a href="../../d1/d2a/power__mgt_8cpp_8hpp_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:d6/d28/struct_rgbww_emitter_power" id="r_d6/d28/struct_rgbww_emitter_power"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#d6/d28/struct_rgbww_emitter_power">RgbwwEmitterPower</a></td></tr>
+<tr class="separator:d6/d28/struct_rgbww_emitter_power"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:d3/d10/struct_white_emitter_power" id="r_d3/d10/struct_white_emitter_power"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#d3/d10/struct_white_emitter_power">WhiteEmitterPower</a></td></tr>
+<tr class="memdesc:d3/d10/struct_white_emitter_power"><td class="mdescLeft">&#160;</td><td class="mdescRight">The white emitter's draw, when the caller declared one.  <a href="#d3/d10/struct_white_emitter_power">More...</a><br /></td></tr>
+<tr class="separator:d3/d10/struct_white_emitter_power"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
 Macros</h2></td></tr>
 <tr class="memitem:ae5caa0e4614a6e13ab3d8b7380337694" id="r_ae5caa0e4614a6e13ab3d8b7380337694"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d2a/power__mgt_8cpp_8hpp_ae5caa0e4614a6e13ab3d8b7380337694.html#ae5caa0e4614a6e13ab3d8b7380337694">POWER_DEBUG_PRINT</a>&#160;&#160;&#160;0</td></tr>
@@ -143,6 +158,10 @@ Macros</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:aa482db0d85e7c33ad7ce4f3b77f4808e" id="r_aa482db0d85e7c33ad7ce4f3b77f4808e"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d2a/power__mgt_8cpp_8hpp_aa482db0d85e7c33ad7ce4f3b77f4808e.html#aa482db0d85e7c33ad7ce4f3b77f4808e">apply_rgb_power_model</a> (const <a class="el" href="../../dc/d4d/struct_power_model_r_g_b.html">PowerModelRGB</a> &amp;model)</td></tr>
+<tr class="separator:aa482db0d85e7c33ad7ce4f3b77f4808e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac08dcfea7df964dcb9e1f2617c5f0b17" id="r_ac08dcfea7df964dcb9e1f2617c5f0b17"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d2a/power__mgt_8cpp_8hpp_ac08dcfea7df964dcb9e1f2617c5f0b17.html#ac08dcfea7df964dcb9e1f2617c5f0b17">brightness_within_budget</a> (fl::u32 fixed_mW, fl::u32 controllable_mW, <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> target_brightness, fl::u32 max_power_mW)</td></tr>
+<tr class="separator:ac08dcfea7df964dcb9e1f2617c5f0b17"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gab540bd9608e32378f1fb29bd9226c970" id="r_gab540bd9608e32378f1fb29bd9226c970"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/d1d/group___power_gab540bd9608e32378f1fb29bd9226c970.html#gab540bd9608e32378f1fb29bd9226c970">calculate_max_brightness_for_power_mW</a> (const <a class="el" href="../../dd/dc7/group___h_s_v2_r_g_b_ga65c1895006b38f8c5114118b6a170327.html#ga65c1895006b38f8c5114118b6a170327">CRGB</a> *ledbuffer, fl::u16 numLeds, <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> target_brightness, fl::u32 max_power_mW)</td></tr>
 <tr class="memdesc:gab540bd9608e32378f1fb29bd9226c970"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determines the highest brightness level you can use and still stay under the specified power budget for a given set of LEDs.  <br /></td></tr>
 <tr class="separator:gab540bd9608e32378f1fb29bd9226c970"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -152,23 +171,50 @@ Functions</h2></td></tr>
 <tr class="memitem:gaf1109b6fa8f504362807f39bc4126306" id="r_gaf1109b6fa8f504362807f39bc4126306"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/d1d/group___power_gaf1109b6fa8f504362807f39bc4126306.html#gaf1109b6fa8f504362807f39bc4126306">calculate_max_brightness_for_power_vmA</a> (const <a class="el" href="../../dd/dc7/group___h_s_v2_r_g_b_ga65c1895006b38f8c5114118b6a170327.html#ga65c1895006b38f8c5114118b6a170327">CRGB</a> *ledbuffer, fl::u16 numLeds, <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> target_brightness, fl::u32 max_power_V, fl::u32 max_power_mA)</td></tr>
 <tr class="memdesc:gaf1109b6fa8f504362807f39bc4126306"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determines the highest brightness level you can use and still stay under the specified power budget for a given set of LEDs.     <br /></td></tr>
 <tr class="separator:gaf1109b6fa8f504362807f39bc4126306"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga315379844ae2a3ff4212fe39ac1ade6c" id="r_ga315379844ae2a3ff4212fe39ac1ade6c"><td class="memItemLeft" align="right" valign="top">fl::u32&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d9/d5f/group___power_model_ga315379844ae2a3ff4212fe39ac1ade6c.html#ga315379844ae2a3ff4212fe39ac1ade6c">calculate_unscaled_emitter_power_mW</a> (<a class="el" href="../../d0/d08/classfl_1_1span.html">fl::span</a>&lt; const <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> &gt; codes, <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> emitter_count)</td></tr>
+<tr class="memdesc:ga315379844ae2a3ff4212fe39ac1ade6c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Charge already-solved physical output bytes in source emitter order: RGB, RGBW, or RGB + warm white + cool white.  <br /></td></tr>
+<tr class="separator:ga315379844ae2a3ff4212fe39ac1ade6c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga46fe8354310cd1888743e400b70175cd" id="r_ga46fe8354310cd1888743e400b70175cd"><td class="memItemLeft" align="right" valign="top">fl::u32&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/d1d/group___power_ga46fe8354310cd1888743e400b70175cd.html#ga46fe8354310cd1888743e400b70175cd">calculate_unscaled_power_mW</a> (const <a class="el" href="../../dd/dc7/group___h_s_v2_r_g_b_ga65c1895006b38f8c5114118b6a170327.html#ga65c1895006b38f8c5114118b6a170327">CRGB</a> *ledbuffer, fl::u16 numLeds)</td></tr>
 <tr class="memdesc:ga46fe8354310cd1888743e400b70175cd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determines how many milliwatts the current LED data would draw at max brightness (255)  <br /></td></tr>
 <tr class="separator:ga46fe8354310cd1888743e400b70175cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gafdf503b02fd644c3398d34f27c3d363d" id="r_gafdf503b02fd644c3398d34f27c3d363d"><td class="memItemLeft" align="right" valign="top">fl::u32&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/d1d/group___power_gafdf503b02fd644c3398d34f27c3d363d.html#gafdf503b02fd644c3398d34f27c3d363d">calculate_unscaled_power_mW</a> (<a class="el" href="../../d0/d08/classfl_1_1span.html">fl::span</a>&lt; const <a class="el" href="../../dd/dc7/group___h_s_v2_r_g_b_ga65c1895006b38f8c5114118b6a170327.html#ga65c1895006b38f8c5114118b6a170327">CRGB</a> &gt; <a class="el" href="../../d6/d05/_animartrix_8ino_a83a59cb1680f896fa1c411261436d4ad.html#a83a59cb1680f896fa1c411261436d4ad">leds</a>)</td></tr>
+<tr class="memitem:gafdf503b02fd644c3398d34f27c3d363d" id="r_gafdf503b02fd644c3398d34f27c3d363d"><td class="memItemLeft" align="right" valign="top">fl::u32&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/d1d/group___power_gafdf503b02fd644c3398d34f27c3d363d.html#gafdf503b02fd644c3398d34f27c3d363d">calculate_unscaled_power_mW</a> (<a class="el" href="../../d0/d08/classfl_1_1span.html">fl::span</a>&lt; const <a class="el" href="../../dd/dc7/group___h_s_v2_r_g_b_ga65c1895006b38f8c5114118b6a170327.html#ga65c1895006b38f8c5114118b6a170327">CRGB</a> &gt; <a class="el" href="../../d5/d17/_analog_output_8ino_a1039e408783ef35dd94161e35efe8ee9.html#a1039e408783ef35dd94161e35efe8ee9">leds</a>)</td></tr>
+<tr class="memdesc:gafdf503b02fd644c3398d34f27c3d363d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determines how many milliwatts the current LED data would draw at max brightness (255)     <br /></td></tr>
 <tr class="separator:gafdf503b02fd644c3398d34f27c3d363d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga01ec0d809cace073e7c92f323cbd38a1" id="r_ga01ec0d809cace073e7c92f323cbd38a1"><td class="memItemLeft" align="right" valign="top">fl::u32&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/d1d/group___power_ga01ec0d809cace073e7c92f323cbd38a1.html#ga01ec0d809cace073e7c92f323cbd38a1">calculate_unscaled_power_mW</a> (<a class="el" href="../../d0/d08/classfl_1_1span.html">fl::span</a>&lt; const <a class="el" href="../../dd/dc7/group___h_s_v2_r_g_b_ga65c1895006b38f8c5114118b6a170327.html#ga65c1895006b38f8c5114118b6a170327">CRGB</a> &gt; <a class="el" href="../../d5/d17/_analog_output_8ino_a1039e408783ef35dd94161e35efe8ee9.html#a1039e408783ef35dd94161e35efe8ee9">leds</a>, const <a class="el" href="../../d7/d27/structfl_1_1_rgbw.html">fl::Rgbw</a> &amp;<a class="el" href="../../d1/d3a/_r_g_b_w_emulated_8ino_af6840056f51753c6731a47458751842d.html#af6840056f51753c6731a47458751842d">rgbw</a>)</td></tr>
+<tr class="memdesc:ga01ec0d809cace073e7c92f323cbd38a1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Same, for a strip driven through the RGBW conversion.  <br /></td></tr>
+<tr class="separator:ga01ec0d809cace073e7c92f323cbd38a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaea016c9708cbd1fce10a90d8fced370a" id="r_gaea016c9708cbd1fce10a90d8fced370a"><td class="memItemLeft" align="right" valign="top">fl::u32&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/d1d/group___power_gaea016c9708cbd1fce10a90d8fced370a.html#gaea016c9708cbd1fce10a90d8fced370a">controller_dither_reserve_mW</a> (const <a class="el" href="../../d8/da0/classfl_1_1_c_l_e_d_controller.html">fl::CLEDController</a> &amp;<a class="el" href="../../d3/dac/_fx_noise_ring_8ino_a6ce69b48435c268b408f7adc51049d0f.html#a6ce69b48435c268b408f7adc51049d0f">controller</a>)</td></tr>
+<tr class="memdesc:gaea016c9708cbd1fce10a90d8fced370a"><td class="mdescLeft">&#160;</td><td class="mdescRight"><code><a class="el" href="../../d3/d1d/group___power_gaf1bc751ffa875570ed2e86fc38db5142.html#gaf1bc751ffa875570ed2e86fc38db5142" title="The most BINARY_DITHER can add to one latched frame of leds, in mW (#4342, contract R4: &quot;quantization...">dither_reserve_mW()</a></code> for a controller that dithers, and zero for one that does not: a mode other than <code>BINARY_DITHER</code>, or an active RGBW/RGBWW conversion (which reads the raw pixel on every non-AVR target).  <br /></td></tr>
+<tr class="separator:gaea016c9708cbd1fce10a90d8fced370a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gab0593d3b85bf91261f5a6288ec4ed71e" id="r_gab0593d3b85bf91261f5a6288ec4ed71e"><td class="memItemLeft" align="right" valign="top">fl::u32&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/d1d/group___power_gab0593d3b85bf91261f5a6288ec4ed71e.html#gab0593d3b85bf91261f5a6288ec4ed71e">controller_unscaled_power_mW</a> (const <a class="el" href="../../d8/da0/classfl_1_1_c_l_e_d_controller.html">fl::CLEDController</a> &amp;<a class="el" href="../../d3/dac/_fx_noise_ring_8ino_a6ce69b48435c268b408f7adc51049d0f.html#a6ce69b48435c268b408f7adc51049d0f">controller</a>)</td></tr>
+<tr class="memdesc:gab0593d3b85bf91261f5a6288ec4ed71e"><td class="mdescLeft">&#160;</td><td class="mdescRight">One controller's demand at full brightness, in mW, including idle draw &ndash; the quantity the limiter sums and scales.  <br /></td></tr>
+<tr class="separator:gab0593d3b85bf91261f5a6288ec4ed71e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaf1bc751ffa875570ed2e86fc38db5142" id="r_gaf1bc751ffa875570ed2e86fc38db5142"><td class="memItemLeft" align="right" valign="top">fl::u32&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/d1d/group___power_gaf1bc751ffa875570ed2e86fc38db5142.html#gaf1bc751ffa875570ed2e86fc38db5142">dither_reserve_mW</a> (<a class="el" href="../../d0/d08/classfl_1_1span.html">fl::span</a>&lt; const <a class="el" href="../../dd/dc7/group___h_s_v2_r_g_b_ga65c1895006b38f8c5114118b6a170327.html#ga65c1895006b38f8c5114118b6a170327">CRGB</a> &gt; <a class="el" href="../../d5/d17/_analog_output_8ino_a1039e408783ef35dd94161e35efe8ee9.html#a1039e408783ef35dd94161e35efe8ee9">leds</a>)</td></tr>
+<tr class="memdesc:gaf1bc751ffa875570ed2e86fc38db5142"><td class="mdescLeft">&#160;</td><td class="mdescRight">The most <code>BINARY_DITHER</code> can add to one latched frame of <code>leds</code>, in mW (#4342, contract R4: "quantization reserve").  <br /></td></tr>
+<tr class="separator:gaf1bc751ffa875570ed2e86fc38db5142"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4ef2b434985b31da5b717f40a2e78e2b" id="r_a4ef2b434985b31da5b717f40a2e78e2b"><td class="memItemLeft" align="right" valign="top">static fl::u32&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d2a/power__mgt_8cpp_8hpp_a4ef2b434985b31da5b717f40a2e78e2b.html#a4ef2b434985b31da5b717f40a2e78e2b">fixed_power_mW</a> (fl::u32 led_count)</td></tr>
+<tr class="separator:a4ef2b434985b31da5b717f40a2e78e2b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaec3b3e44c2f5e7f70127ad76f480ccd0" id="r_gaec3b3e44c2f5e7f70127ad76f480ccd0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../dc/d4d/struct_power_model_r_g_b.html">PowerModelRGB</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d9/d5f/group___power_model_gaec3b3e44c2f5e7f70127ad76f480ccd0.html#gaec3b3e44c2f5e7f70127ad76f480ccd0">get_power_model</a> ()</td></tr>
 <tr class="memdesc:gaec3b3e44c2f5e7f70127ad76f480ccd0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get current RGB power model.  <br /></td></tr>
 <tr class="separator:gaec3b3e44c2f5e7f70127ad76f480ccd0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga8aa9fd0df8e3e989b4907e9f703343b2" id="r_ga8aa9fd0df8e3e989b4907e9f703343b2"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d9/d5f/group___power_model_ga8aa9fd0df8e3e989b4907e9f703343b2.html#ga8aa9fd0df8e3e989b4907e9f703343b2">get_power_scaling_exponent</a> ()</td></tr>
 <tr class="memdesc:ga8aa9fd0df8e3e989b4907e9f703343b2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the current brightness-to-power response exponent.  <br /></td></tr>
 <tr class="separator:ga8aa9fd0df8e3e989b4907e9f703343b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga71d79c746ccde0fd719f37e76638a107" id="r_ga71d79c746ccde0fd719f37e76638a107"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d9/d5f/group___power_model_ga71d79c746ccde0fd719f37e76638a107.html#ga71d79c746ccde0fd719f37e76638a107">get_white_emitter_mW</a> ()</td></tr>
+<tr class="memdesc:ga71d79c746ccde0fd719f37e76638a107"><td class="mdescLeft">&#160;</td><td class="mdescRight">The white-emitter draw the caller declared, or zero if they declared only an RGB model.  <br /></td></tr>
+<tr class="separator:ga71d79c746ccde0fd719f37e76638a107"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga7660e83ad6d90a313426f51c4bcb8f28" id="r_ga7660e83ad6d90a313426f51c4bcb8f28"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/d1d/group___power_ga7660e83ad6d90a313426f51c4bcb8f28.html#ga7660e83ad6d90a313426f51c4bcb8f28">set_max_power_indicator_LED</a> (<a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> pinNumber)</td></tr>
 <tr class="memdesc:ga7660e83ad6d90a313426f51c4bcb8f28"><td class="mdescLeft">&#160;</td><td class="mdescRight">Select a pin with an LED that will be flashed to indicate that power management is pulling down the brightness.  <br /></td></tr>
 <tr class="separator:ga7660e83ad6d90a313426f51c4bcb8f28"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga83d1cb7bfce9bd338765968bb40d54e5" id="r_ga83d1cb7bfce9bd338765968bb40d54e5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d9/d5f/group___power_model_ga83d1cb7bfce9bd338765968bb40d54e5.html#ga83d1cb7bfce9bd338765968bb40d54e5">set_power_model</a> (const <a class="el" href="../../dc/d4d/struct_power_model_r_g_b.html">PowerModelRGB</a> &amp;model)</td></tr>
 <tr class="memdesc:ga83d1cb7bfce9bd338765968bb40d54e5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set custom RGB LED power consumption model.  <br /></td></tr>
 <tr class="separator:ga83d1cb7bfce9bd338765968bb40d54e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga759a23d8dec6a2de0d5b89095014d4e6" id="r_ga759a23d8dec6a2de0d5b89095014d4e6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d9/d5f/group___power_model_ga759a23d8dec6a2de0d5b89095014d4e6.html#ga759a23d8dec6a2de0d5b89095014d4e6">set_power_model</a> (const <a class="el" href="../../de/dc0/struct_power_model_r_g_b_w.html">PowerModelRGBW</a> &amp;model)</td></tr>
+<tr class="memdesc:ga759a23d8dec6a2de0d5b89095014d4e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set custom RGBW LED power consumption model.  <br /></td></tr>
+<tr class="separator:ga759a23d8dec6a2de0d5b89095014d4e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gad42f079a40ba5d5a0db04e14b645e49e" id="r_gad42f079a40ba5d5a0db04e14b645e49e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d9/d5f/group___power_model_gad42f079a40ba5d5a0db04e14b645e49e.html#gad42f079a40ba5d5a0db04e14b645e49e">set_power_model</a> (const <a class="el" href="../../db/d18/struct_power_model_r_g_b_w_w.html">PowerModelRGBWW</a> &amp;model)</td></tr>
+<tr class="memdesc:gad42f079a40ba5d5a0db04e14b645e49e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set custom RGBWW LED power consumption model.  <br /></td></tr>
+<tr class="separator:gad42f079a40ba5d5a0db04e14b645e49e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gad213f217079d1c8e2453b74bd3aec6de" id="r_gad213f217079d1c8e2453b74bd3aec6de"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d9/d5f/group___power_model_gad213f217079d1c8e2453b74bd3aec6de.html#gad213f217079d1c8e2453b74bd3aec6de">set_power_scaling_exponent</a> (float exponent)</td></tr>
 <tr class="memdesc:gad213f217079d1c8e2453b74bd3aec6de"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set a non-linear brightness-to-power response exponent.  <br /></td></tr>
 <tr class="separator:gad213f217079d1c8e2453b74bd3aec6de"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -179,30 +225,101 @@ Variables</h2></td></tr>
 <tr class="separator:a941602425ddcfa856c63daebd9d30bc1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af34a8e7eb0c622deaf3cae1d44ff212f" id="r_af34a8e7eb0c622deaf3cae1d44ff212f"><td class="memItemLeft" align="right" valign="top">static const <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d2a/power__mgt_8cpp_8hpp_af34a8e7eb0c622deaf3cae1d44ff212f.html#af34a8e7eb0c622deaf3cae1d44ff212f">gMCU_mW</a> = 25 * 5</td></tr>
 <tr class="separator:af34a8e7eb0c622deaf3cae1d44ff212f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a013268124f45aa501036e3fe695acc1d" id="r_a013268124f45aa501036e3fe695acc1d"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="../../d9/d13/cpp__compat_8h_a72f0657181cca64b44eb186b707eb380.html#a72f0657181cca64b44eb186b707eb380">constexpr</a> fl::u32&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d2a/power__mgt_8cpp_8hpp_a013268124f45aa501036e3fe695acc1d.html#a013268124f45aa501036e3fe695acc1d">kDitherReserveCodes</a> = 2</td></tr>
+<tr class="separator:a013268124f45aa501036e3fe695acc1d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader">Power Usage Values</h2></td></tr>
 <tr><td class="ititle" colspan="2"><p>Disables pragma messages and warnings</p>
 <p>These power usage values are approximate, and your exact readings will be slightly (10%?) different from these.</p>
 <p>They were arrived at by actually measuing the power draw of a number of different LED strips, and a bunch of closed-loop-feedback testing to make sure that if we USE these values, we stay at or under the target power consumption. Actual power consumption is much, much more complicated and has to include things like voltage drop, etc., etc. However, this is good enough for most cases, and almost certainly better than no power management at all.</p>
 <p>You can now customize these values using the PowerModel API: </p><div class="fragment"><div class="line"><a class="code hl_variable" href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a>.setPowerModel(<a class="code hl_struct" href="../../dc/d4d/struct_power_model_r_g_b.html">PowerModelRGB</a>(40, 40, 40, 2)); <span class="comment">// WS2812B @ 3.3V</span></div>
-<div class="ttc" id="a_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9_html_a8e94985674086ea368e1d51cbc0f82a9"><div class="ttname"><a href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a></div><div class="ttdeci">FL_DISABLE_WARNING_PUSH FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS CFastLED FastLED</div><div class="ttdoc">Global LED strip management instance.</div><div class="ttdef"><b>Definition</b> <a href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_source.html#l00075">FastLED.cpp.hpp:75</a></div></div>
-<div class="ttc" id="astruct_power_model_r_g_b_html"><div class="ttname"><a href="../../dc/d4d/struct_power_model_r_g_b.html">PowerModelRGB</a></div><div class="ttdoc">RGB LED power consumption model Used for standard 3-channel LEDs (WS2812, WS2812B,...</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d5b/power__mgt_8h_source.html#l00027">power_mgt.h:27</a></div></div>
+<div class="ttc" id="a_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9_html_a8e94985674086ea368e1d51cbc0f82a9"><div class="ttname"><a href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a></div><div class="ttdeci">FL_DISABLE_WARNING_PUSH FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS CFastLED FastLED</div><div class="ttdoc">Global LED strip management instance.</div><div class="ttdef"><b>Definition</b> <a href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_source.html#l00090">FastLED.cpp.hpp:90</a></div></div>
+<div class="ttc" id="astruct_power_model_r_g_b_html"><div class="ttname"><a href="../../dc/d4d/struct_power_model_r_g_b.html">PowerModelRGB</a></div><div class="ttdoc">RGB LED power consumption model Used for standard 3-channel LEDs (WS2812, WS2812B,...</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d5b/power__mgt_8h_source.html#l00029">power_mgt.h:29</a></div></div>
 </div><!-- fragment --> </td></tr>
+<tr class="memitem:a65c5cbdd796e64d67cfe0665898797ee" id="r_a65c5cbdd796e64d67cfe0665898797ee"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d2a/power__mgt_8cpp_8hpp_a65c5cbdd796e64d67cfe0665898797ee.html#a65c5cbdd796e64d67cfe0665898797ee">emitter_power_weights</a> (<a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> count, <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a>(&amp;weights)[5])</td></tr>
+<tr class="separator:a65c5cbdd796e64d67cfe0665898797ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afe71d257dc9aca526178a992761bb812" id="r_afe71d257dc9aca526178a992761bb812"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="../../dc/d4d/struct_power_model_r_g_b.html">PowerModelRGB</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d2a/power__mgt_8cpp_8hpp_afe71d257dc9aca526178a992761bb812.html#afe71d257dc9aca526178a992761bb812">gPowerModel</a> ()</td></tr>
 <tr class="memdesc:afe71d257dc9aca526178a992761bb812"><td class="mdescLeft">&#160;</td><td class="mdescRight">Global RGB power model (initialized to WS2812 @ 5V defaults, linear response)  <br /></td></tr>
 <tr class="separator:afe71d257dc9aca526178a992761bb812"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8cfee7a07f6f35100dad7f4d642eaf2d" id="r_a8cfee7a07f6f35100dad7f4d642eaf2d"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="#d6/d28/struct_rgbww_emitter_power">RgbwwEmitterPower</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d2a/power__mgt_8cpp_8hpp_a8cfee7a07f6f35100dad7f4d642eaf2d.html#a8cfee7a07f6f35100dad7f4d642eaf2d">gRgbwwEmitterPower</a> ()</td></tr>
+<tr class="separator:a8cfee7a07f6f35100dad7f4d642eaf2d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a96a9190022832e655b9a01a3e0167d8c" id="r_a96a9190022832e655b9a01a3e0167d8c"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="#d3/d10/struct_white_emitter_power">WhiteEmitterPower</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d2a/power__mgt_8cpp_8hpp_a96a9190022832e655b9a01a3e0167d8c.html#a96a9190022832e655b9a01a3e0167d8c">gWhiteEmitterPower</a> ()</td></tr>
+<tr class="separator:a96a9190022832e655b9a01a3e0167d8c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1fe1958e08bbf3784716f4cd8e804e56" id="r_a1fe1958e08bbf3784716f4cd8e804e56"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="../../d9/d13/cpp__compat_8h_a72f0657181cca64b44eb186b707eb380.html#a72f0657181cca64b44eb186b707eb380">constexpr</a> float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d2a/power__mgt_8cpp_8hpp_a1fe1958e08bbf3784716f4cd8e804e56.html#a1fe1958e08bbf3784716f4cd8e804e56">kLinearPowerScalingExponent</a> = 1.0f</td></tr>
 <tr class="separator:a1fe1958e08bbf3784716f4cd8e804e56"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6d7fd4ef5a280719f5540a69ef8e3e85" id="r_a6d7fd4ef5a280719f5540a69ef8e3e85"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="../../d9/d13/cpp__compat_8h_a72f0657181cca64b44eb186b707eb380.html#a72f0657181cca64b44eb186b707eb380">constexpr</a> float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d2a/power__mgt_8cpp_8hpp_a6d7fd4ef5a280719f5540a69ef8e3e85.html#a6d7fd4ef5a280719f5540a69ef8e3e85">kPowerScalingExponentEpsilon</a> = 0.0001f</td></tr>
 <tr class="separator:a6d7fd4ef5a280719f5540a69ef8e3e85"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adcd9338466b0f22161f7281bfc7cdcdf" id="r_adcd9338466b0f22161f7281bfc7cdcdf"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d2a/power__mgt_8cpp_8hpp_adcd9338466b0f22161f7281bfc7cdcdf.html#adcd9338466b0f22161f7281bfc7cdcdf">map_power_value</a> (<a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> <a class="el" href="../../d6/d05/_animartrix_8ino_ab0d80715bb4b382856cf250c1eeb9b53.html#ab0d80715bb4b382856cf250c1eeb9b53">brightness</a>)</td></tr>
 <tr class="separator:adcd9338466b0f22161f7281bfc7cdcdf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a611a0864af0ba45bfa9c2fee00628214" id="r_a611a0864af0ba45bfa9c2fee00628214"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d2a/power__mgt_8cpp_8hpp_a611a0864af0ba45bfa9c2fee00628214.html#a611a0864af0ba45bfa9c2fee00628214">max_power_step</a> ()</td></tr>
+<tr class="memdesc:a611a0864af0ba45bfa9c2fee00628214"><td class="mdescLeft">&#160;</td><td class="mdescRight">What one output code can cost at the steepest point of the response, in the 0-255 scaled units <code>calculate_unscaled_power_mW</code> multiplies by.  <br /></td></tr>
+<tr class="separator:a611a0864af0ba45bfa9c2fee00628214"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga681489b02b2825095fd40db45906bf26" id="r_ga681489b02b2825095fd40db45906bf26"><td class="memItemLeft" align="right" valign="top">fl::u32&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/d1d/group___power_ga681489b02b2825095fd40db45906bf26.html#ga681489b02b2825095fd40db45906bf26">scale_power_for_brightness</a> (fl::u32 total_mW, <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> <a class="el" href="../../d6/d05/_animartrix_8ino_ab0d80715bb4b382856cf250c1eeb9b53.html#ab0d80715bb4b382856cf250c1eeb9b53">brightness</a>)</td></tr>
 <tr class="memdesc:ga681489b02b2825095fd40db45906bf26"><td class="mdescLeft">&#160;</td><td class="mdescRight">Applies the configured power-scaling response to a total power value.  <br /></td></tr>
 <tr class="separator:ga681489b02b2825095fd40db45906bf26"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3beac85272db71b8f8a1c58f9e041b2e" id="r_a3beac85272db71b8f8a1c58f9e041b2e"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d2a/power__mgt_8cpp_8hpp_a3beac85272db71b8f8a1c58f9e041b2e.html#a3beac85272db71b8f8a1c58f9e041b2e">unmap_power_value</a> (<a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> scaled_brightness)</td></tr>
 <tr class="separator:a3beac85272db71b8f8a1c58f9e041b2e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<hr/><h2 class="groupheader">Class Documentation</h2>
+<a name="d6/d28/struct_rgbww_emitter_power" id="d6/d28/struct_rgbww_emitter_power"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#d6/d28/struct_rgbww_emitter_power">&#9670;&#160;</a></span>RgbwwEmitterPower</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">struct RgbwwEmitterPower</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<div id="dynsection-2" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-2-trigger" src="../../closed.png" alt="+"/> Collaboration diagram for RgbwwEmitterPower:</div>
+<div id="dynsection-2-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-2-content" class="dyncontent" style="display:none;">
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../de/d3a/struct_rgbww_emitter_power__coll__graph.svg" width="168" height="124"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<center><span class="legend">[<a target="top" href="../../graph_legend.html">legend</a>]</span></center></div>
+<table class="fieldtable">
+<tr><th colspan="3">Class Members</th></tr>
+<tr><td class="fieldtype">
+<a id="a8708d6fd7dff1f15c56b69785035b3d7" name="a8708d6fd7dff1f15c56b69785035b3d7"></a>bool</td>
+<td class="fieldname">
+declared = false</td>
+<td class="fielddoc">
+</td></tr>
+<tr><td class="fieldtype">
+<a id="aeb8390ad0b548e48a438cafc7912c10d" name="aeb8390ad0b548e48a438cafc7912c10d"></a><a class="el" href="../../db/d18/struct_power_model_r_g_b_w_w.html">PowerModelRGBWW</a></td>
+<td class="fieldname">
+model</td>
+<td class="fielddoc">
+</td></tr>
+</table>
+
+</div>
+</div>
+<a name="d3/d10/struct_white_emitter_power" id="d3/d10/struct_white_emitter_power"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#d3/d10/struct_white_emitter_power">&#9670;&#160;</a></span>WhiteEmitterPower</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">struct WhiteEmitterPower</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<table class="fieldtable">
+<tr><th colspan="3">Class Members</th></tr>
+<tr><td class="fieldtype">
+<a id="aa2a08875d9bc8d9d3c2eaedf2fa1f181" name="aa2a08875d9bc8d9d3c2eaedf2fa1f181"></a><a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a></td>
+<td class="fieldname">
+mW</td>
+<td class="fielddoc">
+</td></tr>
+</table>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.3-->
@@ -210,7 +327,7 @@ Variables</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d1/d2a/power__mgt_8cpp_8hpp.html">power_mgt.cpp.hpp</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:02 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:05 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -1,0 +1,7 @@
+<map id="fl::SourceProfile::bt2020" name="fl::SourceProfile::bt2020">
+<area shape="rect" id="Node000001" title=" " alt="" coords="436,5,567,45"/>
+<area shape="rect" id="Node000002" href="$d2/dec/namespacefl_1_1fled_a7f3ddd09003b75b034315f97ceb84673.html#a7f3ddd09003b75b034315f97ceb84673" title=" " alt="" coords="220,13,388,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="422,28,388,28,388,23,422,23"/>
+<area shape="rect" id="Node000003" href="$d0/d4b/classfl_1_1_video_ab6ec01681e1f8473a372e6be674426d4.html#ab6ec01681e1f8473a372e6be674426d4" title="The colour&#45;pipeline source profile the file declares (or the default tuple of its pixel format)." alt="" coords="5,13,172,38"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="206,28,172,28,172,23,206,23"/>
+</map>

@@ -1,0 +1,19 @@
+<map id="fl::SPITransposer::getLaneByte" name="fl::SPITransposer::getLaneByte">
+<area shape="rect" id="Node000001" title="Get byte from lane at given index, handling padding automatically." alt="" coords="635,101,771,141"/>
+<area shape="rect" id="Node000002" href="$d3/dfa/classfl_1_1_s_p_i_transposer_a6d5e285eccf27e81fd360ad02170fd33.html#a6d5e285eccf27e81fd360ad02170fd33" title="Transpose 16 lanes of data into interleaved hex&#45;SPI format." alt="" coords="451,5,587,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="654,97,585,60,562,48,564,43,588,55,656,92"/>
+<area shape="rect" id="Node000003" href="$d3/dfa/classfl_1_1_s_p_i_transposer_a685b1154e9612d603229bb9895a6e75e.html#a685b1154e9612d603229bb9895a6e75e" title="Transpose 2 lanes of data into interleaved dual&#45;SPI format." alt="" coords="451,69,587,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="621,110,586,104,587,98,621,105"/>
+<area shape="rect" id="Node000008" href="$d3/dfa/classfl_1_1_s_p_i_transposer_a3e0c7621e15a368bfe879182c97638fc.html#a3e0c7621e15a368bfe879182c97638fc" title="Transpose 4 lanes of data into interleaved quad&#45;SPI format." alt="" coords="451,133,587,173"/>
+<area shape="poly" id="edge6_Node000001_Node000008" title=" " alt="" coords="621,138,587,144,586,139,621,133"/>
+<area shape="rect" id="Node000009" href="$d3/dfa/classfl_1_1_s_p_i_transposer_a2cf424ab57c25a1fa79f98ebb4d6c04a.html#a2cf424ab57c25a1fa79f98ebb4d6c04a" title="Transpose 8 lanes of data into interleaved octal&#45;SPI format." alt="" coords="451,197,587,237"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="656,150,588,188,564,200,562,195,585,183,654,146"/>
+<area shape="rect" id="Node000004" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_a97018959f2c77546fa12f2a0adb2f540.html#a97018959f2c77546fa12f2a0adb2f540" title="Flush all lanes (transpose and transmit)" alt="" coords="228,133,403,173"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="442,116,380,136,379,131,440,111"/>
+<area shape="rect" id="Node000005" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_a552f915191464193c98a7a385a6eb05b.html#a552f915191464193c98a7a385a6eb05b" title=" " alt="" coords="5,101,180,141"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="214,141,180,136,180,131,215,136"/>
+<area shape="rect" id="Node000006" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_a547b2f30f70e16dbb22762f3f2370254.html#a547b2f30f70e16dbb22762f3f2370254" title="Internal implementation &#45; write all lanes atomically." alt="" coords="5,165,180,205"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="215,170,180,175,180,170,214,165"/>
+<area shape="poly" id="edge7_Node000008_Node000004" title=" " alt="" coords="437,156,403,156,403,151,437,151"/>
+<area shape="poly" id="edge9_Node000009_Node000004" title=" " alt="" coords="440,196,379,176,380,171,442,191"/>
+</map>

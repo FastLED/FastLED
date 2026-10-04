@@ -1,0 +1,9 @@
+<map id="fl::audio::AudioManager::instance" name="fl::audio::AudioManager::instance">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,35,181,75"/>
+<area shape="rect" id="Node000002" href="$d4/d9d/classfl_1_1audio_1_1_audio_manager_a69048b1084d8426703381ec34164a0d9.html#a69048b1084d8426703381ec34164a0d9" title=" " alt="" coords="229,5,405,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="181,41,215,36,216,41,182,46"/>
+<area shape="rect" id="Node000003" href="$d9/d5b/classfl_1_1_singleton_ad5cb1b704e17768f75802673abb0ff75.html#ad5cb1b704e17768f75802673abb0ff75" title=" " alt="" coords="236,70,399,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="182,63,223,68,222,73,181,68"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a1e67c0c24ebcd98fcf8554753d1639a6.html#a1e67c0c24ebcd98fcf8554753d1639a6" title=" " alt="" coords="453,70,592,95"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="399,80,439,80,439,85,399,85"/>
+</map>

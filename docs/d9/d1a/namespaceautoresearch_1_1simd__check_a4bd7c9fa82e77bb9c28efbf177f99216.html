@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -125,72 +125,72 @@ $(function(){initNavTree('d9/d1a/namespaceautoresearch_1_1simd__check_a4bd7c9fa8
 
 <p>Run the full SIMD test suite. Returns the number of failures. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d7/dd1/_auto_research_simd_8h_source.html#l01394">1394</a> of file <a class="el" href="../../d7/dd1/_auto_research_simd_8h_source.html">AutoResearchSimd.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno"> 1394</span>                          {</div>
-<div class="line"><span class="lineno"> 1395</span>    <span class="keyword">const</span> <a class="code hl_struct" href="../../d9/d1a/namespaceautoresearch_1_1simd__check.html#d4/d36/structautoresearch_1_1simd__check_1_1_simd_test_entry">SimdTestEntry</a>* tests = <span class="keyword">nullptr</span>;</div>
-<div class="line"><span class="lineno"> 1396</span>    <span class="keywordtype">int</span> num_tests = 0;</div>
-<div class="line"><span class="lineno"> 1397</span>    <a class="code hl_function" href="../../d9/d1a/namespaceautoresearch_1_1simd__check_a81f34bf71b7b00b59cedf9fb126a6050.html#a81f34bf71b7b00b59cedf9fb126a6050">getTests</a>(&amp;tests, &amp;num_tests);</div>
-<div class="line"><span class="lineno"> 1398</span> </div>
-<div class="line"><span class="lineno"> 1399</span>    <span class="keywordtype">int</span> passed = 0;</div>
-<div class="line"><span class="lineno"> 1400</span>    <span class="keywordtype">int</span> failed = 0;</div>
-<div class="line"><span class="lineno"> 1401</span> </div>
-<div class="line"><span class="lineno"> 1402</span>    <a class="code hl_define" href="../../d7/d7f/log_8h_af806ddb55caa7cfe1cc59dd6c785f8be.html#af806ddb55caa7cfe1cc59dd6c785f8be">FL_PRINT</a>(<span class="stringliteral">&quot;\n[SIMD AUTORESEARCH]&quot;</span>);</div>
-<div class="line"><span class="lineno"> 1403</span>    <a class="code hl_define" href="../../d7/d7f/log_8h_af806ddb55caa7cfe1cc59dd6c785f8be.html#af806ddb55caa7cfe1cc59dd6c785f8be">FL_PRINT</a>(<span class="stringliteral">&quot;────────────────────────────────────────────────────────────────&quot;</span>);</div>
-<div class="line"><span class="lineno"> 1404</span> </div>
-<div class="line"><span class="lineno"> 1405</span><span class="preprocessor">#if defined(__x86_64__) || defined(_M_X64) || defined(__i386__) || defined(_M_IX86)</span></div>
-<div class="line"><span class="lineno"> 1406</span>    <a class="code hl_define" href="../../d7/d7f/log_8h_af806ddb55caa7cfe1cc59dd6c785f8be.html#af806ddb55caa7cfe1cc59dd6c785f8be">FL_PRINT</a>(<span class="stringliteral">&quot;  SIMD Backend: x86 SSE2&quot;</span>);</div>
-<div class="line"><span class="lineno"> 1407</span><span class="preprocessor">#elif defined(__XTENSA__) &amp;&amp; FL_XTENSA_HAS_PIE</span></div>
-<div class="line"><span class="lineno"> 1408</span>    <a class="code hl_define" href="../../d7/d7f/log_8h_af806ddb55caa7cfe1cc59dd6c785f8be.html#af806ddb55caa7cfe1cc59dd6c785f8be">FL_PRINT</a>(<span class="stringliteral">&quot;  SIMD Backend: Xtensa PIE (ESP32-S3)&quot;</span>);</div>
-<div class="line"><span class="lineno"> 1409</span><span class="preprocessor">#elif defined(__XTENSA__)</span></div>
-<div class="line"><span class="lineno"> 1410</span>    <a class="code hl_define" href="../../d7/d7f/log_8h_af806ddb55caa7cfe1cc59dd6c785f8be.html#af806ddb55caa7cfe1cc59dd6c785f8be">FL_PRINT</a>(<span class="stringliteral">&quot;  SIMD Backend: Xtensa scalar&quot;</span>);</div>
-<div class="line"><span class="lineno"> 1411</span><span class="preprocessor">#elif defined(__riscv)</span></div>
-<div class="line"><span class="lineno"> 1412</span>    <a class="code hl_define" href="../../d7/d7f/log_8h_af806ddb55caa7cfe1cc59dd6c785f8be.html#af806ddb55caa7cfe1cc59dd6c785f8be">FL_PRINT</a>(<span class="stringliteral">&quot;  SIMD Backend: RISC-V scalar&quot;</span>);</div>
-<div class="line"><span class="lineno"> 1413</span><span class="preprocessor">#else</span></div>
-<div class="line"><span class="lineno"> 1414</span>    <a class="code hl_define" href="../../d7/d7f/log_8h_af806ddb55caa7cfe1cc59dd6c785f8be.html#af806ddb55caa7cfe1cc59dd6c785f8be">FL_PRINT</a>(<span class="stringliteral">&quot;  SIMD Backend: Scalar fallback&quot;</span>);</div>
-<div class="line"><span class="lineno"> 1415</span><span class="preprocessor">#endif</span></div>
-<div class="line"><span class="lineno"> 1416</span> </div>
-<div class="line"><span class="lineno"> 1417</span>    <a class="code hl_class" href="../../d1/d27/classfl_1_1sstream.html">fl::sstream</a> ss;</div>
-<div class="line"><span class="lineno"> 1418</span>    ss &lt;&lt; <span class="stringliteral">&quot;  Running &quot;</span> &lt;&lt; num_tests &lt;&lt; <span class="stringliteral">&quot; SIMD tests...\n&quot;</span>;</div>
-<div class="line"><span class="lineno"> 1419</span>    <a class="code hl_define" href="../../d7/d7f/log_8h_af806ddb55caa7cfe1cc59dd6c785f8be.html#af806ddb55caa7cfe1cc59dd6c785f8be">FL_PRINT</a>(ss.<a class="code hl_function" href="../../d1/d27/classfl_1_1sstream_a08170cac6eba7241f099ae16730f6f8e.html#a08170cac6eba7241f099ae16730f6f8e">str</a>());</div>
-<div class="line"><span class="lineno"> 1420</span> </div>
-<div class="line"><span class="lineno"> 1421</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; num_tests; i++) {</div>
-<div class="line"><span class="lineno"> 1422</span>        <span class="keywordtype">bool</span> ok = tests[i].<a class="code hl_variable" href="../../d9/d1a/namespaceautoresearch_1_1simd__check.html#af71ce2e5ad741d43db48844b40ee7293">func</a>();</div>
-<div class="line"><span class="lineno"> 1423</span>        <span class="keywordflow">if</span> (ok) {</div>
-<div class="line"><span class="lineno"> 1424</span>            passed++;</div>
-<div class="line"><span class="lineno"> 1425</span>            ss.<a class="code hl_function" href="../../d1/d27/classfl_1_1sstream_a2020a3513ae92ed435685030c3127194.html#a2020a3513ae92ed435685030c3127194">clear</a>();</div>
-<div class="line"><span class="lineno"> 1426</span>            ss &lt;&lt; <span class="stringliteral">&quot;  [PASS] &quot;</span> &lt;&lt; tests[i].<a class="code hl_variable" href="../../d9/d1a/namespaceautoresearch_1_1simd__check.html#a137a5408564924b7e943ced98dc58b9d">name</a>;</div>
-<div class="line"><span class="lineno"> 1427</span>            <a class="code hl_define" href="../../d7/d7f/log_8h_af806ddb55caa7cfe1cc59dd6c785f8be.html#af806ddb55caa7cfe1cc59dd6c785f8be">FL_PRINT</a>(ss.<a class="code hl_function" href="../../d1/d27/classfl_1_1sstream_a08170cac6eba7241f099ae16730f6f8e.html#a08170cac6eba7241f099ae16730f6f8e">str</a>());</div>
-<div class="line"><span class="lineno"> 1428</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno"> 1429</span>            failed++;</div>
-<div class="line"><span class="lineno"> 1430</span>            ss.<a class="code hl_function" href="../../d1/d27/classfl_1_1sstream_a2020a3513ae92ed435685030c3127194.html#a2020a3513ae92ed435685030c3127194">clear</a>();</div>
-<div class="line"><span class="lineno"> 1431</span>            ss &lt;&lt; <span class="stringliteral">&quot;  [FAIL] &quot;</span> &lt;&lt; tests[i].<a class="code hl_variable" href="../../d9/d1a/namespaceautoresearch_1_1simd__check.html#a137a5408564924b7e943ced98dc58b9d">name</a>;</div>
-<div class="line"><span class="lineno"> 1432</span>            <a class="code hl_define" href="../../d7/d7f/log_8h_a87d1cd42c16d2496128dd8b10bd737e8.html#a87d1cd42c16d2496128dd8b10bd737e8">FL_ERROR</a>(ss.<a class="code hl_function" href="../../d1/d27/classfl_1_1sstream_a08170cac6eba7241f099ae16730f6f8e.html#a08170cac6eba7241f099ae16730f6f8e">str</a>());</div>
-<div class="line"><span class="lineno"> 1433</span>        }</div>
-<div class="line"><span class="lineno"> 1434</span>    }</div>
-<div class="line"><span class="lineno"> 1435</span> </div>
-<div class="line"><span class="lineno"> 1436</span>    ss.<a class="code hl_function" href="../../d1/d27/classfl_1_1sstream_a2020a3513ae92ed435685030c3127194.html#a2020a3513ae92ed435685030c3127194">clear</a>();</div>
-<div class="line"><span class="lineno"> 1437</span>    ss &lt;&lt; <span class="stringliteral">&quot;\n[SIMD RESULTS] &quot;</span> &lt;&lt; passed &lt;&lt; <span class="stringliteral">&quot;/&quot;</span> &lt;&lt; num_tests &lt;&lt; <span class="stringliteral">&quot; passed&quot;</span>;</div>
-<div class="line"><span class="lineno"> 1438</span>    <span class="keywordflow">if</span> (failed &gt; 0) {</div>
-<div class="line"><span class="lineno"> 1439</span>        ss &lt;&lt; <span class="stringliteral">&quot;, &quot;</span> &lt;&lt; failed &lt;&lt; <span class="stringliteral">&quot; FAILED&quot;</span>;</div>
-<div class="line"><span class="lineno"> 1440</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a87d1cd42c16d2496128dd8b10bd737e8.html#a87d1cd42c16d2496128dd8b10bd737e8">FL_ERROR</a>(ss.<a class="code hl_function" href="../../d1/d27/classfl_1_1sstream_a08170cac6eba7241f099ae16730f6f8e.html#a08170cac6eba7241f099ae16730f6f8e">str</a>());</div>
-<div class="line"><span class="lineno"> 1441</span>    } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno"> 1442</span>        ss &lt;&lt; <span class="stringliteral">&quot; - ALL PASSED&quot;</span>;</div>
-<div class="line"><span class="lineno"> 1443</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_af806ddb55caa7cfe1cc59dd6c785f8be.html#af806ddb55caa7cfe1cc59dd6c785f8be">FL_PRINT</a>(ss.<a class="code hl_function" href="../../d1/d27/classfl_1_1sstream_a08170cac6eba7241f099ae16730f6f8e.html#a08170cac6eba7241f099ae16730f6f8e">str</a>());</div>
-<div class="line"><span class="lineno"> 1444</span>    }</div>
-<div class="line"><span class="lineno"> 1445</span> </div>
-<div class="line"><span class="lineno"> 1446</span>    <span class="keywordflow">return</span> failed;</div>
-<div class="line"><span class="lineno"> 1447</span>}</div>
-<div class="ttc" id="aclassfl_1_1sstream_a08170cac6eba7241f099ae16730f6f8e_html_a08170cac6eba7241f099ae16730f6f8e"><div class="ttname"><a href="../../d1/d27/classfl_1_1sstream_a08170cac6eba7241f099ae16730f6f8e.html#a08170cac6eba7241f099ae16730f6f8e">fl::sstream::str</a></div><div class="ttdeci">string str() const FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d00/strstream_8h_source.html#l00043">strstream.h:43</a></div></div>
-<div class="ttc" id="aclassfl_1_1sstream_a2020a3513ae92ed435685030c3127194_html_a2020a3513ae92ed435685030c3127194"><div class="ttname"><a href="../../d1/d27/classfl_1_1sstream_a2020a3513ae92ed435685030c3127194.html#a2020a3513ae92ed435685030c3127194">fl::sstream::clear</a></div><div class="ttdeci">void clear() FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d00/strstream_8h_source.html#l00358">strstream.h:358</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d7/dd1/_auto_research_simd_8h_source.html#l01402">1402</a> of file <a class="el" href="../../d7/dd1/_auto_research_simd_8h_source.html">AutoResearchSimd.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno"> 1402</span>                          {</div>
+<div class="line"><span class="lineno"> 1403</span>    <span class="keyword">const</span> <a class="code hl_struct" href="../../d9/d1a/namespaceautoresearch_1_1simd__check.html#d4/d36/structautoresearch_1_1simd__check_1_1_simd_test_entry">SimdTestEntry</a>* tests = <span class="keyword">nullptr</span>;</div>
+<div class="line"><span class="lineno"> 1404</span>    <span class="keywordtype">int</span> num_tests = 0;</div>
+<div class="line"><span class="lineno"> 1405</span>    <a class="code hl_function" href="../../d9/d1a/namespaceautoresearch_1_1simd__check_a81f34bf71b7b00b59cedf9fb126a6050.html#a81f34bf71b7b00b59cedf9fb126a6050">getTests</a>(&amp;tests, &amp;num_tests);</div>
+<div class="line"><span class="lineno"> 1406</span> </div>
+<div class="line"><span class="lineno"> 1407</span>    <span class="keywordtype">int</span> passed = 0;</div>
+<div class="line"><span class="lineno"> 1408</span>    <span class="keywordtype">int</span> failed = 0;</div>
+<div class="line"><span class="lineno"> 1409</span> </div>
+<div class="line"><span class="lineno"> 1410</span>    <a class="code hl_define" href="../../d7/d7f/log_8h_ae4b7c64c9ae6ec1cacfabb437a2f9ead.html#ae4b7c64c9ae6ec1cacfabb437a2f9ead">FL_PRINT</a>(<span class="stringliteral">&quot;\n[SIMD AUTORESEARCH]&quot;</span>);</div>
+<div class="line"><span class="lineno"> 1411</span>    <a class="code hl_define" href="../../d7/d7f/log_8h_ae4b7c64c9ae6ec1cacfabb437a2f9ead.html#ae4b7c64c9ae6ec1cacfabb437a2f9ead">FL_PRINT</a>(<span class="stringliteral">&quot;────────────────────────────────────────────────────────────────&quot;</span>);</div>
+<div class="line"><span class="lineno"> 1412</span> </div>
+<div class="line"><span class="lineno"> 1413</span><span class="preprocessor">#if defined(__x86_64__) || defined(_M_X64) || defined(__i386__) || defined(_M_IX86)</span></div>
+<div class="line"><span class="lineno"> 1414</span>    <a class="code hl_define" href="../../d7/d7f/log_8h_ae4b7c64c9ae6ec1cacfabb437a2f9ead.html#ae4b7c64c9ae6ec1cacfabb437a2f9ead">FL_PRINT</a>(<span class="stringliteral">&quot;  SIMD Backend: x86 SSE2&quot;</span>);</div>
+<div class="line"><span class="lineno"> 1415</span><span class="preprocessor">#elif defined(__XTENSA__) &amp;&amp; FL_XTENSA_HAS_PIE</span></div>
+<div class="line"><span class="lineno"> 1416</span>    <a class="code hl_define" href="../../d7/d7f/log_8h_ae4b7c64c9ae6ec1cacfabb437a2f9ead.html#ae4b7c64c9ae6ec1cacfabb437a2f9ead">FL_PRINT</a>(<span class="stringliteral">&quot;  SIMD Backend: Xtensa PIE (ESP32-S3)&quot;</span>);</div>
+<div class="line"><span class="lineno"> 1417</span><span class="preprocessor">#elif defined(__XTENSA__)</span></div>
+<div class="line"><span class="lineno"> 1418</span>    <a class="code hl_define" href="../../d7/d7f/log_8h_ae4b7c64c9ae6ec1cacfabb437a2f9ead.html#ae4b7c64c9ae6ec1cacfabb437a2f9ead">FL_PRINT</a>(<span class="stringliteral">&quot;  SIMD Backend: Xtensa scalar&quot;</span>);</div>
+<div class="line"><span class="lineno"> 1419</span><span class="preprocessor">#elif defined(__riscv)</span></div>
+<div class="line"><span class="lineno"> 1420</span>    <a class="code hl_define" href="../../d7/d7f/log_8h_ae4b7c64c9ae6ec1cacfabb437a2f9ead.html#ae4b7c64c9ae6ec1cacfabb437a2f9ead">FL_PRINT</a>(<span class="stringliteral">&quot;  SIMD Backend: RISC-V scalar&quot;</span>);</div>
+<div class="line"><span class="lineno"> 1421</span><span class="preprocessor">#else</span></div>
+<div class="line"><span class="lineno"> 1422</span>    <a class="code hl_define" href="../../d7/d7f/log_8h_ae4b7c64c9ae6ec1cacfabb437a2f9ead.html#ae4b7c64c9ae6ec1cacfabb437a2f9ead">FL_PRINT</a>(<span class="stringliteral">&quot;  SIMD Backend: Scalar fallback&quot;</span>);</div>
+<div class="line"><span class="lineno"> 1423</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno"> 1424</span> </div>
+<div class="line"><span class="lineno"> 1425</span>    <a class="code hl_class" href="../../d1/d27/classfl_1_1sstream.html">fl::sstream</a> ss;</div>
+<div class="line"><span class="lineno"> 1426</span>    ss &lt;&lt; <span class="stringliteral">&quot;  Running &quot;</span> &lt;&lt; num_tests &lt;&lt; <span class="stringliteral">&quot; SIMD tests...\n&quot;</span>;</div>
+<div class="line"><span class="lineno"> 1427</span>    <a class="code hl_define" href="../../d7/d7f/log_8h_ae4b7c64c9ae6ec1cacfabb437a2f9ead.html#ae4b7c64c9ae6ec1cacfabb437a2f9ead">FL_PRINT</a>(ss.<a class="code hl_function" href="../../d1/d27/classfl_1_1sstream_a904115dfd2a7e462177b6409c9b842d6.html#a904115dfd2a7e462177b6409c9b842d6">str</a>());</div>
+<div class="line"><span class="lineno"> 1428</span> </div>
+<div class="line"><span class="lineno"> 1429</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; num_tests; i++) {</div>
+<div class="line"><span class="lineno"> 1430</span>        <span class="keywordtype">bool</span> ok = tests[i].<a class="code hl_variable" href="../../d9/d1a/namespaceautoresearch_1_1simd__check.html#af71ce2e5ad741d43db48844b40ee7293">func</a>();</div>
+<div class="line"><span class="lineno"> 1431</span>        <span class="keywordflow">if</span> (ok) {</div>
+<div class="line"><span class="lineno"> 1432</span>            passed++;</div>
+<div class="line"><span class="lineno"> 1433</span>            ss.<a class="code hl_function" href="../../d1/d27/classfl_1_1sstream_a6984c3b59302280dc6d30fdd158552a8.html#a6984c3b59302280dc6d30fdd158552a8">clear</a>();</div>
+<div class="line"><span class="lineno"> 1434</span>            ss &lt;&lt; <span class="stringliteral">&quot;  [PASS] &quot;</span> &lt;&lt; tests[i].<a class="code hl_variable" href="../../d9/d1a/namespaceautoresearch_1_1simd__check.html#a137a5408564924b7e943ced98dc58b9d">name</a>;</div>
+<div class="line"><span class="lineno"> 1435</span>            <a class="code hl_define" href="../../d7/d7f/log_8h_ae4b7c64c9ae6ec1cacfabb437a2f9ead.html#ae4b7c64c9ae6ec1cacfabb437a2f9ead">FL_PRINT</a>(ss.<a class="code hl_function" href="../../d1/d27/classfl_1_1sstream_a904115dfd2a7e462177b6409c9b842d6.html#a904115dfd2a7e462177b6409c9b842d6">str</a>());</div>
+<div class="line"><span class="lineno"> 1436</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno"> 1437</span>            failed++;</div>
+<div class="line"><span class="lineno"> 1438</span>            ss.<a class="code hl_function" href="../../d1/d27/classfl_1_1sstream_a6984c3b59302280dc6d30fdd158552a8.html#a6984c3b59302280dc6d30fdd158552a8">clear</a>();</div>
+<div class="line"><span class="lineno"> 1439</span>            ss &lt;&lt; <span class="stringliteral">&quot;  [FAIL] &quot;</span> &lt;&lt; tests[i].<a class="code hl_variable" href="../../d9/d1a/namespaceautoresearch_1_1simd__check.html#a137a5408564924b7e943ced98dc58b9d">name</a>;</div>
+<div class="line"><span class="lineno"> 1440</span>            <a class="code hl_define" href="../../d7/d7f/log_8h_aa90e3b2c36c6225140f46a86c6ac19e2.html#aa90e3b2c36c6225140f46a86c6ac19e2">FL_ERROR</a>(ss.<a class="code hl_function" href="../../d1/d27/classfl_1_1sstream_a904115dfd2a7e462177b6409c9b842d6.html#a904115dfd2a7e462177b6409c9b842d6">str</a>());</div>
+<div class="line"><span class="lineno"> 1441</span>        }</div>
+<div class="line"><span class="lineno"> 1442</span>    }</div>
+<div class="line"><span class="lineno"> 1443</span> </div>
+<div class="line"><span class="lineno"> 1444</span>    ss.<a class="code hl_function" href="../../d1/d27/classfl_1_1sstream_a6984c3b59302280dc6d30fdd158552a8.html#a6984c3b59302280dc6d30fdd158552a8">clear</a>();</div>
+<div class="line"><span class="lineno"> 1445</span>    ss &lt;&lt; <span class="stringliteral">&quot;\n[SIMD RESULTS] &quot;</span> &lt;&lt; passed &lt;&lt; <span class="stringliteral">&quot;/&quot;</span> &lt;&lt; num_tests &lt;&lt; <span class="stringliteral">&quot; passed&quot;</span>;</div>
+<div class="line"><span class="lineno"> 1446</span>    <span class="keywordflow">if</span> (failed &gt; 0) {</div>
+<div class="line"><span class="lineno"> 1447</span>        ss &lt;&lt; <span class="stringliteral">&quot;, &quot;</span> &lt;&lt; failed &lt;&lt; <span class="stringliteral">&quot; FAILED&quot;</span>;</div>
+<div class="line"><span class="lineno"> 1448</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_aa90e3b2c36c6225140f46a86c6ac19e2.html#aa90e3b2c36c6225140f46a86c6ac19e2">FL_ERROR</a>(ss.<a class="code hl_function" href="../../d1/d27/classfl_1_1sstream_a904115dfd2a7e462177b6409c9b842d6.html#a904115dfd2a7e462177b6409c9b842d6">str</a>());</div>
+<div class="line"><span class="lineno"> 1449</span>    } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno"> 1450</span>        ss &lt;&lt; <span class="stringliteral">&quot; - ALL PASSED&quot;</span>;</div>
+<div class="line"><span class="lineno"> 1451</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_ae4b7c64c9ae6ec1cacfabb437a2f9ead.html#ae4b7c64c9ae6ec1cacfabb437a2f9ead">FL_PRINT</a>(ss.<a class="code hl_function" href="../../d1/d27/classfl_1_1sstream_a904115dfd2a7e462177b6409c9b842d6.html#a904115dfd2a7e462177b6409c9b842d6">str</a>());</div>
+<div class="line"><span class="lineno"> 1452</span>    }</div>
+<div class="line"><span class="lineno"> 1453</span> </div>
+<div class="line"><span class="lineno"> 1454</span>    <span class="keywordflow">return</span> failed;</div>
+<div class="line"><span class="lineno"> 1455</span>}</div>
+<div class="ttc" id="aclassfl_1_1sstream_a6984c3b59302280dc6d30fdd158552a8_html_a6984c3b59302280dc6d30fdd158552a8"><div class="ttname"><a href="../../d1/d27/classfl_1_1sstream_a6984c3b59302280dc6d30fdd158552a8.html#a6984c3b59302280dc6d30fdd158552a8">fl::sstream::clear</a></div><div class="ttdeci">void clear() FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d00/strstream_8h_source.html#l00358">strstream.h:358</a></div></div>
+<div class="ttc" id="aclassfl_1_1sstream_a904115dfd2a7e462177b6409c9b842d6_html_a904115dfd2a7e462177b6409c9b842d6"><div class="ttname"><a href="../../d1/d27/classfl_1_1sstream_a904115dfd2a7e462177b6409c9b842d6.html#a904115dfd2a7e462177b6409c9b842d6">fl::sstream::str</a></div><div class="ttdeci">string str() const FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d00/strstream_8h_source.html#l00043">strstream.h:43</a></div></div>
 <div class="ttc" id="aclassfl_1_1sstream_html"><div class="ttname"><a href="../../d1/d27/classfl_1_1sstream.html">fl::sstream</a></div><div class="ttdef"><b>Definition</b> <a href="../../d8/d00/strstream_8h_source.html#l00034">strstream.h:34</a></div></div>
-<div class="ttc" id="alog_8h_a87d1cd42c16d2496128dd8b10bd737e8_html_a87d1cd42c16d2496128dd8b10bd737e8"><div class="ttname"><a href="../../d7/d7f/log_8h_a87d1cd42c16d2496128dd8b10bd737e8.html#a87d1cd42c16d2496128dd8b10bd737e8">FL_ERROR</a></div><div class="ttdeci">#define FL_ERROR(X)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00219">log.h:219</a></div></div>
-<div class="ttc" id="alog_8h_af806ddb55caa7cfe1cc59dd6c785f8be_html_af806ddb55caa7cfe1cc59dd6c785f8be"><div class="ttname"><a href="../../d7/d7f/log_8h_af806ddb55caa7cfe1cc59dd6c785f8be.html#af806ddb55caa7cfe1cc59dd6c785f8be">FL_PRINT</a></div><div class="ttdeci">#define FL_PRINT(X)</div><div class="ttdoc">Print without prefix (like FL_WARN but without &quot;WARN: &quot; prefix) Uses sstream for dynamic formatting (...</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00457">log.h:457</a></div></div>
-<div class="ttc" id="anamespaceautoresearch_1_1simd__check_a81f34bf71b7b00b59cedf9fb126a6050_html_a81f34bf71b7b00b59cedf9fb126a6050"><div class="ttname"><a href="../../d9/d1a/namespaceautoresearch_1_1simd__check_a81f34bf71b7b00b59cedf9fb126a6050.html#a81f34bf71b7b00b59cedf9fb126a6050">autoresearch::simd_check::getTests</a></div><div class="ttdeci">void getTests(const SimdTestEntry **out_tests, int *out_count)</div><div class="ttdoc">Get the static test table. Used by both runSimdTests() and the RPC handler.</div><div class="ttdef"><b>Definition</b> <a href="../../d7/dd1/_auto_research_simd_8h_source.html#l01282">AutoResearchSimd.h:1282</a></div></div>
-<div class="ttc" id="anamespaceautoresearch_1_1simd__check_html_a137a5408564924b7e943ced98dc58b9d"><div class="ttname"><a href="../../d9/d1a/namespaceautoresearch_1_1simd__check.html#a137a5408564924b7e943ced98dc58b9d">autoresearch::simd_check::SimdTestEntry::name</a></div><div class="ttdeci">const char * name</div><div class="ttdef"><b>Definition</b> <a href="../../d7/dd1/_auto_research_simd_8h_source.html#l01277">AutoResearchSimd.h:1277</a></div></div>
-<div class="ttc" id="anamespaceautoresearch_1_1simd__check_html_af71ce2e5ad741d43db48844b40ee7293"><div class="ttname"><a href="../../d9/d1a/namespaceautoresearch_1_1simd__check.html#af71ce2e5ad741d43db48844b40ee7293">autoresearch::simd_check::SimdTestEntry::func</a></div><div class="ttdeci">bool(* func)()</div><div class="ttdef"><b>Definition</b> <a href="../../d7/dd1/_auto_research_simd_8h_source.html#l01278">AutoResearchSimd.h:1278</a></div></div>
-<div class="ttc" id="anamespaceautoresearch_1_1simd__check_html_d4/d36/structautoresearch_1_1simd__check_1_1_simd_test_entry"><div class="ttname"><a href="../../d9/d1a/namespaceautoresearch_1_1simd__check.html#d4/d36/structautoresearch_1_1simd__check_1_1_simd_test_entry">autoresearch::simd_check::SimdTestEntry</a></div><div class="ttdef"><b>Definition</b> <a href="../../d7/dd1/_auto_research_simd_8h_source.html#l01276">AutoResearchSimd.h:1276</a></div></div>
+<div class="ttc" id="alog_8h_aa90e3b2c36c6225140f46a86c6ac19e2_html_aa90e3b2c36c6225140f46a86c6ac19e2"><div class="ttname"><a href="../../d7/d7f/log_8h_aa90e3b2c36c6225140f46a86c6ac19e2.html#aa90e3b2c36c6225140f46a86c6ac19e2">FL_ERROR</a></div><div class="ttdeci">#define FL_ERROR(...)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00372">log.h:372</a></div></div>
+<div class="ttc" id="alog_8h_ae4b7c64c9ae6ec1cacfabb437a2f9ead_html_ae4b7c64c9ae6ec1cacfabb437a2f9ead"><div class="ttname"><a href="../../d7/d7f/log_8h_ae4b7c64c9ae6ec1cacfabb437a2f9ead.html#ae4b7c64c9ae6ec1cacfabb437a2f9ead">FL_PRINT</a></div><div class="ttdeci">#define FL_PRINT(...)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00640">log.h:640</a></div></div>
+<div class="ttc" id="anamespaceautoresearch_1_1simd__check_a81f34bf71b7b00b59cedf9fb126a6050_html_a81f34bf71b7b00b59cedf9fb126a6050"><div class="ttname"><a href="../../d9/d1a/namespaceautoresearch_1_1simd__check_a81f34bf71b7b00b59cedf9fb126a6050.html#a81f34bf71b7b00b59cedf9fb126a6050">autoresearch::simd_check::getTests</a></div><div class="ttdeci">void getTests(const SimdTestEntry **out_tests, int *out_count)</div><div class="ttdoc">Get the static test table. Used by both runSimdTests() and the RPC handler.</div><div class="ttdef"><b>Definition</b> <a href="../../d7/dd1/_auto_research_simd_8h_source.html#l01290">AutoResearchSimd.h:1290</a></div></div>
+<div class="ttc" id="anamespaceautoresearch_1_1simd__check_html_a137a5408564924b7e943ced98dc58b9d"><div class="ttname"><a href="../../d9/d1a/namespaceautoresearch_1_1simd__check.html#a137a5408564924b7e943ced98dc58b9d">autoresearch::simd_check::SimdTestEntry::name</a></div><div class="ttdeci">const char * name</div><div class="ttdef"><b>Definition</b> <a href="../../d7/dd1/_auto_research_simd_8h_source.html#l01285">AutoResearchSimd.h:1285</a></div></div>
+<div class="ttc" id="anamespaceautoresearch_1_1simd__check_html_af71ce2e5ad741d43db48844b40ee7293"><div class="ttname"><a href="../../d9/d1a/namespaceautoresearch_1_1simd__check.html#af71ce2e5ad741d43db48844b40ee7293">autoresearch::simd_check::SimdTestEntry::func</a></div><div class="ttdeci">bool(* func)()</div><div class="ttdef"><b>Definition</b> <a href="../../d7/dd1/_auto_research_simd_8h_source.html#l01286">AutoResearchSimd.h:1286</a></div></div>
+<div class="ttc" id="anamespaceautoresearch_1_1simd__check_html_d4/d36/structautoresearch_1_1simd__check_1_1_simd_test_entry"><div class="ttname"><a href="../../d9/d1a/namespaceautoresearch_1_1simd__check.html#d4/d36/structautoresearch_1_1simd__check_1_1_simd_test_entry">autoresearch::simd_check::SimdTestEntry</a></div><div class="ttdef"><b>Definition</b> <a href="../../d7/dd1/_auto_research_simd_8h_source.html#l01284">AutoResearchSimd.h:1284</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d8/d00/strstream_8h_source.html#l00358">fl::sstream::clear()</a>, <a class="el" href="../../d7/d7f/log_8h_source.html#l00219">FL_ERROR</a>, <a class="el" href="../../d7/d7f/log_8h_source.html#l00457">FL_PRINT</a>, <a class="el" href="../../d7/dd1/_auto_research_simd_8h_source.html#l01278">autoresearch::simd_check::SimdTestEntry::func</a>, <a class="el" href="../../d7/dd1/_auto_research_simd_8h_source.html#l01282">getTests()</a>, <a class="el" href="../../d7/dd1/_auto_research_simd_8h_source.html#l01277">autoresearch::simd_check::SimdTestEntry::name</a>, and <a class="el" href="../../d8/d00/strstream_8h_source.html#l00043">fl::sstream::str()</a>.</p>
+<p class="reference">References <a class="el" href="../../d8/d00/strstream_8h_source.html#l00358">fl::sstream::clear()</a>, <a class="el" href="../../d7/d7f/log_8h_source.html#l00372">FL_ERROR</a>, <a class="el" href="../../d7/d7f/log_8h_source.html#l00640">FL_PRINT</a>, <a class="el" href="../../d7/dd1/_auto_research_simd_8h_source.html#l01286">autoresearch::simd_check::SimdTestEntry::func</a>, <a class="el" href="../../d7/dd1/_auto_research_simd_8h_source.html#l01290">getTests()</a>, <a class="el" href="../../d7/dd1/_auto_research_simd_8h_source.html#l01285">autoresearch::simd_check::SimdTestEntry::name</a>, and <a class="el" href="../../d8/d00/strstream_8h_source.html#l00043">fl::sstream::str()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -208,7 +208,7 @@ $(function(){initNavTree('d9/d1a/namespaceautoresearch_1_1simd__check_a4bd7c9fa8
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d1/dc9/namespaceautoresearch.html">autoresearch</a></li><li class="navelem"><a class="el" href="../../d9/d1a/namespaceautoresearch_1_1simd__check.html">simd_check</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:03 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

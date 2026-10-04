@@ -1,0 +1,8 @@
+<map id="fl::anonymous_namespace{gamut_map::cpp::hpp}::RgbFeasible::operator()" name="fl::anonymous_namespace{gamut_map::cpp::hpp}::RgbFeasible::operator()">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,61,201,116"/>
+<area shape="rect" id="Node000002" href="$d3/dfe/namespacefl_1_1anonymous__namespace_02gamut__map_8cpp_8hpp_03_a267b279ba30d4bf77aa03398dd34da65.html#a267b279ba30d4bf77aa03398dd34da65" title="True when every drive is inside [0, 1], allowing slack ULP either side." alt="" coords="249,29,445,84"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="201,73,235,69,236,74,202,78"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_af5a0679639e0ad1db7feb7f9705df72f.html#af5a0679639e0ad1db7feb7f9705df72f" title="One pixel: XYZ in s16.16 to three emitter drives in s16.16." alt="" coords="264,108,431,133"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="202,99,251,105,250,111,201,104"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="300,29,300,19,309,10,325,5,347,3,375,6,390,14,388,18,373,11,347,8,326,10,312,15,305,21,305,29"/>
+</map>

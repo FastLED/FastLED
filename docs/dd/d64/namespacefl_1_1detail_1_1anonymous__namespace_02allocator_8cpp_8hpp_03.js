@@ -1,7 +1,6 @@
 var namespacefl_1_1detail_1_1anonymous__namespace_02allocator_8cpp_8hpp_03 =
 [
     [ "SlabRegistryEntry", "dd/d64/namespacefl_1_1detail_1_1anonymous__namespace_02allocator_8cpp_8hpp_03.html#d1/dcd/structfl_1_1detail_1_1anonymous__namespace_02allocator_8cpp_8hpp_03_1_1_slab_registry_entry", "dd/d64/namespacefl_1_1detail_1_1anonymous__namespace_02allocator_8cpp_8hpp_03_d1/dcd/structfl_1_1detail_1_1anonymous__namespace_02allocator_8cpp_8hpp_03_1_1_slab_registry_entry_dup" ],
-    [ "slab_registry", "dd/d64/namespacefl_1_1detail_1_1anonymous__namespace_02allocator_8cpp_8hpp_03_a854f2f1cf2ccda866038052770928f64.html#a854f2f1cf2ccda866038052770928f64", null ],
-    [ "slab_registry_count", "dd/d64/namespacefl_1_1detail_1_1anonymous__namespace_02allocator_8cpp_8hpp_03_aec8131b1a66d763654f0b2f9152d287f.html#aec8131b1a66d763654f0b2f9152d287f", null ],
-    [ "SLAB_REGISTRY_MAX", "dd/d64/namespacefl_1_1detail_1_1anonymous__namespace_02allocator_8cpp_8hpp_03_a9780f1b7164124f8844301a0909f2236.html#a9780f1b7164124f8844301a0909f2236", null ]
+    [ "SlabRegistryState", "d8/d67/structfl_1_1detail_1_1anonymous__namespace_02allocator_8cpp_8hpp_03_1_1_slab_registry_state.html", "d8/d67/structfl_1_1detail_1_1anonymous__namespace_02allocator_8cpp_8hpp_03_1_1_slab_registry_state" ],
+    [ "slab_registry_state", "dd/d64/namespacefl_1_1detail_1_1anonymous__namespace_02allocator_8cpp_8hpp_03_ad323a7fef8ce62febc5e675221d278c6.html#ad323a7fef8ce62febc5e675221d278c6", null ]
 ];

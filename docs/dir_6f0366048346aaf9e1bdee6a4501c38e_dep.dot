@@ -11,5 +11,5 @@ digraph "/home/runner/work/FastLED/FastLED/examples/RGBWW"
   dir_6f0366048346aaf9e1bdee6a4501c38e [label="RGBWW", fillcolor="#edf0f7", color="grey25", style="filled,bold", URL="dir_6f0366048346aaf9e1bdee6a4501c38e.html",tooltip=""];
   }
   dir_4d1829fa9bd13d7db71e765b2707b248 [label="fl", fillcolor="#edf0f7", color="red", style="filled", URL="dir_4d1829fa9bd13d7db71e765b2707b248.html",tooltip=""];
-  dir_6f0366048346aaf9e1bdee6a4501c38e->dir_4d1829fa9bd13d7db71e765b2707b248 [headlabel="3", labeldistance=1.5 headhref="dir_000151_000074.html" href="dir_000151_000074.html" color="steelblue1" fontcolor="steelblue1"];
+  dir_6f0366048346aaf9e1bdee6a4501c38e->dir_4d1829fa9bd13d7db71e765b2707b248 [headlabel="3", labeldistance=1.5 headhref="dir_000159_000077.html" href="dir_000159_000077.html" color="steelblue1" fontcolor="steelblue1"];
 }

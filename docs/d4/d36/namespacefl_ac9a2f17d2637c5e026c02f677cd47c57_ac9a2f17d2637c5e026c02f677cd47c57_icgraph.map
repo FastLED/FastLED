@@ -1,0 +1,9 @@
+<map id="fl::encoder_for" name="fl::encoder_for">
+<area shape="rect" id="Node000001" title="Extract the encoder selector from a compile&#45;time TIMING type." alt="" coords="377,42,492,67"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_ada630a354f12bb99f8e128d5ae619fbb.html#ada630a354f12bb99f8e128d5ae619fbb" title="Build a ClocklessChipset from a compile&#45;time TIMING trait." alt="" coords="193,42,329,67"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="364,57,330,57,330,52,364,52"/>
+<area shape="rect" id="Node000003" href="$df/df5/structfl_1_1_channel_config_ae5d90dac70d22bf79ac618e385add5b6.html#ae5d90dac70d22bf79ac618e385add5b6" title="Template constructor with TIMING type (backwards compatibility)" alt="" coords="5,5,145,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="180,44,145,39,146,34,180,39"/>
+<area shape="rect" id="Node000004" href="$db/d9c/_color_profile_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="46,70,105,95"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="180,70,105,81,104,76,179,64"/>
+</map>

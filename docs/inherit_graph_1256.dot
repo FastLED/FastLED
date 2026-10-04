@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::test::TestRegistrar",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d29/structfl_1_1test_1_1_test_registrar.html",tooltip=" "];
+  Node0 [id="Node000000",label="fl::TIMING_LC8816E",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/de8/structfl_1_1_t_i_m_i_n_g___l_c8816_e.html",tooltip="LC8816E RGBW controller @ 800 kHz Four-phase: TH0=300ns, TH1=900ns, TL0=900ns, TL1=300ns."];
 }

@@ -1,0 +1,14 @@
+<map id="fl/codec/mp3_memory.h" name="fl/codec/mp3_memory.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="255,5,432,31"/>
+<area shape="rect" id="Node000002" href="$d9/dd8/mp3_8h.html" title=" " alt="" coords="285,79,402,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="346,44,346,79,341,79,341,44"/>
+<area shape="rect" id="Node000003" href="$d7/d4e/_auto_research_mp3_8h.html" title="On&#45;device verification of the fixed&#45;point MP3 decoder." alt="" coords="5,152,244,207"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="302,112,192,154,190,150,300,107"/>
+<area shape="rect" id="Node000004" href="$de/d4b/file__system__codecs_8cpp_8hpp.html" title="FileSystem codec methods — compiled in fl.codec+ module." alt="" coords="268,159,419,199"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="346,118,346,159,341,159,341,118"/>
+<area shape="rect" id="Node000008" href="$d3/df6/mp3_8cpp_8hpp.html" title=" " alt="" coords="443,167,603,192"/>
+<area shape="poly" id="edge5_Node000002_Node000008" title=" " alt="" coords="381,108,500,164,498,169,379,112"/>
+<area shape="rect" id="Node000005" href="$d7/df8/fl_2codec_2__build_8cpp_8hpp.html" title=" " alt="" coords="347,255,518,280"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="375,207,422,252,418,256,371,211"/>
+<area shape="poly" id="edge6_Node000008_Node000005" title=" " alt="" coords="503,204,447,256,443,252,499,200"/>
+</map>

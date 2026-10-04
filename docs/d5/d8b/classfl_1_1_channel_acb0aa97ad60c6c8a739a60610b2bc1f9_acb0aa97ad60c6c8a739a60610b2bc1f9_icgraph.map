@@ -1,0 +1,5 @@
+<map id="fl::Channel::create" name="fl::Channel::create">
+<area shape="rect" id="Node000001" title="Create a new channel with optional mBus driver pinning." alt="" coords="193,5,333,31"/>
+<area shape="rect" id="Node000002" href="$d5/d8b/classfl_1_1_channel_ad9a233b1ba5461dd9f955ab4caf67f01.html#ad9a233b1ba5461dd9f955ab4caf67f01" title=" " alt="" coords="5,5,145,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="179,21,146,21,146,15,179,15"/>
+</map>

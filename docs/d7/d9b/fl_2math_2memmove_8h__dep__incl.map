@@ -12,7 +12,7 @@
 <area shape="poly" id="edge23_Node000002_Node000039" title=" " alt="" coords="876,117,858,153,840,234,832,316,830,385,832,431,827,431,825,385,826,315,834,233,853,151,871,114"/>
 <area shape="rect" id="Node000057" href="$d4/d46/pixelset_8h.html" title="Declares classes for managing logical groups of LEDs." alt="" coords="1529,431,1614,456"/>
 <area shape="poly" id="edge32_Node000002_Node000057" title=" " alt="" coords="969,92,1079,98,1206,108,1322,125,1369,136,1405,150,1445,177,1478,212,1506,253,1528,295,1558,375,1572,430,1567,431,1553,377,1523,297,1501,255,1474,216,1441,181,1402,154,1368,141,1321,130,1205,114,1079,103,969,98"/>
-<area shape="rect" id="Node000062" href="$dc/da8/src_2fl_2audio_2audio__reactive_8h.html" title=" " alt="" coords="80,167,263,192"/>
+<area shape="rect" id="Node000062" href="$d1/d9a/audio__reactive_8h.html" title=" " alt="" coords="80,167,263,192"/>
 <area shape="poly" id="edge18_Node000002_Node000062" title=" " alt="" coords="811,105,388,155,263,170,262,164,387,149,811,99"/>
 <area shape="rect" id="Node000064" href="$d0/d3e/perlin__particle__punch_8h.html" title="Audio&#45;reactive perlin noise background with ambient particles and beat meteor overlay." alt="" coords="868,159,1032,199"/>
 <area shape="poly" id="edge20_Node000002_Node000064" title=" " alt="" coords="908,114,939,157,934,160,904,117"/>
@@ -20,7 +20,7 @@
 <area shape="poly" id="edge24_Node000002_Node000067" title=" " alt="" coords="811,101,631,121,545,136,484,154,441,181,403,213,350,271,346,267,399,209,438,176,482,150,543,131,630,116,810,96"/>
 <area shape="rect" id="Node000068" href="$db/dfe/gradient_8h.html" title=" " alt="" coords="495,167,621,192"/>
 <area shape="poly" id="edge26_Node000002_Node000068" title=" " alt="" coords="833,110,603,169,602,164,832,105"/>
-<area shape="rect" id="Node000004" href="$db/d97/_fast_l_e_d_8h.html" title="central include file for FastLED, defines the CFastLED class/object" alt="" coords="1609,504,1694,529"/>
+<area shape="rect" id="Node000004" href="$d6/d64/fastled_8h.html" title="central include file for FastLED, defines the CFastLED class/object" alt="" coords="1609,504,1694,529"/>
 <area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="1390,195,1431,219,1450,235,1467,253,1483,281,1490,307,1491,357,1494,405,1502,429,1519,454,1538,472,1561,486,1609,504,1607,509,1559,491,1535,477,1515,458,1497,431,1488,406,1486,357,1485,308,1478,283,1463,256,1446,238,1428,223,1387,200"/>
 <area shape="rect" id="Node000008" href="$d0/df9/colorpalettes_8cpp_8hpp.html" title=" " alt="" coords="1241,431,1403,456"/>
 <area shape="poly" id="edge4_Node000003_Node000008" title=" " alt="" coords="1338,206,1325,255,1320,306,1319,356,1323,430,1318,431,1314,356,1315,306,1319,254,1333,204"/>
@@ -28,7 +28,7 @@
 <area shape="poly" id="edge5_Node000003_Node000009" title=" " alt="" coords="1359,203,1391,268,1386,271,1354,205"/>
 <area shape="poly" id="edge6_Node000009_Node000004" title=" " alt="" coords="1401,308,1410,341,1425,380,1446,420,1474,454,1506,476,1541,491,1609,508,1608,513,1539,496,1503,480,1471,458,1441,423,1420,382,1405,342,1396,309"/>
 <area shape="poly" id="edge7_Node000009_Node000008" title=" " alt="" coords="1386,308,1330,431,1325,429,1381,306"/>
-<area shape="rect" id="Node000010" href="$d7/dc2/fl_2system_2_fast_l_e_d_8h.html" title="Internal FastLED header for implementation files." alt="" coords="1580,357,1723,383"/>
+<area shape="rect" id="Node000010" href="$d0/d69/fl_2system_2fastled_8h.html" title="Internal FastLED header for implementation files." alt="" coords="1580,357,1723,383"/>
 <area shape="poly" id="edge8_Node000009_Node000010" title=" " alt="" coords="1442,297,1618,355,1616,360,1441,302"/>
 <area shape="poly" id="edge9_Node000010_Node000004" title=" " alt="" coords="1654,397,1654,504,1649,504,1649,397"/>
 <area shape="poly" id="edge10_Node000010_Node000008" title=" " alt="" coords="1586,388,1376,433,1375,428,1585,383"/>
@@ -67,7 +67,7 @@
 <area shape="poly" id="edge36_Node000092_Node000093" title=" " alt="" coords="2031,108,2118,150,2115,154,2029,112"/>
 <area shape="rect" id="Node000094" href="$d1/d75/_apa102_h_d_8ino.html" title="Example showing how to use the APA102HD gamma correction." alt="" coords="2294,152,2513,207"/>
 <area shape="poly" id="edge37_Node000092_Node000094" title=" " alt="" coords="2049,101,2283,149,2294,152,2293,157,2281,155,2048,106"/>
-<area shape="rect" id="Node000095" href="$dd/db4/_h_d107_8ino.html" title="Example showing how to use the HD107 and HD which has built in gamma correction." alt="" coords="2537,152,2737,207"/>
+<area shape="rect" id="Node000095" href="$dd/db4/_h_d107_8ino.html" title="Example showing how to use the HD107S (also named HD107)." alt="" coords="2537,152,2737,207"/>
 <area shape="poly" id="edge38_Node000092_Node000095" title=" " alt="" coords="2049,94,2259,113,2392,129,2525,149,2537,152,2536,157,2524,155,2391,135,2258,119,2049,99"/>
 <area shape="rect" id="Node000096" href="$d0/d4b/crgb_8hpp.html" title="Defines utility functions for the red, green, and blue (RGB) pixel struct." alt="" coords="1916,167,1995,192"/>
 <area shape="poly" id="edge40_Node000092_Node000096" title=" " alt="" coords="1986,118,1963,167,1958,165,1981,115"/>

@@ -12,10 +12,10 @@ digraph "fl::HttpConnection::connect"
   Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
   Node3 [id="Node000003",label="fl::HttpConnection\l::calculateBackoffDelay",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d5f/classfl_1_1_http_connection_a5771485770bb65873ba278d1806af6e3.html#a5771485770bb65873ba278d1806af6e3",tooltip=" "];
   Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="fl::delay",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d36/namespacefl_a50131c41da2f619067d98360de35fa27.html#a50131c41da2f619067d98360de35fa27",tooltip="Public delay wrapper that keeps bare Arduino delay() preferred after using fl::delay; while still all..."];
+  Node4 [id="Node000004",label="fl::delay",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d36/namespacefl_a19da680141593b475c4d1d3c1c0a8409.html#a19da680141593b475c4d1d3c1c0a8409",tooltip="Public delay wrapper that keeps bare Arduino delay() preferred after using fl::delay; while still all..."];
   Node4 -> Node4 [id="edge4_Node000004_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node2 -> Node30 [id="edge5_Node000002_Node000030",color="steelblue1",style="solid",tooltip=" "];
-  Node30 [id="Node000030",label="fl::HttpConnection\l::resetReconnectAttempts",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d5f/classfl_1_1_http_connection_a9f989774f6254b213699ab4cd688d858.html#a9f989774f6254b213699ab4cd688d858",tooltip=" "];
-  Node30 -> Node31 [id="edge6_Node000030_Node000031",color="steelblue1",style="solid",tooltip=" "];
-  Node31 [id="Node000031",label="fl::HttpConnection\l::resetReconnectState",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d5f/classfl_1_1_http_connection_afec0714bfaf76f6dd676f76f5faa8c43.html#afec0714bfaf76f6dd676f76f5faa8c43",tooltip=" "];
+  Node2 -> Node27 [id="edge5_Node000002_Node000027",color="steelblue1",style="solid",tooltip=" "];
+  Node27 [id="Node000027",label="fl::HttpConnection\l::resetReconnectAttempts",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d5f/classfl_1_1_http_connection_a9f989774f6254b213699ab4cd688d858.html#a9f989774f6254b213699ab4cd688d858",tooltip=" "];
+  Node27 -> Node28 [id="edge6_Node000027_Node000028",color="steelblue1",style="solid",tooltip=" "];
+  Node28 [id="Node000028",label="fl::HttpConnection\l::resetReconnectState",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d5f/classfl_1_1_http_connection_afec0714bfaf76f6dd676f76f5faa8c43.html#afec0714bfaf76f6dd676f76f5faa8c43",tooltip=" "];
 }

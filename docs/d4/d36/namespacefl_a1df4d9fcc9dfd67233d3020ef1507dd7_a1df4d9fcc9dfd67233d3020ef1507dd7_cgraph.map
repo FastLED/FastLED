@@ -1,6 +1,6 @@
 <map id="fl::wave8Transpose_16_bf1" name="fl::wave8Transpose_16_bf1">
 <area shape="rect" id="Node000001" title="BF1: chipset&#45;aware direct encode for 16&#45;lane Wave8 (#2548 deep&#45;dive)." alt="" coords="5,23,152,63"/>
-<area shape="rect" id="Node000002" href="$df/d9e/namespacefl_1_1detail_aeaedcff33498750d790f9feff188eb2a.html#aeaedcff33498750d790f9feff188eb2a" title="BF1: chipset&#45;aware direct encode for Wave8 16&#45;lane (#2548 deep&#45;dive)." alt="" coords="200,23,397,63"/>
+<area shape="rect" id="Node000002" href="$df/d9e/namespacefl_1_1detail_a2246793f026761f46f74b20ec3c2ecf5.html#a2246793f026761f46f74b20ec3c2ecf5" title=" " alt="" coords="200,23,397,63"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="152,41,186,41,186,46,152,46"/>
 <area shape="rect" id="Node000003" href="$df/d9e/namespacefl_1_1detail_a3f580da2244b0dfd2cfffed1e7874706.html#a3f580da2244b0dfd2cfffed1e7874706" title="Transpose one symbol of 16 lanes (16 input bytes) into 16 output bytes: 8 pulses × 2 bytes,..." alt="" coords="445,23,609,63"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="398,41,432,41,432,46,398,46"/>

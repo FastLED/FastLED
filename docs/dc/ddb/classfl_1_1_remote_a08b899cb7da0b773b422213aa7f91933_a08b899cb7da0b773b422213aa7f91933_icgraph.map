@@ -1,0 +1,16 @@
+<map id="fl::Remote::Remote" name="fl::Remote::Remote">
+<area shape="rect" id="Node000001" title="Construct with I/O callbacks." alt="" coords="216,129,364,155"/>
+<area shape="poly" id="edge3_Node000001_Node000001" title=" " alt="" coords="326,120,316,111,290,108,268,110,257,115,255,120,261,128,257,131,250,121,253,111,267,105,290,103,318,106,330,116"/>
+<area shape="rect" id="Node000002" href="$dc/ddb/classfl_1_1_remote_af6ea3b57234d2f4c3d3d6544713df5e7.html#af6ea3b57234d2f4c3d3d6544713df5e7" title=" " alt="" coords="13,5,161,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="265,121,221,82,167,44,140,33,142,28,169,40,225,78,268,117"/>
+<area shape="rect" id="Node000003" href="$dc/ddb/classfl_1_1_remote_a76260859f6b7f22f261aed2173b3c0cb.html#a76260859f6b7f22f261aed2173b3c0cb" title=" " alt="" coords="13,55,161,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="247,126,167,94,133,83,134,78,169,89,249,121"/>
+<area shape="rect" id="Node000004" href="$d2/d9f/classfl_1_1_w_l_e_d_a9d5d435fd3881e1e962b27e61d5b58eb.html#a9d5d435fd3881e1e962b27e61d5b58eb" title="Construct WLED with default stub I/O callbacks." alt="" coords="25,104,148,129"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="202,134,148,127,148,122,202,128"/>
+<area shape="rect" id="Node000005" href="$d2/d9f/classfl_1_1_w_l_e_d_a7a58faceb49c4058e4c968eb2ddb118d.html#a7a58faceb49c4058e4c968eb2ddb118d" title="Construct WLED with custom I/O callbacks." alt="" coords="25,153,148,179"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="202,155,148,161,148,156,202,150"/>
+<area shape="rect" id="Node000006" href="$dc/ddb/classfl_1_1_remote_ac77a2298625c76c083f3b8042f2c872d.html#ac77a2298625c76c083f3b8042f2c872d" title=" " alt="" coords="5,203,168,228"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="246,163,169,193,131,205,129,200,167,187,244,158"/>
+<area shape="rect" id="Node000007" href="$dc/ddb/classfl_1_1_remote_a0fca9ff9d703d2eace543410a80d6b41.html#a0fca9ff9d703d2eace543410a80d6b41" title=" " alt="" coords="5,252,168,277"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="267,167,224,205,169,242,139,254,137,249,167,237,221,201,264,163"/>
+</map>

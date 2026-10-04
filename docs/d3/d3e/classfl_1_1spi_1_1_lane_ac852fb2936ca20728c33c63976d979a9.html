@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -132,7 +132,7 @@ $(function(){initNavTree('d3/d3e/classfl_1_1spi_1_1_lane_ac852fb2936ca20728c33c6
 <p class="definition">Definition at line <a class="el" href="../../d5/dc5/lane_8cpp_8hpp_source.html#l00013">13</a> of file <a class="el" href="../../d5/dc5/lane_8cpp_8hpp_source.html">lane.cpp.hpp</a>.</p>
 <div class="fragment"><div class="line"><span class="lineno">   13</span>                                            {</div>
 <div class="line"><span class="lineno">   14</span>    <span class="keywordflow">if</span> (!<a class="code hl_function" href="../../d3/d3e/classfl_1_1spi_1_1_lane_ae1aebad9bcbae14192fb0edd4aa2aaa5.html#ae1aebad9bcbae14192fb0edd4aa2aaa5">data</a> || size == 0) {</div>
-<div class="line"><span class="lineno">   15</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;Lane &quot;</span> &lt;&lt; <a class="code hl_variable" href="../../d3/d3e/classfl_1_1spi_1_1_lane_aa44f6d2779789c08e6fd0baa3d70bf05.html#aa44f6d2779789c08e6fd0baa3d70bf05">mLaneId</a> &lt;&lt; <span class="stringliteral">&quot;: Invalid data or size&quot;</span>);</div>
+<div class="line"><span class="lineno">   15</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;Lane %s: Invalid data or size&quot;</span>, <a class="code hl_variable" href="../../d3/d3e/classfl_1_1spi_1_1_lane_aa44f6d2779789c08e6fd0baa3d70bf05.html#aa44f6d2779789c08e6fd0baa3d70bf05">mLaneId</a>);</div>
 <div class="line"><span class="lineno">   16</span>        <span class="keywordflow">return</span>;</div>
 <div class="line"><span class="lineno">   17</span>    }</div>
 <div class="line"><span class="lineno">   18</span> </div>
@@ -144,15 +144,15 @@ $(function(){initNavTree('d3/d3e/classfl_1_1spi_1_1_lane_ac852fb2936ca20728c33c6
 <div class="line"><span class="lineno">   24</span>        <a class="code hl_variable" href="../../d3/d3e/classfl_1_1spi_1_1_lane_ac6a43b4d9f09bfdc06bd4d2cb7924ffa.html#ac6a43b4d9f09bfdc06bd4d2cb7924ffa">mBuffer</a>[i] = <a class="code hl_function" href="../../d3/d3e/classfl_1_1spi_1_1_lane_ae1aebad9bcbae14192fb0edd4aa2aaa5.html#ae1aebad9bcbae14192fb0edd4aa2aaa5">data</a>[i];</div>
 <div class="line"><span class="lineno">   25</span>    }</div>
 <div class="line"><span class="lineno">   26</span> </div>
-<div class="line"><span class="lineno">   27</span>    <a class="code hl_define" href="../../d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a>(<span class="stringliteral">&quot;Lane &quot;</span> &lt;&lt; <a class="code hl_variable" href="../../d3/d3e/classfl_1_1spi_1_1_lane_aa44f6d2779789c08e6fd0baa3d70bf05.html#aa44f6d2779789c08e6fd0baa3d70bf05">mLaneId</a> &lt;&lt; <span class="stringliteral">&quot;: Buffered &quot;</span> &lt;&lt; size &lt;&lt; <span class="stringliteral">&quot; bytes&quot;</span>);</div>
+<div class="line"><span class="lineno">   27</span>    <a class="code hl_define" href="../../d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a>(<span class="stringliteral">&quot;Lane %s: Buffered %s bytes&quot;</span>, <a class="code hl_variable" href="../../d3/d3e/classfl_1_1spi_1_1_lane_aa44f6d2779789c08e6fd0baa3d70bf05.html#aa44f6d2779789c08e6fd0baa3d70bf05">mLaneId</a>, size);</div>
 <div class="line"><span class="lineno">   28</span>}</div>
 <div class="ttc" id="aclassfl_1_1spi_1_1_lane_aa44f6d2779789c08e6fd0baa3d70bf05_html_aa44f6d2779789c08e6fd0baa3d70bf05"><div class="ttname"><a href="../../d3/d3e/classfl_1_1spi_1_1_lane_aa44f6d2779789c08e6fd0baa3d70bf05.html#aa44f6d2779789c08e6fd0baa3d70bf05">fl::spi::Lane::mLaneId</a></div><div class="ttdeci">size_t mLaneId</div><div class="ttdef"><b>Definition</b> <a href="../../d3/d6e/lane_8h_source.html#l00061">lane.h:61</a></div></div>
 <div class="ttc" id="aclassfl_1_1spi_1_1_lane_ac6a43b4d9f09bfdc06bd4d2cb7924ffa_html_ac6a43b4d9f09bfdc06bd4d2cb7924ffa"><div class="ttname"><a href="../../d3/d3e/classfl_1_1spi_1_1_lane_ac6a43b4d9f09bfdc06bd4d2cb7924ffa.html#ac6a43b4d9f09bfdc06bd4d2cb7924ffa">fl::spi::Lane::mBuffer</a></div><div class="ttdeci">fl::vector&lt; u8 &gt; mBuffer</div><div class="ttdef"><b>Definition</b> <a href="../../d3/d6e/lane_8h_source.html#l00062">lane.h:62</a></div></div>
 <div class="ttc" id="aclassfl_1_1spi_1_1_lane_ae1aebad9bcbae14192fb0edd4aa2aaa5_html_ae1aebad9bcbae14192fb0edd4aa2aaa5"><div class="ttname"><a href="../../d3/d3e/classfl_1_1spi_1_1_lane_ae1aebad9bcbae14192fb0edd4aa2aaa5.html#ae1aebad9bcbae14192fb0edd4aa2aaa5">fl::spi::Lane::data</a></div><div class="ttdeci">fl::span&lt; const u8 &gt; data() const</div><div class="ttdoc">Get const access to buffer data.</div><div class="ttdef"><b>Definition</b> <a href="../../d5/dc5/lane_8cpp_8hpp_source.html#l00038">lane.cpp.hpp:38</a></div></div>
-<div class="ttc" id="alog_8h_a868b194fdb2234182e76042d9fde3062_html_a868b194fdb2234182e76042d9fde3062"><div class="ttname"><a href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a></div><div class="ttdeci">#define FL_WARN(X)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00276">log.h:276</a></div></div>
-<div class="ttc" id="alog_8h_a8ccae77aa5fe30a41f19d233cb0de2c1_html_a8ccae77aa5fe30a41f19d233cb0de2c1"><div class="ttname"><a href="../../d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a></div><div class="ttdeci">#define FL_DBG</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00388">log.h:388</a></div></div>
+<div class="ttc" id="alog_8h_a4804912fba6eed63e1afd84b8768aced_html_a4804912fba6eed63e1afd84b8768aced"><div class="ttname"><a href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a></div><div class="ttdeci">#define FL_WARN(...)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00440">log.h:440</a></div></div>
+<div class="ttc" id="alog_8h_a8ccae77aa5fe30a41f19d233cb0de2c1_html_a8ccae77aa5fe30a41f19d233cb0de2c1"><div class="ttname"><a href="../../d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a></div><div class="ttdeci">#define FL_DBG</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00564">log.h:564</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d5/dc5/lane_8cpp_8hpp_source.html#l00038">data()</a>, <a class="el" href="../../d7/d7f/log_8h_source.html#l00388">FL_DBG</a>, <a class="el" href="../../d7/d7f/log_8h_source.html#l00276">FL_WARN</a>, <a class="el" href="../../d3/d6e/lane_8h_source.html#l00062">mBuffer</a>, and <a class="el" href="../../d3/d6e/lane_8h_source.html#l00061">mLaneId</a>.</p>
+<p class="reference">References <a class="el" href="../../d5/dc5/lane_8cpp_8hpp_source.html#l00038">data()</a>, <a class="el" href="../../d7/d7f/log_8h_source.html#l00564">FL_DBG</a>, <a class="el" href="../../d7/d7f/log_8h_source.html#l00440">FL_WARN</a>, <a class="el" href="../../d3/d6e/lane_8h_source.html#l00062">mBuffer</a>, and <a class="el" href="../../d3/d6e/lane_8h_source.html#l00061">mLaneId</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -170,7 +170,7 @@ $(function(){initNavTree('d3/d3e/classfl_1_1spi_1_1_lane_ac852fb2936ca20728c33c6
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d4/d68/namespacefl_1_1spi.html">spi</a></li><li class="navelem"><a class="el" href="../../d3/d3e/classfl_1_1spi_1_1_lane.html">Lane</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:10 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:12 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

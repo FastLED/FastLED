@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -136,7 +136,7 @@ $(function(){initNavTree('d5/d77/structfl_1_1_engine_af736263d5da5f77a12d4db1f06
 <div class="line"><span class="lineno">   65</span> </div>
 <div class="line"><span class="lineno">   66</span>        this-&gt;<a class="code hl_variable" href="../../d5/d77/structfl_1_1_engine_ae8e8920e7a76c9e7ec7a575093aaa860.html#ae8e8920e7a76c9e7ec7a575093aaa860">num_x</a> = w;</div>
 <div class="line"><span class="lineno">   67</span>        this-&gt;<a class="code hl_variable" href="../../d5/d77/structfl_1_1_engine_a06c9f5659ed95f610459dece259b0d59.html#a06c9f5659ed95f610459dece259b0d59">num_y</a> = h;</div>
-<div class="line"><span class="lineno">   68</span>        this-&gt;<a class="code hl_variable" href="../../d5/d77/structfl_1_1_engine_ad29dd17f9b8d324fda614b43b1ec3124.html#ad29dd17f9b8d324fda614b43b1ec3124">radial_filter_radius</a> = <a class="code hl_function" href="../../d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb">fl::min</a>(w, h) * 0.65;</div>
+<div class="line"><span class="lineno">   68</span>        this-&gt;<a class="code hl_variable" href="../../d5/d77/structfl_1_1_engine_ad29dd17f9b8d324fda614b43b1ec3124.html#ad29dd17f9b8d324fda614b43b1ec3124">radial_filter_radius</a> = <a class="code hl_function" href="../../d4/d36/namespacefl_a2fdabb91a1f100dec8da21e4306aba05.html#a2fdabb91a1f100dec8da21e4306aba05">fl::min</a>(w, h) * 0.65;</div>
 <div class="line"><span class="lineno">   69</span>        <a class="code hl_function" href="../../d4/d36/namespacefl_a36eadedfdaf64a69d15726ae19197393.html#a36eadedfdaf64a69d15726ae19197393">render_polar_lookup_table</a>(</div>
 <div class="line"><span class="lineno">   70</span>            (<a class="code hl_variable" href="../../d5/d77/structfl_1_1_engine_ae8e8920e7a76c9e7ec7a575093aaa860.html#ae8e8920e7a76c9e7ec7a575093aaa860">num_x</a> / 2) - 0.5,</div>
 <div class="line"><span class="lineno">   71</span>            (<a class="code hl_variable" href="../../d5/d77/structfl_1_1_engine_a06c9f5659ed95f610459dece259b0d59.html#a06c9f5659ed95f610459dece259b0d59">num_y</a> / 2) - 0.5,</div>
@@ -146,7 +146,7 @@ $(function(){initNavTree('d5/d77/structfl_1_1_engine_af736263d5da5f77a12d4db1f06
 <div class="line"><span class="lineno">   75</span>            <a class="code hl_variable" href="../../d5/d77/structfl_1_1_engine_a06c9f5659ed95f610459dece259b0d59.html#a06c9f5659ed95f610459dece259b0d59">num_y</a>);</div>
 <div class="line"><span class="lineno">   76</span>        <a class="code hl_variable" href="../../d5/d77/structfl_1_1_engine_ab6e82d9c3f5cf5d8bed318d242e3de59.html#ab6e82d9c3f5cf5d8bed318d242e3de59">timings</a>.master_speed = 0.01;</div>
 <div class="line"><span class="lineno">   77</span>    }</div>
-<div class="ttc" id="anamespacefl_a0356f07fb7a8f25752385fd8208b47fb_html_a0356f07fb7a8f25752385fd8208b47fb"><div class="ttname"><a href="../../d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb">fl::min</a></div><div class="ttdeci">FL_DISABLE_WARNING_PUSH U constexpr common_type_t&lt; T, U &gt; min(T a, U b) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00071">math.h:71</a></div></div>
+<div class="ttc" id="anamespacefl_a2fdabb91a1f100dec8da21e4306aba05_html_a2fdabb91a1f100dec8da21e4306aba05"><div class="ttname"><a href="../../d4/d36/namespacefl_a2fdabb91a1f100dec8da21e4306aba05.html#a2fdabb91a1f100dec8da21e4306aba05">fl::min</a></div><div class="ttdeci">FL_DISABLE_WARNING_PUSH U constexpr common_type_t&lt; T, U &gt; min(T a, U b) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00071">math.h:71</a></div></div>
 <div class="ttc" id="anamespacefl_a36eadedfdaf64a69d15726ae19197393_html_a36eadedfdaf64a69d15726ae19197393"><div class="ttname"><a href="../../d4/d36/namespacefl_a36eadedfdaf64a69d15726ae19197393.html#a36eadedfdaf64a69d15726ae19197393">fl::render_polar_lookup_table</a></div><div class="ttdeci">void render_polar_lookup_table(float cx, float cy, fl::vector&lt; fl::vector&lt; float &gt; &gt; &amp;polar_theta, fl::vector&lt; fl::vector&lt; float &gt; &gt; &amp;distance, int num_x, int num_y)</div><div class="ttdef"><b>Definition</b> <a href="../../da/d0b/engine__core_8h_source.html#l00027">engine_core.h:27</a></div></div>
 <div class="ttc" id="astructfl_1_1_engine_a04eaee0c824bfb340aedb4935cecf0c3_html_a04eaee0c824bfb340aedb4935cecf0c3"><div class="ttname"><a href="../../d5/d77/structfl_1_1_engine_a04eaee0c824bfb340aedb4935cecf0c3.html#a04eaee0c824bfb340aedb4935cecf0c3">fl::Engine::move</a></div><div class="ttdeci">modulators move</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d55/engine_8h_source.html#l00031">engine.h:31</a></div></div>
 <div class="ttc" id="astructfl_1_1_engine_a06c9f5659ed95f610459dece259b0d59_html_a06c9f5659ed95f610459dece259b0d59"><div class="ttname"><a href="../../d5/d77/structfl_1_1_engine_a06c9f5659ed95f610459dece259b0d59.html#a06c9f5659ed95f610459dece259b0d59">fl::Engine::num_y</a></div><div class="ttdeci">int num_y</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d55/engine_8h_source.html#l00024">engine.h:24</a></div></div>
@@ -176,7 +176,7 @@ $(function(){initNavTree('d5/d77/structfl_1_1_engine_af736263d5da5f77a12d4db1f06
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d5/d77/structfl_1_1_engine.html">Engine</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:05 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:08 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

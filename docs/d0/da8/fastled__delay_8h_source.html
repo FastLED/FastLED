@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -134,12 +134,12 @@ $(function(){initNavTree('d0/da8/fastled__delay_8h_source.html','../../'); initR
 <div class="line"><a id="l00035" name="l00035"></a><span class="lineno"><a class="line" href="../../d1/d6d/class_c_min_wait_ace3c87d9015aa537d3ee2972657afad3.html#ace3c87d9015aa537d3ee2972657afad3">   35</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="../../d1/d6d/class_c_min_wait_ace3c87d9015aa537d3ee2972657afad3.html#ace3c87d9015aa537d3ee2972657afad3">wait</a>() {</div>
 <div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>        fl::u16 diff;</div>
 <div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>        <span class="keywordflow">do</span> {</div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>            diff = (<a class="code hl_function" href="../../d4/d36/namespacefl_a95a89c7ba649b9bd2c9136c0f517d82f.html#a95a89c7ba649b9bd2c9136c0f517d82f">fl::micros</a>() &amp; 0xFFFF) - <a class="code hl_variable" href="../../d1/d6d/class_c_min_wait_a09c7ff48ae2914b112c798c72a30dfa2.html#a09c7ff48ae2914b112c798c72a30dfa2">mLastMicros</a>;</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>            diff = (<a class="code hl_function" href="../../d4/d36/namespacefl_a4cfbbd90ced1c04107934a3c05d3e679.html#a4cfbbd90ced1c04107934a3c05d3e679">fl::micros</a>() &amp; 0xFFFF) - <a class="code hl_variable" href="../../d1/d6d/class_c_min_wait_a09c7ff48ae2914b112c798c72a30dfa2.html#a09c7ff48ae2914b112c798c72a30dfa2">mLastMicros</a>;</div>
 <div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>        } <span class="keywordflow">while</span>(diff &lt; WAIT);</div>
 <div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    }</div>
 </div>
 <div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span></div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno"><a class="line" href="../../d1/d6d/class_c_min_wait_a9e1941c949810958262ff98f7b591b96.html#a9e1941c949810958262ff98f7b591b96">   43</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="../../d1/d6d/class_c_min_wait_a9e1941c949810958262ff98f7b591b96.html#a9e1941c949810958262ff98f7b591b96">mark</a>() { <a class="code hl_variable" href="../../d1/d6d/class_c_min_wait_a09c7ff48ae2914b112c798c72a30dfa2.html#a09c7ff48ae2914b112c798c72a30dfa2">mLastMicros</a> = <a class="code hl_function" href="../../d4/d36/namespacefl_a95a89c7ba649b9bd2c9136c0f517d82f.html#a95a89c7ba649b9bd2c9136c0f517d82f">fl::micros</a>() &amp; 0xFFFF; }</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno"><a class="line" href="../../d1/d6d/class_c_min_wait_a9e1941c949810958262ff98f7b591b96.html#a9e1941c949810958262ff98f7b591b96">   43</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="../../d1/d6d/class_c_min_wait_a9e1941c949810958262ff98f7b591b96.html#a9e1941c949810958262ff98f7b591b96">mark</a>() { <a class="code hl_variable" href="../../d1/d6d/class_c_min_wait_a09c7ff48ae2914b112c798c72a30dfa2.html#a09c7ff48ae2914b112c798c72a30dfa2">mLastMicros</a> = <a class="code hl_function" href="../../d4/d36/namespacefl_a4cfbbd90ced1c04107934a3c05d3e679.html#a4cfbbd90ced1c04107934a3c05d3e679">fl::micros</a>() &amp; 0xFFFF; }</div>
 <div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>};</div>
 </div>
 <div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> </div>
@@ -166,12 +166,12 @@ $(function(){initNavTree('d0/da8/fastled__delay_8h_source.html','../../'); initR
 <div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span><span class="comment">// Macro to convert from nano-seconds to clocks and clocks to nano-seconds</span></div>
 <div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span><span class="comment">// #define NS(_NS) (_NS / (1000 / (F_CPU / 1000000L)))</span></div>
 <div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span></div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno"><a class="line" href="../../d0/da8/fastled__delay_8h_af4eefef410bd123f2a8b201a28c2352f.html#af4eefef410bd123f2a8b201a28c2352f">   90</a></span><span class="preprocessor">#define F_CPU_MHZ (GET_CPU_FREQUENCY() / 1000000L)</span></div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno"><a class="line" href="../../d0/da8/fastled__delay_8h_af4eefef410bd123f2a8b201a28c2352f.html#af4eefef410bd123f2a8b201a28c2352f">   90</a></span><span class="preprocessor">#define F_CPU_MHZ (FL_CPU_FREQUENCY() / 1000000L)</span></div>
 <div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span> </div>
 <div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span><span class="comment">// #define NS(_NS) ( (_NS * (F_CPU / 1000000L))) / 1000</span></div>
 <div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span></div>
 <div class="line"><a id="l00095" name="l00095"></a><span class="lineno"><a class="line" href="../../d0/da8/fastled__delay_8h_a3c2d7a356c40ef25cfcaaad8556a71c2.html#a3c2d7a356c40ef25cfcaaad8556a71c2">   95</a></span><span class="preprocessor">#define NS(_NS) (((_NS * F_CPU_MHZ) + 999) / 1000)</span></div>
-<div class="line"><a id="l00097" name="l00097"></a><span class="lineno"><a class="line" href="../../d0/da8/fastled__delay_8h_ae98c481f90653827c3a8af0edb59e195.html#ae98c481f90653827c3a8af0edb59e195">   97</a></span><span class="preprocessor">#define CLKS_TO_MICROS(_CLKS) ((long)(_CLKS)) / (GET_CPU_FREQUENCY() / 1000000L)</span></div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno"><a class="line" href="../../d0/da8/fastled__delay_8h_ae98c481f90653827c3a8af0edb59e195.html#ae98c481f90653827c3a8af0edb59e195">   97</a></span><span class="preprocessor">#define CLKS_TO_MICROS(_CLKS) ((long)(_CLKS)) / (FL_CPU_FREQUENCY() / 1000000L)</span></div>
 <div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span></div>
 <div class="line"><a id="l00100" name="l00100"></a><span class="lineno"><a class="line" href="../../d0/da8/fastled__delay_8h_acd145d740ef1b06533fce6d4659401a2.html#acd145d740ef1b06533fce6d4659401a2">  100</a></span><span class="preprocessor">#define NO_TIME(A, B, C) (NS(A) &lt; 3 || NS(B) &lt; 3 || NS(C) &lt; 6)</span></div>
 <div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span></div>
@@ -185,7 +185,7 @@ $(function(){initNavTree('d0/da8/fastled__delay_8h_source.html','../../'); initR
 <div class="ttc" id="aclass_c_min_wait_html"><div class="ttname"><a href="../../d1/d6d/class_c_min_wait.html">CMinWait</a></div><div class="ttdoc">Class to ensure that a minimum amount of time has kicked since the last time run - and delay if not e...</div><div class="ttdef"><b>Definition</b> <a href="#l00026">fastled_delay.h:26</a></div></div>
 <div class="ttc" id="acompiler__control_8h_html"><div class="ttname"><a href="../../d4/d54/compiler__control_8h.html">compiler_control.h</a></div></div>
 <div class="ttc" id="adelay_8h_html"><div class="ttname"><a href="../../dd/dee/delay_8h.html">delay.h</a></div><div class="ttdoc">Delay utilities for FastLED Includes nanosecond-precision delays, cycle counting, and microsecond del...</div></div>
-<div class="ttc" id="anamespacefl_a95a89c7ba649b9bd2c9136c0f517d82f_html_a95a89c7ba649b9bd2c9136c0f517d82f"><div class="ttname"><a href="../../d4/d36/namespacefl_a95a89c7ba649b9bd2c9136c0f517d82f.html#a95a89c7ba649b9bd2c9136c0f517d82f">fl::micros</a></div><div class="ttdeci">fl::u32 micros()</div><div class="ttdoc">Universal microsecond timer - returns microseconds since system startup.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d18/chrono_8cpp_8hpp_source.html#l00080">chrono.cpp.hpp:80</a></div></div>
+<div class="ttc" id="anamespacefl_a4cfbbd90ced1c04107934a3c05d3e679_html_a4cfbbd90ced1c04107934a3c05d3e679"><div class="ttname"><a href="../../d4/d36/namespacefl_a4cfbbd90ced1c04107934a3c05d3e679.html#a4cfbbd90ced1c04107934a3c05d3e679">fl::micros</a></div><div class="ttdeci">fl::u32 micros()</div><div class="ttdoc">Universal microsecond timer - returns microseconds since system startup.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d18/chrono_8cpp_8hpp_source.html#l00091">chrono.cpp.hpp:91</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.3-->
@@ -193,7 +193,7 @@ $(function(){initNavTree('d0/da8/fastled__delay_8h_source.html','../../'); initR
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d0/da8/fastled__delay_8h.html">fastled_delay.h</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:06:58 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:08:59 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

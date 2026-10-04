@@ -1,0 +1,39 @@
+digraph "fl::vector_basic::swap_impl"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::vector_basic::swap_impl",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Swap contents with another vector_basic."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::vector_basic::vector\l_basic",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/dad/classfl_1_1vector__basic_aa3b5f18f20eaa89f869849b2f4207759.html#aa3b5f18f20eaa89f869849b2f4207759",tooltip="Heap-only vector (no inline buffer)."];
+  Node2 -> Node2 [id="edge2_Node000002_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node3 [id="edge3_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::vector_basic::size",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/dad/classfl_1_1vector__basic_a3bdba8a50d37b2fd71bbec2b753fba3e.html#a3bdba8a50d37b2fd71bbec2b753fba3e",tooltip=" "];
+  Node1 -> Node4 [id="edge4_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::memory_resource\l::allocate",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d13/classfl_1_1memory__resource_ad5b6ab31a893518956b491b20968c30f.html#ad5b6ab31a893518956b491b20968c30f",tooltip=" "];
+  Node4 -> Node4 [id="edge5_Node000004_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 -> Node5 [id="edge6_Node000004_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::memory_resource\l::do_allocate",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d13/classfl_1_1memory__resource_aaf171184cd5d92f0ed882f3d859a24af.html#aaf171184cd5d92f0ed882f3d859a24af",tooltip=" "];
+  Node1 -> Node6 [id="edge7_Node000001_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::vector_basic::element_ptr",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/dad/classfl_1_1vector__basic_a3a8ac3fa78ac2345911f4367694f186a.html#a3a8ac3fa78ac2345911f4367694f186a",tooltip="Pointer to element at index (byte arithmetic)."];
+  Node1 -> Node7 [id="edge8_Node000001_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::vector_basic::hasInline\lBuffer",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/dad/classfl_1_1vector__basic_a0f97d38518e3f1448ac5d1b09dd51f31.html#a0f97d38518e3f1448ac5d1b09dd51f31",tooltip="Does this vector have an inline buffer at all?"];
+  Node1 -> Node8 [id="edge9_Node000001_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl::vector_basic::inline\lBufferPtr",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/dad/classfl_1_1vector__basic_a3d528d0097291ad564918d2a37ebf1ec.html#a3d528d0097291ad564918d2a37ebf1ec",tooltip="Compute inline buffer pointer from offset."];
+  Node8 -> Node8 [id="edge10_Node000008_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node9 [id="edge11_Node000001_Node000009",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="fl::vector_basic::isInline",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/dad/classfl_1_1vector__basic_a5c38462334e8be852c00a70dfc4bd31a.html#a5c38462334e8be852c00a70dfc4bd31a",tooltip="Is data currently in the inline buffer?"];
+  Node9 -> Node8 [id="edge12_Node000009_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node10 [id="edge13_Node000001_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="fl::memcpy",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a35ff6755912c639a5e5bd35fc59e57ff.html#a35ff6755912c639a5e5bd35fc59e57ff",tooltip=" "];
+  Node1 -> Node1 [id="edge14_Node000001_Node000001",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node11 [id="edge15_Node000001_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="fl::vector_basic::trivial_copy",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/dad/classfl_1_1vector__basic_a2a90e682670f8fbcc40201fcbe03d999.html#a2a90e682670f8fbcc40201fcbe03d999",tooltip=" "];
+  Node11 -> Node10 [id="edge16_Node000011_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node12 [id="edge17_Node000001_Node000012",color="steelblue1",style="solid",tooltip=" "];
+  Node12 [id="Node000012",label="fl::vector_basic::trivial_swap",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/dad/classfl_1_1vector__basic_a271f57d520c0b92f40f3a5cf6e462b50.html#a271f57d520c0b92f40f3a5cf6e462b50",tooltip=" "];
+  Node12 -> Node10 [id="edge18_Node000012_Node000010",color="steelblue1",style="solid",tooltip=" "];
+}

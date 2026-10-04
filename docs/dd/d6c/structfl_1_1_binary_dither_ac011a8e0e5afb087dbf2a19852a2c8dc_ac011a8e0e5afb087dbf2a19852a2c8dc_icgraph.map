@@ -1,0 +1,13 @@
+<map id="fl::BinaryDither::offset" name="fl::BinaryDither::offset">
+<area shape="rect" id="Node000001" title="Q scaled into [0, range): the offset for one channel." alt="" coords="660,46,825,71"/>
+<area shape="rect" id="Node000002" href="$dd/d6c/structfl_1_1_binary_dither_ad5714524272d9ee39bf3a37d4803132e.html#ad5714524272d9ee39bf3a37d4803132e" title="Set up e from the per&#45;channel brightness scale and d from frame." alt="" coords="451,17,601,42"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="646,48,601,42,601,37,647,43"/>
+<area shape="rect" id="Node000008" href="$dd/d6c/structfl_1_1_binary_dither_a2e392159b251b5e7c17bbe07707ead9e.html#a2e392159b251b5e7c17bbe07707ead9e" title="Re&#45;point d at frame, keeping the ranges init left in e." alt="" coords="440,70,612,95"/>
+<area shape="poly" id="edge4_Node000001_Node000008" title=" " alt="" coords="647,72,612,76,612,71,646,67"/>
+<area shape="rect" id="Node000003" href="$d0/dee/struct_pixel_controller_a2a8441da873d3a094c15c337b34d3e43.html#a2a8441da873d3a094c15c337b34d3e43" title="Set up the values for binary dithering from the shared frame phase." alt="" coords="234,5,381,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="437,30,381,29,381,24,438,25"/>
+<area shape="rect" id="Node000004" href="$d0/dee/struct_pixel_controller_aa86847022436988b28343a76bab0db4c.html#aa86847022436988b28343a76bab0db4c" title="Toggle dithering enable/disable." alt="" coords="5,5,175,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="220,28,175,28,175,23,220,23"/>
+<area shape="rect" id="Node000009" href="$d0/dee/struct_pixel_controller_a6acdf624d872440de0f06ad9b7a840d8.html#a6acdf624d872440de0f06ad9b7a840d8" title="Re&#45;point binary dithering at phase R after construction, leaving the per&#45;channel ranges e[] as init_b..." alt="" coords="223,69,392,109"/>
+<area shape="poly" id="edge5_Node000008_Node000009" title=" " alt="" coords="427,88,392,89,392,84,426,83"/>
+</map>

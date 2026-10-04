@@ -1,0 +1,11 @@
+<map id="PixelController::init_binary_dithering" name="PixelController::init_binary_dithering">
+<area shape="rect" id="Node000001" title="Set up the values for binary dithering from the shared frame phase." alt="" coords="5,23,152,63"/>
+<area shape="rect" id="Node000002" href="$df/d9e/namespacefl_1_1detail_ac2b3ef0a8182dc672f6e63a01ad622cf.html#ac2b3ef0a8182dc672f6e63a01ad622cf" title="Return the temporal&#45;dither phase shared by all controllers in this frame." alt="" coords="200,5,363,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="152,32,186,27,187,33,153,37"/>
+<area shape="rect" id="Node000003" href="$dd/d6c/structfl_1_1_binary_dither_ad5714524272d9ee39bf3a37d4803132e.html#ad5714524272d9ee39bf3a37d4803132e" title="Set up e from the per&#45;channel brightness scale and d from frame." alt="" coords="207,55,356,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="153,49,193,54,193,60,152,55"/>
+<area shape="rect" id="Node000004" href="$dd/d6c/structfl_1_1_binary_dither_ac011a8e0e5afb087dbf2a19852a2c8dc.html#ac011a8e0e5afb087dbf2a19852a2c8dc" title="Q scaled into [0, range): the offset for one channel." alt="" coords="411,29,577,55"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="356,56,397,51,398,56,356,61"/>
+<area shape="rect" id="Node000005" href="$dd/d6c/structfl_1_1_binary_dither_aae46c7435dd271d8e46d3cd7e6b57d5c.html#aae46c7435dd271d8e46d3cd7e6b57d5c" title="The frame&#39;s offset pattern value Q: frame wrapped to VIRTUAL_BITS, bit&#45;reversed so consecutive frames..." alt="" coords="411,79,577,104"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="356,73,397,78,397,83,356,78"/>
+</map>

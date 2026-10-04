@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -145,17 +145,17 @@ $(function(){initNavTree('df/df1/classfl_1_1audio_1_1detector_1_1_mood_analyzer_
 <div class="line"><span class="lineno">  171</span>    <span class="keywordtype">float</span> <a class="code hl_variable" href="../../d6/d05/_animartrix_8ino_ab0d80715bb4b382856cf250c1eeb9b53.html#ab0d80715bb4b382856cf250c1eeb9b53">brightness</a> = normalizedCentroid * rolloff;</div>
 <div class="line"><span class="lineno">  172</span> </div>
 <div class="line"><span class="lineno">  173</span>    <span class="comment">// Stability score (lower flux = more positive/calm, higher = more negative/chaotic)</span></div>
-<div class="line"><span class="lineno">  174</span>    <span class="keywordtype">float</span> stability = 1.0f - <a class="code hl_function" href="../../d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb">fl::min</a>(1.0f, flux / 10.0f);</div>
+<div class="line"><span class="lineno">  174</span>    <span class="keywordtype">float</span> stability = 1.0f - <a class="code hl_function" href="../../d4/d36/namespacefl_a2fdabb91a1f100dec8da21e4306aba05.html#a2fdabb91a1f100dec8da21e4306aba05">fl::min</a>(1.0f, flux / 10.0f);</div>
 <div class="line"><span class="lineno">  175</span> </div>
 <div class="line"><span class="lineno">  176</span>    <span class="comment">// Combine into valence (-1 to 1)</span></div>
 <div class="line"><span class="lineno">  177</span>    <span class="keywordtype">float</span> valence = (<a class="code hl_variable" href="../../d6/d05/_animartrix_8ino_ab0d80715bb4b382856cf250c1eeb9b53.html#ab0d80715bb4b382856cf250c1eeb9b53">brightness</a> * 0.6f + stability * 0.4f) * 2.0f - 1.0f;</div>
 <div class="line"><span class="lineno">  178</span> </div>
 <div class="line"><span class="lineno">  179</span>    <span class="comment">// Clamp to valid range</span></div>
-<div class="line"><span class="lineno">  180</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909">fl::max</a>(-1.0f, <a class="code hl_function" href="../../d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb">fl::min</a>(1.0f, valence));</div>
+<div class="line"><span class="lineno">  180</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a07c69292ef50aa1083046faff1c52ead.html#a07c69292ef50aa1083046faff1c52ead">fl::max</a>(-1.0f, <a class="code hl_function" href="../../d4/d36/namespacefl_a2fdabb91a1f100dec8da21e4306aba05.html#a2fdabb91a1f100dec8da21e4306aba05">fl::min</a>(1.0f, valence));</div>
 <div class="line"><span class="lineno">  181</span>}</div>
 <div class="ttc" id="a_animartrix_8ino_ab0d80715bb4b382856cf250c1eeb9b53_html_ab0d80715bb4b382856cf250c1eeb9b53"><div class="ttname"><a href="../../d6/d05/_animartrix_8ino_ab0d80715bb4b382856cf250c1eeb9b53.html#ab0d80715bb4b382856cf250c1eeb9b53">brightness</a></div><div class="ttdeci">fl::UISlider brightness(&quot;Brightness&quot;, BRIGHTNESS, 0, 255)</div></div>
-<div class="ttc" id="anamespacefl_a0356f07fb7a8f25752385fd8208b47fb_html_a0356f07fb7a8f25752385fd8208b47fb"><div class="ttname"><a href="../../d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb">fl::min</a></div><div class="ttdeci">FL_DISABLE_WARNING_PUSH U constexpr common_type_t&lt; T, U &gt; min(T a, U b) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00071">math.h:71</a></div></div>
-<div class="ttc" id="anamespacefl_a19ba0dae8249e0cf164136846f85e909_html_a19ba0dae8249e0cf164136846f85e909"><div class="ttname"><a href="../../d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909">fl::max</a></div><div class="ttdeci">constexpr common_type_t&lt; T, U &gt; max(T a, U b) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00075">math.h:75</a></div></div>
+<div class="ttc" id="anamespacefl_a07c69292ef50aa1083046faff1c52ead_html_a07c69292ef50aa1083046faff1c52ead"><div class="ttname"><a href="../../d4/d36/namespacefl_a07c69292ef50aa1083046faff1c52ead.html#a07c69292ef50aa1083046faff1c52ead">fl::max</a></div><div class="ttdeci">constexpr common_type_t&lt; T, U &gt; max(T a, U b) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00075">math.h:75</a></div></div>
+<div class="ttc" id="anamespacefl_a2fdabb91a1f100dec8da21e4306aba05_html_a2fdabb91a1f100dec8da21e4306aba05"><div class="ttname"><a href="../../d4/d36/namespacefl_a2fdabb91a1f100dec8da21e4306aba05.html#a2fdabb91a1f100dec8da21e4306aba05">fl::min</a></div><div class="ttdeci">FL_DISABLE_WARNING_PUSH U constexpr common_type_t&lt; T, U &gt; min(T a, U b) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00071">math.h:71</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../d6/d05/_animartrix_8ino_ab0d80715bb4b382856cf250c1eeb9b53.html#ab0d80715bb4b382856cf250c1eeb9b53">brightness</a>, <a class="el" href="../../df/db1/math_8h_source.html#l00075">fl::max()</a>, and <a class="el" href="../../df/db1/math_8h_source.html#l00071">fl::min()</a>.</p>
 
@@ -184,7 +184,7 @@ $(function(){initNavTree('df/df1/classfl_1_1audio_1_1detector_1_1_mood_analyzer_
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../db/dbf/namespacefl_1_1audio.html">audio</a></li><li class="navelem"><a class="el" href="../../dd/d12/namespacefl_1_1audio_1_1detector.html">detector</a></li><li class="navelem"><a class="el" href="../../df/df1/classfl_1_1audio_1_1detector_1_1_mood_analyzer.html">MoodAnalyzer</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:08 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:11 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

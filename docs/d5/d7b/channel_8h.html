@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -103,6 +103,7 @@ $(function(){initNavTree('d5/d7b/channel_8h.html','../../'); initResizable(true)
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
 <a href="#namespaces">Namespaces</a> &#124;
+<a href="#enum-members">Enumerations</a> &#124;
 <a href="#func-members">Functions</a>  </div>
   <div class="headertitle"><div class="title">channel.h File Reference</div></div>
 </div><!--header-->
@@ -123,11 +124,14 @@ $(function(){initNavTree('d5/d7b/channel_8h.html','../../'); initResizable(true)
 <code>#include &quot;<a class="el" href="../../d4/d9b/bus_8h_source.html">fl/channels/bus.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d8/dd4/ichannel_8h_source.html">fl/channels/ichannel.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d7/d5b/options_8h_source.html">fl/channels/options.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../df/d7a/pipeline_8h_source.html">fl/gfx/pipeline.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../da/d4b/unique__ptr_8h_source.html">fl/stl/unique_ptr.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../df/d6a/shared__ptr_8h_source.html">fl/stl/shared_ptr.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../da/d66/string_8h_source.html">fl/stl/string.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../dc/db4/weak__ptr_8h_source.html">fl/stl/weak_ptr.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../df/dd8/stdint_8h_source.html">fl/stl/stdint.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d1/d09/fl_2channels_2config_8h_source.html">fl/channels/config.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d3/dd0/channel__events_8h_source.html">fl/channels/channel_events.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d4/d54/compiler__control_8h_source.html">fl/stl/compiler_control.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for channel.h:</div>
@@ -141,7 +145,7 @@ $(function(){initNavTree('d5/d7b/channel_8h.html','../../'); initResizable(true)
 <div id="dynsection-1-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-1-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d3/db2/channel_8h__dep__incl.svg" width="100%" height="569"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d3/db2/channel_8h__dep__incl.svg" width="100%" height="600"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 </div>
 <p><a href="../../d5/d7b/channel_8h_source.html">Go to the source code of this file.</a></p>
@@ -151,12 +155,27 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d8b/classfl_1_1_channel.html">fl::Channel</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">LED channel for parallel output, pretty much a <a class="el" href="../../d0/dc9/class_c_pixel_l_e_d_controller.html" title="Template extension of the CLEDController class.">CPixelLEDController</a> but with timing and pin information.  <a href="../../d5/d8b/classfl_1_1_channel.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/ddc/classfl_1_1_static_profile_channel.html">fl::StaticProfileChannel&lt; Profile &gt;</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A compile-time profile channel.  <a href="../../d7/ddc/classfl_1_1_static_profile_channel.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></td></tr>
 <tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">Base definition for an LED controller. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="enum-members" name="enum-members"></a>
+Enumerations</h2></td></tr>
+<tr class="memitem:adf08976a82fd066526d1b8c786e6a8de" id="r_adf08976a82fd066526d1b8c786e6a8de"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_adf08976a82fd066526d1b8c786e6a8de.html#adf08976a82fd066526d1b8c786e6a8de">fl::ColorProfileStatus</a> : u8 { <a class="el" href="../../d4/d36/namespacefl_adf08976a82fd066526d1b8c786e6a8de.html#adf08976a82fd066526d1b8c786e6a8deaf5d49bc3243ac8419db1a2a0c448d1f3">fl::Unconfigured</a>
+, <a class="el" href="../../d4/d36/namespacefl_adf08976a82fd066526d1b8c786e6a8de.html#adf08976a82fd066526d1b8c786e6a8dea61aa63eb3ac1c3408640463ee5fe8aa3">fl::Configured</a>
+, <a class="el" href="../../d4/d36/namespacefl_adf08976a82fd066526d1b8c786e6a8de.html#adf08976a82fd066526d1b8c786e6a8dea882277bdf25efaeb8295e842ebcb3d11">fl::Fallback</a>
+, <a class="el" href="../../d4/d36/namespacefl_adf08976a82fd066526d1b8c786e6a8de.html#adf08976a82fd066526d1b8c786e6a8dead37b1f6c0512e2118cee17fea015b699">fl::Rejected</a>
+ }</td></tr>
+<tr class="separator:adf08976a82fd066526d1b8c786e6a8de"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aea2dc762a30457a24cca2c92c0e232e6" id="r_aea2dc762a30457a24cca2c92c0e232e6"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_aea2dc762a30457a24cca2c92c0e232e6.html#aea2dc762a30457a24cca2c92c0e232e6">fl::ProfileId</a> : u8 { <a class="el" href="../../d4/d36/namespacefl_aea2dc762a30457a24cca2c92c0e232e6.html#aea2dc762a30457a24cca2c92c0e232e6a3c05d0de9c7795cf0be6a1d9b9bbad7b">fl::WS2812B</a>
+ }</td></tr>
+<tr class="separator:aea2dc762a30457a24cca2c92c0e232e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
@@ -175,7 +194,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_217dd1d1f80f936dd132dc9fc88b57d1.html">channels</a></li><li class="navelem"><a class="el" href="../../d5/d7b/channel_8h.html">channel.h</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:01 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:03 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

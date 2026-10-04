@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::audio::AutoGainConfig",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/dbf/namespacefl_1_1audio.html#d9/dcf/structfl_1_1audio_1_1_auto_gain_config",tooltip="Configuration for automatic gain control."];
+  Node0 [id="Node000000",label="fl::asio::error_code",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d33/structfl_1_1asio_1_1error__code.html",tooltip="Asio-compatible error code: numeric code + optional human-readable message."];
 }

@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -112,7 +112,7 @@ template&lt;typename T&gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="../../da/d3c/namespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c.html#a7573a66f01c09f14a1ff0411f8e1153c">fl::u8</a> fl::gfx::coordToU8 </td>
+          <td class="memname"><a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> fl::gfx::coordToU8 </td>
           <td>(</td>
           <td class="paramtype">T</td>          <td class="paramname"><span class="paramname"><em>alpha</em></span></td><td>)</td>
           <td></td>
@@ -125,19 +125,19 @@ template&lt;typename T&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>sqrt is provided by <a class="el" href="../../d4/d36/namespacefl_a40c15aab45d44b7ca11f148cc2e997c1.html#a40c15aab45d44b7ca11f148cc2e997c1">fl::sqrt</a> overloads in <a class="el" href="../../df/db1/math_8h.html">math.h</a> for: </p>
+<p>sqrt is provided by <a class="el" href="../../d4/d36/namespacefl_ae5cb57a6b1ba6c629a49f0fec021b6e9.html#ae5cb57a6b1ba6c629a49f0fec021b6e9">fl::sqrt</a> overloads in <a class="el" href="../../df/db1/math_8h.html">math.h</a> for: </p>
 <ul>
 <li>All floating-point types (float, double)</li>
 <li>All fixed-point types (<a class="el" href="../../db/d64/classfl_1_1s8x8.html">s8x8</a>, <a class="el" href="../../da/d43/classfl_1_1s12x4.html">s12x4</a>, <a class="el" href="../../d9/d9f/classfl_1_1s16x16.html">s16x16</a>, <a class="el" href="../../d0/d64/classfl_1_1s24x8.html">s24x8</a>, <a class="el" href="../../d5/dec/classfl_1_1u8x8.html">u8x8</a>, <a class="el" href="../../d5/d21/classfl_1_1u12x4.html">u12x4</a>, <a class="el" href="../../db/d56/classfl_1_1u16x16.html">u16x16</a>, <a class="el" href="../../d9/d31/classfl_1_1u24x8.html">u24x8</a>)</li>
-<li>Integer types (via cast to float) Using: using <a class="el" href="../../d4/d36/namespacefl_a40c15aab45d44b7ca11f148cc2e997c1.html#a40c15aab45d44b7ca11f148cc2e997c1">fl::sqrt</a>; (in drawStrokeLine template to find overloads via ADL) Convert a normalized [0,1] Coord value to <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a> (0-255) for nscale8. Uses integer arithmetic for fixed-point types; float for float/double. Generic: for fixed-point types (those with .to_int()) </li>
+<li>Integer types (via cast to float) Using: using <a class="el" href="../../d4/d36/namespacefl_ae5cb57a6b1ba6c629a49f0fec021b6e9.html#ae5cb57a6b1ba6c629a49f0fec021b6e9">fl::sqrt</a>; (in drawStrokeLine template to find overloads via ADL) Convert a normalized [0,1] Coord value to <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a> (0-255) for nscale8. Uses integer arithmetic for fixed-point types; float for float/double. Generic: for fixed-point types (those with .to_int()) </li>
 </ul>
 
 <p class="definition">Definition at line <a class="el" href="../../de/d34/primitives_8h_source.html#l00024">24</a> of file <a class="el" href="../../de/d34/primitives_8h_source.html">primitives.h</a>.</p>
 <div class="fragment"><div class="line"><span class="lineno">   24</span>                               {</div>
-<div class="line"><span class="lineno">   25</span>    <span class="keywordflow">return</span> (<a class="code hl_typedef" href="../../da/d3c/namespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c.html#a7573a66f01c09f14a1ff0411f8e1153c">fl::u8</a>)<a class="code hl_function" href="../../d4/d36/namespacefl_afb42d6eb6443afc7223ce9b1a812f350.html#afb42d6eb6443afc7223ce9b1a812f350">fl::clamp</a>((alpha * T(255.0f) + T(0.5f)).to_int(), 0, 255);</div>
+<div class="line"><span class="lineno">   25</span>    <span class="keywordflow">return</span> (<a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a>)<a class="code hl_function" href="../../d4/d36/namespacefl_a391721290a9307391d39a0a897d9b9f4.html#a391721290a9307391d39a0a897d9b9f4">fl::clamp</a>((alpha * T(255.0f) + T(0.5f)).to_int(), 0, 255);</div>
 <div class="line"><span class="lineno">   26</span>}</div>
-<div class="ttc" id="anamespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c_html_a7573a66f01c09f14a1ff0411f8e1153c"><div class="ttname"><a href="../../da/d3c/namespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c.html#a7573a66f01c09f14a1ff0411f8e1153c">fl::fl::u8</a></div><div class="ttdeci">unsigned char u8</div><div class="ttdef"><b>Definition</b> <a href="../../df/d96/s16x16x4_8h_source.html#l00132">s16x16x4.h:132</a></div></div>
-<div class="ttc" id="anamespacefl_afb42d6eb6443afc7223ce9b1a812f350_html_afb42d6eb6443afc7223ce9b1a812f350"><div class="ttname"><a href="../../d4/d36/namespacefl_afb42d6eb6443afc7223ce9b1a812f350.html#afb42d6eb6443afc7223ce9b1a812f350">fl::clamp</a></div><div class="ttdeci">constexpr enable_if&lt; is_fixed_point&lt; T &gt;::value, T &gt;::type clamp(T x, T lo, T hi) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../de/d62/fixed__point_8h_source.html#l00542">fixed_point.h:542</a></div></div>
+<div class="ttc" id="anamespacefl_a058ceeac48f181da463c2ba07401292c_html_a058ceeac48f181da463c2ba07401292c"><div class="ttname"><a href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a></div><div class="ttdeci">unsigned char u8</div><div class="ttdef"><b>Definition</b> <a href="../../df/dd8/stdint_8h_source.html#l00131">stdint.h:131</a></div></div>
+<div class="ttc" id="anamespacefl_a391721290a9307391d39a0a897d9b9f4_html_a391721290a9307391d39a0a897d9b9f4"><div class="ttname"><a href="../../d4/d36/namespacefl_a391721290a9307391d39a0a897d9b9f4.html#a391721290a9307391d39a0a897d9b9f4">fl::clamp</a></div><div class="ttdeci">constexpr enable_if&lt; is_fixed_point&lt; T &gt;::value, T &gt;::type clamp(T x, T lo, T hi) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../de/d62/fixed__point_8h_source.html#l00542">fixed_point.h:542</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../de/d62/fixed__point_8h_source.html#l00542">fl::clamp()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
@@ -157,7 +157,7 @@ template&lt;typename T&gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d0/d8b/namespacefl_1_1gfx.html">gfx</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:10 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:12 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -1,7 +1,7 @@
 var classfl_1_1_wave_simulation1_d___real =
 [
-    [ "WaveSimulation1D_Real", "da/df9/classfl_1_1_wave_simulation1_d___real_a2448dabe4e8854f8964931f30c81c369.html#a2448dabe4e8854f8964931f30c81c369", null ],
-    [ "~WaveSimulation1D_Real", "da/df9/classfl_1_1_wave_simulation1_d___real_a73bde0e0f650e6284bc0981d60873611.html#a73bde0e0f650e6284bc0981d60873611", null ],
+    [ "WaveSimulation1D_Real", "da/df9/classfl_1_1_wave_simulation1_d___real_a3d83747d531f51b966518f4740243395.html#a3d83747d531f51b966518f4740243395", null ],
+    [ "~WaveSimulation1D_Real", "da/df9/classfl_1_1_wave_simulation1_d___real_a8936b107166201ce69554ad9b6f7ae7e.html#a8936b107166201ce69554ad9b6f7ae7e", null ],
     [ "getDampenening", "da/df9/classfl_1_1_wave_simulation1_d___real_a716d817cbfa61e9e568789b469dc0ba1.html#a716d817cbfa61e9e568789b469dc0ba1", null ],
     [ "getf", "da/df9/classfl_1_1_wave_simulation1_d___real_adca9fe044b2c0e95a0d874da1d8f7609.html#adca9fe044b2c0e95a0d874da1d8f7609", null ],
     [ "getHalfDuplex", "da/df9/classfl_1_1_wave_simulation1_d___real_aceda65ccbd88fae5370be7bb6efa1629.html#aceda65ccbd88fae5370be7bb6efa1629", null ],
@@ -12,7 +12,7 @@ var classfl_1_1_wave_simulation1_d___real =
     [ "getu8", "da/df9/classfl_1_1_wave_simulation1_d___real_a7a9de2e62d3fd5fa89e43c38852964f7.html#a7a9de2e62d3fd5fa89e43c38852964f7", null ],
     [ "has", "da/df9/classfl_1_1_wave_simulation1_d___real_a4fde7ab530be369657f2efa694400b49.html#a4fde7ab530be369657f2efa694400b49", null ],
     [ "set", "da/df9/classfl_1_1_wave_simulation1_d___real_a33ce49511c95b8f5d7c80d2ee7632359.html#a33ce49511c95b8f5d7c80d2ee7632359", null ],
-    [ "setDampening", "da/df9/classfl_1_1_wave_simulation1_d___real_a47760afe3646a6c744d6700480acb793.html#a47760afe3646a6c744d6700480acb793", null ],
+    [ "setDampening", "da/df9/classfl_1_1_wave_simulation1_d___real_a38583528f98545f15e80b39b029076fb.html#a38583528f98545f15e80b39b029076fb", null ],
     [ "setHalfDuplex", "da/df9/classfl_1_1_wave_simulation1_d___real_a771fe356d8f741b3835961fbd9d22327.html#a771fe356d8f741b3835961fbd9d22327", null ],
     [ "setSpeed", "da/df9/classfl_1_1_wave_simulation1_d___real_abb0ca604e383627374d21dd6e4e992df.html#abb0ca604e383627374d21dd6e4e992df", null ],
     [ "update", "da/df9/classfl_1_1_wave_simulation1_d___real_a2a810c84be2612cf81bb4db88713164f.html#a2a810c84be2612cf81bb4db88713164f", null ],

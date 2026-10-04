@@ -23,23 +23,29 @@ var rx_8h =
       [ "fl::DecodeError::INVALID_ARGUMENT", "d4/d36/namespacefl_ac30c8a1bc13273eec6d149523a756b5f.html#ac30c8a1bc13273eec6d149523a756b5faf295a0c3e37c94f078e1c5476479132d", null ]
     ] ],
     [ "fl::RxDeviceType", "d4/d36/namespacefl_acf4be728c6cec387b6601072b61872fb.html#acf4be728c6cec387b6601072b61872fb", [
+      [ "fl::RxDeviceType::PIO", "d4/d36/namespacefl_acf4be728c6cec387b6601072b61872fb.html#acf4be728c6cec387b6601072b61872fba7a876fbec890f829703bc77a76e8ef45", null ],
       [ "fl::RxDeviceType::PLATFORM_DEFAULT", "d4/d36/namespacefl_acf4be728c6cec387b6601072b61872fb.html#acf4be728c6cec387b6601072b61872fbac974dfaf96813db4ec84e1b8cbc268e7", null ],
       [ "fl::RxDeviceType::ISR", "d4/d36/namespacefl_acf4be728c6cec387b6601072b61872fb.html#acf4be728c6cec387b6601072b61872fbacbada7cecd4982719ca391bd8dc465ed", null ],
       [ "fl::RxDeviceType::RMT", "d4/d36/namespacefl_acf4be728c6cec387b6601072b61872fb.html#acf4be728c6cec387b6601072b61872fbaca3f8dd74af80f58addb7bdadbd43e53", null ],
       [ "fl::RxDeviceType::FLEXPWM", "d4/d36/namespacefl_acf4be728c6cec387b6601072b61872fb.html#acf4be728c6cec387b6601072b61872fba55484906f4fe2206cb61c8c47a9e9272", null ],
       [ "fl::RxDeviceType::FLEXIO", "d4/d36/namespacefl_acf4be728c6cec387b6601072b61872fb.html#acf4be728c6cec387b6601072b61872fba996e13f33a5a2e0c2ca65f6cd1cc9c3c", null ],
-      [ "fl::RxDeviceType::LPC_SCT_CAPTURE", "d4/d36/namespacefl_acf4be728c6cec387b6601072b61872fb.html#acf4be728c6cec387b6601072b61872fba365c55668170695b8cc8c8c3d0145f74", null ]
+      [ "fl::RxDeviceType::LPC_SCT_CAPTURE", "d4/d36/namespacefl_acf4be728c6cec387b6601072b61872fb.html#acf4be728c6cec387b6601072b61872fba365c55668170695b8cc8c8c3d0145f74", null ],
+      [ "fl::RxDeviceType::PARLIO_RX", "d4/d36/namespacefl_acf4be728c6cec387b6601072b61872fb.html#acf4be728c6cec387b6601072b61872fbaec6583ad1c80cec6a0046ba804351ae5", null ],
+      [ "fl::RxDeviceType::I2S_RX", "d4/d36/namespacefl_acf4be728c6cec387b6601072b61872fb.html#acf4be728c6cec387b6601072b61872fba2d09171e726f57ceb0bd356a55100e6f", null ]
     ] ],
     [ "fl::RxWaitResult", "d4/d36/namespacefl_abbddfa9e0f349eb2c0b3195913b67bc5.html#abbddfa9e0f349eb2c0b3195913b67bc5", [
       [ "fl::RxWaitResult::SUCCESS", "d4/d36/namespacefl_abbddfa9e0f349eb2c0b3195913b67bc5.html#abbddfa9e0f349eb2c0b3195913b67bc5ad0749aaba8b833466dfcbb0428e4f89c", null ],
       [ "fl::RxWaitResult::TIMEOUT", "d4/d36/namespacefl_abbddfa9e0f349eb2c0b3195913b67bc5.html#abbddfa9e0f349eb2c0b3195913b67bc5a070a0fb40f6c308ab544b227660aadff", null ],
       [ "fl::RxWaitResult::BUFFER_OVERFLOW", "d4/d36/namespacefl_abbddfa9e0f349eb2c0b3195913b67bc5.html#abbddfa9e0f349eb2c0b3195913b67bc5ad53c9f7d5b985bba6cb80cdf8ae665e4", null ]
     ] ],
-    [ "fl::make4PhaseTiming", "d4/d36/namespacefl_a91e1324b8f8b552ee88b79ba67181369.html#a91e1324b8f8b552ee88b79ba67181369", null ],
-    [ "fl::create< RxDeviceType::FLEXPWM >", "d4/d36/namespacefl_a906e8c258000990d5453ec86ab611094.html#a906e8c258000990d5453ec86ab611094", null ],
-    [ "fl::create< RxDeviceType::ISR >", "d4/d36/namespacefl_a93609981fc6fd74b5014e9291d70e9ff.html#a93609981fc6fd74b5014e9291d70e9ff", null ],
-    [ "fl::create< RxDeviceType::LPC_SCT_CAPTURE >", "d4/d36/namespacefl_aaad6585c080efaf760a2ad9946035fa0.html#aaad6585c080efaf760a2ad9946035fa0", null ],
-    [ "fl::create< RxDeviceType::PLATFORM_DEFAULT >", "d4/d36/namespacefl_a6cb56dc445636e2ea22d4937d017f301.html#a6cb56dc445636e2ea22d4937d017f301", null ],
-    [ "fl::create< RxDeviceType::RMT >", "d4/d36/namespacefl_a6e3ce22ac45aa08eaa3a791c28597b76.html#a6e3ce22ac45aa08eaa3a791c28597b76", null ],
-    [ "fl::toString", "d4/d36/namespacefl_af5bbd781bdb3eed52770e81d8c1dff48.html#af5bbd781bdb3eed52770e81d8c1dff48", null ]
+    [ "fl::make4PhaseTiming", "d4/d36/namespacefl_a43e7c05322904722e2f77d49e4284d1d.html#a43e7c05322904722e2f77d49e4284d1d", null ],
+    [ "fl::create< RxDeviceType::FLEXPWM >", "d4/d36/namespacefl_ab1dfa780959b9f8e2c04fd06e0d76bfd.html#ab1dfa780959b9f8e2c04fd06e0d76bfd", null ],
+    [ "fl::create< RxDeviceType::I2S_RX >", "d4/d36/namespacefl_a9dcd831a5dc6b730e1e933b9bf3804c5.html#a9dcd831a5dc6b730e1e933b9bf3804c5", null ],
+    [ "fl::create< RxDeviceType::ISR >", "d4/d36/namespacefl_aa61efce99d0a3a84196f5db021c6beb8.html#aa61efce99d0a3a84196f5db021c6beb8", null ],
+    [ "fl::create< RxDeviceType::LPC_SCT_CAPTURE >", "d4/d36/namespacefl_ac7ab58c46e18200ce661ba2ad7b2e1e5.html#ac7ab58c46e18200ce661ba2ad7b2e1e5", null ],
+    [ "fl::create< RxDeviceType::PARLIO_RX >", "d4/d36/namespacefl_a37357bde1343e9786702df863a324385.html#a37357bde1343e9786702df863a324385", null ],
+    [ "fl::create< RxDeviceType::PIO >", "d4/d36/namespacefl_aeb6986eb656a77d5c3ac2595b90cc98c.html#aeb6986eb656a77d5c3ac2595b90cc98c", null ],
+    [ "fl::create< RxDeviceType::PLATFORM_DEFAULT >", "d4/d36/namespacefl_a6cbbb7df99dd3ec79f02fdecb2bce838.html#a6cbbb7df99dd3ec79f02fdecb2bce838", null ],
+    [ "fl::create< RxDeviceType::RMT >", "d4/d36/namespacefl_a1116360f256653a936f7d09345ff0943.html#a1116360f256653a936f7d09345ff0943", null ],
+    [ "fl::toString", "d4/d36/namespacefl_ab8e37ce949d7b5b69b7c5f81634a0f09.html#ab8e37ce949d7b5b69b7c5f81634a0f09", null ]
 ];

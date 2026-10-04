@@ -1,0 +1,27 @@
+<map id="fl::powerChannelCodecPolicy" name="fl::powerChannelCodecPolicy">
+<area shape="rect" id="Node000001" title="Identify the channel&#39;s final current/quantization choice without adding a virtual slot or storage to ..." alt="" coords="5,153,216,179"/>
+<area shape="rect" id="Node000002" href="$dd/dbb/class_c_fast_l_e_d_a12da17ab4b0d4daed6ceb429d68ac5cf.html#a12da17ab4b0d4daed6ceb429d68ac5cf" title="stored ChannelPtrs to keep them alive" alt="" coords="284,5,432,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="122,151,179,97,219,66,263,40,279,33,281,38,265,44,222,71,183,101,126,155"/>
+<area shape="rect" id="Node000003" href="$d5/d8b/classfl_1_1_channel_aad464e566821832604d9e96e3d5cf8b2.html#aad464e566821832604d9e96e3d5cf8b2" title=" " alt="" coords="264,55,452,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="133,151,191,120,263,89,286,81,288,86,265,94,193,125,136,155"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_af29c26f0e4e69895290d4edcbb61b93c.html#af29c26f0e4e69895290d4edcbb61b93c" title="The 5&#45;bit semantics for chip, with profile overriding the chip&#39;s default when it is not NotApplicable..." alt="" coords="274,104,442,129"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="174,151,280,129,281,135,176,156"/>
+<area shape="rect" id="Node000008" href="$d5/d8b/classfl_1_1_channel_a6e5fa70911b5ada907abf375021c7356.html#a6e5fa70911b5ada907abf375021c7356" title="Get the chipset configuration variant." alt="" coords="273,153,443,179"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="216,163,259,163,259,169,216,169"/>
+<area shape="rect" id="Node000009" href="$df/d9e/namespacefl_1_1detail_a131805acd6fa1a23ac4211513c94eb02.html#a131805acd6fa1a23ac4211513c94eb02" title="Backing store for CFastLED::setHdFieldFloor()." alt="" coords="277,203,439,228"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="176,176,281,197,280,203,174,181"/>
+<area shape="rect" id="Node000012" href="$d4/d36/namespacefl_a633d8646b83951462c3c7a64fa555d72.html#a633d8646b83951462c3c7a64fa555d72" title="The lowest field the managed HD path may choose: the configured flicker floor for a secondary slow&#45;PW..." alt="" coords="285,252,431,277"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="136,177,193,207,265,238,288,246,286,251,263,243,191,212,133,181"/>
+<area shape="rect" id="Node000013" href="$d4/dad/classfl_1_1vector__basic_a3bdba8a50d37b2fd71bbec2b753fba3e.html#a3bdba8a50d37b2fd71bbec2b753fba3e" title=" " alt="" coords="281,301,435,327"/>
+<area shape="poly" id="edge12_Node000001_Node000013" title=" " alt="" coords="126,177,183,231,222,261,265,288,281,294,279,299,263,292,219,266,179,235,122,181"/>
+<area shape="rect" id="Node000004" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a796bbae17191ecc97fe3cbc408ccb4cf.html#a796bbae17191ecc97fe3cbc408ccb4cf" title=" " alt="" coords="513,47,649,87"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="452,65,500,65,500,70,452,70"/>
+<area shape="rect" id="Node000005" href="$d8/da0/classfl_1_1_c_l_e_d_controller_aa52e32cc0776be75975f5c5939ecb0f2.html#aa52e32cc0776be75975f5c5939ecb0f2" title="Template&#45;derived static&#45;profile controllers override this hook." alt="" coords="712,15,867,55"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="649,54,698,47,699,52,650,59"/>
+<area shape="rect" id="Node000006" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a553d065f7fc62ae2343ff49eae4e9f2d.html#a553d065f7fc62ae2343ff49eae4e9f2d" title=" " alt="" coords="711,79,868,119"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="650,75,698,83,697,88,649,80"/>
+<area shape="rect" id="Node000010" href="$d9/d5b/classfl_1_1_singleton_ad5cb1b704e17768f75802673abb0ff75.html#ad5cb1b704e17768f75802673abb0ff75" title=" " alt="" coords="500,203,663,228"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="440,213,486,213,486,218,440,218"/>
+<area shape="rect" id="Node000011" href="$d4/d36/namespacefl_a1e67c0c24ebcd98fcf8554753d1639a6.html#a1e67c0c24ebcd98fcf8554753d1639a6" title=" " alt="" coords="720,203,859,228"/>
+<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="663,213,706,213,706,218,663,218"/>
+</map>

@@ -140,7 +140,7 @@ var sectionId = 'dynsection-0';
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_a819280601bde62a67c39be0fff7f34af.html#a819280601bde62a67c39be0fff7f34af" target="_top" xlink:title=" ">
+<g id="a_Node000003"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_a1a6856f953e6123c78ee68840cf865c7.html#a1a6856f953e6123c78ee68840cf865c7" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="572,-204 394,-204 394,-185 572,-185 572,-204"/>
 <text text-anchor="middle" x="483" y="-192" font-family="Helvetica,sans-Serif" font-size="10.00">fl::CRGB::blendAlphaMaxChannel</text>
 </a>
@@ -158,7 +158,7 @@ var sectionId = 'dynsection-0';
 <!-- Node6 -->
 <g id="Node000006" class="node">
 <title>Node6</title>
-<g id="a_Node000006"><a xlink:href="../../d4/d36/namespacefl_a0393d1d09fff5bccc427802cc22e756d.html#a0393d1d09fff5bccc427802cc22e756d" target="_top" xlink:title=" ">
+<g id="a_Node000006"><a xlink:href="../../d4/d36/namespacefl_a35ff6755912c639a5e5bd35fc59e57ff.html#a35ff6755912c639a5e5bd35fc59e57ff" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="518.5,-167 447.5,-167 447.5,-148 518.5,-148 518.5,-167"/>
 <text text-anchor="middle" x="483" y="-155" font-family="Helvetica,sans-Serif" font-size="10.00">fl::memcpy</text>
 </a>
@@ -176,7 +176,7 @@ var sectionId = 'dynsection-0';
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_adb891cc4fe8f5ac2188d72c13c0256fd.html#adb891cc4fe8f5ac2188d72c13c0256fd" target="_top" xlink:title="Default constructor.">
+<g id="a_Node000004"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_a910ee467a963ad6805026ad83873e52b.html#a910ee467a963ad6805026ad83873e52b" target="_top" xlink:title="Default constructor.">
 <polygon fill="white" stroke="#666666" points="823,-204 733,-204 733,-185 823,-185 823,-204"/>
 <text text-anchor="middle" x="778" y="-192" font-family="Helvetica,sans-Serif" font-size="10.00">fl::CRGB::CRGB</text>
 </a>
@@ -194,7 +194,7 @@ var sectionId = 'dynsection-0';
 <!-- Node5 -->
 <g id="Node000005" class="node">
 <title>Node5</title>
-<g id="a_Node000005"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_a7e34886ec51c1aff8262123de5152437.html#a7e34886ec51c1aff8262123de5152437" target="_top" xlink:title=" ">
+<g id="a_Node000005"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_a783501cccdd1c0597ce7e2ba56401f6b.html#a783501cccdd1c0597ce7e2ba56401f6b" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="697,-185 608,-185 608,-166 697,-166 697,-185"/>
 <text text-anchor="middle" x="652.5" y="-173" font-family="Helvetica,sans-Serif" font-size="10.00">fl::CRGB::blend</text>
 </a>
@@ -284,7 +284,7 @@ var sectionId = 'dynsection-0';
 <!-- Node11 -->
 <g id="Node000011" class="node">
 <title>Node11</title>
-<g id="a_Node000011"><a xlink:href="../../d4/d36/namespacefl_a44a195439ac7fa303b4b0b0c956605be.html#a44a195439ac7fa303b4b0b0c956605be" target="_top" xlink:title=" ">
+<g id="a_Node000011"><a xlink:href="../../d4/d36/namespacefl_a9416b2c34c489ae11032cb58c2d3c58c.html#a9416b2c34c489ae11032cb58c2d3c58c" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="687,-111 618,-111 618,-92 687,-92 687,-111"/>
 <text text-anchor="middle" x="652.5" y="-99" font-family="Helvetica,sans-Serif" font-size="10.00">fl::memset</text>
 </a>

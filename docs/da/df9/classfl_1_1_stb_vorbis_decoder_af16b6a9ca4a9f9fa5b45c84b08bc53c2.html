@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -121,7 +121,7 @@ $(function(){initNavTree('da/df9/classfl_1_1_stb_vorbis_decoder_af16b6a9ca4a9f9f
 <div class="line"><span class="lineno">   58</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../da/df9/classfl_1_1_stb_vorbis_decoder_a75f765489dfeef65d2751cc86ddf6137.html#a75f765489dfeef65d2751cc86ddf6137">mVorbis</a>) {</div>
 <div class="line"><span class="lineno">   59</span>        vb::stb_vorbis_info vi = vb::stb_vorbis_get_info(<span class="keyword">static_cast&lt;</span>vb::stb_vorbis*<span class="keyword">&gt;</span>(<a class="code hl_variable" href="../../da/df9/classfl_1_1_stb_vorbis_decoder_a75f765489dfeef65d2751cc86ddf6137.html#a75f765489dfeef65d2751cc86ddf6137">mVorbis</a>));</div>
 <div class="line"><span class="lineno">   60</span>        info.sampleRate = vi.sample_rate;</div>
-<div class="line"><span class="lineno">   61</span>        info.channels = <span class="keyword">static_cast&lt;</span><a class="code hl_typedef" href="../../da/d3c/namespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c.html#a7573a66f01c09f14a1ff0411f8e1153c">fl::u8</a><span class="keyword">&gt;</span>(vi.channels);</div>
+<div class="line"><span class="lineno">   61</span>        info.channels = <span class="keyword">static_cast&lt;</span><a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a><span class="keyword">&gt;</span>(vi.channels);</div>
 <div class="line"><span class="lineno">   62</span>        info.maxFrameSize = <span class="keyword">static_cast&lt;</span>fl::u32<span class="keyword">&gt;</span>(vi.max_frame_size);</div>
 <div class="line"><span class="lineno">   63</span>        info.totalSamples = vb::stb_vorbis_stream_length_in_samples(<span class="keyword">static_cast&lt;</span>vb::stb_vorbis*<span class="keyword">&gt;</span>(<a class="code hl_variable" href="../../da/df9/classfl_1_1_stb_vorbis_decoder_a75f765489dfeef65d2751cc86ddf6137.html#a75f765489dfeef65d2751cc86ddf6137">mVorbis</a>));</div>
 <div class="line"><span class="lineno">   64</span>        info.isValid = <span class="keyword">true</span>;</div>
@@ -129,7 +129,7 @@ $(function(){initNavTree('da/df9/classfl_1_1_stb_vorbis_decoder_af16b6a9ca4a9f9f
 <div class="line"><span class="lineno">   66</span>    <span class="keywordflow">return</span> info;</div>
 <div class="line"><span class="lineno">   67</span>}</div>
 <div class="ttc" id="aclassfl_1_1_stb_vorbis_decoder_a75f765489dfeef65d2751cc86ddf6137_html_a75f765489dfeef65d2751cc86ddf6137"><div class="ttname"><a href="../../da/df9/classfl_1_1_stb_vorbis_decoder_a75f765489dfeef65d2751cc86ddf6137.html#a75f765489dfeef65d2751cc86ddf6137">fl::StbVorbisDecoder::mVorbis</a></div><div class="ttdeci">void * mVorbis</div><div class="ttdef"><b>Definition</b> <a href="../../d2/d3c/vorbis_8h_source.html#l00074">vorbis.h:74</a></div></div>
-<div class="ttc" id="anamespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c_html_a7573a66f01c09f14a1ff0411f8e1153c"><div class="ttname"><a href="../../da/d3c/namespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c.html#a7573a66f01c09f14a1ff0411f8e1153c">fl::fl::u8</a></div><div class="ttdeci">unsigned char u8</div><div class="ttdef"><b>Definition</b> <a href="../../df/d96/s16x16x4_8h_source.html#l00132">s16x16x4.h:132</a></div></div>
+<div class="ttc" id="anamespacefl_a058ceeac48f181da463c2ba07401292c_html_a058ceeac48f181da463c2ba07401292c"><div class="ttname"><a href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a></div><div class="ttdeci">unsigned char u8</div><div class="ttdef"><b>Definition</b> <a href="../../df/dd8/stdint_8h_source.html#l00131">stdint.h:131</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../d2/d3c/vorbis_8h_source.html#l00018">fl::VorbisInfo::channels</a>, <a class="el" href="../../d2/d3c/vorbis_8h_source.html#l00021">fl::VorbisInfo::isValid</a>, <a class="el" href="../../d2/d3c/vorbis_8h_source.html#l00020">fl::VorbisInfo::maxFrameSize</a>, <a class="el" href="../../d2/d3c/vorbis_8h_source.html#l00074">mVorbis</a>, <a class="el" href="../../d2/d3c/vorbis_8h_source.html#l00017">fl::VorbisInfo::sampleRate</a>, and <a class="el" href="../../d2/d3c/vorbis_8h_source.html#l00019">fl::VorbisInfo::totalSamples</a>.</p>
 
@@ -151,7 +151,7 @@ $(function(){initNavTree('da/df9/classfl_1_1_stb_vorbis_decoder_af16b6a9ca4a9f9f
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../da/df9/classfl_1_1_stb_vorbis_decoder.html">StbVorbisDecoder</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:10 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -1,6 +1,6 @@
 <map id="colorutils.h" name="colorutils.h">
 <area shape="rect" id="Node000001" title=" " alt="" coords="2151,5,2246,31"/>
-<area shape="rect" id="Node000002" href="$db/d97/_fast_l_e_d_8h.html" title="central include file for FastLED, defines the CFastLED class/object" alt="" coords="3917,313,4002,339"/>
+<area shape="rect" id="Node000002" href="$d6/d64/fastled_8h.html" title="central include file for FastLED, defines the CFastLED class/object" alt="" coords="3917,313,4002,339"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="2259,18,2671,30,2965,43,3277,63,3580,89,3719,106,3844,124,3953,145,4040,168,4104,194,4126,209,4141,224,4148,244,4144,262,4130,278,4109,290,4057,309,4003,321,4002,316,4055,304,4107,285,4127,274,4139,260,4143,245,4136,227,4123,213,4102,199,4039,173,3951,150,3843,129,3718,111,3580,95,3277,68,2964,49,2671,35,2259,23"/>
 <area shape="rect" id="Node000006" href="$d0/df9/colorpalettes_8cpp_8hpp.html" title=" " alt="" coords="45,233,208,258"/>
 <area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="2137,26,1553,70,1135,108,707,155,466,187,227,228,186,235,185,230,226,223,465,182,706,149,1134,103,1552,65,2136,21"/>
@@ -16,7 +16,7 @@
 <area shape="poly" id="edge7_Node000006_Node000005" title=" " alt="" coords="99,268,62,298,27,335,15,355,9,374,10,393,20,410,46,423,97,434,245,451,413,462,551,467,551,472,412,467,244,457,96,440,45,428,17,414,5,394,4,373,10,352,23,332,58,294,96,264"/>
 <area shape="poly" id="edge9_Node000007_Node000002" title=" " alt="" coords="2272,89,2684,90,2969,94,3272,104,3565,120,3821,144,3927,159,4014,178,4079,199,4102,211,4118,224,4127,240,4125,256,4115,270,4097,283,4052,303,4003,317,4002,312,4050,298,4095,278,4111,266,4121,254,4122,241,4114,227,4099,215,4077,204,4013,183,3926,165,3821,149,3565,125,3272,109,2969,100,2684,95,2272,95"/>
 <area shape="poly" id="edge10_Node000007_Node000006" title=" " alt="" coords="2125,97,1823,107,1355,130,798,169,509,196,227,228,181,235,180,230,226,223,509,191,797,164,1355,125,1822,102,2125,92"/>
-<area shape="rect" id="Node000008" href="$d7/dc2/fl_2system_2_fast_l_e_d_8h.html" title="Internal FastLED header for implementation files." alt="" coords="2127,152,2270,177"/>
+<area shape="rect" id="Node000008" href="$d0/d69/fl_2system_2fastled_8h.html" title="Internal FastLED header for implementation files." alt="" coords="2127,152,2270,177"/>
 <area shape="poly" id="edge11_Node000007_Node000008" title=" " alt="" coords="2201,118,2201,152,2196,152,2196,118"/>
 <area shape="poly" id="edge12_Node000008_Node000002" title=" " alt="" coords="2284,164,3313,183,3848,200,4021,211,4072,217,4095,223,4102,234,4104,245,4095,267,4077,287,4053,303,4003,321,4002,316,4051,298,4073,283,4091,264,4099,244,4097,236,4091,228,4071,222,4021,216,3848,206,3313,188,2284,170"/>
 <area shape="poly" id="edge16_Node000008_Node000006" title=" " alt="" coords="2113,170,1108,194,551,211,347,220,227,228,179,235,179,230,226,223,347,215,551,206,1107,189,2113,165"/>

@@ -1,40 +1,46 @@
 <map id="fl::pwm_state::findByPin" name="fl::pwm_state::findByPin">
-<area shape="rect" id="Node000001" title=" " alt="" coords="744,219,923,244"/>
-<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_ab7b2495da785c92a36e91b0a59cde46b.html#ab7b2495da785c92a36e91b0a59cde46b" title="Write analog value to pin (PWM)" alt="" coords="558,80,675,105"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="805,212,755,173,695,132,647,108,649,103,697,128,758,169,808,208"/>
-<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_a277fd63efca228ed3df7bb778b7ab842.html#a277fd63efca228ed3df7bb778b7ab842" title="Query the configured PWM frequency for a pin." alt="" coords="537,143,696,168"/>
-<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="783,217,653,171,655,166,784,212"/>
-<area shape="rect" id="Node000009" href="$d4/d36/namespacefl_aa7a47cf722a2586453e75f6e70284dad.html#aa7a47cf722a2586453e75f6e70284dad" title="Set pin mode (input, output, pull&#45;up, pull&#45;down)" alt="" coords="569,244,664,269"/>
-<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="731,246,665,254,664,249,730,241"/>
-<area shape="rect" id="Node000012" href="$d4/d36/namespacefl_a77306b4a5327eb19e8d003b550b1a0a5.html#a77306b4a5327eb19e8d003b550b1a0a5" title="Set PWM frequency for a pin." alt="" coords="305,156,462,181"/>
-<area shape="poly" id="edge21_Node000001_Node000012" title=" " alt="" coords="730,220,462,182,462,177,731,214"/>
-<area shape="rect" id="Node000016" href="$d4/d36/namespacefl_a799e0254efc7ac0e21305c2c38685f0b.html#a799e0254efc7ac0e21305c2c38685f0b" title="Release PWM channel and stop output on a pin." alt="" coords="569,293,664,319"/>
-<area shape="poly" id="edge18_Node000001_Node000016" title=" " alt="" coords="787,252,697,285,662,296,660,291,695,279,786,247"/>
-<area shape="rect" id="Node000017" href="$d4/d36/namespacefl_a4576b062b8c708eaee16aace718f85f6.html#a4576b062b8c708eaee16aace718f85f6" title="Set PWM duty cycle with 16&#45;bit resolution." alt="" coords="563,395,670,420"/>
-<area shape="poly" id="edge19_Node000001_Node000017" title=" " alt="" coords="808,255,635,396,632,392,804,251"/>
-<area shape="rect" id="Node000003" href="$d9/d1f/el__panel_8cpp_a3d505a2f5ac043b8dc404b92ebb049ef.html#a3d505a2f5ac043b8dc404b92ebb049ef" title=" " alt="" coords="128,156,213,181"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="544,104,420,122,278,146,214,160,213,155,277,141,419,116,544,99"/>
-<area shape="rect" id="Node000005" href="$d9/d1f/el__panel_8cpp_a212827690ec1d11dc4c38a5cc6b541d5.html#a212827690ec1d11dc4c38a5cc6b541d5" title=" " alt="" coords="330,55,437,80"/>
-<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="544,88,437,76,437,70,545,82"/>
-<area shape="rect" id="Node000007" href="$d9/d1f/el__panel_8cpp_ad3b5b489324dd03fc27ad993bae9f2ff.html#ad3b5b489324dd03fc27ad993bae9f2ff" title=" " alt="" coords="332,5,435,31"/>
-<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="574,77,489,45,434,30,436,25,490,39,576,72"/>
-<area shape="rect" id="Node000004" href="$d7/d8f/_el_panel_reactive_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="5,156,64,181"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="114,171,64,171,64,166,114,166"/>
-<area shape="rect" id="Node000006" href="$d7/d8f/_el_panel_reactive_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="145,31,196,56"/>
-<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="316,62,196,49,196,43,316,57"/>
-<area shape="poly" id="edge7_Node000007_Node000006" title=" " alt="" coords="319,28,197,43,196,38,318,23"/>
-<area shape="poly" id="edge11_Node000009_Node000003" title=" " alt="" coords="555,249,277,197,213,182,214,177,278,191,556,244"/>
-<area shape="rect" id="Node000010" href="$d0/da2/classfl_1_1third__party_1_1ez_w_s2812gpio_abad8db01ff1ef8c38c5f8fee610254da.html#abad8db01ff1ef8c38c5f8fee610254da" title="Initialize GPIO pin." alt="" coords="277,307,489,347"/>
-<area shape="poly" id="edge10_Node000009_Node000010" title=" " alt="" coords="561,276,490,298,451,310,450,305,489,293,560,271"/>
-<area shape="rect" id="Node000011" href="$d3/d25/classfl_1_1_digital_pin_impl_a52b7c62cb136adbb22283fc1345d6918.html#a52b7c62cb136adbb22283fc1345d6918" title=" " alt="" coords="318,395,449,435"/>
-<area shape="poly" id="edge12_Node000009_Node000011" title=" " alt="" coords="558,273,539,284,523,302,515,321,507,340,491,361,464,382,436,398,433,393,462,377,487,357,502,338,510,319,518,299,536,280,555,268"/>
-<area shape="poly" id="edge14_Node000009_Node000012" title=" " alt="" coords="569,241,536,227,488,203,431,184,433,179,490,198,538,222,572,236"/>
-<area shape="rect" id="Node000013" href="$d8/d07/namespacefl_1_1validation_a46b68a701e41e321618f87bdb6d80cc2.html#a46b68a701e41e321618f87bdb6d80cc2" title="Test RX channel with manual GPIO toggle pattern." alt="" coords="280,257,487,283"/>
-<area shape="poly" id="edge16_Node000009_Node000013" title=" " alt="" coords="556,263,487,267,487,261,556,257"/>
-<area shape="poly" id="edge13_Node000011_Node000011" title=" " alt="" coords="419,384,406,377,383,374,363,376,351,381,347,387,349,394,344,396,341,386,348,376,362,371,383,369,408,372,421,379"/>
-<area shape="poly" id="edge15_Node000012_Node000003" title=" " alt="" coords="291,171,213,171,213,166,291,166"/>
-<area shape="rect" id="Node000014" href="$d7/d5f/_auto_research_helpers_8cpp_aec5c2c23f8a1e895555f21f61b66b74e.html#aec5c2c23f8a1e895555f21f61b66b74e" title="Test RX channel with manual GPIO toggle." alt="" coords="112,257,229,283"/>
-<area shape="poly" id="edge17_Node000013_Node000014" title=" " alt="" coords="266,273,230,273,230,267,266,267"/>
-<area shape="rect" id="Node000018" href="$d4/d36/namespacefl_abccc821ac69303bc62b15cc61a5e4217.html#abccc821ac69303bc62b15cc61a5e4217" title="Alias for setPwm16 &#45; Set PWM duty cycle with 16&#45;bit resolution." alt="" coords="317,460,450,485"/>
-<area shape="poly" id="edge20_Node000017_Node000018" title=" " alt="" coords="565,427,490,450,441,463,440,457,489,445,564,422"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="801,353,980,379"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_ab7b2495da785c92a36e91b0a59cde46b.html#ab7b2495da785c92a36e91b0a59cde46b" title="Write analog value to pin (PWM)" alt="" coords="615,112,733,137"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="867,345,685,139,689,136,871,341"/>
+<area shape="rect" id="Node000011" href="$d4/d36/namespacefl_a277fd63efca228ed3df7bb778b7ab842.html#a277fd63efca228ed3df7bb778b7ab842" title="Query the configured PWM frequency for a pin." alt="" coords="595,377,753,403"/>
+<area shape="poly" id="edge11_Node000001_Node000011" title=" " alt="" coords="788,380,754,384,753,379,787,375"/>
+<area shape="rect" id="Node000012" href="$d4/d36/namespacefl_aa7a47cf722a2586453e75f6e70284dad.html#aa7a47cf722a2586453e75f6e70284dad" title="Set pin mode (input, output, pull&#45;up, pull&#45;down)" alt="" coords="627,328,721,353"/>
+<area shape="poly" id="edge12_Node000001_Node000012" title=" " alt="" coords="787,357,722,349,722,344,788,351"/>
+<area shape="rect" id="Node000015" href="$d4/d36/namespacefl_a77306b4a5327eb19e8d003b550b1a0a5.html#a77306b4a5327eb19e8d003b550b1a0a5" title="Set PWM frequency for a pin." alt="" coords="362,220,519,245"/>
+<area shape="poly" id="edge25_Node000001_Node000015" title=" " alt="" coords="843,351,753,319,613,279,494,248,495,243,614,274,754,314,845,346"/>
+<area shape="rect" id="Node000017" href="$d4/d36/namespacefl_a799e0254efc7ac0e21305c2c38685f0b.html#a799e0254efc7ac0e21305c2c38685f0b" title="Release PWM channel and stop output on a pin." alt="" coords="627,427,721,452"/>
+<area shape="poly" id="edge22_Node000001_Node000017" title=" " alt="" coords="844,386,754,418,719,429,717,424,752,413,842,381"/>
+<area shape="rect" id="Node000018" href="$d4/d36/namespacefl_a4576b062b8c708eaee16aace718f85f6.html#a4576b062b8c708eaee16aace718f85f6" title="Set PWM duty cycle with 16&#45;bit resolution." alt="" coords="621,524,727,549"/>
+<area shape="poly" id="edge23_Node000001_Node000018" title=" " alt="" coords="864,390,693,526,690,522,861,385"/>
+<area shape="rect" id="Node000003" href="$d9/d1f/el__panel_8cpp_a3d505a2f5ac043b8dc404b92ebb049ef.html#a3d505a2f5ac043b8dc404b92ebb049ef" title=" " alt="" coords="157,256,242,281"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="610,143,547,159,487,171,439,178,392,188,336,210,312,227,288,246,243,262,241,257,285,241,309,223,333,205,391,183,438,173,486,166,546,154,609,138"/>
+<area shape="rect" id="Node000005" href="$d9/d1f/el__panel_8cpp_a212827690ec1d11dc4c38a5cc6b541d5.html#a212827690ec1d11dc4c38a5cc6b541d5" title=" " alt="" coords="387,55,494,80"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="609,111,546,95,494,82,495,77,547,90,610,106"/>
+<area shape="rect" id="Node000007" href="$d9/d1f/el__panel_8cpp_ad3b5b489324dd03fc27ad993bae9f2ff.html#ad3b5b489324dd03fc27ad993bae9f2ff" title=" " alt="" coords="389,5,492,31"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="645,105,600,74,546,44,491,28,493,23,548,40,603,69,648,101"/>
+<area shape="rect" id="Node000008" href="$d0/d5a/classfl_1_1_analog_r_g_b_controller_ad6195e6befb1bdc28ffbc18410e2d0c7.html#ad6195e6befb1bdc28ffbc18410e2d0c7" title=" " alt="" coords="353,105,528,145"/>
+<area shape="poly" id="edge8_Node000002_Node000008" title=" " alt="" coords="602,127,528,127,528,122,602,122"/>
+<area shape="rect" id="Node000004" href="$d7/d8f/_el_panel_reactive_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="5,256,64,281"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="143,271,64,271,64,266,143,266"/>
+<area shape="rect" id="Node000006" href="$d7/d8f/_el_panel_reactive_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="174,31,225,56"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="373,63,225,48,225,43,374,58"/>
+<area shape="poly" id="edge7_Node000007_Node000006" title=" " alt="" coords="376,27,225,43,225,38,376,22"/>
+<area shape="rect" id="Node000009" href="$d0/d5a/classfl_1_1_analog_r_g_b_controller_a0e13c10b28fb7afdff1baa3c11a3859b.html#a0e13c10b28fb7afdff1baa3c11a3859b" title="Initialize the LED controller." alt="" coords="112,191,287,231"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="372,152,257,194,255,189,371,147"/>
+<area shape="rect" id="Node000010" href="$d0/d5a/classfl_1_1_analog_r_g_b_controller_a681be00dd454a605f1001bf1b896d772.html#a681be00dd454a605f1001bf1b896d772" title=" " alt="" coords="112,105,287,145"/>
+<area shape="poly" id="edge10_Node000008_Node000010" title=" " alt="" coords="340,127,287,127,287,122,340,122"/>
+<area shape="poly" id="edge15_Node000012_Node000003" title=" " alt="" coords="620,360,547,375,439,391,392,390,334,375,294,356,259,331,210,283,213,280,263,327,297,352,336,370,393,385,439,386,546,370,619,355"/>
+<area shape="poly" id="edge14_Node000012_Node000009" title=" " alt="" coords="613,328,546,311,440,287,334,261,254,234,255,229,335,255,441,282,547,306,614,323"/>
+<area shape="rect" id="Node000013" href="$d0/da2/classfl_1_1third__party_1_1ez_w_s2812gpio_abad8db01ff1ef8c38c5f8fee610254da.html#abad8db01ff1ef8c38c5f8fee610254da" title="Initialize GPIO pin." alt="" coords="335,321,547,361"/>
+<area shape="poly" id="edge13_Node000012_Node000013" title=" " alt="" coords="613,343,547,343,547,338,613,338"/>
+<area shape="rect" id="Node000014" href="$d3/d25/classfl_1_1_digital_pin_impl_a52b7c62cb136adbb22283fc1345d6918.html#a52b7c62cb136adbb22283fc1345d6918" title=" " alt="" coords="375,459,506,499"/>
+<area shape="poly" id="edge16_Node000012_Node000014" title=" " alt="" coords="615,359,596,368,581,380,572,392,563,405,548,419,483,461,480,457,545,415,559,401,568,389,578,376,593,364,612,354"/>
+<area shape="poly" id="edge18_Node000012_Node000015" title=" " alt="" coords="642,322,598,294,546,267,492,248,493,243,548,262,600,290,645,318"/>
+<area shape="rect" id="Node000016" href="$d8/d07/namespacefl_1_1validation_a46b68a701e41e321618f87bdb6d80cc2.html#a46b68a701e41e321618f87bdb6d80cc2" title="Test RX channel with manual GPIO toggle pattern." alt="" coords="337,524,544,549"/>
+<area shape="poly" id="edge21_Node000012_Node000016" title=" " alt="" coords="615,355,597,368,583,385,576,403,574,440,571,477,563,495,548,513,530,526,527,522,545,509,559,492,566,475,569,439,571,402,578,383,593,364,612,351"/>
+<area shape="poly" id="edge17_Node000014_Node000014" title=" " alt="" coords="480,448,466,441,441,438,418,440,405,445,400,451,402,458,397,460,395,450,402,440,417,435,441,433,468,436,482,443"/>
+<area shape="poly" id="edge20_Node000015_Node000003" title=" " alt="" coords="349,249,242,265,242,260,348,244"/>
+<area shape="poly" id="edge19_Node000015_Node000009" title=" " alt="" coords="348,227,287,222,287,216,348,222"/>
+<area shape="rect" id="Node000019" href="$d4/d36/namespacefl_abccc821ac69303bc62b15cc61a5e4217.html#abccc821ac69303bc62b15cc61a5e4217" title="Alias for setPwm16 &#45; Set PWM duty cycle with 16&#45;bit resolution." alt="" coords="374,573,507,599"/>
+<area shape="poly" id="edge24_Node000018_Node000019" title=" " alt="" coords="608,553,502,576,501,571,606,548"/>
 </map>

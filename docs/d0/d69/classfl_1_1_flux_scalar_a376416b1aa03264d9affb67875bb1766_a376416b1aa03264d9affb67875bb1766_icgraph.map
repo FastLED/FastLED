@@ -1,0 +1,6 @@
+<map id="fl::FluxScalar::fromRawQ16" name="fl::FluxScalar::fromRawQ16">
+<area shape="rect" id="Node000001" title="A limiter fraction already in s16.16, clamped to [0, 1]." alt="" coords="293,44,492,69"/>
+<area shape="rect" id="Node000002" href="$d1/da7/namespacefl_1_1anonymous__namespace_02pipeline__binding_8cpp_8hpp_03_ac06021128ae811d9bb3c04b8a3e98d77.html#ac06021128ae811d9bb3c04b8a3e98d77" title="Builds the managed iterator in the caller&#39;s storage." alt="" coords="5,29,245,84"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="280,59,246,59,246,54,280,54"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="170,18,154,11,125,8,101,10,86,15,79,21,79,29,74,29,74,19,83,10,100,5,125,3,155,6,172,14"/>
+</map>

@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::third_party::ezWS2812",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/db5/classfl_1_1third__party_1_1ez_w_s2812.html",tooltip="ezWS2812 SPI driver for WS2812 LEDs"];
+  Node0 [id="Node000000",label="fl::TIMING_UCS2903",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d03/structfl_1_1_t_i_m_i_n_g___u_c_s2903.html",tooltip="UCS2903 controller @ 800 kHz Four-phase: TH0=250ns, TH1=1000ns, TL0=1000ns, TL1=250ns."];
 }

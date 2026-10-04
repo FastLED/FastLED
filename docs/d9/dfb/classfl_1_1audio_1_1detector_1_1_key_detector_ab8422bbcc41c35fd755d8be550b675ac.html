@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -123,22 +123,22 @@ $(function(){initNavTree('d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_a
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d6/d88/key_8cpp_8hpp_source.html#l00264">264</a> of file <a class="el" href="../../d6/d88/key_8cpp_8hpp_source.html">key.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  264</span>                                                         {</div>
-<div class="line"><span class="lineno">  265</span>    <span class="comment">// Add current chroma to history (circular buffer)</span></div>
-<div class="line"><span class="lineno">  266</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; 12; i++) {</div>
-<div class="line"><span class="lineno">  267</span>        <span class="keywordflow">if</span> (<span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(<a class="code hl_variable" href="../../d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_a5cbed338a13d01031e32249857fb49e6.html#a5cbed338a13d01031e32249857fb49e6">mChromaHistory</a>[i].size()) &lt; <a class="code hl_variable" href="../../d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_adab6abbf7d3d7ca88d8a0434404f47e8.html#adab6abbf7d3d7ca88d8a0434404f47e8">mAveragingFrames</a>) {</div>
-<div class="line"><span class="lineno">  268</span>            <a class="code hl_variable" href="../../d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_a5cbed338a13d01031e32249857fb49e6.html#a5cbed338a13d01031e32249857fb49e6">mChromaHistory</a>[i].push_back(chroma[i]);</div>
-<div class="line"><span class="lineno">  269</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  270</span>            <a class="code hl_variable" href="../../d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_a5cbed338a13d01031e32249857fb49e6.html#a5cbed338a13d01031e32249857fb49e6">mChromaHistory</a>[i][<a class="code hl_variable" href="../../d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_a7950e5331fb52bb9a597c2c744fad8c0.html#a7950e5331fb52bb9a597c2c744fad8c0">mHistoryIndex</a>] = chroma[i];</div>
-<div class="line"><span class="lineno">  271</span>        }</div>
-<div class="line"><span class="lineno">  272</span>    }</div>
-<div class="line"><span class="lineno">  273</span> </div>
-<div class="line"><span class="lineno">  274</span>    <a class="code hl_variable" href="../../d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_a7950e5331fb52bb9a597c2c744fad8c0.html#a7950e5331fb52bb9a597c2c744fad8c0">mHistoryIndex</a> = (<a class="code hl_variable" href="../../d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_a7950e5331fb52bb9a597c2c744fad8c0.html#a7950e5331fb52bb9a597c2c744fad8c0">mHistoryIndex</a> + 1) % <a class="code hl_variable" href="../../d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_adab6abbf7d3d7ca88d8a0434404f47e8.html#adab6abbf7d3d7ca88d8a0434404f47e8">mAveragingFrames</a>;</div>
-<div class="line"><span class="lineno">  275</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_aa4ff66e7f49f54a6c333c3c0fd6ed178.html#aa4ff66e7f49f54a6c333c3c0fd6ed178">mHistorySize</a> &lt; <a class="code hl_variable" href="../../d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_adab6abbf7d3d7ca88d8a0434404f47e8.html#adab6abbf7d3d7ca88d8a0434404f47e8">mAveragingFrames</a>) {</div>
-<div class="line"><span class="lineno">  276</span>        <a class="code hl_variable" href="../../d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_aa4ff66e7f49f54a6c333c3c0fd6ed178.html#aa4ff66e7f49f54a6c333c3c0fd6ed178">mHistorySize</a>++;</div>
-<div class="line"><span class="lineno">  277</span>    }</div>
-<div class="line"><span class="lineno">  278</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../d6/d88/key_8cpp_8hpp_source.html#l00262">262</a> of file <a class="el" href="../../d6/d88/key_8cpp_8hpp_source.html">key.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  262</span>                                                         {</div>
+<div class="line"><span class="lineno">  263</span>    <span class="comment">// Add current chroma to history (circular buffer)</span></div>
+<div class="line"><span class="lineno">  264</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; 12; i++) {</div>
+<div class="line"><span class="lineno">  265</span>        <span class="keywordflow">if</span> (<span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(<a class="code hl_variable" href="../../d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_a5cbed338a13d01031e32249857fb49e6.html#a5cbed338a13d01031e32249857fb49e6">mChromaHistory</a>[i].size()) &lt; <a class="code hl_variable" href="../../d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_adab6abbf7d3d7ca88d8a0434404f47e8.html#adab6abbf7d3d7ca88d8a0434404f47e8">mAveragingFrames</a>) {</div>
+<div class="line"><span class="lineno">  266</span>            <a class="code hl_variable" href="../../d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_a5cbed338a13d01031e32249857fb49e6.html#a5cbed338a13d01031e32249857fb49e6">mChromaHistory</a>[i].push_back(chroma[i]);</div>
+<div class="line"><span class="lineno">  267</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  268</span>            <a class="code hl_variable" href="../../d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_a5cbed338a13d01031e32249857fb49e6.html#a5cbed338a13d01031e32249857fb49e6">mChromaHistory</a>[i][<a class="code hl_variable" href="../../d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_a7950e5331fb52bb9a597c2c744fad8c0.html#a7950e5331fb52bb9a597c2c744fad8c0">mHistoryIndex</a>] = chroma[i];</div>
+<div class="line"><span class="lineno">  269</span>        }</div>
+<div class="line"><span class="lineno">  270</span>    }</div>
+<div class="line"><span class="lineno">  271</span> </div>
+<div class="line"><span class="lineno">  272</span>    <a class="code hl_variable" href="../../d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_a7950e5331fb52bb9a597c2c744fad8c0.html#a7950e5331fb52bb9a597c2c744fad8c0">mHistoryIndex</a> = (<a class="code hl_variable" href="../../d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_a7950e5331fb52bb9a597c2c744fad8c0.html#a7950e5331fb52bb9a597c2c744fad8c0">mHistoryIndex</a> + 1) % <a class="code hl_variable" href="../../d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_adab6abbf7d3d7ca88d8a0434404f47e8.html#adab6abbf7d3d7ca88d8a0434404f47e8">mAveragingFrames</a>;</div>
+<div class="line"><span class="lineno">  273</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_aa4ff66e7f49f54a6c333c3c0fd6ed178.html#aa4ff66e7f49f54a6c333c3c0fd6ed178">mHistorySize</a> &lt; <a class="code hl_variable" href="../../d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_adab6abbf7d3d7ca88d8a0434404f47e8.html#adab6abbf7d3d7ca88d8a0434404f47e8">mAveragingFrames</a>) {</div>
+<div class="line"><span class="lineno">  274</span>        <a class="code hl_variable" href="../../d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_aa4ff66e7f49f54a6c333c3c0fd6ed178.html#aa4ff66e7f49f54a6c333c3c0fd6ed178">mHistorySize</a>++;</div>
+<div class="line"><span class="lineno">  275</span>    }</div>
+<div class="line"><span class="lineno">  276</span>}</div>
 <div class="ttc" id="aclassfl_1_1audio_1_1detector_1_1_key_detector_a5cbed338a13d01031e32249857fb49e6_html_a5cbed338a13d01031e32249857fb49e6"><div class="ttname"><a href="../../d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_a5cbed338a13d01031e32249857fb49e6.html#a5cbed338a13d01031e32249857fb49e6">fl::audio::detector::KeyDetector::mChromaHistory</a></div><div class="ttdeci">vector&lt; float &gt; mChromaHistory[12]</div><div class="ttdef"><b>Definition</b> <a href="../../de/de5/key_8h_source.html#l00120">key.h:120</a></div></div>
 <div class="ttc" id="aclassfl_1_1audio_1_1detector_1_1_key_detector_a7950e5331fb52bb9a597c2c744fad8c0_html_a7950e5331fb52bb9a597c2c744fad8c0"><div class="ttname"><a href="../../d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_a7950e5331fb52bb9a597c2c744fad8c0.html#a7950e5331fb52bb9a597c2c744fad8c0">fl::audio::detector::KeyDetector::mHistoryIndex</a></div><div class="ttdeci">int mHistoryIndex</div><div class="ttdef"><b>Definition</b> <a href="../../de/de5/key_8h_source.html#l00121">key.h:121</a></div></div>
 <div class="ttc" id="aclassfl_1_1audio_1_1detector_1_1_key_detector_aa4ff66e7f49f54a6c333c3c0fd6ed178_html_aa4ff66e7f49f54a6c333c3c0fd6ed178"><div class="ttname"><a href="../../d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_aa4ff66e7f49f54a6c333c3c0fd6ed178.html#aa4ff66e7f49f54a6c333c3c0fd6ed178">fl::audio::detector::KeyDetector::mHistorySize</a></div><div class="ttdeci">int mHistorySize</div><div class="ttdef"><b>Definition</b> <a href="../../de/de5/key_8h_source.html#l00122">key.h:122</a></div></div>
@@ -164,7 +164,7 @@ $(function(){initNavTree('d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_a
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../db/dbf/namespacefl_1_1audio.html">audio</a></li><li class="navelem"><a class="el" href="../../dd/d12/namespacefl_1_1audio_1_1detector.html">detector</a></li><li class="navelem"><a class="el" href="../../d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector.html">KeyDetector</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:08 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:11 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

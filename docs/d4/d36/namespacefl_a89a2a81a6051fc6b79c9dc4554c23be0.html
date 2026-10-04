@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -101,7 +101,7 @@ $(function(){initNavTree('d4/d36/namespacefl_a89a2a81a6051fc6b79c9dc4554c23be0.h
 
 <div class="contents">
 <a id="a89a2a81a6051fc6b79c9dc4554c23be0" name="a89a2a81a6051fc6b79c9dc4554c23be0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a89a2a81a6051fc6b79c9dc4554c23be0">&#9670;&#160;</a></span>buildWave8ByteExpansionLUT()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a89a2a81a6051fc6b79c9dc4554c23be0">&#9670;&#160;</a></span>buildWave8ByteExpansionLUT() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -118,21 +118,23 @@ $(function(){initNavTree('d4/d36/namespacefl_a89a2a81a6051fc6b79c9dc4554c23be0.h
 <p>Build a byte-indexed expansion <a class="el" href="../../d6/d18/classfl_1_1_l_u_t.html">LUT</a> (#2526) from the nibble <a class="el" href="../../d6/d18/classfl_1_1_l_u_t.html">LUT</a>. </p>
 <p>Entry b is the concatenation of the high-nibble expansion (symbols[0..3]) and the low-nibble expansion (symbols[4..7]) — bit-identical to what wave8_convert_byte_to_wave8byte() produces. Not for ISR use. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d8/d81/wave8_8cpp_8hpp_source.html#l00313">313</a> of file <a class="el" href="../../d8/d81/wave8_8cpp_8hpp_source.html">wave8.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  313</span>                                                                                     {</div>
-<div class="line"><span class="lineno">  314</span>    Wave8ByteExpansionLut out;</div>
-<div class="line"><span class="lineno">  315</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> b = 0; b &lt; 256; ++b) {</div>
-<div class="line"><span class="lineno">  316</span>        <span class="keyword">const</span> <a class="code hl_struct" href="../../d4/d36/namespacefl.html#df/dfb/structfl_1_1_wave8_bit">Wave8Bit</a> *hi = nibble.lut[(b &gt;&gt; 4) &amp; 0xF];</div>
-<div class="line"><span class="lineno">  317</span>        <span class="keyword">const</span> <a class="code hl_struct" href="../../d4/d36/namespacefl.html#df/dfb/structfl_1_1_wave8_bit">Wave8Bit</a> *lo = nibble.lut[b &amp; 0xF];</div>
-<div class="line"><span class="lineno">  318</span>        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; 4; ++i) {</div>
-<div class="line"><span class="lineno">  319</span>            out.lut[b].symbols[i] = hi[i];</div>
-<div class="line"><span class="lineno">  320</span>            out.lut[b].symbols[i + 4] = lo[i];</div>
-<div class="line"><span class="lineno">  321</span>        }</div>
-<div class="line"><span class="lineno">  322</span>    }</div>
-<div class="line"><span class="lineno">  323</span>    <span class="keywordflow">return</span> out;</div>
-<div class="line"><span class="lineno">  324</span>}</div>
-<div class="ttc" id="anamespacefl_html_df/dfb/structfl_1_1_wave8_bit"><div class="ttname"><a href="../../d4/d36/namespacefl.html#df/dfb/structfl_1_1_wave8_bit">fl::Wave8Bit</a></div><div class="ttdoc">Type-safe container for packed 8-bit wave pulse pattern.</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d32/wave8_8h_source.html#l00022">wave8.h:22</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d8/d81/wave8_8cpp_8hpp_source.html#l00326">326</a> of file <a class="el" href="../../d8/d81/wave8_8cpp_8hpp_source.html">wave8.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  326</span>                                                                                     {</div>
+<div class="line"><span class="lineno">  327</span>    Wave8ByteExpansionLut out;</div>
+<div class="line"><span class="lineno">  328</span>    <a class="code hl_function" href="../../d4/d36/namespacefl_a6b5f441470840816c9c071d698ac8e9c.html#a6b5f441470840816c9c071d698ac8e9c">buildWave8ByteExpansionLUT</a>(nibble, out);</div>
+<div class="line"><span class="lineno">  329</span>    <span class="keywordflow">return</span> out;</div>
+<div class="line"><span class="lineno">  330</span>}</div>
+<div class="ttc" id="anamespacefl_a6b5f441470840816c9c071d698ac8e9c_html_a6b5f441470840816c9c071d698ac8e9c"><div class="ttname"><a href="../../d4/d36/namespacefl_a6b5f441470840816c9c071d698ac8e9c.html#a6b5f441470840816c9c071d698ac8e9c">fl::buildWave8ByteExpansionLUT</a></div><div class="ttdeci">void buildWave8ByteExpansionLUT(const Wave8BitExpansionLut &amp;nibble, Wave8ByteExpansionLut &amp;out) FL_NO_EXCEPT</div><div class="ttdoc">Out-param overload: fill an existing 2 KB LUT in place.</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d81/wave8_8cpp_8hpp_source.html#l00314">wave8.cpp.hpp:314</a></div></div>
 </div><!-- fragment -->
+<p class="reference">References <a class="el" href="../../d8/d81/wave8_8cpp_8hpp_source.html#l00314">buildWave8ByteExpansionLUT()</a>.</p>
+<div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
+<div id="dynsection-0-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-0-content" class="dyncontent" style="display:none;">
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d4/d36/namespacefl_a89a2a81a6051fc6b79c9dc4554c23be0_a89a2a81a6051fc6b79c9dc4554c23be0_cgraph.svg" width="531" height="36"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+
 </div>
 </div>
 </div><!-- contents -->
@@ -142,7 +144,7 @@ $(function(){initNavTree('d4/d36/namespacefl_a89a2a81a6051fc6b79c9dc4554c23be0.h
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:04 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:07 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

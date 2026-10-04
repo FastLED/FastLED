@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -123,58 +123,58 @@ $(function(){initNavTree('d6/dd2/classfl_1_1audio_1_1fft_1_1_context_a06c04f863b
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d5/df1/fft__impl_8cpp_8hpp_source.html#l00350">350</a> of file <a class="el" href="../../d5/df1/fft__impl_8cpp_8hpp_source.html">fft_impl.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  350</span>                                      {</div>
-<div class="line"><span class="lineno">  351</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d4/d36/namespacefl_a01deac84db27d10f737f8a92973bea86.html#a01deac84db27d10f737f8a92973bea86">x</a> == 0) <span class="keywordflow">return</span> 0.0f;</div>
-<div class="line"><span class="lineno">  352</span> </div>
-<div class="line"><span class="lineno">  353</span>        <span class="comment">// Find highest set bit (integer part of log2)</span></div>
-<div class="line"><span class="lineno">  354</span>        <span class="keywordtype">int</span> msb = 0;</div>
-<div class="line"><span class="lineno">  355</span>        {</div>
-<div class="line"><span class="lineno">  356</span>            u32 v = <a class="code hl_variable" href="../../d4/d36/namespacefl_a01deac84db27d10f737f8a92973bea86.html#a01deac84db27d10f737f8a92973bea86">x</a>;</div>
-<div class="line"><span class="lineno">  357</span>            <span class="keywordflow">if</span> (v &gt;= 0x10000u) { v &gt;&gt;= 16; msb += 16; }</div>
-<div class="line"><span class="lineno">  358</span>            <span class="keywordflow">if</span> (v &gt;= 0x100u)   { v &gt;&gt;= 8;  msb += 8; }</div>
-<div class="line"><span class="lineno">  359</span>            <span class="keywordflow">if</span> (v &gt;= 0x10u)    { v &gt;&gt;= 4;  msb += 4; }</div>
-<div class="line"><span class="lineno">  360</span>            <span class="keywordflow">if</span> (v &gt;= 0x4u)     { v &gt;&gt;= 2;  msb += 2; }</div>
-<div class="line"><span class="lineno">  361</span>            <span class="keywordflow">if</span> (v &gt;= 0x2u)     { msb += 1; }</div>
-<div class="line"><span class="lineno">  362</span>        }</div>
-<div class="line"><span class="lineno">  363</span> </div>
-<div class="line"><span class="lineno">  364</span>        <span class="comment">// Normalized mantissa in [0, 1) as u16x16</span></div>
-<div class="line"><span class="lineno">  365</span>        u32 t_raw;</div>
-<div class="line"><span class="lineno">  366</span>        <span class="keywordflow">if</span> (msb &gt;= 16) {</div>
-<div class="line"><span class="lineno">  367</span>            t_raw = (<a class="code hl_variable" href="../../d4/d36/namespacefl_a01deac84db27d10f737f8a92973bea86.html#a01deac84db27d10f737f8a92973bea86">x</a> &gt;&gt; (msb - 16)) - 65536u;</div>
-<div class="line"><span class="lineno">  368</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  369</span>            t_raw = (<a class="code hl_variable" href="../../d4/d36/namespacefl_a01deac84db27d10f737f8a92973bea86.html#a01deac84db27d10f737f8a92973bea86">x</a> &lt;&lt; (16 - msb)) - 65536u;</div>
-<div class="line"><span class="lineno">  370</span>        }</div>
-<div class="line"><span class="lineno">  371</span>        u16x16 <a class="code hl_variable" href="../../d4/d36/namespacefl_abbddb15aa2e7c8eb469d1dd56d6d2140.html#abbddb15aa2e7c8eb469d1dd56d6d2140">t</a> = <a class="code hl_function" href="../../db/d56/classfl_1_1u16x16_ad4efc4f4b7252b0e56d4c845db9e22d1.html#ad4efc4f4b7252b0e56d4c845db9e22d1">u16x16::from_raw</a>(t_raw);</div>
-<div class="line"><span class="lineno">  372</span> </div>
-<div class="line"><span class="lineno">  373</span>        <span class="comment">// log2(1+t) ~= t + 0.345 * t * (1-t)  [max error ~0.008]</span></div>
-<div class="line"><span class="lineno">  374</span>        <span class="comment">// 22610 = 0.345 * 65536 (from_raw preserves exact original constant)</span></div>
-<div class="line"><span class="lineno">  375</span>        <span class="keyword">static</span> <span class="keyword">constexpr</span> u16x16 one(1.0f);</div>
-<div class="line"><span class="lineno">  376</span>        <span class="keyword">static</span> <span class="keyword">constexpr</span> u16x16 kCorrection = <a class="code hl_function" href="../../db/d56/classfl_1_1u16x16_ad4efc4f4b7252b0e56d4c845db9e22d1.html#ad4efc4f4b7252b0e56d4c845db9e22d1">u16x16::from_raw</a>(22610u);</div>
-<div class="line"><span class="lineno">  377</span>        u16x16 complement = one - <a class="code hl_variable" href="../../d4/d36/namespacefl_abbddb15aa2e7c8eb469d1dd56d6d2140.html#abbddb15aa2e7c8eb469d1dd56d6d2140">t</a>;</div>
-<div class="line"><span class="lineno">  378</span>        u16x16 prod = <a class="code hl_variable" href="../../d4/d36/namespacefl_abbddb15aa2e7c8eb469d1dd56d6d2140.html#abbddb15aa2e7c8eb469d1dd56d6d2140">t</a> * complement;</div>
-<div class="line"><span class="lineno">  379</span>        u16x16 correction = prod * kCorrection;</div>
-<div class="line"><span class="lineno">  380</span>        u16x16 frac = <a class="code hl_variable" href="../../d4/d36/namespacefl_abbddb15aa2e7c8eb469d1dd56d6d2140.html#abbddb15aa2e7c8eb469d1dd56d6d2140">t</a> + correction;</div>
-<div class="line"><span class="lineno">  381</span> </div>
-<div class="line"><span class="lineno">  382</span>        <span class="comment">// log2(x) = msb + frac, assembled as u16x16</span></div>
-<div class="line"><span class="lineno">  383</span>        u16x16 log2_val = <a class="code hl_function" href="../../db/d56/classfl_1_1u16x16_ad4efc4f4b7252b0e56d4c845db9e22d1.html#ad4efc4f4b7252b0e56d4c845db9e22d1">u16x16::from_raw</a>(</div>
-<div class="line"><span class="lineno">  384</span>            (<span class="keyword">static_cast&lt;</span>u32<span class="keyword">&gt;</span>(msb) &lt;&lt; 16) + frac.raw());</div>
-<div class="line"><span class="lineno">  385</span> </div>
-<div class="line"><span class="lineno">  386</span>        <span class="comment">// 20*log10(x) = 6.02060 * log2(x)</span></div>
-<div class="line"><span class="lineno">  387</span><span class="preprocessor">#if FASTLED_FFT_PRECISION == FASTLED_FFT_FIXED16</span></div>
-<div class="line"><span class="lineno">  388</span>        <span class="comment">// 394593 = 6.02060 * 65536 (from_raw preserves exact original constant)</span></div>
-<div class="line"><span class="lineno">  389</span>        <span class="keyword">static</span> <span class="keyword">constexpr</span> u16x16 kDbScale = <a class="code hl_function" href="../../db/d56/classfl_1_1u16x16_ad4efc4f4b7252b0e56d4c845db9e22d1.html#ad4efc4f4b7252b0e56d4c845db9e22d1">u16x16::from_raw</a>(394593u);</div>
-<div class="line"><span class="lineno">  390</span>        u16x16 db = log2_val * kDbScale;</div>
-<div class="line"><span class="lineno">  391</span>        <span class="keywordflow">return</span> db.to_float();</div>
-<div class="line"><span class="lineno">  392</span><span class="preprocessor">#else</span></div>
-<div class="line"><span class="lineno">  393</span>        <span class="keywordflow">return</span> 6.02060f * log2_val.to_float();</div>
-<div class="line"><span class="lineno">  394</span><span class="preprocessor">#endif</span></div>
-<div class="line"><span class="lineno">  395</span>    }</div>
-<div class="ttc" id="aclassfl_1_1u16x16_ad4efc4f4b7252b0e56d4c845db9e22d1_html_ad4efc4f4b7252b0e56d4c845db9e22d1"><div class="ttname"><a href="../../db/d56/classfl_1_1u16x16_ad4efc4f4b7252b0e56d4c845db9e22d1.html#ad4efc4f4b7252b0e56d4c845db9e22d1">fl::u16x16::from_raw</a></div><div class="ttdeci">static constexpr FASTLED_FORCE_INLINE u16x16 from_raw(u32 raw) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d69/fixed__point_2u16x16_8h_source.html#l00053">u16x16.h:53</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d5/df1/fft__impl_8cpp_8hpp_source.html#l00360">360</a> of file <a class="el" href="../../d5/df1/fft__impl_8cpp_8hpp_source.html">fft_impl.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  360</span>                                      {</div>
+<div class="line"><span class="lineno">  361</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d4/d36/namespacefl_a01deac84db27d10f737f8a92973bea86.html#a01deac84db27d10f737f8a92973bea86">x</a> == 0) <span class="keywordflow">return</span> 0.0f;</div>
+<div class="line"><span class="lineno">  362</span> </div>
+<div class="line"><span class="lineno">  363</span>        <span class="comment">// Find highest set bit (integer part of log2)</span></div>
+<div class="line"><span class="lineno">  364</span>        <span class="keywordtype">int</span> msb = 0;</div>
+<div class="line"><span class="lineno">  365</span>        {</div>
+<div class="line"><span class="lineno">  366</span>            u32 v = <a class="code hl_variable" href="../../d4/d36/namespacefl_a01deac84db27d10f737f8a92973bea86.html#a01deac84db27d10f737f8a92973bea86">x</a>;</div>
+<div class="line"><span class="lineno">  367</span>            <span class="keywordflow">if</span> (v &gt;= 0x10000u) { v &gt;&gt;= 16; msb += 16; }</div>
+<div class="line"><span class="lineno">  368</span>            <span class="keywordflow">if</span> (v &gt;= 0x100u)   { v &gt;&gt;= 8;  msb += 8; }</div>
+<div class="line"><span class="lineno">  369</span>            <span class="keywordflow">if</span> (v &gt;= 0x10u)    { v &gt;&gt;= 4;  msb += 4; }</div>
+<div class="line"><span class="lineno">  370</span>            <span class="keywordflow">if</span> (v &gt;= 0x4u)     { v &gt;&gt;= 2;  msb += 2; }</div>
+<div class="line"><span class="lineno">  371</span>            <span class="keywordflow">if</span> (v &gt;= 0x2u)     { msb += 1; }</div>
+<div class="line"><span class="lineno">  372</span>        }</div>
+<div class="line"><span class="lineno">  373</span> </div>
+<div class="line"><span class="lineno">  374</span>        <span class="comment">// Normalized mantissa in [0, 1) as u16x16</span></div>
+<div class="line"><span class="lineno">  375</span>        u32 t_raw;</div>
+<div class="line"><span class="lineno">  376</span>        <span class="keywordflow">if</span> (msb &gt;= 16) {</div>
+<div class="line"><span class="lineno">  377</span>            t_raw = (<a class="code hl_variable" href="../../d4/d36/namespacefl_a01deac84db27d10f737f8a92973bea86.html#a01deac84db27d10f737f8a92973bea86">x</a> &gt;&gt; (msb - 16)) - 65536u;</div>
+<div class="line"><span class="lineno">  378</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  379</span>            t_raw = (<a class="code hl_variable" href="../../d4/d36/namespacefl_a01deac84db27d10f737f8a92973bea86.html#a01deac84db27d10f737f8a92973bea86">x</a> &lt;&lt; (16 - msb)) - 65536u;</div>
+<div class="line"><span class="lineno">  380</span>        }</div>
+<div class="line"><span class="lineno">  381</span>        u16x16 <a class="code hl_variable" href="../../d4/d36/namespacefl_abbddb15aa2e7c8eb469d1dd56d6d2140.html#abbddb15aa2e7c8eb469d1dd56d6d2140">t</a> = <a class="code hl_function" href="../../db/d56/classfl_1_1u16x16_a54a0fac51c4322fc86c12881eda45b3f.html#a54a0fac51c4322fc86c12881eda45b3f">u16x16::from_raw</a>(t_raw);</div>
+<div class="line"><span class="lineno">  382</span> </div>
+<div class="line"><span class="lineno">  383</span>        <span class="comment">// log2(1+t) ~= t + 0.345 * t * (1-t)  [max error ~0.008]</span></div>
+<div class="line"><span class="lineno">  384</span>        <span class="comment">// 22610 = 0.345 * 65536 (from_raw preserves exact original constant)</span></div>
+<div class="line"><span class="lineno">  385</span>        <span class="keyword">static</span> <span class="keyword">constexpr</span> u16x16 one(1.0f);</div>
+<div class="line"><span class="lineno">  386</span>        <span class="keyword">static</span> <span class="keyword">constexpr</span> u16x16 kCorrection = <a class="code hl_function" href="../../db/d56/classfl_1_1u16x16_a54a0fac51c4322fc86c12881eda45b3f.html#a54a0fac51c4322fc86c12881eda45b3f">u16x16::from_raw</a>(22610u);</div>
+<div class="line"><span class="lineno">  387</span>        u16x16 complement = one - <a class="code hl_variable" href="../../d4/d36/namespacefl_abbddb15aa2e7c8eb469d1dd56d6d2140.html#abbddb15aa2e7c8eb469d1dd56d6d2140">t</a>;</div>
+<div class="line"><span class="lineno">  388</span>        u16x16 prod = <a class="code hl_variable" href="../../d4/d36/namespacefl_abbddb15aa2e7c8eb469d1dd56d6d2140.html#abbddb15aa2e7c8eb469d1dd56d6d2140">t</a> * complement;</div>
+<div class="line"><span class="lineno">  389</span>        u16x16 correction = prod * kCorrection;</div>
+<div class="line"><span class="lineno">  390</span>        u16x16 frac = <a class="code hl_variable" href="../../d4/d36/namespacefl_abbddb15aa2e7c8eb469d1dd56d6d2140.html#abbddb15aa2e7c8eb469d1dd56d6d2140">t</a> + correction;</div>
+<div class="line"><span class="lineno">  391</span> </div>
+<div class="line"><span class="lineno">  392</span>        <span class="comment">// log2(x) = msb + frac, assembled as u16x16</span></div>
+<div class="line"><span class="lineno">  393</span>        u16x16 log2_val = <a class="code hl_function" href="../../db/d56/classfl_1_1u16x16_a54a0fac51c4322fc86c12881eda45b3f.html#a54a0fac51c4322fc86c12881eda45b3f">u16x16::from_raw</a>(</div>
+<div class="line"><span class="lineno">  394</span>            (<span class="keyword">static_cast&lt;</span>u32<span class="keyword">&gt;</span>(msb) &lt;&lt; 16) + frac.raw());</div>
+<div class="line"><span class="lineno">  395</span> </div>
+<div class="line"><span class="lineno">  396</span>        <span class="comment">// 20*log10(x) = 6.02060 * log2(x)</span></div>
+<div class="line"><span class="lineno">  397</span><span class="preprocessor">#if FASTLED_FFT_PRECISION == FASTLED_FFT_FIXED16</span></div>
+<div class="line"><span class="lineno">  398</span>        <span class="comment">// 394593 = 6.02060 * 65536 (from_raw preserves exact original constant)</span></div>
+<div class="line"><span class="lineno">  399</span>        <span class="keyword">static</span> <span class="keyword">constexpr</span> u16x16 kDbScale = <a class="code hl_function" href="../../db/d56/classfl_1_1u16x16_a54a0fac51c4322fc86c12881eda45b3f.html#a54a0fac51c4322fc86c12881eda45b3f">u16x16::from_raw</a>(394593u);</div>
+<div class="line"><span class="lineno">  400</span>        u16x16 db = log2_val * kDbScale;</div>
+<div class="line"><span class="lineno">  401</span>        <span class="keywordflow">return</span> db.to_float();</div>
+<div class="line"><span class="lineno">  402</span><span class="preprocessor">#else</span></div>
+<div class="line"><span class="lineno">  403</span>        <span class="keywordflow">return</span> 6.02060f * log2_val.to_float();</div>
+<div class="line"><span class="lineno">  404</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">  405</span>    }</div>
+<div class="ttc" id="aclassfl_1_1u16x16_a54a0fac51c4322fc86c12881eda45b3f_html_a54a0fac51c4322fc86c12881eda45b3f"><div class="ttname"><a href="../../db/d56/classfl_1_1u16x16_a54a0fac51c4322fc86c12881eda45b3f.html#a54a0fac51c4322fc86c12881eda45b3f">fl::u16x16::from_raw</a></div><div class="ttdeci">static constexpr FASTLED_FORCE_INLINE u16x16 from_raw(u32 raw) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d69/fixed__point_2u16x16_8h_source.html#l00054">u16x16.h:54</a></div></div>
 <div class="ttc" id="anamespacefl_a01deac84db27d10f737f8a92973bea86_html_a01deac84db27d10f737f8a92973bea86"><div class="ttname"><a href="../../d4/d36/namespacefl_a01deac84db27d10f737f8a92973bea86.html#a01deac84db27d10f737f8a92973bea86">fl::x</a></div><div class="ttdeci">x</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d91/transposition_8cpp_8hpp_source.html#l00024">transposition.cpp.hpp:24</a></div></div>
 <div class="ttc" id="anamespacefl_abbddb15aa2e7c8eb469d1dd56d6d2140_html_abbddb15aa2e7c8eb469d1dd56d6d2140"><div class="ttname"><a href="../../d4/d36/namespacefl_abbddb15aa2e7c8eb469d1dd56d6d2140.html#abbddb15aa2e7c8eb469d1dd56d6d2140">fl::t</a></div><div class="ttdeci">t</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d91/transposition_8cpp_8hpp_source.html#l00027">transposition.cpp.hpp:27</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d8/d69/fixed__point_2u16x16_8h_source.html#l00053">fl::u16x16::from_raw()</a>, <a class="el" href="../../d8/d69/fixed__point_2u16x16_8h_source.html#l00059">fl::u16x16::raw()</a>, <a class="el" href="../../d7/d91/transposition_8cpp_8hpp_source.html#l00027">fl::t</a>, <a class="el" href="../../d8/d69/fixed__point_2u16x16_8h_source.html#l00061">fl::u16x16::to_float()</a>, and <a class="el" href="../../d7/d91/transposition_8cpp_8hpp_source.html#l00024">fl::x</a>.</p>
+<p class="reference">References <a class="el" href="../../d8/d69/fixed__point_2u16x16_8h_source.html#l00054">fl::u16x16::from_raw()</a>, <a class="el" href="../../d8/d69/fixed__point_2u16x16_8h_source.html#l00060">fl::u16x16::raw()</a>, <a class="el" href="../../d7/d91/transposition_8cpp_8hpp_source.html#l00027">fl::t</a>, <a class="el" href="../../d8/d69/fixed__point_2u16x16_8h_source.html#l00062">fl::u16x16::to_float()</a>, and <a class="el" href="../../d7/d91/transposition_8cpp_8hpp_source.html#l00024">fl::x</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -192,7 +192,7 @@ $(function(){initNavTree('d6/dd2/classfl_1_1audio_1_1fft_1_1_context_a06c04f863b
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../db/dbf/namespacefl_1_1audio.html">audio</a></li><li class="navelem"><a class="el" href="../../de/dee/namespacefl_1_1audio_1_1fft.html">fft</a></li><li class="navelem"><a class="el" href="../../d6/dd2/classfl_1_1audio_1_1fft_1_1_context.html">Context</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:08 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:11 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

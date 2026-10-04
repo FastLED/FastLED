@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -122,20 +122,26 @@ Classes</h2></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">RGB LED power consumption model Used for standard 3-channel LEDs (WS2812, WS2812B, APA102, etc.)  <a href="../../dc/d4d/struct_power_model_r_g_b.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/dc0/struct_power_model_r_g_b_w.html">PowerModelRGBW</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">RGBW LED power consumption model.  <a href="../../de/dc0/struct_power_model_r_g_b_w.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">RGBW LED power consumption model Used for 4-channel LEDs (SK6812 RGBW and similar).  <a href="../../de/dc0/struct_power_model_r_g_b_w.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d18/struct_power_model_r_g_b_w_w.html">PowerModelRGBWW</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">RGBWW LED power consumption model (RGB + Cool White + Warm White)  <a href="../../db/d18/struct_power_model_r_g_b_w_w.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">RGBWW LED power consumption model (RGB + warm white + cool white).  <a href="../../db/d18/struct_power_model_r_g_b_w_w.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:ga315379844ae2a3ff4212fe39ac1ade6c" id="r_ga315379844ae2a3ff4212fe39ac1ade6c"><td class="memItemLeft" align="right" valign="top">fl::u32&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d9/d5f/group___power_model_ga315379844ae2a3ff4212fe39ac1ade6c.html#ga315379844ae2a3ff4212fe39ac1ade6c">calculate_unscaled_emitter_power_mW</a> (<a class="el" href="../../d0/d08/classfl_1_1span.html">fl::span</a>&lt; const <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> &gt; codes, <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> emitter_count)</td></tr>
+<tr class="memdesc:ga315379844ae2a3ff4212fe39ac1ade6c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Charge already-solved physical output bytes in source emitter order: RGB, RGBW, or RGB + warm white + cool white.  <br /></td></tr>
+<tr class="separator:ga315379844ae2a3ff4212fe39ac1ade6c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaec3b3e44c2f5e7f70127ad76f480ccd0" id="r_gaec3b3e44c2f5e7f70127ad76f480ccd0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../dc/d4d/struct_power_model_r_g_b.html">PowerModelRGB</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d9/d5f/group___power_model_gaec3b3e44c2f5e7f70127ad76f480ccd0.html#gaec3b3e44c2f5e7f70127ad76f480ccd0">get_power_model</a> ()</td></tr>
 <tr class="memdesc:gaec3b3e44c2f5e7f70127ad76f480ccd0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get current RGB power model.  <br /></td></tr>
 <tr class="separator:gaec3b3e44c2f5e7f70127ad76f480ccd0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga8aa9fd0df8e3e989b4907e9f703343b2" id="r_ga8aa9fd0df8e3e989b4907e9f703343b2"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d9/d5f/group___power_model_ga8aa9fd0df8e3e989b4907e9f703343b2.html#ga8aa9fd0df8e3e989b4907e9f703343b2">get_power_scaling_exponent</a> ()</td></tr>
 <tr class="memdesc:ga8aa9fd0df8e3e989b4907e9f703343b2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the current brightness-to-power response exponent.  <br /></td></tr>
 <tr class="separator:ga8aa9fd0df8e3e989b4907e9f703343b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga71d79c746ccde0fd719f37e76638a107" id="r_ga71d79c746ccde0fd719f37e76638a107"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d9/d5f/group___power_model_ga71d79c746ccde0fd719f37e76638a107.html#ga71d79c746ccde0fd719f37e76638a107">get_white_emitter_mW</a> ()</td></tr>
+<tr class="memdesc:ga71d79c746ccde0fd719f37e76638a107"><td class="mdescLeft">&#160;</td><td class="mdescRight">The white-emitter draw the caller declared, or zero if they declared only an RGB model.  <br /></td></tr>
+<tr class="separator:ga71d79c746ccde0fd719f37e76638a107"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga83d1cb7bfce9bd338765968bb40d54e5" id="r_ga83d1cb7bfce9bd338765968bb40d54e5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d9/d5f/group___power_model_ga83d1cb7bfce9bd338765968bb40d54e5.html#ga83d1cb7bfce9bd338765968bb40d54e5">set_power_model</a> (const <a class="el" href="../../dc/d4d/struct_power_model_r_g_b.html">PowerModelRGB</a> &amp;model)</td></tr>
 <tr class="memdesc:ga83d1cb7bfce9bd338765968bb40d54e5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set custom RGB LED power consumption model.  <br /></td></tr>
 <tr class="separator:ga83d1cb7bfce9bd338765968bb40d54e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -155,7 +161,7 @@ Functions</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:02 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

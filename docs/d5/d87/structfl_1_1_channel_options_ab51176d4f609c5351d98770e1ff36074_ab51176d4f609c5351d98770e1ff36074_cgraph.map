@@ -1,0 +1,15 @@
+<map id="fl::ChannelOptions::setLegacyTemperature" name="fl::ChannelOptions::setLegacyTemperature">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,37,184,77"/>
+<area shape="rect" id="Node000002" href="$d5/d87/structfl_1_1_channel_options_a1d9e6fd69b109da0867f05f71c53a019.html#a1d9e6fd69b109da0867f05f71c53a019" title=" " alt="" coords="238,5,379,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="184,41,224,35,225,41,185,47"/>
+<area shape="rect" id="Node000003" href="$d5/d87/structfl_1_1_channel_options_a4bcab07ce7acee2d92062812de5dc3db.html#a4bcab07ce7acee2d92062812de5dc3db" title=" " alt="" coords="232,69,385,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="185,68,218,73,218,78,184,73"/>
+<area shape="rect" id="Node000004" href="$d5/d87/structfl_1_1_channel_options_a7d33849ac993a966ad630ffcf58de219.html#a7d33849ac993a966ad630ffcf58de219" title=" " alt="" coords="463,37,604,77"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="385,76,449,67,450,72,386,81"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a4d523439a3a0b7fdf7187bccdc1479b6.html#a4d523439a3a0b7fdf7187bccdc1479b6" title=" " alt="" coords="433,101,633,141"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="386,98,420,102,419,108,385,103"/>
+<area shape="rect" id="Node000005" href="$dc/d29/structfl_1_1_color_profile_binding_aa51c353a7066ea9f484ea9794711bde2.html#aa51c353a7066ea9f484ea9794711bde2" title=" " alt="" coords="681,37,844,77"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="605,55,667,55,667,60,605,60"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_a77e438ae9277ff68b05e14f2979785c5.html#a77e438ae9277ff68b05e14f2979785c5" title="The installed hooks." alt="" coords="681,109,844,134"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="633,119,668,119,668,124,633,124"/>
+</map>

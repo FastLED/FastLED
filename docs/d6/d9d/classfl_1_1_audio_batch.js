@@ -1,8 +1,8 @@
 var classfl_1_1_audio_batch =
 [
-    [ "AudioBatch", "d6/d9d/classfl_1_1_audio_batch_a74642a78fca5ff9ff148ff1261e21451.html#a74642a78fca5ff9ff148ff1261e21451", null ],
+    [ "AudioBatch", "d6/d9d/classfl_1_1_audio_batch_ae6f4361c03482579fa7e3fc4c54791b2.html#ae6f4361c03482579fa7e3fc4c54791b2", null ],
     [ "AudioBatch", "d6/d9d/classfl_1_1_audio_batch_a3753c87141f6aee0f6b1564b7fb45c01.html#a3753c87141f6aee0f6b1564b7fb45c01", null ],
-    [ "AudioBatch", "d6/d9d/classfl_1_1_audio_batch_ad3363fe95173de786e1bfb3f0dce5443.html#ad3363fe95173de786e1bfb3f0dce5443", null ],
+    [ "AudioBatch", "d6/d9d/classfl_1_1_audio_batch_accc786ae36404f1668e3d3be8c9a58d4.html#accc786ae36404f1668e3d3be8c9a58d4", null ],
     [ "bass", "d6/d9d/classfl_1_1_audio_batch_a8448582ad86aebe19e63a1b2a6dde154.html#a8448582ad86aebe19e63a1b2a6dde154", null ],
     [ "beat", "d6/d9d/classfl_1_1_audio_batch_ab90f2695f7e1d4e9d04b540c475cde6b.html#ab90f2695f7e1d4e9d04b540c475cde6b", null ],
     [ "begin", "d6/d9d/classfl_1_1_audio_batch_a28922b08c1fc46646fe5da1007ac8511.html#a28922b08c1fc46646fe5da1007ac8511", null ],
@@ -14,7 +14,7 @@ var classfl_1_1_audio_batch =
     [ "frames", "d6/d9d/classfl_1_1_audio_batch_a1f33ed8dc78152ac9e600ce05c82f098.html#a1f33ed8dc78152ac9e600ce05c82f098", null ],
     [ "hasProcessor", "d6/d9d/classfl_1_1_audio_batch_a5a57a8e4e52f3e0b450d0224600e5531.html#a5a57a8e4e52f3e0b450d0224600e5531", null ],
     [ "mid", "d6/d9d/classfl_1_1_audio_batch_a485e6c67bdef32bd52a3fdfeb3facd22.html#a485e6c67bdef32bd52a3fdfeb3facd22", null ],
-    [ "operator=", "d6/d9d/classfl_1_1_audio_batch_aaaab2bea0a94727bb3af7b55087380e6.html#aaaab2bea0a94727bb3af7b55087380e6", null ],
+    [ "operator=", "d6/d9d/classfl_1_1_audio_batch_ab16be9715241e227b6afde10fca640a8.html#ab16be9715241e227b6afde10fca640a8", null ],
     [ "percussion", "d6/d9d/classfl_1_1_audio_batch_ae9283f06206d4f8be8365c58a787fb2d.html#ae9283f06206d4f8be8365c58a787fb2d", null ],
     [ "treble", "d6/d9d/classfl_1_1_audio_batch_a21d9fe882dae81549f7f764015ca3bff.html#a21d9fe882dae81549f7f764015ca3bff", null ],
     [ "vibe", "d6/d9d/classfl_1_1_audio_batch_af83abed742913e95d5eb953f83fbd53b.html#af83abed742913e95d5eb953f83fbd53b", null ],

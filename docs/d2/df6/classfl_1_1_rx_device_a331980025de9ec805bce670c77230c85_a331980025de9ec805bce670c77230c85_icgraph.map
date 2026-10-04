@@ -1,0 +1,10 @@
+<map id="fl::RxDevice::create" name="fl::RxDevice::create">
+<area shape="rect" id="Node000001" title="Template factory method to create RX device by type." alt="" coords="309,93,459,119"/>
+<area shape="rect" id="Node000002" href="$d2/df6/classfl_1_1_rx_device_af9584c68e11442bcf2a85f58096c9735.html#af9584c68e11442bcf2a85f58096c9735" title=" " alt="" coords="43,5,224,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="350,89,308,65,260,45,220,33,221,28,262,39,311,61,353,84"/>
+<area shape="rect" id="Node000003" href="$dc/d8d/namespacefl_1_1anonymous__namespace_02channel_8cpp_8hpp_03_ab9d9ad2cd9ea55c45093ea0be9f5583f.html#ab9d9ad2cd9ea55c45093ea0be9f5583f" title=" " alt="" coords="5,79,261,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="296,109,261,109,261,103,296,103"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_aeb6986eb656a77d5c3ac2595b90cc98c.html#aeb6986eb656a77d5c3ac2595b90cc98c" title=" " alt="" coords="40,158,227,198"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="332,125,262,147,214,161,213,155,261,142,331,120"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="175,68,160,60,133,57,111,59,96,64,90,70,90,79,85,79,85,68,94,60,110,54,133,52,162,55,178,63"/>
+</map>

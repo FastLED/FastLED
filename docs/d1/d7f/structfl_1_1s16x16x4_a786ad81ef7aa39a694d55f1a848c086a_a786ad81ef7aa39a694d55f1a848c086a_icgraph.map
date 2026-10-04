@@ -1,0 +1,7 @@
+<map id="fl::s16x16x4::sincos" name="fl::s16x16x4::sincos">
+<area shape="rect" id="Node000001" title="Compute sin and cos of 4 angles (in radians) Results written to out_sin and out_cos." alt="" coords="184,31,335,56"/>
+<area shape="rect" id="Node000002" href="$d1/d7f/structfl_1_1s16x16x4_a3f4e12e2d55362b6f941eeefdc570071.html#a3f4e12e2d55362b6f941eeefdc570071" title="Compute cosine of 4 angles (in radians)" alt="" coords="5,5,136,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="170,34,136,29,137,24,171,29"/>
+<area shape="rect" id="Node000003" href="$d1/d7f/structfl_1_1s16x16x4_a84919662dee318e68db552751dd8daa4.html#a84919662dee318e68db552751dd8daa4" title="Compute sine of 4 angles (in radians)" alt="" coords="7,55,135,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="171,57,135,62,135,57,170,52"/>
+</map>

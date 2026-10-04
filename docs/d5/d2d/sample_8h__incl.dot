@@ -37,7 +37,7 @@ digraph "fl/gfx/sample.h"
   Node28 [id="Node000028",label="fl/math/fixed_point.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$de/d62/fixed__point_8h.html",tooltip=" "];
   Node28 -> Node10 [id="edge19_Node000028_Node000010",color="steelblue1",style="solid",tooltip=" "];
   Node11 -> Node10 [id="edge20_Node000011_Node000010",color="steelblue1",style="solid",tooltip=" "];
-  Node2 -> Node56 [id="edge21_Node000002_Node000056",color="steelblue1",style="solid",tooltip=" "];
-  Node56 [id="Node000056",label="color.h",height=0.2,width=0.4,color="grey60", fillcolor="#E0E0E0", style="filled",tooltip=" "];
+  Node2 -> Node49 [id="edge21_Node000002_Node000049",color="steelblue1",style="solid",tooltip=" "];
+  Node49 [id="Node000049",label="color.h",height=0.2,width=0.4,color="grey60", fillcolor="#E0E0E0", style="filled",tooltip=" "];
   Node2 -> Node10 [id="edge22_Node000002_Node000010",color="steelblue1",style="solid",tooltip=" "];
 }

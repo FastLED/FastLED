@@ -1,0 +1,13 @@
+<map id="fl::json::is_bool" name="fl::json::is_bool">
+<area shape="rect" id="Node000001" title=" " alt="" coords="449,125,568,151"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_ab71ec6f8155d69e9955cda2672493822.html#ab71ec6f8155d69e9955cda2672493822" title="Decode a versioned JSON object into an existing CRGB pixel buffer." alt="" coords="233,5,360,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="486,117,449,79,425,60,400,44,360,30,361,25,403,40,428,56,452,75,490,113"/>
+<area shape="rect" id="Node000003" href="$d4/de1/namespacefl_1_1anonymous__namespace_02crgb__json_8cpp_8hpp_03_af587473df89f1148c1c9853133fb4047.html#af587473df89f1148c1c9853133fb4047" title=" " alt="" coords="199,79,395,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="435,130,394,123,395,118,436,124"/>
+<area shape="rect" id="Node000004" href="$dc/d75/namespacefl_1_1wled_a0e1b21aa8cf41f28a4973d7444282fce.html#a0e1b21aa8cf41f28a4973d7444282fce" title="Parse all fields from a segment JSON object into a WLEDSegment." alt="" coords="192,157,401,183"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="436,152,381,160,381,155,435,146"/>
+<area shape="rect" id="Node000005" href="$d2/d9f/classfl_1_1_w_l_e_d_a073f5478071f0b32ea9ac80cf3fd236c.html#a073f5478071f0b32ea9ac80cf3fd236c" title="Set WLED state from JSON object." alt="" coords="5,183,144,208"/>
+<area shape="poly" id="edge6_Node000001_Node000005" title=" " alt="" coords="479,161,444,181,402,197,334,208,265,212,200,211,144,207,145,202,201,206,265,207,334,203,401,191,441,176,477,156"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="332,68,319,60,297,57,278,59,266,64,260,70,261,79,255,79,255,69,263,60,277,54,297,52,321,55,334,63"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="178,186,145,190,144,185,178,181"/>
+</map>

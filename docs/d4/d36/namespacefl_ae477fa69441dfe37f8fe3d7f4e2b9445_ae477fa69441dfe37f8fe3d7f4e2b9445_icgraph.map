@@ -1,0 +1,40 @@
+<map id="fl::q16FromFloatBits" name="fl::q16FromFloatBits">
+<area shape="rect" id="Node000001" title="s16.16 of a float, rounded to nearest, computed from its IEEE&#45;754 bits with integer arithmetic only –..." alt="" coords="1067,211,1220,236"/>
+<area shape="rect" id="Node000002" href="$d1/db2/namespacefl_1_1anonymous__namespace_02chromatic__adaptation_8cpp_8hpp_03_a8183378685874adac7b857a5259d330b.html#a8183378685874adac7b857a5259d330b" title="A white point, converted from float by its bits, inside the open unit square with a non&#45;zero y – the ..." alt="" coords="784,29,1019,84"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1121,202,1076,154,1048,128,1017,106,981,86,984,82,1020,101,1051,124,1080,150,1125,198"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_ad4e39b6ae17313fe651e8059338b8518.html#ad4e39b6ae17313fe651e8059338b8518" title="Invert the emitter matrix for a three&#45;emitter profile." alt="" coords="802,281,1001,307"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="1086,243,946,284,945,279,1085,238"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_ac4d398fdc18a6dbc27b1b07aa647bf0d.html#ac4d398fdc18a6dbc27b1b07aa647bf0d" title="Bind a source declaration and a device profile into a pipeline." alt="" coords="249,211,464,236"/>
+<area shape="poly" id="edge14_Node000001_Node000005" title=" " alt="" coords="1053,216,944,207,809,199,661,196,512,202,425,213,424,208,512,197,661,191,809,194,944,201,1053,211"/>
+<area shape="rect" id="Node000013" href="$d4/d36/namespacefl_ad44a9cdc62803567f2f78f6364abb36c.html#ad44a9cdc62803567f2f78f6364abb36c" title="Bind from an RGB solve already adapted to the D65 working domain." alt="" coords="815,455,988,495"/>
+<area shape="poly" id="edge15_Node000001_Node000013" title=" " alt="" coords="1134,250,1117,288,1092,334,1060,381,1020,424,994,443,965,457,963,453,991,438,1017,420,1056,378,1088,331,1112,285,1129,248"/>
+<area shape="rect" id="Node000015" href="$d0/dc0/namespacefl_1_1anonymous__namespace_02source__xyz_8cpp_8hpp_03_a4fedd6412bea9bfe6bb277dd05b9932e.html#a4fedd6412bea9bfe6bb277dd05b9932e" title="A chromaticity, converted from float by its bits, that is real and usable: inside the open unit squar..." alt="" coords="803,355,999,409"/>
+<area shape="poly" id="edge20_Node000001_Node000015" title=" " alt="" coords="1118,247,1073,283,1020,322,959,357,957,352,1017,317,1070,279,1115,243"/>
+<area shape="rect" id="Node000016" href="$db/d33/namespacefl_1_1anonymous__namespace_02pipeline_8cpp_8hpp_03_ab9c7864cd6f59dbfa968671bb8d9c3c6.html#ab9c7864cd6f59dbfa968671bb8d9c3c6" title=" " alt="" coords="259,113,455,168"/>
+<area shape="poly" id="edge22_Node000001_Node000016" title=" " alt="" coords="1097,208,1018,186,865,163,711,150,570,144,455,142,455,137,570,138,711,145,866,158,1019,181,1098,203"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="941,18,927,11,901,8,880,10,866,15,860,21,860,29,855,29,855,19,863,10,879,5,901,3,928,6,944,14"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a1bb1d650499ca2df115738f4c75464dc.html#a1bb1d650499ca2df115738f4c75464dc" title="Derive the mapper for a three&#45;emitter profile." alt="" coords="540,211,708,236"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="842,280,735,251,683,239,684,234,737,246,844,275"/>
+<area shape="poly" id="edge11_Node000003_Node000005" title=" " alt="" coords="797,311,732,315,660,317,585,312,511,301,472,288,434,272,376,238,378,234,437,267,474,283,513,295,586,307,660,311,732,310,797,305"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_ac53a775b79932ae3fe7e03b287639d43.html#ac53a775b79932ae3fe7e03b287639d43" title="Derive the mapper for a three&#45;primary profile plus one white emitter." alt="" coords="255,412,459,437"/>
+<area shape="poly" id="edge6_Node000003_Node000008" title=" " alt="" coords="808,313,785,322,771,330,762,339,752,349,737,358,667,383,594,401,523,414,459,421,458,416,522,409,593,396,665,378,735,353,749,345,758,336,768,326,783,317,806,308"/>
+<area shape="rect" id="Node000010" href="$d4/d36/namespacefl_a948408716d579dc42f02ad68245c3450.html#a948408716d579dc42f02ad68245c3450" title="Derive the mapper for a three&#45;primary profile plus two white emitters." alt="" coords="249,361,464,387"/>
+<area shape="poly" id="edge9_Node000003_Node000010" title=" " alt="" coords="806,311,736,322,448,364,447,359,736,317,805,306"/>
+<area shape="rect" id="Node000011" href="$d4/d36/namespacefl_af90e10614e44cf7b6b860f5516528724.html#af90e10614e44cf7b6b860f5516528724" title="Derive the allocation for three primaries plus two white emitters." alt="" coords="512,260,736,285"/>
+<area shape="poly" id="edge12_Node000003_Node000011" title=" " alt="" coords="788,288,736,284,736,279,788,283"/>
+<area shape="rect" id="Node000012" href="$d4/d36/namespacefl_a97deed3552ced20bbf44992b9d1845ac.html#a97deed3552ced20bbf44992b9d1845ac" title="Derive the allocation for a three&#45;primary profile plus one white emitter." alt="" coords="525,463,723,488"/>
+<area shape="poly" id="edge13_Node000003_Node000012" title=" " alt="" coords="793,316,786,321,773,336,766,350,762,381,758,413,751,430,738,445,705,465,703,460,734,441,746,427,753,412,757,380,761,349,769,333,782,317,790,311"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="526,226,464,226,464,221,526,221"/>
+<area shape="rect" id="Node000009" href="$db/d33/namespacefl_1_1anonymous__namespace_02pipeline_8cpp_8hpp_03_aece1643892391c10a9c9de9a2f21ab11.html#aece1643892391c10a9c9de9a2f21ab11" title=" " alt="" coords="5,372,201,427"/>
+<area shape="poly" id="edge7_Node000008_Node000009" title=" " alt="" coords="241,416,201,412,202,406,241,410"/>
+<area shape="poly" id="edge8_Node000009_Node000009" title=" " alt="" coords="146,361,130,354,103,351,81,353,66,357,59,364,59,372,54,372,54,362,63,353,80,347,103,345,132,348,148,356"/>
+<area shape="poly" id="edge10_Node000010_Node000009" title=" " alt="" coords="236,389,202,392,201,387,235,383"/>
+<area shape="poly" id="edge19_Node000013_Node000012" title=" " alt="" coords="801,478,724,478,724,473,801,473"/>
+<area shape="rect" id="Node000014" href="$d4/d36/namespacefl_a0bbd4600d1ada0552c6743d28a8683ea.html#a0bbd4600d1ada0552c6743d28a8683ea" title="Bind a four&#45;emitter map from an effective RGB solve and a white column already adapted into the same ..." alt="" coords="519,513,729,553"/>
+<area shape="poly" id="edge16_Node000013_Node000014" title=" " alt="" coords="802,498,722,515,721,510,801,493"/>
+<area shape="poly" id="edge17_Node000014_Node000008" title=" " alt="" coords="532,511,511,503,438,471,380,440,382,435,441,466,513,498,534,506"/>
+<area shape="poly" id="edge18_Node000014_Node000009" title=" " alt="" coords="504,513,381,486,249,453,177,429,178,424,250,447,382,481,505,508"/>
+<area shape="poly" id="edge21_Node000015_Node000015" title=" " alt="" coords="941,344,927,336,901,333,880,335,866,340,860,346,860,355,855,355,855,344,863,336,879,330,901,328,928,331,944,339"/>
+<area shape="poly" id="edge23_Node000016_Node000009" title=" " alt="" coords="285,177,251,201,210,244,173,291,122,373,117,370,169,288,206,241,248,197,282,173"/>
+<area shape="poly" id="edge24_Node000016_Node000016" title=" " alt="" coords="399,102,384,95,357,92,334,94,319,99,313,105,313,113,307,113,308,103,317,94,333,89,357,87,385,90,401,98"/>
+</map>

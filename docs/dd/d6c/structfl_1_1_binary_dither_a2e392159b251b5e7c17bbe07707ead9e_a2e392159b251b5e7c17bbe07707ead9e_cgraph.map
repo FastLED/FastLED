@@ -1,0 +1,7 @@
+<map id="fl::BinaryDither::reseed" name="fl::BinaryDither::reseed">
+<area shape="rect" id="Node000001" title="Re&#45;point d at frame, keeping the ranges init left in e." alt="" coords="5,31,177,56"/>
+<area shape="rect" id="Node000002" href="$dd/d6c/structfl_1_1_binary_dither_ac011a8e0e5afb087dbf2a19852a2c8dc.html#ac011a8e0e5afb087dbf2a19852a2c8dc" title="Q scaled into [0, range): the offset for one channel." alt="" coords="226,5,391,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="177,31,212,27,213,32,178,36"/>
+<area shape="rect" id="Node000003" href="$dd/d6c/structfl_1_1_binary_dither_aae46c7435dd271d8e46d3cd7e6b57d5c.html#aae46c7435dd271d8e46d3cd7e6b57d5c" title="The frame&#39;s offset pattern value Q: frame wrapped to VIRTUAL_BITS, bit&#45;reversed so consecutive frames..." alt="" coords="225,55,392,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="178,50,212,54,212,59,177,55"/>
+</map>

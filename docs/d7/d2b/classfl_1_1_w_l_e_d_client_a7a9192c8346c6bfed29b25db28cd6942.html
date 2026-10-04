@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -131,7 +131,7 @@ $(function(){initNavTree('d7/d2b/classfl_1_1_w_l_e_d_client_a7a9192c8346c6bfed29
 
 <p class="definition">Definition at line <a class="el" href="../../d9/d3b/client_8cpp_8hpp_source.html#l00080">80</a> of file <a class="el" href="../../d9/d3b/client_8cpp_8hpp_source.html">client.cpp.hpp</a>.</p>
 <div class="fragment"><div class="line"><span class="lineno">   80</span>                                                    {</div>
-<div class="line"><span class="lineno">   81</span>    <a class="code hl_define" href="../../d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a>(<span class="stringliteral">&quot;WLEDClient: setSegment(&quot;</span> &lt;&lt; start &lt;&lt; <span class="stringliteral">&quot;, &quot;</span> &lt;&lt; <a class="code hl_enumvalue" href="../../d4/d36/namespacefl_a10024e27b8484ba501ff412b92ef5347.html#a10024e27b8484ba501ff412b92ef5347a7f021a1415b86f2d013b2618fb31ae53">end</a> &lt;&lt; <span class="stringliteral">&quot;)&quot;</span>);</div>
+<div class="line"><span class="lineno">   81</span>    <a class="code hl_define" href="../../d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a>(<span class="stringliteral">&quot;WLEDClient: setSegment(%s, %s)&quot;</span>, start, <a class="code hl_enumvalue" href="../../d4/d36/namespacefl_a10024e27b8484ba501ff412b92ef5347.html#a10024e27b8484ba501ff412b92ef5347a7f021a1415b86f2d013b2618fb31ae53">end</a>);</div>
 <div class="line"><span class="lineno">   82</span> </div>
 <div class="line"><span class="lineno">   83</span>    <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../d7/d2b/classfl_1_1_w_l_e_d_client_aa375003be28e384687b2670963d0ec98.html#aa375003be28e384687b2670963d0ec98">mController</a>) {</div>
 <div class="line"><span class="lineno">   84</span>        <span class="keywordflow">return</span>;</div>
@@ -140,10 +140,10 @@ $(function(){initNavTree('d7/d2b/classfl_1_1_w_l_e_d_client_a7a9192c8346c6bfed29
 <div class="line"><span class="lineno">   87</span>    <a class="code hl_variable" href="../../d7/d2b/classfl_1_1_w_l_e_d_client_aa375003be28e384687b2670963d0ec98.html#aa375003be28e384687b2670963d0ec98">mController</a>-&gt;setSegment(start, <a class="code hl_enumvalue" href="../../d4/d36/namespacefl_a10024e27b8484ba501ff412b92ef5347.html#a10024e27b8484ba501ff412b92ef5347a7f021a1415b86f2d013b2618fb31ae53">end</a>);</div>
 <div class="line"><span class="lineno">   88</span>}</div>
 <div class="ttc" id="aclassfl_1_1_w_l_e_d_client_aa375003be28e384687b2670963d0ec98_html_aa375003be28e384687b2670963d0ec98"><div class="ttname"><a href="../../d7/d2b/classfl_1_1_w_l_e_d_client_aa375003be28e384687b2670963d0ec98.html#aa375003be28e384687b2670963d0ec98">fl::WLEDClient::mController</a></div><div class="ttdeci">fl::shared_ptr&lt; IFastLED &gt; mController</div><div class="ttdef"><b>Definition</b> <a href="../../d8/de1/client_8h_source.html#l00148">client.h:148</a></div></div>
-<div class="ttc" id="alog_8h_a8ccae77aa5fe30a41f19d233cb0de2c1_html_a8ccae77aa5fe30a41f19d233cb0de2c1"><div class="ttname"><a href="../../d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a></div><div class="ttdeci">#define FL_DBG</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00388">log.h:388</a></div></div>
-<div class="ttc" id="anamespacefl_a10024e27b8484ba501ff412b92ef5347_html_a10024e27b8484ba501ff412b92ef5347a7f021a1415b86f2d013b2618fb31ae53"><div class="ttname"><a href="../../d4/d36/namespacefl_a10024e27b8484ba501ff412b92ef5347.html#a10024e27b8484ba501ff412b92ef5347a7f021a1415b86f2d013b2618fb31ae53">fl::seek_dir::end</a></div><div class="ttdeci">@ end</div><div class="ttdef"><b>Definition</b> <a href="../../df/d25/file__handle_8h_source.html#l00022">file_handle.h:22</a></div></div>
+<div class="ttc" id="alog_8h_a8ccae77aa5fe30a41f19d233cb0de2c1_html_a8ccae77aa5fe30a41f19d233cb0de2c1"><div class="ttname"><a href="../../d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a></div><div class="ttdeci">#define FL_DBG</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00564">log.h:564</a></div></div>
+<div class="ttc" id="anamespacefl_a10024e27b8484ba501ff412b92ef5347_html_a10024e27b8484ba501ff412b92ef5347a7f021a1415b86f2d013b2618fb31ae53"><div class="ttname"><a href="../../d4/d36/namespacefl_a10024e27b8484ba501ff412b92ef5347.html#a10024e27b8484ba501ff412b92ef5347a7f021a1415b86f2d013b2618fb31ae53">fl::seek_dir::end</a></div><div class="ttdeci">@ end</div><div class="ttdef"><b>Definition</b> <a href="../../df/d25/file__handle_8h_source.html#l00023">file_handle.h:23</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d5/db6/range__access_8h_source.html#l00016">fl::end()</a>, <a class="el" href="../../d7/d7f/log_8h_source.html#l00388">FL_DBG</a>, and <a class="el" href="../../d8/de1/client_8h_source.html#l00148">mController</a>.</p>
+<p class="reference">References <a class="el" href="../../d5/db6/range__access_8h_source.html#l00016">fl::end()</a>, <a class="el" href="../../d7/d7f/log_8h_source.html#l00564">FL_DBG</a>, and <a class="el" href="../../d8/de1/client_8h_source.html#l00148">mController</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -161,7 +161,7 @@ $(function(){initNavTree('d7/d2b/classfl_1_1_w_l_e_d_client_a7a9192c8346c6bfed29
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d7/d2b/classfl_1_1_w_l_e_d_client.html">WLEDClient</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:07 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:10 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

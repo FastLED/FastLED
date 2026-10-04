@@ -7,5 +7,5 @@ var manager_8h =
       [ "name", "d4/d36/namespacefl.html#aada83931d55c4101549eb160509718e1", null ],
       [ "priority", "d4/d36/namespacefl.html#aed7520aec27f24faee2a20a436b6ef17", null ]
     ] ],
-    [ "fl::channelManager", "d4/d36/namespacefl_a8aafd1d8ccf1aab536564352dd23d204.html#a8aafd1d8ccf1aab536564352dd23d204", null ]
+    [ "fl::channelManager", "d4/d36/namespacefl_a1cc01267f6bdd7251959883412b11bbb.html#a1cc01267f6bdd7251959883412b11bbb", null ]
 ];

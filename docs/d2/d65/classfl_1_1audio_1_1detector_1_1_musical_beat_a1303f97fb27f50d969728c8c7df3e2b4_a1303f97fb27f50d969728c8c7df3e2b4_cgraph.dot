@@ -10,7 +10,7 @@ digraph "fl::audio::detector::MusicalBeat::MusicalBeat"
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
   Node2 [id="Node000002",label="fl::audio::detector\l::MusicalBeat::configure",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_aa3fe998bea55ed148d76230699db4b43.html#aa3fe998bea55ed148d76230699db4b43",tooltip="Configure the beat detector."];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::audio::detector\l::MusicalBeat::MusicalBeat",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_a13472c5b2c18bcd9cc92903b52b18faa.html#a13472c5b2c18bcd9cc92903b52b18faa",tooltip=" "];
+  Node3 [id="Node000003",label="fl::audio::detector\l::MusicalBeat::MusicalBeat",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_abc7b8eaf6fe345fbd930f17ab2c5f5ea.html#abc7b8eaf6fe345fbd930f17ab2c5f5ea",tooltip=" "];
   Node3 -> Node3 [id="edge3_Node000003_Node000003",color="steelblue1",style="solid",tooltip=" "];
   Node2 -> Node2 [id="edge4_Node000002_Node000002",color="steelblue1",style="solid",tooltip=" "];
   Node2 -> Node4 [id="edge5_Node000002_Node000004",color="steelblue1",style="solid",tooltip=" "];

@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::net::NetworkDetector",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d46/classfl_1_1net_1_1_network_detector.html",tooltip="Stub NetworkDetector for platforms without the real implementation."];
+  Node0 [id="Node000000",label="fl::ResponseLutsQ16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl.html#de/d33/structfl_1_1_response_luts_q16",tooltip="Owned code-to-light samples for the three physical emitters."];
 }

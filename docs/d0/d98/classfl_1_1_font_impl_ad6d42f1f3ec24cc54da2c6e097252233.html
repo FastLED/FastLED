@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -130,13 +130,13 @@ $(function(){initNavTree('d0/d98/classfl_1_1_font_impl_ad6d42f1f3ec24cc54da2c6e0
 <div class="line"><span class="lineno">   37</span>        FontMetrics metrics = {};</div>
 <div class="line"><span class="lineno">   38</span>        <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../d0/d98/classfl_1_1_font_impl_a1d065b7a8efaefe492cb5bbf60b29fde.html#a1d065b7a8efaefe492cb5bbf60b29fde">mValid</a>) <span class="keywordflow">return</span> metrics;</div>
 <div class="line"><span class="lineno">   39</span> </div>
-<div class="line"><span class="lineno">   40</span>        <a class="code hl_function" href="../../dc/d41/namespacefl_1_1third__party_1_1truetype_a67e4fa8bae42d385328c5fac016ca109.html#a67e4fa8bae42d385328c5fac016ca109">third_party::truetype::stbtt_GetFontVMetrics</a>(</div>
+<div class="line"><span class="lineno">   40</span>        <a class="code hl_function" href="../../dc/d41/namespacefl_1_1third__party_1_1truetype_a4acac940779b6743e0d00507c06b3dcb.html#a4acac940779b6743e0d00507c06b3dcb">third_party::truetype::stbtt_GetFontVMetrics</a>(</div>
 <div class="line"><span class="lineno">   41</span>            &amp;<a class="code hl_variable" href="../../d0/d98/classfl_1_1_font_impl_a9312c5d5c4ec0f40bec70daa2d029f48.html#a9312c5d5c4ec0f40bec70daa2d029f48">mFontInfo</a>,</div>
 <div class="line"><span class="lineno">   42</span>            &amp;metrics.ascent,</div>
 <div class="line"><span class="lineno">   43</span>            &amp;metrics.descent,</div>
 <div class="line"><span class="lineno">   44</span>            &amp;metrics.lineGap</div>
 <div class="line"><span class="lineno">   45</span>        );</div>
-<div class="line"><span class="lineno">   46</span>        <a class="code hl_function" href="../../dc/d41/namespacefl_1_1third__party_1_1truetype_a3783c52acada89afe113cf524362d563.html#a3783c52acada89afe113cf524362d563">third_party::truetype::stbtt_GetFontBoundingBox</a>(</div>
+<div class="line"><span class="lineno">   46</span>        <a class="code hl_function" href="../../dc/d41/namespacefl_1_1third__party_1_1truetype_adc16b9736f849891776241a56404d774.html#adc16b9736f849891776241a56404d774">third_party::truetype::stbtt_GetFontBoundingBox</a>(</div>
 <div class="line"><span class="lineno">   47</span>            &amp;<a class="code hl_variable" href="../../d0/d98/classfl_1_1_font_impl_a9312c5d5c4ec0f40bec70daa2d029f48.html#a9312c5d5c4ec0f40bec70daa2d029f48">mFontInfo</a>,</div>
 <div class="line"><span class="lineno">   48</span>            &amp;metrics.x0, &amp;metrics.y0,</div>
 <div class="line"><span class="lineno">   49</span>            &amp;metrics.x1, &amp;metrics.y1</div>
@@ -145,8 +145,8 @@ $(function(){initNavTree('d0/d98/classfl_1_1_font_impl_ad6d42f1f3ec24cc54da2c6e0
 <div class="line"><span class="lineno">   52</span>    }</div>
 <div class="ttc" id="aclassfl_1_1_font_impl_a1d065b7a8efaefe492cb5bbf60b29fde_html_a1d065b7a8efaefe492cb5bbf60b29fde"><div class="ttname"><a href="../../d0/d98/classfl_1_1_font_impl_a1d065b7a8efaefe492cb5bbf60b29fde.html#a1d065b7a8efaefe492cb5bbf60b29fde">fl::FontImpl::mValid</a></div><div class="ttdeci">bool mValid</div><div class="ttdef"><b>Definition</b> <a href="../../dd/dc4/truetype_8cpp_8hpp_source.html#l00171">truetype.cpp.hpp:171</a></div></div>
 <div class="ttc" id="aclassfl_1_1_font_impl_a9312c5d5c4ec0f40bec70daa2d029f48_html_a9312c5d5c4ec0f40bec70daa2d029f48"><div class="ttname"><a href="../../d0/d98/classfl_1_1_font_impl_a9312c5d5c4ec0f40bec70daa2d029f48.html#a9312c5d5c4ec0f40bec70daa2d029f48">fl::FontImpl::mFontInfo</a></div><div class="ttdeci">third_party::truetype::stbtt_fontinfo mFontInfo</div><div class="ttdef"><b>Definition</b> <a href="../../dd/dc4/truetype_8cpp_8hpp_source.html#l00170">truetype.cpp.hpp:170</a></div></div>
-<div class="ttc" id="anamespacefl_1_1third__party_1_1truetype_a3783c52acada89afe113cf524362d563_html_a3783c52acada89afe113cf524362d563"><div class="ttname"><a href="../../dc/d41/namespacefl_1_1third__party_1_1truetype_a3783c52acada89afe113cf524362d563.html#a3783c52acada89afe113cf524362d563">fl::third_party::truetype::stbtt_GetFontBoundingBox</a></div><div class="ttdeci">void stbtt_GetFontBoundingBox(const stbtt_fontinfo *info, int32_t *x0, int32_t *y0, int32_t *x1, int32_t *y1) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d3/d12/stb__truetype_8cpp_8hpp_source.html#l02681">stb_truetype.cpp.hpp:2681</a></div></div>
-<div class="ttc" id="anamespacefl_1_1third__party_1_1truetype_a67e4fa8bae42d385328c5fac016ca109_html_a67e4fa8bae42d385328c5fac016ca109"><div class="ttname"><a href="../../dc/d41/namespacefl_1_1third__party_1_1truetype_a67e4fa8bae42d385328c5fac016ca109.html#a67e4fa8bae42d385328c5fac016ca109">fl::third_party::truetype::stbtt_GetFontVMetrics</a></div><div class="ttdeci">void stbtt_GetFontVMetrics(const stbtt_fontinfo *info, int32_t *ascent, int32_t *descent, int32_t *lineGap) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d3/d12/stb__truetype_8cpp_8hpp_source.html#l02663">stb_truetype.cpp.hpp:2663</a></div></div>
+<div class="ttc" id="anamespacefl_1_1third__party_1_1truetype_a4acac940779b6743e0d00507c06b3dcb_html_a4acac940779b6743e0d00507c06b3dcb"><div class="ttname"><a href="../../dc/d41/namespacefl_1_1third__party_1_1truetype_a4acac940779b6743e0d00507c06b3dcb.html#a4acac940779b6743e0d00507c06b3dcb">fl::third_party::truetype::stbtt_GetFontVMetrics</a></div><div class="ttdeci">void stbtt_GetFontVMetrics(const stbtt_fontinfo *info, int32_t *ascent, int32_t *descent, int32_t *lineGap) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d3/d12/stb__truetype_8cpp_8hpp_source.html#l02663">stb_truetype.cpp.hpp:2663</a></div></div>
+<div class="ttc" id="anamespacefl_1_1third__party_1_1truetype_adc16b9736f849891776241a56404d774_html_adc16b9736f849891776241a56404d774"><div class="ttname"><a href="../../dc/d41/namespacefl_1_1third__party_1_1truetype_adc16b9736f849891776241a56404d774.html#adc16b9736f849891776241a56404d774">fl::third_party::truetype::stbtt_GetFontBoundingBox</a></div><div class="ttdeci">void stbtt_GetFontBoundingBox(const stbtt_fontinfo *info, int32_t *x0, int32_t *y0, int32_t *x1, int32_t *y1) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d3/d12/stb__truetype_8cpp_8hpp_source.html#l02681">stb_truetype.cpp.hpp:2681</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../d0/dee/truetype_8h_source.html#l00045">fl::FontMetrics::ascent</a>, <a class="el" href="../../d0/dee/truetype_8h_source.html#l00046">fl::FontMetrics::descent</a>, <a class="el" href="../../d0/dee/truetype_8h_source.html#l00047">fl::FontMetrics::lineGap</a>, <a class="el" href="../../dd/dc4/truetype_8cpp_8hpp_source.html#l00170">mFontInfo</a>, <a class="el" href="../../dd/dc4/truetype_8cpp_8hpp_source.html#l00171">mValid</a>, <a class="el" href="../../d3/d12/stb__truetype_8cpp_8hpp_source.html#l02681">fl::third_party::truetype::stbtt_GetFontBoundingBox()</a>, <a class="el" href="../../d3/d12/stb__truetype_8cpp_8hpp_source.html#l02663">fl::third_party::truetype::stbtt_GetFontVMetrics()</a>, <a class="el" href="../../d0/dee/truetype_8h_source.html#l00048">fl::FontMetrics::x0</a>, <a class="el" href="../../d0/dee/truetype_8h_source.html#l00049">fl::FontMetrics::x1</a>, <a class="el" href="../../d0/dee/truetype_8h_source.html#l00048">fl::FontMetrics::y0</a>, and <a class="el" href="../../d0/dee/truetype_8h_source.html#l00049">fl::FontMetrics::y1</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
@@ -166,7 +166,7 @@ $(function(){initNavTree('d0/d98/classfl_1_1_font_impl_ad6d42f1f3ec24cc54da2c6e0
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d0/d98/classfl_1_1_font_impl.html">FontImpl</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:05 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:09 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

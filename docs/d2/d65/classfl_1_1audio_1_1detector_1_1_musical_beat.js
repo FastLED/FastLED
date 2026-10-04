@@ -8,9 +8,9 @@ var classfl_1_1audio_1_1detector_1_1_musical_beat =
       [ "totalOnsets", "d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat.html#ab728db6b1b5f2b31f2f0cb42f08ababc", null ],
       [ "validatedBeats", "d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat.html#a5e085037befbb3480138073ccb164c34", null ]
     ] ],
-    [ "MusicalBeat", "d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_a13472c5b2c18bcd9cc92903b52b18faa.html#a13472c5b2c18bcd9cc92903b52b18faa", null ],
+    [ "MusicalBeat", "d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_abc7b8eaf6fe345fbd930f17ab2c5f5ea.html#abc7b8eaf6fe345fbd930f17ab2c5f5ea", null ],
     [ "MusicalBeat", "d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_a1303f97fb27f50d969728c8c7df3e2b4.html#a1303f97fb27f50d969728c8c7df3e2b4", null ],
-    [ "~MusicalBeat", "d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_a8ead4e67bdff0c0600d13fc942313879.html#a8ead4e67bdff0c0600d13fc942313879", null ],
+    [ "~MusicalBeat", "d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_aa4122c266cb3b2e9bcdf329ba856a4ae.html#aa4122c266cb3b2e9bcdf329ba856a4ae", null ],
     [ "calculateBeatConfidence", "d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_a25756788660507be8a6660dc23f82624.html#a25756788660507be8a6660dc23f82624", null ],
     [ "calculateIBIStdDev", "d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_af7ccbbd6059884bc88da1f7c171455b9.html#af7ccbbd6059884bc88da1f7c171455b9", null ],
     [ "configure", "d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_aa3fe998bea55ed148d76230699db4b43.html#aa3fe998bea55ed148d76230699db4b43", null ],

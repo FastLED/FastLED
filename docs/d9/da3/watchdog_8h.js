@@ -27,5 +27,5 @@ var watchdog_8h =
       [ "fl::ResetCause::DEBUGGER", "d4/d36/namespacefl_a5096449b4a994331b3746d029e8c3187.html#a5096449b4a994331b3746d029e8c3187a75ae79c8b8e654fa283afb1aac9ae764", null ],
       [ "fl::ResetCause::PANIC", "d4/d36/namespacefl_a5096449b4a994331b3746d029e8c3187.html#a5096449b4a994331b3746d029e8c3187a98a11b6a207bf1c64618790847ab8055", null ]
     ] ],
-    [ "fl::resetCauseName", "d4/d36/namespacefl_aaea3f6340440c4987e8c0f58bd4b0c10.html#aaea3f6340440c4987e8c0f58bd4b0c10", null ]
+    [ "fl::resetCauseName", "d4/d36/namespacefl_aafb1841fee981a59a45f20de791c162f.html#aafb1841fee981a59a45f20de791c162f", null ]
 ];

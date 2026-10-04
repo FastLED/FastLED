@@ -1,0 +1,15 @@
+<map id="fl/math/int_asm.h" name="fl/math/int_asm.h">
+<area shape="rect" id="Node000001" title="Integer arithmetic with a guaranteed instruction shape." alt="" coords="281,5,417,31"/>
+<area shape="rect" id="Node000002" href="$da/dcf/minimp3_8h.html" title=" " alt="" coords="271,79,426,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="351,44,351,79,346,79,346,44"/>
+<area shape="rect" id="Node000003" href="$d7/d4e/_auto_research_mp3_8h.html" title="On&#45;device verification of the fixed&#45;point MP3 decoder." alt="" coords="5,167,244,221"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="292,126,189,169,187,164,290,121"/>
+<area shape="rect" id="Node000004" href="$d3/df6/mp3_8cpp_8hpp.html" title=" " alt="" coords="269,181,429,207"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="351,133,351,181,346,181,346,133"/>
+<area shape="rect" id="Node000008" href="$d1/d74/third__party_2minimp3_2__build_8cpp_8hpp.html" title="Unity build integration for the vendored minimp3 decoder." alt="" coords="465,174,619,214"/>
+<area shape="poly" id="edge5_Node000002_Node000008" title=" " alt="" coords="401,122,504,172,502,176,399,127"/>
+<area shape="rect" id="Node000005" href="$d7/df8/fl_2codec_2__build_8cpp_8hpp.html" title=" " alt="" coords="257,269,427,295"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="349,221,346,269,340,269,344,220"/>
+<area shape="rect" id="Node000009" href="$d3/d75/third__party_2__build_8cpp_8hpp.html" title=" " alt="" coords="452,269,643,295"/>
+<area shape="poly" id="edge6_Node000008_Node000009" title=" " alt="" coords="547,228,549,269,544,269,541,228"/>
+</map>

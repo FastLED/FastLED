@@ -1,0 +1,14 @@
+digraph "fl::printf_detail::format_integral"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::printf_detail::\lformat_integral",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::printf_detail::\lformat_scalar_arg",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/de0/namespacefl_1_1printf__detail_abd5b964ee598ac72b0191a572375231a.html#abd5b964ee598ac72b0191a572375231a",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::printf_detail::\lformat_arg",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/de0/namespacefl_1_1printf__detail_a4a0d5ea6eb6afd400e788b1c5ea31ce1.html#a4a0d5ea6eb6afd400e788b1c5ea31ce1",tooltip=" "];
+}

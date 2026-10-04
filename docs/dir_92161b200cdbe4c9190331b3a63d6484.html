@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -108,7 +108,7 @@ $(function(){initNavTree('dir_92161b200cdbe4c9190331b3a63d6484.html',''); initRe
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="dir_92161b200cdbe4c9190331b3a63d6484_dep.svg" width="150" height="156"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="dir_92161b200cdbe4c9190331b3a63d6484_dep.svg" width="339" height="178"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="files" name="files"></a>
@@ -122,7 +122,7 @@ Files</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p>Cross-platform transport implementations for <code><a class="el" href="dc/ddb/classfl_1_1_remote.html" title="JSON-RPC server with scheduling support.">fl::Remote</a></code> JSON-RPC communication.</p>
-<h1><a class="anchor" id="autotoc_md359"></a>
+<h1><a class="anchor" id="autotoc_md383"></a>
 Overview</h1>
 <p>The transport layer provides <b>generic I/O</b> for serial communication. It is <b>protocol-agnostic</b> and can work with any JSON-based protocol, not just JSON-RPC.</p>
 <p>Factory functions compose the transport layer with the JSON-RPC protocol layer (from <code>fl/remote/rpc/protocol.h</code>) to create <code>RequestSource</code> and <code>ResponseSink</code> callbacks for <code><a class="el" href="dc/ddb/classfl_1_1_remote.html" title="JSON-RPC server with scheduling support.">fl::Remote</a></code>.</p>
@@ -132,7 +132,7 @@ Overview</h1>
 <li><b>Portability</b>: Works across all FastLED platforms</li>
 <li><b>Flexibility</b>: Easy to add new transports (HTTP, WebSocket) or protocols</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md360"></a>
+<h1><a class="anchor" id="autotoc_md384"></a>
 Architecture</h1>
 <div class="fragment"><div class="line">┌─────────────────────────────────────────┐</div>
 <div class="line">│  fl::Remote (RPC Server)                │</div>
@@ -161,9 +161,9 @@ Architecture</h1>
 <div class="line">    │ - Read line    │ │ - Write line   │</div>
 <div class="line">    │ - Parse JSON   │ │ - Serialize    │</div>
 <div class="line">    └────────────────┘ └────────────────┘</div>
-</div><!-- fragment --><h1><a class="anchor" id="autotoc_md361"></a>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md385"></a>
 Serial Transport</h1>
-<h2><a class="anchor" id="autotoc_md362"></a>
+<h2><a class="anchor" id="autotoc_md386"></a>
 Basic Usage</h2>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &quot;<a class="code" href="db/d51/remote_2transport_2serial_8h.html">fl/remote/transport/serial.h</a>&quot;</span></div>
 <div class="line"><span class="preprocessor">#include &quot;<a class="code" href="d6/d06/remote_8h.html">fl/remote/remote.h</a>&quot;</span></div>
@@ -184,16 +184,16 @@ Basic Usage</h2>
 <div class="line"><span class="keywordtype">void</span> <a class="code hl_function" href="d5/d17/_analog_output_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f">loop</a>() {</div>
 <div class="line">    <a class="code hl_variable" href="d8/db9/_rpc_client_8ino_a2322979ac125e8fe8862058961e3d206.html#a2322979ac125e8fe8862058961e3d206">remote</a>.update(millis());  <span class="comment">// Pull + process + push</span></div>
 <div class="line">}</div>
-<div class="ttc" id="a_analog_output_8ino_afe461d27b9c48d5921c00d521181f12f_html_afe461d27b9c48d5921c00d521181f12f"><div class="ttname"><a href="d5/d17/_analog_output_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f">loop</a></div><div class="ttdeci">void loop()</div><div class="ttdef"><b>Definition</b> <a href="d5/d17/_analog_output_8ino_source.html#l00054">AnalogOutput.ino:54</a></div></div>
+<div class="ttc" id="a_analog_output_8ino_afe461d27b9c48d5921c00d521181f12f_html_afe461d27b9c48d5921c00d521181f12f"><div class="ttname"><a href="d5/d17/_analog_output_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f">loop</a></div><div class="ttdeci">void loop()</div><div class="ttdef"><b>Definition</b> <a href="d5/d17/_analog_output_8ino_source.html#l00047">AnalogOutput.ino:47</a></div></div>
 <div class="ttc" id="a_rpc_client_8ino_a2322979ac125e8fe8862058961e3d206_html_a2322979ac125e8fe8862058961e3d206"><div class="ttname"><a href="d8/db9/_rpc_client_8ino_a2322979ac125e8fe8862058961e3d206.html#a2322979ac125e8fe8862058961e3d206">remote</a></div><div class="ttdeci">fl::unique_ptr&lt; fl::Remote &gt; remote</div><div class="ttdef"><b>Definition</b> <a href="d8/db9/_rpc_client_8ino_source.html#l00043">RpcClient.ino:43</a></div></div>
-<div class="ttc" id="aclassfl_1_1_remote_html"><div class="ttname"><a href="dc/ddb/classfl_1_1_remote.html">fl::Remote</a></div><div class="ttdoc">JSON-RPC server with scheduling support.</div><div class="ttdef"><b>Definition</b> <a href="d6/d06/remote_8h_source.html#l00040">remote.h:40</a></div></div>
-<div class="ttc" id="anamespacefl_a6913bcc5545eb4b029ec170d48a14766_html_a6913bcc5545eb4b029ec170d48a14766"><div class="ttname"><a href="d4/d36/namespacefl_a6913bcc5545eb4b029ec170d48a14766.html#a6913bcc5545eb4b029ec170d48a14766">fl::createSerialRequestSource</a></div><div class="ttdeci">fl::function&lt; fl::optional&lt; fl::json &gt;()&gt; createSerialRequestSource(const char *prefix=&quot;&quot;)</div><div class="ttdoc">Create a JSON-RPC RequestSource that reads from fl:: serial input.</div><div class="ttdef"><b>Definition</b> <a href="db/d51/remote_2transport_2serial_8h_source.html#l00109">serial.h:109</a></div></div>
-<div class="ttc" id="anamespacefl_aaaad760134ff434244ec0bfb2740a8f7_html_aaaad760134ff434244ec0bfb2740a8f7"><div class="ttname"><a href="d4/d36/namespacefl_aaaad760134ff434244ec0bfb2740a8f7.html#aaaad760134ff434244ec0bfb2740a8f7">fl::createSerialResponseSink</a></div><div class="ttdeci">fl::function&lt; void(const fl::json &amp;)&gt; createSerialResponseSink(const char *prefix=&quot;REMOTE: &quot;)</div><div class="ttdoc">Create a JSON-RPC ResponseSink that writes to fl:: serial output.</div><div class="ttdef"><b>Definition</b> <a href="db/d51/remote_2transport_2serial_8h_source.html#l00162">serial.h:162</a></div></div>
+<div class="ttc" id="aclassfl_1_1_remote_html"><div class="ttname"><a href="dc/ddb/classfl_1_1_remote.html">fl::Remote</a></div><div class="ttdoc">JSON-RPC server with scheduling support.</div><div class="ttdef"><b>Definition</b> <a href="d6/d06/remote_8h_source.html#l00042">remote.h:42</a></div></div>
+<div class="ttc" id="anamespacefl_a6913bcc5545eb4b029ec170d48a14766_html_a6913bcc5545eb4b029ec170d48a14766"><div class="ttname"><a href="d4/d36/namespacefl_a6913bcc5545eb4b029ec170d48a14766.html#a6913bcc5545eb4b029ec170d48a14766">fl::createSerialRequestSource</a></div><div class="ttdeci">fl::function&lt; fl::optional&lt; fl::json &gt;()&gt; createSerialRequestSource(const char *prefix=&quot;&quot;)</div><div class="ttdef"><b>Definition</b> <a href="db/d51/remote_2transport_2serial_8h_source.html#l00119">serial.h:119</a></div></div>
+<div class="ttc" id="anamespacefl_aaaad760134ff434244ec0bfb2740a8f7_html_aaaad760134ff434244ec0bfb2740a8f7"><div class="ttname"><a href="d4/d36/namespacefl_aaaad760134ff434244ec0bfb2740a8f7.html#aaaad760134ff434244ec0bfb2740a8f7">fl::createSerialResponseSink</a></div><div class="ttdeci">fl::function&lt; void(const fl::json &amp;)&gt; createSerialResponseSink(const char *prefix=&quot;REMOTE: &quot;)</div><div class="ttdoc">Create a JSON-RPC ResponseSink that writes to fl:: serial output.</div><div class="ttdef"><b>Definition</b> <a href="db/d51/remote_2transport_2serial_8h_source.html#l00191">serial.h:191</a></div></div>
 <div class="ttc" id="aremote_2transport_2serial_8h_html"><div class="ttname"><a href="db/d51/remote_2transport_2serial_8h.html">serial.h</a></div></div>
 <div class="ttc" id="aremote_8h_html"><div class="ttname"><a href="d6/d06/remote_8h.html">remote.h</a></div></div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md363"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md387"></a>
 Factory Functions</h2>
-<h3><a class="anchor" id="autotoc_md364"></a>
+<h3><a class="anchor" id="autotoc_md388"></a>
 <code>createSerialRequestSource(prefix = "")</code></h3>
 <p>Creates a <code>RequestSource</code> callback that:</p><ol type="1">
 <li>Reads lines from <code><a class="el" href="d4/d36/namespacefl_a01186a22a1055c583d5408c116c84ffa.html#a01186a22a1055c583d5408c116c84ffa">fl::available()</a></code> / <code><a class="el" href="d4/d36/namespacefl_a18e7608a302c3628c24710b27480641b.html#a18e7608a302c3628c24710b27480641b">fl::read()</a></code></li>
@@ -202,21 +202,21 @@ Factory Functions</h2>
 <li>Returns <code>optional&lt;Json&gt;</code> (nullopt if no data)</li>
 </ol>
 <div class="fragment"><div class="line"><span class="keyword">auto</span> source = <a class="code hl_function" href="d4/d36/namespacefl_a6913bcc5545eb4b029ec170d48a14766.html#a6913bcc5545eb4b029ec170d48a14766">fl::createSerialRequestSource</a>();</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md365"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md389"></a>
 <code>createSerialResponseSink(prefix = "REMOTE: ")</code></h3>
 <p>Creates a <code>ResponseSink</code> callback that:</p><ol type="1">
 <li>Formats JSON-RPC responses</li>
 <li>Prepends optional prefix</li>
-<li>Writes to <code><a class="el" href="d4/d36/namespacefl_adfaedbd8e1ada269a7733e58ff142aea.html#adfaedbd8e1ada269a7733e58ff142aea">fl::println()</a></code></li>
+<li>Writes to <code><a class="el" href="d4/d36/namespacefl_ab058ac6ae882a8344f79b01b40eb6e02.html#ab058ac6ae882a8344f79b01b40eb6e02">fl::println()</a></code></li>
 </ol>
 <div class="fragment"><div class="line"><span class="keyword">auto</span> sink = <a class="code hl_function" href="d4/d36/namespacefl_aaaad760134ff434244ec0bfb2740a8f7.html#aaaad760134ff434244ec0bfb2740a8f7">fl::createSerialResponseSink</a>(<span class="stringliteral">&quot;RESULT: &quot;</span>);</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md366"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md390"></a>
 <code>createSerialTransport(responsePrefix, requestPrefix)</code></h3>
 <p>Creates both callbacks in one call:</p>
 <div class="fragment"><div class="line"><span class="keyword">auto</span> [source, sink] = <a class="code hl_function" href="d4/d36/namespacefl_a7167ab7d0c24c14e0576b7df33c212b6.html#a7167ab7d0c24c14e0576b7df33c212b6">fl::createSerialTransport</a>(<span class="stringliteral">&quot;REMOTE: &quot;</span>);</div>
 <div class="line"><a class="code hl_class" href="dc/ddb/classfl_1_1_remote.html">fl::Remote</a> <a class="code hl_variable" href="d8/db9/_rpc_client_8ino_a2322979ac125e8fe8862058961e3d206.html#a2322979ac125e8fe8862058961e3d206">remote</a>(source, sink);</div>
-<div class="ttc" id="anamespacefl_a7167ab7d0c24c14e0576b7df33c212b6_html_a7167ab7d0c24c14e0576b7df33c212b6"><div class="ttname"><a href="d4/d36/namespacefl_a7167ab7d0c24c14e0576b7df33c212b6.html#a7167ab7d0c24c14e0576b7df33c212b6">fl::createSerialTransport</a></div><div class="ttdeci">fl::pair&lt; fl::function&lt; fl::optional&lt; fl::json &gt;()&gt;, fl::function&lt; void(const fl::json &amp;)&gt; &gt; createSerialTransport(const char *responsePrefix=&quot;REMOTE: &quot;, const char *requestPrefix=&quot;&quot;)</div><div class="ttdoc">Create RequestSource and ResponseSink pair for serial I/O.</div><div class="ttdef"><b>Definition</b> <a href="db/d51/remote_2transport_2serial_8h_source.html#l00182">serial.h:182</a></div></div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md367"></a>
+<div class="ttc" id="anamespacefl_a7167ab7d0c24c14e0576b7df33c212b6_html_a7167ab7d0c24c14e0576b7df33c212b6"><div class="ttname"><a href="d4/d36/namespacefl_a7167ab7d0c24c14e0576b7df33c212b6.html#a7167ab7d0c24c14e0576b7df33c212b6">fl::createSerialTransport</a></div><div class="ttdeci">fl::pair&lt; fl::function&lt; fl::optional&lt; fl::json &gt;()&gt;, fl::function&lt; void(const fl::json &amp;)&gt; &gt; createSerialTransport(const char *responsePrefix=&quot;REMOTE: &quot;, const char *requestPrefix=&quot;&quot;)</div><div class="ttdoc">Create RequestSource and ResponseSink pair for serial I/O.</div><div class="ttdef"><b>Definition</b> <a href="db/d51/remote_2transport_2serial_8h_source.html#l00234">serial.h:234</a></div></div>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md391"></a>
 Custom Serial Adapters</h2>
 <p>For non-fl:: serial sources (e.g., Arduino Serial on specific platforms):</p>
 <div class="fragment"><div class="line"><span class="keyword">struct </span>ArduinoSerialIn {</div>
@@ -244,28 +244,28 @@ Custom Serial Adapters</h2>
 <div class="line"> </div>
 <div class="line"><a class="code hl_class" href="dc/ddb/classfl_1_1_remote.html">fl::Remote</a> <a class="code hl_variable" href="d8/db9/_rpc_client_8ino_a2322979ac125e8fe8862058961e3d206.html#a2322979ac125e8fe8862058961e3d206">remote</a>(source, sink);</div>
 <div class="ttc" id="a_client_validation_real_8h_aa751face66010d26f240cd6813659ae4_html_aa751face66010d26f240cd6813659ae4"><div class="ttname"><a href="d9/dce/_client_validation_real_8h_aa751face66010d26f240cd6813659ae4.html#aa751face66010d26f240cd6813659ae4">println</a></div><div class="ttdeci">Serial println(server.last_error().c_str())</div></div>
-<div class="ttc" id="aclassfl_1_1json_html"><div class="ttname"><a href="de/d40/classfl_1_1json.html">fl::json</a></div><div class="ttdef"><b>Definition</b> <a href="d4/d05/json_8h_source.html#l00128">json.h:128</a></div></div>
-<div class="ttc" id="anamespacefl_a54c09f7965e851d33159fefd483004eb_html_a54c09f7965e851d33159fefd483004eb"><div class="ttname"><a href="d4/d36/namespacefl_a54c09f7965e851d33159fefd483004eb.html#a54c09f7965e851d33159fefd483004eb">fl::readSerialLine</a></div><div class="ttdeci">fl::optional&lt; fl::string &gt; readSerialLine(SerialIn &amp;serial, char delimiter=&#39;\n&#39;, fl::optional&lt; u32 &gt; timeoutMs=fl::nullopt)</div><div class="ttdoc">Read a line from a serial-like input source (blocking with optional timeout)</div><div class="ttdef"><b>Definition</b> <a href="db/d51/remote_2transport_2serial_8h_source.html#l00191">serial.h:191</a></div></div>
-<div class="ttc" id="anamespacefl_a7cbb518d527a0cec0393f52826600e27_html_a7cbb518d527a0cec0393f52826600e27"><div class="ttname"><a href="d4/d36/namespacefl_a7cbb518d527a0cec0393f52826600e27.html#a7cbb518d527a0cec0393f52826600e27">fl::writeSerialLine</a></div><div class="ttdeci">void writeSerialLine(SerialOut &amp;serial, const fl::string &amp;str)</div><div class="ttdoc">Write a string with newline to a serial-like output.</div><div class="ttdef"><b>Definition</b> <a href="db/d51/remote_2transport_2serial_8h_source.html#l00245">serial.h:245</a></div></div>
+<div class="ttc" id="aclassfl_1_1json_html"><div class="ttname"><a href="de/d40/classfl_1_1json.html">fl::json</a></div><div class="ttdef"><b>Definition</b> <a href="d4/d05/json_8h_source.html#l00261">json.h:261</a></div></div>
+<div class="ttc" id="anamespacefl_a54c09f7965e851d33159fefd483004eb_html_a54c09f7965e851d33159fefd483004eb"><div class="ttname"><a href="d4/d36/namespacefl_a54c09f7965e851d33159fefd483004eb.html#a54c09f7965e851d33159fefd483004eb">fl::readSerialLine</a></div><div class="ttdeci">fl::optional&lt; fl::string &gt; readSerialLine(SerialIn &amp;serial, char delimiter=&#39;\n&#39;, fl::optional&lt; u32 &gt; timeoutMs=fl::nullopt)</div><div class="ttdoc">Read a line from a serial-like input source (blocking with optional timeout)</div><div class="ttdef"><b>Definition</b> <a href="db/d51/remote_2transport_2serial_8h_source.html#l00243">serial.h:243</a></div></div>
+<div class="ttc" id="anamespacefl_a7cbb518d527a0cec0393f52826600e27_html_a7cbb518d527a0cec0393f52826600e27"><div class="ttname"><a href="d4/d36/namespacefl_a7cbb518d527a0cec0393f52826600e27.html#a7cbb518d527a0cec0393f52826600e27">fl::writeSerialLine</a></div><div class="ttdeci">void writeSerialLine(SerialOut &amp;serial, const fl::string &amp;str)</div><div class="ttdoc">Write a string with newline to a serial-like output.</div><div class="ttdef"><b>Definition</b> <a href="db/d51/remote_2transport_2serial_8h_source.html#l00297">serial.h:297</a></div></div>
 <div class="ttc" id="anamespacefl_aa51c7c6f506ca9d9f3db40422b352b11_html_aa51c7c6f506ca9d9f3db40422b352b11"><div class="ttname"><a href="d4/d36/namespacefl_aa51c7c6f506ca9d9f3db40422b352b11.html#aa51c7c6f506ca9d9f3db40422b352b11">fl::nullopt</a></div><div class="ttdeci">constexpr nullopt_t nullopt</div><div class="ttdef"><b>Definition</b> <a href="dc/d62/optional_8h_source.html#l00013">optional.h:13</a></div></div>
-<div class="ttc" id="anamespacetest__quick_a00071f2b3e01fb8d2b4e70970ed2d6ce_html_a00071f2b3e01fb8d2b4e70970ed2d6ce"><div class="ttname"><a href="d8/d94/namespacetest__quick_a00071f2b3e01fb8d2b4e70970ed2d6ce.html#a00071f2b3e01fb8d2b4e70970ed2d6ce">test_quick.response</a></div><div class="ttdeci">response</div><div class="ttdef"><b>Definition</b> <a href="d8/def/test__quick_8py_source.html#l00031">test_quick.py:31</a></div></div>
+<div class="ttc" id="anamespacetest__quick_a00071f2b3e01fb8d2b4e70970ed2d6ce_html_a00071f2b3e01fb8d2b4e70970ed2d6ce"><div class="ttname"><a href="d8/d94/namespacetest__quick_a00071f2b3e01fb8d2b4e70970ed2d6ce.html#a00071f2b3e01fb8d2b4e70970ed2d6ce">test_quick.response</a></div><div class="ttdeci">response</div><div class="ttdef"><b>Definition</b> <a href="d8/def/test__quick_8py_source.html#l00036">test_quick.py:36</a></div></div>
 <div class="ttc" id="asystem_2serial_8h_ab1a8531ded8c3d5bee8e36aebec7a8f3_html_ab1a8531ded8c3d5bee8e36aebec7a8f3"><div class="ttname"><a href="de/d8b/system_2serial_8h_ab1a8531ded8c3d5bee8e36aebec7a8f3.html#ab1a8531ded8c3d5bee8e36aebec7a8f3">Serial</a></div><div class="ttdeci">#define Serial</div><div class="ttdef"><b>Definition</b> <a href="de/d8b/system_2serial_8h_source.html#l00304">serial.h:304</a></div></div>
-</div><!-- fragment --><h1><a class="anchor" id="autotoc_md368"></a>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md392"></a>
 Pure Functions (Unit Testable)</h1>
-<h2><a class="anchor" id="autotoc_md369"></a>
+<h2><a class="anchor" id="autotoc_md393"></a>
 <code>formatJsonResponse(response, prefix)</code></h2>
 <p>Generic JSON serialization to single-line string with optional prefix:</p>
-<div class="fragment"><div class="line"><a class="code hl_class" href="de/d40/classfl_1_1json.html">fl::json</a> response = <a class="code hl_function" href="de/d40/classfl_1_1json_af8bc0968107152344bfa8468bba76f54.html#af8bc0968107152344bfa8468bba76f54">fl::json::object</a>();</div>
+<div class="fragment"><div class="line"><a class="code hl_class" href="de/d40/classfl_1_1json.html">fl::json</a> response = <a class="code hl_function" href="de/d40/classfl_1_1json_ae7744bee3369b3debf7e30e4a4a18526.html#ae7744bee3369b3debf7e30e4a4a18526">fl::json::object</a>();</div>
 <div class="line">response.set(<span class="stringliteral">&quot;success&quot;</span>, <span class="keyword">true</span>);</div>
 <div class="line"><span class="keyword">auto</span> formatted = <a class="code hl_function" href="d4/d36/namespacefl_a453c4513b6c26a2104cdf91921eb2742.html#a453c4513b6c26a2104cdf91921eb2742">fl::formatJsonResponse</a>(response, <span class="stringliteral">&quot;REMOTE: &quot;</span>);</div>
 <div class="line"><span class="comment">// formatted = &quot;REMOTE: {\&quot;success\&quot;:true}&quot;</span></div>
-<div class="ttc" id="aclassfl_1_1json_af8bc0968107152344bfa8468bba76f54_html_af8bc0968107152344bfa8468bba76f54"><div class="ttname"><a href="de/d40/classfl_1_1json_af8bc0968107152344bfa8468bba76f54.html#af8bc0968107152344bfa8468bba76f54">fl::json::object</a></div><div class="ttdeci">static json object() FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="d4/d05/json_8h_source.html#l00692">json.h:692</a></div></div>
+<div class="ttc" id="aclassfl_1_1json_ae7744bee3369b3debf7e30e4a4a18526_html_ae7744bee3369b3debf7e30e4a4a18526"><div class="ttname"><a href="de/d40/classfl_1_1json_ae7744bee3369b3debf7e30e4a4a18526.html#ae7744bee3369b3debf7e30e4a4a18526">fl::json::object</a></div><div class="ttdeci">static json object() FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="d4/d05/json_8h_source.html#l00857">json.h:857</a></div></div>
 <div class="ttc" id="anamespacefl_a453c4513b6c26a2104cdf91921eb2742_html_a453c4513b6c26a2104cdf91921eb2742"><div class="ttname"><a href="d4/d36/namespacefl_a453c4513b6c26a2104cdf91921eb2742.html#a453c4513b6c26a2104cdf91921eb2742">fl::formatJsonResponse</a></div><div class="ttdeci">fl::string formatJsonResponse(const fl::json &amp;response, const char *prefix)</div><div class="ttdoc">Serialize JSON response to a string.</div><div class="ttdef"><b>Definition</b> <a href="d2/d6d/remote_2transport_2serial_8cpp_8hpp_source.html#l00012">serial.cpp.hpp:12</a></div></div>
 </div><!-- fragment --><p><b>Note:</b> This is a generic JSON function, not JSON-RPC specific. Works with any JSON object.</p>
-<h1><a class="anchor" id="autotoc_md370"></a>
+<h1><a class="anchor" id="autotoc_md394"></a>
 JSON-RPC Protocol Functions</h1>
 <p>The JSON-RPC specific functions have moved to <code>fl/remote/rpc/protocol.h</code>:</p>
-<h2><a class="anchor" id="autotoc_md371"></a>
+<h2><a class="anchor" id="autotoc_md395"></a>
 <code>normalizeJsonRpcRequest(json)</code> (in rpc/protocol.h)</h2>
 <p>Transforms old JSON-RPC format to standard 2.0:</p><ul>
 <li>Old: <code>{"function": "test", "args": [...]}</code></li>
@@ -273,12 +273,12 @@ JSON-RPC Protocol Functions</h1>
 </ul>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &quot;fl/remote/rpc/protocol.h&quot;</span></div>
 <div class="line"> </div>
-<div class="line"><a class="code hl_class" href="de/d40/classfl_1_1json.html">fl::json</a> oldFormat = <a class="code hl_function" href="de/d40/classfl_1_1json_af7d8a65ad376b44e25bf9653bcac2405.html#af7d8a65ad376b44e25bf9653bcac2405">fl::json::parse</a>(R<span class="stringliteral">&quot;({&quot;function&quot;: &quot;ping&quot;, &quot;args&quot;: []})&quot;).<a class="code hl_function" href="de/d40/classfl_1_1json_ad617704f72b6ca9c33c996466fde27b5.html#ad617704f72b6ca9c33c996466fde27b5">value</a>();</span></div>
+<div class="line"><a class="code hl_class" href="de/d40/classfl_1_1json.html">fl::json</a> oldFormat = <a class="code hl_function" href="de/d40/classfl_1_1json_acfd0c418354f6fa20c838e2167ab9661.html#acfd0c418354f6fa20c838e2167ab9661">fl::json::parse</a>(R<span class="stringliteral">&quot;({&quot;function&quot;: &quot;ping&quot;, &quot;args&quot;: []})&quot;).<a class="code hl_function" href="de/d40/classfl_1_1json_a30b29298cde88f21011d0588729d4797.html#a30b29298cde88f21011d0588729d4797">value</a>();</span></div>
 <div class="line"><span class="stringliteral"><a class="code hl_class" href="de/d40/classfl_1_1json.html">fl::json</a> normalized = fl::normalizeJsonRpcRequest(oldFormat);</span></div>
 <div class="line"><span class="stringliteral"></span><span class="comment">// normalized = {&quot;method&quot;: &quot;ping&quot;, &quot;params&quot;: []}</span></div>
-<div class="ttc" id="aclassfl_1_1json_ad617704f72b6ca9c33c996466fde27b5_html_ad617704f72b6ca9c33c996466fde27b5"><div class="ttname"><a href="de/d40/classfl_1_1json_ad617704f72b6ca9c33c996466fde27b5.html#ad617704f72b6ca9c33c996466fde27b5">fl::json::value</a></div><div class="ttdeci">T value() const FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="d4/d05/json_8h_source.html#l00336">json.h:336</a></div></div>
-<div class="ttc" id="aclassfl_1_1json_af7d8a65ad376b44e25bf9653bcac2405_html_af7d8a65ad376b44e25bf9653bcac2405"><div class="ttname"><a href="de/d40/classfl_1_1json_af7d8a65ad376b44e25bf9653bcac2405.html#af7d8a65ad376b44e25bf9653bcac2405">fl::json::parse</a></div><div class="ttdeci">static json parse(const fl::string &amp;txt) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="d4/d05/json_8h_source.html#l00677">json.h:677</a></div></div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md372"></a>
+<div class="ttc" id="aclassfl_1_1json_a30b29298cde88f21011d0588729d4797_html_a30b29298cde88f21011d0588729d4797"><div class="ttname"><a href="de/d40/classfl_1_1json_a30b29298cde88f21011d0588729d4797.html#a30b29298cde88f21011d0588729d4797">fl::json::value</a></div><div class="ttdeci">T value() const FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="d4/d05/json_8h_source.html#l00497">json.h:497</a></div></div>
+<div class="ttc" id="aclassfl_1_1json_acfd0c418354f6fa20c838e2167ab9661_html_acfd0c418354f6fa20c838e2167ab9661"><div class="ttname"><a href="de/d40/classfl_1_1json_acfd0c418354f6fa20c838e2167ab9661.html#acfd0c418354f6fa20c838e2167ab9661">fl::json::parse</a></div><div class="ttdeci">static json parse(const fl::string &amp;txt) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="d4/d05/json_8h_source.html#l00842">json.h:842</a></div></div>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md396"></a>
 <code>filterSchemaResponse(response)</code> (in rpc/protocol.h)</h2>
 <p>Filters schema responses to prevent stack overflow on constrained platforms:</p>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &quot;fl/remote/rpc/protocol.h&quot;</span></div>
@@ -290,21 +290,21 @@ JSON-RPC Protocol Functions</h1>
 <div class="line"><span class="comment">// returns minimal response: {&quot;jsonrpc&quot;: &quot;2.0&quot;, &quot;id&quot;: ..., &quot;result&quot;: {&quot;message&quot;: &quot;...&quot;, &quot;methodCount&quot;: N}}</span></div>
 <div class="line"><span class="comment">// Otherwise returns original response unchanged</span></div>
 </div><!-- fragment --><p><b>Use case:</b> ESP32-C6, ESP8266, and other platforms with limited stack can overflow when serializing large JSON-RPC schema responses.</p>
-<h1><a class="anchor" id="autotoc_md373"></a>
+<h1><a class="anchor" id="autotoc_md397"></a>
 Template Functions (Generic I/O)</h1>
-<h2><a class="anchor" id="autotoc_md374"></a>
+<h2><a class="anchor" id="autotoc_md398"></a>
 <code>readSerialLine&lt;SerialIn&gt;(serial, delimiter)</code></h2>
 <p>Reads line from any serial-like object with <code>available()</code> and <code>read()</code>:</p>
 <div class="fragment"><div class="line">MockSerialIn mock({<span class="stringliteral">&quot;hello&quot;</span>, <span class="stringliteral">&quot;world&quot;</span>});</div>
 <div class="line"><span class="keyword">auto</span> line = <a class="code hl_function" href="d4/d36/namespacefl_a54c09f7965e851d33159fefd483004eb.html#a54c09f7965e851d33159fefd483004eb">fl::readSerialLine</a>(mock);</div>
 <div class="line"><span class="comment">// line = &quot;hello&quot;</span></div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md375"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md399"></a>
 <code>writeSerialLine&lt;SerialOut&gt;(serial, str)</code></h2>
 <p>Writes line to any serial-like object with <code><a class="el" href="d9/dce/_client_validation_real_8h_aa751face66010d26f240cd6813659ae4.html#aa751face66010d26f240cd6813659ae4">println()</a></code>:</p>
 <div class="fragment"><div class="line">MockSerialOut mock;</div>
 <div class="line"><a class="code hl_function" href="d4/d36/namespacefl_a7cbb518d527a0cec0393f52826600e27.html#a7cbb518d527a0cec0393f52826600e27">fl::writeSerialLine</a>(mock, <span class="stringliteral">&quot;test&quot;</span>);</div>
 <div class="line"><span class="comment">// mock output = &quot;test\n&quot;</span></div>
-</div><!-- fragment --><h1><a class="anchor" id="autotoc_md376"></a>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md400"></a>
 Testing</h1>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &quot;<a class="code" href="db/d51/remote_2transport_2serial_8h.html">fl/remote/transport/serial.h</a>&quot;</span></div>
 <div class="line"><span class="preprocessor">#include &lt;gtest/gtest.h&gt;</span></div>
@@ -318,7 +318,7 @@ Testing</h1>
 <div class="line">}</div>
 <div class="line"> </div>
 <div class="line">TEST(Transport, FormatResponse) {</div>
-<div class="line">    <a class="code hl_class" href="de/d40/classfl_1_1json.html">fl::json</a> response = <a class="code hl_function" href="de/d40/classfl_1_1json_af8bc0968107152344bfa8468bba76f54.html#af8bc0968107152344bfa8468bba76f54">fl::json::object</a>();</div>
+<div class="line">    <a class="code hl_class" href="de/d40/classfl_1_1json.html">fl::json</a> response = <a class="code hl_function" href="de/d40/classfl_1_1json_ae7744bee3369b3debf7e30e4a4a18526.html#ae7744bee3369b3debf7e30e4a4a18526">fl::json::object</a>();</div>
 <div class="line">    response.set(<span class="stringliteral">&quot;result&quot;</span>, <span class="stringliteral">&quot;ok&quot;</span>);</div>
 <div class="line"> </div>
 <div class="line">    <span class="keyword">auto</span> formatted = fl::transport::formatJsonRpcResponse(response, <span class="stringliteral">&quot;RPC: &quot;</span>);</div>
@@ -332,11 +332,11 @@ Testing</h1>
 <div class="line">        <a class="code hl_class" href="d2/db2/classfl_1_1string.html">fl::string</a> buffer = <span class="stringliteral">&quot;test\n&quot;</span>;</div>
 <div class="line">        <span class="keywordtype">size_t</span> <a class="code hl_variable" href="d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a> = 0;</div>
 <div class="line"> </div>
-<div class="line">        <span class="keywordtype">int</span> available()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> buffer.<a class="code hl_function" href="de/d66/classfl_1_1basic__string_af4d95d1e9905eb5fb76e12c2c2bd7ebc.html#af4d95d1e9905eb5fb76e12c2c2bd7ebc">size</a>() - <a class="code hl_variable" href="d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>; }</div>
-<div class="line">        <span class="keywordtype">int</span> read() { <span class="keywordflow">return</span> <a class="code hl_variable" href="d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a> &lt; buffer.<a class="code hl_function" href="de/d66/classfl_1_1basic__string_af4d95d1e9905eb5fb76e12c2c2bd7ebc.html#af4d95d1e9905eb5fb76e12c2c2bd7ebc">size</a>() ? buffer[<a class="code hl_variable" href="d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>++] : -1; }</div>
-<div class="line">        <span class="keywordtype">void</span> <a class="code hl_function" href="d9/dce/_client_validation_real_8h_aa751face66010d26f240cd6813659ae4.html#aa751face66010d26f240cd6813659ae4">println</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* s) { <a class="code hl_variable" href="d8/d94/namespacetest__quick_a8c9b09f7da0aec94eb085625d9c04cdd.html#a8c9b09f7da0aec94eb085625d9c04cdd">output</a> += s; <a class="code hl_variable" href="d8/d94/namespacetest__quick_a8c9b09f7da0aec94eb085625d9c04cdd.html#a8c9b09f7da0aec94eb085625d9c04cdd">output</a> += <span class="charliteral">&#39;\n&#39;</span>; }</div>
+<div class="line">        <span class="keywordtype">int</span> available()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> buffer.<a class="code hl_function" href="de/d66/classfl_1_1basic__string_af8fe033f0ec1bd3567ffcc20ddb4e7fa.html#af8fe033f0ec1bd3567ffcc20ddb4e7fa">size</a>() - <a class="code hl_variable" href="d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>; }</div>
+<div class="line">        <span class="keywordtype">int</span> read() { <span class="keywordflow">return</span> <a class="code hl_variable" href="d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a> &lt; buffer.<a class="code hl_function" href="de/d66/classfl_1_1basic__string_af8fe033f0ec1bd3567ffcc20ddb4e7fa.html#af8fe033f0ec1bd3567ffcc20ddb4e7fa">size</a>() ? buffer[<a class="code hl_variable" href="d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>++] : -1; }</div>
+<div class="line">        <span class="keywordtype">void</span> <a class="code hl_function" href="d9/dce/_client_validation_real_8h_aa751face66010d26f240cd6813659ae4.html#aa751face66010d26f240cd6813659ae4">println</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* s) { output += s; output += <span class="charliteral">&#39;\n&#39;</span>; }</div>
 <div class="line"> </div>
-<div class="line">        fl::string <a class="code hl_variable" href="d8/d94/namespacetest__quick_a8c9b09f7da0aec94eb085625d9c04cdd.html#a8c9b09f7da0aec94eb085625d9c04cdd">output</a>;</div>
+<div class="line">        fl::string output;</div>
 <div class="line">    };</div>
 <div class="line"> </div>
 <div class="line">    MockSerial mock;</div>
@@ -347,11 +347,10 @@ Testing</h1>
 <div class="line">    EXPECT_EQ(mock.output, <span class="stringliteral">&quot;response\n&quot;</span>);</div>
 <div class="line">}</div>
 <div class="ttc" id="a_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae_html_a29716abd4f651ba9d6f1476ea79fa7ae"><div class="ttname"><a href="d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a></div><div class="ttdeci">uint8_t pos</div><div class="ttdef"><b>Definition</b> <a href="d4/d0c/_blur_8ino_source.html#l00011">Blur.ino:11</a></div></div>
-<div class="ttc" id="aclassfl_1_1basic__string_af4d95d1e9905eb5fb76e12c2c2bd7ebc_html_af4d95d1e9905eb5fb76e12c2c2bd7ebc"><div class="ttname"><a href="de/d66/classfl_1_1basic__string_af4d95d1e9905eb5fb76e12c2c2bd7ebc.html#af4d95d1e9905eb5fb76e12c2c2bd7ebc">fl::basic_string::size</a></div><div class="ttdeci">fl::size size() const FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="df/d4b/basic__string_8h_source.html#l00153">basic_string.h:153</a></div></div>
-<div class="ttc" id="aclassfl_1_1string_acce047b79e480790af20c16f1bf84819_html_acce047b79e480790af20c16f1bf84819"><div class="ttname"><a href="d2/db2/classfl_1_1string_acce047b79e480790af20c16f1bf84819.html#acce047b79e480790af20c16f1bf84819">fl::string::npos</a></div><div class="ttdeci">static constexpr fl::size npos</div><div class="ttdef"><b>Definition</b> <a href="da/d66/string_8h_source.html#l00195">string.h:195</a></div></div>
-<div class="ttc" id="aclassfl_1_1string_html"><div class="ttname"><a href="d2/db2/classfl_1_1string.html">fl::string</a></div><div class="ttdef"><b>Definition</b> <a href="da/d66/string_8h_source.html#l00193">string.h:193</a></div></div>
-<div class="ttc" id="anamespacetest__quick_a8c9b09f7da0aec94eb085625d9c04cdd_html_a8c9b09f7da0aec94eb085625d9c04cdd"><div class="ttname"><a href="d8/d94/namespacetest__quick_a8c9b09f7da0aec94eb085625d9c04cdd.html#a8c9b09f7da0aec94eb085625d9c04cdd">test_quick.output</a></div><div class="ttdeci">output</div><div class="ttdef"><b>Definition</b> <a href="d8/def/test__quick_8py_source.html#l00050">test_quick.py:50</a></div></div>
-</div><!-- fragment --><h1><a class="anchor" id="autotoc_md377"></a>
+<div class="ttc" id="aclassfl_1_1basic__string_af8fe033f0ec1bd3567ffcc20ddb4e7fa_html_af8fe033f0ec1bd3567ffcc20ddb4e7fa"><div class="ttname"><a href="de/d66/classfl_1_1basic__string_af8fe033f0ec1bd3567ffcc20ddb4e7fa.html#af8fe033f0ec1bd3567ffcc20ddb4e7fa">fl::basic_string::size</a></div><div class="ttdeci">fl::size size() const FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="df/d4b/basic__string_8h_source.html#l00153">basic_string.h:153</a></div></div>
+<div class="ttc" id="aclassfl_1_1string_acce047b79e480790af20c16f1bf84819_html_acce047b79e480790af20c16f1bf84819"><div class="ttname"><a href="d2/db2/classfl_1_1string_acce047b79e480790af20c16f1bf84819.html#acce047b79e480790af20c16f1bf84819">fl::string::npos</a></div><div class="ttdeci">static constexpr fl::size npos</div><div class="ttdef"><b>Definition</b> <a href="da/d66/string_8h_source.html#l00204">string.h:204</a></div></div>
+<div class="ttc" id="aclassfl_1_1string_html"><div class="ttname"><a href="d2/db2/classfl_1_1string.html">fl::string</a></div><div class="ttdef"><b>Definition</b> <a href="da/d66/string_8h_source.html#l00202">string.h:202</a></div></div>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md401"></a>
 Adding New Transports</h1>
 <p>To add a new transport (e.g., WebSocket):</p>
 <ol type="1">
@@ -366,9 +365,9 @@ Adding New Transports</h1>
 <li>Reuse parsing functions: <code>parseJsonRpcRequest</code>, <code>formatJsonRpcResponse</code></li>
 <li>Add to <code>_build.cpp.hpp</code></li>
 </ol>
-<h1><a class="anchor" id="autotoc_md378"></a>
+<h1><a class="anchor" id="autotoc_md402"></a>
 Platform Support</h1>
-<p>The serial transport uses <code><a class="el" href="d4/d36/namespacefl_a01186a22a1055c583d5408c116c84ffa.html#a01186a22a1055c583d5408c116c84ffa">fl::available()</a></code>, <code><a class="el" href="d4/d36/namespacefl_a18e7608a302c3628c24710b27480641b.html#a18e7608a302c3628c24710b27480641b">fl::read()</a></code>, and <code><a class="el" href="d4/d36/namespacefl_adfaedbd8e1ada269a7733e58ff142aea.html#adfaedbd8e1ada269a7733e58ff142aea">fl::println()</a></code> which work on:</p><ul>
+<p>The serial transport uses <code><a class="el" href="d4/d36/namespacefl_a01186a22a1055c583d5408c116c84ffa.html#a01186a22a1055c583d5408c116c84ffa">fl::available()</a></code>, <code><a class="el" href="d4/d36/namespacefl_a18e7608a302c3628c24710b27480641b.html#a18e7608a302c3628c24710b27480641b">fl::read()</a></code>, and <code><a class="el" href="d4/d36/namespacefl_ab058ac6ae882a8344f79b01b40eb6e02.html#ab058ac6ae882a8344f79b01b40eb6e02">fl::println()</a></code> which work on:</p><ul>
 <li>✅ AVR (Arduino Uno, Mega, etc.)</li>
 <li>✅ ESP32 (all variants)</li>
 <li>✅ ESP8266</li>
@@ -379,7 +378,7 @@ Platform Support</h1>
 <li>✅ Host (native builds)</li>
 <li>✅ WASM (browser)</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md379"></a>
+<h1><a class="anchor" id="autotoc_md403"></a>
 Files</h1>
 <ul>
 <li><b>serial.h</b> - Public API (factory functions, templates)</li>
@@ -387,7 +386,7 @@ Files</h1>
 <li>**_build.hpp** - Build integration</li>
 <li><b>README.md</b> - This file</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md380"></a>
+<h1><a class="anchor" id="autotoc_md404"></a>
 See Also</h1>
 <ul>
 <li><code><a class="el" href="d6/d06/remote_8h.html">fl/remote/remote.h</a></code> - JSON-RPC server</li>
@@ -401,7 +400,7 @@ See Also</h1>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="dir_d08a73fbb994b1f7f5700d569dcb8c8c.html">remote</a></li><li class="navelem"><a class="el" href="dir_92161b200cdbe4c9190331b3a63d6484.html">transport</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:12 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:13 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -128,31 +128,31 @@ $(function(){initNavTree('dd/dc7/group___h_s_v2_r_g_b_gaeb2c441e92abfe7bcc495946
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d6/db5/hsv2rgb_8cpp_8hpp_source.html#l00495">495</a> of file <a class="el" href="../../d6/db5/hsv2rgb_8cpp_8hpp_source.html">hsv2rgb.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  495</span>                                                       {</div>
-<div class="line"><span class="lineno">  496</span>  <span class="keyword">const</span> <span class="keyword">auto</span> f = [](<span class="keyword">const</span> <span class="keywordtype">int</span> n, <span class="keyword">const</span> <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> h) -&gt; fl::u32 {</div>
-<div class="line"><span class="lineno">  497</span>    <span class="keyword">constexpr</span> <span class="keywordtype">int</span> kZero = 0 &lt;&lt; 8;</div>
-<div class="line"><span class="lineno">  498</span>    <span class="keyword">constexpr</span> <span class="keywordtype">int</span> kOne  = 1 &lt;&lt; 8;</div>
-<div class="line"><span class="lineno">  499</span>    <span class="keyword">constexpr</span> <span class="keywordtype">int</span> kFour = 4 &lt;&lt; 8;</div>
-<div class="line"><span class="lineno">  500</span>    <span class="keyword">constexpr</span> <span class="keywordtype">int</span> kSix  = 6 &lt;&lt; 8;</div>
-<div class="line"><span class="lineno">  501</span> </div>
-<div class="line"><span class="lineno">  502</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> k = ((n &lt;&lt; 8) + 6*h) % kSix;</div>
-<div class="line"><span class="lineno">  503</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> k2 = kFour - k;</div>
-<div class="line"><span class="lineno">  504</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909">fl::max</a>(kZero, <a class="code hl_function" href="../../d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb">fl::min</a>(kOne, <a class="code hl_function" href="../../d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb">fl::min</a>(k, k2)));</div>
-<div class="line"><span class="lineno">  505</span>  };</div>
-<div class="line"><span class="lineno">  506</span> </div>
-<div class="line"><span class="lineno">  507</span>  <span class="keyword">const</span> fl::u32 chroma = hsv.v * hsv.s / 255;</div>
-<div class="line"><span class="lineno">  508</span>  rgb.r = hsv.v - ((chroma * f(5, hsv.h)) &gt;&gt; 8);</div>
-<div class="line"><span class="lineno">  509</span>  rgb.g = hsv.v - ((chroma * f(3, hsv.h)) &gt;&gt; 8);</div>
-<div class="line"><span class="lineno">  510</span>  rgb.b = hsv.v - ((chroma * f(1, hsv.h)) &gt;&gt; 8);</div>
-<div class="line"><span class="lineno">  511</span>}</div>
-<div class="ttc" id="anamespacefl_a0356f07fb7a8f25752385fd8208b47fb_html_a0356f07fb7a8f25752385fd8208b47fb"><div class="ttname"><a href="../../d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb">fl::min</a></div><div class="ttdeci">FL_DISABLE_WARNING_PUSH U constexpr common_type_t&lt; T, U &gt; min(T a, U b) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00071">math.h:71</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d6/db5/hsv2rgb_8cpp_8hpp_source.html#l00503">503</a> of file <a class="el" href="../../d6/db5/hsv2rgb_8cpp_8hpp_source.html">hsv2rgb.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  503</span>                                                       {</div>
+<div class="line"><span class="lineno">  504</span>  <span class="keyword">const</span> <span class="keyword">auto</span> f = [](<span class="keyword">const</span> <span class="keywordtype">int</span> n, <span class="keyword">const</span> <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> h) -&gt; fl::u32 {</div>
+<div class="line"><span class="lineno">  505</span>    <span class="keyword">constexpr</span> <span class="keywordtype">int</span> kZero = 0 &lt;&lt; 8;</div>
+<div class="line"><span class="lineno">  506</span>    <span class="keyword">constexpr</span> <span class="keywordtype">int</span> kOne  = 1 &lt;&lt; 8;</div>
+<div class="line"><span class="lineno">  507</span>    <span class="keyword">constexpr</span> <span class="keywordtype">int</span> kFour = 4 &lt;&lt; 8;</div>
+<div class="line"><span class="lineno">  508</span>    <span class="keyword">constexpr</span> <span class="keywordtype">int</span> kSix  = 6 &lt;&lt; 8;</div>
+<div class="line"><span class="lineno">  509</span> </div>
+<div class="line"><span class="lineno">  510</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> k = ((n &lt;&lt; 8) + 6*h) % kSix;</div>
+<div class="line"><span class="lineno">  511</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> k2 = kFour - k;</div>
+<div class="line"><span class="lineno">  512</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a07c69292ef50aa1083046faff1c52ead.html#a07c69292ef50aa1083046faff1c52ead">fl::max</a>(kZero, <a class="code hl_function" href="../../d4/d36/namespacefl_a2fdabb91a1f100dec8da21e4306aba05.html#a2fdabb91a1f100dec8da21e4306aba05">fl::min</a>(kOne, <a class="code hl_function" href="../../d4/d36/namespacefl_a2fdabb91a1f100dec8da21e4306aba05.html#a2fdabb91a1f100dec8da21e4306aba05">fl::min</a>(k, k2)));</div>
+<div class="line"><span class="lineno">  513</span>  };</div>
+<div class="line"><span class="lineno">  514</span> </div>
+<div class="line"><span class="lineno">  515</span>  <span class="keyword">const</span> fl::u32 chroma = hsv.v * hsv.s / 255;</div>
+<div class="line"><span class="lineno">  516</span>  rgb.r = hsv.v - ((chroma * f(5, hsv.h)) &gt;&gt; 8);</div>
+<div class="line"><span class="lineno">  517</span>  rgb.g = hsv.v - ((chroma * f(3, hsv.h)) &gt;&gt; 8);</div>
+<div class="line"><span class="lineno">  518</span>  rgb.b = hsv.v - ((chroma * f(1, hsv.h)) &gt;&gt; 8);</div>
+<div class="line"><span class="lineno">  519</span>}</div>
 <div class="ttc" id="anamespacefl_a058ceeac48f181da463c2ba07401292c_html_a058ceeac48f181da463c2ba07401292c"><div class="ttname"><a href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a></div><div class="ttdeci">unsigned char u8</div><div class="ttdef"><b>Definition</b> <a href="../../df/dd8/stdint_8h_source.html#l00131">stdint.h:131</a></div></div>
-<div class="ttc" id="anamespacefl_a19ba0dae8249e0cf164136846f85e909_html_a19ba0dae8249e0cf164136846f85e909"><div class="ttname"><a href="../../d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909">fl::max</a></div><div class="ttdeci">constexpr common_type_t&lt; T, U &gt; max(T a, U b) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00075">math.h:75</a></div></div>
+<div class="ttc" id="anamespacefl_a07c69292ef50aa1083046faff1c52ead_html_a07c69292ef50aa1083046faff1c52ead"><div class="ttname"><a href="../../d4/d36/namespacefl_a07c69292ef50aa1083046faff1c52ead.html#a07c69292ef50aa1083046faff1c52ead">fl::max</a></div><div class="ttdeci">constexpr common_type_t&lt; T, U &gt; max(T a, U b) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00075">math.h:75</a></div></div>
+<div class="ttc" id="anamespacefl_a2fdabb91a1f100dec8da21e4306aba05_html_a2fdabb91a1f100dec8da21e4306aba05"><div class="ttname"><a href="../../d4/d36/namespacefl_a2fdabb91a1f100dec8da21e4306aba05.html#a2fdabb91a1f100dec8da21e4306aba05">fl::min</a></div><div class="ttdeci">FL_DISABLE_WARNING_PUSH U constexpr common_type_t&lt; T, U &gt; min(T a, U b) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00071">math.h:71</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../df/db1/math_8h_source.html#l00075">fl::max()</a>, and <a class="el" href="../../df/db1/math_8h_source.html#l00071">fl::min()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../db/dd1/crgb_8h_source.html#l00061">hsv2rgb_dispatch()</a>, <a class="el" href="../../db/dd1/crgb_8h_source.html#l00047">hsv2rgb_dispatch()</a>, <a class="el" href="../../d6/db5/hsv2rgb_8cpp_8hpp_source.html#l00514">hsv2rgb_fullspectrum()</a>, <a class="el" href="../../d6/db5/hsv2rgb_8cpp_8hpp_source.html#l00539">hsv2rgb_fullspectrum()</a>, and <a class="el" href="../../de/dc1/_h_s_v_test_8h_source.html#l00042">loop()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../db/dd1/crgb_8h_source.html#l00061">hsv2rgb_dispatch()</a>, <a class="el" href="../../db/dd1/crgb_8h_source.html#l00047">hsv2rgb_dispatch()</a>, <a class="el" href="../../d6/db5/hsv2rgb_8cpp_8hpp_source.html#l00522">hsv2rgb_fullspectrum()</a>, <a class="el" href="../../d6/db5/hsv2rgb_8cpp_8hpp_source.html#l00547">hsv2rgb_fullspectrum()</a>, and <a class="el" href="../../de/dc1/_h_s_v_test_8h_source.html#l00042">loop()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -177,7 +177,7 @@ $(function(){initNavTree('dd/dc7/group___h_s_v2_r_g_b_gaeb2c441e92abfe7bcc495946
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dd/dc7/group___h_s_v2_r_g_b.html">HSV to RGB Conversion Functions</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:02 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -85,7 +85,7 @@ var sectionId = 'dynsection-0';
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../df/d9e/namespacefl_1_1detail_a6639ef5e7932062a12de7451f274b003.html#a6639ef5e7932062a12de7451f274b003" target="_top" xlink:title=" ">
+<g id="a_Node000003"><a xlink:href="../../df/d9e/namespacefl_1_1detail_af1eabc31dea86eb576dfdcfc0357c7ef.html#af1eabc31dea86eb576dfdcfc0357c7ef" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="421,-56 311,-56 311,-37 421,-37 421,-56"/>
 <text text-anchor="middle" x="366" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">fl::detail::atan_full_</text>
 </a>
@@ -103,7 +103,7 @@ var sectionId = 'dynsection-0';
 <!-- Node5 -->
 <g id="Node000005" class="node">
 <title>Node5</title>
-<g id="a_Node000005"><a xlink:href="../../df/d9e/namespacefl_1_1detail_af564e0d482e4925c603cb299c623c312.html#af564e0d482e4925c603cb299c623c312" target="_top" xlink:title=" ">
+<g id="a_Node000005"><a xlink:href="../../df/d9e/namespacefl_1_1detail_aca93bb2a16b11f8732490f1055e89a0f.html#aca93bb2a16b11f8732490f1055e89a0f" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="430,-19 302,-19 302,0 430,0 430,-19"/>
 <text text-anchor="middle" x="366" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::detail::sqrt_newton_</text>
 </a>
@@ -121,7 +121,7 @@ var sectionId = 'dynsection-0';
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../df/d9e/namespacefl_1_1detail_a3065609d49ae6603e01f385d43107a4c.html#a3065609d49ae6603e01f385d43107a4c" target="_top" xlink:title=" ">
+<g id="a_Node000004"><a xlink:href="../../df/d9e/namespacefl_1_1detail_a183d9d1e13b74ad2acebc355243283ff.html#a183d9d1e13b74ad2acebc355243283ff" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="576,-61.5 466,-61.5 466,-31.5 576,-31.5 576,-61.5"/>
 <text text-anchor="start" x="474" y="-49.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::detail::atan_poly</text>
 <text text-anchor="middle" x="521" y="-38.5" font-family="Helvetica,sans-Serif" font-size="10.00">_unit_</text>

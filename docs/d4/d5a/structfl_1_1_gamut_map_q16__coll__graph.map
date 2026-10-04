@@ -1,0 +1,5 @@
+<map id="fl::GamutMapQ16" name="fl::GamutMapQ16">
+<area shape="rect" id="Node000001" title="Everything the per&#45;pixel mapper needs, derived once when a profile binds." alt="" coords="33,93,169,119"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl.html#d0/d89/structfl_1_1_emitter_solve_matrix_q16" title="Inverse emitter matrix in s16.16, mapping XYZ to three emitter drives." alt="" coords="5,5,196,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="103,45,103,93,98,93,98,45"/>
+</map>

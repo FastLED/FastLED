@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -109,7 +109,7 @@ $(function(){initNavTree('d9/d0a/classfl_1_1spi_1_1_device_a851fa0298ee8a47bd677
         <tr>
           <td class="memname">bool fl::spi::Device::waitComplete </td>
           <td>(</td>
-          <td class="paramtype">u32</td>          <td class="paramname"><span class="paramname"><em>timeout_ms</em></span><span class="paramdefsep"> = </span><span class="paramdefval">(<a class="el" href="../../d6/d7c/structfl_1_1numeric__limits.html">fl::numeric_limits</a>&lt;u32&gt;<a class="el" href="../../d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909">::max</a>)()</span></td><td>)</td>
+          <td class="paramtype">u32</td>          <td class="paramname"><span class="paramname"><em>timeout_ms</em></span><span class="paramdefsep"> = </span><span class="paramdefval">(<a class="el" href="../../d6/d7c/structfl_1_1numeric__limits.html">fl::numeric_limits</a>&lt;u32&gt;<a class="el" href="../../d4/d36/namespacefl_a07c69292ef50aa1083046faff1c52ead.html#a07c69292ef50aa1083046faff1c52ead">::max</a>)()</span></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -124,30 +124,30 @@ $(function(){initNavTree('d9/d0a/classfl_1_1spi_1_1_device_a851fa0298ee8a47bd677
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>true if completed, false on timeout </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d0/daf/device_8cpp_8hpp_source.html#l00325">325</a> of file <a class="el" href="../../d0/daf/device_8cpp_8hpp_source.html">device.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  325</span>                                        {</div>
-<div class="line"><span class="lineno">  326</span>    <span class="keywordflow">if</span> (!<a class="code hl_function" href="../../d9/d0a/classfl_1_1spi_1_1_device_a1186e792511c298ed4bbd1c12a180c8c.html#a1186e792511c298ed4bbd1c12a180c8c">isReady</a>()) {</div>
-<div class="line"><span class="lineno">  327</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">  328</span>    }</div>
-<div class="line"><span class="lineno">  329</span> </div>
-<div class="line"><span class="lineno">  330</span>    <span class="comment">// Get hardware controller</span></div>
-<div class="line"><span class="lineno">  331</span>    <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../d9/d0a/classfl_1_1spi_1_1_device_a9a9c763d0d303ebbd0915003d7b89427.html#a9a9c763d0d303ebbd0915003d7b89427">pImpl</a>-&gt;hw_backend) {</div>
-<div class="line"><span class="lineno">  332</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;SPI Device: No hardware controller available&quot;</span>);</div>
-<div class="line"><span class="lineno">  333</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">  334</span>    }</div>
-<div class="line"><span class="lineno">  335</span> </div>
-<div class="line"><span class="lineno">  336</span>    <span class="comment">// Use polymorphic interface (works for SpiHw1/2/4/8)</span></div>
-<div class="line"><span class="lineno">  337</span>    SpiHwBase* hw = <a class="code hl_variable" href="../../d9/d0a/classfl_1_1spi_1_1_device_a9a9c763d0d303ebbd0915003d7b89427.html#a9a9c763d0d303ebbd0915003d7b89427">pImpl</a>-&gt;hw_backend.get();</div>
-<div class="line"><span class="lineno">  338</span> </div>
-<div class="line"><span class="lineno">  339</span>    <span class="keywordflow">return</span> hw-&gt;waitComplete(timeout_ms);</div>
-<div class="line"><span class="lineno">  340</span>}</div>
-<div class="ttc" id="aclassfl_1_1spi_1_1_device_a1186e792511c298ed4bbd1c12a180c8c_html_a1186e792511c298ed4bbd1c12a180c8c"><div class="ttname"><a href="../../d9/d0a/classfl_1_1spi_1_1_device_a1186e792511c298ed4bbd1c12a180c8c.html#a1186e792511c298ed4bbd1c12a180c8c">fl::spi::Device::isReady</a></div><div class="ttdeci">bool isReady() const</div><div class="ttdoc">Check if device is initialized and ready for use.</div><div class="ttdef"><b>Definition</b> <a href="../../d0/daf/device_8cpp_8hpp_source.html#l00152">device.cpp.hpp:152</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d0/daf/device_8cpp_8hpp_source.html#l00323">323</a> of file <a class="el" href="../../d0/daf/device_8cpp_8hpp_source.html">device.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  323</span>                                        {</div>
+<div class="line"><span class="lineno">  324</span>    <span class="keywordflow">if</span> (!<a class="code hl_function" href="../../d9/d0a/classfl_1_1spi_1_1_device_a1186e792511c298ed4bbd1c12a180c8c.html#a1186e792511c298ed4bbd1c12a180c8c">isReady</a>()) {</div>
+<div class="line"><span class="lineno">  325</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  326</span>    }</div>
+<div class="line"><span class="lineno">  327</span> </div>
+<div class="line"><span class="lineno">  328</span>    <span class="comment">// Get hardware controller</span></div>
+<div class="line"><span class="lineno">  329</span>    <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../d9/d0a/classfl_1_1spi_1_1_device_a9a9c763d0d303ebbd0915003d7b89427.html#a9a9c763d0d303ebbd0915003d7b89427">pImpl</a>-&gt;hw_backend) {</div>
+<div class="line"><span class="lineno">  330</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;SPI Device: No hardware controller available&quot;</span>);</div>
+<div class="line"><span class="lineno">  331</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  332</span>    }</div>
+<div class="line"><span class="lineno">  333</span> </div>
+<div class="line"><span class="lineno">  334</span>    <span class="comment">// Use polymorphic interface (works for SpiHw1/2/4/8)</span></div>
+<div class="line"><span class="lineno">  335</span>    SpiHwBase* hw = <a class="code hl_variable" href="../../d9/d0a/classfl_1_1spi_1_1_device_a9a9c763d0d303ebbd0915003d7b89427.html#a9a9c763d0d303ebbd0915003d7b89427">pImpl</a>-&gt;hw_backend.get();</div>
+<div class="line"><span class="lineno">  336</span> </div>
+<div class="line"><span class="lineno">  337</span>    <span class="keywordflow">return</span> hw-&gt;waitComplete(timeout_ms);</div>
+<div class="line"><span class="lineno">  338</span>}</div>
+<div class="ttc" id="aclassfl_1_1spi_1_1_device_a1186e792511c298ed4bbd1c12a180c8c_html_a1186e792511c298ed4bbd1c12a180c8c"><div class="ttname"><a href="../../d9/d0a/classfl_1_1spi_1_1_device_a1186e792511c298ed4bbd1c12a180c8c.html#a1186e792511c298ed4bbd1c12a180c8c">fl::spi::Device::isReady</a></div><div class="ttdeci">bool isReady() const</div><div class="ttdoc">Check if device is initialized and ready for use.</div><div class="ttdef"><b>Definition</b> <a href="../../d0/daf/device_8cpp_8hpp_source.html#l00150">device.cpp.hpp:150</a></div></div>
 <div class="ttc" id="aclassfl_1_1spi_1_1_device_a9a9c763d0d303ebbd0915003d7b89427_html_a9a9c763d0d303ebbd0915003d7b89427"><div class="ttname"><a href="../../d9/d0a/classfl_1_1spi_1_1_device_a9a9c763d0d303ebbd0915003d7b89427.html#a9a9c763d0d303ebbd0915003d7b89427">fl::spi::Device::pImpl</a></div><div class="ttdeci">fl::unique_ptr&lt; Impl &gt; pImpl</div><div class="ttdef"><b>Definition</b> <a href="../../db/de9/device_8h_source.html#l00134">device.h:134</a></div></div>
-<div class="ttc" id="alog_8h_a868b194fdb2234182e76042d9fde3062_html_a868b194fdb2234182e76042d9fde3062"><div class="ttname"><a href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a></div><div class="ttdeci">#define FL_WARN(X)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00276">log.h:276</a></div></div>
+<div class="ttc" id="alog_8h_a4804912fba6eed63e1afd84b8768aced_html_a4804912fba6eed63e1afd84b8768aced"><div class="ttname"><a href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a></div><div class="ttdeci">#define FL_WARN(...)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00440">log.h:440</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d7/d7f/log_8h_source.html#l00276">FL_WARN</a>, <a class="el" href="../../d0/daf/device_8cpp_8hpp_source.html#l00152">isReady()</a>, and <a class="el" href="../../db/de9/device_8h_source.html#l00134">pImpl</a>.</p>
+<p class="reference">References <a class="el" href="../../d7/d7f/log_8h_source.html#l00440">FL_WARN</a>, <a class="el" href="../../d0/daf/device_8cpp_8hpp_source.html#l00150">isReady()</a>, and <a class="el" href="../../db/de9/device_8h_source.html#l00134">pImpl</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d0/daf/device_8cpp_8hpp_source.html#l00127">end()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d0/daf/device_8cpp_8hpp_source.html#l00125">end()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -172,7 +172,7 @@ $(function(){initNavTree('d9/d0a/classfl_1_1spi_1_1_device_a851fa0298ee8a47bd677
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d4/d68/namespacefl_1_1spi.html">spi</a></li><li class="navelem"><a class="el" href="../../d9/d0a/classfl_1_1spi_1_1_device.html">Device</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:10 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:12 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

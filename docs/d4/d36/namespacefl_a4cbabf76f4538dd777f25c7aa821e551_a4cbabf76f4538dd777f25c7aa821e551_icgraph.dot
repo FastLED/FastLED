@@ -8,11 +8,15 @@ digraph "fl::fabs_impl_double"
   rankdir="RL";
   Node1 [id="Node000001",label="fl::fabs_impl_double",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::fabs",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a11518c3c3c229b6f1e95dac2bef295ef.html#a11518c3c3c229b6f1e95dac2bef295ef",tooltip=" "];
+  Node2 [id="Node000002",label="fl::fabs",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_ab4d4c93cb75e3d2abb59cf7893a0949d.html#ab4d4c93cb75e3d2abb59cf7893a0949d",tooltip=" "];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::colorimetric_detail\l::barycentric_xy",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/df0/namespacefl_1_1colorimetric__detail_aa1ae828879a2d482569745a6017e8508.html#aa1ae828879a2d482569745a6017e8508",tooltip=" "];
+  Node3 [id="Node000003",label="fl::colorimetric_response\l::barycentric_xy",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/db3/namespacefl_1_1colorimetric__response_a562a056bd00762875586ce688324a4cf.html#a562a056bd00762875586ce688324a4cf",tooltip=" "];
   Node2 -> Node4 [id="edge3_Node000002_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="fl::colorimetric_detail\l::invert3x3",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/df0/namespacefl_1_1colorimetric__detail_a9ec205eef98add93412ca4f94c20545f.html#a9ec205eef98add93412ca4f94c20545f",tooltip=" "];
-  Node4 -> Node5 [id="edge4_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node5 [id="Node000005",label="fl::colorimetric_detail\l::build_source_matrix",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/df0/namespacefl_1_1colorimetric__detail_a2c7b3de180642cbf3dbe3d9bc370bb13.html#a2c7b3de180642cbf3dbe3d9bc370bb13",tooltip=" "];
+  Node4 [id="Node000004",label="fl::colorimetric_response\l::build_rgb_colorimetric_cache",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/db3/namespacefl_1_1colorimetric__response_ad982dbfa0b852b2299925730448099a7.html#ad982dbfa0b852b2299925730448099a7",tooltip=" "];
+  Node2 -> Node5 [id="edge4_Node000002_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::colorimetric_response\l::detail::columnScale",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d54/namespacefl_1_1colorimetric__response_1_1detail_a6473f7c3cd904a8cda13b9573ab0ffe4.html#a6473f7c3cd904a8cda13b9573ab0ffe4",tooltip="Largest absolute entry of a column, which is its infinity norm."];
+  Node5 -> Node6 [id="edge5_Node000005_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::colorimetric_response\l::invert3x3",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$da/db3/namespacefl_1_1colorimetric__response_a47bab90ae7cc342ef40e1f39ea5c6af9.html#a47bab90ae7cc342ef40e1f39ea5c6af9",tooltip=" "];
+  Node6 -> Node4 [id="edge6_Node000006_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node6 [id="edge7_Node000002_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
 }

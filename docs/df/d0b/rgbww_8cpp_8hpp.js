@@ -8,13 +8,13 @@ var rgbww_8cpp_8hpp =
       [ "profile", "d3/de0/namespacefl_1_1anonymous__namespace_02rgbww_8cpp_8hpp_03.html#a1235a3a18943802d2e0d8c93fd231612", null ]
     ] ],
     [ "FASTLED_INTERNAL", "df/d0b/rgbww_8cpp_8hpp_a2d8dda85477a00deab830effc5159d33.html#a2d8dda85477a00deab830effc5159d33", null ],
-    [ "fl::get_rgbww_colorimetric_profile", "d4/d36/namespacefl_acc85ed3bb393289dc6b9954be1187058.html#acc85ed3bb393289dc6b9954be1187058", null ],
-    [ "fl::rgb_2_rgbww_colorimetric", "d4/d36/namespacefl_a8c2e1ecdc8458727550c1f01ff8821b2.html#a8c2e1ecdc8458727550c1f01ff8821b2", null ],
-    [ "fl::rgb_2_rgbww_colorimetric_boosted", "d4/d36/namespacefl_a3865de8d228e5d331de04ff604b5fbad.html#a3865de8d228e5d331de04ff604b5fbad", null ],
-    [ "fl::rgb_2_rgbww_user_function", "d4/d36/namespacefl_a78a146522b33ee5f36e3a72753c31227.html#a78a146522b33ee5f36e3a72753c31227", null ],
-    [ "fl::rgbww_partial_reorder", "d4/d36/namespacefl_acdf5eb7e2dea41478c27eb87f82538a9.html#acdf5eb7e2dea41478c27eb87f82538a9", null ],
-    [ "fl::set_rgb_2_rgbww_function", "d4/d36/namespacefl_a6475afbb4f23fb586b78a37cf4abbbea.html#a6475afbb4f23fb586b78a37cf4abbbea", null ],
-    [ "fl::set_rgbww_colorimetric_profile", "d4/d36/namespacefl_aca95fa033a16e1ea23c218cd79623319.html#aca95fa033a16e1ea23c218cd79623319", null ],
-    [ "fl::anonymous_namespace{rgbww.cpp.hpp}::zero_out", "d3/de0/namespacefl_1_1anonymous__namespace_02rgbww_8cpp_8hpp_03_a4c35bdb38798909c3ce2c28896ae8348.html#a4c35bdb38798909c3ce2c28896ae8348", null ],
+    [ "fl::get_rgbww_colorimetric_profile", "d4/d36/namespacefl_a4d9d95187d1a4b754fc1e594b8267f9b.html#a4d9d95187d1a4b754fc1e594b8267f9b", null ],
+    [ "fl::rgb_2_rgbww_colorimetric", "d4/d36/namespacefl_a6d10266abe1a3bb806058bddc6280aca.html#a6d10266abe1a3bb806058bddc6280aca", null ],
+    [ "fl::rgb_2_rgbww_colorimetric_boosted", "d4/d36/namespacefl_ad8236e62688ec34ae8b86bd9e6373d92.html#ad8236e62688ec34ae8b86bd9e6373d92", null ],
+    [ "fl::rgb_2_rgbww_user_function", "d4/d36/namespacefl_a91f97ee86d04cf706f017ac389d440f6.html#a91f97ee86d04cf706f017ac389d440f6", null ],
+    [ "fl::rgbww_partial_reorder", "d4/d36/namespacefl_a0ada914bf8a8dbf0fc5a374efccb6007.html#a0ada914bf8a8dbf0fc5a374efccb6007", null ],
+    [ "fl::set_rgb_2_rgbww_function", "d4/d36/namespacefl_a9cdd69b199d2f375f2adb3d3a5a92363.html#a9cdd69b199d2f375f2adb3d3a5a92363", null ],
+    [ "fl::set_rgbww_colorimetric_profile", "d4/d36/namespacefl_a7b5d013d02b5d6337eff08b3e91b41ae.html#a7b5d013d02b5d6337eff08b3e91b41ae", null ],
+    [ "fl::anonymous_namespace{rgbww.cpp.hpp}::zero_out", "d3/de0/namespacefl_1_1anonymous__namespace_02rgbww_8cpp_8hpp_03_aa05065c9e5f821d4d734b2bc38dc21c9.html#aa05065c9e5f821d4d734b2bc38dc21c9", null ],
     [ "fl::kRgbwwDefaultProfile", "d4/d36/namespacefl_a39c6469a136fae25d7fe0db82a54820a.html#a39c6469a136fae25d7fe0db82a54820a", null ]
 ];

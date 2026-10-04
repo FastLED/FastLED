@@ -1,29 +1,33 @@
 <map id="dampening" name="dampening">
-<area shape="rect" id="Node000001" title=" " alt="" coords="491,271,585,296"/>
-<area shape="rect" id="Node000002" href="$d6/d5f/classfl_1_1_wave_fx_a6cee8ec0838deb4d3842f47e672b9395.html#a6cee8ec0838deb4d3842f47e672b9395" title="Construct wave effect with given coordinate mapping and parameters." alt="" coords="254,5,405,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="531,257,523,213,506,157,480,100,462,75,441,52,424,40,404,31,406,26,426,35,444,48,466,71,484,98,511,155,528,211,536,256"/>
-<area shape="rect" id="Node000003" href="$d8/dc1/classfl_1_1_wave_simulation1_d_ad19c029ab35a226c2a34f82997c7c7dc.html#ad19c029ab35a226c2a34f82997c7c7dc" title=" " alt="" coords="5,78,168,118"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="530,258,521,220,504,174,478,130,461,112,441,96,407,79,370,68,332,62,293,61,218,67,153,81,152,75,217,62,293,55,332,57,371,63,409,74,444,92,465,108,482,127,509,172,526,218,535,257"/>
-<area shape="rect" id="Node000004" href="$da/df9/classfl_1_1_wave_simulation1_d___real_a2448dabe4e8854f8964931f30c81c369.html#a2448dabe4e8854f8964931f30c81c369" title=" " alt="" coords="216,106,443,146"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="522,260,490,209,467,183,441,160,420,148,422,144,444,156,471,179,494,206,527,257"/>
-<area shape="rect" id="Node000005" href="$da/d47/classfl_1_1_wave_simulation2_d_a14fc79bc9156543ae8975f9aac2416ad.html#a14fc79bc9156543ae8975f9aac2416ad" title=" " alt="" coords="5,291,168,331"/>
-<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="477,290,169,309,168,304,477,284"/>
-<area shape="rect" id="Node000006" href="$d5/d94/classfl_1_1_wave_simulation2_d___real_aa3f35b8334e4e96576f714639779d1a9.html#aa3f35b8334e4e96576f714639779d1a9" title=" " alt="" coords="216,234,443,274"/>
-<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="477,277,442,273,443,267,478,272"/>
-<area shape="rect" id="Node000007" href="$d8/dc1/classfl_1_1_wave_simulation1_d_ab4890a1397a96d6cab3251453bc81db9.html#ab4890a1397a96d6cab3251453bc81db9" title=" " alt="" coords="248,170,411,210"/>
-<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="508,265,477,244,442,224,410,212,412,207,444,220,480,239,511,260"/>
-<area shape="rect" id="Node000009" href="$da/d47/classfl_1_1_wave_simulation2_d_ae729085b341ecdaef1ea2c4fa18bac40.html#ae729085b341ecdaef1ea2c4fa18bac40" title=" " alt="" coords="248,349,411,389"/>
-<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="502,305,444,332,394,351,392,346,442,328,500,300"/>
-<area shape="rect" id="Node000011" href="$d5/d94/_wave2d_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="304,413,355,439"/>
-<area shape="poly" id="edge12_Node000001_Node000011" title=" " alt="" coords="526,310,493,358,470,382,444,403,422,414,398,421,355,428,354,422,397,416,420,409,441,398,467,378,489,354,521,307"/>
-<area shape="rect" id="Node000012" href="$d6/d5f/classfl_1_1_wave_fx_aa0801aca22b25412f485fce37aed2960.html#aa0801aca22b25412f485fce37aed2960" title="Set wave energy dampening." alt="" coords="233,463,426,488"/>
-<area shape="poly" id="edge13_Node000001_Node000012" title=" " alt="" coords="532,310,520,343,502,382,477,421,444,453,424,465,421,460,441,449,473,418,498,380,515,341,527,309"/>
-<area shape="rect" id="Node000013" href="$d5/d94/_wave2d_8h_af34fad4f4297001aeb4358eb0480e1a1.html#af34fad4f4297001aeb4358eb0480e1a1" title=" " alt="" coords="261,512,397,537"/>
-<area shape="poly" id="edge14_Node000001_Node000013" title=" " alt="" coords="536,310,527,353,510,405,483,458,466,482,444,503,422,516,398,523,397,518,420,511,441,499,462,478,479,455,505,403,522,351,531,309"/>
-<area shape="poly" id="edge7_Node000007_Node000003" title=" " alt="" coords="238,168,215,160,125,120,128,116,217,156,239,163"/>
-<area shape="rect" id="Node000008" href="$d8/dc1/classfl_1_1_wave_simulation1_d_a960e0ff2b90bd9f22d0641c6c78e14f0.html#a960e0ff2b90bd9f22d0641c6c78e14f0" title=" " alt="" coords="5,170,168,210"/>
-<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="234,193,168,193,168,187,234,187"/>
-<area shape="poly" id="edge10_Node000009_Node000005" title=" " alt="" coords="234,349,168,333,169,328,235,344"/>
-<area shape="rect" id="Node000010" href="$da/d47/classfl_1_1_wave_simulation2_d_a018b582b7a5830a2bdafdc52a4cd39d9.html#a018b582b7a5830a2bdafdc52a4cd39d9" title=" " alt="" coords="5,355,168,395"/>
-<area shape="poly" id="edge11_Node000009_Node000010" title=" " alt="" coords="234,374,168,376,168,370,234,369"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="565,305,660,331"/>
+<area shape="rect" id="Node000002" href="$d6/d5f/classfl_1_1_wave_fx_a6cee8ec0838deb4d3842f47e672b9395.html#a6cee8ec0838deb4d3842f47e672b9395" title="Construct wave effect with given coordinate mapping and parameters." alt="" coords="329,5,479,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="608,292,602,240,588,173,576,138,560,104,540,72,516,45,499,34,479,26,481,21,501,29,519,41,545,69,565,101,581,136,593,171,608,239,613,292"/>
+<area shape="rect" id="Node000003" href="$d8/dc1/classfl_1_1_wave_simulation1_d_ad19c029ab35a226c2a34f82997c7c7dc.html#ad19c029ab35a226c2a34f82997c7c7dc" title=" " alt="" coords="43,205,205,245"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="594,295,561,256,540,238,516,224,478,211,437,202,354,195,275,199,206,209,205,204,274,194,354,190,438,197,479,206,518,220,543,234,565,253,598,292"/>
+<area shape="rect" id="Node000004" href="$da/df9/classfl_1_1_wave_simulation1_d___real_a3d83747d531f51b966518f4740243395.html#a3d83747d531f51b966518f4740243395" title=" " alt="" coords="291,119,517,159"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="598,294,566,237,543,206,516,180,483,162,486,157,519,176,547,203,571,234,603,292"/>
+<area shape="rect" id="Node000005" href="$da/d47/classfl_1_1_wave_simulation2_d_a14fc79bc9156543ae8975f9aac2416ad.html#a14fc79bc9156543ae8975f9aac2416ad" title=" " alt="" coords="43,359,205,399"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="569,338,518,353,435,366,352,375,205,382,205,377,351,370,435,361,517,347,567,333"/>
+<area shape="rect" id="Node000006" href="$d5/d94/classfl_1_1_wave_simulation2_d___real_a6cc4a5b0df932fb1c777360a85f9a248.html#a6cc4a5b0df932fb1c777360a85f9a248" title=" " alt="" coords="291,234,517,274"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="562,303,517,289,477,277,479,272,518,283,563,298"/>
+<area shape="rect" id="Node000007" href="$d5/d94/classfl_1_1_wave_simulation2_d___real_a9e5093d52fedeaee09bb10b9f0eef182.html#a9e5093d52fedeaee09bb10b9f0eef182" title=" " alt="" coords="291,55,517,95"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="604,292,595,252,578,202,552,152,535,129,516,109,499,98,502,93,519,105,539,126,556,149,583,200,600,250,610,291"/>
+<area shape="rect" id="Node000009" href="$d8/dc1/classfl_1_1_wave_simulation1_d_ab4890a1397a96d6cab3251453bc81db9.html#ab4890a1397a96d6cab3251453bc81db9" title=" " alt="" coords="323,298,485,338"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="551,321,485,321,485,315,551,315"/>
+<area shape="rect" id="Node000011" href="$da/d47/classfl_1_1_wave_simulation2_d_ae729085b341ecdaef1ea2c4fa18bac40.html#ae729085b341ecdaef1ea2c4fa18bac40" title=" " alt="" coords="323,413,485,453"/>
+<area shape="poly" id="edge11_Node000001_Node000011" title=" " alt="" coords="590,342,558,370,519,396,477,415,475,410,516,392,554,366,587,338"/>
+<area shape="rect" id="Node000013" href="$d5/d94/_wave2d_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="379,477,429,503"/>
+<area shape="poly" id="edge14_Node000001_Node000013" title=" " alt="" coords="604,345,573,407,549,439,519,467,497,479,473,486,430,492,429,487,472,481,495,474,516,462,545,436,569,404,600,342"/>
+<area shape="rect" id="Node000014" href="$d6/d5f/classfl_1_1_wave_fx_aa0801aca22b25412f485fce37aed2960.html#aa0801aca22b25412f485fce37aed2960" title="Set wave energy dampening." alt="" coords="307,527,501,552"/>
+<area shape="poly" id="edge15_Node000001_Node000014" title=" " alt="" coords="609,345,599,384,582,431,556,478,539,499,519,517,500,529,497,524,516,513,535,495,551,475,577,428,594,382,604,344"/>
+<area shape="rect" id="Node000015" href="$d5/d94/_wave2d_8h_af34fad4f4297001aeb4358eb0480e1a1.html#af34fad4f4297001aeb4358eb0480e1a1" title=" " alt="" coords="336,576,472,601"/>
+<area shape="poly" id="edge16_Node000001_Node000015" title=" " alt="" coords="612,345,605,393,589,453,562,515,542,542,519,567,497,580,473,588,472,583,495,575,516,563,538,539,557,512,584,452,599,392,607,345"/>
+<area shape="rect" id="Node000008" href="$d5/d94/classfl_1_1_wave_simulation2_d___real_a78ffbe3169ee9a4681998f80ee2a07e0.html#a78ffbe3169ee9a4681998f80ee2a07e0" title=" " alt="" coords="5,55,243,95"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="277,78,243,78,243,73,277,73"/>
+<area shape="poly" id="edge9_Node000009_Node000003" title=" " alt="" coords="316,297,290,289,175,247,177,242,292,283,317,292"/>
+<area shape="rect" id="Node000010" href="$d8/dc1/classfl_1_1_wave_simulation1_d_a960e0ff2b90bd9f22d0641c6c78e14f0.html#a960e0ff2b90bd9f22d0641c6c78e14f0" title=" " alt="" coords="43,295,205,335"/>
+<area shape="poly" id="edge10_Node000009_Node000010" title=" " alt="" coords="309,320,205,319,205,313,309,314"/>
+<area shape="poly" id="edge12_Node000011_Node000005" title=" " alt="" coords="309,417,205,397,206,392,310,412"/>
+<area shape="rect" id="Node000012" href="$da/d47/classfl_1_1_wave_simulation2_d_a018b582b7a5830a2bdafdc52a4cd39d9.html#a018b582b7a5830a2bdafdc52a4cd39d9" title=" " alt="" coords="43,423,205,463"/>
+<area shape="poly" id="edge13_Node000011_Node000012" title=" " alt="" coords="309,439,205,443,205,438,309,434"/>
 </map>

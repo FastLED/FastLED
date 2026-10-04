@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -148,13 +148,13 @@ $(function(){initNavTree('d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_a
 <div class="line"><span class="lineno">  237</span>    variance /= <span class="keyword">static_cast&lt;</span><span class="keywordtype">float</span><span class="keyword">&gt;</span>(<a class="code hl_variable" href="../../d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_a06038544c12958cd90a596e6d0d849cc.html#a06038544c12958cd90a596e6d0d849cc">mIBIHistory</a>.size());</div>
 <div class="line"><span class="lineno">  238</span> </div>
 <div class="line"><span class="lineno">  239</span>    <span class="comment">// Convert std dev from frames to seconds</span></div>
-<div class="line"><span class="lineno">  240</span>    <span class="keywordtype">float</span> stdDevFrames = <a class="code hl_function" href="../../d4/d36/namespacefl_a40c15aab45d44b7ca11f148cc2e997c1.html#a40c15aab45d44b7ca11f148cc2e997c1">fl::sqrt</a>(variance);</div>
+<div class="line"><span class="lineno">  240</span>    <span class="keywordtype">float</span> stdDevFrames = <a class="code hl_function" href="../../d4/d36/namespacefl_ae5cb57a6b1ba6c629a49f0fec021b6e9.html#ae5cb57a6b1ba6c629a49f0fec021b6e9">fl::sqrt</a>(variance);</div>
 <div class="line"><span class="lineno">  241</span>    <span class="keywordflow">return</span> (stdDevFrames * <span class="keyword">static_cast&lt;</span><span class="keywordtype">float</span><span class="keyword">&gt;</span>(<a class="code hl_variable" href="../../d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_afce3b3e86bd8c3d52f6489972c3e2d35.html#afce3b3e86bd8c3d52f6489972c3e2d35">mConfig</a>.samplesPerFrame)) /</div>
 <div class="line"><span class="lineno">  242</span>           <span class="keyword">static_cast&lt;</span><span class="keywordtype">float</span><span class="keyword">&gt;</span>(<a class="code hl_variable" href="../../d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_afce3b3e86bd8c3d52f6489972c3e2d35.html#afce3b3e86bd8c3d52f6489972c3e2d35">mConfig</a>.sampleRate);</div>
 <div class="line"><span class="lineno">  243</span>}</div>
 <div class="ttc" id="aclassfl_1_1audio_1_1detector_1_1_musical_beat_a06038544c12958cd90a596e6d0d849cc_html_a06038544c12958cd90a596e6d0d849cc"><div class="ttname"><a href="../../d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_a06038544c12958cd90a596e6d0d849cc.html#a06038544c12958cd90a596e6d0d849cc">fl::audio::detector::MusicalBeat::mIBIHistory</a></div><div class="ttdeci">deque&lt; u32 &gt; mIBIHistory</div><div class="ttdoc">Inter-beat interval history (in frames)</div><div class="ttdef"><b>Definition</b> <a href="../../d6/df4/musical__beat__detector_8h_source.html#l00157">musical_beat_detector.h:157</a></div></div>
 <div class="ttc" id="aclassfl_1_1audio_1_1detector_1_1_musical_beat_afce3b3e86bd8c3d52f6489972c3e2d35_html_afce3b3e86bd8c3d52f6489972c3e2d35"><div class="ttname"><a href="../../d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_afce3b3e86bd8c3d52f6489972c3e2d35.html#afce3b3e86bd8c3d52f6489972c3e2d35">fl::audio::detector::MusicalBeat::mConfig</a></div><div class="ttdeci">MusicalBeatDetectorConfig mConfig</div><div class="ttdef"><b>Definition</b> <a href="../../d6/df4/musical__beat__detector_8h_source.html#l00138">musical_beat_detector.h:138</a></div></div>
-<div class="ttc" id="anamespacefl_a40c15aab45d44b7ca11f148cc2e997c1_html_a40c15aab45d44b7ca11f148cc2e997c1"><div class="ttname"><a href="../../d4/d36/namespacefl_a40c15aab45d44b7ca11f148cc2e997c1.html#a40c15aab45d44b7ca11f148cc2e997c1">fl::sqrt</a></div><div class="ttdeci">constexpr enable_if&lt; is_fixed_point&lt; T &gt;::value, T &gt;::type sqrt(T x) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../de/d62/fixed__point_8h_source.html#l00559">fixed_point.h:559</a></div></div>
+<div class="ttc" id="anamespacefl_ae5cb57a6b1ba6c629a49f0fec021b6e9_html_ae5cb57a6b1ba6c629a49f0fec021b6e9"><div class="ttname"><a href="../../d4/d36/namespacefl_ae5cb57a6b1ba6c629a49f0fec021b6e9.html#ae5cb57a6b1ba6c629a49f0fec021b6e9">fl::sqrt</a></div><div class="ttdeci">constexpr enable_if&lt; is_fixed_point&lt; T &gt;::value, T &gt;::type sqrt(T x) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../de/d62/fixed__point_8h_source.html#l00559">fixed_point.h:559</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../d6/df4/musical__beat__detector_8h_source.html#l00138">mConfig</a>, <a class="el" href="../../d6/df4/musical__beat__detector_8h_source.html#l00157">mIBIHistory</a>, and <a class="el" href="../../de/d62/fixed__point_8h_source.html#l00559">fl::sqrt()</a>.</p>
 
@@ -183,7 +183,7 @@ $(function(){initNavTree('d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_a
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../db/dbf/namespacefl_1_1audio.html">audio</a></li><li class="navelem"><a class="el" href="../../dd/d12/namespacefl_1_1audio_1_1detector.html">detector</a></li><li class="navelem"><a class="el" href="../../d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat.html">MusicalBeat</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:08 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:11 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

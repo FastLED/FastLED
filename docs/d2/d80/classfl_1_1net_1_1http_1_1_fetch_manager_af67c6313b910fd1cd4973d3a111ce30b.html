@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -127,36 +127,36 @@ $(function(){initNavTree('d2/d80/classfl_1_1net_1_1http_1_1_fetch_manager_af67c6
 
 <p>Implements <a class="el" href="../../d6/d46/classfl_1_1task_1_1_runner_a03e055fef44aeb8a025d6af652ddf22e.html#a03e055fef44aeb8a025d6af652ddf22e">fl::task::Runner</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="../../de/daa/fetch_8cpp_8hpp_source.html#l00460">460</a> of file <a class="el" href="../../de/daa/fetch_8cpp_8hpp_source.html">fetch.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  460</span>                          {</div>
-<div class="line"><span class="lineno">  461</span>    <span class="comment">// Update all active promises first</span></div>
-<div class="line"><span class="lineno">  462</span>    <span class="keywordflow">for</span> (<span class="keyword">auto</span>&amp; promise : <a class="code hl_variable" href="../../d2/d80/classfl_1_1net_1_1http_1_1_fetch_manager_a7574fa812ee32dc62dbe4bf32871a854.html#a7574fa812ee32dc62dbe4bf32871a854">mActivePromises</a>) {</div>
-<div class="line"><span class="lineno">  463</span>        <span class="keywordflow">if</span> (promise.valid()) {</div>
-<div class="line"><span class="lineno">  464</span>            promise.update();</div>
-<div class="line"><span class="lineno">  465</span>        }</div>
-<div class="line"><span class="lineno">  466</span>    }</div>
-<div class="line"><span class="lineno">  467</span>    </div>
-<div class="line"><span class="lineno">  468</span>    <span class="comment">// Then clean up completed/invalid promises in a separate pass</span></div>
-<div class="line"><span class="lineno">  469</span>    <a class="code hl_function" href="../../d2/d80/classfl_1_1net_1_1http_1_1_fetch_manager_a425f8df1c0e3b094921b99a1883e67c3.html#a425f8df1c0e3b094921b99a1883e67c3">cleanup_completed_promises</a>();</div>
-<div class="line"><span class="lineno">  470</span>    </div>
-<div class="line"><span class="lineno">  471</span>    <span class="comment">// Auto-unregister from async system when no more promises</span></div>
-<div class="line"><span class="lineno">  472</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d2/d80/classfl_1_1net_1_1http_1_1_fetch_manager_a7574fa812ee32dc62dbe4bf32871a854.html#a7574fa812ee32dc62dbe4bf32871a854">mActivePromises</a>.empty()) {</div>
-<div class="line"><span class="lineno">  473</span>        <a class="code hl_function" href="../../d0/dd2/classfl_1_1task_1_1_executor_ac534e963910c0f0acf445c8c61aee216.html#ac534e963910c0f0acf445c8c61aee216">task::Executor::instance</a>().<a class="code hl_function" href="../../d0/dd2/classfl_1_1task_1_1_executor_aea1dccad687b38af63b3fa99484dbddd.html#aea1dccad687b38af63b3fa99484dbddd">unregister_runner</a>(<span class="keyword">this</span>);</div>
-<div class="line"><span class="lineno">  474</span>        </div>
-<div class="line"><span class="lineno">  475</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d2/d80/classfl_1_1net_1_1http_1_1_fetch_manager_a499c76d45abd8afd2326917f64d37cf9.html#a499c76d45abd8afd2326917f64d37cf9">mEngineListener</a>) {</div>
-<div class="line"><span class="lineno">  476</span>            <a class="code hl_function" href="../../de/dca/classfl_1_1_engine_events_a753cb5db841d82ff31a3105d563b6b9c.html#a753cb5db841d82ff31a3105d563b6b9c">EngineEvents::removeListener</a>(<a class="code hl_variable" href="../../d2/d80/classfl_1_1net_1_1http_1_1_fetch_manager_a499c76d45abd8afd2326917f64d37cf9.html#a499c76d45abd8afd2326917f64d37cf9">mEngineListener</a>.get());</div>
-<div class="line"><span class="lineno">  477</span>            <a class="code hl_variable" href="../../d2/d80/classfl_1_1net_1_1http_1_1_fetch_manager_a499c76d45abd8afd2326917f64d37cf9.html#a499c76d45abd8afd2326917f64d37cf9">mEngineListener</a>.reset();</div>
-<div class="line"><span class="lineno">  478</span>        }</div>
-<div class="line"><span class="lineno">  479</span>    }</div>
-<div class="line"><span class="lineno">  480</span>}</div>
-<div class="ttc" id="aclassfl_1_1_engine_events_a753cb5db841d82ff31a3105d563b6b9c_html_a753cb5db841d82ff31a3105d563b6b9c"><div class="ttname"><a href="../../de/dca/classfl_1_1_engine_events_a753cb5db841d82ff31a3105d563b6b9c.html#a753cb5db841d82ff31a3105d563b6b9c">fl::EngineEvents::removeListener</a></div><div class="ttdeci">static void removeListener(Listener *listener) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../db/dc0/engine__events_8h_source.html#l00057">engine_events.h:57</a></div></div>
-<div class="ttc" id="aclassfl_1_1net_1_1http_1_1_fetch_manager_a425f8df1c0e3b094921b99a1883e67c3_html_a425f8df1c0e3b094921b99a1883e67c3"><div class="ttname"><a href="../../d2/d80/classfl_1_1net_1_1http_1_1_fetch_manager_a425f8df1c0e3b094921b99a1883e67c3.html#a425f8df1c0e3b094921b99a1883e67c3">fl::net::http::FetchManager::cleanup_completed_promises</a></div><div class="ttdeci">void cleanup_completed_promises()</div><div class="ttdef"><b>Definition</b> <a href="../../de/daa/fetch_8cpp_8hpp_source.html#l00494">fetch.cpp.hpp:494</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../de/daa/fetch_8cpp_8hpp_source.html#l00462">462</a> of file <a class="el" href="../../de/daa/fetch_8cpp_8hpp_source.html">fetch.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  462</span>                          {</div>
+<div class="line"><span class="lineno">  463</span>    <span class="comment">// Update all active promises first</span></div>
+<div class="line"><span class="lineno">  464</span>    <span class="keywordflow">for</span> (<span class="keyword">auto</span>&amp; promise : <a class="code hl_variable" href="../../d2/d80/classfl_1_1net_1_1http_1_1_fetch_manager_a7574fa812ee32dc62dbe4bf32871a854.html#a7574fa812ee32dc62dbe4bf32871a854">mActivePromises</a>) {</div>
+<div class="line"><span class="lineno">  465</span>        <span class="keywordflow">if</span> (promise.valid()) {</div>
+<div class="line"><span class="lineno">  466</span>            promise.update();</div>
+<div class="line"><span class="lineno">  467</span>        }</div>
+<div class="line"><span class="lineno">  468</span>    }</div>
+<div class="line"><span class="lineno">  469</span>    </div>
+<div class="line"><span class="lineno">  470</span>    <span class="comment">// Then clean up completed/invalid promises in a separate pass</span></div>
+<div class="line"><span class="lineno">  471</span>    <a class="code hl_function" href="../../d2/d80/classfl_1_1net_1_1http_1_1_fetch_manager_a425f8df1c0e3b094921b99a1883e67c3.html#a425f8df1c0e3b094921b99a1883e67c3">cleanup_completed_promises</a>();</div>
+<div class="line"><span class="lineno">  472</span>    </div>
+<div class="line"><span class="lineno">  473</span>    <span class="comment">// Auto-unregister from async system when no more promises</span></div>
+<div class="line"><span class="lineno">  474</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d2/d80/classfl_1_1net_1_1http_1_1_fetch_manager_a7574fa812ee32dc62dbe4bf32871a854.html#a7574fa812ee32dc62dbe4bf32871a854">mActivePromises</a>.empty()) {</div>
+<div class="line"><span class="lineno">  475</span>        <a class="code hl_function" href="../../d0/dd2/classfl_1_1task_1_1_executor_ac534e963910c0f0acf445c8c61aee216.html#ac534e963910c0f0acf445c8c61aee216">task::Executor::instance</a>().<a class="code hl_function" href="../../d0/dd2/classfl_1_1task_1_1_executor_aea1dccad687b38af63b3fa99484dbddd.html#aea1dccad687b38af63b3fa99484dbddd">unregister_runner</a>(<span class="keyword">this</span>);</div>
+<div class="line"><span class="lineno">  476</span>        </div>
+<div class="line"><span class="lineno">  477</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d2/d80/classfl_1_1net_1_1http_1_1_fetch_manager_a499c76d45abd8afd2326917f64d37cf9.html#a499c76d45abd8afd2326917f64d37cf9">mEngineListener</a>) {</div>
+<div class="line"><span class="lineno">  478</span>            <a class="code hl_function" href="../../de/dca/classfl_1_1_engine_events_a420de129a493b4edbd41ccbca42d2308.html#a420de129a493b4edbd41ccbca42d2308">EngineEvents::removeListener</a>(<a class="code hl_variable" href="../../d2/d80/classfl_1_1net_1_1http_1_1_fetch_manager_a499c76d45abd8afd2326917f64d37cf9.html#a499c76d45abd8afd2326917f64d37cf9">mEngineListener</a>.get());</div>
+<div class="line"><span class="lineno">  479</span>            <a class="code hl_variable" href="../../d2/d80/classfl_1_1net_1_1http_1_1_fetch_manager_a499c76d45abd8afd2326917f64d37cf9.html#a499c76d45abd8afd2326917f64d37cf9">mEngineListener</a>.reset();</div>
+<div class="line"><span class="lineno">  480</span>        }</div>
+<div class="line"><span class="lineno">  481</span>    }</div>
+<div class="line"><span class="lineno">  482</span>}</div>
+<div class="ttc" id="aclassfl_1_1_engine_events_a420de129a493b4edbd41ccbca42d2308_html_a420de129a493b4edbd41ccbca42d2308"><div class="ttname"><a href="../../de/dca/classfl_1_1_engine_events_a420de129a493b4edbd41ccbca42d2308.html#a420de129a493b4edbd41ccbca42d2308">fl::EngineEvents::removeListener</a></div><div class="ttdeci">static void removeListener(Listener *listener) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../db/dc0/engine__events_8h_source.html#l00060">engine_events.h:60</a></div></div>
+<div class="ttc" id="aclassfl_1_1net_1_1http_1_1_fetch_manager_a425f8df1c0e3b094921b99a1883e67c3_html_a425f8df1c0e3b094921b99a1883e67c3"><div class="ttname"><a href="../../d2/d80/classfl_1_1net_1_1http_1_1_fetch_manager_a425f8df1c0e3b094921b99a1883e67c3.html#a425f8df1c0e3b094921b99a1883e67c3">fl::net::http::FetchManager::cleanup_completed_promises</a></div><div class="ttdeci">void cleanup_completed_promises()</div><div class="ttdef"><b>Definition</b> <a href="../../de/daa/fetch_8cpp_8hpp_source.html#l00496">fetch.cpp.hpp:496</a></div></div>
 <div class="ttc" id="aclassfl_1_1net_1_1http_1_1_fetch_manager_a499c76d45abd8afd2326917f64d37cf9_html_a499c76d45abd8afd2326917f64d37cf9"><div class="ttname"><a href="../../d2/d80/classfl_1_1net_1_1http_1_1_fetch_manager_a499c76d45abd8afd2326917f64d37cf9.html#a499c76d45abd8afd2326917f64d37cf9">fl::net::http::FetchManager::mEngineListener</a></div><div class="ttdeci">fl::unique_ptr&lt; FetchEngineListener &gt; mEngineListener</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d6a/fetch_8h_source.html#l00265">fetch.h:265</a></div></div>
 <div class="ttc" id="aclassfl_1_1net_1_1http_1_1_fetch_manager_a7574fa812ee32dc62dbe4bf32871a854_html_a7574fa812ee32dc62dbe4bf32871a854"><div class="ttname"><a href="../../d2/d80/classfl_1_1net_1_1http_1_1_fetch_manager_a7574fa812ee32dc62dbe4bf32871a854.html#a7574fa812ee32dc62dbe4bf32871a854">fl::net::http::FetchManager::mActivePromises</a></div><div class="ttdeci">fl::vector&lt; fl::task::Promise&lt; Response &gt; &gt; mActivePromises</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d6a/fetch_8h_source.html#l00264">fetch.h:264</a></div></div>
 <div class="ttc" id="aclassfl_1_1task_1_1_executor_ac534e963910c0f0acf445c8c61aee216_html_ac534e963910c0f0acf445c8c61aee216"><div class="ttname"><a href="../../d0/dd2/classfl_1_1task_1_1_executor_ac534e963910c0f0acf445c8c61aee216.html#ac534e963910c0f0acf445c8c61aee216">fl::task::Executor::instance</a></div><div class="ttdeci">static Executor &amp; instance()</div><div class="ttdef"><b>Definition</b> <a href="../../dc/de9/executor_8cpp_8hpp_source.html#l00028">executor.cpp.hpp:28</a></div></div>
 <div class="ttc" id="aclassfl_1_1task_1_1_executor_aea1dccad687b38af63b3fa99484dbddd_html_aea1dccad687b38af63b3fa99484dbddd"><div class="ttname"><a href="../../d0/dd2/classfl_1_1task_1_1_executor_aea1dccad687b38af63b3fa99484dbddd.html#aea1dccad687b38af63b3fa99484dbddd">fl::task::Executor::unregister_runner</a></div><div class="ttdeci">void unregister_runner(Runner *r)</div><div class="ttdoc">Unregister a runner.</div><div class="ttdef"><b>Definition</b> <a href="../../dc/de9/executor_8cpp_8hpp_source.html#l00038">executor.cpp.hpp:38</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../de/daa/fetch_8cpp_8hpp_source.html#l00494">cleanup_completed_promises()</a>, <a class="el" href="../../dc/de9/executor_8cpp_8hpp_source.html#l00028">fl::task::Executor::instance()</a>, <a class="el" href="../../d6/d6a/fetch_8h_source.html#l00264">mActivePromises</a>, <a class="el" href="../../d6/d6a/fetch_8h_source.html#l00265">mEngineListener</a>, <a class="el" href="../../db/dc0/engine__events_8h_source.html#l00057">fl::EngineEvents::removeListener()</a>, and <a class="el" href="../../dc/de9/executor_8cpp_8hpp_source.html#l00038">fl::task::Executor::unregister_runner()</a>.</p>
+<p class="reference">References <a class="el" href="../../de/daa/fetch_8cpp_8hpp_source.html#l00496">cleanup_completed_promises()</a>, <a class="el" href="../../dc/de9/executor_8cpp_8hpp_source.html#l00028">fl::task::Executor::instance()</a>, <a class="el" href="../../d6/d6a/fetch_8h_source.html#l00264">mActivePromises</a>, <a class="el" href="../../d6/d6a/fetch_8h_source.html#l00265">mEngineListener</a>, <a class="el" href="../../db/dc0/engine__events_8h_source.html#l00060">fl::EngineEvents::removeListener()</a>, and <a class="el" href="../../dc/de9/executor_8cpp_8hpp_source.html#l00038">fl::task::Executor::unregister_runner()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -174,7 +174,7 @@ $(function(){initNavTree('d2/d80/classfl_1_1net_1_1http_1_1_fetch_manager_af67c6
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d5/dc9/namespacefl_1_1net.html">net</a></li><li class="navelem"><a class="el" href="../../d1/d13/namespacefl_1_1net_1_1http.html">http</a></li><li class="navelem"><a class="el" href="../../d2/d80/classfl_1_1net_1_1http_1_1_fetch_manager.html">FetchManager</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:10 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:12 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

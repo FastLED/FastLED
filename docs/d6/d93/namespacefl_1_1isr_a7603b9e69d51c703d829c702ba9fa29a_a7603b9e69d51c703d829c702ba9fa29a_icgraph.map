@@ -1,9 +1,11 @@
 <map id="fl::isr::get_error_string" name="fl::isr::get_error_string">
-<area shape="rect" id="Node000001" title="Get platform&#45;specific error description." alt="" coords="571,5,692,45"/>
-<area shape="rect" id="Node000002" href="$d9/d33/namespacefl_1_1pwm__state_af4374568b5cc7ac35b4a70d554e66257.html#af4374568b5cc7ac35b4a70d554e66257" title=" " alt="" coords="344,5,523,45"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="557,28,523,28,523,23,557,23"/>
-<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a77306b4a5327eb19e8d003b550b1a0a5.html#a77306b4a5327eb19e8d003b550b1a0a5" title="Set PWM frequency for a pin." alt="" coords="139,13,296,38"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="331,28,296,28,296,23,331,23"/>
-<area shape="rect" id="Node000004" href="$d9/d1f/el__panel_8cpp_a3d505a2f5ac043b8dc404b92ebb049ef.html#a3d505a2f5ac043b8dc404b92ebb049ef" title=" " alt="" coords="5,13,91,38"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="125,28,91,28,91,23,125,23"/>
+<area shape="rect" id="Node000001" title="Get platform&#45;specific error description." alt="" coords="660,35,781,75"/>
+<area shape="rect" id="Node000002" href="$d9/d33/namespacefl_1_1pwm__state_af4374568b5cc7ac35b4a70d554e66257.html#af4374568b5cc7ac35b4a70d554e66257" title=" " alt="" coords="433,35,612,75"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="646,57,612,57,612,52,646,52"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a77306b4a5327eb19e8d003b550b1a0a5.html#a77306b4a5327eb19e8d003b550b1a0a5" title="Set PWM frequency for a pin." alt="" coords="228,42,385,67"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="420,57,386,57,386,52,420,52"/>
+<area shape="rect" id="Node000004" href="$d0/d5a/classfl_1_1_analog_r_g_b_controller_a0e13c10b28fb7afdff1baa3c11a3859b.html#a0e13c10b28fb7afdff1baa3c11a3859b" title="Initialize the LED controller." alt="" coords="5,5,180,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="214,45,180,40,180,35,215,39"/>
+<area shape="rect" id="Node000005" href="$d9/d1f/el__panel_8cpp_a3d505a2f5ac043b8dc404b92ebb049ef.html#a3d505a2f5ac043b8dc404b92ebb049ef" title=" " alt="" coords="50,70,135,95"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="215,69,136,80,136,74,214,64"/>
 </map>

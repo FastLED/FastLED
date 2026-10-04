@@ -1,0 +1,10 @@
+<map id="fl::vector_basic::~vector_basic" name="fl::vector_basic::~vector_basic">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,23,133,63"/>
+<area shape="rect" id="Node000002" href="$d4/dad/classfl_1_1vector__basic_ab7f6ed3b28983ba9ad5fc98710922dd2.html#ab7f6ed3b28983ba9ad5fc98710922dd2" title=" " alt="" coords="181,5,377,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="133,33,167,29,168,34,134,38"/>
+<area shape="rect" id="Node000003" href="$d4/dad/classfl_1_1vector__basic_a5c38462334e8be852c00a70dfc4bd31a.html#a5c38462334e8be852c00a70dfc4bd31a" title="Is data currently in the inline buffer?" alt="" coords="192,55,367,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="134,48,179,53,178,58,133,53"/>
+<area shape="rect" id="Node000004" href="$d4/dad/classfl_1_1vector__basic_a3d528d0097291ad564918d2a37ebf1ec.html#a3d528d0097291ad564918d2a37ebf1ec" title="Compute inline buffer pointer from offset." alt="" coords="425,47,589,87"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="367,65,412,65,412,70,367,70"/>
+<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="465,48,462,38,469,28,484,23,507,21,534,24,548,31,546,36,532,29,507,26,486,28,472,33,468,39,470,46"/>
+</map>

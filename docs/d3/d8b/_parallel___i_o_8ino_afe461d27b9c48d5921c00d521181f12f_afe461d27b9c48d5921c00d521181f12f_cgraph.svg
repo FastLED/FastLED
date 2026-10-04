@@ -31,7 +31,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../d1/dfb/colorutils_8h_a5e33a6635101019cce6b0936c9415a6f.html#a5e33a6635101019cce6b0936c9415a6f" target="_top" xlink:title="Fill a range of LEDs with a rainbow of colors.">
+<g id="a_Node000002"><a xlink:href="../../d1/dfb/colorutils_8h_a72ee3324d8c70c52743313f46676204f.html#a72ee3324d8c70c52743313f46676204f" target="_top" xlink:title="Fill a range of LEDs with a rainbow of colors.">
 <polygon fill="white" stroke="#666666" points="147,-56 74,-56 74,-37 147,-37 147,-56"/>
 <text text-anchor="middle" x="110.5" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">fill_rainbow</text>
 </a>

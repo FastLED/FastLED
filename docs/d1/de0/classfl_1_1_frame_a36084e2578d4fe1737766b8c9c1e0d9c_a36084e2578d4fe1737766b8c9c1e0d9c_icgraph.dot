@@ -14,7 +14,7 @@ digraph "fl::Frame::getWidth"
   Node2 -> Node4 [id="edge3_Node000002_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node4 [id="Node000004",label="fl::FileSystem::loadJpeg",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d37/classfl_1_1_file_system_ac981ecdba46591c28acab92177fe70f9.html#ac981ecdba46591c28acab92177fe70f9",tooltip=" "];
   Node4 -> Node5 [id="edge4_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node5 [id="Node000005",label="fl::loadJpegFromSD",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_af51a63f8fa4612beb1f1e320c9a79731.html#af51a63f8fa4612beb1f1e320c9a79731",tooltip=" "];
+  Node5 [id="Node000005",label="fl::loadJpegFromSD",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a02f1bd8446cb6c80855b1afcb281f713.html#a02f1bd8446cb6c80855b1afcb281f713",tooltip=" "];
   Node2 -> Node6 [id="edge5_Node000002_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node6 [id="Node000006",label="CodecProcessor::processJpeg",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dca/namespace_codec_processor_a2edcc19e73e616ac2e999bc6541ea618.html#a2edcc19e73e616ac2e999bc6541ea618",tooltip=" "];
   Node6 -> Node7 [id="edge6_Node000006_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
@@ -35,8 +35,4 @@ digraph "fl::Frame::getWidth"
   Node1 -> Node13 [id="edge15_Node000001_Node000013",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node13 [id="Node000013",label="CodecProcessor::getPixel\lFromFrame",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dca/namespace_codec_processor_a4339272f6685f1fdc7c18717be608065.html#a4339272f6685f1fdc7c18717be608065",tooltip=" "];
   Node13 -> Node10 [id="edge16_Node000013_Node000010",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node1 -> Node14 [id="edge17_Node000001_Node000014",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node14 [id="Node000014",label="AutoResearchRemoteControl\l::registerFunctions",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d63/class_auto_research_remote_control_abb6600e8a1e8c4ef46ba29e7bd3b78b4.html#abb6600e8a1e8c4ef46ba29e7bd3b78b4",tooltip="Register all RPC functions with shared autoresearch state."];
-  Node14 -> Node15 [id="edge18_Node000014_Node000015",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node15 [id="Node000015",label="setup",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dc8/_auto_research_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d",tooltip=" "];
 }

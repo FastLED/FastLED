@@ -15,5 +15,5 @@ digraph "fl::circular_buffer_core::clear"
   Node3 -> Node4 [id="edge4_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
   Node4 [id="Node000004",label="fl::circular_buffer\l_core::increment",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d64/classfl_1_1circular__buffer__core_ae36d76efe80299aac15f95dd50967b7f.html#ae36d76efe80299aac15f95dd50967b7f",tooltip=" "];
   Node3 -> Node5 [id="edge5_Node000003_Node000005",color="steelblue1",style="solid",tooltip=" "];
-  Node5 [id="Node000005",label="fl::fl::move",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d3c/namespacefl_1_1fl_a14315b21314f12a4c40dde841fcc4c8a.html#a14315b21314f12a4c40dde841fcc4c8a",tooltip=" "];
+  Node5 [id="Node000005",label="fl::move",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a0c8a67e528dcd96ee58216754a07a733.html#a0c8a67e528dcd96ee58216754a07a733",tooltip=" "];
 }

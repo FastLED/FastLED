@@ -2,6 +2,8 @@ var fft__impl_8cpp_8hpp =
 [
     [ "fl::audio::fft::Context", "d6/dd2/classfl_1_1audio_1_1fft_1_1_context.html", "d6/dd2/classfl_1_1audio_1_1fft_1_1_context" ],
     [ "fl::audio::fft::Context::FftScratch", "d6/dd2/classfl_1_1audio_1_1fft_1_1_context.html#de/de8/structfl_1_1audio_1_1fft_1_1_context_1_1_fft_scratch", [
+      [ "coverageMaxQueue", "d6/dd2/classfl_1_1audio_1_1fft_1_1_context.html#a2a20a1e4a0351c083bb2b27713faa996", null ],
+      [ "cqSnapshot", "d6/dd2/classfl_1_1audio_1_1fft_1_1_context.html#a9d9760681d727a0791c2f235c8ee61fb", null ],
       [ "fftOut", "d6/dd2/classfl_1_1audio_1_1fft_1_1_context.html#a6cd3891ca146742fe84554eb2122419b", null ],
       [ "im", "d6/dd2/classfl_1_1audio_1_1fft_1_1_context.html#a4ff08ff4b131cc42069621a981d65f53", null ],
       [ "mag", "d6/dd2/classfl_1_1audio_1_1fft_1_1_context.html#a70518125b4df5fd0cd5868be9ef01d76", null ],

@@ -9,6 +9,7 @@ var _fast_l_e_d_8cpp_8hpp =
     [ "set_max_power_in_milliwatts", "d3/d1d/group___power_gadffc621f701c393dd741e9efb454d78b.html#gadffc621f701c393dd741e9efb454d78b", null ],
     [ "set_max_power_in_volts_and_milliamps", "d3/d1d/group___power_gacfe05558d8cf4bbe8b9b08b5cc55efea.html#gacfe05558d8cf4bbe8b9b08b5cc55efea", null ],
     [ "show_at_max_brightness_for_power", "d3/d1d/group___power_ga510b6ca1ea6da7f0f89dcf353f19ffde.html#ga510b6ca1ea6da7f0f89dcf353f19ffde", null ],
+    [ "throttleToMaxRefreshRate", "d7/de5/_fast_l_e_d_8cpp_8hpp_ac6c7e827ae13a7bc3da907399f25142f.html#ac6c7e827ae13a7bc3da907399f25142f", null ],
     [ "_frame_cnt", "d7/de5/_fast_l_e_d_8cpp_8hpp_af4da241789979248be65fcde6d82508a.html#af4da241789979248be65fcde6d82508a", null ],
     [ "_retry_cnt", "d7/de5/_fast_l_e_d_8cpp_8hpp_a3446fe5aa2dfbbefc2d54110644c707a.html#a3446fe5aa2dfbbefc2d54110644c707a", null ],
     [ "FastLED", "d7/de5/_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9", null ],

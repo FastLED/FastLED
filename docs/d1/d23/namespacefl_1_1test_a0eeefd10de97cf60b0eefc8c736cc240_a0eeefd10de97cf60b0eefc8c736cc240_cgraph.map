@@ -1,0 +1,14 @@
+<map id="fl::test::outputCapture" name="fl::test::outputCapture">
+<area shape="rect" id="Node000001" title="Helper to output CAPTURE variable." alt="" coords="5,41,169,66"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a546c74e8a97d8c3dedc2501f6273b51a.html#a546c74e8a97d8c3dedc2501f6273b51a" title=" " alt="" coords="217,41,291,66"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="170,51,204,51,204,56,170,56"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_aee6f6a125b8389786800233a69115983.html#aee6f6a125b8389786800233a69115983" title="Format with no arguments." alt="" coords="533,13,616,38"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="280,38,308,27,338,19,386,13,434,11,520,16,519,21,434,16,386,18,339,24,309,32,282,43"/>
+<area shape="rect" id="Node000008" href="$d2/de0/namespacefl_1_1printf__detail_a815b73d378ad98c5db7890a7836da1b1.html#a815b73d378ad98c5db7890a7836da1b1" title=" " alt="" coords="339,33,485,73"/>
+<area shape="poly" id="edge4_Node000002_Node000008" title=" " alt="" coords="291,51,325,51,325,56,291,56"/>
+<area shape="rect" id="Node000009" href="$d4/d36/namespacefl_a23e9f3b5be31d78996d08b3c811ec5d1.html#a23e9f3b5be31d78996d08b3c811ec5d1" title=" " alt="" coords="378,98,446,123"/>
+<area shape="poly" id="edge6_Node000002_Node000009" title=" " alt="" coords="289,64,340,83,366,92,364,97,338,88,287,69"/>
+<area shape="rect" id="Node000004" href="$da/d2a/namespacefl_1_1format__detail_a892df3c6e93f2a0ce7cfe9b1ea83b035.html#a892df3c6e93f2a0ce7cfe9b1ea83b035" title=" " alt="" coords="664,5,799,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="616,23,650,23,650,28,616,28"/>
+<area shape="poly" id="edge5_Node000008_Node000003" title=" " alt="" coords="485,38,519,32,520,37,486,43"/>
+</map>

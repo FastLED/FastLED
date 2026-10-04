@@ -1,0 +1,11 @@
+<map id="fl::mapAndAllocateRgbwQ16" name="fl::mapAndAllocateRgbwQ16">
+<area shape="rect" id="Node000001" title="One pixel: XYZ in s16.16 to four in&#45;gamut drives, red, green, blue, white." alt="" coords="753,45,960,70"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_aa231682eff63cbd83ee299e6079baeae.html#aa231682eff63cbd83ee299e6079baeae" title=" " alt="" coords="487,45,705,70"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="739,60,705,60,705,55,739,55"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_ad0e379781735f3c39ad9cc2d724f08d4.html#ad0e379781735f3c39ad9cc2d724f08d4" title="Like processPixelQ16, but solves the physical 4/5&#45;emitter hull." alt="" coords="260,45,439,70"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="473,60,439,60,439,55,473,55"/>
+<area shape="rect" id="Node000004" href="$db/da5/classfl_1_1_color_managed_pixel_source_a5282ff6c865aba683ab2953135ca4c09.html#a5282ff6c865aba683ab2953135ca4c09" title="Physical RGBW solve when a matching profile is bound; otherwise the legacy RGB&#45;to&#45;RGBW conversion." alt="" coords="5,5,212,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="246,46,212,42,213,36,246,41"/>
+<area shape="rect" id="Node000005" href="$db/da5/classfl_1_1_color_managed_pixel_source_aefb49429ee466d02d5c2ece50524da34.html#aefb49429ee466d02d5c2ece50524da34" title="Physical two&#45;white solve when a matching RGBWW profile is bound; otherwise the legacy conversion." alt="" coords="5,69,212,109"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="246,74,213,78,212,73,246,68"/>
+</map>

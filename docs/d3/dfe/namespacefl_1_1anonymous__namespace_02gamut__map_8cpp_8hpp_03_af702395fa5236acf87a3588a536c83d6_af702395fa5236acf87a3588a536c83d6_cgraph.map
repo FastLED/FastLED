@@ -1,0 +1,18 @@
+<map id="fl::anonymous_namespace{gamut_map::cpp::hpp}::highestReachableLightness" name="fl::anonymous_namespace{gamut_map::cpp::hpp}::highestReachableLightness">
+<area shape="rect" id="Node000001" title="The highest lightness at or below requested whose feasible chroma interval the probe scan can still f..." alt="" coords="5,68,213,123"/>
+<area shape="poly" id="edge9_Node000001_Node000001" title=" " alt="" coords="61,68,61,58,70,49,86,43,109,41,137,44,153,52,151,57,136,50,109,47,87,49,73,53,66,60,66,68"/>
+<area shape="rect" id="Node000002" href="$d3/dfe/namespacefl_1_1anonymous__namespace_02gamut__map_8cpp_8hpp_03_afa155bfbd32ee5bf3a6c83b6187d3974.html#afa155bfbd32ee5bf3a6c83b6187d3974" title="The feasible chroma interval at the target&#39;s own lightness, as factors of the target&#39;s chroma." alt="" coords="261,35,457,89"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="213,79,247,74,248,79,214,84"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_aa0b8d08b9903ece3fb5f220333b9e785.html#aa0b8d08b9903ece3fb5f220333b9e785" title=" " alt="" coords="570,113,637,139"/>
+<area shape="poly" id="edge10_Node000001_Node000006" title=" " alt="" coords="214,99,556,120,556,126,214,104"/>
+<area shape="poly" id="edge7_Node000002_Node000002" title=" " alt="" coords="312,35,312,24,321,16,337,10,359,8,387,11,402,19,400,24,385,16,359,13,338,15,324,20,317,26,317,35"/>
+<area shape="rect" id="Node000003" href="$d3/dfe/namespacefl_1_1anonymous__namespace_02gamut__map_8cpp_8hpp_03_abfc9fa8f8ad7312ff2b66f7f052b80be.html#abfc9fa8f8ad7312ff2b66f7f052b80be" title="XYZ of the candidate at factor of the target&#39;s chroma." alt="" coords="505,35,701,89"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="457,59,492,59,492,65,457,65"/>
+<area shape="poly" id="edge8_Node000002_Node000006" title=" " alt="" coords="458,85,506,98,557,112,556,117,505,103,457,91"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="556,35,556,24,565,16,581,10,603,8,631,11,646,19,644,24,629,16,603,13,582,15,568,20,561,26,561,35"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a47f3f2b8a91dec1b90ee2740550b6f0b.html#a47f3f2b8a91dec1b90ee2740550b6f0b" title="OKLab (s16.16) &#45;&gt; XYZ (s16.16)." alt="" coords="778,5,917,31"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="701,42,764,30,765,36,702,47"/>
+<area shape="rect" id="Node000005" href="$d3/dfe/namespacefl_1_1anonymous__namespace_02gamut__map_8cpp_8hpp_03_a1219e248ff1e6969080b93b1112e5fdc.html#a1219e248ff1e6969080b93b1112e5fdc" title="Scale an s16.16 value by an s16.16 factor, rounding to nearest." alt="" coords="749,79,945,133"/>
+<area shape="poly" id="edge5_Node000003_Node000005" title=" " alt="" coords="702,77,736,83,735,89,701,82"/>
+<area shape="poly" id="edge6_Node000005_Node000005" title=" " alt="" coords="800,79,800,68,809,60,825,54,847,52,875,55,890,63,888,68,873,60,847,57,826,59,812,64,805,70,805,79"/>
+</map>

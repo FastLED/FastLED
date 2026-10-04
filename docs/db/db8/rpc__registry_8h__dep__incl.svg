@@ -47,7 +47,7 @@
   </g>
 </defs>
 <script type="application/ecmascript">
-var viewWidth = 1159;
+var viewWidth = 1525;
 var viewHeight = 269;
 var sectionId = 'dynsection-1';
 </script>
@@ -137,9 +137,9 @@ var sectionId = 'dynsection-1';
 </g>
 </g>
 <!-- Node7&#45;&gt;Node2 -->
-<g id="edge14_Node000007_Node000002" class="edge">
+<g id="edge16_Node000007_Node000002" class="edge">
 <title>Node7&#45;&gt;Node2</title>
-<g id="a_edge14_Node000007_Node000002"><a xlink:title=" ">
+<g id="a_edge16_Node000007_Node000002"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M212.25,-181.97C195.25,-172.28 172.87,-159.52 158.21,-151.17"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="210.64,-185.07 221.06,-186.98 214.1,-178.99 210.64,-185.07"/>
 </a>
@@ -167,8 +167,8 @@ var sectionId = 'dynsection-1';
 <g id="Node000009" class="node">
 <title>Node9</title>
 <g id="a_Node000009"><a xlink:href="../../d6/d06/remote_8h.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="675,-151 567,-151 567,-132 675,-132 675,-151"/>
-<text text-anchor="middle" x="621" y="-139" font-family="Helvetica,sans-Serif" font-size="10.00">fl/remote/remote.h</text>
+<polygon fill="white" stroke="#666666" points="843,-151 735,-151 735,-132 843,-132 843,-151"/>
+<text text-anchor="middle" x="789" y="-139" font-family="Helvetica,sans-Serif" font-size="10.00">fl/remote/remote.h</text>
 </a>
 </g>
 </g>
@@ -176,8 +176,8 @@ var sectionId = 'dynsection-1';
 <g id="edge7_Node000007_Node000009" class="edge">
 <title>Node7&#45;&gt;Node9</title>
 <g id="a_edge7_Node000007_Node000009"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M299.32,-186.78C373.91,-176.52 496.52,-159.64 566.87,-149.95"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="298.56,-183.36 289.13,-188.19 299.51,-190.29 298.56,-183.36"/>
+<path fill="none" stroke="#63b8ff" d="M299.27,-189.44C408.85,-178.93 632.08,-157.54 734.92,-147.68"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="298.64,-185.98 289.02,-190.42 299.31,-192.95 298.64,-185.98"/>
 </a>
 </g>
 </g>
@@ -191,11 +191,11 @@ var sectionId = 'dynsection-1';
 </g>
 </g>
 <!-- Node9&#45;&gt;Node8 -->
-<g id="edge13_Node000009_Node000008" class="edge">
+<g id="edge15_Node000009_Node000008" class="edge">
 <title>Node9&#45;&gt;Node8</title>
-<g id="a_edge13_Node000009_Node000008"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M556.7,-132.84C495.35,-125.1 400.48,-112.02 319,-96 303.34,-92.92 286.11,-88.76 271.75,-85.07"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="556.64,-136.36 567,-134.13 557.51,-129.41 556.64,-136.36"/>
+<g id="a_edge15_Node000009_Node000008"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M724.59,-137.42C633.67,-132.38 462.75,-120.41 319,-96 302.7,-93.23 284.8,-88.92 270.17,-85.06"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="724.56,-140.92 734.74,-137.97 724.94,-133.93 724.56,-140.92"/>
 </a>
 </g>
 </g>
@@ -214,8 +214,8 @@ var sectionId = 'dynsection-1';
 <g id="edge8_Node000009_Node000010" class="edge">
 <title>Node9&#45;&gt;Node10</title>
 <g id="a_edge8_Node000009_Node000010"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M585.35,-128.68C557.77,-119.53 518.99,-106.67 486.83,-96.01"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="584.38,-132.04 594.97,-131.87 586.58,-125.4 584.38,-132.04"/>
+<path fill="none" stroke="#63b8ff" d="M730.34,-130.18C679.26,-121.18 603.23,-107.77 537,-96 534.07,-95.48 531.09,-94.95 528.08,-94.41"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="729.76,-133.63 740.21,-131.92 730.97,-126.74 729.76,-133.63"/>
 </a>
 </g>
 </g>
@@ -234,8 +234,8 @@ var sectionId = 'dynsection-1';
 <g id="edge9_Node000009_Node000011" class="edge">
 <title>Node9&#45;&gt;Node11</title>
 <g id="a_edge9_Node000009_Node000011"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M621,-121.63C621,-113.56 621,-104.15 621,-96.01"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="617.5,-121.87 621,-131.87 624.5,-121.87 617.5,-121.87"/>
+<path fill="none" stroke="#63b8ff" d="M756.7,-128.19C732.78,-119.08 699.71,-106.49 672.21,-96.01"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="755.75,-131.58 766.34,-131.87 758.24,-125.04 755.75,-131.58"/>
 </a>
 </g>
 </g>
@@ -254,8 +254,8 @@ var sectionId = 'dynsection-1';
 <g id="edge10_Node000009_Node000012" class="edge">
 <title>Node9&#45;&gt;Node12</title>
 <g id="a_edge10_Node000009_Node000012"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M653.3,-128.19C677.22,-119.08 710.29,-106.49 737.79,-96.01"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="651.76,-125.04 643.66,-131.87 654.25,-131.58 651.76,-125.04"/>
+<path fill="none" stroke="#63b8ff" d="M789,-121.63C789,-113.56 789,-104.15 789,-96.01"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="785.5,-121.87 789,-131.87 792.5,-121.87 785.5,-121.87"/>
 </a>
 </g>
 </g>
@@ -263,7 +263,7 @@ var sectionId = 'dynsection-1';
 <g id="Node000013" class="node">
 <title>Node13</title>
 <g id="a_Node000013"><a xlink:href="../../d1/df2/_auto_research_low_memory_8h.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="1061.5,-96 882.5,-96 882.5,-55 1061.5,-55 1061.5,-96"/>
+<polygon fill="#fff0f0" stroke="red" points="1061.5,-96 882.5,-96 882.5,-55 1061.5,-55 1061.5,-96"/>
 <text text-anchor="start" x="890.5" y="-84" font-family="Helvetica,sans-Serif" font-size="10.00">/home/runner/work/FastLED</text>
 <text text-anchor="start" x="890.5" y="-73" font-family="Helvetica,sans-Serif" font-size="10.00">/FastLED/examples/AutoResearch</text>
 <text text-anchor="middle" x="972" y="-62" font-family="Helvetica,sans-Serif" font-size="10.00">/AutoResearchLowMemory.h</text>
@@ -274,26 +274,66 @@ var sectionId = 'dynsection-1';
 <g id="edge11_Node000009_Node000013" class="edge">
 <title>Node9&#45;&gt;Node13</title>
 <g id="a_edge11_Node000009_Node000013"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M681.14,-130.22C732.23,-121.41 807.49,-108.23 873,-96 876.1,-95.42 879.25,-94.83 882.44,-94.22"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="680.52,-126.78 671.26,-131.93 681.7,-133.68 680.52,-126.78"/>
+<path fill="none" stroke="#63b8ff" d="M823.15,-128.56C849.27,-119.42 885.86,-106.63 916.22,-96.01"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="821.96,-125.26 813.68,-131.87 824.28,-131.87 821.96,-125.26"/>
 </a>
 </g>
 </g>
-<!-- Node14 -->
-<g id="Node000014" class="node">
-<title>Node14</title>
-<g id="a_Node000014"><a xlink:href="../../dd/df9/wled_8h.html" target="_top" xlink:title=" ">
-<polygon fill="#fff0f0" stroke="red" points="1150.5,-85 1079.5,-85 1079.5,-66 1150.5,-66 1150.5,-85"/>
-<text text-anchor="middle" x="1115" y="-73" font-family="Helvetica,sans-Serif" font-size="10.00">fl/fx/wled.h</text>
+<!-- Node15 -->
+<g id="Node000015" class="node">
+<title>Node15</title>
+<g id="a_Node000015"><a xlink:href="../../df/d9e/_auto_research_remote_8h.html" target="_top" xlink:title=" ">
+<polygon fill="#fff0f0" stroke="red" points="1258.5,-96 1079.5,-96 1079.5,-55 1258.5,-55 1258.5,-96"/>
+<text text-anchor="start" x="1087.5" y="-84" font-family="Helvetica,sans-Serif" font-size="10.00">/home/runner/work/FastLED</text>
+<text text-anchor="start" x="1087.5" y="-73" font-family="Helvetica,sans-Serif" font-size="10.00">/FastLED/examples/AutoResearch</text>
+<text text-anchor="middle" x="1169" y="-62" font-family="Helvetica,sans-Serif" font-size="10.00">/AutoResearchRemote.h</text>
 </a>
 </g>
 </g>
-<!-- Node9&#45;&gt;Node14 -->
-<g id="edge12_Node000009_Node000014" class="edge">
-<title>Node9&#45;&gt;Node14</title>
-<g id="a_edge12_Node000009_Node000014"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M685.46,-140.51C773.86,-139.1 937.01,-131.34 1071,-96 1080.53,-93.49 1090.63,-89.15 1098.74,-85.2"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="685.27,-137.02 675.32,-140.65 685.36,-144.02 685.27,-137.02"/>
+<!-- Node9&#45;&gt;Node15 -->
+<g id="edge12_Node000009_Node000015" class="edge">
+<title>Node9&#45;&gt;Node15</title>
+<g id="a_edge12_Node000009_Node000015"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M853.16,-131.12C910.4,-122.58 996.43,-109.3 1071,-96 1073.73,-95.51 1076.51,-95.01 1079.31,-94.5"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="852.54,-127.67 843.17,-132.61 853.57,-134.6 852.54,-127.67"/>
+</a>
+</g>
+</g>
+<!-- Node17 -->
+<g id="Node000017" class="node">
+<title>Node17</title>
+<g id="a_Node000017"><a xlink:href="../../d3/df6/_remote_8ino.html" target="_top" xlink:title="Example demonstrating fl::Remote RPC system with callback&#45;based I/O.">
+<polygon fill="white" stroke="#666666" points="1427,-96 1277,-96 1277,-55 1427,-55 1427,-96"/>
+<text text-anchor="start" x="1285" y="-84" font-family="Helvetica,sans-Serif" font-size="10.00">/home/runner/work/FastLED</text>
+<text text-anchor="start" x="1285" y="-73" font-family="Helvetica,sans-Serif" font-size="10.00">/FastLED/examples/Remote</text>
+<text text-anchor="middle" x="1352" y="-62" font-family="Helvetica,sans-Serif" font-size="10.00">/Remote.ino</text>
+</a>
+</g>
+</g>
+<!-- Node9&#45;&gt;Node17 -->
+<g id="edge13_Node000009_Node000017" class="edge">
+<title>Node9&#45;&gt;Node17</title>
+<g id="a_edge13_Node000009_Node000017"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M853.2,-137.31C945.43,-132.09 1120.59,-119.85 1268,-96 1270.96,-95.52 1273.96,-95 1276.99,-94.44"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="852.97,-133.81 843.18,-137.86 853.36,-140.8 852.97,-133.81"/>
+</a>
+</g>
+</g>
+<!-- Node18 -->
+<g id="Node000018" class="node">
+<title>Node18</title>
+<g id="a_Node000018"><a xlink:href="../../dd/df9/wled_8h.html" target="_top" xlink:title=" ">
+<polygon fill="#fff0f0" stroke="red" points="1516.5,-85 1445.5,-85 1445.5,-66 1516.5,-66 1516.5,-85"/>
+<text text-anchor="middle" x="1481" y="-73" font-family="Helvetica,sans-Serif" font-size="10.00">fl/fx/wled.h</text>
+</a>
+</g>
+</g>
+<!-- Node9&#45;&gt;Node18 -->
+<g id="edge14_Node000009_Node000018" class="edge">
+<title>Node9&#45;&gt;Node18</title>
+<g id="a_edge14_Node000009_Node000018"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M853.67,-138.84C994.88,-134.75 1326.87,-122.57 1436,-96 1445.93,-93.58 1456.44,-89.15 1464.8,-85.12"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="853.33,-135.34 843.44,-139.13 853.53,-142.34 853.33,-135.34"/>
 </a>
 </g>
 </g>

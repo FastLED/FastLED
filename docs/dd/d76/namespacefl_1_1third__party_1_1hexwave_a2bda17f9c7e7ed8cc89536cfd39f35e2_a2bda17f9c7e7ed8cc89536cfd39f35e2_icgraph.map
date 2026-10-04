@@ -1,0 +1,7 @@
+<map id="fl::third_party::hexwave::cos" name="fl::third_party::hexwave::cos">
+<area shape="rect" id="Node000001" title=" " alt="" coords="464,13,669,38"/>
+<area shape="rect" id="Node000002" href="$dd/d76/namespacefl_1_1third__party_1_1hexwave_a6ddfc96d0df884c137e6dbd8a0ace213.html#a6ddfc96d0df884c137e6dbd8a0ace213" title="Create and initialize a new HexWaveEngine." alt="" coords="228,5,416,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="450,28,416,28,416,23,450,23"/>
+<area shape="rect" id="Node000003" href="$dd/d76/namespacefl_1_1third__party_1_1hexwave_acf75dfc3efad30e0203f2adfcf379f2a.html#acf75dfc3efad30e0203f2adfcf379f2a" title="Initialize the hexwave library (DEPRECATED &#45; use hexwave_engine_create)" alt="" coords="5,5,180,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="214,28,180,28,180,23,214,23"/>
+</map>

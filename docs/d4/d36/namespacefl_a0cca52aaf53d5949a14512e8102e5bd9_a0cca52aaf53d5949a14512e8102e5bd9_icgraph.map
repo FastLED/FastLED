@@ -1,7 +1,11 @@
 <map id="fl::rgbw_partial_reorder" name="fl::rgbw_partial_reorder">
-<area shape="rect" id="Node000001" title=" " alt="" coords="469,13,643,38"/>
-<area shape="rect" id="Node000002" href="$d0/dee/struct_pixel_controller_a650a6bebd28bdd32f404579c891ca98d.html#a650a6bebd28bdd32f404579c891ca98d" title=" " alt="" coords="243,5,421,45"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="455,28,422,28,422,23,455,23"/>
-<area shape="rect" id="Node000003" href="$d4/d28/group___chipsets_gaba9a2f023f2950dbcdf3c2482f765350.html#gaba9a2f023f2950dbcdf3c2482f765350" title="Main rendering function that converts RGB to RGBW and shows pixels." alt="" coords="5,5,195,45"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="229,28,195,28,195,23,229,23"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="497,77,671,102"/>
+<area shape="rect" id="Node000002" href="$db/da5/classfl_1_1_color_managed_pixel_source_a5282ff6c865aba683ab2953135ca4c09.html#a5282ff6c865aba683ab2953135ca4c09" title="Physical RGBW solve when a matching profile is bound; otherwise the legacy RGB&#45;to&#45;RGBW conversion." alt="" coords="243,5,449,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="522,76,420,48,422,43,523,70"/>
+<area shape="rect" id="Node000003" href="$d0/d09/classfl_1_1_pixel_iterator_ad6500d6de8454456417419ed1291d3c0.html#ad6500d6de8454456417419ed1291d3c0" title=" " alt="" coords="271,69,421,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="484,92,422,92,422,87,484,87"/>
+<area shape="rect" id="Node000004" href="$d0/dee/struct_pixel_controller_a5aa57de8397b498ea587b5f0c049ced5.html#a5aa57de8397b498ea587b5f0c049ced5" title=" " alt="" coords="257,133,435,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="523,108,422,136,420,131,522,103"/>
+<area shape="rect" id="Node000005" href="$d4/d28/group___chipsets_gaba9a2f023f2950dbcdf3c2482f765350.html#gaba9a2f023f2950dbcdf3c2482f765350" title="Main rendering function that converts RGB to RGBW and shows pixels." alt="" coords="5,133,195,173"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="243,156,195,156,195,151,243,151"/>
 </map>

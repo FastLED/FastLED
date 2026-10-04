@@ -1,0 +1,24 @@
+<map id="fl::vector_basic::hasInlineBuffer" name="fl::vector_basic::hasInlineBuffer">
+<area shape="rect" id="Node000001" title="Does this vector have an inline buffer at all?" alt="" coords="501,215,688,255"/>
+<area shape="rect" id="Node000002" href="$d4/dad/classfl_1_1vector__basic_a0987f604ea57ce1ac82a91e91651d0a2.html#a0987f604ea57ce1ac82a91e91651d0a2" title="Move&#45;assign from another vector_basic (clears this first)." alt="" coords="271,112,437,152"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="533,212,401,155,403,150,535,207"/>
+<area shape="rect" id="Node000007" href="$d4/dad/classfl_1_1vector__basic_a5f7aa29e571a89a887332d93ee9e3725.html#a5f7aa29e571a89a887332d93ee9e3725" title=" " alt="" coords="270,215,438,255"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="488,237,438,237,438,232,488,232"/>
+<area shape="rect" id="Node000009" href="$d4/dad/classfl_1_1vector__basic_a8be41cbbc9066e7c94ef553dcd19727d.html#a8be41cbbc9066e7c94ef553dcd19727d" title="Swap contents with another vector_basic." alt="" coords="255,303,453,329"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="523,262,394,306,392,301,521,257"/>
+<area shape="rect" id="Node000003" href="$d2/d24/classfl_1_1vector_a15fe7e736c03eaa318bc50dfb546e88b.html#a15fe7e736c03eaa318bc50dfb546e88b" title=" " alt="" coords="41,5,171,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="304,108,206,60,171,47,172,42,208,55,307,103"/>
+<area shape="rect" id="Node000004" href="$d4/dad/classfl_1_1vector__basic_a76b29a87078fa0ed98475c96e4d7e767.html#a76b29a87078fa0ed98475c96e4d7e767" title=" " alt="" coords="9,70,203,95"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="258,116,170,98,171,93,259,110"/>
+<area shape="rect" id="Node000005" href="$d8/d7d/classfl_1_1vector__psram_a701e01b0ed2eaa90cad53a4fae88025d.html#a701e01b0ed2eaa90cad53a4fae88025d" title=" " alt="" coords="5,119,207,145"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="258,135,207,135,207,129,258,129"/>
+<area shape="rect" id="Node000006" href="$dc/d05/classfl_1_1_vector_n_a38d495754bb90a067ff78b564a668b29.html#a38d495754bb90a067ff78b564a668b29" title=" " alt="" coords="25,169,187,194"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="259,154,171,171,170,166,258,148"/>
+<area shape="rect" id="Node000008" href="$d2/d24/classfl_1_1vector_a1618ed00b8703af668a1ba7e4d36775d.html#a1618ed00b8703af668a1ba7e4d36775d" title=" " alt="" coords="41,219,171,259"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="257,239,172,240,171,235,257,234"/>
+<area shape="poly" id="edge11_Node000009_Node000009" title=" " alt="" coords="397,294,386,285,354,282,328,284,315,289,312,294,319,301,315,305,307,295,311,285,327,279,354,277,388,281,401,290"/>
+<area shape="rect" id="Node000010" href="$d2/d24/classfl_1_1vector_ade07cb2f19eb455df0fbba03449a0c4d.html#ade07cb2f19eb455df0fbba03449a0c4d" title=" " alt="" coords="41,291,171,331"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="241,316,171,315,171,309,241,311"/>
+<area shape="rect" id="Node000011" href="$d2/d24/classfl_1_1vector_ab5b8691cdf39b5293c746ab3a6fdf427.html#ab5b8691cdf39b5293c746ab3a6fdf427" title=" " alt="" coords="41,355,171,395"/>
+<area shape="poly" id="edge10_Node000009_Node000011" title=" " alt="" coords="287,334,172,362,171,357,286,329"/>
+</map>

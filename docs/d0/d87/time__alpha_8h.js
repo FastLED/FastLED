@@ -9,7 +9,7 @@ var time__alpha_8h =
       [ "fl::RampPhase::Plateau", "d4/d36/namespacefl_a2877a4f580878567e34215a59c4e15f9.html#a2877a4f580878567e34215a59c4e15f9a5cf2a054cb658beb406d3e4c02ae3c4e", null ],
       [ "fl::RampPhase::Falling", "d4/d36/namespacefl_a2877a4f580878567e34215a59c4e15f9.html#a2877a4f580878567e34215a59c4e15f9a0f57d5b441651c57eac9f91efaa5a75a", null ]
     ] ],
-    [ "fl::time_alpha16", "d4/d36/namespacefl_a928fadb083bf70c3ad2bc40b730a5698.html#a928fadb083bf70c3ad2bc40b730a5698", null ],
-    [ "fl::time_alpha8", "d4/d36/namespacefl_ac0cd0d573e17e7ec37d4d81dffff708f.html#ac0cd0d573e17e7ec37d4d81dffff708f", null ],
-    [ "fl::time_alphaf", "d4/d36/namespacefl_a0f381e85e41e5fb5cdfb0a7aa0b65872.html#a0f381e85e41e5fb5cdfb0a7aa0b65872", null ]
+    [ "fl::time_alpha16", "d4/d36/namespacefl_a4a434347dfbc97840d07f1aad61a49b9.html#a4a434347dfbc97840d07f1aad61a49b9", null ],
+    [ "fl::time_alpha8", "d4/d36/namespacefl_a2f543d1d4f6e8f6791c9c0b778362e2c.html#a2f543d1d4f6e8f6791c9c0b778362e2c", null ],
+    [ "fl::time_alphaf", "d4/d36/namespacefl_a6686566ff67ad4f5f01410c5581ecf52.html#a6686566ff67ad4f5f01410c5581ecf52", null ]
 ];

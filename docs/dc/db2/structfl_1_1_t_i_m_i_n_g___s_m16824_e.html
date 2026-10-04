@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -107,20 +107,21 @@ $(function(){initNavTree('dc/db2/structfl_1_1_t_i_m_i_n_g___s_m16824_e.html','..
 </div><!--header-->
 <div class="contents">
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>SM16824E RGB controller (high-speed variant) Four-phase: TH0=300ns, TH1=1200ns, TL0=1000ns, TL1=100ns. </p>
+<div class="textblock"><p>SM16824E RGBW controller @ 800 kHz Four-phase: TH0=300ns, TH1=900ns, TL0=900ns, TL1=300ns, TRST=200µs Datasheet typicals are identical to the SM16703 / WS2811-800kHz RZ family, so this timing also lets SM16824E and SM16703 chips share a single data line. </p>
+<p>Prior values (T2=900, T3=100) emitted T1H=1200ns / T1L=100ns — out of spec against both this chip's own datasheet and SM16703. See issue #3203. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d0/d3f/led__timing_8h_source.html#l00319">319</a> of file <a class="el" href="../../d0/d3f/led__timing_8h_source.html">led_timing.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d0/d3f/led__timing_8h_source.html#l00414">414</a> of file <a class="el" href="../../d0/d3f/led__timing_8h_source.html">led_timing.h</a>.</p>
 </div>
 <p><code>#include &lt;<a class="el" href="../../d0/d3f/led__timing_8h_source.html">led_timing.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
 Public Types</h2></td></tr>
-<tr class="memitem:a9c21f88c4c26668ee4401f33eae5d359" id="r_a9c21f88c4c26668ee4401f33eae5d359"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom">: u32 { <a class="el" href="../../dc/db2/structfl_1_1_t_i_m_i_n_g___s_m16824_e_a9c21f88c4c26668ee4401f33eae5d359.html#a9c21f88c4c26668ee4401f33eae5d359ae65c0a0feb7a4137edd85b412d42d8d3">T1</a> = 300
-, <a class="el" href="../../dc/db2/structfl_1_1_t_i_m_i_n_g___s_m16824_e_a9c21f88c4c26668ee4401f33eae5d359.html#a9c21f88c4c26668ee4401f33eae5d359a79d535e572c33005a631e58bfb8e6824">T2</a> = 900
-, <a class="el" href="../../dc/db2/structfl_1_1_t_i_m_i_n_g___s_m16824_e_a9c21f88c4c26668ee4401f33eae5d359.html#a9c21f88c4c26668ee4401f33eae5d359ac199618920a47cb576d78f817f3170ab">T3</a> = 100
-, <a class="el" href="../../dc/db2/structfl_1_1_t_i_m_i_n_g___s_m16824_e_a9c21f88c4c26668ee4401f33eae5d359.html#a9c21f88c4c26668ee4401f33eae5d359aaee1b511a1add6218386ce80dea09300">RESET</a> = 200
+<tr class="memitem:ac9b7d98b90bbccad30caa8cd902922d9" id="r_ac9b7d98b90bbccad30caa8cd902922d9"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom">: u32 { <a class="el" href="../../dc/db2/structfl_1_1_t_i_m_i_n_g___s_m16824_e_ac9b7d98b90bbccad30caa8cd902922d9.html#ac9b7d98b90bbccad30caa8cd902922d9ae65c0a0feb7a4137edd85b412d42d8d3">T1</a> = 300
+, <a class="el" href="../../dc/db2/structfl_1_1_t_i_m_i_n_g___s_m16824_e_ac9b7d98b90bbccad30caa8cd902922d9.html#ac9b7d98b90bbccad30caa8cd902922d9a79d535e572c33005a631e58bfb8e6824">T2</a> = 600
+, <a class="el" href="../../dc/db2/structfl_1_1_t_i_m_i_n_g___s_m16824_e_ac9b7d98b90bbccad30caa8cd902922d9.html#ac9b7d98b90bbccad30caa8cd902922d9ac199618920a47cb576d78f817f3170ab">T3</a> = 300
+, <a class="el" href="../../dc/db2/structfl_1_1_t_i_m_i_n_g___s_m16824_e_ac9b7d98b90bbccad30caa8cd902922d9.html#ac9b7d98b90bbccad30caa8cd902922d9aaee1b511a1add6218386ce80dea09300">RESET</a> = 200
  }</td></tr>
-<tr class="separator:a9c21f88c4c26668ee4401f33eae5d359"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="separator:ac9b7d98b90bbccad30caa8cd902922d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <hr/>The documentation for this struct was generated from the following file:<ul>
 <li>fl/chipsets/<a class="el" href="../../d0/d3f/led__timing_8h_source.html">led_timing.h</a></li>
@@ -132,7 +133,7 @@ Public Types</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../dc/db2/structfl_1_1_t_i_m_i_n_g___s_m16824_e.html">TIMING_SM16824E</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:10 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

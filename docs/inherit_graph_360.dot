@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::detail::ParlioLoggerInfo",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d19/structfl_1_1detail_1_1_parlio_logger_info.html",tooltip="Info providers for each logger category Used to supply category name, define name,..."];
+  Node0 [id="Node000000",label="fl::detail::HampelFilter\lImpl\< T, N \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/db8/classfl_1_1detail_1_1_hampel_filter_impl.html",tooltip=" "];
 }

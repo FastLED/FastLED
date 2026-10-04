@@ -1,0 +1,15 @@
+<map id="fl::buildGamutMapRgbwwFromSolveQ16" name="fl::buildGamutMapRgbwwFromSolveQ16">
+<area shape="rect" id="Node000001" title="Bind a five&#45;emitter map from one effective RGB solve and two white columns, all in the same D65 worki..." alt="" coords="5,106,228,146"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a2cc0220457b8a062b038db171f1b926c.html#a2cc0220457b8a062b038db171f1b926c" title="One pixel: XYZ in s16.16 to five drives – red, green, blue, white1, white2 – at whichever end of the ..." alt="" coords="276,5,497,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="154,103,211,75,275,48,321,32,323,37,277,52,213,80,157,108"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_af5a0679639e0ad1db7feb7f9705df72f.html#af5a0679639e0ad1db7feb7f9705df72f" title="One pixel: XYZ in s16.16 to three emitter drives in s16.16." alt="" coords="545,56,712,81"/>
+<area shape="poly" id="edge5_Node000001_Node000003" title=" " alt="" coords="206,103,276,91,409,77,532,70,532,75,410,83,276,97,207,109"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a1541be3a72791e258764b56f0a545313.html#a1541be3a72791e258764b56f0a545313" title="Bind two adapted white columns with an RGB solve in the same XYZ domain." alt="" coords="287,106,486,146"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="228,123,274,123,274,129,228,129"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_aa0b8d08b9903ece3fb5f220333b9e785.html#aa0b8d08b9903ece3fb5f220333b9e785" title=" " alt="" coords="353,171,420,196"/>
+<area shape="poly" id="edge6_Node000001_Node000005" title=" " alt="" coords="212,143,341,171,340,176,211,149"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a4e06a4bfbce59ea143a3a844cdb084eb.html#a4e06a4bfbce59ea143a3a844cdb084eb" title="XYZ (s16.16, D65&#45;relative) &#45;&gt; OKLab (s16.16), L then a then b." alt="" coords="317,220,456,245"/>
+<area shape="poly" id="edge7_Node000001_Node000006" title=" " alt="" coords="153,144,210,175,277,205,306,214,305,219,275,210,207,180,150,149"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="449,28,555,51,554,56,448,33"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="471,103,561,82,562,87,472,109"/>
+</map>

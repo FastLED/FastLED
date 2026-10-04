@@ -1,0 +1,12 @@
+<map id="fl/channels/detail/wave3.h" name="fl/channels/detail/wave3.h">
+<area shape="rect" id="Node000001" title="Out&#45;of&#45;line declarations for wave3 transposition internals." alt="" coords="99,5,232,45"/>
+<area shape="rect" id="Node000002" href="$dc/d20/detail_2wave3_8cpp_8hpp.html" title="Out&#45;of&#45;line definitions for wave3 transposition internals." alt="" coords="27,93,160,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="143,58,111,95,107,91,139,54"/>
+<area shape="rect" id="Node000007" href="$db/d7a/wave3_8cpp_8hpp.html" title="Wave3 waveform generation and transposition implementation." alt="" coords="163,189,357,214"/>
+<area shape="poly" id="edge4_Node000001_Node000007" title=" " alt="" coords="185,56,256,187,251,190,180,59"/>
+<area shape="rect" id="Node000003" href="$dc/df7/fl_2channels_2detail_2__build_8cpp_8hpp.html" title="Unity build header for fl/channels/detail/ directory." alt="" coords="5,181,139,221"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="88,148,79,182,74,180,83,146"/>
+<area shape="rect" id="Node000004" href="$d1/d97/fl_2channels_2__build_8cpp_8hpp.html" title=" " alt="" coords="70,269,261,295"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="107,228,153,267,150,271,103,232"/>
+<area shape="poly" id="edge5_Node000007_Node000004" title=" " alt="" coords="237,225,181,271,178,267,234,221"/>
+</map>

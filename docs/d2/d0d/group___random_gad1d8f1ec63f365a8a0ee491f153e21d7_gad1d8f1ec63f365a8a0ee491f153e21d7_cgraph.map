@@ -1,0 +1,7 @@
+<map id="random8" name="random8">
+<area shape="rect" id="Node000001" title="Generate an 8&#45;bit random number in the given range." alt="" coords="5,31,85,56"/>
+<area shape="rect" id="Node000002" href="$d6/d64/fastled_8h_a2fdabb91a1f100dec8da21e4306aba05.html#a2fdabb91a1f100dec8da21e4306aba05" title="Memory functions are available in fl:: namespace via fl/stl/cstring.h Using declarations cannot work ..." alt="" coords="150,5,197,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="85,33,136,23,137,28,86,38"/>
+<area shape="rect" id="Node000003" href="$d2/d0d/group___random_gafb55d95e3e866dce182f149535903dd8.html#gafb55d95e3e866dce182f149535903dd8" title="Generate an 8&#45;bit random number." alt="" coords="133,55,213,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="86,48,120,55,119,60,85,53"/>
+</map>

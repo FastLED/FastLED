@@ -30,7 +30,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../d7/dae/structfl_1_1audio_1_1_beat_detectors_a17e54dddaaa0d658a3d9a92166cbef96.html#a17e54dddaaa0d658a3d9a92166cbef96" target="_top" xlink:title=" ">
+<g id="a_Node000002"><a xlink:href="../../d7/dae/structfl_1_1audio_1_1_beat_detectors_a1db2358c6a87e35c301b963b5c2df498.html#a1db2358c6a87e35c301b963b5c2df498" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="131,-30 0,-30 0,0 131,0 131,-30"/>
 <text text-anchor="start" x="8" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">fl::audio::BeatDetectors</text>
 <text text-anchor="middle" x="65.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">::~BeatDetectors</text>

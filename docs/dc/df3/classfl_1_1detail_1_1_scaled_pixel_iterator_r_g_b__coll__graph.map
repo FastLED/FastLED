@@ -1,15 +1,17 @@
 <map id="fl::detail::ScaledPixelIteratorRGB" name="fl::detail::ScaledPixelIteratorRGB">
-<area shape="rect" id="Node000001" title="Input iterator adapter for PixelIterator yielding 3&#45;byte pixel data." alt="" coords="181,299,414,324"/>
-<area shape="rect" id="Node000002" href="$d0/d09/classfl_1_1_pixel_iterator.html" title=" " alt="" coords="164,211,281,236"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="244,245,289,296,285,300,240,248"/>
-<area shape="rect" id="Node000003" href="$d7/d27/structfl_1_1_rgbw.html" title=" " alt="" coords="5,108,80,133"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="49,146,57,167,70,185,91,199,115,209,164,219,163,224,113,214,88,204,66,189,52,169,44,148"/>
-<area shape="rect" id="Node000004" href="$d4/df9/structfl_1_1_rgbww.html" title="Per&#45;strip RGBWW configuration." alt="" coords="180,108,265,133"/>
-<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="225,147,225,211,220,211,220,147"/>
-<area shape="rect" id="Node000005" href="$d7/df0/namespacefl_1_1colorimetric__detail.html#d1/d65/structfl_1_1colorimetric__detail_1_1_rgbcct_profile" title=" " alt="" coords="143,5,303,45"/>
-<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="225,59,225,108,220,108,220,59"/>
-<area shape="rect" id="Node000007" href="$d4/dca/classfl_1_1array.html" title=" " alt="" coords="327,211,462,236"/>
-<area shape="poly" id="edge5_Node000001_Node000007" title=" " alt="" coords="373,247,313,300,309,296,370,243"/>
-<area shape="rect" id="Node000008" href="$d4/dca/classfl_1_1array.html" title="A fixed&#45;size array implementation similar to std::array." alt="" coords="352,108,480,133"/>
-<area shape="poly" id="edge6_Node000007_Node000008" title=" " alt="" coords="413,147,400,211,394,210,408,146"/>
+<area shape="rect" id="Node000001" title="Input iterator adapter for PixelIterator yielding 3&#45;byte pixel data." alt="" coords="286,313,519,339"/>
+<area shape="rect" id="Node000002" href="$d0/d09/classfl_1_1_pixel_iterator.html" title=" " alt="" coords="269,225,387,251"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="349,259,394,311,390,315,345,263"/>
+<area shape="rect" id="Node000003" href="$d7/d27/structfl_1_1_rgbw.html" title=" " alt="" coords="47,108,121,133"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="88,147,95,175,102,188,111,199,137,212,177,221,269,231,269,237,176,226,135,217,108,203,97,191,90,177,83,148"/>
+<area shape="rect" id="Node000004" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="5,5,163,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="87,59,87,108,81,108,81,59"/>
+<area shape="rect" id="Node000010" href="$d4/df9/structfl_1_1_rgbww.html" title="Per&#45;strip RGBWW configuration." alt="" coords="285,108,371,133"/>
+<area shape="poly" id="edge4_Node000002_Node000010" title=" " alt="" coords="331,147,331,225,325,225,325,147"/>
+<area shape="rect" id="Node000011" href="$d7/df0/namespacefl_1_1colorimetric__detail.html#d1/d65/structfl_1_1colorimetric__detail_1_1_rgbcct_profile" title=" " alt="" coords="248,5,408,45"/>
+<area shape="poly" id="edge5_Node000010_Node000011" title=" " alt="" coords="331,59,331,108,325,108,325,59"/>
+<area shape="rect" id="Node000012" href="$d4/dca/classfl_1_1array.html" title=" " alt="" coords="465,225,599,251"/>
+<area shape="poly" id="edge6_Node000001_Node000012" title=" " alt="" coords="505,260,422,315,419,311,502,256"/>
+<area shape="rect" id="Node000013" href="$d4/dca/classfl_1_1array.html" title="A fixed&#45;size array implementation similar to std::array." alt="" coords="521,108,649,133"/>
+<area shape="poly" id="edge7_Node000012_Node000013" title=" " alt="" coords="580,148,558,203,543,227,538,224,554,200,575,146"/>
 </map>

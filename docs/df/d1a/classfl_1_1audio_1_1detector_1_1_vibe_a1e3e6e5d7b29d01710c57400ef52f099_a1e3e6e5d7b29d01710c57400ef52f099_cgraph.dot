@@ -1,0 +1,25 @@
+digraph "fl::audio::detector::Vibe::~Vibe"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::audio::detector\l::Vibe::~Vibe",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::audio::detector\l::Vibe::fireCallbacks",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d1a/classfl_1_1audio_1_1detector_1_1_vibe_a72a5a04a22645878361f0144818c933e.html#a72a5a04a22645878361f0144818c933e",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::audio::detector\l::Vibe::update",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d1a/classfl_1_1audio_1_1detector_1_1_vibe_af18af8217929c6ae55b4f307e007f08b.html#af18af8217929c6ae55b4f307e007f08b",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::audio::detector\l::Vibe::Vibe",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d1a/classfl_1_1audio_1_1detector_1_1_vibe_aa1125b7c41416d5def07e51bada8a3c5.html#aa1125b7c41416d5def07e51bada8a3c5",tooltip=" "];
+  Node3 -> Node5 [id="edge4_Node000003_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::audio::detector\l::Vibe::adjustRateToFPS",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d1a/classfl_1_1audio_1_1detector_1_1_vibe_a085093f71944c275ae3d067420d82c2f.html#a085093f71944c275ae3d067420d82c2f",tooltip=" "];
+  Node5 -> Node6 [id="edge5_Node000005_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::powf",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d36/namespacefl_ac85312ba3e9bfd6fe9a92841f52cbe06.html#ac85312ba3e9bfd6fe9a92841f52cbe06",tooltip=" "];
+  Node3 -> Node12 [id="edge6_Node000003_Node000012",color="steelblue1",style="solid",tooltip=" "];
+  Node12 [id="Node000012",label="fl::audio::computeAudioDt",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/dbf/namespacefl_1_1audio_a8a5c097dfda178fb0d31e2060cb62ea9.html#a8a5c097dfda178fb0d31e2060cb62ea9",tooltip="Compute the time delta (in seconds) for an audio buffer."];
+  Node3 -> Node13 [id="edge7_Node000003_Node000013",color="steelblue1",style="solid",tooltip=" "];
+  Node13 [id="Node000013",label="fl::span::size",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa",tooltip=" "];
+  Node3 -> Node3 [id="edge8_Node000003_Node000003",color="steelblue1",style="solid",tooltip=" "];
+}

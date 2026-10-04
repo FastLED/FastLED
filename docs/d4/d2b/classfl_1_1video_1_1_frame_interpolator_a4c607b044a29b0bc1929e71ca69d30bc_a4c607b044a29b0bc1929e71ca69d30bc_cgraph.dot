@@ -10,14 +10,14 @@ digraph "fl::video::FrameInterpolator::draw"
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
   Node2 [id="Node000002",label="fl::Frame::draw",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/de0/classfl_1_1_frame_a9b46af8f9f48f2e538d2c18ef82b0c6b.html#a9b46af8f9f48f2e538d2c18ef82b0c6b",tooltip=" "];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::CRGB::blendAlphaMaxChannel",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dd6/structfl_1_1_c_r_g_b_a819280601bde62a67c39be0fff7f34af.html#a819280601bde62a67c39be0fff7f34af",tooltip=" "];
+  Node3 [id="Node000003",label="fl::CRGB::blendAlphaMaxChannel",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dd6/structfl_1_1_c_r_g_b_a1a6856f953e6123c78ee68840cf865c7.html#a1a6856f953e6123c78ee68840cf865c7",tooltip=" "];
   Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="fl::CRGB::CRGB",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dd6/structfl_1_1_c_r_g_b_adb891cc4fe8f5ac2188d72c13c0256fd.html#adb891cc4fe8f5ac2188d72c13c0256fd",tooltip="Default constructor."];
+  Node4 [id="Node000004",label="fl::CRGB::CRGB",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dd6/structfl_1_1_c_r_g_b_a910ee467a963ad6805026ad83873e52b.html#a910ee467a963ad6805026ad83873e52b",tooltip="Default constructor."];
   Node3 -> Node5 [id="edge4_Node000003_Node000005",color="steelblue1",style="solid",tooltip=" "];
-  Node5 [id="Node000005",label="fl::CRGB::blend",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dd6/structfl_1_1_c_r_g_b_a7e34886ec51c1aff8262123de5152437.html#a7e34886ec51c1aff8262123de5152437",tooltip=" "];
+  Node5 [id="Node000005",label="fl::CRGB::blend",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dd6/structfl_1_1_c_r_g_b_a783501cccdd1c0597ce7e2ba56401f6b.html#a783501cccdd1c0597ce7e2ba56401f6b",tooltip=" "];
   Node5 -> Node4 [id="edge5_Node000005_Node000004",color="steelblue1",style="solid",tooltip=" "];
   Node2 -> Node6 [id="edge6_Node000002_Node000006",color="steelblue1",style="solid",tooltip=" "];
-  Node6 [id="Node000006",label="fl::memcpy",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a0393d1d09fff5bccc427802cc22e756d.html#a0393d1d09fff5bccc427802cc22e756d",tooltip=" "];
+  Node6 [id="Node000006",label="fl::memcpy",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a35ff6755912c639a5e5bd35fc59e57ff.html#a35ff6755912c639a5e5bd35fc59e57ff",tooltip=" "];
   Node1 -> Node7 [id="edge7_Node000001_Node000007",color="steelblue1",style="solid",tooltip=" "];
   Node7 [id="Node000007",label="fl::video::FrameInterpolator::get",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d2b/classfl_1_1video_1_1_frame_interpolator_a64bb8f0afbdd621383267b96ad40056c.html#a64bb8f0afbdd621383267b96ad40056c",tooltip=" "];
   Node1 -> Node8 [id="edge8_Node000001_Node000008",color="steelblue1",style="solid",tooltip=" "];
@@ -27,7 +27,7 @@ digraph "fl::video::FrameInterpolator::draw"
   Node9 -> Node10 [id="edge10_Node000009_Node000010",color="steelblue1",style="solid",tooltip=" "];
   Node10 [id="Node000010",label="fl::Frame::Frame",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/de0/classfl_1_1_frame_ac1ae7be31afe8c7d481025ca7236b5d6.html#ac1ae7be31afe8c7d481025ca7236b5d6",tooltip=" "];
   Node10 -> Node11 [id="edge11_Node000010_Node000011",color="steelblue1",style="solid",tooltip=" "];
-  Node11 [id="Node000011",label="fl::memset",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a44a195439ac7fa303b4b0b0c956605be.html#a44a195439ac7fa303b4b0b0c956605be",tooltip=" "];
+  Node11 [id="Node000011",label="fl::memset",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a9416b2c34c489ae11032cb58c2d3c58c.html#a9416b2c34c489ae11032cb58c2d3c58c",tooltip=" "];
   Node9 -> Node9 [id="edge12_Node000009_Node000009",color="steelblue1",style="solid",tooltip=" "];
   Node9 -> Node12 [id="edge13_Node000009_Node000012",color="steelblue1",style="solid",tooltip=" "];
   Node12 [id="Node000012",label="fl::Frame::rgb",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/de0/classfl_1_1_frame_ab1f3046927985e53571210acc2f31faa.html#ab1f3046927985e53571210acc2f31faa",tooltip=" "];

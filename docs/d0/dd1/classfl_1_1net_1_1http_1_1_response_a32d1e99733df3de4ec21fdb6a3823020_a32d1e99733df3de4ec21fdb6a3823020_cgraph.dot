@@ -8,5 +8,5 @@ digraph "fl::net::http::Response::get_header"
   rankdir="LR";
   Node1 [id="Node000001",label="fl::net::http::Response\l::get_header",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Get header value (like JavaScript response.headers.get())"];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::make_optional",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a521850c6281549f94bcea643cc9af9ac.html#a521850c6281549f94bcea643cc9af9ac",tooltip=" "];
+  Node2 [id="Node000002",label="fl::make_optional",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a5d712055097d1db2849e63321900ce1a.html#a5d712055097d1db2849e63321900ce1a",tooltip=" "];
 }

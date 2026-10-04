@@ -1,7 +1,11 @@
 <map id="fl::make_sdcard_filesystem" name="fl::make_sdcard_filesystem">
-<area shape="rect" id="Node000001" title=" " alt="" coords="417,5,616,31"/>
-<area shape="rect" id="Node000002" href="$df/d37/classfl_1_1_file_system_a2350b8cc8235a759724d1356b2fb0359.html#a2350b8cc8235a759724d1356b2fb0359" title=" " alt="" coords="199,5,369,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="404,21,369,21,369,15,404,15"/>
-<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_af51a63f8fa4612beb1f1e320c9a79731.html#af51a63f8fa4612beb1f1e320c9a79731" title=" " alt="" coords="5,5,151,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="185,21,151,21,151,15,185,15"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="417,55,616,80"/>
+<area shape="rect" id="Node000002" href="$df/d37/classfl_1_1_file_system_a3ad4a49e617594ca2ba2da45e24b469e.html#a3ad4a49e617594ca2ba2da45e24b469e" title=" " alt="" coords="199,29,369,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="403,58,369,54,370,49,404,52"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a9669b5dc262702ff55666fb8fd854e63.html#a9669b5dc262702ff55666fb8fd854e63" title="Removable SD card on the given chip&#45;select pin." alt="" coords="239,79,329,104"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="404,82,330,89,329,84,404,76"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a02f1bd8446cb6c80855b1afcb281f713.html#a02f1bd8446cb6c80855b1afcb281f713" title=" " alt="" coords="5,5,151,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="185,33,151,29,151,24,185,28"/>
+<area shape="rect" id="Node000004" href="$df/d37/classfl_1_1_file_system_a1f13d3f36a414a164f0d80f07f52c4f0.html#a1f13d3f36a414a164f0d80f07f52c4f0" title=" " alt="" coords="11,55,145,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="185,57,146,62,145,56,185,52"/>
 </map>

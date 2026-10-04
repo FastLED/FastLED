@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::anonymous_namespace\l\{chasing_spirals.cpp.hpp\}\l::FrameSetup",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d09/namespacefl_1_1anonymous__namespace_02chasing__spirals_8cpp_8hpp_03.html#da/ddb/structfl_1_1anonymous__namespace_02chasing__spirals_8cpp_8hpp_03_1_1_frame_setup",tooltip=" "];
+  Node0 [id="Node000000",label="fl::allocator_realloc\l\< T \>::rebind\< U \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d22/classfl_1_1allocator__realloc.html#db/d86/structfl_1_1allocator__realloc_1_1rebind",tooltip=" "];
 }

@@ -1,0 +1,10 @@
+<map id="fl::s16x16x4::clamp" name="fl::s16x16x4::clamp">
+<area shape="rect" id="Node000001" title="Clamp to [lo, hi]." alt="" coords="5,31,155,56"/>
+<area shape="rect" id="Node000002" href="$d1/d7f/structfl_1_1s16x16x4_ab8ed6c45f486e364ab4f2712cb248193.html#ab8ed6c45f486e364ab4f2712cb248193" title="Element&#45;wise maximum." alt="" coords="203,5,341,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="155,31,188,26,189,32,155,36"/>
+<area shape="rect" id="Node000004" href="$d1/d7f/structfl_1_1s16x16x4_a1c933c8699fca08e55e6fc688e80ba20.html#a1c933c8699fca08e55e6fc688e80ba20" title="Element&#45;wise minimum." alt="" coords="205,55,339,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="155,50,191,55,191,60,155,55"/>
+<area shape="rect" id="Node000003" href="$d1/d7f/structfl_1_1s16x16x4_a9779c1f01acf93469171a665b5ae329c.html#a9779c1f01acf93469171a665b5ae329c" title=" " alt="" coords="389,31,560,56"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="342,24,376,28,375,34,341,29"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="339,57,376,52,376,58,340,62"/>
+</map>

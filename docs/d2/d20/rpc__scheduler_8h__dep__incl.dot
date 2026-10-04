@@ -31,9 +31,17 @@ digraph "fl/net/rpc_scheduler.h"
   Node13 [id="Node000013",label="/home/runner/work/FastLED\l/FastLED/examples/Asio\l/RpcServer/RpcServer.ino",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/df2/_rpc_server_8ino.html",tooltip="Example demonstrating fl::Remote with HTTP streaming transport (server side)"];
   Node10 -> Node14 [id="edge13_Node000010_Node000014",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node14 [id="Node000014",label="/home/runner/work/FastLED\l/FastLED/examples/AutoResearch\l/AutoResearchLowMemory.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/df2/_auto_research_low_memory_8h.html",tooltip=" "];
-  Node10 -> Node15 [id="edge14_Node000010_Node000015",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node15 [id="Node000015",label="fl/fx/wled.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/df9/wled_8h.html",tooltip=" "];
-  Node15 -> Node16 [id="edge15_Node000015_Node000016",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node16 [id="Node000016",label="fl/control/wled.cpp.hpp",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d3/da5/wled_8cpp_8hpp.html",tooltip=" "];
-  Node10 -> Node7 [id="edge16_Node000010_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node14 -> Node15 [id="edge14_Node000014_Node000015",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node15 [id="Node000015",label="/home/runner/work/FastLED\l/FastLED/examples/AutoResearch\l/AutoResearch.ino",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dc8/_auto_research_8ino.html",tooltip=" "];
+  Node10 -> Node16 [id="edge15_Node000010_Node000016",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node16 [id="Node000016",label="/home/runner/work/FastLED\l/FastLED/examples/AutoResearch\l/AutoResearchRemote.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d9e/_auto_research_remote_8h.html",tooltip=" "];
+  Node16 -> Node17 [id="edge16_Node000016_Node000017",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node17 [id="Node000017",label="/home/runner/work/FastLED\l/FastLED/examples/AutoResearch\l/AutoResearchAsync.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/df4/_auto_research_async_8h.html",tooltip=" "];
+  Node10 -> Node18 [id="edge17_Node000010_Node000018",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node18 [id="Node000018",label="/home/runner/work/FastLED\l/FastLED/examples/Remote\l/Remote.ino",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/df6/_remote_8ino.html",tooltip="Example demonstrating fl::Remote RPC system with callback-based I/O."];
+  Node10 -> Node19 [id="edge18_Node000010_Node000019",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node19 [id="Node000019",label="fl/fx/wled.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/df9/wled_8h.html",tooltip=" "];
+  Node19 -> Node20 [id="edge19_Node000019_Node000020",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node20 [id="Node000020",label="fl/control/wled.cpp.hpp",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d3/da5/wled_8cpp_8hpp.html",tooltip=" "];
+  Node10 -> Node7 [id="edge20_Node000010_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
 }

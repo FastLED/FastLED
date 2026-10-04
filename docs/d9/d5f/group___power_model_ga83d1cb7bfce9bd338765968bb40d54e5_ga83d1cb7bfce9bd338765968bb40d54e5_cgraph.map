@@ -1,7 +1,15 @@
 <map id="set_power_model" name="set_power_model">
-<area shape="rect" id="Node000001" title="Set custom RGB LED power consumption model." alt="" coords="5,5,143,31"/>
-<area shape="rect" id="Node000002" href="$d1/d2a/power__mgt_8cpp_8hpp_afe71d257dc9aca526178a992761bb812.html#afe71d257dc9aca526178a992761bb812" title="Global RGB power model (initialized to WS2812 @ 5V defaults, linear response)" alt="" coords="191,5,301,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="143,15,177,15,177,21,143,21"/>
-<area shape="rect" id="Node000003" href="$d9/d5b/classfl_1_1_singleton_a47fdc044003ec27f9e9833f7f5418e01.html#a47fdc044003ec27f9e9833f7f5418e01" title=" " alt="" coords="349,5,512,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="301,15,335,15,335,21,301,21"/>
+<area shape="rect" id="Node000001" title="Set custom RGB LED power consumption model." alt="" coords="5,56,143,81"/>
+<area shape="rect" id="Node000002" href="$d1/d2a/power__mgt_8cpp_8hpp_aa482db0d85e7c33ad7ce4f3b77f4808e.html#aa482db0d85e7c33ad7ce4f3b77f4808e" title=" " alt="" coords="191,5,372,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="126,53,215,31,216,37,128,58"/>
+<area shape="rect" id="Node000006" href="$d1/d2a/power__mgt_8cpp_8hpp_a8cfee7a07f6f35100dad7f4d642eaf2d.html#a8cfee7a07f6f35100dad7f4d642eaf2d" title=" " alt="" coords="420,56,585,81"/>
+<area shape="poly" id="edge4_Node000001_Node000006" title=" " alt="" coords="143,66,406,66,406,71,143,71"/>
+<area shape="rect" id="Node000007" href="$d1/d2a/power__mgt_8cpp_8hpp_a96a9190022832e655b9a01a3e0167d8c.html#a96a9190022832e655b9a01a3e0167d8c" title=" " alt="" coords="203,107,359,132"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="128,79,216,101,215,106,126,84"/>
+<area shape="rect" id="Node000003" href="$d1/d2a/power__mgt_8cpp_8hpp_afe71d257dc9aca526178a992761bb812.html#afe71d257dc9aca526178a992761bb812" title="Global RGB power model (initialized to WS2812 @ 5V defaults, linear response)" alt="" coords="447,7,558,32"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="372,16,434,16,434,22,372,21"/>
+<area shape="rect" id="Node000004" href="$d9/d5b/classfl_1_1_singleton_ad5cb1b704e17768f75802673abb0ff75.html#ad5cb1b704e17768f75802673abb0ff75" title=" " alt="" coords="633,56,796,81"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="559,29,647,50,645,55,557,35"/>
+<area shape="poly" id="edge5_Node000006_Node000004" title=" " alt="" coords="586,66,619,66,619,71,586,71"/>
+<area shape="poly" id="edge7_Node000007_Node000004" title=" " alt="" coords="359,113,466,105,585,91,642,81,643,87,586,97,467,110,360,118"/>
 </map>

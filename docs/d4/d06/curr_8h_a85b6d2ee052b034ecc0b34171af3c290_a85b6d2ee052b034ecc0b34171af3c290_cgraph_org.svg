@@ -20,7 +20,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909" target="_top" xlink:title=" ">
+<g id="a_Node000002"><a xlink:href="../../d4/d36/namespacefl_a07c69292ef50aa1083046faff1c52ead.html#a07c69292ef50aa1083046faff1c52ead" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="251.5,-278 201.5,-278 201.5,-259 251.5,-259 251.5,-278"/>
 <text text-anchor="middle" x="226.5" y="-266" font-family="Helvetica,sans-Serif" font-size="10.00">fl::max</text>
 </a>
@@ -38,7 +38,7 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../db/d97/_fast_l_e_d_8h_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909" target="_top" xlink:title=" ">
+<g id="a_Node000003"><a xlink:href="../../d6/d64/fastled_8h_a07c69292ef50aa1083046faff1c52ead.html#a07c69292ef50aa1083046faff1c52ead" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="245.5,-241 207.5,-241 207.5,-222 245.5,-222 245.5,-241"/>
 <text text-anchor="middle" x="226.5" y="-229" font-family="Helvetica,sans-Serif" font-size="10.00">max</text>
 </a>
@@ -56,7 +56,7 @@
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb" target="_top" xlink:title=" ">
+<g id="a_Node000004"><a xlink:href="../../d4/d36/namespacefl_a2fdabb91a1f100dec8da21e4306aba05.html#a2fdabb91a1f100dec8da21e4306aba05" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="250,-204 203,-204 203,-185 250,-185 250,-204"/>
 <text text-anchor="middle" x="226.5" y="-192" font-family="Helvetica,sans-Serif" font-size="10.00">fl::min</text>
 </a>
@@ -74,7 +74,7 @@
 <!-- Node5 -->
 <g id="Node000005" class="node">
 <title>Node5</title>
-<g id="a_Node000005"><a xlink:href="../../db/d97/_fast_l_e_d_8h_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb" target="_top" xlink:title="Memory functions are available in fl:: namespace via fl/stl/cstring.h Using declarations cannot work ...">
+<g id="a_Node000005"><a xlink:href="../../d6/d64/fastled_8h_a2fdabb91a1f100dec8da21e4306aba05.html#a2fdabb91a1f100dec8da21e4306aba05" target="_top" xlink:title="Memory functions are available in fl:: namespace via fl/stl/cstring.h Using declarations cannot work ...">
 <polygon fill="white" stroke="#666666" points="244,-167 209,-167 209,-148 244,-148 244,-167"/>
 <text text-anchor="middle" x="226.5" y="-155" font-family="Helvetica,sans-Serif" font-size="10.00">min</text>
 </a>
@@ -92,7 +92,7 @@
 <!-- Node6 -->
 <g id="Node000006" class="node">
 <title>Node6</title>
-<g id="a_Node000006"><a xlink:href="../../d2/d0d/group___random_gaaaff3e84c6ab2cf5f71400a4b6958beb.html#gaaaff3e84c6ab2cf5f71400a4b6958beb" target="_top" xlink:title="Generate a 16&#45;bit random number.">
+<g id="a_Node000006"><a xlink:href="../../d2/d0d/group___random_ga6f816735a0bd63bfc78bebbc7c5f12b9.html#ga6f816735a0bd63bfc78bebbc7c5f12b9" target="_top" xlink:title="Generate a 16&#45;bit random number.">
 <polygon fill="white" stroke="#666666" points="259.5,-130 193.5,-130 193.5,-111 259.5,-111 259.5,-130"/>
 <text text-anchor="middle" x="226.5" y="-118" font-family="Helvetica,sans-Serif" font-size="10.00">random16</text>
 </a>
@@ -182,7 +182,7 @@
 <!-- Node9 -->
 <g id="Node000009" class="node">
 <title>Node9</title>
-<g id="a_Node000009"><a xlink:href="../../d2/d0d/group___random_gadb05544426b14ef8d85fb2eb73cb8a0a.html#gadb05544426b14ef8d85fb2eb73cb8a0a" target="_top" xlink:title="Generate an 8&#45;bit random number.">
+<g id="a_Node000009"><a xlink:href="../../d2/d0d/group___random_gafb55d95e3e866dce182f149535903dd8.html#gafb55d95e3e866dce182f149535903dd8" target="_top" xlink:title="Generate an 8&#45;bit random number.">
 <polygon fill="white" stroke="#666666" points="379,-74 319,-74 319,-55 379,-55 379,-74"/>
 <text text-anchor="middle" x="349" y="-62" font-family="Helvetica,sans-Serif" font-size="10.00">random8</text>
 </a>

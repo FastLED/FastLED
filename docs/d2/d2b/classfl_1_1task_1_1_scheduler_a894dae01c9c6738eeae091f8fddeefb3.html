@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -115,56 +115,58 @@ $(function(){initNavTree('d2/d2b/classfl_1_1task_1_1_scheduler_a894dae01c9c6738e
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/ded/scheduler_8cpp_8hpp_source.html#l00024">24</a> of file <a class="el" href="../../dd/ded/scheduler_8cpp_8hpp_source.html">scheduler.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   24</span>                       {</div>
-<div class="line"><span class="lineno">   25</span>    u32 current_time = <a class="code hl_function" href="../../d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a">fl::millis</a>();</div>
-<div class="line"><span class="lineno">   26</span> </div>
-<div class="line"><span class="lineno">   27</span>    <span class="comment">// Use index-based iteration to avoid iterator invalidation issues</span></div>
-<div class="line"><span class="lineno">   28</span>    <span class="keywordflow">for</span> (fl::size i = 0; i &lt; <a class="code hl_variable" href="../../d2/d2b/classfl_1_1task_1_1_scheduler_a2110e46329639328b01079f9ddf63f1f.html#a2110e46329639328b01079f9ddf63f1f">mTasks</a>.size();) {</div>
-<div class="line"><span class="lineno">   29</span>        Handle&amp; <a class="code hl_variable" href="../../d4/d36/namespacefl_abbddb15aa2e7c8eb469d1dd56d6d2140.html#abbddb15aa2e7c8eb469d1dd56d6d2140">t</a> = <a class="code hl_variable" href="../../d2/d2b/classfl_1_1task_1_1_scheduler_a2110e46329639328b01079f9ddf63f1f.html#a2110e46329639328b01079f9ddf63f1f">mTasks</a>[i];</div>
-<div class="line"><span class="lineno">   30</span> </div>
-<div class="line"><span class="lineno">   31</span>        <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../d4/d36/namespacefl_abbddb15aa2e7c8eb469d1dd56d6d2140.html#abbddb15aa2e7c8eb469d1dd56d6d2140">t</a>.is_valid() || <a class="code hl_variable" href="../../d4/d36/namespacefl_abbddb15aa2e7c8eb469d1dd56d6d2140.html#abbddb15aa2e7c8eb469d1dd56d6d2140">t</a>._is_canceled()) {</div>
-<div class="line"><span class="lineno">   32</span>            <span class="comment">// erase() returns bool in fl::vector, not iterator</span></div>
-<div class="line"><span class="lineno">   33</span>            <a class="code hl_variable" href="../../d2/d2b/classfl_1_1task_1_1_scheduler_a2110e46329639328b01079f9ddf63f1f.html#a2110e46329639328b01079f9ddf63f1f">mTasks</a>.erase(<a class="code hl_variable" href="../../d2/d2b/classfl_1_1task_1_1_scheduler_a2110e46329639328b01079f9ddf63f1f.html#a2110e46329639328b01079f9ddf63f1f">mTasks</a>.begin() + i);</div>
-<div class="line"><span class="lineno">   34</span>            <span class="comment">// Don&#39;t increment i since we just removed an element</span></div>
-<div class="line"><span class="lineno">   35</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">   36</span>            <span class="comment">// Check if task is ready to run (frame tasks will return false here)</span></div>
-<div class="line"><span class="lineno">   37</span>            <span class="keywordtype">bool</span> should_run = <a class="code hl_variable" href="../../d4/d36/namespacefl_abbddb15aa2e7c8eb469d1dd56d6d2140.html#abbddb15aa2e7c8eb469d1dd56d6d2140">t</a>._ready_to_run(current_time);</div>
-<div class="line"><span class="lineno">   38</span> </div>
-<div class="line"><span class="lineno">   39</span>            <span class="keywordflow">if</span> (should_run) {</div>
-<div class="line"><span class="lineno">   40</span>                <span class="comment">// Update last run time for recurring tasks</span></div>
-<div class="line"><span class="lineno">   41</span>                <a class="code hl_variable" href="../../d4/d36/namespacefl_abbddb15aa2e7c8eb469d1dd56d6d2140.html#abbddb15aa2e7c8eb469d1dd56d6d2140">t</a>._set_last_run_time(current_time);</div>
-<div class="line"><span class="lineno">   42</span> </div>
-<div class="line"><span class="lineno">   43</span>                <span class="comment">// Execute the task</span></div>
-<div class="line"><span class="lineno">   44</span>                <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d4/d36/namespacefl_abbddb15aa2e7c8eb469d1dd56d6d2140.html#abbddb15aa2e7c8eb469d1dd56d6d2140">t</a>._has_then()) {</div>
-<div class="line"><span class="lineno">   45</span>                    <a class="code hl_variable" href="../../d4/d36/namespacefl_abbddb15aa2e7c8eb469d1dd56d6d2140.html#abbddb15aa2e7c8eb469d1dd56d6d2140">t</a>._execute_then();</div>
-<div class="line"><span class="lineno">   46</span>                } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">   47</span>                    <a class="code hl_function" href="../../d2/d2b/classfl_1_1task_1_1_scheduler_a030936767149b44cd3be5b5eccceae86.html#a030936767149b44cd3be5b5eccceae86">warn_no_then</a>(<a class="code hl_variable" href="../../d4/d36/namespacefl_abbddb15aa2e7c8eb469d1dd56d6d2140.html#abbddb15aa2e7c8eb469d1dd56d6d2140">t</a>._id(), <a class="code hl_variable" href="../../d4/d36/namespacefl_abbddb15aa2e7c8eb469d1dd56d6d2140.html#abbddb15aa2e7c8eb469d1dd56d6d2140">t</a>._trace_label());</div>
-<div class="line"><span class="lineno">   48</span>                }</div>
-<div class="line"><span class="lineno">   49</span> </div>
-<div class="line"><span class="lineno">   50</span>                <span class="comment">// Remove one-shot tasks, keep recurring ones</span></div>
-<div class="line"><span class="lineno">   51</span>                <span class="keywordtype">bool</span> is_recurring = (<a class="code hl_variable" href="../../d4/d36/namespacefl_abbddb15aa2e7c8eb469d1dd56d6d2140.html#abbddb15aa2e7c8eb469d1dd56d6d2140">t</a>._type() == <a class="code hl_enumvalue" href="../../db/d5c/namespacefl_1_1task_ae06d127a1ddb858d432f064e4393f4fd.html#ae06d127a1ddb858d432f064e4393f4fda84cb9dce517300d191ffb2538bbc0d33">TaskType::kEveryMs</a> || <a class="code hl_variable" href="../../d4/d36/namespacefl_abbddb15aa2e7c8eb469d1dd56d6d2140.html#abbddb15aa2e7c8eb469d1dd56d6d2140">t</a>._type() == <a class="code hl_enumvalue" href="../../db/d5c/namespacefl_1_1task_ae06d127a1ddb858d432f064e4393f4fd.html#ae06d127a1ddb858d432f064e4393f4fda6eb08055e15b5253c1505bc0e691d7c7">TaskType::kAtFramerate</a>);</div>
-<div class="line"><span class="lineno">   52</span>                <span class="keywordflow">if</span> (is_recurring) {</div>
-<div class="line"><span class="lineno">   53</span>                    ++i; <span class="comment">// Keep recurring tasks</span></div>
-<div class="line"><span class="lineno">   54</span>                } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">   55</span>                    <span class="comment">// erase() returns bool in fl::vector, not iterator</span></div>
-<div class="line"><span class="lineno">   56</span>                    <a class="code hl_variable" href="../../d2/d2b/classfl_1_1task_1_1_scheduler_a2110e46329639328b01079f9ddf63f1f.html#a2110e46329639328b01079f9ddf63f1f">mTasks</a>.erase(<a class="code hl_variable" href="../../d2/d2b/classfl_1_1task_1_1_scheduler_a2110e46329639328b01079f9ddf63f1f.html#a2110e46329639328b01079f9ddf63f1f">mTasks</a>.begin() + i);</div>
-<div class="line"><span class="lineno">   57</span>                    <span class="comment">// Don&#39;t increment i since we just removed an element</span></div>
-<div class="line"><span class="lineno">   58</span>                }</div>
-<div class="line"><span class="lineno">   59</span>            } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">   60</span>                ++i;</div>
-<div class="line"><span class="lineno">   61</span>            }</div>
-<div class="line"><span class="lineno">   62</span>        }</div>
-<div class="line"><span class="lineno">   63</span>    }</div>
-<div class="line"><span class="lineno">   64</span>}</div>
-<div class="ttc" id="aclassfl_1_1task_1_1_scheduler_a030936767149b44cd3be5b5eccceae86_html_a030936767149b44cd3be5b5eccceae86"><div class="ttname"><a href="../../d2/d2b/classfl_1_1task_1_1_scheduler_a030936767149b44cd3be5b5eccceae86.html#a030936767149b44cd3be5b5eccceae86">fl::task::Scheduler::warn_no_then</a></div><div class="ttdeci">void warn_no_then(int task_id, const fl::string &amp;trace_label)</div><div class="ttdef"><b>Definition</b> <a href="../../dd/ded/scheduler_8cpp_8hpp_source.html#l00112">scheduler.cpp.hpp:112</a></div></div>
-<div class="ttc" id="aclassfl_1_1task_1_1_scheduler_a2110e46329639328b01079f9ddf63f1f_html_a2110e46329639328b01079f9ddf63f1f"><div class="ttname"><a href="../../d2/d2b/classfl_1_1task_1_1_scheduler_a2110e46329639328b01079f9ddf63f1f.html#a2110e46329639328b01079f9ddf63f1f">fl::task::Scheduler::mTasks</a></div><div class="ttdeci">fl::vector&lt; Handle &gt; mTasks</div><div class="ttdef"><b>Definition</b> <a href="../../d2/dd8/scheduler_8h_source.html#l00039">scheduler.h:39</a></div></div>
-<div class="ttc" id="anamespacefl_1_1task_ae06d127a1ddb858d432f064e4393f4fd_html_ae06d127a1ddb858d432f064e4393f4fda6eb08055e15b5253c1505bc0e691d7c7"><div class="ttname"><a href="../../db/d5c/namespacefl_1_1task_ae06d127a1ddb858d432f064e4393f4fd.html#ae06d127a1ddb858d432f064e4393f4fda6eb08055e15b5253c1505bc0e691d7c7">fl::task::TaskType::kAtFramerate</a></div><div class="ttdeci">@ kAtFramerate</div><div class="ttdef"><b>Definition</b> <a href="../../db/da4/task_8h_source.html#l00118">task.h:118</a></div></div>
-<div class="ttc" id="anamespacefl_1_1task_ae06d127a1ddb858d432f064e4393f4fd_html_ae06d127a1ddb858d432f064e4393f4fda84cb9dce517300d191ffb2538bbc0d33"><div class="ttname"><a href="../../db/d5c/namespacefl_1_1task_ae06d127a1ddb858d432f064e4393f4fd.html#ae06d127a1ddb858d432f064e4393f4fda84cb9dce517300d191ffb2538bbc0d33">fl::task::TaskType::kEveryMs</a></div><div class="ttdeci">@ kEveryMs</div><div class="ttdef"><b>Definition</b> <a href="../../db/da4/task_8h_source.html#l00117">task.h:117</a></div></div>
-<div class="ttc" id="anamespacefl_a335fa6e4af7f0a011997ea0137d49b5a_html_a335fa6e4af7f0a011997ea0137d49b5a"><div class="ttname"><a href="../../d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a">fl::millis</a></div><div class="ttdeci">fl::u32 millis()</div><div class="ttdoc">Universal millisecond timer - returns milliseconds since system startup.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d18/chrono_8cpp_8hpp_source.html#l00064">chrono.cpp.hpp:64</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../dd/ded/scheduler_8cpp_8hpp_source.html#l00063">63</a> of file <a class="el" href="../../dd/ded/scheduler_8cpp_8hpp_source.html">scheduler.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   63</span>                       {</div>
+<div class="line"><span class="lineno">   64</span>    u32 current_time = <a class="code hl_function" href="../../d4/d36/namespacefl_a3c0ba5842bfd029c404a38c8df2315f3.html#a3c0ba5842bfd029c404a38c8df2315f3">fl::millis</a>();</div>
+<div class="line"><span class="lineno">   65</span> </div>
+<div class="line"><span class="lineno">   66</span>    <span class="comment">// Use index-based iteration to avoid iterator invalidation issues</span></div>
+<div class="line"><span class="lineno">   67</span>    <span class="keywordflow">for</span> (fl::size i = 0; i &lt; <a class="code hl_variable" href="../../d2/d2b/classfl_1_1task_1_1_scheduler_a2110e46329639328b01079f9ddf63f1f.html#a2110e46329639328b01079f9ddf63f1f">mTasks</a>.size();) {</div>
+<div class="line"><span class="lineno">   68</span>        Handle&amp; <a class="code hl_variable" href="../../d4/d36/namespacefl_abbddb15aa2e7c8eb469d1dd56d6d2140.html#abbddb15aa2e7c8eb469d1dd56d6d2140">t</a> = <a class="code hl_variable" href="../../d2/d2b/classfl_1_1task_1_1_scheduler_a2110e46329639328b01079f9ddf63f1f.html#a2110e46329639328b01079f9ddf63f1f">mTasks</a>[i];</div>
+<div class="line"><span class="lineno">   69</span> </div>
+<div class="line"><span class="lineno">   70</span>        <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../d4/d36/namespacefl_abbddb15aa2e7c8eb469d1dd56d6d2140.html#abbddb15aa2e7c8eb469d1dd56d6d2140">t</a>.is_valid() || <a class="code hl_variable" href="../../d4/d36/namespacefl_abbddb15aa2e7c8eb469d1dd56d6d2140.html#abbddb15aa2e7c8eb469d1dd56d6d2140">t</a>._is_canceled()) {</div>
+<div class="line"><span class="lineno">   71</span>            <span class="comment">// erase() returns bool in fl::vector, not iterator</span></div>
+<div class="line"><span class="lineno">   72</span>            <a class="code hl_variable" href="../../d2/d2b/classfl_1_1task_1_1_scheduler_a2110e46329639328b01079f9ddf63f1f.html#a2110e46329639328b01079f9ddf63f1f">mTasks</a>.erase(<a class="code hl_variable" href="../../d2/d2b/classfl_1_1task_1_1_scheduler_a2110e46329639328b01079f9ddf63f1f.html#a2110e46329639328b01079f9ddf63f1f">mTasks</a>.begin() + i);</div>
+<div class="line"><span class="lineno">   73</span>            <span class="comment">// Don&#39;t increment i since we just removed an element</span></div>
+<div class="line"><span class="lineno">   74</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">   75</span>            <span class="comment">// Check if task is ready to run (frame tasks will return false here)</span></div>
+<div class="line"><span class="lineno">   76</span>            <span class="keywordtype">bool</span> should_run = <a class="code hl_variable" href="../../d4/d36/namespacefl_abbddb15aa2e7c8eb469d1dd56d6d2140.html#abbddb15aa2e7c8eb469d1dd56d6d2140">t</a>._ready_to_run(current_time);</div>
+<div class="line"><span class="lineno">   77</span> </div>
+<div class="line"><span class="lineno">   78</span>            <span class="keywordflow">if</span> (should_run) {</div>
+<div class="line"><span class="lineno">   79</span>                <span class="comment">// Update last run time for recurring tasks</span></div>
+<div class="line"><span class="lineno">   80</span>                <a class="code hl_variable" href="../../d4/d36/namespacefl_abbddb15aa2e7c8eb469d1dd56d6d2140.html#abbddb15aa2e7c8eb469d1dd56d6d2140">t</a>._set_last_run_time(current_time);</div>
+<div class="line"><span class="lineno">   81</span> </div>
+<div class="line"><span class="lineno">   82</span>                <span class="comment">// Execute the task</span></div>
+<div class="line"><span class="lineno">   83</span>                <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d4/d36/namespacefl_abbddb15aa2e7c8eb469d1dd56d6d2140.html#abbddb15aa2e7c8eb469d1dd56d6d2140">t</a>._has_then()) {</div>
+<div class="line"><span class="lineno">   84</span>                    <a class="code hl_variable" href="../../d4/d36/namespacefl_abbddb15aa2e7c8eb469d1dd56d6d2140.html#abbddb15aa2e7c8eb469d1dd56d6d2140">t</a>._execute_then();</div>
+<div class="line"><span class="lineno">   85</span>                } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">   86</span>                    <a class="code hl_function" href="../../d2/d2b/classfl_1_1task_1_1_scheduler_a030936767149b44cd3be5b5eccceae86.html#a030936767149b44cd3be5b5eccceae86">warn_no_then</a>(<a class="code hl_variable" href="../../d4/d36/namespacefl_abbddb15aa2e7c8eb469d1dd56d6d2140.html#abbddb15aa2e7c8eb469d1dd56d6d2140">t</a>._id(), <a class="code hl_variable" href="../../d4/d36/namespacefl_abbddb15aa2e7c8eb469d1dd56d6d2140.html#abbddb15aa2e7c8eb469d1dd56d6d2140">t</a>._trace_label());</div>
+<div class="line"><span class="lineno">   87</span>                }</div>
+<div class="line"><span class="lineno">   88</span> </div>
+<div class="line"><span class="lineno">   89</span>                <span class="comment">// Remove one-shot tasks, keep recurring ones</span></div>
+<div class="line"><span class="lineno">   90</span>                <span class="keywordtype">bool</span> is_recurring = (<a class="code hl_variable" href="../../d4/d36/namespacefl_abbddb15aa2e7c8eb469d1dd56d6d2140.html#abbddb15aa2e7c8eb469d1dd56d6d2140">t</a>._type() == <a class="code hl_enumvalue" href="../../db/d5c/namespacefl_1_1task_ae06d127a1ddb858d432f064e4393f4fd.html#ae06d127a1ddb858d432f064e4393f4fda84cb9dce517300d191ffb2538bbc0d33">TaskType::kEveryMs</a> || <a class="code hl_variable" href="../../d4/d36/namespacefl_abbddb15aa2e7c8eb469d1dd56d6d2140.html#abbddb15aa2e7c8eb469d1dd56d6d2140">t</a>._type() == <a class="code hl_enumvalue" href="../../db/d5c/namespacefl_1_1task_ae06d127a1ddb858d432f064e4393f4fd.html#ae06d127a1ddb858d432f064e4393f4fda6eb08055e15b5253c1505bc0e691d7c7">TaskType::kAtFramerate</a>);</div>
+<div class="line"><span class="lineno">   91</span>                <span class="keywordflow">if</span> (is_recurring) {</div>
+<div class="line"><span class="lineno">   92</span>                    ++i; <span class="comment">// Keep recurring tasks</span></div>
+<div class="line"><span class="lineno">   93</span>                } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">   94</span>                    <span class="comment">// erase() returns bool in fl::vector, not iterator</span></div>
+<div class="line"><span class="lineno">   95</span>                    <a class="code hl_variable" href="../../d2/d2b/classfl_1_1task_1_1_scheduler_a2110e46329639328b01079f9ddf63f1f.html#a2110e46329639328b01079f9ddf63f1f">mTasks</a>.erase(<a class="code hl_variable" href="../../d2/d2b/classfl_1_1task_1_1_scheduler_a2110e46329639328b01079f9ddf63f1f.html#a2110e46329639328b01079f9ddf63f1f">mTasks</a>.begin() + i);</div>
+<div class="line"><span class="lineno">   96</span>                    <span class="comment">// Don&#39;t increment i since we just removed an element</span></div>
+<div class="line"><span class="lineno">   97</span>                }</div>
+<div class="line"><span class="lineno">   98</span>            } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">   99</span>                ++i;</div>
+<div class="line"><span class="lineno">  100</span>            }</div>
+<div class="line"><span class="lineno">  101</span>        }</div>
+<div class="line"><span class="lineno">  102</span>    }</div>
+<div class="line"><span class="lineno">  103</span>    <a class="code hl_function" href="../../d2/d2b/classfl_1_1task_1_1_scheduler_ab23e409040ebd66d4ccd8fe53c939d90.html#ab23e409040ebd66d4ccd8fe53c939d90">update_frame_listener_registration</a>();</div>
+<div class="line"><span class="lineno">  104</span>}</div>
+<div class="ttc" id="aclassfl_1_1task_1_1_scheduler_a030936767149b44cd3be5b5eccceae86_html_a030936767149b44cd3be5b5eccceae86"><div class="ttname"><a href="../../d2/d2b/classfl_1_1task_1_1_scheduler_a030936767149b44cd3be5b5eccceae86.html#a030936767149b44cd3be5b5eccceae86">fl::task::Scheduler::warn_no_then</a></div><div class="ttdeci">void warn_no_then(int task_id, const fl::string &amp;trace_label)</div><div class="ttdef"><b>Definition</b> <a href="../../dd/ded/scheduler_8cpp_8hpp_source.html#l00190">scheduler.cpp.hpp:190</a></div></div>
+<div class="ttc" id="aclassfl_1_1task_1_1_scheduler_a2110e46329639328b01079f9ddf63f1f_html_a2110e46329639328b01079f9ddf63f1f"><div class="ttname"><a href="../../d2/d2b/classfl_1_1task_1_1_scheduler_a2110e46329639328b01079f9ddf63f1f.html#a2110e46329639328b01079f9ddf63f1f">fl::task::Scheduler::mTasks</a></div><div class="ttdeci">fl::vector&lt; Handle &gt; mTasks</div><div class="ttdef"><b>Definition</b> <a href="../../d2/dd8/scheduler_8h_source.html#l00046">scheduler.h:46</a></div></div>
+<div class="ttc" id="aclassfl_1_1task_1_1_scheduler_ab23e409040ebd66d4ccd8fe53c939d90_html_ab23e409040ebd66d4ccd8fe53c939d90"><div class="ttname"><a href="../../d2/d2b/classfl_1_1task_1_1_scheduler_ab23e409040ebd66d4ccd8fe53c939d90.html#ab23e409040ebd66d4ccd8fe53c939d90">fl::task::Scheduler::update_frame_listener_registration</a></div><div class="ttdeci">void update_frame_listener_registration() FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../dd/ded/scheduler_8cpp_8hpp_source.html#l00174">scheduler.cpp.hpp:174</a></div></div>
+<div class="ttc" id="anamespacefl_1_1task_ae06d127a1ddb858d432f064e4393f4fd_html_ae06d127a1ddb858d432f064e4393f4fda6eb08055e15b5253c1505bc0e691d7c7"><div class="ttname"><a href="../../db/d5c/namespacefl_1_1task_ae06d127a1ddb858d432f064e4393f4fd.html#ae06d127a1ddb858d432f064e4393f4fda6eb08055e15b5253c1505bc0e691d7c7">fl::task::TaskType::kAtFramerate</a></div><div class="ttdeci">@ kAtFramerate</div><div class="ttdoc">Runs at a fixed number of times per second.</div><div class="ttdef"><b>Definition</b> <a href="../../db/da4/task_8h_source.html#l00119">task.h:119</a></div></div>
+<div class="ttc" id="anamespacefl_1_1task_ae06d127a1ddb858d432f064e4393f4fd_html_ae06d127a1ddb858d432f064e4393f4fda84cb9dce517300d191ffb2538bbc0d33"><div class="ttname"><a href="../../db/d5c/namespacefl_1_1task_ae06d127a1ddb858d432f064e4393f4fd.html#ae06d127a1ddb858d432f064e4393f4fda84cb9dce517300d191ffb2538bbc0d33">fl::task::TaskType::kEveryMs</a></div><div class="ttdeci">@ kEveryMs</div><div class="ttdoc">Runs after a fixed time interval.</div><div class="ttdef"><b>Definition</b> <a href="../../db/da4/task_8h_source.html#l00118">task.h:118</a></div></div>
+<div class="ttc" id="anamespacefl_a3c0ba5842bfd029c404a38c8df2315f3_html_a3c0ba5842bfd029c404a38c8df2315f3"><div class="ttname"><a href="../../d4/d36/namespacefl_a3c0ba5842bfd029c404a38c8df2315f3.html#a3c0ba5842bfd029c404a38c8df2315f3">fl::millis</a></div><div class="ttdeci">fl::u32 millis()</div><div class="ttdoc">Universal millisecond timer - returns milliseconds since system startup.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d18/chrono_8cpp_8hpp_source.html#l00079">chrono.cpp.hpp:79</a></div></div>
 <div class="ttc" id="anamespacefl_abbddb15aa2e7c8eb469d1dd56d6d2140_html_abbddb15aa2e7c8eb469d1dd56d6d2140"><div class="ttname"><a href="../../d4/d36/namespacefl_abbddb15aa2e7c8eb469d1dd56d6d2140.html#abbddb15aa2e7c8eb469d1dd56d6d2140">fl::t</a></div><div class="ttdeci">t</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d91/transposition_8cpp_8hpp_source.html#l00027">transposition.cpp.hpp:27</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../db/da4/task_8h_source.html#l00118">fl::task::kAtFramerate</a>, <a class="el" href="../../db/da4/task_8h_source.html#l00117">fl::task::kEveryMs</a>, <a class="el" href="../../db/d18/chrono_8cpp_8hpp_source.html#l00064">fl::millis()</a>, <a class="el" href="../../d2/dd8/scheduler_8h_source.html#l00039">mTasks</a>, <a class="el" href="../../d7/d91/transposition_8cpp_8hpp_source.html#l00027">fl::t</a>, and <a class="el" href="../../dd/ded/scheduler_8cpp_8hpp_source.html#l00112">warn_no_then()</a>.</p>
+<p class="reference">References <a class="el" href="../../db/da4/task_8h_source.html#l00119">fl::task::kAtFramerate</a>, <a class="el" href="../../db/da4/task_8h_source.html#l00118">fl::task::kEveryMs</a>, <a class="el" href="../../db/d18/chrono_8cpp_8hpp_source.html#l00079">fl::millis()</a>, <a class="el" href="../../d2/dd8/scheduler_8h_source.html#l00046">mTasks</a>, <a class="el" href="../../d7/d91/transposition_8cpp_8hpp_source.html#l00027">fl::t</a>, <a class="el" href="../../dd/ded/scheduler_8cpp_8hpp_source.html#l00174">update_frame_listener_registration()</a>, and <a class="el" href="../../dd/ded/scheduler_8cpp_8hpp_source.html#l00190">warn_no_then()</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../d1/dd7/fx__engine_8cpp_8hpp_source.html#l00096">fl::FxEngine::draw()</a>, and <a class="el" href="../../dc/de9/executor_8cpp_8hpp_source.html#l00075">fl::task::run()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
@@ -172,7 +174,7 @@ $(function(){initNavTree('d2/d2b/classfl_1_1task_1_1_scheduler_a894dae01c9c6738e
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d2/d2b/classfl_1_1task_1_1_scheduler_a894dae01c9c6738eeae091f8fddeefb3_a894dae01c9c6738eeae091f8fddeefb3_cgraph.svg" width="551" height="126"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d2/d2b/classfl_1_1task_1_1_scheduler_a894dae01c9c6738eeae091f8fddeefb3_a894dae01c9c6738eeae091f8fddeefb3_cgraph.svg" width="618" height="204"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 <div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
@@ -191,7 +193,7 @@ $(function(){initNavTree('d2/d2b/classfl_1_1task_1_1_scheduler_a894dae01c9c6738e
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../db/d5c/namespacefl_1_1task.html">task</a></li><li class="navelem"><a class="el" href="../../d2/d2b/classfl_1_1task_1_1_scheduler.html">Scheduler</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:10 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:12 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

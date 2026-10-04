@@ -2,7 +2,7 @@ var classfl_1_1_u_c_s7604_controller_t =
 [
     [ "DelegateController", "dc/da3/classfl_1_1_u_c_s7604_controller_t_1_1_delegate_controller.html", "dc/da3/classfl_1_1_u_c_s7604_controller_t_1_1_delegate_controller" ],
     [ "DelegateControllerBase", "dd/d78/classfl_1_1_u_c_s7604_controller_t_a031f8c056388381c1f0e41223f8f32c7.html#a031f8c056388381c1f0e41223f8f32c7", null ],
-    [ "UCS7604ControllerT", "dd/d78/classfl_1_1_u_c_s7604_controller_t_a4138d05c7c270e2de24e874e101c60a6.html#a4138d05c7c270e2de24e874e101c60a6", null ],
+    [ "UCS7604ControllerT", "dd/d78/classfl_1_1_u_c_s7604_controller_t_a99b38f9c3a0693b2af30b1af88a797f1.html#a99b38f9c3a0693b2af30b1af88a797f1", null ],
     [ "bytes", "dd/d78/classfl_1_1_u_c_s7604_controller_t_a521831ecbed883e8237d5422fd168634.html#a521831ecbed883e8237d5422fd168634", null ],
     [ "getDelegate", "dd/d78/classfl_1_1_u_c_s7604_controller_t_a88fb3255786dfc66c832370588c65b5a.html#a88fb3255786dfc66c832370588c65b5a", null ],
     [ "getDelegate", "dd/d78/classfl_1_1_u_c_s7604_controller_t_a6cf216ae19e00b14a1643a939aa63c09.html#a6cf216ae19e00b14a1643a939aa63c09", null ],

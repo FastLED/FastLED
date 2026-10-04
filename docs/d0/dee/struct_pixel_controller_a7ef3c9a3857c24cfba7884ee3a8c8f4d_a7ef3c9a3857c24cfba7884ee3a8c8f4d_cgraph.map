@@ -1,0 +1,9 @@
+<map id="PixelController::operator=" name="PixelController::operator=">
+<area shape="rect" id="Node000001" title="Copy assignment, through the same copy() as the copy constructor." alt="" coords="5,55,196,80"/>
+<area shape="rect" id="Node000002" href="$d0/dee/struct_pixel_controller_ae44229e20fb4ba4473b057dcda87122e.html#ae44229e20fb4ba4473b057dcda87122e" title="Copy constructor." alt="" coords="244,29,464,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="196,55,230,52,231,57,196,60"/>
+<area shape="rect" id="Node000003" href="$d0/dee/struct_pixel_controller_af3310e3a869dfeafae981291b76b572d.html#af3310e3a869dfeafae981291b76b572d" title=" " alt="" coords="512,55,668,80"/>
+<area shape="poly" id="edge4_Node000001_Node000003" title=" " alt="" coords="196,65,498,65,498,70,196,70"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="316,31,308,21,312,11,328,5,354,3,387,7,400,16,396,20,385,11,354,8,329,10,315,15,313,20,320,27"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="464,51,499,55,498,60,464,56"/>
+</map>

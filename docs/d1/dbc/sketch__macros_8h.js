@@ -1,5 +1,6 @@
 var sketch__macros_8h =
 [
+    [ "FL_AUTORESEARCH_LITE_RPC", "d1/dbc/sketch__macros_8h_a99d2875c1ddad2485183b9294f7923b2.html#a99d2875c1ddad2485183b9294f7923b2", null ],
     [ "FL_PLATFORM_HAS_HUGE_MEMORY", "d1/dbc/sketch__macros_8h_a57f6e4f5138ae6d803d627d29647f39b.html#a57f6e4f5138ae6d803d627d29647f39b", null ],
     [ "FL_PLATFORM_HAS_LARGE_MEMORY", "d1/dbc/sketch__macros_8h_aa36e829478fc8510b54790b7fa56c0d5.html#aa36e829478fc8510b54790b7fa56c0d5", null ],
     [ "FL_PLATFORM_HAS_TINY_MEMORY", "d1/dbc/sketch__macros_8h_aa1b629b092424e6ba9a68829634abc5a.html#aa1b629b092424e6ba9a68829634abc5a", null ],

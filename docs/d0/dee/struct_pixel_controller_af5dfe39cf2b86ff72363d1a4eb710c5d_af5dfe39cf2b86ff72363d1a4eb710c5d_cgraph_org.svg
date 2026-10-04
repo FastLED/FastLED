@@ -11,7 +11,7 @@
 <!-- Node1 -->
 <g id="Node000001" class="node">
 <title>Node1</title>
-<g id="a_Node000001"><a xlink:title=" ">
+<g id="a_Node000001"><a xlink:title="non&#45;template alias of advanceAndLoadAndScale&lt;0&gt;()">
 <polygon fill="#999999" stroke="#666666" points="135,-101.5 0,-101.5 0,-71.5 135,-71.5 135,-101.5"/>
 <text text-anchor="start" x="8" y="-89.5" font-family="Helvetica,sans-Serif" font-size="10.00">PixelController::advance</text>
 <text text-anchor="middle" x="67.5" y="-78.5" font-family="Helvetica,sans-Serif" font-size="10.00">AndLoadAndScale0</text>
@@ -76,7 +76,7 @@
 <!-- Node6 -->
 <g id="Node000006" class="node">
 <title>Node6</title>
-<g id="a_Node000006"><a xlink:href="../../d0/dee/struct_pixel_controller_adad75cb77a4eab720f2ee1023b643a59.html#adad75cb77a4eab720f2ee1023b643a59" target="_top" xlink:title="Complete pipeline: load → dither → scale (THE MAGIC HAPPENS HERE!) Order is critical: pixel + dither ...">
+<g id="a_Node000006"><a xlink:href="../../d0/dee/struct_pixel_controller_adad75cb77a4eab720f2ee1023b643a59.html#adad75cb77a4eab720f2ee1023b643a59" target="_top" xlink:title="Complete pipeline: load â†’ dither â†’ scale (THE MAGIC HAPPENS HERE!) Order is critical: pixel + dit...">
 <polygon fill="white" stroke="#666666" points="488,-58.5 354,-58.5 354,-28.5 488,-28.5 488,-58.5"/>
 <text text-anchor="start" x="362" y="-46.5" font-family="Helvetica,sans-Serif" font-size="10.00">PixelController::loadAnd</text>
 <text text-anchor="middle" x="421" y="-35.5" font-family="Helvetica,sans-Serif" font-size="10.00">Scale</text>
@@ -132,7 +132,7 @@
 <g id="Node000007" class="node">
 <title>Node7</title>
 <g id="a_Node000007"><a xlink:href="../../d0/dee/struct_pixel_controller_af1d6dbfe39be747916896dc44c730a29.html#af1d6dbfe39be747916896dc44c730a29" target="_top" xlink:title="Add dither offset to pixel value (BEFORE scaling).">
-<polygon fill="white" stroke="#666666" points="665.5,-56 543.5,-56 543.5,-37 665.5,-37 665.5,-56"/>
+<polygon fill="#fff0f0" stroke="red" points="665.5,-56 543.5,-56 543.5,-37 665.5,-37 665.5,-56"/>
 <text text-anchor="middle" x="604.5" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">PixelController::dither</text>
 </a>
 </g>
@@ -146,19 +146,19 @@
 </a>
 </g>
 </g>
-<!-- Node8 -->
-<g id="Node000008" class="node">
-<title>Node8</title>
-<g id="a_Node000008"><a xlink:href="../../d0/dee/struct_pixel_controller_a2268d03939af0ad8fcb478ad6c9f33c7.html#a2268d03939af0ad8fcb478ad6c9f33c7" target="_top" xlink:title="Read a byte of LED data.">
+<!-- Node9 -->
+<g id="Node000009" class="node">
+<title>Node9</title>
+<g id="a_Node000009"><a xlink:href="../../d0/dee/struct_pixel_controller_a2268d03939af0ad8fcb478ad6c9f33c7.html#a2268d03939af0ad8fcb478ad6c9f33c7" target="_top" xlink:title="Read a byte of LED data.">
 <polygon fill="white" stroke="#666666" points="673,-19 536,-19 536,0 673,0 673,-19"/>
 <text text-anchor="middle" x="604.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">PixelController::loadByte</text>
 </a>
 </g>
 </g>
-<!-- Node6&#45;&gt;Node8 -->
-<g id="edge10_Node000006_Node000008" class="edge">
-<title>Node6&#45;&gt;Node8</title>
-<g id="a_edge10_Node000006_Node000008"><a xlink:title=" ">
+<!-- Node6&#45;&gt;Node9 -->
+<g id="edge10_Node000006_Node000009" class="edge">
+<title>Node6&#45;&gt;Node9</title>
+<g id="a_edge10_Node000006_Node000009"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M488.04,-31.13C505.83,-27.8 525,-24.21 542.5,-20.93"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="543.41,-24.32 552.59,-19.04 542.12,-17.44 543.41,-24.32"/>
 </a>
@@ -173,10 +173,10 @@
 </a>
 </g>
 </g>
-<!-- Node8&#45;&gt;Node3 -->
-<g id="edge11_Node000008_Node000003" class="edge">
-<title>Node8&#45;&gt;Node3</title>
-<g id="a_edge11_Node000008_Node000003"><a xlink:title=" ">
+<!-- Node9&#45;&gt;Node3 -->
+<g id="edge11_Node000009_Node000003" class="edge">
+<title>Node9&#45;&gt;Node3</title>
+<g id="a_edge11_Node000009_Node000003"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M642.73,-19.06C652.6,-21.69 663.23,-24.62 673,-27.5 699.69,-35.37 729.52,-45.03 752.45,-52.64"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="751.54,-56.03 762.14,-55.87 753.76,-49.38 751.54,-56.03"/>
 </a>

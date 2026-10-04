@@ -8,7 +8,7 @@ digraph "fl::ScaleUp::expand"
   rankdir="LR";
   Node1 [id="Node000001",label="fl::ScaleUp::expand",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Expand a low-resolution buffer to high-resolution using bilinear interpolation."];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::span::data",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d08/classfl_1_1span_a326aa9f29859fe8a92833fd5db12c3bb.html#a326aa9f29859fe8a92833fd5db12c3bb",tooltip=" "];
+  Node2 [id="Node000002",label="fl::span::data",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d08/classfl_1_1span_a45157f503f151e36c679f688f10e3511.html#a45157f503f151e36c679f688f10e3511",tooltip=" "];
   Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
   Node3 [id="Node000003",label="fl::upscale",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_aec4161e7f789764b94b67f9365a277f4.html#aec4161e7f789764b94b67f9365a277f4",tooltip=" "];
   Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];

@@ -1,10 +1,10 @@
 <map id="autoresearch::simd_check::runSimdTests" name="autoresearch::simd_check::runSimdTests">
 <area shape="rect" id="Node000001" title="Run the full SIMD test suite. Returns the number of failures." alt="" coords="5,1655,168,1695"/>
-<area shape="rect" id="Node000002" href="$d1/d27/classfl_1_1sstream_a2020a3513ae92ed435685030c3127194.html#a2020a3513ae92ed435685030c3127194" title=" " alt="" coords="224,1605,355,1630"/>
+<area shape="rect" id="Node000002" href="$d1/d27/classfl_1_1sstream_a6984c3b59302280dc6d30fdd158552a8.html#a6984c3b59302280dc6d30fdd158552a8" title=" " alt="" coords="224,1605,355,1630"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="157,1652,230,1631,231,1636,159,1657"/>
 <area shape="rect" id="Node000003" href="$d9/d1a/namespaceautoresearch_1_1simd__check_a81f34bf71b7b00b59cedf9fb126a6050.html#a81f34bf71b7b00b59cedf9fb126a6050" title="Get the static test table. Used by both runSimdTests() and the RPC handler." alt="" coords="216,1655,363,1695"/>
 <area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="168,1672,202,1672,202,1677,168,1677"/>
-<area shape="rect" id="Node000116" href="$d1/d27/classfl_1_1sstream_a08170cac6eba7241f099ae16730f6f8e.html#a08170cac6eba7241f099ae16730f6f8e" title=" " alt="" coords="231,1719,347,1745"/>
+<area shape="rect" id="Node000116" href="$d1/d27/classfl_1_1sstream_a904115dfd2a7e462177b6409c9b842d6.html#a904115dfd2a7e462177b6409c9b842d6" title=" " alt="" coords="231,1719,347,1745"/>
 <area shape="poly" id="edge49_Node000001_Node000116" title=" " alt="" coords="159,1692,231,1713,230,1718,157,1697"/>
 <area shape="rect" id="Node000004" href="$d9/d1a/namespaceautoresearch_1_1simd__check_a9e4ef02d04c60f246a63180b524191d0.html#a9e4ef02d04c60f246a63180b524191d0" title=" " alt="" coords="434,5,609,45"/>
 <area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="348,1653,360,1640,375,1600,386,1537,391,1452,393,1351,389,1112,380,847,371,581,369,343,372,242,379,159,391,96,408,56,420,44,424,48,413,59,396,97,384,160,377,243,374,343,376,581,385,846,395,1112,399,1351,397,1453,391,1537,381,1602,365,1643,352,1656"/>

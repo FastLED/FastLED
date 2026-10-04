@@ -9,11 +9,11 @@ digraph "fl::task::ITaskImpl::set_last_run_time"
   Node1 [id="Node000001",label="fl::task::ITaskImpl\l::set_last_run_time",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node1 [id="edge1_Node000001_Node000001",color="steelblue1",style="solid",tooltip=" "];
   Node1 -> Node2 [id="edge2_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::time",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a2bccb5decc8613e4b6e232e0a881578f.html#a2bccb5decc8613e4b6e232e0a881578f",tooltip="Alias for millis64() - returns 64-bit millisecond time."];
+  Node2 [id="Node000002",label="fl::time",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a3c694ad275c33c6adaab59f370858771.html#a3c694ad275c33c6adaab59f370858771",tooltip="Alias for millis64() - returns 64-bit millisecond time."];
   Node2 -> Node3 [id="edge3_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::millis64",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_ac8ee0e5ecac16a6ee42def0436a43663.html#ac8ee0e5ecac16a6ee42def0436a43663",tooltip="64-bit millisecond timer - returns milliseconds since system startup without wraparound"];
+  Node3 [id="Node000003",label="fl::millis64",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a822570130e003c9bdf7307e2a29bc9ab.html#a822570130e003c9bdf7307e2a29bc9ab",tooltip="64-bit millisecond timer - returns milliseconds since system startup without wraparound"];
   Node3 -> Node4 [id="edge4_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="fl::millis",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a",tooltip="Universal millisecond timer - returns milliseconds since system startup."];
+  Node4 [id="Node000004",label="fl::millis",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a3c0ba5842bfd029c404a38c8df2315f3.html#a3c0ba5842bfd029c404a38c8df2315f3",tooltip="Universal millisecond timer - returns milliseconds since system startup."];
   Node4 -> Node4 [id="edge5_Node000004_Node000004",color="steelblue1",style="solid",tooltip=" "];
   Node3 -> Node3 [id="edge6_Node000003_Node000003",color="steelblue1",style="solid",tooltip=" "];
   Node2 -> Node2 [id="edge7_Node000002_Node000002",color="steelblue1",style="solid",tooltip=" "];

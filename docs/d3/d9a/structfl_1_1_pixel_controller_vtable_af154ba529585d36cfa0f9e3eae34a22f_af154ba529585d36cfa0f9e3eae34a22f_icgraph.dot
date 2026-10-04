@@ -1,0 +1,12 @@
+digraph "fl::PixelControllerVtable::loadAndScaleRGBWWUnordered"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::PixelControllerVtable\l::loadAndScaleRGBWWUnordered",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::RgbwLoadBinder\l\< T, typename detail\l::OnlyIf\<(T::kColorOrder\l==RGB)\>::type \>::unorderedWW",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/de0/structfl_1_1_rgbw_load_binder_3_01_t_00_01typename_01detail_1_1_only_if_3_07_t_1_1k_color_order_0a_0a_r_g_b_08_4_1_1type_01_4_a0693da7dc63e86b76315e4820fb46de3.html#a0693da7dc63e86b76315e4820fb46de3",tooltip=" "];
+}

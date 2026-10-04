@@ -1,0 +1,5 @@
+<map id="fl::task::Handle::set_interval_ms" name="fl::task::Handle::set_interval_ms">
+<area shape="rect" id="Node000001" title="Changes the interval between runs." alt="" coords="5,5,153,45"/>
+<area shape="rect" id="Node000002" href="$de/daf/classfl_1_1task_1_1_handle_a02e8e1434133031c599f73f14fce9528.html#a02e8e1434133031c599f73f14fce9528" title="Returns the interval between runs, in milliseconds." alt="" coords="201,13,407,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="153,23,188,23,188,28,153,28"/>
+</map>

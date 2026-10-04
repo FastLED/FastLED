@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::expected\< void, E \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d2e/classfl_1_1expected_3_01void_00_01_e_01_4.html",tooltip="Specialization for void (no value to return)"];
+  Node0 [id="Node000000",label="fl::detail::runtime\l_rpc::ArgTypesTable\l\< Args \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d4c/structfl_1_1detail_1_1runtime__rpc_1_1_arg_types_table.html",tooltip=" "];
 }

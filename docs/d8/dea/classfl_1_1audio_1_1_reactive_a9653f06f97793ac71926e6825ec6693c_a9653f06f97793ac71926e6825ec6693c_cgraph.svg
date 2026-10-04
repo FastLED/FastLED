@@ -87,7 +87,7 @@ var sectionId = 'dynsection-0';
 <!-- Node5 -->
 <g id="Node000005" class="node">
 <title>Node5</title>
-<g id="a_Node000005"><a xlink:href="../../d3/d6b/classfl_1_1audio_1_1_processor_a0b73089dc8e55ade73d08863402a7b40.html#a0b73089dc8e55ade73d08863402a7b40" target="_top" xlink:title=" ">
+<g id="a_Node000005"><a xlink:href="../../d3/d6b/classfl_1_1audio_1_1_processor_a326c45c5b94cedef9a84f6a082577658.html#a326c45c5b94cedef9a84f6a082577658" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="260,-106 151,-106 151,-76 260,-76 260,-106"/>
 <text text-anchor="start" x="159" y="-94" font-family="Helvetica,sans-Serif" font-size="10.00">fl::audio::Processor</text>
 <text text-anchor="middle" x="205.5" y="-83" font-family="Helvetica,sans-Serif" font-size="10.00">::getMidLevel</text>
@@ -106,7 +106,7 @@ var sectionId = 'dynsection-0';
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d4/d36/namespacefl_a3fd92c727664a77396403265415789d3.html#a3fd92c727664a77396403265415789d3" target="_top" xlink:title=" ">
+<g id="a_Node000003"><a xlink:href="../../d4/d36/namespacefl_a257ae39a291866e014a2eeb4abe2a29c.html#a257ae39a291866e014a2eeb4abe2a29c" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="413.5,-166.5 319.5,-166.5 319.5,-147.5 413.5,-147.5 413.5,-166.5"/>
 <text text-anchor="middle" x="366.5" y="-154.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::make_unique</text>
 </a>
@@ -124,9 +124,9 @@ var sectionId = 'dynsection-0';
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../da/d3c/namespacefl_1_1fl_a0bddf371925d8c4e94b88e9d7b35d259.html#a0bddf371925d8c4e94b88e9d7b35d259" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="555.5,-166.5 477.5,-166.5 477.5,-147.5 555.5,-147.5 555.5,-166.5"/>
-<text text-anchor="middle" x="516.5" y="-154.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::fl::forward</text>
+<g id="a_Node000004"><a xlink:href="../../d4/d36/namespacefl_a94488336a5db985fbda1bbd317bffc6a.html#a94488336a5db985fbda1bbd317bffc6a" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="549.5,-166.5 483.5,-166.5 483.5,-147.5 549.5,-147.5 549.5,-166.5"/>
+<text text-anchor="middle" x="516.5" y="-154.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::forward</text>
 </a>
 </g>
 </g>
@@ -134,8 +134,8 @@ var sectionId = 'dynsection-0';
 <g id="edge3_Node000003_Node000004" class="edge">
 <title>Node3&#45;&gt;Node4</title>
 <g id="a_edge3_Node000003_Node000004"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M413.52,-157C430.52,-157 449.84,-157 467.05,-157"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="467.46,-160.5 477.46,-157 467.46,-153.5 467.46,-160.5"/>
+<path fill="none" stroke="#63b8ff" d="M413.52,-157C432.47,-157 454.3,-157 472.89,-157"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="473.13,-160.5 483.13,-157 473.13,-153.5 473.13,-160.5"/>
 </a>
 </g>
 </g>
@@ -169,7 +169,7 @@ var sectionId = 'dynsection-0';
 <!-- Node7 -->
 <g id="Node000007" class="node">
 <title>Node7</title>
-<g id="a_Node000007"><a xlink:href="../../d3/d6b/classfl_1_1audio_1_1_processor_a14290b2912c64567baedbe513ab27347.html#a14290b2912c64567baedbe513ab27347" target="_top" xlink:title=" ">
+<g id="a_Node000007"><a xlink:href="../../d3/d6b/classfl_1_1audio_1_1_processor_a5233bd98fcd645cbe3923c1d837975e3.html#a5233bd98fcd645cbe3923c1d837975e3" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="426,-51 307,-51 307,-21 426,-21 426,-51"/>
 <text text-anchor="start" x="315" y="-39" font-family="Helvetica,sans-Serif" font-size="10.00">fl::audio::Processor</text>
 <text text-anchor="middle" x="366.5" y="-28" font-family="Helvetica,sans-Serif" font-size="10.00">::getFrequencyBands</text>
@@ -224,7 +224,7 @@ var sectionId = 'dynsection-0';
 <!-- Node9 -->
 <g id="Node000009" class="node">
 <title>Node9</title>
-<g id="a_Node000009"><a xlink:href="../../d3/d6b/classfl_1_1audio_1_1_processor_ade806d07af52e3d281939cebce7643d5.html#ade806d07af52e3d281939cebce7643d5" target="_top" xlink:title=" ">
+<g id="a_Node000009"><a xlink:href="../../d3/d6b/classfl_1_1audio_1_1_processor_a1650c78facd0315c55a22a1095e0014b.html#a1650c78facd0315c55a22a1095e0014b" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="571,-30 462,-30 462,0 571,0 571,-30"/>
 <text text-anchor="start" x="470" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">fl::audio::Processor</text>
 <text text-anchor="middle" x="516.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">::registerDetector</text>

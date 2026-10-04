@@ -1,0 +1,11 @@
+<map id="fl::audio::Processor::getEqMid" name="fl::audio::Processor::getEqMid">
+<area shape="rect" id="Node000001" title=" " alt="" coords="480,49,625,89"/>
+<area shape="poly" id="edge3_Node000001_Node000001" title=" " alt="" coords="589,38,576,31,553,28,532,30,520,35,515,41,518,48,513,50,510,40,517,30,531,25,553,23,578,26,591,33"/>
+<area shape="rect" id="Node000002" href="$dc/d25/classmood__ring_1_1_room_listener_af684de25fc3935b1a2d0f6b5b1d8d27e.html#af684de25fc3935b1a2d0f6b5b1d8d27e" title=" " alt="" coords="243,5,432,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="466,54,432,47,433,42,467,49"/>
+<area shape="rect" id="Node000004" href="$d3/d6b/classfl_1_1audio_1_1_processor_a3209b620bdf4732030f5ed259cc7fce5.html#a3209b620bdf4732030f5ed259cc7fce5" title=" " alt="" coords="265,93,410,133"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="467,89,411,101,410,96,466,84"/>
+<area shape="rect" id="Node000003" href="$dc/d25/classmood__ring_1_1_room_listener_a101688d3da23eff686cdd2e709b3bc77.html#a101688d3da23eff686cdd2e709b3bc77" title="Poll the Processor and refresh sense(). Call once per frame." alt="" coords="5,5,195,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="229,28,195,28,195,23,229,23"/>
+<area shape="poly" id="edge5_Node000004_Node000004" title=" " alt="" coords="373,82,361,75,337,72,317,74,305,79,300,85,302,92,297,94,295,84,301,74,316,69,337,67,362,70,376,77"/>
+</map>

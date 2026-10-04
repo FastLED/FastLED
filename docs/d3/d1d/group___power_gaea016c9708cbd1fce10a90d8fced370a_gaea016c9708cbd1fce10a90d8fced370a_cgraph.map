@@ -1,0 +1,21 @@
+<map id="controller_dither_reserve_mW" name="controller_dither_reserve_mW">
+<area shape="rect" id="Node000001" title="dither_reserve_mW() for a controller that dithers, and zero for one that does not: a mode other than ..." alt="" coords="5,56,224,81"/>
+<area shape="rect" id="Node000002" href="$d3/d1d/group___power_gaf1bc751ffa875570ed2e86fc38db5142.html#gaf1bc751ffa875570ed2e86fc38db5142" title="The most BINARY_DITHER can add to one latched frame of leds, in mW (#4342, contract R4: &quot;quantization..." alt="" coords="285,56,434,81"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="224,66,271,66,271,71,224,71"/>
+<area shape="rect" id="Node000006" href="$d1/d2a/power__mgt_8cpp_8hpp_a611a0864af0ba45bfa9c2fee00628214.html#a611a0864af0ba45bfa9c2fee00628214" title="What one output code can cost at the steepest point of the response, in the 0&#45;255 scaled units calcul..." alt="" coords="511,5,644,31"/>
+<area shape="poly" id="edge11_Node000001_Node000006" title=" " alt="" coords="187,53,272,41,497,20,497,26,272,46,187,59"/>
+<area shape="rect" id="Node000007" href="$d1/d2a/power__mgt_8cpp_8hpp_a65c5cbdd796e64d67cfe0665898797ee.html#a65c5cbdd796e64d67cfe0665898797ee" title=" " alt="" coords="272,105,447,131"/>
+<area shape="poly" id="edge5_Node000001_Node000007" title=" " alt="" coords="179,79,283,100,281,105,178,84"/>
+<area shape="rect" id="Node000003" href="$d1/d2a/power__mgt_8cpp_8hpp_afe71d257dc9aca526178a992761bb812.html#afe71d257dc9aca526178a992761bb812" title="Global RGB power model (initialized to WS2812 @ 5V defaults, linear response)" alt="" coords="522,56,633,81"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="434,66,508,66,508,71,434,71"/>
+<area shape="poly" id="edge4_Node000002_Node000006" title=" " alt="" coords="414,53,508,31,510,36,416,58"/>
+<area shape="rect" id="Node000004" href="$d9/d5b/classfl_1_1_singleton_ad5cb1b704e17768f75802673abb0ff75.html#ad5cb1b704e17768f75802673abb0ff75" title=" " alt="" coords="708,105,871,131"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="633,79,721,100,720,105,632,84"/>
+<area shape="poly" id="edge6_Node000007_Node000003" title=" " alt="" coords="416,103,508,82,509,87,417,108"/>
+<area shape="rect" id="Node000008" href="$d1/d2a/power__mgt_8cpp_8hpp_a8cfee7a07f6f35100dad7f4d642eaf2d.html#a8cfee7a07f6f35100dad7f4d642eaf2d" title=" " alt="" coords="495,105,660,131"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="447,115,481,115,481,121,447,121"/>
+<area shape="rect" id="Node000009" href="$d1/d2a/power__mgt_8cpp_8hpp_a96a9190022832e655b9a01a3e0167d8c.html#a96a9190022832e655b9a01a3e0167d8c" title=" " alt="" coords="499,155,655,180"/>
+<area shape="poly" id="edge9_Node000007_Node000009" title=" " alt="" coords="417,128,508,149,507,154,416,133"/>
+<area shape="poly" id="edge8_Node000008_Node000004" title=" " alt="" coords="660,115,694,115,694,121,660,121"/>
+<area shape="poly" id="edge10_Node000009_Node000004" title=" " alt="" coords="632,152,720,131,721,136,633,157"/>
+</map>

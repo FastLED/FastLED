@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -124,10 +124,10 @@ $(function(){initNavTree('de/d67/classfl_1_1_serial_port_a81d980e22fa592957c7e16
 <div class="line"><span class="lineno">  226</span>    <span class="keywordtype">bool</span> negative = <span class="keyword">false</span>;</div>
 <div class="line"><span class="lineno">  227</span>    <span class="keywordtype">long</span> <a class="code hl_variable" href="../../d4/d36/namespacefl_a13766ae9e150185981f5096f90a439d7.html#a13766ae9e150185981f5096f90a439d7">value</a> = 0;</div>
 <div class="line"><span class="lineno">  228</span>    <span class="keywordtype">bool</span> foundDigit = <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">  229</span>    u32 startTime = <a class="code hl_function" href="../../d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a">fl::millis</a>();</div>
+<div class="line"><span class="lineno">  229</span>    u32 startTime = <a class="code hl_function" href="../../d4/d36/namespacefl_a3c0ba5842bfd029c404a38c8df2315f3.html#a3c0ba5842bfd029c404a38c8df2315f3">fl::millis</a>();</div>
 <div class="line"><span class="lineno">  230</span> </div>
 <div class="line"><span class="lineno">  231</span>    <span class="comment">// Skip non-numeric characters</span></div>
-<div class="line"><span class="lineno">  232</span>    <span class="keywordflow">while</span> (<a class="code hl_function" href="../../d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a">fl::millis</a>() - startTime &lt; <a class="code hl_variable" href="../../de/d67/classfl_1_1_serial_port_ab84019e6f66024ce670d593c7cf6d76b.html#ab84019e6f66024ce670d593c7cf6d76b">mTimeoutMs</a>) {</div>
+<div class="line"><span class="lineno">  232</span>    <span class="keywordflow">while</span> (<a class="code hl_function" href="../../d4/d36/namespacefl_a3c0ba5842bfd029c404a38c8df2315f3.html#a3c0ba5842bfd029c404a38c8df2315f3">fl::millis</a>() - startTime &lt; <a class="code hl_variable" href="../../de/d67/classfl_1_1_serial_port_ab84019e6f66024ce670d593c7cf6d76b.html#ab84019e6f66024ce670d593c7cf6d76b">mTimeoutMs</a>) {</div>
 <div class="line"><span class="lineno">  233</span>        <span class="keywordflow">if</span> (<a class="code hl_function" href="../../de/d67/classfl_1_1_serial_port_ab121e35dbb39bd8a3ff0b9cc9af8e96a.html#ab121e35dbb39bd8a3ff0b9cc9af8e96a">available</a>() &gt; 0) {</div>
 <div class="line"><span class="lineno">  234</span>            <span class="keywordtype">int</span> c = <a class="code hl_function" href="../../de/d67/classfl_1_1_serial_port_a08dcb585098a85b9be474efccd6bff3c.html#a08dcb585098a85b9be474efccd6bff3c">peek</a>();</div>
 <div class="line"><span class="lineno">  235</span>            <span class="keywordflow">if</span> (c == -1) {</div>
@@ -146,14 +146,14 @@ $(function(){initNavTree('de/d67/classfl_1_1_serial_port_a81d980e22fa592957c7e16
 <div class="line"><span class="lineno">  248</span>                <span class="keywordflow">break</span>;  <span class="comment">// Found a digit</span></div>
 <div class="line"><span class="lineno">  249</span>            } <span class="keywordflow">else</span> {</div>
 <div class="line"><span class="lineno">  250</span>                <a class="code hl_function" href="../../de/d67/classfl_1_1_serial_port_aed1374fc28e70820bc39430f7a16940e.html#aed1374fc28e70820bc39430f7a16940e">read</a>();  <span class="comment">// Skip non-numeric character</span></div>
-<div class="line"><span class="lineno">  251</span>                startTime = <a class="code hl_function" href="../../d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a">fl::millis</a>();  <span class="comment">// Reset timeout</span></div>
+<div class="line"><span class="lineno">  251</span>                startTime = <a class="code hl_function" href="../../d4/d36/namespacefl_a3c0ba5842bfd029c404a38c8df2315f3.html#a3c0ba5842bfd029c404a38c8df2315f3">fl::millis</a>();  <span class="comment">// Reset timeout</span></div>
 <div class="line"><span class="lineno">  252</span>            }</div>
 <div class="line"><span class="lineno">  253</span>        }</div>
 <div class="line"><span class="lineno">  254</span>    }</div>
 <div class="line"><span class="lineno">  255</span> </div>
 <div class="line"><span class="lineno">  256</span>    <span class="comment">// Parse digits</span></div>
-<div class="line"><span class="lineno">  257</span>    startTime = <a class="code hl_function" href="../../d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a">fl::millis</a>();</div>
-<div class="line"><span class="lineno">  258</span>    <span class="keywordflow">while</span> (<a class="code hl_function" href="../../d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a">fl::millis</a>() - startTime &lt; <a class="code hl_variable" href="../../de/d67/classfl_1_1_serial_port_ab84019e6f66024ce670d593c7cf6d76b.html#ab84019e6f66024ce670d593c7cf6d76b">mTimeoutMs</a>) {</div>
+<div class="line"><span class="lineno">  257</span>    startTime = <a class="code hl_function" href="../../d4/d36/namespacefl_a3c0ba5842bfd029c404a38c8df2315f3.html#a3c0ba5842bfd029c404a38c8df2315f3">fl::millis</a>();</div>
+<div class="line"><span class="lineno">  258</span>    <span class="keywordflow">while</span> (<a class="code hl_function" href="../../d4/d36/namespacefl_a3c0ba5842bfd029c404a38c8df2315f3.html#a3c0ba5842bfd029c404a38c8df2315f3">fl::millis</a>() - startTime &lt; <a class="code hl_variable" href="../../de/d67/classfl_1_1_serial_port_ab84019e6f66024ce670d593c7cf6d76b.html#ab84019e6f66024ce670d593c7cf6d76b">mTimeoutMs</a>) {</div>
 <div class="line"><span class="lineno">  259</span>        <span class="keywordflow">if</span> (<a class="code hl_function" href="../../de/d67/classfl_1_1_serial_port_ab121e35dbb39bd8a3ff0b9cc9af8e96a.html#ab121e35dbb39bd8a3ff0b9cc9af8e96a">available</a>() &gt; 0) {</div>
 <div class="line"><span class="lineno">  260</span>            <span class="keywordtype">int</span> c = <a class="code hl_function" href="../../de/d67/classfl_1_1_serial_port_a08dcb585098a85b9be474efccd6bff3c.html#a08dcb585098a85b9be474efccd6bff3c">peek</a>();</div>
 <div class="line"><span class="lineno">  261</span>            <span class="keywordflow">if</span> (c == -1) {</div>
@@ -164,7 +164,7 @@ $(function(){initNavTree('de/d67/classfl_1_1_serial_port_a81d980e22fa592957c7e16
 <div class="line"><span class="lineno">  266</span>                <a class="code hl_variable" href="../../d4/d36/namespacefl_a13766ae9e150185981f5096f90a439d7.html#a13766ae9e150185981f5096f90a439d7">value</a> = <a class="code hl_variable" href="../../d4/d36/namespacefl_a13766ae9e150185981f5096f90a439d7.html#a13766ae9e150185981f5096f90a439d7">value</a> * 10 + (c - <span class="charliteral">&#39;0&#39;</span>);</div>
 <div class="line"><span class="lineno">  267</span>                <a class="code hl_function" href="../../de/d67/classfl_1_1_serial_port_aed1374fc28e70820bc39430f7a16940e.html#aed1374fc28e70820bc39430f7a16940e">read</a>();  <span class="comment">// Consume the digit</span></div>
 <div class="line"><span class="lineno">  268</span>                foundDigit = <span class="keyword">true</span>;</div>
-<div class="line"><span class="lineno">  269</span>                startTime = <a class="code hl_function" href="../../d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a">fl::millis</a>();  <span class="comment">// Reset timeout</span></div>
+<div class="line"><span class="lineno">  269</span>                startTime = <a class="code hl_function" href="../../d4/d36/namespacefl_a3c0ba5842bfd029c404a38c8df2315f3.html#a3c0ba5842bfd029c404a38c8df2315f3">fl::millis</a>();  <span class="comment">// Reset timeout</span></div>
 <div class="line"><span class="lineno">  270</span>            } <span class="keywordflow">else</span> {</div>
 <div class="line"><span class="lineno">  271</span>                <span class="keywordflow">break</span>;  <span class="comment">// Non-digit, stop parsing</span></div>
 <div class="line"><span class="lineno">  272</span>            }</div>
@@ -178,9 +178,9 @@ $(function(){initNavTree('de/d67/classfl_1_1_serial_port_a81d980e22fa592957c7e16
 <div class="ttc" id="aclassfl_1_1_serial_port_ab84019e6f66024ce670d593c7cf6d76b_html_ab84019e6f66024ce670d593c7cf6d76b"><div class="ttname"><a href="../../de/d67/classfl_1_1_serial_port_ab84019e6f66024ce670d593c7cf6d76b.html#ab84019e6f66024ce670d593c7cf6d76b">fl::SerialPort::mTimeoutMs</a></div><div class="ttdeci">u32 mTimeoutMs</div><div class="ttdef"><b>Definition</b> <a href="../../de/d8b/system_2serial_8h_source.html#l00267">serial.h:267</a></div></div>
 <div class="ttc" id="aclassfl_1_1_serial_port_aed1374fc28e70820bc39430f7a16940e_html_aed1374fc28e70820bc39430f7a16940e"><div class="ttname"><a href="../../de/d67/classfl_1_1_serial_port_aed1374fc28e70820bc39430f7a16940e.html#aed1374fc28e70820bc39430f7a16940e">fl::SerialPort::read</a></div><div class="ttdeci">int read()</div><div class="ttdoc">Read next byte from serial input.</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d5f/system_2serial_8cpp_8hpp_source.html#l00030">serial.cpp.hpp:30</a></div></div>
 <div class="ttc" id="anamespacefl_a13766ae9e150185981f5096f90a439d7_html_a13766ae9e150185981f5096f90a439d7"><div class="ttname"><a href="../../d4/d36/namespacefl_a13766ae9e150185981f5096f90a439d7.html#a13766ae9e150185981f5096f90a439d7">fl::value</a></div><div class="ttdeci">constexpr int type_rank&lt; T &gt;::value</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d37/static__constexpr__defs_8cpp_8hpp_source.html#l00082">static_constexpr_defs.cpp.hpp:82</a></div></div>
-<div class="ttc" id="anamespacefl_a335fa6e4af7f0a011997ea0137d49b5a_html_a335fa6e4af7f0a011997ea0137d49b5a"><div class="ttname"><a href="../../d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a">fl::millis</a></div><div class="ttdeci">fl::u32 millis()</div><div class="ttdoc">Universal millisecond timer - returns milliseconds since system startup.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d18/chrono_8cpp_8hpp_source.html#l00064">chrono.cpp.hpp:64</a></div></div>
+<div class="ttc" id="anamespacefl_a3c0ba5842bfd029c404a38c8df2315f3_html_a3c0ba5842bfd029c404a38c8df2315f3"><div class="ttname"><a href="../../d4/d36/namespacefl_a3c0ba5842bfd029c404a38c8df2315f3.html#a3c0ba5842bfd029c404a38c8df2315f3">fl::millis</a></div><div class="ttdeci">fl::u32 millis()</div><div class="ttdoc">Universal millisecond timer - returns milliseconds since system startup.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d18/chrono_8cpp_8hpp_source.html#l00079">chrono.cpp.hpp:79</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d6/d5f/system_2serial_8cpp_8hpp_source.html#l00026">available()</a>, <a class="el" href="../../db/d18/chrono_8cpp_8hpp_source.html#l00064">fl::millis()</a>, <a class="el" href="../../de/d8b/system_2serial_8h_source.html#l00267">mTimeoutMs</a>, <a class="el" href="../../d6/d5f/system_2serial_8cpp_8hpp_source.html#l00034">peek()</a>, <a class="el" href="../../d6/d5f/system_2serial_8cpp_8hpp_source.html#l00030">read()</a>, and <a class="el" href="../../dd/d37/static__constexpr__defs_8cpp_8hpp_source.html#l00082">fl::type_rank&lt; T &gt;::value</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/d5f/system_2serial_8cpp_8hpp_source.html#l00026">available()</a>, <a class="el" href="../../db/d18/chrono_8cpp_8hpp_source.html#l00079">fl::millis()</a>, <a class="el" href="../../de/d8b/system_2serial_8h_source.html#l00267">mTimeoutMs</a>, <a class="el" href="../../d6/d5f/system_2serial_8cpp_8hpp_source.html#l00034">peek()</a>, <a class="el" href="../../d6/d5f/system_2serial_8cpp_8hpp_source.html#l00030">read()</a>, and <a class="el" href="../../dd/d37/static__constexpr__defs_8cpp_8hpp_source.html#l00082">fl::type_rank&lt; T &gt;::value</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -198,7 +198,7 @@ $(function(){initNavTree('de/d67/classfl_1_1_serial_port_a81d980e22fa592957c7e16
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../de/d67/classfl_1_1_serial_port.html">SerialPort</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:10 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

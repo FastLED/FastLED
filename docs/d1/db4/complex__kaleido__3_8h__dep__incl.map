@@ -1,26 +1,23 @@
 <map id="fl/fx/2d/animartrix_detail/viz/complex_kaleido_3.h" name="fl/fx/2d/animartrix_detail/viz/complex_kaleido_3.h">
-<area shape="rect" id="Node000001" title=" " alt="" coords="729,5,879,60"/>
-<area shape="rect" id="Node000002" href="$d3/d5d/animartrix__detail_8h.html" title=" " alt="" coords="651,115,789,155"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="775,72,738,117,734,113,771,69"/>
-<area shape="rect" id="Node000013" href="$d2/d31/complex__kaleido__3_8cpp_8hpp.html" title=" " alt="" coords="821,108,971,163"/>
-<area shape="poly" id="edge10_Node000001_Node000013" title=" " alt="" coords="839,69,874,106,870,110,835,72"/>
-<area shape="rect" id="Node000003" href="$d3/dc3/animartrix_8hpp.html" title=" " alt="" coords="621,218,787,243"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="717,169,709,218,703,217,712,168"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="817,5,967,60"/>
+<area shape="rect" id="Node000002" href="$d3/d5d/animartrix__detail_8h.html" title=" " alt="" coords="739,115,877,155"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="863,72,826,117,822,113,859,69"/>
+<area shape="rect" id="Node000011" href="$d2/d31/complex__kaleido__3_8cpp_8hpp.html" title=" " alt="" coords="909,108,1059,163"/>
+<area shape="poly" id="edge8_Node000001_Node000011" title=" " alt="" coords="927,69,962,106,958,110,923,72"/>
+<area shape="rect" id="Node000003" href="$d3/dc3/animartrix_8hpp.html" title=" " alt="" coords="709,218,875,243"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="805,169,797,218,791,217,800,168"/>
 <area shape="rect" id="Node000004" href="$d6/d05/_animartrix_8ino.html" title="Demo of the Animatrix effects." alt="" coords="5,299,224,353"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="607,247,437,271,243,301,225,305,224,299,242,296,436,265,607,242"/>
-<area shape="rect" id="Node000005" href="$df/dba/_animartrix_ring_8ino.html" title=" " alt="" coords="218,401,465,456"/>
-<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="607,236,516,241,420,252,338,272,308,285,287,300,281,312,278,324,283,350,298,376,317,400,313,403,294,379,278,352,273,324,276,310,283,297,305,280,336,266,420,247,516,236,607,231"/>
-<area shape="rect" id="Node000006" href="$d4/d67/sound__orchestrator_8h.html" title=" " alt="" coords="298,299,545,353"/>
-<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="657,250,502,301,500,296,655,245"/>
-<area shape="rect" id="Node000008" href="$d4/d06/curr_8h.html" title=" " alt="" coords="568,306,840,346"/>
-<area shape="poly" id="edge7_Node000003_Node000008" title=" " alt="" coords="707,257,707,306,701,306,701,257"/>
-<area shape="rect" id="Node000010" href="$d6/d35/_fx_engine_8ino.html" title="Demonstrates FxEngine for switching between effects." alt="" coords="864,299,1093,353"/>
-<area shape="poly" id="edge8_Node000003_Node000010" title=" " alt="" coords="751,245,902,296,901,301,749,250"/>
-<area shape="rect" id="Node000011" href="$da/d40/wasm__impl_8h.html" title=" " alt="" coords="1117,299,1317,353"/>
-<area shape="poly" id="edge9_Node000003_Node000011" title=" " alt="" coords="795,243,941,266,1106,296,1118,298,1117,304,1105,301,940,271,794,248"/>
-<area shape="poly" id="edge6_Node000006_Node000005" title=" " alt="" coords="394,366,364,403,360,400,390,362"/>
-<area shape="rect" id="Node000014" href="$d1/d36/fl_2fx_22d_2animartrix__detail_2viz_2__build_8cpp_8hpp.html" title="Unity build for animartrix_detail/viz/ directory Includes all visualizer implementations in alphabeti..." alt="" coords="1071,211,1257,251"/>
-<area shape="poly" id="edge11_Node000013_Node000014" title=" " alt="" coords="985,164,1111,208,1109,213,983,170"/>
-<area shape="rect" id="Node000015" href="$d2/d40/fl_2fx_22d_2animartrix__detail_2__build_8cpp_8hpp.html" title=" " alt="" coords="1342,306,1506,346"/>
-<area shape="poly" id="edge12_Node000014_Node000015" title=" " alt="" coords="1230,253,1372,303,1371,308,1228,258"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="695,244,484,267,236,301,225,303,224,298,236,296,483,261,694,238"/>
+<area shape="rect" id="Node000005" href="$df/dba/_animartrix_ring_8ino.html" title="Sample a circular LED ring out of a 2D Animartrix grid." alt="" coords="249,299,495,353"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="728,249,491,301,489,296,727,244"/>
+<area shape="rect" id="Node000006" href="$d4/d06/curr_8h.html" title=" " alt="" coords="519,306,791,346"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="765,253,684,308,681,304,762,249"/>
+<area shape="rect" id="Node000008" href="$d6/d35/_fx_engine_8ino.html" title="Demonstrates FxEngine for switching between effects." alt="" coords="815,299,1044,353"/>
+<area shape="poly" id="edge6_Node000003_Node000008" title=" " alt="" coords="822,249,892,296,889,301,819,253"/>
+<area shape="rect" id="Node000009" href="$da/d40/wasm__impl_8h.html" title=" " alt="" coords="1068,299,1268,353"/>
+<area shape="poly" id="edge7_Node000003_Node000009" title=" " alt="" coords="852,244,1068,297,1067,303,850,249"/>
+<area shape="rect" id="Node000012" href="$d1/d36/fl_2fx_22d_2animartrix__detail_2viz_2__build_8cpp_8hpp.html" title="Unity build for animartrix_detail/viz/ directory Includes all visualizer implementations in alphabeti..." alt="" coords="1091,211,1277,251"/>
+<area shape="poly" id="edge9_Node000011_Node000012" title=" " alt="" coords="1054,166,1145,208,1142,213,1051,171"/>
+<area shape="rect" id="Node000013" href="$d2/d40/fl_2fx_22d_2animartrix__detail_2__build_8cpp_8hpp.html" title=" " alt="" coords="1293,306,1457,346"/>
+<area shape="poly" id="edge10_Node000012_Node000013" title=" " alt="" coords="1236,254,1337,304,1335,308,1234,259"/>
 </map>

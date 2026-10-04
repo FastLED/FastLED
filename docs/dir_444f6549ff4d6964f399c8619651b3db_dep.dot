@@ -11,5 +11,5 @@ digraph "/home/runner/work/FastLED/FastLED/examples/Apa102HD"
   dir_444f6549ff4d6964f399c8619651b3db [label="Apa102HD", fillcolor="#edf0f7", color="grey25", style="filled,bold", URL="dir_444f6549ff4d6964f399c8619651b3db.html",tooltip=""];
   }
   dir_4d1829fa9bd13d7db71e765b2707b248 [label="fl", fillcolor="#edf0f7", color="red", style="filled", URL="dir_4d1829fa9bd13d7db71e765b2707b248.html",tooltip=""];
-  dir_444f6549ff4d6964f399c8619651b3db->dir_4d1829fa9bd13d7db71e765b2707b248 [headlabel="1", labeldistance=1.5 headhref="dir_000011_000074.html" href="dir_000011_000074.html" color="steelblue1" fontcolor="steelblue1"];
+  dir_444f6549ff4d6964f399c8619651b3db->dir_4d1829fa9bd13d7db71e765b2707b248 [headlabel="1", labeldistance=1.5 headhref="dir_000011_000077.html" href="dir_000011_000077.html" color="steelblue1" fontcolor="steelblue1"];
 }

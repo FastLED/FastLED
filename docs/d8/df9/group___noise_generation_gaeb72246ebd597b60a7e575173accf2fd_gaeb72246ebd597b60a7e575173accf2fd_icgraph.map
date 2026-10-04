@@ -1,5 +1,5 @@
 <map id="inoise8" name="inoise8">
-<area shape="rect" id="Node000001" title=" " alt="" coords="551,280,620,305"/>
+<area shape="rect" id="Node000001" title="8&#45;Bit, fixed point implementation of Perlin&#39;s noise." alt="" coords="551,280,620,305"/>
 <area shape="rect" id="Node000002" href="$d4/df2/classfl_1_1_luminova_aa775ddcb74da9d8ae057ac8e4c3c50cc.html#aa775ddcb74da9d8ae057ac8e4c3c50cc" title=" " alt="" coords="113,9,255,34"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="581,266,576,220,564,163,540,106,523,80,501,59,474,41,444,27,379,12,314,8,256,12,256,7,314,3,380,7,446,22,476,36,504,54,527,77,545,103,569,161,582,219,586,266"/>
 <area shape="rect" id="Node000003" href="$de/da4/group___noise_fill_gac5e4db886061d72b10ca82cf52aa4d7c.html#gac5e4db886061d72b10ca82cf52aa4d7c" title="Fill a 2D 8&#45;bit buffer with noise, using inoise8()" alt="" coords="340,154,475,180"/>

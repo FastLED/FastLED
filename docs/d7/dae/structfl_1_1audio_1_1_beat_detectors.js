@@ -1,7 +1,7 @@
 var structfl_1_1audio_1_1_beat_detectors =
 [
-    [ "BeatDetectors", "d7/dae/structfl_1_1audio_1_1_beat_detectors_ac77eec523973eaffd87bb5ed279e8aea.html#ac77eec523973eaffd87bb5ed279e8aea", null ],
-    [ "~BeatDetectors", "d7/dae/structfl_1_1audio_1_1_beat_detectors_a17e54dddaaa0d658a3d9a92166cbef96.html#a17e54dddaaa0d658a3d9a92166cbef96", null ],
+    [ "BeatDetectors", "d7/dae/structfl_1_1audio_1_1_beat_detectors_ac1df9ef898301c12c79e7ec3197e4c10.html#ac1df9ef898301c12c79e7ec3197e4c10", null ],
+    [ "~BeatDetectors", "d7/dae/structfl_1_1audio_1_1_beat_detectors_a1db2358c6a87e35c301b963b5c2df498.html#a1db2358c6a87e35c301b963b5c2df498", null ],
     [ "detectBeats", "d7/dae/structfl_1_1audio_1_1_beat_detectors_a19cf7b1808f16de6c503d9c23b847da4.html#a19cf7b1808f16de6c503d9c23b847da4", null ],
     [ "reset", "d7/dae/structfl_1_1audio_1_1_beat_detectors_abe42107745e95aa186819ad310d10b56.html#abe42107745e95aa186819ad310d10b56", null ],
     [ "setThresholds", "d7/dae/structfl_1_1audio_1_1_beat_detectors_a05b382499c8b1820c547bce5f26b4700.html#a05b382499c8b1820c547bce5f26b4700", null ],

@@ -1,0 +1,31 @@
+digraph "fl::ColorManagedPixelSource::loadAndScaleRGB"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::ColorManagedPixelSource\l::loadAndScaleRGB",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="The colour-managed path."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::processPixelQ16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_afb324195d9648e36d4074cd25ecccc92.html#afb324195d9648e36d4074cd25ecccc92",tooltip="One pixel: an RGB8 code triple to three physical emitter drives in s16.16."];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::applyFluxScalar",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a7c62484da7de035da5b8a23dcb1f127f.html#a7c62484da7de035da5b8a23dcb1f127f",tooltip="Scale every drive by one scalar, in place."];
+  Node2 -> Node4 [id="edge3_Node000002_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::processPixelLinearQ16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a84551faf2eec485523c64ea69ec0c782.html#a84551faf2eec485523c64ea69ec0c782",tooltip="Pre-response linear emitter light for a power prepass."];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::decodeTransferU16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_aad6443800e7b03380f9a2283f02c1279.html#aad6443800e7b03380f9a2283f02c1279",tooltip="Decode one 8-bit source code to u16 linear light under transfer."];
+  Node4 -> Node6 [id="edge5_Node000004_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::linearRgbToXyzQ16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_ab239d57d5a4481bf9688ac54d3f328b8.html#ab239d57d5a4481bf9688ac54d3f328b8",tooltip="One pixel: u16 linear RGB -> s16.16 XYZ."];
+  Node4 -> Node7 [id="edge6_Node000004_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::mapAndSolveDrivesQ16",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d36/namespacefl_a37b9b061238b860167bb06b975520fd6.html#a37b9b061238b860167bb06b975520fd6",tooltip="One pixel: XYZ in s16.16 to in-gamut emitter drives in s16.16."];
+  Node7 -> Node8 [id="edge7_Node000007_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl::solveRgbDrivesQ16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_af5a0679639e0ad1db7feb7f9705df72f.html#af5a0679639e0ad1db7feb7f9705df72f",tooltip="One pixel: XYZ in s16.16 to three emitter drives in s16.16."];
+  Node4 -> Node8 [id="edge8_Node000004_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node10 [id="edge9_Node000001_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="fl::ColorManagedPixelSource\l::quantize",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/da5/classfl_1_1_color_managed_pixel_source_a89b7183d8d0e9ba8f905864665c9d90f.html#a89b7183d8d0e9ba8f905864665c9d90f",tooltip="s16.16 drive to an 8-bit code, rounding to nearest."];
+  Node1 -> Node11 [id="edge10_Node000001_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="fl::ColorManagedPixelSource\l::quantizeDithered",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/da5/classfl_1_1_color_managed_pixel_source_af2528805da5b224482ffea7566031d7f.html#af2528805da5b224482ffea7566031d7f",tooltip="quantize with the pipeline's temporal dither (P8, C5): floor(x) or floor(x) + 1 of the exact code x,..."];
+  Node1 -> Node12 [id="edge11_Node000001_Node000012",color="steelblue1",style="solid",tooltip=" "];
+  Node12 [id="Node000012",label="fl::ColorManagedPixelSource\l::temporalDitherEnabled",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/da5/classfl_1_1_color_managed_pixel_source_a5b98ab9b6112de877383a866568b6109.html#a5b98ab9b6112de877383a866568b6109",tooltip="True when the channel asked for dither this frame."];
+}

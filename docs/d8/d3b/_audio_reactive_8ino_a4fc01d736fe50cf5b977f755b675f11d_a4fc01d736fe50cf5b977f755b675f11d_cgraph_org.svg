@@ -20,7 +20,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../dc/d52/classfl_1_1audio_1_1_config_aaace506af66baf0ff0f5704695b9513b.html#aaace506af66baf0ff0f5704695b9513b" target="_top" xlink:title=" ">
+<g id="a_Node000002"><a xlink:href="../../dc/d52/classfl_1_1audio_1_1_config_a3a198452e9496cae2283445525d8a65b.html#a3a198452e9496cae2283445525d8a65b" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="178,-67.5 80,-67.5 80,-37.5 178,-37.5 178,-67.5"/>
 <text text-anchor="start" x="88" y="-55.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::audio::Config::</text>
 <text text-anchor="middle" x="129" y="-44.5" font-family="Helvetica,sans-Serif" font-size="10.00">CreateInmp441</text>
@@ -39,7 +39,7 @@
 <!-- Node5 -->
 <g id="Node000005" class="node">
 <title>Node5</title>
-<g id="a_Node000005"><a xlink:href="../../d1/dfb/colorutils_8h_afba4db18577c19e39c54f1c5793741b7.html#afba4db18577c19e39c54f1c5793741b7" target="_top" xlink:title="Fill a range of LEDs with a solid color.">
+<g id="a_Node000005"><a xlink:href="../../d1/dfb/colorutils_8h_a3198008d7f952f27c3c83aeefedec06b.html#a3198008d7f952f27c3c83aeefedec06b" target="_top" xlink:title="Fill a range of LEDs with a solid color.">
 <polygon fill="white" stroke="#666666" points="157.5,-19 100.5,-19 100.5,0 157.5,0 157.5,-19"/>
 <text text-anchor="middle" x="129" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fill_solid</text>
 </a>
@@ -57,7 +57,7 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../dc/d52/classfl_1_1audio_1_1_config_aea6ac29e0ebdee4aadc8e38d9cb3a71f.html#aea6ac29e0ebdee4aadc8e38d9cb3a71f" target="_top" xlink:title=" ">
+<g id="a_Node000003"><a xlink:href="../../dc/d52/classfl_1_1audio_1_1_config_a2d51ec335208f6ee67326eea0e7998ef.html#a2d51ec335208f6ee67326eea0e7998ef" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="312,-91.5 214,-91.5 214,-61.5 312,-61.5 312,-91.5"/>
 <text text-anchor="start" x="222" y="-79.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::audio::Config::</text>
 <text text-anchor="middle" x="263" y="-68.5" font-family="Helvetica,sans-Serif" font-size="10.00">Config</text>
@@ -76,7 +76,7 @@
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../dc/d52/classfl_1_1audio_1_1_config_a80ce537820ee6d81e2ec9fc24aef7a87.html#a80ce537820ee6d81e2ec9fc24aef7a87" target="_top" xlink:title="Microphone pink noise correction profile.">
+<g id="a_Node000004"><a xlink:href="../../dc/d52/classfl_1_1audio_1_1_config_ae05597722a3f363dac581308962464cd.html#ae05597722a3f363dac581308962464cd" target="_top" xlink:title="Microphone pink noise correction profile.">
 <polygon fill="white" stroke="#666666" points="312,-43.5 214,-43.5 214,-13.5 312,-13.5 312,-43.5"/>
 <text text-anchor="start" x="222" y="-31.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::audio::Config::</text>
 <text text-anchor="middle" x="263" y="-20.5" font-family="Helvetica,sans-Serif" font-size="10.00">setMicProfile</text>

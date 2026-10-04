@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -107,7 +107,7 @@ $(function(){initNavTree('d4/d36/namespacefl_a29b071bb16abe20602cffbbbada53cf0.h
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="../../df/d96/s16x16x4_8h_ad12102840a95770657e94a62c99a82ec.html#ad12102840a95770657e94a62c99a82ec">FL_OPTIMIZE_FUNCTION</a> <a class="el" href="../../df/d96/s16x16x4_8h_adcb7795cd6f85159b3087db18279685e.html#adcb7795cd6f85159b3087db18279685e">FL_IRAM</a> void fl::wave8Transpose_16x2_pipe2 </td>
+          <td class="memname"><a class="el" href="../../d4/d54/compiler__control_8h_ad12102840a95770657e94a62c99a82ec.html#ad12102840a95770657e94a62c99a82ec">FL_OPTIMIZE_FUNCTION</a> <a class="el" href="../../d4/d54/compiler__control_8h_adcb7795cd6f85159b3087db18279685e.html#adcb7795cd6f85159b3087db18279685e">FL_IRAM</a> void fl::wave8Transpose_16x2_pipe2 </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a>(&amp;)</td>          <td class="paramname"><span class="paramname"><em>lanes_a</em></span>[16], </td>
         </tr>
@@ -137,28 +137,28 @@ $(function(){initNavTree('d4/d36/namespacefl_a29b071bb16abe20602cffbbbada53cf0.h
 <p>Pipe2: transpose 16-lane × 2-byte-positions (#2548). </p>
 <p>Bit-identical to two sequential <code>wave8Transpose_16</code> calls. Internally interleaves the two independent OR-trees inside the symbol loop so the in-order RV32 P4 can fill load-use stalls from position A with ALU ops from position B. Measured 9655 → 7625 µs/frame (+26%) on P4 v1.3 (16-lane × 256-LED, byte-LUT path) — first variant to beat the 7680 µs WS2812B 16-lane TX target. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d8/d81/wave8_8cpp_8hpp_source.html#l00136">136</a> of file <a class="el" href="../../d8/d81/wave8_8cpp_8hpp_source.html">wave8.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  140</span>                                                                                         {</div>
-<div class="line"><span class="lineno">  141</span>    <span class="comment">// Expand both positions independently — compiler can interleave the two</span></div>
-<div class="line"><span class="lineno">  142</span>    <span class="comment">// loops freely because they share no data.</span></div>
-<div class="line"><span class="lineno">  143</span>    Wave8Byte laneWaveformsA[16];</div>
-<div class="line"><span class="lineno">  144</span>    Wave8Byte laneWaveformsB[16];</div>
-<div class="line"><span class="lineno">  145</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> lane = 0; lane &lt; 16; lane++) {</div>
-<div class="line"><span class="lineno">  146</span>        <a class="code hl_function" href="../../df/d9e/namespacefl_1_1detail_a66fa111cf8d1f98b7ecda4f2d97b8d75.html#a66fa111cf8d1f98b7ecda4f2d97b8d75">detail::wave8_expand_byte</a>(lanes_a[lane], lut, &amp;laneWaveformsA[lane]);</div>
-<div class="line"><span class="lineno">  147</span>    }</div>
-<div class="line"><span class="lineno">  148</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> lane = 0; lane &lt; 16; lane++) {</div>
-<div class="line"><span class="lineno">  149</span>        <a class="code hl_function" href="../../df/d9e/namespacefl_1_1detail_a66fa111cf8d1f98b7ecda4f2d97b8d75.html#a66fa111cf8d1f98b7ecda4f2d97b8d75">detail::wave8_expand_byte</a>(lanes_b[lane], lut, &amp;laneWaveformsB[lane]);</div>
-<div class="line"><span class="lineno">  150</span>    }</div>
-<div class="line"><span class="lineno">  151</span>    <span class="comment">// Symbol-major loop with both transposes inlined back-to-back: the two</span></div>
-<div class="line"><span class="lineno">  152</span>    <span class="comment">// OR-trees share no dependencies, so the compiler can interleave them and</span></div>
-<div class="line"><span class="lineno">  153</span>    <span class="comment">// fill the in-order pipeline bubbles. See #2548.</span></div>
-<div class="line"><span class="lineno">  154</span>    <a class="code hl_function" href="../../df/d9e/namespacefl_1_1detail_a7dc59e9346ffd0bb292aab29f8bc3627.html#a7dc59e9346ffd0bb292aab29f8bc3627">detail::wave8_transpose_16x2_pipe2</a>(laneWaveformsA, laneWaveformsB,</div>
-<div class="line"><span class="lineno">  155</span>                                       output_a, output_b);</div>
-<div class="line"><span class="lineno">  156</span>}</div>
-<div class="ttc" id="anamespacefl_1_1detail_a66fa111cf8d1f98b7ecda4f2d97b8d75_html_a66fa111cf8d1f98b7ecda4f2d97b8d75"><div class="ttname"><a href="../../df/d9e/namespacefl_1_1detail_a66fa111cf8d1f98b7ecda4f2d97b8d75.html#a66fa111cf8d1f98b7ecda4f2d97b8d75">fl::detail::wave8_expand_byte</a></div><div class="ttdeci">FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION void wave8_expand_byte(u8 byte_value, const Wave8ByteExpansionLut &amp;lut, Wave8Byte *output)</div><div class="ttdoc">Byte-indexed expansion (#2526): one indexed 8-byte copy.</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d4b/wave8_8hpp_source.html#l00069">wave8.hpp:69</a></div></div>
-<div class="ttc" id="anamespacefl_1_1detail_a7dc59e9346ffd0bb292aab29f8bc3627_html_a7dc59e9346ffd0bb292aab29f8bc3627"><div class="ttname"><a href="../../df/d9e/namespacefl_1_1detail_a7dc59e9346ffd0bb292aab29f8bc3627.html#a7dc59e9346ffd0bb292aab29f8bc3627">fl::detail::wave8_transpose_16x2_pipe2</a></div><div class="ttdeci">FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION void wave8_transpose_16x2_pipe2(const Wave8Byte lane_waves_a[16], const Wave8Byte lane_waves_b[16], u8 output_a[16 *sizeof(Wave8Byte)], u8 output_b[16 *sizeof(Wave8Byte)])</div><div class="ttdoc">Pipe2: transpose 16-lane × 2-byte-positions in one fused call.</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d4b/wave8_8hpp_source.html#l00249">wave8.hpp:249</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d8/d81/wave8_8cpp_8hpp_source.html#l00137">137</a> of file <a class="el" href="../../d8/d81/wave8_8cpp_8hpp_source.html">wave8.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  141</span>                                                                                         {</div>
+<div class="line"><span class="lineno">  142</span>    <span class="comment">// Expand both positions independently — compiler can interleave the two</span></div>
+<div class="line"><span class="lineno">  143</span>    <span class="comment">// loops freely because they share no data.</span></div>
+<div class="line"><span class="lineno">  144</span>    Wave8Byte laneWaveformsA[16];</div>
+<div class="line"><span class="lineno">  145</span>    Wave8Byte laneWaveformsB[16];</div>
+<div class="line"><span class="lineno">  146</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> lane = 0; lane &lt; 16; lane++) {</div>
+<div class="line"><span class="lineno">  147</span>        <a class="code hl_function" href="../../df/d9e/namespacefl_1_1detail_ac79066fcad09cc0ca9d99714ee037ec4.html#ac79066fcad09cc0ca9d99714ee037ec4">detail::wave8_expand_byte</a>(lanes_a[lane], lut, &amp;laneWaveformsA[lane]);</div>
+<div class="line"><span class="lineno">  148</span>    }</div>
+<div class="line"><span class="lineno">  149</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> lane = 0; lane &lt; 16; lane++) {</div>
+<div class="line"><span class="lineno">  150</span>        <a class="code hl_function" href="../../df/d9e/namespacefl_1_1detail_ac79066fcad09cc0ca9d99714ee037ec4.html#ac79066fcad09cc0ca9d99714ee037ec4">detail::wave8_expand_byte</a>(lanes_b[lane], lut, &amp;laneWaveformsB[lane]);</div>
+<div class="line"><span class="lineno">  151</span>    }</div>
+<div class="line"><span class="lineno">  152</span>    <span class="comment">// Symbol-major loop with both transposes inlined back-to-back: the two</span></div>
+<div class="line"><span class="lineno">  153</span>    <span class="comment">// OR-trees share no dependencies, so the compiler can interleave them and</span></div>
+<div class="line"><span class="lineno">  154</span>    <span class="comment">// fill the in-order pipeline bubbles. See #2548.</span></div>
+<div class="line"><span class="lineno">  155</span>    <a class="code hl_function" href="../../df/d9e/namespacefl_1_1detail_a3e2f81102679a4106e51e9fc98689fe9.html#a3e2f81102679a4106e51e9fc98689fe9">detail::wave8_transpose_16x2_pipe2</a>(laneWaveformsA, laneWaveformsB,</div>
+<div class="line"><span class="lineno">  156</span>                                       output_a, output_b);</div>
+<div class="line"><span class="lineno">  157</span>}</div>
+<div class="ttc" id="anamespacefl_1_1detail_a3e2f81102679a4106e51e9fc98689fe9_html_a3e2f81102679a4106e51e9fc98689fe9"><div class="ttname"><a href="../../df/d9e/namespacefl_1_1detail_a3e2f81102679a4106e51e9fc98689fe9.html#a3e2f81102679a4106e51e9fc98689fe9">fl::detail::wave8_transpose_16x2_pipe2</a></div><div class="ttdeci">FL_IRAM FL_OPTIMIZE_FUNCTION void wave8_transpose_16x2_pipe2(const Wave8Byte lane_waves_a[16], const Wave8Byte lane_waves_b[16], u8 output_a[16 *sizeof(Wave8Byte)], u8 output_b[16 *sizeof(Wave8Byte)]) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d94/detail_2wave8_8cpp_8hpp_source.html#l00137">wave8.cpp.hpp:137</a></div></div>
+<div class="ttc" id="anamespacefl_1_1detail_ac79066fcad09cc0ca9d99714ee037ec4_html_ac79066fcad09cc0ca9d99714ee037ec4"><div class="ttname"><a href="../../df/d9e/namespacefl_1_1detail_ac79066fcad09cc0ca9d99714ee037ec4.html#ac79066fcad09cc0ca9d99714ee037ec4">fl::detail::wave8_expand_byte</a></div><div class="ttdeci">FL_IRAM FL_OPTIMIZE_FUNCTION void wave8_expand_byte(u8 byte_value, const Wave8ByteExpansionLut &amp;lut, Wave8Byte *output) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d94/detail_2wave8_8cpp_8hpp_source.html#l00039">wave8.cpp.hpp:39</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../df/d96/s16x16x4_8h_aea8406f9f166028d3ae94a87230488ac.html#aea8406f9f166028d3ae94a87230488ac">FL_RESTRICT_PARAM</a>, <a class="el" href="../../dd/d4b/wave8_8hpp_source.html#l00069">fl::detail::wave8_expand_byte()</a>, and <a class="el" href="../../dd/d4b/wave8_8hpp_source.html#l00249">fl::detail::wave8_transpose_16x2_pipe2()</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d54/compiler__control_8h_source.html#l00715">FL_RESTRICT_PARAM</a>, <a class="el" href="../../dc/d94/detail_2wave8_8cpp_8hpp_source.html#l00039">fl::detail::wave8_expand_byte()</a>, and <a class="el" href="../../dc/d94/detail_2wave8_8cpp_8hpp_source.html#l00137">fl::detail::wave8_transpose_16x2_pipe2()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -176,7 +176,7 @@ $(function(){initNavTree('d4/d36/namespacefl_a29b071bb16abe20602cffbbbada53cf0.h
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:04 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:08 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

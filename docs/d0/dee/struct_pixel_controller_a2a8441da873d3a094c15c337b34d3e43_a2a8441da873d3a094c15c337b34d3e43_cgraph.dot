@@ -1,0 +1,18 @@
+digraph "PixelController::init_binary_dithering"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="PixelController::init\l_binary_dithering",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Set up the values for binary dithering from the shared frame phase."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::detail::ditherFrame",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d9e/namespacefl_1_1detail_ac2b3ef0a8182dc672f6e63a01ad622cf.html#ac2b3ef0a8182dc672f6e63a01ad622cf",tooltip="Return the temporal-dither phase shared by all controllers in this frame."];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::BinaryDither::init",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d6c/structfl_1_1_binary_dither_ad5714524272d9ee39bf3a37d4803132e.html#ad5714524272d9ee39bf3a37d4803132e",tooltip="Set up e from the per-channel brightness scale and d from frame."];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::BinaryDither::offset",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d6c/structfl_1_1_binary_dither_ac011a8e0e5afb087dbf2a19852a2c8dc.html#ac011a8e0e5afb087dbf2a19852a2c8dc",tooltip="Q scaled into [0, range): the offset for one channel."];
+  Node3 -> Node5 [id="edge4_Node000003_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::BinaryDither::phase",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d6c/structfl_1_1_binary_dither_aae46c7435dd271d8e46d3cd7e6b57d5c.html#aae46c7435dd271d8e46d3cd7e6b57d5c",tooltip="The frame's offset pattern value Q: frame wrapped to VIRTUAL_BITS, bit-reversed so consecutive frames..."];
+}

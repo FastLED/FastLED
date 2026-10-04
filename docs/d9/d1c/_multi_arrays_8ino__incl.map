@@ -1,5 +1,5 @@
 <map id="/home/runner/work/FastLED/FastLED/examples/Multiple/MultiArrays/MultiArrays.ino" name="/home/runner/work/FastLED/FastLED/examples/Multiple/MultiArrays/MultiArrays.ino">
-<area shape="rect" id="Node000001" title="Demonstrates how to use multiple LED strips, each with their own data." alt="" coords="5,5,209,60"/>
+<area shape="rect" id="Node000001" title="Demonstrates how to use multiple LED strips of different lengths." alt="" coords="5,5,209,60"/>
 <area shape="rect" id="Node000002" title=" " alt="" coords="65,108,150,133"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="110,60,110,94,105,94,105,60"/>
 </map>

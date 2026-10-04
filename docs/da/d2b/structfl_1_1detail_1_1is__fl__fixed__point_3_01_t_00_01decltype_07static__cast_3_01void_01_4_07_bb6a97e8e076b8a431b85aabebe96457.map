@@ -1,0 +1,13 @@
+<map id="fl::detail::is_fl_fixed_point&lt; T, decltype(static_cast&lt; void &gt;(T::INT_BITS), static_cast&lt; void &gt;(T::FRAC_BITS), static_cast&lt; void &gt;(fl::declval&lt; const T &amp; &gt;().raw()), static_cast&lt; void &gt;(T::from_raw(fl::declval&lt; const T &amp; &gt;().raw())), void())&gt;" name="fl::detail::is_fl_fixed_point&lt; T, decltype(static_cast&lt; void &gt;(T::INT_BITS), static_cast&lt; void &gt;(T::FRAC_BITS), static_cast&lt; void &gt;(fl::declval&lt; const T &amp; &gt;().raw()), static_cast&lt; void &gt;(T::from_raw(fl::declval&lt; const T &amp; &gt;().raw())), void())&gt;">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,427,245,569"/>
+<area shape="rect" id="Node000002" href="$d1/d55/structfl_1_1integral__constant.html" title=" " alt="" coords="153,108,260,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="175,143,139,171,122,188,109,208,98,234,91,261,87,319,92,375,104,426,98,427,87,376,81,319,86,261,93,232,104,205,118,185,135,167,172,139"/>
+<area shape="rect" id="Node000005" href="$d4/d1f/structfl_1_1detail_1_1is__fl__fixed__point.html" title=" " alt="" coords="119,207,294,247"/>
+<area shape="poly" id="edge6_Node000005_Node000002" title=" " alt="" coords="209,147,209,206,204,206,204,147"/>
+<area shape="rect" id="Node000003" href="$d1/d55/structfl_1_1integral__constant.html" title=" " alt="" coords="201,5,351,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="227,56,214,71,208,89,208,108,203,108,203,88,210,68,223,52"/>
+<area shape="rect" id="Node000004" href="$d1/d55/structfl_1_1integral__constant.html" title=" " alt="" coords="295,157,395,183"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="308,54,317,68,337,116,346,156,341,158,331,118,312,71,303,57"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="354,196,360,238,362,293,354,351,344,379,330,404,313,425,293,442,247,468,244,463,290,437,309,421,326,401,340,376,349,349,357,292,355,239,348,196"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="143,256,129,272,113,309,107,348,106,388,111,426,105,427,101,389,101,348,108,307,124,269,139,252"/>
+</map>

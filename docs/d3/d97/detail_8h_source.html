@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -109,9 +109,9 @@ $(function(){initNavTree('d3/d97/detail_8h_source.html','../../'); initResizable
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span> </div>
 <div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span> </div>
 <div class="foldopen" id="foldopen00006" data-start="{" data-end="}">
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno"><a class="line" href="../../d3/d97/detail_8h_ac1471539ff95a76883e9c8e83e8548ad.html#ac1471539ff95a76883e9c8e83e8548ad">    6</a></span><span class="keyword">inline</span> uint32_t <a class="code hl_function" href="../../d3/d97/detail_8h_ac1471539ff95a76883e9c8e83e8548ad.html#ac1471539ff95a76883e9c8e83e8548ad">Adafruit_DotStar_ColorHSV</a>(uint16_t <a class="code hl_variable" href="../../da/dc7/advanced_8h_ad7b7eb0b3e04af91bdd64715226c3c68.html#ad7b7eb0b3e04af91bdd64715226c3c68">hue</a>, uint8_t sat, uint8_t val) {</div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno"><a class="line" href="../../d3/d97/detail_8h_ac1471539ff95a76883e9c8e83e8548ad.html#ac1471539ff95a76883e9c8e83e8548ad">    6</a></span><span class="keyword">inline</span> <a class="code hl_typedef" href="../../df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a> <a class="code hl_function" href="../../d3/d97/detail_8h_ac1471539ff95a76883e9c8e83e8548ad.html#ac1471539ff95a76883e9c8e83e8548ad">Adafruit_DotStar_ColorHSV</a>(<a class="code hl_typedef" href="../../df/dd8/stdint_8h_af8b57fa1249a1e2d5cd3c80296874419.html#af8b57fa1249a1e2d5cd3c80296874419">uint16_t</a> <a class="code hl_variable" href="../../da/dc7/advanced_8h_ad7b7eb0b3e04af91bdd64715226c3c68.html#ad7b7eb0b3e04af91bdd64715226c3c68">hue</a>, <a class="code hl_typedef" href="../../df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a> sat, <a class="code hl_typedef" href="../../df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a> val) {</div>
 <div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span> </div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span>    uint8_t r, g, b;</div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span>    <a class="code hl_typedef" href="../../df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a> r, g, b;</div>
 <div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span> </div>
 <div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span>    <span class="comment">// Remap 0-65535 to 0-1529. Pure red is CENTERED on the 64K rollover;</span></div>
 <div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span>    <span class="comment">// 0 is not the start of pure red, but the midpoint...a few values above</span></div>
@@ -177,9 +177,9 @@ $(function(){initNavTree('d3/d97/detail_8h_source.html','../../'); initResizable
 <div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>    }</div>
 <div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span> </div>
 <div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>    <span class="comment">// Apply saturation and value to R,G,B, pack into 32-bit result:</span></div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>    uint32_t v1 = 1 + val;  <span class="comment">// 1 to 256; allows &gt;&gt;8 instead of /255</span></div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>    uint16_t s1 = 1 + sat;  <span class="comment">// 1 to 256; same reason</span></div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>    uint8_t s2 = 255 - sat; <span class="comment">// 255 to 0</span></div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>    <a class="code hl_typedef" href="../../df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a> v1 = 1 + val;  <span class="comment">// 1 to 256; allows &gt;&gt;8 instead of /255</span></div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>    <a class="code hl_typedef" href="../../df/dd8/stdint_8h_af8b57fa1249a1e2d5cd3c80296874419.html#af8b57fa1249a1e2d5cd3c80296874419">uint16_t</a> s1 = 1 + sat;  <span class="comment">// 1 to 256; same reason</span></div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>    <a class="code hl_typedef" href="../../df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a> s2 = 255 - sat; <span class="comment">// 255 to 0</span></div>
 <div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>    <span class="keywordflow">return</span> ((((((r * s1) &gt;&gt; 8) + s2) * v1) &amp; 0xff00) &lt;&lt; 8) |</div>
 <div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>           (((((g * s1) &gt;&gt; 8) + s2) * v1) &amp; 0xff00) |</div>
 <div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>           (((((b * s1) &gt;&gt; 8) + s2) * v1) &gt;&gt; 8);</div>
@@ -187,6 +187,9 @@ $(function(){initNavTree('d3/d97/detail_8h_source.html','../../'); initResizable
 </div>
 <div class="ttc" id="aadvanced_8h_ad7b7eb0b3e04af91bdd64715226c3c68_html_ad7b7eb0b3e04af91bdd64715226c3c68"><div class="ttname"><a href="../../da/dc7/advanced_8h_ad7b7eb0b3e04af91bdd64715226c3c68.html#ad7b7eb0b3e04af91bdd64715226c3c68">hue</a></div><div class="ttdeci">uint8_t hue</div><div class="ttdef"><b>Definition</b> <a href="../../da/dc7/advanced_8h_source.html#l00094">advanced.h:94</a></div></div>
 <div class="ttc" id="adetail_8h_ac1471539ff95a76883e9c8e83e8548ad_html_ac1471539ff95a76883e9c8e83e8548ad"><div class="ttname"><a href="../../d3/d97/detail_8h_ac1471539ff95a76883e9c8e83e8548ad.html#ac1471539ff95a76883e9c8e83e8548ad">Adafruit_DotStar_ColorHSV</a></div><div class="ttdeci">uint32_t Adafruit_DotStar_ColorHSV(uint16_t hue, uint8_t sat, uint8_t val)</div><div class="ttdef"><b>Definition</b> <a href="#l00006">detail.h:6</a></div></div>
+<div class="ttc" id="astdint_8h_aba7bc1797add20fe3efdf37ced1182c5_html_aba7bc1797add20fe3efdf37ced1182c5"><div class="ttname"><a href="../../df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a></div><div class="ttdeci">unsigned char uint8_t</div><div class="ttdef"><b>Definition</b> <a href="../../df/dd8/stdint_8h_source.html#l00208">stdint.h:208</a></div></div>
+<div class="ttc" id="astdint_8h_ae8a835bf6e050b01cc449644a343aa73_html_ae8a835bf6e050b01cc449644a343aa73"><div class="ttname"><a href="../../df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a></div><div class="ttdeci">fl::u32 uint32_t</div><div class="ttdef"><b>Definition</b> <a href="../../df/dd8/stdint_8h_source.html#l00218">stdint.h:218</a></div></div>
+<div class="ttc" id="astdint_8h_af8b57fa1249a1e2d5cd3c80296874419_html_af8b57fa1249a1e2d5cd3c80296874419"><div class="ttname"><a href="../../df/dd8/stdint_8h_af8b57fa1249a1e2d5cd3c80296874419.html#af8b57fa1249a1e2d5cd3c80296874419">uint16_t</a></div><div class="ttdeci">fl::u16 uint16_t</div><div class="ttdef"><b>Definition</b> <a href="../../df/dd8/stdint_8h_source.html#l00213">stdint.h:213</a></div></div>
 <div class="ttc" id="astdint_8h_html"><div class="ttname"><a href="../../df/dd8/stdint_8h.html">stdint.h</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
@@ -195,7 +198,7 @@ $(function(){initNavTree('d3/d97/detail_8h_source.html','../../'); initResizable
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_63a7680d6f3f38816504e5ce30b76a13.html">Chromancer</a></li><li class="navelem"><a class="el" href="../../d3/d97/detail_8h.html">detail.h</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:06:58 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:08:59 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

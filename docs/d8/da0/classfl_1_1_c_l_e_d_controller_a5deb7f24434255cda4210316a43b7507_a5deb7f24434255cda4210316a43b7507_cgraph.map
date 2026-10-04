@@ -1,0 +1,7 @@
+<map id="fl::CLEDController::setFixedRgbw" name="fl::CLEDController::setFixedRgbw">
+<area shape="rect" id="Node000001" title="Configure a chipset&#45;owned RGBW policy that public white&#45;channel setters cannot replace." alt="" coords="5,5,141,45"/>
+<area shape="rect" id="Node000002" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a37429a6c10feb5f7159244d07bb27b21.html#a37429a6c10feb5f7159244d07bb27b21" title=" " alt="" coords="189,5,325,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="142,23,176,23,176,28,142,28"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a56f31e1bfb8fb5b90de25aff94b906d8.html#a56f31e1bfb8fb5b90de25aff94b906d8" title=" " alt="" coords="373,13,585,38"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="326,23,359,23,359,28,326,28"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="fl::encodeAPA102_HD" name="fl::encodeAPA102_HD">
+<area shape="rect" id="Node000001" title="Encode pixel data in APA102 format with per&#45;LED brightness." alt="" coords="179,13,340,38"/>
+<area shape="rect" id="Node000002" href="$d0/d09/classfl_1_1_pixel_iterator_a9640a51a858d2ef2d5902b619e917fd2.html#a9640a51a858d2ef2d5902b619e917fd2" title="Encode pixels in APA102/DOTSTAR format (zero allocation)" alt="" coords="5,5,131,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="165,28,131,28,131,23,165,23"/>
+</map>

@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -101,9 +101,9 @@ $(function(){initNavTree('d4/d27/fltest_8cpp_8hpp.html','../../'); initResizable
 
 <div class="header">
   <div class="summary">
+<a href="#nested-classes">Classes</a> &#124;
 <a href="#namespaces">Namespaces</a> &#124;
-<a href="#func-members">Functions</a> &#124;
-<a href="#var-members">Variables</a>  </div>
+<a href="#func-members">Functions</a>  </div>
   <div class="headertitle"><div class="title">fltest.cpp.hpp File Reference</div></div>
 </div><!--header-->
 <div class="contents">
@@ -111,6 +111,7 @@ $(function(){initNavTree('d4/d27/fltest_8cpp_8hpp.html','../../'); initResizable
 <code>#include &quot;<a class="el" href="../../d7/d7f/log_8h_source.html">fl/log/log.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d6/dd1/stdio_8h_source.html">fl/stl/stdio.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../db/d01/noexcept_8h_source.html">fl/stl/noexcept.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d4/d0b/singleton_8h_source.html">fl/stl/singleton.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for fltest.cpp.hpp:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -128,6 +129,11 @@ $(function(){initNavTree('d4/d27/fltest_8cpp_8hpp.html','../../'); initResizable
 </div>
 <p><a href="../../d4/d27/fltest_8cpp_8hpp_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:d3/d7d/structfl_1_1test_1_1_skip_state" id="r_d3/d7d/structfl_1_1test_1_1_skip_state"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d23/namespacefl_1_1test.html#d3/d7d/structfl_1_1test_1_1_skip_state">fl::test::SkipState</a></td></tr>
+<tr class="separator:d3/d7d/structfl_1_1test_1_1_skip_state"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></td></tr>
@@ -138,29 +144,54 @@ Namespaces</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a680c5f7e455b22f19fc10b5abd2f0a5a" id="r_a680c5f7e455b22f19fc10b5abd2f0a5a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d23/namespacefl_1_1test_a680c5f7e455b22f19fc10b5abd2f0a5a.html#a680c5f7e455b22f19fc10b5abd2f0a5a">fl::test::fail</a> (const char *msg, const char *file, int line, bool isFatal) <a class="el" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></td></tr>
-<tr class="memdesc:a680c5f7e455b22f19fc10b5abd2f0a5a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Helper for FAIL macros.  <br /></td></tr>
-<tr class="separator:a680c5f7e455b22f19fc10b5abd2f0a5a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac4c7e978ce9c314d6af0c5ab3ef82199" id="r_ac4c7e978ce9c314d6af0c5ab3ef82199"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d23/namespacefl_1_1test_ac4c7e978ce9c314d6af0c5ab3ef82199.html#ac4c7e978ce9c314d6af0c5ab3ef82199">fl::test::isTestSkipped</a> () <a class="el" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></td></tr>
-<tr class="memdesc:ac4c7e978ce9c314d6af0c5ab3ef82199"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if current test has been marked as skipped.  <br /></td></tr>
-<tr class="separator:ac4c7e978ce9c314d6af0c5ab3ef82199"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac9fef4e5d06e9f71acfbb3d810b0dece" id="r_ac9fef4e5d06e9f71acfbb3d810b0dece"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d23/namespacefl_1_1test_ac9fef4e5d06e9f71acfbb3d810b0dece.html#ac9fef4e5d06e9f71acfbb3d810b0dece">fl::test::outputCapture</a> (const char *name, const char *<a class="el" href="../../d4/d36/namespacefl_a13766ae9e150185981f5096f90a439d7.html#a13766ae9e150185981f5096f90a439d7">value</a>, const char *file, int line) <a class="el" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></td></tr>
-<tr class="memdesc:ac9fef4e5d06e9f71acfbb3d810b0dece"><td class="mdescLeft">&#160;</td><td class="mdescRight">Helper to output CAPTURE variable.  <br /></td></tr>
-<tr class="separator:ac9fef4e5d06e9f71acfbb3d810b0dece"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af37984455a2feb521a23466ed74eed67" id="r_af37984455a2feb521a23466ed74eed67"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d23/namespacefl_1_1test_af37984455a2feb521a23466ed74eed67.html#af37984455a2feb521a23466ed74eed67">fl::test::outputMessage</a> (const char *msg, const char *file, int line) <a class="el" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></td></tr>
-<tr class="memdesc:af37984455a2feb521a23466ed74eed67"><td class="mdescLeft">&#160;</td><td class="mdescRight">Helper to output INFO/MESSAGE during test execution.  <br /></td></tr>
-<tr class="separator:af37984455a2feb521a23466ed74eed67"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a62d05a4e42b7c15299018e58514c8dcc" id="r_a62d05a4e42b7c15299018e58514c8dcc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d23/namespacefl_1_1test_a62d05a4e42b7c15299018e58514c8dcc.html#a62d05a4e42b7c15299018e58514c8dcc">fl::test::skipTest</a> (const char *reason, const char *file, int line) <a class="el" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></td></tr>
-<tr class="memdesc:a62d05a4e42b7c15299018e58514c8dcc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Record that the current test should be skipped.  <br /></td></tr>
-<tr class="separator:a62d05a4e42b7c15299018e58514c8dcc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
-Variables</h2></td></tr>
-<tr class="memitem:a1238b773fd230dcb5677b6f9662ee4cb" id="r_a1238b773fd230dcb5677b6f9662ee4cb"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d23/namespacefl_1_1test_a1238b773fd230dcb5677b6f9662ee4cb.html#a1238b773fd230dcb5677b6f9662ee4cb">fl::test::sCurrentTestSkipped</a> = false</td></tr>
-<tr class="separator:a1238b773fd230dcb5677b6f9662ee4cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af7c35d2eb0ca3ed37b02afd7cdb4aa62" id="r_af7c35d2eb0ca3ed37b02afd7cdb4aa62"><td class="memItemLeft" align="right" valign="top">static const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d23/namespacefl_1_1test_af7c35d2eb0ca3ed37b02afd7cdb4aa62.html#af7c35d2eb0ca3ed37b02afd7cdb4aa62">fl::test::sSkipReason</a> = nullptr</td></tr>
-<tr class="separator:af7c35d2eb0ca3ed37b02afd7cdb4aa62"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa13798bfbc09c08b5cbf628a2725b9de" id="r_aa13798bfbc09c08b5cbf628a2725b9de"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d23/namespacefl_1_1test_aa13798bfbc09c08b5cbf628a2725b9de.html#aa13798bfbc09c08b5cbf628a2725b9de">fl::test::fail</a> (const char *msg, const char *file, int line, bool isFatal) <a class="el" href="../../d4/d36/namespacefl_aa317f89ca911371e798d08a93770402f.html#aa317f89ca911371e798d08a93770402f">FL_NO_EXCEPT</a></td></tr>
+<tr class="memdesc:aa13798bfbc09c08b5cbf628a2725b9de"><td class="mdescLeft">&#160;</td><td class="mdescRight">Helper for FAIL macros.  <br /></td></tr>
+<tr class="separator:aa13798bfbc09c08b5cbf628a2725b9de"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac6adecce20c2ac9ae2ed95b48a224887" id="r_ac6adecce20c2ac9ae2ed95b48a224887"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d23/namespacefl_1_1test_ac6adecce20c2ac9ae2ed95b48a224887.html#ac6adecce20c2ac9ae2ed95b48a224887">fl::test::isTestSkipped</a> () <a class="el" href="../../d4/d36/namespacefl_aa317f89ca911371e798d08a93770402f.html#aa317f89ca911371e798d08a93770402f">FL_NO_EXCEPT</a></td></tr>
+<tr class="memdesc:ac6adecce20c2ac9ae2ed95b48a224887"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if current test has been marked as skipped.  <br /></td></tr>
+<tr class="separator:ac6adecce20c2ac9ae2ed95b48a224887"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0eeefd10de97cf60b0eefc8c736cc240" id="r_a0eeefd10de97cf60b0eefc8c736cc240"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d23/namespacefl_1_1test_a0eeefd10de97cf60b0eefc8c736cc240.html#a0eeefd10de97cf60b0eefc8c736cc240">fl::test::outputCapture</a> (const char *name, const char *<a class="el" href="../../d4/d36/namespacefl_a13766ae9e150185981f5096f90a439d7.html#a13766ae9e150185981f5096f90a439d7">value</a>, const char *file, int line) <a class="el" href="../../d4/d36/namespacefl_aa317f89ca911371e798d08a93770402f.html#aa317f89ca911371e798d08a93770402f">FL_NO_EXCEPT</a></td></tr>
+<tr class="memdesc:a0eeefd10de97cf60b0eefc8c736cc240"><td class="mdescLeft">&#160;</td><td class="mdescRight">Helper to output CAPTURE variable.  <br /></td></tr>
+<tr class="separator:a0eeefd10de97cf60b0eefc8c736cc240"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9fe3646dc3537b399b25d514538cefdf" id="r_a9fe3646dc3537b399b25d514538cefdf"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d23/namespacefl_1_1test_a9fe3646dc3537b399b25d514538cefdf.html#a9fe3646dc3537b399b25d514538cefdf">fl::test::outputMessage</a> (const char *msg, const char *file, int line) <a class="el" href="../../d4/d36/namespacefl_aa317f89ca911371e798d08a93770402f.html#aa317f89ca911371e798d08a93770402f">FL_NO_EXCEPT</a></td></tr>
+<tr class="memdesc:a9fe3646dc3537b399b25d514538cefdf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Helper to output INFO/MESSAGE during test execution.  <br /></td></tr>
+<tr class="separator:a9fe3646dc3537b399b25d514538cefdf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a582891f3f2b5fff3c594c907e9807ce9" id="r_a582891f3f2b5fff3c594c907e9807ce9"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="../../d1/d23/namespacefl_1_1test.html#d3/d7d/structfl_1_1test_1_1_skip_state">SkipState</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d23/namespacefl_1_1test_a582891f3f2b5fff3c594c907e9807ce9.html#a582891f3f2b5fff3c594c907e9807ce9">fl::test::skipState</a> () <a class="el" href="../../d4/d36/namespacefl_aa317f89ca911371e798d08a93770402f.html#aa317f89ca911371e798d08a93770402f">FL_NO_EXCEPT</a></td></tr>
+<tr class="separator:a582891f3f2b5fff3c594c907e9807ce9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac0bce4f7e43f1cc547f5da6f4356cbef" id="r_ac0bce4f7e43f1cc547f5da6f4356cbef"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d23/namespacefl_1_1test_ac0bce4f7e43f1cc547f5da6f4356cbef.html#ac0bce4f7e43f1cc547f5da6f4356cbef">fl::test::skipTest</a> (const char *reason, const char *file, int line) <a class="el" href="../../d4/d36/namespacefl_aa317f89ca911371e798d08a93770402f.html#aa317f89ca911371e798d08a93770402f">FL_NO_EXCEPT</a></td></tr>
+<tr class="memdesc:ac0bce4f7e43f1cc547f5da6f4356cbef"><td class="mdescLeft">&#160;</td><td class="mdescRight">Record that the current test should be skipped.  <br /></td></tr>
+<tr class="separator:ac0bce4f7e43f1cc547f5da6f4356cbef"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<hr/><h2 class="groupheader">Class Documentation</h2>
+<a name="d3/d7d/structfl_1_1test_1_1_skip_state" id="d3/d7d/structfl_1_1test_1_1_skip_state"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#d3/d7d/structfl_1_1test_1_1_skip_state">&#9670;&#160;</a></span>fl::test::SkipState</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">struct fl::test::SkipState</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<table class="fieldtable">
+<tr><th colspan="3">Class Members</th></tr>
+<tr><td class="fieldtype">
+<a id="a12c3c5bd0675de8b990915848865c412" name="a12c3c5bd0675de8b990915848865c412"></a>const char *</td>
+<td class="fieldname">
+reason = nullptr</td>
+<td class="fielddoc">
+</td></tr>
+<tr><td class="fieldtype">
+<a id="aaae890cf10bc95e4345ed630b5865d6d" name="aaae890cf10bc95e4345ed630b5865d6d"></a>bool</td>
+<td class="fieldname">
+skipped = false</td>
+<td class="fielddoc">
+</td></tr>
+</table>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.3-->
@@ -168,7 +199,7 @@ Variables</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_5d2815a49ec2007abb1596088c137828.html">test</a></li><li class="navelem"><a class="el" href="../../d4/d27/fltest_8cpp_8hpp.html">fltest.cpp.hpp</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:02 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:05 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

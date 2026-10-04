@@ -1,5 +1,5 @@
 <map id="inoise16" name="inoise16">
-<area shape="rect" id="Node000001" title=" " alt="" coords="552,103,629,128"/>
+<area shape="rect" id="Node000001" title="16&#45;bit, fixed point implementation of Perlin&#39;s noise." alt="" coords="552,103,629,128"/>
 <area shape="rect" id="Node000002" href="$de/da4/group___noise_fill_ga689d386bc90057594b92414beb5c879e.html#ga689d386bc90057594b92414beb5c879e" title="Fill a 2D 16&#45;bit buffer with noise, using inoise16()" alt="" coords="345,29,487,55"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="557,98,503,70,467,57,469,52,505,65,559,93"/>
 <area shape="rect" id="Node000003" href="$de/da4/group___noise_fill_ga5ef8a2d2d0ae634a8be8ea3a98e96ad6.html#ga5ef8a2d2d0ae634a8be8ea3a98e96ad6" title="Fill a 2D 8&#45;bit buffer with noise, using inoise16()" alt="" coords="328,103,504,128"/>

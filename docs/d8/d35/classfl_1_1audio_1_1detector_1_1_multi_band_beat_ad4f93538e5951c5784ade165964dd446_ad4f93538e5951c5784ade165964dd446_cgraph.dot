@@ -8,7 +8,7 @@ digraph "fl::audio::detector::MultiBandBeat::configure"
   rankdir="LR";
   Node1 [id="Node000001",label="fl::audio::detector\l::MultiBandBeat::configure",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Configure the multi-band beat detector."];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::audio::detector\l::MultiBandBeat::MultiBandBeat",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/d35/classfl_1_1audio_1_1detector_1_1_multi_band_beat_a5e3bab39bf17461edc0caaf9d372f9f7.html#a5e3bab39bf17461edc0caaf9d372f9f7",tooltip=" "];
+  Node2 [id="Node000002",label="fl::audio::detector\l::MultiBandBeat::MultiBandBeat",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/d35/classfl_1_1audio_1_1detector_1_1_multi_band_beat_a470d0d0b8d6dbda6c6465971252a02ad.html#a470d0d0b8d6dbda6c6465971252a02ad",tooltip=" "];
   Node2 -> Node2 [id="edge2_Node000002_Node000002",color="steelblue1",style="solid",tooltip=" "];
   Node1 -> Node1 [id="edge3_Node000001_Node000001",color="steelblue1",style="solid",tooltip=" "];
   Node1 -> Node3 [id="edge4_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];

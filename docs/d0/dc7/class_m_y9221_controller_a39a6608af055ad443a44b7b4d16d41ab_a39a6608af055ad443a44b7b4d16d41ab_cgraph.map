@@ -1,0 +1,5 @@
+<map id="MY9221Controller::sendWord" name="MY9221Controller::sendWord">
+<area shape="rect" id="Node000001" title="Shift out one 16&#45;bit word MSB&#45;first, one clock edge per bit." alt="" coords="5,5,216,31"/>
+<area shape="rect" id="Node000002" href="$d0/dc7/class_m_y9221_controller_a5c19ad1f61a2b2f93ed3af36e3d3126c.html#a5c19ad1f61a2b2f93ed3af36e3d3126c" title=" " alt="" coords="264,5,461,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="216,15,250,15,250,21,216,21"/>
+</map>

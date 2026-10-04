@@ -1,0 +1,7 @@
+<map id="fl::Rgbw::active" name="fl::Rgbw::active">
+<area shape="rect" id="Node000001" title=" " alt="" coords="377,59,499,85"/>
+<area shape="rect" id="Node000002" href="$d5/d87/structfl_1_1_channel_options_a3fac22e4747c8d27339398c75a2425c4.html#a3fac22e4747c8d27339398c75a2425c4" title="True if this channel emits 4&#45;channel RGBW." alt="" coords="97,5,238,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="363,62,238,40,239,35,364,57"/>
+<area shape="rect" id="Node000003" href="$dd/d78/classfl_1_1_u_c_s7604_controller_t_a0b8dc7f2f0f2e0a2ed3461aa905080ea.html#a0b8dc7f2f0f2e0a2ed3461aa905080ea" title=" " alt="" coords="5,69,329,168"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="364,87,330,93,329,88,363,82"/>
+</map>

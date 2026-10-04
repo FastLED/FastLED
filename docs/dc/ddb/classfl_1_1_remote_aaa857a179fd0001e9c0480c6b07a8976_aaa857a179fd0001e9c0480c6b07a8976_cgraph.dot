@@ -11,5 +11,5 @@ digraph "fl::Remote::bind"
   Node2 [id="Node000002",label="fl::Remote::bind",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/ddb/classfl_1_1_remote_a22ec543edde8a685570e3c6d1a3b0c02.html#a22ec543edde8a685570e3c6d1a3b0c02",tooltip="Register method with config (name, function, optional metadata)"];
   Node2 -> Node2 [id="edge2_Node000002_Node000002",color="steelblue1",style="solid",tooltip=" "];
   Node1 -> Node3 [id="edge3_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::fl::move",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d3c/namespacefl_1_1fl_a14315b21314f12a4c40dde841fcc4c8a.html#a14315b21314f12a4c40dde841fcc4c8a",tooltip=" "];
+  Node3 [id="Node000003",label="fl::move",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a0c8a67e528dcd96ee58216754a07a733.html#a0c8a67e528dcd96ee58216754a07a733",tooltip=" "];
 }

@@ -104,7 +104,7 @@ var sectionId = 'dynsection-0';
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d6/d35/classfl_1_1_async_logger_a55785739910a193b5b6dffeb455bd150.html#a55785739910a193b5b6dffeb455bd150" target="_top" xlink:title=" ">
+<g id="a_Node000003"><a xlink:href="../../d6/d35/classfl_1_1_async_logger_a980ff44240839c88a4475e9283873ba0.html#a980ff44240839c88a4475e9283873ba0" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="321,-138 154,-138 154,-119 321,-119 321,-138"/>
 <text text-anchor="middle" x="237.5" y="-126" font-family="Helvetica,sans-Serif" font-size="10.00">fl::AsyncLogger::~AsyncLogger</text>
 </a>
@@ -183,46 +183,46 @@ var sectionId = 'dynsection-0';
 </a>
 </g>
 </g>
-<!-- Node12 -->
-<g id="Node000012" class="node">
-<title>Node12</title>
-<g id="a_Node000012"><a xlink:href="../../d4/d36/namespacefl_a77306b4a5327eb19e8d003b550b1a0a5.html#a77306b4a5327eb19e8d003b550b1a0a5" target="_top" xlink:title="Set PWM frequency for a pin.">
+<!-- Node13 -->
+<g id="Node000013" class="node">
+<title>Node13</title>
+<g id="a_Node000013"><a xlink:href="../../d4/d36/namespacefl_a77306b4a5327eb19e8d003b550b1a0a5.html#a77306b4a5327eb19e8d003b550b1a0a5" target="_top" xlink:title="Set PWM frequency for a pin.">
 <polygon fill="#fff0f0" stroke="red" points="118,-76 0,-76 0,-57 118,-57 118,-76"/>
 <text text-anchor="middle" x="59" y="-64" font-family="Helvetica,sans-Serif" font-size="10.00">fl::setPwmFrequency</text>
 </a>
 </g>
 </g>
-<!-- Node6&#45;&gt;Node12 -->
-<g id="edge10_Node000006_Node000012" class="edge">
-<title>Node6&#45;&gt;Node12</title>
-<g id="a_edge10_Node000006_Node000012"><a xlink:title=" ">
+<!-- Node6&#45;&gt;Node13 -->
+<g id="edge10_Node000006_Node000013" class="edge">
+<title>Node6&#45;&gt;Node13</title>
+<g id="a_edge10_Node000006_Node000013"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M358.42,-51.96C284.09,-55.58 181.54,-60.58 118.07,-63.67"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="358.9,-55.44 368.72,-51.46 358.56,-48.45 358.9,-55.44"/>
 </a>
 </g>
 </g>
-<!-- Node16 -->
-<g id="Node000016" class="node">
-<title>Node16</title>
-<g id="a_Node000016"><a xlink:href="../../d4/d36/namespacefl_a799e0254efc7ac0e21305c2c38685f0b.html#a799e0254efc7ac0e21305c2c38685f0b" target="_top" xlink:title="Release PWM channel and stop output on a pin.">
+<!-- Node15 -->
+<g id="Node000015" class="node">
+<title>Node15</title>
+<g id="a_Node000015"><a xlink:href="../../d4/d36/namespacefl_a799e0254efc7ac0e21305c2c38685f0b.html#a799e0254efc7ac0e21305c2c38685f0b" target="_top" xlink:title="Release PWM channel and stop output on a pin.">
 <polygon fill="white" stroke="#666666" points="273,-19 202,-19 202,0 273,0 273,-19"/>
 <text text-anchor="middle" x="237.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::pwmEnd</text>
 </a>
 </g>
 </g>
-<!-- Node6&#45;&gt;Node16 -->
-<g id="edge9_Node000006_Node000016" class="edge">
-<title>Node6&#45;&gt;Node16</title>
-<g id="a_edge9_Node000006_Node000016"><a xlink:title=" ">
+<!-- Node6&#45;&gt;Node15 -->
+<g id="edge9_Node000006_Node000015" class="edge">
+<title>Node6&#45;&gt;Node15</title>
+<g id="a_edge9_Node000006_Node000015"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M386.64,-36.12C349.4,-29.42 303.75,-21.22 273.05,-15.71"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="386.44,-39.64 396.9,-37.96 387.68,-32.75 386.44,-39.64"/>
 </a>
 </g>
 </g>
-<!-- Node7&#45;&gt;Node12 -->
-<g id="edge8_Node000007_Node000012" class="edge">
-<title>Node7&#45;&gt;Node12</title>
-<g id="a_edge8_Node000007_Node000012"><a xlink:title=" ">
+<!-- Node7&#45;&gt;Node13 -->
+<g id="edge8_Node000007_Node000013" class="edge">
+<title>Node7&#45;&gt;Node13</title>
+<g id="a_edge8_Node000007_Node000013"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M191.43,-80.65C169.12,-78.25 141.93,-75.32 118.08,-72.75"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="191.31,-84.16 201.63,-81.75 192.06,-77.2 191.31,-84.16"/>
 </a>

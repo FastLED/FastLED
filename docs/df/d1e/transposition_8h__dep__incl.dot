@@ -9,7 +9,7 @@ digraph "fl/math/transposition.h"
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node2 [id="Node000002",label="bitswap.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/ded/bitswap_8h.html",tooltip="Functions for doing a rotation of bits/bytes used by parallel output."];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="FastLED.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d97/_fast_l_e_d_8h.html",tooltip="central include file for FastLED, defines the CFastLED class/object"];
+  Node3 [id="Node000003",label="FastLED.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d64/fastled_8h.html",tooltip="central include file for FastLED, defines the CFastLED class/object"];
   Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node4 [id="Node000004",label="FastLED.cpp.hpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/de5/_fast_l_e_d_8cpp_8hpp.html",tooltip=" "];
   Node4 -> Node5 [id="edge4_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
@@ -17,7 +17,7 @@ digraph "fl/math/transposition.h"
   Node4 -> Node6 [id="edge5_Node000004_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node6 [id="Node000006",label="fl/build/src.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/de2/src_8cpp.html",tooltip="Unity build: flat includes from src/ root directory."];
   Node2 -> Node7 [id="edge6_Node000002_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node7 [id="Node000007",label="fl/system/fastled.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/dc2/fl_2system_2_fast_l_e_d_8h.html",tooltip="Internal FastLED header for implementation files."];
+  Node7 [id="Node000007",label="fl/system/fastled.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d69/fl_2system_2fastled_8h.html",tooltip="Internal FastLED header for implementation files."];
   Node7 -> Node3 [id="edge7_Node000007_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node7 -> Node8 [id="edge8_Node000007_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node8 [id="Node000008",label="cled_controller.cpp.hpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/dcc/cled__controller_8cpp_8hpp.html",tooltip=" "];

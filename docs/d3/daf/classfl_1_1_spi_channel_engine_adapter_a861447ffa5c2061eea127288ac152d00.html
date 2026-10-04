@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -133,54 +133,53 @@ $(function(){initNavTree('d3/daf/classfl_1_1_spi_channel_engine_adapter_a861447f
 <dl class="section return"><dt>Returns</dt><dd>Vector of groups (clock pin + channels) </dd></dl>
 <dl class="section note"><dt>Note</dt><dd>Channels with same clock pin can share SPI bus configuration </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d6/d93/spi__channel__adapter_8cpp_8hpp_source.html#l00297">297</a> of file <a class="el" href="../../d6/d93/spi__channel__adapter_8cpp_8hpp_source.html">spi_channel_adapter.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  299</span>  {</div>
-<div class="line"><span class="lineno">  300</span>    fl::vector&lt;ClockPinGroup&gt; groups;</div>
-<div class="line"><span class="lineno">  301</span> </div>
-<div class="line"><span class="lineno">  302</span>    <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; channel : channels) {</div>
-<div class="line"><span class="lineno">  303</span>        <span class="keywordflow">if</span> (!channel) {</div>
-<div class="line"><span class="lineno">  304</span>            <span class="keywordflow">continue</span>;</div>
-<div class="line"><span class="lineno">  305</span>        }</div>
-<div class="line"><span class="lineno">  306</span> </div>
-<div class="line"><span class="lineno">  307</span>        <span class="comment">// Extract clock pin from chipset configuration</span></div>
-<div class="line"><span class="lineno">  308</span>        <span class="keyword">const</span> <span class="keyword">auto</span>&amp; chipset = channel-&gt;getChipset();</div>
-<div class="line"><span class="lineno">  309</span>        <span class="keywordflow">if</span> (!chipset.is&lt;SpiChipsetConfig&gt;()) {</div>
-<div class="line"><span class="lineno">  310</span>            <a class="code hl_define" href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;SpiChannelEngineAdapter: Non-SPI chipset in groupByClockPin&quot;</span>);</div>
-<div class="line"><span class="lineno">  311</span>            <span class="keywordflow">continue</span>;</div>
-<div class="line"><span class="lineno">  312</span>        }</div>
-<div class="line"><span class="lineno">  313</span> </div>
-<div class="line"><span class="lineno">  314</span>        <span class="keyword">const</span> SpiChipsetConfig&amp; spiConfig = chipset.get&lt;SpiChipsetConfig&gt;();</div>
-<div class="line"><span class="lineno">  315</span>        <span class="keywordtype">int</span> clockPin = spiConfig.clockPin;</div>
-<div class="line"><span class="lineno">  316</span> </div>
-<div class="line"><span class="lineno">  317</span>        <span class="comment">// Find existing group for this clock pin</span></div>
-<div class="line"><span class="lineno">  318</span>        <a class="code hl_struct" href="../../d3/daf/classfl_1_1_spi_channel_engine_adapter.html#de/d67/structfl_1_1_spi_channel_engine_adapter_1_1_clock_pin_group">ClockPinGroup</a>* existingGroup = <span class="keyword">nullptr</span>;</div>
-<div class="line"><span class="lineno">  319</span>        <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; groups.<a class="code hl_function" href="../../d4/dad/classfl_1_1vector__basic_a9a248c6b3d33d24ef21e4275c4fbae8c.html#a9a248c6b3d33d24ef21e4275c4fbae8c">size</a>(); i++) {</div>
-<div class="line"><span class="lineno">  320</span>            <span class="keywordflow">if</span> (groups[i].clockPin == clockPin) {</div>
-<div class="line"><span class="lineno">  321</span>                existingGroup = &amp;groups[i];</div>
-<div class="line"><span class="lineno">  322</span>                <span class="keywordflow">break</span>;</div>
-<div class="line"><span class="lineno">  323</span>            }</div>
-<div class="line"><span class="lineno">  324</span>        }</div>
-<div class="line"><span class="lineno">  325</span> </div>
-<div class="line"><span class="lineno">  326</span>        <span class="comment">// Add to existing group or create new group</span></div>
-<div class="line"><span class="lineno">  327</span>        <span class="keywordflow">if</span> (existingGroup) {</div>
-<div class="line"><span class="lineno">  328</span>            existingGroup-&gt;channels.push_back(channel);</div>
-<div class="line"><span class="lineno">  329</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  330</span>            <a class="code hl_struct" href="../../d3/daf/classfl_1_1_spi_channel_engine_adapter.html#de/d67/structfl_1_1_spi_channel_engine_adapter_1_1_clock_pin_group">ClockPinGroup</a> newGroup;</div>
-<div class="line"><span class="lineno">  331</span>            newGroup.<a class="code hl_variable" href="../../d3/daf/classfl_1_1_spi_channel_engine_adapter.html#a0ca446cdc3b34b11d7cbcffd74d04a7a">clockPin</a> = clockPin;</div>
-<div class="line"><span class="lineno">  332</span>            newGroup.channels.push_back(channel);</div>
-<div class="line"><span class="lineno">  333</span>            groups.<a class="code hl_function" href="../../d2/d24/classfl_1_1vector_ae9a8cea8d4b81d8f2f10a2b007ac2980.html#ae9a8cea8d4b81d8f2f10a2b007ac2980">push_back</a>(newGroup);</div>
-<div class="line"><span class="lineno">  334</span>        }</div>
-<div class="line"><span class="lineno">  335</span>    }</div>
-<div class="line"><span class="lineno">  336</span> </div>
-<div class="line"><span class="lineno">  337</span>    <span class="keywordflow">return</span> groups;</div>
-<div class="line"><span class="lineno">  338</span>}</div>
-<div class="ttc" id="aclassfl_1_1_spi_channel_engine_adapter_html_a0ca446cdc3b34b11d7cbcffd74d04a7a"><div class="ttname"><a href="../../d3/daf/classfl_1_1_spi_channel_engine_adapter.html#a0ca446cdc3b34b11d7cbcffd74d04a7a">fl::SpiChannelEngineAdapter::ClockPinGroup::clockPin</a></div><div class="ttdeci">int clockPin</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d8e/spi__channel__adapter_8h_source.html#l00163">spi_channel_adapter.h:163</a></div></div>
-<div class="ttc" id="aclassfl_1_1_spi_channel_engine_adapter_html_de/d67/structfl_1_1_spi_channel_engine_adapter_1_1_clock_pin_group"><div class="ttname"><a href="../../d3/daf/classfl_1_1_spi_channel_engine_adapter.html#de/d67/structfl_1_1_spi_channel_engine_adapter_1_1_clock_pin_group">fl::SpiChannelEngineAdapter::ClockPinGroup</a></div><div class="ttdoc">Group data structure for channels with same clock pin.</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d8e/spi__channel__adapter_8h_source.html#l00162">spi_channel_adapter.h:162</a></div></div>
-<div class="ttc" id="aclassfl_1_1vector__basic_a9a248c6b3d33d24ef21e4275c4fbae8c_html_a9a248c6b3d33d24ef21e4275c4fbae8c"><div class="ttname"><a href="../../d4/dad/classfl_1_1vector__basic_a9a248c6b3d33d24ef21e4275c4fbae8c.html#a9a248c6b3d33d24ef21e4275c4fbae8c">fl::vector_basic::size</a></div><div class="ttdeci">fl::size size() const FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d47/basic__vector_8h_source.html#l00042">basic_vector.h:42</a></div></div>
-<div class="ttc" id="aclassfl_1_1vector_ae9a8cea8d4b81d8f2f10a2b007ac2980_html_ae9a8cea8d4b81d8f2f10a2b007ac2980"><div class="ttname"><a href="../../d2/d24/classfl_1_1vector_ae9a8cea8d4b81d8f2f10a2b007ac2980.html#ae9a8cea8d4b81d8f2f10a2b007ac2980">fl::vector::push_back</a></div><div class="ttdeci">void push_back(const T &amp;value) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d68/vector_8h_source.html#l00624">vector.h:624</a></div></div>
-<div class="ttc" id="alog_8h_a868b194fdb2234182e76042d9fde3062_html_a868b194fdb2234182e76042d9fde3062"><div class="ttname"><a href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a></div><div class="ttdeci">#define FL_WARN(X)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00276">log.h:276</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d6/d93/spi__channel__adapter_8cpp_8hpp_source.html#l00295">295</a> of file <a class="el" href="../../d6/d93/spi__channel__adapter_8cpp_8hpp_source.html">spi_channel_adapter.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  297</span>  {</div>
+<div class="line"><span class="lineno">  298</span>    fl::vector&lt;ClockPinGroup&gt; groups;</div>
+<div class="line"><span class="lineno">  299</span> </div>
+<div class="line"><span class="lineno">  300</span>    <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; channel : channels) {</div>
+<div class="line"><span class="lineno">  301</span>        <span class="keywordflow">if</span> (!channel) {</div>
+<div class="line"><span class="lineno">  302</span>            <span class="keywordflow">continue</span>;</div>
+<div class="line"><span class="lineno">  303</span>        }</div>
+<div class="line"><span class="lineno">  304</span> </div>
+<div class="line"><span class="lineno">  305</span>        <span class="comment">// Extract clock pin from chipset configuration</span></div>
+<div class="line"><span class="lineno">  306</span>        <span class="keyword">const</span> <span class="keyword">auto</span>&amp; chipset = channel-&gt;getChipset();</div>
+<div class="line"><span class="lineno">  307</span>        <span class="keywordflow">if</span> (!chipset.is&lt;SpiChipsetConfig&gt;()) {</div>
+<div class="line"><span class="lineno">  308</span>            <a class="code hl_define" href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;SpiChannelEngineAdapter: Non-SPI chipset in groupByClockPin&quot;</span>);</div>
+<div class="line"><span class="lineno">  309</span>            <span class="keywordflow">continue</span>;</div>
+<div class="line"><span class="lineno">  310</span>        }</div>
+<div class="line"><span class="lineno">  311</span> </div>
+<div class="line"><span class="lineno">  312</span>        <span class="keyword">const</span> SpiChipsetConfig&amp; spiConfig = chipset.get&lt;SpiChipsetConfig&gt;();</div>
+<div class="line"><span class="lineno">  313</span>        <span class="keywordtype">int</span> clockPin = spiConfig.clockPin;</div>
+<div class="line"><span class="lineno">  314</span> </div>
+<div class="line"><span class="lineno">  315</span>        <span class="comment">// Find existing group for this clock pin</span></div>
+<div class="line"><span class="lineno">  316</span>        <a class="code hl_struct" href="../../d3/daf/classfl_1_1_spi_channel_engine_adapter.html#de/d67/structfl_1_1_spi_channel_engine_adapter_1_1_clock_pin_group">ClockPinGroup</a>* existingGroup = <span class="keyword">nullptr</span>;</div>
+<div class="line"><span class="lineno">  317</span>        <span class="keywordflow">for</span> (<a class="code hl_struct" href="../../d3/daf/classfl_1_1_spi_channel_engine_adapter.html#de/d67/structfl_1_1_spi_channel_engine_adapter_1_1_clock_pin_group">ClockPinGroup</a>&amp; group : groups) {</div>
+<div class="line"><span class="lineno">  318</span>            <span class="keywordflow">if</span> (group.clockPin == clockPin &amp;&amp; group.requestedBus == spiConfig.spiBus) {</div>
+<div class="line"><span class="lineno">  319</span>                existingGroup = &amp;group;</div>
+<div class="line"><span class="lineno">  320</span>                <span class="keywordflow">break</span>;</div>
+<div class="line"><span class="lineno">  321</span>            }</div>
+<div class="line"><span class="lineno">  322</span>        }</div>
+<div class="line"><span class="lineno">  323</span> </div>
+<div class="line"><span class="lineno">  324</span>        <span class="comment">// Add to existing group or create new group</span></div>
+<div class="line"><span class="lineno">  325</span>        <span class="keywordflow">if</span> (existingGroup) {</div>
+<div class="line"><span class="lineno">  326</span>            existingGroup-&gt;channels.push_back(channel);</div>
+<div class="line"><span class="lineno">  327</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  328</span>            <a class="code hl_struct" href="../../d3/daf/classfl_1_1_spi_channel_engine_adapter.html#de/d67/structfl_1_1_spi_channel_engine_adapter_1_1_clock_pin_group">ClockPinGroup</a> newGroup;</div>
+<div class="line"><span class="lineno">  329</span>            newGroup.<a class="code hl_variable" href="../../d3/daf/classfl_1_1_spi_channel_engine_adapter.html#a0ca446cdc3b34b11d7cbcffd74d04a7a">clockPin</a> = clockPin;</div>
+<div class="line"><span class="lineno">  330</span>            newGroup.requestedBus = spiConfig.spiBus;</div>
+<div class="line"><span class="lineno">  331</span>            newGroup.channels.push_back(channel);</div>
+<div class="line"><span class="lineno">  332</span>            groups.push_back(newGroup);</div>
+<div class="line"><span class="lineno">  333</span>        }</div>
+<div class="line"><span class="lineno">  334</span>    }</div>
+<div class="line"><span class="lineno">  335</span> </div>
+<div class="line"><span class="lineno">  336</span>    <span class="keywordflow">return</span> groups;</div>
+<div class="line"><span class="lineno">  337</span>}</div>
+<div class="ttc" id="aclassfl_1_1_spi_channel_engine_adapter_html_a0ca446cdc3b34b11d7cbcffd74d04a7a"><div class="ttname"><a href="../../d3/daf/classfl_1_1_spi_channel_engine_adapter.html#a0ca446cdc3b34b11d7cbcffd74d04a7a">fl::SpiChannelEngineAdapter::ClockPinGroup::clockPin</a></div><div class="ttdeci">int clockPin</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d8e/spi__channel__adapter_8h_source.html#l00164">spi_channel_adapter.h:164</a></div></div>
+<div class="ttc" id="aclassfl_1_1_spi_channel_engine_adapter_html_de/d67/structfl_1_1_spi_channel_engine_adapter_1_1_clock_pin_group"><div class="ttname"><a href="../../d3/daf/classfl_1_1_spi_channel_engine_adapter.html#de/d67/structfl_1_1_spi_channel_engine_adapter_1_1_clock_pin_group">fl::SpiChannelEngineAdapter::ClockPinGroup</a></div><div class="ttdoc">Group data structure for channels with same clock pin.</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d8e/spi__channel__adapter_8h_source.html#l00163">spi_channel_adapter.h:163</a></div></div>
+<div class="ttc" id="alog_8h_a4804912fba6eed63e1afd84b8768aced_html_a4804912fba6eed63e1afd84b8768aced"><div class="ttname"><a href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a></div><div class="ttdeci">#define FL_WARN(...)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00440">log.h:440</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d4/d8e/spi__channel__adapter_8h_source.html#l00164">fl::SpiChannelEngineAdapter::ClockPinGroup::channels</a>, <a class="el" href="../../d4/d8e/spi__channel__adapter_8h_source.html#l00163">fl::SpiChannelEngineAdapter::ClockPinGroup::clockPin</a>, <a class="el" href="../../d1/d09/fl_2channels_2config_8h_source.html#l00104">fl::SpiChipsetConfig::clockPin</a>, <a class="el" href="../../d7/d7f/log_8h_source.html#l00276">FL_WARN</a>, <a class="el" href="../../d6/d68/vector_8h_source.html#l00624">fl::vector&lt; T &gt;::push_back()</a>, and <a class="el" href="../../d5/d47/basic__vector_8h_source.html#l00042">fl::vector_basic::size()</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d8e/spi__channel__adapter_8h_source.html#l00166">fl::SpiChannelEngineAdapter::ClockPinGroup::channels</a>, <a class="el" href="../../d4/d8e/spi__channel__adapter_8h_source.html#l00164">fl::SpiChannelEngineAdapter::ClockPinGroup::clockPin</a>, <a class="el" href="../../d1/d09/fl_2channels_2config_8h_source.html#l00105">fl::SpiChipsetConfig::clockPin</a>, <a class="el" href="../../d7/d7f/log_8h_source.html#l00440">FL_WARN</a>, <a class="el" href="../../d6/d68/vector_8h_source.html#l00624">fl::vector&lt; T &gt;::push_back()</a>, <a class="el" href="../../d4/d8e/spi__channel__adapter_8h_source.html#l00165">fl::SpiChannelEngineAdapter::ClockPinGroup::requestedBus</a>, and <a class="el" href="../../d1/d09/fl_2channels_2config_8h_source.html#l00107">fl::SpiChipsetConfig::spiBus</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../d6/d93/spi__channel__adapter_8cpp_8hpp_source.html#l00229">show()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
@@ -188,7 +187,7 @@ $(function(){initNavTree('d3/daf/classfl_1_1_spi_channel_engine_adapter_a861447f
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d3/daf/classfl_1_1_spi_channel_engine_adapter_a861447ffa5c2061eea127288ac152d00_a861447ffa5c2061eea127288ac152d00_cgraph.svg" width="422" height="86"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d3/daf/classfl_1_1_spi_channel_engine_adapter_a861447ffa5c2061eea127288ac152d00_a861447ffa5c2061eea127288ac152d00_cgraph.svg" width="422" height="51"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 <div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
@@ -207,7 +206,7 @@ $(function(){initNavTree('d3/daf/classfl_1_1_spi_channel_engine_adapter_a861447f
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d3/daf/classfl_1_1_spi_channel_engine_adapter.html">SpiChannelEngineAdapter</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:10 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

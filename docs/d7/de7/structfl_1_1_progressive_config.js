@@ -1,6 +1,6 @@
 var structfl_1_1_progressive_config =
 [
-    [ "ProgressiveConfig", "d7/de7/structfl_1_1_progressive_config_a296cd12a92b3aad9eeb2bbc8ecbb9374.html#a296cd12a92b3aad9eeb2bbc8ecbb9374", null ],
+    [ "ProgressiveConfig", "d7/de7/structfl_1_1_progressive_config_a713bf25ae212f3ffa8c1ed0eb975abff.html#a713bf25ae212f3ffa8c1ed0eb975abff", null ],
     [ "input_buffer_size", "d7/de7/structfl_1_1_progressive_config_a6f868e21be097c8e8a843fcdafdfa963.html#a6f868e21be097c8e8a843fcdafdfa963", null ],
     [ "max_mcus_per_tick", "d7/de7/structfl_1_1_progressive_config_a3686267a087e1e69cb3fcafc8eabe057.html#a3686267a087e1e69cb3fcafc8eabe057", null ],
     [ "max_time_per_tick_ms", "d7/de7/structfl_1_1_progressive_config_a88873535463dc10ba96c17d88b550d26.html#a88873535463dc10ba96c17d88b550d26", null ],

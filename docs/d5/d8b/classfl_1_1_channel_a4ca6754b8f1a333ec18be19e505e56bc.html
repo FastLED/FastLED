@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -117,24 +117,24 @@ $(function(){initNavTree('d5/d8b/classfl_1_1_channel_a4ca6754b8f1a333ec18be19e50
 
 <p>Add this channel to the global controller draw list. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d3/de6/channel_8cpp_8hpp_source.html#l00724">724</a> of file <a class="el" href="../../d3/de6/channel_8cpp_8hpp_source.html">channel.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  724</span>                            {</div>
-<div class="line"><span class="lineno">  725</span>    <span class="keywordflow">if</span> (<a class="code hl_function" href="../../d8/da0/classfl_1_1_c_l_e_d_controller_a5e115bf146729c8868c918538feb06df.html#a5e115bf146729c8868c918538feb06df">isInList</a>()) {</div>
-<div class="line"><span class="lineno">  726</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;Channel &#39;&quot;</span> &lt;&lt; <a class="code hl_variable" href="../../d5/d8b/classfl_1_1_channel_ae08a39aa307a3e97b81bf91a441a04a9.html#ae08a39aa307a3e97b81bf91a441a04a9">mName</a> &lt;&lt; <span class="stringliteral">&quot;&#39;: Skipping addToDrawList() - already in draw list&quot;</span>);</div>
-<div class="line"><span class="lineno">  727</span>        <span class="keywordflow">return</span>;</div>
-<div class="line"><span class="lineno">  728</span>    }</div>
-<div class="line"><span class="lineno">  729</span>    <a class="code hl_function" href="../../d8/da0/classfl_1_1_c_l_e_d_controller_a9e51518d1427463dffd596c69c6f3e46.html#a9e51518d1427463dffd596c69c6f3e46">CPixelLEDController&lt;RGB&gt;::addToList</a>();</div>
-<div class="line"><span class="lineno">  730</span>    <span class="comment">// Fire event after adding to draw list (detectable even if user bypasses FastLED.add())</span></div>
-<div class="line"><span class="lineno">  731</span>    <span class="keyword">auto</span>&amp; events = <a class="code hl_function" href="../../da/db7/structfl_1_1_channel_events_aa02eba6c71d0300625657d33cefceab9.html#aa02eba6c71d0300625657d33cefceab9">ChannelEvents::instance</a>();</div>
-<div class="line"><span class="lineno">  732</span>    events.onChannelAdded(*<span class="keyword">this</span>);</div>
-<div class="line"><span class="lineno">  733</span>}</div>
-<div class="ttc" id="aclassfl_1_1_c_l_e_d_controller_a5e115bf146729c8868c918538feb06df_html_a5e115bf146729c8868c918538feb06df"><div class="ttname"><a href="../../d8/da0/classfl_1_1_c_l_e_d_controller_a5e115bf146729c8868c918538feb06df.html#a5e115bf146729c8868c918538feb06df">fl::CLEDController::isInList</a></div><div class="ttdeci">bool isInList() const FL_NOEXCEPT</div><div class="ttdoc">Check if this controller is in the linked list.</div><div class="ttdef"><b>Definition</b> <a href="../../df/dcc/cled__controller_8cpp_8hpp_source.html#l00048">cled_controller.cpp.hpp:48</a></div></div>
-<div class="ttc" id="aclassfl_1_1_c_l_e_d_controller_a9e51518d1427463dffd596c69c6f3e46_html_a9e51518d1427463dffd596c69c6f3e46"><div class="ttname"><a href="../../d8/da0/classfl_1_1_c_l_e_d_controller_a9e51518d1427463dffd596c69c6f3e46.html#a9e51518d1427463dffd596c69c6f3e46">fl::CLEDController::addToList</a></div><div class="ttdeci">void addToList() FL_NOEXCEPT</div><div class="ttdoc">Add this controller to the linked list.</div><div class="ttdef"><b>Definition</b> <a href="../../df/dcc/cled__controller_8cpp_8hpp_source.html#l00034">cled_controller.cpp.hpp:34</a></div></div>
-<div class="ttc" id="aclassfl_1_1_channel_ae08a39aa307a3e97b81bf91a441a04a9_html_ae08a39aa307a3e97b81bf91a441a04a9"><div class="ttname"><a href="../../d5/d8b/classfl_1_1_channel_ae08a39aa307a3e97b81bf91a441a04a9.html#ae08a39aa307a3e97b81bf91a441a04a9">fl::Channel::mName</a></div><div class="ttdeci">fl::string mName</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d7b/channel_8h_source.html#l00277">channel.h:277</a></div></div>
-<div class="ttc" id="alog_8h_a868b194fdb2234182e76042d9fde3062_html_a868b194fdb2234182e76042d9fde3062"><div class="ttname"><a href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a></div><div class="ttdeci">#define FL_WARN(X)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00276">log.h:276</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d3/de6/channel_8cpp_8hpp_source.html#l01074">1074</a> of file <a class="el" href="../../d3/de6/channel_8cpp_8hpp_source.html">channel.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno"> 1074</span>                            {</div>
+<div class="line"><span class="lineno"> 1075</span>    <span class="keywordflow">if</span> (<a class="code hl_function" href="../../d8/da0/classfl_1_1_c_l_e_d_controller_a346ffe73124af2abf1ccf82a96daee72.html#a346ffe73124af2abf1ccf82a96daee72">isInList</a>()) {</div>
+<div class="line"><span class="lineno"> 1076</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;Channel &#39;%s&#39;: Skipping addToDrawList() - already in draw list&quot;</span>, <a class="code hl_variable" href="../../d5/d8b/classfl_1_1_channel_ae08a39aa307a3e97b81bf91a441a04a9.html#ae08a39aa307a3e97b81bf91a441a04a9">mName</a>);</div>
+<div class="line"><span class="lineno"> 1077</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno"> 1078</span>    }</div>
+<div class="line"><span class="lineno"> 1079</span>    <a class="code hl_function" href="../../d8/da0/classfl_1_1_c_l_e_d_controller_af0c5f56a02ad4e919df8181d3b267390.html#af0c5f56a02ad4e919df8181d3b267390">CPixelLEDController&lt;RGB&gt;::addToList</a>();</div>
+<div class="line"><span class="lineno"> 1080</span>    <span class="comment">// Fire event after adding to draw list (detectable even if user bypasses FastLED.add())</span></div>
+<div class="line"><span class="lineno"> 1081</span>    <span class="keyword">auto</span>&amp; events = <a class="code hl_function" href="../../da/db7/structfl_1_1_channel_events_aa02eba6c71d0300625657d33cefceab9.html#aa02eba6c71d0300625657d33cefceab9">ChannelEvents::instance</a>();</div>
+<div class="line"><span class="lineno"> 1082</span>    events.onChannelAdded(*<span class="keyword">this</span>);</div>
+<div class="line"><span class="lineno"> 1083</span>}</div>
+<div class="ttc" id="aclassfl_1_1_c_l_e_d_controller_a346ffe73124af2abf1ccf82a96daee72_html_a346ffe73124af2abf1ccf82a96daee72"><div class="ttname"><a href="../../d8/da0/classfl_1_1_c_l_e_d_controller_a346ffe73124af2abf1ccf82a96daee72.html#a346ffe73124af2abf1ccf82a96daee72">fl::CLEDController::isInList</a></div><div class="ttdeci">bool isInList() const FL_NO_EXCEPT</div><div class="ttdoc">Check if this controller is in the linked list.</div><div class="ttdef"><b>Definition</b> <a href="../../df/dcc/cled__controller_8cpp_8hpp_source.html#l00048">cled_controller.cpp.hpp:48</a></div></div>
+<div class="ttc" id="aclassfl_1_1_c_l_e_d_controller_af0c5f56a02ad4e919df8181d3b267390_html_af0c5f56a02ad4e919df8181d3b267390"><div class="ttname"><a href="../../d8/da0/classfl_1_1_c_l_e_d_controller_af0c5f56a02ad4e919df8181d3b267390.html#af0c5f56a02ad4e919df8181d3b267390">fl::CLEDController::addToList</a></div><div class="ttdeci">void addToList() FL_NO_EXCEPT</div><div class="ttdoc">Add this controller to the linked list.</div><div class="ttdef"><b>Definition</b> <a href="../../df/dcc/cled__controller_8cpp_8hpp_source.html#l00034">cled_controller.cpp.hpp:34</a></div></div>
+<div class="ttc" id="aclassfl_1_1_channel_ae08a39aa307a3e97b81bf91a441a04a9_html_ae08a39aa307a3e97b81bf91a441a04a9"><div class="ttname"><a href="../../d5/d8b/classfl_1_1_channel_ae08a39aa307a3e97b81bf91a441a04a9.html#ae08a39aa307a3e97b81bf91a441a04a9">fl::Channel::mName</a></div><div class="ttdeci">fl::string mName</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d7b/channel_8h_source.html#l00434">channel.h:434</a></div></div>
+<div class="ttc" id="alog_8h_a4804912fba6eed63e1afd84b8768aced_html_a4804912fba6eed63e1afd84b8768aced"><div class="ttname"><a href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a></div><div class="ttdeci">#define FL_WARN(...)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00440">log.h:440</a></div></div>
 <div class="ttc" id="astructfl_1_1_channel_events_aa02eba6c71d0300625657d33cefceab9_html_aa02eba6c71d0300625657d33cefceab9"><div class="ttname"><a href="../../da/db7/structfl_1_1_channel_events_aa02eba6c71d0300625657d33cefceab9.html#aa02eba6c71d0300625657d33cefceab9">fl::ChannelEvents::instance</a></div><div class="ttdeci">static ChannelEvents &amp; instance()</div><div class="ttdef"><b>Definition</b> <a href="../../dc/dfe/channel__events_8cpp_8hpp_source.html#l00013">channel_events.cpp.hpp:13</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../df/dcc/cled__controller_8cpp_8hpp_source.html#l00034">fl::CLEDController::addToList()</a>, <a class="el" href="../../d7/d7f/log_8h_source.html#l00276">FL_WARN</a>, <a class="el" href="../../dc/dfe/channel__events_8cpp_8hpp_source.html#l00013">fl::ChannelEvents::instance()</a>, <a class="el" href="../../df/dcc/cled__controller_8cpp_8hpp_source.html#l00048">fl::CLEDController::isInList()</a>, and <a class="el" href="../../d5/d7b/channel_8h_source.html#l00277">mName</a>.</p>
+<p class="reference">References <a class="el" href="../../df/dcc/cled__controller_8cpp_8hpp_source.html#l00034">fl::CLEDController::addToList()</a>, <a class="el" href="../../d7/d7f/log_8h_source.html#l00440">FL_WARN</a>, <a class="el" href="../../dc/dfe/channel__events_8cpp_8hpp_source.html#l00013">fl::ChannelEvents::instance()</a>, <a class="el" href="../../df/dcc/cled__controller_8cpp_8hpp_source.html#l00048">fl::CLEDController::isInList()</a>, and <a class="el" href="../../d5/d7b/channel_8h_source.html#l00434">mName</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -152,7 +152,7 @@ $(function(){initNavTree('d5/d8b/classfl_1_1_channel_a4ca6754b8f1a333ec18be19e50
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d5/d8b/classfl_1_1_channel.html">Channel</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:04 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:08 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

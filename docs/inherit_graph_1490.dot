@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::VorbisFrame",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl.html#d3/dd9/structfl_1_1_vorbis_frame",tooltip=" "];
+  Node0 [id="Node000000",label="TProgmemHSVPalette16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/de5/struct_t_progmem_h_s_v_palette16.html",tooltip="CHSVPalette16 entries stored in PROGMEM memory."];
 }

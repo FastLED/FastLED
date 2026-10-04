@@ -11,5 +11,7 @@ digraph "/home/runner/work/FastLED/FastLED/examples/AutoResearch"
   dir_c839598b40e1646daff68c7b4defdc81 [label="AutoResearch", fillcolor="#edf0f7", color="grey25", style="filled,bold", URL="dir_c839598b40e1646daff68c7b4defdc81.html",tooltip=""];
   }
   dir_4d1829fa9bd13d7db71e765b2707b248 [label="fl", fillcolor="#edf0f7", color="red", style="filled", URL="dir_4d1829fa9bd13d7db71e765b2707b248.html",tooltip=""];
-  dir_c839598b40e1646daff68c7b4defdc81->dir_4d1829fa9bd13d7db71e765b2707b248 [headlabel="88", labeldistance=1.5 headhref="dir_000024_000074.html" href="dir_000024_000074.html" color="steelblue1" fontcolor="steelblue1"];
+  dir_c30bdf76ce759a4eae8387be42921388 [label="third_party", fillcolor="#edf0f7", color="red", style="filled", URL="dir_c30bdf76ce759a4eae8387be42921388.html",tooltip=""];
+  dir_c839598b40e1646daff68c7b4defdc81->dir_4d1829fa9bd13d7db71e765b2707b248 [headlabel="97", labeldistance=1.5 headhref="dir_000024_000077.html" href="dir_000024_000077.html" color="steelblue1" fontcolor="steelblue1"];
+  dir_c839598b40e1646daff68c7b4defdc81->dir_c30bdf76ce759a4eae8387be42921388 [headlabel="1", labeldistance=1.5 headhref="dir_000024_000195.html" href="dir_000024_000195.html" color="steelblue1" fontcolor="steelblue1"];
 }

@@ -1,0 +1,13 @@
+<map id="fl::hsv8::hsv8" name="fl::hsv8::hsv8">
+<area shape="rect" id="Node000001" title="Default constructor." alt="" coords="208,104,316,129"/>
+<area shape="rect" id="Node000002" href="$d6/dd5/structfl_1_1hsv8_ac5f0781b9f52cb379aeb64c61e540bf5.html#ac5f0781b9f52cb379aeb64c61e540bf5" title="Allow copy construction." alt="" coords="29,5,137,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="235,97,200,70,159,44,132,33,134,28,161,40,203,66,238,93"/>
+<area shape="rect" id="Node000003" href="$d6/dd5/structfl_1_1hsv8_ac95a24d0451bb6631f81e953e28e5ca4.html#ac95a24d0451bb6631f81e953e28e5ca4" title="Compare two HSV colors field by field." alt="" coords="9,55,157,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="201,103,129,83,131,78,203,98"/>
+<area shape="rect" id="Node000004" href="$d6/dd5/structfl_1_1hsv8_af613764aea74e087a073a10aec3981b2.html#af613764aea74e087a073a10aec3981b2" title="Allow copy construction." alt="" coords="11,104,154,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="194,119,155,119,155,114,194,114"/>
+<area shape="rect" id="Node000005" href="$d6/dd5/structfl_1_1hsv8_a4247cbd6154d9fe7d415bffcffb81aad.html#a4247cbd6154d9fe7d415bffcffb81aad" title="Compare two HSV colors field by field." alt="" coords="5,153,160,179"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="203,136,131,156,129,151,201,131"/>
+<area shape="rect" id="Node000006" href="$d6/dd5/structfl_1_1hsv8_a882beec90ca47adfe88323e5cfb686d0.html#a882beec90ca47adfe88323e5cfb686d0" title="Assign new HSV values." alt="" coords="21,203,145,228"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="237,141,202,167,161,192,131,205,129,200,159,188,199,163,234,136"/>
+</map>

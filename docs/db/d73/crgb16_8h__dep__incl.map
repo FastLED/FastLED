@@ -12,7 +12,7 @@
 <area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="803,375,847,414,843,418,799,379"/>
 <area shape="rect" id="Node000007" href="$d1/dfb/colorutils_8h.html" title=" " alt="" coords="1512,159,1607,185"/>
 <area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="858,98,1377,149,1512,163,1511,168,1376,155,858,103"/>
-<area shape="rect" id="Node000062" href="$dc/da8/src_2fl_2audio_2audio__reactive_8h.html" title=" " alt="" coords="147,159,329,185"/>
+<area shape="rect" id="Node000062" href="$d1/d9a/audio__reactive_8h.html" title=" " alt="" coords="147,159,329,185"/>
 <area shape="poly" id="edge12_Node000006_Node000062" title=" " alt="" coords="700,107,317,162,317,157,700,101"/>
 <area shape="rect" id="Node000064" href="$d0/d3e/perlin__particle__punch_8h.html" title="Audio&#45;reactive perlin noise background with ambient particles and beat meteor overlay." alt="" coords="441,152,605,192"/>
 <area shape="poly" id="edge14_Node000006_Node000064" title=" " alt="" coords="730,110,586,154,584,149,729,105"/>
@@ -24,7 +24,7 @@
 <area shape="poly" id="edge21_Node000006_Node000068" title=" " alt="" coords="829,106,987,157,986,162,827,111"/>
 <area shape="rect" id="Node000057" href="$d4/d46/pixelset_8h.html" title="Declares classes for managing logical groups of LEDs." alt="" coords="1279,159,1365,185"/>
 <area shape="poly" id="edge27_Node000006_Node000057" title=" " alt="" coords="858,101,1280,162,1279,167,858,107"/>
-<area shape="rect" id="Node000008" href="$db/d97/_fast_l_e_d_8h.html" title="central include file for FastLED, defines the CFastLED class/object" alt="" coords="1469,343,1554,368"/>
+<area shape="rect" id="Node000008" href="$d6/d64/fastled_8h.html" title="central include file for FastLED, defines the CFastLED class/object" alt="" coords="1469,343,1554,368"/>
 <area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="1554,198,1541,241,1516,343,1511,342,1535,239,1548,197"/>
 <area shape="rect" id="Node000012" href="$d0/df9/colorpalettes_8cpp_8hpp.html" title=" " alt="" coords="1601,343,1763,368"/>
 <area shape="poly" id="edge8_Node000007_Node000012" title=" " alt="" coords="1616,187,1653,207,1670,222,1683,239,1693,266,1695,295,1688,343,1683,342,1690,295,1688,267,1678,241,1666,225,1650,212,1614,192"/>

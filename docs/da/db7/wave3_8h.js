@@ -6,7 +6,7 @@ var wave3_8h =
     [ "fl::buildWave3ExpansionLUT", "d4/d36/namespacefl_a37fe7c9d283caecc47c83c54783f4ed6.html#a37fe7c9d283caecc47c83c54783f4ed6", null ],
     [ "fl::canUseWave3", "d4/d36/namespacefl_ae9393b9b146723d5edf654f73b4ca439.html#ae9393b9b146723d5edf654f73b4ca439", null ],
     [ "fl::FL_ALIGNAS", "d4/d36/namespacefl_a9439569ede870eaca8e687b00bb58f4e.html#a9439569ede870eaca8e687b00bb58f4e", null ],
-    [ "fl::wave3", "d4/d36/namespacefl_ab4a17f9331a91796b5d8645f9e5983ae.html#ab4a17f9331a91796b5d8645f9e5983ae", null ],
+    [ "fl::wave3", "d4/d36/namespacefl_a42beb1f8b0f17f2d466f25c06e72d48d.html#a42beb1f8b0f17f2d466f25c06e72d48d", null ],
     [ "fl::wave3ClockFrequencyHz", "d4/d36/namespacefl_ab624a99f6046a8bc44e476677791b428.html#ab624a99f6046a8bc44e476677791b428", null ],
     [ "fl::wave3Transpose_16", "d4/d36/namespacefl_afce0e81eba51e7f8494c32187ff61b07.html#afce0e81eba51e7f8494c32187ff61b07", null ],
     [ "fl::wave3Transpose_2", "d4/d36/namespacefl_ac165e2a9f302cbcd514a023af593466e.html#ac165e2a9f302cbcd514a023af593466e", null ],

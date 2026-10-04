@@ -1,0 +1,46 @@
+<map id="fl/channels/detail/wave3.cpp.hpp" name="fl/channels/detail/wave3.cpp.hpp">
+<area shape="rect" id="Node000001" title="Out&#45;of&#45;line definitions for wave3 transposition internals." alt="" coords="474,5,607,45"/>
+<area shape="rect" id="Node000002" href="$d5/d31/detail_2wave3_8h.html" title="Out&#45;of&#45;line declarations for wave3 transposition internals." alt="" coords="606,93,739,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="571,43,633,84,630,88,568,48"/>
+<area shape="rect" id="Node000008" href="$d4/d54/compiler__control_8h.html" title=" " alt="" coords="520,269,694,295"/>
+<area shape="poly" id="edge14_Node000001_Node000008" title=" " alt="" coords="548,45,603,255,598,256,543,46"/>
+<area shape="rect" id="Node000011" href="$db/d89/bit__spread__lut_8hpp.html" title="Shared u32 &quot;spread LUT&quot; bit&#45;matrix transpose primitive (no SIMD, no u64)." alt="" coords="384,181,531,221"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="534,47,475,170,470,168,529,44"/>
+<area shape="rect" id="Node000013" href="$dd/d48/memcpy_8h.html" title="ISR&#45;safe memory operations (inline, header&#45;only)" alt="" coords="219,189,360,214"/>
+<area shape="poly" id="edge15_Node000001_Node000013" title=" " alt="" coords="515,48,319,183,316,178,512,43"/>
+<area shape="rect" id="Node000003" href="$da/db7/wave3_8h.html" title=" " alt="" coords="657,189,808,214"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="688,132,718,175,714,178,683,135"/>
+<area shape="poly" id="edge9_Node000002_Node000008" title=" " alt="" coords="667,135,648,182,619,257,614,255,643,180,662,133"/>
+<area shape="rect" id="Node000004" href="$d1/ddf/align_8h.html" title="Alignment macros and utilities for FastLED." alt="" coords="560,343,659,368"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="735,214,728,253,721,275,709,296,683,321,654,339,651,334,680,317,705,293,716,273,723,251,729,214"/>
+<area shape="poly" id="edge6_Node000003_Node000008" title=" " alt="" coords="715,216,639,264,636,260,712,212"/>
+<area shape="rect" id="Node000009" href="$df/dd8/stdint_8h.html" title=" " alt="" coords="213,489,316,515"/>
+<area shape="poly" id="edge8_Node000003_Node000009" title=" " alt="" coords="737,214,739,251,735,295,724,342,712,380,692,412,657,444,631,456,597,467,510,484,414,494,330,500,329,495,414,489,509,479,596,462,629,452,654,439,688,409,707,378,719,341,730,294,734,250,731,214"/>
+<area shape="rect" id="Node000005" href="$d7/d84/cstddef_8h.html" title=" " alt="" coords="529,416,642,441"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="608,369,597,404,591,402,603,367"/>
+<area shape="rect" id="Node000007" href="$db/d01/noexcept_8h.html" title=" " alt="" coords="302,416,429,441"/>
+<area shape="poly" id="edge5_Node000004_Node000007" title=" " alt="" coords="571,371,419,415,417,410,570,365"/>
+<area shape="poly" id="edge7_Node000008_Node000004" title=" " alt="" coords="610,295,611,329,606,329,605,295"/>
+<area shape="poly" id="edge11_Node000011_Node000008" title=" " alt="" coords="495,219,574,260,571,265,492,224"/>
+<area shape="rect" id="Node000012" href="$d3/d7e/int_8h.html" title=" " alt="" coords="22,416,104,441"/>
+<area shape="poly" id="edge12_Node000011_Node000012" title=" " alt="" coords="385,222,300,245,208,274,128,308,99,326,80,344,68,373,64,402,59,402,63,371,75,341,96,322,126,303,206,269,299,239,383,217"/>
+<area shape="poly" id="edge13_Node000012_Node000009" title=" " alt="" coords="96,439,220,482,218,487,94,444"/>
+<area shape="poly" id="edge29_Node000013_Node000005" title=" " alt="" coords="311,212,395,265,499,341,567,404,564,408,496,345,392,269,308,217"/>
+<area shape="poly" id="edge16_Node000013_Node000008" title=" " alt="" coords="336,211,548,263,547,269,335,217"/>
+<area shape="poly" id="edge28_Node000013_Node000009" title=" " alt="" coords="256,217,195,242,122,284,87,311,56,342,30,377,12,417,8,429,12,440,23,449,41,458,88,473,200,492,199,497,87,479,39,463,20,454,7,443,3,429,7,415,26,374,52,338,84,307,120,279,193,238,254,212"/>
+<area shape="rect" id="Node000014" href="$df/d72/bit__cast_8h.html" title=" " alt="" coords="228,269,346,295"/>
+<area shape="poly" id="edge17_Node000013_Node000014" title=" " alt="" coords="292,214,291,256,285,255,287,214"/>
+<area shape="poly" id="edge26_Node000014_Node000007" title=" " alt="" coords="296,294,355,403,351,405,291,296"/>
+<area shape="poly" id="edge25_Node000014_Node000012" title=" " alt="" coords="229,292,163,309,131,324,102,345,82,372,71,403,66,401,77,370,98,341,128,320,161,304,227,287"/>
+<area shape="rect" id="Node000015" href="$df/d63/type__traits_8h.html" title=" " alt="" coords="112,343,248,368"/>
+<area shape="poly" id="edge18_Node000014_Node000015" title=" " alt="" coords="271,297,211,337,208,333,268,292"/>
+<area shape="rect" id="Node000017" href="$d0/d1b/static__assert_8h.html" title="Portable compile&#45;time assertion wrapper." alt="" coords="128,416,278,441"/>
+<area shape="poly" id="edge27_Node000014_Node000017" title=" " alt="" coords="288,296,279,330,263,369,247,390,230,408,226,405,243,387,258,367,274,328,283,294"/>
+<area shape="rect" id="Node000018" href="$dd/d8d/cstring_8h.html" title=" " alt="" coords="374,343,485,368"/>
+<area shape="poly" id="edge22_Node000014_Node000018" title=" " alt="" coords="311,292,395,334,393,339,309,297"/>
+<area shape="poly" id="edge20_Node000015_Node000007" title=" " alt="" coords="211,366,324,409,322,413,209,371"/>
+<area shape="poly" id="edge19_Node000015_Node000012" title=" " alt="" coords="163,370,95,411,93,406,160,366"/>
+<area shape="poly" id="edge21_Node000015_Node000017" title=" " alt="" coords="187,368,198,402,193,404,182,369"/>
+<area shape="poly" id="edge24_Node000018_Node000007" title=" " alt="" coords="421,370,387,408,383,404,417,367"/>
+<area shape="poly" id="edge23_Node000018_Node000009" title=" " alt="" coords="439,367,451,403,451,424,444,443,421,466,392,483,361,494,330,500,329,495,359,488,390,478,417,462,439,440,446,423,445,404,434,369"/>
+</map>

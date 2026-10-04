@@ -68,7 +68,7 @@ var sectionId = 'dynsection-0';
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../df/d9e/namespacefl_1_1detail_a231be5f311080ab2a8fe4414ee17dcfd.html#a231be5f311080ab2a8fe4414ee17dcfd" target="_top" xlink:title="BF1 for 8&#45;lane Wave8 — same algebraic identity as 16&#45;lane BF1.">
+<g id="a_Node000002"><a xlink:href="../../df/d9e/namespacefl_1_1detail_a8e8d7e6c2826be5e6cb9ac7de5eaf9c4.html#a8e8d7e6c2826be5e6cb9ac7de5eaf9c4" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="294,-42.5 146,-42.5 146,-12.5 294,-12.5 294,-42.5"/>
 <text text-anchor="start" x="154" y="-30.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::detail::wave8_transpose</text>
 <text text-anchor="middle" x="220" y="-19.5" font-family="Helvetica,sans-Serif" font-size="10.00">_8_bf1</text>

@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -117,20 +117,17 @@ $(function(){initNavTree('d5/d17/_analog_output_8ino_a493f802fe26dce77f378873f89
 <dl class="section examples"><dt>Examples</dt><dd><a class="el" href="../../d6/d88/_analog_output_8ino-example.html#a0">AnalogOutput.ino</a>.</dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d5/d17/_analog_output_8ino_source.html#l00035">35</a> of file <a class="el" href="../../d5/d17/_analog_output_8ino_source.html">AnalogOutput.ino</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   36</span>{</div>
-<div class="line"><span class="lineno">   37</span>  <a class="code hl_function" href="../../d4/d36/namespacefl_ab7b2495da785c92a36e91b0a59cde46b.html#ab7b2495da785c92a36e91b0a59cde46b">analogWrite</a>(<a class="code hl_define" href="../../d5/d17/_analog_output_8ino_acb6567c99384d4b7b42c02f958da758d.html#acb6567c99384d4b7b42c02f958da758d">REDPIN</a>,   rgb.r );</div>
-<div class="line"><span class="lineno">   38</span>  <a class="code hl_function" href="../../d4/d36/namespacefl_ab7b2495da785c92a36e91b0a59cde46b.html#ab7b2495da785c92a36e91b0a59cde46b">analogWrite</a>(<a class="code hl_define" href="../../d5/d17/_analog_output_8ino_ae5bf902243dd8d0ef455090c6149c55f.html#ae5bf902243dd8d0ef455090c6149c55f">GREENPIN</a>, rgb.g );</div>
-<div class="line"><span class="lineno">   39</span>  <a class="code hl_function" href="../../d4/d36/namespacefl_ab7b2495da785c92a36e91b0a59cde46b.html#ab7b2495da785c92a36e91b0a59cde46b">analogWrite</a>(<a class="code hl_define" href="../../d5/d17/_analog_output_8ino_af38eca31a8473f3223c9e9de9e2b04de.html#af38eca31a8473f3223c9e9de9e2b04de">BLUEPIN</a>,  rgb.b );</div>
-<div class="line"><span class="lineno">   40</span>}</div>
-<div class="ttc" id="a_analog_output_8ino_acb6567c99384d4b7b42c02f958da758d_html_acb6567c99384d4b7b42c02f958da758d"><div class="ttname"><a href="../../d5/d17/_analog_output_8ino_acb6567c99384d4b7b42c02f958da758d.html#acb6567c99384d4b7b42c02f958da758d">REDPIN</a></div><div class="ttdeci">#define REDPIN</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d17/_analog_output_8ino_source.html#l00025">AnalogOutput.ino:25</a></div></div>
-<div class="ttc" id="a_analog_output_8ino_ae5bf902243dd8d0ef455090c6149c55f_html_ae5bf902243dd8d0ef455090c6149c55f"><div class="ttname"><a href="../../d5/d17/_analog_output_8ino_ae5bf902243dd8d0ef455090c6149c55f.html#ae5bf902243dd8d0ef455090c6149c55f">GREENPIN</a></div><div class="ttdeci">#define GREENPIN</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d17/_analog_output_8ino_source.html#l00026">AnalogOutput.ino:26</a></div></div>
-<div class="ttc" id="a_analog_output_8ino_af38eca31a8473f3223c9e9de9e2b04de_html_af38eca31a8473f3223c9e9de9e2b04de"><div class="ttname"><a href="../../d5/d17/_analog_output_8ino_af38eca31a8473f3223c9e9de9e2b04de.html#af38eca31a8473f3223c9e9de9e2b04de">BLUEPIN</a></div><div class="ttdeci">#define BLUEPIN</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d17/_analog_output_8ino_source.html#l00027">AnalogOutput.ino:27</a></div></div>
-<div class="ttc" id="anamespacefl_ab7b2495da785c92a36e91b0a59cde46b_html_ab7b2495da785c92a36e91b0a59cde46b"><div class="ttname"><a href="../../d4/d36/namespacefl_ab7b2495da785c92a36e91b0a59cde46b.html#ab7b2495da785c92a36e91b0a59cde46b">fl::analogWrite</a></div><div class="ttdeci">void analogWrite(int pin, u16 val)</div><div class="ttdoc">Write analog value to pin (PWM)</div><div class="ttdef"><b>Definition</b> <a href="../../d2/d48/pin_8cpp_8hpp_source.html#l00227">pin.cpp.hpp:227</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d5/d17/_analog_output_8ino_source.html#l00029">29</a> of file <a class="el" href="../../d5/d17/_analog_output_8ino_source.html">AnalogOutput.ino</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   30</span>{</div>
+<div class="line"><span class="lineno">   31</span>  <a class="code hl_variable" href="../../d5/d17/_analog_output_8ino_a1039e408783ef35dd94161e35efe8ee9.html#a1039e408783ef35dd94161e35efe8ee9">leds</a>[0] = rgb;</div>
+<div class="line"><span class="lineno">   32</span>  <a class="code hl_variable" href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a>.show();</div>
+<div class="line"><span class="lineno">   33</span>}</div>
+<div class="ttc" id="a_analog_output_8ino_a1039e408783ef35dd94161e35efe8ee9_html_a1039e408783ef35dd94161e35efe8ee9"><div class="ttname"><a href="../../d5/d17/_analog_output_8ino_a1039e408783ef35dd94161e35efe8ee9.html#a1039e408783ef35dd94161e35efe8ee9">leds</a></div><div class="ttdeci">CRGB leds[1]</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d17/_analog_output_8ino_source.html#l00026">AnalogOutput.ino:26</a></div></div>
+<div class="ttc" id="a_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9_html_a8e94985674086ea368e1d51cbc0f82a9"><div class="ttname"><a href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a></div><div class="ttdeci">FL_DISABLE_WARNING_PUSH FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS CFastLED FastLED</div><div class="ttdoc">Global LED strip management instance.</div><div class="ttdef"><b>Definition</b> <a href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_source.html#l00090">FastLED.cpp.hpp:90</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d5/d17/_analog_output_8ino_source.html#l00027">BLUEPIN</a>, <a class="el" href="../../d5/d17/_analog_output_8ino_source.html#l00026">GREENPIN</a>, and <a class="el" href="../../d5/d17/_analog_output_8ino_source.html#l00025">REDPIN</a>.</p>
+<p class="reference">References <a class="el" href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_source.html#l00090">FastLED</a>, and <a class="el" href="../../d5/d17/_analog_output_8ino_source.html#l00026">leds</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d5/d17/_analog_output_8ino_source.html#l00046">colorBars()</a>, and <a class="el" href="../../d5/d17/_analog_output_8ino_source.html#l00054">loop()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d5/d17/_analog_output_8ino_source.html#l00039">colorBars()</a>, and <a class="el" href="../../d5/d17/_analog_output_8ino_source.html#l00047">loop()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -148,7 +145,7 @@ $(function(){initNavTree('d5/d17/_analog_output_8ino_a493f802fe26dce77f378873f89
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_8bb4b718726ef6bb146f349e752b8dbd.html">AnalogOutput</a></li><li class="navelem"><a class="el" href="../../d5/d17/_analog_output_8ino.html">AnalogOutput.ino</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:00 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:02 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

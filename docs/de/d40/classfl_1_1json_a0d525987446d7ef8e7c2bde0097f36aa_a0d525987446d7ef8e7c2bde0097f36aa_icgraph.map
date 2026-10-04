@@ -1,0 +1,37 @@
+<map id="fl::json::size" name="fl::json::size">
+<area shape="rect" id="Node000001" title=" " alt="" coords="449,484,548,509"/>
+<area shape="rect" id="Node000002" href="$d4/d6b/structfl_1_1detail_1_1_json_to_type_3_01fl_1_1_const_span_wrapper_3_01_t_01_4_00_01void_01_4_a05fec1dab73106d306c437eed8bd2242.html#a05fec1dab73106d306c437eed8bd2242" title=" " alt="" coords="208,5,385,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="492,470,481,382,462,263,434,148,418,104,399,73,384,60,387,56,403,70,423,101,440,147,467,262,486,381,497,470"/>
+<area shape="rect" id="Node000003" href="$d8/d90/structfl_1_1detail_1_1_json_to_type_3_01fl_1_1vector_3_01fl_1_1u8_01_4_00_01void_01_4_a190122f0d31e82490b868e78571d0012.html#a190122f0d31e82490b868e78571d0012" title=" " alt="" coords="219,84,375,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="495,470,492,407,479,322,467,276,450,232,428,189,399,152,373,133,376,128,403,148,432,187,455,229,472,275,484,321,497,406,500,470"/>
+<area shape="rect" id="Node000004" href="$d0/d67/structfl_1_1detail_1_1_json_to_type_3_01fl_1_1vector_3_01_t_01_4_00_01void_01_4_ad700ae3154e169a4d9400abc90f05181.html#ad700ae3154e169a4d9400abc90f05181" title=" " alt="" coords="213,163,381,217"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="492,470,485,420,468,357,441,290,422,259,399,232,379,217,383,212,403,228,427,256,446,288,474,355,490,419,498,470"/>
+<area shape="rect" id="Node000005" href="$d6/d13/classfl_1_1_json_arg_converter_3_01_r_07_08_4_ade4b3d9799cb9c0035186106173d4323.html#ade4b3d9799cb9c0035186106173d4323" title=" " alt="" coords="221,242,372,282"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="489,471,479,432,461,385,435,337,400,296,371,279,374,274,403,292,439,334,466,383,484,430,495,469"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_ab71ec6f8155d69e9955cda2672493822.html#ab71ec6f8155d69e9955cda2672493822" title="Decode a versioned JSON object into an existing CRGB pixel buffer." alt="" coords="233,307,360,332"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="486,473,455,408,430,374,400,345,381,335,360,328,361,323,383,330,403,341,434,370,459,405,491,470"/>
+<area shape="rect" id="Node000007" href="$d4/de1/namespacefl_1_1anonymous__namespace_02crgb__json_8cpp_8hpp_03_af587473df89f1148c1c9853133fb4047.html#af587473df89f1148c1c9853133fb4047" title=" " alt="" coords="199,380,395,435"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="462,480,400,448,374,437,376,432,402,444,465,475"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_a3efa7e455248fb5a75c7f92b3d6385a5.html#a3efa7e455248fb5a75c7f92b3d6385a5" title="Encode a CRGB pixel buffer as a versioned JSON object." alt="" coords="243,459,350,484"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="435,491,350,481,351,475,436,486"/>
+<area shape="rect" id="Node000009" href="$de/d40/classfl_1_1json_ab6f0189d43d35476d598191d361b5e4a.html#ab6f0189d43d35476d598191d361b5e4a" title=" " alt="" coords="236,508,357,533"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="436,507,358,516,357,511,435,501"/>
+<area shape="rect" id="Node000010" href="$dc/ddb/classfl_1_1_remote_aacc8520b7bee2c8fbc6ad058bcccd207.html#aacc8520b7bee2c8fbc6ad058bcccd207" title="Get method information for all registered methods." alt="" coords="219,557,374,583"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="464,518,402,547,361,560,359,555,400,542,462,514"/>
+<area shape="rect" id="Node000011" href="$dc/d75/namespacefl_1_1wled_a0e1b21aa8cf41f28a4973d7444282fce.html#a0e1b21aa8cf41f28a4973d7444282fce" title="Parse all fields from a segment JSON object into a WLEDSegment." alt="" coords="192,607,401,632"/>
+<area shape="poly" id="edge11_Node000001_Node000011" title=" " alt="" coords="482,523,448,561,426,580,403,596,373,609,371,604,400,592,423,576,444,557,478,519"/>
+<area shape="rect" id="Node000012" href="$d2/d9f/classfl_1_1_w_l_e_d_a073f5478071f0b32ea9ac80cf3fd236c.html#a073f5478071f0b32ea9ac80cf3fd236c" title="Set WLED state from JSON object." alt="" coords="5,632,144,657"/>
+<area shape="poly" id="edge13_Node000001_Node000012" title=" " alt="" coords="492,523,479,553,461,588,435,620,403,646,367,661,330,671,291,676,253,677,181,671,121,660,122,655,181,666,253,672,291,670,329,666,366,656,400,641,431,617,456,585,474,551,487,521"/>
+<area shape="rect" id="Node000013" href="$d7/d08/_rpc_bidirectional_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="267,708,326,733"/>
+<area shape="poly" id="edge14_Node000001_Node000013" title=" " alt="" coords="494,524,483,561,464,606,438,651,403,691,385,703,365,711,327,721,326,715,364,706,383,698,400,687,434,648,459,603,478,559,489,522"/>
+<area shape="rect" id="Node000014" href="$d9/dce/_client_validation_real_8h_ad90185b2a71aa34da786634a378ac25b.html#ad90185b2a71aa34da786634a378ac25b" title=" " alt="" coords="224,757,369,783"/>
+<area shape="poly" id="edge15_Node000001_Node000014" title=" " alt="" coords="498,524,490,572,473,632,446,694,426,722,403,747,371,764,368,760,400,743,422,719,441,691,468,630,485,571,492,523"/>
+<area shape="rect" id="Node000016" href="$df/d01/_client_real_8h_ac300da999139e52ab96307f86d7fa84d.html#ac300da999139e52ab96307f86d7fa84d" title="APPROACH 3: JSON Response Handling with FastLED&#39;s ideal JSON API This demonstrates fetch responses wi..." alt="" coords="223,807,370,832"/>
+<area shape="poly" id="edge17_Node000001_Node000016" title=" " alt="" coords="500,524,495,581,481,654,469,693,452,731,430,767,403,797,388,808,371,815,369,810,385,803,400,793,426,763,447,729,464,691,476,653,490,580,494,523"/>
+<area shape="poly" id="edge7_Node000007_Node000007" title=" " alt="" coords="330,369,318,361,297,359,279,361,268,365,262,372,263,380,257,380,257,370,264,361,278,355,297,353,320,356,332,364"/>
+<area shape="poly" id="edge12_Node000011_Node000012" title=" " alt="" coords="178,636,145,639,144,634,178,630"/>
+<area shape="rect" id="Node000015" href="$d9/dce/_client_validation_real_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="49,757,100,783"/>
+<area shape="poly" id="edge16_Node000014_Node000015" title=" " alt="" coords="210,773,100,773,100,767,210,767"/>
+<area shape="rect" id="Node000017" href="$df/d01/_client_real_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="49,807,100,832"/>
+<area shape="poly" id="edge18_Node000016_Node000017" title=" " alt="" coords="209,822,100,822,100,817,209,817"/>
+</map>

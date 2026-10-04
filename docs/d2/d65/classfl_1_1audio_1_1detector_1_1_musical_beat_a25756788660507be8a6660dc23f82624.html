@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -153,12 +153,12 @@ $(function(){initNavTree('d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_a
 <div class="line"><span class="lineno">  169</span>    <span class="comment">// cv = 0.0 (perfect consistency) → confidence = 1.0</span></div>
 <div class="line"><span class="lineno">  170</span>    <span class="comment">// cv = 0.2 (20% variation) → confidence ≈ 0.5</span></div>
 <div class="line"><span class="lineno">  171</span>    <span class="comment">// cv ≥ 0.5 (50%+ variation) → confidence → 0.0</span></div>
-<div class="line"><span class="lineno">  172</span>    <span class="keywordtype">float</span> confidence = <a class="code hl_function" href="../../d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909">fl::max</a>(0.0f, 1.0f - (cv * 2.0f));</div>
+<div class="line"><span class="lineno">  172</span>    <span class="keywordtype">float</span> confidence = <a class="code hl_function" href="../../d4/d36/namespacefl_a07c69292ef50aa1083046faff1c52ead.html#a07c69292ef50aa1083046faff1c52ead">fl::max</a>(0.0f, 1.0f - (cv * 2.0f));</div>
 <div class="line"><span class="lineno">  173</span> </div>
 <div class="line"><span class="lineno">  174</span>    <span class="comment">// Boost confidence if current IBI matches average closely</span></div>
-<div class="line"><span class="lineno">  175</span>    <span class="keywordtype">float</span> ibiDiff = <a class="code hl_function" href="../../d4/d36/namespacefl_aefed87cfefc8330419d3393867945e84.html#aefed87cfefc8330419d3393867945e84">fl::abs</a>(currentIBI - avgIBI);</div>
+<div class="line"><span class="lineno">  175</span>    <span class="keywordtype">float</span> ibiDiff = <a class="code hl_function" href="../../d4/d36/namespacefl_aea39aa3747a937b0dbefabdf22cf2bbc.html#aea39aa3747a937b0dbefabdf22cf2bbc">fl::abs</a>(currentIBI - avgIBI);</div>
 <div class="line"><span class="lineno">  176</span>    <span class="keywordtype">float</span> ibiError = (avgIBI &gt; 0.0f) ? (ibiDiff / avgIBI) : 1.0f;</div>
-<div class="line"><span class="lineno">  177</span>    <span class="keywordtype">float</span> ibiBonus = <a class="code hl_function" href="../../d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909">fl::max</a>(0.0f, 1.0f - (ibiError * 4.0f));</div>
+<div class="line"><span class="lineno">  177</span>    <span class="keywordtype">float</span> ibiBonus = <a class="code hl_function" href="../../d4/d36/namespacefl_a07c69292ef50aa1083046faff1c52ead.html#a07c69292ef50aa1083046faff1c52ead">fl::max</a>(0.0f, 1.0f - (ibiError * 4.0f));</div>
 <div class="line"><span class="lineno">  178</span> </div>
 <div class="line"><span class="lineno">  179</span>    <span class="comment">// Combined confidence (weighted average)</span></div>
 <div class="line"><span class="lineno">  180</span>    <span class="keywordflow">return</span> (confidence * 0.7f) + (ibiBonus * 0.3f);</div>
@@ -166,8 +166,8 @@ $(function(){initNavTree('d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_a
 <div class="ttc" id="aclassfl_1_1audio_1_1detector_1_1_musical_beat_a06038544c12958cd90a596e6d0d849cc_html_a06038544c12958cd90a596e6d0d849cc"><div class="ttname"><a href="../../d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_a06038544c12958cd90a596e6d0d849cc.html#a06038544c12958cd90a596e6d0d849cc">fl::audio::detector::MusicalBeat::mIBIHistory</a></div><div class="ttdeci">deque&lt; u32 &gt; mIBIHistory</div><div class="ttdoc">Inter-beat interval history (in frames)</div><div class="ttdef"><b>Definition</b> <a href="../../d6/df4/musical__beat__detector_8h_source.html#l00157">musical_beat_detector.h:157</a></div></div>
 <div class="ttc" id="aclassfl_1_1audio_1_1detector_1_1_musical_beat_aa892bcc192e2ecd6b2031c290f4b7725_html_aa892bcc192e2ecd6b2031c290f4b7725"><div class="ttname"><a href="../../d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_aa892bcc192e2ecd6b2031c290f4b7725.html#aa892bcc192e2ecd6b2031c290f4b7725">fl::audio::detector::MusicalBeat::getAverageIBI</a></div><div class="ttdeci">float getAverageIBI() const</div><div class="ttdoc">Get inter-beat interval (IBI) statistics.</div><div class="ttdef"><b>Definition</b> <a href="../../d2/d5d/musical__beat__detector_8cpp_8hpp_source.html#l00090">musical_beat_detector.cpp.hpp:90</a></div></div>
 <div class="ttc" id="aclassfl_1_1audio_1_1detector_1_1_musical_beat_af7ccbbd6059884bc88da1f7c171455b9_html_af7ccbbd6059884bc88da1f7c171455b9"><div class="ttname"><a href="../../d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_af7ccbbd6059884bc88da1f7c171455b9.html#af7ccbbd6059884bc88da1f7c171455b9">fl::audio::detector::MusicalBeat::calculateIBIStdDev</a></div><div class="ttdeci">float calculateIBIStdDev() const</div><div class="ttdoc">Calculate standard deviation of IBI history.</div><div class="ttdef"><b>Definition</b> <a href="../../d2/d5d/musical__beat__detector_8cpp_8hpp_source.html#l00219">musical_beat_detector.cpp.hpp:219</a></div></div>
-<div class="ttc" id="anamespacefl_a19ba0dae8249e0cf164136846f85e909_html_a19ba0dae8249e0cf164136846f85e909"><div class="ttname"><a href="../../d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909">fl::max</a></div><div class="ttdeci">constexpr common_type_t&lt; T, U &gt; max(T a, U b) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00075">math.h:75</a></div></div>
-<div class="ttc" id="anamespacefl_aefed87cfefc8330419d3393867945e84_html_aefed87cfefc8330419d3393867945e84"><div class="ttname"><a href="../../d4/d36/namespacefl_aefed87cfefc8330419d3393867945e84.html#aefed87cfefc8330419d3393867945e84">fl::abs</a></div><div class="ttdeci">constexpr enable_if&lt; is_fixed_point&lt; T &gt;::value, T &gt;::type abs(T x) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../de/d62/fixed__point_8h_source.html#l00525">fixed_point.h:525</a></div></div>
+<div class="ttc" id="anamespacefl_a07c69292ef50aa1083046faff1c52ead_html_a07c69292ef50aa1083046faff1c52ead"><div class="ttname"><a href="../../d4/d36/namespacefl_a07c69292ef50aa1083046faff1c52ead.html#a07c69292ef50aa1083046faff1c52ead">fl::max</a></div><div class="ttdeci">constexpr common_type_t&lt; T, U &gt; max(T a, U b) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00075">math.h:75</a></div></div>
+<div class="ttc" id="anamespacefl_aea39aa3747a937b0dbefabdf22cf2bbc_html_aea39aa3747a937b0dbefabdf22cf2bbc"><div class="ttname"><a href="../../d4/d36/namespacefl_aea39aa3747a937b0dbefabdf22cf2bbc.html#aea39aa3747a937b0dbefabdf22cf2bbc">fl::abs</a></div><div class="ttdeci">constexpr enable_if&lt; is_fixed_point&lt; T &gt;::value, T &gt;::type abs(T x) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../de/d62/fixed__point_8h_source.html#l00525">fixed_point.h:525</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../de/d62/fixed__point_8h_source.html#l00525">fl::abs()</a>, <a class="el" href="../../d2/d5d/musical__beat__detector_8cpp_8hpp_source.html#l00219">calculateIBIStdDev()</a>, <a class="el" href="../../d2/d5d/musical__beat__detector_8cpp_8hpp_source.html#l00090">getAverageIBI()</a>, <a class="el" href="../../df/db1/math_8h_source.html#l00075">fl::max()</a>, and <a class="el" href="../../d6/df4/musical__beat__detector_8h_source.html#l00157">mIBIHistory</a>.</p>
 
@@ -196,7 +196,7 @@ $(function(){initNavTree('d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_a
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../db/dbf/namespacefl_1_1audio.html">audio</a></li><li class="navelem"><a class="el" href="../../dd/d12/namespacefl_1_1audio_1_1detector.html">detector</a></li><li class="navelem"><a class="el" href="../../d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat.html">MusicalBeat</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:08 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:11 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

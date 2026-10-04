@@ -1,0 +1,12 @@
+<map id="fl::CLEDController::setLeds" name="fl::CLEDController::setLeds">
+<area shape="rect" id="Node000001" title="Set the default array of LEDs to be used by this controller (span version)" alt="" coords="5,65,141,105"/>
+<area shape="rect" id="Node000002" href="$d8/da0/classfl_1_1_c_l_e_d_controller_ae0828dffacb43dca565ddf8145153ed0.html#ae0828dffacb43dca565ddf8145153ed0" title="Protected constructor with registration mode." alt="" coords="189,33,325,73"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="141,71,176,65,176,70,142,76"/>
+<area shape="rect" id="Node000005" href="$d8/da0/classfl_1_1_c_l_e_d_controller_aa95a0ead8b5cec8440f2bd7770d8e10c.html#aa95a0ead8b5cec8440f2bd7770d8e10c" title="Pointer to the CRGB array for this controller." alt="" coords="189,97,325,137"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="142,95,176,101,176,106,141,100"/>
+<area shape="rect" id="Node000003" href="$d8/da0/classfl_1_1_c_l_e_d_controller_af0c5f56a02ad4e919df8181d3b267390.html#af0c5f56a02ad4e919df8181d3b267390" title="Add this controller to the linked list." alt="" coords="373,5,509,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="325,40,360,35,360,40,326,46"/>
+<area shape="rect" id="Node000004" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a346ffe73124af2abf1ccf82a96daee72.html#a346ffe73124af2abf1ccf82a96daee72" title="Check if this controller is in the linked list." alt="" coords="557,35,693,75"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="510,34,544,39,544,44,509,39"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="557,59,509,60,373,60,339,59,339,54,373,55,509,55,557,54"/>
+</map>

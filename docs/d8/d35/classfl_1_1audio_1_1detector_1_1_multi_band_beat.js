@@ -9,9 +9,9 @@ var classfl_1_1audio_1_1detector_1_1_multi_band_beat =
       [ "trebleBeats", "d8/d35/classfl_1_1audio_1_1detector_1_1_multi_band_beat.html#a3c8bd514f9065ef449649dc311b0e137", null ],
       [ "trebleEnergy", "d8/d35/classfl_1_1audio_1_1detector_1_1_multi_band_beat.html#a96b3aedc46c8a958a053188c3607358d", null ]
     ] ],
-    [ "MultiBandBeat", "d8/d35/classfl_1_1audio_1_1detector_1_1_multi_band_beat_a5e3bab39bf17461edc0caaf9d372f9f7.html#a5e3bab39bf17461edc0caaf9d372f9f7", null ],
+    [ "MultiBandBeat", "d8/d35/classfl_1_1audio_1_1detector_1_1_multi_band_beat_a470d0d0b8d6dbda6c6465971252a02ad.html#a470d0d0b8d6dbda6c6465971252a02ad", null ],
     [ "MultiBandBeat", "d8/d35/classfl_1_1audio_1_1detector_1_1_multi_band_beat_a781a269b8875a67640df514bb50bbff0.html#a781a269b8875a67640df514bb50bbff0", null ],
-    [ "~MultiBandBeat", "d8/d35/classfl_1_1audio_1_1detector_1_1_multi_band_beat_ad89f61c68cafd22344ecbfb03e0cd899.html#ad89f61c68cafd22344ecbfb03e0cd899", null ],
+    [ "~MultiBandBeat", "d8/d35/classfl_1_1audio_1_1detector_1_1_multi_band_beat_a8c8a8af71ab847b98cca6842821451af.html#a8c8a8af71ab847b98cca6842821451af", null ],
     [ "calculateBassEnergy", "d8/d35/classfl_1_1audio_1_1detector_1_1_multi_band_beat_a87124ad16e03c77d722f7ec4b702338d.html#a87124ad16e03c77d722f7ec4b702338d", null ],
     [ "calculateMidEnergy", "d8/d35/classfl_1_1audio_1_1detector_1_1_multi_band_beat_a3a4b66b06bbccc2f2a48baa589759056.html#a3a4b66b06bbccc2f2a48baa589759056", null ],
     [ "calculateTrebleEnergy", "d8/d35/classfl_1_1audio_1_1detector_1_1_multi_band_beat_af1dac745ebe25331e624d24be3262e4d.html#af1dac745ebe25331e624d24be3262e4d", null ],

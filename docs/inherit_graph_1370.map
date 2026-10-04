@@ -1,3 +1,5 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" href="$d1/ddf/structfl_1_1_t_i_m_i_n_g___t_m1803__400_k_h_z.html" title="TM1803 controller @ 400 kHz Four&#45;phase: TH0=700ns, TH1=1800ns, TL0=1800ns, TL1=700ns." alt="" coords="5,5,209,31"/>
+<area shape="rect" id="Node000000" href="$d5/d5d/structfl_1_1vec2.html" title=" " alt="" coords="5,5,112,31"/>
+<area shape="rect" id="Node000001" href="$d3/da1/structfl_1_1pair__xy.html" title=" " alt="" coords="160,5,284,31"/>
+<area shape="poly" id="edge357_Node000000_Node000001" title=" " alt="" coords="126,15,160,15,160,21,126,21"/>
 </map>

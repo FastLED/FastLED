@@ -1,0 +1,47 @@
+digraph "fl::q16FromFloatBits"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::q16FromFloatBits",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="s16.16 of a float, rounded to nearest, computed from its IEEE-754 bits with integer arithmetic only –..."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::anonymous_namespace\l\{chromatic_adaptation\l::cpp::hpp\}::adaptationWhiteQ16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/db2/namespacefl_1_1anonymous__namespace_02chromatic__adaptation_8cpp_8hpp_03_a8183378685874adac7b857a5259d330b.html#a8183378685874adac7b857a5259d330b",tooltip="A white point, converted from float by its bits, inside the open unit square with a non-zero y – the ..."];
+  Node2 -> Node2 [id="edge2_Node000002_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node3 [id="edge3_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::buildRgbSolveMatrixQ16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_ad4e39b6ae17313fe651e8059338b8518.html#ad4e39b6ae17313fe651e8059338b8518",tooltip="Invert the emitter matrix for a three-emitter profile."];
+  Node3 -> Node4 [id="edge4_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::buildGamutMapQ16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a1bb1d650499ca2df115738f4c75464dc.html#a1bb1d650499ca2df115738f4c75464dc",tooltip="Derive the mapper for a three-emitter profile."];
+  Node4 -> Node5 [id="edge5_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::buildStreamingPipelineQ16",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d36/namespacefl_ac4d398fdc18a6dbc27b1b07aa647bf0d.html#ac4d398fdc18a6dbc27b1b07aa647bf0d",tooltip="Bind a source declaration and a device profile into a pipeline."];
+  Node3 -> Node8 [id="edge6_Node000003_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl::buildGamutMapRgbwQ16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_ac53a775b79932ae3fe7e03b287639d43.html#ac53a775b79932ae3fe7e03b287639d43",tooltip="Derive the mapper for a three-primary profile plus one white emitter."];
+  Node8 -> Node9 [id="edge7_Node000008_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="fl::anonymous_namespace\l\{pipeline::cpp::hpp\}::\lbuildWidePipelineQ16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d33/namespacefl_1_1anonymous__namespace_02pipeline_8cpp_8hpp_03_aece1643892391c10a9c9de9a2f21ab11.html#aece1643892391c10a9c9de9a2f21ab11",tooltip=" "];
+  Node9 -> Node9 [id="edge8_Node000009_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node10 [id="edge9_Node000003_Node000010",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="fl::buildGamutMapRgbwwQ16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a948408716d579dc42f02ad68245c3450.html#a948408716d579dc42f02ad68245c3450",tooltip="Derive the mapper for a three-primary profile plus two white emitters."];
+  Node10 -> Node9 [id="edge10_Node000010_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node5 [id="edge11_Node000003_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node11 [id="edge12_Node000003_Node000011",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="fl::buildTwoWhiteAllocationQ16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_af90e10614e44cf7b6b860f5516528724.html#af90e10614e44cf7b6b860f5516528724",tooltip="Derive the allocation for three primaries plus two white emitters."];
+  Node3 -> Node12 [id="edge13_Node000003_Node000012",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node12 [id="Node000012",label="fl::buildWhiteAllocationQ16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a97deed3552ced20bbf44992b9d1845ac.html#a97deed3552ced20bbf44992b9d1845ac",tooltip="Derive the allocation for a three-primary profile plus one white emitter."];
+  Node1 -> Node5 [id="edge14_Node000001_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node13 [id="edge15_Node000001_Node000013",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node13 [id="Node000013",label="fl::buildWhiteAllocation\lFromSolveQ16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_ad44a9cdc62803567f2f78f6364abb36c.html#ad44a9cdc62803567f2f78f6364abb36c",tooltip="Bind from an RGB solve already adapted to the D65 working domain."];
+  Node13 -> Node14 [id="edge16_Node000013_Node000014",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node14 [id="Node000014",label="fl::buildGamutMapRgbwFrom\lSolveQ16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a0bbd4600d1ada0552c6743d28a8683ea.html#a0bbd4600d1ada0552c6743d28a8683ea",tooltip="Bind a four-emitter map from an effective RGB solve and a white column already adapted into the same ..."];
+  Node14 -> Node8 [id="edge17_Node000014_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node14 -> Node9 [id="edge18_Node000014_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node13 -> Node12 [id="edge19_Node000013_Node000012",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node15 [id="edge20_Node000001_Node000015",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node15 [id="Node000015",label="fl::anonymous_namespace\l\{source_xyz::cpp::hpp\}\l::sourceChromaticityQ16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/dc0/namespacefl_1_1anonymous__namespace_02source__xyz_8cpp_8hpp_03_a4fedd6412bea9bfe6bb277dd05b9932e.html#a4fedd6412bea9bfe6bb277dd05b9932e",tooltip="A chromaticity, converted from float by its bits, that is real and usable: inside the open unit squar..."];
+  Node15 -> Node15 [id="edge21_Node000015_Node000015",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node16 [id="edge22_Node000001_Node000016",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node16 [id="Node000016",label="fl::anonymous_namespace\l\{pipeline::cpp::hpp\}::\lwideWhiteColumnQ16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d33/namespacefl_1_1anonymous__namespace_02pipeline_8cpp_8hpp_03_ab9c7864cd6f59dbfa968671bb8d9c3c6.html#ab9c7864cd6f59dbfa968671bb8d9c3c6",tooltip=" "];
+  Node16 -> Node9 [id="edge23_Node000016_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node16 -> Node16 [id="edge24_Node000016_Node000016",dir="back",color="steelblue1",style="solid",tooltip=" "];
+}

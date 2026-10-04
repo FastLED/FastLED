@@ -1,0 +1,5 @@
+<map id="fl::BinaryDither::stepChannel" name="fl::BinaryDither::stepChannel">
+<area shape="rect" id="Node000001" title="step for a single channel (drivers that pre&#45;step their first byte)." alt="" coords="228,13,437,38"/>
+<area shape="rect" id="Node000002" href="$d0/dee/struct_pixel_controller_a4339ebd06d211b9affb17343ae2eefe0.html#a4339ebd06d211b9affb17343ae2eefe0" title="Some chipsets pre&#45;cycle the first byte, which means we want to cycle byte 0&#39;s dithering separately." alt="" coords="5,5,180,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="214,28,180,28,180,23,214,23"/>
+</map>

@@ -6,8 +6,8 @@ var classfl_1_1_rectangular_draw_buffer =
       [ "QUEUEING", "de/d10/classfl_1_1_rectangular_draw_buffer_a8a7ee487ac870855ded20e857acbfbbf.html#a8a7ee487ac870855ded20e857acbfbbfa332f6d620a308da9cfc601c35b6d20b9", null ],
       [ "QUEUE_DONE", "de/d10/classfl_1_1_rectangular_draw_buffer_a8a7ee487ac870855ded20e857acbfbbf.html#a8a7ee487ac870855ded20e857acbfbbfaafbb6283fe1cf3600b547d579089e2b0", null ]
     ] ],
-    [ "RectangularDrawBuffer", "de/d10/classfl_1_1_rectangular_draw_buffer_a4553b6bfaf25ae07aa09839a5a20802d.html#a4553b6bfaf25ae07aa09839a5a20802d", null ],
-    [ "~RectangularDrawBuffer", "de/d10/classfl_1_1_rectangular_draw_buffer_ada51b33f27f50070f13473dd195d1f04.html#ada51b33f27f50070f13473dd195d1f04", null ],
+    [ "RectangularDrawBuffer", "de/d10/classfl_1_1_rectangular_draw_buffer_a9fc8880e1dd8e4a310a3e96c424a3c39.html#a9fc8880e1dd8e4a310a3e96c424a3c39", null ],
+    [ "~RectangularDrawBuffer", "de/d10/classfl_1_1_rectangular_draw_buffer_af9bb417f7e0feb8dc179270791defe93.html#af9bb417f7e0feb8dc179270791defe93", null ],
     [ "getBlockInfo", "de/d10/classfl_1_1_rectangular_draw_buffer_ab09c66bb8f558c3e5b728730e60ea753.html#ab09c66bb8f558c3e5b728730e60ea753", null ],
     [ "getLedsBufferBytesForPin", "de/d10/classfl_1_1_rectangular_draw_buffer_a6da1375ccc6fbb78ba358acaf7e2dc27.html#a6da1375ccc6fbb78ba358acaf7e2dc27", null ],
     [ "getMaxBytesInStrip", "de/d10/classfl_1_1_rectangular_draw_buffer_a1b9f52c3ccf598b0cb78a01d0b71196d.html#a1b9f52c3ccf598b0cb78a01d0b71196d", null ],

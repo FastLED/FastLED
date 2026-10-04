@@ -1,0 +1,20 @@
+<map id="mood_ring::RingCanvas::pixel" name="mood_ring::RingCanvas::pixel">
+<area shape="rect" id="Node000001" title="Add to one pixel, index wrapped." alt="" coords="688,69,864,109"/>
+<area shape="rect" id="Node000002" href="$db/deb/classmood__ring_1_1_flow_layer_a70a95f17eb27a0581135621acbe59b2b.html#a70a95f17eb27a0581135621acbe59b2b" title=" " alt="" coords="469,5,635,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="691,68,622,48,623,43,693,63"/>
+<area shape="rect" id="Node000004" href="$d7/d17/classmood__ring_1_1_ring_canvas_a8ce8023931622ce858d582d136bdb0aa.html#a8ce8023931622ce858d582d136bdb0aa" title="Add a smooth lobe centred at pos (turns) with half&#45;width sigma (turns)." alt="" coords="464,69,640,109"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="674,92,640,92,640,87,674,87"/>
+<area shape="rect" id="Node000007" href="$d7/d17/classmood__ring_1_1_ring_canvas_ac69fa8258949bc23b3b565289846f512.html#ac69fa8258949bc23b3b565289846f512" title="Add a band at distance radius (turns, 0..0.5) from origin, on both sides of it at once: an expanding ..." alt="" coords="464,165,640,205"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="717,117,601,168,599,163,715,112"/>
+<area shape="rect" id="Node000003" href="$db/deb/classmood__ring_1_1_flow_layer_aec6052ddb304be2560793529421b4d13.html#aec6052ddb304be2560793529421b4d13" title=" " alt="" coords="241,5,408,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="455,28,408,28,408,23,455,23"/>
+<area shape="poly" id="edge5_Node000004_Node000003" title=" " alt="" coords="466,68,395,48,397,43,467,63"/>
+<area shape="rect" id="Node000005" href="$da/d3e/classmood__ring_1_1_breath_layer_a4e746520582685543301d68be868d8c7.html#a4e746520582685543301d68be868d8c7" title=" " alt="" coords="235,69,414,109"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="450,92,414,92,414,87,450,87"/>
+<area shape="rect" id="Node000006" href="$d6/dee/classmood__ring_1_1_groove_layer_a085e540e0a3ae1223ee96f965982b9ba.html#a085e540e0a3ae1223ee96f965982b9ba" title=" " alt="" coords="233,133,416,173"/>
+<area shape="poly" id="edge6_Node000004_Node000006" title=" " alt="" coords="467,116,397,136,395,131,466,111"/>
+<area shape="rect" id="Node000008" href="$d7/d06/classmood__ring_1_1_mood_painter_a2d39cdac14d69c9bb9dbed6e676d61ae.html#a2d39cdac14d69c9bb9dbed6e676d61ae" title=" " alt="" coords="235,197,415,237"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="451,202,415,207,414,202,450,197"/>
+<area shape="rect" id="Node000009" href="$d7/d06/classmood__ring_1_1_mood_painter_ac3fb619def2fc2ffc2c906e65e8bb214.html#ac3fb619def2fc2ffc2c906e65e8bb214" title="Render one frame into out." alt="" coords="5,197,185,237"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="221,220,185,220,185,215,221,215"/>
+</map>

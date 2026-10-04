@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::audio::FrequencyBinMapper\l::FrequencyRange",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper.html#d0/de6/structfl_1_1audio_1_1_frequency_bin_mapper_1_1_frequency_range",tooltip="Get frequency boundaries for a specific output bin."];
+  Node0 [id="Node000000",label="fl::audio::detector\l::MultiBandBeatDetectorConfig",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d12/namespacefl_1_1audio_1_1detector.html#db/d81/structfl_1_1audio_1_1detector_1_1_multi_band_beat_detector_config",tooltip="Configuration for multi-band beat detection."];
 }

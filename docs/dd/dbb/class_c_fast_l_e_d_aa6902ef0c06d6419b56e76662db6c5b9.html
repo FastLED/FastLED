@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -101,7 +101,7 @@ $(function(){initNavTree('dd/dbb/class_c_fast_l_e_d_aa6902ef0c06d6419b56e76662db
 
 <div class="contents">
 <a id="aa6902ef0c06d6419b56e76662db6c5b9" name="aa6902ef0c06d6419b56e76662db6c5b9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa6902ef0c06d6419b56e76662db6c5b9">&#9670;&#160;</a></span>add() <span class="overload">[1/8]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#aa6902ef0c06d6419b56e76662db6c5b9">&#9670;&#160;</a></span>add() <span class="overload">[1/9]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -110,7 +110,7 @@ $(function(){initNavTree('dd/dbb/class_c_fast_l_e_d_aa6902ef0c06d6419b56e76662db
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="../../df/d96/s16x16x4_8h_ae8927738bf7b382c3eedd07f0e3b0b60.html#ae8927738bf7b382c3eedd07f0e3b0b60">FL_MAYBE_UNUSED</a> <a class="el" href="../../d1/d74/classfl_1_1shared__ptr.html">fl::shared_ptr</a>&lt; <a class="el" href="../../d3/d6b/classfl_1_1audio_1_1_processor.html">fl::audio::Processor</a> &gt; CFastLED::add </td>
+          <td class="memname"><a class="el" href="../../d4/d54/compiler__control_8h_ae8927738bf7b382c3eedd07f0e3b0b60.html#ae8927738bf7b382c3eedd07f0e3b0b60">FL_MAYBE_UNUSED</a> <a class="el" href="../../d1/d74/classfl_1_1shared__ptr.html">fl::shared_ptr</a>&lt; <a class="el" href="../../d3/d6b/classfl_1_1audio_1_1_processor.html">fl::audio::Processor</a> &gt; CFastLED::add </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="../../dc/d52/classfl_1_1audio_1_1_config.html">fl::audio::Config</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>config</em></span></td><td>)</td>
           <td></td>
@@ -133,20 +133,20 @@ $(function(){initNavTree('dd/dbb/class_c_fast_l_e_d_aa6902ef0c06d6419b56e76662db
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>shared_ptr to Processor, or nullptr on failure</dd></dl>
-<p>Example: </p><div class="fragment"><div class="line"><span class="keyword">auto</span> config = <a class="code hl_function" href="../../dc/d52/classfl_1_1audio_1_1_config_aaace506af66baf0ff0f5704695b9513b.html#aaace506af66baf0ff0f5704695b9513b">fl::audio::Config::CreateInmp441</a>(WS, SD, CLK, fl::Both);</div>
-<div class="line"><span class="keyword">auto</span> <a class="code hl_variable" href="../../d6/d05/_animartrix_8ino_a09940ad25ff9f7998b1dca9f5a76303d.html#a09940ad25ff9f7998b1dca9f5a76303d">audio</a> = <a class="code hl_variable" href="../../db/d97/_fast_l_e_d_8h_a7077a6a69b1339a4c04f4bb9ecc0ad3f.html#a7077a6a69b1339a4c04f4bb9ecc0ad3f">FastLED</a>.add(config);</div>
+<p>Example: </p><div class="fragment"><div class="line"><span class="keyword">auto</span> config = <a class="code hl_function" href="../../dc/d52/classfl_1_1audio_1_1_config_a3a198452e9496cae2283445525d8a65b.html#a3a198452e9496cae2283445525d8a65b">fl::audio::Config::CreateInmp441</a>(WS, SD, CLK, fl::Both);</div>
+<div class="line"><span class="keyword">auto</span> <a class="code hl_variable" href="../../d6/d05/_animartrix_8ino_a09940ad25ff9f7998b1dca9f5a76303d.html#a09940ad25ff9f7998b1dca9f5a76303d">audio</a> = <a class="code hl_variable" href="../../d6/d64/fastled_8h_a7077a6a69b1339a4c04f4bb9ecc0ad3f.html#a7077a6a69b1339a4c04f4bb9ecc0ad3f">FastLED</a>.add(config);</div>
 <div class="line"><a class="code hl_variable" href="../../d6/d05/_animartrix_8ino_a09940ad25ff9f7998b1dca9f5a76303d.html#a09940ad25ff9f7998b1dca9f5a76303d">audio</a>-&gt;setGain(2.0f);  <span class="comment">// Optional: amplify input</span></div>
 <div class="line"><a class="code hl_variable" href="../../d6/d05/_animartrix_8ino_a09940ad25ff9f7998b1dca9f5a76303d.html#a09940ad25ff9f7998b1dca9f5a76303d">audio</a>-&gt;onBeat([]{ <span class="comment">/* pulse leds */</span> });</div>
 <div class="ttc" id="a_animartrix_8ino_a09940ad25ff9f7998b1dca9f5a76303d_html_a09940ad25ff9f7998b1dca9f5a76303d"><div class="ttname"><a href="../../d6/d05/_animartrix_8ino_a09940ad25ff9f7998b1dca9f5a76303d.html#a09940ad25ff9f7998b1dca9f5a76303d">audio</a></div><div class="ttdeci">fl::UIAudio audio(&quot;Audio Input&quot;)</div></div>
-<div class="ttc" id="a_fast_l_e_d_8h_a7077a6a69b1339a4c04f4bb9ecc0ad3f_html_a7077a6a69b1339a4c04f4bb9ecc0ad3f"><div class="ttname"><a href="../../db/d97/_fast_l_e_d_8h_a7077a6a69b1339a4c04f4bb9ecc0ad3f.html#a7077a6a69b1339a4c04f4bb9ecc0ad3f">FastLED</a></div><div class="ttdeci">CFastLED FastLED</div><div class="ttdoc">Global LED strip management instance.</div><div class="ttdef"><b>Definition</b> <a href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_source.html#l00075">FastLED.cpp.hpp:75</a></div></div>
-<div class="ttc" id="aclassfl_1_1audio_1_1_config_aaace506af66baf0ff0f5704695b9513b_html_aaace506af66baf0ff0f5704695b9513b"><div class="ttname"><a href="../../dc/d52/classfl_1_1audio_1_1_config_aaace506af66baf0ff0f5704695b9513b.html#aaace506af66baf0ff0f5704695b9513b">fl::audio::Config::CreateInmp441</a></div><div class="ttdeci">static Config CreateInmp441(int pin_ws, int pin_sd, int pin_clk, AudioChannel channel, u16 sample_rate=44100ul, int i2s_num=0) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../de/ded/input_8h_source.html#l00153">input.h:153</a></div></div>
+<div class="ttc" id="aclassfl_1_1audio_1_1_config_a3a198452e9496cae2283445525d8a65b_html_a3a198452e9496cae2283445525d8a65b"><div class="ttname"><a href="../../dc/d52/classfl_1_1audio_1_1_config_a3a198452e9496cae2283445525d8a65b.html#a3a198452e9496cae2283445525d8a65b">fl::audio::Config::CreateInmp441</a></div><div class="ttdeci">static Config CreateInmp441(int pin_ws, int pin_sd, int pin_clk, AudioChannel channel, u16 sample_rate=44100ul, int i2s_num=0) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../de/ded/input_8h_source.html#l00153">input.h:153</a></div></div>
+<div class="ttc" id="afastled_8h_a7077a6a69b1339a4c04f4bb9ecc0ad3f_html_a7077a6a69b1339a4c04f4bb9ecc0ad3f"><div class="ttname"><a href="../../d6/d64/fastled_8h_a7077a6a69b1339a4c04f4bb9ecc0ad3f.html#a7077a6a69b1339a4c04f4bb9ecc0ad3f">FastLED</a></div><div class="ttdeci">CFastLED FastLED</div><div class="ttdoc">Global LED strip management instance.</div><div class="ttdef"><b>Definition</b> <a href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_source.html#l00090">FastLED.cpp.hpp:90</a></div></div>
 </div><!-- fragment --> 
-<p class="definition">Definition at line <a class="el" href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_source.html#l00749">749</a> of file <a class="el" href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_source.html">FastLED.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  749</span>                                                                        {</div>
-<div class="line"><span class="lineno">  750</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="../../d4/d9d/classfl_1_1audio_1_1_audio_manager_a5bfbd81ceda3da10014947211340be86.html#a5bfbd81ceda3da10014947211340be86">fl::audio::AudioManager::instance</a>().<a class="code hl_function" href="../../d4/d9d/classfl_1_1audio_1_1_audio_manager_a19815b509ca8b88682cb93c9faba4360.html#a19815b509ca8b88682cb93c9faba4360">add</a>(config);</div>
-<div class="line"><span class="lineno">  751</span>}</div>
-<div class="ttc" id="aclassfl_1_1audio_1_1_audio_manager_a19815b509ca8b88682cb93c9faba4360_html_a19815b509ca8b88682cb93c9faba4360"><div class="ttname"><a href="../../d4/d9d/classfl_1_1audio_1_1_audio_manager_a19815b509ca8b88682cb93c9faba4360.html#a19815b509ca8b88682cb93c9faba4360">fl::audio::AudioManager::add</a></div><div class="ttdeci">shared_ptr&lt; Processor &gt; add(const Config &amp;config) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../dd/da6/audio__manager_8cpp_8hpp_source.html#l00018">audio_manager.cpp.hpp:18</a></div></div>
-<div class="ttc" id="aclassfl_1_1audio_1_1_audio_manager_a5bfbd81ceda3da10014947211340be86_html_a5bfbd81ceda3da10014947211340be86"><div class="ttname"><a href="../../d4/d9d/classfl_1_1audio_1_1_audio_manager_a5bfbd81ceda3da10014947211340be86.html#a5bfbd81ceda3da10014947211340be86">fl::audio::AudioManager::instance</a></div><div class="ttdeci">static AudioManager &amp; instance() FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../dd/da6/audio__manager_8cpp_8hpp_source.html#l00010">audio_manager.cpp.hpp:10</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_source.html#l00931">931</a> of file <a class="el" href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_source.html">FastLED.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  931</span>                                                                        {</div>
+<div class="line"><span class="lineno">  932</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="../../d4/d9d/classfl_1_1audio_1_1_audio_manager_a3c540fd2680373c71adf61f0c67f7b53.html#a3c540fd2680373c71adf61f0c67f7b53">fl::audio::AudioManager::instance</a>().<a class="code hl_function" href="../../d4/d9d/classfl_1_1audio_1_1_audio_manager_a50a318328d3ab7153dd90b4f7c63c5c0.html#a50a318328d3ab7153dd90b4f7c63c5c0">add</a>(config);</div>
+<div class="line"><span class="lineno">  933</span>}</div>
+<div class="ttc" id="aclassfl_1_1audio_1_1_audio_manager_a3c540fd2680373c71adf61f0c67f7b53_html_a3c540fd2680373c71adf61f0c67f7b53"><div class="ttname"><a href="../../d4/d9d/classfl_1_1audio_1_1_audio_manager_a3c540fd2680373c71adf61f0c67f7b53.html#a3c540fd2680373c71adf61f0c67f7b53">fl::audio::AudioManager::instance</a></div><div class="ttdeci">static AudioManager &amp; instance() FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../dd/da6/audio__manager_8cpp_8hpp_source.html#l00010">audio_manager.cpp.hpp:10</a></div></div>
+<div class="ttc" id="aclassfl_1_1audio_1_1_audio_manager_a50a318328d3ab7153dd90b4f7c63c5c0_html_a50a318328d3ab7153dd90b4f7c63c5c0"><div class="ttname"><a href="../../d4/d9d/classfl_1_1audio_1_1_audio_manager_a50a318328d3ab7153dd90b4f7c63c5c0.html#a50a318328d3ab7153dd90b4f7c63c5c0">fl::audio::AudioManager::add</a></div><div class="ttdeci">shared_ptr&lt; Processor &gt; add(const Config &amp;config) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../dd/da6/audio__manager_8cpp_8hpp_source.html#l00018">audio_manager.cpp.hpp:18</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../dd/da6/audio__manager_8cpp_8hpp_source.html#l00018">fl::audio::AudioManager::add()</a>, and <a class="el" href="../../dd/da6/audio__manager_8cpp_8hpp_source.html#l00010">fl::audio::AudioManager::instance()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
@@ -166,7 +166,7 @@ $(function(){initNavTree('dd/dbb/class_c_fast_l_e_d_aa6902ef0c06d6419b56e76662db
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dd/dbb/class_c_fast_l_e_d.html">CFastLED</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:03 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

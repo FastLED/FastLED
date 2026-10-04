@@ -118,19 +118,19 @@ var sectionId = 'dynsection-0';
 </a>
 </g>
 </g>
-<!-- Node56 -->
-<g id="Node000056" class="node">
-<title>Node56</title>
-<g id="a_Node000056"><a xlink:href="../../db/d72/fl_2math_2intmap_8h.html" target="_top" xlink:title="Integer mapping functions between different integer sizes.">
+<!-- Node49 -->
+<g id="Node000049" class="node">
+<title>Node49</title>
+<g id="a_Node000049"><a xlink:href="../../db/d72/fl_2math_2intmap_8h.html" target="_top" xlink:title="Integer mapping functions between different integer sizes.">
 <polygon fill="white" stroke="#666666" points="577.5,-184 479.5,-184 479.5,-165 577.5,-165 577.5,-184"/>
 <text text-anchor="middle" x="528.5" y="-172" font-family="Helvetica,sans-Serif" font-size="10.00">fl/math/intmap.h</text>
 </a>
 </g>
 </g>
-<!-- Node1&#45;&gt;Node56 -->
-<g id="edge20_Node000001_Node000056" class="edge">
-<title>Node1&#45;&gt;Node56</title>
-<g id="a_edge20_Node000001_Node000056"><a xlink:title=" ">
+<!-- Node1&#45;&gt;Node49 -->
+<g id="edge20_Node000001_Node000049" class="edge">
+<title>Node1&#45;&gt;Node49</title>
+<g id="a_edge20_Node000001_Node000049"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M273.06,-329.97C315.95,-315.44 402.08,-283.13 465.5,-239 484.71,-225.63 503.14,-205.99 515.05,-192.1"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="517.84,-194.22 521.57,-184.3 512.47,-189.73 517.84,-194.22"/>
 </a>
@@ -343,37 +343,37 @@ var sectionId = 'dynsection-0';
 </a>
 </g>
 </g>
-<!-- Node56&#45;&gt;Node8 -->
-<g id="edge22_Node000056_Node000008" class="edge">
-<title>Node56&#45;&gt;Node8</title>
-<g id="a_edge22_Node000056_Node000008"><a xlink:title=" ">
+<!-- Node49&#45;&gt;Node8 -->
+<g id="edge22_Node000049_Node000008" class="edge">
+<title>Node49&#45;&gt;Node8</title>
+<g id="a_edge22_Node000049_Node000008"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M479.44,-167.26C401.09,-157.31 248.22,-137.88 166.36,-127.47"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="166.62,-123.98 156.25,-126.19 165.73,-130.92 166.62,-123.98"/>
 </a>
 </g>
 </g>
-<!-- Node56&#45;&gt;Node13 -->
-<g id="edge23_Node000056_Node000013" class="edge">
-<title>Node56&#45;&gt;Node13</title>
-<g id="a_edge23_Node000056_Node000013"><a xlink:title=" ">
+<!-- Node49&#45;&gt;Node13 -->
+<g id="edge23_Node000049_Node000013" class="edge">
+<title>Node49&#45;&gt;Node13</title>
+<g id="a_edge23_Node000049_Node000013"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M522.07,-164.91C511.59,-151.45 489.58,-125.38 465.5,-110 441.86,-94.91 412.41,-84.02 388.25,-76.8"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="389.18,-73.42 378.6,-74.02 387.24,-80.15 389.18,-73.42"/>
 </a>
 </g>
 </g>
-<!-- Node57 -->
-<g id="Node000057" class="node">
-<title>Node57</title>
-<g id="a_Node000057"><a xlink:title=" ">
+<!-- Node50 -->
+<g id="Node000050" class="node">
+<title>Node50</title>
+<g id="a_Node000050"><a xlink:title=" ">
 <polygon fill="#e0e0e0" stroke="#999999" points="627.5,-129 517.5,-129 517.5,-110 627.5,-110 627.5,-129"/>
 <text text-anchor="middle" x="572.5" y="-117" font-family="Helvetica,sans-Serif" font-size="10.00">platforms/intmap.h</text>
 </a>
 </g>
 </g>
-<!-- Node56&#45;&gt;Node57 -->
-<g id="edge21_Node000056_Node000057" class="edge">
-<title>Node56&#45;&gt;Node57</title>
-<g id="a_edge21_Node000056_Node000057"><a xlink:title=" ">
+<!-- Node49&#45;&gt;Node50 -->
+<g id="edge21_Node000049_Node000050" class="edge">
+<title>Node49&#45;&gt;Node50</title>
+<g id="a_edge21_Node000049_Node000050"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M535.77,-164.75C542.04,-157.18 551.29,-146.05 558.93,-136.84"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="561.67,-139.02 565.37,-129.09 556.29,-134.55 561.67,-139.02"/>
 </a>

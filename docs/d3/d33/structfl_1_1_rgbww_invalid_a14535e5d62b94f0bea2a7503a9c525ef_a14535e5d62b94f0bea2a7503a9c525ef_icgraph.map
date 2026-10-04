@@ -1,0 +1,19 @@
+<map id="fl::RgbwwInvalid::value" name="fl::RgbwwInvalid::value">
+<area shape="rect" id="Node000001" title=" " alt="" coords="387,109,560,134"/>
+<area shape="rect" id="Node000002" href="$d0/d09/classfl_1_1_pixel_iterator_adf89dddf6e35d6a40259744f4a32df3a.html#adf89dddf6e35d6a40259744f4a32df3a" title=" " alt="" coords="205,5,330,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="432,105,338,60,312,48,314,43,340,55,434,100"/>
+<area shape="rect" id="Node000003" href="$d3/dc7/classfl_1_1_pixel_iterator_any_ab136b28e1a8d9f512d9ee5d97357ccc8.html#ab136b28e1a8d9f512d9ee5d97357ccc8" title=" " alt="" coords="196,69,339,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="377,109,338,103,339,98,378,104"/>
+<area shape="rect" id="Node000004" href="$d3/dc7/classfl_1_1_pixel_iterator_any_ac0406f961031d4acae7cf2233bab13f8.html#ac0406f961031d4acae7cf2233bab13f8" title="Construct adapter with color order conversion." alt="" coords="196,133,339,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="378,139,339,145,338,140,377,134"/>
+<area shape="rect" id="Node000009" href="$d5/d87/structfl_1_1_channel_options_a38daffbee24f3df5851425e1134f216d.html#a38daffbee24f3df5851425e1134f216d" title=" " alt="" coords="197,197,338,237"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="434,143,340,188,314,200,312,195,338,183,432,138"/>
+<area shape="rect" id="Node000005" href="$d3/dc7/classfl_1_1_pixel_iterator_any_aabc036e7f094a1c0c60a5d0c5ac39412.html#aabc036e7f094a1c0c60a5d0c5ac39412" title="Copy: the iterator must be re&#45;aimed, not copied." alt="" coords="5,37,148,77"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="206,130,195,124,147,92,124,80,126,75,149,87,197,119,208,125"/>
+<area shape="rect" id="Node000006" href="$d3/dc7/classfl_1_1_pixel_iterator_any_ad8584750940ac5809fff110f1a008c7d.html#ad8584750940ac5809fff110f1a008c7d" title=" " alt="" coords="5,101,148,141"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="182,142,148,136,149,131,183,137"/>
+<area shape="rect" id="Node000007" href="$d3/dc7/classfl_1_1_pixel_iterator_any_ac9626174b7e1a5ff7a5b8269741d71fb.html#ac9626174b7e1a5ff7a5b8269741d71fb" title=" " alt="" coords="5,165,148,205"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="183,170,149,176,148,171,182,165"/>
+<area shape="rect" id="Node000008" href="$d3/dc7/classfl_1_1_pixel_iterator_any_afc4af68e0aa5eb181c1f102dce8317ec.html#afc4af68e0aa5eb181c1f102dce8317ec" title=" " alt="" coords="5,229,148,269"/>
+<area shape="poly" id="edge7_Node000004_Node000008" title=" " alt="" coords="208,182,197,188,149,220,126,232,124,227,147,215,195,183,206,177"/>
+</map>

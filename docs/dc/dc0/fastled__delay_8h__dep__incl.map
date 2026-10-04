@@ -1,10 +1,10 @@
 <map id="fastled_delay.h" name="fastled_delay.h">
 <area shape="rect" id="Node000001" title="Utility functions and classes for managing delay cycles." alt="" coords="280,5,400,31"/>
-<area shape="rect" id="Node000002" href="$db/d97/_fast_l_e_d_8h.html" title="central include file for FastLED, defines the CFastLED class/object" alt="" coords="577,233,663,258"/>
+<area shape="rect" id="Node000002" href="$d6/d64/fastled_8h.html" title="central include file for FastLED, defines the CFastLED class/object" alt="" coords="577,233,663,258"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="348,43,371,109,391,145,418,175,455,201,498,219,540,230,578,237,577,243,539,236,496,224,453,205,414,179,387,148,366,111,343,45"/>
 <area shape="rect" id="Node000006" href="$d0/d5b/fastled__delay_8cpp_8hpp.html" title=" " alt="" coords="5,313,168,339"/>
 <area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="320,42,242,121,195,172,150,227,118,275,95,315,90,312,113,272,146,224,191,169,238,117,316,38"/>
-<area shape="rect" id="Node000007" href="$d7/dc2/fl_2system_2_fast_l_e_d_8h.html" title="Internal FastLED header for implementation files." alt="" coords="1531,79,1674,104"/>
+<area shape="rect" id="Node000007" href="$d0/d69/fl_2system_2fastled_8h.html" title="Internal FastLED header for implementation files." alt="" coords="1531,79,1674,104"/>
 <area shape="poly" id="edge8_Node000001_Node000007" title=" " alt="" coords="414,21,1531,83,1531,89,413,26"/>
 <area shape="rect" id="Node000003" href="$d7/de5/_fast_l_e_d_8cpp_8hpp.html" title=" " alt="" coords="685,313,813,339"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="652,263,732,311,729,315,649,267"/>

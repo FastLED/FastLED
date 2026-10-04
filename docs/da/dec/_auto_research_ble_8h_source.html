@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -120,19 +120,34 @@ $(function(){initNavTree('da/dec/_auto_research_ble_8h_source.html','../../'); i
 <div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> </div>
 <div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#include &quot;<a class="code" href="../../df/dd8/stdint_8h.html">fl/stl/stdint.h</a>&quot;</span></div>
 <div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment">// BLE configuration constants</span></div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno"><a class="line" href="../../da/dec/_auto_research_ble_8h_a7f1a5a93fd157fe22e9390fdeac26969.html#a7f1a5a93fd157fe22e9390fdeac26969">   19</a></span><span class="preprocessor">#define AUTORESEARCH_BLE_DEVICE_NAME &quot;FastLED-C6&quot;</span></div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span></div>
-<div class="foldopen" id="foldopen00022" data-start="{" data-end="};">
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno"><a class="line" href="../../da/dec/_auto_research_ble_8h.html">   22</a></span><span class="keyword">struct </span><a class="code hl_struct" href="../../da/dec/_auto_research_ble_8h.html#d9/d5f/struct_auto_research_ble_state">AutoResearchBleState</a> {</div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno"><a class="line" href="../../da/dec/_auto_research_ble_8h.html#a61e74b861ca4bdcbe8ca6c43b8c19104">   23</a></span>    <span class="keywordtype">bool</span> <a class="code hl_variable" href="../../da/dec/_auto_research_ble_8h.html#a61e74b861ca4bdcbe8ca6c43b8c19104">ble_server_active</a> = <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>};</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment">// FL_IS_RP2040 / FL_IS_RP2350 for the advertising-name default below.</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#include &quot;platforms/is_platform.h&quot;</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span> </div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment">// BLE configuration constants</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment">//</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment">// The advertising name is what a host scan matches on, so it has to name the</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment">// board that actually answered. It was hardcoded &quot;FastLED-C6&quot;, which meant an</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="comment">// RP2350W advertised under a C6 name and the scan log reported the wrong chip.</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#ifndef AUTORESEARCH_BLE_DEVICE_NAME</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#if defined(FL_IS_RP2350)</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#define AUTORESEARCH_BLE_DEVICE_NAME &quot;FastLED-RP2350&quot;</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#elif defined(FL_IS_RP2040)</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#define AUTORESEARCH_BLE_DEVICE_NAME &quot;FastLED-RP2040&quot;</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno"><a class="line" href="../../da/dec/_auto_research_ble_8h_a7f1a5a93fd157fe22e9390fdeac26969.html#a7f1a5a93fd157fe22e9390fdeac26969">   32</a></span><span class="preprocessor">#define AUTORESEARCH_BLE_DEVICE_NAME &quot;FastLED-C6&quot;</span></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span></div>
+<div class="foldopen" id="foldopen00037" data-start="{" data-end="};">
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno"><a class="line" href="../../da/dec/_auto_research_ble_8h.html">   37</a></span><span class="keyword">struct </span><a class="code hl_struct" href="../../da/dec/_auto_research_ble_8h.html#d9/d5f/struct_auto_research_ble_state">AutoResearchBleState</a> {</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno"><a class="line" href="../../da/dec/_auto_research_ble_8h.html#a61e74b861ca4bdcbe8ca6c43b8c19104">   38</a></span>    <span class="keywordtype">bool</span> <a class="code hl_variable" href="../../da/dec/_auto_research_ble_8h.html#a61e74b861ca4bdcbe8ca6c43b8c19104">ble_server_active</a> = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>};</div>
 </div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span></div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><a class="code hl_struct" href="../../da/dec/_auto_research_ble_8h.html#d9/d5f/struct_auto_research_ble_state">AutoResearchBleState</a>&amp; <a class="code hl_function" href="../../da/dec/_auto_research_ble_8h_a148423e1a23c3528f5499ffd84bbd65a.html#a148423e1a23c3528f5499ffd84bbd65a">getBleState</a>();</div>
-<div class="ttc" id="a_auto_research_ble_8h_a148423e1a23c3528f5499ffd84bbd65a_html_a148423e1a23c3528f5499ffd84bbd65a"><div class="ttname"><a href="../../da/dec/_auto_research_ble_8h_a148423e1a23c3528f5499ffd84bbd65a.html#a148423e1a23c3528f5499ffd84bbd65a">getBleState</a></div><div class="ttdeci">AutoResearchBleState &amp; getBleState()</div><div class="ttdoc">Get current BLE autoresearch state.</div><div class="ttdef"><b>Definition</b> <a href="../../da/d79/_auto_research_ble_8cpp_source.html#l00012">AutoResearchBle.cpp:12</a></div></div>
-<div class="ttc" id="a_auto_research_ble_8h_html_a61e74b861ca4bdcbe8ca6c43b8c19104"><div class="ttname"><a href="../../da/dec/_auto_research_ble_8h.html#a61e74b861ca4bdcbe8ca6c43b8c19104">AutoResearchBleState::ble_server_active</a></div><div class="ttdeci">bool ble_server_active</div><div class="ttdef"><b>Definition</b> <a href="#l00023">AutoResearchBle.h:23</a></div></div>
-<div class="ttc" id="a_auto_research_ble_8h_html_d9/d5f/struct_auto_research_ble_state"><div class="ttname"><a href="../../da/dec/_auto_research_ble_8h.html#d9/d5f/struct_auto_research_ble_state">AutoResearchBleState</a></div><div class="ttdoc">State for BLE autoresearch.</div><div class="ttdef"><b>Definition</b> <a href="#l00022">AutoResearchBle.h:22</a></div></div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span></div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno"><a class="line" href="../../da/dec/_auto_research_ble_8h_a148423e1a23c3528f5499ffd84bbd65a.html#a148423e1a23c3528f5499ffd84bbd65a">   43</a></span><a class="code hl_struct" href="../../da/dec/_auto_research_ble_8h.html#d9/d5f/struct_auto_research_ble_state">AutoResearchBleState</a>&amp; <a class="code hl_function" href="../../da/dec/_auto_research_ble_8h_a148423e1a23c3528f5499ffd84bbd65a.html#a148423e1a23c3528f5499ffd84bbd65a">getBleState</a>();</div>
+<div class="ttc" id="a_auto_research_ble_8h_a148423e1a23c3528f5499ffd84bbd65a_html_a148423e1a23c3528f5499ffd84bbd65a"><div class="ttname"><a href="../../da/dec/_auto_research_ble_8h_a148423e1a23c3528f5499ffd84bbd65a.html#a148423e1a23c3528f5499ffd84bbd65a">getBleState</a></div><div class="ttdeci">AutoResearchBleState &amp; getBleState()</div><div class="ttdoc">Get current BLE autoresearch state.</div></div>
+<div class="ttc" id="a_auto_research_ble_8h_html_a61e74b861ca4bdcbe8ca6c43b8c19104"><div class="ttname"><a href="../../da/dec/_auto_research_ble_8h.html#a61e74b861ca4bdcbe8ca6c43b8c19104">AutoResearchBleState::ble_server_active</a></div><div class="ttdeci">bool ble_server_active</div><div class="ttdef"><b>Definition</b> <a href="#l00038">AutoResearchBle.h:38</a></div></div>
+<div class="ttc" id="a_auto_research_ble_8h_html_d9/d5f/struct_auto_research_ble_state"><div class="ttname"><a href="../../da/dec/_auto_research_ble_8h.html#d9/d5f/struct_auto_research_ble_state">AutoResearchBleState</a></div><div class="ttdoc">State for BLE autoresearch.</div><div class="ttdef"><b>Definition</b> <a href="#l00037">AutoResearchBle.h:37</a></div></div>
 <div class="ttc" id="astdint_8h_html"><div class="ttname"><a href="../../df/dd8/stdint_8h.html">stdint.h</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
@@ -141,7 +156,7 @@ $(function(){initNavTree('da/dec/_auto_research_ble_8h_source.html','../../'); i
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_c839598b40e1646daff68c7b4defdc81.html">AutoResearch</a></li><li class="navelem"><a class="el" href="../../da/dec/_auto_research_ble_8h.html">AutoResearchBle.h</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:06:58 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:08:59 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

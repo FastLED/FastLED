@@ -3,7 +3,7 @@
 <area shape="poly" id="edge5_Node000001_Node000001" title=" " alt="" coords="66,69,66,59,75,50,91,45,115,43,144,46,161,54,158,58,143,51,115,48,92,50,78,55,71,61,71,69"/>
 <area shape="rect" id="Node000002" href="$da/dec/structfl_1_1perlin__s16x16__simd_af9fca57c248cfdf924dfb5c33d37edad.html#af9fca57c248cfdf924dfb5c33d37edad" title=" " alt="" coords="273,47,471,87"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="225,81,260,77,260,83,226,87"/>
-<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a3a23a29b7fae800b629360cd32fec586.html#a3a23a29b7fae800b629360cd32fec586" title="Process 4 angles simultaneously, returning vectorized sin/cos values SIMD&#45;optimized: vectorized angle..." alt="" coords="305,112,439,137"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a92f648bf72198076845339c6859d3e19.html#a92f648bf72198076845339c6859d3e19" title="Process 4 angles simultaneously, returning vectorized sin/cos values SIMD&#45;optimized: vectorized angle..." alt="" coords="305,112,439,137"/>
 <area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="226,106,292,113,291,119,225,111"/>
 <area shape="rect" id="Node000003" href="$d3/d7d/structfl_1_1perlin__s16x16_a1a05f472ef13e32ff6b280da22010afe.html#a1a05f472ef13e32ff6b280da22010afe" title=" " alt="" coords="519,5,685,31"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="465,45,528,31,529,36,466,50"/>

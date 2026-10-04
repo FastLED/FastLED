@@ -8,14 +8,16 @@ digraph "fl::detail::ScaledPixelIteratorRGBWW"
   Node1 [id="Node000001",label="fl::detail::ScaledPixelIterator\lRGBWW",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Input iterator adapter yielding 5-byte RGBWW pixels (issue #2558)."];
   Node2 -> Node1 [id="edge1_Node000001_Node000002",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mPixels",fontcolor="grey" ];
   Node2 [id="Node000002",label="fl::PixelIterator",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d0/d09/classfl_1_1_pixel_iterator.html",tooltip=" "];
-  Node3 -> Node2 [id="edge2_Node000002_Node000003",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mLoadAndScaleRGBW\nmRgbw",fontcolor="grey" ];
+  Node3 -> Node2 [id="edge2_Node000002_Node000003",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mLoadAndScaleRGBW\nmLoadAndScaleRGBWUnordered\nmRgbw",fontcolor="grey" ];
   Node3 [id="Node000003",label="fl::Rgbw",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d7/d27/structfl_1_1_rgbw.html",tooltip=" "];
-  Node4 -> Node2 [id="edge3_Node000002_Node000004",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mLoadAndScaleRGBWW\nmRgbww",fontcolor="grey" ];
-  Node4 [id="Node000004",label="fl::Rgbww",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d4/df9/structfl_1_1_rgbww.html",tooltip="Per-strip RGBWW configuration."];
-  Node5 -> Node4 [id="edge4_Node000004_Node000005",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" profile",fontcolor="grey" ];
-  Node5 [id="Node000005",label="fl::colorimetric_detail\l::RgbcctProfile",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d7/df0/namespacefl_1_1colorimetric__detail.html#d1/d65/structfl_1_1colorimetric__detail_1_1_rgbcct_profile",tooltip=" "];
-  Node7 -> Node1 [id="edge5_Node000001_Node000007",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mCurrent",fontcolor="grey" ];
-  Node7 [id="Node000007",label="fl::array\< u8, 5 \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d4/dca/classfl_1_1array.html",tooltip=" "];
-  Node8 -> Node7 [id="edge6_Node000007_Node000008",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< u8, 5 \>",fontcolor="grey" ];
-  Node8 [id="Node000008",label="fl::array\< T, N \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d4/dca/classfl_1_1array.html",tooltip="A fixed-size array implementation similar to std::array."];
+  Node4 -> Node3 [id="edge3_Node000003_Node000004",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" profile",fontcolor="grey" ];
+  Node4 [id="Node000004",label="fl::shared_ptr\< const\l fl::DiodeProfile \>",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d1/d74/classfl_1_1shared__ptr.html",tooltip=" "];
+  Node10 -> Node2 [id="edge4_Node000002_Node000010",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mLoadAndScaleRGBWW\nmLoadAndScaleRGBWWUnordered\nmRgbww",fontcolor="grey" ];
+  Node10 [id="Node000010",label="fl::Rgbww",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d4/df9/structfl_1_1_rgbww.html",tooltip="Per-strip RGBWW configuration."];
+  Node11 -> Node10 [id="edge5_Node000010_Node000011",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" profile",fontcolor="grey" ];
+  Node11 [id="Node000011",label="fl::colorimetric_detail\l::RgbcctProfile",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d7/df0/namespacefl_1_1colorimetric__detail.html#d1/d65/structfl_1_1colorimetric__detail_1_1_rgbcct_profile",tooltip=" "];
+  Node12 -> Node1 [id="edge6_Node000001_Node000012",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mCurrent",fontcolor="grey" ];
+  Node12 [id="Node000012",label="fl::array\< u8, 5 \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d4/dca/classfl_1_1array.html",tooltip=" "];
+  Node13 -> Node12 [id="edge7_Node000012_Node000013",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< u8, 5 \>",fontcolor="grey" ];
+  Node13 [id="Node000013",label="fl::array\< T, N \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d4/dca/classfl_1_1array.html",tooltip="A fixed-size array implementation similar to std::array."];
 }

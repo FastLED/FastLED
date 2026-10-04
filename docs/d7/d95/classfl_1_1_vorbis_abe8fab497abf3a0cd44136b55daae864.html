@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -112,7 +112,7 @@ $(function(){initNavTree('d7/d95/classfl_1_1_vorbis_abe8fab497abf3a0cd44136b55da
         <tr>
           <td class="memname"><a class="el" href="../../d2/d24/classfl_1_1vector.html">fl::vector</a>&lt; <a class="el" href="../../d1/d24/classfl_1_1audio_1_1_sample.html">audio::Sample</a> &gt; fl::Vorbis::decodeAll </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="../../d0/d08/classfl_1_1span.html">fl::span</a>&lt; const <a class="el" href="../../da/d3c/namespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c.html#a7573a66f01c09f14a1ff0411f8e1153c">fl::u8</a> &gt;</td>          <td class="paramname"><span class="paramname"><em>data</em></span>, </td>
+          <td class="paramtype"><a class="el" href="../../d0/d08/classfl_1_1span.html">fl::span</a>&lt; const <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> &gt;</td>          <td class="paramname"><span class="paramname"><em>data</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -152,22 +152,22 @@ $(function(){initNavTree('d7/d95/classfl_1_1_vorbis_abe8fab497abf3a0cd44136b55da
 <div class="line"><span class="lineno">  297</span>        <span class="comment">// Convert stereo to mono</span></div>
 <div class="line"><span class="lineno">  298</span>        <span class="keywordflow">if</span> (channels == 2) {</div>
 <div class="line"><span class="lineno">  299</span>            fl::vector&lt;fl::i16&gt; mono;</div>
-<div class="line"><span class="lineno">  300</span>            mono.<a class="code hl_function" href="../../d2/d24/classfl_1_1vector_a305fb6473faab9c2798479c057a58d50.html#a305fb6473faab9c2798479c057a58d50">reserve</a>(samplesDecoded);</div>
+<div class="line"><span class="lineno">  300</span>            mono.<a class="code hl_function" href="../../d2/d24/classfl_1_1vector_a106fe3779897c81ef234f25952ed29d7.html#a106fe3779897c81ef234f25952ed29d7">reserve</a>(samplesDecoded);</div>
 <div class="line"><span class="lineno">  301</span>            <span class="keywordflow">for</span> (fl::i32 i = 0; i &lt; samplesDecoded; ++i) {</div>
 <div class="line"><span class="lineno">  302</span>                fl::i32 left = buffer[i * 2];</div>
 <div class="line"><span class="lineno">  303</span>                fl::i32 right = buffer[i * 2 + 1];</div>
-<div class="line"><span class="lineno">  304</span>                mono.<a class="code hl_function" href="../../d2/d24/classfl_1_1vector_ae9a8cea8d4b81d8f2f10a2b007ac2980.html#ae9a8cea8d4b81d8f2f10a2b007ac2980">push_back</a>(<span class="keyword">static_cast&lt;</span>fl::i16<span class="keyword">&gt;</span>((left + right) / 2));</div>
+<div class="line"><span class="lineno">  304</span>                mono.<a class="code hl_function" href="../../d2/d24/classfl_1_1vector_a82c3455c1a345460f95a0180c93b3fb0.html#a82c3455c1a345460f95a0180c93b3fb0">push_back</a>(<span class="keyword">static_cast&lt;</span>fl::i16<span class="keyword">&gt;</span>((left + right) / 2));</div>
 <div class="line"><span class="lineno">  305</span>            }</div>
-<div class="line"><span class="lineno">  306</span>            samples.<a class="code hl_function" href="../../d2/d24/classfl_1_1vector_ae9a8cea8d4b81d8f2f10a2b007ac2980.html#ae9a8cea8d4b81d8f2f10a2b007ac2980">push_back</a>(audio::Sample(mono));</div>
+<div class="line"><span class="lineno">  306</span>            samples.<a class="code hl_function" href="../../d2/d24/classfl_1_1vector_a82c3455c1a345460f95a0180c93b3fb0.html#a82c3455c1a345460f95a0180c93b3fb0">push_back</a>(audio::Sample(mono));</div>
 <div class="line"><span class="lineno">  307</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  308</span>            samples.<a class="code hl_function" href="../../d2/d24/classfl_1_1vector_ae9a8cea8d4b81d8f2f10a2b007ac2980.html#ae9a8cea8d4b81d8f2f10a2b007ac2980">push_back</a>(audio::Sample(fl::span&lt;const fl::i16&gt;(buffer.data(), samplesDecoded)));</div>
+<div class="line"><span class="lineno">  308</span>            samples.<a class="code hl_function" href="../../d2/d24/classfl_1_1vector_a82c3455c1a345460f95a0180c93b3fb0.html#a82c3455c1a345460f95a0180c93b3fb0">push_back</a>(audio::Sample(fl::span&lt;const fl::i16&gt;(buffer.data(), samplesDecoded)));</div>
 <div class="line"><span class="lineno">  309</span>        }</div>
 <div class="line"><span class="lineno">  310</span>    }</div>
 <div class="line"><span class="lineno">  311</span> </div>
 <div class="line"><span class="lineno">  312</span>    <span class="keywordflow">return</span> samples;</div>
 <div class="line"><span class="lineno">  313</span>}</div>
-<div class="ttc" id="aclassfl_1_1vector_a305fb6473faab9c2798479c057a58d50_html_a305fb6473faab9c2798479c057a58d50"><div class="ttname"><a href="../../d2/d24/classfl_1_1vector_a305fb6473faab9c2798479c057a58d50.html#a305fb6473faab9c2798479c057a58d50">fl::vector::reserve</a></div><div class="ttdeci">void reserve(fl::size n) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d68/vector_8h_source.html#l00591">vector.h:591</a></div></div>
-<div class="ttc" id="aclassfl_1_1vector_ae9a8cea8d4b81d8f2f10a2b007ac2980_html_ae9a8cea8d4b81d8f2f10a2b007ac2980"><div class="ttname"><a href="../../d2/d24/classfl_1_1vector_ae9a8cea8d4b81d8f2f10a2b007ac2980.html#ae9a8cea8d4b81d8f2f10a2b007ac2980">fl::vector::push_back</a></div><div class="ttdeci">void push_back(const T &amp;value) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d68/vector_8h_source.html#l00624">vector.h:624</a></div></div>
+<div class="ttc" id="aclassfl_1_1vector_a106fe3779897c81ef234f25952ed29d7_html_a106fe3779897c81ef234f25952ed29d7"><div class="ttname"><a href="../../d2/d24/classfl_1_1vector_a106fe3779897c81ef234f25952ed29d7.html#a106fe3779897c81ef234f25952ed29d7">fl::vector::reserve</a></div><div class="ttdeci">void reserve(fl::size n) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d68/vector_8h_source.html#l00591">vector.h:591</a></div></div>
+<div class="ttc" id="aclassfl_1_1vector_a82c3455c1a345460f95a0180c93b3fb0_html_a82c3455c1a345460f95a0180c93b3fb0"><div class="ttname"><a href="../../d2/d24/classfl_1_1vector_a82c3455c1a345460f95a0180c93b3fb0.html#a82c3455c1a345460f95a0180c93b3fb0">fl::vector::push_back</a></div><div class="ttdeci">void push_back(const T &amp;value) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d68/vector_8h_source.html#l00624">vector.h:624</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../d2/d3c/vorbis_8h_source.html#l00018">fl::VorbisInfo::channels</a>, <a class="el" href="../../d6/d68/vector_8h_source.html#l00619">fl::vector&lt; T &gt;::data()</a>, <a class="el" href="../../d8/db0/vorbis_8cpp_8hpp_source.html#l00056">fl::StbVorbisDecoder::getInfo()</a>, <a class="el" href="../../d8/db0/vorbis_8cpp_8hpp_source.html#l00069">fl::StbVorbisDecoder::getSamplesShortInterleaved()</a>, <a class="el" href="../../d8/db0/vorbis_8cpp_8hpp_source.html#l00037">fl::StbVorbisDecoder::openMemory()</a>, <a class="el" href="../../d6/d68/vector_8h_source.html#l00624">fl::vector&lt; T &gt;::push_back()</a>, <a class="el" href="../../d6/d68/vector_8h_source.html#l00591">fl::vector&lt; T &gt;::reserve()</a>, and <a class="el" href="../../d5/d47/basic__vector_8h_source.html#l00042">fl::vector_basic::size()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
@@ -187,7 +187,7 @@ $(function(){initNavTree('d7/d95/classfl_1_1_vorbis_abe8fab497abf3a0cd44136b55da
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d7/d95/classfl_1_1_vorbis.html">Vorbis</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:07 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:10 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

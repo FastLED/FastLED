@@ -94,7 +94,7 @@ var sectionId = 'dynsection-0';
 <!-- Node5 -->
 <g id="Node000005" class="node">
 <title>Node5</title>
-<g id="a_Node000005"><a xlink:href="../../d4/d36/namespacefl_aed9da76a781c194392d591b3391d46f2.html#aed9da76a781c194392d591b3391d46f2" target="_top" xlink:title=" ">
+<g id="a_Node000005"><a xlink:href="../../d4/d36/namespacefl_a8718b186e1e9e7733925e503710fcb0a.html#a8718b186e1e9e7733925e503710fcb0a" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="248,-19 189,-19 189,0 248,0 248,-19"/>
 <text text-anchor="middle" x="218.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::blur1d</text>
 </a>
@@ -148,7 +148,7 @@ var sectionId = 'dynsection-0';
 <!-- Node6 -->
 <g id="Node000006" class="node">
 <title>Node6</title>
-<g id="a_Node000006"><a xlink:href="../../d5/d3d/group___color_blurs_ga49f52d9c240dbe519dcdeb778269b8d7.html#ga49f52d9c240dbe519dcdeb778269b8d7" target="_top" xlink:title="One&#45;dimensional blur filter (span version).">
+<g id="a_Node000006"><a xlink:href="../../d5/d3d/group___color_blurs_ga2643721cf9668e794909f3eb19705180.html#ga2643721cf9668e794909f3eb19705180" target="_top" xlink:title="One&#45;dimensional blur filter (span version).">
 <polygon fill="white" stroke="#666666" points="407,-19 326,-19 326,0 407,0 407,-19"/>
 <text text-anchor="middle" x="366.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::gfx::blur1d</text>
 </a>
@@ -166,7 +166,7 @@ var sectionId = 'dynsection-0';
 <!-- Node7 -->
 <g id="Node000007" class="node">
 <title>Node7</title>
-<g id="a_Node000007"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_aa272170bea8120f101f27ebd2c323b55.html#aa272170bea8120f101f27ebd2c323b55" target="_top" xlink:title="Scale down a RGB to N/256ths of its current brightness, using &quot;plain math&quot; dimming rules.">
+<g id="a_Node000007"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_a88ec345b046910f4ddf5cd4d793e7e88.html#a88ec345b046910f4ddf5cd4d793e7e88" target="_top" xlink:title="Scale down a RGB to N/256ths of its current brightness, using &quot;plain math&quot; dimming rules.">
 <polygon fill="#fff0f0" stroke="red" points="544,-19 444,-19 444,0 544,0 544,-19"/>
 <text text-anchor="middle" x="494" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::CRGB::nscale8</text>
 </a>

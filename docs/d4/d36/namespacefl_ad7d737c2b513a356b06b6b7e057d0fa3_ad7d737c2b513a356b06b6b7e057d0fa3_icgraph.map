@@ -1,5 +1,9 @@
 <map id="fl::write_bytes" name="fl::write_bytes">
-<area shape="rect" id="Node000001" title=" " alt="" coords="196,5,311,31"/>
-<area shape="rect" id="Node000002" href="$de/d67/classfl_1_1_serial_port_ab382ef2d9597a0d90a0d2cee32bc2774.html#ab382ef2d9597a0d90a0d2cee32bc2774" title="Write buffer to serial output." alt="" coords="5,5,148,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="183,21,149,21,149,15,183,15"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="436,31,551,56"/>
+<area shape="rect" id="Node000002" href="$de/d67/classfl_1_1_serial_port_ab382ef2d9597a0d90a0d2cee32bc2774.html#ab382ef2d9597a0d90a0d2cee32bc2774" title="Write buffer to serial output." alt="" coords="239,5,381,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="422,36,381,30,382,25,423,31"/>
+<area shape="rect" id="Node000003" href="$d2/d8c/structfl_1_1_serial_writer_a2f8049c23dc431094d4c09c92926d9c5.html#a2f8049c23dc431094d4c09c92926d9c5" title=" " alt="" coords="232,55,388,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="423,55,388,60,388,54,422,50"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a4c5381818ea42c674c16b43466bedef0.html#a4c5381818ea42c674c16b43466bedef0" title="Create a streamed JSON&#45;RPC ResponseSink that writes directly to serial." alt="" coords="5,47,184,87"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="218,70,184,70,184,65,218,65"/>
 </map>

@@ -1,0 +1,16 @@
+digraph "fl::s12x4::angle_to_a24"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::s12x4::angle_to_a24",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::s12x4::cos",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d43/classfl_1_1s12x4_a54385ce2bcc2b7c8977580a861f45367.html#a54385ce2bcc2b7c8977580a861f45367",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::s12x4::sin",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d43/classfl_1_1s12x4_ad9ceba65a2f4ff571a79ddccaf51551a.html#ad9ceba65a2f4ff571a79ddccaf51551a",tooltip=" "];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::s12x4::sincos",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d43/classfl_1_1s12x4_a56693cb191779341b0e5d58969dbb9aa.html#a56693cb191779341b0e5d58969dbb9aa",tooltip=" "];
+}

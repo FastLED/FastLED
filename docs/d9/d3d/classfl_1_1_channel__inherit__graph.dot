@@ -15,4 +15,6 @@ digraph "fl::Channel"
   Node3 -> Node4 [id="edge4_Node000004_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node5 -> Node1 [id="edge5_Node000001_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node5 [id="Node000005",label="fl::IChannel",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d8/dcc/classfl_1_1_i_channel.html",tooltip="Polymorphic identification base for any channel in the system."];
+  Node1 -> Node6 [id="edge6_Node000001_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::StaticProfileChannel\l\< Profile \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d7/ddc/classfl_1_1_static_profile_channel.html",tooltip="A compile-time profile channel."];
 }

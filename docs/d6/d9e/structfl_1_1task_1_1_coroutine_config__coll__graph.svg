@@ -58,7 +58,7 @@ var sectionId = 'dynsection-2';
 <!-- Node1 -->
 <g id="Node000001" class="node">
 <title>Node1</title>
-<g id="a_Node000001"><a xlink:title="Configuration for OS&#45;level coroutine tasks.">
+<g id="a_Node000001"><a xlink:title="Function and platform tuning for an OS&#45;level coroutine task.">
 <polygon fill="#999999" stroke="#666666" points="981,-96 847,-96 847,-77 981,-77 981,-96"/>
 <text text-anchor="middle" x="914" y="-84" font-family="Helvetica,sans-Serif" font-size="10.00">fl::task::CoroutineConfig</text>
 </a>

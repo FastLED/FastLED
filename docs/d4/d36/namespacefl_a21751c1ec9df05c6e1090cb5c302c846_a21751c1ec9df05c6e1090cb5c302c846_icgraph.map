@@ -1,0 +1,17 @@
+<map id="fl::makeTimingConfig" name="fl::makeTimingConfig">
+<area shape="rect" id="Node000001" title="Convert compile&#45;time CHIPSET type to runtime timing config." alt="" coords="480,127,640,153"/>
+<area shape="rect" id="Node000002" href="$de/d93/classfl_1_1_slim_bridge_controller_a5570d69d314743c2fa55c8c23ad0ae3d.html#a5570d69d314743c2fa55c8c23ad0ae3d" title=" " alt="" coords="226,5,399,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="530,121,485,90,431,61,396,48,398,43,433,56,487,86,533,117"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_ada630a354f12bb99f8e128d5ae619fbb.html#ada630a354f12bb99f8e128d5ae619fbb" title="Build a ClocklessChipset from a compile&#45;time TIMING trait." alt="" coords="245,70,381,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="496,127,431,111,375,98,376,93,433,105,498,121"/>
+<area shape="rect" id="Node000006" href="$d1/dc9/namespaceautoresearch_a1868ca9225c807cbaf571228e6629e34.html#a1868ca9225c807cbaf571228e6629e34" title="On FL_IS_STUB: register a one&#45;shot async task that drives autoresearch." alt="" coords="205,120,420,160"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="466,143,420,143,420,137,466,137"/>
+<area shape="rect" id="Node000007" href="$db/dda/_sailboat_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="283,185,342,210"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="498,159,433,175,343,194,342,189,431,169,496,153"/>
+<area shape="rect" id="Node000008" href="$d6/d84/namespaceautoresearch_1_1parlio__stream_a83a87dbb8fccb4873f303d9821c35f0f.html#a83a87dbb8fccb4873f303d9821c35f0f" title="Run the PARLIO streaming functional test." alt="" coords="193,235,432,275"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="534,163,488,195,433,225,402,237,400,232,431,220,485,190,531,159"/>
+<area shape="rect" id="Node000004" href="$df/df5/structfl_1_1_channel_config_ae5d90dac70d22bf79ac618e385add5b6.html#ae5d90dac70d22bf79ac618e385add5b6" title="Template constructor with TIMING type (backwards compatibility)" alt="" coords="5,35,145,75"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="230,76,145,66,146,60,231,70"/>
+<area shape="rect" id="Node000005" href="$db/d9c/_color_profile_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="46,99,105,125"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="231,95,105,111,105,106,231,90"/>
+</map>

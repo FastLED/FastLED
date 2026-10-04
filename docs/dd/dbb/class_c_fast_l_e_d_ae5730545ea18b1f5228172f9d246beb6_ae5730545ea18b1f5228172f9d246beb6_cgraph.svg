@@ -67,7 +67,7 @@ var sectionId = 'dynsection-0';
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../d8/da0/classfl_1_1_c_l_e_d_controller_ad9e0dfb8b8b333d9e48c7695b202710c.html#ad9e0dfb8b8b333d9e48c7695b202710c" target="_top" xlink:title="Get the first LED controller in the linked list of controllers.">
+<g id="a_Node000002"><a xlink:href="../../d8/da0/classfl_1_1_c_l_e_d_controller_a4d10d41f89ce46d06fd504c2019dc291.html#a4d10d41f89ce46d06fd504c2019dc291" target="_top" xlink:title="Get the first LED controller in the linked list of controllers.">
 <polygon fill="white" stroke="#666666" points="233,-78 131,-78 131,-48 233,-48 233,-78"/>
 <text text-anchor="start" x="139" y="-66" font-family="Helvetica,sans-Serif" font-size="10.00">fl::CLEDController</text>
 <text text-anchor="middle" x="182" y="-55" font-family="Helvetica,sans-Serif" font-size="10.00">::head</text>
@@ -86,7 +86,7 @@ var sectionId = 'dynsection-0';
 <!-- Node6 -->
 <g id="Node000006" class="node">
 <title>Node6</title>
-<g id="a_Node000006"><a xlink:href="../../d8/da0/classfl_1_1_c_l_e_d_controller_a87abe437742b3f2b06943fafd4404aef.html#a87abe437742b3f2b06943fafd4404aef" target="_top" xlink:title="Get the next controller in the linked list after this one.">
+<g id="a_Node000006"><a xlink:href="../../d8/da0/classfl_1_1_c_l_e_d_controller_ad9abf4aa42ae3bb2876f82857514a7be.html#ad9abf4aa42ae3bb2876f82857514a7be" target="_top" xlink:title="Get the next controller in the linked list after this one.">
 <polygon fill="white" stroke="#666666" points="233,-30 131,-30 131,0 233,0 233,-30"/>
 <text text-anchor="start" x="139" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">fl::CLEDController</text>
 <text text-anchor="middle" x="182" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">::next</text>
@@ -105,7 +105,7 @@ var sectionId = 'dynsection-0';
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d8/da0/classfl_1_1_c_l_e_d_controller_a7e91fc8f83d62c9da5e5c3d6d1bc10ce.html#a7e91fc8f83d62c9da5e5c3d6d1bc10ce" target="_top" xlink:title="Protected constructor with registration mode.">
+<g id="a_Node000003"><a xlink:href="../../d8/da0/classfl_1_1_c_l_e_d_controller_ae0828dffacb43dca565ddf8145153ed0.html#ae0828dffacb43dca565ddf8145153ed0" target="_top" xlink:title="Protected constructor with registration mode.">
 <polygon fill="white" stroke="#666666" points="371,-54 269,-54 269,-24 371,-24 371,-54"/>
 <text text-anchor="start" x="277" y="-42" font-family="Helvetica,sans-Serif" font-size="10.00">fl::CLEDController</text>
 <text text-anchor="middle" x="320" y="-31" font-family="Helvetica,sans-Serif" font-size="10.00">::CLEDController</text>
@@ -124,7 +124,7 @@ var sectionId = 'dynsection-0';
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../d8/da0/classfl_1_1_c_l_e_d_controller_a9e51518d1427463dffd596c69c6f3e46.html#a9e51518d1427463dffd596c69c6f3e46" target="_top" xlink:title="Add this controller to the linked list.">
+<g id="a_Node000004"><a xlink:href="../../d8/da0/classfl_1_1_c_l_e_d_controller_af0c5f56a02ad4e919df8181d3b267390.html#af0c5f56a02ad4e919df8181d3b267390" target="_top" xlink:title="Add this controller to the linked list.">
 <polygon fill="#fff0f0" stroke="red" points="509,-54 407,-54 407,-24 509,-24 509,-54"/>
 <text text-anchor="start" x="415" y="-42" font-family="Helvetica,sans-Serif" font-size="10.00">fl::CLEDController</text>
 <text text-anchor="middle" x="458" y="-31" font-family="Helvetica,sans-Serif" font-size="10.00">::addToList</text>

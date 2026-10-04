@@ -32,7 +32,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../df/d9e/namespacefl_1_1detail_a6407553e7cf821f4f7727bd01b890b6c.html#a6407553e7cf821f4f7727bd01b890b6c" target="_top" xlink:title="Transpose 8 lanes of Wave3Byte data into interleaved format.">
+<g id="a_Node000002"><a xlink:href="../../df/d9e/namespacefl_1_1detail_ac947073ef56b660e06edb6a04b8f9d51.html#ac947073ef56b660e06edb6a04b8f9d51" target="_top" xlink:title="Transpose 8 lanes of Wave3Byte data via the spread&#45;LUT path (#2533).">
 <polygon fill="white" stroke="#666666" points="316,-136.5 157,-136.5 157,-117.5 316,-117.5 316,-136.5"/>
 <text text-anchor="middle" x="236.5" y="-124.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::detail::wave3_transpose_8</text>
 </a>
@@ -50,7 +50,7 @@
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../df/d9e/namespacefl_1_1detail_a28048c15bb5d847dd9c0e186ac8acfa6.html#a28048c15bb5d847dd9c0e186ac8acfa6" target="_top" xlink:title="Transpose 8 lanes of Wave8Byte data into interleaved format.">
+<g id="a_Node000004"><a xlink:href="../../df/d9e/namespacefl_1_1detail_a756967b8dca3cdde3223444819a7bed0.html#a756967b8dca3cdde3223444819a7bed0" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="316,-94.5 157,-94.5 157,-75.5 316,-75.5 316,-94.5"/>
 <text text-anchor="middle" x="236.5" y="-82.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::detail::wave8_transpose_8</text>
 </a>
@@ -68,7 +68,7 @@
 <!-- Node7 -->
 <g id="Node000007" class="node">
 <title>Node7</title>
-<g id="a_Node000007"><a xlink:href="../../df/d9e/namespacefl_1_1detail_a231be5f311080ab2a8fe4414ee17dcfd.html#a231be5f311080ab2a8fe4414ee17dcfd" target="_top" xlink:title="BF1 for 8&#45;lane Wave8 — same algebraic identity as 16&#45;lane BF1.">
+<g id="a_Node000007"><a xlink:href="../../df/d9e/namespacefl_1_1detail_a8e8d7e6c2826be5e6cb9ac7de5eaf9c4.html#a8e8d7e6c2826be5e6cb9ac7de5eaf9c4" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="310.5,-48 162.5,-48 162.5,-18 310.5,-18 310.5,-48"/>
 <text text-anchor="start" x="170.5" y="-36" font-family="Helvetica,sans-Serif" font-size="10.00">fl::detail::wave8_transpose</text>
 <text text-anchor="middle" x="236.5" y="-25" font-family="Helvetica,sans-Serif" font-size="10.00">_8_bf1</text>

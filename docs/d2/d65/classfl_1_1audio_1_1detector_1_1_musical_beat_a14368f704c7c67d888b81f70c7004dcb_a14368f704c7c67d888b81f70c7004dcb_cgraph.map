@@ -10,18 +10,18 @@
 <area shape="poly" id="edge13_Node000001_Node000013" title=" " alt="" coords="212,217,283,202,284,207,214,222"/>
 <area shape="rect" id="Node000015" href="$d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_abef5ac55aa91cb94f03cda4f2c34d229.html#abef5ac55aa91cb94f03cda4f2c34d229" title="Validate if an onset is a true musical beat." alt="" coords="295,277,497,317"/>
 <area shape="poly" id="edge17_Node000001_Node000015" title=" " alt="" coords="214,257,284,271,283,276,212,262"/>
-<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_aefed87cfefc8330419d3393867945e84.html#aefed87cfefc8330419d3393867945e84" title=" " alt="" coords="659,5,721,31"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_aea39aa3747a937b0dbefabdf22cf2bbc.html#aea39aa3747a937b0dbefabdf22cf2bbc" title=" " alt="" coords="659,5,721,31"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="460,80,569,41,645,23,646,28,570,46,462,85"/>
 <area shape="rect" id="Node000004" href="$d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_af7ccbbd6059884bc88da1f7c171455b9.html#af7ccbbd6059884bc88da1f7c171455b9" title="Calculate standard deviation of IBI history." alt="" coords="569,55,811,95"/>
 <area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="499,95,555,89,556,94,500,100"/>
 <area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="500,135,523,148,539,162,547,177,556,191,571,204,585,212,582,216,568,208,552,194,543,180,534,166,520,152,498,140"/>
-<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909" title=" " alt="" coords="657,120,723,145"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_a07c69292ef50aa1083046faff1c52ead.html#a07c69292ef50aa1083046faff1c52ead" title=" " alt="" coords="657,120,723,145"/>
 <area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="500,115,643,126,643,132,499,121"/>
-<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a40c15aab45d44b7ca11f148cc2e997c1.html#a40c15aab45d44b7ca11f148cc2e997c1" title=" " alt="" coords="859,63,921,88"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_ae5cb57a6b1ba6c629a49f0fec021b6e9.html#ae5cb57a6b1ba6c629a49f0fec021b6e9" title=" " alt="" coords="859,63,921,88"/>
 <area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="811,73,845,73,845,78,811,78"/>
 <area shape="rect" id="Node000009" href="$d5/d25/_demo_reel100_8ino_a4875f6d9a2b0f08d3cf221974234121b.html#a4875f6d9a2b0f08d3cf221974234121b" title=" " alt="" coords="865,316,915,341"/>
 <area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="780,326,851,326,851,331,780,331"/>
-<area shape="rect" id="Node000010" href="$df/da5/lib8tion_8h_a696b9421eca961df0a68c7c6c3e983ab.html#a696b9421eca961df0a68c7c6c3e983ab" title="Generates an 8&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="997,267,1076,292"/>
+<area shape="rect" id="Node000010" href="$df/da5/lib8tion_8h_aca012663c6c8fe9a7240bcbc76095ba9.html#aca012663c6c8fe9a7240bcbc76095ba9" title="Generates an 8&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="997,267,1076,292"/>
 <area shape="poly" id="edge10_Node000009_Node000010" title=" " alt="" coords="915,318,985,294,987,299,917,323"/>
 <area shape="rect" id="Node000011" href="$d1/dfb/colorutils_8h_a3d488dd1e2d27e99307310527e51cad3.html#a3d488dd1e2d27e99307310527e51cad3" title=" " alt="" coords="969,316,1104,341"/>
 <area shape="poly" id="edge11_Node000009_Node000011" title=" " alt="" coords="916,326,956,326,956,331,916,331"/>
@@ -29,7 +29,7 @@
 <area shape="poly" id="edge12_Node000009_Node000012" title=" " alt="" coords="917,335,991,360,989,365,915,340"/>
 <area shape="poly" id="edge14_Node000013_Node000006" title=" " alt="" coords="500,199,574,214,573,219,499,205"/>
 <area shape="poly" id="edge15_Node000013_Node000007" title=" " alt="" coords="515,159,643,138,644,143,516,165"/>
-<area shape="rect" id="Node000014" href="$d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb" title=" " alt="" coords="659,169,721,195"/>
+<area shape="rect" id="Node000014" href="$d4/d36/namespacefl_a2fdabb91a1f100dec8da21e4306aba05.html#a2fdabb91a1f100dec8da21e4306aba05" title=" " alt="" coords="659,169,721,195"/>
 <area shape="poly" id="edge16_Node000013_Node000014" title=" " alt="" coords="522,179,645,179,645,185,522,185"/>
 <area shape="poly" id="edge18_Node000015_Node000008" title=" " alt="" coords="497,305,587,315,586,320,496,310"/>
 </map>

@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -124,28 +124,28 @@ $(function(){initNavTree('d4/d61/fl_2gfx_2noise_2noise_8cpp_8hpp_a6ae857dd0735e2
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../da/dca/noise_8cpp_8hpp_source.html#l00441">441</a> of file <a class="el" href="../../da/dca/noise_8cpp_8hpp_source.html">noise.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  441</span>                                          {</div>
-<div class="line"><span class="lineno">  442</span>    fl::i32 ans = <a class="code hl_function" href="../../d8/df9/group___noise_generation_gae021f30d62fea75ea1397e1a81b28a59.html#gae021f30d62fea75ea1397e1a81b28a59">inoise16_raw</a>(<a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>,<a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a>,<a class="code hl_variable" href="../../de/d71/_fire2023_8h_a4e48336126ecdad27c0411a91b14bf5a.html#a4e48336126ecdad27c0411a91b14bf5a">z</a>);</div>
-<div class="line"><span class="lineno">  443</span>    ans = ans + 19052L;</div>
-<div class="line"><span class="lineno">  444</span>    fl::u32 pan = ans;</div>
-<div class="line"><span class="lineno">  445</span>    <span class="comment">// pan = (ans * 220L) &gt;&gt; 7.  That&#39;s the same as:</span></div>
-<div class="line"><span class="lineno">  446</span>    <span class="comment">// pan = (ans * 440L) &gt;&gt; 8.  And this way avoids a 7X four-byte shift-loop on AVR.</span></div>
-<div class="line"><span class="lineno">  447</span>    <span class="comment">// Identical math, except for the highest bit, which we don&#39;t care about anyway,</span></div>
-<div class="line"><span class="lineno">  448</span>    <span class="comment">// since we&#39;re returning the &#39;middle&#39; 16 out of a 32-bit value anyway.</span></div>
-<div class="line"><span class="lineno">  449</span>    pan *= 440L;</div>
-<div class="line"><span class="lineno">  450</span>    <span class="keywordflow">return</span> (pan&gt;&gt;8);</div>
-<div class="line"><span class="lineno">  451</span> </div>
-<div class="line"><span class="lineno">  452</span>    <span class="comment">// // return scale16by8(pan,220)&lt;&lt;1;</span></div>
-<div class="line"><span class="lineno">  453</span>    <span class="comment">// return ((inoise16_raw(x,y,z)+19052)*220)&gt;&gt;7;</span></div>
-<div class="line"><span class="lineno">  454</span>    <span class="comment">// return scale16by8(inoise16_raw(x,y,z)+19052,220)&lt;&lt;1;</span></div>
-<div class="line"><span class="lineno">  455</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../da/dca/noise_8cpp_8hpp_source.html#l00478">478</a> of file <a class="el" href="../../da/dca/noise_8cpp_8hpp_source.html">noise.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  478</span>                                          {</div>
+<div class="line"><span class="lineno">  479</span>    fl::i32 ans = <a class="code hl_function" href="../../d8/df9/group___noise_generation_gae021f30d62fea75ea1397e1a81b28a59.html#gae021f30d62fea75ea1397e1a81b28a59">inoise16_raw</a>(<a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>,<a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a>,<a class="code hl_variable" href="../../de/d71/_fire2023_8h_a4e48336126ecdad27c0411a91b14bf5a.html#a4e48336126ecdad27c0411a91b14bf5a">z</a>);</div>
+<div class="line"><span class="lineno">  480</span>    ans = ans + 19052L;</div>
+<div class="line"><span class="lineno">  481</span>    fl::u32 pan = ans;</div>
+<div class="line"><span class="lineno">  482</span>    <span class="comment">// pan = (ans * 220L) &gt;&gt; 7.  That&#39;s the same as:</span></div>
+<div class="line"><span class="lineno">  483</span>    <span class="comment">// pan = (ans * 440L) &gt;&gt; 8.  And this way avoids a 7X four-byte shift-loop on AVR.</span></div>
+<div class="line"><span class="lineno">  484</span>    <span class="comment">// Identical math, except for the highest bit, which we don&#39;t care about anyway,</span></div>
+<div class="line"><span class="lineno">  485</span>    <span class="comment">// since we&#39;re returning the &#39;middle&#39; 16 out of a 32-bit value anyway.</span></div>
+<div class="line"><span class="lineno">  486</span>    pan *= 440L;</div>
+<div class="line"><span class="lineno">  487</span>    <span class="keywordflow">return</span> (pan&gt;&gt;8);</div>
+<div class="line"><span class="lineno">  488</span> </div>
+<div class="line"><span class="lineno">  489</span>    <span class="comment">// // return scale16by8(pan,220)&lt;&lt;1;</span></div>
+<div class="line"><span class="lineno">  490</span>    <span class="comment">// return ((inoise16_raw(x,y,z)+19052)*220)&gt;&gt;7;</span></div>
+<div class="line"><span class="lineno">  491</span>    <span class="comment">// return scale16by8(inoise16_raw(x,y,z)+19052,220)&lt;&lt;1;</span></div>
+<div class="line"><span class="lineno">  492</span>}</div>
 <div class="ttc" id="a_audio_2simple_2simple_8h_a0a2f84ed7838f07779ae24c5a9086d33_html_a0a2f84ed7838f07779ae24c5a9086d33"><div class="ttname"><a href="../../db/d49/_audio_2simple_2simple_8h_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a></div><div class="ttdeci">int y</div><div class="ttdef"><b>Definition</b> <a href="../../db/d49/_audio_2simple_2simple_8h_source.html#l00093">simple.h:93</a></div></div>
 <div class="ttc" id="a_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc_html_a6150e0515f7202e2fb518f7206ed97dc"><div class="ttname"><a href="../../db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a></div><div class="ttdeci">int x</div><div class="ttdef"><b>Definition</b> <a href="../../db/d49/_audio_2simple_2simple_8h_source.html#l00092">simple.h:92</a></div></div>
 <div class="ttc" id="a_fire2023_8h_a4e48336126ecdad27c0411a91b14bf5a_html_a4e48336126ecdad27c0411a91b14bf5a"><div class="ttname"><a href="../../de/d71/_fire2023_8h_a4e48336126ecdad27c0411a91b14bf5a.html#a4e48336126ecdad27c0411a91b14bf5a">z</a></div><div class="ttdeci">uint32_t z[NUM_LAYERS]</div><div class="ttdef"><b>Definition</b> <a href="../../de/d71/_fire2023_8h_source.html#l00093">Fire2023.h:93</a></div></div>
-<div class="ttc" id="agroup___noise_generation_gae021f30d62fea75ea1397e1a81b28a59_html_gae021f30d62fea75ea1397e1a81b28a59"><div class="ttname"><a href="../../d8/df9/group___noise_generation_gae021f30d62fea75ea1397e1a81b28a59.html#gae021f30d62fea75ea1397e1a81b28a59">inoise16_raw</a></div><div class="ttdeci">fl::i16 inoise16_raw(fl::u32 x, fl::u32 y, fl::u32 z)</div><div class="ttdef"><b>Definition</b> <a href="../../da/dca/noise_8cpp_8hpp_source.html#l00303">noise.cpp.hpp:303</a></div></div>
+<div class="ttc" id="agroup___noise_generation_gae021f30d62fea75ea1397e1a81b28a59_html_gae021f30d62fea75ea1397e1a81b28a59"><div class="ttname"><a href="../../d8/df9/group___noise_generation_gae021f30d62fea75ea1397e1a81b28a59.html#gae021f30d62fea75ea1397e1a81b28a59">inoise16_raw</a></div><div class="ttdeci">fl::i16 inoise16_raw(fl::u32 x, fl::u32 y, fl::u32 z)</div><div class="ttdoc">16-bit, fixed point implementation of Perlin&#39;s noise without scaling.</div><div class="ttdef"><b>Definition</b> <a href="../../da/dca/noise_8cpp_8hpp_source.html#l00340">noise.cpp.hpp:340</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../da/dca/noise_8cpp_8hpp_source.html#l00303">inoise16_raw()</a>, <a class="el" href="../../db/d49/_audio_2simple_2simple_8h_source.html#l00092">x</a>, <a class="el" href="../../db/d49/_audio_2simple_2simple_8h_source.html#l00093">y</a>, and <a class="el" href="../../de/d71/_fire2023_8h_source.html#l00093">z</a>.</p>
+<p class="reference">References <a class="el" href="../../da/dca/noise_8cpp_8hpp_source.html#l00340">inoise16_raw()</a>, <a class="el" href="../../db/d49/_audio_2simple_2simple_8h_source.html#l00092">x</a>, <a class="el" href="../../db/d49/_audio_2simple_2simple_8h_source.html#l00093">y</a>, and <a class="el" href="../../de/d71/_fire2023_8h_source.html#l00093">z</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -163,7 +163,7 @@ $(function(){initNavTree('d4/d61/fl_2gfx_2noise_2noise_8cpp_8hpp_a6ae857dd0735e2
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_c9349635bab014644c82face402cd66f.html">gfx</a></li><li class="navelem"><a class="el" href="../../dir_a6f2cf68bfa8ae1099445abdc0d2a72a.html">noise</a></li><li class="navelem"><a class="el" href="../../d4/d61/fl_2gfx_2noise_2noise_8cpp_8hpp.html">noise.cpp.hpp</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:02 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:04 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -8,9 +8,9 @@ var classfl_1_1audio_1_1_spectral_equalizer =
       [ "lastMakeupGain", "db/d9c/classfl_1_1audio_1_1_spectral_equalizer.html#a7b0418a421e94922a015b5c9e4c4d28c", null ],
       [ "lastOutputPeak", "db/d9c/classfl_1_1audio_1_1_spectral_equalizer.html#a4c28cc8c8ba06ad94986d9ef09c70b33", null ]
     ] ],
-    [ "SpectralEqualizer", "db/d9c/classfl_1_1audio_1_1_spectral_equalizer_a35ee44583dde1fd3908700b39aa5a165.html#a35ee44583dde1fd3908700b39aa5a165", null ],
+    [ "SpectralEqualizer", "db/d9c/classfl_1_1audio_1_1_spectral_equalizer_a72d6e75386c93d059c15d330e92de73c.html#a72d6e75386c93d059c15d330e92de73c", null ],
     [ "SpectralEqualizer", "db/d9c/classfl_1_1audio_1_1_spectral_equalizer_a43d36f6a7b9cd2a0f6348bb2d3cdb462.html#a43d36f6a7b9cd2a0f6348bb2d3cdb462", null ],
-    [ "~SpectralEqualizer", "db/d9c/classfl_1_1audio_1_1_spectral_equalizer_a6eed65351ec3db77b488db8a99322a48.html#a6eed65351ec3db77b488db8a99322a48", null ],
+    [ "~SpectralEqualizer", "db/d9c/classfl_1_1audio_1_1_spectral_equalizer_a45b2d4283ec71907df32ffe7ea48c4b2.html#a45b2d4283ec71907df32ffe7ea48c4b2", null ],
     [ "apply", "db/d9c/classfl_1_1audio_1_1_spectral_equalizer_aaf69c16c24bdb5099b9665ebeb41eb50.html#aaf69c16c24bdb5099b9665ebeb41eb50", null ],
     [ "applyCompression", "db/d9c/classfl_1_1audio_1_1_spectral_equalizer_ad7f44ec5f58bce14c88e4af1eb3ccff9.html#ad7f44ec5f58bce14c88e4af1eb3ccff9", null ],
     [ "calculateAWeightingGains", "db/d9c/classfl_1_1audio_1_1_spectral_equalizer_aa6f94ad4e418f660b71ac6e99fc0ba14.html#aa6f94ad4e418f660b71ac6e99fc0ba14", null ],

@@ -17,9 +17,9 @@ digraph "fl/math/types.h"
   Node4 -> Node6 [id="edge5_Node000004_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node6 [id="Node000006",label="/home/runner/work/FastLED\l/FastLED/examples/Apa102HD\l/Apa102HD.ino",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d75/_apa102_h_d_8ino.html",tooltip="Example showing how to use the APA102HD gamma correction."];
   Node4 -> Node7 [id="edge6_Node000004_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node7 [id="Node000007",label="/home/runner/work/FastLED\l/FastLED/examples/HD107\l/HD107.ino",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/db4/_h_d107_8ino.html",tooltip="Example showing how to use the HD107 and HD which has built in gamma correction."];
+  Node7 [id="Node000007",label="/home/runner/work/FastLED\l/FastLED/examples/HD107\l/HD107.ino",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/db4/_h_d107_8ino.html",tooltip="Example showing how to use the HD107S (also named HD107)."];
   Node4 -> Node8 [id="edge7_Node000004_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node8 [id="Node000008",label="FastLED.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d97/_fast_l_e_d_8h.html",tooltip="central include file for FastLED, defines the CFastLED class/object"];
+  Node8 [id="Node000008",label="FastLED.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d64/fastled_8h.html",tooltip="central include file for FastLED, defines the CFastLED class/object"];
   Node8 -> Node9 [id="edge8_Node000008_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node9 [id="Node000009",label="FastLED.cpp.hpp",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d7/de5/_fast_l_e_d_8cpp_8hpp.html",tooltip=" "];
   Node4 -> Node12 [id="edge9_Node000004_Node000012",dir="back",color="steelblue1",style="solid",tooltip=" "];
@@ -28,7 +28,7 @@ digraph "fl/math/types.h"
   Node13 [id="Node000013",label="pixeltypes.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d2/dba/pixeltypes_8h.html",tooltip="Includes defintions for RGB and HSV pixels."];
   Node13 -> Node8 [id="edge11_Node000013_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node13 -> Node20 [id="edge12_Node000013_Node000020",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node20 [id="Node000020",label="fl/system/fastled.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d7/dc2/fl_2system_2_fast_l_e_d_8h.html",tooltip="Internal FastLED header for implementation files."];
+  Node20 [id="Node000020",label="fl/system/fastled.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d0/d69/fl_2system_2fastled_8h.html",tooltip="Internal FastLED header for implementation files."];
   Node20 -> Node8 [id="edge13_Node000020_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node20 -> Node17 [id="edge14_Node000020_Node000017",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node17 [id="Node000017",label="fastspi.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d6/ddc/fastspi_8h.html",tooltip="Serial peripheral interface (SPI) definitions per platform."];

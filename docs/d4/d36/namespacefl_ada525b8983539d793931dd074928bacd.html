@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -119,50 +119,54 @@ $(function(){initNavTree('d4/d36/namespacefl_ada525b8983539d793931dd074928bacd.h
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="../../da/d3c/namespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c.html#a7573a66f01c09f14a1ff0411f8e1153c">fl::u8</a></td>          <td class="paramname"><span class="paramname"><em>maxChanges</em></span>&#160;)</td>
+          <td class="paramtype"><a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a></td>          <td class="paramname"><span class="paramname"><em>maxChanges</em></span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d4e/colorutils_8cpp_8hpp_source.html#l01251">1251</a> of file <a class="el" href="../../db/d4e/colorutils_8cpp_8hpp_source.html">colorutils.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno"> 1252</span>                                                 {</div>
-<div class="line"><span class="lineno"> 1253</span>    <a class="code hl_typedef" href="../../da/d3c/namespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c.html#a7573a66f01c09f14a1ff0411f8e1153c">fl::u8</a> *p1;</div>
-<div class="line"><span class="lineno"> 1254</span>    <a class="code hl_typedef" href="../../da/d3c/namespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c.html#a7573a66f01c09f14a1ff0411f8e1153c">fl::u8</a> *p2;</div>
-<div class="line"><span class="lineno"> 1255</span>    <a class="code hl_typedef" href="../../da/d3c/namespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c.html#a7573a66f01c09f14a1ff0411f8e1153c">fl::u8</a> changes = 0;</div>
-<div class="line"><span class="lineno"> 1256</span> </div>
-<div class="line"><span class="lineno"> 1257</span>    p1 = (<a class="code hl_typedef" href="../../da/d3c/namespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c.html#a7573a66f01c09f14a1ff0411f8e1153c">fl::u8</a> *)current.entries;</div>
-<div class="line"><span class="lineno"> 1258</span>    p2 = (<a class="code hl_typedef" href="../../da/d3c/namespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c.html#a7573a66f01c09f14a1ff0411f8e1153c">fl::u8</a> *)target.entries;</div>
-<div class="line"><span class="lineno"> 1259</span> </div>
-<div class="line"><span class="lineno"> 1260</span>    <span class="keyword">const</span> <a class="code hl_typedef" href="../../da/d3c/namespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c.html#a7573a66f01c09f14a1ff0411f8e1153c">fl::u8</a> totalChannels = <span class="keyword">sizeof</span>(CRGBPalette16);</div>
-<div class="line"><span class="lineno"> 1261</span>    <span class="keywordflow">for</span> (<a class="code hl_typedef" href="../../da/d3c/namespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c.html#a7573a66f01c09f14a1ff0411f8e1153c">fl::u8</a> i = 0; i &lt; totalChannels; ++i) {</div>
-<div class="line"><span class="lineno"> 1262</span>        <span class="comment">// if the values are equal, no changes are needed</span></div>
-<div class="line"><span class="lineno"> 1263</span>        <span class="keywordflow">if</span> (p1[i] == p2[i]) {</div>
-<div class="line"><span class="lineno"> 1264</span>            <span class="keywordflow">continue</span>;</div>
-<div class="line"><span class="lineno"> 1265</span>        }</div>
-<div class="line"><span class="lineno"> 1266</span> </div>
-<div class="line"><span class="lineno"> 1267</span>        <span class="comment">// if the current value is less than the target, increase it by one</span></div>
-<div class="line"><span class="lineno"> 1268</span>        <span class="keywordflow">if</span> (p1[i] &lt; p2[i]) {</div>
-<div class="line"><span class="lineno"> 1269</span>            ++p1[i];</div>
-<div class="line"><span class="lineno"> 1270</span>            ++changes;</div>
-<div class="line"><span class="lineno"> 1271</span>        }</div>
-<div class="line"><span class="lineno"> 1272</span> </div>
-<div class="line"><span class="lineno"> 1273</span>        <span class="comment">// if the current value is greater than the target,</span></div>
-<div class="line"><span class="lineno"> 1274</span>        <span class="comment">// increase it by one (or two if it&#39;s still greater).</span></div>
-<div class="line"><span class="lineno"> 1275</span>        <span class="keywordflow">if</span> (p1[i] &gt; p2[i]) {</div>
-<div class="line"><span class="lineno"> 1276</span>            --p1[i];</div>
-<div class="line"><span class="lineno"> 1277</span>            ++changes;</div>
-<div class="line"><span class="lineno"> 1278</span>            <span class="keywordflow">if</span> (p1[i] &gt; p2[i]) {</div>
-<div class="line"><span class="lineno"> 1279</span>                --p1[i];</div>
-<div class="line"><span class="lineno"> 1280</span>            }</div>
-<div class="line"><span class="lineno"> 1281</span>        }</div>
-<div class="line"><span class="lineno"> 1282</span> </div>
-<div class="line"><span class="lineno"> 1283</span>        <span class="comment">// if we&#39;ve hit the maximum number of changes, exit</span></div>
-<div class="line"><span class="lineno"> 1284</span>        <span class="keywordflow">if</span> (changes &gt;= maxChanges) {</div>
-<div class="line"><span class="lineno"> 1285</span>            <span class="keywordflow">break</span>;</div>
-<div class="line"><span class="lineno"> 1286</span>        }</div>
-<div class="line"><span class="lineno"> 1287</span>    }</div>
-<div class="line"><span class="lineno"> 1288</span>}</div>
-<div class="ttc" id="anamespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c_html_a7573a66f01c09f14a1ff0411f8e1153c"><div class="ttname"><a href="../../da/d3c/namespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c.html#a7573a66f01c09f14a1ff0411f8e1153c">fl::fl::u8</a></div><div class="ttdeci">unsigned char u8</div><div class="ttdef"><b>Definition</b> <a href="../../df/d96/s16x16x4_8h_source.html#l00132">s16x16x4.h:132</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../db/d4e/colorutils_8cpp_8hpp_source.html#l01332">1332</a> of file <a class="el" href="../../db/d4e/colorutils_8cpp_8hpp_source.html">colorutils.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno"> 1333</span>                                                 {</div>
+<div class="line"><span class="lineno"> 1334</span>    <span class="keywordflow">if</span> (maxChanges == 0) {</div>
+<div class="line"><span class="lineno"> 1335</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno"> 1336</span>    }</div>
+<div class="line"><span class="lineno"> 1337</span> </div>
+<div class="line"><span class="lineno"> 1338</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> *p1;</div>
+<div class="line"><span class="lineno"> 1339</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> *p2;</div>
+<div class="line"><span class="lineno"> 1340</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> changes = 0;</div>
+<div class="line"><span class="lineno"> 1341</span> </div>
+<div class="line"><span class="lineno"> 1342</span>    p1 = (<a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> *)current.entries;</div>
+<div class="line"><span class="lineno"> 1343</span>    p2 = (<a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> *)target.entries;</div>
+<div class="line"><span class="lineno"> 1344</span> </div>
+<div class="line"><span class="lineno"> 1345</span>    <span class="keyword">const</span> <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> totalChannels = <span class="keyword">sizeof</span>(CRGBPalette16);</div>
+<div class="line"><span class="lineno"> 1346</span>    <span class="keywordflow">for</span> (<a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> i = 0; i &lt; totalChannels; ++i) {</div>
+<div class="line"><span class="lineno"> 1347</span>        <span class="comment">// if the values are equal, no changes are needed</span></div>
+<div class="line"><span class="lineno"> 1348</span>        <span class="keywordflow">if</span> (p1[i] == p2[i]) {</div>
+<div class="line"><span class="lineno"> 1349</span>            <span class="keywordflow">continue</span>;</div>
+<div class="line"><span class="lineno"> 1350</span>        }</div>
+<div class="line"><span class="lineno"> 1351</span> </div>
+<div class="line"><span class="lineno"> 1352</span>        <span class="comment">// if the current value is less than the target, increase it by one</span></div>
+<div class="line"><span class="lineno"> 1353</span>        <span class="keywordflow">if</span> (p1[i] &lt; p2[i]) {</div>
+<div class="line"><span class="lineno"> 1354</span>            ++p1[i];</div>
+<div class="line"><span class="lineno"> 1355</span>            ++changes;</div>
+<div class="line"><span class="lineno"> 1356</span>        }</div>
+<div class="line"><span class="lineno"> 1357</span> </div>
+<div class="line"><span class="lineno"> 1358</span>        <span class="comment">// if the current value is greater than the target,</span></div>
+<div class="line"><span class="lineno"> 1359</span>        <span class="comment">// increase it by one (or two if it&#39;s still greater).</span></div>
+<div class="line"><span class="lineno"> 1360</span>        <span class="keywordflow">if</span> (p1[i] &gt; p2[i]) {</div>
+<div class="line"><span class="lineno"> 1361</span>            --p1[i];</div>
+<div class="line"><span class="lineno"> 1362</span>            ++changes;</div>
+<div class="line"><span class="lineno"> 1363</span>            <span class="keywordflow">if</span> (p1[i] &gt; p2[i]) {</div>
+<div class="line"><span class="lineno"> 1364</span>                --p1[i];</div>
+<div class="line"><span class="lineno"> 1365</span>            }</div>
+<div class="line"><span class="lineno"> 1366</span>        }</div>
+<div class="line"><span class="lineno"> 1367</span> </div>
+<div class="line"><span class="lineno"> 1368</span>        <span class="comment">// if we&#39;ve hit the maximum number of changes, exit</span></div>
+<div class="line"><span class="lineno"> 1369</span>        <span class="keywordflow">if</span> (changes &gt;= maxChanges) {</div>
+<div class="line"><span class="lineno"> 1370</span>            <span class="keywordflow">break</span>;</div>
+<div class="line"><span class="lineno"> 1371</span>        }</div>
+<div class="line"><span class="lineno"> 1372</span>    }</div>
+<div class="line"><span class="lineno"> 1373</span>}</div>
+<div class="ttc" id="anamespacefl_a058ceeac48f181da463c2ba07401292c_html_a058ceeac48f181da463c2ba07401292c"><div class="ttname"><a href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a></div><div class="ttdeci">unsigned char u8</div><div class="ttdef"><b>Definition</b> <a href="../../df/dd8/stdint_8h_source.html#l00131">stdint.h:131</a></div></div>
 </div><!-- fragment -->
 <p class="reference">Referenced by <a class="el" href="../../d1/df6/twinklefox_8h_source.html#l00121">fl::TwinkleFox::draw()</a>, and <a class="el" href="../../d4/d1c/fl_2gfx_2colorutils_8h_source.html#l00042">FL_DISABLE_WARNING()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
@@ -182,7 +186,7 @@ $(function(){initNavTree('d4/d36/namespacefl_ada525b8983539d793931dd074928bacd.h
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:04 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:08 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

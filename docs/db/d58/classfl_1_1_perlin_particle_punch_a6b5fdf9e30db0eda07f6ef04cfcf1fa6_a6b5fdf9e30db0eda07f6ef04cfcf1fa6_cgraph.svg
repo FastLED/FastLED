@@ -50,7 +50,7 @@
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_aa272170bea8120f101f27ebd2c323b55.html#aa272170bea8120f101f27ebd2c323b55" target="_top" xlink:title="Scale down a RGB to N/256ths of its current brightness, using &quot;plain math&quot; dimming rules.">
+<g id="a_Node000004"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_a88ec345b046910f4ddf5cd4d793e7e88.html#a88ec345b046910f4ddf5cd4d793e7e88" target="_top" xlink:title="Scale down a RGB to N/256ths of its current brightness, using &quot;plain math&quot; dimming rules.">
 <polygon fill="white" stroke="#666666" points="282,-189.5 182,-189.5 182,-170.5 282,-170.5 282,-189.5"/>
 <text text-anchor="middle" x="232" y="-177.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::CRGB::nscale8</text>
 </a>
@@ -86,7 +86,7 @@
 <!-- Node7 -->
 <g id="Node000007" class="node">
 <title>Node7</title>
-<g id="a_Node000007"><a xlink:href="../../d2/d0d/group___random_gadb05544426b14ef8d85fb2eb73cb8a0a.html#gadb05544426b14ef8d85fb2eb73cb8a0a" target="_top" xlink:title="Generate an 8&#45;bit random number.">
+<g id="a_Node000007"><a xlink:href="../../d2/d0d/group___random_gafb55d95e3e866dce182f149535903dd8.html#gafb55d95e3e866dce182f149535903dd8" target="_top" xlink:title="Generate an 8&#45;bit random number.">
 <polygon fill="white" stroke="#666666" points="262,-115.5 202,-115.5 202,-96.5 262,-96.5 262,-115.5"/>
 <text text-anchor="middle" x="232" y="-103.5" font-family="Helvetica,sans-Serif" font-size="10.00">random8</text>
 </a>
@@ -160,7 +160,7 @@
 <!-- Node5 -->
 <g id="Node000005" class="node">
 <title>Node5</title>
-<g id="a_Node000005"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_adb891cc4fe8f5ac2188d72c13c0256fd.html#adb891cc4fe8f5ac2188d72c13c0256fd" target="_top" xlink:title="Default constructor.">
+<g id="a_Node000005"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_a910ee467a963ad6805026ad83873e52b.html#a910ee467a963ad6805026ad83873e52b" target="_top" xlink:title="Default constructor.">
 <polygon fill="white" stroke="#666666" points="432,-189.5 342,-189.5 342,-170.5 432,-170.5 432,-189.5"/>
 <text text-anchor="middle" x="387" y="-177.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::CRGB::CRGB</text>
 </a>

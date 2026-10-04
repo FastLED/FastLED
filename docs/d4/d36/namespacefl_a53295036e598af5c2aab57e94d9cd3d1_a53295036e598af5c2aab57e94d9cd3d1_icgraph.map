@@ -1,0 +1,10 @@
+<map id="fl::setPipelineFluxQ16" name="fl::setPipelineFluxQ16">
+<area shape="rect" id="Node000001" title="Set the composed brightness&#45;and&#45;power scalar for the frames that follow." alt="" coords="548,45,712,70"/>
+<area shape="rect" id="Node000002" href="$db/da5/classfl_1_1_color_managed_pixel_source_a997c43bfad4c89ccef47540e8e0ca692.html#a997c43bfad4c89ccef47540e8e0ca692" title=" " alt="" coords="293,5,500,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="534,47,500,42,500,37,535,42"/>
+<area shape="rect" id="Node000003" href="$db/da5/classfl_1_1_color_managed_pixel_source_a840318a93b26254902901cdefd55cd35.html#a840318a93b26254902901cdefd55cd35" title="Frame&#45;local brightness is applied to the source&#39;s owned pipeline on shared tiers; only managed iterat..." alt="" coords="293,69,500,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="535,73,500,78,500,73,534,68"/>
+<area shape="rect" id="Node000004" href="$d1/da7/namespacefl_1_1anonymous__namespace_02pipeline__binding_8cpp_8hpp_03_ac06021128ae811d9bb3c04b8a3e98d77.html#ac06021128ae811d9bb3c04b8a3e98d77" title="Builds the managed iterator in the caller&#39;s storage." alt="" coords="5,62,245,117"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="279,92,245,92,245,87,279,87"/>
+<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="171,51,154,44,125,41,101,43,85,47,78,54,78,62,73,62,73,52,83,43,100,37,125,35,156,38,173,46"/>
+</map>

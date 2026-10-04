@@ -21,7 +21,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../d0/dee/struct_pixel_controller_aa1f529fa22c32adeca547198478fb561.html#aa1f529fa22c32adeca547198478fb561" target="_top" xlink:title=" ">
+<g id="a_Node000002"><a xlink:href="../../d0/dee/struct_pixel_controller_aa1f529fa22c32adeca547198478fb561.html#aa1f529fa22c32adeca547198478fb561" target="_top" xlink:title="non&#45;template alias of advanceAndLoadAndScale&lt;0&gt;()">
 <polygon fill="white" stroke="#666666" points="146,-270 11,-270 11,-240 146,-240 146,-270"/>
 <text text-anchor="start" x="19" y="-258" font-family="Helvetica,sans-Serif" font-size="10.00">PixelController::advance</text>
 <text text-anchor="middle" x="78.5" y="-247" font-family="Helvetica,sans-Serif" font-size="10.00">AndLoadAndScale0</text>
@@ -40,7 +40,7 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d0/dee/struct_pixel_controller_af5dfe39cf2b86ff72363d1a4eb710c5d.html#af5dfe39cf2b86ff72363d1a4eb710c5d" target="_top" xlink:title=" ">
+<g id="a_Node000003"><a xlink:href="../../d0/dee/struct_pixel_controller_af5dfe39cf2b86ff72363d1a4eb710c5d.html#af5dfe39cf2b86ff72363d1a4eb710c5d" target="_top" xlink:title="non&#45;template alias of advanceAndLoadAndScale&lt;0&gt;()">
 <polygon fill="white" stroke="#666666" points="146,-222 11,-222 11,-192 146,-192 146,-222"/>
 <text text-anchor="start" x="19" y="-210" font-family="Helvetica,sans-Serif" font-size="10.00">PixelController::advance</text>
 <text text-anchor="middle" x="78.5" y="-199" font-family="Helvetica,sans-Serif" font-size="10.00">AndLoadAndScale0</text>
@@ -78,7 +78,7 @@
 <!-- Node5 -->
 <g id="Node000005" class="node">
 <title>Node5</title>
-<g id="a_Node000005"><a xlink:href="../../d0/dee/struct_pixel_controller_a5dd95a08ff4c11980801b888c48de0b5.html#a5dd95a08ff4c11980801b888c48de0b5" target="_top" xlink:title=" ">
+<g id="a_Node000005"><a xlink:href="../../d0/dee/struct_pixel_controller_a5dd95a08ff4c11980801b888c48de0b5.html#a5dd95a08ff4c11980801b888c48de0b5" target="_top" xlink:title="stepDithering() and advanceAndLoadAndScale0()">
 <polygon fill="white" stroke="#666666" points="157,-126 0,-126 0,-96 157,-96 157,-126"/>
 <text text-anchor="start" x="8" y="-114" font-family="Helvetica,sans-Serif" font-size="10.00">PixelController::stepAdvance</text>
 <text text-anchor="middle" x="78.5" y="-103" font-family="Helvetica,sans-Serif" font-size="10.00">AndLoadAndScale0</text>
@@ -97,7 +97,7 @@
 <!-- Node6 -->
 <g id="Node000006" class="node">
 <title>Node6</title>
-<g id="a_Node000006"><a xlink:href="../../d0/dee/struct_pixel_controller_abfc21e7a2692504f7331156ea9989fd4.html#abfc21e7a2692504f7331156ea9989fd4" target="_top" xlink:title=" ">
+<g id="a_Node000006"><a xlink:href="../../d0/dee/struct_pixel_controller_abfc21e7a2692504f7331156ea9989fd4.html#abfc21e7a2692504f7331156ea9989fd4" target="_top" xlink:title="stepDithering() and advanceAndLoadAndScale0()">
 <polygon fill="white" stroke="#666666" points="157,-78 0,-78 0,-48 157,-48 157,-78"/>
 <text text-anchor="start" x="8" y="-66" font-family="Helvetica,sans-Serif" font-size="10.00">PixelController::stepAdvance</text>
 <text text-anchor="middle" x="78.5" y="-55" font-family="Helvetica,sans-Serif" font-size="10.00">AndLoadAndScale0</text>

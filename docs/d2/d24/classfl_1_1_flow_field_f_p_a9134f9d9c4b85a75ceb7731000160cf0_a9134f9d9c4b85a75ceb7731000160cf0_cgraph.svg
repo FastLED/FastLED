@@ -67,7 +67,7 @@ var sectionId = 'dynsection-0';
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_a194d91aefbc2fd91cdb02fcb05962a64.html#a194d91aefbc2fd91cdb02fcb05962a64" target="_top" xlink:title=" ">
+<g id="a_Node000002"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_a9f5639024241e7fa54b3889ef51dd68c.html#a9f5639024241e7fa54b3889ef51dd68c" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="422,-177 322,-177 322,-158 422,-158 422,-177"/>
 <text text-anchor="middle" x="372" y="-165" font-family="Helvetica,sans-Serif" font-size="10.00">fl::s16x16::clamp</text>
 </a>
@@ -103,7 +103,7 @@ var sectionId = 'dynsection-0';
 <!-- Node5 -->
 <g id="Node000005" class="node">
 <title>Node5</title>
-<g id="a_Node000005"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_a16ba0d04952fcc60fdde0eacb4383b91.html#a16ba0d04952fcc60fdde0eacb4383b91" target="_top" xlink:title=" ">
+<g id="a_Node000005"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_aaad1bad5ab4ec24c196a00e4ab0c35cd.html#aaad1bad5ab4ec24c196a00e4ab0c35cd" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="269,-93 177,-93 177,-74 269,-74 269,-93"/>
 <text text-anchor="middle" x="223" y="-81" font-family="Helvetica,sans-Serif" font-size="10.00">fl::s16x16::mod</text>
 </a>
@@ -139,7 +139,7 @@ var sectionId = 'dynsection-0';
 <!-- Node9 -->
 <g id="Node000009" class="node">
 <title>Node9</title>
-<g id="a_Node000009"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_a590f31e60f8954944bb4ea7ccbbb4b88.html#a590f31e60f8954944bb4ea7ccbbb4b88" target="_top" xlink:title=" ">
+<g id="a_Node000009"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_ae28d3d77e670a9f4702ce8f82ff90341.html#ae28d3d77e670a9f4702ce8f82ff90341" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="272,-19 174,-19 174,0 272,0 272,-19"/>
 <text text-anchor="middle" x="223" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::s16x16::to_int</text>
 </a>
@@ -157,7 +157,7 @@ var sectionId = 'dynsection-0';
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_a5e82494e286448e4cad2de1b302b9168.html#a5e82494e286448e4cad2de1b302b9168" target="_top" xlink:title=" ">
+<g id="a_Node000003"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_ada6cb5198c9b09c4299cd8ab059951e7.html#ada6cb5198c9b09c4299cd8ab059951e7" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="571,-131 466,-131 466,-112 571,-112 571,-131"/>
 <text text-anchor="middle" x="518.5" y="-119" font-family="Helvetica,sans-Serif" font-size="10.00">fl::s16x16::s16x16</text>
 </a>
@@ -193,7 +193,7 @@ var sectionId = 'dynsection-0';
 <!-- Node6 -->
 <g id="Node000006" class="node">
 <title>Node6</title>
-<g id="a_Node000006"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_a9c7a5411b60510e5a513c5d1e305720d.html#a9c7a5411b60510e5a513c5d1e305720d" target="_top" xlink:title=" ">
+<g id="a_Node000006"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_acb5f1fc389057c6c799b796a296f1c33.html#acb5f1fc389057c6c799b796a296f1c33" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="430,-93 314,-93 314,-74 430,-74 430,-93"/>
 <text text-anchor="middle" x="372" y="-81" font-family="Helvetica,sans-Serif" font-size="10.00">fl::s16x16::from_raw</text>
 </a>
@@ -220,7 +220,7 @@ var sectionId = 'dynsection-0';
 <!-- Node7 -->
 <g id="Node000007" class="node">
 <title>Node7</title>
-<g id="a_Node000007"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_aa048b427f50f28993a67941e0f303a65.html#aa048b427f50f28993a67941e0f303a65" target="_top" xlink:title=" ">
+<g id="a_Node000007"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_a7b25b9c301243694aa32f9754bec11d2.html#a7b25b9c301243694aa32f9754bec11d2" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="562.5,-93 474.5,-93 474.5,-74 562.5,-74 562.5,-93"/>
 <text text-anchor="middle" x="518.5" y="-81" font-family="Helvetica,sans-Serif" font-size="10.00">fl::s16x16::raw</text>
 </a>

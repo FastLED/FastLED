@@ -8,4 +8,6 @@ digraph "fl::IChannel"
   Node1 [id="Node000001",label="fl::IChannel",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Polymorphic identification base for any channel in the system."];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node2 [id="Node000002",label="fl::Channel",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d5/d8b/classfl_1_1_channel.html",tooltip="LED channel for parallel output, pretty much a CPixelLEDController but with timing and pin informatio..."];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::StaticProfileChannel\l\< Profile \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d7/ddc/classfl_1_1_static_profile_channel.html",tooltip="A compile-time profile channel."];
 }

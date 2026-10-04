@@ -8,9 +8,9 @@ var namespacefl_1_1audio =
         [ "I2S1", "d5/d5b/namespacefl_1_1audio_1_1_teensy_i2_s_a5c334373b5e02f0d9aeb9255a16be07f.html#a5c334373b5e02f0d9aeb9255a16be07faf52dbbdea00729f874ffc668735ef445", null ],
         [ "I2S2", "d5/d5b/namespacefl_1_1audio_1_1_teensy_i2_s_a5c334373b5e02f0d9aeb9255a16be07f.html#a5c334373b5e02f0d9aeb9255a16be07fa85bc70f69df5958976b9d4650ee07208", null ]
       ] ],
-      [ "getPinCLK", "d5/d5b/namespacefl_1_1audio_1_1_teensy_i2_s_aaf0f048705bb3fc909d2dd1540052858.html#aaf0f048705bb3fc909d2dd1540052858", null ],
-      [ "getPinSD", "d5/d5b/namespacefl_1_1audio_1_1_teensy_i2_s_a3a4595ecf32ef89e2c79900ddff859ef.html#a3a4595ecf32ef89e2c79900ddff859ef", null ],
-      [ "getPinWS", "d5/d5b/namespacefl_1_1audio_1_1_teensy_i2_s_a8ce1940f8366667991e3463ff0575805.html#a8ce1940f8366667991e3463ff0575805", null ]
+      [ "getPinCLK", "d5/d5b/namespacefl_1_1audio_1_1_teensy_i2_s_ac51a17187c429877df04e554dedd7980.html#ac51a17187c429877df04e554dedd7980", null ],
+      [ "getPinSD", "d5/d5b/namespacefl_1_1audio_1_1_teensy_i2_s_a7a47bb78863bd21923daed63ef05d8d5.html#a7a47bb78863bd21923daed63ef05d8d5", null ],
+      [ "getPinWS", "d5/d5b/namespacefl_1_1audio_1_1_teensy_i2_s_a0a940fa4fc70782117a3c718df55869b.html#a0a940fa4fc70782117a3c718df55869b", null ]
     ] ],
     [ "AudioManager", "d4/d9d/classfl_1_1audio_1_1_audio_manager.html", "d4/d9d/classfl_1_1audio_1_1_audio_manager" ],
     [ "AutoGain", "d1/dec/classfl_1_1audio_1_1_auto_gain.html", "d1/dec/classfl_1_1audio_1_1_auto_gain" ],
@@ -91,7 +91,7 @@ var namespacefl_1_1audio =
     ] ],
     [ "clamp01", "db/dbf/namespacefl_1_1audio_a1cbdb2338ec760ba92ce43fece0713d2.html#a1cbdb2338ec760ba92ce43fece0713d2", null ],
     [ "clampNeg1To1", "db/dbf/namespacefl_1_1audio_a9b850f6d4dcc78d8d7ffbcea50896411.html#a9b850f6d4dcc78d8d7ffbcea50896411", null ],
-    [ "computeAudioDt", "db/dbf/namespacefl_1_1audio_a7189558c538537464f1d31c91596631d.html#a7189558c538537464f1d31c91596631d", null ],
+    [ "computeAudioDt", "db/dbf/namespacefl_1_1audio_a8a5c097dfda178fb0d31e2060cb62ea9.html#a8a5c097dfda178fb0d31e2060cb62ea9", null ],
     [ "computePinkNoiseGain", "db/dbf/namespacefl_1_1audio_af91427a06670b3079df66588c73cd4b7.html#af91427a06670b3079df66588c73cd4b7", null ],
     [ "computePinkNoiseGains", "db/dbf/namespacefl_1_1audio_abb758259be0e1ff6bf938c9eae4b6118.html#abb758259be0e1ff6bf938c9eae4b6118", null ],
     [ "downsampleMicResponse", "db/dbf/namespacefl_1_1audio_a51b42dfdb22be4944a9a6d62c87a376c.html#a51b42dfdb22be4944a9a6d62c87a376c", null ],

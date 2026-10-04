@@ -1,0 +1,13 @@
+digraph "fl::SlimBridgeShowPolicy&lt; DIRECT_SHOW &gt;"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  Node1 [id="Node000001",label="fl::SlimBridgeShowPolicy\l\< DIRECT_SHOW \>",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="How a SlimBridgeController reaches its driver."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< false \>",fontcolor="grey" ];
+  Node2 [id="Node000002",label="fl::SlimBridgeShowPolicy\l\< false \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d9/df1/structfl_1_1_slim_bridge_show_policy_3_01false_01_4.html",tooltip="Default: registered with ChannelManager, which owns enable/disable and flushes every registered drive..."];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< true \>",fontcolor="grey" ];
+  Node3 [id="Node000003",label="fl::SlimBridgeShowPolicy\l\< true \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d6/d05/structfl_1_1_slim_bridge_show_policy_3_01true_01_4.html",tooltip="Direct: no registry, so there is no runtime enable/disable or exclusive-driver selection,..."];
+}

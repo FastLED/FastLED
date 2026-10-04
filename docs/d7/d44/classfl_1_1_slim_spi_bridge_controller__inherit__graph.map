@@ -1,0 +1,7 @@
+<map id="fl::SlimSpiBridgeController&lt; CHIPSET, RGB_ORDER, B, B_WHICH &gt;" name="fl::SlimSpiBridgeController&lt; CHIPSET, RGB_ORDER, B, B_WHICH &gt;">
+<area shape="rect" id="Node000001" title="Shared legacy addLeds&lt;ESPIChipsets ...&gt;() bridge controller over an IChannelDriver,..." alt="" coords="5,181,208,236"/>
+<area shape="rect" id="Node000002" href="$d0/dc9/class_c_pixel_l_e_d_controller.html" title="Template extension of the CLEDController class." alt="" coords="20,79,193,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="109,147,109,181,104,181,104,147"/>
+<area shape="rect" id="Node000003" href="$d8/da0/classfl_1_1_c_l_e_d_controller.html" title=" " alt="" coords="47,5,167,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="109,44,109,79,104,79,104,44"/>
+</map>

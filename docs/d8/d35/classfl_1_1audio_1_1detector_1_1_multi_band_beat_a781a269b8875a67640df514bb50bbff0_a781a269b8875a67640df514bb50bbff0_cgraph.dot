@@ -10,7 +10,7 @@ digraph "fl::audio::detector::MultiBandBeat::MultiBandBeat"
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
   Node2 [id="Node000002",label="fl::audio::detector\l::MultiBandBeat::configure",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/d35/classfl_1_1audio_1_1detector_1_1_multi_band_beat_ad4f93538e5951c5784ade165964dd446.html#ad4f93538e5951c5784ade165964dd446",tooltip="Configure the multi-band beat detector."];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::audio::detector\l::MultiBandBeat::MultiBandBeat",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/d35/classfl_1_1audio_1_1detector_1_1_multi_band_beat_a5e3bab39bf17461edc0caaf9d372f9f7.html#a5e3bab39bf17461edc0caaf9d372f9f7",tooltip=" "];
+  Node3 [id="Node000003",label="fl::audio::detector\l::MultiBandBeat::MultiBandBeat",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/d35/classfl_1_1audio_1_1detector_1_1_multi_band_beat_a470d0d0b8d6dbda6c6465971252a02ad.html#a470d0d0b8d6dbda6c6465971252a02ad",tooltip=" "];
   Node3 -> Node3 [id="edge3_Node000003_Node000003",color="steelblue1",style="solid",tooltip=" "];
   Node2 -> Node2 [id="edge4_Node000002_Node000002",color="steelblue1",style="solid",tooltip=" "];
   Node2 -> Node4 [id="edge5_Node000002_Node000004",color="steelblue1",style="solid",tooltip=" "];

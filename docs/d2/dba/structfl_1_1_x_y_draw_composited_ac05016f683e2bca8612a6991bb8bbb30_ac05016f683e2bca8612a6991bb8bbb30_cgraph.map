@@ -1,12 +1,12 @@
 <map id="fl::XYDrawComposited::draw" name="fl::XYDrawComposited::draw">
 <area shape="rect" id="Node000001" title=" " alt="" coords="5,41,172,81"/>
-<area shape="rect" id="Node000002" href="$da/dd6/structfl_1_1_c_r_g_b_a819280601bde62a67c39be0fff7f34af.html#a819280601bde62a67c39be0fff7f34af" title=" " alt="" coords="220,23,457,48"/>
+<area shape="rect" id="Node000002" href="$da/dd6/structfl_1_1_c_r_g_b_a1a6856f953e6123c78ee68840cf865c7.html#a1a6856f953e6123c78ee68840cf865c7" title=" " alt="" coords="220,23,457,48"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="172,50,206,46,206,51,172,55"/>
-<area shape="rect" id="Node000005" href="$da/dd6/structfl_1_1_c_r_g_b_ab88584d982259ec4ad72511cfe641579.html#ab88584d982259ec4ad72511cfe641579" title="fadeToBlackBy is a synonym for nscale8(), as a fade instead of a scale" alt="" coords="505,73,684,99"/>
+<area shape="rect" id="Node000005" href="$da/dd6/structfl_1_1_c_r_g_b_a2f5cfc2455a8e3ebb89709aea325ed51.html#a2f5cfc2455a8e3ebb89709aea325ed51" title="fadeToBlackBy is a synonym for nscale8(), as a fade instead of a scale" alt="" coords="505,73,684,99"/>
 <area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="173,62,492,78,492,84,172,68"/>
-<area shape="rect" id="Node000003" href="$da/dd6/structfl_1_1_c_r_g_b_adb891cc4fe8f5ac2188d72c13c0256fd.html#adb891cc4fe8f5ac2188d72c13c0256fd" title="Default constructor." alt="" coords="732,24,852,49"/>
+<area shape="rect" id="Node000003" href="$da/dd6/structfl_1_1_c_r_g_b_a910ee467a963ad6805026ad83873e52b.html#a910ee467a963ad6805026ad83873e52b" title="Default constructor." alt="" coords="732,24,852,49"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="411,20,505,9,595,3,684,9,735,18,734,23,684,14,595,8,506,14,412,25"/>
-<area shape="rect" id="Node000004" href="$da/dd6/structfl_1_1_c_r_g_b_a7e34886ec51c1aff8262123de5152437.html#a7e34886ec51c1aff8262123de5152437" title=" " alt="" coords="535,24,654,49"/>
+<area shape="rect" id="Node000004" href="$da/dd6/structfl_1_1_c_r_g_b_a783501cccdd1c0597ce7e2ba56401f6b.html#a783501cccdd1c0597ce7e2ba56401f6b" title=" " alt="" coords="535,24,654,49"/>
 <area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="457,33,522,34,521,39,457,39"/>
 <area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="654,34,718,34,718,39,654,39"/>
 <area shape="poly" id="edge6_Node000005_Node000003" title=" " alt="" coords="645,71,727,50,728,55,647,76"/>

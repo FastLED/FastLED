@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -123,26 +123,28 @@ $(function(){initNavTree('d1/dc9/namespaceautoresearch_a2e87b475e94489d16fe1266d
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d4/d9d/_auto_research_platform_8h_source.html#l00033">33</a> of file <a class="el" href="../../d4/d9d/_auto_research_platform_8h_source.html">AutoResearchPlatform.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   33</span>                             {</div>
-<div class="line"><span class="lineno">   34</span><span class="preprocessor">#if defined(FL_IS_STUB)</span></div>
-<div class="line"><span class="lineno">   35</span>    <span class="keywordflow">return</span> 1;  <span class="comment">// Stub: same pin as TX — internal loopback</span></div>
-<div class="line"><span class="lineno">   36</span><span class="preprocessor">#elif defined(FL_IS_ESP_32S3)</span></div>
-<div class="line"><span class="lineno">   37</span>    <span class="keywordflow">return</span> 2;  <span class="comment">// ESP32-S3: jumper wire from GPIO 1</span></div>
-<div class="line"><span class="lineno">   38</span><span class="preprocessor">#elif defined(FL_IS_ESP_32S2)</span></div>
-<div class="line"><span class="lineno">   39</span>    <span class="keywordflow">return</span> 0;</div>
-<div class="line"><span class="lineno">   40</span><span class="preprocessor">#elif defined(FL_IS_ESP_32C6)</span></div>
-<div class="line"><span class="lineno">   41</span>    <span class="keywordflow">return</span> 0;</div>
-<div class="line"><span class="lineno">   42</span><span class="preprocessor">#elif defined(FL_IS_ESP_32C3)</span></div>
-<div class="line"><span class="lineno">   43</span>    <span class="keywordflow">return</span> 0;</div>
-<div class="line"><span class="lineno">   44</span><span class="preprocessor">#elif defined(FL_IS_ESP_32P4)</span></div>
-<div class="line"><span class="lineno">   45</span>    <span class="keywordflow">return</span> 6;  <span class="comment">// ESP32-P4: jumper wire from GPIO 5</span></div>
-<div class="line"><span class="lineno">   46</span><span class="preprocessor">#elif defined(FL_IS_TEENSY_4X)</span></div>
-<div class="line"><span class="lineno">   47</span>    <span class="keywordflow">return</span> 2;  <span class="comment">// Teensy 4.x: FlexPWM-capable pin, jumper wire from pin 1</span></div>
-<div class="line"><span class="lineno">   48</span><span class="preprocessor">#else</span></div>
-<div class="line"><span class="lineno">   49</span>    <span class="keywordflow">return</span> 0;  <span class="comment">// ESP32 (classic) and other variants</span></div>
-<div class="line"><span class="lineno">   50</span><span class="preprocessor">#endif</span></div>
-<div class="line"><span class="lineno">   51</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../d4/d9d/_auto_research_platform_8h_source.html#l00050">50</a> of file <a class="el" href="../../d4/d9d/_auto_research_platform_8h_source.html">AutoResearchPlatform.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   50</span>                             {</div>
+<div class="line"><span class="lineno">   51</span><span class="preprocessor">#if defined(FL_IS_STUB)</span></div>
+<div class="line"><span class="lineno">   52</span>    <span class="keywordflow">return</span> 1;  <span class="comment">// Stub: same pin as TX — internal loopback</span></div>
+<div class="line"><span class="lineno">   53</span><span class="preprocessor">#elif defined(FL_IS_ESP_32S3)</span></div>
+<div class="line"><span class="lineno">   54</span>    <span class="keywordflow">return</span> 2;  <span class="comment">// ESP32-S3: jumper wire from GPIO 1</span></div>
+<div class="line"><span class="lineno">   55</span><span class="preprocessor">#elif defined(FL_IS_ESP_32S2)</span></div>
+<div class="line"><span class="lineno">   56</span>    <span class="keywordflow">return</span> 0;</div>
+<div class="line"><span class="lineno">   57</span><span class="preprocessor">#elif defined(FL_IS_ESP_32C6)</span></div>
+<div class="line"><span class="lineno">   58</span>    <span class="keywordflow">return</span> 0;</div>
+<div class="line"><span class="lineno">   59</span><span class="preprocessor">#elif defined(FL_IS_ESP_32C3)</span></div>
+<div class="line"><span class="lineno">   60</span>    <span class="keywordflow">return</span> 0;</div>
+<div class="line"><span class="lineno">   61</span><span class="preprocessor">#elif defined(FL_IS_ESP_32P4)</span></div>
+<div class="line"><span class="lineno">   62</span>    <span class="keywordflow">return</span> 6;  <span class="comment">// ESP32-P4: jumper wire from GPIO 5</span></div>
+<div class="line"><span class="lineno">   63</span><span class="preprocessor">#elif defined(FL_IS_TEENSY_4X)</span></div>
+<div class="line"><span class="lineno">   64</span>    <span class="keywordflow">return</span> 2;  <span class="comment">// Teensy 4.x: FlexPWM-capable pin, jumper wire from pin 1</span></div>
+<div class="line"><span class="lineno">   65</span><span class="preprocessor">#elif defined(FL_IS_ESP_32DEV)</span></div>
+<div class="line"><span class="lineno">   66</span>    <span class="keywordflow">return</span> 34;  <span class="comment">// ESP32 (classic): input-only pad, jumper wire from GPIO 33.</span></div>
+<div class="line"><span class="lineno">   67</span><span class="preprocessor">#else</span></div>
+<div class="line"><span class="lineno">   68</span>    <span class="keywordflow">return</span> 0;  <span class="comment">// Other variants</span></div>
+<div class="line"><span class="lineno">   69</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">   70</span>}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -153,7 +155,7 @@ $(function(){initNavTree('d1/dc9/namespaceautoresearch_a2e87b475e94489d16fe1266d
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d1/dc9/namespaceautoresearch.html">autoresearch</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:03 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

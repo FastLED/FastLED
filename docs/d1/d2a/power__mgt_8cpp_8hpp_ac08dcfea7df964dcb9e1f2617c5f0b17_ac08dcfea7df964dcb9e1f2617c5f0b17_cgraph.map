@@ -1,0 +1,10 @@
+<map id="brightness_within_budget" name="brightness_within_budget">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,31,195,56"/>
+<area shape="rect" id="Node000002" href="$d1/d2a/power__mgt_8cpp_8hpp_adcd9338466b0f22161f7281bfc7cdcdf.html#adcd9338466b0f22161f7281bfc7cdcdf" title=" " alt="" coords="493,5,635,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="158,28,242,15,367,10,480,11,480,17,367,15,243,21,159,33"/>
+<area shape="rect" id="Node000003" href="$d3/d1d/group___power_ga681489b02b2825095fd40db45906bf26.html#ga681489b02b2825095fd40db45906bf26" title="Applies the configured power&#45;scaling response to a total power value." alt="" coords="243,31,445,56"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="195,41,229,41,229,46,195,46"/>
+<area shape="rect" id="Node000004" href="$d1/d2a/power__mgt_8cpp_8hpp_a3beac85272db71b8f8a1c58f9e041b2e.html#a3beac85272db71b8f8a1c58f9e041b2e" title=" " alt="" coords="265,80,423,105"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="164,53,267,75,266,80,163,59"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="445,29,479,25,480,30,446,34"/>
+</map>

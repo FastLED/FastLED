@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -143,8 +143,8 @@ $(function(){initNavTree('dd/d45/struct_painter_a023fedf9449a5964c0c576805a22d04
 <div class="line"><span class="lineno">  414</span>  <a class="code hl_variable" href="../../d8/de5/_luminescent_grand_8ino_a8dca22aed95d1ff4d038b56167579319.html#a8dca22aed95d1ff4d038b56167579319">led_rope</a>-&gt;<a class="code hl_function" href="../../d4/df6/class_led_rope_t_c_l_ae60663b8c9b70e2dd58ebbfe14c22111.html#ae60663b8c9b70e2dd58ebbfe14c22111">RawBeginDraw</a>();</div>
 <div class="line"><span class="lineno">  415</span>  <span class="keywordtype">int</span> total_counted = 0;</div>
 <div class="line"><span class="lineno">  416</span>  </div>
-<div class="line"><span class="lineno">  417</span>  <span class="keywordtype">float</span> r, g, b;</div>
-<div class="line"><span class="lineno">  418</span>  r = g = b = 0;</div>
+<div class="line"><span class="lineno">  417</span>  <span class="keywordtype">float</span> r, <a class="code hl_variable" href="../../d4/d36/namespacefl_abb8ff746cce2b11a90718afba1cfec1b.html#abb8ff746cce2b11a90718afba1cfec1b">g</a>, b;</div>
+<div class="line"><span class="lineno">  418</span>  r = <a class="code hl_variable" href="../../d4/d36/namespacefl_abb8ff746cce2b11a90718afba1cfec1b.html#abb8ff746cce2b11a90718afba1cfec1b">g</a> = b = 0;</div>
 <div class="line"><span class="lineno">  419</span>  </div>
 <div class="line"><span class="lineno">  420</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; <a class="code hl_variable" href="../../db/d37/class_keyboard_state_a1627e92082392d5690a41ff2058199b2.html#a1627e92082392d5690a41ff2058199b2">KeyboardState::kNumKeys</a>; ++i) {</div>
 <div class="line"><span class="lineno">  421</span>    <span class="keyword">const</span> Key&amp; key = <a class="code hl_variable" href="../../d8/de5/_luminescent_grand_8ino_ac00b91883c896ad0045234318d17b183.html#ac00b91883c896ad0045234318d17b183">keyboard</a>.<a class="code hl_variable" href="../../db/d37/class_keyboard_state_afefcfd0d49e4d7a07c483ba57de840e9.html#afefcfd0d49e4d7a07c483ba57de840e9">mKeys</a>[i];</div>
@@ -153,7 +153,7 @@ $(function(){initNavTree('dd/d45/struct_painter_a023fedf9449a5964c0c576805a22d04
 <div class="line"><span class="lineno">  424</span>    <span class="keywordflow">if</span> (key.<a class="code hl_variable" href="../../db/d42/struct_key_af029b59eff6813504425c91428fe162d.html#af029b59eff6813504425c91428fe162d">mCurrColor</a>.<a class="code hl_variable" href="../../d7/d38/struct_color_h_s_v_a0096a4003cbc683bc1ed7e675c5c029b.html#a0096a4003cbc683bc1ed7e675c5c029b">v_</a> &gt; 0.0f) {</div>
 <div class="line"><span class="lineno">  425</span>      <span class="keyword">const</span> Color3i rgb = key.<a class="code hl_variable" href="../../db/d42/struct_key_af029b59eff6813504425c91428fe162d.html#af029b59eff6813504425c91428fe162d">mCurrColor</a>.<a class="code hl_function" href="../../d7/d38/struct_color_h_s_v_a46c2d7fa61b17ef44d98e7c64798ffe5.html#a46c2d7fa61b17ef44d98e7c64798ffe5">ToRGB</a>();</div>
 <div class="line"><span class="lineno">  426</span>      r += rgb.<a class="code hl_variable" href="../../de/d12/struct_color3i_ac82e943def8ec0943db1a50607fb6f38.html#ac82e943def8ec0943db1a50607fb6f38">r_</a>;</div>
-<div class="line"><span class="lineno">  427</span>      g += rgb.<a class="code hl_variable" href="../../de/d12/struct_color3i_aa31bd0c7fdeb7977ba1a3d6a349b1779.html#aa31bd0c7fdeb7977ba1a3d6a349b1779">g_</a>;</div>
+<div class="line"><span class="lineno">  427</span>      <a class="code hl_variable" href="../../d4/d36/namespacefl_abb8ff746cce2b11a90718afba1cfec1b.html#abb8ff746cce2b11a90718afba1cfec1b">g</a> += rgb.<a class="code hl_variable" href="../../de/d12/struct_color3i_aa31bd0c7fdeb7977ba1a3d6a349b1779.html#aa31bd0c7fdeb7977ba1a3d6a349b1779">g_</a>;</div>
 <div class="line"><span class="lineno">  428</span>      b += rgb.<a class="code hl_variable" href="../../de/d12/struct_color3i_a22493bbbe5034f47aefa051e2236a8b0.html#a22493bbbe5034f47aefa051e2236a8b0">b_</a>;</div>
 <div class="line"><span class="lineno">  429</span>      ++total_counted;</div>
 <div class="line"><span class="lineno">  430</span>    }</div>
@@ -161,7 +161,7 @@ $(function(){initNavTree('dd/d45/struct_painter_a023fedf9449a5964c0c576805a22d04
 <div class="line"><span class="lineno">  432</span>  </div>
 <div class="line"><span class="lineno">  433</span>  <span class="keywordtype">float</span> denom = total_counted ? total_counted : 1;</div>
 <div class="line"><span class="lineno">  434</span>  r /= denom;</div>
-<div class="line"><span class="lineno">  435</span>  g /= denom;</div>
+<div class="line"><span class="lineno">  435</span>  <a class="code hl_variable" href="../../d4/d36/namespacefl_abb8ff746cce2b11a90718afba1cfec1b.html#abb8ff746cce2b11a90718afba1cfec1b">g</a> /= denom;</div>
 <div class="line"><span class="lineno">  436</span>  b /= denom;</div>
 <div class="line"><span class="lineno">  437</span>  </div>
 <div class="line"><span class="lineno">  438</span> </div>
@@ -182,6 +182,7 @@ $(function(){initNavTree('dd/d45/struct_painter_a023fedf9449a5964c0c576805a22d04
 <div class="ttc" id="aclass_led_rope_t_c_l_a2c5c772faf24596d5be70d96581e7454_html_a2c5c772faf24596d5be70d96581e7454"><div class="ttname"><a href="../../d4/df6/class_led_rope_t_c_l_a2c5c772faf24596d5be70d96581e7454.html#a2c5c772faf24596d5be70d96581e7454">LedRopeTCL::RawCommitDraw</a></div><div class="ttdeci">void RawCommitDraw()</div><div class="ttdef"><b>Definition</b> <a href="../../d6/dc9/_led_rope_t_c_l_8cpp_source.html#l00111">LedRopeTCL.cpp:111</a></div></div>
 <div class="ttc" id="aclass_led_rope_t_c_l_a44e74c392ae8f3e56d58000912d38aed_html_a44e74c392ae8f3e56d58000912d38aed"><div class="ttname"><a href="../../d4/df6/class_led_rope_t_c_l_a44e74c392ae8f3e56d58000912d38aed.html#a44e74c392ae8f3e56d58000912d38aed">LedRopeTCL::RawDrawPixel</a></div><div class="ttdeci">void RawDrawPixel(const Color3i &amp;c)</div><div class="ttdef"><b>Definition</b> <a href="../../d6/dc9/_led_rope_t_c_l_8cpp_source.html#l00079">LedRopeTCL.cpp:79</a></div></div>
 <div class="ttc" id="aclass_led_rope_t_c_l_ae60663b8c9b70e2dd58ebbfe14c22111_html_ae60663b8c9b70e2dd58ebbfe14c22111"><div class="ttname"><a href="../../d4/df6/class_led_rope_t_c_l_ae60663b8c9b70e2dd58ebbfe14c22111.html#ae60663b8c9b70e2dd58ebbfe14c22111">LedRopeTCL::RawBeginDraw</a></div><div class="ttdeci">void RawBeginDraw()</div><div class="ttdef"><b>Definition</b> <a href="../../d6/dc9/_led_rope_t_c_l_8cpp_source.html#l00073">LedRopeTCL.cpp:73</a></div></div>
+<div class="ttc" id="anamespacefl_abb8ff746cce2b11a90718afba1cfec1b_html_abb8ff746cce2b11a90718afba1cfec1b"><div class="ttname"><a href="../../d4/d36/namespacefl_abb8ff746cce2b11a90718afba1cfec1b.html#abb8ff746cce2b11a90718afba1cfec1b">fl::g</a></div><div class="ttdeci">InputGamut g</div><div class="ttdef"><b>Definition</b> <a href="../../df/df8/fl_2gfx_2rgbw_8h_source.html#l00124">rgbw.h:124</a></div></div>
 <div class="ttc" id="astruct_color3i_a22493bbbe5034f47aefa051e2236a8b0_html_a22493bbbe5034f47aefa051e2236a8b0"><div class="ttname"><a href="../../de/d12/struct_color3i_a22493bbbe5034f47aefa051e2236a8b0.html#a22493bbbe5034f47aefa051e2236a8b0">Color3i::b_</a></div><div class="ttdeci">uint8_t b_</div><div class="ttdef"><b>Definition</b> <a href="../../de/de1/examples_2_luminescent_grand_2shared_2color_8h_source.html#l00056">color.h:56</a></div></div>
 <div class="ttc" id="astruct_color3i_aa31bd0c7fdeb7977ba1a3d6a349b1779_html_aa31bd0c7fdeb7977ba1a3d6a349b1779"><div class="ttname"><a href="../../de/d12/struct_color3i_aa31bd0c7fdeb7977ba1a3d6a349b1779.html#aa31bd0c7fdeb7977ba1a3d6a349b1779">Color3i::g_</a></div><div class="ttdeci">uint8_t g_</div><div class="ttdef"><b>Definition</b> <a href="../../de/de1/examples_2_luminescent_grand_2shared_2color_8h_source.html#l00056">color.h:56</a></div></div>
 <div class="ttc" id="astruct_color3i_ac82e943def8ec0943db1a50607fb6f38_html_ac82e943def8ec0943db1a50607fb6f38"><div class="ttname"><a href="../../de/d12/struct_color3i_ac82e943def8ec0943db1a50607fb6f38.html#ac82e943def8ec0943db1a50607fb6f38">Color3i::r_</a></div><div class="ttdeci">uint8_t r_</div><div class="ttdef"><b>Definition</b> <a href="../../de/de1/examples_2_luminescent_grand_2shared_2color_8h_source.html#l00056">color.h:56</a></div></div>
@@ -216,7 +217,7 @@ $(function(){initNavTree('dd/d45/struct_painter_a023fedf9449a5964c0c576805a22d04
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dd/d45/struct_painter.html">Painter</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:03 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

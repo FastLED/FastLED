@@ -3,7 +3,7 @@ var searchData=
   ['rand16_5fseed_0',['RAND16_SEED',['../dd/dfe/lib8tion_8cpp_8hpp_a2184511e26c0caf04d34adab1c73eef8.html#a2184511e26c0caf04d34adab1c73eef8',1,'lib8tion.cpp.hpp']]],
   ['randompulsesenabled_1',['randomPulsesEnabled',['../d1/ddb/_chromancer_8ino_a966f9faaa59d07f53d0ec806b37b8bf4.html#a966f9faaa59d07f53d0ec806b37b8bf4',1,'Chromancer.ino']]],
   ['randompulsetime_2',['randomPulseTime',['../d1/ddb/_chromancer_8ino_ad3604a7bb7768beb6d31c8cce636995e.html#ad3604a7bb7768beb6d31c8cce636995e',1,'Chromancer.ino']]],
-  ['recommended_5fvirtual_5fbits_3',['RECOMMENDED_VIRTUAL_BITS',['../d5/d4d/pixel__controller_8h_a0d71bfb7ef663994e4121f7b42aa8183.html#a0d71bfb7ef663994e4121f7b42aa8183',1,'pixel_controller.h']]],
+  ['recommended_5fvirtual_5fbits_3',['RECOMMENDED_VIRTUAL_BITS',['../da/d08/binary__dither_8h_a0d71bfb7ef663994e4121f7b42aa8183.html#a0d71bfb7ef663994e4121f7b42aa8183',1,'binary_dither.h']]],
   ['red_4',['RED',['../d8/d53/_octo_w_s2811__impl_8h_a8d23feea868a983c8c2b661e1e16972f.html#a8d23feea868a983c8c2b661e1e16972f',1,'OctoWS2811_impl.h']]],
   ['redpin_5',['REDPIN',['../d5/d17/_analog_output_8ino_acb6567c99384d4b7b42c02f958da758d.html#acb6567c99384d4b7b42c02f958da758d',1,'AnalogOutput.ino']]],
   ['release_6',['RELEASE',['../d1/df2/_auto_research_low_memory_8h_a5bd9a30fc22d9a737ee060d41a4ec479.html#a5bd9a30fc22d9a737ee060d41a4ec479',1,'AutoResearchLowMemory.h']]],

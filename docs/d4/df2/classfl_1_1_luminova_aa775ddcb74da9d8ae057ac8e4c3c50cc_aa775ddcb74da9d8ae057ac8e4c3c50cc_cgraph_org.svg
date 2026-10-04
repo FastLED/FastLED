@@ -20,7 +20,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../d4/d36/namespacefl_aca219e4ecfa76d0476e9f553f4066548.html#aca219e4ecfa76d0476e9f553f4066548" target="_top" xlink:title=" ">
+<g id="a_Node000002"><a xlink:href="../../d4/d36/namespacefl_a297e1492a0d4d3959a013cc8225de491.html#a297e1492a0d4d3959a013cc8225de491" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="244,-357 185,-357 185,-338 244,-338 244,-357"/>
 <text text-anchor="middle" x="214.5" y="-345" font-family="Helvetica,sans-Serif" font-size="10.00">fl::blur2d</text>
 </a>
@@ -38,7 +38,7 @@
 <!-- Node8 -->
 <g id="Node000008" class="node">
 <title>Node8</title>
-<g id="a_Node000008"><a xlink:href="../../d4/d36/namespacefl_ad87db990a26723fa560bc364734ea6cc.html#ad87db990a26723fa560bc364734ea6cc" target="_top" xlink:title=" ">
+<g id="a_Node000008"><a xlink:href="../../d4/d36/namespacefl_ac01366c0ac52fd6d3aeab8b11d69310b.html#ac01366c0ac52fd6d3aeab8b11d69310b" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="239,-283 190,-283 190,-264 239,-264 239,-283"/>
 <text text-anchor="middle" x="214.5" y="-271" font-family="Helvetica,sans-Serif" font-size="10.00">fl::cosf</text>
 </a>
@@ -110,7 +110,7 @@
 <!-- Node17 -->
 <g id="Node000017" class="node">
 <title>Node17</title>
-<g id="a_Node000017"><a xlink:href="../../d8/df9/group___noise_generation_gaeb72246ebd597b60a7e575173accf2fd.html#gaeb72246ebd597b60a7e575173accf2fd" target="_top" xlink:title=" ">
+<g id="a_Node000017"><a xlink:href="../../d8/df9/group___noise_generation_gaeb72246ebd597b60a7e575173accf2fd.html#gaeb72246ebd597b60a7e575173accf2fd" target="_top" xlink:title="8&#45;Bit, fixed point implementation of Perlin&#39;s noise.">
 <polygon fill="white" stroke="#666666" points="407.5,-131 355.5,-131 355.5,-112 407.5,-112 407.5,-131"/>
 <text text-anchor="middle" x="381.5" y="-119" font-family="Helvetica,sans-Serif" font-size="10.00">inoise8</text>
 </a>
@@ -164,7 +164,7 @@
 <!-- Node26 -->
 <g id="Node000026" class="node">
 <title>Node26</title>
-<g id="a_Node000026"><a xlink:href="../../d4/d36/namespacefl_a4ba2744fe96375793e6f7a98b188d343.html#a4ba2744fe96375793e6f7a98b188d343" target="_top" xlink:title=" ">
+<g id="a_Node000026"><a xlink:href="../../d4/d36/namespacefl_a367128bb231fab59275e129d3dc3d909.html#a367128bb231fab59275e129d3dc3d909" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="238,-320 191,-320 191,-301 238,-301 238,-320"/>
 <text text-anchor="middle" x="214.5" y="-308" font-family="Helvetica,sans-Serif" font-size="10.00">fl::sinf</text>
 </a>
@@ -182,7 +182,7 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d5/d3d/group___color_blurs_ga0699f1dd2dc72d5e683bd148378050a9.html#ga0699f1dd2dc72d5e683bd148378050a9" target="_top" xlink:title="Two&#45;dimensional blur filter (span version).">
+<g id="a_Node000003"><a xlink:href="../../d5/d3d/group___color_blurs_ga648b01339a6b68fecbcb933df57db297.html#ga648b01339a6b68fecbcb933df57db297" target="_top" xlink:title="Two&#45;dimensional blur filter (span version).">
 <polygon fill="white" stroke="#666666" points="422,-358 341,-358 341,-339 422,-339 422,-358"/>
 <text text-anchor="middle" x="381.5" y="-346" font-family="Helvetica,sans-Serif" font-size="10.00">fl::gfx::blur2d</text>
 </a>
@@ -200,7 +200,7 @@
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../d5/d3d/group___color_blurs_gaf6b4765e82578c70df7b3d12ca4b6c71.html#gaf6b4765e82578c70df7b3d12ca4b6c71" target="_top" xlink:title="Perform a blur1d() on every column of a rectangular matrix (span version).">
+<g id="a_Node000004"><a xlink:href="../../d5/d3d/group___color_blurs_gaf42765991cf5da9428fe3e7d1d104168.html#gaf42765991cf5da9428fe3e7d1d104168" target="_top" xlink:title="Perform a blur1d() on every column of a rectangular matrix (span version).">
 <polygon fill="#fff0f0" stroke="red" points="594,-357 482,-357 482,-338 594,-338 594,-357"/>
 <text text-anchor="middle" x="538" y="-345" font-family="Helvetica,sans-Serif" font-size="10.00">fl::gfx::blurColumns</text>
 </a>
@@ -218,7 +218,7 @@
 <!-- Node7 -->
 <g id="Node000007" class="node">
 <title>Node7</title>
-<g id="a_Node000007"><a xlink:href="../../d5/d3d/group___color_blurs_ga83bb8ebe9bd3ab749bcb42aaa0fc7df5.html#ga83bb8ebe9bd3ab749bcb42aaa0fc7df5" target="_top" xlink:title="Perform a blur1d() on every row of a rectangular matrix (span version).">
+<g id="a_Node000007"><a xlink:href="../../d5/d3d/group___color_blurs_gafe47df0af91421b253a945970c99f646.html#gafe47df0af91421b253a945970c99f646" target="_top" xlink:title="Perform a blur1d() on every row of a rectangular matrix (span version).">
 <polygon fill="#fff0f0" stroke="red" points="585.5,-394 490.5,-394 490.5,-375 585.5,-375 585.5,-394"/>
 <text text-anchor="middle" x="538" y="-382" font-family="Helvetica,sans-Serif" font-size="10.00">fl::gfx::blurRows</text>
 </a>
@@ -254,7 +254,7 @@
 <!-- Node10 -->
 <g id="Node000010" class="node">
 <title>Node10</title>
-<g id="a_Node000010"><a xlink:href="../../df/d9e/namespacefl_1_1detail_ab42e702a90f152dbad7d35ea9eab976a.html#ab42e702a90f152dbad7d35ea9eab976a" target="_top" xlink:title=" ">
+<g id="a_Node000010"><a xlink:href="../../df/d9e/namespacefl_1_1detail_ac2273fa1bad46159181e978dff14b9b2.html#ac2273fa1bad46159181e978dff14b9b2" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="599,-282 477,-282 477,-263 599,-263 599,-282"/>
 <text text-anchor="middle" x="538" y="-270" font-family="Helvetica,sans-Serif" font-size="10.00">fl::detail::cos_reduce_</text>
 </a>
@@ -272,7 +272,7 @@
 <!-- Node11 -->
 <g id="Node000011" class="node">
 <title>Node11</title>
-<g id="a_Node000011"><a xlink:href="../../df/d9e/namespacefl_1_1detail_a525aa6aacdb5d3d48ebe21adb14da430.html#a525aa6aacdb5d3d48ebe21adb14da430" target="_top" xlink:title=" ">
+<g id="a_Node000011"><a xlink:href="../../df/d9e/namespacefl_1_1detail_a6a0079ec5177e72b0e64470ba18a332e.html#a6a0079ec5177e72b0e64470ba18a332e" target="_top" xlink:title=" ">
 <polygon fill="#fff0f0" stroke="red" points="755,-301 635,-301 635,-282 755,-282 755,-301"/>
 <text text-anchor="middle" x="695" y="-289" font-family="Helvetica,sans-Serif" font-size="10.00">fl::detail::sin_reduce_</text>
 </a>
@@ -308,7 +308,7 @@
 <!-- Node18 -->
 <g id="Node000018" class="node">
 <title>Node18</title>
-<g id="a_Node000018"><a xlink:href="../../d8/d5c/group___noise_gaa3db0f2f3777cf5bb7a4dd1359dba4fe.html#gaa3db0f2f3777cf5bb7a4dd1359dba4fe" target="_top" xlink:title=" ">
+<g id="a_Node000018"><a xlink:href="../../d8/d5c/group___noise_gaa3db0f2f3777cf5bb7a4dd1359dba4fe.html#gaa3db0f2f3777cf5bb7a4dd1359dba4fe" target="_top" xlink:title="8&#45;bit, fixed point implementation of Perlin&#39;s noise without scaling.">
 <polygon fill="white" stroke="#666666" points="575.5,-131 500.5,-131 500.5,-112 575.5,-112 575.5,-131"/>
 <text text-anchor="middle" x="538" y="-119" font-family="Helvetica,sans-Serif" font-size="10.00">inoise8_raw</text>
 </a>
@@ -362,7 +362,7 @@
 <!-- Node22 -->
 <g id="Node000022" class="node">
 <title>Node22</title>
-<g id="a_Node000022"><a xlink:href="../../d4/d36/namespacefl_a3147d73d9121eec8710b892112eda203.html#a3147d73d9121eec8710b892112eda203" target="_top" xlink:title=" ">
+<g id="a_Node000022"><a xlink:href="../../d4/d36/namespacefl_a4f76bde8d17a25790ec3382f979786c9.html#a4f76bde8d17a25790ec3382f979786c9" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="404.5,-93 358.5,-93 358.5,-74 404.5,-74 404.5,-93"/>
 <text text-anchor="middle" x="381.5" y="-81" font-family="Helvetica,sans-Serif" font-size="10.00">fl::ceil</text>
 </a>
@@ -380,7 +380,7 @@
 <!-- Node23 -->
 <g id="Node000023" class="node">
 <title>Node23</title>
-<g id="a_Node000023"><a xlink:href="../../d4/d36/namespacefl_afb42d6eb6443afc7223ce9b1a812f350.html#afb42d6eb6443afc7223ce9b1a812f350" target="_top" xlink:title=" ">
+<g id="a_Node000023"><a xlink:href="../../d4/d36/namespacefl_a391721290a9307391d39a0a897d9b9f4.html#a391721290a9307391d39a0a897d9b9f4" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="411,-56 352,-56 352,-37 411,-37 411,-56"/>
 <text text-anchor="middle" x="381.5" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">fl::clamp</text>
 </a>

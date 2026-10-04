@@ -1,12 +1,24 @@
 <map id="PixelController::enable_dithering" name="PixelController::enable_dithering">
-<area shape="rect" id="Node000001" title="Toggle dithering enable/disable." alt="" coords="5,51,175,91"/>
-<area shape="rect" id="Node000002" href="$d0/dee/struct_pixel_controller_af1d6dbfe39be747916896dc44c730a29.html#af1d6dbfe39be747916896dc44c730a29" title="Add dither offset to pixel value (BEFORE scaling)." alt="" coords="223,29,385,55"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="174,57,209,52,210,58,175,62"/>
-<area shape="rect" id="Node000005" href="$d0/dee/struct_pixel_controller_a2a8441da873d3a094c15c337b34d3e43.html#a2a8441da873d3a094c15c337b34d3e43" title="Set up the values for binary dithering." alt="" coords="231,79,377,119"/>
-<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="175,80,217,85,216,91,175,85"/>
-<area shape="rect" id="Node000003" href="$d0/dee/struct_pixel_controller_ae44229e20fb4ba4473b057dcda87122e.html#ae44229e20fb4ba4473b057dcda87122e" title="Copy constructor." alt="" coords="433,29,653,55"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="385,39,419,39,419,45,385,45"/>
-<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="505,31,497,21,501,11,517,5,543,3,576,7,589,16,586,20,574,11,543,8,518,10,505,15,502,20,509,27"/>
-<area shape="rect" id="Node000004" href="$d0/dee/struct_pixel_controller_af3310e3a869dfeafae981291b76b572d.html#af3310e3a869dfeafae981291b76b572d" title=" " alt="" coords="701,29,857,55"/>
-<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="653,39,688,39,688,45,653,45"/>
+<area shape="rect" id="Node000001" title="Toggle dithering enable/disable." alt="" coords="5,70,175,110"/>
+<area shape="rect" id="Node000002" href="$dd/d6c/structfl_1_1_binary_dither_a682cf9722cf138f0621df6aa8631c80b.html#a682cf9722cf138f0621df6aa8631c80b" title=" " alt="" coords="224,28,384,53"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="174,68,234,54,235,59,175,73"/>
+<area shape="rect" id="Node000003" href="$d0/dee/struct_pixel_controller_af1d6dbfe39be747916896dc44c730a29.html#af1d6dbfe39be747916896dc44c730a29" title="Add dither offset to pixel value (BEFORE scaling)." alt="" coords="223,77,385,103"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="175,87,209,87,209,93,175,93"/>
+<area shape="rect" id="Node000007" href="$d0/dee/struct_pixel_controller_a2a8441da873d3a094c15c337b34d3e43.html#a2a8441da873d3a094c15c337b34d3e43" title="Set up the values for binary dithering from the shared frame phase." alt="" coords="231,127,377,167"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="166,107,218,122,217,127,165,113"/>
+<area shape="rect" id="Node000004" href="$d0/dee/struct_pixel_controller_ae44229e20fb4ba4473b057dcda87122e.html#ae44229e20fb4ba4473b057dcda87122e" title="Copy constructor." alt="" coords="433,29,653,55"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="368,75,466,55,467,60,369,80"/>
+<area shape="rect" id="Node000006" href="$dd/d6c/structfl_1_1_binary_dither_a855eeda5bd1b617b06acd895eeba5b03.html#a855eeda5bd1b617b06acd895eeba5b03" title="Add the offset to a source byte, before scaling. Black is never lifted." alt="" coords="461,79,625,104"/>
+<area shape="poly" id="edge6_Node000003_Node000006" title=" " alt="" coords="385,88,448,88,448,93,385,93"/>
+<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="505,31,496,21,501,11,517,5,543,3,577,7,589,16,586,20,575,11,543,8,518,10,504,15,502,20,509,27"/>
+<area shape="rect" id="Node000005" href="$d0/dee/struct_pixel_controller_af3310e3a869dfeafae981291b76b572d.html#af3310e3a869dfeafae981291b76b572d" title=" " alt="" coords="707,29,863,55"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="654,39,693,39,693,45,654,45"/>
+<area shape="rect" id="Node000008" href="$df/d9e/namespacefl_1_1detail_ac2b3ef0a8182dc672f6e63a01ad622cf.html#ac2b3ef0a8182dc672f6e63a01ad622cf" title="Return the temporal&#45;dither phase shared by all controllers in this frame." alt="" coords="462,132,625,157"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="378,144,448,143,448,148,378,149"/>
+<area shape="rect" id="Node000009" href="$dd/d6c/structfl_1_1_binary_dither_ad5714524272d9ee39bf3a37d4803132e.html#ad5714524272d9ee39bf3a37d4803132e" title="Set up e from the per&#45;channel brightness scale and d from frame." alt="" coords="469,181,618,207"/>
+<area shape="poly" id="edge9_Node000007_Node000009" title=" " alt="" coords="378,159,465,176,464,181,377,164"/>
+<area shape="rect" id="Node000010" href="$dd/d6c/structfl_1_1_binary_dither_ac011a8e0e5afb087dbf2a19852a2c8dc.html#ac011a8e0e5afb087dbf2a19852a2c8dc" title="Q scaled into [0, range): the offset for one channel." alt="" coords="702,156,867,181"/>
+<area shape="poly" id="edge10_Node000009_Node000010" title=" " alt="" coords="618,184,688,176,688,181,619,189"/>
+<area shape="rect" id="Node000011" href="$dd/d6c/structfl_1_1_binary_dither_aae46c7435dd271d8e46d3cd7e6b57d5c.html#aae46c7435dd271d8e46d3cd7e6b57d5c" title="The frame&#39;s offset pattern value Q: frame wrapped to VIRTUAL_BITS, bit&#45;reversed so consecutive frames..." alt="" coords="701,205,868,231"/>
+<area shape="poly" id="edge11_Node000009_Node000011" title=" " alt="" coords="618,199,688,206,688,211,618,204"/>
 </map>

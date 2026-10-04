@@ -1,0 +1,7 @@
+<map id="fl::anonymous_namespace{gamut_map::cpp::hpp}::RgbwFeasible::operator()" name="fl::anonymous_namespace{gamut_map::cpp::hpp}::RgbwFeasible::operator()">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,201,60"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a4c4252a212f90916fad278f35b001081.html#a4c4252a212f90916fad278f35b001081" title="One pixel: XYZ in s16.16 to four drives, in the order red, green, blue, white, at whichever end of th..." alt="" coords="249,20,456,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="201,30,236,30,236,35,201,35"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_af5a0679639e0ad1db7feb7f9705df72f.html#af5a0679639e0ad1db7feb7f9705df72f" title="One pixel: XYZ in s16.16 to three emitter drives in s16.16." alt="" coords="504,20,671,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="456,30,490,30,490,35,456,35"/>
+</map>

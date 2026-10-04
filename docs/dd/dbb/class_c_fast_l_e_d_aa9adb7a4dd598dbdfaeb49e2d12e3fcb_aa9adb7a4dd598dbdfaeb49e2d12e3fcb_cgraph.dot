@@ -8,8 +8,8 @@ digraph "CFastLED::watchdog"
   rankdir="LR";
   Node1 [id="Node000001",label="CFastLED::watchdog",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Access the unified cross-platform watchdog timer."];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::Watchdog::instance",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d45/classfl_1_1_watchdog_a09a903bdc23fddbb6caac87080a2a567.html#a09a903bdc23fddbb6caac87080a2a567",tooltip=" "];
+  Node2 [id="Node000002",label="fl::Watchdog::instance",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d45/classfl_1_1_watchdog_a1e8bbc71d53587db65db2d3b81f23334.html#a1e8bbc71d53587db65db2d3b81f23334",tooltip=" "];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::Watchdog::Watchdog",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d45/classfl_1_1_watchdog_aa289ba7fe21f2add007ae8680e51249a.html#aa289ba7fe21f2add007ae8680e51249a",tooltip=" "];
+  Node3 [id="Node000003",label="fl::Watchdog::Watchdog",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d45/classfl_1_1_watchdog_ac01eedccb9f606463033025109f1d7d4.html#ac01eedccb9f606463033025109f1d7d4",tooltip=" "];
   Node3 -> Node3 [id="edge3_Node000003_Node000003",color="steelblue1",style="solid",tooltip=" "];
 }

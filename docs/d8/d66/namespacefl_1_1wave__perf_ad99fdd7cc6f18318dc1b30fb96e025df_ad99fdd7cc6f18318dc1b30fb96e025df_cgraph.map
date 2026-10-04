@@ -1,0 +1,16 @@
+<map id="fl::wave_perf::runWavePerfLoadsOnly" name="fl::wave_perf::runWavePerfLoadsOnly">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,73,201,113"/>
+<area shape="rect" id="Node000002" href="$d8/d66/namespacefl_1_1wave__perf_abf792533b3c54ec20c87fd5e82acc351.html#abf792533b3c54ec20c87fd5e82acc351" title=" " alt="" coords="267,5,450,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="156,70,249,39,281,31,282,36,250,45,158,75"/>
+<area shape="rect" id="Node000003" href="$d8/d66/namespacefl_1_1wave__perf_a92ea7eff2b4f11e8c195751913487108.html#a92ea7eff2b4f11e8c195751913487108" title=" " alt="" coords="249,55,468,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="201,80,236,77,236,82,202,86"/>
+<area shape="rect" id="Node000004" href="$d8/d66/namespacefl_1_1wave__perf_a41a80acc9f34762b7e3b8acffedf2c52.html#a41a80acc9f34762b7e3b8acffedf2c52" title=" " alt="" coords="251,104,466,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="202,99,238,103,237,108,201,105"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_a4cfbbd90ced1c04107934a3c05d3e679.html#a4cfbbd90ced1c04107934a3c05d3e679" title="Universal microsecond timer &#45; returns microseconds since system startup." alt="" coords="317,177,400,203"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="158,110,313,170,311,175,156,115"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a257ae39a291866e014a2eeb4abe2a29c.html#a257ae39a291866e014a2eeb4abe2a29c" title=" " alt="" coords="516,104,641,129"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="466,114,502,114,502,119,466,119"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a94488336a5db985fbda1bbd317bffc6a.html#a94488336a5db985fbda1bbd317bffc6a" title=" " alt="" coords="689,104,777,129"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="641,114,675,114,675,119,641,119"/>
+<area shape="poly" id="edge7_Node000007_Node000007" title=" " alt="" coords="323,179,315,169,319,159,334,153,359,151,389,154,401,163,398,168,387,159,359,156,335,158,323,163,320,168,327,176"/>
+</map>

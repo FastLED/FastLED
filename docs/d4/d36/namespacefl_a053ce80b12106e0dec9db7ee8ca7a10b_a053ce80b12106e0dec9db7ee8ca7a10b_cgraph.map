@@ -1,0 +1,5 @@
+<map id="fl::canRepresentTiming" name="fl::canRepresentTiming">
+<area shape="rect" id="Node000001" title="Check if a chipset timing can be accurately represented by UART." alt="" coords="5,13,177,38"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_af0f189ab85e8ea3b4290691a46188a8d.html#af0f189ab85e8ea3b4290691a46188a8d" title="Timing feasibility with a backend&#45;specific baud ceiling." alt="" coords="225,5,417,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="178,23,211,23,211,28,178,28"/>
+</map>

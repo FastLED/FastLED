@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -117,30 +117,30 @@ $(function(){initNavTree('d6/d35/classfl_1_1_async_logger_ad95625ceb246ef889558a
 
 <p>Disable background flushing. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d2/de0/async__logger_8cpp_8hpp_source.html#l00184">184</a> of file <a class="el" href="../../d2/de0/async__logger_8cpp_8hpp_source.html">async_logger.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  184</span>                                         {</div>
-<div class="line"><span class="lineno">  185</span>    detail::BackgroundFlushState&amp; <a class="code hl_variable" href="../../d9/dce/_client_validation_real_8h_adc6e5733fc3c22f0a7b2914188c49c90.html#adc6e5733fc3c22f0a7b2914188c49c90">state</a> = <a class="code hl_function" href="../../d9/d5b/classfl_1_1_singleton_a47fdc044003ec27f9e9833f7f5418e01.html#a47fdc044003ec27f9e9833f7f5418e01">Singleton&lt;detail::BackgroundFlushState&gt;::instance</a>();</div>
-<div class="line"><span class="lineno">  186</span> </div>
-<div class="line"><span class="lineno">  187</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d9/dce/_client_validation_real_8h_adc6e5733fc3c22f0a7b2914188c49c90.html#adc6e5733fc3c22f0a7b2914188c49c90">state</a>.mEnabled &amp;&amp; <a class="code hl_variable" href="../../d9/dce/_client_validation_real_8h_adc6e5733fc3c22f0a7b2914188c49c90.html#adc6e5733fc3c22f0a7b2914188c49c90">state</a>.mTimerHandle.is_valid()) {</div>
-<div class="line"><span class="lineno">  188</span>        <a class="code hl_function" href="../../d6/d93/namespacefl_1_1isr_a29c0b8a68aa4b89155f40b914eaaa4fb.html#a29c0b8a68aa4b89155f40b914eaaa4fb">fl::isr::detach_handler</a>(<a class="code hl_variable" href="../../d9/dce/_client_validation_real_8h_adc6e5733fc3c22f0a7b2914188c49c90.html#adc6e5733fc3c22f0a7b2914188c49c90">state</a>.mTimerHandle);</div>
-<div class="line"><span class="lineno">  189</span>        <a class="code hl_variable" href="../../d9/dce/_client_validation_real_8h_adc6e5733fc3c22f0a7b2914188c49c90.html#adc6e5733fc3c22f0a7b2914188c49c90">state</a>.mTimerHandle = fl::isr::handle();  <span class="comment">// Reset to default (invalid) handle</span></div>
-<div class="line"><span class="lineno">  190</span>        <a class="code hl_variable" href="../../d9/dce/_client_validation_real_8h_adc6e5733fc3c22f0a7b2914188c49c90.html#adc6e5733fc3c22f0a7b2914188c49c90">state</a>.mEnabled = <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">  191</span>        <a class="code hl_variable" href="../../d9/dce/_client_validation_real_8h_adc6e5733fc3c22f0a7b2914188c49c90.html#adc6e5733fc3c22f0a7b2914188c49c90">state</a>.mNeedsFlush = <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">  192</span>    }</div>
-<div class="line"><span class="lineno">  193</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../d2/de0/async__logger_8cpp_8hpp_source.html#l00186">186</a> of file <a class="el" href="../../d2/de0/async__logger_8cpp_8hpp_source.html">async_logger.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  186</span>                                         {</div>
+<div class="line"><span class="lineno">  187</span>    detail::BackgroundFlushState&amp; <a class="code hl_variable" href="../../d9/dce/_client_validation_real_8h_adc6e5733fc3c22f0a7b2914188c49c90.html#adc6e5733fc3c22f0a7b2914188c49c90">state</a> = <a class="code hl_function" href="../../d9/d5b/classfl_1_1_singleton_ad5cb1b704e17768f75802673abb0ff75.html#ad5cb1b704e17768f75802673abb0ff75">Singleton&lt;detail::BackgroundFlushState&gt;::instance</a>();</div>
+<div class="line"><span class="lineno">  188</span> </div>
+<div class="line"><span class="lineno">  189</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d9/dce/_client_validation_real_8h_adc6e5733fc3c22f0a7b2914188c49c90.html#adc6e5733fc3c22f0a7b2914188c49c90">state</a>.mEnabled &amp;&amp; <a class="code hl_variable" href="../../d9/dce/_client_validation_real_8h_adc6e5733fc3c22f0a7b2914188c49c90.html#adc6e5733fc3c22f0a7b2914188c49c90">state</a>.mTimerHandle.is_valid()) {</div>
+<div class="line"><span class="lineno">  190</span>        <a class="code hl_function" href="../../d6/d93/namespacefl_1_1isr_a29c0b8a68aa4b89155f40b914eaaa4fb.html#a29c0b8a68aa4b89155f40b914eaaa4fb">fl::isr::detach_handler</a>(<a class="code hl_variable" href="../../d9/dce/_client_validation_real_8h_adc6e5733fc3c22f0a7b2914188c49c90.html#adc6e5733fc3c22f0a7b2914188c49c90">state</a>.mTimerHandle);</div>
+<div class="line"><span class="lineno">  191</span>        <a class="code hl_variable" href="../../d9/dce/_client_validation_real_8h_adc6e5733fc3c22f0a7b2914188c49c90.html#adc6e5733fc3c22f0a7b2914188c49c90">state</a>.mTimerHandle = fl::isr::handle();  <span class="comment">// Reset to default (invalid) handle</span></div>
+<div class="line"><span class="lineno">  192</span>        <a class="code hl_variable" href="../../d9/dce/_client_validation_real_8h_adc6e5733fc3c22f0a7b2914188c49c90.html#adc6e5733fc3c22f0a7b2914188c49c90">state</a>.mEnabled = <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  193</span>        <a class="code hl_variable" href="../../d9/dce/_client_validation_real_8h_adc6e5733fc3c22f0a7b2914188c49c90.html#adc6e5733fc3c22f0a7b2914188c49c90">state</a>.mNeedsFlush = <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  194</span>    }</div>
+<div class="line"><span class="lineno">  195</span>}</div>
 <div class="ttc" id="a_client_validation_real_8h_adc6e5733fc3c22f0a7b2914188c49c90_html_adc6e5733fc3c22f0a7b2914188c49c90"><div class="ttname"><a href="../../d9/dce/_client_validation_real_8h_adc6e5733fc3c22f0a7b2914188c49c90.html#adc6e5733fc3c22f0a7b2914188c49c90">state</a></div><div class="ttdeci">TestState state</div><div class="ttdef"><b>Definition</b> <a href="../../d9/dce/_client_validation_real_8h_source.html#l00049">ClientValidationReal.h:49</a></div></div>
-<div class="ttc" id="aclassfl_1_1_singleton_a47fdc044003ec27f9e9833f7f5418e01_html_a47fdc044003ec27f9e9833f7f5418e01"><div class="ttname"><a href="../../d9/d5b/classfl_1_1_singleton_a47fdc044003ec27f9e9833f7f5418e01.html#a47fdc044003ec27f9e9833f7f5418e01">fl::Singleton::instance</a></div><div class="ttdeci">static T &amp; instance() FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d0b/singleton_8h_source.html#l00041">singleton.h:41</a></div></div>
+<div class="ttc" id="aclassfl_1_1_singleton_ad5cb1b704e17768f75802673abb0ff75_html_ad5cb1b704e17768f75802673abb0ff75"><div class="ttname"><a href="../../d9/d5b/classfl_1_1_singleton_ad5cb1b704e17768f75802673abb0ff75.html#ad5cb1b704e17768f75802673abb0ff75">fl::Singleton::instance</a></div><div class="ttdeci">static T &amp; instance() FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d0b/singleton_8h_source.html#l00041">singleton.h:41</a></div></div>
 <div class="ttc" id="anamespacefl_1_1isr_a29c0b8a68aa4b89155f40b914eaaa4fb_html_a29c0b8a68aa4b89155f40b914eaaa4fb"><div class="ttname"><a href="../../d6/d93/namespacefl_1_1isr_a29c0b8a68aa4b89155f40b914eaaa4fb.html#a29c0b8a68aa4b89155f40b914eaaa4fb">fl::isr::detach_handler</a></div><div class="ttdeci">int detach_handler(handle &amp;h)</div><div class="ttdoc">Detach an ISR handler.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d55/handler_8cpp_8hpp_source.html#l00018">handler.cpp.hpp:18</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../db/d55/handler_8cpp_8hpp_source.html#l00018">fl::isr::detach_handler()</a>, <a class="el" href="../../d4/d0b/singleton_8h_source.html#l00041">fl::Singleton&lt; T, N &gt;::instance()</a>, and <a class="el" href="../../d9/dce/_client_validation_real_8h_source.html#l00049">state</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d6/d35/classfl_1_1_async_logger_a55785739910a193b5b6dffeb455bd150.html#a55785739910a193b5b6dffeb455bd150">~AsyncLogger()</a>, and <a class="el" href="../../d2/de0/async__logger_8cpp_8hpp_source.html#l00156">enableBackgroundFlush()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d6/d35/classfl_1_1_async_logger_a980ff44240839c88a4475e9283873ba0.html#a980ff44240839c88a4475e9283873ba0">~AsyncLogger()</a>, and <a class="el" href="../../d2/de0/async__logger_8cpp_8hpp_source.html#l00158">enableBackgroundFlush()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d6/d35/classfl_1_1_async_logger_ad95625ceb246ef889558a7f72d86b4fb_ad95625ceb246ef889558a7f72d86b4fb_cgraph.svg" width="398" height="86"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d6/d35/classfl_1_1_async_logger_ad95625ceb246ef889558a7f72d86b4fb_ad95625ceb246ef889558a7f72d86b4fb_cgraph.svg" width="584" height="86"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 <div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
@@ -159,7 +159,7 @@ $(function(){initNavTree('d6/d35/classfl_1_1_async_logger_ad95625ceb246ef889558a
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d6/d35/classfl_1_1_async_logger.html">AsyncLogger</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:04 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:08 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

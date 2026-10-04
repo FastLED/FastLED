@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -118,19 +118,19 @@ $(function(){initNavTree('dc/ddb/classfl_1_1_remote_ab569e9a1c7410ed56274db6b13f
 <p>Send an error notification to the remote peer. </p>
 <p>This is an unsolicited JSON-RPC notification (no request ID) that bypasses normal RPC flow. Use this for error-only state reporting where logging would fail due to serial backpressure. Format: {"jsonrpc":"2.0","method":"__error","params":{"message":"..."}} </p>
 
-<p class="definition">Definition at line <a class="el" href="../../db/d04/remote_8cpp_8hpp_source.html#l00115">115</a> of file <a class="el" href="../../db/d04/remote_8cpp_8hpp_source.html">remote.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  115</span>                                                {</div>
-<div class="line"><span class="lineno">  116</span>    fl::json params = <a class="code hl_function" href="../../de/d40/classfl_1_1json_af8bc0968107152344bfa8468bba76f54.html#af8bc0968107152344bfa8468bba76f54">fl::json::object</a>();</div>
-<div class="line"><span class="lineno">  117</span>    params.<a class="code hl_function" href="../../de/d40/classfl_1_1json_af272c33451fcfba68454595a4f6d8444.html#af272c33451fcfba68454595a4f6d8444">set</a>(<span class="stringliteral">&quot;message&quot;</span>, message);</div>
-<div class="line"><span class="lineno">  118</span>    <a class="code hl_function" href="#ab569e9a1c7410ed56274db6b13fb09c7">reportError</a>(params);</div>
-<div class="line"><span class="lineno">  119</span>}</div>
-<div class="ttc" id="aclassfl_1_1_remote_ab569e9a1c7410ed56274db6b13fb09c7_html_ab569e9a1c7410ed56274db6b13fb09c7"><div class="ttname"><a href="#ab569e9a1c7410ed56274db6b13fb09c7">fl::Remote::reportError</a></div><div class="ttdeci">void reportError(const fl::string &amp;message)</div><div class="ttdoc">Send an error notification to the remote peer.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d04/remote_8cpp_8hpp_source.html#l00115">remote.cpp.hpp:115</a></div></div>
-<div class="ttc" id="aclassfl_1_1json_af272c33451fcfba68454595a4f6d8444_html_af272c33451fcfba68454595a4f6d8444"><div class="ttname"><a href="../../de/d40/classfl_1_1json_af272c33451fcfba68454595a4f6d8444.html#af272c33451fcfba68454595a4f6d8444">fl::json::set</a></div><div class="ttdeci">void set(const fl::string &amp;key, const json &amp;value) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d05/json_8h_source.html#l00701">json.h:701</a></div></div>
-<div class="ttc" id="aclassfl_1_1json_af8bc0968107152344bfa8468bba76f54_html_af8bc0968107152344bfa8468bba76f54"><div class="ttname"><a href="../../de/d40/classfl_1_1json_af8bc0968107152344bfa8468bba76f54.html#af8bc0968107152344bfa8468bba76f54">fl::json::object</a></div><div class="ttdeci">static json object() FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d05/json_8h_source.html#l00692">json.h:692</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../db/d04/remote_8cpp_8hpp_source.html#l00134">134</a> of file <a class="el" href="../../db/d04/remote_8cpp_8hpp_source.html">remote.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  134</span>                                                {</div>
+<div class="line"><span class="lineno">  135</span>    fl::json params = <a class="code hl_function" href="../../de/d40/classfl_1_1json_ae7744bee3369b3debf7e30e4a4a18526.html#ae7744bee3369b3debf7e30e4a4a18526">fl::json::object</a>();</div>
+<div class="line"><span class="lineno">  136</span>    params.<a class="code hl_function" href="../../de/d40/classfl_1_1json_a2973a868c9dc87ee871bc400414920c9.html#a2973a868c9dc87ee871bc400414920c9">set</a>(<span class="stringliteral">&quot;message&quot;</span>, message);</div>
+<div class="line"><span class="lineno">  137</span>    <a class="code hl_function" href="#ab569e9a1c7410ed56274db6b13fb09c7">reportError</a>(params);</div>
+<div class="line"><span class="lineno">  138</span>}</div>
+<div class="ttc" id="aclassfl_1_1_remote_ab569e9a1c7410ed56274db6b13fb09c7_html_ab569e9a1c7410ed56274db6b13fb09c7"><div class="ttname"><a href="#ab569e9a1c7410ed56274db6b13fb09c7">fl::Remote::reportError</a></div><div class="ttdeci">void reportError(const fl::string &amp;message)</div><div class="ttdoc">Send an error notification to the remote peer.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d04/remote_8cpp_8hpp_source.html#l00134">remote.cpp.hpp:134</a></div></div>
+<div class="ttc" id="aclassfl_1_1json_a2973a868c9dc87ee871bc400414920c9_html_a2973a868c9dc87ee871bc400414920c9"><div class="ttname"><a href="../../de/d40/classfl_1_1json_a2973a868c9dc87ee871bc400414920c9.html#a2973a868c9dc87ee871bc400414920c9">fl::json::set</a></div><div class="ttdeci">void set(const fl::string &amp;key, const json &amp;value) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d05/json_8h_source.html#l00866">json.h:866</a></div></div>
+<div class="ttc" id="aclassfl_1_1json_ae7744bee3369b3debf7e30e4a4a18526_html_ae7744bee3369b3debf7e30e4a4a18526"><div class="ttname"><a href="../../de/d40/classfl_1_1json_ae7744bee3369b3debf7e30e4a4a18526.html#ae7744bee3369b3debf7e30e4a4a18526">fl::json::object</a></div><div class="ttdeci">static json object() FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d05/json_8h_source.html#l00857">json.h:857</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d4/d05/json_8h_source.html#l00692">fl::json::object()</a>, <a class="el" href="../../db/d04/remote_8cpp_8hpp_source.html#l00115">reportError()</a>, and <a class="el" href="../../d4/d05/json_8h_source.html#l00701">fl::json::set()</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d05/json_8h_source.html#l00857">fl::json::object()</a>, <a class="el" href="../../db/d04/remote_8cpp_8hpp_source.html#l00134">reportError()</a>, and <a class="el" href="../../d4/d05/json_8h_source.html#l00866">fl::json::set()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../db/d04/remote_8cpp_8hpp_source.html#l00115">reportError()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../db/d04/remote_8cpp_8hpp_source.html#l00134">reportError()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -155,7 +155,7 @@ $(function(){initNavTree('dc/ddb/classfl_1_1_remote_ab569e9a1c7410ed56274db6b13f
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../dc/ddb/classfl_1_1_remote.html">Remote</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:09 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

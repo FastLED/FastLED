@@ -1,0 +1,9 @@
+<map id="PixelController::reseed_binary_dithering" name="PixelController::reseed_binary_dithering">
+<area shape="rect" id="Node000001" title="Re&#45;point binary dithering at phase R after construction, leaving the per&#45;channel ranges e[] as init_b..." alt="" coords="5,23,175,63"/>
+<area shape="rect" id="Node000002" href="$dd/d6c/structfl_1_1_binary_dither_a2e392159b251b5e7c17bbe07707ead9e.html#a2e392159b251b5e7c17bbe07707ead9e" title="Re&#45;point d at frame, keeping the ranges init left in e." alt="" coords="223,31,395,56"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="175,41,209,41,209,46,175,46"/>
+<area shape="rect" id="Node000003" href="$dd/d6c/structfl_1_1_binary_dither_ac011a8e0e5afb087dbf2a19852a2c8dc.html#ac011a8e0e5afb087dbf2a19852a2c8dc" title="Q scaled into [0, range): the offset for one channel." alt="" coords="443,5,609,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="395,31,429,27,430,32,395,36"/>
+<area shape="rect" id="Node000004" href="$dd/d6c/structfl_1_1_binary_dither_aae46c7435dd271d8e46d3cd7e6b57d5c.html#aae46c7435dd271d8e46d3cd7e6b57d5c" title="The frame&#39;s offset pattern value Q: frame wrapped to VIRTUAL_BITS, bit&#45;reversed so consecutive frames..." alt="" coords="443,55,609,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="395,50,430,54,429,59,395,55"/>
+</map>

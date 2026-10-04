@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -130,20 +130,20 @@ $(function(){initNavTree('db/d58/classfl_1_1_perlin_particle_punch_aea526214d527
 <div class="line"><span class="lineno">  153</span>        <span class="keywordflow">return</span>;</div>
 <div class="line"><span class="lineno">  154</span>    p-&gt;alive = <span class="keyword">true</span>;</div>
 <div class="line"><span class="lineno">  155</span>    p-&gt;position = 0.0f; <span class="comment">// All particles punch out from position 0 (ground)</span></div>
-<div class="line"><span class="lineno">  156</span>    <span class="keywordtype">float</span> jitter = float(<a class="code hl_function" href="../../d2/d0d/group___random_gadb05544426b14ef8d85fb2eb73cb8a0a.html#gadb05544426b14ef8d85fb2eb73cb8a0a">random8</a>(80, 120)) / 100.0f;</div>
+<div class="line"><span class="lineno">  156</span>    <span class="keywordtype">float</span> jitter = float(<a class="code hl_function" href="../../d2/d0d/group___random_gafb55d95e3e866dce182f149535903dd8.html#gafb55d95e3e866dce182f149535903dd8">random8</a>(80, 120)) / 100.0f;</div>
 <div class="line"><span class="lineno">  157</span>    p-&gt;velocity = (0.5f + intensity * 1.5f) * <a class="code hl_variable" href="../../db/d58/classfl_1_1_perlin_particle_punch_a6358709ffeff1abe94dce81353fcce9b.html#a6358709ffeff1abe94dce81353fcce9b">mSpeed</a> * jitter;</div>
 <div class="line"><span class="lineno">  158</span>    p-&gt;brightness = 128.0f + intensity * 127.0f;</div>
-<div class="line"><span class="lineno">  159</span>    p-&gt;paletteIndex = <a class="code hl_function" href="../../d2/d0d/group___random_gadb05544426b14ef8d85fb2eb73cb8a0a.html#gadb05544426b14ef8d85fb2eb73cb8a0a">random8</a>();</div>
-<div class="line"><span class="lineno">  160</span>    p-&gt;headWidth = 3 + <a class="code hl_function" href="../../d2/d0d/group___random_gadb05544426b14ef8d85fb2eb73cb8a0a.html#gadb05544426b14ef8d85fb2eb73cb8a0a">random8</a>(3); <span class="comment">// 3, 4, or 5</span></div>
+<div class="line"><span class="lineno">  159</span>    p-&gt;paletteIndex = <a class="code hl_function" href="../../d2/d0d/group___random_gafb55d95e3e866dce182f149535903dd8.html#gafb55d95e3e866dce182f149535903dd8">random8</a>();</div>
+<div class="line"><span class="lineno">  160</span>    p-&gt;headWidth = 3 + <a class="code hl_function" href="../../d2/d0d/group___random_gafb55d95e3e866dce182f149535903dd8.html#gafb55d95e3e866dce182f149535903dd8">random8</a>(3); <span class="comment">// 3, 4, or 5</span></div>
 <div class="line"><span class="lineno">  161</span>}</div>
 <div class="ttc" id="aclassfl_1_1_perlin_particle_punch_a6358709ffeff1abe94dce81353fcce9b_html_a6358709ffeff1abe94dce81353fcce9b"><div class="ttname"><a href="../../db/d58/classfl_1_1_perlin_particle_punch_a6358709ffeff1abe94dce81353fcce9b.html#a6358709ffeff1abe94dce81353fcce9b">fl::PerlinParticlePunch::mSpeed</a></div><div class="ttdeci">float mSpeed</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d3e/perlin__particle__punch_8h_source.html#l00099">perlin_particle_punch.h:99</a></div></div>
 <div class="ttc" id="aclassfl_1_1_perlin_particle_punch_abcc211e1dbd044865f5e25430f1fb5dc_html_abcc211e1dbd044865f5e25430f1fb5dc"><div class="ttname"><a href="../../db/d58/classfl_1_1_perlin_particle_punch_abcc211e1dbd044865f5e25430f1fb5dc.html#abcc211e1dbd044865f5e25430f1fb5dc">fl::PerlinParticlePunch::tryAllocateAmbient</a></div><div class="ttdeci">AmbientParticle * tryAllocateAmbient()</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d46/perlin__particle__punch_8cpp_8hpp_source.html#l00185">perlin_particle_punch.cpp.hpp:185</a></div></div>
 <div class="ttc" id="aclassfl_1_1_perlin_particle_punch_html_df/df9/structfl_1_1_perlin_particle_punch_1_1_ambient_particle"><div class="ttname"><a href="../../db/d58/classfl_1_1_perlin_particle_punch.html#df/df9/structfl_1_1_perlin_particle_punch_1_1_ambient_particle">fl::PerlinParticlePunch::AmbientParticle</a></div><div class="ttdef"><b>Definition</b> <a href="../../d1/d46/perlin__particle__punch_8cpp_8hpp_source.html#l00022">perlin_particle_punch.cpp.hpp:22</a></div></div>
-<div class="ttc" id="agroup___random_gadb05544426b14ef8d85fb2eb73cb8a0a_html_gadb05544426b14ef8d85fb2eb73cb8a0a"><div class="ttname"><a href="../../d2/d0d/group___random_gadb05544426b14ef8d85fb2eb73cb8a0a.html#gadb05544426b14ef8d85fb2eb73cb8a0a">random8</a></div><div class="ttdeci">LIB8STATIC fl::u8 random8() FL_NOEXCEPT</div><div class="ttdoc">Generate an 8-bit random number.</div><div class="ttdef"><b>Definition</b> <a href="../../db/dab/fl_2math_2random8_8h_source.html#l00053">random8.h:53</a></div></div>
+<div class="ttc" id="agroup___random_gafb55d95e3e866dce182f149535903dd8_html_gafb55d95e3e866dce182f149535903dd8"><div class="ttname"><a href="../../d2/d0d/group___random_gafb55d95e3e866dce182f149535903dd8.html#gafb55d95e3e866dce182f149535903dd8">random8</a></div><div class="ttdeci">LIB8STATIC fl::u8 random8() FL_NO_EXCEPT</div><div class="ttdoc">Generate an 8-bit random number.</div><div class="ttdef"><b>Definition</b> <a href="../../db/dab/fl_2math_2random8_8h_source.html#l00053">random8.h:53</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../d1/d46/perlin__particle__punch_8cpp_8hpp_source.html#l00023">fl::PerlinParticlePunch::AmbientParticle::alive</a>, <a class="el" href="../../d1/d46/perlin__particle__punch_8cpp_8hpp_source.html#l00026">fl::PerlinParticlePunch::AmbientParticle::brightness</a>, <a class="el" href="../../d1/d46/perlin__particle__punch_8cpp_8hpp_source.html#l00028">fl::PerlinParticlePunch::AmbientParticle::headWidth</a>, <a class="el" href="../../d0/d3e/perlin__particle__punch_8h_source.html#l00099">mSpeed</a>, <a class="el" href="../../d1/d46/perlin__particle__punch_8cpp_8hpp_source.html#l00027">fl::PerlinParticlePunch::AmbientParticle::paletteIndex</a>, <a class="el" href="../../d1/d46/perlin__particle__punch_8cpp_8hpp_source.html#l00024">fl::PerlinParticlePunch::AmbientParticle::position</a>, <a class="el" href="../../db/dab/fl_2math_2random8_8h_source.html#l00053">random8()</a>, <a class="el" href="../../d1/d46/perlin__particle__punch_8cpp_8hpp_source.html#l00185">tryAllocateAmbient()</a>, and <a class="el" href="../../d1/d46/perlin__particle__punch_8cpp_8hpp_source.html#l00025">fl::PerlinParticlePunch::AmbientParticle::velocity</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../db/d58/classfl_1_1_perlin_particle_punch_aae158d36e0b12c32e8a9dacfb065aaaa.html#aae158d36e0b12c32e8a9dacfb065aaaa">~PerlinParticlePunch()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../db/d58/classfl_1_1_perlin_particle_punch_afd6df75b40d441453ebb926050bd1528.html#afd6df75b40d441453ebb926050bd1528">~PerlinParticlePunch()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -168,7 +168,7 @@ $(function(){initNavTree('db/d58/classfl_1_1_perlin_particle_punch_aea526214d527
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../db/d58/classfl_1_1_perlin_particle_punch.html">PerlinParticlePunch</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:09 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

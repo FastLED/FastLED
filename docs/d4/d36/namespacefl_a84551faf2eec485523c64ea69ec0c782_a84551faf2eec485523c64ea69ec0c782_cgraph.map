@@ -1,0 +1,14 @@
+<map id="fl::processPixelLinearQ16" name="fl::processPixelLinearQ16">
+<area shape="rect" id="Node000001" title="Pre&#45;response linear emitter light for a power prepass." alt="" coords="5,80,191,105"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_aad6443800e7b03380f9a2283f02c1279.html#aad6443800e7b03380f9a2283f02c1279" title="Decode one 8&#45;bit source code to u16 linear light under transfer." alt="" coords="255,5,418,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="131,77,238,39,266,32,267,37,239,45,133,82"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_ab239d57d5a4481bf9688ac54d3f328b8.html#ab239d57d5a4481bf9688ac54d3f328b8" title="One pixel: u16 linear RGB &#45;&gt; s16.16 XYZ." alt="" coords="255,55,419,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="191,80,241,75,241,80,191,85"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a37b9b061238b860167bb06b975520fd6.html#a37b9b061238b860167bb06b975520fd6" title="One pixel: XYZ in s16.16 to in&#45;gamut emitter drives in s16.16." alt="" coords="239,156,435,181"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="140,103,284,149,282,154,138,108"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_af5a0679639e0ad1db7feb7f9705df72f.html#af5a0679639e0ad1db7feb7f9705df72f" title="One pixel: XYZ in s16.16 to three emitter drives in s16.16." alt="" coords="483,107,649,132"/>
+<area shape="poly" id="edge6_Node000001_Node000005" title=" " alt="" coords="191,95,469,111,469,116,191,101"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="396,153,492,132,493,138,397,159"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a4e06a4bfbce59ea143a3a844cdb084eb.html#a4e06a4bfbce59ea143a3a844cdb084eb" title="XYZ (s16.16, D65&#45;relative) &#45;&gt; OKLab (s16.16), L then a then b." alt="" coords="497,156,635,181"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="435,166,483,166,483,171,435,171"/>
+</map>

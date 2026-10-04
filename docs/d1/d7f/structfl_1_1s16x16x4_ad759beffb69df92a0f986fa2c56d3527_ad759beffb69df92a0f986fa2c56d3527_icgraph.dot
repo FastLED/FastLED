@@ -11,6 +11,6 @@ digraph "fl::s16x16x4::set1"
   Node2 [id="Node000002",label="autoresearch::simd\l_check::benchSimd4",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d1a/namespaceautoresearch_1_1simd__check_a31fa178fd9b80e3836f4a68e5f433705.html#a31fa178fd9b80e3836f4a68e5f433705",tooltip=" "];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node3 [id="Node000003",label="autoresearch::simd\l_check::runMultiplyBenchmark",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d1a/namespaceautoresearch_1_1simd__check_acd8ffc3b65508dec50abd9f9ed7a6f20.html#acd8ffc3b65508dec50abd9f9ed7a6f20",tooltip=" "];
-  Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="AutoResearchRemoteControl\l::registerFunctions",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$db/d63/class_auto_research_remote_control_abb6600e8a1e8c4ef46ba29e7bd3b78b4.html#abb6600e8a1e8c4ef46ba29e7bd3b78b4",tooltip="Register all RPC functions with shared autoresearch state."];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::s16x16x4::lerp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d7f/structfl_1_1s16x16x4_addc6e10b8b68c4819600996f20aa11d0.html#addc6e10b8b68c4819600996f20aa11d0",tooltip="Linear interpolation: a + (b - a) * t (using Q16 multiply) t: s16x16 interpolation factor in [0,..."];
 }

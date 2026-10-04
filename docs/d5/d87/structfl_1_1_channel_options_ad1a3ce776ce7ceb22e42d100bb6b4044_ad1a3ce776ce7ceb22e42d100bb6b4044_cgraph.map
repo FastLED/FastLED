@@ -1,0 +1,13 @@
+<map id="fl::ChannelOptions::requestColorManagement" name="fl::ChannelOptions::requestColorManagement">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,37,204,77"/>
+<area shape="rect" id="Node000002" href="$d5/d87/structfl_1_1_channel_options_a1d9e6fd69b109da0867f05f71c53a019.html#a1d9e6fd69b109da0867f05f71c53a019" title=" " alt="" coords="252,5,393,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="204,40,238,35,239,40,205,45"/>
+<area shape="rect" id="Node000003" href="$da/d81/structfl_1_1_source_profile_aebd5c778d592b6b83ad80d137eef242c.html#aebd5c778d592b6b83ad80d137eef242c" title=" " alt="" coords="257,69,388,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="205,69,244,75,243,80,204,75"/>
+<area shape="rect" id="Node000004" href="$da/d81/structfl_1_1_source_profile_a0751fcad63d8efb4f3ac55baa3c1ec52.html#a0751fcad63d8efb4f3ac55baa3c1ec52" title=" " alt="" coords="441,37,572,77"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="388,75,427,68,428,74,389,81"/>
+<area shape="rect" id="Node000005" href="$da/d81/structfl_1_1_source_profile_af2c687f77eb11afc242a0004593a0a78.html#af2c687f77eb11afc242a0004593a0a78" title=" " alt="" coords="441,101,572,141"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="389,98,428,105,427,110,388,103"/>
+<area shape="rect" id="Node000006" href="$da/d81/structfl_1_1_source_profile_a54f99d88f00f61f8fba9bfbfedc5210c.html#a54f99d88f00f61f8fba9bfbfedc5210c" title=" " alt="" coords="620,109,775,134"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="572,119,606,119,606,124,572,124"/>
+</map>

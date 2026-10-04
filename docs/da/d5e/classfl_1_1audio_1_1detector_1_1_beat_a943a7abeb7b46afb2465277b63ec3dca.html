@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -123,7 +123,7 @@ $(function(){initNavTree('da/d5e/classfl_1_1audio_1_1detector_1_1_beat_a943a7abe
 </table>
 </div><div class="memdoc">
 
-<p>Implements <a class="el" href="../../df/d9b/classfl_1_1audio_1_1_detector_a19901584e2d364d70455cb878c2efc77.html#a19901584e2d364d70455cb878c2efc77">fl::audio::Detector</a>.</p>
+<p>Implements <a class="el" href="../../df/d9b/classfl_1_1audio_1_1_detector_acc485e66fc812ccd1ae79d213adb08ac.html#acc485e66fc812ccd1ae79d213adb08ac">fl::audio::Detector</a>.</p>
 
 <p class="definition">Definition at line <a class="el" href="../../df/ded/beat_8cpp_8hpp_source.html#l00028">28</a> of file <a class="el" href="../../df/ded/beat_8cpp_8hpp_source.html">beat.cpp.hpp</a>.</p>
 <div class="fragment"><div class="line"><span class="lineno">   28</span>                                             {</div>
@@ -134,7 +134,7 @@ $(function(){initNavTree('da/d5e/classfl_1_1audio_1_1detector_1_1_beat_a943a7abe
 <div class="line"><span class="lineno">   33</span>    <span class="comment">// than CQ_OCTAVE. The 16-bin / 30-14080Hz range has N_window=1,</span></div>
 <div class="line"><span class="lineno">   34</span>    <span class="comment">// which is borderline for CQ_NAIVE but acceptable for beat detection.</span></div>
 <div class="line"><span class="lineno">   35</span>    <a class="code hl_variable" href="../../da/d5e/classfl_1_1audio_1_1detector_1_1_beat_a886ba9481489d302e67bb29f4091c23a.html#a886ba9481489d302e67bb29f4091c23a">mRetainedFFT</a> = context-&gt;getFFT(16, 30.0f,</div>
-<div class="line"><span class="lineno">   36</span>                                   <a class="code hl_function" href="../../d9/d76/structfl_1_1audio_1_1fft_1_1_args_a77f3e2e45eca08b1ff1a2e93901ea4a7.html#a77f3e2e45eca08b1ff1a2e93901ea4a7">fft::Args::DefaultMaxFrequency</a>(),</div>
+<div class="line"><span class="lineno">   36</span>                                   <a class="code hl_function" href="../../d9/d76/structfl_1_1audio_1_1fft_1_1_args_ab249a53d081a66065b74573cd8f67dbb.html#ab249a53d081a66065b74573cd8f67dbb">fft::Args::DefaultMaxFrequency</a>(),</div>
 <div class="line"><span class="lineno">   37</span>                                   <a class="code hl_enumvalue" href="../../de/dee/namespacefl_1_1audio_1_1fft_a6daa8d51b19c113e5318d12785c0f571.html#a6daa8d51b19c113e5318d12785c0f571a273283e789df4285798abcd51e2b23c5">fft::Mode::CQ_NAIVE</a>);</div>
 <div class="line"><span class="lineno">   38</span>    <span class="keyword">const</span> fft::Bins&amp; <a class="code hl_variable" href="../../de/d2f/_p_j_r_c_spectrum_analyzer_8h_a73e27170be4f75c0c95ba2891aa89837.html#a73e27170be4f75c0c95ba2891aa89837">fft</a> = *<a class="code hl_variable" href="../../da/d5e/classfl_1_1audio_1_1detector_1_1_beat_a886ba9481489d302e67bb29f4091c23a.html#a886ba9481489d302e67bb29f4091c23a">mRetainedFFT</a>;</div>
 <div class="line"><span class="lineno">   39</span>    u32 timestamp = context-&gt;getTimestamp();</div>
@@ -176,11 +176,11 @@ $(function(){initNavTree('da/d5e/classfl_1_1audio_1_1detector_1_1_beat_a943a7abe
 <div class="ttc" id="aclassfl_1_1audio_1_1detector_1_1_beat_ab557af915484ab1d58c06feb2d511bc8_html_ab557af915484ab1d58c06feb2d511bc8"><div class="ttname"><a href="../../da/d5e/classfl_1_1audio_1_1detector_1_1_beat_ab557af915484ab1d58c06feb2d511bc8.html#ab557af915484ab1d58c06feb2d511bc8">fl::audio::detector::Beat::mBeatDetected</a></div><div class="ttdeci">bool mBeatDetected</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d07/audio_2detector_2beat_8h_source.html#l00042">beat.h:42</a></div></div>
 <div class="ttc" id="aclassfl_1_1audio_1_1detector_1_1_beat_ae9c4aba9f9dbafe63ac0c9f658aed542_html_ae9c4aba9f9dbafe63ac0c9f658aed542"><div class="ttname"><a href="../../da/d5e/classfl_1_1audio_1_1detector_1_1_beat_ae9c4aba9f9dbafe63ac0c9f658aed542.html#ae9c4aba9f9dbafe63ac0c9f658aed542">fl::audio::detector::Beat::updatePhase</a></div><div class="ttdeci">void updatePhase(u32 timestamp)</div><div class="ttdef"><b>Definition</b> <a href="../../df/ded/beat_8cpp_8hpp_source.html#l00161">beat.cpp.hpp:161</a></div></div>
 <div class="ttc" id="anamespacefl_1_1audio_1_1fft_a6daa8d51b19c113e5318d12785c0f571_html_a6daa8d51b19c113e5318d12785c0f571a273283e789df4285798abcd51e2b23c5"><div class="ttname"><a href="../../de/dee/namespacefl_1_1audio_1_1fft_a6daa8d51b19c113e5318d12785c0f571.html#a6daa8d51b19c113e5318d12785c0f571a273283e789df4285798abcd51e2b23c5">fl::audio::fft::Mode::CQ_NAIVE</a></div><div class="ttdeci">@ CQ_NAIVE</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d76/fft_8h_source.html#l00039">fft.h:39</a></div></div>
-<div class="ttc" id="astructfl_1_1audio_1_1fft_1_1_args_a77f3e2e45eca08b1ff1a2e93901ea4a7_html_a77f3e2e45eca08b1ff1a2e93901ea4a7"><div class="ttname"><a href="../../d9/d76/structfl_1_1audio_1_1fft_1_1_args_a77f3e2e45eca08b1ff1a2e93901ea4a7.html#a77f3e2e45eca08b1ff1a2e93901ea4a7">fl::audio::fft::Args::DefaultMaxFrequency</a></div><div class="ttdeci">static float DefaultMaxFrequency() FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d76/fft_8h_source.html#l00128">fft.h:128</a></div></div>
+<div class="ttc" id="astructfl_1_1audio_1_1fft_1_1_args_ab249a53d081a66065b74573cd8f67dbb_html_ab249a53d081a66065b74573cd8f67dbb"><div class="ttname"><a href="../../d9/d76/structfl_1_1audio_1_1fft_1_1_args_ab249a53d081a66065b74573cd8f67dbb.html#ab249a53d081a66065b74573cd8f67dbb">fl::audio::fft::Args::DefaultMaxFrequency</a></div><div class="ttdeci">static float DefaultMaxFrequency() FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d76/fft_8h_source.html#l00128">fft.h:128</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../df/ded/beat_8cpp_8hpp_source.html#l00011">Beat()</a>, <a class="el" href="../../df/ded/beat_8cpp_8hpp_source.html#l00080">calculateSpectralFlux()</a>, <a class="el" href="../../d7/d76/fft_8h_source.html#l00039">fl::audio::fft::CQ_NAIVE</a>, <a class="el" href="../../d7/d76/fft_8h_source.html#l00128">fl::audio::fft::Args::DefaultMaxFrequency()</a>, <a class="el" href="../../da/dc7/advanced_8h_source.html#l00123">detectBeat()</a>, <a class="el" href="../../d6/d07/audio_2detector_2beat_8h_source.html#l00042">mBeatDetected</a>, <a class="el" href="../../d6/d07/audio_2detector_2beat_8h_source.html#l00055">mLastBeatTime</a>, <a class="el" href="../../d6/d07/audio_2detector_2beat_8h_source.html#l00051">mPreviousMagnitudes</a>, <a class="el" href="../../d6/d07/audio_2detector_2beat_8h_source.html#l00065">mRetainedFFT</a>, <a class="el" href="../../d6/d07/audio_2detector_2beat_8h_source.html#l00052">mSpectralFlux</a>, <a class="el" href="../../df/ded/beat_8cpp_8hpp_source.html#l00028">update()</a>, <a class="el" href="../../df/ded/beat_8cpp_8hpp_source.html#l00104">updateAdaptiveThreshold()</a>, <a class="el" href="../../df/ded/beat_8cpp_8hpp_source.html#l00161">updatePhase()</a>, and <a class="el" href="../../df/ded/beat_8cpp_8hpp_source.html#l00138">updateTempo()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../da/d5e/classfl_1_1audio_1_1detector_1_1_beat_a8015bb04d312d1e0b4efba50c7810400.html#a8015bb04d312d1e0b4efba50c7810400">~Beat()</a>, and <a class="el" href="../../df/ded/beat_8cpp_8hpp_source.html#l00028">update()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../da/d5e/classfl_1_1audio_1_1detector_1_1_beat_af83682b803c2eb9d1d8ee48756c31014.html#af83682b803c2eb9d1d8ee48756c31014">~Beat()</a>, and <a class="el" href="../../df/ded/beat_8cpp_8hpp_source.html#l00028">update()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -205,7 +205,7 @@ $(function(){initNavTree('da/d5e/classfl_1_1audio_1_1detector_1_1_beat_a943a7abe
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../db/dbf/namespacefl_1_1audio.html">audio</a></li><li class="navelem"><a class="el" href="../../dd/d12/namespacefl_1_1audio_1_1detector.html">detector</a></li><li class="navelem"><a class="el" href="../../da/d5e/classfl_1_1audio_1_1detector_1_1_beat.html">Beat</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:08 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:11 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

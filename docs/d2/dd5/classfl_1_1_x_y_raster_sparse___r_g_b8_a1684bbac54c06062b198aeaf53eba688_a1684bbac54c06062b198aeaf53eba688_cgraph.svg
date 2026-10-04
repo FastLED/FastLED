@@ -104,7 +104,7 @@ var sectionId = 'dynsection-0';
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_a2792268a864ed3d46b191c20fd56ff87.html#a2792268a864ed3d46b191c20fd56ff87" target="_top" xlink:title=" ">
+<g id="a_Node000004"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_aa93f4f0e5197ba7d957ac3d32ce76c52.html#aa93f4f0e5197ba7d957ac3d32ce76c52" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="339.5,-241 225.5,-241 225.5,-222 339.5,-222 339.5,-241"/>
 <text text-anchor="middle" x="282.5" y="-229" font-family="Helvetica,sans-Serif" font-size="10.00">fl::CRGB::colorBoost</text>
 </a>
@@ -176,7 +176,7 @@ var sectionId = 'dynsection-0';
 <!-- Node30 -->
 <g id="Node000030" class="node">
 <title>Node30</title>
-<g id="a_Node000030"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_aa272170bea8120f101f27ebd2c323b55.html#aa272170bea8120f101f27ebd2c323b55" target="_top" xlink:title="Scale down a RGB to N/256ths of its current brightness, using &quot;plain math&quot; dimming rules.">
+<g id="a_Node000030"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_a88ec345b046910f4ddf5cd4d793e7e88.html#a88ec345b046910f4ddf5cd4d793e7e88" target="_top" xlink:title="Scale down a RGB to N/256ths of its current brightness, using &quot;plain math&quot; dimming rules.">
 <polygon fill="white" stroke="#666666" points="332.5,-93 232.5,-93 232.5,-74 332.5,-74 332.5,-93"/>
 <text text-anchor="middle" x="282.5" y="-81" font-family="Helvetica,sans-Serif" font-size="10.00">fl::CRGB::nscale8</text>
 </a>
@@ -230,7 +230,7 @@ var sectionId = 'dynsection-0';
 <!-- Node5 -->
 <g id="Node000005" class="node">
 <title>Node5</title>
-<g id="a_Node000005"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_adb891cc4fe8f5ac2188d72c13c0256fd.html#adb891cc4fe8f5ac2188d72c13c0256fd" target="_top" xlink:title="Default constructor.">
+<g id="a_Node000005"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_a910ee467a963ad6805026ad83873e52b.html#a910ee467a963ad6805026ad83873e52b" target="_top" xlink:title="Default constructor.">
 <polygon fill="white" stroke="#666666" points="486.5,-149 396.5,-149 396.5,-130 486.5,-130 486.5,-149"/>
 <text text-anchor="middle" x="441.5" y="-137" font-family="Helvetica,sans-Serif" font-size="10.00">fl::CRGB::CRGB</text>
 </a>

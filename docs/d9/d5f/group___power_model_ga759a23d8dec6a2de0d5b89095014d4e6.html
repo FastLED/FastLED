@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -105,9 +105,6 @@ $(function(){initNavTree('d9/d5f/group___power_model_ga759a23d8dec6a2de0d5b89095
 
 <div class="memitem">
 <div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void set_power_model </td>
@@ -116,38 +113,39 @@ $(function(){initNavTree('d9/d5f/group___power_model_ga759a23d8dec6a2de0d5b89095
           <td></td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
 
 <p>Set custom RGBW LED power consumption model. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">model</td><td>RGBW power consumption model </td></tr>
+    <tr><td class="paramname">model</td><td>RGBW power consumption model</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section note"><dt>Note</dt><dd>Future API enhancement - currently extracts RGB components only </dd>
-<dd>
-White channel power is stored but not yet used in calculations </dd></dl>
+<p><code>white_mW</code> is kept and used. It used to be dropped by <code>toRGB()</code>, so a caller who declared an RGBW strip got a budget computed over three emitters while four were lit. On the shipped default model (r90 g70 b90 w100) and the shipped conversions, at full white, the three-emitter figure is 249 units against a true four-emitter draw of 348 under <code>kRGBWMaxBrightness</code> (40% under budget), 266 under <code>kRGBWBoostedWhite</code>, and 99 under <code>kRGBWExactColors</code> (2.5x over).</p>
+<p>The white emitter is charged only for controllers actually in RGBW mode; see <code>calculate_unscaled_power_mW(span, const <a class="el" href="../../db/d74/struct_rgbw.html">Rgbw</a>&amp;)</code>. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../dc/d5b/power__mgt_8h_source.html#l00186">186</a> of file <a class="el" href="../../dc/d5b/power__mgt_8h_source.html">power_mgt.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  186</span>                                                         {</div>
-<div class="line"><span class="lineno">  187</span>    <a class="code hl_function" href="../../d9/d5f/group___power_model_ga83d1cb7bfce9bd338765968bb40d54e5.html#ga83d1cb7bfce9bd338765968bb40d54e5">set_power_model</a>(model.<a class="code hl_function" href="../../de/dc0/struct_power_model_r_g_b_w_aaca8cbfd4a2b24930f0be607fd02c0a2.html#aaca8cbfd4a2b24930f0be607fd02c0a2">toRGB</a>());  <span class="comment">// TODO: Implement RGBW power model.</span></div>
-<div class="line"><span class="lineno">  188</span>}</div>
-<div class="ttc" id="agroup___power_model_ga83d1cb7bfce9bd338765968bb40d54e5_html_ga83d1cb7bfce9bd338765968bb40d54e5"><div class="ttname"><a href="../../d9/d5f/group___power_model_ga83d1cb7bfce9bd338765968bb40d54e5.html#ga83d1cb7bfce9bd338765968bb40d54e5">set_power_model</a></div><div class="ttdeci">void set_power_model(const PowerModelRGB &amp;model)</div><div class="ttdoc">Set custom RGB LED power consumption model.</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d2a/power__mgt_8cpp_8hpp_source.html#l00275">power_mgt.cpp.hpp:275</a></div></div>
-<div class="ttc" id="astruct_power_model_r_g_b_w_aaca8cbfd4a2b24930f0be607fd02c0a2_html_aaca8cbfd4a2b24930f0be607fd02c0a2"><div class="ttname"><a href="../../de/dc0/struct_power_model_r_g_b_w_aaca8cbfd4a2b24930f0be607fd02c0a2.html#aaca8cbfd4a2b24930f0be607fd02c0a2">PowerModelRGBW::toRGB</a></div><div class="ttdeci">constexpr PowerModelRGB toRGB() const</div><div class="ttdoc">Convert to RGB model (extracts RGB components, preserves exponent)</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d5b/power__mgt_8h_source.html#l00083">power_mgt.h:83</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d1/d2a/power__mgt_8cpp_8hpp_source.html#l00917">917</a> of file <a class="el" href="../../d1/d2a/power__mgt_8cpp_8hpp_source.html">power_mgt.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  917</span>                                                  {</div>
+<div class="line"><span class="lineno">  918</span>    <a class="code hl_function" href="../../d1/d2a/power__mgt_8cpp_8hpp_aa482db0d85e7c33ad7ce4f3b77f4808e.html#aa482db0d85e7c33ad7ce4f3b77f4808e">apply_rgb_power_model</a>(model.<a class="code hl_function" href="../../de/dc0/struct_power_model_r_g_b_w_aaca8cbfd4a2b24930f0be607fd02c0a2.html#aaca8cbfd4a2b24930f0be607fd02c0a2">toRGB</a>());</div>
+<div class="line"><span class="lineno">  919</span>    <a class="code hl_function" href="../../d1/d2a/power__mgt_8cpp_8hpp_a96a9190022832e655b9a01a3e0167d8c.html#a96a9190022832e655b9a01a3e0167d8c">gWhiteEmitterPower</a>().<a class="code hl_variable" href="../../d1/d2a/power__mgt_8cpp_8hpp.html#aa2a08875d9bc8d9d3c2eaedf2fa1f181">mW</a> = model.<a class="code hl_variable" href="../../de/dc0/struct_power_model_r_g_b_w_afcf3fd1764495b33c9c02b62741a9097.html#afcf3fd1764495b33c9c02b62741a9097">white_mW</a>;</div>
+<div class="line"><span class="lineno">  920</span>    <a class="code hl_function" href="../../d1/d2a/power__mgt_8cpp_8hpp_a8cfee7a07f6f35100dad7f4d642eaf2d.html#a8cfee7a07f6f35100dad7f4d642eaf2d">gRgbwwEmitterPower</a>().<a class="code hl_variable" href="../../d1/d2a/power__mgt_8cpp_8hpp.html#a8708d6fd7dff1f15c56b69785035b3d7">declared</a> = <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  921</span>}</div>
+<div class="ttc" id="apower__mgt_8cpp_8hpp_a8cfee7a07f6f35100dad7f4d642eaf2d_html_a8cfee7a07f6f35100dad7f4d642eaf2d"><div class="ttname"><a href="../../d1/d2a/power__mgt_8cpp_8hpp_a8cfee7a07f6f35100dad7f4d642eaf2d.html#a8cfee7a07f6f35100dad7f4d642eaf2d">gRgbwwEmitterPower</a></div><div class="ttdeci">static RgbwwEmitterPower &amp; gRgbwwEmitterPower()</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d2a/power__mgt_8cpp_8hpp_source.html#l00074">power_mgt.cpp.hpp:74</a></div></div>
+<div class="ttc" id="apower__mgt_8cpp_8hpp_a96a9190022832e655b9a01a3e0167d8c_html_a96a9190022832e655b9a01a3e0167d8c"><div class="ttname"><a href="../../d1/d2a/power__mgt_8cpp_8hpp_a96a9190022832e655b9a01a3e0167d8c.html#a96a9190022832e655b9a01a3e0167d8c">gWhiteEmitterPower</a></div><div class="ttdeci">static WhiteEmitterPower &amp; gWhiteEmitterPower()</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d2a/power__mgt_8cpp_8hpp_source.html#l00065">power_mgt.cpp.hpp:65</a></div></div>
+<div class="ttc" id="apower__mgt_8cpp_8hpp_aa482db0d85e7c33ad7ce4f3b77f4808e_html_aa482db0d85e7c33ad7ce4f3b77f4808e"><div class="ttname"><a href="../../d1/d2a/power__mgt_8cpp_8hpp_aa482db0d85e7c33ad7ce4f3b77f4808e.html#aa482db0d85e7c33ad7ce4f3b77f4808e">apply_rgb_power_model</a></div><div class="ttdeci">static void apply_rgb_power_model(const PowerModelRGB &amp;model)</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d2a/power__mgt_8cpp_8hpp_source.html#l00897">power_mgt.cpp.hpp:897</a></div></div>
+<div class="ttc" id="apower__mgt_8cpp_8hpp_html_a8708d6fd7dff1f15c56b69785035b3d7"><div class="ttname"><a href="../../d1/d2a/power__mgt_8cpp_8hpp.html#a8708d6fd7dff1f15c56b69785035b3d7">RgbwwEmitterPower::declared</a></div><div class="ttdeci">bool declared</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d2a/power__mgt_8cpp_8hpp_source.html#l00071">power_mgt.cpp.hpp:71</a></div></div>
+<div class="ttc" id="apower__mgt_8cpp_8hpp_html_aa2a08875d9bc8d9d3c2eaedf2fa1f181"><div class="ttname"><a href="../../d1/d2a/power__mgt_8cpp_8hpp.html#aa2a08875d9bc8d9d3c2eaedf2fa1f181">WhiteEmitterPower::mW</a></div><div class="ttdeci">fl::u8 mW</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d2a/power__mgt_8cpp_8hpp_source.html#l00062">power_mgt.cpp.hpp:62</a></div></div>
+<div class="ttc" id="astruct_power_model_r_g_b_w_aaca8cbfd4a2b24930f0be607fd02c0a2_html_aaca8cbfd4a2b24930f0be607fd02c0a2"><div class="ttname"><a href="../../de/dc0/struct_power_model_r_g_b_w_aaca8cbfd4a2b24930f0be607fd02c0a2.html#aaca8cbfd4a2b24930f0be607fd02c0a2">PowerModelRGBW::toRGB</a></div><div class="ttdeci">constexpr PowerModelRGB toRGB() const</div><div class="ttdoc">The RGB emitters alone, without the white one.</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d5b/power__mgt_8h_source.html#l00090">power_mgt.h:90</a></div></div>
+<div class="ttc" id="astruct_power_model_r_g_b_w_afcf3fd1764495b33c9c02b62741a9097_html_afcf3fd1764495b33c9c02b62741a9097"><div class="ttname"><a href="../../de/dc0/struct_power_model_r_g_b_w_afcf3fd1764495b33c9c02b62741a9097.html#afcf3fd1764495b33c9c02b62741a9097">PowerModelRGBW::white_mW</a></div><div class="ttdeci">fl::u8 white_mW</div><div class="ttdoc">White channel power at full brightness (255), in milliwatts.</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d5b/power__mgt_8h_source.html#l00061">power_mgt.h:61</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d1/d2a/power__mgt_8cpp_8hpp_source.html#l00275">set_power_model()</a>, and <a class="el" href="../../dc/d5b/power__mgt_8h_source.html#l00083">PowerModelRGBW::toRGB()</a>.</p>
+<p class="reference">References <a class="el" href="../../d1/d2a/power__mgt_8cpp_8hpp_source.html#l00897">apply_rgb_power_model()</a>, <a class="el" href="../../d1/d2a/power__mgt_8cpp_8hpp_source.html#l00071">RgbwwEmitterPower::declared</a>, <a class="el" href="../../d1/d2a/power__mgt_8cpp_8hpp_source.html#l00074">gRgbwwEmitterPower()</a>, <a class="el" href="../../d1/d2a/power__mgt_8cpp_8hpp_source.html#l00065">gWhiteEmitterPower()</a>, <a class="el" href="../../d1/d2a/power__mgt_8cpp_8hpp_source.html#l00062">WhiteEmitterPower::mW</a>, <a class="el" href="../../dc/d5b/power__mgt_8h_source.html#l00090">PowerModelRGBW::toRGB()</a>, and <a class="el" href="../../dc/d5b/power__mgt_8h_source.html#l00061">PowerModelRGBW::white_mW</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d9/d5f/group___power_model_ga759a23d8dec6a2de0d5b89095014d4e6_ga759a23d8dec6a2de0d5b89095014d4e6_cgraph.svg" width="100%" height="364"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d9/d5f/group___power_model_ga759a23d8dec6a2de0d5b89095014d4e6_ga759a23d8dec6a2de0d5b89095014d4e6_cgraph.svg" width="100%" height="441"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 
 </div>
@@ -159,7 +157,7 @@ White channel power is stored but not yet used in calculations </dd></dl>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d9/d5f/group___power_model.html">LED Power Consumption Models</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:02 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

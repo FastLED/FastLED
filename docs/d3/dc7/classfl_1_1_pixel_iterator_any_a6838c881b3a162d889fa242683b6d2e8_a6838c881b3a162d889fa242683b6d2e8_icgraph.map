@@ -1,0 +1,19 @@
+<map id="fl::PixelIteratorAny::bindIterator" name="fl::PixelIteratorAny::bindIterator">
+<area shape="rect" id="Node000001" title="Point mPixelIterator at this object&#39;s own controller." alt="" coords="387,140,529,180"/>
+<area shape="rect" id="Node000002" href="$d3/dc7/classfl_1_1_pixel_iterator_any_aabc036e7f094a1c0c60a5d0c5ac39412.html#aabc036e7f094a1c0c60a5d0c5ac39412" title="Copy: the iterator must be re&#45;aimed, not copied." alt="" coords="5,5,148,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="424,133,384,102,338,76,290,59,240,46,148,32,149,27,241,41,292,54,340,71,387,98,427,129"/>
+<area shape="rect" id="Node000003" href="$d3/dc7/classfl_1_1_pixel_iterator_any_ab136b28e1a8d9f512d9ee5d97357ccc8.html#ab136b28e1a8d9f512d9ee5d97357ccc8" title=" " alt="" coords="196,276,339,316"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="426,192,386,225,340,260,309,278,307,274,337,255,382,221,422,188"/>
+<area shape="rect" id="Node000004" href="$d3/dc7/classfl_1_1_pixel_iterator_any_ac0406f961031d4acae7cf2233bab13f8.html#ac0406f961031d4acae7cf2233bab13f8" title="Construct adapter with color order conversion." alt="" coords="196,111,339,151"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="373,150,338,144,339,139,374,144"/>
+<area shape="rect" id="Node000005" href="$d3/dc7/classfl_1_1_pixel_iterator_any_ad8584750940ac5809fff110f1a008c7d.html#ad8584750940ac5809fff110f1a008c7d" title=" " alt="" coords="5,71,148,111"/>
+<area shape="poly" id="edge8_Node000001_Node000005" title=" " alt="" coords="414,135,378,116,338,101,289,92,240,87,148,87,148,82,240,82,290,87,339,96,380,111,417,131"/>
+<area shape="rect" id="Node000006" href="$d3/dc7/classfl_1_1_pixel_iterator_any_ac9626174b7e1a5ff7a5b8269741d71fb.html#ac9626174b7e1a5ff7a5b8269741d71fb" title=" " alt="" coords="5,137,148,177"/>
+<area shape="poly" id="edge9_Node000001_Node000006" title=" " alt="" coords="372,165,196,165,148,164,149,158,196,160,372,160"/>
+<area shape="rect" id="Node000007" href="$d3/dc7/classfl_1_1_pixel_iterator_any_afc4af68e0aa5eb181c1f102dce8317ec.html#afc4af68e0aa5eb181c1f102dce8317ec" title=" " alt="" coords="5,207,148,247"/>
+<area shape="poly" id="edge10_Node000001_Node000007" title=" " alt="" coords="373,177,149,217,148,212,372,172"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="222,105,147,61,121,48,123,43,149,56,225,101"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="182,116,148,108,149,103,183,110"/>
+<area shape="poly" id="edge6_Node000004_Node000006" title=" " alt="" coords="183,145,148,150,148,145,182,140"/>
+<area shape="poly" id="edge7_Node000004_Node000007" title=" " alt="" coords="216,159,119,209,116,204,213,155"/>
+</map>

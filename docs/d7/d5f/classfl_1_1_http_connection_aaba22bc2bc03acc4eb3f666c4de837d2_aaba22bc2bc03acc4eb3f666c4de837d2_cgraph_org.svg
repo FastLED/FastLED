@@ -115,7 +115,7 @@
 <!-- Node6 -->
 <g id="Node000006" class="node">
 <title>Node6</title>
-<g id="a_Node000006"><a xlink:href="../../d4/d36/namespacefl_a50131c41da2f619067d98360de35fa27.html#a50131c41da2f619067d98360de35fa27" target="_top" xlink:title="Public delay wrapper that keeps bare Arduino delay() preferred after using fl::delay; while still all...">
+<g id="a_Node000006"><a xlink:href="../../d4/d36/namespacefl_a19da680141593b475c4d1d3c1c0a8409.html#a19da680141593b475c4d1d3c1c0a8409" target="_top" xlink:title="Public delay wrapper that keeps bare Arduino delay() preferred after using fl::delay; while still all...">
 <polygon fill="#fff0f0" stroke="red" points="549,-24.5 493,-24.5 493,-5.5 549,-5.5 549,-24.5"/>
 <text text-anchor="middle" x="521" y="-12.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::delay</text>
 </a>

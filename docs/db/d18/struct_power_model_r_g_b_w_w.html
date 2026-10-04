@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -108,12 +108,10 @@ $(function(){initNavTree('db/d18/struct_power_model_r_g_b_w_w.html','../../'); i
 </div><!--header-->
 <div class="contents">
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>RGBWW LED power consumption model (RGB + Cool White + Warm White) </p>
-<dl class="section note"><dt>Note</dt><dd>Future API enhancement - not yet implemented in power calculations </dd>
-<dd>
-Currently forwards to <a class="el" href="../../dc/d4d/struct_power_model_r_g_b.html" title="RGB LED power consumption model Used for standard 3-channel LEDs (WS2812, WS2812B,...">PowerModelRGB</a>, ignoring white channels </dd></dl>
+<div class="textblock"><p>RGBWW LED power consumption model (RGB + warm white + cool white). </p>
+<p>Managed five-emitter output charges these channels independently. Legacy output retains the historical folded-RGB estimate for compatibility. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../dc/d5b/power__mgt_8h_source.html#l00091">91</a> of file <a class="el" href="../../dc/d5b/power__mgt_8h_source.html">power_mgt.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dc/d5b/power__mgt_8h_source.html#l00098">98</a> of file <a class="el" href="../../dc/d5b/power__mgt_8h_source.html">power_mgt.h</a>.</p>
 </div>
 <p><code>#include &lt;<a class="el" href="../../dc/d5b/power__mgt_8h_source.html">power_mgt.h</a>&gt;</code></p>
 <table class="memberdecls">
@@ -163,7 +161,7 @@ Public Attributes</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../db/d18/struct_power_model_r_g_b_w_w.html">PowerModelRGBWW</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:03 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

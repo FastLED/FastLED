@@ -18,6 +18,6 @@ digraph "fl::pwm_state::ensureIsrActive"
   Node4 -> Node6 [id="edge5_Node000004_Node000006",color="steelblue1",style="solid",tooltip=" "];
   Node6 [id="Node000006",label="fl::pwm_state::state",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d33/namespacefl_1_1pwm__state_a6df56c095fbd351947b973e0e1d5289a.html#a6df56c095fbd351947b973e0e1d5289a",tooltip=" "];
   Node6 -> Node7 [id="edge6_Node000006_Node000007",color="steelblue1",style="solid",tooltip=" "];
-  Node7 [id="Node000007",label="fl::Singleton::instance",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d5b/classfl_1_1_singleton_a47fdc044003ec27f9e9833f7f5418e01.html#a47fdc044003ec27f9e9833f7f5418e01",tooltip=" "];
+  Node7 [id="Node000007",label="fl::Singleton::instance",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d9/d5b/classfl_1_1_singleton_ad5cb1b704e17768f75802673abb0ff75.html#ad5cb1b704e17768f75802673abb0ff75",tooltip=" "];
   Node1 -> Node6 [id="edge7_Node000001_Node000006",color="steelblue1",style="solid",tooltip=" "];
 }

@@ -1,6 +1,6 @@
 var structfl_1_1_u_c_s7604_current_control =
 [
-    [ "UCS7604CurrentControl", "db/d91/structfl_1_1_u_c_s7604_current_control_a523477802df93872dca4768e00e40167.html#a523477802df93872dca4768e00e40167", null ],
+    [ "UCS7604CurrentControl", "db/d91/structfl_1_1_u_c_s7604_current_control_af59502e5d813b0fa046e7023658940db.html#af59502e5d813b0fa046e7023658940db", null ],
     [ "UCS7604CurrentControl", "db/d91/structfl_1_1_u_c_s7604_current_control_a2b81e40207421aae9a1017e58eb6226d.html#a2b81e40207421aae9a1017e58eb6226d", null ],
     [ "UCS7604CurrentControl", "db/d91/structfl_1_1_u_c_s7604_current_control_acd427a152789087812a8024c91152ed8.html#acd427a152789087812a8024c91152ed8", null ],
     [ "b", "db/d91/structfl_1_1_u_c_s7604_current_control_a3e36e58937b2b7e0cc9b4b4cee6e1288.html#a3e36e58937b2b7e0cc9b4b4cee6e1288", null ],

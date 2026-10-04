@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -129,35 +129,35 @@ $(function(){initNavTree('df/d9e/namespacefl_1_1detail_a6ceafefa035ed7743e9c1098
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d1/dda/cstdlib_8cpp_8hpp_source.html#l00417">417</a> of file <a class="el" href="../../d1/dda/cstdlib_8cpp_8hpp_source.html">cstdlib.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  417</span>                                                                                      {</div>
-<div class="line"><span class="lineno">  418</span>    <span class="keywordflow">if</span> (nmemb &lt;= 1) {</div>
-<div class="line"><span class="lineno">  419</span>        <span class="keywordflow">return</span>;</div>
-<div class="line"><span class="lineno">  420</span>    }</div>
-<div class="line"><span class="lineno">  421</span> </div>
-<div class="line"><span class="lineno">  422</span>    <span class="comment">// Use insertion sort for small arrays (threshold of 16)</span></div>
-<div class="line"><span class="lineno">  423</span>    <span class="keywordflow">if</span> (nmemb &lt;= 16) {</div>
-<div class="line"><span class="lineno">  424</span>        <a class="code hl_function" href="../../d4/d36/namespacefl_a80e54bbf6547a2844ff3a2215f0e6823.html#a80e54bbf6547a2844ff3a2215f0e6823">qsort_insertion_sort</a>(base, nmemb, size, compar);</div>
-<div class="line"><span class="lineno">  425</span>        <span class="keywordflow">return</span>;</div>
-<div class="line"><span class="lineno">  426</span>    }</div>
-<div class="line"><span class="lineno">  427</span> </div>
-<div class="line"><span class="lineno">  428</span>    <span class="keywordtype">size_t</span> pivot_idx = <a class="code hl_function" href="../../d4/d36/namespacefl_a18e193998f38762ec52b7c1963474af8.html#a18e193998f38762ec52b7c1963474af8">qsort_partition</a>(base, nmemb, size, compar);</div>
+<p class="definition">Definition at line <a class="el" href="../../d1/dda/cstdlib_8cpp_8hpp_source.html#l00419">419</a> of file <a class="el" href="../../d1/dda/cstdlib_8cpp_8hpp_source.html">cstdlib.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  419</span>                                                                                      {</div>
+<div class="line"><span class="lineno">  420</span>    <span class="keywordflow">if</span> (nmemb &lt;= 1) {</div>
+<div class="line"><span class="lineno">  421</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">  422</span>    }</div>
+<div class="line"><span class="lineno">  423</span> </div>
+<div class="line"><span class="lineno">  424</span>    <span class="comment">// Use insertion sort for small arrays (threshold of 16)</span></div>
+<div class="line"><span class="lineno">  425</span>    <span class="keywordflow">if</span> (nmemb &lt;= 16) {</div>
+<div class="line"><span class="lineno">  426</span>        <a class="code hl_function" href="../../d4/d36/namespacefl_a80e54bbf6547a2844ff3a2215f0e6823.html#a80e54bbf6547a2844ff3a2215f0e6823">qsort_insertion_sort</a>(base, nmemb, size, compar);</div>
+<div class="line"><span class="lineno">  427</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">  428</span>    }</div>
 <div class="line"><span class="lineno">  429</span> </div>
-<div class="line"><span class="lineno">  430</span>    <span class="comment">// Sort left partition</span></div>
-<div class="line"><span class="lineno">  431</span>    <a class="code hl_function" href="#a6ceafefa035ed7743e9c1098a208e649">qsort_impl</a>(base, pivot_idx, size, compar);</div>
-<div class="line"><span class="lineno">  432</span> </div>
-<div class="line"><span class="lineno">  433</span>    <span class="comment">// Sort right partition</span></div>
-<div class="line"><span class="lineno">  434</span>    <span class="keywordflow">if</span> (pivot_idx + 1 &lt; nmemb) {</div>
-<div class="line"><span class="lineno">  435</span>        <a class="code hl_function" href="#a6ceafefa035ed7743e9c1098a208e649">qsort_impl</a>(base + (pivot_idx + 1) * size, nmemb - pivot_idx - 1, size, compar);</div>
-<div class="line"><span class="lineno">  436</span>    }</div>
-<div class="line"><span class="lineno">  437</span>}</div>
-<div class="ttc" id="anamespacefl_1_1detail_a6ceafefa035ed7743e9c1098a208e649_html_a6ceafefa035ed7743e9c1098a208e649"><div class="ttname"><a href="#a6ceafefa035ed7743e9c1098a208e649">fl::detail::qsort_impl</a></div><div class="ttdeci">void qsort_impl(char *base, size_t nmemb, size_t size, qsort_compare_fn compar)</div><div class="ttdef"><b>Definition</b> <a href="../../d1/dda/cstdlib_8cpp_8hpp_source.html#l00417">cstdlib.cpp.hpp:417</a></div></div>
-<div class="ttc" id="anamespacefl_a18e193998f38762ec52b7c1963474af8_html_a18e193998f38762ec52b7c1963474af8"><div class="ttname"><a href="../../d4/d36/namespacefl_a18e193998f38762ec52b7c1963474af8.html#a18e193998f38762ec52b7c1963474af8">fl::qsort_partition</a></div><div class="ttdeci">static size_t qsort_partition(char *base, size_t nmemb, size_t size, qsort_compare_fn compar)</div><div class="ttdef"><b>Definition</b> <a href="../../d1/dda/cstdlib_8cpp_8hpp_source.html#l00376">cstdlib.cpp.hpp:376</a></div></div>
-<div class="ttc" id="anamespacefl_a80e54bbf6547a2844ff3a2215f0e6823_html_a80e54bbf6547a2844ff3a2215f0e6823"><div class="ttname"><a href="../../d4/d36/namespacefl_a80e54bbf6547a2844ff3a2215f0e6823.html#a80e54bbf6547a2844ff3a2215f0e6823">fl::qsort_insertion_sort</a></div><div class="ttdeci">static void qsort_insertion_sort(char *base, size_t nmemb, size_t size, qsort_compare_fn compar)</div><div class="ttdef"><b>Definition</b> <a href="../../d1/dda/cstdlib_8cpp_8hpp_source.html#l00348">cstdlib.cpp.hpp:348</a></div></div>
+<div class="line"><span class="lineno">  430</span>    <span class="keywordtype">size_t</span> pivot_idx = <a class="code hl_function" href="../../d4/d36/namespacefl_a18e193998f38762ec52b7c1963474af8.html#a18e193998f38762ec52b7c1963474af8">qsort_partition</a>(base, nmemb, size, compar);</div>
+<div class="line"><span class="lineno">  431</span> </div>
+<div class="line"><span class="lineno">  432</span>    <span class="comment">// Sort left partition</span></div>
+<div class="line"><span class="lineno">  433</span>    <a class="code hl_function" href="#a6ceafefa035ed7743e9c1098a208e649">qsort_impl</a>(base, pivot_idx, size, compar);</div>
+<div class="line"><span class="lineno">  434</span> </div>
+<div class="line"><span class="lineno">  435</span>    <span class="comment">// Sort right partition</span></div>
+<div class="line"><span class="lineno">  436</span>    <span class="keywordflow">if</span> (pivot_idx + 1 &lt; nmemb) {</div>
+<div class="line"><span class="lineno">  437</span>        <a class="code hl_function" href="#a6ceafefa035ed7743e9c1098a208e649">qsort_impl</a>(base + (pivot_idx + 1) * size, nmemb - pivot_idx - 1, size, compar);</div>
+<div class="line"><span class="lineno">  438</span>    }</div>
+<div class="line"><span class="lineno">  439</span>}</div>
+<div class="ttc" id="anamespacefl_1_1detail_a6ceafefa035ed7743e9c1098a208e649_html_a6ceafefa035ed7743e9c1098a208e649"><div class="ttname"><a href="#a6ceafefa035ed7743e9c1098a208e649">fl::detail::qsort_impl</a></div><div class="ttdeci">void qsort_impl(char *base, size_t nmemb, size_t size, qsort_compare_fn compar)</div><div class="ttdef"><b>Definition</b> <a href="../../d1/dda/cstdlib_8cpp_8hpp_source.html#l00419">cstdlib.cpp.hpp:419</a></div></div>
+<div class="ttc" id="anamespacefl_a18e193998f38762ec52b7c1963474af8_html_a18e193998f38762ec52b7c1963474af8"><div class="ttname"><a href="../../d4/d36/namespacefl_a18e193998f38762ec52b7c1963474af8.html#a18e193998f38762ec52b7c1963474af8">fl::qsort_partition</a></div><div class="ttdeci">static size_t qsort_partition(char *base, size_t nmemb, size_t size, qsort_compare_fn compar)</div><div class="ttdef"><b>Definition</b> <a href="../../d1/dda/cstdlib_8cpp_8hpp_source.html#l00378">cstdlib.cpp.hpp:378</a></div></div>
+<div class="ttc" id="anamespacefl_a80e54bbf6547a2844ff3a2215f0e6823_html_a80e54bbf6547a2844ff3a2215f0e6823"><div class="ttname"><a href="../../d4/d36/namespacefl_a80e54bbf6547a2844ff3a2215f0e6823.html#a80e54bbf6547a2844ff3a2215f0e6823">fl::qsort_insertion_sort</a></div><div class="ttdeci">static void qsort_insertion_sort(char *base, size_t nmemb, size_t size, qsort_compare_fn compar)</div><div class="ttdef"><b>Definition</b> <a href="../../d1/dda/cstdlib_8cpp_8hpp_source.html#l00350">cstdlib.cpp.hpp:350</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d1/dda/cstdlib_8cpp_8hpp_source.html#l00417">qsort_impl()</a>, <a class="el" href="../../d1/dda/cstdlib_8cpp_8hpp_source.html#l00348">fl::qsort_insertion_sort()</a>, and <a class="el" href="../../d1/dda/cstdlib_8cpp_8hpp_source.html#l00376">fl::qsort_partition()</a>.</p>
+<p class="reference">References <a class="el" href="../../d1/dda/cstdlib_8cpp_8hpp_source.html#l00419">qsort_impl()</a>, <a class="el" href="../../d1/dda/cstdlib_8cpp_8hpp_source.html#l00350">fl::qsort_insertion_sort()</a>, and <a class="el" href="../../d1/dda/cstdlib_8cpp_8hpp_source.html#l00378">fl::qsort_partition()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d1/dda/cstdlib_8cpp_8hpp_source.html#l00440">fl::qsort()</a>, and <a class="el" href="../../d1/dda/cstdlib_8cpp_8hpp_source.html#l00417">qsort_impl()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d1/dda/cstdlib_8cpp_8hpp_source.html#l00442">fl::qsort()</a>, and <a class="el" href="../../d1/dda/cstdlib_8cpp_8hpp_source.html#l00419">qsort_impl()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -182,7 +182,7 @@ $(function(){initNavTree('df/d9e/namespacefl_1_1detail_a6ceafefa035ed7743e9c1098
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../df/d9e/namespacefl_1_1detail.html">detail</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:09 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:11 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

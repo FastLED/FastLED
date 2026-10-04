@@ -1,0 +1,16 @@
+digraph "fl::printf_detail::format_impl"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::printf_detail::\lformat_impl",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::printf_detail::\lformat_impl",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/de0/namespacefl_1_1printf__detail_a0cfba980b6b961240e638e9b8cdee355.html#a0cfba980b6b961240e638e9b8cdee355",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::printf",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a50b0a5f6ecc6e26dab3981b92a795d86.html#a50b0a5f6ecc6e26dab3981b92a795d86",tooltip="Printf-like formatting function that prints directly to the platform output."];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::snprintf",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a8b42c041692e8770fe6d73d9c2a90cbe.html#a8b42c041692e8770fe6d73d9c2a90cbe",tooltip="Snprintf-like formatting function that writes to a buffer."];
+}

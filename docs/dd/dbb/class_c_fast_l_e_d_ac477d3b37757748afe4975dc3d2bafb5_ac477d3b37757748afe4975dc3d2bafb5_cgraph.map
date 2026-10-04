@@ -1,0 +1,27 @@
+<map id="CFastLED::setExclusiveDriver" name="CFastLED::setExclusiveDriver">
+<area shape="rect" id="Node000001" title="Enable only one driver exclusively, runtime form (disables all others)" alt="" coords="5,66,217,91"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a1cc01267f6bdd7251959883412b11bbb.html#a1cc01267f6bdd7251959883412b11bbb" title="Get the global ChannelManager singleton instance." alt="" coords="268,25,415,50"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="182,63,256,50,257,55,183,69"/>
+<area shape="rect" id="Node000011" href="$d2/d6b/classfl_1_1_channel_manager_ab9c9a1f5d639849bdb5cf352dd22e0b2.html#ab9c9a1f5d639849bdb5cf352dd22e0b2" title="Register a single driver at a priority above the platform default and disable all others (compile&#45;tim..." alt="" coords="265,99,417,139"/>
+<area shape="poly" id="edge7_Node000001_Node000011" title=" " alt="" coords="186,89,252,100,251,106,185,94"/>
+<area shape="rect" id="Node000003" href="$d2/d6b/classfl_1_1_channel_manager_a76013c6913045962ce5bb8d227e760b3.html#a76013c6913045962ce5bb8d227e760b3" title="Get the global singleton instance." alt="" coords="465,17,613,57"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="415,35,451,35,451,40,415,40"/>
+<area shape="rect" id="Node000004" href="$d2/d6b/classfl_1_1_channel_manager_a3f0e1823366151d87c97be78f4273755.html#a3f0e1823366151d87c97be78f4273755" title="Constructor." alt="" coords="876,29,1024,69"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="613,21,661,15,745,9,828,15,873,23,872,29,828,20,745,14,662,20,614,26"/>
+<area shape="rect" id="Node000008" href="$d2/d6b/classfl_1_1_channel_manager_a58d12a4cf75bb181c7093141240bb94b.html#a58d12a4cf75bb181c7093141240bb94b" title="Get the singleton WITHOUT registering platform default drivers." alt="" coords="671,29,819,69"/>
+<area shape="poly" id="edge5_Node000003_Node000008" title=" " alt="" coords="614,39,657,42,657,47,614,44"/>
+<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="911,30,909,20,915,11,929,5,950,3,974,6,987,13,985,18,972,11,950,8,930,10,919,15,914,21,916,28"/>
+<area shape="poly" id="edge6_Node000008_Node000004" title=" " alt="" coords="819,47,862,47,862,52,819,52"/>
+<area shape="poly" id="edge8_Node000011_Node000004" title=" " alt="" coords="417,114,605,105,716,94,828,79,868,70,869,75,828,84,717,99,605,110,418,120"/>
+<area shape="poly" id="edge14_Node000011_Node000011" title=" " alt="" coords="304,99,302,89,308,80,321,74,341,72,365,75,377,82,375,87,363,80,341,77,322,79,311,84,307,90,309,98"/>
+<area shape="rect" id="Node000012" href="$d2/d6b/classfl_1_1_channel_manager_ae6eb27ff8398726d8c5fcb9052ea9528.html#ae6eb27ff8398726d8c5fcb9052ea9528" title="Add a driver with priority (higher priority = preferred)" alt="" coords="465,201,613,241"/>
+<area shape="poly" id="edge9_Node000011_Node000012" title=" " alt="" coords="382,136,489,193,487,197,380,141"/>
+<area shape="rect" id="Node000013" href="$d2/d6b/classfl_1_1_channel_manager_a9d5c6d37df9f78ddacf9e44073b4fe18.html#a9d5c6d37df9f78ddacf9e44073b4fe18" title="Handle validation failures and the uncommon replacement flow outside the normal driver&#45;registration p..." alt="" coords="671,144,819,184"/>
+<area shape="poly" id="edge10_Node000012_Node000013" title=" " alt="" coords="611,199,659,185,660,190,612,204"/>
+<area shape="rect" id="Node000040" href="$de/d66/classfl_1_1basic__string_ac7b40587b637d254d009cc32f530fb83.html#ac7b40587b637d254d009cc32f530fb83" title=" " alt="" coords="667,209,822,234"/>
+<area shape="poly" id="edge11_Node000012_Node000040" title=" " alt="" coords="614,219,654,219,654,224,614,224"/>
+<area shape="rect" id="Node000016" href="$de/d66/classfl_1_1basic__string_ac3effe716fde4667b05a52d78d74bbfb.html#ac3effe716fde4667b05a52d78d74bbfb" title=" " alt="" coords="661,258,828,283"/>
+<area shape="poly" id="edge12_Node000012_Node000016" title=" " alt="" coords="614,237,679,252,678,257,613,242"/>
+<area shape="rect" id="Node000050" href="$d4/d36/namespacefl_abc76b289e45e1c247accf27c76992bfc.html#abc76b289e45e1c247accf27c76992bfc" title=" " alt="" coords="691,307,798,333"/>
+<area shape="poly" id="edge13_Node000012_Node000050" title=" " alt="" coords="570,239,612,267,662,294,680,300,678,305,660,298,610,272,567,244"/>
+</map>

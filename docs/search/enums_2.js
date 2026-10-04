@@ -1,7 +1,19 @@
 var searchData=
 [
-  ['binderror_0',['BindError',['../d4/d36/namespacefl_a6d93dfe697b79fe80883dfe32eb9ce56.html#a6d93dfe697b79fe80883dfe32eb9ce56',1,'fl']]],
-  ['bumpshape_1',['BumpShape',['../d4/d36/namespacefl_ab027aaa11f27d74ba02d76bb7de571f5.html#ab027aaa11f27d74ba02d76bb7de571f5',1,'fl']]],
-  ['bus_2',['Bus',['../d4/d36/namespacefl_a7e1e94407fbd018269794d74ab7fb4c1.html#a7e1e94407fbd018269794d74ab7fb4c1',1,'fl']]],
-  ['buttonstrategy_3',['ButtonStrategy',['../d4/d36/namespacefl_ac1d4a27d825a85e6fbb3fae56546f2af.html#ac1d4a27d825a85e6fbb3fae56546f2af',1,'fl']]]
+  ['category_0',['Category',['../db/dc1/structfl_1_1audio_1_1detector_1_1_mood_ae8b62b89363fe3672b926a7f315c9e4b.html#ae8b62b89363fe3672b926a7f315c9e4b',1,'fl::audio::detector::Mood']]],
+  ['channelpixelformat_1',['ChannelPixelFormat',['../d4/d36/namespacefl_ad067e3fb96d08fad4b57bac8281ba222.html#ad067e3fb96d08fad4b57bac8281ba222',1,'fl']]],
+  ['chordtype_2',['ChordType',['../dd/d12/namespacefl_1_1audio_1_1detector_a48f78ccc0932bdc5addc744bbe3578a5.html#a48f78ccc0932bdc5addc744bbe3578a5',1,'fl::audio::detector']]],
+  ['clearflags_3',['ClearFlags',['../d6/d64/fastled_8h_a15a661b6c3fff802200588e2b93fddb1.html#a15a661b6c3fff802200588e2b93fddb1',1,'FastLED.h']]],
+  ['clocklessencoder_4',['ClocklessEncoder',['../d4/d36/namespacefl_a1137af1fb4e66850a4890c89ca333de5.html#a1137af1fb4e66850a4890c89ca333de5',1,'fl']]],
+  ['color_5',['Color',['../dd/d28/classfl_1_1_red_black_tree_a4566c51a366d57fcd85936fc5d11eda8.html#a4566c51a366d57fcd85936fc5d11eda8',1,'fl::RedBlackTree']]],
+  ['colormatrix_6',['ColorMatrix',['../d2/dec/namespacefl_1_1fled_ad813f773708839a6c946f0b467e91c03.html#ad813f773708839a6c946f0b467e91c03',1,'fl::fled']]],
+  ['colorprimaries_7',['ColorPrimaries',['../d2/dec/namespacefl_1_1fled_a9ebc86a0bed9d9dc3153f698e69f5849.html#a9ebc86a0bed9d9dc3153f698e69f5849',1,'fl::fled']]],
+  ['colorprofilestatus_8',['ColorProfileStatus',['../d4/d36/namespacefl_adf08976a82fd066526d1b8c786e6a8de.html#adf08976a82fd066526d1b8c786e6a8de',1,'fl']]],
+  ['colorprofilewarning_9',['ColorProfileWarning',['../d4/d36/namespacefl_aade096ff21e17eeccb323ad4a9106659.html#aade096ff21e17eeccb323ad4a9106659',1,'fl']]],
+  ['colorrange_10',['ColorRange',['../d2/dec/namespacefl_1_1fled_ae0dabb79263749ceb370866fc99671da.html#ae0dabb79263749ceb370866fc99671da',1,'fl::fled']]],
+  ['colorstatus_11',['ColorStatus',['../d2/dec/namespacefl_1_1fled_a8a97e106b888d7dc926739d364756f80.html#a8a97e106b888d7dc926739d364756f80',1,'fl::fled']]],
+  ['colortemperature_12',['ColorTemperature',['../d0/d89/group___color_enums_ga251e9e8dc2c7b981786b71706522b2a9.html#ga251e9e8dc2c7b981786b71706522b2a9',1,'color.h']]],
+  ['colortransfer_13',['ColorTransfer',['../d2/dec/namespacefl_1_1fled_ad4f57219eb531827f41a5b47e3dfe8ec.html#ad4f57219eb531827f41a5b47e3dfe8ec',1,'fl::fled']]],
+  ['componentbyteorder_14',['ComponentByteOrder',['../d2/dec/namespacefl_1_1fled_abf56254ec144b154b8d39de2134cedc0.html#abf56254ec144b154b8d39de2134cedc0',1,'fl::fled']]],
+  ['connectionstate_15',['ConnectionState',['../d4/d36/namespacefl_a0bdb26591577be2a247023ca457b392e.html#a0bdb26591577be2a247023ca457b392e',1,'fl']]]
 ];

@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -124,18 +124,18 @@ $(function(){initNavTree('d4/d36/namespacefl_a6d3dde4b59c470212560afa6b6d7a712.h
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d8/d81/wave8_8cpp_8hpp_source.html#l00125">125</a> of file <a class="el" href="../../d8/d81/wave8_8cpp_8hpp_source.html">wave8.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  127</span>                                                                               {</div>
-<div class="line"><span class="lineno">  128</span>    Wave8Byte laneWaveformSymbols[16];</div>
-<div class="line"><span class="lineno">  129</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> lane = 0; lane &lt; 16; lane++) {</div>
-<div class="line"><span class="lineno">  130</span>        <a class="code hl_function" href="../../df/d9e/namespacefl_1_1detail_a66fa111cf8d1f98b7ecda4f2d97b8d75.html#a66fa111cf8d1f98b7ecda4f2d97b8d75">detail::wave8_expand_byte</a>(lanes[lane], lut, &amp;laneWaveformSymbols[lane]);</div>
-<div class="line"><span class="lineno">  131</span>    }</div>
-<div class="line"><span class="lineno">  132</span>    <a class="code hl_function" href="../../df/d9e/namespacefl_1_1detail_a1c33564a267c6374d9afeb116447102f.html#a1c33564a267c6374d9afeb116447102f">detail::wave8_transpose_16</a>(laneWaveformSymbols, output);</div>
-<div class="line"><span class="lineno">  133</span>}</div>
-<div class="ttc" id="anamespacefl_1_1detail_a1c33564a267c6374d9afeb116447102f_html_a1c33564a267c6374d9afeb116447102f"><div class="ttname"><a href="../../df/d9e/namespacefl_1_1detail_a1c33564a267c6374d9afeb116447102f.html#a1c33564a267c6374d9afeb116447102f">fl::detail::wave8_transpose_16</a></div><div class="ttdeci">FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION void wave8_transpose_16(const Wave8Byte lane_waves[16], u8 output[16 *sizeof(Wave8Byte)])</div><div class="ttdoc">Transpose 16 lanes of Wave8Byte data into interleaved format.</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d4b/wave8_8hpp_source.html#l00231">wave8.hpp:231</a></div></div>
-<div class="ttc" id="anamespacefl_1_1detail_a66fa111cf8d1f98b7ecda4f2d97b8d75_html_a66fa111cf8d1f98b7ecda4f2d97b8d75"><div class="ttname"><a href="../../df/d9e/namespacefl_1_1detail_a66fa111cf8d1f98b7ecda4f2d97b8d75.html#a66fa111cf8d1f98b7ecda4f2d97b8d75">fl::detail::wave8_expand_byte</a></div><div class="ttdeci">FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION void wave8_expand_byte(u8 byte_value, const Wave8ByteExpansionLut &amp;lut, Wave8Byte *output)</div><div class="ttdoc">Byte-indexed expansion (#2526): one indexed 8-byte copy.</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d4b/wave8_8hpp_source.html#l00069">wave8.hpp:69</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d8/d81/wave8_8cpp_8hpp_source.html#l00126">126</a> of file <a class="el" href="../../d8/d81/wave8_8cpp_8hpp_source.html">wave8.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  128</span>                                                                               {</div>
+<div class="line"><span class="lineno">  129</span>    Wave8Byte laneWaveformSymbols[16];</div>
+<div class="line"><span class="lineno">  130</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> lane = 0; lane &lt; 16; lane++) {</div>
+<div class="line"><span class="lineno">  131</span>        <a class="code hl_function" href="../../df/d9e/namespacefl_1_1detail_ac79066fcad09cc0ca9d99714ee037ec4.html#ac79066fcad09cc0ca9d99714ee037ec4">detail::wave8_expand_byte</a>(lanes[lane], lut, &amp;laneWaveformSymbols[lane]);</div>
+<div class="line"><span class="lineno">  132</span>    }</div>
+<div class="line"><span class="lineno">  133</span>    <a class="code hl_function" href="../../df/d9e/namespacefl_1_1detail_a78e359dd2cb7c2a0f069ea1aec2127e2.html#a78e359dd2cb7c2a0f069ea1aec2127e2">detail::wave8_transpose_16</a>(laneWaveformSymbols, output);</div>
+<div class="line"><span class="lineno">  134</span>}</div>
+<div class="ttc" id="anamespacefl_1_1detail_a78e359dd2cb7c2a0f069ea1aec2127e2_html_a78e359dd2cb7c2a0f069ea1aec2127e2"><div class="ttname"><a href="../../df/d9e/namespacefl_1_1detail_a78e359dd2cb7c2a0f069ea1aec2127e2.html#a78e359dd2cb7c2a0f069ea1aec2127e2">fl::detail::wave8_transpose_16</a></div><div class="ttdeci">FL_IRAM FL_OPTIMIZE_FUNCTION void wave8_transpose_16(const Wave8Byte lane_waves[16], u8 output[16 *sizeof(Wave8Byte)]) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d94/detail_2wave8_8cpp_8hpp_source.html#l00125">wave8.cpp.hpp:125</a></div></div>
+<div class="ttc" id="anamespacefl_1_1detail_ac79066fcad09cc0ca9d99714ee037ec4_html_ac79066fcad09cc0ca9d99714ee037ec4"><div class="ttname"><a href="../../df/d9e/namespacefl_1_1detail_ac79066fcad09cc0ca9d99714ee037ec4.html#ac79066fcad09cc0ca9d99714ee037ec4">fl::detail::wave8_expand_byte</a></div><div class="ttdeci">FL_IRAM FL_OPTIMIZE_FUNCTION void wave8_expand_byte(u8 byte_value, const Wave8ByteExpansionLut &amp;lut, Wave8Byte *output) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d94/detail_2wave8_8cpp_8hpp_source.html#l00039">wave8.cpp.hpp:39</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../df/d96/s16x16x4_8h_aea8406f9f166028d3ae94a87230488ac.html#aea8406f9f166028d3ae94a87230488ac">FL_RESTRICT_PARAM</a>, <a class="el" href="../../dd/d4b/wave8_8hpp_source.html#l00069">fl::detail::wave8_expand_byte()</a>, and <a class="el" href="../../dd/d4b/wave8_8hpp_source.html#l00231">fl::detail::wave8_transpose_16()</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d54/compiler__control_8h_source.html#l00715">FL_RESTRICT_PARAM</a>, <a class="el" href="../../dc/d94/detail_2wave8_8cpp_8hpp_source.html#l00039">fl::detail::wave8_expand_byte()</a>, and <a class="el" href="../../dc/d94/detail_2wave8_8cpp_8hpp_source.html#l00125">fl::detail::wave8_transpose_16()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -153,7 +153,7 @@ $(function(){initNavTree('d4/d36/namespacefl_a6d3dde4b59c470212560afa6b6d7a712.h
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:04 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:08 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

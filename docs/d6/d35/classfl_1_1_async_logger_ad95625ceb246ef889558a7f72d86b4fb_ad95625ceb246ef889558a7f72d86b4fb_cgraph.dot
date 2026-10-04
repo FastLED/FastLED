@@ -10,5 +10,7 @@ digraph "fl::AsyncLogger::disableBackgroundFlush"
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
   Node2 [id="Node000002",label="fl::isr::detach_handler",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d93/namespacefl_1_1isr_a29c0b8a68aa4b89155f40b914eaaa4fb.html#a29c0b8a68aa4b89155f40b914eaaa4fb",tooltip="Detach an ISR handler."];
   Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::Singleton::instance",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d5b/classfl_1_1_singleton_a47fdc044003ec27f9e9833f7f5418e01.html#a47fdc044003ec27f9e9833f7f5418e01",tooltip=" "];
+  Node3 [id="Node000003",label="fl::Singleton::instance",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d5b/classfl_1_1_singleton_ad5cb1b704e17768f75802673abb0ff75.html#ad5cb1b704e17768f75802673abb0ff75",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::FL_ALIGN_AS_T",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a1e67c0c24ebcd98fcf8554753d1639a6.html#a1e67c0c24ebcd98fcf8554753d1639a6",tooltip=" "];
 }

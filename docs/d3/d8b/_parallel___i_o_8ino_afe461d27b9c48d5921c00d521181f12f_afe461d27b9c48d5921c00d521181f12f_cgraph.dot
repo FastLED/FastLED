@@ -8,7 +8,7 @@ digraph "loop"
   rankdir="LR";
   Node1 [id="Node000001",label="loop",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fill_rainbow",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/dfb/colorutils_8h_a5e33a6635101019cce6b0936c9415a6f.html#a5e33a6635101019cce6b0936c9415a6f",tooltip="Fill a range of LEDs with a rainbow of colors."];
+  Node2 [id="Node000002",label="fill_rainbow",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/dfb/colorutils_8h_a72ee3324d8c70c52743313f46676204f.html#a72ee3324d8c70c52743313f46676204f",tooltip="Fill a range of LEDs with a rainbow of colors."];
   Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
   Node3 [id="Node000003",label="rotate",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d8b/_parallel___i_o_8ino_a6d4ae9ba50f9cb29cd6e9dbc1ede55ad.html#a6d4ae9ba50f9cb29cd6e9dbc1ede55ad",tooltip="Helper: Rotate array elements."];
   Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];

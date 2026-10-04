@@ -135,7 +135,7 @@
 <!-- Node14 -->
 <g id="Node000014" class="node">
 <title>Node14</title>
-<g id="a_Node000014"><a xlink:href="../../db/dbf/namespacefl_1_1audio_a7189558c538537464f1d31c91596631d.html#a7189558c538537464f1d31c91596631d" target="_top" xlink:title="Compute the time delta (in seconds) for an audio buffer.">
+<g id="a_Node000014"><a xlink:href="../../db/dbf/namespacefl_1_1audio_a8a5c097dfda178fb0d31e2060cb62ea9.html#a8a5c097dfda178fb0d31e2060cb62ea9" target="_top" xlink:title="Compute the time delta (in seconds) for an audio buffer.">
 <polygon fill="white" stroke="#666666" points="294.5,-582.5 151.5,-582.5 151.5,-563.5 294.5,-563.5 294.5,-582.5"/>
 <text text-anchor="middle" x="223" y="-570.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::audio::computeAudioDt</text>
 </a>
@@ -210,7 +210,7 @@
 <!-- Node20 -->
 <g id="Node000020" class="node">
 <title>Node20</title>
-<g id="a_Node000020"><a xlink:href="../../d1/d24/classfl_1_1audio_1_1_sample_a2c4f85477b6762bbc06c23ffea8a6a6f.html#a2c4f85477b6762bbc06c23ffea8a6a6f" target="_top" xlink:title=" ">
+<g id="a_Node000020"><a xlink:href="../../d1/d24/classfl_1_1audio_1_1_sample_a4a8e420765980a4a5b36c9babcee695d.html#a4a8e420765980a4a5b36c9babcee695d" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="488,-397 384,-397 384,-367 488,-367 488,-397"/>
 <text text-anchor="start" x="392" y="-385" font-family="Helvetica,sans-Serif" font-size="10.00">fl::audio::Sample::</text>
 <text text-anchor="middle" x="436" y="-374" font-family="Helvetica,sans-Serif" font-size="10.00">isValid</text>
@@ -229,7 +229,7 @@
 <!-- Node21 -->
 <g id="Node000021" class="node">
 <title>Node21</title>
-<g id="a_Node000021"><a xlink:href="../../d1/d24/classfl_1_1audio_1_1_sample_af9de506f0df843eb2255949da0da1e50.html#af9de506f0df843eb2255949da0da1e50" target="_top" xlink:title=" ">
+<g id="a_Node000021"><a xlink:href="../../d1/d24/classfl_1_1audio_1_1_sample_a18cebba8ac2959297a84fbbd74383aaa.html#a18cebba8ac2959297a84fbbd74383aaa" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="285.5,-325.5 160.5,-325.5 160.5,-306.5 285.5,-306.5 285.5,-325.5"/>
 <text text-anchor="middle" x="223" y="-313.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::audio::Sample::pcm</text>
 </a>
@@ -284,7 +284,7 @@
 <!-- Node34 -->
 <g id="Node000034" class="node">
 <title>Node34</title>
-<g id="a_Node000034"><a xlink:href="../../d1/d24/classfl_1_1audio_1_1_sample_a54c059280429074cc4fb65408e99bb0c.html#a54c059280429074cc4fb65408e99bb0c" target="_top" xlink:title=" ">
+<g id="a_Node000034"><a xlink:href="../../d1/d24/classfl_1_1audio_1_1_sample_af150d38e95ba14085e975e72038f4d93.html#af150d38e95ba14085e975e72038f4d93" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="284.5,-362.5 161.5,-362.5 161.5,-343.5 284.5,-343.5 284.5,-362.5"/>
 <text text-anchor="middle" x="223" y="-350.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::audio::Sample::rms</text>
 </a>
@@ -320,7 +320,7 @@
 <!-- Node37 -->
 <g id="Node000037" class="node">
 <title>Node37</title>
-<g id="a_Node000037"><a xlink:href="../../d4/dad/classfl_1_1vector__basic_a9a248c6b3d33d24ef21e4275c4fbae8c.html#a9a248c6b3d33d24ef21e4275c4fbae8c" target="_top" xlink:title=" ">
+<g id="a_Node000037"><a xlink:href="../../d4/dad/classfl_1_1vector__basic_a3bdba8a50d37b2fd71bbec2b753fba3e.html#a3bdba8a50d37b2fd71bbec2b753fba3e" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="281,-115.5 165,-115.5 165,-96.5 281,-96.5 281,-115.5"/>
 <text text-anchor="middle" x="223" y="-103.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::vector_basic::size</text>
 </a>
@@ -395,7 +395,7 @@
 <!-- Node6 -->
 <g id="Node000006" class="node">
 <title>Node6</title>
-<g id="a_Node000006"><a xlink:href="../../d4/d36/namespacefl_af3a8e787bc8bcd73dcddb8b47a826554.html#af3a8e787bc8bcd73dcddb8b47a826554" target="_top" xlink:title=" ">
+<g id="a_Node000006"><a xlink:href="../../d4/d36/namespacefl_a009a6061a9324e18ae194e4c16749297.html#a009a6061a9324e18ae194e4c16749297" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="459.5,-739.5 412.5,-739.5 412.5,-720.5 459.5,-720.5 459.5,-739.5"/>
 <text text-anchor="middle" x="436" y="-727.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::logf</text>
 </a>
@@ -413,7 +413,7 @@
 <!-- Node9 -->
 <g id="Node000009" class="node">
 <title>Node9</title>
-<g id="a_Node000009"><a xlink:href="../../d4/d36/namespacefl_a0b5da884257d0f4003ead08f27915a2b.html#a0b5da884257d0f4003ead08f27915a2b" target="_top" xlink:title=" ">
+<g id="a_Node000009"><a xlink:href="../../d4/d36/namespacefl_aa4ee5b2900fe7489cc2628422555eb62.html#aa4ee5b2900fe7489cc2628422555eb62" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="461.5,-702.5 410.5,-702.5 410.5,-683.5 461.5,-683.5 461.5,-702.5"/>
 <text text-anchor="middle" x="436" y="-690.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::sqrtf</text>
 </a>
@@ -467,7 +467,7 @@
 <!-- Node18 -->
 <g id="Node000018" class="node">
 <title>Node18</title>
-<g id="a_Node000018"><a xlink:href="../../d4/d36/namespacefl_a3fd92c727664a77396403265415789d3.html#a3fd92c727664a77396403265415789d3" target="_top" xlink:title=" ">
+<g id="a_Node000018"><a xlink:href="../../d4/d36/namespacefl_a257ae39a291866e014a2eeb4abe2a29c.html#a257ae39a291866e014a2eeb4abe2a29c" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="483,-452.5 389,-452.5 389,-433.5 483,-433.5 483,-452.5"/>
 <text text-anchor="middle" x="436" y="-440.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::make_unique</text>
 </a>
@@ -485,9 +485,9 @@
 <!-- Node19 -->
 <g id="Node000019" class="node">
 <title>Node19</title>
-<g id="a_Node000019"><a xlink:href="../../da/d3c/namespacefl_1_1fl_a0bddf371925d8c4e94b88e9d7b35d259.html#a0bddf371925d8c4e94b88e9d7b35d259" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="656.5,-452.5 578.5,-452.5 578.5,-433.5 656.5,-433.5 656.5,-452.5"/>
-<text text-anchor="middle" x="617.5" y="-440.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::fl::forward</text>
+<g id="a_Node000019"><a xlink:href="../../d4/d36/namespacefl_a94488336a5db985fbda1bbd317bffc6a.html#a94488336a5db985fbda1bbd317bffc6a" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="650.5,-452.5 584.5,-452.5 584.5,-433.5 650.5,-433.5 650.5,-452.5"/>
+<text text-anchor="middle" x="617.5" y="-440.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::forward</text>
 </a>
 </g>
 </g>
@@ -495,8 +495,8 @@
 <g id="edge16_Node000018_Node000019" class="edge">
 <title>Node18&#45;&gt;Node19</title>
 <g id="a_edge16_Node000018_Node000019"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M483.23,-443C509.27,-443 541.76,-443 568.15,-443"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="568.3,-446.5 578.3,-443 568.3,-439.5 568.3,-446.5"/>
+<path fill="none" stroke="#63b8ff" d="M483.23,-443C511.32,-443 546.92,-443 574.26,-443"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="574.3,-446.5 584.3,-443 574.3,-439.5 574.3,-446.5"/>
 </a>
 </g>
 </g>
@@ -521,7 +521,7 @@
 <!-- Node22 -->
 <g id="Node000022" class="node">
 <title>Node22</title>
-<g id="a_Node000022"><a xlink:href="../../d1/d24/classfl_1_1audio_1_1_sample_a2648a902311aaeac6475b411f722a8ce.html#a2648a902311aaeac6475b411f722a8ce" target="_top" xlink:title=" ">
+<g id="a_Node000022"><a xlink:href="../../d1/d24/classfl_1_1audio_1_1_sample_a92123a8fe172c3809a2933d56ba5b2d5.html#a92123a8fe172c3809a2933d56ba5b2d5" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="488,-331 384,-331 384,-301 488,-301 488,-331"/>
 <text text-anchor="start" x="392" y="-319" font-family="Helvetica,sans-Serif" font-size="10.00">fl::audio::Sample::</text>
 <text text-anchor="middle" x="436" y="-308" font-family="Helvetica,sans-Serif" font-size="10.00">empty</text>
@@ -577,7 +577,7 @@
 <!-- Node25 -->
 <g id="Node000025" class="node">
 <title>Node25</title>
-<g id="a_Node000025"><a xlink:href="../../d0/d08/classfl_1_1span_a1e467b483bfd364c93ae966e5bd4e427.html#a1e467b483bfd364c93ae966e5bd4e427" target="_top" xlink:title=" ">
+<g id="a_Node000025"><a xlink:href="../../d0/d08/classfl_1_1span_a28135041ca9036a3efb34c1d0afe115b.html#a28135041ca9036a3efb34c1d0afe115b" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="662,-290.5 573,-290.5 573,-271.5 662,-271.5 662,-290.5"/>
 <text text-anchor="middle" x="617.5" y="-278.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::span::empty</text>
 </a>
@@ -595,7 +595,7 @@
 <!-- Node26 -->
 <g id="Node000026" class="node">
 <title>Node26</title>
-<g id="a_Node000026"><a xlink:href="../../d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac" target="_top" xlink:title=" ">
+<g id="a_Node000026"><a xlink:href="../../d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="656,-253.5 579,-253.5 579,-234.5 656,-234.5 656,-253.5"/>
 <text text-anchor="middle" x="617.5" y="-241.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::span::size</text>
 </a>
@@ -676,7 +676,7 @@
 <!-- Node36 -->
 <g id="Node000036" class="node">
 <title>Node36</title>
-<g id="a_Node000036"><a xlink:href="../../d4/d36/namespacefl_a40c15aab45d44b7ca11f148cc2e997c1.html#a40c15aab45d44b7ca11f148cc2e997c1" target="_top" xlink:title=" ">
+<g id="a_Node000036"><a xlink:href="../../d4/d36/namespacefl_ae5cb57a6b1ba6c629a49f0fec021b6e9.html#ae5cb57a6b1ba6c629a49f0fec021b6e9" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="641,-216.5 594,-216.5 594,-197.5 641,-197.5 641,-216.5"/>
 <text text-anchor="middle" x="617.5" y="-204.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::sqrt</text>
 </a>

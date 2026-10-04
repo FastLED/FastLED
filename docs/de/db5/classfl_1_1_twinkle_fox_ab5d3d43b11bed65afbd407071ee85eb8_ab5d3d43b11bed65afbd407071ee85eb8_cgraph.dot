@@ -23,14 +23,14 @@ digraph "fl::TwinkleFox::draw"
   Node5 -> Node10 [id="edge8_Node000005_Node000010",color="steelblue1",style="solid",tooltip=" "];
   Node10 [id="Node000010",label="fl::TwinkleFox::coolLike\lIncandescentFunction",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/db5/classfl_1_1_twinkle_fox_a5c68d964361dfa1535a5d5ae100f95b2.html#a5c68d964361dfa1535a5d5ae100f95b2",tooltip=" "];
   Node2 -> Node11 [id="edge9_Node000002_Node000011",color="steelblue1",style="solid",tooltip=" "];
-  Node11 [id="Node000011",label="fl::CRGB::getAverageLight",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dd6/structfl_1_1_c_r_g_b_a8931f3bad3b656409122dc815850a000.html#a8931f3bad3b656409122dc815850a000",tooltip="Get the average of the R, G, and B values."];
+  Node11 [id="Node000011",label="fl::CRGB::getAverageLight",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dd6/structfl_1_1_c_r_g_b_a7fcc7eeff15c59ffcdb3ede8070d0fec.html#a7fcc7eeff15c59ffcdb3ede8070d0fec",tooltip="Get the average of the R, G, and B values."];
   Node2 -> Node12 [id="edge10_Node000002_Node000012",color="steelblue1",style="solid",tooltip=" "];
-  Node12 [id="Node000012",label="fl::millis",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a",tooltip="Universal millisecond timer - returns milliseconds since system startup."];
+  Node12 [id="Node000012",label="fl::millis",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a3c0ba5842bfd029c404a38c8df2315f3.html#a3c0ba5842bfd029c404a38c8df2315f3",tooltip="Universal millisecond timer - returns milliseconds since system startup."];
   Node12 -> Node12 [id="edge11_Node000012_Node000012",color="steelblue1",style="solid",tooltip=" "];
   Node2 -> Node13 [id="edge12_Node000002_Node000013",color="steelblue1",style="solid",tooltip=" "];
-  Node13 [id="Node000013",label="fl::CRGB::nscale8_video",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dd6/structfl_1_1_c_r_g_b_ae30b045e289d2de1bfb985bf048a130a.html#ae30b045e289d2de1bfb985bf048a130a",tooltip="Scale down a RGB to N/256ths of it's current brightness using \"video\" dimming rules."];
+  Node13 [id="Node000013",label="fl::CRGB::nscale8_video",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dd6/structfl_1_1_c_r_g_b_a5a5f3c7f22d9dc91d1ab6dba03f56194.html#a5a5f3c7f22d9dc91d1ab6dba03f56194",tooltip="Scale down a RGB to N/256ths of it's current brightness using \"video\" dimming rules."];
   Node13 -> Node14 [id="edge13_Node000013_Node000014",color="steelblue1",style="solid",tooltip=" "];
-  Node14 [id="Node000014",label="fl::CRGB::CRGB",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dd6/structfl_1_1_c_r_g_b_adb891cc4fe8f5ac2188d72c13c0256fd.html#adb891cc4fe8f5ac2188d72c13c0256fd",tooltip="Default constructor."];
+  Node14 [id="Node000014",label="fl::CRGB::CRGB",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dd6/structfl_1_1_c_r_g_b_a910ee467a963ad6805026ad83873e52b.html#a910ee467a963ad6805026ad83873e52b",tooltip="Default constructor."];
   Node1 -> Node15 [id="edge14_Node000001_Node000015",color="steelblue1",style="solid",tooltip=" "];
   Node15 [id="Node000015",label="fl::nblendPaletteTowardPalette",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_ada525b8983539d793931dd074928bacd.html#ada525b8983539d793931dd074928bacd",tooltip=" "];
 }

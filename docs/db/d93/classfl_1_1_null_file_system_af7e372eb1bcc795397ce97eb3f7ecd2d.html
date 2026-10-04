@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -112,7 +112,7 @@ $(function(){initNavTree('db/d93/classfl_1_1_null_file_system_af7e372eb1bcc79539
         <tr>
           <td class="memname"><a class="el" href="../../d4/d36/namespacefl_a985073893930f8a7596f2aab50885e90.html#a985073893930f8a7596f2aab50885e90">filebuf_ptr</a> fl::NullFileSystem::openRead </td>
           <td>(</td>
-          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>_path</em></span></td><td>)</td>
+          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>path</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -123,20 +123,22 @@ $(function(){initNavTree('db/d93/classfl_1_1_null_file_system_af7e372eb1bcc79539
 </table>
 </div><div class="memdoc">
 
+<p>Null handle if the file does not exist or cannot be opened. </p>
+
 <p>Implements <a class="el" href="../../d7/d43/classfl_1_1_fs_impl_ada394ba2b3d1d6fb5711c5d06e98b359.html#ada394ba2b3d1d6fb5711c5d06e98b359">fl::FsImpl</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="../../da/d96/file__system_8cpp_8hpp_source.html#l00079">79</a> of file <a class="el" href="../../da/d96/file__system_8cpp_8hpp_source.html">file_system.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   79</span>                                                     {</div>
-<div class="line"><span class="lineno">   80</span>        <a class="code hl_define" href="../../df/d96/s16x16x4_8h_a9de675fbd4d59f415613d91c159cf5b5.html#a9de675fbd4d59f415613d91c159cf5b5">FASTLED_UNUSED</a>(_path);</div>
-<div class="line"><span class="lineno">   81</span>        fl::shared_ptr&lt;NullFileHandle&gt; ptr = <a class="code hl_function" href="../../d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af">fl::make_shared&lt;NullFileHandle&gt;</a>();</div>
-<div class="line"><span class="lineno">   82</span>        <a class="code hl_typedef" href="../../d4/d36/namespacefl_a985073893930f8a7596f2aab50885e90.html#a985073893930f8a7596f2aab50885e90">filebuf_ptr</a> out = ptr;</div>
-<div class="line"><span class="lineno">   83</span>        <span class="keywordflow">return</span> out;</div>
-<div class="line"><span class="lineno">   84</span>    }</div>
-<div class="ttc" id="anamespacefl_a87ae8a24cc8b709a64f39370e71846af_html_a87ae8a24cc8b709a64f39370e71846af"><div class="ttname"><a href="../../d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af">fl::make_shared</a></div><div class="ttdeci">shared_ptr&lt; T &gt; make_shared(Args &amp;&amp;... args) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/d6a/shared__ptr_8h_source.html#l00414">shared_ptr.h:414</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d3/d6e/fs_8cpp_8hpp_source.html#l00080">80</a> of file <a class="el" href="../../d3/d6e/fs_8cpp_8hpp_source.html">fs.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   80</span>                                                     {</div>
+<div class="line"><span class="lineno">   81</span>        <a class="code hl_define" href="../../d4/d54/compiler__control_8h_a9de675fbd4d59f415613d91c159cf5b5.html#a9de675fbd4d59f415613d91c159cf5b5">FASTLED_UNUSED</a>(_path);</div>
+<div class="line"><span class="lineno">   82</span>        fl::shared_ptr&lt;NullFileHandle&gt; ptr = <a class="code hl_function" href="../../d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af">fl::make_shared&lt;NullFileHandle&gt;</a>();</div>
+<div class="line"><span class="lineno">   83</span>        <a class="code hl_typedef" href="../../d4/d36/namespacefl_a985073893930f8a7596f2aab50885e90.html#a985073893930f8a7596f2aab50885e90">filebuf_ptr</a> out = ptr;</div>
+<div class="line"><span class="lineno">   84</span>        <span class="keywordflow">return</span> out;</div>
+<div class="line"><span class="lineno">   85</span>    }</div>
+<div class="ttc" id="acompiler__control_8h_a9de675fbd4d59f415613d91c159cf5b5_html_a9de675fbd4d59f415613d91c159cf5b5"><div class="ttname"><a href="../../d4/d54/compiler__control_8h_a9de675fbd4d59f415613d91c159cf5b5.html#a9de675fbd4d59f415613d91c159cf5b5">FASTLED_UNUSED</a></div><div class="ttdeci">#define FASTLED_UNUSED(x)</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d54/compiler__control_8h_source.html#l00901">compiler_control.h:901</a></div></div>
+<div class="ttc" id="anamespacefl_a87ae8a24cc8b709a64f39370e71846af_html_a87ae8a24cc8b709a64f39370e71846af"><div class="ttname"><a href="../../d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af">fl::make_shared</a></div><div class="ttdeci">shared_ptr&lt; T &gt; make_shared(Args &amp;&amp;... args) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/d6a/shared__ptr_8h_source.html#l00414">shared_ptr.h:414</a></div></div>
 <div class="ttc" id="anamespacefl_a985073893930f8a7596f2aab50885e90_html_a985073893930f8a7596f2aab50885e90"><div class="ttname"><a href="../../d4/d36/namespacefl_a985073893930f8a7596f2aab50885e90.html#a985073893930f8a7596f2aab50885e90">fl::filebuf_ptr</a></div><div class="ttdeci">fl::shared_ptr&lt; filebuf &gt; filebuf_ptr</div><div class="ttdef"><b>Definition</b> <a href="../../d0/dfc/idecoder_8h_source.html#l00015">idecoder.h:15</a></div></div>
-<div class="ttc" id="as16x16x4_8h_a9de675fbd4d59f415613d91c159cf5b5_html_a9de675fbd4d59f415613d91c159cf5b5"><div class="ttname"><a href="../../df/d96/s16x16x4_8h_a9de675fbd4d59f415613d91c159cf5b5.html#a9de675fbd4d59f415613d91c159cf5b5">FASTLED_UNUSED</a></div><div class="ttdeci">#define FASTLED_UNUSED(x)</div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../df/d96/s16x16x4_8h_a9de675fbd4d59f415613d91c159cf5b5.html#a9de675fbd4d59f415613d91c159cf5b5">FASTLED_UNUSED</a>, and <a class="el" href="../../df/d6a/shared__ptr_8h_source.html#l00414">fl::make_shared()</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d54/compiler__control_8h_source.html#l00901">FASTLED_UNUSED</a>, and <a class="el" href="../../df/d6a/shared__ptr_8h_source.html#l00414">fl::make_shared()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -154,7 +156,7 @@ $(function(){initNavTree('db/d93/classfl_1_1_null_file_system_af7e372eb1bcc79539
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../db/d93/classfl_1_1_null_file_system.html">NullFileSystem</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:05 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:09 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -1,0 +1,30 @@
+<map id="fl/channels/color_managed_source.h" name="fl/channels/color_managed_source.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="141,5,337,45"/>
+<area shape="rect" id="Node000002" href="$da/df1/color__managed__source_8cpp_8hpp.html" title=" " alt="" coords="5,93,201,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="199,55,135,96,132,91,196,51"/>
+<area shape="rect" id="Node000006" href="$d6/d09/pipeline__binding_8cpp_8hpp.html" title=" " alt="" coords="141,181,289,221"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="237,59,221,182,215,181,232,59"/>
+<area shape="rect" id="Node000007" href="$d7/dcc/pipeline__binding_8h.html" title=" " alt="" coords="341,93,489,133"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="291,49,378,91,376,96,289,54"/>
+<area shape="rect" id="Node000003" href="$d1/d97/fl_2channels_2__build_8cpp_8hpp.html" title=" " alt="" coords="120,269,311,295"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="108,147,115,184,131,220,159,248,190,267,188,271,155,252,126,223,110,185,102,148"/>
+<area shape="rect" id="Node000004" href="$d1/deb/fl_2__build_8cpp_8hpp.html" title=" " alt="" coords="63,343,191,368"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="192,305,143,345,140,340,189,301"/>
+<area shape="rect" id="Node000005" href="$d7/d44/fl_8channels_09_8cpp.html" title="Unity build: recursive includes from src/fl/channels/." alt="" coords="215,343,394,368"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="242,301,292,340,288,345,239,305"/>
+<area shape="poly" id="edge6_Node000006_Node000003" title=" " alt="" coords="218,235,218,269,213,269,213,235"/>
+<area shape="poly" id="edge13_Node000007_Node000006" title=" " alt="" coords="360,141,260,184,258,179,358,136"/>
+<area shape="rect" id="Node000008" href="$d7/de5/_fast_l_e_d_8cpp_8hpp.html" title=" " alt="" coords="541,189,669,214"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="470,137,581,186,578,191,468,141"/>
+<area shape="rect" id="Node000011" href="$d3/de6/channel_8cpp_8hpp.html" title=" " alt="" coords="314,189,517,214"/>
+<area shape="poly" id="edge11_Node000007_Node000011" title=" " alt="" coords="418,147,418,188,413,188,413,147"/>
+<area shape="rect" id="Node000012" href="$d1/d2a/power__mgt_8cpp_8hpp.html" title=" " alt="" coords="693,189,844,214"/>
+<area shape="poly" id="edge14_Node000007_Node000012" title=" " alt="" coords="503,133,722,186,721,191,502,138"/>
+<area shape="rect" id="Node000009" href="$d7/dd5/__build_8cpp_8hpp.html" title=" " alt="" coords="704,269,820,295"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="641,218,740,267,738,272,638,222"/>
+<area shape="rect" id="Node000010" href="$dd/de2/src_8cpp.html" title="Unity build: flat includes from src/ root directory." alt="" coords="552,269,668,295"/>
+<area shape="poly" id="edge10_Node000008_Node000010" title=" " alt="" coords="609,228,612,269,607,269,604,228"/>
+<area shape="poly" id="edge12_Node000011_Node000003" title=" " alt="" coords="374,222,245,272,243,267,372,217"/>
+<area shape="poly" id="edge15_Node000012_Node000009" title=" " alt="" coords="769,228,766,269,760,269,764,228"/>
+<area shape="poly" id="edge16_Node000012_Node000010" title=" " alt="" coords="735,222,634,272,632,267,732,218"/>
+</map>

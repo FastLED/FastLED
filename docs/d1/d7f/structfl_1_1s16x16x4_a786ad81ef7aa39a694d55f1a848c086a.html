@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -110,7 +110,7 @@ $(function(){initNavTree('d1/d7f/structfl_1_1s16x16x4_a786ad81ef7aa39a694d55f1a8
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="../../df/d96/s16x16x4_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> void fl::s16x16x4::sincos </td>
+          <td class="memname"><a class="el" href="../../d4/d54/compiler__control_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> void fl::s16x16x4::sincos </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="../../d1/d7f/structfl_1_1s16x16x4.html">s16x16x4</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>out_sin</em></span>, </td>
         </tr>
@@ -129,27 +129,36 @@ $(function(){initNavTree('d1/d7f/structfl_1_1s16x16x4_a786ad81ef7aa39a694d55f1a8
 
 <p>Compute sin and cos of 4 angles (in radians) Results written to out_sin and out_cos. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../df/d96/s16x16x4_8h_source.html#l00114">114</a> of file <a class="el" href="../../df/d96/s16x16x4_8h_source.html">s16x16x4.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  114</span>                                                                                 {</div>
-<div class="line"><span class="lineno">  115</span>        <span class="comment">// Convert radians to 24-bit angle units (same as scalar s16x16)</span></div>
-<div class="line"><span class="lineno">  116</span>        <span class="comment">// RAD_TO_24 = 2^24 / (2π) in Q16</span></div>
-<div class="line"><span class="lineno">  117</span>        <span class="keyword">static</span> <span class="keyword">constexpr</span> i32 RAD_TO_24 = 2670177;  <span class="comment">// from s16x16.h</span></div>
-<div class="line"><span class="lineno">  118</span> </div>
-<div class="line"><span class="lineno">  119</span>        <span class="comment">// Convert 4 angles: mulhi_i32_4 does (i64*i64) &gt;&gt; 16</span></div>
-<div class="line"><span class="lineno">  120</span>        <span class="keyword">auto</span> angles_u32 = simd::mulhi_su32_4(<a class="code hl_variable" href="../../d1/d7f/structfl_1_1s16x16x4_ab28f260d1c5d58a97d8e92331fa3b5c5.html#ab28f260d1c5d58a97d8e92331fa3b5c5">raw</a>, simd::set1_u32_4(<span class="keyword">static_cast&lt;</span>u32<span class="keyword">&gt;</span>(RAD_TO_24)));</div>
-<div class="line"><span class="lineno">  121</span> </div>
-<div class="line"><span class="lineno">  122</span>        <span class="comment">// Call vectorized sincos</span></div>
-<div class="line"><span class="lineno">  123</span>        <span class="keyword">auto</span> sc = <a class="code hl_function" href="../../d4/d36/namespacefl_a3a23a29b7fae800b629360cd32fec586.html#a3a23a29b7fae800b629360cd32fec586">sincos32_simd</a>(angles_u32);</div>
-<div class="line"><span class="lineno">  124</span> </div>
-<div class="line"><span class="lineno">  125</span>        <span class="comment">// Shift results right by 15 to convert from raw sin32 output to Q16.16</span></div>
-<div class="line"><span class="lineno">  126</span>        out_sin = <a class="code hl_function" href="../../d1/d7f/structfl_1_1s16x16x4_a9779c1f01acf93469171a665b5ae329c.html#a9779c1f01acf93469171a665b5ae329c">from_raw</a>(simd::sra_i32_4(sc.sin_vals, 15));</div>
-<div class="line"><span class="lineno">  127</span>        out_cos = <a class="code hl_function" href="../../d1/d7f/structfl_1_1s16x16x4_a9779c1f01acf93469171a665b5ae329c.html#a9779c1f01acf93469171a665b5ae329c">from_raw</a>(simd::sra_i32_4(sc.cos_vals, 15));</div>
-<div class="line"><span class="lineno">  128</span>    }</div>
-<div class="ttc" id="anamespacefl_a3a23a29b7fae800b629360cd32fec586_html_a3a23a29b7fae800b629360cd32fec586"><div class="ttname"><a href="../../d4/d36/namespacefl_a3a23a29b7fae800b629360cd32fec586.html#a3a23a29b7fae800b629360cd32fec586">fl::sincos32_simd</a></div><div class="ttdeci">FASTLED_FORCE_INLINE SinCos32_simd sincos32_simd(simd::simd_u32x4 angles) FL_NOEXCEPT</div><div class="ttdoc">Process 4 angles simultaneously, returning vectorized sin/cos values SIMD-optimized: vectorized angle...</div><div class="ttdef"><b>Definition</b> <a href="../../d3/d84/sin32_8h_source.html#l00145">sin32.h:145</a></div></div>
-<div class="ttc" id="astructfl_1_1s16x16x4_a9779c1f01acf93469171a665b5ae329c_html_a9779c1f01acf93469171a665b5ae329c"><div class="ttname"><a href="../../d1/d7f/structfl_1_1s16x16x4_a9779c1f01acf93469171a665b5ae329c.html#a9779c1f01acf93469171a665b5ae329c">fl::s16x16x4::from_raw</a></div><div class="ttdeci">static FASTLED_FORCE_INLINE s16x16x4 from_raw(simd::simd_u32x4 r)</div><div class="ttdef"><b>Definition</b> <a href="../../df/d96/s16x16x4_8h_source.html#l00024">s16x16x4.h:24</a></div></div>
-<div class="ttc" id="astructfl_1_1s16x16x4_ab28f260d1c5d58a97d8e92331fa3b5c5_html_ab28f260d1c5d58a97d8e92331fa3b5c5"><div class="ttname"><a href="../../d1/d7f/structfl_1_1s16x16x4_ab28f260d1c5d58a97d8e92331fa3b5c5.html#ab28f260d1c5d58a97d8e92331fa3b5c5">fl::s16x16x4::raw</a></div><div class="ttdeci">simd::simd_u32x4 raw</div><div class="ttdef"><b>Definition</b> <a href="../../df/d96/s16x16x4_8h_source.html#l00020">s16x16x4.h:20</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../df/d96/s16x16x4_8h_source.html#l00118">118</a> of file <a class="el" href="../../df/d96/s16x16x4_8h_source.html">s16x16x4.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  118</span>                                                                                 {</div>
+<div class="line"><span class="lineno">  119</span>        <span class="comment">// Convert radians to 24-bit angle units (same as scalar s16x16)</span></div>
+<div class="line"><span class="lineno">  120</span>        <span class="comment">// RAD_TO_24 = 2^24 / (2π) in Q16</span></div>
+<div class="line"><span class="lineno">  121</span>        <span class="keyword">static</span> <span class="keyword">constexpr</span> i32 RAD_TO_24 = 2670177;  <span class="comment">// from s16x16.h</span></div>
+<div class="line"><span class="lineno">  122</span> </div>
+<div class="line"><span class="lineno">  123</span>        <span class="comment">// Convert 4 angles: mulhi_i32_4 does (i64*i64) &gt;&gt; 16</span></div>
+<div class="line"><span class="lineno">  124</span>        <span class="keyword">auto</span> angles_u32 = simd::mulhi_su32_4(<a class="code hl_variable" href="../../d1/d7f/structfl_1_1s16x16x4_ab28f260d1c5d58a97d8e92331fa3b5c5.html#ab28f260d1c5d58a97d8e92331fa3b5c5">raw</a>, simd::set1_u32_4(<span class="keyword">static_cast&lt;</span>u32<span class="keyword">&gt;</span>(RAD_TO_24)));</div>
+<div class="line"><span class="lineno">  125</span> </div>
+<div class="line"><span class="lineno">  126</span>        <span class="comment">// Call vectorized sincos</span></div>
+<div class="line"><span class="lineno">  127</span>        <span class="keyword">auto</span> sc = <a class="code hl_function" href="../../d4/d36/namespacefl_a92f648bf72198076845339c6859d3e19.html#a92f648bf72198076845339c6859d3e19">sincos32_simd</a>(angles_u32);</div>
+<div class="line"><span class="lineno">  128</span> </div>
+<div class="line"><span class="lineno">  129</span>        <span class="comment">// Shift results right by 15 to convert from raw sin32 output to Q16.16</span></div>
+<div class="line"><span class="lineno">  130</span>        out_sin = <a class="code hl_function" href="../../d1/d7f/structfl_1_1s16x16x4_a9779c1f01acf93469171a665b5ae329c.html#a9779c1f01acf93469171a665b5ae329c">from_raw</a>(simd::sra_i32_4(sc.sin_vals, 15));</div>
+<div class="line"><span class="lineno">  131</span>        out_cos = <a class="code hl_function" href="../../d1/d7f/structfl_1_1s16x16x4_a9779c1f01acf93469171a665b5ae329c.html#a9779c1f01acf93469171a665b5ae329c">from_raw</a>(simd::sra_i32_4(sc.cos_vals, 15));</div>
+<div class="line"><span class="lineno">  132</span>    }</div>
+<div class="ttc" id="anamespacefl_a92f648bf72198076845339c6859d3e19_html_a92f648bf72198076845339c6859d3e19"><div class="ttname"><a href="../../d4/d36/namespacefl_a92f648bf72198076845339c6859d3e19.html#a92f648bf72198076845339c6859d3e19">fl::sincos32_simd</a></div><div class="ttdeci">FASTLED_FORCE_INLINE SinCos32_simd sincos32_simd(simd::simd_u32x4 angles) FL_NO_EXCEPT</div><div class="ttdoc">Process 4 angles simultaneously, returning vectorized sin/cos values SIMD-optimized: vectorized angle...</div><div class="ttdef"><b>Definition</b> <a href="../../d2/d4b/sin32__simd_8h_source.html#l00032">sin32_simd.h:32</a></div></div>
+<div class="ttc" id="astructfl_1_1s16x16x4_a9779c1f01acf93469171a665b5ae329c_html_a9779c1f01acf93469171a665b5ae329c"><div class="ttname"><a href="../../d1/d7f/structfl_1_1s16x16x4_a9779c1f01acf93469171a665b5ae329c.html#a9779c1f01acf93469171a665b5ae329c">fl::s16x16x4::from_raw</a></div><div class="ttdeci">static FASTLED_FORCE_INLINE s16x16x4 from_raw(simd::simd_u32x4 r)</div><div class="ttdef"><b>Definition</b> <a href="../../df/d96/s16x16x4_8h_source.html#l00028">s16x16x4.h:28</a></div></div>
+<div class="ttc" id="astructfl_1_1s16x16x4_ab28f260d1c5d58a97d8e92331fa3b5c5_html_ab28f260d1c5d58a97d8e92331fa3b5c5"><div class="ttname"><a href="../../d1/d7f/structfl_1_1s16x16x4_ab28f260d1c5d58a97d8e92331fa3b5c5.html#ab28f260d1c5d58a97d8e92331fa3b5c5">fl::s16x16x4::raw</a></div><div class="ttdeci">simd::simd_u32x4 raw</div><div class="ttdef"><b>Definition</b> <a href="../../df/d96/s16x16x4_8h_source.html#l00024">s16x16x4.h:24</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../df/d96/s16x16x4_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d54/compiler__control_8h_source.html#l00819">FASTLED_FORCE_INLINE</a>, and <a class="el" href="../../df/d96/s16x16x4_8h_source.html#l00024">raw</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../df/d96/s16x16x4_8h_source.html#l00142">cos()</a>, and <a class="el" href="../../df/d96/s16x16x4_8h_source.html#l00135">sin()</a>.</p>
+<div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
+<div id="dynsection-0-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-0-content" class="dyncontent" style="display:none;">
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d1/d7f/structfl_1_1s16x16x4_a786ad81ef7aa39a694d55f1a848c086a_a786ad81ef7aa39a694d55f1a848c086a_icgraph.svg" width="340" height="86"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
 
 </div>
 </div>
@@ -160,7 +169,7 @@ $(function(){initNavTree('d1/d7f/structfl_1_1s16x16x4_a786ad81ef7aa39a694d55f1a8
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d1/d7f/structfl_1_1s16x16x4.html">s16x16x4</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:09 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -1,0 +1,17 @@
+<map id="fl::audio::fft::Bins::rawNormalized" name="fl::audio::fft::Bins::rawNormalized">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,97,137,137"/>
+<area shape="rect" id="Node000002" href="$da/d27/classfl_1_1audio_1_1fft_1_1_float_vector_pool_ae9e0a949ca5ed56a4f007e4cb0b06a57.html#ae9e0a949ca5ed56a4f007e4cb0b06a57" title=" " alt="" coords="185,57,364,97"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="137,101,172,94,173,99,138,106"/>
+<area shape="rect" id="Node000006" href="$d6/d86/classfl_1_1audio_1_1fft_1_1_bins_a308c8118702b4fc332ed339392b3ef05.html#a308c8118702b4fc332ed339392b3ef05" title=" " alt="" coords="209,129,341,169"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="138,124,195,134,195,139,137,130"/>
+<area shape="rect" id="Node000003" href="$d2/d24/classfl_1_1vector_a6bcea23da2d1c39846ec89a5119310ff.html#a6bcea23da2d1c39846ec89a5119310ff" title=" " alt="" coords="434,5,553,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="349,54,431,32,433,37,350,59"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a0c8a67e528dcd96ee58216754a07a733.html#a0c8a67e528dcd96ee58216754a07a733" title=" " alt="" coords="456,55,531,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="364,70,442,67,442,72,365,76"/>
+<area shape="rect" id="Node000005" href="$d2/d24/classfl_1_1vector_a106fe3779897c81ef234f25952ed29d7.html#a106fe3779897c81ef234f25952ed29d7" title=" " alt="" coords="425,104,561,129"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="365,90,412,99,411,104,364,96"/>
+<area shape="rect" id="Node000007" href="$d9/d5b/classfl_1_1_singleton_ad5cb1b704e17768f75802673abb0ff75.html#ad5cb1b704e17768f75802673abb0ff75" title=" " alt="" coords="412,153,575,179"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="341,151,399,156,398,161,341,157"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_a1e67c0c24ebcd98fcf8554753d1639a6.html#a1e67c0c24ebcd98fcf8554753d1639a6" title=" " alt="" coords="623,153,761,179"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="575,163,609,163,609,169,575,169"/>
+</map>

@@ -8,13 +8,13 @@ digraph "fl::audio::detector::TempoAnalyzer::update"
   rankdir="LR";
   Node1 [id="Node000001",label="fl::audio::detector\l::TempoAnalyzer::update",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::audio::detector\l::TempoAnalyzer::TempoAnalyzer",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/df8/classfl_1_1audio_1_1detector_1_1_tempo_analyzer_a8f5e18f161b94036334fbe0c924ba6e2.html#a8f5e18f161b94036334fbe0c924ba6e2",tooltip=" "];
+  Node2 [id="Node000002",label="fl::audio::detector\l::TempoAnalyzer::TempoAnalyzer",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/df8/classfl_1_1audio_1_1detector_1_1_tempo_analyzer_ab7ad3de965b9807d90b4fa272f11b14c.html#ab7ad3de965b9807d90b4fa272f11b14c",tooltip=" "];
   Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::abs",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_aefed87cfefc8330419d3393867945e84.html#aefed87cfefc8330419d3393867945e84",tooltip=" "];
+  Node3 [id="Node000003",label="fl::abs",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_aea39aa3747a937b0dbefabdf22cf2bbc.html#aea39aa3747a937b0dbefabdf22cf2bbc",tooltip=" "];
   Node1 -> Node4 [id="edge3_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];
   Node4 [id="Node000004",label="fl::audio::detector\l::TempoAnalyzer::calculate\lSpectralFlux",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/df8/classfl_1_1audio_1_1detector_1_1_tempo_analyzer_a2af9c06e55473b5a8358465e2d65073d.html#a2af9c06e55473b5a8358465e2d65073d",tooltip=" "];
   Node4 -> Node5 [id="edge4_Node000004_Node000005",color="steelblue1",style="solid",tooltip=" "];
-  Node5 [id="Node000005",label="fl::min",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb",tooltip=" "];
+  Node5 [id="Node000005",label="fl::min",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a2fdabb91a1f100dec8da21e4306aba05.html#a2fdabb91a1f100dec8da21e4306aba05",tooltip=" "];
   Node1 -> Node6 [id="edge5_Node000001_Node000006",color="steelblue1",style="solid",tooltip=" "];
   Node6 [id="Node000006",label="fl::audio::detector\l::TempoAnalyzer::detectOnset",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/df8/classfl_1_1audio_1_1detector_1_1_tempo_analyzer_a49119063b53029f3dd84ff5615715801.html#a49119063b53029f3dd84ff5615715801",tooltip=" "];
   Node1 -> Node5 [id="edge6_Node000001_Node000005",color="steelblue1",style="solid",tooltip=" "];
@@ -34,7 +34,7 @@ digraph "fl::audio::detector::TempoAnalyzer::update"
   Node11 -> Node12 [id="edge15_Node000011_Node000012",color="steelblue1",style="solid",tooltip=" "];
   Node12 [id="Node000012",label="bpm",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d25/_demo_reel100_8ino_a4875f6d9a2b0f08d3cf221974234121b.html#a4875f6d9a2b0f08d3cf221974234121b",tooltip=" "];
   Node12 -> Node13 [id="edge16_Node000012_Node000013",color="steelblue1",style="solid",tooltip=" "];
-  Node13 [id="Node000013",label="beatsin8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/da5/lib8tion_8h_a696b9421eca961df0a68c7c6c3e983ab.html#a696b9421eca961df0a68c7c6c3e983ab",tooltip="Generates an 8-bit sine wave at a given BPM that oscillates within a given range."];
+  Node13 [id="Node000013",label="beatsin8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/da5/lib8tion_8h_aca012663c6c8fe9a7240bcbc76095ba9.html#aca012663c6c8fe9a7240bcbc76095ba9",tooltip="Generates an 8-bit sine wave at a given BPM that oscillates within a given range."];
   Node12 -> Node14 [id="edge17_Node000012_Node000014",color="steelblue1",style="solid",tooltip=" "];
   Node14 [id="Node000014",label="ColorFromPalette",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/dfb/colorutils_8h_a3d488dd1e2d27e99307310527e51cad3.html#a3d488dd1e2d27e99307310527e51cad3",tooltip=" "];
   Node12 -> Node15 [id="edge18_Node000012_Node000015",color="steelblue1",style="solid",tooltip=" "];
@@ -43,10 +43,10 @@ digraph "fl::audio::detector::TempoAnalyzer::update"
   Node16 [id="Node000016",label="fl::audio::detector\l::TempoAnalyzer::calculate\lIntervalScore",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/df8/classfl_1_1audio_1_1detector_1_1_tempo_analyzer_af6cec5c9a6b3bc7b7151a75ef743d9df.html#af6cec5c9a6b3bc7b7151a75ef743d9df",tooltip=" "];
   Node16 -> Node12 [id="edge20_Node000016_Node000012",color="steelblue1",style="solid",tooltip=" "];
   Node16 -> Node17 [id="edge21_Node000016_Node000017",color="steelblue1",style="solid",tooltip=" "];
-  Node17 [id="Node000017",label="fl::max",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909",tooltip=" "];
+  Node17 [id="Node000017",label="fl::max",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a07c69292ef50aa1083046faff1c52ead.html#a07c69292ef50aa1083046faff1c52ead",tooltip=" "];
   Node1 -> Node18 [id="edge22_Node000001_Node000018",color="steelblue1",style="solid",tooltip=" "];
   Node18 [id="Node000018",label="fl::audio::detector\l::TempoAnalyzer::updateStability",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/df8/classfl_1_1audio_1_1detector_1_1_tempo_analyzer_a7c4d8dcf2390654e1287db085c3728f7.html#a7c4d8dcf2390654e1287db085c3728f7",tooltip=" "];
   Node18 -> Node17 [id="edge23_Node000018_Node000017",color="steelblue1",style="solid",tooltip=" "];
   Node18 -> Node19 [id="edge24_Node000018_Node000019",color="steelblue1",style="solid",tooltip=" "];
-  Node19 [id="Node000019",label="fl::sqrt",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a40c15aab45d44b7ca11f148cc2e997c1.html#a40c15aab45d44b7ca11f148cc2e997c1",tooltip=" "];
+  Node19 [id="Node000019",label="fl::sqrt",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_ae5cb57a6b1ba6c629a49f0fec021b6e9.html#ae5cb57a6b1ba6c629a49f0fec021b6e9",tooltip=" "];
 }

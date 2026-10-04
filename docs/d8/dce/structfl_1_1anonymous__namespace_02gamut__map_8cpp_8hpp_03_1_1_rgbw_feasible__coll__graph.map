@@ -1,0 +1,7 @@
+<map id="fl::anonymous_namespace{gamut_map.cpp.hpp}::RgbwFeasible" name="fl::anonymous_namespace{gamut_map.cpp.hpp}::RgbwFeasible">
+<area shape="rect" id="Node000001" title="Feasibility against the device&#39;s real hull when it has a white emitter." alt="" coords="5,181,275,221"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl.html#d1/d56/structfl_1_1_white_allocation_q16" title="Everything the per&#45;pixel allocation needs, derived once when a profile binds." alt="" coords="57,93,223,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="143,132,143,181,137,181,137,132"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl.html#d0/d89/structfl_1_1_emitter_solve_matrix_q16" title="Inverse emitter matrix in s16.16, mapping XYZ to three emitter drives." alt="" coords="45,5,235,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="143,45,143,93,137,93,137,45"/>
+</map>

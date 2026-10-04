@@ -1,0 +1,21 @@
+<map id="fl::canMatch" name="fl::canMatch">
+<area shape="rect" id="Node000001" title="Test a request (single&#45;pin OR multi&#45;pin ganged) against a driver&#39;s published capability data." alt="" coords="5,191,107,216"/>
+<area shape="rect" id="Node000002" href="$d9/d73/namespacefl_1_1can__match__detail_a2782ca55b5e55940659c993d592afb7b.html#a2782ca55b5e55940659c993d592afb7b" title=" " alt="" coords="155,119,308,159"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="91,188,162,162,164,167,93,193"/>
+<area shape="rect" id="Node000009" href="$d9/d73/namespacefl_1_1can__match__detail_a7a69dbc0bb55b86271f3e13d16da8679.html#a7a69dbc0bb55b86271f3e13d16da8679" title=" " alt="" coords="155,183,308,223"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="107,201,141,201,141,206,107,206"/>
+<area shape="rect" id="Node000010" href="$d9/d73/namespacefl_1_1can__match__detail_ac9908d06f233632148fe77f9ceb0e038.html#ac9908d06f233632148fe77f9ceb0e038" title=" " alt="" coords="155,247,308,287"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="93,214,164,240,162,245,91,219"/>
+<area shape="rect" id="Node000003" href="$d6/d12/structfl_1_1_freq_range_af02c05730f48a9764dfafc3b37065c81.html#af02c05730f48a9764dfafc3b37065c81" title=" " alt="" coords="382,5,553,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="251,117,296,78,324,58,355,41,376,32,378,37,357,46,327,63,299,82,254,121"/>
+<area shape="rect" id="Node000004" href="$d9/d73/namespacefl_1_1can__match__detail_a953f015f3c77806c4a3135eb298d1d18.html#a953f015f3c77806c4a3135eb298d1d18" title=" " alt="" coords="370,55,565,95"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="305,117,379,96,381,101,307,122"/>
+<area shape="rect" id="Node000005" href="$d9/d73/namespacefl_1_1can__match__detail_a71efa121191f543bbc596241531d38c2.html#a71efa121191f543bbc596241531d38c2" title=" " alt="" coords="356,119,579,159"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="308,137,342,137,342,142,308,142"/>
+<area shape="rect" id="Node000007" href="$d9/d73/namespacefl_1_1can__match__detail_a61e9b7211958d6428db556a38de0ece0.html#a61e9b7211958d6428db556a38de0ece0" title=" " alt="" coords="391,183,544,223"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="307,157,381,177,379,182,305,162"/>
+<area shape="rect" id="Node000008" href="$d6/d12/structfl_1_1_freq_range_aedcf45139672ad9d7348670ffd21b578.html#aedcf45139672ad9d7348670ffd21b578" title=" " alt="" coords="366,248,569,273"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="291,157,310,169,325,186,334,203,342,219,358,233,371,240,368,245,354,237,338,222,329,206,321,189,306,173,288,162"/>
+<area shape="rect" id="Node000006" href="$d9/d73/namespacefl_1_1can__match__detail_accdc0b8db845702f8003386ec51144ca.html#accdc0b8db845702f8003386ec51144ca" title=" " alt="" coords="627,119,780,159"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="579,137,613,137,613,142,579,142"/>
+</map>

@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -140,7 +140,7 @@ $(function(){initNavTree('da/d5e/classfl_1_1audio_1_1detector_1_1_beat_aa8b02762
 <div class="line"><span class="lineno">  151</span>        <span class="keywordtype">float</span> newBPM = 60000.0f / <span class="keyword">static_cast&lt;</span><span class="keywordtype">float</span><span class="keyword">&gt;</span>(<a class="code hl_variable" href="../../da/d5e/classfl_1_1audio_1_1detector_1_1_beat_aad6927e19d7902b2b2ffdfd264a6a3a1.html#aad6927e19d7902b2b2ffdfd264a6a3a1">mBeatInterval</a>);</div>
 <div class="line"><span class="lineno">  152</span> </div>
 <div class="line"><span class="lineno">  153</span>        <span class="comment">// Check if tempo changed significantly</span></div>
-<div class="line"><span class="lineno">  154</span>        <span class="keywordtype">float</span> bpmDiff = <a class="code hl_function" href="../../d4/d36/namespacefl_aefed87cfefc8330419d3393867945e84.html#aefed87cfefc8330419d3393867945e84">fl::abs</a>(newBPM - <a class="code hl_variable" href="../../da/d5e/classfl_1_1audio_1_1detector_1_1_beat_a24d2ceb11d0fb04b3d28fc5cf5153037.html#a24d2ceb11d0fb04b3d28fc5cf5153037">mBPM</a>);</div>
+<div class="line"><span class="lineno">  154</span>        <span class="keywordtype">float</span> bpmDiff = <a class="code hl_function" href="../../d4/d36/namespacefl_aea39aa3747a937b0dbefabdf22cf2bbc.html#aea39aa3747a937b0dbefabdf22cf2bbc">fl::abs</a>(newBPM - <a class="code hl_variable" href="../../da/d5e/classfl_1_1audio_1_1detector_1_1_beat_a24d2ceb11d0fb04b3d28fc5cf5153037.html#a24d2ceb11d0fb04b3d28fc5cf5153037">mBPM</a>);</div>
 <div class="line"><span class="lineno">  155</span>        <a class="code hl_variable" href="../../da/d5e/classfl_1_1audio_1_1detector_1_1_beat_addef49539ee6594be8c676d6438b31b8.html#addef49539ee6594be8c676d6438b31b8">mTempoChanged</a> = (bpmDiff &gt; 5.0f);</div>
 <div class="line"><span class="lineno">  156</span> </div>
 <div class="line"><span class="lineno">  157</span>        <a class="code hl_variable" href="../../da/d5e/classfl_1_1audio_1_1detector_1_1_beat_a24d2ceb11d0fb04b3d28fc5cf5153037.html#a24d2ceb11d0fb04b3d28fc5cf5153037">mBPM</a> = newBPM;</div>
@@ -152,7 +152,7 @@ $(function(){initNavTree('da/d5e/classfl_1_1audio_1_1detector_1_1_beat_aa8b02762
 <div class="ttc" id="aclassfl_1_1audio_1_1detector_1_1_beat_ab0b76b604965260b17500a8b31abc59d_html_ab0b76b604965260b17500a8b31abc59d"><div class="ttname"><a href="../../da/d5e/classfl_1_1audio_1_1detector_1_1_beat_ab0b76b604965260b17500a8b31abc59d.html#ab0b76b604965260b17500a8b31abc59d">fl::audio::detector::Beat::MAX_BEAT_INTERVAL_MS</a></div><div class="ttdeci">static constexpr u32 MAX_BEAT_INTERVAL_MS</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d07/audio_2detector_2beat_8h_source.html#l00058">beat.h:58</a></div></div>
 <div class="ttc" id="aclassfl_1_1audio_1_1detector_1_1_beat_addef49539ee6594be8c676d6438b31b8_html_addef49539ee6594be8c676d6438b31b8"><div class="ttname"><a href="../../da/d5e/classfl_1_1audio_1_1detector_1_1_beat_addef49539ee6594be8c676d6438b31b8.html#addef49539ee6594be8c676d6438b31b8">fl::audio::detector::Beat::mTempoChanged</a></div><div class="ttdeci">bool mTempoChanged</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d07/audio_2detector_2beat_8h_source.html#l00043">beat.h:43</a></div></div>
 <div class="ttc" id="aclassfl_1_1audio_1_1detector_1_1_beat_af17f9d19352924e507a749d31dfa7f56_html_af17f9d19352924e507a749d31dfa7f56"><div class="ttname"><a href="../../da/d5e/classfl_1_1audio_1_1detector_1_1_beat_af17f9d19352924e507a749d31dfa7f56.html#af17f9d19352924e507a749d31dfa7f56">fl::audio::detector::Beat::MIN_BEAT_INTERVAL_MS</a></div><div class="ttdeci">static constexpr u32 MIN_BEAT_INTERVAL_MS</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d07/audio_2detector_2beat_8h_source.html#l00057">beat.h:57</a></div></div>
-<div class="ttc" id="anamespacefl_aefed87cfefc8330419d3393867945e84_html_aefed87cfefc8330419d3393867945e84"><div class="ttname"><a href="../../d4/d36/namespacefl_aefed87cfefc8330419d3393867945e84.html#aefed87cfefc8330419d3393867945e84">fl::abs</a></div><div class="ttdeci">constexpr enable_if&lt; is_fixed_point&lt; T &gt;::value, T &gt;::type abs(T x) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../de/d62/fixed__point_8h_source.html#l00525">fixed_point.h:525</a></div></div>
+<div class="ttc" id="anamespacefl_aea39aa3747a937b0dbefabdf22cf2bbc_html_aea39aa3747a937b0dbefabdf22cf2bbc"><div class="ttname"><a href="../../d4/d36/namespacefl_aea39aa3747a937b0dbefabdf22cf2bbc.html#aea39aa3747a937b0dbefabdf22cf2bbc">fl::abs</a></div><div class="ttdeci">constexpr enable_if&lt; is_fixed_point&lt; T &gt;::value, T &gt;::type abs(T x) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../de/d62/fixed__point_8h_source.html#l00525">fixed_point.h:525</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../de/d62/fixed__point_8h_source.html#l00525">fl::abs()</a>, <a class="el" href="../../d6/d07/audio_2detector_2beat_8h_source.html#l00058">MAX_BEAT_INTERVAL_MS</a>, <a class="el" href="../../d6/d07/audio_2detector_2beat_8h_source.html#l00056">mBeatInterval</a>, <a class="el" href="../../d6/d07/audio_2detector_2beat_8h_source.html#l00044">mBPM</a>, <a class="el" href="../../d6/d07/audio_2detector_2beat_8h_source.html#l00057">MIN_BEAT_INTERVAL_MS</a>, <a class="el" href="../../d6/d07/audio_2detector_2beat_8h_source.html#l00055">mLastBeatTime</a>, and <a class="el" href="../../d6/d07/audio_2detector_2beat_8h_source.html#l00043">mTempoChanged</a>.</p>
 
@@ -181,7 +181,7 @@ $(function(){initNavTree('da/d5e/classfl_1_1audio_1_1detector_1_1_beat_aa8b02762
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../db/dbf/namespacefl_1_1audio.html">audio</a></li><li class="navelem"><a class="el" href="../../dd/d12/namespacefl_1_1audio_1_1detector.html">detector</a></li><li class="navelem"><a class="el" href="../../da/d5e/classfl_1_1audio_1_1detector_1_1_beat.html">Beat</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:08 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:11 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

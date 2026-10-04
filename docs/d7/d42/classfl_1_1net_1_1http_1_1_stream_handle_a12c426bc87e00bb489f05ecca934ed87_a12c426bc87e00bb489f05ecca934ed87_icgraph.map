@@ -1,6 +1,6 @@
 <map id="fl::net::http::StreamHandle::promise" name="fl::net::http::StreamHandle::promise">
 <area shape="rect" id="Node000001" title="Access the underlying promise." alt="" coords="491,157,685,197"/>
-<area shape="rect" id="Node000002" href="$d7/d42/classfl_1_1net_1_1http_1_1_stream_handle_a1eacb2334461db8f8806ee33f4d1829c.html#a1eacb2334461db8f8806ee33f4d1829c" title=" " alt="" coords="248,157,443,197"/>
+<area shape="rect" id="Node000002" href="$d7/d42/classfl_1_1net_1_1http_1_1_stream_handle_aac259c7475c1a9098a0c7490870c18d1.html#aac259c7475c1a9098a0c7490870c18d1" title=" " alt="" coords="248,157,443,197"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="477,180,443,180,443,175,477,175"/>
 <area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="387,146,372,139,345,136,322,138,308,143,303,149,305,156,300,158,297,148,305,138,321,133,345,131,374,134,389,141"/>
 <area shape="rect" id="Node000003" href="$d7/d42/classfl_1_1net_1_1http_1_1_stream_handle_a54e58b3be2d0cfc2b1c31230c5cf4515.html#a54e58b3be2d0cfc2b1c31230c5cf4515" title="Register callback for errors." alt="" coords="5,5,200,45"/>

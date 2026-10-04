@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -112,7 +112,7 @@ $(function(){initNavTree('d6/d66/classfl_1_1_mp3_a05c327e508e430bc8959024aa100d1
         <tr>
           <td class="memname"><a class="el" href="../../d7/df3/structfl_1_1_mp3_info.html">Mp3Info</a> fl::Mp3::parseMp3Info </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="../../d0/d08/classfl_1_1span.html">fl::span</a>&lt; const <a class="el" href="../../da/d3c/namespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c.html#a7573a66f01c09f14a1ff0411f8e1153c">fl::u8</a> &gt;</td>          <td class="paramname"><span class="paramname"><em>data</em></span>, </td>
+          <td class="paramtype"><a class="el" href="../../d0/d08/classfl_1_1span.html">fl::span</a>&lt; const <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> &gt;</td>          <td class="paramname"><span class="paramname"><em>data</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -127,95 +127,96 @@ $(function(){initNavTree('d6/d66/classfl_1_1_mp3_a05c327e508e430bc8959024aa100d1
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d3/df6/mp3_8cpp_8hpp_source.html#l00410">410</a> of file <a class="el" href="../../d3/df6/mp3_8cpp_8hpp_source.html">mp3.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  410</span>                                                                          {</div>
-<div class="line"><span class="lineno">  411</span>    Mp3Info info;</div>
-<div class="line"><span class="lineno">  412</span> </div>
-<div class="line"><span class="lineno">  413</span>    <span class="comment">// Validate input data</span></div>
-<div class="line"><span class="lineno">  414</span>    <span class="keywordflow">if</span> (data.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_a1e467b483bfd364c93ae966e5bd4e427.html#a1e467b483bfd364c93ae966e5bd4e427">empty</a>()) {</div>
-<div class="line"><span class="lineno">  415</span>        <span class="keywordflow">if</span> (error_message) {</div>
-<div class="line"><span class="lineno">  416</span>            *error_message = <span class="stringliteral">&quot;Empty MP3 data&quot;</span>;</div>
-<div class="line"><span class="lineno">  417</span>        }</div>
-<div class="line"><span class="lineno">  418</span>        <span class="keywordflow">return</span> info; <span class="comment">// returns invalid info</span></div>
-<div class="line"><span class="lineno">  419</span>    }</div>
-<div class="line"><span class="lineno">  420</span> </div>
-<div class="line"><span class="lineno">  421</span>    <span class="comment">// Minimum size check - need at least an MP3 frame header (4 bytes) + some data</span></div>
-<div class="line"><span class="lineno">  422</span>    <span class="keywordflow">if</span> (data.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac">size</a>() &lt; 128) {</div>
-<div class="line"><span class="lineno">  423</span>        <span class="keywordflow">if</span> (error_message) {</div>
-<div class="line"><span class="lineno">  424</span>            *error_message = <span class="stringliteral">&quot;MP3 data too small&quot;</span>;</div>
-<div class="line"><span class="lineno">  425</span>        }</div>
-<div class="line"><span class="lineno">  426</span>        <span class="keywordflow">return</span> info;</div>
-<div class="line"><span class="lineno">  427</span>    }</div>
-<div class="line"><span class="lineno">  428</span> </div>
-<div class="line"><span class="lineno">  429</span>    <span class="comment">// Look for MP3 sync word (11 bits set: 0xFFE or 0xFFF)</span></div>
-<div class="line"><span class="lineno">  430</span>    <span class="keywordtype">bool</span> foundSync = <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">  431</span>    fl::size syncOffset = 0;</div>
-<div class="line"><span class="lineno">  432</span> </div>
-<div class="line"><span class="lineno">  433</span>    <span class="keywordflow">for</span> (fl::size i = 0; i &lt;= data.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac">size</a>() - 4; i++) {</div>
-<div class="line"><span class="lineno">  434</span>        <span class="keywordflow">if</span> (data[i] == 0xFF &amp;&amp; (data[i + 1] &amp; 0xE0) == 0xE0) {</div>
-<div class="line"><span class="lineno">  435</span>            foundSync = <span class="keyword">true</span>;</div>
-<div class="line"><span class="lineno">  436</span>            syncOffset = i;</div>
-<div class="line"><span class="lineno">  437</span>            <span class="keywordflow">break</span>;</div>
-<div class="line"><span class="lineno">  438</span>        }</div>
-<div class="line"><span class="lineno">  439</span>    }</div>
-<div class="line"><span class="lineno">  440</span> </div>
-<div class="line"><span class="lineno">  441</span>    <span class="keywordflow">if</span> (!foundSync) {</div>
-<div class="line"><span class="lineno">  442</span>        <span class="keywordflow">if</span> (error_message) {</div>
-<div class="line"><span class="lineno">  443</span>            *error_message = <span class="stringliteral">&quot;Invalid MP3 stream - no sync word found&quot;</span>;</div>
-<div class="line"><span class="lineno">  444</span>        }</div>
-<div class="line"><span class="lineno">  445</span>        <span class="keywordflow">return</span> info;</div>
-<div class="line"><span class="lineno">  446</span>    }</div>
-<div class="line"><span class="lineno">  447</span> </div>
-<div class="line"><span class="lineno">  448</span>    <span class="comment">// Use the decoder to parse the first frame</span></div>
-<div class="line"><span class="lineno">  449</span>    third_party::Mp3HelixDecoder decoder;</div>
-<div class="line"><span class="lineno">  450</span>    <span class="keywordflow">if</span> (!decoder.init()) {</div>
-<div class="line"><span class="lineno">  451</span>        <span class="keywordflow">if</span> (error_message) {</div>
-<div class="line"><span class="lineno">  452</span>            *error_message = <span class="stringliteral">&quot;Failed to initialize MP3 decoder&quot;</span>;</div>
-<div class="line"><span class="lineno">  453</span>        }</div>
-<div class="line"><span class="lineno">  454</span>        <span class="keywordflow">return</span> info;</div>
-<div class="line"><span class="lineno">  455</span>    }</div>
-<div class="line"><span class="lineno">  456</span> </div>
-<div class="line"><span class="lineno">  457</span>    <span class="keyword">const</span> <a class="code hl_typedef" href="../../da/d3c/namespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c.html#a7573a66f01c09f14a1ff0411f8e1153c">fl::u8</a>* inptr = data.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_a326aa9f29859fe8a92833fd5db12c3bb.html#a326aa9f29859fe8a92833fd5db12c3bb">data</a>() + syncOffset;</div>
-<div class="line"><span class="lineno">  458</span>    fl::size bytes_left = data.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac">size</a>() - syncOffset;</div>
-<div class="line"><span class="lineno">  459</span> </div>
-<div class="line"><span class="lineno">  460</span>    <span class="comment">// Try to decode first frame to get metadata</span></div>
-<div class="line"><span class="lineno">  461</span>    <span class="keywordtype">int</span> <a class="code hl_function" href="../../d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d">offset</a> = decoder.findSyncWord(inptr, bytes_left);</div>
-<div class="line"><span class="lineno">  462</span>    <span class="keywordflow">if</span> (<a class="code hl_function" href="../../d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d">offset</a> &gt;= 0) {</div>
-<div class="line"><span class="lineno">  463</span>        inptr += <a class="code hl_function" href="../../d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d">offset</a>;</div>
-<div class="line"><span class="lineno">  464</span>        bytes_left -= <a class="code hl_function" href="../../d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d">offset</a>;</div>
-<div class="line"><span class="lineno">  465</span> </div>
-<div class="line"><span class="lineno">  466</span>        <span class="keywordtype">int</span> <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a> = decoder.decodeFrame(&amp;inptr, &amp;bytes_left);</div>
-<div class="line"><span class="lineno">  467</span>        <span class="keywordflow">if</span> (<a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a> == 0) {</div>
-<div class="line"><span class="lineno">  468</span>            <span class="comment">// Successfully decoded - extract metadata</span></div>
-<div class="line"><span class="lineno">  469</span>            info.sampleRate = decoder.mFrameInfo.samprate;</div>
-<div class="line"><span class="lineno">  470</span>            info.channels = <span class="keyword">static_cast&lt;</span><a class="code hl_typedef" href="../../da/d3c/namespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c.html#a7573a66f01c09f14a1ff0411f8e1153c">fl::u8</a><span class="keyword">&gt;</span>(decoder.mFrameInfo.nChans);</div>
-<div class="line"><span class="lineno">  471</span>            info.bitrate = decoder.mFrameInfo.bitrate;</div>
-<div class="line"><span class="lineno">  472</span>            info.version = <span class="keyword">static_cast&lt;</span><a class="code hl_typedef" href="../../da/d3c/namespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c.html#a7573a66f01c09f14a1ff0411f8e1153c">fl::u8</a><span class="keyword">&gt;</span>(decoder.mFrameInfo.version);</div>
-<div class="line"><span class="lineno">  473</span>            info.layer = <span class="keyword">static_cast&lt;</span><a class="code hl_typedef" href="../../da/d3c/namespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c.html#a7573a66f01c09f14a1ff0411f8e1153c">fl::u8</a><span class="keyword">&gt;</span>(decoder.mFrameInfo.layer);</div>
-<div class="line"><span class="lineno">  474</span>            info.isValid = <span class="keyword">true</span>;</div>
-<div class="line"><span class="lineno">  475</span>        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (error_message) {</div>
-<div class="line"><span class="lineno">  476</span>            *error_message = <span class="stringliteral">&quot;Failed to decode MP3 frame header&quot;</span>;</div>
-<div class="line"><span class="lineno">  477</span>        }</div>
-<div class="line"><span class="lineno">  478</span>    } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (error_message) {</div>
-<div class="line"><span class="lineno">  479</span>        *error_message = <span class="stringliteral">&quot;Failed to find MP3 sync word&quot;</span>;</div>
-<div class="line"><span class="lineno">  480</span>    }</div>
-<div class="line"><span class="lineno">  481</span> </div>
-<div class="line"><span class="lineno">  482</span>    <span class="keywordflow">return</span> info;</div>
-<div class="line"><span class="lineno">  483</span>}</div>
-<div class="ttc" id="aclassfl_1_1span_a1e467b483bfd364c93ae966e5bd4e427_html_a1e467b483bfd364c93ae966e5bd4e427"><div class="ttname"><a href="../../d0/d08/classfl_1_1span_a1e467b483bfd364c93ae966e5bd4e427.html#a1e467b483bfd364c93ae966e5bd4e427">fl::span::empty</a></div><div class="ttdeci">constexpr bool empty() const FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d7a/span_8h_source.html#l00510">span.h:510</a></div></div>
-<div class="ttc" id="aclassfl_1_1span_a326aa9f29859fe8a92833fd5db12c3bb_html_a326aa9f29859fe8a92833fd5db12c3bb"><div class="ttname"><a href="../../d0/d08/classfl_1_1span_a326aa9f29859fe8a92833fd5db12c3bb.html#a326aa9f29859fe8a92833fd5db12c3bb">fl::span::data</a></div><div class="ttdeci">const T * data() const FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d7a/span_8h_source.html#l00461">span.h:461</a></div></div>
-<div class="ttc" id="aclassfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac_html_aef7ee7eb5254da1ba1eb4f3e0173d0ac"><div class="ttname"><a href="../../d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac">fl::span::size</a></div><div class="ttdeci">constexpr fl::size size() const FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d7a/span_8h_source.html#l00458">span.h:458</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d3/df6/mp3_8cpp_8hpp_source.html#l00638">638</a> of file <a class="el" href="../../d3/df6/mp3_8cpp_8hpp_source.html">mp3.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  638</span>                                                                          {</div>
+<div class="line"><span class="lineno">  639</span>    Mp3Info info;</div>
+<div class="line"><span class="lineno">  640</span> </div>
+<div class="line"><span class="lineno">  641</span>    <span class="comment">// Validate input data</span></div>
+<div class="line"><span class="lineno">  642</span>    <span class="keywordflow">if</span> (data.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_a28135041ca9036a3efb34c1d0afe115b.html#a28135041ca9036a3efb34c1d0afe115b">empty</a>()) {</div>
+<div class="line"><span class="lineno">  643</span>        <span class="keywordflow">if</span> (error_message) {</div>
+<div class="line"><span class="lineno">  644</span>            *error_message = <span class="stringliteral">&quot;Empty MP3 data&quot;</span>;</div>
+<div class="line"><span class="lineno">  645</span>        }</div>
+<div class="line"><span class="lineno">  646</span>        <span class="keywordflow">return</span> info; <span class="comment">// returns invalid info</span></div>
+<div class="line"><span class="lineno">  647</span>    }</div>
+<div class="line"><span class="lineno">  648</span> </div>
+<div class="line"><span class="lineno">  649</span>    <span class="comment">// Minimum size check - need at least an MP3 frame header (4 bytes) + some data</span></div>
+<div class="line"><span class="lineno">  650</span>    <span class="keywordflow">if</span> (data.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa">size</a>() &lt; 128) {</div>
+<div class="line"><span class="lineno">  651</span>        <span class="keywordflow">if</span> (error_message) {</div>
+<div class="line"><span class="lineno">  652</span>            *error_message = <span class="stringliteral">&quot;MP3 data too small&quot;</span>;</div>
+<div class="line"><span class="lineno">  653</span>        }</div>
+<div class="line"><span class="lineno">  654</span>        <span class="keywordflow">return</span> info;</div>
+<div class="line"><span class="lineno">  655</span>    }</div>
+<div class="line"><span class="lineno">  656</span> </div>
+<div class="line"><span class="lineno">  657</span>    <span class="comment">// Look for MP3 sync word (11 bits set: 0xFFE or 0xFFF)</span></div>
+<div class="line"><span class="lineno">  658</span>    <span class="keywordtype">bool</span> foundSync = <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  659</span>    fl::size syncOffset = 0;</div>
+<div class="line"><span class="lineno">  660</span> </div>
+<div class="line"><span class="lineno">  661</span>    <span class="keywordflow">for</span> (fl::size i = 0; i &lt;= data.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa">size</a>() - 4; i++) {</div>
+<div class="line"><span class="lineno">  662</span>        <span class="keywordflow">if</span> (data[i] == 0xFF &amp;&amp; (data[i + 1] &amp; 0xE0) == 0xE0) {</div>
+<div class="line"><span class="lineno">  663</span>            foundSync = <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  664</span>            syncOffset = i;</div>
+<div class="line"><span class="lineno">  665</span>            <span class="keywordflow">break</span>;</div>
+<div class="line"><span class="lineno">  666</span>        }</div>
+<div class="line"><span class="lineno">  667</span>    }</div>
+<div class="line"><span class="lineno">  668</span> </div>
+<div class="line"><span class="lineno">  669</span>    <span class="keywordflow">if</span> (!foundSync) {</div>
+<div class="line"><span class="lineno">  670</span>        <span class="keywordflow">if</span> (error_message) {</div>
+<div class="line"><span class="lineno">  671</span>            *error_message = <span class="stringliteral">&quot;Invalid MP3 stream - no sync word found&quot;</span>;</div>
+<div class="line"><span class="lineno">  672</span>        }</div>
+<div class="line"><span class="lineno">  673</span>        <span class="keywordflow">return</span> info;</div>
+<div class="line"><span class="lineno">  674</span>    }</div>
+<div class="line"><span class="lineno">  675</span> </div>
+<div class="line"><span class="lineno">  676</span>    <span class="comment">// Use the decoder to parse the first frame</span></div>
+<div class="line"><span class="lineno">  677</span>    <a class="code hl_typedef" href="../../d1/d86/namespacefl_1_1third__party_a51ea26074f7c7015c2b1563c60800336.html#a51ea26074f7c7015c2b1563c60800336">third_party::Mp3SelectedDecoder</a> decoder;</div>
+<div class="line"><span class="lineno">  678</span>    <span class="keywordflow">if</span> (!decoder.init()) {</div>
+<div class="line"><span class="lineno">  679</span>        <span class="keywordflow">if</span> (error_message) {</div>
+<div class="line"><span class="lineno">  680</span>            *error_message = <span class="stringliteral">&quot;Failed to initialize MP3 decoder&quot;</span>;</div>
+<div class="line"><span class="lineno">  681</span>        }</div>
+<div class="line"><span class="lineno">  682</span>        <span class="keywordflow">return</span> info;</div>
+<div class="line"><span class="lineno">  683</span>    }</div>
+<div class="line"><span class="lineno">  684</span> </div>
+<div class="line"><span class="lineno">  685</span>    <span class="keyword">const</span> <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a>* inptr = data.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_a45157f503f151e36c679f688f10e3511.html#a45157f503f151e36c679f688f10e3511">data</a>() + syncOffset;</div>
+<div class="line"><span class="lineno">  686</span>    fl::size bytes_left = data.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa">size</a>() - syncOffset;</div>
+<div class="line"><span class="lineno">  687</span> </div>
+<div class="line"><span class="lineno">  688</span>    <span class="comment">// Try to decode first frame to get metadata</span></div>
+<div class="line"><span class="lineno">  689</span>    <span class="keywordtype">int</span> <a class="code hl_function" href="../../d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d">offset</a> = decoder.findSyncWord(inptr, bytes_left);</div>
+<div class="line"><span class="lineno">  690</span>    <span class="keywordflow">if</span> (<a class="code hl_function" href="../../d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d">offset</a> &gt;= 0) {</div>
+<div class="line"><span class="lineno">  691</span>        inptr += <a class="code hl_function" href="../../d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d">offset</a>;</div>
+<div class="line"><span class="lineno">  692</span>        bytes_left -= <a class="code hl_function" href="../../d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d">offset</a>;</div>
+<div class="line"><span class="lineno">  693</span> </div>
+<div class="line"><span class="lineno">  694</span>        <span class="keywordtype">int</span> <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a> = decoder.decodeFrame(&amp;inptr, &amp;bytes_left);</div>
+<div class="line"><span class="lineno">  695</span>        <span class="keywordflow">if</span> (<a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a> == 0) {</div>
+<div class="line"><span class="lineno">  696</span>            <span class="comment">// Successfully decoded - extract metadata</span></div>
+<div class="line"><span class="lineno">  697</span>            info.sampleRate = decoder.mFrameInfo.samprate;</div>
+<div class="line"><span class="lineno">  698</span>            info.channels = <span class="keyword">static_cast&lt;</span><a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a><span class="keyword">&gt;</span>(decoder.mFrameInfo.nChans);</div>
+<div class="line"><span class="lineno">  699</span>            info.bitrate = decoder.mFrameInfo.bitrate;</div>
+<div class="line"><span class="lineno">  700</span>            info.version = <span class="keyword">static_cast&lt;</span><a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a><span class="keyword">&gt;</span>(decoder.mFrameInfo.version);</div>
+<div class="line"><span class="lineno">  701</span>            info.layer = <span class="keyword">static_cast&lt;</span><a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a><span class="keyword">&gt;</span>(decoder.mFrameInfo.layer);</div>
+<div class="line"><span class="lineno">  702</span>            info.isValid = <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  703</span>        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (error_message) {</div>
+<div class="line"><span class="lineno">  704</span>            *error_message = <span class="stringliteral">&quot;Failed to decode MP3 frame header&quot;</span>;</div>
+<div class="line"><span class="lineno">  705</span>        }</div>
+<div class="line"><span class="lineno">  706</span>    } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (error_message) {</div>
+<div class="line"><span class="lineno">  707</span>        *error_message = <span class="stringliteral">&quot;Failed to find MP3 sync word&quot;</span>;</div>
+<div class="line"><span class="lineno">  708</span>    }</div>
+<div class="line"><span class="lineno">  709</span> </div>
+<div class="line"><span class="lineno">  710</span>    <span class="keywordflow">return</span> info;</div>
+<div class="line"><span class="lineno">  711</span>}</div>
+<div class="ttc" id="aclassfl_1_1span_a28135041ca9036a3efb34c1d0afe115b_html_a28135041ca9036a3efb34c1d0afe115b"><div class="ttname"><a href="../../d0/d08/classfl_1_1span_a28135041ca9036a3efb34c1d0afe115b.html#a28135041ca9036a3efb34c1d0afe115b">fl::span::empty</a></div><div class="ttdeci">constexpr bool empty() const FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d7a/span_8h_source.html#l00535">span.h:535</a></div></div>
+<div class="ttc" id="aclassfl_1_1span_a45157f503f151e36c679f688f10e3511_html_a45157f503f151e36c679f688f10e3511"><div class="ttname"><a href="../../d0/d08/classfl_1_1span_a45157f503f151e36c679f688f10e3511.html#a45157f503f151e36c679f688f10e3511">fl::span::data</a></div><div class="ttdeci">const T * data() const FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d7a/span_8h_source.html#l00486">span.h:486</a></div></div>
+<div class="ttc" id="aclassfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa_html_aaf3daca1c2c8f93b2ac7b319989b22fa"><div class="ttname"><a href="../../d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa">fl::span::size</a></div><div class="ttdeci">constexpr fl::size size() const FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d7a/span_8h_source.html#l00483">span.h:483</a></div></div>
 <div class="ttc" id="adirect_8h_ae2738c620ee3ab857c9656b3bf86a24d_html_ae2738c620ee3ab857c9656b3bf86a24d"><div class="ttname"><a href="../../d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d">offset</a></div><div class="ttdeci">fl::UISlider offset(&quot;Offset&quot;, 0.0f, 0.0f, 1.0f, 0.01f)</div></div>
-<div class="ttc" id="anamespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c_html_a7573a66f01c09f14a1ff0411f8e1153c"><div class="ttname"><a href="../../da/d3c/namespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c.html#a7573a66f01c09f14a1ff0411f8e1153c">fl::fl::u8</a></div><div class="ttdeci">unsigned char u8</div><div class="ttdef"><b>Definition</b> <a href="../../df/d96/s16x16x4_8h_source.html#l00132">s16x16x4.h:132</a></div></div>
+<div class="ttc" id="anamespacefl_1_1third__party_a51ea26074f7c7015c2b1563c60800336_html_a51ea26074f7c7015c2b1563c60800336"><div class="ttname"><a href="../../d1/d86/namespacefl_1_1third__party_a51ea26074f7c7015c2b1563c60800336.html#a51ea26074f7c7015c2b1563c60800336">fl::third_party::Mp3SelectedDecoder</a></div><div class="ttdeci">Mp3Minimp3Decoder Mp3SelectedDecoder</div><div class="ttdef"><b>Definition</b> <a href="../../d3/df6/mp3_8cpp_8hpp_source.html#l00264">mp3.cpp.hpp:264</a></div></div>
+<div class="ttc" id="anamespacefl_a058ceeac48f181da463c2ba07401292c_html_a058ceeac48f181da463c2ba07401292c"><div class="ttname"><a href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a></div><div class="ttdeci">unsigned char u8</div><div class="ttdef"><b>Definition</b> <a href="../../df/dd8/stdint_8h_source.html#l00131">stdint.h:131</a></div></div>
 <div class="ttc" id="anamespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99_html_a8fa65f6529fc3eb6a174cb304a4bfc99"><div class="ttname"><a href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">fl::result</a></div><div class="ttdeci">expected&lt; T, E &gt; result</div><div class="ttdoc">Alias for expected (Rust-style naming)</div><div class="ttdef"><b>Definition</b> <a href="../../de/d93/result_8h_source.html#l00031">result.h:31</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d9/dd8/mp3_8h_source.html#l00019">fl::Mp3Info::bitrate</a>, <a class="el" href="../../d9/dd8/mp3_8h_source.html#l00119">fl::third_party::Mp3HelixDecoder::FrameInfo::bitrate</a>, <a class="el" href="../../d9/dd8/mp3_8h_source.html#l00018">fl::Mp3Info::channels</a>, <a class="el" href="../../d4/d7a/span_8h_source.html#l00461">fl::span&lt; T, Extent &gt;::data()</a>, <a class="el" href="../../d3/df6/mp3_8cpp_8hpp_source.html#l00065">fl::third_party::Mp3HelixDecoder::decodeFrame()</a>, <a class="el" href="../../d4/d7a/span_8h_source.html#l00510">fl::span&lt; T, Extent &gt;::empty()</a>, <a class="el" href="../../d3/df6/mp3_8cpp_8hpp_source.html#l00060">fl::third_party::Mp3HelixDecoder::findSyncWord()</a>, <a class="el" href="../../d3/df6/mp3_8cpp_8hpp_source.html#l00027">fl::third_party::Mp3HelixDecoder::init()</a>, <a class="el" href="../../d9/dd8/mp3_8h_source.html#l00023">fl::Mp3Info::isValid</a>, <a class="el" href="../../d9/dd8/mp3_8h_source.html#l00022">fl::Mp3Info::layer</a>, <a class="el" href="../../d9/dd8/mp3_8h_source.html#l00124">fl::third_party::Mp3HelixDecoder::FrameInfo::layer</a>, <a class="el" href="../../d9/dd8/mp3_8h_source.html#l00127">fl::third_party::Mp3HelixDecoder::mFrameInfo</a>, <a class="el" href="../../d9/dd8/mp3_8h_source.html#l00120">fl::third_party::Mp3HelixDecoder::FrameInfo::nChans</a>, <a class="el" href="../../d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d">offset()</a>, <a class="el" href="../../d9/dd8/mp3_8h_source.html#l00017">fl::Mp3Info::sampleRate</a>, <a class="el" href="../../d9/dd8/mp3_8h_source.html#l00121">fl::third_party::Mp3HelixDecoder::FrameInfo::samprate</a>, <a class="el" href="../../d4/d7a/span_8h_source.html#l00458">fl::span&lt; T, Extent &gt;::size()</a>, <a class="el" href="../../d9/dd8/mp3_8h_source.html#l00021">fl::Mp3Info::version</a>, and <a class="el" href="../../d9/dd8/mp3_8h_source.html#l00125">fl::third_party::Mp3HelixDecoder::FrameInfo::version</a>.</p>
+<p class="reference">References <a class="el" href="../../d9/dd8/mp3_8h_source.html#l00021">fl::Mp3Info::bitrate</a>, <a class="el" href="../../d9/dd8/mp3_8h_source.html#l00054">fl::third_party::Mp3FrameInfo::bitrate</a>, <a class="el" href="../../d9/dd8/mp3_8h_source.html#l00020">fl::Mp3Info::channels</a>, <a class="el" href="../../d4/d7a/span_8h_source.html#l00486">fl::span&lt; T, Extent &gt;::data()</a>, <a class="el" href="../../d3/df6/mp3_8cpp_8hpp_source.html#l00197">fl::third_party::Mp3Minimp3Decoder::decodeFrame()</a>, <a class="el" href="../../d4/d7a/span_8h_source.html#l00535">fl::span&lt; T, Extent &gt;::empty()</a>, <a class="el" href="../../d3/df6/mp3_8cpp_8hpp_source.html#l00177">fl::third_party::Mp3Minimp3Decoder::findSyncWord()</a>, <a class="el" href="../../d3/df6/mp3_8cpp_8hpp_source.html#l00148">fl::third_party::Mp3Minimp3Decoder::init()</a>, <a class="el" href="../../d9/dd8/mp3_8h_source.html#l00025">fl::Mp3Info::isValid</a>, <a class="el" href="../../d9/dd8/mp3_8h_source.html#l00024">fl::Mp3Info::layer</a>, <a class="el" href="../../d9/dd8/mp3_8h_source.html#l00059">fl::third_party::Mp3FrameInfo::layer</a>, <a class="el" href="../../d9/dd8/mp3_8h_source.html#l00125">fl::third_party::Mp3Minimp3Decoder::mFrameInfo</a>, <a class="el" href="../../d9/dd8/mp3_8h_source.html#l00055">fl::third_party::Mp3FrameInfo::nChans</a>, <a class="el" href="../../d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d">offset()</a>, <a class="el" href="../../d9/dd8/mp3_8h_source.html#l00019">fl::Mp3Info::sampleRate</a>, <a class="el" href="../../d9/dd8/mp3_8h_source.html#l00056">fl::third_party::Mp3FrameInfo::samprate</a>, <a class="el" href="../../d4/d7a/span_8h_source.html#l00483">fl::span&lt; T, Extent &gt;::size()</a>, <a class="el" href="../../d9/dd8/mp3_8h_source.html#l00023">fl::Mp3Info::version</a>, and <a class="el" href="../../d9/dd8/mp3_8h_source.html#l00060">fl::third_party::Mp3FrameInfo::version</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d6/d66/classfl_1_1_mp3_a05c327e508e430bc8959024aa100d1ab_a05c327e508e430bc8959024aa100d1ab_cgraph.svg" width="100%" height="600"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d6/d66/classfl_1_1_mp3_a05c327e508e430bc8959024aa100d1ab_a05c327e508e430bc8959024aa100d1ab_cgraph.svg" width="100%" height="584"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 
 </div>
@@ -227,7 +228,7 @@ $(function(){initNavTree('d6/d66/classfl_1_1_mp3_a05c327e508e430bc8959024aa100d1
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d6/d66/classfl_1_1_mp3.html">Mp3</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:05 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:09 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

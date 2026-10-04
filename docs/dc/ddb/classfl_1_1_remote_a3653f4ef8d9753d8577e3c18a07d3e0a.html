@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -117,26 +117,27 @@ $(function(){initNavTree('dc/ddb/classfl_1_1_remote_a3653f4ef8d9753d8577e3c18a07
 
 <p>Process scheduled calls (call regularly) </p>
 
-<p class="definition">Definition at line <a class="el" href="../../db/d04/remote_8cpp_8hpp_source.html#l00222">222</a> of file <a class="el" href="../../db/d04/remote_8cpp_8hpp_source.html">remote.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  222</span>                                     {</div>
-<div class="line"><span class="lineno">  223</span>    <span class="comment">// Clear previous results</span></div>
-<div class="line"><span class="lineno">  224</span>    <a class="code hl_variable" href="../../dc/ddb/classfl_1_1_remote_ad1314a8fd6e6394dac7019ddd5b5c7ef.html#ad1314a8fd6e6394dac7019ddd5b5c7ef">mResults</a>.clear();</div>
-<div class="line"><span class="lineno">  225</span> </div>
-<div class="line"><span class="lineno">  226</span>    <span class="comment">// Delegate to generic scheduler - tasks handle their own execution and result recording</span></div>
-<div class="line"><span class="lineno">  227</span>    <span class="keywordflow">return</span> <a class="code hl_variable" href="../../dc/ddb/classfl_1_1_remote_a4d6c8de19c2556eaf16c0c14a42d22bc.html#a4d6c8de19c2556eaf16c0c14a42d22bc">mScheduler</a>.tick(currentTimeMs);</div>
-<div class="line"><span class="lineno">  228</span>}</div>
-<div class="ttc" id="aclassfl_1_1_remote_a4d6c8de19c2556eaf16c0c14a42d22bc_html_a4d6c8de19c2556eaf16c0c14a42d22bc"><div class="ttname"><a href="../../dc/ddb/classfl_1_1_remote_a4d6c8de19c2556eaf16c0c14a42d22bc.html#a4d6c8de19c2556eaf16c0c14a42d22bc">fl::Remote::mScheduler</a></div><div class="ttdeci">fl::net::RpcScheduler mScheduler</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d06/remote_8h_source.html#l00209">remote.h:209</a></div></div>
-<div class="ttc" id="aclassfl_1_1_remote_ad1314a8fd6e6394dac7019ddd5b5c7ef_html_ad1314a8fd6e6394dac7019ddd5b5c7ef"><div class="ttname"><a href="../../dc/ddb/classfl_1_1_remote_ad1314a8fd6e6394dac7019ddd5b5c7ef.html#ad1314a8fd6e6394dac7019ddd5b5c7ef">fl::Remote::mResults</a></div><div class="ttdeci">fl::vector&lt; RpcResult &gt; mResults</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d06/remote_8h_source.html#l00212">remote.h:212</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../db/d04/remote_8cpp_8hpp_source.html#l00268">268</a> of file <a class="el" href="../../db/d04/remote_8cpp_8hpp_source.html">remote.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  268</span>                                     {</div>
+<div class="line"><span class="lineno">  269</span><span class="preprocessor">#if FL_PLATFORM_HAS_LARGE_MEMORY</span></div>
+<div class="line"><span class="lineno">  270</span>    <span class="comment">// Clear previous results</span></div>
+<div class="line"><span class="lineno">  271</span>    mResults.clear();</div>
+<div class="line"><span class="lineno">  272</span> </div>
+<div class="line"><span class="lineno">  273</span>    <span class="comment">// Delegate to generic scheduler - tasks handle their own execution and result recording</span></div>
+<div class="line"><span class="lineno">  274</span>    <span class="keywordflow">return</span> mScheduler.tick(currentTimeMs);</div>
+<div class="line"><span class="lineno">  275</span><span class="preprocessor">#else</span></div>
+<div class="line"><span class="lineno">  276</span>    (void)currentTimeMs;</div>
+<div class="line"><span class="lineno">  277</span>    <span class="keywordflow">return</span> 0;</div>
+<div class="line"><span class="lineno">  278</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">  279</span>}</div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d6/d06/remote_8h_source.html#l00212">mResults</a>, and <a class="el" href="../../d6/d06/remote_8h_source.html#l00209">mScheduler</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../db/d04/remote_8cpp_8hpp_source.html#l00272">update()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../db/d04/remote_8cpp_8hpp_source.html#l00347">update()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../dc/ddb/classfl_1_1_remote_a3653f4ef8d9753d8577e3c18a07d3e0a_a3653f4ef8d9753d8577e3c18a07d3e0a_icgraph.svg" width="594" height="86"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../dc/ddb/classfl_1_1_remote_a3653f4ef8d9753d8577e3c18a07d3e0a_a3653f4ef8d9753d8577e3c18a07d3e0a_icgraph.svg" width="100%" height="300"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 
 </div>
@@ -148,7 +149,7 @@ $(function(){initNavTree('dc/ddb/classfl_1_1_remote_a3653f4ef8d9753d8577e3c18a07
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../dc/ddb/classfl_1_1_remote.html">Remote</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:09 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

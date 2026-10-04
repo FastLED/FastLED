@@ -1,6 +1,7 @@
 var wave8_8cpp_8hpp =
 [
     [ "fl::buildWave8ByteExpansionLUT", "d4/d36/namespacefl_a89a2a81a6051fc6b79c9dc4554c23be0.html#a89a2a81a6051fc6b79c9dc4554c23be0", null ],
+    [ "fl::buildWave8ByteExpansionLUT", "d4/d36/namespacefl_a6b5f441470840816c9c071d698ac8e9c.html#a6b5f441470840816c9c071d698ac8e9c", null ],
     [ "fl::buildWave8ExpansionLUT", "d4/d36/namespacefl_a0a7ce9d898e073d505fc9b4499cd324e.html#a0a7ce9d898e073d505fc9b4499cd324e", null ],
     [ "fl::wave8Transpose_16", "d4/d36/namespacefl_a428be465fbb9564d7cf8e7badeb0ea99.html#a428be465fbb9564d7cf8e7badeb0ea99", null ],
     [ "fl::wave8Transpose_16", "d4/d36/namespacefl_a6d3dde4b59c470212560afa6b6d7a712.html#a6d3dde4b59c470212560afa6b6d7a712", null ],

@@ -1,0 +1,12 @@
+<map id="fl::transpose_strips" name="fl::transpose_strips">
+<area shape="rect" id="Node000001" title="Helper to transpose N strips with automatic dispatch." alt="" coords="5,55,151,80"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_aebeb61fa5e14aa03cbadf7de353c9e1c.html#aebeb61fa5e14aa03cbadf7de353c9e1c" title="Transpose 2 LED strips into parallel bit format." alt="" coords="199,5,352,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="129,52,210,31,211,37,130,57"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_afd245586d429cb2413de8f041dafdc2b.html#afd245586d429cb2413de8f041dafdc2b" title="Transpose 4 LED strips into parallel bit format." alt="" coords="199,55,352,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="151,65,184,65,184,70,151,70"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a09e5ca3f4dae4a77160f453fde667b44.html#a09e5ca3f4dae4a77160f453fde667b44" title="Transpose 8 LED strips into parallel bit format." alt="" coords="199,128,352,153"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="114,78,228,120,226,125,112,83"/>
+<area shape="poly" id="edge5_Node000004_Node000004" title=" " alt="" coords="243,129,236,120,239,110,253,104,275,101,302,105,314,114,310,118,300,110,275,107,254,109,243,113,241,119,247,126"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a1d12ef99b8ab801fd1a90d81c1750791.html#a1d12ef99b8ab801fd1a90d81c1750791" title="Simplified 8x1 bit transpose with MSB&#45;first output." alt="" coords="400,128,563,153"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="352,138,386,138,386,143,352,143"/>
+</map>

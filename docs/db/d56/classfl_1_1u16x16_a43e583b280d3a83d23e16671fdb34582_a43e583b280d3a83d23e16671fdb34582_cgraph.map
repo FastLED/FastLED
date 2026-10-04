@@ -1,0 +1,14 @@
+<map id="fl::u16x16::operator/" name="fl::u16x16::operator/">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,66,159,91"/>
+<area shape="rect" id="Node000002" href="$db/d56/classfl_1_1u16x16_abccfa790a4251fe375ecb6d436620c00.html#abccfa790a4251fe375ecb6d436620c00" title=" " alt="" coords="439,70,581,95"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="159,77,425,79,425,85,159,82"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a0b3d2471317a8e829f3b4239df87b92c.html#a0b3d2471317a8e829f3b4239df87b92c" title="(hi:lo) / divisor, for a quotient that fits 32 bits." alt="" coords="221,14,348,39"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="132,63,221,40,222,45,133,69"/>
+<area shape="rect" id="Node000005" href="$db/d56/classfl_1_1u16x16_a54a0fac51c4322fc86c12881eda45b3f.html#a54a0fac51c4322fc86c12881eda45b3f" title=" " alt="" coords="207,117,363,142"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="134,89,221,111,219,116,133,94"/>
+<area shape="rect" id="Node000004" href="$df/d9e/namespacefl_1_1detail_ab5b0c3f509025a57bfd70165841e1b79.html#ab5b0c3f509025a57bfd70165841e1b79" title="Leading zeros of a non&#45;zero 32&#45;bit value; 32 for zero." alt="" coords="411,5,609,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="348,24,397,23,397,29,348,29"/>
+<area shape="poly" id="edge5_Node000005_Node000002" title=" " alt="" coords="346,114,434,96,435,101,347,119"/>
+<area shape="rect" id="Node000006" href="$db/d56/classfl_1_1u16x16_a1096a189ca0bb5e19a8135cbafd33092.html#a1096a189ca0bb5e19a8135cbafd33092" title=" " alt="" coords="451,119,569,145"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="363,128,437,128,437,134,363,133"/>
+</map>

@@ -1,5 +1,7 @@
 <map id="fl::bitset_fixed&lt; N &gt;" name="fl::bitset_fixed&lt; N &gt;">
-<area shape="rect" id="Node000001" title=" " alt="" coords="19,5,172,31"/>
-<area shape="rect" id="Node000002" href="$d4/d36/namespacefl.html#d4/d36/namespacefl" title=" " alt="" coords="5,93,185,133"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="98,44,98,93,93,93,93,44"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="119,5,272,31"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl.html#d4/d36/namespacefl" title=" " alt="" coords="5,93,183,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="153,39,128,57,114,75,104,94,99,92,109,72,124,53,150,35"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl.html#d4/d36/namespacefl" title=" " alt="" coords="207,93,387,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="243,34,269,53,283,72,293,92,288,94,279,75,265,57,240,39"/>
 </map>

@@ -1,0 +1,11 @@
+<map id="fl::anonymous_namespace{uart_wave_encoder::cpp::hpp}::absDiff" name="fl::anonymous_namespace{uart_wave_encoder::cpp::hpp}::absDiff">
+<area shape="rect" id="Node000001" title="Absolute value of difference (unsigned&#45;safe)" alt="" coords="497,63,693,117"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="636,52,622,44,595,41,573,43,559,48,553,54,553,63,548,63,548,52,556,44,572,38,595,36,623,39,639,47"/>
+<area shape="rect" id="Node000002" href="$d4/d85/namespacefl_1_1anonymous__namespace_02uart__wave__encoder_8cpp_8hpp_03_a3a8bfbba05647c73093a9daf05c4d871.html#a3a8bfbba05647c73093a9daf05c4d871" title="Compute HIGH pulse count for a given timing value." alt="" coords="249,29,449,84"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="483,78,449,73,450,68,484,72"/>
+<area shape="rect" id="Node000003" href="$d4/d85/namespacefl_1_1anonymous__namespace_02uart__wave__encoder_8cpp_8hpp_03_abd7d4f916c9261d3f134262d03a5711d.html#abd7d4f916c9261d3f134262d03a5711d" title="Evaluate whether P pulses/LED&#45;bit can represent the timing." alt="" coords="5,63,201,117"/>
+<area shape="poly" id="edge6_Node000001_Node000003" title=" " alt="" coords="484,97,449,98,249,98,201,97,202,91,249,93,449,93,484,92"/>
+<area shape="poly" id="edge3_Node000002_Node000002" title=" " alt="" coords="390,18,376,11,349,8,327,10,313,15,307,21,307,29,302,29,302,19,310,10,326,5,349,3,377,6,393,14"/>
+<area shape="poly" id="edge4_Node000002_Node000003" title=" " alt="" coords="236,75,202,79,201,74,235,69"/>
+<area shape="poly" id="edge5_Node000003_Node000003" title=" " alt="" coords="144,52,130,44,103,41,81,43,67,48,61,54,61,63,56,63,56,52,64,44,80,38,103,36,131,39,147,47"/>
+</map>

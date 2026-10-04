@@ -1,0 +1,25 @@
+digraph "fl::fled::resolveVideoColor"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::fled::resolveVideoColor",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::json::as_string",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d40/classfl_1_1json_a1acf5a8f64b2f0e90f0c58de446afcc7.html#a1acf5a8f64b2f0e90f0c58de446afcc7",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::json::contains",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d40/classfl_1_1json_aa8690461b881393386d9ff2d9e45ea03.html#aa8690461b881393386d9ff2d9e45ea03",tooltip=" "];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::fled::defaultVideoColor",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/dec/namespacefl_1_1fled_a4ec36b2ba8a2605c4ffc37060169fabd.html#a4ec36b2ba8a2605c4ffc37060169fabd",tooltip=" "];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::fled::pixelFormatHas\lDefaultTuple",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/dec/namespacefl_1_1fled_a9e5dcde616fc78283d895acea676d01d.html#a9e5dcde616fc78283d895acea676d01d",tooltip=" "];
+  Node1 -> Node6 [id="edge5_Node000001_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::json::is_null",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d40/classfl_1_1json_a81b39e8d1d60c09dff5c241846743262.html#a81b39e8d1d60c09dff5c241846743262",tooltip=" "];
+  Node1 -> Node7 [id="edge6_Node000001_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::json::is_object",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d40/classfl_1_1json_a0614da6f180c61c8389eb0097c4fab90.html#a0614da6f180c61c8389eb0097c4fab90",tooltip=" "];
+  Node1 -> Node8 [id="edge7_Node000001_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl::json::is_string",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d40/classfl_1_1json_ae3022ff3fa59e33a02b08c5b31b372a4.html#ae3022ff3fa59e33a02b08c5b31b372a4",tooltip=" "];
+  Node1 -> Node5 [id="edge8_Node000001_Node000005",color="steelblue1",style="solid",tooltip=" "];
+}

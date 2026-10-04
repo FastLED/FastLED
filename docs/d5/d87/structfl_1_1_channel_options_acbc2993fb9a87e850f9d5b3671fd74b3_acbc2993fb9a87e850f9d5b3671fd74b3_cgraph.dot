@@ -1,0 +1,22 @@
+digraph "fl::ChannelOptions::setLegacyCorrection"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::ChannelOptions\l::setLegacyCorrection",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::ChannelOptions\l::clearColorProfile",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d87/structfl_1_1_channel_options_a1d9e6fd69b109da0867f05f71c53a019.html#a1d9e6fd69b109da0867f05f71c53a019",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::ChannelOptions\l::warnProfileCleared",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d87/structfl_1_1_channel_options_a4bcab07ce7acee2d92062812de5dc3db.html#a4bcab07ce7acee2d92062812de5dc3db",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::ChannelOptions\l::hasColorProfile",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d87/structfl_1_1_channel_options_a7d33849ac993a966ad630ffcf58de219.html#a7d33849ac993a966ad630ffcf58de219",tooltip=" "];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::ColorProfileBinding\l::active",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d29/structfl_1_1_color_profile_binding_aa51c353a7066ea9f484ea9794711bde2.html#aa51c353a7066ea9f484ea9794711bde2",tooltip=" "];
+  Node3 -> Node6 [id="edge5_Node000003_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::notifyColorProfileCleared\lByLegacy",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a4d523439a3a0b7fdf7187bccdc1479b6.html#a4d523439a3a0b7fdf7187bccdc1479b6",tooltip=" "];
+  Node6 -> Node7 [id="edge6_Node000006_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::colorPipelineHooks",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a77e438ae9277ff68b05e14f2979785c5.html#a77e438ae9277ff68b05e14f2979785c5",tooltip="The installed hooks."];
+}

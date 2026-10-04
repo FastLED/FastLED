@@ -1,0 +1,9 @@
+<map id="fl::Channel::encodeFrame" name="fl::Channel::encodeFrame">
+<area shape="rect" id="Node000001" title="Encode pixels into mChannelData and fire onChannelDataEncoded (#4566)." alt="" coords="5,13,192,38"/>
+<area shape="rect" id="Node000002" href="$da/db7/structfl_1_1_channel_events_aa02eba6c71d0300625657d33cefceab9.html#aa02eba6c71d0300625657d33cefceab9" title=" " alt="" coords="240,5,383,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="192,23,226,23,226,28,192,28"/>
+<area shape="rect" id="Node000003" href="$d9/d5b/classfl_1_1_singleton_ad5cb1b704e17768f75802673abb0ff75.html#ad5cb1b704e17768f75802673abb0ff75" title=" " alt="" coords="431,13,593,38"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="383,23,417,23,417,28,383,28"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a1e67c0c24ebcd98fcf8554753d1639a6.html#a1e67c0c24ebcd98fcf8554753d1639a6" title=" " alt="" coords="641,13,780,38"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="594,23,627,23,627,28,594,28"/>
+</map>

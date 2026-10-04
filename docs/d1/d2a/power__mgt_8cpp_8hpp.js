@@ -1,23 +1,46 @@
 var power__mgt_8cpp_8hpp =
 [
+    [ "RgbwwEmitterPower", "d1/d2a/power__mgt_8cpp_8hpp.html#d6/d28/struct_rgbww_emitter_power", [
+      [ "declared", "d1/d2a/power__mgt_8cpp_8hpp.html#a8708d6fd7dff1f15c56b69785035b3d7", null ],
+      [ "model", "d1/d2a/power__mgt_8cpp_8hpp.html#aeb8390ad0b548e48a438cafc7912c10d", null ]
+    ] ],
+    [ "WhiteEmitterPower", "d1/d2a/power__mgt_8cpp_8hpp.html#d3/d10/struct_white_emitter_power", [
+      [ "mW", "d1/d2a/power__mgt_8cpp_8hpp.html#aa2a08875d9bc8d9d3c2eaedf2fa1f181", null ]
+    ] ],
     [ "POWER_DEBUG_PRINT", "d1/d2a/power__mgt_8cpp_8hpp_ae5caa0e4614a6e13ab3d8b7380337694.html#ae5caa0e4614a6e13ab3d8b7380337694", null ],
     [ "POWER_LED", "d1/d2a/power__mgt_8cpp_8hpp_a5accdd4ce7a8ad188df024ae552324e8.html#a5accdd4ce7a8ad188df024ae552324e8", null ],
+    [ "apply_rgb_power_model", "d1/d2a/power__mgt_8cpp_8hpp_aa482db0d85e7c33ad7ce4f3b77f4808e.html#aa482db0d85e7c33ad7ce4f3b77f4808e", null ],
+    [ "brightness_within_budget", "d1/d2a/power__mgt_8cpp_8hpp_ac08dcfea7df964dcb9e1f2617c5f0b17.html#ac08dcfea7df964dcb9e1f2617c5f0b17", null ],
     [ "calculate_max_brightness_for_power_mW", "d3/d1d/group___power_gab540bd9608e32378f1fb29bd9226c970.html#gab540bd9608e32378f1fb29bd9226c970", null ],
     [ "calculate_max_brightness_for_power_mW", "d3/d1d/group___power_gab33dbfb39f4368fffdc17807883c787e.html#gab33dbfb39f4368fffdc17807883c787e", null ],
     [ "calculate_max_brightness_for_power_vmA", "d3/d1d/group___power_gaf1109b6fa8f504362807f39bc4126306.html#gaf1109b6fa8f504362807f39bc4126306", null ],
+    [ "calculate_unscaled_emitter_power_mW", "d9/d5f/group___power_model_ga315379844ae2a3ff4212fe39ac1ade6c.html#ga315379844ae2a3ff4212fe39ac1ade6c", null ],
     [ "calculate_unscaled_power_mW", "d3/d1d/group___power_ga46fe8354310cd1888743e400b70175cd.html#ga46fe8354310cd1888743e400b70175cd", null ],
     [ "calculate_unscaled_power_mW", "d3/d1d/group___power_gafdf503b02fd644c3398d34f27c3d363d.html#gafdf503b02fd644c3398d34f27c3d363d", null ],
+    [ "calculate_unscaled_power_mW", "d3/d1d/group___power_ga01ec0d809cace073e7c92f323cbd38a1.html#ga01ec0d809cace073e7c92f323cbd38a1", null ],
+    [ "controller_dither_reserve_mW", "d3/d1d/group___power_gaea016c9708cbd1fce10a90d8fced370a.html#gaea016c9708cbd1fce10a90d8fced370a", null ],
+    [ "controller_unscaled_power_mW", "d3/d1d/group___power_gab0593d3b85bf91261f5a6288ec4ed71e.html#gab0593d3b85bf91261f5a6288ec4ed71e", null ],
+    [ "dither_reserve_mW", "d3/d1d/group___power_gaf1bc751ffa875570ed2e86fc38db5142.html#gaf1bc751ffa875570ed2e86fc38db5142", null ],
+    [ "emitter_power_weights", "d1/d2a/power__mgt_8cpp_8hpp_a65c5cbdd796e64d67cfe0665898797ee.html#a65c5cbdd796e64d67cfe0665898797ee", null ],
+    [ "fixed_power_mW", "d1/d2a/power__mgt_8cpp_8hpp_a4ef2b434985b31da5b717f40a2e78e2b.html#a4ef2b434985b31da5b717f40a2e78e2b", null ],
     [ "get_power_model", "d9/d5f/group___power_model_gaec3b3e44c2f5e7f70127ad76f480ccd0.html#gaec3b3e44c2f5e7f70127ad76f480ccd0", null ],
     [ "get_power_scaling_exponent", "d9/d5f/group___power_model_ga8aa9fd0df8e3e989b4907e9f703343b2.html#ga8aa9fd0df8e3e989b4907e9f703343b2", null ],
+    [ "get_white_emitter_mW", "d9/d5f/group___power_model_ga71d79c746ccde0fd719f37e76638a107.html#ga71d79c746ccde0fd719f37e76638a107", null ],
     [ "gPowerModel", "d1/d2a/power__mgt_8cpp_8hpp_afe71d257dc9aca526178a992761bb812.html#afe71d257dc9aca526178a992761bb812", null ],
+    [ "gRgbwwEmitterPower", "d1/d2a/power__mgt_8cpp_8hpp_a8cfee7a07f6f35100dad7f4d642eaf2d.html#a8cfee7a07f6f35100dad7f4d642eaf2d", null ],
+    [ "gWhiteEmitterPower", "d1/d2a/power__mgt_8cpp_8hpp_a96a9190022832e655b9a01a3e0167d8c.html#a96a9190022832e655b9a01a3e0167d8c", null ],
     [ "map_power_value", "d1/d2a/power__mgt_8cpp_8hpp_adcd9338466b0f22161f7281bfc7cdcdf.html#adcd9338466b0f22161f7281bfc7cdcdf", null ],
+    [ "max_power_step", "d1/d2a/power__mgt_8cpp_8hpp_a611a0864af0ba45bfa9c2fee00628214.html#a611a0864af0ba45bfa9c2fee00628214", null ],
     [ "scale_power_for_brightness", "d3/d1d/group___power_ga681489b02b2825095fd40db45906bf26.html#ga681489b02b2825095fd40db45906bf26", null ],
     [ "set_max_power_indicator_LED", "d3/d1d/group___power_ga7660e83ad6d90a313426f51c4bcb8f28.html#ga7660e83ad6d90a313426f51c4bcb8f28", null ],
     [ "set_power_model", "d9/d5f/group___power_model_ga83d1cb7bfce9bd338765968bb40d54e5.html#ga83d1cb7bfce9bd338765968bb40d54e5", null ],
+    [ "set_power_model", "d9/d5f/group___power_model_ga759a23d8dec6a2de0d5b89095014d4e6.html#ga759a23d8dec6a2de0d5b89095014d4e6", null ],
+    [ "set_power_model", "d9/d5f/group___power_model_gad42f079a40ba5d5a0db04e14b645e49e.html#gad42f079a40ba5d5a0db04e14b645e49e", null ],
     [ "set_power_scaling_exponent", "d9/d5f/group___power_model_gad213f217079d1c8e2453b74bd3aec6de.html#gad213f217079d1c8e2453b74bd3aec6de", null ],
     [ "unmap_power_value", "d1/d2a/power__mgt_8cpp_8hpp_a3beac85272db71b8f8a1c58f9e041b2e.html#a3beac85272db71b8f8a1c58f9e041b2e", null ],
     [ "gMaxPowerIndicatorLEDPinNumber", "d1/d2a/power__mgt_8cpp_8hpp_a941602425ddcfa856c63daebd9d30bc1.html#a941602425ddcfa856c63daebd9d30bc1", null ],
     [ "gMCU_mW", "d1/d2a/power__mgt_8cpp_8hpp_af34a8e7eb0c622deaf3cae1d44ff212f.html#af34a8e7eb0c622deaf3cae1d44ff212f", null ],
+    [ "kDitherReserveCodes", "d1/d2a/power__mgt_8cpp_8hpp_a013268124f45aa501036e3fe695acc1d.html#a013268124f45aa501036e3fe695acc1d", null ],
     [ "kLinearPowerScalingExponent", "d1/d2a/power__mgt_8cpp_8hpp_a1fe1958e08bbf3784716f4cd8e804e56.html#a1fe1958e08bbf3784716f4cd8e804e56", null ],
     [ "kPowerScalingExponentEpsilon", "d1/d2a/power__mgt_8cpp_8hpp_a6d7fd4ef5a280719f5540a69ef8e3e85.html#a6d7fd4ef5a280719f5540a69ef8e3e85", null ]
 ];

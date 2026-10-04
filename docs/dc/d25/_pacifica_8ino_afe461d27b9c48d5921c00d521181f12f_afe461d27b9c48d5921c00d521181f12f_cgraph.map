@@ -2,15 +2,15 @@
 <area shape="rect" id="Node000001" title=" " alt="" coords="5,181,56,207"/>
 <area shape="rect" id="Node000002" href="$dc/d25/_pacifica_8ino_a158d427a947ef0a715c7ffd916346acc.html#a158d427a947ef0a715c7ffd916346acc" title=" " alt="" coords="104,181,211,207"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="56,191,90,191,90,197,56,197"/>
-<area shape="rect" id="Node000003" href="$df/da5/lib8tion_8h_a120dfa6dac7fa3d3958ae1e30b64e1d7.html#a120dfa6dac7fa3d3958ae1e30b64e1d7" title="Generates a 16&#45;bit &quot;sawtooth&quot; wave at a given BPM." alt="" coords="313,5,380,31"/>
+<area shape="rect" id="Node000003" href="$df/da5/lib8tion_8h_ad335b2b96f9dd59cac724dc1177b6373.html#ad335b2b96f9dd59cac724dc1177b6373" title="Generates a 16&#45;bit &quot;sawtooth&quot; wave at a given BPM." alt="" coords="313,5,380,31"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="161,180,194,113,222,74,257,40,277,29,299,22,301,27,280,34,260,44,226,77,198,116,166,182"/>
-<area shape="rect" id="Node000004" href="$df/da5/lib8tion_8h_adf8e83564c52b94d0ff5594aede0be28.html#adf8e83564c52b94d0ff5594aede0be28" title="Generates a 16&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="303,55,390,80"/>
+<area shape="rect" id="Node000004" href="$df/da5/lib8tion_8h_ac869590ebed22301d9a08cf7406128b3.html#ac869590ebed22301d9a08cf7406128b3" title="Generates a 16&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="303,55,390,80"/>
 <area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="167,179,204,140,257,97,289,81,292,86,260,102,208,143,171,183"/>
-<area shape="rect" id="Node000005" href="$df/da5/lib8tion_8h_a696b9421eca961df0a68c7c6c3e983ab.html#a696b9421eca961df0a68c7c6c3e983ab" title="Generates an 8&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="511,156,589,181"/>
+<area shape="rect" id="Node000005" href="$df/da5/lib8tion_8h_aca012663c6c8fe9a7240bcbc76095ba9.html#aca012663c6c8fe9a7240bcbc76095ba9" title="Generates an 8&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="511,156,589,181"/>
 <area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="176,179,213,158,258,141,322,132,387,134,447,141,498,152,497,157,446,147,387,139,322,138,259,146,215,163,178,184"/>
-<area shape="rect" id="Node000006" href="$df/da5/lib8tion_8h_a4c4a1bcd3ca4f16cf04f1344afd601cc.html#a4c4a1bcd3ca4f16cf04f1344afd601cc" title="Generates a 16&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="303,156,390,181"/>
+<area shape="rect" id="Node000006" href="$df/da5/lib8tion_8h_ab37e7f1a7b32b98c793c4f2cb15afc5d.html#ab37e7f1a7b32b98c793c4f2cb15afc5d" title="Generates a 16&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="303,156,390,181"/>
 <area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="211,184,290,174,290,179,212,190"/>
-<area shape="rect" id="Node000007" href="$d1/dfb/colorutils_8h_afba4db18577c19e39c54f1c5793741b7.html#afba4db18577c19e39c54f1c5793741b7" title="Fill a range of LEDs with a solid color." alt="" coords="309,205,385,231"/>
+<area shape="rect" id="Node000007" href="$d1/dfb/colorutils_8h_a3198008d7f952f27c3c83aeefedec06b.html#a3198008d7f952f27c3c83aeefedec06b" title="Fill a range of LEDs with a solid color." alt="" coords="309,205,385,231"/>
 <area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="212,198,296,209,295,214,211,203"/>
 <area shape="rect" id="Node000008" href="$dc/d25/_pacifica_8ino_a638fb6ae6610fed66077161e7e044f26.html#a638fb6ae6610fed66077161e7e044f26" title=" " alt="" coords="259,255,435,280"/>
 <area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="184,204,260,240,284,248,283,253,258,244,181,209"/>
@@ -19,7 +19,7 @@
 <area shape="rect" id="Node000011" href="$dc/d25/_pacifica_8ino_a63f0dae9ffb2570165687c18aef51387.html#a63f0dae9ffb2570165687c18aef51387" title=" " alt="" coords="275,353,418,379"/>
 <area shape="poly" id="edge11_Node000002_Node000011" title=" " alt="" coords="166,206,199,270,226,308,260,340,269,345,266,350,257,344,222,311,194,273,161,208"/>
 <area shape="poly" id="edge9_Node000008_Node000005" title=" " alt="" coords="400,252,434,240,480,214,519,188,522,192,483,219,436,244,402,257"/>
-<area shape="rect" id="Node000009" href="$df/da5/lib8tion_8h_a7195cd79b30358b151154623586631aa.html#a7195cd79b30358b151154623586631aa" title="Generates an 8&#45;bit &quot;sawtooth&quot; wave at a given BPM." alt="" coords="521,255,579,280"/>
+<area shape="rect" id="Node000009" href="$df/da5/lib8tion_8h_a6931d7f79bebd9c76e29fb41aafe5e9e.html#a6931d7f79bebd9c76e29fb41aafe5e9e" title="Generates an 8&#45;bit &quot;sawtooth&quot; wave at a given BPM." alt="" coords="521,255,579,280"/>
 <area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="435,265,507,265,507,270,435,270"/>
 <area shape="rect" id="Node000012" href="$d1/dfb/colorutils_8h_a3d488dd1e2d27e99307310527e51cad3.html#a3d488dd1e2d27e99307310527e51cad3" title=" " alt="" coords="483,353,617,379"/>
 <area shape="poly" id="edge12_Node000011_Node000012" title=" " alt="" coords="418,363,469,363,469,369,418,369"/>

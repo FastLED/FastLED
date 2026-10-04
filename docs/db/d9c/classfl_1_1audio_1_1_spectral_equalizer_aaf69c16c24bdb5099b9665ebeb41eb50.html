@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -128,83 +128,81 @@ $(function(){initNavTree('db/d9c/classfl_1_1audio_1_1_spectral_equalizer_aaf69c1
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="../../db/dea/spectral__equalizer_8cpp_8hpp_source.html#l00122">122</a> of file <a class="el" href="../../db/dea/spectral__equalizer_8cpp_8hpp_source.html">spectral_equalizer.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  122</span>                                                                                       {</div>
-<div class="line"><span class="lineno">  123</span>    <span class="keywordflow">if</span> (inputBins.size() != <a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_af4043dbd3a10668fa3eec1b3346f7db2.html#af4043dbd3a10668fa3eec1b3346f7db2">mConfig</a>.numBands) {</div>
-<div class="line"><span class="lineno">  124</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;SpectralEqualizer: input size mismatch (&quot;</span></div>
-<div class="line"><span class="lineno">  125</span>                &lt;&lt; inputBins.size() &lt;&lt; <span class="stringliteral">&quot; != &quot;</span> &lt;&lt; <a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_af4043dbd3a10668fa3eec1b3346f7db2.html#af4043dbd3a10668fa3eec1b3346f7db2">mConfig</a>.numBands &lt;&lt; <span class="stringliteral">&quot;)&quot;</span>);</div>
+<p class="definition">Definition at line <a class="el" href="../../db/dea/spectral__equalizer_8cpp_8hpp_source.html#l00118">118</a> of file <a class="el" href="../../db/dea/spectral__equalizer_8cpp_8hpp_source.html">spectral_equalizer.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  118</span>                                                                                       {</div>
+<div class="line"><span class="lineno">  119</span>    <span class="keywordflow">if</span> (inputBins.size() != <a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_af4043dbd3a10668fa3eec1b3346f7db2.html#af4043dbd3a10668fa3eec1b3346f7db2">mConfig</a>.numBands) {</div>
+<div class="line"><span class="lineno">  120</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;SpectralEqualizer: input size mismatch (%s != %s)&quot;</span>, inputBins.size(), <a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_af4043dbd3a10668fa3eec1b3346f7db2.html#af4043dbd3a10668fa3eec1b3346f7db2">mConfig</a>.numBands);</div>
+<div class="line"><span class="lineno">  121</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">  122</span>    }</div>
+<div class="line"><span class="lineno">  123</span> </div>
+<div class="line"><span class="lineno">  124</span>    <span class="keywordflow">if</span> (outputBins.size() &lt; <a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_af4043dbd3a10668fa3eec1b3346f7db2.html#af4043dbd3a10668fa3eec1b3346f7db2">mConfig</a>.numBands) {</div>
+<div class="line"><span class="lineno">  125</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;SpectralEqualizer: output buffer too small (%s &lt; %s)&quot;</span>, outputBins.size(), <a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_af4043dbd3a10668fa3eec1b3346f7db2.html#af4043dbd3a10668fa3eec1b3346f7db2">mConfig</a>.numBands);</div>
 <div class="line"><span class="lineno">  126</span>        <span class="keywordflow">return</span>;</div>
 <div class="line"><span class="lineno">  127</span>    }</div>
 <div class="line"><span class="lineno">  128</span> </div>
-<div class="line"><span class="lineno">  129</span>    <span class="keywordflow">if</span> (outputBins.size() &lt; <a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_af4043dbd3a10668fa3eec1b3346f7db2.html#af4043dbd3a10668fa3eec1b3346f7db2">mConfig</a>.numBands) {</div>
-<div class="line"><span class="lineno">  130</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;SpectralEqualizer: output buffer too small (&quot;</span></div>
-<div class="line"><span class="lineno">  131</span>                &lt;&lt; outputBins.size() &lt;&lt; <span class="stringliteral">&quot; &lt; &quot;</span> &lt;&lt; <a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_af4043dbd3a10668fa3eec1b3346f7db2.html#af4043dbd3a10668fa3eec1b3346f7db2">mConfig</a>.numBands &lt;&lt; <span class="stringliteral">&quot;)&quot;</span>);</div>
-<div class="line"><span class="lineno">  132</span>        <span class="keywordflow">return</span>;</div>
-<div class="line"><span class="lineno">  133</span>    }</div>
+<div class="line"><span class="lineno">  129</span>    <span class="comment">// Track input/output levels for stats</span></div>
+<div class="line"><span class="lineno">  130</span>    <span class="keywordtype">float</span> inputPeak = 0.0f;</div>
+<div class="line"><span class="lineno">  131</span>    <span class="keywordtype">float</span> outputPeak = 0.0f;</div>
+<div class="line"><span class="lineno">  132</span>    <span class="keywordtype">float</span> inputSum = 0.0f;</div>
+<div class="line"><span class="lineno">  133</span>    <span class="keywordtype">float</span> outputSum = 0.0f;</div>
 <div class="line"><span class="lineno">  134</span> </div>
-<div class="line"><span class="lineno">  135</span>    <span class="comment">// Track input/output levels for stats</span></div>
-<div class="line"><span class="lineno">  136</span>    <span class="keywordtype">float</span> inputPeak = 0.0f;</div>
-<div class="line"><span class="lineno">  137</span>    <span class="keywordtype">float</span> outputPeak = 0.0f;</div>
-<div class="line"><span class="lineno">  138</span>    <span class="keywordtype">float</span> inputSum = 0.0f;</div>
-<div class="line"><span class="lineno">  139</span>    <span class="keywordtype">float</span> outputSum = 0.0f;</div>
+<div class="line"><span class="lineno">  135</span>    <span class="comment">// Apply per-band gains</span></div>
+<div class="line"><span class="lineno">  136</span>    <span class="keywordflow">for</span> (size i = 0; i &lt; <a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_af4043dbd3a10668fa3eec1b3346f7db2.html#af4043dbd3a10668fa3eec1b3346f7db2">mConfig</a>.numBands; ++i) {</div>
+<div class="line"><span class="lineno">  137</span>        <span class="keywordtype">float</span> inputValue = inputBins[i];</div>
+<div class="line"><span class="lineno">  138</span>        <span class="keywordtype">float</span> gain = <a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_af6ff0afeba839e05b74faf1c03a20ff4.html#af6ff0afeba839e05b74faf1c03a20ff4">mGains</a>[i];</div>
+<div class="line"><span class="lineno">  139</span>        <span class="keywordtype">float</span> outputValue = inputValue * gain;</div>
 <div class="line"><span class="lineno">  140</span> </div>
-<div class="line"><span class="lineno">  141</span>    <span class="comment">// Apply per-band gains</span></div>
-<div class="line"><span class="lineno">  142</span>    <span class="keywordflow">for</span> (size i = 0; i &lt; <a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_af4043dbd3a10668fa3eec1b3346f7db2.html#af4043dbd3a10668fa3eec1b3346f7db2">mConfig</a>.numBands; ++i) {</div>
-<div class="line"><span class="lineno">  143</span>        <span class="keywordtype">float</span> inputValue = inputBins[i];</div>
-<div class="line"><span class="lineno">  144</span>        <span class="keywordtype">float</span> gain = <a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_af6ff0afeba839e05b74faf1c03a20ff4.html#af6ff0afeba839e05b74faf1c03a20ff4">mGains</a>[i];</div>
-<div class="line"><span class="lineno">  145</span>        <span class="keywordtype">float</span> outputValue = inputValue * gain;</div>
-<div class="line"><span class="lineno">  146</span> </div>
-<div class="line"><span class="lineno">  147</span>        <span class="comment">// Apply compression if enabled</span></div>
-<div class="line"><span class="lineno">  148</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_af4043dbd3a10668fa3eec1b3346f7db2.html#af4043dbd3a10668fa3eec1b3346f7db2">mConfig</a>.enableCompression) {</div>
-<div class="line"><span class="lineno">  149</span>            outputValue = <a class="code hl_function" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_ad7f44ec5f58bce14c88e4af1eb3ccff9.html#ad7f44ec5f58bce14c88e4af1eb3ccff9">applyCompression</a>(outputValue);</div>
-<div class="line"><span class="lineno">  150</span>        }</div>
-<div class="line"><span class="lineno">  151</span> </div>
-<div class="line"><span class="lineno">  152</span>        outputBins[i] = outputValue;</div>
-<div class="line"><span class="lineno">  153</span> </div>
-<div class="line"><span class="lineno">  154</span>        <span class="comment">// Track levels</span></div>
-<div class="line"><span class="lineno">  155</span>        <span class="keywordflow">if</span> (inputValue &gt; inputPeak) {</div>
-<div class="line"><span class="lineno">  156</span>            inputPeak = inputValue;</div>
-<div class="line"><span class="lineno">  157</span>        }</div>
-<div class="line"><span class="lineno">  158</span>        <span class="keywordflow">if</span> (outputValue &gt; outputPeak) {</div>
-<div class="line"><span class="lineno">  159</span>            outputPeak = outputValue;</div>
-<div class="line"><span class="lineno">  160</span>        }</div>
-<div class="line"><span class="lineno">  161</span>        inputSum += inputValue;</div>
-<div class="line"><span class="lineno">  162</span>        outputSum += outputValue;</div>
-<div class="line"><span class="lineno">  163</span>    }</div>
-<div class="line"><span class="lineno">  164</span> </div>
-<div class="line"><span class="lineno">  165</span>    <span class="comment">// Calculate makeup gain if enabled</span></div>
-<div class="line"><span class="lineno">  166</span>    <span class="keywordtype">float</span> makeupGain = 1.0f;</div>
-<div class="line"><span class="lineno">  167</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_af4043dbd3a10668fa3eec1b3346f7db2.html#af4043dbd3a10668fa3eec1b3346f7db2">mConfig</a>.applyMakeupGain) {</div>
-<div class="line"><span class="lineno">  168</span>        makeupGain = <a class="code hl_function" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_a7e97098c6523794252c46a229df713ee.html#a7e97098c6523794252c46a229df713ee">calculateMakeupGain</a>(inputBins, outputBins);</div>
-<div class="line"><span class="lineno">  169</span> </div>
-<div class="line"><span class="lineno">  170</span>        <span class="comment">// Apply makeup gain to all output bins</span></div>
-<div class="line"><span class="lineno">  171</span>        <span class="keywordflow">for</span> (size i = 0; i &lt; <a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_af4043dbd3a10668fa3eec1b3346f7db2.html#af4043dbd3a10668fa3eec1b3346f7db2">mConfig</a>.numBands; ++i) {</div>
-<div class="line"><span class="lineno">  172</span>            outputBins[i] *= makeupGain;</div>
-<div class="line"><span class="lineno">  173</span>        }</div>
-<div class="line"><span class="lineno">  174</span> </div>
-<div class="line"><span class="lineno">  175</span>        <span class="comment">// Adjust output stats</span></div>
-<div class="line"><span class="lineno">  176</span>        outputPeak *= makeupGain;</div>
-<div class="line"><span class="lineno">  177</span>        outputSum *= makeupGain;</div>
-<div class="line"><span class="lineno">  178</span>    }</div>
-<div class="line"><span class="lineno">  179</span> </div>
-<div class="line"><span class="lineno">  180</span>    <span class="comment">// Update mutable stats</span></div>
-<div class="line"><span class="lineno">  181</span>    <a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_aa53ccd7b2e58f633576d8fbf7be5c4fa.html#aa53ccd7b2e58f633576d8fbf7be5c4fa">mStats</a>.applicationsCount++;</div>
-<div class="line"><span class="lineno">  182</span>    <a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_aa53ccd7b2e58f633576d8fbf7be5c4fa.html#aa53ccd7b2e58f633576d8fbf7be5c4fa">mStats</a>.lastInputPeak = inputPeak;</div>
-<div class="line"><span class="lineno">  183</span>    <a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_aa53ccd7b2e58f633576d8fbf7be5c4fa.html#aa53ccd7b2e58f633576d8fbf7be5c4fa">mStats</a>.lastOutputPeak = outputPeak;</div>
-<div class="line"><span class="lineno">  184</span>    <a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_aa53ccd7b2e58f633576d8fbf7be5c4fa.html#aa53ccd7b2e58f633576d8fbf7be5c4fa">mStats</a>.lastMakeupGain = makeupGain;</div>
-<div class="line"><span class="lineno">  185</span>    <a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_aa53ccd7b2e58f633576d8fbf7be5c4fa.html#aa53ccd7b2e58f633576d8fbf7be5c4fa">mStats</a>.avgInputLevel = inputSum / <span class="keyword">static_cast&lt;</span><span class="keywordtype">float</span><span class="keyword">&gt;</span>(<a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_af4043dbd3a10668fa3eec1b3346f7db2.html#af4043dbd3a10668fa3eec1b3346f7db2">mConfig</a>.numBands);</div>
-<div class="line"><span class="lineno">  186</span>    <a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_aa53ccd7b2e58f633576d8fbf7be5c4fa.html#aa53ccd7b2e58f633576d8fbf7be5c4fa">mStats</a>.avgOutputLevel = outputSum / <span class="keyword">static_cast&lt;</span><span class="keywordtype">float</span><span class="keyword">&gt;</span>(<a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_af4043dbd3a10668fa3eec1b3346f7db2.html#af4043dbd3a10668fa3eec1b3346f7db2">mConfig</a>.numBands);</div>
-<div class="line"><span class="lineno">  187</span>}</div>
-<div class="ttc" id="aclassfl_1_1audio_1_1_spectral_equalizer_a7e97098c6523794252c46a229df713ee_html_a7e97098c6523794252c46a229df713ee"><div class="ttname"><a href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_a7e97098c6523794252c46a229df713ee.html#a7e97098c6523794252c46a229df713ee">fl::audio::SpectralEqualizer::calculateMakeupGain</a></div><div class="ttdeci">float calculateMakeupGain(span&lt; const float &gt; inputBins, span&lt; const float &gt; outputBins) const</div><div class="ttdoc">Calculate makeup gain to maintain target level.</div><div class="ttdef"><b>Definition</b> <a href="../../db/dea/spectral__equalizer_8cpp_8hpp_source.html#l00189">spectral_equalizer.cpp.hpp:189</a></div></div>
+<div class="line"><span class="lineno">  141</span>        <span class="comment">// Apply compression if enabled</span></div>
+<div class="line"><span class="lineno">  142</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_af4043dbd3a10668fa3eec1b3346f7db2.html#af4043dbd3a10668fa3eec1b3346f7db2">mConfig</a>.enableCompression) {</div>
+<div class="line"><span class="lineno">  143</span>            outputValue = <a class="code hl_function" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_ad7f44ec5f58bce14c88e4af1eb3ccff9.html#ad7f44ec5f58bce14c88e4af1eb3ccff9">applyCompression</a>(outputValue);</div>
+<div class="line"><span class="lineno">  144</span>        }</div>
+<div class="line"><span class="lineno">  145</span> </div>
+<div class="line"><span class="lineno">  146</span>        outputBins[i] = outputValue;</div>
+<div class="line"><span class="lineno">  147</span> </div>
+<div class="line"><span class="lineno">  148</span>        <span class="comment">// Track levels</span></div>
+<div class="line"><span class="lineno">  149</span>        <span class="keywordflow">if</span> (inputValue &gt; inputPeak) {</div>
+<div class="line"><span class="lineno">  150</span>            inputPeak = inputValue;</div>
+<div class="line"><span class="lineno">  151</span>        }</div>
+<div class="line"><span class="lineno">  152</span>        <span class="keywordflow">if</span> (outputValue &gt; outputPeak) {</div>
+<div class="line"><span class="lineno">  153</span>            outputPeak = outputValue;</div>
+<div class="line"><span class="lineno">  154</span>        }</div>
+<div class="line"><span class="lineno">  155</span>        inputSum += inputValue;</div>
+<div class="line"><span class="lineno">  156</span>        outputSum += outputValue;</div>
+<div class="line"><span class="lineno">  157</span>    }</div>
+<div class="line"><span class="lineno">  158</span> </div>
+<div class="line"><span class="lineno">  159</span>    <span class="comment">// Calculate makeup gain if enabled</span></div>
+<div class="line"><span class="lineno">  160</span>    <span class="keywordtype">float</span> makeupGain = 1.0f;</div>
+<div class="line"><span class="lineno">  161</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_af4043dbd3a10668fa3eec1b3346f7db2.html#af4043dbd3a10668fa3eec1b3346f7db2">mConfig</a>.applyMakeupGain) {</div>
+<div class="line"><span class="lineno">  162</span>        makeupGain = <a class="code hl_function" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_a7e97098c6523794252c46a229df713ee.html#a7e97098c6523794252c46a229df713ee">calculateMakeupGain</a>(inputBins, outputBins);</div>
+<div class="line"><span class="lineno">  163</span> </div>
+<div class="line"><span class="lineno">  164</span>        <span class="comment">// Apply makeup gain to all output bins</span></div>
+<div class="line"><span class="lineno">  165</span>        <span class="keywordflow">for</span> (size i = 0; i &lt; <a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_af4043dbd3a10668fa3eec1b3346f7db2.html#af4043dbd3a10668fa3eec1b3346f7db2">mConfig</a>.numBands; ++i) {</div>
+<div class="line"><span class="lineno">  166</span>            outputBins[i] *= makeupGain;</div>
+<div class="line"><span class="lineno">  167</span>        }</div>
+<div class="line"><span class="lineno">  168</span> </div>
+<div class="line"><span class="lineno">  169</span>        <span class="comment">// Adjust output stats</span></div>
+<div class="line"><span class="lineno">  170</span>        outputPeak *= makeupGain;</div>
+<div class="line"><span class="lineno">  171</span>        outputSum *= makeupGain;</div>
+<div class="line"><span class="lineno">  172</span>    }</div>
+<div class="line"><span class="lineno">  173</span> </div>
+<div class="line"><span class="lineno">  174</span>    <span class="comment">// Update mutable stats</span></div>
+<div class="line"><span class="lineno">  175</span>    <a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_aa53ccd7b2e58f633576d8fbf7be5c4fa.html#aa53ccd7b2e58f633576d8fbf7be5c4fa">mStats</a>.applicationsCount++;</div>
+<div class="line"><span class="lineno">  176</span>    <a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_aa53ccd7b2e58f633576d8fbf7be5c4fa.html#aa53ccd7b2e58f633576d8fbf7be5c4fa">mStats</a>.lastInputPeak = inputPeak;</div>
+<div class="line"><span class="lineno">  177</span>    <a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_aa53ccd7b2e58f633576d8fbf7be5c4fa.html#aa53ccd7b2e58f633576d8fbf7be5c4fa">mStats</a>.lastOutputPeak = outputPeak;</div>
+<div class="line"><span class="lineno">  178</span>    <a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_aa53ccd7b2e58f633576d8fbf7be5c4fa.html#aa53ccd7b2e58f633576d8fbf7be5c4fa">mStats</a>.lastMakeupGain = makeupGain;</div>
+<div class="line"><span class="lineno">  179</span>    <a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_aa53ccd7b2e58f633576d8fbf7be5c4fa.html#aa53ccd7b2e58f633576d8fbf7be5c4fa">mStats</a>.avgInputLevel = inputSum / <span class="keyword">static_cast&lt;</span><span class="keywordtype">float</span><span class="keyword">&gt;</span>(<a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_af4043dbd3a10668fa3eec1b3346f7db2.html#af4043dbd3a10668fa3eec1b3346f7db2">mConfig</a>.numBands);</div>
+<div class="line"><span class="lineno">  180</span>    <a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_aa53ccd7b2e58f633576d8fbf7be5c4fa.html#aa53ccd7b2e58f633576d8fbf7be5c4fa">mStats</a>.avgOutputLevel = outputSum / <span class="keyword">static_cast&lt;</span><span class="keywordtype">float</span><span class="keyword">&gt;</span>(<a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_af4043dbd3a10668fa3eec1b3346f7db2.html#af4043dbd3a10668fa3eec1b3346f7db2">mConfig</a>.numBands);</div>
+<div class="line"><span class="lineno">  181</span>}</div>
+<div class="ttc" id="aclassfl_1_1audio_1_1_spectral_equalizer_a7e97098c6523794252c46a229df713ee_html_a7e97098c6523794252c46a229df713ee"><div class="ttname"><a href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_a7e97098c6523794252c46a229df713ee.html#a7e97098c6523794252c46a229df713ee">fl::audio::SpectralEqualizer::calculateMakeupGain</a></div><div class="ttdeci">float calculateMakeupGain(span&lt; const float &gt; inputBins, span&lt; const float &gt; outputBins) const</div><div class="ttdoc">Calculate makeup gain to maintain target level.</div><div class="ttdef"><b>Definition</b> <a href="../../db/dea/spectral__equalizer_8cpp_8hpp_source.html#l00183">spectral_equalizer.cpp.hpp:183</a></div></div>
 <div class="ttc" id="aclassfl_1_1audio_1_1_spectral_equalizer_aa53ccd7b2e58f633576d8fbf7be5c4fa_html_aa53ccd7b2e58f633576d8fbf7be5c4fa"><div class="ttname"><a href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_aa53ccd7b2e58f633576d8fbf7be5c4fa.html#aa53ccd7b2e58f633576d8fbf7be5c4fa">fl::audio::SpectralEqualizer::mStats</a></div><div class="ttdeci">Stats mStats</div><div class="ttdef"><b>Definition</b> <a href="../../d7/dda/spectral__equalizer_8h_source.html#l00139">spectral_equalizer.h:139</a></div></div>
-<div class="ttc" id="aclassfl_1_1audio_1_1_spectral_equalizer_ad7f44ec5f58bce14c88e4af1eb3ccff9_html_ad7f44ec5f58bce14c88e4af1eb3ccff9"><div class="ttname"><a href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_ad7f44ec5f58bce14c88e4af1eb3ccff9.html#ad7f44ec5f58bce14c88e4af1eb3ccff9">fl::audio::SpectralEqualizer::applyCompression</a></div><div class="ttdeci">float applyCompression(float value) const</div><div class="ttdoc">Apply dynamic range compression per band.</div><div class="ttdef"><b>Definition</b> <a href="../../db/dea/spectral__equalizer_8cpp_8hpp_source.html#l00223">spectral_equalizer.cpp.hpp:223</a></div></div>
+<div class="ttc" id="aclassfl_1_1audio_1_1_spectral_equalizer_ad7f44ec5f58bce14c88e4af1eb3ccff9_html_ad7f44ec5f58bce14c88e4af1eb3ccff9"><div class="ttname"><a href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_ad7f44ec5f58bce14c88e4af1eb3ccff9.html#ad7f44ec5f58bce14c88e4af1eb3ccff9">fl::audio::SpectralEqualizer::applyCompression</a></div><div class="ttdeci">float applyCompression(float value) const</div><div class="ttdoc">Apply dynamic range compression per band.</div><div class="ttdef"><b>Definition</b> <a href="../../db/dea/spectral__equalizer_8cpp_8hpp_source.html#l00217">spectral_equalizer.cpp.hpp:217</a></div></div>
 <div class="ttc" id="aclassfl_1_1audio_1_1_spectral_equalizer_af4043dbd3a10668fa3eec1b3346f7db2_html_af4043dbd3a10668fa3eec1b3346f7db2"><div class="ttname"><a href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_af4043dbd3a10668fa3eec1b3346f7db2.html#af4043dbd3a10668fa3eec1b3346f7db2">fl::audio::SpectralEqualizer::mConfig</a></div><div class="ttdeci">SpectralEqualizerConfig mConfig</div><div class="ttdef"><b>Definition</b> <a href="../../d7/dda/spectral__equalizer_8h_source.html#l00138">spectral_equalizer.h:138</a></div></div>
 <div class="ttc" id="aclassfl_1_1audio_1_1_spectral_equalizer_af6ff0afeba839e05b74faf1c03a20ff4_html_af6ff0afeba839e05b74faf1c03a20ff4"><div class="ttname"><a href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_af6ff0afeba839e05b74faf1c03a20ff4.html#af6ff0afeba839e05b74faf1c03a20ff4">fl::audio::SpectralEqualizer::mGains</a></div><div class="ttdeci">vector&lt; float &gt; mGains</div><div class="ttdoc">Per-band gain multipliers.</div><div class="ttdef"><b>Definition</b> <a href="../../d7/dda/spectral__equalizer_8h_source.html#l00142">spectral_equalizer.h:142</a></div></div>
-<div class="ttc" id="alog_8h_a868b194fdb2234182e76042d9fde3062_html_a868b194fdb2234182e76042d9fde3062"><div class="ttname"><a href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a></div><div class="ttdeci">#define FL_WARN(X)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00276">log.h:276</a></div></div>
+<div class="ttc" id="alog_8h_a4804912fba6eed63e1afd84b8768aced_html_a4804912fba6eed63e1afd84b8768aced"><div class="ttname"><a href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a></div><div class="ttdeci">#define FL_WARN(...)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00440">log.h:440</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../db/dea/spectral__equalizer_8cpp_8hpp_source.html#l00223">applyCompression()</a>, <a class="el" href="../../db/dea/spectral__equalizer_8cpp_8hpp_source.html#l00189">calculateMakeupGain()</a>, <a class="el" href="../../d7/d7f/log_8h_source.html#l00276">FL_WARN</a>, <a class="el" href="../../d7/dda/spectral__equalizer_8h_source.html#l00138">mConfig</a>, <a class="el" href="../../d7/dda/spectral__equalizer_8h_source.html#l00142">mGains</a>, <a class="el" href="../../d7/dda/spectral__equalizer_8h_source.html#l00139">mStats</a>, and <a class="el" href="../../d4/d7a/span_8h_source.html#l00458">fl::span&lt; T, Extent &gt;::size()</a>.</p>
+<p class="reference">References <a class="el" href="../../db/dea/spectral__equalizer_8cpp_8hpp_source.html#l00217">applyCompression()</a>, <a class="el" href="../../db/dea/spectral__equalizer_8cpp_8hpp_source.html#l00183">calculateMakeupGain()</a>, <a class="el" href="../../d7/d7f/log_8h_source.html#l00440">FL_WARN</a>, <a class="el" href="../../d7/dda/spectral__equalizer_8h_source.html#l00138">mConfig</a>, <a class="el" href="../../d7/dda/spectral__equalizer_8h_source.html#l00142">mGains</a>, <a class="el" href="../../d7/dda/spectral__equalizer_8h_source.html#l00139">mStats</a>, and <a class="el" href="../../d4/d7a/span_8h_source.html#l00483">fl::span&lt; T, Extent &gt;::size()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_a6eed65351ec3db77b488db8a99322a48.html#a6eed65351ec3db77b488db8a99322a48">~SpectralEqualizer()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_a45b2d4283ec71907df32ffe7ea48c4b2.html#a45b2d4283ec71907df32ffe7ea48c4b2">~SpectralEqualizer()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -229,7 +227,7 @@ $(function(){initNavTree('db/d9c/classfl_1_1audio_1_1_spectral_equalizer_aaf69c1
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../db/dbf/namespacefl_1_1audio.html">audio</a></li><li class="navelem"><a class="el" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer.html">SpectralEqualizer</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:08 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:11 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

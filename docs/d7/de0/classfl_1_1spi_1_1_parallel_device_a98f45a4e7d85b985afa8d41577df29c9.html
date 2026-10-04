@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -132,31 +132,30 @@ $(function(){initNavTree('d7/de0/classfl_1_1spi_1_1_parallel_device_a98f45a4e7d8
 </dl>
 
 <p class="definition">Definition at line <a class="el" href="../../d7/d37/parallel__device_8cpp_8hpp_source.html#l00136">136</a> of file <a class="el" href="../../d7/d37/parallel__device_8cpp_8hpp_source.html">parallel_device.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  137</span>    : <a class="code hl_variable" href="../../d7/de0/classfl_1_1spi_1_1_parallel_device_af112adec52e630c7993fcc8a135c0877.html#af112adec52e630c7993fcc8a135c0877">pImpl</a>(<a class="code hl_function" href="../../d4/d36/namespacefl_a3fd92c727664a77396403265415789d3.html#a3fd92c727664a77396403265415789d3">fl::make_unique&lt;Impl&gt;</a>(config)) {</div>
+<div class="fragment"><div class="line"><span class="lineno">  137</span>    : <a class="code hl_variable" href="../../d7/de0/classfl_1_1spi_1_1_parallel_device_af112adec52e630c7993fcc8a135c0877.html#af112adec52e630c7993fcc8a135c0877">pImpl</a>(<a class="code hl_function" href="../../d4/d36/namespacefl_a257ae39a291866e014a2eeb4abe2a29c.html#a257ae39a291866e014a2eeb4abe2a29c">fl::make_unique&lt;Impl&gt;</a>(config)) {</div>
 <div class="line"><span class="lineno">  138</span> </div>
 <div class="line"><span class="lineno">  139</span>    <span class="comment">// Validate configuration</span></div>
 <div class="line"><span class="lineno">  140</span>    <span class="keywordtype">size_t</span> num_pins = config.gpio_pins.size();</div>
 <div class="line"><span class="lineno">  141</span>    <span class="keywordflow">if</span> (num_pins == 0 || num_pins &gt; 32) {</div>
-<div class="line"><span class="lineno">  142</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;ParallelDevice: Invalid number of GPIO pins (&quot;</span> &lt;&lt; num_pins</div>
-<div class="line"><span class="lineno">  143</span>                &lt;&lt; <span class="stringliteral">&quot;), must be 1-32&quot;</span>);</div>
-<div class="line"><span class="lineno">  144</span>    }</div>
-<div class="line"><span class="lineno">  145</span> </div>
-<div class="line"><span class="lineno">  146</span>    <a class="code hl_define" href="../../d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a>(<span class="stringliteral">&quot;ParallelDevice: Created with &quot;</span> &lt;&lt; num_pins &lt;&lt; <span class="stringliteral">&quot; GPIO pins&quot;</span>);</div>
-<div class="line"><span class="lineno">  147</span>}</div>
+<div class="line"><span class="lineno">  142</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;ParallelDevice: Invalid number of GPIO pins (%s), must be 1-32&quot;</span>, num_pins);</div>
+<div class="line"><span class="lineno">  143</span>    }</div>
+<div class="line"><span class="lineno">  144</span> </div>
+<div class="line"><span class="lineno">  145</span>    <a class="code hl_define" href="../../d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a>(<span class="stringliteral">&quot;ParallelDevice: Created with %s GPIO pins&quot;</span>, num_pins);</div>
+<div class="line"><span class="lineno">  146</span>}</div>
 <div class="ttc" id="aclassfl_1_1spi_1_1_parallel_device_af112adec52e630c7993fcc8a135c0877_html_af112adec52e630c7993fcc8a135c0877"><div class="ttname"><a href="../../d7/de0/classfl_1_1spi_1_1_parallel_device_af112adec52e630c7993fcc8a135c0877.html#af112adec52e630c7993fcc8a135c0877">fl::spi::ParallelDevice::pImpl</a></div><div class="ttdeci">fl::unique_ptr&lt; Impl &gt; pImpl</div><div class="ttdef"><b>Definition</b> <a href="../../d3/d08/parallel__device_8h_source.html#l00138">parallel_device.h:138</a></div></div>
-<div class="ttc" id="alog_8h_a868b194fdb2234182e76042d9fde3062_html_a868b194fdb2234182e76042d9fde3062"><div class="ttname"><a href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a></div><div class="ttdeci">#define FL_WARN(X)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00276">log.h:276</a></div></div>
-<div class="ttc" id="alog_8h_a8ccae77aa5fe30a41f19d233cb0de2c1_html_a8ccae77aa5fe30a41f19d233cb0de2c1"><div class="ttname"><a href="../../d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a></div><div class="ttdeci">#define FL_DBG</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00388">log.h:388</a></div></div>
-<div class="ttc" id="anamespacefl_a3fd92c727664a77396403265415789d3_html_a3fd92c727664a77396403265415789d3"><div class="ttname"><a href="../../d4/d36/namespacefl_a3fd92c727664a77396403265415789d3.html#a3fd92c727664a77396403265415789d3">fl::make_unique</a></div><div class="ttdeci">fl::enable_if&lt;!fl::is_array&lt; T &gt;::value, unique_ptr&lt; T &gt; &gt;::type make_unique(Args &amp;&amp;... args) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../da/d4b/unique__ptr_8h_source.html#l00261">unique_ptr.h:261</a></div></div>
+<div class="ttc" id="alog_8h_a4804912fba6eed63e1afd84b8768aced_html_a4804912fba6eed63e1afd84b8768aced"><div class="ttname"><a href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a></div><div class="ttdeci">#define FL_WARN(...)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00440">log.h:440</a></div></div>
+<div class="ttc" id="alog_8h_a8ccae77aa5fe30a41f19d233cb0de2c1_html_a8ccae77aa5fe30a41f19d233cb0de2c1"><div class="ttname"><a href="../../d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a></div><div class="ttdeci">#define FL_DBG</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00564">log.h:564</a></div></div>
+<div class="ttc" id="anamespacefl_a257ae39a291866e014a2eeb4abe2a29c_html_a257ae39a291866e014a2eeb4abe2a29c"><div class="ttname"><a href="../../d4/d36/namespacefl_a257ae39a291866e014a2eeb4abe2a29c.html#a257ae39a291866e014a2eeb4abe2a29c">fl::make_unique</a></div><div class="ttdeci">fl::enable_if&lt;!fl::is_array&lt; T &gt;::value, unique_ptr&lt; T &gt; &gt;::type make_unique(Args &amp;&amp;... args) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../da/d4b/unique__ptr_8h_source.html#l00261">unique_ptr.h:261</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d7/d7f/log_8h_source.html#l00388">FL_DBG</a>, <a class="el" href="../../d7/d7f/log_8h_source.html#l00276">FL_WARN</a>, <a class="el" href="../../d3/d08/parallel__device_8h_source.html#l00070">fl::spi::ParallelDevice::Config::gpio_pins</a>, <a class="el" href="../../da/d4b/unique__ptr_8h_source.html#l00261">fl::make_unique()</a>, <a class="el" href="../../d3/d08/parallel__device_8h_source.html#l00138">pImpl</a>, and <a class="el" href="../../d5/d47/basic__vector_8h_source.html#l00042">fl::vector_basic::size()</a>.</p>
+<p class="reference">References <a class="el" href="../../d7/d7f/log_8h_source.html#l00564">FL_DBG</a>, <a class="el" href="../../d7/d7f/log_8h_source.html#l00440">FL_WARN</a>, <a class="el" href="../../d3/d08/parallel__device_8h_source.html#l00070">fl::spi::ParallelDevice::Config::gpio_pins</a>, <a class="el" href="../../da/d4b/unique__ptr_8h_source.html#l00261">fl::make_unique()</a>, <a class="el" href="../../d3/d08/parallel__device_8h_source.html#l00138">pImpl</a>, and <a class="el" href="../../d5/d47/basic__vector_8h_source.html#l00042">fl::vector_basic::size()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d7/de0/classfl_1_1spi_1_1_parallel_device_af23b642838396e1651a49669b4e8d295.html#af23b642838396e1651a49669b4e8d295">ParallelDevice()</a>, <a class="el" href="../../d7/de0/classfl_1_1spi_1_1_parallel_device_a2a20384fec090fe69d2e4f0c6146878e.html#a2a20384fec090fe69d2e4f0c6146878e">ParallelDevice()</a>, <a class="el" href="../../d7/de0/classfl_1_1spi_1_1_parallel_device_ac0503b843cfe4fd9c22831253af5fd44.html#ac0503b843cfe4fd9c22831253af5fd44">operator=()</a>, and <a class="el" href="../../d7/de0/classfl_1_1spi_1_1_parallel_device_a7401728911c15f96eedba08dcf5544d6.html#a7401728911c15f96eedba08dcf5544d6">operator=()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d7/de0/classfl_1_1spi_1_1_parallel_device_a6a598968039a03e3f6e525122eef35e3.html#a6a598968039a03e3f6e525122eef35e3">ParallelDevice()</a>, <a class="el" href="../../d7/de0/classfl_1_1spi_1_1_parallel_device_acd94243bcd39bc0b6c3a82b817f4c8b2.html#acd94243bcd39bc0b6c3a82b817f4c8b2">ParallelDevice()</a>, <a class="el" href="../../d7/de0/classfl_1_1spi_1_1_parallel_device_a720504bfc98760de9d41bc00cdde4748.html#a720504bfc98760de9d41bc00cdde4748">operator=()</a>, and <a class="el" href="../../d7/de0/classfl_1_1spi_1_1_parallel_device_a7b2885b8912f58bbe1995093352ef6de.html#a7b2885b8912f58bbe1995093352ef6de">operator=()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d7/de0/classfl_1_1spi_1_1_parallel_device_a98f45a4e7d85b985afa8d41577df29c9_a98f45a4e7d85b985afa8d41577df29c9_cgraph.svg" width="524" height="86"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d7/de0/classfl_1_1spi_1_1_parallel_device_a98f45a4e7d85b985afa8d41577df29c9_a98f45a4e7d85b985afa8d41577df29c9_cgraph.svg" width="508" height="86"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 <div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
@@ -175,7 +174,7 @@ $(function(){initNavTree('d7/de0/classfl_1_1spi_1_1_parallel_device_a98f45a4e7d8
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d4/d68/namespacefl_1_1spi.html">spi</a></li><li class="navelem"><a class="el" href="../../d7/de0/classfl_1_1spi_1_1_parallel_device.html">ParallelDevice</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:10 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:12 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -139,7 +139,7 @@ $(function(){initNavTree('de/da4/group___noise_fill_ga912553a59d75e9e03b631a1f65
       </table>
 </div><div class="memdoc">
 
-<p>Fill a 1D 8-bit buffer with noise, using <a class="el" href="../../d8/df9/group___noise_generation_gaeb72246ebd597b60a7e575173accf2fd.html#gaeb72246ebd597b60a7e575173accf2fd">inoise8()</a> </p>
+<p>Fill a 1D 8-bit buffer with noise, using <a class="el" href="../../d8/df9/group___noise_generation_gaeb72246ebd597b60a7e575173accf2fd.html#gaeb72246ebd597b60a7e575173accf2fd" title="8-Bit, fixed point implementation of Perlin&#39;s noise.">inoise8()</a> </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">pData</td><td>the array of data to fill with noise values </td></tr>
@@ -152,27 +152,27 @@ $(function(){initNavTree('de/da4/group___noise_fill_ga912553a59d75e9e03b631a1f65
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="../../da/dca/noise_8cpp_8hpp_source.html#l00675">675</a> of file <a class="el" href="../../da/dca/noise_8cpp_8hpp_source.html">noise.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  675</span>                                                                                                 {</div>
-<div class="line"><span class="lineno">  676</span>  fl::u32 _xx = <a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>;</div>
-<div class="line"><span class="lineno">  677</span>  fl::u32 scx = <a class="code hl_variable" href="../../d3/dac/_fx_noise_ring_8ino_ae6325d6552afdaddd577e0ccce29ceba.html#ae6325d6552afdaddd577e0ccce29ceba">scale</a>;</div>
-<div class="line"><span class="lineno">  678</span>  <span class="keywordflow">for</span>(<span class="keywordtype">int</span> o = 0; o &lt; <a class="code hl_variable" href="../../d3/d4e/_noise_playground_8h_a453bb447145d05bae0b0ad07d33f3f0c.html#a453bb447145d05bae0b0ad07d33f3f0c">octaves</a>; ++o) {</div>
-<div class="line"><span class="lineno">  679</span>    <span class="keywordflow">for</span>(<span class="keywordtype">int</span> i = 0,xx=_xx; i &lt; num_points; ++i, xx+=scx) {</div>
-<div class="line"><span class="lineno">  680</span>          pData[i] = qadd8(pData[i],<a class="code hl_function" href="../../d8/df9/group___noise_generation_gaeb72246ebd597b60a7e575173accf2fd.html#gaeb72246ebd597b60a7e575173accf2fd">inoise8</a>(xx,time)&gt;&gt;o);</div>
-<div class="line"><span class="lineno">  681</span>    }</div>
-<div class="line"><span class="lineno">  682</span> </div>
-<div class="line"><span class="lineno">  683</span>    _xx &lt;&lt;= 1;</div>
-<div class="line"><span class="lineno">  684</span>    scx &lt;&lt;= 1;</div>
-<div class="line"><span class="lineno">  685</span>  }</div>
-<div class="line"><span class="lineno">  686</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../da/dca/noise_8cpp_8hpp_source.html#l00712">712</a> of file <a class="el" href="../../da/dca/noise_8cpp_8hpp_source.html">noise.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  712</span>                                                                                                 {</div>
+<div class="line"><span class="lineno">  713</span>  fl::u32 _xx = <a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>;</div>
+<div class="line"><span class="lineno">  714</span>  fl::u32 scx = <a class="code hl_variable" href="../../d3/dac/_fx_noise_ring_8ino_ae6325d6552afdaddd577e0ccce29ceba.html#ae6325d6552afdaddd577e0ccce29ceba">scale</a>;</div>
+<div class="line"><span class="lineno">  715</span>  <span class="keywordflow">for</span>(<span class="keywordtype">int</span> o = 0; o &lt; <a class="code hl_variable" href="../../d3/d4e/_noise_playground_8h_a453bb447145d05bae0b0ad07d33f3f0c.html#a453bb447145d05bae0b0ad07d33f3f0c">octaves</a>; ++o) {</div>
+<div class="line"><span class="lineno">  716</span>    <span class="keywordflow">for</span>(<span class="keywordtype">int</span> i = 0,xx=_xx; i &lt; num_points; ++i, xx+=scx) {</div>
+<div class="line"><span class="lineno">  717</span>          pData[i] = qadd8(pData[i],<a class="code hl_function" href="../../d8/df9/group___noise_generation_gaeb72246ebd597b60a7e575173accf2fd.html#gaeb72246ebd597b60a7e575173accf2fd">inoise8</a>(xx,time)&gt;&gt;o);</div>
+<div class="line"><span class="lineno">  718</span>    }</div>
+<div class="line"><span class="lineno">  719</span> </div>
+<div class="line"><span class="lineno">  720</span>    _xx &lt;&lt;= 1;</div>
+<div class="line"><span class="lineno">  721</span>    scx &lt;&lt;= 1;</div>
+<div class="line"><span class="lineno">  722</span>  }</div>
+<div class="line"><span class="lineno">  723</span>}</div>
 <div class="ttc" id="a_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc_html_a6150e0515f7202e2fb518f7206ed97dc"><div class="ttname"><a href="../../db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a></div><div class="ttdeci">int x</div><div class="ttdef"><b>Definition</b> <a href="../../db/d49/_audio_2simple_2simple_8h_source.html#l00092">simple.h:92</a></div></div>
 <div class="ttc" id="a_fx_noise_ring_8ino_ae6325d6552afdaddd577e0ccce29ceba_html_ae6325d6552afdaddd577e0ccce29ceba"><div class="ttname"><a href="../../d3/dac/_fx_noise_ring_8ino_ae6325d6552afdaddd577e0ccce29ceba.html#ae6325d6552afdaddd577e0ccce29ceba">scale</a></div><div class="ttdeci">fl::UISlider scale(&quot;Scale&quot;, 4,.1, 4,.1)</div></div>
 <div class="ttc" id="a_noise_playground_8h_a453bb447145d05bae0b0ad07d33f3f0c_html_a453bb447145d05bae0b0ad07d33f3f0c"><div class="ttname"><a href="../../d3/d4e/_noise_playground_8h_a453bb447145d05bae0b0ad07d33f3f0c.html#a453bb447145d05bae0b0ad07d33f3f0c">octaves</a></div><div class="ttdeci">uint8_t octaves</div><div class="ttdef"><b>Definition</b> <a href="../../d3/d4e/_noise_playground_8h_source.html#l00030">NoisePlayground.h:30</a></div></div>
-<div class="ttc" id="agroup___noise_generation_gaeb72246ebd597b60a7e575173accf2fd_html_gaeb72246ebd597b60a7e575173accf2fd"><div class="ttname"><a href="../../d8/df9/group___noise_generation_gaeb72246ebd597b60a7e575173accf2fd.html#gaeb72246ebd597b60a7e575173accf2fd">inoise8</a></div><div class="ttdeci">fl::u8 inoise8(fl::u16 x, fl::u16 y, fl::u16 z)</div><div class="ttdef"><b>Definition</b> <a href="../../da/dca/noise_8cpp_8hpp_source.html#l00575">noise.cpp.hpp:575</a></div></div>
+<div class="ttc" id="agroup___noise_generation_gaeb72246ebd597b60a7e575173accf2fd_html_gaeb72246ebd597b60a7e575173accf2fd"><div class="ttname"><a href="../../d8/df9/group___noise_generation_gaeb72246ebd597b60a7e575173accf2fd.html#gaeb72246ebd597b60a7e575173accf2fd">inoise8</a></div><div class="ttdeci">fl::u8 inoise8(fl::u16 x, fl::u16 y, fl::u16 z)</div><div class="ttdoc">8-Bit, fixed point implementation of Perlin&#39;s noise.</div><div class="ttdef"><b>Definition</b> <a href="../../da/dca/noise_8cpp_8hpp_source.html#l00612">noise.cpp.hpp:612</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../da/dca/noise_8cpp_8hpp_source.html#l00575">inoise8()</a>, <a class="el" href="../../d3/d4e/_noise_playground_8h_source.html#l00030">octaves</a>, <a class="el" href="../../d3/dac/_fx_noise_ring_8ino_ae6325d6552afdaddd577e0ccce29ceba.html#ae6325d6552afdaddd577e0ccce29ceba">scale</a>, and <a class="el" href="../../db/d49/_audio_2simple_2simple_8h_source.html#l00092">x</a>.</p>
+<p class="reference">References <a class="el" href="../../da/dca/noise_8cpp_8hpp_source.html#l00612">inoise8()</a>, <a class="el" href="../../d3/d4e/_noise_playground_8h_source.html#l00030">octaves</a>, <a class="el" href="../../d3/dac/_fx_noise_ring_8ino_ae6325d6552afdaddd577e0ccce29ceba.html#ae6325d6552afdaddd577e0ccce29ceba">scale</a>, and <a class="el" href="../../db/d49/_audio_2simple_2simple_8h_source.html#l00092">x</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../da/dca/noise_8cpp_8hpp_source.html#l00858">fill_noise16()</a>, and <a class="el" href="../../da/dca/noise_8cpp_8hpp_source.html#l00831">fill_noise8()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../da/dca/noise_8cpp_8hpp_source.html#l00895">fill_noise16()</a>, and <a class="el" href="../../da/dca/noise_8cpp_8hpp_source.html#l00868">fill_noise8()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -197,7 +197,7 @@ $(function(){initNavTree('de/da4/group___noise_fill_ga912553a59d75e9e03b631a1f65
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../de/da4/group___noise_fill.html">Noise Fill Functions</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:02 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

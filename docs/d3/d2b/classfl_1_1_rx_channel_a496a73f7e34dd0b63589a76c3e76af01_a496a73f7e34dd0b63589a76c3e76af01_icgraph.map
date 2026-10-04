@@ -1,0 +1,16 @@
+<map id="fl::RxChannel::nextId" name="fl::RxChannel::nextId">
+<area shape="rect" id="Node000001" title=" " alt="" coords="475,128,632,153"/>
+<area shape="rect" id="Node000002" href="$d3/d2b/classfl_1_1_rx_channel_ae02fcd5e35e79edfb1b699bac468558d.html#ae02fcd5e35e79edfb1b699bac468558d" title=" " alt="" coords="240,128,427,153"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="461,143,427,143,427,138,461,138"/>
+<area shape="rect" id="Node000003" href="$d3/d2b/classfl_1_1_rx_channel_a560f7663cba8d3c679115fd31180f244.html#a560f7663cba8d3c679115fd31180f244" title=" " alt="" coords="5,5,192,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="306,121,255,82,191,44,161,33,162,28,193,40,258,78,309,117"/>
+<area shape="rect" id="Node000004" href="$d3/d2b/classfl_1_1_rx_channel_a7beb0731c518ae65957137553e5d1d39.html#a7beb0731c518ae65957137553e5d1d39" title=" " alt="" coords="5,55,192,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="285,126,191,94,151,83,153,77,193,89,287,121"/>
+<area shape="rect" id="Node000005" href="$d3/d2b/classfl_1_1_rx_channel_a966313a9f7e1163b38106138f5c6cd5a.html#a966313a9f7e1163b38106138f5c6cd5a" title=" " alt="" coords="20,128,177,153"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="226,143,177,143,177,138,226,138"/>
+<area shape="rect" id="Node000006" href="$d3/d2b/classfl_1_1_rx_channel_ad7e0b0ab0ed0137566aee649aeb56fc5.html#ad7e0b0ab0ed0137566aee649aeb56fc5" title=" " alt="" coords="7,177,190,203"/>
+<area shape="poly" id="edge6_Node000002_Node000006" title=" " alt="" coords="259,159,161,180,159,175,258,154"/>
+<area shape="rect" id="Node000007" href="$d3/d2b/classfl_1_1_rx_channel_a1b092b84450764fd984fe36ab19eb7e0.html#a1b092b84450764fd984fe36ab19eb7e0" title=" " alt="" coords="7,227,190,252"/>
+<area shape="poly" id="edge7_Node000002_Node000007" title=" " alt="" coords="300,163,251,190,193,216,154,229,153,224,191,212,248,185,298,158"/>
+<area shape="poly" id="edge5_Node000005_Node000005" title=" " alt="" coords="141,119,130,110,99,107,74,109,60,114,57,119,64,126,61,130,52,120,57,110,72,104,99,101,132,105,144,115"/>
+</map>

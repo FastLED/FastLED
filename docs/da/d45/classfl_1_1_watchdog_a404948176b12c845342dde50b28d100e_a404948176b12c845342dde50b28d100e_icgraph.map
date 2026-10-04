@@ -1,0 +1,6 @@
+<map id="fl::Watchdog::bootloaderEscapeThreshold" name="fl::Watchdog::bootloaderEscapeThreshold">
+<area shape="rect" id="Node000001" title="Boot&#45;loop escape hatch: drop to the bootloader instead of looping forever, so an unattended host can ..." alt="" coords="248,29,428,69"/>
+<area shape="rect" id="Node000002" href="$da/d45/classfl_1_1_watchdog_a52c7e7907740b1fd50f57d8586bd5a75.html#a52c7e7907740b1fd50f57d8586bd5a75" title=" " alt="" coords="5,29,200,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="234,52,200,52,200,47,234,47"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="143,18,129,11,103,8,80,10,66,15,61,21,64,28,59,30,56,20,63,10,79,5,103,3,130,6,145,13"/>
+</map>

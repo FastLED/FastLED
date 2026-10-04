@@ -1,0 +1,24 @@
+<map id="fl::oklabToXyzQ16" name="fl::oklabToXyzQ16">
+<area shape="rect" id="Node000001" title="OKLab (s16.16) &#45;&gt; XYZ (s16.16)." alt="" coords="795,197,933,223"/>
+<area shape="rect" id="Node000002" href="$d3/dfe/namespacefl_1_1anonymous__namespace_02gamut__map_8cpp_8hpp_03_abfc9fa8f8ad7312ff2b66f7f052b80be.html#abfc9fa8f8ad7312ff2b66f7f052b80be" title="XYZ of the candidate at factor of the target&#39;s chroma." alt="" coords="539,119,735,173"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="804,196,734,176,735,171,806,191"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_aff71f788bfac3a8885b0e622af3d2b4d.html#aff71f788bfac3a8885b0e622af3d2b4d" title="One pixel: XYZ in s16.16 to four in&#45;gamut drives, red, green, blue, white." alt="" coords="534,197,741,223"/>
+<area shape="poly" id="edge9_Node000001_Node000006" title=" " alt="" coords="781,213,741,213,741,207,781,207"/>
+<area shape="rect" id="Node000011" href="$d4/d36/namespacefl_a2145e99048b45f249d35f24940689595.html#a2145e99048b45f249d35f24940689595" title="One pixel: XYZ in s16.16 to five in&#45;gamut drives – red, green, blue, white1, white2." alt="" coords="528,247,747,272"/>
+<area shape="poly" id="edge12_Node000001_Node000011" title=" " alt="" coords="792,228,697,249,696,244,791,223"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="675,108,661,100,637,97,617,99,604,104,598,110,598,119,593,119,593,108,601,100,616,94,637,92,663,95,678,103"/>
+<area shape="rect" id="Node000003" href="$d3/dfe/namespacefl_1_1anonymous__namespace_02gamut__map_8cpp_8hpp_03_afa155bfbd32ee5bf3a6c83b6187d3974.html#afa155bfbd32ee5bf3a6c83b6187d3974" title="The feasible chroma interval at the target&#39;s own lightness, as factors of the target&#39;s chroma." alt="" coords="273,29,469,84"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="541,117,452,87,454,81,543,112"/>
+<area shape="rect" id="Node000005" href="$d3/dfe/namespacefl_1_1anonymous__namespace_02gamut__map_8cpp_8hpp_03_acab6ba92f373afb8b7168f0c4d0cd038.html#acab6ba92f373afb8b7168f0c4d0cd038" title="Largest chroma factor the hull accepts, by a fixed count of halvings." alt="" coords="273,132,469,187"/>
+<area shape="poly" id="edge7_Node000002_Node000005" title=" " alt="" coords="526,154,469,157,469,152,525,149"/>
+<area shape="poly" id="edge4_Node000003_Node000003" title=" " alt="" coords="414,18,399,11,371,8,347,10,332,15,325,21,325,29,320,29,320,19,329,10,346,5,371,3,400,6,417,14"/>
+<area shape="rect" id="Node000004" href="$d3/dfe/namespacefl_1_1anonymous__namespace_02gamut__map_8cpp_8hpp_03_af702395fa5236acf87a3588a536c83d6.html#af702395fa5236acf87a3588a536c83d6" title="The highest lightness at or below requested whose feasible chroma interval the probe scan can still f..." alt="" coords="5,29,213,84"/>
+<area shape="poly" id="edge5_Node000003_Node000004" title=" " alt="" coords="259,59,214,59,214,54,259,54"/>
+<area shape="poly" id="edge6_Node000004_Node000004" title=" " alt="" coords="153,18,137,11,109,8,86,10,71,15,64,21,64,29,59,29,59,19,68,10,85,5,109,3,139,6,155,14"/>
+<area shape="poly" id="edge8_Node000005_Node000005" title=" " alt="" coords="414,121,399,114,371,111,347,113,332,117,325,124,325,132,320,132,320,122,329,113,346,107,371,105,400,108,417,116"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_aa231682eff63cbd83ee299e6079baeae.html#aa231682eff63cbd83ee299e6079baeae" title=" " alt="" coords="261,223,480,248"/>
+<area shape="poly" id="edge10_Node000006_Node000007" title=" " alt="" coords="521,224,481,228,480,222,520,218"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_ad0e379781735f3c39ad9cc2d724f08d4.html#ad0e379781735f3c39ad9cc2d724f08d4" title="Like processPixelQ16, but solves the physical 4/5&#45;emitter hull." alt="" coords="20,223,199,248"/>
+<area shape="poly" id="edge11_Node000007_Node000008" title=" " alt="" coords="247,238,199,238,199,233,247,233"/>
+<area shape="poly" id="edge13_Node000011_Node000007" title=" " alt="" coords="514,251,480,248,481,243,515,246"/>
+</map>

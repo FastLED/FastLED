@@ -1,0 +1,14 @@
+<map id="fl::CLEDController::clearWhiteChannel" name="fl::CLEDController::clearWhiteChannel">
+<area shape="rect" id="Node000001" title="Reset this channel to plain 3&#45;channel RGB (clears any RGBW/RGBWW configuration)." alt="" coords="5,91,159,131"/>
+<area shape="rect" id="Node000002" href="$d8/da0/classfl_1_1_c_l_e_d_controller_ae0828dffacb43dca565ddf8145153ed0.html#ae0828dffacb43dca565ddf8145153ed0" title="Protected constructor with registration mode." alt="" coords="259,59,395,99"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="158,98,245,87,246,92,159,103"/>
+<area shape="rect" id="Node000005" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a95ede2f374809004d76c246f747d056b.html#a95ede2f374809004d76c246f747d056b" title=" " alt="" coords="207,123,448,163"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="159,118,194,123,193,128,158,123"/>
+<area shape="rect" id="Node000003" href="$d8/da0/classfl_1_1_c_l_e_d_controller_af0c5f56a02ad4e919df8181d3b267390.html#af0c5f56a02ad4e919df8181d3b267390" title="Add this controller to the linked list." alt="" coords="529,5,665,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="395,63,515,39,516,44,396,68"/>
+<area shape="rect" id="Node000004" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a346ffe73124af2abf1ccf82a96daee72.html#a346ffe73124af2abf1ccf82a96daee72" title="Check if this controller is in the linked list." alt="" coords="745,35,881,75"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="665,32,732,41,731,46,665,37"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="745,61,409,77,409,72,745,55"/>
+<area shape="rect" id="Node000006" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a749a14da275dfd7a2b91ec3e8b82fef7.html#a749a14da275dfd7a2b91ec3e8b82fef7" title="Return the name of a chipset whose wire format owns its white&#45;channel policy." alt="" coords="496,123,697,163"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="448,140,482,140,482,145,448,145"/>
+</map>

@@ -1,0 +1,11 @@
+<map id="CFastLED::setRgbwColorimetricProfile" name="CFastLED::setRgbwColorimetricProfile">
+<area shape="rect" id="Node000001" title="Install a legacy fallback RGBW diode chromaticity profile for scalar colorimetric calls." alt="" coords="5,23,232,63"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_aadf9b0aff96f2fa548f7a12858f67cad.html#aadf9b0aff96f2fa548f7a12858f67cad" title=" " alt="" coords="280,23,463,63"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="232,41,266,41,266,46,232,46"/>
+<area shape="rect" id="Node000003" href="$d9/d5b/classfl_1_1_singleton_ad5cb1b704e17768f75802673abb0ff75.html#ad5cb1b704e17768f75802673abb0ff75" title=" " alt="" coords="535,5,698,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="462,31,521,25,522,30,463,37"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a56f31e1bfb8fb5b90de25aff94b906d8.html#a56f31e1bfb8fb5b90de25aff94b906d8" title=" " alt="" coords="511,55,723,80"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="463,50,497,53,497,58,462,55"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a1e67c0c24ebcd98fcf8554753d1639a6.html#a1e67c0c24ebcd98fcf8554753d1639a6" title=" " alt="" coords="771,5,909,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="698,15,757,15,757,21,698,21"/>
+</map>

@@ -1,0 +1,8 @@
+<map id="fl::encodeUCS7604" name="fl::encodeUCS7604">
+<area shape="rect" id="Node000001" title="Encode complete UCS7604 frame (preamble + padding + pixel data)" alt="" coords="377,101,521,126"/>
+<area shape="rect" id="Node000002" href="$dd/d78/classfl_1_1_u_c_s7604_controller_t_a0b8dc7f2f0f2e0a2ed3461aa905080ea.html#a0b8dc7f2f0f2e0a2ed3461aa905080ea" title=" " alt="" coords="5,5,329,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="374,100,329,91,330,86,375,95"/>
+<area shape="rect" id="Node000003" href="$dc/d8d/namespacefl_1_1anonymous__namespace_02channel_8cpp_8hpp_03_a5f78780348edce94192b57b45f1778b4.html#a5f78780348edce94192b57b45f1778b4" title="Encode UCS7604 pixel data into the channel data buffer." alt="" coords="41,152,293,192"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="374,132,265,155,264,149,373,126"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="215,140,198,133,167,131,140,133,124,138,118,143,121,151,116,153,112,142,121,133,139,127,167,125,200,128,217,135"/>
+</map>

@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -121,7 +121,7 @@ $(function(){initNavTree('d3/ded/fl_2channels_2rx_2types_8h.html','../../'); ini
 <div id="dynsection-1-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-1-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../db/dfe/fl_2channels_2rx_2types_8h__dep__incl.svg" width="100%" height="503"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../db/dfe/fl_2channels_2rx_2types_8h__dep__incl.svg" width="100%" height="600"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 </div>
 <p><a href="../../d3/ded/fl_2channels_2rx_2types_8h_source.html">Go to the source code of this file.</a></p>
@@ -135,21 +135,25 @@ Namespaces</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="enum-members" name="enum-members"></a>
 Enumerations</h2></td></tr>
 <tr class="memitem:a6f679a987369746122401c946b3a1d8b" id="r_a6f679a987369746122401c946b3a1d8b"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a6f679a987369746122401c946b3a1d8b.html#a6f679a987369746122401c946b3a1d8b">fl::RxBackend</a> : u8 { <br />
-&#160;&#160;<a class="el" href="../../d4/d36/namespacefl_a6f679a987369746122401c946b3a1d8b.html#a6f679a987369746122401c946b3a1d8bac974dfaf96813db4ec84e1b8cbc268e7">fl::PLATFORM_DEFAULT</a> = 0
+&#160;&#160;<a class="el" href="../../d4/d36/namespacefl_a6f679a987369746122401c946b3a1d8b.html#a6f679a987369746122401c946b3a1d8ba7a876fbec890f829703bc77a76e8ef45">fl::PIO</a> = 7
+, <a class="el" href="../../d4/d36/namespacefl_a6f679a987369746122401c946b3a1d8b.html#a6f679a987369746122401c946b3a1d8bac974dfaf96813db4ec84e1b8cbc268e7">fl::PLATFORM_DEFAULT</a> = 0
 , <a class="el" href="../../d4/d36/namespacefl_a6f679a987369746122401c946b3a1d8b.html#a6f679a987369746122401c946b3a1d8baca3f8dd74af80f58addb7bdadbd43e53">fl::RMT</a> = 1
 , <a class="el" href="../../d4/d36/namespacefl_a6f679a987369746122401c946b3a1d8b.html#a6f679a987369746122401c946b3a1d8bacbada7cecd4982719ca391bd8dc465ed">fl::ISR</a> = 2
-, <a class="el" href="../../d4/d36/namespacefl_a6f679a987369746122401c946b3a1d8b.html#a6f679a987369746122401c946b3a1d8ba55484906f4fe2206cb61c8c47a9e9272">fl::FLEXPWM</a> = 3
 , <br />
-&#160;&#160;<a class="el" href="../../d4/d36/namespacefl_a6f679a987369746122401c946b3a1d8b.html#a6f679a987369746122401c946b3a1d8ba996e13f33a5a2e0c2ca65f6cd1cc9c3c">fl::FLEXIO</a> = 4
+&#160;&#160;<a class="el" href="../../d4/d36/namespacefl_a6f679a987369746122401c946b3a1d8b.html#a6f679a987369746122401c946b3a1d8ba55484906f4fe2206cb61c8c47a9e9272">fl::FLEXPWM</a> = 3
+, <a class="el" href="../../d4/d36/namespacefl_a6f679a987369746122401c946b3a1d8b.html#a6f679a987369746122401c946b3a1d8ba996e13f33a5a2e0c2ca65f6cd1cc9c3c">fl::FLEXIO</a> = 4
 , <a class="el" href="../../d4/d36/namespacefl_a6f679a987369746122401c946b3a1d8b.html#a6f679a987369746122401c946b3a1d8ba365c55668170695b8cc8c8c3d0145f74">fl::LPC_SCT_CAPTURE</a> = 5
+, <a class="el" href="../../d4/d36/namespacefl_a6f679a987369746122401c946b3a1d8b.html#a6f679a987369746122401c946b3a1d8baec6583ad1c80cec6a0046ba804351ae5">fl::PARLIO_RX</a> = 8
+, <br />
+&#160;&#160;<a class="el" href="../../d4/d36/namespacefl_a6f679a987369746122401c946b3a1d8b.html#a6f679a987369746122401c946b3a1d8ba2d09171e726f57ceb0bd356a55100e6f">fl::I2S_RX</a> = 6
 <br />
  }</td></tr>
 <tr class="separator:a6f679a987369746122401c946b3a1d8b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a8eec789e1d45489f5659f4efaf1710bd" id="r_a8eec789e1d45489f5659f4efaf1710bd"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a8eec789e1d45489f5659f4efaf1710bd.html#a8eec789e1d45489f5659f4efaf1710bd">fl::toString</a> (<a class="el" href="../../d4/d36/namespacefl_a6f679a987369746122401c946b3a1d8b.html#a6f679a987369746122401c946b3a1d8b">RxBackend</a> backend) <a class="el" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></td></tr>
-<tr class="separator:a8eec789e1d45489f5659f4efaf1710bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa4aa3909191dfe37e06c4501ee2ad874" id="r_aa4aa3909191dfe37e06c4501ee2ad874"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_aa4aa3909191dfe37e06c4501ee2ad874.html#aa4aa3909191dfe37e06c4501ee2ad874">fl::toString</a> (<a class="el" href="../../d4/d36/namespacefl_a6f679a987369746122401c946b3a1d8b.html#a6f679a987369746122401c946b3a1d8b">RxBackend</a> backend) <a class="el" href="../../d4/d36/namespacefl_aa317f89ca911371e798d08a93770402f.html#aa317f89ca911371e798d08a93770402f">FL_NO_EXCEPT</a></td></tr>
+<tr class="separator:aa4aa3909191dfe37e06c4501ee2ad874"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -158,7 +162,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_217dd1d1f80f936dd132dc9fc88b57d1.html">channels</a></li><li class="navelem"><a class="el" href="../../dir_9fd6d0f25479d287126f3c6ad32d1d5b.html">rx</a></li><li class="navelem"><a class="el" href="../../d3/ded/fl_2channels_2rx_2types_8h.html">types.h</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:01 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:05 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

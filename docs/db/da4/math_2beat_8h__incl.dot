@@ -49,14 +49,14 @@ digraph "fl/math/beat.h"
   Node19 [id="Node000019",label="fl/math/ease.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$db/d19/ease_8h.html",tooltip=" "];
   Node19 -> Node2 [id="edge25_Node000019_Node000002",color="steelblue1",style="solid",tooltip=" "];
   Node19 -> Node13 [id="edge26_Node000019_Node000013",color="steelblue1",style="solid",tooltip=" "];
-  Node18 -> Node63 [id="edge27_Node000018_Node000063",color="steelblue1",style="solid",tooltip=" "];
-  Node63 [id="Node000063",label="color.h",height=0.2,width=0.4,color="grey60", fillcolor="#E0E0E0", style="filled",tooltip=" "];
+  Node18 -> Node56 [id="edge27_Node000018_Node000056",color="steelblue1",style="solid",tooltip=" "];
+  Node56 [id="Node000056",label="color.h",height=0.2,width=0.4,color="grey60", fillcolor="#E0E0E0", style="filled",tooltip=" "];
   Node18 -> Node13 [id="edge28_Node000018_Node000013",color="steelblue1",style="solid",tooltip=" "];
-  Node17 -> Node64 [id="edge29_Node000017_Node000064",color="steelblue1",style="solid",tooltip=" "];
-  Node64 [id="Node000064",label="fastled_config.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d11/fastled__config_8h.html",tooltip="Contains definitions that can be used to configure FastLED at compile time."];
+  Node17 -> Node57 [id="edge29_Node000017_Node000057",color="steelblue1",style="solid",tooltip=" "];
+  Node57 [id="Node000057",label="fastled_config.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d11/fastled__config_8h.html",tooltip="Contains definitions that can be used to configure FastLED at compile time."];
   Node17 -> Node8 [id="edge30_Node000017_Node000008",color="steelblue1",style="solid",tooltip=" "];
   Node17 -> Node9 [id="edge31_Node000017_Node000009",color="steelblue1",style="solid",tooltip=" "];
-  Node17 -> Node65 [id="edge32_Node000017_Node000065",color="steelblue1",style="solid",tooltip=" "];
-  Node65 [id="Node000065",label="platforms/scale8.h",height=0.2,width=0.4,color="grey60", fillcolor="#E0E0E0", style="filled",tooltip=" "];
+  Node17 -> Node58 [id="edge32_Node000017_Node000058",color="steelblue1",style="solid",tooltip=" "];
+  Node58 [id="Node000058",label="platforms/scale8.h",height=0.2,width=0.4,color="grey60", fillcolor="#E0E0E0", style="filled",tooltip=" "];
   Node1 -> Node13 [id="edge33_Node000001_Node000013",color="steelblue1",style="solid",tooltip=" "];
 }

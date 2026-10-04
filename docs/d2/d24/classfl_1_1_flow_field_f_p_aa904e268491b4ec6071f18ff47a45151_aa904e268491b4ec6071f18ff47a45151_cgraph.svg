@@ -86,7 +86,7 @@ var sectionId = 'dynsection-0';
 <!-- Node9 -->
 <g id="Node000009" class="node">
 <title>Node9</title>
-<g id="a_Node000009"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_aa048b427f50f28993a67941e0f303a65.html#aa048b427f50f28993a67941e0f303a65" target="_top" xlink:title=" ">
+<g id="a_Node000009"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_a7b25b9c301243694aa32f9754bec11d2.html#a7b25b9c301243694aa32f9754bec11d2" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="1054.5,-242.5 966.5,-242.5 966.5,-223.5 1054.5,-223.5 1054.5,-242.5"/>
 <text text-anchor="middle" x="1010.5" y="-230.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::s16x16::raw</text>
 </a>
@@ -213,7 +213,7 @@ var sectionId = 'dynsection-0';
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d4/d36/namespacefl_a83381fb5b1fcd1d43aaa05d5eb9a3699.html#a83381fb5b1fcd1d43aaa05d5eb9a3699" target="_top" xlink:title=" ">
+<g id="a_Node000003"><a xlink:href="../../d4/d36/namespacefl_ac273e40cd7a2558a676cb7da93684b1a.html#ac273e40cd7a2558a676cb7da93684b1a" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="494,-1203.5 441,-1203.5 441,-1184.5 494,-1184.5 494,-1203.5"/>
 <text text-anchor="middle" x="467.5" y="-1191.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::fabsf</text>
 </a>
@@ -231,7 +231,7 @@ var sectionId = 'dynsection-0';
 <!-- Node5 -->
 <g id="Node000005" class="node">
 <title>Node5</title>
-<g id="a_Node000005"><a xlink:href="../../d4/d36/namespacefl_a2e35dfe73de1a16365fb9ff78ad5230a.html#a2e35dfe73de1a16365fb9ff78ad5230a" target="_top" xlink:title=" ">
+<g id="a_Node000005"><a xlink:href="../../d4/d36/namespacefl_acbab7965ace60152d4d09abd92544e7e.html#acbab7965ace60152d4d09abd92544e7e" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="494.5,-1240.5 440.5,-1240.5 440.5,-1221.5 494.5,-1221.5 494.5,-1240.5"/>
 <text text-anchor="middle" x="467.5" y="-1228.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::floorf</text>
 </a>
@@ -249,7 +249,7 @@ var sectionId = 'dynsection-0';
 <!-- Node7 -->
 <g id="Node000007" class="node">
 <title>Node7</title>
-<g id="a_Node000007"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_a9c7a5411b60510e5a513c5d1e305720d.html#a9c7a5411b60510e5a513c5d1e305720d" target="_top" xlink:title=" ">
+<g id="a_Node000007"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_acb5f1fc389057c6c799b796a296f1c33.html#acb5f1fc389057c6c799b796a296f1c33" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="897,-546.5 781,-546.5 781,-527.5 897,-527.5 897,-546.5"/>
 <text text-anchor="middle" x="839" y="-534.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::s16x16::from_raw</text>
 </a>
@@ -285,7 +285,7 @@ var sectionId = 'dynsection-0';
 <!-- Node11 -->
 <g id="Node000011" class="node">
 <title>Node11</title>
-<g id="a_Node000011"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_a0dce0a4dc6aa77a3618189073870cdc5.html#a0dce0a4dc6aa77a3618189073870cdc5" target="_top" xlink:title=" ">
+<g id="a_Node000011"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_a0ea0a2ff5c80cb2b4cce13da7b99d3ad.html#a0ea0a2ff5c80cb2b4cce13da7b99d3ad" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="521,-1111.5 414,-1111.5 414,-1092.5 521,-1092.5 521,-1111.5"/>
 <text text-anchor="middle" x="467.5" y="-1099.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::s16x16::to_float</text>
 </a>
@@ -339,7 +339,7 @@ var sectionId = 'dynsection-0';
 <!-- Node8 -->
 <g id="Node000008" class="node">
 <title>Node8</title>
-<g id="a_Node000008"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_a5e82494e286448e4cad2de1b302b9168.html#a5e82494e286448e4cad2de1b302b9168" target="_top" xlink:title=" ">
+<g id="a_Node000008"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_ada6cb5198c9b09c4299cd8ab059951e7.html#ada6cb5198c9b09c4299cd8ab059951e7" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="1063,-716.5 958,-716.5 958,-697.5 1063,-697.5 1063,-716.5"/>
 <text text-anchor="middle" x="1010.5" y="-704.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::s16x16::s16x16</text>
 </a>
@@ -429,7 +429,7 @@ var sectionId = 'dynsection-0';
 <!-- Node28 -->
 <g id="Node000028" class="node">
 <title>Node28</title>
-<g id="a_Node000028"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_ab726cc0ca16fc59e027e55bf0c69652e.html#ab726cc0ca16fc59e027e55bf0c69652e" target="_top" xlink:title=" ">
+<g id="a_Node000028"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_a82c0b7341d79f1e48f96c35ee42a9f03.html#a82c0b7341d79f1e48f96c35ee42a9f03" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="881,-1053.5 797,-1053.5 797,-1034.5 881,-1034.5 881,-1053.5"/>
 <text text-anchor="middle" x="839" y="-1041.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::s16x16::sin</text>
 </a>
@@ -447,7 +447,7 @@ var sectionId = 'dynsection-0';
 <!-- Node14 -->
 <g id="Node000014" class="node">
 <title>Node14</title>
-<g id="a_Node000014"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_aa22ff77d1a4a1ee686ae2892bdacaf9c.html#aa22ff77d1a4a1ee686ae2892bdacaf9c" target="_top" xlink:title=" ">
+<g id="a_Node000014"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_ae8db3a100a7aed386860686df328ad61.html#ae8db3a100a7aed386860686df328ad61" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="698,-885.5 611,-885.5 611,-866.5 698,-866.5 698,-885.5"/>
 <text text-anchor="middle" x="654.5" y="-873.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::s16x16::abs</text>
 </a>
@@ -465,7 +465,7 @@ var sectionId = 'dynsection-0';
 <!-- Node15 -->
 <g id="Node000015" class="node">
 <title>Node15</title>
-<g id="a_Node000015"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_a3952fb797f221afa2ddc0fd5d13b2570.html#a3952fb797f221afa2ddc0fd5d13b2570" target="_top" xlink:title=" ">
+<g id="a_Node000015"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_a58c3f75d500194657dc43c0f5ae7eacb.html#a58c3f75d500194657dc43c0f5ae7eacb" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="885,-811.5 793,-811.5 793,-792.5 885,-792.5 885,-811.5"/>
 <text text-anchor="middle" x="839" y="-799.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::s16x16::floor</text>
 </a>
@@ -483,7 +483,7 @@ var sectionId = 'dynsection-0';
 <!-- Node16 -->
 <g id="Node000016" class="node">
 <title>Node16</title>
-<g id="a_Node000016"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_a629790e18827d999dd81c1e607d14e0d.html#a629790e18827d999dd81c1e607d14e0d" target="_top" xlink:title=" ">
+<g id="a_Node000016"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_a2f6833ef3d3712308cbfdad3392697e2.html#a2f6833ef3d3712308cbfdad3392697e2" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="885,-978.5 793,-978.5 793,-959.5 885,-959.5 885,-978.5"/>
 <text text-anchor="middle" x="839" y="-966.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::s16x16::fract</text>
 </a>
@@ -501,7 +501,7 @@ var sectionId = 'dynsection-0';
 <!-- Node17 -->
 <g id="Node000017" class="node">
 <title>Node17</title>
-<g id="a_Node000017"><a xlink:href="../../d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909" target="_top" xlink:title=" ">
+<g id="a_Node000017"><a xlink:href="../../d4/d36/namespacefl_a07c69292ef50aa1083046faff1c52ead.html#a07c69292ef50aa1083046faff1c52ead" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="679.5,-809.5 629.5,-809.5 629.5,-790.5 679.5,-790.5 679.5,-809.5"/>
 <text text-anchor="middle" x="654.5" y="-797.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::max</text>
 </a>
@@ -546,7 +546,7 @@ var sectionId = 'dynsection-0';
 <!-- Node21 -->
 <g id="Node000021" class="node">
 <title>Node21</title>
-<g id="a_Node000021"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_a590f31e60f8954944bb4ea7ccbbb4b88.html#a590f31e60f8954944bb4ea7ccbbb4b88" target="_top" xlink:title=" ">
+<g id="a_Node000021"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_ae28d3d77e670a9f4702ce8f82ff90341.html#ae28d3d77e670a9f4702ce8f82ff90341" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="703.5,-922.5 605.5,-922.5 605.5,-903.5 703.5,-903.5 703.5,-922.5"/>
 <text text-anchor="middle" x="654.5" y="-910.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::s16x16::to_int</text>
 </a>
@@ -645,7 +645,7 @@ var sectionId = 'dynsection-0';
 <!-- Node23 -->
 <g id="Node000023" class="node">
 <title>Node23</title>
-<g id="a_Node000023"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_a1ca1af0b2fe1b59959cafc20e8872621.html#a1ca1af0b2fe1b59959cafc20e8872621" target="_top" xlink:title=" ">
+<g id="a_Node000023"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_ad1fe7c9e0180ae9f80d286e6a78cde57.html#ad1fe7c9e0180ae9f80d286e6a78cde57" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="698,-659.5 611,-659.5 611,-640.5 698,-640.5 698,-659.5"/>
 <text text-anchor="middle" x="654.5" y="-647.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::s16x16::ceil</text>
 </a>
@@ -663,7 +663,7 @@ var sectionId = 'dynsection-0';
 <!-- Node24 -->
 <g id="Node000024" class="node">
 <title>Node24</title>
-<g id="a_Node000024"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_a194d91aefbc2fd91cdb02fcb05962a64.html#a194d91aefbc2fd91cdb02fcb05962a64" target="_top" xlink:title=" ">
+<g id="a_Node000024"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_a9f5639024241e7fa54b3889ef51dd68c.html#a9f5639024241e7fa54b3889ef51dd68c" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="889,-432.5 789,-432.5 789,-413.5 889,-413.5 889,-432.5"/>
 <text text-anchor="middle" x="839" y="-420.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::s16x16::clamp</text>
 </a>
@@ -681,7 +681,7 @@ var sectionId = 'dynsection-0';
 <!-- Node25 -->
 <g id="Node000025" class="node">
 <title>Node25</title>
-<g id="a_Node000025"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_a938350908117bb78524e7a0e327d9a16.html#a938350908117bb78524e7a0e327d9a16" target="_top" xlink:title=" ">
+<g id="a_Node000025"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_ae754a91cc57e81a7378eb0a73284de8e.html#ae754a91cc57e81a7378eb0a73284de8e" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="700.5,-696.5 608.5,-696.5 608.5,-677.5 700.5,-677.5 700.5,-696.5"/>
 <text text-anchor="middle" x="654.5" y="-684.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::s16x16::floor</text>
 </a>
@@ -699,7 +699,7 @@ var sectionId = 'dynsection-0';
 <!-- Node26 -->
 <g id="Node000026" class="node">
 <title>Node26</title>
-<g id="a_Node000026"><a xlink:href="../../d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb" target="_top" xlink:title=" ">
+<g id="a_Node000026"><a xlink:href="../../d4/d36/namespacefl_a2fdabb91a1f100dec8da21e4306aba05.html#a2fdabb91a1f100dec8da21e4306aba05" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="678,-432.5 631,-432.5 631,-413.5 678,-413.5 678,-432.5"/>
 <text text-anchor="middle" x="654.5" y="-420.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::min</text>
 </a>
@@ -717,7 +717,7 @@ var sectionId = 'dynsection-0';
 <!-- Node27 -->
 <g id="Node000027" class="node">
 <title>Node27</title>
-<g id="a_Node000027"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_a57f68b82f5bf3b9bcda7932130f288a4.html#a57f68b82f5bf3b9bcda7932130f288a4" target="_top" xlink:title=" ">
+<g id="a_Node000027"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_ad87790c4c6b9822efd9f6579c00b86aa.html#ad87790c4c6b9822efd9f6579c00b86aa" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="883.5,-866.5 794.5,-866.5 794.5,-847.5 883.5,-847.5 883.5,-866.5"/>
 <text text-anchor="middle" x="839" y="-854.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::s16x16::sqrt</text>
 </a>
@@ -843,7 +843,7 @@ var sectionId = 'dynsection-0';
 <!-- Node30 -->
 <g id="Node000030" class="node">
 <title>Node30</title>
-<g id="a_Node000030"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_a16358cb4db9d9056cc85ea036c5ef1e4.html#a16358cb4db9d9056cc85ea036c5ef1e4" target="_top" xlink:title=" ">
+<g id="a_Node000030"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_ae0b5fb2336121030ec1d35063544dfdb.html#ae0b5fb2336121030ec1d35063544dfdb" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="705,-622.5 604,-622.5 604,-603.5 705,-603.5 705,-622.5"/>
 <text text-anchor="middle" x="654.5" y="-610.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::s16x16::sincos</text>
 </a>
@@ -861,7 +861,7 @@ var sectionId = 'dynsection-0';
 <!-- Node36 -->
 <g id="Node000036" class="node">
 <title>Node36</title>
-<g id="a_Node000036"><a xlink:href="../../d4/d36/namespacefl_aa6f747fb354cae784bdd4c656cbdd9fb.html#aa6f747fb354cae784bdd4c656cbdd9fb" target="_top" xlink:title=" ">
+<g id="a_Node000036"><a xlink:href="../../d4/d36/namespacefl_aa0b8d08b9903ece3fb5f220333b9e785.html#aa0b8d08b9903ece3fb5f220333b9e785" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="492.5,-545.5 442.5,-545.5 442.5,-526.5 492.5,-526.5 492.5,-545.5"/>
 <text text-anchor="middle" x="467.5" y="-533.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::step</text>
 </a>
@@ -897,7 +897,7 @@ var sectionId = 'dynsection-0';
 <!-- Node31 -->
 <g id="Node000031" class="node">
 <title>Node31</title>
-<g id="a_Node000031"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_abb43dd69e7dfbbb23acfdb79835c987a.html#abb43dd69e7dfbbb23acfdb79835c987a" target="_top" xlink:title=" ">
+<g id="a_Node000031"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_a65205772871004fae8520210db4f9501.html#a65205772871004fae8520210db4f9501" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="906.5,-659.5 771.5,-659.5 771.5,-640.5 906.5,-640.5 906.5,-659.5"/>
 <text text-anchor="middle" x="839" y="-647.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::s16x16::angle_to_a24</text>
 </a>
@@ -915,7 +915,7 @@ var sectionId = 'dynsection-0';
 <!-- Node32 -->
 <g id="Node000032" class="node">
 <title>Node32</title>
-<g id="a_Node000032"><a xlink:href="../../d4/d36/namespacefl_ab168280957e4bfee3a3976381bd9e663.html#ab168280957e4bfee3a3976381bd9e663" target="_top" xlink:title=" ">
+<g id="a_Node000032"><a xlink:href="../../d4/d36/namespacefl_a7fa7965b1634d81dd3070b937da2697a.html#a7fa7965b1634d81dd3070b937da2697a" target="_top" xlink:title=" ">
 <polygon fill="#fff0f0" stroke="red" points="874.5,-583.5 803.5,-583.5 803.5,-564.5 874.5,-564.5 874.5,-583.5"/>
 <text text-anchor="middle" x="839" y="-571.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::sincos32</text>
 </a>
@@ -978,7 +978,7 @@ var sectionId = 'dynsection-0';
 <!-- Node40 -->
 <g id="Node000040" class="node">
 <title>Node40</title>
-<g id="a_Node000040"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_ad54fc4759a533ca8fb29bd32ba982291.html#ad54fc4759a533ca8fb29bd32ba982291" target="_top" xlink:title=" ">
+<g id="a_Node000040"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_acf62d2e1fa0e10fed6c06699798c0325.html#acf62d2e1fa0e10fed6c06699798c0325" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="512.5,-394.5 422.5,-394.5 422.5,-375.5 512.5,-375.5 512.5,-394.5"/>
 <text text-anchor="middle" x="467.5" y="-382.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::s16x16::pow</text>
 </a>
@@ -1023,7 +1023,7 @@ var sectionId = 'dynsection-0';
 <!-- Node41 -->
 <g id="Node000041" class="node">
 <title>Node41</title>
-<g id="a_Node000041"><a xlink:href="../../d4/d36/namespacefl_ae393fecb8f433ee4b88027955350bdc8.html#ae393fecb8f433ee4b88027955350bdc8" target="_top" xlink:title=" ">
+<g id="a_Node000041"><a xlink:href="../../d4/d36/namespacefl_ad01db2eb12a95fcdbd62fd8835caf4e2.html#ad01db2eb12a95fcdbd62fd8835caf4e2" target="_top" xlink:title=" ">
 <polygon fill="#fff0f0" stroke="red" points="678,-356.5 631,-356.5 631,-337.5 678,-337.5 678,-356.5"/>
 <text text-anchor="middle" x="654.5" y="-344.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::exp</text>
 </a>
@@ -1041,7 +1041,7 @@ var sectionId = 'dynsection-0';
 <!-- Node44 -->
 <g id="Node000044" class="node">
 <title>Node44</title>
-<g id="a_Node000044"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_a734cbfe41dc1bf7b316cf49fe5eade08.html#a734cbfe41dc1bf7b316cf49fe5eade08" target="_top" xlink:title=" ">
+<g id="a_Node000044"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_aa8872f5e9b5eca91dc38110ce53e2785.html#aa8872f5e9b5eca91dc38110ce53e2785" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="709,-733.5 600,-733.5 600,-714.5 709,-714.5 709,-733.5"/>
 <text text-anchor="middle" x="654.5" y="-721.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::s16x16::exp2_fp</text>
 </a>
@@ -1059,7 +1059,7 @@ var sectionId = 'dynsection-0';
 <!-- Node45 -->
 <g id="Node000045" class="node">
 <title>Node45</title>
-<g id="a_Node000045"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_a02cc018cfdcf668c4636d708695af362.html#a02cc018cfdcf668c4636d708695af362" target="_top" xlink:title=" ">
+<g id="a_Node000045"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_ad21eb6937e5bb9e575a3ae6960ac9a94.html#ad21eb6937e5bb9e575a3ae6960ac9a94" target="_top" xlink:title=" ">
 <polygon fill="#fff0f0" stroke="red" points="707.5,-546.5 601.5,-546.5 601.5,-527.5 707.5,-527.5 707.5,-546.5"/>
 <text text-anchor="middle" x="654.5" y="-534.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::s16x16::log2_fp</text>
 </a>

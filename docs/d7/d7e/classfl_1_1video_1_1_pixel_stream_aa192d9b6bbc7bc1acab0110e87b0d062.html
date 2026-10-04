@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -119,40 +119,64 @@ $(function(){initNavTree('d7/d7e/classfl_1_1video_1_1_pixel_stream_aa192d9b6bbc7
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d2/db2/pixel__stream_8cpp_8hpp_source.html#l00220">220</a> of file <a class="el" href="../../d2/db2/pixel__stream_8cpp_8hpp_source.html">pixel_stream.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  220</span>                                                 {</div>
-<div class="line"><span class="lineno">  221</span>    u16 bytesRead = 0;</div>
-<div class="line"><span class="lineno">  222</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d7/d7e/classfl_1_1video_1_1_pixel_stream_a677c4665fedc0ec38f8e57e2b02455f7.html#a677c4665fedc0ec38f8e57e2b02455f7">mType</a> == <a class="code hl_enumvalue" href="../../d7/d7e/classfl_1_1video_1_1_pixel_stream_af7e361137e1b718c7216d5cc99eb0e83.html#af7e361137e1b718c7216d5cc99eb0e83a7554dabb8e163cdaefadc9f794ea2cd7">kStreaming</a>) {</div>
-<div class="line"><span class="lineno">  223</span>        <span class="keywordflow">while</span> (bytesRead &lt; len &amp;&amp; mHandle-&gt;<a class="code hl_function" href="../../d7/d7e/classfl_1_1video_1_1_pixel_stream_abeed96c4358995f3e48035e6b580e4da.html#abeed96c4358995f3e48035e6b580e4da">available</a>(len)) {</div>
-<div class="line"><span class="lineno">  224</span>            <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d7/d7e/classfl_1_1video_1_1_pixel_stream_a12777a8d83cc78f8938d8e7efdb724d7.html#a12777a8d83cc78f8938d8e7efdb724d7">mHandle</a>-&gt;read(dst + bytesRead, 1)) {</div>
-<div class="line"><span class="lineno">  225</span>                bytesRead++;</div>
-<div class="line"><span class="lineno">  226</span>            } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  227</span>                <span class="keywordflow">break</span>;</div>
-<div class="line"><span class="lineno">  228</span>            }</div>
-<div class="line"><span class="lineno">  229</span>        }</div>
-<div class="line"><span class="lineno">  230</span>    } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  231</span>        <span class="keywordflow">while</span> (bytesRead &lt; len &amp;&amp; mHandle-&gt;<a class="code hl_function" href="../../d7/d7e/classfl_1_1video_1_1_pixel_stream_abeed96c4358995f3e48035e6b580e4da.html#abeed96c4358995f3e48035e6b580e4da">available</a>()) {</div>
-<div class="line"><span class="lineno">  232</span>            <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d7/d7e/classfl_1_1video_1_1_pixel_stream_a12777a8d83cc78f8938d8e7efdb724d7.html#a12777a8d83cc78f8938d8e7efdb724d7">mHandle</a>-&gt;read(dst + bytesRead, 1)) {</div>
-<div class="line"><span class="lineno">  233</span>                bytesRead++;</div>
-<div class="line"><span class="lineno">  234</span>            } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  235</span>                <span class="keywordflow">break</span>;</div>
-<div class="line"><span class="lineno">  236</span>            }</div>
-<div class="line"><span class="lineno">  237</span>        }</div>
-<div class="line"><span class="lineno">  238</span>    }</div>
-<div class="line"><span class="lineno">  239</span>    <span class="keywordflow">return</span> bytesRead;</div>
-<div class="line"><span class="lineno">  240</span>}</div>
-<div class="ttc" id="aclassfl_1_1video_1_1_pixel_stream_a12777a8d83cc78f8938d8e7efdb724d7_html_a12777a8d83cc78f8938d8e7efdb724d7"><div class="ttname"><a href="../../d7/d7e/classfl_1_1video_1_1_pixel_stream_a12777a8d83cc78f8938d8e7efdb724d7.html#a12777a8d83cc78f8938d8e7efdb724d7">fl::video::PixelStream::mHandle</a></div><div class="ttdeci">fl::filebuf_ptr mHandle</div><div class="ttdef"><b>Definition</b> <a href="../../d3/dfa/pixel__stream_8h_source.html#l00065">pixel_stream.h:65</a></div></div>
-<div class="ttc" id="aclassfl_1_1video_1_1_pixel_stream_a677c4665fedc0ec38f8e57e2b02455f7_html_a677c4665fedc0ec38f8e57e2b02455f7"><div class="ttname"><a href="../../d7/d7e/classfl_1_1video_1_1_pixel_stream_a677c4665fedc0ec38f8e57e2b02455f7.html#a677c4665fedc0ec38f8e57e2b02455f7">fl::video::PixelStream::mType</a></div><div class="ttdeci">Type mType</div><div class="ttdef"><b>Definition</b> <a href="../../d3/dfa/pixel__stream_8h_source.html#l00066">pixel_stream.h:66</a></div></div>
-<div class="ttc" id="aclassfl_1_1video_1_1_pixel_stream_abeed96c4358995f3e48035e6b580e4da_html_abeed96c4358995f3e48035e6b580e4da"><div class="ttname"><a href="../../d7/d7e/classfl_1_1video_1_1_pixel_stream_abeed96c4358995f3e48035e6b580e4da.html#abeed96c4358995f3e48035e6b580e4da">fl::video::PixelStream::available</a></div><div class="ttdeci">bool available() const</div><div class="ttdef"><b>Definition</b> <a href="../../d2/db2/pixel__stream_8cpp_8hpp_source.html#l00100">pixel_stream.cpp.hpp:100</a></div></div>
-<div class="ttc" id="aclassfl_1_1video_1_1_pixel_stream_af7e361137e1b718c7216d5cc99eb0e83_html_af7e361137e1b718c7216d5cc99eb0e83a7554dabb8e163cdaefadc9f794ea2cd7"><div class="ttname"><a href="../../d7/d7e/classfl_1_1video_1_1_pixel_stream_af7e361137e1b718c7216d5cc99eb0e83.html#af7e361137e1b718c7216d5cc99eb0e83a7554dabb8e163cdaefadc9f794ea2cd7">fl::video::PixelStream::kStreaming</a></div><div class="ttdeci">@ kStreaming</div><div class="ttdef"><b>Definition</b> <a href="../../d3/dfa/pixel__stream_8h_source.html#l00030">pixel_stream.h:30</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d2/db2/pixel__stream_8cpp_8hpp_source.html#l00423">423</a> of file <a class="el" href="../../d2/db2/pixel__stream_8cpp_8hpp_source.html">pixel_stream.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  423</span>                                                 {</div>
+<div class="line"><span class="lineno">  424</span>    <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../d7/d7e/classfl_1_1video_1_1_pixel_stream_a12777a8d83cc78f8938d8e7efdb724d7.html#a12777a8d83cc78f8938d8e7efdb724d7">mHandle</a> || !dst) {</div>
+<div class="line"><span class="lineno">  425</span>        <span class="keywordflow">return</span> 0;</div>
+<div class="line"><span class="lineno">  426</span>    }</div>
+<div class="line"><span class="lineno">  427</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d7/d7e/classfl_1_1video_1_1_pixel_stream_a677c4665fedc0ec38f8e57e2b02455f7.html#a677c4665fedc0ec38f8e57e2b02455f7">mType</a> == <a class="code hl_enumvalue" href="../../d7/d7e/classfl_1_1video_1_1_pixel_stream_af7e361137e1b718c7216d5cc99eb0e83.html#af7e361137e1b718c7216d5cc99eb0e83a7554dabb8e163cdaefadc9f794ea2cd7">kStreaming</a> &amp;&amp;</div>
+<div class="line"><span class="lineno">  428</span>        (!<a class="code hl_function" href="../../d7/d7e/classfl_1_1video_1_1_pixel_stream_a2c599e14e779218ddbda706c55406458.html#a2c599e14e779218ddbda706c55406458">probeStreamingMagic</a>() || <a class="code hl_variable" href="../../d7/d7e/classfl_1_1video_1_1_pixel_stream_a4f3e15242d968a77d2c1c51ddaf180eb.html#a4f3e15242d968a77d2c1c51ddaf180eb">mStreamingProbePending</a>)) {</div>
+<div class="line"><span class="lineno">  429</span>        <span class="keywordflow">return</span> 0;</div>
+<div class="line"><span class="lineno">  430</span>    }</div>
+<div class="line"><span class="lineno">  431</span>    <span class="keywordtype">size_t</span> bytesRead = 0;</div>
+<div class="line"><span class="lineno">  432</span>    <span class="keywordflow">while</span> (bytesRead &lt; len &amp;&amp; <a class="code hl_variable" href="../../d7/d7e/classfl_1_1video_1_1_pixel_stream_a6a41b6c88dd2936e9aca04f6654f52f6.html#a6a41b6c88dd2936e9aca04f6654f52f6">mStreamingPrefixPos</a> &lt; <a class="code hl_variable" href="../../d7/d7e/classfl_1_1video_1_1_pixel_stream_ab123062478229be3d476364555f70d24.html#ab123062478229be3d476364555f70d24">mStreamingPrefixSize</a>) {</div>
+<div class="line"><span class="lineno">  433</span>        dst[bytesRead++] = <a class="code hl_variable" href="../../d7/d7e/classfl_1_1video_1_1_pixel_stream_accb8fecea0d8dff03eb0f17ba8281d86.html#accb8fecea0d8dff03eb0f17ba8281d86">mStreamingPrefix</a>[<a class="code hl_variable" href="../../d7/d7e/classfl_1_1video_1_1_pixel_stream_a6a41b6c88dd2936e9aca04f6654f52f6.html#a6a41b6c88dd2936e9aca04f6654f52f6">mStreamingPrefixPos</a>++];</div>
+<div class="line"><span class="lineno">  434</span>    }</div>
+<div class="line"><span class="lineno">  435</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d7/d7e/classfl_1_1video_1_1_pixel_stream_a677c4665fedc0ec38f8e57e2b02455f7.html#a677c4665fedc0ec38f8e57e2b02455f7">mType</a> == <a class="code hl_enumvalue" href="../../d7/d7e/classfl_1_1video_1_1_pixel_stream_af7e361137e1b718c7216d5cc99eb0e83.html#af7e361137e1b718c7216d5cc99eb0e83a7554dabb8e163cdaefadc9f794ea2cd7">kStreaming</a>) {</div>
+<div class="line"><span class="lineno">  436</span>        <span class="keywordflow">while</span> (bytesRead &lt; len &amp;&amp; mHandle-&gt;<a class="code hl_function" href="../../d7/d7e/classfl_1_1video_1_1_pixel_stream_abeed96c4358995f3e48035e6b580e4da.html#abeed96c4358995f3e48035e6b580e4da">available</a>(len - bytesRead)) {</div>
+<div class="line"><span class="lineno">  437</span>            <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d7/d7e/classfl_1_1video_1_1_pixel_stream_a12777a8d83cc78f8938d8e7efdb724d7.html#a12777a8d83cc78f8938d8e7efdb724d7">mHandle</a>-&gt;read(dst + bytesRead, 1)) {</div>
+<div class="line"><span class="lineno">  438</span>                bytesRead++;</div>
+<div class="line"><span class="lineno">  439</span>            } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  440</span>                <span class="keywordflow">break</span>;</div>
+<div class="line"><span class="lineno">  441</span>            }</div>
+<div class="line"><span class="lineno">  442</span>        }</div>
+<div class="line"><span class="lineno">  443</span>    } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  444</span>        <span class="keywordflow">while</span> (bytesRead &lt; len &amp;&amp; mHandle-&gt;<a class="code hl_function" href="../../d7/d7e/classfl_1_1video_1_1_pixel_stream_abeed96c4358995f3e48035e6b580e4da.html#abeed96c4358995f3e48035e6b580e4da">available</a>()) {</div>
+<div class="line"><span class="lineno">  445</span>            <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d7/d7e/classfl_1_1video_1_1_pixel_stream_a12777a8d83cc78f8938d8e7efdb724d7.html#a12777a8d83cc78f8938d8e7efdb724d7">mHandle</a>-&gt;read(dst + bytesRead, 1)) {</div>
+<div class="line"><span class="lineno">  446</span>                bytesRead++;</div>
+<div class="line"><span class="lineno">  447</span>            } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  448</span>                <span class="keywordflow">break</span>;</div>
+<div class="line"><span class="lineno">  449</span>            }</div>
+<div class="line"><span class="lineno">  450</span>        }</div>
+<div class="line"><span class="lineno">  451</span>    }</div>
+<div class="line"><span class="lineno">  452</span>    <span class="keywordflow">return</span> bytesRead;</div>
+<div class="line"><span class="lineno">  453</span>}</div>
+<div class="ttc" id="aclassfl_1_1video_1_1_pixel_stream_a12777a8d83cc78f8938d8e7efdb724d7_html_a12777a8d83cc78f8938d8e7efdb724d7"><div class="ttname"><a href="../../d7/d7e/classfl_1_1video_1_1_pixel_stream_a12777a8d83cc78f8938d8e7efdb724d7.html#a12777a8d83cc78f8938d8e7efdb724d7">fl::video::PixelStream::mHandle</a></div><div class="ttdeci">fl::filebuf_ptr mHandle</div><div class="ttdef"><b>Definition</b> <a href="../../d3/dfa/pixel__stream_8h_source.html#l00074">pixel_stream.h:74</a></div></div>
+<div class="ttc" id="aclassfl_1_1video_1_1_pixel_stream_a2c599e14e779218ddbda706c55406458_html_a2c599e14e779218ddbda706c55406458"><div class="ttname"><a href="../../d7/d7e/classfl_1_1video_1_1_pixel_stream_a2c599e14e779218ddbda706c55406458.html#a2c599e14e779218ddbda706c55406458">fl::video::PixelStream::probeStreamingMagic</a></div><div class="ttdeci">bool probeStreamingMagic() const FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d2/db2/pixel__stream_8cpp_8hpp_source.html#l00188">pixel_stream.cpp.hpp:188</a></div></div>
+<div class="ttc" id="aclassfl_1_1video_1_1_pixel_stream_a4f3e15242d968a77d2c1c51ddaf180eb_html_a4f3e15242d968a77d2c1c51ddaf180eb"><div class="ttname"><a href="../../d7/d7e/classfl_1_1video_1_1_pixel_stream_a4f3e15242d968a77d2c1c51ddaf180eb.html#a4f3e15242d968a77d2c1c51ddaf180eb">fl::video::PixelStream::mStreamingProbePending</a></div><div class="ttdeci">bool mStreamingProbePending</div><div class="ttdef"><b>Definition</b> <a href="../../d3/dfa/pixel__stream_8h_source.html#l00093">pixel_stream.h:93</a></div></div>
+<div class="ttc" id="aclassfl_1_1video_1_1_pixel_stream_a677c4665fedc0ec38f8e57e2b02455f7_html_a677c4665fedc0ec38f8e57e2b02455f7"><div class="ttname"><a href="../../d7/d7e/classfl_1_1video_1_1_pixel_stream_a677c4665fedc0ec38f8e57e2b02455f7.html#a677c4665fedc0ec38f8e57e2b02455f7">fl::video::PixelStream::mType</a></div><div class="ttdeci">Type mType</div><div class="ttdef"><b>Definition</b> <a href="../../d3/dfa/pixel__stream_8h_source.html#l00075">pixel_stream.h:75</a></div></div>
+<div class="ttc" id="aclassfl_1_1video_1_1_pixel_stream_a6a41b6c88dd2936e9aca04f6654f52f6_html_a6a41b6c88dd2936e9aca04f6654f52f6"><div class="ttname"><a href="../../d7/d7e/classfl_1_1video_1_1_pixel_stream_a6a41b6c88dd2936e9aca04f6654f52f6.html#a6a41b6c88dd2936e9aca04f6654f52f6">fl::video::PixelStream::mStreamingPrefixPos</a></div><div class="ttdeci">fl::size_t mStreamingPrefixPos</div><div class="ttdef"><b>Definition</b> <a href="../../d3/dfa/pixel__stream_8h_source.html#l00092">pixel_stream.h:92</a></div></div>
+<div class="ttc" id="aclassfl_1_1video_1_1_pixel_stream_ab123062478229be3d476364555f70d24_html_ab123062478229be3d476364555f70d24"><div class="ttname"><a href="../../d7/d7e/classfl_1_1video_1_1_pixel_stream_ab123062478229be3d476364555f70d24.html#ab123062478229be3d476364555f70d24">fl::video::PixelStream::mStreamingPrefixSize</a></div><div class="ttdeci">fl::size_t mStreamingPrefixSize</div><div class="ttdef"><b>Definition</b> <a href="../../d3/dfa/pixel__stream_8h_source.html#l00091">pixel_stream.h:91</a></div></div>
+<div class="ttc" id="aclassfl_1_1video_1_1_pixel_stream_abeed96c4358995f3e48035e6b580e4da_html_abeed96c4358995f3e48035e6b580e4da"><div class="ttname"><a href="../../d7/d7e/classfl_1_1video_1_1_pixel_stream_abeed96c4358995f3e48035e6b580e4da.html#abeed96c4358995f3e48035e6b580e4da">fl::video::PixelStream::available</a></div><div class="ttdeci">bool available() const</div><div class="ttdef"><b>Definition</b> <a href="../../d2/db2/pixel__stream_8cpp_8hpp_source.html#l00250">pixel_stream.cpp.hpp:250</a></div></div>
+<div class="ttc" id="aclassfl_1_1video_1_1_pixel_stream_accb8fecea0d8dff03eb0f17ba8281d86_html_accb8fecea0d8dff03eb0f17ba8281d86"><div class="ttname"><a href="../../d7/d7e/classfl_1_1video_1_1_pixel_stream_accb8fecea0d8dff03eb0f17ba8281d86.html#accb8fecea0d8dff03eb0f17ba8281d86">fl::video::PixelStream::mStreamingPrefix</a></div><div class="ttdeci">fl::u8 mStreamingPrefix[4]</div><div class="ttdef"><b>Definition</b> <a href="../../d3/dfa/pixel__stream_8h_source.html#l00090">pixel_stream.h:90</a></div></div>
+<div class="ttc" id="aclassfl_1_1video_1_1_pixel_stream_af7e361137e1b718c7216d5cc99eb0e83_html_af7e361137e1b718c7216d5cc99eb0e83a7554dabb8e163cdaefadc9f794ea2cd7"><div class="ttname"><a href="../../d7/d7e/classfl_1_1video_1_1_pixel_stream_af7e361137e1b718c7216d5cc99eb0e83.html#af7e361137e1b718c7216d5cc99eb0e83a7554dabb8e163cdaefadc9f794ea2cd7">fl::video::PixelStream::kStreaming</a></div><div class="ttdeci">@ kStreaming</div><div class="ttdef"><b>Definition</b> <a href="../../d3/dfa/pixel__stream_8h_source.html#l00031">pixel_stream.h:31</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d2/db2/pixel__stream_8cpp_8hpp_source.html#l00100">available()</a>, <a class="el" href="../../d3/dfa/pixel__stream_8h_source.html#l00030">kStreaming</a>, <a class="el" href="../../d3/dfa/pixel__stream_8h_source.html#l00065">mHandle</a>, and <a class="el" href="../../d3/dfa/pixel__stream_8h_source.html#l00066">mType</a>.</p>
+<p class="reference">References <a class="el" href="../../d2/db2/pixel__stream_8cpp_8hpp_source.html#l00250">available()</a>, <a class="el" href="../../d3/dfa/pixel__stream_8h_source.html#l00031">kStreaming</a>, <a class="el" href="../../d3/dfa/pixel__stream_8h_source.html#l00074">mHandle</a>, <a class="el" href="../../d3/dfa/pixel__stream_8h_source.html#l00090">mStreamingPrefix</a>, <a class="el" href="../../d3/dfa/pixel__stream_8h_source.html#l00092">mStreamingPrefixPos</a>, <a class="el" href="../../d3/dfa/pixel__stream_8h_source.html#l00091">mStreamingPrefixSize</a>, <a class="el" href="../../d3/dfa/pixel__stream_8h_source.html#l00093">mStreamingProbePending</a>, <a class="el" href="../../d3/dfa/pixel__stream_8h_source.html#l00075">mType</a>, and <a class="el" href="../../d2/db2/pixel__stream_8cpp_8hpp_source.html#l00188">probeStreamingMagic()</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d2/db2/pixel__stream_8cpp_8hpp_source.html#l00215">readPixel()</a>, and <a class="el" href="../../d2/db2/pixel__stream_8cpp_8hpp_source.html#l00225">readSample()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d7/d7e/classfl_1_1video_1_1_pixel_stream_aa192d9b6bbc7bc1acab0110e87b0d062_aa192d9b6bbc7bc1acab0110e87b0d062_cgraph.svg" width="379" height="51"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d7/d7e/classfl_1_1video_1_1_pixel_stream_aa192d9b6bbc7bc1acab0110e87b0d062_aa192d9b6bbc7bc1acab0110e87b0d062_cgraph.svg" width="600" height="80"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+<div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
+<div id="dynsection-1-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-1-content" class="dyncontent" style="display:none;">
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d7/d7e/classfl_1_1video_1_1_pixel_stream_aa192d9b6bbc7bc1acab0110e87b0d062_aa192d9b6bbc7bc1acab0110e87b0d062_icgraph.svg" width="587" height="115"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 
 </div>
@@ -164,7 +188,7 @@ $(function(){initNavTree('d7/d7e/classfl_1_1video_1_1_pixel_stream_aa192d9b6bbc7
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d7/dbc/namespacefl_1_1video.html">video</a></li><li class="navelem"><a class="el" href="../../d7/d7e/classfl_1_1video_1_1_pixel_stream.html">PixelStream</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:11 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:13 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

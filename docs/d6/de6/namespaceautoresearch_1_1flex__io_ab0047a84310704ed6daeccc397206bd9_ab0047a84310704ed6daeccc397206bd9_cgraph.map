@@ -1,0 +1,7 @@
+<map id="autoresearch::flex_io::idfVersion" name="autoresearch::flex_io::idfVersion">
+<area shape="rect" id="Node000001" title="ESP&#45;IDF version string, or &quot;n/a&quot; on non&#45;ESP32 targets." alt="" coords="5,23,144,63"/>
+<area shape="rect" id="Node000002" href="$d2/db2/classfl_1_1string_af72684ed7d6b211b41ace065de0bcfe7.html#af72684ed7d6b211b41ace065de0bcfe7" title=" " alt="" coords="192,5,351,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="144,32,178,27,179,33,145,37"/>
+<area shape="rect" id="Node000003" href="$d1/d27/classfl_1_1sstream_a904115dfd2a7e462177b6409c9b842d6.html#a904115dfd2a7e462177b6409c9b842d6" title=" " alt="" coords="213,55,329,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="145,49,200,56,199,61,144,54"/>
+</map>

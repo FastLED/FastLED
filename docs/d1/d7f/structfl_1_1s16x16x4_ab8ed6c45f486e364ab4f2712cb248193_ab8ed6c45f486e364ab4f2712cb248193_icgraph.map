@@ -1,0 +1,5 @@
+<map id="fl::s16x16x4::max" name="fl::s16x16x4::max">
+<area shape="rect" id="Node000001" title="Element&#45;wise maximum." alt="" coords="203,5,341,31"/>
+<area shape="rect" id="Node000002" href="$d1/d7f/structfl_1_1s16x16x4_a2bf751e0b8ef9006cf8c915b446b87a8.html#a2bf751e0b8ef9006cf8c915b446b87a8" title="Clamp to [lo, hi]." alt="" coords="5,5,155,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="189,21,155,21,155,15,189,15"/>
+</map>

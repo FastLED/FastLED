@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -124,23 +124,23 @@ $(function(){initNavTree('d4/d36/namespacefl_ad0e6c4abefa2d795fcdba18f0d5c1573.h
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d8/d81/wave8_8cpp_8hpp_source.html#l00057">57</a> of file <a class="el" href="../../d8/d81/wave8_8cpp_8hpp_source.html">wave8.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   59</span>                                                                             {</div>
-<div class="line"><span class="lineno">   60</span>    <span class="comment">// Allocate waveform buffers on stack (64 Wave8Bit total: 8 packed bytes per lane × 8 lanes)</span></div>
-<div class="line"><span class="lineno">   61</span>    Wave8Byte laneWaveformSymbols[8];</div>
-<div class="line"><span class="lineno">   62</span> </div>
-<div class="line"><span class="lineno">   63</span>    <span class="comment">// Convert each lane byte to wave pulse symbols (8 packed bytes each)</span></div>
-<div class="line"><span class="lineno">   64</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> lane = 0; lane &lt; 8; lane++) {</div>
-<div class="line"><span class="lineno">   65</span>        <a class="code hl_function" href="../../df/d9e/namespacefl_1_1detail_a2538a6e0d2d28d4194ec004bf5fe6003.html#a2538a6e0d2d28d4194ec004bf5fe6003">detail::wave8_convert_byte_to_wave8byte</a>(lanes[lane], lut, &amp;laneWaveformSymbols[lane]);</div>
-<div class="line"><span class="lineno">   66</span>    }</div>
-<div class="line"><span class="lineno">   67</span> </div>
-<div class="line"><span class="lineno">   68</span>    <span class="comment">// Transpose waveforms to DMA format (interleave 64 packed bytes to 64 bytes)</span></div>
-<div class="line"><span class="lineno">   69</span>    <a class="code hl_function" href="../../df/d9e/namespacefl_1_1detail_a28048c15bb5d847dd9c0e186ac8acfa6.html#a28048c15bb5d847dd9c0e186ac8acfa6">detail::wave8_transpose_8</a>(laneWaveformSymbols, output);</div>
-<div class="line"><span class="lineno">   70</span>}</div>
-<div class="ttc" id="anamespacefl_1_1detail_a2538a6e0d2d28d4194ec004bf5fe6003_html_a2538a6e0d2d28d4194ec004bf5fe6003"><div class="ttname"><a href="../../df/d9e/namespacefl_1_1detail_a2538a6e0d2d28d4194ec004bf5fe6003.html#a2538a6e0d2d28d4194ec004bf5fe6003">fl::detail::wave8_convert_byte_to_wave8byte</a></div><div class="ttdeci">FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION void wave8_convert_byte_to_wave8byte(u8 byte_value, const Wave8BitExpansionLut &amp;lut, Wave8Byte *output)</div><div class="ttdoc">Helper: Convert byte to Wave8Byte using nibble LUT (internal use only)</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d4b/wave8_8hpp_source.html#l00047">wave8.hpp:47</a></div></div>
-<div class="ttc" id="anamespacefl_1_1detail_a28048c15bb5d847dd9c0e186ac8acfa6_html_a28048c15bb5d847dd9c0e186ac8acfa6"><div class="ttname"><a href="../../df/d9e/namespacefl_1_1detail_a28048c15bb5d847dd9c0e186ac8acfa6.html#a28048c15bb5d847dd9c0e186ac8acfa6">fl::detail::wave8_transpose_8</a></div><div class="ttdeci">FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION void wave8_transpose_8(const Wave8Byte lane_waves[8], u8 output[8 *sizeof(Wave8Byte)])</div><div class="ttdoc">Transpose 8 lanes of Wave8Byte data into interleaved format.</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d4b/wave8_8hpp_source.html#l00205">wave8.hpp:205</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d8/d81/wave8_8cpp_8hpp_source.html#l00058">58</a> of file <a class="el" href="../../d8/d81/wave8_8cpp_8hpp_source.html">wave8.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   60</span>                                                                             {</div>
+<div class="line"><span class="lineno">   61</span>    <span class="comment">// Allocate waveform buffers on stack (64 Wave8Bit total: 8 packed bytes per lane × 8 lanes)</span></div>
+<div class="line"><span class="lineno">   62</span>    Wave8Byte laneWaveformSymbols[8];</div>
+<div class="line"><span class="lineno">   63</span> </div>
+<div class="line"><span class="lineno">   64</span>    <span class="comment">// Convert each lane byte to wave pulse symbols (8 packed bytes each)</span></div>
+<div class="line"><span class="lineno">   65</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> lane = 0; lane &lt; 8; lane++) {</div>
+<div class="line"><span class="lineno">   66</span>        <a class="code hl_function" href="../../df/d9e/namespacefl_1_1detail_aa731fdf58a33695ff45eee66bb3c8ff6.html#aa731fdf58a33695ff45eee66bb3c8ff6">detail::wave8_convert_byte_to_wave8byte</a>(lanes[lane], lut, &amp;laneWaveformSymbols[lane]);</div>
+<div class="line"><span class="lineno">   67</span>    }</div>
+<div class="line"><span class="lineno">   68</span> </div>
+<div class="line"><span class="lineno">   69</span>    <span class="comment">// Transpose waveforms to DMA format (interleave 64 packed bytes to 64 bytes)</span></div>
+<div class="line"><span class="lineno">   70</span>    <a class="code hl_function" href="../../df/d9e/namespacefl_1_1detail_a756967b8dca3cdde3223444819a7bed0.html#a756967b8dca3cdde3223444819a7bed0">detail::wave8_transpose_8</a>(laneWaveformSymbols, output);</div>
+<div class="line"><span class="lineno">   71</span>}</div>
+<div class="ttc" id="anamespacefl_1_1detail_a756967b8dca3cdde3223444819a7bed0_html_a756967b8dca3cdde3223444819a7bed0"><div class="ttname"><a href="../../df/d9e/namespacefl_1_1detail_a756967b8dca3cdde3223444819a7bed0.html#a756967b8dca3cdde3223444819a7bed0">fl::detail::wave8_transpose_8</a></div><div class="ttdeci">FL_IRAM FL_OPTIMIZE_FUNCTION void wave8_transpose_8(const Wave8Byte lane_waves[8], u8 output[8 *sizeof(Wave8Byte)]) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d94/detail_2wave8_8cpp_8hpp_source.html#l00113">wave8.cpp.hpp:113</a></div></div>
+<div class="ttc" id="anamespacefl_1_1detail_aa731fdf58a33695ff45eee66bb3c8ff6_html_aa731fdf58a33695ff45eee66bb3c8ff6"><div class="ttname"><a href="../../df/d9e/namespacefl_1_1detail_aa731fdf58a33695ff45eee66bb3c8ff6.html#aa731fdf58a33695ff45eee66bb3c8ff6">fl::detail::wave8_convert_byte_to_wave8byte</a></div><div class="ttdeci">FL_IRAM FL_OPTIMIZE_FUNCTION void wave8_convert_byte_to_wave8byte(u8 byte_value, const Wave8BitExpansionLut &amp;lut, Wave8Byte *output) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d94/detail_2wave8_8cpp_8hpp_source.html#l00024">wave8.cpp.hpp:24</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../df/d96/s16x16x4_8h_aea8406f9f166028d3ae94a87230488ac.html#aea8406f9f166028d3ae94a87230488ac">FL_RESTRICT_PARAM</a>, <a class="el" href="../../dd/d4b/wave8_8hpp_source.html#l00047">fl::detail::wave8_convert_byte_to_wave8byte()</a>, and <a class="el" href="../../dd/d4b/wave8_8hpp_source.html#l00205">fl::detail::wave8_transpose_8()</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d54/compiler__control_8h_source.html#l00715">FL_RESTRICT_PARAM</a>, <a class="el" href="../../dc/d94/detail_2wave8_8cpp_8hpp_source.html#l00024">fl::detail::wave8_convert_byte_to_wave8byte()</a>, and <a class="el" href="../../dc/d94/detail_2wave8_8cpp_8hpp_source.html#l00113">fl::detail::wave8_transpose_8()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -158,7 +158,7 @@ $(function(){initNavTree('d4/d36/namespacefl_ad0e6c4abefa2d795fcdba18f0d5c1573.h
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:04 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:08 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

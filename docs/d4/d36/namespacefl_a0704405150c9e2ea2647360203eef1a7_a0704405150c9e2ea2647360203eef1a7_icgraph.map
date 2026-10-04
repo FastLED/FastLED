@@ -2,12 +2,12 @@
 <area shape="rect" id="Node000001" title=" " alt="" coords="617,55,740,80"/>
 <area shape="rect" id="Node000002" href="$d4/d5d/structfl_1_1_h_s_v16_a66d9cc0fccee4175baaef83f1a2d7d7d.html#a66d9cc0fccee4175baaef83f1a2d7d7d" title=" " alt="" coords="439,55,569,80"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="604,70,570,70,570,65,604,65"/>
-<area shape="rect" id="Node000003" href="$da/dd6/structfl_1_1_c_r_g_b_a04a5f8d4d52c62efb40aa95af8ebb160.html#a04a5f8d4d52c62efb40aa95af8ebb160" title="Allow construction from a HSV16 color Enables automatic conversion from HSV16 to CRGB." alt="" coords="238,5,358,31"/>
+<area shape="rect" id="Node000003" href="$da/dd6/structfl_1_1_c_r_g_b_a3f41e230cef41109477d0ef93be03639.html#a3f41e230cef41109477d0ef93be03639" title="Allow construction from a HSV16 color Enables automatic conversion from HSV16 to CRGB." alt="" coords="238,5,358,31"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="437,54,351,33,353,28,438,49"/>
 <area shape="rect" id="Node000004" href="$d4/d5d/structfl_1_1_h_s_v16_a76546a195f4bb8cce8ac071d4d7786d4.html#a76546a195f4bb8cce8ac071d4d7786d4" title=" " alt="" coords="219,55,377,80"/>
 <area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="425,70,378,70,378,65,425,65"/>
 <area shape="rect" id="Node000016" href="$d4/d5d/structfl_1_1_h_s_v16_a3ece902080f8d4dbaca82dbc974c58d0.html#a3ece902080f8d4dbaca82dbc974c58d0" title="Automatic conversion operator to CRGB Allows HSV16 to be automatically converted to CRGB." alt="" coords="205,104,391,129"/>
 <area shape="poly" id="edge5_Node000002_Node000016" title=" " alt="" coords="438,86,353,107,351,101,437,81"/>
-<area shape="rect" id="Node000005" href="$da/dd6/structfl_1_1_c_r_g_b_a2792268a864ed3d46b191c20fd56ff87.html#a2792268a864ed3d46b191c20fd56ff87" title=" " alt="" coords="5,55,157,80"/>
+<area shape="rect" id="Node000005" href="$da/dd6/structfl_1_1_c_r_g_b_aa93f4f0e5197ba7d957ac3d32ce76c52.html#aa93f4f0e5197ba7d957ac3d32ce76c52" title=" " alt="" coords="5,55,157,80"/>
 <area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="205,70,158,70,158,65,205,65"/>
 </map>

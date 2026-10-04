@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -117,55 +117,58 @@ $(function(){initNavTree('dc/d00/classfl_1_1_server_a4b8b9821566f8389e43734b90ae
 
 <p>Pull requests from source, process, queue responses. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../da/d73/remote_2rpc_2server_8cpp_8hpp_source.html#l00038">38</a> of file <a class="el" href="../../da/d73/remote_2rpc_2server_8cpp_8hpp_source.html">server.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   38</span>                    {</div>
-<div class="line"><span class="lineno">   39</span>    <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../dc/d00/classfl_1_1_server_a9a54ebfb0c00b5754d1574f5c61a7eac.html#a9a54ebfb0c00b5754d1574f5c61a7eac">mRequestSource</a> || !<a class="code hl_variable" href="../../dc/d00/classfl_1_1_server_a861f60fb3689154387d6445db46d716e.html#a861f60fb3689154387d6445db46d716e">mRequestHandler</a>) {</div>
-<div class="line"><span class="lineno">   40</span>        <span class="keywordflow">return</span> 0;</div>
-<div class="line"><span class="lineno">   41</span>    }</div>
-<div class="line"><span class="lineno">   42</span> </div>
-<div class="line"><span class="lineno">   43</span>    <span class="keywordtype">size_t</span> processed = 0;</div>
-<div class="line"><span class="lineno">   44</span> </div>
-<div class="line"><span class="lineno">   45</span>    <span class="comment">// Pull JSON-RPC requests from source until none available</span></div>
-<div class="line"><span class="lineno">   46</span>    <span class="keywordflow">while</span> (<span class="keyword">auto</span> optRequest = <a class="code hl_variable" href="../../dc/d00/classfl_1_1_server_a9a54ebfb0c00b5754d1574f5c61a7eac.html#a9a54ebfb0c00b5754d1574f5c61a7eac">mRequestSource</a>()) {</div>
-<div class="line"><span class="lineno">   47</span>        fl::json request = <a class="code hl_function" href="../../da/d3c/namespacefl_1_1fl_a14315b21314f12a4c40dde841fcc4c8a.html#a14315b21314f12a4c40dde841fcc4c8a">fl::move</a>(*optRequest);</div>
-<div class="line"><span class="lineno">   48</span> </div>
-<div class="line"><span class="lineno">   49</span>        <span class="comment">// Process request through handler</span></div>
-<div class="line"><span class="lineno">   50</span>        fl::json <a class="code hl_variable" href="../../d8/d94/namespacetest__quick_a00071f2b3e01fb8d2b4e70970ed2d6ce.html#a00071f2b3e01fb8d2b4e70970ed2d6ce">response</a> = <a class="code hl_variable" href="../../dc/d00/classfl_1_1_server_a861f60fb3689154387d6445db46d716e.html#a861f60fb3689154387d6445db46d716e">mRequestHandler</a>(request);</div>
-<div class="line"><span class="lineno">   51</span> </div>
-<div class="line"><span class="lineno">   52</span>        <span class="comment">// Queue response (skip scheduled acknowledgments and async skip markers)</span></div>
-<div class="line"><span class="lineno">   53</span>        <span class="keywordtype">bool</span> isScheduledAck = <a class="code hl_variable" href="../../d8/d94/namespacetest__quick_a00071f2b3e01fb8d2b4e70970ed2d6ce.html#a00071f2b3e01fb8d2b4e70970ed2d6ce">response</a>.contains(<span class="stringliteral">&quot;scheduled&quot;</span>) &amp;&amp; <a class="code hl_variable" href="../../d8/d94/namespacetest__quick_a00071f2b3e01fb8d2b4e70970ed2d6ce.html#a00071f2b3e01fb8d2b4e70970ed2d6ce">response</a>[<span class="stringliteral">&quot;scheduled&quot;</span>].as_bool().value_or(<span class="keyword">false</span>);</div>
-<div class="line"><span class="lineno">   54</span>        <span class="keywordtype">bool</span> isAsyncSkip = <a class="code hl_variable" href="../../d8/d94/namespacetest__quick_a00071f2b3e01fb8d2b4e70970ed2d6ce.html#a00071f2b3e01fb8d2b4e70970ed2d6ce">response</a>.contains(<span class="stringliteral">&quot;__skip&quot;</span>) &amp;&amp; <a class="code hl_variable" href="../../d8/d94/namespacetest__quick_a00071f2b3e01fb8d2b4e70970ed2d6ce.html#a00071f2b3e01fb8d2b4e70970ed2d6ce">response</a>[<span class="stringliteral">&quot;__skip&quot;</span>].as_bool().value_or(<span class="keyword">false</span>);</div>
-<div class="line"><span class="lineno">   55</span>        <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../d8/d94/namespacetest__quick_a00071f2b3e01fb8d2b4e70970ed2d6ce.html#a00071f2b3e01fb8d2b4e70970ed2d6ce">response</a>.is_null() &amp;&amp; !isScheduledAck &amp;&amp; !isAsyncSkip) {</div>
-<div class="line"><span class="lineno">   56</span>            <a class="code hl_variable" href="../../dc/d00/classfl_1_1_server_a31be41547313a58aaa29944c8bc410de.html#a31be41547313a58aaa29944c8bc410de">mOutgoingQueue</a>.push_back(<a class="code hl_function" href="../../da/d3c/namespacefl_1_1fl_a14315b21314f12a4c40dde841fcc4c8a.html#a14315b21314f12a4c40dde841fcc4c8a">fl::move</a>(response));</div>
-<div class="line"><span class="lineno">   57</span>        }</div>
-<div class="line"><span class="lineno">   58</span> </div>
-<div class="line"><span class="lineno">   59</span>        processed++;</div>
-<div class="line"><span class="lineno">   60</span>    }</div>
-<div class="line"><span class="lineno">   61</span> </div>
-<div class="line"><span class="lineno">   62</span>    <span class="keywordflow">return</span> processed;</div>
-<div class="line"><span class="lineno">   63</span>}</div>
-<div class="ttc" id="aclassfl_1_1_server_a31be41547313a58aaa29944c8bc410de_html_a31be41547313a58aaa29944c8bc410de"><div class="ttname"><a href="../../dc/d00/classfl_1_1_server_a31be41547313a58aaa29944c8bc410de.html#a31be41547313a58aaa29944c8bc410de">fl::Server::mOutgoingQueue</a></div><div class="ttdeci">fl::vector&lt; fl::json &gt; mOutgoingQueue</div><div class="ttdef"><b>Definition</b> <a href="../../da/dad/remote_2rpc_2server_8h_source.html#l00091">server.h:91</a></div></div>
-<div class="ttc" id="aclassfl_1_1_server_a861f60fb3689154387d6445db46d716e_html_a861f60fb3689154387d6445db46d716e"><div class="ttname"><a href="../../dc/d00/classfl_1_1_server_a861f60fb3689154387d6445db46d716e.html#a861f60fb3689154387d6445db46d716e">fl::Server::mRequestHandler</a></div><div class="ttdeci">RequestHandler mRequestHandler</div><div class="ttdef"><b>Definition</b> <a href="../../da/dad/remote_2rpc_2server_8h_source.html#l00090">server.h:90</a></div></div>
-<div class="ttc" id="aclassfl_1_1_server_a9a54ebfb0c00b5754d1574f5c61a7eac_html_a9a54ebfb0c00b5754d1574f5c61a7eac"><div class="ttname"><a href="../../dc/d00/classfl_1_1_server_a9a54ebfb0c00b5754d1574f5c61a7eac.html#a9a54ebfb0c00b5754d1574f5c61a7eac">fl::Server::mRequestSource</a></div><div class="ttdeci">RequestSource mRequestSource</div><div class="ttdef"><b>Definition</b> <a href="../../da/dad/remote_2rpc_2server_8h_source.html#l00088">server.h:88</a></div></div>
-<div class="ttc" id="anamespacefl_1_1fl_a14315b21314f12a4c40dde841fcc4c8a_html_a14315b21314f12a4c40dde841fcc4c8a"><div class="ttname"><a href="../../da/d3c/namespacefl_1_1fl_a14315b21314f12a4c40dde841fcc4c8a.html#a14315b21314f12a4c40dde841fcc4c8a">fl::fl::move</a></div><div class="ttdeci">constexpr remove_reference&lt; T &gt;::type &amp;&amp; move(T &amp;&amp;t) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/d96/s16x16x4_8h_source.html#l00028">s16x16x4.h:28</a></div></div>
-<div class="ttc" id="anamespacetest__quick_a00071f2b3e01fb8d2b4e70970ed2d6ce_html_a00071f2b3e01fb8d2b4e70970ed2d6ce"><div class="ttname"><a href="../../d8/d94/namespacetest__quick_a00071f2b3e01fb8d2b4e70970ed2d6ce.html#a00071f2b3e01fb8d2b4e70970ed2d6ce">test_quick.response</a></div><div class="ttdeci">response</div><div class="ttdef"><b>Definition</b> <a href="../../d8/def/test__quick_8py_source.html#l00031">test_quick.py:31</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../da/d73/remote_2rpc_2server_8cpp_8hpp_source.html#l00046">46</a> of file <a class="el" href="../../da/d73/remote_2rpc_2server_8cpp_8hpp_source.html">server.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   46</span>                    {</div>
+<div class="line"><span class="lineno">   47</span>    <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../dc/d00/classfl_1_1_server_a9a54ebfb0c00b5754d1574f5c61a7eac.html#a9a54ebfb0c00b5754d1574f5c61a7eac">mRequestSource</a> || !<a class="code hl_variable" href="../../dc/d00/classfl_1_1_server_a861f60fb3689154387d6445db46d716e.html#a861f60fb3689154387d6445db46d716e">mRequestHandler</a>) {</div>
+<div class="line"><span class="lineno">   48</span>        <span class="keywordflow">return</span> 0;</div>
+<div class="line"><span class="lineno">   49</span>    }</div>
+<div class="line"><span class="lineno">   50</span> </div>
+<div class="line"><span class="lineno">   51</span>    <span class="keywordtype">size_t</span> processed = 0;</div>
+<div class="line"><span class="lineno">   52</span> </div>
+<div class="line"><span class="lineno">   53</span>    <span class="comment">// Pull JSON-RPC requests from source until none available</span></div>
+<div class="line"><span class="lineno">   54</span>    <span class="keywordflow">while</span> (<span class="keyword">auto</span> optRequest = <a class="code hl_variable" href="../../dc/d00/classfl_1_1_server_a9a54ebfb0c00b5754d1574f5c61a7eac.html#a9a54ebfb0c00b5754d1574f5c61a7eac">mRequestSource</a>()) {</div>
+<div class="line"><span class="lineno">   55</span>        fl::json request = <a class="code hl_function" href="../../d4/d36/namespacefl_a0c8a67e528dcd96ee58216754a07a733.html#a0c8a67e528dcd96ee58216754a07a733">fl::move</a>(*optRequest);</div>
+<div class="line"><span class="lineno">   56</span> </div>
+<div class="line"><span class="lineno">   57</span>        <span class="comment">// Process request through handler</span></div>
+<div class="line"><span class="lineno">   58</span>        fl::json <a class="code hl_variable" href="../../d8/d94/namespacetest__quick_a00071f2b3e01fb8d2b4e70970ed2d6ce.html#a00071f2b3e01fb8d2b4e70970ed2d6ce">response</a> = <a class="code hl_variable" href="../../dc/d00/classfl_1_1_server_a861f60fb3689154387d6445db46d716e.html#a861f60fb3689154387d6445db46d716e">mRequestHandler</a>(request);</div>
+<div class="line"><span class="lineno">   59</span> </div>
+<div class="line"><span class="lineno">   60</span>        <span class="comment">// Queue response (skip scheduled acknowledgments and async skip markers).</span></div>
+<div class="line"><span class="lineno">   61</span>        <span class="comment">// `noEnqueue` is the new envelope marker (#3228); accept legacy `__skip`</span></div>
+<div class="line"><span class="lineno">   62</span>        <span class="comment">// for one release of back-compat.</span></div>
+<div class="line"><span class="lineno">   63</span>        <span class="keywordtype">bool</span> isScheduledAck = <a class="code hl_variable" href="../../d8/d94/namespacetest__quick_a00071f2b3e01fb8d2b4e70970ed2d6ce.html#a00071f2b3e01fb8d2b4e70970ed2d6ce">response</a>.contains(<span class="stringliteral">&quot;scheduled&quot;</span>) &amp;&amp; <a class="code hl_variable" href="../../d8/d94/namespacetest__quick_a00071f2b3e01fb8d2b4e70970ed2d6ce.html#a00071f2b3e01fb8d2b4e70970ed2d6ce">response</a>[<span class="stringliteral">&quot;scheduled&quot;</span>].as_bool().value_or(<span class="keyword">false</span>);</div>
+<div class="line"><span class="lineno">   64</span>        <span class="keywordtype">bool</span> isAsyncSkip = (<a class="code hl_variable" href="../../d8/d94/namespacetest__quick_a00071f2b3e01fb8d2b4e70970ed2d6ce.html#a00071f2b3e01fb8d2b4e70970ed2d6ce">response</a>.contains(<span class="stringliteral">&quot;noEnqueue&quot;</span>) &amp;&amp; response[<span class="stringliteral">&quot;noEnqueue&quot;</span>].as_bool().value_or(<span class="keyword">false</span>))</div>
+<div class="line"><span class="lineno">   65</span>                       || (<a class="code hl_variable" href="../../d8/d94/namespacetest__quick_a00071f2b3e01fb8d2b4e70970ed2d6ce.html#a00071f2b3e01fb8d2b4e70970ed2d6ce">response</a>.contains(<span class="stringliteral">&quot;__skip&quot;</span>) &amp;&amp; response[<span class="stringliteral">&quot;__skip&quot;</span>].as_bool().value_or(<span class="keyword">false</span>));</div>
+<div class="line"><span class="lineno">   66</span>        <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../d8/d94/namespacetest__quick_a00071f2b3e01fb8d2b4e70970ed2d6ce.html#a00071f2b3e01fb8d2b4e70970ed2d6ce">response</a>.is_null() &amp;&amp; !isScheduledAck &amp;&amp; !isAsyncSkip) {</div>
+<div class="line"><span class="lineno">   67</span>            <a class="code hl_variable" href="../../dc/d00/classfl_1_1_server_a31be41547313a58aaa29944c8bc410de.html#a31be41547313a58aaa29944c8bc410de">mOutgoingQueue</a>.push_back(<a class="code hl_function" href="../../d4/d36/namespacefl_a0c8a67e528dcd96ee58216754a07a733.html#a0c8a67e528dcd96ee58216754a07a733">fl::move</a>(response));</div>
+<div class="line"><span class="lineno">   68</span>        }</div>
+<div class="line"><span class="lineno">   69</span> </div>
+<div class="line"><span class="lineno">   70</span>        processed++;</div>
+<div class="line"><span class="lineno">   71</span>    }</div>
+<div class="line"><span class="lineno">   72</span> </div>
+<div class="line"><span class="lineno">   73</span>    <span class="keywordflow">return</span> processed;</div>
+<div class="line"><span class="lineno">   74</span>}</div>
+<div class="ttc" id="aclassfl_1_1_server_a31be41547313a58aaa29944c8bc410de_html_a31be41547313a58aaa29944c8bc410de"><div class="ttname"><a href="../../dc/d00/classfl_1_1_server_a31be41547313a58aaa29944c8bc410de.html#a31be41547313a58aaa29944c8bc410de">fl::Server::mOutgoingQueue</a></div><div class="ttdeci">fl::vector&lt; fl::json &gt; mOutgoingQueue</div><div class="ttdef"><b>Definition</b> <a href="../../da/dad/remote_2rpc_2server_8h_source.html#l00104">server.h:104</a></div></div>
+<div class="ttc" id="aclassfl_1_1_server_a861f60fb3689154387d6445db46d716e_html_a861f60fb3689154387d6445db46d716e"><div class="ttname"><a href="../../dc/d00/classfl_1_1_server_a861f60fb3689154387d6445db46d716e.html#a861f60fb3689154387d6445db46d716e">fl::Server::mRequestHandler</a></div><div class="ttdeci">RequestHandler mRequestHandler</div><div class="ttdef"><b>Definition</b> <a href="../../da/dad/remote_2rpc_2server_8h_source.html#l00100">server.h:100</a></div></div>
+<div class="ttc" id="aclassfl_1_1_server_a9a54ebfb0c00b5754d1574f5c61a7eac_html_a9a54ebfb0c00b5754d1574f5c61a7eac"><div class="ttname"><a href="../../dc/d00/classfl_1_1_server_a9a54ebfb0c00b5754d1574f5c61a7eac.html#a9a54ebfb0c00b5754d1574f5c61a7eac">fl::Server::mRequestSource</a></div><div class="ttdeci">RequestSource mRequestSource</div><div class="ttdef"><b>Definition</b> <a href="../../da/dad/remote_2rpc_2server_8h_source.html#l00098">server.h:98</a></div></div>
+<div class="ttc" id="anamespacefl_a0c8a67e528dcd96ee58216754a07a733_html_a0c8a67e528dcd96ee58216754a07a733"><div class="ttname"><a href="../../d4/d36/namespacefl_a0c8a67e528dcd96ee58216754a07a733.html#a0c8a67e528dcd96ee58216754a07a733">fl::move</a></div><div class="ttdeci">constexpr remove_reference&lt; T &gt;::type &amp;&amp; move(T &amp;&amp;t) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d83/move_8h_source.html#l00028">move.h:28</a></div></div>
+<div class="ttc" id="anamespacetest__quick_a00071f2b3e01fb8d2b4e70970ed2d6ce_html_a00071f2b3e01fb8d2b4e70970ed2d6ce"><div class="ttname"><a href="../../d8/d94/namespacetest__quick_a00071f2b3e01fb8d2b4e70970ed2d6ce.html#a00071f2b3e01fb8d2b4e70970ed2d6ce">test_quick.response</a></div><div class="ttdeci">response</div><div class="ttdef"><b>Definition</b> <a href="../../d8/def/test__quick_8py_source.html#l00036">test_quick.py:36</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../da/dad/remote_2rpc_2server_8h_source.html#l00091">mOutgoingQueue</a>, <a class="el" href="../../df/d96/s16x16x4_8h_source.html#l00028">fl::fl::move()</a>, <a class="el" href="../../da/dad/remote_2rpc_2server_8h_source.html#l00090">mRequestHandler</a>, and <a class="el" href="../../da/dad/remote_2rpc_2server_8h_source.html#l00088">mRequestSource</a>.</p>
+<p class="reference">References <a class="el" href="../../da/dad/remote_2rpc_2server_8h_source.html#l00104">mOutgoingQueue</a>, <a class="el" href="../../d9/d83/move_8h_source.html#l00028">fl::move()</a>, <a class="el" href="../../da/dad/remote_2rpc_2server_8h_source.html#l00100">mRequestHandler</a>, and <a class="el" href="../../da/dad/remote_2rpc_2server_8h_source.html#l00098">mRequestSource</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dc/d00/classfl_1_1_server_a100615100d89f2a4e725a2525405ddfe.html#a100615100d89f2a4e725a2525405ddfe">operator=()</a>, <a class="el" href="../../db/d04/remote_8cpp_8hpp_source.html#l00272">fl::Remote::update()</a>, and <a class="el" href="../../da/d73/remote_2rpc_2server_8cpp_8hpp_source.html#l00032">update()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dc/d00/classfl_1_1_server_a4c07bac803c0e25c85c5b29209b8be52.html#a4c07bac803c0e25c85c5b29209b8be52">operator=()</a>, <a class="el" href="../../db/d04/remote_8cpp_8hpp_source.html#l00347">fl::Remote::update()</a>, and <a class="el" href="../../da/d73/remote_2rpc_2server_8cpp_8hpp_source.html#l00040">update()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../dc/d00/classfl_1_1_server_a4b8b9821566f8389e43734b90ae36798_a4b8b9821566f8389e43734b90ae36798_cgraph.svg" width="262" height="36"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../dc/d00/classfl_1_1_server_a4b8b9821566f8389e43734b90ae36798_a4b8b9821566f8389e43734b90ae36798_cgraph.svg" width="246" height="36"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 <div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
 <div id="dynsection-1-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-1-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../dc/d00/classfl_1_1_server_a4b8b9821566f8389e43734b90ae36798_a4b8b9821566f8389e43734b90ae36798_icgraph.svg" width="584" height="147"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../dc/d00/classfl_1_1_server_a4b8b9821566f8389e43734b90ae36798_a4b8b9821566f8389e43734b90ae36798_icgraph.svg" width="100%" height="383"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 
 </div>
@@ -177,7 +180,7 @@ $(function(){initNavTree('dc/d00/classfl_1_1_server_a4b8b9821566f8389e43734b90ae
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../dc/d00/classfl_1_1_server.html">Server</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:10 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

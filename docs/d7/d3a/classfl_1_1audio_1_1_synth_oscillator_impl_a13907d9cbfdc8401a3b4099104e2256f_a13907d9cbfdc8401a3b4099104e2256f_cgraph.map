@@ -1,5 +1,9 @@
 <map id="fl::audio::SynthOscillatorImpl::generateSamples" name="fl::audio::SynthOscillatorImpl::generateSamples">
-<area shape="rect" id="Node000001" title="Generate audio samples (span version)" alt="" coords="5,5,187,45"/>
-<area shape="rect" id="Node000002" href="$d7/d3a/classfl_1_1audio_1_1_synth_oscillator_impl_a67fba92fe86b8204924ad0e25d2fe176.html#a67fba92fe86b8204924ad0e25d2fe176" title="Generate audio samples." alt="" coords="235,5,416,45"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="187,23,221,23,221,28,187,28"/>
+<area shape="rect" id="Node000001" title="Generate audio samples (span version)" alt="" coords="5,55,187,95"/>
+<area shape="rect" id="Node000002" href="$d0/d08/classfl_1_1span_a45157f503f151e36c679f688f10e3511.html#a45157f503f151e36c679f688f10e3511" title=" " alt="" coords="272,5,379,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="176,53,260,31,261,37,177,58"/>
+<area shape="rect" id="Node000003" href="$d7/d3a/classfl_1_1audio_1_1_synth_oscillator_impl_a67fba92fe86b8204924ad0e25d2fe176.html#a67fba92fe86b8204924ad0e25d2fe176" title="Generate audio samples." alt="" coords="235,55,416,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="187,73,221,73,221,78,187,78"/>
+<area shape="rect" id="Node000004" href="$d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa" title=" " alt="" coords="274,120,377,145"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="177,93,261,114,260,119,176,98"/>
 </map>

@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -123,7 +123,7 @@ Files</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p>Educational tutorial for FastLED's HTTP fetch API (<code>fl::fetch</code>) with explicit types for learning.</p>
-<h1><a class="anchor" id="autotoc_md794"></a>
+<h1><a class="anchor" id="autotoc_md817"></a>
 Overview</h1>
 <p>This comprehensive tutorial demonstrates <b>4 different async approaches</b> for HTTP networking in FastLED:</p>
 <ol type="1">
@@ -133,7 +133,7 @@ Overview</h1>
 <li><b>JSON Await</b> - Await pattern with JSON response handling</li>
 </ol>
 <p>The example <b>cycles through all 4 approaches</b> every 10 seconds with LED feedback to help you understand different async patterns.</p>
-<h1><a class="anchor" id="autotoc_md795"></a>
+<h1><a class="anchor" id="autotoc_md818"></a>
 Educational Focus</h1>
 <p><b>All types are explicitly declared</b> (no <code>auto</code>) to help you understand FastLED's async type system:</p>
 <ul>
@@ -144,7 +144,7 @@ Educational Focus</h1>
 <li><code><a class="el" href="d4/d36/namespacefl_aaed350b21465df8c68244fc4d77fa693.html#aaed350b21465df8c68244fc4d77fa693a902b0d55fddef6f8d651fe1035b7d4bd">fl::Error</a></code> - Error information</li>
 <li><code><a class="el" href="de/d40/classfl_1_1json.html">fl::json</a></code> - JSON parsing with safe access</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md796"></a>
+<h1><a class="anchor" id="autotoc_md819"></a>
 LED Status Indicators</h1>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -164,20 +164,20 @@ LED Status Indicators</h1>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">Orange   </td><td class="markdownTableBodyNone">JSON Await   </td><td class="markdownTableBodyNone">Non-JSON response   </td></tr>
 </table>
-<h1><a class="anchor" id="autotoc_md797"></a>
+<h1><a class="anchor" id="autotoc_md820"></a>
 Usage</h1>
-<h2><a class="anchor" id="autotoc_md798"></a>
+<h2><a class="anchor" id="autotoc_md821"></a>
 1. Compile the Tutorial</h2>
 <div class="fragment"><div class="line"># For WASM (recommended - full networking)</div>
 <div class="line">bash compile wasm --examples Client</div>
 <div class="line"> </div>
 <div class="line"># For POSIX (host-based testing)</div>
 <div class="line">bash compile posix --examples Client</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md799"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md822"></a>
 2. Run the Tutorial</h2>
 <p><b>WASM (browser):</b> </p><div class="fragment"><div class="line">bash run wasm Client</div>
 </div><!-- fragment --><p><b>POSIX (console):</b> </p><div class="fragment"><div class="line">.build/meson-quick/examples/Client.exe</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md800"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md823"></a>
 3. With Local Test Server (Optional)</h2>
 <p>For testing without internet connection:</p>
 <div class="fragment"><div class="line"># Terminal 1: Start local test server</div>
@@ -185,27 +185,27 @@ Usage</h1>
 <div class="line"> </div>
 <div class="line"># Terminal 2: Modify tutorial to use localhost:8081</div>
 <div class="line"># (Edit ClientReal.h to change URLs from fastled.io/httpbin.org to localhost:8081)</div>
-</div><!-- fragment --><h1><a class="anchor" id="autotoc_md801"></a>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md824"></a>
 Async Approaches Explained</h1>
-<h2><a class="anchor" id="autotoc_md802"></a>
+<h2><a class="anchor" id="autotoc_md825"></a>
 APPROACH 1: Promise-based (.then/.catch)</h2>
 <p>JavaScript-like async pattern with method chaining:</p>
 <div class="fragment"><div class="line">fl::promise&lt;fl::response&gt; promise = fl::fetch_get(<span class="stringliteral">&quot;http://fastled.io&quot;</span>);</div>
 <div class="line">promise.then([](<span class="keyword">const</span> fl::response&amp; response) {</div>
 <div class="line">    <span class="keywordflow">if</span> (response.ok()) {</div>
-<div class="line">        <a class="code hl_define" href="d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;Success: &quot;</span> &lt;&lt; response.text());</div>
+<div class="line">        <a class="code hl_define" href="d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;Success: &quot;</span> &lt;&lt; response.text());</div>
 <div class="line">    }</div>
 <div class="line">}).catch_([](<span class="keyword">const</span> <a class="code hl_enumvalue" href="d4/d36/namespacefl_aaed350b21465df8c68244fc4d77fa693.html#aaed350b21465df8c68244fc4d77fa693a902b0d55fddef6f8d651fe1035b7d4bd">fl::Error</a>&amp; error) {</div>
-<div class="line">    <a class="code hl_define" href="d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;Error: &quot;</span> &lt;&lt; error.message);</div>
+<div class="line">    <a class="code hl_define" href="d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;Error: &quot;</span> &lt;&lt; error.message);</div>
 <div class="line">});</div>
-<div class="ttc" id="alog_8h_a868b194fdb2234182e76042d9fde3062_html_a868b194fdb2234182e76042d9fde3062"><div class="ttname"><a href="d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a></div><div class="ttdeci">#define FL_WARN(X)</div><div class="ttdef"><b>Definition</b> <a href="d7/d7f/log_8h_source.html#l00276">log.h:276</a></div></div>
+<div class="ttc" id="alog_8h_a4804912fba6eed63e1afd84b8768aced_html_a4804912fba6eed63e1afd84b8768aced"><div class="ttname"><a href="d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a></div><div class="ttdeci">#define FL_WARN(...)</div><div class="ttdef"><b>Definition</b> <a href="d7/d7f/log_8h_source.html#l00440">log.h:440</a></div></div>
 <div class="ttc" id="anamespacefl_aaed350b21465df8c68244fc4d77fa693_html_aaed350b21465df8c68244fc4d77fa693a902b0d55fddef6f8d651fe1035b7d4bd"><div class="ttname"><a href="d4/d36/namespacefl_aaed350b21465df8c68244fc4d77fa693.html#aaed350b21465df8c68244fc4d77fa693a902b0d55fddef6f8d651fe1035b7d4bd">fl::DecodeResult::Error</a></div><div class="ttdeci">@ Error</div><div class="ttdef"><b>Definition</b> <a href="d0/dfc/idecoder_8h_source.html#l00022">idecoder.h:22</a></div></div>
 </div><!-- fragment --><p><b>When to use:</b></p><ul>
 <li>✅ Non-blocking UI/LED updates during request</li>
 <li>✅ Multiple parallel requests</li>
 <li>✅ Event-driven architectures</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md803"></a>
+<h2><a class="anchor" id="autotoc_md826"></a>
 APPROACH 2: Await-based (fl::await_top_level)</h2>
 <p>Synchronous-style code that blocks until completion:</p>
 <div class="fragment"><div class="line">fl::promise&lt;fl::response&gt; promise = fl::fetch_get(<span class="stringliteral">&quot;http://fastled.io&quot;</span>);</div>
@@ -213,9 +213,9 @@ APPROACH 2: Await-based (fl::await_top_level)</h2>
 <div class="line"> </div>
 <div class="line"><span class="keywordflow">if</span> (result.ok()) {</div>
 <div class="line">    <span class="keyword">const</span> fl::response&amp; response = result.value();</div>
-<div class="line">    <a class="code hl_define" href="d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;Success: &quot;</span> &lt;&lt; response.text());</div>
+<div class="line">    <a class="code hl_define" href="d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;Success: &quot;</span> &lt;&lt; response.text());</div>
 <div class="line">} <span class="keywordflow">else</span> {</div>
-<div class="line">    <a class="code hl_define" href="d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;Error: &quot;</span> &lt;&lt; result.error_message());</div>
+<div class="line">    <a class="code hl_define" href="d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;Error: &quot;</span> &lt;&lt; result.error_message());</div>
 <div class="line">}</div>
 </div><!-- fragment --><p><b>When to use:</b></p><ul>
 <li>✅ Simple request/response patterns</li>
@@ -223,27 +223,27 @@ APPROACH 2: Await-based (fl::await_top_level)</h2>
 <li>✅ Arduino <code><a class="el" href="d5/d17/_analog_output_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f">loop()</a></code> context (safe to block)</li>
 </ul>
 <p><b>⚠️ CRITICAL:</b> <code>await_top_level()</code> blocks execution - ONLY use in <code><a class="el" href="d5/d17/_analog_output_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f">loop()</a></code>, NEVER in callbacks!</p>
-<h2><a class="anchor" id="autotoc_md804"></a>
+<h2><a class="anchor" id="autotoc_md827"></a>
 APPROACH 3: JSON Promise</h2>
 <p>Promise pattern with automatic JSON parsing:</p>
 <div class="fragment"><div class="line">fl::fetch_get(<span class="stringliteral">&quot;https://httpbin.org/json&quot;</span>).then([](<span class="keyword">const</span> fl::response&amp; response) {</div>
 <div class="line">    <span class="keywordflow">if</span> (response.is_json()) {</div>
 <div class="line">        <a class="code hl_class" href="de/d40/classfl_1_1json.html">fl::json</a> data = response.json();</div>
 <div class="line">        <a class="code hl_class" href="d2/db2/classfl_1_1string.html">fl::string</a> author = data[<span class="stringliteral">&quot;slideshow&quot;</span>][<span class="stringliteral">&quot;author&quot;</span>] | <a class="code hl_class" href="d2/db2/classfl_1_1string.html">fl::string</a>(<span class="stringliteral">&quot;unknown&quot;</span>);</div>
-<div class="line">        <a class="code hl_define" href="d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;Author: &quot;</span> &lt;&lt; author);</div>
+<div class="line">        <a class="code hl_define" href="d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;Author: &quot;</span> &lt;&lt; author);</div>
 <div class="line">    }</div>
 <div class="line">}).catch_([](<span class="keyword">const</span> <a class="code hl_enumvalue" href="d4/d36/namespacefl_aaed350b21465df8c68244fc4d77fa693.html#aaed350b21465df8c68244fc4d77fa693a902b0d55fddef6f8d651fe1035b7d4bd">fl::Error</a>&amp; error) {</div>
-<div class="line">    <a class="code hl_define" href="d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;Error: &quot;</span> &lt;&lt; error.message);</div>
+<div class="line">    <a class="code hl_define" href="d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;Error: &quot;</span> &lt;&lt; error.message);</div>
 <div class="line">});</div>
-<div class="ttc" id="aclassfl_1_1json_html"><div class="ttname"><a href="de/d40/classfl_1_1json.html">fl::json</a></div><div class="ttdef"><b>Definition</b> <a href="d4/d05/json_8h_source.html#l00128">json.h:128</a></div></div>
-<div class="ttc" id="aclassfl_1_1string_html"><div class="ttname"><a href="d2/db2/classfl_1_1string.html">fl::string</a></div><div class="ttdef"><b>Definition</b> <a href="da/d66/string_8h_source.html#l00193">string.h:193</a></div></div>
+<div class="ttc" id="aclassfl_1_1json_html"><div class="ttname"><a href="de/d40/classfl_1_1json.html">fl::json</a></div><div class="ttdef"><b>Definition</b> <a href="d4/d05/json_8h_source.html#l00261">json.h:261</a></div></div>
+<div class="ttc" id="aclassfl_1_1string_html"><div class="ttname"><a href="d2/db2/classfl_1_1string.html">fl::string</a></div><div class="ttdef"><b>Definition</b> <a href="da/d66/string_8h_source.html#l00202">string.h:202</a></div></div>
 </div><!-- fragment --><p><b>Features:</b></p><ul>
 <li>Automatic Content-Type detection</li>
 <li>Safe access with default values (<code>|</code> operator)</li>
 <li>Nested object/array access</li>
 <li>No manual parsing needed</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md805"></a>
+<h2><a class="anchor" id="autotoc_md828"></a>
 APPROACH 4: JSON Await</h2>
 <p>Await pattern with JSON responses:</p>
 <div class="fragment"><div class="line">fl::promise&lt;fl::response&gt; promise = fl::fetch_get(<span class="stringliteral">&quot;https://httpbin.org/get&quot;</span>);</div>
@@ -252,16 +252,16 @@ APPROACH 4: JSON Await</h2>
 <div class="line"><span class="keywordflow">if</span> (result.ok() &amp;&amp; result.value().is_json()) {</div>
 <div class="line">    <a class="code hl_class" href="de/d40/classfl_1_1json.html">fl::json</a> data = result.value().json();</div>
 <div class="line">    <a class="code hl_class" href="d2/db2/classfl_1_1string.html">fl::string</a> origin = data[<span class="stringliteral">&quot;origin&quot;</span>] | <a class="code hl_class" href="d2/db2/classfl_1_1string.html">fl::string</a>(<span class="stringliteral">&quot;unknown&quot;</span>);</div>
-<div class="line">    <a class="code hl_define" href="d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;Origin: &quot;</span> &lt;&lt; origin);</div>
+<div class="line">    <a class="code hl_define" href="d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;Origin: &quot;</span> &lt;&lt; origin);</div>
 <div class="line">}</div>
 </div><!-- fragment --><p><b>Combines:</b></p><ul>
 <li>Synchronous-style code (await)</li>
 <li>Automatic JSON parsing</li>
 <li>Safe nested access</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md806"></a>
+<h1><a class="anchor" id="autotoc_md829"></a>
 API Reference</h1>
-<h2><a class="anchor" id="autotoc_md807"></a>
+<h2><a class="anchor" id="autotoc_md830"></a>
 fl::fetch_get(url, options)</h2>
 <p>Make HTTP GET request:</p>
 <div class="fragment"><div class="line"><span class="comment">// Simple GET</span></div>
@@ -271,7 +271,7 @@ fl::fetch_get(url, options)</h2>
 <div class="line">fl::fetch_options opts(<span class="stringliteral">&quot;&quot;</span>);</div>
 <div class="line">opts.timeout(5000).header(<span class="stringliteral">&quot;User-Agent&quot;</span>, <span class="stringliteral">&quot;FastLED&quot;</span>);</div>
 <div class="line">fl::promise&lt;fl::response&gt; promise = fl::fetch_get(<span class="stringliteral">&quot;http://example.com&quot;</span>, opts);</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md808"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md831"></a>
 fl::response</h2>
 <p>HTTP response object:</p>
 <p><b>Methods:</b></p><ul>
@@ -283,14 +283,14 @@ fl::response</h2>
 <li><code>bool is_json()</code> - Check if response is JSON</li>
 <li><code>optional&lt;string&gt; get_content_type()</code> - Get Content-Type header</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md809"></a>
+<h2><a class="anchor" id="autotoc_md832"></a>
 fl::promise&lt;T&gt;</h2>
 <p>Represents future value:</p>
 <p><b>Methods:</b></p><ul>
 <li><code>promise&lt;T&gt;&amp; then(callback)</code> - Success handler</li>
 <li><code>promise&lt;T&gt;&amp; catch_(callback)</code> - Error handler</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md810"></a>
+<h2><a class="anchor" id="autotoc_md833"></a>
 fl::promise_result&lt;T&gt;</h2>
 <p>Wraps success or error:</p>
 <p><b>Methods:</b></p><ul>
@@ -298,7 +298,7 @@ fl::promise_result&lt;T&gt;</h2>
 <li><code>const T&amp; value()</code> - Get success value (throws if error)</li>
 <li><code>const string&amp; error_message()</code> - Get error message</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md811"></a>
+<h2><a class="anchor" id="autotoc_md834"></a>
 fl::json</h2>
 <p>JSON object with safe access:</p>
 <p><b>Methods:</b></p><ul>
@@ -306,9 +306,9 @@ fl::json</h2>
 <li><code>T operator|(default)</code> - Get value or default</li>
 <li><code>bool contains(key)</code> - Check if key exists</li>
 <li><code>bool is_array()</code> - Check if JSON array</li>
-<li><code><a class="el" href="d7/d84/cstddef_8h_a1ed206c22241d418bcd1746517563727.html#a1ed206c22241d418bcd1746517563727">size_t</a> size()</code> - Array/object size</li>
+<li><code><a class="el" href="df/dd8/stdint_8h_ac27ddc68fd06b365a956040e5d9645f0.html#ac27ddc68fd06b365a956040e5d9645f0">size_t</a> size()</code> - Array/object size</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md812"></a>
+<h1><a class="anchor" id="autotoc_md835"></a>
 Tutorial Behavior</h1>
 <p>The example <b>automatically cycles</b> through all 4 approaches:</p>
 <div class="fragment"><div class="line">0-10s:  Approach 1 (Promise)        → Green LEDs on success</div>
@@ -317,7 +317,7 @@ Tutorial Behavior</h1>
 <div class="line">30-40s: Approach 4 (JSON Await)     → Cyan LEDs on success</div>
 <div class="line">40s+:   Repeats from Approach 1</div>
 </div><!-- fragment --><p>Watch the serial output and LED colors to understand each approach!</p>
-<h1><a class="anchor" id="autotoc_md813"></a>
+<h1><a class="anchor" id="autotoc_md836"></a>
 Platform Support</h1>
 <ul>
 <li>✅ <b>WASM</b> - Full networking via browser fetch API</li>
@@ -326,22 +326,22 @@ Platform Support</h1>
 <li>⚠️ <b>ESP32</b> - Limited support (different networking API)</li>
 <li>❌ <b>Arduino</b> - No networking (mock responses only)</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md814"></a>
+<h1><a class="anchor" id="autotoc_md837"></a>
 Common Patterns</h1>
-<h2><a class="anchor" id="autotoc_md815"></a>
+<h2><a class="anchor" id="autotoc_md838"></a>
 Error Handling</h2>
 <p><b>Promise-based:</b> </p><div class="fragment"><div class="line">fetch_get(url).then([](<span class="keyword">const</span> fl::response&amp; r) {</div>
 <div class="line">    <span class="keywordflow">if</span> (!r.ok()) {</div>
-<div class="line">        <a class="code hl_define" href="d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;HTTP error: &quot;</span> &lt;&lt; r.status());</div>
+<div class="line">        <a class="code hl_define" href="d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;HTTP error: &quot;</span> &lt;&lt; r.status());</div>
 <div class="line">    }</div>
 <div class="line">}).catch_([](<span class="keyword">const</span> <a class="code hl_enumvalue" href="d4/d36/namespacefl_aaed350b21465df8c68244fc4d77fa693.html#aaed350b21465df8c68244fc4d77fa693a902b0d55fddef6f8d651fe1035b7d4bd">fl::Error</a>&amp; e) {</div>
-<div class="line">    <a class="code hl_define" href="d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;Network error: &quot;</span> &lt;&lt; e.message);</div>
+<div class="line">    <a class="code hl_define" href="d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;Network error: &quot;</span> &lt;&lt; e.message);</div>
 <div class="line">});</div>
 </div><!-- fragment --><p><b>Await-based:</b> </p><div class="fragment"><div class="line">fl::promise_result&lt;fl::response&gt; result = fl::await_top_level(fetch_get(url));</div>
 <div class="line"><span class="keywordflow">if</span> (!result.ok()) {</div>
-<div class="line">    <a class="code hl_define" href="d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;Request failed: &quot;</span> &lt;&lt; result.error_message());</div>
+<div class="line">    <a class="code hl_define" href="d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;Request failed: &quot;</span> &lt;&lt; result.error_message());</div>
 <div class="line">}</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md816"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md839"></a>
 Custom Headers</h2>
 <div class="fragment"><div class="line">fl::fetch_options opts(<span class="stringliteral">&quot;&quot;</span>);</div>
 <div class="line">opts.header(<span class="stringliteral">&quot;Authorization&quot;</span>, <span class="stringliteral">&quot;Bearer token123&quot;</span>)</div>
@@ -349,7 +349,7 @@ Custom Headers</h2>
 <div class="line">    .timeout(10000);  <span class="comment">// 10 seconds</span></div>
 <div class="line"> </div>
 <div class="line">fl::fetch_get(<span class="stringliteral">&quot;http://api.example.com/data&quot;</span>, opts);</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md817"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md840"></a>
 Multiple Parallel Requests</h2>
 <div class="fragment"><div class="line"><span class="comment">// Start multiple requests (non-blocking)</span></div>
 <div class="line">fl::fetch_get(<span class="stringliteral">&quot;http://api1.com/data&quot;</span>).then(handle_api1);</div>
@@ -357,13 +357,13 @@ Multiple Parallel Requests</h2>
 <div class="line">fl::fetch_get(<span class="stringliteral">&quot;http://api3.com/data&quot;</span>).then(handle_api3);</div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// All requests run in parallel!</span></div>
-</div><!-- fragment --><h1><a class="anchor" id="autotoc_md818"></a>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md841"></a>
 Troubleshooting</h1>
-<h2><a class="anchor" id="autotoc_md819"></a>
+<h2><a class="anchor" id="autotoc_md842"></a>
 WASM: "Network request failed"</h2>
 <p><b>Cause:</b> CORS policy blocking request</p>
 <p><b>Solution:</b> Use CORS-enabled endpoints or run local test server: </p><div class="fragment"><div class="line">uv run python examples/Asio/Client/test_server.py</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md820"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md843"></a>
 POSIX/Windows: "Connection refused"</h2>
 <p><b>Cause:</b> Firewall or no internet connection</p>
 <p><b>Solutions:</b></p><ol type="1">
@@ -371,11 +371,11 @@ POSIX/Windows: "Connection refused"</h2>
 <li>Use local test server (localhost bypasses firewall)</li>
 <li>Try different URL</li>
 </ol>
-<h2><a class="anchor" id="autotoc_md821"></a>
+<h2><a class="anchor" id="autotoc_md844"></a>
 "await_top_level blocked forever"</h2>
 <p><b>Cause:</b> Used <code>await_top_level()</code> in callback context</p>
 <p><b>Solution:</b> Only use <code>await_top_level()</code> in <code><a class="el" href="d5/d17/_analog_output_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f">loop()</a></code>, use <code>.then()</code> in callbacks</p>
-<h1><a class="anchor" id="autotoc_md822"></a>
+<h1><a class="anchor" id="autotoc_md845"></a>
 Next Steps</h1>
 <ul>
 <li><b>Validation Testing</b>: See <code><a class="el" href="d8/d5b/_client_validation_8ino.html" title="HTTP Client Validation Suite for FastLED fetch API.">ClientValidation.ino</a></code> for automated test suite</li>
@@ -383,7 +383,7 @@ Next Steps</h1>
 <li><b>Advanced</b>: Combine fetch with LED effects (e.g., weather-reactive LEDs)</li>
 <li><b>Production</b>: Add retry logic, caching, rate limiting</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md823"></a>
+<h1><a class="anchor" id="autotoc_md846"></a>
 See Also</h1>
 <ul>
 <li><b><a class="el" href="d8/d5b/_client_validation_8ino.html" title="HTTP Client Validation Suite for FastLED fetch API.">ClientValidation.ino</a></b> - Automated test suite for fetch API</li>
@@ -398,7 +398,7 @@ See Also</h1>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="dir_2e1cb969a724d6e5361be673f84b357b.html">Asio</a></li><li class="navelem"><a class="el" href="dir_8463951134ad125555f9924aaae8b52f.html">Client</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:12 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:13 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

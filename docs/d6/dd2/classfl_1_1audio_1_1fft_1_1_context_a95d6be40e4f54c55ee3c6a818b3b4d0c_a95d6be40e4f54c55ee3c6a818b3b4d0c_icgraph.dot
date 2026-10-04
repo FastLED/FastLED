@@ -14,10 +14,11 @@ digraph "fl::audio::fft::Context::buildLinearBinLut"
   Node1 -> Node4 [id="edge3_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node4 [id="Node000004",label="fl::audio::fft::Context\l::initLogRebin",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/dd2/classfl_1_1audio_1_1fft_1_1_context_aa18665fa11fd20a61dbaacdedf356546.html#aa18665fa11fd20a61dbaacdedf356546",tooltip=" "];
   Node4 -> Node3 [id="edge4_Node000004_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node1 -> Node5 [id="edge5_Node000001_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node5 [id="Node000005",label="fl::audio::fft::Context\l::initNaive",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/dd2/classfl_1_1audio_1_1fft_1_1_context_a93747331977300f307a45ddcfdbd4d7e.html#a93747331977300f307a45ddcfdbd4d7e",tooltip=" "];
+  Node4 -> Node5 [id="edge5_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::audio::fft::Context\l::initOctaveWise",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/dd2/classfl_1_1audio_1_1fft_1_1_context_ae1ac25f10559abec2b783581e1590fa4.html#ae1ac25f10559abec2b783581e1590fa4",tooltip=" "];
   Node5 -> Node3 [id="edge6_Node000005_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node1 -> Node6 [id="edge7_Node000001_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node6 [id="Node000006",label="fl::audio::fft::Context\l::initOctaveWise",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/dd2/classfl_1_1audio_1_1fft_1_1_context_ae1ac25f10559abec2b783581e1590fa4.html#ae1ac25f10559abec2b783581e1590fa4",tooltip=" "];
+  Node6 [id="Node000006",label="fl::audio::fft::Context\l::initNaive",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/dd2/classfl_1_1audio_1_1fft_1_1_context_a93747331977300f307a45ddcfdbd4d7e.html#a93747331977300f307a45ddcfdbd4d7e",tooltip=" "];
   Node6 -> Node3 [id="edge8_Node000006_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node5 [id="edge9_Node000001_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
 }

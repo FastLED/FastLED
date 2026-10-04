@@ -96,7 +96,7 @@ var sectionId = 'dynsection-1';
 <text text-anchor="start" x="440" y="-159.32" font-family="Helvetica,sans-Serif" font-size="10.00"> SPI_SPEED, fl::FiveBitGammaCorrection</text>
 <text text-anchor="start" x="440" y="-148.32" font-family="Helvetica,sans-Serif" font-size="10.00">Mode::kFiveBitGammaCorrectionMode</text>
 <text text-anchor="start" x="440" y="-137.32" font-family="Helvetica,sans-Serif" font-size="10.00">_BitShift, fl::u32(0x00000000), fl</text>
-<text text-anchor="middle" x="538" y="-126.32" font-family="Helvetica,sans-Serif" font-size="10.00">::u32(0x00000000)&gt;</text>
+<text text-anchor="middle" x="538" y="-126.32" font-family="Helvetica,sans-Serif" font-size="10.00">::u32(0xFFFFFFFF)&gt;</text>
 </a>
 </g>
 </g>
@@ -140,7 +140,7 @@ var sectionId = 'dynsection-1';
 <text text-anchor="start" x="456.5" y="-55.82" font-family="Helvetica,sans-Serif" font-size="10.00">FiveBitGammaCorrectionMode</text>
 <text text-anchor="start" x="456.5" y="-44.82" font-family="Helvetica,sans-Serif" font-size="10.00">::kFiveBitGammaCorrectionMode</text>
 <text text-anchor="start" x="456.5" y="-33.82" font-family="Helvetica,sans-Serif" font-size="10.00">_BitShift, fl::u32(0x00000000)</text>
-<text text-anchor="middle" x="538" y="-22.82" font-family="Helvetica,sans-Serif" font-size="10.00">, fl::u32(0x00000000)&gt;</text>
+<text text-anchor="middle" x="538" y="-22.82" font-family="Helvetica,sans-Serif" font-size="10.00">, fl::u32(0xFFFFFFFF)&gt;</text>
 </a>
 </g>
 </g>
@@ -178,7 +178,7 @@ var sectionId = 'dynsection-1';
 <text text-anchor="start" x="236" y="-157.32" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> fl::FiveBitGammaCorrectionMode</text>
 <text text-anchor="start" x="236" y="-146.32" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey">::kFiveBitGammaCorrectionMode</text>
 <text text-anchor="start" x="236" y="-135.32" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey">_BitShift, fl::u32(0x00000000)</text>
-<text text-anchor="middle" x="319" y="-124.32" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey">, fl::u32(0x00000000)&gt;</text>
+<text text-anchor="middle" x="319" y="-124.32" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey">, fl::u32(0xFFFFFFFF)&gt;</text>
 </g>
 <!-- Node13&#45;&gt;Node17 -->
 <g id="edge8_Node000017_Node000013" class="edge">
@@ -193,7 +193,7 @@ var sectionId = 'dynsection-1';
 <text text-anchor="start" x="224" y="-47.32" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey">, fl::FiveBitGammaCorrection</text>
 <text text-anchor="start" x="224" y="-36.32" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey">Mode::kFiveBitGammaCorrectionMode</text>
 <text text-anchor="start" x="224" y="-25.32" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey">_BitShift, fl::u32(0x00000000),</text>
-<text text-anchor="middle" x="319" y="-14.32" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> fl::u32(0x00000000)&gt;</text>
+<text text-anchor="middle" x="319" y="-14.32" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> fl::u32(0xFFFFFFFF)&gt;</text>
 </g>
 <!-- Node16 -->
 <g id="Node000016" class="node">

@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -115,39 +115,39 @@ $(function(){initNavTree('d4/d36/namespacefl_abe5657de2c328256b3c15a1388b793aa.h
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d2/de0/async__logger_8cpp_8hpp_source.html#l00203">203</a> of file <a class="el" href="../../d2/de0/async__logger_8cpp_8hpp_source.html">async_logger.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  203</span>                         {</div>
-<div class="line"><span class="lineno">  204</span>    <span class="comment">// Get background flush state</span></div>
-<div class="line"><span class="lineno">  205</span>    <a class="code hl_struct" href="../../de/dbe/structfl_1_1detail_1_1_background_flush_state.html">detail::BackgroundFlushState</a>&amp; <a class="code hl_variable" href="../../d9/dce/_client_validation_real_8h_adc6e5733fc3c22f0a7b2914188c49c90.html#adc6e5733fc3c22f0a7b2914188c49c90">state</a> = <a class="code hl_function" href="../../d9/d5b/classfl_1_1_singleton_a47fdc044003ec27f9e9833f7f5418e01.html#a47fdc044003ec27f9e9833f7f5418e01">Singleton&lt;detail::BackgroundFlushState&gt;::instance</a>();</div>
-<div class="line"><span class="lineno">  206</span> </div>
-<div class="line"><span class="lineno">  207</span>    <span class="comment">// Quick check - return immediately if no flush needed</span></div>
-<div class="line"><span class="lineno">  208</span>    <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../d9/dce/_client_validation_real_8h_adc6e5733fc3c22f0a7b2914188c49c90.html#adc6e5733fc3c22f0a7b2914188c49c90">state</a>.mNeedsFlush) {</div>
-<div class="line"><span class="lineno">  209</span>        <span class="keywordflow">return</span>;</div>
-<div class="line"><span class="lineno">  210</span>    }</div>
-<div class="line"><span class="lineno">  211</span> </div>
-<div class="line"><span class="lineno">  212</span>    <span class="comment">// Clear flag</span></div>
-<div class="line"><span class="lineno">  213</span>    <a class="code hl_variable" href="../../d9/dce/_client_validation_real_8h_adc6e5733fc3c22f0a7b2914188c49c90.html#adc6e5733fc3c22f0a7b2914188c49c90">state</a>.mNeedsFlush = <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">  214</span> </div>
-<div class="line"><span class="lineno">  215</span>    <span class="comment">// Flush all instantiated async loggers (uses ActiveLoggerRegistry)</span></div>
-<div class="line"><span class="lineno">  216</span>    <span class="comment">// Only flushes loggers that have been accessed via template functions</span></div>
-<div class="line"><span class="lineno">  217</span>    fl::size n = <a class="code hl_variable" href="../../d9/dce/_client_validation_real_8h_adc6e5733fc3c22f0a7b2914188c49c90.html#adc6e5733fc3c22f0a7b2914188c49c90">state</a>.mMessagesPerTick;</div>
-<div class="line"><span class="lineno">  218</span>    <a class="code hl_function" href="../../d5/d7b/structfl_1_1detail_1_1_active_logger_registry_a0ba7ba9bde21bfc28ef06006930c34f1.html#a0ba7ba9bde21bfc28ef06006930c34f1">detail::ActiveLoggerRegistry::instance</a>().<a class="code hl_function" href="../../d5/d7b/structfl_1_1detail_1_1_active_logger_registry_a428161495700eb0287637b406ec06ca3.html#a428161495700eb0287637b406ec06ca3">forEach</a>([n](AsyncLogger&amp; logger) {</div>
-<div class="line"><span class="lineno">  219</span>        logger.flushN(n);</div>
-<div class="line"><span class="lineno">  220</span>    });</div>
-<div class="line"><span class="lineno">  221</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../d2/de0/async__logger_8cpp_8hpp_source.html#l00205">205</a> of file <a class="el" href="../../d2/de0/async__logger_8cpp_8hpp_source.html">async_logger.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  205</span>                         {</div>
+<div class="line"><span class="lineno">  206</span>    <span class="comment">// Get background flush state</span></div>
+<div class="line"><span class="lineno">  207</span>    <a class="code hl_struct" href="../../de/dbe/structfl_1_1detail_1_1_background_flush_state.html">detail::BackgroundFlushState</a>&amp; <a class="code hl_variable" href="../../d9/dce/_client_validation_real_8h_adc6e5733fc3c22f0a7b2914188c49c90.html#adc6e5733fc3c22f0a7b2914188c49c90">state</a> = <a class="code hl_function" href="../../d9/d5b/classfl_1_1_singleton_ad5cb1b704e17768f75802673abb0ff75.html#ad5cb1b704e17768f75802673abb0ff75">Singleton&lt;detail::BackgroundFlushState&gt;::instance</a>();</div>
+<div class="line"><span class="lineno">  208</span> </div>
+<div class="line"><span class="lineno">  209</span>    <span class="comment">// Quick check - return immediately if no flush needed</span></div>
+<div class="line"><span class="lineno">  210</span>    <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../d9/dce/_client_validation_real_8h_adc6e5733fc3c22f0a7b2914188c49c90.html#adc6e5733fc3c22f0a7b2914188c49c90">state</a>.mNeedsFlush) {</div>
+<div class="line"><span class="lineno">  211</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">  212</span>    }</div>
+<div class="line"><span class="lineno">  213</span> </div>
+<div class="line"><span class="lineno">  214</span>    <span class="comment">// Clear flag</span></div>
+<div class="line"><span class="lineno">  215</span>    <a class="code hl_variable" href="../../d9/dce/_client_validation_real_8h_adc6e5733fc3c22f0a7b2914188c49c90.html#adc6e5733fc3c22f0a7b2914188c49c90">state</a>.mNeedsFlush = <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  216</span> </div>
+<div class="line"><span class="lineno">  217</span>    <span class="comment">// Flush all instantiated async loggers (uses ActiveLoggerRegistry)</span></div>
+<div class="line"><span class="lineno">  218</span>    <span class="comment">// Only flushes loggers that have been accessed via template functions</span></div>
+<div class="line"><span class="lineno">  219</span>    fl::size n = <a class="code hl_variable" href="../../d9/dce/_client_validation_real_8h_adc6e5733fc3c22f0a7b2914188c49c90.html#adc6e5733fc3c22f0a7b2914188c49c90">state</a>.mMessagesPerTick;</div>
+<div class="line"><span class="lineno">  220</span>    <a class="code hl_function" href="../../d5/d7b/structfl_1_1detail_1_1_active_logger_registry_a0ba7ba9bde21bfc28ef06006930c34f1.html#a0ba7ba9bde21bfc28ef06006930c34f1">detail::ActiveLoggerRegistry::instance</a>().<a class="code hl_function" href="../../d5/d7b/structfl_1_1detail_1_1_active_logger_registry_a428161495700eb0287637b406ec06ca3.html#a428161495700eb0287637b406ec06ca3">forEach</a>([n](AsyncLogger&amp; logger) {</div>
+<div class="line"><span class="lineno">  221</span>        logger.flushN(n);</div>
+<div class="line"><span class="lineno">  222</span>    });</div>
+<div class="line"><span class="lineno">  223</span>}</div>
 <div class="ttc" id="a_client_validation_real_8h_adc6e5733fc3c22f0a7b2914188c49c90_html_adc6e5733fc3c22f0a7b2914188c49c90"><div class="ttname"><a href="../../d9/dce/_client_validation_real_8h_adc6e5733fc3c22f0a7b2914188c49c90.html#adc6e5733fc3c22f0a7b2914188c49c90">state</a></div><div class="ttdeci">TestState state</div><div class="ttdef"><b>Definition</b> <a href="../../d9/dce/_client_validation_real_8h_source.html#l00049">ClientValidationReal.h:49</a></div></div>
-<div class="ttc" id="aclassfl_1_1_singleton_a47fdc044003ec27f9e9833f7f5418e01_html_a47fdc044003ec27f9e9833f7f5418e01"><div class="ttname"><a href="../../d9/d5b/classfl_1_1_singleton_a47fdc044003ec27f9e9833f7f5418e01.html#a47fdc044003ec27f9e9833f7f5418e01">fl::Singleton::instance</a></div><div class="ttdeci">static T &amp; instance() FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d0b/singleton_8h_source.html#l00041">singleton.h:41</a></div></div>
+<div class="ttc" id="aclassfl_1_1_singleton_ad5cb1b704e17768f75802673abb0ff75_html_ad5cb1b704e17768f75802673abb0ff75"><div class="ttname"><a href="../../d9/d5b/classfl_1_1_singleton_ad5cb1b704e17768f75802673abb0ff75.html#ad5cb1b704e17768f75802673abb0ff75">fl::Singleton::instance</a></div><div class="ttdeci">static T &amp; instance() FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d0b/singleton_8h_source.html#l00041">singleton.h:41</a></div></div>
 <div class="ttc" id="astructfl_1_1detail_1_1_active_logger_registry_a0ba7ba9bde21bfc28ef06006930c34f1_html_a0ba7ba9bde21bfc28ef06006930c34f1"><div class="ttname"><a href="../../d5/d7b/structfl_1_1detail_1_1_active_logger_registry_a0ba7ba9bde21bfc28ef06006930c34f1.html#a0ba7ba9bde21bfc28ef06006930c34f1">fl::detail::ActiveLoggerRegistry::instance</a></div><div class="ttdeci">static ActiveLoggerRegistry &amp; instance()</div><div class="ttdef"><b>Definition</b> <a href="../../df/df1/async__logger_8h_source.html#l00181">async_logger.h:181</a></div></div>
 <div class="ttc" id="astructfl_1_1detail_1_1_active_logger_registry_a428161495700eb0287637b406ec06ca3_html_a428161495700eb0287637b406ec06ca3"><div class="ttname"><a href="../../d5/d7b/structfl_1_1detail_1_1_active_logger_registry_a428161495700eb0287637b406ec06ca3.html#a428161495700eb0287637b406ec06ca3">fl::detail::ActiveLoggerRegistry::forEach</a></div><div class="ttdeci">void forEach(Func func)</div><div class="ttdef"><b>Definition</b> <a href="../../df/df1/async__logger_8h_source.html#l00197">async_logger.h:197</a></div></div>
-<div class="ttc" id="astructfl_1_1detail_1_1_background_flush_state_html"><div class="ttname"><a href="../../de/dbe/structfl_1_1detail_1_1_background_flush_state.html">fl::detail::BackgroundFlushState</a></div><div class="ttdef"><b>Definition</b> <a href="../../d2/de0/async__logger_8cpp_8hpp_source.html#l00031">async_logger.cpp.hpp:31</a></div></div>
+<div class="ttc" id="astructfl_1_1detail_1_1_background_flush_state_html"><div class="ttname"><a href="../../de/dbe/structfl_1_1detail_1_1_background_flush_state.html">fl::detail::BackgroundFlushState</a></div><div class="ttdef"><b>Definition</b> <a href="../../d2/de0/async__logger_8cpp_8hpp_source.html#l00033">async_logger.cpp.hpp:33</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d2/de0/async__logger_8cpp_8hpp_source.html#l00120">fl::AsyncLogger::flushN()</a>, <a class="el" href="../../df/df1/async__logger_8h_source.html#l00197">fl::detail::ActiveLoggerRegistry::forEach()</a>, <a class="el" href="../../df/df1/async__logger_8h_source.html#l00181">fl::detail::ActiveLoggerRegistry::instance()</a>, <a class="el" href="../../d4/d0b/singleton_8h_source.html#l00041">fl::Singleton&lt; T, N &gt;::instance()</a>, and <a class="el" href="../../d9/dce/_client_validation_real_8h_source.html#l00049">state</a>.</p>
+<p class="reference">References <a class="el" href="../../d2/de0/async__logger_8cpp_8hpp_source.html#l00122">fl::AsyncLogger::flushN()</a>, <a class="el" href="../../df/df1/async__logger_8h_source.html#l00197">fl::detail::ActiveLoggerRegistry::forEach()</a>, <a class="el" href="../../df/df1/async__logger_8h_source.html#l00181">fl::detail::ActiveLoggerRegistry::instance()</a>, <a class="el" href="../../d4/d0b/singleton_8h_source.html#l00041">fl::Singleton&lt; T, N &gt;::instance()</a>, and <a class="el" href="../../d9/dce/_client_validation_real_8h_source.html#l00049">state</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d4/d36/namespacefl_abe5657de2c328256b3c15a1388b793aa_abe5657de2c328256b3c15a1388b793aa_cgraph.svg" width="100%" height="572"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d4/d36/namespacefl_abe5657de2c328256b3c15a1388b793aa_abe5657de2c328256b3c15a1388b793aa_cgraph.svg" width="100%" height="597"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 
 </div>
@@ -159,7 +159,7 @@ $(function(){initNavTree('d4/d36/namespacefl_abe5657de2c328256b3c15a1388b793aa.h
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:04 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:07 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

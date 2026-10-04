@@ -1,7 +1,7 @@
 var classfl_1_1audio_1_1detector_1_1_energy_analyzer =
 [
-    [ "EnergyAnalyzer", "d2/db4/classfl_1_1audio_1_1detector_1_1_energy_analyzer_a71cb5a732054c78dab4c675385d1d4b3.html#a71cb5a732054c78dab4c675385d1d4b3", null ],
-    [ "~EnergyAnalyzer", "d2/db4/classfl_1_1audio_1_1detector_1_1_energy_analyzer_a4beb74d0c98b223c042d06c103ebf9ce.html#a4beb74d0c98b223c042d06c103ebf9ce", null ],
+    [ "EnergyAnalyzer", "d2/db4/classfl_1_1audio_1_1detector_1_1_energy_analyzer_a849bf9739f91f566ab5dfebf1312e668.html#a849bf9739f91f566ab5dfebf1312e668", null ],
+    [ "~EnergyAnalyzer", "d2/db4/classfl_1_1audio_1_1detector_1_1_energy_analyzer_ae540f15ff1af504245c6c3ee8d09c302.html#ae540f15ff1af504245c6c3ee8d09c302", null ],
     [ "fireCallbacks", "d2/db4/classfl_1_1audio_1_1detector_1_1_energy_analyzer_a9ba107ead9fc96155762e8b41756d96f.html#a9ba107ead9fc96155762e8b41756d96f", null ],
     [ "getAverageEnergy", "d2/db4/classfl_1_1audio_1_1detector_1_1_energy_analyzer_ab6cad100466a19e444807f2bbe1ecf39.html#ab6cad100466a19e444807f2bbe1ecf39", null ],
     [ "getMaxEnergy", "d2/db4/classfl_1_1audio_1_1detector_1_1_energy_analyzer_a1ef00c1c66f6bd5669d05c32f2066b2d.html#a1ef00c1c66f6bd5669d05c32f2066b2d", null ],

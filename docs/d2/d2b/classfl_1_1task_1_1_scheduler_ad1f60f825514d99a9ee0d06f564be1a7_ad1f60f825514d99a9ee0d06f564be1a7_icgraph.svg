@@ -68,7 +68,7 @@ var sectionId = 'dynsection-1';
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../d5/d06/classfl_1_1detail_1_1_async_logger_service_task_a3bff7aaa6e1158fbbee95055b3458285.html#a3bff7aaa6e1158fbbee95055b3458285" target="_top" xlink:title=" ">
+<g id="a_Node000002"><a xlink:href="../../d5/d06/classfl_1_1detail_1_1_async_logger_service_task_a76e22f26c5676ba890e783435db46aa6.html#a76e22f26c5676ba890e783435db46aa6" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="598,-255.5 434,-255.5 434,-225.5 598,-225.5 598,-255.5"/>
 <text text-anchor="start" x="442" y="-243.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::detail::AsyncLoggerService</text>
 <text text-anchor="middle" x="516" y="-232.5" font-family="Helvetica,sans-Serif" font-size="10.00">Task::AsyncLoggerServiceTask</text>
@@ -87,7 +87,7 @@ var sectionId = 'dynsection-1';
 <!-- Node22 -->
 <g id="Node000022" class="node">
 <title>Node22</title>
-<g id="a_Node000022"><a xlink:href="../../de/daf/classfl_1_1task_1_1_handle_a01b05372acab06bd2197d033aafe8cb9.html#a01b05372acab06bd2197d033aafe8cb9" target="_top" xlink:title=" ">
+<g id="a_Node000022"><a xlink:href="../../de/daf/classfl_1_1task_1_1_handle_a0d96031ff5c53ece780698c5f39d9d2b.html#a0d96031ff5c53ece780698c5f39d9d2b" target="_top" xlink:title="Sets the callback invoked when the task runs successfully.">
 <polygon fill="white" stroke="#666666" points="761,-136 643,-136 643,-117 761,-117 761,-136"/>
 <text text-anchor="middle" x="702" y="-124" font-family="Helvetica,sans-Serif" font-size="10.00">fl::task::Handle::then</text>
 </a>
@@ -105,7 +105,7 @@ var sectionId = 'dynsection-1';
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d5/d06/classfl_1_1detail_1_1_async_logger_service_task_ae03d5fbeb6d8557bd7c4c5fabfe77b06.html#ae03d5fbeb6d8557bd7c4c5fabfe77b06" target="_top" xlink:title=" ">
+<g id="a_Node000003"><a xlink:href="../../d5/d06/classfl_1_1detail_1_1_async_logger_service_task_a82e728d22c5bcc164c62953f3e8d6e6f.html#a82e728d22c5bcc164c62953f3e8d6e6f" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="377,-340.5 204,-340.5 204,-310.5 377,-310.5 377,-340.5"/>
 <text text-anchor="start" x="212" y="-328.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::detail::AsyncLoggerService</text>
 <text text-anchor="middle" x="290.5" y="-317.5" font-family="Helvetica,sans-Serif" font-size="10.00">Task::~AsyncLoggerServiceTask</text>
@@ -163,7 +163,7 @@ var sectionId = 'dynsection-1';
 <!-- Node6 -->
 <g id="Node000006" class="node">
 <title>Node6</title>
-<g id="a_Node000006"><a xlink:href="../../d4/d36/namespacefl_abe4e89a0a574f2abfa9c1bb53b9bd343.html#abe4e89a0a574f2abfa9c1bb53b9bd343" target="_top" xlink:title="Configure async logger automatic servicing task.">
+<g id="a_Node000006"><a xlink:href="../../d4/d36/namespacefl_aa724af6bce4780d93d1b20804ebe3e69.html#aa724af6bce4780d93d1b20804ebe3e69" target="_top" xlink:title="Configure async logger automatic servicing task.">
 <polygon fill="white" stroke="#666666" points="156,-258 0,-258 0,-239 156,-239 156,-258"/>
 <text text-anchor="middle" x="78" y="-246" font-family="Helvetica,sans-Serif" font-size="10.00">fl::configureAsyncLogService</text>
 </a>
@@ -218,7 +218,7 @@ var sectionId = 'dynsection-1';
 <!-- Node23 -->
 <g id="Node000023" class="node">
 <title>Node23</title>
-<g id="a_Node000023"><a xlink:href="../../d3/d6b/classfl_1_1audio_1_1_processor_a0c7c1161cfabfdb0d8d9c159f8c1f9f7.html#a0c7c1161cfabfdb0d8d9c159f8c1f9f7" target="_top" xlink:title=" ">
+<g id="a_Node000023"><a xlink:href="../../d3/d6b/classfl_1_1audio_1_1_processor_ac25ffea2d1abf227cecff4e4a7448a5a.html#ac25ffea2d1abf227cecff4e4a7448a5a" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="577.5,-189.5 454.5,-189.5 454.5,-159.5 577.5,-159.5 577.5,-189.5"/>
 <text text-anchor="start" x="462.5" y="-177.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::audio::Processor</text>
 <text text-anchor="middle" x="516" y="-166.5" font-family="Helvetica,sans-Serif" font-size="10.00">::createWithAutoInput</text>
@@ -253,12 +253,30 @@ var sectionId = 'dynsection-1';
 </a>
 </g>
 </g>
+<!-- Node32 -->
+<g id="Node000032" class="node">
+<title>Node32</title>
+<g id="a_Node000032"><a xlink:href="../../de/daf/classfl_1_1task_1_1_handle_ae0269eb6707f449059862fd1c7f57739.html#ae0269eb6707f449059862fd1c7f57739" target="_top" xlink:title="Moves a handle without changing the underlying task.">
+<polygon fill="white" stroke="#666666" points="589,-93 443,-93 443,-74 589,-74 589,-93"/>
+<text text-anchor="middle" x="516" y="-81" font-family="Helvetica,sans-Serif" font-size="10.00">fl::task::Handle::operator=</text>
+</a>
+</g>
+</g>
+<!-- Node22&#45;&gt;Node32 -->
+<g id="edge15_Node000022_Node000032" class="edge">
+<title>Node22&#45;&gt;Node32</title>
+<g id="a_edge15_Node000022_Node000032"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M655.18,-114.39C639.89,-110.46 622.74,-106.17 607,-102.5 593.16,-99.27 578.06,-95.99 564.26,-93.09"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="654.37,-117.8 664.93,-116.91 656.13,-111.02 654.37,-117.8"/>
+</a>
+</g>
+</g>
 <!-- Node33 -->
 <g id="Node000033" class="node">
 <title>Node33</title>
-<g id="a_Node000033"><a xlink:href="../../de/daf/classfl_1_1task_1_1_handle_aeae236ac7d49198b88ae58cb29f5912c.html#aeae236ac7d49198b88ae58cb29f5912c" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="589,-93 443,-93 443,-74 589,-74 589,-93"/>
-<text text-anchor="middle" x="516" y="-81" font-family="Helvetica,sans-Serif" font-size="10.00">fl::task::Handle::operator=</text>
+<g id="a_Node000033"><a xlink:href="../../d3/d3a/_async_8h_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="538,-56 494,-56 494,-37 538,-37 538,-56"/>
+<text text-anchor="middle" x="516" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">setup</text>
 </a>
 </g>
 </g>
@@ -266,17 +284,17 @@ var sectionId = 'dynsection-1';
 <g id="edge16_Node000022_Node000033" class="edge">
 <title>Node22&#45;&gt;Node33</title>
 <g id="a_edge16_Node000022_Node000033"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M655.18,-114.39C639.89,-110.46 622.74,-106.17 607,-102.5 593.16,-99.27 578.06,-95.99 564.26,-93.09"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="654.37,-117.8 664.93,-116.91 656.13,-111.02 654.37,-117.8"/>
+<path fill="none" stroke="#63b8ff" d="M681.63,-110.46C663.46,-96.24 634.97,-76 607,-64.5 584.45,-55.23 556.71,-50.61 538.03,-48.39"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="679.67,-113.38 689.67,-116.89 684.05,-107.91 679.67,-113.38"/>
 </a>
 </g>
 </g>
 <!-- Node34 -->
 <g id="Node000034" class="node">
 <title>Node34</title>
-<g id="a_Node000034"><a xlink:href="../../d3/d3a/_async_8h_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="538,-56 494,-56 494,-37 538,-37 538,-56"/>
-<text text-anchor="middle" x="516" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">setup</text>
+<g id="a_Node000034"><a xlink:href="../../d1/dc9/namespaceautoresearch_a14b9dde802b1a01ef0d7f9ea258bd7f6.html#a14b9dde802b1a01ef0d7f9ea258bd7f6" target="_top" xlink:title="Setup async task for JSON&#45;RPC processing.">
+<polygon fill="white" stroke="#666666" points="607,-19 425,-19 425,0 607,0 607,-19"/>
+<text text-anchor="middle" x="516" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">autoresearch::setupRpcAsyncTask</text>
 </a>
 </g>
 </g>
@@ -284,24 +302,6 @@ var sectionId = 'dynsection-1';
 <g id="edge17_Node000022_Node000034" class="edge">
 <title>Node22&#45;&gt;Node34</title>
 <g id="a_edge17_Node000022_Node000034"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M681.63,-110.46C663.46,-96.24 634.97,-76 607,-64.5 584.45,-55.23 556.71,-50.61 538.03,-48.39"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="679.67,-113.38 689.67,-116.89 684.05,-107.91 679.67,-113.38"/>
-</a>
-</g>
-</g>
-<!-- Node35 -->
-<g id="Node000035" class="node">
-<title>Node35</title>
-<g id="a_Node000035"><a xlink:href="../../d1/dc9/namespaceautoresearch_a14b9dde802b1a01ef0d7f9ea258bd7f6.html#a14b9dde802b1a01ef0d7f9ea258bd7f6" target="_top" xlink:title="Setup async task for JSON&#45;RPC processing.">
-<polygon fill="white" stroke="#666666" points="607,-19 425,-19 425,0 607,0 607,-19"/>
-<text text-anchor="middle" x="516" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">autoresearch::setupRpcAsyncTask</text>
-</a>
-</g>
-</g>
-<!-- Node22&#45;&gt;Node35 -->
-<g id="edge18_Node000022_Node000035" class="edge">
-<title>Node22&#45;&gt;Node35</title>
-<g id="a_edge18_Node000022_Node000035"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M689.12,-108.33C673.26,-85.62 642.93,-47.33 607,-27.5 600.86,-24.11 594.17,-21.36 587.31,-19.12"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="686.32,-110.44 694.84,-116.74 692.11,-106.5 686.32,-110.44"/>
 </a>
@@ -319,7 +319,7 @@ var sectionId = 'dynsection-1';
 <!-- Node24 -->
 <g id="Node000024" class="node">
 <title>Node24</title>
-<g id="a_Node000024"><a xlink:href="../../d4/d9d/classfl_1_1audio_1_1_audio_manager_a19815b509ca8b88682cb93c9faba4360.html#a19815b509ca8b88682cb93c9faba4360" target="_top" xlink:title=" ">
+<g id="a_Node000024"><a xlink:href="../../d4/d9d/classfl_1_1audio_1_1_audio_manager_a50a318328d3ab7153dd90b4f7c63c5c0.html#a50a318328d3ab7153dd90b4f7c63c5c0" target="_top" xlink:title=" ">
 <polygon fill="#fff0f0" stroke="red" points="368.5,-184 212.5,-184 212.5,-165 368.5,-165 368.5,-184"/>
 <text text-anchor="middle" x="290.5" y="-172" font-family="Helvetica,sans-Serif" font-size="10.00">fl::audio::AudioManager::add</text>
 </a>
@@ -337,7 +337,7 @@ var sectionId = 'dynsection-1';
 <!-- Node30 -->
 <g id="Node000030" class="node">
 <title>Node30</title>
-<g id="a_Node000030"><a xlink:href="../../d4/d9d/classfl_1_1audio_1_1_audio_manager_ab4ec0824d17d0fa4968e21e287f44476.html#ab4ec0824d17d0fa4968e21e287f44476" target="_top" xlink:title=" ">
+<g id="a_Node000030"><a xlink:href="../../d4/d9d/classfl_1_1audio_1_1_audio_manager_a836eb15d1067209d94b7e6108bb7ec97.html#a836eb15d1067209d94b7e6108bb7ec97" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="368.5,-147 212.5,-147 212.5,-128 368.5,-128 368.5,-147"/>
 <text text-anchor="middle" x="290.5" y="-135" font-family="Helvetica,sans-Serif" font-size="10.00">fl::audio::AudioManager::add</text>
 </a>
@@ -349,33 +349,6 @@ var sectionId = 'dynsection-1';
 <g id="a_edge12_Node000023_Node000030"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M444.05,-162.75C413.45,-157.69 378.13,-151.84 349.19,-147.05"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="443.79,-166.26 454.22,-164.44 444.93,-159.35 443.79,-166.26"/>
-</a>
-</g>
-</g>
-<!-- Node32 -->
-<g id="Node000032" class="node">
-<title>Node32</title>
-<g id="a_Node000032"><a xlink:href="../../dd/dc8/_auto_research_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="312.5,-65 268.5,-65 268.5,-46 312.5,-46 312.5,-65"/>
-<text text-anchor="middle" x="290.5" y="-53" font-family="Helvetica,sans-Serif" font-size="10.00">setup</text>
-</a>
-</g>
-</g>
-<!-- Node31&#45;&gt;Node32 -->
-<g id="edge15_Node000031_Node000032" class="edge">
-<title>Node31&#45;&gt;Node32</title>
-<g id="a_edge15_Node000031_Node000032"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M448.89,-108.63C440.82,-106.3 432.71,-103.9 425,-101.5 384.97,-89.06 338.85,-72.71 312.64,-63.23"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="448.1,-112.05 458.67,-111.42 450.02,-105.31 448.1,-112.05"/>
-</a>
-</g>
-</g>
-<!-- Node35&#45;&gt;Node32 -->
-<g id="edge19_Node000035_Node000032" class="edge">
-<title>Node35&#45;&gt;Node32</title>
-<g id="a_edge19_Node000035_Node000032"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M456.85,-21.05C446.25,-23.18 435.29,-25.39 425,-27.5 385.33,-35.63 339.09,-45.39 312.76,-50.98"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="457.76,-24.44 466.87,-19.04 456.38,-17.57 457.76,-24.44"/>
 </a>
 </g>
 </g>

@@ -1,0 +1,42 @@
+<map id="fl::CLEDController::showLeds" name="fl::CLEDController::showLeds">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,353,141,393"/>
+<area shape="rect" id="Node000002" href="$d8/da0/classfl_1_1_c_l_e_d_controller_add0d4300c170a9c0d27381589ced536e.html#add0d4300c170a9c0d27381589ced536e" title=" " alt="" coords="241,92,377,132"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="86,351,130,292,187,221,271,139,275,143,191,224,134,295,91,355"/>
+<area shape="rect" id="Node000008" href="$d8/da0/classfl_1_1_c_l_e_d_controller_ae79bcd8406036a23b76f1fe569d74714.html#ae79bcd8406036a23b76f1fe569d74714" title=" " alt="" coords="241,235,377,275"/>
+<area shape="poly" id="edge6_Node000001_Node000008" title=" " alt="" coords="110,351,188,310,252,278,254,283,191,314,113,355"/>
+<area shape="rect" id="Node000014" href="$de/dca/classfl_1_1_engine_events_a0a5a3bb00e383055f035b9588f285a86.html#a0a5a3bb00e383055f035b9588f285a86" title=" " alt="" coords="215,324,402,364"/>
+<area shape="poly" id="edge11_Node000001_Node000014" title=" " alt="" coords="141,362,201,355,202,360,142,368"/>
+<area shape="rect" id="Node000017" href="$de/dca/classfl_1_1_engine_events_a5f428b668b5a7d0d46b7d251b62d00a0.html#a5f428b668b5a7d0d46b7d251b62d00a0" title=" " alt="" coords="201,389,416,414"/>
+<area shape="poly" id="edge15_Node000001_Node000017" title=" " alt="" coords="142,379,189,384,188,390,141,384"/>
+<area shape="rect" id="Node000019" href="$de/dca/classfl_1_1_engine_events_a4d4f1ce825e517989efa423d5776f2d4.html#a4d4f1ce825e517989efa423d5776f2d4" title=" " alt="" coords="189,462,428,487"/>
+<area shape="poly" id="edge17_Node000001_Node000019" title=" " alt="" coords="119,391,190,423,265,454,263,459,188,428,117,396"/>
+<area shape="rect" id="Node000020" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a1ca4ae71475314978355961ee2a392c4.html#a1ca4ae71475314978355961ee2a392c4" title="Write the data to the LEDs managed by this controller." alt="" coords="237,515,381,555"/>
+<area shape="poly" id="edge19_Node000001_Node000020" title=" " alt="" coords="90,392,131,445,159,473,191,498,225,514,222,519,188,502,155,477,127,449,86,395"/>
+<area shape="rect" id="Node000003" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a8ac52066b02a3ec4dda386f6c5ae4267.html#a8ac52066b02a3ec4dda386f6c5ae4267" title="Get the dithering option currently set for this controller." alt="" coords="501,5,637,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="369,89,494,47,496,52,371,94"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_ab77cd36de982ae7d84faae1151feada7.html#ab77cd36de982ae7d84faae1151feada7" title=" " alt="" coords="519,70,619,95"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="376,102,505,87,506,92,377,107"/>
+<area shape="rect" id="Node000007" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a4c61b86add1463a4f968b88d803e0737.html#a4c61b86add1463a4f968b88d803e0737" title="How many LEDs does this controller manage?" alt="" coords="501,120,637,160"/>
+<area shape="poly" id="edge5_Node000002_Node000007" title=" " alt="" coords="377,117,488,129,487,134,376,122"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_aab9d4e461519c66fc958efc9e9ba2efa.html#aab9d4e461519c66fc958efc9e9ba2efa" title=" " alt="" coords="734,127,823,153"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="618,93,663,105,721,122,720,127,662,111,616,98"/>
+<area shape="rect" id="Node000009" href="$d4/d36/namespacefl_aa87e47dbd130b02304c473d3f7500b0d.html#aa87e47dbd130b02304c473d3f7500b0d" title=" " alt="" coords="519,185,619,210"/>
+<area shape="poly" id="edge7_Node000008_Node000009" title=" " alt="" coords="376,237,505,209,506,214,377,242"/>
+<area shape="rect" id="Node000010" href="$d8/da0/classfl_1_1_c_l_e_d_controller_ac6da605f844f65d778d05a9962fd327b.html#ac6da605f844f65d778d05a9962fd327b" title="Set the dithering mode for this controller to use." alt="" coords="501,235,637,275"/>
+<area shape="poly" id="edge9_Node000008_Node000010" title=" " alt="" coords="377,252,488,252,488,257,377,257"/>
+<area shape="poly" id="edge8_Node000009_Node000005" title=" " alt="" coords="616,182,662,169,720,153,721,158,663,175,618,187"/>
+<area shape="rect" id="Node000011" href="$d8/da0/classfl_1_1_c_l_e_d_controller_ae0828dffacb43dca565ddf8145153ed0.html#ae0828dffacb43dca565ddf8145153ed0" title="Protected constructor with registration mode." alt="" coords="711,235,847,275"/>
+<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="638,252,697,252,697,257,638,257"/>
+<area shape="rect" id="Node000015" href="$df/d9e/namespacefl_1_1detail_a4ecf69a0759c119b930cc4690cc11e65.html#a4ecf69a0759c119b930cc4690cc11e65" title="Advance temporal dithering once per logical frame, not once per controller." alt="" coords="480,323,659,363"/>
+<area shape="poly" id="edge12_Node000014_Node000015" title=" " alt="" coords="402,341,466,341,466,346,402,346"/>
+<area shape="rect" id="Node000016" href="$db/da2/classfl_1_1_engine_events_1_1_listener_a624b8203c73b6e8045801da3ee391713.html#a624b8203c73b6e8045801da3ee391713" title=" " alt="" coords="476,387,663,427"/>
+<area shape="poly" id="edge14_Node000014_Node000016" title=" " alt="" coords="393,361,473,381,472,386,392,367"/>
+<area shape="poly" id="edge13_Node000015_Node000015" title=" " alt="" coords="530,323,528,313,534,304,548,298,569,296,594,299,607,306,604,311,592,304,569,301,549,303,537,308,533,314,535,322"/>
+<area shape="rect" id="Node000018" href="$db/da2/classfl_1_1_engine_events_1_1_listener_a64cffa0a94c052aa7d41974d7fa4b614.html#a64cffa0a94c052aa7d41974d7fa4b614" title=" " alt="" coords="476,451,663,491"/>
+<area shape="poly" id="edge16_Node000017_Node000018" title=" " alt="" coords="380,412,429,423,499,444,497,449,427,428,379,417"/>
+<area shape="poly" id="edge18_Node000019_Node000019" title=" " alt="" coords="271,464,262,454,267,444,282,438,309,435,342,439,354,449,351,453,340,444,309,441,284,443,270,448,267,453,274,460"/>
+<area shape="rect" id="Node000021" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a51e12cdcfc9322cdbe9322d04ef4ef7d.html#a51e12cdcfc9322cdbe9322d04ef4ef7d" title=" " alt="" coords="501,515,637,555"/>
+<area shape="poly" id="edge20_Node000020_Node000021" title=" " alt="" coords="381,532,488,532,488,537,381,537"/>
+<area shape="rect" id="Node000022" href="$d9/dce/_client_validation_real_8h_a02882a6e53c2b3b63eba56831f88f604.html#a02882a6e53c2b3b63eba56831f88f604" title=" " alt="" coords="541,579,597,605"/>
+<area shape="poly" id="edge21_Node000020_Node000022" title=" " alt="" coords="381,548,528,580,527,586,380,553"/>
+</map>

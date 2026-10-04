@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -132,29 +132,29 @@ $(function(){initNavTree('df/d9e/namespacefl_1_1detail_a48bb51330309f1b3d84c577f
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../df/d30/rpc__registry_8h_source.html#l00061">61</a> of file <a class="el" href="../../df/d30/rpc__registry_8h_source.html">rpc_registry.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   61</span>                                                                                {</div>
-<div class="line"><span class="lineno">   62</span>    <a class="code hl_class" href="../../de/d40/classfl_1_1json.html">json</a> response = <a class="code hl_function" href="../../de/d40/classfl_1_1json_af8bc0968107152344bfa8468bba76f54.html#af8bc0968107152344bfa8468bba76f54">json::object</a>();</div>
-<div class="line"><span class="lineno">   63</span>    response.set(<span class="stringliteral">&quot;jsonrpc&quot;</span>, <span class="stringliteral">&quot;2.0&quot;</span>);</div>
-<div class="line"><span class="lineno">   64</span> </div>
-<div class="line"><span class="lineno">   65</span>    <a class="code hl_class" href="../../de/d40/classfl_1_1json.html">json</a> error = <a class="code hl_function" href="../../de/d40/classfl_1_1json_af8bc0968107152344bfa8468bba76f54.html#af8bc0968107152344bfa8468bba76f54">json::object</a>();</div>
-<div class="line"><span class="lineno">   66</span>    error.<a class="code hl_function" href="../../de/d40/classfl_1_1json_af272c33451fcfba68454595a4f6d8444.html#af272c33451fcfba68454595a4f6d8444">set</a>(<span class="stringliteral">&quot;code&quot;</span>, code);</div>
-<div class="line"><span class="lineno">   67</span>    error.<a class="code hl_function" href="../../de/d40/classfl_1_1json_af272c33451fcfba68454595a4f6d8444.html#af272c33451fcfba68454595a4f6d8444">set</a>(<span class="stringliteral">&quot;message&quot;</span>, message);</div>
-<div class="line"><span class="lineno">   68</span>    response.set(<span class="stringliteral">&quot;error&quot;</span>, error);</div>
-<div class="line"><span class="lineno">   69</span> </div>
-<div class="line"><span class="lineno">   70</span>    <span class="keywordflow">if</span> (<span class="keywordtype">id</span>.has_value()) {</div>
-<div class="line"><span class="lineno">   71</span>        response.set(<span class="stringliteral">&quot;id&quot;</span>, <span class="keywordtype">id</span>);</div>
-<div class="line"><span class="lineno">   72</span>    }</div>
-<div class="line"><span class="lineno">   73</span> </div>
-<div class="line"><span class="lineno">   74</span>    <span class="keywordflow">return</span> response;</div>
-<div class="line"><span class="lineno">   75</span>}</div>
-<div class="ttc" id="aclassfl_1_1json_af272c33451fcfba68454595a4f6d8444_html_af272c33451fcfba68454595a4f6d8444"><div class="ttname"><a href="../../de/d40/classfl_1_1json_af272c33451fcfba68454595a4f6d8444.html#af272c33451fcfba68454595a4f6d8444">fl::json::set</a></div><div class="ttdeci">void set(const fl::string &amp;key, const json &amp;value) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d05/json_8h_source.html#l00701">json.h:701</a></div></div>
-<div class="ttc" id="aclassfl_1_1json_af8bc0968107152344bfa8468bba76f54_html_af8bc0968107152344bfa8468bba76f54"><div class="ttname"><a href="../../de/d40/classfl_1_1json_af8bc0968107152344bfa8468bba76f54.html#af8bc0968107152344bfa8468bba76f54">fl::json::object</a></div><div class="ttdeci">static json object() FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d05/json_8h_source.html#l00692">json.h:692</a></div></div>
-<div class="ttc" id="aclassfl_1_1json_html"><div class="ttname"><a href="../../de/d40/classfl_1_1json.html">fl::json</a></div><div class="ttdef"><b>Definition</b> <a href="../../d4/d05/json_8h_source.html#l00128">json.h:128</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../df/d30/rpc__registry_8h_source.html#l00069">69</a> of file <a class="el" href="../../df/d30/rpc__registry_8h_source.html">rpc_registry.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   69</span>                                                                                {</div>
+<div class="line"><span class="lineno">   70</span>    <a class="code hl_class" href="../../de/d40/classfl_1_1json.html">json</a> response = <a class="code hl_function" href="../../de/d40/classfl_1_1json_ae7744bee3369b3debf7e30e4a4a18526.html#ae7744bee3369b3debf7e30e4a4a18526">json::object</a>();</div>
+<div class="line"><span class="lineno">   71</span>    response.set(<span class="stringliteral">&quot;jsonrpc&quot;</span>, <span class="stringliteral">&quot;2.0&quot;</span>);</div>
+<div class="line"><span class="lineno">   72</span> </div>
+<div class="line"><span class="lineno">   73</span>    <a class="code hl_class" href="../../de/d40/classfl_1_1json.html">json</a> error = <a class="code hl_function" href="../../de/d40/classfl_1_1json_ae7744bee3369b3debf7e30e4a4a18526.html#ae7744bee3369b3debf7e30e4a4a18526">json::object</a>();</div>
+<div class="line"><span class="lineno">   74</span>    error.<a class="code hl_function" href="../../de/d40/classfl_1_1json_a2973a868c9dc87ee871bc400414920c9.html#a2973a868c9dc87ee871bc400414920c9">set</a>(<span class="stringliteral">&quot;code&quot;</span>, code);</div>
+<div class="line"><span class="lineno">   75</span>    error.<a class="code hl_function" href="../../de/d40/classfl_1_1json_a2973a868c9dc87ee871bc400414920c9.html#a2973a868c9dc87ee871bc400414920c9">set</a>(<span class="stringliteral">&quot;message&quot;</span>, message);</div>
+<div class="line"><span class="lineno">   76</span>    response.set(<span class="stringliteral">&quot;error&quot;</span>, error);</div>
+<div class="line"><span class="lineno">   77</span> </div>
+<div class="line"><span class="lineno">   78</span>    <span class="keywordflow">if</span> (<span class="keywordtype">id</span>.has_value()) {</div>
+<div class="line"><span class="lineno">   79</span>        response.set(<span class="stringliteral">&quot;id&quot;</span>, <span class="keywordtype">id</span>);</div>
+<div class="line"><span class="lineno">   80</span>    }</div>
+<div class="line"><span class="lineno">   81</span> </div>
+<div class="line"><span class="lineno">   82</span>    <span class="keywordflow">return</span> response;</div>
+<div class="line"><span class="lineno">   83</span>}</div>
+<div class="ttc" id="aclassfl_1_1json_a2973a868c9dc87ee871bc400414920c9_html_a2973a868c9dc87ee871bc400414920c9"><div class="ttname"><a href="../../de/d40/classfl_1_1json_a2973a868c9dc87ee871bc400414920c9.html#a2973a868c9dc87ee871bc400414920c9">fl::json::set</a></div><div class="ttdeci">void set(const fl::string &amp;key, const json &amp;value) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d05/json_8h_source.html#l00866">json.h:866</a></div></div>
+<div class="ttc" id="aclassfl_1_1json_ae7744bee3369b3debf7e30e4a4a18526_html_ae7744bee3369b3debf7e30e4a4a18526"><div class="ttname"><a href="../../de/d40/classfl_1_1json_ae7744bee3369b3debf7e30e4a4a18526.html#ae7744bee3369b3debf7e30e4a4a18526">fl::json::object</a></div><div class="ttdeci">static json object() FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d05/json_8h_source.html#l00857">json.h:857</a></div></div>
+<div class="ttc" id="aclassfl_1_1json_html"><div class="ttname"><a href="../../de/d40/classfl_1_1json.html">fl::json</a></div><div class="ttdef"><b>Definition</b> <a href="../../d4/d05/json_8h_source.html#l00261">json.h:261</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d4/d05/json_8h_source.html#l00692">fl::json::object()</a>, and <a class="el" href="../../d4/d05/json_8h_source.html#l00701">fl::json::set()</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d05/json_8h_source.html#l00857">fl::json::object()</a>, and <a class="el" href="../../d4/d05/json_8h_source.html#l00866">fl::json::set()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d5/d8f/rpc_8cpp_8hpp_source.html#l00067">fl::Rpc::handle()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d5/d8f/rpc_8cpp_8hpp_source.html#l00125">fl::Rpc::handle()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -179,7 +179,7 @@ $(function(){initNavTree('df/d9e/namespacefl_1_1detail_a48bb51330309f1b3d84c577f
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../df/d9e/namespacefl_1_1detail.html">detail</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:09 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:11 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

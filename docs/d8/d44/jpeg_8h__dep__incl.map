@@ -1,52 +1,69 @@
 <map id="fl/codec/jpeg.h" name="fl/codec/jpeg.h">
-<area shape="rect" id="Node000001" title=" " alt="" coords="555,5,671,31"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="585,5,701,31"/>
 <area shape="rect" id="Node000002" href="$d5/d9a/codec__processor_8h.html" title=" " alt="" coords="229,79,429,133"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="563,37,417,81,415,76,561,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="588,37,426,81,424,76,586,32"/>
 <area shape="rect" id="Node000005" href="$de/d4b/file__system__codecs_8cpp_8hpp.html" title="FileSystem codec methods — compiled in fl.codec+ module." alt="" coords="454,189,605,229"/>
-<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="605,44,540,190,535,188,600,42"/>
-<area shape="rect" id="Node000009" href="$dd/d39/jpeg_8cpp_8hpp.html" title=" " alt="" coords="530,291,689,317"/>
-<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="617,44,620,129,619,236,614,291,608,291,613,236,615,129,612,44"/>
-<area shape="rect" id="Node000010" href="$d6/d8d/file__system_8h.html" title=" " alt="" coords="1315,93,1488,119"/>
-<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="686,24,1315,93,1314,98,685,30"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="631,44,543,190,538,187,626,41"/>
+<area shape="rect" id="Node000009" href="$dd/d39/jpeg_8cpp_8hpp.html" title=" " alt="" coords="386,291,545,317"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="650,44,653,85,652,135,642,189,632,214,618,238,599,258,575,273,526,294,524,289,573,269,595,254,614,234,627,212,637,187,647,135,648,85,644,45"/>
+<area shape="rect" id="Node000010" href="$df/d26/fs_8h.html" title=" " alt="" coords="1525,93,1600,119"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="715,23,1525,99,1525,104,714,29"/>
+<area shape="rect" id="Node000022" href="$d7/d7e/read_8h.html" title="Decoding files into FastLED types." alt="" coords="2368,196,2459,221"/>
+<area shape="poly" id="edge37_Node000001_Node000022" title=" " alt="" coords="714,19,1098,37,1353,54,1612,76,1982,109,2143,133,2346,179,2388,193,2386,198,2345,184,2142,138,1982,114,1612,81,1353,59,1098,43,714,24"/>
 <area shape="rect" id="Node000003" href="$da/dd2/_codec_8ino.html" title=" " alt="" coords="229,181,429,236"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="332,147,332,181,327,181,327,147"/>
 <area shape="rect" id="Node000004" href="$dc/de0/codec__processor_8cpp.html" title=" " alt="" coords="5,181,205,236"/>
 <area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="260,141,165,184,163,179,258,136"/>
-<area shape="rect" id="Node000006" href="$d7/df8/fl_2codec_2__build_8cpp_8hpp.html" title=" " alt="" coords="524,372,695,397"/>
-<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="519,242,512,283,513,303,520,323,531,338,545,351,578,369,575,374,542,355,527,342,515,325,508,304,506,282,514,241"/>
-<area shape="rect" id="Node000007" href="$d1/deb/fl_2__build_8cpp_8hpp.html" title=" " alt="" coords="729,445,857,471"/>
-<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="653,400,764,443,762,448,651,405"/>
-<area shape="rect" id="Node000008" href="$dd/dad/fl_8codec_09_8cpp.html" title="Unity build: recursive includes from src/fl/codec/." alt="" coords="530,445,689,471"/>
-<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="612,411,612,445,607,445,607,411"/>
-<area shape="poly" id="edge9_Node000009_Node000006" title=" " alt="" coords="612,330,612,372,607,372,607,330"/>
-<area shape="poly" id="edge12_Node000010_Node000005" title=" " alt="" coords="1301,119,1030,146,702,184,605,198,605,193,701,179,1030,141,1301,114"/>
-<area shape="rect" id="Node000011" href="$d7/d35/_fx_sd_card_8ino.html" title="Play a mapped video off an SD card." alt="" coords="1562,181,1793,236"/>
-<area shape="poly" id="edge11_Node000010_Node000011" title=" " alt="" coords="1446,121,1606,179,1604,184,1445,126"/>
-<area shape="rect" id="Node000012" href="$da/d96/file__system_8cpp_8hpp.html" title=" " alt="" coords="1817,196,2033,221"/>
-<area shape="poly" id="edge13_Node000010_Node000012" title=" " alt="" coords="1481,118,1806,179,1875,193,1874,199,1805,184,1480,124"/>
-<area shape="rect" id="Node000015" href="$d9/d55/file__system__sd_8cpp_8hpp.html" title="SD&#45;card support split off from file_system.cpp.hpp so the linker can tree&#45;shake the entire SD chain w..." alt="" coords="1087,189,1267,229"/>
-<area shape="poly" id="edge16_Node000010_Node000015" title=" " alt="" coords="1364,127,1221,191,1218,186,1362,122"/>
-<area shape="rect" id="Node000018" href="$de/d19/file__system__sd_8h.html" title="Header pair for file_system_sd.cpp.hpp." alt="" coords="2058,196,2273,221"/>
-<area shape="poly" id="edge18_Node000010_Node000018" title=" " alt="" coords="1502,113,1750,138,1898,157,2046,179,2119,193,2118,199,2045,184,1897,162,1749,144,1501,118"/>
-<area shape="rect" id="Node000019" href="$d3/dfa/pixel__stream_8h.html" title=" " alt="" coords="1316,196,1487,221"/>
-<area shape="poly" id="edge19_Node000010_Node000019" title=" " alt="" coords="1404,133,1404,196,1399,196,1399,133"/>
-<area shape="rect" id="Node000027" href="$d6/db7/video__impl_8cpp_8hpp.html" title=" " alt="" coords="1827,291,2029,317"/>
-<area shape="poly" id="edge24_Node000010_Node000027" title=" " alt="" coords="1431,125,1501,179,1525,209,1535,222,1552,234,1861,289,1860,294,1550,238,1532,226,1521,213,1497,183,1428,129"/>
-<area shape="rect" id="Node000028" href="$da/d7a/third__party_2_t_jpg___decoder_2driver_8h.html" title=" " alt="" coords="713,189,900,229"/>
-<area shape="poly" id="edge25_Node000010_Node000028" title=" " alt="" coords="1321,124,901,194,900,189,1320,118"/>
-<area shape="rect" id="Node000013" href="$d7/d7b/fl_2system_2__build_8cpp_8hpp.html" title="Unity build header for fl/system/ directory." alt="" coords="1347,372,1527,397"/>
-<area shape="poly" id="edge14_Node000012_Node000013" title=" " alt="" coords="1966,225,2002,244,2034,268,2046,282,2052,296,2052,311,2043,326,2017,339,1970,351,1832,367,1671,378,1528,384,1528,378,1671,373,1832,362,1969,345,2015,334,2039,322,2047,310,2047,297,2041,285,2031,272,1999,249,1964,229"/>
-<area shape="poly" id="edge15_Node000013_Node000007" title=" " alt="" coords="1334,400,858,452,857,447,1333,395"/>
-<area shape="rect" id="Node000016" href="$d7/d3b/fl_2system_2sd_2__build_8cpp_8hpp.html" title="Unity&#45;build aggregate for SD&#45;card support." alt="" coords="925,291,1123,317"/>
-<area shape="poly" id="edge17_Node000015_Node000016" title=" " alt="" coords="1136,238,1044,294,1042,289,1133,233"/>
-<area shape="rect" id="Node000020" href="$d6/d37/video_8cpp_8hpp.html" title=" " alt="" coords="1661,291,1803,317"/>
-<area shape="poly" id="edge20_Node000019_Node000020" title=" " alt="" coords="1456,222,1692,289,1690,294,1454,228"/>
-<area shape="rect" id="Node000023" href="$da/dfa/frame__interpolator_8cpp_8hpp.html" title=" " alt="" coords="1148,291,1399,317"/>
-<area shape="poly" id="edge21_Node000019_Node000023" title=" " alt="" coords="1376,231,1291,293,1288,289,1373,227"/>
-<area shape="rect" id="Node000026" href="$d2/db2/pixel__stream_8cpp_8hpp.html" title=" " alt="" coords="1423,291,1636,317"/>
-<area shape="poly" id="edge22_Node000019_Node000026" title=" " alt="" coords="1429,227,1515,289,1512,293,1426,231"/>
-<area shape="poly" id="edge23_Node000019_Node000027" title=" " alt="" coords="1457,222,1506,233,1661,259,1816,281,1861,289,1860,294,1816,287,1660,265,1505,239,1456,227"/>
-<area shape="poly" id="edge26_Node000028_Node000009" title=" " alt="" coords="756,237,635,294,633,289,753,232"/>
-<area shape="rect" id="Node000029" href="$d9/dc2/third__party_2_t_jpg___decoder_2driver_8cpp_8hpp.html" title=" " alt="" coords="713,284,900,324"/>
-<area shape="poly" id="edge27_Node000028_Node000029" title=" " alt="" coords="809,242,809,284,804,284,804,242"/>
+<area shape="rect" id="Node000006" href="$d7/df8/fl_2codec_2__build_8cpp_8hpp.html" title=" " alt="" coords="380,372,551,397"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="464,236,409,260,388,273,376,285,369,304,376,323,387,338,401,351,434,369,431,374,398,355,383,342,371,325,364,304,371,283,385,269,407,256,461,231"/>
+<area shape="rect" id="Node000007" href="$d1/deb/fl_2__build_8cpp_8hpp.html" title=" " alt="" coords="1156,445,1284,471"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="564,393,1156,448,1155,453,564,398"/>
+<area shape="rect" id="Node000008" href="$dd/dad/fl_8codec_09_8cpp.html" title="Unity build: recursive includes from src/fl/codec/." alt="" coords="386,445,545,471"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="468,411,468,445,463,445,463,411"/>
+<area shape="poly" id="edge9_Node000009_Node000006" title=" " alt="" coords="468,330,468,372,463,372,463,330"/>
+<area shape="poly" id="edge12_Node000010_Node000005" title=" " alt="" coords="1512,112,1158,135,915,156,668,184,605,194,604,189,668,179,915,150,1158,129,1511,107"/>
+<area shape="rect" id="Node000011" href="$d7/d35/_fx_sd_card_8ino.html" title="Play a mapped video off an SD card." alt="" coords="1817,181,2047,236"/>
+<area shape="poly" id="edge11_Node000010_Node000011" title=" " alt="" coords="1614,118,1837,179,1835,184,1612,124"/>
+<area shape="rect" id="Node000012" href="$df/d4d/fled_8cpp_8hpp.html" title=" " alt="" coords="1600,196,1741,221"/>
+<area shape="poly" id="edge13_Node000010_Node000012" title=" " alt="" coords="1587,126,1660,194,1657,198,1583,130"/>
+<area shape="rect" id="Node000015" href="$d6/d9a/embedded__fs_8h.html" title="Storage built into the microcontroller itself." alt="" coords="2071,196,2294,221"/>
+<area shape="poly" id="edge16_Node000010_Node000015" title=" " alt="" coords="1614,111,1810,138,2060,179,2133,193,2132,198,2060,184,1810,144,1613,117"/>
+<area shape="rect" id="Node000019" href="$d3/d6e/fs_8cpp_8hpp.html" title=" " alt="" coords="1924,291,2041,317"/>
+<area shape="poly" id="edge18_Node000010_Node000019" title=" " alt="" coords="1614,118,1683,142,1720,159,1755,179,1771,193,1781,207,1791,220,1807,234,1839,252,1873,267,1937,289,1935,294,1871,272,1836,257,1804,238,1787,224,1777,210,1767,197,1752,184,1718,164,1681,147,1612,123"/>
+<area shape="poly" id="edge20_Node000010_Node000022" title=" " alt="" coords="1614,108,1986,134,2197,154,2284,166,2350,179,2390,193,2389,198,2349,184,2283,171,2196,160,1986,139,1614,113"/>
+<area shape="rect" id="Node000024" href="$d6/d8d/file__system_8h.html" title="Compatibility forwarder." alt="" coords="2281,291,2455,317"/>
+<area shape="poly" id="edge27_Node000010_Node000024" title=" " alt="" coords="1614,107,1781,116,1998,131,2197,152,2268,165,2308,179,2334,205,2351,236,2369,290,2363,292,2347,238,2329,208,2305,184,2266,170,2196,157,1998,136,1781,121,1613,112"/>
+<area shape="rect" id="Node000026" href="$d9/d55/file__system__sd_8cpp_8hpp.html" title="SD&#45;card support split off from file_system.cpp.hpp so the linker can tree&#45;shake the entire SD chain w..." alt="" coords="680,189,824,229"/>
+<area shape="poly" id="edge24_Node000010_Node000026" title=" " alt="" coords="1512,112,1391,118,1223,131,1031,152,837,184,808,191,807,186,835,179,1030,147,1223,125,1391,113,1511,106"/>
+<area shape="rect" id="Node000029" href="$de/d19/file__system__sd_8h.html" title="Header pair for file_system_sd.cpp.hpp." alt="" coords="1347,196,1525,221"/>
+<area shape="poly" id="edge26_Node000010_Node000029" title=" " alt="" coords="1539,129,1452,198,1449,194,1536,125"/>
+<area shape="rect" id="Node000030" href="$d3/dfa/pixel__stream_8h.html" title=" " alt="" coords="1152,196,1323,221"/>
+<area shape="poly" id="edge28_Node000010_Node000030" title=" " alt="" coords="1513,125,1275,199,1273,193,1512,120"/>
+<area shape="rect" id="Node000038" href="$d6/db7/video__impl_8cpp_8hpp.html" title=" " alt="" coords="1647,291,1849,317"/>
+<area shape="poly" id="edge33_Node000010_Node000038" title=" " alt="" coords="1564,132,1568,183,1576,210,1590,234,1610,254,1634,269,1686,289,1684,294,1632,274,1607,258,1586,238,1571,212,1563,184,1558,133"/>
+<area shape="rect" id="Node000039" href="$da/d7a/third__party_2_t_jpg___decoder_2driver_8h.html" title=" " alt="" coords="848,189,1035,229"/>
+<area shape="poly" id="edge34_Node000010_Node000039" title=" " alt="" coords="1512,118,1035,195,1035,190,1512,113"/>
+<area shape="rect" id="Node000013" href="$d9/d9a/fl_2fled_2__build_8cpp_8hpp.html" title="Unity build header for fl/fled/ directory." alt="" coords="1622,372,1778,397"/>
+<area shape="poly" id="edge14_Node000012_Node000013" title=" " alt="" coords="1720,223,1808,254,1844,270,1863,282,1872,304,1864,325,1847,344,1826,359,1779,376,1777,371,1823,354,1843,340,1859,323,1866,304,1859,286,1842,274,1806,259,1718,228"/>
+<area shape="poly" id="edge15_Node000013_Node000007" title=" " alt="" coords="1610,402,1285,450,1284,445,1609,397"/>
+<area shape="rect" id="Node000016" href="$d4/d26/embedded__fs_8cpp_8hpp.html" title="Body of fl::getEmbeddedFs()." alt="" coords="2065,284,2257,324"/>
+<area shape="poly" id="edge17_Node000015_Node000016" title=" " alt="" coords="2180,235,2168,284,2163,283,2174,234"/>
+<area shape="rect" id="Node000020" href="$d0/dc9/fl_2fs_2__build_8cpp_8hpp.html" title="Unity&#45;build aggregate for the filesystem subsystem." alt="" coords="2096,372,2240,397"/>
+<area shape="poly" id="edge19_Node000019_Node000020" title=" " alt="" coords="2023,319,2142,370,2140,374,2021,324"/>
+<area shape="rect" id="Node000023" href="$d4/d86/read_8cpp_8hpp.html" title="Bodies for the format helpers declared in fl/fs/read.h." alt="" coords="2479,291,2614,317"/>
+<area shape="poly" id="edge21_Node000022_Node000023" title=" " alt="" coords="2442,227,2532,289,2529,293,2439,231"/>
+<area shape="poly" id="edge23_Node000022_Node000024" title=" " alt="" coords="2404,235,2376,292,2371,290,2399,232"/>
+<area shape="poly" id="edge22_Node000023_Node000020" title=" " alt="" coords="2486,322,2467,327,2229,375,2228,369,2466,321,2485,317"/>
+<area shape="rect" id="Node000027" href="$dc/d30/fl_2fs_2sd_2__build_8cpp_8hpp.html" title="Unity&#45;build aggregate for SD&#45;card support." alt="" coords="569,291,732,317"/>
+<area shape="poly" id="edge25_Node000026_Node000027" title=" " alt="" coords="723,240,665,293,662,289,719,236"/>
+<area shape="rect" id="Node000031" href="$d6/d37/video_8cpp_8hpp.html" title=" " alt="" coords="967,291,1110,317"/>
+<area shape="poly" id="edge29_Node000030_Node000031" title=" " alt="" coords="1202,229,1064,294,1062,289,1200,225"/>
+<area shape="rect" id="Node000034" href="$da/dfa/frame__interpolator_8cpp_8hpp.html" title=" " alt="" coords="1135,291,1385,317"/>
+<area shape="poly" id="edge30_Node000030_Node000034" title=" " alt="" coords="1246,234,1260,291,1255,292,1241,235"/>
+<area shape="rect" id="Node000037" href="$d2/db2/pixel__stream_8cpp_8hpp.html" title=" " alt="" coords="1409,291,1623,317"/>
+<area shape="poly" id="edge31_Node000030_Node000037" title=" " alt="" coords="1285,223,1482,289,1481,294,1283,228"/>
+<area shape="poly" id="edge32_Node000030_Node000038" title=" " alt="" coords="1290,222,1335,233,1485,260,1635,281,1680,289,1679,294,1634,287,1484,265,1334,239,1289,228"/>
+<area shape="poly" id="edge35_Node000039_Node000009" title=" " alt="" coords="856,234,837,239,697,264,558,287,521,294,520,289,557,281,696,258,835,233,855,229"/>
+<area shape="rect" id="Node000040" href="$d9/dc2/third__party_2_t_jpg___decoder_2driver_8cpp_8hpp.html" title=" " alt="" coords="756,284,943,324"/>
+<area shape="poly" id="edge36_Node000039_Node000040" title=" " alt="" coords="915,240,870,286,866,282,911,237"/>
 </map>

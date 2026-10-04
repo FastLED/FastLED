@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -131,103 +131,103 @@ $(function(){initNavTree('d1/dfb/colorutils_8h_a3d488dd1e2d27e99307310527e51cad3
 <dl class="section examples"><dt>Examples</dt><dd><a class="el" href="../../df/d66/_color_palette_8ino-example.html#a7">ColorPalette.ino</a>, <a class="el" href="../../db/dd5/_demo_reel100_8ino-example.html#a20">DemoReel100.ino</a>, <a class="el" href="../../dd/d7b/_fire2012_with_palette_8ino-example.html#a2">Fire2012WithPalette.ino</a>, <a class="el" href="../../d6/d86/_pacifica_8ino-example.html#a14">Pacifica.ino</a>, and <a class="el" href="../../df/d61/_twinkle_fox_8ino-example.html#a14">TwinkleFox.ino</a>.</dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="../../db/d4e/colorutils_8cpp_8hpp_source.html#l00395">395</a> of file <a class="el" href="../../db/d4e/colorutils_8cpp_8hpp_source.html">colorutils.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  396</span>                                                             {</div>
-<div class="line"><span class="lineno">  397</span>    <span class="keywordflow">if</span> (blendType == LINEARBLEND_NOWRAP) {</div>
-<div class="line"><span class="lineno">  398</span>        index = <a class="code hl_function" href="../../d6/d19/group___linear_interpolation_gaeb360269bf892a49b96b9ea8248ea8a7.html#gaeb360269bf892a49b96b9ea8248ea8a7">map8</a>(index, 0, 239); <span class="comment">// Blend range is affected by lo4 blend of</span></div>
-<div class="line"><span class="lineno">  399</span>                                     <span class="comment">// values, remap to avoid wrapping</span></div>
-<div class="line"><span class="lineno">  400</span>    }</div>
-<div class="line"><span class="lineno">  401</span> </div>
-<div class="line"><span class="lineno">  402</span>    <span class="comment">//      hi4 = index &gt;&gt; 4;</span></div>
-<div class="line"><span class="lineno">  403</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> hi4 = <a class="code hl_function" href="../../d4/d36/namespacefl_ab169b38b75fd1ab29b3dc61a32497ff1.html#ab169b38b75fd1ab29b3dc61a32497ff1">lsrX4</a>(index);</div>
-<div class="line"><span class="lineno">  404</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> lo4 = index &amp; 0x0F;</div>
-<div class="line"><span class="lineno">  405</span> </div>
-<div class="line"><span class="lineno">  406</span>    <span class="comment">// const CRGB* entry = &amp;(pal[0]) + hi4;</span></div>
-<div class="line"><span class="lineno">  407</span>    <span class="comment">// since hi4 is always 0..15, hi4 * sizeof(CRGB) can be a single-byte value,</span></div>
-<div class="line"><span class="lineno">  408</span>    <span class="comment">// instead of the two byte &#39;int&#39; that avr-gcc defaults to.</span></div>
-<div class="line"><span class="lineno">  409</span>    <span class="comment">// So, we multiply hi4 X sizeof(CRGB), giving hi4XsizeofCRGB;</span></div>
-<div class="line"><span class="lineno">  410</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> hi4XsizeofCRGB = hi4 * <span class="keyword">sizeof</span>(<a class="code hl_typedef" href="../../dd/dc7/group___h_s_v2_r_g_b_ga65c1895006b38f8c5114118b6a170327.html#ga65c1895006b38f8c5114118b6a170327">CRGB</a>);</div>
-<div class="line"><span class="lineno">  411</span>    <span class="comment">// We then add that to a base array pointer.</span></div>
-<div class="line"><span class="lineno">  412</span>    <span class="keyword">const</span> <a class="code hl_typedef" href="../../dd/dc7/group___h_s_v2_r_g_b_ga65c1895006b38f8c5114118b6a170327.html#ga65c1895006b38f8c5114118b6a170327">CRGB</a> *entry = (<a class="code hl_typedef" href="../../dd/dc7/group___h_s_v2_r_g_b_ga65c1895006b38f8c5114118b6a170327.html#ga65c1895006b38f8c5114118b6a170327">CRGB</a> *)((<a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> *)(&amp;(pal[0])) + hi4XsizeofCRGB);</div>
-<div class="line"><span class="lineno">  413</span> </div>
-<div class="line"><span class="lineno">  414</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> <a class="code hl_function" href="../../d1/dfb/colorutils_8h_a924fc8748f53389e55fdc63bfc14b805.html#a924fc8748f53389e55fdc63bfc14b805">blend</a> = lo4 &amp;&amp; (blendType != NOBLEND);</div>
-<div class="line"><span class="lineno">  415</span> </div>
-<div class="line"><span class="lineno">  416</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> red1 = entry-&gt;red;</div>
-<div class="line"><span class="lineno">  417</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> green1 = entry-&gt;green;</div>
-<div class="line"><span class="lineno">  418</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> blue1 = entry-&gt;blue;</div>
-<div class="line"><span class="lineno">  419</span> </div>
-<div class="line"><span class="lineno">  420</span>    <span class="keywordflow">if</span> (<a class="code hl_function" href="../../d1/dfb/colorutils_8h_a924fc8748f53389e55fdc63bfc14b805.html#a924fc8748f53389e55fdc63bfc14b805">blend</a>) {</div>
-<div class="line"><span class="lineno">  421</span> </div>
-<div class="line"><span class="lineno">  422</span>        <span class="keywordflow">if</span> (hi4 == 15) {</div>
-<div class="line"><span class="lineno">  423</span>            entry = &amp;(pal[0]);</div>
-<div class="line"><span class="lineno">  424</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  425</span>            ++entry;</div>
-<div class="line"><span class="lineno">  426</span>        }</div>
-<div class="line"><span class="lineno">  427</span> </div>
-<div class="line"><span class="lineno">  428</span>        <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> f2 = lo4 &lt;&lt; 4;</div>
-<div class="line"><span class="lineno">  429</span>        <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> f1 = 255 - f2;</div>
-<div class="line"><span class="lineno">  430</span> </div>
-<div class="line"><span class="lineno">  431</span>        <span class="comment">//    rgb1.nscale8(f1);</span></div>
-<div class="line"><span class="lineno">  432</span>        <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> red2 = entry-&gt;red;</div>
-<div class="line"><span class="lineno">  433</span>        red1 = scale8_LEAVING_R1_DIRTY(red1, f1);</div>
-<div class="line"><span class="lineno">  434</span>        red2 = scale8_LEAVING_R1_DIRTY(red2, f2);</div>
-<div class="line"><span class="lineno">  435</span>        red1 += red2;</div>
-<div class="line"><span class="lineno">  436</span> </div>
-<div class="line"><span class="lineno">  437</span>        <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> green2 = entry-&gt;green;</div>
-<div class="line"><span class="lineno">  438</span>        green1 = scale8_LEAVING_R1_DIRTY(green1, f1);</div>
-<div class="line"><span class="lineno">  439</span>        green2 = scale8_LEAVING_R1_DIRTY(green2, f2);</div>
-<div class="line"><span class="lineno">  440</span>        green1 += green2;</div>
-<div class="line"><span class="lineno">  441</span> </div>
-<div class="line"><span class="lineno">  442</span>        <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> blue2 = entry-&gt;blue;</div>
-<div class="line"><span class="lineno">  443</span>        blue1 = scale8_LEAVING_R1_DIRTY(blue1, f1);</div>
-<div class="line"><span class="lineno">  444</span>        blue2 = scale8_LEAVING_R1_DIRTY(blue2, f2);</div>
-<div class="line"><span class="lineno">  445</span>        blue1 += blue2;</div>
-<div class="line"><span class="lineno">  446</span> </div>
-<div class="line"><span class="lineno">  447</span>        cleanup_R1();</div>
-<div class="line"><span class="lineno">  448</span>    }</div>
-<div class="line"><span class="lineno">  449</span> </div>
-<div class="line"><span class="lineno">  450</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d6/d05/_animartrix_8ino_ab0d80715bb4b382856cf250c1eeb9b53.html#ab0d80715bb4b382856cf250c1eeb9b53">brightness</a> != 255) {</div>
-<div class="line"><span class="lineno">  451</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d6/d05/_animartrix_8ino_ab0d80715bb4b382856cf250c1eeb9b53.html#ab0d80715bb4b382856cf250c1eeb9b53">brightness</a>) {</div>
-<div class="line"><span class="lineno">  452</span>            ++<a class="code hl_variable" href="../../d6/d05/_animartrix_8ino_ab0d80715bb4b382856cf250c1eeb9b53.html#ab0d80715bb4b382856cf250c1eeb9b53">brightness</a>; <span class="comment">// adjust for rounding</span></div>
-<div class="line"><span class="lineno">  453</span>            <span class="comment">// Now, since brightness is nonzero, we don&#39;t need the full</span></div>
-<div class="line"><span class="lineno">  454</span>            <span class="comment">// scale8_video logic; we can just to scale8 and then add one</span></div>
-<div class="line"><span class="lineno">  455</span>            <span class="comment">// (unless scale8 fixed) to all nonzero inputs.</span></div>
-<div class="line"><span class="lineno">  456</span>            <span class="keywordflow">if</span> (red1) {</div>
-<div class="line"><span class="lineno">  457</span>                red1 = scale8_LEAVING_R1_DIRTY(red1, <a class="code hl_variable" href="../../d6/d05/_animartrix_8ino_ab0d80715bb4b382856cf250c1eeb9b53.html#ab0d80715bb4b382856cf250c1eeb9b53">brightness</a>);</div>
-<div class="line"><span class="lineno">  458</span><span class="preprocessor">#if !(FASTLED_SCALE8_FIXED == 1)</span></div>
-<div class="line"><span class="lineno">  459</span>                ++red1;</div>
-<div class="line"><span class="lineno">  460</span><span class="preprocessor">#endif</span></div>
-<div class="line"><span class="lineno">  461</span>            }</div>
-<div class="line"><span class="lineno">  462</span>            <span class="keywordflow">if</span> (green1) {</div>
-<div class="line"><span class="lineno">  463</span>                green1 = scale8_LEAVING_R1_DIRTY(green1, <a class="code hl_variable" href="../../d6/d05/_animartrix_8ino_ab0d80715bb4b382856cf250c1eeb9b53.html#ab0d80715bb4b382856cf250c1eeb9b53">brightness</a>);</div>
-<div class="line"><span class="lineno">  464</span><span class="preprocessor">#if !(FASTLED_SCALE8_FIXED == 1)</span></div>
-<div class="line"><span class="lineno">  465</span>                ++green1;</div>
-<div class="line"><span class="lineno">  466</span><span class="preprocessor">#endif</span></div>
-<div class="line"><span class="lineno">  467</span>            }</div>
-<div class="line"><span class="lineno">  468</span>            <span class="keywordflow">if</span> (blue1) {</div>
-<div class="line"><span class="lineno">  469</span>                blue1 = scale8_LEAVING_R1_DIRTY(blue1, <a class="code hl_variable" href="../../d6/d05/_animartrix_8ino_ab0d80715bb4b382856cf250c1eeb9b53.html#ab0d80715bb4b382856cf250c1eeb9b53">brightness</a>);</div>
-<div class="line"><span class="lineno">  470</span><span class="preprocessor">#if !(FASTLED_SCALE8_FIXED == 1)</span></div>
-<div class="line"><span class="lineno">  471</span>                ++blue1;</div>
-<div class="line"><span class="lineno">  472</span><span class="preprocessor">#endif</span></div>
-<div class="line"><span class="lineno">  473</span>            }</div>
-<div class="line"><span class="lineno">  474</span>            cleanup_R1();</div>
-<div class="line"><span class="lineno">  475</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  476</span>            red1 = 0;</div>
-<div class="line"><span class="lineno">  477</span>            green1 = 0;</div>
-<div class="line"><span class="lineno">  478</span>            blue1 = 0;</div>
-<div class="line"><span class="lineno">  479</span>        }</div>
-<div class="line"><span class="lineno">  480</span>    }</div>
-<div class="line"><span class="lineno">  481</span> </div>
-<div class="line"><span class="lineno">  482</span>    <span class="keywordflow">return</span> <a class="code hl_typedef" href="../../dd/dc7/group___h_s_v2_r_g_b_ga65c1895006b38f8c5114118b6a170327.html#ga65c1895006b38f8c5114118b6a170327">CRGB</a>(red1, green1, blue1);</div>
-<div class="line"><span class="lineno">  483</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../db/d4e/colorutils_8cpp_8hpp_source.html#l00476">476</a> of file <a class="el" href="../../db/d4e/colorutils_8cpp_8hpp_source.html">colorutils.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  477</span>                                                             {</div>
+<div class="line"><span class="lineno">  478</span>    <span class="keywordflow">if</span> (blendType == LINEARBLEND_NOWRAP) {</div>
+<div class="line"><span class="lineno">  479</span>        index = <a class="code hl_function" href="../../d6/d19/group___linear_interpolation_gaeb360269bf892a49b96b9ea8248ea8a7.html#gaeb360269bf892a49b96b9ea8248ea8a7">map8</a>(index, 0, 239); <span class="comment">// Blend range is affected by lo4 blend of</span></div>
+<div class="line"><span class="lineno">  480</span>                                     <span class="comment">// values, remap to avoid wrapping</span></div>
+<div class="line"><span class="lineno">  481</span>    }</div>
+<div class="line"><span class="lineno">  482</span> </div>
+<div class="line"><span class="lineno">  483</span>    <span class="comment">//      hi4 = index &gt;&gt; 4;</span></div>
+<div class="line"><span class="lineno">  484</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> hi4 = <a class="code hl_function" href="../../d4/d36/namespacefl_ab169b38b75fd1ab29b3dc61a32497ff1.html#ab169b38b75fd1ab29b3dc61a32497ff1">lsrX4</a>(index);</div>
+<div class="line"><span class="lineno">  485</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> lo4 = index &amp; 0x0F;</div>
+<div class="line"><span class="lineno">  486</span> </div>
+<div class="line"><span class="lineno">  487</span>    <span class="comment">// const CRGB* entry = &amp;(pal[0]) + hi4;</span></div>
+<div class="line"><span class="lineno">  488</span>    <span class="comment">// since hi4 is always 0..15, hi4 * sizeof(CRGB) can be a single-byte value,</span></div>
+<div class="line"><span class="lineno">  489</span>    <span class="comment">// instead of the two byte &#39;int&#39; that avr-gcc defaults to.</span></div>
+<div class="line"><span class="lineno">  490</span>    <span class="comment">// So, we multiply hi4 X sizeof(CRGB), giving hi4XsizeofCRGB;</span></div>
+<div class="line"><span class="lineno">  491</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> hi4XsizeofCRGB = hi4 * <span class="keyword">sizeof</span>(<a class="code hl_typedef" href="../../dd/dc7/group___h_s_v2_r_g_b_ga65c1895006b38f8c5114118b6a170327.html#ga65c1895006b38f8c5114118b6a170327">CRGB</a>);</div>
+<div class="line"><span class="lineno">  492</span>    <span class="comment">// We then add that to a base array pointer.</span></div>
+<div class="line"><span class="lineno">  493</span>    <span class="keyword">const</span> <a class="code hl_typedef" href="../../dd/dc7/group___h_s_v2_r_g_b_ga65c1895006b38f8c5114118b6a170327.html#ga65c1895006b38f8c5114118b6a170327">CRGB</a> *entry = (<a class="code hl_typedef" href="../../dd/dc7/group___h_s_v2_r_g_b_ga65c1895006b38f8c5114118b6a170327.html#ga65c1895006b38f8c5114118b6a170327">CRGB</a> *)((<a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> *)(&amp;(pal[0])) + hi4XsizeofCRGB);</div>
+<div class="line"><span class="lineno">  494</span> </div>
+<div class="line"><span class="lineno">  495</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> <a class="code hl_function" href="../../d1/dfb/colorutils_8h_a924fc8748f53389e55fdc63bfc14b805.html#a924fc8748f53389e55fdc63bfc14b805">blend</a> = lo4 &amp;&amp; (blendType != NOBLEND);</div>
+<div class="line"><span class="lineno">  496</span> </div>
+<div class="line"><span class="lineno">  497</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> red1 = entry-&gt;red;</div>
+<div class="line"><span class="lineno">  498</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> green1 = entry-&gt;green;</div>
+<div class="line"><span class="lineno">  499</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> blue1 = entry-&gt;blue;</div>
+<div class="line"><span class="lineno">  500</span> </div>
+<div class="line"><span class="lineno">  501</span>    <span class="keywordflow">if</span> (<a class="code hl_function" href="../../d1/dfb/colorutils_8h_a924fc8748f53389e55fdc63bfc14b805.html#a924fc8748f53389e55fdc63bfc14b805">blend</a>) {</div>
+<div class="line"><span class="lineno">  502</span> </div>
+<div class="line"><span class="lineno">  503</span>        <span class="keywordflow">if</span> (hi4 == 15) {</div>
+<div class="line"><span class="lineno">  504</span>            entry = &amp;(pal[0]);</div>
+<div class="line"><span class="lineno">  505</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  506</span>            ++entry;</div>
+<div class="line"><span class="lineno">  507</span>        }</div>
+<div class="line"><span class="lineno">  508</span> </div>
+<div class="line"><span class="lineno">  509</span>        <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> f2 = lo4 &lt;&lt; 4;</div>
+<div class="line"><span class="lineno">  510</span>        <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> f1 = 255 - f2;</div>
+<div class="line"><span class="lineno">  511</span> </div>
+<div class="line"><span class="lineno">  512</span>        <span class="comment">//    rgb1.nscale8(f1);</span></div>
+<div class="line"><span class="lineno">  513</span>        <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> red2 = entry-&gt;red;</div>
+<div class="line"><span class="lineno">  514</span>        red1 = scale8_LEAVING_R1_DIRTY(red1, f1);</div>
+<div class="line"><span class="lineno">  515</span>        red2 = scale8_LEAVING_R1_DIRTY(red2, f2);</div>
+<div class="line"><span class="lineno">  516</span>        red1 += red2;</div>
+<div class="line"><span class="lineno">  517</span> </div>
+<div class="line"><span class="lineno">  518</span>        <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> green2 = entry-&gt;green;</div>
+<div class="line"><span class="lineno">  519</span>        green1 = scale8_LEAVING_R1_DIRTY(green1, f1);</div>
+<div class="line"><span class="lineno">  520</span>        green2 = scale8_LEAVING_R1_DIRTY(green2, f2);</div>
+<div class="line"><span class="lineno">  521</span>        green1 += green2;</div>
+<div class="line"><span class="lineno">  522</span> </div>
+<div class="line"><span class="lineno">  523</span>        <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> blue2 = entry-&gt;blue;</div>
+<div class="line"><span class="lineno">  524</span>        blue1 = scale8_LEAVING_R1_DIRTY(blue1, f1);</div>
+<div class="line"><span class="lineno">  525</span>        blue2 = scale8_LEAVING_R1_DIRTY(blue2, f2);</div>
+<div class="line"><span class="lineno">  526</span>        blue1 += blue2;</div>
+<div class="line"><span class="lineno">  527</span> </div>
+<div class="line"><span class="lineno">  528</span>        cleanup_R1();</div>
+<div class="line"><span class="lineno">  529</span>    }</div>
+<div class="line"><span class="lineno">  530</span> </div>
+<div class="line"><span class="lineno">  531</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d6/d05/_animartrix_8ino_ab0d80715bb4b382856cf250c1eeb9b53.html#ab0d80715bb4b382856cf250c1eeb9b53">brightness</a> != 255) {</div>
+<div class="line"><span class="lineno">  532</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d6/d05/_animartrix_8ino_ab0d80715bb4b382856cf250c1eeb9b53.html#ab0d80715bb4b382856cf250c1eeb9b53">brightness</a>) {</div>
+<div class="line"><span class="lineno">  533</span>            ++<a class="code hl_variable" href="../../d6/d05/_animartrix_8ino_ab0d80715bb4b382856cf250c1eeb9b53.html#ab0d80715bb4b382856cf250c1eeb9b53">brightness</a>; <span class="comment">// adjust for rounding</span></div>
+<div class="line"><span class="lineno">  534</span>            <span class="comment">// Now, since brightness is nonzero, we don&#39;t need the full</span></div>
+<div class="line"><span class="lineno">  535</span>            <span class="comment">// scale8_video logic; we can just to scale8 and then add one</span></div>
+<div class="line"><span class="lineno">  536</span>            <span class="comment">// (unless scale8 fixed) to all nonzero inputs.</span></div>
+<div class="line"><span class="lineno">  537</span>            <span class="keywordflow">if</span> (red1) {</div>
+<div class="line"><span class="lineno">  538</span>                red1 = scale8_LEAVING_R1_DIRTY(red1, <a class="code hl_variable" href="../../d6/d05/_animartrix_8ino_ab0d80715bb4b382856cf250c1eeb9b53.html#ab0d80715bb4b382856cf250c1eeb9b53">brightness</a>);</div>
+<div class="line"><span class="lineno">  539</span><span class="preprocessor">#if !(FASTLED_SCALE8_FIXED == 1)</span></div>
+<div class="line"><span class="lineno">  540</span>                ++red1;</div>
+<div class="line"><span class="lineno">  541</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">  542</span>            }</div>
+<div class="line"><span class="lineno">  543</span>            <span class="keywordflow">if</span> (green1) {</div>
+<div class="line"><span class="lineno">  544</span>                green1 = scale8_LEAVING_R1_DIRTY(green1, <a class="code hl_variable" href="../../d6/d05/_animartrix_8ino_ab0d80715bb4b382856cf250c1eeb9b53.html#ab0d80715bb4b382856cf250c1eeb9b53">brightness</a>);</div>
+<div class="line"><span class="lineno">  545</span><span class="preprocessor">#if !(FASTLED_SCALE8_FIXED == 1)</span></div>
+<div class="line"><span class="lineno">  546</span>                ++green1;</div>
+<div class="line"><span class="lineno">  547</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">  548</span>            }</div>
+<div class="line"><span class="lineno">  549</span>            <span class="keywordflow">if</span> (blue1) {</div>
+<div class="line"><span class="lineno">  550</span>                blue1 = scale8_LEAVING_R1_DIRTY(blue1, <a class="code hl_variable" href="../../d6/d05/_animartrix_8ino_ab0d80715bb4b382856cf250c1eeb9b53.html#ab0d80715bb4b382856cf250c1eeb9b53">brightness</a>);</div>
+<div class="line"><span class="lineno">  551</span><span class="preprocessor">#if !(FASTLED_SCALE8_FIXED == 1)</span></div>
+<div class="line"><span class="lineno">  552</span>                ++blue1;</div>
+<div class="line"><span class="lineno">  553</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">  554</span>            }</div>
+<div class="line"><span class="lineno">  555</span>            cleanup_R1();</div>
+<div class="line"><span class="lineno">  556</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  557</span>            red1 = 0;</div>
+<div class="line"><span class="lineno">  558</span>            green1 = 0;</div>
+<div class="line"><span class="lineno">  559</span>            blue1 = 0;</div>
+<div class="line"><span class="lineno">  560</span>        }</div>
+<div class="line"><span class="lineno">  561</span>    }</div>
+<div class="line"><span class="lineno">  562</span> </div>
+<div class="line"><span class="lineno">  563</span>    <span class="keywordflow">return</span> <a class="code hl_typedef" href="../../dd/dc7/group___h_s_v2_r_g_b_ga65c1895006b38f8c5114118b6a170327.html#ga65c1895006b38f8c5114118b6a170327">CRGB</a>(red1, green1, blue1);</div>
+<div class="line"><span class="lineno">  564</span>}</div>
 <div class="ttc" id="a_animartrix_8ino_ab0d80715bb4b382856cf250c1eeb9b53_html_ab0d80715bb4b382856cf250c1eeb9b53"><div class="ttname"><a href="../../d6/d05/_animartrix_8ino_ab0d80715bb4b382856cf250c1eeb9b53.html#ab0d80715bb4b382856cf250c1eeb9b53">brightness</a></div><div class="ttdeci">fl::UISlider brightness(&quot;Brightness&quot;, BRIGHTNESS, 0, 255)</div></div>
-<div class="ttc" id="acolorutils_8h_a924fc8748f53389e55fdc63bfc14b805_html_a924fc8748f53389e55fdc63bfc14b805"><div class="ttname"><a href="../../d1/dfb/colorutils_8h_a924fc8748f53389e55fdc63bfc14b805.html#a924fc8748f53389e55fdc63bfc14b805">blend</a></div><div class="ttdeci">CRGB blend(const CRGB &amp;p1, const CRGB &amp;p2, fract8 amountOfP2)</div><div class="ttdef"><b>Definition</b> <a href="../../db/d4e/colorutils_8cpp_8hpp_source.html#l00063">colorutils.cpp.hpp:63</a></div></div>
+<div class="ttc" id="acolorutils_8h_a924fc8748f53389e55fdc63bfc14b805_html_a924fc8748f53389e55fdc63bfc14b805"><div class="ttname"><a href="../../d1/dfb/colorutils_8h_a924fc8748f53389e55fdc63bfc14b805.html#a924fc8748f53389e55fdc63bfc14b805">blend</a></div><div class="ttdeci">CRGB blend(const CRGB &amp;p1, const CRGB &amp;p2, fract8 amountOfP2)</div><div class="ttdef"><b>Definition</b> <a href="../../db/d4e/colorutils_8cpp_8hpp_source.html#l00128">colorutils.cpp.hpp:128</a></div></div>
 <div class="ttc" id="agroup___h_s_v2_r_g_b_ga65c1895006b38f8c5114118b6a170327_html_ga65c1895006b38f8c5114118b6a170327"><div class="ttname"><a href="../../dd/dc7/group___h_s_v2_r_g_b_ga65c1895006b38f8c5114118b6a170327.html#ga65c1895006b38f8c5114118b6a170327">CRGB</a></div><div class="ttdeci">fl::CRGB CRGB</div><div class="ttdef"><b>Definition</b> <a href="../../db/dd1/crgb_8h_source.html#l00025">crgb.h:25</a></div></div>
 <div class="ttc" id="agroup___linear_interpolation_gaeb360269bf892a49b96b9ea8248ea8a7_html_gaeb360269bf892a49b96b9ea8248ea8a7"><div class="ttname"><a href="../../d6/d19/group___linear_interpolation_gaeb360269bf892a49b96b9ea8248ea8a7.html#gaeb360269bf892a49b96b9ea8248ea8a7">map8</a></div><div class="ttdeci">LIB8STATIC fl::u8 map8(fl::u8 in, fl::u8 rangeStart, fl::u8 rangeEnd)</div><div class="ttdoc">Map from one full-range 8-bit value into a narrower range of 8-bit values, possibly a range of hues.</div><div class="ttdef"><b>Definition</b> <a href="../../df/da5/lib8tion_8h_source.html#l00467">lib8tion.h:467</a></div></div>
 <div class="ttc" id="anamespacefl_a058ceeac48f181da463c2ba07401292c_html_a058ceeac48f181da463c2ba07401292c"><div class="ttname"><a href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a></div><div class="ttdeci">unsigned char u8</div><div class="ttdef"><b>Definition</b> <a href="../../df/dd8/stdint_8h_source.html#l00131">stdint.h:131</a></div></div>
-<div class="ttc" id="anamespacefl_ab169b38b75fd1ab29b3dc61a32497ff1_html_ab169b38b75fd1ab29b3dc61a32497ff1"><div class="ttname"><a href="../../d4/d36/namespacefl_ab169b38b75fd1ab29b3dc61a32497ff1.html#ab169b38b75fd1ab29b3dc61a32497ff1">fl::lsrX4</a></div><div class="ttdeci">fl::u8 lsrX4(fl::u8 dividend)</div><div class="ttdoc">Helper function to divide a number by 16, aka four logical shift right (LSR)&#39;s.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d4e/colorutils_8cpp_8hpp_source.html#l00243">colorutils.cpp.hpp:243</a></div></div>
+<div class="ttc" id="anamespacefl_ab169b38b75fd1ab29b3dc61a32497ff1_html_ab169b38b75fd1ab29b3dc61a32497ff1"><div class="ttname"><a href="../../d4/d36/namespacefl_ab169b38b75fd1ab29b3dc61a32497ff1.html#ab169b38b75fd1ab29b3dc61a32497ff1">fl::lsrX4</a></div><div class="ttdeci">fl::u8 lsrX4(fl::u8 dividend)</div><div class="ttdoc">Helper function to divide a number by 16, aka four logical shift right (LSR)&#39;s.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d4e/colorutils_8cpp_8hpp_source.html#l00324">colorutils.cpp.hpp:324</a></div></div>
 </div><!-- fragment -->
-<p class="reference">Referenced by <a class="el" href="../../dc/d33/gradient_8cpp_8hpp_source.html#l00012">fl::anonymous_namespace{gradient.cpp.hpp}::Visitor::accept()</a>, <a class="el" href="../../dc/d33/gradient_8cpp_8hpp_source.html#l00017">fl::anonymous_namespace{gradient.cpp.hpp}::Visitor::accept()</a>, <a class="el" href="../../dc/d33/gradient_8cpp_8hpp_source.html#l00053">fl::anonymous_namespace{gradient.cpp.hpp}::VisitorFill::accept()</a>, <a class="el" href="../../dc/d33/gradient_8cpp_8hpp_source.html#l00059">fl::anonymous_namespace{gradient.cpp.hpp}::VisitorFill::accept()</a>, <a class="el" href="../../d5/d25/_demo_reel100_8ino_source.html#l00116">bpm()</a>, <a class="el" href="../../d4/dd0/_twinkle_fox_8ino_source.html#l00229">computeOneTwinkle()</a>, <a class="el" href="../../da/dc7/advanced_8h_source.html#l00432">drawPlasmaWave()</a>, <a class="el" href="../../da/dc7/advanced_8h_source.html#l00232">drawRadialSpectrum()</a>, <a class="el" href="../../da/dc7/advanced_8h_source.html#l00182">drawSpectrumBars()</a>, <a class="el" href="../../da/dc7/advanced_8h_source.html#l00341">drawVUMeter()</a>, <a class="el" href="../../da/dc7/advanced_8h_source.html#l00268">drawWaveform()</a>, <a class="el" href="../../d4/d06/curr_8h_source.html#l00608">fillFrameBufferFire()</a>, <a class="el" href="../../d4/d06/curr_8h_source.html#l00434">fillFrameBufferNoise()</a>, <a class="el" href="../../d1/dc5/_color_palette_8ino_source.html#l00078">FillLEDsFromPaletteColors()</a>, <a class="el" href="../../db/d92/_fire2012_with_palette_8ino_source.html#l00062">Fire2012WithPalette()</a>, <a class="el" href="../../de/d71/_fire2023_8h_source.html#l00138">Fire2023()</a>, <a class="el" href="../../d8/dd0/_fire_cylinder_8h_source.html#l00173">loop()</a>, and <a class="el" href="../../dc/d25/_pacifica_8ino_source.html#l00126">pacifica_one_layer()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dc/d33/gradient_8cpp_8hpp_source.html#l00012">fl::anonymous_namespace{gradient.cpp.hpp}::Visitor::accept()</a>, <a class="el" href="../../dc/d33/gradient_8cpp_8hpp_source.html#l00017">fl::anonymous_namespace{gradient.cpp.hpp}::Visitor::accept()</a>, <a class="el" href="../../dc/d33/gradient_8cpp_8hpp_source.html#l00053">fl::anonymous_namespace{gradient.cpp.hpp}::VisitorFill::accept()</a>, <a class="el" href="../../dc/d33/gradient_8cpp_8hpp_source.html#l00059">fl::anonymous_namespace{gradient.cpp.hpp}::VisitorFill::accept()</a>, <a class="el" href="../../d5/d25/_demo_reel100_8ino_source.html#l00116">bpm()</a>, <a class="el" href="../../d4/dd0/_twinkle_fox_8ino_source.html#l00234">computeOneTwinkle()</a>, <a class="el" href="../../da/dc7/advanced_8h_source.html#l00432">drawPlasmaWave()</a>, <a class="el" href="../../da/dc7/advanced_8h_source.html#l00232">drawRadialSpectrum()</a>, <a class="el" href="../../da/dc7/advanced_8h_source.html#l00182">drawSpectrumBars()</a>, <a class="el" href="../../da/dc7/advanced_8h_source.html#l00341">drawVUMeter()</a>, <a class="el" href="../../da/dc7/advanced_8h_source.html#l00268">drawWaveform()</a>, <a class="el" href="../../d4/d06/curr_8h_source.html#l00608">fillFrameBufferFire()</a>, <a class="el" href="../../d4/d06/curr_8h_source.html#l00434">fillFrameBufferNoise()</a>, <a class="el" href="../../d1/dc5/_color_palette_8ino_source.html#l00078">FillLEDsFromPaletteColors()</a>, <a class="el" href="../../db/d92/_fire2012_with_palette_8ino_source.html#l00062">Fire2012WithPalette()</a>, <a class="el" href="../../de/d71/_fire2023_8h_source.html#l00138">Fire2023()</a>, <a class="el" href="../../db/d49/_audio_2simple_2simple_8h_source.html#l00188">loop()</a>, and <a class="el" href="../../dc/d25/_pacifica_8ino_source.html#l00126">pacifica_one_layer()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -245,7 +245,7 @@ $(function(){initNavTree('d1/dfb/colorutils_8h_a3d488dd1e2d27e99307310527e51cad3
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d1/dfb/colorutils_8h.html">colorutils.h</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:01 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:04 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

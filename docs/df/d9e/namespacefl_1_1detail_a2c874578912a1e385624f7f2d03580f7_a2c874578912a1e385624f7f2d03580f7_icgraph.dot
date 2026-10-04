@@ -1,0 +1,16 @@
+digraph "fl::detail::availableRuntime"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::detail::availableRuntime",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::detail::DeviceInfoResolver\l\< Bus::AUTO, Which \>::get",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d7d/structfl_1_1detail_1_1_device_info_resolver_3_01_bus_1_1_a_u_t_o_00_01_which_01_4_adf4090ae7f8e3c95a0626ec088a49e09.html#adf4090ae7f8e3c95a0626ec088a49e09",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::detail::makeInfo",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d9e/namespacefl_1_1detail_ae3b7c3bf636ea67cae77e9301c659ed5.html#ae3b7c3bf636ea67cae77e9301c659ed5",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::detail::DeviceInfoResolver\l\< Bus::BIT_BANG, Which \>::get",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/da0/structfl_1_1detail_1_1_device_info_resolver_3_01_bus_1_1_b_i_t___b_a_n_g_00_01_which_01_4_ab5147d9723b70c568a897616e3d9c89e.html#ab5147d9723b70c568a897616e3d9c89e",tooltip=" "];
+}

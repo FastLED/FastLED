@@ -1,0 +1,13 @@
+<map id="fl::audio::Processor::getTempoConfidence" name="fl::audio::Processor::getTempoConfidence">
+<area shape="rect" id="Node000001" title=" " alt="" coords="480,69,647,109"/>
+<area shape="poly" id="edge3_Node000001_Node000001" title=" " alt="" coords="601,58,588,51,563,48,542,50,529,55,524,61,527,68,521,70,519,60,526,50,541,45,563,43,589,46,604,53"/>
+<area shape="rect" id="Node000002" href="$dc/d25/classmood__ring_1_1_room_listener_ab5ab816f13ce6bdd812624d4cdffa45d.html#ab5ab816f13ce6bdd812624d4cdffa45d" title=" " alt="" coords="243,5,432,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="478,68,408,48,409,43,479,63"/>
+<area shape="rect" id="Node000004" href="$d8/dea/classfl_1_1audio_1_1_reactive_a56cdf2839bd5e16a0aeaa58f75a2f39a.html#a56cdf2839bd5e16a0aeaa58f75a2f39a" title=" " alt="" coords="254,69,421,109"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="466,92,421,92,421,87,466,87"/>
+<area shape="rect" id="Node000005" href="$d3/d6b/classfl_1_1audio_1_1_processor_a3209b620bdf4732030f5ed259cc7fce5.html#a3209b620bdf4732030f5ed259cc7fce5" title=" " alt="" coords="265,157,410,197"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="499,117,391,160,389,155,497,112"/>
+<area shape="rect" id="Node000003" href="$dc/d25/classmood__ring_1_1_room_listener_a101688d3da23eff686cdd2e709b3bc77.html#a101688d3da23eff686cdd2e709b3bc77" title="Poll the Processor and refresh sense(). Call once per frame." alt="" coords="5,5,195,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="229,28,195,28,195,23,229,23"/>
+<area shape="poly" id="edge6_Node000005_Node000005" title=" " alt="" coords="375,146,362,139,337,136,316,138,303,143,298,149,301,156,295,158,293,148,300,138,315,133,337,131,363,134,378,141"/>
+</map>

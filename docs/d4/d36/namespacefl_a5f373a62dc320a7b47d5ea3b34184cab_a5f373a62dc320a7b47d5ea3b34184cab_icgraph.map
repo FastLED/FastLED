@@ -1,0 +1,85 @@
+<map id="fl::strlen" name="fl::strlen">
+<area shape="rect" id="Node000001" title=" " alt="" coords="649,726,724,751"/>
+<area shape="rect" id="Node000002" href="$dc/da7/classfl_1_1_string_holder_af3dffad310e530a2855163d8e927e70b.html#af3dffad310e530a2855163d8e927e70b" title=" " alt="" coords="412,63,577,103"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="682,712,678,591,665,420,654,332,640,251,622,183,599,136,582,118,560,105,563,100,585,114,604,133,627,181,645,250,660,331,670,420,683,591,688,712"/>
+<area shape="rect" id="Node000005" href="$de/d66/classfl_1_1basic__string_afd7f50bf06c9c391098fdaa9060c5a09.html#afd7f50bf06c9c391098fdaa9060c5a09" title=" " alt="" coords="409,147,581,173"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="682,712,679,598,667,440,657,359,642,286,623,226,612,203,599,186,579,172,583,167,603,182,616,200,628,224,647,285,662,359,673,439,684,598,688,712"/>
+<area shape="rect" id="Node000009" href="$de/d66/classfl_1_1basic__string_a0e476a4ce06879b0e3d3e1ce3f6ea694.html#a0e476a4ce06879b0e3d3e1ce3f6ea694" title=" " alt="" coords="409,197,581,222"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="682,713,677,608,664,465,653,392,639,325,621,271,599,235,579,221,582,217,603,232,626,269,645,324,659,391,669,464,682,608,687,712"/>
+<area shape="rect" id="Node000010" href="$de/d66/classfl_1_1basic__string_a3e53921d8f0ef73d2883997ab537fcbb.html#a3e53921d8f0ef73d2883997ab537fcbb" title=" " alt="" coords="409,246,581,271"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="682,712,675,617,661,488,650,423,636,365,620,317,599,285,579,270,582,266,603,281,624,314,641,363,655,422,666,488,680,617,687,712"/>
+<area shape="rect" id="Node000011" href="$d2/db2/classfl_1_1string_a32a268e06c0eb5d94d4e1fa3e7becee7.html#a32a268e06c0eb5d94d4e1fa3e7becee7" title=" " alt="" coords="418,295,571,321"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="681,712,673,626,658,512,633,404,618,362,599,334,586,324,571,317,573,312,589,319,603,330,622,359,638,402,663,511,678,626,686,712"/>
+<area shape="rect" id="Node000012" href="$de/d66/classfl_1_1basic__string_a416ff7f3a636346e803d5e17b8cf76b3.html#a416ff7f3a636346e803d5e17b8cf76b3" title=" " alt="" coords="404,345,585,370"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="680,713,671,636,654,537,630,443,616,407,599,383,584,372,587,368,603,379,620,405,635,442,659,536,676,635,685,712"/>
+<area shape="rect" id="Node000013" href="$d4/d36/namespacefl_a6913bcc5545eb4b029ec170d48a14766.html#a6913bcc5545eb4b029ec170d48a14766" title=" " alt="" coords="388,394,601,419"/>
+<area shape="poly" id="edge12_Node000001_Node000013" title=" " alt="" coords="684,713,682,655,671,580,661,540,646,501,626,465,600,434,582,422,585,417,603,430,630,462,651,499,666,538,677,579,687,654,689,712"/>
+<area shape="rect" id="Node000015" href="$d4/d36/namespacefl_a4c5381818ea42c674c16b43466bedef0.html#a4c5381818ea42c674c16b43466bedef0" title="Create a streamed JSON&#45;RPC ResponseSink that writes directly to serial." alt="" coords="405,444,584,484"/>
+<area shape="poly" id="edge14_Node000001_Node000015" title=" " alt="" coords="681,712,675,666,662,608,637,549,620,522,600,498,583,486,586,481,603,494,625,519,642,547,667,607,680,665,686,712"/>
+<area shape="rect" id="Node000016" href="$de/d66/classfl_1_1basic__string_a752ce6d635ae28d3d861bfbac19d0439.html#a752ce6d635ae28d3d861bfbac19d0439" title=" " alt="" coords="399,509,590,534"/>
+<area shape="poly" id="edge15_Node000001_Node000016" title=" " alt="" coords="679,713,670,675,655,631,632,586,600,549,580,536,582,532,603,545,637,583,660,629,675,674,684,712"/>
+<area shape="rect" id="Node000018" href="$de/d66/classfl_1_1basic__string_a6884e1a546c416065397dc76092a4e06.html#a6884e1a546c416065397dc76092a4e06" title=" " alt="" coords="421,559,569,599"/>
+<area shape="poly" id="edge17_Node000001_Node000018" title=" " alt="" coords="673,715,645,663,624,636,600,613,568,596,570,591,603,608,628,632,649,660,677,712"/>
+<area shape="rect" id="Node000019" href="$de/d66/classfl_1_1basic__string_aed4cb68b6016f7a8c3e89e53bf013d90.html#aed4cb68b6016f7a8c3e89e53bf013d90" title=" " alt="" coords="421,623,569,663"/>
+<area shape="poly" id="edge18_Node000001_Node000019" title=" " alt="" coords="660,719,632,697,600,677,568,663,570,659,603,672,635,693,663,715"/>
+<area shape="rect" id="Node000020" href="$de/d66/classfl_1_1basic__string_acdfbca273f132b4f11175fe2361019c9.html#acdfbca273f132b4f11175fe2361019c9" title=" " alt="" coords="421,687,569,727"/>
+<area shape="poly" id="edge19_Node000001_Node000020" title=" " alt="" coords="635,733,568,722,569,716,636,728"/>
+<area shape="rect" id="Node000021" href="$de/d66/classfl_1_1basic__string_a85dda0565f47ab25b8557fbb2b332333.html#a85dda0565f47ab25b8557fbb2b332333" title=" " alt="" coords="421,751,569,791"/>
+<area shape="poly" id="edge20_Node000001_Node000021" title=" " alt="" coords="636,750,569,761,568,756,635,744"/>
+<area shape="rect" id="Node000022" href="$de/d66/classfl_1_1basic__string_af926658eb9f7d50d82f970258acdee59.html#af926658eb9f7d50d82f970258acdee59" title=" " alt="" coords="414,815,575,841"/>
+<area shape="poly" id="edge21_Node000001_Node000022" title=" " alt="" coords="664,763,636,785,602,805,568,818,566,813,600,800,633,781,661,758"/>
+<area shape="rect" id="Node000023" href="$da/db8/classfl_1_1_font_renderer_a0c99d50122d49875783631ca5881383a.html#a0c99d50122d49875783631ca5881383a" title=" " alt="" coords="399,889,590,929"/>
+<area shape="poly" id="edge22_Node000001_Node000023" title=" " alt="" coords="674,765,644,809,603,854,574,875,544,892,542,887,571,870,600,850,640,806,669,762"/>
+<area shape="rect" id="Node000024" href="$de/d40/classfl_1_1json_a99f6b736101f16bf54e1dcf72c8220d5.html#a99f6b736101f16bf54e1dcf72c8220d5" title=" " alt="" coords="425,953,564,993"/>
+<area shape="poly" id="edge24_Node000001_Node000024" title=" " alt="" coords="684,766,676,805,661,853,637,901,622,924,603,943,585,956,565,965,563,960,583,951,600,939,617,920,633,898,656,851,671,803,679,765"/>
+<area shape="rect" id="Node000026" href="$d2/db2/classfl_1_1string_ab55430c7d3beb6dd7f6243e852039ebc.html#ab55430c7d3beb6dd7f6243e852039ebc" title=" " alt="" coords="420,1018,569,1043"/>
+<area shape="poly" id="edge26_Node000001_Node000026" title=" " alt="" coords="688,765,684,816,671,882,660,916,646,949,627,980,603,1007,588,1018,571,1026,568,1021,585,1014,600,1003,623,977,641,947,655,914,666,880,678,816,682,765"/>
+<area shape="rect" id="Node000027" href="$de/d67/classfl_1_1_serial_port_a3339b490d16bccad572b1ce0989abcb4.html#a3339b490d16bccad572b1ce0989abcb4" title="Print string to serial output." alt="" coords="425,1067,564,1093"/>
+<area shape="poly" id="edge27_Node000001_Node000027" title=" " alt="" coords="684,765,674,834,656,921,633,1003,619,1035,603,1057,585,1069,565,1077,563,1072,583,1065,599,1053,614,1032,628,1001,651,920,668,833,679,765"/>
+<area shape="rect" id="Node000032" href="$de/d67/classfl_1_1_serial_port_a59956b7e405022d909754417a8378d53.html#a59956b7e405022d909754417a8378d53" title="Print string with newline to serial output." alt="" coords="419,1117,570,1142"/>
+<area shape="poly" id="edge32_Node000001_Node000032" title=" " alt="" coords="685,765,676,843,660,945,636,1042,621,1080,603,1106,588,1117,571,1125,569,1120,585,1113,599,1102,616,1077,631,1040,655,944,671,843,680,765"/>
+<area shape="rect" id="Node000033" href="$de/d66/classfl_1_1basic__string_addf8a6f65cd51c28ff5dc69394498356.html#addf8a6f65cd51c28ff5dc69394498356" title=" " alt="" coords="409,1166,581,1191"/>
+<area shape="poly" id="edge33_Node000001_Node000033" title=" " alt="" coords="686,766,679,853,663,970,639,1081,623,1125,603,1155,582,1170,579,1166,599,1151,618,1123,634,1080,658,969,673,853,681,765"/>
+<area shape="rect" id="Node000034" href="$de/d66/classfl_1_1basic__string_a1dec353005979a22fdd09f31ea8a49fd.html#a1dec353005979a22fdd09f31ea8a49fd" title=" " alt="" coords="418,1215,571,1241"/>
+<area shape="poly" id="edge34_Node000001_Node000034" title=" " alt="" coords="687,766,681,863,666,994,656,1060,642,1121,624,1170,603,1204,589,1216,573,1224,570,1219,586,1211,599,1201,620,1168,637,1119,650,1059,661,993,675,862,682,765"/>
+<area shape="rect" id="Node000035" href="$d1/dc6/namespaceautoresearch_1_1ieee754__check_a944c8722b3e21a95d06ba42e91be2903.html#a944c8722b3e21a95d06ba42e91be2903" title=" " alt="" coords="411,1289,578,1329"/>
+<area shape="poly" id="edge35_Node000001_Node000035" title=" " alt="" coords="687,765,680,870,665,1014,654,1088,640,1156,623,1213,604,1254,582,1276,556,1292,553,1287,578,1271,599,1250,618,1211,635,1155,648,1087,659,1014,674,869,681,765"/>
+<area shape="rect" id="Node000038" href="$de/d66/classfl_1_1basic__string_abda3f733a6e057e24ee96f93fc1885b8.html#abda3f733a6e057e24ee96f93fc1885b8" title=" " alt="" coords="402,1354,587,1379"/>
+<area shape="poly" id="edge39_Node000001_Node000038" title=" " alt="" coords="688,765,686,887,675,1060,665,1149,650,1230,630,1297,617,1323,603,1343,587,1356,584,1352,599,1339,613,1320,625,1295,645,1229,660,1148,670,1060,681,887,683,765"/>
+<area shape="rect" id="Node000040" href="$de/d66/classfl_1_1basic__string_a2eed1e17148acc2f71102b24a641a475.html#a2eed1e17148acc2f71102b24a641a475" title=" " alt="" coords="397,1403,593,1429"/>
+<area shape="poly" id="edge41_Node000001_Node000040" title=" " alt="" coords="688,765,688,896,679,1085,669,1182,653,1271,632,1344,619,1372,603,1394,589,1405,586,1401,599,1390,614,1369,627,1342,648,1269,663,1181,673,1085,683,896,683,765"/>
+<area shape="rect" id="Node000003" href="$dc/da7/classfl_1_1_string_holder_a94fd0f8fffb3a0b49ea73262af3e1648.html#a94fd0f8fffb3a0b49ea73262af3e1648" title=" " alt="" coords="143,5,309,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="398,65,308,45,309,40,399,60"/>
+<area shape="rect" id="Node000004" href="$dc/da7/classfl_1_1_string_holder_af9ac6c273e854d8f2074b4c95e56a657.html#af9ac6c273e854d8f2074b4c95e56a657" title=" " alt="" coords="129,70,323,95"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="398,85,323,85,323,80,398,80"/>
+<area shape="rect" id="Node000006" href="$de/d66/classfl_1_1basic__string_a91d661323c7cc3bf7d3a22d6229c90b5.html#a91d661323c7cc3bf7d3a22d6229c90b5" title=" " alt="" coords="140,119,312,145"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="395,152,312,144,313,138,395,147"/>
+<area shape="rect" id="Node000007" href="$de/d66/classfl_1_1basic__string_a7c8d29b62dd5733696a2e6c9a9f89e20.html#a7c8d29b62dd5733696a2e6c9a9f89e20" title=" " alt="" coords="140,169,312,194"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="395,171,313,177,312,172,395,165"/>
+<area shape="rect" id="Node000008" href="$d2/db2/classfl_1_1string_a88431d8515f94a9e9fa257ac29639402.html#a88431d8515f94a9e9fa257ac29639402" title=" " alt="" coords="161,218,291,243"/>
+<area shape="poly" id="edge7_Node000005_Node000008" title=" " alt="" coords="416,179,389,187,341,208,292,221,291,216,339,203,387,181,414,174"/>
+<area shape="rect" id="Node000014" href="$d4/d36/namespacefl_a7167ab7d0c24c14e0576b7df33c212b6.html#a7167ab7d0c24c14e0576b7df33c212b6" title="Create RequestSource and ResponseSink pair for serial I/O." alt="" coords="138,394,314,419"/>
+<area shape="poly" id="edge13_Node000013_Node000014" title=" " alt="" coords="374,409,314,409,314,404,374,404"/>
+<area shape="rect" id="Node000017" href="$de/d66/classfl_1_1basic__string_a0f3f39a7b8bbf08074bbe1c836782910.html#a0f3f39a7b8bbf08074bbe1c836782910" title=" " alt="" coords="131,509,321,534"/>
+<area shape="poly" id="edge16_Node000016_Node000017" title=" " alt="" coords="385,524,321,524,321,519,385,519"/>
+<area shape="poly" id="edge23_Node000023_Node000023" title=" " alt="" coords="527,877,516,871,495,868,476,870,465,875,461,881,464,888,458,890,456,880,462,871,475,865,495,863,517,866,530,873"/>
+<area shape="rect" id="Node000025" href="$de/d40/classfl_1_1json_a02ea976dd8406ac69056753b4602866d.html#a02ea976dd8406ac69056753b4602866d" title=" " alt="" coords="125,961,327,986"/>
+<area shape="poly" id="edge25_Node000024_Node000025" title=" " alt="" coords="412,976,327,976,327,971,412,971"/>
+<area shape="rect" id="Node000028" href="$de/d67/classfl_1_1_serial_port_a7a2c3747163b339e8197502b59c5bc4c.html#a7a2c3747163b339e8197502b59c5bc4c" title="Print integer to serial output." alt="" coords="157,1014,295,1039"/>
+<area shape="poly" id="edge28_Node000027_Node000028" title=" " alt="" coords="416,1067,290,1042,291,1037,417,1062"/>
+<area shape="rect" id="Node000029" href="$de/d67/classfl_1_1_serial_port_a2c0ce9b0e0987b3a374e60de37f056ee.html#a2c0ce9b0e0987b3a374e60de37f056ee" title="Print long integer to serial output." alt="" coords="157,1063,295,1089"/>
+<area shape="poly" id="edge29_Node000027_Node000029" title=" " alt="" coords="412,1081,296,1080,296,1074,412,1076"/>
+<area shape="rect" id="Node000030" href="$de/d67/classfl_1_1_serial_port_a27c7ccd6b299f48e84093a5a12f10cc7.html#a27c7ccd6b299f48e84093a5a12f10cc7" title="Print generic unsigned integer via SFINAE template Handles u32, unsigned long, and other unsigned mul..." alt="" coords="157,1113,295,1138"/>
+<area shape="poly" id="edge30_Node000027_Node000030" title=" " alt="" coords="412,1097,296,1116,295,1111,411,1091"/>
+<area shape="rect" id="Node000031" href="$de/d67/classfl_1_1_serial_port_a99291ac3b9fb6def2d792313ec597f17.html#a99291ac3b9fb6def2d792313ec597f17" title="Print formatted string to serial output (printf&#45;style)" alt="" coords="154,1162,298,1187"/>
+<area shape="poly" id="edge31_Node000027_Node000031" title=" " alt="" coords="413,1096,389,1106,375,1117,366,1128,357,1140,341,1152,299,1167,298,1162,339,1147,353,1136,362,1125,371,1113,387,1102,411,1091"/>
+<area shape="poly" id="edge38_Node000035_Node000035" title=" " alt="" coords="527,1277,516,1271,495,1268,476,1270,465,1275,461,1281,464,1288,458,1290,456,1280,462,1271,475,1265,495,1263,517,1266,530,1273"/>
+<area shape="rect" id="Node000036" href="$d1/df2/_auto_research_low_memory_8h_ae3f918f9121ab392058ef53302b021cf.html#ae3f918f9121ab392058ef53302b021cf" title=" " alt="" coords="112,1297,340,1322"/>
+<area shape="poly" id="edge36_Node000035_Node000036" title=" " alt="" coords="398,1312,340,1312,340,1307,398,1307"/>
+<area shape="rect" id="Node000037" href="$dd/dc8/_auto_research_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="5,1297,64,1322"/>
+<area shape="poly" id="edge37_Node000036_Node000037" title=" " alt="" coords="98,1312,64,1312,64,1307,98,1307"/>
+<area shape="rect" id="Node000039" href="$de/d66/classfl_1_1basic__string_a3d17855029014decbff82d0297734043.html#a3d17855029014decbff82d0297734043" title=" " alt="" coords="131,1354,321,1379"/>
+<area shape="poly" id="edge40_Node000038_Node000039" title=" " alt="" coords="388,1369,322,1369,322,1364,388,1364"/>
+<area shape="rect" id="Node000041" href="$de/d66/classfl_1_1basic__string_ae5b0cf4487a418d18b077cad3eb5ca44.html#ae5b0cf4487a418d18b077cad3eb5ca44" title=" " alt="" coords="128,1403,324,1429"/>
+<area shape="poly" id="edge42_Node000040_Node000041" title=" " alt="" coords="383,1419,324,1419,324,1413,383,1413"/>
+</map>

@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -138,7 +138,7 @@ $(function(){initNavTree('d3/d19/_object_f_l_e_d_pin_validation_8h_source.html',
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="comment">// Pin validation for Teensy 4.x (iMXRT1062)</span></div>
 <div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="comment">// Based on _FL_DEFPIN definitions from fastpin_arm_mxrt1062.h</span></div>
 <div class="foldopen" id="foldopen00030" data-start="{" data-end="}">
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno"><a class="line" href="../../d4/dc4/namespaceobjectfled_a4de63123d020d200a03f3e89fa74aa05.html#a4de63123d020d200a03f3e89fa74aa05">   30</a></span><span class="keyword">inline</span> <a class="code hl_struct" href="../../d4/dc4/namespaceobjectfled.html#dc/d37/structobjectfled_1_1_pin_validation_result">PinValidationResult</a> <a class="code hl_function" href="../../d4/dc4/namespaceobjectfled_a4de63123d020d200a03f3e89fa74aa05.html#a4de63123d020d200a03f3e89fa74aa05">validate_teensy4_pin</a>(uint8_t pin) {</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno"><a class="line" href="../../d4/dc4/namespaceobjectfled_a4de63123d020d200a03f3e89fa74aa05.html#a4de63123d020d200a03f3e89fa74aa05">   30</a></span><span class="keyword">inline</span> <a class="code hl_struct" href="../../d4/dc4/namespaceobjectfled.html#dc/d37/structobjectfled_1_1_pin_validation_result">PinValidationResult</a> <a class="code hl_function" href="../../d4/dc4/namespaceobjectfled_a4de63123d020d200a03f3e89fa74aa05.html#a4de63123d020d200a03f3e89fa74aa05">validate_teensy4_pin</a>(<a class="code hl_typedef" href="../../df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a> pin) {</div>
 <div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>    <span class="comment">// Teensy 4.0 supports pins 0-39</span></div>
 <div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>    <span class="comment">// Teensy 4.1 adds pins 40-54, but we&#39;ll be permissive and allow</span></div>
 <div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>    <span class="comment">// any pin that could theoretically exist on a Teensy 4.x variant</span></div>
@@ -153,7 +153,7 @@ $(function(){initNavTree('d3/d19/_object_f_l_e_d_pin_validation_8h_source.html',
 <div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
 <div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    <span class="comment">// Check if pin maps to a valid GPIO port (GPIO6-9)</span></div>
 <div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    <span class="comment">// Use the same logic as ObjectFLED::begin() to verify pin is usable</span></div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    uint8_t <a class="code hl_function" href="../../d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d">offset</a> = ((uint32_t)portOutputRegister(pin) - (uint32_t)&amp;GPIO6_DR) &gt;&gt; 14;</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    <a class="code hl_typedef" href="../../df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a> <a class="code hl_function" href="../../d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d">offset</a> = ((<a class="code hl_typedef" href="../../df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a>)portOutputRegister(pin) - (<a class="code hl_typedef" href="../../df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a>)&amp;GPIO6_DR) &gt;&gt; 14;</div>
 <div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    <span class="keywordflow">if</span> (<a class="code hl_function" href="../../d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d">offset</a> &gt; 3) {</div>
 <div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>        <span class="keywordflow">return</span> {<span class="keyword">false</span>, <a class="code hl_enumvalue" href="../../d4/dc4/namespaceobjectfled_a4574a1f31e16026e6881bf2c7706fe2e.html#a4574a1f31e16026e6881bf2c7706fe2ea90da35179c525f42c3969e9db51d399d">PinIssueType::INVALID_GPIO</a>, <span class="stringliteral">&quot;Pin does not map to a valid GPIO port (GPIO6-9) - may be a ground/power/read-only pin&quot;</span>};</div>
 <div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    }</div>
@@ -200,7 +200,7 @@ $(function(){initNavTree('d3/d19/_object_f_l_e_d_pin_validation_8h_source.html',
 <div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span> </div>
 <div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span><span class="comment">// Check if a pin is valid (simple boolean check)</span></div>
 <div class="foldopen" id="foldopen00090" data-start="{" data-end="}">
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno"><a class="line" href="../../d4/dc4/namespaceobjectfled_af58006b0e570f0f4eaaa7cbe83326e29.html#af58006b0e570f0f4eaaa7cbe83326e29">   90</a></span><span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="../../d4/dc4/namespaceobjectfled_af58006b0e570f0f4eaaa7cbe83326e29.html#af58006b0e570f0f4eaaa7cbe83326e29">is_valid_teensy4_pin</a>(uint8_t pin) {</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno"><a class="line" href="../../d4/dc4/namespaceobjectfled_af58006b0e570f0f4eaaa7cbe83326e29.html#af58006b0e570f0f4eaaa7cbe83326e29">   90</a></span><span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="../../d4/dc4/namespaceobjectfled_af58006b0e570f0f4eaaa7cbe83326e29.html#af58006b0e570f0f4eaaa7cbe83326e29">is_valid_teensy4_pin</a>(<a class="code hl_typedef" href="../../df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a> pin) {</div>
 <div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>    <span class="keyword">auto</span> result = <a class="code hl_function" href="../../d4/dc4/namespaceobjectfled_a4de63123d020d200a03f3e89fa74aa05.html#a4de63123d020d200a03f3e89fa74aa05">validate_teensy4_pin</a>(pin);</div>
 <div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>    <span class="keywordflow">return</span> result.valid;</div>
 <div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>}</div>
@@ -230,6 +230,8 @@ $(function(){initNavTree('d3/d19/_object_f_l_e_d_pin_validation_8h_source.html',
 <div class="ttc" id="anamespaceobjectfled_html_a046664d6cd088f04ec66c8efda7cc418"><div class="ttname"><a href="../../d4/dc4/namespaceobjectfled.html#a046664d6cd088f04ec66c8efda7cc418">objectfled::PinValidationResult::error_message</a></div><div class="ttdeci">const char * error_message</div><div class="ttdef"><b>Definition</b> <a href="#l00025">ObjectFLEDPinValidation.h:25</a></div></div>
 <div class="ttc" id="anamespaceobjectfled_html_a7580161e617ff8a6e42e0ad09c97d8af"><div class="ttname"><a href="../../d4/dc4/namespaceobjectfled.html#a7580161e617ff8a6e42e0ad09c97d8af">objectfled::PinValidationResult::issue_type</a></div><div class="ttdeci">PinIssueType issue_type</div><div class="ttdef"><b>Definition</b> <a href="#l00024">ObjectFLEDPinValidation.h:24</a></div></div>
 <div class="ttc" id="anamespaceobjectfled_html_dc/d37/structobjectfled_1_1_pin_validation_result"><div class="ttname"><a href="../../d4/dc4/namespaceobjectfled.html#dc/d37/structobjectfled_1_1_pin_validation_result">objectfled::PinValidationResult</a></div><div class="ttdef"><b>Definition</b> <a href="#l00022">ObjectFLEDPinValidation.h:22</a></div></div>
+<div class="ttc" id="astdint_8h_aba7bc1797add20fe3efdf37ced1182c5_html_aba7bc1797add20fe3efdf37ced1182c5"><div class="ttname"><a href="../../df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a></div><div class="ttdeci">unsigned char uint8_t</div><div class="ttdef"><b>Definition</b> <a href="../../df/dd8/stdint_8h_source.html#l00208">stdint.h:208</a></div></div>
+<div class="ttc" id="astdint_8h_ae8a835bf6e050b01cc449644a343aa73_html_ae8a835bf6e050b01cc449644a343aa73"><div class="ttname"><a href="../../df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a></div><div class="ttdeci">fl::u32 uint32_t</div><div class="ttdef"><b>Definition</b> <a href="../../df/dd8/stdint_8h_source.html#l00218">stdint.h:218</a></div></div>
 <div class="ttc" id="astdint_8h_html"><div class="ttname"><a href="../../df/dd8/stdint_8h.html">stdint.h</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
@@ -238,7 +240,7 @@ $(function(){initNavTree('d3/d19/_object_f_l_e_d_pin_validation_8h_source.html',
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_c30bdf76ce759a4eae8387be42921388.html">third_party</a></li><li class="navelem"><a class="el" href="../../dir_c31c3e3593f8f0c28b47badf4d12d70e.html">object_fled</a></li><li class="navelem"><a class="el" href="../../dir_3fb338c90e52612a3293a7dbe09f30ff.html">src</a></li><li class="navelem"><a class="el" href="../../d3/d19/_object_f_l_e_d_pin_validation_8h.html">ObjectFLEDPinValidation.h</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:00 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:02 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

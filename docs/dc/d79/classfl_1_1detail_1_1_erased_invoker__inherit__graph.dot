@@ -12,7 +12,9 @@ digraph "fl::detail::ErasedInvoker"
   Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node3 [id="Node000003",label="fl::detail::ResponseAware\lInvoker\< void(Args...)\>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$db/d87/classfl_1_1detail_1_1_response_aware_invoker_3_01void_07_args_8_8_8_08_4.html",tooltip=" "];
   Node1 -> Node4 [id="edge3_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="fl::detail::TypedInvoker\l\< R(Args...)\>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$dd/de4/classfl_1_1detail_1_1_typed_invoker_3_01_r_07_args_8_8_8_08_4.html",tooltip=" "];
+  Node4 [id="Node000004",label="fl::detail::RuntimeRpcBinding",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$db/d66/classfl_1_1detail_1_1_runtime_rpc_binding.html",tooltip=" "];
   Node1 -> Node5 [id="edge4_Node000001_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node5 [id="Node000005",label="fl::detail::TypedInvoker\l\< void(Args...)\>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d8/d77/classfl_1_1detail_1_1_typed_invoker_3_01void_07_args_8_8_8_08_4.html",tooltip=" "];
+  Node5 [id="Node000005",label="fl::detail::TypedInvoker\l\< R(Args...)\>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$dd/de4/classfl_1_1detail_1_1_typed_invoker_3_01_r_07_args_8_8_8_08_4.html",tooltip=" "];
+  Node1 -> Node6 [id="edge5_Node000001_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::detail::TypedInvoker\l\< void(Args...)\>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d8/d77/classfl_1_1detail_1_1_typed_invoker_3_01void_07_args_8_8_8_08_4.html",tooltip=" "];
 }

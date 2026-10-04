@@ -1,0 +1,28 @@
+<map id="fl::ColorProfileBinding" name="fl::ColorProfileBinding">
+<area shape="rect" id="Node000001" title="Immutable profile binding carried by a channel." alt="" coords="1309,309,1472,334"/>
+<area shape="rect" id="Node000002" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="1011,272,1193,312"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1207,300,1309,310,1309,316,1207,305"/>
+<area shape="rect" id="Node000003" href="$da/d42/structfl_1_1_color_profile_storage.html" title="One immutable allocation for every borrowed member in EmitterProfile." alt="" coords="651,167,813,193"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="804,193,892,216,988,244,1055,269,1053,274,986,249,890,221,802,199"/>
+<area shape="rect" id="Node000004" href="$d0/d10/structfl_1_1colorimetric__response_1_1_emitter_profile.html" title=" " alt="" coords="289,5,472,45"/>
+<area shape="poly" id="edge14_Node000001_Node000004" title=" " alt="" coords="486,15,556,16,627,24,743,51,859,86,972,126,1078,169,1256,250,1367,306,1365,311,1254,255,1076,174,970,131,858,91,742,56,626,29,555,21,486,20"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="486,40,568,58,628,78,658,98,685,122,723,166,719,169,681,126,655,102,625,82,567,63,485,45"/>
+<area shape="rect" id="Node000005" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="314,134,447,159"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="461,152,650,170,650,175,461,157"/>
+<area shape="rect" id="Node000010" href="$d2/db2/classfl_1_1string.html" title=" " alt="" coords="343,209,418,234"/>
+<area shape="poly" id="edge5_Node000003_Node000010" title=" " alt="" coords="432,223,523,225,575,223,626,216,667,205,703,190,705,195,669,210,627,221,575,228,523,231,432,228"/>
+<area shape="rect" id="Node000014" href="$d4/dc0/structfl_1_1detail_1_1_control_block_base.html" title=" " alt="" coords="281,279,480,305"/>
+<area shape="poly" id="edge6_Node000002_Node000014" title=" " alt="" coords="494,283,504,283,745,277,987,281,1011,282,1010,288,987,287,745,282,504,288,494,288"/>
+<area shape="rect" id="Node000017" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="659,314,805,339"/>
+<area shape="poly" id="edge9_Node000017_Node000014" title=" " alt="" coords="494,300,660,317,659,322,493,306"/>
+<area shape="rect" id="Node000015" href="$da/d98/classfl_1_1_atomic_fake.html" title=" " alt="" coords="5,272,141,312"/>
+<area shape="poly" id="edge7_Node000014_Node000015" title=" " alt="" coords="155,289,281,289,281,295,155,295"/>
+<area shape="poly" id="edge8_Node000002_Node000017" title=" " alt="" coords="818,322,900,318,986,311,1010,307,1011,313,987,316,900,324,819,328"/>
+<area shape="rect" id="Node000018" href="$da/d81/structfl_1_1_source_profile.html" title="A source declaration, not a container or an output&#45;device selection." alt="" coords="1041,422,1163,447"/>
+<area shape="poly" id="edge10_Node000001_Node000018" title=" " alt="" coords="1177,432,1231,425,1284,408,1313,392,1339,371,1377,332,1381,336,1342,375,1316,396,1286,413,1232,430,1178,437"/>
+<area shape="rect" id="Node000019" href="$d4/d33/structfl_1_1_rgb_primaries.html" title=" " alt="" coords="669,429,795,454"/>
+<area shape="poly" id="edge11_Node000018_Node000019" title=" " alt="" coords="808,437,1040,433,1040,438,809,443"/>
+<area shape="rect" id="Node000020" href="$d2/d9c/structfl_1_1_chromaticity.html" title="CIE 1931 xy chromaticity, independent of encoded storage and chipset." alt="" coords="319,403,442,429"/>
+<area shape="poly" id="edge13_Node000001_Node000020" title=" " alt="" coords="455,400,504,393,732,368,959,348,1309,323,1309,329,959,353,733,374,504,399,456,406"/>
+<area shape="poly" id="edge12_Node000019_Node000020" title=" " alt="" coords="427,431,464,443,504,452,547,456,590,456,669,449,669,455,590,462,547,461,504,457,463,448,425,436"/>
+</map>

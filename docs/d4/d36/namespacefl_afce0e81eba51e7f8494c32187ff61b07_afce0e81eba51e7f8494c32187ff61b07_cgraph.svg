@@ -67,7 +67,7 @@ var sectionId = 'dynsection-0';
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../df/d9e/namespacefl_1_1detail_afa4a607fdb31c744529cfe7156160684.html#afa4a607fdb31c744529cfe7156160684" target="_top" xlink:title="Helper: Convert byte to Wave3Byte using nibble LUT (internal use only)">
+<g id="a_Node000002"><a xlink:href="../../df/d9e/namespacefl_1_1detail_a9cca48b40077776f677dd377947ff7a3.html#a9cca48b40077776f677dd377947ff7a3" target="_top" xlink:title="Convert one byte to a Wave3Byte using the nibble LUT.">
 <polygon fill="white" stroke="#666666" points="314,-85.5 177,-85.5 177,-55.5 314,-55.5 314,-85.5"/>
 <text text-anchor="start" x="185" y="-73.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::detail::wave3_convert</text>
 <text text-anchor="middle" x="245.5" y="-62.5" font-family="Helvetica,sans-Serif" font-size="10.00">_byte_to_wave3byte</text>
@@ -86,7 +86,7 @@ var sectionId = 'dynsection-0';
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../df/d9e/namespacefl_1_1detail_af8a68cecaea535bce87ed6b98d58b149.html#af8a68cecaea535bce87ed6b98d58b149" target="_top" xlink:title="Transpose 16 lanes of Wave3Byte data into interleaved format.">
+<g id="a_Node000003"><a xlink:href="../../df/d9e/namespacefl_1_1detail_af60deb9998d29f24a69577743e9d7138.html#af60deb9998d29f24a69577743e9d7138" target="_top" xlink:title="Transpose 16 lanes of Wave3Byte data via the spread&#45;LUT path (#2533).">
 <polygon fill="white" stroke="#666666" points="328,-37 163,-37 163,-18 328,-18 328,-37"/>
 <text text-anchor="middle" x="245.5" y="-25" font-family="Helvetica,sans-Serif" font-size="10.00">fl::detail::wave3_transpose_16</text>
 </a>

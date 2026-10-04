@@ -1,0 +1,15 @@
+<map id="emitter_power_weights" name="emitter_power_weights">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,55,180,80"/>
+<area shape="rect" id="Node000002" href="$d1/d2a/power__mgt_8cpp_8hpp_afe71d257dc9aca526178a992761bb812.html#afe71d257dc9aca526178a992761bb812" title="Global RGB power model (initialized to WS2812 @ 5V defaults, linear response)" alt="" coords="255,5,366,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="149,52,241,31,242,36,150,57"/>
+<area shape="rect" id="Node000005" href="$d1/d2a/power__mgt_8cpp_8hpp_a8cfee7a07f6f35100dad7f4d642eaf2d.html#a8cfee7a07f6f35100dad7f4d642eaf2d" title=" " alt="" coords="228,55,393,80"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="180,65,214,65,214,70,180,70"/>
+<area shape="rect" id="Node000006" href="$d1/d2a/power__mgt_8cpp_8hpp_a96a9190022832e655b9a01a3e0167d8c.html#a96a9190022832e655b9a01a3e0167d8c" title=" " alt="" coords="233,104,389,129"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="150,77,241,98,240,104,149,83"/>
+<area shape="rect" id="Node000003" href="$d9/d5b/classfl_1_1_singleton_ad5cb1b704e17768f75802673abb0ff75.html#ad5cb1b704e17768f75802673abb0ff75" title=" " alt="" coords="441,55,604,80"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="367,28,455,49,453,54,365,33"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a1e67c0c24ebcd98fcf8554753d1639a6.html#a1e67c0c24ebcd98fcf8554753d1639a6" title=" " alt="" coords="652,55,791,80"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="604,65,638,65,638,70,604,70"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="394,65,427,65,427,70,394,70"/>
+<area shape="poly" id="edge7_Node000006_Node000003" title=" " alt="" coords="365,101,453,81,455,86,367,107"/>
+</map>

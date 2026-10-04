@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -113,49 +113,62 @@ $(function(){initNavTree('d0/d1b/static__assert_8h_source.html','../../'); initR
 <div class="line"><a id="l00010" name="l00010"></a><span class="lineno"><a class="line" href="../../d4/d36/namespacefl.html">   10</a></span><span class="keyword">template</span> &lt;&gt; <span class="keyword">struct </span><a class="code hl_struct" href="../../d4/d36/namespacefl.html#d0/d22/structfl_1_1static__assert__failure">static_assert_failure</a>&lt;true&gt; {};</div>
 <div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span>} <span class="comment">// namespace fl</span></div>
 <div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span> </div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#define FL_STATIC_ASSERT_JOIN_IMPL(a, b) a##b</span></div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#define FL_STATIC_ASSERT_JOIN(a, b) FL_STATIC_ASSERT_JOIN_IMPL(a, b)</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno"><a class="line" href="../../d0/d1b/static__assert_8h_ac8c80780a44729ff1a0bae69f7a6d86c.html#ac8c80780a44729ff1a0bae69f7a6d86c">   13</a></span><span class="preprocessor">#define FL_STATIC_ASSERT_JOIN_IMPL(a, b) a##b</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno"><a class="line" href="../../d0/d1b/static__assert_8h_a6fde4aeaa4b69e58516210721d7f408c.html#a6fde4aeaa4b69e58516210721d7f408c">   14</a></span><span class="preprocessor">#define FL_STATIC_ASSERT_JOIN(a, b) FL_STATIC_ASSERT_JOIN_IMPL(a, b)</span></div>
 <div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#ifdef __COUNTER__</span></div>
 <div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#define FL_STATIC_ASSERT_NAME FL_STATIC_ASSERT_JOIN(fl_static_assert_, __COUNTER__)</span></div>
 <div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#else</span></div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#define FL_STATIC_ASSERT_NAME FL_STATIC_ASSERT_JOIN(fl_static_assert_, __LINE__)</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno"><a class="line" href="../../d0/d1b/static__assert_8h_a520f01e41499efe521ddf53e2a79adae.html#a520f01e41499efe521ddf53e2a79adae">   18</a></span><span class="preprocessor">#define FL_STATIC_ASSERT_NAME FL_STATIC_ASSERT_JOIN(fl_static_assert_, __LINE__)</span></div>
 <div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#define FL_STATIC_ASSERT_IMPL(expression)                                      \</span></div>
+<div class="foldopen" id="foldopen00020" data-start="" data-end="">
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno"><a class="line" href="../../d0/d1b/static__assert_8h_a341572979ede15faf001d87eb036acaf.html#a341572979ede15faf001d87eb036acaf">   20</a></span><span class="preprocessor">#define FL_STATIC_ASSERT_IMPL(expression)                                      \</span></div>
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">    typedef char FL_STATIC_ASSERT_NAME[sizeof(                                \</span></div>
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">        ::fl::static_assert_failure&lt;(bool)(expression)&gt;)]</span></div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#define FL_STATIC_ASSERT_SELECT(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10,     \</span></div>
+</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno"><a class="line" href="../../d0/d1b/static__assert_8h_a9a32dc60d815cac4ce580342a356291d.html#a9a32dc60d815cac4ce580342a356291d">   23</a></span><span class="preprocessor">#define FL_STATIC_ASSERT_SELECT(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10,     \</span></div>
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">                                _11, _12, _13, _14, _15, _16, NAME, ...)     \</span></div>
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">    NAME</span></div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#define FL_STATIC_ASSERT_EXPR_1(expression) expression</span></div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#define FL_STATIC_ASSERT_EXPR_2(expression, message) expression</span></div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#define FL_STATIC_ASSERT_EXPR_3(a, b, message) a, b</span></div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#define FL_STATIC_ASSERT_EXPR_4(a, b, c, message) a, b, c</span></div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#define FL_STATIC_ASSERT_EXPR_5(a, b, c, d, message) a, b, c, d</span></div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#define FL_STATIC_ASSERT_EXPR_6(a, b, c, d, e, message) a, b, c, d, e</span></div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="preprocessor">#define FL_STATIC_ASSERT_EXPR_7(a, b, c, d, e, f, message) a, b, c, d, e, f</span></div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="preprocessor">#define FL_STATIC_ASSERT_EXPR_8(a, b, c, d, e, f, g, message) a, b, c, d, e, \</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno"><a class="line" href="../../d0/d1b/static__assert_8h_ac3b103ab5ccb6f1eae1c3d96c7b6c770.html#ac3b103ab5ccb6f1eae1c3d96c7b6c770">   26</a></span><span class="preprocessor">#define FL_STATIC_ASSERT_EXPR_1(expression) expression</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno"><a class="line" href="../../d0/d1b/static__assert_8h_a4b658b98757db6695f44f48e45d2a4a6.html#a4b658b98757db6695f44f48e45d2a4a6">   27</a></span><span class="preprocessor">#define FL_STATIC_ASSERT_EXPR_2(expression, message) expression</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno"><a class="line" href="../../d0/d1b/static__assert_8h_a7fb262d3fe0397bddd65504a96fc8f27.html#a7fb262d3fe0397bddd65504a96fc8f27">   28</a></span><span class="preprocessor">#define FL_STATIC_ASSERT_EXPR_3(a, b, message) a, b</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno"><a class="line" href="../../d0/d1b/static__assert_8h_a42f29487659dd633147c270615c8687f.html#a42f29487659dd633147c270615c8687f">   29</a></span><span class="preprocessor">#define FL_STATIC_ASSERT_EXPR_4(a, b, c, message) a, b, c</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno"><a class="line" href="../../d0/d1b/static__assert_8h_a368111604215fd4819c04ac83313b398.html#a368111604215fd4819c04ac83313b398">   30</a></span><span class="preprocessor">#define FL_STATIC_ASSERT_EXPR_5(a, b, c, d, message) a, b, c, d</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno"><a class="line" href="../../d0/d1b/static__assert_8h_a11224e456c09b55e53967cb4269b4a62.html#a11224e456c09b55e53967cb4269b4a62">   31</a></span><span class="preprocessor">#define FL_STATIC_ASSERT_EXPR_6(a, b, c, d, e, message) a, b, c, d, e</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno"><a class="line" href="../../d0/d1b/static__assert_8h_a26faf2db703133b90c5264f6f76e61fa.html#a26faf2db703133b90c5264f6f76e61fa">   32</a></span><span class="preprocessor">#define FL_STATIC_ASSERT_EXPR_7(a, b, c, d, e, f, message) a, b, c, d, e, f</span></div>
+<div class="foldopen" id="foldopen00033" data-start="" data-end="">
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno"><a class="line" href="../../d0/d1b/static__assert_8h_ab40328f1129f8de7ca8337abd20e2da4.html#ab40328f1129f8de7ca8337abd20e2da4">   33</a></span><span class="preprocessor">#define FL_STATIC_ASSERT_EXPR_8(a, b, c, d, e, f, g, message) a, b, c, d, e, \</span></div>
 <div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="preprocessor">    f, g</span></div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="preprocessor">#define FL_STATIC_ASSERT_EXPR_9(a, b, c, d, e, f, g, h, message) a, b, c, d, \</span></div>
+</div>
+<div class="foldopen" id="foldopen00035" data-start="" data-end="">
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno"><a class="line" href="../../d0/d1b/static__assert_8h_a130f1cb33830fee768eaaea09e404dbe.html#a130f1cb33830fee768eaaea09e404dbe">   35</a></span><span class="preprocessor">#define FL_STATIC_ASSERT_EXPR_9(a, b, c, d, e, f, g, h, message) a, b, c, d, \</span></div>
 <div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="preprocessor">    e, f, g, h</span></div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="preprocessor">#define FL_STATIC_ASSERT_EXPR_10(a, b, c, d, e, f, g, h, i, message) a, b, c, \</span></div>
+</div>
+<div class="foldopen" id="foldopen00037" data-start="" data-end="">
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno"><a class="line" href="../../d0/d1b/static__assert_8h_a97490b67ce0174d14ec54e96cfbae6a9.html#a97490b67ce0174d14ec54e96cfbae6a9">   37</a></span><span class="preprocessor">#define FL_STATIC_ASSERT_EXPR_10(a, b, c, d, e, f, g, h, i, message) a, b, c, \</span></div>
 <div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><span class="preprocessor">    d, e, f, g, h, i</span></div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="preprocessor">#define FL_STATIC_ASSERT_EXPR_11(a, b, c, d, e, f, g, h, i, j, message) a, b, \</span></div>
+</div>
+<div class="foldopen" id="foldopen00039" data-start="" data-end="">
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno"><a class="line" href="../../d0/d1b/static__assert_8h_adf4d9549c033b7f602a71514043363ec.html#adf4d9549c033b7f602a71514043363ec">   39</a></span><span class="preprocessor">#define FL_STATIC_ASSERT_EXPR_11(a, b, c, d, e, f, g, h, i, j, message) a, b, \</span></div>
 <div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="preprocessor">    c, d, e, f, g, h, i, j</span></div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="preprocessor">#define FL_STATIC_ASSERT_EXPR_12(a, b, c, d, e, f, g, h, i, j, k, message) a, \</span></div>
+</div>
+<div class="foldopen" id="foldopen00041" data-start="" data-end="">
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno"><a class="line" href="../../d0/d1b/static__assert_8h_a7cfd2526072f8847b75d8215491132fe.html#a7cfd2526072f8847b75d8215491132fe">   41</a></span><span class="preprocessor">#define FL_STATIC_ASSERT_EXPR_12(a, b, c, d, e, f, g, h, i, j, k, message) a, \</span></div>
 <div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="preprocessor">    b, c, d, e, f, g, h, i, j, k</span></div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="preprocessor">#define FL_STATIC_ASSERT_EXPR_13(a, b, c, d, e, f, g, h, i, j, k, l,         \</span></div>
+</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno"><a class="line" href="../../d0/d1b/static__assert_8h_a9781a2f39cf223ccfdae0f44f59c97de.html#a9781a2f39cf223ccfdae0f44f59c97de">   43</a></span><span class="preprocessor">#define FL_STATIC_ASSERT_EXPR_13(a, b, c, d, e, f, g, h, i, j, k, l,         \</span></div>
 <div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="preprocessor">                                 message)                                     \</span></div>
 <div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="preprocessor">    a, b, c, d, e, f, g, h, i, j, k, l</span></div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="preprocessor">#define FL_STATIC_ASSERT_EXPR_14(a, b, c, d, e, f, g, h, i, j, k, l, m,      \</span></div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno"><a class="line" href="../../d0/d1b/static__assert_8h_a1fda45bfbbc1d19a8dab17e7ca77e286.html#a1fda45bfbbc1d19a8dab17e7ca77e286">   46</a></span><span class="preprocessor">#define FL_STATIC_ASSERT_EXPR_14(a, b, c, d, e, f, g, h, i, j, k, l, m,      \</span></div>
 <div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="preprocessor">                                 message)                                     \</span></div>
 <div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="preprocessor">    a, b, c, d, e, f, g, h, i, j, k, l, m</span></div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="preprocessor">#define FL_STATIC_ASSERT_EXPR_15(a, b, c, d, e, f, g, h, i, j, k, l, m, n,   \</span></div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno"><a class="line" href="../../d0/d1b/static__assert_8h_a9976a25bb5f4c04f5b1879190c3725b3.html#a9976a25bb5f4c04f5b1879190c3725b3">   49</a></span><span class="preprocessor">#define FL_STATIC_ASSERT_EXPR_15(a, b, c, d, e, f, g, h, i, j, k, l, m, n,   \</span></div>
 <div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span><span class="preprocessor">                                 message)                                     \</span></div>
 <div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="preprocessor">    a, b, c, d, e, f, g, h, i, j, k, l, m, n</span></div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span><span class="preprocessor">#define FL_STATIC_ASSERT_EXPR_16(a, b, c, d, e, f, g, h, i, j, k, l, m, n,   \</span></div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno"><a class="line" href="../../d0/d1b/static__assert_8h_a73e4b2887945d5b29a926ee6619f8b57.html#a73e4b2887945d5b29a926ee6619f8b57">   52</a></span><span class="preprocessor">#define FL_STATIC_ASSERT_EXPR_16(a, b, c, d, e, f, g, h, i, j, k, l, m, n,   \</span></div>
 <div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span><span class="preprocessor">                                 o, message)                                  \</span></div>
 <div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span><span class="preprocessor">    a, b, c, d, e, f, g, h, i, j, k, l, m, n, o</span></div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span><span class="preprocessor">#define FL_STATIC_ASSERT_EXPR(...)                                            \</span></div>
+<div class="foldopen" id="foldopen00055" data-start="" data-end="">
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno"><a class="line" href="../../d0/d1b/static__assert_8h_a8500c1c4bacb65320a449fa8e973ea16.html#a8500c1c4bacb65320a449fa8e973ea16">   55</a></span><span class="preprocessor">#define FL_STATIC_ASSERT_EXPR(...)                                            \</span></div>
 <div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span><span class="preprocessor">    FL_STATIC_ASSERT_SELECT(__VA_ARGS__, FL_STATIC_ASSERT_EXPR_16,            \</span></div>
 <div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span><span class="preprocessor">                            FL_STATIC_ASSERT_EXPR_15,                         \</span></div>
 <div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span><span class="preprocessor">                            FL_STATIC_ASSERT_EXPR_14,                         \</span></div>
@@ -168,11 +181,14 @@ $(function(){initNavTree('d0/d1b/static__assert_8h_source.html','../../'); initR
 <div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span><span class="preprocessor">                            FL_STATIC_ASSERT_EXPR_5, FL_STATIC_ASSERT_EXPR_4, \</span></div>
 <div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span><span class="preprocessor">                            FL_STATIC_ASSERT_EXPR_3, FL_STATIC_ASSERT_EXPR_2, \</span></div>
 <div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span><span class="preprocessor">                            FL_STATIC_ASSERT_EXPR_1)(__VA_ARGS__)</span></div>
+</div>
 <div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span> </div>
 <div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span><span class="comment">// Template commas split macro arguments on old preprocessors. Drop the message</span></div>
 <div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span><span class="comment">// argument, then rejoin the remaining tokens as the assertion expression.</span></div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span><span class="preprocessor">#define FL_STATIC_ASSERT(...)                                                 \</span></div>
+<div class="foldopen" id="foldopen00071" data-start="" data-end="">
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno"><a class="line" href="../../d0/d1b/static__assert_8h_a1e4d1792cf482d5f64f27714ea210d47.html#a1e4d1792cf482d5f64f27714ea210d47">   71</a></span><span class="preprocessor">#define FL_STATIC_ASSERT(...)                                                 \</span></div>
 <div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span><span class="preprocessor">    FL_STATIC_ASSERT_IMPL((FL_STATIC_ASSERT_EXPR(__VA_ARGS__)))</span></div>
+</div>
 <div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span> </div>
 <div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span><span class="preprocessor">#else</span></div>
 <div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span> </div>
@@ -188,7 +204,7 @@ $(function(){initNavTree('d0/d1b/static__assert_8h_source.html','../../'); initR
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_0dd6897a8ae40540acd9d694849e950e.html">stl</a></li><li class="navelem"><a class="el" href="../../d0/d1b/static__assert_8h.html">static_assert.h</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:00 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:01 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

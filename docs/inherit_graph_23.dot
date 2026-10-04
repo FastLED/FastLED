@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="AutoResearchState",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d9e/_auto_research_remote_8h.html#d6/d06/struct_auto_research_state",tooltip="AutoResearch runtime state (shared between main loop and RPC handlers)"];
+  Node0 [id="Node000000",label="autoresearch::simd\l_check::SimdTestEntry",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d1a/namespaceautoresearch_1_1simd__check.html#d4/d36/structautoresearch_1_1simd__check_1_1_simd_test_entry",tooltip=" "];
 }

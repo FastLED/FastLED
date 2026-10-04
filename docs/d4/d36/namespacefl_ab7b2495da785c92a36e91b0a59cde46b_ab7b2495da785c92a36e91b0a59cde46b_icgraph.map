@@ -1,14 +1,20 @@
 <map id="fl::analogWrite" name="fl::analogWrite">
-<area shape="rect" id="Node000001" title="Write analog value to pin (PWM)" alt="" coords="267,55,384,80"/>
-<area shape="rect" id="Node000002" href="$d9/d1f/el__panel_8cpp_a3d505a2f5ac043b8dc404b92ebb049ef.html#a3d505a2f5ac043b8dc404b92ebb049ef" title=" " alt="" coords="123,5,208,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="270,53,207,33,208,28,271,48"/>
-<area shape="rect" id="Node000004" href="$d9/d1f/el__panel_8cpp_a212827690ec1d11dc4c38a5cc6b541d5.html#a212827690ec1d11dc4c38a5cc6b541d5" title=" " alt="" coords="112,55,219,80"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="253,70,219,70,219,65,253,65"/>
-<area shape="rect" id="Node000006" href="$d9/d1f/el__panel_8cpp_ad3b5b489324dd03fc27ad993bae9f2ff.html#ad3b5b489324dd03fc27ad993bae9f2ff" title=" " alt="" coords="114,104,217,129"/>
-<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="271,87,208,106,207,101,270,82"/>
-<area shape="rect" id="Node000003" href="$d7/d8f/_el_panel_reactive_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="5,5,64,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="109,21,64,21,64,15,109,15"/>
-<area shape="rect" id="Node000005" href="$d7/d8f/_el_panel_reactive_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="9,79,60,104"/>
-<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="99,82,60,89,60,84,98,77"/>
-<area shape="poly" id="edge6_Node000006_Node000005" title=" " alt="" coords="100,107,60,99,61,93,101,102"/>
+<area shape="rect" id="Node000001" title="Write analog value to pin (PWM)" alt="" coords="451,80,568,105"/>
+<area shape="rect" id="Node000002" href="$d9/d1f/el__panel_8cpp_a3d505a2f5ac043b8dc404b92ebb049ef.html#a3d505a2f5ac043b8dc404b92ebb049ef" title=" " alt="" coords="273,5,358,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="471,76,402,44,357,31,359,25,404,40,473,71"/>
+<area shape="rect" id="Node000004" href="$d9/d1f/el__panel_8cpp_a212827690ec1d11dc4c38a5cc6b541d5.html#a212827690ec1d11dc4c38a5cc6b541d5" title=" " alt="" coords="262,55,369,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="436,86,368,77,369,72,437,81"/>
+<area shape="rect" id="Node000006" href="$d9/d1f/el__panel_8cpp_ad3b5b489324dd03fc27ad993bae9f2ff.html#ad3b5b489324dd03fc27ad993bae9f2ff" title=" " alt="" coords="264,104,367,129"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="437,104,367,113,367,108,437,99"/>
+<area shape="rect" id="Node000007" href="$d0/d5a/classfl_1_1_analog_r_g_b_controller_ad6195e6befb1bdc28ffbc18410e2d0c7.html#ad6195e6befb1bdc28ffbc18410e2d0c7" title=" " alt="" coords="228,154,403,194"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="470,114,404,143,371,156,369,151,402,138,468,109"/>
+<area shape="rect" id="Node000003" href="$d7/d8f/_el_panel_reactive_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="63,5,122,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="259,21,123,21,123,15,259,15"/>
+<area shape="rect" id="Node000005" href="$d7/d8f/_el_panel_reactive_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="67,67,118,92"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="248,74,118,81,118,75,248,68"/>
+<area shape="poly" id="edge6_Node000006_Node000005" title=" " alt="" coords="250,108,118,86,119,81,251,103"/>
+<area shape="rect" id="Node000008" href="$d0/d5a/classfl_1_1_analog_r_g_b_controller_a0e13c10b28fb7afdff1baa3c11a3859b.html#a0e13c10b28fb7afdff1baa3c11a3859b" title="Initialize the LED controller." alt="" coords="5,141,180,181"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="214,171,180,169,180,163,215,165"/>
+<area shape="rect" id="Node000009" href="$d0/d5a/classfl_1_1_analog_r_g_b_controller_a681be00dd454a605f1001bf1b896d772.html#a681be00dd454a605f1001bf1b896d772" title=" " alt="" coords="5,205,180,245"/>
+<area shape="poly" id="edge9_Node000007_Node000009" title=" " alt="" coords="215,200,181,207,179,202,214,194"/>
 </map>

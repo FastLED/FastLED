@@ -1,16 +1,27 @@
 var classfl_1_1task_1_1_scheduler =
 [
-    [ "Scheduler", "d2/d2b/classfl_1_1task_1_1_scheduler_a56ea341e8b9965989c7634c973ef8027.html#a56ea341e8b9965989c7634c973ef8027", null ],
+    [ "Scheduler", "d2/d2b/classfl_1_1task_1_1_scheduler_ae121a634a1a55f695f640be58619bb46.html#ae121a634a1a55f695f640be58619bb46", null ],
+    [ "~Scheduler", "d2/d2b/classfl_1_1task_1_1_scheduler_a07e49fd4a04cf6be953e625cac5e0078.html#a07e49fd4a04cf6be953e625cac5e0078", null ],
     [ "add_task", "d2/d2b/classfl_1_1task_1_1_scheduler_ad1f60f825514d99a9ee0d06f564be1a7.html#ad1f60f825514d99a9ee0d06f564be1a7", null ],
-    [ "clear_all_tasks", "d2/d2b/classfl_1_1task_1_1_scheduler_adec757b4834627531c92b834d27b4718.html#adec757b4834627531c92b834d27b4718", null ],
+    [ "clear_all_tasks", "d2/d2b/classfl_1_1task_1_1_scheduler_a137409a37a1c5cb8cdee568287404389.html#a137409a37a1c5cb8cdee568287404389", null ],
     [ "instance", "d2/d2b/classfl_1_1task_1_1_scheduler_a266030d285c7f6ae31eb3c619cee8693.html#a266030d285c7f6ae31eb3c619cee8693", null ],
+    [ "onBeginFrame", "d2/d2b/classfl_1_1task_1_1_scheduler_ae25e57a0fa39469045c8459a0d3e1ae0.html#ae25e57a0fa39469045c8459a0d3e1ae0", null ],
+    [ "onEndFrame", "d2/d2b/classfl_1_1task_1_1_scheduler_aa8f55191b33b752cf474c0266f877133.html#aa8f55191b33b752cf474c0266f877133", null ],
+    [ "remove_inactive_tasks", "d2/d2b/classfl_1_1task_1_1_scheduler_aacdd3fab091ccf2185e45abc19177755.html#aacdd3fab091ccf2185e45abc19177755", null ],
     [ "update", "d2/d2b/classfl_1_1task_1_1_scheduler_a894dae01c9c6738eeae091f8fddeefb3.html#a894dae01c9c6738eeae091f8fddeefb3", null ],
     [ "update_after_frame_tasks", "d2/d2b/classfl_1_1task_1_1_scheduler_a55942f7d4bf9dc02cf0c4b871b207722.html#a55942f7d4bf9dc02cf0c4b871b207722", null ],
     [ "update_before_frame_tasks", "d2/d2b/classfl_1_1task_1_1_scheduler_a855c5a328c90cebcc0b5877612b6005b.html#a855c5a328c90cebcc0b5877612b6005b", null ],
+    [ "update_frame_listener_registration", "d2/d2b/classfl_1_1task_1_1_scheduler_ab23e409040ebd66d4ccd8fe53c939d90.html#ab23e409040ebd66d4ccd8fe53c939d90", null ],
     [ "update_tasks_of_type", "d2/d2b/classfl_1_1task_1_1_scheduler_a523f729f91cfca13038bd39ca4838397.html#a523f729f91cfca13038bd39ca4838397", null ],
     [ "warn_no_catch", "d2/d2b/classfl_1_1task_1_1_scheduler_a2d58c9931fbb9da0730f6176c392b406.html#a2d58c9931fbb9da0730f6176c392b406", null ],
     [ "warn_no_then", "d2/d2b/classfl_1_1task_1_1_scheduler_a030936767149b44cd3be5b5eccceae86.html#a030936767149b44cd3be5b5eccceae86", null ],
     [ "fl::Singleton< Scheduler >", "d2/d2b/classfl_1_1task_1_1_scheduler_a0f7928f8c5d46fcd68f1c9cbda6b88d2.html#a0f7928f8c5d46fcd68f1c9cbda6b88d2", null ],
+    [ "mAfterFrameSnapshot", "d2/d2b/classfl_1_1task_1_1_scheduler_a46be8ae01c92e5f8e61222493c4ca11f.html#a46be8ae01c92e5f8e61222493c4ca11f", null ],
+    [ "mBeforeFrameSnapshot", "d2/d2b/classfl_1_1task_1_1_scheduler_ab86b4b1d07886f34886ae44a44403f2a.html#ab86b4b1d07886f34886ae44a44403f2a", null ],
+    [ "mClearGeneration", "d2/d2b/classfl_1_1task_1_1_scheduler_a9f9f8cc230c1dc493f281772b4a4cd39.html#a9f9f8cc230c1dc493f281772b4a4cd39", null ],
+    [ "mFrameListenerRegistered", "d2/d2b/classfl_1_1task_1_1_scheduler_a357ef140706a3494a3baa76e6b768ac5.html#a357ef140706a3494a3baa76e6b768ac5", null ],
     [ "mNextTaskId", "d2/d2b/classfl_1_1task_1_1_scheduler_a219c9c4c2db0e030c10d532e51f45438.html#a219c9c4c2db0e030c10d532e51f45438", null ],
-    [ "mTasks", "d2/d2b/classfl_1_1task_1_1_scheduler_a2110e46329639328b01079f9ddf63f1f.html#a2110e46329639328b01079f9ddf63f1f", null ]
+    [ "mTasks", "d2/d2b/classfl_1_1task_1_1_scheduler_a2110e46329639328b01079f9ddf63f1f.html#a2110e46329639328b01079f9ddf63f1f", null ],
+    [ "mUpdatingAfterFrameTasks", "d2/d2b/classfl_1_1task_1_1_scheduler_a33d8848b71afc472854980b11be3fed4.html#a33d8848b71afc472854980b11be3fed4", null ],
+    [ "mUpdatingBeforeFrameTasks", "d2/d2b/classfl_1_1task_1_1_scheduler_a540d1b4f78004c8d9b595b6d4c967c5b.html#a540d1b4f78004c8d9b595b6d4c967c5b", null ]
 ];

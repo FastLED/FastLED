@@ -1,0 +1,5 @@
+<map id="fl::WideLoadBinder&lt; T, decltype(static_cast&lt; void &gt;(fl::declval&lt; T &amp; &gt;().loadAndScaleRGB16(static_cast&lt; u16 * &gt;(nullptr), static_cast&lt; u16 * &gt;(nullptr), static_cast&lt; u16 * &gt;(nullptr))))&gt;" name="fl::WideLoadBinder&lt; T, decltype(static_cast&lt; void &gt;(fl::declval&lt; T &amp; &gt;().loadAndScaleRGB16(static_cast&lt; u16 * &gt;(nullptr), static_cast&lt; u16 * &gt;(nullptr), static_cast&lt; u16 * &gt;(nullptr))))&gt;">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,181,248,295"/>
+<area shape="rect" id="Node000002" href="$d4/dc8/structfl_1_1_wide_load_binder.html" title="Binds the wide thunk only when T declares loadAndScaleRGB16." alt="" coords="55,5,199,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="129,59,129,181,124,181,124,59"/>
+</map>

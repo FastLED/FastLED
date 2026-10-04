@@ -1,0 +1,5 @@
+<map id="PixelController::stepDithering" name="PixelController::stepDithering">
+<area shape="rect" id="Node000001" title="Step the dithering forward &#45; creates triangular wave that toggles between pixels." alt="" coords="5,5,219,31"/>
+<area shape="rect" id="Node000002" href="$dd/d6c/structfl_1_1_binary_dither_aec4f7e267899df2091d71250efa816be.html#aec4f7e267899df2091d71250efa816be" title="Next pixel: toggle each offset to its complement in [0, e], so neighbours dither in opposite directio..." alt="" coords="267,5,423,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="219,15,253,15,253,21,219,21"/>
+</map>

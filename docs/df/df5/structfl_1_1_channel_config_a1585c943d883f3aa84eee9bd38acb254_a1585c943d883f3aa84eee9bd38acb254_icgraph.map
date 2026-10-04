@@ -1,0 +1,14 @@
+<map id="fl::ChannelConfig::ChannelConfig" name="fl::ChannelConfig::ChannelConfig">
+<area shape="rect" id="Node000001" title="Named constructor with chipset variant." alt="" coords="193,133,333,173"/>
+<area shape="poly" id="edge3_Node000001_Node000001" title=" " alt="" coords="295,121,284,115,263,112,246,114,235,119,231,125,233,132,228,134,226,124,232,115,244,109,263,107,285,110,297,117"/>
+<area shape="rect" id="Node000002" href="$df/df5/structfl_1_1_channel_config_a748c480ecf4350c39f35fd661132fed6.html#a748c480ecf4350c39f35fd661132fed6" title=" " alt="" coords="5,5,145,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="229,126,189,92,144,60,123,48,125,43,147,55,193,88,232,122"/>
+<area shape="rect" id="Node000003" href="$df/df5/structfl_1_1_channel_config_a6765abe2033ea7bb16d66e526faa9305.html#a6765abe2033ea7bb16d66e526faa9305" title=" " alt="" coords="5,69,145,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="190,131,134,112,135,107,192,126"/>
+<area shape="rect" id="Node000004" href="$df/df5/structfl_1_1_channel_config_ae5d90dac70d22bf79ac618e385add5b6.html#ae5d90dac70d22bf79ac618e385add5b6" title="Template constructor with TIMING type (backwards compatibility)" alt="" coords="5,133,145,173"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="179,156,146,156,146,151,179,151"/>
+<area shape="rect" id="Node000005" href="$df/df5/structfl_1_1_channel_config_a1cd86ffb7d39a9bf39d41e755ea71caf.html#a1cd86ffb7d39a9bf39d41e755ea71caf" title=" " alt="" coords="5,197,145,237"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="192,180,135,200,134,195,190,175"/>
+<area shape="rect" id="Node000006" href="$df/df5/structfl_1_1_channel_config_a8990c6351c3435e9510f1feb28cc0ede.html#a8990c6351c3435e9510f1feb28cc0ede" title=" " alt="" coords="5,261,145,301"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="232,185,193,219,147,252,125,264,123,259,144,247,189,214,229,181"/>
+</map>

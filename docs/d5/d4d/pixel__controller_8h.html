@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -111,6 +111,7 @@ $(function(){initNavTree('d5/d4d/pixel__controller_8h.html','../../'); initResiz
 
 <p class="definition">Definition in file <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html">pixel_controller.h</a>.</p>
 </div><div class="textblock"><code>#include &quot;<a class="el" href="../../db/d72/fl_2math_2intmap_8h_source.html">fl/math/intmap.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d1/dbc/sketch__macros_8h_source.html">fl/system/sketch_macros.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../da/d60/fl_2math_2math8_8h_source.html">fl/math/math8.h</a>&quot;</code><br />
 <code>#include &quot;platforms/is_platform.h&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d7/dbb/rgbw_8h_source.html">rgbw.h</a>&quot;</code><br />
@@ -125,6 +126,7 @@ $(function(){initNavTree('d5/d4d/pixel__controller_8h.html','../../'); initResiz
 <code>#include &quot;<a class="el" href="../../d8/d6c/pixel__iterator_8h_source.html">pixel_iterator.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../db/dd1/crgb_8h_source.html">crgb.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d6/d10/variant_8h_source.html">fl/stl/variant.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../da/d08/binary__dither_8h_source.html">fl/gfx/binary_dither.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for pixel_controller.h:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -153,15 +155,6 @@ Classes</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
 Macros</h2></td></tr>
-<tr class="memitem:a6b62d843cb5aa0c21dceafe56901fd17" id="r_a6b62d843cb5aa0c21dceafe56901fd17"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d4d/pixel__controller_8h_a6b62d843cb5aa0c21dceafe56901fd17.html#a6b62d843cb5aa0c21dceafe56901fd17">MAX_LIKELY_UPDATE_RATE_HZ</a>&#160;&#160;&#160;400</td></tr>
-<tr class="memdesc:a6b62d843cb5aa0c21dceafe56901fd17"><td class="mdescLeft">&#160;</td><td class="mdescRight">Predicted max update rate, in Hertz.  <br /></td></tr>
-<tr class="separator:a6b62d843cb5aa0c21dceafe56901fd17"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4e5988c0a9a14761da407256de025abf" id="r_a4e5988c0a9a14761da407256de025abf"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d4d/pixel__controller_8h_a4e5988c0a9a14761da407256de025abf.html#a4e5988c0a9a14761da407256de025abf">MIN_ACCEPTABLE_DITHER_RATE_HZ</a>&#160;&#160;&#160;50</td></tr>
-<tr class="memdesc:a4e5988c0a9a14761da407256de025abf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Minimum acceptable dithering rate, in Hertz.  <br /></td></tr>
-<tr class="separator:a4e5988c0a9a14761da407256de025abf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0d71bfb7ef663994e4121f7b42aa8183" id="r_a0d71bfb7ef663994e4121f7b42aa8183"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d4d/pixel__controller_8h_a0d71bfb7ef663994e4121f7b42aa8183.html#a0d71bfb7ef663994e4121f7b42aa8183">RECOMMENDED_VIRTUAL_BITS</a></td></tr>
-<tr class="memdesc:a0d71bfb7ef663994e4121f7b42aa8183"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set "virtual bits" of dithering to the highest level that is not likely to cause excessive flickering at low brightness levels + low update rates.  <br /></td></tr>
-<tr class="separator:a0d71bfb7ef663994e4121f7b42aa8183"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a29cf1a59cdb0fc81a54ba6ae0c865bc8" id="r_a29cf1a59cdb0fc81a54ba6ae0c865bc8"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d4d/pixel__controller_8h_a29cf1a59cdb0fc81a54ba6ae0c865bc8.html#a29cf1a59cdb0fc81a54ba6ae0c865bc8">RGB_BYTE</a>(<a class="el" href="../../d5/d4d/pixel__controller_8h_afef3a6dc05d96466ceb8bd8a89d7b6bd.html#afef3a6dc05d96466ceb8bd8a89d7b6bd">RO</a>,  X)</td></tr>
 <tr class="memdesc:a29cf1a59cdb0fc81a54ba6ae0c865bc8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the assigned color channel for a byte's position in the output, using a passed RGB color order.  <br /></td></tr>
 <tr class="separator:a29cf1a59cdb0fc81a54ba6ae0c865bc8"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -177,12 +170,6 @@ Macros</h2></td></tr>
 <tr class="memitem:afef3a6dc05d96466ceb8bd8a89d7b6bd" id="r_afef3a6dc05d96466ceb8bd8a89d7b6bd"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d4d/pixel__controller_8h_afef3a6dc05d96466ceb8bd8a89d7b6bd.html#afef3a6dc05d96466ceb8bd8a89d7b6bd">RO</a>(X)</td></tr>
 <tr class="memdesc:afef3a6dc05d96466ceb8bd8a89d7b6bd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the assigned color channel for a byte's position in the output, using the color order (<a class="el" href="../../db/d07/eorder_8h_a3aba410ffe1f43e934fdc88e97cb7d02.html#a3aba410ffe1f43e934fdc88e97cb7d02">EOrder</a>) template parameter from the LED controller.  <br /></td></tr>
 <tr class="separator:afef3a6dc05d96466ceb8bd8a89d7b6bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aebfff45adc514fa6fee761623598df59" id="r_aebfff45adc514fa6fee761623598df59"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d4d/pixel__controller_8h_aebfff45adc514fa6fee761623598df59.html#aebfff45adc514fa6fee761623598df59">UPDATES_PER_FULL_DITHER_CYCLE</a>&#160;&#160;&#160;(<a class="el" href="../../d5/d4d/pixel__controller_8h_a6b62d843cb5aa0c21dceafe56901fd17.html#a6b62d843cb5aa0c21dceafe56901fd17">MAX_LIKELY_UPDATE_RATE_HZ</a> / <a class="el" href="../../d5/d4d/pixel__controller_8h_a4e5988c0a9a14761da407256de025abf.html#a4e5988c0a9a14761da407256de025abf">MIN_ACCEPTABLE_DITHER_RATE_HZ</a>)</td></tr>
-<tr class="memdesc:aebfff45adc514fa6fee761623598df59"><td class="mdescLeft">&#160;</td><td class="mdescRight">The number of updates in a single dither cycle.  <br /></td></tr>
-<tr class="separator:aebfff45adc514fa6fee761623598df59"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a25177681f9e6192fe226707691a24dcb" id="r_a25177681f9e6192fe226707691a24dcb"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d4d/pixel__controller_8h_a25177681f9e6192fe226707691a24dcb.html#a25177681f9e6192fe226707691a24dcb">VIRTUAL_BITS</a>&#160;&#160;&#160;<a class="el" href="../../d5/d4d/pixel__controller_8h_a0d71bfb7ef663994e4121f7b42aa8183.html#a0d71bfb7ef663994e4121f7b42aa8183">RECOMMENDED_VIRTUAL_BITS</a></td></tr>
-<tr class="memdesc:a25177681f9e6192fe226707691a24dcb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Alias for RECOMMENDED_VIRTUAL_BITS.  <br /></td></tr>
-<tr class="separator:a25177681f9e6192fe226707691a24dcb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -191,7 +178,7 @@ Macros</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d5/d4d/pixel__controller_8h.html">pixel_controller.h</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:02 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:05 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

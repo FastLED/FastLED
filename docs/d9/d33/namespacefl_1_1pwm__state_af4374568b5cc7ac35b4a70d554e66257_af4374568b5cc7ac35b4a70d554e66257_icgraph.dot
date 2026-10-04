@@ -10,7 +10,9 @@ digraph "fl::pwm_state::ensureIsrActive"
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node2 [id="Node000002",label="fl::setPwmFrequency",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a77306b4a5327eb19e8d003b550b1a0a5.html#a77306b4a5327eb19e8d003b550b1a0a5",tooltip="Set PWM frequency for a pin."];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="initPanels",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d1f/el__panel_8cpp_a3d505a2f5ac043b8dc404b92ebb049ef.html#a3d505a2f5ac043b8dc404b92ebb049ef",tooltip=" "];
-  Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="setup",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d8f/_el_panel_reactive_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d",tooltip=" "];
+  Node3 [id="Node000003",label="fl::AnalogRGBController\l::init",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d5a/classfl_1_1_analog_r_g_b_controller_a0e13c10b28fb7afdff1baa3c11a3859b.html#a0e13c10b28fb7afdff1baa3c11a3859b",tooltip="Initialize the LED controller."];
+  Node2 -> Node4 [id="edge3_Node000002_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="initPanels",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d1f/el__panel_8cpp_a3d505a2f5ac043b8dc404b92ebb049ef.html#a3d505a2f5ac043b8dc404b92ebb049ef",tooltip=" "];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="setup",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d8f/_el_panel_reactive_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d",tooltip=" "];
 }

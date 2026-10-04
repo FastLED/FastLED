@@ -1,0 +1,5 @@
+<map id="PixelController::preStepFirstByteDithering" name="PixelController::preStepFirstByteDithering">
+<area shape="rect" id="Node000001" title="Some chipsets pre&#45;cycle the first byte, which means we want to cycle byte 0&#39;s dithering separately." alt="" coords="5,5,180,45"/>
+<area shape="rect" id="Node000002" href="$dd/d6c/structfl_1_1_binary_dither_a284869bd50cc701f12f3a101ddf09378.html#a284869bd50cc701f12f3a101ddf09378" title="step for a single channel (drivers that pre&#45;step their first byte)." alt="" coords="228,13,437,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="180,23,214,23,214,28,180,28"/>
+</map>

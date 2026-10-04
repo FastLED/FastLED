@@ -1,0 +1,16 @@
+<map id="fl::fled::VideoFrameView" name="fl::fled::VideoFrameView">
+<area shape="rect" id="Node000001" title=" " alt="" coords="161,401,341,427"/>
+<area shape="rect" id="Node000002" href="$d2/dec/namespacefl_1_1fled.html#da/d8e/structfl_1_1fled_1_1_pixel_storage" title=" " alt="" coords="5,306,156,331"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="112,336,179,375,227,399,225,404,177,380,109,341"/>
+<area shape="rect" id="Node000003" href="$d2/dec/namespacefl_1_1fled.html#db/d5b/structfl_1_1fled_1_1_video_color" title=" " alt="" coords="181,306,322,331"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="254,345,254,401,249,401,249,345"/>
+<area shape="rect" id="Node000004" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="346,299,503,339"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="379,348,274,404,271,399,376,343"/>
+<area shape="rect" id="Node000005" href="$d4/dc0/structfl_1_1detail_1_1_control_block_base.html" title=" " alt="" coords="285,123,484,148"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="381,162,376,197,379,235,394,269,412,297,407,300,389,271,374,237,371,197,375,161"/>
+<area shape="rect" id="Node000008" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="489,211,635,236"/>
+<area shape="poly" id="edge7_Node000008_Node000005" title=" " alt="" coords="422,152,539,208,537,213,419,156"/>
+<area shape="rect" id="Node000006" href="$da/d98/classfl_1_1_atomic_fake.html" title=" " alt="" coords="317,5,453,45"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="387,59,387,122,382,122,382,59"/>
+<area shape="poly" id="edge6_Node000004_Node000008" title=" " alt="" coords="535,246,454,301,451,296,532,242"/>
+</map>

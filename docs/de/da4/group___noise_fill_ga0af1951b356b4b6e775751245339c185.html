@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -154,9 +154,23 @@ $(function(){initNavTree('de/da4/group___noise_fill_ga0af1951b356b4b6e7757512453
       </table>
 </div><div class="memdoc">
 
-<p>Fill a 2D 8-bit buffer with noise, using <a class="el" href="../../d8/df9/group___noise_generation_gaa452e57f154ab8d6d692375dba1ef5cb.html#gaa452e57f154ab8d6d692375dba1ef5cb">inoise16()</a> </p>
+<p>Fill a 2D 8-bit buffer with noise, using <a class="el" href="../../d8/df9/group___noise_generation_gaa452e57f154ab8d6d692375dba1ef5cb.html#gaa452e57f154ab8d6d692375dba1ef5cb" title="16-bit, fixed point implementation of Perlin&#39;s noise.">inoise16()</a> </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">pData</td><td>the array of data to fill with noise values </td></tr>
+    <tr><td class="paramname">width</td><td>the width of the 2D buffer </td></tr>
+    <tr><td class="paramname">height</td><td>the height of the 2D buffer </td></tr>
+    <tr><td class="paramname">octaves</td><td>the number of octaves to use for noise. More octaves = more noise. </td></tr>
+    <tr><td class="paramname">x</td><td>x-axis coordinate on noise map (1D) </td></tr>
+    <tr><td class="paramname">scalex</td><td>the scale (distance) between x points when filling in noise </td></tr>
+    <tr><td class="paramname">y</td><td>y-axis coordinate on noise map (2D) </td></tr>
+    <tr><td class="paramname">scaley</td><td>the scale (distance) between y points when filling in noise </td></tr>
+    <tr><td class="paramname">time</td><td>the time position for the noise field    </td></tr>
+  </table>
+  </dd>
+</dl>
 
-<p class="reference">References <a class="el" href="../../db/d4e/colorutils_8cpp_8hpp_source.html#l00063">blend()</a>, <a class="el" href="../../d3/d4e/_noise_playground_8h_source.html#l00031">hue_octaves</a>, <a class="el" href="../../d3/d4e/_noise_playground_8h_source.html#l00038">hue_scale</a>, <a class="el" href="../../d3/d4e/_noise_playground_8h_source.html#l00024">hue_time</a>, <a class="el" href="../../d6/d05/_animartrix_8ino_source.html#l00093">leds</a>, <a class="el" href="../../d3/d4e/_noise_playground_8h_source.html#l00030">octaves</a>, <a class="el" href="../../d3/dac/_fx_noise_ring_8ino_ae6325d6552afdaddd577e0ccce29ceba.html#ae6325d6552afdaddd577e0ccce29ceba">scale</a>, <a class="el" href="../../db/d49/_audio_2simple_2simple_8h_source.html#l00092">x</a>, <a class="el" href="../../d3/d4e/_noise_playground_8h_source.html#l00034">xscale</a>, <a class="el" href="../../db/d49/_audio_2simple_2simple_8h_source.html#l00093">y</a>, and <a class="el" href="../../d3/d4e/_noise_playground_8h_source.html#l00035">yscale</a>.</p>
+<p class="reference">References <a class="el" href="../../db/d4e/colorutils_8cpp_8hpp_source.html#l00128">blend()</a>, <a class="el" href="../../d3/d4e/_noise_playground_8h_source.html#l00031">hue_octaves</a>, <a class="el" href="../../d3/d4e/_noise_playground_8h_source.html#l00038">hue_scale</a>, <a class="el" href="../../d3/d4e/_noise_playground_8h_source.html#l00024">hue_time</a>, <a class="el" href="../../d5/d17/_analog_output_8ino_source.html#l00026">leds</a>, <a class="el" href="../../d3/d4e/_noise_playground_8h_source.html#l00030">octaves</a>, <a class="el" href="../../d3/dac/_fx_noise_ring_8ino_ae6325d6552afdaddd577e0ccce29ceba.html#ae6325d6552afdaddd577e0ccce29ceba">scale</a>, <a class="el" href="../../db/d49/_audio_2simple_2simple_8h_source.html#l00092">x</a>, <a class="el" href="../../d3/d4e/_noise_playground_8h_source.html#l00034">xscale</a>, <a class="el" href="../../db/d49/_audio_2simple_2simple_8h_source.html#l00093">y</a>, and <a class="el" href="../../d3/d4e/_noise_playground_8h_source.html#l00035">yscale</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -174,7 +188,7 @@ $(function(){initNavTree('de/da4/group___noise_fill_ga0af1951b356b4b6e7757512453
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../de/da4/group___noise_fill.html">Noise Fill Functions</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:02 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

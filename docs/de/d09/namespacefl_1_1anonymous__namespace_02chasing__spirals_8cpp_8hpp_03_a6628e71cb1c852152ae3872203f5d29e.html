@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -165,7 +165,7 @@ $(function(){initNavTree('de/d09/namespacefl_1_1anonymous__namespace_02chasing__
 <div class="line"><span class="lineno">  119</span>    <span class="keyword">auto</span> rad_const_vec = simd::set1_u32_4(<span class="keyword">static_cast&lt;</span>u32<span class="keyword">&gt;</span>(RAD_TO_A24));</div>
 <div class="line"><span class="lineno">  120</span>    <span class="keyword">auto</span> angles_vec    = simd::mulhi_su32_4(sum_vec, rad_const_vec);</div>
 <div class="line"><span class="lineno">  121</span> </div>
-<div class="line"><span class="lineno">  122</span>    SinCos32_simd sc = <a class="code hl_function" href="../../d4/d36/namespacefl_a3a23a29b7fae800b629360cd32fec586.html#a3a23a29b7fae800b629360cd32fec586">sincos32_simd</a>(angles_vec);</div>
+<div class="line"><span class="lineno">  122</span>    SinCos32_simd sc = <a class="code hl_function" href="../../d4/d36/namespacefl_a92f648bf72198076845339c6859d3e19.html#a92f648bf72198076845339c6859d3e19">sincos32_simd</a>(angles_vec);</div>
 <div class="line"><span class="lineno">  123</span> </div>
 <div class="line"><span class="lineno">  124</span>    <span class="comment">// Perlin coordinates: nx = lin+cx - cos*dist, ny = cy - sin*dist</span></div>
 <div class="line"><span class="lineno">  125</span>    <span class="keyword">auto</span> lin_cx  = simd::set1_u32_4(<span class="keyword">static_cast&lt;</span>u32<span class="keyword">&gt;</span>(linear_offset + cx_raw));</div>
@@ -189,12 +189,12 @@ $(function(){initNavTree('de/d09/namespacefl_1_1anonymous__namespace_02chasing__
 <div class="line"><span class="lineno">  143</span>    <span class="keyword">auto</span> <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a> = simd::mulhi32_i32_4(noise_scaled, rf_vec);</div>
 <div class="line"><span class="lineno">  144</span>    <span class="keywordflow">return</span> simd::min_i32_4(simd::max_i32_4(<a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>, zero), max255);</div>
 <div class="line"><span class="lineno">  145</span>}</div>
-<div class="ttc" id="aclassfl_1_1s16x16_a6f77b00e0919c4f19c094468af38fd6d_html_a6f77b00e0919c4f19c094468af38fd6d"><div class="ttname"><a href="../../d9/d9f/classfl_1_1s16x16_a6f77b00e0919c4f19c094468af38fd6d.html#a6f77b00e0919c4f19c094468af38fd6d">fl::s16x16::FRAC_BITS</a></div><div class="ttdeci">static constexpr int FRAC_BITS</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d64/s16x16_8h_source.html#l00022">s16x16.h:22</a></div></div>
-<div class="ttc" id="anamespacefl_a3a23a29b7fae800b629360cd32fec586_html_a3a23a29b7fae800b629360cd32fec586"><div class="ttname"><a href="../../d4/d36/namespacefl_a3a23a29b7fae800b629360cd32fec586.html#a3a23a29b7fae800b629360cd32fec586">fl::sincos32_simd</a></div><div class="ttdeci">FASTLED_FORCE_INLINE SinCos32_simd sincos32_simd(simd::simd_u32x4 angles) FL_NOEXCEPT</div><div class="ttdoc">Process 4 angles simultaneously, returning vectorized sin/cos values SIMD-optimized: vectorized angle...</div><div class="ttdef"><b>Definition</b> <a href="../../d3/d84/sin32_8h_source.html#l00145">sin32.h:145</a></div></div>
+<div class="ttc" id="aclassfl_1_1s16x16_a6f77b00e0919c4f19c094468af38fd6d_html_a6f77b00e0919c4f19c094468af38fd6d"><div class="ttname"><a href="../../d9/d9f/classfl_1_1s16x16_a6f77b00e0919c4f19c094468af38fd6d.html#a6f77b00e0919c4f19c094468af38fd6d">fl::s16x16::FRAC_BITS</a></div><div class="ttdeci">static constexpr int FRAC_BITS</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d64/s16x16_8h_source.html#l00024">s16x16.h:24</a></div></div>
 <div class="ttc" id="anamespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99_html_a8fa65f6529fc3eb6a174cb304a4bfc99"><div class="ttname"><a href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">fl::result</a></div><div class="ttdeci">expected&lt; T, E &gt; result</div><div class="ttdoc">Alias for expected (Rust-style naming)</div><div class="ttdef"><b>Definition</b> <a href="../../de/d93/result_8h_source.html#l00031">result.h:31</a></div></div>
+<div class="ttc" id="anamespacefl_a92f648bf72198076845339c6859d3e19_html_a92f648bf72198076845339c6859d3e19"><div class="ttname"><a href="../../d4/d36/namespacefl_a92f648bf72198076845339c6859d3e19.html#a92f648bf72198076845339c6859d3e19">fl::sincos32_simd</a></div><div class="ttdeci">FASTLED_FORCE_INLINE SinCos32_simd sincos32_simd(simd::simd_u32x4 angles) FL_NO_EXCEPT</div><div class="ttdoc">Process 4 angles simultaneously, returning vectorized sin/cos values SIMD-optimized: vectorized angle...</div><div class="ttdef"><b>Definition</b> <a href="../../d2/d4b/sin32__simd_8h_source.html#l00032">sin32_simd.h:32</a></div></div>
 <div class="ttc" id="astructfl_1_1perlin__s16x16__simd_af9fca57c248cfdf924dfb5c33d37edad_html_af9fca57c248cfdf924dfb5c33d37edad"><div class="ttname"><a href="../../da/dec/structfl_1_1perlin__s16x16__simd_af9fca57c248cfdf924dfb5c33d37edad.html#af9fca57c248cfdf924dfb5c33d37edad">fl::perlin_s16x16_simd::pnoise2d_raw_simd4_vec</a></div><div class="ttdeci">static fl::simd::simd_u32x4 pnoise2d_raw_simd4_vec(fl::simd::simd_u32x4 nx_vec, fl::simd::simd_u32x4 ny_vec, const fl::i32 *fade_lut, const fl::u8 *perm)</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d2a/perlin__s16x16__simd_8cpp_8hpp_source.html#l00019">perlin_s16x16_simd.cpp.hpp:19</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d7/d64/s16x16_8h_source.html#l00022">fl::s16x16::FRAC_BITS</a>, <a class="el" href="../../d8/d2a/perlin__s16x16__simd_8cpp_8hpp_source.html#l00019">fl::perlin_s16x16_simd::pnoise2d_raw_simd4_vec()</a>, <a class="el" href="../../d9/dc3/chasing__spirals_8cpp_8hpp_source.html#l00108">simd4_processChannel()</a>, and <a class="el" href="../../d3/d84/sin32_8h_source.html#l00145">fl::sincos32_simd()</a>.</p>
+<p class="reference">References <a class="el" href="../../d7/d64/s16x16_8h_source.html#l00024">fl::s16x16::FRAC_BITS</a>, <a class="el" href="../../d8/d2a/perlin__s16x16__simd_8cpp_8hpp_source.html#l00019">fl::perlin_s16x16_simd::pnoise2d_raw_simd4_vec()</a>, <a class="el" href="../../d9/dc3/chasing__spirals_8cpp_8hpp_source.html#l00108">simd4_processChannel()</a>, and <a class="el" href="../../d2/d4b/sin32__simd_8h_source.html#l00032">fl::sincos32_simd()</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../d9/dc3/chasing__spirals_8cpp_8hpp_source.html#l00108">simd4_processChannel()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
@@ -221,7 +221,7 @@ $(function(){initNavTree('de/d09/namespacefl_1_1anonymous__namespace_02chasing__
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../de/d09/namespacefl_1_1anonymous__namespace_02chasing__spirals_8cpp_8hpp_03.html">anonymous_namespace{chasing_spirals.cpp.hpp}</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:07 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:10 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

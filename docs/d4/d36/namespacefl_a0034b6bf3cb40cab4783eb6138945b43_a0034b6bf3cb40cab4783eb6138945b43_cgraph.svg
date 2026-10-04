@@ -31,7 +31,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../d4/d36/namespacefl_a95a89c7ba649b9bd2c9136c0f517d82f.html#a95a89c7ba649b9bd2c9136c0f517d82f" target="_top" xlink:title="Universal microsecond timer &#45; returns microseconds since system startup.">
+<g id="a_Node000002"><a xlink:href="../../d4/d36/namespacefl_a4cfbbd90ced1c04107934a3c05d3e679.html#a4cfbbd90ced1c04107934a3c05d3e679" target="_top" xlink:title="Universal microsecond timer &#45; returns microseconds since system startup.">
 <polygon fill="white" stroke="#666666" points="175,-19 113,-19 113,0 175,0 175,-19"/>
 <text text-anchor="middle" x="144" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::micros</text>
 </a>

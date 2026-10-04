@@ -1,0 +1,31 @@
+<map id="fl::printf_detail::scalar_kind&lt; T &gt;" name="fl::printf_detail::scalar_kind&lt; T &gt;">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,431,140,471"/>
+<area shape="rect" id="Node000002" href="$d8/d12/structfl_1_1printf__detail_1_1scalar__kind_3_01bool_01_4.html" title=" " alt="" coords="371,15,526,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="74,417,84,333,101,228,127,129,143,92,162,66,185,49,210,36,264,21,320,17,371,19,371,24,320,22,265,27,212,41,188,54,166,70,148,94,132,131,107,229,89,334,80,417"/>
+<area shape="rect" id="Node000003" href="$d9/da3/structfl_1_1printf__detail_1_1scalar__kind_3_01char_01_4.html" title=" " alt="" coords="371,79,526,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="76,417,88,347,107,263,132,185,146,156,162,135,185,119,210,106,264,90,320,84,371,85,371,91,320,90,265,95,212,111,188,123,166,139,151,158,137,187,112,264,94,348,82,418"/>
+<area shape="rect" id="Node000004" href="$de/dfe/structfl_1_1printf__detail_1_1scalar__kind_3_01double_01_4.html" title=" " alt="" coords="363,143,534,183"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="74,417,81,369,96,313,122,256,140,231,162,209,209,180,261,163,314,155,363,153,363,159,314,161,262,169,211,185,166,213,144,234,127,259,101,314,86,370,79,417"/>
+<area shape="rect" id="Node000005" href="$d9/d93/structfl_1_1printf__detail_1_1scalar__kind_3_01float_01_4.html" title=" " alt="" coords="371,207,526,247"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="80,417,92,384,109,348,132,312,162,282,212,254,266,236,321,226,371,222,371,228,322,232,268,241,214,259,166,286,136,315,113,350,96,386,85,418"/>
+<area shape="rect" id="Node000006" href="$db/d48/structfl_1_1printf__detail_1_1scalar__kind_3_01int_01_4.html" title=" " alt="" coords="377,271,520,311"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="94,417,124,383,163,352,216,328,272,310,327,299,376,292,377,298,328,304,273,316,218,333,165,357,127,387,98,421"/>
+<area shape="rect" id="Node000007" href="$dc/d9f/structfl_1_1printf__detail_1_1scalar__kind_3_01long_01_4.html" title=" " alt="" coords="371,335,526,375"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="125,423,163,408,271,380,371,362,371,368,272,386,165,413,127,428"/>
+<area shape="rect" id="Node000008" href="$db/d1f/structfl_1_1printf__detail_1_1scalar__kind_3_01long_01long_01_4.html" title=" " alt="" coords="355,399,542,439"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="153,441,355,424,355,429,154,446"/>
+<area shape="rect" id="Node000009" href="$d5/d52/structfl_1_1printf__detail_1_1scalar__kind_3_01short_01_4.html" title=" " alt="" coords="369,463,528,503"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="154,460,164,461,369,477,369,482,164,467,153,465"/>
+<area shape="rect" id="Node000010" href="$dc/d5d/structfl_1_1printf__detail_1_1scalar__kind_3_01signed_01char_01_4.html" title=" " alt="" coords="371,527,526,582"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="120,475,165,495,272,524,372,543,371,548,271,530,163,500,118,480"/>
+<area shape="rect" id="Node000011" href="$dc/dc8/structfl_1_1printf__detail_1_1scalar__kind_3_01unsigned_01char_01_4.html" title=" " alt="" coords="363,606,534,661"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="96,481,126,519,166,554,213,579,265,598,316,612,364,621,363,626,315,617,263,603,211,584,162,558,122,523,91,484"/>
+<area shape="rect" id="Node000012" href="$da/dcd/structfl_1_1printf__detail_1_1scalar__kind_3_01unsigned_01int_01_4.html" title=" " alt="" coords="345,685,552,725"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="84,483,94,519,111,560,134,600,166,634,207,660,253,679,300,691,346,699,345,704,299,697,251,684,204,665,162,638,130,603,106,562,89,521,78,485"/>
+<area shape="rect" id="Node000013" href="$d7/d7f/structfl_1_1printf__detail_1_1scalar__kind_3_01unsigned_01long_01_4.html" title=" " alt="" coords="363,750,534,805"/>
+<area shape="poly" id="edge12_Node000001_Node000013" title=" " alt="" coords="78,484,84,536,98,599,124,662,143,691,166,715,210,745,261,764,314,774,363,778,363,783,313,779,260,769,208,750,162,719,139,694,119,665,93,600,78,537,73,485"/>
+<area shape="rect" id="Node000014" href="$db/d73/structfl_1_1printf__detail_1_1scalar__kind_3_01unsigned_01long_01long_01_4.html" title=" " alt="" coords="363,829,534,883"/>
+<area shape="poly" id="edge13_Node000001_Node000014" title=" " alt="" coords="81,484,92,560,110,654,135,741,150,775,166,797,187,813,210,827,260,846,313,855,363,859,363,864,312,861,259,851,207,832,184,818,162,801,145,777,130,743,105,655,87,561,76,485"/>
+<area shape="rect" id="Node000015" href="$dd/d11/structfl_1_1printf__detail_1_1scalar__kind_3_01unsigned_01short_01_4.html" title=" " alt="" coords="363,907,534,962"/>
+<area shape="poly" id="edge14_Node000001_Node000015" title=" " alt="" coords="79,484,88,577,104,695,116,754,130,807,147,850,166,878,186,895,209,909,260,927,313,936,363,939,363,944,312,942,259,933,207,914,183,899,162,882,142,852,125,808,111,755,99,696,82,577,74,485"/>
+</map>

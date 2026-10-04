@@ -1,0 +1,7 @@
+<map id="fl::CLEDController::clearLedDataInternal" name="fl::CLEDController::clearLedDataInternal">
+<area shape="rect" id="Node000001" title="Zero out the LED data managed by this controller." alt="" coords="5,35,172,75"/>
+<area shape="rect" id="Node000002" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a191c35a8d03902ad6933c60f3731033d.html#a191c35a8d03902ad6933c60f3731033d" title="How many Lanes does this controller manage?" alt="" coords="220,5,356,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="172,40,206,35,207,40,173,45"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a9416b2c34c489ae11032cb58c2d3c58c.html#a9416b2c34c489ae11032cb58c2d3c58c" title=" " alt="" coords="242,70,334,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="173,64,229,72,228,77,172,69"/>
+</map>

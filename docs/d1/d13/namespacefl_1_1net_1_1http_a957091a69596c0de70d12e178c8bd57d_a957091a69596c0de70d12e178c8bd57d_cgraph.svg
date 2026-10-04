@@ -68,7 +68,7 @@ var sectionId = 'dynsection-0';
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../d0/d34/classfl_1_1task_1_1_promise_a70811e463c0161394aae6e29b442b266.html#a70811e463c0161394aae6e29b442b266" target="_top" xlink:title="Create a resolved Promise with value.">
+<g id="a_Node000002"><a xlink:href="../../d0/d34/classfl_1_1task_1_1_promise_a973eed5d2fbd0bc5e227af3488b04fcf.html#a973eed5d2fbd0bc5e227af3488b04fcf" target="_top" xlink:title="Create a resolved Promise with value.">
 <polygon fill="white" stroke="#666666" points="262,-78 161,-78 161,-48 262,-48 262,-78"/>
 <text text-anchor="start" x="169" y="-66" font-family="Helvetica,sans-Serif" font-size="10.00">fl::task::Promise::</text>
 <text text-anchor="middle" x="211.5" y="-55" font-family="Helvetica,sans-Serif" font-size="10.00">resolve</text>
@@ -106,7 +106,7 @@ var sectionId = 'dynsection-0';
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d0/d34/classfl_1_1task_1_1_promise_a4ae6da8172cc69a1dbbc7a01bc86f959.html#a4ae6da8172cc69a1dbbc7a01bc86f959" target="_top" xlink:title="Default constructor &#45; creates invalid Promise.">
+<g id="a_Node000003"><a xlink:href="../../d0/d34/classfl_1_1task_1_1_promise_ae75706ae1089e184850eb571f0b8c3aa.html#ae75706ae1089e184850eb571f0b8c3aa" target="_top" xlink:title="Default constructor &#45; creates invalid Promise.">
 <polygon fill="white" stroke="#666666" points="547,-121 446,-121 446,-91 547,-91 547,-121"/>
 <text text-anchor="start" x="454" y="-109" font-family="Helvetica,sans-Serif" font-size="10.00">fl::task::Promise::</text>
 <text text-anchor="middle" x="496.5" y="-98" font-family="Helvetica,sans-Serif" font-size="10.00">Promise</text>
@@ -125,7 +125,7 @@ var sectionId = 'dynsection-0';
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../d0/d34/classfl_1_1task_1_1_promise_a9fd2b38e45453a1061acc972d64a2bed.html#a9fd2b38e45453a1061acc972d64a2bed" target="_top" xlink:title="Create a pending Promise.">
+<g id="a_Node000004"><a xlink:href="../../d0/d34/classfl_1_1task_1_1_promise_abdb44418713e7f012b6860d6cf6aa69a.html#abdb44418713e7f012b6860d6cf6aa69a" target="_top" xlink:title="Create a pending Promise.">
 <polygon fill="white" stroke="#666666" points="410,-78 309,-78 309,-48 410,-48 410,-78"/>
 <text text-anchor="start" x="317" y="-66" font-family="Helvetica,sans-Serif" font-size="10.00">fl::task::Promise::</text>
 <text text-anchor="middle" x="359.5" y="-55" font-family="Helvetica,sans-Serif" font-size="10.00">create</text>
@@ -144,7 +144,7 @@ var sectionId = 'dynsection-0';
 <!-- Node6 -->
 <g id="Node000006" class="node">
 <title>Node6</title>
-<g id="a_Node000006"><a xlink:href="../../d0/d34/classfl_1_1task_1_1_promise_a2eccb92f3cd894efe9a728eea2db7c45.html#a2eccb92f3cd894efe9a728eea2db7c45" target="_top" xlink:title="Get the result value (only valid if is_resolved() returns true)">
+<g id="a_Node000006"><a xlink:href="../../d0/d34/classfl_1_1task_1_1_promise_aa523169946167b53608c4a86d79b6969.html#aa523169946167b53608c4a86d79b6969" target="_top" xlink:title="Get the result value (only valid if is_resolved() returns true)">
 <polygon fill="white" stroke="#666666" points="410,-30 309,-30 309,0 410,0 410,-30"/>
 <text text-anchor="start" x="317" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">fl::task::Promise::</text>
 <text text-anchor="middle" x="359.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">value</text>
@@ -190,7 +190,7 @@ var sectionId = 'dynsection-0';
 <!-- Node7 -->
 <g id="Node000007" class="node">
 <title>Node7</title>
-<g id="a_Node000007"><a xlink:href="../../d0/d34/classfl_1_1task_1_1_promise_aa4a0fc861a1271cbb04a46aa7628c611.html#aa4a0fc861a1271cbb04a46aa7628c611" target="_top" xlink:title="Check if Promise is valid.">
+<g id="a_Node000007"><a xlink:href="../../d0/d34/classfl_1_1task_1_1_promise_a4df3cf33aa75a0482148e9d6bf1d34eb.html#a4df3cf33aa75a0482148e9d6bf1d34eb" target="_top" xlink:title="Check if Promise is valid.">
 <polygon fill="white" stroke="#666666" points="547,-30 446,-30 446,0 547,0 547,-30"/>
 <text text-anchor="start" x="454" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">fl::task::Promise::</text>
 <text text-anchor="middle" x="496.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">valid</text>

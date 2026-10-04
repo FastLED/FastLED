@@ -1,0 +1,8 @@
+<map id="fl::FluxScalar::fromBrightness" name="fl::FluxScalar::fromBrightness">
+<area shape="rect" id="Node000001" title="setBrightness(b) as the linear flux scalar b/255." alt="" coords="548,44,763,69"/>
+<area shape="rect" id="Node000002" href="$db/da5/classfl_1_1_color_managed_pixel_source_a840318a93b26254902901cdefd55cd35.html#a840318a93b26254902901cdefd55cd35" title="Frame&#45;local brightness is applied to the source&#39;s owned pipeline on shared tiers; only managed iterat..." alt="" coords="293,37,500,77"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="534,59,500,59,500,54,534,54"/>
+<area shape="rect" id="Node000003" href="$d1/da7/namespacefl_1_1anonymous__namespace_02pipeline__binding_8cpp_8hpp_03_ac06021128ae811d9bb3c04b8a3e98d77.html#ac06021128ae811d9bb3c04b8a3e98d77" title="Builds the managed iterator in the caller&#39;s storage." alt="" coords="5,29,245,84"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="279,59,245,59,245,54,279,54"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="171,18,154,11,125,8,101,10,85,15,78,21,78,29,73,29,73,19,83,10,100,5,125,3,156,6,173,14"/>
+</map>

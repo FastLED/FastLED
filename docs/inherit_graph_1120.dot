@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::ResponseSend",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d22/classfl_1_1_response_send.html",tooltip="Helper class for sending responses in async/streaming RPC methods."];
+  Node0 [id="Node000000",label="fl::StringConversionVisitor",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d51/structfl_1_1_string_conversion_visitor.html",tooltip=" "];
 }

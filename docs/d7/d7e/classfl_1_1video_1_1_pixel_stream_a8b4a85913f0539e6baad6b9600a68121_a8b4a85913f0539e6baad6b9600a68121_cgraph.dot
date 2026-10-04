@@ -10,6 +10,6 @@ digraph "fl::video::PixelStream::framesRemaining"
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
   Node2 [id="Node000002",label="fl::video::PixelStream\l::bytesRemaining",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d7e/classfl_1_1video_1_1_pixel_stream_a2c959aba90451e9ba9fb72e3225dea44.html#a2c959aba90451e9ba9fb72e3225dea44",tooltip=" "];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::numeric_limits::max",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d7c/structfl_1_1numeric__limits_a31c1687ca77003f233081c372a5c9922.html#a31c1687ca77003f233081c372a5c9922",tooltip=" "];
+  Node3 [id="Node000003",label="fl::numeric_limits::max",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d7c/structfl_1_1numeric__limits_a2b2339ce825702a70e844734319e5727.html#a2b2339ce825702a70e844734319e5727",tooltip=" "];
   Node3 -> Node3 [id="edge3_Node000003_Node000003",color="steelblue1",style="solid",tooltip=" "];
 }

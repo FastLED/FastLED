@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -117,35 +117,35 @@ $(function(){initNavTree('d7/dd1/classfl_1_1_rpc_acfc87927e9e6affe54e4f2861adac5
 
 <p>For notifications (no id), returns nullopt. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d5/d8f/rpc_8cpp_8hpp_source.html#l00192">192</a> of file <a class="el" href="../../d5/d8f/rpc_8cpp_8hpp_source.html">rpc.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  192</span>                                                      {</div>
-<div class="line"><span class="lineno">  193</span>    <span class="comment">// If no id, this is a notification - process but don&#39;t return response</span></div>
-<div class="line"><span class="lineno">  194</span>    <span class="keywordflow">if</span> (!request.contains(<span class="stringliteral">&quot;id&quot;</span>)) {</div>
-<div class="line"><span class="lineno">  195</span>        <span class="comment">// Still need to execute the method</span></div>
-<div class="line"><span class="lineno">  196</span>        <span class="keywordflow">if</span> (request.contains(<span class="stringliteral">&quot;method&quot;</span>)) {</div>
-<div class="line"><span class="lineno">  197</span>            <span class="keyword">auto</span> methodOpt = request[<span class="stringliteral">&quot;method&quot;</span>].as_string();</div>
-<div class="line"><span class="lineno">  198</span>            <span class="keywordflow">if</span> (methodOpt.has_value()) {</div>
-<div class="line"><span class="lineno">  199</span>                fl::string methodName = methodOpt.value();</div>
-<div class="line"><span class="lineno">  200</span>                <span class="keyword">auto</span> it = <a class="code hl_variable" href="../../d7/dd1/classfl_1_1_rpc_a0b85a2409339f2a83307a1b68f8ec2f5.html#a0b85a2409339f2a83307a1b68f8ec2f5">mRegistry</a>.find(methodName);</div>
-<div class="line"><span class="lineno">  201</span>                <span class="keywordflow">if</span> (it != <a class="code hl_variable" href="../../d7/dd1/classfl_1_1_rpc_a0b85a2409339f2a83307a1b68f8ec2f5.html#a0b85a2409339f2a83307a1b68f8ec2f5">mRegistry</a>.end()) {</div>
-<div class="line"><span class="lineno">  202</span>                    json params = request.contains(<span class="stringliteral">&quot;params&quot;</span>) ? request[<span class="stringliteral">&quot;params&quot;</span>] : <a class="code hl_function" href="../../de/d40/classfl_1_1json_af7d8a65ad376b44e25bf9653bcac2405.html#af7d8a65ad376b44e25bf9653bcac2405">json::parse</a>(<span class="stringliteral">&quot;[]&quot;</span>);</div>
-<div class="line"><span class="lineno">  203</span>                    <span class="keywordflow">if</span> (params.is_array()) {</div>
-<div class="line"><span class="lineno">  204</span>                        it-&gt;second.mInvoker-&gt;invoke(params);</div>
-<div class="line"><span class="lineno">  205</span>                    }</div>
-<div class="line"><span class="lineno">  206</span>                }</div>
-<div class="line"><span class="lineno">  207</span>            }</div>
-<div class="line"><span class="lineno">  208</span>        }</div>
-<div class="line"><span class="lineno">  209</span>        <span class="keywordflow">return</span> <a class="code hl_variable" href="../../d4/d36/namespacefl_aa51c7c6f506ca9d9f3db40422b352b11.html#aa51c7c6f506ca9d9f3db40422b352b11">fl::nullopt</a>;</div>
-<div class="line"><span class="lineno">  210</span>    }</div>
-<div class="line"><span class="lineno">  211</span> </div>
-<div class="line"><span class="lineno">  212</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="../../d7/dd1/classfl_1_1_rpc_a16bb9675b8d15f3713e49fbb5a8b05a3.html#a16bb9675b8d15f3713e49fbb5a8b05a3">handle</a>(request);</div>
-<div class="line"><span class="lineno">  213</span>}</div>
-<div class="ttc" id="aclassfl_1_1_rpc_a0b85a2409339f2a83307a1b68f8ec2f5_html_a0b85a2409339f2a83307a1b68f8ec2f5"><div class="ttname"><a href="../../d7/dd1/classfl_1_1_rpc_a0b85a2409339f2a83307a1b68f8ec2f5.html#a0b85a2409339f2a83307a1b68f8ec2f5">fl::Rpc::mRegistry</a></div><div class="ttdeci">fl::unordered_map&lt; fl::string, detail::RpcEntry &gt; mRegistry</div><div class="ttdef"><b>Definition</b> <a href="../../df/d16/remote_2rpc_2rpc_8h_source.html#l00387">rpc.h:387</a></div></div>
-<div class="ttc" id="aclassfl_1_1_rpc_a16bb9675b8d15f3713e49fbb5a8b05a3_html_a16bb9675b8d15f3713e49fbb5a8b05a3"><div class="ttname"><a href="../../d7/dd1/classfl_1_1_rpc_a16bb9675b8d15f3713e49fbb5a8b05a3.html#a16bb9675b8d15f3713e49fbb5a8b05a3">fl::Rpc::handle</a></div><div class="ttdeci">json handle(const json &amp;request)</div><div class="ttdoc">Process a JSON-RPC request.</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d8f/rpc_8cpp_8hpp_source.html#l00067">rpc.cpp.hpp:67</a></div></div>
-<div class="ttc" id="aclassfl_1_1json_af7d8a65ad376b44e25bf9653bcac2405_html_af7d8a65ad376b44e25bf9653bcac2405"><div class="ttname"><a href="../../de/d40/classfl_1_1json_af7d8a65ad376b44e25bf9653bcac2405.html#af7d8a65ad376b44e25bf9653bcac2405">fl::json::parse</a></div><div class="ttdeci">static json parse(const fl::string &amp;txt) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d05/json_8h_source.html#l00677">json.h:677</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d5/d8f/rpc_8cpp_8hpp_source.html#l00296">296</a> of file <a class="el" href="../../d5/d8f/rpc_8cpp_8hpp_source.html">rpc.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  296</span>                                                      {</div>
+<div class="line"><span class="lineno">  297</span>    <span class="comment">// If no id, this is a notification - process but don&#39;t return response</span></div>
+<div class="line"><span class="lineno">  298</span>    <span class="keywordflow">if</span> (!request.contains(<span class="stringliteral">&quot;id&quot;</span>)) {</div>
+<div class="line"><span class="lineno">  299</span>        <span class="comment">// Still need to execute the method</span></div>
+<div class="line"><span class="lineno">  300</span>        <span class="keywordflow">if</span> (request.contains(<span class="stringliteral">&quot;method&quot;</span>)) {</div>
+<div class="line"><span class="lineno">  301</span>            <span class="keyword">auto</span> methodOpt = request[<span class="stringliteral">&quot;method&quot;</span>].as_string();</div>
+<div class="line"><span class="lineno">  302</span>            <span class="keywordflow">if</span> (methodOpt.has_value()) {</div>
+<div class="line"><span class="lineno">  303</span>                fl::string methodName = methodOpt.value();</div>
+<div class="line"><span class="lineno">  304</span>                <span class="keyword">auto</span> it = <a class="code hl_variable" href="../../d7/dd1/classfl_1_1_rpc_a0b85a2409339f2a83307a1b68f8ec2f5.html#a0b85a2409339f2a83307a1b68f8ec2f5">mRegistry</a>.find(methodName);</div>
+<div class="line"><span class="lineno">  305</span>                <span class="keywordflow">if</span> (it != <a class="code hl_variable" href="../../d7/dd1/classfl_1_1_rpc_a0b85a2409339f2a83307a1b68f8ec2f5.html#a0b85a2409339f2a83307a1b68f8ec2f5">mRegistry</a>.end()) {</div>
+<div class="line"><span class="lineno">  306</span>                    json params = request.contains(<span class="stringliteral">&quot;params&quot;</span>) ? request[<span class="stringliteral">&quot;params&quot;</span>] : <a class="code hl_function" href="../../de/d40/classfl_1_1json_acfd0c418354f6fa20c838e2167ab9661.html#acfd0c418354f6fa20c838e2167ab9661">json::parse</a>(<span class="stringliteral">&quot;[]&quot;</span>);</div>
+<div class="line"><span class="lineno">  307</span>                    <span class="keywordflow">if</span> (params.is_array()) {</div>
+<div class="line"><span class="lineno">  308</span>                        it-&gt;second.mInvoker-&gt;invoke(params);</div>
+<div class="line"><span class="lineno">  309</span>                    }</div>
+<div class="line"><span class="lineno">  310</span>                }</div>
+<div class="line"><span class="lineno">  311</span>            }</div>
+<div class="line"><span class="lineno">  312</span>        }</div>
+<div class="line"><span class="lineno">  313</span>        <span class="keywordflow">return</span> <a class="code hl_variable" href="../../d4/d36/namespacefl_aa51c7c6f506ca9d9f3db40422b352b11.html#aa51c7c6f506ca9d9f3db40422b352b11">fl::nullopt</a>;</div>
+<div class="line"><span class="lineno">  314</span>    }</div>
+<div class="line"><span class="lineno">  315</span> </div>
+<div class="line"><span class="lineno">  316</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="../../d7/dd1/classfl_1_1_rpc_a16bb9675b8d15f3713e49fbb5a8b05a3.html#a16bb9675b8d15f3713e49fbb5a8b05a3">handle</a>(request);</div>
+<div class="line"><span class="lineno">  317</span>}</div>
+<div class="ttc" id="aclassfl_1_1_rpc_a0b85a2409339f2a83307a1b68f8ec2f5_html_a0b85a2409339f2a83307a1b68f8ec2f5"><div class="ttname"><a href="../../d7/dd1/classfl_1_1_rpc_a0b85a2409339f2a83307a1b68f8ec2f5.html#a0b85a2409339f2a83307a1b68f8ec2f5">fl::Rpc::mRegistry</a></div><div class="ttdeci">fl::unordered_map&lt; fl::string, detail::RpcEntry &gt; mRegistry</div><div class="ttdef"><b>Definition</b> <a href="../../df/d16/remote_2rpc_2rpc_8h_source.html#l00406">rpc.h:406</a></div></div>
+<div class="ttc" id="aclassfl_1_1_rpc_a16bb9675b8d15f3713e49fbb5a8b05a3_html_a16bb9675b8d15f3713e49fbb5a8b05a3"><div class="ttname"><a href="../../d7/dd1/classfl_1_1_rpc_a16bb9675b8d15f3713e49fbb5a8b05a3.html#a16bb9675b8d15f3713e49fbb5a8b05a3">fl::Rpc::handle</a></div><div class="ttdeci">json handle(const json &amp;request)</div><div class="ttdoc">Process a JSON-RPC request.</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d8f/rpc_8cpp_8hpp_source.html#l00125">rpc.cpp.hpp:125</a></div></div>
+<div class="ttc" id="aclassfl_1_1json_acfd0c418354f6fa20c838e2167ab9661_html_acfd0c418354f6fa20c838e2167ab9661"><div class="ttname"><a href="../../de/d40/classfl_1_1json_acfd0c418354f6fa20c838e2167ab9661.html#acfd0c418354f6fa20c838e2167ab9661">fl::json::parse</a></div><div class="ttdeci">static json parse(const fl::string &amp;txt) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d05/json_8h_source.html#l00842">json.h:842</a></div></div>
 <div class="ttc" id="anamespacefl_aa51c7c6f506ca9d9f3db40422b352b11_html_aa51c7c6f506ca9d9f3db40422b352b11"><div class="ttname"><a href="../../d4/d36/namespacefl_aa51c7c6f506ca9d9f3db40422b352b11.html#aa51c7c6f506ca9d9f3db40422b352b11">fl::nullopt</a></div><div class="ttdeci">constexpr nullopt_t nullopt</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d62/optional_8h_source.html#l00013">optional.h:13</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d4/d05/json_8h_source.html#l00282">fl::json::as_string()</a>, <a class="el" href="../../d4/d05/json_8h_source.html#l00625">fl::json::contains()</a>, <a class="el" href="../../d5/d8f/rpc_8cpp_8hpp_source.html#l00067">handle()</a>, <a class="el" href="../../d4/d05/json_8h_source.html#l00246">fl::json::is_array()</a>, <a class="el" href="../../df/d16/remote_2rpc_2rpc_8h_source.html#l00387">mRegistry</a>, <a class="el" href="../../dc/d62/optional_8h_source.html#l00013">fl::nullopt</a>, and <a class="el" href="../../d4/d05/json_8h_source.html#l00677">fl::json::parse()</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d05/json_8h_source.html#l00443">fl::json::as_string()</a>, <a class="el" href="../../d4/d05/json_8h_source.html#l00790">fl::json::contains()</a>, <a class="el" href="../../d5/d8f/rpc_8cpp_8hpp_source.html#l00125">handle()</a>, <a class="el" href="../../d4/d05/json_8h_source.html#l00389">fl::json::is_array()</a>, <a class="el" href="../../df/d16/remote_2rpc_2rpc_8h_source.html#l00406">mRegistry</a>, <a class="el" href="../../dc/d62/optional_8h_source.html#l00013">fl::nullopt</a>, and <a class="el" href="../../d4/d05/json_8h_source.html#l00842">fl::json::parse()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -163,7 +163,7 @@ $(function(){initNavTree('d7/dd1/classfl_1_1_rpc_acfc87927e9e6affe54e4f2861adac5
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d7/dd1/classfl_1_1_rpc.html">Rpc</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:09 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

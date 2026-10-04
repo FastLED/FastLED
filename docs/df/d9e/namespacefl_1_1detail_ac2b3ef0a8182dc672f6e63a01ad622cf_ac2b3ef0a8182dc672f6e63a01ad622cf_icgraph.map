@@ -1,0 +1,15 @@
+<map id="fl::detail::ditherFrame" name="fl::detail::ditherFrame">
+<area shape="rect" id="Node000001" title="Return the temporal&#45;dither phase shared by all controllers in this frame." alt="" coords="745,45,908,70"/>
+<area shape="rect" id="Node000002" href="$db/da5/classfl_1_1_color_managed_pixel_source_adbb3fa53e2239b46eb46f797b32fae61.html#adbb3fa53e2239b46eb46f797b32fae61" title=" " alt="" coords="491,5,697,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="731,47,697,42,698,37,732,42"/>
+<area shape="rect" id="Node000003" href="$d0/dee/struct_pixel_controller_a2a8441da873d3a094c15c337b34d3e43.html#a2a8441da873d3a094c15c337b34d3e43" title="Set up the values for binary dithering from the shared frame phase." alt="" coords="521,69,667,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="732,73,668,82,667,77,731,68"/>
+<area shape="rect" id="Node000004" href="$d0/dee/struct_pixel_controller_aa86847022436988b28343a76bab0db4c.html#aa86847022436988b28343a76bab0db4c" title="Toggle dithering enable/disable." alt="" coords="273,69,443,109"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="507,92,443,92,443,87,507,87"/>
+<area shape="rect" id="Node000005" href="$d0/dee/struct_pixel_controller_a68e0ae41357f1dda75a5724cde6aa991.html#a68e0ae41357f1dda75a5724cde6aa991" title="Constructor." alt="" coords="5,27,225,53"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="259,72,178,55,179,50,260,67"/>
+<area shape="rect" id="Node000006" href="$d0/dee/struct_pixel_controller_ac272cca24b476c78cddd257cd9406150.html#ac272cca24b476c78cddd257cd9406150" title="Constructor." alt="" coords="5,77,225,102"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="260,92,226,92,226,87,260,87"/>
+<area shape="rect" id="Node000007" href="$d0/dee/struct_pixel_controller_a12e8445765cfedd2e09818f58daad6a0.html#a12e8445765cfedd2e09818f58daad6a0" title="Constructor." alt="" coords="5,126,225,151"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="260,112,179,129,178,123,259,107"/>
+</map>

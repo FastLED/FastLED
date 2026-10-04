@@ -1,0 +1,30 @@
+digraph "fl::audio::Context::getBandEnergy"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::audio::Context\l::getBandEnergy",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::audio::Context\l::getFFT",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d7d/classfl_1_1audio_1_1_context_a3250bd330a7877842dd736d37e715a1f.html#a3250bd330a7877842dd736d37e715a1f",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::audio::Context\l::Context",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d7d/classfl_1_1audio_1_1_context_ac7869a27a22d6d161818f598028a417b.html#ac7869a27a22d6d161818f598028a417b",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::sample",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d36/namespacefl_a7028271728479d2b9330f545c776ca5b.html#a7028271728479d2b9330f545c776ca5b",tooltip="Sample a pixel from a 2D CRGB grid at floating-point coordinates."];
+  Node2 -> Node11 [id="edge4_Node000002_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="fl::shared_ptr::get",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d74/classfl_1_1shared__ptr_a37ec1cede0916362cebbb1824f674d37.html#a37ec1cede0916362cebbb1824f674d37",tooltip=" "];
+  Node2 -> Node2 [id="edge5_Node000002_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node12 [id="edge6_Node000002_Node000012",color="steelblue1",style="solid",tooltip=" "];
+  Node12 [id="Node000012",label="fl::audio::Context\l::hashFFTArgs",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d7d/classfl_1_1audio_1_1_context_a8e73c1fae465c5f9dcd40637f85dd8cc.html#a8e73c1fae465c5f9dcd40637f85dd8cc",tooltip=" "];
+  Node12 -> Node13 [id="edge7_Node000012_Node000013",color="steelblue1",style="solid",tooltip=" "];
+  Node13 [id="Node000013",label="fl::memcpy",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a35ff6755912c639a5e5bd35fc59e57ff.html#a35ff6755912c639a5e5bd35fc59e57ff",tooltip=" "];
+  Node2 -> Node14 [id="edge8_Node000002_Node000014",color="steelblue1",style="solid",tooltip=" "];
+  Node14 [id="Node000014",label="fl::make_shared",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af",tooltip=" "];
+  Node2 -> Node15 [id="edge9_Node000002_Node000015",color="steelblue1",style="solid",tooltip=" "];
+  Node15 [id="Node000015",label="fl::move",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a0c8a67e528dcd96ee58216754a07a733.html#a0c8a67e528dcd96ee58216754a07a733",tooltip=" "];
+  Node2 -> Node4 [id="edge10_Node000002_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node16 [id="edge11_Node000001_Node000016",color="steelblue1",style="solid",tooltip=" "];
+  Node16 [id="Node000016",label="fl::span::size",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa",tooltip=" "];
+}

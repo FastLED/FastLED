@@ -148,7 +148,7 @@
 <!-- Node7 -->
 <g id="Node000007" class="node">
 <title>Node7</title>
-<g id="a_Node000007"><a xlink:href="../../df/dba/_animartrix_ring_8ino.html" target="_top" xlink:title=" ">
+<g id="a_Node000007"><a xlink:href="../../df/dba/_animartrix_ring_8ino.html" target="_top" xlink:title="Sample a circular LED ring out of a 2D Animartrix grid.">
 <polygon fill="white" stroke="#666666" points="337.5,-151 152.5,-151 152.5,-110 337.5,-110 337.5,-151"/>
 <text text-anchor="start" x="160.5" y="-139" font-family="Helvetica,sans-Serif" font-size="10.00">/home/runner/work/FastLED</text>
 <text text-anchor="start" x="160.5" y="-128" font-family="Helvetica,sans-Serif" font-size="10.00">/FastLED/examples/AnimartrixRing</text>

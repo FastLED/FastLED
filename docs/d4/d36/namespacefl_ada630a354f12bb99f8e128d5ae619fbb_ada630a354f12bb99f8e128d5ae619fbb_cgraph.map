@@ -1,0 +1,7 @@
+<map id="fl::makeClockless" name="fl::makeClockless">
+<area shape="rect" id="Node000001" title="Build a ClocklessChipset from a compile&#45;time TIMING trait." alt="" coords="5,31,141,56"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_ac9a2f17d2637c5e026c02f677cd47c57.html#ac9a2f17d2637c5e026c02f677cd47c57" title="Extract the encoder selector from a compile&#45;time TIMING type." alt="" coords="212,5,327,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="141,32,198,25,199,30,142,37"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a21751c1ec9df05c6e1090cb5c302c846.html#a21751c1ec9df05c6e1090cb5c302c846" title="Convert compile&#45;time CHIPSET type to runtime timing config." alt="" coords="189,55,349,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="142,49,176,53,175,59,141,54"/>
+</map>

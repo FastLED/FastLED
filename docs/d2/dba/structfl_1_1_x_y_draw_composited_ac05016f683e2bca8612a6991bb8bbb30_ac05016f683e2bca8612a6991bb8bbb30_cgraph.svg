@@ -68,7 +68,7 @@ var sectionId = 'dynsection-0';
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_a819280601bde62a67c39be0fff7f34af.html#a819280601bde62a67c39be0fff7f34af" target="_top" xlink:title=" ">
+<g id="a_Node000002"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_a1a6856f953e6123c78ee68840cf865c7.html#a1a6856f953e6123c78ee68840cf865c7" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="339,-57 161,-57 161,-38 339,-38 339,-57"/>
 <text text-anchor="middle" x="250" y="-45" font-family="Helvetica,sans-Serif" font-size="10.00">fl::CRGB::blendAlphaMaxChannel</text>
 </a>
@@ -86,7 +86,7 @@ var sectionId = 'dynsection-0';
 <!-- Node5 -->
 <g id="Node000005" class="node">
 <title>Node5</title>
-<g id="a_Node000005"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_ab88584d982259ec4ad72511cfe641579.html#ab88584d982259ec4ad72511cfe641579" target="_top" xlink:title="fadeToBlackBy is a synonym for nscale8(), as a fade instead of a scale">
+<g id="a_Node000005"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_a2f5cfc2455a8e3ebb89709aea325ed51.html#a2f5cfc2455a8e3ebb89709aea325ed51" target="_top" xlink:title="fadeToBlackBy is a synonym for nscale8(), as a fade instead of a scale">
 <polygon fill="white" stroke="#666666" points="509,-19 375,-19 375,0 509,0 509,-19"/>
 <text text-anchor="middle" x="442" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::CRGB::fadeToBlackBy</text>
 </a>
@@ -104,7 +104,7 @@ var sectionId = 'dynsection-0';
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_adb891cc4fe8f5ac2188d72c13c0256fd.html#adb891cc4fe8f5ac2188d72c13c0256fd" target="_top" xlink:title="Default constructor.">
+<g id="a_Node000003"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_a910ee467a963ad6805026ad83873e52b.html#a910ee467a963ad6805026ad83873e52b" target="_top" xlink:title="Default constructor.">
 <polygon fill="white" stroke="#666666" points="635,-56 545,-56 545,-37 635,-37 635,-56"/>
 <text text-anchor="middle" x="590" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">fl::CRGB::CRGB</text>
 </a>
@@ -122,7 +122,7 @@ var sectionId = 'dynsection-0';
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_a7e34886ec51c1aff8262123de5152437.html#a7e34886ec51c1aff8262123de5152437" target="_top" xlink:title=" ">
+<g id="a_Node000004"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_a783501cccdd1c0597ce7e2ba56401f6b.html#a783501cccdd1c0597ce7e2ba56401f6b" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="486.5,-56 397.5,-56 397.5,-37 486.5,-37 486.5,-56"/>
 <text text-anchor="middle" x="442" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">fl::CRGB::blend</text>
 </a>

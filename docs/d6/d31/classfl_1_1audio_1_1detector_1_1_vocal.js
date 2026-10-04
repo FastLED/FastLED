@@ -1,9 +1,9 @@
 var classfl_1_1audio_1_1detector_1_1_vocal =
 [
-    [ "Vocal", "d6/d31/classfl_1_1audio_1_1detector_1_1_vocal_ab4c82fcf5afd3a1501a1b94bb982180a.html#ab4c82fcf5afd3a1501a1b94bb982180a", null ],
-    [ "~Vocal", "d6/d31/classfl_1_1audio_1_1detector_1_1_vocal_aff949e7724354f44375b801cf3419646.html#aff949e7724354f44375b801cf3419646", null ],
-    [ "Vocal", "d6/d31/classfl_1_1audio_1_1detector_1_1_vocal_ab4c82fcf5afd3a1501a1b94bb982180a.html#ab4c82fcf5afd3a1501a1b94bb982180a", null ],
-    [ "~Vocal", "d6/d31/classfl_1_1audio_1_1detector_1_1_vocal_a0c42937c23b774b3104ab32bdefad6d1.html#a0c42937c23b774b3104ab32bdefad6d1", null ],
+    [ "Vocal", "d6/d31/classfl_1_1audio_1_1detector_1_1_vocal_a94bac76bfac9a7661f017c22b21d8ea6.html#a94bac76bfac9a7661f017c22b21d8ea6", null ],
+    [ "~Vocal", "d6/d31/classfl_1_1audio_1_1detector_1_1_vocal_a723298ca6db26d6159c8e6463ca4d8aa.html#a723298ca6db26d6159c8e6463ca4d8aa", null ],
+    [ "Vocal", "d6/d31/classfl_1_1audio_1_1detector_1_1_vocal_a94bac76bfac9a7661f017c22b21d8ea6.html#a94bac76bfac9a7661f017c22b21d8ea6", null ],
+    [ "~Vocal", "d6/d31/classfl_1_1audio_1_1detector_1_1_vocal_abd8d90355bd259451d5e734831cd8aca.html#abd8d90355bd259451d5e734831cd8aca", null ],
     [ "calculateAutocorrelationIrregularity", "d6/d31/classfl_1_1audio_1_1detector_1_1_vocal_aa35f5b55426a794b605ecb8766cd3571.html#aa35f5b55426a794b605ecb8766cd3571", null ],
     [ "calculateRawConfidence", "d6/d31/classfl_1_1audio_1_1detector_1_1_vocal_af77a8d66619b307e27734babf69553a8.html#af77a8d66619b307e27734babf69553a8", null ],
     [ "calculateSpectralCentroid", "d6/d31/classfl_1_1audio_1_1detector_1_1_vocal_ac99bf8edb5c44ec6064105c9bde1a791.html#ac99bf8edb5c44ec6064105c9bde1a791", null ],

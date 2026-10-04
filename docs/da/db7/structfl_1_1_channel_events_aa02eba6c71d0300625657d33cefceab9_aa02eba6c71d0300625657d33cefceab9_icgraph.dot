@@ -8,7 +8,7 @@ digraph "fl::ChannelEvents::instance"
   rankdir="RL";
   Node1 [id="Node000001",label="fl::ChannelEvents::\linstance",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::Channel::~Channel",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d8b/classfl_1_1_channel_aca6fc2d13573eb25aa436459fb7309e2.html#aca6fc2d13573eb25aa436459fb7309e2",tooltip="Destructor."];
+  Node2 [id="Node000002",label="fl::Channel::~Channel",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d8b/classfl_1_1_channel_a2cdf448e592885a6e905fbd3d68c833d.html#a2cdf448e592885a6e905fbd3d68c833d",tooltip="Destructor."];
   Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node3 [id="Node000003",label="fl::Channel::addToDrawList",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d8b/classfl_1_1_channel_a4ca6754b8f1a333ec18be19e505e56bc.html#a4ca6754b8f1a333ec18be19e505e56bc",tooltip="Add this channel to the global controller draw list."];
   Node1 -> Node4 [id="edge3_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
@@ -17,8 +17,21 @@ digraph "fl::ChannelEvents::instance"
   Node5 [id="Node000005",label="CFastLED::channelEvents",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dbb/class_c_fast_l_e_d_afdf3c3fcd91dcafbca741ae395570737.html#afdf3c3fcd91dcafbca741ae395570737",tooltip="Access the channel event system."];
   Node1 -> Node6 [id="edge5_Node000001_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node6 [id="Node000006",label="fl::Channel::create",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d8b/classfl_1_1_channel_acb0aa97ad60c6c8a739a60610b2bc1f9.html#acb0aa97ad60c6c8a739a60610b2bc1f9",tooltip="Create a new channel with optional mBus driver pinning."];
-  Node1 -> Node7 [id="edge6_Node000001_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node7 [id="Node000007",label="fl::Channel::removeFromDrawList",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d8b/classfl_1_1_channel_a0ba6c6bbdbae21db23f1310b9af6def9.html#a0ba6c6bbdbae21db23f1310b9af6def9",tooltip="Remove this channel from the global controller draw list."];
-  Node1 -> Node8 [id="edge7_Node000001_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node8 [id="Node000008",label="fl::Channel::showPixels",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d8b/classfl_1_1_channel_a44414e176c7d2ef65fcdd390f6852322.html#a44414e176c7d2ef65fcdd390f6852322",tooltip=" "];
+  Node6 -> Node7 [id="edge6_Node000006_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::Channel::create",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d8b/classfl_1_1_channel_ad9a233b1ba5461dd9f955ab4caf67f01.html#ad9a233b1ba5461dd9f955ab4caf67f01",tooltip=" "];
+  Node1 -> Node7 [id="edge7_Node000001_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node8 [id="edge8_Node000001_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl::Channel::encodeFrame",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d8b/classfl_1_1_channel_ab8507a9fb4c6f089aa088d9668fd0325.html#ab8507a9fb4c6f089aa088d9668fd0325",tooltip="Encode pixels into mChannelData and fire onChannelDataEncoded (#4566)."];
+  Node8 -> Node9 [id="edge9_Node000008_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="fl::Channel::showPixels",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d8b/classfl_1_1_channel_a44414e176c7d2ef65fcdd390f6852322.html#a44414e176c7d2ef65fcdd390f6852322",tooltip=" "];
+  Node1 -> Node10 [id="edge10_Node000001_Node000010",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="fl::anonymous_namespace\l\{pipeline_binding::cpp\l::hpp\}::notifyColorPipelineProfile\lClearedByLegacy",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/da7/namespacefl_1_1anonymous__namespace_02pipeline__binding_8cpp_8hpp_03_ae8fbc986ecc4d8004e199770fd89e2b7.html#ae8fbc986ecc4d8004e199770fd89e2b7",tooltip=" "];
+  Node10 -> Node10 [id="edge11_Node000010_Node000010",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node11 [id="edge12_Node000001_Node000011",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="fl::Channel::removeFromDrawList",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d8b/classfl_1_1_channel_a0ba6c6bbdbae21db23f1310b9af6def9.html#a0ba6c6bbdbae21db23f1310b9af6def9",tooltip="Remove this channel from the global controller draw list."];
+  Node1 -> Node12 [id="edge13_Node000001_Node000012",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node12 [id="Node000012",label="fl::ChannelOptions\l::setColorProfile",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d87/structfl_1_1_channel_options_ad12e16c7fd37d07cabadb738d9ddc4ad.html#ad12e16c7fd37d07cabadb738d9ddc4ad",tooltip=" "];
+  Node1 -> Node13 [id="edge14_Node000001_Node000013",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node13 [id="Node000013",label="fl::Channel::submitFrame",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d8b/classfl_1_1_channel_addb05b5a8b6719a6a1f3856893931901.html#addb05b5a8b6719a6a1f3856893931901",tooltip="Submit the encoded frame to driver: disabled-driver drop + one-shot diagnostic, enqueue,..."];
+  Node13 -> Node9 [id="edge15_Node000013_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
 }

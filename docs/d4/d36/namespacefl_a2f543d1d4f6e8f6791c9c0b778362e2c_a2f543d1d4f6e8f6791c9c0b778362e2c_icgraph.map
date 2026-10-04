@@ -1,0 +1,7 @@
+<map id="fl::time_alpha8" name="fl::time_alpha8">
+<area shape="rect" id="Node000001" title=" " alt="" coords="245,42,364,67"/>
+<area shape="rect" id="Node000002" href="$d8/d62/classfl_1_1_time_clamped_transition_aae11036f39ec08c2b0674e660de74976.html#aae11036f39ec08c2b0674e660de74976" title=" " alt="" coords="5,5,197,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="232,47,197,42,198,37,232,42"/>
+<area shape="rect" id="Node000003" href="$d0/d9d/classfl_1_1_time_ramp_a2ecf553c0bbf26354d4500a4cdbcfe87.html#a2ecf553c0bbf26354d4500a4cdbcfe87" title="Compute current 0–255 output based on how much time has elapsed since trigger()." alt="" coords="16,70,187,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="232,67,187,74,186,68,231,62"/>
+</map>

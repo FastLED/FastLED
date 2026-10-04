@@ -1,7 +1,7 @@
 var classfl_1_1_font =
 [
-    [ "~Font", "d7/d4f/classfl_1_1_font_a908777df75848e1273a1f6d42a503e03.html#a908777df75848e1273a1f6d42a503e03", null ],
-    [ "Font", "d7/d4f/classfl_1_1_font_a94061bd5898fb669eea60a56c0af9cf2.html#a94061bd5898fb669eea60a56c0af9cf2", null ],
+    [ "~Font", "d7/d4f/classfl_1_1_font_ab233ecd7312676a5f444cfe1156c0730.html#ab233ecd7312676a5f444cfe1156c0730", null ],
+    [ "Font", "d7/d4f/classfl_1_1_font_add00a3119efe39ff7ed55b83964d3fbf.html#add00a3119efe39ff7ed55b83964d3fbf", null ],
     [ "getGlyphMetrics", "d7/d4f/classfl_1_1_font_a31b5eb68a44d1751a96b758cb7807972.html#a31b5eb68a44d1751a96b758cb7807972", null ],
     [ "getKerning", "d7/d4f/classfl_1_1_font_a60cb7d475ed864487ceabc518e51a8c9.html#a60cb7d475ed864487ceabc518e51a8c9", null ],
     [ "getMetrics", "d7/d4f/classfl_1_1_font_a517ec5cd74432f6a27f9f34574b148cc.html#a517ec5cd74432f6a27f9f34574b148cc", null ],

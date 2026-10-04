@@ -1,0 +1,13 @@
+<map id="fl::CLEDController::beginShowLeds" name="fl::CLEDController::beginShowLeds">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,63,141,103"/>
+<area shape="rect" id="Node000002" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a8ac52066b02a3ec4dda386f6c5ae4267.html#a8ac52066b02a3ec4dda386f6c5ae4267" title="Get the dithering option currently set for this controller." alt="" coords="189,5,325,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="137,60,179,47,180,52,139,65"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_ab77cd36de982ae7d84faae1151feada7.html#ab77cd36de982ae7d84faae1151feada7" title=" " alt="" coords="207,70,307,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="142,80,193,80,193,85,142,85"/>
+<area shape="rect" id="Node000006" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a4c61b86add1463a4f968b88d803e0737.html#a4c61b86add1463a4f968b88d803e0737" title="How many LEDs does this controller manage?" alt="" coords="189,120,325,160"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="139,100,180,113,179,118,137,105"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_aab9d4e461519c66fc958efc9e9ba2efa.html#aab9d4e461519c66fc958efc9e9ba2efa" title=" " alt="" coords="373,70,463,95"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="307,80,360,80,360,85,307,85"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a35ff6755912c639a5e5bd35fc59e57ff.html#a35ff6755912c639a5e5bd35fc59e57ff" title=" " alt="" coords="511,70,605,95"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="463,80,497,80,497,85,463,85"/>
+</map>

@@ -1,8 +1,8 @@
 var classfl_1_1audio_1_1detector_1_1_downbeat =
 [
     [ "Downbeat", "df/d03/classfl_1_1audio_1_1detector_1_1_downbeat_a8c6a9cca34b69d15d987bbefc0c21dc1.html#a8c6a9cca34b69d15d987bbefc0c21dc1", null ],
-    [ "Downbeat", "df/d03/classfl_1_1audio_1_1detector_1_1_downbeat_a98262bacf159fd5b500530dfd218b3fa.html#a98262bacf159fd5b500530dfd218b3fa", null ],
-    [ "~Downbeat", "df/d03/classfl_1_1audio_1_1detector_1_1_downbeat_a3cefcdea6afeb5fa150eff107a9d6718.html#a3cefcdea6afeb5fa150eff107a9d6718", null ],
+    [ "Downbeat", "df/d03/classfl_1_1audio_1_1detector_1_1_downbeat_a989097392b2a80667304a9223d13a0ac.html#a989097392b2a80667304a9223d13a0ac", null ],
+    [ "~Downbeat", "df/d03/classfl_1_1audio_1_1detector_1_1_downbeat_ace69a0a4de6cc2984c36416ebfd6c971.html#ace69a0a4de6cc2984c36416ebfd6c971", null ],
     [ "calculateBeatAccent", "df/d03/classfl_1_1audio_1_1detector_1_1_downbeat_a2d602a6a7fbb478afdb956660d2860fc.html#a2d602a6a7fbb478afdb956660d2860fc", null ],
     [ "detectDownbeat", "df/d03/classfl_1_1audio_1_1detector_1_1_downbeat_afb91a3e8747ec76cc9a05db789e70945.html#afb91a3e8747ec76cc9a05db789e70945", null ],
     [ "detectMeter", "df/d03/classfl_1_1audio_1_1detector_1_1_downbeat_ab74f5fcc689eefc96d9b8e035c7382e3.html#ab74f5fcc689eefc96d9b8e035c7382e3", null ],

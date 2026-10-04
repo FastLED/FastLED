@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::not_null\< T \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dc8/classfl_1_1not__null.html",tooltip=" "];
+  Node0 [id="Node000000",label="fl::RgbwLoadBinder\l\< T, typename \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d8d/structfl_1_1_rgbw_load_binder.html",tooltip="Binds exactly one RGBW thunk and one RGBWW thunk per source type, and names only that one,..."];
 }

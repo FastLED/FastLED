@@ -1,5 +1,14 @@
 <map id="RgbwWhiteIsOff" name="RgbwWhiteIsOff">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,79,132,104"/>
-<area shape="rect" id="Node000002" href="$d7/d27/structfl_1_1_rgbw.html" title=" " alt="" coords="31,5,106,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="71,44,71,79,66,79,66,44"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="107,359,234,384"/>
+<area shape="rect" id="Node000002" href="$d7/d27/structfl_1_1_rgbw.html" title=" " alt="" coords="133,284,208,309"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="173,324,173,358,168,358,168,324"/>
+<area shape="rect" id="Node000003" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="92,181,249,221"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="173,235,173,284,168,284,168,235"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl.html#d5/db5/structfl_1_1_diode_profile" title=" " alt="" coords="5,93,123,119"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="87,127,118,155,147,179,144,183,114,159,83,131"/>
+<area shape="rect" id="Node000005" href="$d4/dc0/structfl_1_1detail_1_1_control_block_base.html" title=" " alt="" coords="93,5,291,31"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="192,45,176,181,170,181,186,45"/>
+<area shape="rect" id="Node000008" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="297,93,442,119"/>
+<area shape="poly" id="edge6_Node000008_Node000005" title=" " alt="" coords="229,34,346,91,344,95,227,39"/>
+<area shape="poly" id="edge5_Node000003_Node000008" title=" " alt="" coords="334,127,212,184,210,179,331,122"/>
 </map>

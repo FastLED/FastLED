@@ -1,0 +1,20 @@
+digraph "fl/math/soft_float.h"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  Node1 [id="Node000001",label="fl/math/soft_float.h",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl/stl/json/types_impl.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d4e/types__impl_8h.html",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl/stl/json/types.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d5e/fl_2stl_2json_2types_8h.html",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl/remote/rpc/json\l_dispatch.cpp.hpp",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$db/df7/json__dispatch_8cpp_8hpp.html",tooltip=" "];
+  Node3 -> Node9 [id="edge4_Node000003_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="fl/stl/json.cpp.hpp",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$db/da5/json_8cpp_8hpp.html",tooltip=" "];
+  Node3 -> Node12 [id="edge5_Node000003_Node000012",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node12 [id="Node000012",label="fl/stl/json.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d05/json_8h.html",tooltip="FastLED's Elegant JSON Library: fl::json"];
+  Node12 -> Node9 [id="edge6_Node000012_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
+}

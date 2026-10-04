@@ -1,0 +1,14 @@
+digraph "fl::s16x16x4::sincos"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::s16x16x4::sincos",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Compute sin and cos of 4 angles (in radians) Results written to out_sin and out_cos."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::s16x16x4::cos",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d7f/structfl_1_1s16x16x4_a3f4e12e2d55362b6f941eeefdc570071.html#a3f4e12e2d55362b6f941eeefdc570071",tooltip="Compute cosine of 4 angles (in radians)"];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::s16x16x4::sin",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d7f/structfl_1_1s16x16x4_a84919662dee318e68db552751dd8daa4.html#a84919662dee318e68db552751dd8daa4",tooltip="Compute sine of 4 angles (in radians)"];
+}

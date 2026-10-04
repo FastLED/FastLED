@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -124,52 +124,52 @@ $(function(){initNavTree('d6/d35/classfl_1_1_async_logger_a0571151055f7766375895
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Number of messages actually flushed </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d2/de0/async__logger_8cpp_8hpp_source.html#l00120">120</a> of file <a class="el" href="../../d2/de0/async__logger_8cpp_8hpp_source.html">async_logger.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  120</span>                                             {</div>
-<div class="line"><span class="lineno">  121</span>    fl::size flushed = 0;</div>
-<div class="line"><span class="lineno">  122</span>    <span class="keyword">const</span> <span class="keywordtype">char</span>* msg;</div>
-<div class="line"><span class="lineno">  123</span>    fl::u16 len;</div>
-<div class="line"><span class="lineno">  124</span> </div>
-<div class="line"><span class="lineno">  125</span>    <span class="comment">// 256-byte stack buffer - handles most messages in a single chunk</span></div>
-<div class="line"><span class="lineno">  126</span>    <span class="comment">// Avoids heap allocation entirely by chunking long messages</span></div>
-<div class="line"><span class="lineno">  127</span>    <span class="keywordtype">char</span> buffer[256];</div>
-<div class="line"><span class="lineno">  128</span> </div>
-<div class="line"><span class="lineno">  129</span>    <span class="keywordflow">while</span> (flushed &lt; maxMessages &amp;&amp; <a class="code hl_variable" href="../../d6/d35/classfl_1_1_async_logger_a61ff8a18ac1c89a82820daea910ae519.html#a61ff8a18ac1c89a82820daea910ae519">mQueue</a>.tryPop(&amp;msg, &amp;len)) {</div>
-<div class="line"><span class="lineno">  130</span>        fl::u16 <a class="code hl_function" href="../../d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d">offset</a> = 0;</div>
-<div class="line"><span class="lineno">  131</span> </div>
-<div class="line"><span class="lineno">  132</span>        <span class="comment">// Process message in chunks to avoid heap allocation</span></div>
-<div class="line"><span class="lineno">  133</span>        <span class="keywordflow">while</span> (<a class="code hl_function" href="../../d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d">offset</a> &lt; len) {</div>
-<div class="line"><span class="lineno">  134</span>            fl::u16 chunk_size = <a class="code hl_function" href="../../d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb">min</a>(len - <a class="code hl_function" href="../../d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d">offset</a>, <span class="keyword">static_cast&lt;</span>fl::u16<span class="keyword">&gt;</span>(<span class="keyword">sizeof</span>(buffer) - 1));</div>
-<div class="line"><span class="lineno">  135</span>            <a class="code hl_function" href="../../d4/d36/namespacefl_a0393d1d09fff5bccc427802cc22e756d.html#a0393d1d09fff5bccc427802cc22e756d">fl::memcpy</a>(buffer, msg + <a class="code hl_function" href="../../d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d">offset</a>, chunk_size);</div>
-<div class="line"><span class="lineno">  136</span>            buffer[chunk_size] = <span class="charliteral">&#39;\0&#39;</span>;  <span class="comment">// Null-terminate</span></div>
-<div class="line"><span class="lineno">  137</span> </div>
-<div class="line"><span class="lineno">  138</span>            <a class="code hl_function" href="../../d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d">offset</a> += chunk_size;</div>
+<p class="definition">Definition at line <a class="el" href="../../d2/de0/async__logger_8cpp_8hpp_source.html#l00122">122</a> of file <a class="el" href="../../d2/de0/async__logger_8cpp_8hpp_source.html">async_logger.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  122</span>                                             {</div>
+<div class="line"><span class="lineno">  123</span>    fl::size flushed = 0;</div>
+<div class="line"><span class="lineno">  124</span>    <span class="keyword">const</span> <span class="keywordtype">char</span>* msg;</div>
+<div class="line"><span class="lineno">  125</span>    fl::u16 len;</div>
+<div class="line"><span class="lineno">  126</span> </div>
+<div class="line"><span class="lineno">  127</span>    <span class="comment">// 256-byte stack buffer - handles most messages in a single chunk</span></div>
+<div class="line"><span class="lineno">  128</span>    <span class="comment">// Avoids heap allocation entirely by chunking long messages</span></div>
+<div class="line"><span class="lineno">  129</span>    <span class="keywordtype">char</span> buffer[256];</div>
+<div class="line"><span class="lineno">  130</span> </div>
+<div class="line"><span class="lineno">  131</span>    <span class="keywordflow">while</span> (flushed &lt; maxMessages &amp;&amp; <a class="code hl_variable" href="../../d6/d35/classfl_1_1_async_logger_a61ff8a18ac1c89a82820daea910ae519.html#a61ff8a18ac1c89a82820daea910ae519">mQueue</a>.tryPop(&amp;msg, &amp;len)) {</div>
+<div class="line"><span class="lineno">  132</span>        fl::u16 <a class="code hl_function" href="../../d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d">offset</a> = 0;</div>
+<div class="line"><span class="lineno">  133</span> </div>
+<div class="line"><span class="lineno">  134</span>        <span class="comment">// Process message in chunks to avoid heap allocation</span></div>
+<div class="line"><span class="lineno">  135</span>        <span class="keywordflow">while</span> (<a class="code hl_function" href="../../d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d">offset</a> &lt; len) {</div>
+<div class="line"><span class="lineno">  136</span>            fl::u16 chunk_size = <a class="code hl_function" href="../../d4/d36/namespacefl_a2fdabb91a1f100dec8da21e4306aba05.html#a2fdabb91a1f100dec8da21e4306aba05">min</a>(len - <a class="code hl_function" href="../../d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d">offset</a>, <span class="keyword">static_cast&lt;</span>fl::u16<span class="keyword">&gt;</span>(<span class="keyword">sizeof</span>(buffer) - 1));</div>
+<div class="line"><span class="lineno">  137</span>            <a class="code hl_function" href="../../d4/d36/namespacefl_a35ff6755912c639a5e5bd35fc59e57ff.html#a35ff6755912c639a5e5bd35fc59e57ff">fl::memcpy</a>(buffer, msg + <a class="code hl_function" href="../../d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d">offset</a>, chunk_size);</div>
+<div class="line"><span class="lineno">  138</span>            buffer[chunk_size] = <span class="charliteral">&#39;\0&#39;</span>;  <span class="comment">// Null-terminate</span></div>
 <div class="line"><span class="lineno">  139</span> </div>
-<div class="line"><span class="lineno">  140</span>            <span class="keywordflow">if</span> (<a class="code hl_function" href="../../d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d">offset</a> &gt;= len) {</div>
-<div class="line"><span class="lineno">  141</span>                <span class="comment">// Last chunk or whole message - use println (adds newline)</span></div>
-<div class="line"><span class="lineno">  142</span>                <a class="code hl_function" href="../../d4/d36/namespacefl_adfaedbd8e1ada269a7733e58ff142aea.html#adfaedbd8e1ada269a7733e58ff142aea">fl::println</a>(buffer);</div>
-<div class="line"><span class="lineno">  143</span>            } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  144</span>                <span class="comment">// Not last chunk - use print (no newline)</span></div>
-<div class="line"><span class="lineno">  145</span>                <a class="code hl_function" href="../../d4/d36/namespacefl_a23e9f3b5be31d78996d08b3c811ec5d1.html#a23e9f3b5be31d78996d08b3c811ec5d1">fl::print</a>(buffer);</div>
-<div class="line"><span class="lineno">  146</span>            }</div>
-<div class="line"><span class="lineno">  147</span>        }</div>
-<div class="line"><span class="lineno">  148</span> </div>
-<div class="line"><span class="lineno">  149</span>        <a class="code hl_variable" href="../../d6/d35/classfl_1_1_async_logger_a61ff8a18ac1c89a82820daea910ae519.html#a61ff8a18ac1c89a82820daea910ae519">mQueue</a>.commit();</div>
-<div class="line"><span class="lineno">  150</span>        flushed++;</div>
-<div class="line"><span class="lineno">  151</span>    }</div>
-<div class="line"><span class="lineno">  152</span> </div>
-<div class="line"><span class="lineno">  153</span>    <span class="keywordflow">return</span> flushed;</div>
-<div class="line"><span class="lineno">  154</span>}</div>
+<div class="line"><span class="lineno">  140</span>            <a class="code hl_function" href="../../d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d">offset</a> += chunk_size;</div>
+<div class="line"><span class="lineno">  141</span> </div>
+<div class="line"><span class="lineno">  142</span>            <span class="keywordflow">if</span> (<a class="code hl_function" href="../../d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d">offset</a> &gt;= len) {</div>
+<div class="line"><span class="lineno">  143</span>                <span class="comment">// Last chunk or whole message - use println (adds newline)</span></div>
+<div class="line"><span class="lineno">  144</span>                <a class="code hl_function" href="../../d4/d36/namespacefl_ab058ac6ae882a8344f79b01b40eb6e02.html#ab058ac6ae882a8344f79b01b40eb6e02">fl::println</a>(buffer);</div>
+<div class="line"><span class="lineno">  145</span>            } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  146</span>                <span class="comment">// Not last chunk - use print (no newline)</span></div>
+<div class="line"><span class="lineno">  147</span>                <a class="code hl_function" href="../../d4/d36/namespacefl_a23e9f3b5be31d78996d08b3c811ec5d1.html#a23e9f3b5be31d78996d08b3c811ec5d1">fl::print</a>(buffer);</div>
+<div class="line"><span class="lineno">  148</span>            }</div>
+<div class="line"><span class="lineno">  149</span>        }</div>
+<div class="line"><span class="lineno">  150</span> </div>
+<div class="line"><span class="lineno">  151</span>        <a class="code hl_variable" href="../../d6/d35/classfl_1_1_async_logger_a61ff8a18ac1c89a82820daea910ae519.html#a61ff8a18ac1c89a82820daea910ae519">mQueue</a>.commit();</div>
+<div class="line"><span class="lineno">  152</span>        flushed++;</div>
+<div class="line"><span class="lineno">  153</span>    }</div>
+<div class="line"><span class="lineno">  154</span> </div>
+<div class="line"><span class="lineno">  155</span>    <span class="keywordflow">return</span> flushed;</div>
+<div class="line"><span class="lineno">  156</span>}</div>
 <div class="ttc" id="aclassfl_1_1_async_logger_a61ff8a18ac1c89a82820daea910ae519_html_a61ff8a18ac1c89a82820daea910ae519"><div class="ttname"><a href="../../d6/d35/classfl_1_1_async_logger_a61ff8a18ac1c89a82820daea910ae519.html#a61ff8a18ac1c89a82820daea910ae519">fl::AsyncLogger::mQueue</a></div><div class="ttdeci">AsyncLogQueue&lt; 128, 4096 &gt; mQueue</div><div class="ttdef"><b>Definition</b> <a href="../../df/df1/async__logger_8h_source.html#l00050">async_logger.h:50</a></div></div>
 <div class="ttc" id="adirect_8h_ae2738c620ee3ab857c9656b3bf86a24d_html_ae2738c620ee3ab857c9656b3bf86a24d"><div class="ttname"><a href="../../d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d">offset</a></div><div class="ttdeci">fl::UISlider offset(&quot;Offset&quot;, 0.0f, 0.0f, 1.0f, 0.01f)</div></div>
-<div class="ttc" id="anamespacefl_a0356f07fb7a8f25752385fd8208b47fb_html_a0356f07fb7a8f25752385fd8208b47fb"><div class="ttname"><a href="../../d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb">fl::min</a></div><div class="ttdeci">FL_DISABLE_WARNING_PUSH U constexpr common_type_t&lt; T, U &gt; min(T a, U b) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00071">math.h:71</a></div></div>
-<div class="ttc" id="anamespacefl_a0393d1d09fff5bccc427802cc22e756d_html_a0393d1d09fff5bccc427802cc22e756d"><div class="ttname"><a href="../../d4/d36/namespacefl_a0393d1d09fff5bccc427802cc22e756d.html#a0393d1d09fff5bccc427802cc22e756d">fl::memcpy</a></div><div class="ttdeci">void * memcpy(void *dest, const void *src, size_t n) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/da3/cstring_8cpp_8hpp_source.html#l00110">cstring.cpp.hpp:110</a></div></div>
 <div class="ttc" id="anamespacefl_a23e9f3b5be31d78996d08b3c811ec5d1_html_a23e9f3b5be31d78996d08b3c811ec5d1"><div class="ttname"><a href="../../d4/d36/namespacefl_a23e9f3b5be31d78996d08b3c811ec5d1.html#a23e9f3b5be31d78996d08b3c811ec5d1">fl::print</a></div><div class="ttdeci">void print(const char *str)</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d7a/cstdio_8cpp_8hpp_source.html#l00077">cstdio.cpp.hpp:77</a></div></div>
-<div class="ttc" id="anamespacefl_adfaedbd8e1ada269a7733e58ff142aea_html_adfaedbd8e1ada269a7733e58ff142aea"><div class="ttname"><a href="../../d4/d36/namespacefl_adfaedbd8e1ada269a7733e58ff142aea.html#adfaedbd8e1ada269a7733e58ff142aea">fl::println</a></div><div class="ttdeci">void println(const char *str) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d7a/cstdio_8cpp_8hpp_source.html#l00094">cstdio.cpp.hpp:94</a></div></div>
+<div class="ttc" id="anamespacefl_a2fdabb91a1f100dec8da21e4306aba05_html_a2fdabb91a1f100dec8da21e4306aba05"><div class="ttname"><a href="../../d4/d36/namespacefl_a2fdabb91a1f100dec8da21e4306aba05.html#a2fdabb91a1f100dec8da21e4306aba05">fl::min</a></div><div class="ttdeci">FL_DISABLE_WARNING_PUSH U constexpr common_type_t&lt; T, U &gt; min(T a, U b) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00071">math.h:71</a></div></div>
+<div class="ttc" id="anamespacefl_a35ff6755912c639a5e5bd35fc59e57ff_html_a35ff6755912c639a5e5bd35fc59e57ff"><div class="ttname"><a href="../../d4/d36/namespacefl_a35ff6755912c639a5e5bd35fc59e57ff.html#a35ff6755912c639a5e5bd35fc59e57ff">fl::memcpy</a></div><div class="ttdeci">void * memcpy(void *dest, const void *src, size_t n) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/da3/cstring_8cpp_8hpp_source.html#l00128">cstring.cpp.hpp:128</a></div></div>
+<div class="ttc" id="anamespacefl_ab058ac6ae882a8344f79b01b40eb6e02_html_ab058ac6ae882a8344f79b01b40eb6e02"><div class="ttname"><a href="../../d4/d36/namespacefl_ab058ac6ae882a8344f79b01b40eb6e02.html#ab058ac6ae882a8344f79b01b40eb6e02">fl::println</a></div><div class="ttdeci">void println(const char *str) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d7a/cstdio_8cpp_8hpp_source.html#l00094">cstdio.cpp.hpp:94</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../df/da3/cstring_8cpp_8hpp_source.html#l00110">fl::memcpy()</a>, <a class="el" href="../../df/db1/math_8h_source.html#l00071">fl::min()</a>, <a class="el" href="../../df/df1/async__logger_8h_source.html#l00050">mQueue</a>, <a class="el" href="../../d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d">offset()</a>, <a class="el" href="../../dd/d7a/cstdio_8cpp_8hpp_source.html#l00077">fl::print()</a>, and <a class="el" href="../../dd/d7a/cstdio_8cpp_8hpp_source.html#l00094">fl::println()</a>.</p>
+<p class="reference">References <a class="el" href="../../df/da3/cstring_8cpp_8hpp_source.html#l00128">fl::memcpy()</a>, <a class="el" href="../../df/db1/math_8h_source.html#l00071">fl::min()</a>, <a class="el" href="../../df/df1/async__logger_8h_source.html#l00050">mQueue</a>, <a class="el" href="../../d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d">offset()</a>, <a class="el" href="../../dd/d7a/cstdio_8cpp_8hpp_source.html#l00077">fl::print()</a>, and <a class="el" href="../../dd/d7a/cstdio_8cpp_8hpp_source.html#l00094">fl::println()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d6/d35/classfl_1_1_async_logger_a55785739910a193b5b6dffeb455bd150.html#a55785739910a193b5b6dffeb455bd150">~AsyncLogger()</a>, <a class="el" href="../../d2/de0/async__logger_8cpp_8hpp_source.html#l00203">fl::async_log_service()</a>, and <a class="el" href="../../d2/de0/async__logger_8cpp_8hpp_source.html#l00263">fl::detail::AsyncLoggerServiceTask::serviceLoggers()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d6/d35/classfl_1_1_async_logger_a980ff44240839c88a4475e9283873ba0.html#a980ff44240839c88a4475e9283873ba0">~AsyncLogger()</a>, <a class="el" href="../../d2/de0/async__logger_8cpp_8hpp_source.html#l00205">fl::async_log_service()</a>, and <a class="el" href="../../d2/de0/async__logger_8cpp_8hpp_source.html#l00265">fl::detail::AsyncLoggerServiceTask::serviceLoggers()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -194,7 +194,7 @@ $(function(){initNavTree('d6/d35/classfl_1_1_async_logger_a0571151055f7766375895
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d6/d35/classfl_1_1_async_logger.html">AsyncLogger</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:04 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:08 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

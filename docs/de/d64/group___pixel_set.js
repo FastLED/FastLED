@@ -60,7 +60,7 @@ var group___pixel_set =
       [ "operator|=", "db/df7/class_c_pixel_view_a367dc7ea6199d6794dd827c5c92a19e0.html#a367dc7ea6199d6794dd827c5c92a19e0", null ],
       [ "operator|=", "db/df7/class_c_pixel_view_a72761de85777a149bc2cdc3b0d969374.html#a72761de85777a149bc2cdc3b0d969374", null ],
       [ "reversed", "db/df7/class_c_pixel_view_a384417cfef1e38aa24fde4673fd8eaac.html#a384417cfef1e38aa24fde4673fd8eaac", null ],
-      [ "size", "db/df7/class_c_pixel_view_afe3500651fc4eb5770aeb01728aa0a1e.html#afe3500651fc4eb5770aeb01728aa0a1e", null ],
+      [ "size", "db/df7/class_c_pixel_view_ac69fd31def4a8cd6cb467d8a3c0a8772.html#ac69fd31def4a8cd6cb467d8a3c0a8772", null ],
       [ "subFromRGB", "db/df7/class_c_pixel_view_a591bdad3c85f583d48279a1e962960ec.html#a591bdad3c85f583d48279a1e962960ec", null ],
       [ "dir", "db/df7/class_c_pixel_view_adc4db33ac1cc063be48691ba34ee2da3.html#adc4db33ac1cc063be48691ba34ee2da3", null ],
       [ "end_pos", "db/df7/class_c_pixel_view_abfcab2974a78f644d27f2ba39bcd40f1.html#abfcab2974a78f644d27f2ba39bcd40f1", null ],
@@ -70,11 +70,11 @@ var group___pixel_set =
     [ "CPixelView< PIXEL_TYPE >::pixelset_iterator_base< T >", "db/d9b/class_c_pixel_view_1_1pixelset__iterator__base.html", [
       [ "pixelset_iterator_base", "db/d9b/class_c_pixel_view_1_1pixelset__iterator__base_a6bcfa51e507b8a91bcdbb648830638ec.html#a6bcfa51e507b8a91bcdbb648830638ec", null ],
       [ "pixelset_iterator_base", "db/d9b/class_c_pixel_view_1_1pixelset__iterator__base_a8a858a5963e520967561ee98afd9d56e.html#a8a858a5963e520967561ee98afd9d56e", null ],
-      [ "operator!=", "db/d9b/class_c_pixel_view_1_1pixelset__iterator__base_aec44112bc6bcd864584844e64147c387.html#aec44112bc6bcd864584844e64147c387", null ],
+      [ "operator!=", "db/d9b/class_c_pixel_view_1_1pixelset__iterator__base_a3b659c63474d08467c06a924de2088f6.html#a3b659c63474d08467c06a924de2088f6", null ],
       [ "operator*", "db/d9b/class_c_pixel_view_1_1pixelset__iterator__base_aba545091ed06e18822ee7aad875afd0d.html#aba545091ed06e18822ee7aad875afd0d", null ],
       [ "operator++", "db/d9b/class_c_pixel_view_1_1pixelset__iterator__base_a35aaf813fca6983c7d0c1dc3e6e11099.html#a35aaf813fca6983c7d0c1dc3e6e11099", null ],
       [ "operator++", "db/d9b/class_c_pixel_view_1_1pixelset__iterator__base_a51d3e576bc088db16895eae5e55aa7bb.html#a51d3e576bc088db16895eae5e55aa7bb", null ],
-      [ "operator==", "db/d9b/class_c_pixel_view_1_1pixelset__iterator__base_a20e52ba17158c74ad73e1911d33bebb9.html#a20e52ba17158c74ad73e1911d33bebb9", null ],
+      [ "operator==", "db/d9b/class_c_pixel_view_1_1pixelset__iterator__base_a094b9c8b4d935f79d564c8f164bef217.html#a094b9c8b4d935f79d564c8f164bef217", null ],
       [ "dir", "db/d9b/class_c_pixel_view_1_1pixelset__iterator__base_a4556335c561ae20e349529037e627367.html#a4556335c561ae20e349529037e627367", null ],
       [ "leds", "db/d9b/class_c_pixel_view_1_1pixelset__iterator__base_a45f5ff18585c93f88d676148688f8173.html#a45f5ff18585c93f88d676148688f8173", null ]
     ] ],

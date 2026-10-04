@@ -1,0 +1,37 @@
+<map id="fl::ColorManagedPixelSource" name="fl::ColorManagedPixelSource">
+<area shape="rect" id="Node000001" title="Runs processPixelQ16 over a PixelController&#39;s pixels as they are read." alt="" coords="1368,134,1575,159"/>
+<area shape="rect" id="Node000002" href="$d0/dee/struct_pixel_controller.html" title=" " alt="" coords="1060,55,1235,81"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1214,81,1419,131,1417,137,1213,87"/>
+<area shape="rect" id="Node000003" href="$d4/d7d/struct_color_adjustment.html" title="Color adjustment structure for pixel output." alt="" coords="383,14,514,39"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="528,20,568,19,699,16,801,18,903,27,1032,45,1077,53,1076,58,1032,51,902,32,801,24,699,22,568,24,528,25"/>
+<area shape="rect" id="Node000005" href="$d0/dee/struct_pixel_controller.html" title="Pixel controller class." alt="" coords="757,48,944,88"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="528,32,757,56,757,61,527,37"/>
+<area shape="rect" id="Node000004" href="$da/dd6/structfl_1_1_c_r_g_b.html" title="Representation of an 8&#45;bit RGB pixel (Red, Green, Blue)" alt="" coords="67,14,142,39"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="156,24,383,24,383,29,156,29"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="958,65,1060,65,1060,71,958,71"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl.html#de/d4b/structfl_1_1_streaming_pipeline_q16" title="Everything the per&#45;pixel path needs, derived once when a profile binds." alt="" coords="1056,187,1239,213"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="1238,182,1393,157,1394,162,1239,188"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl.html#db/d1d/structfl_1_1_source_matrix_q16" title="Source&#45;primaries matrix in s16.16, rows ordered X, Y, Z." alt="" coords="775,113,926,138"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="929,138,1033,163,1107,185,1106,190,1031,168,928,144"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl.html#d3/dd2/structfl_1_1_gamut_map_q16" title="Everything the per&#45;pixel mapper needs, derived once when a profile binds." alt="" coords="783,162,919,187"/>
+<area shape="poly" id="edge8_Node000006_Node000008" title=" " alt="" coords="933,179,1056,190,1055,195,932,184"/>
+<area shape="rect" id="Node000009" href="$d4/d36/namespacefl.html#d0/d89/structfl_1_1_emitter_solve_matrix_q16" title="Inverse emitter matrix in s16.16, mapping XYZ to three emitter drives." alt="" coords="353,162,544,187"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="558,172,782,172,782,177,558,177"/>
+<area shape="rect" id="Node000010" href="$d0/d69/classfl_1_1_flux_scalar.html" title="A linear flux scalar in s16.16." alt="" coords="797,211,904,237"/>
+<area shape="poly" id="edge10_Node000006_Node000010" title=" " alt="" coords="918,222,1032,217,1083,210,1084,215,1032,223,918,228"/>
+<area shape="rect" id="Node000011" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="764,261,937,301"/>
+<area shape="poly" id="edge11_Node000006_Node000011" title=" " alt="" coords="950,261,1031,241,1116,210,1118,215,1033,247,951,266"/>
+<area shape="rect" id="Node000012" href="$d4/d36/namespacefl.html#de/d33/structfl_1_1_response_luts_q16" title="Owned code&#45;to&#45;light samples for the three physical emitters." alt="" coords="371,214,526,239"/>
+<area shape="poly" id="edge12_Node000011_Node000012" title=" " alt="" coords="540,233,734,257,764,262,763,268,733,263,540,238"/>
+<area shape="rect" id="Node000018" href="$d4/dc0/structfl_1_1detail_1_1_control_block_base.html" title=" " alt="" coords="5,347,204,373"/>
+<area shape="poly" id="edge13_Node000011_Node000018" title=" " alt="" coords="194,343,228,337,397,313,568,295,763,282,764,287,568,300,398,318,228,343,194,348"/>
+<area shape="rect" id="Node000021" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="376,347,521,373"/>
+<area shape="poly" id="edge15_Node000021_Node000018" title=" " alt="" coords="218,357,376,357,376,363,218,363"/>
+<area shape="rect" id="Node000022" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="767,389,935,429"/>
+<area shape="poly" id="edge18_Node000022_Node000018" title=" " alt="" coords="188,372,354,396,465,405,577,409,767,409,767,414,577,414,465,410,353,401,187,378"/>
+<area shape="poly" id="edge14_Node000011_Node000021" title=" " alt="" coords="535,353,631,343,733,324,805,299,806,304,734,329,631,348,535,358"/>
+<area shape="poly" id="edge19_Node000022_Node000021" title=" " alt="" coords="513,373,568,384,671,396,767,403,766,408,671,401,568,389,512,378"/>
+<area shape="poly" id="edge16_Node000006_Node000022" title=" " alt="" coords="890,379,1030,279,1127,211,1130,215,1034,284,893,383"/>
+<area shape="rect" id="Node000023" href="$d4/d36/namespacefl.html#de/d8b/structfl_1_1_wide_pipeline_q16" title="Allocated only for a bound four&#45; or five&#45;emitter profile." alt="" coords="374,481,523,506"/>
+<area shape="poly" id="edge17_Node000022_Node000023" title=" " alt="" coords="537,490,632,482,683,474,733,463,776,447,814,427,817,432,778,452,734,468,684,479,633,487,537,495"/>
+</map>

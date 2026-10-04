@@ -1,0 +1,9 @@
+<map id="mood_ring::RingCanvas" name="mood_ring::RingCanvas">
+<area shape="rect" id="Node000001" title="Additive drawing helpers over a span of float pixels." alt="" coords="67,196,243,221"/>
+<area shape="rect" id="Node000002" href="$d0/d08/classfl_1_1span.html" title=" " alt="" coords="79,93,232,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="158,147,158,196,153,196,153,147"/>
+<area shape="rect" id="Node000003" href="$da/d62/structmood__ring_1_1_r_g_bf.html" title="Linear&#45;light float pixel, nominal range [0, 1], may exceed 1 before clip." alt="" coords="5,5,137,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="93,39,140,91,136,95,89,42"/>
+<area shape="rect" id="Node000004" href="$d0/d08/classfl_1_1span.html" title=" " alt="" coords="162,5,319,31"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="223,42,175,95,171,91,219,39"/>
+</map>

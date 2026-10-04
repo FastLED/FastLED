@@ -1,26 +1,30 @@
 <map id="fl::audio::fft::Context::FftScratch" name="fl::audio::fft::Context::FftScratch">
-<area shape="rect" id="Node000001" title=" " alt="" coords="1020,110,1175,150"/>
-<area shape="rect" id="Node000002" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="764,76,905,116"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="919,104,1020,118,1019,123,919,109"/>
-<area shape="rect" id="Node000003" href="$d4/dad/classfl_1_1vector__basic.html" title="Type&#45;erased vector base class." alt="" coords="301,111,421,136"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="395,102,459,71,546,41,594,31,643,25,693,27,741,37,754,45,766,55,797,73,794,78,762,59,751,49,739,42,692,32,643,31,595,36,547,46,461,76,397,107"/>
-<area shape="rect" id="Node000006" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="471,111,588,136"/>
-<area shape="poly" id="edge6_Node000006_Node000003" title=" " alt="" coords="435,121,471,121,471,126,435,126"/>
-<area shape="rect" id="Node000007" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="768,20,901,46"/>
-<area shape="poly" id="edge8_Node000007_Node000003" title=" " alt="" coords="381,99,420,63,444,46,470,32,509,18,551,9,635,3,714,8,779,18,779,23,714,13,635,8,552,14,511,23,472,37,446,51,423,67,385,103"/>
-<area shape="rect" id="Node000008" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="764,190,905,230"/>
-<area shape="poly" id="edge11_Node000008_Node000003" title=" " alt="" coords="384,145,422,182,446,200,472,213,508,225,547,233,625,238,699,234,763,224,764,229,700,239,625,243,546,238,507,230,470,218,443,204,418,186,380,149"/>
-<area shape="rect" id="Node000009" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="768,140,901,166"/>
-<area shape="poly" id="edge14_Node000009_Node000003" title=" " alt="" coords="397,141,462,172,549,201,596,211,645,215,693,211,739,199,751,189,762,176,789,163,791,168,766,181,754,193,741,203,694,217,645,220,595,216,547,206,460,177,395,145"/>
-<area shape="rect" id="Node000004" href="$db/d13/classfl_1_1memory__resource.html" title="Polymorphic memory resource base class (PMR&#45;style)." alt="" coords="13,86,169,111"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="183,104,301,116,301,121,182,110"/>
-<area shape="rect" id="Node000005" href="$d4/d36/namespacefl.html#d8/d72/structfl_1_1vector__element__ops" title="Function pointer table for type&#45;specific element operations." alt="" coords="5,135,176,160"/>
-<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="190,146,277,140,310,134,311,139,278,145,190,151"/>
-<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="601,115,763,100,764,105,602,120"/>
-<area shape="poly" id="edge9_Node000007_Node000006" title=" " alt="" coords="565,102,611,83,692,59,767,42,768,47,693,64,613,88,567,107"/>
-<area shape="poly" id="edge12_Node000008_Node000006" title=" " alt="" coords="565,141,613,163,690,184,764,198,763,204,689,189,611,168,562,145"/>
-<area shape="poly" id="edge15_Node000009_Node000006" title=" " alt="" coords="602,131,612,132,768,146,768,151,612,137,601,136"/>
-<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="916,38,957,47,997,60,1039,83,1074,108,1071,112,1036,87,995,65,955,52,915,44"/>
-<area shape="poly" id="edge10_Node000001_Node000008" title=" " alt="" coords="918,192,995,172,1054,148,1056,153,997,177,920,198"/>
-<area shape="poly" id="edge13_Node000001_Node000009" title=" " alt="" coords="915,153,996,149,1019,146,1020,151,996,154,915,158"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="1088,142,1243,182"/>
+<area shape="rect" id="Node000002" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="764,82,905,122"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="920,114,1088,145,1087,150,919,120"/>
+<area shape="rect" id="Node000003" href="$d4/dad/classfl_1_1vector__basic.html" title="Type&#45;erased vector base class." alt="" coords="301,200,421,225"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="383,188,422,153,476,110,541,70,611,39,647,29,677,25,706,28,741,39,755,51,766,64,791,79,788,84,762,68,751,55,739,44,705,33,677,30,648,34,613,44,543,74,480,115,426,157,387,192"/>
+<area shape="rect" id="Node000006" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="471,154,588,180"/>
+<area shape="poly" id="edge6_Node000006_Node000003" title=" " alt="" coords="422,194,481,177,482,183,423,199"/>
+<area shape="rect" id="Node000007" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="768,29,901,54"/>
+<area shape="poly" id="edge8_Node000007_Node000003" title=" " alt="" coords="373,186,410,125,437,92,469,64,504,40,536,23,566,12,597,5,661,5,740,14,796,27,795,32,740,19,661,10,597,11,568,17,538,28,507,45,472,68,441,96,415,128,377,189"/>
+<area shape="rect" id="Node000008" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="764,196,905,236"/>
+<area shape="poly" id="edge11_Node000008_Node000003" title=" " alt="" coords="394,230,419,244,446,254,528,276,593,286,658,283,739,263,751,257,763,248,788,234,790,239,765,252,754,261,741,268,659,288,593,291,526,281,445,259,417,248,392,235"/>
+<area shape="rect" id="Node000009" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="768,261,901,286"/>
+<area shape="poly" id="edge14_Node000009_Node000003" title=" " alt="" coords="386,233,424,265,447,279,472,290,513,301,557,307,644,307,724,297,787,284,788,289,724,303,644,312,556,312,512,306,470,295,444,284,421,269,383,237"/>
+<area shape="rect" id="Node000010" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="765,146,904,172"/>
+<area shape="poly" id="edge17_Node000010_Node000003" title=" " alt="" coords="432,225,499,234,578,237,660,230,701,221,739,208,751,196,762,182,788,169,790,174,766,187,754,200,741,212,702,226,661,235,578,243,499,239,432,230"/>
+<area shape="rect" id="Node000004" href="$db/d13/classfl_1_1memory__resource.html" title="Polymorphic memory resource base class (PMR&#45;style)." alt="" coords="13,174,169,200"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="183,193,301,204,301,210,182,198"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl.html#d8/d72/structfl_1_1vector__element__ops" title="Function pointer table for type&#45;specific element operations." alt="" coords="5,224,176,249"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="190,235,277,228,310,223,311,228,278,234,190,240"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="580,148,611,139,763,110,764,115,613,144,582,153"/>
+<area shape="poly" id="edge9_Node000007_Node000006" title=" " alt="" coords="550,143,577,118,611,95,650,78,690,65,767,48,768,53,692,70,652,83,613,100,581,122,553,147"/>
+<area shape="poly" id="edge12_Node000008_Node000006" title=" " alt="" coords="597,180,612,183,764,206,763,211,612,188,596,185"/>
+<area shape="poly" id="edge15_Node000009_Node000006" title=" " alt="" coords="557,187,583,206,613,222,692,248,768,263,767,269,691,254,611,227,581,210,554,191"/>
+<area shape="poly" id="edge18_Node000010_Node000006" title=" " alt="" coords="602,163,765,158,765,164,602,168"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="916,38,990,46,1028,55,1065,69,1091,84,1114,102,1150,140,1146,144,1111,106,1088,88,1063,74,1027,60,989,51,915,43"/>
+<area shape="poly" id="edge10_Node000001_Node000008" title=" " alt="" coords="919,202,1064,179,1087,175,1088,180,1064,184,920,207"/>
+<area shape="poly" id="edge13_Node000001_Node000009" title=" " alt="" coords="914,260,988,244,1063,219,1101,201,1135,180,1137,184,1104,205,1065,224,989,249,916,265"/>
+<area shape="poly" id="edge16_Node000001_Node000010" title=" " alt="" coords="918,158,929,158,1088,159,1088,164,929,163,918,163"/>
 </map>

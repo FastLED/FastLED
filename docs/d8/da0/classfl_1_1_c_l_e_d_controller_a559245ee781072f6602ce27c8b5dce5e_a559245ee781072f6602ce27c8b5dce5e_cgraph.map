@@ -1,0 +1,21 @@
+<map id="fl::CLEDController::setRgbww" name="fl::CLEDController::setRgbww">
+<area shape="rect" id="Node000001" title="Configure this channel for 5&#45;channel RGBWW (RGB + warm&#45;W + cool&#45;W) output." alt="" coords="5,124,141,164"/>
+<area shape="rect" id="Node000002" href="$d8/da0/classfl_1_1_c_l_e_d_controller_ae0828dffacb43dca565ddf8145153ed0.html#ae0828dffacb43dca565ddf8145153ed0" title="Protected constructor with registration mode." alt="" coords="242,60,378,100"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="141,123,189,109,228,99,229,104,190,115,143,128"/>
+<area shape="rect" id="Node000005" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a95ede2f374809004d76c246f747d056b.html#a95ede2f374809004d76c246f747d056b" title=" " alt="" coords="189,124,431,164"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="142,141,175,141,175,147,142,147"/>
+<area shape="rect" id="Node000007" href="$d6/dd0/structfl_1_1_rgbww_default_a8205ae34d66f3aafb06fe876126e7224.html#a8205ae34d66f3aafb06fe876126e7224" title=" " alt="" coords="221,189,399,214"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="142,161,190,173,233,183,231,188,189,179,141,166"/>
+<area shape="rect" id="Node000003" href="$d8/da0/classfl_1_1_c_l_e_d_controller_af0c5f56a02ad4e919df8181d3b267390.html#af0c5f56a02ad4e919df8181d3b267390" title="Add this controller to the linked list." alt="" coords="529,5,665,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="378,64,514,38,515,43,379,70"/>
+<area shape="rect" id="Node000004" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a346ffe73124af2abf1ccf82a96daee72.html#a346ffe73124af2abf1ccf82a96daee72" title="Check if this controller is in the linked list." alt="" coords="764,35,900,75"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="665,31,751,42,750,47,664,36"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="764,61,392,79,392,73,764,55"/>
+<area shape="rect" id="Node000006" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a749a14da275dfd7a2b91ec3e8b82fef7.html#a749a14da275dfd7a2b91ec3e8b82fef7" title="Return the name of a chipset whose wire format owns its white&#45;channel policy." alt="" coords="496,124,697,164"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="431,141,482,141,482,147,431,147"/>
+<area shape="rect" id="Node000008" href="$d4/df9/structfl_1_1_rgbww_a0d2908da04ace06a285f187b68b4e169.html#a0d2908da04ace06a285f187b68b4e169" title=" " alt="" coords="763,214,901,239"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="399,203,749,220,749,225,399,208"/>
+<area shape="rect" id="Node000009" href="$d6/dd0/structfl_1_1_rgbww_default_a61aa7b301c50a59a284664e21691e3e1.html#a61aa7b301c50a59a284664e21691e3e1" title=" " alt="" coords="479,239,715,265"/>
+<area shape="poly" id="edge9_Node000007_Node000009" title=" " alt="" coords="383,211,511,234,510,239,382,217"/>
+<area shape="poly" id="edge10_Node000009_Node000008" title=" " alt="" coords="714,237,749,233,749,238,715,242"/>
+</map>

@@ -1,0 +1,35 @@
+digraph "PixelController::loadAndScaleRGBWUnordered"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="PixelController::loadAnd\lScaleRGBWUnordered",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="loadAndScaleRGBW before its wire reorder: RGB in source order plus W."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="PixelController::loadAnd\lScaleChannel",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/dee/struct_pixel_controller_a889ab47bc5c8189d46452faa0490f56d.html#a889ab47bc5c8189d46452faa0490f56d",tooltip="One source channel, loaded, dithered and scaled – loadAndScale<SLOT> with RO(SLOT) replaced by a runt..."];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::BinaryDither::apply",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d6c/structfl_1_1_binary_dither_a855eeda5bd1b617b06acd895eeba5b03.html#a855eeda5bd1b617b06acd895eeba5b03",tooltip="Add the offset to a source byte, before scaling. Black is never lifted."];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::rgb_2_rgbw",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a5d7f88cea77f862d6c24639b5a0cd916.html#a5d7f88cea77f862d6c24639b5a0cd916",tooltip="Converts RGB to RGBW using one of the functions."];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::rgb_2_rgbw_colorimetric",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a25c2dc6d7ea89abcd4c49a3f47db92a8.html#a25c2dc6d7ea89abcd4c49a3f47db92a8",tooltip=" "];
+  Node5 -> Node6 [id="edge5_Node000005_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::rgb_2_rgbw_exact",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a6aa3f7f2e78c62689adead6bf6345fc2.html#a6aa3f7f2e78c62689adead6bf6345fc2",tooltip="Converts RGB to RGBW using a color transfer method from saturated color channels to white."];
+  Node4 -> Node7 [id="edge6_Node000004_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::rgb_2_rgbw_colorimetric\l_boosted",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_ac181c9536b6f0d1d772a4bd18f48a543.html#ac181c9536b6f0d1d772a4bd18f48a543",tooltip=" "];
+  Node7 -> Node6 [id="edge7_Node000007_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node4 -> Node6 [id="edge8_Node000004_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node4 -> Node8 [id="edge9_Node000004_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl::rgb_2_rgbw_max\l_brightness",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_aa1613ee1e95b25e5378d780742d73719.html#aa1613ee1e95b25e5378d780742d73719",tooltip="The minimum brigthness of the RGB channels is used to set the W channel."];
+  Node4 -> Node9 [id="edge10_Node000004_Node000009",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="fl::rgb_2_rgbw_null\l_white_pixel",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a127a41ddb75b964f9c4fd9b495116195.html#a127a41ddb75b964f9c4fd9b495116195",tooltip="Converts RGB to RGBW with the W channel set to black, always."];
+  Node4 -> Node10 [id="edge11_Node000004_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="fl::rgb_2_rgbw_user\l_function",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_ada2d5e03b4fc0a4720ff3fcbc0769945.html#ada2d5e03b4fc0a4720ff3fcbc0769945",tooltip=" "];
+  Node10 -> Node11 [id="edge12_Node000010_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="fl::Singleton::instance",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d9/d5b/classfl_1_1_singleton_ad5cb1b704e17768f75802673abb0ff75.html#ad5cb1b704e17768f75802673abb0ff75",tooltip=" "];
+  Node10 -> Node6 [id="edge13_Node000010_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node4 -> Node13 [id="edge14_Node000004_Node000013",color="steelblue1",style="solid",tooltip=" "];
+  Node13 [id="Node000013",label="fl::rgb_2_rgbw_white\l_boosted",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_af35efd61260f0d8d2bf7da89f49ac821.html#af35efd61260f0d8d2bf7da89f49ac821",tooltip="Converts RGB to RGBW with a boosted white channel."];
+}

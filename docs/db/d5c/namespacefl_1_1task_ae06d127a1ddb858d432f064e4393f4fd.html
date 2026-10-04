@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -119,27 +119,34 @@ $(function(){initNavTree('db/d5c/namespacefl_1_1task_ae06d127a1ddb858d432f064e43
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Identifies how a scheduled task is triggered. </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ae06d127a1ddb858d432f064e4393f4fda84cb9dce517300d191ffb2538bbc0d33" name="ae06d127a1ddb858d432f064e4393f4fda84cb9dce517300d191ffb2538bbc0d33"></a>kEveryMs&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="ae06d127a1ddb858d432f064e4393f4fda6eb08055e15b5253c1505bc0e691d7c7" name="ae06d127a1ddb858d432f064e4393f4fda6eb08055e15b5253c1505bc0e691d7c7"></a>kAtFramerate&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="ae06d127a1ddb858d432f064e4393f4fda1b6d07cce4ad02e783b7dc300196cb7a" name="ae06d127a1ddb858d432f064e4393f4fda1b6d07cce4ad02e783b7dc300196cb7a"></a>kBeforeFrame&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="ae06d127a1ddb858d432f064e4393f4fda6079a274a1dcd7e08722e5316af0b537" name="ae06d127a1ddb858d432f064e4393f4fda6079a274a1dcd7e08722e5316af0b537"></a>kAfterFrame&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="ae06d127a1ddb858d432f064e4393f4fdaf79290fdb06503a03f8d833da7eabda2" name="ae06d127a1ddb858d432f064e4393f4fdaf79290fdb06503a03f8d833da7eabda2"></a>kCoroutine&#160;</td><td class="fielddoc"></td></tr>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ae06d127a1ddb858d432f064e4393f4fda84cb9dce517300d191ffb2538bbc0d33" name="ae06d127a1ddb858d432f064e4393f4fda84cb9dce517300d191ffb2538bbc0d33"></a>kEveryMs&#160;</td><td class="fielddoc"><p>Runs after a fixed time interval. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ae06d127a1ddb858d432f064e4393f4fda6eb08055e15b5253c1505bc0e691d7c7" name="ae06d127a1ddb858d432f064e4393f4fda6eb08055e15b5253c1505bc0e691d7c7"></a>kAtFramerate&#160;</td><td class="fielddoc"><p>Runs at a fixed number of times per second. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ae06d127a1ddb858d432f064e4393f4fda1b6d07cce4ad02e783b7dc300196cb7a" name="ae06d127a1ddb858d432f064e4393f4fda1b6d07cce4ad02e783b7dc300196cb7a"></a>kBeforeFrame&#160;</td><td class="fielddoc"><p>Runs immediately before each FastLED frame is rendered. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ae06d127a1ddb858d432f064e4393f4fda6079a274a1dcd7e08722e5316af0b537" name="ae06d127a1ddb858d432f064e4393f4fda6079a274a1dcd7e08722e5316af0b537"></a>kAfterFrame&#160;</td><td class="fielddoc"><p>Runs immediately after each FastLED frame is rendered. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ae06d127a1ddb858d432f064e4393f4fdaf79290fdb06503a03f8d833da7eabda2" name="ae06d127a1ddb858d432f064e4393f4fdaf79290fdb06503a03f8d833da7eabda2"></a>kCoroutine&#160;</td><td class="fielddoc"><p>Runs as an operating-system or RTOS task. </p>
+</td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="../../db/da4/task_8h_source.html#l00116">116</a> of file <a class="el" href="../../db/da4/task_8h_source.html">task.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  116</span>                    {</div>
-<div class="line"><span class="lineno">  117</span>    <a class="code hl_enumvalue" href="#ae06d127a1ddb858d432f064e4393f4fda84cb9dce517300d191ffb2538bbc0d33">kEveryMs</a>,</div>
-<div class="line"><span class="lineno">  118</span>    <a class="code hl_enumvalue" href="#ae06d127a1ddb858d432f064e4393f4fda6eb08055e15b5253c1505bc0e691d7c7">kAtFramerate</a>,</div>
-<div class="line"><span class="lineno">  119</span>    <a class="code hl_enumvalue" href="#ae06d127a1ddb858d432f064e4393f4fda1b6d07cce4ad02e783b7dc300196cb7a">kBeforeFrame</a>,</div>
-<div class="line"><span class="lineno">  120</span>    <a class="code hl_enumvalue" href="#ae06d127a1ddb858d432f064e4393f4fda6079a274a1dcd7e08722e5316af0b537">kAfterFrame</a>,</div>
-<div class="line"><span class="lineno">  121</span>    <a class="code hl_enumvalue" href="#ae06d127a1ddb858d432f064e4393f4fdaf79290fdb06503a03f8d833da7eabda2">kCoroutine</a></div>
-<div class="line"><span class="lineno">  122</span>};</div>
-<div class="ttc" id="anamespacefl_1_1task_ae06d127a1ddb858d432f064e4393f4fd_html_ae06d127a1ddb858d432f064e4393f4fda1b6d07cce4ad02e783b7dc300196cb7a"><div class="ttname"><a href="#ae06d127a1ddb858d432f064e4393f4fda1b6d07cce4ad02e783b7dc300196cb7a">fl::task::TaskType::kBeforeFrame</a></div><div class="ttdeci">@ kBeforeFrame</div><div class="ttdef"><b>Definition</b> <a href="../../db/da4/task_8h_source.html#l00119">task.h:119</a></div></div>
-<div class="ttc" id="anamespacefl_1_1task_ae06d127a1ddb858d432f064e4393f4fd_html_ae06d127a1ddb858d432f064e4393f4fda6079a274a1dcd7e08722e5316af0b537"><div class="ttname"><a href="#ae06d127a1ddb858d432f064e4393f4fda6079a274a1dcd7e08722e5316af0b537">fl::task::TaskType::kAfterFrame</a></div><div class="ttdeci">@ kAfterFrame</div><div class="ttdef"><b>Definition</b> <a href="../../db/da4/task_8h_source.html#l00120">task.h:120</a></div></div>
-<div class="ttc" id="anamespacefl_1_1task_ae06d127a1ddb858d432f064e4393f4fd_html_ae06d127a1ddb858d432f064e4393f4fda6eb08055e15b5253c1505bc0e691d7c7"><div class="ttname"><a href="#ae06d127a1ddb858d432f064e4393f4fda6eb08055e15b5253c1505bc0e691d7c7">fl::task::TaskType::kAtFramerate</a></div><div class="ttdeci">@ kAtFramerate</div><div class="ttdef"><b>Definition</b> <a href="../../db/da4/task_8h_source.html#l00118">task.h:118</a></div></div>
-<div class="ttc" id="anamespacefl_1_1task_ae06d127a1ddb858d432f064e4393f4fd_html_ae06d127a1ddb858d432f064e4393f4fda84cb9dce517300d191ffb2538bbc0d33"><div class="ttname"><a href="#ae06d127a1ddb858d432f064e4393f4fda84cb9dce517300d191ffb2538bbc0d33">fl::task::TaskType::kEveryMs</a></div><div class="ttdeci">@ kEveryMs</div><div class="ttdef"><b>Definition</b> <a href="../../db/da4/task_8h_source.html#l00117">task.h:117</a></div></div>
-<div class="ttc" id="anamespacefl_1_1task_ae06d127a1ddb858d432f064e4393f4fd_html_ae06d127a1ddb858d432f064e4393f4fdaf79290fdb06503a03f8d833da7eabda2"><div class="ttname"><a href="#ae06d127a1ddb858d432f064e4393f4fdaf79290fdb06503a03f8d833da7eabda2">fl::task::TaskType::kCoroutine</a></div><div class="ttdeci">@ kCoroutine</div><div class="ttdef"><b>Definition</b> <a href="../../db/da4/task_8h_source.html#l00121">task.h:121</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../db/da4/task_8h_source.html#l00117">117</a> of file <a class="el" href="../../db/da4/task_8h_source.html">task.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  117</span>                    {</div>
+<div class="line"><span class="lineno">  118</span>    <a class="code hl_enumvalue" href="#ae06d127a1ddb858d432f064e4393f4fda84cb9dce517300d191ffb2538bbc0d33">kEveryMs</a>,      </div>
+<div class="line"><span class="lineno">  119</span>    <a class="code hl_enumvalue" href="#ae06d127a1ddb858d432f064e4393f4fda6eb08055e15b5253c1505bc0e691d7c7">kAtFramerate</a>, </div>
+<div class="line"><span class="lineno">  120</span>    <a class="code hl_enumvalue" href="#ae06d127a1ddb858d432f064e4393f4fda1b6d07cce4ad02e783b7dc300196cb7a">kBeforeFrame</a>, </div>
+<div class="line"><span class="lineno">  121</span>    <a class="code hl_enumvalue" href="#ae06d127a1ddb858d432f064e4393f4fda6079a274a1dcd7e08722e5316af0b537">kAfterFrame</a>,  </div>
+<div class="line"><span class="lineno">  122</span>    <a class="code hl_enumvalue" href="#ae06d127a1ddb858d432f064e4393f4fdaf79290fdb06503a03f8d833da7eabda2">kCoroutine</a>    </div>
+<div class="line"><span class="lineno">  123</span>};</div>
+<div class="ttc" id="anamespacefl_1_1task_ae06d127a1ddb858d432f064e4393f4fd_html_ae06d127a1ddb858d432f064e4393f4fda1b6d07cce4ad02e783b7dc300196cb7a"><div class="ttname"><a href="#ae06d127a1ddb858d432f064e4393f4fda1b6d07cce4ad02e783b7dc300196cb7a">fl::task::TaskType::kBeforeFrame</a></div><div class="ttdeci">@ kBeforeFrame</div><div class="ttdoc">Runs immediately before each FastLED frame is rendered.</div><div class="ttdef"><b>Definition</b> <a href="../../db/da4/task_8h_source.html#l00120">task.h:120</a></div></div>
+<div class="ttc" id="anamespacefl_1_1task_ae06d127a1ddb858d432f064e4393f4fd_html_ae06d127a1ddb858d432f064e4393f4fda6079a274a1dcd7e08722e5316af0b537"><div class="ttname"><a href="#ae06d127a1ddb858d432f064e4393f4fda6079a274a1dcd7e08722e5316af0b537">fl::task::TaskType::kAfterFrame</a></div><div class="ttdeci">@ kAfterFrame</div><div class="ttdoc">Runs immediately after each FastLED frame is rendered.</div><div class="ttdef"><b>Definition</b> <a href="../../db/da4/task_8h_source.html#l00121">task.h:121</a></div></div>
+<div class="ttc" id="anamespacefl_1_1task_ae06d127a1ddb858d432f064e4393f4fd_html_ae06d127a1ddb858d432f064e4393f4fda6eb08055e15b5253c1505bc0e691d7c7"><div class="ttname"><a href="#ae06d127a1ddb858d432f064e4393f4fda6eb08055e15b5253c1505bc0e691d7c7">fl::task::TaskType::kAtFramerate</a></div><div class="ttdeci">@ kAtFramerate</div><div class="ttdoc">Runs at a fixed number of times per second.</div><div class="ttdef"><b>Definition</b> <a href="../../db/da4/task_8h_source.html#l00119">task.h:119</a></div></div>
+<div class="ttc" id="anamespacefl_1_1task_ae06d127a1ddb858d432f064e4393f4fd_html_ae06d127a1ddb858d432f064e4393f4fda84cb9dce517300d191ffb2538bbc0d33"><div class="ttname"><a href="#ae06d127a1ddb858d432f064e4393f4fda84cb9dce517300d191ffb2538bbc0d33">fl::task::TaskType::kEveryMs</a></div><div class="ttdeci">@ kEveryMs</div><div class="ttdoc">Runs after a fixed time interval.</div><div class="ttdef"><b>Definition</b> <a href="../../db/da4/task_8h_source.html#l00118">task.h:118</a></div></div>
+<div class="ttc" id="anamespacefl_1_1task_ae06d127a1ddb858d432f064e4393f4fd_html_ae06d127a1ddb858d432f064e4393f4fdaf79290fdb06503a03f8d833da7eabda2"><div class="ttname"><a href="#ae06d127a1ddb858d432f064e4393f4fdaf79290fdb06503a03f8d833da7eabda2">fl::task::TaskType::kCoroutine</a></div><div class="ttdeci">@ kCoroutine</div><div class="ttdoc">Runs as an operating-system or RTOS task.</div><div class="ttdef"><b>Definition</b> <a href="../../db/da4/task_8h_source.html#l00122">task.h:122</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -150,7 +157,7 @@ $(function(){initNavTree('db/d5c/namespacefl_1_1task_ae06d127a1ddb858d432f064e43
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../db/d5c/namespacefl_1_1task.html">task</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:10 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:12 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

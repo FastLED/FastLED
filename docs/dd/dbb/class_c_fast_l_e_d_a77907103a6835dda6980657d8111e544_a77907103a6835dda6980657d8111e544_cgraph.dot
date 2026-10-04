@@ -1,0 +1,16 @@
+digraph "CFastLED::addLeds"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="CFastLED::addLeds",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Add an SPI based CLEDController instance to the world (legacy path)."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="CFastLED::addLeds",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dbb/class_c_fast_l_e_d_af05a7eb54282b7c43293e2905b7405bb.html#af05a7eb54282b7c43293e2905b7405bb",tooltip="Add a CLEDController instance to the world."];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::busKeepAlive",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a617e5ddee673007123ec891a051965fc.html#a617e5ddee673007123ec891a051965fc",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::detail::BusKeepAlive\lImpl::odr_use",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d77/structfl_1_1detail_1_1_bus_keep_alive_impl_aa550845c70a7a9d04a667e7718fbbe07.html#aa550845c70a7a9d04a667e7718fbbe07",tooltip=" "];
+}

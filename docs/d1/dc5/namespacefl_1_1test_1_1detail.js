@@ -6,6 +6,6 @@ var namespacefl_1_1test_1_1detail =
     [ "TypeIterator< TypeList<>, TestFunc >", "d6/d6d/structfl_1_1test_1_1detail_1_1_type_iterator_3_01_type_list_3_4_00_01_test_func_01_4.html", "d6/d6d/structfl_1_1test_1_1detail_1_1_type_iterator_3_01_type_list_3_4_00_01_test_func_01_4" ],
     [ "TypeList", "d1/dc5/namespacefl_1_1test_1_1detail.html#d4/dd2/structfl_1_1test_1_1detail_1_1_type_list", null ],
     [ "TypeNameHolder", "dd/d34/structfl_1_1test_1_1detail_1_1_type_name_holder.html", "dd/d34/structfl_1_1test_1_1detail_1_1_type_name_holder" ],
-    [ "currentSuiteName", "d1/dc5/namespacefl_1_1test_1_1detail_acac1a6e3826f448c097bbe42b708cd15.html#acac1a6e3826f448c097bbe42b708cd15", null ],
-    [ "getTypeName", "d1/dc5/namespacefl_1_1test_1_1detail_ab7bf617e5c1191a79b4db58cd4864292.html#ab7bf617e5c1191a79b4db58cd4864292", null ]
+    [ "currentSuiteName", "d1/dc5/namespacefl_1_1test_1_1detail_a0ebdd54113ed70bc032f86db9e54ba3d.html#a0ebdd54113ed70bc032f86db9e54ba3d", null ],
+    [ "getTypeName", "d1/dc5/namespacefl_1_1test_1_1detail_acc2630fcca5c3f17667b11178d0402ad.html#acc2630fcca5c3f17667b11178d0402ad", null ]
 ];

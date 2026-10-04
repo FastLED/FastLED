@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -109,6 +109,7 @@ $(function(){initNavTree('df/d9e/_auto_research_remote_8h.html','../../'); initR
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><code>#include &quot;<a class="el" href="../../df/dd8/stdint_8h_source.html">fl/stl/stdint.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d6/d06/remote_8h_source.html">fl/remote/remote.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../db/d45/manager_8h_source.html">fl/channels/manager.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../df/d6a/shared__ptr_8h_source.html">fl/stl/shared_ptr.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d4/d7a/span_8h_source.html">fl/stl/span.h</a>&quot;</code><br />
@@ -126,7 +127,7 @@ $(function(){initNavTree('df/d9e/_auto_research_remote_8h.html','../../'); initR
 <div id="dynsection-1-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-1-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d0/d73/_auto_research_remote_8h__dep__incl.svg" width="591" height="271"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d0/d73/_auto_research_remote_8h__dep__incl.svg" width="250" height="168"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 </div>
 <p><a href="../../df/d9e/_auto_research_remote_8h_source.html">Go to the source code of this file.</a></p>
@@ -136,9 +137,9 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d63/class_auto_research_remote_control.html">AutoResearchRemoteControl</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remote RPC control system for test autoresearch Encapsulates all RPC function registration and processing logic.  <a href="../../db/d63/class_auto_research_remote_control.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:d6/d06/struct_auto_research_state" id="r_d6/d06/struct_auto_research_state"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#d6/d06/struct_auto_research_state">AutoResearchState</a></td></tr>
-<tr class="memdesc:d6/d06/struct_auto_research_state"><td class="mdescLeft">&#160;</td><td class="mdescRight">AutoResearch runtime state (shared between main loop and RPC handlers)  <a href="#d6/d06/struct_auto_research_state">More...</a><br /></td></tr>
-<tr class="separator:d6/d06/struct_auto_research_state"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d6/d06/struct_auto_research_state.html">AutoResearchState</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">AutoResearch runtime state (shared between main loop and RPC handlers)  <a href="../../d6/d06/struct_auto_research_state.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
@@ -159,121 +160,12 @@ Typedefs</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:a94bf79298a38a4c78e548d246039ebb7" id="r_a94bf79298a38a4c78e548d246039ebb7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d9e/_auto_research_remote_8h_a94bf79298a38a4c78e548d246039ebb7.html#a94bf79298a38a4c78e548d246039ebb7">printJsonRaw</a> (const <a class="el" href="../../de/d40/classfl_1_1json.html">fl::json</a> &amp;json, const char *prefix=&quot;REMOTE: &quot;)</td></tr>
-<tr class="memdesc:a94bf79298a38a4c78e548d246039ebb7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Print JSON directly to Serial, bypassing <a class="el" href="../../d4/d36/namespacefl_adfaedbd8e1ada269a7733e58ff142aea.html#adfaedbd8e1ada269a7733e58ff142aea">fl::println</a> and ScopedLogDisable This ensures RPC responses are always visible regardless of log level.  <br /></td></tr>
+<tr class="memdesc:a94bf79298a38a4c78e548d246039ebb7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Print JSON directly to Serial, bypassing <a class="el" href="../../d4/d36/namespacefl_ab058ac6ae882a8344f79b01b40eb6e02.html#ab058ac6ae882a8344f79b01b40eb6e02">fl::println</a> and ScopedLogDisable This ensures RPC responses are always visible regardless of log level.  <br /></td></tr>
 <tr class="separator:a94bf79298a38a4c78e548d246039ebb7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a34ed01c48f858d996b90eaf35a99dbc3" id="r_a34ed01c48f858d996b90eaf35a99dbc3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d9e/_auto_research_remote_8h_a34ed01c48f858d996b90eaf35a99dbc3.html#a34ed01c48f858d996b90eaf35a99dbc3">printStreamRaw</a> (const char *messageType, const <a class="el" href="../../de/d40/classfl_1_1json.html">fl::json</a> &amp;data)</td></tr>
-<tr class="memdesc:a34ed01c48f858d996b90eaf35a99dbc3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Print JSONL stream message directly to Serial, bypassing <a class="el" href="../../d4/d36/namespacefl_adfaedbd8e1ada269a7733e58ff142aea.html#adfaedbd8e1ada269a7733e58ff142aea">fl::println</a>.  <br /></td></tr>
+<tr class="memdesc:a34ed01c48f858d996b90eaf35a99dbc3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Print JSONL stream message directly to Serial, bypassing <a class="el" href="../../d4/d36/namespacefl_ab058ac6ae882a8344f79b01b40eb6e02.html#ab058ac6ae882a8344f79b01b40eb6e02">fl::println</a>.  <br /></td></tr>
 <tr class="separator:a34ed01c48f858d996b90eaf35a99dbc3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<hr/><h2 class="groupheader">Class Documentation</h2>
-<a name="d6/d06/struct_auto_research_state" id="d6/d06/struct_auto_research_state"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#d6/d06/struct_auto_research_state">&#9670;&#160;</a></span>AutoResearchState</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">struct AutoResearchState</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<div id="dynsection-2" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
-  <img id="dynsection-2-trigger" src="../../closed.png" alt="+"/> Collaboration diagram for AutoResearchState:</div>
-<div id="dynsection-2-summary" class="dynsummary" style="display:block;">
-</div>
-<div id="dynsection-2-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../dc/d1d/struct_auto_research_state__coll__graph.svg" width="100%" height="600"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
-<center><span class="legend">[<a target="top" href="../../graph_legend.html">legend</a>]</span></center></div>
-<table class="fieldtable">
-<tr><th colspan="3">Class Members</th></tr>
-<tr><td class="fieldtype">
-<a id="a64c8ee827c2760e2b685dbc7534fd5a8" name="a64c8ee827c2760e2b685dbc7534fd5a8"></a>bool</td>
-<td class="fieldname">
-ble_server_active = false</td>
-<td class="fielddoc">
-</td></tr>
-<tr><td class="fieldtype">
-<a id="a300c46dac7ff910fb4ed14f64e3672f7" name="a300c46dac7ff910fb4ed14f64e3672f7"></a>bool</td>
-<td class="fieldname">
-debug_enabled = false</td>
-<td class="fielddoc">
-</td></tr>
-<tr><td class="fieldtype">
-<a id="a6218591ccb11ff6aaa3144b7b906e670" name="a6218591ccb11ff6aaa3144b7b906e670"></a>int</td>
-<td class="fieldname">
-default_pin_rx</td>
-<td class="fielddoc">
-</td></tr>
-<tr><td class="fieldtype">
-<a id="a9c7a29a21576fbdcf7b84da1b28bc1ea" name="a9c7a29a21576fbdcf7b84da1b28bc1ea"></a>int</td>
-<td class="fieldname">
-default_pin_tx</td>
-<td class="fielddoc">
-</td></tr>
-<tr><td class="fieldtype">
-<a id="a97fd7d0a42bf331aa332b45ce0a273fb" name="a97fd7d0a42bf331aa332b45ce0a273fb"></a>bool</td>
-<td class="fieldname">
-deliberate_hang_requested = false</td>
-<td class="fielddoc">
-</td></tr>
-<tr><td class="fieldtype">
-<a id="a7919f13a9fbcdb9c02b4289cd3a05dcb" name="a7919f13a9fbcdb9c02b4289cd3a05dcb"></a>vector&lt; DriverInfo &gt;</td>
-<td class="fieldname">
-drivers_available</td>
-<td class="fielddoc">
-</td></tr>
-<tr><td class="fieldtype">
-<a id="a2846fb7b6286d1859b7fc8d7929fe452" name="a2846fb7b6286d1859b7fc8d7929fe452"></a>bool</td>
-<td class="fieldname">
-gpio_baseline_test_done = false</td>
-<td class="fielddoc">
-</td></tr>
-<tr><td class="fieldtype">
-<a id="af5b28f9790b8d3b8a80b48e047907ad0" name="af5b28f9790b8d3b8a80b48e047907ad0"></a>bool</td>
-<td class="fieldname">
-net_client_active = false</td>
-<td class="fielddoc">
-</td></tr>
-<tr><td class="fieldtype">
-<a id="aa75f922d490266aadcc845b432252b10" name="aa75f922d490266aadcc845b432252b10"></a>bool</td>
-<td class="fieldname">
-net_server_active = false</td>
-<td class="fielddoc">
-</td></tr>
-<tr><td class="fieldtype">
-<a id="a446bd0f8a8d56440def4ce2e269fadb5" name="a446bd0f8a8d56440def4ce2e269fadb5"></a>int</td>
-<td class="fieldname">
-pin_rx</td>
-<td class="fielddoc">
-</td></tr>
-<tr><td class="fieldtype">
-<a id="a28551b7810eca5e75ac7d0899029eb34" name="a28551b7810eca5e75ac7d0899029eb34"></a>int</td>
-<td class="fieldname">
-pin_tx</td>
-<td class="fielddoc">
-</td></tr>
-<tr><td class="fieldtype">
-<a id="a6cbd1f20607828c80ad96c77be8bad8a" name="a6cbd1f20607828c80ad96c77be8bad8a"></a>span&lt; uint8_t &gt;</td>
-<td class="fieldname">
-rx_buffer</td>
-<td class="fielddoc">
-</td></tr>
-<tr><td class="fieldtype">
-<a id="a33fdc3e21c6385cf08ab74389f283035" name="a33fdc3e21c6385cf08ab74389f283035"></a>shared_ptr&lt; RxChannel &gt;</td>
-<td class="fieldname">
-rx_channel</td>
-<td class="fielddoc">
-</td></tr>
-<tr><td class="fieldtype">
-<a id="ae45cba20fbc891434475c2c2031a851b" name="ae45cba20fbc891434475c2c2031a851b"></a><a class="el" href="../../df/d9e/_auto_research_remote_8h_ad83f108b0b5c56404ea5a6bdcb330a60.html#ad83f108b0b5c56404ea5a6bdcb330a60">RxDeviceFactory</a></td>
-<td class="fieldname">
-rx_factory</td>
-<td class="fielddoc">
-</td></tr>
-</table>
-
-</div>
-</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.3-->
@@ -281,7 +173,7 @@ rx_factory</td>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_c839598b40e1646daff68c7b4defdc81.html">AutoResearch</a></li><li class="navelem"><a class="el" href="../../df/d9e/_auto_research_remote_8h.html">AutoResearchRemote.h</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:00 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:02 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

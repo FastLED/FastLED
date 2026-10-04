@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -196,7 +196,7 @@ template&lt;typename PixelT, typename Coord, bool Overwrite&gt; </div>
 <div class="line"><span class="lineno">  776</span>    <span class="keywordflow">else</span> { gc.<a class="code hl_variable" href="../../d6/d9a/namespacefl_1_1gfx_1_1detail.html#aa1a9f51b81a127dac561557948978998">inner_shift</a> = 0; gc.<a class="code hl_variable" href="../../d6/d9a/namespacefl_1_1gfx_1_1detail.html#a0d1184c3ffc6fd0d299c2ab51f06ea1c">inner_inv</a> = 65280u; }</div>
 <div class="line"><span class="lineno">  777</span>    <span class="keywordflow">if</span> (outer_band &gt; 0) <a class="code hl_function" href="../../d6/d9a/namespacefl_1_1gfx_1_1detail_ace632a8bd8b1b176f9f882b536fc486c.html#ace632a8bd8b1b176f9f882b536fc486c">detail::computeBandShift</a>(outer_band, gc.<a class="code hl_variable" href="../../d6/d9a/namespacefl_1_1gfx_1_1detail.html#a774e9ee6538f1391874f503dcbe39f36">outer_shift</a>, gc.<a class="code hl_variable" href="../../d6/d9a/namespacefl_1_1gfx_1_1detail.html#ad834483a8cd079eac793dcefddf75b70">outer_inv</a>);</div>
 <div class="line"><span class="lineno">  778</span>    <span class="keywordflow">else</span> { gc.<a class="code hl_variable" href="../../d6/d9a/namespacefl_1_1gfx_1_1detail.html#a774e9ee6538f1391874f503dcbe39f36">outer_shift</a> = 0; gc.<a class="code hl_variable" href="../../d6/d9a/namespacefl_1_1gfx_1_1detail.html#ad834483a8cd079eac793dcefddf75b70">outer_inv</a> = 65280u; }</div>
-<div class="line"><span class="lineno">  779</span>    gc.<a class="code hl_variable" href="../../d6/d9a/namespacefl_1_1gfx_1_1detail.html#a140a21d12fca43c06d7f9674ce594012">color</a> = color;</div>
+<div class="line"><span class="lineno">  779</span>    gc.<a class="code hl_variable" href="../../d6/d9a/namespacefl_1_1gfx_1_1detail.html#a140a21d12fca43c06d7f9674ce594012">color</a> = <a class="code hl_namespace" href="../../d5/d38/namespacefl_1_1color.html">color</a>;</div>
 <div class="line"><span class="lineno">  780</span> </div>
 <div class="line"><span class="lineno">  781</span>    fl::i32 cyfrac = (<span class="keyword">static_cast&lt;</span>fl::i32<span class="keyword">&gt;</span>(cyi) &lt;&lt; 8) - cy8;</div>
 <div class="line"><span class="lineno">  782</span>    fl::i32 d2c = dx2 + cyfrac * cyfrac;</div>
@@ -222,6 +222,7 @@ template&lt;typename PixelT, typename Coord, bool Overwrite&gt; </div>
 <div class="line"><span class="lineno">  802</span>        topd2 += topdelta; topdelta += 131072;</div>
 <div class="line"><span class="lineno">  803</span>    }</div>
 <div class="line"><span class="lineno">  804</span>}</div>
+<div class="ttc" id="anamespacefl_1_1color_html"><div class="ttname"><a href="../../d5/d38/namespacefl_1_1color.html">fl::color</a></div><div class="ttdef"><b>Definition</b> <a href="../../d0/df3/fl_2color_2rgbw_8h_source.html#l00009">rgbw.h:9</a></div></div>
 <div class="ttc" id="anamespacefl_1_1gfx_1_1detail_ab04a22e2927673d2692b4f3e354af564_html_ab04a22e2927673d2692b4f3e354af564"><div class="ttname"><a href="../../d6/d9a/namespacefl_1_1gfx_1_1detail_ab04a22e2927673d2692b4f3e354af564.html#ab04a22e2927673d2692b4f3e354af564">fl::gfx::detail::toFixed8</a></div><div class="ttdeci">fl::i32 toFixed8(Coord val)</div><div class="ttdoc">Convert any Coord type to 8.8 fixed-point (fl::i32).</div><div class="ttdef"><b>Definition</b> <a href="../../de/d34/primitives_8h_source.html#l00180">primitives.h:180</a></div></div>
 <div class="ttc" id="anamespacefl_1_1gfx_1_1detail_abd0fb21c2ae83be519a7c70ebaa442fe_html_abd0fb21c2ae83be519a7c70ebaa442fe"><div class="ttname"><a href="../../d6/d9a/namespacefl_1_1gfx_1_1detail_abd0fb21c2ae83be519a7c70ebaa442fe.html#abd0fb21c2ae83be519a7c70ebaa442fe">fl::gfx::detail::renderRingRow</a></div><div class="ttdeci">void renderRingRow(PixelT *buf, int w, int py, fl::i32 d2_row, const RingCtx&lt; PixelT &gt; &amp;g)</div><div class="ttdoc">Render one scanline of a ring using incremental d² with phase-based scanning.</div><div class="ttdef"><b>Definition</b> <a href="../../de/d34/primitives_8h_source.html#l00317">primitives.h:317</a></div></div>
 <div class="ttc" id="anamespacefl_1_1gfx_1_1detail_ace632a8bd8b1b176f9f882b536fc486c_html_ace632a8bd8b1b176f9f882b536fc486c"><div class="ttname"><a href="../../d6/d9a/namespacefl_1_1gfx_1_1detail_ace632a8bd8b1b176f9f882b536fc486c.html#ace632a8bd8b1b176f9f882b536fc486c">fl::gfx::detail::computeBandShift</a></div><div class="ttdeci">void computeBandShift(fl::i32 band, fl::u8 &amp;shift_out, fl::u16 &amp;inv_out)</div><div class="ttdoc">Precompute right-shift and reciprocal multiplier for AA division.</div><div class="ttdef"><b>Definition</b> <a href="../../de/d34/primitives_8h_source.html#l00209">primitives.h:209</a></div></div>
@@ -271,7 +272,7 @@ template&lt;typename PixelT, typename Coord, bool Overwrite&gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d0/d8b/namespacefl_1_1gfx.html">gfx</a></li><li class="navelem"><a class="el" href="../../d6/d9a/namespacefl_1_1gfx_1_1detail.html">detail</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:10 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:12 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

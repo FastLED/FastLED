@@ -1,0 +1,9 @@
+<map id="CFastLED::setHdFieldFloor" name="CFastLED::setHdFieldFloor">
+<area shape="rect" id="Node000001" title="Lowest 5&#45;bit current field the colour&#45;managed APA102&#45;HD path may use (B1&#39;s flicker floor,..." alt="" coords="5,5,197,31"/>
+<area shape="rect" id="Node000002" href="$df/d9e/namespacefl_1_1detail_a131805acd6fa1a23ac4211513c94eb02.html#a131805acd6fa1a23ac4211513c94eb02" title="Backing store for CFastLED::setHdFieldFloor()." alt="" coords="245,5,408,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="198,15,232,15,232,21,198,21"/>
+<area shape="rect" id="Node000003" href="$d9/d5b/classfl_1_1_singleton_ad5cb1b704e17768f75802673abb0ff75.html#ad5cb1b704e17768f75802673abb0ff75" title=" " alt="" coords="456,5,619,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="408,15,442,15,442,21,408,21"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a1e67c0c24ebcd98fcf8554753d1639a6.html#a1e67c0c24ebcd98fcf8554753d1639a6" title=" " alt="" coords="667,5,805,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="619,15,653,15,653,21,619,21"/>
+</map>

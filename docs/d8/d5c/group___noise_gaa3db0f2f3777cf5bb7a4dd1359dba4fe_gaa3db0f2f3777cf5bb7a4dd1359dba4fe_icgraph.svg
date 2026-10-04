@@ -58,7 +58,7 @@ var sectionId = 'dynsection-1';
 <!-- Node1 -->
 <g id="Node000001" class="node">
 <title>Node1</title>
-<g id="a_Node000001"><a xlink:title=" ">
+<g id="a_Node000001"><a xlink:title="8&#45;bit, fixed point implementation of Perlin&#39;s noise without scaling.">
 <polygon fill="#999999" stroke="#666666" points="498,-206 423,-206 423,-187 498,-187 498,-206"/>
 <text text-anchor="middle" x="460.5" y="-194" font-family="Helvetica,sans-Serif" font-size="10.00">inoise8_raw</text>
 </a>
@@ -85,7 +85,7 @@ var sectionId = 'dynsection-1';
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d8/df9/group___noise_generation_ga241eb59109b1d0a39daca3466d216721.html#ga241eb59109b1d0a39daca3466d216721" target="_top" xlink:title=" ">
+<g id="a_Node000003"><a xlink:href="../../d8/df9/group___noise_generation_ga241eb59109b1d0a39daca3466d216721.html#ga241eb59109b1d0a39daca3466d216721" target="_top" xlink:title="8&#45;Bit, fixed point implementation of Perlin&#39;s noise.">
 <polygon fill="white" stroke="#666666" points="387,-206 335,-206 335,-187 387,-187 387,-206"/>
 <text text-anchor="middle" x="361" y="-194" font-family="Helvetica,sans-Serif" font-size="10.00">inoise8</text>
 </a>
@@ -103,7 +103,7 @@ var sectionId = 'dynsection-1';
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../d8/df9/group___noise_generation_gaeb72246ebd597b60a7e575173accf2fd.html#gaeb72246ebd597b60a7e575173accf2fd" target="_top" xlink:title=" ">
+<g id="a_Node000004"><a xlink:href="../../d8/df9/group___noise_generation_gaeb72246ebd597b60a7e575173accf2fd.html#gaeb72246ebd597b60a7e575173accf2fd" target="_top" xlink:title="8&#45;Bit, fixed point implementation of Perlin&#39;s noise.">
 <polygon fill="white" stroke="#666666" points="387,-169 335,-169 335,-150 387,-150 387,-169"/>
 <text text-anchor="middle" x="361" y="-157" font-family="Helvetica,sans-Serif" font-size="10.00">inoise8</text>
 </a>

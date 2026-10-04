@@ -1,0 +1,7 @@
+<map id="MY9221Controller::sendLed" name="MY9221Controller::sendLed">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,205,31"/>
+<area shape="rect" id="Node000002" href="$d0/dc7/class_m_y9221_controller_a39a6608af055ad443a44b7b4d16d41ab.html#a39a6608af055ad443a44b7b4d16d41ab" title="Shift out one 16&#45;bit word MSB&#45;first, one clock edge per bit." alt="" coords="253,5,464,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="205,15,240,15,240,21,205,21"/>
+<area shape="rect" id="Node000003" href="$d0/dc7/class_m_y9221_controller_a5c19ad1f61a2b2f93ed3af36e3d3126c.html#a5c19ad1f61a2b2f93ed3af36e3d3126c" title=" " alt="" coords="512,5,709,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="464,15,498,15,498,21,464,21"/>
+</map>

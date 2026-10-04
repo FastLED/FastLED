@@ -1,24 +1,25 @@
 <map id="fl::pwm_state::releaseChannel" name="fl::pwm_state::releaseChannel">
-<area shape="rect" id="Node000001" title=" " alt="" coords="680,236,899,261"/>
-<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_aa7a47cf722a2586453e75f6e70284dad.html#aa7a47cf722a2586453e75f6e70284dad" title="Set pin mode (input, output, pull&#45;up, pull&#45;down)" alt="" coords="537,141,632,167"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="747,233,612,169,615,164,750,228"/>
-<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_a77306b4a5327eb19e8d003b550b1a0a5.html#a77306b4a5327eb19e8d003b550b1a0a5" title="Set PWM frequency for a pin." alt="" coords="305,259,462,284"/>
-<area shape="poly" id="edge12_Node000001_Node000007" title=" " alt="" coords="667,258,463,270,462,264,666,253"/>
-<area shape="rect" id="Node000011" href="$d4/d36/namespacefl_a799e0254efc7ac0e21305c2c38685f0b.html#a799e0254efc7ac0e21305c2c38685f0b" title="Release PWM channel and stop output on a pin." alt="" coords="537,287,632,312"/>
-<area shape="poly" id="edge11_Node000001_Node000011" title=" " alt="" coords="724,267,633,290,631,285,723,262"/>
-<area shape="rect" id="Node000003" href="$d0/da2/classfl_1_1third__party_1_1ez_w_s2812gpio_abad8db01ff1ef8c38c5f8fee610254da.html#abad8db01ff1ef8c38c5f8fee610254da" title="Initialize GPIO pin." alt="" coords="277,55,489,95"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="541,138,488,116,440,98,442,93,490,112,543,133"/>
-<area shape="rect" id="Node000004" href="$d9/d1f/el__panel_8cpp_a3d505a2f5ac043b8dc404b92ebb049ef.html#a3d505a2f5ac043b8dc404b92ebb049ef" title=" " alt="" coords="128,189,213,215"/>
-<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="524,151,409,147,343,151,278,161,234,174,197,192,194,187,232,169,277,155,342,146,409,142,524,145"/>
-<area shape="rect" id="Node000006" href="$d3/d25/classfl_1_1_digital_pin_impl_a52b7c62cb136adbb22283fc1345d6918.html#a52b7c62cb136adbb22283fc1345d6918" title=" " alt="" coords="318,194,449,234"/>
-<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="529,173,450,197,448,192,528,168"/>
-<area shape="poly" id="edge7_Node000002_Node000007" title=" " alt="" coords="567,179,534,215,491,248,460,261,458,256,488,244,531,211,564,176"/>
-<area shape="rect" id="Node000008" href="$d8/d07/namespacefl_1_1validation_a46b68a701e41e321618f87bdb6d80cc2.html#a46b68a701e41e321618f87bdb6d80cc2" title="Test RX channel with manual GPIO toggle pattern." alt="" coords="280,5,487,31"/>
-<area shape="poly" id="edge9_Node000002_Node000008" title=" " alt="" coords="567,131,534,87,513,64,488,46,461,33,463,28,491,41,516,60,538,83,571,128"/>
-<area shape="rect" id="Node000005" href="$d7/d8f/_el_panel_reactive_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="5,189,64,215"/>
-<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="114,205,64,205,64,199,114,199"/>
-<area shape="poly" id="edge6_Node000006_Node000006" title=" " alt="" coords="417,182,405,175,383,173,364,175,353,179,349,185,351,193,346,194,343,184,349,175,363,169,383,167,407,170,420,178"/>
-<area shape="poly" id="edge8_Node000007_Node000004" title=" " alt="" coords="309,258,276,249,198,217,200,212,278,243,310,253"/>
-<area shape="rect" id="Node000009" href="$d7/d5f/_auto_research_helpers_8cpp_aec5c2c23f8a1e895555f21f61b66b74e.html#aec5c2c23f8a1e895555f21f61b66b74e" title="Test RX channel with manual GPIO toggle." alt="" coords="112,5,229,31"/>
-<area shape="poly" id="edge10_Node000008_Node000009" title=" " alt="" coords="266,21,230,21,230,15,266,15"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="737,107,956,132"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_aa7a47cf722a2586453e75f6e70284dad.html#aa7a47cf722a2586453e75f6e70284dad" title="Set pin mode (input, output, pull&#45;up, pull&#45;down)" alt="" coords="595,107,689,132"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="724,122,690,122,690,117,724,117"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_a77306b4a5327eb19e8d003b550b1a0a5.html#a77306b4a5327eb19e8d003b550b1a0a5" title="Set PWM frequency for a pin." alt="" coords="362,5,519,31"/>
+<area shape="poly" id="edge13_Node000001_Node000008" title=" " alt="" coords="781,106,492,33,493,28,782,101"/>
+<area shape="rect" id="Node000010" href="$d4/d36/namespacefl_a799e0254efc7ac0e21305c2c38685f0b.html#a799e0254efc7ac0e21305c2c38685f0b" title="Release PWM channel and stop output on a pin." alt="" coords="595,156,689,181"/>
+<area shape="poly" id="edge12_Node000001_Node000010" title=" " alt="" coords="781,138,690,160,689,155,780,133"/>
+<area shape="rect" id="Node000003" href="$d0/da2/classfl_1_1third__party_1_1ez_w_s2812gpio_abad8db01ff1ef8c38c5f8fee610254da.html#abad8db01ff1ef8c38c5f8fee610254da" title="Initialize GPIO pin." alt="" coords="335,245,547,285"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="602,141,597,146,581,169,574,191,567,213,548,235,530,247,527,242,545,231,562,210,569,189,576,167,593,143,599,137"/>
+<area shape="rect" id="Node000004" href="$d0/d5a/classfl_1_1_analog_r_g_b_controller_a0e13c10b28fb7afdff1baa3c11a3859b.html#a0e13c10b28fb7afdff1baa3c11a3859b" title="Initialize the LED controller." alt="" coords="112,78,287,118"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="581,119,287,105,287,100,581,114"/>
+<area shape="rect" id="Node000005" href="$d9/d1f/el__panel_8cpp_a3d505a2f5ac043b8dc404b92ebb049ef.html#a3d505a2f5ac043b8dc404b92ebb049ef" title=" " alt="" coords="157,17,242,43"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="590,105,546,93,378,59,242,38,242,33,379,54,547,87,592,100"/>
+<area shape="rect" id="Node000007" href="$d3/d25/classfl_1_1_digital_pin_impl_a52b7c62cb136adbb22283fc1345d6918.html#a52b7c62cb136adbb22283fc1345d6918" title=" " alt="" coords="375,181,506,221"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="598,140,492,183,490,178,596,135"/>
+<area shape="poly" id="edge8_Node000002_Node000008" title=" " alt="" coords="615,100,583,75,545,52,495,33,497,28,548,48,586,71,618,96"/>
+<area shape="rect" id="Node000009" href="$d8/d07/namespacefl_1_1validation_a46b68a701e41e321618f87bdb6d80cc2.html#a46b68a701e41e321618f87bdb6d80cc2" title="Test RX channel with manual GPIO toggle pattern." alt="" coords="337,309,544,335"/>
+<area shape="poly" id="edge11_Node000002_Node000009" title=" " alt="" coords="601,142,597,146,584,166,578,185,576,223,572,261,564,280,548,299,530,311,527,307,545,295,559,277,567,260,571,223,573,184,579,164,593,143,597,138"/>
+<area shape="rect" id="Node000006" href="$d7/d8f/_el_panel_reactive_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="5,17,64,43"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="143,33,64,33,64,27,143,27"/>
+<area shape="poly" id="edge7_Node000007_Node000007" title=" " alt="" coords="474,169,462,162,441,159,422,161,410,166,406,172,408,180,403,181,401,171,407,162,420,156,441,154,464,157,477,164"/>
+<area shape="poly" id="edge9_Node000008_Node000004" title=" " alt="" coords="389,38,261,80,260,75,388,33"/>
+<area shape="poly" id="edge10_Node000008_Node000005" title=" " alt="" coords="348,25,242,31,242,25,348,20"/>
 </map>

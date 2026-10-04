@@ -1,0 +1,20 @@
+<map id="fl::ColorManagedPixelSource::loadAndScaleRGB16" name="fl::ColorManagedPixelSource::loadAndScaleRGB16">
+<area shape="rect" id="Node000001" title="The same pixel, quantized once to 16 bits instead of to 8 (P8, #4042)." alt="" coords="5,77,212,117"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_afb324195d9648e36d4074cd25ecccc92.html#afb324195d9648e36d4074cd25ecccc92" title="One pixel: an RGB8 code triple to three physical emitter drives in s16.16." alt="" coords="291,55,436,80"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="212,82,277,75,277,80,212,87"/>
+<area shape="rect" id="Node000010" href="$db/da5/classfl_1_1_color_managed_pixel_source_a9294985182535f26753e2fb9658af7de.html#a9294985182535f26753e2fb9658af7de" title="quantize onto the 16&#45;bit wire." alt="" coords="260,105,467,145"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="212,105,247,109,246,114,212,111"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a7c62484da7de035da5b8a23dcb1f127f.html#a7c62484da7de035da5b8a23dcb1f127f" title="Scale every drive by one scalar, in place." alt="" coords="536,31,679,56"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="436,58,522,49,523,54,437,63"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a84551faf2eec485523c64ea69ec0c782.html#a84551faf2eec485523c64ea69ec0c782" title="Pre&#45;response linear emitter light for a power prepass." alt="" coords="515,80,700,105"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="437,72,501,79,501,84,436,78"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_aad6443800e7b03380f9a2283f02c1279.html#aad6443800e7b03380f9a2283f02c1279" title="Decode one 8&#45;bit source code to u16 linear light under transfer." alt="" coords="765,5,927,31"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="661,77,699,65,723,52,747,40,770,32,771,37,749,44,725,57,701,70,663,82"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_ab239d57d5a4481bf9688ac54d3f328b8.html#ab239d57d5a4481bf9688ac54d3f328b8" title="One pixel: u16 linear RGB &#45;&gt; s16.16 XYZ." alt="" coords="764,55,928,80"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="700,80,750,75,751,80,701,85"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_a37b9b061238b860167bb06b975520fd6.html#a37b9b061238b860167bb06b975520fd6" title="One pixel: XYZ in s16.16 to in&#45;gamut emitter drives in s16.16." alt="" coords="748,104,944,129"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="701,99,735,103,734,108,700,105"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_af5a0679639e0ad1db7feb7f9705df72f.html#af5a0679639e0ad1db7feb7f9705df72f" title="One pixel: XYZ in s16.16 to three emitter drives in s16.16." alt="" coords="992,129,1159,155"/>
+<area shape="poly" id="edge8_Node000004_Node000008" title=" " alt="" coords="637,103,688,123,749,139,807,147,867,150,978,148,978,153,867,155,807,152,747,145,686,128,635,108"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="944,125,979,129,978,134,944,130"/>
+</map>

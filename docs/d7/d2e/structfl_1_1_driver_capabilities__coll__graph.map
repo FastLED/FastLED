@@ -1,0 +1,11 @@
+<map id="fl::DriverCapabilities" name="fl::DriverCapabilities">
+<area shape="rect" id="Node000001" title=" " alt="" coords="401,89,556,115"/>
+<area shape="rect" id="Node000002" href="$d0/ddb/classfl_1_1string__view.html" title=" " alt="" coords="54,5,167,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="181,18,276,27,328,36,378,49,422,67,458,87,456,91,420,72,376,54,326,41,275,32,181,23"/>
+<area shape="rect" id="Node000003" href="$d6/d12/structfl_1_1_freq_range.html" title=" " alt="" coords="57,63,164,88"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="178,77,401,94,401,99,178,83"/>
+<area shape="rect" id="Node000004" href="$d2/de7/structfl_1_1_clockless_timing_capability.html" title=" " alt="" coords="5,112,216,137"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="230,126,303,124,377,119,423,112,424,117,378,125,303,130,230,131"/>
+<area shape="rect" id="Node000005" href="$d7/dc8/structfl_1_1_driver_capabilities.html#d8/dc6/structfl_1_1_driver_capabilities_1_1_flags" title="Peripheral&#45;flavor flags. Default zero = neutral / no claim." alt="" coords="33,162,188,202"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="201,175,287,165,377,146,418,130,454,112,456,117,420,135,378,151,288,170,202,180"/>
+</map>

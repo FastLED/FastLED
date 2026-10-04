@@ -40,7 +40,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../d8/df9/group___noise_generation_gaa452e57f154ab8d6d692375dba1ef5cb.html#gaa452e57f154ab8d6d692375dba1ef5cb" target="_top" xlink:title=" ">
+<g id="a_Node000002"><a xlink:href="../../d8/df9/group___noise_generation_gaa452e57f154ab8d6d692375dba1ef5cb.html#gaa452e57f154ab8d6d692375dba1ef5cb" target="_top" xlink:title="16&#45;bit, fixed point implementation of Perlin&#39;s noise.">
 <polygon fill="white" stroke="#666666" points="226,-19 168,-19 168,0 226,0 226,-19"/>
 <text text-anchor="middle" x="197" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">inoise16</text>
 </a>
@@ -58,7 +58,7 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d8/df9/group___noise_generation_gae021f30d62fea75ea1397e1a81b28a59.html#gae021f30d62fea75ea1397e1a81b28a59" target="_top" xlink:title=" ">
+<g id="a_Node000003"><a xlink:href="../../d8/df9/group___noise_generation_gae021f30d62fea75ea1397e1a81b28a59.html#gae021f30d62fea75ea1397e1a81b28a59" target="_top" xlink:title="16&#45;bit, fixed point implementation of Perlin&#39;s noise without scaling.">
 <polygon fill="white" stroke="#666666" points="343,-19 262,-19 262,0 343,0 343,-19"/>
 <text text-anchor="middle" x="302.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">inoise16_raw</text>
 </a>

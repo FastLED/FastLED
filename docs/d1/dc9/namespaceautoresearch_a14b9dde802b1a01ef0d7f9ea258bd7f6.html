@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -148,35 +148,27 @@ $(function(){initNavTree('d1/dc9/namespaceautoresearch_a14b9dde802b1a01ef0d7f9ea
 <li>No additional synchronization needed </li>
 </ul>
 
-<p class="definition">Definition at line <a class="el" href="../../d2/df4/_auto_research_async_8h_source.html#l00034">34</a> of file <a class="el" href="../../d2/df4/_auto_research_async_8h_source.html">AutoResearchAsync.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   34</span>                                                                                                       {</div>
-<div class="line"><span class="lineno">   35</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="../../db/d5c/namespacefl_1_1task_a0f002cad452f6b7f8dff6ba2b8f0f8b8.html#a0f002cad452f6b7f8dff6ba2b8f0f8b8">fl::task::every_ms</a>(interval_ms, <a class="code hl_define" href="../../d1/d1b/trace_8h_a8f0cce5e62eddca8e714394e36b14ac1.html#a8f0cce5e62eddca8e714394e36b14ac1">FL_TRACE</a>)</div>
-<div class="line"><span class="lineno">   36</span>        .<a class="code hl_function" href="../../de/daf/classfl_1_1task_1_1_handle_a01b05372acab06bd2197d033aafe8cb9.html#a01b05372acab06bd2197d033aafe8cb9">then</a>([&amp;remote_control]() {</div>
-<div class="line"><span class="lineno">   37</span>            uint32_t current_time = millis();</div>
-<div class="line"><span class="lineno">   38</span>            remote_control.<a class="code hl_function" href="../../db/d63/class_auto_research_remote_control_a5dc876faece5043348a46a5836c335c6.html#a5dc876faece5043348a46a5836c335c6">tick</a>(current_time);  <span class="comment">// Calls Remote::update() which does pull + tick + push</span></div>
-<div class="line"><span class="lineno">   39</span>        });</div>
-<div class="line"><span class="lineno">   40</span>}</div>
-<div class="ttc" id="aclass_auto_research_remote_control_a5dc876faece5043348a46a5836c335c6_html_a5dc876faece5043348a46a5836c335c6"><div class="ttname"><a href="../../db/d63/class_auto_research_remote_control_a5dc876faece5043348a46a5836c335c6.html#a5dc876faece5043348a46a5836c335c6">AutoResearchRemoteControl::tick</a></div><div class="ttdeci">void tick(uint32_t current_millis)</div><div class="ttdoc">Process RPC system (pull + tick + push)</div><div class="ttdef"><b>Definition</b> <a href="../../db/dfb/_auto_research_remote_8cpp_source.html#l03614">AutoResearchRemote.cpp:3614</a></div></div>
-<div class="ttc" id="aclassfl_1_1task_1_1_handle_a01b05372acab06bd2197d033aafe8cb9_html_a01b05372acab06bd2197d033aafe8cb9"><div class="ttname"><a href="../../de/daf/classfl_1_1task_1_1_handle_a01b05372acab06bd2197d033aafe8cb9.html#a01b05372acab06bd2197d033aafe8cb9">fl::task::Handle::then</a></div><div class="ttdeci">Handle &amp; then(function&lt; void()&gt; on_then) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db6/task_8cpp_8hpp_source.html#l00276">task.cpp.hpp:276</a></div></div>
-<div class="ttc" id="anamespacefl_1_1task_a0f002cad452f6b7f8dff6ba2b8f0f8b8_html_a0f002cad452f6b7f8dff6ba2b8f0f8b8"><div class="ttname"><a href="../../db/d5c/namespacefl_1_1task_a0f002cad452f6b7f8dff6ba2b8f0f8b8.html#a0f002cad452f6b7f8dff6ba2b8f0f8b8">fl::task::every_ms</a></div><div class="ttdeci">Handle every_ms(int interval_ms)</div><div class="ttdef"><b>Definition</b> <a href="../../df/db6/task_8cpp_8hpp_source.html#l00320">task.cpp.hpp:320</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d2/df4/_auto_research_async_8h_source.html#l00043">43</a> of file <a class="el" href="../../d2/df4/_auto_research_async_8h_source.html">AutoResearchAsync.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   43</span>                                                                                                       {</div>
+<div class="line"><span class="lineno">   44</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="../../db/d5c/namespacefl_1_1task_ad990b0044cf3097520e9afa9aa6b27f5.html#ad990b0044cf3097520e9afa9aa6b27f5">fl::task::every_ms</a>(interval_ms, <a class="code hl_define" href="../../d1/d1b/trace_8h_a8f0cce5e62eddca8e714394e36b14ac1.html#a8f0cce5e62eddca8e714394e36b14ac1">FL_TRACE</a>)</div>
+<div class="line"><span class="lineno">   45</span>        .<a class="code hl_function" href="../../de/daf/classfl_1_1task_1_1_handle_a0d96031ff5c53ece780698c5f39d9d2b.html#a0d96031ff5c53ece780698c5f39d9d2b">then</a>([&amp;remote_control]() {</div>
+<div class="line"><span class="lineno">   46</span>            <a class="code hl_typedef" href="../../df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a> current_time = millis();</div>
+<div class="line"><span class="lineno">   47</span>            remote_control.<a class="code hl_function" href="../../db/d63/class_auto_research_remote_control_a5dc876faece5043348a46a5836c335c6.html#a5dc876faece5043348a46a5836c335c6">tick</a>(current_time);  <span class="comment">// Calls Remote::update() which does pull + tick + push</span></div>
+<div class="line"><span class="lineno">   48</span>        });</div>
+<div class="line"><span class="lineno">   49</span>}</div>
+<div class="ttc" id="aclass_auto_research_remote_control_a5dc876faece5043348a46a5836c335c6_html_a5dc876faece5043348a46a5836c335c6"><div class="ttname"><a href="../../db/d63/class_auto_research_remote_control_a5dc876faece5043348a46a5836c335c6.html#a5dc876faece5043348a46a5836c335c6">AutoResearchRemoteControl::tick</a></div><div class="ttdeci">void tick(uint32_t current_millis)</div><div class="ttdoc">Process RPC system (pull + tick + push)</div></div>
+<div class="ttc" id="aclassfl_1_1task_1_1_handle_a0d96031ff5c53ece780698c5f39d9d2b_html_a0d96031ff5c53ece780698c5f39d9d2b"><div class="ttname"><a href="../../de/daf/classfl_1_1task_1_1_handle_a0d96031ff5c53ece780698c5f39d9d2b.html#a0d96031ff5c53ece780698c5f39d9d2b">fl::task::Handle::then</a></div><div class="ttdeci">Handle &amp; then(function&lt; void()&gt; on_then) FL_NO_EXCEPT</div><div class="ttdoc">Sets the callback invoked when the task runs successfully.</div><div class="ttdef"><b>Definition</b> <a href="../../df/db6/task_8cpp_8hpp_source.html#l00276">task.cpp.hpp:276</a></div></div>
+<div class="ttc" id="anamespacefl_1_1task_ad990b0044cf3097520e9afa9aa6b27f5_html_ad990b0044cf3097520e9afa9aa6b27f5"><div class="ttname"><a href="../../db/d5c/namespacefl_1_1task_ad990b0044cf3097520e9afa9aa6b27f5.html#ad990b0044cf3097520e9afa9aa6b27f5">fl::task::every_ms</a></div><div class="ttdeci">Handle every_ms(int interval_ms)</div><div class="ttdoc">Creates a task that runs at a fixed millisecond interval.</div><div class="ttdef"><b>Definition</b> <a href="../../df/db6/task_8cpp_8hpp_source.html#l00320">task.cpp.hpp:320</a></div></div>
+<div class="ttc" id="astdint_8h_ae8a835bf6e050b01cc449644a343aa73_html_ae8a835bf6e050b01cc449644a343aa73"><div class="ttname"><a href="../../df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a></div><div class="ttdeci">fl::u32 uint32_t</div><div class="ttdef"><b>Definition</b> <a href="../../df/dd8/stdint_8h_source.html#l00218">stdint.h:218</a></div></div>
 <div class="ttc" id="atrace_8h_a8f0cce5e62eddca8e714394e36b14ac1_html_a8f0cce5e62eddca8e714394e36b14ac1"><div class="ttname"><a href="../../d1/d1b/trace_8h_a8f0cce5e62eddca8e714394e36b14ac1.html#a8f0cce5e62eddca8e714394e36b14ac1">FL_TRACE</a></div><div class="ttdeci">#define FL_TRACE</div><div class="ttdoc">A macro to capture the current source file, line number, and time.</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d1b/trace_8h_source.html#l00102">trace.h:102</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../df/db6/task_8cpp_8hpp_source.html#l00320">fl::task::every_ms()</a>, <a class="el" href="../../d1/d1b/trace_8h_source.html#l00102">FL_TRACE</a>, <a class="el" href="../../df/db6/task_8cpp_8hpp_source.html#l00276">fl::task::Handle::then()</a>, and <a class="el" href="../../db/dfb/_auto_research_remote_8cpp_source.html#l03614">AutoResearchRemoteControl::tick()</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../dd/dc8/_auto_research_8ino_source.html#l00375">setup()</a>.</p>
+<p class="reference">References <a class="el" href="../../df/db6/task_8cpp_8hpp_source.html#l00320">fl::task::every_ms()</a>, <a class="el" href="../../d1/d1b/trace_8h_source.html#l00102">FL_TRACE</a>, <a class="el" href="../../df/db6/task_8cpp_8hpp_source.html#l00276">fl::task::Handle::then()</a>, and <a class="el" href="../../db/d63/class_auto_research_remote_control_a5dc876faece5043348a46a5836c335c6.html#a5dc876faece5043348a46a5836c335c6">AutoResearchRemoteControl::tick()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d1/dc9/namespaceautoresearch_a14b9dde802b1a01ef0d7f9ea258bd7f6_a14b9dde802b1a01ef0d7f9ea258bd7f6_cgraph.svg" width="100%" height="573"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
-</div>
-<div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
-  <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
-<div id="dynsection-1-summary" class="dynsummary" style="display:block;">
-</div>
-<div id="dynsection-1-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d1/dc9/namespaceautoresearch_a14b9dde802b1a01ef0d7f9ea258bd7f6_a14b9dde802b1a01ef0d7f9ea258bd7f6_icgraph.svg" width="360" height="36"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d1/dc9/namespaceautoresearch_a14b9dde802b1a01ef0d7f9ea258bd7f6_a14b9dde802b1a01ef0d7f9ea258bd7f6_cgraph.svg" width="100%" height="536"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 
 </div>
@@ -188,7 +180,7 @@ $(function(){initNavTree('d1/dc9/namespaceautoresearch_a14b9dde802b1a01ef0d7f9ea
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d1/dc9/namespaceautoresearch.html">autoresearch</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:03 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

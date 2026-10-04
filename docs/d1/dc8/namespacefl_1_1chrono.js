@@ -10,5 +10,5 @@ var namespacefl_1_1chrono =
     [ "minutes", "d1/dc8/namespacefl_1_1chrono_abad9527eabcc99c0da9bd11587ba6df1.html#abad9527eabcc99c0da9bd11587ba6df1", null ],
     [ "nanoseconds", "d1/dc8/namespacefl_1_1chrono_a0d83a25e4d268f2620582dd03baf73d3.html#a0d83a25e4d268f2620582dd03baf73d3", null ],
     [ "seconds", "d1/dc8/namespacefl_1_1chrono_ab2e61b483d77d42070cf8bed12837ef4.html#ab2e61b483d77d42070cf8bed12837ef4", null ],
-    [ "duration_cast", "d1/dc8/namespacefl_1_1chrono_a30fa9fb83d77a6e6f797cddef237b651.html#a30fa9fb83d77a6e6f797cddef237b651", null ]
+    [ "duration_cast", "d1/dc8/namespacefl_1_1chrono_a802845803ed0130470dfbe3c5d552e55.html#a802845803ed0130470dfbe3c5d552e55", null ]
 ];

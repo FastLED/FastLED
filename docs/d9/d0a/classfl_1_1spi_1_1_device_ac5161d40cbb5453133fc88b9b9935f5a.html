@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -127,41 +127,41 @@ $(function(){initNavTree('d9/d0a/classfl_1_1spi_1_1_device_ac5161d40cbb5453133fc
 <dd>
 Buffer lifetime managed by <a class="el" href="../../d1/d74/classfl_1_1shared__ptr.html">shared_ptr</a> </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d0/daf/device_8cpp_8hpp_source.html#l00259">259</a> of file <a class="el" href="../../d0/daf/device_8cpp_8hpp_source.html">device.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  259</span>                                           {</div>
-<div class="line"><span class="lineno">  260</span>    <span class="keywordflow">if</span> (!<a class="code hl_function" href="../../d9/d0a/classfl_1_1spi_1_1_device_a1186e792511c298ed4bbd1c12a180c8c.html#a1186e792511c298ed4bbd1c12a180c8c">isReady</a>()) {</div>
-<div class="line"><span class="lineno">  261</span>        <span class="keywordflow">return</span> DMABuffer(SPIError::NOT_INITIALIZED);</div>
-<div class="line"><span class="lineno">  262</span>    }</div>
-<div class="line"><span class="lineno">  263</span> </div>
-<div class="line"><span class="lineno">  264</span>    <span class="comment">// Get hardware controller</span></div>
-<div class="line"><span class="lineno">  265</span>    <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../d9/d0a/classfl_1_1spi_1_1_device_a9a9c763d0d303ebbd0915003d7b89427.html#a9a9c763d0d303ebbd0915003d7b89427">pImpl</a>-&gt;hw_backend) {</div>
-<div class="line"><span class="lineno">  266</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;SPI Device: No hardware controller available&quot;</span>);</div>
-<div class="line"><span class="lineno">  267</span>        <span class="keywordflow">return</span> DMABuffer(SPIError::NOT_INITIALIZED);</div>
-<div class="line"><span class="lineno">  268</span>    }</div>
-<div class="line"><span class="lineno">  269</span> </div>
-<div class="line"><span class="lineno">  270</span>    <span class="comment">// Use polymorphic interface (works for SpiHw1/2/4/8)</span></div>
-<div class="line"><span class="lineno">  271</span>    SpiHwBase* hw = <a class="code hl_variable" href="../../d9/d0a/classfl_1_1spi_1_1_device_a9a9c763d0d303ebbd0915003d7b89427.html#a9a9c763d0d303ebbd0915003d7b89427">pImpl</a>-&gt;hw_backend.get();</div>
-<div class="line"><span class="lineno">  272</span> </div>
-<div class="line"><span class="lineno">  273</span>    <span class="comment">// Always acquire a fresh buffer from hardware</span></div>
-<div class="line"><span class="lineno">  274</span>    <span class="comment">// Note: The hardware controller may internally cache/reuse buffers</span></div>
-<div class="line"><span class="lineno">  275</span>    DMABuffer buffer = hw-&gt;acquireDMABuffer(size);</div>
-<div class="line"><span class="lineno">  276</span> </div>
-<div class="line"><span class="lineno">  277</span>    <span class="keywordflow">if</span> (!buffer.ok()) {</div>
-<div class="line"><span class="lineno">  278</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;SPI Device: Failed to acquire DMA buffer from hardware&quot;</span>);</div>
-<div class="line"><span class="lineno">  279</span>    } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  280</span>        <a class="code hl_define" href="../../d8/d1c/group__log__hw__interfaces_ga178692e92d575c24c831f587f2165911.html#ga178692e92d575c24c831f587f2165911">FL_LOG_SPI</a>(<span class="stringliteral">&quot;SPI Device: Acquired DMA buffer (&quot;</span> &lt;&lt; size &lt;&lt; <span class="stringliteral">&quot; bytes)&quot;</span>);</div>
-<div class="line"><span class="lineno">  281</span>    }</div>
-<div class="line"><span class="lineno">  282</span> </div>
-<div class="line"><span class="lineno">  283</span>    <span class="keywordflow">return</span> buffer;</div>
-<div class="line"><span class="lineno">  284</span>}</div>
-<div class="ttc" id="aclassfl_1_1spi_1_1_device_a1186e792511c298ed4bbd1c12a180c8c_html_a1186e792511c298ed4bbd1c12a180c8c"><div class="ttname"><a href="../../d9/d0a/classfl_1_1spi_1_1_device_a1186e792511c298ed4bbd1c12a180c8c.html#a1186e792511c298ed4bbd1c12a180c8c">fl::spi::Device::isReady</a></div><div class="ttdeci">bool isReady() const</div><div class="ttdoc">Check if device is initialized and ready for use.</div><div class="ttdef"><b>Definition</b> <a href="../../d0/daf/device_8cpp_8hpp_source.html#l00152">device.cpp.hpp:152</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d0/daf/device_8cpp_8hpp_source.html#l00257">257</a> of file <a class="el" href="../../d0/daf/device_8cpp_8hpp_source.html">device.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  257</span>                                           {</div>
+<div class="line"><span class="lineno">  258</span>    <span class="keywordflow">if</span> (!<a class="code hl_function" href="../../d9/d0a/classfl_1_1spi_1_1_device_a1186e792511c298ed4bbd1c12a180c8c.html#a1186e792511c298ed4bbd1c12a180c8c">isReady</a>()) {</div>
+<div class="line"><span class="lineno">  259</span>        <span class="keywordflow">return</span> DMABuffer(SPIError::NOT_INITIALIZED);</div>
+<div class="line"><span class="lineno">  260</span>    }</div>
+<div class="line"><span class="lineno">  261</span> </div>
+<div class="line"><span class="lineno">  262</span>    <span class="comment">// Get hardware controller</span></div>
+<div class="line"><span class="lineno">  263</span>    <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../d9/d0a/classfl_1_1spi_1_1_device_a9a9c763d0d303ebbd0915003d7b89427.html#a9a9c763d0d303ebbd0915003d7b89427">pImpl</a>-&gt;hw_backend) {</div>
+<div class="line"><span class="lineno">  264</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;SPI Device: No hardware controller available&quot;</span>);</div>
+<div class="line"><span class="lineno">  265</span>        <span class="keywordflow">return</span> DMABuffer(SPIError::NOT_INITIALIZED);</div>
+<div class="line"><span class="lineno">  266</span>    }</div>
+<div class="line"><span class="lineno">  267</span> </div>
+<div class="line"><span class="lineno">  268</span>    <span class="comment">// Use polymorphic interface (works for SpiHw1/2/4/8)</span></div>
+<div class="line"><span class="lineno">  269</span>    SpiHwBase* hw = <a class="code hl_variable" href="../../d9/d0a/classfl_1_1spi_1_1_device_a9a9c763d0d303ebbd0915003d7b89427.html#a9a9c763d0d303ebbd0915003d7b89427">pImpl</a>-&gt;hw_backend.get();</div>
+<div class="line"><span class="lineno">  270</span> </div>
+<div class="line"><span class="lineno">  271</span>    <span class="comment">// Always acquire a fresh buffer from hardware</span></div>
+<div class="line"><span class="lineno">  272</span>    <span class="comment">// Note: The hardware controller may internally cache/reuse buffers</span></div>
+<div class="line"><span class="lineno">  273</span>    DMABuffer buffer = hw-&gt;acquireDMABuffer(size);</div>
+<div class="line"><span class="lineno">  274</span> </div>
+<div class="line"><span class="lineno">  275</span>    <span class="keywordflow">if</span> (!buffer.ok()) {</div>
+<div class="line"><span class="lineno">  276</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;SPI Device: Failed to acquire DMA buffer from hardware&quot;</span>);</div>
+<div class="line"><span class="lineno">  277</span>    } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  278</span>        <a class="code hl_define" href="../../d8/d1c/group__log__hw__interfaces_gad110e32042dacf3d1607d9905ded4a8b.html#gad110e32042dacf3d1607d9905ded4a8b">FL_LOG_SPI</a>(<span class="stringliteral">&quot;SPI Device: Acquired DMA buffer (%s bytes)&quot;</span>, size);</div>
+<div class="line"><span class="lineno">  279</span>    }</div>
+<div class="line"><span class="lineno">  280</span> </div>
+<div class="line"><span class="lineno">  281</span>    <span class="keywordflow">return</span> buffer;</div>
+<div class="line"><span class="lineno">  282</span>}</div>
+<div class="ttc" id="aclassfl_1_1spi_1_1_device_a1186e792511c298ed4bbd1c12a180c8c_html_a1186e792511c298ed4bbd1c12a180c8c"><div class="ttname"><a href="../../d9/d0a/classfl_1_1spi_1_1_device_a1186e792511c298ed4bbd1c12a180c8c.html#a1186e792511c298ed4bbd1c12a180c8c">fl::spi::Device::isReady</a></div><div class="ttdeci">bool isReady() const</div><div class="ttdoc">Check if device is initialized and ready for use.</div><div class="ttdef"><b>Definition</b> <a href="../../d0/daf/device_8cpp_8hpp_source.html#l00150">device.cpp.hpp:150</a></div></div>
 <div class="ttc" id="aclassfl_1_1spi_1_1_device_a9a9c763d0d303ebbd0915003d7b89427_html_a9a9c763d0d303ebbd0915003d7b89427"><div class="ttname"><a href="../../d9/d0a/classfl_1_1spi_1_1_device_a9a9c763d0d303ebbd0915003d7b89427.html#a9a9c763d0d303ebbd0915003d7b89427">fl::spi::Device::pImpl</a></div><div class="ttdeci">fl::unique_ptr&lt; Impl &gt; pImpl</div><div class="ttdef"><b>Definition</b> <a href="../../db/de9/device_8h_source.html#l00134">device.h:134</a></div></div>
-<div class="ttc" id="agroup__log__hw__interfaces_ga178692e92d575c24c831f587f2165911_html_ga178692e92d575c24c831f587f2165911"><div class="ttname"><a href="../../d8/d1c/group__log__hw__interfaces_ga178692e92d575c24c831f587f2165911.html#ga178692e92d575c24c831f587f2165911">FL_LOG_SPI</a></div><div class="ttdeci">#define FL_LOG_SPI(X)</div><div class="ttdoc">Serial Peripheral Interface (SPI) logging Logs SPI configuration, initialization, and transfers.</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00474">log.h:474</a></div></div>
-<div class="ttc" id="alog_8h_a868b194fdb2234182e76042d9fde3062_html_a868b194fdb2234182e76042d9fde3062"><div class="ttname"><a href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a></div><div class="ttdeci">#define FL_WARN(X)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00276">log.h:276</a></div></div>
+<div class="ttc" id="agroup__log__hw__interfaces_gad110e32042dacf3d1607d9905ded4a8b_html_gad110e32042dacf3d1607d9905ded4a8b"><div class="ttname"><a href="../../d8/d1c/group__log__hw__interfaces_gad110e32042dacf3d1607d9905ded4a8b.html#gad110e32042dacf3d1607d9905ded4a8b">FL_LOG_SPI</a></div><div class="ttdeci">#define FL_LOG_SPI(...)</div><div class="ttdoc">Serial Peripheral Interface (SPI) logging Logs SPI configuration, initialization, and transfers.</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00657">log.h:657</a></div></div>
+<div class="ttc" id="alog_8h_a4804912fba6eed63e1afd84b8768aced_html_a4804912fba6eed63e1afd84b8768aced"><div class="ttname"><a href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a></div><div class="ttdeci">#define FL_WARN(...)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00440">log.h:440</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d7/d7f/log_8h_source.html#l00474">FL_LOG_SPI</a>, <a class="el" href="../../d7/d7f/log_8h_source.html#l00276">FL_WARN</a>, <a class="el" href="../../d0/daf/device_8cpp_8hpp_source.html#l00152">isReady()</a>, and <a class="el" href="../../db/de9/device_8h_source.html#l00134">pImpl</a>.</p>
+<p class="reference">References <a class="el" href="../../d7/d7f/log_8h_source.html#l00657">FL_LOG_SPI</a>, <a class="el" href="../../d7/d7f/log_8h_source.html#l00440">FL_WARN</a>, <a class="el" href="../../d0/daf/device_8cpp_8hpp_source.html#l00150">isReady()</a>, and <a class="el" href="../../db/de9/device_8h_source.html#l00134">pImpl</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d0/daf/device_8cpp_8hpp_source.html#l00184">writeAsync()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d0/daf/device_8cpp_8hpp_source.html#l00182">writeAsync()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -186,7 +186,7 @@ Buffer lifetime managed by <a class="el" href="../../d1/d74/classfl_1_1shared__p
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d4/d68/namespacefl_1_1spi.html">spi</a></li><li class="navelem"><a class="el" href="../../d9/d0a/classfl_1_1spi_1_1_device.html">Device</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:10 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:12 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

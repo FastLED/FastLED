@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -115,40 +115,51 @@ $(function(){initNavTree('d0/d4b/classfl_1_1_video_a2a116cafd5588cce6f34c68c59d1
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d6/d37/video_8cpp_8hpp_source.html#l00038">38</a> of file <a class="el" href="../../d6/d37/video_8cpp_8hpp_source.html">video.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   38</span>                                    {</div>
-<div class="line"><span class="lineno">   39</span>    <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../d0/d4b/classfl_1_1_video_abe11ebd3329d6d9ce07b8683fd4c845d.html#abe11ebd3329d6d9ce07b8683fd4c845d">mImpl</a>) {</div>
-<div class="line"><span class="lineno">   40</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;Video::begin: mImpl is null, manually constructed videos &quot;</span></div>
-<div class="line"><span class="lineno">   41</span>                     <span class="stringliteral">&quot;must include full parameters.&quot;</span>);</div>
-<div class="line"><span class="lineno">   42</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">   43</span>    }</div>
-<div class="line"><span class="lineno">   44</span>    <span class="keywordflow">if</span> (!handle) {</div>
-<div class="line"><span class="lineno">   45</span>        <a class="code hl_variable" href="../../d0/d4b/classfl_1_1_video_a49fb403eb2ca0919cd5532b49225e623.html#a49fb403eb2ca0919cd5532b49225e623">mError</a> = <span class="stringliteral">&quot;filebuf is null&quot;</span>;</div>
-<div class="line"><span class="lineno">   46</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a>(<a class="code hl_variable" href="../../d0/d4b/classfl_1_1_video_a49fb403eb2ca0919cd5532b49225e623.html#a49fb403eb2ca0919cd5532b49225e623">mError</a>.c_str());</div>
-<div class="line"><span class="lineno">   47</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">   48</span>    }</div>
-<div class="line"><span class="lineno">   49</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d0/d4b/classfl_1_1_video_a49fb403eb2ca0919cd5532b49225e623.html#a49fb403eb2ca0919cd5532b49225e623">mError</a>.size()) {</div>
-<div class="line"><span class="lineno">   50</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a>(<a class="code hl_variable" href="../../d0/d4b/classfl_1_1_video_a49fb403eb2ca0919cd5532b49225e623.html#a49fb403eb2ca0919cd5532b49225e623">mError</a>.c_str());</div>
-<div class="line"><span class="lineno">   51</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<p class="definition">Definition at line <a class="el" href="../../d6/d37/video_8cpp_8hpp_source.html#l00040">40</a> of file <a class="el" href="../../d6/d37/video_8cpp_8hpp_source.html">video.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   40</span>                                    {</div>
+<div class="line"><span class="lineno">   41</span>    <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../d0/d4b/classfl_1_1_video_abe11ebd3329d6d9ce07b8683fd4c845d.html#abe11ebd3329d6d9ce07b8683fd4c845d">mImpl</a>) {</div>
+<div class="line"><span class="lineno">   42</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;Video::begin: mImpl is null, manually constructed videos &quot;</span></div>
+<div class="line"><span class="lineno">   43</span>                     <span class="stringliteral">&quot;must include full parameters.&quot;</span>);</div>
+<div class="line"><span class="lineno">   44</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">   45</span>    }</div>
+<div class="line"><span class="lineno">   46</span>    <span class="comment">// Drop a previous admission failure before evaluating this attempt.</span></div>
+<div class="line"><span class="lineno">   47</span>    <span class="comment">// Rejecting one source says nothing about the next; only a persistent</span></div>
+<div class="line"><span class="lineno">   48</span>    <span class="comment">// setError() failure keeps blocking.</span></div>
+<div class="line"><span class="lineno">   49</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d0/d4b/classfl_1_1_video_aebe47b004e0de4418668a43a9c284666.html#aebe47b004e0de4418668a43a9c284666">mAdmissionError</a>) {</div>
+<div class="line"><span class="lineno">   50</span>        <a class="code hl_variable" href="../../d0/d4b/classfl_1_1_video_a49fb403eb2ca0919cd5532b49225e623.html#a49fb403eb2ca0919cd5532b49225e623">mError</a>.clear();</div>
+<div class="line"><span class="lineno">   51</span>        <a class="code hl_variable" href="../../d0/d4b/classfl_1_1_video_aebe47b004e0de4418668a43a9c284666.html#aebe47b004e0de4418668a43a9c284666">mAdmissionError</a> = <span class="keyword">false</span>;</div>
 <div class="line"><span class="lineno">   52</span>    }</div>
-<div class="line"><span class="lineno">   53</span>    <a class="code hl_variable" href="../../d0/d4b/classfl_1_1_video_a49fb403eb2ca0919cd5532b49225e623.html#a49fb403eb2ca0919cd5532b49225e623">mError</a>.clear();</div>
-<div class="line"><span class="lineno">   54</span>    <a class="code hl_variable" href="../../d0/d4b/classfl_1_1_video_abe11ebd3329d6d9ce07b8683fd4c845d.html#abe11ebd3329d6d9ce07b8683fd4c845d">mImpl</a>-&gt;begin(handle);</div>
-<div class="line"><span class="lineno">   55</span>    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><span class="lineno">   56</span>}</div>
-<div class="ttc" id="aclassfl_1_1_video_a49fb403eb2ca0919cd5532b49225e623_html_a49fb403eb2ca0919cd5532b49225e623"><div class="ttname"><a href="../../d0/d4b/classfl_1_1_video_a49fb403eb2ca0919cd5532b49225e623.html#a49fb403eb2ca0919cd5532b49225e623">fl::Video::mError</a></div><div class="ttdeci">string mError</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d78/video_8h_source.html#l00091">video.h:91</a></div></div>
-<div class="ttc" id="aclassfl_1_1_video_abe11ebd3329d6d9ce07b8683fd4c845d_html_abe11ebd3329d6d9ce07b8683fd4c845d"><div class="ttname"><a href="../../d0/d4b/classfl_1_1_video_abe11ebd3329d6d9ce07b8683fd4c845d.html#abe11ebd3329d6d9ce07b8683fd4c845d">fl::Video::mImpl</a></div><div class="ttdeci">VideoImplPtr mImpl</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d78/video_8h_source.html#l00090">video.h:90</a></div></div>
-<div class="ttc" id="alog_8h_a868b194fdb2234182e76042d9fde3062_html_a868b194fdb2234182e76042d9fde3062"><div class="ttname"><a href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a></div><div class="ttdeci">#define FL_WARN(X)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00276">log.h:276</a></div></div>
-<div class="ttc" id="alog_8h_a8ccae77aa5fe30a41f19d233cb0de2c1_html_a8ccae77aa5fe30a41f19d233cb0de2c1"><div class="ttname"><a href="../../d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a></div><div class="ttdeci">#define FL_DBG</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00388">log.h:388</a></div></div>
+<div class="line"><span class="lineno">   53</span>    <span class="keywordflow">if</span> (!handle) {</div>
+<div class="line"><span class="lineno">   54</span>        <a class="code hl_function" href="../../d0/d4b/classfl_1_1_video_a510e3f591075769fca2179731e265137.html#a510e3f591075769fca2179731e265137">setAdmissionError</a>(<span class="stringliteral">&quot;filebuf is null&quot;</span>);</div>
+<div class="line"><span class="lineno">   55</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a>(<span class="stringliteral">&quot;%s&quot;</span>, <a class="code hl_variable" href="../../d0/d4b/classfl_1_1_video_a49fb403eb2ca0919cd5532b49225e623.html#a49fb403eb2ca0919cd5532b49225e623">mError</a>.c_str());</div>
+<div class="line"><span class="lineno">   56</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">   57</span>    }</div>
+<div class="line"><span class="lineno">   58</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d0/d4b/classfl_1_1_video_a49fb403eb2ca0919cd5532b49225e623.html#a49fb403eb2ca0919cd5532b49225e623">mError</a>.size()) {</div>
+<div class="line"><span class="lineno">   59</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a>(<span class="stringliteral">&quot;%s&quot;</span>, <a class="code hl_variable" href="../../d0/d4b/classfl_1_1_video_a49fb403eb2ca0919cd5532b49225e623.html#a49fb403eb2ca0919cd5532b49225e623">mError</a>.c_str());</div>
+<div class="line"><span class="lineno">   60</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">   61</span>    }</div>
+<div class="line"><span class="lineno">   62</span>    <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../d0/d4b/classfl_1_1_video_abe11ebd3329d6d9ce07b8683fd4c845d.html#abe11ebd3329d6d9ce07b8683fd4c845d">mImpl</a>-&gt;begin(handle)) {</div>
+<div class="line"><span class="lineno">   63</span>        <a class="code hl_function" href="../../d0/d4b/classfl_1_1_video_a510e3f591075769fca2179731e265137.html#a510e3f591075769fca2179731e265137">setAdmissionError</a>(<span class="stringliteral">&quot;unsupported or malformed FLED container&quot;</span>);</div>
+<div class="line"><span class="lineno">   64</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">   65</span>    }</div>
+<div class="line"><span class="lineno">   66</span>    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">   67</span>}</div>
+<div class="ttc" id="aclassfl_1_1_video_a49fb403eb2ca0919cd5532b49225e623_html_a49fb403eb2ca0919cd5532b49225e623"><div class="ttname"><a href="../../d0/d4b/classfl_1_1_video_a49fb403eb2ca0919cd5532b49225e623.html#a49fb403eb2ca0919cd5532b49225e623">fl::Video::mError</a></div><div class="ttdeci">string mError</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d78/video_8h_source.html#l00125">video.h:125</a></div></div>
+<div class="ttc" id="aclassfl_1_1_video_a510e3f591075769fca2179731e265137_html_a510e3f591075769fca2179731e265137"><div class="ttname"><a href="../../d0/d4b/classfl_1_1_video_a510e3f591075769fca2179731e265137.html#a510e3f591075769fca2179731e265137">fl::Video::setAdmissionError</a></div><div class="ttdeci">void setAdmissionError(const string &amp;error) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d78/video_8h_source.html#l00117">video.h:117</a></div></div>
+<div class="ttc" id="aclassfl_1_1_video_abe11ebd3329d6d9ce07b8683fd4c845d_html_abe11ebd3329d6d9ce07b8683fd4c845d"><div class="ttname"><a href="../../d0/d4b/classfl_1_1_video_abe11ebd3329d6d9ce07b8683fd4c845d.html#abe11ebd3329d6d9ce07b8683fd4c845d">fl::Video::mImpl</a></div><div class="ttdeci">VideoImplPtr mImpl</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d78/video_8h_source.html#l00124">video.h:124</a></div></div>
+<div class="ttc" id="aclassfl_1_1_video_aebe47b004e0de4418668a43a9c284666_html_aebe47b004e0de4418668a43a9c284666"><div class="ttname"><a href="../../d0/d4b/classfl_1_1_video_aebe47b004e0de4418668a43a9c284666.html#aebe47b004e0de4418668a43a9c284666">fl::Video::mAdmissionError</a></div><div class="ttdeci">bool mAdmissionError</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d78/video_8h_source.html#l00123">video.h:123</a></div></div>
+<div class="ttc" id="alog_8h_a4804912fba6eed63e1afd84b8768aced_html_a4804912fba6eed63e1afd84b8768aced"><div class="ttname"><a href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a></div><div class="ttdeci">#define FL_WARN(...)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00440">log.h:440</a></div></div>
+<div class="ttc" id="alog_8h_a8ccae77aa5fe30a41f19d233cb0de2c1_html_a8ccae77aa5fe30a41f19d233cb0de2c1"><div class="ttname"><a href="../../d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a></div><div class="ttdeci">#define FL_DBG</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00564">log.h:564</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d6/d37/video_8cpp_8hpp_source.html#l00019">Video()</a>, <a class="el" href="../../d6/d37/video_8cpp_8hpp_source.html#l00038">begin()</a>, <a class="el" href="../../d7/d7f/log_8h_source.html#l00388">FL_DBG</a>, <a class="el" href="../../d7/d7f/log_8h_source.html#l00276">FL_WARN</a>, <a class="el" href="../../dd/d78/video_8h_source.html#l00091">mError</a>, and <a class="el" href="../../dd/d78/video_8h_source.html#l00090">mImpl</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/d37/video_8cpp_8hpp_source.html#l00021">Video()</a>, <a class="el" href="../../d6/d37/video_8cpp_8hpp_source.html#l00040">begin()</a>, <a class="el" href="../../d7/d7f/log_8h_source.html#l00564">FL_DBG</a>, <a class="el" href="../../d7/d7f/log_8h_source.html#l00440">FL_WARN</a>, <a class="el" href="../../dd/d78/video_8h_source.html#l00123">mAdmissionError</a>, <a class="el" href="../../dd/d78/video_8h_source.html#l00125">mError</a>, <a class="el" href="../../dd/d78/video_8h_source.html#l00124">mImpl</a>, and <a class="el" href="../../dd/d78/video_8h_source.html#l00117">setAdmissionError()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d6/d37/video_8cpp_8hpp_source.html#l00038">begin()</a>, and <a class="el" href="../../d0/d4b/classfl_1_1_video_a958384d2d775d417cec22426ff39e14f.html#a958384d2d775d417cec22426ff39e14f">operator=()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d6/d37/video_8cpp_8hpp_source.html#l00040">begin()</a>, and <a class="el" href="../../d0/d4b/classfl_1_1_video_aaa9f25d798fdfad22dc20153c7efe99a.html#aaa9f25d798fdfad22dc20153c7efe99a">operator=()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d0/d4b/classfl_1_1_video_a2a116cafd5588cce6f34c68c59d186f7_a2a116cafd5588cce6f34c68c59d186f7_cgraph.svg" width="583" height="60"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d0/d4b/classfl_1_1_video_a2a116cafd5588cce6f34c68c59d186f7_a2a116cafd5588cce6f34c68c59d186f7_cgraph.svg" width="100%" height="364"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 <div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
@@ -167,7 +178,7 @@ $(function(){initNavTree('d0/d4b/classfl_1_1_video_a2a116cafd5588cce6f34c68c59d1
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d0/d4b/classfl_1_1_video.html">Video</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:07 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:10 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

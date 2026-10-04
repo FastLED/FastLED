@@ -10,5 +10,5 @@ digraph "fl::SerializerVisitor::append_escaped"
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
   Node2 [id="Node000002",label="fl::SerializerVisitor\l::append",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/da0/structfl_1_1_serializer_visitor_aad4a938e3ccb76535a2212f38f573c4e.html#aad4a938e3ccb76535a2212f38f573c4e",tooltip=" "];
   Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::basic_string::size",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d66/classfl_1_1basic__string_af4d95d1e9905eb5fb76e12c2c2bd7ebc.html#af4d95d1e9905eb5fb76e12c2c2bd7ebc",tooltip=" "];
+  Node3 [id="Node000003",label="fl::basic_string::size",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d66/classfl_1_1basic__string_af8fe033f0ec1bd3567ffcc20ddb4e7fa.html#af8fe033f0ec1bd3567ffcc20ddb4e7fa",tooltip=" "];
 }

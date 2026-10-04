@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -130,20 +130,23 @@ This only affects power estimation and limiting, not rendered LED brightness. </
 <dd>
 Only enabled on platforms where <code>SKETCH_HAS_LARGE_MEMORY==1</code>. Smaller-memory targets keep the legacy linear behavior and ignore this setting. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d1/d2a/power__mgt_8cpp_8hpp_source.html#l00286">286</a> of file <a class="el" href="../../d1/d2a/power__mgt_8cpp_8hpp_source.html">power_mgt.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  286</span>                                                {</div>
-<div class="line"><span class="lineno">  287</span>    <a class="code hl_struct" href="../../dc/d4d/struct_power_model_r_g_b.html">PowerModelRGB</a> model = <a class="code hl_function" href="../../d1/d2a/power__mgt_8cpp_8hpp_afe71d257dc9aca526178a992761bb812.html#afe71d257dc9aca526178a992761bb812">gPowerModel</a>();</div>
-<div class="line"><span class="lineno">  288</span>    model.<a class="code hl_variable" href="../../dc/d4d/struct_power_model_r_g_b_a7a37817db3c842361c04b8a85c20f29e.html#a7a37817db3c842361c04b8a85c20f29e">exponent</a> = exponent;</div>
-<div class="line"><span class="lineno">  289</span>    <a class="code hl_function" href="../../d9/d5f/group___power_model_ga83d1cb7bfce9bd338765968bb40d54e5.html#ga83d1cb7bfce9bd338765968bb40d54e5">set_power_model</a>(model);</div>
-<div class="line"><span class="lineno">  290</span>}</div>
-<div class="ttc" id="agroup___power_model_ga83d1cb7bfce9bd338765968bb40d54e5_html_ga83d1cb7bfce9bd338765968bb40d54e5"><div class="ttname"><a href="../../d9/d5f/group___power_model_ga83d1cb7bfce9bd338765968bb40d54e5.html#ga83d1cb7bfce9bd338765968bb40d54e5">set_power_model</a></div><div class="ttdeci">void set_power_model(const PowerModelRGB &amp;model)</div><div class="ttdoc">Set custom RGB LED power consumption model.</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d2a/power__mgt_8cpp_8hpp_source.html#l00275">power_mgt.cpp.hpp:275</a></div></div>
-<div class="ttc" id="apower__mgt_8cpp_8hpp_afe71d257dc9aca526178a992761bb812_html_afe71d257dc9aca526178a992761bb812"><div class="ttname"><a href="../../d1/d2a/power__mgt_8cpp_8hpp_afe71d257dc9aca526178a992761bb812.html#afe71d257dc9aca526178a992761bb812">gPowerModel</a></div><div class="ttdeci">static PowerModelRGB &amp; gPowerModel()</div><div class="ttdoc">Global RGB power model (initialized to WS2812 @ 5V defaults, linear response)</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d2a/power__mgt_8cpp_8hpp_source.html#l00042">power_mgt.cpp.hpp:42</a></div></div>
-<div class="ttc" id="astruct_power_model_r_g_b_a7a37817db3c842361c04b8a85c20f29e_html_a7a37817db3c842361c04b8a85c20f29e"><div class="ttname"><a href="../../dc/d4d/struct_power_model_r_g_b_a7a37817db3c842361c04b8a85c20f29e.html#a7a37817db3c842361c04b8a85c20f29e">PowerModelRGB::exponent</a></div><div class="ttdeci">float exponent</div><div class="ttdoc">Brightness-to-power response exponent (1.0 = linear)</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d5b/power__mgt_8h_source.html#l00032">power_mgt.h:32</a></div></div>
-<div class="ttc" id="astruct_power_model_r_g_b_html"><div class="ttname"><a href="../../dc/d4d/struct_power_model_r_g_b.html">PowerModelRGB</a></div><div class="ttdoc">RGB LED power consumption model Used for standard 3-channel LEDs (WS2812, WS2812B,...</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d5b/power__mgt_8h_source.html#l00027">power_mgt.h:27</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d1/d2a/power__mgt_8cpp_8hpp_source.html#l00936">936</a> of file <a class="el" href="../../d1/d2a/power__mgt_8cpp_8hpp_source.html">power_mgt.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  936</span>                                                {</div>
+<div class="line"><span class="lineno">  937</span>    <a class="code hl_struct" href="../../dc/d4d/struct_power_model_r_g_b.html">PowerModelRGB</a> model = <a class="code hl_function" href="../../d1/d2a/power__mgt_8cpp_8hpp_afe71d257dc9aca526178a992761bb812.html#afe71d257dc9aca526178a992761bb812">gPowerModel</a>();</div>
+<div class="line"><span class="lineno">  938</span>    model.<a class="code hl_variable" href="../../dc/d4d/struct_power_model_r_g_b_a7a37817db3c842361c04b8a85c20f29e.html#a7a37817db3c842361c04b8a85c20f29e">exponent</a> = exponent;</div>
+<div class="line"><span class="lineno">  939</span>    <span class="comment">// Not `set_power_model`: the exponent is a property of the response</span></div>
+<div class="line"><span class="lineno">  940</span>    <span class="comment">// curve, and changing it is not a statement about how many emitters the</span></div>
+<div class="line"><span class="lineno">  941</span>    <span class="comment">// strip has.</span></div>
+<div class="line"><span class="lineno">  942</span>    <a class="code hl_function" href="../../d1/d2a/power__mgt_8cpp_8hpp_aa482db0d85e7c33ad7ce4f3b77f4808e.html#aa482db0d85e7c33ad7ce4f3b77f4808e">apply_rgb_power_model</a>(model);</div>
+<div class="line"><span class="lineno">  943</span>}</div>
+<div class="ttc" id="apower__mgt_8cpp_8hpp_aa482db0d85e7c33ad7ce4f3b77f4808e_html_aa482db0d85e7c33ad7ce4f3b77f4808e"><div class="ttname"><a href="../../d1/d2a/power__mgt_8cpp_8hpp_aa482db0d85e7c33ad7ce4f3b77f4808e.html#aa482db0d85e7c33ad7ce4f3b77f4808e">apply_rgb_power_model</a></div><div class="ttdeci">static void apply_rgb_power_model(const PowerModelRGB &amp;model)</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d2a/power__mgt_8cpp_8hpp_source.html#l00897">power_mgt.cpp.hpp:897</a></div></div>
+<div class="ttc" id="apower__mgt_8cpp_8hpp_afe71d257dc9aca526178a992761bb812_html_afe71d257dc9aca526178a992761bb812"><div class="ttname"><a href="../../d1/d2a/power__mgt_8cpp_8hpp_afe71d257dc9aca526178a992761bb812.html#afe71d257dc9aca526178a992761bb812">gPowerModel</a></div><div class="ttdeci">static PowerModelRGB &amp; gPowerModel()</div><div class="ttdoc">Global RGB power model (initialized to WS2812 @ 5V defaults, linear response)</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d2a/power__mgt_8cpp_8hpp_source.html#l00048">power_mgt.cpp.hpp:48</a></div></div>
+<div class="ttc" id="astruct_power_model_r_g_b_a7a37817db3c842361c04b8a85c20f29e_html_a7a37817db3c842361c04b8a85c20f29e"><div class="ttname"><a href="../../dc/d4d/struct_power_model_r_g_b_a7a37817db3c842361c04b8a85c20f29e.html#a7a37817db3c842361c04b8a85c20f29e">PowerModelRGB::exponent</a></div><div class="ttdeci">float exponent</div><div class="ttdoc">Brightness-to-power response exponent (1.0 = linear)</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d5b/power__mgt_8h_source.html#l00034">power_mgt.h:34</a></div></div>
+<div class="ttc" id="astruct_power_model_r_g_b_html"><div class="ttname"><a href="../../dc/d4d/struct_power_model_r_g_b.html">PowerModelRGB</a></div><div class="ttdoc">RGB LED power consumption model Used for standard 3-channel LEDs (WS2812, WS2812B,...</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d5b/power__mgt_8h_source.html#l00029">power_mgt.h:29</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../dc/d5b/power__mgt_8h_source.html#l00032">PowerModelRGB::exponent</a>, <a class="el" href="../../d1/d2a/power__mgt_8cpp_8hpp_source.html#l00042">gPowerModel()</a>, and <a class="el" href="../../d1/d2a/power__mgt_8cpp_8hpp_source.html#l00275">set_power_model()</a>.</p>
+<p class="reference">References <a class="el" href="../../d1/d2a/power__mgt_8cpp_8hpp_source.html#l00897">apply_rgb_power_model()</a>, <a class="el" href="../../dc/d5b/power__mgt_8h_source.html#l00034">PowerModelRGB::exponent</a>, and <a class="el" href="../../d1/d2a/power__mgt_8cpp_8hpp_source.html#l00048">gPowerModel()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../db/d97/_fast_l_e_d_8h_source.html#l01486">CFastLED::setPowerScalingExponent()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d6/d64/fastled_8h_source.html#l01755">CFastLED::setPowerScalingExponent()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -168,7 +171,7 @@ Only enabled on platforms where <code>SKETCH_HAS_LARGE_MEMORY==1</code>. Smaller
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d9/d5f/group___power_model.html">LED Power Consumption Models</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:02 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

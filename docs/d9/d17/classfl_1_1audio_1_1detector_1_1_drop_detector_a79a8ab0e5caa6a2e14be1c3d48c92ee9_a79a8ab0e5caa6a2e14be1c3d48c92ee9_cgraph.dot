@@ -10,13 +10,13 @@ digraph "fl::audio::detector::DropDetector::update"
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
   Node2 [id="Node000002",label="fl::audio::detector\l::DropDetector::update",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d17/classfl_1_1audio_1_1detector_1_1_drop_detector_a0c5baca6665a65b4868979c3332d066c.html#a0c5baca6665a65b4868979c3332d066c",tooltip=" "];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::audio::detector\l::DropDetector::DropDetector",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d17/classfl_1_1audio_1_1detector_1_1_drop_detector_ab8925c9ca9ad5db348cbc4ce6f887049.html#ab8925c9ca9ad5db348cbc4ce6f887049",tooltip=" "];
+  Node3 [id="Node000003",label="fl::audio::detector\l::DropDetector::DropDetector",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d17/classfl_1_1audio_1_1detector_1_1_drop_detector_a92d1e370fa861378014ac803e55281ec.html#a92d1e370fa861378014ac803e55281ec",tooltip=" "];
   Node2 -> Node4 [id="edge3_Node000002_Node000004",color="steelblue1",style="solid",tooltip=" "];
   Node4 [id="Node000004",label="fl::audio::detector\l::DropDetector::calculateBassFlux",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d17/classfl_1_1audio_1_1detector_1_1_drop_detector_a350f750ffe01ed7de94f5897c35e3c0a.html#a350f750ffe01ed7de94f5897c35e3c0a",tooltip=" "];
   Node4 -> Node5 [id="edge4_Node000004_Node000005",color="steelblue1",style="solid",tooltip=" "];
-  Node5 [id="Node000005",label="fl::max",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909",tooltip=" "];
+  Node5 [id="Node000005",label="fl::max",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a07c69292ef50aa1083046faff1c52ead.html#a07c69292ef50aa1083046faff1c52ead",tooltip=" "];
   Node4 -> Node6 [id="edge5_Node000004_Node000006",color="steelblue1",style="solid",tooltip=" "];
-  Node6 [id="Node000006",label="fl::min",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb",tooltip=" "];
+  Node6 [id="Node000006",label="fl::min",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a2fdabb91a1f100dec8da21e4306aba05.html#a2fdabb91a1f100dec8da21e4306aba05",tooltip=" "];
   Node2 -> Node7 [id="edge6_Node000002_Node000007",color="steelblue1",style="solid",tooltip=" "];
   Node7 [id="Node000007",label="fl::audio::detector\l::DropDetector::calculateDrop\lImpact",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d17/classfl_1_1audio_1_1detector_1_1_drop_detector_ab1e01f2a78eaf61b40eb59b5cf08f75b.html#ab1e01f2a78eaf61b40eb59b5cf08f75b",tooltip=" "];
   Node7 -> Node5 [id="edge7_Node000007_Node000005",color="steelblue1",style="solid",tooltip=" "];
@@ -31,7 +31,7 @@ digraph "fl::audio::detector::DropDetector::update"
   Node2 -> Node12 [id="edge14_Node000002_Node000012",color="steelblue1",style="solid",tooltip=" "];
   Node12 [id="Node000012",label="fl::audio::detector\l::DropDetector::calculateSpectral\lNovelty",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d17/classfl_1_1audio_1_1detector_1_1_drop_detector_aeaa28ff90b01cf8ac272bf861effb3aa.html#aeaa28ff90b01cf8ac272bf861effb3aa",tooltip=" "];
   Node12 -> Node13 [id="edge15_Node000012_Node000013",color="steelblue1",style="solid",tooltip=" "];
-  Node13 [id="Node000013",label="fl::abs",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_aefed87cfefc8330419d3393867945e84.html#aefed87cfefc8330419d3393867945e84",tooltip=" "];
+  Node13 [id="Node000013",label="fl::abs",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_aea39aa3747a937b0dbefabdf22cf2bbc.html#aea39aa3747a937b0dbefabdf22cf2bbc",tooltip=" "];
   Node12 -> Node6 [id="edge16_Node000012_Node000006",color="steelblue1",style="solid",tooltip=" "];
   Node2 -> Node14 [id="edge17_Node000002_Node000014",color="steelblue1",style="solid",tooltip=" "];
   Node14 [id="Node000014",label="fl::audio::detector\l::DropDetector::getBassEnergy",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d17/classfl_1_1audio_1_1detector_1_1_drop_detector_a878bfd0bf72aec64175d737184fc03ce.html#a878bfd0bf72aec64175d737184fc03ce",tooltip=" "];

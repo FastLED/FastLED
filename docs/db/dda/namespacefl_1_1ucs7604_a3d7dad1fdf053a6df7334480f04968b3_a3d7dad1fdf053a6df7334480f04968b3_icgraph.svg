@@ -54,7 +54,7 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../dc/d8d/namespacefl_1_1anonymous__namespace_02channel_8cpp_8hpp_03_ad61b123c8a67b000fe20a82438d06343.html#ad61b123c8a67b000fe20a82438d06343" target="_top" xlink:title="Encode UCS7604 pixel data into the channel data buffer.">
+<g id="a_Node000003"><a xlink:href="../../dc/d8d/namespacefl_1_1anonymous__namespace_02channel_8cpp_8hpp_03_a5f78780348edce94192b57b45f1778b4.html#a5f78780348edce94192b57b45f1778b4" target="_top" xlink:title="Encode UCS7604 pixel data into the channel data buffer.">
 <polygon fill="white" stroke="#666666" points="216,-30 27,-30 27,0 216,0 216,-30"/>
 <text text-anchor="start" x="35" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">fl::anonymous_namespace</text>
 <text text-anchor="middle" x="121.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">{channel::cpp::hpp}::writeUCS7604</text>

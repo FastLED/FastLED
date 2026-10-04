@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -129,6 +129,7 @@ $(function(){initNavTree('db/dcf/_auto_research_parlio_stream_8h.html','../../')
 <code>#include &quot;<a class="el" href="../../d0/d3f/led__timing_8h_source.html">fl/chipsets/led_timing.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d3/d7e/int_8h_source.html">fl/stl/int.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d4/d7a/span_8h_source.html">fl/stl/span.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d4/d0b/singleton_8h_source.html">fl/stl/singleton.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d6/d68/vector_8h_source.html">fl/stl/vector.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for AutoResearchParlioStream.h:</div>
@@ -137,18 +138,13 @@ $(function(){initNavTree('db/dcf/_auto_research_parlio_stream_8h.html','../../')
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
 <div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d6/dc2/_auto_research_parlio_stream_8h__incl.svg" width="100%" height="600"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
-</div><div class="textblock"><div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
-  <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> This graph shows which files directly or indirectly include this file:</div>
-<div id="dynsection-1-summary" class="dynsummary" style="display:block;">
-</div>
-<div id="dynsection-1-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d6/d5e/_auto_research_parlio_stream_8h__dep__incl.svg" width="512" height="168"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
-</div>
 </div>
 <p><a href="../../db/dcf/_auto_research_parlio_stream_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
+<tr class="memitem:df/d8a/structautoresearch_1_1parlio__stream_1_1_parlio_led_state" id="r_df/d8a/structautoresearch_1_1parlio__stream_1_1_parlio_led_state"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d6/d84/namespaceautoresearch_1_1parlio__stream.html#df/d8a/structautoresearch_1_1parlio__stream_1_1_parlio_led_state">autoresearch::parlio_stream::ParlioLedState</a></td></tr>
+<tr class="separator:df/d8a/structautoresearch_1_1parlio__stream_1_1_parlio_led_state"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:d9/dc3/structautoresearch_1_1parlio__stream_1_1_validate_result" id="r_d9/dc3/structautoresearch_1_1parlio__stream_1_1_validate_result"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d6/d84/namespaceautoresearch_1_1parlio__stream.html#d9/dc3/structautoresearch_1_1parlio__stream_1_1_validate_result">autoresearch::parlio_stream::ValidateResult</a></td></tr>
 <tr class="separator:d9/dc3/structautoresearch_1_1parlio__stream_1_1_validate_result"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -163,7 +159,9 @@ Namespaces</h2></td></tr>
 Functions</h2></td></tr>
 <tr class="memitem:ad71f1c168c6b35a807d76735a49d0922" id="r_ad71f1c168c6b35a807d76735a49d0922"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d6/d84/namespaceautoresearch_1_1parlio__stream_ad71f1c168c6b35a807d76735a49d0922.html#ad71f1c168c6b35a807d76735a49d0922">autoresearch::parlio_stream::isFastLedOutputPinValid</a> (int pin)</td></tr>
 <tr class="separator:ad71f1c168c6b35a807d76735a49d0922"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a83a87dbb8fccb4873f303d9821c35f0f" id="r_a83a87dbb8fccb4873f303d9821c35f0f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d6/d84/namespaceautoresearch_1_1parlio__stream.html#d9/dc3/structautoresearch_1_1parlio__stream_1_1_validate_result">ValidateResult</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d6/d84/namespaceautoresearch_1_1parlio__stream_a83a87dbb8fccb4873f303d9821c35f0f.html#a83a87dbb8fccb4873f303d9821c35f0f">autoresearch::parlio_stream::validateParlioStreaming</a> (int base_tx_pin, int num_lanes, int num_leds, int iterations, uint32_t timeout_ms, const int *tx_pins=nullptr)</td></tr>
+<tr class="memitem:a7d18c0c4db81a3b668bc140972185e9b" id="r_a7d18c0c4db81a3b668bc140972185e9b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d6/d84/namespaceautoresearch_1_1parlio__stream.html#df/d8a/structautoresearch_1_1parlio__stream_1_1_parlio_led_state">ParlioLedState</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d6/d84/namespaceautoresearch_1_1parlio__stream_a7d18c0c4db81a3b668bc140972185e9b.html#a7d18c0c4db81a3b668bc140972185e9b">autoresearch::parlio_stream::parlioLedState</a> ()</td></tr>
+<tr class="separator:a7d18c0c4db81a3b668bc140972185e9b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a83a87dbb8fccb4873f303d9821c35f0f" id="r_a83a87dbb8fccb4873f303d9821c35f0f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d6/d84/namespaceautoresearch_1_1parlio__stream.html#d9/dc3/structautoresearch_1_1parlio__stream_1_1_validate_result">ValidateResult</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d6/d84/namespaceautoresearch_1_1parlio__stream_a83a87dbb8fccb4873f303d9821c35f0f.html#a83a87dbb8fccb4873f303d9821c35f0f">autoresearch::parlio_stream::validateParlioStreaming</a> (int base_tx_pin, int num_lanes, int num_leds, int iterations, <a class="el" href="../../df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a> timeout_ms, const int *tx_pins=nullptr)</td></tr>
 <tr class="memdesc:a83a87dbb8fccb4873f303d9821c35f0f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run the PARLIO streaming functional test.  <br /></td></tr>
 <tr class="separator:a83a87dbb8fccb4873f303d9821c35f0f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -173,8 +171,40 @@ Variables</h2></td></tr>
 <tr class="separator:ab0719c679ee8c49ad6a72a0041fd92f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a97189ef8f9ac11832817b86de9a692b4" id="r_a97189ef8f9ac11832817b86de9a692b4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d9/d13/cpp__compat_8h_a72f0657181cca64b44eb186b707eb380.html#a72f0657181cca64b44eb186b707eb380">constexpr</a> int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d6/d84/namespaceautoresearch_1_1parlio__stream_a97189ef8f9ac11832817b86de9a692b4.html#a97189ef8f9ac11832817b86de9a692b4">autoresearch::parlio_stream::kMaxLanes</a> = 16</td></tr>
 <tr class="separator:a97189ef8f9ac11832817b86de9a692b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af007581d13b6ccc4b492855fdc7d9f4f" id="r_af007581d13b6ccc4b492855fdc7d9f4f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d9/d13/cpp__compat_8h_a72f0657181cca64b44eb186b707eb380.html#a72f0657181cca64b44eb186b707eb380">constexpr</a> int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d6/d84/namespaceautoresearch_1_1parlio__stream_af007581d13b6ccc4b492855fdc7d9f4f.html#af007581d13b6ccc4b492855fdc7d9f4f">autoresearch::parlio_stream::kMaxLeds</a> = 256</td></tr>
+<tr class="separator:af007581d13b6ccc4b492855fdc7d9f4f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <hr/><h2 class="groupheader">Class Documentation</h2>
+<a name="df/d8a/structautoresearch_1_1parlio__stream_1_1_parlio_led_state" id="df/d8a/structautoresearch_1_1parlio__stream_1_1_parlio_led_state"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#df/d8a/structautoresearch_1_1parlio__stream_1_1_parlio_led_state">&#9670;&#160;</a></span>autoresearch::parlio_stream::ParlioLedState</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">struct autoresearch::parlio_stream::ParlioLedState</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> Collaboration diagram for autoresearch::parlio_stream::ParlioLedState:</div>
+<div id="dynsection-1-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-1-content" class="dyncontent" style="display:none;">
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d0/d98/structautoresearch_1_1parlio__stream_1_1_parlio_led_state__coll__graph.svg" width="187" height="139"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<center><span class="legend">[<a target="top" href="../../graph_legend.html">legend</a>]</span></center></div>
+<table class="fieldtable">
+<tr><th colspan="3">Class Members</th></tr>
+<tr><td class="fieldtype">
+<a id="a39569cdfe26b59322fc3275727fb25ce" name="a39569cdfe26b59322fc3275727fb25ce"></a><a class="el" href="../../dd/dc7/group___h_s_v2_r_g_b_ga65c1895006b38f8c5114118b6a170327.html#ga65c1895006b38f8c5114118b6a170327">CRGB</a></td>
+<td class="fieldname">
+leds[<a class="el" href="../../d6/d84/namespaceautoresearch_1_1parlio__stream_a97189ef8f9ac11832817b86de9a692b4.html#a97189ef8f9ac11832817b86de9a692b4">kMaxLanes</a>][<a class="el" href="../../d6/d84/namespaceautoresearch_1_1parlio__stream_af007581d13b6ccc4b492855fdc7d9f4f.html#af007581d13b6ccc4b492855fdc7d9f4f">kMaxLeds</a>]</td>
+<td class="fielddoc">
+</td></tr>
+</table>
+
+</div>
+</div>
 <a name="d9/dc3/structautoresearch_1_1parlio__stream_1_1_validate_result" id="d9/dc3/structautoresearch_1_1parlio__stream_1_1_validate_result"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#d9/dc3/structautoresearch_1_1parlio__stream_1_1_validate_result">&#9670;&#160;</a></span>autoresearch::parlio_stream::ValidateResult</h2>
 
@@ -195,13 +225,13 @@ base_tx_pin</td>
 <td class="fielddoc">
 </td></tr>
 <tr><td class="fieldtype">
-<a id="a21dbe4bd827c45b5db16a461ffdf1557" name="a21dbe4bd827c45b5db16a461ffdf1557"></a>uint32_t</td>
+<a id="a21dbe4bd827c45b5db16a461ffdf1557" name="a21dbe4bd827c45b5db16a461ffdf1557"></a><a class="el" href="../../df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a></td>
 <td class="fieldname">
 bytes_total</td>
 <td class="fielddoc">
 </td></tr>
 <tr><td class="fieldtype">
-<a id="a82b42e53b67756274a9c8cf13c6e69d8" name="a82b42e53b67756274a9c8cf13c6e69d8"></a>uint32_t</td>
+<a id="a82b42e53b67756274a9c8cf13c6e69d8" name="a82b42e53b67756274a9c8cf13c6e69d8"></a><a class="el" href="../../df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a></td>
 <td class="fieldname">
 bytes_transmitted</td>
 <td class="fielddoc">
@@ -255,25 +285,25 @@ leds_per_lane</td>
 <td class="fielddoc">
 </td></tr>
 <tr><td class="fieldtype">
-<a id="a27e861d05a5b1305d63c4607a0b073d6" name="a27e861d05a5b1305d63c4607a0b073d6"></a>uint32_t</td>
+<a id="a27e861d05a5b1305d63c4607a0b073d6" name="a27e861d05a5b1305d63c4607a0b073d6"></a><a class="el" href="../../df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a></td>
 <td class="fieldname">
 per_iter_show_us[<a class="el" href="../../d6/d84/namespaceautoresearch_1_1parlio__stream_ab0719c679ee8c49ad6a72a0041fd92f5.html#ab0719c679ee8c49ad6a72a0041fd92f5">kMaxIterations</a>]</td>
 <td class="fielddoc">
 </td></tr>
 <tr><td class="fieldtype">
-<a id="a237f8f63f18ef506f59bf022a3485399" name="a237f8f63f18ef506f59bf022a3485399"></a>uint32_t</td>
+<a id="a237f8f63f18ef506f59bf022a3485399" name="a237f8f63f18ef506f59bf022a3485399"></a><a class="el" href="../../df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a></td>
 <td class="fieldname">
 per_iter_us[<a class="el" href="../../d6/d84/namespaceautoresearch_1_1parlio__stream_ab0719c679ee8c49ad6a72a0041fd92f5.html#ab0719c679ee8c49ad6a72a0041fd92f5">kMaxIterations</a>]</td>
 <td class="fielddoc">
 </td></tr>
 <tr><td class="fieldtype">
-<a id="a22ed6a74e697bbe87293adad6d377e3d" name="a22ed6a74e697bbe87293adad6d377e3d"></a>uint32_t</td>
+<a id="a22ed6a74e697bbe87293adad6d377e3d" name="a22ed6a74e697bbe87293adad6d377e3d"></a><a class="el" href="../../df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a></td>
 <td class="fieldname">
 per_iter_wait_us[<a class="el" href="../../d6/d84/namespaceautoresearch_1_1parlio__stream_ab0719c679ee8c49ad6a72a0041fd92f5.html#ab0719c679ee8c49ad6a72a0041fd92f5">kMaxIterations</a>]</td>
 <td class="fielddoc">
 </td></tr>
 <tr><td class="fieldtype">
-<a id="a812b8a7f61ac5cdc687207c2e1cf7c53" name="a812b8a7f61ac5cdc687207c2e1cf7c53"></a>uint32_t</td>
+<a id="a812b8a7f61ac5cdc687207c2e1cf7c53" name="a812b8a7f61ac5cdc687207c2e1cf7c53"></a><a class="el" href="../../df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a></td>
 <td class="fieldname">
 ring_count</td>
 <td class="fielddoc">
@@ -285,31 +315,31 @@ ring_error</td>
 <td class="fielddoc">
 </td></tr>
 <tr><td class="fieldtype">
-<a id="af223bb0beccef75ef5121253defc243e" name="af223bb0beccef75ef5121253defc243e"></a>uint32_t</td>
+<a id="af223bb0beccef75ef5121253defc243e" name="af223bb0beccef75ef5121253defc243e"></a><a class="el" href="../../df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a></td>
 <td class="fieldname">
 steady_avg_show_us</td>
 <td class="fielddoc">
 </td></tr>
 <tr><td class="fieldtype">
-<a id="a340af96934a3a54355e2d006cab811f0" name="a340af96934a3a54355e2d006cab811f0"></a>uint32_t</td>
+<a id="a340af96934a3a54355e2d006cab811f0" name="a340af96934a3a54355e2d006cab811f0"></a><a class="el" href="../../df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a></td>
 <td class="fieldname">
 steady_avg_us</td>
 <td class="fielddoc">
 </td></tr>
 <tr><td class="fieldtype">
-<a id="a5d66ddb022f05d1e075a36b4ac8e8ce5" name="a5d66ddb022f05d1e075a36b4ac8e8ce5"></a>uint32_t</td>
+<a id="a5d66ddb022f05d1e075a36b4ac8e8ce5" name="a5d66ddb022f05d1e075a36b4ac8e8ce5"></a><a class="el" href="../../df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a></td>
 <td class="fieldname">
 steady_avg_wait_us</td>
 <td class="fielddoc">
 </td></tr>
 <tr><td class="fieldtype">
-<a id="a8873db9677583ed3a71eb3d075783727" name="a8873db9677583ed3a71eb3d075783727"></a>uint32_t</td>
+<a id="a8873db9677583ed3a71eb3d075783727" name="a8873db9677583ed3a71eb3d075783727"></a><a class="el" href="../../df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a></td>
 <td class="fieldname">
 timeout_ms</td>
 <td class="fielddoc">
 </td></tr>
 <tr><td class="fieldtype">
-<a id="a6cab3839e322c5e05b318acd22dff1b6" name="a6cab3839e322c5e05b318acd22dff1b6"></a>uint32_t</td>
+<a id="a6cab3839e322c5e05b318acd22dff1b6" name="a6cab3839e322c5e05b318acd22dff1b6"></a><a class="el" href="../../df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a></td>
 <td class="fieldname">
 tx_done_count</td>
 <td class="fielddoc">
@@ -321,13 +351,13 @@ tx_pins[<a class="el" href="../../d6/d84/namespaceautoresearch_1_1parlio__stream
 <td class="fielddoc">
 </td></tr>
 <tr><td class="fieldtype">
-<a id="ae019f0c3439e47a5733a4238fbe77a74" name="ae019f0c3439e47a5733a4238fbe77a74"></a>uint32_t</td>
+<a id="ae019f0c3439e47a5733a4238fbe77a74" name="ae019f0c3439e47a5733a4238fbe77a74"></a><a class="el" href="../../df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a></td>
 <td class="fieldname">
 underrun_count</td>
 <td class="fielddoc">
 </td></tr>
 <tr><td class="fieldtype">
-<a id="a10daf3eea39fa3b8fd4277b95abfa680" name="a10daf3eea39fa3b8fd4277b95abfa680"></a>uint32_t</td>
+<a id="a10daf3eea39fa3b8fd4277b95abfa680" name="a10daf3eea39fa3b8fd4277b95abfa680"></a><a class="el" href="../../df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a></td>
 <td class="fieldname">
 worker_isr_count</td>
 <td class="fielddoc">
@@ -343,7 +373,7 @@ worker_isr_count</td>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_c839598b40e1646daff68c7b4defdc81.html">AutoResearch</a></li><li class="navelem"><a class="el" href="../../db/dcf/_auto_research_parlio_stream_8h.html">AutoResearchParlioStream.h</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:00 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:02 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -1,10 +1,6 @@
 var namespaces_dup =
 [
-    [ "animartrix_ring", "df/d27/namespaceanimartrix__ring.html", "df/d27/namespaceanimartrix__ring" ],
-    [ "anonymous_namespace{AutoResearchLowMemory.h}", "dd/d64/namespaceanonymous__namespace_02_auto_research_low_memory_8h_03.html", [
-      [ "g_low_memory_remote", "dd/d64/namespaceanonymous__namespace_02_auto_research_low_memory_8h_03_a41037f1a47a52ae878c54662f6893d77.html#a41037f1a47a52ae878c54662f6893d77", null ]
-    ] ],
-    [ "anonymous_namespace{AutoResearchRemote.cpp}", "d1/d1d/namespaceanonymous__namespace_02_auto_research_remote_8cpp_03.html", "d1/d1d/namespaceanonymous__namespace_02_auto_research_remote_8cpp_03" ],
+    [ "anonymous_namespace{AutoResearchLowMemory.h}", "dd/d64/namespaceanonymous__namespace_02_auto_research_low_memory_8h_03.html", null ],
     [ "anonymous_namespace{LedRopeTCL.cpp}", "d3/d78/namespaceanonymous__namespace_02_led_rope_t_c_l_8cpp_03.html", [
       [ "init_screenmap", "d3/d78/namespaceanonymous__namespace_02_led_rope_t_c_l_8cpp_03_a7b016ca2c4fdac4d82598319aa426999.html#a7b016ca2c4fdac4d82598319aa426999", null ],
       [ "buttonAllWhite", "d3/d78/namespaceanonymous__namespace_02_led_rope_t_c_l_8cpp_03_a42518294b25652e63c932da22f1f24c2.html#a42518294b25652e63c932da22f1f24c2", null ]
@@ -48,6 +44,7 @@ var namespaces_dup =
     ] ],
     [ "fl", "d4/d36/namespacefl.html", "d4/d36/namespacefl" ],
     [ "gen", "dc/d8e/namespacegen.html", "dc/d8e/namespacegen" ],
+    [ "mood_ring", "d2/df0/namespacemood__ring.html", "d2/df0/namespacemood__ring" ],
     [ "noise_detail", "d2/dda/namespacenoise__detail.html", [
       [ "p", "d2/dda/namespacenoise__detail_a113253203153b946e31f943032447374.html#a113253203153b946e31f943032447374", null ]
     ] ],
@@ -67,10 +64,8 @@ var namespaces_dup =
       [ "runner_path", "df/d76/namespacetest__manual_a004561c71fc97bcf99181241ee7e1fc9.html#a004561c71fc97bcf99181241ee7e1fc9", null ]
     ] ],
     [ "test_quick", "d8/d94/namespacetest__quick.html", [
-      [ "_", "d8/d94/namespacetest__quick_a8c3bfc80cf8d06d96864286f8e0dcd84.html#a8c3bfc80cf8d06d96864286f8e0dcd84", null ],
       [ "cwd", "d8/d94/namespacetest__quick_a34bb69ba385d5f2cf85f2137e9021c86.html#a34bb69ba385d5f2cf85f2137e9021c86", null ],
       [ "dll_path", "d8/d94/namespacetest__quick_a41f60e33caf33a355d1f203d48958b9d.html#a41f60e33caf33a355d1f203d48958b9d", null ],
-      [ "output", "d8/d94/namespacetest__quick_a8c9b09f7da0aec94eb085625d9c04cdd.html#a8c9b09f7da0aec94eb085625d9c04cdd", null ],
       [ "proc", "d8/d94/namespacetest__quick_a13dc1c558463c07f13b4d6ac2ef74a22.html#a13dc1c558463c07f13b4d6ac2ef74a22", null ],
       [ "response", "d8/d94/namespacetest__quick_a00071f2b3e01fb8d2b4e70970ed2d6ce.html#a00071f2b3e01fb8d2b4e70970ed2d6ce", null ],
       [ "runner_path", "d8/d94/namespacetest__quick_a39cafecef9d5a57c1884d8eb1e4578a2.html#a39cafecef9d5a57c1884d8eb1e4578a2", null ],

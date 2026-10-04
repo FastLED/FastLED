@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -123,25 +123,25 @@ $(function(){initNavTree('d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_a
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d6/d88/key_8cpp_8hpp_source.html#l00280">280</a> of file <a class="el" href="../../d6/d88/key_8cpp_8hpp_source.html">key.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  280</span>                                                 {</div>
-<div class="line"><span class="lineno">  281</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_aa4ff66e7f49f54a6c333c3c0fd6ed178.html#aa4ff66e7f49f54a6c333c3c0fd6ed178">mHistorySize</a> == 0) {</div>
-<div class="line"><span class="lineno">  282</span>        <span class="comment">// No history yet, return zeros</span></div>
-<div class="line"><span class="lineno">  283</span>        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; 12; i++) {</div>
-<div class="line"><span class="lineno">  284</span>            chroma[i] = 0.0f;</div>
-<div class="line"><span class="lineno">  285</span>        }</div>
-<div class="line"><span class="lineno">  286</span>        <span class="keywordflow">return</span>;</div>
-<div class="line"><span class="lineno">  287</span>    }</div>
-<div class="line"><span class="lineno">  288</span> </div>
-<div class="line"><span class="lineno">  289</span>    <span class="comment">// Average across history</span></div>
-<div class="line"><span class="lineno">  290</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; 12; i++) {</div>
-<div class="line"><span class="lineno">  291</span>        <span class="keywordtype">float</span> sum = 0.0f;</div>
-<div class="line"><span class="lineno">  292</span>        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> j = 0; j &lt; <a class="code hl_variable" href="../../d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_aa4ff66e7f49f54a6c333c3c0fd6ed178.html#aa4ff66e7f49f54a6c333c3c0fd6ed178">mHistorySize</a>; j++) {</div>
-<div class="line"><span class="lineno">  293</span>            sum += <a class="code hl_variable" href="../../d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_a5cbed338a13d01031e32249857fb49e6.html#a5cbed338a13d01031e32249857fb49e6">mChromaHistory</a>[i][j];</div>
-<div class="line"><span class="lineno">  294</span>        }</div>
-<div class="line"><span class="lineno">  295</span>        chroma[i] = sum / <a class="code hl_variable" href="../../d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_aa4ff66e7f49f54a6c333c3c0fd6ed178.html#aa4ff66e7f49f54a6c333c3c0fd6ed178">mHistorySize</a>;</div>
-<div class="line"><span class="lineno">  296</span>    }</div>
-<div class="line"><span class="lineno">  297</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../d6/d88/key_8cpp_8hpp_source.html#l00278">278</a> of file <a class="el" href="../../d6/d88/key_8cpp_8hpp_source.html">key.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  278</span>                                                 {</div>
+<div class="line"><span class="lineno">  279</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_aa4ff66e7f49f54a6c333c3c0fd6ed178.html#aa4ff66e7f49f54a6c333c3c0fd6ed178">mHistorySize</a> == 0) {</div>
+<div class="line"><span class="lineno">  280</span>        <span class="comment">// No history yet, return zeros</span></div>
+<div class="line"><span class="lineno">  281</span>        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; 12; i++) {</div>
+<div class="line"><span class="lineno">  282</span>            chroma[i] = 0.0f;</div>
+<div class="line"><span class="lineno">  283</span>        }</div>
+<div class="line"><span class="lineno">  284</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">  285</span>    }</div>
+<div class="line"><span class="lineno">  286</span> </div>
+<div class="line"><span class="lineno">  287</span>    <span class="comment">// Average across history</span></div>
+<div class="line"><span class="lineno">  288</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; 12; i++) {</div>
+<div class="line"><span class="lineno">  289</span>        <span class="keywordtype">float</span> sum = 0.0f;</div>
+<div class="line"><span class="lineno">  290</span>        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> j = 0; j &lt; <a class="code hl_variable" href="../../d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_aa4ff66e7f49f54a6c333c3c0fd6ed178.html#aa4ff66e7f49f54a6c333c3c0fd6ed178">mHistorySize</a>; j++) {</div>
+<div class="line"><span class="lineno">  291</span>            sum += <a class="code hl_variable" href="../../d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_a5cbed338a13d01031e32249857fb49e6.html#a5cbed338a13d01031e32249857fb49e6">mChromaHistory</a>[i][j];</div>
+<div class="line"><span class="lineno">  292</span>        }</div>
+<div class="line"><span class="lineno">  293</span>        chroma[i] = sum / <a class="code hl_variable" href="../../d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_aa4ff66e7f49f54a6c333c3c0fd6ed178.html#aa4ff66e7f49f54a6c333c3c0fd6ed178">mHistorySize</a>;</div>
+<div class="line"><span class="lineno">  294</span>    }</div>
+<div class="line"><span class="lineno">  295</span>}</div>
 <div class="ttc" id="aclassfl_1_1audio_1_1detector_1_1_key_detector_a5cbed338a13d01031e32249857fb49e6_html_a5cbed338a13d01031e32249857fb49e6"><div class="ttname"><a href="../../d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_a5cbed338a13d01031e32249857fb49e6.html#a5cbed338a13d01031e32249857fb49e6">fl::audio::detector::KeyDetector::mChromaHistory</a></div><div class="ttdeci">vector&lt; float &gt; mChromaHistory[12]</div><div class="ttdef"><b>Definition</b> <a href="../../de/de5/key_8h_source.html#l00120">key.h:120</a></div></div>
 <div class="ttc" id="aclassfl_1_1audio_1_1detector_1_1_key_detector_aa4ff66e7f49f54a6c333c3c0fd6ed178_html_aa4ff66e7f49f54a6c333c3c0fd6ed178"><div class="ttname"><a href="../../d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_aa4ff66e7f49f54a6c333c3c0fd6ed178.html#aa4ff66e7f49f54a6c333c3c0fd6ed178">fl::audio::detector::KeyDetector::mHistorySize</a></div><div class="ttdeci">int mHistorySize</div><div class="ttdef"><b>Definition</b> <a href="../../de/de5/key_8h_source.html#l00122">key.h:122</a></div></div>
 </div><!-- fragment -->
@@ -165,7 +165,7 @@ $(function(){initNavTree('d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_a
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../db/dbf/namespacefl_1_1audio.html">audio</a></li><li class="navelem"><a class="el" href="../../dd/d12/namespacefl_1_1audio_1_1detector.html">detector</a></li><li class="navelem"><a class="el" href="../../d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector.html">KeyDetector</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:08 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:11 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

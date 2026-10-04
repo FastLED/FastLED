@@ -1,0 +1,9 @@
+<map id="fl::ColorManagedPixelSource::setFlux" name="fl::ColorManagedPixelSource::setFlux">
+<area shape="rect" id="Node000001" title="Frame&#45;local brightness is applied to the source&#39;s owned pipeline on shared tiers; only managed iterat..." alt="" coords="5,23,212,63"/>
+<area shape="rect" id="Node000002" href="$d0/d69/classfl_1_1_flux_scalar_aa0b3144c87fcec1496103e76d7977630.html#aa0b3144c87fcec1496103e76d7977630" title="setBrightness(b) as the linear flux scalar b/255." alt="" coords="260,5,475,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="212,31,246,27,247,32,213,36"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a53295036e598af5c2aab57e94d9cd3d1.html#a53295036e598af5c2aab57e94d9cd3d1" title="Set the composed brightness&#45;and&#45;power scalar for the frames that follow." alt="" coords="285,55,449,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="213,50,272,56,271,61,212,56"/>
+<area shape="rect" id="Node000003" href="$d0/d69/classfl_1_1_flux_scalar_a5a9296a2c583b737dad92df25efc0bc6.html#a5a9296a2c583b737dad92df25efc0bc6" title=" " alt="" coords="523,5,705,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="475,15,509,15,509,21,475,21"/>
+</map>

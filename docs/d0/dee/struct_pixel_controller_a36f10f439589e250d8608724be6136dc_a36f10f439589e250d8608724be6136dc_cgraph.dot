@@ -1,0 +1,17 @@
+digraph "PixelController::loadAndScaleRGBWWUnordered"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="PixelController::loadAnd\lScaleRGBWWUnordered",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="loadAndScaleRGBWW before its wire reorder. See loadAndScaleRGBWUnordered."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="PixelController::loadAnd\lScaleChannel",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/dee/struct_pixel_controller_a889ab47bc5c8189d46452faa0490f56d.html#a889ab47bc5c8189d46452faa0490f56d",tooltip="One source channel, loaded, dithered and scaled – loadAndScale<SLOT> with RO(SLOT) replaced by a runt..."];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::BinaryDither::apply",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d6c/structfl_1_1_binary_dither_a855eeda5bd1b617b06acd895eeba5b03.html#a855eeda5bd1b617b06acd895eeba5b03",tooltip="Add the offset to a source byte, before scaling. Black is never lifted."];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::rgb_2_rgbww",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_ad4f9f0e8a803c639d39f18fb703dfbed.html#ad4f9f0e8a803c639d39f18fb703dfbed",tooltip=" "];
+  Node4 -> Node4 [id="edge4_Node000004_Node000004",color="steelblue1",style="solid",tooltip=" "];
+}

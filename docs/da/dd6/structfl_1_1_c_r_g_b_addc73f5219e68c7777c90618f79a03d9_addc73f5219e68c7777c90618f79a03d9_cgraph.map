@@ -1,0 +1,8 @@
+<map id="fl::CRGB::nscale" name="fl::CRGB::nscale">
+<area shape="rect" id="Node000001" title="Generic scale — delegates to nscale8 for CRGB." alt="" coords="5,5,131,31"/>
+<area shape="rect" id="Node000002" href="$da/dd6/structfl_1_1_c_r_g_b_a910ee467a963ad6805026ad83873e52b.html#a910ee467a963ad6805026ad83873e52b" title="Default constructor." alt="" coords="360,5,480,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="131,15,346,15,346,21,131,21"/>
+<area shape="rect" id="Node000003" href="$da/dd6/structfl_1_1_c_r_g_b_a88ec345b046910f4ddf5cd4d793e7e88.html#a88ec345b046910f4ddf5cd4d793e7e88" title="Scale down a RGB to N/256ths of its current brightness, using &quot;plain math&quot; dimming rules." alt="" coords="179,31,312,56"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="131,24,165,29,165,35,131,30"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="312,31,346,26,346,31,313,36"/>
+</map>

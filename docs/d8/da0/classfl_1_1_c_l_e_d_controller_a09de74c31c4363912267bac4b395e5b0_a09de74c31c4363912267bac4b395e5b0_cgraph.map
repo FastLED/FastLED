@@ -1,0 +1,8 @@
+<map id="fl::CLEDController::showColorInternal" name="fl::CLEDController::showColorInternal">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,49,153,89"/>
+<area shape="rect" id="Node000002" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a51e12cdcfc9322cdbe9322d04ef4ef7d.html#a51e12cdcfc9322cdbe9322d04ef4ef7d" title=" " alt="" coords="201,5,337,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="153,50,187,42,188,47,154,55"/>
+<area shape="rect" id="Node000003" href="$d8/da0/classfl_1_1_c_l_e_d_controller_ae2f417dfb514e61374c5ffd8b6130c7a.html#ae2f417dfb514e61374c5ffd8b6130c7a" title="Set all the LEDs to a given color." alt="" coords="201,93,337,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="154,84,188,92,187,97,153,89"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="233,94,231,84,237,75,250,69,269,67,292,70,304,77,301,81,290,75,269,72,251,74,241,79,237,85,239,92"/>
+</map>

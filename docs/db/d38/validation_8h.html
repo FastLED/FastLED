@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -112,6 +112,7 @@ $(function(){initNavTree('db/d38/validation_8h.html','../../'); initResizable(tr
 <code>#include &quot;<a class="el" href="../../dc/d62/optional_8h_source.html">fl/stl/optional.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d3/d7e/int_8h_source.html">fl/stl/int.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../db/d01/noexcept_8h_source.html">fl/stl/noexcept.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d3/ded/fl_2channels_2rx_2types_8h_source.html">fl/channels/rx/types.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for validation.h:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -151,9 +152,24 @@ Namespaces</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:ab78f47ffe3f374fd893f9252cf52e2bc" id="r_ab78f47ffe3f374fd893f9252cf52e2bc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d4/d36/namespacefl_a8a657d5e3d1c15816e367eada17134c9.html#a8a657d5e3d1c15816e367eada17134c9">size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d8/d07/namespacefl_1_1validation_ab78f47ffe3f374fd893f9252cf52e2bc.html#ab78f47ffe3f374fd893f9252cf52e2bc">fl::validation::captureEdgeCapacity</a> (<a class="el" href="../../d4/d36/namespacefl_a8a657d5e3d1c15816e367eada17134c9.html#a8a657d5e3d1c15816e367eada17134c9">size_t</a> shared_buffer_bytes, <a class="el" href="../../d4/d36/namespacefl_a8a657d5e3d1c15816e367eada17134c9.html#a8a657d5e3d1c15816e367eada17134c9">size_t</a> expected_data_bytes, <a class="el" href="../../d4/d36/namespacefl_a6f679a987369746122401c946b3a1d8b.html#a6f679a987369746122401c946b3a1d8b">RxBackend</a> backend) <a class="el" href="../../d4/d36/namespacefl_aa317f89ca911371e798d08a93770402f.html#aa317f89ca911371e798d08a93770402f">FL_NO_EXCEPT</a></td></tr>
+<tr class="memdesc:ab78f47ffe3f374fd893f9252cf52e2bc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the RX edge-buffer capacity for a validation frame.  <br /></td></tr>
+<tr class="separator:ab78f47ffe3f374fd893f9252cf52e2bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9f49a7b97a5982cadd13a4bee98f6e15" id="r_a9f49a7b97a5982cadd13a4bee98f6e15"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d8/d07/namespacefl_1_1validation_a9f49a7b97a5982cadd13a4bee98f6e15.html#a9f49a7b97a5982cadd13a4bee98f6e15">fl::validation::isWholeCaptureFrame</a> (<a class="el" href="../../d4/d36/namespacefl_a8a657d5e3d1c15816e367eada17134c9.html#a8a657d5e3d1c15816e367eada17134c9">size_t</a> run_count, bool lead_run_is_low, u32 lead_run_ns, u32 idle_threshold_ns, <a class="el" href="../../d4/d36/namespacefl_a8a657d5e3d1c15816e367eada17134c9.html#a8a657d5e3d1c15816e367eada17134c9">size_t</a> min_frame_runs) <a class="el" href="../../d4/d36/namespacefl_aa317f89ca911371e798d08a93770402f.html#aa317f89ca911371e798d08a93770402f">FL_NO_EXCEPT</a></td></tr>
+<tr class="memdesc:a9f49a7b97a5982cadd13a4bee98f6e15"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether an oversampled capture holds a whole frame, not a fragment.  <br /></td></tr>
+<tr class="separator:a9f49a7b97a5982cadd13a4bee98f6e15"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8b1040a8b44cf8e17e38ed40dd8c844b" id="r_a8b1040a8b44cf8e17e38ed40dd8c844b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d4/d36/namespacefl_a6f679a987369746122401c946b3a1d8b.html#a6f679a987369746122401c946b3a1d8b">RxBackend</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d8/d07/namespacefl_1_1validation_a8b1040a8b44cf8e17e38ed40dd8c844b.html#a8b1040a8b44cf8e17e38ed40dd8c844b">fl::validation::resolveCaptureBackend</a> (<a class="el" href="../../d4/d36/namespacefl_a6f679a987369746122401c946b3a1d8b.html#a6f679a987369746122401c946b3a1d8b">RxBackend</a> requested_backend, bool has_explicit_override, bool is_parlio_driver, bool is_esp32_c6) <a class="el" href="../../d4/d36/namespacefl_aa317f89ca911371e798d08a93770402f.html#aa317f89ca911371e798d08a93770402f">FL_NO_EXCEPT</a></td></tr>
+<tr class="memdesc:a8b1040a8b44cf8e17e38ed40dd8c844b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Select the independent capture backend used by AutoResearch.  <br /></td></tr>
+<tr class="separator:a8b1040a8b44cf8e17e38ed40dd8c844b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adc33264c0c32cc5f2e2f2b036d5d9c95" id="r_adc33264c0c32cc5f2e2f2b036d5d9c95"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d4/d36/namespacefl_a8a657d5e3d1c15816e367eada17134c9.html#a8a657d5e3d1c15816e367eada17134c9">size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d8/d07/namespacefl_1_1validation_adc33264c0c32cc5f2e2f2b036d5d9c95.html#adc33264c0c32cc5f2e2f2b036d5d9c95">fl::validation::rpPioMaxWireBytes</a> (<a class="el" href="../../d4/d36/namespacefl_a8a657d5e3d1c15816e367eada17134c9.html#a8a657d5e3d1c15816e367eada17134c9">size_t</a> edge_capacity, <a class="el" href="../../d4/d36/namespacefl_a8a657d5e3d1c15816e367eada17134c9.html#a8a657d5e3d1c15816e367eada17134c9">size_t</a> dma_tail_words, u32 samples_per_dma_word, u32 sample_period_ns, u32 idle_tail_ns, u32 arming_lead_in_ns, u32 bit_period_ns) <a class="el" href="../../d4/d36/namespacefl_aa317f89ca911371e798d08a93770402f.html#aa317f89ca911371e798d08a93770402f">FL_NO_EXCEPT</a></td></tr>
+<tr class="memdesc:adc33264c0c32cc5f2e2f2b036d5d9c95"><td class="mdescLeft">&#160;</td><td class="mdescRight">Largest frame, in wire bytes, an RP PIO RX capture can hold.  <br /></td></tr>
+<tr class="separator:adc33264c0c32cc5f2e2f2b036d5d9c95"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a667cd91ada8ae4cd5be771db2d810c54" id="r_a667cd91ada8ae4cd5be771db2d810c54"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../da/d3b/structfl_1_1_single_test_result.html">SingleTestResult</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a667cd91ada8ae4cd5be771db2d810c54.html#a667cd91ada8ae4cd5be771db2d810c54">fl::runSingleValidationTest</a> (const <a class="el" href="../../d0/de5/structfl_1_1_single_test_config.html">SingleTestConfig</a> &amp;config)</td></tr>
 <tr class="memdesc:a667cd91ada8ae4cd5be771db2d810c54"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run a single stateless validation test.  <br /></td></tr>
 <tr class="separator:a667cd91ada8ae4cd5be771db2d810c54"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5c365893faf653499d1f87c9e9aaa190" id="r_a5c365893faf653499d1f87c9e9aaa190"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d8/d07/namespacefl_1_1validation_a5c365893faf653499d1f87c9e9aaa190.html#a5c365893faf653499d1f87c9e9aaa190">fl::validation::useRmtInternalLoopback</a> (bool is_rmt_driver, int tx_pin, int rx_pin) <a class="el" href="../../d4/d36/namespacefl_aa317f89ca911371e798d08a93770402f.html#aa317f89ca911371e798d08a93770402f">FL_NO_EXCEPT</a></td></tr>
+<tr class="memdesc:a5c365893faf653499d1f87c9e9aaa190"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether an RMT validation capture should use ESP-IDF loopback.  <br /></td></tr>
+<tr class="separator:a5c365893faf653499d1f87c9e9aaa190"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -162,7 +178,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_217dd1d1f80f936dd132dc9fc88b57d1.html">channels</a></li><li class="navelem"><a class="el" href="../../db/d38/validation_8h.html">validation.h</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:01 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:03 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

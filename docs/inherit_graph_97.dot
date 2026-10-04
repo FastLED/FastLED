@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::array\< T, 0 \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d64/classfl_1_1array_3_01_t_00_010_01_4.html",tooltip=" "];
+  Node0 [id="Node000000",label="fl::anonymous_namespace\l\{gamut_map.cpp.hpp\}::RgbFeasible",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/ddc/structfl_1_1anonymous__namespace_02gamut__map_8cpp_8hpp_03_1_1_rgb_feasible.html",tooltip="Feasibility against the three-emitter hull."];
 }

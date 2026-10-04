@@ -1,0 +1,11 @@
+<map id="fl::ScopedTrace::clear" name="fl::ScopedTrace::clear">
+<area shape="rect" id="Node000001" title="Clear the entire call stack (primarily for testing)" alt="" coords="5,42,164,67"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a1489f5bf0724c2458554c1722e2f5df9.html#a1489f5bf0724c2458554c1722e2f5df9" title=" " alt="" coords="212,42,355,67"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="164,52,198,52,198,57,164,57"/>
+<area shape="rect" id="Node000003" href="$dc/dad/classfl_1_1_singleton_thread_local_ab08f30bdc7b1529ab6f1927a961d4283.html#ab08f30bdc7b1529ab6f1927a961d4283" title=" " alt="" coords="403,35,581,75"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="355,52,389,52,389,57,355,57"/>
+<area shape="rect" id="Node000004" href="$dd/dfc/classfl_1_1_thread_local_fake_abb8598fd8aabf2409d37c78ea3f20ccf.html#abb8598fd8aabf2409d37c78ea3f20ccf" title=" " alt="" coords="629,5,776,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="581,40,615,35,616,40,582,45"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a1e67c0c24ebcd98fcf8554753d1639a6.html#a1e67c0c24ebcd98fcf8554753d1639a6" title=" " alt="" coords="633,70,772,95"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="582,64,620,69,619,74,581,69"/>
+</map>

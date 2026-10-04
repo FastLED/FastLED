@@ -1,0 +1,7 @@
+<map id="fl::AnalogRGBController::writeRgb" name="fl::AnalogRGBController::writeRgb">
+<area shape="rect" id="Node000001" title=" " alt="" coords="228,37,403,77"/>
+<area shape="rect" id="Node000002" href="$d0/d5a/classfl_1_1_analog_r_g_b_controller_a0e13c10b28fb7afdff1baa3c11a3859b.html#a0e13c10b28fb7afdff1baa3c11a3859b" title="Initialize the LED controller." alt="" coords="5,5,180,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="214,45,180,40,180,35,215,40"/>
+<area shape="rect" id="Node000003" href="$d0/d5a/classfl_1_1_analog_r_g_b_controller_a681be00dd454a605f1001bf1b896d772.html#a681be00dd454a605f1001bf1b896d772" title=" " alt="" coords="5,69,180,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="215,74,180,79,180,74,214,69"/>
+</map>

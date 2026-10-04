@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -117,7 +117,7 @@ $(function(){initNavTree('df/d28/classfl_1_1_jpeg_aa8a17870c42c6d51418108a42c2c4
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="../../d0/d08/classfl_1_1span.html">fl::span</a>&lt; const <a class="el" href="../../da/d3c/namespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c.html#a7573a66f01c09f14a1ff0411f8e1153c">fl::u8</a> &gt;</td>          <td class="paramname"><span class="paramname"><em>data</em></span>, </td>
+          <td class="paramtype"><a class="el" href="../../d0/d08/classfl_1_1span.html">fl::span</a>&lt; const <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> &gt;</td>          <td class="paramname"><span class="paramname"><em>data</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -158,7 +158,7 @@ $(function(){initNavTree('df/d28/classfl_1_1_jpeg_aa8a17870c42c6d51418108a42c2c4
 <div class="line"><span class="lineno">  393</span>    }</div>
 <div class="line"><span class="lineno">  394</span> </div>
 <div class="line"><span class="lineno">  395</span>    <span class="keyword">auto</span> decoder = <a class="code hl_function" href="../../df/d28/classfl_1_1_jpeg_a6070d60029c1e6852a533f1e0fb99561.html#a6070d60029c1e6852a533f1e0fb99561">createDecoder</a>(config);</div>
-<div class="line"><span class="lineno">  396</span>    <span class="keyword">auto</span> stream = <a class="code hl_function" href="../../d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af">fl::make_shared&lt;fl::memorybuf&gt;</a>(data.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac">size</a>());</div>
+<div class="line"><span class="lineno">  396</span>    <span class="keyword">auto</span> stream = <a class="code hl_function" href="../../d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af">fl::make_shared&lt;fl::memorybuf&gt;</a>(data.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa">size</a>());</div>
 <div class="line"><span class="lineno">  397</span>    stream-&gt;write(data);</div>
 <div class="line"><span class="lineno">  398</span> </div>
 <div class="line"><span class="lineno">  399</span>    <span class="keywordflow">if</span> (!decoder-&gt;begin(stream)) {</div>
@@ -168,7 +168,7 @@ $(function(){initNavTree('df/d28/classfl_1_1_jpeg_aa8a17870c42c6d51418108a42c2c4
 <div class="line"><span class="lineno">  403</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
 <div class="line"><span class="lineno">  404</span>    }</div>
 <div class="line"><span class="lineno">  405</span> </div>
-<div class="line"><span class="lineno">  406</span>    fl::u32 start_time = <a class="code hl_function" href="../../d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a">fl::millis</a>();</div>
+<div class="line"><span class="lineno">  406</span>    fl::u32 start_time = <a class="code hl_function" href="../../d4/d36/namespacefl_a3c0ba5842bfd029c404a38c8df2315f3.html#a3c0ba5842bfd029c404a38c8df2315f3">fl::millis</a>();</div>
 <div class="line"><span class="lineno">  407</span>    fl::u32 deadline = start_time + timeout_ms;</div>
 <div class="line"><span class="lineno">  408</span> </div>
 <div class="line"><span class="lineno">  409</span>    <span class="comment">// Use callback-based decode with time budget check</span></div>
@@ -176,7 +176,7 @@ $(function(){initNavTree('df/d28/classfl_1_1_jpeg_aa8a17870c42c6d51418108a42c2c4
 <div class="line"><span class="lineno">  411</span>        <span class="keywordflow">if</span> (mProgressout) {</div>
 <div class="line"><span class="lineno">  412</span>            *mProgressout = decoder-&gt;getProgress();</div>
 <div class="line"><span class="lineno">  413</span>        }</div>
-<div class="line"><span class="lineno">  414</span>        <span class="keywordflow">return</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a">fl::millis</a>() &gt;= deadline; <span class="comment">// Yield if time budget exceeded</span></div>
+<div class="line"><span class="lineno">  414</span>        <span class="keywordflow">return</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a3c0ba5842bfd029c404a38c8df2315f3.html#a3c0ba5842bfd029c404a38c8df2315f3">fl::millis</a>() &gt;= deadline; <span class="comment">// Yield if time budget exceeded</span></div>
 <div class="line"><span class="lineno">  415</span>    }));</div>
 <div class="line"><span class="lineno">  416</span> </div>
 <div class="line"><span class="lineno">  417</span>    <span class="keywordflow">if</span> (<a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a> == <a class="code hl_enumvalue" href="../../d4/d36/namespacefl_aaed350b21465df8c68244fc4d77fa693.html#aaed350b21465df8c68244fc4d77fa693a505a83f220c02df2f85c3810cd9ceb38">DecodeResult::Success</a>) {</div>
@@ -205,15 +205,15 @@ $(function(){initNavTree('df/d28/classfl_1_1_jpeg_aa8a17870c42c6d51418108a42c2c4
 <div class="line"><span class="lineno">  440</span>    <span class="keywordflow">return</span> <span class="keyword">false</span>; <span class="comment">// Not complete yet</span></div>
 <div class="line"><span class="lineno">  441</span>}</div>
 <div class="ttc" id="aclassfl_1_1_jpeg_a6070d60029c1e6852a533f1e0fb99561_html_a6070d60029c1e6852a533f1e0fb99561"><div class="ttname"><a href="../../df/d28/classfl_1_1_jpeg_a6070d60029c1e6852a533f1e0fb99561.html#a6070d60029c1e6852a533f1e0fb99561">fl::Jpeg::createDecoder</a></div><div class="ttdeci">static JpegDecoderPtr createDecoder(const JpegConfig &amp;config)</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d39/jpeg_8cpp_8hpp_source.html#l00372">jpeg.cpp.hpp:372</a></div></div>
-<div class="ttc" id="aclassfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac_html_aef7ee7eb5254da1ba1eb4f3e0173d0ac"><div class="ttname"><a href="../../d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac">fl::span::size</a></div><div class="ttdeci">constexpr fl::size size() const FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d7a/span_8h_source.html#l00458">span.h:458</a></div></div>
-<div class="ttc" id="anamespacefl_a335fa6e4af7f0a011997ea0137d49b5a_html_a335fa6e4af7f0a011997ea0137d49b5a"><div class="ttname"><a href="../../d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a">fl::millis</a></div><div class="ttdeci">fl::u32 millis()</div><div class="ttdoc">Universal millisecond timer - returns milliseconds since system startup.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d18/chrono_8cpp_8hpp_source.html#l00064">chrono.cpp.hpp:64</a></div></div>
-<div class="ttc" id="anamespacefl_a87ae8a24cc8b709a64f39370e71846af_html_a87ae8a24cc8b709a64f39370e71846af"><div class="ttname"><a href="../../d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af">fl::make_shared</a></div><div class="ttdeci">shared_ptr&lt; T &gt; make_shared(Args &amp;&amp;... args) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/d6a/shared__ptr_8h_source.html#l00414">shared_ptr.h:414</a></div></div>
+<div class="ttc" id="aclassfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa_html_aaf3daca1c2c8f93b2ac7b319989b22fa"><div class="ttname"><a href="../../d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa">fl::span::size</a></div><div class="ttdeci">constexpr fl::size size() const FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d7a/span_8h_source.html#l00483">span.h:483</a></div></div>
+<div class="ttc" id="anamespacefl_a3c0ba5842bfd029c404a38c8df2315f3_html_a3c0ba5842bfd029c404a38c8df2315f3"><div class="ttname"><a href="../../d4/d36/namespacefl_a3c0ba5842bfd029c404a38c8df2315f3.html#a3c0ba5842bfd029c404a38c8df2315f3">fl::millis</a></div><div class="ttdeci">fl::u32 millis()</div><div class="ttdoc">Universal millisecond timer - returns milliseconds since system startup.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d18/chrono_8cpp_8hpp_source.html#l00079">chrono.cpp.hpp:79</a></div></div>
+<div class="ttc" id="anamespacefl_a87ae8a24cc8b709a64f39370e71846af_html_a87ae8a24cc8b709a64f39370e71846af"><div class="ttname"><a href="../../d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af">fl::make_shared</a></div><div class="ttdeci">shared_ptr&lt; T &gt; make_shared(Args &amp;&amp;... args) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/d6a/shared__ptr_8h_source.html#l00414">shared_ptr.h:414</a></div></div>
 <div class="ttc" id="anamespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99_html_a8fa65f6529fc3eb6a174cb304a4bfc99"><div class="ttname"><a href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">fl::result</a></div><div class="ttdeci">expected&lt; T, E &gt; result</div><div class="ttdoc">Alias for expected (Rust-style naming)</div><div class="ttdef"><b>Definition</b> <a href="../../de/d93/result_8h_source.html#l00031">result.h:31</a></div></div>
 <div class="ttc" id="anamespacefl_aaed350b21465df8c68244fc4d77fa693_html_aaed350b21465df8c68244fc4d77fa693"><div class="ttname"><a href="../../d4/d36/namespacefl_aaed350b21465df8c68244fc4d77fa693.html#aaed350b21465df8c68244fc4d77fa693">fl::DecodeResult</a></div><div class="ttdeci">DecodeResult</div><div class="ttdef"><b>Definition</b> <a href="../../d0/dfc/idecoder_8h_source.html#l00018">idecoder.h:18</a></div></div>
 <div class="ttc" id="anamespacefl_aaed350b21465df8c68244fc4d77fa693_html_aaed350b21465df8c68244fc4d77fa693a505a83f220c02df2f85c3810cd9ceb38"><div class="ttname"><a href="../../d4/d36/namespacefl_aaed350b21465df8c68244fc4d77fa693.html#aaed350b21465df8c68244fc4d77fa693a505a83f220c02df2f85c3810cd9ceb38">fl::DecodeResult::Success</a></div><div class="ttdeci">@ Success</div><div class="ttdef"><b>Definition</b> <a href="../../d0/dfc/idecoder_8h_source.html#l00019">idecoder.h:19</a></div></div>
 <div class="ttc" id="anamespacefl_aaed350b21465df8c68244fc4d77fa693_html_aaed350b21465df8c68244fc4d77fa693a902b0d55fddef6f8d651fe1035b7d4bd"><div class="ttname"><a href="../../d4/d36/namespacefl_aaed350b21465df8c68244fc4d77fa693.html#aaed350b21465df8c68244fc4d77fa693a902b0d55fddef6f8d651fe1035b7d4bd">fl::DecodeResult::Error</a></div><div class="ttdeci">@ Error</div><div class="ttdef"><b>Definition</b> <a href="../../d0/dfc/idecoder_8h_source.html#l00022">idecoder.h:22</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../df/d7d/frame_8h_source.html#l00078">fl::Frame::copy()</a>, <a class="el" href="../../dd/d39/jpeg_8cpp_8hpp_source.html#l00372">createDecoder()</a>, <a class="el" href="../../d0/dfc/idecoder_8h_source.html#l00022">fl::Error</a>, <a class="el" href="../../df/d7d/frame_8h_source.html#l00060">fl::Frame::getHeight()</a>, <a class="el" href="../../df/d7d/frame_8h_source.html#l00059">fl::Frame::getWidth()</a>, <a class="el" href="../../df/d6a/shared__ptr_8h_source.html#l00414">fl::make_shared()</a>, <a class="el" href="../../db/d18/chrono_8cpp_8hpp_source.html#l00064">fl::millis()</a>, <a class="el" href="../../d4/d7a/span_8h_source.html#l00458">fl::span&lt; T, Extent &gt;::size()</a>, and <a class="el" href="../../d0/dfc/idecoder_8h_source.html#l00019">fl::Success</a>.</p>
+<p class="reference">References <a class="el" href="../../df/d7d/frame_8h_source.html#l00078">fl::Frame::copy()</a>, <a class="el" href="../../dd/d39/jpeg_8cpp_8hpp_source.html#l00372">createDecoder()</a>, <a class="el" href="../../d0/dfc/idecoder_8h_source.html#l00022">fl::Error</a>, <a class="el" href="../../df/d7d/frame_8h_source.html#l00060">fl::Frame::getHeight()</a>, <a class="el" href="../../df/d7d/frame_8h_source.html#l00059">fl::Frame::getWidth()</a>, <a class="el" href="../../df/d6a/shared__ptr_8h_source.html#l00414">fl::make_shared()</a>, <a class="el" href="../../db/d18/chrono_8cpp_8hpp_source.html#l00079">fl::millis()</a>, <a class="el" href="../../d4/d7a/span_8h_source.html#l00483">fl::span&lt; T, Extent &gt;::size()</a>, and <a class="el" href="../../d0/dfc/idecoder_8h_source.html#l00019">fl::Success</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -231,7 +231,7 @@ $(function(){initNavTree('df/d28/classfl_1_1_jpeg_aa8a17870c42c6d51418108a42c2c4
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../df/d28/classfl_1_1_jpeg.html">Jpeg</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:05 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:09 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

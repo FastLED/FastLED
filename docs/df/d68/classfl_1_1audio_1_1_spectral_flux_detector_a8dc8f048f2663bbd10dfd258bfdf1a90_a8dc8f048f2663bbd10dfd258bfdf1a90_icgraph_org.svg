@@ -30,7 +30,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../df/d68/classfl_1_1audio_1_1_spectral_flux_detector_a8e0f6473708a56c3d828b19ab9e05840.html#a8e0f6473708a56c3d828b19ab9e05840" target="_top" xlink:title=" ">
+<g id="a_Node000002"><a xlink:href="../../df/d68/classfl_1_1audio_1_1_spectral_flux_detector_a10b9bf92079b60c64226e91bdf335dba.html#a10b9bf92079b60c64226e91bdf335dba" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="164,-30 0,-30 0,0 164,0 164,-30"/>
 <text text-anchor="start" x="8" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">fl::audio::SpectralFluxDetector</text>
 <text text-anchor="middle" x="82" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">::~SpectralFluxDetector</text>

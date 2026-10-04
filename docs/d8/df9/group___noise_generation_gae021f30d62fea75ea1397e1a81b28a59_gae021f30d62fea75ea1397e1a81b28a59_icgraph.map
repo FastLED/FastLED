@@ -1,8 +1,8 @@
 <map id="inoise16_raw" name="inoise16_raw">
-<area shape="rect" id="Node000001" title=" " alt="" coords="588,269,696,294"/>
+<area shape="rect" id="Node000001" title="16&#45;bit, fixed point implementation of Perlin&#39;s noise without scaling." alt="" coords="588,269,696,294"/>
 <area shape="rect" id="Node000002" href="$d8/df9/group___noise_generation_ga84f51afa244b0b4eb39bada95a33acb8.html#ga84f51afa244b0b4eb39bada95a33acb8" title="16&#45;bit, fixed point implementation of Perlin&#39;s noise." alt="" coords="463,194,540,219"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="604,264,525,222,528,217,606,260"/>
-<area shape="rect" id="Node000003" href="$d8/df9/group___noise_generation_gad2c041d7b65808890265ed62a75555bb.html#gad2c041d7b65808890265ed62a75555bb" title=" " alt="" coords="463,243,540,269"/>
+<area shape="rect" id="Node000003" href="$d8/df9/group___noise_generation_gad2c041d7b65808890265ed62a75555bb.html#gad2c041d7b65808890265ed62a75555bb" title="16&#45;bit, fixed point implementation of Perlin&#39;s noise." alt="" coords="463,243,540,269"/>
 <area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="574,272,540,266,541,260,575,267"/>
 <area shape="rect" id="Node000004" href="$d8/df9/group___noise_generation_ga6ae857dd0735e2ea05347ae11b587f9e.html#ga6ae857dd0735e2ea05347ae11b587f9e" title=" " alt="" coords="463,293,540,318"/>
 <area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="575,295,541,301,540,296,574,290"/>

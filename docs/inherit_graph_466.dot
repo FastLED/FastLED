@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::fl::common_type\l_impl\< i8, u8, void \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d3c/namespacefl_1_1fl.html#de/d36/structfl_1_1fl_1_1common__type__impl_3_01i8_00_01u8_00_01void_01_4",tooltip=" "];
+  Node0 [id="Node000000",label="fl::EmitterSolveMatrixQ16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl.html#d0/d89/structfl_1_1_emitter_solve_matrix_q16",tooltip="Inverse emitter matrix in s16.16, mapping XYZ to three emitter drives."];
 }

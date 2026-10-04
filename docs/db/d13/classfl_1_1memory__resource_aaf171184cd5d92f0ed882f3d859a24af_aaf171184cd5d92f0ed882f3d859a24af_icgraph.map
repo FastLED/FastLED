@@ -1,0 +1,15 @@
+<map id="fl::memory_resource::do_allocate" name="fl::memory_resource::do_allocate">
+<area shape="rect" id="Node000001" title=" " alt="" coords="635,47,791,87"/>
+<area shape="rect" id="Node000002" href="$db/d13/classfl_1_1memory__resource_ad5b6ab31a893518956b491b20968c30f.html#ad5b6ab31a893518956b491b20968c30f" title=" " alt="" coords="431,47,587,87"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="621,69,587,69,587,64,621,64"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="543,35,531,28,509,25,489,27,478,32,473,38,476,46,470,47,468,37,474,28,488,22,509,20,532,23,545,30"/>
+<area shape="rect" id="Node000003" href="$db/d13/classfl_1_1memory__resource_a8cf7276a4cc29b7568c61c6b87d3e67f.html#a8cf7276a4cc29b7568c61c6b87d3e67f" title="Try to resize in&#45;place." alt="" coords="205,5,361,45"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="416,52,361,42,362,37,417,47"/>
+<area shape="rect" id="Node000004" href="$d4/dad/classfl_1_1vector__basic_a8be41cbbc9066e7c94ef553dcd19727d.html#a8be41cbbc9066e7c94ef553dcd19727d" title="Swap contents with another vector_basic." alt="" coords="184,94,383,119"/>
+<area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="417,86,356,97,355,91,416,80"/>
+<area shape="poly" id="edge7_Node000004_Node000004" title=" " alt="" coords="321,84,311,76,283,73,261,75,249,79,247,85,253,92,249,96,241,86,245,76,260,70,283,67,313,71,324,80"/>
+<area shape="rect" id="Node000005" href="$d2/d24/classfl_1_1vector_ade07cb2f19eb455df0fbba03449a0c4d.html#ade07cb2f19eb455df0fbba03449a0c4d" title=" " alt="" coords="5,55,136,95"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="184,94,136,87,137,82,185,89"/>
+<area shape="rect" id="Node000006" href="$d2/d24/classfl_1_1vector_ab5b8691cdf39b5293c746ab3a6fdf427.html#ab5b8691cdf39b5293c746ab3a6fdf427" title=" " alt="" coords="5,119,136,159"/>
+<area shape="poly" id="edge6_Node000004_Node000006" title=" " alt="" coords="185,124,137,131,136,126,184,119"/>
+</map>

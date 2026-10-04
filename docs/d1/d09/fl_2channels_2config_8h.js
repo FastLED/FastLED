@@ -7,5 +7,5 @@ var fl_2channels_2config_8h =
     [ "fl::SpiChipsetConfig", "d8/d5b/structfl_1_1_spi_chipset_config.html", "d8/d5b/structfl_1_1_spi_chipset_config" ],
     [ "fl::ChipsetVariant", "d4/d36/namespacefl_a71a8408b84f38a325705a25558e4c2c6.html#a71a8408b84f38a325705a25558e4c2c6", null ],
     [ "fl::FASTLED_SHARED_PTR_STRUCT", "d4/d36/namespacefl_af28c578c031d4fa02c0c080997a7e2ba.html#af28c578c031d4fa02c0c080997a7e2ba", null ],
-    [ "fl::makeClockless", "d4/d36/namespacefl_a336a0d84589b1ad8d94fd4a267b68504.html#a336a0d84589b1ad8d94fd4a267b68504", null ]
+    [ "fl::makeClockless", "d4/d36/namespacefl_ada630a354f12bb99f8e128d5ae619fbb.html#ada630a354f12bb99f8e128d5ae619fbb", null ]
 ];

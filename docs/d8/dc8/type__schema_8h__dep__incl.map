@@ -1,17 +1,23 @@
 <map id="fl/remote/rpc/type_schema.h" name="fl/remote/rpc/type_schema.h">
-<area shape="rect" id="Node000001" title=" " alt="" coords="141,5,280,45"/>
-<area shape="rect" id="Node000002" href="$d5/dab/rpc__invokers_8h.html" title=" " alt="" coords="109,93,312,119"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="213,59,213,93,208,93,208,59"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="209,5,348,45"/>
+<area shape="rect" id="Node000002" href="$d5/dab/rpc__invokers_8h.html" title=" " alt="" coords="177,93,380,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="281,59,281,93,276,93,276,59"/>
 <area shape="rect" id="Node000003" href="$dc/d92/response__aware__binding_8h.html" title=" " alt="" coords="5,167,173,207"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="183,129,120,169,117,164,180,124"/>
-<area shape="rect" id="Node000004" href="$d5/d8f/rpc_8cpp_8hpp.html" title=" " alt="" coords="169,328,353,353"/>
-<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="219,132,261,327,256,328,214,133"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="239,126,136,169,134,164,237,121"/>
+<area shape="rect" id="Node000004" href="$d5/d8f/rpc_8cpp_8hpp.html" title=" " alt="" coords="251,335,435,361"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="260,131,248,148,239,168,234,187,239,206,257,246,283,282,331,333,328,337,279,285,253,248,233,208,229,187,233,166,243,145,256,127"/>
 <area shape="rect" id="Node000009" href="$df/d30/rpc__registry_8h.html" title=" " alt="" coords="249,174,445,199"/>
-<area shape="poly" id="edge5_Node000002_Node000009" title=" " alt="" coords="244,123,328,171,325,176,241,128"/>
-<area shape="rect" id="Node000005" href="$de/d1e/fl_2remote_2rpc_2__build_8cpp_8hpp.html" title=" " alt="" coords="160,401,363,427"/>
-<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="264,367,264,401,259,401,259,367"/>
-<area shape="poly" id="edge6_Node000009_Node000004" title=" " alt="" coords="326,211,306,232,289,256,273,295,266,328,261,327,268,293,284,253,302,228,322,207"/>
-<area shape="rect" id="Node000010" href="$df/d16/remote_2rpc_2rpc_8h.html" title=" " alt="" coords="299,255,440,280"/>
-<area shape="poly" id="edge7_Node000009_Node000010" title=" " alt="" coords="356,212,369,254,363,255,351,213"/>
-<area shape="poly" id="edge8_Node000010_Node000004" title=" " alt="" coords="342,290,280,330,278,326,339,285"/>
+<area shape="poly" id="edge5_Node000002_Node000009" title=" " alt="" coords="300,127,339,172,335,176,296,131"/>
+<area shape="rect" id="Node000025" href="$d4/d19/runtime__rpc__binding_8h.html" title=" " alt="" coords="469,167,629,207"/>
+<area shape="poly" id="edge9_Node000002_Node000025" title=" " alt="" coords="332,120,485,164,484,169,330,125"/>
+<area shape="rect" id="Node000005" href="$de/d1e/fl_2remote_2rpc_2__build_8cpp_8hpp.html" title=" " alt="" coords="339,416,541,441"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="369,367,427,414,424,418,366,371"/>
+<area shape="poly" id="edge6_Node000009_Node000004" title=" " alt="" coords="349,213,346,335,340,335,343,213"/>
+<area shape="rect" id="Node000010" href="$df/d16/remote_2rpc_2rpc_8h.html" title=" " alt="" coords="371,255,512,280"/>
+<area shape="poly" id="edge7_Node000009_Node000010" title=" " alt="" coords="373,206,429,252,426,257,370,210"/>
+<area shape="poly" id="edge8_Node000010_Node000004" title=" " alt="" coords="418,291,359,337,356,333,414,287"/>
+<area shape="poly" id="edge10_Node000025_Node000010" title=" " alt="" coords="514,217,459,256,456,252,511,213"/>
+<area shape="rect" id="Node000026" href="$de/dbf/runtime__rpc__binding_8cpp_8hpp.html" title="Non&#45;template RuntimeRpcBinding::invoke body (FastLED #3246 Tier 1A)." alt="" coords="464,328,624,368"/>
+<area shape="poly" id="edge11_Node000025_Node000026" title=" " alt="" coords="551,221,547,328,542,328,546,220"/>
+<area shape="poly" id="edge12_Node000026_Node000005" title=" " alt="" coords="510,378,457,418,454,414,507,374"/>
 </map>

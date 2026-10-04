@@ -10,10 +10,20 @@ digraph "fl::task::Scheduler::update_before_frame_tasks"
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
   Node2 [id="Node000002",label="fl::task::Scheduler\l::update_tasks_of_type",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d2b/classfl_1_1task_1_1_scheduler_a523f729f91cfca13038bd39ca4838397.html#a523f729f91cfca13038bd39ca4838397",tooltip=" "];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::millis",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a",tooltip="Universal millisecond timer - returns milliseconds since system startup."];
-  Node3 -> Node3 [id="edge3_Node000003_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node2 -> Node4 [id="edge4_Node000002_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="fl::task::Scheduler\l::warn_no_then",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d2b/classfl_1_1task_1_1_scheduler_a030936767149b44cd3be5b5eccceae86.html#a030936767149b44cd3be5b5eccceae86",tooltip=" "];
-  Node4 -> Node5 [id="edge5_Node000004_Node000005",color="steelblue1",style="solid",tooltip=" "];
-  Node5 [id="Node000005",label="fl::basic_string::empty",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d66/classfl_1_1basic__string_a409024020d4cdb01125a9b7fba3404b5.html#a409024020d4cdb01125a9b7fba3404b5",tooltip=" "];
+  Node3 [id="Node000003",label="fl::vector::clear",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d24/classfl_1_1vector_a6bcea23da2d1c39846ec89a5119310ff.html#a6bcea23da2d1c39846ec89a5119310ff",tooltip=" "];
+  Node2 -> Node4 [id="edge3_Node000002_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::millis",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a3c0ba5842bfd029c404a38c8df2315f3.html#a3c0ba5842bfd029c404a38c8df2315f3",tooltip="Universal millisecond timer - returns milliseconds since system startup."];
+  Node4 -> Node4 [id="edge4_Node000004_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node5 [id="edge5_Node000002_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::vector::push_back",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d24/classfl_1_1vector_a82c3455c1a345460f95a0180c93b3fb0.html#a82c3455c1a345460f95a0180c93b3fb0",tooltip=" "];
+  Node2 -> Node6 [id="edge6_Node000002_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::task::Scheduler\l::remove_inactive_tasks",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d2b/classfl_1_1task_1_1_scheduler_aacdd3fab091ccf2185e45abc19177755.html#aacdd3fab091ccf2185e45abc19177755",tooltip=" "];
+  Node2 -> Node7 [id="edge7_Node000002_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::task::Scheduler\l::update_frame_listener\l_registration",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d2b/classfl_1_1task_1_1_scheduler_ab23e409040ebd66d4ccd8fe53c939d90.html#ab23e409040ebd66d4ccd8fe53c939d90",tooltip=" "];
+  Node7 -> Node8 [id="edge8_Node000007_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl::EngineEvents::setFrame\lTaskListener",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/dca/classfl_1_1_engine_events_a72f24bd8f5798f69531fef3a895ab3cd.html#a72f24bd8f5798f69531fef3a895ab3cd",tooltip=" "];
+  Node2 -> Node9 [id="edge9_Node000002_Node000009",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="fl::task::Scheduler\l::warn_no_then",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d2b/classfl_1_1task_1_1_scheduler_a030936767149b44cd3be5b5eccceae86.html#a030936767149b44cd3be5b5eccceae86",tooltip=" "];
+  Node9 -> Node10 [id="edge10_Node000009_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="fl::basic_string::empty",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d66/classfl_1_1basic__string_ac3effe716fde4667b05a52d78d74bbfb.html#ac3effe716fde4667b05a52d78d74bbfb",tooltip=" "];
 }

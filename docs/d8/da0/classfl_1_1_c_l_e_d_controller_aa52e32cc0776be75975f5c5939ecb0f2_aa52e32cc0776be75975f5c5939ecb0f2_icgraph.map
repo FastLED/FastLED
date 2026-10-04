@@ -1,0 +1,34 @@
+<map id="fl::CLEDController::staticEmitterProfile" name="fl::CLEDController::staticEmitterProfile">
+<area shape="rect" id="Node000001" title="Template&#45;derived static&#45;profile controllers override this hook." alt="" coords="755,193,909,233"/>
+<area shape="rect" id="Node000002" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a86cf56f34d65e24324a27d7bde59a6cd.html#a86cf56f34d65e24324a27d7bde59a6cd" title=" " alt="" coords="500,126,707,181"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="741,192,706,183,708,178,742,187"/>
+<area shape="rect" id="Node000036" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a796bbae17191ecc97fe3cbc408ccb4cf.html#a796bbae17191ecc97fe3cbc408ccb4cf" title=" " alt="" coords="535,229,671,269"/>
+<area shape="poly" id="edge14_Node000001_Node000036" title=" " alt="" coords="741,230,672,241,671,236,740,225"/>
+<area shape="rect" id="Node000003" href="$d8/da0/classfl_1_1_c_l_e_d_controller_af0d30f71a36e250fce4a47dd21c64ec0.html#af0d30f71a36e250fce4a47dd21c64ec0" title="The color corrction to use for this controller, expressed as a CRGB object." alt="" coords="290,5,426,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="552,120,504,89,451,60,423,48,425,43,453,55,507,84,555,116"/>
+<area shape="rect" id="Node000032" href="$d8/da0/classfl_1_1_c_l_e_d_controller_ad8e020b604e927758a28470f0b49c0bf.html#ad8e020b604e927758a28470f0b49c0bf" title="The color corrction to use for this controller, expressed as a CRGB object." alt="" coords="290,69,426,109"/>
+<area shape="poly" id="edge7_Node000002_Node000032" title=" " alt="" coords="486,126,426,110,427,104,488,120"/>
+<area shape="rect" id="Node000033" href="$d8/da0/classfl_1_1_c_l_e_d_controller_af4dfaa16e23f4bde54d366f6950afabe.html#af4dfaa16e23f4bde54d366f6950afabe" title="Set the color temperature, aka white point, for this controller." alt="" coords="290,133,426,173"/>
+<area shape="poly" id="edge8_Node000002_Node000033" title=" " alt="" coords="486,156,426,156,426,151,486,151"/>
+<area shape="rect" id="Node000034" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a436416f75884d028d60cc2de24480d81.html#a436416f75884d028d60cc2de24480d81" title="Set the color temperature, aka white point, for this controller." alt="" coords="290,197,426,237"/>
+<area shape="poly" id="edge9_Node000002_Node000034" title=" " alt="" coords="488,186,427,202,426,197,486,181"/>
+<area shape="rect" id="Node000004" href="$d5/d8b/classfl_1_1_channel_aa19c8e51e8dd59b5474c8dfa9cc9c98f.html#aa19c8e51e8dd59b5474c8dfa9cc9c98f" title="Private constructor (use create() factory method)" alt="" coords="35,157,187,182"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="279,50,266,59,250,80,243,102,236,124,218,146,188,161,186,157,214,142,231,122,238,100,245,78,262,55,276,46"/>
+<area shape="rect" id="Node000029" href="$d5/d8b/classfl_1_1_channel_a8c13b18e633465e6c0e4ea2ab2fac125.html#a8c13b18e633465e6c0e4ea2ab2fac125" title="Backwards&#45;compatible constructor (deprecated)" alt="" coords="35,58,187,83"/>
+<area shape="poly" id="edge4_Node000003_Node000029" title=" " alt="" coords="277,43,181,61,180,55,276,38"/>
+<area shape="rect" id="Node000030" href="$d5/d8b/classfl_1_1_channel_a4fd9736141ec00c1a8f5db47a0af1882.html#a4fd9736141ec00c1a8f5db47a0af1882" title="Apply reconfigurable settings from a ChannelConfig." alt="" coords="23,107,199,133"/>
+<area shape="poly" id="edge5_Node000003_Node000030" title=" " alt="" coords="279,53,265,60,242,79,217,97,183,110,181,105,215,92,239,74,263,55,276,48"/>
+<area shape="rect" id="Node000031" href="$dd/dbb/class_c_fast_l_e_d_aed55271c9d1461ba5a80ac3d4221fc6e.html#aed55271c9d1461ba5a80ac3d4221fc6e" title="Set a global color correction." alt="" coords="22,9,199,34"/>
+<area shape="poly" id="edge6_Node000003_Node000031" title=" " alt="" coords="276,27,199,25,199,20,276,21"/>
+<area shape="poly" id="edge10_Node000034_Node000004" title=" " alt="" coords="276,204,176,185,177,179,277,199"/>
+<area shape="poly" id="edge11_Node000034_Node000029" title=" " alt="" coords="276,197,262,187,245,164,238,140,232,118,214,97,186,82,188,77,218,93,236,115,243,139,249,161,266,183,279,193"/>
+<area shape="poly" id="edge12_Node000034_Node000030" title=" " alt="" coords="276,195,263,188,248,177,238,166,229,156,215,146,186,135,188,130,217,142,232,152,242,162,252,173,265,183,278,190"/>
+<area shape="rect" id="Node000035" href="$dd/dbb/class_c_fast_l_e_d_a322d924794233b3ea163d4865c63e976.html#a322d924794233b3ea163d4865c63e976" title="Set a global color temperature." alt="" coords="15,206,207,231"/>
+<area shape="poly" id="edge13_Node000034_Node000035" title=" " alt="" coords="276,220,207,221,207,215,276,215"/>
+<area shape="rect" id="Node000037" href="$d5/d8b/classfl_1_1_channel_aad464e566821832604d9e96e3d5cf8b2.html#aad464e566821832604d9e96e3d5cf8b2" title=" " alt="" coords="264,262,452,287"/>
+<area shape="poly" id="edge15_Node000036_Node000037" title=" " alt="" coords="522,260,453,268,452,262,521,255"/>
+<area shape="rect" id="Node000038" href="$d5/d8b/classfl_1_1_channel_aa950935278c20c6bf10bf30fd9a502f6.html#aa950935278c20c6bf10bf30fd9a502f6" title=" " alt="" coords="12,309,209,334"/>
+<area shape="poly" id="edge16_Node000037_Node000038" title=" " alt="" coords="277,293,179,311,178,306,276,287"/>
+<area shape="rect" id="Node000040" href="$d4/d36/namespacefl_aba71524e25f179bf921dc7b760eb125d.html#aba71524e25f179bf921dc7b760eb125d" title="Identify the channel&#39;s final current/quantization choice without adding a virtual slot or storage to ..." alt="" coords="5,259,216,285"/>
+<area shape="poly" id="edge17_Node000037_Node000040" title=" " alt="" coords="250,276,216,276,216,270,250,271"/>
+</map>

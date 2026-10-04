@@ -47,7 +47,7 @@
   </g>
 </defs>
 <script type="application/ecmascript">
-var viewWidth = 766;
+var viewWidth = 641;
 var viewHeight = 52;
 var sectionId = 'dynsection-0';
 </script>
@@ -59,9 +59,9 @@ var sectionId = 'dynsection-0';
 <g id="Node000001" class="node">
 <title>Node1</title>
 <g id="a_Node000001"><a xlink:title="Set a non&#45;linear brightness&#45;to&#45;power response exponent.">
-<polygon fill="#999999" stroke="#666666" points="148,-43.5 0,-43.5 0,-13.5 148,-13.5 148,-43.5"/>
-<text text-anchor="start" x="8" y="-31.5" font-family="Helvetica,sans-Serif" font-size="10.00">CFastLED::setPowerScaling</text>
-<text text-anchor="middle" x="74" y="-20.5" font-family="Helvetica,sans-Serif" font-size="10.00">Exponent</text>
+<polygon fill="#999999" stroke="#666666" points="148,-30 0,-30 0,0 148,0 148,-30"/>
+<text text-anchor="start" x="8" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">CFastLED::setPowerScaling</text>
+<text text-anchor="middle" x="74" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">Exponent</text>
 </a>
 </g>
 </g>
@@ -69,8 +69,8 @@ var sectionId = 'dynsection-0';
 <g id="Node000002" class="node">
 <title>Node2</title>
 <g id="a_Node000002"><a xlink:href="../../d9/d5f/group___power_model_gad213f217079d1c8e2453b74bd3aec6de.html#gad213f217079d1c8e2453b74bd3aec6de" target="_top" xlink:title="Set a non&#45;linear brightness&#45;to&#45;power response exponent.">
-<polygon fill="white" stroke="#666666" points="342,-38 184,-38 184,-19 342,-19 342,-38"/>
-<text text-anchor="middle" x="263" y="-26" font-family="Helvetica,sans-Serif" font-size="10.00">set_power_scaling_exponent</text>
+<polygon fill="white" stroke="#666666" points="342,-24.5 184,-24.5 184,-5.5 342,-5.5 342,-24.5"/>
+<text text-anchor="middle" x="263" y="-12.5" font-family="Helvetica,sans-Serif" font-size="10.00">set_power_scaling_exponent</text>
 </a>
 </g>
 </g>
@@ -78,17 +78,17 @@ var sectionId = 'dynsection-0';
 <g id="edge1_Node000001_Node000002" class="edge">
 <title>Node1&#45;&gt;Node2</title>
 <g id="a_edge1_Node000001_Node000002"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M148.1,-28.5C156.5,-28.5 165.12,-28.5 173.69,-28.5"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="173.7,-32 183.7,-28.5 173.7,-25 173.7,-32"/>
+<path fill="none" stroke="#63b8ff" d="M148.1,-15C156.5,-15 165.12,-15 173.69,-15"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="173.7,-18.5 183.7,-15 173.7,-11.5 173.7,-18.5"/>
 </a>
 </g>
 </g>
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d1/d2a/power__mgt_8cpp_8hpp_afe71d257dc9aca526178a992761bb812.html#afe71d257dc9aca526178a992761bb812" target="_top" xlink:title="Global RGB power model (initialized to WS2812 @ 5V defaults, linear response)">
-<polygon fill="white" stroke="#666666" points="600,-38 517,-38 517,-19 600,-19 600,-38"/>
-<text text-anchor="middle" x="558.5" y="-26" font-family="Helvetica,sans-Serif" font-size="10.00">gPowerModel</text>
+<g id="a_Node000003"><a xlink:href="../../d1/d2a/power__mgt_8cpp_8hpp_aa482db0d85e7c33ad7ce4f3b77f4808e.html#aa482db0d85e7c33ad7ce4f3b77f4808e" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="514,-43.5 378,-43.5 378,-24.5 514,-24.5 514,-43.5"/>
+<text text-anchor="middle" x="446" y="-31.5" font-family="Helvetica,sans-Serif" font-size="10.00">apply_rgb_power_model</text>
 </a>
 </g>
 </g>
@@ -96,35 +96,26 @@ var sectionId = 'dynsection-0';
 <g id="edge2_Node000002_Node000003" class="edge">
 <title>Node2&#45;&gt;Node3</title>
 <g id="a_edge2_Node000002_Node000003"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M342.27,-28.5C394.41,-28.5 461.43,-28.5 506.73,-28.5"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="506.9,-32 516.9,-28.5 506.9,-25 506.9,-32"/>
-</a>
-</g>
-</g>
-<!-- Node5 -->
-<g id="Node000005" class="node">
-<title>Node5</title>
-<g id="a_Node000005"><a xlink:href="../../d9/d5f/group___power_model_ga83d1cb7bfce9bd338765968bb40d54e5.html#ga83d1cb7bfce9bd338765968bb40d54e5" target="_top" xlink:title="Set custom RGB LED power consumption model.">
-<polygon fill="white" stroke="#666666" points="481,-19 378,-19 378,0 481,0 481,-19"/>
-<text text-anchor="middle" x="429.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">set_power_model</text>
-</a>
-</g>
-</g>
-<!-- Node2&#45;&gt;Node5 -->
-<g id="edge4_Node000002_Node000005" class="edge">
-<title>Node2&#45;&gt;Node5</title>
-<g id="a_edge4_Node000002_Node000005"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M342.4,-19.45C350.99,-18.45 359.63,-17.45 367.96,-16.49"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="368.4,-19.97 377.93,-15.34 367.59,-13.01 368.4,-19.97"/>
+<path fill="none" stroke="#63b8ff" d="M342.07,-23.2C350.67,-24.1 359.42,-25.02 368,-25.92"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="367.67,-29.4 377.98,-26.96 368.4,-22.44 367.67,-29.4"/>
 </a>
 </g>
 </g>
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../d9/d5b/classfl_1_1_singleton_a47fdc044003ec27f9e9833f7f5418e01.html#a47fdc044003ec27f9e9833f7f5418e01" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="758,-38 636,-38 636,-19 758,-19 758,-38"/>
-<text text-anchor="middle" x="697" y="-26" font-family="Helvetica,sans-Serif" font-size="10.00">fl::Singleton::instance</text>
+<g id="a_Node000004"><a xlink:href="../../d1/d2a/power__mgt_8cpp_8hpp_afe71d257dc9aca526178a992761bb812.html#afe71d257dc9aca526178a992761bb812" target="_top" xlink:title="Global RGB power model (initialized to WS2812 @ 5V defaults, linear response)">
+<polygon fill="#fff0f0" stroke="red" points="633,-24.5 550,-24.5 550,-5.5 633,-5.5 633,-24.5"/>
+<text text-anchor="middle" x="591.5" y="-12.5" font-family="Helvetica,sans-Serif" font-size="10.00">gPowerModel</text>
+</a>
+</g>
+</g>
+<!-- Node2&#45;&gt;Node4 -->
+<g id="edge4_Node000002_Node000004" class="edge">
+<title>Node2&#45;&gt;Node4</title>
+<g id="a_edge4_Node000002_Node000004"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M342.2,-15C403.4,-15 486.72,-15 539.56,-15"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="539.71,-18.5 549.71,-15 539.71,-11.5 539.71,-18.5"/>
 </a>
 </g>
 </g>
@@ -132,17 +123,8 @@ var sectionId = 'dynsection-0';
 <g id="edge3_Node000003_Node000004" class="edge">
 <title>Node3&#45;&gt;Node4</title>
 <g id="a_edge3_Node000003_Node000004"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M600.08,-28.5C608.16,-28.5 616.86,-28.5 625.61,-28.5"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="625.86,-32 635.86,-28.5 625.86,-25 625.86,-32"/>
-</a>
-</g>
-</g>
-<!-- Node5&#45;&gt;Node3 -->
-<g id="edge5_Node000005_Node000003" class="edge">
-<title>Node5&#45;&gt;Node3</title>
-<g id="a_edge5_Node000005_Node000003"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M481.06,-17.06C489.52,-18.33 498.3,-19.64 506.76,-20.91"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="506.47,-24.41 516.88,-22.42 507.51,-17.48 506.47,-24.41"/>
+<path fill="none" stroke="#63b8ff" d="M514.13,-25.11C522.84,-23.96 531.64,-22.79 540.02,-21.68"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="540.54,-25.15 550,-20.36 539.62,-18.21 540.54,-25.15"/>
 </a>
 </g>
 </g>

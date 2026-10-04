@@ -8,7 +8,7 @@ digraph "fl::tan_impl_float"
   rankdir="RL";
   Node1 [id="Node000001",label="fl::tan_impl_float",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::tan",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a85ff26cabf049821a12b7e1a0031b1b0.html#a85ff26cabf049821a12b7e1a0031b1b0",tooltip=" "];
+  Node2 [id="Node000002",label="fl::tan",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a6675364aebf6ff5ffc757c10e55514ff.html#a6675364aebf6ff5ffc757c10e55514ff",tooltip=" "];
   Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::tanf",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_aa8c93038f7e4e388592f97501162b5e5.html#aa8c93038f7e4e388592f97501162b5e5",tooltip=" "];
+  Node3 [id="Node000003",label="fl::tanf",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a36219360da6961a7080ac8a6473ffbe5.html#a36219360da6961a7080ac8a6473ffbe5",tooltip=" "];
 }

@@ -49,7 +49,7 @@
 <!-- Node5 -->
 <g id="Node000005" class="node">
 <title>Node5</title>
-<g id="a_Node000005"><a xlink:href="../../d4/d36/namespacefl_a2d12ae4decce550cd9809a6687f112e2.html#a2d12ae4decce550cd9809a6687f112e2" target="_top" xlink:title="Convert unsigned 64&#45;bit integer to string buffer in given radix.">
+<g id="a_Node000005"><a xlink:href="../../d4/d36/namespacefl_aa60cdd7a91156d23e724b99f4719e849.html#aa60cdd7a91156d23e724b99f4719e849" target="_top" xlink:title="Convert unsigned 64&#45;bit integer to string buffer in given radix.">
 <polygon fill="white" stroke="#666666" points="223,-19 161,-19 161,0 223,0 223,-19"/>
 <text text-anchor="middle" x="192" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::utoa64</text>
 </a>
@@ -85,7 +85,7 @@
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../d4/d36/namespacefl_a2b133338a142a6ec52750f65eb3a33e5.html#a2b133338a142a6ec52750f65eb3a33e5" target="_top" xlink:title=" ">
+<g id="a_Node000004"><a xlink:href="../../d4/d36/namespacefl_a5f373a62dc320a7b47d5ea3b34184cab.html#a5f373a62dc320a7b47d5ea3b34184cab" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="336,-37 280,-37 280,-18 336,-18 336,-37"/>
 <text text-anchor="middle" x="308" y="-25" font-family="Helvetica,sans-Serif" font-size="10.00">fl::strlen</text>
 </a>

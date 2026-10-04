@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -127,18 +127,18 @@ $(function(){initNavTree('da/dca/noise_8cpp_8hpp_adfa7fac27b820e71cc7a913a951f9c
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../da/dca/noise_8cpp_8hpp_source.html#l00157">157</a> of file <a class="el" href="../../da/dca/noise_8cpp_8hpp_source.html">noise.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  157</span>                                                                              {</div>
-<div class="line"><span class="lineno">  158</span>    <a class="code hl_function" href="../../d3/d7d/namespacefl_1_1anonymous__namespace_02noise__woryley_8cpp_8hpp_03_a3cf77c64767ffeb9d6ae1ed02f4d14d9.html#a3cf77c64767ffeb9d6ae1ed02f4d14d9">hash</a> = <a class="code hl_function" href="../../d3/d7d/namespacefl_1_1anonymous__namespace_02noise__woryley_8cpp_8hpp_03_a3cf77c64767ffeb9d6ae1ed02f4d14d9.html#a3cf77c64767ffeb9d6ae1ed02f4d14d9">hash</a> &amp; 15;</div>
-<div class="line"><span class="lineno">  159</span>    fl::i16 u,v;</div>
-<div class="line"><span class="lineno">  160</span>    <span class="keywordflow">if</span>(hash &gt; 8) { u=<a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>;v=<a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>; }</div>
-<div class="line"><span class="lineno">  161</span>    <span class="keywordflow">else</span> <span class="keywordflow">if</span>(hash &lt; 4) { u=<a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>;v=1; }</div>
-<div class="line"><span class="lineno">  162</span>    <span class="keywordflow">else</span> { u=1;v=<a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>; }</div>
-<div class="line"><span class="lineno">  163</span>    <span class="keywordflow">if</span>(hash&amp;1) { u = -u; }</div>
-<div class="line"><span class="lineno">  164</span>    <span class="keywordflow">if</span>(hash&amp;2) { v = -v; }</div>
-<div class="line"><span class="lineno">  165</span> </div>
-<div class="line"><span class="lineno">  166</span>    <span class="keywordflow">return</span> AVG15(u,v);</div>
-<div class="line"><span class="lineno">  167</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../da/dca/noise_8cpp_8hpp_source.html#l00158">158</a> of file <a class="el" href="../../da/dca/noise_8cpp_8hpp_source.html">noise.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  158</span>                                                                              {</div>
+<div class="line"><span class="lineno">  159</span>    <a class="code hl_function" href="../../d3/d7d/namespacefl_1_1anonymous__namespace_02noise__woryley_8cpp_8hpp_03_a3cf77c64767ffeb9d6ae1ed02f4d14d9.html#a3cf77c64767ffeb9d6ae1ed02f4d14d9">hash</a> = <a class="code hl_function" href="../../d3/d7d/namespacefl_1_1anonymous__namespace_02noise__woryley_8cpp_8hpp_03_a3cf77c64767ffeb9d6ae1ed02f4d14d9.html#a3cf77c64767ffeb9d6ae1ed02f4d14d9">hash</a> &amp; 15;</div>
+<div class="line"><span class="lineno">  160</span>    fl::i16 u,v;</div>
+<div class="line"><span class="lineno">  161</span>    <span class="keywordflow">if</span>(hash &gt; 8) { u=<a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>;v=<a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>; }</div>
+<div class="line"><span class="lineno">  162</span>    <span class="keywordflow">else</span> <span class="keywordflow">if</span>(hash &lt; 4) { u=<a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>;v=1; }</div>
+<div class="line"><span class="lineno">  163</span>    <span class="keywordflow">else</span> { u=1;v=<a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>; }</div>
+<div class="line"><span class="lineno">  164</span>    <span class="keywordflow">if</span>(hash&amp;1) { u = -u; }</div>
+<div class="line"><span class="lineno">  165</span>    <span class="keywordflow">if</span>(hash&amp;2) { v = -v; }</div>
+<div class="line"><span class="lineno">  166</span> </div>
+<div class="line"><span class="lineno">  167</span>    <span class="keywordflow">return</span> AVG15(u,v);</div>
+<div class="line"><span class="lineno">  168</span>}</div>
 <div class="ttc" id="a_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc_html_a6150e0515f7202e2fb518f7206ed97dc"><div class="ttname"><a href="../../db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a></div><div class="ttdeci">int x</div><div class="ttdef"><b>Definition</b> <a href="../../db/d49/_audio_2simple_2simple_8h_source.html#l00092">simple.h:92</a></div></div>
 <div class="ttc" id="anamespacefl_1_1anonymous__namespace_02noise__woryley_8cpp_8hpp_03_a3cf77c64767ffeb9d6ae1ed02f4d14d9_html_a3cf77c64767ffeb9d6ae1ed02f4d14d9"><div class="ttname"><a href="../../d3/d7d/namespacefl_1_1anonymous__namespace_02noise__woryley_8cpp_8hpp_03_a3cf77c64767ffeb9d6ae1ed02f4d14d9.html#a3cf77c64767ffeb9d6ae1ed02f4d14d9">fl::anonymous_namespace{noise_woryley.cpp.hpp}::hash</a></div><div class="ttdeci">u16 hash(i32 x, i32 y)</div><div class="ttdef"><b>Definition</b> <a href="../../db/dac/noise__woryley_8cpp_8hpp_source.html#l00019">noise_woryley.cpp.hpp:19</a></div></div>
 </div><!-- fragment -->
@@ -153,7 +153,7 @@ $(function(){initNavTree('da/dca/noise_8cpp_8hpp_adfa7fac27b820e71cc7a913a951f9c
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../da/dca/noise_8cpp_8hpp.html">noise.cpp.hpp</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:02 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:04 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

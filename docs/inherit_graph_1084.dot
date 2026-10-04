@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::qfx\< T, F, I \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dc1/classfl_1_1qfx.html",tooltip="Template class for representing fractional ints."];
+  Node0 [id="Node000000",label="fl::SlimBridgeShowPolicy\l\< true \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d05/structfl_1_1_slim_bridge_show_policy_3_01true_01_4.html",tooltip="Direct: no registry, so there is no runtime enable/disable or exclusive-driver selection,..."];
 }

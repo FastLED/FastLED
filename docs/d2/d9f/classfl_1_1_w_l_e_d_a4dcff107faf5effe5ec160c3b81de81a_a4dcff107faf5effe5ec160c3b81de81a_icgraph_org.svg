@@ -20,7 +20,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../d2/d9f/classfl_1_1_w_l_e_d_aac647eb33edf4763608c393c494ba749.html#aac647eb33edf4763608c393c494ba749" target="_top" xlink:title="Construct WLED with default stub I/O callbacks.">
+<g id="a_Node000002"><a xlink:href="../../d2/d9f/classfl_1_1_w_l_e_d_a9d5d435fd3881e1e962b27e61d5b58eb.html#a9d5d435fd3881e1e962b27e61d5b58eb" target="_top" xlink:title="Construct WLED with default stub I/O callbacks.">
 <polygon fill="white" stroke="#666666" points="92,-19 0,-19 0,0 92,0 92,-19"/>
 <text text-anchor="middle" x="46" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::WLED::WLED</text>
 </a>

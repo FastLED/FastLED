@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -115,48 +115,63 @@ $(function(){initNavTree('de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d3/df6/mp3_8cpp_8hpp_source.html#l00332">332</a> of file <a class="el" href="../../d3/df6/mp3_8cpp_8hpp_source.html">mp3.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  332</span>                                                                  {</div>
-<div class="line"><span class="lineno">  333</span>    <span class="keywordflow">if</span> (!<a class="code hl_function" href="../../de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_afe1f17dc6a8bb4612d8e3e0ae5c25f54.html#afe1f17dc6a8bb4612d8e3e0ae5c25f54">isReady</a>()) {</div>
-<div class="line"><span class="lineno">  334</span>        <a class="code hl_variable" href="../../de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_a4490c83b238d9349b1fe0710ae342f2b.html#a4490c83b238d9349b1fe0710ae342f2b">mErrorMsg</a> = <span class="stringliteral">&quot;Decoder not ready&quot;</span>;</div>
-<div class="line"><span class="lineno">  335</span>        <a class="code hl_variable" href="../../de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_ac504e6a51a329a4bcfd40f4febd7a60c.html#ac504e6a51a329a4bcfd40f4febd7a60c">mHasError</a> = <span class="keyword">true</span>;</div>
-<div class="line"><span class="lineno">  336</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">  337</span>    }</div>
-<div class="line"><span class="lineno">  338</span> </div>
-<div class="line"><span class="lineno">  339</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_adbcbacc03f4d59e0b39c852e3f5d743f.html#adbcbacc03f4d59e0b39c852e3f5d743f">mEndOfStream</a>) {</div>
-<div class="line"><span class="lineno">  340</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">  341</span>    }</div>
-<div class="line"><span class="lineno">  342</span> </div>
-<div class="line"><span class="lineno">  343</span>    <span class="comment">// Try to decode from existing buffer</span></div>
-<div class="line"><span class="lineno">  344</span>    <span class="keywordflow">if</span> (<a class="code hl_function" href="../../de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_a0bf63aa7f0502fbbb5907c31bd396168.html#a0bf63aa7f0502fbbb5907c31bd396168">findAndDecodeFrame</a>(out_sample)) {</div>
-<div class="line"><span class="lineno">  345</span>        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><span class="lineno">  346</span>    }</div>
-<div class="line"><span class="lineno">  347</span> </div>
-<div class="line"><span class="lineno">  348</span>    <span class="comment">// Need more data - try to fill buffer and decode again</span></div>
-<div class="line"><span class="lineno">  349</span>    <span class="keywordflow">while</span> (<a class="code hl_function" href="../../de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_aaeb6a271da676437b46bab5b2132d223.html#aaeb6a271da676437b46bab5b2132d223">fillBuffer</a>()) {</div>
-<div class="line"><span class="lineno">  350</span>        <span class="keywordflow">if</span> (<a class="code hl_function" href="../../de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_a0bf63aa7f0502fbbb5907c31bd396168.html#a0bf63aa7f0502fbbb5907c31bd396168">findAndDecodeFrame</a>(out_sample)) {</div>
-<div class="line"><span class="lineno">  351</span>            <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><span class="lineno">  352</span>        }</div>
-<div class="line"><span class="lineno">  353</span>    }</div>
-<div class="line"><span class="lineno">  354</span> </div>
-<div class="line"><span class="lineno">  355</span>    <span class="comment">// No more data available</span></div>
-<div class="line"><span class="lineno">  356</span>    <a class="code hl_variable" href="../../de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_adbcbacc03f4d59e0b39c852e3f5d743f.html#adbcbacc03f4d59e0b39c852e3f5d743f">mEndOfStream</a> = <span class="keyword">true</span>;</div>
-<div class="line"><span class="lineno">  357</span>    <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">  358</span>}</div>
-<div class="ttc" id="aclassfl_1_1third__party_1_1_mp3_stream_decoder_impl_a0bf63aa7f0502fbbb5907c31bd396168_html_a0bf63aa7f0502fbbb5907c31bd396168"><div class="ttname"><a href="../../de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_a0bf63aa7f0502fbbb5907c31bd396168.html#a0bf63aa7f0502fbbb5907c31bd396168">fl::third_party::Mp3StreamDecoderImpl::findAndDecodeFrame</a></div><div class="ttdeci">bool findAndDecodeFrame(audio::Sample *out_sample)</div><div class="ttdef"><b>Definition</b> <a href="../../d3/df6/mp3_8cpp_8hpp_source.html#l00250">mp3.cpp.hpp:250</a></div></div>
-<div class="ttc" id="aclassfl_1_1third__party_1_1_mp3_stream_decoder_impl_a4490c83b238d9349b1fe0710ae342f2b_html_a4490c83b238d9349b1fe0710ae342f2b"><div class="ttname"><a href="../../de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_a4490c83b238d9349b1fe0710ae342f2b.html#a4490c83b238d9349b1fe0710ae342f2b">fl::third_party::Mp3StreamDecoderImpl::mErrorMsg</a></div><div class="ttdeci">fl::string mErrorMsg</div><div class="ttdef"><b>Definition</b> <a href="../../d3/df6/mp3_8cpp_8hpp_source.html#l00151">mp3.cpp.hpp:151</a></div></div>
-<div class="ttc" id="aclassfl_1_1third__party_1_1_mp3_stream_decoder_impl_aaeb6a271da676437b46bab5b2132d223_html_aaeb6a271da676437b46bab5b2132d223"><div class="ttname"><a href="../../de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_aaeb6a271da676437b46bab5b2132d223.html#aaeb6a271da676437b46bab5b2132d223">fl::third_party::Mp3StreamDecoderImpl::fillBuffer</a></div><div class="ttdeci">bool fillBuffer()</div><div class="ttdef"><b>Definition</b> <a href="../../d3/df6/mp3_8cpp_8hpp_source.html#l00225">mp3.cpp.hpp:225</a></div></div>
-<div class="ttc" id="aclassfl_1_1third__party_1_1_mp3_stream_decoder_impl_ac504e6a51a329a4bcfd40f4febd7a60c_html_ac504e6a51a329a4bcfd40f4febd7a60c"><div class="ttname"><a href="../../de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_ac504e6a51a329a4bcfd40f4febd7a60c.html#ac504e6a51a329a4bcfd40f4febd7a60c">fl::third_party::Mp3StreamDecoderImpl::mHasError</a></div><div class="ttdeci">bool mHasError</div><div class="ttdef"><b>Definition</b> <a href="../../d3/df6/mp3_8cpp_8hpp_source.html#l00152">mp3.cpp.hpp:152</a></div></div>
-<div class="ttc" id="aclassfl_1_1third__party_1_1_mp3_stream_decoder_impl_adbcbacc03f4d59e0b39c852e3f5d743f_html_adbcbacc03f4d59e0b39c852e3f5d743f"><div class="ttname"><a href="../../de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_adbcbacc03f4d59e0b39c852e3f5d743f.html#adbcbacc03f4d59e0b39c852e3f5d743f">fl::third_party::Mp3StreamDecoderImpl::mEndOfStream</a></div><div class="ttdeci">bool mEndOfStream</div><div class="ttdef"><b>Definition</b> <a href="../../d3/df6/mp3_8cpp_8hpp_source.html#l00153">mp3.cpp.hpp:153</a></div></div>
-<div class="ttc" id="aclassfl_1_1third__party_1_1_mp3_stream_decoder_impl_afe1f17dc6a8bb4612d8e3e0ae5c25f54_html_afe1f17dc6a8bb4612d8e3e0ae5c25f54"><div class="ttname"><a href="../../de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_afe1f17dc6a8bb4612d8e3e0ae5c25f54.html#afe1f17dc6a8bb4612d8e3e0ae5c25f54">fl::third_party::Mp3StreamDecoderImpl::isReady</a></div><div class="ttdeci">bool isReady() const</div><div class="ttdef"><b>Definition</b> <a href="../../d3/df6/mp3_8cpp_8hpp_source.html#l00132">mp3.cpp.hpp:132</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d3/df6/mp3_8cpp_8hpp_source.html#l00548">548</a> of file <a class="el" href="../../d3/df6/mp3_8cpp_8hpp_source.html">mp3.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  548</span>                                                                  {</div>
+<div class="line"><span class="lineno">  549</span>    <span class="keywordflow">if</span> (!<a class="code hl_function" href="../../de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_afe1f17dc6a8bb4612d8e3e0ae5c25f54.html#afe1f17dc6a8bb4612d8e3e0ae5c25f54">isReady</a>()) {</div>
+<div class="line"><span class="lineno">  550</span>        <a class="code hl_variable" href="../../de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_a4490c83b238d9349b1fe0710ae342f2b.html#a4490c83b238d9349b1fe0710ae342f2b">mErrorMsg</a> = <span class="stringliteral">&quot;Decoder not ready&quot;</span>;</div>
+<div class="line"><span class="lineno">  551</span>        <a class="code hl_variable" href="../../de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_ac504e6a51a329a4bcfd40f4febd7a60c.html#ac504e6a51a329a4bcfd40f4febd7a60c">mHasError</a> = <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  552</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  553</span>    }</div>
+<div class="line"><span class="lineno">  554</span> </div>
+<div class="line"><span class="lineno">  555</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_adbcbacc03f4d59e0b39c852e3f5d743f.html#adbcbacc03f4d59e0b39c852e3f5d743f">mEndOfStream</a>) {</div>
+<div class="line"><span class="lineno">  556</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  557</span>    }</div>
+<div class="line"><span class="lineno">  558</span> </div>
+<div class="line"><span class="lineno">  559</span>    <span class="keywordflow">while</span> (<span class="keyword">true</span>) {</div>
+<div class="line"><span class="lineno">  560</span>        <span class="keyword">const</span> fl::size previous_position = <a class="code hl_variable" href="../../de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_a776b7f4147f1c630aaae6bf4c9ac938c.html#a776b7f4147f1c630aaae6bf4c9ac938c">mBufferPos</a>;</div>
+<div class="line"><span class="lineno">  561</span>        <span class="keywordflow">if</span> (<a class="code hl_function" href="../../de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_a0bf63aa7f0502fbbb5907c31bd396168.html#a0bf63aa7f0502fbbb5907c31bd396168">findAndDecodeFrame</a>(out_sample)) {</div>
+<div class="line"><span class="lineno">  562</span>            <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  563</span>        }</div>
+<div class="line"><span class="lineno">  564</span> </div>
+<div class="line"><span class="lineno">  565</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_a776b7f4147f1c630aaae6bf4c9ac938c.html#a776b7f4147f1c630aaae6bf4c9ac938c">mBufferPos</a> &gt; previous_position) {</div>
+<div class="line"><span class="lineno">  566</span>            <span class="comment">// The decoder rejected or skipped bytes. Retry the remainder before</span></div>
+<div class="line"><span class="lineno">  567</span>            <span class="comment">// refilling so a valid frame after corruption is not discarded.</span></div>
+<div class="line"><span class="lineno">  568</span>            <span class="keywordflow">continue</span>;</div>
+<div class="line"><span class="lineno">  569</span>        }</div>
+<div class="line"><span class="lineno">  570</span> </div>
+<div class="line"><span class="lineno">  571</span>        <span class="keywordflow">if</span> (<a class="code hl_function" href="../../de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_aaeb6a271da676437b46bab5b2132d223.html#aaeb6a271da676437b46bab5b2132d223">fillBuffer</a>()) {</div>
+<div class="line"><span class="lineno">  572</span>            <span class="keywordflow">continue</span>;</div>
+<div class="line"><span class="lineno">  573</span>        }</div>
+<div class="line"><span class="lineno">  574</span> </div>
+<div class="line"><span class="lineno">  575</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_a776b7f4147f1c630aaae6bf4c9ac938c.html#a776b7f4147f1c630aaae6bf4c9ac938c">mBufferPos</a> &lt; <a class="code hl_variable" href="../../de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_a4ae99fe5c72432058556471bab7d7b41.html#a4ae99fe5c72432058556471bab7d7b41">mBufferFilled</a>) {</div>
+<div class="line"><span class="lineno">  576</span>            <span class="comment">// No more bytes are available to complete the current candidate.</span></div>
+<div class="line"><span class="lineno">  577</span>            <span class="comment">// Advance through the tail so a later sync can still be recovered.</span></div>
+<div class="line"><span class="lineno">  578</span>            ++<a class="code hl_variable" href="../../de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_a776b7f4147f1c630aaae6bf4c9ac938c.html#a776b7f4147f1c630aaae6bf4c9ac938c">mBufferPos</a>;</div>
+<div class="line"><span class="lineno">  579</span>            ++<a class="code hl_variable" href="../../de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_a3b0de062022621efe32a79eb9f99fec4.html#a3b0de062022621efe32a79eb9f99fec4">mBytesProcessed</a>;</div>
+<div class="line"><span class="lineno">  580</span>            <span class="keywordflow">continue</span>;</div>
+<div class="line"><span class="lineno">  581</span>        }</div>
+<div class="line"><span class="lineno">  582</span> </div>
+<div class="line"><span class="lineno">  583</span>        <a class="code hl_variable" href="../../de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_adbcbacc03f4d59e0b39c852e3f5d743f.html#adbcbacc03f4d59e0b39c852e3f5d743f">mEndOfStream</a> = <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  584</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  585</span>    }</div>
+<div class="line"><span class="lineno">  586</span>}</div>
+<div class="ttc" id="aclassfl_1_1third__party_1_1_mp3_stream_decoder_impl_a0bf63aa7f0502fbbb5907c31bd396168_html_a0bf63aa7f0502fbbb5907c31bd396168"><div class="ttname"><a href="../../de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_a0bf63aa7f0502fbbb5907c31bd396168.html#a0bf63aa7f0502fbbb5907c31bd396168">fl::third_party::Mp3StreamDecoderImpl::findAndDecodeFrame</a></div><div class="ttdeci">bool findAndDecodeFrame(audio::Sample *out_sample)</div><div class="ttdef"><b>Definition</b> <a href="../../d3/df6/mp3_8cpp_8hpp_source.html#l00425">mp3.cpp.hpp:425</a></div></div>
+<div class="ttc" id="aclassfl_1_1third__party_1_1_mp3_stream_decoder_impl_a3b0de062022621efe32a79eb9f99fec4_html_a3b0de062022621efe32a79eb9f99fec4"><div class="ttname"><a href="../../de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_a3b0de062022621efe32a79eb9f99fec4.html#a3b0de062022621efe32a79eb9f99fec4">fl::third_party::Mp3StreamDecoderImpl::mBytesProcessed</a></div><div class="ttdeci">fl::size mBytesProcessed</div><div class="ttdef"><b>Definition</b> <a href="../../d3/df6/mp3_8cpp_8hpp_source.html#l00309">mp3.cpp.hpp:309</a></div></div>
+<div class="ttc" id="aclassfl_1_1third__party_1_1_mp3_stream_decoder_impl_a4490c83b238d9349b1fe0710ae342f2b_html_a4490c83b238d9349b1fe0710ae342f2b"><div class="ttname"><a href="../../de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_a4490c83b238d9349b1fe0710ae342f2b.html#a4490c83b238d9349b1fe0710ae342f2b">fl::third_party::Mp3StreamDecoderImpl::mErrorMsg</a></div><div class="ttdeci">fl::string mErrorMsg</div><div class="ttdef"><b>Definition</b> <a href="../../d3/df6/mp3_8cpp_8hpp_source.html#l00310">mp3.cpp.hpp:310</a></div></div>
+<div class="ttc" id="aclassfl_1_1third__party_1_1_mp3_stream_decoder_impl_a4ae99fe5c72432058556471bab7d7b41_html_a4ae99fe5c72432058556471bab7d7b41"><div class="ttname"><a href="../../de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_a4ae99fe5c72432058556471bab7d7b41.html#a4ae99fe5c72432058556471bab7d7b41">fl::third_party::Mp3StreamDecoderImpl::mBufferFilled</a></div><div class="ttdeci">fl::size mBufferFilled</div><div class="ttdef"><b>Definition</b> <a href="../../d3/df6/mp3_8cpp_8hpp_source.html#l00308">mp3.cpp.hpp:308</a></div></div>
+<div class="ttc" id="aclassfl_1_1third__party_1_1_mp3_stream_decoder_impl_a776b7f4147f1c630aaae6bf4c9ac938c_html_a776b7f4147f1c630aaae6bf4c9ac938c"><div class="ttname"><a href="../../de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_a776b7f4147f1c630aaae6bf4c9ac938c.html#a776b7f4147f1c630aaae6bf4c9ac938c">fl::third_party::Mp3StreamDecoderImpl::mBufferPos</a></div><div class="ttdeci">fl::size mBufferPos</div><div class="ttdef"><b>Definition</b> <a href="../../d3/df6/mp3_8cpp_8hpp_source.html#l00307">mp3.cpp.hpp:307</a></div></div>
+<div class="ttc" id="aclassfl_1_1third__party_1_1_mp3_stream_decoder_impl_aaeb6a271da676437b46bab5b2132d223_html_aaeb6a271da676437b46bab5b2132d223"><div class="ttname"><a href="../../de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_aaeb6a271da676437b46bab5b2132d223.html#aaeb6a271da676437b46bab5b2132d223">fl::third_party::Mp3StreamDecoderImpl::fillBuffer</a></div><div class="ttdeci">bool fillBuffer()</div><div class="ttdef"><b>Definition</b> <a href="../../d3/df6/mp3_8cpp_8hpp_source.html#l00399">mp3.cpp.hpp:399</a></div></div>
+<div class="ttc" id="aclassfl_1_1third__party_1_1_mp3_stream_decoder_impl_ac504e6a51a329a4bcfd40f4febd7a60c_html_ac504e6a51a329a4bcfd40f4febd7a60c"><div class="ttname"><a href="../../de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_ac504e6a51a329a4bcfd40f4febd7a60c.html#ac504e6a51a329a4bcfd40f4febd7a60c">fl::third_party::Mp3StreamDecoderImpl::mHasError</a></div><div class="ttdeci">bool mHasError</div><div class="ttdef"><b>Definition</b> <a href="../../d3/df6/mp3_8cpp_8hpp_source.html#l00311">mp3.cpp.hpp:311</a></div></div>
+<div class="ttc" id="aclassfl_1_1third__party_1_1_mp3_stream_decoder_impl_adbcbacc03f4d59e0b39c852e3f5d743f_html_adbcbacc03f4d59e0b39c852e3f5d743f"><div class="ttname"><a href="../../de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_adbcbacc03f4d59e0b39c852e3f5d743f.html#adbcbacc03f4d59e0b39c852e3f5d743f">fl::third_party::Mp3StreamDecoderImpl::mEndOfStream</a></div><div class="ttdeci">bool mEndOfStream</div><div class="ttdef"><b>Definition</b> <a href="../../d3/df6/mp3_8cpp_8hpp_source.html#l00312">mp3.cpp.hpp:312</a></div></div>
+<div class="ttc" id="aclassfl_1_1third__party_1_1_mp3_stream_decoder_impl_afe1f17dc6a8bb4612d8e3e0ae5c25f54_html_afe1f17dc6a8bb4612d8e3e0ae5c25f54"><div class="ttname"><a href="../../de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_afe1f17dc6a8bb4612d8e3e0ae5c25f54.html#afe1f17dc6a8bb4612d8e3e0ae5c25f54">fl::third_party::Mp3StreamDecoderImpl::isReady</a></div><div class="ttdeci">bool isReady() const</div><div class="ttdef"><b>Definition</b> <a href="../../d3/df6/mp3_8cpp_8hpp_source.html#l00274">mp3.cpp.hpp:274</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d3/df6/mp3_8cpp_8hpp_source.html#l00225">fillBuffer()</a>, <a class="el" href="../../d3/df6/mp3_8cpp_8hpp_source.html#l00250">findAndDecodeFrame()</a>, <a class="el" href="../../d3/df6/mp3_8cpp_8hpp_source.html#l00132">isReady()</a>, <a class="el" href="../../d3/df6/mp3_8cpp_8hpp_source.html#l00153">mEndOfStream</a>, <a class="el" href="../../d3/df6/mp3_8cpp_8hpp_source.html#l00151">mErrorMsg</a>, and <a class="el" href="../../d3/df6/mp3_8cpp_8hpp_source.html#l00152">mHasError</a>.</p>
+<p class="reference">References <a class="el" href="../../d3/df6/mp3_8cpp_8hpp_source.html#l00399">fillBuffer()</a>, <a class="el" href="../../d3/df6/mp3_8cpp_8hpp_source.html#l00425">findAndDecodeFrame()</a>, <a class="el" href="../../d3/df6/mp3_8cpp_8hpp_source.html#l00274">isReady()</a>, <a class="el" href="../../d3/df6/mp3_8cpp_8hpp_source.html#l00308">mBufferFilled</a>, <a class="el" href="../../d3/df6/mp3_8cpp_8hpp_source.html#l00307">mBufferPos</a>, <a class="el" href="../../d3/df6/mp3_8cpp_8hpp_source.html#l00309">mBytesProcessed</a>, <a class="el" href="../../d3/df6/mp3_8cpp_8hpp_source.html#l00312">mEndOfStream</a>, <a class="el" href="../../d3/df6/mp3_8cpp_8hpp_source.html#l00310">mErrorMsg</a>, and <a class="el" href="../../d3/df6/mp3_8cpp_8hpp_source.html#l00311">mHasError</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_af0982d3b4ee0b814eaff23e1cc2fe33e_af0982d3b4ee0b814eaff23e1cc2fe33e_cgraph.svg" width="100%" height="434"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_af0982d3b4ee0b814eaff23e1cc2fe33e_af0982d3b4ee0b814eaff23e1cc2fe33e_cgraph.svg" width="100%" height="487"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 
 </div>
@@ -168,7 +183,7 @@ $(function(){initNavTree('de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d1/d86/namespacefl_1_1third__party.html">third_party</a></li><li class="navelem"><a class="el" href="../../de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl.html">Mp3StreamDecoderImpl</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:11 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:13 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

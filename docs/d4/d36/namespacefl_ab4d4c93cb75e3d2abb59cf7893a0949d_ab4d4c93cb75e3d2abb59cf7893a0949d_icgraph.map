@@ -1,0 +1,16 @@
+<map id="fl::fabs" name="fl::fabs">
+<area shape="rect" id="Node000001" title=" " alt="" coords="965,99,1032,125"/>
+<area shape="rect" id="Node000002" href="$da/db3/namespacefl_1_1colorimetric__response_a562a056bd00762875586ce688324a4cf.html#a562a056bd00762875586ce688324a4cf" title=" " alt="" coords="735,5,917,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="965,94,916,66,876,48,879,43,919,62,967,90"/>
+<area shape="rect" id="Node000003" href="$da/db3/namespacefl_1_1colorimetric__response_ad982dbfa0b852b2299925730448099a7.html#ad982dbfa0b852b2299925730448099a7" title=" " alt="" coords="5,113,225,153"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="951,112,917,111,735,111,460,119,226,130,225,125,459,114,735,105,917,105,952,107"/>
+<area shape="rect" id="Node000004" href="$d1/d54/namespacefl_1_1colorimetric__response_1_1detail_a6473f7c3cd904a8cda13b9573ab0ffe4.html#a6473f7c3cd904a8cda13b9573ab0ffe4" title="Largest absolute entry of a column, which is its infinity norm." alt="" coords="735,120,917,160"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="952,122,918,128,917,122,951,117"/>
+<area shape="rect" id="Node000005" href="$da/db3/namespacefl_1_1colorimetric__response_a47bab90ae7cc342ef40e1f39ea5c6af9.html#a47bab90ae7cc342ef40e1f39ea5c6af9" title=" " alt="" coords="504,145,687,185"/>
+<area shape="poly" id="edge8_Node000001_Node000005" title=" " alt="" coords="977,137,951,158,918,175,859,188,799,193,740,191,687,186,687,180,740,186,799,188,859,183,916,169,948,153,974,132"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="721,154,687,158,687,153,721,149"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="490,161,225,143,226,138,490,156"/>
+<area shape="rect" id="Node000006" href="$da/db3/namespacefl_1_1colorimetric__response_a6d86272feb688e9e8af324d7da5088eb.html#a6d86272feb688e9e8af324d7da5088eb" title=" " alt="" coords="273,171,456,211"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="491,179,456,183,456,178,490,174"/>
+<area shape="poly" id="edge7_Node000006_Node000003" title=" " alt="" coords="263,170,202,156,203,151,265,165"/>
+</map>

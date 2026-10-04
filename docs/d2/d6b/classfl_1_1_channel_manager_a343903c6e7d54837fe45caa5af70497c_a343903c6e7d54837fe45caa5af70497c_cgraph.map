@@ -1,0 +1,13 @@
+<map id="fl::ChannelManager::operator=" name="fl::ChannelManager::operator=">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,55,153,95"/>
+<area shape="rect" id="Node000002" href="$d2/d6b/classfl_1_1_channel_manager_a3f0e1823366151d87c97be78f4273755.html#a3f0e1823366151d87c97be78f4273755" title="Constructor." alt="" coords="201,55,349,95"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="154,73,187,73,187,78,154,78"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="239,56,236,46,242,37,255,31,275,29,298,32,311,39,308,43,297,37,275,34,257,36,246,41,242,47,244,54"/>
+<area shape="rect" id="Node000003" href="$de/dca/classfl_1_1_engine_events_a98984c55652e174bb2384d85935c581b.html#a98984c55652e174bb2384d85935c581b" title=" " alt="" coords="397,5,608,31"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="349,53,397,41,435,31,436,36,398,46,350,58"/>
+<area shape="rect" id="Node000004" href="$d2/d6b/classfl_1_1_channel_manager_ae0d96adf1576f8fe62b937685991e3b5.html#ae0d96adf1576f8fe62b937685991e3b5" title=" " alt="" coords="412,55,593,95"/>
+<area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="350,81,398,82,398,87,350,86"/>
+<area shape="poly" id="edge5_Node000004_Node000002" title=" " alt="" coords="412,69,363,69,363,64,412,64"/>
+<area shape="rect" id="Node000005" href="$d2/d6b/classfl_1_1_channel_manager_aeecac5c6f4dbc304c9be01384ae5fb82.html#aeecac5c6f4dbc304c9be01384ae5fb82" title=" " alt="" coords="656,55,804,95"/>
+<area shape="poly" id="edge6_Node000004_Node000005" title=" " alt="" coords="593,73,642,73,642,78,593,78"/>
+</map>

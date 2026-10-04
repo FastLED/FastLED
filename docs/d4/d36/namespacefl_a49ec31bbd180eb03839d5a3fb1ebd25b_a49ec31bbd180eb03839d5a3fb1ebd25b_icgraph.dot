@@ -15,5 +15,5 @@ digraph "fl::upscaleArbitrary"
   Node4 [id="Node000004",label="fl::upscale",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_aec4161e7f789764b94b67f9365a277f4.html#aec4161e7f789764b94b67f9365a277f4",tooltip=" "];
   Node4 -> Node2 [id="edge4_Node000004_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node4 -> Node5 [id="edge5_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node5 [id="Node000005",label="fl::CRGB::upscale",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dd6/structfl_1_1_c_r_g_b_a9a8c1c3646e8decc74200a7f5215e190.html#a9a8c1c3646e8decc74200a7f5215e190",tooltip=" "];
+  Node5 [id="Node000005",label="fl::CRGB::upscale",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dd6/structfl_1_1_c_r_g_b_aff2a79ed9b50595f4017d559696d34fd.html#aff2a79ed9b50595f4017d559696d34fd",tooltip=" "];
 }

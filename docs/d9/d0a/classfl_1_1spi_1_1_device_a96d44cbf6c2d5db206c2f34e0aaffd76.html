@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -127,33 +127,32 @@ $(function(){initNavTree('d9/d0a/classfl_1_1spi_1_1_device_a96d44cbf6c2d5db206c2
 <dd>
 To apply immediately: call <a class="el" href="../../d9/d0a/classfl_1_1spi_1_1_device_a1efb1bb9dd5c9626afaa071b58ec1972.html#a1efb1bb9dd5c9626afaa071b58ec1972" title="Shutdown the SPI hardware and release resources.">end()</a> then <a class="el" href="../../d9/d0a/classfl_1_1spi_1_1_device_a1c42ea0fa3ddcfc079a7d09f78576a41.html#a1c42ea0fa3ddcfc079a7d09f78576a41" title="Initialize the SPI hardware.">begin()</a> </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d0/daf/device_8cpp_8hpp_source.html#l00358">358</a> of file <a class="el" href="../../d0/daf/device_8cpp_8hpp_source.html">device.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  358</span>                                                          {</div>
-<div class="line"><span class="lineno">  359</span>    <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../d9/d0a/classfl_1_1spi_1_1_device_a9a9c763d0d303ebbd0915003d7b89427.html#a9a9c763d0d303ebbd0915003d7b89427">pImpl</a>) {</div>
-<div class="line"><span class="lineno">  360</span>        <span class="keywordflow">return</span> fl::task::Error(<span class="stringliteral">&quot;Device not initialized&quot;</span>);</div>
-<div class="line"><span class="lineno">  361</span>    }</div>
-<div class="line"><span class="lineno">  362</span> </div>
-<div class="line"><span class="lineno">  363</span>    <span class="comment">// Update the configuration</span></div>
-<div class="line"><span class="lineno">  364</span>    <a class="code hl_variable" href="../../d9/d0a/classfl_1_1spi_1_1_device_a9a9c763d0d303ebbd0915003d7b89427.html#a9a9c763d0d303ebbd0915003d7b89427">pImpl</a>-&gt;config.clock_speed_hz = speed_hz;</div>
-<div class="line"><span class="lineno">  365</span> </div>
-<div class="line"><span class="lineno">  366</span>    <span class="comment">// Note: Runtime clock speed updates are not currently supported by the hardware layer.</span></div>
-<div class="line"><span class="lineno">  367</span>    <span class="comment">// The new speed will take effect on the next begin() call.</span></div>
-<div class="line"><span class="lineno">  368</span>    <span class="comment">// To apply immediately, call end() followed by begin().</span></div>
-<div class="line"><span class="lineno">  369</span> </div>
-<div class="line"><span class="lineno">  370</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d9/d0a/classfl_1_1spi_1_1_device_a9a9c763d0d303ebbd0915003d7b89427.html#a9a9c763d0d303ebbd0915003d7b89427">pImpl</a>-&gt;initialized) {</div>
-<div class="line"><span class="lineno">  371</span>        <a class="code hl_define" href="../../d8/d1c/group__log__hw__interfaces_ga178692e92d575c24c831f587f2165911.html#ga178692e92d575c24c831f587f2165911">FL_LOG_SPI</a>(<span class="stringliteral">&quot;SPI Device: Clock speed updated to &quot;</span> &lt;&lt; speed_hz</div>
-<div class="line"><span class="lineno">  372</span>               &lt;&lt; <span class="stringliteral">&quot; Hz (will take effect on next begin())&quot;</span>);</div>
-<div class="line"><span class="lineno">  373</span>    } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  374</span>        <a class="code hl_define" href="../../d8/d1c/group__log__hw__interfaces_ga178692e92d575c24c831f587f2165911.html#ga178692e92d575c24c831f587f2165911">FL_LOG_SPI</a>(<span class="stringliteral">&quot;SPI Device: Clock speed set to &quot;</span> &lt;&lt; speed_hz &lt;&lt; <span class="stringliteral">&quot; Hz&quot;</span>);</div>
-<div class="line"><span class="lineno">  375</span>    }</div>
-<div class="line"><span class="lineno">  376</span> </div>
-<div class="line"><span class="lineno">  377</span>    <span class="keywordflow">return</span> <a class="code hl_variable" href="../../d4/d36/namespacefl_aa51c7c6f506ca9d9f3db40422b352b11.html#aa51c7c6f506ca9d9f3db40422b352b11">fl::nullopt</a>;</div>
-<div class="line"><span class="lineno">  378</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../d0/daf/device_8cpp_8hpp_source.html#l00356">356</a> of file <a class="el" href="../../d0/daf/device_8cpp_8hpp_source.html">device.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  356</span>                                                          {</div>
+<div class="line"><span class="lineno">  357</span>    <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../d9/d0a/classfl_1_1spi_1_1_device_a9a9c763d0d303ebbd0915003d7b89427.html#a9a9c763d0d303ebbd0915003d7b89427">pImpl</a>) {</div>
+<div class="line"><span class="lineno">  358</span>        <span class="keywordflow">return</span> fl::task::Error(<span class="stringliteral">&quot;Device not initialized&quot;</span>);</div>
+<div class="line"><span class="lineno">  359</span>    }</div>
+<div class="line"><span class="lineno">  360</span> </div>
+<div class="line"><span class="lineno">  361</span>    <span class="comment">// Update the configuration</span></div>
+<div class="line"><span class="lineno">  362</span>    <a class="code hl_variable" href="../../d9/d0a/classfl_1_1spi_1_1_device_a9a9c763d0d303ebbd0915003d7b89427.html#a9a9c763d0d303ebbd0915003d7b89427">pImpl</a>-&gt;config.clock_speed_hz = speed_hz;</div>
+<div class="line"><span class="lineno">  363</span> </div>
+<div class="line"><span class="lineno">  364</span>    <span class="comment">// Note: Runtime clock speed updates are not currently supported by the hardware layer.</span></div>
+<div class="line"><span class="lineno">  365</span>    <span class="comment">// The new speed will take effect on the next begin() call.</span></div>
+<div class="line"><span class="lineno">  366</span>    <span class="comment">// To apply immediately, call end() followed by begin().</span></div>
+<div class="line"><span class="lineno">  367</span> </div>
+<div class="line"><span class="lineno">  368</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d9/d0a/classfl_1_1spi_1_1_device_a9a9c763d0d303ebbd0915003d7b89427.html#a9a9c763d0d303ebbd0915003d7b89427">pImpl</a>-&gt;initialized) {</div>
+<div class="line"><span class="lineno">  369</span>        <a class="code hl_define" href="../../d8/d1c/group__log__hw__interfaces_gad110e32042dacf3d1607d9905ded4a8b.html#gad110e32042dacf3d1607d9905ded4a8b">FL_LOG_SPI</a>(<span class="stringliteral">&quot;SPI Device: Clock speed updated to %s Hz (will take effect on next begin())&quot;</span>, speed_hz);</div>
+<div class="line"><span class="lineno">  370</span>    } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  371</span>        <a class="code hl_define" href="../../d8/d1c/group__log__hw__interfaces_gad110e32042dacf3d1607d9905ded4a8b.html#gad110e32042dacf3d1607d9905ded4a8b">FL_LOG_SPI</a>(<span class="stringliteral">&quot;SPI Device: Clock speed set to %s Hz&quot;</span>, speed_hz);</div>
+<div class="line"><span class="lineno">  372</span>    }</div>
+<div class="line"><span class="lineno">  373</span> </div>
+<div class="line"><span class="lineno">  374</span>    <span class="keywordflow">return</span> <a class="code hl_variable" href="../../d4/d36/namespacefl_aa51c7c6f506ca9d9f3db40422b352b11.html#aa51c7c6f506ca9d9f3db40422b352b11">fl::nullopt</a>;</div>
+<div class="line"><span class="lineno">  375</span>}</div>
 <div class="ttc" id="aclassfl_1_1spi_1_1_device_a9a9c763d0d303ebbd0915003d7b89427_html_a9a9c763d0d303ebbd0915003d7b89427"><div class="ttname"><a href="../../d9/d0a/classfl_1_1spi_1_1_device_a9a9c763d0d303ebbd0915003d7b89427.html#a9a9c763d0d303ebbd0915003d7b89427">fl::spi::Device::pImpl</a></div><div class="ttdeci">fl::unique_ptr&lt; Impl &gt; pImpl</div><div class="ttdef"><b>Definition</b> <a href="../../db/de9/device_8h_source.html#l00134">device.h:134</a></div></div>
-<div class="ttc" id="agroup__log__hw__interfaces_ga178692e92d575c24c831f587f2165911_html_ga178692e92d575c24c831f587f2165911"><div class="ttname"><a href="../../d8/d1c/group__log__hw__interfaces_ga178692e92d575c24c831f587f2165911.html#ga178692e92d575c24c831f587f2165911">FL_LOG_SPI</a></div><div class="ttdeci">#define FL_LOG_SPI(X)</div><div class="ttdoc">Serial Peripheral Interface (SPI) logging Logs SPI configuration, initialization, and transfers.</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00474">log.h:474</a></div></div>
+<div class="ttc" id="agroup__log__hw__interfaces_gad110e32042dacf3d1607d9905ded4a8b_html_gad110e32042dacf3d1607d9905ded4a8b"><div class="ttname"><a href="../../d8/d1c/group__log__hw__interfaces_gad110e32042dacf3d1607d9905ded4a8b.html#gad110e32042dacf3d1607d9905ded4a8b">FL_LOG_SPI</a></div><div class="ttdeci">#define FL_LOG_SPI(...)</div><div class="ttdoc">Serial Peripheral Interface (SPI) logging Logs SPI configuration, initialization, and transfers.</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00657">log.h:657</a></div></div>
 <div class="ttc" id="anamespacefl_aa51c7c6f506ca9d9f3db40422b352b11_html_aa51c7c6f506ca9d9f3db40422b352b11"><div class="ttname"><a href="../../d4/d36/namespacefl_aa51c7c6f506ca9d9f3db40422b352b11.html#aa51c7c6f506ca9d9f3db40422b352b11">fl::nullopt</a></div><div class="ttdeci">constexpr nullopt_t nullopt</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d62/optional_8h_source.html#l00013">optional.h:13</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d7/d7f/log_8h_source.html#l00474">FL_LOG_SPI</a>, <a class="el" href="../../dc/d62/optional_8h_source.html#l00013">fl::nullopt</a>, and <a class="el" href="../../db/de9/device_8h_source.html#l00134">pImpl</a>.</p>
+<p class="reference">References <a class="el" href="../../d7/d7f/log_8h_source.html#l00657">FL_LOG_SPI</a>, <a class="el" href="../../dc/d62/optional_8h_source.html#l00013">fl::nullopt</a>, and <a class="el" href="../../db/de9/device_8h_source.html#l00134">pImpl</a>.</p>
 
 </div>
 </div>
@@ -164,7 +163,7 @@ To apply immediately: call <a class="el" href="../../d9/d0a/classfl_1_1spi_1_1_d
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d4/d68/namespacefl_1_1spi.html">spi</a></li><li class="navelem"><a class="el" href="../../d9/d0a/classfl_1_1spi_1_1_device.html">Device</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:10 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:12 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

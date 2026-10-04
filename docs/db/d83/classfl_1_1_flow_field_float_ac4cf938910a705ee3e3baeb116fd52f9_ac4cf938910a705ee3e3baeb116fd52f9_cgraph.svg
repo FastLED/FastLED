@@ -160,7 +160,7 @@ var sectionId = 'dynsection-0';
 <!-- Node22 -->
 <g id="Node000022" class="node">
 <title>Node22</title>
-<g id="a_Node000022"><a xlink:href="../../d4/d36/namespacefl_a4ba2744fe96375793e6f7a98b188d343.html#a4ba2744fe96375793e6f7a98b188d343" target="_top" xlink:title=" ">
+<g id="a_Node000022"><a xlink:href="../../d4/d36/namespacefl_a367128bb231fab59275e129d3dc3d909.html#a367128bb231fab59275e129d3dc3d909" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="219.5,-97 172.5,-97 172.5,-78 219.5,-78 219.5,-97"/>
 <text text-anchor="middle" x="196" y="-85" font-family="Helvetica,sans-Serif" font-size="10.00">fl::sinf</text>
 </a>
@@ -178,7 +178,7 @@ var sectionId = 'dynsection-0';
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d4/d36/namespacefl_a83381fb5b1fcd1d43aaa05d5eb9a3699.html#a83381fb5b1fcd1d43aaa05d5eb9a3699" target="_top" xlink:title=" ">
+<g id="a_Node000003"><a xlink:href="../../d4/d36/namespacefl_ac273e40cd7a2558a676cb7da93684b1a.html#ac273e40cd7a2558a676cb7da93684b1a" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="369,-481 316,-481 316,-462 369,-462 369,-481"/>
 <text text-anchor="middle" x="342.5" y="-469" font-family="Helvetica,sans-Serif" font-size="10.00">fl::fabsf</text>
 </a>
@@ -196,7 +196,7 @@ var sectionId = 'dynsection-0';
 <!-- Node5 -->
 <g id="Node000005" class="node">
 <title>Node5</title>
-<g id="a_Node000005"><a xlink:href="../../d4/d36/namespacefl_a2e35dfe73de1a16365fb9ff78ad5230a.html#a2e35dfe73de1a16365fb9ff78ad5230a" target="_top" xlink:title=" ">
+<g id="a_Node000005"><a xlink:href="../../d4/d36/namespacefl_acbab7965ace60152d4d09abd92544e7e.html#acbab7965ace60152d4d09abd92544e7e" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="369.5,-255 315.5,-255 315.5,-236 369.5,-236 369.5,-255"/>
 <text text-anchor="middle" x="342.5" y="-243" font-family="Helvetica,sans-Serif" font-size="10.00">fl::floorf</text>
 </a>
@@ -250,7 +250,7 @@ var sectionId = 'dynsection-0';
 <!-- Node10 -->
 <g id="Node000010" class="node">
 <title>Node10</title>
-<g id="a_Node000010"><a xlink:href="../../d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909" target="_top" xlink:title=" ">
+<g id="a_Node000010"><a xlink:href="../../d4/d36/namespacefl_a07c69292ef50aa1083046faff1c52ead.html#a07c69292ef50aa1083046faff1c52ead" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="367.5,-368 317.5,-368 317.5,-349 367.5,-349 367.5,-368"/>
 <text text-anchor="middle" x="342.5" y="-356" font-family="Helvetica,sans-Serif" font-size="10.00">fl::max</text>
 </a>
@@ -340,7 +340,7 @@ var sectionId = 'dynsection-0';
 <!-- Node12 -->
 <g id="Node000012" class="node">
 <title>Node12</title>
-<g id="a_Node000012"><a xlink:href="../../d1/dfb/colorutils_8h_a5e33a6635101019cce6b0936c9415a6f.html#a5e33a6635101019cce6b0936c9415a6f" target="_top" xlink:title="Fill a range of LEDs with a rainbow of colors.">
+<g id="a_Node000012"><a xlink:href="../../d1/dfb/colorutils_8h_a72ee3324d8c70c52743313f46676204f.html#a72ee3324d8c70c52743313f46676204f" target="_top" xlink:title="Fill a range of LEDs with a rainbow of colors.">
 <polygon fill="white" stroke="#666666" points="535.5,-555 462.5,-555 462.5,-536 535.5,-536 535.5,-555"/>
 <text text-anchor="middle" x="499" y="-543" font-family="Helvetica,sans-Serif" font-size="10.00">fill_rainbow</text>
 </a>
@@ -403,7 +403,7 @@ var sectionId = 'dynsection-0';
 <!-- Node15 -->
 <g id="Node000015" class="node">
 <title>Node15</title>
-<g id="a_Node000015"><a xlink:href="../../d4/d36/namespacefl_a680a4050712ddcb48b6107ce5294a82f.html#a680a4050712ddcb48b6107ce5294a82f" target="_top" xlink:title=" ">
+<g id="a_Node000015"><a xlink:href="../../d4/d36/namespacefl_adb63d3a6e58a41ac639c371abe6be324.html#adb63d3a6e58a41ac639c371abe6be324" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="367.5,-179 317.5,-179 317.5,-160 367.5,-160 367.5,-179"/>
 <text text-anchor="middle" x="342.5" y="-167" font-family="Helvetica,sans-Serif" font-size="10.00">fl::ceilf</text>
 </a>
@@ -440,7 +440,7 @@ var sectionId = 'dynsection-0';
 <!-- Node18 -->
 <g id="Node000018" class="node">
 <title>Node18</title>
-<g id="a_Node000018"><a xlink:href="../../d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb" target="_top" xlink:title=" ">
+<g id="a_Node000018"><a xlink:href="../../d4/d36/namespacefl_a2fdabb91a1f100dec8da21e4306aba05.html#a2fdabb91a1f100dec8da21e4306aba05" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="366,-93 319,-93 319,-74 366,-74 366,-93"/>
 <text text-anchor="middle" x="342.5" y="-81" font-family="Helvetica,sans-Serif" font-size="10.00">fl::min</text>
 </a>
@@ -458,7 +458,7 @@ var sectionId = 'dynsection-0';
 <!-- Node19 -->
 <g id="Node000019" class="node">
 <title>Node19</title>
-<g id="a_Node000019"><a xlink:href="../../d4/d36/namespacefl_a0b5da884257d0f4003ead08f27915a2b.html#a0b5da884257d0f4003ead08f27915a2b" target="_top" xlink:title=" ">
+<g id="a_Node000019"><a xlink:href="../../d4/d36/namespacefl_aa4ee5b2900fe7489cc2628422555eb62.html#aa4ee5b2900fe7489cc2628422555eb62" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="368,-56 317,-56 317,-37 368,-37 368,-56"/>
 <text text-anchor="middle" x="342.5" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">fl::sqrtf</text>
 </a>
@@ -530,7 +530,7 @@ var sectionId = 'dynsection-0';
 <!-- Node24 -->
 <g id="Node000024" class="node">
 <title>Node24</title>
-<g id="a_Node000024"><a xlink:href="../../df/d9e/namespacefl_1_1detail_a525aa6aacdb5d3d48ebe21adb14da430.html#a525aa6aacdb5d3d48ebe21adb14da430" target="_top" xlink:title=" ">
+<g id="a_Node000024"><a xlink:href="../../df/d9e/namespacefl_1_1detail_a6a0079ec5177e72b0e64470ba18a332e.html#a6a0079ec5177e72b0e64470ba18a332e" target="_top" xlink:title=" ">
 <polygon fill="#fff0f0" stroke="red" points="559,-19 439,-19 439,0 559,0 559,-19"/>
 <text text-anchor="middle" x="499" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::detail::sin_reduce_</text>
 </a>

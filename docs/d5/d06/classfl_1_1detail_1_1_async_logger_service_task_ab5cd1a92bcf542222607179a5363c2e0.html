@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -117,20 +117,20 @@ $(function(){initNavTree('d5/d06/classfl_1_1detail_1_1_async_logger_service_task
 
 <p>Service all registered loggers (called by task) </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d2/de0/async__logger_8cpp_8hpp_source.html#l00263">263</a> of file <a class="el" href="../../d2/de0/async__logger_8cpp_8hpp_source.html">async_logger.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  263</span>                                            {</div>
-<div class="line"><span class="lineno">  264</span>    <span class="comment">// Flush N messages from all registered loggers</span></div>
-<div class="line"><span class="lineno">  265</span>    <a class="code hl_function" href="../../d5/d7b/structfl_1_1detail_1_1_active_logger_registry_a0ba7ba9bde21bfc28ef06006930c34f1.html#a0ba7ba9bde21bfc28ef06006930c34f1">detail::ActiveLoggerRegistry::instance</a>().<a class="code hl_function" href="../../d5/d7b/structfl_1_1detail_1_1_active_logger_registry_a428161495700eb0287637b406ec06ca3.html#a428161495700eb0287637b406ec06ca3">forEach</a>([<span class="keyword">this</span>](AsyncLogger&amp; logger) {</div>
-<div class="line"><span class="lineno">  266</span>        logger.flushN(<a class="code hl_variable" href="../../d5/d06/classfl_1_1detail_1_1_async_logger_service_task_a26473c9512fb2ec0d3ad047d1f8f7f6b.html#a26473c9512fb2ec0d3ad047d1f8f7f6b">mMessagesPerTick</a>);</div>
-<div class="line"><span class="lineno">  267</span>    });</div>
-<div class="line"><span class="lineno">  268</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../d2/de0/async__logger_8cpp_8hpp_source.html#l00265">265</a> of file <a class="el" href="../../d2/de0/async__logger_8cpp_8hpp_source.html">async_logger.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  265</span>                                            {</div>
+<div class="line"><span class="lineno">  266</span>    <span class="comment">// Flush N messages from all registered loggers</span></div>
+<div class="line"><span class="lineno">  267</span>    <a class="code hl_function" href="../../d5/d7b/structfl_1_1detail_1_1_active_logger_registry_a0ba7ba9bde21bfc28ef06006930c34f1.html#a0ba7ba9bde21bfc28ef06006930c34f1">detail::ActiveLoggerRegistry::instance</a>().<a class="code hl_function" href="../../d5/d7b/structfl_1_1detail_1_1_active_logger_registry_a428161495700eb0287637b406ec06ca3.html#a428161495700eb0287637b406ec06ca3">forEach</a>([<span class="keyword">this</span>](AsyncLogger&amp; logger) {</div>
+<div class="line"><span class="lineno">  268</span>        logger.flushN(<a class="code hl_variable" href="../../d5/d06/classfl_1_1detail_1_1_async_logger_service_task_a26473c9512fb2ec0d3ad047d1f8f7f6b.html#a26473c9512fb2ec0d3ad047d1f8f7f6b">mMessagesPerTick</a>);</div>
+<div class="line"><span class="lineno">  269</span>    });</div>
+<div class="line"><span class="lineno">  270</span>}</div>
 <div class="ttc" id="aclassfl_1_1detail_1_1_async_logger_service_task_a26473c9512fb2ec0d3ad047d1f8f7f6b_html_a26473c9512fb2ec0d3ad047d1f8f7f6b"><div class="ttname"><a href="../../d5/d06/classfl_1_1detail_1_1_async_logger_service_task_a26473c9512fb2ec0d3ad047d1f8f7f6b.html#a26473c9512fb2ec0d3ad047d1f8f7f6b">fl::detail::AsyncLoggerServiceTask::mMessagesPerTick</a></div><div class="ttdeci">fl::size mMessagesPerTick</div><div class="ttdef"><b>Definition</b> <a href="../../df/df1/async__logger_8h_source.html#l00236">async_logger.h:236</a></div></div>
 <div class="ttc" id="astructfl_1_1detail_1_1_active_logger_registry_a0ba7ba9bde21bfc28ef06006930c34f1_html_a0ba7ba9bde21bfc28ef06006930c34f1"><div class="ttname"><a href="../../d5/d7b/structfl_1_1detail_1_1_active_logger_registry_a0ba7ba9bde21bfc28ef06006930c34f1.html#a0ba7ba9bde21bfc28ef06006930c34f1">fl::detail::ActiveLoggerRegistry::instance</a></div><div class="ttdeci">static ActiveLoggerRegistry &amp; instance()</div><div class="ttdef"><b>Definition</b> <a href="../../df/df1/async__logger_8h_source.html#l00181">async_logger.h:181</a></div></div>
 <div class="ttc" id="astructfl_1_1detail_1_1_active_logger_registry_a428161495700eb0287637b406ec06ca3_html_a428161495700eb0287637b406ec06ca3"><div class="ttname"><a href="../../d5/d7b/structfl_1_1detail_1_1_active_logger_registry_a428161495700eb0287637b406ec06ca3.html#a428161495700eb0287637b406ec06ca3">fl::detail::ActiveLoggerRegistry::forEach</a></div><div class="ttdeci">void forEach(Func func)</div><div class="ttdef"><b>Definition</b> <a href="../../df/df1/async__logger_8h_source.html#l00197">async_logger.h:197</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d2/de0/async__logger_8cpp_8hpp_source.html#l00120">fl::AsyncLogger::flushN()</a>, <a class="el" href="../../df/df1/async__logger_8h_source.html#l00197">fl::detail::ActiveLoggerRegistry::forEach()</a>, <a class="el" href="../../df/df1/async__logger_8h_source.html#l00181">fl::detail::ActiveLoggerRegistry::instance()</a>, and <a class="el" href="../../df/df1/async__logger_8h_source.html#l00236">mMessagesPerTick</a>.</p>
+<p class="reference">References <a class="el" href="../../d2/de0/async__logger_8cpp_8hpp_source.html#l00122">fl::AsyncLogger::flushN()</a>, <a class="el" href="../../df/df1/async__logger_8h_source.html#l00197">fl::detail::ActiveLoggerRegistry::forEach()</a>, <a class="el" href="../../df/df1/async__logger_8h_source.html#l00181">fl::detail::ActiveLoggerRegistry::instance()</a>, and <a class="el" href="../../df/df1/async__logger_8h_source.html#l00236">mMessagesPerTick</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d2/de0/async__logger_8cpp_8hpp_source.html#l00234">AsyncLoggerServiceTask()</a>, and <a class="el" href="../../df/df1/async__logger_8h_source.html#l00230">fl::SingletonShared&lt; AsyncLoggerServiceTask &gt;</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d2/de0/async__logger_8cpp_8hpp_source.html#l00236">AsyncLoggerServiceTask()</a>, and <a class="el" href="../../df/df1/async__logger_8h_source.html#l00230">fl::SingletonShared&lt; AsyncLoggerServiceTask &gt;</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -155,7 +155,7 @@ $(function(){initNavTree('d5/d06/classfl_1_1detail_1_1_async_logger_service_task
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../df/d9e/namespacefl_1_1detail.html">detail</a></li><li class="navelem"><a class="el" href="../../d5/d06/classfl_1_1detail_1_1_async_logger_service_task.html">AsyncLoggerServiceTask</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:09 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:11 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

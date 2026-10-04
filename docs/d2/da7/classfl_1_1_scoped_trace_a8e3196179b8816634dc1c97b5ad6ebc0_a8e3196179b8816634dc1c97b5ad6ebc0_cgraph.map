@@ -1,0 +1,11 @@
+<map id="fl::ScopedTrace::depth" name="fl::ScopedTrace::depth">
+<area shape="rect" id="Node000001" title="Get the current stack depth." alt="" coords="5,42,169,67"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a1489f5bf0724c2458554c1722e2f5df9.html#a1489f5bf0724c2458554c1722e2f5df9" title=" " alt="" coords="217,42,360,67"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="169,52,203,52,203,57,169,57"/>
+<area shape="rect" id="Node000003" href="$dc/dad/classfl_1_1_singleton_thread_local_ab08f30bdc7b1529ab6f1927a961d4283.html#ab08f30bdc7b1529ab6f1927a961d4283" title=" " alt="" coords="408,35,587,75"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="360,52,394,52,394,57,360,57"/>
+<area shape="rect" id="Node000004" href="$dd/dfc/classfl_1_1_thread_local_fake_abb8598fd8aabf2409d37c78ea3f20ccf.html#abb8598fd8aabf2409d37c78ea3f20ccf" title=" " alt="" coords="635,5,781,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="587,40,620,35,621,40,587,45"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a1e67c0c24ebcd98fcf8554753d1639a6.html#a1e67c0c24ebcd98fcf8554753d1639a6" title=" " alt="" coords="639,70,777,95"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="587,64,625,69,625,74,587,69"/>
+</map>

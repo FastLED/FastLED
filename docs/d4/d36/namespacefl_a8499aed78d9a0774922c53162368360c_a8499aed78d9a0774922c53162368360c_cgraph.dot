@@ -8,5 +8,5 @@ digraph "fl::encodeUCS7604_16bit_RGBW"
   rankdir="LR";
   Node1 [id="Node000001",label="fl::encodeUCS7604_16bit_RGBW",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Encode RGBW pixels in UCS7604 16-bit format with gamma correction."];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::gamma",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_ab48f77d450cf05f81e3cb66a588e5ae5.html#ab48f77d450cf05f81e3cb66a588e5ae5",tooltip=" "];
+  Node2 [id="Node000002",label="fl::gamma",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a2c2a565c361b0fc8eced9bd0552e67ce.html#a2c2a565c361b0fc8eced9bd0552e67ce",tooltip=" "];
 }

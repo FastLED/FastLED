@@ -8,11 +8,11 @@ digraph "fl::Fluffy_Blobs_FP::draw"
   rankdir="LR";
   Node1 [id="Node000001",label="fl::Fluffy_Blobs_FP\l::draw",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::fl::assume_aligned",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d3c/namespacefl_1_1fl_ab4a4a89750bf923005084995e1de2f92.html#ab4a4a89750bf923005084995e1de2f92",tooltip=" "];
+  Node2 [id="Node000002",label="fl::fl::assume_aligned",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d3c/namespacefl_1_1fl_a534ca7ae9d568ff7d45e8e978586d9cb.html#a534ca7ae9d568ff7d45e8e978586d9cb",tooltip=" "];
   Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
   Node3 [id="Node000003",label="fl::render_value_fp\l_from_float",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a9b47c6dc4674f84aec1a4acfaa5732f9.html#a9b47c6dc4674f84aec1a4acfaa5732f9",tooltip=" "];
   Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="fl::s16x16::raw",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d9f/classfl_1_1s16x16_aa048b427f50f28993a67941e0f303a65.html#aa048b427f50f28993a67941e0f303a65",tooltip=" "];
+  Node4 [id="Node000004",label="fl::s16x16::raw",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d9f/classfl_1_1s16x16_a7b25b9c301243694aa32f9754bec11d2.html#a7b25b9c301243694aa32f9754bec11d2",tooltip=" "];
   Node3 -> Node5 [id="edge4_Node000003_Node000005",color="steelblue1",style="solid",tooltip=" "];
   Node5 [id="Node000005",label="fl::render_value_fp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a6291b8d2d09d5f814b0a4314a2d6ed71.html#a6291b8d2d09d5f814b0a4314a2d6ed71",tooltip=" "];
   Node5 -> Node6 [id="edge5_Node000005_Node000006",color="steelblue1",style="solid",tooltip=" "];
@@ -22,5 +22,5 @@ digraph "fl::Fluffy_Blobs_FP::draw"
   Node5 -> Node13 [id="edge7_Node000005_Node000013",color="steelblue1",style="solid",tooltip=" "];
   Node13 [id="Node000013",label="fl::radiansToA24_fp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a3554157e5c580a5b363e1a723d39e024.html#a3554157e5c580a5b363e1a723d39e024",tooltip=" "];
   Node5 -> Node14 [id="edge8_Node000005_Node000014",color="steelblue1",style="solid",tooltip=" "];
-  Node14 [id="Node000014",label="fl::sincos32",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d36/namespacefl_ab168280957e4bfee3a3976381bd9e663.html#ab168280957e4bfee3a3976381bd9e663",tooltip=" "];
+  Node14 [id="Node000014",label="fl::sincos32",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d36/namespacefl_a7fa7965b1634d81dd3070b937da2697a.html#a7fa7965b1634d81dd3070b937da2697a",tooltip=" "];
 }

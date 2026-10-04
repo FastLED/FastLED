@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -127,20 +127,19 @@ $(function(){initNavTree('db/db0/classfl_1_1_gamma8_impl_a5dcce944caabdf258c5077
 </table>
 </div><div class="memdoc">
 
-<p>Implements <a class="el" href="../../dc/da5/classfl_1_1_gamma8_a0f5e2ecb0054a152c7b64ecfa60b3dc0.html#a0f5e2ecb0054a152c7b64ecfa60b3dc0">fl::Gamma8</a>.</p>
+<p>Implements <a class="el" href="../../dc/da5/classfl_1_1_gamma8_a4e8a2f6704af7acdb5d19cd1d8f43c3b.html#a4e8a2f6704af7acdb5d19cd1d8f43c3b">fl::Gamma8</a>.</p>
 
 <p class="definition">Definition at line <a class="el" href="../../df/d60/ease_8cpp_8hpp_source.html#l00417">417</a> of file <a class="el" href="../../df/d60/ease_8cpp_8hpp_source.html">ease.cpp.hpp</a>.</p>
 <div class="fragment"><div class="line"><span class="lineno">  418</span>                                                     {</div>
 <div class="line"><span class="lineno">  419</span>        <span class="keyword">const</span> <span class="keywordtype">int</span> n =</div>
-<div class="line"><span class="lineno">  420</span>            input.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac">size</a>() &lt; <a class="code hl_variable" href="../../d8/d94/namespacetest__quick_a8c9b09f7da0aec94eb085625d9c04cdd.html#a8c9b09f7da0aec94eb085625d9c04cdd">output</a>.size() ? input.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac">size</a>() : <a class="code hl_variable" href="../../d8/d94/namespacetest__quick_a8c9b09f7da0aec94eb085625d9c04cdd.html#a8c9b09f7da0aec94eb085625d9c04cdd">output</a>.size();</div>
+<div class="line"><span class="lineno">  420</span>            input.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa">size</a>() &lt; output.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa">size</a>() ? input.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa">size</a>() : output.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa">size</a>();</div>
 <div class="line"><span class="lineno">  421</span>        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; n; ++i) {</div>
-<div class="line"><span class="lineno">  422</span>            <a class="code hl_variable" href="../../d8/d94/namespacetest__quick_a8c9b09f7da0aec94eb085625d9c04cdd.html#a8c9b09f7da0aec94eb085625d9c04cdd">output</a>[i] = mLut[input[i]];</div>
+<div class="line"><span class="lineno">  422</span>            output[i] = mLut[input[i]];</div>
 <div class="line"><span class="lineno">  423</span>        }</div>
 <div class="line"><span class="lineno">  424</span>    }</div>
-<div class="ttc" id="aclassfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac_html_aef7ee7eb5254da1ba1eb4f3e0173d0ac"><div class="ttname"><a href="../../d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac">fl::span::size</a></div><div class="ttdeci">constexpr fl::size size() const FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d7a/span_8h_source.html#l00458">span.h:458</a></div></div>
-<div class="ttc" id="anamespacetest__quick_a8c9b09f7da0aec94eb085625d9c04cdd_html_a8c9b09f7da0aec94eb085625d9c04cdd"><div class="ttname"><a href="../../d8/d94/namespacetest__quick_a8c9b09f7da0aec94eb085625d9c04cdd.html#a8c9b09f7da0aec94eb085625d9c04cdd">test_quick.output</a></div><div class="ttdeci">output</div><div class="ttdef"><b>Definition</b> <a href="../../d8/def/test__quick_8py_source.html#l00050">test_quick.py:50</a></div></div>
+<div class="ttc" id="aclassfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa_html_aaf3daca1c2c8f93b2ac7b319989b22fa"><div class="ttname"><a href="../../d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa">fl::span::size</a></div><div class="ttdeci">constexpr fl::size size() const FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d7a/span_8h_source.html#l00483">span.h:483</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d4/d7a/span_8h_source.html#l00458">fl::span&lt; T, Extent &gt;::size()</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d7a/span_8h_source.html#l00483">fl::span&lt; T, Extent &gt;::size()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -158,7 +157,7 @@ $(function(){initNavTree('db/db0/classfl_1_1_gamma8_impl_a5dcce944caabdf258c5077
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../db/db0/classfl_1_1_gamma8_impl.html">Gamma8Impl</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:05 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:09 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

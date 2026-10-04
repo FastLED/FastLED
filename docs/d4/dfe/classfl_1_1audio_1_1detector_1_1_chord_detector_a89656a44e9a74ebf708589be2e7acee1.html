@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -123,52 +123,52 @@ $(function(){initNavTree('d4/dfe/classfl_1_1audio_1_1detector_1_1_chord_detector
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d5/d2d/chord_8cpp_8hpp_source.html#l00141">141</a> of file <a class="el" href="../../d5/d2d/chord_8cpp_8hpp_source.html">chord.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  141</span>                                                      {</div>
-<div class="line"><span class="lineno">  142</span>    <span class="comment">// Clear chroma</span></div>
-<div class="line"><span class="lineno">  143</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; 12; i++) {</div>
-<div class="line"><span class="lineno">  144</span>        <a class="code hl_variable" href="../../d4/dfe/classfl_1_1audio_1_1detector_1_1_chord_detector_a269947f6aef24147fa262bffd9a62d64.html#a269947f6aef24147fa262bffd9a62d64">mChroma</a>[i] = 0.0f;</div>
-<div class="line"><span class="lineno">  145</span>    }</div>
-<div class="line"><span class="lineno">  146</span> </div>
-<div class="line"><span class="lineno">  147</span>    <span class="comment">// Map fft::FFT bins to pitch classes (chroma) using linearly-rebinned magnitudes.</span></div>
-<div class="line"><span class="lineno">  148</span>    <span class="comment">// Linear bins give evenly-spaced frequency mapping: freq = fmin + bin * binWidth.</span></div>
-<div class="line"><span class="lineno">  149</span>    fl::span&lt;const float&gt; linearBins = <a class="code hl_variable" href="../../de/d2f/_p_j_r_c_spectrum_analyzer_8h_a73e27170be4f75c0c95ba2891aa89837.html#a73e27170be4f75c0c95ba2891aa89837">fft</a>.linear();</div>
-<div class="line"><span class="lineno">  150</span>    <span class="keyword">const</span> fl::size numBins = linearBins.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac">size</a>();</div>
-<div class="line"><span class="lineno">  151</span>    <span class="keyword">const</span> <span class="keywordtype">float</span> fmin = <a class="code hl_variable" href="../../de/d2f/_p_j_r_c_spectrum_analyzer_8h_a73e27170be4f75c0c95ba2891aa89837.html#a73e27170be4f75c0c95ba2891aa89837">fft</a>.linearFmin();</div>
-<div class="line"><span class="lineno">  152</span>    <span class="keyword">const</span> <span class="keywordtype">float</span> fmax = <a class="code hl_variable" href="../../de/d2f/_p_j_r_c_spectrum_analyzer_8h_a73e27170be4f75c0c95ba2891aa89837.html#a73e27170be4f75c0c95ba2891aa89837">fft</a>.linearFmax();</div>
-<div class="line"><span class="lineno">  153</span>    <span class="keyword">const</span> <span class="keywordtype">float</span> linearBinWidth = (numBins &gt; 0) ? (fmax - fmin) / <span class="keyword">static_cast&lt;</span><span class="keywordtype">float</span><span class="keyword">&gt;</span>(numBins) : 1.0f;</div>
-<div class="line"><span class="lineno">  154</span> </div>
-<div class="line"><span class="lineno">  155</span>    <span class="keywordflow">for</span> (fl::size binIdx = 0; binIdx &lt; numBins; binIdx++) {</div>
-<div class="line"><span class="lineno">  156</span>        <span class="keywordtype">float</span> magnitude = linearBins[binIdx];</div>
-<div class="line"><span class="lineno">  157</span>        <span class="keywordflow">if</span> (magnitude &lt; 1e-6f) <span class="keywordflow">continue</span>;</div>
-<div class="line"><span class="lineno">  158</span> </div>
-<div class="line"><span class="lineno">  159</span>        <span class="comment">// Calculate frequency for this linearly-spaced bin</span></div>
-<div class="line"><span class="lineno">  160</span>        <span class="keywordtype">float</span> freq = fmin + (<span class="keyword">static_cast&lt;</span><span class="keywordtype">float</span><span class="keyword">&gt;</span>(binIdx) + 0.5f) * linearBinWidth;</div>
-<div class="line"><span class="lineno">  161</span> </div>
-<div class="line"><span class="lineno">  162</span>        <span class="comment">// Skip frequencies below 60Hz (too low for chord detection)</span></div>
-<div class="line"><span class="lineno">  163</span>        <span class="keywordflow">if</span> (freq &lt; 60.0f) <span class="keywordflow">continue</span>;</div>
-<div class="line"><span class="lineno">  164</span> </div>
-<div class="line"><span class="lineno">  165</span>        <span class="comment">// Convert frequency to MIDI note number (A4 = 440Hz = MIDI 69)</span></div>
-<div class="line"><span class="lineno">  166</span>        <span class="keywordtype">float</span> midiNote = 69.0f + 12.0f * (<a class="code hl_function" href="../../d4/d36/namespacefl_af3a8e787bc8bcd73dcddb8b47a826554.html#af3a8e787bc8bcd73dcddb8b47a826554">fl::logf</a>(freq / 440.0f) / <a class="code hl_function" href="../../d4/d36/namespacefl_af3a8e787bc8bcd73dcddb8b47a826554.html#af3a8e787bc8bcd73dcddb8b47a826554">fl::logf</a>(2.0f));</div>
-<div class="line"><span class="lineno">  167</span> </div>
-<div class="line"><span class="lineno">  168</span>        <span class="comment">// Get pitch class (0-11)</span></div>
-<div class="line"><span class="lineno">  169</span>        <span class="keywordtype">int</span> pitchClass = <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(midiNote + 0.5f) % 12;</div>
-<div class="line"><span class="lineno">  170</span>        <span class="keywordflow">if</span> (pitchClass &lt; 0) pitchClass += 12;</div>
-<div class="line"><span class="lineno">  171</span> </div>
-<div class="line"><span class="lineno">  172</span>        <span class="comment">// Accumulate magnitude into chroma</span></div>
-<div class="line"><span class="lineno">  173</span>        <a class="code hl_variable" href="../../d4/dfe/classfl_1_1audio_1_1detector_1_1_chord_detector_a269947f6aef24147fa262bffd9a62d64.html#a269947f6aef24147fa262bffd9a62d64">mChroma</a>[pitchClass] += magnitude;</div>
-<div class="line"><span class="lineno">  174</span>    }</div>
-<div class="line"><span class="lineno">  175</span> </div>
-<div class="line"><span class="lineno">  176</span>    <span class="comment">// Normalize chroma</span></div>
-<div class="line"><span class="lineno">  177</span>    <a class="code hl_function" href="../../d4/dfe/classfl_1_1audio_1_1detector_1_1_chord_detector_a329da81a05032333792c077948b98745.html#a329da81a05032333792c077948b98745">normalizeChroma</a>(<a class="code hl_variable" href="../../d4/dfe/classfl_1_1audio_1_1detector_1_1_chord_detector_a269947f6aef24147fa262bffd9a62d64.html#a269947f6aef24147fa262bffd9a62d64">mChroma</a>);</div>
-<div class="line"><span class="lineno">  178</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../d5/d2d/chord_8cpp_8hpp_source.html#l00139">139</a> of file <a class="el" href="../../d5/d2d/chord_8cpp_8hpp_source.html">chord.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  139</span>                                                      {</div>
+<div class="line"><span class="lineno">  140</span>    <span class="comment">// Clear chroma</span></div>
+<div class="line"><span class="lineno">  141</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; 12; i++) {</div>
+<div class="line"><span class="lineno">  142</span>        <a class="code hl_variable" href="../../d4/dfe/classfl_1_1audio_1_1detector_1_1_chord_detector_a269947f6aef24147fa262bffd9a62d64.html#a269947f6aef24147fa262bffd9a62d64">mChroma</a>[i] = 0.0f;</div>
+<div class="line"><span class="lineno">  143</span>    }</div>
+<div class="line"><span class="lineno">  144</span> </div>
+<div class="line"><span class="lineno">  145</span>    <span class="comment">// Map fft::FFT bins to pitch classes (chroma) using linearly-rebinned magnitudes.</span></div>
+<div class="line"><span class="lineno">  146</span>    <span class="comment">// Linear bins give evenly-spaced frequency mapping: freq = fmin + bin * binWidth.</span></div>
+<div class="line"><span class="lineno">  147</span>    fl::span&lt;const float&gt; linearBins = <a class="code hl_variable" href="../../de/d2f/_p_j_r_c_spectrum_analyzer_8h_a73e27170be4f75c0c95ba2891aa89837.html#a73e27170be4f75c0c95ba2891aa89837">fft</a>.linear();</div>
+<div class="line"><span class="lineno">  148</span>    <span class="keyword">const</span> fl::size numBins = linearBins.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa">size</a>();</div>
+<div class="line"><span class="lineno">  149</span>    <span class="keyword">const</span> <span class="keywordtype">float</span> fmin = <a class="code hl_variable" href="../../de/d2f/_p_j_r_c_spectrum_analyzer_8h_a73e27170be4f75c0c95ba2891aa89837.html#a73e27170be4f75c0c95ba2891aa89837">fft</a>.linearFmin();</div>
+<div class="line"><span class="lineno">  150</span>    <span class="keyword">const</span> <span class="keywordtype">float</span> fmax = <a class="code hl_variable" href="../../de/d2f/_p_j_r_c_spectrum_analyzer_8h_a73e27170be4f75c0c95ba2891aa89837.html#a73e27170be4f75c0c95ba2891aa89837">fft</a>.linearFmax();</div>
+<div class="line"><span class="lineno">  151</span>    <span class="keyword">const</span> <span class="keywordtype">float</span> linearBinWidth = (numBins &gt; 0) ? (fmax - fmin) / <span class="keyword">static_cast&lt;</span><span class="keywordtype">float</span><span class="keyword">&gt;</span>(numBins) : 1.0f;</div>
+<div class="line"><span class="lineno">  152</span> </div>
+<div class="line"><span class="lineno">  153</span>    <span class="keywordflow">for</span> (fl::size binIdx = 0; binIdx &lt; numBins; binIdx++) {</div>
+<div class="line"><span class="lineno">  154</span>        <span class="keywordtype">float</span> magnitude = linearBins[binIdx];</div>
+<div class="line"><span class="lineno">  155</span>        <span class="keywordflow">if</span> (magnitude &lt; 1e-6f) <span class="keywordflow">continue</span>;</div>
+<div class="line"><span class="lineno">  156</span> </div>
+<div class="line"><span class="lineno">  157</span>        <span class="comment">// Calculate frequency for this linearly-spaced bin</span></div>
+<div class="line"><span class="lineno">  158</span>        <span class="keywordtype">float</span> freq = fmin + (<span class="keyword">static_cast&lt;</span><span class="keywordtype">float</span><span class="keyword">&gt;</span>(binIdx) + 0.5f) * linearBinWidth;</div>
+<div class="line"><span class="lineno">  159</span> </div>
+<div class="line"><span class="lineno">  160</span>        <span class="comment">// Skip frequencies below 60Hz (too low for chord detection)</span></div>
+<div class="line"><span class="lineno">  161</span>        <span class="keywordflow">if</span> (freq &lt; 60.0f) <span class="keywordflow">continue</span>;</div>
+<div class="line"><span class="lineno">  162</span> </div>
+<div class="line"><span class="lineno">  163</span>        <span class="comment">// Convert frequency to MIDI note number (A4 = 440Hz = MIDI 69)</span></div>
+<div class="line"><span class="lineno">  164</span>        <span class="keywordtype">float</span> midiNote = 69.0f + 12.0f * (<a class="code hl_function" href="../../d4/d36/namespacefl_a009a6061a9324e18ae194e4c16749297.html#a009a6061a9324e18ae194e4c16749297">fl::logf</a>(freq / 440.0f) / <a class="code hl_function" href="../../d4/d36/namespacefl_a009a6061a9324e18ae194e4c16749297.html#a009a6061a9324e18ae194e4c16749297">fl::logf</a>(2.0f));</div>
+<div class="line"><span class="lineno">  165</span> </div>
+<div class="line"><span class="lineno">  166</span>        <span class="comment">// Get pitch class (0-11)</span></div>
+<div class="line"><span class="lineno">  167</span>        <span class="keywordtype">int</span> pitchClass = <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(midiNote + 0.5f) % 12;</div>
+<div class="line"><span class="lineno">  168</span>        <span class="keywordflow">if</span> (pitchClass &lt; 0) pitchClass += 12;</div>
+<div class="line"><span class="lineno">  169</span> </div>
+<div class="line"><span class="lineno">  170</span>        <span class="comment">// Accumulate magnitude into chroma</span></div>
+<div class="line"><span class="lineno">  171</span>        <a class="code hl_variable" href="../../d4/dfe/classfl_1_1audio_1_1detector_1_1_chord_detector_a269947f6aef24147fa262bffd9a62d64.html#a269947f6aef24147fa262bffd9a62d64">mChroma</a>[pitchClass] += magnitude;</div>
+<div class="line"><span class="lineno">  172</span>    }</div>
+<div class="line"><span class="lineno">  173</span> </div>
+<div class="line"><span class="lineno">  174</span>    <span class="comment">// Normalize chroma</span></div>
+<div class="line"><span class="lineno">  175</span>    <a class="code hl_function" href="../../d4/dfe/classfl_1_1audio_1_1detector_1_1_chord_detector_a329da81a05032333792c077948b98745.html#a329da81a05032333792c077948b98745">normalizeChroma</a>(<a class="code hl_variable" href="../../d4/dfe/classfl_1_1audio_1_1detector_1_1_chord_detector_a269947f6aef24147fa262bffd9a62d64.html#a269947f6aef24147fa262bffd9a62d64">mChroma</a>);</div>
+<div class="line"><span class="lineno">  176</span>}</div>
 <div class="ttc" id="a_p_j_r_c_spectrum_analyzer_8h_a73e27170be4f75c0c95ba2891aa89837_html_a73e27170be4f75c0c95ba2891aa89837"><div class="ttname"><a href="../../de/d2f/_p_j_r_c_spectrum_analyzer_8h_a73e27170be4f75c0c95ba2891aa89837.html#a73e27170be4f75c0c95ba2891aa89837">fft</a></div><div class="ttdeci">AudioAnalyzeFFT1024 fft</div><div class="ttdef"><b>Definition</b> <a href="../../de/d2f/_p_j_r_c_spectrum_analyzer_8h_source.html#l00046">PJRCSpectrumAnalyzer.h:46</a></div></div>
 <div class="ttc" id="aclassfl_1_1audio_1_1detector_1_1_chord_detector_a269947f6aef24147fa262bffd9a62d64_html_a269947f6aef24147fa262bffd9a62d64"><div class="ttname"><a href="../../d4/dfe/classfl_1_1audio_1_1detector_1_1_chord_detector_a269947f6aef24147fa262bffd9a62d64.html#a269947f6aef24147fa262bffd9a62d64">fl::audio::detector::ChordDetector::mChroma</a></div><div class="ttdeci">float mChroma[12]</div><div class="ttdef"><b>Definition</b> <a href="../../db/d44/chord_8h_source.html#l00085">chord.h:85</a></div></div>
-<div class="ttc" id="aclassfl_1_1audio_1_1detector_1_1_chord_detector_a329da81a05032333792c077948b98745_html_a329da81a05032333792c077948b98745"><div class="ttname"><a href="../../d4/dfe/classfl_1_1audio_1_1detector_1_1_chord_detector_a329da81a05032333792c077948b98745.html#a329da81a05032333792c077948b98745">fl::audio::detector::ChordDetector::normalizeChroma</a></div><div class="ttdeci">void normalizeChroma(float *chroma)</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d2d/chord_8cpp_8hpp_source.html#l00258">chord.cpp.hpp:258</a></div></div>
-<div class="ttc" id="aclassfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac_html_aef7ee7eb5254da1ba1eb4f3e0173d0ac"><div class="ttname"><a href="../../d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac">fl::span::size</a></div><div class="ttdeci">constexpr fl::size size() const FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d7a/span_8h_source.html#l00458">span.h:458</a></div></div>
-<div class="ttc" id="anamespacefl_af3a8e787bc8bcd73dcddb8b47a826554_html_af3a8e787bc8bcd73dcddb8b47a826554"><div class="ttname"><a href="../../d4/d36/namespacefl_af3a8e787bc8bcd73dcddb8b47a826554.html#af3a8e787bc8bcd73dcddb8b47a826554">fl::logf</a></div><div class="ttdeci">float logf(float value) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00418">math.h:418</a></div></div>
+<div class="ttc" id="aclassfl_1_1audio_1_1detector_1_1_chord_detector_a329da81a05032333792c077948b98745_html_a329da81a05032333792c077948b98745"><div class="ttname"><a href="../../d4/dfe/classfl_1_1audio_1_1detector_1_1_chord_detector_a329da81a05032333792c077948b98745.html#a329da81a05032333792c077948b98745">fl::audio::detector::ChordDetector::normalizeChroma</a></div><div class="ttdeci">void normalizeChroma(float *chroma)</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d2d/chord_8cpp_8hpp_source.html#l00256">chord.cpp.hpp:256</a></div></div>
+<div class="ttc" id="aclassfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa_html_aaf3daca1c2c8f93b2ac7b319989b22fa"><div class="ttname"><a href="../../d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa">fl::span::size</a></div><div class="ttdeci">constexpr fl::size size() const FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d7a/span_8h_source.html#l00483">span.h:483</a></div></div>
+<div class="ttc" id="anamespacefl_a009a6061a9324e18ae194e4c16749297_html_a009a6061a9324e18ae194e4c16749297"><div class="ttname"><a href="../../d4/d36/namespacefl_a009a6061a9324e18ae194e4c16749297.html#a009a6061a9324e18ae194e4c16749297">fl::logf</a></div><div class="ttdeci">float logf(float value) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00418">math.h:418</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../df/db1/math_8h_source.html#l00418">fl::logf()</a>, <a class="el" href="../../db/d44/chord_8h_source.html#l00085">mChroma</a>, <a class="el" href="../../d5/d2d/chord_8cpp_8hpp_source.html#l00258">normalizeChroma()</a>, and <a class="el" href="../../d4/d7a/span_8h_source.html#l00458">fl::span&lt; T, Extent &gt;::size()</a>.</p>
+<p class="reference">References <a class="el" href="../../df/db1/math_8h_source.html#l00418">fl::logf()</a>, <a class="el" href="../../db/d44/chord_8h_source.html#l00085">mChroma</a>, <a class="el" href="../../d5/d2d/chord_8cpp_8hpp_source.html#l00256">normalizeChroma()</a>, and <a class="el" href="../../d4/d7a/span_8h_source.html#l00483">fl::span&lt; T, Extent &gt;::size()</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../d5/d2d/chord_8cpp_8hpp_source.html#l00061">update()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
@@ -195,7 +195,7 @@ $(function(){initNavTree('d4/dfe/classfl_1_1audio_1_1detector_1_1_chord_detector
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../db/dbf/namespacefl_1_1audio.html">audio</a></li><li class="navelem"><a class="el" href="../../dd/d12/namespacefl_1_1audio_1_1detector.html">detector</a></li><li class="navelem"><a class="el" href="../../d4/dfe/classfl_1_1audio_1_1detector_1_1_chord_detector.html">ChordDetector</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:08 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:11 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

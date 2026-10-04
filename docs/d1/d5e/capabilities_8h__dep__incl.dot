@@ -1,0 +1,46 @@
+digraph "fl/channels/capabilities.h"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  Node1 [id="Node000001",label="fl/channels/capabilities.h",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Declarative driver capabilities + channel-request types for the Channel Manager's predicate / depende..."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl/channels/can_match.cpp.hpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d8b/can__match_8cpp_8hpp.html",tooltip="Implementation of fl::canMatch (#3186)."];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl/channels/_build.cpp.hpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d97/fl_2channels_2__build_8cpp_8hpp.html",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl/_build.cpp.hpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/deb/fl_2__build_8cpp_8hpp.html",tooltip=" "];
+  Node3 -> Node5 [id="edge4_Node000003_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl/build/fl.channels+.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d44/fl_8channels_09_8cpp.html",tooltip="Unity build: recursive includes from src/fl/channels/."];
+  Node1 -> Node6 [id="edge5_Node000001_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl/channels/can_match.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/dfb/can__match_8h.html",tooltip="Free function that decides whether a ChannelRequest can be served by a driver's published capability ..."];
+  Node6 -> Node2 [id="edge6_Node000006_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node6 -> Node7 [id="edge7_Node000006_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl/channels/driver.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/dc9/fl_2channels_2driver_8h.html",tooltip=" "];
+  Node7 -> Node8 [id="edge8_Node000007_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="FastLED.cpp.hpp",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d7/de5/_fast_l_e_d_8cpp_8hpp.html",tooltip=" "];
+  Node7 -> Node11 [id="edge9_Node000007_Node000011",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="fl/channels/adapters\l/spi_channel_adapter.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d8e/spi__channel__adapter_8h.html",tooltip="Adapter that wraps HW SPI controllers for ChannelManager."];
+  Node7 -> Node14 [id="edge10_Node000007_Node000014",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node14 [id="Node000014",label="fl/channels/channel.cpp.hpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/de6/channel_8cpp_8hpp.html",tooltip=" "];
+  Node14 -> Node3 [id="edge11_Node000014_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node7 -> Node15 [id="edge12_Node000007_Node000015",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node15 [id="Node000015",label="fl/channels/driver.cpp.hpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/dc5/fl_2channels_2driver_8cpp_8hpp.html",tooltip=" "];
+  Node15 -> Node3 [id="edge13_Node000015_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node7 -> Node16 [id="edge14_Node000007_Node000016",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node16 [id="Node000016",label="fl/channels/manager.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$db/d45/manager_8h.html",tooltip="Unified manager for channel drivers with priority-based fallback."];
+  Node16 -> Node8 [id="edge15_Node000016_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node16 -> Node14 [id="edge16_Node000016_Node000014",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node16 -> Node27 [id="edge17_Node000016_Node000027",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node27 [id="Node000027",label="fl/channels/slim_bridge\l_controller.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d99/slim__bridge__controller_8h.html",tooltip="Shared \"slim bridge\" legacy addLeds<>() controller for channel drivers."];
+  Node16 -> Node28 [id="edge18_Node000016_Node000028",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node28 [id="Node000028",label="fl/channels/slim_spi\l_bridge_controller.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d5/d9b/slim__spi__bridge__controller_8h.html",tooltip="Shared \"slim bridge\" legacy addLeds<ESPIChipsets ...>() controller for the SPI channel API – driver-a..."];
+  Node7 -> Node27 [id="edge19_Node000007_Node000027",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node7 -> Node28 [id="edge20_Node000007_Node000028",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node29 [id="edge21_Node000001_Node000029",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node29 [id="Node000029",label="fl/channels/capabilities.cpp.hpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/da0/capabilities_8cpp_8hpp.html",tooltip="Out-of-line definitions for capabilities.h types (#3186)."];
+  Node29 -> Node3 [id="edge22_Node000029_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node7 [id="edge23_Node000001_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+}

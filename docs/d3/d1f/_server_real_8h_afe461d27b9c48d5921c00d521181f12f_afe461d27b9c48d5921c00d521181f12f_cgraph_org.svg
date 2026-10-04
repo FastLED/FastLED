@@ -38,7 +38,7 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a" target="_top" xlink:title="Universal millisecond timer &#45; returns milliseconds since system startup.">
+<g id="a_Node000003"><a xlink:href="../../d4/d36/namespacefl_a3c0ba5842bfd029c404a38c8df2315f3.html#a3c0ba5842bfd029c404a38c8df2315f3" target="_top" xlink:title="Universal millisecond timer &#45; returns milliseconds since system startup.">
 <polygon fill="white" stroke="#666666" points="241.5,-103 185.5,-103 185.5,-84 241.5,-84 241.5,-103"/>
 <text text-anchor="middle" x="213.5" y="-91" font-family="Helvetica,sans-Serif" font-size="10.00">fl::millis</text>
 </a>
@@ -92,7 +92,7 @@
 <!-- Node5 -->
 <g id="Node000005" class="node">
 <title>Node5</title>
-<g id="a_Node000005"><a xlink:href="../../df/da5/lib8tion_8h_a696b9421eca961df0a68c7c6c3e983ab.html#a696b9421eca961df0a68c7c6c3e983ab" target="_top" xlink:title="Generates an 8&#45;bit sine wave at a given BPM that oscillates within a given range.">
+<g id="a_Node000005"><a xlink:href="../../df/da5/lib8tion_8h_aca012663c6c8fe9a7240bcbc76095ba9.html#aca012663c6c8fe9a7240bcbc76095ba9" target="_top" xlink:title="Generates an 8&#45;bit sine wave at a given BPM that oscillates within a given range.">
 <polygon fill="white" stroke="#666666" points="243,-56 184,-56 184,-37 243,-37 243,-56"/>
 <text text-anchor="middle" x="213.5" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">beatsin8</text>
 </a>
@@ -110,7 +110,7 @@
 <!-- Node6 -->
 <g id="Node000006" class="node">
 <title>Node6</title>
-<g id="a_Node000006"><a xlink:href="../../d1/dfb/colorutils_8h_afba4db18577c19e39c54f1c5793741b7.html#afba4db18577c19e39c54f1c5793741b7" target="_top" xlink:title="Fill a range of LEDs with a solid color.">
+<g id="a_Node000006"><a xlink:href="../../d1/dfb/colorutils_8h_a3198008d7f952f27c3c83aeefedec06b.html#a3198008d7f952f27c3c83aeefedec06b" target="_top" xlink:title="Fill a range of LEDs with a solid color.">
 <polygon fill="white" stroke="#666666" points="242,-19 185,-19 185,0 242,0 242,-19"/>
 <text text-anchor="middle" x="213.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fill_solid</text>
 </a>

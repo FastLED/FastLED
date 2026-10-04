@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -167,7 +167,7 @@ $(function(){initNavTree('dd/dc7/group___h_s_v2_r_g_b_ga06ee0f21e1bf430ea547244f
 <div class="line"><span class="lineno">  313</span> </div>
 <div class="line"><span class="lineno">  314</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> third = scale8( offset8, (256 / 3)); <span class="comment">// max = 85</span></div>
 <div class="line"><span class="lineno">  315</span> </div>
-<div class="line"><span class="lineno">  316</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> r, g, b;</div>
+<div class="line"><span class="lineno">  316</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> r, <a class="code hl_variable" href="../../d4/d36/namespacefl_abb8ff746cce2b11a90718afba1cfec1b.html#abb8ff746cce2b11a90718afba1cfec1b">g</a>, b;</div>
 <div class="line"><span class="lineno">  317</span> </div>
 <div class="line"><span class="lineno">  318</span>    <span class="keywordflow">if</span>( ! (<a class="code hl_variable" href="../../da/dc7/advanced_8h_ad7b7eb0b3e04af91bdd64715226c3c68.html#ad7b7eb0b3e04af91bdd64715226c3c68">hue</a> &amp; 0x80) ) {</div>
 <div class="line"><span class="lineno">  319</span>        <span class="comment">// 0XX</span></div>
@@ -178,7 +178,7 @@ $(function(){initNavTree('dd/dc7/group___h_s_v2_r_g_b_ga06ee0f21e1bf430ea547244f
 <div class="line"><span class="lineno">  324</span>                <span class="comment">// 000</span></div>
 <div class="line"><span class="lineno">  325</span>                <span class="comment">//case 0: // R -&gt; O</span></div>
 <div class="line"><span class="lineno">  326</span>                r = K255 - third;</div>
-<div class="line"><span class="lineno">  327</span>                g = third;</div>
+<div class="line"><span class="lineno">  327</span>                <a class="code hl_variable" href="../../d4/d36/namespacefl_abb8ff746cce2b11a90718afba1cfec1b.html#abb8ff746cce2b11a90718afba1cfec1b">g</a> = third;</div>
 <div class="line"><span class="lineno">  328</span>                b = 0;</div>
 <div class="line"><span class="lineno">  329</span>                <a class="code hl_define" href="../../d6/db5/hsv2rgb_8cpp_8hpp_a62d9eb0363957a0e61b35ca80efb31a1.html#a62d9eb0363957a0e61b35ca80efb31a1">FORCE_REFERENCE</a>(b);</div>
 <div class="line"><span class="lineno">  330</span>            } <span class="keywordflow">else</span> {</div>
@@ -186,7 +186,7 @@ $(function(){initNavTree('dd/dc7/group___h_s_v2_r_g_b_ga06ee0f21e1bf430ea547244f
 <div class="line"><span class="lineno">  332</span>                <span class="comment">//case 1: // O -&gt; Y</span></div>
 <div class="line"><span class="lineno">  333</span>                <span class="keywordflow">if</span>( Y1 ) {</div>
 <div class="line"><span class="lineno">  334</span>                    r = K171;</div>
-<div class="line"><span class="lineno">  335</span>                    g = K85 + third ;</div>
+<div class="line"><span class="lineno">  335</span>                    <a class="code hl_variable" href="../../d4/d36/namespacefl_abb8ff746cce2b11a90718afba1cfec1b.html#abb8ff746cce2b11a90718afba1cfec1b">g</a> = K85 + third ;</div>
 <div class="line"><span class="lineno">  336</span>                    b = 0;</div>
 <div class="line"><span class="lineno">  337</span>                    <a class="code hl_define" href="../../d6/db5/hsv2rgb_8cpp_8hpp_a62d9eb0363957a0e61b35ca80efb31a1.html#a62d9eb0363957a0e61b35ca80efb31a1">FORCE_REFERENCE</a>(b);</div>
 <div class="line"><span class="lineno">  338</span>                }</div>
@@ -194,7 +194,7 @@ $(function(){initNavTree('dd/dc7/group___h_s_v2_r_g_b_ga06ee0f21e1bf430ea547244f
 <div class="line"><span class="lineno">  340</span>                    r = K170 + third;</div>
 <div class="line"><span class="lineno">  341</span>                    <span class="comment">//uint8_t twothirds = (third &lt;&lt; 1);</span></div>
 <div class="line"><span class="lineno">  342</span>                    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> twothirds = scale8( offset8, ((256 * 2) / 3)); <span class="comment">// max=170</span></div>
-<div class="line"><span class="lineno">  343</span>                    g = K85 + twothirds;</div>
+<div class="line"><span class="lineno">  343</span>                    <a class="code hl_variable" href="../../d4/d36/namespacefl_abb8ff746cce2b11a90718afba1cfec1b.html#abb8ff746cce2b11a90718afba1cfec1b">g</a> = K85 + twothirds;</div>
 <div class="line"><span class="lineno">  344</span>                    b = 0;</div>
 <div class="line"><span class="lineno">  345</span>                    <a class="code hl_define" href="../../d6/db5/hsv2rgb_8cpp_8hpp_a62d9eb0363957a0e61b35ca80efb31a1.html#a62d9eb0363957a0e61b35ca80efb31a1">FORCE_REFERENCE</a>(b);</div>
 <div class="line"><span class="lineno">  346</span>                }</div>
@@ -209,13 +209,13 @@ $(function(){initNavTree('dd/dc7/group___h_s_v2_r_g_b_ga06ee0f21e1bf430ea547244f
 <div class="line"><span class="lineno">  355</span>                    <span class="comment">//uint8_t twothirds = (third &lt;&lt; 1);</span></div>
 <div class="line"><span class="lineno">  356</span>                    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> twothirds = scale8( offset8, ((256 * 2) / 3)); <span class="comment">// max=170</span></div>
 <div class="line"><span class="lineno">  357</span>                    r = K171 - twothirds;</div>
-<div class="line"><span class="lineno">  358</span>                    g = K170 + third;</div>
+<div class="line"><span class="lineno">  358</span>                    <a class="code hl_variable" href="../../d4/d36/namespacefl_abb8ff746cce2b11a90718afba1cfec1b.html#abb8ff746cce2b11a90718afba1cfec1b">g</a> = K170 + third;</div>
 <div class="line"><span class="lineno">  359</span>                    b = 0;</div>
 <div class="line"><span class="lineno">  360</span>                    <a class="code hl_define" href="../../d6/db5/hsv2rgb_8cpp_8hpp_a62d9eb0363957a0e61b35ca80efb31a1.html#a62d9eb0363957a0e61b35ca80efb31a1">FORCE_REFERENCE</a>(b);</div>
 <div class="line"><span class="lineno">  361</span>                }</div>
 <div class="line"><span class="lineno">  362</span>                <span class="keywordflow">if</span>( Y2 ) {</div>
 <div class="line"><span class="lineno">  363</span>                    r = K255 - offset8;</div>
-<div class="line"><span class="lineno">  364</span>                    g = K255;</div>
+<div class="line"><span class="lineno">  364</span>                    <a class="code hl_variable" href="../../d4/d36/namespacefl_abb8ff746cce2b11a90718afba1cfec1b.html#abb8ff746cce2b11a90718afba1cfec1b">g</a> = K255;</div>
 <div class="line"><span class="lineno">  365</span>                    b = 0;</div>
 <div class="line"><span class="lineno">  366</span>                    <a class="code hl_define" href="../../d6/db5/hsv2rgb_8cpp_8hpp_a62d9eb0363957a0e61b35ca80efb31a1.html#a62d9eb0363957a0e61b35ca80efb31a1">FORCE_REFERENCE</a>(b);</div>
 <div class="line"><span class="lineno">  367</span>                }</div>
@@ -224,7 +224,7 @@ $(function(){initNavTree('dd/dc7/group___h_s_v2_r_g_b_ga06ee0f21e1bf430ea547244f
 <div class="line"><span class="lineno">  370</span>                <span class="comment">// case 3: // G -&gt; A</span></div>
 <div class="line"><span class="lineno">  371</span>                r = 0;</div>
 <div class="line"><span class="lineno">  372</span>                <a class="code hl_define" href="../../d6/db5/hsv2rgb_8cpp_8hpp_a62d9eb0363957a0e61b35ca80efb31a1.html#a62d9eb0363957a0e61b35ca80efb31a1">FORCE_REFERENCE</a>(r);</div>
-<div class="line"><span class="lineno">  373</span>                g = K255 - third;</div>
+<div class="line"><span class="lineno">  373</span>                <a class="code hl_variable" href="../../d4/d36/namespacefl_abb8ff746cce2b11a90718afba1cfec1b.html#abb8ff746cce2b11a90718afba1cfec1b">g</a> = K255 - third;</div>
 <div class="line"><span class="lineno">  374</span>                b = third;</div>
 <div class="line"><span class="lineno">  375</span>            }</div>
 <div class="line"><span class="lineno">  376</span>        }</div>
@@ -240,14 +240,14 @@ $(function(){initNavTree('dd/dc7/group___h_s_v2_r_g_b_ga06ee0f21e1bf430ea547244f
 <div class="line"><span class="lineno">  386</span>                <a class="code hl_define" href="../../d6/db5/hsv2rgb_8cpp_8hpp_a62d9eb0363957a0e61b35ca80efb31a1.html#a62d9eb0363957a0e61b35ca80efb31a1">FORCE_REFERENCE</a>(r);</div>
 <div class="line"><span class="lineno">  387</span>                <span class="comment">//uint8_t twothirds = (third &lt;&lt; 1);</span></div>
 <div class="line"><span class="lineno">  388</span>                <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> twothirds = scale8( offset8, ((256 * 2) / 3)); <span class="comment">// max=170</span></div>
-<div class="line"><span class="lineno">  389</span>                g = K171 - twothirds; <span class="comment">//K170?</span></div>
+<div class="line"><span class="lineno">  389</span>                <a class="code hl_variable" href="../../d4/d36/namespacefl_abb8ff746cce2b11a90718afba1cfec1b.html#abb8ff746cce2b11a90718afba1cfec1b">g</a> = K171 - twothirds; <span class="comment">//K170?</span></div>
 <div class="line"><span class="lineno">  390</span>                b = K85  + twothirds;</div>
 <div class="line"><span class="lineno">  391</span> </div>
 <div class="line"><span class="lineno">  392</span>            } <span class="keywordflow">else</span> {</div>
 <div class="line"><span class="lineno">  393</span>                <span class="comment">// 101</span></div>
 <div class="line"><span class="lineno">  394</span>                <span class="comment">//case 5: // B -&gt; P</span></div>
 <div class="line"><span class="lineno">  395</span>                r = third;</div>
-<div class="line"><span class="lineno">  396</span>                g = 0;</div>
+<div class="line"><span class="lineno">  396</span>                <a class="code hl_variable" href="../../d4/d36/namespacefl_abb8ff746cce2b11a90718afba1cfec1b.html#abb8ff746cce2b11a90718afba1cfec1b">g</a> = 0;</div>
 <div class="line"><span class="lineno">  397</span>                <a class="code hl_define" href="../../d6/db5/hsv2rgb_8cpp_8hpp_a62d9eb0363957a0e61b35ca80efb31a1.html#a62d9eb0363957a0e61b35ca80efb31a1">FORCE_REFERENCE</a>(g);</div>
 <div class="line"><span class="lineno">  398</span>                b = K255 - third;</div>
 <div class="line"><span class="lineno">  399</span> </div>
@@ -257,7 +257,7 @@ $(function(){initNavTree('dd/dc7/group___h_s_v2_r_g_b_ga06ee0f21e1bf430ea547244f
 <div class="line"><span class="lineno">  403</span>                <span class="comment">// 110</span></div>
 <div class="line"><span class="lineno">  404</span>                <span class="comment">//case 6: // P -- K</span></div>
 <div class="line"><span class="lineno">  405</span>                r = K85 + third;</div>
-<div class="line"><span class="lineno">  406</span>                g = 0;</div>
+<div class="line"><span class="lineno">  406</span>                <a class="code hl_variable" href="../../d4/d36/namespacefl_abb8ff746cce2b11a90718afba1cfec1b.html#abb8ff746cce2b11a90718afba1cfec1b">g</a> = 0;</div>
 <div class="line"><span class="lineno">  407</span>                <a class="code hl_define" href="../../d6/db5/hsv2rgb_8cpp_8hpp_a62d9eb0363957a0e61b35ca80efb31a1.html#a62d9eb0363957a0e61b35ca80efb31a1">FORCE_REFERENCE</a>(g);</div>
 <div class="line"><span class="lineno">  408</span>                b = K171 - third;</div>
 <div class="line"><span class="lineno">  409</span> </div>
@@ -265,7 +265,7 @@ $(function(){initNavTree('dd/dc7/group___h_s_v2_r_g_b_ga06ee0f21e1bf430ea547244f
 <div class="line"><span class="lineno">  411</span>                <span class="comment">// 111</span></div>
 <div class="line"><span class="lineno">  412</span>                <span class="comment">//case 7: // K -&gt; R</span></div>
 <div class="line"><span class="lineno">  413</span>                r = K170 + third;</div>
-<div class="line"><span class="lineno">  414</span>                g = 0;</div>
+<div class="line"><span class="lineno">  414</span>                <a class="code hl_variable" href="../../d4/d36/namespacefl_abb8ff746cce2b11a90718afba1cfec1b.html#abb8ff746cce2b11a90718afba1cfec1b">g</a> = 0;</div>
 <div class="line"><span class="lineno">  415</span>                <a class="code hl_define" href="../../d6/db5/hsv2rgb_8cpp_8hpp_a62d9eb0363957a0e61b35ca80efb31a1.html#a62d9eb0363957a0e61b35ca80efb31a1">FORCE_REFERENCE</a>(g);</div>
 <div class="line"><span class="lineno">  416</span>                b = K85 - third;</div>
 <div class="line"><span class="lineno">  417</span> </div>
@@ -275,80 +275,89 @@ $(function(){initNavTree('dd/dc7/group___h_s_v2_r_g_b_ga06ee0f21e1bf430ea547244f
 <div class="line"><span class="lineno">  421</span> </div>
 <div class="line"><span class="lineno">  422</span>    <span class="comment">// This is one of the good places to scale the green down,</span></div>
 <div class="line"><span class="lineno">  423</span>    <span class="comment">// although the client can scale green down as well.</span></div>
-<div class="line"><span class="lineno">  424</span>    <span class="keywordflow">if</span>( G2 ) g = g &gt;&gt; 1;</div>
-<div class="line"><span class="lineno">  425</span>    <span class="keywordflow">if</span>( Gscale ) g = scale8_video_LEAVING_R1_DIRTY( g, Gscale);</div>
-<div class="line"><span class="lineno">  426</span> </div>
-<div class="line"><span class="lineno">  427</span>    <span class="comment">// Scale down colors if we&#39;re desaturated at all</span></div>
-<div class="line"><span class="lineno">  428</span>    <span class="comment">// and add the brightness_floor to r, g, and b.</span></div>
-<div class="line"><span class="lineno">  429</span>    <span class="keywordflow">if</span>( sat != 255 ) {</div>
-<div class="line"><span class="lineno">  430</span>        <span class="keywordflow">if</span>( sat == 0) {</div>
-<div class="line"><span class="lineno">  431</span>            r = 255; b = 255; g = 255;</div>
-<div class="line"><span class="lineno">  432</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  433</span>            <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> desat = 255 - sat;</div>
-<div class="line"><span class="lineno">  434</span>            desat = scale8_video( desat, desat);</div>
-<div class="line"><span class="lineno">  435</span> </div>
-<div class="line"><span class="lineno">  436</span>            <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> satscale = 255 - desat;</div>
-<div class="line"><span class="lineno">  437</span>            <span class="comment">//satscale = sat; // uncomment to revert to pre-2021 saturation behavior</span></div>
-<div class="line"><span class="lineno">  438</span> </div>
-<div class="line"><span class="lineno">  439</span>            <span class="comment">//nscale8x3_video( r, g, b, sat);</span></div>
-<div class="line"><span class="lineno">  440</span><span class="preprocessor">#if (FASTLED_SCALE8_FIXED==1)</span></div>
-<div class="line"><span class="lineno">  441</span>            r = scale8_LEAVING_R1_DIRTY( r, satscale);</div>
-<div class="line"><span class="lineno">  442</span>            <span class="keyword">asm</span> <span class="keyword">volatile</span>(<span class="stringliteral">&quot;&quot;</span>);  <span class="comment">// Fixes jumping red pixel: https://github.com/FastLED/FastLED/pull/943</span></div>
-<div class="line"><span class="lineno">  443</span>            g = scale8_LEAVING_R1_DIRTY( g, satscale);</div>
-<div class="line"><span class="lineno">  444</span>            <span class="keyword">asm</span> <span class="keyword">volatile</span>(<span class="stringliteral">&quot;&quot;</span>);</div>
-<div class="line"><span class="lineno">  445</span>            b = scale8_LEAVING_R1_DIRTY( b, satscale);</div>
-<div class="line"><span class="lineno">  446</span>            <span class="keyword">asm</span> <span class="keyword">volatile</span>(<span class="stringliteral">&quot;&quot;</span>);</div>
-<div class="line"><span class="lineno">  447</span>            cleanup_R1();</div>
-<div class="line"><span class="lineno">  448</span><span class="preprocessor">#else</span></div>
-<div class="line"><span class="lineno">  449</span>            <span class="keywordflow">if</span>( r ) r = scale8( r, satscale) + 1;</div>
-<div class="line"><span class="lineno">  450</span>            <span class="keywordflow">if</span>( g ) g = scale8( g, satscale) + 1;</div>
-<div class="line"><span class="lineno">  451</span>            <span class="keywordflow">if</span>( b ) b = scale8( b, satscale) + 1;</div>
-<div class="line"><span class="lineno">  452</span><span class="preprocessor">#endif</span></div>
-<div class="line"><span class="lineno">  453</span>            <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> brightness_floor = desat;</div>
-<div class="line"><span class="lineno">  454</span>            r += brightness_floor;</div>
-<div class="line"><span class="lineno">  455</span>            g += brightness_floor;</div>
-<div class="line"><span class="lineno">  456</span>            b += brightness_floor;</div>
-<div class="line"><span class="lineno">  457</span>        }</div>
-<div class="line"><span class="lineno">  458</span>    }</div>
-<div class="line"><span class="lineno">  459</span> </div>
-<div class="line"><span class="lineno">  460</span>    <span class="comment">// Now scale everything down if we&#39;re at value &lt; 255.</span></div>
-<div class="line"><span class="lineno">  461</span>    <span class="keywordflow">if</span>( val != 255 ) {</div>
-<div class="line"><span class="lineno">  462</span> </div>
-<div class="line"><span class="lineno">  463</span>        val = scale8_video_LEAVING_R1_DIRTY( val, val);</div>
-<div class="line"><span class="lineno">  464</span>        <span class="keywordflow">if</span>( val == 0 ) {</div>
-<div class="line"><span class="lineno">  465</span>            r=0; g=0; b=0;</div>
-<div class="line"><span class="lineno">  466</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  467</span>            <span class="comment">// nscale8x3_video( r, g, b, val);</span></div>
-<div class="line"><span class="lineno">  468</span><span class="preprocessor">#if (FASTLED_SCALE8_FIXED==1)</span></div>
-<div class="line"><span class="lineno">  469</span>            r = scale8_LEAVING_R1_DIRTY( r, val);</div>
-<div class="line"><span class="lineno">  470</span>            <span class="keyword">asm</span> <span class="keyword">volatile</span>(<span class="stringliteral">&quot;&quot;</span>);  <span class="comment">// Fixes jumping red pixel: https://github.com/FastLED/FastLED/pull/943</span></div>
-<div class="line"><span class="lineno">  471</span>            g = scale8_LEAVING_R1_DIRTY( g, val);</div>
-<div class="line"><span class="lineno">  472</span>            <span class="keyword">asm</span> <span class="keyword">volatile</span>(<span class="stringliteral">&quot;&quot;</span>);</div>
-<div class="line"><span class="lineno">  473</span>            b = scale8_LEAVING_R1_DIRTY( b, val);</div>
-<div class="line"><span class="lineno">  474</span>            <span class="keyword">asm</span> <span class="keyword">volatile</span>(<span class="stringliteral">&quot;&quot;</span>);</div>
-<div class="line"><span class="lineno">  475</span>            cleanup_R1();</div>
-<div class="line"><span class="lineno">  476</span><span class="preprocessor">#else</span></div>
-<div class="line"><span class="lineno">  477</span>            <span class="keywordflow">if</span>( r ) r = scale8( r, val) + 1;</div>
-<div class="line"><span class="lineno">  478</span>            <span class="keywordflow">if</span>( g ) g = scale8( g, val) + 1;</div>
-<div class="line"><span class="lineno">  479</span>            <span class="keywordflow">if</span>( b ) b = scale8( b, val) + 1;</div>
-<div class="line"><span class="lineno">  480</span><span class="preprocessor">#endif</span></div>
-<div class="line"><span class="lineno">  481</span>        }</div>
-<div class="line"><span class="lineno">  482</span>    }</div>
-<div class="line"><span class="lineno">  483</span> </div>
-<div class="line"><span class="lineno">  484</span>    <span class="comment">// Here we have the old AVR &quot;missing std X+n&quot; problem again</span></div>
-<div class="line"><span class="lineno">  485</span>    <span class="comment">// It turns out that fixing it winds up costing more than</span></div>
-<div class="line"><span class="lineno">  486</span>    <span class="comment">// not fixing it.</span></div>
-<div class="line"><span class="lineno">  487</span>    <span class="comment">// To paraphrase Dr Bronner, profile! profile! profile!</span></div>
-<div class="line"><span class="lineno">  488</span>    <span class="comment">//asm volatile(  &quot;&quot;  :  :  : &quot;r26&quot;, &quot;r27&quot; );</span></div>
-<div class="line"><span class="lineno">  489</span>    <span class="comment">//asm volatile (&quot; movw r30, r26 \n&quot; : : : &quot;r30&quot;, &quot;r31&quot;);</span></div>
-<div class="line"><span class="lineno">  490</span>    rgb.r = r;</div>
-<div class="line"><span class="lineno">  491</span>    rgb.g = g;</div>
-<div class="line"><span class="lineno">  492</span>    rgb.b = b;</div>
-<div class="line"><span class="lineno">  493</span>}</div>
+<div class="line"><span class="lineno">  424</span>    <span class="keywordflow">if</span>( G2 ) <a class="code hl_variable" href="../../d4/d36/namespacefl_abb8ff746cce2b11a90718afba1cfec1b.html#abb8ff746cce2b11a90718afba1cfec1b">g</a> = <a class="code hl_variable" href="../../d4/d36/namespacefl_abb8ff746cce2b11a90718afba1cfec1b.html#abb8ff746cce2b11a90718afba1cfec1b">g</a> &gt;&gt; 1;</div>
+<div class="line"><span class="lineno">  425</span>    <span class="comment">// Deliberately the cleaning variant. The _LEAVING_R1_DIRTY form only pays</span></div>
+<div class="line"><span class="lineno">  426</span>    <span class="comment">// off when several calls are batched before one cleanup_R1(), and this is a</span></div>
+<div class="line"><span class="lineno">  427</span>    <span class="comment">// lone call whose dirty R1 outlives it on three separate paths: sat == 255</span></div>
+<div class="line"><span class="lineno">  428</span>    <span class="comment">// and val == 255 both skip their blocks entirely, and the sat == 0 branch</span></div>
+<div class="line"><span class="lineno">  429</span>    <span class="comment">// below just assigns 255s. Any of those returns to the caller with AVR&#39;s</span></div>
+<div class="line"><span class="lineno">  430</span>    <span class="comment">// __zero_reg__ non-zero. See issue #668.</span></div>
+<div class="line"><span class="lineno">  431</span>    <span class="keywordflow">if</span>( Gscale ) <a class="code hl_variable" href="../../d4/d36/namespacefl_abb8ff746cce2b11a90718afba1cfec1b.html#abb8ff746cce2b11a90718afba1cfec1b">g</a> = scale8_video( g, Gscale);</div>
+<div class="line"><span class="lineno">  432</span> </div>
+<div class="line"><span class="lineno">  433</span>    <span class="comment">// Scale down colors if we&#39;re desaturated at all</span></div>
+<div class="line"><span class="lineno">  434</span>    <span class="comment">// and add the brightness_floor to r, g, and b.</span></div>
+<div class="line"><span class="lineno">  435</span>    <span class="keywordflow">if</span>( sat != 255 ) {</div>
+<div class="line"><span class="lineno">  436</span>        <span class="keywordflow">if</span>( sat == 0) {</div>
+<div class="line"><span class="lineno">  437</span>            r = 255; b = 255; <a class="code hl_variable" href="../../d4/d36/namespacefl_abb8ff746cce2b11a90718afba1cfec1b.html#abb8ff746cce2b11a90718afba1cfec1b">g</a> = 255;</div>
+<div class="line"><span class="lineno">  438</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  439</span>            <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> desat = 255 - sat;</div>
+<div class="line"><span class="lineno">  440</span>            desat = scale8_video( desat, desat);</div>
+<div class="line"><span class="lineno">  441</span> </div>
+<div class="line"><span class="lineno">  442</span>            <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> satscale = 255 - desat;</div>
+<div class="line"><span class="lineno">  443</span>            <span class="comment">//satscale = sat; // uncomment to revert to pre-2021 saturation behavior</span></div>
+<div class="line"><span class="lineno">  444</span> </div>
+<div class="line"><span class="lineno">  445</span>            <span class="comment">//nscale8x3_video( r, g, b, sat);</span></div>
+<div class="line"><span class="lineno">  446</span><span class="preprocessor">#if (FASTLED_SCALE8_FIXED==1)</span></div>
+<div class="line"><span class="lineno">  447</span>            r = scale8_LEAVING_R1_DIRTY( r, satscale);</div>
+<div class="line"><span class="lineno">  448</span>            <span class="keyword">asm</span> <span class="keyword">volatile</span>(<span class="stringliteral">&quot;&quot;</span>);  <span class="comment">// Fixes jumping red pixel: https://github.com/FastLED/FastLED/pull/943</span></div>
+<div class="line"><span class="lineno">  449</span>            <a class="code hl_variable" href="../../d4/d36/namespacefl_abb8ff746cce2b11a90718afba1cfec1b.html#abb8ff746cce2b11a90718afba1cfec1b">g</a> = scale8_LEAVING_R1_DIRTY( g, satscale);</div>
+<div class="line"><span class="lineno">  450</span>            <span class="keyword">asm</span> <span class="keyword">volatile</span>(<span class="stringliteral">&quot;&quot;</span>);</div>
+<div class="line"><span class="lineno">  451</span>            b = scale8_LEAVING_R1_DIRTY( b, satscale);</div>
+<div class="line"><span class="lineno">  452</span>            <span class="keyword">asm</span> <span class="keyword">volatile</span>(<span class="stringliteral">&quot;&quot;</span>);</div>
+<div class="line"><span class="lineno">  453</span>            cleanup_R1();</div>
+<div class="line"><span class="lineno">  454</span><span class="preprocessor">#else</span></div>
+<div class="line"><span class="lineno">  455</span>            <span class="keywordflow">if</span>( r ) r = scale8( r, satscale) + 1;</div>
+<div class="line"><span class="lineno">  456</span>            <span class="keywordflow">if</span>( g ) <a class="code hl_variable" href="../../d4/d36/namespacefl_abb8ff746cce2b11a90718afba1cfec1b.html#abb8ff746cce2b11a90718afba1cfec1b">g</a> = scale8( g, satscale) + 1;</div>
+<div class="line"><span class="lineno">  457</span>            <span class="keywordflow">if</span>( b ) b = scale8( b, satscale) + 1;</div>
+<div class="line"><span class="lineno">  458</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">  459</span>            <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> brightness_floor = desat;</div>
+<div class="line"><span class="lineno">  460</span>            r += brightness_floor;</div>
+<div class="line"><span class="lineno">  461</span>            <a class="code hl_variable" href="../../d4/d36/namespacefl_abb8ff746cce2b11a90718afba1cfec1b.html#abb8ff746cce2b11a90718afba1cfec1b">g</a> += brightness_floor;</div>
+<div class="line"><span class="lineno">  462</span>            b += brightness_floor;</div>
+<div class="line"><span class="lineno">  463</span>        }</div>
+<div class="line"><span class="lineno">  464</span>    }</div>
+<div class="line"><span class="lineno">  465</span> </div>
+<div class="line"><span class="lineno">  466</span>    <span class="comment">// Now scale everything down if we&#39;re at value &lt; 255.</span></div>
+<div class="line"><span class="lineno">  467</span>    <span class="keywordflow">if</span>( val != 255 ) {</div>
+<div class="line"><span class="lineno">  468</span> </div>
+<div class="line"><span class="lineno">  469</span>        <span class="comment">// This call is followed by branching before any other scale8 batch,</span></div>
+<div class="line"><span class="lineno">  470</span>        <span class="comment">// so use the cleaning form rather than carrying dirty R1 through C++.</span></div>
+<div class="line"><span class="lineno">  471</span>        val = scale8_video( val, val);</div>
+<div class="line"><span class="lineno">  472</span>        <span class="keywordflow">if</span>( val == 0 ) {</div>
+<div class="line"><span class="lineno">  473</span>            r=0; <a class="code hl_variable" href="../../d4/d36/namespacefl_abb8ff746cce2b11a90718afba1cfec1b.html#abb8ff746cce2b11a90718afba1cfec1b">g</a>=0; b=0;</div>
+<div class="line"><span class="lineno">  474</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  475</span>            <span class="comment">// nscale8x3_video( r, g, b, val);</span></div>
+<div class="line"><span class="lineno">  476</span><span class="preprocessor">#if (FASTLED_SCALE8_FIXED==1)</span></div>
+<div class="line"><span class="lineno">  477</span>            r = scale8_LEAVING_R1_DIRTY( r, val);</div>
+<div class="line"><span class="lineno">  478</span>            <span class="keyword">asm</span> <span class="keyword">volatile</span>(<span class="stringliteral">&quot;&quot;</span>);  <span class="comment">// Fixes jumping red pixel: https://github.com/FastLED/FastLED/pull/943</span></div>
+<div class="line"><span class="lineno">  479</span>            <a class="code hl_variable" href="../../d4/d36/namespacefl_abb8ff746cce2b11a90718afba1cfec1b.html#abb8ff746cce2b11a90718afba1cfec1b">g</a> = scale8_LEAVING_R1_DIRTY( g, val);</div>
+<div class="line"><span class="lineno">  480</span>            <span class="keyword">asm</span> <span class="keyword">volatile</span>(<span class="stringliteral">&quot;&quot;</span>);</div>
+<div class="line"><span class="lineno">  481</span>            b = scale8_LEAVING_R1_DIRTY( b, val);</div>
+<div class="line"><span class="lineno">  482</span>            <span class="keyword">asm</span> <span class="keyword">volatile</span>(<span class="stringliteral">&quot;&quot;</span>);</div>
+<div class="line"><span class="lineno">  483</span>            cleanup_R1();</div>
+<div class="line"><span class="lineno">  484</span><span class="preprocessor">#else</span></div>
+<div class="line"><span class="lineno">  485</span>            <span class="keywordflow">if</span>( r ) r = scale8( r, val) + 1;</div>
+<div class="line"><span class="lineno">  486</span>            <span class="keywordflow">if</span>( g ) <a class="code hl_variable" href="../../d4/d36/namespacefl_abb8ff746cce2b11a90718afba1cfec1b.html#abb8ff746cce2b11a90718afba1cfec1b">g</a> = scale8( g, val) + 1;</div>
+<div class="line"><span class="lineno">  487</span>            <span class="keywordflow">if</span>( b ) b = scale8( b, val) + 1;</div>
+<div class="line"><span class="lineno">  488</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">  489</span>        }</div>
+<div class="line"><span class="lineno">  490</span>    }</div>
+<div class="line"><span class="lineno">  491</span> </div>
+<div class="line"><span class="lineno">  492</span>    <span class="comment">// Here we have the old AVR &quot;missing std X+n&quot; problem again</span></div>
+<div class="line"><span class="lineno">  493</span>    <span class="comment">// It turns out that fixing it winds up costing more than</span></div>
+<div class="line"><span class="lineno">  494</span>    <span class="comment">// not fixing it.</span></div>
+<div class="line"><span class="lineno">  495</span>    <span class="comment">// To paraphrase Dr Bronner, profile! profile! profile!</span></div>
+<div class="line"><span class="lineno">  496</span>    <span class="comment">//asm volatile(  &quot;&quot;  :  :  : &quot;r26&quot;, &quot;r27&quot; );</span></div>
+<div class="line"><span class="lineno">  497</span>    <span class="comment">//asm volatile (&quot; movw r30, r26 \n&quot; : : : &quot;r30&quot;, &quot;r31&quot;);</span></div>
+<div class="line"><span class="lineno">  498</span>    rgb.r = r;</div>
+<div class="line"><span class="lineno">  499</span>    rgb.g = <a class="code hl_variable" href="../../d4/d36/namespacefl_abb8ff746cce2b11a90718afba1cfec1b.html#abb8ff746cce2b11a90718afba1cfec1b">g</a>;</div>
+<div class="line"><span class="lineno">  500</span>    rgb.b = b;</div>
+<div class="line"><span class="lineno">  501</span>}</div>
 <div class="ttc" id="aadvanced_8h_ad7b7eb0b3e04af91bdd64715226c3c68_html_ad7b7eb0b3e04af91bdd64715226c3c68"><div class="ttname"><a href="../../da/dc7/advanced_8h_ad7b7eb0b3e04af91bdd64715226c3c68.html#ad7b7eb0b3e04af91bdd64715226c3c68">hue</a></div><div class="ttdeci">uint8_t hue</div><div class="ttdef"><b>Definition</b> <a href="../../da/dc7/advanced_8h_source.html#l00094">advanced.h:94</a></div></div>
 <div class="ttc" id="adirect_8h_ae2738c620ee3ab857c9656b3bf86a24d_html_ae2738c620ee3ab857c9656b3bf86a24d"><div class="ttname"><a href="../../d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d">offset</a></div><div class="ttdeci">fl::UISlider offset(&quot;Offset&quot;, 0.0f, 0.0f, 1.0f, 0.01f)</div></div>
 <div class="ttc" id="ahsv2rgb_8cpp_8hpp_a62d9eb0363957a0e61b35ca80efb31a1_html_a62d9eb0363957a0e61b35ca80efb31a1"><div class="ttname"><a href="../../d6/db5/hsv2rgb_8cpp_8hpp_a62d9eb0363957a0e61b35ca80efb31a1.html#a62d9eb0363957a0e61b35ca80efb31a1">FORCE_REFERENCE</a></div><div class="ttdeci">#define FORCE_REFERENCE(var)</div><div class="ttdoc">Force a variable reference to avoid compiler over-optimization.</div><div class="ttdef"><b>Definition</b> <a href="../../d6/db5/hsv2rgb_8cpp_8hpp_source.html#l00252">hsv2rgb.cpp.hpp:252</a></div></div>
 <div class="ttc" id="anamespacefl_a058ceeac48f181da463c2ba07401292c_html_a058ceeac48f181da463c2ba07401292c"><div class="ttname"><a href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a></div><div class="ttdeci">unsigned char u8</div><div class="ttdef"><b>Definition</b> <a href="../../df/dd8/stdint_8h_source.html#l00131">stdint.h:131</a></div></div>
+<div class="ttc" id="anamespacefl_abb8ff746cce2b11a90718afba1cfec1b_html_abb8ff746cce2b11a90718afba1cfec1b"><div class="ttname"><a href="../../d4/d36/namespacefl_abb8ff746cce2b11a90718afba1cfec1b.html#abb8ff746cce2b11a90718afba1cfec1b">fl::g</a></div><div class="ttdeci">InputGamut g</div><div class="ttdef"><b>Definition</b> <a href="../../df/df8/fl_2gfx_2rgbw_8h_source.html#l00124">rgbw.h:124</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../d6/db5/hsv2rgb_8cpp_8hpp_source.html#l00252">FORCE_REFERENCE</a>, <a class="el" href="../../da/dc7/advanced_8h_source.html#l00094">hue</a>, and <a class="el" href="../../d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d">offset()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
@@ -368,7 +377,7 @@ $(function(){initNavTree('dd/dc7/group___h_s_v2_r_g_b_ga06ee0f21e1bf430ea547244f
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dd/dc7/group___h_s_v2_r_g_b.html">HSV to RGB Conversion Functions</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:02 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

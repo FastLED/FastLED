@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -115,6 +115,7 @@ $(function(){initNavTree('d2/de0/async__logger_8cpp_8hpp.html','../../'); initRe
 <code>#include &quot;<a class="el" href="../../db/da4/task_8h_source.html">fl/task/task.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d2/dd8/scheduler_8h_source.html">fl/task/scheduler.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../db/d01/noexcept_8h_source.html">fl/stl/noexcept.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d4/d54/compiler__control_8h_source.html">fl/stl/compiler_control.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for async_logger.cpp.hpp:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -143,18 +144,18 @@ Namespaces</h2></td></tr>
 <tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">Base definition for an LED controller. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d9e/namespacefl_1_1detail.html">fl::detail</a></td></tr>
-<tr class="memdesc:df/d9e/namespacefl_1_1detail"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compile-time linker keep-alive hook for a single <code><a class="el" href="../../d4/d36/namespacefl_a7e1e94407fbd018269794d74ab7fb4c1.html#a7e1e94407fbd018269794d74ab7fb4c1" title="Driver identifier for compile-time bus selection.">fl::Bus</a></code>. <br /></td></tr>
+<tr class="memdesc:df/d9e/namespacefl_1_1detail"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compile-time linker keep-alive hook for a single <code><a class="el" href="../../d4/d36/namespacefl_a7e1e94407fbd018269794d74ab7fb4c1.html#a7e1e94407fbd018269794d74ab7fb4c1" title="Portable public bus selector.">fl::Bus</a></code>. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a2e82003c43743a6a665e4d58c7f932ce" id="r_a2e82003c43743a6a665e4d58c7f932ce"><td class="memItemLeft" align="right" valign="top">void <a class="el" href="../../df/d96/s16x16x4_8h_adcb7795cd6f85159b3087db18279685e.html#adcb7795cd6f85159b3087db18279685e">FL_IRAM</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d9e/namespacefl_1_1detail_a2e82003c43743a6a665e4d58c7f932ce.html#a2e82003c43743a6a665e4d58c7f932ce">fl::detail::async_log_flush_timer_isr</a> (void *user_data)</td></tr>
+<tr class="memitem:a2e82003c43743a6a665e4d58c7f932ce" id="r_a2e82003c43743a6a665e4d58c7f932ce"><td class="memItemLeft" align="right" valign="top">void <a class="el" href="../../d4/d54/compiler__control_8h_adcb7795cd6f85159b3087db18279685e.html#adcb7795cd6f85159b3087db18279685e">FL_IRAM</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d9e/namespacefl_1_1detail_a2e82003c43743a6a665e4d58c7f932ce.html#a2e82003c43743a6a665e4d58c7f932ce">fl::detail::async_log_flush_timer_isr</a> (void *user_data)</td></tr>
 <tr class="separator:a2e82003c43743a6a665e4d58c7f932ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abe5657de2c328256b3c15a1388b793aa" id="r_abe5657de2c328256b3c15a1388b793aa"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_abe5657de2c328256b3c15a1388b793aa.html#abe5657de2c328256b3c15a1388b793aa">fl::async_log_service</a> ()</td></tr>
 <tr class="separator:abe5657de2c328256b3c15a1388b793aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abe4e89a0a574f2abfa9c1bb53b9bd343" id="r_abe4e89a0a574f2abfa9c1bb53b9bd343"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_abe4e89a0a574f2abfa9c1bb53b9bd343.html#abe4e89a0a574f2abfa9c1bb53b9bd343">fl::configureAsyncLogService</a> (u32 interval_ms=16, fl::size messages_per_tick=5) <a class="el" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></td></tr>
-<tr class="memdesc:abe4e89a0a574f2abfa9c1bb53b9bd343"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configure async logger automatic servicing task.  <br /></td></tr>
-<tr class="separator:abe4e89a0a574f2abfa9c1bb53b9bd343"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa724af6bce4780d93d1b20804ebe3e69" id="r_aa724af6bce4780d93d1b20804ebe3e69"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_aa724af6bce4780d93d1b20804ebe3e69.html#aa724af6bce4780d93d1b20804ebe3e69">fl::configureAsyncLogService</a> (u32 interval_ms=16, fl::size messages_per_tick=5) <a class="el" href="../../d4/d36/namespacefl_aa317f89ca911371e798d08a93770402f.html#aa317f89ca911371e798d08a93770402f">FL_NO_EXCEPT</a></td></tr>
+<tr class="memdesc:aa724af6bce4780d93d1b20804ebe3e69"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configure async logger automatic servicing task.  <br /></td></tr>
+<tr class="separator:aa724af6bce4780d93d1b20804ebe3e69"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae18de49f03a7a361a888c1e75d5e2f86" id="r_ae18de49f03a7a361a888c1e75d5e2f86"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d9e/namespacefl_1_1detail_ae18de49f03a7a361a888c1e75d5e2f86.html#ae18de49f03a7a361a888c1e75d5e2f86">fl::detail::printLoggerDisabledError</a> (const char *category_name, const char *define_name)</td></tr>
 <tr class="memdesc:ae18de49f03a7a361a888c1e75d5e2f86"><td class="mdescLeft">&#160;</td><td class="mdescRight">Print error message for disabled logger (non-template helper) Called from checkLoggerEnabled template function IMPORTANT: This must NOT be inline - needs external linkage for cross-TU calls.  <br /></td></tr>
 <tr class="separator:ae18de49f03a7a361a888c1e75d5e2f86"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -166,7 +167,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_c0183bc946151a111096e1f3b7a19762.html">log</a></li><li class="navelem"><a class="el" href="../../d2/de0/async__logger_8cpp_8hpp.html">async_logger.cpp.hpp</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:01 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:04 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

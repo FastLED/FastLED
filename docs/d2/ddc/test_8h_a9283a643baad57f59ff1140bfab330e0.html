@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -114,7 +114,7 @@ $(function(){initNavTree('d2/ddc/test_8h_a9283a643baad57f59ff1140bfab330e0.html'
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="../../d7/d84/cstddef_8h_a1ed206c22241d418bcd1746517563727.html#a1ed206c22241d418bcd1746517563727">size_t</a></td>          <td class="paramname"><span class="paramname"><em>edge_count</em></span>, </td>
+          <td class="paramtype"><a class="el" href="../../df/dd8/stdint_8h_ac27ddc68fd06b365a956040e5d9645f0.html#ac27ddc68fd06b365a956040e5d9645f0">size_t</a></td>          <td class="paramname"><span class="paramname"><em>edge_count</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -124,7 +124,7 @@ $(function(){initNavTree('d2/ddc/test_8h_a9283a643baad57f59ff1140bfab330e0.html'
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">uint32_t</td>          <td class="paramname"><span class="paramname"><em>tolerance_percent</em></span>&#160;)</td>
+          <td class="paramtype"><a class="el" href="../../df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a></td>          <td class="paramname"><span class="paramname"><em>tolerance_percent</em></span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -145,17 +145,17 @@ $(function(){initNavTree('d2/ddc/test_8h_a9283a643baad57f59ff1140bfab330e0.html'
 <p class="definition">Definition at line <a class="el" href="../../df/dac/test_8cpp_source.html#l00060">60</a> of file <a class="el" href="../../df/dac/test_8cpp_source.html">test.cpp</a>.</p>
 <div class="fragment"><div class="line"><span class="lineno">   63</span>                                                    {</div>
 <div class="line"><span class="lineno">   64</span> </div>
-<div class="line"><span class="lineno">   65</span>    <a class="code hl_define" href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;[TEST] Captured &quot;</span> &lt;&lt; edge_count &lt;&lt; <span class="stringliteral">&quot; edges&quot;</span>);</div>
+<div class="line"><span class="lineno">   65</span>    <a class="code hl_define" href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;[TEST] Captured &quot;</span> &lt;&lt; edge_count &lt;&lt; <span class="stringliteral">&quot; edges&quot;</span>);</div>
 <div class="line"><span class="lineno">   66</span> </div>
 <div class="line"><span class="lineno">   67</span>    <span class="keywordflow">if</span> (edge_count == 0) {</div>
-<div class="line"><span class="lineno">   68</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a87d1cd42c16d2496128dd8b10bd737e8.html#a87d1cd42c16d2496128dd8b10bd737e8">FL_ERROR</a>(<span class="stringliteral">&quot;No edges captured!&quot;</span>);</div>
+<div class="line"><span class="lineno">   68</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_aa90e3b2c36c6225140f46a86c6ac19e2.html#aa90e3b2c36c6225140f46a86c6ac19e2">FL_ERROR</a>(<span class="stringliteral">&quot;No edges captured!&quot;</span>);</div>
 <div class="line"><span class="lineno">   69</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
 <div class="line"><span class="lineno">   70</span>    }</div>
 <div class="line"><span class="lineno">   71</span> </div>
 <div class="line"><span class="lineno">   72</span>    <span class="comment">// Print edge timings</span></div>
-<div class="line"><span class="lineno">   73</span>    <a class="code hl_define" href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;[TEST] Edge timings:&quot;</span>);</div>
+<div class="line"><span class="lineno">   73</span>    <a class="code hl_define" href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;[TEST] Edge timings:&quot;</span>);</div>
 <div class="line"><span class="lineno">   74</span>    <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; edge_count; i++) {</div>
-<div class="line"><span class="lineno">   75</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;  [&quot;</span> &lt;&lt; i &lt;&lt; <span class="stringliteral">&quot;] &quot;</span> &lt;&lt; (edges[i].high ? <span class="stringliteral">&quot;HIGH&quot;</span> : <span class="stringliteral">&quot;LOW &quot;</span>)</div>
+<div class="line"><span class="lineno">   75</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;  [&quot;</span> &lt;&lt; i &lt;&lt; <span class="stringliteral">&quot;] &quot;</span> &lt;&lt; (edges[i].high ? <span class="stringliteral">&quot;HIGH&quot;</span> : <span class="stringliteral">&quot;LOW &quot;</span>)</div>
 <div class="line"><span class="lineno">   76</span>                &lt;&lt; <span class="stringliteral">&quot; &quot;</span> &lt;&lt; edges[i].ns &lt;&lt; <span class="stringliteral">&quot;ns (&quot;</span> &lt;&lt; (edges[i].ns / 1000) &lt;&lt; <span class="stringliteral">&quot;us)&quot;</span>);</div>
 <div class="line"><span class="lineno">   77</span>    }</div>
 <div class="line"><span class="lineno">   78</span> </div>
@@ -163,7 +163,7 @@ $(function(){initNavTree('d2/ddc/test_8h_a9283a643baad57f59ff1140bfab330e0.html'
 <div class="line"><span class="lineno">   80</span>    <span class="keywordtype">bool</span> alternation_valid = <span class="keyword">true</span>;</div>
 <div class="line"><span class="lineno">   81</span>    <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 1; i &lt; edge_count; i++) {</div>
 <div class="line"><span class="lineno">   82</span>        <span class="keywordflow">if</span> (edges[i].high == edges[i-1].high) {</div>
-<div class="line"><span class="lineno">   83</span>            <a class="code hl_define" href="../../d7/d7f/log_8h_a87d1cd42c16d2496128dd8b10bd737e8.html#a87d1cd42c16d2496128dd8b10bd737e8">FL_ERROR</a>(<span class="stringliteral">&quot;Sequential &quot;</span> &lt;&lt; (edges[i].high ? <span class="stringliteral">&quot;HIGH&quot;</span> : <span class="stringliteral">&quot;LOW&quot;</span>)</div>
+<div class="line"><span class="lineno">   83</span>            <a class="code hl_define" href="../../d7/d7f/log_8h_aa90e3b2c36c6225140f46a86c6ac19e2.html#aa90e3b2c36c6225140f46a86c6ac19e2">FL_ERROR</a>(<span class="stringliteral">&quot;Sequential &quot;</span> &lt;&lt; (edges[i].high ? <span class="stringliteral">&quot;HIGH&quot;</span> : <span class="stringliteral">&quot;LOW&quot;</span>)</div>
 <div class="line"><span class="lineno">   84</span>                    &lt;&lt; <span class="stringliteral">&quot; values at indices &quot;</span> &lt;&lt; (i-1) &lt;&lt; <span class="stringliteral">&quot; and &quot;</span> &lt;&lt; i</div>
 <div class="line"><span class="lineno">   85</span>                    &lt;&lt; <span class="stringliteral">&quot; - edges should alternate HIGH/LOW&quot;</span>);</div>
 <div class="line"><span class="lineno">   86</span>            alternation_valid = <span class="keyword">false</span>;</div>
@@ -172,46 +172,46 @@ $(function(){initNavTree('d2/ddc/test_8h_a9283a643baad57f59ff1140bfab330e0.html'
 <div class="line"><span class="lineno">   89</span> </div>
 <div class="line"><span class="lineno">   90</span>    <span class="comment">// Validate timing accuracy against expected pattern</span></div>
 <div class="line"><span class="lineno">   91</span>    <span class="keywordtype">bool</span> timing_valid = <span class="keyword">true</span>;</div>
-<div class="line"><span class="lineno">   92</span>    <a class="code hl_define" href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;[TEST] Validating timing accuracy (±&quot;</span> &lt;&lt; tolerance_percent &lt;&lt; <span class="stringliteral">&quot;% tolerance):&quot;</span>);</div>
+<div class="line"><span class="lineno">   92</span>    <a class="code hl_define" href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;[TEST] Validating timing accuracy (±&quot;</span> &lt;&lt; tolerance_percent &lt;&lt; <span class="stringliteral">&quot;% tolerance):&quot;</span>);</div>
 <div class="line"><span class="lineno">   93</span> </div>
 <div class="line"><span class="lineno">   94</span>    <span class="comment">// Expected edge count is expected_pattern.size() - 1 because the last edge</span></div>
 <div class="line"><span class="lineno">   95</span>    <span class="comment">// ends with timeout (no subsequent transition to measure duration)</span></div>
-<div class="line"><span class="lineno">   96</span>    <span class="keywordtype">size_t</span> expected_edge_count = expected_pattern.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac">size</a>() - 1;</div>
+<div class="line"><span class="lineno">   96</span>    <span class="keywordtype">size_t</span> expected_edge_count = expected_pattern.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa">size</a>() - 1;</div>
 <div class="line"><span class="lineno">   97</span>    <span class="keywordflow">if</span> (edge_count != expected_edge_count) {</div>
-<div class="line"><span class="lineno">   98</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;WARNING: Edge count mismatch - expected &quot;</span> &lt;&lt; expected_edge_count</div>
+<div class="line"><span class="lineno">   98</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;WARNING: Edge count mismatch - expected &quot;</span> &lt;&lt; expected_edge_count</div>
 <div class="line"><span class="lineno">   99</span>                &lt;&lt; <span class="stringliteral">&quot;, got &quot;</span> &lt;&lt; edge_count);</div>
 <div class="line"><span class="lineno">  100</span>        timing_valid = <span class="keyword">false</span>;</div>
 <div class="line"><span class="lineno">  101</span>    }</div>
 <div class="line"><span class="lineno">  102</span> </div>
 <div class="line"><span class="lineno">  103</span>    <span class="keywordtype">size_t</span> compare_count = edge_count &lt; expected_edge_count ? edge_count : expected_edge_count;</div>
 <div class="line"><span class="lineno">  104</span>    <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; compare_count; i++) {</div>
-<div class="line"><span class="lineno">  105</span>        <a class="code hl_typedef" href="../../d4/d36/namespacefl_a2384f46fb563f37f7ed4a2173d93e9e9.html#a2384f46fb563f37f7ed4a2173d93e9e9">uint32_t</a> expected_us = expected_pattern[i].delay_us;</div>
-<div class="line"><span class="lineno">  106</span>        <a class="code hl_typedef" href="../../d4/d36/namespacefl_a2384f46fb563f37f7ed4a2173d93e9e9.html#a2384f46fb563f37f7ed4a2173d93e9e9">uint32_t</a> actual_us = edges[i].ns / 1000;</div>
+<div class="line"><span class="lineno">  105</span>        <a class="code hl_typedef" href="../../df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a> expected_us = expected_pattern[i].delay_us;</div>
+<div class="line"><span class="lineno">  106</span>        <a class="code hl_typedef" href="../../df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a> actual_us = edges[i].ns / 1000;</div>
 <div class="line"><span class="lineno">  107</span>        <span class="keywordtype">bool</span> expected_high = expected_pattern[i].is_high;</div>
 <div class="line"><span class="lineno">  108</span>        <span class="keywordtype">bool</span> actual_high = edges[i].high;</div>
 <div class="line"><span class="lineno">  109</span> </div>
 <div class="line"><span class="lineno">  110</span>        <span class="comment">// Calculate tolerance range</span></div>
-<div class="line"><span class="lineno">  111</span>        <a class="code hl_typedef" href="../../d4/d36/namespacefl_a2384f46fb563f37f7ed4a2173d93e9e9.html#a2384f46fb563f37f7ed4a2173d93e9e9">uint32_t</a> tolerance_us = (expected_us * tolerance_percent) / 100;</div>
-<div class="line"><span class="lineno">  112</span>        <a class="code hl_typedef" href="../../d4/d36/namespacefl_a2384f46fb563f37f7ed4a2173d93e9e9.html#a2384f46fb563f37f7ed4a2173d93e9e9">uint32_t</a> min_us = expected_us - tolerance_us;</div>
-<div class="line"><span class="lineno">  113</span>        <a class="code hl_typedef" href="../../d4/d36/namespacefl_a2384f46fb563f37f7ed4a2173d93e9e9.html#a2384f46fb563f37f7ed4a2173d93e9e9">uint32_t</a> max_us = expected_us + tolerance_us;</div>
+<div class="line"><span class="lineno">  111</span>        <a class="code hl_typedef" href="../../df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a> tolerance_us = (expected_us * tolerance_percent) / 100;</div>
+<div class="line"><span class="lineno">  112</span>        <a class="code hl_typedef" href="../../df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a> min_us = expected_us - tolerance_us;</div>
+<div class="line"><span class="lineno">  113</span>        <a class="code hl_typedef" href="../../df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a> max_us = expected_us + tolerance_us;</div>
 <div class="line"><span class="lineno">  114</span> </div>
 <div class="line"><span class="lineno">  115</span>        <span class="comment">// Validate timing and level</span></div>
 <div class="line"><span class="lineno">  116</span>        <span class="keywordtype">bool</span> timing_ok = (actual_us &gt;= min_us) &amp;&amp; (actual_us &lt;= max_us);</div>
 <div class="line"><span class="lineno">  117</span>        <span class="keywordtype">bool</span> level_ok = (expected_high == actual_high);</div>
 <div class="line"><span class="lineno">  118</span> </div>
 <div class="line"><span class="lineno">  119</span>        <span class="keywordflow">if</span> (timing_ok &amp;&amp; level_ok) {</div>
-<div class="line"><span class="lineno">  120</span>            <a class="code hl_define" href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;  [&quot;</span> &lt;&lt; i &lt;&lt; <span class="stringliteral">&quot;] ✓ &quot;</span> &lt;&lt; (actual_high ? <span class="stringliteral">&quot;HIGH&quot;</span> : <span class="stringliteral">&quot;LOW &quot;</span>)</div>
+<div class="line"><span class="lineno">  120</span>            <a class="code hl_define" href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;  [&quot;</span> &lt;&lt; i &lt;&lt; <span class="stringliteral">&quot;] ✓ &quot;</span> &lt;&lt; (actual_high ? <span class="stringliteral">&quot;HIGH&quot;</span> : <span class="stringliteral">&quot;LOW &quot;</span>)</div>
 <div class="line"><span class="lineno">  121</span>                    &lt;&lt; <span class="stringliteral">&quot; &quot;</span> &lt;&lt; actual_us &lt;&lt; <span class="stringliteral">&quot;us (expected &quot;</span> &lt;&lt; expected_us</div>
 <div class="line"><span class="lineno">  122</span>                    &lt;&lt; <span class="stringliteral">&quot;us ±&quot;</span> &lt;&lt; tolerance_us &lt;&lt; <span class="stringliteral">&quot;us)&quot;</span>);</div>
 <div class="line"><span class="lineno">  123</span>        } <span class="keywordflow">else</span> {</div>
 <div class="line"><span class="lineno">  124</span>            <span class="keywordflow">if</span> (!level_ok) {</div>
-<div class="line"><span class="lineno">  125</span>                <a class="code hl_define" href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;  [&quot;</span> &lt;&lt; i &lt;&lt; <span class="stringliteral">&quot;] ✗ Level mismatch: expected &quot;</span></div>
+<div class="line"><span class="lineno">  125</span>                <a class="code hl_define" href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;  [&quot;</span> &lt;&lt; i &lt;&lt; <span class="stringliteral">&quot;] ✗ Level mismatch: expected &quot;</span></div>
 <div class="line"><span class="lineno">  126</span>                        &lt;&lt; (expected_high ? <span class="stringliteral">&quot;HIGH&quot;</span> : <span class="stringliteral">&quot;LOW&quot;</span>) &lt;&lt; <span class="stringliteral">&quot;, got &quot;</span></div>
 <div class="line"><span class="lineno">  127</span>                        &lt;&lt; (actual_high ? <span class="stringliteral">&quot;HIGH&quot;</span> : <span class="stringliteral">&quot;LOW&quot;</span>));</div>
 <div class="line"><span class="lineno">  128</span>                timing_valid = <span class="keyword">false</span>;</div>
 <div class="line"><span class="lineno">  129</span>            }</div>
 <div class="line"><span class="lineno">  130</span>            <span class="keywordflow">if</span> (!timing_ok) {</div>
-<div class="line"><span class="lineno">  131</span>                <a class="code hl_define" href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;  [&quot;</span> &lt;&lt; i &lt;&lt; <span class="stringliteral">&quot;] ✗ Timing out of range: &quot;</span> &lt;&lt; actual_us</div>
+<div class="line"><span class="lineno">  131</span>                <a class="code hl_define" href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;  [&quot;</span> &lt;&lt; i &lt;&lt; <span class="stringliteral">&quot;] ✗ Timing out of range: &quot;</span> &lt;&lt; actual_us</div>
 <div class="line"><span class="lineno">  132</span>                        &lt;&lt; <span class="stringliteral">&quot;us (expected &quot;</span> &lt;&lt; expected_us &lt;&lt; <span class="stringliteral">&quot;us ±&quot;</span> &lt;&lt; tolerance_us</div>
 <div class="line"><span class="lineno">  133</span>                        &lt;&lt; <span class="stringliteral">&quot;us, range: &quot;</span> &lt;&lt; min_us &lt;&lt; <span class="stringliteral">&quot;-&quot;</span> &lt;&lt; max_us &lt;&lt; <span class="stringliteral">&quot;us)&quot;</span>);</div>
 <div class="line"><span class="lineno">  134</span>                timing_valid = <span class="keyword">false</span>;</div>
@@ -221,30 +221,30 @@ $(function(){initNavTree('d2/ddc/test_8h_a9283a643baad57f59ff1140bfab330e0.html'
 <div class="line"><span class="lineno">  138</span> </div>
 <div class="line"><span class="lineno">  139</span>    <span class="comment">// Validate results</span></div>
 <div class="line"><span class="lineno">  140</span>    <span class="keywordflow">if</span> (!alternation_valid) {</div>
-<div class="line"><span class="lineno">  141</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a87d1cd42c16d2496128dd8b10bd737e8.html#a87d1cd42c16d2496128dd8b10bd737e8">FL_ERROR</a>(<span class="stringliteral">&quot;Edge timings are not properly alternating&quot;</span>);</div>
-<div class="line"><span class="lineno">  142</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a87d1cd42c16d2496128dd8b10bd737e8.html#a87d1cd42c16d2496128dd8b10bd737e8">FL_ERROR</a>(<span class="stringliteral">&quot;Expected pattern: HIGH, LOW, HIGH, LOW, ...&quot;</span>);</div>
-<div class="line"><span class="lineno">  143</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a87d1cd42c16d2496128dd8b10bd737e8.html#a87d1cd42c16d2496128dd8b10bd737e8">FL_ERROR</a>(<span class="stringliteral">&quot;Actual pattern contains sequential identical states&quot;</span>);</div>
+<div class="line"><span class="lineno">  141</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_aa90e3b2c36c6225140f46a86c6ac19e2.html#aa90e3b2c36c6225140f46a86c6ac19e2">FL_ERROR</a>(<span class="stringliteral">&quot;Edge timings are not properly alternating&quot;</span>);</div>
+<div class="line"><span class="lineno">  142</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_aa90e3b2c36c6225140f46a86c6ac19e2.html#aa90e3b2c36c6225140f46a86c6ac19e2">FL_ERROR</a>(<span class="stringliteral">&quot;Expected pattern: HIGH, LOW, HIGH, LOW, ...&quot;</span>);</div>
+<div class="line"><span class="lineno">  143</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_aa90e3b2c36c6225140f46a86c6ac19e2.html#aa90e3b2c36c6225140f46a86c6ac19e2">FL_ERROR</a>(<span class="stringliteral">&quot;Actual pattern contains sequential identical states&quot;</span>);</div>
 <div class="line"><span class="lineno">  144</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
 <div class="line"><span class="lineno">  145</span>    } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (!timing_valid) {</div>
-<div class="line"><span class="lineno">  146</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a87d1cd42c16d2496128dd8b10bd737e8.html#a87d1cd42c16d2496128dd8b10bd737e8">FL_ERROR</a>(<span class="stringliteral">&quot;Captured edge timings do not match expected pattern&quot;</span>);</div>
-<div class="line"><span class="lineno">  147</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a87d1cd42c16d2496128dd8b10bd737e8.html#a87d1cd42c16d2496128dd8b10bd737e8">FL_ERROR</a>(<span class="stringliteral">&quot;Check timing accuracy and tolerance settings&quot;</span>);</div>
+<div class="line"><span class="lineno">  146</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_aa90e3b2c36c6225140f46a86c6ac19e2.html#aa90e3b2c36c6225140f46a86c6ac19e2">FL_ERROR</a>(<span class="stringliteral">&quot;Captured edge timings do not match expected pattern&quot;</span>);</div>
+<div class="line"><span class="lineno">  147</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_aa90e3b2c36c6225140f46a86c6ac19e2.html#aa90e3b2c36c6225140f46a86c6ac19e2">FL_ERROR</a>(<span class="stringliteral">&quot;Check timing accuracy and tolerance settings&quot;</span>);</div>
 <div class="line"><span class="lineno">  148</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
 <div class="line"><span class="lineno">  149</span>    } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (edge_count &gt;= 5) {</div>
-<div class="line"><span class="lineno">  150</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;[TEST] ✓ PASS: Captured &quot;</span> &lt;&lt; edge_count &lt;&lt; <span class="stringliteral">&quot; edges with proper alternation&quot;</span>);</div>
-<div class="line"><span class="lineno">  151</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;[TEST] ✓ PASS: All timing values match expected pattern within tolerance&quot;</span>);</div>
-<div class="line"><span class="lineno">  152</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;[TEST] ✓ RX channel working correctly!&quot;</span>);</div>
+<div class="line"><span class="lineno">  150</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;[TEST] ✓ PASS: Captured &quot;</span> &lt;&lt; edge_count &lt;&lt; <span class="stringliteral">&quot; edges with proper alternation&quot;</span>);</div>
+<div class="line"><span class="lineno">  151</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;[TEST] ✓ PASS: All timing values match expected pattern within tolerance&quot;</span>);</div>
+<div class="line"><span class="lineno">  152</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;[TEST] ✓ RX channel working correctly!&quot;</span>);</div>
 <div class="line"><span class="lineno">  153</span>        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
 <div class="line"><span class="lineno">  154</span>    } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  155</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;WARNING: Only captured &quot;</span> &lt;&lt; edge_count &lt;&lt; <span class="stringliteral">&quot; edges (expected &gt;=5)&quot;</span>);</div>
+<div class="line"><span class="lineno">  155</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;WARNING: Only captured &quot;</span> &lt;&lt; edge_count &lt;&lt; <span class="stringliteral">&quot; edges (expected &gt;=5)&quot;</span>);</div>
 <div class="line"><span class="lineno">  156</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
 <div class="line"><span class="lineno">  157</span>    }</div>
 <div class="line"><span class="lineno">  158</span>}</div>
-<div class="ttc" id="aclassfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac_html_aef7ee7eb5254da1ba1eb4f3e0173d0ac"><div class="ttname"><a href="../../d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac">fl::span::size</a></div><div class="ttdeci">constexpr fl::size size() const FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d7a/span_8h_source.html#l00458">span.h:458</a></div></div>
-<div class="ttc" id="alog_8h_a868b194fdb2234182e76042d9fde3062_html_a868b194fdb2234182e76042d9fde3062"><div class="ttname"><a href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a></div><div class="ttdeci">#define FL_WARN(X)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00276">log.h:276</a></div></div>
-<div class="ttc" id="alog_8h_a87d1cd42c16d2496128dd8b10bd737e8_html_a87d1cd42c16d2496128dd8b10bd737e8"><div class="ttname"><a href="../../d7/d7f/log_8h_a87d1cd42c16d2496128dd8b10bd737e8.html#a87d1cd42c16d2496128dd8b10bd737e8">FL_ERROR</a></div><div class="ttdeci">#define FL_ERROR(X)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00219">log.h:219</a></div></div>
-<div class="ttc" id="anamespacefl_a2384f46fb563f37f7ed4a2173d93e9e9_html_a2384f46fb563f37f7ed4a2173d93e9e9"><div class="ttname"><a href="../../d4/d36/namespacefl_a2384f46fb563f37f7ed4a2173d93e9e9.html#a2384f46fb563f37f7ed4a2173d93e9e9">fl::uint32_t</a></div><div class="ttdeci">fl::u32 uint32_t</div><div class="ttdef"><b>Definition</b> <a href="../../df/d96/s16x16x4_8h_source.html#l00219">s16x16x4.h:219</a></div></div>
+<div class="ttc" id="aclassfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa_html_aaf3daca1c2c8f93b2ac7b319989b22fa"><div class="ttname"><a href="../../d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa">fl::span::size</a></div><div class="ttdeci">constexpr fl::size size() const FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d7a/span_8h_source.html#l00483">span.h:483</a></div></div>
+<div class="ttc" id="alog_8h_a4804912fba6eed63e1afd84b8768aced_html_a4804912fba6eed63e1afd84b8768aced"><div class="ttname"><a href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a></div><div class="ttdeci">#define FL_WARN(...)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00440">log.h:440</a></div></div>
+<div class="ttc" id="alog_8h_aa90e3b2c36c6225140f46a86c6ac19e2_html_aa90e3b2c36c6225140f46a86c6ac19e2"><div class="ttname"><a href="../../d7/d7f/log_8h_aa90e3b2c36c6225140f46a86c6ac19e2.html#aa90e3b2c36c6225140f46a86c6ac19e2">FL_ERROR</a></div><div class="ttdeci">#define FL_ERROR(...)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00372">log.h:372</a></div></div>
+<div class="ttc" id="astdint_8h_ae8a835bf6e050b01cc449644a343aa73_html_ae8a835bf6e050b01cc449644a343aa73"><div class="ttname"><a href="../../df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a></div><div class="ttdeci">fl::u32 uint32_t</div><div class="ttdef"><b>Definition</b> <a href="../../df/dd8/stdint_8h_source.html#l00218">stdint.h:218</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d7/d7f/log_8h_source.html#l00219">FL_ERROR</a>, <a class="el" href="../../d7/d7f/log_8h_source.html#l00276">FL_WARN</a>, and <a class="el" href="../../d4/d7a/span_8h_source.html#l00458">fl::span&lt; T, Extent &gt;::size()</a>.</p>
+<p class="reference">References <a class="el" href="../../d7/d7f/log_8h_source.html#l00372">FL_ERROR</a>, <a class="el" href="../../d7/d7f/log_8h_source.html#l00440">FL_WARN</a>, and <a class="el" href="../../d4/d7a/span_8h_source.html#l00483">fl::span&lt; T, Extent &gt;::size()</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../df/d05/_r_x_8ino_source.html#l00145">loop()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
@@ -271,7 +271,7 @@ $(function(){initNavTree('d2/ddc/test_8h_a9283a643baad57f59ff1140bfab330e0.html'
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_06d068aec9e4416f35d5578a9a40b41b.html">RX</a></li><li class="navelem"><a class="el" href="../../d2/ddc/test_8h.html">test.h</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:00 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:02 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

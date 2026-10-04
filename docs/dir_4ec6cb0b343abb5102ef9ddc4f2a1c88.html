@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -126,7 +126,7 @@ Files</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p>This directory contains examples demonstrating the FastLED codec module functionality for JPEG and MPEG1 decoding.</p>
-<h1><a class="anchor" id="autotoc_md898"></a>
+<h1><a class="anchor" id="autotoc_md921"></a>
 Overview</h1>
 <p>The FastLED codec module provides video and image decoding capabilities optimized for LED display applications through individual codec headers (<code><a class="el" href="d3/d31/jpeg_8h.html">fl/codec/jpeg.h</a></code> and <code><a class="el" href="de/da7/mpeg1_8h.html">fl/codec/mpeg1.h</a></code>). It supports:</p>
 <ul>
@@ -136,7 +136,7 @@ Overview</h1>
 <li><b>Efficient software fallbacks</b> for broad platform compatibility</li>
 <li><b>Memory-optimized streaming</b> for resource-constrained devices</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md899"></a>
+<h1><a class="anchor" id="autotoc_md922"></a>
 Platform Support</h1>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -158,9 +158,9 @@ Platform Support</h1>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">Other   </td><td class="markdownTableBodyNone">✗   </td><td class="markdownTableBodyNone">✗   </td><td class="markdownTableBodyNone">None   </td></tr>
 </table>
-<h1><a class="anchor" id="autotoc_md900"></a>
+<h1><a class="anchor" id="autotoc_md923"></a>
 Examples</h1>
-<h2><a class="anchor" id="autotoc_md901"></a>
+<h2><a class="anchor" id="autotoc_md924"></a>
 1. CodecJpeg.ino</h2>
 <p><b>JPEG image decoding and display</b></p>
 <ul>
@@ -180,7 +180,7 @@ Examples</h1>
 <li>Frame scaling and color conversion</li>
 <li>Error handling and fallback</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md902"></a>
+<h2><a class="anchor" id="autotoc_md925"></a>
 2. CodecMpeg1.ino</h2>
 <p><b>MPEG1 video playback on LED matrix</b></p>
 <ul>
@@ -200,9 +200,9 @@ Examples</h1>
 <li>Memory-efficient buffering</li>
 <li>End-of-stream handling</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md903"></a>
+<h1><a class="anchor" id="autotoc_md926"></a>
 Basic Usage Pattern</h1>
-<h2><a class="anchor" id="autotoc_md904"></a>
+<h2><a class="anchor" id="autotoc_md927"></a>
 JPEG Decoding</h2>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &quot;<a class="code" href="d3/d31/jpeg_8h.html">fl/codec/jpeg.h</a>&quot;</span></div>
 <div class="line"><span class="preprocessor">#include &quot;fl/bytestreammemory.h&quot;</span></div>
@@ -228,10 +228,10 @@ JPEG Decoding</h2>
 <div class="line">}</div>
 <div class="ttc" id="aclassfl_1_1_jpeg_a6070d60029c1e6852a533f1e0fb99561_html_a6070d60029c1e6852a533f1e0fb99561"><div class="ttname"><a href="df/d28/classfl_1_1_jpeg_a6070d60029c1e6852a533f1e0fb99561.html#a6070d60029c1e6852a533f1e0fb99561">fl::Jpeg::createDecoder</a></div><div class="ttdeci">static JpegDecoderPtr createDecoder(const JpegConfig &amp;config)</div><div class="ttdef"><b>Definition</b> <a href="dd/d39/jpeg_8cpp_8hpp_source.html#l00372">jpeg.cpp.hpp:372</a></div></div>
 <div class="ttc" id="ajpeg_8h_html"><div class="ttname"><a href="d3/d31/jpeg_8h.html">jpeg.h</a></div></div>
-<div class="ttc" id="anamespacefl_a87ae8a24cc8b709a64f39370e71846af_html_a87ae8a24cc8b709a64f39370e71846af"><div class="ttname"><a href="d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af">fl::make_shared</a></div><div class="ttdeci">shared_ptr&lt; T &gt; make_shared(Args &amp;&amp;... args) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="df/d6a/shared__ptr_8h_source.html#l00414">shared_ptr.h:414</a></div></div>
+<div class="ttc" id="anamespacefl_a87ae8a24cc8b709a64f39370e71846af_html_a87ae8a24cc8b709a64f39370e71846af"><div class="ttname"><a href="d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af">fl::make_shared</a></div><div class="ttdeci">shared_ptr&lt; T &gt; make_shared(Args &amp;&amp;... args) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="df/d6a/shared__ptr_8h_source.html#l00414">shared_ptr.h:414</a></div></div>
 <div class="ttc" id="anamespacefl_aaed350b21465df8c68244fc4d77fa693_html_aaed350b21465df8c68244fc4d77fa693a505a83f220c02df2f85c3810cd9ceb38"><div class="ttname"><a href="d4/d36/namespacefl_aaed350b21465df8c68244fc4d77fa693.html#aaed350b21465df8c68244fc4d77fa693a505a83f220c02df2f85c3810cd9ceb38">fl::DecodeResult::Success</a></div><div class="ttdeci">@ Success</div><div class="ttdef"><b>Definition</b> <a href="d0/dfc/idecoder_8h_source.html#l00019">idecoder.h:19</a></div></div>
 <div class="ttc" id="anamespacefl_aef30cbd1dac648887ffa5dc1086b0164_html_aef30cbd1dac648887ffa5dc1086b0164a30ff380a3be74628024063a99fba10f0"><div class="ttname"><a href="d4/d36/namespacefl_aef30cbd1dac648887ffa5dc1086b0164.html#aef30cbd1dac648887ffa5dc1086b0164a30ff380a3be74628024063a99fba10f0">fl::PixelFormat::RGB888</a></div><div class="ttdeci">@ RGB888</div><div class="ttdef"><b>Definition</b> <a href="dd/dcd/pixel_8h_source.html#l00009">pixel.h:9</a></div></div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md905"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md928"></a>
 MPEG1 Video Playback</h2>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &quot;<a class="code" href="de/da7/mpeg1_8h.html">fl/codec/mpeg1.h</a>&quot;</span></div>
 <div class="line"> </div>
@@ -261,9 +261,9 @@ MPEG1 Video Playback</h2>
 <div class="ttc" id="astructfl_1_1third__party_1_1_mpeg1_config_a8912c3aa32074df37a7c1d4c83000af3_html_a8912c3aa32074df37a7c1d4c83000af3"><div class="ttname"><a href="da/d3b/structfl_1_1third__party_1_1_mpeg1_config_a8912c3aa32074df37a7c1d4c83000af3.html#a8912c3aa32074df37a7c1d4c83000af3">fl::third_party::Mpeg1Config::targetFps</a></div><div class="ttdeci">fl::u16 targetFps</div><div class="ttdef"><b>Definition</b> <a href="d6/d30/mpeg1__decoder_2software__decoder_8h_source.html#l00017">software_decoder.h:17</a></div></div>
 <div class="ttc" id="astructfl_1_1third__party_1_1_mpeg1_config_a934339312e8ff4a30c53830544b7c54b_html_a934339312e8ff4a30c53830544b7c54b"><div class="ttname"><a href="da/d3b/structfl_1_1third__party_1_1_mpeg1_config_a934339312e8ff4a30c53830544b7c54b.html#a934339312e8ff4a30c53830544b7c54b">fl::third_party::Mpeg1Config::mode</a></div><div class="ttdeci">FrameMode mode</div><div class="ttdef"><b>Definition</b> <a href="d6/d30/mpeg1__decoder_2software__decoder_8h_source.html#l00016">software_decoder.h:16</a></div></div>
 <div class="ttc" id="astructfl_1_1third__party_1_1_mpeg1_config_afaa6cb8f333073d05e763b62d979bf14_html_afaa6cb8f333073d05e763b62d979bf14abac379c5e6b07ac068e3cb891afed115"><div class="ttname"><a href="da/d3b/structfl_1_1third__party_1_1_mpeg1_config_afaa6cb8f333073d05e763b62d979bf14.html#afaa6cb8f333073d05e763b62d979bf14abac379c5e6b07ac068e3cb891afed115">fl::third_party::Mpeg1Config::Streaming</a></div><div class="ttdeci">@ Streaming</div><div class="ttdef"><b>Definition</b> <a href="d6/d30/mpeg1__decoder_2software__decoder_8h_source.html#l00014">software_decoder.h:14</a></div></div>
-</div><!-- fragment --><h1><a class="anchor" id="autotoc_md906"></a>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md929"></a>
 Performance Modes</h1>
-<h2><a class="anchor" id="autotoc_md907"></a>
+<h2><a class="anchor" id="autotoc_md930"></a>
 Immediate Mode (Default - Recommended for Real-Time)</h2>
 <ul>
 <li><b>Enabled by default</b>: <code>config.immediateMode = true</code></li>
@@ -275,7 +275,7 @@ Immediate Mode (Default - Recommended for Real-Time)</h2>
 </li>
 <li><b>Best for</b>: Real-time LED applications, live video streaming</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md908"></a>
+<h2><a class="anchor" id="autotoc_md931"></a>
 Buffered Mode (Legacy)</h2>
 <ul>
 <li><b>Enable with</b>: <code>config.immediateMode = false</code></li>
@@ -291,23 +291,23 @@ Buffered Mode (Legacy)</h2>
 </li>
 <li><b>Best for</b>: Non-real-time applications where smooth playback matters more than latency</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md909"></a>
+<h1><a class="anchor" id="autotoc_md932"></a>
 Memory Considerations</h1>
-<h2><a class="anchor" id="autotoc_md910"></a>
+<h2><a class="anchor" id="autotoc_md933"></a>
 Frame Buffer Sizes</h2>
 <ul>
 <li><b>RGB565</b>: 2 bytes per pixel</li>
 <li><b>RGB888</b>: 3 bytes per pixel</li>
 <li><b>RGBA8888</b>: 4 bytes per pixel</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md911"></a>
+<h2><a class="anchor" id="autotoc_md934"></a>
 Example Memory Usage</h2>
 <ul>
 <li>64x64 RGB888 frame: 12KB</li>
 <li>32x32 RGB565 frame: 2KB</li>
 <li>MPEG1 streaming (2 buffers): 2x frame size</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md912"></a>
+<h2><a class="anchor" id="autotoc_md935"></a>
 Optimization Tips</h2>
 <ol type="1">
 <li>Use RGB565 format for memory-constrained devices</li>
@@ -315,7 +315,7 @@ Optimization Tips</h2>
 <li>Limit buffer frames in streaming mode</li>
 <li>Enable hardware acceleration when available</li>
 </ol>
-<h1><a class="anchor" id="autotoc_md913"></a>
+<h1><a class="anchor" id="autotoc_md936"></a>
 Error Handling</h1>
 <p>All decoders provide comprehensive error reporting:</p>
 <div class="fragment"><div class="line"><a class="code hl_class" href="d2/db2/classfl_1_1string.html">fl::string</a> error_msg;</div>
@@ -329,9 +329,9 @@ Error Handling</h1>
 <div class="line"><span class="keywordflow">if</span> (decoder-&gt;hasError(&amp;error_msg)) {</div>
 <div class="line">    <a class="code hl_define" href="de/d8b/system_2serial_8h_ab1a8531ded8c3d5bee8e36aebec7a8f3.html#ab1a8531ded8c3d5bee8e36aebec7a8f3">Serial</a>.println(<span class="stringliteral">&quot;Decoder error: &quot;</span> + error_msg);</div>
 <div class="line">}</div>
-<div class="ttc" id="aclassfl_1_1string_html"><div class="ttname"><a href="d2/db2/classfl_1_1string.html">fl::string</a></div><div class="ttdef"><b>Definition</b> <a href="da/d66/string_8h_source.html#l00193">string.h:193</a></div></div>
+<div class="ttc" id="aclassfl_1_1string_html"><div class="ttname"><a href="d2/db2/classfl_1_1string.html">fl::string</a></div><div class="ttdef"><b>Definition</b> <a href="da/d66/string_8h_source.html#l00202">string.h:202</a></div></div>
 <div class="ttc" id="asystem_2serial_8h_ab1a8531ded8c3d5bee8e36aebec7a8f3_html_ab1a8531ded8c3d5bee8e36aebec7a8f3"><div class="ttname"><a href="de/d8b/system_2serial_8h_ab1a8531ded8c3d5bee8e36aebec7a8f3.html#ab1a8531ded8c3d5bee8e36aebec7a8f3">Serial</a></div><div class="ttdeci">#define Serial</div><div class="ttdef"><b>Definition</b> <a href="de/d8b/system_2serial_8h_source.html#l00304">serial.h:304</a></div></div>
-</div><!-- fragment --><h1><a class="anchor" id="autotoc_md914"></a>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md937"></a>
 Performance Tips</h1>
 <ol type="1">
 <li><b>Choose appropriate resolution</b>: Lower resolutions decode faster</li>
@@ -340,9 +340,9 @@ Performance Tips</h1>
 <li><b>Buffer management</b>: Use minimal buffer frames for streaming</li>
 <li><b>Platform-specific</b>: ESP32-S3 PIE optimizations are automatic</li>
 </ol>
-<h1><a class="anchor" id="autotoc_md915"></a>
+<h1><a class="anchor" id="autotoc_md938"></a>
 Troubleshooting</h1>
-<h2><a class="anchor" id="autotoc_md916"></a>
+<h2><a class="anchor" id="autotoc_md939"></a>
 Common Issues</h2>
 <p><b>"Codec not supported on this platform"</b></p><ul>
 <li>Check platform compatibility table</li>
@@ -363,11 +363,11 @@ Common Issues</h2>
 <li>Check supported JPEG format (baseline only)</li>
 <li>Ensure adequate memory</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md917"></a>
+<h2><a class="anchor" id="autotoc_md940"></a>
 Debug Output</h2>
 <p>Enable serial output for debugging: </p><div class="fragment"><div class="line"><a class="code hl_define" href="de/d8b/system_2serial_8h_ab1a8531ded8c3d5bee8e36aebec7a8f3.html#ab1a8531ded8c3d5bee8e36aebec7a8f3">Serial</a>.begin(115200);</div>
 <div class="line"><a class="code hl_define" href="de/d8b/system_2serial_8h_ab1a8531ded8c3d5bee8e36aebec7a8f3.html#ab1a8531ded8c3d5bee8e36aebec7a8f3">Serial</a>.println(<span class="stringliteral">&quot;Decoder status: &quot;</span> + (decoder-&gt;isReady() ? <span class="stringliteral">&quot;Ready&quot;</span> : <span class="stringliteral">&quot;Not Ready&quot;</span>));</div>
-</div><!-- fragment --><h1><a class="anchor" id="autotoc_md918"></a>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md941"></a>
 Building and Installation</h1>
 <ol type="1">
 <li>Install FastLED library with codec support</li>
@@ -376,7 +376,7 @@ Building and Installation</h1>
 <li>Adjust LED configuration for your hardware</li>
 <li>Upload and test</li>
 </ol>
-<h1><a class="anchor" id="autotoc_md919"></a>
+<h1><a class="anchor" id="autotoc_md942"></a>
 Further Reading</h1>
 <ul>
 <li>FastLED Codec Architecture</li>
@@ -391,7 +391,7 @@ Further Reading</h1>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="dir_4ec6cb0b343abb5102ef9ddc4f2a1c88.html">Codec</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:12 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:13 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

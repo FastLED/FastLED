@@ -1,0 +1,60 @@
+<map id="mood_ring::clampf" name="mood_ring::clampf">
+<area shape="rect" id="Node000001" title=" " alt="" coords="956,491,1100,516"/>
+<area shape="rect" id="Node000002" href="$d7/d06/classmood__ring_1_1_mood_painter_a47edf350f804d30048513e887980c881.html#a47edf350f804d30048513e887980c881" title=" " alt="" coords="485,103,665,143"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1024,477,1020,409,1004,319,989,272,969,226,941,185,906,151,880,134,851,121,788,106,725,103,666,108,665,103,725,98,789,101,853,116,882,129,910,147,945,182,973,224,994,270,1009,318,1025,408,1030,477"/>
+<area shape="rect" id="Node000004" href="$dc/d25/classmood__ring_1_1_room_listener_af684de25fc3935b1a2d0f6b5b1d8d27e.html#af684de25fc3935b1a2d0f6b5b1d8d27e" title=" " alt="" coords="243,959,432,999"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="1026,530,1013,624,989,751,974,815,955,872,934,919,910,949,852,987,787,1011,719,1025,650,1030,582,1029,518,1022,410,1002,411,997,518,1017,582,1023,650,1025,719,1020,786,1006,849,982,906,945,929,916,950,870,968,814,984,750,1008,624,1021,529"/>
+<area shape="rect" id="Node000006" href="$dc/d25/classmood__ring_1_1_room_listener_a6675b5c8e716836ea18e1f3ea22705f0.html#a6675b5c8e716836ea18e1f3ea22705f0" title=" " alt="" coords="243,666,432,706"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="996,525,938,559,859,599,767,639,671,670,610,682,547,689,432,693,432,687,547,684,609,677,670,665,765,634,856,595,935,554,993,521"/>
+<area shape="rect" id="Node000007" href="$dc/d25/classmood__ring_1_1_room_listener_a6a684889f27877243898786f8b9ca90f.html#a6a684889f27877243898786f8b9ca90f" title=" " alt="" coords="719,895,908,935"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="1028,530,1021,598,1003,690,988,740,968,790,942,836,910,879,885,897,882,893,906,875,938,834,963,787,983,738,998,689,1016,597,1023,529"/>
+<area shape="rect" id="Node000008" href="$d7/d06/classmood__ring_1_1_mood_painter_a335878321ff13970b99d9fe7544ca23a.html#a335878321ff13970b99d9fe7544ca23a" title=" " alt="" coords="723,161,903,201"/>
+<area shape="poly" id="edge9_Node000001_Node000008" title=" " alt="" coords="1020,477,1008,424,987,356,954,284,932,251,906,221,880,203,883,199,910,217,936,248,958,282,992,354,1014,423,1025,476"/>
+<area shape="rect" id="Node000009" href="$d2/df0/namespacemood__ring_adab294c0032e0fa5dc8e0564ca2755d9.html#adab294c0032e0fa5dc8e0564ca2755d9" title="Colour at position t in [0, 1] along the family, at value v." alt="" coords="724,433,903,459"/>
+<area shape="poly" id="edge11_Node000001_Node000009" title=" " alt="" coords="966,490,861,461,862,456,967,484"/>
+<area shape="rect" id="Node000011" href="$db/deb/classmood__ring_1_1_flow_layer_aec6052ddb304be2560793529421b4d13.html#aec6052ddb304be2560793529421b4d13" title=" " alt="" coords="254,333,421,373"/>
+<area shape="poly" id="edge21_Node000001_Node000011" title=" " alt="" coords="1002,482,948,431,870,368,775,306,723,279,670,259,618,245,575,241,533,245,481,259,446,274,413,294,361,335,358,330,410,289,443,269,479,254,532,240,575,235,619,240,671,254,725,275,778,301,873,363,952,427,1006,478"/>
+<area shape="rect" id="Node000015" href="$d2/df0/namespacemood__ring_a67db50a3baf7eef8c72f7df0e92cb634.html#a67db50a3baf7eef8c72f7df0e92cb634" title="Derive the family for this frame. Cheap; call every frame." alt="" coords="731,5,896,31"/>
+<area shape="poly" id="edge19_Node000001_Node000015" title=" " alt="" coords="1021,477,1006,381,982,252,966,187,948,127,928,79,906,47,887,33,890,29,910,43,933,77,953,126,971,185,987,251,1012,381,1026,476"/>
+<area shape="rect" id="Node000016" href="$dc/d25/classmood__ring_1_1_room_listener_aadeb42d025926b4fa88bfbd0dbca7f3e.html#aadeb42d025926b4fa88bfbd0dbca7f3e" title="Not listening this frame." alt="" coords="243,794,432,834"/>
+<area shape="poly" id="edge22_Node000001_Node000016" title=" " alt="" coords="1015,529,972,592,943,627,910,659,850,706,799,738,744,761,671,785,610,799,548,809,432,817,432,812,547,804,609,794,670,779,742,756,797,733,847,702,906,655,939,623,967,589,1010,526"/>
+<area shape="rect" id="Node000017" href="$d2/df0/namespacemood__ring_a093a60b56a881ff84ef24fae7de0194d.html#a093a60b56a881ff84ef24fae7de0194d" title="0 below e0, 1 above e1, smooth in between." alt="" coords="723,519,904,544"/>
+<area shape="poly" id="edge23_Node000001_Node000017" title=" " alt="" coords="942,517,904,522,904,517,942,512"/>
+<area shape="rect" id="Node000021" href="$dc/d25/classmood__ring_1_1_room_listener_aec8bca6dc66207d1ba64124c226479be.html#aec8bca6dc66207d1ba64124c226479be" title="Advance the frame clock; returns a bounded dt in ms." alt="" coords="481,845,670,885"/>
+<area shape="poly" id="edge32_Node000001_Node000021" title=" " alt="" coords="1028,530,1022,592,1004,674,989,717,968,758,942,796,910,828,883,846,854,860,792,876,729,882,670,881,670,876,728,877,791,871,852,855,880,841,906,824,938,793,964,756,984,715,999,673,1016,591,1023,529"/>
+<area shape="rect" id="Node000022" href="$d2/df0/namespacemood__ring_a5f26857824a66e74278d1209dc77c669.html#a5f26857824a66e74278d1209dc77c669" title=" " alt="" coords="739,57,888,83"/>
+<area shape="poly" id="edge35_Node000001_Node000022" title=" " alt="" coords="1024,477,1019,405,1002,306,987,253,967,200,940,151,906,107,891,94,873,85,875,80,894,90,910,103,945,148,972,198,992,251,1007,305,1024,404,1029,477"/>
+<area shape="rect" id="Node000003" href="$d7/d06/classmood__ring_1_1_mood_painter_ac3fb619def2fc2ffc2c906e65e8bb214.html#ac3fb619def2fc2ffc2c906e65e8bb214" title="Render one frame into out." alt="" coords="247,103,427,143"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="472,126,427,126,427,121,472,121"/>
+<area shape="rect" id="Node000005" href="$dc/d25/classmood__ring_1_1_room_listener_a101688d3da23eff686cdd2e709b3bc77.html#a101688d3da23eff686cdd2e709b3bc77" title="Poll the Processor and refresh sense(). Call once per frame." alt="" coords="5,851,195,891"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="272,957,242,943,139,894,142,889,244,938,275,952"/>
+<area shape="poly" id="edge6_Node000006_Node000005" title=" " alt="" coords="254,714,244,720,204,752,168,788,117,853,113,849,164,784,200,748,241,716,251,710"/>
+<area shape="poly" id="edge8_Node000007_Node000005" title=" " alt="" coords="705,912,480,899,195,881,195,875,480,894,705,907"/>
+<area shape="poly" id="edge10_Node000008_Node000003" title=" " alt="" coords="709,179,598,172,480,158,417,146,418,141,480,153,599,166,710,174"/>
+<area shape="rect" id="Node000010" href="$db/deb/classmood__ring_1_1_flow_layer_a70a95f17eb27a0581135621acbe59b2b.html#a70a95f17eb27a0581135621acbe59b2b" title=" " alt="" coords="492,333,659,373"/>
+<area shape="poly" id="edge12_Node000009_Node000010" title=" " alt="" coords="771,430,670,387,637,375,639,370,672,382,773,425"/>
+<area shape="poly" id="edge17_Node000009_Node000011" title=" " alt="" coords="728,463,672,468,609,470,543,465,479,451,443,436,410,416,358,375,361,371,413,412,446,431,481,446,544,460,609,464,671,463,727,458"/>
+<area shape="rect" id="Node000012" href="$d7/d06/classmood__ring_1_1_mood_painter_a2d39cdac14d69c9bb9dbed6e676d61ae.html#a2d39cdac14d69c9bb9dbed6e676d61ae" title=" " alt="" coords="485,397,665,437"/>
+<area shape="poly" id="edge14_Node000009_Node000012" title=" " alt="" coords="710,436,665,430,666,425,710,431"/>
+<area shape="rect" id="Node000013" href="$da/d3e/classmood__ring_1_1_breath_layer_a4e746520582685543301d68be868d8c7.html#a4e746520582685543301d68be868d8c7" title=" " alt="" coords="486,269,665,309"/>
+<area shape="poly" id="edge16_Node000009_Node000013" title=" " alt="" coords="790,425,738,374,705,347,669,323,645,311,648,306,672,318,708,343,742,370,794,421"/>
+<area shape="rect" id="Node000014" href="$d6/dee/classmood__ring_1_1_groove_layer_a085e540e0a3ae1223ee96f965982b9ba.html#a085e540e0a3ae1223ee96f965982b9ba" title=" " alt="" coords="484,511,667,551"/>
+<area shape="poly" id="edge18_Node000009_Node000014" title=" " alt="" coords="765,466,633,514,631,509,763,461"/>
+<area shape="poly" id="edge13_Node000010_Node000011" title=" " alt="" coords="478,355,421,355,421,350,478,350"/>
+<area shape="poly" id="edge15_Node000012_Node000003" title=" " alt="" coords="485,392,478,387,461,368,443,341,405,273,345,145,350,142,410,270,448,339,466,365,482,383,488,387"/>
+<area shape="poly" id="edge20_Node000015_Node000003" title=" " alt="" coords="717,28,603,42,481,67,428,85,380,106,378,101,426,80,479,62,602,37,716,22"/>
+<area shape="poly" id="edge28_Node000017_Node000012" title=" " alt="" coords="772,515,617,439,619,434,775,510"/>
+<area shape="poly" id="edge31_Node000017_Node000014" title=" " alt="" coords="709,534,667,534,667,529,709,529"/>
+<area shape="rect" id="Node000018" href="$dc/d25/classmood__ring_1_1_room_listener_acd5d63b0f2875609df0a48370c9da480.html#acd5d63b0f2875609df0a48370c9da480" title=" " alt="" coords="481,730,670,770"/>
+<area shape="poly" id="edge24_Node000017_Node000018" title=" " alt="" coords="791,556,672,669,602,732,598,728,669,665,788,552"/>
+<area shape="rect" id="Node000020" href="$d4/d94/namespacemood__ring_1_1anonymous__namespace_02layers_8cpp_03_a849c7a27d6f0ea7881c08ec0fdd93220.html#a849c7a27d6f0ea7881c08ec0fdd93220" title="Rise over attack, hold, fall to zero at life. Smooth at both ends." alt="" coords="480,600,671,655"/>
+<area shape="poly" id="edge29_Node000017_Node000020" title=" " alt="" coords="769,552,645,602,643,597,767,547"/>
+<area shape="poly" id="edge27_Node000018_Node000016" title=" " alt="" coords="488,776,413,797,412,791,486,771"/>
+<area shape="rect" id="Node000019" href="$dc/d25/classmood__ring_1_1_room_listener_ab5ab816f13ce6bdd812624d4cdffa45d.html#ab5ab816f13ce6bdd812624d4cdffa45d" title=" " alt="" coords="243,730,432,770"/>
+<area shape="poly" id="edge25_Node000018_Node000019" title=" " alt="" coords="467,753,432,753,432,747,467,747"/>
+<area shape="poly" id="edge26_Node000019_Node000005" title=" " alt="" coords="259,777,244,784,182,819,130,853,127,849,179,814,241,780,257,773"/>
+<area shape="poly" id="edge30_Node000020_Node000020" title=" " alt="" coords="615,589,601,582,575,579,554,581,541,585,534,592,534,600,529,600,529,590,538,581,553,575,575,573,602,576,617,584"/>
+<area shape="poly" id="edge34_Node000021_Node000005" title=" " alt="" coords="467,869,195,873,195,867,467,864"/>
+<area shape="poly" id="edge33_Node000021_Node000016" title=" " alt="" coords="467,844,431,837,432,831,468,839"/>
+<area shape="poly" id="edge36_Node000022_Node000003" title=" " alt="" coords="725,74,608,81,480,94,417,106,416,101,480,89,608,75,725,69"/>
+</map>

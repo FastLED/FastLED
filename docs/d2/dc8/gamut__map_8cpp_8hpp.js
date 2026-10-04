@@ -1,0 +1,28 @@
+var gamut__map_8cpp_8hpp =
+[
+    [ "fl::anonymous_namespace{gamut_map.cpp.hpp}::RgbFeasible", "d5/ddc/structfl_1_1anonymous__namespace_02gamut__map_8cpp_8hpp_03_1_1_rgb_feasible.html", "d5/ddc/structfl_1_1anonymous__namespace_02gamut__map_8cpp_8hpp_03_1_1_rgb_feasible" ],
+    [ "fl::anonymous_namespace{gamut_map.cpp.hpp}::RgbwFeasible", "de/d90/structfl_1_1anonymous__namespace_02gamut__map_8cpp_8hpp_03_1_1_rgbw_feasible.html", "de/d90/structfl_1_1anonymous__namespace_02gamut__map_8cpp_8hpp_03_1_1_rgbw_feasible" ],
+    [ "fl::anonymous_namespace{gamut_map.cpp.hpp}::RgbwwFeasible", "d4/db4/structfl_1_1anonymous__namespace_02gamut__map_8cpp_8hpp_03_1_1_rgbww_feasible.html", "d4/db4/structfl_1_1anonymous__namespace_02gamut__map_8cpp_8hpp_03_1_1_rgbww_feasible" ],
+    [ "fl::buildGamutMapFromSolveQ16", "d4/d36/namespacefl_ab9c27d964a0667a59fc93cdba7caeb69.html#ab9c27d964a0667a59fc93cdba7caeb69", null ],
+    [ "fl::buildGamutMapQ16", "d4/d36/namespacefl_a1bb1d650499ca2df115738f4c75464dc.html#a1bb1d650499ca2df115738f4c75464dc", null ],
+    [ "fl::buildGamutMapRgbwFromSolveQ16", "d4/d36/namespacefl_a0bbd4600d1ada0552c6743d28a8683ea.html#a0bbd4600d1ada0552c6743d28a8683ea", null ],
+    [ "fl::buildGamutMapRgbwQ16", "d4/d36/namespacefl_ac53a775b79932ae3fe7e03b287639d43.html#ac53a775b79932ae3fe7e03b287639d43", null ],
+    [ "fl::buildGamutMapRgbwwFromSolveQ16", "d4/d36/namespacefl_afff4e9bb0e778bb7459488538fb1d86d.html#afff4e9bb0e778bb7459488538fb1d86d", null ],
+    [ "fl::buildGamutMapRgbwwQ16", "d4/d36/namespacefl_a948408716d579dc42f02ad68245c3450.html#a948408716d579dc42f02ad68245c3450", null ],
+    [ "fl::anonymous_namespace{gamut_map.cpp.hpp}::chromaCandidateXyz", "d3/dfe/namespacefl_1_1anonymous__namespace_02gamut__map_8cpp_8hpp_03_abfc9fa8f8ad7312ff2b66f7f052b80be.html#abfc9fa8f8ad7312ff2b66f7f052b80be", null ],
+    [ "fl::anonymous_namespace{gamut_map.cpp.hpp}::clampChromaFactor", "d3/dfe/namespacefl_1_1anonymous__namespace_02gamut__map_8cpp_8hpp_03_aac3f02bf3af8bd483ade22de8cb9ae53.html#aac3f02bf3af8bd483ade22de8cb9ae53", null ],
+    [ "fl::anonymous_namespace{gamut_map.cpp.hpp}::clampGamutDrives", "d3/dfe/namespacefl_1_1anonymous__namespace_02gamut__map_8cpp_8hpp_03_a7e74b24492cd34e59eb998c9feb515a8.html#a7e74b24492cd34e59eb998c9feb515a8", null ],
+    [ "fl::anonymous_namespace{gamut_map.cpp.hpp}::feasibleChromaInterval", "d3/dfe/namespacefl_1_1anonymous__namespace_02gamut__map_8cpp_8hpp_03_afa155bfbd32ee5bf3a6c83b6187d3974.html#afa155bfbd32ee5bf3a6c83b6187d3974", null ],
+    [ "fl::anonymous_namespace{gamut_map.cpp.hpp}::gamutDrivesAreInRange", "d3/dfe/namespacefl_1_1anonymous__namespace_02gamut__map_8cpp_8hpp_03_a267b279ba30d4bf77aa03398dd34da65.html#a267b279ba30d4bf77aa03398dd34da65", null ],
+    [ "fl::anonymous_namespace{gamut_map.cpp.hpp}::highestReachableLightness", "d3/dfe/namespacefl_1_1anonymous__namespace_02gamut__map_8cpp_8hpp_03_af702395fa5236acf87a3588a536c83d6.html#af702395fa5236acf87a3588a536c83d6", null ],
+    [ "fl::anonymous_namespace{gamut_map.cpp.hpp}::largestFeasibleChroma", "d3/dfe/namespacefl_1_1anonymous__namespace_02gamut__map_8cpp_8hpp_03_acab6ba92f373afb8b7168f0c4d0cd038.html#acab6ba92f373afb8b7168f0c4d0cd038", null ],
+    [ "fl::mapAndAllocateRgbwQ16", "d4/d36/namespacefl_aff71f788bfac3a8885b0e622af3d2b4d.html#aff71f788bfac3a8885b0e622af3d2b4d", null ],
+    [ "fl::mapAndAllocateRgbwwQ16", "d4/d36/namespacefl_a2145e99048b45f249d35f24940689595.html#a2145e99048b45f249d35f24940689595", null ],
+    [ "fl::mapAndSolveDrivesQ16", "d4/d36/namespacefl_a37b9b061238b860167bb06b975520fd6.html#a37b9b061238b860167bb06b975520fd6", null ],
+    [ "fl::anonymous_namespace{gamut_map.cpp.hpp}::scaleGamutQ16", "d3/dfe/namespacefl_1_1anonymous__namespace_02gamut__map_8cpp_8hpp_03_a1219e248ff1e6969080b93b1112e5fdc.html#a1219e248ff1e6969080b93b1112e5fdc", null ],
+    [ "fl::anonymous_namespace{gamut_map.cpp.hpp}::kGamutD65Q16", "d3/dfe/namespacefl_1_1anonymous__namespace_02gamut__map_8cpp_8hpp_03_ab1147b8763a1f400a77680e5dc5a68b7.html#ab1147b8763a1f400a77680e5dc5a68b7", null ],
+    [ "fl::anonymous_namespace{gamut_map.cpp.hpp}::kGamutFeasibilitySlack", "d3/dfe/namespacefl_1_1anonymous__namespace_02gamut__map_8cpp_8hpp_03_a216fce3dda2d00ef86cb61f69f04c364.html#a216fce3dda2d00ef86cb61f69f04c364", null ],
+    [ "fl::anonymous_namespace{gamut_map.cpp.hpp}::kGamutFullDrive", "d3/dfe/namespacefl_1_1anonymous__namespace_02gamut__map_8cpp_8hpp_03_a59b5583f46f09601b97fab5f2a2b2995.html#a59b5583f46f09601b97fab5f2a2b2995", null ],
+    [ "fl::anonymous_namespace{gamut_map.cpp.hpp}::kGamutMapProbes", "d3/dfe/namespacefl_1_1anonymous__namespace_02gamut__map_8cpp_8hpp_03_a333dbf507ef6471ca22464aac24a8aee.html#a333dbf507ef6471ca22464aac24a8aee", null ],
+    [ "fl::anonymous_namespace{gamut_map.cpp.hpp}::kGamutProbeCeilingQ16", "d3/dfe/namespacefl_1_1anonymous__namespace_02gamut__map_8cpp_8hpp_03_afdf2958d432b1833185f2d6e1f87e71e.html#afdf2958d432b1833185f2d6e1f87e71e", null ]
+];

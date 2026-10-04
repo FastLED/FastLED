@@ -1,0 +1,7 @@
+<map id="fl::ScopedLogDisable::ScopedLogDisable" name="fl::ScopedLogDisable::ScopedLogDisable">
+<area shape="rect" id="Node000001" title="Constructor &#45; saves current log level and disables logging." alt="" coords="5,23,163,63"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a08c031dfef2f50f499c3138cc5cfb267.html#a08c031dfef2f50f499c3138cc5cfb267" title="Get the current global log level." alt="" coords="211,5,328,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="162,30,197,25,197,30,163,35"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a25e2681567b4dfc57e23cd40b9cdfb5e.html#a25e2681567b4dfc57e23cd40b9cdfb5e" title="Set the global log level." alt="" coords="211,55,327,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="163,51,198,55,197,61,162,56"/>
+</map>

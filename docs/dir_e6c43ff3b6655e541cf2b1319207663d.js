@@ -5,6 +5,7 @@ var dir_e6c43ff3b6655e541cf2b1319207663d =
     [ "FxEngine", "dir_5160a4e1e6c18a7fe831c01468d7a951.html", "dir_5160a4e1e6c18a7fe831c01468d7a951" ],
     [ "FxFire2012", "dir_862101cba912c7b661bf5373d79892d5.html", "dir_862101cba912c7b661bf5373d79892d5" ],
     [ "FxGfx2Video", "dir_de5cfb5a4bcc0c6db52344643d1da89e.html", "dir_de5cfb5a4bcc0c6db52344643d1da89e" ],
+    [ "FxLedmapper32x32", "dir_8106b4c0e7328b783be325a43b800a9a.html", "dir_8106b4c0e7328b783be325a43b800a9a" ],
     [ "FxNoisePlusPalette", "dir_a439727bd19f4c8207178fd822b549da.html", "dir_a439727bd19f4c8207178fd822b549da" ],
     [ "FxNoiseRing", "dir_bc03f354e13e2f9a3b05007d163733b2.html", "dir_bc03f354e13e2f9a3b05007d163733b2" ],
     [ "FxPacifica", "dir_01eb5085481dfc0e74b0dc3529421c72.html", "dir_01eb5085481dfc0e74b0dc3529421c72" ],

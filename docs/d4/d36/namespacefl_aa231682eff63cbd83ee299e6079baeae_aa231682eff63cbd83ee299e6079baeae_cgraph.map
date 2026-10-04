@@ -1,0 +1,27 @@
+<map id="fl::processPixelWideLinearQ16" name="fl::processPixelWideLinearQ16">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,134,224,160"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a4c4252a212f90916fad278f35b001081.html#a4c4252a212f90916fad278f35b001081" title="One pixel: XYZ in s16.16 to four drives, in the order red, green, blue, white, at whichever end of th..." alt="" coords="546,34,753,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="147,132,205,111,271,92,406,68,532,53,532,59,407,73,273,98,206,116,149,137"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_af5a0679639e0ad1db7feb7f9705df72f.html#af5a0679639e0ad1db7feb7f9705df72f" title="One pixel: XYZ in s16.16 to three emitter drives in s16.16." alt="" coords="808,34,975,60"/>
+<area shape="poly" id="edge15_Node000001_Node000003" title=" " alt="" coords="132,132,192,95,231,74,271,58,404,19,460,9,512,4,622,6,760,19,825,29,824,34,760,24,621,12,512,10,460,15,405,25,273,63,233,79,195,99,135,137"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a2cc0220457b8a062b038db171f1b926c.html#a2cc0220457b8a062b038db171f1b926c" title="One pixel: XYZ in s16.16 to five drives – red, green, blue, white1, white2 – at whichever end of the ..." alt="" coords="539,84,760,109"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="185,132,272,119,402,107,525,99,525,104,403,112,272,124,186,137"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_aad6443800e7b03380f9a2283f02c1279.html#aad6443800e7b03380f9a2283f02c1279" title="Decode one 8&#45;bit source code to u16 linear light under transfer." alt="" coords="300,233,463,258"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="140,158,199,188,273,219,299,227,298,232,271,224,197,193,137,162"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_ab239d57d5a4481bf9688ac54d3f328b8.html#ab239d57d5a4481bf9688ac54d3f328b8" title="One pixel: u16 linear RGB &#45;&gt; s16.16 XYZ." alt="" coords="299,282,463,308"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="130,158,188,212,229,243,273,269,290,276,288,281,271,273,226,247,185,216,126,162"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_aff71f788bfac3a8885b0e622af3d2b4d.html#aff71f788bfac3a8885b0e622af3d2b4d" title="One pixel: XYZ in s16.16 to four in&#45;gamut drives, red, green, blue, white." alt="" coords="278,134,485,160"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="224,144,265,144,265,150,224,150"/>
+<area shape="rect" id="Node000010" href="$d4/d36/namespacefl_a2145e99048b45f249d35f24940689595.html#a2145e99048b45f249d35f24940689595" title="One pixel: XYZ in s16.16 to five in&#45;gamut drives – red, green, blue, white1, white2." alt="" coords="272,184,491,209"/>
+<area shape="poly" id="edge11_Node000001_Node000010" title=" " alt="" coords="184,157,299,179,298,184,183,162"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="753,44,794,44,794,50,753,50"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="712,81,814,60,815,65,713,86"/>
+<area shape="poly" id="edge8_Node000007_Node000002" title=" " alt="" coords="403,132,463,100,538,69,564,61,566,66,540,74,465,105,406,137"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_a47f3f2b8a91dec1b90ee2740550b6f0b.html#a47f3f2b8a91dec1b90ee2740550b6f0b" title="OKLab (s16.16) &#45;&gt; XYZ (s16.16)." alt="" coords="580,184,719,209"/>
+<area shape="poly" id="edge9_Node000007_Node000008" title=" " alt="" coords="451,157,567,179,566,184,451,162"/>
+<area shape="rect" id="Node000009" href="$d4/d36/namespacefl_a4e06a4bfbce59ea143a3a844cdb084eb.html#a4e06a4bfbce59ea143a3a844cdb084eb" title="XYZ (s16.16, D65&#45;relative) &#45;&gt; OKLab (s16.16), L then a then b." alt="" coords="580,134,719,160"/>
+<area shape="poly" id="edge10_Node000007_Node000009" title=" " alt="" coords="485,144,566,144,566,150,485,150"/>
+<area shape="poly" id="edge12_Node000010_Node000004" title=" " alt="" coords="460,181,489,169,504,157,512,145,522,132,537,119,554,111,557,116,540,124,526,135,517,148,508,161,492,173,462,186"/>
+<area shape="poly" id="edge13_Node000010_Node000008" title=" " alt="" coords="491,194,567,194,567,199,491,199"/>
+<area shape="poly" id="edge14_Node000010_Node000009" title=" " alt="" coords="451,181,566,160,567,165,451,186"/>
+</map>

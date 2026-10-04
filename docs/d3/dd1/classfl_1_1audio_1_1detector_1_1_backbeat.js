@@ -2,8 +2,8 @@ var classfl_1_1audio_1_1detector_1_1_backbeat =
 [
     [ "Backbeat", "d3/dd1/classfl_1_1audio_1_1detector_1_1_backbeat_ae616d013654a60850d1ad4ea042a487d.html#ae616d013654a60850d1ad4ea042a487d", null ],
     [ "Backbeat", "d3/dd1/classfl_1_1audio_1_1detector_1_1_backbeat_a1a173feac8b883c25926f2e305e850d2.html#a1a173feac8b883c25926f2e305e850d2", null ],
-    [ "Backbeat", "d3/dd1/classfl_1_1audio_1_1detector_1_1_backbeat_ada220e44f462603e8fdebb9da0ee36e6.html#ada220e44f462603e8fdebb9da0ee36e6", null ],
-    [ "~Backbeat", "d3/dd1/classfl_1_1audio_1_1detector_1_1_backbeat_ab80abe1a4f92cbd9fc5ee8a20244536a.html#ab80abe1a4f92cbd9fc5ee8a20244536a", null ],
+    [ "Backbeat", "d3/dd1/classfl_1_1audio_1_1detector_1_1_backbeat_af42665c5b070f2c41efa170375f54cfc.html#af42665c5b070f2c41efa170375f54cfc", null ],
+    [ "~Backbeat", "d3/dd1/classfl_1_1audio_1_1detector_1_1_backbeat_a6de22a7698960d169db012977effe6a2.html#a6de22a7698960d169db012977effe6a2", null ],
     [ "calculateMultibandAccent", "d3/dd1/classfl_1_1audio_1_1detector_1_1_backbeat_a1ba095cf2a5aa331a675235f229eabe9.html#a1ba095cf2a5aa331a675235f229eabe9", null ],
     [ "calculatePatternConfidence", "d3/dd1/classfl_1_1audio_1_1detector_1_1_backbeat_a886439e936547a5f3a8b1d8f6fa1d6ce.html#a886439e936547a5f3a8b1d8f6fa1d6ce", null ],
     [ "detectBackbeat", "d3/dd1/classfl_1_1audio_1_1detector_1_1_backbeat_a82bf97dd057d84089b5f6f8288c263b6.html#a82bf97dd057d84089b5f6f8288c263b6", null ],

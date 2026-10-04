@@ -92,7 +92,7 @@
 <!-- Node13 -->
 <g id="Node000013" class="node">
 <title>Node13</title>
-<g id="a_Node000013"><a xlink:href="../../d4/d36/namespacefl_a44a195439ac7fa303b4b0b0c956605be.html#a44a195439ac7fa303b4b0b0c956605be" target="_top" xlink:title=" ">
+<g id="a_Node000013"><a xlink:href="../../d4/d36/namespacefl_a9416b2c34c489ae11032cb58c2d3c58c.html#a9416b2c34c489ae11032cb58c2d3c58c" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="294.5,-19 225.5,-19 225.5,0 294.5,0 294.5,-19"/>
 <text text-anchor="middle" x="260" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::memset</text>
 </a>
@@ -119,7 +119,7 @@
 <!-- Node5 -->
 <g id="Node000005" class="node">
 <title>Node5</title>
-<g id="a_Node000005"><a xlink:href="../../d8/df9/group___noise_generation_gaa452e57f154ab8d6d692375dba1ef5cb.html#gaa452e57f154ab8d6d692375dba1ef5cb" target="_top" xlink:title=" ">
+<g id="a_Node000005"><a xlink:href="../../d8/df9/group___noise_generation_gaa452e57f154ab8d6d692375dba1ef5cb.html#gaa452e57f154ab8d6d692375dba1ef5cb" target="_top" xlink:title="16&#45;bit, fixed point implementation of Perlin&#39;s noise.">
 <polygon fill="#fff0f0" stroke="red" points="420,-111 362,-111 362,-92 420,-92 420,-111"/>
 <text text-anchor="middle" x="391" y="-99" font-family="Helvetica,sans-Serif" font-size="10.00">inoise16</text>
 </a>
@@ -146,7 +146,7 @@
 <!-- Node9 -->
 <g id="Node000009" class="node">
 <title>Node9</title>
-<g id="a_Node000009"><a xlink:href="../../d8/df9/group___noise_generation_gaeb72246ebd597b60a7e575173accf2fd.html#gaeb72246ebd597b60a7e575173accf2fd" target="_top" xlink:title=" ">
+<g id="a_Node000009"><a xlink:href="../../d8/df9/group___noise_generation_gaeb72246ebd597b60a7e575173accf2fd.html#gaeb72246ebd597b60a7e575173accf2fd" target="_top" xlink:title="8&#45;Bit, fixed point implementation of Perlin&#39;s noise.">
 <polygon fill="#fff0f0" stroke="red" points="417,-56 365,-56 365,-37 417,-37 417,-56"/>
 <text text-anchor="middle" x="391" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">inoise8</text>
 </a>

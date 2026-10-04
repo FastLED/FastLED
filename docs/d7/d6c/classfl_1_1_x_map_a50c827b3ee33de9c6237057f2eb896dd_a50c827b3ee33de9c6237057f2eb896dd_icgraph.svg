@@ -50,7 +50,7 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d0/dce/classfl_1_1_x_y_map_a7bd487e461514cf6527b4072d2a0233b.html#a7bd487e461514cf6527b4072d2a0233b" target="_top" xlink:title="Create an XYMap from an XMap (treats 1D as 2D with height=1)">
+<g id="a_Node000003"><a xlink:href="../../d0/dce/classfl_1_1_x_y_map_af21deefaaca981ddb23af128e8149fc4.html#af21deefaaca981ddb23af128e8149fc4" target="_top" xlink:title="Create an XYMap from an XMap (treats 1D as 2D with height=1)">
 <polygon fill="white" stroke="#666666" points="311.5,-56 192.5,-56 192.5,-37 311.5,-37 311.5,-56"/>
 <text text-anchor="middle" x="252" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">fl::XYMap::fromXMap</text>
 </a>

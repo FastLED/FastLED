@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -118,19 +118,19 @@ $(function(){initNavTree('d7/d5d/classfl_1_1spi_1_1_transaction_a7b0dcccce8444b5
 <p>Destructor - automatically waits for completion. </p>
 <dl class="section note"><dt>Note</dt><dd>Ensures transaction completes before destruction </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d0/daf/device_8cpp_8hpp_source.html#l00402">402</a> of file <a class="el" href="../../d0/daf/device_8cpp_8hpp_source.html">device.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  402</span>                                      {</div>
-<div class="line"><span class="lineno">  403</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d7/d5d/classfl_1_1spi_1_1_transaction_a1af88efdb384f2f03d18b1ee67feab12.html#a1af88efdb384f2f03d18b1ee67feab12">pImpl</a>) {</div>
-<div class="line"><span class="lineno">  404</span>        <span class="comment">// Auto-wait for completion if not already done</span></div>
-<div class="line"><span class="lineno">  405</span>        <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../d7/d5d/classfl_1_1spi_1_1_transaction_a1af88efdb384f2f03d18b1ee67feab12.html#a1af88efdb384f2f03d18b1ee67feab12">pImpl</a>-&gt;completed) {</div>
-<div class="line"><span class="lineno">  406</span>            <a class="code hl_function" href="../../d7/d5d/classfl_1_1spi_1_1_transaction_ae1a9c9739de90f51e789ff9be608d587.html#ae1a9c9739de90f51e789ff9be608d587">wait</a>();</div>
-<div class="line"><span class="lineno">  407</span>        }</div>
-<div class="line"><span class="lineno">  408</span>    }</div>
-<div class="line"><span class="lineno">  409</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../d0/daf/device_8cpp_8hpp_source.html#l00399">399</a> of file <a class="el" href="../../d0/daf/device_8cpp_8hpp_source.html">device.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  399</span>                                       {</div>
+<div class="line"><span class="lineno">  400</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d7/d5d/classfl_1_1spi_1_1_transaction_a1af88efdb384f2f03d18b1ee67feab12.html#a1af88efdb384f2f03d18b1ee67feab12">pImpl</a>) {</div>
+<div class="line"><span class="lineno">  401</span>        <span class="comment">// Auto-wait for completion if not already done</span></div>
+<div class="line"><span class="lineno">  402</span>        <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../d7/d5d/classfl_1_1spi_1_1_transaction_a1af88efdb384f2f03d18b1ee67feab12.html#a1af88efdb384f2f03d18b1ee67feab12">pImpl</a>-&gt;completed) {</div>
+<div class="line"><span class="lineno">  403</span>            <a class="code hl_function" href="../../d7/d5d/classfl_1_1spi_1_1_transaction_ae1a9c9739de90f51e789ff9be608d587.html#ae1a9c9739de90f51e789ff9be608d587">wait</a>();</div>
+<div class="line"><span class="lineno">  404</span>        }</div>
+<div class="line"><span class="lineno">  405</span>    }</div>
+<div class="line"><span class="lineno">  406</span>}</div>
 <div class="ttc" id="aclassfl_1_1spi_1_1_transaction_a1af88efdb384f2f03d18b1ee67feab12_html_a1af88efdb384f2f03d18b1ee67feab12"><div class="ttname"><a href="../../d7/d5d/classfl_1_1spi_1_1_transaction_a1af88efdb384f2f03d18b1ee67feab12.html#a1af88efdb384f2f03d18b1ee67feab12">fl::spi::Transaction::pImpl</a></div><div class="ttdeci">fl::unique_ptr&lt; Impl &gt; pImpl</div><div class="ttdef"><b>Definition</b> <a href="../../d0/db6/transaction_8h_source.html#l00078">transaction.h:78</a></div></div>
-<div class="ttc" id="aclassfl_1_1spi_1_1_transaction_ae1a9c9739de90f51e789ff9be608d587_html_ae1a9c9739de90f51e789ff9be608d587"><div class="ttname"><a href="../../d7/d5d/classfl_1_1spi_1_1_transaction_ae1a9c9739de90f51e789ff9be608d587.html#ae1a9c9739de90f51e789ff9be608d587">fl::spi::Transaction::wait</a></div><div class="ttdeci">bool wait(u32 timeout_ms=(fl::numeric_limits&lt; u32 &gt;::max)())</div><div class="ttdoc">Wait for transaction to complete.</div><div class="ttdef"><b>Definition</b> <a href="../../d0/daf/device_8cpp_8hpp_source.html#l00411">device.cpp.hpp:411</a></div></div>
+<div class="ttc" id="aclassfl_1_1spi_1_1_transaction_ae1a9c9739de90f51e789ff9be608d587_html_ae1a9c9739de90f51e789ff9be608d587"><div class="ttname"><a href="../../d7/d5d/classfl_1_1spi_1_1_transaction_ae1a9c9739de90f51e789ff9be608d587.html#ae1a9c9739de90f51e789ff9be608d587">fl::spi::Transaction::wait</a></div><div class="ttdeci">bool wait(u32 timeout_ms=(fl::numeric_limits&lt; u32 &gt;::max)())</div><div class="ttdoc">Wait for transaction to complete.</div><div class="ttdef"><b>Definition</b> <a href="../../d0/daf/device_8cpp_8hpp_source.html#l00408">device.cpp.hpp:408</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a>, <a class="el" href="../../d0/db6/transaction_8h_source.html#l00078">pImpl</a>, and <a class="el" href="../../d0/daf/device_8cpp_8hpp_source.html#l00411">wait()</a>.</p>
+<p class="reference">References <a class="el" href="../../df/df8/fl_2gfx_2rgbw_8h_source.html#l00121">fl::FL_NO_EXCEPT</a>, <a class="el" href="../../d0/db6/transaction_8h_source.html#l00078">pImpl</a>, and <a class="el" href="../../d0/daf/device_8cpp_8hpp_source.html#l00408">wait()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -148,7 +148,7 @@ $(function(){initNavTree('d7/d5d/classfl_1_1spi_1_1_transaction_a7b0dcccce8444b5
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d4/d68/namespacefl_1_1spi.html">spi</a></li><li class="navelem"><a class="el" href="../../d7/d5d/classfl_1_1spi_1_1_transaction.html">Transaction</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:10 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:12 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

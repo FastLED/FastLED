@@ -130,7 +130,7 @@ var sectionId = 'dynsection-1';
 <!-- Node5 -->
 <g id="Node000005" class="node">
 <title>Node5</title>
-<g id="a_Node000005"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_a9a8c1c3646e8decc74200a7f5215e190.html#a9a8c1c3646e8decc74200a7f5215e190" target="_top" xlink:title=" ">
+<g id="a_Node000005"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_aff2a79ed9b50595f4017d559696d34fd.html#aff2a79ed9b50595f4017d559696d34fd" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="239,-19 139,-19 139,0 239,0 239,-19"/>
 <text text-anchor="middle" x="189" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::CRGB::upscale</text>
 </a>

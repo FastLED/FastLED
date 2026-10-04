@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -144,7 +144,7 @@ template&lt;typename OutputIterator&gt; </div>
 <p>Build UCS7604 preamble (15 bytes) </p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
-    <tr><td class="paramname">OutputIterator</td><td>Output iterator accepting <a class="el" href="../../d4/d36/namespacefl_afd9f334550c5839ec8307748aba15027.html#afd9f334550c5839ec8307748aba15027">uint8_t</a> </td></tr>
+    <tr><td class="paramname">OutputIterator</td><td>Output iterator accepting <a class="el" href="../../df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a> </td></tr>
   </table>
   </dd>
 </dl>
@@ -161,44 +161,44 @@ template&lt;typename OutputIterator&gt; </div>
 </dl>
 <dl class="section note"><dt>Note</dt><dd>Current control values should already be reordered to match wire protocol (RGB) </dd>
 <dd>
-KNOWN LIMITATION: The UCS7604 protocol spec requires a ~20µs "W-code low" delay between the 8-byte verification code and the 7-byte configuration block. Our clockless controller sends all 15 bytes as a continuous bit-encoded stream without this gap. If this causes issues on some hardware, the transmission would need to be split into two separate clockless sends with a manual low-hold between them. See: <a href="https://github.com/clinder/Arduino-Teensy-UCS7604">https://github.com/clinder/Arduino-Teensy-UCS7604</a> </dd></dl>
+KNOWN LIMITATION: The UCS7604 protocol spec requires a ~20us "W-code low" delay between the 8-byte verification code and the 7-byte configuration block. Our clockless controller sends all 15 bytes as a continuous bit-encoded stream without this gap. If this causes issues on some hardware, the transmission would need to be split into two separate clockless sends with a manual low-hold between them. See: <a href="https://github.com/clinder/Arduino-Teensy-UCS7604">https://github.com/clinder/Arduino-Teensy-UCS7604</a> </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d4/db7/encoders_2ucs7604_8h_source.html#l00069">69</a> of file <a class="el" href="../../d4/db7/encoders_2ucs7604_8h_source.html">ucs7604.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   71</span>                                                      {</div>
-<div class="line"><span class="lineno">   72</span>    <span class="comment">// Sync pattern (6 bytes)</span></div>
-<div class="line"><span class="lineno">   73</span>    *out++ = 0xFF;</div>
-<div class="line"><span class="lineno">   74</span>    *out++ = 0xFF;</div>
+<p class="definition">Definition at line <a class="el" href="../../d4/db7/encoders_2ucs7604_8h_source.html#l00071">71</a> of file <a class="el" href="../../d4/db7/encoders_2ucs7604_8h_source.html">ucs7604.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   73</span>                                                      {</div>
+<div class="line"><span class="lineno">   74</span>    <span class="comment">// Sync pattern (6 bytes)</span></div>
 <div class="line"><span class="lineno">   75</span>    *out++ = 0xFF;</div>
 <div class="line"><span class="lineno">   76</span>    *out++ = 0xFF;</div>
 <div class="line"><span class="lineno">   77</span>    *out++ = 0xFF;</div>
 <div class="line"><span class="lineno">   78</span>    *out++ = 0xFF;</div>
-<div class="line"><span class="lineno">   79</span> </div>
-<div class="line"><span class="lineno">   80</span>    <span class="comment">// Header (2 bytes)</span></div>
-<div class="line"><span class="lineno">   81</span>    *out++ = 0x00;</div>
-<div class="line"><span class="lineno">   82</span>    *out++ = 0x03;</div>
-<div class="line"><span class="lineno">   83</span> </div>
-<div class="line"><span class="lineno">   84</span>    <span class="comment">// Mode byte</span></div>
-<div class="line"><span class="lineno">   85</span>    *out++ = <span class="keyword">static_cast&lt;</span><a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a><span class="keyword">&gt;</span>(mode);</div>
-<div class="line"><span class="lineno">   86</span> </div>
-<div class="line"><span class="lineno">   87</span>    <span class="comment">// Current control (4 bytes, 4-bit each, wire order RGBW)</span></div>
-<div class="line"><span class="lineno">   88</span>    *out++ = r_current &amp; 0x0F;</div>
-<div class="line"><span class="lineno">   89</span>    *out++ = g_current &amp; 0x0F;</div>
-<div class="line"><span class="lineno">   90</span>    *out++ = b_current &amp; 0x0F;</div>
-<div class="line"><span class="lineno">   91</span>    *out++ = w_current &amp; 0x0F;</div>
-<div class="line"><span class="lineno">   92</span> </div>
-<div class="line"><span class="lineno">   93</span>    <span class="comment">// Reserved (2 bytes)</span></div>
-<div class="line"><span class="lineno">   94</span>    *out++ = 0x00;</div>
-<div class="line"><span class="lineno">   95</span>    *out++ = 0x00;</div>
-<div class="line"><span class="lineno">   96</span>}</div>
+<div class="line"><span class="lineno">   79</span>    *out++ = 0xFF;</div>
+<div class="line"><span class="lineno">   80</span>    *out++ = 0xFF;</div>
+<div class="line"><span class="lineno">   81</span> </div>
+<div class="line"><span class="lineno">   82</span>    <span class="comment">// Header (2 bytes)</span></div>
+<div class="line"><span class="lineno">   83</span>    *out++ = 0x00;</div>
+<div class="line"><span class="lineno">   84</span>    *out++ = 0x03;</div>
+<div class="line"><span class="lineno">   85</span> </div>
+<div class="line"><span class="lineno">   86</span>    <span class="comment">// Mode byte</span></div>
+<div class="line"><span class="lineno">   87</span>    *out++ = <span class="keyword">static_cast&lt;</span><a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a><span class="keyword">&gt;</span>(mode);</div>
+<div class="line"><span class="lineno">   88</span> </div>
+<div class="line"><span class="lineno">   89</span>    <span class="comment">// Current control (4 bytes, 4-bit each, wire order RGBW)</span></div>
+<div class="line"><span class="lineno">   90</span>    *out++ = r_current &amp; 0x0F;</div>
+<div class="line"><span class="lineno">   91</span>    *out++ = g_current &amp; 0x0F;</div>
+<div class="line"><span class="lineno">   92</span>    *out++ = b_current &amp; 0x0F;</div>
+<div class="line"><span class="lineno">   93</span>    *out++ = w_current &amp; 0x0F;</div>
+<div class="line"><span class="lineno">   94</span> </div>
+<div class="line"><span class="lineno">   95</span>    <span class="comment">// Reserved (2 bytes)</span></div>
+<div class="line"><span class="lineno">   96</span>    *out++ = 0x00;</div>
+<div class="line"><span class="lineno">   97</span>    *out++ = 0x00;</div>
+<div class="line"><span class="lineno">   98</span>}</div>
 <div class="ttc" id="anamespacefl_a058ceeac48f181da463c2ba07401292c_html_a058ceeac48f181da463c2ba07401292c"><div class="ttname"><a href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a></div><div class="ttdeci">unsigned char u8</div><div class="ttdef"><b>Definition</b> <a href="../../df/dd8/stdint_8h_source.html#l00131">stdint.h:131</a></div></div>
 </div><!-- fragment -->
-<p class="reference">Referenced by <a class="el" href="../../d4/db7/encoders_2ucs7604_8h_source.html#l00209">encodeUCS7604()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d4/db7/encoders_2ucs7604_8h_source.html#l00273">encodeUCS7604()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d4/d36/namespacefl_a6b8c1c3d9c1f0133d76297c9325c3ccc_a6b8c1c3d9c1f0133d76297c9325c3ccc_icgraph.svg" width="100%" height="504"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d4/d36/namespacefl_a6b8c1c3d9c1f0133d76297c9325c3ccc_a6b8c1c3d9c1f0133d76297c9325c3ccc_icgraph.svg" width="100%" height="448"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 
 </div>
@@ -210,7 +210,7 @@ KNOWN LIMITATION: The UCS7604 protocol spec requires a ~20µs "W-code low" delay
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:04 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:07 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

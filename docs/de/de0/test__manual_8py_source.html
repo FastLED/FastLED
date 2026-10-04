@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -104,11 +104,11 @@ $(function(){initNavTree('de/de0/test__manual_8py_source.html','../../'); initRe
 </div><!--header-->
 <div class="contents">
 <a href="../../de/de0/test__manual_8py.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno"><a class="line" href="../../df/d76/namespacetest__manual.html">    1</a></span><span class="keyword">import</span> os</div>
-<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="keyword">import</span> subprocess</div>
-<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="keyword">import</span> sys</div>
-<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="keyword">import</span> time</div>
-<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span> </div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="keyword">import</span> httpx</div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="keyword">import</span> sys</div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="keyword">import</span> time</div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span> </div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="keyword">import</span> httpx</div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="keyword">from</span> running_process <span class="keyword">import</span> RunningProcess</div>
 <div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span> </div>
 <div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span> </div>
 <div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment"># Get absolute paths</span></div>
@@ -126,7 +126,7 @@ $(function(){initNavTree('de/de0/test__manual_8py_source.html','../../'); initRe
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><a class="code hl_function" href="../../d9/dce/_client_validation_real_8h_a61602dbe1913a3b1a801bc0608a74e72.html#a61602dbe1913a3b1a801bc0608a74e72">print</a>()</div>
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
 <div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment"># Run server in foreground (no stdout capture)</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>subprocess.run([runner_path, dll_path])</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>RunningProcess.run([runner_path, dll_path])</div>
 <div class="ttc" id="a_client_validation_real_8h_a61602dbe1913a3b1a801bc0608a74e72_html_a61602dbe1913a3b1a801bc0608a74e72"><div class="ttname"><a href="../../d9/dce/_client_validation_real_8h_a61602dbe1913a3b1a801bc0608a74e72.html#a61602dbe1913a3b1a801bc0608a74e72">print</a></div><div class="ttdeci">Serial print(&quot;Error: &quot;)</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
@@ -135,7 +135,7 @@ $(function(){initNavTree('de/de0/test__manual_8py_source.html','../../'); initRe
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_2e1cb969a724d6e5361be673f84b357b.html">Asio</a></li><li class="navelem"><a class="el" href="../../dir_37c21fcc6acaf68b5eee5909dd6494ed.html">Server</a></li><li class="navelem"><a class="el" href="../../de/de0/test__manual_8py.html">test_manual.py</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:06:58 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:08:59 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

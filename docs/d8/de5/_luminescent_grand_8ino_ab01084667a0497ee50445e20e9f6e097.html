@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -118,20 +118,20 @@ $(function(){initNavTree('d8/de5/_luminescent_grand_8ino_ab01084667a0497ee50445e
 <p class="definition">Definition at line <a class="el" href="../../d8/de5/_luminescent_grand_8ino_source.html#l00139">139</a> of file <a class="el" href="../../d8/de5/_luminescent_grand_8ino_source.html">LuminescentGrand.ino</a>.</p>
 <div class="fragment"><div class="line"><span class="lineno">  139</span>                                   {</div>
 <div class="line"><span class="lineno">  140</span><span class="preprocessor">#ifdef DEBUG_FORCED_KEYBOARD</span></div>
-<div class="line"><span class="lineno">  141</span>  <span class="keyword">static</span> <a class="code hl_typedef" href="../../d4/d36/namespacefl_a2384f46fb563f37f7ed4a2173d93e9e9.html#a2384f46fb563f37f7ed4a2173d93e9e9">uint32_t</a> start_time = 0;</div>
+<div class="line"><span class="lineno">  141</span>  <span class="keyword">static</span> <a class="code hl_typedef" href="../../df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a> start_time = 0;</div>
 <div class="line"><span class="lineno">  142</span>  <span class="keyword">static</span> <span class="keywordtype">bool</span> <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_aac80e317e5bde15da9ff90feeccbc5ef.html#aac80e317e5bde15da9ff90feeccbc5ef">toggle</a> = 0;</div>
 <div class="line"><span class="lineno">  143</span> </div>
-<div class="line"><span class="lineno">  144</span>  <span class="keyword">const</span> <a class="code hl_typedef" href="../../d4/d36/namespacefl_a2384f46fb563f37f7ed4a2173d93e9e9.html#a2384f46fb563f37f7ed4a2173d93e9e9">uint32_t</a> time_on = 25;</div>
-<div class="line"><span class="lineno">  145</span>  <span class="keyword">const</span> <a class="code hl_typedef" href="../../d4/d36/namespacefl_a2384f46fb563f37f7ed4a2173d93e9e9.html#a2384f46fb563f37f7ed4a2173d93e9e9">uint32_t</a> time_off = 500;</div>
+<div class="line"><span class="lineno">  144</span>  <span class="keyword">const</span> <a class="code hl_typedef" href="../../df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a> time_on = 25;</div>
+<div class="line"><span class="lineno">  145</span>  <span class="keyword">const</span> <a class="code hl_typedef" href="../../df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a> time_off = 500;</div>
 <div class="line"><span class="lineno">  146</span> </div>
 <div class="line"><span class="lineno">  147</span>  <span class="comment">// Just force it on whenever this function is called.</span></div>
 <div class="line"><span class="lineno">  148</span>  <a class="code hl_variable" href="../../dd/dd5/dprint_8cpp_a05c120132db8916c2e7883c085a6fcaf.html#a05c120132db8916c2e7883c085a6fcaf">is_debugging</a> = <span class="keyword">true</span>;</div>
 <div class="line"><span class="lineno">  149</span> </div>
-<div class="line"><span class="lineno">  150</span>  <a class="code hl_typedef" href="../../d4/d36/namespacefl_a2384f46fb563f37f7ed4a2173d93e9e9.html#a2384f46fb563f37f7ed4a2173d93e9e9">uint32_t</a> now = <a class="code hl_function" href="../../d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a">fl::millis</a>();</div>
-<div class="line"><span class="lineno">  151</span>  <a class="code hl_typedef" href="../../d4/d36/namespacefl_a2384f46fb563f37f7ed4a2173d93e9e9.html#a2384f46fb563f37f7ed4a2173d93e9e9">uint32_t</a> delta_time = now - start_time;</div>
+<div class="line"><span class="lineno">  150</span>  <a class="code hl_typedef" href="../../df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a> now = <a class="code hl_function" href="../../d4/d36/namespacefl_a3c0ba5842bfd029c404a38c8df2315f3.html#a3c0ba5842bfd029c404a38c8df2315f3">fl::millis</a>();</div>
+<div class="line"><span class="lineno">  151</span>  <a class="code hl_typedef" href="../../df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a> delta_time = now - start_time;</div>
 <div class="line"><span class="lineno">  152</span> </div>
 <div class="line"><span class="lineno">  153</span> </div>
-<div class="line"><span class="lineno">  154</span>  <a class="code hl_typedef" href="../../d4/d36/namespacefl_a2384f46fb563f37f7ed4a2173d93e9e9.html#a2384f46fb563f37f7ed4a2173d93e9e9">uint32_t</a> threshold_time = <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_aac80e317e5bde15da9ff90feeccbc5ef.html#aac80e317e5bde15da9ff90feeccbc5ef">toggle</a> ? time_off : time_on;</div>
+<div class="line"><span class="lineno">  154</span>  <a class="code hl_typedef" href="../../df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a> threshold_time = <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_aac80e317e5bde15da9ff90feeccbc5ef.html#aac80e317e5bde15da9ff90feeccbc5ef">toggle</a> ? time_off : time_on;</div>
 <div class="line"><span class="lineno">  155</span>  <span class="keywordflow">if</span> (delta_time &lt; threshold_time) {</div>
 <div class="line"><span class="lineno">  156</span>    <span class="keywordflow">return</span>;</div>
 <div class="line"><span class="lineno">  157</span>  }</div>
@@ -151,10 +151,10 @@ $(function(){initNavTree('d8/de5/_luminescent_grand_8ino_ab01084667a0497ee50445e
 <div class="ttc" id="a_luminescent_grand_8ino_a98a0bed97c6da33828fae06e39e62b3b_html_a98a0bed97c6da33828fae06e39e62b3b"><div class="ttname"><a href="../../d8/de5/_luminescent_grand_8ino_a98a0bed97c6da33828fae06e39e62b3b.html#a98a0bed97c6da33828fae06e39e62b3b">HandleNoteOff</a></div><div class="ttdeci">void HandleNoteOff(byte channel, byte midi_note, byte velocity)</div><div class="ttdef"><b>Definition</b> <a href="../../d8/de5/_luminescent_grand_8ino_source.html#l00081">LuminescentGrand.ino:81</a></div></div>
 <div class="ttc" id="a_luminescent_grand_8ino_ab0bc55c4addfc1a3e21270de2e7f5c3b_html_ab0bc55c4addfc1a3e21270de2e7f5c3b"><div class="ttname"><a href="../../d8/de5/_luminescent_grand_8ino_ab0bc55c4addfc1a3e21270de2e7f5c3b.html#ab0bc55c4addfc1a3e21270de2e7f5c3b">HandleNoteOn</a></div><div class="ttdeci">void HandleNoteOn(byte channel, byte midi_note, byte velocity)</div><div class="ttdef"><b>Definition</b> <a href="../../d8/de5/_luminescent_grand_8ino_source.html#l00069">LuminescentGrand.ino:69</a></div></div>
 <div class="ttc" id="adprint_8cpp_a05c120132db8916c2e7883c085a6fcaf_html_a05c120132db8916c2e7883c085a6fcaf"><div class="ttname"><a href="../../dd/dd5/dprint_8cpp_a05c120132db8916c2e7883c085a6fcaf.html#a05c120132db8916c2e7883c085a6fcaf">is_debugging</a></div><div class="ttdeci">bool is_debugging</div><div class="ttdef"><b>Definition</b> <a href="../../dd/dd5/dprint_8cpp_source.html#l00005">dprint.cpp:5</a></div></div>
-<div class="ttc" id="anamespacefl_a2384f46fb563f37f7ed4a2173d93e9e9_html_a2384f46fb563f37f7ed4a2173d93e9e9"><div class="ttname"><a href="../../d4/d36/namespacefl_a2384f46fb563f37f7ed4a2173d93e9e9.html#a2384f46fb563f37f7ed4a2173d93e9e9">fl::uint32_t</a></div><div class="ttdeci">fl::u32 uint32_t</div><div class="ttdef"><b>Definition</b> <a href="../../df/d96/s16x16x4_8h_source.html#l00219">s16x16x4.h:219</a></div></div>
-<div class="ttc" id="anamespacefl_a335fa6e4af7f0a011997ea0137d49b5a_html_a335fa6e4af7f0a011997ea0137d49b5a"><div class="ttname"><a href="../../d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a">fl::millis</a></div><div class="ttdeci">fl::u32 millis()</div><div class="ttdoc">Universal millisecond timer - returns milliseconds since system startup.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d18/chrono_8cpp_8hpp_source.html#l00064">chrono.cpp.hpp:64</a></div></div>
+<div class="ttc" id="anamespacefl_a3c0ba5842bfd029c404a38c8df2315f3_html_a3c0ba5842bfd029c404a38c8df2315f3"><div class="ttname"><a href="../../d4/d36/namespacefl_a3c0ba5842bfd029c404a38c8df2315f3.html#a3c0ba5842bfd029c404a38c8df2315f3">fl::millis</a></div><div class="ttdeci">fl::u32 millis()</div><div class="ttdoc">Universal millisecond timer - returns milliseconds since system startup.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d18/chrono_8cpp_8hpp_source.html#l00079">chrono.cpp.hpp:79</a></div></div>
+<div class="ttc" id="astdint_8h_ae8a835bf6e050b01cc449644a343aa73_html_ae8a835bf6e050b01cc449644a343aa73"><div class="ttname"><a href="../../df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a></div><div class="ttdeci">fl::u32 uint32_t</div><div class="ttdef"><b>Definition</b> <a href="../../df/dd8/stdint_8h_source.html#l00218">stdint.h:218</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d8/de5/_luminescent_grand_8ino_source.html#l00081">HandleNoteOff()</a>, <a class="el" href="../../d8/de5/_luminescent_grand_8ino_source.html#l00069">HandleNoteOn()</a>, <a class="el" href="../../dd/dd5/dprint_8cpp_source.html#l00005">is_debugging</a>, <a class="el" href="../../db/d18/chrono_8cpp_8hpp_source.html#l00064">fl::millis()</a>, and <a class="el" href="../../d4/d0c/_blur_8ino_source.html#l00012">toggle</a>.</p>
+<p class="reference">References <a class="el" href="../../d8/de5/_luminescent_grand_8ino_source.html#l00081">HandleNoteOff()</a>, <a class="el" href="../../d8/de5/_luminescent_grand_8ino_source.html#l00069">HandleNoteOn()</a>, <a class="el" href="../../dd/dd5/dprint_8cpp_source.html#l00005">is_debugging</a>, <a class="el" href="../../db/d18/chrono_8cpp_8hpp_source.html#l00079">fl::millis()</a>, and <a class="el" href="../../d4/d0c/_blur_8ino_source.html#l00012">toggle</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../d8/de5/_luminescent_grand_8ino_source.html#l00173">loop()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
@@ -181,7 +181,7 @@ $(function(){initNavTree('d8/de5/_luminescent_grand_8ino_ab01084667a0497ee50445e
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_786f9dc3989cf40b3de9df2d18ba04d7.html">LuminescentGrand</a></li><li class="navelem"><a class="el" href="../../d8/de5/_luminescent_grand_8ino.html">LuminescentGrand.ino</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:00 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:02 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -1,0 +1,22 @@
+<map id="autoresearch::mp3_check::run" name="autoresearch::mp3_check::run">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,211,224,237"/>
+<area shape="rect" id="Node000002" href="$d6/d9c/namespaceautoresearch_1_1mp3__check_a92346eb7cb9f85ab3222c1d2bdcb4f8c.html#a92346eb7cb9f85ab3222c1d2bdcb4f8c" title="Decode one stream." alt="" coords="272,60,461,100"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="131,209,191,166,271,116,298,103,300,108,273,121,194,170,134,213"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a9416b2c34c489ae11032cb58c2d3c58c.html#a9416b2c34c489ae11032cb58c2d3c58c" title=" " alt="" coords="558,123,650,149"/>
+<area shape="poly" id="edge9_Node000001_Node000004" title=" " alt="" coords="141,209,199,183,271,160,344,147,418,139,544,133,544,138,418,144,345,152,273,165,201,188,143,214"/>
+<area shape="rect" id="Node000006" href="$d6/d9c/namespaceautoresearch_1_1mp3__check_a79f03da3c63314e88a97747f8da6957c.html#a79f03da3c63314e88a97747f8da6957c" title="Fold one stream&#39;s checksum into the run&#45;wide one, so a single reported value covers every stream in o..." alt="" coords="272,175,461,215"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="224,209,258,205,259,210,224,214"/>
+<area shape="rect" id="Node000007" href="$d6/d2e/classfl_1_1unique__ptr_a736032151c8ba9d69c13cd171daae88f.html#a736032151c8ba9d69c13cd171daae88f" title=" " alt="" coords="299,239,435,265"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="225,234,285,240,284,246,224,239"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_a257ae39a291866e014a2eeb4abe2a29c.html#a257ae39a291866e014a2eeb4abe2a29c" title=" " alt="" coords="304,289,429,314"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="152,234,273,275,300,283,299,288,271,280,150,239"/>
+<area shape="rect" id="Node000010" href="$d6/d9c/namespaceautoresearch_1_1mp3__check_a2eaa0af80f6b162de7d020f181600943.html#a2eaa0af80f6b162de7d020f181600943" title=" " alt="" coords="272,339,461,379"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="134,235,194,277,273,324,288,331,286,336,271,329,191,282,131,239"/>
+<area shape="rect" id="Node000003" href="$d6/d9c/namespaceautoresearch_1_1mp3__check_a46eb617d801c057491e7dbc14d3e4ebf.html#a46eb617d801c057491e7dbc14d3e4ebf" title=" " alt="" coords="509,5,699,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="453,57,503,46,504,51,455,63"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="453,97,545,120,544,125,451,103"/>
+<area shape="rect" id="Node000005" href="$d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d" title=" " alt="" coords="575,70,633,95"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="461,78,561,80,561,85,461,84"/>
+<area shape="rect" id="Node000009" href="$d4/d36/namespacefl_a94488336a5db985fbda1bbd317bffc6a.html#a94488336a5db985fbda1bbd317bffc6a" title=" " alt="" coords="560,289,648,314"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="430,299,546,299,546,304,430,304"/>
+</map>

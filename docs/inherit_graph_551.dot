@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::fl::is_multi_byte\l_integer\< T \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/dee/structfl_1_1fl_1_1is__multi__byte__integer.html",tooltip=" "];
+  Node0 [id="Node000000",label="fl::GamutMapRgbwwQ16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl.html#d9/d33/structfl_1_1_gamut_map_rgbww_q16",tooltip="The same mapper for a device with two white emitters."];
 }

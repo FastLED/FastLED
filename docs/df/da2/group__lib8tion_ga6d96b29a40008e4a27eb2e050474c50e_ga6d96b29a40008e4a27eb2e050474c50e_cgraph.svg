@@ -32,7 +32,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../df/da5/lib8tion_8h_a65144b3f3a34d39e15d4b1d66a5a589c.html#a65144b3f3a34d39e15d4b1d66a5a589c" target="_top" xlink:title="Return the current minutes since boot in a 16&#45;bit value.">
+<g id="a_Node000002"><a xlink:href="../../df/da5/lib8tion_8h_abeca3e3a233e13112ba2abed16d011b1.html#abeca3e3a233e13112ba2abed16d011b1" target="_top" xlink:title="Return the current minutes since boot in a 16&#45;bit value.">
 <polygon fill="white" stroke="#666666" points="232,-24.5 164,-24.5 164,-5.5 232,-5.5 232,-24.5"/>
 <text text-anchor="middle" x="198" y="-12.5" font-family="Helvetica,sans-Serif" font-size="10.00">minutes16</text>
 </a>

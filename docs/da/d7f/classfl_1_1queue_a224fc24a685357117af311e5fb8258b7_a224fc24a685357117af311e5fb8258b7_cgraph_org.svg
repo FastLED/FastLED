@@ -20,7 +20,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../da/d7f/classfl_1_1queue_adfc34d719da231288595fbb75ccf1088.html#adfc34d719da231288595fbb75ccf1088" target="_top" xlink:title="Default constructor &#45; creates an empty queue.">
+<g id="a_Node000002"><a xlink:href="../../da/d7f/classfl_1_1queue_a8109b151364e132e177ed17fd8004f5b.html#a8109b151364e132e177ed17fd8004f5b" target="_top" xlink:title="Default constructor &#45; creates an empty queue.">
 <polygon fill="white" stroke="#666666" points="245,-19 150,-19 150,0 245,0 245,-19"/>
 <text text-anchor="middle" x="197.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::queue::queue</text>
 </a>

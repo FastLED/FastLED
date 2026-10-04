@@ -1,0 +1,23 @@
+<map id="fl::buildWhiteAllocationQ16" name="fl::buildWhiteAllocationQ16">
+<area shape="rect" id="Node000001" title="Derive the allocation for a three&#45;primary profile plus one white emitter." alt="" coords="5,80,204,105"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_ad4e39b6ae17313fe651e8059338b8518.html#ad4e39b6ae17313fe651e8059338b8518" title="Invert the emitter matrix for a three&#45;emitter profile." alt="" coords="252,51,451,76"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="204,78,238,74,239,79,205,84"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_ad44a9cdc62803567f2f78f6364abb36c.html#ad44a9cdc62803567f2f78f6364abb36c" title="Bind from an RGB solve already adapted to the D65 working domain." alt="" coords="265,101,438,141"/>
+<area shape="poly" id="edge6_Node000001_Node000008" title=" " alt="" coords="204,101,251,107,251,112,204,107"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a0a7d1e6f0f08ff52ebc895eb553c23e2.html#a0a7d1e6f0f08ff52ebc895eb553c23e2" title="Build the inverse emitter matrix from a Q16 profile, without floats." alt="" coords="499,5,731,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="425,48,527,30,528,36,426,53"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_ae477fa69441dfe37f8fe3d7f4e2b9445.html#ae477fa69441dfe37f8fe3d7f4e2b9445" title="s16.16 of a float, rounded to nearest, computed from its IEEE&#45;754 bits with integer arithmetic only –..." alt="" coords="538,55,691,80"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="451,62,524,63,524,69,451,68"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_acc62e8cbc43e6a7b23c7e7f5ebf72a1a.html#acc62e8cbc43e6a7b23c7e7f5ebf72a1a" title="Inverse of an s16.16 3x3 matrix, in s16.16, computed without floats." alt="" coords="779,5,905,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="731,15,765,15,765,21,731,21"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_aab9d4e461519c66fc958efc9e9ba2efa.html#aab9d4e461519c66fc958efc9e9ba2efa" title=" " alt="" coords="797,55,887,80"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="691,65,784,65,784,70,691,70"/>
+<area shape="poly" id="edge7_Node000008_Node000005" title=" " alt="" coords="437,101,538,80,539,85,439,106"/>
+<area shape="rect" id="Node000009" href="$d4/d36/namespacefl_af5a0679639e0ad1db7feb7f9705df72f.html#af5a0679639e0ad1db7feb7f9705df72f" title="One pixel: XYZ in s16.16 to three emitter drives in s16.16." alt="" coords="531,104,698,129"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="438,117,517,115,518,121,438,122"/>
+<area shape="rect" id="Node000010" href="$de/d2f/_p_j_r_c_spectrum_analyzer_8h_a310eea447890e3471c6b27fd79dc94fc.html#a310eea447890e3471c6b27fd79dc94fc" title=" " alt="" coords="823,180,861,205"/>
+<area shape="poly" id="edge9_Node000008_Node000010" title=" " alt="" coords="439,131,810,185,809,191,438,136"/>
+<area shape="rect" id="Node000011" href="$df/d9e/namespacefl_1_1detail_ad8dbf6e13640f3720b79e74c643def26.html#ad8dbf6e13640f3720b79e74c643def26" title="XYZ of chromaticity xy at luminance luminance, all s16.16; false for a non&#45;positive or out&#45;of&#45;simplex..." alt="" coords="523,205,706,231"/>
+<area shape="poly" id="edge10_Node000008_Node000011" title=" " alt="" coords="395,138,500,183,549,199,548,204,498,189,392,143"/>
+<area shape="poly" id="edge11_Node000011_Node000010" title=" " alt="" coords="706,205,809,194,809,199,706,210"/>
+</map>

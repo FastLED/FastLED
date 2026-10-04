@@ -1,0 +1,11 @@
+<map id="/home/runner/work/FastLED/FastLED/examples/MoodRing/layers.h" name="/home/runner/work/FastLED/FastLED/examples/MoodRing/layers.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="124,5,339,60"/>
+<area shape="rect" id="Node000002" href="$d9/d6b/layers_8cpp.html" title=" " alt="" coords="5,108,220,163"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="192,71,145,110,142,106,188,67"/>
+<area shape="rect" id="Node000003" href="$d1/d75/mood__painter_8h.html" title=" " alt="" coords="244,108,459,163"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="275,67,322,106,318,110,271,71"/>
+<area shape="rect" id="Node000004" href="$d5/db2/_mood_ring_8ino.html" title="A ring that listens to the room and lights the room back." alt="" coords="124,211,339,265"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="311,174,264,213,261,209,308,169"/>
+<area shape="rect" id="Node000005" href="$d8/da5/mood__painter_8cpp.html" title=" " alt="" coords="363,211,577,265"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="394,169,441,209,437,213,391,174"/>
+</map>

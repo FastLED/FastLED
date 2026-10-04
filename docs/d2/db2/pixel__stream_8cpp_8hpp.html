@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -103,6 +103,7 @@ $(function(){initNavTree('d2/db2/pixel__stream_8cpp_8hpp.html','../../'); initRe
   <div class="summary">
 <a href="#namespaces">Namespaces</a> &#124;
 <a href="#define-members">Macros</a> &#124;
+<a href="#func-members">Functions</a> &#124;
 <a href="#var-members">Variables</a>  </div>
   <div class="headertitle"><div class="title">pixel_stream.cpp.hpp File Reference</div></div>
 </div><!--header-->
@@ -111,6 +112,7 @@ $(function(){initNavTree('d2/db2/pixel__stream_8cpp_8hpp.html','../../'); initRe
 <code>#include &quot;<a class="el" href="../../d7/d7f/log_8h_source.html">fl/log/log.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d9/d86/limits_8h_source.html">fl/stl/limits.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../db/d01/noexcept_8h_source.html">fl/stl/noexcept.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d4/d05/json_8h_source.html">fl/stl/json.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for pixel_stream.cpp.hpp:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -143,17 +145,20 @@ Macros</h2></td></tr>
 <tr class="memitem:a49606be7356624568932ec81c0d429f4" id="r_a49606be7356624568932ec81c0d429f4"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d2/db2/pixel__stream_8cpp_8hpp_a49606be7356624568932ec81c0d429f4.html#a49606be7356624568932ec81c0d429f4">DBG</a>&#160;&#160;&#160;<a class="el" href="../../d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a></td></tr>
 <tr class="separator:a49606be7356624568932ec81c0d429f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:adcb26bd8612d9bd0ad6a171ef54162bd" id="r_adcb26bd8612d9bd0ad6a171ef54162bd"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d89/namespacefl_1_1video_1_1anonymous__namespace_02pixel__stream_8cpp_8hpp_03_adcb26bd8612d9bd0ad6a171ef54162bd.html#adcb26bd8612d9bd0ad6a171ef54162bd">fl::video::anonymous_namespace{pixel_stream.cpp.hpp}::isFledMagicPrefix</a> (const <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> *bytes, <a class="el" href="../../da/d3c/namespacefl_1_1fl_ad95910fa68ff00bf006f4992b1b89256.html#ad95910fa68ff00bf006f4992b1b89256">fl::size_t</a> size) <a class="el" href="../../d4/d36/namespacefl_aa317f89ca911371e798d08a93770402f.html#aa317f89ca911371e798d08a93770402f">FL_NO_EXCEPT</a></td></tr>
+<tr class="separator:adcb26bd8612d9bd0ad6a171ef54162bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
 Variables</h2></td></tr>
 <tr class="memitem:ad0a393845b1b8f860a66b91395cb0112" id="r_ad0a393845b1b8f860a66b91395cb0112"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d9/d13/cpp__compat_8h_a72f0657181cca64b44eb186b707eb380.html#a72f0657181cca64b44eb186b707eb380">constexpr</a> <a class="el" href="../../da/d3c/namespacefl_1_1fl_ad95910fa68ff00bf006f4992b1b89256.html#ad95910fa68ff00bf006f4992b1b89256">fl::size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d89/namespacefl_1_1video_1_1anonymous__namespace_02pixel__stream_8cpp_8hpp_03_ad0a393845b1b8f860a66b91395cb0112.html#ad0a393845b1b8f860a66b91395cb0112">fl::video::anonymous_namespace{pixel_stream.cpp.hpp}::kFledHeaderBytes</a> = 12</td></tr>
 <tr class="separator:ad0a393845b1b8f860a66b91395cb0112"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3dc83390b47de54db2896273ab54c836" id="r_a3dc83390b47de54db2896273ab54c836"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d9/d13/cpp__compat_8h_a72f0657181cca64b44eb186b707eb380.html#a72f0657181cca64b44eb186b707eb380">constexpr</a> <a class="el" href="../../da/d3c/namespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c.html#a7573a66f01c09f14a1ff0411f8e1153c">fl::u8</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d89/namespacefl_1_1video_1_1anonymous__namespace_02pixel__stream_8cpp_8hpp_03_a3dc83390b47de54db2896273ab54c836.html#a3dc83390b47de54db2896273ab54c836">fl::video::anonymous_namespace{pixel_stream.cpp.hpp}::kFledMagic</a> [4] = {'F', 'L', 'E', 'D'}</td></tr>
+<tr class="memitem:a3dc83390b47de54db2896273ab54c836" id="r_a3dc83390b47de54db2896273ab54c836"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d9/d13/cpp__compat_8h_a72f0657181cca64b44eb186b707eb380.html#a72f0657181cca64b44eb186b707eb380">constexpr</a> <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d89/namespacefl_1_1video_1_1anonymous__namespace_02pixel__stream_8cpp_8hpp_03_a3dc83390b47de54db2896273ab54c836.html#a3dc83390b47de54db2896273ab54c836">fl::video::anonymous_namespace{pixel_stream.cpp.hpp}::kFledMagic</a> [4] = {'F', 'L', 'E', 'D'}</td></tr>
 <tr class="separator:a3dc83390b47de54db2896273ab54c836"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8395a27e2b84a8f48b3546a77d594617" id="r_a8395a27e2b84a8f48b3546a77d594617"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d9/d13/cpp__compat_8h_a72f0657181cca64b44eb186b707eb380.html#a72f0657181cca64b44eb186b707eb380">constexpr</a> <a class="el" href="../../da/d3c/namespacefl_1_1fl_ad95910fa68ff00bf006f4992b1b89256.html#ad95910fa68ff00bf006f4992b1b89256">fl::size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d89/namespacefl_1_1video_1_1anonymous__namespace_02pixel__stream_8cpp_8hpp_03_a8395a27e2b84a8f48b3546a77d594617.html#a8395a27e2b84a8f48b3546a77d594617">fl::video::anonymous_namespace{pixel_stream.cpp.hpp}::kFledMaxJsonBytes</a> = 1u * 1024u * 1024u</td></tr>
 <tr class="separator:a8395a27e2b84a8f48b3546a77d594617"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1149aa4a207450a078c24f7c6b13f34d" id="r_a1149aa4a207450a078c24f7c6b13f34d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d9/d13/cpp__compat_8h_a72f0657181cca64b44eb186b707eb380.html#a72f0657181cca64b44eb186b707eb380">constexpr</a> <a class="el" href="../../da/d3c/namespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c.html#a7573a66f01c09f14a1ff0411f8e1153c">fl::u8</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d89/namespacefl_1_1video_1_1anonymous__namespace_02pixel__stream_8cpp_8hpp_03_a1149aa4a207450a078c24f7c6b13f34d.html#a1149aa4a207450a078c24f7c6b13f34d">fl::video::anonymous_namespace{pixel_stream.cpp.hpp}::kFledPixelFormatRgb8</a> = 0x00</td></tr>
-<tr class="separator:a1149aa4a207450a078c24f7c6b13f34d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0fb4ff2a60e665f51acf7e65941dd5d0" id="r_a0fb4ff2a60e665f51acf7e65941dd5d0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d9/d13/cpp__compat_8h_a72f0657181cca64b44eb186b707eb380.html#a72f0657181cca64b44eb186b707eb380">constexpr</a> <a class="el" href="../../da/d3c/namespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c.html#a7573a66f01c09f14a1ff0411f8e1153c">fl::u8</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d89/namespacefl_1_1video_1_1anonymous__namespace_02pixel__stream_8cpp_8hpp_03_a0fb4ff2a60e665f51acf7e65941dd5d0.html#a0fb4ff2a60e665f51acf7e65941dd5d0">fl::video::anonymous_namespace{pixel_stream.cpp.hpp}::kFledVersionV1</a> = 1</td></tr>
+<tr class="memitem:a0fb4ff2a60e665f51acf7e65941dd5d0" id="r_a0fb4ff2a60e665f51acf7e65941dd5d0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d9/d13/cpp__compat_8h_a72f0657181cca64b44eb186b707eb380.html#a72f0657181cca64b44eb186b707eb380">constexpr</a> <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d89/namespacefl_1_1video_1_1anonymous__namespace_02pixel__stream_8cpp_8hpp_03_a0fb4ff2a60e665f51acf7e65941dd5d0.html#a0fb4ff2a60e665f51acf7e65941dd5d0">fl::video::anonymous_namespace{pixel_stream.cpp.hpp}::kFledVersionV1</a> = 1</td></tr>
 <tr class="separator:a0fb4ff2a60e665f51acf7e65941dd5d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
@@ -163,7 +168,7 @@ Variables</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_454acf09c0e4fff6d624d6e8600905f6.html">video</a></li><li class="navelem"><a class="el" href="../../d2/db2/pixel__stream_8cpp_8hpp.html">pixel_stream.cpp.hpp</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:02 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:05 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

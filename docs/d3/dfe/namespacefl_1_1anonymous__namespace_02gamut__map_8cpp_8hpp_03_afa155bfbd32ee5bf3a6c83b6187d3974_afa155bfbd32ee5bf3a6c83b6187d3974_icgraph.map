@@ -1,0 +1,7 @@
+<map id="fl::anonymous_namespace{gamut_map::cpp::hpp}::feasibleChromaInterval" name="fl::anonymous_namespace{gamut_map::cpp::hpp}::feasibleChromaInterval">
+<area shape="rect" id="Node000001" title="The feasible chroma interval at the target&#39;s own lightness, as factors of the target&#39;s chroma." alt="" coords="261,29,457,84"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="401,18,386,11,359,8,337,10,323,15,316,21,316,29,311,29,311,19,320,10,336,5,359,3,387,6,403,14"/>
+<area shape="rect" id="Node000002" href="$d3/dfe/namespacefl_1_1anonymous__namespace_02gamut__map_8cpp_8hpp_03_af702395fa5236acf87a3588a536c83d6.html#af702395fa5236acf87a3588a536c83d6" title="The highest lightness at or below requested whose feasible chroma interval the probe scan can still f..." alt="" coords="5,29,213,84"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="248,59,213,59,213,54,248,54"/>
+<area shape="poly" id="edge3_Node000002_Node000002" title=" " alt="" coords="151,18,136,11,109,8,87,10,73,15,66,21,66,29,61,29,61,19,70,10,86,5,109,3,137,6,153,14"/>
+</map>

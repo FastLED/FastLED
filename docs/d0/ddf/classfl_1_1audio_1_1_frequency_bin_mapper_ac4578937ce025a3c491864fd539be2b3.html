@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -124,25 +124,25 @@ $(function(){initNavTree('d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper_ac457
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Average treble energy (0.0-1.0 normalized) </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../df/d6c/frequency__bin__mapper_8cpp_8hpp_source.html#l00193">193</a> of file <a class="el" href="../../df/d6c/frequency__bin__mapper_8cpp_8hpp_source.html">frequency_bin_mapper.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  193</span>                                                                               {</div>
-<div class="line"><span class="lineno">  194</span>    <span class="keywordflow">if</span> (frequencyBins.size() &lt; <a class="code hl_variable" href="../../d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper_a019344e922c3e480276005927a9dd482.html#a019344e922c3e480276005927a9dd482">TREBLE_BIN_END</a>) {</div>
-<div class="line"><span class="lineno">  195</span>        <span class="keywordflow">return</span> 0.0f;</div>
-<div class="line"><span class="lineno">  196</span>    }</div>
-<div class="line"><span class="lineno">  197</span> </div>
-<div class="line"><span class="lineno">  198</span>    <span class="comment">// Average bins 14-15 (treble range)</span></div>
-<div class="line"><span class="lineno">  199</span>    <span class="keywordtype">float</span> sum = 0.0f;</div>
-<div class="line"><span class="lineno">  200</span>    <span class="keywordflow">for</span> (size i = <a class="code hl_variable" href="../../d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper_a24b06f40ffc367c461efa585e9614276.html#a24b06f40ffc367c461efa585e9614276">TREBLE_BIN_START</a>; i &lt; <a class="code hl_variable" href="../../d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper_a019344e922c3e480276005927a9dd482.html#a019344e922c3e480276005927a9dd482">TREBLE_BIN_END</a>; ++i) {</div>
-<div class="line"><span class="lineno">  201</span>        sum += frequencyBins[i];</div>
-<div class="line"><span class="lineno">  202</span>    }</div>
-<div class="line"><span class="lineno">  203</span>    <span class="keywordflow">return</span> sum / <span class="keyword">static_cast&lt;</span><span class="keywordtype">float</span><span class="keyword">&gt;</span>(<a class="code hl_variable" href="../../d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper_a019344e922c3e480276005927a9dd482.html#a019344e922c3e480276005927a9dd482">TREBLE_BIN_END</a> - <a class="code hl_variable" href="../../d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper_a24b06f40ffc367c461efa585e9614276.html#a24b06f40ffc367c461efa585e9614276">TREBLE_BIN_START</a>);</div>
-<div class="line"><span class="lineno">  204</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../df/d6c/frequency__bin__mapper_8cpp_8hpp_source.html#l00192">192</a> of file <a class="el" href="../../df/d6c/frequency__bin__mapper_8cpp_8hpp_source.html">frequency_bin_mapper.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  192</span>                                                                               {</div>
+<div class="line"><span class="lineno">  193</span>    <span class="keywordflow">if</span> (frequencyBins.size() &lt; <a class="code hl_variable" href="../../d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper_a019344e922c3e480276005927a9dd482.html#a019344e922c3e480276005927a9dd482">TREBLE_BIN_END</a>) {</div>
+<div class="line"><span class="lineno">  194</span>        <span class="keywordflow">return</span> 0.0f;</div>
+<div class="line"><span class="lineno">  195</span>    }</div>
+<div class="line"><span class="lineno">  196</span> </div>
+<div class="line"><span class="lineno">  197</span>    <span class="comment">// Average bins 14-15 (treble range)</span></div>
+<div class="line"><span class="lineno">  198</span>    <span class="keywordtype">float</span> sum = 0.0f;</div>
+<div class="line"><span class="lineno">  199</span>    <span class="keywordflow">for</span> (size i = <a class="code hl_variable" href="../../d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper_a24b06f40ffc367c461efa585e9614276.html#a24b06f40ffc367c461efa585e9614276">TREBLE_BIN_START</a>; i &lt; <a class="code hl_variable" href="../../d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper_a019344e922c3e480276005927a9dd482.html#a019344e922c3e480276005927a9dd482">TREBLE_BIN_END</a>; ++i) {</div>
+<div class="line"><span class="lineno">  200</span>        sum += frequencyBins[i];</div>
+<div class="line"><span class="lineno">  201</span>    }</div>
+<div class="line"><span class="lineno">  202</span>    <span class="keywordflow">return</span> sum / <span class="keyword">static_cast&lt;</span><span class="keywordtype">float</span><span class="keyword">&gt;</span>(<a class="code hl_variable" href="../../d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper_a019344e922c3e480276005927a9dd482.html#a019344e922c3e480276005927a9dd482">TREBLE_BIN_END</a> - <a class="code hl_variable" href="../../d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper_a24b06f40ffc367c461efa585e9614276.html#a24b06f40ffc367c461efa585e9614276">TREBLE_BIN_START</a>);</div>
+<div class="line"><span class="lineno">  203</span>}</div>
 <div class="ttc" id="aclassfl_1_1audio_1_1_frequency_bin_mapper_a019344e922c3e480276005927a9dd482_html_a019344e922c3e480276005927a9dd482"><div class="ttname"><a href="../../d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper_a019344e922c3e480276005927a9dd482.html#a019344e922c3e480276005927a9dd482">fl::audio::FrequencyBinMapper::TREBLE_BIN_END</a></div><div class="ttdeci">static constexpr size TREBLE_BIN_END</div><div class="ttdef"><b>Definition</b> <a href="../../df/dfc/frequency__bin__mapper_8h_source.html#l00166">frequency_bin_mapper.h:166</a></div></div>
 <div class="ttc" id="aclassfl_1_1audio_1_1_frequency_bin_mapper_a24b06f40ffc367c461efa585e9614276_html_a24b06f40ffc367c461efa585e9614276"><div class="ttname"><a href="../../d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper_a24b06f40ffc367c461efa585e9614276.html#a24b06f40ffc367c461efa585e9614276">fl::audio::FrequencyBinMapper::TREBLE_BIN_START</a></div><div class="ttdeci">static constexpr size TREBLE_BIN_START</div><div class="ttdef"><b>Definition</b> <a href="../../df/dfc/frequency__bin__mapper_8h_source.html#l00165">frequency_bin_mapper.h:165</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d4/d7a/span_8h_source.html#l00458">fl::span&lt; T, Extent &gt;::size()</a>, <a class="el" href="../../df/dfc/frequency__bin__mapper_8h_source.html#l00166">TREBLE_BIN_END</a>, and <a class="el" href="../../df/dfc/frequency__bin__mapper_8h_source.html#l00165">TREBLE_BIN_START</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d7a/span_8h_source.html#l00483">fl::span&lt; T, Extent &gt;::size()</a>, <a class="el" href="../../df/dfc/frequency__bin__mapper_8h_source.html#l00166">TREBLE_BIN_END</a>, and <a class="el" href="../../df/dfc/frequency__bin__mapper_8h_source.html#l00165">TREBLE_BIN_START</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper_a87d17b79660b18efcade392935222299.html#a87d17b79660b18efcade392935222299">~FrequencyBinMapper()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper_ad3defb9c89dd3eaa32d10b1c5832eff5.html#ad3defb9c89dd3eaa32d10b1c5832eff5">~FrequencyBinMapper()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -167,7 +167,7 @@ $(function(){initNavTree('d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper_ac457
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../db/dbf/namespacefl_1_1audio.html">audio</a></li><li class="navelem"><a class="el" href="../../d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper.html">FrequencyBinMapper</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:08 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:11 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

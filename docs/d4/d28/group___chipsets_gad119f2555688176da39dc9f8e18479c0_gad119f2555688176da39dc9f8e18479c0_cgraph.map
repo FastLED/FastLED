@@ -1,10 +1,18 @@
 <map id="RGBWEmulatedController::RGBWEmulatedController" name="RGBWEmulatedController::RGBWEmulatedController">
-<area shape="rect" id="Node000001" title="Constructor with optional RGBW configuration." alt="" coords="5,29,203,69"/>
-<area shape="rect" id="Node000002" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a1f2664b654b0f44dbbaaec4001b6c5ce.html#a1f2664b654b0f44dbbaaec4001b6c5ce" title=" " alt="" coords="251,29,387,69"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="203,47,237,47,237,52,203,52"/>
-<area shape="poly" id="edge4_Node000002_Node000002" title=" " alt="" coords="284,30,282,20,287,11,300,5,319,3,340,6,352,13,349,17,339,11,319,8,301,10,291,15,287,21,289,28"/>
-<area shape="rect" id="Node000003" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a7e91fc8f83d62c9da5e5c3d6d1bc10ce.html#a7e91fc8f83d62c9da5e5c3d6d1bc10ce" title="Protected constructor with registration mode." alt="" coords="435,29,571,69"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="387,47,421,47,421,52,387,52"/>
-<area shape="rect" id="Node000004" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a9e51518d1427463dffd596c69c6f3e46.html#a9e51518d1427463dffd596c69c6f3e46" title="Add this controller to the linked list." alt="" coords="619,29,755,69"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="571,47,605,47,605,52,571,52"/>
+<area shape="rect" id="Node000001" title="Constructor with optional RGBW configuration." alt="" coords="5,69,203,109"/>
+<area shape="rect" id="Node000002" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a364042729b1cf127821d255d67f0f91c.html#a364042729b1cf127821d255d67f0f91c" title=" " alt="" coords="251,69,387,109"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="203,87,237,87,237,92,203,92"/>
+<area shape="poly" id="edge8_Node000002_Node000002" title=" " alt="" coords="279,70,276,60,283,50,297,45,319,43,344,46,357,53,355,58,342,51,319,48,298,50,286,55,281,61,284,68"/>
+<area shape="rect" id="Node000003" href="$d8/da0/classfl_1_1_c_l_e_d_controller_ae0828dffacb43dca565ddf8145153ed0.html#ae0828dffacb43dca565ddf8145153ed0" title="Protected constructor with registration mode." alt="" coords="487,5,623,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="387,68,434,55,473,44,475,49,435,60,388,73"/>
+<area shape="rect" id="Node000006" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a37429a6c10feb5f7159244d07bb27b21.html#a37429a6c10feb5f7159244d07bb27b21" title=" " alt="" coords="487,69,623,109"/>
+<area shape="poly" id="edge4_Node000002_Node000006" title=" " alt="" coords="387,87,473,87,473,92,387,92"/>
+<area shape="rect" id="Node000008" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a95ede2f374809004d76c246f747d056b.html#a95ede2f374809004d76c246f747d056b" title=" " alt="" coords="435,133,676,173"/>
+<area shape="poly" id="edge6_Node000002_Node000008" title=" " alt="" coords="388,106,435,119,466,127,465,132,434,124,387,111"/>
+<area shape="rect" id="Node000004" href="$d8/da0/classfl_1_1_c_l_e_d_controller_af0c5f56a02ad4e919df8181d3b267390.html#af0c5f56a02ad4e919df8181d3b267390" title="Add this controller to the linked list." alt="" coords="762,5,898,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="624,23,748,23,748,28,624,28"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_a56f31e1bfb8fb5b90de25aff94b906d8.html#a56f31e1bfb8fb5b90de25aff94b906d8" title=" " alt="" coords="724,77,936,102"/>
+<area shape="poly" id="edge5_Node000006_Node000007" title=" " alt="" coords="624,87,710,87,710,92,624,92"/>
+<area shape="rect" id="Node000009" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a749a14da275dfd7a2b91ec3e8b82fef7.html#a749a14da275dfd7a2b91ec3e8b82fef7" title="Return the name of a chipset whose wire format owns its white&#45;channel policy." alt="" coords="729,133,931,173"/>
+<area shape="poly" id="edge7_Node000008_Node000009" title=" " alt="" coords="676,151,716,151,716,156,676,156"/>
 </map>

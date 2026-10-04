@@ -1,0 +1,18 @@
+digraph "fl::Watchdog::escapeToBootloaderIfLooping"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::Watchdog::escapeToBootloader\lIfLooping",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Reboot into the bootloader if this looks like a boot loop."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::Watchdog::rebootInto\lBootloader",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d45/classfl_1_1_watchdog_ae9d453ddb3610f25574411571c147c1e.html#ae9d453ddb3610f25574411571c147c1e",tooltip=" "];
+  Node2 -> Node2 [id="edge2_Node000002_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node3 [id="edge3_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::Watchdog::shouldEscape\lToBootloader",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d45/classfl_1_1_watchdog_a25cd2a8bd5dcdfc24f0f30e8eae1a8ff.html#a25cd2a8bd5dcdfc24f0f30e8eae1a8ff",tooltip="True when the escape is enabled and the board has hit the consecutive-watchdog-reset threshold."];
+  Node3 -> Node4 [id="edge4_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::Watchdog::consecutive\lCrashCount",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d45/classfl_1_1_watchdog_abde207d5474f84d8af78a41687c4c109.html#abde207d5474f84d8af78a41687c4c109",tooltip=" "];
+  Node4 -> Node4 [id="edge5_Node000004_Node000004",color="steelblue1",style="solid",tooltip=" "];
+}

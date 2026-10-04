@@ -6,5 +6,7 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::RpcHandle\< R(Args...)\>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/dd9/classfl_1_1_rpc_handle_3_01_r_07_args_8_8_8_08_4.html",tooltip=" "];
+  Node0 [id="Node000000",label="fl::task::Runner",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d46/classfl_1_1task_1_1_runner.html",tooltip="Generic task runner interface."];
+  Node0 -> Node1 [id="edge337_Node000000_Node000001",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 [id="Node000001",label="fl::net::http::FetchManager",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d80/classfl_1_1net_1_1http_1_1_fetch_manager.html",tooltip="Internal fetch manager for promise tracking."];
 }

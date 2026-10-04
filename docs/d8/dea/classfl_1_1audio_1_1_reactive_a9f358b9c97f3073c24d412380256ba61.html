@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -130,7 +130,7 @@ $(function(){initNavTree('d8/dea/classfl_1_1audio_1_1_reactive_a9f358b9c97f3073c
 <div class="line"><span class="lineno">  296</span>    <span class="comment">// directly instead of re-mapping through FrequencyBinMapper, which</span></div>
 <div class="line"><span class="lineno">  297</span>    <span class="comment">// incorrectly treats CQ bins as raw DFT bins.</span></div>
 <div class="line"><span class="lineno">  298</span>    fl::span&lt;const float&gt; rawBins = <a class="code hl_variable" href="../../d8/dea/classfl_1_1audio_1_1_reactive_a1be2a0f8a2fc15fd0cbfb2c491d29c15.html#a1be2a0f8a2fc15fd0cbfb2c491d29c15">mFFTBins</a>.raw();</div>
-<div class="line"><span class="lineno">  299</span>    <span class="keywordflow">if</span> (rawBins.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_a1e467b483bfd364c93ae966e5bd4e427.html#a1e467b483bfd364c93ae966e5bd4e427">empty</a>()) {</div>
+<div class="line"><span class="lineno">  299</span>    <span class="keywordflow">if</span> (rawBins.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_a28135041ca9036a3efb34c1d0afe115b.html#a28135041ca9036a3efb34c1d0afe115b">empty</a>()) {</div>
 <div class="line"><span class="lineno">  300</span>        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; 16; ++i) {</div>
 <div class="line"><span class="lineno">  301</span>            <a class="code hl_variable" href="../../d8/dea/classfl_1_1audio_1_1_reactive_a882ecffdc0840cc913e8eb33a1097858.html#a882ecffdc0840cc913e8eb33a1097858">mCurrentData</a>.frequencyBins[i] = 0.0f;</div>
 <div class="line"><span class="lineno">  302</span>        }</div>
@@ -139,7 +139,7 @@ $(function(){initNavTree('d8/dea/classfl_1_1audio_1_1_reactive_a9f358b9c97f3073c
 <div class="line"><span class="lineno">  305</span> </div>
 <div class="line"><span class="lineno">  306</span>    <span class="comment">// Copy CQ bins directly to frequency bins (already frequency-mapped)</span></div>
 <div class="line"><span class="lineno">  307</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; 16; ++i) {</div>
-<div class="line"><span class="lineno">  308</span>        <span class="keywordflow">if</span> (i &lt; <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(rawBins.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac">size</a>())) {</div>
+<div class="line"><span class="lineno">  308</span>        <span class="keywordflow">if</span> (i &lt; <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(rawBins.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa">size</a>())) {</div>
 <div class="line"><span class="lineno">  309</span>            <a class="code hl_variable" href="../../d8/dea/classfl_1_1audio_1_1_reactive_a882ecffdc0840cc913e8eb33a1097858.html#a882ecffdc0840cc913e8eb33a1097858">mCurrentData</a>.frequencyBins[i] = rawBins[i];</div>
 <div class="line"><span class="lineno">  310</span>        } <span class="keywordflow">else</span> {</div>
 <div class="line"><span class="lineno">  311</span>            <a class="code hl_variable" href="../../d8/dea/classfl_1_1audio_1_1_reactive_a882ecffdc0840cc913e8eb33a1097858.html#a882ecffdc0840cc913e8eb33a1097858">mCurrentData</a>.frequencyBins[i] = 0.0f;</div>
@@ -165,12 +165,12 @@ $(function(){initNavTree('d8/dea/classfl_1_1audio_1_1_reactive_a9f358b9c97f3073c
 <div class="line"><span class="lineno">  331</span>    <a class="code hl_variable" href="../../d8/dea/classfl_1_1audio_1_1_reactive_a882ecffdc0840cc913e8eb33a1097858.html#a882ecffdc0840cc913e8eb33a1097858">mCurrentData</a>.dominantFrequency = <a class="code hl_variable" href="../../d8/dea/classfl_1_1audio_1_1_reactive_a1be2a0f8a2fc15fd0cbfb2c491d29c15.html#a1be2a0f8a2fc15fd0cbfb2c491d29c15">mFFTBins</a>.binToFreq(maxBin);</div>
 <div class="line"><span class="lineno">  332</span>    <a class="code hl_variable" href="../../d8/dea/classfl_1_1audio_1_1_reactive_a882ecffdc0840cc913e8eb33a1097858.html#a882ecffdc0840cc913e8eb33a1097858">mCurrentData</a>.magnitude = maxMagnitude;</div>
 <div class="line"><span class="lineno">  333</span>}</div>
-<div class="ttc" id="aclassfl_1_1audio_1_1_reactive_a1be2a0f8a2fc15fd0cbfb2c491d29c15_html_a1be2a0f8a2fc15fd0cbfb2c491d29c15"><div class="ttname"><a href="../../d8/dea/classfl_1_1audio_1_1_reactive_a1be2a0f8a2fc15fd0cbfb2c491d29c15.html#a1be2a0f8a2fc15fd0cbfb2c491d29c15">fl::audio::Reactive::mFFTBins</a></div><div class="ttdeci">fft::Bins mFFTBins</div><div class="ttdef"><b>Definition</b> <a href="../../dc/da8/src_2fl_2audio_2audio__reactive_8h_source.html#l00246">audio_reactive.h:246</a></div></div>
-<div class="ttc" id="aclassfl_1_1audio_1_1_reactive_a882ecffdc0840cc913e8eb33a1097858_html_a882ecffdc0840cc913e8eb33a1097858"><div class="ttname"><a href="../../d8/dea/classfl_1_1audio_1_1_reactive_a882ecffdc0840cc913e8eb33a1097858.html#a882ecffdc0840cc913e8eb33a1097858">fl::audio::Reactive::mCurrentData</a></div><div class="ttdeci">Data mCurrentData</div><div class="ttdef"><b>Definition</b> <a href="../../dc/da8/src_2fl_2audio_2audio__reactive_8h_source.html#l00249">audio_reactive.h:249</a></div></div>
-<div class="ttc" id="aclassfl_1_1span_a1e467b483bfd364c93ae966e5bd4e427_html_a1e467b483bfd364c93ae966e5bd4e427"><div class="ttname"><a href="../../d0/d08/classfl_1_1span_a1e467b483bfd364c93ae966e5bd4e427.html#a1e467b483bfd364c93ae966e5bd4e427">fl::span::empty</a></div><div class="ttdeci">constexpr bool empty() const FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d7a/span_8h_source.html#l00510">span.h:510</a></div></div>
-<div class="ttc" id="aclassfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac_html_aef7ee7eb5254da1ba1eb4f3e0173d0ac"><div class="ttname"><a href="../../d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac">fl::span::size</a></div><div class="ttdeci">constexpr fl::size size() const FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d7a/span_8h_source.html#l00458">span.h:458</a></div></div>
+<div class="ttc" id="aclassfl_1_1audio_1_1_reactive_a1be2a0f8a2fc15fd0cbfb2c491d29c15_html_a1be2a0f8a2fc15fd0cbfb2c491d29c15"><div class="ttname"><a href="../../d8/dea/classfl_1_1audio_1_1_reactive_a1be2a0f8a2fc15fd0cbfb2c491d29c15.html#a1be2a0f8a2fc15fd0cbfb2c491d29c15">fl::audio::Reactive::mFFTBins</a></div><div class="ttdeci">fft::Bins mFFTBins</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d9a/audio__reactive_8h_source.html#l00246">audio_reactive.h:246</a></div></div>
+<div class="ttc" id="aclassfl_1_1audio_1_1_reactive_a882ecffdc0840cc913e8eb33a1097858_html_a882ecffdc0840cc913e8eb33a1097858"><div class="ttname"><a href="../../d8/dea/classfl_1_1audio_1_1_reactive_a882ecffdc0840cc913e8eb33a1097858.html#a882ecffdc0840cc913e8eb33a1097858">fl::audio::Reactive::mCurrentData</a></div><div class="ttdeci">Data mCurrentData</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d9a/audio__reactive_8h_source.html#l00249">audio_reactive.h:249</a></div></div>
+<div class="ttc" id="aclassfl_1_1span_a28135041ca9036a3efb34c1d0afe115b_html_a28135041ca9036a3efb34c1d0afe115b"><div class="ttname"><a href="../../d0/d08/classfl_1_1span_a28135041ca9036a3efb34c1d0afe115b.html#a28135041ca9036a3efb34c1d0afe115b">fl::span::empty</a></div><div class="ttdeci">constexpr bool empty() const FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d7a/span_8h_source.html#l00535">span.h:535</a></div></div>
+<div class="ttc" id="aclassfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa_html_aaf3daca1c2c8f93b2ac7b319989b22fa"><div class="ttname"><a href="../../d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa">fl::span::size</a></div><div class="ttdeci">constexpr fl::size size() const FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d7a/span_8h_source.html#l00483">span.h:483</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d4/d7a/span_8h_source.html#l00510">fl::span&lt; T, Extent &gt;::empty()</a>, <a class="el" href="../../dc/da8/src_2fl_2audio_2audio__reactive_8h_source.html#l00249">mCurrentData</a>, <a class="el" href="../../dc/da8/src_2fl_2audio_2audio__reactive_8h_source.html#l00246">mFFTBins</a>, and <a class="el" href="../../d4/d7a/span_8h_source.html#l00458">fl::span&lt; T, Extent &gt;::size()</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d7a/span_8h_source.html#l00535">fl::span&lt; T, Extent &gt;::empty()</a>, <a class="el" href="../../d1/d9a/audio__reactive_8h_source.html#l00249">mCurrentData</a>, <a class="el" href="../../d1/d9a/audio__reactive_8h_source.html#l00246">mFFTBins</a>, and <a class="el" href="../../d4/d7a/span_8h_source.html#l00483">fl::span&lt; T, Extent &gt;::size()</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../d5/dc5/audio__reactive_8cpp_8hpp_source.html#l00280">processFFT()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
@@ -197,7 +197,7 @@ $(function(){initNavTree('d8/dea/classfl_1_1audio_1_1_reactive_a9f358b9c97f3073c
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../db/dbf/namespacefl_1_1audio.html">audio</a></li><li class="navelem"><a class="el" href="../../d8/dea/classfl_1_1audio_1_1_reactive.html">Reactive</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:08 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:11 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

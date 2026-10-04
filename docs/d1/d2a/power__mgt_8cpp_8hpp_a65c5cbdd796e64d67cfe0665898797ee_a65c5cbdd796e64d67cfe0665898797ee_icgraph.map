@@ -1,0 +1,15 @@
+<map id="emitter_power_weights" name="emitter_power_weights">
+<area shape="rect" id="Node000001" title=" " alt="" coords="743,46,917,71"/>
+<area shape="rect" id="Node000002" href="$d9/d5f/group___power_model_ga315379844ae2a3ff4212fe39ac1ade6c.html#ga315379844ae2a3ff4212fe39ac1ade6c" title="Charge already&#45;solved physical output bytes in source emitter order: RGB, RGBW, or RGB + warm white +..." alt="" coords="537,9,695,49"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="728,47,695,43,695,37,729,42"/>
+<area shape="rect" id="Node000006" href="$d3/d1d/group___power_gaea016c9708cbd1fce10a90d8fced370a.html#gaea016c9708cbd1fce10a90d8fced370a" title="dither_reserve_mW() for a controller that dithers, and zero for one that does not: a mode other than ..." alt="" coords="271,74,489,99"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="729,68,490,83,489,77,729,62"/>
+<area shape="rect" id="Node000003" href="$d3/d1d/group___power_gab0593d3b85bf91261f5a6288ec4ed71e.html#gab0593d3b85bf91261f5a6288ec4ed71e" title="One controller&#39;s demand at full brightness, in mW, including idle draw – the quantity the limiter sum..." alt="" coords="305,9,455,49"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="523,32,455,32,455,27,523,27"/>
+<area shape="rect" id="Node000004" href="$d3/d1d/group___power_gab33dbfb39f4368fffdc17807883c787e.html#gab33dbfb39f4368fffdc17807883c787e" title="Determines the highest brightness level you can use and still stay under the specified power budget f..." alt="" coords="18,5,210,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="292,31,210,29,211,24,292,25"/>
+<area shape="rect" id="Node000005" href="$dd/dbb/class_c_fast_l_e_d_a06a8bc368f2ef5816015b75ad54d1e6b.html#a06a8bc368f2ef5816015b75ad54d1e6b" title="Get estimated power consumption in milliwatts." alt="" coords="5,69,223,109"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="293,52,204,72,203,67,291,46"/>
+<area shape="poly" id="edge6_Node000006_Node000004" title=" " alt="" coords="310,73,201,48,202,43,311,68"/>
+<area shape="poly" id="edge7_Node000006_Node000005" title=" " alt="" coords="257,91,223,91,223,86,257,85"/>
+</map>

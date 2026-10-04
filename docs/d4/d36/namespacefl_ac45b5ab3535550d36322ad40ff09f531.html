@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -119,97 +119,97 @@ $(function(){initNavTree('d4/d36/namespacefl_ac45b5ab3535550d36322ad40ff09f531.h
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d1/dda/cstdlib_8cpp_8hpp_source.html#l00238">238</a> of file <a class="el" href="../../d1/dda/cstdlib_8cpp_8hpp_source.html">cstdlib.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  238</span>                                              {</div>
-<div class="line"><span class="lineno">  239</span>    <span class="keywordflow">if</span> (!str) {</div>
-<div class="line"><span class="lineno">  240</span>        <span class="keywordflow">if</span> (endptr) {</div>
-<div class="line"><span class="lineno">  241</span>            *endptr = <span class="keyword">const_cast&lt;</span><span class="keywordtype">char</span>*<span class="keyword">&gt;</span>(str);</div>
-<div class="line"><span class="lineno">  242</span>        }</div>
-<div class="line"><span class="lineno">  243</span>        <span class="keywordflow">return</span> 0.0;</div>
-<div class="line"><span class="lineno">  244</span>    }</div>
-<div class="line"><span class="lineno">  245</span> </div>
-<div class="line"><span class="lineno">  246</span>    <span class="keyword">const</span> <span class="keywordtype">char</span>* p = str;</div>
-<div class="line"><span class="lineno">  247</span>    <span class="keywordtype">double</span> <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a> = 0.0;</div>
-<div class="line"><span class="lineno">  248</span>    <span class="keywordtype">bool</span> negative = <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">  249</span> </div>
-<div class="line"><span class="lineno">  250</span>    <span class="comment">// Skip leading whitespace</span></div>
-<div class="line"><span class="lineno">  251</span>    <span class="keywordflow">while</span> (*p == <span class="charliteral">&#39; &#39;</span> || *p == <span class="charliteral">&#39;\t&#39;</span> || *p == <span class="charliteral">&#39;\n&#39;</span> || *p == <span class="charliteral">&#39;\r&#39;</span> || *p == <span class="charliteral">&#39;\f&#39;</span> || *p == <span class="charliteral">&#39;\v&#39;</span>) {</div>
-<div class="line"><span class="lineno">  252</span>        p++;</div>
-<div class="line"><span class="lineno">  253</span>    }</div>
-<div class="line"><span class="lineno">  254</span> </div>
-<div class="line"><span class="lineno">  255</span>    <span class="comment">// Handle sign</span></div>
-<div class="line"><span class="lineno">  256</span>    <span class="keywordflow">if</span> (*p == <span class="charliteral">&#39;-&#39;</span>) {</div>
-<div class="line"><span class="lineno">  257</span>        negative = <span class="keyword">true</span>;</div>
-<div class="line"><span class="lineno">  258</span>        p++;</div>
-<div class="line"><span class="lineno">  259</span>    } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (*p == <span class="charliteral">&#39;+&#39;</span>) {</div>
+<p class="definition">Definition at line <a class="el" href="../../d1/dda/cstdlib_8cpp_8hpp_source.html#l00240">240</a> of file <a class="el" href="../../d1/dda/cstdlib_8cpp_8hpp_source.html">cstdlib.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  240</span>                                              {</div>
+<div class="line"><span class="lineno">  241</span>    <span class="keywordflow">if</span> (!str) {</div>
+<div class="line"><span class="lineno">  242</span>        <span class="keywordflow">if</span> (endptr) {</div>
+<div class="line"><span class="lineno">  243</span>            *endptr = <span class="keyword">const_cast&lt;</span><span class="keywordtype">char</span>*<span class="keyword">&gt;</span>(str);</div>
+<div class="line"><span class="lineno">  244</span>        }</div>
+<div class="line"><span class="lineno">  245</span>        <span class="keywordflow">return</span> 0.0;</div>
+<div class="line"><span class="lineno">  246</span>    }</div>
+<div class="line"><span class="lineno">  247</span> </div>
+<div class="line"><span class="lineno">  248</span>    <span class="keyword">const</span> <span class="keywordtype">char</span>* p = str;</div>
+<div class="line"><span class="lineno">  249</span>    <span class="keywordtype">double</span> <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a> = 0.0;</div>
+<div class="line"><span class="lineno">  250</span>    <span class="keywordtype">bool</span> negative = <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  251</span> </div>
+<div class="line"><span class="lineno">  252</span>    <span class="comment">// Skip leading whitespace</span></div>
+<div class="line"><span class="lineno">  253</span>    <span class="keywordflow">while</span> (*p == <span class="charliteral">&#39; &#39;</span> || *p == <span class="charliteral">&#39;\t&#39;</span> || *p == <span class="charliteral">&#39;\n&#39;</span> || *p == <span class="charliteral">&#39;\r&#39;</span> || *p == <span class="charliteral">&#39;\f&#39;</span> || *p == <span class="charliteral">&#39;\v&#39;</span>) {</div>
+<div class="line"><span class="lineno">  254</span>        p++;</div>
+<div class="line"><span class="lineno">  255</span>    }</div>
+<div class="line"><span class="lineno">  256</span> </div>
+<div class="line"><span class="lineno">  257</span>    <span class="comment">// Handle sign</span></div>
+<div class="line"><span class="lineno">  258</span>    <span class="keywordflow">if</span> (*p == <span class="charliteral">&#39;-&#39;</span>) {</div>
+<div class="line"><span class="lineno">  259</span>        negative = <span class="keyword">true</span>;</div>
 <div class="line"><span class="lineno">  260</span>        p++;</div>
-<div class="line"><span class="lineno">  261</span>    }</div>
-<div class="line"><span class="lineno">  262</span> </div>
-<div class="line"><span class="lineno">  263</span>    <span class="keyword">const</span> <span class="keywordtype">char</span>* start = p;</div>
+<div class="line"><span class="lineno">  261</span>    } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (*p == <span class="charliteral">&#39;+&#39;</span>) {</div>
+<div class="line"><span class="lineno">  262</span>        p++;</div>
+<div class="line"><span class="lineno">  263</span>    }</div>
 <div class="line"><span class="lineno">  264</span> </div>
-<div class="line"><span class="lineno">  265</span>    <span class="comment">// Parse integer part</span></div>
-<div class="line"><span class="lineno">  266</span>    <span class="keywordflow">while</span> (*p &gt;= <span class="charliteral">&#39;0&#39;</span> &amp;&amp; *p &lt;= <span class="charliteral">&#39;9&#39;</span>) {</div>
-<div class="line"><span class="lineno">  267</span>        <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a> = <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a> * 10.0 + (*p - <span class="charliteral">&#39;0&#39;</span>);</div>
-<div class="line"><span class="lineno">  268</span>        p++;</div>
-<div class="line"><span class="lineno">  269</span>    }</div>
-<div class="line"><span class="lineno">  270</span> </div>
-<div class="line"><span class="lineno">  271</span>    <span class="comment">// Parse fractional part</span></div>
-<div class="line"><span class="lineno">  272</span>    <span class="keywordflow">if</span> (*p == <span class="charliteral">&#39;.&#39;</span>) {</div>
-<div class="line"><span class="lineno">  273</span>        p++;</div>
-<div class="line"><span class="lineno">  274</span>        <span class="keywordtype">double</span> fraction = 0.1;</div>
-<div class="line"><span class="lineno">  275</span>        <span class="keywordflow">while</span> (*p &gt;= <span class="charliteral">&#39;0&#39;</span> &amp;&amp; *p &lt;= <span class="charliteral">&#39;9&#39;</span>) {</div>
-<div class="line"><span class="lineno">  276</span>            <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a> += (*p - <span class="charliteral">&#39;0&#39;</span>) * fraction;</div>
-<div class="line"><span class="lineno">  277</span>            fraction *= 0.1;</div>
-<div class="line"><span class="lineno">  278</span>            p++;</div>
-<div class="line"><span class="lineno">  279</span>        }</div>
-<div class="line"><span class="lineno">  280</span>    }</div>
-<div class="line"><span class="lineno">  281</span> </div>
-<div class="line"><span class="lineno">  282</span>    <span class="comment">// Parse exponent</span></div>
-<div class="line"><span class="lineno">  283</span>    <span class="keywordflow">if</span> (*p == <span class="charliteral">&#39;e&#39;</span> || *p == <span class="charliteral">&#39;E&#39;</span>) {</div>
-<div class="line"><span class="lineno">  284</span>        p++;</div>
-<div class="line"><span class="lineno">  285</span>        <span class="keywordtype">bool</span> expNegative = <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">  286</span>        <span class="keywordflow">if</span> (*p == <span class="charliteral">&#39;-&#39;</span>) {</div>
-<div class="line"><span class="lineno">  287</span>            expNegative = <span class="keyword">true</span>;</div>
-<div class="line"><span class="lineno">  288</span>            p++;</div>
-<div class="line"><span class="lineno">  289</span>        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (*p == <span class="charliteral">&#39;+&#39;</span>) {</div>
+<div class="line"><span class="lineno">  265</span>    <span class="keyword">const</span> <span class="keywordtype">char</span>* start = p;</div>
+<div class="line"><span class="lineno">  266</span> </div>
+<div class="line"><span class="lineno">  267</span>    <span class="comment">// Parse integer part</span></div>
+<div class="line"><span class="lineno">  268</span>    <span class="keywordflow">while</span> (*p &gt;= <span class="charliteral">&#39;0&#39;</span> &amp;&amp; *p &lt;= <span class="charliteral">&#39;9&#39;</span>) {</div>
+<div class="line"><span class="lineno">  269</span>        <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a> = <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a> * 10.0 + (*p - <span class="charliteral">&#39;0&#39;</span>);</div>
+<div class="line"><span class="lineno">  270</span>        p++;</div>
+<div class="line"><span class="lineno">  271</span>    }</div>
+<div class="line"><span class="lineno">  272</span> </div>
+<div class="line"><span class="lineno">  273</span>    <span class="comment">// Parse fractional part</span></div>
+<div class="line"><span class="lineno">  274</span>    <span class="keywordflow">if</span> (*p == <span class="charliteral">&#39;.&#39;</span>) {</div>
+<div class="line"><span class="lineno">  275</span>        p++;</div>
+<div class="line"><span class="lineno">  276</span>        <span class="keywordtype">double</span> fraction = 0.1;</div>
+<div class="line"><span class="lineno">  277</span>        <span class="keywordflow">while</span> (*p &gt;= <span class="charliteral">&#39;0&#39;</span> &amp;&amp; *p &lt;= <span class="charliteral">&#39;9&#39;</span>) {</div>
+<div class="line"><span class="lineno">  278</span>            <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a> += (*p - <span class="charliteral">&#39;0&#39;</span>) * fraction;</div>
+<div class="line"><span class="lineno">  279</span>            fraction *= 0.1;</div>
+<div class="line"><span class="lineno">  280</span>            p++;</div>
+<div class="line"><span class="lineno">  281</span>        }</div>
+<div class="line"><span class="lineno">  282</span>    }</div>
+<div class="line"><span class="lineno">  283</span> </div>
+<div class="line"><span class="lineno">  284</span>    <span class="comment">// Parse exponent</span></div>
+<div class="line"><span class="lineno">  285</span>    <span class="keywordflow">if</span> (*p == <span class="charliteral">&#39;e&#39;</span> || *p == <span class="charliteral">&#39;E&#39;</span>) {</div>
+<div class="line"><span class="lineno">  286</span>        p++;</div>
+<div class="line"><span class="lineno">  287</span>        <span class="keywordtype">bool</span> expNegative = <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  288</span>        <span class="keywordflow">if</span> (*p == <span class="charliteral">&#39;-&#39;</span>) {</div>
+<div class="line"><span class="lineno">  289</span>            expNegative = <span class="keyword">true</span>;</div>
 <div class="line"><span class="lineno">  290</span>            p++;</div>
-<div class="line"><span class="lineno">  291</span>        }</div>
-<div class="line"><span class="lineno">  292</span> </div>
-<div class="line"><span class="lineno">  293</span>        <span class="keywordtype">int</span> <a class="code hl_function" href="../../d4/d36/namespacefl_ae393fecb8f433ee4b88027955350bdc8.html#ae393fecb8f433ee4b88027955350bdc8">exp</a> = 0;</div>
-<div class="line"><span class="lineno">  294</span>        <span class="keywordflow">while</span> (*p &gt;= <span class="charliteral">&#39;0&#39;</span> &amp;&amp; *p &lt;= <span class="charliteral">&#39;9&#39;</span>) {</div>
-<div class="line"><span class="lineno">  295</span>            <a class="code hl_function" href="../../d4/d36/namespacefl_ae393fecb8f433ee4b88027955350bdc8.html#ae393fecb8f433ee4b88027955350bdc8">exp</a> = <a class="code hl_function" href="../../d4/d36/namespacefl_ae393fecb8f433ee4b88027955350bdc8.html#ae393fecb8f433ee4b88027955350bdc8">exp</a> * 10 + (*p - <span class="charliteral">&#39;0&#39;</span>);</div>
-<div class="line"><span class="lineno">  296</span>            p++;</div>
-<div class="line"><span class="lineno">  297</span>        }</div>
-<div class="line"><span class="lineno">  298</span> </div>
-<div class="line"><span class="lineno">  299</span>        <span class="keywordtype">double</span> multiplier = 1.0;</div>
-<div class="line"><span class="lineno">  300</span>        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; <a class="code hl_function" href="../../d4/d36/namespacefl_ae393fecb8f433ee4b88027955350bdc8.html#ae393fecb8f433ee4b88027955350bdc8">exp</a>; i++) {</div>
-<div class="line"><span class="lineno">  301</span>            multiplier *= 10.0;</div>
-<div class="line"><span class="lineno">  302</span>        }</div>
-<div class="line"><span class="lineno">  303</span> </div>
-<div class="line"><span class="lineno">  304</span>        <span class="keywordflow">if</span> (expNegative) {</div>
-<div class="line"><span class="lineno">  305</span>            <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a> /= multiplier;</div>
-<div class="line"><span class="lineno">  306</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  307</span>            <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a> *= multiplier;</div>
-<div class="line"><span class="lineno">  308</span>        }</div>
-<div class="line"><span class="lineno">  309</span>    }</div>
-<div class="line"><span class="lineno">  310</span> </div>
-<div class="line"><span class="lineno">  311</span>    <span class="comment">// Set endptr</span></div>
-<div class="line"><span class="lineno">  312</span>    <span class="keywordflow">if</span> (endptr) {</div>
-<div class="line"><span class="lineno">  313</span>        <span class="keywordflow">if</span> (p == start) {</div>
-<div class="line"><span class="lineno">  314</span>            *endptr = <span class="keyword">const_cast&lt;</span><span class="keywordtype">char</span>*<span class="keyword">&gt;</span>(str);</div>
-<div class="line"><span class="lineno">  315</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  316</span>            *endptr = <span class="keyword">const_cast&lt;</span><span class="keywordtype">char</span>*<span class="keyword">&gt;</span>(p);</div>
-<div class="line"><span class="lineno">  317</span>        }</div>
-<div class="line"><span class="lineno">  318</span>    }</div>
-<div class="line"><span class="lineno">  319</span> </div>
-<div class="line"><span class="lineno">  320</span>    <span class="keywordflow">return</span> negative ? -<a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a> : <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>;</div>
-<div class="line"><span class="lineno">  321</span>}</div>
+<div class="line"><span class="lineno">  291</span>        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (*p == <span class="charliteral">&#39;+&#39;</span>) {</div>
+<div class="line"><span class="lineno">  292</span>            p++;</div>
+<div class="line"><span class="lineno">  293</span>        }</div>
+<div class="line"><span class="lineno">  294</span> </div>
+<div class="line"><span class="lineno">  295</span>        <span class="keywordtype">int</span> <a class="code hl_function" href="../../d4/d36/namespacefl_ad01db2eb12a95fcdbd62fd8835caf4e2.html#ad01db2eb12a95fcdbd62fd8835caf4e2">exp</a> = 0;</div>
+<div class="line"><span class="lineno">  296</span>        <span class="keywordflow">while</span> (*p &gt;= <span class="charliteral">&#39;0&#39;</span> &amp;&amp; *p &lt;= <span class="charliteral">&#39;9&#39;</span>) {</div>
+<div class="line"><span class="lineno">  297</span>            <a class="code hl_function" href="../../d4/d36/namespacefl_ad01db2eb12a95fcdbd62fd8835caf4e2.html#ad01db2eb12a95fcdbd62fd8835caf4e2">exp</a> = <a class="code hl_function" href="../../d4/d36/namespacefl_ad01db2eb12a95fcdbd62fd8835caf4e2.html#ad01db2eb12a95fcdbd62fd8835caf4e2">exp</a> * 10 + (*p - <span class="charliteral">&#39;0&#39;</span>);</div>
+<div class="line"><span class="lineno">  298</span>            p++;</div>
+<div class="line"><span class="lineno">  299</span>        }</div>
+<div class="line"><span class="lineno">  300</span> </div>
+<div class="line"><span class="lineno">  301</span>        <span class="keywordtype">double</span> multiplier = 1.0;</div>
+<div class="line"><span class="lineno">  302</span>        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; <a class="code hl_function" href="../../d4/d36/namespacefl_ad01db2eb12a95fcdbd62fd8835caf4e2.html#ad01db2eb12a95fcdbd62fd8835caf4e2">exp</a>; i++) {</div>
+<div class="line"><span class="lineno">  303</span>            multiplier *= 10.0;</div>
+<div class="line"><span class="lineno">  304</span>        }</div>
+<div class="line"><span class="lineno">  305</span> </div>
+<div class="line"><span class="lineno">  306</span>        <span class="keywordflow">if</span> (expNegative) {</div>
+<div class="line"><span class="lineno">  307</span>            <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a> /= multiplier;</div>
+<div class="line"><span class="lineno">  308</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  309</span>            <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a> *= multiplier;</div>
+<div class="line"><span class="lineno">  310</span>        }</div>
+<div class="line"><span class="lineno">  311</span>    }</div>
+<div class="line"><span class="lineno">  312</span> </div>
+<div class="line"><span class="lineno">  313</span>    <span class="comment">// Set endptr</span></div>
+<div class="line"><span class="lineno">  314</span>    <span class="keywordflow">if</span> (endptr) {</div>
+<div class="line"><span class="lineno">  315</span>        <span class="keywordflow">if</span> (p == start) {</div>
+<div class="line"><span class="lineno">  316</span>            *endptr = <span class="keyword">const_cast&lt;</span><span class="keywordtype">char</span>*<span class="keyword">&gt;</span>(str);</div>
+<div class="line"><span class="lineno">  317</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  318</span>            *endptr = <span class="keyword">const_cast&lt;</span><span class="keywordtype">char</span>*<span class="keyword">&gt;</span>(p);</div>
+<div class="line"><span class="lineno">  319</span>        }</div>
+<div class="line"><span class="lineno">  320</span>    }</div>
+<div class="line"><span class="lineno">  321</span> </div>
+<div class="line"><span class="lineno">  322</span>    <span class="keywordflow">return</span> negative ? -<a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a> : <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>;</div>
+<div class="line"><span class="lineno">  323</span>}</div>
 <div class="ttc" id="anamespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99_html_a8fa65f6529fc3eb6a174cb304a4bfc99"><div class="ttname"><a href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">fl::result</a></div><div class="ttdeci">expected&lt; T, E &gt; result</div><div class="ttdoc">Alias for expected (Rust-style naming)</div><div class="ttdef"><b>Definition</b> <a href="../../de/d93/result_8h_source.html#l00031">result.h:31</a></div></div>
-<div class="ttc" id="anamespacefl_ae393fecb8f433ee4b88027955350bdc8_html_ae393fecb8f433ee4b88027955350bdc8"><div class="ttname"><a href="../../d4/d36/namespacefl_ae393fecb8f433ee4b88027955350bdc8.html#ae393fecb8f433ee4b88027955350bdc8">fl::exp</a></div><div class="ttdeci">enable_if&lt; is_fixed_point&lt; T &gt;::value, T &gt;::type exp(T x) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../de/d62/fixed__point_8h_source.html#l00642">fixed_point.h:642</a></div></div>
+<div class="ttc" id="anamespacefl_ad01db2eb12a95fcdbd62fd8835caf4e2_html_ad01db2eb12a95fcdbd62fd8835caf4e2"><div class="ttname"><a href="../../d4/d36/namespacefl_ad01db2eb12a95fcdbd62fd8835caf4e2.html#ad01db2eb12a95fcdbd62fd8835caf4e2">fl::exp</a></div><div class="ttdeci">enable_if&lt; is_fixed_point&lt; T &gt;::value, T &gt;::type exp(T x) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../de/d62/fixed__point_8h_source.html#l00642">fixed_point.h:642</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../de/d62/fixed__point_8h_source.html#l00642">exp()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../df/d36/json__visitors_8h_source.html#l00210">fl::detail::JsonToFloatVisitor&lt; T &gt;::operator()()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../db/df7/json__dispatch_8cpp_8hpp_source.html#l00116">fl::detail::json_convert_to_float_core()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -222,7 +222,7 @@ $(function(){initNavTree('d4/d36/namespacefl_ac45b5ab3535550d36322ad40ff09f531.h
 <div id="dynsection-1-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-1-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d4/d36/namespacefl_ac45b5ab3535550d36322ad40ff09f531_ac45b5ab3535550d36322ad40ff09f531_icgraph.svg" width="334" height="51"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d4/d36/namespacefl_ac45b5ab3535550d36322ad40ff09f531_ac45b5ab3535550d36322ad40ff09f531_icgraph.svg" width="578" height="80"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 
 </div>
@@ -234,7 +234,7 @@ $(function(){initNavTree('d4/d36/namespacefl_ac45b5ab3535550d36322ad40ff09f531.h
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:04 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:08 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

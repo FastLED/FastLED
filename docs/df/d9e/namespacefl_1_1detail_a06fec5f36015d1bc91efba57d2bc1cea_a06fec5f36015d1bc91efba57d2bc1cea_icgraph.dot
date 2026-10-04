@@ -1,0 +1,22 @@
+digraph "fl::detail::soft_floor_log2_u64"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::detail::soft_floor\l_log2_u64",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::detail::json_floor\l_log2_u64",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d9e/namespacefl_1_1detail_a72ba9d4ebcbf32f6cf48ad4b703a0c93.html#a72ba9d4ebcbf32f6cf48ad4b703a0c93",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::detail::soft_float\l_bits_from_scaled_u64",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d9e/namespacefl_1_1detail_a1d31199fde8dc73af2aac102a8018d43.html#a1d31199fde8dc73af2aac102a8018d43",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::detail::json_ieee754\l_float_bits_from_scaled_u64",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d9e/namespacefl_1_1detail_ac6d9fecf5d4445598dbdcec5f0551b04.html#ac6d9fecf5d4445598dbdcec5f0551b04",tooltip=" "];
+  Node3 -> Node5 [id="edge4_Node000003_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::soft_float_bits\l_from_double_bits",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a7ce4b4443a469a93f6be4967eeca7d62.html#a7ce4b4443a469a93f6be4967eeca7d62",tooltip=" "];
+  Node5 -> Node6 [id="edge5_Node000005_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::detail::json_ieee754\l_float_bits_from_double_bits",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d9e/namespacefl_1_1detail_aa03c61eb23e4644533363efb3f241b43.html#aa03c61eb23e4644533363efb3f241b43",tooltip=" "];
+  Node5 -> Node7 [id="edge6_Node000005_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::soft_double_to\l_float",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d36/namespacefl_ab02435f98049f246ffc5bd375763e67c.html#ab02435f98049f246ffc5bd375763e67c",tooltip=" "];
+}

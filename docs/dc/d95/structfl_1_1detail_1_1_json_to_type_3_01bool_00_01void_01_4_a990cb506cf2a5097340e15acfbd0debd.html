@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -123,30 +123,29 @@ $(function(){initNavTree('dc/d95/structfl_1_1detail_1_1_json_to_type_3_01bool_00
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../de/d58/json__to__type_8h_source.html#l00086">86</a> of file <a class="el" href="../../de/d58/json__to__type_8h_source.html">json_to_type.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   86</span>                                                                      {</div>
-<div class="line"><span class="lineno">   87</span>        <span class="comment">// Access internal json_value directly instead of re-parsing</span></div>
-<div class="line"><span class="lineno">   88</span>        <span class="keyword">const</span> <a class="code hl_struct" href="../../dc/d8e/structfl_1_1detail_1_1_json_to_type.html">json_value</a>* <a class="code hl_struct" href="../../dc/d8e/structfl_1_1detail_1_1_json_to_type.html">val</a> = <a class="code hl_struct" href="../../dc/d8e/structfl_1_1detail_1_1_json_to_type.html">j</a>.internal_value();</div>
-<div class="line"><span class="lineno">   89</span>        <span class="keywordflow">if</span> (!<a class="code hl_struct" href="../../dc/d8e/structfl_1_1detail_1_1_json_to_type.html">val</a>) {</div>
-<div class="line"><span class="lineno">   90</span>            <a class="code hl_struct" href="../../dc/d8e/structfl_1_1detail_1_1_json_to_type.html">TypeConversionResult</a> <a class="code hl_struct" href="../../dc/d8e/structfl_1_1detail_1_1_json_to_type.html">result</a>;</div>
-<div class="line"><span class="lineno">   91</span>            <a class="code hl_struct" href="../../dc/d8e/structfl_1_1detail_1_1_json_to_type.html">result</a>.setError(<span class="stringliteral">&quot;failed to access JSON value&quot;</span>);</div>
-<div class="line"><span class="lineno">   92</span>            <span class="keywordflow">return</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a8c18961c82484f938000c3a24be290e1.html#a8c18961c82484f938000c3a24be290e1">fl::make_tuple</a>(<span class="keywordtype">bool</span>(<span class="keyword">false</span>), <a class="code hl_struct" href="../../dc/d8e/structfl_1_1detail_1_1_json_to_type.html">result</a>);</div>
-<div class="line"><span class="lineno">   93</span>        }</div>
-<div class="line"><span class="lineno">   94</span> </div>
-<div class="line"><span class="lineno">   95</span>        <a class="code hl_struct" href="../../dc/d8e/structfl_1_1detail_1_1_json_to_type.html">JsonToBoolVisitor</a> <a class="code hl_struct" href="../../dc/d8e/structfl_1_1detail_1_1_json_to_type.html">visitor</a>;</div>
-<div class="line"><span class="lineno">   96</span>        <a class="code hl_struct" href="../../dc/d8e/structfl_1_1detail_1_1_json_to_type.html">val</a>-&gt;data.visit(<a class="code hl_struct" href="../../dc/d8e/structfl_1_1detail_1_1_json_to_type.html">visitor</a>);</div>
-<div class="line"><span class="lineno">   97</span>        <span class="keywordflow">return</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a8c18961c82484f938000c3a24be290e1.html#a8c18961c82484f938000c3a24be290e1">fl::make_tuple</a>(<a class="code hl_struct" href="../../dc/d8e/structfl_1_1detail_1_1_json_to_type.html">visitor</a>.mValue, <a class="code hl_struct" href="../../dc/d8e/structfl_1_1detail_1_1_json_to_type.html">visitor</a>.mResult);</div>
-<div class="line"><span class="lineno">   98</span>    }</div>
-<div class="ttc" id="anamespacefl_a8c18961c82484f938000c3a24be290e1_html_a8c18961c82484f938000c3a24be290e1"><div class="ttname"><a href="../../d4/d36/namespacefl_a8c18961c82484f938000c3a24be290e1.html#a8c18961c82484f938000c3a24be290e1">fl::make_tuple</a></div><div class="ttdeci">tuple&lt; typename fl::decay&lt; Ts &gt;::type... &gt; make_tuple(Ts &amp;&amp;... args) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d2/d20/tuple_8h_source.html#l00104">tuple.h:104</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../de/d58/json__to__type_8h_source.html#l00093">93</a> of file <a class="el" href="../../de/d58/json__to__type_8h_source.html">json_to_type.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   93</span>                                                                      {</div>
+<div class="line"><span class="lineno">   94</span>        <span class="keyword">const</span> <a class="code hl_struct" href="../../dc/d8e/structfl_1_1detail_1_1_json_to_type.html">json_value</a>* <a class="code hl_struct" href="../../dc/d8e/structfl_1_1detail_1_1_json_to_type.html">val</a> = <a class="code hl_struct" href="../../dc/d8e/structfl_1_1detail_1_1_json_to_type.html">j</a>.internal_value();</div>
+<div class="line"><span class="lineno">   95</span>        <span class="keywordflow">if</span> (!<a class="code hl_struct" href="../../dc/d8e/structfl_1_1detail_1_1_json_to_type.html">val</a>) {</div>
+<div class="line"><span class="lineno">   96</span>            <a class="code hl_struct" href="../../dc/d8e/structfl_1_1detail_1_1_json_to_type.html">TypeConversionResult</a> <a class="code hl_struct" href="../../dc/d8e/structfl_1_1detail_1_1_json_to_type.html">result</a>;</div>
+<div class="line"><span class="lineno">   97</span>            <a class="code hl_struct" href="../../dc/d8e/structfl_1_1detail_1_1_json_to_type.html">result</a>.setError(<span class="stringliteral">&quot;failed to access JSON value&quot;</span>);</div>
+<div class="line"><span class="lineno">   98</span>            <span class="keywordflow">return</span> <a class="code hl_function" href="../../d4/d36/namespacefl_ab0947434c66d5afb0dd749516e0d09e4.html#ab0947434c66d5afb0dd749516e0d09e4">fl::make_tuple</a>(<span class="keywordtype">bool</span>(<span class="keyword">false</span>), <a class="code hl_struct" href="../../dc/d8e/structfl_1_1detail_1_1_json_to_type.html">result</a>);</div>
+<div class="line"><span class="lineno">   99</span>        }</div>
+<div class="line"><span class="lineno">  100</span>        <span class="keywordtype">bool</span> <a class="code hl_struct" href="../../dc/d8e/structfl_1_1detail_1_1_json_to_type.html">out</a> = <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  101</span>        <a class="code hl_struct" href="../../dc/d8e/structfl_1_1detail_1_1_json_to_type.html">TypeConversionResult</a> <a class="code hl_struct" href="../../dc/d8e/structfl_1_1detail_1_1_json_to_type.html">result</a> = <a class="code hl_function" href="../../df/d9e/namespacefl_1_1detail_ab40bc3cf22b558f4a05c08f063d7ea21.html#ab40bc3cf22b558f4a05c08f063d7ea21">json_convert_to_bool_core</a>(*<a class="code hl_struct" href="../../dc/d8e/structfl_1_1detail_1_1_json_to_type.html">val</a>, &amp;<a class="code hl_struct" href="../../dc/d8e/structfl_1_1detail_1_1_json_to_type.html">out</a>);</div>
+<div class="line"><span class="lineno">  102</span>        <span class="keywordflow">return</span> <a class="code hl_function" href="../../d4/d36/namespacefl_ab0947434c66d5afb0dd749516e0d09e4.html#ab0947434c66d5afb0dd749516e0d09e4">fl::make_tuple</a>(<a class="code hl_struct" href="../../dc/d8e/structfl_1_1detail_1_1_json_to_type.html">out</a>, <a class="code hl_struct" href="../../dc/d8e/structfl_1_1detail_1_1_json_to_type.html">result</a>);</div>
+<div class="line"><span class="lineno">  103</span>    }</div>
+<div class="ttc" id="anamespacefl_1_1detail_ab40bc3cf22b558f4a05c08f063d7ea21_html_ab40bc3cf22b558f4a05c08f063d7ea21"><div class="ttname"><a href="../../df/d9e/namespacefl_1_1detail_ab40bc3cf22b558f4a05c08f063d7ea21.html#ab40bc3cf22b558f4a05c08f063d7ea21">fl::detail::json_convert_to_bool_core</a></div><div class="ttdeci">FL_NO_INLINE TypeConversionResult json_convert_to_bool_core(const json_value &amp;val, bool *out_value) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../db/df7/json__dispatch_8cpp_8hpp_source.html#l00067">json_dispatch.cpp.hpp:67</a></div></div>
+<div class="ttc" id="anamespacefl_ab0947434c66d5afb0dd749516e0d09e4_html_ab0947434c66d5afb0dd749516e0d09e4"><div class="ttname"><a href="../../d4/d36/namespacefl_ab0947434c66d5afb0dd749516e0d09e4.html#ab0947434c66d5afb0dd749516e0d09e4">fl::make_tuple</a></div><div class="ttdeci">tuple&lt; typename fl::decay&lt; Ts &gt;::type... &gt; make_tuple(Ts &amp;&amp;... args) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d2/d20/tuple_8h_source.html#l00104">tuple.h:104</a></div></div>
 <div class="ttc" id="astructfl_1_1detail_1_1_json_to_type_html"><div class="ttname"><a href="../../dc/d8e/structfl_1_1detail_1_1_json_to_type.html">fl::detail::JsonToType</a></div><div class="ttdef"><b>Definition</b> <a href="../../de/d58/json__to__type_8h_source.html#l00056">json_to_type.h:56</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d7/d5e/fl_2stl_2json_2types_8h_source.html#l00700">fl::json_value::data</a>, <a class="el" href="../../d4/d05/json_8h_source.html#l00660">fl::json::internal_value()</a>, <a class="el" href="../../d2/d20/tuple_8h_source.html#l00104">fl::make_tuple()</a>, <a class="el" href="../../df/d36/json__visitors_8h_source.html#l00102">fl::detail::JsonToBoolVisitor::mResult</a>, and <a class="el" href="../../df/d36/json__visitors_8h_source.html#l00101">fl::detail::JsonToBoolVisitor::mValue</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d05/json_8h_source.html#l00825">fl::json::internal_value()</a>, <a class="el" href="../../db/df7/json__dispatch_8cpp_8hpp_source.html#l00067">fl::detail::json_convert_to_bool_core()</a>, and <a class="el" href="../../d2/d20/tuple_8h_source.html#l00104">fl::make_tuple()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../dc/d95/structfl_1_1detail_1_1_json_to_type_3_01bool_00_01void_01_4_a990cb506cf2a5097340e15acfbd0debd_a990cb506cf2a5097340e15acfbd0debd_cgraph.svg" width="507" height="102"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../dc/d95/structfl_1_1detail_1_1_json_to_type_3_01bool_00_01void_01_4_a990cb506cf2a5097340e15acfbd0debd_a990cb506cf2a5097340e15acfbd0debd_cgraph.svg" width="542" height="166"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 
 </div>
@@ -158,7 +157,7 @@ $(function(){initNavTree('dc/d95/structfl_1_1detail_1_1_json_to_type_3_01bool_00
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../df/d9e/namespacefl_1_1detail.html">detail</a></li><li class="navelem"><a class="el" href="../../dc/d95/structfl_1_1detail_1_1_json_to_type_3_01bool_00_01void_01_4.html">JsonToType&lt; bool, void &gt;</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:09 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:11 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

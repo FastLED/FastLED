@@ -1,0 +1,7 @@
+<map id="fl::CLEDController::bindStaticEmitterProfile" name="fl::CLEDController::bindStaticEmitterProfile">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,189,45"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a2321ecc6a20f28d25814f956eded8304.html#a2321ecc6a20f28d25814f956eded8304" title="Point the hooks at the real implementations." alt="" coords="237,5,401,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="190,23,224,23,224,28,190,28"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a77e438ae9277ff68b05e14f2979785c5.html#a77e438ae9277ff68b05e14f2979785c5" title="The installed hooks." alt="" coords="449,13,612,38"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="401,23,436,23,436,28,401,28"/>
+</map>

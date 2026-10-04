@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -114,7 +114,7 @@ template&lt;int SLOT&gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static <a class="el" href="../../df/d96/s16x16x4_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> <a class="el" href="../../d0/dee/struct_pixel_controller.html">PixelController</a>&lt; <a class="el" href="../../d3/d8b/_parallel___i_o_8ino_a87eecf85eebf5be8fb74183807e8e2f0.html#a87eecf85eebf5be8fb74183807e8e2f0">RGB_ORDER</a>, LANES, MASK &gt;::getd </td>
+          <td class="memname">static <a class="el" href="../../d4/d54/compiler__control_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> <a class="el" href="../../d0/dee/struct_pixel_controller.html">PixelController</a>&lt; <a class="el" href="../../d3/d8b/_parallel___i_o_8ino_a87eecf85eebf5be8fb74183807e8e2f0.html#a87eecf85eebf5be8fb74183807e8e2f0">RGB_ORDER</a>, LANES, MASK &gt;::getd </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="../../d0/dee/struct_pixel_controller.html">PixelController</a>&lt; <a class="el" href="../../d3/d8b/_parallel___i_o_8ino_a87eecf85eebf5be8fb74183807e8e2f0.html#a87eecf85eebf5be8fb74183807e8e2f0">RGB_ORDER</a>, LANES, MASK &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>pc</em></span></td><td>)</td>
           <td></td>
@@ -143,13 +143,13 @@ template&lt;int SLOT&gt; </div>
 <dl class="section return"><dt>Returns</dt><dd>dithering data for the given channel </dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="../../d0/dee/struct_pixel_controller_a5ad48a201e6f48a4ff1fa9936e590324.html#a5ad48a201e6f48a4ff1fa9936e590324" title="[DITHER] Current dither offset per R,G,B channel (toggles via stepDithering)">PixelController::d</a> </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00512">512</a> of file <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html">pixel_controller.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  512</span>{ <span class="keywordflow">return</span> <a class="code hl_struct" href="../../d0/dee/struct_pixel_controller.html">pc</a>.<a class="code hl_variable" href="../../d0/dee/struct_pixel_controller_a5ad48a201e6f48a4ff1fa9936e590324.html#a5ad48a201e6f48a4ff1fa9936e590324">d</a>[<a class="code hl_define" href="../../d5/d4d/pixel__controller_8h_afef3a6dc05d96466ceb8bd8a89d7b6bd.html#afef3a6dc05d96466ceb8bd8a89d7b6bd">RO</a>(<a class="code hl_struct" href="../../d0/dee/struct_pixel_controller.html">SLOT</a>)]; }</div>
-<div class="ttc" id="apixel__controller_8h_afef3a6dc05d96466ceb8bd8a89d7b6bd_html_afef3a6dc05d96466ceb8bd8a89d7b6bd"><div class="ttname"><a href="../../d5/d4d/pixel__controller_8h_afef3a6dc05d96466ceb8bd8a89d7b6bd.html#afef3a6dc05d96466ceb8bd8a89d7b6bd">RO</a></div><div class="ttdeci">#define RO(X)</div><div class="ttdoc">Gets the assigned color channel for a byte&#39;s position in the output, using the color order (EOrder) t...</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d4d/pixel__controller_8h_source.html#l00046">pixel_controller.h:46</a></div></div>
-<div class="ttc" id="astruct_pixel_controller_a5ad48a201e6f48a4ff1fa9936e590324_html_a5ad48a201e6f48a4ff1fa9936e590324"><div class="ttname"><a href="../../d0/dee/struct_pixel_controller_a5ad48a201e6f48a4ff1fa9936e590324.html#a5ad48a201e6f48a4ff1fa9936e590324">PixelController::d</a></div><div class="ttdeci">fl::u8 d[3]</div><div class="ttdoc">[DITHER] Current dither offset per R,G,B channel (toggles via stepDithering)</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d4d/pixel__controller_8h_source.html#l00106">pixel_controller.h:106</a></div></div>
-<div class="ttc" id="astruct_pixel_controller_html"><div class="ttname"><a href="../../d0/dee/struct_pixel_controller.html">PixelController</a></div><div class="ttdoc">Pixel controller class.</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d4d/pixel__controller_8h_source.html#l00102">pixel_controller.h:102</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00423">423</a> of file <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html">pixel_controller.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  423</span>{ <span class="keywordflow">return</span> <a class="code hl_struct" href="../../d0/dee/struct_pixel_controller.html">pc</a>.<a class="code hl_variable" href="../../d0/dee/struct_pixel_controller_a5ad48a201e6f48a4ff1fa9936e590324.html#a5ad48a201e6f48a4ff1fa9936e590324">d</a>[<a class="code hl_define" href="../../d5/d4d/pixel__controller_8h_afef3a6dc05d96466ceb8bd8a89d7b6bd.html#afef3a6dc05d96466ceb8bd8a89d7b6bd">RO</a>(<a class="code hl_struct" href="../../d0/dee/struct_pixel_controller.html">SLOT</a>)]; }</div>
+<div class="ttc" id="apixel__controller_8h_afef3a6dc05d96466ceb8bd8a89d7b6bd_html_afef3a6dc05d96466ceb8bd8a89d7b6bd"><div class="ttname"><a href="../../d5/d4d/pixel__controller_8h_afef3a6dc05d96466ceb8bd8a89d7b6bd.html#afef3a6dc05d96466ceb8bd8a89d7b6bd">RO</a></div><div class="ttdeci">#define RO(X)</div><div class="ttdoc">Gets the assigned color channel for a byte&#39;s position in the output, using the color order (EOrder) t...</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d4d/pixel__controller_8h_source.html#l00048">pixel_controller.h:48</a></div></div>
+<div class="ttc" id="astruct_pixel_controller_a5ad48a201e6f48a4ff1fa9936e590324_html_a5ad48a201e6f48a4ff1fa9936e590324"><div class="ttname"><a href="../../d0/dee/struct_pixel_controller_a5ad48a201e6f48a4ff1fa9936e590324.html#a5ad48a201e6f48a4ff1fa9936e590324">PixelController::d</a></div><div class="ttdeci">fl::u8 d[3]</div><div class="ttdoc">[DITHER] Current dither offset per R,G,B channel (toggles via stepDithering)</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d4d/pixel__controller_8h_source.html#l00108">pixel_controller.h:108</a></div></div>
+<div class="ttc" id="astruct_pixel_controller_html"><div class="ttname"><a href="../../d0/dee/struct_pixel_controller.html">PixelController</a></div><div class="ttdoc">Pixel controller class.</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d4d/pixel__controller_8h_source.html#l00104">pixel_controller.h:104</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00130">PixelController()</a>, <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00106">d</a>, <a class="el" href="../../df/d96/s16x16x4_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a>, and <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00046">RO</a>.</p>
+<p class="reference">References <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00136">PixelController()</a>, <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00108">d</a>, <a class="el" href="../../d4/d54/compiler__control_8h_source.html#l00819">FASTLED_FORCE_INLINE</a>, and <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00048">RO</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -167,7 +167,7 @@ template&lt;int SLOT&gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d0/dee/struct_pixel_controller.html">PixelController</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:03 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -1,0 +1,5 @@
+<map id="mood_ring::RoomSense" name="mood_ring::RoomSense">
+<area shape="rect" id="Node000001" title="Everything a visual is allowed to react to." alt="" coords="8,93,184,119"/>
+<area shape="rect" id="Node000002" href="$d2/df0/namespacemood__ring.html#da/d38/structmood__ring_1_1_room_events" title="One&#45;frame rising edges. Set on the frame the event lands, cleared next." alt="" coords="5,5,187,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="99,45,99,93,93,93,93,45"/>
+</map>

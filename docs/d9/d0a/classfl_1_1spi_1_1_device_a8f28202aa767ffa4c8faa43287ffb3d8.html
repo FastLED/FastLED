@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -132,23 +132,22 @@ $(function(){initNavTree('d9/d0a/classfl_1_1spi_1_1_device_a8f28202aa767ffa4c8fa
 </dl>
 
 <p class="definition">Definition at line <a class="el" href="../../d0/daf/device_8cpp_8hpp_source.html#l00021">21</a> of file <a class="el" href="../../d0/daf/device_8cpp_8hpp_source.html">device.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   22</span>    : <a class="code hl_variable" href="../../d9/d0a/classfl_1_1spi_1_1_device_a9a9c763d0d303ebbd0915003d7b89427.html#a9a9c763d0d303ebbd0915003d7b89427">pImpl</a>(<a class="code hl_function" href="../../d4/d36/namespacefl_a3fd92c727664a77396403265415789d3.html#a3fd92c727664a77396403265415789d3">fl::make_unique&lt;Impl&gt;</a>(config)) {</div>
-<div class="line"><span class="lineno">   23</span>    <a class="code hl_define" href="../../d8/d1c/group__log__hw__interfaces_ga178692e92d575c24c831f587f2165911.html#ga178692e92d575c24c831f587f2165911">FL_LOG_SPI</a>(<span class="stringliteral">&quot;SPI Device: Created with clock=&quot;</span> &lt;&lt; config.clock_pin</div>
-<div class="line"><span class="lineno">   24</span>           &lt;&lt; <span class="stringliteral">&quot; data_pins.size()=&quot;</span> &lt;&lt; config.data_pins.size());</div>
-<div class="line"><span class="lineno">   25</span>}</div>
+<div class="fragment"><div class="line"><span class="lineno">   22</span>    : <a class="code hl_variable" href="../../d9/d0a/classfl_1_1spi_1_1_device_a9a9c763d0d303ebbd0915003d7b89427.html#a9a9c763d0d303ebbd0915003d7b89427">pImpl</a>(<a class="code hl_function" href="../../d4/d36/namespacefl_a257ae39a291866e014a2eeb4abe2a29c.html#a257ae39a291866e014a2eeb4abe2a29c">fl::make_unique&lt;Impl&gt;</a>(config)) {</div>
+<div class="line"><span class="lineno">   23</span>    <a class="code hl_define" href="../../d8/d1c/group__log__hw__interfaces_gad110e32042dacf3d1607d9905ded4a8b.html#gad110e32042dacf3d1607d9905ded4a8b">FL_LOG_SPI</a>(<span class="stringliteral">&quot;SPI Device: Created with clock=%s data_pins.size()=%s&quot;</span>, config.clock_pin, config.data_pins.size());</div>
+<div class="line"><span class="lineno">   24</span>}</div>
 <div class="ttc" id="aclassfl_1_1spi_1_1_device_a9a9c763d0d303ebbd0915003d7b89427_html_a9a9c763d0d303ebbd0915003d7b89427"><div class="ttname"><a href="../../d9/d0a/classfl_1_1spi_1_1_device_a9a9c763d0d303ebbd0915003d7b89427.html#a9a9c763d0d303ebbd0915003d7b89427">fl::spi::Device::pImpl</a></div><div class="ttdeci">fl::unique_ptr&lt; Impl &gt; pImpl</div><div class="ttdef"><b>Definition</b> <a href="../../db/de9/device_8h_source.html#l00134">device.h:134</a></div></div>
-<div class="ttc" id="agroup__log__hw__interfaces_ga178692e92d575c24c831f587f2165911_html_ga178692e92d575c24c831f587f2165911"><div class="ttname"><a href="../../d8/d1c/group__log__hw__interfaces_ga178692e92d575c24c831f587f2165911.html#ga178692e92d575c24c831f587f2165911">FL_LOG_SPI</a></div><div class="ttdeci">#define FL_LOG_SPI(X)</div><div class="ttdoc">Serial Peripheral Interface (SPI) logging Logs SPI configuration, initialization, and transfers.</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00474">log.h:474</a></div></div>
-<div class="ttc" id="anamespacefl_a3fd92c727664a77396403265415789d3_html_a3fd92c727664a77396403265415789d3"><div class="ttname"><a href="../../d4/d36/namespacefl_a3fd92c727664a77396403265415789d3.html#a3fd92c727664a77396403265415789d3">fl::make_unique</a></div><div class="ttdeci">fl::enable_if&lt;!fl::is_array&lt; T &gt;::value, unique_ptr&lt; T &gt; &gt;::type make_unique(Args &amp;&amp;... args) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../da/d4b/unique__ptr_8h_source.html#l00261">unique_ptr.h:261</a></div></div>
+<div class="ttc" id="agroup__log__hw__interfaces_gad110e32042dacf3d1607d9905ded4a8b_html_gad110e32042dacf3d1607d9905ded4a8b"><div class="ttname"><a href="../../d8/d1c/group__log__hw__interfaces_gad110e32042dacf3d1607d9905ded4a8b.html#gad110e32042dacf3d1607d9905ded4a8b">FL_LOG_SPI</a></div><div class="ttdeci">#define FL_LOG_SPI(...)</div><div class="ttdoc">Serial Peripheral Interface (SPI) logging Logs SPI configuration, initialization, and transfers.</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00657">log.h:657</a></div></div>
+<div class="ttc" id="anamespacefl_a257ae39a291866e014a2eeb4abe2a29c_html_a257ae39a291866e014a2eeb4abe2a29c"><div class="ttname"><a href="../../d4/d36/namespacefl_a257ae39a291866e014a2eeb4abe2a29c.html#a257ae39a291866e014a2eeb4abe2a29c">fl::make_unique</a></div><div class="ttdeci">fl::enable_if&lt;!fl::is_array&lt; T &gt;::value, unique_ptr&lt; T &gt; &gt;::type make_unique(Args &amp;&amp;... args) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../da/d4b/unique__ptr_8h_source.html#l00261">unique_ptr.h:261</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../dd/dbd/fl_2channels_2spi_2config_8h_source.html#l00071">fl::SpiConfig::clock_pin</a>, <a class="el" href="../../dd/dbd/fl_2channels_2spi_2config_8h_source.html#l00072">fl::SpiConfig::data_pins</a>, <a class="el" href="../../d7/d7f/log_8h_source.html#l00474">FL_LOG_SPI</a>, <a class="el" href="../../da/d4b/unique__ptr_8h_source.html#l00261">fl::make_unique()</a>, <a class="el" href="../../db/de9/device_8h_source.html#l00134">pImpl</a>, and <a class="el" href="../../d5/d47/basic__vector_8h_source.html#l00042">fl::vector_basic::size()</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/dbd/fl_2channels_2spi_2config_8h_source.html#l00071">fl::SpiConfig::clock_pin</a>, <a class="el" href="../../dd/dbd/fl_2channels_2spi_2config_8h_source.html#l00072">fl::SpiConfig::data_pins</a>, <a class="el" href="../../d7/d7f/log_8h_source.html#l00657">FL_LOG_SPI</a>, <a class="el" href="../../da/d4b/unique__ptr_8h_source.html#l00261">fl::make_unique()</a>, <a class="el" href="../../db/de9/device_8h_source.html#l00134">pImpl</a>, and <a class="el" href="../../d5/d47/basic__vector_8h_source.html#l00042">fl::vector_basic::size()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d9/d0a/classfl_1_1spi_1_1_device_a164c4a5d432910862a3a908727a11138.html#a164c4a5d432910862a3a908727a11138">Device()</a>, and <a class="el" href="../../d9/d0a/classfl_1_1spi_1_1_device_a0d4f32bfdbe507e52ff28f4d11c601a8.html#a0d4f32bfdbe507e52ff28f4d11c601a8">operator=()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d9/d0a/classfl_1_1spi_1_1_device_ab7976f88995225ecb317e95ddd83160c.html#ab7976f88995225ecb317e95ddd83160c">Device()</a>, and <a class="el" href="../../d9/d0a/classfl_1_1spi_1_1_device_af7d35a37cb54596edfbc1bce9a46c341.html#af7d35a37cb54596edfbc1bce9a46c341">operator=()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d9/d0a/classfl_1_1spi_1_1_device_a8f28202aa767ffa4c8faa43287ffb3d8_a8f28202aa767ffa4c8faa43287ffb3d8_cgraph.svg" width="528" height="86"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d9/d0a/classfl_1_1spi_1_1_device_a8f28202aa767ffa4c8faa43287ffb3d8_a8f28202aa767ffa4c8faa43287ffb3d8_cgraph.svg" width="512" height="86"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 <div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
@@ -167,7 +166,7 @@ $(function(){initNavTree('d9/d0a/classfl_1_1spi_1_1_device_a8f28202aa767ffa4c8fa
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d4/d68/namespacefl_1_1spi.html">spi</a></li><li class="navelem"><a class="el" href="../../d9/d0a/classfl_1_1spi_1_1_device.html">Device</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:10 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:12 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -134,7 +134,7 @@ $(function(){initNavTree('db/d5f/pl__mpeg_8hpp_ab22d08e04827d921fced081bb7627424
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em><a class="el" href="../../da/dbd/coder_8h_ad51ded0bbd705f02f73fc60c0b721ced.html#ad51ded0bbd705f02f73fc60c0b721ced">BLOCK_SIZE</a></em></span>, </td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>BLOCK_SIZE</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -144,10 +144,10 @@ $(function(){initNavTree('db/d5f/pl__mpeg_8hpp_ab22d08e04827d921fced081bb7627424
       </table>
 </div><div class="memdoc">
 <b>Value:</b><div class="fragment"><div class="line">    <span class="keywordflow">do</span> { \</div>
-<div class="line">    <span class="keywordtype">int</span> dest_scan = DEST_WIDTH - <a class="code hl_define" href="../../da/dbd/coder_8h_ad51ded0bbd705f02f73fc60c0b721ced.html#ad51ded0bbd705f02f73fc60c0b721ced">BLOCK_SIZE</a>; \</div>
-<div class="line">    <span class="keywordtype">int</span> source_scan = SOURCE_WIDTH - <a class="code hl_define" href="../../da/dbd/coder_8h_ad51ded0bbd705f02f73fc60c0b721ced.html#ad51ded0bbd705f02f73fc60c0b721ced">BLOCK_SIZE</a>; \</div>
-<div class="line">    for (<span class="keywordtype">int</span> <a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a> = 0; <a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a> &lt; <a class="code hl_define" href="../../da/dbd/coder_8h_ad51ded0bbd705f02f73fc60c0b721ced.html#ad51ded0bbd705f02f73fc60c0b721ced">BLOCK_SIZE</a>; <a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a>++) { \</div>
-<div class="line">        for (<span class="keywordtype">int</span> <a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a> = 0; <a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a> &lt; <a class="code hl_define" href="../../da/dbd/coder_8h_ad51ded0bbd705f02f73fc60c0b721ced.html#ad51ded0bbd705f02f73fc60c0b721ced">BLOCK_SIZE</a>; <a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>++) { \</div>
+<div class="line">    <span class="keywordtype">int</span> dest_scan = DEST_WIDTH - BLOCK_SIZE; \</div>
+<div class="line">    <span class="keywordtype">int</span> source_scan = SOURCE_WIDTH - BLOCK_SIZE; \</div>
+<div class="line">    for (<span class="keywordtype">int</span> <a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a> = 0; <a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a> &lt; BLOCK_SIZE; <a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a>++) { \</div>
+<div class="line">        for (<span class="keywordtype">int</span> <a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a> = 0; <a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a> &lt; BLOCK_SIZE; <a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>++) { \</div>
 <div class="line">            DEST[DEST_INDEX] = OP; \</div>
 <div class="line">            SOURCE_INDEX++; DEST_INDEX++; \</div>
 <div class="line">        } \</div>
@@ -156,7 +156,6 @@ $(function(){initNavTree('db/d5f/pl__mpeg_8hpp_ab22d08e04827d921fced081bb7627424
 <div class="line">    }} <span class="keywordflow">while</span>(<a class="code hl_define" href="../../db/d5f/pl__mpeg_8hpp_aa93f0eb578d23995850d61f7d61c55c1.html#aa93f0eb578d23995850d61f7d61c55c1">FALSE</a>)</div>
 <div class="ttc" id="a_audio_2simple_2simple_8h_a0a2f84ed7838f07779ae24c5a9086d33_html_a0a2f84ed7838f07779ae24c5a9086d33"><div class="ttname"><a href="../../db/d49/_audio_2simple_2simple_8h_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a></div><div class="ttdeci">int y</div><div class="ttdef"><b>Definition</b> <a href="../../db/d49/_audio_2simple_2simple_8h_source.html#l00093">simple.h:93</a></div></div>
 <div class="ttc" id="a_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc_html_a6150e0515f7202e2fb518f7206ed97dc"><div class="ttname"><a href="../../db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a></div><div class="ttdeci">int x</div><div class="ttdef"><b>Definition</b> <a href="../../db/d49/_audio_2simple_2simple_8h_source.html#l00092">simple.h:92</a></div></div>
-<div class="ttc" id="acoder_8h_ad51ded0bbd705f02f73fc60c0b721ced_html_ad51ded0bbd705f02f73fc60c0b721ced"><div class="ttname"><a href="../../da/dbd/coder_8h_ad51ded0bbd705f02f73fc60c0b721ced.html#ad51ded0bbd705f02f73fc60c0b721ced">BLOCK_SIZE</a></div><div class="ttdeci">#define BLOCK_SIZE</div><div class="ttdef"><b>Definition</b> <a href="../../da/dbd/coder_8h_source.html#l00106">coder.h:106</a></div></div>
 <div class="ttc" id="apl__mpeg_8hpp_aa93f0eb578d23995850d61f7d61c55c1_html_aa93f0eb578d23995850d61f7d61c55c1"><div class="ttname"><a href="../../db/d5f/pl__mpeg_8hpp_aa93f0eb578d23995850d61f7d61c55c1.html#aa93f0eb578d23995850d61f7d61c55c1">FALSE</a></div><div class="ttdeci">#define FALSE</div><div class="ttdef"><b>Definition</b> <a href="../../db/d5f/pl__mpeg_8hpp_source.html#l00175">pl_mpeg.hpp:175</a></div></div>
 </div><!-- fragment -->
 <p class="definition">Definition at line <a class="el" href="../../db/d5f/pl__mpeg_8hpp_source.html#l02675">2675</a> of file <a class="el" href="../../db/d5f/pl__mpeg_8hpp_source.html">pl_mpeg.hpp</a>.</p>
@@ -183,7 +182,7 @@ $(function(){initNavTree('db/d5f/pl__mpeg_8hpp_ab22d08e04827d921fced081bb7627424
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_c30bdf76ce759a4eae8387be42921388.html">third_party</a></li><li class="navelem"><a class="el" href="../../dir_eb1f5c2f803cdbf443cfd484912b2a78.html">pl_mpeg</a></li><li class="navelem"><a class="el" href="../../dir_020aa29fe78127ec4eb95d3d99e2904e.html">src</a></li><li class="navelem"><a class="el" href="../../db/d5f/pl__mpeg_8hpp.html">pl_mpeg.hpp</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:02 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:05 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

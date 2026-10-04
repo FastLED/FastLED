@@ -1,0 +1,5 @@
+<map id="fl::buildWave8ByteExpansionLUT" name="fl::buildWave8ByteExpansionLUT">
+<area shape="rect" id="Node000001" title="Build a byte&#45;indexed expansion LUT (#2526) from the nibble LUT." alt="" coords="5,5,241,31"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a6b5f441470840816c9c071d698ac8e9c.html#a6b5f441470840816c9c071d698ac8e9c" title="Out&#45;param overload: fill an existing 2 KB LUT in place." alt="" coords="289,5,525,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="242,15,275,15,275,21,242,21"/>
+</map>

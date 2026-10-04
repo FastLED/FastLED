@@ -1,5 +1,5 @@
 <map id="LegacyClocklessProxy" name="LegacyClocklessProxy">
-<area shape="rect" id="Node000001" title="Proxy that creates a legacy WS2812B controller from a runtime pin number." alt="" coords="1009,131,1176,156"/>
+<area shape="rect" id="Node000001" title="Proxy that creates a legacy clockless controller from runtime inputs." alt="" coords="1009,131,1176,156"/>
 <area shape="rect" id="Node000002" href="$d6/d2e/classfl_1_1unique__ptr.html" title=" " alt="" coords="737,123,880,163"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="894,141,1009,141,1009,146,894,146"/>
 <area shape="rect" id="Node000003" href="$d8/da0/classfl_1_1_c_l_e_d_controller.html" title=" " alt="" coords="389,73,525,99"/>

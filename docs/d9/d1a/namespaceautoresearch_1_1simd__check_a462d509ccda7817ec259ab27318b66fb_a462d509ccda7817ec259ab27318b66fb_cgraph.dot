@@ -8,8 +8,19 @@ digraph "autoresearch::simd_check::benchFloat4"
   rankdir="LR";
   Node1 [id="Node000001",label="autoresearch::simd\l_check::benchFloat4",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::memcpy",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a0393d1d09fff5bccc427802cc22e756d.html#a0393d1d09fff5bccc427802cc22e756d",tooltip=" "];
+  Node2 [id="Node000002",label="fl::memcpy",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a35ff6755912c639a5e5bd35fc59e57ff.html#a35ff6755912c639a5e5bd35fc59e57ff",tooltip=" "];
   Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::micros",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a95a89c7ba649b9bd2c9136c0f517d82f.html#a95a89c7ba649b9bd2c9136c0f517d82f",tooltip="Universal microsecond timer - returns microseconds since system startup."];
+  Node3 [id="Node000003",label="fl::micros",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a4cfbbd90ced1c04107934a3c05d3e679.html#a4cfbbd90ced1c04107934a3c05d3e679",tooltip="Universal microsecond timer - returns microseconds since system startup."];
   Node3 -> Node3 [id="edge3_Node000003_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node4 [id="edge4_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="autoresearch::simd\l_check::simdBenchmarkState",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d1a/namespaceautoresearch_1_1simd__check_a3597f8ae57d802ae5f1e2fe16bfdbe28.html#a3597f8ae57d802ae5f1e2fe16bfdbe28",tooltip=" "];
+  Node4 -> Node5 [id="edge5_Node000004_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::SingletonShared\l::instance",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d4a/classfl_1_1_singleton_shared_a1ec246efec2c46bc053a64fe7e8170ad.html#a1ec246efec2c46bc053a64fe7e8170ad",tooltip=" "];
+  Node5 -> Node6 [id="edge6_Node000005_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::SingletonShared\l::instanceInner",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$db/d4a/classfl_1_1_singleton_shared_a03c9eb23cd0cb903d5ae8fd44b1a4984.html#a03c9eb23cd0cb903d5ae8fd44b1a4984",tooltip=" "];
+  Node6 -> Node6 [id="edge7_Node000006_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node5 -> Node8 [id="edge8_Node000005_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl::detail::singleton\l_registry_get",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$df/d9e/namespacefl_1_1detail_a6bef973c17637a167f1f94d7db03905c.html#a6bef973c17637a167f1f94d7db03905c",tooltip=" "];
+  Node5 -> Node10 [id="edge9_Node000005_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="fl::detail::singleton\l_registry_set",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$df/d9e/namespacefl_1_1detail_af558e779ba2417d4cf14bdb1cbfd3d34.html#af558e779ba2417d4cf14bdb1cbfd3d34",tooltip=" "];
 }

@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -137,28 +137,28 @@ $(function(){initNavTree('d3/daf/classfl_1_1_spi_channel_engine_adapter_af0366a9
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>true if compatible, false otherwise </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d6/d93/spi__channel__adapter_8cpp_8hpp_source.html#l00132">132</a> of file <a class="el" href="../../d6/d93/spi__channel__adapter_8cpp_8hpp_source.html">spi_channel_adapter.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  133</span>                                                    {</div>
-<div class="line"><span class="lineno">  134</span> </div>
-<div class="line"><span class="lineno">  135</span>    <span class="comment">// Uninitialized controllers can handle any pin</span></div>
-<div class="line"><span class="lineno">  136</span>    <span class="keywordflow">if</span> (!ctrl.isInitialized) {</div>
-<div class="line"><span class="lineno">  137</span>        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><span class="lineno">  138</span>    }</div>
-<div class="line"><span class="lineno">  139</span> </div>
-<div class="line"><span class="lineno">  140</span>    <span class="comment">// Check if already handling this pin</span></div>
-<div class="line"><span class="lineno">  141</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> assignedPin : ctrl.assignedClockPins) {</div>
-<div class="line"><span class="lineno">  142</span>        <span class="keywordflow">if</span> (assignedPin == clockPin) {</div>
-<div class="line"><span class="lineno">  143</span>            <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><span class="lineno">  144</span>        }</div>
-<div class="line"><span class="lineno">  145</span>    }</div>
-<div class="line"><span class="lineno">  146</span> </div>
-<div class="line"><span class="lineno">  147</span>    <span class="comment">// ESP32 constraint: cannot re-initialize with different pins</span></div>
-<div class="line"><span class="lineno">  148</span>    <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">  149</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../d6/d93/spi__channel__adapter_8cpp_8hpp_source.html#l00134">134</a> of file <a class="el" href="../../d6/d93/spi__channel__adapter_8cpp_8hpp_source.html">spi_channel_adapter.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  135</span>                                                    {</div>
+<div class="line"><span class="lineno">  136</span> </div>
+<div class="line"><span class="lineno">  137</span>    <span class="comment">// Uninitialized controllers can handle any pin</span></div>
+<div class="line"><span class="lineno">  138</span>    <span class="keywordflow">if</span> (!ctrl.isInitialized) {</div>
+<div class="line"><span class="lineno">  139</span>        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  140</span>    }</div>
+<div class="line"><span class="lineno">  141</span> </div>
+<div class="line"><span class="lineno">  142</span>    <span class="comment">// Check if already handling this pin</span></div>
+<div class="line"><span class="lineno">  143</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> assignedPin : ctrl.assignedClockPins) {</div>
+<div class="line"><span class="lineno">  144</span>        <span class="keywordflow">if</span> (assignedPin == clockPin) {</div>
+<div class="line"><span class="lineno">  145</span>            <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  146</span>        }</div>
+<div class="line"><span class="lineno">  147</span>    }</div>
+<div class="line"><span class="lineno">  148</span> </div>
+<div class="line"><span class="lineno">  149</span>    <span class="comment">// ESP32 constraint: cannot re-initialize with different pins</span></div>
+<div class="line"><span class="lineno">  150</span>    <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  151</span>}</div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../d4/d8e/spi__channel__adapter_8h_source.html#l00131">fl::SpiChannelEngineAdapter::ControllerInfo::assignedClockPins</a>, and <a class="el" href="../../d4/d8e/spi__channel__adapter_8h_source.html#l00132">fl::SpiChannelEngineAdapter::ControllerInfo::isInitialized</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d6/d93/spi__channel__adapter_8cpp_8hpp_source.html#l00101">selectControllerForClockPin()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d6/d93/spi__channel__adapter_8cpp_8hpp_source.html#l00099">selectControllerForClockPin()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -176,7 +176,7 @@ $(function(){initNavTree('d3/daf/classfl_1_1_spi_channel_engine_adapter_af0366a9
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d3/daf/classfl_1_1_spi_channel_engine_adapter.html">SpiChannelEngineAdapter</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:10 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

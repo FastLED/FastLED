@@ -1,0 +1,14 @@
+<map id="fl/fs/embedded/_build.cpp.hpp" name="fl/fs/embedded/_build.cpp.hpp">
+<area shape="rect" id="Node000001" title="Unity&#45;build aggregate for embedded (on&#45;chip flash) storage." alt="" coords="123,5,340,31"/>
+<area shape="rect" id="Node000002" href="$d4/d26/embedded__fs_8cpp_8hpp.html" title="Body of fl::getEmbeddedFs()." alt="" coords="135,79,327,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="234,31,234,65,229,65,229,31"/>
+<area shape="rect" id="Node000003" href="$d6/d9a/embedded__fs_8h.html" title="Storage built into the microcontroller itself." alt="" coords="5,167,228,192"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="205,121,146,161,143,157,202,117"/>
+<area shape="rect" id="Node000096" title=" " alt="" coords="253,167,442,192"/>
+<area shape="poly" id="edge6_Node000002_Node000096" title=" " alt="" coords="261,117,320,157,317,161,258,121"/>
+<area shape="rect" id="Node000004" href="$db/d01/noexcept_8h.html" title=" " alt="" coords="53,313,180,339"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="116,193,107,240,108,271,113,300,107,301,103,272,102,240,111,192"/>
+<area shape="rect" id="Node000005" href="$df/d26/fs_8h.html" title=" " alt="" coords="117,240,191,265"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="125,191,144,227,139,229,120,194"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="150,267,131,303,127,300,145,264"/>
+</map>

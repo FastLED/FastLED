@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -126,10 +126,10 @@ $(function(){initNavTree('d9/d1a/namespaceautoresearch_1_1simd__check_a479a28fc4
 <p class="definition">Definition at line <a class="el" href="../../d7/dd1/_auto_research_simd_8h_source.html#l01046">1046</a> of file <a class="el" href="../../d7/dd1/_auto_research_simd_8h_source.html">AutoResearchSimd.h</a>.</p>
 <div class="fragment"><div class="line"><span class="lineno"> 1046</span>                                       {</div>
 <div class="line"><span class="lineno"> 1047</span>    <span class="comment">// Test adversarial values: sign bit, all ones, zero, alternating bits</span></div>
-<div class="line"><span class="lineno"> 1048</span>    uint32_t test_values[] = {0x80000000, 0xFFFFFFFF, 0x00000000, 0xAAAAAAAA, 0x55555555, 0x01010101};</div>
+<div class="line"><span class="lineno"> 1048</span>    <a class="code hl_typedef" href="../../df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a> test_values[] = {0x80000000, 0xFFFFFFFF, 0x00000000, 0xAAAAAAAA, 0x55555555, 0x01010101};</div>
 <div class="line"><span class="lineno"> 1049</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> <a class="code hl_variable" href="../../dc/db7/examples_2_luminova_2luminova_8h_ae96c939a2a46590dc79c7d9ca8331dfe.html#ae96c939a2a46590dc79c7d9ca8331dfe">t</a> = 0; <a class="code hl_variable" href="../../dc/db7/examples_2_luminova_2luminova_8h_ae96c939a2a46590dc79c7d9ca8331dfe.html#ae96c939a2a46590dc79c7d9ca8331dfe">t</a> &lt; 6; <a class="code hl_variable" href="../../dc/db7/examples_2_luminova_2luminova_8h_ae96c939a2a46590dc79c7d9ca8331dfe.html#ae96c939a2a46590dc79c7d9ca8331dfe">t</a>++) {</div>
-<div class="line"><span class="lineno"> 1050</span>        uint32_t val = test_values[<a class="code hl_variable" href="../../dc/db7/examples_2_luminova_2luminova_8h_ae96c939a2a46590dc79c7d9ca8331dfe.html#ae96c939a2a46590dc79c7d9ca8331dfe">t</a>];</div>
-<div class="line"><span class="lineno"> 1051</span>        uint32_t output[4];</div>
+<div class="line"><span class="lineno"> 1050</span>        <a class="code hl_typedef" href="../../df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a> val = test_values[<a class="code hl_variable" href="../../dc/db7/examples_2_luminova_2luminova_8h_ae96c939a2a46590dc79c7d9ca8331dfe.html#ae96c939a2a46590dc79c7d9ca8331dfe">t</a>];</div>
+<div class="line"><span class="lineno"> 1051</span>        <a class="code hl_typedef" href="../../df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a> output[4];</div>
 <div class="line"><span class="lineno"> 1052</span>        store_u32_4(output, set1_u32_4(val));</div>
 <div class="line"><span class="lineno"> 1053</span>        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; 4; i++) {</div>
 <div class="line"><span class="lineno"> 1054</span>            <span class="keywordflow">if</span> (output[i] != val) <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
@@ -138,16 +138,17 @@ $(function(){initNavTree('d9/d1a/namespaceautoresearch_1_1simd__check_a479a28fc4
 <div class="line"><span class="lineno"> 1057</span>    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
 <div class="line"><span class="lineno"> 1058</span>}</div>
 <div class="ttc" id="aexamples_2_luminova_2luminova_8h_ae96c939a2a46590dc79c7d9ca8331dfe_html_ae96c939a2a46590dc79c7d9ca8331dfe"><div class="ttname"><a href="../../dc/db7/examples_2_luminova_2luminova_8h_ae96c939a2a46590dc79c7d9ca8331dfe.html#ae96c939a2a46590dc79c7d9ca8331dfe">t</a></div><div class="ttdeci">static uint32_t t</div><div class="ttdef"><b>Definition</b> <a href="../../dc/db7/examples_2_luminova_2luminova_8h_source.html#l00055">Luminova.h:55</a></div></div>
+<div class="ttc" id="astdint_8h_ae8a835bf6e050b01cc449644a343aa73_html_ae8a835bf6e050b01cc449644a343aa73"><div class="ttname"><a href="../../df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a></div><div class="ttdeci">fl::u32 uint32_t</div><div class="ttdef"><b>Definition</b> <a href="../../df/dd8/stdint_8h_source.html#l00218">stdint.h:218</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../dc/db7/examples_2_luminova_2luminova_8h_source.html#l00055">t</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d7/dd1/_auto_research_simd_8h_source.html#l01282">getTests()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d7/dd1/_auto_research_simd_8h_source.html#l01290">getTests()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d9/d1a/namespaceautoresearch_1_1simd__check_a479a28fc4445edcb85f3e1803bdda165_a479a28fc4445edcb85f3e1803bdda165_icgraph.svg" width="100%" height="386"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d9/d1a/namespaceautoresearch_1_1simd__check_a479a28fc4445edcb85f3e1803bdda165_a479a28fc4445edcb85f3e1803bdda165_icgraph.svg" width="578" height="66"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 
 </div>
@@ -159,7 +160,7 @@ $(function(){initNavTree('d9/d1a/namespaceautoresearch_1_1simd__check_a479a28fc4
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d1/dc9/namespaceautoresearch.html">autoresearch</a></li><li class="navelem"><a class="el" href="../../d9/d1a/namespaceautoresearch_1_1simd__check.html">simd_check</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:03 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -1,9 +1,15 @@
 <map id="fl::format_detail::format_float" name="fl::format_detail::format_float">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,140,45"/>
-<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_adfaa5b18090b6c3e6c83fb49411e94a1.html#adfaa5b18090b6c3e6c83fb49411e94a1" title="Convert floating point number to string buffer." alt="" coords="188,13,251,38"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="140,23,174,23,174,28,140,28"/>
-<area shape="rect" id="Node000003" href="$d2/de0/namespacefl_1_1printf__detail_a591e637254c01dab2e4eea75e058ccc3.html#a591e637254c01dab2e4eea75e058ccc3" title=" " alt="" coords="299,5,424,45"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="251,23,285,23,285,28,251,28"/>
-<area shape="rect" id="Node000004" href="$d1/d27/classfl_1_1sstream_a08170cac6eba7241f099ae16730f6f8e.html#a08170cac6eba7241f099ae16730f6f8e" title=" " alt="" coords="472,13,588,38"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="424,23,458,23,458,28,424,28"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,69,140,109"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_ac989c29682fbeaa00f035d553618340c.html#ac989c29682fbeaa00f035d553618340c" title="Convert floating point number to string buffer." alt="" coords="188,77,251,102"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="140,87,174,87,174,92,140,92"/>
+<area shape="rect" id="Node000003" href="$d2/de0/namespacefl_1_1printf__detail_a5b3d38a2dd5df9b06bca627b30ab4c43.html#a5b3d38a2dd5df9b06bca627b30ab4c43" title=" " alt="" coords="299,69,424,109"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="251,87,285,87,285,92,251,92"/>
+<area shape="rect" id="Node000004" href="$d2/de0/namespacefl_1_1printf__detail_a779dee3217fc97683aeea217eac1b78a.html#a779dee3217fc97683aeea217eac1b78a" title=" " alt="" coords="493,5,618,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="422,67,480,47,482,52,424,72"/>
+<area shape="rect" id="Node000005" href="$d2/de0/namespacefl_1_1printf__detail_ac941b26565ba5c61672d0e5217fb1acc.html#ac941b26565ba5c61672d0e5217fb1acc" title=" " alt="" coords="472,69,639,109"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="424,95,458,96,458,101,424,100"/>
+<area shape="rect" id="Node000006" href="$d1/d27/classfl_1_1sstream_a904115dfd2a7e462177b6409c9b842d6.html#a904115dfd2a7e462177b6409c9b842d6" title=" " alt="" coords="687,106,803,131"/>
+<area shape="poly" id="edge7_Node000003_Node000006" title=" " alt="" coords="420,107,472,119,577,126,673,123,673,128,577,131,472,124,419,112"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="472,83,438,83,438,78,472,78"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="639,100,674,105,673,110,639,105"/>
 </map>

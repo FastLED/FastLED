@@ -1,0 +1,8 @@
+<map id="fl::hdMinimumField" name="fl::hdMinimumField">
+<area shape="rect" id="Node000001" title="The lowest field the managed HD path may choose: the configured flicker floor for a secondary slow&#45;PW..." alt="" coords="336,76,483,101"/>
+<area shape="rect" id="Node000002" href="$d1/da7/namespacefl_1_1anonymous__namespace_02pipeline__binding_8cpp_8hpp_03_a9b0cf72bec5a5c75a680086f93f41890.html#a9b0cf72bec5a5c75a680086f93f41890" title=" " alt="" coords="5,29,288,84"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="322,81,288,77,288,71,323,76"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_aba71524e25f179bf921dc7b760eb125d.html#aba71524e25f179bf921dc7b760eb125d" title="Identify the channel&#39;s final current/quantization choice without adding a virtual slot or storage to ..." alt="" coords="41,108,252,133"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="322,102,252,111,251,105,322,97"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="190,18,175,11,147,8,123,10,108,15,101,21,101,29,96,29,96,19,105,10,122,5,147,3,176,6,193,14"/>
+</map>

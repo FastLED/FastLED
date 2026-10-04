@@ -1,0 +1,5 @@
+<map id="mood_ring::GrooveLayer" name="mood_ring::GrooveLayer">
+<area shape="rect" id="Node000001" title="Music with a beat." alt="" coords="5,123,188,148"/>
+<area shape="rect" id="Node000002" href="$d8/dc9/classmood__ring_1_1_follower.html" title="Smoothed one&#45;pole follower with independent attack and release." alt="" coords="19,5,174,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="99,44,99,123,94,123,94,44"/>
+</map>

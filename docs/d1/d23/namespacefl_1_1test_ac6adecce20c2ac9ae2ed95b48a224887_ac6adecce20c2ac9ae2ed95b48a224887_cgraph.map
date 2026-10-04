@@ -1,0 +1,9 @@
+<map id="fl::test::isTestSkipped" name="fl::test::isTestSkipped">
+<area shape="rect" id="Node000001" title="Check if current test has been marked as skipped." alt="" coords="5,5,165,31"/>
+<area shape="rect" id="Node000002" href="$d1/d23/namespacefl_1_1test_a582891f3f2b5fff3c594c907e9807ce9.html#a582891f3f2b5fff3c594c907e9807ce9" title=" " alt="" coords="213,5,345,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="166,15,200,15,200,21,166,21"/>
+<area shape="rect" id="Node000003" href="$d9/d5b/classfl_1_1_singleton_ad5cb1b704e17768f75802673abb0ff75.html#ad5cb1b704e17768f75802673abb0ff75" title=" " alt="" coords="393,5,556,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="345,15,380,15,380,21,345,21"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a1e67c0c24ebcd98fcf8554753d1639a6.html#a1e67c0c24ebcd98fcf8554753d1639a6" title=" " alt="" coords="604,5,743,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="556,15,590,15,590,21,556,21"/>
+</map>

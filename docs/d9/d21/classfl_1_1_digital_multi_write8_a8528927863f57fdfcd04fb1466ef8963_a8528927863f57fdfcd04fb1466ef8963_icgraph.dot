@@ -10,7 +10,7 @@ digraph "fl::DigitalMultiWrite8::applyNibble"
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node2 [id="Node000002",label="fl::DigitalMultiWrite8\l::write",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d21/classfl_1_1_digital_multi_write8_aa5b3d3dc7ea64d70b0e835e8ef1ff702.html#aa5b3d3dc7ea64d70b0e835e8ef1ff702",tooltip="Write pre-transposed byte data to the 8 pins."];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::DigitalMultiWrite8\l::DigitalMultiWrite8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d21/classfl_1_1_digital_multi_write8_ad9c5db6010bb7ec249d2a525b69125dc.html#ad9c5db6010bb7ec249d2a525b69125dc",tooltip=" "];
+  Node3 [id="Node000003",label="fl::DigitalMultiWrite8\l::DigitalMultiWrite8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d21/classfl_1_1_digital_multi_write8_ad0c4c021c3a11369ace26461b7f1b0c3.html#ad0c4c021c3a11369ace26461b7f1b0c3",tooltip=" "];
   Node2 -> Node4 [id="edge3_Node000002_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node4 [id="Node000004",label="fl::digitalMultiWrite8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a0beee42fe65dbc34d13920741a3237ed.html#a0beee42fe65dbc34d13920741a3237ed",tooltip="Convenience free function — creates a temporary DigitalMultiWrite8, initializes it,..."];
   Node1 -> Node5 [id="edge4_Node000001_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];

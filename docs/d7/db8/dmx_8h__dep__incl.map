@@ -1,6 +1,6 @@
 <map id="dmx.h" name="dmx.h">
 <area shape="rect" id="Node000001" title="Defines the DMX512&#45;based LED controllers." alt="" coords="101,5,164,31"/>
-<area shape="rect" id="Node000002" href="$db/d97/_fast_l_e_d_8h.html" title="central include file for FastLED, defines the CFastLED class/object" alt="" coords="90,79,175,104"/>
+<area shape="rect" id="Node000002" href="$d6/d64/fastled_8h.html" title="central include file for FastLED, defines the CFastLED class/object" alt="" coords="90,79,175,104"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="135,44,135,79,130,79,130,44"/>
 <area shape="rect" id="Node000003" href="$d7/de5/_fast_l_e_d_8cpp_8hpp.html" title=" " alt="" coords="69,152,197,177"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="135,118,135,152,130,152,130,118"/>

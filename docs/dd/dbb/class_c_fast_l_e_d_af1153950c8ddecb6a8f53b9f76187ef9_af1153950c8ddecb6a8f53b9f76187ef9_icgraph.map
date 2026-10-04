@@ -1,0 +1,7 @@
+<map id="CFastLED::addLedsSpiDispatch" name="CFastLED::addLedsSpiDispatch">
+<area shape="rect" id="Node000001" title=" " alt="" coords="271,31,492,56"/>
+<area shape="rect" id="Node000002" href="$dd/dbb/class_c_fast_l_e_d_a4fb94311febea463f730cd5f85f0de0f.html#a4fb94311febea463f730cd5f85f0de0f" title="Add an SPI controller with an explicit ESP&#45;IDF SPI host." alt="" coords="5,5,223,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="257,34,222,31,223,26,257,29"/>
+<area shape="rect" id="Node000003" href="$dd/dbb/class_c_fast_l_e_d_a7a6a0bd952643368315f254c0db8cd64.html#a7a6a0bd952643368315f254c0db8cd64" title="Add an SPI based CLEDController via Channel API." alt="" coords="5,55,223,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="257,57,223,60,222,55,257,52"/>
+</map>

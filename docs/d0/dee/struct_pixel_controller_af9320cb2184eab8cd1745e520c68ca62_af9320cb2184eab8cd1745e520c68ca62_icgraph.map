@@ -1,0 +1,7 @@
+<map id="PixelController::loadAndScaleRGBWUnordered" name="PixelController::loadAndScaleRGBWUnordered">
+<area shape="rect" id="Node000001" title="loadAndScaleRGBW before its wire reorder: RGB in source order plus W." alt="" coords="469,5,648,45"/>
+<area shape="rect" id="Node000002" href="$d0/dee/struct_pixel_controller_a5aa57de8397b498ea587b5f0c049ced5.html#a5aa57de8397b498ea587b5f0c049ced5" title=" " alt="" coords="243,5,421,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="455,28,422,28,422,23,455,23"/>
+<area shape="rect" id="Node000003" href="$d4/d28/group___chipsets_gaba9a2f023f2950dbcdf3c2482f765350.html#gaba9a2f023f2950dbcdf3c2482f765350" title="Main rendering function that converts RGB to RGBW and shows pixels." alt="" coords="5,5,195,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="229,28,195,28,195,23,229,23"/>
+</map>

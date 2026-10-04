@@ -1,0 +1,11 @@
+<map id="fl::mapAndAllocateRgbwwQ16" name="fl::mapAndAllocateRgbwwQ16">
+<area shape="rect" id="Node000001" title="One pixel: XYZ in s16.16 to five in&#45;gamut drives – red, green, blue, white1, white2." alt="" coords="5,55,224,80"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a2cc0220457b8a062b038db171f1b926c.html#a2cc0220457b8a062b038db171f1b926c" title="One pixel: XYZ in s16.16 to five drives – red, green, blue, white1, white2 – at whichever end of the ..." alt="" coords="272,5,493,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="184,52,299,31,300,36,185,57"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a47f3f2b8a91dec1b90ee2740550b6f0b.html#a47f3f2b8a91dec1b90ee2740550b6f0b" title="OKLab (s16.16) &#45;&gt; XYZ (s16.16)." alt="" coords="313,55,452,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="224,65,300,65,300,70,224,70"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a4e06a4bfbce59ea143a3a844cdb084eb.html#a4e06a4bfbce59ea143a3a844cdb084eb" title="XYZ (s16.16, D65&#45;relative) &#45;&gt; OKLab (s16.16), L then a then b." alt="" coords="313,104,452,129"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="185,77,300,99,299,104,184,83"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_af5a0679639e0ad1db7feb7f9705df72f.html#af5a0679639e0ad1db7feb7f9705df72f" title="One pixel: XYZ in s16.16 to three emitter drives in s16.16." alt="" coords="541,5,708,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="494,15,528,15,528,21,494,21"/>
+</map>

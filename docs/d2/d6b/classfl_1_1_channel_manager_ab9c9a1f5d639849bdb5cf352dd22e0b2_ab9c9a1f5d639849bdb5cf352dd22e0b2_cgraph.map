@@ -1,0 +1,35 @@
+<map id="fl::ChannelManager::setExclusiveDriver" name="fl::ChannelManager::setExclusiveDriver">
+<area shape="rect" id="Node000001" title="Register a single driver at a priority above the platform default and disable all others (compile&#45;tim..." alt="" coords="5,182,157,222"/>
+<area shape="poly" id="edge18_Node000001_Node000001" title=" " alt="" coords="44,182,42,172,48,163,61,157,81,155,105,158,117,166,115,170,103,163,81,161,62,163,51,167,47,173,49,181"/>
+<area shape="rect" id="Node000002" href="$d2/d6b/classfl_1_1_channel_manager_a3f0e1823366151d87c97be78f4273755.html#a3f0e1823366151d87c97be78f4273755" title="Constructor." alt="" coords="205,55,353,95"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="112,180,234,101,237,105,115,184"/>
+<area shape="rect" id="Node000006" href="$d2/d6b/classfl_1_1_channel_manager_ae6eb27ff8398726d8c5fcb9052ea9528.html#ae6eb27ff8398726d8c5fcb9052ea9528" title="Add a driver with priority (higher priority = preferred)" alt="" coords="205,242,353,282"/>
+<area shape="poly" id="edge7_Node000001_Node000006" title=" " alt="" coords="149,220,200,235,199,240,147,225"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="242,56,240,46,246,37,259,31,279,29,303,32,315,39,313,44,301,37,279,34,260,36,249,41,245,47,247,54"/>
+<area shape="rect" id="Node000003" href="$de/dca/classfl_1_1_engine_events_a98984c55652e174bb2384d85935c581b.html#a98984c55652e174bb2384d85935c581b" title=" " alt="" coords="401,5,612,31"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="353,53,401,41,439,31,440,36,402,46,354,58"/>
+<area shape="rect" id="Node000004" href="$d2/d6b/classfl_1_1_channel_manager_ae0d96adf1576f8fe62b937685991e3b5.html#ae0d96adf1576f8fe62b937685991e3b5" title=" " alt="" coords="416,55,597,95"/>
+<area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="354,81,402,82,402,87,354,86"/>
+<area shape="poly" id="edge5_Node000004_Node000002" title=" " alt="" coords="416,69,367,69,367,64,416,64"/>
+<area shape="rect" id="Node000005" href="$d2/d6b/classfl_1_1_channel_manager_aeecac5c6f4dbc304c9be01384ae5fb82.html#aeecac5c6f4dbc304c9be01384ae5fb82" title=" " alt="" coords="685,43,833,83"/>
+<area shape="poly" id="edge6_Node000004_Node000005" title=" " alt="" coords="597,68,672,65,672,70,598,74"/>
+<area shape="rect" id="Node000007" href="$d2/d6b/classfl_1_1_channel_manager_a9d5c6d37df9f78ddacf9e44073b4fe18.html#a9d5c6d37df9f78ddacf9e44073b4fe18" title="Handle validation failures and the uncommon replacement flow outside the normal driver&#45;registration p..." alt="" coords="433,141,581,181"/>
+<area shape="poly" id="edge8_Node000006_Node000007" title=" " alt="" coords="324,240,447,184,449,189,326,244"/>
+<area shape="rect" id="Node000036" href="$de/d66/classfl_1_1basic__string_ac7b40587b637d254d009cc32f530fb83.html#ac7b40587b637d254d009cc32f530fb83" title=" " alt="" coords="429,249,584,275"/>
+<area shape="poly" id="edge10_Node000006_Node000036" title=" " alt="" coords="354,259,416,259,416,265,354,265"/>
+<area shape="rect" id="Node000010" href="$de/d66/classfl_1_1basic__string_ac3effe716fde4667b05a52d78d74bbfb.html#ac3effe716fde4667b05a52d78d74bbfb" title=" " alt="" coords="423,299,590,324"/>
+<area shape="poly" id="edge15_Node000006_Node000010" title=" " alt="" coords="354,275,435,293,434,298,353,281"/>
+<area shape="rect" id="Node000046" href="$d4/d36/namespacefl_abc76b289e45e1c247accf27c76992bfc.html#abc76b289e45e1c247accf27c76992bfc" title=" " alt="" coords="453,348,560,373"/>
+<area shape="poly" id="edge16_Node000006_Node000046" title=" " alt="" coords="309,280,352,308,402,334,440,346,439,351,400,339,349,313,306,284"/>
+<area shape="rect" id="Node000008" href="$d2/d6b/classfl_1_1_channel_manager_af3041b5d8b20269dc1909667d8714de6.html#af3041b5d8b20269dc1909667d8714de6" title="Wait for all drivers to become READY." alt="" coords="685,107,833,147"/>
+<area shape="poly" id="edge9_Node000007_Node000008" title=" " alt="" coords="581,148,671,136,672,141,581,154"/>
+<area shape="rect" id="Node000037" href="$de/d66/classfl_1_1basic__string_a8a58fba79da87be2d1783cd652afeadc.html#a8a58fba79da87be2d1783cd652afeadc" title=" " alt="" coords="680,195,839,235"/>
+<area shape="poly" id="edge11_Node000036_Node000037" title=" " alt="" coords="576,247,666,230,667,235,577,252"/>
+<area shape="rect" id="Node000039" href="$de/d66/classfl_1_1basic__string_a0625094a763be3f500174030c18eff86.html#a0625094a763be3f500174030c18eff86" title=" " alt="" coords="664,260,855,285"/>
+<area shape="poly" id="edge13_Node000036_Node000039" title=" " alt="" coords="584,263,650,265,650,271,584,268"/>
+<area shape="rect" id="Node000043" href="$de/d66/classfl_1_1basic__string_a0fcfaea1e856f9a1fb0b73a2b19ff3bc.html#a0fcfaea1e856f9a1fb0b73a2b19ff3bc" title=" " alt="" coords="660,309,859,335"/>
+<area shape="poly" id="edge14_Node000036_Node000043" title=" " alt="" coords="564,272,613,283,695,304,694,309,611,289,563,277"/>
+<area shape="poly" id="edge12_Node000037_Node000037" title=" " alt="" coords="713,196,710,186,717,176,734,171,759,169,788,172,804,179,802,184,787,177,759,174,735,176,720,181,715,187,718,194"/>
+<area shape="rect" id="Node000047" href="$df/d9e/namespacefl_1_1detail_ad6c308f777032370a471cfb725796e50.html#ad6c308f777032370a471cfb725796e50" title=" " alt="" coords="673,359,845,384"/>
+<area shape="poly" id="edge17_Node000046_Node000047" title=" " alt="" coords="561,360,660,364,660,370,560,366"/>
+</map>

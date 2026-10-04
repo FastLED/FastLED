@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -132,67 +132,67 @@ $(function(){initNavTree('d6/dd2/classfl_1_1audio_1_1fft_1_1_context_afc5fc4c70a
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d5/df1/fft__impl_8cpp_8hpp_source.html#l00492">492</a> of file <a class="el" href="../../d5/df1/fft__impl_8cpp_8hpp_source.html">fft_impl.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  492</span>                                                                          {</div>
-<div class="line"><span class="lineno">  493</span>        <span class="keyword">using </span><a class="code hl_typedef" href="../../de/d09/namespacefl_1_1anonymous__namespace_02chasing__spirals_8cpp_8hpp_03_a35b7c16dbb81fa10e70a00947b42d887.html#a35b7c16dbb81fa10e70a00947b42d887">FP</a> = fl::fixed_point&lt;16, 16&gt;;</div>
-<div class="line"><span class="lineno">  494</span>        win.<a class="code hl_function" href="../../d2/d24/classfl_1_1vector_af937c1c325072247a23862ef0adbc51b.html#af937c1c325072247a23862ef0adbc51b">resize</a>(N);</div>
-<div class="line"><span class="lineno">  495</span> </div>
-<div class="line"><span class="lineno">  496</span>        <span class="comment">// NONE: rectangular window (all coefficients = 1.0)</span></div>
-<div class="line"><span class="lineno">  497</span>        <span class="keywordflow">if</span> (type == <a class="code hl_enumvalue" href="../../de/dee/namespacefl_1_1audio_1_1fft_aa036454af7be032ea4c5436153862487.html#aa036454af7be032ea4c5436153862487ab50339a10e1de285ac99d4c3990b8693">Window::NONE</a>) {</div>
-<div class="line"><span class="lineno">  498</span>            <span class="keywordflow">for</span> (<span class="keywordtype">int</span> n = 0; n &lt; N; ++n) {</div>
-<div class="line"><span class="lineno">  499</span>                win[n] = alpha16(65535);</div>
-<div class="line"><span class="lineno">  500</span>            }</div>
-<div class="line"><span class="lineno">  501</span>            <span class="keywordflow">return</span>;</div>
-<div class="line"><span class="lineno">  502</span>        }</div>
-<div class="line"><span class="lineno">  503</span> </div>
-<div class="line"><span class="lineno">  504</span>        <span class="keyword">const</span> <a class="code hl_typedef" href="../../de/d09/namespacefl_1_1anonymous__namespace_02chasing__spirals_8cpp_8hpp_03_a35b7c16dbb81fa10e70a00947b42d887.html#a35b7c16dbb81fa10e70a00947b42d887">FP</a> two_pi(6.2831853f);   <span class="comment">// 2π</span></div>
-<div class="line"><span class="lineno">  505</span>        <span class="keyword">const</span> <a class="code hl_typedef" href="../../de/d09/namespacefl_1_1anonymous__namespace_02chasing__spirals_8cpp_8hpp_03_a35b7c16dbb81fa10e70a00947b42d887.html#a35b7c16dbb81fa10e70a00947b42d887">FP</a> invNm1 = <a class="code hl_typedef" href="../../de/d09/namespacefl_1_1anonymous__namespace_02chasing__spirals_8cpp_8hpp_03_a35b7c16dbb81fa10e70a00947b42d887.html#a35b7c16dbb81fa10e70a00947b42d887">FP</a>(1) / <a class="code hl_typedef" href="../../de/d09/namespacefl_1_1anonymous__namespace_02chasing__spirals_8cpp_8hpp_03_a35b7c16dbb81fa10e70a00947b42d887.html#a35b7c16dbb81fa10e70a00947b42d887">FP</a>(N - 1);</div>
-<div class="line"><span class="lineno">  506</span>        <span class="keyword">const</span> <a class="code hl_typedef" href="../../de/d09/namespacefl_1_1anonymous__namespace_02chasing__spirals_8cpp_8hpp_03_a35b7c16dbb81fa10e70a00947b42d887.html#a35b7c16dbb81fa10e70a00947b42d887">FP</a> phase_step = two_pi * invNm1;</div>
-<div class="line"><span class="lineno">  507</span> </div>
-<div class="line"><span class="lineno">  508</span>        <span class="comment">// Blackman-Harris coefficients</span></div>
-<div class="line"><span class="lineno">  509</span>        <span class="keyword">constexpr</span> <a class="code hl_typedef" href="../../de/d09/namespacefl_1_1anonymous__namespace_02chasing__spirals_8cpp_8hpp_03_a35b7c16dbb81fa10e70a00947b42d887.html#a35b7c16dbb81fa10e70a00947b42d887">FP</a> bh_a0(0.35875f);</div>
-<div class="line"><span class="lineno">  510</span>        <span class="keyword">constexpr</span> <a class="code hl_typedef" href="../../de/d09/namespacefl_1_1anonymous__namespace_02chasing__spirals_8cpp_8hpp_03_a35b7c16dbb81fa10e70a00947b42d887.html#a35b7c16dbb81fa10e70a00947b42d887">FP</a> bh_a1(0.48829f);</div>
-<div class="line"><span class="lineno">  511</span>        <span class="keyword">constexpr</span> <a class="code hl_typedef" href="../../de/d09/namespacefl_1_1anonymous__namespace_02chasing__spirals_8cpp_8hpp_03_a35b7c16dbb81fa10e70a00947b42d887.html#a35b7c16dbb81fa10e70a00947b42d887">FP</a> bh_a2(0.14128f);</div>
-<div class="line"><span class="lineno">  512</span>        <span class="keyword">constexpr</span> <a class="code hl_typedef" href="../../de/d09/namespacefl_1_1anonymous__namespace_02chasing__spirals_8cpp_8hpp_03_a35b7c16dbb81fa10e70a00947b42d887.html#a35b7c16dbb81fa10e70a00947b42d887">FP</a> bh_a3(0.01168f);</div>
-<div class="line"><span class="lineno">  513</span>        <span class="comment">// Hanning coefficients</span></div>
-<div class="line"><span class="lineno">  514</span>        <span class="keyword">constexpr</span> <a class="code hl_typedef" href="../../de/d09/namespacefl_1_1anonymous__namespace_02chasing__spirals_8cpp_8hpp_03_a35b7c16dbb81fa10e70a00947b42d887.html#a35b7c16dbb81fa10e70a00947b42d887">FP</a> half(0.5f);</div>
-<div class="line"><span class="lineno">  515</span>        <span class="keyword">constexpr</span> <a class="code hl_typedef" href="../../de/d09/namespacefl_1_1anonymous__namespace_02chasing__spirals_8cpp_8hpp_03_a35b7c16dbb81fa10e70a00947b42d887.html#a35b7c16dbb81fa10e70a00947b42d887">FP</a> one(1.0f);</div>
-<div class="line"><span class="lineno">  516</span> </div>
-<div class="line"><span class="lineno">  517</span>        <a class="code hl_typedef" href="../../de/d09/namespacefl_1_1anonymous__namespace_02chasing__spirals_8cpp_8hpp_03_a35b7c16dbb81fa10e70a00947b42d887.html#a35b7c16dbb81fa10e70a00947b42d887">FP</a> phase(0.0f);</div>
-<div class="line"><span class="lineno">  518</span>        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> n = 0; n &lt; N; ++n) {</div>
-<div class="line"><span class="lineno">  519</span>            <a class="code hl_typedef" href="../../de/d09/namespacefl_1_1anonymous__namespace_02chasing__spirals_8cpp_8hpp_03_a35b7c16dbb81fa10e70a00947b42d887.html#a35b7c16dbb81fa10e70a00947b42d887">FP</a> w;</div>
-<div class="line"><span class="lineno">  520</span>            <span class="keywordflow">switch</span> (type) {</div>
-<div class="line"><span class="lineno">  521</span>            <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="../../de/dee/namespacefl_1_1audio_1_1fft_aa036454af7be032ea4c5436153862487.html#aa036454af7be032ea4c5436153862487a571575ff930fc746f331e0f84155fac0">Window::BLACKMAN_HARRIS</a>: {</div>
-<div class="line"><span class="lineno">  522</span>                <span class="comment">// 4-term Blackman-Harris: -92 dB sidelobe rejection</span></div>
-<div class="line"><span class="lineno">  523</span>                <a class="code hl_typedef" href="../../de/d09/namespacefl_1_1anonymous__namespace_02chasing__spirals_8cpp_8hpp_03_a35b7c16dbb81fa10e70a00947b42d887.html#a35b7c16dbb81fa10e70a00947b42d887">FP</a> phase2 = phase + phase;</div>
-<div class="line"><span class="lineno">  524</span>                <a class="code hl_typedef" href="../../de/d09/namespacefl_1_1anonymous__namespace_02chasing__spirals_8cpp_8hpp_03_a35b7c16dbb81fa10e70a00947b42d887.html#a35b7c16dbb81fa10e70a00947b42d887">FP</a> phase3 = phase2 + phase;</div>
-<div class="line"><span class="lineno">  525</span>                w = bh_a0 - bh_a1 * FP::cos(phase)</div>
-<div class="line"><span class="lineno">  526</span>                    + bh_a2 * FP::cos(phase2)</div>
-<div class="line"><span class="lineno">  527</span>                    - bh_a3 * FP::cos(phase3);</div>
-<div class="line"><span class="lineno">  528</span>                <span class="keywordflow">break</span>;</div>
-<div class="line"><span class="lineno">  529</span>            }</div>
-<div class="line"><span class="lineno">  530</span>            <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="../../de/dee/namespacefl_1_1audio_1_1fft_aa036454af7be032ea4c5436153862487.html#aa036454af7be032ea4c5436153862487a0cc67b768345986318df7c23b7ec8c8e">Window::HANNING</a>:</div>
-<div class="line"><span class="lineno">  531</span>            <span class="keywordflow">default</span>:</div>
-<div class="line"><span class="lineno">  532</span>                w = half * (one - FP::cos(phase));</div>
-<div class="line"><span class="lineno">  533</span>                <span class="keywordflow">break</span>;</div>
-<div class="line"><span class="lineno">  534</span>            }</div>
-<div class="line"><span class="lineno">  535</span>            i32 raw = w.<a class="code hl_function" href="../../d9/d9f/classfl_1_1s16x16_aa048b427f50f28993a67941e0f303a65.html#aa048b427f50f28993a67941e0f303a65">raw</a>();</div>
-<div class="line"><span class="lineno">  536</span>            <span class="keywordflow">if</span> (raw &lt; 0) raw = 0;          <span class="comment">// guard against FP rounding</span></div>
-<div class="line"><span class="lineno">  537</span>            <span class="keywordflow">if</span> (raw &gt; 65535) raw = 65535;   <span class="comment">// 1.0 in s16x16 = 65536, clamp for u16</span></div>
-<div class="line"><span class="lineno">  538</span>            win[n] = alpha16(<span class="keyword">static_cast&lt;</span><span class="keywordtype">unsigned</span> <span class="keywordtype">short</span><span class="keyword">&gt;</span>(raw));</div>
-<div class="line"><span class="lineno">  539</span>            phase = phase + phase_step;</div>
-<div class="line"><span class="lineno">  540</span>        }</div>
-<div class="line"><span class="lineno">  541</span>    }</div>
-<div class="ttc" id="aclassfl_1_1s16x16_aa048b427f50f28993a67941e0f303a65_html_aa048b427f50f28993a67941e0f303a65"><div class="ttname"><a href="../../d9/d9f/classfl_1_1s16x16_aa048b427f50f28993a67941e0f303a65.html#aa048b427f50f28993a67941e0f303a65">fl::s16x16::raw</a></div><div class="ttdeci">constexpr i32 raw() const FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d64/s16x16_8h_source.html#l00060">s16x16.h:60</a></div></div>
-<div class="ttc" id="aclassfl_1_1vector_af937c1c325072247a23862ef0adbc51b_html_af937c1c325072247a23862ef0adbc51b"><div class="ttname"><a href="../../d2/d24/classfl_1_1vector_af937c1c325072247a23862ef0adbc51b.html#af937c1c325072247a23862ef0adbc51b">fl::vector::resize</a></div><div class="ttdeci">void resize(fl::size n) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d68/vector_8h_source.html#l00593">vector.h:593</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d5/df1/fft__impl_8cpp_8hpp_source.html#l00502">502</a> of file <a class="el" href="../../d5/df1/fft__impl_8cpp_8hpp_source.html">fft_impl.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  502</span>                                                                          {</div>
+<div class="line"><span class="lineno">  503</span>        <span class="keyword">using </span><a class="code hl_typedef" href="../../de/d09/namespacefl_1_1anonymous__namespace_02chasing__spirals_8cpp_8hpp_03_a35b7c16dbb81fa10e70a00947b42d887.html#a35b7c16dbb81fa10e70a00947b42d887">FP</a> = fl::fixed_point&lt;16, 16&gt;;</div>
+<div class="line"><span class="lineno">  504</span>        win.<a class="code hl_function" href="../../d2/d24/classfl_1_1vector_a673f4982dd5a998b3ced94ef480e5399.html#a673f4982dd5a998b3ced94ef480e5399">resize</a>(N);</div>
+<div class="line"><span class="lineno">  505</span> </div>
+<div class="line"><span class="lineno">  506</span>        <span class="comment">// NONE: rectangular window (all coefficients = 1.0)</span></div>
+<div class="line"><span class="lineno">  507</span>        <span class="keywordflow">if</span> (type == <a class="code hl_enumvalue" href="../../de/dee/namespacefl_1_1audio_1_1fft_aa036454af7be032ea4c5436153862487.html#aa036454af7be032ea4c5436153862487ab50339a10e1de285ac99d4c3990b8693">Window::NONE</a>) {</div>
+<div class="line"><span class="lineno">  508</span>            <span class="keywordflow">for</span> (<span class="keywordtype">int</span> n = 0; n &lt; N; ++n) {</div>
+<div class="line"><span class="lineno">  509</span>                win[n] = alpha16(65535);</div>
+<div class="line"><span class="lineno">  510</span>            }</div>
+<div class="line"><span class="lineno">  511</span>            <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">  512</span>        }</div>
+<div class="line"><span class="lineno">  513</span> </div>
+<div class="line"><span class="lineno">  514</span>        <span class="keyword">const</span> <a class="code hl_typedef" href="../../de/d09/namespacefl_1_1anonymous__namespace_02chasing__spirals_8cpp_8hpp_03_a35b7c16dbb81fa10e70a00947b42d887.html#a35b7c16dbb81fa10e70a00947b42d887">FP</a> two_pi(6.2831853f);   <span class="comment">// 2π</span></div>
+<div class="line"><span class="lineno">  515</span>        <span class="keyword">const</span> <a class="code hl_typedef" href="../../de/d09/namespacefl_1_1anonymous__namespace_02chasing__spirals_8cpp_8hpp_03_a35b7c16dbb81fa10e70a00947b42d887.html#a35b7c16dbb81fa10e70a00947b42d887">FP</a> invNm1 = <a class="code hl_typedef" href="../../de/d09/namespacefl_1_1anonymous__namespace_02chasing__spirals_8cpp_8hpp_03_a35b7c16dbb81fa10e70a00947b42d887.html#a35b7c16dbb81fa10e70a00947b42d887">FP</a>(1) / <a class="code hl_typedef" href="../../de/d09/namespacefl_1_1anonymous__namespace_02chasing__spirals_8cpp_8hpp_03_a35b7c16dbb81fa10e70a00947b42d887.html#a35b7c16dbb81fa10e70a00947b42d887">FP</a>(N - 1);</div>
+<div class="line"><span class="lineno">  516</span>        <span class="keyword">const</span> <a class="code hl_typedef" href="../../de/d09/namespacefl_1_1anonymous__namespace_02chasing__spirals_8cpp_8hpp_03_a35b7c16dbb81fa10e70a00947b42d887.html#a35b7c16dbb81fa10e70a00947b42d887">FP</a> phase_step = two_pi * invNm1;</div>
+<div class="line"><span class="lineno">  517</span> </div>
+<div class="line"><span class="lineno">  518</span>        <span class="comment">// Blackman-Harris coefficients</span></div>
+<div class="line"><span class="lineno">  519</span>        <span class="keyword">constexpr</span> <a class="code hl_typedef" href="../../de/d09/namespacefl_1_1anonymous__namespace_02chasing__spirals_8cpp_8hpp_03_a35b7c16dbb81fa10e70a00947b42d887.html#a35b7c16dbb81fa10e70a00947b42d887">FP</a> bh_a0(0.35875f);</div>
+<div class="line"><span class="lineno">  520</span>        <span class="keyword">constexpr</span> <a class="code hl_typedef" href="../../de/d09/namespacefl_1_1anonymous__namespace_02chasing__spirals_8cpp_8hpp_03_a35b7c16dbb81fa10e70a00947b42d887.html#a35b7c16dbb81fa10e70a00947b42d887">FP</a> bh_a1(0.48829f);</div>
+<div class="line"><span class="lineno">  521</span>        <span class="keyword">constexpr</span> <a class="code hl_typedef" href="../../de/d09/namespacefl_1_1anonymous__namespace_02chasing__spirals_8cpp_8hpp_03_a35b7c16dbb81fa10e70a00947b42d887.html#a35b7c16dbb81fa10e70a00947b42d887">FP</a> bh_a2(0.14128f);</div>
+<div class="line"><span class="lineno">  522</span>        <span class="keyword">constexpr</span> <a class="code hl_typedef" href="../../de/d09/namespacefl_1_1anonymous__namespace_02chasing__spirals_8cpp_8hpp_03_a35b7c16dbb81fa10e70a00947b42d887.html#a35b7c16dbb81fa10e70a00947b42d887">FP</a> bh_a3(0.01168f);</div>
+<div class="line"><span class="lineno">  523</span>        <span class="comment">// Hanning coefficients</span></div>
+<div class="line"><span class="lineno">  524</span>        <span class="keyword">constexpr</span> <a class="code hl_typedef" href="../../de/d09/namespacefl_1_1anonymous__namespace_02chasing__spirals_8cpp_8hpp_03_a35b7c16dbb81fa10e70a00947b42d887.html#a35b7c16dbb81fa10e70a00947b42d887">FP</a> half(0.5f);</div>
+<div class="line"><span class="lineno">  525</span>        <span class="keyword">constexpr</span> <a class="code hl_typedef" href="../../de/d09/namespacefl_1_1anonymous__namespace_02chasing__spirals_8cpp_8hpp_03_a35b7c16dbb81fa10e70a00947b42d887.html#a35b7c16dbb81fa10e70a00947b42d887">FP</a> one(1.0f);</div>
+<div class="line"><span class="lineno">  526</span> </div>
+<div class="line"><span class="lineno">  527</span>        <a class="code hl_typedef" href="../../de/d09/namespacefl_1_1anonymous__namespace_02chasing__spirals_8cpp_8hpp_03_a35b7c16dbb81fa10e70a00947b42d887.html#a35b7c16dbb81fa10e70a00947b42d887">FP</a> phase(0.0f);</div>
+<div class="line"><span class="lineno">  528</span>        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> n = 0; n &lt; N; ++n) {</div>
+<div class="line"><span class="lineno">  529</span>            <a class="code hl_typedef" href="../../de/d09/namespacefl_1_1anonymous__namespace_02chasing__spirals_8cpp_8hpp_03_a35b7c16dbb81fa10e70a00947b42d887.html#a35b7c16dbb81fa10e70a00947b42d887">FP</a> w;</div>
+<div class="line"><span class="lineno">  530</span>            <span class="keywordflow">switch</span> (type) {</div>
+<div class="line"><span class="lineno">  531</span>            <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="../../de/dee/namespacefl_1_1audio_1_1fft_aa036454af7be032ea4c5436153862487.html#aa036454af7be032ea4c5436153862487a571575ff930fc746f331e0f84155fac0">Window::BLACKMAN_HARRIS</a>: {</div>
+<div class="line"><span class="lineno">  532</span>                <span class="comment">// 4-term Blackman-Harris: -92 dB sidelobe rejection</span></div>
+<div class="line"><span class="lineno">  533</span>                <a class="code hl_typedef" href="../../de/d09/namespacefl_1_1anonymous__namespace_02chasing__spirals_8cpp_8hpp_03_a35b7c16dbb81fa10e70a00947b42d887.html#a35b7c16dbb81fa10e70a00947b42d887">FP</a> phase2 = phase + phase;</div>
+<div class="line"><span class="lineno">  534</span>                <a class="code hl_typedef" href="../../de/d09/namespacefl_1_1anonymous__namespace_02chasing__spirals_8cpp_8hpp_03_a35b7c16dbb81fa10e70a00947b42d887.html#a35b7c16dbb81fa10e70a00947b42d887">FP</a> phase3 = phase2 + phase;</div>
+<div class="line"><span class="lineno">  535</span>                w = bh_a0 - bh_a1 * FP::cos(phase)</div>
+<div class="line"><span class="lineno">  536</span>                    + bh_a2 * FP::cos(phase2)</div>
+<div class="line"><span class="lineno">  537</span>                    - bh_a3 * FP::cos(phase3);</div>
+<div class="line"><span class="lineno">  538</span>                <span class="keywordflow">break</span>;</div>
+<div class="line"><span class="lineno">  539</span>            }</div>
+<div class="line"><span class="lineno">  540</span>            <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="../../de/dee/namespacefl_1_1audio_1_1fft_aa036454af7be032ea4c5436153862487.html#aa036454af7be032ea4c5436153862487a0cc67b768345986318df7c23b7ec8c8e">Window::HANNING</a>:</div>
+<div class="line"><span class="lineno">  541</span>            <span class="keywordflow">default</span>:</div>
+<div class="line"><span class="lineno">  542</span>                w = half * (one - FP::cos(phase));</div>
+<div class="line"><span class="lineno">  543</span>                <span class="keywordflow">break</span>;</div>
+<div class="line"><span class="lineno">  544</span>            }</div>
+<div class="line"><span class="lineno">  545</span>            i32 raw = w.<a class="code hl_function" href="../../d9/d9f/classfl_1_1s16x16_a7b25b9c301243694aa32f9754bec11d2.html#a7b25b9c301243694aa32f9754bec11d2">raw</a>();</div>
+<div class="line"><span class="lineno">  546</span>            <span class="keywordflow">if</span> (raw &lt; 0) raw = 0;          <span class="comment">// guard against FP rounding</span></div>
+<div class="line"><span class="lineno">  547</span>            <span class="keywordflow">if</span> (raw &gt; 65535) raw = 65535;   <span class="comment">// 1.0 in s16x16 = 65536, clamp for u16</span></div>
+<div class="line"><span class="lineno">  548</span>            win[n] = alpha16(<span class="keyword">static_cast&lt;</span><span class="keywordtype">unsigned</span> <span class="keywordtype">short</span><span class="keyword">&gt;</span>(raw));</div>
+<div class="line"><span class="lineno">  549</span>            phase = phase + phase_step;</div>
+<div class="line"><span class="lineno">  550</span>        }</div>
+<div class="line"><span class="lineno">  551</span>    }</div>
+<div class="ttc" id="aclassfl_1_1s16x16_a7b25b9c301243694aa32f9754bec11d2_html_a7b25b9c301243694aa32f9754bec11d2"><div class="ttname"><a href="../../d9/d9f/classfl_1_1s16x16_a7b25b9c301243694aa32f9754bec11d2.html#a7b25b9c301243694aa32f9754bec11d2">fl::s16x16::raw</a></div><div class="ttdeci">constexpr i32 raw() const FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d64/s16x16_8h_source.html#l00062">s16x16.h:62</a></div></div>
+<div class="ttc" id="aclassfl_1_1vector_a673f4982dd5a998b3ced94ef480e5399_html_a673f4982dd5a998b3ced94ef480e5399"><div class="ttname"><a href="../../d2/d24/classfl_1_1vector_a673f4982dd5a998b3ced94ef480e5399.html#a673f4982dd5a998b3ced94ef480e5399">fl::vector::resize</a></div><div class="ttdeci">void resize(fl::size n) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d68/vector_8h_source.html#l00593">vector.h:593</a></div></div>
 <div class="ttc" id="anamespacefl_1_1anonymous__namespace_02chasing__spirals_8cpp_8hpp_03_a35b7c16dbb81fa10e70a00947b42d887_html_a35b7c16dbb81fa10e70a00947b42d887"><div class="ttname"><a href="../../de/d09/namespacefl_1_1anonymous__namespace_02chasing__spirals_8cpp_8hpp_03_a35b7c16dbb81fa10e70a00947b42d887.html#a35b7c16dbb81fa10e70a00947b42d887">fl::anonymous_namespace{chasing_spirals.cpp.hpp}::FP</a></div><div class="ttdeci">fl::s16x16 FP</div><div class="ttdef"><b>Definition</b> <a href="../../d9/dc3/chasing__spirals_8cpp_8hpp_source.html#l00032">chasing_spirals.cpp.hpp:32</a></div></div>
 <div class="ttc" id="anamespacefl_1_1audio_1_1fft_aa036454af7be032ea4c5436153862487_html_aa036454af7be032ea4c5436153862487a0cc67b768345986318df7c23b7ec8c8e"><div class="ttname"><a href="../../de/dee/namespacefl_1_1audio_1_1fft_aa036454af7be032ea4c5436153862487.html#aa036454af7be032ea4c5436153862487a0cc67b768345986318df7c23b7ec8c8e">fl::audio::fft::Window::HANNING</a></div><div class="ttdeci">@ HANNING</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d76/fft_8h_source.html#l00026">fft.h:26</a></div></div>
 <div class="ttc" id="anamespacefl_1_1audio_1_1fft_aa036454af7be032ea4c5436153862487_html_aa036454af7be032ea4c5436153862487a571575ff930fc746f331e0f84155fac0"><div class="ttname"><a href="../../de/dee/namespacefl_1_1audio_1_1fft_aa036454af7be032ea4c5436153862487.html#aa036454af7be032ea4c5436153862487a571575ff930fc746f331e0f84155fac0">fl::audio::fft::Window::BLACKMAN_HARRIS</a></div><div class="ttdeci">@ BLACKMAN_HARRIS</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d76/fft_8h_source.html#l00027">fft.h:27</a></div></div>
 <div class="ttc" id="anamespacefl_1_1audio_1_1fft_aa036454af7be032ea4c5436153862487_html_aa036454af7be032ea4c5436153862487ab50339a10e1de285ac99d4c3990b8693"><div class="ttname"><a href="../../de/dee/namespacefl_1_1audio_1_1fft_aa036454af7be032ea4c5436153862487.html#aa036454af7be032ea4c5436153862487ab50339a10e1de285ac99d4c3990b8693">fl::audio::fft::Window::NONE</a></div><div class="ttdeci">@ NONE</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d76/fft_8h_source.html#l00025">fft.h:25</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d7/d76/fft_8h_source.html#l00027">fl::audio::fft::BLACKMAN_HARRIS</a>, <a class="el" href="../../d7/d76/fft_8h_source.html#l00026">fl::audio::fft::HANNING</a>, <a class="el" href="../../d7/d76/fft_8h_source.html#l00025">fl::audio::fft::NONE</a>, <a class="el" href="../../d7/d64/s16x16_8h_source.html#l00060">fl::s16x16::raw()</a>, and <a class="el" href="../../d6/d68/vector_8h_source.html#l00593">fl::vector&lt; T &gt;::resize()</a>.</p>
+<p class="reference">References <a class="el" href="../../d7/d76/fft_8h_source.html#l00027">fl::audio::fft::BLACKMAN_HARRIS</a>, <a class="el" href="../../d7/d76/fft_8h_source.html#l00026">fl::audio::fft::HANNING</a>, <a class="el" href="../../d7/d76/fft_8h_source.html#l00025">fl::audio::fft::NONE</a>, <a class="el" href="../../d7/d64/s16x16_8h_source.html#l00062">fl::s16x16::raw()</a>, and <a class="el" href="../../d6/d68/vector_8h_source.html#l00593">fl::vector&lt; T &gt;::resize()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d5/df1/fft__impl_8cpp_8hpp_source.html#l00742">initHybrid()</a>, <a class="el" href="../../d5/df1/fft__impl_8cpp_8hpp_source.html#l00178">initLogRebin()</a>, and <a class="el" href="../../d5/df1/fft__impl_8cpp_8hpp_source.html#l00553">initWindow()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d5/df1/fft__impl_8cpp_8hpp_source.html#l00837">initHybrid()</a>, <a class="el" href="../../d5/df1/fft__impl_8cpp_8hpp_source.html#l00188">initLogRebin()</a>, <a class="el" href="../../d5/df1/fft__impl_8cpp_8hpp_source.html#l00583">initOctaveWise()</a>, and <a class="el" href="../../d5/df1/fft__impl_8cpp_8hpp_source.html#l00563">initWindow()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -205,7 +205,7 @@ $(function(){initNavTree('d6/dd2/classfl_1_1audio_1_1fft_1_1_context_afc5fc4c70a
 <div id="dynsection-1-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-1-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d6/dd2/classfl_1_1audio_1_1fft_1_1_context_afc5fc4c70a85034374ff16e51be49392_afc5fc4c70a85034374ff16e51be49392_icgraph.svg" width="100%" height="395"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d6/dd2/classfl_1_1audio_1_1fft_1_1_context_afc5fc4c70a85034374ff16e51be49392_afc5fc4c70a85034374ff16e51be49392_icgraph.svg" width="100%" height="442"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 
 </div>
@@ -217,7 +217,7 @@ $(function(){initNavTree('d6/dd2/classfl_1_1audio_1_1fft_1_1_context_afc5fc4c70a
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../db/dbf/namespacefl_1_1audio.html">audio</a></li><li class="navelem"><a class="el" href="../../de/dee/namespacefl_1_1audio_1_1fft.html">fft</a></li><li class="navelem"><a class="el" href="../../d6/dd2/classfl_1_1audio_1_1fft_1_1_context.html">Context</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:08 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:11 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

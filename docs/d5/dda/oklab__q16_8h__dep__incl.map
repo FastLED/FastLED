@@ -1,0 +1,14 @@
+<map id="fl/gfx/oklab_q16.h" name="fl/gfx/oklab_q16.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="137,5,276,31"/>
+<area shape="rect" id="Node000002" href="$d2/dc8/gamut__map_8cpp_8hpp.html" title=" " alt="" coords="5,79,197,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="180,41,120,81,117,76,177,36"/>
+<area shape="rect" id="Node000006" href="$d2/d41/oklab__q16_8cpp_8hpp.html" title=" " alt="" coords="221,79,403,104"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="237,36,296,76,293,81,234,41"/>
+<area shape="rect" id="Node000003" href="$d5/d88/fl_2gfx_2__build_8cpp_8hpp.html" title="Unity build for fl/gfx/ — graphics types, primitives, and simulators." alt="" coords="130,152,283,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="131,110,191,150,188,154,128,114"/>
+<area shape="rect" id="Node000004" href="$d1/deb/fl_2__build_8cpp_8hpp.html" title=" " alt="" coords="64,225,192,251"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="186,189,143,227,139,223,182,185"/>
+<area shape="rect" id="Node000005" href="$db/d06/fl_8gfx_09_8cpp.html" title="Unity build: recursive includes from src/fl/gfx/." alt="" coords="216,225,357,251"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="231,184,275,223,272,227,228,188"/>
+<area shape="poly" id="edge6_Node000006_Node000003" title=" " alt="" coords="285,114,225,154,222,150,282,110"/>
+</map>

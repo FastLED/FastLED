@@ -58,7 +58,7 @@ var sectionId = 'dynsection-1';
 <!-- Node1 -->
 <g id="Node000001" class="node">
 <title>Node1</title>
-<g id="a_Node000001"><a xlink:title=" ">
+<g id="a_Node000001"><a xlink:title="non&#45;template alias of loadAndScale&lt;1&gt;()">
 <polygon fill="#999999" stroke="#666666" points="892,-78 758,-78 758,-48 892,-48 892,-78"/>
 <text text-anchor="start" x="766" y="-66" font-family="Helvetica,sans-Serif" font-size="10.00">PixelController::loadAnd</text>
 <text text-anchor="middle" x="825" y="-55" font-family="Helvetica,sans-Serif" font-size="10.00">Scale1</text>
@@ -87,7 +87,7 @@ var sectionId = 'dynsection-1';
 <!-- Node8 -->
 <g id="Node000008" class="node">
 <title>Node8</title>
-<g id="a_Node000008"><a xlink:href="../../d0/dee/struct_pixel_controller_a650a6bebd28bdd32f404579c891ca98d.html#a650a6bebd28bdd32f404579c891ca98d" target="_top" xlink:title=" ">
+<g id="a_Node000008"><a xlink:href="../../d0/dee/struct_pixel_controller_a5aa57de8397b498ea587b5f0c049ced5.html#a5aa57de8397b498ea587b5f0c049ced5" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="722,-78 588,-78 588,-48 722,-48 722,-78"/>
 <text text-anchor="start" x="596" y="-66" font-family="Helvetica,sans-Serif" font-size="10.00">PixelController::loadAnd</text>
 <text text-anchor="middle" x="655" y="-55" font-family="Helvetica,sans-Serif" font-size="10.00">ScaleRGBW</text>

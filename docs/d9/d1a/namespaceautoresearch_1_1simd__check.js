@@ -8,6 +8,7 @@ var namespaceautoresearch_1_1simd__check =
     [ "OpDivU16x16", "d0/d69/structautoresearch_1_1simd__check_1_1_op_div_u16x16.html", "d0/d69/structautoresearch_1_1simd__check_1_1_op_div_u16x16" ],
     [ "OpMul", "d3/dc3/structautoresearch_1_1simd__check_1_1_op_mul.html", "d3/dc3/structautoresearch_1_1simd__check_1_1_op_mul" ],
     [ "OpSub", "d0/dff/structautoresearch_1_1simd__check_1_1_op_sub.html", "d0/dff/structautoresearch_1_1simd__check_1_1_op_sub" ],
+    [ "SimdBenchmarkState", "de/d85/structautoresearch_1_1simd__check_1_1_simd_benchmark_state.html", "de/d85/structautoresearch_1_1simd__check_1_1_simd_benchmark_state" ],
     [ "SimdTestEntry", "d9/d1a/namespaceautoresearch_1_1simd__check.html#d4/d36/structautoresearch_1_1simd__check_1_1_simd_test_entry", "d9/d1a/namespaceautoresearch_1_1simd__check_d4/d36/structautoresearch_1_1simd__check_1_1_simd_test_entry_dup" ],
     [ "as_i32", "d9/d1a/namespaceautoresearch_1_1simd__check_a6b0a6976b8470dfb3ddb9ce9527e7b18.html#a6b0a6976b8470dfb3ddb9ce9527e7b18", null ],
     [ "as_u32", "d9/d1a/namespaceautoresearch_1_1simd__check_a0130a9f090980e720fff0c3d8115562f.html#a0130a9f090980e720fff0c3d8115562f", null ],
@@ -44,6 +45,7 @@ var namespaceautoresearch_1_1simd__check =
     [ "ref_xor_u8_16", "d9/d1a/namespaceautoresearch_1_1simd__check_a51ce9e61e45f9c2f5ef57016fa474fda.html#a51ce9e61e45f9c2f5ef57016fa474fda", null ],
     [ "runMultiplyBenchmark", "d9/d1a/namespaceautoresearch_1_1simd__check_acd8ffc3b65508dec50abd9f9ed7a6f20.html#acd8ffc3b65508dec50abd9f9ed7a6f20", null ],
     [ "runSimdTests", "d9/d1a/namespaceautoresearch_1_1simd__check_a4bd7c9fa82e77bb9c28efbf177f99216.html#a4bd7c9fa82e77bb9c28efbf177f99216", null ],
+    [ "simdBenchmarkState", "d9/d1a/namespaceautoresearch_1_1simd__check_a3597f8ae57d802ae5f1e2fe16bfdbe28.html#a3597f8ae57d802ae5f1e2fe16bfdbe28", null ],
     [ "test_add_f32_4", "d9/d1a/namespaceautoresearch_1_1simd__check_a9e4ef02d04c60f246a63180b524191d0.html#a9e4ef02d04c60f246a63180b524191d0", null ],
     [ "test_add_f32_4_negative", "d9/d1a/namespaceautoresearch_1_1simd__check_adfc3b577d9a1b659e58d4befc6af5e26.html#adfc3b577d9a1b659e58d4befc6af5e26", null ],
     [ "test_add_i32_4", "d9/d1a/namespaceautoresearch_1_1simd__check_a1c5c38278a177910236f6f277a6a8554.html#a1c5c38278a177910236f6f277a6a8554", null ],
@@ -128,6 +130,5 @@ var namespaceautoresearch_1_1simd__check =
     [ "test_unpacklo_u32_4", "d9/d1a/namespaceautoresearch_1_1simd__check_a8eae92e2bcbebc0f7f2fc90458dc0d67.html#a8eae92e2bcbebc0f7f2fc90458dc0d67", null ],
     [ "test_unpacklo_u64_as_u32_4", "d9/d1a/namespaceautoresearch_1_1simd__check_a1790613e9236086b5118c909d17a9fbc.html#a1790613e9236086b5118c909d17a9fbc", null ],
     [ "test_xor_u32_4", "d9/d1a/namespaceautoresearch_1_1simd__check_a8a844a13b51c4f045d5ff6b533975507.html#a8a844a13b51c4f045d5ff6b533975507", null ],
-    [ "test_xor_u8_16", "d9/d1a/namespaceautoresearch_1_1simd__check_a0ac768c7f26e6a8c9ff5783c77ecee24.html#a0ac768c7f26e6a8c9ff5783c77ecee24", null ],
-    [ "g_bench_sink", "d9/d1a/namespaceautoresearch_1_1simd__check_af4fa5aa1813ca39aec51b145aefa1675.html#af4fa5aa1813ca39aec51b145aefa1675", null ]
+    [ "test_xor_u8_16", "d9/d1a/namespaceautoresearch_1_1simd__check_a0ac768c7f26e6a8c9ff5783c77ecee24.html#a0ac768c7f26e6a8c9ff5783c77ecee24", null ]
 ];

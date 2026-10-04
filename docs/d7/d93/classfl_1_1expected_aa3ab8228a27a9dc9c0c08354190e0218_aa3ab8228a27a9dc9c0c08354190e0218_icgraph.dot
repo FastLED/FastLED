@@ -1,0 +1,16 @@
+digraph "fl::expected::ok"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::expected::ok",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Check if operation succeeded."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::expected::has_value",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d93/classfl_1_1expected_a4ff9f342d4c877d528e733eae6af0135.html#a4ff9f342d4c877d528e733eae6af0135",tooltip="Check if operation succeeded (alias for ok())"];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::expected::operator bool",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d93/classfl_1_1expected_af2332cc762c19ff7f5ae2682f0e48e73.html#af2332cc762c19ff7f5ae2682f0e48e73",tooltip="Explicit conversion to bool for contextual evaluation."];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::expected\< void,\l E \>::operator bool",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d2e/classfl_1_1expected_3_01void_00_01_e_01_4_ad4d81b77f9f81c262992c54120c17b10.html#ad4d81b77f9f81c262992c54120c17b10",tooltip=" "];
+}

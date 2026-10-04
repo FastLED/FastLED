@@ -1,0 +1,7 @@
+<map id="fl::anonymous_namespace{uart_wave_encoder::cpp::hpp}::computePulseCount" name="fl::anonymous_namespace{uart_wave_encoder::cpp::hpp}::computePulseCount">
+<area shape="rect" id="Node000001" title="Compute HIGH pulse count for a given timing value." alt="" coords="249,29,449,84"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="390,18,376,11,349,8,327,10,313,15,307,21,307,29,302,29,302,19,310,10,326,5,349,3,377,6,393,14"/>
+<area shape="rect" id="Node000002" href="$d4/d85/namespacefl_1_1anonymous__namespace_02uart__wave__encoder_8cpp_8hpp_03_abd7d4f916c9261d3f134262d03a5711d.html#abd7d4f916c9261d3f134262d03a5711d" title="Evaluate whether P pulses/LED&#45;bit can represent the timing." alt="" coords="5,29,201,84"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="235,59,202,59,202,54,235,54"/>
+<area shape="poly" id="edge3_Node000002_Node000002" title=" " alt="" coords="144,18,130,11,103,8,81,10,67,15,61,21,61,29,56,29,56,19,64,10,80,5,103,3,131,6,147,14"/>
+</map>

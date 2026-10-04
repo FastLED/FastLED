@@ -8,5 +8,5 @@ var fastled__progmem_8h =
     [ "FL_PGM_READ_DWORD_NEAR", "df/dab/fastled__progmem_8h_ac6a3d8446c38aabc9f0f55196a2eae3c.html#ac6a3d8446c38aabc9f0f55196a2eae3c", null ],
     [ "FL_PGM_READ_WORD_ALIGNED", "df/dab/fastled__progmem_8h_aa6e83b33d3e000a7965f9379b4dd111f.html#aa6e83b33d3e000a7965f9379b4dd111f", null ],
     [ "FL_PGM_READ_WORD_NEAR", "df/dab/fastled__progmem_8h_a75dd19fa43287b32ffc51f8b522f1c88.html#a75dd19fa43287b32ffc51f8b522f1c88", null ],
-    [ "FL_PROGMEM", "df/dab/fastled__progmem_8h_af4d0ad0021dafa1c293cb3363a82ee8f.html#af4d0ad0021dafa1c293cb3363a82ee8f", null ]
+    [ "FL_PROGMEM", "d3/d4f/group___predefined_palettes_ga57a38373661043f74b292976e83c687b.html#ga57a38373661043f74b292976e83c687b", null ]
 ];

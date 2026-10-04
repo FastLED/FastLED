@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -114,79 +114,102 @@ $(function(){initNavTree('d4/d9d/_auto_research_platform_8h_source.html','../../
 <div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="keyword">namespace </span><a class="code hl_namespace" href="../../d1/dc9/namespaceautoresearch.html">autoresearch</a> {</div>
 <div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span> </div>
 <div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment">// Default TX pin for each platform</span></div>
-<div class="foldopen" id="foldopen00012" data-start="{" data-end="}">
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno"><a class="line" href="../../d1/dc9/namespaceautoresearch_a1570377b93a404194c1fb81a83b81a9a.html#a1570377b93a404194c1fb81a83b81a9a">   12</a></span><span class="keyword">constexpr</span> <span class="keywordtype">int</span> <a class="code hl_function" href="../../d1/dc9/namespaceautoresearch_a1570377b93a404194c1fb81a83b81a9a.html#a1570377b93a404194c1fb81a83b81a9a">defaultTxPin</a>() {</div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#if defined(FL_IS_STUB)</span></div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span>    <span class="keywordflow">return</span> 1;  <span class="comment">// Stub: TX and RX same pin — NativeRxDevice monitors TX output directly</span></div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#elif defined(FL_IS_ESP_32S3)</span></div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>    <span class="keywordflow">return</span> 1;  <span class="comment">// ESP32-S3: Connect GPIO 1 (TX) to GPIO 2 (RX) with jumper wire</span></div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#elif defined(FL_IS_ESP_32S2)</span></div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>    <span class="keywordflow">return</span> 1;  <span class="comment">// ESP32-S2</span></div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#elif defined(FL_IS_ESP_32C6)</span></div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>    <span class="keywordflow">return</span> 1;  <span class="comment">// ESP32-C6 (RISC-V)</span></div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#elif defined(FL_IS_ESP_32C3)</span></div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>    <span class="keywordflow">return</span> 1;  <span class="comment">// ESP32-C3 (RISC-V)</span></div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#elif defined(FL_IS_ESP_32P4)</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>    <span class="keywordflow">return</span> 5;  <span class="comment">// ESP32-P4: Connect GPIO 5 (TX) to GPIO 6 (RX) with jumper wire</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#elif defined(FL_IS_TEENSY_4X)</span></div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>    <span class="keywordflow">return</span> 1;  <span class="comment">// Teensy 4.x: any GPIO works for TX</span></div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#else</span></div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>    <span class="keywordflow">return</span> 1;  <span class="comment">// ESP32 (classic) and other variants</span></div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>}</div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment">//</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment">// NOTE: Avoid GPIO0/1/3 on classic ESP32 — GPIO1 is UART0 TX (console output),</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment">// GPIO3 is UART0 RX, and GPIO0 is a boot-strap pin. Toggling GPIO1 from</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment">// AutoResearch&#39;s GPIO baseline test (testRxChannel) silences the console and</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment">// causes FastLED #3452 (RPC silence). Use GPIO 18/19 which are general-purpose</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment">// and don&#39;t collide with peripheral fixed-function muxing on the WROOM module.</span></div>
+<div class="foldopen" id="foldopen00018" data-start="{" data-end="}">
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno"><a class="line" href="../../d1/dc9/namespaceautoresearch_a1570377b93a404194c1fb81a83b81a9a.html#a1570377b93a404194c1fb81a83b81a9a">   18</a></span><span class="keyword">constexpr</span> <span class="keywordtype">int</span> <a class="code hl_function" href="../../d1/dc9/namespaceautoresearch_a1570377b93a404194c1fb81a83b81a9a.html#a1570377b93a404194c1fb81a83b81a9a">defaultTxPin</a>() {</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#if defined(FL_IS_STUB)</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>    <span class="keywordflow">return</span> 1;  <span class="comment">// Stub: TX and RX same pin — NativeRxDevice monitors TX output directly</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#elif defined(FL_IS_ESP_32S3)</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>    <span class="keywordflow">return</span> 1;  <span class="comment">// ESP32-S3: Connect GPIO 1 (TX) to GPIO 2 (RX) with jumper wire</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#elif defined(FL_IS_ESP_32S2)</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>    <span class="keywordflow">return</span> 1;  <span class="comment">// ESP32-S2</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#elif defined(FL_IS_ESP_32C6)</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>    <span class="keywordflow">return</span> 1;  <span class="comment">// ESP32-C6 (RISC-V)</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#elif defined(FL_IS_ESP_32C3)</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>    <span class="keywordflow">return</span> 1;  <span class="comment">// ESP32-C3 (RISC-V)</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#elif defined(FL_IS_ESP_32P4)</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>    <span class="keywordflow">return</span> 5;  <span class="comment">// ESP32-P4: Connect GPIO 5 (TX) to GPIO 6 (RX) with jumper wire</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#elif defined(FL_IS_TEENSY_4X)</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>    <span class="keywordflow">return</span> 1;  <span class="comment">// Teensy 4.x: any GPIO works for TX</span></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="preprocessor">#elif defined(FL_IS_ESP_32DEV)</span></div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>    <span class="comment">// ESP32 (classic): GPIO 33 → GPIO 34 jumper. GPIO34 is input-only</span></div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    <span class="comment">// (no output driver, no boot-strap role) which makes it an ideal RX</span></div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    <span class="comment">// pin, and 33/34 avoid GPIO0/1/3 (boot strap + UART0, see #3452).</span></div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    <span class="comment">// The WROOM COM11 bench harness is physically wired 33 → 34</span></div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    <span class="comment">// (verified electrically in FastLED#3569 — the previously-documented</span></div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    <span class="comment">// 18 → 19 pair was never connected there).</span></div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    <span class="keywordflow">return</span> 33;</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    <span class="keywordflow">return</span> 1;  <span class="comment">// Other variants</span></div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>}</div>
 </div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span> </div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="comment">// Default RX pin for each platform</span></div>
-<div class="foldopen" id="foldopen00033" data-start="{" data-end="}">
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno"><a class="line" href="../../d1/dc9/namespaceautoresearch_a2e87b475e94489d16fe1266d09a30e3a.html#a2e87b475e94489d16fe1266d09a30e3a">   33</a></span><span class="keyword">constexpr</span> <span class="keywordtype">int</span> <a class="code hl_function" href="../../d1/dc9/namespaceautoresearch_a2e87b475e94489d16fe1266d09a30e3a.html#a2e87b475e94489d16fe1266d09a30e3a">defaultRxPin</a>() {</div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="preprocessor">#if defined(FL_IS_STUB)</span></div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    <span class="keywordflow">return</span> 1;  <span class="comment">// Stub: same pin as TX — internal loopback</span></div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="preprocessor">#elif defined(FL_IS_ESP_32S3)</span></div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    <span class="keywordflow">return</span> 2;  <span class="comment">// ESP32-S3: jumper wire from GPIO 1</span></div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><span class="preprocessor">#elif defined(FL_IS_ESP_32S2)</span></div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    <span class="keywordflow">return</span> 0;</div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="preprocessor">#elif defined(FL_IS_ESP_32C6)</span></div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    <span class="keywordflow">return</span> 0;</div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="preprocessor">#elif defined(FL_IS_ESP_32C3)</span></div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    <span class="keywordflow">return</span> 0;</div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="preprocessor">#elif defined(FL_IS_ESP_32P4)</span></div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    <span class="keywordflow">return</span> 6;  <span class="comment">// ESP32-P4: jumper wire from GPIO 5</span></div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="preprocessor">#elif defined(FL_IS_TEENSY_4X)</span></div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>    <span class="keywordflow">return</span> 2;  <span class="comment">// Teensy 4.x: FlexPWM-capable pin, jumper wire from pin 1</span></div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="preprocessor">#else</span></div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>    <span class="keywordflow">return</span> 0;  <span class="comment">// ESP32 (classic) and other variants</span></div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>}</div>
-</div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span> </div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span><span class="comment">// Human-readable chip/platform name</span></div>
-<div class="foldopen" id="foldopen00054" data-start="{" data-end="}">
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno"><a class="line" href="../../d1/dc9/namespaceautoresearch_aedb819aec7d4b494948dd3b2fb5eba8c.html#aedb819aec7d4b494948dd3b2fb5eba8c">   54</a></span><span class="keyword">constexpr</span> <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="../../d1/dc9/namespaceautoresearch_aedb819aec7d4b494948dd3b2fb5eba8c.html#aedb819aec7d4b494948dd3b2fb5eba8c">chipName</a>() {</div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span><span class="preprocessor">#if defined(FL_IS_STUB)</span></div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    <span class="keywordflow">return</span> <span class="stringliteral">&quot;Stub/Native&quot;</span>;</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> </div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="comment">// Default RX pin for each platform</span></div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="comment">//</span></div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="comment">// NOTE: See defaultTxPin() above for the classic-ESP32 GPIO0/1/3 caveat — the</span></div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="comment">// default RX pin must also avoid those. GPIO 19 is a safe partner for GPIO 18.</span></div>
+<div class="foldopen" id="foldopen00050" data-start="{" data-end="}">
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno"><a class="line" href="../../d1/dc9/namespaceautoresearch_a2e87b475e94489d16fe1266d09a30e3a.html#a2e87b475e94489d16fe1266d09a30e3a">   50</a></span><span class="keyword">constexpr</span> <span class="keywordtype">int</span> <a class="code hl_function" href="../../d1/dc9/namespaceautoresearch_a2e87b475e94489d16fe1266d09a30e3a.html#a2e87b475e94489d16fe1266d09a30e3a">defaultRxPin</a>() {</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="preprocessor">#if defined(FL_IS_STUB)</span></div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    <span class="keywordflow">return</span> 1;  <span class="comment">// Stub: same pin as TX — internal loopback</span></div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span><span class="preprocessor">#elif defined(FL_IS_ESP_32S3)</span></div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    <span class="keywordflow">return</span> 2;  <span class="comment">// ESP32-S3: jumper wire from GPIO 1</span></div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span><span class="preprocessor">#elif defined(FL_IS_ESP_32S2)</span></div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    <span class="keywordflow">return</span> 0;</div>
 <div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span><span class="preprocessor">#elif defined(FL_IS_ESP_32C6)</span></div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    <span class="keywordflow">return</span> <span class="stringliteral">&quot;ESP32-C6 (RISC-V)&quot;</span>;</div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span><span class="preprocessor">#elif defined(FL_IS_ESP_32S3)</span></div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>    <span class="keywordflow">return</span> <span class="stringliteral">&quot;ESP32-S3 (Xtensa)&quot;</span>;</div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span><span class="preprocessor">#elif defined(FL_IS_ESP_32C3)</span></div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    <span class="keywordflow">return</span> <span class="stringliteral">&quot;ESP32-C3 (RISC-V)&quot;</span>;</div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span><span class="preprocessor">#elif defined(FL_IS_ESP_32DEV)</span></div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    <span class="keywordflow">return</span> <span class="stringliteral">&quot;ESP32 (Xtensa)&quot;</span>;</div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span><span class="preprocessor">#elif defined(FL_IS_ESP_32P4)</span></div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    <span class="keywordflow">return</span> <span class="stringliteral">&quot;ESP32-P4 (dual-core RISC-V)&quot;</span>;</div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span><span class="preprocessor">#elif defined(FL_IS_TEENSY_4X)</span></div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>    <span class="keywordflow">return</span> <span class="stringliteral">&quot;Teensy 4.x (Cortex-M7)&quot;</span>;</div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span><span class="preprocessor">#else</span></div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>    <span class="keywordflow">return</span> <span class="stringliteral">&quot;Unknown platform&quot;</span>;</div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>}</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    <span class="keywordflow">return</span> 0;</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span><span class="preprocessor">#elif defined(FL_IS_ESP_32C3)</span></div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>    <span class="keywordflow">return</span> 0;</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span><span class="preprocessor">#elif defined(FL_IS_ESP_32P4)</span></div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    <span class="keywordflow">return</span> 6;  <span class="comment">// ESP32-P4: jumper wire from GPIO 5</span></div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span><span class="preprocessor">#elif defined(FL_IS_TEENSY_4X)</span></div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    <span class="keywordflow">return</span> 2;  <span class="comment">// Teensy 4.x: FlexPWM-capable pin, jumper wire from pin 1</span></div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span><span class="preprocessor">#elif defined(FL_IS_ESP_32DEV)</span></div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    <span class="keywordflow">return</span> 34;  <span class="comment">// ESP32 (classic): input-only pad, jumper wire from GPIO 33.</span></div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>    <span class="keywordflow">return</span> 0;  <span class="comment">// Other variants</span></div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>}</div>
 </div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span> </div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>} <span class="comment">// namespace autoresearch</span></div>
-<div class="ttc" id="anamespaceautoresearch_a1570377b93a404194c1fb81a83b81a9a_html_a1570377b93a404194c1fb81a83b81a9a"><div class="ttname"><a href="../../d1/dc9/namespaceautoresearch_a1570377b93a404194c1fb81a83b81a9a.html#a1570377b93a404194c1fb81a83b81a9a">autoresearch::defaultTxPin</a></div><div class="ttdeci">constexpr int defaultTxPin()</div><div class="ttdef"><b>Definition</b> <a href="#l00012">AutoResearchPlatform.h:12</a></div></div>
-<div class="ttc" id="anamespaceautoresearch_a2e87b475e94489d16fe1266d09a30e3a_html_a2e87b475e94489d16fe1266d09a30e3a"><div class="ttname"><a href="../../d1/dc9/namespaceautoresearch_a2e87b475e94489d16fe1266d09a30e3a.html#a2e87b475e94489d16fe1266d09a30e3a">autoresearch::defaultRxPin</a></div><div class="ttdeci">constexpr int defaultRxPin()</div><div class="ttdef"><b>Definition</b> <a href="#l00033">AutoResearchPlatform.h:33</a></div></div>
-<div class="ttc" id="anamespaceautoresearch_aedb819aec7d4b494948dd3b2fb5eba8c_html_aedb819aec7d4b494948dd3b2fb5eba8c"><div class="ttname"><a href="../../d1/dc9/namespaceautoresearch_aedb819aec7d4b494948dd3b2fb5eba8c.html#aedb819aec7d4b494948dd3b2fb5eba8c">autoresearch::chipName</a></div><div class="ttdeci">constexpr const char * chipName()</div><div class="ttdef"><b>Definition</b> <a href="#l00054">AutoResearchPlatform.h:54</a></div></div>
-<div class="ttc" id="anamespaceautoresearch_html"><div class="ttname"><a href="../../d1/dc9/namespaceautoresearch.html">autoresearch</a></div><div class="ttdef"><b>Definition</b> <a href="../../d9/d0a/_auto_research_animartrix_bench_8h_source.html#l00024">AutoResearchAnimartrixBench.h:24</a></div></div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span> </div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span><span class="comment">// Human-readable chip/platform name</span></div>
+<div class="foldopen" id="foldopen00073" data-start="{" data-end="}">
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno"><a class="line" href="../../d1/dc9/namespaceautoresearch_aedb819aec7d4b494948dd3b2fb5eba8c.html#aedb819aec7d4b494948dd3b2fb5eba8c">   73</a></span><span class="keyword">constexpr</span> <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="../../d1/dc9/namespaceautoresearch_aedb819aec7d4b494948dd3b2fb5eba8c.html#aedb819aec7d4b494948dd3b2fb5eba8c">chipName</a>() {</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span><span class="preprocessor">#if defined(FL_IS_STUB)</span></div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>    <span class="keywordflow">return</span> <span class="stringliteral">&quot;Stub/Native&quot;</span>;</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span><span class="preprocessor">#elif defined(FL_IS_ESP_32C6)</span></div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>    <span class="keywordflow">return</span> <span class="stringliteral">&quot;ESP32-C6 (RISC-V)&quot;</span>;</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span><span class="preprocessor">#elif defined(FL_IS_ESP_32S3)</span></div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>    <span class="keywordflow">return</span> <span class="stringliteral">&quot;ESP32-S3 (Xtensa)&quot;</span>;</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span><span class="preprocessor">#elif defined(FL_IS_ESP_32C3)</span></div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>    <span class="keywordflow">return</span> <span class="stringliteral">&quot;ESP32-C3 (RISC-V)&quot;</span>;</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span><span class="preprocessor">#elif defined(FL_IS_ESP_32DEV)</span></div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    <span class="keywordflow">return</span> <span class="stringliteral">&quot;ESP32 (Xtensa)&quot;</span>;</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span><span class="preprocessor">#elif defined(FL_IS_ESP_32P4)</span></div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>    <span class="keywordflow">return</span> <span class="stringliteral">&quot;ESP32-P4 (dual-core RISC-V)&quot;</span>;</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span><span class="preprocessor">#elif defined(FL_IS_TEENSY_4X)</span></div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>    <span class="keywordflow">return</span> <span class="stringliteral">&quot;Teensy 4.x (Cortex-M7)&quot;</span>;</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span><span class="preprocessor">#elif defined(ARDUINO_RASPBERRY_PI_PICO_2W) || defined(ARDUINO_RPIPICO2W)</span></div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>    <span class="keywordflow">return</span> <span class="stringliteral">&quot;Raspberry Pi Pico 2 W (RP2350)&quot;</span>;</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span><span class="preprocessor">#elif defined(FL_IS_RP2350)</span></div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>    <span class="keywordflow">return</span> <span class="stringliteral">&quot;RP2350&quot;</span>;</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>    <span class="keywordflow">return</span> <span class="stringliteral">&quot;Unknown platform&quot;</span>;</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>}</div>
+</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span> </div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>} <span class="comment">// namespace autoresearch</span></div>
+<div class="ttc" id="anamespaceautoresearch_a1570377b93a404194c1fb81a83b81a9a_html_a1570377b93a404194c1fb81a83b81a9a"><div class="ttname"><a href="../../d1/dc9/namespaceautoresearch_a1570377b93a404194c1fb81a83b81a9a.html#a1570377b93a404194c1fb81a83b81a9a">autoresearch::defaultTxPin</a></div><div class="ttdeci">constexpr int defaultTxPin()</div><div class="ttdef"><b>Definition</b> <a href="#l00018">AutoResearchPlatform.h:18</a></div></div>
+<div class="ttc" id="anamespaceautoresearch_a2e87b475e94489d16fe1266d09a30e3a_html_a2e87b475e94489d16fe1266d09a30e3a"><div class="ttname"><a href="../../d1/dc9/namespaceautoresearch_a2e87b475e94489d16fe1266d09a30e3a.html#a2e87b475e94489d16fe1266d09a30e3a">autoresearch::defaultRxPin</a></div><div class="ttdeci">constexpr int defaultRxPin()</div><div class="ttdef"><b>Definition</b> <a href="#l00050">AutoResearchPlatform.h:50</a></div></div>
+<div class="ttc" id="anamespaceautoresearch_aedb819aec7d4b494948dd3b2fb5eba8c_html_aedb819aec7d4b494948dd3b2fb5eba8c"><div class="ttname"><a href="../../d1/dc9/namespaceautoresearch_aedb819aec7d4b494948dd3b2fb5eba8c.html#aedb819aec7d4b494948dd3b2fb5eba8c">autoresearch::chipName</a></div><div class="ttdeci">constexpr const char * chipName()</div><div class="ttdef"><b>Definition</b> <a href="#l00073">AutoResearchPlatform.h:73</a></div></div>
+<div class="ttc" id="anamespaceautoresearch_html"><div class="ttname"><a href="../../d1/dc9/namespaceautoresearch.html">autoresearch</a></div><div class="ttdef"><b>Definition</b> <a href="../../d9/d0a/_auto_research_animartrix_bench_8h_source.html#l00025">AutoResearchAnimartrixBench.h:25</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.3-->
@@ -194,7 +217,7 @@ $(function(){initNavTree('d4/d9d/_auto_research_platform_8h_source.html','../../
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_c839598b40e1646daff68c7b4defdc81.html">AutoResearch</a></li><li class="navelem"><a class="el" href="../../d4/d9d/_auto_research_platform_8h.html">AutoResearchPlatform.h</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:06:58 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:08:59 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

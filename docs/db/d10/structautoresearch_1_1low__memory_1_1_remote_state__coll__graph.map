@@ -1,0 +1,20 @@
+<map id="autoresearch::low_memory::RemoteState" name="autoresearch::low_memory::RemoteState">
+<area shape="rect" id="Node000001" title=" " alt="" coords="708,165,908,205"/>
+<area shape="rect" id="Node000002" href="$dc/ddb/classfl_1_1_remote.html" title="JSON&#45;RPC server with scheduling support." alt="" coords="519,173,608,198"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="622,183,708,183,708,188,622,188"/>
+<area shape="rect" id="Node000003" href="$dc/d00/classfl_1_1_server.html" title="JSON&#45;RPC server with callback&#45;based I/O." alt="" coords="349,127,429,153"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="443,151,519,171,518,176,442,156"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl.html#d4/d36/namespacefl" title=" " alt="" coords="5,120,180,160"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="194,137,349,137,349,143,194,143"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl.html#d4/d36/namespacefl" title=" " alt="" coords="23,184,162,224"/>
+<area shape="poly" id="edge4_Node000003_Node000006" title=" " alt="" coords="175,188,325,157,350,150,351,155,326,163,176,194"/>
+<area shape="rect" id="Node000013" href="$d7/dd1/classfl_1_1_rpc.html" title=" " alt="" coords="358,218,421,243"/>
+<area shape="poly" id="edge9_Node000013_Node000006" title=" " alt="" coords="176,222,204,227,288,231,358,230,358,235,287,237,204,232,176,228"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl.html#d4/d36/namespacefl" title=" " alt="" coords="18,5,167,45"/>
+<area shape="poly" id="edge5_Node000003_Node000007" title=" " alt="" coords="182,31,254,46,292,59,327,75,358,100,381,126,377,129,355,104,324,80,290,64,253,51,181,36"/>
+<area shape="rect" id="Node000008" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="17,70,169,95"/>
+<area shape="poly" id="edge6_Node000003_Node000008" title=" " alt="" coords="183,91,326,117,352,125,350,130,325,123,182,96"/>
+<area shape="poly" id="edge7_Node000002_Node000013" title=" " alt="" coords="433,217,518,194,519,199,435,222"/>
+<area shape="rect" id="Node000014" href="$dc/d56/classfl_1_1unordered__map.html" title=" " alt="" coords="17,249,168,303"/>
+<area shape="poly" id="edge8_Node000013_Node000014" title=" " alt="" coords="182,270,252,263,325,251,357,241,359,246,326,256,253,268,182,275"/>
+</map>

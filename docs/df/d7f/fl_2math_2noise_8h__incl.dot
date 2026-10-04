@@ -19,6 +19,26 @@ digraph "fl/math/noise.h"
   Node7 -> Node8 [id="edge6_Node000007_Node000008",color="steelblue1",style="solid",tooltip=" "];
   Node8 [id="Node000008",label="fl/math/fixed_point\l/s16x16.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d7/d64/s16x16_8h.html",tooltip=" "];
   Node8 -> Node4 [id="edge7_Node000008_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node6 -> Node16 [id="edge8_Node000006_Node000016",color="steelblue1",style="solid",tooltip=" "];
-  Node16 [id="Node000016",label="fl/math/simd.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d8/de1/simd_8h.html",tooltip="Umbrella header for SIMD subsystem."];
+  Node6 -> Node25 [id="edge8_Node000006_Node000025",color="steelblue1",style="solid",tooltip=" "];
+  Node25 [id="Node000025",label="fl/math/simd.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/de1/simd_8h.html",tooltip="Umbrella header for SIMD subsystem."];
+  Node25 -> Node26 [id="edge9_Node000025_Node000026",color="steelblue1",style="solid",tooltip=" "];
+  Node26 [id="Node000026",label="fl/math/simd/types.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d0/d7e/fl_2math_2simd_2types_8h.html",tooltip="SIMD register type aliases."];
+  Node25 -> Node28 [id="edge10_Node000025_Node000028",color="steelblue1",style="solid",tooltip=" "];
+  Node28 [id="Node000028",label="fl/math/simd/u8x16.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d1e/u8x16_8h.html",tooltip="SIMD operations on 16-element uint8_t vectors."];
+  Node28 -> Node26 [id="edge11_Node000028_Node000026",color="steelblue1",style="solid",tooltip=" "];
+  Node25 -> Node29 [id="edge12_Node000025_Node000029",color="steelblue1",style="solid",tooltip=" "];
+  Node29 [id="Node000029",label="fl/math/simd/u8x32.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d94/u8x32_8h.html",tooltip="SIMD operations on 32-element uint8_t vectors (256-bit)"];
+  Node29 -> Node26 [id="edge13_Node000029_Node000026",color="steelblue1",style="solid",tooltip=" "];
+  Node25 -> Node30 [id="edge14_Node000025_Node000030",color="steelblue1",style="solid",tooltip=" "];
+  Node30 [id="Node000030",label="fl/math/simd/u16x8.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d0c/u16x8_8h.html",tooltip="SIMD operations on 8-element uint16_t vectors."];
+  Node30 -> Node26 [id="edge15_Node000030_Node000026",color="steelblue1",style="solid",tooltip=" "];
+  Node25 -> Node31 [id="edge16_Node000025_Node000031",color="steelblue1",style="solid",tooltip=" "];
+  Node31 [id="Node000031",label="fl/math/simd/u16x16.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d91/simd_2u16x16_8h.html",tooltip="SIMD operations on 16-element uint16_t vectors (256-bit)"];
+  Node31 -> Node26 [id="edge17_Node000031_Node000026",color="steelblue1",style="solid",tooltip=" "];
+  Node25 -> Node32 [id="edge18_Node000025_Node000032",color="steelblue1",style="solid",tooltip=" "];
+  Node32 [id="Node000032",label="fl/math/simd/u32x4.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d0c/u32x4_8h.html",tooltip="SIMD operations on 4-element uint32_t/int32_t vectors."];
+  Node32 -> Node26 [id="edge19_Node000032_Node000026",color="steelblue1",style="solid",tooltip=" "];
+  Node25 -> Node33 [id="edge20_Node000025_Node000033",color="steelblue1",style="solid",tooltip=" "];
+  Node33 [id="Node000033",label="fl/math/simd/f32x4.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/df4/f32x4_8h.html",tooltip="SIMD operations on 4-element float32 vectors."];
+  Node33 -> Node26 [id="edge21_Node000033_Node000026",color="steelblue1",style="solid",tooltip=" "];
 }

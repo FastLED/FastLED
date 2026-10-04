@@ -24,7 +24,7 @@
 <area shape="rect" id="Node000010" href="$d3/dac/_fx_noise_ring_8ino.html" title="Noise effect on circular ring with ScreenMap." alt="" coords="463,299,714,353"/>
 <area shape="poly" id="edge11_Node000009_Node000010" title=" " alt="" coords="470,117,488,179,502,215,520,249,539,275,560,297,556,300,535,278,516,252,498,217,483,181,465,118"/>
 <area shape="poly" id="edge13_Node000009_Node000011" title=" " alt="" coords="493,109,556,150,553,154,490,114"/>
-<area shape="rect" id="Node000012" href="$db/d97/_fast_l_e_d_8h.html" title="central include file for FastLED, defines the CFastLED class/object" alt="" coords="530,225,615,251"/>
+<area shape="rect" id="Node000012" href="$d6/d64/fastled_8h.html" title="central include file for FastLED, defines the CFastLED class/object" alt="" coords="530,225,615,251"/>
 <area shape="poly" id="edge14_Node000011_Node000012" title=" " alt="" coords="575,191,575,225,570,225,570,191"/>
 <area shape="rect" id="Node000016" href="$d8/d10/noisegen_8h.html" title="Noise generation classes." alt="" coords="639,225,733,251"/>
 <area shape="poly" id="edge15_Node000011_Node000016" title=" " alt="" coords="604,183,669,223,666,227,601,187"/>

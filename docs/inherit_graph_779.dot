@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::IChannelDriver\l::PollNeededCallbackSlot",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/d50/classfl_1_1_i_channel_driver_1_1_poll_needed_callback_slot.html",tooltip="ISR-safe storage for a poll-needed callback handle."];
+  Node0 [id="Node000000",label="fl::isr::critical_section",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/dc3/classfl_1_1isr_1_1critical__section.html",tooltip="RAII helper for critical sections (interrupt disable/enable) Automatically disables interrupts on con..."];
 }

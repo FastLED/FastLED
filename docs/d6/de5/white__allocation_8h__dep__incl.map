@@ -1,0 +1,24 @@
+<map id="fl/gfx/white_allocation.h" name="fl/gfx/white_allocation.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="521,5,699,31"/>
+<area shape="rect" id="Node000002" href="$d8/ded/gamut__map_8h.html" title=" " alt="" coords="431,79,581,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="583,41,525,81,522,76,580,36"/>
+<area shape="rect" id="Node000026" href="$d3/d33/white__allocation_8cpp_8hpp.html" title=" " alt="" coords="605,79,826,104"/>
+<area shape="poly" id="edge11_Node000001_Node000026" title=" " alt="" coords="640,36,700,76,697,81,637,41"/>
+<area shape="rect" id="Node000003" href="$d2/dc8/gamut__map_8cpp_8hpp.html" title=" " alt="" coords="466,152,658,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="526,113,555,150,551,154,522,117"/>
+<area shape="rect" id="Node000007" href="$df/d7a/pipeline_8h.html" title=" " alt="" coords="299,152,422,177"/>
+<area shape="poly" id="edge4_Node000002_Node000007" title=" " alt="" coords="472,112,386,154,383,149,469,108"/>
+<area shape="rect" id="Node000004" href="$d5/d88/fl_2gfx_2__build_8cpp_8hpp.html" title="Unity build for fl/gfx/ — graphics types, primitives, and simulators." alt="" coords="588,321,741,346"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="597,183,620,201,640,224,653,249,661,276,667,320,662,321,655,277,648,251,636,227,616,205,594,187"/>
+<area shape="rect" id="Node000008" href="$d5/d7b/channel_8h.html" title="ESP32&#45;P4 Parallel IO (PARLIO) LED channel." alt="" coords="468,233,627,258"/>
+<area shape="poly" id="edge5_Node000007_Node000008" title=" " alt="" coords="401,180,521,230,519,235,399,185"/>
+<area shape="rect" id="Node000020" href="$db/d8c/color__managed__source_8h.html" title=" " alt="" coords="5,225,201,265"/>
+<area shape="poly" id="edge6_Node000007_Node000020" title=" " alt="" coords="311,184,166,228,164,223,310,179"/>
+<area shape="rect" id="Node000023" href="$d7/dcc/pipeline__binding_8h.html" title=" " alt="" coords="97,313,245,353"/>
+<area shape="poly" id="edge8_Node000007_Node000023" title=" " alt="" coords="328,186,297,205,266,227,221,273,187,315,183,311,217,269,263,223,294,200,325,182"/>
+<area shape="rect" id="Node000025" href="$d4/d9b/pipeline_8cpp_8hpp.html" title=" " alt="" coords="277,233,444,258"/>
+<area shape="poly" id="edge9_Node000007_Node000025" title=" " alt="" coords="363,191,363,232,358,232,358,191"/>
+<area shape="poly" id="edge7_Node000020_Node000023" title=" " alt="" coords="129,275,158,311,154,315,125,278"/>
+<area shape="poly" id="edge10_Node000025_Node000004" title=" " alt="" coords="415,259,625,318,623,323,414,264"/>
+<area shape="poly" id="edge12_Node000026_Node000004" title=" " alt="" coords="713,118,670,321,664,320,708,117"/>
+</map>

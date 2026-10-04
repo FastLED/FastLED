@@ -1,0 +1,5 @@
+<map id="fl::ChannelManager::setExclusiveDriverByName" name="fl::ChannelManager::setExclusiveDriverByName">
+<area shape="rect" id="Node000001" title="Enable only one driver exclusively (disables all others) — by&#45;name escape hatch." alt="" coords="205,5,413,45"/>
+<area shape="rect" id="Node000002" href="$d2/d6b/classfl_1_1_channel_manager_a987f60fa13c37e9d725e5541d04ce14e.html#a987f60fa13c37e9d725e5541d04ce14e" title="Enable only one driver exclusively, by fl::Bus enum (runtime form)." alt="" coords="5,5,157,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="192,28,158,28,158,23,192,23"/>
+</map>

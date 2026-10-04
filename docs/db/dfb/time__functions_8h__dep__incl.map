@@ -6,15 +6,15 @@
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="732,99,507,118,363,134,218,155,206,157,205,152,217,149,362,128,506,112,731,93"/>
 <area shape="rect" id="Node000004" href="$d1/d75/_apa102_h_d_8ino.html" title="Example showing how to use the APA102HD gamma correction." alt="" coords="229,152,448,207"/>
 <area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="732,105,461,155,449,157,448,152,459,149,731,99"/>
-<area shape="rect" id="Node000005" href="$dd/db4/_h_d107_8ino.html" title="Example showing how to use the HD107 and HD which has built in gamma correction." alt="" coords="472,152,672,207"/>
+<area shape="rect" id="Node000005" href="$dd/db4/_h_d107_8ino.html" title="Example showing how to use the HD107S (also named HD107)." alt="" coords="472,152,672,207"/>
 <area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="746,112,638,154,636,150,744,107"/>
-<area shape="rect" id="Node000006" href="$db/d97/_fast_l_e_d_8h.html" title="central include file for FastLED, defines the CFastLED class/object" alt="" coords="792,475,877,500"/>
+<area shape="rect" id="Node000006" href="$d6/d64/fastled_8h.html" title="central include file for FastLED, defines the CFastLED class/object" alt="" coords="792,475,877,500"/>
 <area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="843,102,906,121,940,136,972,154,1001,176,1024,201,1040,231,1045,266,1045,342,1043,389,1035,408,1019,429,987,453,950,470,912,480,878,486,877,481,911,475,948,465,984,449,1015,425,1031,406,1038,388,1040,342,1040,266,1035,233,1020,204,997,180,969,158,937,141,904,126,841,107"/>
 <area shape="rect" id="Node000010" href="$d0/d4b/crgb_8hpp.html" title="Defines utility functions for the red, green, and blue (RGB) pixel struct." alt="" coords="747,167,826,192"/>
 <area shape="poly" id="edge7_Node000002_Node000010" title=" " alt="" coords="789,118,789,166,784,166,784,118"/>
 <area shape="rect" id="Node000011" href="$d2/dba/pixeltypes_8h.html" title="Includes defintions for RGB and HSV pixels." alt="" coords="692,255,793,280"/>
 <area shape="poly" id="edge18_Node000002_Node000011" title=" " alt="" coords="764,115,749,133,737,153,731,180,732,208,741,254,736,255,727,209,726,180,732,151,744,129,760,112"/>
-<area shape="rect" id="Node000018" href="$d7/dc2/fl_2system_2_fast_l_e_d_8h.html" title="Internal FastLED header for implementation files." alt="" coords="734,328,877,353"/>
+<area shape="rect" id="Node000018" href="$d0/d69/fl_2system_2fastled_8h.html" title="Internal FastLED header for implementation files." alt="" coords="734,328,877,353"/>
 <area shape="poly" id="edge17_Node000002_Node000018" title=" " alt="" coords="813,112,829,129,841,151,848,176,849,202,842,253,828,298,814,329,809,327,823,296,837,252,844,202,842,177,836,153,825,133,809,115"/>
 <area shape="rect" id="Node000015" href="$d6/ddc/fastspi_8h.html" title="Serial peripheral interface (SPI) definitions per platform." alt="" coords="926,401,1005,427"/>
 <area shape="poly" id="edge15_Node000002_Node000015" title=" " alt="" coords="833,107,864,125,891,150,913,183,930,218,952,291,964,356,968,401,962,401,958,357,947,292,925,220,908,185,887,154,861,129,830,112"/>

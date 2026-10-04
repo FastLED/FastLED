@@ -1,0 +1,5 @@
+<map id="autoresearch::flex_io::siliconName" name="autoresearch::flex_io::siliconName">
+<area shape="rect" id="Node000001" title="Platform identification string derived from build&#45;time macros." alt="" coords="204,5,343,45"/>
+<area shape="rect" id="Node000002" href="$d6/de6/namespaceautoresearch_1_1flex__io_afbd0720b63a6ebead0ceddf3b3853538.html#afbd0720b63a6ebead0ceddf3b3853538" title="Build the device&#45;info JSON returned by the flexIoDeviceInfo RPC." alt="" coords="5,5,156,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="190,28,156,28,156,23,190,23"/>
+</map>

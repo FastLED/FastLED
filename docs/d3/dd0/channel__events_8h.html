@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -102,13 +102,15 @@ $(function(){initNavTree('d3/dd0/channel__events_8h.html','../../'); initResizab
 <div class="header">
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
-<a href="#namespaces">Namespaces</a>  </div>
+<a href="#namespaces">Namespaces</a> &#124;
+<a href="#enum-members">Enumerations</a>  </div>
   <div class="headertitle"><div class="title">channel_events.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><code>#include &quot;<a class="el" href="../../dd/d67/function_8h_source.html">fl/stl/function.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../db/d01/noexcept_8h_source.html">fl/stl/noexcept.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../da/d66/string_8h_source.html">fl/stl/string.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../df/dd8/stdint_8h_source.html">fl/stl/stdint.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for channel_events.h:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -121,7 +123,7 @@ $(function(){initNavTree('d3/dd0/channel__events_8h.html','../../'); initResizab
 <div id="dynsection-1-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-1-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../dc/d2b/channel__events_8h__dep__incl.svg" width="658" height="286"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../dc/d2b/channel__events_8h__dep__incl.svg" width="100%" height="600"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 </div>
 <p><a href="../../d3/dd0/channel__events_8h_source.html">Go to the source code of this file.</a></p>
@@ -131,13 +133,59 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../da/db7/structfl_1_1_channel_events.html">fl::ChannelEvents</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="../../d9/d5b/classfl_1_1_singleton.html">Singleton</a> event router for <a class="el" href="../../d5/d8b/classfl_1_1_channel.html" title="LED channel for parallel output, pretty much a CPixelLEDController but with timing and pin informatio...">Channel</a> lifecycle events.  <a href="../../da/db7/structfl_1_1_channel_events.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:d9/ddb/structfl_1_1_color_profile_event" id="r_d9/ddb/structfl_1_1_color_profile_event"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl.html#d9/ddb/structfl_1_1_color_profile_event">fl::ColorProfileEvent</a></td></tr>
+<tr class="memdesc:d9/ddb/structfl_1_1_color_profile_event"><td class="mdescLeft">&#160;</td><td class="mdescRight">Payload shared by every color-profile notification.  <a href="../../d4/d36/namespacefl.html#d9/ddb/structfl_1_1_color_profile_event">More...</a><br /></td></tr>
+<tr class="separator:d9/ddb/structfl_1_1_color_profile_event"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></td></tr>
 <tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">Base definition for an LED controller. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="enum-members" name="enum-members"></a>
+Enumerations</h2></td></tr>
+<tr class="memitem:aade096ff21e17eeccb323ad4a9106659" id="r_aade096ff21e17eeccb323ad4a9106659"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_aade096ff21e17eeccb323ad4a9106659.html#aade096ff21e17eeccb323ad4a9106659">fl::ColorProfileWarning</a> : u8 { <a class="el" href="../../d4/d36/namespacefl_aade096ff21e17eeccb323ad4a9106659.html#aade096ff21e17eeccb323ad4a9106659a367d57936a67db8750e8325093aac11b">fl::ProfileClearedByLegacy</a>
+, <a class="el" href="../../d4/d36/namespacefl_aade096ff21e17eeccb323ad4a9106659.html#aade096ff21e17eeccb323ad4a9106659a8832c541fd4a252b45ea0d5b85ac7aa4">fl::LegacyClearedByProfile</a>
+ }</td></tr>
+<tr class="separator:aade096ff21e17eeccb323ad4a9106659"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<hr/><h2 class="groupheader">Class Documentation</h2>
+<a name="d9/ddb/structfl_1_1_color_profile_event" id="d9/ddb/structfl_1_1_color_profile_event"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#d9/ddb/structfl_1_1_color_profile_event">&#9670;&#160;</a></span>fl::ColorProfileEvent</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">struct fl::ColorProfileEvent</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<table class="fieldtable">
+<tr><th colspan="3">Class Members</th></tr>
+<tr><td class="fieldtype">
+<a id="adf9d2a5c5d20867f5f41f605b641b1a4" name="adf9d2a5c5d20867f5f41f605b641b1a4"></a>i32</td>
+<td class="fieldname">
+channelId</td>
+<td class="fielddoc">
+</td></tr>
+<tr><td class="fieldtype">
+<a id="af375ac9703d9c43d2a5bec86d97db3e6" name="af375ac9703d9c43d2a5bec86d97db3e6"></a><a class="el" href="../../d4/d36/namespacefl_adf08976a82fd066526d1b8c786e6a8de.html#adf08976a82fd066526d1b8c786e6a8de">ColorProfileStatus</a></td>
+<td class="fieldname">
+status</td>
+<td class="fielddoc">
+</td></tr>
+<tr><td class="fieldtype">
+<a id="a20f232d726ba2a777191e22b9561a889" name="a20f232d726ba2a777191e22b9561a889"></a><a class="el" href="../../d4/d36/namespacefl_aade096ff21e17eeccb323ad4a9106659.html#aade096ff21e17eeccb323ad4a9106659">ColorProfileWarning</a></td>
+<td class="fieldname">
+warning</td>
+<td class="fielddoc">
+</td></tr>
+</table>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.3-->
@@ -145,7 +193,7 @@ Namespaces</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_217dd1d1f80f936dd132dc9fc88b57d1.html">channels</a></li><li class="navelem"><a class="el" href="../../d3/dd0/channel__events_8h.html">channel_events.h</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:01 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:03 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

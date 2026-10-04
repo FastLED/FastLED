@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -137,39 +137,39 @@ $(function(){initNavTree('d4/d36/namespacefl_a80e54bbf6547a2844ff3a2215f0e6823.h
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d1/dda/cstdlib_8cpp_8hpp_source.html#l00348">348</a> of file <a class="el" href="../../d1/dda/cstdlib_8cpp_8hpp_source.html">cstdlib.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  348</span>                                                                                                 {</div>
-<div class="line"><span class="lineno">  349</span>    <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 1; i &lt; nmemb; ++i) {</div>
-<div class="line"><span class="lineno">  350</span>        <span class="comment">// Save current element in temp buffer</span></div>
-<div class="line"><span class="lineno">  351</span>        <span class="keywordtype">char</span> temp[256]; <span class="comment">// Stack buffer for elements up to 256 bytes</span></div>
-<div class="line"><span class="lineno">  352</span>        <span class="keywordtype">char</span>* elem_i = base + i * size;</div>
-<div class="line"><span class="lineno">  353</span> </div>
-<div class="line"><span class="lineno">  354</span>        <span class="keywordflow">if</span> (size &lt;= <span class="keyword">sizeof</span>(temp)) {</div>
-<div class="line"><span class="lineno">  355</span>            <a class="code hl_function" href="../../d4/d36/namespacefl_a0393d1d09fff5bccc427802cc22e756d.html#a0393d1d09fff5bccc427802cc22e756d">memcpy</a>(temp, elem_i, size);</div>
-<div class="line"><span class="lineno">  356</span> </div>
-<div class="line"><span class="lineno">  357</span>            <span class="keywordtype">size_t</span> j = i;</div>
-<div class="line"><span class="lineno">  358</span>            <span class="keywordflow">while</span> (j &gt; 0 &amp;&amp; compar(temp, base + (j - 1) * size) &lt; 0) {</div>
-<div class="line"><span class="lineno">  359</span>                <a class="code hl_function" href="../../d4/d36/namespacefl_a0393d1d09fff5bccc427802cc22e756d.html#a0393d1d09fff5bccc427802cc22e756d">memcpy</a>(base + j * size, base + (j - 1) * size, size);</div>
-<div class="line"><span class="lineno">  360</span>                --j;</div>
-<div class="line"><span class="lineno">  361</span>            }</div>
-<div class="line"><span class="lineno">  362</span> </div>
-<div class="line"><span class="lineno">  363</span>            <a class="code hl_function" href="../../d4/d36/namespacefl_a0393d1d09fff5bccc427802cc22e756d.html#a0393d1d09fff5bccc427802cc22e756d">memcpy</a>(base + j * size, temp, size);</div>
-<div class="line"><span class="lineno">  364</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  365</span>            <span class="comment">// For large elements, use swaps instead of shifts</span></div>
-<div class="line"><span class="lineno">  366</span>            <span class="keywordtype">size_t</span> j = i;</div>
-<div class="line"><span class="lineno">  367</span>            <span class="keywordflow">while</span> (j &gt; 0 &amp;&amp; compar(elem_i, base + (j - 1) * size) &lt; 0) {</div>
-<div class="line"><span class="lineno">  368</span>                <a class="code hl_function" href="../../df/d9e/namespacefl_1_1detail_adb3a6ac8bb85481a8f028e8e829b9178.html#adb3a6ac8bb85481a8f028e8e829b9178">detail::qsort_swap</a>(base + j * size, base + (j - 1) * size, size);</div>
-<div class="line"><span class="lineno">  369</span>                --j;</div>
-<div class="line"><span class="lineno">  370</span>            }</div>
-<div class="line"><span class="lineno">  371</span>        }</div>
-<div class="line"><span class="lineno">  372</span>    }</div>
-<div class="line"><span class="lineno">  373</span>}</div>
-<div class="ttc" id="anamespacefl_1_1detail_adb3a6ac8bb85481a8f028e8e829b9178_html_adb3a6ac8bb85481a8f028e8e829b9178"><div class="ttname"><a href="../../df/d9e/namespacefl_1_1detail_adb3a6ac8bb85481a8f028e8e829b9178.html#adb3a6ac8bb85481a8f028e8e829b9178">fl::detail::qsort_swap</a></div><div class="ttdeci">void qsort_swap(char *a, char *b, size_t size)</div><div class="ttdef"><b>Definition</b> <a href="../../d1/dda/cstdlib_8cpp_8hpp_source.html#l00330">cstdlib.cpp.hpp:330</a></div></div>
-<div class="ttc" id="anamespacefl_a0393d1d09fff5bccc427802cc22e756d_html_a0393d1d09fff5bccc427802cc22e756d"><div class="ttname"><a href="../../d4/d36/namespacefl_a0393d1d09fff5bccc427802cc22e756d.html#a0393d1d09fff5bccc427802cc22e756d">fl::memcpy</a></div><div class="ttdeci">void * memcpy(void *dest, const void *src, size_t n) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/da3/cstring_8cpp_8hpp_source.html#l00110">cstring.cpp.hpp:110</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d1/dda/cstdlib_8cpp_8hpp_source.html#l00350">350</a> of file <a class="el" href="../../d1/dda/cstdlib_8cpp_8hpp_source.html">cstdlib.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  350</span>                                                                                                 {</div>
+<div class="line"><span class="lineno">  351</span>    <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 1; i &lt; nmemb; ++i) {</div>
+<div class="line"><span class="lineno">  352</span>        <span class="comment">// Save current element in temp buffer</span></div>
+<div class="line"><span class="lineno">  353</span>        <span class="keywordtype">char</span> temp[256]; <span class="comment">// Stack buffer for elements up to 256 bytes</span></div>
+<div class="line"><span class="lineno">  354</span>        <span class="keywordtype">char</span>* elem_i = base + i * size;</div>
+<div class="line"><span class="lineno">  355</span> </div>
+<div class="line"><span class="lineno">  356</span>        <span class="keywordflow">if</span> (size &lt;= <span class="keyword">sizeof</span>(temp)) {</div>
+<div class="line"><span class="lineno">  357</span>            <a class="code hl_function" href="../../d4/d36/namespacefl_a35ff6755912c639a5e5bd35fc59e57ff.html#a35ff6755912c639a5e5bd35fc59e57ff">memcpy</a>(temp, elem_i, size);</div>
+<div class="line"><span class="lineno">  358</span> </div>
+<div class="line"><span class="lineno">  359</span>            <span class="keywordtype">size_t</span> j = i;</div>
+<div class="line"><span class="lineno">  360</span>            <span class="keywordflow">while</span> (j &gt; 0 &amp;&amp; compar(temp, base + (j - 1) * size) &lt; 0) {</div>
+<div class="line"><span class="lineno">  361</span>                <a class="code hl_function" href="../../d4/d36/namespacefl_a35ff6755912c639a5e5bd35fc59e57ff.html#a35ff6755912c639a5e5bd35fc59e57ff">memcpy</a>(base + j * size, base + (j - 1) * size, size);</div>
+<div class="line"><span class="lineno">  362</span>                --j;</div>
+<div class="line"><span class="lineno">  363</span>            }</div>
+<div class="line"><span class="lineno">  364</span> </div>
+<div class="line"><span class="lineno">  365</span>            <a class="code hl_function" href="../../d4/d36/namespacefl_a35ff6755912c639a5e5bd35fc59e57ff.html#a35ff6755912c639a5e5bd35fc59e57ff">memcpy</a>(base + j * size, temp, size);</div>
+<div class="line"><span class="lineno">  366</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  367</span>            <span class="comment">// For large elements, use swaps instead of shifts</span></div>
+<div class="line"><span class="lineno">  368</span>            <span class="keywordtype">size_t</span> j = i;</div>
+<div class="line"><span class="lineno">  369</span>            <span class="keywordflow">while</span> (j &gt; 0 &amp;&amp; compar(elem_i, base + (j - 1) * size) &lt; 0) {</div>
+<div class="line"><span class="lineno">  370</span>                <a class="code hl_function" href="../../df/d9e/namespacefl_1_1detail_adb3a6ac8bb85481a8f028e8e829b9178.html#adb3a6ac8bb85481a8f028e8e829b9178">detail::qsort_swap</a>(base + j * size, base + (j - 1) * size, size);</div>
+<div class="line"><span class="lineno">  371</span>                --j;</div>
+<div class="line"><span class="lineno">  372</span>            }</div>
+<div class="line"><span class="lineno">  373</span>        }</div>
+<div class="line"><span class="lineno">  374</span>    }</div>
+<div class="line"><span class="lineno">  375</span>}</div>
+<div class="ttc" id="anamespacefl_1_1detail_adb3a6ac8bb85481a8f028e8e829b9178_html_adb3a6ac8bb85481a8f028e8e829b9178"><div class="ttname"><a href="../../df/d9e/namespacefl_1_1detail_adb3a6ac8bb85481a8f028e8e829b9178.html#adb3a6ac8bb85481a8f028e8e829b9178">fl::detail::qsort_swap</a></div><div class="ttdeci">void qsort_swap(char *a, char *b, size_t size)</div><div class="ttdef"><b>Definition</b> <a href="../../d1/dda/cstdlib_8cpp_8hpp_source.html#l00332">cstdlib.cpp.hpp:332</a></div></div>
+<div class="ttc" id="anamespacefl_a35ff6755912c639a5e5bd35fc59e57ff_html_a35ff6755912c639a5e5bd35fc59e57ff"><div class="ttname"><a href="../../d4/d36/namespacefl_a35ff6755912c639a5e5bd35fc59e57ff.html#a35ff6755912c639a5e5bd35fc59e57ff">fl::memcpy</a></div><div class="ttdeci">void * memcpy(void *dest, const void *src, size_t n) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/da3/cstring_8cpp_8hpp_source.html#l00128">cstring.cpp.hpp:128</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../df/da3/cstring_8cpp_8hpp_source.html#l00110">memcpy()</a>, and <a class="el" href="../../d1/dda/cstdlib_8cpp_8hpp_source.html#l00330">fl::detail::qsort_swap()</a>.</p>
+<p class="reference">References <a class="el" href="../../df/da3/cstring_8cpp_8hpp_source.html#l00128">memcpy()</a>, and <a class="el" href="../../d1/dda/cstdlib_8cpp_8hpp_source.html#l00332">fl::detail::qsort_swap()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d1/dda/cstdlib_8cpp_8hpp_source.html#l00417">fl::detail::qsort_impl()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d1/dda/cstdlib_8cpp_8hpp_source.html#l00419">fl::detail::qsort_impl()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -194,7 +194,7 @@ $(function(){initNavTree('d4/d36/namespacefl_a80e54bbf6547a2844ff3a2215f0e6823.h
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:04 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:08 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

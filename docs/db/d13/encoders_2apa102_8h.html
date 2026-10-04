@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -112,7 +112,7 @@ $(function(){initNavTree('db/d13/encoders_2apa102_8h.html','../../'); initResiza
 <p>Protocol:</p><ul>
 <li>Start frame: 4 bytes of 0x00</li>
 <li>LED data: [0xE0|brightness][B][G][R] (4 bytes per LED)</li>
-<li>End frame: ⌈num_leds/32⌉ DWords of 0xFF</li>
+<li>End frame: (num_leds / 32) + 1 DWords of 0xFF</li>
 </ul>
 <p>Brightness modes:</p><ul>
 <li>Global: All LEDs use same 5-bit brightness (from first pixel)</li>
@@ -153,18 +153,18 @@ Namespaces</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a33d4ad1d833a1cc01e377ae4f04d990e" id="r_a33d4ad1d833a1cc01e377ae4f04d990e"><td class="memTemplParams" colspan="2">template&lt;typename InputIterator, typename OutputIterator&gt; </td></tr>
-<tr class="memitem:a33d4ad1d833a1cc01e377ae4f04d990e"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a33d4ad1d833a1cc01e377ae4f04d990e.html#a33d4ad1d833a1cc01e377ae4f04d990e">fl::encodeAPA102</a> (InputIterator first, InputIterator last, OutputIterator out, <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a> global_brightness=31) <a class="el" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></td></tr>
-<tr class="memdesc:a33d4ad1d833a1cc01e377ae4f04d990e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Encode pixel data in APA102 format with global brightness.  <br /></td></tr>
-<tr class="separator:a33d4ad1d833a1cc01e377ae4f04d990e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7cdae15614e23cafd5acc32fa1774fa1" id="r_a7cdae15614e23cafd5acc32fa1774fa1"><td class="memTemplParams" colspan="2">template&lt;typename InputIterator, typename OutputIterator&gt; </td></tr>
-<tr class="memitem:a7cdae15614e23cafd5acc32fa1774fa1"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="../../df/d96/s16x16x4_8h_a5197e8973f3c4c7bd4276ed1e3ca4525.html#a5197e8973f3c4c7bd4276ed1e3ca4525">FL_NO_INLINE_IF_AVR</a> <a class="el" href="../../df/d96/s16x16x4_8h_a58db51d7df63eadd6b2b92b03f5c14d8.html#a58db51d7df63eadd6b2b92b03f5c14d8">FL_OPTIMIZE_O2</a> void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a7cdae15614e23cafd5acc32fa1774fa1.html#a7cdae15614e23cafd5acc32fa1774fa1">fl::encodeAPA102_AutoBrightness</a> (InputIterator first, InputIterator last, OutputIterator out) <a class="el" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></td></tr>
-<tr class="memdesc:a7cdae15614e23cafd5acc32fa1774fa1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Encode pixel data in APA102 format (auto-detected brightness from first pixel)  <br /></td></tr>
-<tr class="separator:a7cdae15614e23cafd5acc32fa1774fa1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:add26493b14b4d8fc2a0f076b487ce221" id="r_add26493b14b4d8fc2a0f076b487ce221"><td class="memTemplParams" colspan="2">template&lt;typename InputIterator, typename BrightnessIterator, typename OutputIterator&gt; </td></tr>
-<tr class="memitem:add26493b14b4d8fc2a0f076b487ce221"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_add26493b14b4d8fc2a0f076b487ce221.html#add26493b14b4d8fc2a0f076b487ce221">fl::encodeAPA102_HD</a> (InputIterator first, InputIterator last, BrightnessIterator brightness_first, OutputIterator out) <a class="el" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></td></tr>
-<tr class="memdesc:add26493b14b4d8fc2a0f076b487ce221"><td class="mdescLeft">&#160;</td><td class="mdescRight">Encode pixel data in APA102 format with per-LED brightness.  <br /></td></tr>
-<tr class="separator:add26493b14b4d8fc2a0f076b487ce221"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adba73d16d4d3f796b4b860f6a1a29757" id="r_adba73d16d4d3f796b4b860f6a1a29757"><td class="memTemplParams" colspan="2">template&lt;typename InputIterator, typename OutputIterator&gt; </td></tr>
+<tr class="memitem:adba73d16d4d3f796b4b860f6a1a29757"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_adba73d16d4d3f796b4b860f6a1a29757.html#adba73d16d4d3f796b4b860f6a1a29757">fl::encodeAPA102</a> (InputIterator first, InputIterator last, OutputIterator out, <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a> global_brightness=31) <a class="el" href="../../d4/d36/namespacefl_aa317f89ca911371e798d08a93770402f.html#aa317f89ca911371e798d08a93770402f">FL_NO_EXCEPT</a></td></tr>
+<tr class="memdesc:adba73d16d4d3f796b4b860f6a1a29757"><td class="mdescLeft">&#160;</td><td class="mdescRight">Encode pixel data in APA102 format with global brightness.  <br /></td></tr>
+<tr class="separator:adba73d16d4d3f796b4b860f6a1a29757"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a222cbad8079e70e4a577100f338c09d2" id="r_a222cbad8079e70e4a577100f338c09d2"><td class="memTemplParams" colspan="2">template&lt;typename InputIterator, typename OutputIterator&gt; </td></tr>
+<tr class="memitem:a222cbad8079e70e4a577100f338c09d2"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="../../d4/d54/compiler__control_8h_a5197e8973f3c4c7bd4276ed1e3ca4525.html#a5197e8973f3c4c7bd4276ed1e3ca4525">FL_NO_INLINE_IF_AVR</a> <a class="el" href="../../d4/d54/compiler__control_8h_a58db51d7df63eadd6b2b92b03f5c14d8.html#a58db51d7df63eadd6b2b92b03f5c14d8">FL_OPTIMIZE_O2</a> void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a222cbad8079e70e4a577100f338c09d2.html#a222cbad8079e70e4a577100f338c09d2">fl::encodeAPA102_AutoBrightness</a> (InputIterator first, InputIterator last, OutputIterator out) <a class="el" href="../../d4/d36/namespacefl_aa317f89ca911371e798d08a93770402f.html#aa317f89ca911371e798d08a93770402f">FL_NO_EXCEPT</a></td></tr>
+<tr class="memdesc:a222cbad8079e70e4a577100f338c09d2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Encode pixel data in APA102 format (auto-detected brightness from first pixel)  <br /></td></tr>
+<tr class="separator:a222cbad8079e70e4a577100f338c09d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a57d597614a87020cdcf82ea6e5aa84c1" id="r_a57d597614a87020cdcf82ea6e5aa84c1"><td class="memTemplParams" colspan="2">template&lt;typename InputIterator, typename BrightnessIterator, typename OutputIterator&gt; </td></tr>
+<tr class="memitem:a57d597614a87020cdcf82ea6e5aa84c1"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a57d597614a87020cdcf82ea6e5aa84c1.html#a57d597614a87020cdcf82ea6e5aa84c1">fl::encodeAPA102_HD</a> (InputIterator first, InputIterator last, BrightnessIterator brightness_first, OutputIterator out) <a class="el" href="../../d4/d36/namespacefl_aa317f89ca911371e798d08a93770402f.html#aa317f89ca911371e798d08a93770402f">FL_NO_EXCEPT</a></td></tr>
+<tr class="memdesc:a57d597614a87020cdcf82ea6e5aa84c1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Encode pixel data in APA102 format with per-LED brightness.  <br /></td></tr>
+<tr class="separator:a57d597614a87020cdcf82ea6e5aa84c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -173,7 +173,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_4bca70778167b44495d699f593f26052.html">chipsets</a></li><li class="navelem"><a class="el" href="../../dir_d192c7b937ee683426e0e6cba42a0235.html">encoders</a></li><li class="navelem"><a class="el" href="../../db/d13/encoders_2apa102_8h.html">apa102.h</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:01 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:03 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

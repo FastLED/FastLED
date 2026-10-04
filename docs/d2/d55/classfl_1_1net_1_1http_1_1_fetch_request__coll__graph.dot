@@ -24,11 +24,16 @@ digraph "fl::net::http::FetchRequest"
   Node35 [id="Node000035",label="fl::shared_ptr\< fl\l::task::detail::PromiseImpl\l\< T \> \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d1/d74/classfl_1_1shared__ptr.html",tooltip=" "];
   Node31 -> Node35 [id="edge9_Node000035_Node000031",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mControlBlock",fontcolor="grey" ];
   Node33 -> Node35 [id="edge10_Node000035_Node000033",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::task::detail\l::PromiseImpl\< T \> \>",fontcolor="grey" ];
-  Node36 -> Node1 [id="edge11_Node000001_Node000036",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mParsedUrl",fontcolor="grey" ];
-  Node36 [id="Node000036",label="fl::url",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d2/db7/classfl_1_1url.html",tooltip=" "];
-  Node8 -> Node36 [id="edge12_Node000036_Node000008",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mUrl",fontcolor="grey" ];
+  Node36 -> Node1 [id="edge11_Node000001_Node000036",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mOptions",fontcolor="grey" ];
+  Node36 [id="Node000036",label="fl::net::http::RequestOptions",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d7/d70/structfl_1_1net_1_1http_1_1_request_options.html",tooltip="Request options (matches JavaScript fetch RequestInit)"];
+  Node8 -> Node36 [id="edge12_Node000036_Node000008",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" body\nmethod",fontcolor="grey" ];
   Node8 [id="Node000008",label="fl::string",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d2/db2/classfl_1_1string.html",tooltip=" "];
-  Node37 -> Node36 [id="edge13_Node000036_Node000037",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mAuthority\nmFragment\nmHost\nmPath\nmPort\nmQuery\nmScheme\nmUserinfo",fontcolor="grey" ];
-  Node37 [id="Node000037",label="fl::url::Span",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d2/db7/classfl_1_1url.html#d2/d9e/structfl_1_1url_1_1_span",tooltip=" "];
-  Node8 -> Node1 [id="edge14_Node000001_Node000008",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mHostname\nmPath\nmRequestBuffer\nmResponseBuffer",fontcolor="grey" ];
+  Node12 -> Node36 [id="edge13_Node000036_Node000012",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" headers",fontcolor="grey" ];
+  Node12 [id="Node000012",label="fl::MapRedBlackTree\l\< Key, T, Compare, fl\l::allocator_slab\< char\l \> \>\< fl::string, fl::string \>",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$de/dd4/classfl_1_1_map_red_black_tree.html",tooltip=" "];
+  Node37 -> Node1 [id="edge14_Node000001_Node000037",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mParsedUrl",fontcolor="grey" ];
+  Node37 [id="Node000037",label="fl::url",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d2/db7/classfl_1_1url.html",tooltip=" "];
+  Node8 -> Node37 [id="edge15_Node000037_Node000008",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mUrl",fontcolor="grey" ];
+  Node38 -> Node37 [id="edge16_Node000037_Node000038",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mAuthority\nmFragment\nmHost\nmPath\nmPort\nmQuery\nmScheme\nmUserinfo",fontcolor="grey" ];
+  Node38 [id="Node000038",label="fl::url::Span",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d2/db7/classfl_1_1url.html#d2/d9e/structfl_1_1url_1_1_span",tooltip=" "];
+  Node8 -> Node1 [id="edge17_Node000001_Node000008",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mHostname\nmPath\nmRequestBuffer\nmResponseBuffer",fontcolor="grey" ];
 }

@@ -1,0 +1,25 @@
+digraph "fl::third_party::SoftwareGifDecoder::initializeDecoder"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::third_party::Software\lGifDecoder::initializeDecoder",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::third_party::nsgif\l_create",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d86/namespacefl_1_1third__party_a8eef74c8feef65ab9c92f048c57cdae5.html#a8eef74c8feef65ab9c92f048c57cdae5",tooltip="Create the NSGIF object."];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::Malloc",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a95dbc431c0b3451c8ffd336fe2793a47.html#a95dbc431c0b3451c8ffd336fe2793a47",tooltip=" "];
+  Node2 -> Node4 [id="edge3_Node000002_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::memset",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a9416b2c34c489ae11032cb58c2d3c58c.html#a9416b2c34c489ae11032cb58c2d3c58c",tooltip=" "];
+  Node2 -> Node5 [id="edge4_Node000002_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::third_party::nsgif\l__bitmap_fmt_to_colour\l_layout",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d86/namespacefl_1_1third__party_a0de217fff309b92627b1ef8dabdfcdb9.html#a0de217fff309b92627b1ef8dabdfcdb9",tooltip=" "];
+  Node5 -> Node5 [id="edge5_Node000005_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 -> Node6 [id="edge6_Node000005_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::third_party::nsgif\l__host_is_little_endian",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d86/namespacefl_1_1third__party_a69bed39a537fb3068083f0a486559796.html#a69bed39a537fb3068083f0a486559796",tooltip="Check whether the host is little endian."];
+  Node1 -> Node7 [id="edge7_Node000001_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::third_party::nsgif\l_strerror",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d86/namespacefl_1_1third__party_ae190a2225389e0e52586f7c55cf43544.html#ae190a2225389e0e52586f7c55cf43544",tooltip="Convert an error code to a string."];
+  Node1 -> Node8 [id="edge8_Node000001_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl::third_party::Software\lGifDecoder::setError",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d7a/classfl_1_1third__party_1_1_software_gif_decoder_af68838686c8534f2ae4ba8ded76b9352.html#af68838686c8534f2ae4ba8ded76b9352",tooltip=" "];
+}

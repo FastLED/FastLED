@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -123,25 +123,25 @@ $(function(){initNavTree('d4/dfe/classfl_1_1audio_1_1detector_1_1_chord_detector
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d5/d2d/chord_8cpp_8hpp_source.html#l00258">258</a> of file <a class="el" href="../../d5/d2d/chord_8cpp_8hpp_source.html">chord.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  258</span>                                                 {</div>
-<div class="line"><span class="lineno">  259</span>    <span class="comment">// Find max value</span></div>
-<div class="line"><span class="lineno">  260</span>    <span class="keywordtype">float</span> maxVal = 0.0f;</div>
-<div class="line"><span class="lineno">  261</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; 12; i++) {</div>
-<div class="line"><span class="lineno">  262</span>        <span class="keywordflow">if</span> (chroma[i] &gt; maxVal) {</div>
-<div class="line"><span class="lineno">  263</span>            maxVal = chroma[i];</div>
-<div class="line"><span class="lineno">  264</span>        }</div>
-<div class="line"><span class="lineno">  265</span>    }</div>
-<div class="line"><span class="lineno">  266</span> </div>
-<div class="line"><span class="lineno">  267</span>    <span class="comment">// Normalize to 0-1 range</span></div>
-<div class="line"><span class="lineno">  268</span>    <span class="keywordflow">if</span> (maxVal &gt; 1e-6f) {</div>
-<div class="line"><span class="lineno">  269</span>        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; 12; i++) {</div>
-<div class="line"><span class="lineno">  270</span>            chroma[i] /= maxVal;</div>
-<div class="line"><span class="lineno">  271</span>        }</div>
-<div class="line"><span class="lineno">  272</span>    }</div>
-<div class="line"><span class="lineno">  273</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../d5/d2d/chord_8cpp_8hpp_source.html#l00256">256</a> of file <a class="el" href="../../d5/d2d/chord_8cpp_8hpp_source.html">chord.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  256</span>                                                 {</div>
+<div class="line"><span class="lineno">  257</span>    <span class="comment">// Find max value</span></div>
+<div class="line"><span class="lineno">  258</span>    <span class="keywordtype">float</span> maxVal = 0.0f;</div>
+<div class="line"><span class="lineno">  259</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; 12; i++) {</div>
+<div class="line"><span class="lineno">  260</span>        <span class="keywordflow">if</span> (chroma[i] &gt; maxVal) {</div>
+<div class="line"><span class="lineno">  261</span>            maxVal = chroma[i];</div>
+<div class="line"><span class="lineno">  262</span>        }</div>
+<div class="line"><span class="lineno">  263</span>    }</div>
+<div class="line"><span class="lineno">  264</span> </div>
+<div class="line"><span class="lineno">  265</span>    <span class="comment">// Normalize to 0-1 range</span></div>
+<div class="line"><span class="lineno">  266</span>    <span class="keywordflow">if</span> (maxVal &gt; 1e-6f) {</div>
+<div class="line"><span class="lineno">  267</span>        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; 12; i++) {</div>
+<div class="line"><span class="lineno">  268</span>            chroma[i] /= maxVal;</div>
+<div class="line"><span class="lineno">  269</span>        }</div>
+<div class="line"><span class="lineno">  270</span>    }</div>
+<div class="line"><span class="lineno">  271</span>}</div>
 </div><!-- fragment -->
-<p class="reference">Referenced by <a class="el" href="../../d5/d2d/chord_8cpp_8hpp_source.html#l00141">calculateChroma()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d5/d2d/chord_8cpp_8hpp_source.html#l00139">calculateChroma()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -159,7 +159,7 @@ $(function(){initNavTree('d4/dfe/classfl_1_1audio_1_1detector_1_1_chord_detector
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../db/dbf/namespacefl_1_1audio.html">audio</a></li><li class="navelem"><a class="el" href="../../dd/d12/namespacefl_1_1audio_1_1detector.html">detector</a></li><li class="navelem"><a class="el" href="../../d4/dfe/classfl_1_1audio_1_1detector_1_1_chord_detector.html">ChordDetector</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:08 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:11 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -127,22 +127,21 @@ $(function(){initNavTree('db/db0/classfl_1_1_gamma8_impl_acc336dc186c472ef0cb15a
 </table>
 </div><div class="memdoc">
 
-<p>Implements <a class="el" href="../../dc/da5/classfl_1_1_gamma8_ad6323c231dfd4b3dc12e93664e90dacc.html#ad6323c231dfd4b3dc12e93664e90dacc">fl::Gamma8</a>.</p>
+<p>Implements <a class="el" href="../../dc/da5/classfl_1_1_gamma8_a7102813e46aae27207197b58d551241b.html#a7102813e46aae27207197b58d551241b">fl::Gamma8</a>.</p>
 
 <p class="definition">Definition at line <a class="el" href="../../df/d60/ease_8cpp_8hpp_source.html#l00435">435</a> of file <a class="el" href="../../df/d60/ease_8cpp_8hpp_source.html">ease.cpp.hpp</a>.</p>
 <div class="fragment"><div class="line"><span class="lineno">  436</span>                                                                      {</div>
 <div class="line"><span class="lineno">  437</span>        <span class="keyword">using </span><a class="code hl_typedef" href="../../de/d09/namespacefl_1_1anonymous__namespace_02chasing__spirals_8cpp_8hpp_03_a35b7c16dbb81fa10e70a00947b42d887.html#a35b7c16dbb81fa10e70a00947b42d887">FP</a> = <a class="code hl_typedef" href="../../d4/d36/namespacefl_af4b8f13ad8b9d5e4cfa01256884e944b.html#af4b8f13ad8b9d5e4cfa01256884e944b">fl::ufixed_point&lt;8, 8&gt;</a>;</div>
 <div class="line"><span class="lineno">  438</span>        <span class="keyword">const</span> <span class="keywordtype">int</span> n =</div>
-<div class="line"><span class="lineno">  439</span>            input.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac">size</a>() &lt; <a class="code hl_variable" href="../../d8/d94/namespacetest__quick_a8c9b09f7da0aec94eb085625d9c04cdd.html#a8c9b09f7da0aec94eb085625d9c04cdd">output</a>.size() ? input.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac">size</a>() : <a class="code hl_variable" href="../../d8/d94/namespacetest__quick_a8c9b09f7da0aec94eb085625d9c04cdd.html#a8c9b09f7da0aec94eb085625d9c04cdd">output</a>.size();</div>
+<div class="line"><span class="lineno">  439</span>            input.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa">size</a>() &lt; output.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa">size</a>() ? input.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa">size</a>() : output.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa">size</a>();</div>
 <div class="line"><span class="lineno">  440</span>        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; n; ++i) {</div>
-<div class="line"><span class="lineno">  441</span>            <a class="code hl_variable" href="../../d8/d94/namespacetest__quick_a8c9b09f7da0aec94eb085625d9c04cdd.html#a8c9b09f7da0aec94eb085625d9c04cdd">output</a>[i] = FP::from_raw(<a class="code hl_function" href="../../db/db0/classfl_1_1_gamma8_impl_a37ba658ac04593be68aa90bea6ff4956.html#a37ba658ac04593be68aa90bea6ff4956">lerpLut</a>(input[i]));</div>
+<div class="line"><span class="lineno">  441</span>            output[i] = FP::from_raw(<a class="code hl_function" href="../../db/db0/classfl_1_1_gamma8_impl_a37ba658ac04593be68aa90bea6ff4956.html#a37ba658ac04593be68aa90bea6ff4956">lerpLut</a>(input[i]));</div>
 <div class="line"><span class="lineno">  442</span>        }</div>
 <div class="line"><span class="lineno">  443</span>    }</div>
 <div class="ttc" id="aclassfl_1_1_gamma8_impl_a37ba658ac04593be68aa90bea6ff4956_html_a37ba658ac04593be68aa90bea6ff4956"><div class="ttname"><a href="../../db/db0/classfl_1_1_gamma8_impl_a37ba658ac04593be68aa90bea6ff4956.html#a37ba658ac04593be68aa90bea6ff4956">fl::Gamma8Impl::lerpLut</a></div><div class="ttdeci">u16 lerpLut(const fl::ufixed_point&lt; 8, 8 &gt; &amp;fp) const</div><div class="ttdef"><b>Definition</b> <a href="../../df/d60/ease_8cpp_8hpp_source.html#l00446">ease.cpp.hpp:446</a></div></div>
-<div class="ttc" id="aclassfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac_html_aef7ee7eb5254da1ba1eb4f3e0173d0ac"><div class="ttname"><a href="../../d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac">fl::span::size</a></div><div class="ttdeci">constexpr fl::size size() const FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d7a/span_8h_source.html#l00458">span.h:458</a></div></div>
+<div class="ttc" id="aclassfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa_html_aaf3daca1c2c8f93b2ac7b319989b22fa"><div class="ttname"><a href="../../d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa">fl::span::size</a></div><div class="ttdeci">constexpr fl::size size() const FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d7a/span_8h_source.html#l00483">span.h:483</a></div></div>
 <div class="ttc" id="anamespacefl_1_1anonymous__namespace_02chasing__spirals_8cpp_8hpp_03_a35b7c16dbb81fa10e70a00947b42d887_html_a35b7c16dbb81fa10e70a00947b42d887"><div class="ttname"><a href="../../de/d09/namespacefl_1_1anonymous__namespace_02chasing__spirals_8cpp_8hpp_03_a35b7c16dbb81fa10e70a00947b42d887.html#a35b7c16dbb81fa10e70a00947b42d887">fl::anonymous_namespace{chasing_spirals.cpp.hpp}::FP</a></div><div class="ttdeci">fl::s16x16 FP</div><div class="ttdef"><b>Definition</b> <a href="../../d9/dc3/chasing__spirals_8cpp_8hpp_source.html#l00032">chasing_spirals.cpp.hpp:32</a></div></div>
 <div class="ttc" id="anamespacefl_af4b8f13ad8b9d5e4cfa01256884e944b_html_af4b8f13ad8b9d5e4cfa01256884e944b"><div class="ttname"><a href="../../d4/d36/namespacefl_af4b8f13ad8b9d5e4cfa01256884e944b.html#af4b8f13ad8b9d5e4cfa01256884e944b">fl::ufixed_point</a></div><div class="ttdeci">ufixed_integer&lt; IntBits, FracBits &gt; ufixed_point</div><div class="ttdef"><b>Definition</b> <a href="../../de/d62/fixed__point_8h_source.html#l00460">fixed_point.h:460</a></div></div>
-<div class="ttc" id="anamespacetest__quick_a8c9b09f7da0aec94eb085625d9c04cdd_html_a8c9b09f7da0aec94eb085625d9c04cdd"><div class="ttname"><a href="../../d8/d94/namespacetest__quick_a8c9b09f7da0aec94eb085625d9c04cdd.html#a8c9b09f7da0aec94eb085625d9c04cdd">test_quick.output</a></div><div class="ttdeci">output</div><div class="ttdef"><b>Definition</b> <a href="../../d8/def/test__quick_8py_source.html#l00050">test_quick.py:50</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../df/d60/ease_8cpp_8hpp_source.html#l00446">lerpLut()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
@@ -162,7 +161,7 @@ $(function(){initNavTree('db/db0/classfl_1_1_gamma8_impl_acc336dc186c472ef0cb15a
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../db/db0/classfl_1_1_gamma8_impl.html">Gamma8Impl</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:05 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:09 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

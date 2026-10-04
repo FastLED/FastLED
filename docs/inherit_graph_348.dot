@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::detail::max_align\l_with_ld",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d9e/namespacefl_1_1detail.html#d3/d65/unionfl_1_1detail_1_1max__align__with__ld",tooltip=" "];
+  Node0 [id="Node000000",label="fl::detail::DeviceInfoResolver\l\< Bus::AUTO, Which \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d7d/structfl_1_1detail_1_1_device_info_resolver_3_01_bus_1_1_a_u_t_o_00_01_which_01_4.html",tooltip=" "];
 }

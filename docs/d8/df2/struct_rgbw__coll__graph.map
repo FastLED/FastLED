@@ -1,0 +1,14 @@
+<map id="Rgbw" name="Rgbw">
+<area shape="rect" id="Node000001" title=" " alt="" coords="141,401,200,427"/>
+<area shape="rect" id="Node000002" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="92,299,249,339"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="173,353,173,401,168,401,168,353"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl.html#d5/db5/structfl_1_1_diode_profile" title=" " alt="" coords="5,211,123,236"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="87,244,118,273,147,296,144,300,114,277,83,248"/>
+<area shape="rect" id="Node000004" href="$d4/dc0/structfl_1_1detail_1_1_control_block_base.html" title=" " alt="" coords="93,123,291,148"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="192,163,176,299,170,298,186,162"/>
+<area shape="rect" id="Node000007" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="297,211,442,236"/>
+<area shape="poly" id="edge6_Node000007_Node000004" title=" " alt="" coords="229,152,346,208,344,213,227,156"/>
+<area shape="rect" id="Node000005" href="$da/d98/classfl_1_1_atomic_fake.html" title=" " alt="" coords="124,5,260,45"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="195,59,195,122,189,122,189,59"/>
+<area shape="poly" id="edge5_Node000002_Node000007" title=" " alt="" coords="334,244,212,301,210,296,331,239"/>
+</map>

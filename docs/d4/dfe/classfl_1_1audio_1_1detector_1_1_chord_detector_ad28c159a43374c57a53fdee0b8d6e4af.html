@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -127,33 +127,33 @@ $(function(){initNavTree('d4/dfe/classfl_1_1audio_1_1detector_1_1_chord_detector
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d5/d2d/chord_8cpp_8hpp_source.html#l00180">180</a> of file <a class="el" href="../../d5/d2d/chord_8cpp_8hpp_source.html">chord.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  180</span>                                                                   {</div>
-<div class="line"><span class="lineno">  181</span>    <span class="keywordtype">float</span> bestScore = 0.0f;</div>
-<div class="line"><span class="lineno">  182</span>    <span class="keywordtype">int</span> bestRoot = -1;</div>
-<div class="line"><span class="lineno">  183</span>    <a class="code hl_enumeration" href="../../dd/d12/namespacefl_1_1audio_1_1detector_a48f78ccc0932bdc5addc744bbe3578a5.html#a48f78ccc0932bdc5addc744bbe3578a5">ChordType</a> bestType = <a class="code hl_enumvalue" href="../../dd/d12/namespacefl_1_1audio_1_1detector_a48f78ccc0932bdc5addc744bbe3578a5.html#a48f78ccc0932bdc5addc744bbe3578a5a696b031073e74bf2cb98e5ef201d4aa3">ChordType::UNKNOWN</a>;</div>
-<div class="line"><span class="lineno">  184</span> </div>
-<div class="line"><span class="lineno">  185</span>    <span class="comment">// Try all root notes (0-11)</span></div>
-<div class="line"><span class="lineno">  186</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> root = 0; root &lt; 12; root++) {</div>
-<div class="line"><span class="lineno">  187</span>        <span class="comment">// Try all chord templates</span></div>
-<div class="line"><span class="lineno">  188</span>        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> <a class="code hl_variable" href="../../d4/d36/namespacefl_abbddb15aa2e7c8eb469d1dd56d6d2140.html#abbddb15aa2e7c8eb469d1dd56d6d2140">t</a> = 0; <a class="code hl_variable" href="../../d4/d36/namespacefl_abbddb15aa2e7c8eb469d1dd56d6d2140.html#abbddb15aa2e7c8eb469d1dd56d6d2140">t</a> &lt; <a class="code hl_variable" href="../../dd/d12/namespacefl_1_1audio_1_1detector_a1f73a65c762c4876880624ee7d03a4de.html#a1f73a65c762c4876880624ee7d03a4de">kNumChordTemplates</a>; <a class="code hl_variable" href="../../d4/d36/namespacefl_abbddb15aa2e7c8eb469d1dd56d6d2140.html#abbddb15aa2e7c8eb469d1dd56d6d2140">t</a>++) {</div>
-<div class="line"><span class="lineno">  189</span>            <span class="keywordtype">float</span> score = <a class="code hl_function" href="../../d4/dfe/classfl_1_1audio_1_1detector_1_1_chord_detector_aa0a45cb4db883a146956d986f8039db0.html#aa0a45cb4db883a146956d986f8039db0">matchChordPattern</a>(chroma, root, <a class="code hl_variable" href="../../dd/d12/namespacefl_1_1audio_1_1detector_acf81d33f676a3ff32e1608f4f9bf32b9.html#acf81d33f676a3ff32e1608f4f9bf32b9">kChordTemplates</a>[<a class="code hl_variable" href="../../d4/d36/namespacefl_abbddb15aa2e7c8eb469d1dd56d6d2140.html#abbddb15aa2e7c8eb469d1dd56d6d2140">t</a>].type);</div>
-<div class="line"><span class="lineno">  190</span>            <span class="keywordflow">if</span> (score &gt; bestScore) {</div>
-<div class="line"><span class="lineno">  191</span>                bestScore = score;</div>
-<div class="line"><span class="lineno">  192</span>                bestRoot = root;</div>
-<div class="line"><span class="lineno">  193</span>                bestType = <a class="code hl_variable" href="../../dd/d12/namespacefl_1_1audio_1_1detector_acf81d33f676a3ff32e1608f4f9bf32b9.html#acf81d33f676a3ff32e1608f4f9bf32b9">kChordTemplates</a>[<a class="code hl_variable" href="../../d4/d36/namespacefl_abbddb15aa2e7c8eb469d1dd56d6d2140.html#abbddb15aa2e7c8eb469d1dd56d6d2140">t</a>].<a class="code hl_variable" href="../../dd/d12/namespacefl_1_1audio_1_1detector.html#aeafd575187cbe4b795a348c6395c2d5b">type</a>;</div>
-<div class="line"><span class="lineno">  194</span>            }</div>
-<div class="line"><span class="lineno">  195</span>        }</div>
-<div class="line"><span class="lineno">  196</span>    }</div>
-<div class="line"><span class="lineno">  197</span> </div>
-<div class="line"><span class="lineno">  198</span>    <span class="comment">// Confidence threshold</span></div>
-<div class="line"><span class="lineno">  199</span>    <span class="keywordflow">if</span> (bestScore &lt; 0.3f) {</div>
-<div class="line"><span class="lineno">  200</span>        <span class="keywordflow">return</span> Chord();  <span class="comment">// No valid chord</span></div>
-<div class="line"><span class="lineno">  201</span>    }</div>
-<div class="line"><span class="lineno">  202</span> </div>
-<div class="line"><span class="lineno">  203</span>    <span class="keywordflow">return</span> Chord(bestRoot, bestType, bestScore, timestamp);</div>
-<div class="line"><span class="lineno">  204</span>}</div>
-<div class="ttc" id="aclassfl_1_1audio_1_1detector_1_1_chord_detector_aa0a45cb4db883a146956d986f8039db0_html_aa0a45cb4db883a146956d986f8039db0"><div class="ttname"><a href="../../d4/dfe/classfl_1_1audio_1_1detector_1_1_chord_detector_aa0a45cb4db883a146956d986f8039db0.html#aa0a45cb4db883a146956d986f8039db0">fl::audio::detector::ChordDetector::matchChordPattern</a></div><div class="ttdeci">float matchChordPattern(const float *chroma, int root, ChordType type)</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d2d/chord_8cpp_8hpp_source.html#l00206">chord.cpp.hpp:206</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d5/d2d/chord_8cpp_8hpp_source.html#l00178">178</a> of file <a class="el" href="../../d5/d2d/chord_8cpp_8hpp_source.html">chord.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  178</span>                                                                   {</div>
+<div class="line"><span class="lineno">  179</span>    <span class="keywordtype">float</span> bestScore = 0.0f;</div>
+<div class="line"><span class="lineno">  180</span>    <span class="keywordtype">int</span> bestRoot = -1;</div>
+<div class="line"><span class="lineno">  181</span>    <a class="code hl_enumeration" href="../../dd/d12/namespacefl_1_1audio_1_1detector_a48f78ccc0932bdc5addc744bbe3578a5.html#a48f78ccc0932bdc5addc744bbe3578a5">ChordType</a> bestType = <a class="code hl_enumvalue" href="../../dd/d12/namespacefl_1_1audio_1_1detector_a48f78ccc0932bdc5addc744bbe3578a5.html#a48f78ccc0932bdc5addc744bbe3578a5a696b031073e74bf2cb98e5ef201d4aa3">ChordType::UNKNOWN</a>;</div>
+<div class="line"><span class="lineno">  182</span> </div>
+<div class="line"><span class="lineno">  183</span>    <span class="comment">// Try all root notes (0-11)</span></div>
+<div class="line"><span class="lineno">  184</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> root = 0; root &lt; 12; root++) {</div>
+<div class="line"><span class="lineno">  185</span>        <span class="comment">// Try all chord templates</span></div>
+<div class="line"><span class="lineno">  186</span>        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> <a class="code hl_variable" href="../../d4/d36/namespacefl_abbddb15aa2e7c8eb469d1dd56d6d2140.html#abbddb15aa2e7c8eb469d1dd56d6d2140">t</a> = 0; <a class="code hl_variable" href="../../d4/d36/namespacefl_abbddb15aa2e7c8eb469d1dd56d6d2140.html#abbddb15aa2e7c8eb469d1dd56d6d2140">t</a> &lt; <a class="code hl_variable" href="../../dd/d12/namespacefl_1_1audio_1_1detector_a1f73a65c762c4876880624ee7d03a4de.html#a1f73a65c762c4876880624ee7d03a4de">kNumChordTemplates</a>; <a class="code hl_variable" href="../../d4/d36/namespacefl_abbddb15aa2e7c8eb469d1dd56d6d2140.html#abbddb15aa2e7c8eb469d1dd56d6d2140">t</a>++) {</div>
+<div class="line"><span class="lineno">  187</span>            <span class="keywordtype">float</span> score = <a class="code hl_function" href="../../d4/dfe/classfl_1_1audio_1_1detector_1_1_chord_detector_aa0a45cb4db883a146956d986f8039db0.html#aa0a45cb4db883a146956d986f8039db0">matchChordPattern</a>(chroma, root, <a class="code hl_variable" href="../../dd/d12/namespacefl_1_1audio_1_1detector_acf81d33f676a3ff32e1608f4f9bf32b9.html#acf81d33f676a3ff32e1608f4f9bf32b9">kChordTemplates</a>[<a class="code hl_variable" href="../../d4/d36/namespacefl_abbddb15aa2e7c8eb469d1dd56d6d2140.html#abbddb15aa2e7c8eb469d1dd56d6d2140">t</a>].type);</div>
+<div class="line"><span class="lineno">  188</span>            <span class="keywordflow">if</span> (score &gt; bestScore) {</div>
+<div class="line"><span class="lineno">  189</span>                bestScore = score;</div>
+<div class="line"><span class="lineno">  190</span>                bestRoot = root;</div>
+<div class="line"><span class="lineno">  191</span>                bestType = <a class="code hl_variable" href="../../dd/d12/namespacefl_1_1audio_1_1detector_acf81d33f676a3ff32e1608f4f9bf32b9.html#acf81d33f676a3ff32e1608f4f9bf32b9">kChordTemplates</a>[<a class="code hl_variable" href="../../d4/d36/namespacefl_abbddb15aa2e7c8eb469d1dd56d6d2140.html#abbddb15aa2e7c8eb469d1dd56d6d2140">t</a>].<a class="code hl_variable" href="../../dd/d12/namespacefl_1_1audio_1_1detector.html#aeafd575187cbe4b795a348c6395c2d5b">type</a>;</div>
+<div class="line"><span class="lineno">  192</span>            }</div>
+<div class="line"><span class="lineno">  193</span>        }</div>
+<div class="line"><span class="lineno">  194</span>    }</div>
+<div class="line"><span class="lineno">  195</span> </div>
+<div class="line"><span class="lineno">  196</span>    <span class="comment">// Confidence threshold</span></div>
+<div class="line"><span class="lineno">  197</span>    <span class="keywordflow">if</span> (bestScore &lt; 0.3f) {</div>
+<div class="line"><span class="lineno">  198</span>        <span class="keywordflow">return</span> Chord();  <span class="comment">// No valid chord</span></div>
+<div class="line"><span class="lineno">  199</span>    }</div>
+<div class="line"><span class="lineno">  200</span> </div>
+<div class="line"><span class="lineno">  201</span>    <span class="keywordflow">return</span> Chord(bestRoot, bestType, bestScore, timestamp);</div>
+<div class="line"><span class="lineno">  202</span>}</div>
+<div class="ttc" id="aclassfl_1_1audio_1_1detector_1_1_chord_detector_aa0a45cb4db883a146956d986f8039db0_html_aa0a45cb4db883a146956d986f8039db0"><div class="ttname"><a href="../../d4/dfe/classfl_1_1audio_1_1detector_1_1_chord_detector_aa0a45cb4db883a146956d986f8039db0.html#aa0a45cb4db883a146956d986f8039db0">fl::audio::detector::ChordDetector::matchChordPattern</a></div><div class="ttdeci">float matchChordPattern(const float *chroma, int root, ChordType type)</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d2d/chord_8cpp_8hpp_source.html#l00204">chord.cpp.hpp:204</a></div></div>
 <div class="ttc" id="anamespacefl_1_1audio_1_1detector_a1f73a65c762c4876880624ee7d03a4de_html_a1f73a65c762c4876880624ee7d03a4de"><div class="ttname"><a href="../../dd/d12/namespacefl_1_1audio_1_1detector_a1f73a65c762c4876880624ee7d03a4de.html#a1f73a65c762c4876880624ee7d03a4de">fl::audio::detector::kNumChordTemplates</a></div><div class="ttdeci">static const int kNumChordTemplates</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d2d/chord_8cpp_8hpp_source.html#l00034">chord.cpp.hpp:34</a></div></div>
 <div class="ttc" id="anamespacefl_1_1audio_1_1detector_a48f78ccc0932bdc5addc744bbe3578a5_html_a48f78ccc0932bdc5addc744bbe3578a5"><div class="ttname"><a href="../../dd/d12/namespacefl_1_1audio_1_1detector_a48f78ccc0932bdc5addc744bbe3578a5.html#a48f78ccc0932bdc5addc744bbe3578a5">fl::audio::detector::ChordType</a></div><div class="ttdeci">ChordType</div><div class="ttdef"><b>Definition</b> <a href="../../db/d44/chord_8h_source.html#l00014">chord.h:14</a></div></div>
 <div class="ttc" id="anamespacefl_1_1audio_1_1detector_a48f78ccc0932bdc5addc744bbe3578a5_html_a48f78ccc0932bdc5addc744bbe3578a5a696b031073e74bf2cb98e5ef201d4aa3"><div class="ttname"><a href="../../dd/d12/namespacefl_1_1audio_1_1detector_a48f78ccc0932bdc5addc744bbe3578a5.html#a48f78ccc0932bdc5addc744bbe3578a5a696b031073e74bf2cb98e5ef201d4aa3">fl::audio::detector::ChordType::UNKNOWN</a></div><div class="ttdeci">@ UNKNOWN</div><div class="ttdef"><b>Definition</b> <a href="../../db/d44/chord_8h_source.html#l00024">chord.h:24</a></div></div>
@@ -161,7 +161,7 @@ $(function(){initNavTree('d4/dfe/classfl_1_1audio_1_1detector_1_1_chord_detector
 <div class="ttc" id="anamespacefl_1_1audio_1_1detector_html_aeafd575187cbe4b795a348c6395c2d5b"><div class="ttname"><a href="../../dd/d12/namespacefl_1_1audio_1_1detector.html#aeafd575187cbe4b795a348c6395c2d5b">fl::audio::detector::ChordTemplate::type</a></div><div class="ttdeci">ChordType type</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d2d/chord_8cpp_8hpp_source.html#l00018">chord.cpp.hpp:18</a></div></div>
 <div class="ttc" id="anamespacefl_abbddb15aa2e7c8eb469d1dd56d6d2140_html_abbddb15aa2e7c8eb469d1dd56d6d2140"><div class="ttname"><a href="../../d4/d36/namespacefl_abbddb15aa2e7c8eb469d1dd56d6d2140.html#abbddb15aa2e7c8eb469d1dd56d6d2140">fl::t</a></div><div class="ttdeci">t</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d91/transposition_8cpp_8hpp_source.html#l00027">transposition.cpp.hpp:27</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d5/d2d/chord_8cpp_8hpp_source.html#l00023">fl::audio::detector::kChordTemplates</a>, <a class="el" href="../../d5/d2d/chord_8cpp_8hpp_source.html#l00034">fl::audio::detector::kNumChordTemplates</a>, <a class="el" href="../../d5/d2d/chord_8cpp_8hpp_source.html#l00206">matchChordPattern()</a>, <a class="el" href="../../d7/d91/transposition_8cpp_8hpp_source.html#l00027">fl::t</a>, and <a class="el" href="../../db/d44/chord_8h_source.html#l00024">fl::audio::detector::UNKNOWN</a>.</p>
+<p class="reference">References <a class="el" href="../../d5/d2d/chord_8cpp_8hpp_source.html#l00023">fl::audio::detector::kChordTemplates</a>, <a class="el" href="../../d5/d2d/chord_8cpp_8hpp_source.html#l00034">fl::audio::detector::kNumChordTemplates</a>, <a class="el" href="../../d5/d2d/chord_8cpp_8hpp_source.html#l00204">matchChordPattern()</a>, <a class="el" href="../../d7/d91/transposition_8cpp_8hpp_source.html#l00027">fl::t</a>, and <a class="el" href="../../db/d44/chord_8h_source.html#l00024">fl::audio::detector::UNKNOWN</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../d5/d2d/chord_8cpp_8hpp_source.html#l00061">update()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
@@ -188,7 +188,7 @@ $(function(){initNavTree('d4/dfe/classfl_1_1audio_1_1detector_1_1_chord_detector
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../db/dbf/namespacefl_1_1audio.html">audio</a></li><li class="navelem"><a class="el" href="../../dd/d12/namespacefl_1_1audio_1_1detector.html">detector</a></li><li class="navelem"><a class="el" href="../../d4/dfe/classfl_1_1audio_1_1detector_1_1_chord_detector.html">ChordDetector</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:08 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:11 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

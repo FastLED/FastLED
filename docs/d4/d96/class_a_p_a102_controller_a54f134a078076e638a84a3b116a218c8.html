@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -106,7 +106,7 @@ $(function(){initNavTree('d4/d96/class_a_p_a102_controller_a54f134a078076e638a84
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> DATA_PIN, <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> CLOCK_PIN, <a class="el" href="../../d4/d36/namespacefl_ab289ace8bd149d39b87ebd778e9abe23.html#ab289ace8bd149d39b87ebd778e9abe23">EOrder</a> RGB_ORDER = RGB, fl::u32 SPI_SPEED = DATA_RATE_MHZ(6), <a class="el" href="../../d4/d36/namespacefl_a0b4d5ae1c89a46822e8c170e38f43466.html#a0b4d5ae1c89a46822e8c170e38f43466">fl::FiveBitGammaCorrectionMode</a> GAMMA_CORRECTION_MODE = fl::FiveBitGammaCorrectionMode::kFiveBitGammaCorrectionMode_Null, fl::u32 START_FRAME = 0x00000000, fl::u32 END_FRAME = 0xFF000000&gt; </div>
+template&lt;<a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> DATA_PIN, <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> CLOCK_PIN, <a class="el" href="../../d4/d36/namespacefl_ab289ace8bd149d39b87ebd778e9abe23.html#ab289ace8bd149d39b87ebd778e9abe23">EOrder</a> RGB_ORDER = RGB, fl::u32 SPI_SPEED = DATA_RATE_MHZ(6), <a class="el" href="../../d4/d36/namespacefl_a0b4d5ae1c89a46822e8c170e38f43466.html#a0b4d5ae1c89a46822e8c170e38f43466">fl::FiveBitGammaCorrectionMode</a> GAMMA_CORRECTION_MODE = fl::FiveBitGammaCorrectionMode::kFiveBitGammaCorrectionMode_Null, fl::u32 START_FRAME = 0x00000000, fl::u32 END_FRAME = 0xFFFFFFFF&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -128,19 +128,19 @@ template&lt;<a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2b
 <p>Get padding LED frame for synchronized latching in quad-SPI Returns a black LED frame to prepend to shorter strips, ensuring all strips finish transmitting simultaneously for synchronized updates. </p>
 <dl class="section return"><dt>Returns</dt><dd>Black LED frame (4 bytes: brightness=0, RGB=0,0,0) </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d3/de8/apa102_8h_source.html#l00239">239</a> of file <a class="el" href="../../d3/de8/apa102_8h_source.html">apa102.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  239</span>                                                   {  <span class="comment">// okay static in header</span></div>
-<div class="line"><span class="lineno">  240</span>        <span class="comment">// APA102 LED frame format: [111BBBBB][B][G][R]</span></div>
-<div class="line"><span class="lineno">  241</span>        <span class="comment">// Black LED: 0xE0 (brightness=0), RGB=0,0,0</span></div>
-<div class="line"><span class="lineno">  242</span>        <span class="keyword">static</span> <span class="keyword">const</span> <a class="code hl_class" href="../../d4/d96/class_a_p_a102_controller.html">fl::u8</a> <a class="code hl_class" href="../../d4/d96/class_a_p_a102_controller.html">frame</a>[] = {  <span class="comment">// okay static in header</span></div>
-<div class="line"><span class="lineno">  243</span>            0xE0,  <span class="comment">// Brightness byte (111 00000 = brightness 0)</span></div>
-<div class="line"><span class="lineno">  244</span>            0x00,  <span class="comment">// Blue = 0</span></div>
-<div class="line"><span class="lineno">  245</span>            0x00,  <span class="comment">// Green = 0</span></div>
-<div class="line"><span class="lineno">  246</span>            0x00   <span class="comment">// Red = 0</span></div>
-<div class="line"><span class="lineno">  247</span>        };</div>
-<div class="line"><span class="lineno">  248</span>        <span class="keywordflow">return</span> <a class="code hl_class" href="../../d4/d96/class_a_p_a102_controller.html">fl::span&lt;const fl::u8&gt;</a>(<a class="code hl_class" href="../../d4/d96/class_a_p_a102_controller.html">frame</a>, 4);</div>
-<div class="line"><span class="lineno">  249</span>    }</div>
-<div class="ttc" id="aclass_a_p_a102_controller_html"><div class="ttname"><a href="../../d4/d96/class_a_p_a102_controller.html">APA102Controller</a></div><div class="ttdoc">APA102 controller class.</div><div class="ttdef"><b>Definition</b> <a href="../../d3/de8/apa102_8h_source.html#l00038">apa102.h:38</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d3/de8/apa102_8h_source.html#l00249">249</a> of file <a class="el" href="../../d3/de8/apa102_8h_source.html">apa102.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  249</span>                                                   {  <span class="comment">// okay static in header</span></div>
+<div class="line"><span class="lineno">  250</span>        <span class="comment">// APA102 LED frame format: [111BBBBB][B][G][R]</span></div>
+<div class="line"><span class="lineno">  251</span>        <span class="comment">// Black LED: 0xE0 (brightness=0), RGB=0,0,0</span></div>
+<div class="line"><span class="lineno">  252</span>        <span class="keyword">static</span> <span class="keyword">const</span> <a class="code hl_class" href="../../d4/d96/class_a_p_a102_controller.html">fl::u8</a> <a class="code hl_class" href="../../d4/d96/class_a_p_a102_controller.html">frame</a>[] = {  <span class="comment">// okay static in header</span></div>
+<div class="line"><span class="lineno">  253</span>            0xE0,  <span class="comment">// Brightness byte (111 00000 = brightness 0)</span></div>
+<div class="line"><span class="lineno">  254</span>            0x00,  <span class="comment">// Blue = 0</span></div>
+<div class="line"><span class="lineno">  255</span>            0x00,  <span class="comment">// Green = 0</span></div>
+<div class="line"><span class="lineno">  256</span>            0x00   <span class="comment">// Red = 0</span></div>
+<div class="line"><span class="lineno">  257</span>        };</div>
+<div class="line"><span class="lineno">  258</span>        <span class="keywordflow">return</span> <a class="code hl_class" href="../../d4/d96/class_a_p_a102_controller.html">fl::span&lt;const fl::u8&gt;</a>(<a class="code hl_class" href="../../d4/d96/class_a_p_a102_controller.html">frame</a>, 4);</div>
+<div class="line"><span class="lineno">  259</span>    }</div>
+<div class="ttc" id="aclass_a_p_a102_controller_html"><div class="ttname"><a href="../../d4/d96/class_a_p_a102_controller.html">APA102Controller</a></div><div class="ttdoc">APA102 controller class.</div><div class="ttdef"><b>Definition</b> <a href="../../d3/de8/apa102_8h_source.html#l00042">apa102.h:42</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -151,7 +151,7 @@ template&lt;<a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2b
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d96/class_a_p_a102_controller.html">APA102Controller</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:03 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -1,0 +1,15 @@
+<map id="fl::rgb_2_rgbw" name="fl::rgb_2_rgbw">
+<area shape="rect" id="Node000001" title="Converts RGB to RGBW using one of the functions." alt="" coords="696,106,809,131"/>
+<area shape="rect" id="Node000002" href="$d3/d1d/group___power_ga01ec0d809cace073e7c92f323cbd38a1.html#ga01ec0d809cace073e7c92f323cbd38a1" title="Same, for a strip driven through the RGBW conversion." alt="" coords="485,5,632,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="719,101,647,60,619,48,621,43,649,55,722,96"/>
+<area shape="rect" id="Node000003" href="$d0/dee/struct_pixel_controller_af9320cb2184eab8cd1745e520c68ca62.html#af9320cb2184eab8cd1745e520c68ca62" title="loadAndScaleRGBW before its wire reorder: RGB in source order plus W." alt="" coords="469,69,648,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="682,111,648,105,648,100,683,105"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_af3542d7e69706a23e59f68a803550161.html#af3542d7e69706a23e59f68a803550161" title=" " alt="" coords="502,134,615,159"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="683,131,616,141,615,136,682,126"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_a147010e2e1d4169b136516045ad0cbc0.html#a147010e2e1d4169b136516045ad0cbc0" title=" " alt="" coords="502,183,615,209"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="718,140,649,173,611,186,609,181,647,168,716,136"/>
+<area shape="rect" id="Node000004" href="$d0/dee/struct_pixel_controller_a5aa57de8397b498ea587b5f0c049ced5.html#a5aa57de8397b498ea587b5f0c049ced5" title=" " alt="" coords="243,69,421,109"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="455,92,422,92,422,87,455,87"/>
+<area shape="rect" id="Node000005" href="$d4/d28/group___chipsets_gaba9a2f023f2950dbcdf3c2482f765350.html#gaba9a2f023f2950dbcdf3c2482f765350" title="Main rendering function that converts RGB to RGBW and shows pixels." alt="" coords="5,69,195,109"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="229,92,195,92,195,87,229,87"/>
+</map>

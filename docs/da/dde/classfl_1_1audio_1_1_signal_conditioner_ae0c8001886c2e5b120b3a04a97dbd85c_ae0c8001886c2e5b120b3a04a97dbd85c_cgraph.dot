@@ -1,0 +1,45 @@
+digraph "fl::audio::SignalConditioner::processSample"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::audio::SignalConditioner\l::processSample",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Process a raw audio sample through the conditioning pipeline."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::audio::SignalConditioner\l::applyNoiseGate",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dde/classfl_1_1audio_1_1_signal_conditioner_a3315afd633c00fe262dedba1091d2fe5.html#a3315afd633c00fe262dedba1091d2fe5",tooltip="Apply noise gate with hysteresis."];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::vector::clear",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d24/classfl_1_1vector_a6bcea23da2d1c39846ec89a5119310ff.html#a6bcea23da2d1c39846ec89a5119310ff",tooltip=" "];
+  Node2 -> Node4 [id="edge3_Node000002_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::vector::push_back",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d24/classfl_1_1vector_a82c3455c1a345460f95a0180c93b3fb0.html#a82c3455c1a345460f95a0180c93b3fb0",tooltip=" "];
+  Node2 -> Node5 [id="edge4_Node000002_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::vector::reserve",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d24/classfl_1_1vector_a106fe3779897c81ef234f25952ed29d7.html#a106fe3779897c81ef234f25952ed29d7",tooltip=" "];
+  Node2 -> Node6 [id="edge5_Node000002_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::sample",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a7028271728479d2b9330f545c776ca5b.html#a7028271728479d2b9330f545c776ca5b",tooltip="Sample a pixel from a 2D CRGB grid at floating-point coordinates."];
+  Node6 -> Node7 [id="edge6_Node000006_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::sampleBilinear",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d36/namespacefl_ae42bfeb5fc989a01c398b85f4e3accca.html#ae42bfeb5fc989a01c398b85f4e3accca",tooltip="Bilinear interpolation sample from a 2D CRGB grid."];
+  Node6 -> Node12 [id="edge7_Node000006_Node000012",color="steelblue1",style="solid",tooltip=" "];
+  Node12 [id="Node000012",label="fl::sampleNearest",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d36/namespacefl_a119e769098c559cc0883bed762678d55.html#a119e769098c559cc0883bed762678d55",tooltip="Nearest-neighbor sample from a 2D CRGB grid."];
+  Node2 -> Node13 [id="edge8_Node000002_Node000013",color="steelblue1",style="solid",tooltip=" "];
+  Node13 [id="Node000013",label="fl::span::size",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa",tooltip=" "];
+  Node1 -> Node14 [id="edge9_Node000001_Node000014",color="steelblue1",style="solid",tooltip=" "];
+  Node14 [id="Node000014",label="fl::audio::SignalConditioner\l::calculateDCOffset",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dde/classfl_1_1audio_1_1_signal_conditioner_ab399a15fb6495148c7a09417ed68d93a.html#ab399a15fb6495148c7a09417ed68d93a",tooltip="Calculate DC offset from valid samples only."];
+  Node14 -> Node13 [id="edge10_Node000014_Node000013",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node15 [id="edge11_Node000001_Node000015",color="steelblue1",style="solid",tooltip=" "];
+  Node15 [id="Node000015",label="fl::audio::SignalConditioner\l::filterSpikes",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dde/classfl_1_1audio_1_1_signal_conditioner_af158561b35f56da9bd924e98cd012daf.html#af158561b35f56da9bd924e98cd012daf",tooltip="Detect and reject spike samples."];
+  Node15 -> Node3 [id="edge12_Node000015_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node15 -> Node4 [id="edge13_Node000015_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node15 -> Node5 [id="edge14_Node000015_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node15 -> Node6 [id="edge15_Node000015_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node15 -> Node13 [id="edge16_Node000015_Node000013",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node16 [id="edge17_Node000001_Node000016",color="steelblue1",style="solid",tooltip=" "];
+  Node16 [id="Node000016",label="fl::make_shared",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af",tooltip=" "];
+  Node1 -> Node17 [id="edge18_Node000001_Node000017",color="steelblue1",style="solid",tooltip=" "];
+  Node17 [id="Node000017",label="fl::audio::SignalConditioner\l::removeDCOffset",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dde/classfl_1_1audio_1_1_signal_conditioner_a0c302cefc461912305e83274cc246508.html#a0c302cefc461912305e83274cc246508",tooltip="Remove DC offset from samples."];
+  Node17 -> Node3 [id="edge19_Node000017_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node17 -> Node4 [id="edge20_Node000017_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node17 -> Node5 [id="edge21_Node000017_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node17 -> Node13 [id="edge22_Node000017_Node000013",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node6 [id="edge23_Node000001_Node000006",color="steelblue1",style="solid",tooltip=" "];
+}

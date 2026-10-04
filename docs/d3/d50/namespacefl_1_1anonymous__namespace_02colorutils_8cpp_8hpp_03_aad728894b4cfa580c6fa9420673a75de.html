@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -127,18 +127,18 @@ $(function(){initNavTree('d3/d50/namespacefl_1_1anonymous__namespace_02colorutil
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d4e/colorutils_8cpp_8hpp_source.html#l00289">289</a> of file <a class="el" href="../../db/d4e/colorutils_8cpp_8hpp_source.html">colorutils.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  289</span>                                                           {</div>
-<div class="line"><span class="lineno">  290</span>    <span class="keyword">const</span> fl::u32 scaled =</div>
-<div class="line"><span class="lineno">  291</span>        (<span class="keyword">static_cast&lt;</span>fl::u32<span class="keyword">&gt;</span>(channel) * <a class="code hl_variable" href="../../d3/dac/_fx_noise_ring_8ino_ae6325d6552afdaddd577e0ccce29ceba.html#ae6325d6552afdaddd577e0ccce29ceba">scale</a>.raw()) &gt;&gt; 8;</div>
-<div class="line"><span class="lineno">  292</span>    <span class="keywordflow">return</span> scaled &gt; 0xFFFFu ? fl::u16(0xFFFF) : static_cast&lt;<a class="code hl_namespace" href="../../d4/d36/namespacefl.html">fl</a>::u16&gt;(scaled);</div>
-<div class="line"><span class="lineno">  293</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../db/d4e/colorutils_8cpp_8hpp_source.html#l00370">370</a> of file <a class="el" href="../../db/d4e/colorutils_8cpp_8hpp_source.html">colorutils.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  370</span>                                                           {</div>
+<div class="line"><span class="lineno">  371</span>    <span class="keyword">const</span> fl::u32 scaled =</div>
+<div class="line"><span class="lineno">  372</span>        (<span class="keyword">static_cast&lt;</span>fl::u32<span class="keyword">&gt;</span>(channel) * <a class="code hl_variable" href="../../d3/dac/_fx_noise_ring_8ino_ae6325d6552afdaddd577e0ccce29ceba.html#ae6325d6552afdaddd577e0ccce29ceba">scale</a>.raw()) &gt;&gt; 8;</div>
+<div class="line"><span class="lineno">  373</span>    <span class="keywordflow">return</span> scaled &gt; 0xFFFFu ? fl::u16(0xFFFF) : static_cast&lt;<a class="code hl_namespace" href="../../d4/d36/namespacefl.html">fl</a>::u16&gt;(scaled);</div>
+<div class="line"><span class="lineno">  374</span>}</div>
 <div class="ttc" id="a_fx_noise_ring_8ino_ae6325d6552afdaddd577e0ccce29ceba_html_ae6325d6552afdaddd577e0ccce29ceba"><div class="ttname"><a href="../../d3/dac/_fx_noise_ring_8ino_ae6325d6552afdaddd577e0ccce29ceba.html#ae6325d6552afdaddd577e0ccce29ceba">scale</a></div><div class="ttdeci">fl::UISlider scale(&quot;Scale&quot;, 4,.1, 4,.1)</div></div>
 <div class="ttc" id="anamespacefl_html"><div class="ttname"><a href="../../d4/d36/namespacefl.html">fl</a></div><div class="ttdoc">Base definition for an LED controller.</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d4b/crgb_8hpp_source.html#l00179">crgb.hpp:179</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d3/dac/_fx_noise_ring_8ino_ae6325d6552afdaddd577e0ccce29ceba.html#ae6325d6552afdaddd577e0ccce29ceba">scale</a>, and <a class="el" href="../../db/d4e/colorutils_8cpp_8hpp_source.html#l00289">scale_hd_channel()</a>.</p>
+<p class="reference">References <a class="el" href="../../d3/dac/_fx_noise_ring_8ino_ae6325d6552afdaddd577e0ccce29ceba.html#ae6325d6552afdaddd577e0ccce29ceba">scale</a>, and <a class="el" href="../../db/d4e/colorutils_8cpp_8hpp_source.html#l00370">scale_hd_channel()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../db/d4e/colorutils_8cpp_8hpp_source.html#l00289">scale_hd_channel()</a>, and <a class="el" href="../../db/d4e/colorutils_8cpp_8hpp_source.html#l00295">scale_rgb_hd()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../db/d4e/colorutils_8cpp_8hpp_source.html#l00370">scale_hd_channel()</a>, and <a class="el" href="../../db/d4e/colorutils_8cpp_8hpp_source.html#l00376">scale_rgb_hd()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -163,7 +163,7 @@ $(function(){initNavTree('d3/d50/namespacefl_1_1anonymous__namespace_02colorutil
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d3/d50/namespacefl_1_1anonymous__namespace_02colorutils_8cpp_8hpp_03.html">anonymous_namespace{colorutils.cpp.hpp}</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:07 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:10 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

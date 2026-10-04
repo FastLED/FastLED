@@ -1,0 +1,26 @@
+<map id="fl::PixelIterator::writeWS2812" name="fl::PixelIterator::writeWS2812">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,146,131,186"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a021929c212e1cf2dcb7c11445c6c9744.html#a021929c212e1cf2dcb7c11445c6c9744" title="Helper function to create a back_insert_iterator." alt="" coords="231,5,357,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="79,144,118,91,146,63,177,40,216,24,218,29,180,44,149,67,122,95,83,147"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_ac0ba01a5693cd8c8ed52829a6c3c7b92.html#ac0ba01a5693cd8c8ed52829a6c3c7b92" title="Encode 3&#45;byte pixel data in WS2812 format." alt="" coords="207,55,381,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="91,144,130,115,178,89,198,81,200,86,180,94,133,120,94,148"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a3106d0b548eb61a422c162bec57831ad.html#a3106d0b548eb61a422c162bec57831ad" title="Encode 4&#45;byte pixel data in WS2812 format." alt="" coords="201,104,387,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="131,149,178,138,217,130,218,135,179,143,132,154"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a2d5892aa383ece7364e3c48f9a98f5e9.html#a2d5892aa383ece7364e3c48f9a98f5e9" title="Encode 5&#45;byte pixel data in WS2812 format (issue #2558, RGBWW)." alt="" coords="195,153,393,179"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="131,163,181,163,181,169,131,169"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_adc2a6d67292f87361ce6d24c000d1ef0.html#adc2a6d67292f87361ce6d24c000d1ef0" title="Create RGB input iterator range from PixelIterator." alt="" coords="185,227,403,252"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="131,184,241,220,240,225,130,189"/>
+<area shape="rect" id="Node000009" href="$d4/d36/namespacefl_a6b4108d3bdb4fef9ebac608e652146fc.html#a6b4108d3bdb4fef9ebac608e652146fc" title="Create RGBW input iterator range from PixelIterator." alt="" coords="179,300,409,325"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="90,184,130,222,180,261,243,293,241,297,177,266,126,227,86,188"/>
+<area shape="rect" id="Node000010" href="$d4/d36/namespacefl_aee850565d7c7536162d49010c6df90d2.html#aee850565d7c7536162d49010c6df90d2" title="Create RGBWW input iterator range from PixelIterator (issue #2558)" alt="" coords="199,374,389,414"/>
+<area shape="poly" id="edge12_Node000001_Node000010" title=" " alt="" coords="80,185,118,257,146,298,180,335,203,352,228,366,225,370,200,356,177,339,142,301,113,259,76,188"/>
+<area shape="poly" id="edge8_Node000006_Node000006" title=" " alt="" coords="259,228,251,218,255,208,270,202,294,200,324,204,336,213,333,217,322,209,294,205,271,207,259,212,256,218,263,225"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_a53d5062c3cacc67b60ff5bc033333817.html#a53d5062c3cacc67b60ff5bc033333817" title=" " alt="" coords="457,300,564,325"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="370,249,410,261,476,291,474,296,408,266,368,255"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_a94488336a5db985fbda1bbd317bffc6a.html#a94488336a5db985fbda1bbd317bffc6a" title=" " alt="" coords="612,300,700,325"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="564,310,598,310,598,315,564,315"/>
+<area shape="poly" id="edge10_Node000009_Node000007" title=" " alt="" coords="410,310,443,310,443,315,410,315"/>
+<area shape="poly" id="edge11_Node000009_Node000009" title=" " alt="" coords="259,302,251,292,255,282,270,276,294,273,324,277,336,286,333,290,322,282,294,279,271,281,259,286,256,291,263,298"/>
+<area shape="poly" id="edge13_Node000010_Node000007" title=" " alt="" coords="347,371,462,328,464,333,349,376"/>
+<area shape="poly" id="edge14_Node000010_Node000010" title=" " alt="" coords="253,374,251,364,258,355,272,349,294,347,319,350,333,358,331,362,318,355,294,353,273,355,261,359,256,365,259,373"/>
+</map>

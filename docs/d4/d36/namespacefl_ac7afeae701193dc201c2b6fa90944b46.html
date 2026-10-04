@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -109,7 +109,7 @@ $(function(){initNavTree('d4/d36/namespacefl_ac7afeae701193dc201c2b6fa90944b46.h
         <tr>
           <td class="memname"><a class="el" href="../../d4/d36/namespacefl.html#d3/d78/structfl_1_1_mp4_track_info">Mp4TrackInfo</a> fl::parseMp4 </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="../../d0/d08/classfl_1_1span.html">fl::span</a>&lt; const <a class="el" href="../../da/d3c/namespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c.html#a7573a66f01c09f14a1ff0411f8e1153c">fl::u8</a> &gt;</td>          <td class="paramname"><span class="paramname"><em>data</em></span>, </td>
+          <td class="paramtype"><a class="el" href="../../d0/d08/classfl_1_1span.html">fl::span</a>&lt; const <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> &gt;</td>          <td class="paramname"><span class="paramname"><em>data</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -123,13 +123,13 @@ $(function(){initNavTree('d4/d36/namespacefl_ac7afeae701193dc201c2b6fa90944b46.h
 <div class="fragment"><div class="line"><span class="lineno">  106</span>                                                                {</div>
 <div class="line"><span class="lineno">  107</span>    <a class="code hl_struct" href="../../d4/d36/namespacefl.html#d3/d78/structfl_1_1_mp4_track_info">Mp4TrackInfo</a> info;</div>
 <div class="line"><span class="lineno">  108</span> </div>
-<div class="line"><span class="lineno">  109</span>    <span class="keywordflow">if</span> (data.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac">size</a>() &lt; 8) {</div>
+<div class="line"><span class="lineno">  109</span>    <span class="keywordflow">if</span> (data.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa">size</a>() &lt; 8) {</div>
 <div class="line"><span class="lineno">  110</span>        <span class="keywordflow">if</span> (error) *error = <span class="stringliteral">&quot;Data too small for MP4&quot;</span>;</div>
 <div class="line"><span class="lineno">  111</span>        <span class="keywordflow">return</span> info;</div>
 <div class="line"><span class="lineno">  112</span>    }</div>
 <div class="line"><span class="lineno">  113</span> </div>
 <div class="line"><span class="lineno">  114</span>    <span class="comment">// Find moov box at top level</span></div>
-<div class="line"><span class="lineno">  115</span>    fl::size moovPos = findBox(data, 0, data.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac">size</a>(), <span class="stringliteral">&quot;moov&quot;</span>);</div>
+<div class="line"><span class="lineno">  115</span>    fl::size moovPos = findBox(data, 0, data.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa">size</a>(), <span class="stringliteral">&quot;moov&quot;</span>);</div>
 <div class="line"><span class="lineno">  116</span>    <span class="keywordflow">if</span> (moovPos == fl::size(-1)) {</div>
 <div class="line"><span class="lineno">  117</span>        <span class="keywordflow">if</span> (error) *error = <span class="stringliteral">&quot;No moov box found&quot;</span>;</div>
 <div class="line"><span class="lineno">  118</span>        <span class="keywordflow">return</span> info;</div>
@@ -142,7 +142,7 @@ $(function(){initNavTree('d4/d36/namespacefl_ac7afeae701193dc201c2b6fa90944b46.h
 <div class="line"><span class="lineno">  125</span>        <span class="keywordflow">return</span> info;</div>
 <div class="line"><span class="lineno">  126</span>    }</div>
 <div class="line"><span class="lineno">  127</span>    fl::size moovEnd = moovPos + moovSize;</div>
-<div class="line"><span class="lineno">  128</span>    <span class="keywordflow">if</span> (moovEnd &gt; data.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac">size</a>()) moovEnd = data.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac">size</a>();</div>
+<div class="line"><span class="lineno">  128</span>    <span class="keywordflow">if</span> (moovEnd &gt; data.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa">size</a>()) moovEnd = data.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa">size</a>();</div>
 <div class="line"><span class="lineno">  129</span>    fl::size moovBody = moovPos + 8;</div>
 <div class="line"><span class="lineno">  130</span> </div>
 <div class="line"><span class="lineno">  131</span>    <span class="comment">// Find trak box inside moov</span></div>
@@ -296,7 +296,7 @@ $(function(){initNavTree('d4/d36/namespacefl_ac7afeae701193dc201c2b6fa90944b46.h
 <div class="line"><span class="lineno">  279</span>    info.<a class="code hl_variable" href="../../d4/d36/namespacefl.html#ad6e08d04986abcd6f2e2a3f9240a531e">isValid</a> = <span class="keyword">true</span>;</div>
 <div class="line"><span class="lineno">  280</span>    <span class="keywordflow">return</span> info;</div>
 <div class="line"><span class="lineno">  281</span>}</div>
-<div class="ttc" id="aclassfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac_html_aef7ee7eb5254da1ba1eb4f3e0173d0ac"><div class="ttname"><a href="../../d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac">fl::span::size</a></div><div class="ttdeci">constexpr fl::size size() const FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d7a/span_8h_source.html#l00458">span.h:458</a></div></div>
+<div class="ttc" id="aclassfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa_html_aaf3daca1c2c8f93b2ac7b319989b22fa"><div class="ttname"><a href="../../d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa">fl::span::size</a></div><div class="ttdeci">constexpr fl::size size() const FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d7a/span_8h_source.html#l00483">span.h:483</a></div></div>
 <div class="ttc" id="anamespacefl_1_1anonymous__namespace_02mp4__parser_8cpp_8hpp_03_a1523fe6f710c09e6c86f157018f2be65_html_a1523fe6f710c09e6c86f157018f2be65"><div class="ttname"><a href="../../d5/db0/namespacefl_1_1anonymous__namespace_02mp4__parser_8cpp_8hpp_03_a1523fe6f710c09e6c86f157018f2be65.html#a1523fe6f710c09e6c86f157018f2be65">fl::anonymous_namespace{mp4_parser.cpp.hpp}::parseAvcC</a></div><div class="ttdeci">bool parseAvcC(fl::span&lt; const fl::u8 &gt; data, fl::size offset, fl::size boxEnd, Mp4TrackInfo &amp;info)</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d97/mp4__parser_8cpp_8hpp_source.html#l00046">mp4_parser.cpp.hpp:46</a></div></div>
 <div class="ttc" id="anamespacefl_1_1anonymous__namespace_02mp4__parser_8cpp_8hpp_03_a1f7e432a75b3f4145be483642b478825_html_a1f7e432a75b3f4145be483642b478825"><div class="ttname"><a href="../../d5/db0/namespacefl_1_1anonymous__namespace_02mp4__parser_8cpp_8hpp_03_a1f7e432a75b3f4145be483642b478825.html#a1f7e432a75b3f4145be483642b478825">fl::anonymous_namespace{mp4_parser.cpp.hpp}::readU32BE</a></div><div class="ttdeci">fl::u32 readU32BE(fl::span&lt; const fl::u8 &gt; data, fl::size offset, bool &amp;ok)</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d97/mp4__parser_8cpp_8hpp_source.html#l00009">mp4_parser.cpp.hpp:9</a></div></div>
 <div class="ttc" id="anamespacefl_1_1anonymous__namespace_02mp4__parser_8cpp_8hpp_03_a32615700d67cc4ad39a8371dec76a3ea_html_a32615700d67cc4ad39a8371dec76a3ea"><div class="ttname"><a href="../../d5/db0/namespacefl_1_1anonymous__namespace_02mp4__parser_8cpp_8hpp_03_a32615700d67cc4ad39a8371dec76a3ea.html#a32615700d67cc4ad39a8371dec76a3ea">fl::anonymous_namespace{mp4_parser.cpp.hpp}::readU16BE</a></div><div class="ttdeci">fl::u16 readU16BE(fl::span&lt; const fl::u8 &gt; data, fl::size offset, bool &amp;ok)</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d97/mp4__parser_8cpp_8hpp_source.html#l00017">mp4_parser.cpp.hpp:17</a></div></div>
@@ -306,7 +306,7 @@ $(function(){initNavTree('d4/d36/namespacefl_ac7afeae701193dc201c2b6fa90944b46.h
 <div class="ttc" id="anamespacefl_html_ad6e08d04986abcd6f2e2a3f9240a531e"><div class="ttname"><a href="../../d4/d36/namespacefl.html#ad6e08d04986abcd6f2e2a3f9240a531e">fl::Mp4TrackInfo::isValid</a></div><div class="ttdeci">bool isValid</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d45/mp4__parser_8h_source.html#l00022">mp4_parser.h:22</a></div></div>
 <div class="ttc" id="anamespacefl_html_d3/d78/structfl_1_1_mp4_track_info"><div class="ttname"><a href="../../d4/d36/namespacefl.html#d3/d78/structfl_1_1_mp4_track_info">fl::Mp4TrackInfo</a></div><div class="ttdef"><b>Definition</b> <a href="../../d4/d45/mp4__parser_8h_source.html#l00014">mp4_parser.h:14</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d4/d45/mp4__parser_8h_source.html#l00016">fl::Mp4TrackInfo::height</a>, <a class="el" href="../../d4/d45/mp4__parser_8h_source.html#l00022">fl::Mp4TrackInfo::isValid</a>, <a class="el" href="../../d4/d7a/span_8h_source.html#l00458">fl::span&lt; T, Extent &gt;::size()</a>, and <a class="el" href="../../d4/d45/mp4__parser_8h_source.html#l00015">fl::Mp4TrackInfo::width</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d45/mp4__parser_8h_source.html#l00016">fl::Mp4TrackInfo::height</a>, <a class="el" href="../../d4/d45/mp4__parser_8h_source.html#l00022">fl::Mp4TrackInfo::isValid</a>, <a class="el" href="../../d4/d7a/span_8h_source.html#l00483">fl::span&lt; T, Extent &gt;::size()</a>, and <a class="el" href="../../d4/d45/mp4__parser_8h_source.html#l00015">fl::Mp4TrackInfo::width</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../db/da1/h264_8cpp_8hpp_source.html#l00196">fl::H264::parseH264Info()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
@@ -321,7 +321,7 @@ $(function(){initNavTree('d4/d36/namespacefl_ac7afeae701193dc201c2b6fa90944b46.h
 <div id="dynsection-1-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-1-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d4/d36/namespacefl_ac7afeae701193dc201c2b6fa90944b46_ac7afeae701193dc201c2b6fa90944b46_icgraph.svg" width="100%" height="300"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d4/d36/namespacefl_ac7afeae701193dc201c2b6fa90944b46_ac7afeae701193dc201c2b6fa90944b46_icgraph.svg" width="336" height="36"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 
 </div>
@@ -333,7 +333,7 @@ $(function(){initNavTree('d4/d36/namespacefl_ac7afeae701193dc201c2b6fa90944b46.h
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:04 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:08 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

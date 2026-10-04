@@ -21,7 +21,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../d6/d6c/group___beat_generators_ga7195cd79b30358b151154623586631aa.html#ga7195cd79b30358b151154623586631aa" target="_top" xlink:title="Generates an 8&#45;bit &quot;sawtooth&quot; wave at a given BPM.">
+<g id="a_Node000002"><a xlink:href="../../d6/d6c/group___beat_generators_ga6931d7f79bebd9c76e29fb41aafe5e9e.html#ga6931d7f79bebd9c76e29fb41aafe5e9e" target="_top" xlink:title="Generates an 8&#45;bit &quot;sawtooth&quot; wave at a given BPM.">
 <polygon fill="white" stroke="#666666" points="308,-38 252,-38 252,-19 308,-19 308,-38"/>
 <text text-anchor="middle" x="280" y="-26" font-family="Helvetica,sans-Serif" font-size="10.00">fl::beat8</text>
 </a>
@@ -39,7 +39,7 @@
 <!-- Node6 -->
 <g id="Node000006" class="node">
 <title>Node6</title>
-<g id="a_Node000006"><a xlink:href="../../d6/d6c/group___beat_generators_ga696b9421eca961df0a68c7c6c3e983ab.html#ga696b9421eca961df0a68c7c6c3e983ab" target="_top" xlink:title="Generates an 8&#45;bit sine wave at a given BPM that oscillates within a given range.">
+<g id="a_Node000006"><a xlink:href="../../d6/d6c/group___beat_generators_gaca012663c6c8fe9a7240bcbc76095ba9.html#gaca012663c6c8fe9a7240bcbc76095ba9" target="_top" xlink:title="Generates an 8&#45;bit sine wave at a given BPM that oscillates within a given range.">
 <polygon fill="white" stroke="#666666" points="216,-19 145,-19 145,0 216,0 216,-19"/>
 <text text-anchor="middle" x="180.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::beatsin8</text>
 </a>
@@ -57,7 +57,7 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d6/d6c/group___beat_generators_ga120dfa6dac7fa3d3958ae1e30b64e1d7.html#ga120dfa6dac7fa3d3958ae1e30b64e1d7" target="_top" xlink:title="Generates a 16&#45;bit &quot;sawtooth&quot; wave at a given BPM.">
+<g id="a_Node000003"><a xlink:href="../../d6/d6c/group___beat_generators_gad335b2b96f9dd59cac724dc1177b6373.html#gad335b2b96f9dd59cac724dc1177b6373" target="_top" xlink:title="Generates a 16&#45;bit &quot;sawtooth&quot; wave at a given BPM.">
 <polygon fill="white" stroke="#666666" points="406,-38 344,-38 344,-19 406,-19 406,-38"/>
 <text text-anchor="middle" x="375" y="-26" font-family="Helvetica,sans-Serif" font-size="10.00">fl::beat16</text>
 </a>
@@ -75,7 +75,7 @@
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../d6/d6c/group___beat_generators_gac4b5cef78b913f63a26012d69ca37889.html#gac4b5cef78b913f63a26012d69ca37889" target="_top" xlink:title="Generates a 16&#45;bit &quot;sawtooth&quot; wave at a given BPM, with BPM specified in Q8.8 fixed&#45;point format.">
+<g id="a_Node000004"><a xlink:href="../../d6/d6c/group___beat_generators_ga6675df99171a44d0d463eba91be86a2f.html#ga6675df99171a44d0d463eba91be86a2f" target="_top" xlink:title="Generates a 16&#45;bit &quot;sawtooth&quot; wave at a given BPM, with BPM specified in Q8.8 fixed&#45;point format.">
 <polygon fill="#fff0f0" stroke="red" points="504,-38 442,-38 442,-19 504,-19 504,-38"/>
 <text text-anchor="middle" x="473" y="-26" font-family="Helvetica,sans-Serif" font-size="10.00">fl::beat88</text>
 </a>

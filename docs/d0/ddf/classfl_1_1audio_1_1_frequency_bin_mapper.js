@@ -13,9 +13,9 @@ var classfl_1_1audio_1_1_frequency_bin_mapper =
       [ "lastFFTBinsUsed", "d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper.html#af09022ccbb7a004875638787779ebc5e", null ],
       [ "maxMagnitude", "d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper.html#a386e10372c5dbee569405bedb59bfe20", null ]
     ] ],
-    [ "FrequencyBinMapper", "d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper_aff7a703833f164394d054f0f48c2ef9a.html#aff7a703833f164394d054f0f48c2ef9a", null ],
+    [ "FrequencyBinMapper", "d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper_a80e17a3177ad36621659b6afcdaec51b.html#a80e17a3177ad36621659b6afcdaec51b", null ],
     [ "FrequencyBinMapper", "d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper_a0d39c0b36cc9acb67ac5b8ae04a36ac6.html#a0d39c0b36cc9acb67ac5b8ae04a36ac6", null ],
-    [ "~FrequencyBinMapper", "d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper_a87d17b79660b18efcade392935222299.html#a87d17b79660b18efcade392935222299", null ],
+    [ "~FrequencyBinMapper", "d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper_ad3defb9c89dd3eaa32d10b1c5832eff5.html#ad3defb9c89dd3eaa32d10b1c5832eff5", null ],
     [ "calculateBinBoundaries", "d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper_aca828d77220fdaf9492335d21480cb2a.html#aca828d77220fdaf9492335d21480cb2a", null ],
     [ "calculateBinMappings", "d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper_a457278fcf5b0d96f9d8af8df6446e70f.html#a457278fcf5b0d96f9d8af8df6446e70f", null ],
     [ "calculateLinearFrequencies", "d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper_ac00a1cd7e5df9094c6248051584e5329.html#ac00a1cd7e5df9094c6248051584e5329", null ],

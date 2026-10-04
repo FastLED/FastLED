@@ -16,7 +16,7 @@ digraph "fl::sys_yield"
   Node4 -> Node5 [id="edge4_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node5 [id="Node000005",label="fl::task::await_top\l_level",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$db/d5c/namespacefl_1_1task_ab96dc4828a01d1cff109d355d8ffc23d.html#ab96dc4828a01d1cff109d355d8ffc23d",tooltip="Synchronously wait for a promise to complete (ONLY safe in top-level contexts)"];
   Node4 -> Node13 [id="edge5_Node000004_Node000013",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node13 [id="Node000013",label="fl::detail::delay_impl",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$df/d9e/namespacefl_1_1detail_abd6e1e8189dbbbf28d720923205bd0dd.html#abd6e1e8189dbbbf28d720923205bd0dd",tooltip="Internal delay implementation used by the public fl::delay wrapper."];
+  Node13 [id="Node000013",label="fl::detail::delay_impl",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$df/d9e/namespacefl_1_1detail_a83cc378dd24fb46853fc05f394c60dc0.html#a83cc378dd24fb46853fc05f394c60dc0",tooltip="Internal delay implementation used by the public fl::delay wrapper."];
   Node4 -> Node35 [id="edge6_Node000004_Node000035",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node35 [id="Node000035",label="fl::net::http::fetch\l_update",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d13/namespacefl_1_1net_1_1http_a25ef84b119ebfab47c0ecec96a224181.html#a25ef84b119ebfab47c0ecec96a224181",tooltip="Legacy manual update for fetch promises (use fl::task::run() for new code)"];
   Node4 -> Node36 [id="edge7_Node000004_Node000036",dir="back",color="steelblue1",style="solid",tooltip=" "];
@@ -24,11 +24,9 @@ digraph "fl::sys_yield"
   Node4 -> Node37 [id="edge8_Node000004_Node000037",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node37 [id="Node000037",label="fl::net::http::FetchEngine\lListener::onEndFrame",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d37/classfl_1_1net_1_1http_1_1_fetch_engine_listener_a5c4b1669a29e122fd11f9b2f48641e1f.html#a5c4b1669a29e122fd11f9b2f48641e1f",tooltip=" "];
   Node4 -> Node38 [id="edge9_Node000004_Node000038",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node38 [id="Node000038",label="CFastLED::show",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dbb/class_c_fast_l_e_d_a93471b4babe96100496e8e25062cba3f.html#a93471b4babe96100496e8e25062cba3f",tooltip="Update all our controllers with the current led colors, using the passed in brightness."];
-  Node4 -> Node39 [id="edge10_Node000004_Node000039",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node39 [id="Node000039",label="CFastLED::showColor",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$dd/dbb/class_c_fast_l_e_d_a50e30222e81562a7ef334dbe4fdfa856.html#a50e30222e81562a7ef334dbe4fdfa856",tooltip="Set all leds on all controllers to the given color/scale."];
-  Node4 -> Node41 [id="edge11_Node000004_Node000041",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node41 [id="Node000041",label="fl::ChannelManager\l::waitForCondition",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d2/d6b/classfl_1_1_channel_manager_adc62325e449dbe69df3b351071f50821.html#adc62325e449dbe69df3b351071f50821",tooltip="Wait until a condition is met, with check-pump-delay logic."];
-  Node4 -> Node55 [id="edge12_Node000004_Node000055",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node55 [id="Node000055",label="fl::IChannelDriver\l::waitForCondition",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d3/da0/classfl_1_1_i_channel_driver_a9b3137f96a8915d980f7e33ba1e3b3d9.html#a9b3137f96a8915d980f7e33ba1e3b3d9",tooltip=" "];
+  Node38 [id="Node000038",label="throttleToMaxRefreshRate",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d7/de5/_fast_l_e_d_8cpp_8hpp_ac6c7e827ae13a7bc3da907399f25142f.html#ac6c7e827ae13a7bc3da907399f25142f",tooltip=" "];
+  Node4 -> Node42 [id="edge10_Node000004_Node000042",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node42 [id="Node000042",label="fl::ChannelManager\l::waitForCondition",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d2/d6b/classfl_1_1_channel_manager_ad2dad2fdb0279c8f211fd524025e14f0.html#ad2dad2fdb0279c8f211fd524025e14f0",tooltip="Wait until a condition is met, with check-pump-delay logic."];
+  Node4 -> Node57 [id="edge11_Node000004_Node000057",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node57 [id="Node000057",label="fl::IChannelDriver\l::waitForCondition",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d3/da0/classfl_1_1_i_channel_driver_a699840e6b4d11e9215de9e4a7e8f8c3d.html#a699840e6b4d11e9215de9e4a7e8f8c3d",tooltip=" "];
 }

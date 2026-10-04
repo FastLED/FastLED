@@ -1,0 +1,8 @@
+<map id="fl::rgb_2_rgbww" name="fl::rgb_2_rgbww">
+<area shape="rect" id="Node000001" title=" " alt="" coords="459,29,583,55"/>
+<area shape="poly" id="edge3_Node000001_Node000001" title=" " alt="" coords="556,19,546,11,521,8,500,10,489,15,486,20,492,28,488,31,481,21,485,11,498,5,521,3,548,6,559,15"/>
+<area shape="rect" id="Node000002" href="$d0/dee/struct_pixel_controller_a36f10f439589e250d8608724be6136dc.html#a36f10f439589e250d8608724be6136dc" title="loadAndScaleRGBWW before its wire reorder. See loadAndScaleRGBWUnordered." alt="" coords="232,22,411,62"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="445,45,411,45,411,39,445,39"/>
+<area shape="rect" id="Node000003" href="$d0/dee/struct_pixel_controller_a48468aafc35cdf4f317b7256c0221789.html#a48468aafc35cdf4f317b7256c0221789" title="Load + scale a single pixel to 5&#45;channel RGBWW (issue #2558)." alt="" coords="5,22,184,62"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="218,45,184,45,184,39,218,39"/>
+</map>

@@ -1,7 +1,7 @@
 var classfl_1_1audio_1_1detector_1_1_chord_detector =
 [
-    [ "ChordDetector", "d4/dfe/classfl_1_1audio_1_1detector_1_1_chord_detector_a82c05c59355b6d7b071fafd2da47ecfc.html#a82c05c59355b6d7b071fafd2da47ecfc", null ],
-    [ "~ChordDetector", "d4/dfe/classfl_1_1audio_1_1detector_1_1_chord_detector_acbc732d69cf26e673a19723d5f042c10.html#acbc732d69cf26e673a19723d5f042c10", null ],
+    [ "ChordDetector", "d4/dfe/classfl_1_1audio_1_1detector_1_1_chord_detector_aae5f5da38323f915ed16489ded4e2221.html#aae5f5da38323f915ed16489ded4e2221", null ],
+    [ "~ChordDetector", "d4/dfe/classfl_1_1audio_1_1detector_1_1_chord_detector_aa6bd69e1ca3c9edf1ef1b28edb0970e3.html#aa6bd69e1ca3c9edf1ef1b28edb0970e3", null ],
     [ "calculateChroma", "d4/dfe/classfl_1_1audio_1_1detector_1_1_chord_detector_a89656a44e9a74ebf708589be2e7acee1.html#a89656a44e9a74ebf708589be2e7acee1", null ],
     [ "chromaDistance", "d4/dfe/classfl_1_1audio_1_1detector_1_1_chord_detector_a472379b1242eebbb828cb226a3febc46.html#a472379b1242eebbb828cb226a3febc46", null ],
     [ "detectChord", "d4/dfe/classfl_1_1audio_1_1detector_1_1_chord_detector_ad28c159a43374c57a53fdee0b8d6e4af.html#ad28c159a43374c57a53fdee0b8d6e4af", null ],

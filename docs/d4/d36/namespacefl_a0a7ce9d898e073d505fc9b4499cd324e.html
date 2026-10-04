@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -107,7 +107,7 @@ $(function(){initNavTree('d4/d36/namespacefl_a0a7ce9d898e073d505fc9b4499cd324e.h
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="../../df/d96/s16x16x4_8h_ad12102840a95770657e94a62c99a82ec.html#ad12102840a95770657e94a62c99a82ec">FL_OPTIMIZE_FUNCTION</a> Wave8BitExpansionLut fl::buildWave8ExpansionLUT </td>
+          <td class="memname"><a class="el" href="../../d4/d54/compiler__control_8h_ad12102840a95770657e94a62c99a82ec.html#ad12102840a95770657e94a62c99a82ec">FL_OPTIMIZE_FUNCTION</a> Wave8BitExpansionLut fl::buildWave8ExpansionLUT </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="../../d4/d36/namespacefl.html#dc/dc3/structfl_1_1_chipset_timing">ChipsetTiming</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>timing</em></span></td><td>)</td>
           <td></td>
@@ -126,66 +126,66 @@ $(function(){initNavTree('d4/d36/namespacefl_a0a7ce9d898e073d505fc9b4499cd324e.h
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Populated Wave8BitExpansionLut lookup table (64 bytes) </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d8/d81/wave8_8cpp_8hpp_source.html#l00250">250</a> of file <a class="el" href="../../d8/d81/wave8_8cpp_8hpp_source.html">wave8.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  250</span>                                                                         {</div>
-<div class="line"><span class="lineno">  251</span>    Wave8BitExpansionLut lut;</div>
-<div class="line"><span class="lineno">  252</span> </div>
-<div class="line"><span class="lineno">  253</span>    <span class="comment">// Step 1: Calculate absolute times from ChipsetTiming format</span></div>
-<div class="line"><span class="lineno">  254</span>    <span class="comment">// ChipsetTiming.T1 = T0H (high time for bit 0)</span></div>
-<div class="line"><span class="lineno">  255</span>    <span class="comment">// ChipsetTiming.T2 = T1H - T0H (ADDITIONAL high time for bit 1)</span></div>
-<div class="line"><span class="lineno">  256</span>    <span class="comment">// ChipsetTiming.T3 = T0L (low tail duration)</span></div>
-<div class="line"><span class="lineno">  257</span>    <span class="keyword">const</span> u32 t0h = timing.<a class="code hl_variable" href="../../d4/d36/namespacefl.html#af65473a4933d816b51eae53b8e567095">T1</a>;                     <span class="comment">// T0H: bit 0 goes LOW here</span></div>
-<div class="line"><span class="lineno">  258</span>    <span class="keyword">const</span> u32 t1h = timing.<a class="code hl_variable" href="../../d4/d36/namespacefl.html#af65473a4933d816b51eae53b8e567095">T1</a> + timing.<a class="code hl_variable" href="../../d4/d36/namespacefl.html#a536e056ab8ffefa91422247c79f98395">T2</a>;          <span class="comment">// T1H: bit 1 goes LOW here</span></div>
-<div class="line"><span class="lineno">  259</span>    <span class="keyword">const</span> u32 period = timing.<a class="code hl_variable" href="../../d4/d36/namespacefl.html#af65473a4933d816b51eae53b8e567095">T1</a> + timing.<a class="code hl_variable" href="../../d4/d36/namespacefl.html#a536e056ab8ffefa91422247c79f98395">T2</a> + timing.<a class="code hl_variable" href="../../d4/d36/namespacefl.html#ad10dd64d53383f359fd4c5a11c7b1bbf">T3</a>; <span class="comment">// Total period</span></div>
-<div class="line"><span class="lineno">  260</span> </div>
-<div class="line"><span class="lineno">  261</span>    <span class="comment">// Step 2: Normalize absolute times</span></div>
-<div class="line"><span class="lineno">  262</span>    <span class="keyword">const</span> <span class="keywordtype">float</span> t0h_norm = <span class="keyword">static_cast&lt;</span><span class="keywordtype">float</span><span class="keyword">&gt;</span>(t0h) / period;</div>
-<div class="line"><span class="lineno">  263</span>    <span class="keyword">const</span> <span class="keywordtype">float</span> t1h_norm = <span class="keyword">static_cast&lt;</span><span class="keywordtype">float</span><span class="keyword">&gt;</span>(t1h) / period;</div>
-<div class="line"><span class="lineno">  264</span> </div>
-<div class="line"><span class="lineno">  265</span>    <span class="comment">// Step 3: Convert to pulse counts (fixed 8 pulses per bit)</span></div>
-<div class="line"><span class="lineno">  266</span>    <span class="comment">// pulses_bit0: number of HIGH pulses for bit 0 (before it goes LOW at t0h)</span></div>
-<div class="line"><span class="lineno">  267</span>    <span class="comment">// pulses_bit1: number of HIGH pulses for bit 1 (before it goes LOW at t1h)</span></div>
-<div class="line"><span class="lineno">  268</span>    u32 pulses_bit0 =</div>
-<div class="line"><span class="lineno">  269</span>        <span class="keyword">static_cast&lt;</span>u32<span class="keyword">&gt;</span>(t0h_norm * 8.0f + 0.5f); <span class="comment">// round</span></div>
-<div class="line"><span class="lineno">  270</span>    u32 pulses_bit1 =</div>
-<div class="line"><span class="lineno">  271</span>        <span class="keyword">static_cast&lt;</span>u32<span class="keyword">&gt;</span>(t1h_norm * 8.0f + 0.5f); <span class="comment">// round</span></div>
-<div class="line"><span class="lineno">  272</span> </div>
-<div class="line"><span class="lineno">  273</span>    <span class="comment">// Clamp to valid range [0, 8]</span></div>
-<div class="line"><span class="lineno">  274</span>    <span class="keywordflow">if</span> (pulses_bit0 &gt; 8)</div>
-<div class="line"><span class="lineno">  275</span>        pulses_bit0 = 8;</div>
-<div class="line"><span class="lineno">  276</span>    <span class="keywordflow">if</span> (pulses_bit1 &gt; 8)</div>
-<div class="line"><span class="lineno">  277</span>        pulses_bit1 = 8;</div>
-<div class="line"><span class="lineno">  278</span> </div>
-<div class="line"><span class="lineno">  279</span>    <span class="comment">// Step 4: Generate bit0 and bit1 waveforms (1 byte each, packed format)</span></div>
-<div class="line"><span class="lineno">  280</span>    <span class="comment">// Each bit represents one pulse (MSB = first pulse)</span></div>
-<div class="line"><span class="lineno">  281</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a> bit0_waveform = 0;</div>
-<div class="line"><span class="lineno">  282</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a> bit1_waveform = 0;</div>
-<div class="line"><span class="lineno">  283</span> </div>
-<div class="line"><span class="lineno">  284</span>    <span class="comment">// Bit 0: Set MSB bits for HIGH pulses</span></div>
-<div class="line"><span class="lineno">  285</span>    <span class="keywordflow">for</span> (u32 i = 0; i &lt; pulses_bit0; i++) {</div>
-<div class="line"><span class="lineno">  286</span>        bit0_waveform |= (0x80 &gt;&gt; i);  <span class="comment">// Set bit from MSB</span></div>
-<div class="line"><span class="lineno">  287</span>    }</div>
-<div class="line"><span class="lineno">  288</span> </div>
-<div class="line"><span class="lineno">  289</span>    <span class="comment">// Bit 1: Set MSB bits for HIGH pulses</span></div>
-<div class="line"><span class="lineno">  290</span>    <span class="keywordflow">for</span> (u32 i = 0; i &lt; pulses_bit1; i++) {</div>
-<div class="line"><span class="lineno">  291</span>        bit1_waveform |= (0x80 &gt;&gt; i);  <span class="comment">// Set bit from MSB</span></div>
-<div class="line"><span class="lineno">  292</span>    }</div>
-<div class="line"><span class="lineno">  293</span> </div>
-<div class="line"><span class="lineno">  294</span>    <span class="comment">// Step 5: Build LUT for all 16 nibbles</span></div>
-<div class="line"><span class="lineno">  295</span>    <span class="keywordflow">for</span> (<a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a> nibble = 0; nibble &lt; 16; nibble++) {</div>
-<div class="line"><span class="lineno">  296</span>        <span class="comment">// For each nibble, generate 4 Wave8Bit (one per bit, MSB first)</span></div>
-<div class="line"><span class="lineno">  297</span>        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> bit_pos = 3; bit_pos &gt;= 0; bit_pos--) {</div>
-<div class="line"><span class="lineno">  298</span>            <span class="comment">// Extract bit (MSB first: bit 3, 2, 1, 0)</span></div>
-<div class="line"><span class="lineno">  299</span>            <span class="keyword">const</span> <span class="keywordtype">bool</span> bit_set = (nibble &gt;&gt; bit_pos) &amp; 1;</div>
-<div class="line"><span class="lineno">  300</span>            <span class="keyword">const</span> <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a> waveform = bit_set ? bit1_waveform : bit0_waveform;</div>
-<div class="line"><span class="lineno">  301</span> </div>
-<div class="line"><span class="lineno">  302</span>            <span class="comment">// Store packed waveform to LUT entry</span></div>
-<div class="line"><span class="lineno">  303</span>            lut.lut[nibble][3 - bit_pos].data = waveform;</div>
-<div class="line"><span class="lineno">  304</span>        }</div>
-<div class="line"><span class="lineno">  305</span>    }</div>
-<div class="line"><span class="lineno">  306</span> </div>
-<div class="line"><span class="lineno">  307</span>    <span class="keywordflow">return</span> lut;</div>
-<div class="line"><span class="lineno">  308</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../d8/d81/wave8_8cpp_8hpp_source.html#l00251">251</a> of file <a class="el" href="../../d8/d81/wave8_8cpp_8hpp_source.html">wave8.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  251</span>                                                                         {</div>
+<div class="line"><span class="lineno">  252</span>    Wave8BitExpansionLut lut;</div>
+<div class="line"><span class="lineno">  253</span> </div>
+<div class="line"><span class="lineno">  254</span>    <span class="comment">// Step 1: Calculate absolute times from ChipsetTiming format</span></div>
+<div class="line"><span class="lineno">  255</span>    <span class="comment">// ChipsetTiming.T1 = T0H (high time for bit 0)</span></div>
+<div class="line"><span class="lineno">  256</span>    <span class="comment">// ChipsetTiming.T2 = T1H - T0H (ADDITIONAL high time for bit 1)</span></div>
+<div class="line"><span class="lineno">  257</span>    <span class="comment">// ChipsetTiming.T3 = T0L (low tail duration)</span></div>
+<div class="line"><span class="lineno">  258</span>    <span class="keyword">const</span> u32 t0h = timing.<a class="code hl_variable" href="../../d4/d36/namespacefl.html#af65473a4933d816b51eae53b8e567095">T1</a>;                     <span class="comment">// T0H: bit 0 goes LOW here</span></div>
+<div class="line"><span class="lineno">  259</span>    <span class="keyword">const</span> u32 t1h = timing.<a class="code hl_variable" href="../../d4/d36/namespacefl.html#af65473a4933d816b51eae53b8e567095">T1</a> + timing.<a class="code hl_variable" href="../../d4/d36/namespacefl.html#a536e056ab8ffefa91422247c79f98395">T2</a>;          <span class="comment">// T1H: bit 1 goes LOW here</span></div>
+<div class="line"><span class="lineno">  260</span>    <span class="keyword">const</span> u32 period = timing.<a class="code hl_variable" href="../../d4/d36/namespacefl.html#af65473a4933d816b51eae53b8e567095">T1</a> + timing.<a class="code hl_variable" href="../../d4/d36/namespacefl.html#a536e056ab8ffefa91422247c79f98395">T2</a> + timing.<a class="code hl_variable" href="../../d4/d36/namespacefl.html#ad10dd64d53383f359fd4c5a11c7b1bbf">T3</a>; <span class="comment">// Total period</span></div>
+<div class="line"><span class="lineno">  261</span> </div>
+<div class="line"><span class="lineno">  262</span>    <span class="comment">// Step 2: Normalize absolute times</span></div>
+<div class="line"><span class="lineno">  263</span>    <span class="keyword">const</span> <span class="keywordtype">float</span> t0h_norm = <span class="keyword">static_cast&lt;</span><span class="keywordtype">float</span><span class="keyword">&gt;</span>(t0h) / period;</div>
+<div class="line"><span class="lineno">  264</span>    <span class="keyword">const</span> <span class="keywordtype">float</span> t1h_norm = <span class="keyword">static_cast&lt;</span><span class="keywordtype">float</span><span class="keyword">&gt;</span>(t1h) / period;</div>
+<div class="line"><span class="lineno">  265</span> </div>
+<div class="line"><span class="lineno">  266</span>    <span class="comment">// Step 3: Convert to pulse counts (fixed 8 pulses per bit)</span></div>
+<div class="line"><span class="lineno">  267</span>    <span class="comment">// pulses_bit0: number of HIGH pulses for bit 0 (before it goes LOW at t0h)</span></div>
+<div class="line"><span class="lineno">  268</span>    <span class="comment">// pulses_bit1: number of HIGH pulses for bit 1 (before it goes LOW at t1h)</span></div>
+<div class="line"><span class="lineno">  269</span>    u32 pulses_bit0 =</div>
+<div class="line"><span class="lineno">  270</span>        <span class="keyword">static_cast&lt;</span>u32<span class="keyword">&gt;</span>(t0h_norm * 8.0f + 0.5f); <span class="comment">// round</span></div>
+<div class="line"><span class="lineno">  271</span>    u32 pulses_bit1 =</div>
+<div class="line"><span class="lineno">  272</span>        <span class="keyword">static_cast&lt;</span>u32<span class="keyword">&gt;</span>(t1h_norm * 8.0f + 0.5f); <span class="comment">// round</span></div>
+<div class="line"><span class="lineno">  273</span> </div>
+<div class="line"><span class="lineno">  274</span>    <span class="comment">// Clamp to valid range [0, 8]</span></div>
+<div class="line"><span class="lineno">  275</span>    <span class="keywordflow">if</span> (pulses_bit0 &gt; 8)</div>
+<div class="line"><span class="lineno">  276</span>        pulses_bit0 = 8;</div>
+<div class="line"><span class="lineno">  277</span>    <span class="keywordflow">if</span> (pulses_bit1 &gt; 8)</div>
+<div class="line"><span class="lineno">  278</span>        pulses_bit1 = 8;</div>
+<div class="line"><span class="lineno">  279</span> </div>
+<div class="line"><span class="lineno">  280</span>    <span class="comment">// Step 4: Generate bit0 and bit1 waveforms (1 byte each, packed format)</span></div>
+<div class="line"><span class="lineno">  281</span>    <span class="comment">// Each bit represents one pulse (MSB = first pulse)</span></div>
+<div class="line"><span class="lineno">  282</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a> bit0_waveform = 0;</div>
+<div class="line"><span class="lineno">  283</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a> bit1_waveform = 0;</div>
+<div class="line"><span class="lineno">  284</span> </div>
+<div class="line"><span class="lineno">  285</span>    <span class="comment">// Bit 0: Set MSB bits for HIGH pulses</span></div>
+<div class="line"><span class="lineno">  286</span>    <span class="keywordflow">for</span> (u32 i = 0; i &lt; pulses_bit0; i++) {</div>
+<div class="line"><span class="lineno">  287</span>        bit0_waveform |= (0x80 &gt;&gt; i);  <span class="comment">// Set bit from MSB</span></div>
+<div class="line"><span class="lineno">  288</span>    }</div>
+<div class="line"><span class="lineno">  289</span> </div>
+<div class="line"><span class="lineno">  290</span>    <span class="comment">// Bit 1: Set MSB bits for HIGH pulses</span></div>
+<div class="line"><span class="lineno">  291</span>    <span class="keywordflow">for</span> (u32 i = 0; i &lt; pulses_bit1; i++) {</div>
+<div class="line"><span class="lineno">  292</span>        bit1_waveform |= (0x80 &gt;&gt; i);  <span class="comment">// Set bit from MSB</span></div>
+<div class="line"><span class="lineno">  293</span>    }</div>
+<div class="line"><span class="lineno">  294</span> </div>
+<div class="line"><span class="lineno">  295</span>    <span class="comment">// Step 5: Build LUT for all 16 nibbles</span></div>
+<div class="line"><span class="lineno">  296</span>    <span class="keywordflow">for</span> (<a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a> nibble = 0; nibble &lt; 16; nibble++) {</div>
+<div class="line"><span class="lineno">  297</span>        <span class="comment">// For each nibble, generate 4 Wave8Bit (one per bit, MSB first)</span></div>
+<div class="line"><span class="lineno">  298</span>        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> bit_pos = 3; bit_pos &gt;= 0; bit_pos--) {</div>
+<div class="line"><span class="lineno">  299</span>            <span class="comment">// Extract bit (MSB first: bit 3, 2, 1, 0)</span></div>
+<div class="line"><span class="lineno">  300</span>            <span class="keyword">const</span> <span class="keywordtype">bool</span> bit_set = (nibble &gt;&gt; bit_pos) &amp; 1;</div>
+<div class="line"><span class="lineno">  301</span>            <span class="keyword">const</span> <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a> waveform = bit_set ? bit1_waveform : bit0_waveform;</div>
+<div class="line"><span class="lineno">  302</span> </div>
+<div class="line"><span class="lineno">  303</span>            <span class="comment">// Store packed waveform to LUT entry</span></div>
+<div class="line"><span class="lineno">  304</span>            lut.lut[nibble][3 - bit_pos].data = waveform;</div>
+<div class="line"><span class="lineno">  305</span>        }</div>
+<div class="line"><span class="lineno">  306</span>    }</div>
+<div class="line"><span class="lineno">  307</span> </div>
+<div class="line"><span class="lineno">  308</span>    <span class="keywordflow">return</span> lut;</div>
+<div class="line"><span class="lineno">  309</span>}</div>
 <div class="ttc" id="anamespacefl_a058ceeac48f181da463c2ba07401292c_html_a058ceeac48f181da463c2ba07401292c"><div class="ttname"><a href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a></div><div class="ttdeci">unsigned char u8</div><div class="ttdef"><b>Definition</b> <a href="../../df/dd8/stdint_8h_source.html#l00131">stdint.h:131</a></div></div>
 <div class="ttc" id="anamespacefl_html_a536e056ab8ffefa91422247c79f98395"><div class="ttname"><a href="../../d4/d36/namespacefl.html#a536e056ab8ffefa91422247c79f98395">fl::ChipsetTiming::T2</a></div><div class="ttdeci">u32 T2</div><div class="ttdoc">Additional high time for bit 1 (nanoseconds)</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d3f/led__timing_8h_source.html#l00088">led_timing.h:88</a></div></div>
 <div class="ttc" id="anamespacefl_html_ad10dd64d53383f359fd4c5a11c7b1bbf"><div class="ttname"><a href="../../d4/d36/namespacefl.html#ad10dd64d53383f359fd4c5a11c7b1bbf">fl::ChipsetTiming::T3</a></div><div class="ttdeci">u32 T3</div><div class="ttdoc">Low tail duration (nanoseconds)</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d3f/led__timing_8h_source.html#l00089">led_timing.h:89</a></div></div>
@@ -202,7 +202,7 @@ $(function(){initNavTree('d4/d36/namespacefl_a0a7ce9d898e073d505fc9b4499cd324e.h
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:04 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:07 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

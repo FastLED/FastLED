@@ -1,0 +1,20 @@
+<map id="calculate_unscaled_emitter_power_mW" name="calculate_unscaled_emitter_power_mW">
+<area shape="rect" id="Node000001" title="Charge already&#45;solved physical output bytes in source emitter order: RGB, RGBW, or RGB + warm white +..." alt="" coords="5,73,163,113"/>
+<area shape="rect" id="Node000002" href="$d1/d2a/power__mgt_8cpp_8hpp_a65c5cbdd796e64d67cfe0665898797ee.html#a65c5cbdd796e64d67cfe0665898797ee" title=" " alt="" coords="211,55,385,80"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="163,81,197,77,197,82,163,86"/>
+<area shape="rect" id="Node000003" href="$d1/d2a/power__mgt_8cpp_8hpp_afe71d257dc9aca526178a992761bb812.html#afe71d257dc9aca526178a992761bb812" title="Global RGB power model (initialized to WS2812 @ 5V defaults, linear response)" alt="" coords="461,5,571,31"/>
+<area shape="poly" id="edge8_Node000001_Node000003" title=" " alt="" coords="125,70,166,53,210,39,272,28,335,20,447,15,447,20,336,26,273,33,211,45,167,58,127,75"/>
+<area shape="rect" id="Node000008" href="$d1/d2a/power__mgt_8cpp_8hpp_adcd9338466b0f22161f7281bfc7cdcdf.html#adcd9338466b0f22161f7281bfc7cdcdf" title=" " alt="" coords="227,104,369,129"/>
+<area shape="poly" id="edge9_Node000001_Node000008" title=" " alt="" coords="163,99,214,105,214,110,163,104"/>
+<area shape="rect" id="Node000009" href="$d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa" title=" " alt="" coords="247,153,349,179"/>
+<area shape="poly" id="edge10_Node000001_Node000009" title=" " alt="" coords="134,110,212,139,235,147,234,152,210,145,132,115"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="354,52,447,31,448,36,355,57"/>
+<area shape="rect" id="Node000006" href="$d1/d2a/power__mgt_8cpp_8hpp_a8cfee7a07f6f35100dad7f4d642eaf2d.html#a8cfee7a07f6f35100dad7f4d642eaf2d" title=" " alt="" coords="433,55,599,80"/>
+<area shape="poly" id="edge4_Node000002_Node000006" title=" " alt="" coords="386,65,420,65,420,70,386,70"/>
+<area shape="rect" id="Node000007" href="$d1/d2a/power__mgt_8cpp_8hpp_a96a9190022832e655b9a01a3e0167d8c.html#a96a9190022832e655b9a01a3e0167d8c" title=" " alt="" coords="438,104,594,129"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="355,77,446,98,445,104,354,83"/>
+<area shape="rect" id="Node000004" href="$d9/d5b/classfl_1_1_singleton_ad5cb1b704e17768f75802673abb0ff75.html#ad5cb1b704e17768f75802673abb0ff75" title=" " alt="" coords="647,55,809,80"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="572,28,660,49,659,54,571,33"/>
+<area shape="poly" id="edge5_Node000006_Node000004" title=" " alt="" coords="599,65,633,65,633,70,599,70"/>
+<area shape="poly" id="edge7_Node000007_Node000004" title=" " alt="" coords="571,101,659,81,660,86,572,107"/>
+</map>

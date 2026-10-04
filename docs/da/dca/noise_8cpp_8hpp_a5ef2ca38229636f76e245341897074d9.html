@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -137,25 +137,25 @@ $(function(){initNavTree('da/dca/noise_8cpp_8hpp_a5ef2ca38229636f76e245341897074
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../da/dca/noise_8cpp_8hpp_source.html#l00173">173</a> of file <a class="el" href="../../da/dca/noise_8cpp_8hpp_source.html">noise.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  173</span>                                                                                                                                          {</div>
-<div class="line"><span class="lineno">  174</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_ac821a1ccf53c09489285843d2beb42e3.html#ac821a1ccf53c09489285843d2beb42e3">fl::i8</a> <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>;</div>
-<div class="line"><span class="lineno">  175</span><span class="preprocessor">#if !defined(FL_IS_AVR)</span></div>
-<div class="line"><span class="lineno">  176</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a> = (<a class="code hl_function" href="../../d3/d7d/namespacefl_1_1anonymous__namespace_02noise__woryley_8cpp_8hpp_03_a3cf77c64767ffeb9d6ae1ed02f4d14d9.html#a3cf77c64767ffeb9d6ae1ed02f4d14d9">hash</a> &amp; (1&lt;&lt;bitnumber)) ? a : b;</div>
-<div class="line"><span class="lineno">  177</span><span class="preprocessor">#else</span></div>
-<div class="line"><span class="lineno">  178</span>    <span class="keyword">asm</span> <span class="keyword">volatile</span>(</div>
-<div class="line"><span class="lineno">  179</span>        <span class="stringliteral">&quot;mov %[result],%[a]          \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  180</span>        <span class="stringliteral">&quot;sbrs %[hash],%[bitnumber]   \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  181</span>        <span class="stringliteral">&quot;mov %[result],%[b]          \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  182</span>        : [<a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>] <span class="stringliteral">&quot;=r&quot;</span> (<a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>)</div>
-<div class="line"><span class="lineno">  183</span>        : [<a class="code hl_function" href="../../d3/d7d/namespacefl_1_1anonymous__namespace_02noise__woryley_8cpp_8hpp_03_a3cf77c64767ffeb9d6ae1ed02f4d14d9.html#a3cf77c64767ffeb9d6ae1ed02f4d14d9">hash</a>] <span class="stringliteral">&quot;r&quot;</span> (<a class="code hl_function" href="../../d3/d7d/namespacefl_1_1anonymous__namespace_02noise__woryley_8cpp_8hpp_03_a3cf77c64767ffeb9d6ae1ed02f4d14d9.html#a3cf77c64767ffeb9d6ae1ed02f4d14d9">hash</a>),</div>
-<div class="line"><span class="lineno">  184</span>          [bitnumber] <span class="stringliteral">&quot;M&quot;</span> (bitnumber),</div>
-<div class="line"><span class="lineno">  185</span>          [a] <span class="stringliteral">&quot;r&quot;</span> (a),</div>
-<div class="line"><span class="lineno">  186</span>          [b] <span class="stringliteral">&quot;r&quot;</span> (b)</div>
-<div class="line"><span class="lineno">  187</span>        );</div>
-<div class="line"><span class="lineno">  188</span><span class="preprocessor">#endif</span></div>
-<div class="line"><span class="lineno">  189</span>    <span class="keywordflow">return</span> <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>;</div>
-<div class="line"><span class="lineno">  190</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../da/dca/noise_8cpp_8hpp_source.html#l00183">183</a> of file <a class="el" href="../../da/dca/noise_8cpp_8hpp_source.html">noise.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  183</span>                                                                                                                                          {</div>
+<div class="line"><span class="lineno">  184</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_ac821a1ccf53c09489285843d2beb42e3.html#ac821a1ccf53c09489285843d2beb42e3">fl::i8</a> <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>;</div>
+<div class="line"><span class="lineno">  185</span><span class="preprocessor">#if !defined(FL_IS_AVR)</span></div>
+<div class="line"><span class="lineno">  186</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a> = (<a class="code hl_function" href="../../d3/d7d/namespacefl_1_1anonymous__namespace_02noise__woryley_8cpp_8hpp_03_a3cf77c64767ffeb9d6ae1ed02f4d14d9.html#a3cf77c64767ffeb9d6ae1ed02f4d14d9">hash</a> &amp; (1&lt;&lt;bitnumber)) ? a : b;</div>
+<div class="line"><span class="lineno">  187</span><span class="preprocessor">#else</span></div>
+<div class="line"><span class="lineno">  188</span>    <span class="keyword">asm</span> <span class="keyword">volatile</span>(</div>
+<div class="line"><span class="lineno">  189</span>        <span class="stringliteral">&quot;mov %[result],%[a]          \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  190</span>        <span class="stringliteral">&quot;sbrs %[hash],%[bitnumber]   \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  191</span>        <span class="stringliteral">&quot;mov %[result],%[b]          \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  192</span>        : [<a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>] <span class="stringliteral">&quot;=r&quot;</span> (<a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>)</div>
+<div class="line"><span class="lineno">  193</span>        : [<a class="code hl_function" href="../../d3/d7d/namespacefl_1_1anonymous__namespace_02noise__woryley_8cpp_8hpp_03_a3cf77c64767ffeb9d6ae1ed02f4d14d9.html#a3cf77c64767ffeb9d6ae1ed02f4d14d9">hash</a>] <span class="stringliteral">&quot;r&quot;</span> (<a class="code hl_function" href="../../d3/d7d/namespacefl_1_1anonymous__namespace_02noise__woryley_8cpp_8hpp_03_a3cf77c64767ffeb9d6ae1ed02f4d14d9.html#a3cf77c64767ffeb9d6ae1ed02f4d14d9">hash</a>),</div>
+<div class="line"><span class="lineno">  194</span>          [bitnumber] <span class="stringliteral">&quot;M&quot;</span> (bitnumber),</div>
+<div class="line"><span class="lineno">  195</span>          [a] <span class="stringliteral">&quot;r&quot;</span> (a),</div>
+<div class="line"><span class="lineno">  196</span>          [b] <span class="stringliteral">&quot;r&quot;</span> (b)</div>
+<div class="line"><span class="lineno">  197</span>        );</div>
+<div class="line"><span class="lineno">  198</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">  199</span>    <span class="keywordflow">return</span> <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>;</div>
+<div class="line"><span class="lineno">  200</span>}</div>
 <div class="ttc" id="anamespacefl_1_1anonymous__namespace_02noise__woryley_8cpp_8hpp_03_a3cf77c64767ffeb9d6ae1ed02f4d14d9_html_a3cf77c64767ffeb9d6ae1ed02f4d14d9"><div class="ttname"><a href="../../d3/d7d/namespacefl_1_1anonymous__namespace_02noise__woryley_8cpp_8hpp_03_a3cf77c64767ffeb9d6ae1ed02f4d14d9.html#a3cf77c64767ffeb9d6ae1ed02f4d14d9">fl::anonymous_namespace{noise_woryley.cpp.hpp}::hash</a></div><div class="ttdeci">u16 hash(i32 x, i32 y)</div><div class="ttdef"><b>Definition</b> <a href="../../db/dac/noise__woryley_8cpp_8hpp_source.html#l00019">noise_woryley.cpp.hpp:19</a></div></div>
 <div class="ttc" id="anamespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99_html_a8fa65f6529fc3eb6a174cb304a4bfc99"><div class="ttname"><a href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">fl::result</a></div><div class="ttdeci">expected&lt; T, E &gt; result</div><div class="ttdoc">Alias for expected (Rust-style naming)</div><div class="ttdef"><b>Definition</b> <a href="../../de/d93/result_8h_source.html#l00031">result.h:31</a></div></div>
 <div class="ttc" id="anamespacefl_ac821a1ccf53c09489285843d2beb42e3_html_ac821a1ccf53c09489285843d2beb42e3"><div class="ttname"><a href="../../d4/d36/namespacefl_ac821a1ccf53c09489285843d2beb42e3.html#ac821a1ccf53c09489285843d2beb42e3">fl::i8</a></div><div class="ttdeci">signed char i8</div><div class="ttdef"><b>Definition</b> <a href="../../df/dd8/stdint_8h_source.html#l00130">stdint.h:130</a></div></div>
@@ -169,7 +169,7 @@ $(function(){initNavTree('da/dca/noise_8cpp_8hpp_a5ef2ca38229636f76e245341897074
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../da/dca/noise_8cpp_8hpp.html">noise.cpp.hpp</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:02 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:04 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

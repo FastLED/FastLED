@@ -40,17 +40,17 @@
 <area shape="poly" id="edge31_Node000017_Node000009" title=" " alt="" coords="686,103,777,213,773,216,682,106"/>
 <area shape="rect" id="Node000018" href="$df/dcc/fl_2gfx_2crgb_8h.html" title="Defines the 8&#45;bit red, green, and blue (RGB) pixel type in the fl namespace." alt="" coords="431,152,529,177"/>
 <area shape="poly" id="edge21_Node000017_Node000018" title=" " alt="" coords="644,107,525,150,524,145,642,102"/>
-<area shape="rect" id="Node000064" href="$d5/d11/fastled__config_8h.html" title="Contains definitions that can be used to configure FastLED at compile time." alt="" coords="772,152,897,177"/>
-<area shape="poly" id="edge29_Node000017_Node000064" title=" " alt="" coords="701,102,797,144,795,149,699,106"/>
-<area shape="rect" id="Node000065" title=" " alt="" coords="554,152,697,177"/>
-<area shape="poly" id="edge32_Node000017_Node000065" title=" " alt="" coords="669,106,643,142,639,139,664,103"/>
+<area shape="rect" id="Node000057" href="$d5/d11/fastled__config_8h.html" title="Contains definitions that can be used to configure FastLED at compile time." alt="" coords="772,152,897,177"/>
+<area shape="poly" id="edge29_Node000017_Node000057" title=" " alt="" coords="701,102,797,144,795,149,699,106"/>
+<area shape="rect" id="Node000058" title=" " alt="" coords="554,152,697,177"/>
+<area shape="poly" id="edge32_Node000017_Node000058" title=" " alt="" coords="669,106,643,142,639,139,664,103"/>
 <area shape="poly" id="edge22_Node000018_Node000002" title=" " alt="" coords="460,180,254,294,251,290,458,175"/>
 <area shape="poly" id="edge23_Node000018_Node000009" title=" " alt="" coords="530,175,730,220,729,225,529,180"/>
 <area shape="poly" id="edge28_Node000018_Node000013" title=" " alt="" coords="505,175,533,195,556,224,562,243,562,263,551,301,530,336,508,363,504,360,526,333,546,299,557,262,556,244,551,227,529,199,502,180"/>
 <area shape="rect" id="Node000019" href="$db/d19/ease_8h.html" title=" " alt="" coords="427,225,541,251"/>
 <area shape="poly" id="edge24_Node000018_Node000019" title=" " alt="" coords="483,178,485,212,480,212,478,178"/>
-<area shape="rect" id="Node000063" title=" " alt="" coords="617,225,682,251"/>
-<area shape="poly" id="edge27_Node000018_Node000063" title=" " alt="" coords="508,175,610,217,608,222,506,180"/>
+<area shape="rect" id="Node000056" title=" " alt="" coords="617,225,682,251"/>
+<area shape="poly" id="edge27_Node000018_Node000056" title=" " alt="" coords="508,175,610,217,608,222,506,180"/>
 <area shape="poly" id="edge25_Node000019_Node000002" title=" " alt="" coords="442,253,275,298,274,293,441,248"/>
 <area shape="poly" id="edge26_Node000019_Node000013" title=" " alt="" coords="487,251,487,358,481,358,481,251"/>
 </map>

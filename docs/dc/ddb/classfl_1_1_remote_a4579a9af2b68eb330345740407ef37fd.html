@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -117,47 +117,49 @@ $(function(){initNavTree('dc/ddb/classfl_1_1_remote_a4579a9af2b68eb330345740407e
 
 <p>Main update: pull + tick + push (overrides <a class="el" href="../../dc/d00/classfl_1_1_server_a29083a0d8c0d26ca3c6c4ab341a1b0cb.html#a29083a0d8c0d26ca3c6c4ab341a1b0cb" title="Main update: pull + push.">Server::update</a>) </p>
 
-<p class="definition">Definition at line <a class="el" href="../../db/d04/remote_8cpp_8hpp_source.html#l00272">272</a> of file <a class="el" href="../../db/d04/remote_8cpp_8hpp_source.html">remote.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  272</span>                                       {</div>
-<div class="line"><span class="lineno">  273</span>    <span class="keywordtype">size_t</span> processed = <a class="code hl_function" href="../../dc/d00/classfl_1_1_server_a4b8b9821566f8389e43734b90ae36798.html#a4b8b9821566f8389e43734b90ae36798">Server::pull</a>();   <span class="comment">// Pull requests from Server</span></div>
-<div class="line"><span class="lineno">  274</span>    <span class="keywordtype">size_t</span> executed = <a class="code hl_function" href="../../dc/ddb/classfl_1_1_remote_a3653f4ef8d9753d8577e3c18a07d3e0a.html#a3653f4ef8d9753d8577e3c18a07d3e0a">tick</a>(currentTimeMs);  <span class="comment">// Process scheduled tasks</span></div>
-<div class="line"><span class="lineno">  275</span> </div>
-<div class="line"><span class="lineno">  276</span>    <span class="comment">// Push scheduled results as JSON-RPC responses</span></div>
-<div class="line"><span class="lineno">  277</span>    <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; r : <a class="code hl_variable" href="../../dc/ddb/classfl_1_1_remote_ad1314a8fd6e6394dac7019ddd5b5c7ef.html#ad1314a8fd6e6394dac7019ddd5b5c7ef">mResults</a>) {</div>
-<div class="line"><span class="lineno">  278</span>        fl::json <a class="code hl_variable" href="../../d8/d94/namespacetest__quick_a00071f2b3e01fb8d2b4e70970ed2d6ce.html#a00071f2b3e01fb8d2b4e70970ed2d6ce">response</a> = <a class="code hl_function" href="../../de/d40/classfl_1_1json_af8bc0968107152344bfa8468bba76f54.html#af8bc0968107152344bfa8468bba76f54">fl::json::object</a>();</div>
-<div class="line"><span class="lineno">  279</span>        <a class="code hl_variable" href="../../d8/d94/namespacetest__quick_a00071f2b3e01fb8d2b4e70970ed2d6ce.html#a00071f2b3e01fb8d2b4e70970ed2d6ce">response</a>.set(<span class="stringliteral">&quot;result&quot;</span>, r.result);</div>
-<div class="line"><span class="lineno">  280</span>        <span class="comment">// Note: We don&#39;t have the original request ID for scheduled calls</span></div>
-<div class="line"><span class="lineno">  281</span>        <span class="comment">// This could be improved by storing the ID with RpcResult</span></div>
-<div class="line"><span class="lineno">  282</span>        <a class="code hl_variable" href="../../dc/d00/classfl_1_1_server_a31be41547313a58aaa29944c8bc410de.html#a31be41547313a58aaa29944c8bc410de">mOutgoingQueue</a>.push_back(response);</div>
-<div class="line"><span class="lineno">  283</span>    }</div>
-<div class="line"><span class="lineno">  284</span> </div>
-<div class="line"><span class="lineno">  285</span>    <span class="keywordtype">size_t</span> sent = <a class="code hl_function" href="../../dc/d00/classfl_1_1_server_a049bc5d74287eaf42b1b4b8086e7213d.html#a049bc5d74287eaf42b1b4b8086e7213d">Server::push</a>();        <span class="comment">// Push responses from Server</span></div>
-<div class="line"><span class="lineno">  286</span>    <span class="keywordflow">return</span> processed + executed + sent;</div>
-<div class="line"><span class="lineno">  287</span>}</div>
-<div class="ttc" id="aclassfl_1_1_remote_a3653f4ef8d9753d8577e3c18a07d3e0a_html_a3653f4ef8d9753d8577e3c18a07d3e0a"><div class="ttname"><a href="../../dc/ddb/classfl_1_1_remote_a3653f4ef8d9753d8577e3c18a07d3e0a.html#a3653f4ef8d9753d8577e3c18a07d3e0a">fl::Remote::tick</a></div><div class="ttdeci">size_t tick(u32 currentTimeMs)</div><div class="ttdoc">Process scheduled calls (call regularly)</div><div class="ttdef"><b>Definition</b> <a href="../../db/d04/remote_8cpp_8hpp_source.html#l00222">remote.cpp.hpp:222</a></div></div>
-<div class="ttc" id="aclassfl_1_1_remote_ad1314a8fd6e6394dac7019ddd5b5c7ef_html_ad1314a8fd6e6394dac7019ddd5b5c7ef"><div class="ttname"><a href="../../dc/ddb/classfl_1_1_remote_ad1314a8fd6e6394dac7019ddd5b5c7ef.html#ad1314a8fd6e6394dac7019ddd5b5c7ef">fl::Remote::mResults</a></div><div class="ttdeci">fl::vector&lt; RpcResult &gt; mResults</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d06/remote_8h_source.html#l00212">remote.h:212</a></div></div>
-<div class="ttc" id="aclassfl_1_1_server_a049bc5d74287eaf42b1b4b8086e7213d_html_a049bc5d74287eaf42b1b4b8086e7213d"><div class="ttname"><a href="../../dc/d00/classfl_1_1_server_a049bc5d74287eaf42b1b4b8086e7213d.html#a049bc5d74287eaf42b1b4b8086e7213d">fl::Server::push</a></div><div class="ttdeci">size_t push()</div><div class="ttdoc">Push queued responses to sink.</div><div class="ttdef"><b>Definition</b> <a href="../../da/d73/remote_2rpc_2server_8cpp_8hpp_source.html#l00065">server.cpp.hpp:65</a></div></div>
-<div class="ttc" id="aclassfl_1_1_server_a31be41547313a58aaa29944c8bc410de_html_a31be41547313a58aaa29944c8bc410de"><div class="ttname"><a href="../../dc/d00/classfl_1_1_server_a31be41547313a58aaa29944c8bc410de.html#a31be41547313a58aaa29944c8bc410de">fl::Server::mOutgoingQueue</a></div><div class="ttdeci">fl::vector&lt; fl::json &gt; mOutgoingQueue</div><div class="ttdef"><b>Definition</b> <a href="../../da/dad/remote_2rpc_2server_8h_source.html#l00091">server.h:91</a></div></div>
-<div class="ttc" id="aclassfl_1_1_server_a4b8b9821566f8389e43734b90ae36798_html_a4b8b9821566f8389e43734b90ae36798"><div class="ttname"><a href="../../dc/d00/classfl_1_1_server_a4b8b9821566f8389e43734b90ae36798.html#a4b8b9821566f8389e43734b90ae36798">fl::Server::pull</a></div><div class="ttdeci">size_t pull()</div><div class="ttdoc">Pull requests from source, process, queue responses.</div><div class="ttdef"><b>Definition</b> <a href="../../da/d73/remote_2rpc_2server_8cpp_8hpp_source.html#l00038">server.cpp.hpp:38</a></div></div>
-<div class="ttc" id="aclassfl_1_1json_af8bc0968107152344bfa8468bba76f54_html_af8bc0968107152344bfa8468bba76f54"><div class="ttname"><a href="../../de/d40/classfl_1_1json_af8bc0968107152344bfa8468bba76f54.html#af8bc0968107152344bfa8468bba76f54">fl::json::object</a></div><div class="ttdeci">static json object() FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d05/json_8h_source.html#l00692">json.h:692</a></div></div>
-<div class="ttc" id="anamespacetest__quick_a00071f2b3e01fb8d2b4e70970ed2d6ce_html_a00071f2b3e01fb8d2b4e70970ed2d6ce"><div class="ttname"><a href="../../d8/d94/namespacetest__quick_a00071f2b3e01fb8d2b4e70970ed2d6ce.html#a00071f2b3e01fb8d2b4e70970ed2d6ce">test_quick.response</a></div><div class="ttdeci">response</div><div class="ttdef"><b>Definition</b> <a href="../../d8/def/test__quick_8py_source.html#l00031">test_quick.py:31</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../db/d04/remote_8cpp_8hpp_source.html#l00347">347</a> of file <a class="el" href="../../db/d04/remote_8cpp_8hpp_source.html">remote.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  347</span>                                       {</div>
+<div class="line"><span class="lineno">  348</span>    <span class="keywordtype">size_t</span> processed = <a class="code hl_function" href="../../dc/d00/classfl_1_1_server_a4b8b9821566f8389e43734b90ae36798.html#a4b8b9821566f8389e43734b90ae36798">Server::pull</a>();   <span class="comment">// Pull requests from Server</span></div>
+<div class="line"><span class="lineno">  349</span>    <span class="keywordtype">size_t</span> executed = <a class="code hl_function" href="../../dc/ddb/classfl_1_1_remote_a3653f4ef8d9753d8577e3c18a07d3e0a.html#a3653f4ef8d9753d8577e3c18a07d3e0a">tick</a>(currentTimeMs);  <span class="comment">// Process scheduled tasks</span></div>
+<div class="line"><span class="lineno">  350</span> </div>
+<div class="line"><span class="lineno">  351</span><span class="preprocessor">#if FL_PLATFORM_HAS_LARGE_MEMORY</span></div>
+<div class="line"><span class="lineno">  352</span>    <span class="comment">// Push scheduled results as JSON-RPC responses. Gated on Low-memory</span></div>
+<div class="line"><span class="lineno">  353</span>    <span class="comment">// because mResults is dropped there (see #3224 Tier 1B).</span></div>
+<div class="line"><span class="lineno">  354</span>    <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; r : mResults) {</div>
+<div class="line"><span class="lineno">  355</span>        fl::json <a class="code hl_variable" href="../../d8/d94/namespacetest__quick_a00071f2b3e01fb8d2b4e70970ed2d6ce.html#a00071f2b3e01fb8d2b4e70970ed2d6ce">response</a> = <a class="code hl_function" href="../../de/d40/classfl_1_1json_ae7744bee3369b3debf7e30e4a4a18526.html#ae7744bee3369b3debf7e30e4a4a18526">fl::json::object</a>();</div>
+<div class="line"><span class="lineno">  356</span>        <a class="code hl_variable" href="../../d8/d94/namespacetest__quick_a00071f2b3e01fb8d2b4e70970ed2d6ce.html#a00071f2b3e01fb8d2b4e70970ed2d6ce">response</a>.set(<span class="stringliteral">&quot;result&quot;</span>, r.result);</div>
+<div class="line"><span class="lineno">  357</span>        <span class="comment">// Note: We don&#39;t have the original request ID for scheduled calls</span></div>
+<div class="line"><span class="lineno">  358</span>        <span class="comment">// This could be improved by storing the ID with RpcResult</span></div>
+<div class="line"><span class="lineno">  359</span>        <a class="code hl_variable" href="../../dc/d00/classfl_1_1_server_a31be41547313a58aaa29944c8bc410de.html#a31be41547313a58aaa29944c8bc410de">mOutgoingQueue</a>.push_back(response);</div>
+<div class="line"><span class="lineno">  360</span>    }</div>
+<div class="line"><span class="lineno">  361</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">  362</span> </div>
+<div class="line"><span class="lineno">  363</span>    <span class="keywordtype">size_t</span> sent = <a class="code hl_function" href="../../dc/d00/classfl_1_1_server_a049bc5d74287eaf42b1b4b8086e7213d.html#a049bc5d74287eaf42b1b4b8086e7213d">Server::push</a>();        <span class="comment">// Push responses from Server</span></div>
+<div class="line"><span class="lineno">  364</span>    <span class="keywordflow">return</span> processed + executed + sent;</div>
+<div class="line"><span class="lineno">  365</span>}</div>
+<div class="ttc" id="aclassfl_1_1_remote_a3653f4ef8d9753d8577e3c18a07d3e0a_html_a3653f4ef8d9753d8577e3c18a07d3e0a"><div class="ttname"><a href="../../dc/ddb/classfl_1_1_remote_a3653f4ef8d9753d8577e3c18a07d3e0a.html#a3653f4ef8d9753d8577e3c18a07d3e0a">fl::Remote::tick</a></div><div class="ttdeci">size_t tick(u32 currentTimeMs)</div><div class="ttdoc">Process scheduled calls (call regularly)</div><div class="ttdef"><b>Definition</b> <a href="../../db/d04/remote_8cpp_8hpp_source.html#l00268">remote.cpp.hpp:268</a></div></div>
+<div class="ttc" id="aclassfl_1_1_server_a049bc5d74287eaf42b1b4b8086e7213d_html_a049bc5d74287eaf42b1b4b8086e7213d"><div class="ttname"><a href="../../dc/d00/classfl_1_1_server_a049bc5d74287eaf42b1b4b8086e7213d.html#a049bc5d74287eaf42b1b4b8086e7213d">fl::Server::push</a></div><div class="ttdeci">size_t push()</div><div class="ttdoc">Push queued responses to sink.</div><div class="ttdef"><b>Definition</b> <a href="../../da/d73/remote_2rpc_2server_8cpp_8hpp_source.html#l00076">server.cpp.hpp:76</a></div></div>
+<div class="ttc" id="aclassfl_1_1_server_a31be41547313a58aaa29944c8bc410de_html_a31be41547313a58aaa29944c8bc410de"><div class="ttname"><a href="../../dc/d00/classfl_1_1_server_a31be41547313a58aaa29944c8bc410de.html#a31be41547313a58aaa29944c8bc410de">fl::Server::mOutgoingQueue</a></div><div class="ttdeci">fl::vector&lt; fl::json &gt; mOutgoingQueue</div><div class="ttdef"><b>Definition</b> <a href="../../da/dad/remote_2rpc_2server_8h_source.html#l00104">server.h:104</a></div></div>
+<div class="ttc" id="aclassfl_1_1_server_a4b8b9821566f8389e43734b90ae36798_html_a4b8b9821566f8389e43734b90ae36798"><div class="ttname"><a href="../../dc/d00/classfl_1_1_server_a4b8b9821566f8389e43734b90ae36798.html#a4b8b9821566f8389e43734b90ae36798">fl::Server::pull</a></div><div class="ttdeci">size_t pull()</div><div class="ttdoc">Pull requests from source, process, queue responses.</div><div class="ttdef"><b>Definition</b> <a href="../../da/d73/remote_2rpc_2server_8cpp_8hpp_source.html#l00046">server.cpp.hpp:46</a></div></div>
+<div class="ttc" id="aclassfl_1_1json_ae7744bee3369b3debf7e30e4a4a18526_html_ae7744bee3369b3debf7e30e4a4a18526"><div class="ttname"><a href="../../de/d40/classfl_1_1json_ae7744bee3369b3debf7e30e4a4a18526.html#ae7744bee3369b3debf7e30e4a4a18526">fl::json::object</a></div><div class="ttdeci">static json object() FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d05/json_8h_source.html#l00857">json.h:857</a></div></div>
+<div class="ttc" id="anamespacetest__quick_a00071f2b3e01fb8d2b4e70970ed2d6ce_html_a00071f2b3e01fb8d2b4e70970ed2d6ce"><div class="ttname"><a href="../../d8/d94/namespacetest__quick_a00071f2b3e01fb8d2b4e70970ed2d6ce.html#a00071f2b3e01fb8d2b4e70970ed2d6ce">test_quick.response</a></div><div class="ttdeci">response</div><div class="ttdef"><b>Definition</b> <a href="../../d8/def/test__quick_8py_source.html#l00036">test_quick.py:36</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../da/dad/remote_2rpc_2server_8h_source.html#l00091">fl::Server::mOutgoingQueue</a>, <a class="el" href="../../d6/d06/remote_8h_source.html#l00212">mResults</a>, <a class="el" href="../../d4/d05/json_8h_source.html#l00692">fl::json::object()</a>, <a class="el" href="../../da/d73/remote_2rpc_2server_8cpp_8hpp_source.html#l00038">fl::Server::pull()</a>, <a class="el" href="../../da/d73/remote_2rpc_2server_8cpp_8hpp_source.html#l00065">fl::Server::push()</a>, and <a class="el" href="../../db/d04/remote_8cpp_8hpp_source.html#l00222">tick()</a>.</p>
+<p class="reference">References <a class="el" href="../../da/dad/remote_2rpc_2server_8h_source.html#l00104">fl::Server::mOutgoingQueue</a>, <a class="el" href="../../d4/d05/json_8h_source.html#l00857">fl::json::object()</a>, <a class="el" href="../../da/d73/remote_2rpc_2server_8cpp_8hpp_source.html#l00046">fl::Server::pull()</a>, <a class="el" href="../../da/d73/remote_2rpc_2server_8cpp_8hpp_source.html#l00076">fl::Server::push()</a>, and <a class="el" href="../../db/d04/remote_8cpp_8hpp_source.html#l00268">tick()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d1/df2/_auto_research_low_memory_8h_source.html#l00303">autoResearchLowMemoryLoop()</a>, and <a class="el" href="../../db/d04/remote_8cpp_8hpp_source.html#l00058">sendStreamUpdate()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d1/df2/_auto_research_low_memory_8h_source.html#l00523">autoResearchLowMemoryLoop()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../dc/ddb/classfl_1_1_remote_a4579a9af2b68eb330345740407ef37fd_a4579a9af2b68eb330345740407ef37fd_cgraph.svg" width="462" height="184"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../dc/ddb/classfl_1_1_remote_a4579a9af2b68eb330345740407ef37fd_a4579a9af2b68eb330345740407ef37fd_cgraph.svg" width="446" height="184"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 <div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
 <div id="dynsection-1-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-1-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../dc/ddb/classfl_1_1_remote_a4579a9af2b68eb330345740407ef37fd_a4579a9af2b68eb330345740407ef37fd_icgraph.svg" width="424" height="86"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../dc/ddb/classfl_1_1_remote_a4579a9af2b68eb330345740407ef37fd_a4579a9af2b68eb330345740407ef37fd_icgraph.svg" width="523" height="36"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 
 </div>
@@ -169,7 +171,7 @@ $(function(){initNavTree('dc/ddb/classfl_1_1_remote_a4579a9af2b68eb330345740407e
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../dc/ddb/classfl_1_1_remote.html">Remote</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:09 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

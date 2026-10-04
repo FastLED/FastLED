@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::SPITransposer",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/dfa/classfl_1_1_s_p_i_transposer.html",tooltip="Unified stateless bit-interleaving transposer for multi-lane SPI parallel LED transmission."];
+  Node0 [id="Node000000",label="fl::third_party::truetype\l::stbrp_context",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d41/namespacefl_1_1third__party_1_1truetype.html#d3/d67/structfl_1_1third__party_1_1truetype_1_1stbrp__context",tooltip=" "];
 }

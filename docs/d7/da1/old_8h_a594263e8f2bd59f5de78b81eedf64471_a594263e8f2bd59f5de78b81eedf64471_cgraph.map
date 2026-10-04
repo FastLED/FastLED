@@ -1,12 +1,12 @@
 <map id="showGenerative" name="showGenerative">
 <area shape="rect" id="Node000001" title=" " alt="" coords="5,55,133,80"/>
-<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_afb42d6eb6443afc7223ce9b1a812f350.html#afb42d6eb6443afc7223ce9b1a812f350" title=" " alt="" coords="184,5,263,31"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a391721290a9307391d39a0a897d9b9f4.html#a391721290a9307391d39a0a897d9b9f4" title=" " alt="" coords="184,5,263,31"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="109,52,170,32,172,37,110,57"/>
 <area shape="rect" id="Node000003" href="$d8/df9/group___noise_generation_gaa452e57f154ab8d6d692375dba1ef5cb.html#gaa452e57f154ab8d6d692375dba1ef5cb" title=" " alt="" coords="185,55,262,80"/>
 <area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="134,65,171,65,171,70,134,70"/>
 <area shape="rect" id="Node000006" href="$d7/da1/old_8h_ad36625c06ceb4e34319e326160b9350d.html#ad36625c06ceb4e34319e326160b9350d" title=" " alt="" coords="181,104,265,129"/>
 <area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="110,78,170,97,169,102,109,83"/>
-<area shape="rect" id="Node000004" href="$d8/df9/group___noise_generation_gae021f30d62fea75ea1397e1a81b28a59.html#gae021f30d62fea75ea1397e1a81b28a59" title=" " alt="" coords="313,55,421,80"/>
+<area shape="rect" id="Node000004" href="$d8/df9/group___noise_generation_gae021f30d62fea75ea1397e1a81b28a59.html#gae021f30d62fea75ea1397e1a81b28a59" title="16&#45;bit, fixed point implementation of Perlin&#39;s noise without scaling." alt="" coords="313,55,421,80"/>
 <area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="262,65,299,65,299,70,262,70"/>
 <area shape="rect" id="Node000005" href="$da/dca/noise_8cpp_8hpp_aa1191276c67b1c0264857c9d802c665b.html#aa1191276c67b1c0264857c9d802c665b" title=" " alt="" coords="469,55,536,80"/>
 <area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="421,65,456,65,456,70,421,70"/>

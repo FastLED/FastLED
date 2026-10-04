@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -115,15 +115,21 @@ $(function(){initNavTree('df/d37/classfl_1_1_file_system_a732edc4ea24e9be95cb829
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../da/d96/file__system_8cpp_8hpp_source.html#l00165">165</a> of file <a class="el" href="../../da/d96/file__system_8cpp_8hpp_source.html">file_system.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  165</span>                                                {</div>
-<div class="line"><span class="lineno">  166</span>    <span class="keywordflow">return</span> fl::ifstream(<a class="code hl_variable" href="../../df/d37/classfl_1_1_file_system_ad156631717b133340e30414b2d70a379.html#ad156631717b133340e30414b2d70a379">mFs</a>-&gt;openRead(path));</div>
-<div class="line"><span class="lineno">  167</span>}</div>
-<div class="ttc" id="aclassfl_1_1_file_system_ad156631717b133340e30414b2d70a379_html_ad156631717b133340e30414b2d70a379"><div class="ttname"><a href="../../df/d37/classfl_1_1_file_system_ad156631717b133340e30414b2d70a379.html#ad156631717b133340e30414b2d70a379">fl::FileSystem::mFs</a></div><div class="ttdeci">FsImplPtr mFs</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d8d/file__system_8h_source.html#l00082">file_system.h:82</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d3/d6e/fs_8cpp_8hpp_source.html#l00170">170</a> of file <a class="el" href="../../d3/d6e/fs_8cpp_8hpp_source.html">fs.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  170</span>                                                {</div>
+<div class="line"><span class="lineno">  171</span>    <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../df/d37/classfl_1_1_file_system_ad156631717b133340e30414b2d70a379.html#ad156631717b133340e30414b2d70a379">mFs</a>) {</div>
+<div class="line"><span class="lineno">  172</span>        <span class="comment">// Defensive: default-constructed FileSystem or one whose begin*()</span></div>
+<div class="line"><span class="lineno">  173</span>        <span class="comment">// call failed has a null backend. Returning a closed ifstream</span></div>
+<div class="line"><span class="lineno">  174</span>        <span class="comment">// lets downstream code branch on is_open() rather than crash.</span></div>
+<div class="line"><span class="lineno">  175</span>        <span class="keywordflow">return</span> fl::ifstream();</div>
+<div class="line"><span class="lineno">  176</span>    }</div>
+<div class="line"><span class="lineno">  177</span>    <span class="keywordflow">return</span> fl::ifstream(<a class="code hl_variable" href="../../df/d37/classfl_1_1_file_system_ad156631717b133340e30414b2d70a379.html#ad156631717b133340e30414b2d70a379">mFs</a>-&gt;openRead(path));</div>
+<div class="line"><span class="lineno">  178</span>}</div>
+<div class="ttc" id="aclassfl_1_1_file_system_ad156631717b133340e30414b2d70a379_html_ad156631717b133340e30414b2d70a379"><div class="ttname"><a href="../../df/d37/classfl_1_1_file_system_ad156631717b133340e30414b2d70a379.html#ad156631717b133340e30414b2d70a379">fl::FileSystem::mFs</a></div><div class="ttdeci">FsImplPtr mFs</div><div class="ttdef"><b>Definition</b> <a href="../../df/d26/fs_8h_source.html#l00106">fs.h:106</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d6/d8d/file__system_8h_source.html#l00082">mFs</a>.</p>
+<p class="reference">References <a class="el" href="../../df/d26/fs_8h_source.html#l00106">mFs</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../de/d4b/file__system__codecs_8cpp_8hpp_source.html#l00103">loadJpeg()</a>, <a class="el" href="../../de/d4b/file__system__codecs_8cpp_8hpp_source.html#l00142">openMp3()</a>, <a class="el" href="../../de/d4b/file__system__codecs_8cpp_8hpp_source.html#l00081">openMpeg1Video()</a>, <a class="el" href="../../da/d96/file__system_8cpp_8hpp_source.html#l00168">openVideo()</a>, and <a class="el" href="../../da/d96/file__system_8cpp_8hpp_source.html#l00180">readText()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../de/d4b/file__system__codecs_8cpp_8hpp_source.html#l00103">loadJpeg()</a>, <a class="el" href="../../de/d4b/file__system__codecs_8cpp_8hpp_source.html#l00142">openMp3()</a>, <a class="el" href="../../de/d4b/file__system__codecs_8cpp_8hpp_source.html#l00081">openMpeg1Video()</a>, <a class="el" href="../../d3/d6e/fs_8cpp_8hpp_source.html#l00179">openVideo()</a>, and <a class="el" href="../../d3/d6e/fs_8cpp_8hpp_source.html#l00191">readText()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -141,7 +147,7 @@ $(function(){initNavTree('df/d37/classfl_1_1_file_system_a732edc4ea24e9be95cb829
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../df/d37/classfl_1_1_file_system.html">FileSystem</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:05 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:08 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

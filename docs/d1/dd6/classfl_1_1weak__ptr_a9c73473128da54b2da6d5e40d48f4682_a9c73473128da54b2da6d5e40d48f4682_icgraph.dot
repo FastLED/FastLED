@@ -1,0 +1,33 @@
+digraph "fl::weak_ptr::expired"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::weak_ptr::expired",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::shared_ptr::shared_ptr",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d74/classfl_1_1shared__ptr_a604c29a9f6af10f43ad77ab1851a2e24.html#a604c29a9f6af10f43ad77ab1851a2e24",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::weak_ptr::lock",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/dd6/classfl_1_1weak__ptr_a4778142e95d49053ea59a79c47137b06.html#a4778142e95d49053ea59a79c47137b06",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::audio::Processor\l::createWithAutoInput",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d6b/classfl_1_1audio_1_1_processor_ac25ffea2d1abf227cecff4e4a7448a5a.html#ac25ffea2d1abf227cecff4e4a7448a5a",tooltip=" "];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::audio::AudioManager::add",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d9d/classfl_1_1audio_1_1_audio_manager_a50a318328d3ab7153dd90b4f7c63c5c0.html#a50a318328d3ab7153dd90b4f7c63c5c0",tooltip=" "];
+  Node4 -> Node11 [id="edge5_Node000004_Node000011",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="fl::audio::AudioManager::add",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d9d/classfl_1_1audio_1_1_audio_manager_a836eb15d1067209d94b7e6108bb7ec97.html#a836eb15d1067209d94b7e6108bb7ec97",tooltip=" "];
+  Node4 -> Node4 [id="edge6_Node000004_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node12 [id="edge7_Node000003_Node000012",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node12 [id="Node000012",label="fl::Gamma8::getOrCreate",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/da5/classfl_1_1_gamma8_a1e23628420de45c97d2b741722445024.html#a1e23628420de45c97d2b741722445024",tooltip=" "];
+  Node12 -> Node13 [id="edge8_Node000012_Node000013",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node13 [id="Node000013",label="fl::encodeUCS7604",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_ab3b16ea2da444a2539d082aae754217f.html#ab3b16ea2da444a2539d082aae754217f",tooltip="Encode complete UCS7604 frame (preamble + padding + pixel data)"];
+  Node13 -> Node14 [id="edge9_Node000013_Node000014",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node14 [id="Node000014",label="fl::UCS7604ControllerT\l\< DATA_PIN, RGB_ORDER,\l fl::UCS7604Mode::UCS7604\l_MODE_8BIT_800KHZ, fl::TIMING\l_UCS7604_800KHZ, CLOCKLESS_CONTROLLER\l \>::showPixels",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d78/classfl_1_1_u_c_s7604_controller_t_a0b8dc7f2f0f2e0a2ed3461aa905080ea.html#a0b8dc7f2f0f2e0a2ed3461aa905080ea",tooltip=" "];
+  Node13 -> Node15 [id="edge10_Node000013_Node000015",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node15 [id="Node000015",label="fl::anonymous_namespace\l\{channel::cpp::hpp\}::writeUCS7604",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d8d/namespacefl_1_1anonymous__namespace_02channel_8cpp_8hpp_03_a5f78780348edce94192b57b45f1778b4.html#a5f78780348edce94192b57b45f1778b4",tooltip="Encode UCS7604 pixel data into the channel data buffer."];
+  Node15 -> Node15 [id="edge11_Node000015_Node000015",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node12 -> Node12 [id="edge12_Node000012_Node000012",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node12 -> Node14 [id="edge13_Node000012_Node000014",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node12 -> Node15 [id="edge14_Node000012_Node000015",dir="back",color="steelblue1",style="solid",tooltip=" "];
+}

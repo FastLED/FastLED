@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -111,7 +111,7 @@ $(function(){initNavTree('d1/d66/simd__ops_8h_source.html','../../'); initResiza
 <div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &quot;<a class="code" href="../../d1/ddf/align_8h.html">fl/stl/align.h</a>&quot;</span></div>
 <div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span> </div>
 <div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment">// Implementation of s0x32x4 × s16x16x4 (after s16x16x4 is defined)</span></div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><a class="code hl_define" href="../../df/d96/s16x16x4_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> s16x16x4 s0x32x4::operator*(s16x16x4 b)<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><a class="code hl_define" href="../../d4/d54/compiler__control_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> s16x16x4 s0x32x4::operator*(s16x16x4 b)<span class="keyword"> const </span>{</div>
 <div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>    <span class="comment">// Q31 × Q16 = Q47 → shift right 31 → Q16</span></div>
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>    <span class="comment">// Use mulhi32_i32_4 which computes (i64*i64) &gt;&gt; 32, then shift left 1</span></div>
 <div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>    <span class="comment">// (because &gt;&gt; 31 is equivalent to &gt;&gt; 32 then &lt;&lt; 1)</span></div>
@@ -120,12 +120,12 @@ $(function(){initNavTree('d1/d66/simd__ops_8h_source.html','../../'); initResiza
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>}</div>
 <div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment">// Implementation of s16x16x4 × s0x32x4 (commutative)</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><a class="code hl_define" href="../../df/d96/s16x16x4_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> s16x16x4 s16x16x4::operator*(s0x32x4 b)<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><a class="code hl_define" href="../../d4/d54/compiler__control_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> s16x16x4 s16x16x4::operator*(s0x32x4 b)<span class="keyword"> const </span>{</div>
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>    <span class="keywordflow">return</span> b * (*this);  <span class="comment">// Delegate to s0x32x4::operator*</span></div>
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>}</div>
 <div class="ttc" id="aalign_8h_html"><div class="ttname"><a href="../../d1/ddf/align_8h.html">align.h</a></div><div class="ttdoc">Alignment macros and utilities for FastLED.</div></div>
+<div class="ttc" id="acompiler__control_8h_a2f767b53d92c9d761d9f8d28a35d80c7_html_a2f767b53d92c9d761d9f8d28a35d80c7"><div class="ttname"><a href="../../d4/d54/compiler__control_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a></div><div class="ttdeci">#define FASTLED_FORCE_INLINE</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d54/compiler__control_8h_source.html#l00819">compiler_control.h:819</a></div></div>
 <div class="ttc" id="as0x32x4_8h_html"><div class="ttname"><a href="../../d1/dcf/s0x32x4_8h.html">s0x32x4.h</a></div><div class="ttdoc">SIMD 4-wide s0x32 fixed-point vector type.</div></div>
-<div class="ttc" id="as16x16x4_8h_a2f767b53d92c9d761d9f8d28a35d80c7_html_a2f767b53d92c9d761d9f8d28a35d80c7"><div class="ttname"><a href="../../df/d96/s16x16x4_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a></div><div class="ttdeci">#define FASTLED_FORCE_INLINE</div></div>
 <div class="ttc" id="as16x16x4_8h_html"><div class="ttname"><a href="../../df/d96/s16x16x4_8h.html">s16x16x4.h</a></div><div class="ttdoc">SIMD 4-wide s16x16 fixed-point vector type.</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
@@ -134,7 +134,7 @@ $(function(){initNavTree('d1/d66/simd__ops_8h_source.html','../../'); initResiza
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_94896ea2d28e1d34f24a1dbbb9436aa8.html">math</a></li><li class="navelem"><a class="el" href="../../dir_f2ccef9f6c31b883ce82e6f26140ecd0.html">fixed_point</a></li><li class="navelem"><a class="el" href="../../d1/d66/simd__ops_8h.html">simd_ops.h</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:06:59 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:01 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

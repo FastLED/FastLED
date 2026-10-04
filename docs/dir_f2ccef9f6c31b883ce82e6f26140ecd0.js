@@ -2,6 +2,7 @@ var dir_f2ccef9f6c31b883ce82e6f26140ecd0 =
 [
     [ "_build.cpp.hpp", "d6/df1/fl_2math_2fixed__point_2__build_8cpp_8hpp.html", null ],
     [ "base.h", "d3/d5a/base_8h.html", "d3/d5a/base_8h" ],
+    [ "icbrt.h", "df/d19/icbrt_8h.html", "df/d19/icbrt_8h" ],
     [ "isqrt.h", "d7/dac/isqrt_8h.html", "d7/dac/isqrt_8h" ],
     [ "s0x32.h", "d8/d64/s0x32_8h.html", "d8/d64/s0x32_8h" ],
     [ "s0x32x4.h", "d1/dcf/s0x32x4_8h.html", "d1/dcf/s0x32x4_8h" ],
@@ -22,5 +23,6 @@ var dir_f2ccef9f6c31b883ce82e6f26140ecd0 =
     [ "u4x12.h", "d7/dff/u4x12_8h.html", "d7/dff/u4x12_8h" ],
     [ "u8x24.h", "d0/d1b/u8x24_8h.html", "d0/d1b/u8x24_8h" ],
     [ "u8x8.cpp.hpp", "da/d97/u8x8_8cpp_8hpp.html", null ],
-    [ "u8x8.h", "d7/d11/u8x8_8h.html", "d7/d11/u8x8_8h" ]
+    [ "u8x8.h", "d7/d11/u8x8_8h.html", "d7/d11/u8x8_8h" ],
+    [ "wide_divide.h", "dd/dbf/wide__divide_8h.html", "dd/dbf/wide__divide_8h" ]
 ];

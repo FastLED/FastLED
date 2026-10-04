@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -121,7 +121,7 @@ $(function(){initNavTree('d0/d4c/platforms_8cpp_8hpp_source.html','../../'); ini
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#    ifdef __cplusplus</span></div>
 <div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="keyword">extern</span> <span class="stringliteral">&quot;C&quot;</span> {</div>
 <div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#    endif</span></div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><a class="code hl_define" href="../../df/d96/s16x16x4_8h_afde174fbd5fd09901dcac3f36aed38d8.html#afde174fbd5fd09901dcac3f36aed38d8">FL_LINK_WEAK</a> <span class="keyword">volatile</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> timer_millis = 0;</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><a class="code hl_define" href="../../d4/d54/compiler__control_8h_afde174fbd5fd09901dcac3f36aed38d8.html#afde174fbd5fd09901dcac3f36aed38d8">FL_LINK_WEAK</a> <span class="keyword">volatile</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> timer_millis = 0;</div>
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#    ifdef __cplusplus</span></div>
 <div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>}</div>
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#    endif</span></div>
@@ -140,27 +140,27 @@ $(function(){initNavTree('d0/d4c/platforms_8cpp_8hpp_source.html','../../'); ini
 <div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span> </div>
 <div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    fl::u32 isrCount;</div>
 <div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    <a class="code hl_define" href="../../df/d96/s16x16x4_8h_a24755b4e8438a27ee5aa58963ed6f74a.html#a24755b4e8438a27ee5aa58963ed6f74a">FL_EXTERN_C_BEGIN</a></div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    <a class="code hl_define" href="../../d4/d54/compiler__control_8h_a24755b4e8438a27ee5aa58963ed6f74a.html#a24755b4e8438a27ee5aa58963ed6f74a">FL_EXTERN_C_BEGIN</a></div>
 <div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>            <span class="comment">// NOTE: Update platforms.cpp in root of FastLED library if this changes        </span></div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="preprocessor">            #if defined(FASTLED_NRF52_ENABLE_PWM_INSTANCE0)</span></div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="preprocessor">            #if FL_NRF52_ENABLE_PWM_INSTANCE0 &amp;&amp; FL_NRF52_USE_PWM_INTERRUPTS</span></div>
 <div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>                <span class="keywordtype">void</span> PWM0_IRQHandler(<span class="keywordtype">void</span>) { ++isrCount; PWM_Arbiter&lt;0&gt;::isr_handler(); }</div>
 <div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="preprocessor">            #endif</span></div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="preprocessor">            #if defined(FASTLED_NRF52_ENABLE_PWM_INSTANCE1)</span></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="preprocessor">            #if FL_NRF52_ENABLE_PWM_INSTANCE1 &amp;&amp; FL_NRF52_USE_PWM_INTERRUPTS</span></div>
 <div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>                <span class="keywordtype">void</span> PWM1_IRQHandler(<span class="keywordtype">void</span>) { ++isrCount; PWM_Arbiter&lt;1&gt;::isr_handler(); }</div>
 <div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="preprocessor">            #endif</span></div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="preprocessor">            #if defined(FASTLED_NRF52_ENABLE_PWM_INSTANCE2)</span></div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="preprocessor">            #if FL_NRF52_ENABLE_PWM_INSTANCE2 &amp;&amp; FL_NRF52_USE_PWM_INTERRUPTS</span></div>
 <div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>                <span class="keywordtype">void</span> PWM2_IRQHandler(<span class="keywordtype">void</span>) { ++isrCount; PWM_Arbiter&lt;2&gt;::isr_handler(); }</div>
 <div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span><span class="preprocessor">            #endif</span></div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="preprocessor">            #if defined(FASTLED_NRF52_ENABLE_PWM_INSTANCE3)</span></div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="preprocessor">            #if FL_NRF52_ENABLE_PWM_INSTANCE3 &amp;&amp; FL_NRF52_USE_PWM_INTERRUPTS</span></div>
 <div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>                <span class="keywordtype">void</span> PWM3_IRQHandler(<span class="keywordtype">void</span>) { ++isrCount; PWM_Arbiter&lt;3&gt;::isr_handler(); }</div>
 <div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span><span class="preprocessor">            #endif</span></div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    <a class="code hl_define" href="../../df/d96/s16x16x4_8h_a37c56eb519b76266c026c43ad3a6d88d.html#a37c56eb519b76266c026c43ad3a6d88d">FL_EXTERN_C_END</a></div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    <a class="code hl_define" href="../../d4/d54/compiler__control_8h_a37c56eb519b76266c026c43ad3a6d88d.html#a37c56eb519b76266c026c43ad3a6d88d">FL_EXTERN_C_END</a></div>
 <div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
 <div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span><span class="preprocessor">#endif </span><span class="comment">// defined(FL_IS_NRF52)</span></div>
+<div class="ttc" id="acompiler__control_8h_a24755b4e8438a27ee5aa58963ed6f74a_html_a24755b4e8438a27ee5aa58963ed6f74a"><div class="ttname"><a href="../../d4/d54/compiler__control_8h_a24755b4e8438a27ee5aa58963ed6f74a.html#a24755b4e8438a27ee5aa58963ed6f74a">FL_EXTERN_C_BEGIN</a></div><div class="ttdeci">#define FL_EXTERN_C_BEGIN</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d54/compiler__control_8h_source.html#l00499">compiler_control.h:499</a></div></div>
+<div class="ttc" id="acompiler__control_8h_a37c56eb519b76266c026c43ad3a6d88d_html_a37c56eb519b76266c026c43ad3a6d88d"><div class="ttname"><a href="../../d4/d54/compiler__control_8h_a37c56eb519b76266c026c43ad3a6d88d.html#a37c56eb519b76266c026c43ad3a6d88d">FL_EXTERN_C_END</a></div><div class="ttdeci">#define FL_EXTERN_C_END</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d54/compiler__control_8h_source.html#l00500">compiler_control.h:500</a></div></div>
+<div class="ttc" id="acompiler__control_8h_afde174fbd5fd09901dcac3f36aed38d8_html_afde174fbd5fd09901dcac3f36aed38d8"><div class="ttname"><a href="../../d4/d54/compiler__control_8h_afde174fbd5fd09901dcac3f36aed38d8.html#afde174fbd5fd09901dcac3f36aed38d8">FL_LINK_WEAK</a></div><div class="ttdeci">#define FL_LINK_WEAK</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d54/compiler__control_8h_source.html#l00287">compiler_control.h:287</a></div></div>
 <div class="ttc" id="acompiler__control_8h_html"><div class="ttname"><a href="../../d4/d54/compiler__control_8h.html">compiler_control.h</a></div></div>
-<div class="ttc" id="as16x16x4_8h_a24755b4e8438a27ee5aa58963ed6f74a_html_a24755b4e8438a27ee5aa58963ed6f74a"><div class="ttname"><a href="../../df/d96/s16x16x4_8h_a24755b4e8438a27ee5aa58963ed6f74a.html#a24755b4e8438a27ee5aa58963ed6f74a">FL_EXTERN_C_BEGIN</a></div><div class="ttdeci">#define FL_EXTERN_C_BEGIN</div></div>
-<div class="ttc" id="as16x16x4_8h_a37c56eb519b76266c026c43ad3a6d88d_html_a37c56eb519b76266c026c43ad3a6d88d"><div class="ttname"><a href="../../df/d96/s16x16x4_8h_a37c56eb519b76266c026c43ad3a6d88d.html#a37c56eb519b76266c026c43ad3a6d88d">FL_EXTERN_C_END</a></div><div class="ttdeci">#define FL_EXTERN_C_END</div></div>
-<div class="ttc" id="as16x16x4_8h_afde174fbd5fd09901dcac3f36aed38d8_html_afde174fbd5fd09901dcac3f36aed38d8"><div class="ttname"><a href="../../df/d96/s16x16x4_8h_afde174fbd5fd09901dcac3f36aed38d8.html#afde174fbd5fd09901dcac3f36aed38d8">FL_LINK_WEAK</a></div><div class="ttdeci">#define FL_LINK_WEAK</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.3-->
@@ -168,7 +168,7 @@ $(function(){initNavTree('d0/d4c/platforms_8cpp_8hpp_source.html','../../'); ini
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d0/d4c/platforms_8cpp_8hpp.html">platforms.cpp.hpp</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:00 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:02 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

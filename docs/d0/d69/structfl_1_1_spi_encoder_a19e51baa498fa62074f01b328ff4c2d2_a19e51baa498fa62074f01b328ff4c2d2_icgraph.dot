@@ -1,0 +1,16 @@
+digraph "fl::SpiEncoder::sm16716"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::SpiEncoder::sm16716",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Create SM16716 encoder configuration."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::SpiEncoder::spiEncoder\lForChipset",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d69/structfl_1_1_spi_encoder_a70ab533d731ab69cc043b02be20473c8.html#a70ab533d731ab69cc043b02be20473c8",tooltip="Look up the default SpiEncoder for a given chipset."];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="CFastLED::addLedsSpiChannel",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dbb/class_c_fast_l_e_d_a4fb94311febea463f730cd5f85f0de0f.html#a4fb94311febea463f730cd5f85f0de0f",tooltip="Add an SPI controller with an explicit ESP-IDF SPI host."];
+  Node2 -> Node4 [id="edge3_Node000002_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="CFastLED::addLedsSpiChannel",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dbb/class_c_fast_l_e_d_a7a6a0bd952643368315f254c0db8cd64.html#a7a6a0bd952643368315f254c0db8cd64",tooltip="Add an SPI based CLEDController via Channel API."];
+}

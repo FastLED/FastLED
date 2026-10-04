@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -115,68 +115,69 @@ $(function(){initNavTree('d5/d22/namespacetest__stress_a573611374b6e37c513fa105c
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d5/dfa/test__stress_8py_source.html#l00272">272</a> of file <a class="el" href="../../d5/dfa/test__stress_8py_source.html">test_stress.py</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  272</span><span class="keyword">def </span>main() -&gt; int:</div>
-<div class="line"><span class="lineno">  273</span>    parser = argparse.ArgumentParser(</div>
-<div class="line"><span class="lineno">  274</span>        description=<span class="stringliteral">&quot;Stress test FastLED Network HTTP server&quot;</span></div>
-<div class="line"><span class="lineno">  275</span>    )</div>
-<div class="line"><span class="lineno">  276</span>    parser.add_argument(<span class="stringliteral">&quot;--host&quot;</span>, default=<span class="stringliteral">&quot;localhost&quot;</span>, help=<span class="stringliteral">&quot;Server host&quot;</span>)</div>
-<div class="line"><span class="lineno">  277</span>    parser.add_argument(<span class="stringliteral">&quot;--port&quot;</span>, type=int, default=8080, help=<span class="stringliteral">&quot;Server port&quot;</span>)</div>
-<div class="line"><span class="lineno">  278</span>    parser.add_argument(</div>
-<div class="line"><span class="lineno">  279</span>        <span class="stringliteral">&quot;--connections&quot;</span>, type=int, default=20, help=<span class="stringliteral">&quot;Number of concurrent connections&quot;</span></div>
-<div class="line"><span class="lineno">  280</span>    )</div>
-<div class="line"><span class="lineno">  281</span>    parser.add_argument(</div>
-<div class="line"><span class="lineno">  282</span>        <span class="stringliteral">&quot;--requests&quot;</span>, type=int, default=50, help=<span class="stringliteral">&quot;Number of sequential requests&quot;</span></div>
-<div class="line"><span class="lineno">  283</span>    )</div>
-<div class="line"><span class="lineno">  284</span>    args = parser.parse_args()</div>
-<div class="line"><span class="lineno">  285</span> </div>
-<div class="line"><span class="lineno">  286</span>    config = StressTestConfig(</div>
-<div class="line"><span class="lineno">  287</span>        host=args.host,</div>
-<div class="line"><span class="lineno">  288</span>        port=args.port,</div>
-<div class="line"><span class="lineno">  289</span>        num_connections=args.connections,</div>
-<div class="line"><span class="lineno">  290</span>        num_requests=args.requests,</div>
-<div class="line"><span class="lineno">  291</span>    )</div>
-<div class="line"><span class="lineno">  292</span> </div>
-<div class="line"><span class="lineno">  293</span>    console.print(<span class="stringliteral">&quot;[bold]FastLED Network HTTP Server - Phase 3 Stress Test[/bold]&quot;</span>)</div>
-<div class="line"><span class="lineno">  294</span>    console.print(f<span class="stringliteral">&quot;Server: http://{config.host}:{config.port}\n&quot;</span>)</div>
-<div class="line"><span class="lineno">  295</span> </div>
-<div class="line"><span class="lineno">  296</span>    console.print(<span class="stringliteral">&quot;[cyan]Starting server...[/cyan]&quot;</span>)</div>
-<div class="line"><span class="lineno">  297</span>    server_proc = start_server(config)</div>
-<div class="line"><span class="lineno">  298</span>    console.print(<span class="stringliteral">&quot;[green]✓ Server started and responding[/green]&quot;</span>)</div>
-<div class="line"><span class="lineno">  299</span> </div>
-<div class="line"><span class="lineno">  300</span>    results = StressTestResults()</div>
+<p class="definition">Definition at line <a class="el" href="../../d5/dfa/test__stress_8py_source.html#l00274">274</a> of file <a class="el" href="../../d5/dfa/test__stress_8py_source.html">test_stress.py</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  274</span><span class="keyword">def </span>main() -&gt; int:</div>
+<div class="line"><span class="lineno">  275</span>    parser = argparse.ArgumentParser(</div>
+<div class="line"><span class="lineno">  276</span>        description=<span class="stringliteral">&quot;Stress test FastLED Network HTTP server&quot;</span></div>
+<div class="line"><span class="lineno">  277</span>    )</div>
+<div class="line"><span class="lineno">  278</span>    parser.add_argument(<span class="stringliteral">&quot;--host&quot;</span>, default=<span class="stringliteral">&quot;localhost&quot;</span>, help=<span class="stringliteral">&quot;Server host&quot;</span>)</div>
+<div class="line"><span class="lineno">  279</span>    parser.add_argument(<span class="stringliteral">&quot;--port&quot;</span>, type=int, default=8080, help=<span class="stringliteral">&quot;Server port&quot;</span>)</div>
+<div class="line"><span class="lineno">  280</span>    parser.add_argument(</div>
+<div class="line"><span class="lineno">  281</span>        <span class="stringliteral">&quot;--connections&quot;</span>, type=int, default=20, help=<span class="stringliteral">&quot;Number of concurrent connections&quot;</span></div>
+<div class="line"><span class="lineno">  282</span>    )</div>
+<div class="line"><span class="lineno">  283</span>    parser.add_argument(</div>
+<div class="line"><span class="lineno">  284</span>        <span class="stringliteral">&quot;--requests&quot;</span>, type=int, default=50, help=<span class="stringliteral">&quot;Number of sequential requests&quot;</span></div>
+<div class="line"><span class="lineno">  285</span>    )</div>
+<div class="line"><span class="lineno">  286</span>    args = parser.parse_args()</div>
+<div class="line"><span class="lineno">  287</span> </div>
+<div class="line"><span class="lineno">  288</span>    config = StressTestConfig(</div>
+<div class="line"><span class="lineno">  289</span>        host=args.host,</div>
+<div class="line"><span class="lineno">  290</span>        port=args.port,</div>
+<div class="line"><span class="lineno">  291</span>        num_connections=args.connections,</div>
+<div class="line"><span class="lineno">  292</span>        num_requests=args.requests,</div>
+<div class="line"><span class="lineno">  293</span>    )</div>
+<div class="line"><span class="lineno">  294</span> </div>
+<div class="line"><span class="lineno">  295</span>    console.print(<span class="stringliteral">&quot;[bold]FastLED Network HTTP Server - Phase 3 Stress Test[/bold]&quot;</span>)</div>
+<div class="line"><span class="lineno">  296</span>    console.print(f<span class="stringliteral">&quot;Server: http://{config.host}:{config.port}\n&quot;</span>)</div>
+<div class="line"><span class="lineno">  297</span> </div>
+<div class="line"><span class="lineno">  298</span>    console.print(<span class="stringliteral">&quot;[cyan]Starting server...[/cyan]&quot;</span>)</div>
+<div class="line"><span class="lineno">  299</span>    server_proc = start_server(config)</div>
+<div class="line"><span class="lineno">  300</span>    console.print(<span class="stringliteral">&quot;[green]✓ Server started and responding[/green]&quot;</span>)</div>
 <div class="line"><span class="lineno">  301</span> </div>
-<div class="line"><span class="lineno">  302</span>    <span class="keywordflow">try</span>:</div>
-<div class="line"><span class="lineno">  303</span>        <span class="comment"># Test 1: Concurrent connections</span></div>
-<div class="line"><span class="lineno">  304</span>        stress_test_concurrent(config, results)</div>
-<div class="line"><span class="lineno">  305</span> </div>
-<div class="line"><span class="lineno">  306</span>        <span class="comment"># Test 2: Rapid sequential requests</span></div>
-<div class="line"><span class="lineno">  307</span>        stress_test_rapid(config, results)</div>
-<div class="line"><span class="lineno">  308</span> </div>
-<div class="line"><span class="lineno">  309</span>        <span class="comment"># Display results</span></div>
-<div class="line"><span class="lineno">  310</span>        exit_code = display_results(results)</div>
-<div class="line"><span class="lineno">  311</span> </div>
-<div class="line"><span class="lineno">  312</span>        <span class="keywordflow">return</span> exit_code</div>
+<div class="line"><span class="lineno">  302</span>    results = StressTestResults()</div>
+<div class="line"><span class="lineno">  303</span> </div>
+<div class="line"><span class="lineno">  304</span>    <span class="keywordflow">try</span>:</div>
+<div class="line"><span class="lineno">  305</span>        <span class="comment"># Test 1: Concurrent connections</span></div>
+<div class="line"><span class="lineno">  306</span>        stress_test_concurrent(config, results)</div>
+<div class="line"><span class="lineno">  307</span> </div>
+<div class="line"><span class="lineno">  308</span>        <span class="comment"># Test 2: Rapid sequential requests</span></div>
+<div class="line"><span class="lineno">  309</span>        stress_test_rapid(config, results)</div>
+<div class="line"><span class="lineno">  310</span> </div>
+<div class="line"><span class="lineno">  311</span>        <span class="comment"># Display results</span></div>
+<div class="line"><span class="lineno">  312</span>        exit_code = display_results(results)</div>
 <div class="line"><span class="lineno">  313</span> </div>
-<div class="line"><span class="lineno">  314</span>    <span class="keywordflow">except</span> KeyboardInterrupt:</div>
-<div class="line"><span class="lineno">  315</span>        console.print(<span class="stringliteral">&quot;\n[yellow]Test interrupted by user[/yellow]&quot;</span>)</div>
-<div class="line"><span class="lineno">  316</span>        _thread.interrupt_main()</div>
-<div class="line"><span class="lineno">  317</span>        <span class="keywordflow">return</span> 130</div>
-<div class="line"><span class="lineno">  318</span> </div>
-<div class="line"><span class="lineno">  319</span>    <span class="keywordflow">finally</span>:</div>
-<div class="line"><span class="lineno">  320</span>        console.print(<span class="stringliteral">&quot;\n[cyan]Stopping server...[/cyan]&quot;</span>)</div>
-<div class="line"><span class="lineno">  321</span>        server_proc.terminate()</div>
-<div class="line"><span class="lineno">  322</span>        <span class="keywordflow">try</span>:</div>
-<div class="line"><span class="lineno">  323</span>            server_proc.wait(timeout=5)</div>
-<div class="line"><span class="lineno">  324</span>        <span class="keywordflow">except</span> subprocess.TimeoutExpired:</div>
-<div class="line"><span class="lineno">  325</span>            server_proc.kill()</div>
-<div class="line"><span class="lineno">  326</span>        console.print(<span class="stringliteral">&quot;[green]✓ Server stopped[/green]&quot;</span>)</div>
-<div class="line"><span class="lineno">  327</span> </div>
-<div class="line"><span class="lineno">  328</span> </div>
+<div class="line"><span class="lineno">  314</span>        <span class="keywordflow">return</span> exit_code</div>
+<div class="line"><span class="lineno">  315</span> </div>
+<div class="line"><span class="lineno">  316</span>    <span class="keywordflow">except</span> KeyboardInterrupt:</div>
+<div class="line"><span class="lineno">  317</span>        console.print(<span class="stringliteral">&quot;\n[yellow]Test interrupted by user[/yellow]&quot;</span>)</div>
+<div class="line"><span class="lineno">  318</span>        _thread.interrupt_main()</div>
+<div class="line"><span class="lineno">  319</span>        <span class="keywordflow">return</span> 130</div>
+<div class="line"><span class="lineno">  320</span> </div>
+<div class="line"><span class="lineno">  321</span>    <span class="keywordflow">finally</span>:</div>
+<div class="line"><span class="lineno">  322</span>        console.print(<span class="stringliteral">&quot;\n[cyan]Stopping server...[/cyan]&quot;</span>)</div>
+<div class="line"><span class="lineno">  323</span>        server_proc.terminate()</div>
+<div class="line"><span class="lineno">  324</span>        <span class="keywordflow">try</span>:</div>
+<div class="line"><span class="lineno">  325</span>            server_proc.wait(timeout=5)</div>
+<div class="line"><span class="lineno">  326</span>        <span class="keywordflow">except</span> TimeoutError:</div>
+<div class="line"><span class="lineno">  327</span>            <span class="comment"># RunningProcess.wait(timeout=) already killed the process.</span></div>
+<div class="line"><span class="lineno">  328</span>            server_proc.kill()</div>
+<div class="line"><span class="lineno">  329</span>        console.print(<span class="stringliteral">&quot;[green]✓ Server stopped[/green]&quot;</span>)</div>
+<div class="line"><span class="lineno">  330</span> </div>
+<div class="line"><span class="lineno">  331</span> </div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d5/dfa/test__stress_8py_source.html#l00217">display_results()</a>, <a class="el" href="../../d5/dfa/test__stress_8py_source.html#l00272">main()</a>, <a class="el" href="../../d5/dfa/test__stress_8py_source.html#l00079">start_server()</a>, <a class="el" href="../../d5/dfa/test__stress_8py_source.html#l00149">stress_test_concurrent()</a>, and <a class="el" href="../../d5/dfa/test__stress_8py_source.html#l00186">stress_test_rapid()</a>.</p>
+<p class="reference">References <a class="el" href="../../d5/dfa/test__stress_8py_source.html#l00219">display_results()</a>, <a class="el" href="../../d5/dfa/test__stress_8py_source.html#l00274">main()</a>, <a class="el" href="../../d5/dfa/test__stress_8py_source.html#l00079">start_server()</a>, <a class="el" href="../../d5/dfa/test__stress_8py_source.html#l00151">stress_test_concurrent()</a>, and <a class="el" href="../../d5/dfa/test__stress_8py_source.html#l00188">stress_test_rapid()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d5/dfa/test__stress_8py_source.html#l00272">main()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d5/dfa/test__stress_8py_source.html#l00274">main()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -201,7 +202,7 @@ $(function(){initNavTree('d5/d22/namespacetest__stress_a573611374b6e37c513fa105c
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d5/d22/namespacetest__stress.html">test_stress</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:12 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:13 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

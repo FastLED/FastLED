@@ -1,0 +1,5 @@
+<map id="RgbwwEmitterPower" name="RgbwwEmitterPower">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,93,163,119"/>
+<area shape="rect" id="Node000002" href="$db/d18/struct_power_model_r_g_b_w_w.html" title="RGBWW LED power consumption model (RGB + warm white + cool white)." alt="" coords="6,5,162,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="87,45,87,93,81,93,81,45"/>
+</map>

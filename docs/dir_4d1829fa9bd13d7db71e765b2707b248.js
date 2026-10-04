@@ -6,8 +6,11 @@ var dir_4d1829fa9bd13d7db71e765b2707b248 =
     [ "channels", "dir_217dd1d1f80f936dd132dc9fc88b57d1.html", "dir_217dd1d1f80f936dd132dc9fc88b57d1" ],
     [ "chipsets", "dir_4bca70778167b44495d699f593f26052.html", "dir_4bca70778167b44495d699f593f26052" ],
     [ "codec", "dir_10dd822f9fdc91e4cdf1760ae6c69186.html", "dir_10dd822f9fdc91e4cdf1760ae6c69186" ],
+    [ "color", "dir_c6197854394a4ba223304cdddfb4f881.html", "dir_c6197854394a4ba223304cdddfb4f881" ],
     [ "control", "dir_d5597cc0ea618692ff61f4f95c52a8d9.html", "dir_d5597cc0ea618692ff61f4f95c52a8d9" ],
+    [ "fled", "dir_99036044bfbb3e3b0cc79102ca66e382.html", "dir_99036044bfbb3e3b0cc79102ca66e382" ],
     [ "font", "dir_20029ed6a9de90604a8f51f99b514d92.html", "dir_20029ed6a9de90604a8f51f99b514d92" ],
+    [ "fs", "dir_defadf1938929596e66bcac4675bfead.html", "dir_defadf1938929596e66bcac4675bfead" ],
     [ "fx", "dir_d90d106199f3fa0759eaa8cec7e30de8.html", "dir_d90d106199f3fa0759eaa8cec7e30de8" ],
     [ "gfx", "dir_c9349635bab014644c82face402cd66f.html", "dir_c9349635bab014644c82face402cd66f" ],
     [ "log", "dir_c0183bc946151a111096e1f3b7a19762.html", "dir_c0183bc946151a111096e1f3b7a19762" ],
@@ -22,5 +25,6 @@ var dir_4d1829fa9bd13d7db71e765b2707b248 =
     [ "ui", "dir_a07f19b7f86e604d2aac7ea6a5a83e59.html", "dir_a07f19b7f86e604d2aac7ea6a5a83e59" ],
     [ "video", "dir_454acf09c0e4fff6d624d6e8600905f6.html", "dir_454acf09c0e4fff6d624d6e8600905f6" ],
     [ "wdt", "dir_ac76db32e99fa8ef4f8df9c398ba7a65.html", "dir_ac76db32e99fa8ef4f8df9c398ba7a65" ],
-    [ "_build.cpp.hpp", "d1/deb/fl_2__build_8cpp_8hpp.html", null ]
+    [ "_build.cpp.hpp", "d1/deb/fl_2__build_8cpp_8hpp.html", null ],
+    [ "spi_bus.h", "d5/df0/spi__bus_8h.html", "d5/df0/spi__bus_8h" ]
 ];

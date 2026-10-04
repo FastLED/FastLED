@@ -1,0 +1,9 @@
+<map id="fl/fs/embedded/embedded_fs.h" name="fl/fs/embedded/embedded_fs.h">
+<area shape="rect" id="Node000001" title="Storage built into the microcontroller itself." alt="" coords="5,5,228,31"/>
+<area shape="rect" id="Node000002" href="$d4/d26/embedded__fs_8cpp_8hpp.html" title="Body of fl::getEmbeddedFs()." alt="" coords="21,79,213,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="119,44,119,79,114,79,114,44"/>
+<area shape="rect" id="Node000003" href="$db/df3/fl_2fs_2embedded_2__build_8cpp_8hpp.html" title="Unity&#45;build aggregate for embedded (on&#45;chip flash) storage." alt="" coords="8,167,225,192"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="119,132,119,166,114,166,114,132"/>
+<area shape="rect" id="Node000004" href="$d0/d32/fl_8fs_8embedded_09_8cpp.html" title="Unity build entry&#45;point for embedded (on&#45;chip flash) storage, kept out of fl.system+...." alt="" coords="14,240,219,265"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="119,206,119,240,114,240,114,206"/>
+</map>

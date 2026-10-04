@@ -1,0 +1,67 @@
+<map id="fl::ThreadLocalFake::access" name="fl::ThreadLocalFake::access">
+<area shape="rect" id="Node000001" title=" " alt="" coords="765,724,912,764"/>
+<area shape="rect" id="Node000002" href="$dc/dad/classfl_1_1_singleton_thread_local_ab08f30bdc7b1529ab6f1927a961d4283.html#ab08f30bdc7b1529ab6f1927a961d4283" title=" " alt="" coords="539,660,717,700"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="758,722,694,703,695,697,760,717"/>
+<area shape="rect" id="Node000089" href="$dd/dfc/classfl_1_1_thread_local_fake_a74a09bbbe701cca7fec6d259232b81fe.html#a74a09bbbe701cca7fec6d259232b81fe" title=" " alt="" coords="553,724,703,764"/>
+<area shape="poly" id="edge32_Node000001_Node000089" title=" " alt="" coords="751,747,703,747,703,741,751,741"/>
+<area shape="rect" id="Node000090" href="$dd/dfc/classfl_1_1_thread_local_fake_a0e89f58be9ce32260e5762519f59bb77.html#a0e89f58be9ce32260e5762519f59bb77" title=" " alt="" coords="555,788,701,828"/>
+<area shape="poly" id="edge33_Node000001_Node000090" title=" " alt="" coords="760,771,695,791,694,785,758,766"/>
+<area shape="rect" id="Node000003" href="$de/d4f/namespacefl_1_1task_1_1detail_a47ceeb6aa357d65f1b7f1db3e9c2e476.html#a47ceeb6aa357d65f1b7f1db3e9c2e476" title="Get reference to thread&#45;local await recursion depth." alt="" coords="315,92,470,132"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="619,647,603,569,577,464,539,345,515,287,488,231,451,176,413,134,417,130,455,173,493,228,520,284,544,344,582,462,609,568,624,646"/>
+<area shape="rect" id="Node000012" href="$d2/d59/namespacefl_1_1third__party_1_1vorbis_a0e6d2b51fba72910c2ffc5cbbadcdb70.html#a0e6d2b51fba72910c2ffc5cbbadcdb70" title=" " alt="" coords="307,556,479,596"/>
+<area shape="poly" id="edge4_Node000002_Node000012" title=" " alt="" coords="572,656,490,618,443,599,445,594,492,614,574,652"/>
+<area shape="rect" id="Node000016" href="$de/d8f/namespacefl_1_1anonymous__namespace_02xypath_8cpp_8hpp_03_a1db1095abb5d9b2dfda1596d3ca6adf7.html#a1db1095abb5d9b2dfda1596d3ca6adf7" title=" " alt="" coords="295,653,491,707"/>
+<area shape="poly" id="edge8_Node000002_Node000016" title=" " alt="" coords="525,683,491,683,491,677,525,677"/>
+<area shape="rect" id="Node000017" href="$d4/d36/namespacefl_a1489f5bf0724c2458554c1722e2f5df9.html#a1489f5bf0724c2458554c1722e2f5df9" title=" " alt="" coords="321,761,464,786"/>
+<area shape="poly" id="edge10_Node000002_Node000017" title=" " alt="" coords="558,707,540,714,424,763,422,758,538,710,556,702"/>
+<area shape="rect" id="Node000030" href="$dc/dad/classfl_1_1_singleton_thread_local_a925bd633a86f4a431153ca4c0dce6ee1.html#a925bd633a86f4a431153ca4c0dce6ee1" title=" " alt="" coords="303,811,482,851"/>
+<area shape="poly" id="edge17_Node000002_Node000030" title=" " alt="" coords="547,709,541,714,524,735,517,756,510,777,492,799,472,813,469,808,489,795,505,775,512,754,520,732,537,710,543,705"/>
+<area shape="rect" id="Node000031" href="$db/d5c/namespacefl_1_1task_a2d40b476742263a3fa212e24b722e3ef.html#a2d40b476742263a3fa212e24b722e3ef" title="Run selected task subsystems." alt="" coords="345,242,440,267"/>
+<area shape="poly" id="edge18_Node000002_Node000031" title=" " alt="" coords="606,649,399,269,403,266,611,646"/>
+<area shape="rect" id="Node000083" href="$d6/dd2/classfl_1_1audio_1_1fft_1_1_context_a82a3d10a1ff9d7feb09e0672e7e44059.html#a82a3d10a1ff9d7feb09e0672e7e44059" title=" " alt="" coords="315,1031,470,1071"/>
+<area shape="poly" id="edge27_Node000002_Node000083" title=" " alt="" coords="544,710,541,714,526,732,517,749,509,782,505,819,493,864,448,959,408,1032,404,1029,443,956,488,862,500,818,504,782,512,747,522,729,537,710,541,706"/>
+<area shape="rect" id="Node000004" href="$db/d5c/namespacefl_1_1task_ab96dc4828a01d1cff109d355d8ffc23d.html#ab96dc4828a01d1cff109d355d8ffc23d" title="Synchronously wait for a promise to complete (ONLY safe in top&#45;level contexts)" alt="" coords="57,5,195,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="328,89,246,60,195,45,197,40,247,55,330,84"/>
+<area shape="rect" id="Node000013" href="$d2/d59/namespacefl_1_1third__party_1_1vorbis_a66ce9b23b8b8f6cffd5ca6df6d483378.html#a66ce9b23b8b8f6cffd5ca6df6d483378" title=" " alt="" coords="32,477,220,517"/>
+<area shape="poly" id="edge5_Node000012_Node000013" title=" " alt="" coords="317,554,246,532,204,520,205,515,247,527,319,549"/>
+<area shape="rect" id="Node000014" href="$d2/d59/namespacefl_1_1third__party_1_1vorbis_afd98766a846378bc32934e93cba84542.html#afd98766a846378bc32934e93cba84542" title=" " alt="" coords="5,541,247,581"/>
+<area shape="poly" id="edge6_Node000012_Node000014" title=" " alt="" coords="293,573,247,571,247,565,293,568"/>
+<area shape="rect" id="Node000015" href="$d2/d59/namespacefl_1_1third__party_1_1vorbis_a3abe7a97c21302f64c1caece8c8e7e05.html#a3abe7a97c21302f64c1caece8c8e7e05" title=" " alt="" coords="13,605,239,645"/>
+<area shape="poly" id="edge7_Node000012_Node000015" title=" " alt="" coords="293,597,235,608,234,603,292,592"/>
+<area shape="poly" id="edge9_Node000016_Node000016" title=" " alt="" coords="432,642,418,634,393,631,372,633,358,638,352,644,352,653,347,653,347,642,355,634,371,628,393,626,419,629,434,637"/>
+<area shape="rect" id="Node000018" href="$d2/da7/classfl_1_1_scoped_trace_a3c853a1179bd1f7f50e96a4550cd7ce9.html#a3c853a1179bd1f7f50e96a4550cd7ce9" title="Clear the entire call stack (primarily for testing)" alt="" coords="47,670,205,695"/>
+<area shape="poly" id="edge11_Node000017_Node000018" title=" " alt="" coords="355,757,304,732,246,709,204,698,205,693,247,704,306,727,357,752"/>
+<area shape="rect" id="Node000020" href="$d2/da7/classfl_1_1_scoped_trace_a8e3196179b8816634dc1c97b5ad6ebc0.html#a8e3196179b8816634dc1c97b5ad6ebc0" title="Get the current stack depth." alt="" coords="44,719,208,745"/>
+<area shape="poly" id="edge12_Node000017_Node000020" title=" " alt="" coords="307,763,208,747,208,742,308,758"/>
+<area shape="rect" id="Node000021" href="$d2/da7/classfl_1_1_scoped_trace_aa26b00e68f2abb506002e39eb10495c0.html#aa26b00e68f2abb506002e39eb10495c0" title="Dump the current call stack to a string." alt="" coords="44,769,208,794"/>
+<area shape="poly" id="edge13_Node000017_Node000021" title=" " alt="" coords="308,779,208,782,208,776,308,773"/>
+<area shape="rect" id="Node000022" href="$d2/da7/classfl_1_1_scoped_trace_a8a0f8b357bd51cec5abf2e41e2c291ae.html#a8a0f8b357bd51cec5abf2e41e2c291ae" title="Dump the current call stack to an inlined vector of TracePoints." alt="" coords="44,818,208,843"/>
+<area shape="poly" id="edge14_Node000017_Node000022" title=" " alt="" coords="321,792,247,808,189,820,188,815,246,803,320,786"/>
+<area shape="rect" id="Node000023" href="$d2/da7/classfl_1_1_scoped_trace_a0439cb0188f246ab2fffbc763108059a.html#a0439cb0188f246ab2fffbc763108059a" title="Pop the most recent function from the call stack." alt="" coords="51,867,201,893"/>
+<area shape="poly" id="edge15_Node000017_Node000023" title=" " alt="" coords="310,793,296,801,281,814,273,828,264,843,248,857,202,875,200,870,245,852,260,840,269,826,277,811,293,796,308,789"/>
+<area shape="rect" id="Node000025" href="$d2/da7/classfl_1_1_scoped_trace_a8673ee9a8c14c0679afd46d4ce3e02af.html#a8673ee9a8c14c0679afd46d4ce3e02af" title="Push a function name onto the call stack." alt="" coords="47,917,205,942"/>
+<area shape="poly" id="edge16_Node000017_Node000025" title=" " alt="" coords="310,791,296,801,285,813,279,825,274,852,268,880,261,893,248,906,229,918,207,926,205,921,226,913,245,902,256,890,263,878,268,851,274,824,281,810,293,797,307,787"/>
+<area shape="poly" id="edge19_Node000031_Node000004" title=" " alt="" coords="367,233,330,194,292,145,279,120,272,98,263,79,245,59,221,45,195,36,196,31,223,41,248,55,267,76,277,96,284,118,297,143,334,190,371,230"/>
+<area shape="rect" id="Node000032" href="$df/d9e/namespacefl_1_1detail_a83cc378dd24fb46853fc05f394c60dc0.html#a83cc378dd24fb46853fc05f394c60dc0" title="Internal delay implementation used by the public fl::delay wrapper." alt="" coords="49,70,203,95"/>
+<area shape="poly" id="edge20_Node000031_Node000032" title=" " alt="" coords="369,233,306,163,272,131,245,110,203,94,204,89,248,106,276,127,310,160,373,229"/>
+<area shape="rect" id="Node000055" href="$d1/d13/namespacefl_1_1net_1_1http_a25ef84b119ebfab47c0ecec96a224181.html#a25ef84b119ebfab47c0ecec96a224181" title="Legacy manual update for fetch promises (use fl::task::run() for new code)" alt="" coords="59,120,193,160"/>
+<area shape="poly" id="edge21_Node000031_Node000055" title=" " alt="" coords="360,237,308,205,246,174,193,157,194,152,248,170,310,200,363,232"/>
+<area shape="rect" id="Node000056" href="$dc/dba/_loopback_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="101,185,151,210"/>
+<area shape="poly" id="edge22_Node000031_Node000056" title=" " alt="" coords="331,244,246,225,151,205,152,200,247,220,332,239"/>
+<area shape="rect" id="Node000057" href="$d7/d37/classfl_1_1net_1_1http_1_1_fetch_engine_listener_a5c4b1669a29e122fd11f9b2f48641e1f.html#a5c4b1669a29e122fd11f9b2f48641e1f" title=" " alt="" coords="36,235,216,275"/>
+<area shape="poly" id="edge23_Node000031_Node000057" title=" " alt="" coords="331,257,216,257,216,252,331,252"/>
+<area shape="rect" id="Node000058" href="$d7/de5/_fast_l_e_d_8cpp_8hpp_ac6c7e827ae13a7bc3da907399f25142f.html#ac6c7e827ae13a7bc3da907399f25142f" title=" " alt="" coords="30,299,222,325"/>
+<area shape="poly" id="edge24_Node000031_Node000058" title=" " alt="" coords="332,271,247,289,189,302,188,297,246,284,331,265"/>
+<area shape="rect" id="Node000062" href="$d2/d6b/classfl_1_1_channel_manager_ad2dad2fdb0279c8f211fd524025e14f0.html#ad2dad2fdb0279c8f211fd524025e14f0" title="Wait until a condition is met, with check&#45;pump&#45;delay logic." alt="" coords="52,349,200,389"/>
+<area shape="poly" id="edge25_Node000031_Node000062" title=" " alt="" coords="362,277,309,308,248,338,201,354,199,349,246,334,307,304,359,273"/>
+<area shape="rect" id="Node000077" href="$d3/da0/classfl_1_1_i_channel_driver_a699840e6b4d11e9215de9e4a7e8f8c3d.html#a699840e6b4d11e9215de9e4a7e8f8c3d" title=" " alt="" coords="56,413,196,453"/>
+<area shape="poly" id="edge26_Node000031_Node000077" title=" " alt="" coords="376,280,324,342,288,375,248,404,197,424,195,419,245,399,285,371,320,338,372,277"/>
+<area shape="rect" id="Node000084" href="$d6/dd2/classfl_1_1audio_1_1fft_1_1_context_a4c842a6f5023ef1144f1d0c63f850b3a.html#a4c842a6f5023ef1144f1d0c63f850b3a" title=" " alt="" coords="49,967,203,1007"/>
+<area shape="poly" id="edge28_Node000083_Node000084" title=" " alt="" coords="302,1032,203,1008,204,1003,303,1027"/>
+<area shape="rect" id="Node000086" href="$d6/dd2/classfl_1_1audio_1_1fft_1_1_context_a4cd66183d61e2210388cdd23cc47aa5f.html#a4cd66183d61e2210388cdd23cc47aa5f" title=" " alt="" coords="49,1031,203,1071"/>
+<area shape="poly" id="edge29_Node000083_Node000086" title=" " alt="" coords="302,1053,204,1053,204,1048,302,1048"/>
+<area shape="rect" id="Node000087" href="$d6/dd2/classfl_1_1audio_1_1fft_1_1_context_af55f1a9f44852cee054233b1bfc5ea23.html#af55f1a9f44852cee054233b1bfc5ea23" title=" " alt="" coords="49,1095,203,1135"/>
+<area shape="poly" id="edge30_Node000083_Node000087" title=" " alt="" coords="303,1075,204,1099,203,1094,302,1070"/>
+<area shape="rect" id="Node000088" href="$d6/dd2/classfl_1_1audio_1_1fft_1_1_context_afe9dcd43e0591f626db7127bbc638f73.html#afe9dcd43e0591f626db7127bbc638f73" title=" " alt="" coords="49,1159,203,1199"/>
+<area shape="poly" id="edge31_Node000083_Node000088" title=" " alt="" coords="357,1081,307,1116,248,1149,205,1165,203,1160,246,1144,304,1112,354,1077"/>
+</map>

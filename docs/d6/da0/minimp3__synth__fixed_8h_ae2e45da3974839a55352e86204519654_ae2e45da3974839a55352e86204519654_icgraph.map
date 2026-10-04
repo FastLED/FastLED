@@ -1,0 +1,10 @@
+<map id="mp3d_scale_pcm" name="mp3d_scale_pcm">
+<area shape="rect" id="Node000001" title=" " alt="" coords="545,5,680,31"/>
+<area shape="rect" id="Node000002" href="$d6/da0/minimp3__synth__fixed_8h_a5e8c40ad20d11ebc9c96105d4fbae0f6.html#a5e8c40ad20d11ebc9c96105d4fbae0f6" title=" " alt="" coords="212,5,315,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="532,21,315,21,315,15,532,15"/>
+<area shape="rect" id="Node000004" href="$d6/da0/minimp3__synth__fixed_8h_aa984adb924d02fb8553fc60b937c4a8b.html#aa984adb924d02fb8553fc60b937c4a8b" title=" " alt="" coords="363,31,497,56"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="532,32,498,37,498,31,532,27"/>
+<area shape="rect" id="Node000003" href="$d6/da0/minimp3__synth__fixed_8h_a4914665a71c932259b54b993f3ad3742.html#a4914665a71c932259b54b993f3ad3742" title=" " alt="" coords="5,5,164,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="198,21,164,21,164,15,198,15"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="349,34,315,28,315,23,349,28"/>
+</map>

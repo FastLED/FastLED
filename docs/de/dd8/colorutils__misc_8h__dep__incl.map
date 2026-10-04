@@ -14,7 +14,7 @@
 <area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="173,448,217,487,213,491,169,452"/>
 <area shape="rect" id="Node000007" href="$d1/dfb/colorutils_8h.html" title=" " alt="" coords="845,233,939,258"/>
 <area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="778,181,871,230,869,235,775,186"/>
-<area shape="rect" id="Node000062" href="$dc/da8/src_2fl_2audio_2audio__reactive_8h.html" title=" " alt="" coords="963,233,1146,258"/>
+<area shape="rect" id="Node000062" href="$d1/d9a/audio__reactive_8h.html" title=" " alt="" coords="963,233,1146,258"/>
 <area shape="poly" id="edge12_Node000006_Node000062" title=" " alt="" coords="802,178,1010,230,1009,235,800,183"/>
 <area shape="rect" id="Node000064" href="$d0/d3e/perlin__particle__punch_8h.html" title="Audio&#45;reactive perlin noise background with ambient particles and beat meteor overlay." alt="" coords="1442,225,1606,265"/>
 <area shape="poly" id="edge14_Node000006_Node000064" title=" " alt="" coords="822,171,1442,233,1441,238,821,177"/>
@@ -26,7 +26,7 @@
 <area shape="poly" id="edge21_Node000006_Node000068" title=" " alt="" coords="715,187,640,235,637,230,712,182"/>
 <area shape="rect" id="Node000057" href="$d4/d46/pixelset_8h.html" title="Declares classes for managing logical groups of LEDs." alt="" coords="1171,233,1256,258"/>
 <area shape="poly" id="edge27_Node000006_Node000057" title=" " alt="" coords="822,170,979,189,1070,204,1159,223,1184,230,1182,235,1158,228,1069,209,978,194,821,175"/>
-<area shape="rect" id="Node000008" href="$db/d97/_fast_l_e_d_8h.html" title="central include file for FastLED, defines the CFastLED class/object" alt="" coords="1044,416,1129,441"/>
+<area shape="rect" id="Node000008" href="$d6/d64/fastled_8h.html" title="central include file for FastLED, defines the CFastLED class/object" alt="" coords="1044,416,1129,441"/>
 <area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="939,260,1016,288,1063,311,1079,338,1087,367,1090,416,1085,416,1082,368,1074,340,1060,315,1013,293,938,265"/>
 <area shape="rect" id="Node000012" href="$d0/df9/colorpalettes_8cpp_8hpp.html" title=" " alt="" coords="833,416,996,441"/>
 <area shape="poly" id="edge8_Node000007_Node000012" title=" " alt="" coords="898,271,916,415,911,416,893,272"/>

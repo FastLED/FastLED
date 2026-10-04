@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -153,21 +153,20 @@ $(function(){initNavTree('d9/df4/classfl_1_1_x_y_path_a0ed9f389539879ed7528bab6b
 <div class="line"><span class="lineno">  256</span>    <span class="keywordflow">if</span> (path-&gt;hasDrawBounds(&amp;bounds)) {</div>
 <div class="line"><span class="lineno">  257</span>        <span class="keywordflow">if</span> (!bounds.mMin.is_zero()) {</div>
 <div class="line"><span class="lineno">  258</span>            <span class="comment">// Set the bounds to the path&#39;s bounds</span></div>
-<div class="line"><span class="lineno">  259</span>            <a class="code hl_define" href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(</div>
-<div class="line"><span class="lineno">  260</span>                <span class="stringliteral">&quot;Bounds with an origin other than 0,0 is not supported yet&quot;</span>);</div>
-<div class="line"><span class="lineno">  261</span>        }</div>
-<div class="line"><span class="lineno">  262</span>        <span class="keyword">auto</span> w = bounds.width();</div>
-<div class="line"><span class="lineno">  263</span>        <span class="keyword">auto</span> h = bounds.height();</div>
-<div class="line"><span class="lineno">  264</span>        out-&gt;setDrawBounds(w, h);</div>
-<div class="line"><span class="lineno">  265</span>    }</div>
-<div class="line"><span class="lineno">  266</span>    <span class="keywordflow">return</span> out;</div>
-<div class="line"><span class="lineno">  267</span>}</div>
+<div class="line"><span class="lineno">  259</span>            <a class="code hl_define" href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;Bounds with an origin other than 0,0 is not supported yet&quot;</span>);</div>
+<div class="line"><span class="lineno">  260</span>        }</div>
+<div class="line"><span class="lineno">  261</span>        <span class="keyword">auto</span> w = bounds.width();</div>
+<div class="line"><span class="lineno">  262</span>        <span class="keyword">auto</span> h = bounds.height();</div>
+<div class="line"><span class="lineno">  263</span>        out-&gt;setDrawBounds(w, h);</div>
+<div class="line"><span class="lineno">  264</span>    }</div>
+<div class="line"><span class="lineno">  265</span>    <span class="keywordflow">return</span> out;</div>
+<div class="line"><span class="lineno">  266</span>}</div>
 <div class="ttc" id="aclassfl_1_1_x_y_path_ab98fd099b410ec542662eb14488ae8b6_html_ab98fd099b410ec542662eb14488ae8b6"><div class="ttname"><a href="../../d9/df4/classfl_1_1_x_y_path_ab98fd099b410ec542662eb14488ae8b6.html#ab98fd099b410ec542662eb14488ae8b6">fl::XYPath::name</a></div><div class="ttdeci">string name() const</div><div class="ttdef"><b>Definition</b> <a href="../../d0/dd8/xypath_8cpp_8hpp_source.html#l00057">xypath.cpp.hpp:57</a></div></div>
 <div class="ttc" id="aclassfl_1_1_x_y_path_afff9e863ebda5a087e09c27913698b73_html_afff9e863ebda5a087e09c27913698b73"><div class="ttname"><a href="../../d9/df4/classfl_1_1_x_y_path_afff9e863ebda5a087e09c27913698b73.html#afff9e863ebda5a087e09c27913698b73">fl::XYPath::transform</a></div><div class="ttdeci">TransformFloat &amp; transform()</div><div class="ttdef"><b>Definition</b> <a href="../../d0/dd8/xypath_8cpp_8hpp_source.html#l00070">xypath.cpp.hpp:70</a></div></div>
-<div class="ttc" id="alog_8h_a868b194fdb2234182e76042d9fde3062_html_a868b194fdb2234182e76042d9fde3062"><div class="ttname"><a href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a></div><div class="ttdeci">#define FL_WARN(X)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00276">log.h:276</a></div></div>
-<div class="ttc" id="anamespacefl_a87ae8a24cc8b709a64f39370e71846af_html_a87ae8a24cc8b709a64f39370e71846af"><div class="ttname"><a href="../../d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af">fl::make_shared</a></div><div class="ttdeci">shared_ptr&lt; T &gt; make_shared(Args &amp;&amp;... args) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/d6a/shared__ptr_8h_source.html#l00414">shared_ptr.h:414</a></div></div>
+<div class="ttc" id="alog_8h_a4804912fba6eed63e1afd84b8768aced_html_a4804912fba6eed63e1afd84b8768aced"><div class="ttname"><a href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a></div><div class="ttdeci">#define FL_WARN(...)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00440">log.h:440</a></div></div>
+<div class="ttc" id="anamespacefl_a87ae8a24cc8b709a64f39370e71846af_html_a87ae8a24cc8b709a64f39370e71846af"><div class="ttname"><a href="../../d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af">fl::make_shared</a></div><div class="ttdeci">shared_ptr&lt; T &gt; make_shared(Args &amp;&amp;... args) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/d6a/shared__ptr_8h_source.html#l00414">shared_ptr.h:414</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d4/d67/geometry_8h_source.html#l00455">fl::rect&lt; T &gt;::empty()</a>, <a class="el" href="../../d7/d7f/log_8h_source.html#l00276">FL_WARN</a>, <a class="el" href="../../d4/d67/geometry_8h_source.html#l00453">fl::rect&lt; T &gt;::height()</a>, <a class="el" href="../../df/d6a/shared__ptr_8h_source.html#l00414">fl::make_shared()</a>, <a class="el" href="../../d4/d67/geometry_8h_source.html#l00437">fl::rect&lt; T &gt;::mMin</a>, <a class="el" href="../../d0/dd8/xypath_8cpp_8hpp_source.html#l00057">name()</a>, <a class="el" href="../../d0/dd8/xypath_8cpp_8hpp_source.html#l00070">transform()</a>, and <a class="el" href="../../d4/d67/geometry_8h_source.html#l00451">fl::rect&lt; T &gt;::width()</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d67/geometry_8h_source.html#l00455">fl::rect&lt; T &gt;::empty()</a>, <a class="el" href="../../d7/d7f/log_8h_source.html#l00440">FL_WARN</a>, <a class="el" href="../../d4/d67/geometry_8h_source.html#l00453">fl::rect&lt; T &gt;::height()</a>, <a class="el" href="../../df/d6a/shared__ptr_8h_source.html#l00414">fl::make_shared()</a>, <a class="el" href="../../d4/d67/geometry_8h_source.html#l00437">fl::rect&lt; T &gt;::mMin</a>, <a class="el" href="../../d0/dd8/xypath_8cpp_8hpp_source.html#l00057">name()</a>, <a class="el" href="../../d0/dd8/xypath_8cpp_8hpp_source.html#l00070">transform()</a>, and <a class="el" href="../../d4/d67/geometry_8h_source.html#l00451">fl::rect&lt; T &gt;::width()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -185,7 +184,7 @@ $(function(){initNavTree('d9/df4/classfl_1_1_x_y_path_a0ed9f389539879ed7528bab6b
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d9/df4/classfl_1_1_x_y_path.html">XYPath</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:07 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:10 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

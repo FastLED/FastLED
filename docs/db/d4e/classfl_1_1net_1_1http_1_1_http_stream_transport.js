@@ -11,7 +11,7 @@ var classfl_1_1net_1_1http_1_1_http_stream_transport =
     ] ],
     [ "StateCallback", "db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a70c78744122864b2956af202c0d14ba6.html#a70c78744122864b2956af202c0d14ba6", null ],
     [ "HttpStreamTransport", "db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_aae25b4b7a85088b8833b6b3f02e30ef7.html#aae25b4b7a85088b8833b6b3f02e30ef7", null ],
-    [ "~HttpStreamTransport", "db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a8f90c8324e79f241db42677b58e84d6a.html#a8f90c8324e79f241db42677b58e84d6a", null ],
+    [ "~HttpStreamTransport", "db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a0e64f77a8ce18a7033c9a33e0fe1b906.html#a0e64f77a8ce18a7033c9a33e0fe1b906", null ],
     [ "checkHeartbeatTimeout", "db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_abf435d90483aa8f1acc7ab64dc2cb14e.html#abf435d90483aa8f1acc7ab64dc2cb14e", null ],
     [ "connect", "db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a6036cda356e4ca5d955b819e87552958.html#a6036cda356e4ca5d955b819e87552958", null ],
     [ "disconnect", "db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_ac903b0c43a022a373bda24dac11bed24.html#ac903b0c43a022a373bda24dac11bed24", null ],

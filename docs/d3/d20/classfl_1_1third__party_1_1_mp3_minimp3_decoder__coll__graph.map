@@ -1,0 +1,29 @@
+<map id="fl::third_party::Mp3Minimp3Decoder" name="fl::third_party::Mp3Minimp3Decoder">
+<area shape="rect" id="Node000001" title=" " alt="" coords="1236,199,1437,239"/>
+<area shape="rect" id="Node000002" href="$d6/d2e/classfl_1_1unique__ptr.html" title=" " alt="" coords="902,89,1085,159"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1099,150,1264,196,1262,201,1097,155"/>
+<area shape="rect" id="Node000003" href="$d2/db3/structfl_1_1third__party_1_1_mp3_memory_deleter.html" title=" " alt="" coords="415,5,614,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="628,23,741,33,802,42,861,56,899,70,935,87,932,92,897,75,859,61,801,47,741,38,627,29"/>
+<area shape="rect" id="Node000004" href="$d2/db3/structfl_1_1third__party_1_1_mp3_memory_deleter.html" title=" " alt="" coords="5,179,204,219"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="155,170,268,114,404,55,439,43,441,48,406,60,270,119,157,175"/>
+<area shape="rect" id="Node000009" href="$d2/db3/structfl_1_1third__party_1_1_mp3_memory_deleter.html" title=" " alt="" coords="415,179,614,219"/>
+<area shape="poly" id="edge9_Node000009_Node000004" title=" " alt="" coords="217,196,415,196,415,201,217,201"/>
+<area shape="rect" id="Node000012" href="$d2/db3/structfl_1_1third__party_1_1_mp3_memory_deleter.html" title=" " alt="" coords="405,427,624,467"/>
+<area shape="poly" id="edge14_Node000012_Node000004" title=" " alt="" coords="140,226,254,317,328,368,407,412,435,424,433,429,404,417,325,372,250,321,137,230"/>
+<area shape="rect" id="Node000005" href="$d6/d2e/classfl_1_1unique__ptr.html" title=" " alt="" coords="447,253,582,293"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="593,248,622,229,630,218,633,207,637,196,646,185,674,168,700,158,748,153,798,154,860,149,901,141,902,146,860,155,798,160,748,158,701,163,677,172,650,189,641,198,638,209,635,221,626,233,596,252"/>
+<area shape="rect" id="Node000007" href="$d6/d2e/classfl_1_1unique__ptr.html" title=" " alt="" coords="884,233,1103,287"/>
+<area shape="poly" id="edge10_Node000007_Node000005" title=" " alt="" coords="596,272,720,273,860,269,884,268,884,273,860,275,720,278,596,278"/>
+<area shape="rect" id="Node000010" href="$d6/d2e/classfl_1_1unique__ptr.html" title=" " alt="" coords="893,328,1093,397"/>
+<area shape="poly" id="edge15_Node000010_Node000005" title=" " alt="" coords="572,296,649,323,711,336,775,345,894,356,893,362,775,351,710,341,647,328,570,301"/>
+<area shape="rect" id="Node000006" href="$d1/d86/namespacefl_1_1third__party.html#d5/d93/structfl_1_1third__party_1_1_mp3_frame_info" title=" " alt="" coords="888,183,1099,209"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="1112,201,1236,209,1236,215,1112,206"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="1116,243,1235,228,1236,233,1117,248"/>
+<area shape="rect" id="Node000008" href="$da/dcf/minimp3_8h.html#d3/d84/structmp3dec__t" title=" " alt="" coords="471,70,558,95"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="572,81,742,87,819,94,846,99,862,106,873,120,878,134,877,162,874,191,877,204,886,218,900,231,896,234,882,222,873,207,869,191,871,162,873,135,868,122,858,110,845,104,819,99,742,92,572,86"/>
+<area shape="poly" id="edge8_Node000007_Node000009" title=" " alt="" coords="628,201,741,210,860,225,885,230,884,235,860,231,740,215,628,207"/>
+<area shape="poly" id="edge11_Node000001_Node000010" title=" " alt="" coords="1088,320,1287,236,1289,241,1090,325"/>
+<area shape="rect" id="Node000011" href="$da/dcf/minimp3_8h.html#d6/d8e/unionmp3dec__scratch__t" title=" " alt="" coords="445,377,585,402"/>
+<area shape="poly" id="edge12_Node000010_Node000011" title=" " alt="" coords="598,393,722,396,791,395,860,389,893,384,894,390,860,395,791,400,722,401,598,398"/>
+<area shape="poly" id="edge13_Node000010_Node000012" title=" " alt="" coords="638,444,746,435,859,416,921,395,923,400,861,421,747,441,638,449"/>
+</map>

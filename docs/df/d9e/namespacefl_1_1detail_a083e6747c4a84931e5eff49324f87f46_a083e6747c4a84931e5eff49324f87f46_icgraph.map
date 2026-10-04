@@ -1,0 +1,7 @@
+<map id="fl::detail::encodeUartByte" name="fl::detail::encodeUartByte">
+<area shape="rect" id="Node000001" title="Encode 1 LED byte to 4 UART bytes using a Wave10 LUT." alt="" coords="211,31,399,56"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_ac642a2adbcc5e98ed8d2706fb0261cf2.html#ac642a2adbcc5e98ed8d2706fb0261cf2" title="Legacy encoding using hardcoded WS2812 LUT (backward compat)" alt="" coords="5,5,163,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="196,34,162,30,163,24,197,28"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a35ba822376bba4e27165aa902de56adb.html#a35ba822376bba4e27165aa902de56adb" title="Encode LED pixel data to UART bytes using a Wave10 LUT." alt="" coords="5,55,163,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="197,58,163,61,162,56,197,52"/>
+</map>

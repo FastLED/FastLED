@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -101,7 +101,7 @@ $(function(){initNavTree('dd/dbb/class_c_fast_l_e_d_aad60fcbfda63e035ef49e7fc693
 
 <div class="contents">
 <a id="aad60fcbfda63e035ef49e7fc693f8049" name="aad60fcbfda63e035ef49e7fc693f8049"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aad60fcbfda63e035ef49e7fc693f8049">&#9670;&#160;</a></span>add() <span class="overload">[7/8]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#aad60fcbfda63e035ef49e7fc693f8049">&#9670;&#160;</a></span>add() <span class="overload">[8/9]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -124,7 +124,7 @@ $(function(){initNavTree('dd/dbb/class_c_fast_l_e_d_aad60fcbfda63e035ef49e7fc693
 </div><div class="memdoc">
 
 <p>Add multiple LED channels from a config array. </p>
-<p>Creates and registers multiple Channel-based LED controllers from an array of configurations. Returns a vector of shared_ptrs for lifetime control.</p>
+<p>Creates and registers multiple Channel-based LED controllers from an array of configurations. Returns handles for later inspection, reconfiguration, or removal. FastLED retains its own references until remove(channel) is called for each channel.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">configs</td><td>Span of ChannelConfig objects </td></tr>
@@ -133,7 +133,7 @@ $(function(){initNavTree('dd/dbb/class_c_fast_l_e_d_aad60fcbfda63e035ef49e7fc693
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Vector of ChannelPtrs (one per config), or empty elements if unsupported </dd></dl>
 <dl class="section note"><dt>Note</dt><dd>Supported platforms: ESP32, ESP32-S2, ESP32-S3, ESP32-C3, ESP32-C6, ESP32-P4</dd></dl>
-<p>Example: </p><div class="fragment"><div class="line"><span class="keyword">auto</span> timing = <a class="code hl_function" href="../../d4/d36/namespacefl_a6a0e89a1b4749cf4fbffeae60a312496.html#a6a0e89a1b4749cf4fbffeae60a312496">fl::makeTimingConfig&lt;fl::TIMING_WS2812_800KHZ&gt;</a>();</div>
+<p>Example: </p><div class="fragment"><div class="line"><span class="keyword">auto</span> timing = <a class="code hl_function" href="../../d4/d36/namespacefl_a21751c1ec9df05c6e1090cb5c302c846.html#a21751c1ec9df05c6e1090cb5c302c846">fl::makeTimingConfig&lt;fl::TIMING_WS2812_800KHZ&gt;</a>();</div>
 <div class="line"><a class="code hl_struct" href="../../df/df5/structfl_1_1_channel_config.html">fl::ChannelConfig</a> configs[] = {</div>
 <div class="line">    <a class="code hl_struct" href="../../df/df5/structfl_1_1_channel_config.html">fl::ChannelConfig</a>(PIN1, timing, <a class="code hl_variable" href="../../d1/ddb/_chromancer_8ino_a9ae8c3bf4c7b3310fa865ad1f8e74578.html#a9ae8c3bf4c7b3310fa865ad1f8e74578">leds1</a>, <a class="code hl_variable" href="../../db/d07/eorder_8h_a7942dd080bb89f6e0c5a171420d40520.html#a7942dd080bb89f6e0c5a171420d40520">RGB</a>),</div>
 <div class="line">    <a class="code hl_struct" href="../../df/df5/structfl_1_1_channel_config.html">fl::ChannelConfig</a>(PIN2, timing, <a class="code hl_variable" href="../../d1/ddb/_chromancer_8ino_a0d6be088b801023f1e7cdd77831fdf66.html#a0d6be088b801023f1e7cdd77831fdf66">leds2</a>, <a class="code hl_variable" href="../../db/d07/eorder_8h_a7942dd080bb89f6e0c5a171420d40520.html#a7942dd080bb89f6e0c5a171420d40520">RGB</a>)</div>
@@ -141,28 +141,28 @@ $(function(){initNavTree('dd/dbb/class_c_fast_l_e_d_aad60fcbfda63e035ef49e7fc693
 <div class="line"><span class="keyword">auto</span> <a class="code hl_function" href="../../dd/dbb/class_c_fast_l_e_d_a12da17ab4b0d4daed6ceb429d68ac5cf.html#a12da17ab4b0d4daed6ceb429d68ac5cf">channels</a> = <a class="code hl_variable" href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a>.add(<a class="code hl_class" href="../../d0/d08/classfl_1_1span.html">fl::span&lt;const fl::ChannelConfig&gt;</a>(configs, 2));</div>
 <div class="ttc" id="a_chromancer_8ino_a0d6be088b801023f1e7cdd77831fdf66_html_a0d6be088b801023f1e7cdd77831fdf66"><div class="ttname"><a href="../../d1/ddb/_chromancer_8ino_a0d6be088b801023f1e7cdd77831fdf66.html#a0d6be088b801023f1e7cdd77831fdf66">leds2</a></div><div class="ttdeci">CRGB leds2[lengths[RedStrip]]</div><div class="ttdef"><b>Definition</b> <a href="../../d1/ddb/_chromancer_8ino_source.html#l00074">Chromancer.ino:74</a></div></div>
 <div class="ttc" id="a_chromancer_8ino_a9ae8c3bf4c7b3310fa865ad1f8e74578_html_a9ae8c3bf4c7b3310fa865ad1f8e74578"><div class="ttname"><a href="../../d1/ddb/_chromancer_8ino_a9ae8c3bf4c7b3310fa865ad1f8e74578.html#a9ae8c3bf4c7b3310fa865ad1f8e74578">leds1</a></div><div class="ttdeci">CRGB leds1[lengths[GreenStrip]]</div><div class="ttdef"><b>Definition</b> <a href="../../d1/ddb/_chromancer_8ino_source.html#l00073">Chromancer.ino:73</a></div></div>
-<div class="ttc" id="a_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9_html_a8e94985674086ea368e1d51cbc0f82a9"><div class="ttname"><a href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a></div><div class="ttdeci">FL_DISABLE_WARNING_PUSH FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS CFastLED FastLED</div><div class="ttdoc">Global LED strip management instance.</div><div class="ttdef"><b>Definition</b> <a href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_source.html#l00075">FastLED.cpp.hpp:75</a></div></div>
-<div class="ttc" id="aclass_c_fast_l_e_d_a12da17ab4b0d4daed6ceb429d68ac5cf_html_a12da17ab4b0d4daed6ceb429d68ac5cf"><div class="ttname"><a href="../../dd/dbb/class_c_fast_l_e_d_a12da17ab4b0d4daed6ceb429d68ac5cf.html#a12da17ab4b0d4daed6ceb429d68ac5cf">CFastLED::channels</a></div><div class="ttdeci">static fl::vector&lt; fl::ChannelPtr &gt; &amp; channels()</div><div class="ttdoc">stored ChannelPtrs to keep them alive</div><div class="ttdef"><b>Definition</b> <a href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_source.html#l00131">FastLED.cpp.hpp:131</a></div></div>
-<div class="ttc" id="aclassfl_1_1span_html"><div class="ttname"><a href="../../d0/d08/classfl_1_1span.html">fl::span</a></div><div class="ttdef"><b>Definition</b> <a href="../../d4/d7a/span_8h_source.html#l00385">span.h:385</a></div></div>
+<div class="ttc" id="a_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9_html_a8e94985674086ea368e1d51cbc0f82a9"><div class="ttname"><a href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a></div><div class="ttdeci">FL_DISABLE_WARNING_PUSH FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS CFastLED FastLED</div><div class="ttdoc">Global LED strip management instance.</div><div class="ttdef"><b>Definition</b> <a href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_source.html#l00090">FastLED.cpp.hpp:90</a></div></div>
+<div class="ttc" id="aclass_c_fast_l_e_d_a12da17ab4b0d4daed6ceb429d68ac5cf_html_a12da17ab4b0d4daed6ceb429d68ac5cf"><div class="ttname"><a href="../../dd/dbb/class_c_fast_l_e_d_a12da17ab4b0d4daed6ceb429d68ac5cf.html#a12da17ab4b0d4daed6ceb429d68ac5cf">CFastLED::channels</a></div><div class="ttdeci">static fl::vector&lt; fl::ChannelPtr &gt; &amp; channels()</div><div class="ttdoc">stored ChannelPtrs to keep them alive</div><div class="ttdef"><b>Definition</b> <a href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_source.html#l00155">FastLED.cpp.hpp:155</a></div></div>
+<div class="ttc" id="aclassfl_1_1span_html"><div class="ttname"><a href="../../d0/d08/classfl_1_1span.html">fl::span</a></div><div class="ttdef"><b>Definition</b> <a href="../../d4/d7a/span_8h_source.html#l00410">span.h:410</a></div></div>
 <div class="ttc" id="aeorder_8h_a7942dd080bb89f6e0c5a171420d40520_html_a7942dd080bb89f6e0c5a171420d40520"><div class="ttname"><a href="../../db/d07/eorder_8h_a7942dd080bb89f6e0c5a171420d40520.html#a7942dd080bb89f6e0c5a171420d40520">RGB</a></div><div class="ttdeci">constexpr EOrder RGB</div><div class="ttdef"><b>Definition</b> <a href="../../db/d07/eorder_8h_source.html#l00017">eorder.h:17</a></div></div>
-<div class="ttc" id="anamespacefl_a6a0e89a1b4749cf4fbffeae60a312496_html_a6a0e89a1b4749cf4fbffeae60a312496"><div class="ttname"><a href="../../d4/d36/namespacefl_a6a0e89a1b4749cf4fbffeae60a312496.html#a6a0e89a1b4749cf4fbffeae60a312496">fl::makeTimingConfig</a></div><div class="ttdeci">constexpr ChipsetTimingConfig makeTimingConfig() FL_NOEXCEPT</div><div class="ttdoc">Convert compile-time CHIPSET type to runtime timing config.</div><div class="ttdef"><b>Definition</b> <a href="../../d8/dc5/chipset__timing__config_8h_source.html#l00063">chipset_timing_config.h:63</a></div></div>
-<div class="ttc" id="astructfl_1_1_channel_config_html"><div class="ttname"><a href="../../df/df5/structfl_1_1_channel_config.html">fl::ChannelConfig</a></div><div class="ttdoc">Configuration for a single LED channel.</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d09/fl_2channels_2config_8h_source.html#l00163">config.h:163</a></div></div>
+<div class="ttc" id="anamespacefl_a21751c1ec9df05c6e1090cb5c302c846_html_a21751c1ec9df05c6e1090cb5c302c846"><div class="ttname"><a href="../../d4/d36/namespacefl_a21751c1ec9df05c6e1090cb5c302c846.html#a21751c1ec9df05c6e1090cb5c302c846">fl::makeTimingConfig</a></div><div class="ttdeci">constexpr ChipsetTimingConfig makeTimingConfig() FL_NO_EXCEPT</div><div class="ttdoc">Convert compile-time CHIPSET type to runtime timing config.</div><div class="ttdef"><b>Definition</b> <a href="../../d8/dc5/chipset__timing__config_8h_source.html#l00063">chipset_timing_config.h:63</a></div></div>
+<div class="ttc" id="astructfl_1_1_channel_config_html"><div class="ttname"><a href="../../df/df5/structfl_1_1_channel_config.html">fl::ChannelConfig</a></div><div class="ttdoc">Configuration for a single LED channel.</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d09/fl_2channels_2config_8h_source.html#l00167">config.h:167</a></div></div>
 </div><!-- fragment --> 
-<p class="definition">Definition at line <a class="el" href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_source.html#l00648">648</a> of file <a class="el" href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_source.html">FastLED.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  648</span>                                                                          {</div>
-<div class="line"><span class="lineno">  649</span>    fl::vector&lt;fl::ChannelPtr&gt; <a class="code hl_function" href="../../dd/dbb/class_c_fast_l_e_d_a12da17ab4b0d4daed6ceb429d68ac5cf.html#a12da17ab4b0d4daed6ceb429d68ac5cf">channels</a>;</div>
-<div class="line"><span class="lineno">  650</span>    <a class="code hl_function" href="../../dd/dbb/class_c_fast_l_e_d_a12da17ab4b0d4daed6ceb429d68ac5cf.html#a12da17ab4b0d4daed6ceb429d68ac5cf">channels</a>.reserve(configs.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac">size</a>());</div>
-<div class="line"><span class="lineno">  651</span> </div>
-<div class="line"><span class="lineno">  652</span>    <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; config : configs) {</div>
-<div class="line"><span class="lineno">  653</span>        <a class="code hl_function" href="../../dd/dbb/class_c_fast_l_e_d_a12da17ab4b0d4daed6ceb429d68ac5cf.html#a12da17ab4b0d4daed6ceb429d68ac5cf">channels</a>.push_back(<a class="code hl_function" href="../../dd/dbb/class_c_fast_l_e_d_ac1bc33cf75115ef770091396bbc57861.html#ac1bc33cf75115ef770091396bbc57861">add</a>(config));</div>
-<div class="line"><span class="lineno">  654</span>    }</div>
-<div class="line"><span class="lineno">  655</span> </div>
-<div class="line"><span class="lineno">  656</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="../../dd/dbb/class_c_fast_l_e_d_a12da17ab4b0d4daed6ceb429d68ac5cf.html#a12da17ab4b0d4daed6ceb429d68ac5cf">channels</a>;</div>
-<div class="line"><span class="lineno">  657</span>}</div>
-<div class="ttc" id="aclass_c_fast_l_e_d_ac1bc33cf75115ef770091396bbc57861_html_ac1bc33cf75115ef770091396bbc57861"><div class="ttname"><a href="../../dd/dbb/class_c_fast_l_e_d_ac1bc33cf75115ef770091396bbc57861.html#ac1bc33cf75115ef770091396bbc57861">CFastLED::add</a></div><div class="ttdeci">static void add(fl::ChannelPtr channel)</div><div class="ttdoc">Add a Channel-based LED controller (from ChannelPtr)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_source.html#l00135">FastLED.cpp.hpp:135</a></div></div>
-<div class="ttc" id="aclassfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac_html_aef7ee7eb5254da1ba1eb4f3e0173d0ac"><div class="ttname"><a href="../../d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac">fl::span::size</a></div><div class="ttdeci">constexpr fl::size size() const FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d7a/span_8h_source.html#l00458">span.h:458</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_source.html#l00832">832</a> of file <a class="el" href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_source.html">FastLED.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  832</span>                                                                          {</div>
+<div class="line"><span class="lineno">  833</span>    fl::vector&lt;fl::ChannelPtr&gt; <a class="code hl_function" href="../../dd/dbb/class_c_fast_l_e_d_a12da17ab4b0d4daed6ceb429d68ac5cf.html#a12da17ab4b0d4daed6ceb429d68ac5cf">channels</a>;</div>
+<div class="line"><span class="lineno">  834</span>    <a class="code hl_function" href="../../dd/dbb/class_c_fast_l_e_d_a12da17ab4b0d4daed6ceb429d68ac5cf.html#a12da17ab4b0d4daed6ceb429d68ac5cf">channels</a>.reserve(configs.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa">size</a>());</div>
+<div class="line"><span class="lineno">  835</span> </div>
+<div class="line"><span class="lineno">  836</span>    <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; config : configs) {</div>
+<div class="line"><span class="lineno">  837</span>        <a class="code hl_function" href="../../dd/dbb/class_c_fast_l_e_d_a12da17ab4b0d4daed6ceb429d68ac5cf.html#a12da17ab4b0d4daed6ceb429d68ac5cf">channels</a>.push_back(<a class="code hl_function" href="../../dd/dbb/class_c_fast_l_e_d_ac1bc33cf75115ef770091396bbc57861.html#ac1bc33cf75115ef770091396bbc57861">add</a>(config));</div>
+<div class="line"><span class="lineno">  838</span>    }</div>
+<div class="line"><span class="lineno">  839</span> </div>
+<div class="line"><span class="lineno">  840</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="../../dd/dbb/class_c_fast_l_e_d_a12da17ab4b0d4daed6ceb429d68ac5cf.html#a12da17ab4b0d4daed6ceb429d68ac5cf">channels</a>;</div>
+<div class="line"><span class="lineno">  841</span>}</div>
+<div class="ttc" id="aclass_c_fast_l_e_d_ac1bc33cf75115ef770091396bbc57861_html_ac1bc33cf75115ef770091396bbc57861"><div class="ttname"><a href="../../dd/dbb/class_c_fast_l_e_d_ac1bc33cf75115ef770091396bbc57861.html#ac1bc33cf75115ef770091396bbc57861">CFastLED::add</a></div><div class="ttdeci">static void add(fl::ChannelPtr channel)</div><div class="ttdoc">Add a Channel-based LED controller (from ChannelPtr)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_source.html#l00201">FastLED.cpp.hpp:201</a></div></div>
+<div class="ttc" id="aclassfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa_html_aaf3daca1c2c8f93b2ac7b319989b22fa"><div class="ttname"><a href="../../d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa">fl::span::size</a></div><div class="ttdeci">constexpr fl::size size() const FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d7a/span_8h_source.html#l00483">span.h:483</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_source.html#l00135">add()</a>, <a class="el" href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_source.html#l00131">channels()</a>, and <a class="el" href="../../d4/d7a/span_8h_source.html#l00458">fl::span&lt; T, Extent &gt;::size()</a>.</p>
+<p class="reference">References <a class="el" href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_source.html#l00201">add()</a>, <a class="el" href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_source.html#l00155">channels()</a>, and <a class="el" href="../../d4/d7a/span_8h_source.html#l00483">fl::span&lt; T, Extent &gt;::size()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -180,7 +180,7 @@ $(function(){initNavTree('dd/dbb/class_c_fast_l_e_d_aad60fcbfda63e035ef49e7fc693
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dd/dbb/class_c_fast_l_e_d.html">CFastLED</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:03 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

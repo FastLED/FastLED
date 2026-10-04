@@ -1,0 +1,5 @@
+<map id="fl::allocateEmitterDrivesQ16" name="fl::allocateEmitterDrivesQ16">
+<area shape="rect" id="Node000001" title="One pixel: XYZ in s16.16 to four drives, in the order red, green, blue, white, at whichever end of th..." alt="" coords="5,5,212,31"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_af5a0679639e0ad1db7feb7f9705df72f.html#af5a0679639e0ad1db7feb7f9705df72f" title="One pixel: XYZ in s16.16 to three emitter drives in s16.16." alt="" coords="260,5,427,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="212,15,246,15,246,21,212,21"/>
+</map>

@@ -1,5 +1,6 @@
 <map id="CFastLED::onEndShowLeds" name="CFastLED::onEndShowLeds">
-<area shape="rect" id="Node000001" title="Manually trigger the end show LEDs event." alt="" coords="5,5,200,31"/>
-<area shape="rect" id="Node000002" href="$de/dca/classfl_1_1_engine_events_a11157d3edc6bca6c80a64c01ca16b1f9.html#a11157d3edc6bca6c80a64c01ca16b1f9" title=" " alt="" coords="248,5,487,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="200,15,234,15,234,21,200,21"/>
+<area shape="rect" id="Node000001" title="Manually trigger the end show LEDs event." alt="" coords="5,29,200,55"/>
+<area shape="rect" id="Node000002" href="$de/dca/classfl_1_1_engine_events_a4d4f1ce825e517989efa423d5776f2d4.html#a4d4f1ce825e517989efa423d5776f2d4" title=" " alt="" coords="248,29,487,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="200,39,234,39,234,45,200,45"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="325,31,315,21,320,11,338,5,367,3,405,7,416,12,419,18,415,20,412,16,404,12,367,8,339,10,324,15,321,20,329,27"/>
 </map>

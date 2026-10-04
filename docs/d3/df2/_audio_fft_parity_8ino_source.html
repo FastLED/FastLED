@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -132,14 +132,14 @@ $(function(){initNavTree('d3/df2/_audio_fft_parity_8ino_source.html','../../'); 
 <div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span><span class="keyword">static</span> <a class="code hl_struct" href="../../d0/dc9/kiss__fft_8h.html#d4/d47/structkiss__fft__cpx">kiss_fft_cpx</a> outBuf[N / 2 + 1];</div>
 <div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> </div>
 <div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span><span class="keywordtype">float</span> binMag(<span class="keyword">const</span> <a class="code hl_struct" href="../../d0/dc9/kiss__fft_8h.html#d4/d47/structkiss__fft__cpx">kiss_fft_cpx</a> *cpx, <span class="keywordtype">int</span> k) {</div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a0b5da884257d0f4003ead08f27915a2b.html#a0b5da884257d0f4003ead08f27915a2b">sqrtf</a>(cpx[k].r * cpx[k].r + cpx[k].i * cpx[k].i);</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="../../d4/d36/namespacefl_aa4ee5b2900fe7489cc2628422555eb62.html#aa4ee5b2900fe7489cc2628422555eb62">sqrtf</a>(cpx[k].r * cpx[k].r + cpx[k].i * cpx[k].i);</div>
 <div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>}</div>
 <div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
 <div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span><span class="comment">// Check: single-tone sine at bin k produces dominant peak at bin k.</span></div>
 <div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span><span class="keywordtype">bool</span> testSine(<span class="keywordtype">int</span> k) {</div>
 <div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    <span class="keywordtype">float</span> in[N];</div>
 <div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; N; ++i) {</div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>        in[i] = 0.5f * <a class="code hl_function" href="../../d4/d36/namespacefl_a4ba2744fe96375793e6f7a98b188d343.html#a4ba2744fe96375793e6f7a98b188d343">sinf</a>(TWO_PI_F * <span class="keyword">static_cast&lt;</span><span class="keywordtype">float</span><span class="keyword">&gt;</span>(k) * i / N);</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>        in[i] = 0.5f * <a class="code hl_function" href="../../d4/d36/namespacefl_a367128bb231fab59275e129d3dc3d909.html#a367128bb231fab59275e129d3dc3d909">sinf</a>(TWO_PI_F * <span class="keyword">static_cast&lt;</span><span class="keywordtype">float</span><span class="keyword">&gt;</span>(k) * i / N);</div>
 <div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    }</div>
 <div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    espDspRealForward(N, in, outBuf);</div>
 <div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span> </div>
@@ -231,7 +231,7 @@ $(function(){initNavTree('d3/df2/_audio_fft_parity_8ino_source.html','../../'); 
 <div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span> </div>
 <div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span><span class="keywordtype">void</span> <a class="code hl_function" href="../../d3/df2/_audio_fft_parity_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d">setup</a>() {</div>
 <div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span>    <a class="code hl_define" href="../../de/d8b/system_2serial_8h_ab1a8531ded8c3d5bee8e36aebec7a8f3.html#ab1a8531ded8c3d5bee8e36aebec7a8f3">Serial</a>.begin(115200);</div>
-<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>    <a class="code hl_function" href="../../d4/d36/namespacefl_a50131c41da2f619067d98360de35fa27.html#a50131c41da2f619067d98360de35fa27">delay</a>(500);</div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>    <a class="code hl_function" href="../../d4/d36/namespacefl_a19da680141593b475c4d1d3c1c0a8409.html#a19da680141593b475c4d1d3c1c0a8409">delay</a>(500);</div>
 <div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span> </div>
 <div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>    <a class="code hl_define" href="../../de/d8b/system_2serial_8h_ab1a8531ded8c3d5bee8e36aebec7a8f3.html#ab1a8531ded8c3d5bee8e36aebec7a8f3">Serial</a>.println();</div>
 <div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>    <a class="code hl_define" href="../../de/d8b/system_2serial_8h_ab1a8531ded8c3d5bee8e36aebec7a8f3.html#ab1a8531ded8c3d5bee8e36aebec7a8f3">Serial</a>.println(<span class="stringliteral">&quot;========================================&quot;</span>);</div>
@@ -257,7 +257,7 @@ $(function(){initNavTree('d3/df2/_audio_fft_parity_8ino_source.html','../../'); 
 <div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>}</div>
 <div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span> </div>
 <div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span><span class="keywordtype">void</span> <a class="code hl_function" href="../../d3/df2/_audio_fft_parity_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f">loop</a>() {</div>
-<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>    <a class="code hl_function" href="../../d4/d36/namespacefl_a50131c41da2f619067d98360de35fa27.html#a50131c41da2f619067d98360de35fa27">delay</a>(1000);</div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>    <a class="code hl_function" href="../../d4/d36/namespacefl_a19da680141593b475c4d1d3c1c0a8409.html#a19da680141593b475c4d1d3c1c0a8409">delay</a>(1000);</div>
 <div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>}</div>
 <div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span> </div>
 <div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span><span class="preprocessor">#endif </span><span class="comment">// FL_FFT_ESP_DSP_AVAILABLE</span></div>
@@ -267,9 +267,9 @@ $(function(){initNavTree('d3/df2/_audio_fft_parity_8ino_source.html','../../'); 
 <div class="ttc" id="afft__backend_8h_html"><div class="ttname"><a href="../../de/db2/fft__backend_8h.html">fft_backend.h</a></div></div>
 <div class="ttc" id="akiss__fft_8h_html_d4/d47/structkiss__fft__cpx"><div class="ttname"><a href="../../d0/dc9/kiss__fft_8h.html#d4/d47/structkiss__fft__cpx">kiss_fft_cpx</a></div><div class="ttdef"><b>Definition</b> <a href="../../d0/dc9/kiss__fft_8h_source.html#l00084">kiss_fft.h:84</a></div></div>
 <div class="ttc" id="amath_8h_html"><div class="ttname"><a href="../../df/db1/math_8h.html">math.h</a></div></div>
-<div class="ttc" id="anamespacefl_a0b5da884257d0f4003ead08f27915a2b_html_a0b5da884257d0f4003ead08f27915a2b"><div class="ttname"><a href="../../d4/d36/namespacefl_a0b5da884257d0f4003ead08f27915a2b.html#a0b5da884257d0f4003ead08f27915a2b">fl::sqrtf</a></div><div class="ttdeci">float sqrtf(float value) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00453">math.h:453</a></div></div>
-<div class="ttc" id="anamespacefl_a4ba2744fe96375793e6f7a98b188d343_html_a4ba2744fe96375793e6f7a98b188d343"><div class="ttname"><a href="../../d4/d36/namespacefl_a4ba2744fe96375793e6f7a98b188d343.html#a4ba2744fe96375793e6f7a98b188d343">fl::sinf</a></div><div class="ttdeci">float sinf(float value) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00352">math.h:352</a></div></div>
-<div class="ttc" id="anamespacefl_a50131c41da2f619067d98360de35fa27_html_a50131c41da2f619067d98360de35fa27"><div class="ttname"><a href="../../d4/d36/namespacefl_a50131c41da2f619067d98360de35fa27.html#a50131c41da2f619067d98360de35fa27">fl::delay</a></div><div class="ttdeci">void delay(u32 ms, bool run_async=true) FL_NOEXCEPT</div><div class="ttdoc">Public delay wrapper that keeps bare Arduino delay() preferred after using fl::delay; while still all...</div><div class="ttdef"><b>Definition</b> <a href="../../dd/dee/delay_8h_source.html#l00098">delay.h:98</a></div></div>
+<div class="ttc" id="anamespacefl_a19da680141593b475c4d1d3c1c0a8409_html_a19da680141593b475c4d1d3c1c0a8409"><div class="ttname"><a href="../../d4/d36/namespacefl_a19da680141593b475c4d1d3c1c0a8409.html#a19da680141593b475c4d1d3c1c0a8409">fl::delay</a></div><div class="ttdeci">void delay(u32 ms, bool run_async=true) FL_NO_EXCEPT</div><div class="ttdoc">Public delay wrapper that keeps bare Arduino delay() preferred after using fl::delay; while still all...</div><div class="ttdef"><b>Definition</b> <a href="../../dd/dee/delay_8h_source.html#l00098">delay.h:98</a></div></div>
+<div class="ttc" id="anamespacefl_a367128bb231fab59275e129d3dc3d909_html_a367128bb231fab59275e129d3dc3d909"><div class="ttname"><a href="../../d4/d36/namespacefl_a367128bb231fab59275e129d3dc3d909.html#a367128bb231fab59275e129d3dc3d909">fl::sinf</a></div><div class="ttdeci">float sinf(float value) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00352">math.h:352</a></div></div>
+<div class="ttc" id="anamespacefl_aa4ee5b2900fe7489cc2628422555eb62_html_aa4ee5b2900fe7489cc2628422555eb62"><div class="ttname"><a href="../../d4/d36/namespacefl_aa4ee5b2900fe7489cc2628422555eb62.html#aa4ee5b2900fe7489cc2628422555eb62">fl::sqrtf</a></div><div class="ttdeci">float sqrtf(float value) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00453">math.h:453</a></div></div>
 <div class="ttc" id="asystem_2serial_8h_ab1a8531ded8c3d5bee8e36aebec7a8f3_html_ab1a8531ded8c3d5bee8e36aebec7a8f3"><div class="ttname"><a href="../../de/d8b/system_2serial_8h_ab1a8531ded8c3d5bee8e36aebec7a8f3.html#ab1a8531ded8c3d5bee8e36aebec7a8f3">Serial</a></div><div class="ttdeci">#define Serial</div><div class="ttdef"><b>Definition</b> <a href="../../de/d8b/system_2serial_8h_source.html#l00304">serial.h:304</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
@@ -278,7 +278,7 @@ $(function(){initNavTree('d3/df2/_audio_fft_parity_8ino_source.html','../../'); 
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_e07d918aab28a19f2255c0efa18e03ff.html">AudioFftParity</a></li><li class="navelem"><a class="el" href="../../d3/df2/_audio_fft_parity_8ino.html">AudioFftParity.ino</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:06:58 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:08:59 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

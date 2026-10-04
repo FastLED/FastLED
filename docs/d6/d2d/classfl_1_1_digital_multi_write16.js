@@ -4,7 +4,7 @@ var classfl_1_1_digital_multi_write16 =
       [ "count", "d6/d2d/classfl_1_1_digital_multi_write16.html#ad094239d51e7b624e31acb4396da1ee5", null ],
       [ "pins", "d6/d2d/classfl_1_1_digital_multi_write16.html#ad0762cb780988ea0272568427443be70", null ]
     ] ],
-    [ "DigitalMultiWrite16", "d6/d2d/classfl_1_1_digital_multi_write16_acddfa0f31daba041d8076772c5bdb8ee.html#acddfa0f31daba041d8076772c5bdb8ee", null ],
+    [ "DigitalMultiWrite16", "d6/d2d/classfl_1_1_digital_multi_write16_a6cc8227eb539b5fd0c2bbbfdc6a5a404.html#a6cc8227eb539b5fd0c2bbbfdc6a5a404", null ],
     [ "allSamePort", "d6/d2d/classfl_1_1_digital_multi_write16_a38d1416a928e245c4979fa628e14d805.html#a38d1416a928e245c4979fa628e14d805", null ],
     [ "applyNibble", "d6/d2d/classfl_1_1_digital_multi_write16_ab2fbb0f68e3c32263d9bbaf0cc7b0ec8.html#ab2fbb0f68e3c32263d9bbaf0cc7b0ec8", null ],
     [ "buildNibbleLut", "d6/d2d/classfl_1_1_digital_multi_write16_a6cd2b4ab4ed31b5b8b0660b42274c791.html#a6cd2b4ab4ed31b5b8b0660b42274c791", null ],

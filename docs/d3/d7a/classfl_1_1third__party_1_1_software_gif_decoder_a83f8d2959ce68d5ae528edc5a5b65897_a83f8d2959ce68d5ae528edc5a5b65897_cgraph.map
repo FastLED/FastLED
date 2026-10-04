@@ -1,0 +1,18 @@
+<map id="fl::third_party::SoftwareGifDecoder::initializeDecoder" name="fl::third_party::SoftwareGifDecoder::initializeDecoder">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,111,219,151"/>
+<area shape="rect" id="Node000002" href="$d1/d86/namespacefl_1_1third__party_a8eef74c8feef65ab9c92f048c57cdae5.html#a8eef74c8feef65ab9c92f048c57cdae5" title="Create the NSGIF object." alt="" coords="279,47,427,87"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="188,109,265,88,267,93,189,114"/>
+<area shape="rect" id="Node000007" href="$d1/d86/namespacefl_1_1third__party_ae190a2225389e0e52586f7c55cf43544.html#ae190a2225389e0e52586f7c55cf43544" title="Convert an error code to a string." alt="" coords="279,111,427,151"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="219,129,265,129,265,134,219,134"/>
+<area shape="rect" id="Node000008" href="$d3/d7a/classfl_1_1third__party_1_1_software_gif_decoder_af68838686c8534f2ae4ba8ded76b9352.html#af68838686c8534f2ae4ba8ded76b9352" title=" " alt="" coords="267,175,440,215"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="189,149,265,169,264,174,188,154"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a95dbc431c0b3451c8ffd336fe2793a47.html#a95dbc431c0b3451c8ffd336fe2793a47" title=" " alt="" coords="537,5,618,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="427,48,523,27,524,32,428,54"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a9416b2c34c489ae11032cb58c2d3c58c.html#a9416b2c34c489ae11032cb58c2d3c58c" title=" " alt="" coords="531,55,623,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="428,65,517,65,517,70,428,70"/>
+<area shape="rect" id="Node000005" href="$d1/d86/namespacefl_1_1third__party_a0de217fff309b92627b1ef8dabdfcdb9.html#a0de217fff309b92627b1ef8dabdfcdb9" title=" " alt="" coords="488,128,667,183"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="410,85,441,97,499,120,497,125,439,102,408,90"/>
+<area shape="poly" id="edge5_Node000005_Node000005" title=" " alt="" coords="534,128,534,118,542,109,556,103,577,101,602,104,617,112,614,117,601,110,577,107,558,109,545,113,539,120,539,128"/>
+<area shape="rect" id="Node000006" href="$d1/d86/namespacefl_1_1third__party_a69bed39a537fb3068083f0a486559796.html#a69bed39a537fb3068083f0a486559796" title="Check whether the host is little endian." alt="" coords="715,135,885,175"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="667,153,701,153,701,158,667,158"/>
+</map>

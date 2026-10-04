@@ -110,7 +110,7 @@
 <!-- Node8 -->
 <g id="Node000008" class="node">
 <title>Node8</title>
-<g id="a_Node000008"><a xlink:href="../../d2/d0d/group___random_gadb05544426b14ef8d85fb2eb73cb8a0a.html#gadb05544426b14ef8d85fb2eb73cb8a0a" target="_top" xlink:title="Generate an 8&#45;bit random number.">
+<g id="a_Node000008"><a xlink:href="../../d2/d0d/group___random_gafb55d95e3e866dce182f149535903dd8.html#gafb55d95e3e866dce182f149535903dd8" target="_top" xlink:title="Generate an 8&#45;bit random number.">
 <polygon fill="white" stroke="#666666" points="194.5,-541.5 134.5,-541.5 134.5,-522.5 194.5,-522.5 194.5,-541.5"/>
 <text text-anchor="middle" x="164.5" y="-529.5" font-family="Helvetica,sans-Serif" font-size="10.00">random8</text>
 </a>

@@ -17,7 +17,7 @@ var _auto_research_test_8h =
     ] ],
     [ "autoResearchChipsetTiming", "d8/d1c/_auto_research_test_8h_ae72812619f8c37828f691774381974a6.html#ae72812619f8c37828f691774381974a6", null ],
     [ "autoResearchChipsetTimingLegacy", "d8/d1c/_auto_research_test_8h_a2f385b83241385aff0bd0ea678bdc30d.html#a2f385b83241385aff0bd0ea678bdc30d", null ],
-    [ "capture", "d8/d1c/_auto_research_test_8h_ade4309c9f4171360f59ed787c7041584.html#ade4309c9f4171360f59ed787c7041584", null ],
+    [ "capture", "d8/d1c/_auto_research_test_8h_a048f547d706cab6173976a8571638e3a.html#a048f547d706cab6173976a8571638e3a", null ],
     [ "getBitPatternName", "d8/d1c/_auto_research_test_8h_a4bf2c967e5a9f824ed586e4f1b6685d3.html#a4bf2c967e5a9f824ed586e4f1b6685d3", null ],
     [ "runMultiTest", "d8/d1c/_auto_research_test_8h_a0816969bb8b66856752bd54dd800462c.html#a0816969bb8b66856752bd54dd800462c", null ],
     [ "runTest", "d8/d1c/_auto_research_test_8h_ab5d3883aa989a0c1298af1a8a0d2851a.html#ab5d3883aa989a0c1298af1a8a0d2851a", null ],

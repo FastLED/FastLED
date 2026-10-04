@@ -1,0 +1,16 @@
+<map id="fl::colorimetric_response::build_source_matrix" name="fl::colorimetric_response::build_source_matrix">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,127,188,167"/>
+<area shape="rect" id="Node000002" href="$da/db3/namespacefl_1_1colorimetric__response_a47bab90ae7cc342ef40e1f39ea5c6af9.html#a47bab90ae7cc342ef40e1f39ea5c6af9" title=" " alt="" coords="236,33,419,73"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="140,124,235,83,254,76,256,81,237,88,142,129"/>
+<area shape="rect" id="Node000006" href="$da/db3/namespacefl_1_1colorimetric__response_a39d0dc3084f4ee0f0e7cc7caba1e090b.html#a39d0dc3084f4ee0f0e7cc7caba1e090b" title=" " alt="" coords="236,97,419,137"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="188,132,222,128,223,133,188,138"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_a715b655d8ee6017d3c827c5de110d59e.html#a715b655d8ee6017d3c827c5de110d59e" title=" " alt="" coords="304,162,351,187"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="188,155,290,168,290,173,188,160"/>
+<area shape="rect" id="Node000008" href="$da/db3/namespacefl_1_1colorimetric__response_aa851bfe04e01aa234524500cc7cee414.html#aa851bfe04e01aa234524500cc7cee414" title=" " alt="" coords="236,212,419,252"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="150,164,237,198,257,205,255,210,235,202,148,169"/>
+<area shape="rect" id="Node000003" href="$d1/d54/namespacefl_1_1colorimetric__response_1_1detail_a6473f7c3cd904a8cda13b9573ab0ffe4.html#a6473f7c3cd904a8cda13b9573ab0ffe4" title="Largest absolute entry of a column, which is its infinity norm." alt="" coords="467,5,649,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="418,40,453,35,453,41,419,45"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_ab4d4c93cb75e3d2abb59cf7893a0949d.html#ab4d4c93cb75e3d2abb59cf7893a0949d" title=" " alt="" coords="697,42,764,67"/>
+<area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="419,54,467,55,649,55,683,54,683,59,649,60,467,60,419,59"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="650,38,684,44,683,49,649,44"/>
+</map>

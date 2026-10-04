@@ -37,15 +37,15 @@ digraph "fl/math/scale8.h"
   Node28 [id="Node000028",label="fl/math/fixed_point.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$de/d62/fixed__point_8h.html",tooltip=" "];
   Node28 -> Node10 [id="edge19_Node000028_Node000010",color="steelblue1",style="solid",tooltip=" "];
   Node11 -> Node10 [id="edge20_Node000011_Node000010",color="steelblue1",style="solid",tooltip=" "];
-  Node2 -> Node56 [id="edge21_Node000002_Node000056",color="steelblue1",style="solid",tooltip=" "];
-  Node56 [id="Node000056",label="color.h",height=0.2,width=0.4,color="grey60", fillcolor="#E0E0E0", style="filled",tooltip=" "];
+  Node2 -> Node49 [id="edge21_Node000002_Node000049",color="steelblue1",style="solid",tooltip=" "];
+  Node49 [id="Node000049",label="color.h",height=0.2,width=0.4,color="grey60", fillcolor="#E0E0E0", style="filled",tooltip=" "];
   Node2 -> Node10 [id="edge22_Node000002_Node000010",color="steelblue1",style="solid",tooltip=" "];
-  Node1 -> Node57 [id="edge23_Node000001_Node000057",color="steelblue1",style="solid",tooltip=" "];
-  Node57 [id="Node000057",label="fastled_config.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d11/fastled__config_8h.html",tooltip="Contains definitions that can be used to configure FastLED at compile time."];
-  Node1 -> Node58 [id="edge24_Node000001_Node000058",color="steelblue1",style="solid",tooltip=" "];
-  Node58 [id="Node000058",label="fl/math/lib8static.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d0f/fl_2math_2lib8static_8h.html",tooltip="Defines static inlining macros for lib8tion functions."];
-  Node58 -> Node6 [id="edge25_Node000058_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node50 [id="edge23_Node000001_Node000050",color="steelblue1",style="solid",tooltip=" "];
+  Node50 [id="Node000050",label="fastled_config.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d11/fastled__config_8h.html",tooltip="Contains definitions that can be used to configure FastLED at compile time."];
+  Node1 -> Node51 [id="edge24_Node000001_Node000051",color="steelblue1",style="solid",tooltip=" "];
+  Node51 [id="Node000051",label="fl/math/lib8static.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d0f/fl_2math_2lib8static_8h.html",tooltip="Defines static inlining macros for lib8tion functions."];
+  Node51 -> Node6 [id="edge25_Node000051_Node000006",color="steelblue1",style="solid",tooltip=" "];
   Node1 -> Node6 [id="edge26_Node000001_Node000006",color="steelblue1",style="solid",tooltip=" "];
-  Node1 -> Node59 [id="edge27_Node000001_Node000059",color="steelblue1",style="solid",tooltip=" "];
-  Node59 [id="Node000059",label="platforms/scale8.h",height=0.2,width=0.4,color="grey60", fillcolor="#E0E0E0", style="filled",tooltip=" "];
+  Node1 -> Node52 [id="edge27_Node000001_Node000052",color="steelblue1",style="solid",tooltip=" "];
+  Node52 [id="Node000052",label="platforms/scale8.h",height=0.2,width=0.4,color="grey60", fillcolor="#E0E0E0", style="filled",tooltip=" "];
 }

@@ -1,0 +1,11 @@
+<map id="fl::ChannelManager::selectDriverForChannel" name="fl::ChannelManager::selectDriverForChannel">
+<area shape="rect" id="Node000001" title="Select best driver for channel data (used by Channel::showPixels)" alt="" coords="500,37,683,77"/>
+<area shape="rect" id="Node000002" href="$de/d07/classfl_1_1_slim_spi_bridge_controller_ad342cd44bd75c6d02679ca04b6d4f895.html#ad342cd44bd75c6d02679ca04b6d4f895" title="Resolve the driver for this frame." alt="" coords="253,5,446,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="486,46,446,41,447,35,487,41"/>
+<area shape="rect" id="Node000004" href="$d5/d8b/classfl_1_1_channel_a1ac53e5596ff3b71fd028a159eb542fb.html#a1ac53e5596ff3b71fd028a159eb542fb" title="Cold slow&#45;path helper for showPixels()." alt="" coords="247,69,452,109"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="487,74,453,78,452,73,486,69"/>
+<area shape="rect" id="Node000003" href="$de/d07/classfl_1_1_slim_spi_bridge_controller_abbd35c320bbde28d28f84e1014e0e77f.html#abbd35c320bbde28d28f84e1014e0e77f" title=" " alt="" coords="5,5,199,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="239,28,199,28,199,23,239,23"/>
+<area shape="rect" id="Node000005" href="$d5/d8b/classfl_1_1_channel_a44414e176c7d2ef65fcdd390f6852322.html#a44414e176c7d2ef65fcdd390f6852322" title=" " alt="" coords="17,77,187,102"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="233,92,188,92,188,87,233,87"/>
+</map>

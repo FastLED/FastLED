@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::Transition",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/dde/classfl_1_1_transition.html",tooltip=" "];
+  Node0 [id="Node000000",label="fl::wave_perf::WavePerfRepeat\lResult",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/d66/namespacefl_1_1wave__perf.html#d3/d1f/structfl_1_1wave__perf_1_1_wave_perf_repeat_result",tooltip=" "];
 }

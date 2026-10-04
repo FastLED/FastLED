@@ -8,5 +8,5 @@ digraph "fl::Channel::getCorrection"
   rankdir="LR";
   Node1 [id="Node000001",label="fl::Channel::getCorrection",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Get the color correction."];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::CLEDController\l::getCorrection",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/da0/classfl_1_1_c_l_e_d_controller_ad02a16c3296094bac942dc4afbbdfaf7.html#ad02a16c3296094bac942dc4afbbdfaf7",tooltip="Get the correction value used by this controller."];
+  Node2 [id="Node000002",label="fl::CLEDController\l::getCorrection",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/da0/classfl_1_1_c_l_e_d_controller_a8aa542c280f549bc1ce1a56cdd6f7186.html#a8aa542c280f549bc1ce1a56cdd6f7186",tooltip="Get the correction value used by this controller."];
 }

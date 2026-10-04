@@ -1,0 +1,5 @@
+<map id="fl::ucs7604FrameBytes" name="fl::ucs7604FrameBytes">
+<area shape="rect" id="Node000001" title="Total wire bytes of a complete UCS7604 frame." alt="" coords="5,5,176,31"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_acdb05f31078a6079912de68b41a5ee4e.html#acdb05f31078a6079912de68b41a5ee4e" title="Wire bytes each LED contributes to a UCS7604 frame." alt="" coords="224,5,397,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="176,15,210,15,210,21,176,21"/>
+</map>

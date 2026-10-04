@@ -8,5 +8,5 @@ digraph "fl::fixed_point_base::fixed_point_base"
   rankdir="LR";
   Node1 [id="Node000001",label="fl::fixed_point_base\l::fixed_point_base",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::fixed_point_base\l::fixed_point_base",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d93/classfl_1_1fixed__point__base_a0786e38948f8bbb5bf375a1ca1834cb7.html#a0786e38948f8bbb5bf375a1ca1834cb7",tooltip=" "];
+  Node2 [id="Node000002",label="fl::fixed_point_base\l::fixed_point_base",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d93/classfl_1_1fixed__point__base_a26b8ed3ee37acae094a7a781d332aa46.html#a26b8ed3ee37acae094a7a781d332aa46",tooltip=" "];
 }

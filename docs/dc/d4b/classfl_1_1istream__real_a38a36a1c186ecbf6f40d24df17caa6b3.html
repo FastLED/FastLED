@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -115,32 +115,32 @@ $(function(){initNavTree('dc/d4b/classfl_1_1istream__real_a38a36a1c186ecbf6f40d2
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d4/d99/istream_8cpp_8hpp_source.html#l00384">384</a> of file <a class="el" href="../../d4/d99/istream_8cpp_8hpp_source.html">istream.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  384</span>                                          {</div>
-<div class="line"><span class="lineno">  385</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../dc/d4b/classfl_1_1istream__real_a312c8696be016d5571314a1cbf63b9c7.html#a312c8696be016d5571314a1cbf63b9c7">mPos</a> &gt; 0) {</div>
-<div class="line"><span class="lineno">  386</span>        <a class="code hl_variable" href="../../dc/d4b/classfl_1_1istream__real_a312c8696be016d5571314a1cbf63b9c7.html#a312c8696be016d5571314a1cbf63b9c7">mPos</a>--;</div>
-<div class="line"><span class="lineno">  387</span>        <a class="code hl_variable" href="../../dc/d4b/classfl_1_1istream__real_a394682cc4c8762dfee64c2ff456c62c3.html#a394682cc4c8762dfee64c2ff456c62c3">mBuffer</a>[<a class="code hl_variable" href="../../dc/d4b/classfl_1_1istream__real_a312c8696be016d5571314a1cbf63b9c7.html#a312c8696be016d5571314a1cbf63b9c7">mPos</a>] = c;</div>
-<div class="line"><span class="lineno">  388</span>    } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  389</span>        <span class="comment">// Insert at beginning of buffer - shift existing data</span></div>
-<div class="line"><span class="lineno">  390</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../dc/d4b/classfl_1_1istream__real_a2af0bf93c37f54366f4b7abc33520632.html#a2af0bf93c37f54366f4b7abc33520632">mBufferLen</a> &lt; <a class="code hl_variable" href="../../dc/d4b/classfl_1_1istream__real_a9dca9b9e297824879c2f3696bc4f00c7.html#a9dca9b9e297824879c2f3696bc4f00c7">BUFFER_SIZE</a> - 1) {</div>
-<div class="line"><span class="lineno">  391</span>            <span class="keywordflow">for</span> (fl::size i = <a class="code hl_variable" href="../../dc/d4b/classfl_1_1istream__real_a2af0bf93c37f54366f4b7abc33520632.html#a2af0bf93c37f54366f4b7abc33520632">mBufferLen</a>; i &gt; 0; --i) {</div>
-<div class="line"><span class="lineno">  392</span>                <a class="code hl_variable" href="../../dc/d4b/classfl_1_1istream__real_a394682cc4c8762dfee64c2ff456c62c3.html#a394682cc4c8762dfee64c2ff456c62c3">mBuffer</a>[i] = <a class="code hl_variable" href="../../dc/d4b/classfl_1_1istream__real_a394682cc4c8762dfee64c2ff456c62c3.html#a394682cc4c8762dfee64c2ff456c62c3">mBuffer</a>[i-1];</div>
-<div class="line"><span class="lineno">  393</span>            }</div>
-<div class="line"><span class="lineno">  394</span>            <a class="code hl_variable" href="../../dc/d4b/classfl_1_1istream__real_a394682cc4c8762dfee64c2ff456c62c3.html#a394682cc4c8762dfee64c2ff456c62c3">mBuffer</a>[0] = c;</div>
-<div class="line"><span class="lineno">  395</span>            <a class="code hl_variable" href="../../dc/d4b/classfl_1_1istream__real_a2af0bf93c37f54366f4b7abc33520632.html#a2af0bf93c37f54366f4b7abc33520632">mBufferLen</a>++;</div>
-<div class="line"><span class="lineno">  396</span>            <a class="code hl_variable" href="../../dc/d4b/classfl_1_1istream__real_a394682cc4c8762dfee64c2ff456c62c3.html#a394682cc4c8762dfee64c2ff456c62c3">mBuffer</a>[<a class="code hl_variable" href="../../dc/d4b/classfl_1_1istream__real_a2af0bf93c37f54366f4b7abc33520632.html#a2af0bf93c37f54366f4b7abc33520632">mBufferLen</a>] = <span class="charliteral">&#39;\0&#39;</span>;</div>
-<div class="line"><span class="lineno">  397</span>        }</div>
-<div class="line"><span class="lineno">  398</span>    }</div>
-<div class="line"><span class="lineno">  399</span>    <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
-<div class="line"><span class="lineno">  400</span>}</div>
-<div class="ttc" id="aclassfl_1_1istream__real_a2af0bf93c37f54366f4b7abc33520632_html_a2af0bf93c37f54366f4b7abc33520632"><div class="ttname"><a href="../../dc/d4b/classfl_1_1istream__real_a2af0bf93c37f54366f4b7abc33520632.html#a2af0bf93c37f54366f4b7abc33520632">fl::istream_real::mBufferLen</a></div><div class="ttdeci">fl::size mBufferLen</div><div class="ttdef"><b>Definition</b> <a href="../../db/dc9/istream_8h_source.html#l00026">istream.h:26</a></div></div>
-<div class="ttc" id="aclassfl_1_1istream__real_a312c8696be016d5571314a1cbf63b9c7_html_a312c8696be016d5571314a1cbf63b9c7"><div class="ttname"><a href="../../dc/d4b/classfl_1_1istream__real_a312c8696be016d5571314a1cbf63b9c7.html#a312c8696be016d5571314a1cbf63b9c7">fl::istream_real::mPos</a></div><div class="ttdeci">fl::size mPos</div><div class="ttdef"><b>Definition</b> <a href="../../db/dc9/istream_8h_source.html#l00027">istream.h:27</a></div></div>
-<div class="ttc" id="aclassfl_1_1istream__real_a394682cc4c8762dfee64c2ff456c62c3_html_a394682cc4c8762dfee64c2ff456c62c3"><div class="ttname"><a href="../../dc/d4b/classfl_1_1istream__real_a394682cc4c8762dfee64c2ff456c62c3.html#a394682cc4c8762dfee64c2ff456c62c3">fl::istream_real::mBuffer</a></div><div class="ttdeci">char mBuffer[BUFFER_SIZE]</div><div class="ttdef"><b>Definition</b> <a href="../../db/dc9/istream_8h_source.html#l00025">istream.h:25</a></div></div>
-<div class="ttc" id="aclassfl_1_1istream__real_a9dca9b9e297824879c2f3696bc4f00c7_html_a9dca9b9e297824879c2f3696bc4f00c7"><div class="ttname"><a href="../../dc/d4b/classfl_1_1istream__real_a9dca9b9e297824879c2f3696bc4f00c7.html#a9dca9b9e297824879c2f3696bc4f00c7">fl::istream_real::BUFFER_SIZE</a></div><div class="ttdeci">static const fl::size BUFFER_SIZE</div><div class="ttdef"><b>Definition</b> <a href="../../db/dc9/istream_8h_source.html#l00024">istream.h:24</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d4/d99/istream_8cpp_8hpp_source.html#l00385">385</a> of file <a class="el" href="../../d4/d99/istream_8cpp_8hpp_source.html">istream.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  385</span>                                          {</div>
+<div class="line"><span class="lineno">  386</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../dc/d4b/classfl_1_1istream__real_a312c8696be016d5571314a1cbf63b9c7.html#a312c8696be016d5571314a1cbf63b9c7">mPos</a> &gt; 0) {</div>
+<div class="line"><span class="lineno">  387</span>        <a class="code hl_variable" href="../../dc/d4b/classfl_1_1istream__real_a312c8696be016d5571314a1cbf63b9c7.html#a312c8696be016d5571314a1cbf63b9c7">mPos</a>--;</div>
+<div class="line"><span class="lineno">  388</span>        <a class="code hl_variable" href="../../dc/d4b/classfl_1_1istream__real_a394682cc4c8762dfee64c2ff456c62c3.html#a394682cc4c8762dfee64c2ff456c62c3">mBuffer</a>[<a class="code hl_variable" href="../../dc/d4b/classfl_1_1istream__real_a312c8696be016d5571314a1cbf63b9c7.html#a312c8696be016d5571314a1cbf63b9c7">mPos</a>] = c;</div>
+<div class="line"><span class="lineno">  389</span>    } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  390</span>        <span class="comment">// Insert at beginning of buffer - shift existing data</span></div>
+<div class="line"><span class="lineno">  391</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../dc/d4b/classfl_1_1istream__real_a2af0bf93c37f54366f4b7abc33520632.html#a2af0bf93c37f54366f4b7abc33520632">mBufferLen</a> &lt; <a class="code hl_variable" href="../../dc/d4b/classfl_1_1istream__real_a9dca9b9e297824879c2f3696bc4f00c7.html#a9dca9b9e297824879c2f3696bc4f00c7">BUFFER_SIZE</a> - 1) {</div>
+<div class="line"><span class="lineno">  392</span>            <span class="keywordflow">for</span> (fl::size i = <a class="code hl_variable" href="../../dc/d4b/classfl_1_1istream__real_a2af0bf93c37f54366f4b7abc33520632.html#a2af0bf93c37f54366f4b7abc33520632">mBufferLen</a>; i &gt; 0; --i) {</div>
+<div class="line"><span class="lineno">  393</span>                <a class="code hl_variable" href="../../dc/d4b/classfl_1_1istream__real_a394682cc4c8762dfee64c2ff456c62c3.html#a394682cc4c8762dfee64c2ff456c62c3">mBuffer</a>[i] = <a class="code hl_variable" href="../../dc/d4b/classfl_1_1istream__real_a394682cc4c8762dfee64c2ff456c62c3.html#a394682cc4c8762dfee64c2ff456c62c3">mBuffer</a>[i-1];</div>
+<div class="line"><span class="lineno">  394</span>            }</div>
+<div class="line"><span class="lineno">  395</span>            <a class="code hl_variable" href="../../dc/d4b/classfl_1_1istream__real_a394682cc4c8762dfee64c2ff456c62c3.html#a394682cc4c8762dfee64c2ff456c62c3">mBuffer</a>[0] = c;</div>
+<div class="line"><span class="lineno">  396</span>            <a class="code hl_variable" href="../../dc/d4b/classfl_1_1istream__real_a2af0bf93c37f54366f4b7abc33520632.html#a2af0bf93c37f54366f4b7abc33520632">mBufferLen</a>++;</div>
+<div class="line"><span class="lineno">  397</span>            <a class="code hl_variable" href="../../dc/d4b/classfl_1_1istream__real_a394682cc4c8762dfee64c2ff456c62c3.html#a394682cc4c8762dfee64c2ff456c62c3">mBuffer</a>[<a class="code hl_variable" href="../../dc/d4b/classfl_1_1istream__real_a2af0bf93c37f54366f4b7abc33520632.html#a2af0bf93c37f54366f4b7abc33520632">mBufferLen</a>] = <span class="charliteral">&#39;\0&#39;</span>;</div>
+<div class="line"><span class="lineno">  398</span>        }</div>
+<div class="line"><span class="lineno">  399</span>    }</div>
+<div class="line"><span class="lineno">  400</span>    <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
+<div class="line"><span class="lineno">  401</span>}</div>
+<div class="ttc" id="aclassfl_1_1istream__real_a2af0bf93c37f54366f4b7abc33520632_html_a2af0bf93c37f54366f4b7abc33520632"><div class="ttname"><a href="../../dc/d4b/classfl_1_1istream__real_a2af0bf93c37f54366f4b7abc33520632.html#a2af0bf93c37f54366f4b7abc33520632">fl::istream_real::mBufferLen</a></div><div class="ttdeci">fl::size mBufferLen</div><div class="ttdef"><b>Definition</b> <a href="../../db/dc9/istream_8h_source.html#l00027">istream.h:27</a></div></div>
+<div class="ttc" id="aclassfl_1_1istream__real_a312c8696be016d5571314a1cbf63b9c7_html_a312c8696be016d5571314a1cbf63b9c7"><div class="ttname"><a href="../../dc/d4b/classfl_1_1istream__real_a312c8696be016d5571314a1cbf63b9c7.html#a312c8696be016d5571314a1cbf63b9c7">fl::istream_real::mPos</a></div><div class="ttdeci">fl::size mPos</div><div class="ttdef"><b>Definition</b> <a href="../../db/dc9/istream_8h_source.html#l00028">istream.h:28</a></div></div>
+<div class="ttc" id="aclassfl_1_1istream__real_a394682cc4c8762dfee64c2ff456c62c3_html_a394682cc4c8762dfee64c2ff456c62c3"><div class="ttname"><a href="../../dc/d4b/classfl_1_1istream__real_a394682cc4c8762dfee64c2ff456c62c3.html#a394682cc4c8762dfee64c2ff456c62c3">fl::istream_real::mBuffer</a></div><div class="ttdeci">char mBuffer[BUFFER_SIZE]</div><div class="ttdef"><b>Definition</b> <a href="../../db/dc9/istream_8h_source.html#l00026">istream.h:26</a></div></div>
+<div class="ttc" id="aclassfl_1_1istream__real_a9dca9b9e297824879c2f3696bc4f00c7_html_a9dca9b9e297824879c2f3696bc4f00c7"><div class="ttname"><a href="../../dc/d4b/classfl_1_1istream__real_a9dca9b9e297824879c2f3696bc4f00c7.html#a9dca9b9e297824879c2f3696bc4f00c7">fl::istream_real::BUFFER_SIZE</a></div><div class="ttdeci">static const fl::size BUFFER_SIZE</div><div class="ttdef"><b>Definition</b> <a href="../../db/dc9/istream_8h_source.html#l00025">istream.h:25</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../dc/d4b/classfl_1_1istream__real_a5fbce5bd8ad11d97946caad0564943b0.html#a5fbce5bd8ad11d97946caad0564943b0">istream_real()</a>, <a class="el" href="../../db/dc9/istream_8h_source.html#l00024">BUFFER_SIZE</a>, <a class="el" href="../../db/dc9/istream_8h_source.html#l00025">mBuffer</a>, <a class="el" href="../../db/dc9/istream_8h_source.html#l00026">mBufferLen</a>, and <a class="el" href="../../db/dc9/istream_8h_source.html#l00027">mPos</a>.</p>
+<p class="reference">References <a class="el" href="../../dc/d4b/classfl_1_1istream__real_ae6547e9d62d571037f8a94ab6ff446be.html#ae6547e9d62d571037f8a94ab6ff446be">istream_real()</a>, <a class="el" href="../../db/dc9/istream_8h_source.html#l00025">BUFFER_SIZE</a>, <a class="el" href="../../db/dc9/istream_8h_source.html#l00026">mBuffer</a>, <a class="el" href="../../db/dc9/istream_8h_source.html#l00027">mBufferLen</a>, and <a class="el" href="../../db/dc9/istream_8h_source.html#l00028">mPos</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../db/dc9/istream_8h_source.html#l00257">fl::istream::putback()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../db/dc9/istream_8h_source.html#l00258">fl::istream::putback()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -165,7 +165,7 @@ $(function(){initNavTree('dc/d4b/classfl_1_1istream__real_a38a36a1c186ecbf6f40d2
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../dc/d4b/classfl_1_1istream__real.html">istream_real</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:05 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:09 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

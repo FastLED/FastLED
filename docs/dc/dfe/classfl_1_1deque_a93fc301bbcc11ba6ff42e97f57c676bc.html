@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -125,13 +125,23 @@ template&lt;typename T&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dc/d44/deque_8h_source.html#l00356">356</a> of file <a class="el" href="../../dc/d44/deque_8h_source.html">deque.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  356</span>               {</div>
-<div class="line"><span class="lineno">  357</span>        <span class="keywordflow">return</span> <a class="code hl_variable" href="../../dc/dfe/classfl_1_1deque_a9b9a6f580b1b01e6e61ab7819e4f8014.html#a9b9a6f580b1b01e6e61ab7819e4f8014">mData</a>[<a class="code hl_variable" href="../../dc/dfe/classfl_1_1deque_a02b810cfba3cb22465e6defc49705b4f.html#a02b810cfba3cb22465e6defc49705b4f">mFront</a>];</div>
-<div class="line"><span class="lineno">  358</span>    }</div>
-<div class="ttc" id="aclassfl_1_1deque_a02b810cfba3cb22465e6defc49705b4f_html_a02b810cfba3cb22465e6defc49705b4f"><div class="ttname"><a href="../../dc/dfe/classfl_1_1deque_a02b810cfba3cb22465e6defc49705b4f.html#a02b810cfba3cb22465e6defc49705b4f">fl::deque::mFront</a></div><div class="ttdeci">fl::size mFront</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d44/deque_8h_source.html#l00019">deque.h:19</a></div></div>
-<div class="ttc" id="aclassfl_1_1deque_a9b9a6f580b1b01e6e61ab7819e4f8014_html_a9b9a6f580b1b01e6e61ab7819e4f8014"><div class="ttname"><a href="../../dc/dfe/classfl_1_1deque_a9b9a6f580b1b01e6e61ab7819e4f8014.html#a9b9a6f580b1b01e6e61ab7819e4f8014">fl::deque::mData</a></div><div class="ttdeci">T * mData</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d44/deque_8h_source.html#l00016">deque.h:16</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../dc/d44/deque_8h_source.html#l00483">483</a> of file <a class="el" href="../../dc/d44/deque_8h_source.html">deque.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  483</span>               {</div>
+<div class="line"><span class="lineno">  484</span>        <span class="keywordflow">return</span> <a class="code hl_variable" href="../../dc/dfe/classfl_1_1deque_ae475f4bf46a6ab235ad148583aa75966.html#ae475f4bf46a6ab235ad148583aa75966">mMap</a>[<a class="code hl_variable" href="../../dc/dfe/classfl_1_1deque_af1cf39af9eb444fef48de917b653e2a3.html#af1cf39af9eb444fef48de917b653e2a3">mFrontMapIdx</a>][<a class="code hl_variable" href="../../dc/dfe/classfl_1_1deque_ad108bea702be4bf1226d6a57c895a9ac.html#ad108bea702be4bf1226d6a57c895a9ac">mFrontOffset</a>];</div>
+<div class="line"><span class="lineno">  485</span>    }</div>
+<div class="ttc" id="aclassfl_1_1deque_ad108bea702be4bf1226d6a57c895a9ac_html_ad108bea702be4bf1226d6a57c895a9ac"><div class="ttname"><a href="../../dc/dfe/classfl_1_1deque_ad108bea702be4bf1226d6a57c895a9ac.html#ad108bea702be4bf1226d6a57c895a9ac">fl::deque::mFrontOffset</a></div><div class="ttdeci">fl::size mFrontOffset</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d44/deque_8h_source.html#l00041">deque.h:41</a></div></div>
+<div class="ttc" id="aclassfl_1_1deque_ae475f4bf46a6ab235ad148583aa75966_html_ae475f4bf46a6ab235ad148583aa75966"><div class="ttname"><a href="../../dc/dfe/classfl_1_1deque_ae475f4bf46a6ab235ad148583aa75966.html#ae475f4bf46a6ab235ad148583aa75966">fl::deque::mMap</a></div><div class="ttdeci">T ** mMap</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d44/deque_8h_source.html#l00038">deque.h:38</a></div></div>
+<div class="ttc" id="aclassfl_1_1deque_af1cf39af9eb444fef48de917b653e2a3_html_af1cf39af9eb444fef48de917b653e2a3"><div class="ttname"><a href="../../dc/dfe/classfl_1_1deque_af1cf39af9eb444fef48de917b653e2a3.html#af1cf39af9eb444fef48de917b653e2a3">fl::deque::mFrontMapIdx</a></div><div class="ttdeci">fl::size mFrontMapIdx</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d44/deque_8h_source.html#l00040">deque.h:40</a></div></div>
 </div><!-- fragment -->
+<p class="reference">Referenced by <a class="el" href="../../dc/d44/deque_8h_source.html#l00465">fl::deque&lt; int &gt;::at()</a>, and <a class="el" href="../../dc/d44/deque_8h_source.html#l00475">fl::deque&lt; int &gt;::at()</a>.</p>
+<div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
+<div id="dynsection-0-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-0-content" class="dyncontent" style="display:none;">
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../dc/dfe/classfl_1_1deque_a93fc301bbcc11ba6ff42e97f57c676bc_a93fc301bbcc11ba6ff42e97f57c676bc_icgraph.svg" width="323" height="86"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+
 </div>
 </div>
 </div><!-- contents -->
@@ -141,7 +151,7 @@ template&lt;typename T&gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../dc/dfe/classfl_1_1deque.html">deque</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:05 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:08 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

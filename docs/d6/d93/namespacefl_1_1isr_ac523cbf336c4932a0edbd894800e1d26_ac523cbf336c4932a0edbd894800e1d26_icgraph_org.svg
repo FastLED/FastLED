@@ -38,7 +38,7 @@
 <!-- Node11 -->
 <g id="Node000011" class="node">
 <title>Node11</title>
-<g id="a_Node000011"><a xlink:href="../../d4/d36/namespacefl_a5b15f08d117ed2b984fbd6881dbbde51.html#a5b15f08d117ed2b984fbd6881dbbde51" target="_top" xlink:title="Convert byte to 8 Wave8Bit structures using nibble LUT.">
+<g id="a_Node000011"><a xlink:href="../../d4/d36/namespacefl_a1a175139a4d8f986acdb0fd1782ae581.html#a1a175139a4d8f986acdb0fd1782ae581" target="_top" xlink:title="Public single&#45;lane wave8 encoder.">
 <polygon fill="white" stroke="#666666" points="100.5,-412 39.5,-412 39.5,-393 100.5,-393 100.5,-412"/>
 <text text-anchor="middle" x="70" y="-400" font-family="Helvetica,sans-Serif" font-size="10.00">fl::wave8</text>
 </a>
@@ -56,7 +56,7 @@
 <!-- Node12 -->
 <g id="Node000012" class="node">
 <title>Node12</title>
-<g id="a_Node000012"><a xlink:href="../../df/d9e/namespacefl_1_1detail_a2538a6e0d2d28d4194ec004bf5fe6003.html#a2538a6e0d2d28d4194ec004bf5fe6003" target="_top" xlink:title="Helper: Convert byte to Wave8Byte using nibble LUT (internal use only)">
+<g id="a_Node000012"><a xlink:href="../../df/d9e/namespacefl_1_1detail_aa731fdf58a33695ff45eee66bb3c8ff6.html#aa731fdf58a33695ff45eee66bb3c8ff6" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="326,-351.5 189,-351.5 189,-321.5 326,-321.5 326,-351.5"/>
 <text text-anchor="start" x="197" y="-339.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::detail::wave8_convert</text>
 <text text-anchor="middle" x="257.5" y="-328.5" font-family="Helvetica,sans-Serif" font-size="10.00">_byte_to_wave8byte</text>
@@ -75,7 +75,7 @@
 <!-- Node17 -->
 <g id="Node000017" class="node">
 <title>Node17</title>
-<g id="a_Node000017"><a xlink:href="../../df/d9e/namespacefl_1_1detail_a66fa111cf8d1f98b7ecda4f2d97b8d75.html#a66fa111cf8d1f98b7ecda4f2d97b8d75" target="_top" xlink:title="Byte&#45;indexed expansion (#2526): one indexed 8&#45;byte copy.">
+<g id="a_Node000017"><a xlink:href="../../df/d9e/namespacefl_1_1detail_ac79066fcad09cc0ca9d99714ee037ec4.html#ac79066fcad09cc0ca9d99714ee037ec4" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="339,-136 176,-136 176,-117 339,-117 339,-136"/>
 <text text-anchor="middle" x="257.5" y="-124" font-family="Helvetica,sans-Serif" font-size="10.00">fl::detail::wave8_expand_byte</text>
 </a>

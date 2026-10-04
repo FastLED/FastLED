@@ -1,5 +1,15 @@
 <map id="fl::video::PixelStream::available" name="fl::video::PixelStream::available">
-<area shape="rect" id="Node000001" title=" " alt="" coords="213,5,373,45"/>
-<area shape="rect" id="Node000002" href="$d7/d7e/classfl_1_1video_1_1_pixel_stream_aa192d9b6bbc7bc1acab0110e87b0d062.html#aa192d9b6bbc7bc1acab0110e87b0d062" title=" " alt="" coords="5,5,165,45"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="200,28,166,28,166,23,200,23"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="643,12,803,52"/>
+<area shape="rect" id="Node000002" href="$d7/d7e/classfl_1_1video_1_1_pixel_stream_a2c599e14e779218ddbda706c55406458.html#a2c599e14e779218ddbda706c55406458" title=" " alt="" coords="421,12,595,52"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="629,44,595,44,595,38,629,38"/>
+<area shape="rect" id="Node000004" href="$d7/d7e/classfl_1_1video_1_1_pixel_stream_aa192d9b6bbc7bc1acab0110e87b0d062.html#aa192d9b6bbc7bc1acab0110e87b0d062" title=" " alt="" coords="213,69,373,109"/>
+<area shape="poly" id="edge7_Node000001_Node000004" title=" " alt="" coords="637,58,595,67,479,81,374,89,373,84,479,76,594,61,636,53"/>
+<area shape="poly" id="edge2_Node000002_Node000001" title=" " alt="" coords="608,20,642,21,642,26,608,26"/>
+<area shape="rect" id="Node000003" href="$d7/d7e/classfl_1_1video_1_1_pixel_stream_a2d2bc6715c9d04166f12a4d316bbfcd3.html#a2d2bc6715c9d04166f12a4d316bbfcd3" title=" " alt="" coords="213,5,373,45"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="408,32,373,30,373,25,408,26"/>
+<area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="420,58,369,72,368,67,419,53"/>
+<area shape="rect" id="Node000005" href="$d7/d7e/classfl_1_1video_1_1_pixel_stream_ae5ab48636bc0fd92d8f07ae105067724.html#ae5ab48636bc0fd92d8f07ae105067724" title=" " alt="" coords="5,37,165,77"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="199,78,165,72,166,67,200,72"/>
+<area shape="rect" id="Node000007" href="$d7/d7e/classfl_1_1video_1_1_pixel_stream_a1f961e2f5aeecbf5e3c5ef38bf03eeba.html#a1f961e2f5aeecbf5e3c5ef38bf03eeba" title=" " alt="" coords="5,101,165,141"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="200,106,166,112,165,106,199,101"/>
 </map>

@@ -4,9 +4,10 @@ var wave8_8h =
       [ "data", "d4/d36/namespacefl.html#aa3277412f884cc1f32638880ee1b763d", null ]
     ] ],
     [ "fl::buildWave8ByteExpansionLUT", "d4/d36/namespacefl_a89a2a81a6051fc6b79c9dc4554c23be0.html#a89a2a81a6051fc6b79c9dc4554c23be0", null ],
+    [ "fl::buildWave8ByteExpansionLUT", "d4/d36/namespacefl_a6b5f441470840816c9c071d698ac8e9c.html#a6b5f441470840816c9c071d698ac8e9c", null ],
     [ "fl::buildWave8ExpansionLUT", "d4/d36/namespacefl_a0a7ce9d898e073d505fc9b4499cd324e.html#a0a7ce9d898e073d505fc9b4499cd324e", null ],
     [ "fl::FL_ALIGNAS", "d4/d36/namespacefl_a1a872cbf2be9da94e06510d4f16f413f.html#a1a872cbf2be9da94e06510d4f16f413f", null ],
-    [ "fl::wave8", "d4/d36/namespacefl_a5b15f08d117ed2b984fbd6881dbbde51.html#a5b15f08d117ed2b984fbd6881dbbde51", null ],
+    [ "fl::wave8", "d4/d36/namespacefl_a1a175139a4d8f986acdb0fd1782ae581.html#a1a175139a4d8f986acdb0fd1782ae581", null ],
     [ "fl::wave8Transpose_16", "d4/d36/namespacefl_a428be465fbb9564d7cf8e7badeb0ea99.html#a428be465fbb9564d7cf8e7badeb0ea99", null ],
     [ "fl::wave8Transpose_16", "d4/d36/namespacefl_a6d3dde4b59c470212560afa6b6d7a712.html#a6d3dde4b59c470212560afa6b6d7a712", null ],
     [ "fl::wave8Transpose_16_bf1", "d4/d36/namespacefl_a1df4d9fcc9dfd67233d3020ef1507dd7.html#a1df4d9fcc9dfd67233d3020ef1507dd7", null ],

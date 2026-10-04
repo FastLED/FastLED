@@ -1,0 +1,9 @@
+<map id="fl::detail::BusKeepAliveImpl::odr_use" name="fl::detail::BusKeepAliveImpl::odr_use">
+<area shape="rect" id="Node000001" title=" " alt="" coords="372,23,544,63"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a617e5ddee673007123ec891a051965fc.html#a617e5ddee673007123ec891a051965fc" title=" " alt="" coords="197,31,324,56"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="358,46,324,46,324,41,358,41"/>
+<area shape="rect" id="Node000003" href="$dd/dbb/class_c_fast_l_e_d_ab1fc0970c9280020e713ae86c7539374.html#ab1fc0970c9280020e713ae86c7539374" title="Add an SPI controller on a selected ESP&#45;IDF host." alt="" coords="5,5,149,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="183,35,149,31,150,25,184,30"/>
+<area shape="rect" id="Node000004" href="$dd/dbb/class_c_fast_l_e_d_ac6910f4593686faa50bfd942056af78a.html#ac6910f4593686faa50bfd942056af78a" title="Add an SPI based CLEDController instance to the world (legacy path)." alt="" coords="5,55,149,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="184,56,150,61,149,55,183,51"/>
+</map>

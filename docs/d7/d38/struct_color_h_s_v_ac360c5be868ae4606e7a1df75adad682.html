@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -119,10 +119,10 @@ $(function(){initNavTree('d7/d38/struct_color_h_s_v_ac360c5be868ae4606e7a1df75ad
 <div class="fragment"><div class="line"><span class="lineno">  102</span>                                         {</div>
 <div class="line"><span class="lineno">  103</span>  <span class="keyword">typedef</span> <span class="keywordtype">double</span> FloatT;</div>
 <div class="line"><span class="lineno">  104</span>  FloatT r = (FloatT) rgb.<a class="code hl_variable" href="../../de/d12/struct_color3i_ac82e943def8ec0943db1a50607fb6f38.html#ac82e943def8ec0943db1a50607fb6f38">r_</a>/255.f;</div>
-<div class="line"><span class="lineno">  105</span>  FloatT g = (FloatT) rgb.<a class="code hl_variable" href="../../de/d12/struct_color3i_aa31bd0c7fdeb7977ba1a3d6a349b1779.html#aa31bd0c7fdeb7977ba1a3d6a349b1779">g_</a>/255.f;</div>
+<div class="line"><span class="lineno">  105</span>  FloatT <a class="code hl_variable" href="../../d4/d36/namespacefl_abb8ff746cce2b11a90718afba1cfec1b.html#abb8ff746cce2b11a90718afba1cfec1b">g</a> = (FloatT) rgb.<a class="code hl_variable" href="../../de/d12/struct_color3i_aa31bd0c7fdeb7977ba1a3d6a349b1779.html#aa31bd0c7fdeb7977ba1a3d6a349b1779">g_</a>/255.f;</div>
 <div class="line"><span class="lineno">  106</span>  FloatT b = (FloatT) rgb.<a class="code hl_variable" href="../../de/d12/struct_color3i_a22493bbbe5034f47aefa051e2236a8b0.html#a22493bbbe5034f47aefa051e2236a8b0">b_</a>/255.f;</div>
-<div class="line"><span class="lineno">  107</span>  FloatT max_rgb = <a class="code hl_function" href="../../d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909">fl::max</a>(r, <a class="code hl_function" href="../../d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909">fl::max</a>(g, b));</div>
-<div class="line"><span class="lineno">  108</span>  FloatT min_rgb = <a class="code hl_function" href="../../d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb">fl::min</a>(r, <a class="code hl_function" href="../../d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb">fl::min</a>(g, b));</div>
+<div class="line"><span class="lineno">  107</span>  FloatT max_rgb = <a class="code hl_function" href="../../d4/d36/namespacefl_a07c69292ef50aa1083046faff1c52ead.html#a07c69292ef50aa1083046faff1c52ead">fl::max</a>(r, <a class="code hl_function" href="../../d4/d36/namespacefl_a07c69292ef50aa1083046faff1c52ead.html#a07c69292ef50aa1083046faff1c52ead">fl::max</a>(g, b));</div>
+<div class="line"><span class="lineno">  108</span>  FloatT min_rgb = <a class="code hl_function" href="../../d4/d36/namespacefl_a2fdabb91a1f100dec8da21e4306aba05.html#a2fdabb91a1f100dec8da21e4306aba05">fl::min</a>(r, <a class="code hl_function" href="../../d4/d36/namespacefl_a2fdabb91a1f100dec8da21e4306aba05.html#a2fdabb91a1f100dec8da21e4306aba05">fl::min</a>(g, b));</div>
 <div class="line"><span class="lineno">  109</span>  <a class="code hl_variable" href="../../d7/d38/struct_color_h_s_v_a0096a4003cbc683bc1ed7e675c5c029b.html#a0096a4003cbc683bc1ed7e675c5c029b">v_</a> = max_rgb;</div>
 <div class="line"><span class="lineno">  110</span> </div>
 <div class="line"><span class="lineno">  111</span>  FloatT d = max_rgb - min_rgb;</div>
@@ -132,17 +132,18 @@ $(function(){initNavTree('d7/d38/struct_color_h_s_v_ac360c5be868ae4606e7a1df75ad
 <div class="line"><span class="lineno">  115</span>    <a class="code hl_variable" href="../../d7/d38/struct_color_h_s_v_a17055787fae5ee13e283e4c47072f217.html#a17055787fae5ee13e283e4c47072f217">h_</a> = 0; <span class="comment">// achromatic</span></div>
 <div class="line"><span class="lineno">  116</span>  } <span class="keywordflow">else</span> {</div>
 <div class="line"><span class="lineno">  117</span>    <span class="keywordflow">if</span> (max_rgb == r) {</div>
-<div class="line"><span class="lineno">  118</span>      <a class="code hl_variable" href="../../d7/d38/struct_color_h_s_v_a17055787fae5ee13e283e4c47072f217.html#a17055787fae5ee13e283e4c47072f217">h_</a> = (g - b) / d + (g &lt; b ? 6 : 0);</div>
+<div class="line"><span class="lineno">  118</span>      <a class="code hl_variable" href="../../d7/d38/struct_color_h_s_v_a17055787fae5ee13e283e4c47072f217.html#a17055787fae5ee13e283e4c47072f217">h_</a> = (<a class="code hl_variable" href="../../d4/d36/namespacefl_abb8ff746cce2b11a90718afba1cfec1b.html#abb8ff746cce2b11a90718afba1cfec1b">g</a> - b) / d + (g &lt; b ? 6 : 0);</div>
 <div class="line"><span class="lineno">  119</span>    } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (max_rgb == g) {</div>
 <div class="line"><span class="lineno">  120</span>      <a class="code hl_variable" href="../../d7/d38/struct_color_h_s_v_a17055787fae5ee13e283e4c47072f217.html#a17055787fae5ee13e283e4c47072f217">h_</a> = (b - r) / d + 2;</div>
 <div class="line"><span class="lineno">  121</span>    } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (max_rgb == b) {</div>
-<div class="line"><span class="lineno">  122</span>      <a class="code hl_variable" href="../../d7/d38/struct_color_h_s_v_a17055787fae5ee13e283e4c47072f217.html#a17055787fae5ee13e283e4c47072f217">h_</a> = (r - g) / d + 4;</div>
+<div class="line"><span class="lineno">  122</span>      <a class="code hl_variable" href="../../d7/d38/struct_color_h_s_v_a17055787fae5ee13e283e4c47072f217.html#a17055787fae5ee13e283e4c47072f217">h_</a> = (r - <a class="code hl_variable" href="../../d4/d36/namespacefl_abb8ff746cce2b11a90718afba1cfec1b.html#abb8ff746cce2b11a90718afba1cfec1b">g</a>) / d + 4;</div>
 <div class="line"><span class="lineno">  123</span>    }</div>
 <div class="line"><span class="lineno">  124</span>    <a class="code hl_variable" href="../../d7/d38/struct_color_h_s_v_a17055787fae5ee13e283e4c47072f217.html#a17055787fae5ee13e283e4c47072f217">h_</a> /= 6;</div>
 <div class="line"><span class="lineno">  125</span>  }</div>
 <div class="line"><span class="lineno">  126</span>}</div>
-<div class="ttc" id="anamespacefl_a0356f07fb7a8f25752385fd8208b47fb_html_a0356f07fb7a8f25752385fd8208b47fb"><div class="ttname"><a href="../../d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb">fl::min</a></div><div class="ttdeci">FL_DISABLE_WARNING_PUSH U constexpr common_type_t&lt; T, U &gt; min(T a, U b) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00071">math.h:71</a></div></div>
-<div class="ttc" id="anamespacefl_a19ba0dae8249e0cf164136846f85e909_html_a19ba0dae8249e0cf164136846f85e909"><div class="ttname"><a href="../../d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909">fl::max</a></div><div class="ttdeci">constexpr common_type_t&lt; T, U &gt; max(T a, U b) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00075">math.h:75</a></div></div>
+<div class="ttc" id="anamespacefl_a07c69292ef50aa1083046faff1c52ead_html_a07c69292ef50aa1083046faff1c52ead"><div class="ttname"><a href="../../d4/d36/namespacefl_a07c69292ef50aa1083046faff1c52ead.html#a07c69292ef50aa1083046faff1c52ead">fl::max</a></div><div class="ttdeci">constexpr common_type_t&lt; T, U &gt; max(T a, U b) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00075">math.h:75</a></div></div>
+<div class="ttc" id="anamespacefl_a2fdabb91a1f100dec8da21e4306aba05_html_a2fdabb91a1f100dec8da21e4306aba05"><div class="ttname"><a href="../../d4/d36/namespacefl_a2fdabb91a1f100dec8da21e4306aba05.html#a2fdabb91a1f100dec8da21e4306aba05">fl::min</a></div><div class="ttdeci">FL_DISABLE_WARNING_PUSH U constexpr common_type_t&lt; T, U &gt; min(T a, U b) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00071">math.h:71</a></div></div>
+<div class="ttc" id="anamespacefl_abb8ff746cce2b11a90718afba1cfec1b_html_abb8ff746cce2b11a90718afba1cfec1b"><div class="ttname"><a href="../../d4/d36/namespacefl_abb8ff746cce2b11a90718afba1cfec1b.html#abb8ff746cce2b11a90718afba1cfec1b">fl::g</a></div><div class="ttdeci">InputGamut g</div><div class="ttdef"><b>Definition</b> <a href="../../df/df8/fl_2gfx_2rgbw_8h_source.html#l00124">rgbw.h:124</a></div></div>
 <div class="ttc" id="astruct_color3i_a22493bbbe5034f47aefa051e2236a8b0_html_a22493bbbe5034f47aefa051e2236a8b0"><div class="ttname"><a href="../../de/d12/struct_color3i_a22493bbbe5034f47aefa051e2236a8b0.html#a22493bbbe5034f47aefa051e2236a8b0">Color3i::b_</a></div><div class="ttdeci">uint8_t b_</div><div class="ttdef"><b>Definition</b> <a href="../../de/de1/examples_2_luminescent_grand_2shared_2color_8h_source.html#l00056">color.h:56</a></div></div>
 <div class="ttc" id="astruct_color3i_aa31bd0c7fdeb7977ba1a3d6a349b1779_html_aa31bd0c7fdeb7977ba1a3d6a349b1779"><div class="ttname"><a href="../../de/d12/struct_color3i_aa31bd0c7fdeb7977ba1a3d6a349b1779.html#aa31bd0c7fdeb7977ba1a3d6a349b1779">Color3i::g_</a></div><div class="ttdeci">uint8_t g_</div><div class="ttdef"><b>Definition</b> <a href="../../de/de1/examples_2_luminescent_grand_2shared_2color_8h_source.html#l00056">color.h:56</a></div></div>
 <div class="ttc" id="astruct_color3i_ac82e943def8ec0943db1a50607fb6f38_html_ac82e943def8ec0943db1a50607fb6f38"><div class="ttname"><a href="../../de/d12/struct_color3i_ac82e943def8ec0943db1a50607fb6f38.html#ac82e943def8ec0943db1a50607fb6f38">Color3i::r_</a></div><div class="ttdeci">uint8_t r_</div><div class="ttdef"><b>Definition</b> <a href="../../de/de1/examples_2_luminescent_grand_2shared_2color_8h_source.html#l00056">color.h:56</a></div></div>
@@ -177,7 +178,7 @@ $(function(){initNavTree('d7/d38/struct_color_h_s_v_ac360c5be868ae4606e7a1df75ad
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d7/d38/struct_color_h_s_v.html">ColorHSV</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:03 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -1,0 +1,9 @@
+<map id="fl::net::ble::BleNotifyQueue::next" name="fl::net::ble::BleNotifyQueue::next">
+<area shape="rect" id="Node000001" title=" " alt="" coords="251,69,448,109"/>
+<area shape="rect" id="Node000002" href="$d5/daa/classfl_1_1net_1_1ble_1_1_ble_notify_queue_a4142951cbf46fb623138406547a55994.html#a4142951cbf46fb623138406547a55994" title="Record that sent bytes were accepted by the stack." alt="" coords="5,5,203,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="258,68,180,48,182,43,259,63"/>
+<area shape="rect" id="Node000003" href="$d5/daa/classfl_1_1net_1_1ble_1_1_ble_notify_queue_a0cfc166127ab44f93d59029114658772.html#a0cfc166127ab44f93d59029114658772" title="Drop the in&#45;flight payload and move to the next one." alt="" coords="5,69,203,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="237,92,203,92,203,87,237,87"/>
+<area shape="rect" id="Node000004" href="$d5/daa/classfl_1_1net_1_1ble_1_1_ble_notify_queue_a08b21d527d3038c9a90fdb72ae842b0f.html#a08b21d527d3038c9a90fdb72ae842b0f" title="Append a complete payload." alt="" coords="5,133,203,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="259,115,182,136,180,131,258,110"/>
+</map>

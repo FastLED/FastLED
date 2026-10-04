@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -115,31 +115,31 @@ $(function(){initNavTree('dc/d4b/classfl_1_1istream__real_a5b4127ad810823bd7722f
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d4/d99/istream_8cpp_8hpp_source.html#l00369">369</a> of file <a class="el" href="../../d4/d99/istream_8cpp_8hpp_source.html">istream.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  369</span>                      {</div>
-<div class="line"><span class="lineno">  370</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../dc/d4b/classfl_1_1istream__real_a312c8696be016d5571314a1cbf63b9c7.html#a312c8696be016d5571314a1cbf63b9c7">mPos</a> &gt;= <a class="code hl_variable" href="../../dc/d4b/classfl_1_1istream__real_a2af0bf93c37f54366f4b7abc33520632.html#a2af0bf93c37f54366f4b7abc33520632">mBufferLen</a> &amp;&amp; <a class="code hl_function" href="../../d4/d36/namespacefl_a01186a22a1055c583d5408c116c84ffa.html#a01186a22a1055c583d5408c116c84ffa">fl::available</a>() &gt; 0) {</div>
-<div class="line"><span class="lineno">  371</span>        <span class="keywordflow">if</span> (!<a class="code hl_function" href="../../dc/d4b/classfl_1_1istream__real_ab70ff31d4c958447b46066a17a55d047.html#ab70ff31d4c958447b46066a17a55d047">readLine</a>()) {</div>
-<div class="line"><span class="lineno">  372</span>            <span class="keywordflow">return</span> -1;</div>
-<div class="line"><span class="lineno">  373</span>        }</div>
-<div class="line"><span class="lineno">  374</span>    }</div>
-<div class="line"><span class="lineno">  375</span>    </div>
-<div class="line"><span class="lineno">  376</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../dc/d4b/classfl_1_1istream__real_a312c8696be016d5571314a1cbf63b9c7.html#a312c8696be016d5571314a1cbf63b9c7">mPos</a> &lt; <a class="code hl_variable" href="../../dc/d4b/classfl_1_1istream__real_a2af0bf93c37f54366f4b7abc33520632.html#a2af0bf93c37f54366f4b7abc33520632">mBufferLen</a>) {</div>
-<div class="line"><span class="lineno">  377</span>        <span class="keywordflow">return</span> <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(<span class="keyword">static_cast&lt;</span><span class="keywordtype">unsigned</span> <span class="keywordtype">char</span><span class="keyword">&gt;</span>(<a class="code hl_variable" href="../../dc/d4b/classfl_1_1istream__real_a394682cc4c8762dfee64c2ff456c62c3.html#a394682cc4c8762dfee64c2ff456c62c3">mBuffer</a>[<a class="code hl_variable" href="../../dc/d4b/classfl_1_1istream__real_a312c8696be016d5571314a1cbf63b9c7.html#a312c8696be016d5571314a1cbf63b9c7">mPos</a>++]));</div>
-<div class="line"><span class="lineno">  378</span>    }</div>
-<div class="line"><span class="lineno">  379</span>    </div>
-<div class="line"><span class="lineno">  380</span>    <span class="comment">// Try to read directly from input if buffer is empty</span></div>
-<div class="line"><span class="lineno">  381</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a18e7608a302c3628c24710b27480641b.html#a18e7608a302c3628c24710b27480641b">fl::read</a>();</div>
-<div class="line"><span class="lineno">  382</span>}</div>
-<div class="ttc" id="aclassfl_1_1istream__real_a2af0bf93c37f54366f4b7abc33520632_html_a2af0bf93c37f54366f4b7abc33520632"><div class="ttname"><a href="../../dc/d4b/classfl_1_1istream__real_a2af0bf93c37f54366f4b7abc33520632.html#a2af0bf93c37f54366f4b7abc33520632">fl::istream_real::mBufferLen</a></div><div class="ttdeci">fl::size mBufferLen</div><div class="ttdef"><b>Definition</b> <a href="../../db/dc9/istream_8h_source.html#l00026">istream.h:26</a></div></div>
-<div class="ttc" id="aclassfl_1_1istream__real_a312c8696be016d5571314a1cbf63b9c7_html_a312c8696be016d5571314a1cbf63b9c7"><div class="ttname"><a href="../../dc/d4b/classfl_1_1istream__real_a312c8696be016d5571314a1cbf63b9c7.html#a312c8696be016d5571314a1cbf63b9c7">fl::istream_real::mPos</a></div><div class="ttdeci">fl::size mPos</div><div class="ttdef"><b>Definition</b> <a href="../../db/dc9/istream_8h_source.html#l00027">istream.h:27</a></div></div>
-<div class="ttc" id="aclassfl_1_1istream__real_a394682cc4c8762dfee64c2ff456c62c3_html_a394682cc4c8762dfee64c2ff456c62c3"><div class="ttname"><a href="../../dc/d4b/classfl_1_1istream__real_a394682cc4c8762dfee64c2ff456c62c3.html#a394682cc4c8762dfee64c2ff456c62c3">fl::istream_real::mBuffer</a></div><div class="ttdeci">char mBuffer[BUFFER_SIZE]</div><div class="ttdef"><b>Definition</b> <a href="../../db/dc9/istream_8h_source.html#l00025">istream.h:25</a></div></div>
-<div class="ttc" id="aclassfl_1_1istream__real_ab70ff31d4c958447b46066a17a55d047_html_ab70ff31d4c958447b46066a17a55d047"><div class="ttname"><a href="../../dc/d4b/classfl_1_1istream__real_ab70ff31d4c958447b46066a17a55d047.html#ab70ff31d4c958447b46066a17a55d047">fl::istream_real::readLine</a></div><div class="ttdeci">bool readLine()</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d99/istream_8cpp_8hpp_source.html#l00136">istream.cpp.hpp:136</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d4/d99/istream_8cpp_8hpp_source.html#l00370">370</a> of file <a class="el" href="../../d4/d99/istream_8cpp_8hpp_source.html">istream.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  370</span>                      {</div>
+<div class="line"><span class="lineno">  371</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../dc/d4b/classfl_1_1istream__real_a312c8696be016d5571314a1cbf63b9c7.html#a312c8696be016d5571314a1cbf63b9c7">mPos</a> &gt;= <a class="code hl_variable" href="../../dc/d4b/classfl_1_1istream__real_a2af0bf93c37f54366f4b7abc33520632.html#a2af0bf93c37f54366f4b7abc33520632">mBufferLen</a> &amp;&amp; <a class="code hl_function" href="../../d4/d36/namespacefl_a01186a22a1055c583d5408c116c84ffa.html#a01186a22a1055c583d5408c116c84ffa">fl::available</a>() &gt; 0) {</div>
+<div class="line"><span class="lineno">  372</span>        <span class="keywordflow">if</span> (!<a class="code hl_function" href="../../dc/d4b/classfl_1_1istream__real_ab70ff31d4c958447b46066a17a55d047.html#ab70ff31d4c958447b46066a17a55d047">readLine</a>()) {</div>
+<div class="line"><span class="lineno">  373</span>            <span class="keywordflow">return</span> -1;</div>
+<div class="line"><span class="lineno">  374</span>        }</div>
+<div class="line"><span class="lineno">  375</span>    }</div>
+<div class="line"><span class="lineno">  376</span>    </div>
+<div class="line"><span class="lineno">  377</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../dc/d4b/classfl_1_1istream__real_a312c8696be016d5571314a1cbf63b9c7.html#a312c8696be016d5571314a1cbf63b9c7">mPos</a> &lt; <a class="code hl_variable" href="../../dc/d4b/classfl_1_1istream__real_a2af0bf93c37f54366f4b7abc33520632.html#a2af0bf93c37f54366f4b7abc33520632">mBufferLen</a>) {</div>
+<div class="line"><span class="lineno">  378</span>        <span class="keywordflow">return</span> <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(<span class="keyword">static_cast&lt;</span><span class="keywordtype">unsigned</span> <span class="keywordtype">char</span><span class="keyword">&gt;</span>(<a class="code hl_variable" href="../../dc/d4b/classfl_1_1istream__real_a394682cc4c8762dfee64c2ff456c62c3.html#a394682cc4c8762dfee64c2ff456c62c3">mBuffer</a>[<a class="code hl_variable" href="../../dc/d4b/classfl_1_1istream__real_a312c8696be016d5571314a1cbf63b9c7.html#a312c8696be016d5571314a1cbf63b9c7">mPos</a>++]));</div>
+<div class="line"><span class="lineno">  379</span>    }</div>
+<div class="line"><span class="lineno">  380</span>    </div>
+<div class="line"><span class="lineno">  381</span>    <span class="comment">// Try to read directly from input if buffer is empty</span></div>
+<div class="line"><span class="lineno">  382</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a18e7608a302c3628c24710b27480641b.html#a18e7608a302c3628c24710b27480641b">fl::read</a>();</div>
+<div class="line"><span class="lineno">  383</span>}</div>
+<div class="ttc" id="aclassfl_1_1istream__real_a2af0bf93c37f54366f4b7abc33520632_html_a2af0bf93c37f54366f4b7abc33520632"><div class="ttname"><a href="../../dc/d4b/classfl_1_1istream__real_a2af0bf93c37f54366f4b7abc33520632.html#a2af0bf93c37f54366f4b7abc33520632">fl::istream_real::mBufferLen</a></div><div class="ttdeci">fl::size mBufferLen</div><div class="ttdef"><b>Definition</b> <a href="../../db/dc9/istream_8h_source.html#l00027">istream.h:27</a></div></div>
+<div class="ttc" id="aclassfl_1_1istream__real_a312c8696be016d5571314a1cbf63b9c7_html_a312c8696be016d5571314a1cbf63b9c7"><div class="ttname"><a href="../../dc/d4b/classfl_1_1istream__real_a312c8696be016d5571314a1cbf63b9c7.html#a312c8696be016d5571314a1cbf63b9c7">fl::istream_real::mPos</a></div><div class="ttdeci">fl::size mPos</div><div class="ttdef"><b>Definition</b> <a href="../../db/dc9/istream_8h_source.html#l00028">istream.h:28</a></div></div>
+<div class="ttc" id="aclassfl_1_1istream__real_a394682cc4c8762dfee64c2ff456c62c3_html_a394682cc4c8762dfee64c2ff456c62c3"><div class="ttname"><a href="../../dc/d4b/classfl_1_1istream__real_a394682cc4c8762dfee64c2ff456c62c3.html#a394682cc4c8762dfee64c2ff456c62c3">fl::istream_real::mBuffer</a></div><div class="ttdeci">char mBuffer[BUFFER_SIZE]</div><div class="ttdef"><b>Definition</b> <a href="../../db/dc9/istream_8h_source.html#l00026">istream.h:26</a></div></div>
+<div class="ttc" id="aclassfl_1_1istream__real_ab70ff31d4c958447b46066a17a55d047_html_ab70ff31d4c958447b46066a17a55d047"><div class="ttname"><a href="../../dc/d4b/classfl_1_1istream__real_ab70ff31d4c958447b46066a17a55d047.html#ab70ff31d4c958447b46066a17a55d047">fl::istream_real::readLine</a></div><div class="ttdeci">bool readLine()</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d99/istream_8cpp_8hpp_source.html#l00137">istream.cpp.hpp:137</a></div></div>
 <div class="ttc" id="anamespacefl_a01186a22a1055c583d5408c116c84ffa_html_a01186a22a1055c583d5408c116c84ffa"><div class="ttname"><a href="../../d4/d36/namespacefl_a01186a22a1055c583d5408c116c84ffa.html#a01186a22a1055c583d5408c116c84ffa">fl::available</a></div><div class="ttdeci">int available()</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d7a/cstdio_8cpp_8hpp_source.html#l00111">cstdio.cpp.hpp:111</a></div></div>
 <div class="ttc" id="anamespacefl_a18e7608a302c3628c24710b27480641b_html_a18e7608a302c3628c24710b27480641b"><div class="ttname"><a href="../../d4/d36/namespacefl_a18e7608a302c3628c24710b27480641b.html#a18e7608a302c3628c24710b27480641b">fl::read</a></div><div class="ttdeci">int read()</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d7a/cstdio_8cpp_8hpp_source.html#l00127">cstdio.cpp.hpp:127</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../dd/d7a/cstdio_8cpp_8hpp_source.html#l00111">fl::available()</a>, <a class="el" href="../../db/dc9/istream_8h_source.html#l00025">mBuffer</a>, <a class="el" href="../../db/dc9/istream_8h_source.html#l00026">mBufferLen</a>, <a class="el" href="../../db/dc9/istream_8h_source.html#l00027">mPos</a>, <a class="el" href="../../dd/d7a/cstdio_8cpp_8hpp_source.html#l00127">fl::read()</a>, and <a class="el" href="../../d4/d99/istream_8cpp_8hpp_source.html#l00136">readLine()</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d7a/cstdio_8cpp_8hpp_source.html#l00111">fl::available()</a>, <a class="el" href="../../db/dc9/istream_8h_source.html#l00026">mBuffer</a>, <a class="el" href="../../db/dc9/istream_8h_source.html#l00027">mBufferLen</a>, <a class="el" href="../../db/dc9/istream_8h_source.html#l00028">mPos</a>, <a class="el" href="../../dd/d7a/cstdio_8cpp_8hpp_source.html#l00127">fl::read()</a>, and <a class="el" href="../../d4/d99/istream_8cpp_8hpp_source.html#l00137">readLine()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../db/dc9/istream_8h_source.html#l00247">fl::istream::get()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../db/dc9/istream_8h_source.html#l00248">fl::istream::get()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -164,7 +164,7 @@ $(function(){initNavTree('dc/d4b/classfl_1_1istream__real_a5b4127ad810823bd7722f
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../dc/d4b/classfl_1_1istream__real.html">istream_real</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:05 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:09 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

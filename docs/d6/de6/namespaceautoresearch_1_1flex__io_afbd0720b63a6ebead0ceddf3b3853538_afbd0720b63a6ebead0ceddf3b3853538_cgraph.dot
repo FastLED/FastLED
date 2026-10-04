@@ -1,0 +1,54 @@
+digraph "autoresearch::flex_io::buildDeviceInfo"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="autoresearch::flex\l_io::buildDeviceInfo",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Build the device-info JSON returned by the flexIoDeviceInfo RPC."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::json::array",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d40/classfl_1_1json_af90f2900d83afc831235728d14b6aa89.html#af90f2900d83afc831235728d14b6aa89",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::json::json",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d40/classfl_1_1json_a53d3876e579581337439bdede3c7dad6.html#a53d3876e579581337439bdede3c7dad6",tooltip=" "];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="autoresearch::flex\l_io::firstDriverName",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/de6/namespaceautoresearch_1_1flex__io_ad65d2d40462eb7994ada240ee44bf83b.html#ad65d2d40462eb7994ada240ee44bf83b",tooltip="Convenience — first non-empty driver name, or \"<none>\" if empty."];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::string::from_literal",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/db2/classfl_1_1string_af72684ed7d6b211b41ace065de0bcfe7.html#af72684ed7d6b211b41ace065de0bcfe7",tooltip=" "];
+  Node4 -> Node6 [id="edge5_Node000004_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="autoresearch::flex\l_io::registeredDriverNames",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/de6/namespaceautoresearch_1_1flex__io_a95988818b200e04cba93b8ab803eeed0.html#a95988818b200e04cba93b8ab803eeed0",tooltip="Return the list of registered driver names."];
+  Node6 -> Node7 [id="edge6_Node000006_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::channelManager",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d36/namespacefl_a1cc01267f6bdd7251959883412b11bbb.html#a1cc01267f6bdd7251959883412b11bbb",tooltip="Get the global ChannelManager singleton instance."];
+  Node6 -> Node16 [id="edge7_Node000006_Node000016",color="steelblue1",style="solid",tooltip=" "];
+  Node16 [id="Node000016",label="fl::vector::push_back",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d24/classfl_1_1vector_a82c3455c1a345460f95a0180c93b3fb0.html#a82c3455c1a345460f95a0180c93b3fb0",tooltip=" "];
+  Node1 -> Node5 [id="edge8_Node000001_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node17 [id="edge9_Node000001_Node000017",color="steelblue1",style="solid",tooltip=" "];
+  Node17 [id="Node000017",label="autoresearch::flex\l_io::idfVersion",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/de6/namespaceautoresearch_1_1flex__io_ab0047a84310704ed6daeccc397206bd9.html#ab0047a84310704ed6daeccc397206bd9",tooltip="ESP-IDF version string, or \"n/a\" on non-ESP32 targets."];
+  Node17 -> Node5 [id="edge10_Node000017_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node17 -> Node18 [id="edge11_Node000017_Node000018",color="steelblue1",style="solid",tooltip=" "];
+  Node18 [id="Node000018",label="fl::sstream::str",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d27/classfl_1_1sstream_a904115dfd2a7e462177b6409c9b842d6.html#a904115dfd2a7e462177b6409c9b842d6",tooltip=" "];
+  Node1 -> Node19 [id="edge12_Node000001_Node000019",color="steelblue1",style="solid",tooltip=" "];
+  Node19 [id="Node000019",label="fl::json::object",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d40/classfl_1_1json_ae7744bee3369b3debf7e30e4a4a18526.html#ae7744bee3369b3debf7e30e4a4a18526",tooltip=" "];
+  Node1 -> Node20 [id="edge13_Node000001_Node000020",color="steelblue1",style="solid",tooltip=" "];
+  Node20 [id="Node000020",label="fl::json::push_back",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d40/classfl_1_1json_a963c715e78b5508488bad0cea5203919.html#a963c715e78b5508488bad0cea5203919",tooltip=" "];
+  Node20 -> Node3 [id="edge14_Node000020_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node20 -> Node21 [id="edge15_Node000020_Node000021",color="steelblue1",style="solid",tooltip=" "];
+  Node21 [id="Node000021",label="fl::make_shared",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af",tooltip=" "];
+  Node20 -> Node22 [id="edge16_Node000020_Node000022",color="steelblue1",style="solid",tooltip=" "];
+  Node22 [id="Node000022",label="fl::move",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a0c8a67e528dcd96ee58216754a07a733.html#a0c8a67e528dcd96ee58216754a07a733",tooltip=" "];
+  Node20 -> Node23 [id="edge17_Node000020_Node000023",color="steelblue1",style="solid",tooltip=" "];
+  Node23 [id="Node000023",label="fl::json::value",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d40/classfl_1_1json_a30b29298cde88f21011d0588729d4797.html#a30b29298cde88f21011d0588729d4797",tooltip=" "];
+  Node23 -> Node24 [id="edge18_Node000023_Node000024",color="steelblue1",style="solid",tooltip=" "];
+  Node24 [id="Node000024",label="fl::json::get_default\l_value",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d40/classfl_1_1json_a429a58af2f793adfefd3d900b9468307.html#a429a58af2f793adfefd3d900b9468307",tooltip=" "];
+  Node23 -> Node25 [id="edge19_Node000023_Node000025",color="steelblue1",style="solid",tooltip=" "];
+  Node25 [id="Node000025",label="fl::json::try_as",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$de/d40/classfl_1_1json_a769328e7906ef56e498609120b37f385.html#a769328e7906ef56e498609120b37f385",tooltip=" "];
+  Node1 -> Node6 [id="edge20_Node000001_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node28 [id="edge21_Node000001_Node000028",color="steelblue1",style="solid",tooltip=" "];
+  Node28 [id="Node000028",label="fl::json::set",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d40/classfl_1_1json_a2973a868c9dc87ee871bc400414920c9.html#a2973a868c9dc87ee871bc400414920c9",tooltip=" "];
+  Node28 -> Node3 [id="edge22_Node000028_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node28 -> Node21 [id="edge23_Node000028_Node000021",color="steelblue1",style="solid",tooltip=" "];
+  Node28 -> Node23 [id="edge24_Node000028_Node000023",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node29 [id="edge25_Node000001_Node000029",color="steelblue1",style="solid",tooltip=" "];
+  Node29 [id="Node000029",label="autoresearch::flex\l_io::siliconName",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/de6/namespaceautoresearch_1_1flex__io_afdd631fa4430fe8538a015a4fb499b71.html#afdd631fa4430fe8538a015a4fb499b71",tooltip="Platform identification string derived from build-time macros."];
+  Node29 -> Node5 [id="edge26_Node000029_Node000005",color="steelblue1",style="solid",tooltip=" "];
+}

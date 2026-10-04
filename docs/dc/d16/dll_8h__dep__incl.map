@@ -1,8 +1,8 @@
 <map id="fl/system/dll.h" name="fl/system/dll.h">
 <area shape="rect" id="Node000001" title="FastLED dynamic library interface &#45; lightweight header for external callers." alt="" coords="724,5,839,31"/>
-<area shape="rect" id="Node000002" href="$db/d97/_fast_l_e_d_8h.html" title="central include file for FastLED, defines the CFastLED class/object" alt="" coords="215,233,300,258"/>
+<area shape="rect" id="Node000002" href="$d6/d64/fastled_8h.html" title="central include file for FastLED, defines the CFastLED class/object" alt="" coords="215,233,300,258"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="710,24,551,33,356,55,261,72,177,94,110,121,85,137,66,154,57,171,61,186,75,199,97,210,156,227,215,237,214,242,155,232,95,215,72,203,57,188,52,171,62,150,81,132,107,116,175,89,260,67,355,50,550,28,710,19"/>
-<area shape="rect" id="Node000006" href="$d7/dc2/fl_2system_2_fast_l_e_d_8h.html" title="Internal FastLED header for implementation files." alt="" coords="1505,79,1647,104"/>
+<area shape="rect" id="Node000006" href="$d0/d69/fl_2system_2fastled_8h.html" title="Internal FastLED header for implementation files." alt="" coords="1505,79,1647,104"/>
 <area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="853,23,1505,81,1504,86,852,28"/>
 <area shape="rect" id="Node000003" href="$d7/de5/_fast_l_e_d_8cpp_8hpp.html" title=" " alt="" coords="836,313,964,339"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="315,253,379,263,601,287,823,311,836,312,836,318,822,316,600,292,378,268,314,259"/>

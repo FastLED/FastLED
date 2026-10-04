@@ -1,0 +1,33 @@
+digraph "fl::delaycycles"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::delaycycles",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Forward declaration of delaycycles template."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::delaycycles\<-1 \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a1db30525977bd23ef43e4fffe6b8d9b1.html#a1db30525977bd23ef43e4fffe6b8d9b1",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::delaycycles\<-10 \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a524c91eab9b2b34f0ff9e9110df761c2.html#a524c91eab9b2b34f0ff9e9110df761c2",tooltip=" "];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::delaycycles\<-2 \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a1b70e3aa8391e8205d6409715136ff75.html#a1b70e3aa8391e8205d6409715136ff75",tooltip=" "];
+  Node1 -> Node5 [id="edge4_Node000001_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::delaycycles\<-3 \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_af150ec7cd55da4e9e28cdf49fd114c54.html#af150ec7cd55da4e9e28cdf49fd114c54",tooltip=" "];
+  Node1 -> Node6 [id="edge5_Node000001_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::delaycycles\<-4 \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a3ced0eb71c1543c1a667ce92b141ed1e.html#a3ced0eb71c1543c1a667ce92b141ed1e",tooltip=" "];
+  Node1 -> Node7 [id="edge6_Node000001_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::delaycycles\<-5 \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_af9fcf72aa6dc256d45e770d113c49d06.html#af9fcf72aa6dc256d45e770d113c49d06",tooltip=" "];
+  Node1 -> Node8 [id="edge7_Node000001_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl::delaycycles\<-6 \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a5704d428cad5076b046a3ec9b4733971.html#a5704d428cad5076b046a3ec9b4733971",tooltip=" "];
+  Node1 -> Node9 [id="edge8_Node000001_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="fl::delaycycles\<-7 \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_afbf4b1f4edd64d6d0c2f11bda3f81ab0.html#afbf4b1f4edd64d6d0c2f11bda3f81ab0",tooltip=" "];
+  Node1 -> Node10 [id="edge9_Node000001_Node000010",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="fl::delaycycles\<-8 \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a8e3dd04d6ac873f5bac22a4dc7fd1f61.html#a8e3dd04d6ac873f5bac22a4dc7fd1f61",tooltip=" "];
+  Node1 -> Node11 [id="edge10_Node000001_Node000011",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="fl::delaycycles\<-9 \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a2fc46aac5545ccee46b9fb326e5a2eaf.html#a2fc46aac5545ccee46b9fb326e5a2eaf",tooltip=" "];
+  Node1 -> Node12 [id="edge11_Node000001_Node000012",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node12 [id="Node000012",label="fl::delaycycles_min1",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a6fd73d7c33c90f24b86719dd4b836268.html#a6fd73d7c33c90f24b86719dd4b836268",tooltip="A variant of delaycycles that will always delay at least one cycle."];
+  Node12 -> Node12 [id="edge12_Node000012_Node000012",dir="back",color="steelblue1",style="solid",tooltip=" "];
+}

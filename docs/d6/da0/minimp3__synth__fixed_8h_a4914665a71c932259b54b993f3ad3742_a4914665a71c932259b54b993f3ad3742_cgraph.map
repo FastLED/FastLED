@@ -1,0 +1,12 @@
+<map id="mp3d_synth_granule" name="mp3d_synth_granule">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,31,164,56"/>
+<area shape="rect" id="Node000002" href="$d6/da0/minimp3__synth__fixed_8h_a19a9112858545a33a12a5ebc5b35bb1b.html#a19a9112858545a33a12a5ebc5b35bb1b" title=" " alt="" coords="212,5,320,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="164,30,198,25,198,30,165,35"/>
+<area shape="rect" id="Node000003" href="$d6/da0/minimp3__synth__fixed_8h_a5e8c40ad20d11ebc9c96105d4fbae0f6.html#a5e8c40ad20d11ebc9c96105d4fbae0f6" title=" " alt="" coords="215,55,317,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="165,51,201,56,201,61,164,57"/>
+<area shape="rect" id="Node000004" href="$d6/da0/minimp3__synth__fixed_8h_ae2e45da3974839a55352e86204519654.html#ae2e45da3974839a55352e86204519654" title=" " alt="" coords="551,55,685,80"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="317,65,537,65,537,70,317,70"/>
+<area shape="rect" id="Node000005" href="$d6/da0/minimp3__synth__fixed_8h_aa984adb924d02fb8553fc60b937c4a8b.html#aa984adb924d02fb8553fc60b937c4a8b" title=" " alt="" coords="368,80,503,105"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="318,72,355,78,354,83,317,78"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="502,81,536,76,537,81,503,86"/>
+</map>

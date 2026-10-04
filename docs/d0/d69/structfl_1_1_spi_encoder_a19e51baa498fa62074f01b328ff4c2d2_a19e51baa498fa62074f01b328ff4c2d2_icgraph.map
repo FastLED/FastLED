@@ -1,0 +1,9 @@
+<map id="fl::SpiEncoder::sm16716" name="fl::SpiEncoder::sm16716">
+<area shape="rect" id="Node000001" title="Create SM16716 encoder configuration." alt="" coords="508,31,687,56"/>
+<area shape="rect" id="Node000002" href="$d0/d69/structfl_1_1_spi_encoder_a70ab533d731ab69cc043b02be20473c8.html#a70ab533d731ab69cc043b02be20473c8" title="Look up the default SpiEncoder for a given chipset." alt="" coords="271,23,460,63"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="495,46,460,46,460,41,495,41"/>
+<area shape="rect" id="Node000003" href="$dd/dbb/class_c_fast_l_e_d_a4fb94311febea463f730cd5f85f0de0f.html#a4fb94311febea463f730cd5f85f0de0f" title="Add an SPI controller with an explicit ESP&#45;IDF SPI host." alt="" coords="5,5,223,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="257,35,222,32,223,26,257,30"/>
+<area shape="rect" id="Node000004" href="$dd/dbb/class_c_fast_l_e_d_a7a6a0bd952643368315f254c0db8cd64.html#a7a6a0bd952643368315f254c0db8cd64" title="Add an SPI based CLEDController via Channel API." alt="" coords="5,55,223,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="257,56,223,60,222,54,256,51"/>
+</map>

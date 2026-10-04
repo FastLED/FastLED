@@ -1,0 +1,14 @@
+<map id="fl::third_party::nsgif__colour_table_decode" name="fl::third_party::nsgif__colour_table_decode">
+<area shape="rect" id="Node000001" title="Extract a GIF colour table into a LibNSGIF colour table buffer." alt="" coords="821,65,992,105"/>
+<area shape="rect" id="Node000002" href="$d1/d86/namespacefl_1_1third__party_af0e6caee94b8038dc36959de5ae22f41.html#af0e6caee94b8038dc36959de5ae22f41" title="Extract a GIF colour table into a LibNSGIF colour table buffer." alt="" coords="604,33,773,73"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="807,73,773,68,774,63,808,68"/>
+<area shape="rect" id="Node000010" href="$d1/d86/namespacefl_1_1third__party_a4b8fe20eb5f26c94e8bb4991820b4ca3.html#a4b8fe20eb5f26c94e8bb4991820b4ca3" title="Get the local colour palette for a frame." alt="" coords="615,97,763,137"/>
+<area shape="poly" id="edge6_Node000001_Node000010" title=" " alt="" coords="808,103,763,109,762,104,807,97"/>
+<area shape="rect" id="Node000003" href="$d1/d86/namespacefl_1_1third__party_a19fba0f55b21ea4a0addf0568bd68d2b.html#a19fba0f55b21ea4a0addf0568bd68d2b" title="Get a frame&#39;s colour table." alt="" coords="397,5,556,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="590,43,556,38,557,33,591,38"/>
+<area shape="rect" id="Node000005" href="$d1/d86/namespacefl_1_1third__party_ac0c0b97e37911e82ef3974b049784c33.html#ac0c0b97e37911e82ef3974b049784c33" title="Scan the source image data." alt="" coords="5,35,153,75"/>
+<area shape="poly" id="edge5_Node000002_Node000005" title=" " alt="" coords="590,59,556,60,201,60,153,59,153,54,201,55,556,55,590,54"/>
+<area shape="rect" id="Node000004" href="$d1/d86/namespacefl_1_1third__party_a5544ea660bb409ce782aec2a3629f1fe.html#a5544ea660bb409ce782aec2a3629f1fe" title="Attempts to initialise the next frame." alt="" coords="201,5,349,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="383,28,349,28,349,23,383,23"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="188,41,154,46,153,41,187,36"/>
+</map>

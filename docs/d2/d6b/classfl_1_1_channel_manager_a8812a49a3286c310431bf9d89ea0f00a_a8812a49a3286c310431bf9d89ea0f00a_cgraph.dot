@@ -1,0 +1,28 @@
+digraph "fl::ChannelManager::operator="
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::ChannelManager\l::operator=",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::ChannelManager\l::ChannelManager",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d6b/classfl_1_1_channel_manager_a3f0e1823366151d87c97be78f4273755.html#a3f0e1823366151d87c97be78f4273755",tooltip="Constructor."];
+  Node2 -> Node2 [id="edge2_Node000002_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node3 [id="edge3_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::EngineEvents::addListener",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/dca/classfl_1_1_engine_events_a98984c55652e174bb2384d85935c581b.html#a98984c55652e174bb2384d85935c581b",tooltip=" "];
+  Node2 -> Node4 [id="edge4_Node000002_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::ChannelManager\l::notifyPollNeededThunk",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d6b/classfl_1_1_channel_manager_ae0d96adf1576f8fe62b937685991e3b5.html#ae0d96adf1576f8fe62b937685991e3b5",tooltip=" "];
+  Node4 -> Node2 [id="edge5_Node000004_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node4 -> Node5 [id="edge6_Node000004_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::ChannelManager\l::notifyPollNeeded",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d6b/classfl_1_1_channel_manager_aeecac5c6f4dbc304c9be01384ae5fb82.html#aeecac5c6f4dbc304c9be01384ae5fb82",tooltip=" "];
+  Node1 -> Node6 [id="edge7_Node000001_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::channelManager",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a1cc01267f6bdd7251959883412b11bbb.html#a1cc01267f6bdd7251959883412b11bbb",tooltip="Get the global ChannelManager singleton instance."];
+  Node6 -> Node7 [id="edge8_Node000006_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::ChannelManager\l::instance",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d6b/classfl_1_1_channel_manager_a76013c6913045962ce5bb8d227e760b3.html#a76013c6913045962ce5bb8d227e760b3",tooltip="Get the global singleton instance."];
+  Node7 -> Node2 [id="edge9_Node000007_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node7 -> Node8 [id="edge10_Node000007_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl::ChannelManager\l::registry",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d2/d6b/classfl_1_1_channel_manager_a58d12a4cf75bb181c7093141240bb94b.html#a58d12a4cf75bb181c7093141240bb94b",tooltip="Get the singleton WITHOUT registering platform default drivers."];
+  Node8 -> Node2 [id="edge11_Node000008_Node000002",color="steelblue1",style="solid",tooltip=" "];
+}

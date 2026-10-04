@@ -1,0 +1,6 @@
+<map id="fl::Watchdog::setBootloaderEscapeThreshold" name="fl::Watchdog::setBootloaderEscapeThreshold">
+<area shape="rect" id="Node000001" title="Set the consecutive&#45;watchdog&#45;reset count that triggers the escape." alt="" coords="248,29,449,69"/>
+<area shape="rect" id="Node000002" href="$da/d45/classfl_1_1_watchdog_a52c7e7907740b1fd50f57d8586bd5a75.html#a52c7e7907740b1fd50f57d8586bd5a75" title=" " alt="" coords="5,29,200,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="234,52,200,52,200,47,234,47"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="144,18,130,11,103,8,79,10,65,15,59,21,62,28,57,30,54,20,62,10,78,5,103,3,131,6,147,13"/>
+</map>

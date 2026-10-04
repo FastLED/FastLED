@@ -8,7 +8,7 @@ digraph "fl::net::http::StreamHandle::promise"
   rankdir="RL";
   Node1 [id="Node000001",label="fl::net::http::StreamHandle\l::promise",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Access the underlying promise."];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::net::http::StreamHandle\l::StreamHandle",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d42/classfl_1_1net_1_1http_1_1_stream_handle_a1eacb2334461db8f8806ee33f4d1829c.html#a1eacb2334461db8f8806ee33f4d1829c",tooltip=" "];
+  Node2 [id="Node000002",label="fl::net::http::StreamHandle\l::StreamHandle",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d42/classfl_1_1net_1_1http_1_1_stream_handle_aac259c7475c1a9098a0c7490870c18d1.html#aac259c7475c1a9098a0c7490870c18d1",tooltip=" "];
   Node2 -> Node2 [id="edge2_Node000002_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node2 -> Node3 [id="edge3_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node3 [id="Node000003",label="fl::net::http::StreamHandle\l::catch_",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d42/classfl_1_1net_1_1http_1_1_stream_handle_a54e58b3be2d0cfc2b1c31230c5cf4515.html#a54e58b3be2d0cfc2b1c31230c5cf4515",tooltip="Register callback for errors."];

@@ -8,9 +8,9 @@ digraph "fl::wave3Transpose_16"
   rankdir="LR";
   Node1 [id="Node000001",label="fl::wave3Transpose_16",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::detail::wave3_convert\l_byte_to_wave3byte",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d9e/namespacefl_1_1detail_afa4a607fdb31c744529cfe7156160684.html#afa4a607fdb31c744529cfe7156160684",tooltip="Helper: Convert byte to Wave3Byte using nibble LUT (internal use only)"];
+  Node2 [id="Node000002",label="fl::detail::wave3_convert\l_byte_to_wave3byte",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d9e/namespacefl_1_1detail_a9cca48b40077776f677dd377947ff7a3.html#a9cca48b40077776f677dd377947ff7a3",tooltip="Convert one byte to a Wave3Byte using the nibble LUT."];
   Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::detail::wave3_transpose_16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d9e/namespacefl_1_1detail_af8a68cecaea535bce87ed6b98d58b149.html#af8a68cecaea535bce87ed6b98d58b149",tooltip="Transpose 16 lanes of Wave3Byte data into interleaved format."];
+  Node3 [id="Node000003",label="fl::detail::wave3_transpose_16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d9e/namespacefl_1_1detail_af60deb9998d29f24a69577743e9d7138.html#af60deb9998d29f24a69577743e9d7138",tooltip="Transpose 16 lanes of Wave3Byte data via the spread-LUT path (#2533)."];
   Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
   Node4 [id="Node000004",label="fl::detail::spread\l_transpose16_symbol",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d9e/namespacefl_1_1detail_a3f580da2244b0dfd2cfffed1e7874706.html#a3f580da2244b0dfd2cfffed1e7874706",tooltip="Transpose one symbol of 16 lanes (16 input bytes) into 16 output bytes: 8 pulses × 2 bytes,..."];
   Node4 -> Node5 [id="edge4_Node000004_Node000005",color="steelblue1",style="solid",tooltip=" "];

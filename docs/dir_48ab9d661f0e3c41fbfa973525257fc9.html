@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -112,7 +112,7 @@ $(function(){initNavTree('dir_48ab9d661f0e3c41fbfa973525257fc9.html',''); initRe
 </div>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p>Pulled from: <a href="https://github.com/PaulStoffregen/Audio/tree/master">https://github.com/PaulStoffregen/Audio/tree/master</a> (analyze_notefreq.cpp and analyze_notefreq.h)</p>
-<h1><a class="anchor" id="autotoc_md704"></a>
+<h1><a class="anchor" id="autotoc_md723"></a>
 Current Status</h1>
 <ul>
 <li>⏸️ <b>Library Staged</b>: Awaiting third-party code integration</li>
@@ -121,10 +121,10 @@ Current Status</h1>
 <li>⏸️ <b>FastLED Integration</b>: Bridge implementation pending</li>
 <li>⏸️ <b>Audio System Integration</b>: Integration with FastLED audio analysis pending</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md705"></a>
+<h1><a class="anchor" id="autotoc_md724"></a>
 Overview</h1>
 <p>The Teensy Audio Library's <code>analyze_notefreq</code> component provides real-time fundamental frequency detection using the <b>Yin algorithm</b>, designed specifically for musical note detection and tuning applications. This component is MIT licensed and authored by Colin Duffy (2015).</p>
-<h2><a class="anchor" id="autotoc_md706"></a>
+<h2><a class="anchor" id="autotoc_md725"></a>
 Key Features</h2>
 <ul>
 <li><b>Yin Algorithm Implementation</b>: High-quality fundamental frequency estimation</li>
@@ -133,11 +133,11 @@ Key Features</h2>
 <li><b>Configurable Accuracy</b>: Adjustable uncertainty threshold and buffer size</li>
 <li><b>Low-frequency Capable</b>: Default configuration detects down to ~29.14 Hz</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md707"></a>
+<h1><a class="anchor" id="autotoc_md726"></a>
 Original API</h1>
-<h2><a class="anchor" id="autotoc_md708"></a>
+<h2><a class="anchor" id="autotoc_md727"></a>
 Class: <code>AudioAnalyzeNoteFrequency</code></h2>
-<h3><a class="anchor" id="autotoc_md709"></a>
+<h3><a class="anchor" id="autotoc_md728"></a>
 Public Methods</h3>
 <div class="fragment"><div class="line"><span class="comment">// Initialize frequency detection with threshold and buffer configuration</span></div>
 <div class="line"><span class="keywordtype">bool</span> begin(<span class="keywordtype">float</span> threshold = 0.15);</div>
@@ -153,7 +153,7 @@ Public Methods</h3>
 <div class="line"> </div>
 <div class="line"><span class="comment">// Get confidence of frequency detection (0.0 to 1.0)</span></div>
 <div class="line"><span class="keywordtype">float</span> probability(<span class="keywordtype">void</span>);</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md710"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md729"></a>
 Configuration Parameters</h3>
 <ul>
 <li><b>Buffer Size</b>: Default 24 audio blocks<ul>
@@ -169,7 +169,7 @@ Configuration Parameters</h3>
 </ul>
 </li>
 </ul>
-<h2><a class="anchor" id="autotoc_md711"></a>
+<h2><a class="anchor" id="autotoc_md730"></a>
 Algorithm Details</h2>
 <p>The Yin algorithm is a well-established pitch detection algorithm that:</p><ol type="1">
 <li>Computes the autocorrelation function using cumulative mean normalized difference</li>
@@ -183,10 +183,10 @@ Algorithm Details</h2>
 <li>Provides confidence metric for quality assessment</li>
 <li>Computationally efficient for embedded systems</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md712"></a>
+<h1><a class="anchor" id="autotoc_md731"></a>
 FastLED Third-Party Namespace Architecture</h1>
 <p>FastLED mandates that all third-party libraries be wrapped in the <code><a class="el" href="d1/d86/namespacefl_1_1third__party.html">fl::third_party</a></code> namespace to:</p>
-<h2><a class="anchor" id="autotoc_md713"></a>
+<h2><a class="anchor" id="autotoc_md732"></a>
 1. <b>Prevent Global Namespace Pollution</b></h2>
 <div class="fragment"><div class="line"><span class="comment">// Before: Global namespace collision risk</span></div>
 <div class="line"><span class="keyword">class </span>AudioAnalyzeNoteFrequency { <span class="comment">/* ... */</span> };</div>
@@ -200,7 +200,7 @@ FastLED Third-Party Namespace Architecture</h1>
 <div class="line">}</div>
 <div class="line">}</div>
 <div class="ttc" id="anamespacefl_html"><div class="ttname"><a href="d4/d36/namespacefl.html">fl</a></div><div class="ttdoc">Base definition for an LED controller.</div><div class="ttdef"><b>Definition</b> <a href="d0/d4b/crgb_8hpp_source.html#l00179">crgb.hpp:179</a></div></div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md714"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md733"></a>
 2. <b>Clear Ownership and Licensing Boundaries</b></h2>
 <p>The <code>fl::third_party::teensy_audio</code> namespace makes it immediately clear:</p><ul>
 <li><b>What code is external</b>: Everything in <code>fl::third_party::teensy_audio</code> is from Teensy Audio Library</li>
@@ -208,7 +208,7 @@ FastLED Third-Party Namespace Architecture</h1>
 <li><b>Maintenance responsibility</b>: Upstream maintained by PJRC (Paul Stoffregen)</li>
 <li><b>API stability</b>: Third-party APIs may change independently of FastLED</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md715"></a>
+<h2><a class="anchor" id="autotoc_md734"></a>
 3. <b>Controlled Integration Points</b></h2>
 <div class="fragment"><div class="line"><span class="comment">// Third-party code stays isolated</span></div>
 <div class="line"><span class="keyword">namespace </span>fl::third_party::teensy_audio {</div>
@@ -225,12 +225,12 @@ FastLED Third-Party Namespace Architecture</h1>
 <div class="line">        fl::third_party::teensy_audio::AudioAnalyzeNoteFrequency analyzer_;</div>
 <div class="line">    };</div>
 <div class="line">}</div>
-<div class="ttc" id="aclassfl_1_1span_html"><div class="ttname"><a href="d0/d08/classfl_1_1span.html">fl::span</a></div><div class="ttdef"><b>Definition</b> <a href="d4/d7a/span_8h_source.html#l00385">span.h:385</a></div></div>
-</div><!-- fragment --><h1><a class="anchor" id="autotoc_md716"></a>
+<div class="ttc" id="aclassfl_1_1span_html"><div class="ttname"><a href="d0/d08/classfl_1_1span.html">fl::span</a></div><div class="ttdef"><b>Definition</b> <a href="d4/d7a/span_8h_source.html#l00410">span.h:410</a></div></div>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md735"></a>
 Proposed FastLED Integration</h1>
-<h2><a class="anchor" id="autotoc_md717"></a>
+<h2><a class="anchor" id="autotoc_md736"></a>
 Phase 1: Library Staging and Namespace Wrapping</h2>
-<h3><a class="anchor" id="autotoc_md718"></a>
+<h3><a class="anchor" id="autotoc_md737"></a>
 1.1 File Structure</h3>
 <div class="fragment"><div class="line">src/third_party/teensy_audio_notefreq/</div>
 <div class="line">├── README.md                    (this file)</div>
@@ -238,7 +238,7 @@ Phase 1: Library Staging and Namespace Wrapping</h2>
 <div class="line">├── analyze_notefreq.h           (wrapped in fl::third_party::teensy_audio)</div>
 <div class="line">├── analyze_notefreq.cpp         (wrapped in fl::third_party::teensy_audio)</div>
 <div class="line">└── AudioStream.h                (minimal stub for Teensy Audio dependency)</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md719"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md738"></a>
 1.2 Namespace Wrapping</h3>
 <div class="fragment"><div class="line"><span class="comment">// analyze_notefreq.h</span></div>
 <div class="line"><span class="keyword">namespace </span><a class="code hl_namespace" href="d4/d36/namespacefl.html">fl</a> {</div>
@@ -250,7 +250,7 @@ Phase 1: Library Staging and Namespace Wrapping</h2>
 <div class="line">}</div>
 <div class="line">}</div>
 <div class="line">}</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md720"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md739"></a>
 1.3 Dependency Handling</h3>
 <p>The original code depends on Teensy Audio's <code>AudioStream</code> class for audio block management. Options:</p>
 <p><b>Option A: Minimal Stub</b> (Recommended)</p><ul>
@@ -263,9 +263,9 @@ Phase 1: Library Staging and Namespace Wrapping</h2>
 <li>Remove <code>AudioStream</code> dependency entirely</li>
 <li>Implement buffer management directly in FastLED wrapper</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md721"></a>
+<h2><a class="anchor" id="autotoc_md740"></a>
 Phase 2: FastLED API Wrapper</h2>
-<h3><a class="anchor" id="autotoc_md722"></a>
+<h3><a class="anchor" id="autotoc_md741"></a>
 2.1 Configuration Structure</h3>
 <div class="fragment"><div class="line"><span class="keyword">namespace </span><a class="code hl_namespace" href="d4/d36/namespacefl.html">fl</a> {</div>
 <div class="line"> </div>
@@ -276,8 +276,8 @@ Phase 2: FastLED API Wrapper</h2>
 <div class="line">    <span class="keywordtype">float</span> maxFrequency = 5000.0f;   <span class="comment">// Maximum detectable frequency (Hz)</span></div>
 <div class="line"> </div>
 <div class="line">    <span class="comment">// Buffer configuration</span></div>
-<div class="line">    uint32_t sampleRate = 44100;    <span class="comment">// Audio sample rate</span></div>
-<div class="line">    uint32_t bufferSize = 3072;     <span class="comment">// Analysis buffer size (samples)</span></div>
+<div class="line">    <a class="code hl_typedef" href="df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a> sampleRate = 44100;    <span class="comment">// Audio sample rate</span></div>
+<div class="line">    <a class="code hl_typedef" href="df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a> bufferSize = 3072;     <span class="comment">// Analysis buffer size (samples)</span></div>
 <div class="line"> </div>
 <div class="line">    <span class="comment">// Output options</span></div>
 <div class="line">    <span class="keywordtype">bool</span> requireHighConfidence = <span class="keyword">false</span>;  <span class="comment">// Only return high-confidence results</span></div>
@@ -285,7 +285,8 @@ Phase 2: FastLED API Wrapper</h2>
 <div class="line">};</div>
 <div class="line"> </div>
 <div class="line">}</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md723"></a>
+<div class="ttc" id="astdint_8h_ae8a835bf6e050b01cc449644a343aa73_html_ae8a835bf6e050b01cc449644a343aa73"><div class="ttname"><a href="df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a></div><div class="ttdeci">fl::u32 uint32_t</div><div class="ttdef"><b>Definition</b> <a href="df/dd8/stdint_8h_source.html#l00218">stdint.h:218</a></div></div>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md742"></a>
 2.2 Clean FastLED API</h3>
 <div class="fragment"><div class="line"><span class="keyword">namespace </span><a class="code hl_namespace" href="d4/d36/namespacefl.html">fl</a> {</div>
 <div class="line"> </div>
@@ -325,10 +326,10 @@ Phase 2: FastLED API Wrapper</h2>
 <div class="line">};</div>
 <div class="line"> </div>
 <div class="line">}</div>
-<div class="ttc" id="aclassfl_1_1string_html"><div class="ttname"><a href="d2/db2/classfl_1_1string.html">fl::string</a></div><div class="ttdef"><b>Definition</b> <a href="da/d66/string_8h_source.html#l00193">string.h:193</a></div></div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md724"></a>
+<div class="ttc" id="aclassfl_1_1string_html"><div class="ttname"><a href="d2/db2/classfl_1_1string.html">fl::string</a></div><div class="ttdef"><b>Definition</b> <a href="da/d66/string_8h_source.html#l00202">string.h:202</a></div></div>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md743"></a>
 Phase 3: Integration Implementation</h2>
-<h3><a class="anchor" id="autotoc_md725"></a>
+<h3><a class="anchor" id="autotoc_md744"></a>
 3.1 Bridge Implementation (<code>fl/audio/note_frequency.cpp</code>)</h3>
 <div class="fragment"><div class="line"><span class="keyword">namespace </span><a class="code hl_namespace" href="d4/d36/namespacefl.html">fl</a> {</div>
 <div class="line"> </div>
@@ -378,28 +379,28 @@ Phase 3: Integration Implementation</h2>
 <div class="line">};</div>
 <div class="line"> </div>
 <div class="line">}</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md726"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md745"></a>
 3.2 Memory Management</h3>
 <ul>
 <li>Use <code>fl::scoped_array</code> for temporary buffers</li>
 <li>Replace any dynamic allocation with FastLED memory patterns</li>
 <li>Ensure proper cleanup in destructors</li>
 </ul>
-<h3><a class="anchor" id="autotoc_md727"></a>
+<h3><a class="anchor" id="autotoc_md746"></a>
 3.3 Type Conversions</h3>
 <div class="fragment"><div class="line"><span class="comment">// Teensy Audio uses float samples in range [-1.0, 1.0]</span></div>
 <div class="line"><span class="comment">// FastLED may use int16_t or other formats</span></div>
 <div class="line"> </div>
 <div class="line"><span class="keywordtype">void</span> convertSamples(<a class="code hl_class" href="d0/d08/classfl_1_1span.html">fl::span&lt;const int16_t&gt;</a> input,</div>
 <div class="line">                   <a class="code hl_class" href="d0/d08/classfl_1_1span.html">fl::span&lt;float&gt;</a> output) {</div>
-<div class="line">    <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; input.<a class="code hl_function" href="d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac">size</a>(); ++i) {</div>
+<div class="line">    <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; input.<a class="code hl_function" href="d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa">size</a>(); ++i) {</div>
 <div class="line">        output[i] = input[i] / 32768.0f;</div>
 <div class="line">    }</div>
 <div class="line">}</div>
-<div class="ttc" id="aclassfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac_html_aef7ee7eb5254da1ba1eb4f3e0173d0ac"><div class="ttname"><a href="d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac">fl::span::size</a></div><div class="ttdeci">constexpr fl::size size() const FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="d4/d7a/span_8h_source.html#l00458">span.h:458</a></div></div>
-</div><!-- fragment --><h1><a class="anchor" id="autotoc_md728"></a>
+<div class="ttc" id="aclassfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa_html_aaf3daca1c2c8f93b2ac7b319989b22fa"><div class="ttname"><a href="d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa">fl::span::size</a></div><div class="ttdeci">constexpr fl::size size() const FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="d4/d7a/span_8h_source.html#l00483">span.h:483</a></div></div>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md747"></a>
 Integration Challenges and Solutions</h1>
-<h2><a class="anchor" id="autotoc_md729"></a>
+<h2><a class="anchor" id="autotoc_md748"></a>
 Challenge 1: AudioStream Dependency</h2>
 <p><b>Problem</b>: Original code inherits from <code>AudioStream</code> class for Teensy Audio framework integration.</p>
 <p><b>Solutions</b>:</p><ol type="1">
@@ -408,7 +409,7 @@ Challenge 1: AudioStream Dependency</h2>
 <li><b>Adapter Pattern</b>: Wrap analyzer and translate between FastLED and Teensy Audio semantics</li>
 </ol>
 <p><b>Recommendation</b>: Use Minimal Stub for fastest integration, preserving original code quality.</p>
-<h2><a class="anchor" id="autotoc_md730"></a>
+<h2><a class="anchor" id="autotoc_md749"></a>
 Challenge 2: Audio Block Management</h2>
 <p><b>Problem</b>: Teensy Audio uses specific audio block structure (128 samples per block, reference counting).</p>
 <p><b>Solutions</b>:</p><ol type="1">
@@ -417,7 +418,7 @@ Challenge 2: Audio Block Management</h2>
 <li><b>Algorithm Refactor</b>: Modify to accept arbitrary buffer sizes</li>
 </ol>
 <p><b>Recommendation</b>: Emulate blocks in stub for minimal code changes.</p>
-<h2><a class="anchor" id="autotoc_md731"></a>
+<h2><a class="anchor" id="autotoc_md750"></a>
 Challenge 3: Platform Dependencies</h2>
 <p><b>Problem</b>: Original code may have ARM-specific optimizations or Teensy hardware assumptions.</p>
 <p><b>Solutions</b>:</p><ol type="1">
@@ -426,7 +427,7 @@ Challenge 3: Platform Dependencies</h2>
 <li><b>FastLED Portability</b>: Leverage existing FastLED cross-platform patterns</li>
 </ol>
 <p><b>Recommendation</b>: Test on multiple platforms early, add portable fallbacks as needed.</p>
-<h2><a class="anchor" id="autotoc_md732"></a>
+<h2><a class="anchor" id="autotoc_md751"></a>
 Challenge 4: Real-time Requirements</h2>
 <p><b>Problem</b>: Musical note detection requires consistent low-latency processing.</p>
 <p><b>Solutions</b>:</p><ol type="1">
@@ -434,11 +435,11 @@ Challenge 4: Real-time Requirements</h2>
 <li><b>Buffer Size Tuning</b>: Allow configuration of latency vs. accuracy trade-off</li>
 <li><b>Optimization</b>: Consider fixed-point math for microcontrollers if needed</li>
 </ol>
-<h1><a class="anchor" id="autotoc_md733"></a>
+<h1><a class="anchor" id="autotoc_md752"></a>
 Testing Strategy</h1>
-<h2><a class="anchor" id="autotoc_md734"></a>
+<h2><a class="anchor" id="autotoc_md753"></a>
 Unit Tests (<code>tests/audio_note_frequency.cpp</code>)</h2>
-<h3><a class="anchor" id="autotoc_md735"></a>
+<h3><a class="anchor" id="autotoc_md754"></a>
 Phase 1: Basic Functionality</h3>
 <div class="fragment"><div class="line">TEST_CASE(<span class="stringliteral">&quot;NoteFrequency initialization&quot;</span>) {</div>
 <div class="line">    fl::NoteFrequencyConfig config;</div>
@@ -458,7 +459,7 @@ Phase 1: Basic Functionality</h3>
 <div class="line">    CHECK(freq == Approx(440.0f).epsilon(0.01));  <span class="comment">// Within 1%</span></div>
 <div class="line">    CHECK(conf &gt; 0.8f);  <span class="comment">// High confidence</span></div>
 <div class="line">}</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md736"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md755"></a>
 Phase 2: Musical Note Range</h3>
 <div class="fragment"><div class="line">TEST_CASE(<span class="stringliteral">&quot;NoteFrequency musical note range&quot;</span>) {</div>
 <div class="line">    <span class="comment">// Test standard guitar tuning: E2, A2, D3, G3, B3, E4</span></div>
@@ -475,7 +476,7 @@ Phase 2: Musical Note Range</h3>
 <div class="line">        CHECK(detected == Approx(expected).epsilon(0.02));</div>
 <div class="line">    }</div>
 <div class="line">}</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md737"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md756"></a>
 Phase 3: Edge Cases</h3>
 <div class="fragment"><div class="line">TEST_CASE(<span class="stringliteral">&quot;NoteFrequency low SNR handling&quot;</span>) {</div>
 <div class="line">    <span class="comment">// Test with noisy signal</span></div>
@@ -509,7 +510,7 @@ Phase 3: Edge Cases</h3>
 <div class="line">    CHECK(freq == Approx(440.0f).epsilon(0.02));  <span class="comment">// Should find fundamental</span></div>
 <div class="line">}</div>
 <div class="ttc" id="a_fire2023_8h_a0b46167016d5b2cd0c800213002e1fad_html_a0b46167016d5b2cd0c800213002e1fad"><div class="ttname"><a href="de/d71/_fire2023_8h_a0b46167016d5b2cd0c800213002e1fad.html#a0b46167016d5b2cd0c800213002e1fad">noise</a></div><div class="ttdeci">uint8_t noise[NUM_LAYERS][WIDTH][HEIGHT]</div><div class="ttdef"><b>Definition</b> <a href="de/d71/_fire2023_8h_source.html#l00097">Fire2023.h:97</a></div></div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md738"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md757"></a>
 Test Data Requirements</h2>
 <ul>
 <li><b>Pure Tones</b>: Sine waves at musical note frequencies</li>
@@ -517,16 +518,16 @@ Test Data Requirements</h2>
 <li><b>Noisy Signals</b>: Signal + white/pink noise at various SNR levels</li>
 <li><b>Edge Cases</b>: Sub-threshold signals, octave ambiguity tests</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md739"></a>
+<h2><a class="anchor" id="autotoc_md758"></a>
 Integration Tests</h2>
 <ul>
 <li><b>Streaming Analysis</b>: Feed continuous audio, verify state updates</li>
 <li><b>Configuration Impact</b>: Test different threshold/buffer size settings</li>
 <li><b>Performance</b>: Benchmark processing time on embedded targets</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md740"></a>
+<h1><a class="anchor" id="autotoc_md759"></a>
 Build System Integration</h1>
-<h2><a class="anchor" id="autotoc_md741"></a>
+<h2><a class="anchor" id="autotoc_md760"></a>
 CMake Configuration</h2>
 <div class="fragment"><div class="line"># src/third_party/teensy_audio_notefreq/CMakeLists.txt</div>
 <div class="line"> </div>
@@ -541,7 +542,7 @@ CMake Configuration</h2>
 <div class="line"> </div>
 <div class="line"># Add to FastLED build</div>
 <div class="line">target_link_libraries(FastLED PRIVATE teensy_audio_notefreq)</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md742"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md761"></a>
 Platform Support</h2>
 <div class="fragment"><div class="line"><span class="comment">// fl/audio/note_frequency.h</span></div>
 <div class="line"><span class="keyword">namespace </span><a class="code hl_namespace" href="d4/d36/namespacefl.html">fl</a> {</div>
@@ -555,13 +556,13 @@ Platform Support</h2>
 <div class="line">}</div>
 <div class="line"> </div>
 <div class="line">}</div>
-</div><!-- fragment --><h1><a class="anchor" id="autotoc_md743"></a>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md762"></a>
 Documentation Requirements</h1>
-<h2><a class="anchor" id="autotoc_md744"></a>
+<h2><a class="anchor" id="autotoc_md763"></a>
 API Documentation (<code>fl/audio/note_frequency.h</code>)</h2>
 <div class="fragment"><div class="line"></div>
 <div class="line"><span class="keyword">class </span>NoteFrequencyAnalyzer { <span class="comment">/* ... */</span> };</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md745"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md764"></a>
 User Guide Section</h2>
 <p>Add to FastLED documentation:</p><ul>
 <li><b>Audio Analysis Overview</b>: Introduction to pitch detection</li>
@@ -569,9 +570,9 @@ User Guide Section</h2>
 <li><b>Performance Considerations</b>: Latency vs. accuracy trade-offs</li>
 <li><b>Example Applications</b>: Tuner, pitch-to-MIDI, reactive lighting</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md746"></a>
+<h1><a class="anchor" id="autotoc_md765"></a>
 Timeline and Milestones</h1>
-<h2><a class="anchor" id="autotoc_md747"></a>
+<h2><a class="anchor" id="autotoc_md766"></a>
 Milestone 1: Library Integration (Est. 1-2 days)</h2>
 <ul class="check">
 <li class="unchecked">Copy source files to <code>src/third_party/teensy_audio_notefreq/</code></li>
@@ -588,7 +589,7 @@ Milestone 1: Library Integration (Est. 1-2 days)</h2>
 <ul class="check">
 <li class="unchecked">Verify compilation on multiple platforms</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md748"></a>
+<h2><a class="anchor" id="autotoc_md767"></a>
 Milestone 2: FastLED API Wrapper (Est. 2-3 days)</h2>
 <ul class="check">
 <li class="unchecked">Implement <code>NoteFrequencyConfig</code> structure</li>
@@ -600,12 +601,12 @@ Milestone 2: FastLED API Wrapper (Est. 2-3 days)</h2>
 <li class="unchecked">Implement <code>StreamingAnalyzer</code> for stateful processing</li>
 </ul>
 <ul class="check">
-<li class="unchecked">Add type conversion utilities (int16_t ↔ float)</li>
+<li class="unchecked">Add type conversion utilities (<a class="el" href="df/dd8/stdint_8h_ae7dd6acf1dfba9504cc86a3e92eacf40.html#ae7dd6acf1dfba9504cc86a3e92eacf40">int16_t</a> ↔ float)</li>
 </ul>
 <ul class="check">
 <li class="unchecked">Implement error handling and validation</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md749"></a>
+<h2><a class="anchor" id="autotoc_md768"></a>
 Milestone 3: Testing and Validation (Est. 2-3 days)</h2>
 <ul class="check">
 <li class="unchecked">Write unit tests for basic functionality</li>
@@ -622,7 +623,7 @@ Milestone 3: Testing and Validation (Est. 2-3 days)</h2>
 <ul class="check">
 <li class="unchecked">Performance benchmarking on ESP32/Arduino</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md750"></a>
+<h2><a class="anchor" id="autotoc_md769"></a>
 Milestone 4: Documentation and Examples (Est. 1-2 days)</h2>
 <ul class="check">
 <li class="unchecked">API documentation in headers</li>
@@ -636,18 +637,18 @@ Milestone 4: Documentation and Examples (Est. 1-2 days)</h2>
 <ul class="check">
 <li class="unchecked">Update FastLED documentation index</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md751"></a>
+<h1><a class="anchor" id="autotoc_md770"></a>
 Success Criteria</h1>
-<h2><a class="anchor" id="autotoc_md752"></a>
+<h2><a class="anchor" id="autotoc_md771"></a>
 Functional Requirements</h2>
 <p>✅ Detects fundamental frequency of musical notes (E2-E6: 82Hz-1318Hz) ✅ Accuracy within 2% of true frequency for clean signals ✅ Processes audio in real-time on ESP32/Teensy platforms ✅ Provides confidence metric for detection quality ✅ Handles harmonic-rich signals (guitar, bass, voice)</p>
-<h2><a class="anchor" id="autotoc_md753"></a>
+<h2><a class="anchor" id="autotoc_md772"></a>
 Code Quality</h2>
 <p>✅ All code in <code>fl::third_party::teensy_audio</code> namespace ✅ Clean FastLED API following project conventions ✅ Comprehensive error handling and validation ✅ Full test coverage with unit and integration tests ✅ Documented API with usage examples</p>
-<h2><a class="anchor" id="autotoc_md754"></a>
+<h2><a class="anchor" id="autotoc_md773"></a>
 Performance</h2>
 <p>✅ Processing latency &lt; 100ms for typical configurations ✅ Memory footprint &lt; 20KB for analyzer instance ✅ No dynamic allocation in real-time processing path ✅ Consistent performance across FastLED-supported platforms</p>
-<h1><a class="anchor" id="autotoc_md755"></a>
+<h1><a class="anchor" id="autotoc_md774"></a>
 License and Attribution</h1>
 <p><b>Original Work</b>:</p><ul>
 <li><b>Library</b>: Teensy Audio Library</li>
@@ -664,23 +665,23 @@ License and Attribution</h1>
 <li>FastLED wrapper code follows FastLED license (MIT)</li>
 <li>Clear attribution maintained in documentation</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md756"></a>
+<h1><a class="anchor" id="autotoc_md775"></a>
 References</h1>
-<h2><a class="anchor" id="autotoc_md757"></a>
+<h2><a class="anchor" id="autotoc_md776"></a>
 Yin Algorithm</h2>
 <ul>
 <li><b>Paper</b>: "YIN, a fundamental frequency estimator for speech and music" by Alain de Cheveigné and Hideki Kawahara (2002)</li>
 <li><b>Algorithm</b>: Autocorrelation-based pitch detection with cumulative mean normalized difference function</li>
 <li><b>Advantages</b>: Resistant to octave errors, works well with harmonic signals</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md758"></a>
+<h2><a class="anchor" id="autotoc_md777"></a>
 Teensy Audio Library</h2>
 <ul>
 <li><b>Repository</b>: <a href="https://github.com/PaulStoffregen/Audio">https://github.com/PaulStoffregen/Audio</a></li>
 <li><b>Documentation</b>: <a href="https://www.pjrc.com/teensy/td_libs_Audio.html">https://www.pjrc.com/teensy/td_libs_Audio.html</a></li>
 <li><b>Forum</b>: <a href="https://forum.pjrc.com/forums/4-Audio-Projects">https://forum.pjrc.com/forums/4-Audio-Projects</a></li>
 </ul>
-<h2><a class="anchor" id="autotoc_md759"></a>
+<h2><a class="anchor" id="autotoc_md778"></a>
 FastLED Integration Patterns</h2>
 <ul>
 <li><b>TJpg_Decoder Integration</b>: <code><a class="el" href="dc/d11/src_2third__party_2_t_jpg___decoder_2_r_e_a_d_m_e_8md.html">src/third_party/TJpg_Decoder/README.md</a></code> (reference implementation)</li>
@@ -696,7 +697,7 @@ FastLED Integration Patterns</h2>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_c30bdf76ce759a4eae8387be42921388.html">third_party</a></li><li class="navelem"><a class="el" href="dir_48ab9d661f0e3c41fbfa973525257fc9.html">teensy_audio_notefreq</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:12 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:13 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

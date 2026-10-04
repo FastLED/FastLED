@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -112,7 +112,7 @@ $(function(){initNavTree('dir_644e53244137bfc556a3328d07004ff5.html',''); initRe
 </div>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p>This example demonstrates using FastLED with SPI-based LED chipsets on SAMD21 and SAMD51 platforms.</p>
-<h1><a class="anchor" id="autotoc_md971"></a>
+<h1><a class="anchor" id="autotoc_md1006"></a>
 Supported Platforms</h1>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -122,7 +122,7 @@ Supported Platforms</h1>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><b>SAMD51</b>   </td><td class="markdownTableBodyNone">Cortex-M4F   </td><td class="markdownTableBodyNone">120 MHz   </td><td class="markdownTableBodyNone">192 KB   </td><td class="markdownTableBodyNone">512 KB   </td><td class="markdownTableBodyNone">Adafruit Feather M4, Grand Central M4   </td></tr>
 </table>
-<h1><a class="anchor" id="autotoc_md972"></a>
+<h1><a class="anchor" id="autotoc_md1007"></a>
 Supported LED Chipsets</h1>
 <p>This example works with SPI-based LED chipsets that require both DATA and CLOCK signals:</p>
 <ul>
@@ -132,9 +132,9 @@ Supported LED Chipsets</h1>
 <li><b>WS2801</b> - Common RGB strip controller</li>
 <li><b>P9813</b> - Used in some RGB LED modules</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md973"></a>
+<h1><a class="anchor" id="autotoc_md1008"></a>
 Hardware Connections</h1>
-<h2><a class="anchor" id="autotoc_md974"></a>
+<h2><a class="anchor" id="autotoc_md1009"></a>
 Basic Wiring</h2>
 <div class="fragment"><div class="line">LED Strip          SAMD Board</div>
 <div class="line">─────────          ──────────</div>
@@ -149,7 +149,7 @@ Basic Wiring</h2>
 <li>Add a 1000 µF capacitor across LED strip power connections</li>
 <li>Add a 470Ω resistor in series with DATA line (optional but recommended)</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md975"></a>
+<h2><a class="anchor" id="autotoc_md1010"></a>
 Pin Mappings (Hardware SPI)</h2>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -164,31 +164,31 @@ Pin Mappings (Hardware SPI)</h2>
 <td class="markdownTableBodyNone"><b>Adafruit Grand Central M4</b>   </td><td class="markdownTableBodyNone">Pin 51 (ICSP)   </td><td class="markdownTableBodyNone">Pin 52 (ICSP)   </td><td class="markdownTableBodyNone">SERCOM2   </td></tr>
 </table>
 <p><b>Note:</b> These pins are automatically configured by the example sketch based on the detected board.</p>
-<h1><a class="anchor" id="autotoc_md976"></a>
+<h1><a class="anchor" id="autotoc_md1011"></a>
 Usage</h1>
-<h2><a class="anchor" id="autotoc_md977"></a>
+<h2><a class="anchor" id="autotoc_md1012"></a>
 1. Select Your LED Chipset</h2>
 <p>In the sketch, uncomment the line matching your LED chipset:</p>
 <div class="fragment"><div class="line"><span class="comment">// Default: APA102 (DotStar)</span></div>
-<div class="line"><a class="code hl_variable" href="d7/de5/_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a>.addLeds&lt;<a class="code hl_enumvalue" href="db/d97/_fast_l_e_d_8h_ac06549dc4a351e2c8f1dda8ae81f7926.html#ac06549dc4a351e2c8f1dda8ae81f7926ab58884059d69c6f6fdb432cc53b5db48">APA102</a>, <a class="code hl_define" href="df/d01/_client_real_8h_adad67fe595ea440c8f8247ec2cddf070.html#adad67fe595ea440c8f8247ec2cddf070">DATA_PIN</a>, <a class="code hl_define" href="d0/dc3/_blink_8ino_a23b348310475af5d6544794f1a167ee8.html#a23b348310475af5d6544794f1a167ee8">CLOCK_PIN</a>, <a class="code hl_variable" href="db/d07/eorder_8h_a11fb32f7b5dd68340fe224121dc87238.html#a11fb32f7b5dd68340fe224121dc87238">BGR</a>&gt;(<a class="code hl_variable" href="d6/d05/_animartrix_8ino_a83a59cb1680f896fa1c411261436d4ad.html#a83a59cb1680f896fa1c411261436d4ad">leds</a>, <a class="code hl_define" href="d6/d05/_animartrix_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd">NUM_LEDS</a>);</div>
+<div class="line"><a class="code hl_variable" href="d7/de5/_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a>.addLeds&lt;<a class="code hl_enumvalue" href="d6/d64/fastled_8h_ac06549dc4a351e2c8f1dda8ae81f7926.html#ac06549dc4a351e2c8f1dda8ae81f7926ab58884059d69c6f6fdb432cc53b5db48">APA102</a>, <a class="code hl_define" href="df/d01/_client_real_8h_adad67fe595ea440c8f8247ec2cddf070.html#adad67fe595ea440c8f8247ec2cddf070">DATA_PIN</a>, <a class="code hl_define" href="d0/dc3/_blink_8ino_a23b348310475af5d6544794f1a167ee8.html#a23b348310475af5d6544794f1a167ee8">CLOCK_PIN</a>, <a class="code hl_variable" href="db/d07/eorder_8h_a11fb32f7b5dd68340fe224121dc87238.html#a11fb32f7b5dd68340fe224121dc87238">BGR</a>&gt;(<a class="code hl_variable" href="d5/d17/_analog_output_8ino_a1039e408783ef35dd94161e35efe8ee9.html#a1039e408783ef35dd94161e35efe8ee9">leds</a>, <a class="code hl_define" href="d6/d05/_animartrix_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd">NUM_LEDS</a>);</div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// Or choose another:</span></div>
 <div class="line"><span class="comment">// FastLED.addLeds&lt;SK9822, DATA_PIN, CLOCK_PIN, BGR&gt;(leds, NUM_LEDS);</span></div>
 <div class="line"><span class="comment">// FastLED.addLeds&lt;LPD8806, DATA_PIN, CLOCK_PIN, RGB&gt;(leds, NUM_LEDS);</span></div>
 <div class="line"><span class="comment">// FastLED.addLeds&lt;WS2801, DATA_PIN, CLOCK_PIN, RGB&gt;(leds, NUM_LEDS);</span></div>
 <div class="line"><span class="comment">// FastLED.addLeds&lt;P9813, DATA_PIN, CLOCK_PIN, RGB&gt;(leds, NUM_LEDS);</span></div>
+<div class="ttc" id="a_analog_output_8ino_a1039e408783ef35dd94161e35efe8ee9_html_a1039e408783ef35dd94161e35efe8ee9"><div class="ttname"><a href="d5/d17/_analog_output_8ino_a1039e408783ef35dd94161e35efe8ee9.html#a1039e408783ef35dd94161e35efe8ee9">leds</a></div><div class="ttdeci">CRGB leds[1]</div><div class="ttdef"><b>Definition</b> <a href="d5/d17/_analog_output_8ino_source.html#l00026">AnalogOutput.ino:26</a></div></div>
 <div class="ttc" id="a_animartrix_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd_html_a4c4ae9a4146ce8d6a5debc90300d9abd"><div class="ttname"><a href="d6/d05/_animartrix_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd">NUM_LEDS</a></div><div class="ttdeci">#define NUM_LEDS</div><div class="ttdef"><b>Definition</b> <a href="d6/d05/_animartrix_8ino_source.html#l00079">Animartrix.ino:79</a></div></div>
-<div class="ttc" id="a_animartrix_8ino_a83a59cb1680f896fa1c411261436d4ad_html_a83a59cb1680f896fa1c411261436d4ad"><div class="ttname"><a href="d6/d05/_animartrix_8ino_a83a59cb1680f896fa1c411261436d4ad.html#a83a59cb1680f896fa1c411261436d4ad">leds</a></div><div class="ttdeci">fl::CRGB leds[NUM_LEDS]</div><div class="ttdef"><b>Definition</b> <a href="d6/d05/_animartrix_8ino_source.html#l00093">Animartrix.ino:93</a></div></div>
 <div class="ttc" id="a_blink_8ino_a23b348310475af5d6544794f1a167ee8_html_a23b348310475af5d6544794f1a167ee8"><div class="ttname"><a href="d0/dc3/_blink_8ino_a23b348310475af5d6544794f1a167ee8.html#a23b348310475af5d6544794f1a167ee8">CLOCK_PIN</a></div><div class="ttdeci">#define CLOCK_PIN</div><div class="ttdef"><b>Definition</b> <a href="d0/dc3/_blink_8ino_source.html#l00019">Blink.ino:19</a></div></div>
 <div class="ttc" id="a_client_real_8h_adad67fe595ea440c8f8247ec2cddf070_html_adad67fe595ea440c8f8247ec2cddf070"><div class="ttname"><a href="df/d01/_client_real_8h_adad67fe595ea440c8f8247ec2cddf070.html#adad67fe595ea440c8f8247ec2cddf070">DATA_PIN</a></div><div class="ttdeci">#define DATA_PIN</div><div class="ttdef"><b>Definition</b> <a href="df/d01/_client_real_8h_source.html#l00082">ClientReal.h:82</a></div></div>
-<div class="ttc" id="a_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9_html_a8e94985674086ea368e1d51cbc0f82a9"><div class="ttname"><a href="d7/de5/_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a></div><div class="ttdeci">FL_DISABLE_WARNING_PUSH FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS CFastLED FastLED</div><div class="ttdoc">Global LED strip management instance.</div><div class="ttdef"><b>Definition</b> <a href="d7/de5/_fast_l_e_d_8cpp_8hpp_source.html#l00075">FastLED.cpp.hpp:75</a></div></div>
-<div class="ttc" id="a_fast_l_e_d_8h_ac06549dc4a351e2c8f1dda8ae81f7926_html_ac06549dc4a351e2c8f1dda8ae81f7926ab58884059d69c6f6fdb432cc53b5db48"><div class="ttname"><a href="db/d97/_fast_l_e_d_8h_ac06549dc4a351e2c8f1dda8ae81f7926.html#ac06549dc4a351e2c8f1dda8ae81f7926ab58884059d69c6f6fdb432cc53b5db48">APA102</a></div><div class="ttdeci">@ APA102</div><div class="ttdoc">APA102 LED chipset.</div><div class="ttdef"><b>Definition</b> <a href="db/d97/_fast_l_e_d_8h_source.html#l00262">FastLED.h:262</a></div></div>
+<div class="ttc" id="a_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9_html_a8e94985674086ea368e1d51cbc0f82a9"><div class="ttname"><a href="d7/de5/_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a></div><div class="ttdeci">FL_DISABLE_WARNING_PUSH FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS CFastLED FastLED</div><div class="ttdoc">Global LED strip management instance.</div><div class="ttdef"><b>Definition</b> <a href="d7/de5/_fast_l_e_d_8cpp_8hpp_source.html#l00090">FastLED.cpp.hpp:90</a></div></div>
 <div class="ttc" id="aeorder_8h_a11fb32f7b5dd68340fe224121dc87238_html_a11fb32f7b5dd68340fe224121dc87238"><div class="ttname"><a href="db/d07/eorder_8h_a11fb32f7b5dd68340fe224121dc87238.html#a11fb32f7b5dd68340fe224121dc87238">BGR</a></div><div class="ttdeci">constexpr EOrder BGR</div><div class="ttdef"><b>Definition</b> <a href="db/d07/eorder_8h_source.html#l00022">eorder.h:22</a></div></div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md978"></a>
+<div class="ttc" id="afastled_8h_ac06549dc4a351e2c8f1dda8ae81f7926_html_ac06549dc4a351e2c8f1dda8ae81f7926ab58884059d69c6f6fdb432cc53b5db48"><div class="ttname"><a href="d6/d64/fastled_8h_ac06549dc4a351e2c8f1dda8ae81f7926.html#ac06549dc4a351e2c8f1dda8ae81f7926ab58884059d69c6f6fdb432cc53b5db48">APA102</a></div><div class="ttdeci">@ APA102</div><div class="ttdoc">APA102 LED chipset.</div><div class="ttdef"><b>Definition</b> <a href="d6/d64/fastled_8h_source.html#l00304">FastLED.h:304</a></div></div>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md1013"></a>
 2. Adjust LED Count</h2>
 <p>Set <code>NUM_LEDS</code> to match your strip:</p>
 <div class="fragment"><div class="line"><span class="preprocessor">#define NUM_LEDS 30  </span><span class="comment">// Change to your actual LED count</span></div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md979"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md1014"></a>
 3. Adjust Color Ordering (if needed)</h2>
 <p>Some LED strips have different color orderings. Try these if colors are wrong:</p>
 <ul>
@@ -197,21 +197,21 @@ Usage</h1>
 <li><code>GRB</code> - Green, Red, Blue</li>
 <li><code>RBG</code>, <code>BRG</code>, <code>GBR</code> - Other orderings</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md980"></a>
+<h2><a class="anchor" id="autotoc_md1015"></a>
 4. Compile and Upload</h2>
-<div class="fragment"><div class="line"># Using PlatformIO</div>
-<div class="line">pio run -e adafruit_feather_m4 -t upload</div>
+<div class="fragment"><div class="line"># Using fbuild</div>
+<div class="line">fbuild deploy -e adafruit_feather_m4</div>
 <div class="line"> </div>
 <div class="line"># Or using FastLED build system</div>
 <div class="line">uv run ci/ci-compile.py adafruit_feather_m4 --examples SpecialDrivers/Adafruit/SAMD_SingleSPI</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md981"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md1016"></a>
 5. Monitor Serial Output</h2>
 <p>Open serial monitor at 115200 baud to see:</p><ul>
 <li>Board detection</li>
 <li>Pin configuration</li>
 <li>FPS counter (updated every 2 seconds)</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md982"></a>
+<h1><a class="anchor" id="autotoc_md1017"></a>
 Expected Performance</h1>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -222,9 +222,9 @@ Expected Performance</h1>
 <td class="markdownTableBodyNone"><b>SAMD21</b>   </td><td class="markdownTableBodyNone">~150 FPS   </td><td class="markdownTableBodyNone">@ 30 LEDs, 48 MHz CPU   </td></tr>
 </table>
 <p>Performance scales with LED count. More LEDs = lower FPS.</p>
-<h1><a class="anchor" id="autotoc_md983"></a>
+<h1><a class="anchor" id="autotoc_md1018"></a>
 Implementation Details</h1>
-<h2><a class="anchor" id="autotoc_md984"></a>
+<h2><a class="anchor" id="autotoc_md1019"></a>
 Single-SPI Architecture</h2>
 <p>This example uses FastLED's standard single-SPI backend (<code>SAMDHardwareSPIOutput</code> class) which leverages the Arduino SPI library:</p>
 <ul>
@@ -233,7 +233,7 @@ Single-SPI Architecture</h2>
 <li><b>Portability:</b> Works on all SAMD boards without custom pin configuration</li>
 <li><b>Performance:</b> Hardware SPI with polling mode (non-blocking for typical use cases)</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md985"></a>
+<h2><a class="anchor" id="autotoc_md1020"></a>
 Parallel SPI Infrastructure (Advanced)</h2>
 <p>FastLED includes infrastructure for <b>Dual-SPI</b> and <b>Quad-SPI</b> on SAMD platforms:</p>
 <p><b>Files:</b></p><ul>
@@ -250,9 +250,9 @@ Parallel SPI Infrastructure (Advanced)</h2>
 <li>⚠️ True multi-lane operation needs hardware-specific approach</li>
 </ul>
 <p><b>Recommendation:</b> Use single-SPI mode (this example) for production applications. Parallel SPI infrastructure is experimental and requires hardware validation.</p>
-<h1><a class="anchor" id="autotoc_md986"></a>
+<h1><a class="anchor" id="autotoc_md1021"></a>
 Troubleshooting</h1>
-<h2><a class="anchor" id="autotoc_md987"></a>
+<h2><a class="anchor" id="autotoc_md1022"></a>
 LEDs don't light up</h2>
 <ol type="1">
 <li>Check power supply (needs separate 5V source, not board power)</li>
@@ -262,14 +262,14 @@ LEDs don't light up</h2>
 <li>Verify LED chipset type matches your strip</li>
 <li>Check color ordering (try RGB, BGR, GRB)</li>
 </ol>
-<h2><a class="anchor" id="autotoc_md988"></a>
+<h2><a class="anchor" id="autotoc_md1023"></a>
 Wrong colors displayed</h2>
 <ol type="1">
 <li>Change color ordering in <code>addLeds()</code> call (RGB, BGR, GRB, etc.)</li>
 <li>Verify chipset type (APA102 vs SK9822 vs others)</li>
 <li>Check if your strip requires different voltage levels (some are 3.3V only)</li>
 </ol>
-<h2><a class="anchor" id="autotoc_md989"></a>
+<h2><a class="anchor" id="autotoc_md1024"></a>
 Compilation errors</h2>
 <ol type="1">
 <li>Make sure you have the correct board selected</li>
@@ -277,7 +277,7 @@ Compilation errors</h2>
 <li>Check that FastLED is using hardware SPI pins (don't use arbitrary GPIO)</li>
 <li>Update to latest Arduino SAMD board definitions</li>
 </ol>
-<h2><a class="anchor" id="autotoc_md990"></a>
+<h2><a class="anchor" id="autotoc_md1025"></a>
 Slow frame rate</h2>
 <ol type="1">
 <li>Reduce <code>NUM_LEDS</code> for testing</li>
@@ -286,7 +286,7 @@ Slow frame rate</h2>
 <li>Check power supply can deliver enough current</li>
 <li>For SAMD21, consider reducing brightness to reduce data transmission time</li>
 </ol>
-<h1><a class="anchor" id="autotoc_md991"></a>
+<h1><a class="anchor" id="autotoc_md1026"></a>
 Additional Resources</h1>
 <ul>
 <li><b>FastLED Documentation:</b> <a href="https://fastled.io">https://fastled.io</a></li>
@@ -294,9 +294,9 @@ Additional Resources</h1>
 <li><b>Adafruit SAMD Boards:</b> <a href="https://learn.adafruit.com/adafruit-feather-m4-express-atsamd51">https://learn.adafruit.com/adafruit-feather-m4-express-atsamd51</a></li>
 <li><b>APA102/DotStar Guide:</b> <a href="https://learn.adafruit.com/adafruit-dotstar-leds">https://learn.adafruit.com/adafruit-dotstar-leds</a></li>
 </ul>
-<h1><a class="anchor" id="autotoc_md992"></a>
+<h1><a class="anchor" id="autotoc_md1027"></a>
 Technical Notes</h1>
-<h2><a class="anchor" id="autotoc_md993"></a>
+<h2><a class="anchor" id="autotoc_md1028"></a>
 SERCOM Peripheral</h2>
 <p>SAMD platforms use SERCOM peripherals (Serial Communication) that can be configured as:</p><ul>
 <li>SPI (Serial Peripheral Interface)</li>
@@ -304,7 +304,7 @@ SERCOM Peripheral</h2>
 <li>UART (Universal Asynchronous Receiver-Transmitter)</li>
 </ul>
 <p>Each board has a default SPI instance connected to specific pins. This example uses the board's default hardware SPI pins for maximum compatibility.</p>
-<h2><a class="anchor" id="autotoc_md994"></a>
+<h2><a class="anchor" id="autotoc_md1029"></a>
 Clock Speed</h2>
 <p>The SPI clock speed is automatically configured by FastLED based on the LED chipset:</p><ul>
 <li><b>APA102/SK9822:</b> Up to 24 MHz (limited by LED chipset, not MCU)</li>
@@ -316,7 +316,7 @@ Clock Speed</h2>
 <li><b>SAMD21:</b> Up to 24 MHz SPI clock (MCU_FREQ / 2)</li>
 </ul>
 <p>In practice, LED chipset limits are the bottleneck, not the MCU.</p>
-<h2><a class="anchor" id="autotoc_md995"></a>
+<h2><a class="anchor" id="autotoc_md1030"></a>
 Future Enhancements</h2>
 <p>Potential improvements for SAMD parallel SPI implementation:</p>
 <ol type="1">
@@ -326,10 +326,10 @@ Future Enhancements</h2>
 <li><b>TCC + GPIO:</b> Use Timer/Counter for Compare (TCC) with GPIO for bit-banging additional lanes on SAMD21</li>
 </ol>
 <p>These enhancements require hardware testing and validation before production use.</p>
-<h1><a class="anchor" id="autotoc_md996"></a>
+<h1><a class="anchor" id="autotoc_md1031"></a>
 License</h1>
 <p>This example is part of the FastLED library and is released under the same license.</p>
-<h1><a class="anchor" id="autotoc_md997"></a>
+<h1><a class="anchor" id="autotoc_md1032"></a>
 Contributing</h1>
 <p>Found a bug or have an improvement? Please submit an issue or pull request to the FastLED repository. </p>
 </div><!-- contents -->
@@ -339,7 +339,7 @@ Contributing</h1>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="dir_45d8fcb39455346615c49383ff8b6a4c.html">SpecialDrivers</a></li><li class="navelem"><a class="el" href="dir_cc3ce79f6e6a7967ed1d2a53ca85d363.html">Adafruit</a></li><li class="navelem"><a class="el" href="dir_644e53244137bfc556a3328d07004ff5.html">SAMD_SingleSPI</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:12 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:13 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

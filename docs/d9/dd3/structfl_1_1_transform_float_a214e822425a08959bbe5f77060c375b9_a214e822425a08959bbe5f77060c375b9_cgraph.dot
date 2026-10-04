@@ -10,5 +10,5 @@ digraph "fl::TransformFloat::set_scale"
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
   Node2 [id="Node000002",label="fl::TransformFloat\l::scale",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/dd3/structfl_1_1_transform_float_a61dc91e6cd05d9525fa7b2c4f0b931d0.html#a61dc91e6cd05d9525fa7b2c4f0b931d0",tooltip=" "];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::min",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb",tooltip=" "];
+  Node3 [id="Node000003",label="fl::min",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a2fdabb91a1f100dec8da21e4306aba05.html#a2fdabb91a1f100dec8da21e4306aba05",tooltip=" "];
 }

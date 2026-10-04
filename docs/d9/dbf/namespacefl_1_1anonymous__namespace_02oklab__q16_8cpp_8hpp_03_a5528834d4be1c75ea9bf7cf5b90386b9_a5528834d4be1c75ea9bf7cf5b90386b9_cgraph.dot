@@ -1,0 +1,14 @@
+digraph "fl::anonymous_namespace{oklab_q16::cpp::hpp}::signedCubeQ16"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::anonymous_namespace\l\{oklab_q16::cpp::hpp\}\l::signedCubeQ16",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::anonymous_namespace\l\{oklab_q16::cpp::hpp\}\l::clampOklabQ16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/dbf/namespacefl_1_1anonymous__namespace_02oklab__q16_8cpp_8hpp_03_a844374c523d1db4a29f1a80a33dcabb6.html#a844374c523d1db4a29f1a80a33dcabb6",tooltip="Clamp into a symmetric domain."];
+  Node2 -> Node2 [id="edge2_Node000002_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node1 [id="edge3_Node000001_Node000001",color="steelblue1",style="solid",tooltip=" "];
+}

@@ -128,7 +128,7 @@
 <!-- Node62 -->
 <g id="Node000062" class="node">
 <title>Node62</title>
-<g id="a_Node000062"><a xlink:href="../../dc/da8/src_2fl_2audio_2audio__reactive_8h.html" target="_top" xlink:title=" ">
+<g id="a_Node000062"><a xlink:href="../../d1/d9a/audio__reactive_8h.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="193,-272 56,-272 56,-253 193,-253 193,-272"/>
 <text text-anchor="middle" x="124.5" y="-260" font-family="Helvetica,sans-Serif" font-size="10.00">fl/audio/audio_reactive.h</text>
 </a>
@@ -201,7 +201,7 @@
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../db/d97/_fast_l_e_d_8h.html" target="_top" xlink:title="central include file for FastLED, defines the CFastLED class/object">
+<g id="a_Node000004"><a xlink:href="../../d6/d64/fastled_8h.html" target="_top" xlink:title="central include file for FastLED, defines the CFastLED class/object">
 <polygon fill="#fff0f0" stroke="red" points="1266.5,-19 1202.5,-19 1202.5,0 1266.5,0 1266.5,-19"/>
 <text text-anchor="middle" x="1234.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">FastLED.h</text>
 </a>
@@ -273,7 +273,7 @@
 <!-- Node10 -->
 <g id="Node000010" class="node">
 <title>Node10</title>
-<g id="a_Node000010"><a xlink:href="../../d7/dc2/fl_2system_2_fast_l_e_d_8h.html" target="_top" xlink:title="Internal FastLED header for implementation files.">
+<g id="a_Node000010"><a xlink:href="../../d0/d69/fl_2system_2fastled_8h.html" target="_top" xlink:title="Internal FastLED header for implementation files.">
 <polygon fill="#fff0f0" stroke="red" points="1288,-129 1181,-129 1181,-110 1288,-110 1288,-129"/>
 <text text-anchor="middle" x="1234.5" y="-117" font-family="Helvetica,sans-Serif" font-size="10.00">fl/system/fastled.h</text>
 </a>
@@ -631,7 +631,7 @@
 <!-- Node95 -->
 <g id="Node000095" class="node">
 <title>Node95</title>
-<g id="a_Node000095"><a xlink:href="../../dd/db4/_h_d107_8ino.html" target="_top" xlink:title="Example showing how to use the HD107 and HD which has built in gamma correction.">
+<g id="a_Node000095"><a xlink:href="../../dd/db4/_h_d107_8ino.html" target="_top" xlink:title="Example showing how to use the HD107S (also named HD107).">
 <polygon fill="white" stroke="#666666" points="2048.5,-283 1898.5,-283 1898.5,-242 2048.5,-242 2048.5,-283"/>
 <text text-anchor="start" x="1906.5" y="-271" font-family="Helvetica,sans-Serif" font-size="10.00">/home/runner/work/FastLED</text>
 <text text-anchor="start" x="1906.5" y="-260" font-family="Helvetica,sans-Serif" font-size="10.00">/FastLED/examples/HD107</text>

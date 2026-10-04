@@ -10,5 +10,5 @@ digraph "fl::SpiChannelEngineAdapter::create"
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
   Node2 [id="Node000002",label="fl::make_shared",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af",tooltip=" "];
   Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::vector_basic::size",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/dad/classfl_1_1vector__basic_a9a248c6b3d33d24ef21e4275c4fbae8c.html#a9a248c6b3d33d24ef21e4275c4fbae8c",tooltip=" "];
+  Node3 [id="Node000003",label="fl::vector_basic::size",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/dad/classfl_1_1vector__basic_a3bdba8a50d37b2fd71bbec2b753fba3e.html#a3bdba8a50d37b2fd71bbec2b753fba3e",tooltip=" "];
 }

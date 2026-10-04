@@ -1,7 +1,6 @@
 var _object_f_l_e_d_8h =
 [
     [ "fl::ObjectFLED", "d9/d33/classfl_1_1_object_f_l_e_d.html", "d9/d33/classfl_1_1_object_f_l_e_d" ],
-    [ "BYTES_PER_DMA", "de/d7a/_object_f_l_e_d_8h_a85ab718063b47eb4e3f63f2c631e1ee6.html#a85ab718063b47eb4e3f63f2c631e1ee6", null ],
     [ "CORDER_BGR", "de/d7a/_object_f_l_e_d_8h_a126482e12ffcb4650f8ff2278a0dbbc5.html#a126482e12ffcb4650f8ff2278a0dbbc5", null ],
     [ "CORDER_BGRW", "de/d7a/_object_f_l_e_d_8h_add23e7f327c2bac8d44aaca1f62ef126.html#add23e7f327c2bac8d44aaca1f62ef126", null ],
     [ "CORDER_BGWR", "de/d7a/_object_f_l_e_d_8h_a0f1d68edf841dea4d6d804de3b629ec1.html#a0f1d68edf841dea4d6d804de3b629ec1", null ],

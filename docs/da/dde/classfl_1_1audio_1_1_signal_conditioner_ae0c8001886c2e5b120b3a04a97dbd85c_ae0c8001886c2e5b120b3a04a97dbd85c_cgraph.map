@@ -1,0 +1,38 @@
+<map id="fl::audio::SignalConditioner::processSample" name="fl::audio::SignalConditioner::processSample">
+<area shape="rect" id="Node000001" title="Process a raw audio sample through the conditioning pipeline." alt="" coords="5,159,203,199"/>
+<area shape="rect" id="Node000002" href="$da/dde/classfl_1_1audio_1_1_signal_conditioner_a3315afd633c00fe262dedba1091d2fe5.html#a3315afd633c00fe262dedba1091d2fe5" title="Apply noise gate with hysteresis." alt="" coords="251,63,448,103"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="147,157,250,113,270,105,272,110,252,118,149,162"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a7028271728479d2b9330f545c776ca5b.html#a7028271728479d2b9330f545c776ca5b" title="Sample a pixel from a 2D CRGB grid at floating&#45;point coordinates." alt="" coords="531,29,617,55"/>
+<area shape="poly" id="edge23_Node000001_Node000006" title=" " alt="" coords="119,157,171,100,208,71,250,49,320,30,392,23,460,24,517,30,517,35,460,30,392,28,321,35,252,54,211,76,175,104,122,161"/>
+<area shape="rect" id="Node000014" href="$da/dde/classfl_1_1audio_1_1_signal_conditioner_ab399a15fb6495148c7a09417ed68d93a.html#ab399a15fb6495148c7a09417ed68d93a" title="Calculate DC offset from valid samples only." alt="" coords="251,306,448,346"/>
+<area shape="poly" id="edge9_Node000001_Node000014" title=" " alt="" coords="128,197,182,244,216,269,252,292,266,298,263,303,249,296,213,274,178,248,124,201"/>
+<area shape="rect" id="Node000015" href="$da/dde/classfl_1_1audio_1_1_signal_conditioner_af158561b35f56da9bd924e98cd012daf.html#af158561b35f56da9bd924e98cd012daf" title="Detect and reject spike samples." alt="" coords="251,127,448,167"/>
+<area shape="poly" id="edge11_Node000001_Node000015" title=" " alt="" coords="203,164,237,159,238,165,203,169"/>
+<area shape="rect" id="Node000016" href="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af" title=" " alt="" coords="287,256,412,281"/>
+<area shape="poly" id="edge17_Node000001_Node000016" title=" " alt="" coords="148,197,252,241,281,250,279,255,250,246,146,202"/>
+<area shape="rect" id="Node000017" href="$da/dde/classfl_1_1audio_1_1_signal_conditioner_a0c302cefc461912305e83274cc246508.html#a0c302cefc461912305e83274cc246508" title="Remove DC offset from samples." alt="" coords="251,191,448,231"/>
+<area shape="poly" id="edge18_Node000001_Node000017" title=" " alt="" coords="203,190,238,194,237,199,203,195"/>
+<area shape="rect" id="Node000003" href="$d2/d24/classfl_1_1vector_a6bcea23da2d1c39846ec89a5119310ff.html#a6bcea23da2d1c39846ec89a5119310ff" title=" " alt="" coords="515,79,633,104"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="448,84,501,86,500,91,448,90"/>
+<area shape="rect" id="Node000004" href="$d2/d24/classfl_1_1vector_a82c3455c1a345460f95a0180c93b3fb0.html#a82c3455c1a345460f95a0180c93b3fb0" title=" " alt="" coords="496,128,652,153"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="429,101,511,122,509,127,428,106"/>
+<area shape="rect" id="Node000005" href="$d2/d24/classfl_1_1vector_a106fe3779897c81ef234f25952ed29d7.html#a106fe3779897c81ef234f25952ed29d7" title=" " alt="" coords="506,177,642,203"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="426,101,449,113,465,126,474,138,483,151,497,162,511,170,509,175,495,167,479,154,470,142,461,129,447,118,423,106"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="448,63,517,50,518,55,449,68"/>
+<area shape="rect" id="Node000013" href="$d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa" title=" " alt="" coords="523,227,625,252"/>
+<area shape="poly" id="edge8_Node000002_Node000013" title=" " alt="" coords="432,101,450,113,461,126,468,139,475,165,480,190,487,202,498,213,512,223,509,227,494,217,483,205,475,192,469,166,463,141,457,129,446,117,429,106"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_ae42bfeb5fc989a01c398b85f4e3accca.html#ae42bfeb5fc989a01c398b85f4e3accca" title="Bilinear interpolation sample from a 2D CRGB grid." alt="" coords="701,5,837,31"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="617,34,687,25,687,31,618,39"/>
+<area shape="rect" id="Node000012" href="$d4/d36/namespacefl_a119e769098c559cc0883bed762678d55.html#a119e769098c559cc0883bed762678d55" title="Nearest&#45;neighbor sample from a 2D CRGB grid." alt="" coords="700,55,837,80"/>
+<area shape="poly" id="edge7_Node000006_Node000012" title=" " alt="" coords="618,45,686,54,686,59,617,50"/>
+<area shape="poly" id="edge10_Node000014_Node000013" title=" " alt="" coords="414,303,447,292,532,255,534,260,449,296,416,308"/>
+<area shape="poly" id="edge12_Node000015_Node000003" title=" " alt="" coords="430,125,508,105,509,110,431,130"/>
+<area shape="poly" id="edge13_Node000015_Node000004" title=" " alt="" coords="448,142,482,141,482,146,448,147"/>
+<area shape="poly" id="edge14_Node000015_Node000005" title=" " alt="" coords="449,163,494,172,493,177,448,169"/>
+<area shape="poly" id="edge15_Node000015_Node000006" title=" " alt="" coords="423,125,447,113,461,101,470,89,479,76,495,64,517,53,519,58,497,68,483,80,474,92,465,105,449,118,426,130"/>
+<area shape="poly" id="edge16_Node000015_Node000013" title=" " alt="" coords="422,165,449,177,474,195,497,213,512,220,510,224,495,218,470,200,447,182,420,170"/>
+<area shape="poly" id="edge19_Node000017_Node000003" title=" " alt="" coords="426,189,446,177,461,162,470,146,478,130,494,113,503,108,506,112,498,117,482,133,474,148,466,165,450,181,429,194"/>
+<area shape="poly" id="edge20_Node000017_Node000004" title=" " alt="" coords="412,189,495,162,518,155,520,160,497,167,414,194"/>
+<area shape="poly" id="edge21_Node000017_Node000005" title=" " alt="" coords="448,199,492,195,493,200,448,205"/>
+<area shape="poly" id="edge22_Node000017_Node000013" title=" " alt="" coords="448,221,509,229,509,234,448,226"/>
+</map>

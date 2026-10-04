@@ -1,0 +1,7 @@
+<map id="fl::mapAndSolveDrivesQ16" name="fl::mapAndSolveDrivesQ16">
+<area shape="rect" id="Node000001" title="One pixel: XYZ in s16.16 to in&#45;gamut emitter drives in s16.16." alt="" coords="5,31,201,56"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_af5a0679639e0ad1db7feb7f9705df72f.html#af5a0679639e0ad1db7feb7f9705df72f" title="One pixel: XYZ in s16.16 to three emitter drives in s16.16." alt="" coords="249,5,416,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="201,30,235,26,236,31,202,35"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a4e06a4bfbce59ea143a3a844cdb084eb.html#a4e06a4bfbce59ea143a3a844cdb084eb" title="XYZ (s16.16, D65&#45;relative) &#45;&gt; OKLab (s16.16), L then a then b." alt="" coords="263,55,402,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="202,51,250,56,249,61,201,56"/>
+</map>

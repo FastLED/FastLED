@@ -67,7 +67,7 @@ var sectionId = 'dynsection-0';
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_a2792268a864ed3d46b191c20fd56ff87.html#a2792268a864ed3d46b191c20fd56ff87" target="_top" xlink:title=" ">
+<g id="a_Node000002"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_aa93f4f0e5197ba7d957ac3d32ce76c52.html#aa93f4f0e5197ba7d957ac3d32ce76c52" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="266,-407 152,-407 152,-388 266,-388 266,-407"/>
 <text text-anchor="middle" x="209" y="-395" font-family="Helvetica,sans-Serif" font-size="10.00">fl::CRGB::colorBoost</text>
 </a>
@@ -103,7 +103,7 @@ var sectionId = 'dynsection-0';
 <!-- Node26 -->
 <g id="Node000026" class="node">
 <title>Node26</title>
-<g id="a_Node000026"><a xlink:href="../../d4/d36/namespacefl_a9cda2472ab9bd68df745496533aa76e7.html#a9cda2472ab9bd68df745496533aa76e7" target="_top" xlink:title=" ">
+<g id="a_Node000026"><a xlink:href="../../d4/d36/namespacefl_a2bda17f9c7e7ed8cc89536cfd39f35e2.html#a2bda17f9c7e7ed8cc89536cfd39f35e2" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="231.5,-333 186.5,-333 186.5,-314 231.5,-314 231.5,-333"/>
 <text text-anchor="middle" x="209" y="-321" font-family="Helvetica,sans-Serif" font-size="10.00">fl::cos</text>
 </a>
@@ -139,7 +139,7 @@ var sectionId = 'dynsection-0';
 <!-- Node28 -->
 <g id="Node000028" class="node">
 <title>Node28</title>
-<g id="a_Node000028"><a xlink:href="../../d8/df9/group___noise_generation_gaeb72246ebd597b60a7e575173accf2fd.html#gaeb72246ebd597b60a7e575173accf2fd" target="_top" xlink:title=" ">
+<g id="a_Node000028"><a xlink:href="../../d8/df9/group___noise_generation_gaeb72246ebd597b60a7e575173accf2fd.html#gaeb72246ebd597b60a7e575173accf2fd" target="_top" xlink:title="8&#45;Bit, fixed point implementation of Perlin&#39;s noise.">
 <polygon fill="white" stroke="#666666" points="235,-259 183,-259 183,-240 235,-240 235,-259"/>
 <text text-anchor="middle" x="209" y="-247" font-family="Helvetica,sans-Serif" font-size="10.00">inoise8</text>
 </a>
@@ -175,7 +175,7 @@ var sectionId = 'dynsection-0';
 <!-- Node33 -->
 <g id="Node000033" class="node">
 <title>Node33</title>
-<g id="a_Node000033"><a xlink:href="../../d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a" target="_top" xlink:title="Universal millisecond timer &#45; returns milliseconds since system startup.">
+<g id="a_Node000033"><a xlink:href="../../d4/d36/namespacefl_a3c0ba5842bfd029c404a38c8df2315f3.html#a3c0ba5842bfd029c404a38c8df2315f3" target="_top" xlink:title="Universal millisecond timer &#45; returns milliseconds since system startup.">
 <polygon fill="white" stroke="#666666" points="237,-167 181,-167 181,-148 237,-148 237,-167"/>
 <text text-anchor="middle" x="209" y="-155" font-family="Helvetica,sans-Serif" font-size="10.00">fl::millis</text>
 </a>
@@ -247,7 +247,7 @@ var sectionId = 'dynsection-0';
 <!-- Node37 -->
 <g id="Node000037" class="node">
 <title>Node37</title>
-<g id="a_Node000037"><a xlink:href="../../d4/d36/namespacefl_abc07da8d8983da7016b55f7626e9c060.html#abc07da8d8983da7016b55f7626e9c060" target="_top" xlink:title=" ">
+<g id="a_Node000037"><a xlink:href="../../d4/d36/namespacefl_a080e32a9d5b39b1674c35757eaa2daf9.html#a080e32a9d5b39b1674c35757eaa2daf9" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="230.5,-19 187.5,-19 187.5,0 230.5,0 230.5,-19"/>
 <text text-anchor="middle" x="209" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::sin</text>
 </a>
@@ -265,7 +265,7 @@ var sectionId = 'dynsection-0';
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_adb891cc4fe8f5ac2188d72c13c0256fd.html#adb891cc4fe8f5ac2188d72c13c0256fd" target="_top" xlink:title="Default constructor.">
+<g id="a_Node000003"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_a910ee467a963ad6805026ad83873e52b.html#a910ee467a963ad6805026ad83873e52b" target="_top" xlink:title="Default constructor.">
 <polygon fill="white" stroke="#666666" points="406.5,-407 316.5,-407 316.5,-388 406.5,-388 406.5,-407"/>
 <text text-anchor="middle" x="361.5" y="-395" font-family="Helvetica,sans-Serif" font-size="10.00">fl::CRGB::CRGB</text>
 </a>
@@ -301,7 +301,7 @@ var sectionId = 'dynsection-0';
 <!-- Node5 -->
 <g id="Node000005" class="node">
 <title>Node5</title>
-<g id="a_Node000005"><a xlink:href="../../d4/d5d/structfl_1_1_h_s_v16_afb1735cc73fa0e364b7a24893e2f6f8b.html#afb1735cc73fa0e364b7a24893e2f6f8b" target="_top" xlink:title=" ">
+<g id="a_Node000005"><a xlink:href="../../d4/d5d/structfl_1_1_h_s_v16_acac3ff8bdd1e5038d2c7551084659bd9.html#acac3ff8bdd1e5038d2c7551084659bd9" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="556,-407 457,-407 457,-388 556,-388 556,-407"/>
 <text text-anchor="middle" x="506.5" y="-395" font-family="Helvetica,sans-Serif" font-size="10.00">fl::HSV16::HSV16</text>
 </a>
@@ -319,7 +319,7 @@ var sectionId = 'dynsection-0';
 <!-- Node6 -->
 <g id="Node000006" class="node">
 <title>Node6</title>
-<g id="a_Node000006"><a xlink:href="../../d4/d36/namespacefl_adbc9938a37fd2f52f4c865a78914f420.html#adbc9938a37fd2f52f4c865a78914f420" target="_top" xlink:title=" ">
+<g id="a_Node000006"><a xlink:href="../../d4/d36/namespacefl_a4bfb168f4c6c19a8c0298b937b8baa46.html#a4bfb168f4c6c19a8c0298b937b8baa46" target="_top" xlink:title=" ">
 <polygon fill="#fff0f0" stroke="red" points="538.5,-370 474.5,-370 474.5,-351 538.5,-351 538.5,-370"/>
 <text text-anchor="middle" x="506.5" y="-358" font-family="Helvetica,sans-Serif" font-size="10.00">fl::ease16</text>
 </a>
@@ -355,7 +355,7 @@ var sectionId = 'dynsection-0';
 <!-- Node29 -->
 <g id="Node000029" class="node">
 <title>Node29</title>
-<g id="a_Node000029"><a xlink:href="../../d8/d5c/group___noise_gaa3db0f2f3777cf5bb7a4dd1359dba4fe.html#gaa3db0f2f3777cf5bb7a4dd1359dba4fe" target="_top" xlink:title=" ">
+<g id="a_Node000029"><a xlink:href="../../d8/d5c/group___noise_gaa3db0f2f3777cf5bb7a4dd1359dba4fe.html#gaa3db0f2f3777cf5bb7a4dd1359dba4fe" target="_top" xlink:title="8&#45;bit, fixed point implementation of Perlin&#39;s noise without scaling.">
 <polygon fill="white" stroke="#666666" points="399,-259 324,-259 324,-240 399,-240 399,-259"/>
 <text text-anchor="middle" x="361.5" y="-247" font-family="Helvetica,sans-Serif" font-size="10.00">inoise8_raw</text>
 </a>

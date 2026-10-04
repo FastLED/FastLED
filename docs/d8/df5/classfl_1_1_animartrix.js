@@ -1,7 +1,7 @@
 var classfl_1_1_animartrix =
 [
     [ "Animartrix", "d8/df5/classfl_1_1_animartrix_a8ba7b7c451c37ad1ae58a135b2486657.html#a8ba7b7c451c37ad1ae58a135b2486657", null ],
-    [ "Animartrix", "d8/df5/classfl_1_1_animartrix_a36ad8dc1940ab67e11e662da749d7276.html#a36ad8dc1940ab67e11e662da749d7276", null ],
+    [ "Animartrix", "d8/df5/classfl_1_1_animartrix_a02aaa163cfcf86b423b71888860aa8d6.html#a02aaa163cfcf86b423b71888860aa8d6", null ],
     [ "createViz", "d8/df5/classfl_1_1_animartrix_affcad2365916ea5a54f1e5d0450000df.html#affcad2365916ea5a54f1e5d0450000df", null ],
     [ "draw", "d8/df5/classfl_1_1_animartrix_a6c9c2e9254e38790e717852d5dca3c46.html#a6c9c2e9254e38790e717852d5dca3c46", null ],
     [ "fxGet", "d8/df5/classfl_1_1_animartrix_abaf7df331465ceed41d6d2e39699d22e.html#abaf7df331465ceed41d6d2e39699d22e", null ],

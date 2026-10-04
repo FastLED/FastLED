@@ -67,7 +67,7 @@ var sectionId = 'dynsection-0';
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a" target="_top" xlink:title="Universal millisecond timer &#45; returns milliseconds since system startup.">
+<g id="a_Node000002"><a xlink:href="../../d4/d36/namespacefl_a3c0ba5842bfd029c404a38c8df2315f3.html#a3c0ba5842bfd029c404a38c8df2315f3" target="_top" xlink:title="Universal millisecond timer &#45; returns milliseconds since system startup.">
 <polygon fill="white" stroke="#666666" points="272,-225 216,-225 216,-206 272,-206 272,-225"/>
 <text text-anchor="middle" x="244" y="-213" font-family="Helvetica,sans-Serif" font-size="10.00">fl::millis</text>
 </a>
@@ -238,7 +238,7 @@ var sectionId = 'dynsection-0';
 <!-- Node6 -->
 <g id="Node000006" class="node">
 <title>Node6</title>
-<g id="a_Node000006"><a xlink:href="../../df/da5/lib8tion_8h_a696b9421eca961df0a68c7c6c3e983ab.html#a696b9421eca961df0a68c7c6c3e983ab" target="_top" xlink:title="Generates an 8&#45;bit sine wave at a given BPM that oscillates within a given range.">
+<g id="a_Node000006"><a xlink:href="../../df/da5/lib8tion_8h_aca012663c6c8fe9a7240bcbc76095ba9.html#aca012663c6c8fe9a7240bcbc76095ba9" target="_top" xlink:title="Generates an 8&#45;bit sine wave at a given BPM that oscillates within a given range.">
 <polygon fill="white" stroke="#666666" points="585,-318 526,-318 526,-299 585,-299 585,-318"/>
 <text text-anchor="middle" x="555.5" y="-306" font-family="Helvetica,sans-Serif" font-size="10.00">beatsin8</text>
 </a>
@@ -310,7 +310,7 @@ var sectionId = 'dynsection-0';
 <!-- Node11 -->
 <g id="Node000011" class="node">
 <title>Node11</title>
-<g id="a_Node000011"><a xlink:href="../../d2/d0d/group___random_gaaaff3e84c6ab2cf5f71400a4b6958beb.html#gaaaff3e84c6ab2cf5f71400a4b6958beb" target="_top" xlink:title="Generate a 16&#45;bit random number.">
+<g id="a_Node000011"><a xlink:href="../../d2/d0d/group___random_ga6f816735a0bd63bfc78bebbc7c5f12b9.html#ga6f816735a0bd63bfc78bebbc7c5f12b9" target="_top" xlink:title="Generate a 16&#45;bit random number.">
 <polygon fill="white" stroke="#666666" points="711.5,-75 645.5,-75 645.5,-56 711.5,-56 711.5,-75"/>
 <text text-anchor="middle" x="678.5" y="-63" font-family="Helvetica,sans-Serif" font-size="10.00">random16</text>
 </a>
@@ -328,7 +328,7 @@ var sectionId = 'dynsection-0';
 <!-- Node12 -->
 <g id="Node000012" class="node">
 <title>Node12</title>
-<g id="a_Node000012"><a xlink:href="../../d2/d0d/group___random_gadb05544426b14ef8d85fb2eb73cb8a0a.html#gadb05544426b14ef8d85fb2eb73cb8a0a" target="_top" xlink:title="Generate an 8&#45;bit random number.">
+<g id="a_Node000012"><a xlink:href="../../d2/d0d/group___random_gafb55d95e3e866dce182f149535903dd8.html#gafb55d95e3e866dce182f149535903dd8" target="_top" xlink:title="Generate an 8&#45;bit random number.">
 <polygon fill="white" stroke="#666666" points="708.5,-122 648.5,-122 648.5,-103 708.5,-103 708.5,-122"/>
 <text text-anchor="middle" x="678.5" y="-110" font-family="Helvetica,sans-Serif" font-size="10.00">random8</text>
 </a>
@@ -355,7 +355,7 @@ var sectionId = 'dynsection-0';
 <!-- Node14 -->
 <g id="Node000014" class="node">
 <title>Node14</title>
-<g id="a_Node000014"><a xlink:href="../../df/da5/lib8tion_8h_adf8e83564c52b94d0ff5594aede0be28.html#adf8e83564c52b94d0ff5594aede0be28" target="_top" xlink:title="Generates a 16&#45;bit sine wave at a given BPM that oscillates within a given range.">
+<g id="a_Node000014"><a xlink:href="../../df/da5/lib8tion_8h_ac869590ebed22301d9a08cf7406128b3.html#ac869590ebed22301d9a08cf7406128b3" target="_top" xlink:title="Generates a 16&#45;bit sine wave at a given BPM that oscillates within a given range.">
 <polygon fill="white" stroke="#666666" points="588,-207 523,-207 523,-188 588,-188 588,-207"/>
 <text text-anchor="middle" x="555.5" y="-195" font-family="Helvetica,sans-Serif" font-size="10.00">beatsin16</text>
 </a>
@@ -373,7 +373,7 @@ var sectionId = 'dynsection-0';
 <!-- Node16 -->
 <g id="Node000016" class="node">
 <title>Node16</title>
-<g id="a_Node000016"><a xlink:href="../../d1/dfb/colorutils_8h_a5e33a6635101019cce6b0936c9415a6f.html#a5e33a6635101019cce6b0936c9415a6f" target="_top" xlink:title="Fill a range of LEDs with a rainbow of colors.">
+<g id="a_Node000016"><a xlink:href="../../d1/dfb/colorutils_8h_a72ee3324d8c70c52743313f46676204f.html#a72ee3324d8c70c52743313f46676204f" target="_top" xlink:title="Fill a range of LEDs with a rainbow of colors.">
 <polygon fill="white" stroke="#666666" points="715,-19 642,-19 642,0 715,0 715,-19"/>
 <text text-anchor="middle" x="678.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fill_rainbow</text>
 </a>

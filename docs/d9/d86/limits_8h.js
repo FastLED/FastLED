@@ -21,6 +21,6 @@ var limits_8h =
     [ "fl::numeric_limits< unsigned long >", "d4/d0e/structfl_1_1numeric__limits_3_01unsigned_01long_01_4.html", "d4/d0e/structfl_1_1numeric__limits_3_01unsigned_01long_01_4" ],
     [ "fl::numeric_limits< unsigned long long >", "dd/de3/structfl_1_1numeric__limits_3_01unsigned_01long_01long_01_4.html", "dd/de3/structfl_1_1numeric__limits_3_01unsigned_01long_01long_01_4" ],
     [ "fl::numeric_limits< unsigned short >", "d1/d0d/structfl_1_1numeric__limits_3_01unsigned_01short_01_4.html", "d1/d0d/structfl_1_1numeric__limits_3_01unsigned_01short_01_4" ],
-    [ "fl::detail::integer_digits10_func", "df/d9e/namespacefl_1_1detail_ab9304926ab91217e480451c4d4739d52.html#ab9304926ab91217e480451c4d4739d52", null ],
-    [ "fl::detail::integer_digits_func", "df/d9e/namespacefl_1_1detail_abea84fe8da25730201cbfead18a81ea5.html#abea84fe8da25730201cbfead18a81ea5", null ]
+    [ "fl::detail::integer_digits10_func", "df/d9e/namespacefl_1_1detail_a10062f2e0795a031c8dd6b13a6961f3a.html#a10062f2e0795a031c8dd6b13a6961f3a", null ],
+    [ "fl::detail::integer_digits_func", "df/d9e/namespacefl_1_1detail_a6de6f4c109b4ede07fa25e395f7ca3d4.html#a6de6f4c109b4ede07fa25e395f7ca3d4", null ]
 ];

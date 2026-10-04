@@ -1,8 +1,10 @@
 <map id="fl::video::PixelStream::readFrameAt" name="fl::video::PixelStream::readFrameAt">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,35,165,75"/>
-<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a18e7608a302c3628c24710b27480641b.html#a18e7608a302c3628c24710b27480641b" title=" " alt="" coords="234,5,301,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="165,36,220,25,221,30,166,41"/>
-<area shape="rect" id="Node000003" href="$d1/de0/classfl_1_1_frame_ab1f3046927985e53571210acc2f31faa.html#ab1f3046927985e53571210acc2f31faa" title=" " alt="" coords="213,79,321,104"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="166,69,200,75,199,81,165,74"/>
-<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="237,80,231,70,234,61,247,54,267,52,292,56,303,64,299,68,290,60,267,57,248,59,238,64,236,70,242,77"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,63,165,103"/>
+<area shape="rect" id="Node000002" href="$d7/d7e/classfl_1_1video_1_1_pixel_stream_af6c4c5a2ccb07a467b7e1ae45495a9c9.html#af6c4c5a2ccb07a467b7e1ae45495a9c9" title=" " alt="" coords="213,5,373,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="158,60,207,46,208,52,159,65"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a18e7608a302c3628c24710b27480641b.html#a18e7608a302c3628c24710b27480641b" title=" " alt="" coords="260,70,327,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="165,80,246,80,246,85,165,85"/>
+<area shape="rect" id="Node000004" href="$d1/de0/classfl_1_1_frame_ab1f3046927985e53571210acc2f31faa.html#ab1f3046927985e53571210acc2f31faa" title=" " alt="" coords="239,143,347,169"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="144,100,244,136,242,141,142,105"/>
+<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="259,145,252,135,256,125,270,119,293,117,322,120,334,129,330,134,320,125,293,122,271,124,259,129,257,134,263,142"/>
 </map>

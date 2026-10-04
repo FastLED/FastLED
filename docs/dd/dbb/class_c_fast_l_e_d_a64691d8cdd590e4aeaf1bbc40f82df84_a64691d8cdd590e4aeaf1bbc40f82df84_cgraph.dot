@@ -1,0 +1,48 @@
+digraph "CFastLED::addLedsSpiChannel"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="CFastLED::addLedsSpiChannel",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Add an SPI based CLEDController via Channel API (default RGB order and speed)."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="CFastLED::addLedsSpiDispatch",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dbb/class_c_fast_l_e_d_af1153950c8ddecb6a8f53b9f76187ef9.html#af1153950c8ddecb6a8f53b9f76187ef9",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="CFastLED::addLeds",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dbb/class_c_fast_l_e_d_af05a7eb54282b7c43293e2905b7405bb.html#af05a7eb54282b7c43293e2905b7405bb",tooltip="Add a CLEDController instance to the world."];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::SpiEncoder::spiEncoder\lForChipset",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d69/structfl_1_1_spi_encoder_a70ab533d731ab69cc043b02be20473c8.html#a70ab533d731ab69cc043b02be20473c8",tooltip="Look up the default SpiEncoder for a given chipset."];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::SpiEncoder::apa102",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d69/structfl_1_1_spi_encoder_a7a025094f11fb213c7b3054075f7a8a1.html#a7a025094f11fb213c7b3054075f7a8a1",tooltip="Create APA102 encoder configuration."];
+  Node4 -> Node6 [id="edge5_Node000004_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::SpiEncoder::apa102HD",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d69/structfl_1_1_spi_encoder_a8fc549c0a4f94334e1b25fcbae940226.html#a8fc549c0a4f94334e1b25fcbae940226",tooltip="Create APA102HD encoder configuration (per-LED brightness via HD gamma)"];
+  Node4 -> Node7 [id="edge6_Node000004_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::SpiEncoder::dotstar",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d69/structfl_1_1_spi_encoder_ac8e0f0d110fa0edddbc14d58b959b3ef.html#ac8e0f0d110fa0edddbc14d58b959b3ef",tooltip="Create DOTSTAR encoder configuration (alias for APA102)"];
+  Node4 -> Node8 [id="edge7_Node000004_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl::SpiEncoder::dotstarHD",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d69/structfl_1_1_spi_encoder_a6845d32272fa83226f38ae55f8853b4a.html#a6845d32272fa83226f38ae55f8853b4a",tooltip="Create DOTSTARHD encoder configuration (alias for APA102HD)"];
+  Node4 -> Node9 [id="edge8_Node000004_Node000009",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="fl::SpiEncoder::hd107",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d69/structfl_1_1_spi_encoder_ae060d9c1da640440532aa4d55ef12a60.html#ae060d9c1da640440532aa4d55ef12a60",tooltip="Create HD107 encoder configuration."];
+  Node4 -> Node10 [id="edge9_Node000004_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="fl::SpiEncoder::hd107HD",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d69/structfl_1_1_spi_encoder_a901555767195c09bb6830c76cb80afad.html#a901555767195c09bb6830c76cb80afad",tooltip="Create HD107HD encoder configuration."];
+  Node4 -> Node11 [id="edge10_Node000004_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="fl::SpiEncoder::hd108",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d69/structfl_1_1_spi_encoder_a73958fd7080dd2e5439354cc40791811.html#a73958fd7080dd2e5439354cc40791811",tooltip="Create HD108 encoder configuration."];
+  Node4 -> Node12 [id="edge11_Node000004_Node000012",color="steelblue1",style="solid",tooltip=" "];
+  Node12 [id="Node000012",label="fl::SpiEncoder::lpd6803",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d69/structfl_1_1_spi_encoder_aaa4d77146e4d8dd602e9141d2f76c10d.html#aaa4d77146e4d8dd602e9141d2f76c10d",tooltip="Create LPD6803 encoder configuration."];
+  Node4 -> Node13 [id="edge12_Node000004_Node000013",color="steelblue1",style="solid",tooltip=" "];
+  Node13 [id="Node000013",label="fl::SpiEncoder::lpd8806",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d69/structfl_1_1_spi_encoder_ac042c1e3dc29b1238bc16a9340d42b16.html#ac042c1e3dc29b1238bc16a9340d42b16",tooltip="Create LPD8806 encoder configuration."];
+  Node4 -> Node14 [id="edge13_Node000004_Node000014",color="steelblue1",style="solid",tooltip=" "];
+  Node14 [id="Node000014",label="fl::SpiEncoder::my9221",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d69/structfl_1_1_spi_encoder_a383b0c8db4769cb455a2e3caff0164a5.html#a383b0c8db4769cb455a2e3caff0164a5",tooltip="Create MY9221 encoder configuration."];
+  Node4 -> Node15 [id="edge14_Node000004_Node000015",color="steelblue1",style="solid",tooltip=" "];
+  Node15 [id="Node000015",label="fl::SpiEncoder::p9813",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d69/structfl_1_1_spi_encoder_a8f9bd45633eecd7f5f51a81deaeab8a0.html#a8f9bd45633eecd7f5f51a81deaeab8a0",tooltip="Create P9813 encoder configuration."];
+  Node4 -> Node16 [id="edge15_Node000004_Node000016",color="steelblue1",style="solid",tooltip=" "];
+  Node16 [id="Node000016",label="fl::SpiEncoder::sk9822",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d69/structfl_1_1_spi_encoder_a7aa4236a8221e07c1d3d21d0e8df6bcb.html#a7aa4236a8221e07c1d3d21d0e8df6bcb",tooltip="Create SK9822 encoder configuration."];
+  Node4 -> Node17 [id="edge16_Node000004_Node000017",color="steelblue1",style="solid",tooltip=" "];
+  Node17 [id="Node000017",label="fl::SpiEncoder::sk9822HD",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d69/structfl_1_1_spi_encoder_af34e0e3ca679bc9627284517957387a6.html#af34e0e3ca679bc9627284517957387a6",tooltip="Create SK9822HD encoder configuration."];
+  Node4 -> Node18 [id="edge17_Node000004_Node000018",color="steelblue1",style="solid",tooltip=" "];
+  Node18 [id="Node000018",label="fl::SpiEncoder::sm16716",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d69/structfl_1_1_spi_encoder_a19e51baa498fa62074f01b328ff4c2d2.html#a19e51baa498fa62074f01b328ff4c2d2",tooltip="Create SM16716 encoder configuration."];
+  Node4 -> Node19 [id="edge18_Node000004_Node000019",color="steelblue1",style="solid",tooltip=" "];
+  Node19 [id="Node000019",label="fl::SpiEncoder::ws2801",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d69/structfl_1_1_spi_encoder_ae999b0bb429cb88f341edcb27f34c619.html#ae999b0bb429cb88f341edcb27f34c619",tooltip="Create WS2801 encoder configuration."];
+  Node4 -> Node20 [id="edge19_Node000004_Node000020",color="steelblue1",style="solid",tooltip=" "];
+  Node20 [id="Node000020",label="fl::SpiEncoder::ws2803",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d69/structfl_1_1_spi_encoder_af49ab084fce419e164ce9fdd39551c2e.html#af49ab084fce419e164ce9fdd39551c2e",tooltip="Create WS2803 encoder configuration."];
+}

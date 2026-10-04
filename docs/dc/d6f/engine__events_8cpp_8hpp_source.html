@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -109,173 +109,223 @@ $(function(){initNavTree('dc/d6f/engine__events_8cpp_8hpp_source.html','../../')
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment">// zackees/zccache#619 (Windows PCH path-spelling drift). The comment</span></div>
 <div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment">// above said &quot;for printf debug&quot; but no printf-debug call survived.</span></div>
 <div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">#include &quot;<a class="code" href="../../db/d01/noexcept_8h.html">fl/stl/noexcept.h</a>&quot;</span></div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span> </div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span> </div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="keyword">namespace </span><a class="code hl_namespace" href="../../d4/d36/namespacefl.html">fl</a> {</div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#if !FL_PLATFORM_HAS_TINY_MEMORY</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#include &quot;<a class="code" href="../../d2/d17/dither__frame_8h.html">fl/channels/dither_frame.h</a>&quot;</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#endif</span></div>
 <div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span> </div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment">// Explicitly define constructor and destructor</span></div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><a class="code hl_function" href="../../de/dca/classfl_1_1_engine_events_a2376795d7dc9338c6c532d1814b86789.html#a2376795d7dc9338c6c532d1814b86789">EngineEvents::EngineEvents</a>() = <span class="keywordflow">default</span>;</div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><a class="code hl_function" href="../../de/dca/classfl_1_1_engine_events_a0a9393c2019983116a4990a31a3221ae.html#a0a9393c2019983116a4990a31a3221ae">EngineEvents::~EngineEvents</a>() <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> = default;</div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span> </div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> </div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno"><a class="line" href="../../db/da2/classfl_1_1_engine_events_1_1_listener_a790a1b0679dc932b312ee945ecf0cc46.html#a790a1b0679dc932b312ee945ecf0cc46">   16</a></span><a class="code hl_function" href="../../de/dca/classfl_1_1_engine_events_a2376795d7dc9338c6c532d1814b86789.html#a2376795d7dc9338c6c532d1814b86789">EngineEvents</a>::<a class="code hl_function" href="../../db/da2/classfl_1_1_engine_events_1_1_listener_a790a1b0679dc932b312ee945ecf0cc46.html#a790a1b0679dc932b312ee945ecf0cc46">Listener</a>::<a class="code hl_function" href="../../db/da2/classfl_1_1_engine_events_1_1_listener_a790a1b0679dc932b312ee945ecf0cc46.html#a790a1b0679dc932b312ee945ecf0cc46">Listener</a>() {}</div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
-<div class="foldopen" id="foldopen00018" data-start="{" data-end="}">
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno"><a class="line" href="../../db/da2/classfl_1_1_engine_events_1_1_listener_ac785ff88f46f3a7fae72f7d32400a33c.html#ac785ff88f46f3a7fae72f7d32400a33c">   18</a></span><a class="code hl_function" href="../../db/da2/classfl_1_1_engine_events_1_1_listener_ac785ff88f46f3a7fae72f7d32400a33c.html#ac785ff88f46f3a7fae72f7d32400a33c">EngineEvents::Listener::~Listener</a>() <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#if FASTLED_HAS_ENGINE_EVENTS</span></div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>    <a class="code hl_function" href="../../de/dca/classfl_1_1_engine_events_a2376795d7dc9338c6c532d1814b86789.html#a2376795d7dc9338c6c532d1814b86789">EngineEvents</a> *ptr = EngineEvents::getInstance();</div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>    <span class="keyword">const</span> <span class="keywordtype">bool</span> has_listener = ptr &amp;&amp; ptr-&gt;<a class="code hl_function" href="../../de/dca/classfl_1_1_engine_events_a89e502cfa90b62843a8d491c6c14f9e3.html#a89e502cfa90b62843a8d491c6c14f9e3">_hasListener</a>(<span class="keyword">this</span>);</div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>    <span class="keywordflow">if</span> (has_listener) {</div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>        <span class="comment">// Warning, the listener should be removed by the subclass. If we are</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>        <span class="comment">// here then the subclass did not remove the listener and we are now in</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>        <span class="comment">// a partial state of destruction and the results may be undefined for</span></div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>        <span class="comment">// multithreaded applications. However, for single threaded (the only</span></div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>        <span class="comment">// option as of 2024, October) this will be ok.</span></div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>        ptr-&gt;<a class="code hl_function" href="../../de/dca/classfl_1_1_engine_events_a738fcb94b479c6c1565333094b7e8202.html#a738fcb94b479c6c1565333094b7e8202">_removeListener</a>(<span class="keyword">this</span>);</div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>    }</div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>}</div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span> </div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="keyword">namespace </span><a class="code hl_namespace" href="../../d4/d36/namespacefl.html">fl</a> {</div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
+<div class="foldopen" id="foldopen00014" data-start="{" data-end="}">
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno"><a class="line" href="../../d7/d18/namespacefl_1_1anonymous__namespace_02engine__events_8cpp_8hpp_03.html">   14</a></span><span class="keyword">namespace </span>{</div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment">// FL_LINT_ALLOW_GLOBAL(frame-task callback registry backing)</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno"><a class="line" href="../../d7/d18/namespacefl_1_1anonymous__namespace_02engine__events_8cpp_8hpp_03_a4f06fab16314fb946950d79e7cfda6cc.html#a4f06fab16314fb946950d79e7cfda6cc">   16</a></span><a class="code hl_class" href="../../db/da2/classfl_1_1_engine_events_1_1_listener.html">EngineEvents::Listener</a> *<a class="code hl_variable" href="../../d7/d18/namespacefl_1_1anonymous__namespace_02engine__events_8cpp_8hpp_03_a4f06fab16314fb946950d79e7cfda6cc.html#a4f06fab16314fb946950d79e7cfda6cc">gFrameTaskListener</a> = <span class="keyword">nullptr</span>;</div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>}</div>
 </div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="preprocessor">#if FASTLED_HAS_ENGINE_EVENTS</span></div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><a class="code hl_function" href="../../de/dca/classfl_1_1_engine_events_a2376795d7dc9338c6c532d1814b86789.html#a2376795d7dc9338c6c532d1814b86789">EngineEvents</a> *EngineEvents::getInstance() {</div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    <span class="keywordflow">return</span> &amp;<a class="code hl_function" href="../../d9/d5b/classfl_1_1_singleton_a47fdc044003ec27f9e9833f7f5418e01.html#a47fdc044003ec27f9e9833f7f5418e01">Singleton&lt;EngineEvents&gt;::instance</a>();</div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>}</div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="preprocessor">#if FASTLED_HAS_ENGINE_EVENTS</span></div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="keywordtype">void</span> <a class="code hl_function" href="../../de/dca/classfl_1_1_engine_events_a67277a0b83dfcf03ab6730488adada3d.html#a67277a0b83dfcf03ab6730488adada3d">EngineEvents::_onPlatformPreLoop</a>() {</div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    <span class="keywordflow">for</span> (<span class="keyword">auto</span> &amp;item : mListeners) {</div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>        <span class="keyword">auto</span> listener = item.listener;</div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>        listener-&gt;onPlatformPreLoop();</div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    }</div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    <span class="keywordflow">for</span> (<span class="keyword">auto</span> &amp;item : mListeners) {</div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>        <span class="keyword">auto</span> listener = item.listener;</div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>        listener-&gt;onPlatformPreLoop2();</div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    }</div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>}</div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> </div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="keywordtype">bool</span> <a class="code hl_function" href="../../de/dca/classfl_1_1_engine_events_a89e502cfa90b62843a8d491c6c14f9e3.html#a89e502cfa90b62843a8d491c6c14f9e3">EngineEvents::_hasListener</a>(<a class="code hl_class" href="../../db/da2/classfl_1_1_engine_events_1_1_listener.html">Listener</a> *listener) {</div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    <span class="keyword">auto</span> predicate = [listener](<span class="keyword">const</span> <a class="code hl_typedef" href="../../d4/d36/namespacefl_a413503284f9ea52cb03ab5ceb120b927.html#a413503284f9ea52cb03ab5ceb120b927">Pair</a> &amp;pair) {</div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>        <span class="keywordflow">return</span> pair.listener == listener;</div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    };</div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    <span class="keywordflow">return</span> mListeners.find_if(predicate) != mListeners.end();</div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>}</div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span><span class="keywordtype">void</span> <a class="code hl_function" href="../../de/dca/classfl_1_1_engine_events_a5db1774e984faf3b0d5a67f7b3878bc0.html#a5db1774e984faf3b0d5a67f7b3878bc0">EngineEvents::_addListener</a>(<a class="code hl_class" href="../../db/da2/classfl_1_1_engine_events_1_1_listener.html">Listener</a> *listener, <span class="keywordtype">int</span> priority) {</div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    <span class="keywordflow">if</span> (<a class="code hl_function" href="../../de/dca/classfl_1_1_engine_events_a89e502cfa90b62843a8d491c6c14f9e3.html#a89e502cfa90b62843a8d491c6c14f9e3">_hasListener</a>(listener)) {</div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>        <span class="keywordflow">return</span>;</div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    }</div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    <span class="keywordflow">for</span> (<span class="keyword">auto</span> it = mListeners.begin(); it != mListeners.end(); ++it) {</div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>        <span class="keywordflow">if</span> (it-&gt;priority &lt; priority) {</div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>            <span class="comment">// this is now the highest priority in this spot.</span></div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>            EngineEvents::Pair pair = EngineEvents::Pair(listener, priority);</div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>            mListeners.insert(it, pair);</div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>            <span class="keywordflow">return</span>;</div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>        }</div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>    }</div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>    EngineEvents::Pair pair = EngineEvents::Pair(listener, priority);</div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>    mListeners.push_back(pair);</div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>}</div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span> </div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span><span class="keywordtype">void</span> <a class="code hl_function" href="../../de/dca/classfl_1_1_engine_events_a738fcb94b479c6c1565333094b7e8202.html#a738fcb94b479c6c1565333094b7e8202">EngineEvents::_removeListener</a>(<a class="code hl_class" href="../../db/da2/classfl_1_1_engine_events_1_1_listener.html">Listener</a> *listener) {</div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>    <span class="keyword">auto</span> predicate = [listener](<span class="keyword">const</span> <a class="code hl_typedef" href="../../d4/d36/namespacefl_a413503284f9ea52cb03ab5ceb120b927.html#a413503284f9ea52cb03ab5ceb120b927">Pair</a> &amp;pair) {</div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>        <span class="keywordflow">return</span> pair.listener == listener;</div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>    };</div>
-<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    <span class="keyword">auto</span> it = mListeners.find_if(predicate);</div>
-<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>    <span class="keywordflow">if</span> (it != mListeners.end()) {</div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>        mListeners.erase(it);</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> </div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment">// Explicitly define constructor and destructor</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><a class="code hl_function" href="../../de/dca/classfl_1_1_engine_events_a748ab630e2d0e24bf56ea54886ffba2a.html#a748ab630e2d0e24bf56ea54886ffba2a">EngineEvents::EngineEvents</a>() = <span class="keywordflow">default</span>;</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><a class="code hl_function" href="../../de/dca/classfl_1_1_engine_events_a97fdf26628d61f8f6b3c3588230e9980.html#a97fdf26628d61f8f6b3c3588230e9980">EngineEvents::~EngineEvents</a>() <a class="code hl_variable" href="../../d4/d36/namespacefl_aa317f89ca911371e798d08a93770402f.html#aa317f89ca911371e798d08a93770402f">FL_NO_EXCEPT</a> = default;</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno"><a class="line" href="../../db/da2/classfl_1_1_engine_events_1_1_listener_a34df26390cbc880f54f7a55769bfa8f0.html#a34df26390cbc880f54f7a55769bfa8f0">   24</a></span><a class="code hl_function" href="../../de/dca/classfl_1_1_engine_events_a748ab630e2d0e24bf56ea54886ffba2a.html#a748ab630e2d0e24bf56ea54886ffba2a">EngineEvents</a>::<a class="code hl_function" href="../../db/da2/classfl_1_1_engine_events_1_1_listener_a34df26390cbc880f54f7a55769bfa8f0.html#a34df26390cbc880f54f7a55769bfa8f0">Listener</a>::<a class="code hl_function" href="../../db/da2/classfl_1_1_engine_events_1_1_listener_a34df26390cbc880f54f7a55769bfa8f0.html#a34df26390cbc880f54f7a55769bfa8f0">Listener</a>() {}</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
+<div class="foldopen" id="foldopen00026" data-start="{" data-end="}">
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno"><a class="line" href="../../db/da2/classfl_1_1_engine_events_1_1_listener_a03a793c2f8ad599ec5800e6414a9bfbb.html#a03a793c2f8ad599ec5800e6414a9bfbb">   26</a></span><a class="code hl_function" href="../../db/da2/classfl_1_1_engine_events_1_1_listener_a03a793c2f8ad599ec5800e6414a9bfbb.html#a03a793c2f8ad599ec5800e6414a9bfbb">EngineEvents::Listener::~Listener</a>() <a class="code hl_variable" href="../../d4/d36/namespacefl_aa317f89ca911371e798d08a93770402f.html#aa317f89ca911371e798d08a93770402f">FL_NO_EXCEPT</a> {</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#if FASTLED_HAS_ENGINE_EVENTS</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>    <a class="code hl_function" href="../../de/dca/classfl_1_1_engine_events_a748ab630e2d0e24bf56ea54886ffba2a.html#a748ab630e2d0e24bf56ea54886ffba2a">EngineEvents</a> *ptr = EngineEvents::getInstance();</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>    <span class="keyword">const</span> <span class="keywordtype">bool</span> has_listener = ptr &amp;&amp; ptr-&gt;<a class="code hl_function" href="../../de/dca/classfl_1_1_engine_events_a0d646965f4cd4e78936500e961799ed0.html#a0d646965f4cd4e78936500e961799ed0">_hasListener</a>(<span class="keyword">this</span>);</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>    <span class="keywordflow">if</span> (has_listener) {</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>        <span class="comment">// Warning, the listener should be removed by the subclass. If we are</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>        <span class="comment">// here then the subclass did not remove the listener and we are now in</span></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>        <span class="comment">// a partial state of destruction and the results may be undefined for</span></div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>        <span class="comment">// multithreaded applications. However, for single threaded (the only</span></div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>        <span class="comment">// option as of 2024, October) this will be ok.</span></div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>        ptr-&gt;<a class="code hl_function" href="../../de/dca/classfl_1_1_engine_events_ac1df119809416fe388584c49dea6f53a.html#ac1df119809416fe388584c49dea6f53a">_removeListener</a>(<span class="keyword">this</span>);</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    }</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>}</div>
+</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
+<div class="foldopen" id="foldopen00041" data-start="{" data-end="}">
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno"><a class="line" href="../../de/dca/classfl_1_1_engine_events_a72f24bd8f5798f69531fef3a895ab3cd.html#a72f24bd8f5798f69531fef3a895ab3cd">   41</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="../../de/dca/classfl_1_1_engine_events_a72f24bd8f5798f69531fef3a895ab3cd.html#a72f24bd8f5798f69531fef3a895ab3cd">EngineEvents::setFrameTaskListener</a>(<a class="code hl_class" href="../../db/da2/classfl_1_1_engine_events_1_1_listener.html">Listener</a> *listener) <a class="code hl_variable" href="../../d4/d36/namespacefl_aa317f89ca911371e798d08a93770402f.html#aa317f89ca911371e798d08a93770402f">FL_NO_EXCEPT</a> {</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    gFrameTaskListener = listener;</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>}</div>
+</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> </div>
+<div class="foldopen" id="foldopen00045" data-start="{" data-end="}">
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno"><a class="line" href="../../de/dca/classfl_1_1_engine_events_a0a5a3bb00e383055f035b9588f285a86.html#a0a5a3bb00e383055f035b9588f285a86">   45</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="../../de/dca/classfl_1_1_engine_events_a0a5a3bb00e383055f035b9588f285a86.html#a0a5a3bb00e383055f035b9588f285a86">EngineEvents::onBeginFrame</a>() <a class="code hl_variable" href="../../d4/d36/namespacefl_aa317f89ca911371e798d08a93770402f.html#aa317f89ca911371e798d08a93770402f">FL_NO_EXCEPT</a> {</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="preprocessor">#if !FL_PLATFORM_HAS_TINY_MEMORY</span></div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>    <a class="code hl_function" href="../../df/d9e/namespacefl_1_1detail_a4ecf69a0759c119b930cc4690cc11e65.html#a4ecf69a0759c119b930cc4690cc11e65">detail::advanceDitherFrame</a>();</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="preprocessor">#if FASTLED_HAS_ENGINE_EVENTS</span></div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    EngineEvents::getInstance()-&gt;_onBeginFrame();</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    <span class="keywordflow">if</span> (gFrameTaskListener) {</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>        gFrameTaskListener-&gt;<a class="code hl_function" href="../../db/da2/classfl_1_1_engine_events_1_1_listener_a624b8203c73b6e8045801da3ee391713.html#a624b8203c73b6e8045801da3ee391713">onBeginFrame</a>();</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    }</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>}</div>
+</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
+<div class="foldopen" id="foldopen00057" data-start="{" data-end="}">
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno"><a class="line" href="../../de/dca/classfl_1_1_engine_events_a5f428b668b5a7d0d46b7d251b62d00a0.html#a5f428b668b5a7d0d46b7d251b62d00a0">   57</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="../../de/dca/classfl_1_1_engine_events_a5f428b668b5a7d0d46b7d251b62d00a0.html#a5f428b668b5a7d0d46b7d251b62d00a0">EngineEvents::onEndFrame</a>() <a class="code hl_variable" href="../../d4/d36/namespacefl_aa317f89ca911371e798d08a93770402f.html#aa317f89ca911371e798d08a93770402f">FL_NO_EXCEPT</a> {</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span><span class="preprocessor">#if FASTLED_HAS_ENGINE_EVENTS</span></div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    EngineEvents::getInstance()-&gt;_onEndFrame();</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    <span class="keywordflow">if</span> (gFrameTaskListener) {</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>        gFrameTaskListener-&gt;<a class="code hl_function" href="../../db/da2/classfl_1_1_engine_events_1_1_listener_a64cffa0a94c052aa7d41974d7fa4b614.html#a64cffa0a94c052aa7d41974d7fa4b614">onEndFrame</a>();</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>    }</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>}</div>
+</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span> </div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span><span class="preprocessor">#if FASTLED_HAS_ENGINE_EVENTS</span></div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span><a class="code hl_class" href="../../de/dca/classfl_1_1_engine_events.html">EngineEvents</a> *EngineEvents::getInstance() {</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>    <span class="keywordflow">return</span> &amp;<a class="code hl_function" href="../../d9/d5b/classfl_1_1_singleton_ad5cb1b704e17768f75802673abb0ff75.html#ad5cb1b704e17768f75802673abb0ff75">Singleton&lt;EngineEvents&gt;::instance</a>();</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>}</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span> </div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span><span class="preprocessor">#if FASTLED_HAS_ENGINE_EVENTS</span></div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span><span class="keywordtype">void</span> <a class="code hl_function" href="../../de/dca/classfl_1_1_engine_events_a1d782693466255e62a35ffa2c150bbce.html#a1d782693466255e62a35ffa2c150bbce">EngineEvents::_onPlatformPreLoop</a>() {</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>    <span class="keywordflow">for</span> (<span class="keyword">auto</span> &amp;item : mListeners) {</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>        <span class="keyword">auto</span> listener = item.listener;</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>        listener-&gt;onPlatformPreLoop();</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>    }</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    <span class="keywordflow">for</span> (<span class="keyword">auto</span> &amp;item : mListeners) {</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>        <span class="keyword">auto</span> listener = item.listener;</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>        listener-&gt;onPlatformPreLoop2();</div>
 <div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>    }</div>
 <div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>}</div>
 <div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span> </div>
-<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span><span class="keywordtype">void</span> <a class="code hl_function" href="../../de/dca/classfl_1_1_engine_events_a994a57d95516ce2f09d2730f55064535.html#a994a57d95516ce2f09d2730f55064535">EngineEvents::_onBeginFrame</a>() {</div>
-<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>    <span class="comment">// Make the copy of the listener list to avoid issues with listeners being</span></div>
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>    <span class="comment">// added or removed during the loop.</span></div>
-<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>    ListenerList copy = mListeners;</div>
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>    <span class="keywordflow">for</span> (<span class="keyword">auto</span> &amp;item : copy) {</div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>        <span class="keyword">auto</span> listener = item.listener;</div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>        listener-&gt;onBeginFrame();</div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>    }</div>
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>}</div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span> </div>
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span><span class="keywordtype">void</span> <a class="code hl_function" href="../../de/dca/classfl_1_1_engine_events_a66f213ba6b8673239e20c34cbd47652a.html#a66f213ba6b8673239e20c34cbd47652a">EngineEvents::_onEndShowLeds</a>() {</div>
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>    <span class="comment">// Make the copy of the listener list to avoid issues with listeners being</span></div>
-<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>    <span class="comment">// added or removed during the loop.</span></div>
-<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>    ListenerList copy = mListeners;</div>
-<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>    <span class="keywordflow">for</span> (<span class="keyword">auto</span> &amp;item : copy) {</div>
-<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>        <span class="keyword">auto</span> listener = item.listener;</div>
-<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>        listener-&gt;onEndShowLeds();</div>
-<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>    }</div>
-<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>}</div>
-<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span> </div>
-<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span><span class="keywordtype">void</span> <a class="code hl_function" href="../../de/dca/classfl_1_1_engine_events_ad8f75cdfa7ac86dfedc28b8922bc2c06.html#ad8f75cdfa7ac86dfedc28b8922bc2c06">EngineEvents::_onEndFrame</a>() {</div>
-<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>    <span class="comment">// Make the copy of the listener list to avoid issues with listeners being</span></div>
-<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>    <span class="comment">// added or removed during the loop.</span></div>
-<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>    ListenerList copy = mListeners;</div>
-<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>    <span class="keywordflow">for</span> (<span class="keyword">auto</span> &amp;item : copy) {</div>
-<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>        <span class="keyword">auto</span> listener = item.listener;</div>
-<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>        listener-&gt;onEndFrame();</div>
-<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>    }</div>
-<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>}</div>
-<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span> </div>
-<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span><span class="keywordtype">void</span> <a class="code hl_function" href="../../de/dca/classfl_1_1_engine_events_a1fe1261e564a846e86fbabac7a5462aa.html#a1fe1261e564a846e86fbabac7a5462aa">EngineEvents::_onStripAdded</a>(<a class="code hl_typedef" href="../../db/d6d/cled__controller_8h_a5c4c69e67efd8ee1b27833dfef522d6f.html#a5c4c69e67efd8ee1b27833dfef522d6f">CLEDController</a> *strip, fl::u32 num_leds) {</div>
-<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>    <span class="comment">// Make the copy of the listener list to avoid issues with listeners being</span></div>
-<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>    <span class="comment">// added or removed during the loop.</span></div>
-<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>    ListenerList copy = mListeners;</div>
-<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>    <span class="keywordflow">for</span> (<span class="keyword">auto</span> &amp;item : copy) {</div>
-<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>        <span class="keyword">auto</span> listener = item.listener;</div>
-<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>        listener-&gt;onStripAdded(strip, num_leds);</div>
-<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>    }</div>
-<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>}</div>
-<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span> </div>
-<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span><span class="keywordtype">void</span> <a class="code hl_function" href="../../de/dca/classfl_1_1_engine_events_a4775e3d20c9f3afff147622f5a4c7455.html#a4775e3d20c9f3afff147622f5a4c7455">EngineEvents::_onCanvasUiSet</a>(<a class="code hl_typedef" href="../../db/d6d/cled__controller_8h_a5c4c69e67efd8ee1b27833dfef522d6f.html#a5c4c69e67efd8ee1b27833dfef522d6f">CLEDController</a> *strip,</div>
-<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>                                  <span class="keyword">const</span> ScreenMap &amp;<a class="code hl_variable" href="../../df/dba/_animartrix_ring_8ino_a81753f0017d69bdb0d6d647586a5502a.html#a81753f0017d69bdb0d6d647586a5502a">screenmap</a>) {</div>
-<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>    <span class="comment">// Make the copy of the listener list to avoid issues with listeners being</span></div>
-<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>    <span class="comment">// added or removed during the loop.</span></div>
-<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>    ListenerList copy = mListeners;</div>
-<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>    <span class="keywordflow">for</span> (<span class="keyword">auto</span> &amp;item : copy) {</div>
-<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>        <span class="keyword">auto</span> listener = item.listener;</div>
-<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>        listener-&gt;onCanvasUiSet(strip, <a class="code hl_variable" href="../../df/dba/_animartrix_ring_8ino_a81753f0017d69bdb0d6d647586a5502a.html#a81753f0017d69bdb0d6d647586a5502a">screenmap</a>);</div>
-<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>    }</div>
-<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>}</div>
-<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span> </div>
-<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span><span class="keywordtype">void</span> <a class="code hl_function" href="../../de/dca/classfl_1_1_engine_events_af194e829e524acc84951febfcbe964fb.html#af194e829e524acc84951febfcbe964fb">EngineEvents::_onExit</a>() {</div>
-<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>    <span class="comment">// Make the copy of the listener list to avoid issues with listeners being</span></div>
-<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>    <span class="comment">// added or removed during the loop.</span></div>
-<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>    ListenerList copy = mListeners;</div>
-<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span>    <span class="keywordflow">for</span> (<span class="keyword">auto</span> &amp;item : copy) {</div>
-<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span>        <span class="keyword">auto</span> listener = item.listener;</div>
-<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span>        listener-&gt;onExit();</div>
-<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span>    }</div>
-<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span>}</div>
-<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span> </div>
-<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span><span class="preprocessor">#endif </span><span class="comment">// FASTLED_HAS_ENGINE_EVENTS</span></div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span><span class="keywordtype">bool</span> <a class="code hl_function" href="../../de/dca/classfl_1_1_engine_events_a0d646965f4cd4e78936500e961799ed0.html#a0d646965f4cd4e78936500e961799ed0">EngineEvents::_hasListener</a>(<a class="code hl_class" href="../../db/da2/classfl_1_1_engine_events_1_1_listener.html">Listener</a> *listener) {</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>    <span class="keyword">auto</span> predicate = [listener](<span class="keyword">const</span> <a class="code hl_typedef" href="../../d4/d36/namespacefl_a413503284f9ea52cb03ab5ceb120b927.html#a413503284f9ea52cb03ab5ceb120b927">Pair</a> &amp;pair) {</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>        <span class="keywordflow">return</span> pair.listener == listener;</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>    };</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>    <span class="keywordflow">return</span> mListeners.find_if(predicate) != mListeners.end();</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>}</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span> </div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span><span class="keywordtype">void</span> <a class="code hl_function" href="../../de/dca/classfl_1_1_engine_events_a0441e41a595a11753a83027cc0fc319a.html#a0441e41a595a11753a83027cc0fc319a">EngineEvents::_addListener</a>(<a class="code hl_class" href="../../db/da2/classfl_1_1_engine_events_1_1_listener.html">Listener</a> *listener, <span class="keywordtype">int</span> priority) {</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>    <span class="keywordflow">if</span> (<a class="code hl_function" href="../../de/dca/classfl_1_1_engine_events_a0d646965f4cd4e78936500e961799ed0.html#a0d646965f4cd4e78936500e961799ed0">_hasListener</a>(listener)) {</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>    }</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>    <span class="keywordflow">for</span> (<span class="keyword">auto</span> it = mListeners.begin(); it != mListeners.end(); ++it) {</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>        <span class="keywordflow">if</span> (it-&gt;priority &lt; priority) {</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>            <span class="comment">// this is now the highest priority in this spot.</span></div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>            EngineEvents::Pair pair = EngineEvents::Pair(listener, priority);</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>            mListeners.insert(it, pair);</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>            <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>        }</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>    }</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>    EngineEvents::Pair pair = EngineEvents::Pair(listener, priority);</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>    mListeners.push_back(pair);</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>}</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span> </div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span><span class="keywordtype">void</span> <a class="code hl_function" href="../../de/dca/classfl_1_1_engine_events_ac1df119809416fe388584c49dea6f53a.html#ac1df119809416fe388584c49dea6f53a">EngineEvents::_removeListener</a>(<a class="code hl_class" href="../../db/da2/classfl_1_1_engine_events_1_1_listener.html">Listener</a> *listener) {</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>    <span class="keyword">auto</span> predicate = [listener](<span class="keyword">const</span> <a class="code hl_typedef" href="../../d4/d36/namespacefl_a413503284f9ea52cb03ab5ceb120b927.html#a413503284f9ea52cb03ab5ceb120b927">Pair</a> &amp;pair) {</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>        <span class="keywordflow">return</span> pair.listener == listener;</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>    };</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>    <span class="keyword">auto</span> it = mListeners.find_if(predicate);</div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>    <span class="keywordflow">if</span> (it != mListeners.end()) {</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>        mListeners.erase(it);</div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>    }</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>}</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span> </div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span><span class="keywordtype">void</span> <a class="code hl_function" href="../../de/dca/classfl_1_1_engine_events_abeff434efdbe861cf2a96388e0fecca3.html#abeff434efdbe861cf2a96388e0fecca3">EngineEvents::_onBeginFrame</a>() {</div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>    <span class="comment">// Make the copy of the listener list to avoid issues with listeners being</span></div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>    <span class="comment">// added or removed during the loop.</span></div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>    ListenerList copy = mListeners;</div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>    <span class="keywordflow">for</span> (<span class="keyword">auto</span> &amp;item : copy) {</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>        <span class="keyword">auto</span> listener = item.listener;</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>        listener-&gt;onBeginFrame();</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>    }</div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>}</div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span> </div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span><span class="keywordtype">void</span> <a class="code hl_function" href="../../de/dca/classfl_1_1_engine_events_a7a842f627bbe9a014977f64f1b7f4ad8.html#a7a842f627bbe9a014977f64f1b7f4ad8">EngineEvents::_onEndShowLeds</a>() {</div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>    <span class="comment">// Make the copy of the listener list to avoid issues with listeners being</span></div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>    <span class="comment">// added or removed during the loop.</span></div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>    ListenerList copy = mListeners;</div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>    <span class="keywordflow">for</span> (<span class="keyword">auto</span> &amp;item : copy) {</div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>        <span class="keyword">auto</span> listener = item.listener;</div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>        listener-&gt;onEndShowLeds();</div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>    }</div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>}</div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span> </div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span><span class="keywordtype">void</span> <a class="code hl_function" href="../../de/dca/classfl_1_1_engine_events_aabaf54f430def92f1650deb789038d14.html#aabaf54f430def92f1650deb789038d14">EngineEvents::_onEndFrame</a>() {</div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>    <span class="comment">// Make the copy of the listener list to avoid issues with listeners being</span></div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span>    <span class="comment">// added or removed during the loop.</span></div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span>    ListenerList copy = mListeners;</div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span>    <span class="keywordflow">for</span> (<span class="keyword">auto</span> &amp;item : copy) {</div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span>        <span class="keyword">auto</span> listener = item.listener;</div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span>        listener-&gt;onEndFrame();</div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span>    }</div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span>}</div>
 <div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span> </div>
-<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>} <span class="comment">// namespace fl</span></div>
-<div class="ttc" id="a_animartrix_ring_8ino_a81753f0017d69bdb0d6d647586a5502a_html_a81753f0017d69bdb0d6d647586a5502a"><div class="ttname"><a href="../../df/dba/_animartrix_ring_8ino_a81753f0017d69bdb0d6d647586a5502a.html#a81753f0017d69bdb0d6d647586a5502a">screenmap</a></div><div class="ttdeci">fl::ScreenMap screenmap</div><div class="ttdef"><b>Definition</b> <a href="../../df/dba/_animartrix_ring_8ino_source.html#l00066">AnimartrixRing.ino:66</a></div></div>
-<div class="ttc" id="aclassfl_1_1_engine_events_1_1_listener_a790a1b0679dc932b312ee945ecf0cc46_html_a790a1b0679dc932b312ee945ecf0cc46"><div class="ttname"><a href="../../db/da2/classfl_1_1_engine_events_1_1_listener_a790a1b0679dc932b312ee945ecf0cc46.html#a790a1b0679dc932b312ee945ecf0cc46">fl::EngineEvents::Listener::Listener</a></div><div class="ttdeci">Listener() FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="#l00016">engine_events.cpp.hpp:16</a></div></div>
-<div class="ttc" id="aclassfl_1_1_engine_events_1_1_listener_ac785ff88f46f3a7fae72f7d32400a33c_html_ac785ff88f46f3a7fae72f7d32400a33c"><div class="ttname"><a href="../../db/da2/classfl_1_1_engine_events_1_1_listener_ac785ff88f46f3a7fae72f7d32400a33c.html#ac785ff88f46f3a7fae72f7d32400a33c">fl::EngineEvents::Listener::~Listener</a></div><div class="ttdeci">virtual ~Listener() FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="#l00018">engine_events.cpp.hpp:18</a></div></div>
-<div class="ttc" id="aclassfl_1_1_engine_events_1_1_listener_html"><div class="ttname"><a href="../../db/da2/classfl_1_1_engine_events_1_1_listener.html">fl::EngineEvents::Listener</a></div><div class="ttdef"><b>Definition</b> <a href="../../db/dc0/engine__events_8h_source.html#l00023">engine_events.h:23</a></div></div>
-<div class="ttc" id="aclassfl_1_1_engine_events_a0a9393c2019983116a4990a31a3221ae_html_a0a9393c2019983116a4990a31a3221ae"><div class="ttname"><a href="../../de/dca/classfl_1_1_engine_events_a0a9393c2019983116a4990a31a3221ae.html#a0a9393c2019983116a4990a31a3221ae">fl::EngineEvents::~EngineEvents</a></div><div class="ttdeci">~EngineEvents() FL_NOEXCEPT</div></div>
-<div class="ttc" id="aclassfl_1_1_engine_events_a1fe1261e564a846e86fbabac7a5462aa_html_a1fe1261e564a846e86fbabac7a5462aa"><div class="ttname"><a href="../../de/dca/classfl_1_1_engine_events_a1fe1261e564a846e86fbabac7a5462aa.html#a1fe1261e564a846e86fbabac7a5462aa">fl::EngineEvents::_onStripAdded</a></div><div class="ttdeci">void _onStripAdded(CLEDController *strip, fl::u32 num_leds) FL_NOEXCEPT</div></div>
-<div class="ttc" id="aclassfl_1_1_engine_events_a2376795d7dc9338c6c532d1814b86789_html_a2376795d7dc9338c6c532d1814b86789"><div class="ttname"><a href="../../de/dca/classfl_1_1_engine_events_a2376795d7dc9338c6c532d1814b86789.html#a2376795d7dc9338c6c532d1814b86789">fl::EngineEvents::EngineEvents</a></div><div class="ttdeci">EngineEvents() FL_NOEXCEPT</div></div>
-<div class="ttc" id="aclassfl_1_1_engine_events_a4775e3d20c9f3afff147622f5a4c7455_html_a4775e3d20c9f3afff147622f5a4c7455"><div class="ttname"><a href="../../de/dca/classfl_1_1_engine_events_a4775e3d20c9f3afff147622f5a4c7455.html#a4775e3d20c9f3afff147622f5a4c7455">fl::EngineEvents::_onCanvasUiSet</a></div><div class="ttdeci">void _onCanvasUiSet(CLEDController *strip, const ScreenMap &amp;xymap) FL_NOEXCEPT</div></div>
-<div class="ttc" id="aclassfl_1_1_engine_events_a5db1774e984faf3b0d5a67f7b3878bc0_html_a5db1774e984faf3b0d5a67f7b3878bc0"><div class="ttname"><a href="../../de/dca/classfl_1_1_engine_events_a5db1774e984faf3b0d5a67f7b3878bc0.html#a5db1774e984faf3b0d5a67f7b3878bc0">fl::EngineEvents::_addListener</a></div><div class="ttdeci">void _addListener(Listener *listener, int priority) FL_NOEXCEPT</div></div>
-<div class="ttc" id="aclassfl_1_1_engine_events_a66f213ba6b8673239e20c34cbd47652a_html_a66f213ba6b8673239e20c34cbd47652a"><div class="ttname"><a href="../../de/dca/classfl_1_1_engine_events_a66f213ba6b8673239e20c34cbd47652a.html#a66f213ba6b8673239e20c34cbd47652a">fl::EngineEvents::_onEndShowLeds</a></div><div class="ttdeci">void _onEndShowLeds() FL_NOEXCEPT</div></div>
-<div class="ttc" id="aclassfl_1_1_engine_events_a67277a0b83dfcf03ab6730488adada3d_html_a67277a0b83dfcf03ab6730488adada3d"><div class="ttname"><a href="../../de/dca/classfl_1_1_engine_events_a67277a0b83dfcf03ab6730488adada3d.html#a67277a0b83dfcf03ab6730488adada3d">fl::EngineEvents::_onPlatformPreLoop</a></div><div class="ttdeci">void _onPlatformPreLoop() FL_NOEXCEPT</div></div>
-<div class="ttc" id="aclassfl_1_1_engine_events_a738fcb94b479c6c1565333094b7e8202_html_a738fcb94b479c6c1565333094b7e8202"><div class="ttname"><a href="../../de/dca/classfl_1_1_engine_events_a738fcb94b479c6c1565333094b7e8202.html#a738fcb94b479c6c1565333094b7e8202">fl::EngineEvents::_removeListener</a></div><div class="ttdeci">void _removeListener(Listener *listener) FL_NOEXCEPT</div></div>
-<div class="ttc" id="aclassfl_1_1_engine_events_a89e502cfa90b62843a8d491c6c14f9e3_html_a89e502cfa90b62843a8d491c6c14f9e3"><div class="ttname"><a href="../../de/dca/classfl_1_1_engine_events_a89e502cfa90b62843a8d491c6c14f9e3.html#a89e502cfa90b62843a8d491c6c14f9e3">fl::EngineEvents::_hasListener</a></div><div class="ttdeci">bool _hasListener(Listener *listener) FL_NOEXCEPT</div></div>
-<div class="ttc" id="aclassfl_1_1_engine_events_a994a57d95516ce2f09d2730f55064535_html_a994a57d95516ce2f09d2730f55064535"><div class="ttname"><a href="../../de/dca/classfl_1_1_engine_events_a994a57d95516ce2f09d2730f55064535.html#a994a57d95516ce2f09d2730f55064535">fl::EngineEvents::_onBeginFrame</a></div><div class="ttdeci">void _onBeginFrame() FL_NOEXCEPT</div></div>
-<div class="ttc" id="aclassfl_1_1_engine_events_ad8f75cdfa7ac86dfedc28b8922bc2c06_html_ad8f75cdfa7ac86dfedc28b8922bc2c06"><div class="ttname"><a href="../../de/dca/classfl_1_1_engine_events_ad8f75cdfa7ac86dfedc28b8922bc2c06.html#ad8f75cdfa7ac86dfedc28b8922bc2c06">fl::EngineEvents::_onEndFrame</a></div><div class="ttdeci">void _onEndFrame() FL_NOEXCEPT</div></div>
-<div class="ttc" id="aclassfl_1_1_engine_events_af194e829e524acc84951febfcbe964fb_html_af194e829e524acc84951febfcbe964fb"><div class="ttname"><a href="../../de/dca/classfl_1_1_engine_events_af194e829e524acc84951febfcbe964fb.html#af194e829e524acc84951febfcbe964fb">fl::EngineEvents::_onExit</a></div><div class="ttdeci">void _onExit() FL_NOEXCEPT</div></div>
-<div class="ttc" id="aclassfl_1_1_singleton_a47fdc044003ec27f9e9833f7f5418e01_html_a47fdc044003ec27f9e9833f7f5418e01"><div class="ttname"><a href="../../d9/d5b/classfl_1_1_singleton_a47fdc044003ec27f9e9833f7f5418e01.html#a47fdc044003ec27f9e9833f7f5418e01">fl::Singleton::instance</a></div><div class="ttdeci">static T &amp; instance() FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d0b/singleton_8h_source.html#l00041">singleton.h:41</a></div></div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span><span class="keywordtype">void</span> <a class="code hl_function" href="../../de/dca/classfl_1_1_engine_events_aa6e9a72ca129c69407b17b52e1946942.html#aa6e9a72ca129c69407b17b52e1946942">EngineEvents::_onStripAdded</a>(<a class="code hl_typedef" href="../../db/d6d/cled__controller_8h_a5c4c69e67efd8ee1b27833dfef522d6f.html#a5c4c69e67efd8ee1b27833dfef522d6f">CLEDController</a> *strip, fl::u32 num_leds) {</div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>    <span class="comment">// Make the copy of the listener list to avoid issues with listeners being</span></div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span>    <span class="comment">// added or removed during the loop.</span></div>
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span>    ListenerList copy = mListeners;</div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span>    <span class="keywordflow">for</span> (<span class="keyword">auto</span> &amp;item : copy) {</div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>        <span class="keyword">auto</span> listener = item.listener;</div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span>        listener-&gt;onStripAdded(strip, num_leds);</div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>    }</div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>}</div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span> </div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span><span class="keywordtype">void</span> <a class="code hl_function" href="../../de/dca/classfl_1_1_engine_events_a290a56befeffdedfcf72971b5f5929b7.html#a290a56befeffdedfcf72971b5f5929b7">EngineEvents::_onCanvasUiSet</a>(<a class="code hl_typedef" href="../../db/d6d/cled__controller_8h_a5c4c69e67efd8ee1b27833dfef522d6f.html#a5c4c69e67efd8ee1b27833dfef522d6f">CLEDController</a> *strip,</div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span>                                  <span class="keyword">const</span> ScreenMap &amp;<a class="code hl_variable" href="../../df/dba/_animartrix_ring_8ino_a81753f0017d69bdb0d6d647586a5502a.html#a81753f0017d69bdb0d6d647586a5502a">screenmap</a>) {</div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>    <span class="comment">// Make the copy of the listener list to avoid issues with listeners being</span></div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>    <span class="comment">// added or removed during the loop.</span></div>
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>    ListenerList copy = mListeners;</div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>    <span class="keywordflow">for</span> (<span class="keyword">auto</span> &amp;item : copy) {</div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>        <span class="keyword">auto</span> listener = item.listener;</div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>        listener-&gt;onCanvasUiSet(strip, <a class="code hl_variable" href="../../df/dba/_animartrix_ring_8ino_a81753f0017d69bdb0d6d647586a5502a.html#a81753f0017d69bdb0d6d647586a5502a">screenmap</a>);</div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>    }</div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>}</div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span> </div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span><span class="keywordtype">void</span> <a class="code hl_function" href="../../de/dca/classfl_1_1_engine_events_a60f0b6166eb66c9cbb1b689fea26d443.html#a60f0b6166eb66c9cbb1b689fea26d443">EngineEvents::_onExit</a>() {</div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>    <span class="comment">// Make the copy of the listener list to avoid issues with listeners being</span></div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span>    <span class="comment">// added or removed during the loop.</span></div>
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span>    ListenerList copy = mListeners;</div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span>    <span class="keywordflow">for</span> (<span class="keyword">auto</span> &amp;item : copy) {</div>
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span>        <span class="keyword">auto</span> listener = item.listener;</div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>        listener-&gt;onExit();</div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>    }</div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span>}</div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span> </div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span><span class="preprocessor">#endif </span><span class="comment">// FASTLED_HAS_ENGINE_EVENTS</span></div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span> </div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span>} <span class="comment">// namespace fl</span></div>
+<div class="ttc" id="a_animartrix_ring_8ino_a81753f0017d69bdb0d6d647586a5502a_html_a81753f0017d69bdb0d6d647586a5502a"><div class="ttname"><a href="../../df/dba/_animartrix_ring_8ino_a81753f0017d69bdb0d6d647586a5502a.html#a81753f0017d69bdb0d6d647586a5502a">screenmap</a></div><div class="ttdeci">fl::ScreenMap screenmap</div><div class="ttdef"><b>Definition</b> <a href="../../df/dba/_animartrix_ring_8ino_source.html#l00068">AnimartrixRing.ino:68</a></div></div>
+<div class="ttc" id="aclassfl_1_1_engine_events_1_1_listener_a03a793c2f8ad599ec5800e6414a9bfbb_html_a03a793c2f8ad599ec5800e6414a9bfbb"><div class="ttname"><a href="../../db/da2/classfl_1_1_engine_events_1_1_listener_a03a793c2f8ad599ec5800e6414a9bfbb.html#a03a793c2f8ad599ec5800e6414a9bfbb">fl::EngineEvents::Listener::~Listener</a></div><div class="ttdeci">virtual ~Listener() FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="#l00026">engine_events.cpp.hpp:26</a></div></div>
+<div class="ttc" id="aclassfl_1_1_engine_events_1_1_listener_a34df26390cbc880f54f7a55769bfa8f0_html_a34df26390cbc880f54f7a55769bfa8f0"><div class="ttname"><a href="../../db/da2/classfl_1_1_engine_events_1_1_listener_a34df26390cbc880f54f7a55769bfa8f0.html#a34df26390cbc880f54f7a55769bfa8f0">fl::EngineEvents::Listener::Listener</a></div><div class="ttdeci">Listener() FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="#l00024">engine_events.cpp.hpp:24</a></div></div>
+<div class="ttc" id="aclassfl_1_1_engine_events_1_1_listener_a624b8203c73b6e8045801da3ee391713_html_a624b8203c73b6e8045801da3ee391713"><div class="ttname"><a href="../../db/da2/classfl_1_1_engine_events_1_1_listener_a624b8203c73b6e8045801da3ee391713.html#a624b8203c73b6e8045801da3ee391713">fl::EngineEvents::Listener::onBeginFrame</a></div><div class="ttdeci">virtual void onBeginFrame() FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../db/dc0/engine__events_8h_source.html#l00033">engine_events.h:33</a></div></div>
+<div class="ttc" id="aclassfl_1_1_engine_events_1_1_listener_a64cffa0a94c052aa7d41974d7fa4b614_html_a64cffa0a94c052aa7d41974d7fa4b614"><div class="ttname"><a href="../../db/da2/classfl_1_1_engine_events_1_1_listener_a64cffa0a94c052aa7d41974d7fa4b614.html#a64cffa0a94c052aa7d41974d7fa4b614">fl::EngineEvents::Listener::onEndFrame</a></div><div class="ttdeci">virtual void onEndFrame() FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../db/dc0/engine__events_8h_source.html#l00035">engine_events.h:35</a></div></div>
+<div class="ttc" id="aclassfl_1_1_engine_events_1_1_listener_html"><div class="ttname"><a href="../../db/da2/classfl_1_1_engine_events_1_1_listener.html">fl::EngineEvents::Listener</a></div><div class="ttdef"><b>Definition</b> <a href="../../db/dc0/engine__events_8h_source.html#l00026">engine_events.h:26</a></div></div>
+<div class="ttc" id="aclassfl_1_1_engine_events_a0441e41a595a11753a83027cc0fc319a_html_a0441e41a595a11753a83027cc0fc319a"><div class="ttname"><a href="../../de/dca/classfl_1_1_engine_events_a0441e41a595a11753a83027cc0fc319a.html#a0441e41a595a11753a83027cc0fc319a">fl::EngineEvents::_addListener</a></div><div class="ttdeci">void _addListener(Listener *listener, int priority) FL_NO_EXCEPT</div></div>
+<div class="ttc" id="aclassfl_1_1_engine_events_a0a5a3bb00e383055f035b9588f285a86_html_a0a5a3bb00e383055f035b9588f285a86"><div class="ttname"><a href="../../de/dca/classfl_1_1_engine_events_a0a5a3bb00e383055f035b9588f285a86.html#a0a5a3bb00e383055f035b9588f285a86">fl::EngineEvents::onBeginFrame</a></div><div class="ttdeci">static void onBeginFrame() FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="#l00045">engine_events.cpp.hpp:45</a></div></div>
+<div class="ttc" id="aclassfl_1_1_engine_events_a0d646965f4cd4e78936500e961799ed0_html_a0d646965f4cd4e78936500e961799ed0"><div class="ttname"><a href="../../de/dca/classfl_1_1_engine_events_a0d646965f4cd4e78936500e961799ed0.html#a0d646965f4cd4e78936500e961799ed0">fl::EngineEvents::_hasListener</a></div><div class="ttdeci">bool _hasListener(Listener *listener) FL_NO_EXCEPT</div></div>
+<div class="ttc" id="aclassfl_1_1_engine_events_a1d782693466255e62a35ffa2c150bbce_html_a1d782693466255e62a35ffa2c150bbce"><div class="ttname"><a href="../../de/dca/classfl_1_1_engine_events_a1d782693466255e62a35ffa2c150bbce.html#a1d782693466255e62a35ffa2c150bbce">fl::EngineEvents::_onPlatformPreLoop</a></div><div class="ttdeci">void _onPlatformPreLoop() FL_NO_EXCEPT</div></div>
+<div class="ttc" id="aclassfl_1_1_engine_events_a290a56befeffdedfcf72971b5f5929b7_html_a290a56befeffdedfcf72971b5f5929b7"><div class="ttname"><a href="../../de/dca/classfl_1_1_engine_events_a290a56befeffdedfcf72971b5f5929b7.html#a290a56befeffdedfcf72971b5f5929b7">fl::EngineEvents::_onCanvasUiSet</a></div><div class="ttdeci">void _onCanvasUiSet(CLEDController *strip, const ScreenMap &amp;xymap) FL_NO_EXCEPT</div></div>
+<div class="ttc" id="aclassfl_1_1_engine_events_a5f428b668b5a7d0d46b7d251b62d00a0_html_a5f428b668b5a7d0d46b7d251b62d00a0"><div class="ttname"><a href="../../de/dca/classfl_1_1_engine_events_a5f428b668b5a7d0d46b7d251b62d00a0.html#a5f428b668b5a7d0d46b7d251b62d00a0">fl::EngineEvents::onEndFrame</a></div><div class="ttdeci">static void onEndFrame() FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="#l00057">engine_events.cpp.hpp:57</a></div></div>
+<div class="ttc" id="aclassfl_1_1_engine_events_a60f0b6166eb66c9cbb1b689fea26d443_html_a60f0b6166eb66c9cbb1b689fea26d443"><div class="ttname"><a href="../../de/dca/classfl_1_1_engine_events_a60f0b6166eb66c9cbb1b689fea26d443.html#a60f0b6166eb66c9cbb1b689fea26d443">fl::EngineEvents::_onExit</a></div><div class="ttdeci">void _onExit() FL_NO_EXCEPT</div></div>
+<div class="ttc" id="aclassfl_1_1_engine_events_a72f24bd8f5798f69531fef3a895ab3cd_html_a72f24bd8f5798f69531fef3a895ab3cd"><div class="ttname"><a href="../../de/dca/classfl_1_1_engine_events_a72f24bd8f5798f69531fef3a895ab3cd.html#a72f24bd8f5798f69531fef3a895ab3cd">fl::EngineEvents::setFrameTaskListener</a></div><div class="ttdeci">static void setFrameTaskListener(Listener *listener) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="#l00041">engine_events.cpp.hpp:41</a></div></div>
+<div class="ttc" id="aclassfl_1_1_engine_events_a748ab630e2d0e24bf56ea54886ffba2a_html_a748ab630e2d0e24bf56ea54886ffba2a"><div class="ttname"><a href="../../de/dca/classfl_1_1_engine_events_a748ab630e2d0e24bf56ea54886ffba2a.html#a748ab630e2d0e24bf56ea54886ffba2a">fl::EngineEvents::EngineEvents</a></div><div class="ttdeci">EngineEvents() FL_NO_EXCEPT</div></div>
+<div class="ttc" id="aclassfl_1_1_engine_events_a7a842f627bbe9a014977f64f1b7f4ad8_html_a7a842f627bbe9a014977f64f1b7f4ad8"><div class="ttname"><a href="../../de/dca/classfl_1_1_engine_events_a7a842f627bbe9a014977f64f1b7f4ad8.html#a7a842f627bbe9a014977f64f1b7f4ad8">fl::EngineEvents::_onEndShowLeds</a></div><div class="ttdeci">void _onEndShowLeds() FL_NO_EXCEPT</div></div>
+<div class="ttc" id="aclassfl_1_1_engine_events_a97fdf26628d61f8f6b3c3588230e9980_html_a97fdf26628d61f8f6b3c3588230e9980"><div class="ttname"><a href="../../de/dca/classfl_1_1_engine_events_a97fdf26628d61f8f6b3c3588230e9980.html#a97fdf26628d61f8f6b3c3588230e9980">fl::EngineEvents::~EngineEvents</a></div><div class="ttdeci">~EngineEvents() FL_NO_EXCEPT</div></div>
+<div class="ttc" id="aclassfl_1_1_engine_events_aa6e9a72ca129c69407b17b52e1946942_html_aa6e9a72ca129c69407b17b52e1946942"><div class="ttname"><a href="../../de/dca/classfl_1_1_engine_events_aa6e9a72ca129c69407b17b52e1946942.html#aa6e9a72ca129c69407b17b52e1946942">fl::EngineEvents::_onStripAdded</a></div><div class="ttdeci">void _onStripAdded(CLEDController *strip, fl::u32 num_leds) FL_NO_EXCEPT</div></div>
+<div class="ttc" id="aclassfl_1_1_engine_events_aabaf54f430def92f1650deb789038d14_html_aabaf54f430def92f1650deb789038d14"><div class="ttname"><a href="../../de/dca/classfl_1_1_engine_events_aabaf54f430def92f1650deb789038d14.html#aabaf54f430def92f1650deb789038d14">fl::EngineEvents::_onEndFrame</a></div><div class="ttdeci">void _onEndFrame() FL_NO_EXCEPT</div></div>
+<div class="ttc" id="aclassfl_1_1_engine_events_abeff434efdbe861cf2a96388e0fecca3_html_abeff434efdbe861cf2a96388e0fecca3"><div class="ttname"><a href="../../de/dca/classfl_1_1_engine_events_abeff434efdbe861cf2a96388e0fecca3.html#abeff434efdbe861cf2a96388e0fecca3">fl::EngineEvents::_onBeginFrame</a></div><div class="ttdeci">void _onBeginFrame() FL_NO_EXCEPT</div></div>
+<div class="ttc" id="aclassfl_1_1_engine_events_ac1df119809416fe388584c49dea6f53a_html_ac1df119809416fe388584c49dea6f53a"><div class="ttname"><a href="../../de/dca/classfl_1_1_engine_events_ac1df119809416fe388584c49dea6f53a.html#ac1df119809416fe388584c49dea6f53a">fl::EngineEvents::_removeListener</a></div><div class="ttdeci">void _removeListener(Listener *listener) FL_NO_EXCEPT</div></div>
+<div class="ttc" id="aclassfl_1_1_engine_events_html"><div class="ttname"><a href="../../de/dca/classfl_1_1_engine_events.html">fl::EngineEvents</a></div><div class="ttdef"><b>Definition</b> <a href="../../db/dc0/engine__events_8h_source.html#l00024">engine_events.h:24</a></div></div>
+<div class="ttc" id="aclassfl_1_1_singleton_ad5cb1b704e17768f75802673abb0ff75_html_ad5cb1b704e17768f75802673abb0ff75"><div class="ttname"><a href="../../d9/d5b/classfl_1_1_singleton_ad5cb1b704e17768f75802673abb0ff75.html#ad5cb1b704e17768f75802673abb0ff75">fl::Singleton::instance</a></div><div class="ttdeci">static T &amp; instance() FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d0b/singleton_8h_source.html#l00041">singleton.h:41</a></div></div>
 <div class="ttc" id="acled__controller_8h_a5c4c69e67efd8ee1b27833dfef522d6f_html_a5c4c69e67efd8ee1b27833dfef522d6f"><div class="ttname"><a href="../../db/d6d/cled__controller_8h_a5c4c69e67efd8ee1b27833dfef522d6f.html#a5c4c69e67efd8ee1b27833dfef522d6f">CLEDController</a></div><div class="ttdeci">fl::CLEDController CLEDController</div><div class="ttdef"><b>Definition</b> <a href="../../db/d6d/cled__controller_8h_source.html#l00010">cled_controller.h:10</a></div></div>
+<div class="ttc" id="adither__frame_8h_html"><div class="ttname"><a href="../../d2/d17/dither__frame_8h.html">dither_frame.h</a></div><div class="ttdoc">Shared temporal-dither phase tracking.</div></div>
 <div class="ttc" id="aengine__events_8h_html"><div class="ttname"><a href="../../db/dc0/engine__events_8h.html">engine_events.h</a></div></div>
 <div class="ttc" id="aint_8h_html"><div class="ttname"><a href="../../d3/d7e/int_8h.html">int.h</a></div></div>
+<div class="ttc" id="anamespacefl_1_1anonymous__namespace_02engine__events_8cpp_8hpp_03_a4f06fab16314fb946950d79e7cfda6cc_html_a4f06fab16314fb946950d79e7cfda6cc"><div class="ttname"><a href="../../d7/d18/namespacefl_1_1anonymous__namespace_02engine__events_8cpp_8hpp_03_a4f06fab16314fb946950d79e7cfda6cc.html#a4f06fab16314fb946950d79e7cfda6cc">fl::anonymous_namespace{engine_events.cpp.hpp}::gFrameTaskListener</a></div><div class="ttdeci">EngineEvents::Listener * gFrameTaskListener</div><div class="ttdef"><b>Definition</b> <a href="#l00016">engine_events.cpp.hpp:16</a></div></div>
+<div class="ttc" id="anamespacefl_1_1detail_a4ecf69a0759c119b930cc4690cc11e65_html_a4ecf69a0759c119b930cc4690cc11e65"><div class="ttname"><a href="../../df/d9e/namespacefl_1_1detail_a4ecf69a0759c119b930cc4690cc11e65.html#a4ecf69a0759c119b930cc4690cc11e65">fl::detail::advanceDitherFrame</a></div><div class="ttdeci">FL_ALWAYS_INLINE void advanceDitherFrame() FL_NO_EXCEPT</div><div class="ttdoc">Advance temporal dithering once per logical frame, not once per controller.</div><div class="ttdef"><b>Definition</b> <a href="../../d2/d17/dither__frame_8h_source.html#l00019">dither_frame.h:19</a></div></div>
 <div class="ttc" id="anamespacefl_a413503284f9ea52cb03ab5ceb120b927_html_a413503284f9ea52cb03ab5ceb120b927"><div class="ttname"><a href="../../d4/d36/namespacefl_a413503284f9ea52cb03ab5ceb120b927.html#a413503284f9ea52cb03ab5ceb120b927">fl::Pair</a></div><div class="ttdeci">pair&lt; T1, T2 &gt; Pair</div><div class="ttdef"><b>Definition</b> <a href="../../d3/d41/pair_8h_source.html#l00207">pair.h:207</a></div></div>
+<div class="ttc" id="anamespacefl_aa317f89ca911371e798d08a93770402f_html_aa317f89ca911371e798d08a93770402f"><div class="ttname"><a href="../../d4/d36/namespacefl_aa317f89ca911371e798d08a93770402f.html#aa317f89ca911371e798d08a93770402f">fl::FL_NO_EXCEPT</a></div><div class="ttdeci">InputGamut g FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/df8/fl_2gfx_2rgbw_8h_source.html#l00121">rgbw.h:121</a></div></div>
 <div class="ttc" id="anamespacefl_html"><div class="ttname"><a href="../../d4/d36/namespacefl.html">fl</a></div><div class="ttdoc">Base definition for an LED controller.</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d4b/crgb_8hpp_source.html#l00179">crgb.hpp:179</a></div></div>
 <div class="ttc" id="anoexcept_8h_html"><div class="ttname"><a href="../../db/d01/noexcept_8h.html">noexcept.h</a></div></div>
-<div class="ttc" id="as16x16x4_8h_af54aac016b86a178940aca20946a8002_html_af54aac016b86a178940aca20946a8002"><div class="ttname"><a href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></div><div class="ttdeci">#define FL_NOEXCEPT</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.3-->
@@ -283,7 +333,7 @@ $(function(){initNavTree('dc/d6f/engine__events_8cpp_8hpp_source.html','../../')
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_c27a882fecb444156419346f13162968.html">system</a></li><li class="navelem"><a class="el" href="../../dc/d6f/engine__events_8cpp_8hpp.html">engine_events.cpp.hpp</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:00 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:01 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

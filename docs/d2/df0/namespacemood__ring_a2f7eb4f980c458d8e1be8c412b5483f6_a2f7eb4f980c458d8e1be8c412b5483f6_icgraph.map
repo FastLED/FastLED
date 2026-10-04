@@ -1,0 +1,18 @@
+<map id="mood_ring::toRGBf" name="mood_ring::toRGBf">
+<area shape="rect" id="Node000001" title=" " alt="" coords="691,127,836,153"/>
+<area shape="rect" id="Node000002" href="$d2/df0/namespacemood__ring_adab294c0032e0fa5dc8e0564ca2755d9.html#adab294c0032e0fa5dc8e0564ca2755d9" title="Colour at position t in [0, 1] along the family, at value v." alt="" coords="464,127,643,153"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="677,143,643,143,643,137,677,137"/>
+<area shape="rect" id="Node000003" href="$db/deb/classmood__ring_1_1_flow_layer_a70a95f17eb27a0581135621acbe59b2b.html#a70a95f17eb27a0581135621acbe59b2b" title=" " alt="" coords="241,5,408,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="518,123,415,66,374,48,377,43,417,62,520,118"/>
+<area shape="rect" id="Node000004" href="$db/deb/classmood__ring_1_1_flow_layer_aec6052ddb304be2560793529421b4d13.html#aec6052ddb304be2560793529421b4d13" title=" " alt="" coords="12,31,179,71"/>
+<area shape="poly" id="edge7_Node000002_Node000004" title=" " alt="" coords="486,127,415,111,178,67,179,62,417,105,488,121"/>
+<area shape="rect" id="Node000005" href="$d7/d06/classmood__ring_1_1_mood_painter_a2d39cdac14d69c9bb9dbed6e676d61ae.html#a2d39cdac14d69c9bb9dbed6e676d61ae" title=" " alt="" coords="235,120,415,160"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="451,143,415,143,415,137,451,137"/>
+<area shape="rect" id="Node000007" href="$da/d3e/classmood__ring_1_1_breath_layer_a4e746520582685543301d68be868d8c7.html#a4e746520582685543301d68be868d8c7" title=" " alt="" coords="235,184,414,224"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="494,159,398,186,396,181,493,154"/>
+<area shape="rect" id="Node000008" href="$d6/dee/classmood__ring_1_1_groove_layer_a085e540e0a3ae1223ee96f965982b9ba.html#a085e540e0a3ae1223ee96f965982b9ba" title=" " alt="" coords="233,248,416,288"/>
+<area shape="poly" id="edge8_Node000002_Node000008" title=" " alt="" coords="528,163,478,201,417,238,390,250,388,246,415,234,475,196,525,159"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="228,39,179,44,178,39,227,33"/>
+<area shape="rect" id="Node000006" href="$d7/d06/classmood__ring_1_1_mood_painter_ac3fb619def2fc2ffc2c906e65e8bb214.html#ac3fb619def2fc2ffc2c906e65e8bb214" title="Render one frame into out." alt="" coords="5,120,185,160"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="221,143,185,143,185,137,221,137"/>
+</map>

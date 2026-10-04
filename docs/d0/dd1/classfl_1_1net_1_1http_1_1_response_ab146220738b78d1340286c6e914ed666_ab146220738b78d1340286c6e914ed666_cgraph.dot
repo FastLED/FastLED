@@ -10,9 +10,9 @@ digraph "fl::net::http::Response::json"
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
   Node2 [id="Node000002",label="fl::net::http::Response\l::is_json",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/dd1/classfl_1_1net_1_1http_1_1_response_a51705ec3125666014aafa0b6b23131b2.html#a51705ec3125666014aafa0b6b23131b2",tooltip="Check if response appears to contain JSON content."];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::basic_string::find",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d66/classfl_1_1basic__string_a8cd84151a13a11e97e0edbad6de0ef1b.html#a8cd84151a13a11e97e0edbad6de0ef1b",tooltip=" "];
+  Node3 [id="Node000003",label="fl::basic_string::find",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d66/classfl_1_1basic__string_a7bfa2f25babcd53b1df4d89e936b7ce6.html#a7bfa2f25babcd53b1df4d89e936b7ce6",tooltip=" "];
   Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="fl::basic_string::c_str",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$de/d66/classfl_1_1basic__string_adc70863b5a29972d3e45c5e5b31e6686.html#adc70863b5a29972d3e45c5e5b31e6686",tooltip=" "];
+  Node4 [id="Node000004",label="fl::basic_string::c_str",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$de/d66/classfl_1_1basic__string_ac7b40587b637d254d009cc32f530fb83.html#ac7b40587b637d254d009cc32f530fb83",tooltip=" "];
   Node2 -> Node14 [id="edge4_Node000002_Node000014",color="steelblue1",style="solid",tooltip=" "];
   Node14 [id="Node000014",label="fl::net::http::Response\l::get_content_type",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/dd1/classfl_1_1net_1_1http_1_1_response_a8e0b95a5583b711afd86ac267ca2c203.html#a8e0b95a5583b711afd86ac267ca2c203",tooltip="Get content type convenience method."];
   Node14 -> Node15 [id="edge5_Node000014_Node000015",color="steelblue1",style="solid",tooltip=" "];
@@ -20,12 +20,12 @@ digraph "fl::net::http::Response::json"
   Node1 -> Node17 [id="edge6_Node000001_Node000017",color="steelblue1",style="solid",tooltip=" "];
   Node17 [id="Node000017",label="fl::net::http::Response\l::parse_json_body",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/dd1/classfl_1_1net_1_1http_1_1_response_aa7ab961e382572de8e991ea8bb6b5907.html#aa7ab961e382572de8e991ea8bb6b5907",tooltip="Parse JSON from response body with error handling."];
   Node17 -> Node18 [id="edge7_Node000017_Node000018",color="steelblue1",style="solid",tooltip=" "];
-  Node18 [id="Node000018",label="fl::json::is_null",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d40/classfl_1_1json_a59f212a0074c9bad4d2519ddf272bc8f.html#a59f212a0074c9bad4d2519ddf272bc8f",tooltip=" "];
+  Node18 [id="Node000018",label="fl::json::is_null",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d40/classfl_1_1json_a81b39e8d1d60c09dff5c241846743262.html#a81b39e8d1d60c09dff5c241846743262",tooltip=" "];
   Node17 -> Node19 [id="edge8_Node000017_Node000019",color="steelblue1",style="solid",tooltip=" "];
-  Node19 [id="Node000019",label="fl::json::parse",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d40/classfl_1_1json_af7d8a65ad376b44e25bf9653bcac2405.html#af7d8a65ad376b44e25bf9653bcac2405",tooltip=" "];
+  Node19 [id="Node000019",label="fl::json::parse",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d40/classfl_1_1json_acfd0c418354f6fa20c838e2167ab9661.html#acfd0c418354f6fa20c838e2167ab9661",tooltip=" "];
   Node19 -> Node20 [id="edge9_Node000019_Node000020",color="steelblue1",style="solid",tooltip=" "];
-  Node20 [id="Node000020",label="fl::json::json",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d40/classfl_1_1json_a08247deaa089c843eae1e64655e2d761.html#a08247deaa089c843eae1e64655e2d761",tooltip=" "];
+  Node20 [id="Node000020",label="fl::json::json",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d40/classfl_1_1json_a53d3876e579581337439bdede3c7dad6.html#a53d3876e579581337439bdede3c7dad6",tooltip=" "];
   Node19 -> Node19 [id="edge10_Node000019_Node000019",color="steelblue1",style="solid",tooltip=" "];
   Node19 -> Node21 [id="edge11_Node000019_Node000021",color="steelblue1",style="solid",tooltip=" "];
-  Node21 [id="Node000021",label="fl::json_value::parse2",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$dc/dec/structfl_1_1json__value_aa55ba03795c9d30a654c1385a9d28f8e.html#aa55ba03795c9d30a654c1385a9d28f8e",tooltip=" "];
+  Node21 [id="Node000021",label="fl::json_value::parse2",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$dc/dec/structfl_1_1json__value_a64c9537a2f78141f776e1596f9e1e412.html#a64c9537a2f78141f776e1596f9e1e412",tooltip=" "];
 }

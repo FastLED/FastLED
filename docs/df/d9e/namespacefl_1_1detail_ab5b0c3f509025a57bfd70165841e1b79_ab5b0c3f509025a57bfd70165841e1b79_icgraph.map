@@ -1,0 +1,9 @@
+<map id="fl::detail::fixedPointLeadingZeros" name="fl::detail::fixedPointLeadingZeros">
+<area shape="rect" id="Node000001" title="Leading zeros of a non&#45;zero 32&#45;bit value; 32 for zero." alt="" coords="381,23,580,63"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a0b3d2471317a8e829f3b4239df87b92c.html#a0b3d2471317a8e829f3b4239df87b92c" title="(hi:lo) / divisor, for a quotient that fits 32 bits." alt="" coords="207,31,333,56"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="367,46,333,46,333,41,367,41"/>
+<area shape="rect" id="Node000003" href="$d9/d9f/classfl_1_1s16x16_a5c9b3eafa0cfb512a10821a87587067e.html#a5c9b3eafa0cfb512a10821a87587067e" title=" " alt="" coords="6,5,158,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="192,36,158,31,159,26,193,30"/>
+<area shape="rect" id="Node000004" href="$db/d56/classfl_1_1u16x16_a43e583b280d3a83d23e16671fdb34582.html#a43e583b280d3a83d23e16671fdb34582" title=" " alt="" coords="5,55,159,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="193,56,160,60,159,55,193,50"/>
+</map>

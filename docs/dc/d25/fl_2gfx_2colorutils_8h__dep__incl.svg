@@ -121,7 +121,7 @@ var sectionId = 'dynsection-1';
 <!-- Node61 -->
 <g id="Node000061" class="node">
 <title>Node61</title>
-<g id="a_Node000061"><a xlink:href="../../dc/da8/src_2fl_2audio_2audio__reactive_8h.html" target="_top" xlink:title=" ">
+<g id="a_Node000061"><a xlink:href="../../d1/d9a/audio__reactive_8h.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="1308,-420.5 1171,-420.5 1171,-401.5 1308,-401.5 1308,-420.5"/>
 <text text-anchor="middle" x="1239.5" y="-408.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl/audio/audio_reactive.h</text>
 </a>
@@ -194,7 +194,7 @@ var sectionId = 'dynsection-1';
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../db/d97/_fast_l_e_d_8h.html" target="_top" xlink:title="central include file for FastLED, defines the CFastLED class/object">
+<g id="a_Node000003"><a xlink:href="../../d6/d64/fastled_8h.html" target="_top" xlink:title="central include file for FastLED, defines the CFastLED class/object">
 <polygon fill="white" stroke="#666666" points="264.5,-129 200.5,-129 200.5,-110 264.5,-110 264.5,-129"/>
 <text text-anchor="middle" x="232.5" y="-117" font-family="Helvetica,sans-Serif" font-size="10.00">FastLED.h</text>
 </a>
@@ -338,7 +338,7 @@ var sectionId = 'dynsection-1';
 <!-- Node9 -->
 <g id="Node000009" class="node">
 <title>Node9</title>
-<g id="a_Node000009"><a xlink:href="../../d7/dc2/fl_2system_2_fast_l_e_d_8h.html" target="_top" xlink:title="Internal FastLED header for implementation files.">
+<g id="a_Node000009"><a xlink:href="../../d0/d69/fl_2system_2fastled_8h.html" target="_top" xlink:title="Internal FastLED header for implementation files.">
 <polygon fill="#fff0f0" stroke="red" points="213,-272 106,-272 106,-253 213,-253 213,-272"/>
 <text text-anchor="middle" x="159.5" y="-260" font-family="Helvetica,sans-Serif" font-size="10.00">fl/system/fastled.h</text>
 </a>

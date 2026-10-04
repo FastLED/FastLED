@@ -111,6 +111,9 @@ var type__traits_8h =
       [ "type", "d4/d36/namespacefl.html#ab1f6eb57b62fb9c41b0267753e5cceaf", null ]
     ] ],
     [ "fl::index_sequence< Is >", "df/da2/structfl_1_1index__sequence.html", "df/da2/structfl_1_1index__sequence" ],
+    [ "fl::index_sequence_concat< index_sequence< Lhs... >, index_sequence< Rhs... > >", "d4/d36/namespacefl.html#d4/dbb/structfl_1_1index__sequence__concat_3_01index__sequence_3_01_lhs_8_8_8_01_4_00_01index__sequence_3_01_rhs_8_8_8_01_4_01_4", [
+      [ "type", "d4/d36/namespacefl.html#a181a1a35f3971632b74500b7a423fa14", null ]
+    ] ],
     [ "fl::int_cast_detail::cast_target< T, Size, IsSigned >", "dc/d4d/namespacefl_1_1int__cast__detail.html#d9/dac/structfl_1_1int__cast__detail_1_1cast__target", [
       [ "type", "dc/d4d/namespacefl_1_1int__cast__detail.html#a192ed130b6d4b855b5227f3cb6bab415", null ]
     ] ],
@@ -247,9 +250,16 @@ var type__traits_8h =
     [ "fl::is_trivially_copyable_v_helper< T >", "db/d4e/structfl_1_1is__trivially__copyable__v__helper.html", "db/d4e/structfl_1_1is__trivially__copyable__v__helper" ],
     [ "fl::is_void< T >", "de/d29/structfl_1_1is__void.html", null ],
     [ "fl::is_void< void >", "de/d46/structfl_1_1is__void_3_01void_01_4.html", null ],
-    [ "fl::make_index_sequence_impl< N, Is >", "d4/d36/namespacefl.html#d7/d61/structfl_1_1make__index__sequence__impl", null ],
-    [ "fl::make_index_sequence_impl< 0, Is... >", "d4/d36/namespacefl.html#d7/d27/structfl_1_1make__index__sequence__impl_3_010_00_01_is_8_8_8_01_4", [
-      [ "type", "d4/d36/namespacefl.html#a19657a3f7300af95af850b8dd10e9187", null ]
+    [ "fl::make_index_sequence_impl< N >", "d4/d36/namespacefl.html#d7/d61/structfl_1_1make__index__sequence__impl", [
+      [ "type", "d4/d36/namespacefl.html#abea085ae717422ac0373f5b491c7538d", null ]
+    ] ],
+    [ "fl::make_index_sequence_impl< 0 >", "d4/d36/namespacefl.html#d2/d64/structfl_1_1make__index__sequence__impl_3_010_01_4", [
+      [ "type", "d4/d36/namespacefl.html#abea085ae717422ac0373f5b491c7538d", null ],
+      [ "type", "d4/d36/namespacefl.html#af47db76e504fbe67eb81646513e1ec68", null ]
+    ] ],
+    [ "fl::make_index_sequence_impl< 1 >", "d4/d36/namespacefl.html#dc/d38/structfl_1_1make__index__sequence__impl_3_011_01_4", [
+      [ "type", "d4/d36/namespacefl.html#abea085ae717422ac0373f5b491c7538d", null ],
+      [ "type", "d4/d36/namespacefl.html#a5e2d0f3672292c267329bf5fe0b69c73", null ]
     ] ],
     [ "fl::make_unsigned< T, Enable >", "da/d3b/structfl_1_1make__unsigned.html", "da/d3b/structfl_1_1make__unsigned" ],
     [ "fl::make_unsigned< T, typename enable_if< is_integral< T >::value &&!is_same< typename remove_cv< T >::type, bool >::value >::type >", "df/d6d/structfl_1_1make__unsigned_3_01_t_00_01typename_01enable__if_3_01is__integral_3_01_t_01_4_1_1val481b23729577e02ebcd4811cbfc30fab.html", "df/d6d/structfl_1_1make__unsigned_3_01_t_00_01typename_01enable__if_3_01is__integral_3_01_t_01_4_1_1val481b23729577e02ebcd4811cbfc30fab" ],
@@ -356,9 +366,9 @@ var type__traits_8h =
     [ "fl::remove_pointer_t", "d4/d36/namespacefl_a5e33ea56db58b3d5ee8a7242d7e56813.html#a5e33ea56db58b3d5ee8a7242d7e56813", null ],
     [ "fl::true_type", "d4/d36/namespacefl_aec5b506b1eebcaf642acbdbef139775a.html#aec5b506b1eebcaf642acbdbef139775a", null ],
     [ "fl::underlying_type_t", "d4/d36/namespacefl_a106835cf7613b4f4607b80415b1917f6.html#a106835cf7613b4f4607b80415b1917f6", null ],
-    [ "fl::declval", "d4/d36/namespacefl_a34d2621a8267cd5e6059bce9e862fee5.html#a34d2621a8267cd5e6059bce9e862fee5", null ],
-    [ "fl::forward", "d4/d36/namespacefl_a0be17d960b37ba2328e7e83dc33fd86b.html#a0be17d960b37ba2328e7e83dc33fd86b", null ],
-    [ "fl::forward", "d4/d36/namespacefl_add9e137f59b736bd3f5b4b9ff21a59d5.html#add9e137f59b736bd3f5b4b9ff21a59d5", null ],
-    [ "fl::swap", "d4/d36/namespacefl_a223d78a3a627fa71e7cdd3ac9b37620d.html#a223d78a3a627fa71e7cdd3ac9b37620d", null ],
-    [ "fl::swap_by_copy", "d4/d36/namespacefl_a1faa2b29cd4415cf6099e1e500b641fe.html#a1faa2b29cd4415cf6099e1e500b641fe", null ]
+    [ "fl::declval", "d4/d36/namespacefl_a2f0d122e587feba8da364fdc8099af81.html#a2f0d122e587feba8da364fdc8099af81", null ],
+    [ "fl::forward", "d4/d36/namespacefl_affa3033eb62ea25473e06467610d2178.html#affa3033eb62ea25473e06467610d2178", null ],
+    [ "fl::forward", "d4/d36/namespacefl_a94488336a5db985fbda1bbd317bffc6a.html#a94488336a5db985fbda1bbd317bffc6a", null ],
+    [ "fl::swap", "d4/d36/namespacefl_a53b8f0c4ecdf92bb5393aca4df53bac1.html#a53b8f0c4ecdf92bb5393aca4df53bac1", null ],
+    [ "fl::swap_by_copy", "d4/d36/namespacefl_a19e9628dd804bc3b71fe63d59cbe89b4.html#a19e9628dd804bc3b71fe63d59cbe89b4", null ]
 ];

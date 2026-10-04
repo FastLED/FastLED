@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['optimization_20for_20libhelix_20mp3_0',['ARM Assembly Optimization for libhelix-mp3',['../d2/df4/md_third__party_2libhelix__mp3_2_r_e_a_d_m_e___a_r_m___a_s_s_e_m_b_l_y.html',1,'']]]
+  ['minimp3_20provenance_0',['minimp3 provenance',['../d6/d2d/md_third__party_2minimp3_2_p_r_o_v_e_n_a_n_c_e.html',1,'']]],
+  ['moodring_20redesign_20journal_1',['MoodRing redesign journal',['../da/d77/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_mood_ring_2_d_e_s_i_g_n.html',1,'']]]
 ];

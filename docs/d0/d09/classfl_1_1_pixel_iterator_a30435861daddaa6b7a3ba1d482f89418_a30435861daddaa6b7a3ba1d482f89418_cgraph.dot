@@ -1,0 +1,21 @@
+digraph "fl::PixelIterator::writeTM1812RGBWW"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::PixelIterator::\lwriteTM1812RGBWW",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Encode RGBWW pixels into 12-channel TM1812 IC frames."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::back_inserter",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a021929c212e1cf2dcb7c11445c6c9744.html#a021929c212e1cf2dcb7c11445c6c9744",tooltip="Helper function to create a back_insert_iterator."];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::encodeTM1812_RGBWW",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a06204cc9f3413187c749b0c41420dd96.html#a06204cc9f3413187c749b0c41420dd96",tooltip="Pack 5-channel RGBCCT pixels into TM1812 12-channel frames."];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::makeScaledPixelRange\lRGBWW",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_aee850565d7c7536162d49010c6df90d2.html#aee850565d7c7536162d49010c6df90d2",tooltip="Create RGBWW input iterator range from PixelIterator (issue #2558)"];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::make_pair",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a53d5062c3cacc67b60ff5bc033333817.html#a53d5062c3cacc67b60ff5bc033333817",tooltip=" "];
+  Node5 -> Node6 [id="edge5_Node000005_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::forward",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a94488336a5db985fbda1bbd317bffc6a.html#a94488336a5db985fbda1bbd317bffc6a",tooltip=" "];
+  Node4 -> Node4 [id="edge6_Node000004_Node000004",color="steelblue1",style="solid",tooltip=" "];
+}

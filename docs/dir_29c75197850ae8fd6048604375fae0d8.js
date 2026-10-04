@@ -5,6 +5,8 @@ var dir_29c75197850ae8fd6048604375fae0d8 =
     [ "bit_spread_lut.hpp", "db/d89/bit__spread__lut_8hpp.html", "db/d89/bit__spread__lut_8hpp" ],
     [ "wait_spin_budget.cpp.hpp", "d9/dd1/wait__spin__budget_8cpp_8hpp.html", "d9/dd1/wait__spin__budget_8cpp_8hpp" ],
     [ "wait_spin_budget.h", "df/d8e/wait__spin__budget_8h.html", "df/d8e/wait__spin__budget_8h" ],
-    [ "wave3.hpp", "d9/d66/wave3_8hpp.html", "d9/d66/wave3_8hpp" ],
-    [ "wave8.hpp", "dd/d4b/wave8_8hpp.html", "dd/d4b/wave8_8hpp" ]
+    [ "wave3.cpp.hpp", "dc/d20/detail_2wave3_8cpp_8hpp.html", "dc/d20/detail_2wave3_8cpp_8hpp" ],
+    [ "wave3.h", "d5/d31/detail_2wave3_8h.html", "d5/d31/detail_2wave3_8h" ],
+    [ "wave8.cpp.hpp", "dc/d94/detail_2wave8_8cpp_8hpp.html", "dc/d94/detail_2wave8_8cpp_8hpp" ],
+    [ "wave8.h", "de/dea/detail_2wave8_8h.html", "de/dea/detail_2wave8_8h" ]
 ];

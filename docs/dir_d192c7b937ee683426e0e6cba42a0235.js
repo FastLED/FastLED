@@ -12,6 +12,8 @@ var dir_d192c7b937ee683426e0e6cba42a0235 =
     [ "pixel_iterator_adapters.h", "db/d2b/pixel__iterator__adapters_8h.html", "db/d2b/pixel__iterator__adapters_8h" ],
     [ "sk9822.h", "d5/df5/sk9822_8h.html", "d5/df5/sk9822_8h" ],
     [ "sm16716.h", "d4/da2/encoders_2sm16716_8h.html", "d4/da2/encoders_2sm16716_8h" ],
+    [ "tm1812.h", "d7/de3/tm1812_8h.html", "d7/de3/tm1812_8h" ],
+    [ "tm1908.h", "dd/d86/tm1908_8h.html", "dd/d86/tm1908_8h" ],
     [ "ucs7604.h", "d4/db7/encoders_2ucs7604_8h.html", "d4/db7/encoders_2ucs7604_8h" ],
     [ "ws2801.h", "d4/ddc/encoders_2ws2801_8h.html", "d4/ddc/encoders_2ws2801_8h" ],
     [ "ws2801_encoder_impl.h", "d8/d18/ws2801__encoder__impl_8h.html", "d8/d18/ws2801__encoder__impl_8h" ],

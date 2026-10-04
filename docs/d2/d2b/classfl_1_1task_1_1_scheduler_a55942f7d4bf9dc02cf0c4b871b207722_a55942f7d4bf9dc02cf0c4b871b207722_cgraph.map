@@ -1,12 +1,22 @@
 <map id="fl::task::Scheduler::update_after_frame_tasks" name="fl::task::Scheduler::update_after_frame_tasks">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,51,205,91"/>
-<area shape="rect" id="Node000002" href="$d2/d2b/classfl_1_1task_1_1_scheduler_a523f729f91cfca13038bd39ca4838397.html#a523f729f91cfca13038bd39ca4838397" title=" " alt="" coords="253,51,427,91"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="205,69,240,69,240,74,205,74"/>
-<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a" title="Universal millisecond timer &#45; returns milliseconds since system startup." alt="" coords="507,29,581,55"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="426,56,493,47,493,52,427,62"/>
-<area shape="rect" id="Node000004" href="$d2/d2b/classfl_1_1task_1_1_scheduler_a030936767149b44cd3be5b5eccceae86.html#a030936767149b44cd3be5b5eccceae86" title=" " alt="" coords="475,79,613,119"/>
-<area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="427,81,461,85,460,91,426,86"/>
-<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="511,31,504,21,508,11,521,5,544,3,572,6,583,16,580,20,570,11,544,8,523,10,512,15,509,20,515,28"/>
-<area shape="rect" id="Node000005" href="$de/d66/classfl_1_1basic__string_a409024020d4cdb01125a9b7fba3404b5.html#a409024020d4cdb01125a9b7fba3404b5" title=" " alt="" coords="661,87,828,112"/>
-<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="613,97,648,97,648,102,613,102"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,150,205,190"/>
+<area shape="rect" id="Node000002" href="$d2/d2b/classfl_1_1task_1_1_scheduler_a523f729f91cfca13038bd39ca4838397.html#a523f729f91cfca13038bd39ca4838397" title=" " alt="" coords="253,150,427,190"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="205,167,240,167,240,173,205,173"/>
+<area shape="rect" id="Node000003" href="$d2/d24/classfl_1_1vector_a6bcea23da2d1c39846ec89a5119310ff.html#a6bcea23da2d1c39846ec89a5119310ff" title=" " alt="" coords="506,5,625,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="355,148,404,94,437,65,473,40,492,31,494,36,476,44,440,69,407,98,359,152"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a3c0ba5842bfd029c404a38c8df2315f3.html#a3c0ba5842bfd029c404a38c8df2315f3" title="Universal millisecond timer &#45; returns milliseconds since system startup." alt="" coords="528,79,603,104"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="385,147,474,113,514,101,515,106,476,118,387,152"/>
+<area shape="rect" id="Node000005" href="$d2/d24/classfl_1_1vector_a82c3455c1a345460f95a0180c93b3fb0.html#a82c3455c1a345460f95a0180c93b3fb0" title=" " alt="" coords="487,128,643,153"/>
+<area shape="poly" id="edge5_Node000002_Node000005" title=" " alt="" coords="426,156,473,150,474,155,427,161"/>
+<area shape="rect" id="Node000006" href="$d2/d2b/classfl_1_1task_1_1_scheduler_aacdd3fab091ccf2185e45abc19177755.html#aacdd3fab091ccf2185e45abc19177755" title=" " alt="" coords="475,178,656,218"/>
+<area shape="poly" id="edge6_Node000002_Node000006" title=" " alt="" coords="427,178,461,182,461,188,426,183"/>
+<area shape="rect" id="Node000007" href="$d2/d2b/classfl_1_1task_1_1_scheduler_ab23e409040ebd66d4ccd8fe53c939d90.html#ab23e409040ebd66d4ccd8fe53c939d90" title=" " alt="" coords="477,243,654,297"/>
+<area shape="poly" id="edge7_Node000002_Node000007" title=" " alt="" coords="387,188,476,228,491,235,489,239,474,232,385,192"/>
+<area shape="rect" id="Node000009" href="$d2/d2b/classfl_1_1task_1_1_scheduler_a030936767149b44cd3be5b5eccceae86.html#a030936767149b44cd3be5b5eccceae86" title=" " alt="" coords="496,322,635,362"/>
+<area shape="poly" id="edge9_Node000002_Node000009" title=" " alt="" coords="358,189,406,247,440,280,476,308,486,314,483,318,473,312,436,284,403,251,354,192"/>
+<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="529,80,521,70,525,60,540,54,565,52,597,56,609,65,606,69,595,61,565,57,541,59,529,64,526,70,533,77"/>
+<area shape="rect" id="Node000008" href="$de/dca/classfl_1_1_engine_events_a72f24bd8f5798f69531fef3a895ab3cd.html#a72f24bd8f5798f69531fef3a895ab3cd" title=" " alt="" coords="704,250,899,290"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="654,267,690,267,690,273,654,273"/>
+<area shape="rect" id="Node000010" href="$de/d66/classfl_1_1basic__string_ac3effe716fde4667b05a52d78d74bbfb.html#ac3effe716fde4667b05a52d78d74bbfb" title=" " alt="" coords="718,329,885,355"/>
+<area shape="poly" id="edge10_Node000009_Node000010" title=" " alt="" coords="635,339,704,339,704,345,635,345"/>
 </map>

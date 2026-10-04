@@ -10,5 +10,5 @@ digraph "fl::detail::GaussianFilterImpl::update"
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
   Node2 [id="Node000002",label="fl::detail::GaussianFilter\lImpl::recompute",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/dd8/classfl_1_1detail_1_1_gaussian_filter_impl_a491e013733af5103d07f1730b3ec47ed.html#a491e013733af5103d07f1730b3ec47ed",tooltip=" "];
   Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::span::size",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac",tooltip=" "];
+  Node3 [id="Node000003",label="fl::span::size",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa",tooltip=" "];
 }

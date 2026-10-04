@@ -1,0 +1,18 @@
+digraph "CFastLED::defaultSourceProfile"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="CFastLED::defaultSourceProfile",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::detail::defaultSource\lProfile",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d9e/namespacefl_1_1detail_ab5f23307c864de5b8f5c5da7224062ab.html#ab5f23307c864de5b8f5c5da7224062ab",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::SourceProfile::\llinearSrgb",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d81/structfl_1_1_source_profile_aebd5c778d592b6b83ad80d137eef242c.html#aebd5c778d592b6b83ad80d137eef242c",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::SourceProfile::\lSourceProfile",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d81/structfl_1_1_source_profile_a0751fcad63d8efb4f3ac55baa3c1ec52.html#a0751fcad63d8efb4f3ac55baa3c1ec52",tooltip=" "];
+  Node3 -> Node5 [id="edge4_Node000003_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::SourceProfile::\lsrgbPrimaries",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$da/d81/structfl_1_1_source_profile_af2c687f77eb11afc242a0004593a0a78.html#af2c687f77eb11afc242a0004593a0a78",tooltip=" "];
+}

@@ -8,11 +8,15 @@ digraph "fl::rgb_2_rgbw_user_function"
   rankdir="RL";
   Node1 [id="Node000001",label="fl::rgb_2_rgbw_user\l_function",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::rgb_2_rgbw",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a3003f962f976136b64f0e656e37742da.html#a3003f962f976136b64f0e656e37742da",tooltip="Converts RGB to RGBW using one of the functions."];
+  Node2 [id="Node000002",label="fl::rgb_2_rgbw",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a5d7f88cea77f862d6c24639b5a0cd916.html#a5d7f88cea77f862d6c24639b5a0cd916",tooltip="Converts RGB to RGBW using one of the functions."];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="PixelController::loadAnd\lScaleRGBW",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/dee/struct_pixel_controller_a650a6bebd28bdd32f404579c891ca98d.html#a650a6bebd28bdd32f404579c891ca98d",tooltip=" "];
-  Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="RGBWEmulatedController\l::showPixels",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d28/group___chipsets_gaba9a2f023f2950dbcdf3c2482f765350.html#gaba9a2f023f2950dbcdf3c2482f765350",tooltip="Main rendering function that converts RGB to RGBW and shows pixels."];
-  Node2 -> Node5 [id="edge4_Node000002_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node5 [id="Node000005",label="fl::rgb_2_rgbw",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_ae20004430e9197f538e3c8ad3e03a5db.html#ae20004430e9197f538e3c8ad3e03a5db",tooltip=" "];
+  Node3 [id="Node000003",label="calculate_unscaled\l_power_mW",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d1d/group___power_ga01ec0d809cace073e7c92f323cbd38a1.html#ga01ec0d809cace073e7c92f323cbd38a1",tooltip="Same, for a strip driven through the RGBW conversion."];
+  Node2 -> Node4 [id="edge3_Node000002_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="PixelController::loadAnd\lScaleRGBWUnordered",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/dee/struct_pixel_controller_af9320cb2184eab8cd1745e520c68ca62.html#af9320cb2184eab8cd1745e520c68ca62",tooltip="loadAndScaleRGBW before its wire reorder: RGB in source order plus W."];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="PixelController::loadAnd\lScaleRGBW",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d0/dee/struct_pixel_controller_a5aa57de8397b498ea587b5f0c049ced5.html#a5aa57de8397b498ea587b5f0c049ced5",tooltip=" "];
+  Node2 -> Node7 [id="edge5_Node000002_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::rgb_2_rgbw",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_af3542d7e69706a23e59f68a803550161.html#af3542d7e69706a23e59f68a803550161",tooltip=" "];
+  Node2 -> Node8 [id="edge6_Node000002_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl::rgb_2_rgbw",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a147010e2e1d4169b136516045ad0cbc0.html#a147010e2e1d4169b136516045ad0cbc0",tooltip=" "];
 }

@@ -1,0 +1,14 @@
+<map id="fl/math/soft_float.h" name="fl/math/soft_float.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="109,5,253,31"/>
+<area shape="rect" id="Node000002" href="$d1/d4e/types__impl_8h.html" title=" " alt="" coords="97,79,266,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="184,44,184,79,179,79,179,44"/>
+<area shape="rect" id="Node000003" href="$d7/d5e/fl_2stl_2json_2types_8h.html" title=" " alt="" coords="115,152,248,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="184,118,184,152,179,152,179,118"/>
+<area shape="rect" id="Node000004" href="$db/df7/json__dispatch_8cpp_8hpp.html" title=" " alt="" coords="5,225,144,265"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="156,188,102,227,99,223,153,183"/>
+<area shape="rect" id="Node000009" href="$db/da5/json_8cpp_8hpp.html" title=" " alt="" coords="155,313,291,339"/>
+<area shape="poly" id="edge4_Node000003_Node000009" title=" " alt="" coords="190,190,209,265,222,313,217,314,204,266,185,192"/>
+<area shape="rect" id="Node000012" href="$d4/d05/json_8h.html" title="FastLED&#39;s Elegant JSON Library: fl::json" alt="" coords="219,233,312,258"/>
+<area shape="poly" id="edge5_Node000003_Node000012" title=" " alt="" coords="206,185,255,230,251,234,202,189"/>
+<area shape="poly" id="edge6_Node000012_Node000009" title=" " alt="" coords="255,271,231,314,227,312,250,269"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="mood_ring::ringOffset" name="mood_ring::ringOffset">
+<area shape="rect" id="Node000001" title="Signed shortest offset from b to a on the ring, in (&#45;0.5, 0.5]." alt="" coords="5,5,168,31"/>
+<area shape="rect" id="Node000002" href="$d2/df0/namespacemood__ring_afd9d29472c525f39ef3e4d658dde6837.html#afd9d29472c525f39ef3e4d658dde6837" title="Wrap into [0, 1)." alt="" coords="216,5,381,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="168,15,202,15,202,21,168,21"/>
+</map>

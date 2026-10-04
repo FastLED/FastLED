@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -121,22 +121,22 @@ template&lt;typename TSrcPalette, typename TDestPalette&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d4e/colorutils_8cpp_8hpp_source.html#l01185">1185</a> of file <a class="el" href="../../db/d4e/colorutils_8cpp_8hpp_source.html">colorutils.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno"> 1186</span>                                                 {</div>
-<div class="line"><span class="lineno"> 1187</span>    <span class="keyword">const</span> fl::u16 src_size = <span class="keyword">sizeof</span>(srcpal.entries) / <span class="keyword">sizeof</span>(srcpal.entries[0]);</div>
-<div class="line"><span class="lineno"> 1188</span>    <span class="keyword">const</span> fl::u16 dest_size =</div>
-<div class="line"><span class="lineno"> 1189</span>        <span class="keyword">sizeof</span>(destpal.entries) / <span class="keyword">sizeof</span>(destpal.entries[0]);</div>
-<div class="line"><span class="lineno"> 1190</span>    <span class="keyword">const</span> fl::u16 repeat = dest_size / src_size;</div>
-<div class="line"><span class="lineno"> 1191</span>    <span class="keywordflow">for</span> (fl::u16 i = 0; i &lt; src_size; ++i) {</div>
-<div class="line"><span class="lineno"> 1192</span>        <span class="keyword">const</span> fl::u16 start = i * repeat;</div>
-<div class="line"><span class="lineno"> 1193</span>        <span class="keywordflow">for</span> (fl::u16 j = 0; j &lt; repeat; ++j) {</div>
-<div class="line"><span class="lineno"> 1194</span>            destpal[<span class="keyword">static_cast&lt;</span><a class="code hl_typedef" href="../../da/d3c/namespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c.html#a7573a66f01c09f14a1ff0411f8e1153c">fl::u8</a><span class="keyword">&gt;</span>(start + j)] = srcpal[<span class="keyword">static_cast&lt;</span><a class="code hl_typedef" href="../../da/d3c/namespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c.html#a7573a66f01c09f14a1ff0411f8e1153c">fl::u8</a><span class="keyword">&gt;</span>(i)];</div>
-<div class="line"><span class="lineno"> 1195</span>        }</div>
-<div class="line"><span class="lineno"> 1196</span>    }</div>
-<div class="line"><span class="lineno"> 1197</span>}</div>
-<div class="ttc" id="anamespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c_html_a7573a66f01c09f14a1ff0411f8e1153c"><div class="ttname"><a href="../../da/d3c/namespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c.html#a7573a66f01c09f14a1ff0411f8e1153c">fl::fl::u8</a></div><div class="ttdeci">unsigned char u8</div><div class="ttdef"><b>Definition</b> <a href="../../df/d96/s16x16x4_8h_source.html#l00132">s16x16x4.h:132</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../db/d4e/colorutils_8cpp_8hpp_source.html#l01266">1266</a> of file <a class="el" href="../../db/d4e/colorutils_8cpp_8hpp_source.html">colorutils.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno"> 1267</span>                                                 {</div>
+<div class="line"><span class="lineno"> 1268</span>    <span class="keyword">const</span> fl::u16 src_size = <span class="keyword">sizeof</span>(srcpal.entries) / <span class="keyword">sizeof</span>(srcpal.entries[0]);</div>
+<div class="line"><span class="lineno"> 1269</span>    <span class="keyword">const</span> fl::u16 dest_size =</div>
+<div class="line"><span class="lineno"> 1270</span>        <span class="keyword">sizeof</span>(destpal.entries) / <span class="keyword">sizeof</span>(destpal.entries[0]);</div>
+<div class="line"><span class="lineno"> 1271</span>    <span class="keyword">const</span> fl::u16 repeat = dest_size / src_size;</div>
+<div class="line"><span class="lineno"> 1272</span>    <span class="keywordflow">for</span> (fl::u16 i = 0; i &lt; src_size; ++i) {</div>
+<div class="line"><span class="lineno"> 1273</span>        <span class="keyword">const</span> fl::u16 start = i * repeat;</div>
+<div class="line"><span class="lineno"> 1274</span>        <span class="keywordflow">for</span> (fl::u16 j = 0; j &lt; repeat; ++j) {</div>
+<div class="line"><span class="lineno"> 1275</span>            destpal[<span class="keyword">static_cast&lt;</span><a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a><span class="keyword">&gt;</span>(start + j)] = srcpal[<span class="keyword">static_cast&lt;</span><a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a><span class="keyword">&gt;</span>(i)];</div>
+<div class="line"><span class="lineno"> 1276</span>        }</div>
+<div class="line"><span class="lineno"> 1277</span>    }</div>
+<div class="line"><span class="lineno"> 1278</span>}</div>
+<div class="ttc" id="anamespacefl_a058ceeac48f181da463c2ba07401292c_html_a058ceeac48f181da463c2ba07401292c"><div class="ttname"><a href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a></div><div class="ttdeci">unsigned char u8</div><div class="ttdef"><b>Definition</b> <a href="../../df/dd8/stdint_8h_source.html#l00131">stdint.h:131</a></div></div>
 </div><!-- fragment -->
-<p class="reference">Referenced by <a class="el" href="../../db/d4e/colorutils_8cpp_8hpp_source.html#l01227">fl::UpscalePalette()</a>, and <a class="el" href="../../db/d4e/colorutils_8cpp_8hpp_source.html#l01222">fl::UpscalePalette()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../db/d4e/colorutils_8cpp_8hpp_source.html#l01308">fl::UpscalePalette()</a>, and <a class="el" href="../../db/d4e/colorutils_8cpp_8hpp_source.html#l01303">fl::UpscalePalette()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -154,7 +154,7 @@ template&lt;typename TSrcPalette, typename TDestPalette&gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../df/d9e/namespacefl_1_1detail.html">detail</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:09 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:11 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

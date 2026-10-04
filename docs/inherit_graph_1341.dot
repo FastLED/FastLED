@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::third_party::vorbis\l::Floor1",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d59/namespacefl_1_1third__party_1_1vorbis.html#d1/d6c/structfl_1_1third__party_1_1vorbis_1_1_floor1",tooltip=" "];
+  Node0 [id="Node000000",label="fl::UCS7604CurrentControl",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d91/structfl_1_1_u_c_s7604_current_control.html",tooltip="UCS7604 current control structure with 4-bit fields for each channel."];
 }

@@ -23,12 +23,12 @@ var stb__hexwave_8h =
       [ "zero_wait", "dd/d76/namespacefl_1_1third__party_1_1hexwave.html#a33610bb7bf411c65b0d5d9fe039a263a", null ]
     ] ],
     [ "FL_STB_HEXWAVE_MAX_BLEP_LENGTH", "dd/dbb/stb__hexwave_8h_a8f503b02e2dee5e829d3eae8ce62b461.html#a8f503b02e2dee5e829d3eae8ce62b461", null ],
-    [ "fl::third_party::hexwave::hexwave_change", "dd/d76/namespacefl_1_1third__party_1_1hexwave_a73df37e7c28a4aa231f4573592e48f82.html#a73df37e7c28a4aa231f4573592e48f82", null ],
-    [ "fl::third_party::hexwave::hexwave_create", "dd/d76/namespacefl_1_1third__party_1_1hexwave_a706734748c19f4ac353569d7aa7c5b0e.html#a706734748c19f4ac353569d7aa7c5b0e", null ],
-    [ "fl::third_party::hexwave::hexwave_create_legacy", "dd/d76/namespacefl_1_1third__party_1_1hexwave_a98002b5c669050aa19b7cdfd46ee8f9e.html#a98002b5c669050aa19b7cdfd46ee8f9e", null ],
-    [ "fl::third_party::hexwave::hexwave_engine_create", "dd/d76/namespacefl_1_1third__party_1_1hexwave_ae1d7f1bfbf1e38371ddb8430a353d7bf.html#ae1d7f1bfbf1e38371ddb8430a353d7bf", null ],
-    [ "fl::third_party::hexwave::hexwave_engine_destroy", "dd/d76/namespacefl_1_1third__party_1_1hexwave_a02ab69db1ef35ecf2336643ebbd4e742.html#a02ab69db1ef35ecf2336643ebbd4e742", null ],
-    [ "fl::third_party::hexwave::hexwave_generate_samples", "dd/d76/namespacefl_1_1third__party_1_1hexwave_af3f50c133d31699878600252717015f7.html#af3f50c133d31699878600252717015f7", null ],
-    [ "fl::third_party::hexwave::hexwave_init", "dd/d76/namespacefl_1_1third__party_1_1hexwave_aa3919fa11833cf2e47534f6941a764b1.html#aa3919fa11833cf2e47534f6941a764b1", null ],
-    [ "fl::third_party::hexwave::hexwave_shutdown", "dd/d76/namespacefl_1_1third__party_1_1hexwave_ad85887b0f8a194b325e94dce4942c60e.html#ad85887b0f8a194b325e94dce4942c60e", null ]
+    [ "fl::third_party::hexwave::hexwave_change", "dd/d76/namespacefl_1_1third__party_1_1hexwave_ae9c54ee53ae904944b064c53c915ca84.html#ae9c54ee53ae904944b064c53c915ca84", null ],
+    [ "fl::third_party::hexwave::hexwave_create", "dd/d76/namespacefl_1_1third__party_1_1hexwave_a0dc1e64b08a25927f91f707fdaa524fb.html#a0dc1e64b08a25927f91f707fdaa524fb", null ],
+    [ "fl::third_party::hexwave::hexwave_create_legacy", "dd/d76/namespacefl_1_1third__party_1_1hexwave_a522542d95e85fc2f60829878184db6d4.html#a522542d95e85fc2f60829878184db6d4", null ],
+    [ "fl::third_party::hexwave::hexwave_engine_create", "dd/d76/namespacefl_1_1third__party_1_1hexwave_a6ddfc96d0df884c137e6dbd8a0ace213.html#a6ddfc96d0df884c137e6dbd8a0ace213", null ],
+    [ "fl::third_party::hexwave::hexwave_engine_destroy", "dd/d76/namespacefl_1_1third__party_1_1hexwave_a2ec99d613618bc4b1c466690be5bbc08.html#a2ec99d613618bc4b1c466690be5bbc08", null ],
+    [ "fl::third_party::hexwave::hexwave_generate_samples", "dd/d76/namespacefl_1_1third__party_1_1hexwave_ab4ee5bc9adb1f96a6bc100ed3d3714f0.html#ab4ee5bc9adb1f96a6bc100ed3d3714f0", null ],
+    [ "fl::third_party::hexwave::hexwave_init", "dd/d76/namespacefl_1_1third__party_1_1hexwave_acf75dfc3efad30e0203f2adfcf379f2a.html#acf75dfc3efad30e0203f2adfcf379f2a", null ],
+    [ "fl::third_party::hexwave::hexwave_shutdown", "dd/d76/namespacefl_1_1third__party_1_1hexwave_a5dfba6f4edb0d0eba22df4c0029fba45.html#a5dfba6f4edb0d0eba22df4c0029fba45", null ]
 ];

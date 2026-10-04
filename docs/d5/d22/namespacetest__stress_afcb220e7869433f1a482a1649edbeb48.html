@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -115,64 +115,64 @@ $(function(){initNavTree('d5/d22/namespacetest__stress_afcb220e7869433f1a482a164
       </table>
 </div><div class="memdoc">
 <pre class="fragment">Display test results in a formatted table.</pre> 
-<p class="definition">Definition at line <a class="el" href="../../d5/dfa/test__stress_8py_source.html#l00217">217</a> of file <a class="el" href="../../d5/dfa/test__stress_8py_source.html">test_stress.py</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  217</span><span class="keyword">def </span>display_results(results: StressTestResults):</div>
-<div class="line"><span class="lineno">  218</span>    <span class="stringliteral">&quot;&quot;&quot;Display test results in a formatted table.&quot;&quot;&quot;</span></div>
-<div class="line"><span class="lineno">  219</span>    console.print(<span class="stringliteral">&quot;\n[bold]Stress Test Results[/bold]&quot;</span>)</div>
-<div class="line"><span class="lineno">  220</span> </div>
-<div class="line"><span class="lineno">  221</span>    table = Table(title=<span class="stringliteral">&quot;Summary&quot;</span>)</div>
-<div class="line"><span class="lineno">  222</span>    table.add_column(<span class="stringliteral">&quot;Metric&quot;</span>, style=<span class="stringliteral">&quot;cyan&quot;</span>)</div>
-<div class="line"><span class="lineno">  223</span>    table.add_column(<span class="stringliteral">&quot;Value&quot;</span>, style=<span class="stringliteral">&quot;magenta&quot;</span>)</div>
-<div class="line"><span class="lineno">  224</span> </div>
-<div class="line"><span class="lineno">  225</span>    table.add_row(<span class="stringliteral">&quot;Total Requests&quot;</span>, str(results.total_requests))</div>
-<div class="line"><span class="lineno">  226</span>    table.add_row(</div>
-<div class="line"><span class="lineno">  227</span>        <span class="stringliteral">&quot;Successful&quot;</span>,</div>
-<div class="line"><span class="lineno">  228</span>        f<span class="stringliteral">&quot;{results.successful_requests} ({results.successful_requests / results.total_requests * 100:.1f}%)&quot;</span>,</div>
-<div class="line"><span class="lineno">  229</span>    )</div>
-<div class="line"><span class="lineno">  230</span>    table.add_row(</div>
-<div class="line"><span class="lineno">  231</span>        <span class="stringliteral">&quot;Failed&quot;</span>,</div>
-<div class="line"><span class="lineno">  232</span>        f<span class="stringliteral">&quot;{results.failed_requests} ({results.failed_requests / results.total_requests * 100:.1f}%)&quot;</span>,</div>
-<div class="line"><span class="lineno">  233</span>    )</div>
-<div class="line"><span class="lineno">  234</span>    table.add_row(<span class="stringliteral">&quot;Connection Errors&quot;</span>, str(results.connection_errors))</div>
-<div class="line"><span class="lineno">  235</span>    table.add_row(<span class="stringliteral">&quot;Timeout Errors&quot;</span>, str(results.timeout_errors))</div>
-<div class="line"><span class="lineno">  236</span>    table.add_row(<span class="stringliteral">&quot;Other Errors&quot;</span>, str(results.other_errors))</div>
-<div class="line"><span class="lineno">  237</span> </div>
-<div class="line"><span class="lineno">  238</span>    <span class="keywordflow">if</span> results.response_times:</div>
-<div class="line"><span class="lineno">  239</span>        table.add_row(<span class="stringliteral">&quot;Min Response Time&quot;</span>, f<span class="stringliteral">&quot;{min(results.response_times):.1f} ms&quot;</span>)</div>
-<div class="line"><span class="lineno">  240</span>        table.add_row(<span class="stringliteral">&quot;Max Response Time&quot;</span>, f<span class="stringliteral">&quot;{max(results.response_times):.1f} ms&quot;</span>)</div>
-<div class="line"><span class="lineno">  241</span>        table.add_row(</div>
-<div class="line"><span class="lineno">  242</span>            <span class="stringliteral">&quot;Avg Response Time&quot;</span>,</div>
-<div class="line"><span class="lineno">  243</span>            f<span class="stringliteral">&quot;{sum(results.response_times) / len(results.response_times):.1f} ms&quot;</span>,</div>
-<div class="line"><span class="lineno">  244</span>        )</div>
-<div class="line"><span class="lineno">  245</span> </div>
-<div class="line"><span class="lineno">  246</span>    console.print()</div>
-<div class="line"><span class="lineno">  247</span>    console.print(table)</div>
-<div class="line"><span class="lineno">  248</span> </div>
-<div class="line"><span class="lineno">  249</span>    success_rate = (</div>
-<div class="line"><span class="lineno">  250</span>        (results.successful_requests / results.total_requests * 100)</div>
-<div class="line"><span class="lineno">  251</span>        <span class="keywordflow">if</span> results.total_requests &gt; 0</div>
-<div class="line"><span class="lineno">  252</span>        <span class="keywordflow">else</span> 0</div>
-<div class="line"><span class="lineno">  253</span>    )</div>
-<div class="line"><span class="lineno">  254</span> </div>
-<div class="line"><span class="lineno">  255</span>    <span class="keywordflow">if</span> success_rate &gt;= 95:</div>
-<div class="line"><span class="lineno">  256</span>        console.print(</div>
-<div class="line"><span class="lineno">  257</span>            <span class="stringliteral">&quot;\n[green bold]✓ Phase 3 PASSED - Server handled stress test successfully (≥95% success)[/green bold]&quot;</span></div>
-<div class="line"><span class="lineno">  258</span>        )</div>
-<div class="line"><span class="lineno">  259</span>        <span class="keywordflow">return</span> 0</div>
-<div class="line"><span class="lineno">  260</span>    <span class="keywordflow">elif</span> success_rate &gt;= 80:</div>
-<div class="line"><span class="lineno">  261</span>        console.print(</div>
-<div class="line"><span class="lineno">  262</span>            f<span class="stringliteral">&quot;\n[yellow bold]⚠ Phase 3 MARGINAL - Server mostly stable ({success_rate:.1f}% success, threshold: 95%)[/yellow bold]&quot;</span></div>
-<div class="line"><span class="lineno">  263</span>        )</div>
-<div class="line"><span class="lineno">  264</span>        <span class="keywordflow">return</span> 1</div>
-<div class="line"><span class="lineno">  265</span>    <span class="keywordflow">else</span>:</div>
-<div class="line"><span class="lineno">  266</span>        console.print(</div>
-<div class="line"><span class="lineno">  267</span>            f<span class="stringliteral">&quot;\n[red bold]✗ Phase 3 FAILED - Server unstable under stress ({success_rate:.1f}% success)[/red bold]&quot;</span></div>
-<div class="line"><span class="lineno">  268</span>        )</div>
-<div class="line"><span class="lineno">  269</span>        <span class="keywordflow">return</span> 1</div>
-<div class="line"><span class="lineno">  270</span> </div>
-<div class="line"><span class="lineno">  271</span> </div>
+<p class="definition">Definition at line <a class="el" href="../../d5/dfa/test__stress_8py_source.html#l00219">219</a> of file <a class="el" href="../../d5/dfa/test__stress_8py_source.html">test_stress.py</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  219</span><span class="keyword">def </span>display_results(results: StressTestResults):</div>
+<div class="line"><span class="lineno">  220</span>    <span class="stringliteral">&quot;&quot;&quot;Display test results in a formatted table.&quot;&quot;&quot;</span></div>
+<div class="line"><span class="lineno">  221</span>    console.print(<span class="stringliteral">&quot;\n[bold]Stress Test Results[/bold]&quot;</span>)</div>
+<div class="line"><span class="lineno">  222</span> </div>
+<div class="line"><span class="lineno">  223</span>    table = Table(title=<span class="stringliteral">&quot;Summary&quot;</span>)</div>
+<div class="line"><span class="lineno">  224</span>    table.add_column(<span class="stringliteral">&quot;Metric&quot;</span>, style=<span class="stringliteral">&quot;cyan&quot;</span>)</div>
+<div class="line"><span class="lineno">  225</span>    table.add_column(<span class="stringliteral">&quot;Value&quot;</span>, style=<span class="stringliteral">&quot;magenta&quot;</span>)</div>
+<div class="line"><span class="lineno">  226</span> </div>
+<div class="line"><span class="lineno">  227</span>    table.add_row(<span class="stringliteral">&quot;Total Requests&quot;</span>, str(results.total_requests))</div>
+<div class="line"><span class="lineno">  228</span>    table.add_row(</div>
+<div class="line"><span class="lineno">  229</span>        <span class="stringliteral">&quot;Successful&quot;</span>,</div>
+<div class="line"><span class="lineno">  230</span>        f<span class="stringliteral">&quot;{results.successful_requests} ({results.successful_requests / results.total_requests * 100:.1f}%)&quot;</span>,</div>
+<div class="line"><span class="lineno">  231</span>    )</div>
+<div class="line"><span class="lineno">  232</span>    table.add_row(</div>
+<div class="line"><span class="lineno">  233</span>        <span class="stringliteral">&quot;Failed&quot;</span>,</div>
+<div class="line"><span class="lineno">  234</span>        f<span class="stringliteral">&quot;{results.failed_requests} ({results.failed_requests / results.total_requests * 100:.1f}%)&quot;</span>,</div>
+<div class="line"><span class="lineno">  235</span>    )</div>
+<div class="line"><span class="lineno">  236</span>    table.add_row(<span class="stringliteral">&quot;Connection Errors&quot;</span>, str(results.connection_errors))</div>
+<div class="line"><span class="lineno">  237</span>    table.add_row(<span class="stringliteral">&quot;Timeout Errors&quot;</span>, str(results.timeout_errors))</div>
+<div class="line"><span class="lineno">  238</span>    table.add_row(<span class="stringliteral">&quot;Other Errors&quot;</span>, str(results.other_errors))</div>
+<div class="line"><span class="lineno">  239</span> </div>
+<div class="line"><span class="lineno">  240</span>    <span class="keywordflow">if</span> results.response_times:</div>
+<div class="line"><span class="lineno">  241</span>        table.add_row(<span class="stringliteral">&quot;Min Response Time&quot;</span>, f<span class="stringliteral">&quot;{min(results.response_times):.1f} ms&quot;</span>)</div>
+<div class="line"><span class="lineno">  242</span>        table.add_row(<span class="stringliteral">&quot;Max Response Time&quot;</span>, f<span class="stringliteral">&quot;{max(results.response_times):.1f} ms&quot;</span>)</div>
+<div class="line"><span class="lineno">  243</span>        table.add_row(</div>
+<div class="line"><span class="lineno">  244</span>            <span class="stringliteral">&quot;Avg Response Time&quot;</span>,</div>
+<div class="line"><span class="lineno">  245</span>            f<span class="stringliteral">&quot;{sum(results.response_times) / len(results.response_times):.1f} ms&quot;</span>,</div>
+<div class="line"><span class="lineno">  246</span>        )</div>
+<div class="line"><span class="lineno">  247</span> </div>
+<div class="line"><span class="lineno">  248</span>    console.print()</div>
+<div class="line"><span class="lineno">  249</span>    console.print(table)</div>
+<div class="line"><span class="lineno">  250</span> </div>
+<div class="line"><span class="lineno">  251</span>    success_rate = (</div>
+<div class="line"><span class="lineno">  252</span>        (results.successful_requests / results.total_requests * 100)</div>
+<div class="line"><span class="lineno">  253</span>        <span class="keywordflow">if</span> results.total_requests &gt; 0</div>
+<div class="line"><span class="lineno">  254</span>        <span class="keywordflow">else</span> 0</div>
+<div class="line"><span class="lineno">  255</span>    )</div>
+<div class="line"><span class="lineno">  256</span> </div>
+<div class="line"><span class="lineno">  257</span>    <span class="keywordflow">if</span> success_rate &gt;= 95:</div>
+<div class="line"><span class="lineno">  258</span>        console.print(</div>
+<div class="line"><span class="lineno">  259</span>            <span class="stringliteral">&quot;\n[green bold]✓ Phase 3 PASSED - Server handled stress test successfully (≥95% success)[/green bold]&quot;</span></div>
+<div class="line"><span class="lineno">  260</span>        )</div>
+<div class="line"><span class="lineno">  261</span>        <span class="keywordflow">return</span> 0</div>
+<div class="line"><span class="lineno">  262</span>    <span class="keywordflow">elif</span> success_rate &gt;= 80:</div>
+<div class="line"><span class="lineno">  263</span>        console.print(</div>
+<div class="line"><span class="lineno">  264</span>            f<span class="stringliteral">&quot;\n[yellow bold]⚠ Phase 3 MARGINAL - Server mostly stable ({success_rate:.1f}% success, threshold: 95%)[/yellow bold]&quot;</span></div>
+<div class="line"><span class="lineno">  265</span>        )</div>
+<div class="line"><span class="lineno">  266</span>        <span class="keywordflow">return</span> 1</div>
+<div class="line"><span class="lineno">  267</span>    <span class="keywordflow">else</span>:</div>
+<div class="line"><span class="lineno">  268</span>        console.print(</div>
+<div class="line"><span class="lineno">  269</span>            f<span class="stringliteral">&quot;\n[red bold]✗ Phase 3 FAILED - Server unstable under stress ({success_rate:.1f}% success)[/red bold]&quot;</span></div>
+<div class="line"><span class="lineno">  270</span>        )</div>
+<div class="line"><span class="lineno">  271</span>        <span class="keywordflow">return</span> 1</div>
+<div class="line"><span class="lineno">  272</span> </div>
+<div class="line"><span class="lineno">  273</span> </div>
 </div><!-- fragment -->
-<p class="reference">Referenced by <a class="el" href="../../d5/dfa/test__stress_8py_source.html#l00272">main()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d5/dfa/test__stress_8py_source.html#l00274">main()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -190,7 +190,7 @@ $(function(){initNavTree('d5/d22/namespacetest__stress_afcb220e7869433f1a482a164
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d5/d22/namespacetest__stress.html">test_stress</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:12 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:13 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

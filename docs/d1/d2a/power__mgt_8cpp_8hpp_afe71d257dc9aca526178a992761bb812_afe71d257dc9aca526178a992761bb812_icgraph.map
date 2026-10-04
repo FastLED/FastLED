@@ -1,42 +1,68 @@
 <map id="gPowerModel" name="gPowerModel">
-<area shape="rect" id="Node000001" title="Global RGB power model (initialized to WS2812 @ 5V defaults, linear response)" alt="" coords="796,351,907,377"/>
-<area shape="rect" id="Node000002" href="$d3/d1d/group___power_gafdf503b02fd644c3398d34f27c3d363d.html#gafdf503b02fd644c3398d34f27c3d363d" title=" " alt="" coords="569,165,716,205"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="823,344,665,207,669,203,827,340"/>
-<area shape="rect" id="Node000010" href="$d9/d5f/group___power_model_gaec3b3e44c2f5e7f70127ad76f480ccd0.html#gaec3b3e44c2f5e7f70127ad76f480ccd0" title="Get current RGB power model." alt="" coords="573,298,712,323"/>
-<area shape="poly" id="edge8_Node000001_Node000010" title=" " alt="" coords="787,350,692,326,694,321,788,345"/>
-<area shape="rect" id="Node000012" href="$d9/d5f/group___power_model_ga8aa9fd0df8e3e989b4907e9f703343b2.html#ga8aa9fd0df8e3e989b4907e9f703343b2" title="Get the current brightness&#45;to&#45;power response exponent." alt="" coords="537,351,748,377"/>
-<area shape="poly" id="edge10_Node000001_Node000012" title=" " alt="" coords="782,367,748,367,748,361,782,361"/>
-<area shape="rect" id="Node000014" href="$d9/d5f/group___power_model_ga83d1cb7bfce9bd338765968bb40d54e5.html#ga83d1cb7bfce9bd338765968bb40d54e5" title="Set custom RGB LED power consumption model." alt="" coords="574,507,711,533"/>
-<area shape="poly" id="edge12_Node000001_Node000014" title=" " alt="" coords="824,387,663,509,659,505,820,383"/>
-<area shape="rect" id="Node000017" href="$d9/d5f/group___power_model_gad213f217079d1c8e2453b74bd3aec6de.html#gad213f217079d1c8e2453b74bd3aec6de" title="Set a non&#45;linear brightness&#45;to&#45;power response exponent." alt="" coords="275,409,486,434"/>
-<area shape="poly" id="edge20_Node000001_Node000017" title=" " alt="" coords="792,383,748,392,612,409,486,419,486,414,612,404,748,387,791,377"/>
-<area shape="rect" id="Node000003" href="$d3/d1d/group___power_gab540bd9608e32378f1fb29bd9226c970.html#gab540bd9608e32378f1fb29bd9226c970" title="Determines the highest brightness level you can use and still stay under the specified power budget f..." alt="" coords="285,37,477,77"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="602,160,549,125,488,92,458,80,460,75,490,87,552,120,605,155"/>
-<area shape="rect" id="Node000007" href="$d3/d1d/group___power_gab33dbfb39f4368fffdc17807883c787e.html#gab33dbfb39f4368fffdc17807883c787e" title="Determines the highest brightness level you can use and still stay under the specified power budget f..." alt="" coords="285,101,477,141"/>
-<area shape="poly" id="edge5_Node000002_Node000007" title=" " alt="" coords="555,167,463,144,464,139,557,162"/>
-<area shape="rect" id="Node000008" href="$d3/d1d/group___power_ga46fe8354310cd1888743e400b70175cd.html#ga46fe8354310cd1888743e400b70175cd" title="Determines how many milliwatts the current LED data would draw at max brightness (255)" alt="" coords="307,165,454,205"/>
-<area shape="poly" id="edge6_Node000002_Node000008" title=" " alt="" coords="555,188,454,188,454,183,555,183"/>
-<area shape="rect" id="Node000009" href="$dd/dbb/class_c_fast_l_e_d_a06a8bc368f2ef5816015b75ad54d1e6b.html#a06a8bc368f2ef5816015b75ad54d1e6b" title="Get estimated power consumption in milliwatts." alt="" coords="272,229,489,269"/>
-<area shape="poly" id="edge7_Node000002_Node000009" title=" " alt="" coords="557,209,464,232,463,227,555,204"/>
-<area shape="rect" id="Node000004" href="$d3/d1d/group___power_gaf1109b6fa8f504362807f39bc4126306.html#gaf1109b6fa8f504362807f39bc4126306" title="Determines the highest brightness level you can use and still stay under the specified power budget f..." alt="" coords="19,5,211,45"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="271,47,210,39,211,34,271,42"/>
-<area shape="rect" id="Node000005" href="$dd/dbb/class_c_fast_l_e_d_a660c4ce3348e4463932f350be99215bf.html#a660c4ce3348e4463932f350be99215bf" title="Set the maximum power to be used, given in milliwatts." alt="" coords="5,69,224,109"/>
-<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="271,73,224,79,224,74,271,68"/>
-<area shape="rect" id="Node000011" href="$dd/dbb/class_c_fast_l_e_d_add8d88cb11f7e09c627de99ba78e69d3.html#add8d88cb11f7e09c627de99ba78e69d3" title="Get current RGB power model." alt="" coords="285,294,476,319"/>
-<area shape="poly" id="edge9_Node000010_Node000011" title=" " alt="" coords="560,312,476,311,476,305,560,307"/>
-<area shape="rect" id="Node000013" href="$dd/dbb/class_c_fast_l_e_d_a60ff859b0d54bfa42a669b9fdec5ab34.html#a60ff859b0d54bfa42a669b9fdec5ab34" title="Get the configured brightness&#45;to&#45;power response exponent." alt="" coords="281,344,480,384"/>
-<area shape="poly" id="edge11_Node000012_Node000013" title=" " alt="" coords="523,367,480,367,480,361,523,361"/>
-<area shape="rect" id="Node000015" href="$d9/d5f/group___power_model_ga759a23d8dec6a2de0d5b89095014d4e6.html#ga759a23d8dec6a2de0d5b89095014d4e6" title="Set custom RGBW LED power consumption model." alt="" coords="312,458,449,483"/>
-<area shape="poly" id="edge13_Node000014_Node000015" title=" " alt="" coords="561,507,449,486,450,481,562,502"/>
-<area shape="rect" id="Node000016" href="$d9/d5f/group___power_model_gad42f079a40ba5d5a0db04e14b645e49e.html#gad42f079a40ba5d5a0db04e14b645e49e" title="Set custom RGBWW LED power consumption model." alt="" coords="312,507,449,533"/>
-<area shape="poly" id="edge14_Node000014_Node000016" title=" " alt="" coords="561,523,450,523,450,517,561,517"/>
-<area shape="poly" id="edge15_Node000014_Node000017" title=" " alt="" coords="606,503,551,476,488,449,445,437,447,432,490,444,554,471,608,498"/>
-<area shape="rect" id="Node000019" href="$dd/dbb/class_c_fast_l_e_d_a5d64d016a6852b44aa79e158545a40aa.html#a5d64d016a6852b44aa79e158545a40aa" title=" " alt="" coords="285,557,476,582"/>
-<area shape="poly" id="edge17_Node000014_Node000019" title=" " alt="" coords="562,538,450,559,449,554,561,533"/>
-<area shape="rect" id="Node000020" href="$dd/dbb/class_c_fast_l_e_d_aea009a14e51158999765c111c514fa8c.html#aea009a14e51158999765c111c514fa8c" title=" " alt="" coords="285,606,476,631"/>
-<area shape="poly" id="edge18_Node000014_Node000020" title=" " alt="" coords="609,542,554,570,490,597,451,609,450,603,488,592,552,565,606,537"/>
-<area shape="rect" id="Node000021" href="$dd/dbb/class_c_fast_l_e_d_a261a8d22d7221b379723a83f4c343f92.html#a261a8d22d7221b379723a83f4c343f92" title=" " alt="" coords="285,655,476,681"/>
-<area shape="poly" id="edge19_Node000014_Node000021" title=" " alt="" coords="622,545,566,596,530,623,490,646,460,658,458,653,488,642,527,619,563,592,619,541"/>
-<area shape="rect" id="Node000018" href="$dd/dbb/class_c_fast_l_e_d_a7b1664e5e57fd2e2141ef00cc28a1a1f.html#a7b1664e5e57fd2e2141ef00cc28a1a1f" title="Set a non&#45;linear brightness&#45;to&#45;power response exponent." alt="" coords="16,401,213,441"/>
-<area shape="poly" id="edge16_Node000017_Node000018" title=" " alt="" coords="262,424,214,424,214,419,262,419"/>
+<area shape="rect" id="Node000001" title="Global RGB power model (initialized to WS2812 @ 5V defaults, linear response)" alt="" coords="1055,455,1165,480"/>
+<area shape="rect" id="Node000002" href="$d1/d2a/power__mgt_8cpp_8hpp_aa482db0d85e7c33ad7ce4f3b77f4808e.html#aa482db0d85e7c33ad7ce4f3b77f4808e" title=" " alt="" coords="811,108,992,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1105,441,1099,383,1084,307,1071,267,1054,227,1032,190,1005,157,989,145,970,136,972,131,992,140,1009,153,1036,187,1058,225,1076,265,1089,306,1104,382,1110,441"/>
+<area shape="rect" id="Node000009" href="$d9/d5f/group___power_model_gad213f217079d1c8e2453b74bd3aec6de.html#gad213f217079d1c8e2453b74bd3aec6de" title="Set a non&#45;linear brightness&#45;to&#45;power response exponent." alt="" coords="537,157,748,183"/>
+<area shape="poly" id="edge38_Node000001_Node000009" title=" " alt="" coords="1100,442,1088,403,1069,356,1042,308,1005,268,976,248,945,230,879,204,811,187,748,177,749,172,812,182,880,199,948,225,979,243,1008,264,1046,305,1074,353,1093,401,1105,440"/>
+<area shape="rect" id="Node000011" href="$d9/d5f/group___power_model_ga315379844ae2a3ff4212fe39ac1ade6c.html#ga315379844ae2a3ff4212fe39ac1ade6c" title="Charge already&#45;solved physical output bytes in source emitter order: RGB, RGBW, or RGB + warm white +..." alt="" coords="564,551,721,591"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="1042,485,722,557,721,551,1041,480"/>
+<area shape="rect" id="Node000015" href="$d3/d1d/group___power_gafdf503b02fd644c3398d34f27c3d363d.html#gafdf503b02fd644c3398d34f27c3d363d" title="Determines how many milliwatts the current LED data would draw at max brightness (255)" alt="" coords="828,335,975,375"/>
+<area shape="poly" id="edge14_Node000001_Node000015" title=" " alt="" coords="1078,449,1005,404,950,378,953,373,1008,400,1080,444"/>
+<area shape="rect" id="Node000021" href="$d3/d1d/group___power_ga01ec0d809cace073e7c92f323cbd38a1.html#ga01ec0d809cace073e7c92f323cbd38a1" title="Same, for a strip driven through the RGBW conversion." alt="" coords="569,207,716,247"/>
+<area shape="poly" id="edge21_Node000001_Node000021" title=" " alt="" coords="1095,443,1060,383,1035,352,1005,325,971,305,934,287,857,260,782,244,716,235,717,229,782,238,858,255,936,282,973,300,1008,321,1039,348,1065,380,1100,441"/>
+<area shape="rect" id="Node000022" href="$d3/d1d/group___power_gaf1bc751ffa875570ed2e86fc38db5142.html#gaf1bc751ffa875570ed2e86fc38db5142" title="The most BINARY_DITHER can add to one latched frame of leds, in mW (#4342, contract R4: &quot;quantization..." alt="" coords="827,637,976,663"/>
+<area shape="poly" id="edge22_Node000001_Node000022" title=" " alt="" coords="1096,493,1059,544,1035,572,1008,597,972,622,936,640,934,635,969,617,1005,593,1031,568,1055,541,1092,490"/>
+<area shape="rect" id="Node000024" href="$d1/d2a/power__mgt_8cpp_8hpp_a65c5cbdd796e64d67cfe0665898797ee.html#a65c5cbdd796e64d67cfe0665898797ee" title=" " alt="" coords="814,559,989,584"/>
+<area shape="poly" id="edge26_Node000001_Node000024" title=" " alt="" coords="1073,489,929,561,927,556,1070,484"/>
+<area shape="rect" id="Node000025" href="$d1/d2a/power__mgt_8cpp_8hpp_a4ef2b434985b31da5b717f40a2e78e2b.html#a4ef2b434985b31da5b717f40a2e78e2b" title=" " alt="" coords="835,415,968,440"/>
+<area shape="poly" id="edge29_Node000001_Node000025" title=" " alt="" coords="1041,457,968,443,969,437,1042,452"/>
+<area shape="rect" id="Node000026" href="$d9/d5f/group___power_model_gaec3b3e44c2f5e7f70127ad76f480ccd0.html#gaec3b3e44c2f5e7f70127ad76f480ccd0" title="Get current RGB power model." alt="" coords="832,717,971,743"/>
+<area shape="poly" id="edge33_Node000001_Node000026" title=" " alt="" coords="1104,494,1091,533,1071,581,1044,631,1009,676,975,702,940,720,937,715,972,697,1005,672,1039,628,1066,578,1086,531,1099,492"/>
+<area shape="rect" id="Node000028" href="$d9/d5f/group___power_model_ga8aa9fd0df8e3e989b4907e9f703343b2.html#ga8aa9fd0df8e3e989b4907e9f703343b2" title="Get the current brightness&#45;to&#45;power response exponent." alt="" coords="796,796,1007,821"/>
+<area shape="poly" id="edge36_Node000001_Node000028" title=" " alt="" coords="1108,494,1100,548,1082,617,1053,690,1033,725,1009,757,978,782,945,798,943,793,976,777,1005,753,1028,722,1048,688,1077,615,1094,547,1103,494"/>
+<area shape="rect" id="Node000003" href="$d9/d5f/group___power_model_ga83d1cb7bfce9bd338765968bb40d54e5.html#ga83d1cb7bfce9bd338765968bb40d54e5" title="Set custom RGB LED power consumption model." alt="" coords="574,59,711,84"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="820,108,710,87,711,81,821,103"/>
+<area shape="rect" id="Node000007" href="$d9/d5f/group___power_model_ga759a23d8dec6a2de0d5b89095014d4e6.html#ga759a23d8dec6a2de0d5b89095014d4e6" title="Set custom RGBW LED power consumption model." alt="" coords="574,108,711,133"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="797,123,712,123,712,118,797,118"/>
+<area shape="rect" id="Node000008" href="$d9/d5f/group___power_model_gad42f079a40ba5d5a0db04e14b645e49e.html#gad42f079a40ba5d5a0db04e14b645e49e" title="Set custom RGBWW LED power consumption model." alt="" coords="574,9,711,35"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="865,104,810,75,747,49,709,37,710,32,749,43,813,71,867,99"/>
+<area shape="poly" id="edge8_Node000002_Node000009" title=" " alt="" coords="821,139,711,160,710,155,820,133"/>
+<area shape="rect" id="Node000004" href="$dd/dbb/class_c_fast_l_e_d_a5d64d016a6852b44aa79e158545a40aa.html#a5d64d016a6852b44aa79e158545a40aa" title=" " alt="" coords="285,104,475,129"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="561,88,455,107,454,101,560,83"/>
+<area shape="rect" id="Node000005" href="$dd/dbb/class_c_fast_l_e_d_aea009a14e51158999765c111c514fa8c.html#aea009a14e51158999765c111c514fa8c" title=" " alt="" coords="285,5,475,31"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="565,58,443,33,444,28,566,53"/>
+<area shape="rect" id="Node000006" href="$dd/dbb/class_c_fast_l_e_d_a261a8d22d7221b379723a83f4c343f92.html#a261a8d22d7221b379723a83f4c343f92" title=" " alt="" coords="285,55,475,80"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="560,73,475,71,476,66,560,67"/>
+<area shape="rect" id="Node000010" href="$dd/dbb/class_c_fast_l_e_d_a7b1664e5e57fd2e2141ef00cc28a1a1f.html#a7b1664e5e57fd2e2141ef00cc28a1a1f" title="Set a non&#45;linear brightness&#45;to&#45;power response exponent." alt="" coords="281,154,479,194"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="524,174,479,175,479,170,523,169"/>
+<area shape="rect" id="Node000012" href="$d3/d1d/group___power_gab0593d3b85bf91261f5a6288ec4ed71e.html#gab0593d3b85bf91261f5a6288ec4ed71e" title="One controller&#39;s demand at full brightness, in mW, including idle draw – the quantity the limiter sum..." alt="" coords="305,450,455,490"/>
+<area shape="poly" id="edge11_Node000011_Node000012" title=" " alt="" coords="576,549,432,493,434,488,578,544"/>
+<area shape="rect" id="Node000013" href="$d3/d1d/group___power_gab33dbfb39f4368fffdc17807883c787e.html#gab33dbfb39f4368fffdc17807883c787e" title="Determines the highest brightness level you can use and still stay under the specified power budget f..." alt="" coords="18,450,210,490"/>
+<area shape="poly" id="edge12_Node000012_Node000013" title=" " alt="" coords="292,473,210,473,210,467,292,467"/>
+<area shape="rect" id="Node000014" href="$dd/dbb/class_c_fast_l_e_d_a06a8bc368f2ef5816015b75ad54d1e6b.html#a06a8bc368f2ef5816015b75ad54d1e6b" title="Get estimated power consumption in milliwatts." alt="" coords="5,561,223,601"/>
+<area shape="poly" id="edge13_Node000012_Node000014" title=" " alt="" coords="307,497,272,511,158,563,155,558,270,506,306,492"/>
+<area shape="poly" id="edge20_Node000015_Node000012" title=" " alt="" coords="815,377,456,456,454,451,814,372"/>
+<area shape="rect" id="Node000016" href="$d3/d1d/group___power_gab540bd9608e32378f1fb29bd9226c970.html#gab540bd9608e32378f1fb29bd9226c970" title="Determines the highest brightness level you can use and still stay under the specified power budget f..." alt="" coords="547,335,739,375"/>
+<area shape="poly" id="edge15_Node000015_Node000016" title=" " alt="" coords="814,358,739,358,739,353,814,353"/>
+<area shape="rect" id="Node000020" href="$d3/d1d/group___power_ga46fe8354310cd1888743e400b70175cd.html#ga46fe8354310cd1888743e400b70175cd" title="Determines how many milliwatts the current LED data would draw at max brightness (255)" alt="" coords="569,271,716,311"/>
+<area shape="poly" id="edge18_Node000015_Node000020" title=" " alt="" coords="814,337,716,312,717,307,815,331"/>
+<area shape="poly" id="edge19_Node000015_Node000021" title=" " alt="" coords="861,330,808,295,747,262,716,249,718,244,749,257,811,290,864,325"/>
+<area shape="rect" id="Node000017" href="$d3/d1d/group___power_gaf1109b6fa8f504362807f39bc4126306.html#gaf1109b6fa8f504362807f39bc4126306" title="Determines the highest brightness level you can use and still stay under the specified power budget f..." alt="" coords="284,335,476,375"/>
+<area shape="poly" id="edge16_Node000016_Node000017" title=" " alt="" coords="533,358,476,358,476,353,533,353"/>
+<area shape="rect" id="Node000018" href="$dd/dbb/class_c_fast_l_e_d_a660c4ce3348e4463932f350be99215bf.html#a660c4ce3348e4463932f350be99215bf" title="Set the maximum power to be used, given in milliwatts." alt="" coords="271,271,489,311"/>
+<area shape="poly" id="edge17_Node000016_Node000018" title=" " alt="" coords="546,335,462,314,463,309,547,329"/>
+<area shape="rect" id="Node000023" href="$d3/d1d/group___power_gaea016c9708cbd1fce10a90d8fced370a.html#gaea016c9708cbd1fce10a90d8fced370a" title="dither_reserve_mW() for a controller that dithers, and zero for one that does not: a mode other than ..." alt="" coords="271,592,489,617"/>
+<area shape="poly" id="edge23_Node000022_Node000023" title=" " alt="" coords="813,645,489,617,490,611,813,640"/>
+<area shape="poly" id="edge24_Node000023_Node000013" title=" " alt="" coords="340,588,153,492,156,488,343,583"/>
+<area shape="poly" id="edge25_Node000023_Node000014" title=" " alt="" coords="257,596,222,593,223,588,257,591"/>
+<area shape="poly" id="edge27_Node000024_Node000011" title=" " alt="" coords="800,574,721,574,721,569,800,569"/>
+<area shape="poly" id="edge28_Node000024_Node000023" title=" " alt="" coords="840,590,748,606,614,614,490,613,490,607,614,608,748,601,839,585"/>
+<area shape="poly" id="edge31_Node000025_Node000013" title=" " alt="" coords="821,427,575,424,423,429,271,441,199,453,198,447,270,435,423,423,575,419,821,421"/>
+<area shape="poly" id="edge32_Node000025_Node000014" title=" " alt="" coords="822,445,219,563,218,558,821,440"/>
+<area shape="poly" id="edge30_Node000025_Node000016" title=" " alt="" coords="841,413,715,378,716,373,842,408"/>
+<area shape="poly" id="edge34_Node000026_Node000014" title=" " alt="" coords="818,723,572,689,421,663,270,631,173,603,174,598,271,626,422,657,573,683,819,718"/>
+<area shape="rect" id="Node000027" href="$dd/dbb/class_c_fast_l_e_d_add8d88cb11f7e09c627de99ba78e69d3.html#add8d88cb11f7e09c627de99ba78e69d3" title="Get current RGB power model." alt="" coords="547,768,738,793"/>
+<area shape="poly" id="edge35_Node000026_Node000027" title=" " alt="" coords="823,748,709,771,708,765,822,743"/>
+<area shape="rect" id="Node000029" href="$dd/dbb/class_c_fast_l_e_d_a60ff859b0d54bfa42a669b9fdec5ab34.html#a60ff859b0d54bfa42a669b9fdec5ab34" title="Get the configured brightness&#45;to&#45;power response exponent." alt="" coords="543,818,742,858"/>
+<area shape="poly" id="edge37_Node000028_Node000029" title=" " alt="" coords="783,825,743,829,742,824,782,819"/>
 </map>

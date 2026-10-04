@@ -1,0 +1,9 @@
+<map id="fl::expected::ok" name="fl::expected::ok">
+<area shape="rect" id="Node000001" title="Check if operation succeeded." alt="" coords="247,55,369,80"/>
+<area shape="rect" id="Node000002" href="$d7/d93/classfl_1_1expected_a4ff9f342d4c877d528e733eae6af0135.html#a4ff9f342d4c877d528e733eae6af0135" title="Check if operation succeeded (alias for ok())" alt="" coords="16,5,188,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="241,54,155,33,157,28,242,49"/>
+<area shape="rect" id="Node000003" href="$d7/d93/classfl_1_1expected_af2332cc762c19ff7f5ae2682f0e48e73.html#af2332cc762c19ff7f5ae2682f0e48e73" title="Explicit conversion to bool for contextual evaluation." alt="" coords="5,55,199,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="233,70,199,70,199,65,233,65"/>
+<area shape="rect" id="Node000004" href="$d1/d2e/classfl_1_1expected_3_01void_00_01_e_01_4_ad4d81b77f9f81c262992c54120c17b10.html#ad4d81b77f9f81c262992c54120c17b10" title=" " alt="" coords="29,105,175,145"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="249,86,175,107,174,102,248,81"/>
+</map>

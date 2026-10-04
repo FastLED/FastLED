@@ -37,12 +37,12 @@ digraph "hsv2rgb.h"
   Node28 [id="Node000028",label="fl/math/fixed_point.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$de/d62/fixed__point_8h.html",tooltip=" "];
   Node28 -> Node10 [id="edge19_Node000028_Node000010",color="steelblue1",style="solid",tooltip=" "];
   Node11 -> Node10 [id="edge20_Node000011_Node000010",color="steelblue1",style="solid",tooltip=" "];
-  Node2 -> Node56 [id="edge21_Node000002_Node000056",color="steelblue1",style="solid",tooltip=" "];
-  Node56 [id="Node000056",label="color.h",height=0.2,width=0.4,color="grey60", fillcolor="#E0E0E0", style="filled",tooltip=" "];
+  Node2 -> Node49 [id="edge21_Node000002_Node000049",color="steelblue1",style="solid",tooltip=" "];
+  Node49 [id="Node000049",label="color.h",height=0.2,width=0.4,color="grey60", fillcolor="#E0E0E0", style="filled",tooltip=" "];
   Node2 -> Node10 [id="edge22_Node000002_Node000010",color="steelblue1",style="solid",tooltip=" "];
-  Node1 -> Node57 [id="edge23_Node000001_Node000057",color="steelblue1",style="solid",tooltip=" "];
-  Node57 [id="Node000057",label="fl/gfx/hsv.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d4f/hsv_8h.html",tooltip="Defines the hue, saturation, and value (HSV) pixel struct."];
-  Node57 -> Node3 [id="edge24_Node000057_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node57 -> Node6 [id="edge25_Node000057_Node000006",color="steelblue1",style="solid",tooltip=" "];
-  Node57 -> Node10 [id="edge26_Node000057_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node50 [id="edge23_Node000001_Node000050",color="steelblue1",style="solid",tooltip=" "];
+  Node50 [id="Node000050",label="fl/gfx/hsv.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d4f/hsv_8h.html",tooltip="Defines the hue, saturation, and value (HSV) pixel struct."];
+  Node50 -> Node3 [id="edge24_Node000050_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node50 -> Node6 [id="edge25_Node000050_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node50 -> Node10 [id="edge26_Node000050_Node000010",color="steelblue1",style="solid",tooltip=" "];
 }

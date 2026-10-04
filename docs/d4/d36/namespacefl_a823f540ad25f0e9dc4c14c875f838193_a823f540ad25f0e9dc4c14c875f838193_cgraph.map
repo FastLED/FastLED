@@ -1,0 +1,7 @@
+<map id="fl::rgb_2_rgbw_colorimetric" name="fl::rgb_2_rgbw_colorimetric">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,204,31"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a25c2dc6d7ea89abcd4c49a3f47db92a8.html#a25c2dc6d7ea89abcd4c49a3f47db92a8" title=" " alt="" coords="252,5,451,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="204,15,238,15,238,21,204,21"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a6aa3f7f2e78c62689adead6bf6345fc2.html#a6aa3f7f2e78c62689adead6bf6345fc2" title="Converts RGB to RGBW using a color transfer method from saturated color channels to white." alt="" coords="499,5,655,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="451,15,485,15,485,21,451,21"/>
+</map>

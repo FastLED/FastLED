@@ -2,7 +2,7 @@
 <area shape="rect" id="Node000001" title="Read all available bytes into a string." alt="" coords="5,79,181,104"/>
 <area shape="rect" id="Node000002" href="$de/d67/classfl_1_1_serial_port_ab121e35dbb39bd8a3ff0b9cc9af8e96a.html#ab121e35dbb39bd8a3ff0b9cc9af8e96a" title="Check how many bytes are available to read." alt="" coords="229,5,399,31"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="127,76,228,39,252,32,254,37,230,45,129,81"/>
-<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a" title="Universal millisecond timer &#45; returns milliseconds since system startup." alt="" coords="277,79,351,104"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a3c0ba5842bfd029c404a38c8df2315f3.html#a3c0ba5842bfd029c404a38c8df2315f3" title="Universal millisecond timer &#45; returns milliseconds since system startup." alt="" coords="277,79,351,104"/>
 <area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="181,89,263,89,263,94,181,94"/>
 <area shape="rect" id="Node000005" href="$de/d67/classfl_1_1_serial_port_aed1374fc28e70820bc39430f7a16940e.html#aed1374fc28e70820bc39430f7a16940e" title="Read next byte from serial input." alt="" coords="245,128,383,153"/>
 <area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="151,101,244,122,242,128,150,107"/>

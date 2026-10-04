@@ -1,6 +1,6 @@
 <map id="fl::audio::detector::MusicalBeat::getAverageIBI" name="fl::audio::detector::MusicalBeat::getAverageIBI">
 <area shape="rect" id="Node000001" title="Get inter&#45;beat interval (IBI) statistics." alt="" coords="827,81,1036,121"/>
-<area shape="rect" id="Node000002" href="$d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_a8ead4e67bdff0c0600d13fc942313879.html#a8ead4e67bdff0c0600d13fc942313879" title=" " alt="" coords="5,47,215,87"/>
+<area shape="rect" id="Node000002" href="$d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_aa4122c266cb3b2e9bcdf329ba856a4ae.html#aa4122c266cb3b2e9bcdf329ba856a4ae" title=" " alt="" coords="5,47,215,87"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="886,76,835,50,778,30,699,16,619,9,537,9,458,12,312,29,196,50,195,45,311,24,458,7,537,3,619,4,700,11,779,25,838,45,888,71"/>
 <area shape="rect" id="Node000003" href="$d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_a25756788660507be8a6660dc23f82624.html#a25756788660507be8a6660dc23f82624" title="Calculate beat confidence based on rhythmic consistency." alt="" coords="550,40,757,95"/>
 <area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="813,89,757,82,757,77,813,84"/>

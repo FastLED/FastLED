@@ -1,0 +1,13 @@
+<map id="fl::createSerialResponseStreamSink" name="fl::createSerialResponseStreamSink">
+<area shape="rect" id="Node000001" title="Create a streamed JSON&#45;RPC ResponseSink that writes directly to serial." alt="" coords="5,85,184,125"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_aeb5a9565995f4532282c8e93a3acb401.html#aeb5a9565995f4532282c8e93a3acb401" title=" " alt="" coords="275,5,345,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="137,82,231,41,261,30,263,35,233,46,139,87"/>
+<area shape="rect" id="Node000003" href="$dc/d87/classfl_1_1_json_stream_writer_a98811bb3e58e072403b7dd50d308c8f3.html#a98811bb3e58e072403b7dd50d308c8f3" title=" " alt="" coords="234,55,386,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="184,90,220,85,221,90,185,95"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a5f373a62dc320a7b47d5ea3b34184cab.html#a5f373a62dc320a7b47d5ea3b34184cab" title=" " alt="" coords="273,120,347,145"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="185,114,259,123,258,129,184,119"/>
+<area shape="rect" id="Node000005" href="$d2/d8c/structfl_1_1_serial_writer_a2f8049c23dc431094d4c09c92926d9c5.html#a2f8049c23dc431094d4c09c92926d9c5" title=" " alt="" coords="232,169,388,195"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="148,122,233,154,257,163,256,168,231,159,146,127"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_ad7d737c2b513a356b06b6b7e057d0fa3.html#ad7d737c2b513a356b06b6b7e057d0fa3" title=" " alt="" coords="436,169,551,195"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="388,179,422,179,422,185,388,185"/>
+</map>

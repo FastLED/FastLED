@@ -1,0 +1,15 @@
+<map id="fl::detail::roundedDivideQ16" name="fl::detail::roundedDivideQ16">
+<area shape="rect" id="Node000001" title="The s16.16 building blocks the bind&#45;time builders share." alt="" coords="749,31,953,56"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_ad6f2ff94520f8796af18542b1844730f.html#ad6f2ff94520f8796af18542b1844730f" title="Build the Bradford transform from source_white to destination_white." alt="" coords="507,55,701,80"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="736,57,702,61,701,55,736,52"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_a5ceffc39c2bae8d63b8b8d3fe8459dcb.html#a5ceffc39c2bae8d63b8b8d3fe8459dcb" title="Quantize the source matrix for primaries." alt="" coords="513,5,695,31"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="735,34,695,30,696,25,736,29"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_ac4d398fdc18a6dbc27b1b07aa647bf0d.html#ac4d398fdc18a6dbc27b1b07aa647bf0d" title="Bind a source declaration and a device profile into a pipeline." alt="" coords="244,5,459,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="524,55,417,33,418,28,525,49"/>
+<area shape="rect" id="Node000006" href="$db/d33/namespacefl_1_1anonymous__namespace_02pipeline_8cpp_8hpp_03_aece1643892391c10a9c9de9a2f21ab11.html#aece1643892391c10a9c9de9a2f21ab11" title=" " alt="" coords="253,79,449,133"/>
+<area shape="poly" id="edge4_Node000002_Node000006" title=" " alt="" coords="507,85,450,94,449,88,507,79"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_ab00dbc8e93b9e8d57787730e08c3bbe9.html#ab00dbc8e93b9e8d57787730e08c3bbe9" title="Build the streaming pipeline a binding describes." alt="" coords="5,5,196,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="230,21,196,21,196,15,230,15"/>
+<area shape="poly" id="edge5_Node000006_Node000006" title=" " alt="" coords="393,68,378,60,351,57,329,59,314,64,308,70,308,79,303,79,303,68,312,60,328,54,351,52,380,55,396,63"/>
+<area shape="poly" id="edge7_Node000007_Node000003" title=" " alt="" coords="499,21,459,21,459,15,499,15"/>
+</map>

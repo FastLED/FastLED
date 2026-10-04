@@ -11,7 +11,7 @@ digraph "fl::audio::detector::DynamicsAnalyzer::updatePeak"
   Node2 [id="Node000002",label="rms",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d49/_audio_2simple_2simple_8h_a588b0ed03ff3e39281e2bc8b149dbdbd.html#a588b0ed03ff3e39281e2bc8b149dbdbd",tooltip=" "];
   Node2 -> Node2 [id="edge2_Node000002_Node000002",color="steelblue1",style="solid",tooltip=" "];
   Node2 -> Node3 [id="edge3_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::span::size",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac",tooltip=" "];
+  Node3 [id="Node000003",label="fl::span::size",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa",tooltip=" "];
   Node2 -> Node4 [id="edge4_Node000002_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="fl::sqrt",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a40c15aab45d44b7ca11f148cc2e997c1.html#a40c15aab45d44b7ca11f148cc2e997c1",tooltip=" "];
+  Node4 [id="Node000004",label="fl::sqrt",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_ae5cb57a6b1ba6c629a49f0fec021b6e9.html#ae5cb57a6b1ba6c629a49f0fec021b6e9",tooltip=" "];
 }

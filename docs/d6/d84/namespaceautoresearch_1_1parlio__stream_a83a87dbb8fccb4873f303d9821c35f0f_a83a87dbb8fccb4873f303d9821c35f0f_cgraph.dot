@@ -10,7 +10,18 @@ digraph "autoresearch::parlio_stream::validateParlioStreaming"
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
   Node2 [id="Node000002",label="autoresearch::parlio\l_stream::isFastLedOutputPin\lValid",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d84/namespaceautoresearch_1_1parlio__stream_ad71f1c168c6b35a807d76735a49d0922.html#ad71f1c168c6b35a807d76735a49d0922",tooltip=" "];
   Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::makeTimingConfig",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a6a0e89a1b4749cf4fbffeae60a312496.html#a6a0e89a1b4749cf4fbffeae60a312496",tooltip="Convert compile-time CHIPSET type to runtime timing config."];
+  Node3 [id="Node000003",label="fl::makeTimingConfig",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a21751c1ec9df05c6e1090cb5c302c846.html#a21751c1ec9df05c6e1090cb5c302c846",tooltip="Convert compile-time CHIPSET type to runtime timing config."];
   Node1 -> Node4 [id="edge3_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="fl::vector::push_back",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d24/classfl_1_1vector_ae9a8cea8d4b81d8f2f10a2b007ac2980.html#ae9a8cea8d4b81d8f2f10a2b007ac2980",tooltip=" "];
+  Node4 [id="Node000004",label="autoresearch::parlio\l_stream::parlioLedState",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d84/namespaceautoresearch_1_1parlio__stream_a7d18c0c4db81a3b668bc140972185e9b.html#a7d18c0c4db81a3b668bc140972185e9b",tooltip=" "];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::SingletonShared\l::instance",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d4a/classfl_1_1_singleton_shared_a1ec246efec2c46bc053a64fe7e8170ad.html#a1ec246efec2c46bc053a64fe7e8170ad",tooltip=" "];
+  Node5 -> Node6 [id="edge5_Node000005_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::SingletonShared\l::instanceInner",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$db/d4a/classfl_1_1_singleton_shared_a03c9eb23cd0cb903d5ae8fd44b1a4984.html#a03c9eb23cd0cb903d5ae8fd44b1a4984",tooltip=" "];
+  Node6 -> Node6 [id="edge6_Node000006_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node5 -> Node8 [id="edge7_Node000005_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl::detail::singleton\l_registry_get",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$df/d9e/namespacefl_1_1detail_a6bef973c17637a167f1f94d7db03905c.html#a6bef973c17637a167f1f94d7db03905c",tooltip=" "];
+  Node5 -> Node10 [id="edge8_Node000005_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="fl::detail::singleton\l_registry_set",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$df/d9e/namespacefl_1_1detail_af558e779ba2417d4cf14bdb1cbfd3d34.html#af558e779ba2417d4cf14bdb1cbfd3d34",tooltip=" "];
+  Node1 -> Node11 [id="edge9_Node000001_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="fl::vector::push_back",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d24/classfl_1_1vector_a82c3455c1a345460f95a0180c93b3fb0.html#a82c3455c1a345460f95a0180c93b3fb0",tooltip=" "];
 }

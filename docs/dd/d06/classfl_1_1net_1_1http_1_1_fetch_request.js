@@ -1,5 +1,6 @@
 var classfl_1_1net_1_1http_1_1_fetch_request =
 [
+    [ "SocketHandle", "dd/d06/classfl_1_1net_1_1http_1_1_fetch_request_a11e2faf2b0e6008e9986d01405315dbd.html#a11e2faf2b0e6008e9986d01405315dbd", null ],
     [ "State", "dd/d06/classfl_1_1net_1_1http_1_1_fetch_request_a97f4e6d39f3d063b816a2b980266e06d.html#a97f4e6d39f3d063b816a2b980266e06d", [
       [ "DNS_LOOKUP", "dd/d06/classfl_1_1net_1_1http_1_1_fetch_request_a97f4e6d39f3d063b816a2b980266e06d.html#a97f4e6d39f3d063b816a2b980266e06da1b73d61c2b9b9a263bb0df4a63cc5922", null ],
       [ "CONNECTING", "dd/d06/classfl_1_1net_1_1http_1_1_fetch_request_a97f4e6d39f3d063b816a2b980266e06d.html#a97f4e6d39f3d063b816a2b980266e06dabebaacdf42cb26147ce9539b0ec63903", null ],
@@ -8,8 +9,8 @@ var classfl_1_1net_1_1http_1_1_fetch_request =
       [ "COMPLETED", "dd/d06/classfl_1_1net_1_1http_1_1_fetch_request_a97f4e6d39f3d063b816a2b980266e06d.html#a97f4e6d39f3d063b816a2b980266e06daeb458f271b299029678456651c3a24cc", null ],
       [ "FAILED", "dd/d06/classfl_1_1net_1_1http_1_1_fetch_request_a97f4e6d39f3d063b816a2b980266e06d.html#a97f4e6d39f3d063b816a2b980266e06daf0c41088358c35c859ddcf07380055b1", null ]
     ] ],
-    [ "FetchRequest", "dd/d06/classfl_1_1net_1_1http_1_1_fetch_request_ae6378fe072e5ac3ddb14199e7b45b13c.html#ae6378fe072e5ac3ddb14199e7b45b13c", null ],
-    [ "~FetchRequest", "dd/d06/classfl_1_1net_1_1http_1_1_fetch_request_a84e08618c680961414f06e8e4e0c1eb4.html#a84e08618c680961414f06e8e4e0c1eb4", null ],
+    [ "FetchRequest", "dd/d06/classfl_1_1net_1_1http_1_1_fetch_request_a878e3b7d6d8c071bbfab33b88244abc9.html#a878e3b7d6d8c071bbfab33b88244abc9", null ],
+    [ "~FetchRequest", "dd/d06/classfl_1_1net_1_1http_1_1_fetch_request_a85135720490f54a7fa32b1b177795c8f.html#a85135720490f54a7fa32b1b177795c8f", null ],
     [ "close_socket", "dd/d06/classfl_1_1net_1_1http_1_1_fetch_request_a83a733d6efbbe87e2697d2c5a54f1373.html#a83a733d6efbbe87e2697d2c5a54f1373", null ],
     [ "complete_error", "dd/d06/classfl_1_1net_1_1http_1_1_fetch_request_a618d5c7554b4c05f13b04f5d0e0a0dfa.html#a618d5c7554b4c05f13b04f5d0e0a0dfa", null ],
     [ "complete_success", "dd/d06/classfl_1_1net_1_1http_1_1_fetch_request_a8797a546c348d63f48c1610cf14586f6.html#a8797a546c348d63f48c1610cf14586f6", null ],
@@ -24,13 +25,14 @@ var classfl_1_1net_1_1http_1_1_fetch_request =
     [ "mBytesSent", "dd/d06/classfl_1_1net_1_1http_1_1_fetch_request_a4806b409559e886c8b2eb6be46030bc2.html#a4806b409559e886c8b2eb6be46030bc2", null ],
     [ "mDnsResult", "dd/d06/classfl_1_1net_1_1http_1_1_fetch_request_aabe00a048f28388de97656b098c521e7.html#aabe00a048f28388de97656b098c521e7", null ],
     [ "mHostname", "dd/d06/classfl_1_1net_1_1http_1_1_fetch_request_af2061b51b6fba4a859621801448629f8.html#af2061b51b6fba4a859621801448629f8", null ],
+    [ "mOptions", "dd/d06/classfl_1_1net_1_1http_1_1_fetch_request_a01f82a2c3138cf0988e3008cfc1c89f2.html#a01f82a2c3138cf0988e3008cfc1c89f2", null ],
     [ "mParsedUrl", "dd/d06/classfl_1_1net_1_1http_1_1_fetch_request_a10e9a32207838881409ec085809e1b2d.html#a10e9a32207838881409ec085809e1b2d", null ],
     [ "mPath", "dd/d06/classfl_1_1net_1_1http_1_1_fetch_request_afa3e8fd801915c0045cd62c1d2a5f65f.html#afa3e8fd801915c0045cd62c1d2a5f65f", null ],
     [ "mPort", "dd/d06/classfl_1_1net_1_1http_1_1_fetch_request_a1d8e406adc6bdfbe3e16fbb07ae7cf11.html#a1d8e406adc6bdfbe3e16fbb07ae7cf11", null ],
     [ "mPromise", "dd/d06/classfl_1_1net_1_1http_1_1_fetch_request_a2674174b6740bc8dd4ce0ccb2d487e1a.html#a2674174b6740bc8dd4ce0ccb2d487e1a", null ],
     [ "mRequestBuffer", "dd/d06/classfl_1_1net_1_1http_1_1_fetch_request_af7015b3292bf44d88852f3b98e1084c3.html#af7015b3292bf44d88852f3b98e1084c3", null ],
     [ "mResponseBuffer", "dd/d06/classfl_1_1net_1_1http_1_1_fetch_request_a4969e7d4563786396957acf00efb57b1.html#a4969e7d4563786396957acf00efb57b1", null ],
-    [ "mSocketFd", "dd/d06/classfl_1_1net_1_1http_1_1_fetch_request_a6f0116a916be4d96b8057661dcdfa3d0.html#a6f0116a916be4d96b8057661dcdfa3d0", null ],
+    [ "mSocketFd", "dd/d06/classfl_1_1net_1_1http_1_1_fetch_request_a45c99d09a87b3523cfe0724c2c9ccc78.html#a45c99d09a87b3523cfe0724c2c9ccc78", null ],
     [ "mState", "dd/d06/classfl_1_1net_1_1http_1_1_fetch_request_a9fdd2b77066256576a15f76f6dc1bcf0.html#a9fdd2b77066256576a15f76f6dc1bcf0", null ],
     [ "mStateStartTime", "dd/d06/classfl_1_1net_1_1http_1_1_fetch_request_a56a77dbc61660cde2ef0428b3a5cf4e2.html#a56a77dbc61660cde2ef0428b3a5cf4e2", null ]
 ];

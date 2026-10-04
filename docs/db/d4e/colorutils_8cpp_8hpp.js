@@ -1,5 +1,10 @@
 var colorutils_8cpp_8hpp =
 [
+    [ "fl::anonymous_namespace{colorutils.cpp.hpp}::Oklab", "d3/d50/namespacefl_1_1anonymous__namespace_02colorutils_8cpp_8hpp_03.html#df/d7c/structfl_1_1anonymous__namespace_02colorutils_8cpp_8hpp_03_1_1_oklab", [
+      [ "blue_yellow", "d3/d50/namespacefl_1_1anonymous__namespace_02colorutils_8cpp_8hpp_03.html#a3da570d990610f2250b50428ae2a093c", null ],
+      [ "green_red", "d3/d50/namespacefl_1_1anonymous__namespace_02colorutils_8cpp_8hpp_03.html#a2e91c1cc3eeaeeea95b77c69f78dee2d", null ],
+      [ "lightness", "d3/d50/namespacefl_1_1anonymous__namespace_02colorutils_8cpp_8hpp_03.html#a50bb6ea64c41e7120720a58a471d3330", null ]
+    ] ],
     [ "fl::anonymous_namespace{colorutils.cpp.hpp}::ProgmemRGBPaletteReader< Size >", "d8/d25/structfl_1_1anonymous__namespace_02colorutils_8cpp_8hpp_03_1_1_progmem_r_g_b_palette_reader.html", "d8/d25/structfl_1_1anonymous__namespace_02colorutils_8cpp_8hpp_03_1_1_progmem_r_g_b_palette_reader" ],
     [ "fl::anonymous_namespace{colorutils.cpp.hpp}::RuntimeRGBPaletteReader< Size >", "d3/da3/structfl_1_1anonymous__namespace_02colorutils_8cpp_8hpp_03_1_1_runtime_r_g_b_palette_reader.html", "d3/da3/structfl_1_1anonymous__namespace_02colorutils_8cpp_8hpp_03_1_1_runtime_r_g_b_palette_reader" ],
     [ "__PROG_TYPES_COMPAT__", "db/d4e/colorutils_8cpp_8hpp_a00167d1f0bf80faa62c6d8952f540f82.html#a00167d1f0bf80faa62c6d8952f540f82", null ],
@@ -11,6 +16,8 @@ var colorutils_8cpp_8hpp =
     [ "fl::blend", "d4/d36/namespacefl_a627fdecddc0a18efacf1e4971b5cc25c.html#a627fdecddc0a18efacf1e4971b5cc25c", null ],
     [ "fl::blend", "d4/d36/namespacefl_a924fc8748f53389e55fdc63bfc14b805.html#a924fc8748f53389e55fdc63bfc14b805", null ],
     [ "fl::blend", "d4/d36/namespacefl_a073fc1b903aae2ae9e334b7b9dd8b441.html#a073fc1b903aae2ae9e334b7b9dd8b441", null ],
+    [ "fl::blend_oklab", "d4/d36/namespacefl_ad1ffe187d9734e708f488a6920ebd814.html#ad1ffe187d9734e708f488a6920ebd814", null ],
+    [ "fl::anonymous_namespace{colorutils.cpp.hpp}::channelFromFloat", "d3/d50/namespacefl_1_1anonymous__namespace_02colorutils_8cpp_8hpp_03_ae0b2d8c8ac8aaea675064bdafeadea23.html#ae0b2d8c8ac8aaea675064bdafeadea23", null ],
     [ "fl::ColorFromPalette", "d4/d36/namespacefl_a36a7be19ed0bffbb62d8dadc9016df39.html#a36a7be19ed0bffbb62d8dadc9016df39", null ],
     [ "fl::ColorFromPalette", "d4/d36/namespacefl_abe91de9cfdb9f5b98528582d69358180.html#abe91de9cfdb9f5b98528582d69358180", null ],
     [ "fl::ColorFromPalette", "d4/d36/namespacefl_a47a180e0f9f1a72bb559c6b66c19c55a.html#a47a180e0f9f1a72bb559c6b66c19c55a", null ],
@@ -49,10 +56,13 @@ var colorutils_8cpp_8hpp =
     [ "fl::nblendPaletteTowardPalette", "d4/d36/namespacefl_ada525b8983539d793931dd074928bacd.html#ada525b8983539d793931dd074928bacd", null ],
     [ "fl::nscale8", "d4/d36/namespacefl_a5a8a33cdb0434211edc66189968155ea.html#a5a8a33cdb0434211edc66189968155ea", null ],
     [ "fl::nscale8_video", "d4/d36/namespacefl_afeab8fee9825db38da61088d125dea42.html#afeab8fee9825db38da61088d125dea42", null ],
+    [ "fl::anonymous_namespace{colorutils.cpp.hpp}::oklabToRgb", "d3/d50/namespacefl_1_1anonymous__namespace_02colorutils_8cpp_8hpp_03_a6b26f18c56b3e1fe7c1f0cdf17de64d0.html#a6b26f18c56b3e1fe7c1f0cdf17de64d0", null ],
     [ "fl::anonymous_namespace{colorutils.cpp.hpp}::promote_channel_to_hd", "d3/d50/namespacefl_1_1anonymous__namespace_02colorutils_8cpp_8hpp_03_a21159a4d20864d156f6918e368026708.html#a21159a4d20864d156f6918e368026708", null ],
     [ "fl::anonymous_namespace{colorutils.cpp.hpp}::promote_rgb_to_hd", "d3/d50/namespacefl_1_1anonymous__namespace_02colorutils_8cpp_8hpp_03_a4eb13a09503c053dda1d26a5245bec18.html#a4eb13a09503c053dda1d26a5245bec18", null ],
+    [ "fl::anonymous_namespace{colorutils.cpp.hpp}::rgbToOklab", "d3/d50/namespacefl_1_1anonymous__namespace_02colorutils_8cpp_8hpp_03_afd86df437f42cf80498e5bf197413f25.html#afd86df437f42cf80498e5bf197413f25", null ],
     [ "fl::anonymous_namespace{colorutils.cpp.hpp}::scale_hd_channel", "d3/d50/namespacefl_1_1anonymous__namespace_02colorutils_8cpp_8hpp_03_aad728894b4cfa580c6fa9420673a75de.html#aad728894b4cfa580c6fa9420673a75de", null ],
     [ "fl::anonymous_namespace{colorutils.cpp.hpp}::scale_rgb_hd", "d3/d50/namespacefl_1_1anonymous__namespace_02colorutils_8cpp_8hpp_03_a044490c07b27de074eaf5b6e5502873f.html#a044490c07b27de074eaf5b6e5502873f", null ],
+    [ "fl::anonymous_namespace{colorutils.cpp.hpp}::signedCubeRoot", "d3/d50/namespacefl_1_1anonymous__namespace_02colorutils_8cpp_8hpp_03_ab264776964b824fbc7e312de0b3a93a0.html#ab264776964b824fbc7e312de0b3a93a0", null ],
     [ "fl::UpscalePalette", "d4/d36/namespacefl_abf83f8c9171b3b60bb3f69e0d04b3e94.html#abf83f8c9171b3b60bb3f69e0d04b3e94", null ],
     [ "fl::UpscalePalette", "d4/d36/namespacefl_ab8747b9da38221462073e4ebec9bf94e.html#ab8747b9da38221462073e4ebec9bf94e", null ],
     [ "fl::UpscalePalette", "d4/d36/namespacefl_ac2561c87f2746c8d2d718cc226cd5dae.html#ac2561c87f2746c8d2d718cc226cd5dae", null ],

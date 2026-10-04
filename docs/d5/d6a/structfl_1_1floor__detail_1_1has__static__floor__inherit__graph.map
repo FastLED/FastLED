@@ -1,9 +1,9 @@
 <map id="fl::floor_detail::has_static_floor&lt; T, typename &gt;" name="fl::floor_detail::has_static_floor&lt; T, typename &gt;">
-<area shape="rect" id="Node000001" title=" " alt="" coords="463,29,676,69"/>
-<area shape="rect" id="Node000004" href="$d0/d49/structfl_1_1floor__detail_1_1has__static__floor_3_01_t_00_01decltype_07static__cast_3_01void_01_bfdee8da8dbac04077f4d7a9d5b18505.html" title=" " alt="" coords="865,15,1069,84"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="690,47,865,47,865,52,690,52"/>
-<area shape="rect" id="Node000002" href="$dd/dca/structfl_1_1fl_1_1integral__constant.html" title=" " alt="" coords="323,37,413,62"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="427,47,462,47,462,52,427,52"/>
-<area shape="rect" id="Node000003" href="$dd/dca/structfl_1_1fl_1_1integral__constant.html" title=" " alt="" coords="5,29,172,69"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="186,47,322,47,322,52,186,52"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="447,29,660,69"/>
+<area shape="rect" id="Node000004" href="$d0/d49/structfl_1_1floor__detail_1_1has__static__floor_3_01_t_00_01decltype_07static__cast_3_01void_01_bfdee8da8dbac04077f4d7a9d5b18505.html" title=" " alt="" coords="849,15,1053,84"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="674,47,849,47,849,52,674,52"/>
+<area shape="rect" id="Node000002" href="$d1/d55/structfl_1_1integral__constant.html" title=" " alt="" coords="307,37,397,62"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="411,47,446,47,446,52,411,52"/>
+<area shape="rect" id="Node000003" href="$d1/d55/structfl_1_1integral__constant.html" title=" " alt="" coords="5,29,156,69"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="170,47,307,47,307,52,170,52"/>
 </map>

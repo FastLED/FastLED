@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -108,23 +108,27 @@ $(function(){initNavTree('d2/d16/fl_2system_2fastpin_8h_source.html','../../'); 
 <div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#pragma once</span></div>
 <div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> </div>
 <div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#include &quot;<a class="code" href="../../d4/d54/compiler__control_8h.html">fl/stl/compiler_control.h</a>&quot;</span>  <span class="comment">// IWYU pragma: keep</span></div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#include &quot;<a class="code" href="../../d9/d3e/led__sysdefs_8h.html">led_sysdefs.h</a>&quot;</span>  <span class="comment">// IWYU pragma: keep</span></div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span></div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno"><a class="line" href="../../d2/d16/fl_2system_2fastpin_8h_a4af4244f8a09607e0d6a5d0ee80f1de8.html#a4af4244f8a09607e0d6a5d0ee80f1de8">   21</a></span><span class="preprocessor">#define NO_PIN 255</span></div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment">// Include base class definitions (Selectable, FastPin&lt;&gt;, FastPinBB, __FL_PORT_INFO, etc.)</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &quot;<a class="code" href="../../d3/da0/fastpin__base_8h.html">fl/system/fastpin_base.h</a>&quot;</span>  <span class="comment">// IWYU pragma: keep</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="comment">// Platform-specific implementations:</span></div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="comment">// This include handles platform detection and provides:</span></div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="comment">// - Pin class (runtime pin access) - varies by platform</span></div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="comment">// - FastPin&lt;&gt; specializations - platform-specific optimization</span></div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="comment">// - For stub/WASM: no-op implementations</span></div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="comment">// - For other platforms: optimized register access or Arduino PINMAP fallback</span></div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="preprocessor">#include &quot;platforms/fastpin.h&quot;</span>  <span class="comment">// IWYU pragma: keep</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#include &quot;<a class="code" href="../../d3/d7e/int_8h.html">fl/stl/int.h</a>&quot;</span>  <span class="comment">// IWYU pragma: keep</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#include &quot;<a class="code" href="../../d9/d3e/led__sysdefs_8h.html">led_sysdefs.h</a>&quot;</span>  <span class="comment">// IWYU pragma: keep</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span></div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno"><a class="line" href="../../d2/d16/fl_2system_2fastpin_8h_a6c165a4aec4ce2819abd3b78672a0f02.html#a6c165a4aec4ce2819abd3b78672a0f02">   38</a></span><span class="keyword">constexpr</span> <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> <a class="code hl_variable" href="../../d2/d16/fl_2system_2fastpin_8h_a6c165a4aec4ce2819abd3b78672a0f02.html#a6c165a4aec4ce2819abd3b78672a0f02">NO_PIN</a> = 255;</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="comment">// Include base class definitions (Selectable, FastPin&lt;&gt;, FastPinBB, __FL_PORT_INFO, etc.)</span></div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="preprocessor">#include &quot;<a class="code" href="../../d3/da0/fastpin__base_8h.html">fl/system/fastpin_base.h</a>&quot;</span>  <span class="comment">// IWYU pragma: keep</span></div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="comment">// Platform-specific implementations:</span></div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="comment">// This include handles platform detection and provides:</span></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="comment">// - Pin class (runtime pin access) - varies by platform</span></div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="comment">// - FastPin&lt;&gt; specializations - platform-specific optimization</span></div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="comment">// - For stub/WASM: no-op implementations</span></div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="comment">// - For other platforms: optimized register access or Arduino PINMAP fallback</span></div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="preprocessor">#include &quot;platforms/fastpin.h&quot;</span>  <span class="comment">// IWYU pragma: keep</span></div>
 <div class="ttc" id="acompiler__control_8h_html"><div class="ttname"><a href="../../d4/d54/compiler__control_8h.html">compiler_control.h</a></div></div>
 <div class="ttc" id="afastpin__base_8h_html"><div class="ttname"><a href="../../d3/da0/fastpin__base_8h.html">fastpin_base.h</a></div></div>
+<div class="ttc" id="afl_2system_2fastpin_8h_a6c165a4aec4ce2819abd3b78672a0f02_html_a6c165a4aec4ce2819abd3b78672a0f02"><div class="ttname"><a href="../../d2/d16/fl_2system_2fastpin_8h_a6c165a4aec4ce2819abd3b78672a0f02.html#a6c165a4aec4ce2819abd3b78672a0f02">NO_PIN</a></div><div class="ttdeci">constexpr fl::u8 NO_PIN</div><div class="ttdoc">Constant for &quot;not a pin&quot;.</div><div class="ttdef"><b>Definition</b> <a href="#l00038">fastpin.h:38</a></div></div>
+<div class="ttc" id="aint_8h_html"><div class="ttname"><a href="../../d3/d7e/int_8h.html">int.h</a></div></div>
 <div class="ttc" id="aled__sysdefs_8h_html"><div class="ttname"><a href="../../d9/d3e/led__sysdefs_8h.html">led_sysdefs.h</a></div><div class="ttdoc">Determines which platform system definitions to include.</div></div>
+<div class="ttc" id="anamespacefl_a058ceeac48f181da463c2ba07401292c_html_a058ceeac48f181da463c2ba07401292c"><div class="ttname"><a href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a></div><div class="ttdeci">unsigned char u8</div><div class="ttdef"><b>Definition</b> <a href="../../df/dd8/stdint_8h_source.html#l00131">stdint.h:131</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.3-->
@@ -132,7 +136,7 @@ $(function(){initNavTree('d2/d16/fl_2system_2fastpin_8h_source.html','../../'); 
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_c27a882fecb444156419346f13162968.html">system</a></li><li class="navelem"><a class="el" href="../../d2/d16/fl_2system_2fastpin_8h.html">fastpin.h</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:00 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:08:59 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

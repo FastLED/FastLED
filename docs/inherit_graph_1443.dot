@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::UCS7604CurrentControl",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d91/structfl_1_1_u_c_s7604_current_control.html",tooltip="UCS7604 current control structure with 4-bit fields for each channel."];
+  Node0 [id="Node000000",label="mood_ring::FlowLayer",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/deb/classmood__ring_1_1_flow_layer.html",tooltip="Busy room without a beat."];
 }

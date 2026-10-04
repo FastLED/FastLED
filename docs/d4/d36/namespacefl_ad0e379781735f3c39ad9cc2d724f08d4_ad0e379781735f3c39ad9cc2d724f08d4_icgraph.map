@@ -1,0 +1,7 @@
+<map id="fl::processPixelWideQ16" name="fl::processPixelWideQ16">
+<area shape="rect" id="Node000001" title="Like processPixelQ16, but solves the physical 4/5&#45;emitter hull." alt="" coords="260,45,439,70"/>
+<area shape="rect" id="Node000002" href="$db/da5/classfl_1_1_color_managed_pixel_source_a5282ff6c865aba683ab2953135ca4c09.html#a5282ff6c865aba683ab2953135ca4c09" title="Physical RGBW solve when a matching profile is bound; otherwise the legacy RGB&#45;to&#45;RGBW conversion." alt="" coords="5,5,212,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="246,46,212,42,213,36,246,41"/>
+<area shape="rect" id="Node000003" href="$db/da5/classfl_1_1_color_managed_pixel_source_aefb49429ee466d02d5c2ece50524da34.html#aefb49429ee466d02d5c2ece50524da34" title="Physical two&#45;white solve when a matching RGBWW profile is bound; otherwise the legacy conversion." alt="" coords="5,69,212,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="246,74,213,78,212,73,246,68"/>
+</map>

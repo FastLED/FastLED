@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -146,7 +146,7 @@ $(function(){initNavTree('df/d2d/util_8cpp_a0f02f59740c07ab03cedef15f4db1fb5.htm
 <div class="line"><span class="lineno">   79</span>  <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">float</span> kBias = 1.10;</div>
 <div class="line"><span class="lineno">   80</span>  <span class="keywordtype">float</span> decay_time = kDefaultDecayTime;  <span class="comment">// default - no sustain.</span></div>
 <div class="line"><span class="lineno">   81</span>  <span class="keywordflow">if</span> (key_on || sustain_pedal_on || !dampened_key) {</div>
-<div class="line"><span class="lineno">   82</span>    decay_time = <a class="code hl_function" href="../../df/d2d/util_8cpp_aee747f0ac88c4cf7788a0c9d9b80268d.html#aee747f0ac88c4cf7788a0c9d9b80268d">MapDecayTime</a>(key_idx) * <a class="code hl_function" href="../../d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909">fl::max</a>(0.25f, velocity);</div>
+<div class="line"><span class="lineno">   82</span>    decay_time = <a class="code hl_function" href="../../df/d2d/util_8cpp_aee747f0ac88c4cf7788a0c9d9b80268d.html#aee747f0ac88c4cf7788a0c9d9b80268d">MapDecayTime</a>(key_idx) * <a class="code hl_function" href="../../d4/d36/namespacefl_a07c69292ef50aa1083046faff1c52ead.html#a07c69292ef50aa1083046faff1c52ead">fl::max</a>(0.25f, velocity);</div>
 <div class="line"><span class="lineno">   83</span>  }</div>
 <div class="line"><span class="lineno">   84</span>  <span class="comment">// decay_interp is a value which starts off as 1.0 to signify the start of the</span></div>
 <div class="line"><span class="lineno">   85</span>  <span class="comment">// key press and gradually decreases to 0.0. For example, if the decay time is 1 second</span></div>
@@ -162,7 +162,7 @@ $(function(){initNavTree('df/d2d/util_8cpp_a0f02f59740c07ab03cedef15f4db1fb5.htm
 <div class="line"><span class="lineno">   95</span>  intensity_factor = constrain(intensity_factor, 0.0f, 1.0f);</div>
 <div class="line"><span class="lineno">   96</span>  <span class="keywordflow">return</span> intensity_factor;</div>
 <div class="line"><span class="lineno">   97</span>}</div>
-<div class="ttc" id="anamespacefl_a19ba0dae8249e0cf164136846f85e909_html_a19ba0dae8249e0cf164136846f85e909"><div class="ttname"><a href="../../d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909">fl::max</a></div><div class="ttdeci">constexpr common_type_t&lt; T, U &gt; max(T a, U b) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00075">math.h:75</a></div></div>
+<div class="ttc" id="anamespacefl_a07c69292ef50aa1083046faff1c52ead_html_a07c69292ef50aa1083046faff1c52ead"><div class="ttname"><a href="../../d4/d36/namespacefl_a07c69292ef50aa1083046faff1c52ead.html#a07c69292ef50aa1083046faff1c52ead">fl::max</a></div><div class="ttdeci">constexpr common_type_t&lt; T, U &gt; max(T a, U b) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00075">math.h:75</a></div></div>
 <div class="ttc" id="autil_8cpp_a06d59f8f94c4693a77270d804881f468_html_a06d59f8f94c4693a77270d804881f468"><div class="ttname"><a href="../../df/d2d/util_8cpp_a06d59f8f94c4693a77270d804881f468.html#a06d59f8f94c4693a77270d804881f468">mapf</a></div><div class="ttdeci">float mapf(float x, float in_min, float in_max, float out_min, float out_max)</div><div class="ttdef"><b>Definition</b> <a href="../../df/d2d/util_8cpp_source.html#l00018">util.cpp:18</a></div></div>
 <div class="ttc" id="autil_8cpp_aee747f0ac88c4cf7788a0c9d9b80268d_html_aee747f0ac88c4cf7788a0c9d9b80268d"><div class="ttname"><a href="../../df/d2d/util_8cpp_aee747f0ac88c4cf7788a0c9d9b80268d.html#aee747f0ac88c4cf7788a0c9d9b80268d">MapDecayTime</a></div><div class="ttdeci">float MapDecayTime(uint8_t key_idx)</div><div class="ttdef"><b>Definition</b> <a href="../../df/d2d/util_8cpp_source.html#l00034">util.cpp:34</a></div></div>
 </div><!-- fragment -->
@@ -193,7 +193,7 @@ $(function(){initNavTree('df/d2d/util_8cpp_a0f02f59740c07ab03cedef15f4db1fb5.htm
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_786f9dc3989cf40b3de9df2d18ba04d7.html">LuminescentGrand</a></li><li class="navelem"><a class="el" href="../../dir_82c6f96b5a39b3aa6c2c41086d3f3d73.html">shared</a></li><li class="navelem"><a class="el" href="../../df/d2d/util_8cpp.html">util.cpp</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:00 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:02 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

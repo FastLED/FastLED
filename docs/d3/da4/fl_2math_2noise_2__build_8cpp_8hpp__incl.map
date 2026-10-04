@@ -4,8 +4,8 @@
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="331,33,238,75,236,70,329,28"/>
 <area shape="rect" id="Node000009" href="$dc/df8/perlin__s16x16_8cpp_8hpp.html" title=" " alt="" coords="281,79,429,119"/>
 <area shape="poly" id="edge6_Node000001_Node000009" title=" " alt="" coords="357,31,357,65,352,65,352,31"/>
-<area shape="rect" id="Node000035" href="$d8/d2a/perlin__s16x16__simd_8cpp_8hpp.html" title=" " alt="" coords="453,79,624,119"/>
-<area shape="poly" id="edge14_Node000001_Node000035" title=" " alt="" coords="382,28,483,71,481,76,380,33"/>
+<area shape="rect" id="Node000028" href="$d8/d2a/perlin__s16x16__simd_8cpp_8hpp.html" title=" " alt="" coords="453,79,624,119"/>
+<area shape="poly" id="edge14_Node000001_Node000028" title=" " alt="" coords="382,28,483,71,481,76,380,33"/>
 <area shape="rect" id="Node000003" href="$d4/d3f/noise__woryley_8h.html" title=" " alt="" coords="5,167,152,207"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="161,121,114,160,111,156,158,117"/>
 <area shape="rect" id="Node000007" href="$d9/d86/limits_8h.html" title=" " alt="" coords="142,262,245,287"/>
@@ -26,12 +26,12 @@
 <area shape="poly" id="edge10_Node000012_Node000011" title=" " alt="" coords="332,286,377,331,373,335,328,289"/>
 <area shape="rect" id="Node000015" href="$db/d65/math_2noise_2perlin__s16x16_8h.html" title=" " alt="" coords="529,255,677,295"/>
 <area shape="poly" id="edge13_Node000014_Node000015" title=" " alt="" coords="550,205,581,242,576,246,546,209"/>
-<area shape="poly" id="edge15_Node000035_Node000010" title=" " alt="" coords="495,121,374,171,372,166,493,116"/>
-<area shape="poly" id="edge20_Node000035_Node000014" title=" " alt="" coords="540,119,537,153,532,153,535,119"/>
-<area shape="rect" id="Node000036" href="$d7/db2/perlin__s16x16__simd_8h.html" title=" " alt="" coords="643,167,791,207"/>
-<area shape="poly" id="edge16_Node000035_Node000036" title=" " alt="" coords="579,116,667,158,665,163,577,121"/>
-<area shape="rect" id="Node000019" href="$d8/de1/simd_8h.html" title="Umbrella header for SIMD subsystem." alt="" coords="715,262,831,287"/>
-<area shape="poly" id="edge19_Node000035_Node000019" title=" " alt="" coords="625,107,732,129,777,145,806,165,815,186,813,210,804,232,793,252,788,249,800,230,808,208,809,187,802,168,775,150,731,134,624,113"/>
-<area shape="poly" id="edge17_Node000036_Node000015" title=" " alt="" coords="693,209,640,249,637,244,690,205"/>
-<area shape="poly" id="edge18_Node000036_Node000019" title=" " alt="" coords="732,205,760,249,756,252,728,208"/>
+<area shape="poly" id="edge15_Node000028_Node000010" title=" " alt="" coords="495,121,374,171,372,166,493,116"/>
+<area shape="poly" id="edge20_Node000028_Node000014" title=" " alt="" coords="540,119,537,153,532,153,535,119"/>
+<area shape="rect" id="Node000029" href="$d7/db2/perlin__s16x16__simd_8h.html" title=" " alt="" coords="643,167,791,207"/>
+<area shape="poly" id="edge16_Node000028_Node000029" title=" " alt="" coords="579,116,667,158,665,163,577,121"/>
+<area shape="rect" id="Node000030" href="$d8/de1/simd_8h.html" title="Umbrella header for SIMD subsystem." alt="" coords="715,262,831,287"/>
+<area shape="poly" id="edge19_Node000028_Node000030" title=" " alt="" coords="625,107,732,129,777,145,806,165,815,186,813,210,804,232,793,252,788,249,800,230,808,208,809,187,802,168,775,150,731,134,624,113"/>
+<area shape="poly" id="edge17_Node000029_Node000015" title=" " alt="" coords="693,209,640,249,637,244,690,205"/>
+<area shape="poly" id="edge18_Node000029_Node000030" title=" " alt="" coords="732,205,760,249,756,252,728,208"/>
 </map>

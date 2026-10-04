@@ -1,0 +1,24 @@
+<map id="fl::PixelIterator::writeHD108" name="fl::PixelIterator::writeHD108">
+<area shape="rect" id="Node000001" title="Encode pixels in HD108 format (zero allocation)" alt="" coords="5,187,131,227"/>
+<area shape="rect" id="Node000002" href="$d0/d09/classfl_1_1_pixel_iterator_a20b1f7f8de51f77507da920ebce3bf04.html#a20b1f7f8de51f77507da920ebce3bf04" title=" " alt="" coords="213,5,339,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="77,185,115,122,143,86,177,55,199,42,202,47,180,59,147,90,119,125,81,188"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a021929c212e1cf2dcb7c11445c6c9744.html#a021929c212e1cf2dcb7c11445c6c9744" title="Helper function to create a back_insert_iterator." alt="" coords="213,70,339,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="84,185,123,144,149,122,177,104,198,95,201,100,180,109,152,127,127,148,88,188"/>
+<area shape="rect" id="Node000004" href="$d0/d09/classfl_1_1_pixel_iterator_a8f6e7554cee021e8e08de34f887ff16a.html#a8f6e7554cee021e8e08de34f887ff16a" title=" " alt="" coords="202,119,350,145"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="107,184,178,154,202,146,204,151,180,158,109,189"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a13246aca24c12f5bd68e0988f8472c9e.html#a13246aca24c12f5bd68e0988f8472c9e" title="Generate HD108 per&#45;channel gain header bytes." alt="" coords="179,169,373,194"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="131,196,165,192,166,197,131,202"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_acca5e6d858d0107ed5018cdc592f6bb4.html#acca5e6d858d0107ed5018cdc592f6bb4" title="Convert 8&#45;bit color to HD108 16&#45;bit gamma&#45;corrected value (gamma 2.8)" alt="" coords="187,218,365,243"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="131,211,174,216,174,222,131,217"/>
+<area shape="rect" id="Node000008" href="$d0/d09/classfl_1_1_pixel_iterator_a595227c01a4f21f3bcf375b1bbeec058.html#a595227c01a4f21f3bcf375b1bbeec058" title=" " alt="" coords="479,272,617,312"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="108,224,142,240,179,252,254,268,330,279,465,288,465,294,329,284,253,273,178,257,140,245,106,229"/>
+<area shape="rect" id="Node000009" href="$d0/d09/classfl_1_1_pixel_iterator_a65edf3ee981db4bd3e380a418163147d.html#a65edf3ee981db4bd3e380a418163147d" title="One pixel at the source&#39;s own precision, wire&#45;ordered." alt="" coords="199,319,353,359"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="91,225,130,261,180,298,205,311,202,315,177,302,127,265,87,229"/>
+<area shape="rect" id="Node000011" href="$d0/d09/classfl_1_1_pixel_iterator_ae60759e41b9d52b25c3c711f38bfe494.html#ae60759e41b9d52b25c3c711f38bfe494" title=" " alt="" coords="213,383,339,423"/>
+<area shape="poly" id="edge11_Node000001_Node000011" title=" " alt="" coords="80,226,117,296,145,335,180,369,202,381,199,386,177,373,141,338,112,299,75,228"/>
+<area shape="rect" id="Node000007" href="$d3/d1a/structfl_1_1_progmem_l_u_t16_a07eda62e67541075cfe222480358bc3f.html#a07eda62e67541075cfe222480358bc3f" title=" " alt="" coords="421,193,675,247"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="365,225,408,223,408,228,365,230"/>
+<area shape="poly" id="edge9_Node000009_Node000008" title=" " alt="" coords="353,323,465,303,466,309,354,328"/>
+<area shape="rect" id="Node000010" href="$d1/d12/group__intmap_ga9129b84dce3a4e4359ce1117197ad2c3.html#ga9129b84dce3a4e4359ce1117197ad2c3" title=" " alt="" coords="489,337,607,362"/>
+<area shape="poly" id="edge10_Node000009_Node000010" title=" " alt="" coords="354,339,475,344,475,349,353,344"/>
+</map>

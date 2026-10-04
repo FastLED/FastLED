@@ -1,0 +1,7 @@
+<map id="mood_ring::RingCanvas::ring" name="mood_ring::RingCanvas::ring">
+<area shape="rect" id="Node000001" title="Add a band at distance radius (turns, 0..0.5) from origin, on both sides of it at once: an expanding ..." alt="" coords="461,5,637,45"/>
+<area shape="rect" id="Node000002" href="$d7/d06/classmood__ring_1_1_mood_painter_a2d39cdac14d69c9bb9dbed6e676d61ae.html#a2d39cdac14d69c9bb9dbed6e676d61ae" title=" " alt="" coords="233,5,413,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="447,28,414,28,414,23,447,23"/>
+<area shape="rect" id="Node000003" href="$d7/d06/classmood__ring_1_1_mood_painter_ac3fb619def2fc2ffc2c906e65e8bb214.html#ac3fb619def2fc2ffc2c906e65e8bb214" title="Render one frame into out." alt="" coords="5,5,185,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="219,28,185,28,185,23,219,23"/>
+</map>

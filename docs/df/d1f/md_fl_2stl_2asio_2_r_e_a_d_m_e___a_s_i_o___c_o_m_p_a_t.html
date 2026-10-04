@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -103,9 +103,9 @@ $(function(){initNavTree('df/d1f/md_fl_2stl_2asio_2_r_e_a_d_m_e___a_s_i_o___c_o_
   <div class="headertitle"><div class="title">FastLED ↔ Asio Compatibility Layer</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="autotoc_md440"></a></p>
+<div class="textblock"><p><a class="anchor" id="autotoc_md528"></a></p>
 <p>FastLED's networking types are designed to be portable to/from Boost.Asio code. This document maps Asio concepts to their FastLED equivalents.</p>
-<h1><a class="anchor" id="autotoc_md441"></a>
+<h1><a class="anchor" id="autotoc_md529"></a>
 Type Mapping</h1>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -125,7 +125,7 @@ Type Mapping</h1>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><code>boost::system::errc</code>   </td><td class="markdownTableBodyNone"><code><a class="el" href="../../da/dba/namespacefl_1_1asio_a71ea0ec019fe8379abb69a2b643ed5da.html#a71ea0ec019fe8379abb69a2b643ed5da" title="Asio-compatible error code enumeration.">fl::asio::errc</a></code>   </td><td class="markdownTableBodyNone"><code><a class="el" href="../../db/daa/error__code_8h.html">fl/stl/asio/error_code.h</a></code>   </td></tr>
 </table>
-<h1><a class="anchor" id="autotoc_md442"></a>
+<h1><a class="anchor" id="autotoc_md530"></a>
 Operation Mapping</h1>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -157,7 +157,7 @@ Operation Mapping</h1>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><code>acceptor.accept(peer)</code>   </td><td class="markdownTableBodyNone"><code>acceptor.accept(peer)</code>   </td></tr>
 </table>
-<h1><a class="anchor" id="autotoc_md443"></a>
+<h1><a class="anchor" id="autotoc_md531"></a>
 Completion Handler Signatures</h1>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -167,7 +167,7 @@ Completion Handler Signatures</h1>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><code>void(error_code)</code> (ConnectHandler/AcceptHandler)   </td><td class="markdownTableBodyNone"><code><a class="el" href="../../da/dba/namespacefl_1_1asio_ae45f01c527818e4e7e95b79a0dd12e1f.html#ae45f01c527818e4e7e95b79a0dd12e1f" title="Asio-style connect completion handler signature.">fl::asio::connect_handler</a></code>   </td></tr>
 </table>
-<h1><a class="anchor" id="autotoc_md444"></a>
+<h1><a class="anchor" id="autotoc_md532"></a>
 Error Handling</h1>
 <div class="fragment"><div class="line"><span class="comment">// Asio style — works identically in FastLED</span></div>
 <div class="line"><a class="code hl_struct" href="../../de/d33/structfl_1_1asio_1_1error__code.html">fl::asio::error_code</a> ec;</div>
@@ -190,7 +190,7 @@ Error Handling</h1>
 <div class="ttc" id="astructfl_1_1asio_1_1error__code_a7a0d849ba77b5b65fe67fafd6eaa0ab9_html_a7a0d849ba77b5b65fe67fafd6eaa0ab9"><div class="ttname"><a href="../../de/d33/structfl_1_1asio_1_1error__code_a7a0d849ba77b5b65fe67fafd6eaa0ab9.html#a7a0d849ba77b5b65fe67fafd6eaa0ab9">fl::asio::error_code::to_error</a></div><div class="ttdeci">fl::task::Error to_error() const</div><div class="ttdoc">Convert to fl::task::Error for interop with existing FastLED code.</div><div class="ttdef"><b>Definition</b> <a href="../../db/daa/error__code_8h_source.html#l00055">error_code.h:55</a></div></div>
 <div class="ttc" id="astructfl_1_1asio_1_1error__code_ac34acd49e67108b60440cb5f8a234096_html_ac34acd49e67108b60440cb5f8a234096"><div class="ttname"><a href="../../de/d33/structfl_1_1asio_1_1error__code_ac34acd49e67108b60440cb5f8a234096.html#ac34acd49e67108b60440cb5f8a234096">fl::asio::error_code::from_error</a></div><div class="ttdeci">static error_code from_error(const fl::task::Error &amp;e)</div><div class="ttdoc">Convert from fl::task::Error for interop with existing FastLED code.</div><div class="ttdef"><b>Definition</b> <a href="../../db/daa/error__code_8h_source.html#l00047">error_code.h:47</a></div></div>
 <div class="ttc" id="astructfl_1_1asio_1_1error__code_html"><div class="ttname"><a href="../../de/d33/structfl_1_1asio_1_1error__code.html">fl::asio::error_code</a></div><div class="ttdoc">Asio-compatible error code: numeric code + optional human-readable message.</div><div class="ttdef"><b>Definition</b> <a href="../../db/daa/error__code_8h_source.html#l00031">error_code.h:31</a></div></div>
-</div><!-- fragment --><h1><a class="anchor" id="autotoc_md445"></a>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md533"></a>
 What's NOT Ported (By Design)</h1>
 <ul>
 <li><b>No <code>io_context</code></b> — FastLED's <code>AsyncManager</code> + <code>Scheduler</code> fill this role</li>
@@ -207,7 +207,7 @@ What's NOT Ported (By Design)</h1>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:02 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

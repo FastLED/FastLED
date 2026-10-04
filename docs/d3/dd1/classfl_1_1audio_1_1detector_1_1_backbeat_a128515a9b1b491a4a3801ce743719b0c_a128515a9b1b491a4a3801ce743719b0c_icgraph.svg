@@ -41,7 +41,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../d3/dd1/classfl_1_1audio_1_1detector_1_1_backbeat_ab80abe1a4f92cbd9fc5ee8a20244536a.html#ab80abe1a4f92cbd9fc5ee8a20244536a" target="_top" xlink:title=" ">
+<g id="a_Node000002"><a xlink:href="../../d3/dd1/classfl_1_1audio_1_1detector_1_1_backbeat_a6de22a7698960d169db012977effe6a2.html#a6de22a7698960d169db012977effe6a2" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="128,-30 0,-30 0,0 128,0 128,-30"/>
 <text text-anchor="start" x="8" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">fl::audio::detector</text>
 <text text-anchor="middle" x="64" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">::Backbeat::~Backbeat</text>

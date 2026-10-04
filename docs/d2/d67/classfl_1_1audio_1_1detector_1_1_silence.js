@@ -6,8 +6,8 @@ var classfl_1_1audio_1_1detector_1_1_silence =
       [ "kEnd", "d2/d67/classfl_1_1audio_1_1detector_1_1_silence_a287f33aa0c93c34c87c60de5caeca1fe.html#a287f33aa0c93c34c87c60de5caeca1fea374bf9ba57a441a600d65b212cf9d13c", null ],
       [ "kMaxDuration", "d2/d67/classfl_1_1audio_1_1detector_1_1_silence_a287f33aa0c93c34c87c60de5caeca1fe.html#a287f33aa0c93c34c87c60de5caeca1fea9caffec247d3ebcbd5e52c16f0d385fd", null ]
     ] ],
-    [ "Silence", "d2/d67/classfl_1_1audio_1_1detector_1_1_silence_a03107fa4d456df1138c0fa65fd917678.html#a03107fa4d456df1138c0fa65fd917678", null ],
-    [ "~Silence", "d2/d67/classfl_1_1audio_1_1detector_1_1_silence_ae464e368b003df751e3a916be4654346.html#ae464e368b003df751e3a916be4654346", null ],
+    [ "Silence", "d2/d67/classfl_1_1audio_1_1detector_1_1_silence_ad342059ab57cf53dd44fec48bc8cbdde.html#ad342059ab57cf53dd44fec48bc8cbdde", null ],
+    [ "~Silence", "d2/d67/classfl_1_1audio_1_1detector_1_1_silence_a727706d77d6cb81768e14be7294adbbf.html#a727706d77d6cb81768e14be7294adbbf", null ],
     [ "checkSilenceCondition", "d2/d67/classfl_1_1audio_1_1detector_1_1_silence_a0b804da76b305090bd16bda7fd358865.html#a0b804da76b305090bd16bda7fd358865", null ],
     [ "fireCallbacks", "d2/d67/classfl_1_1audio_1_1detector_1_1_silence_aebf2b37620c77ea9d9729fdfe6da11d4.html#aebf2b37620c77ea9d9729fdfe6da11d4", null ],
     [ "getCurrentRMS", "d2/d67/classfl_1_1audio_1_1detector_1_1_silence_afaaedd4d7a9f98921254d38349fc9589.html#afaaedd4d7a9f98921254d38349fc9589", null ],

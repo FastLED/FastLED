@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -130,55 +130,55 @@ $(function(){initNavTree('d9/d0a/classfl_1_1spi_1_1_device_a4b4903b281bf5fdb3ddb
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="../../d4/d68/namespacefl_1_1spi_a4120bc55ea0fd2c6122f704357f12762.html#a4120bc55ea0fd2c6122f704357f12762">Result</a> indicating success or error </dd></dl>
 <dl class="section note"><dt>Note</dt><dd>Zero-copy: buffer is transmitted directly via DMA </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d0/daf/device_8cpp_8hpp_source.html#l00286">286</a> of file <a class="el" href="../../d0/daf/device_8cpp_8hpp_source.html">device.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  286</span>                                                                      {</div>
-<div class="line"><span class="lineno">  287</span>    <span class="keywordflow">if</span> (!<a class="code hl_function" href="../../d9/d0a/classfl_1_1spi_1_1_device_a1186e792511c298ed4bbd1c12a180c8c.html#a1186e792511c298ed4bbd1c12a180c8c">isReady</a>()) {</div>
-<div class="line"><span class="lineno">  288</span>        <span class="keywordflow">return</span> fl::task::Error(<span class="stringliteral">&quot;Device not initialized&quot;</span>);</div>
-<div class="line"><span class="lineno">  289</span>    }</div>
-<div class="line"><span class="lineno">  290</span> </div>
-<div class="line"><span class="lineno">  291</span>    <span class="keywordflow">if</span> (!buffer.ok()) {</div>
-<div class="line"><span class="lineno">  292</span>        <span class="keywordflow">return</span> fl::task::Error(<span class="stringliteral">&quot;Invalid buffer&quot;</span>);</div>
-<div class="line"><span class="lineno">  293</span>    }</div>
-<div class="line"><span class="lineno">  294</span> </div>
-<div class="line"><span class="lineno">  295</span>    <span class="comment">// Get hardware controller</span></div>
-<div class="line"><span class="lineno">  296</span>    <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../d9/d0a/classfl_1_1spi_1_1_device_a9a9c763d0d303ebbd0915003d7b89427.html#a9a9c763d0d303ebbd0915003d7b89427">pImpl</a>-&gt;hw_backend) {</div>
-<div class="line"><span class="lineno">  297</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;SPI Device: No hardware controller available&quot;</span>);</div>
-<div class="line"><span class="lineno">  298</span>        <span class="keywordflow">return</span> fl::task::Error(<span class="stringliteral">&quot;No hardware controller&quot;</span>);</div>
-<div class="line"><span class="lineno">  299</span>    }</div>
-<div class="line"><span class="lineno">  300</span> </div>
-<div class="line"><span class="lineno">  301</span>    <span class="comment">// Use polymorphic interface (works for SpiHw1/2/4/8)</span></div>
-<div class="line"><span class="lineno">  302</span>    SpiHwBase* hw = <a class="code hl_variable" href="../../d9/d0a/classfl_1_1spi_1_1_device_a9a9c763d0d303ebbd0915003d7b89427.html#a9a9c763d0d303ebbd0915003d7b89427">pImpl</a>-&gt;hw_backend.get();</div>
-<div class="line"><span class="lineno">  303</span> </div>
-<div class="line"><span class="lineno">  304</span>    <span class="comment">// Start transmission</span></div>
-<div class="line"><span class="lineno">  305</span>    TransmitMode mode = async ? TransmitMode::ASYNC : TransmitMode::SYNC;</div>
-<div class="line"><span class="lineno">  306</span>    <span class="keywordtype">bool</span> <a class="code hl_enumvalue" href="../../da/dba/namespacefl_1_1asio_a71ea0ec019fe8379abb69a2b643ed5da.html#a71ea0ec019fe8379abb69a2b643ed5daa260ca9dd8a4577fc00b7bd5810298076">success</a> = hw-&gt;transmit(mode);</div>
-<div class="line"><span class="lineno">  307</span> </div>
-<div class="line"><span class="lineno">  308</span>    <span class="keywordflow">if</span> (!success) {</div>
-<div class="line"><span class="lineno">  309</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;SPI Device: Transmission failed&quot;</span>);</div>
-<div class="line"><span class="lineno">  310</span>        <span class="keywordflow">return</span> fl::task::Error(<span class="stringliteral">&quot;Transmission failed&quot;</span>);</div>
-<div class="line"><span class="lineno">  311</span>    }</div>
-<div class="line"><span class="lineno">  312</span> </div>
-<div class="line"><span class="lineno">  313</span>    <span class="comment">// If blocking mode, wait for completion</span></div>
-<div class="line"><span class="lineno">  314</span>    <span class="keywordflow">if</span> (!async) {</div>
-<div class="line"><span class="lineno">  315</span>        <span class="keywordflow">if</span> (!hw-&gt;waitComplete()) {</div>
-<div class="line"><span class="lineno">  316</span>            <a class="code hl_define" href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;SPI Device: Wait for completion failed&quot;</span>);</div>
-<div class="line"><span class="lineno">  317</span>            <span class="keywordflow">return</span> fl::task::Error(<span class="stringliteral">&quot;Wait for completion failed&quot;</span>);</div>
-<div class="line"><span class="lineno">  318</span>        }</div>
-<div class="line"><span class="lineno">  319</span>    }</div>
-<div class="line"><span class="lineno">  320</span> </div>
-<div class="line"><span class="lineno">  321</span>    <a class="code hl_define" href="../../d8/d1c/group__log__hw__interfaces_ga178692e92d575c24c831f587f2165911.html#ga178692e92d575c24c831f587f2165911">FL_LOG_SPI</a>(<span class="stringliteral">&quot;SPI Device: Transmission started (&quot;</span> &lt;&lt; (async ? <span class="stringliteral">&quot;async&quot;</span> : <span class="stringliteral">&quot;blocking&quot;</span>) &lt;&lt; <span class="stringliteral">&quot;)&quot;</span>);</div>
-<div class="line"><span class="lineno">  322</span>    <span class="keywordflow">return</span> <a class="code hl_variable" href="../../d4/d36/namespacefl_aa51c7c6f506ca9d9f3db40422b352b11.html#aa51c7c6f506ca9d9f3db40422b352b11">fl::nullopt</a>;</div>
-<div class="line"><span class="lineno">  323</span>}</div>
-<div class="ttc" id="aclassfl_1_1spi_1_1_device_a1186e792511c298ed4bbd1c12a180c8c_html_a1186e792511c298ed4bbd1c12a180c8c"><div class="ttname"><a href="../../d9/d0a/classfl_1_1spi_1_1_device_a1186e792511c298ed4bbd1c12a180c8c.html#a1186e792511c298ed4bbd1c12a180c8c">fl::spi::Device::isReady</a></div><div class="ttdeci">bool isReady() const</div><div class="ttdoc">Check if device is initialized and ready for use.</div><div class="ttdef"><b>Definition</b> <a href="../../d0/daf/device_8cpp_8hpp_source.html#l00152">device.cpp.hpp:152</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d0/daf/device_8cpp_8hpp_source.html#l00284">284</a> of file <a class="el" href="../../d0/daf/device_8cpp_8hpp_source.html">device.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  284</span>                                                                      {</div>
+<div class="line"><span class="lineno">  285</span>    <span class="keywordflow">if</span> (!<a class="code hl_function" href="../../d9/d0a/classfl_1_1spi_1_1_device_a1186e792511c298ed4bbd1c12a180c8c.html#a1186e792511c298ed4bbd1c12a180c8c">isReady</a>()) {</div>
+<div class="line"><span class="lineno">  286</span>        <span class="keywordflow">return</span> fl::task::Error(<span class="stringliteral">&quot;Device not initialized&quot;</span>);</div>
+<div class="line"><span class="lineno">  287</span>    }</div>
+<div class="line"><span class="lineno">  288</span> </div>
+<div class="line"><span class="lineno">  289</span>    <span class="keywordflow">if</span> (!buffer.ok()) {</div>
+<div class="line"><span class="lineno">  290</span>        <span class="keywordflow">return</span> fl::task::Error(<span class="stringliteral">&quot;Invalid buffer&quot;</span>);</div>
+<div class="line"><span class="lineno">  291</span>    }</div>
+<div class="line"><span class="lineno">  292</span> </div>
+<div class="line"><span class="lineno">  293</span>    <span class="comment">// Get hardware controller</span></div>
+<div class="line"><span class="lineno">  294</span>    <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../d9/d0a/classfl_1_1spi_1_1_device_a9a9c763d0d303ebbd0915003d7b89427.html#a9a9c763d0d303ebbd0915003d7b89427">pImpl</a>-&gt;hw_backend) {</div>
+<div class="line"><span class="lineno">  295</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;SPI Device: No hardware controller available&quot;</span>);</div>
+<div class="line"><span class="lineno">  296</span>        <span class="keywordflow">return</span> fl::task::Error(<span class="stringliteral">&quot;No hardware controller&quot;</span>);</div>
+<div class="line"><span class="lineno">  297</span>    }</div>
+<div class="line"><span class="lineno">  298</span> </div>
+<div class="line"><span class="lineno">  299</span>    <span class="comment">// Use polymorphic interface (works for SpiHw1/2/4/8)</span></div>
+<div class="line"><span class="lineno">  300</span>    SpiHwBase* hw = <a class="code hl_variable" href="../../d9/d0a/classfl_1_1spi_1_1_device_a9a9c763d0d303ebbd0915003d7b89427.html#a9a9c763d0d303ebbd0915003d7b89427">pImpl</a>-&gt;hw_backend.get();</div>
+<div class="line"><span class="lineno">  301</span> </div>
+<div class="line"><span class="lineno">  302</span>    <span class="comment">// Start transmission</span></div>
+<div class="line"><span class="lineno">  303</span>    TransmitMode mode = async ? TransmitMode::ASYNC : TransmitMode::SYNC;</div>
+<div class="line"><span class="lineno">  304</span>    <span class="keywordtype">bool</span> <a class="code hl_enumvalue" href="../../da/dba/namespacefl_1_1asio_a71ea0ec019fe8379abb69a2b643ed5da.html#a71ea0ec019fe8379abb69a2b643ed5daa260ca9dd8a4577fc00b7bd5810298076">success</a> = hw-&gt;transmit(mode);</div>
+<div class="line"><span class="lineno">  305</span> </div>
+<div class="line"><span class="lineno">  306</span>    <span class="keywordflow">if</span> (!success) {</div>
+<div class="line"><span class="lineno">  307</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;SPI Device: Transmission failed&quot;</span>);</div>
+<div class="line"><span class="lineno">  308</span>        <span class="keywordflow">return</span> fl::task::Error(<span class="stringliteral">&quot;Transmission failed&quot;</span>);</div>
+<div class="line"><span class="lineno">  309</span>    }</div>
+<div class="line"><span class="lineno">  310</span> </div>
+<div class="line"><span class="lineno">  311</span>    <span class="comment">// If blocking mode, wait for completion</span></div>
+<div class="line"><span class="lineno">  312</span>    <span class="keywordflow">if</span> (!async) {</div>
+<div class="line"><span class="lineno">  313</span>        <span class="keywordflow">if</span> (!hw-&gt;waitComplete()) {</div>
+<div class="line"><span class="lineno">  314</span>            <a class="code hl_define" href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;SPI Device: Wait for completion failed&quot;</span>);</div>
+<div class="line"><span class="lineno">  315</span>            <span class="keywordflow">return</span> fl::task::Error(<span class="stringliteral">&quot;Wait for completion failed&quot;</span>);</div>
+<div class="line"><span class="lineno">  316</span>        }</div>
+<div class="line"><span class="lineno">  317</span>    }</div>
+<div class="line"><span class="lineno">  318</span> </div>
+<div class="line"><span class="lineno">  319</span>    <a class="code hl_define" href="../../d8/d1c/group__log__hw__interfaces_gad110e32042dacf3d1607d9905ded4a8b.html#gad110e32042dacf3d1607d9905ded4a8b">FL_LOG_SPI</a>(<span class="stringliteral">&quot;SPI Device: Transmission started (%s)&quot;</span>, (async ? <span class="stringliteral">&quot;async&quot;</span> : <span class="stringliteral">&quot;blocking&quot;</span>));</div>
+<div class="line"><span class="lineno">  320</span>    <span class="keywordflow">return</span> <a class="code hl_variable" href="../../d4/d36/namespacefl_aa51c7c6f506ca9d9f3db40422b352b11.html#aa51c7c6f506ca9d9f3db40422b352b11">fl::nullopt</a>;</div>
+<div class="line"><span class="lineno">  321</span>}</div>
+<div class="ttc" id="aclassfl_1_1spi_1_1_device_a1186e792511c298ed4bbd1c12a180c8c_html_a1186e792511c298ed4bbd1c12a180c8c"><div class="ttname"><a href="../../d9/d0a/classfl_1_1spi_1_1_device_a1186e792511c298ed4bbd1c12a180c8c.html#a1186e792511c298ed4bbd1c12a180c8c">fl::spi::Device::isReady</a></div><div class="ttdeci">bool isReady() const</div><div class="ttdoc">Check if device is initialized and ready for use.</div><div class="ttdef"><b>Definition</b> <a href="../../d0/daf/device_8cpp_8hpp_source.html#l00150">device.cpp.hpp:150</a></div></div>
 <div class="ttc" id="aclassfl_1_1spi_1_1_device_a9a9c763d0d303ebbd0915003d7b89427_html_a9a9c763d0d303ebbd0915003d7b89427"><div class="ttname"><a href="../../d9/d0a/classfl_1_1spi_1_1_device_a9a9c763d0d303ebbd0915003d7b89427.html#a9a9c763d0d303ebbd0915003d7b89427">fl::spi::Device::pImpl</a></div><div class="ttdeci">fl::unique_ptr&lt; Impl &gt; pImpl</div><div class="ttdef"><b>Definition</b> <a href="../../db/de9/device_8h_source.html#l00134">device.h:134</a></div></div>
-<div class="ttc" id="agroup__log__hw__interfaces_ga178692e92d575c24c831f587f2165911_html_ga178692e92d575c24c831f587f2165911"><div class="ttname"><a href="../../d8/d1c/group__log__hw__interfaces_ga178692e92d575c24c831f587f2165911.html#ga178692e92d575c24c831f587f2165911">FL_LOG_SPI</a></div><div class="ttdeci">#define FL_LOG_SPI(X)</div><div class="ttdoc">Serial Peripheral Interface (SPI) logging Logs SPI configuration, initialization, and transfers.</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00474">log.h:474</a></div></div>
-<div class="ttc" id="alog_8h_a868b194fdb2234182e76042d9fde3062_html_a868b194fdb2234182e76042d9fde3062"><div class="ttname"><a href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a></div><div class="ttdeci">#define FL_WARN(X)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00276">log.h:276</a></div></div>
+<div class="ttc" id="agroup__log__hw__interfaces_gad110e32042dacf3d1607d9905ded4a8b_html_gad110e32042dacf3d1607d9905ded4a8b"><div class="ttname"><a href="../../d8/d1c/group__log__hw__interfaces_gad110e32042dacf3d1607d9905ded4a8b.html#gad110e32042dacf3d1607d9905ded4a8b">FL_LOG_SPI</a></div><div class="ttdeci">#define FL_LOG_SPI(...)</div><div class="ttdoc">Serial Peripheral Interface (SPI) logging Logs SPI configuration, initialization, and transfers.</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00657">log.h:657</a></div></div>
+<div class="ttc" id="alog_8h_a4804912fba6eed63e1afd84b8768aced_html_a4804912fba6eed63e1afd84b8768aced"><div class="ttname"><a href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a></div><div class="ttdeci">#define FL_WARN(...)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00440">log.h:440</a></div></div>
 <div class="ttc" id="anamespacefl_1_1asio_a71ea0ec019fe8379abb69a2b643ed5da_html_a71ea0ec019fe8379abb69a2b643ed5daa260ca9dd8a4577fc00b7bd5810298076"><div class="ttname"><a href="../../da/dba/namespacefl_1_1asio_a71ea0ec019fe8379abb69a2b643ed5da.html#a71ea0ec019fe8379abb69a2b643ed5daa260ca9dd8a4577fc00b7bd5810298076">fl::asio::errc::success</a></div><div class="ttdeci">@ success</div><div class="ttdef"><b>Definition</b> <a href="../../db/daa/error__code_8h_source.html#l00014">error_code.h:14</a></div></div>
 <div class="ttc" id="anamespacefl_aa51c7c6f506ca9d9f3db40422b352b11_html_aa51c7c6f506ca9d9f3db40422b352b11"><div class="ttname"><a href="../../d4/d36/namespacefl_aa51c7c6f506ca9d9f3db40422b352b11.html#aa51c7c6f506ca9d9f3db40422b352b11">fl::nullopt</a></div><div class="ttdeci">constexpr nullopt_t nullopt</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d62/optional_8h_source.html#l00013">optional.h:13</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d7/d7f/log_8h_source.html#l00474">FL_LOG_SPI</a>, <a class="el" href="../../d7/d7f/log_8h_source.html#l00276">FL_WARN</a>, <a class="el" href="../../d0/daf/device_8cpp_8hpp_source.html#l00152">isReady()</a>, <a class="el" href="../../dc/d62/optional_8h_source.html#l00013">fl::nullopt</a>, and <a class="el" href="../../db/de9/device_8h_source.html#l00134">pImpl</a>.</p>
+<p class="reference">References <a class="el" href="../../d7/d7f/log_8h_source.html#l00657">FL_LOG_SPI</a>, <a class="el" href="../../d7/d7f/log_8h_source.html#l00440">FL_WARN</a>, <a class="el" href="../../d0/daf/device_8cpp_8hpp_source.html#l00150">isReady()</a>, <a class="el" href="../../dc/d62/optional_8h_source.html#l00013">fl::nullopt</a>, and <a class="el" href="../../db/de9/device_8h_source.html#l00134">pImpl</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d0/daf/device_8cpp_8hpp_source.html#l00184">writeAsync()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d0/daf/device_8cpp_8hpp_source.html#l00182">writeAsync()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -203,7 +203,7 @@ $(function(){initNavTree('d9/d0a/classfl_1_1spi_1_1_device_a4b4903b281bf5fdb3ddb
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d4/d68/namespacefl_1_1spi.html">spi</a></li><li class="navelem"><a class="el" href="../../d9/d0a/classfl_1_1spi_1_1_device.html">Device</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:10 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:12 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

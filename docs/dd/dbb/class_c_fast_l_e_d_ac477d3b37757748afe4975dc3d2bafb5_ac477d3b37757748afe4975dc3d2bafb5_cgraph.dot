@@ -1,0 +1,34 @@
+digraph "CFastLED::setExclusiveDriver"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="CFastLED::setExclusiveDriver",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Enable only one driver exclusively, runtime form (disables all others)"];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::channelManager",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a1cc01267f6bdd7251959883412b11bbb.html#a1cc01267f6bdd7251959883412b11bbb",tooltip="Get the global ChannelManager singleton instance."];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::ChannelManager\l::instance",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d6b/classfl_1_1_channel_manager_a76013c6913045962ce5bb8d227e760b3.html#a76013c6913045962ce5bb8d227e760b3",tooltip="Get the global singleton instance."];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::ChannelManager\l::ChannelManager",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d2/d6b/classfl_1_1_channel_manager_a3f0e1823366151d87c97be78f4273755.html#a3f0e1823366151d87c97be78f4273755",tooltip="Constructor."];
+  Node4 -> Node4 [id="edge4_Node000004_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node8 [id="edge5_Node000003_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl::ChannelManager\l::registry",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d2/d6b/classfl_1_1_channel_manager_a58d12a4cf75bb181c7093141240bb94b.html#a58d12a4cf75bb181c7093141240bb94b",tooltip="Get the singleton WITHOUT registering platform default drivers."];
+  Node8 -> Node4 [id="edge6_Node000008_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node11 [id="edge7_Node000001_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="fl::ChannelManager\l::setExclusiveDriver",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d6b/classfl_1_1_channel_manager_ab9c9a1f5d639849bdb5cf352dd22e0b2.html#ab9c9a1f5d639849bdb5cf352dd22e0b2",tooltip="Register a single driver at a priority above the platform default and disable all others (compile-tim..."];
+  Node11 -> Node4 [id="edge8_Node000011_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node11 -> Node12 [id="edge9_Node000011_Node000012",color="steelblue1",style="solid",tooltip=" "];
+  Node12 [id="Node000012",label="fl::ChannelManager\l::addDriver",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d6b/classfl_1_1_channel_manager_ae6eb27ff8398726d8c5fcb9052ea9528.html#ae6eb27ff8398726d8c5fcb9052ea9528",tooltip="Add a driver with priority (higher priority = preferred)"];
+  Node12 -> Node13 [id="edge10_Node000012_Node000013",color="steelblue1",style="solid",tooltip=" "];
+  Node13 [id="Node000013",label="fl::ChannelManager\l::addDriverSlow",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d2/d6b/classfl_1_1_channel_manager_a9d5c6d37df9f78ddacf9e44073b4fe18.html#a9d5c6d37df9f78ddacf9e44073b4fe18",tooltip="Handle validation failures and the uncommon replacement flow outside the normal driver-registration p..."];
+  Node12 -> Node40 [id="edge11_Node000012_Node000040",color="steelblue1",style="solid",tooltip=" "];
+  Node40 [id="Node000040",label="fl::basic_string::c_str",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$de/d66/classfl_1_1basic__string_ac7b40587b637d254d009cc32f530fb83.html#ac7b40587b637d254d009cc32f530fb83",tooltip=" "];
+  Node12 -> Node16 [id="edge12_Node000012_Node000016",color="steelblue1",style="solid",tooltip=" "];
+  Node16 [id="Node000016",label="fl::basic_string::empty",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d66/classfl_1_1basic__string_ac3effe716fde4667b05a52d78d74bbfb.html#ac3effe716fde4667b05a52d78d74bbfb",tooltip=" "];
+  Node12 -> Node50 [id="edge13_Node000012_Node000050",color="steelblue1",style="solid",tooltip=" "];
+  Node50 [id="Node000050",label="fl::sort_small",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d36/namespacefl_abc76b289e45e1c247accf27c76992bfc.html#abc76b289e45e1c247accf27c76992bfc",tooltip=" "];
+  Node11 -> Node11 [id="edge14_Node000011_Node000011",color="steelblue1",style="solid",tooltip=" "];
+}

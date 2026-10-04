@@ -38,7 +38,7 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_a04a5f8d4d52c62efb40aa95af8ebb160.html#a04a5f8d4d52c62efb40aa95af8ebb160" target="_top" xlink:title="Allow construction from a HSV16 color Enables automatic conversion from HSV16 to CRGB.">
+<g id="a_Node000003"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_a3f41e230cef41109477d0ef93be03639.html#a3f41e230cef41109477d0ef93be03639" target="_top" xlink:title="Allow construction from a HSV16 color Enables automatic conversion from HSV16 to CRGB.">
 <polygon fill="white" stroke="#666666" points="264.5,-93 174.5,-93 174.5,-74 264.5,-74 264.5,-93"/>
 <text text-anchor="middle" x="219.5" y="-81" font-family="Helvetica,sans-Serif" font-size="10.00">fl::CRGB::CRGB</text>
 </a>
@@ -92,7 +92,7 @@
 <!-- Node5 -->
 <g id="Node000005" class="node">
 <title>Node5</title>
-<g id="a_Node000005"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_a2792268a864ed3d46b191c20fd56ff87.html#a2792268a864ed3d46b191c20fd56ff87" target="_top" xlink:title=" ">
+<g id="a_Node000005"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_aa93f4f0e5197ba7d957ac3d32ce76c52.html#aa93f4f0e5197ba7d957ac3d32ce76c52" target="_top" xlink:title=" ">
 <polygon fill="#fff0f0" stroke="red" points="114,-56 0,-56 0,-37 114,-37 114,-56"/>
 <text text-anchor="middle" x="57" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">fl::CRGB::colorBoost</text>
 </a>

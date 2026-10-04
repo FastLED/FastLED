@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -132,7 +132,7 @@ template&lt;typename Task = fl::function&lt;void()&gt;&gt; </div>
 <p>Schedule a task for execution at specified timestamp. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">timestamp</td><td>Execution time (e.g., <a class="el" href="../../d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a" title="Universal millisecond timer - returns milliseconds since system startup.">millis()</a>) </td></tr>
+    <tr><td class="paramname">timestamp</td><td>Execution time (e.g., <a class="el" href="../../d4/d36/namespacefl_a3c0ba5842bfd029c404a38c8df2315f3.html#a3c0ba5842bfd029c404a38c8df2315f3" title="Universal millisecond timer - returns milliseconds since system startup.">millis()</a>) </td></tr>
     <tr><td class="paramname">task</td><td>Callable to execute when timestamp arrives </td></tr>
   </table>
   </dd>
@@ -140,13 +140,13 @@ template&lt;typename Task = fl::function&lt;void()&gt;&gt; </div>
 
 <p class="definition">Definition at line <a class="el" href="../../d2/dd6/rpc__scheduler_8h_source.html#l00039">39</a> of file <a class="el" href="../../d2/dd6/rpc__scheduler_8h_source.html">rpc_scheduler.h</a>.</p>
 <div class="fragment"><div class="line"><span class="lineno">   39</span>                                            {</div>
-<div class="line"><span class="lineno">   40</span>        <a class="code hl_variable" href="../../d6/d93/classfl_1_1net_1_1_rpc_scheduler_a2df81235475a37df65610f3cd4dee06d.html#a2df81235475a37df65610f3cd4dee06d">mQueue</a>.push({<a class="code hl_class" href="../../d6/d93/classfl_1_1net_1_1_rpc_scheduler.html">timestamp</a>, <a class="code hl_function" href="../../da/d3c/namespacefl_1_1fl_a14315b21314f12a4c40dde841fcc4c8a.html#a14315b21314f12a4c40dde841fcc4c8a">fl::move</a>(<a class="code hl_class" href="../../d6/d93/classfl_1_1net_1_1_rpc_scheduler.html">task</a>)});</div>
+<div class="line"><span class="lineno">   40</span>        <a class="code hl_variable" href="../../d6/d93/classfl_1_1net_1_1_rpc_scheduler_a2df81235475a37df65610f3cd4dee06d.html#a2df81235475a37df65610f3cd4dee06d">mQueue</a>.push({<a class="code hl_class" href="../../d6/d93/classfl_1_1net_1_1_rpc_scheduler.html">timestamp</a>, <a class="code hl_function" href="../../d4/d36/namespacefl_a0c8a67e528dcd96ee58216754a07a733.html#a0c8a67e528dcd96ee58216754a07a733">fl::move</a>(<a class="code hl_class" href="../../d6/d93/classfl_1_1net_1_1_rpc_scheduler.html">task</a>)});</div>
 <div class="line"><span class="lineno">   41</span>    }</div>
 <div class="ttc" id="aclassfl_1_1net_1_1_rpc_scheduler_a2df81235475a37df65610f3cd4dee06d_html_a2df81235475a37df65610f3cd4dee06d"><div class="ttname"><a href="../../d6/d93/classfl_1_1net_1_1_rpc_scheduler_a2df81235475a37df65610f3cd4dee06d.html#a2df81235475a37df65610f3cd4dee06d">fl::net::RpcScheduler::mQueue</a></div><div class="ttdeci">fl::priority_queue_stable&lt; ScheduledTask &gt; mQueue</div><div class="ttdef"><b>Definition</b> <a href="../../d2/dd6/rpc__scheduler_8h_source.html#l00090">rpc_scheduler.h:90</a></div></div>
 <div class="ttc" id="aclassfl_1_1net_1_1_rpc_scheduler_html"><div class="ttname"><a href="../../d6/d93/classfl_1_1net_1_1_rpc_scheduler.html">fl::net::RpcScheduler</a></div><div class="ttdoc">Generic time-based task scheduler.</div><div class="ttdef"><b>Definition</b> <a href="../../d2/dd6/rpc__scheduler_8h_source.html#l00023">rpc_scheduler.h:23</a></div></div>
-<div class="ttc" id="anamespacefl_1_1fl_a14315b21314f12a4c40dde841fcc4c8a_html_a14315b21314f12a4c40dde841fcc4c8a"><div class="ttname"><a href="../../da/d3c/namespacefl_1_1fl_a14315b21314f12a4c40dde841fcc4c8a.html#a14315b21314f12a4c40dde841fcc4c8a">fl::fl::move</a></div><div class="ttdeci">constexpr remove_reference&lt; T &gt;::type &amp;&amp; move(T &amp;&amp;t) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/d96/s16x16x4_8h_source.html#l00028">s16x16x4.h:28</a></div></div>
+<div class="ttc" id="anamespacefl_a0c8a67e528dcd96ee58216754a07a733_html_a0c8a67e528dcd96ee58216754a07a733"><div class="ttname"><a href="../../d4/d36/namespacefl_a0c8a67e528dcd96ee58216754a07a733.html#a0c8a67e528dcd96ee58216754a07a733">fl::move</a></div><div class="ttdeci">constexpr remove_reference&lt; T &gt;::type &amp;&amp; move(T &amp;&amp;t) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d83/move_8h_source.html#l00028">move.h:28</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../df/d96/s16x16x4_8h_source.html#l00028">fl::fl::move()</a>, <a class="el" href="../../d2/dd6/rpc__scheduler_8h_source.html#l00090">mQueue</a>, and <a class="el" href="../../d2/dd6/rpc__scheduler_8h_source.html#l00039">schedule()</a>.</p>
+<p class="reference">References <a class="el" href="../../d9/d83/move_8h_source.html#l00028">fl::move()</a>, <a class="el" href="../../d2/dd6/rpc__scheduler_8h_source.html#l00090">mQueue</a>, and <a class="el" href="../../d2/dd6/rpc__scheduler_8h_source.html#l00039">schedule()</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../d2/dd6/rpc__scheduler_8h_source.html#l00039">schedule()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
@@ -154,7 +154,7 @@ template&lt;typename Task = fl::function&lt;void()&gt;&gt; </div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d6/d93/classfl_1_1net_1_1_rpc_scheduler_a97ec4e7fb0362885290082bf5bcc207e_a97ec4e7fb0362885290082bf5bcc207e_cgraph.svg" width="304" height="75"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d6/d93/classfl_1_1net_1_1_rpc_scheduler_a97ec4e7fb0362885290082bf5bcc207e_a97ec4e7fb0362885290082bf5bcc207e_cgraph.svg" width="288" height="75"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 <div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
@@ -173,7 +173,7 @@ template&lt;typename Task = fl::function&lt;void()&gt;&gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d5/dc9/namespacefl_1_1net.html">net</a></li><li class="navelem"><a class="el" href="../../d6/d93/classfl_1_1net_1_1_rpc_scheduler.html">RpcScheduler</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:10 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:12 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

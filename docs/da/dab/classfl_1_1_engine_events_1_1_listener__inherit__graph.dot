@@ -29,4 +29,6 @@ digraph "fl::EngineEvents::Listener"
   Node11 [id="Node000011",label="fl::asio::http::Server",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d9/d56/classfl_1_1asio_1_1http_1_1_server.html",tooltip="HTTP Server class."];
   Node1 -> Node12 [id="edge11_Node000001_Node000012",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node12 [id="Node000012",label="fl::net::http::FetchEngine\lListener",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d7/d37/classfl_1_1net_1_1http_1_1_fetch_engine_listener.html",tooltip=" "];
+  Node1 -> Node13 [id="edge12_Node000001_Node000013",dir="back",color="firebrick4",style="solid",tooltip=" "];
+  Node13 [id="Node000013",label="fl::task::Scheduler",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d2/d2b/classfl_1_1task_1_1_scheduler.html",tooltip=" "];
 }

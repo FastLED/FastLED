@@ -2,12 +2,12 @@
 <area shape="rect" id="Node000001" title=" " alt="" coords="5,55,56,80"/>
 <area shape="rect" id="Node000002" href="$d1/d3d/_smart_matrix_sketch_8h_a695b396822bbfb2d9b29c121cf13e8f3.html#a695b396822bbfb2d9b29c121cf13e8f3" title=" " alt="" coords="107,5,189,31"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="55,54,104,34,106,39,57,59"/>
-<area shape="rect" id="Node000007" href="$d2/d0d/group___random_gaaaff3e84c6ab2cf5f71400a4b6958beb.html#gaaaff3e84c6ab2cf5f71400a4b6958beb" title="Generate a 16&#45;bit random number." alt="" coords="104,55,192,80"/>
+<area shape="rect" id="Node000007" href="$d2/d0d/group___random_ga6f816735a0bd63bfc78bebbc7c5f12b9.html#ga6f816735a0bd63bfc78bebbc7c5f12b9" title="Generate a 16&#45;bit random number." alt="" coords="104,55,192,80"/>
 <area shape="poly" id="edge4_Node000001_Node000007" title=" " alt="" coords="56,65,90,65,90,70,56,70"/>
 <area shape="rect" id="Node000008" href="$d1/d3d/_smart_matrix_sketch_8h_a7aa2d780d14ccc2f3ce3c493e01999eb.html#a7aa2d780d14ccc2f3ce3c493e01999eb" title=" " alt="" coords="129,104,167,129"/>
 <area shape="poly" id="edge5_Node000001_Node000008" title=" " alt="" coords="57,75,117,101,115,106,55,80"/>
-<area shape="rect" id="Node000003" href="$d8/df9/group___noise_generation_gaeb72246ebd597b60a7e575173accf2fd.html#gaeb72246ebd597b60a7e575173accf2fd" title=" " alt="" coords="240,5,309,31"/>
+<area shape="rect" id="Node000003" href="$d8/df9/group___noise_generation_gaeb72246ebd597b60a7e575173accf2fd.html#gaeb72246ebd597b60a7e575173accf2fd" title="8&#45;Bit, fixed point implementation of Perlin&#39;s noise." alt="" coords="240,5,309,31"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="189,15,226,15,226,21,189,21"/>
-<area shape="rect" id="Node000004" href="$d8/d5c/group___noise_gaa3db0f2f3777cf5bb7a4dd1359dba4fe.html#gaa3db0f2f3777cf5bb7a4dd1359dba4fe" title=" " alt="" coords="357,5,457,31"/>
+<area shape="rect" id="Node000004" href="$d8/d5c/group___noise_gaa3db0f2f3777cf5bb7a4dd1359dba4fe.html#gaa3db0f2f3777cf5bb7a4dd1359dba4fe" title="8&#45;bit, fixed point implementation of Perlin&#39;s noise without scaling." alt="" coords="357,5,457,31"/>
 <area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="309,15,343,15,343,21,309,21"/>
 </map>

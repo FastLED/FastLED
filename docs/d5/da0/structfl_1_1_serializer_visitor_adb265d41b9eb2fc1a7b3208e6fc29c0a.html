@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -123,27 +123,27 @@ $(function(){initNavTree('d5/da0/structfl_1_1_serializer_visitor_adb265d41b9eb2f
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/da5/json_8cpp_8hpp_source.html#l01198">1198</a> of file <a class="el" href="../../db/da5/json_8cpp_8hpp_source.html">json.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno"> 1198</span>                                       {</div>
-<div class="line"><span class="lineno"> 1199</span>        <span class="keywordflow">if</span> (arr.empty()) {</div>
-<div class="line"><span class="lineno"> 1200</span>            <a class="code hl_function" href="../../d5/da0/structfl_1_1_serializer_visitor_aad4a938e3ccb76535a2212f38f573c4e.html#aad4a938e3ccb76535a2212f38f573c4e">append</a>(<span class="stringliteral">&quot;[]&quot;</span>);</div>
-<div class="line"><span class="lineno"> 1201</span>            <span class="keywordflow">return</span>;</div>
-<div class="line"><span class="lineno"> 1202</span>        }</div>
-<div class="line"><span class="lineno"> 1203</span>        <a class="code hl_variable" href="../../d5/da0/structfl_1_1_serializer_visitor_aa35c490f35cde04943a29ea000d56c55.html#aa35c490f35cde04943a29ea000d56c55">out</a>.push_back(<span class="charliteral">&#39;[&#39;</span>);</div>
-<div class="line"><span class="lineno"> 1204</span>        <span class="keywordtype">bool</span> first = <span class="keyword">true</span>;</div>
-<div class="line"><span class="lineno"> 1205</span>        <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; item : arr) {</div>
-<div class="line"><span class="lineno"> 1206</span>            <span class="keywordflow">if</span> (!first) <a class="code hl_variable" href="../../d5/da0/structfl_1_1_serializer_visitor_aa35c490f35cde04943a29ea000d56c55.html#aa35c490f35cde04943a29ea000d56c55">out</a>.push_back(<span class="charliteral">&#39;,&#39;</span>);</div>
-<div class="line"><span class="lineno"> 1207</span>            first = <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno"> 1208</span>            <a class="code hl_function" href="../../d5/da0/structfl_1_1_serializer_visitor_af2688ec47073edf4484e7ec372b5c45d.html#af2688ec47073edf4484e7ec372b5c45d">serialize_value</a>(item ? item.get() : &amp;<a class="code hl_function" href="../../d4/d36/namespacefl_a97c26892f428477baf5a2bc8114ae8ed.html#a97c26892f428477baf5a2bc8114ae8ed">get_null_json_value</a>());</div>
-<div class="line"><span class="lineno"> 1209</span>        }</div>
-<div class="line"><span class="lineno"> 1210</span>        <a class="code hl_variable" href="../../d5/da0/structfl_1_1_serializer_visitor_aa35c490f35cde04943a29ea000d56c55.html#aa35c490f35cde04943a29ea000d56c55">out</a>.push_back(<span class="charliteral">&#39;]&#39;</span>);</div>
-<div class="line"><span class="lineno"> 1211</span>    }</div>
+<p class="definition">Definition at line <a class="el" href="../../db/da5/json_8cpp_8hpp_source.html#l01226">1226</a> of file <a class="el" href="../../db/da5/json_8cpp_8hpp_source.html">json.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno"> 1226</span>                                       {</div>
+<div class="line"><span class="lineno"> 1227</span>        <span class="keywordflow">if</span> (arr.empty()) {</div>
+<div class="line"><span class="lineno"> 1228</span>            <a class="code hl_function" href="../../d5/da0/structfl_1_1_serializer_visitor_aad4a938e3ccb76535a2212f38f573c4e.html#aad4a938e3ccb76535a2212f38f573c4e">append</a>(<span class="stringliteral">&quot;[]&quot;</span>);</div>
+<div class="line"><span class="lineno"> 1229</span>            <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno"> 1230</span>        }</div>
+<div class="line"><span class="lineno"> 1231</span>        <a class="code hl_variable" href="../../d5/da0/structfl_1_1_serializer_visitor_aa35c490f35cde04943a29ea000d56c55.html#aa35c490f35cde04943a29ea000d56c55">out</a>.push_back(<span class="charliteral">&#39;[&#39;</span>);</div>
+<div class="line"><span class="lineno"> 1232</span>        <span class="keywordtype">bool</span> first = <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno"> 1233</span>        <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; item : arr) {</div>
+<div class="line"><span class="lineno"> 1234</span>            <span class="keywordflow">if</span> (!first) <a class="code hl_variable" href="../../d5/da0/structfl_1_1_serializer_visitor_aa35c490f35cde04943a29ea000d56c55.html#aa35c490f35cde04943a29ea000d56c55">out</a>.push_back(<span class="charliteral">&#39;,&#39;</span>);</div>
+<div class="line"><span class="lineno"> 1235</span>            first = <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno"> 1236</span>            <a class="code hl_function" href="../../d5/da0/structfl_1_1_serializer_visitor_af2688ec47073edf4484e7ec372b5c45d.html#af2688ec47073edf4484e7ec372b5c45d">serialize_value</a>(item ? item.get() : &amp;<a class="code hl_function" href="../../d4/d36/namespacefl_a97c26892f428477baf5a2bc8114ae8ed.html#a97c26892f428477baf5a2bc8114ae8ed">get_null_json_value</a>());</div>
+<div class="line"><span class="lineno"> 1237</span>        }</div>
+<div class="line"><span class="lineno"> 1238</span>        <a class="code hl_variable" href="../../d5/da0/structfl_1_1_serializer_visitor_aa35c490f35cde04943a29ea000d56c55.html#aa35c490f35cde04943a29ea000d56c55">out</a>.push_back(<span class="charliteral">&#39;]&#39;</span>);</div>
+<div class="line"><span class="lineno"> 1239</span>    }</div>
 <div class="ttc" id="anamespacefl_a97c26892f428477baf5a2bc8114ae8ed_html_a97c26892f428477baf5a2bc8114ae8ed"><div class="ttname"><a href="../../d4/d36/namespacefl_a97c26892f428477baf5a2bc8114ae8ed.html#a97c26892f428477baf5a2bc8114ae8ed">fl::get_null_json_value</a></div><div class="ttdeci">json_value &amp; get_null_json_value()</div><div class="ttdef"><b>Definition</b> <a href="../../db/da5/json_8cpp_8hpp_source.html#l00064">json.cpp.hpp:64</a></div></div>
-<div class="ttc" id="astructfl_1_1_serializer_visitor_aa35c490f35cde04943a29ea000d56c55_html_aa35c490f35cde04943a29ea000d56c55"><div class="ttname"><a href="../../d5/da0/structfl_1_1_serializer_visitor_aa35c490f35cde04943a29ea000d56c55.html#aa35c490f35cde04943a29ea000d56c55">fl::SerializerVisitor::out</a></div><div class="ttdeci">fl::deque&lt; char &gt; &amp; out</div><div class="ttdef"><b>Definition</b> <a href="../../db/da5/json_8cpp_8hpp_source.html#l01129">json.cpp.hpp:1129</a></div></div>
-<div class="ttc" id="astructfl_1_1_serializer_visitor_aad4a938e3ccb76535a2212f38f573c4e_html_aad4a938e3ccb76535a2212f38f573c4e"><div class="ttname"><a href="../../d5/da0/structfl_1_1_serializer_visitor_aad4a938e3ccb76535a2212f38f573c4e.html#aad4a938e3ccb76535a2212f38f573c4e">fl::SerializerVisitor::append</a></div><div class="ttdeci">void append(const char *str)</div><div class="ttdef"><b>Definition</b> <a href="../../db/da5/json_8cpp_8hpp_source.html#l01131">json.cpp.hpp:1131</a></div></div>
-<div class="ttc" id="astructfl_1_1_serializer_visitor_af2688ec47073edf4484e7ec372b5c45d_html_af2688ec47073edf4484e7ec372b5c45d"><div class="ttname"><a href="../../d5/da0/structfl_1_1_serializer_visitor_af2688ec47073edf4484e7ec372b5c45d.html#af2688ec47073edf4484e7ec372b5c45d">fl::SerializerVisitor::serialize_value</a></div><div class="ttdeci">void serialize_value(const json_value *value)</div><div class="ttdef"><b>Definition</b> <a href="../../db/da5/json_8cpp_8hpp_source.html#l01160">json.cpp.hpp:1160</a></div></div>
+<div class="ttc" id="astructfl_1_1_serializer_visitor_aa35c490f35cde04943a29ea000d56c55_html_aa35c490f35cde04943a29ea000d56c55"><div class="ttname"><a href="../../d5/da0/structfl_1_1_serializer_visitor_aa35c490f35cde04943a29ea000d56c55.html#aa35c490f35cde04943a29ea000d56c55">fl::SerializerVisitor::out</a></div><div class="ttdeci">fl::deque&lt; char &gt; &amp; out</div><div class="ttdef"><b>Definition</b> <a href="../../db/da5/json_8cpp_8hpp_source.html#l01157">json.cpp.hpp:1157</a></div></div>
+<div class="ttc" id="astructfl_1_1_serializer_visitor_aad4a938e3ccb76535a2212f38f573c4e_html_aad4a938e3ccb76535a2212f38f573c4e"><div class="ttname"><a href="../../d5/da0/structfl_1_1_serializer_visitor_aad4a938e3ccb76535a2212f38f573c4e.html#aad4a938e3ccb76535a2212f38f573c4e">fl::SerializerVisitor::append</a></div><div class="ttdeci">void append(const char *str)</div><div class="ttdef"><b>Definition</b> <a href="../../db/da5/json_8cpp_8hpp_source.html#l01159">json.cpp.hpp:1159</a></div></div>
+<div class="ttc" id="astructfl_1_1_serializer_visitor_af2688ec47073edf4484e7ec372b5c45d_html_af2688ec47073edf4484e7ec372b5c45d"><div class="ttname"><a href="../../d5/da0/structfl_1_1_serializer_visitor_af2688ec47073edf4484e7ec372b5c45d.html#af2688ec47073edf4484e7ec372b5c45d">fl::SerializerVisitor::serialize_value</a></div><div class="ttdeci">void serialize_value(const json_value *value)</div><div class="ttdef"><b>Definition</b> <a href="../../db/da5/json_8cpp_8hpp_source.html#l01188">json.cpp.hpp:1188</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../db/da5/json_8cpp_8hpp_source.html#l01131">append()</a>, <a class="el" href="../../d5/d47/basic__vector_8h_source.html#l00043">fl::vector_basic::empty()</a>, <a class="el" href="../../db/da5/json_8cpp_8hpp_source.html#l00064">fl::get_null_json_value()</a>, <a class="el" href="../../db/da5/json_8cpp_8hpp_source.html#l01129">out</a>, and <a class="el" href="../../db/da5/json_8cpp_8hpp_source.html#l01160">serialize_value()</a>.</p>
+<p class="reference">References <a class="el" href="../../db/da5/json_8cpp_8hpp_source.html#l01159">append()</a>, <a class="el" href="../../d5/d47/basic__vector_8h_source.html#l00043">fl::vector_basic::empty()</a>, <a class="el" href="../../db/da5/json_8cpp_8hpp_source.html#l00064">fl::get_null_json_value()</a>, <a class="el" href="../../db/da5/json_8cpp_8hpp_source.html#l01157">out</a>, and <a class="el" href="../../db/da5/json_8cpp_8hpp_source.html#l01188">serialize_value()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -161,7 +161,7 @@ $(function(){initNavTree('d5/da0/structfl_1_1_serializer_visitor_adb265d41b9eb2f
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d5/da0/structfl_1_1_serializer_visitor.html">SerializerVisitor</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:10 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

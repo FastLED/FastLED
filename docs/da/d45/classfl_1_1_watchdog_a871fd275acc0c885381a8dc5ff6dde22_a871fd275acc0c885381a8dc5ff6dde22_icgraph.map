@@ -1,0 +1,16 @@
+<map id="fl::Watchdog::feed" name="fl::Watchdog::feed">
+<area shape="rect" id="Node000001" title=" " alt="" coords="388,106,527,131"/>
+<area shape="poly" id="edge7_Node000001_Node000001" title=" " alt="" coords="499,97,488,88,457,85,433,87,420,92,417,97,424,104,420,108,412,98,416,88,432,82,457,79,490,83,502,93"/>
+<area shape="rect" id="Node000002" href="$d7/d76/classfl_1_1_scoped_watchdog_a9c36ed18662dc1deb74850e729e11a31.html#a9c36ed18662dc1deb74850e729e11a31" title="Construct with an explicit timeout." alt="" coords="151,5,301,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="422,102,339,60,300,46,302,41,341,55,425,97"/>
+<area shape="rect" id="Node000003" href="$d7/d76/classfl_1_1_scoped_watchdog_a5a798d12712c5f17b4d55875a35f3fa4.html#a5a798d12712c5f17b4d55875a35f3fa4" title="Feed the watchdog at end&#45;of&#45;scope so the next loop() iteration has a clean deadline window." alt="" coords="150,69,302,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="374,111,302,102,303,96,374,105"/>
+<area shape="rect" id="Node000004" href="$d1/df2/_auto_research_low_memory_8h_a313a652d1531f7d82fb04a3f6499ddff.html#a313a652d1531f7d82fb04a3f6499ddff" title=" " alt="" coords="115,134,337,159"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="374,131,331,137,331,131,373,126"/>
+<area shape="rect" id="Node000006" href="$d1/df2/_auto_research_low_memory_8h_ae3f918f9121ab392058ef53302b021cf.html#ae3f918f9121ab392058ef53302b021cf" title=" " alt="" coords="112,183,340,209"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="421,140,341,175,300,186,298,181,339,169,419,135"/>
+<area shape="rect" id="Node000005" href="$dd/dc8/_auto_research_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="9,134,60,159"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="101,149,60,149,60,144,101,144"/>
+<area shape="rect" id="Node000007" href="$dd/dc8/_auto_research_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="5,183,64,209"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="98,199,64,199,64,193,98,193"/>
+</map>

@@ -18,7 +18,7 @@ digraph "drawVUMeter"
   Node4 -> Node6 [id="edge5_Node000004_Node000006",color="steelblue1",style="solid",tooltip=" "];
   Node6 [id="Node000006",label="fadeToBlackBy",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/dfb/colorutils_8h_a399e4e094995b8e97420b89a2dd6548b.html#a399e4e094995b8e97420b89a2dd6548b",tooltip=" "];
   Node4 -> Node7 [id="edge6_Node000004_Node000007",color="steelblue1",style="solid",tooltip=" "];
-  Node7 [id="Node000007",label="fill_solid",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/dfb/colorutils_8h_afba4db18577c19e39c54f1c5793741b7.html#afba4db18577c19e39c54f1c5793741b7",tooltip="Fill a range of LEDs with a solid color."];
+  Node7 [id="Node000007",label="fill_solid",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/dfb/colorutils_8h_a3198008d7f952f27c3c83aeefedec06b.html#a3198008d7f952f27c3c83aeefedec06b",tooltip="Fill a range of LEDs with a solid color."];
   Node1 -> Node8 [id="edge7_Node000001_Node000008",color="steelblue1",style="solid",tooltip=" "];
   Node8 [id="Node000008",label="ColorFromPalette",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/dfb/colorutils_8h_a3d488dd1e2d27e99307310527e51cad3.html#a3d488dd1e2d27e99307310527e51cad3",tooltip=" "];
   Node1 -> Node9 [id="edge8_Node000001_Node000009",color="steelblue1",style="solid",tooltip=" "];
@@ -26,16 +26,16 @@ digraph "drawVUMeter"
   Node9 -> Node10 [id="edge9_Node000009_Node000010",color="steelblue1",style="solid",tooltip=" "];
   Node10 [id="Node000010",label="colorPalette",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dc7/advanced_8h_aa40f4f9f21c2392da36ba0259e623720.html#aa40f4f9f21c2392da36ba0259e623720",tooltip=" "];
   Node1 -> Node11 [id="edge10_Node000001_Node000011",color="steelblue1",style="solid",tooltip=" "];
-  Node11 [id="Node000011",label="fl::map_range",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a33fb57d527658d545f129f9fd7cf5860.html#a33fb57d527658d545f129f9fd7cf5860",tooltip=" "];
+  Node11 [id="Node000011",label="fl::map_range",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a5577faf0ab50486e75edec69ea890321.html#a5577faf0ab50486e75edec69ea890321",tooltip=" "];
   Node1 -> Node12 [id="edge11_Node000001_Node000012",color="steelblue1",style="solid",tooltip=" "];
-  Node12 [id="Node000012",label="fl::min",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb",tooltip=" "];
+  Node12 [id="Node000012",label="fl::min",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a2fdabb91a1f100dec8da21e4306aba05.html#a2fdabb91a1f100dec8da21e4306aba05",tooltip=" "];
   Node1 -> Node13 [id="edge12_Node000001_Node000013",color="steelblue1",style="solid",tooltip=" "];
   Node13 [id="Node000013",label="palette",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/dd0/_fire_cylinder_8h_a470cec2dcb21e474c257065bb93bfcd1.html#a470cec2dcb21e474c257065bb93bfcd1",tooltip=" "];
   Node1 -> Node14 [id="edge13_Node000001_Node000014",color="steelblue1",style="solid",tooltip=" "];
   Node14 [id="Node000014",label="rms",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d49/_audio_2simple_2simple_8h_a588b0ed03ff3e39281e2bc8b149dbdbd.html#a588b0ed03ff3e39281e2bc8b149dbdbd",tooltip=" "];
   Node14 -> Node14 [id="edge14_Node000014_Node000014",color="steelblue1",style="solid",tooltip=" "];
   Node14 -> Node15 [id="edge15_Node000014_Node000015",color="steelblue1",style="solid",tooltip=" "];
-  Node15 [id="Node000015",label="fl::span::size",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac",tooltip=" "];
+  Node15 [id="Node000015",label="fl::span::size",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa",tooltip=" "];
   Node14 -> Node16 [id="edge16_Node000014_Node000016",color="steelblue1",style="solid",tooltip=" "];
-  Node16 [id="Node000016",label="fl::sqrt",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a40c15aab45d44b7ca11f148cc2e997c1.html#a40c15aab45d44b7ca11f148cc2e997c1",tooltip=" "];
+  Node16 [id="Node000016",label="fl::sqrt",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_ae5cb57a6b1ba6c629a49f0fec021b6e9.html#ae5cb57a6b1ba6c629a49f0fec021b6e9",tooltip=" "];
 }

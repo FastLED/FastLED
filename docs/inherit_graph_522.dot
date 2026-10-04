@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::fl::is_floating\l_point\< T & \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d98/structfl_1_1fl_1_1is__floating__point_3_01_t_01_6_01_4.html",tooltip=" "];
+  Node0 [id="Node000000",label="fl::FlowFieldFloat\l::Perlin2D",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d6b/classfl_1_1_flow_field_float_1_1_perlin2_d.html",tooltip=" "];
 }

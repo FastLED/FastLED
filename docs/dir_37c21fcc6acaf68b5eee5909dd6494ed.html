@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -129,7 +129,7 @@ Files</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p>Demonstrates a minimal HTTP server for FastLED using the <code><a class="el" href="d4/d36/namespacefl_aab4470ccc4d4dcf2d2b9a1563473d4fa.html#aab4470ccc4d4dcf2d2b9a1563473d4fa">fl::HttpServer</a></code> API.</p>
-<h1><a class="anchor" id="autotoc_md825"></a>
+<h1><a class="anchor" id="autotoc_md848"></a>
 Features</h1>
 <ul>
 <li><b>Clean API</b>: Route handlers using <code><a class="el" href="d4/d36/namespacefl.html#d0/ddd/classfl_1_1function">fl::function</a>&lt;&gt;</code> callbacks</li>
@@ -138,7 +138,7 @@ Features</h1>
 <li><b>Visual feedback</b>: LED colors indicate server state</li>
 <li><b>Educational</b>: Clear example of HTTP server patterns</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md826"></a>
+<h1><a class="anchor" id="autotoc_md849"></a>
 Routes</h1>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -152,7 +152,7 @@ Routes</h1>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">GET   </td><td class="markdownTableBodyNone">/ping   </td><td class="markdownTableBodyNone">Health check (returns "pong")   </td></tr>
 </table>
-<h1><a class="anchor" id="autotoc_md827"></a>
+<h1><a class="anchor" id="autotoc_md850"></a>
 LED Status Indicators</h1>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -168,17 +168,17 @@ LED Status Indicators</h1>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">Red (solid)   </td><td class="markdownTableBodyNone">ERROR   </td><td class="markdownTableBodyNone">Server failed to start   </td></tr>
 </table>
-<h1><a class="anchor" id="autotoc_md828"></a>
+<h1><a class="anchor" id="autotoc_md851"></a>
 Usage</h1>
-<h2><a class="anchor" id="autotoc_md829"></a>
+<h2><a class="anchor" id="autotoc_md852"></a>
 1. Compile the Example</h2>
 <div class="fragment"><div class="line">bash compile posix --examples Server</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md830"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md853"></a>
 2. Run the Server</h2>
 <div class="fragment"><div class="line">.build/meson-quick/examples/Server.exe</div>
 </div><!-- fragment --><p>Expected output: </p><div class="fragment"><div class="line">HTTP Server Example</div>
 <div class="line">Server started on http://localhost:8080/</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md831"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md854"></a>
 3. Test with Python Client</h2>
 <div class="fragment"><div class="line">uv run python examples/Asio/Server/test_client.py</div>
 </div><!-- fragment --><p>Output: </p><div class="fragment"><div class="line">FastLED Network Example Test Client</div>
@@ -205,7 +205,7 @@ Usage</h1>
 <div class="line">└───────────────────┴──────────┘</div>
 <div class="line"> </div>
 <div class="line">✓ All tests passed!</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md832"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md855"></a>
 4. Test with curl</h2>
 <div class="fragment"><div class="line"># GET /</div>
 <div class="line">curl http://localhost:8080/</div>
@@ -222,7 +222,7 @@ Usage</h1>
 <div class="line"># GET /ping</div>
 <div class="line">curl http://localhost:8080/ping</div>
 <div class="line"># Output: pong</div>
-</div><!-- fragment --><h1><a class="anchor" id="autotoc_md833"></a>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md856"></a>
 Code Example</h1>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &quot;<a class="code" href="da/d20/stl_2asio_2http_2server_8h.html">fl/stl/asio/http/server.h</a>&quot;</span></div>
 <div class="line"><span class="preprocessor">#include &lt;FastLED.h&gt;</span></div>
@@ -237,7 +237,7 @@ Code Example</h1>
 <div class="line"> </div>
 <div class="line">    <span class="comment">// Register POST route with JSON response</span></div>
 <div class="line">    <a class="code hl_variable" href="d9/dce/_client_validation_real_8h_a508ca9e4d4d5e9774c787fe3167fb996.html#a508ca9e4d4d5e9774c787fe3167fb996">server</a>.post(<span class="stringliteral">&quot;/api/data&quot;</span>, [](<span class="keyword">const</span> <a class="code hl_typedef" href="d4/d36/namespacefl_a1943d069db5c88418400c23cc3dcf8d2.html#a1943d069db5c88418400c23cc3dcf8d2">fl::http_request</a>&amp; req) {</div>
-<div class="line">        <a class="code hl_class" href="de/d40/classfl_1_1json.html">fl::json</a> response = <a class="code hl_function" href="de/d40/classfl_1_1json_af8bc0968107152344bfa8468bba76f54.html#af8bc0968107152344bfa8468bba76f54">fl::json::object</a>();</div>
+<div class="line">        <a class="code hl_class" href="de/d40/classfl_1_1json.html">fl::json</a> response = <a class="code hl_function" href="de/d40/classfl_1_1json_ae7744bee3369b3debf7e30e4a4a18526.html#ae7744bee3369b3debf7e30e4a4a18526">fl::json::object</a>();</div>
 <div class="line">        response.set(<span class="stringliteral">&quot;status&quot;</span>, <span class="stringliteral">&quot;ok&quot;</span>);</div>
 <div class="line">        response.set(<span class="stringliteral">&quot;message&quot;</span>, <span class="stringliteral">&quot;Data received&quot;</span>);</div>
 <div class="line"> </div>
@@ -256,29 +256,29 @@ Code Example</h1>
 <div class="line"> </div>
 <div class="line">    <span class="comment">// Regular FastLED operations</span></div>
 <div class="line">    <a class="code hl_variable" href="d7/de5/_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a>.show();</div>
-<div class="line">    <a class="code hl_function" href="d4/d36/namespacefl_a50131c41da2f619067d98360de35fa27.html#a50131c41da2f619067d98360de35fa27">delay</a>(10);</div>
+<div class="line">    <a class="code hl_function" href="d4/d36/namespacefl_a19da680141593b475c4d1d3c1c0a8409.html#a19da680141593b475c4d1d3c1c0a8409">delay</a>(10);</div>
 <div class="line">}</div>
-<div class="ttc" id="a_analog_output_8ino_a4fc01d736fe50cf5b977f755b675f11d_html_a4fc01d736fe50cf5b977f755b675f11d"><div class="ttname"><a href="d5/d17/_analog_output_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d">setup</a></div><div class="ttdeci">void setup()</div><div class="ttdef"><b>Definition</b> <a href="d5/d17/_analog_output_8ino_source.html#l00065">AnalogOutput.ino:65</a></div></div>
-<div class="ttc" id="a_analog_output_8ino_afe461d27b9c48d5921c00d521181f12f_html_afe461d27b9c48d5921c00d521181f12f"><div class="ttname"><a href="d5/d17/_analog_output_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f">loop</a></div><div class="ttdeci">void loop()</div><div class="ttdef"><b>Definition</b> <a href="d5/d17/_analog_output_8ino_source.html#l00054">AnalogOutput.ino:54</a></div></div>
+<div class="ttc" id="a_analog_output_8ino_a4fc01d736fe50cf5b977f755b675f11d_html_a4fc01d736fe50cf5b977f755b675f11d"><div class="ttname"><a href="d5/d17/_analog_output_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d">setup</a></div><div class="ttdeci">void setup()</div><div class="ttdef"><b>Definition</b> <a href="d5/d17/_analog_output_8ino_source.html#l00058">AnalogOutput.ino:58</a></div></div>
+<div class="ttc" id="a_analog_output_8ino_afe461d27b9c48d5921c00d521181f12f_html_afe461d27b9c48d5921c00d521181f12f"><div class="ttname"><a href="d5/d17/_analog_output_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f">loop</a></div><div class="ttdeci">void loop()</div><div class="ttdef"><b>Definition</b> <a href="d5/d17/_analog_output_8ino_source.html#l00047">AnalogOutput.ino:47</a></div></div>
 <div class="ttc" id="a_client_validation_real_8h_a508ca9e4d4d5e9774c787fe3167fb996_html_a508ca9e4d4d5e9774c787fe3167fb996"><div class="ttname"><a href="d9/dce/_client_validation_real_8h_a508ca9e4d4d5e9774c787fe3167fb996.html#a508ca9e4d4d5e9774c787fe3167fb996">server</a></div><div class="ttdeci">fl::HttpServer server</div><div class="ttdef"><b>Definition</b> <a href="d9/dce/_client_validation_real_8h_source.html#l00038">ClientValidationReal.h:38</a></div></div>
-<div class="ttc" id="a_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9_html_a8e94985674086ea368e1d51cbc0f82a9"><div class="ttname"><a href="d7/de5/_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a></div><div class="ttdeci">FL_DISABLE_WARNING_PUSH FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS CFastLED FastLED</div><div class="ttdoc">Global LED strip management instance.</div><div class="ttdef"><b>Definition</b> <a href="d7/de5/_fast_l_e_d_8cpp_8hpp_source.html#l00075">FastLED.cpp.hpp:75</a></div></div>
-<div class="ttc" id="aclassfl_1_1asio_1_1http_1_1_response_a5750f33732ba08a389f9f6ce4a387338_html_a5750f33732ba08a389f9f6ce4a387338"><div class="ttname"><a href="da/d78/classfl_1_1asio_1_1http_1_1_response_a5750f33732ba08a389f9f6ce4a387338.html#a5750f33732ba08a389f9f6ce4a387338">fl::asio::http::Response::json</a></div><div class="ttdeci">Response &amp; json(const class json &amp;data)</div><div class="ttdoc">Set JSON response body with automatic Content-Type header.</div><div class="ttdef"><b>Definition</b> <a href="da/d52/stl_2asio_2http_2server_8cpp_8hpp_source.html#l00961">server.cpp.hpp:961</a></div></div>
-<div class="ttc" id="aclassfl_1_1asio_1_1http_1_1_response_ab07b6f9e44bc8aba1f780b0230f5be21_html_ab07b6f9e44bc8aba1f780b0230f5be21"><div class="ttname"><a href="da/d78/classfl_1_1asio_1_1http_1_1_response_ab07b6f9e44bc8aba1f780b0230f5be21.html#ab07b6f9e44bc8aba1f780b0230f5be21">fl::asio::http::Response::ok</a></div><div class="ttdeci">static Response ok(const string &amp;body=&quot;&quot;)</div><div class="ttdoc">Factory method for 200 OK response.</div><div class="ttdef"><b>Definition</b> <a href="da/d52/stl_2asio_2http_2server_8cpp_8hpp_source.html#l00963">server.cpp.hpp:963</a></div></div>
-<div class="ttc" id="aclassfl_1_1json_af8bc0968107152344bfa8468bba76f54_html_af8bc0968107152344bfa8468bba76f54"><div class="ttname"><a href="de/d40/classfl_1_1json_af8bc0968107152344bfa8468bba76f54.html#af8bc0968107152344bfa8468bba76f54">fl::json::object</a></div><div class="ttdeci">static json object() FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="d4/d05/json_8h_source.html#l00692">json.h:692</a></div></div>
-<div class="ttc" id="aclassfl_1_1json_html"><div class="ttname"><a href="de/d40/classfl_1_1json.html">fl::json</a></div><div class="ttdef"><b>Definition</b> <a href="d4/d05/json_8h_source.html#l00128">json.h:128</a></div></div>
+<div class="ttc" id="a_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9_html_a8e94985674086ea368e1d51cbc0f82a9"><div class="ttname"><a href="d7/de5/_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a></div><div class="ttdeci">FL_DISABLE_WARNING_PUSH FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS CFastLED FastLED</div><div class="ttdoc">Global LED strip management instance.</div><div class="ttdef"><b>Definition</b> <a href="d7/de5/_fast_l_e_d_8cpp_8hpp_source.html#l00090">FastLED.cpp.hpp:90</a></div></div>
+<div class="ttc" id="aclassfl_1_1asio_1_1http_1_1_response_a5750f33732ba08a389f9f6ce4a387338_html_a5750f33732ba08a389f9f6ce4a387338"><div class="ttname"><a href="da/d78/classfl_1_1asio_1_1http_1_1_response_a5750f33732ba08a389f9f6ce4a387338.html#a5750f33732ba08a389f9f6ce4a387338">fl::asio::http::Response::json</a></div><div class="ttdeci">Response &amp; json(const class json &amp;data)</div><div class="ttdoc">Set JSON response body with automatic Content-Type header.</div><div class="ttdef"><b>Definition</b> <a href="da/d52/stl_2asio_2http_2server_8cpp_8hpp_source.html#l01129">server.cpp.hpp:1129</a></div></div>
+<div class="ttc" id="aclassfl_1_1asio_1_1http_1_1_response_ab07b6f9e44bc8aba1f780b0230f5be21_html_ab07b6f9e44bc8aba1f780b0230f5be21"><div class="ttname"><a href="da/d78/classfl_1_1asio_1_1http_1_1_response_ab07b6f9e44bc8aba1f780b0230f5be21.html#ab07b6f9e44bc8aba1f780b0230f5be21">fl::asio::http::Response::ok</a></div><div class="ttdeci">static Response ok(const string &amp;body=&quot;&quot;)</div><div class="ttdoc">Factory method for 200 OK response.</div><div class="ttdef"><b>Definition</b> <a href="da/d52/stl_2asio_2http_2server_8cpp_8hpp_source.html#l01131">server.cpp.hpp:1131</a></div></div>
+<div class="ttc" id="aclassfl_1_1json_ae7744bee3369b3debf7e30e4a4a18526_html_ae7744bee3369b3debf7e30e4a4a18526"><div class="ttname"><a href="de/d40/classfl_1_1json_ae7744bee3369b3debf7e30e4a4a18526.html#ae7744bee3369b3debf7e30e4a4a18526">fl::json::object</a></div><div class="ttdeci">static json object() FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="d4/d05/json_8h_source.html#l00857">json.h:857</a></div></div>
+<div class="ttc" id="aclassfl_1_1json_html"><div class="ttname"><a href="de/d40/classfl_1_1json.html">fl::json</a></div><div class="ttdef"><b>Definition</b> <a href="d4/d05/json_8h_source.html#l00261">json.h:261</a></div></div>
 <div class="ttc" id="anamespacefl_a1943d069db5c88418400c23cc3dcf8d2_html_a1943d069db5c88418400c23cc3dcf8d2"><div class="ttname"><a href="d4/d36/namespacefl_a1943d069db5c88418400c23cc3dcf8d2.html#a1943d069db5c88418400c23cc3dcf8d2">fl::http_request</a></div><div class="ttdeci">asio::http::Request http_request</div><div class="ttdef"><b>Definition</b> <a href="da/d20/stl_2asio_2http_2server_8h_source.html#l00280">server.h:280</a></div></div>
-<div class="ttc" id="anamespacefl_a50131c41da2f619067d98360de35fa27_html_a50131c41da2f619067d98360de35fa27"><div class="ttname"><a href="d4/d36/namespacefl_a50131c41da2f619067d98360de35fa27.html#a50131c41da2f619067d98360de35fa27">fl::delay</a></div><div class="ttdeci">void delay(u32 ms, bool run_async=true) FL_NOEXCEPT</div><div class="ttdoc">Public delay wrapper that keeps bare Arduino delay() preferred after using fl::delay; while still all...</div><div class="ttdef"><b>Definition</b> <a href="dd/dee/delay_8h_source.html#l00098">delay.h:98</a></div></div>
+<div class="ttc" id="anamespacefl_a19da680141593b475c4d1d3c1c0a8409_html_a19da680141593b475c4d1d3c1c0a8409"><div class="ttname"><a href="d4/d36/namespacefl_a19da680141593b475c4d1d3c1c0a8409.html#a19da680141593b475c4d1d3c1c0a8409">fl::delay</a></div><div class="ttdeci">void delay(u32 ms, bool run_async=true) FL_NO_EXCEPT</div><div class="ttdoc">Public delay wrapper that keeps bare Arduino delay() preferred after using fl::delay; while still all...</div><div class="ttdef"><b>Definition</b> <a href="dd/dee/delay_8h_source.html#l00098">delay.h:98</a></div></div>
 <div class="ttc" id="anamespacefl_aab4470ccc4d4dcf2d2b9a1563473d4fa_html_aab4470ccc4d4dcf2d2b9a1563473d4fa"><div class="ttname"><a href="d4/d36/namespacefl_aab4470ccc4d4dcf2d2b9a1563473d4fa.html#aab4470ccc4d4dcf2d2b9a1563473d4fa">fl::HttpServer</a></div><div class="ttdeci">asio::http::Server HttpServer</div><div class="ttdef"><b>Definition</b> <a href="da/d20/stl_2asio_2http_2server_8h_source.html#l00279">server.h:279</a></div></div>
 <div class="ttc" id="astl_2asio_2http_2server_8h_html"><div class="ttname"><a href="da/d20/stl_2asio_2http_2server_8h.html">server.h</a></div></div>
 <div class="ttc" id="asystem_2serial_8h_ab1a8531ded8c3d5bee8e36aebec7a8f3_html_ab1a8531ded8c3d5bee8e36aebec7a8f3"><div class="ttname"><a href="de/d8b/system_2serial_8h_ab1a8531ded8c3d5bee8e36aebec7a8f3.html#ab1a8531ded8c3d5bee8e36aebec7a8f3">Serial</a></div><div class="ttdeci">#define Serial</div><div class="ttdef"><b>Definition</b> <a href="de/d8b/system_2serial_8h_source.html#l00304">serial.h:304</a></div></div>
-</div><!-- fragment --><h1><a class="anchor" id="autotoc_md834"></a>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md857"></a>
 API Reference</h1>
-<h2><a class="anchor" id="autotoc_md835"></a>
+<h2><a class="anchor" id="autotoc_md858"></a>
 HttpServer</h2>
 <p><b>Methods:</b></p><ul>
 <li><code>bool start(int port = 8080)</code> - Start server on specified port</li>
 <li><code>void stop()</code> - Stop server and close connections</li>
-<li><code><a class="el" href="d7/d84/cstddef_8h_a1ed206c22241d418bcd1746517563727.html#a1ed206c22241d418bcd1746517563727">size_t</a> update()</code> - Process pending requests (call in <code><a class="el" href="d5/d17/_analog_output_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f">loop()</a></code>)</li>
+<li><code><a class="el" href="df/dd8/stdint_8h_ac27ddc68fd06b365a956040e5d9645f0.html#ac27ddc68fd06b365a956040e5d9645f0">size_t</a> update()</code> - Process pending requests (call in <code><a class="el" href="d5/d17/_analog_output_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f">loop()</a></code>)</li>
 <li><code>void get(path, handler)</code> - Register GET route</li>
 <li><code>void post(path, handler)</code> - Register POST route</li>
 <li><code>void put(path, handler)</code> - Register PUT route</li>
@@ -287,7 +287,7 @@ HttpServer</h2>
 <li><code>int port()</code> - Get server port</li>
 <li><code>string last_error()</code> - Get last error message</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md836"></a>
+<h2><a class="anchor" id="autotoc_md859"></a>
 http_request</h2>
 <p><b>Methods:</b></p><ul>
 <li><code>const string&amp; method()</code> - HTTP method ("GET", "POST", etc.)</li>
@@ -298,7 +298,7 @@ http_request</h2>
 <li><code>bool is_get()</code> - Check if method is GET</li>
 <li><code>bool is_post()</code> - Check if method is POST</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md837"></a>
+<h2><a class="anchor" id="autotoc_md860"></a>
 http_response</h2>
 <p><b>Methods:</b></p><ul>
 <li><code>http_response&amp; status(int code)</code> - Set HTTP status code</li>
@@ -312,7 +312,7 @@ http_response</h2>
 <li><code>http_response::bad_request(msg)</code> - 400 Bad Request</li>
 <li><code>http_response::internal_error(msg)</code> - 500 Internal Server Error</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md838"></a>
+<h1><a class="anchor" id="autotoc_md861"></a>
 Platform Support</h1>
 <ul>
 <li>✅ <b>POSIX</b> (Linux, macOS) - Full support</li>
@@ -321,9 +321,9 @@ Platform Support</h1>
 <li>❌ <b>Arduino</b> - Not supported (no networking stack)</li>
 <li>❌ <b>WASM</b> - Not supported (browser doesn't allow servers)</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md839"></a>
+<h1><a class="anchor" id="autotoc_md862"></a>
 Technical Details</h1>
-<h2><a class="anchor" id="autotoc_md840"></a>
+<h2><a class="anchor" id="autotoc_md863"></a>
 Non-Blocking I/O</h2>
 <p>The HTTP server uses non-blocking sockets to integrate with FastLED's event loop:</p>
 <ul>
@@ -332,7 +332,7 @@ Non-Blocking I/O</h2>
 <li><b>fcntl(O_NONBLOCK)</b>: Non-blocking socket mode</li>
 <li><b>Sequential polling</b>: Simple client socket iteration</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md841"></a>
+<h2><a class="anchor" id="autotoc_md864"></a>
 HTTP/1.0 Protocol</h2>
 <p>Minimal HTTP/1.0 implementation for simplicity:</p>
 <ul>
@@ -341,14 +341,14 @@ HTTP/1.0 Protocol</h2>
 <li><b>Connection: close</b>: One request per connection</li>
 <li><b>Content-Length</b>: Automatic header generation</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md842"></a>
+<h2><a class="anchor" id="autotoc_md865"></a>
 Route Matching</h2>
 <p>Simple exact-match routing (no regex or wildcards):</p>
 <div class="fragment"><div class="line"><a class="code hl_variable" href="d9/dce/_client_validation_real_8h_a508ca9e4d4d5e9774c787fe3167fb996.html#a508ca9e4d4d5e9774c787fe3167fb996">server</a>.get(<span class="stringliteral">&quot;/api/status&quot;</span>, handler);  <span class="comment">// Matches &quot;/api/status&quot; only</span></div>
 </div><!-- fragment --><p>For advanced routing (wildcards, parameters), consider extending the <code>HttpServer</code> class.</p>
-<h1><a class="anchor" id="autotoc_md843"></a>
+<h1><a class="anchor" id="autotoc_md866"></a>
 Troubleshooting</h1>
-<h2><a class="anchor" id="autotoc_md844"></a>
+<h2><a class="anchor" id="autotoc_md867"></a>
 Server won't start</h2>
 <div class="fragment"><div class="line">ERROR: Failed to start server</div>
 <div class="line">Error: Failed to bind to port</div>
@@ -359,17 +359,17 @@ Server won't start</h2>
 <div class="line"># Windows</div>
 <div class="line">netstat -ano | findstr :8080</div>
 <div class="line">taskkill /PID &lt;PID&gt; /F</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md845"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md868"></a>
 Connection refused</h2>
 <p><b>Solution</b>: Ensure the server is running before testing: </p><div class="fragment"><div class="line"># Terminal 1: Run server</div>
 <div class="line">.build/meson-quick/examples/Server.exe</div>
 <div class="line"> </div>
 <div class="line"># Terminal 2: Run test client</div>
 <div class="line">uv run python examples/Asio/Server/test_client.py</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md846"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md869"></a>
 Firewall blocking connections</h2>
 <p><b>Solution</b>: Allow incoming connections on port 8080 in your firewall settings.</p>
-<h1><a class="anchor" id="autotoc_md847"></a>
+<h1><a class="anchor" id="autotoc_md870"></a>
 Next Steps</h1>
 <ul>
 <li><b>Add authentication</b>: Implement API key validation</li>
@@ -379,7 +379,7 @@ Next Steps</h1>
 <li><b>Rate limiting</b>: Prevent abuse with request throttling</li>
 <li><b>Logging</b>: Add request/response logging</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md848"></a>
+<h1><a class="anchor" id="autotoc_md871"></a>
 See Also</h1>
 <ul>
 <li><b><a class="el" href="d8/d11/_client_8ino.html" title="Educational tutorial for FastLED HTTP fetch API with explicit types.">Client.ino</a></b>: HTTP client example using <code>fl::fetch</code></li>
@@ -393,7 +393,7 @@ See Also</h1>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="dir_2e1cb969a724d6e5361be673f84b357b.html">Asio</a></li><li class="navelem"><a class="el" href="dir_37c21fcc6acaf68b5eee5909dd6494ed.html">Server</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:12 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:13 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

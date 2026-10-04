@@ -1,0 +1,10 @@
+<map id="fl::buildGamutMapQ16" name="fl::buildGamutMapQ16">
+<area shape="rect" id="Node000001" title="Derive the mapper for a three&#45;emitter profile." alt="" coords="781,51,949,77"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_ac4d398fdc18a6dbc27b1b07aa647bf0d.html#ac4d398fdc18a6dbc27b1b07aa647bf0d" title="Bind a source declaration and a device profile into a pipeline." alt="" coords="519,51,733,77"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="768,67,733,67,733,61,768,61"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_ab00dbc8e93b9e8d57787730e08c3bbe9.html#ab00dbc8e93b9e8d57787730e08c3bbe9" title="Build the streaming pipeline a binding describes." alt="" coords="280,51,471,77"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="505,67,471,67,471,61,505,61"/>
+<area shape="rect" id="Node000004" href="$d1/da7/namespacefl_1_1anonymous__namespace_02pipeline__binding_8cpp_8hpp_03_a481e67680332928d645c53886e4475f1.html#a481e67680332928d645c53886e4475f1" title=" " alt="" coords="5,29,232,99"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="266,67,232,67,232,61,266,61"/>
+<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="160,19,145,11,119,8,97,10,83,15,75,21,73,30,68,28,71,18,80,10,96,5,119,3,146,6,163,14"/>
+</map>

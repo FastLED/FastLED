@@ -8,13 +8,13 @@ digraph "fl::pow_impl_float"
   rankdir="RL";
   Node1 [id="Node000001",label="fl::pow_impl_float",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::pow",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_afe4f814daddbfacd608d40e3343139cb.html#afe4f814daddbfacd608d40e3343139cb",tooltip=" "];
+  Node2 [id="Node000002",label="fl::pow",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_abff61584bbd4132c4126242edf165a63.html#abff61584bbd4132c4126242edf165a63",tooltip=" "];
   Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::powf",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a20736f8f6d31db2c6ac9b4def3b1a80a.html#a20736f8f6d31db2c6ac9b4def3b1a80a",tooltip=" "];
+  Node3 [id="Node000003",label="fl::powf",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_ac85312ba3e9bfd6fe9a92841f52cbe06.html#ac85312ba3e9bfd6fe9a92841f52cbe06",tooltip=" "];
   Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="fl::audio::detector\l::Vibe::adjustRateToFPS",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d1a/classfl_1_1audio_1_1detector_1_1_vibe_aaca6d10e09a7383a1b42af847297c245.html#aaca6d10e09a7383a1b42af847297c245",tooltip=" "];
+  Node4 [id="Node000004",label="fl::audio::detector\l::Vibe::adjustRateToFPS",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d1a/classfl_1_1audio_1_1detector_1_1_vibe_a085093f71944c275ae3d067420d82c2f.html#a085093f71944c275ae3d067420d82c2f",tooltip=" "];
   Node4 -> Node5 [id="edge4_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node5 [id="Node000005",label="fl::audio::detector\l::Vibe::update",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$df/d1a/classfl_1_1audio_1_1detector_1_1_vibe_a624f33fe6d77882c256466ac680f0c89.html#a624f33fe6d77882c256466ac680f0c89",tooltip=" "];
+  Node5 [id="Node000005",label="fl::audio::detector\l::Vibe::update",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$df/d1a/classfl_1_1audio_1_1detector_1_1_vibe_af18af8217929c6ae55b4f307e007f08b.html#af18af8217929c6ae55b4f307e007f08b",tooltip=" "];
   Node5 -> Node5 [id="edge5_Node000005_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node3 -> Node7 [id="edge6_Node000003_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node7 [id="Node000007",label="fl::GielisCurvePath\l::compute",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d9f/classfl_1_1_gielis_curve_path_aa60cb369455b245d6d0afe1a5ab12c8f.html#aa60cb369455b245d6d0afe1a5ab12c8f",tooltip=" "];
@@ -37,4 +37,10 @@ digraph "fl::pow_impl_float"
   Node15 -> Node16 [id="edge15_Node000015_Node000016",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node16 [id="Node000016",label="fl::audio::detector\l::Note::calculatePitchBend",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d9/d77/classfl_1_1audio_1_1detector_1_1_note_a2482d62d81f30bdf48c6f4d96b20be6b.html#a2482d62d81f30bdf48c6f4d96b20be6b",tooltip=" "];
   Node15 -> Node15 [id="edge16_Node000015_Node000015",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node20 [id="edge17_Node000003_Node000020",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node20 [id="Node000020",label="fl::anonymous_namespace\l\{colorutils::cpp::hpp\}\l::signedCubeRoot",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d50/namespacefl_1_1anonymous__namespace_02colorutils_8cpp_8hpp_03_ab264776964b824fbc7e312de0b3a93a0.html#ab264776964b824fbc7e312de0b3a93a0",tooltip=" "];
+  Node20 -> Node21 [id="edge18_Node000020_Node000021",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node21 [id="Node000021",label="fl::anonymous_namespace\l\{colorutils::cpp::hpp\}\l::rgbToOklab",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d50/namespacefl_1_1anonymous__namespace_02colorutils_8cpp_8hpp_03_afd86df437f42cf80498e5bf197413f25.html#afd86df437f42cf80498e5bf197413f25",tooltip=" "];
+  Node21 -> Node21 [id="edge19_Node000021_Node000021",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node20 -> Node20 [id="edge20_Node000020_Node000020",dir="back",color="steelblue1",style="solid",tooltip=" "];
 }

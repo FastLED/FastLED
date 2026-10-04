@@ -20,7 +20,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../df/da5/lib8tion_8h_adf8e83564c52b94d0ff5594aede0be28.html#adf8e83564c52b94d0ff5594aede0be28" target="_top" xlink:title="Generates a 16&#45;bit sine wave at a given BPM that oscillates within a given range.">
+<g id="a_Node000002"><a xlink:href="../../df/da5/lib8tion_8h_ac869590ebed22301d9a08cf7406128b3.html#ac869590ebed22301d9a08cf7406128b3" target="_top" xlink:title="Generates a 16&#45;bit sine wave at a given BPM that oscillates within a given range.">
 <polygon fill="white" stroke="#666666" points="160,-56 95,-56 95,-37 160,-37 160,-56"/>
 <text text-anchor="middle" x="127.5" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">beatsin16</text>
 </a>

@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -117,11 +117,13 @@ $(function(){initNavTree('df/d9e/namespacefl_1_1detail_add45438e006346f13897a1df
 
 <p class="definition">Definition at line <a class="el" href="../../d0/da7/not__null_8cpp_8hpp_source.html#l00024">24</a> of file <a class="el" href="../../d0/da7/not__null_8cpp_8hpp_source.html">not_null.cpp.hpp</a>.</p>
 <div class="fragment"><div class="line"><span class="lineno">   24</span>                                                 {</div>
-<div class="line"><span class="lineno">   25</span>    <a class="code hl_define" href="../../dc/da7/assert_8h_a9b0cc574ae8c34997b6ac88cd7cc8b91.html#a9b0cc574ae8c34997b6ac88cd7cc8b91">FL_ASSERT</a>(<span class="keyword">false</span>, message);</div>
-<div class="line"><span class="lineno">   26</span>}</div>
+<div class="line"><span class="lineno">   25</span>    <a class="code hl_define" href="../../d4/d54/compiler__control_8h_a3600073df3d019f0b6288e9d59b3e883.html#a3600073df3d019f0b6288e9d59b3e883">FL_UNUSED</a>(message);  <span class="comment">// FL_ASSERT compiles to nothing in some builds</span></div>
+<div class="line"><span class="lineno">   26</span>    <a class="code hl_define" href="../../dc/da7/assert_8h_a9b0cc574ae8c34997b6ac88cd7cc8b91.html#a9b0cc574ae8c34997b6ac88cd7cc8b91">FL_ASSERT</a>(<span class="keyword">false</span>, message);</div>
+<div class="line"><span class="lineno">   27</span>}</div>
 <div class="ttc" id="aassert_8h_a9b0cc574ae8c34997b6ac88cd7cc8b91_html_a9b0cc574ae8c34997b6ac88cd7cc8b91"><div class="ttname"><a href="../../dc/da7/assert_8h_a9b0cc574ae8c34997b6ac88cd7cc8b91.html#a9b0cc574ae8c34997b6ac88cd7cc8b91">FL_ASSERT</a></div><div class="ttdeci">#define FL_ASSERT(x, MSG)</div><div class="ttdef"><b>Definition</b> <a href="../../dc/da7/assert_8h_source.html#l00006">assert.h:6</a></div></div>
+<div class="ttc" id="acompiler__control_8h_a3600073df3d019f0b6288e9d59b3e883_html_a3600073df3d019f0b6288e9d59b3e883"><div class="ttname"><a href="../../d4/d54/compiler__control_8h_a3600073df3d019f0b6288e9d59b3e883.html#a3600073df3d019f0b6288e9d59b3e883">FL_UNUSED</a></div><div class="ttdeci">#define FL_UNUSED(x)</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d54/compiler__control_8h_source.html#l00905">compiler_control.h:905</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../dc/da7/assert_8h_source.html#l00006">FL_ASSERT</a>.</p>
+<p class="reference">References <a class="el" href="../../dc/da7/assert_8h_source.html#l00006">FL_ASSERT</a>, and <a class="el" href="../../d4/d54/compiler__control_8h_source.html#l00905">FL_UNUSED</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../db/d69/not__null_8h_source.html#l00173">fl::not_null&lt; StringHolderPtr &gt;::not_null()</a>, and <a class="el" href="../../db/d69/not__null_8h_source.html#l00206">fl::not_null&lt; StringHolderPtr &gt;::operator=()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
@@ -141,7 +143,7 @@ $(function(){initNavTree('df/d9e/namespacefl_1_1detail_add45438e006346f13897a1df
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../df/d9e/namespacefl_1_1detail.html">detail</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:09 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:11 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

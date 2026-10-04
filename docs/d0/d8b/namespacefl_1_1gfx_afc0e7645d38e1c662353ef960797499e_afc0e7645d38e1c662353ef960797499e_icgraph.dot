@@ -8,7 +8,7 @@ digraph "fl::gfx::blurGaussianMappedImpl"
   rankdir="RL";
   Node1 [id="Node000001",label="fl::gfx::blurGaussianMappedImpl",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::gfx::blurGaussian",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d8b/namespacefl_1_1gfx_a0cff613753b89f4d03fdb3cbb0b8c85d.html#a0cff613753b89f4d03fdb3cbb0b8c85d",tooltip="Higher-precision dim overload for CanvasMapped (UNORM16)."];
+  Node2 [id="Node000002",label="fl::gfx::blurGaussian",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d8b/namespacefl_1_1gfx_a0b9368df543fe5081aa85fcb3d9497ed.html#a0b9368df543fe5081aa85fcb3d9497ed",tooltip="Higher-precision dim overload for CanvasMapped (UNORM16)."];
   Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::gfx::blurGaussian",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d8b/namespacefl_1_1gfx_a955705e50434d56764daab1cbd72d5ad.html#a955705e50434d56764daab1cbd72d5ad",tooltip="XYMap-backed Gaussian blur (non-optimized, per-pixel path)."];
+  Node3 [id="Node000003",label="fl::gfx::blurGaussian",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d8b/namespacefl_1_1gfx_a6d0a0dcf735c179c1ba1fe42a15a25e1.html#a6d0a0dcf735c179c1ba1fe42a15a25e1",tooltip="XYMap-backed Gaussian blur (non-optimized, per-pixel path)."];
 }

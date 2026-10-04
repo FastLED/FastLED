@@ -1,0 +1,7 @@
+<map id="fl::anonymous_namespace{gamut_map.cpp.hpp}::RgbwwFeasible" name="fl::anonymous_namespace{gamut_map.cpp.hpp}::RgbwwFeasible">
+<area shape="rect" id="Node000001" title="Feasibility against the device&#39;s real hull when it has two white emitters." alt="" coords="5,181,285,221"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl.html#d8/d4d/structfl_1_1_two_white_allocation_q16" title="Everything the two&#45;white allocation needs, derived once when a profile binds (C3, #4198)." alt="" coords="49,93,241,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="148,132,148,181,143,181,143,132"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl.html#d0/d89/structfl_1_1_emitter_solve_matrix_q16" title="Inverse emitter matrix in s16.16, mapping XYZ to three emitter drives." alt="" coords="50,5,241,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="148,45,148,93,143,93,143,45"/>
+</map>

@@ -8,7 +8,7 @@ digraph "fl::splat"
   rankdir="LR";
   Node1 [id="Node000001",label="fl::splat",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="\"Splat\" as in \"splat pixel rendering\" takes a pixel value in float x,y coordinates and \"splats\" it in..."];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::floorf",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a2e35dfe73de1a16365fb9ff78ad5230a.html#a2e35dfe73de1a16365fb9ff78ad5230a",tooltip=" "];
+  Node2 [id="Node000002",label="fl::floorf",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_acbab7965ace60152d4d09abd92544e7e.html#acbab7965ace60152d4d09abd92544e7e",tooltip=" "];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
   Node3 [id="Node000003",label="fl::floor_impl_float",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_ac9688f13d338da44ae3700b0a5602ac7.html#ac9688f13d338da44ae3700b0a5602ac7",tooltip=" "];
   Node1 -> Node4 [id="edge3_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];
@@ -21,7 +21,7 @@ digraph "fl::splat"
   Node1 -> Node7 [id="edge7_Node000001_Node000007",color="steelblue1",style="solid",tooltip=" "];
   Node7 [id="Node000007",label="fl::to_uint8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_aed8e8c82ca09d380cdf3858b196df31c.html#aed8e8c82ca09d380cdf3858b196df31c",tooltip=" "];
   Node7 -> Node8 [id="edge8_Node000007_Node000008",color="steelblue1",style="solid",tooltip=" "];
-  Node8 [id="Node000008",label="fl::min",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb",tooltip=" "];
+  Node8 [id="Node000008",label="fl::min",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a2fdabb91a1f100dec8da21e4306aba05.html#a2fdabb91a1f100dec8da21e4306aba05",tooltip=" "];
   Node1 -> Node9 [id="edge9_Node000001_Node000009",color="steelblue1",style="solid",tooltip=" "];
   Node9 [id="Node000009",label="fl::Tile2x2_u8::upper_left",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d2b/classfl_1_1_tile2x2__u8_ac78c461b4a4fc3a28d9fd8c7209a4b4e.html#ac78c461b4a4fc3a28d9fd8c7209a4b4e",tooltip=" "];
   Node9 -> Node5 [id="edge10_Node000009_Node000005",color="steelblue1",style="solid",tooltip=" "];

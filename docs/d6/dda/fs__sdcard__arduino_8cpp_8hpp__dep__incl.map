@@ -1,0 +1,7 @@
+<map id="fl/fs/sd/fs_sdcard_arduino.cpp.hpp" name="fl/fs/sd/fs_sdcard_arduino.cpp.hpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="20,5,153,45"/>
+<area shape="rect" id="Node000002" href="$dc/d30/fl_2fs_2sd_2__build_8cpp_8hpp.html" title="Unity&#45;build aggregate for SD&#45;card support." alt="" coords="5,93,168,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="89,59,89,93,84,93,84,59"/>
+<area shape="rect" id="Node000003" href="$df/d01/fl_8fs_8sd_09_8cpp.html" title="Unity build entry&#45;point for SD&#45;card support, split out of fl.system+.cpp so the linker can drop the e..." alt="" coords="11,167,162,192"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="89,132,89,167,84,167,84,132"/>
+</map>

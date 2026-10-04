@@ -1,0 +1,12 @@
+<map id="fl::installColorPipelineHooks" name="fl::installColorPipelineHooks">
+<area shape="rect" id="Node000001" title="Point the hooks at the real implementations." alt="" coords="237,92,401,132"/>
+<area shape="rect" id="Node000002" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a45a956371f28c961495b1d4c46c9fca2.html#a45a956371f28c961495b1d4c46c9fca2" title=" " alt="" coords="5,5,189,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="259,89,188,60,156,48,158,43,190,55,261,84"/>
+<area shape="rect" id="Node000003" href="$d5/d8b/classfl_1_1_channel_ad9a233b1ba5461dd9f955ab4caf67f01.html#ad9a233b1ba5461dd9f955ab4caf67f01" title=" " alt="" coords="27,70,167,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="223,102,167,95,168,89,224,97"/>
+<area shape="rect" id="Node000004" href="$d5/d87/structfl_1_1_channel_options_ad12e16c7fd37d07cabadb738d9ddc4ad.html#ad12e16c7fd37d07cabadb738d9ddc4ad" title=" " alt="" coords="27,120,168,160"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="224,127,169,134,168,128,223,121"/>
+<area shape="rect" id="Node000005" href="$d5/d87/structfl_1_1_channel_options_ab68678563049eea05cd43d8bf88c2c00.html#ab68678563049eea05cd43d8bf88c2c00" title=" " alt="" coords="27,208,168,248"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="269,141,138,210,136,205,267,136"/>
+<area shape="poly" id="edge5_Node000005_Node000005" title=" " alt="" coords="135,196,122,189,97,187,76,189,63,193,59,199,61,207,56,208,53,198,60,189,75,183,97,181,123,184,137,192"/>
+</map>

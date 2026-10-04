@@ -1,7 +1,7 @@
 var classfl_1_1_stb_vorbis_decoder =
 [
-    [ "StbVorbisDecoder", "da/df9/classfl_1_1_stb_vorbis_decoder_aa8dbaa76d6114c630fbefe052ca531fe.html#aa8dbaa76d6114c630fbefe052ca531fe", null ],
-    [ "~StbVorbisDecoder", "da/df9/classfl_1_1_stb_vorbis_decoder_aad9aa2696a99945ae677656117b7e744.html#aad9aa2696a99945ae677656117b7e744", null ],
+    [ "StbVorbisDecoder", "da/df9/classfl_1_1_stb_vorbis_decoder_a6e79c9c831a6a47b16905242efd28f6d.html#a6e79c9c831a6a47b16905242efd28f6d", null ],
+    [ "~StbVorbisDecoder", "da/df9/classfl_1_1_stb_vorbis_decoder_abffb80f5645bc05b2ccd5576c7aacdde.html#abffb80f5645bc05b2ccd5576c7aacdde", null ],
     [ "close", "da/df9/classfl_1_1_stb_vorbis_decoder_ac03ab9640c97acc1d0f95f166c0b7862.html#ac03ab9640c97acc1d0f95f166c0b7862", null ],
     [ "getInfo", "da/df9/classfl_1_1_stb_vorbis_decoder_af16b6a9ca4a9f9fa5b45c84b08bc53c2.html#af16b6a9ca4a9f9fa5b45c84b08bc53c2", null ],
     [ "getSampleOffset", "da/df9/classfl_1_1_stb_vorbis_decoder_ad6f584765ccd3e784a4db4d3e2ddc4db.html#ad6f584765ccd3e784a4db4d3e2ddc4db", null ],

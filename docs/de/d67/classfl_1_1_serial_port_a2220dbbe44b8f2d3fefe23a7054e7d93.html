@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -122,14 +122,14 @@ $(function(){initNavTree('de/d67/classfl_1_1_serial_port_a2220dbbe44b8f2d3fefe23
 <p class="definition">Definition at line <a class="el" href="../../d6/d5f/system_2serial_8cpp_8hpp_source.html#l00141">141</a> of file <a class="el" href="../../d6/d5f/system_2serial_8cpp_8hpp_source.html">serial.cpp.hpp</a>.</p>
 <div class="fragment"><div class="line"><span class="lineno">  141</span>                                {</div>
 <div class="line"><span class="lineno">  142</span>    fl::string <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>;</div>
-<div class="line"><span class="lineno">  143</span>    u32 startTime = <a class="code hl_function" href="../../d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a">fl::millis</a>();</div>
+<div class="line"><span class="lineno">  143</span>    u32 startTime = <a class="code hl_function" href="../../d4/d36/namespacefl_a3c0ba5842bfd029c404a38c8df2315f3.html#a3c0ba5842bfd029c404a38c8df2315f3">fl::millis</a>();</div>
 <div class="line"><span class="lineno">  144</span> </div>
-<div class="line"><span class="lineno">  145</span>    <span class="keywordflow">while</span> (<a class="code hl_function" href="../../d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a">fl::millis</a>() - startTime &lt; <a class="code hl_variable" href="../../de/d67/classfl_1_1_serial_port_ab84019e6f66024ce670d593c7cf6d76b.html#ab84019e6f66024ce670d593c7cf6d76b">mTimeoutMs</a>) {</div>
+<div class="line"><span class="lineno">  145</span>    <span class="keywordflow">while</span> (<a class="code hl_function" href="../../d4/d36/namespacefl_a3c0ba5842bfd029c404a38c8df2315f3.html#a3c0ba5842bfd029c404a38c8df2315f3">fl::millis</a>() - startTime &lt; <a class="code hl_variable" href="../../de/d67/classfl_1_1_serial_port_ab84019e6f66024ce670d593c7cf6d76b.html#ab84019e6f66024ce670d593c7cf6d76b">mTimeoutMs</a>) {</div>
 <div class="line"><span class="lineno">  146</span>        <span class="keywordflow">if</span> (<a class="code hl_function" href="../../de/d67/classfl_1_1_serial_port_ab121e35dbb39bd8a3ff0b9cc9af8e96a.html#ab121e35dbb39bd8a3ff0b9cc9af8e96a">available</a>() &gt; 0) {</div>
 <div class="line"><span class="lineno">  147</span>            <span class="keywordtype">int</span> c = <a class="code hl_function" href="../../de/d67/classfl_1_1_serial_port_aed1374fc28e70820bc39430f7a16940e.html#aed1374fc28e70820bc39430f7a16940e">read</a>();</div>
 <div class="line"><span class="lineno">  148</span>            <span class="keywordflow">if</span> (c != -1) {</div>
 <div class="line"><span class="lineno">  149</span>                <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a> += <span class="keyword">static_cast&lt;</span><span class="keywordtype">char</span><span class="keyword">&gt;</span>(c);</div>
-<div class="line"><span class="lineno">  150</span>                startTime = <a class="code hl_function" href="../../d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a">fl::millis</a>();  <span class="comment">// Reset timeout on successful read</span></div>
+<div class="line"><span class="lineno">  150</span>                startTime = <a class="code hl_function" href="../../d4/d36/namespacefl_a3c0ba5842bfd029c404a38c8df2315f3.html#a3c0ba5842bfd029c404a38c8df2315f3">fl::millis</a>();  <span class="comment">// Reset timeout on successful read</span></div>
 <div class="line"><span class="lineno">  151</span>            }</div>
 <div class="line"><span class="lineno">  152</span>        }</div>
 <div class="line"><span class="lineno">  153</span>    }</div>
@@ -139,10 +139,10 @@ $(function(){initNavTree('de/d67/classfl_1_1_serial_port_a2220dbbe44b8f2d3fefe23
 <div class="ttc" id="aclassfl_1_1_serial_port_ab121e35dbb39bd8a3ff0b9cc9af8e96a_html_ab121e35dbb39bd8a3ff0b9cc9af8e96a"><div class="ttname"><a href="../../de/d67/classfl_1_1_serial_port_ab121e35dbb39bd8a3ff0b9cc9af8e96a.html#ab121e35dbb39bd8a3ff0b9cc9af8e96a">fl::SerialPort::available</a></div><div class="ttdeci">int available()</div><div class="ttdoc">Check how many bytes are available to read.</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d5f/system_2serial_8cpp_8hpp_source.html#l00026">serial.cpp.hpp:26</a></div></div>
 <div class="ttc" id="aclassfl_1_1_serial_port_ab84019e6f66024ce670d593c7cf6d76b_html_ab84019e6f66024ce670d593c7cf6d76b"><div class="ttname"><a href="../../de/d67/classfl_1_1_serial_port_ab84019e6f66024ce670d593c7cf6d76b.html#ab84019e6f66024ce670d593c7cf6d76b">fl::SerialPort::mTimeoutMs</a></div><div class="ttdeci">u32 mTimeoutMs</div><div class="ttdef"><b>Definition</b> <a href="../../de/d8b/system_2serial_8h_source.html#l00267">serial.h:267</a></div></div>
 <div class="ttc" id="aclassfl_1_1_serial_port_aed1374fc28e70820bc39430f7a16940e_html_aed1374fc28e70820bc39430f7a16940e"><div class="ttname"><a href="../../de/d67/classfl_1_1_serial_port_aed1374fc28e70820bc39430f7a16940e.html#aed1374fc28e70820bc39430f7a16940e">fl::SerialPort::read</a></div><div class="ttdeci">int read()</div><div class="ttdoc">Read next byte from serial input.</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d5f/system_2serial_8cpp_8hpp_source.html#l00030">serial.cpp.hpp:30</a></div></div>
-<div class="ttc" id="anamespacefl_a335fa6e4af7f0a011997ea0137d49b5a_html_a335fa6e4af7f0a011997ea0137d49b5a"><div class="ttname"><a href="../../d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a">fl::millis</a></div><div class="ttdeci">fl::u32 millis()</div><div class="ttdoc">Universal millisecond timer - returns milliseconds since system startup.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d18/chrono_8cpp_8hpp_source.html#l00064">chrono.cpp.hpp:64</a></div></div>
+<div class="ttc" id="anamespacefl_a3c0ba5842bfd029c404a38c8df2315f3_html_a3c0ba5842bfd029c404a38c8df2315f3"><div class="ttname"><a href="../../d4/d36/namespacefl_a3c0ba5842bfd029c404a38c8df2315f3.html#a3c0ba5842bfd029c404a38c8df2315f3">fl::millis</a></div><div class="ttdeci">fl::u32 millis()</div><div class="ttdoc">Universal millisecond timer - returns milliseconds since system startup.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d18/chrono_8cpp_8hpp_source.html#l00079">chrono.cpp.hpp:79</a></div></div>
 <div class="ttc" id="anamespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99_html_a8fa65f6529fc3eb6a174cb304a4bfc99"><div class="ttname"><a href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">fl::result</a></div><div class="ttdeci">expected&lt; T, E &gt; result</div><div class="ttdoc">Alias for expected (Rust-style naming)</div><div class="ttdef"><b>Definition</b> <a href="../../de/d93/result_8h_source.html#l00031">result.h:31</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d6/d5f/system_2serial_8cpp_8hpp_source.html#l00026">available()</a>, <a class="el" href="../../db/d18/chrono_8cpp_8hpp_source.html#l00064">fl::millis()</a>, <a class="el" href="../../de/d8b/system_2serial_8h_source.html#l00267">mTimeoutMs</a>, and <a class="el" href="../../d6/d5f/system_2serial_8cpp_8hpp_source.html#l00030">read()</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/d5f/system_2serial_8cpp_8hpp_source.html#l00026">available()</a>, <a class="el" href="../../db/d18/chrono_8cpp_8hpp_source.html#l00079">fl::millis()</a>, <a class="el" href="../../de/d8b/system_2serial_8h_source.html#l00267">mTimeoutMs</a>, and <a class="el" href="../../d6/d5f/system_2serial_8cpp_8hpp_source.html#l00030">read()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -160,7 +160,7 @@ $(function(){initNavTree('de/d67/classfl_1_1_serial_port_a2220dbbe44b8f2d3fefe23
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../de/d67/classfl_1_1_serial_port.html">SerialPort</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:10 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

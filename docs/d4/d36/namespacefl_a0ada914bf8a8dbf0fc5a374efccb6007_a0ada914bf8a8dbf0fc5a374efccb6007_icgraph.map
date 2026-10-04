@@ -1,0 +1,9 @@
+<map id="fl::rgbww_partial_reorder" name="fl::rgbww_partial_reorder">
+<area shape="rect" id="Node000001" title="Dispatch RGB&#45;&gt;RGBWW for a given mode." alt="" coords="260,77,444,102"/>
+<area shape="rect" id="Node000002" href="$db/da5/classfl_1_1_color_managed_pixel_source_aefb49429ee466d02d5c2ece50524da34.html#aefb49429ee466d02d5c2ece50524da34" title="Physical two&#45;white solve when a matching RGBWW profile is bound; otherwise the legacy conversion." alt="" coords="5,5,212,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="289,76,185,48,186,43,290,70"/>
+<area shape="rect" id="Node000003" href="$d0/d09/classfl_1_1_pixel_iterator_a467adc13de5f0f856ad2df6ba0540baa.html#a467adc13de5f0f856ad2df6ba0540baa" title=" " alt="" coords="27,69,191,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="246,92,191,92,191,87,246,87"/>
+<area shape="rect" id="Node000004" href="$d0/dee/struct_pixel_controller_a48468aafc35cdf4f317b7256c0221789.html#a48468aafc35cdf4f317b7256c0221789" title="Load + scale a single pixel to 5&#45;channel RGBWW (issue #2558)." alt="" coords="19,133,198,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="290,108,186,136,185,131,289,103"/>
+</map>

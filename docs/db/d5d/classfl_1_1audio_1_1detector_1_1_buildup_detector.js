@@ -1,7 +1,7 @@
 var classfl_1_1audio_1_1detector_1_1_buildup_detector =
 [
-    [ "BuildupDetector", "db/d5d/classfl_1_1audio_1_1detector_1_1_buildup_detector_a3dea43b086f90afe134cfbb1c8b88d2c.html#a3dea43b086f90afe134cfbb1c8b88d2c", null ],
-    [ "~BuildupDetector", "db/d5d/classfl_1_1audio_1_1detector_1_1_buildup_detector_a9cfcd4b63ec64b6c4fb0774b8d15bf4d.html#a9cfcd4b63ec64b6c4fb0774b8d15bf4d", null ],
+    [ "BuildupDetector", "db/d5d/classfl_1_1audio_1_1detector_1_1_buildup_detector_a3c83dc0be3ebb584efcf5081740654ca.html#a3c83dc0be3ebb584efcf5081740654ca", null ],
+    [ "~BuildupDetector", "db/d5d/classfl_1_1audio_1_1detector_1_1_buildup_detector_a5542cd1c93e4f18db2fa71c672c693e2.html#a5542cd1c93e4f18db2fa71c672c693e2", null ],
     [ "calculateBuildupIntensity", "db/d5d/classfl_1_1audio_1_1detector_1_1_buildup_detector_aba0cb9109acd09f69a5bd17f96388bb1.html#aba0cb9109acd09f69a5bd17f96388bb1", null ],
     [ "calculateEnergyTrend", "db/d5d/classfl_1_1audio_1_1detector_1_1_buildup_detector_a0a5452e280c1645217b0ba97f3e08b54.html#a0a5452e280c1645217b0ba97f3e08b54", null ],
     [ "calculateTrebleTrend", "db/d5d/classfl_1_1audio_1_1detector_1_1_buildup_detector_a1a4cb2728734b3641fd095e84c82dddd.html#a1a4cb2728734b3641fd095e84c82dddd", null ],

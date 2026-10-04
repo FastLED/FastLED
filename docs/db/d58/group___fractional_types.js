@@ -21,12 +21,12 @@ var group___fractional_types =
       [ "sb_exphi7", "db/d58/group___fractional_types.html#aef373aad7e32899b9445f75b0def52be", null ]
     ] ],
     [ "fl::qfx< T, F, I >", "da/dc1/classfl_1_1qfx.html", [
-      [ "qfx", "da/dc1/classfl_1_1qfx_a4184d162076bba383396a6fb3eb4d9f3.html#a4184d162076bba383396a6fb3eb4d9f3", null ],
-      [ "qfx", "da/dc1/classfl_1_1qfx_a9649b610efed9174bec92f0a9a7cc70b.html#a9649b610efed9174bec92f0a9a7cc70b", null ],
-      [ "operator*", "da/dc1/classfl_1_1qfx_a085642d6464ae836cda900c1a0f4bbc9.html#a085642d6464ae836cda900c1a0f4bbc9", null ],
-      [ "operator*", "da/dc1/classfl_1_1qfx_a79419f4d5a12af24bd402c7f1d5fb0d2.html#a79419f4d5a12af24bd402c7f1d5fb0d2", null ],
-      [ "operator*", "da/dc1/classfl_1_1qfx_a1acd0dc12d3d8649f835ec97125ec573.html#a1acd0dc12d3d8649f835ec97125ec573", null ],
-      [ "operator*", "da/dc1/classfl_1_1qfx_a21addc9658991f09961304af8d487026.html#a21addc9658991f09961304af8d487026", null ],
+      [ "qfx", "da/dc1/classfl_1_1qfx_ade5496bcc4257b57f773aee151beb394.html#ade5496bcc4257b57f773aee151beb394", null ],
+      [ "qfx", "da/dc1/classfl_1_1qfx_af685986d695f958574eb50af492aaf1b.html#af685986d695f958574eb50af492aaf1b", null ],
+      [ "operator*", "da/dc1/classfl_1_1qfx_aa752a4f23fc12b606fcd0bfc33d0cdd5.html#aa752a4f23fc12b606fcd0bfc33d0cdd5", null ],
+      [ "operator*", "da/dc1/classfl_1_1qfx_ab9622a227de49c9b0969d7bbfb1c344f.html#ab9622a227de49c9b0969d7bbfb1c344f", null ],
+      [ "operator*", "da/dc1/classfl_1_1qfx_aca6b5a2ed0fe4dd4e4232d1de2c36da3.html#aca6b5a2ed0fe4dd4e4232d1de2c36da3", null ],
+      [ "operator*", "da/dc1/classfl_1_1qfx_a8bdcf1d93a056c9b048e3b208264ce12.html#a8bdcf1d93a056c9b048e3b208264ce12", null ],
       [ "f", "da/dc1/classfl_1_1qfx_ae988957a0e53b653c4ff590c96d8ec12.html#ae988957a0e53b653c4ff590c96d8ec12", null ],
       [ "i", "da/dc1/classfl_1_1qfx_a410c74765ca69a8d73b43b76645ececb.html#a410c74765ca69a8d73b43b76645ececb", null ]
     ] ],
@@ -34,8 +34,8 @@ var group___fractional_types =
     [ "fl::q44", "db/d58/group___fractional_types_ga600e801eb801e093c1a39f32b34a7624.html#ga600e801eb801e093c1a39f32b34a7624", null ],
     [ "fl::q62", "db/d58/group___fractional_types_ga756a63119726fd735aa31d66f8cbccfb.html#ga756a63119726fd735aa31d66f8cbccfb", null ],
     [ "fl::q88", "db/d58/group___fractional_types_ga560fa566f4f0e520aa8a4545e74d872f.html#ga560fa566f4f0e520aa8a4545e74d872f", null ],
-    [ "fl::operator*", "db/d58/group___fractional_types_gad52d02055e59538caf18f7a247890689.html#gad52d02055e59538caf18f7a247890689", null ],
-    [ "fl::operator*", "db/d58/group___fractional_types_ga91db7f2683b0dd0f709519db8c485794.html#ga91db7f2683b0dd0f709519db8c485794", null ],
-    [ "fl::operator*", "db/d58/group___fractional_types_ga44b935e306ad1b5a61f697af61e3aad6.html#ga44b935e306ad1b5a61f697af61e3aad6", null ],
-    [ "fl::operator*", "db/d58/group___fractional_types_ga4603ec61ad02baf18c03b87c9a705102.html#ga4603ec61ad02baf18c03b87c9a705102", null ]
+    [ "fl::operator*", "db/d58/group___fractional_types_ga0dfa50094a9df14ee1fd8fb18ca1a403.html#ga0dfa50094a9df14ee1fd8fb18ca1a403", null ],
+    [ "fl::operator*", "db/d58/group___fractional_types_ga6f043608a1b3e71ed5de493ce31de978.html#ga6f043608a1b3e71ed5de493ce31de978", null ],
+    [ "fl::operator*", "db/d58/group___fractional_types_gaff16e600181517101f2e0628d063562f.html#gaff16e600181517101f2e0628d063562f", null ],
+    [ "fl::operator*", "db/d58/group___fractional_types_ga85c1520dbfc8c198023324c31ffeaf82.html#ga85c1520dbfc8c198023324c31ffeaf82", null ]
 ];

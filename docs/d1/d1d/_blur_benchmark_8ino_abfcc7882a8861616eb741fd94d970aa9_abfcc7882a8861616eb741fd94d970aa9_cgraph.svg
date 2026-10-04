@@ -67,7 +67,7 @@ var sectionId = 'dynsection-0';
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../d0/d8b/namespacefl_1_1gfx_a2d0276b48f273dfb519f75e12846b0d4.html#a2d0276b48f273dfb519f75e12846b0d4" target="_top" xlink:title="Compile&#45;time Gaussian blur with independent H/V radii.">
+<g id="a_Node000002"><a xlink:href="../../d0/d8b/namespacefl_1_1gfx_a45b1aab14593cbdfababf7e10bdf9696.html#a45b1aab14593cbdfababf7e10bdf9696" target="_top" xlink:title="Compile&#45;time Gaussian blur with independent H/V radii.">
 <polygon fill="white" stroke="#666666" points="196,-158.5 82,-158.5 82,-139.5 196,-139.5 196,-158.5"/>
 <text text-anchor="middle" x="139" y="-146.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::gfx::blurGaussian</text>
 </a>
@@ -159,7 +159,7 @@ var sectionId = 'dynsection-0';
 <!-- Node6 -->
 <g id="Node000006" class="node">
 <title>Node6</title>
-<g id="a_Node000006"><a xlink:href="../../d0/d08/classfl_1_1span_a326aa9f29859fe8a92833fd5db12c3bb.html#a326aa9f29859fe8a92833fd5db12c3bb" target="_top" xlink:title=" ">
+<g id="a_Node000006"><a xlink:href="../../d0/d08/classfl_1_1span_a45157f503f151e36c679f688f10e3511.html#a45157f503f151e36c679f688f10e3511" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="500.5,-201.5 420.5,-201.5 420.5,-182.5 500.5,-182.5 500.5,-201.5"/>
 <text text-anchor="middle" x="460.5" y="-189.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::span::data</text>
 </a>

@@ -2,6 +2,7 @@ var dir_4bca70778167b44495d699f593f26052 =
 [
     [ "encoders", "dir_d192c7b937ee683426e0e6cba42a0235.html", "dir_d192c7b937ee683426e0e6cba42a0235" ],
     [ "_build.cpp.hpp", "d6/dda/fl_2chipsets_2__build_8cpp_8hpp.html", null ],
+    [ "analog.h", "d8/dc5/analog_8h.html", "d8/dc5/analog_8h" ],
     [ "apa102.h", "d3/de8/apa102_8h.html", "d3/de8/apa102_8h" ],
     [ "chipset_timing_config.h", "d8/dc5/chipset__timing__config_8h.html", "d8/dc5/chipset__timing__config_8h" ],
     [ "clockless_controller_impl.h", "db/d78/clockless__controller__impl_8h.html", "db/d78/clockless__controller__impl_8h" ],
@@ -9,6 +10,7 @@ var dir_4bca70778167b44495d699f593f26052 =
     [ "hd108.h", "d8/d61/hd108_8h.html", "d8/d61/hd108_8h" ],
     [ "led_timing.h", "d0/d3f/led__timing_8h.html", "d0/d3f/led__timing_8h" ],
     [ "lpd880x.h", "dd/d1b/lpd880x_8h.html", "dd/d1b/lpd880x_8h" ],
+    [ "my9221.h", "df/dbf/my9221_8h.html", "df/dbf/my9221_8h" ],
     [ "p9813.h", "de/d36/p9813_8h.html", "de/d36/p9813_8h" ],
     [ "sm16716.h", "d0/dd2/sm16716_8h.html", "d0/dd2/sm16716_8h" ],
     [ "spi.h", "d9/d58/chipsets_2spi_8h.html", "d9/d58/chipsets_2spi_8h" ],

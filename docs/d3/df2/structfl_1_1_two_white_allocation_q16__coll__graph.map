@@ -1,0 +1,5 @@
+<map id="fl::TwoWhiteAllocationQ16" name="fl::TwoWhiteAllocationQ16">
+<area shape="rect" id="Node000001" title="Everything the two&#45;white allocation needs, derived once when a profile binds (C3, #4198)." alt="" coords="5,93,197,119"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl.html#d0/d89/structfl_1_1_emitter_solve_matrix_q16" title="Inverse emitter matrix in s16.16, mapping XYZ to three emitter drives." alt="" coords="6,5,197,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="104,45,104,93,99,93,99,45"/>
+</map>

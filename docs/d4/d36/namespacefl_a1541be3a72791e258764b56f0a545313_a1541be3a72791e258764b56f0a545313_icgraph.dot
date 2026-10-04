@@ -1,0 +1,20 @@
+digraph "fl::buildTwoWhiteAllocationFromSolveQ16"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::buildTwoWhiteAllocation\lFromSolveQ16",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Bind two adapted white columns with an RGB solve in the same XYZ domain."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::buildGamutMapRgbwwFrom\lSolveQ16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_afff4e9bb0e778bb7459488538fb1d86d.html#afff4e9bb0e778bb7459488538fb1d86d",tooltip="Bind a five-emitter map from one effective RGB solve and two white columns, all in the same D65 worki..."];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::buildGamutMapRgbwwQ16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a948408716d579dc42f02ad68245c3450.html#a948408716d579dc42f02ad68245c3450",tooltip="Derive the mapper for a three-primary profile plus two white emitters."];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::anonymous_namespace\l\{pipeline::cpp::hpp\}::\lbuildWidePipelineQ16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d33/namespacefl_1_1anonymous__namespace_02pipeline_8cpp_8hpp_03_aece1643892391c10a9c9de9a2f21ab11.html#aece1643892391c10a9c9de9a2f21ab11",tooltip=" "];
+  Node4 -> Node4 [id="edge4_Node000004_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node4 [id="edge5_Node000002_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node5 [id="edge6_Node000001_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::buildTwoWhiteAllocationQ16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_af90e10614e44cf7b6b860f5516528724.html#af90e10614e44cf7b6b860f5516528724",tooltip="Derive the allocation for three primaries plus two white emitters."];
+}

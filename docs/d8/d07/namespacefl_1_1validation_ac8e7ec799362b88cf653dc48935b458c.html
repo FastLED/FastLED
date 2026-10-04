@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -119,46 +119,34 @@ $(function(){initNavTree('d8/d07/namespacefl_1_1validation_ac8e7ec799362b88cf653
 
 <p class="definition">Definition at line <a class="el" href="../../da/d75/platform_8cpp_8hpp_source.html#l00020">20</a> of file <a class="el" href="../../da/d75/platform_8cpp_8hpp_source.html">platform.cpp.hpp</a>.</p>
 <div class="fragment"><div class="line"><span class="lineno">   20</span>                             {</div>
-<div class="line"><span class="lineno">   21</span>    <span class="keyword">auto</span> infos = <a class="code hl_function" href="../../d4/d36/namespacefl_a8aafd1d8ccf1aab536564352dd23d204.html#a8aafd1d8ccf1aab536564352dd23d204">channelManager</a>().<a class="code hl_function" href="../../d2/d6b/classfl_1_1_channel_manager_a96f21ad5ff259842566e73eb07f14549.html#a96f21ad5ff259842566e73eb07f14549">getDriverInfos</a>();</div>
+<div class="line"><span class="lineno">   21</span>    <span class="keyword">auto</span> infos = <a class="code hl_function" href="../../d4/d36/namespacefl_a1cc01267f6bdd7251959883412b11bbb.html#a1cc01267f6bdd7251959883412b11bbb">channelManager</a>().<a class="code hl_function" href="../../d2/d6b/classfl_1_1_channel_manager_af905f8eba8d7ec070aeba0d5d672a43e.html#af905f8eba8d7ec070aeba0d5d672a43e">getDriverInfos</a>();</div>
 <div class="line"><span class="lineno">   22</span> </div>
 <div class="line"><span class="lineno">   23</span>    <span class="keywordflow">if</span> (infos.empty()) {</div>
-<div class="line"><span class="lineno">   24</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a87d1cd42c16d2496128dd8b10bd737e8.html#a87d1cd42c16d2496128dd8b10bd737e8">FL_ERROR</a>(<span class="stringliteral">&quot;[VALIDATION] No drivers registered with ChannelManager!&quot;</span>);</div>
+<div class="line"><span class="lineno">   24</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_aa90e3b2c36c6225140f46a86c6ac19e2.html#aa90e3b2c36c6225140f46a86c6ac19e2">FL_ERROR</a>(<span class="stringliteral">&quot;[VALIDATION] No drivers registered with ChannelManager!&quot;</span>);</div>
 <div class="line"><span class="lineno">   25</span>        <span class="keywordflow">return</span>;</div>
 <div class="line"><span class="lineno">   26</span>    }</div>
 <div class="line"><span class="lineno">   27</span> </div>
-<div class="line"><span class="lineno">   28</span>    <a class="code hl_define" href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;\n[VALIDATION] Registered drivers: &quot;</span> &lt;&lt; infos.size());</div>
+<div class="line"><span class="lineno">   28</span>    <a class="code hl_define" href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;\n[VALIDATION] Registered drivers: %s&quot;</span>, infos.size());</div>
 <div class="line"><span class="lineno">   29</span>    <span class="keywordflow">for</span> (fl::size i = 0; i &lt; infos.size(); i++) {</div>
 <div class="line"><span class="lineno">   30</span>        <span class="keyword">const</span> <span class="keyword">auto</span>&amp; info = infos[i];</div>
-<div class="line"><span class="lineno">   31</span>        <a class="code hl_define" href="../../df/d96/s16x16x4_8h_a3600073df3d019f0b6288e9d59b3e883.html#a3600073df3d019f0b6288e9d59b3e883">FL_UNUSED</a>(info);  <span class="comment">// silences -Wunused-variable when FL_WARN is a no-op</span></div>
-<div class="line"><span class="lineno">   32</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;  - &quot;</span> &lt;&lt; info.name.c_str()</div>
-<div class="line"><span class="lineno">   33</span>                        &lt;&lt; <span class="stringliteral">&quot; (priority=&quot;</span> &lt;&lt; info.priority</div>
-<div class="line"><span class="lineno">   34</span>                        &lt;&lt; <span class="stringliteral">&quot;, enabled=&quot;</span> &lt;&lt; (info.enabled ? <span class="stringliteral">&quot;true&quot;</span> : <span class="stringliteral">&quot;false&quot;</span>)</div>
-<div class="line"><span class="lineno">   35</span>                        &lt;&lt; <span class="stringliteral">&quot;)&quot;</span>);</div>
-<div class="line"><span class="lineno">   36</span>    }</div>
-<div class="line"><span class="lineno">   37</span>    <a class="code hl_define" href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;[VALIDATION] Driver registration OK&quot;</span>);</div>
-<div class="line"><span class="lineno">   38</span>}</div>
-<div class="ttc" id="aclassfl_1_1_channel_manager_a96f21ad5ff259842566e73eb07f14549_html_a96f21ad5ff259842566e73eb07f14549"><div class="ttname"><a href="../../d2/d6b/classfl_1_1_channel_manager_a96f21ad5ff259842566e73eb07f14549.html#a96f21ad5ff259842566e73eb07f14549">fl::ChannelManager::getDriverInfos</a></div><div class="ttdeci">fl::span&lt; const DriverInfo &gt; getDriverInfos() const FL_NOEXCEPT</div><div class="ttdoc">Get full state of all registered drivers.</div><div class="ttdef"><b>Definition</b> <a href="../../d2/dd3/manager_8cpp_8hpp_source.html#l00339">manager.cpp.hpp:339</a></div></div>
-<div class="ttc" id="alog_8h_a868b194fdb2234182e76042d9fde3062_html_a868b194fdb2234182e76042d9fde3062"><div class="ttname"><a href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a></div><div class="ttdeci">#define FL_WARN(X)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00276">log.h:276</a></div></div>
-<div class="ttc" id="alog_8h_a87d1cd42c16d2496128dd8b10bd737e8_html_a87d1cd42c16d2496128dd8b10bd737e8"><div class="ttname"><a href="../../d7/d7f/log_8h_a87d1cd42c16d2496128dd8b10bd737e8.html#a87d1cd42c16d2496128dd8b10bd737e8">FL_ERROR</a></div><div class="ttdeci">#define FL_ERROR(X)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00219">log.h:219</a></div></div>
-<div class="ttc" id="anamespacefl_a8aafd1d8ccf1aab536564352dd23d204_html_a8aafd1d8ccf1aab536564352dd23d204"><div class="ttname"><a href="../../d4/d36/namespacefl_a8aafd1d8ccf1aab536564352dd23d204.html#a8aafd1d8ccf1aab536564352dd23d204">fl::channelManager</a></div><div class="ttdeci">ChannelManager &amp; channelManager()</div><div class="ttdoc">Get the global ChannelManager singleton instance.</div><div class="ttdef"><b>Definition</b> <a href="../../d2/dd3/manager_8cpp_8hpp_source.html#l00575">manager.cpp.hpp:575</a></div></div>
-<div class="ttc" id="as16x16x4_8h_a3600073df3d019f0b6288e9d59b3e883_html_a3600073df3d019f0b6288e9d59b3e883"><div class="ttname"><a href="../../df/d96/s16x16x4_8h_a3600073df3d019f0b6288e9d59b3e883.html#a3600073df3d019f0b6288e9d59b3e883">FL_UNUSED</a></div><div class="ttdeci">#define FL_UNUSED(x)</div></div>
+<div class="line"><span class="lineno">   31</span>        <a class="code hl_define" href="../../d4/d54/compiler__control_8h_a3600073df3d019f0b6288e9d59b3e883.html#a3600073df3d019f0b6288e9d59b3e883">FL_UNUSED</a>(info);  <span class="comment">// silences -Wunused-variable when FL_WARN is a no-op</span></div>
+<div class="line"><span class="lineno">   32</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;  - %s (priority=%s, enabled=%s)&quot;</span>, info.name.c_str(), info.priority, (info.enabled ? <span class="stringliteral">&quot;true&quot;</span> : <span class="stringliteral">&quot;false&quot;</span>));</div>
+<div class="line"><span class="lineno">   33</span>    }</div>
+<div class="line"><span class="lineno">   34</span>    <a class="code hl_define" href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;[VALIDATION] Driver registration OK&quot;</span>);</div>
+<div class="line"><span class="lineno">   35</span>}</div>
+<div class="ttc" id="aclassfl_1_1_channel_manager_af905f8eba8d7ec070aeba0d5d672a43e_html_af905f8eba8d7ec070aeba0d5d672a43e"><div class="ttname"><a href="../../d2/d6b/classfl_1_1_channel_manager_af905f8eba8d7ec070aeba0d5d672a43e.html#af905f8eba8d7ec070aeba0d5d672a43e">fl::ChannelManager::getDriverInfos</a></div><div class="ttdeci">fl::span&lt; const DriverInfo &gt; getDriverInfos() const FL_NO_EXCEPT</div><div class="ttdoc">Get full state of all registered drivers.</div><div class="ttdef"><b>Definition</b> <a href="../../d2/dd3/manager_8cpp_8hpp_source.html#l00367">manager.cpp.hpp:367</a></div></div>
+<div class="ttc" id="acompiler__control_8h_a3600073df3d019f0b6288e9d59b3e883_html_a3600073df3d019f0b6288e9d59b3e883"><div class="ttname"><a href="../../d4/d54/compiler__control_8h_a3600073df3d019f0b6288e9d59b3e883.html#a3600073df3d019f0b6288e9d59b3e883">FL_UNUSED</a></div><div class="ttdeci">#define FL_UNUSED(x)</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d54/compiler__control_8h_source.html#l00905">compiler_control.h:905</a></div></div>
+<div class="ttc" id="alog_8h_a4804912fba6eed63e1afd84b8768aced_html_a4804912fba6eed63e1afd84b8768aced"><div class="ttname"><a href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a></div><div class="ttdeci">#define FL_WARN(...)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00440">log.h:440</a></div></div>
+<div class="ttc" id="alog_8h_aa90e3b2c36c6225140f46a86c6ac19e2_html_aa90e3b2c36c6225140f46a86c6ac19e2"><div class="ttname"><a href="../../d7/d7f/log_8h_aa90e3b2c36c6225140f46a86c6ac19e2.html#aa90e3b2c36c6225140f46a86c6ac19e2">FL_ERROR</a></div><div class="ttdeci">#define FL_ERROR(...)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00372">log.h:372</a></div></div>
+<div class="ttc" id="anamespacefl_a1cc01267f6bdd7251959883412b11bbb_html_a1cc01267f6bdd7251959883412b11bbb"><div class="ttname"><a href="../../d4/d36/namespacefl_a1cc01267f6bdd7251959883412b11bbb.html#a1cc01267f6bdd7251959883412b11bbb">fl::channelManager</a></div><div class="ttdeci">ChannelManager &amp; channelManager()</div><div class="ttdoc">Get the global ChannelManager singleton instance.</div><div class="ttdef"><b>Definition</b> <a href="../../d2/dd3/manager_8cpp_8hpp_source.html#l00601">manager.cpp.hpp:601</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d2/dd3/manager_8cpp_8hpp_source.html#l00575">fl::channelManager()</a>, <a class="el" href="../../d7/d7f/log_8h_source.html#l00219">FL_ERROR</a>, <a class="el" href="../../df/d96/s16x16x4_8h_a3600073df3d019f0b6288e9d59b3e883.html#a3600073df3d019f0b6288e9d59b3e883">FL_UNUSED</a>, <a class="el" href="../../d7/d7f/log_8h_source.html#l00276">FL_WARN</a>, and <a class="el" href="../../d2/dd3/manager_8cpp_8hpp_source.html#l00339">fl::ChannelManager::getDriverInfos()</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d7/d5f/_auto_research_helpers_8cpp_source.html#l00022">autoResearchExpectedEngines()</a>.</p>
+<p class="reference">References <a class="el" href="../../d2/dd3/manager_8cpp_8hpp_source.html#l00601">fl::channelManager()</a>, <a class="el" href="../../d7/d7f/log_8h_source.html#l00372">FL_ERROR</a>, <a class="el" href="../../d4/d54/compiler__control_8h_source.html#l00905">FL_UNUSED</a>, <a class="el" href="../../d7/d7f/log_8h_source.html#l00440">FL_WARN</a>, and <a class="el" href="../../d2/dd3/manager_8cpp_8hpp_source.html#l00367">fl::ChannelManager::getDriverInfos()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d8/d07/namespacefl_1_1validation_ac8e7ec799362b88cf653dc48935b458c_ac8e7ec799362b88cf653dc48935b458c_cgraph.svg" width="100%" height="421"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
-</div>
-<div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
-  <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
-<div id="dynsection-1-summary" class="dynsummary" style="display:block;">
-</div>
-<div id="dynsection-1-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d8/d07/namespacefl_1_1validation_ac8e7ec799362b88cf653dc48935b458c_ac8e7ec799362b88cf653dc48935b458c_icgraph.svg" width="574" height="51"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d8/d07/namespacefl_1_1validation_ac8e7ec799362b88cf653dc48935b458c_ac8e7ec799362b88cf653dc48935b458c_cgraph.svg" width="100%" height="399"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 
 </div>
@@ -170,7 +158,7 @@ $(function(){initNavTree('d8/d07/namespacefl_1_1validation_ac8e7ec799362b88cf653
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d8/d07/namespacefl_1_1validation.html">validation</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:11 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:13 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

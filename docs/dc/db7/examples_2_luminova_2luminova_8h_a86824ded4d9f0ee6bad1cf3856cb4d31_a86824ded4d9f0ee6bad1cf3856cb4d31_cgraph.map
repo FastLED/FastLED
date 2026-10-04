@@ -1,8 +1,8 @@
 <map id="resetParticle" name="resetParticle">
 <area shape="rect" id="Node000001" title=" " alt="" coords="5,31,108,56"/>
-<area shape="rect" id="Node000002" href="$d8/df9/group___noise_generation_gaeb72246ebd597b60a7e575173accf2fd.html#gaeb72246ebd597b60a7e575173accf2fd" title=" " alt="" coords="156,31,225,56"/>
+<area shape="rect" id="Node000002" href="$d8/df9/group___noise_generation_gaeb72246ebd597b60a7e575173accf2fd.html#gaeb72246ebd597b60a7e575173accf2fd" title="8&#45;Bit, fixed point implementation of Perlin&#39;s noise." alt="" coords="156,31,225,56"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="108,41,142,41,142,46,108,46"/>
-<area shape="rect" id="Node000003" href="$d8/d5c/group___noise_gaa3db0f2f3777cf5bb7a4dd1359dba4fe.html#gaa3db0f2f3777cf5bb7a4dd1359dba4fe" title=" " alt="" coords="273,31,373,56"/>
+<area shape="rect" id="Node000003" href="$d8/d5c/group___noise_gaa3db0f2f3777cf5bb7a4dd1359dba4fe.html#gaa3db0f2f3777cf5bb7a4dd1359dba4fe" title="8&#45;bit, fixed point implementation of Perlin&#39;s noise without scaling." alt="" coords="273,31,373,56"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="225,41,259,41,259,46,225,46"/>
 <area shape="rect" id="Node000004" href="$da/dca/noise_8cpp_8hpp_aaef794781206db0a4d368d37e6ef6ee8.html#aaef794781206db0a4d368d37e6ef6ee8" title=" " alt="" coords="431,5,490,31"/>
 <area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="373,31,418,23,419,28,374,37"/>

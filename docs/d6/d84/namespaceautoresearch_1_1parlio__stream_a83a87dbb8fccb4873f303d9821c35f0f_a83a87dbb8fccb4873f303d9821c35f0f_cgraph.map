@@ -1,9 +1,20 @@
 <map id="autoresearch::parlio_stream::validateParlioStreaming" name="autoresearch::parlio_stream::validateParlioStreaming">
-<area shape="rect" id="Node000001" title="Run the PARLIO streaming functional test." alt="" coords="5,77,244,117"/>
+<area shape="rect" id="Node000001" title="Run the PARLIO streaming functional test." alt="" coords="5,106,244,146"/>
 <area shape="rect" id="Node000002" href="$d6/d84/namespaceautoresearch_1_1parlio__stream_ad71f1c168c6b35a807d76735a49d0922.html#ad71f1c168c6b35a807d76735a49d0922" title=" " alt="" coords="292,5,499,60"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="209,74,278,58,279,63,211,79"/>
-<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a6a0e89a1b4749cf4fbffeae60a312496.html#a6a0e89a1b4749cf4fbffeae60a312496" title="Convert compile&#45;time CHIPSET type to runtime timing config." alt="" coords="315,84,475,109"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="244,94,301,94,301,99,244,99"/>
-<area shape="rect" id="Node000004" href="$d2/d24/classfl_1_1vector_ae9a8cea8d4b81d8f2f10a2b007ac2980.html#ae9a8cea8d4b81d8f2f10a2b007ac2980" title=" " alt="" coords="317,133,473,159"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="235,114,312,128,311,134,235,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="183,103,302,62,304,67,184,108"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a21751c1ec9df05c6e1090cb5c302c846.html#a21751c1ec9df05c6e1090cb5c302c846" title="Convert compile&#45;time CHIPSET type to runtime timing config." alt="" coords="315,84,475,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="244,110,302,104,302,109,245,116"/>
+<area shape="rect" id="Node000004" href="$d6/d84/namespaceautoresearch_1_1parlio__stream_a7d18c0c4db81a3b668bc140972185e9b.html#a7d18c0c4db81a3b668bc140972185e9b" title=" " alt="" coords="307,134,484,174"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="245,136,293,141,292,146,244,141"/>
+<area shape="rect" id="Node000011" href="$d2/d24/classfl_1_1vector_a82c3455c1a345460f95a0180c93b3fb0.html#a82c3455c1a345460f95a0180c93b3fb0" title=" " alt="" coords="317,199,473,224"/>
+<area shape="poly" id="edge9_Node000001_Node000011" title=" " alt="" coords="178,144,293,183,326,193,324,198,291,189,176,149"/>
+<area shape="rect" id="Node000005" href="$db/d4a/classfl_1_1_singleton_shared_a1ec246efec2c46bc053a64fe7e8170ad.html#a1ec246efec2c46bc053a64fe7e8170ad" title=" " alt="" coords="547,134,691,174"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="485,151,533,151,533,157,485,157"/>
+<area shape="rect" id="Node000006" href="$db/d4a/classfl_1_1_singleton_shared_a03c9eb23cd0cb903d5ae8fd44b1a4984.html#a03c9eb23cd0cb903d5ae8fd44b1a4984" title=" " alt="" coords="739,70,883,110"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="679,131,736,112,738,117,680,136"/>
+<area shape="rect" id="Node000008" href="$df/d9e/namespacefl_1_1detail_a6bef973c17637a167f1f94d7db03905c.html#a6bef973c17637a167f1f94d7db03905c" title=" " alt="" coords="739,134,882,174"/>
+<area shape="poly" id="edge7_Node000005_Node000008" title=" " alt="" coords="691,151,726,151,726,157,691,157"/>
+<area shape="rect" id="Node000010" href="$df/d9e/namespacefl_1_1detail_af558e779ba2417d4cf14bdb1cbfd3d34.html#af558e779ba2417d4cf14bdb1cbfd3d34" title=" " alt="" coords="739,198,882,238"/>
+<area shape="poly" id="edge8_Node000005_Node000010" title=" " alt="" coords="680,172,738,191,736,196,679,177"/>
+<area shape="poly" id="edge6_Node000006_Node000006" title=" " alt="" coords="774,70,772,60,778,51,791,45,811,43,833,46,846,54,843,58,832,51,811,49,792,51,781,55,777,61,780,69"/>
 </map>

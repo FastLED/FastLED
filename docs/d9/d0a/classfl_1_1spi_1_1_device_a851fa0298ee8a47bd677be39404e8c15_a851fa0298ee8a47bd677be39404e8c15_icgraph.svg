@@ -49,7 +49,7 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d9/d0a/classfl_1_1spi_1_1_device_abfe19210e765c3b147865c530d48cccb.html#abfe19210e765c3b147865c530d48cccb" target="_top" xlink:title="Destructor &#45; releases hardware resources.">
+<g id="a_Node000003"><a xlink:href="../../d9/d0a/classfl_1_1spi_1_1_device_a9807e40b1dc5cd6e43ab6d05dfa39b93.html#a9807e40b1dc5cd6e43ab6d05dfa39b93" target="_top" xlink:title="Destructor &#45; releases hardware resources.">
 <polygon fill="white" stroke="#666666" points="131,-19 0,-19 0,0 131,0 131,-19"/>
 <text text-anchor="middle" x="65.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::spi::Device::~Device</text>
 </a>

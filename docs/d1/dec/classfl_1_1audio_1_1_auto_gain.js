@@ -9,9 +9,9 @@ var classfl_1_1audio_1_1_auto_gain =
       [ "samplesProcessed", "d1/dec/classfl_1_1audio_1_1_auto_gain.html#a49014693f3a9368f6c0e92c666acbd75", null ],
       [ "targetGain", "d1/dec/classfl_1_1audio_1_1_auto_gain.html#ad9bdcfdb45232cbb7fad07a7bdfafdb2", null ]
     ] ],
-    [ "AutoGain", "d1/dec/classfl_1_1audio_1_1_auto_gain_a1e8a853f5997a19afdfc8b1586c979e7.html#a1e8a853f5997a19afdfc8b1586c979e7", null ],
+    [ "AutoGain", "d1/dec/classfl_1_1audio_1_1_auto_gain_a649f2c0e3577781c91421019e2d974bd.html#a649f2c0e3577781c91421019e2d974bd", null ],
     [ "AutoGain", "d1/dec/classfl_1_1audio_1_1_auto_gain_a763118e95033c3c51055d17d66a0dad8.html#a763118e95033c3c51055d17d66a0dad8", null ],
-    [ "~AutoGain", "d1/dec/classfl_1_1audio_1_1_auto_gain_a2b4a902f5f8a151104348d3188454e3c.html#a2b4a902f5f8a151104348d3188454e3c", null ],
+    [ "~AutoGain", "d1/dec/classfl_1_1audio_1_1_auto_gain_ad1c24859bdfbd526f435c9a103d63380.html#ad1c24859bdfbd526f435c9a103d63380", null ],
     [ "applyGain", "d1/dec/classfl_1_1audio_1_1_auto_gain_a652335a06786bf45fc4bca3702a3b470.html#a652335a06786bf45fc4bca3702a3b470", null ],
     [ "computeTargetGain", "d1/dec/classfl_1_1audio_1_1_auto_gain_aa6aaedccec20537cca9dce4d4575bf4f.html#aa6aaedccec20537cca9dce4d4575bf4f", null ],
     [ "configure", "d1/dec/classfl_1_1audio_1_1_auto_gain_aa0f573c5523b76a8d90d1a5da2e2dc56.html#aa0f573c5523b76a8d90d1a5da2e2dc56", null ],

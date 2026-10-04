@@ -1,0 +1,9 @@
+<map id="mood_ring::RingCanvas::lobe" name="mood_ring::RingCanvas::lobe">
+<area shape="rect" id="Node000001" title="Add a smooth lobe centred at pos (turns) with half&#45;width sigma (turns)." alt="" coords="236,69,412,109"/>
+<area shape="rect" id="Node000002" href="$da/d3e/classmood__ring_1_1_breath_layer_a4e746520582685543301d68be868d8c7.html#a4e746520582685543301d68be868d8c7" title=" " alt="" coords="7,5,186,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="238,68,167,48,169,43,239,63"/>
+<area shape="rect" id="Node000003" href="$db/deb/classmood__ring_1_1_flow_layer_aec6052ddb304be2560793529421b4d13.html#aec6052ddb304be2560793529421b4d13" title=" " alt="" coords="13,69,180,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="222,92,180,92,180,87,222,87"/>
+<area shape="rect" id="Node000004" href="$d6/dee/classmood__ring_1_1_groove_layer_a085e540e0a3ae1223ee96f965982b9ba.html#a085e540e0a3ae1223ee96f965982b9ba" title=" " alt="" coords="5,133,188,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="239,116,169,136,167,131,238,111"/>
+</map>

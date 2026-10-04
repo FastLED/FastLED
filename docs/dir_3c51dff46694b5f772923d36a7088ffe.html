@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -112,7 +112,7 @@ $(function(){initNavTree('dir_3c51dff46694b5f772923d36a7088ffe.html',''); initRe
 </div>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p>Fast, integer-only fixed-point arithmetic. All operations use pure integer math—no floating-point overhead.</p>
-<h1><a class="anchor" id="autotoc_md511"></a>
+<h1><a class="anchor" id="autotoc_md535"></a>
 What is Fixed-Point? (5-Minute Intro)</h1>
 <p>Fixed-point numbers store decimals using only <b>integers</b>. Think of it like storing money in cents instead of dollars:</p><ul>
 <li><code>$1.50</code> → store as <code>150</code> cents, then divide by 100 when needed</li>
@@ -150,10 +150,10 @@ What is Fixed-Point? (5-Minute Intro)</h1>
 </table>
 <p><b>→ Use fixed-point for FastLED because embedded systems have NO hardware float support.</b></p>
 <hr  />
-<h1><a class="anchor" id="autotoc_md513"></a>
+<h1><a class="anchor" id="autotoc_md537"></a>
 The Two Main APIs: <code>sfixed_integer</code> and <code>ufixed_integer</code></h1>
 <p>FastLED provides <b>two templated types</b> that are the primary entry point:</p>
-<h2><a class="anchor" id="autotoc_md514"></a>
+<h2><a class="anchor" id="autotoc_md538"></a>
 Signed Fixed-Point Integer</h2>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &quot;<a class="code" href="de/d62/fixed__point_8h.html">fl/math/fixed_point.h</a>&quot;</span></div>
 <div class="line"> </div>
@@ -165,7 +165,7 @@ Signed Fixed-Point Integer</h2>
 <div class="line"><a class="code hl_typedef" href="d4/d36/namespacefl_af658998b5a577acdd4ef0115f8e3643a.html#af658998b5a577acdd4ef0115f8e3643a">fl::sfixed_integer&lt;24, 8&gt;</a> large(100000.5f);  <span class="comment">// ±8M range, 1/256 precision</span></div>
 <div class="ttc" id="afixed__point_8h_html"><div class="ttname"><a href="de/d62/fixed__point_8h.html">fixed_point.h</a></div></div>
 <div class="ttc" id="anamespacefl_af658998b5a577acdd4ef0115f8e3643a_html_af658998b5a577acdd4ef0115f8e3643a"><div class="ttname"><a href="d4/d36/namespacefl_af658998b5a577acdd4ef0115f8e3643a.html#af658998b5a577acdd4ef0115f8e3643a">fl::sfixed_integer</a></div><div class="ttdeci">fixed_point&lt; IntBits, FracBits, Sign::SIGNED &gt; sfixed_integer</div><div class="ttdef"><b>Definition</b> <a href="de/d62/fixed__point_8h_source.html#l00450">fixed_point.h:450</a></div></div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md515"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md539"></a>
 Unsigned Fixed-Point Integer</h2>
 <div class="fragment"><div class="line"><span class="comment">// ufixed_integer&lt;IntBits, FracBits&gt;</span></div>
 <div class="line"><span class="comment">// Stores unsigned values (0 and positive only)</span></div>
@@ -190,9 +190,9 @@ Unsigned Fixed-Point Integer</h2>
 <li><b>Total storage</b> = <code>(IntBits + FracBits)</code> rounded up to 8, 16, 32, or 64 bits</li>
 </ul>
 <hr  />
-<h1><a class="anchor" id="autotoc_md517"></a>
+<h1><a class="anchor" id="autotoc_md541"></a>
 Quick Examples (Start Here)</h1>
-<h2><a class="anchor" id="autotoc_md518"></a>
+<h2><a class="anchor" id="autotoc_md542"></a>
 Example 1: Fade LED Brightness</h2>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &quot;<a class="code" href="de/d62/fixed__point_8h.html">fl/math/fixed_point.h</a>&quot;</span></div>
 <div class="line"> </div>
@@ -205,25 +205,26 @@ Example 1: Fade LED Brightness</h2>
 <div class="line"><a class="code hl_typedef" href="d4/d36/namespacefl_a8f164561f6287d9220ff336568cea837.html#a8f164561f6287d9220ff336568cea837">fl::ufixed_integer&lt;8, 8&gt;</a> half = <a class="code hl_typedef" href="d4/d36/namespacefl_a8f164561f6287d9220ff336568cea837.html#a8f164561f6287d9220ff336568cea837">fl::ufixed_integer&lt;8, 8&gt;</a>(0.5f);</div>
 <div class="line"><a class="code hl_typedef" href="d4/d36/namespacefl_a8f164561f6287d9220ff336568cea837.html#a8f164561f6287d9220ff336568cea837">fl::ufixed_integer&lt;8, 8&gt;</a> faded = <a class="code hl_variable" href="d6/d05/_animartrix_8ino_ab0d80715bb4b382856cf250c1eeb9b53.html#ab0d80715bb4b382856cf250c1eeb9b53">brightness</a> * half;</div>
 <div class="line"> </div>
-<div class="line">uint8_t output = faded.<a class="code hl_function" href="da/da0/classfl_1_1fixed__point_ae8f47e061ecae7c57cf1ab20913b826d.html#ae8f47e061ecae7c57cf1ab20913b826d">to_int</a>();  <span class="comment">// Convert back to int: 100</span></div>
+<div class="line"><a class="code hl_typedef" href="df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a> output = faded.<a class="code hl_function" href="da/da0/classfl_1_1fixed__point_ac60521e3482f94873c3cda9500d1d570.html#ac60521e3482f94873c3cda9500d1d570">to_int</a>();  <span class="comment">// Convert back to int: 100</span></div>
 <div class="line"><span class="comment">// ✅ Result: 200 × 0.5 = 100 (fast integer-only math)</span></div>
-<div class="ttc" id="aclassfl_1_1fixed__point_ae8f47e061ecae7c57cf1ab20913b826d_html_ae8f47e061ecae7c57cf1ab20913b826d"><div class="ttname"><a href="da/da0/classfl_1_1fixed__point_ae8f47e061ecae7c57cf1ab20913b826d.html#ae8f47e061ecae7c57cf1ab20913b826d">fl::fixed_point::to_int</a></div><div class="ttdeci">constexpr FASTLED_FORCE_INLINE i32 to_int() const FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="de/d62/fixed__point_8h_source.html#l00211">fixed_point.h:211</a></div></div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md519"></a>
+<div class="ttc" id="aclassfl_1_1fixed__point_ac60521e3482f94873c3cda9500d1d570_html_ac60521e3482f94873c3cda9500d1d570"><div class="ttname"><a href="da/da0/classfl_1_1fixed__point_ac60521e3482f94873c3cda9500d1d570.html#ac60521e3482f94873c3cda9500d1d570">fl::fixed_point::to_int</a></div><div class="ttdeci">constexpr FASTLED_FORCE_INLINE i32 to_int() const FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="de/d62/fixed__point_8h_source.html#l00211">fixed_point.h:211</a></div></div>
+<div class="ttc" id="astdint_8h_aba7bc1797add20fe3efdf37ced1182c5_html_aba7bc1797add20fe3efdf37ced1182c5"><div class="ttname"><a href="df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a></div><div class="ttdeci">unsigned char uint8_t</div><div class="ttdef"><b>Definition</b> <a href="df/dd8/stdint_8h_source.html#l00208">stdint.h:208</a></div></div>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md543"></a>
 Example 2: Smooth Animation</h2>
 <div class="fragment"><div class="line"><span class="comment">// Animate from 0 to 1 with easing</span></div>
 <div class="line"><a class="code hl_typedef" href="d4/d36/namespacefl_af658998b5a577acdd4ef0115f8e3643a.html#af658998b5a577acdd4ef0115f8e3643a">fl::sfixed_integer&lt;16, 16&gt;</a> <a class="code hl_variable" href="dc/db7/examples_2_luminova_2luminova_8h_ae96c939a2a46590dc79c7d9ca8331dfe.html#ae96c939a2a46590dc79c7d9ca8331dfe">t</a>(0.3f);  <span class="comment">// Time: 0.0 to 1.0</span></div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// Smooth step (hermite interpolation)</span></div>
-<div class="line"><span class="keyword">auto</span> eased = <a class="code hl_function" href="d4/d36/namespacefl_a3675944a3c2a0c577c7319d662134d1b.html#a3675944a3c2a0c577c7319d662134d1b">fl::smoothstep</a>(</div>
+<div class="line"><span class="keyword">auto</span> eased = <a class="code hl_function" href="d4/d36/namespacefl_aca1b5358345a40dcc552e41138cfaa11.html#aca1b5358345a40dcc552e41138cfaa11">fl::smoothstep</a>(</div>
 <div class="line">    <a class="code hl_typedef" href="d4/d36/namespacefl_af658998b5a577acdd4ef0115f8e3643a.html#af658998b5a577acdd4ef0115f8e3643a">fl::sfixed_integer&lt;16, 16&gt;</a>(0.0f),</div>
 <div class="line">    <a class="code hl_typedef" href="d4/d36/namespacefl_af658998b5a577acdd4ef0115f8e3643a.html#af658998b5a577acdd4ef0115f8e3643a">fl::sfixed_integer&lt;16, 16&gt;</a>(1.0f),</div>
 <div class="line">    <a class="code hl_variable" href="dc/db7/examples_2_luminova_2luminova_8h_ae96c939a2a46590dc79c7d9ca8331dfe.html#ae96c939a2a46590dc79c7d9ca8331dfe">t</a>);</div>
 <div class="line"> </div>
-<div class="line">uint8_t <a class="code hl_variable" href="da/dc7/advanced_8h_ad7b7eb0b3e04af91bdd64715226c3c68.html#ad7b7eb0b3e04af91bdd64715226c3c68">hue</a> = (eased * 255.0f).to_int();</div>
+<div class="line"><a class="code hl_typedef" href="df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a> <a class="code hl_variable" href="da/dc7/advanced_8h_ad7b7eb0b3e04af91bdd64715226c3c68.html#ad7b7eb0b3e04af91bdd64715226c3c68">hue</a> = (eased * 255.0f).to_int();</div>
 <div class="ttc" id="aadvanced_8h_ad7b7eb0b3e04af91bdd64715226c3c68_html_ad7b7eb0b3e04af91bdd64715226c3c68"><div class="ttname"><a href="da/dc7/advanced_8h_ad7b7eb0b3e04af91bdd64715226c3c68.html#ad7b7eb0b3e04af91bdd64715226c3c68">hue</a></div><div class="ttdeci">uint8_t hue</div><div class="ttdef"><b>Definition</b> <a href="da/dc7/advanced_8h_source.html#l00094">advanced.h:94</a></div></div>
 <div class="ttc" id="aexamples_2_luminova_2luminova_8h_ae96c939a2a46590dc79c7d9ca8331dfe_html_ae96c939a2a46590dc79c7d9ca8331dfe"><div class="ttname"><a href="dc/db7/examples_2_luminova_2luminova_8h_ae96c939a2a46590dc79c7d9ca8331dfe.html#ae96c939a2a46590dc79c7d9ca8331dfe">t</a></div><div class="ttdeci">static uint32_t t</div><div class="ttdef"><b>Definition</b> <a href="dc/db7/examples_2_luminova_2luminova_8h_source.html#l00055">Luminova.h:55</a></div></div>
-<div class="ttc" id="anamespacefl_a3675944a3c2a0c577c7319d662134d1b_html_a3675944a3c2a0c577c7319d662134d1b"><div class="ttname"><a href="d4/d36/namespacefl_a3675944a3c2a0c577c7319d662134d1b.html#a3675944a3c2a0c577c7319d662134d1b">fl::smoothstep</a></div><div class="ttdeci">enable_if&lt; is_fixed_point&lt; T &gt;::value, T &gt;::type smoothstep(T edge0, T edge1, T x) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="de/d62/fixed__point_8h_source.html#l00552">fixed_point.h:552</a></div></div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md520"></a>
+<div class="ttc" id="anamespacefl_aca1b5358345a40dcc552e41138cfaa11_html_aca1b5358345a40dcc552e41138cfaa11"><div class="ttname"><a href="d4/d36/namespacefl_aca1b5358345a40dcc552e41138cfaa11.html#aca1b5358345a40dcc552e41138cfaa11">fl::smoothstep</a></div><div class="ttdeci">enable_if&lt; is_fixed_point&lt; T &gt;::value, T &gt;::type smoothstep(T edge0, T edge1, T x) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="de/d62/fixed__point_8h_source.html#l00552">fixed_point.h:552</a></div></div>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md544"></a>
 Example 3: Rotate a Point</h2>
 <div class="fragment"><div class="line"><span class="keyword">struct </span>Point {</div>
 <div class="line">    <a class="code hl_typedef" href="d4/d36/namespacefl_af658998b5a577acdd4ef0115f8e3643a.html#af658998b5a577acdd4ef0115f8e3643a">fl::sfixed_integer&lt;16, 16&gt;</a> <a class="code hl_variable" href="db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>, <a class="code hl_variable" href="db/d49/_audio_2simple_2simple_8h_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a>;</div>
@@ -231,7 +232,7 @@ Example 3: Rotate a Point</h2>
 <div class="line"> </div>
 <div class="line">Point <a class="code hl_function" href="d3/d8b/_parallel___i_o_8ino_a6d4ae9ba50f9cb29cd6e9dbc1ede55ad.html#a6d4ae9ba50f9cb29cd6e9dbc1ede55ad">rotate</a>(<span class="keyword">const</span> Point&amp; p, <a class="code hl_typedef" href="d4/d36/namespacefl_af658998b5a577acdd4ef0115f8e3643a.html#af658998b5a577acdd4ef0115f8e3643a">fl::sfixed_integer&lt;16, 16&gt;</a> angle) {</div>
 <div class="line">    <a class="code hl_typedef" href="d4/d36/namespacefl_af658998b5a577acdd4ef0115f8e3643a.html#af658998b5a577acdd4ef0115f8e3643a">fl::sfixed_integer&lt;16, 16&gt;</a> sin_a, cos_a;</div>
-<div class="line">    <a class="code hl_function" href="d4/d36/namespacefl_a3ca54b704b8f16ccd5392c4f8190f2fc.html#a3ca54b704b8f16ccd5392c4f8190f2fc">fl::sincos</a>(angle, sin_a, cos_a);</div>
+<div class="line">    <a class="code hl_function" href="d4/d36/namespacefl_a8736d9eb2af15deb2e1667b0e3982cfd.html#a8736d9eb2af15deb2e1667b0e3982cfd">fl::sincos</a>(angle, sin_a, cos_a);</div>
 <div class="line"> </div>
 <div class="line">    <span class="keywordflow">return</span> {</div>
 <div class="line">        p.x * cos_a - p.y * sin_a,</div>
@@ -241,8 +242,8 @@ Example 3: Rotate a Point</h2>
 <div class="ttc" id="a_audio_2simple_2simple_8h_a0a2f84ed7838f07779ae24c5a9086d33_html_a0a2f84ed7838f07779ae24c5a9086d33"><div class="ttname"><a href="db/d49/_audio_2simple_2simple_8h_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a></div><div class="ttdeci">int y</div><div class="ttdef"><b>Definition</b> <a href="db/d49/_audio_2simple_2simple_8h_source.html#l00093">simple.h:93</a></div></div>
 <div class="ttc" id="a_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc_html_a6150e0515f7202e2fb518f7206ed97dc"><div class="ttname"><a href="db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a></div><div class="ttdeci">int x</div><div class="ttdef"><b>Definition</b> <a href="db/d49/_audio_2simple_2simple_8h_source.html#l00092">simple.h:92</a></div></div>
 <div class="ttc" id="a_parallel___i_o_8ino_a6d4ae9ba50f9cb29cd6e9dbc1ede55ad_html_a6d4ae9ba50f9cb29cd6e9dbc1ede55ad"><div class="ttname"><a href="d3/d8b/_parallel___i_o_8ino_a6d4ae9ba50f9cb29cd6e9dbc1ede55ad.html#a6d4ae9ba50f9cb29cd6e9dbc1ede55ad">rotate</a></div><div class="ttdeci">void rotate(CRGB *array, int length, uint8_t amount)</div><div class="ttdoc">Helper: Rotate array elements.</div><div class="ttdef"><b>Definition</b> <a href="d3/d8b/_parallel___i_o_8ino_source.html#l00164">Parallel_IO.ino:164</a></div></div>
-<div class="ttc" id="anamespacefl_a3ca54b704b8f16ccd5392c4f8190f2fc_html_a3ca54b704b8f16ccd5392c4f8190f2fc"><div class="ttname"><a href="d4/d36/namespacefl_a3ca54b704b8f16ccd5392c4f8190f2fc.html#a3ca54b704b8f16ccd5392c4f8190f2fc">fl::sincos</a></div><div class="ttdeci">enable_if&lt; is_fixed_point&lt; T &gt;::value, void &gt;::type sincos(T angle, T &amp;out_sin, T &amp;out_cos) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="de/d62/fixed__point_8h_source.html#l00589">fixed_point.h:589</a></div></div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md521"></a>
+<div class="ttc" id="anamespacefl_a8736d9eb2af15deb2e1667b0e3982cfd_html_a8736d9eb2af15deb2e1667b0e3982cfd"><div class="ttname"><a href="d4/d36/namespacefl_a8736d9eb2af15deb2e1667b0e3982cfd.html#a8736d9eb2af15deb2e1667b0e3982cfd">fl::sincos</a></div><div class="ttdeci">enable_if&lt; is_fixed_point&lt; T &gt;::value, void &gt;::type sincos(T angle, T &amp;out_sin, T &amp;out_cos) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="de/d62/fixed__point_8h_source.html#l00589">fixed_point.h:589</a></div></div>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md545"></a>
 Example 4: Perlin Noise (Animartrix)</h2>
 <div class="fragment"><div class="line"><span class="comment">// Used in 2D effects</span></div>
 <div class="line"><a class="code hl_typedef" href="d4/d36/namespacefl_af658998b5a577acdd4ef0115f8e3643a.html#af658998b5a577acdd4ef0115f8e3643a">fl::sfixed_integer&lt;16, 16&gt;</a> <a class="code hl_variable" href="db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>(0.5f);</div>
@@ -251,9 +252,9 @@ Example 4: Perlin Noise (Animartrix)</h2>
 <div class="line"><span class="comment">// Noise returns [-1, 1]</span></div>
 <div class="line"><span class="keyword">auto</span> pattern = perlin_s16x16::pnoise2d(<a class="code hl_variable" href="db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>, <a class="code hl_variable" href="db/d49/_audio_2simple_2simple_8h_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a>, ...);</div>
 <div class="line"> </div>
-<div class="line">uint8_t led = ((pattern + 1.0f) * 128.0f).to_int();</div>
+<div class="line"><a class="code hl_typedef" href="df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a> led = ((pattern + 1.0f) * 128.0f).to_int();</div>
 </div><!-- fragment --><hr  />
-<h1><a class="anchor" id="autotoc_md523"></a>
+<h1><a class="anchor" id="autotoc_md547"></a>
 Understanding Range vs Precision (Key Concept)</h1>
 <p>Fixed-point forces a <b>trade-off</b>: You have a fixed number of bits (typically 32 or 64). You split them between integer and fractional parts. More bits for integers = larger range but coarser precision.</p>
 <p><b>Visual example (32-bit fixed-point):</b></p>
@@ -275,15 +276,15 @@ Understanding Range vs Precision (Key Concept)</h1>
 </ul>
 <p><b>Rarely need to think about this</b> — <code>s16x16</code> handles angles, brightness, coordinates, and most animation parameters just fine.</p>
 <hr  />
-<h1><a class="anchor" id="autotoc_md525"></a>
+<h1><a class="anchor" id="autotoc_md549"></a>
 Creating and Converting Values</h1>
-<h2><a class="anchor" id="autotoc_md526"></a>
+<h2><a class="anchor" id="autotoc_md550"></a>
 From Floats (Most Common)</h2>
 <div class="fragment"><div class="line"><span class="comment">// Initialize from float — compiler does the scaling automatically</span></div>
 <div class="line"><a class="code hl_typedef" href="d4/d36/namespacefl_af658998b5a577acdd4ef0115f8e3643a.html#af658998b5a577acdd4ef0115f8e3643a">fl::sfixed_integer&lt;16, 16&gt;</a> angle(3.14159f);      <span class="comment">// 3.14159</span></div>
 <div class="line"><a class="code hl_typedef" href="d4/d36/namespacefl_a8f164561f6287d9220ff336568cea837.html#a8f164561f6287d9220ff336568cea837">fl::ufixed_integer&lt;8, 8&gt;</a> <a class="code hl_variable" href="d6/d05/_animartrix_8ino_ab0d80715bb4b382856cf250c1eeb9b53.html#ab0d80715bb4b382856cf250c1eeb9b53">brightness</a>(200.0f);     <span class="comment">// 200.0</span></div>
 <div class="line"><a class="code hl_typedef" href="d4/d36/namespacefl_af658998b5a577acdd4ef0115f8e3643a.html#af658998b5a577acdd4ef0115f8e3643a">fl::sfixed_integer&lt;8, 24&gt;</a> precise(0.1f);         <span class="comment">// 0.1 (high precision)</span></div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md527"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md551"></a>
 Converting Back</h2>
 <div class="fragment"><div class="line"><span class="keyword">auto</span> value = <a class="code hl_typedef" href="d4/d36/namespacefl_af658998b5a577acdd4ef0115f8e3643a.html#af658998b5a577acdd4ef0115f8e3643a">fl::sfixed_integer&lt;16, 16&gt;</a>(1.5f);</div>
 <div class="line"> </div>
@@ -291,13 +292,13 @@ Converting Back</h2>
 <div class="line"><span class="keywordtype">int</span> i = value.to_int();           <span class="comment">// → 1 (truncated, loses 0.5)</span></div>
 <div class="line"><span class="keyword">auto</span> raw = value.raw();           <span class="comment">// → 98304 (internal scaled integer)</span></div>
 <div class="line">                                  <span class="comment">//   (1.5 × 65536)</span></div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md528"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md552"></a>
 From Raw Values (Advanced/Rare)</h2>
 <div class="fragment"><div class="line"><span class="comment">// If you need to pack/unpack binary data:</span></div>
-<div class="line"><span class="keyword">auto</span> value = <a class="code hl_function" href="da/da0/classfl_1_1fixed__point_a6411ab4d7ef62d6ae1a3ceeec6b0c059.html#a6411ab4d7ef62d6ae1a3ceeec6b0c059">fl::sfixed_integer&lt;16, 16&gt;::from_raw</a>(0x10000);  <span class="comment">// 1.0</span></div>
+<div class="line"><span class="keyword">auto</span> value = <a class="code hl_function" href="da/da0/classfl_1_1fixed__point_a8cce962867779eae2e4c7eaa0a27144e.html#a8cce962867779eae2e4c7eaa0a27144e">fl::sfixed_integer&lt;16, 16&gt;::from_raw</a>(0x10000);  <span class="comment">// 1.0</span></div>
 <div class="line"><span class="comment">// 0x10000 (65,536) = 1.0 in s16x16 because 2^16 is the scale</span></div>
-<div class="ttc" id="aclassfl_1_1fixed__point_a6411ab4d7ef62d6ae1a3ceeec6b0c059_html_a6411ab4d7ef62d6ae1a3ceeec6b0c059"><div class="ttname"><a href="da/da0/classfl_1_1fixed__point_a6411ab4d7ef62d6ae1a3ceeec6b0c059.html#a6411ab4d7ef62d6ae1a3ceeec6b0c059">fl::fixed_point&lt; IntBits, FracBits, Sign::SIGNED &gt;::from_raw</a></div><div class="ttdeci">static constexpr FASTLED_FORCE_INLINE fixed_point from_raw(RawType raw) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="de/d62/fixed__point_8h_source.html#l00197">fixed_point.h:197</a></div></div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md529"></a>
+<div class="ttc" id="aclassfl_1_1fixed__point_a8cce962867779eae2e4c7eaa0a27144e_html_a8cce962867779eae2e4c7eaa0a27144e"><div class="ttname"><a href="da/da0/classfl_1_1fixed__point_a8cce962867779eae2e4c7eaa0a27144e.html#a8cce962867779eae2e4c7eaa0a27144e">fl::fixed_point&lt; IntBits, FracBits, Sign::SIGNED &gt;::from_raw</a></div><div class="ttdeci">static constexpr FASTLED_FORCE_INLINE fixed_point from_raw(RawType raw) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="de/d62/fixed__point_8h_source.html#l00197">fixed_point.h:197</a></div></div>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md553"></a>
 Auto-Promotion (Smaller → Larger, Automatic)</h2>
 <div class="fragment"><div class="line"><a class="code hl_typedef" href="d4/d36/namespacefl_a8f164561f6287d9220ff336568cea837.html#a8f164561f6287d9220ff336568cea837">fl::ufixed_integer&lt;8, 8&gt;</a> small(1.5f);       <span class="comment">// 8+8 = 16 bits</span></div>
 <div class="line"><a class="code hl_typedef" href="d4/d36/namespacefl_a8f164561f6287d9220ff336568cea837.html#a8f164561f6287d9220ff336568cea837">fl::ufixed_integer&lt;16, 16&gt;</a> large = small;   <span class="comment">// ✅ Auto-promotes!</span></div>
@@ -309,66 +310,66 @@ Auto-Promotion (Smaller → Larger, Automatic)</h2>
 <div class="line"><span class="comment">// ❌ u8x8 → s16x16  (sign mismatch: unsigned → signed)</span></div>
 <div class="line"><span class="comment">// ❌ s16x16 → s8x24 (int bits shrink: 16 → 8)</span></div>
 </div><!-- fragment --><hr  />
-<h1><a class="anchor" id="autotoc_md531"></a>
+<h1><a class="anchor" id="autotoc_md555"></a>
 Math API: Free-Function Style (Like std::cmath)</h1>
-<h2><a class="anchor" id="autotoc_md532"></a>
+<h2><a class="anchor" id="autotoc_md556"></a>
 Rounding &amp; Decomposition</h2>
 <div class="fragment"><div class="line"><span class="keyword">auto</span> <a class="code hl_variable" href="db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a> = <a class="code hl_typedef" href="d4/d36/namespacefl_af658998b5a577acdd4ef0115f8e3643a.html#af658998b5a577acdd4ef0115f8e3643a">fl::sfixed_integer&lt;16, 16&gt;</a>(2.7f);</div>
 <div class="line"> </div>
-<div class="line"><a class="code hl_function" href="d4/d36/namespacefl_a4b1911051ff514cded442be8dfa5cc2b.html#a4b1911051ff514cded442be8dfa5cc2b">fl::floor</a>(<a class="code hl_variable" href="db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>);   <span class="comment">// 2.0</span></div>
-<div class="line"><a class="code hl_function" href="d4/d36/namespacefl_a3147d73d9121eec8710b892112eda203.html#a3147d73d9121eec8710b892112eda203">fl::ceil</a>(<a class="code hl_variable" href="db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>);    <span class="comment">// 3.0</span></div>
-<div class="line"><a class="code hl_function" href="d4/d36/namespacefl_a4bf8681b8fe6ca3b6a9b792d0ec97634.html#a4bf8681b8fe6ca3b6a9b792d0ec97634">fl::fract</a>(<a class="code hl_variable" href="db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>);   <span class="comment">// 0.7</span></div>
-<div class="line"><a class="code hl_function" href="d4/d36/namespacefl_aefed87cfefc8330419d3393867945e84.html#aefed87cfefc8330419d3393867945e84">fl::abs</a>(<a class="code hl_variable" href="db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>);     <span class="comment">// Absolute value</span></div>
-<div class="ttc" id="anamespacefl_a3147d73d9121eec8710b892112eda203_html_a3147d73d9121eec8710b892112eda203"><div class="ttname"><a href="d4/d36/namespacefl_a3147d73d9121eec8710b892112eda203.html#a3147d73d9121eec8710b892112eda203">fl::ceil</a></div><div class="ttdeci">constexpr enable_if&lt; is_fixed_point&lt; T &gt;::value, T &gt;::type ceil(T x) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="de/d62/fixed__point_8h_source.html#l00508">fixed_point.h:508</a></div></div>
-<div class="ttc" id="anamespacefl_a4b1911051ff514cded442be8dfa5cc2b_html_a4b1911051ff514cded442be8dfa5cc2b"><div class="ttname"><a href="d4/d36/namespacefl_a4b1911051ff514cded442be8dfa5cc2b.html#a4b1911051ff514cded442be8dfa5cc2b">fl::floor</a></div><div class="ttdeci">constexpr enable_if&lt; is_fixed_point&lt; T &gt;::value, T &gt;::type floor(T x) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="de/d62/fixed__point_8h_source.html#l00503">fixed_point.h:503</a></div></div>
-<div class="ttc" id="anamespacefl_a4bf8681b8fe6ca3b6a9b792d0ec97634_html_a4bf8681b8fe6ca3b6a9b792d0ec97634"><div class="ttname"><a href="d4/d36/namespacefl_a4bf8681b8fe6ca3b6a9b792d0ec97634.html#a4bf8681b8fe6ca3b6a9b792d0ec97634">fl::fract</a></div><div class="ttdeci">constexpr enable_if&lt; is_fixed_point&lt; T &gt;::value, T &gt;::type fract(T x) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="de/d62/fixed__point_8h_source.html#l00513">fixed_point.h:513</a></div></div>
-<div class="ttc" id="anamespacefl_aefed87cfefc8330419d3393867945e84_html_aefed87cfefc8330419d3393867945e84"><div class="ttname"><a href="d4/d36/namespacefl_aefed87cfefc8330419d3393867945e84.html#aefed87cfefc8330419d3393867945e84">fl::abs</a></div><div class="ttdeci">constexpr enable_if&lt; is_fixed_point&lt; T &gt;::value, T &gt;::type abs(T x) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="de/d62/fixed__point_8h_source.html#l00525">fixed_point.h:525</a></div></div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md533"></a>
+<div class="line"><a class="code hl_function" href="d4/d36/namespacefl_afc0b481c5e1581a1b21e988c119f8a86.html#afc0b481c5e1581a1b21e988c119f8a86">fl::floor</a>(<a class="code hl_variable" href="db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>);   <span class="comment">// 2.0</span></div>
+<div class="line"><a class="code hl_function" href="d4/d36/namespacefl_a4f76bde8d17a25790ec3382f979786c9.html#a4f76bde8d17a25790ec3382f979786c9">fl::ceil</a>(<a class="code hl_variable" href="db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>);    <span class="comment">// 3.0</span></div>
+<div class="line"><a class="code hl_function" href="d4/d36/namespacefl_a34ec1a3fec70639de9a12dbf87d8c26a.html#a34ec1a3fec70639de9a12dbf87d8c26a">fl::fract</a>(<a class="code hl_variable" href="db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>);   <span class="comment">// 0.7</span></div>
+<div class="line"><a class="code hl_function" href="d4/d36/namespacefl_aea39aa3747a937b0dbefabdf22cf2bbc.html#aea39aa3747a937b0dbefabdf22cf2bbc">fl::abs</a>(<a class="code hl_variable" href="db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>);     <span class="comment">// Absolute value</span></div>
+<div class="ttc" id="anamespacefl_a34ec1a3fec70639de9a12dbf87d8c26a_html_a34ec1a3fec70639de9a12dbf87d8c26a"><div class="ttname"><a href="d4/d36/namespacefl_a34ec1a3fec70639de9a12dbf87d8c26a.html#a34ec1a3fec70639de9a12dbf87d8c26a">fl::fract</a></div><div class="ttdeci">constexpr enable_if&lt; is_fixed_point&lt; T &gt;::value, T &gt;::type fract(T x) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="de/d62/fixed__point_8h_source.html#l00513">fixed_point.h:513</a></div></div>
+<div class="ttc" id="anamespacefl_a4f76bde8d17a25790ec3382f979786c9_html_a4f76bde8d17a25790ec3382f979786c9"><div class="ttname"><a href="d4/d36/namespacefl_a4f76bde8d17a25790ec3382f979786c9.html#a4f76bde8d17a25790ec3382f979786c9">fl::ceil</a></div><div class="ttdeci">constexpr enable_if&lt; is_fixed_point&lt; T &gt;::value, T &gt;::type ceil(T x) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="de/d62/fixed__point_8h_source.html#l00508">fixed_point.h:508</a></div></div>
+<div class="ttc" id="anamespacefl_aea39aa3747a937b0dbefabdf22cf2bbc_html_aea39aa3747a937b0dbefabdf22cf2bbc"><div class="ttname"><a href="d4/d36/namespacefl_aea39aa3747a937b0dbefabdf22cf2bbc.html#aea39aa3747a937b0dbefabdf22cf2bbc">fl::abs</a></div><div class="ttdeci">constexpr enable_if&lt; is_fixed_point&lt; T &gt;::value, T &gt;::type abs(T x) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="de/d62/fixed__point_8h_source.html#l00525">fixed_point.h:525</a></div></div>
+<div class="ttc" id="anamespacefl_afc0b481c5e1581a1b21e988c119f8a86_html_afc0b481c5e1581a1b21e988c119f8a86"><div class="ttname"><a href="d4/d36/namespacefl_afc0b481c5e1581a1b21e988c119f8a86.html#afc0b481c5e1581a1b21e988c119f8a86">fl::floor</a></div><div class="ttdeci">constexpr enable_if&lt; is_fixed_point&lt; T &gt;::value, T &gt;::type floor(T x) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="de/d62/fixed__point_8h_source.html#l00503">fixed_point.h:503</a></div></div>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md557"></a>
 Interpolation &amp; Clamping</h2>
 <div class="fragment"><div class="line"><span class="keyword">auto</span> a = <a class="code hl_typedef" href="d4/d36/namespacefl_af658998b5a577acdd4ef0115f8e3643a.html#af658998b5a577acdd4ef0115f8e3643a">fl::sfixed_integer&lt;16, 16&gt;</a>(0.0f);</div>
 <div class="line"><span class="keyword">auto</span> b = <a class="code hl_typedef" href="d4/d36/namespacefl_af658998b5a577acdd4ef0115f8e3643a.html#af658998b5a577acdd4ef0115f8e3643a">fl::sfixed_integer&lt;16, 16&gt;</a>(10.0f);</div>
 <div class="line"><span class="keyword">auto</span> <a class="code hl_variable" href="dc/db7/examples_2_luminova_2luminova_8h_ae96c939a2a46590dc79c7d9ca8331dfe.html#ae96c939a2a46590dc79c7d9ca8331dfe">t</a> = <a class="code hl_typedef" href="d4/d36/namespacefl_af658998b5a577acdd4ef0115f8e3643a.html#af658998b5a577acdd4ef0115f8e3643a">fl::sfixed_integer&lt;16, 16&gt;</a>(0.3f);</div>
 <div class="line"> </div>
 <div class="line"><a class="code hl_function" href="d4/d36/namespacefl_afedf8c141bccc0f156238153a61fbb9f.html#afedf8c141bccc0f156238153a61fbb9f">fl::lerp</a>(a, b, <a class="code hl_variable" href="dc/db7/examples_2_luminova_2luminova_8h_ae96c939a2a46590dc79c7d9ca8331dfe.html#ae96c939a2a46590dc79c7d9ca8331dfe">t</a>);           <span class="comment">// Linear interpolation: 3.0</span></div>
-<div class="line"><a class="code hl_function" href="d4/d36/namespacefl_afb42d6eb6443afc7223ce9b1a812f350.html#afb42d6eb6443afc7223ce9b1a812f350">fl::clamp</a>(<a class="code hl_typedef" href="d4/d36/namespacefl_af658998b5a577acdd4ef0115f8e3643a.html#af658998b5a577acdd4ef0115f8e3643a">fl::sfixed_integer&lt;16, 16&gt;</a>(15.0f), a, b);  <span class="comment">// → 10.0</span></div>
-<div class="line"><a class="code hl_function" href="d4/d36/namespacefl_a3675944a3c2a0c577c7319d662134d1b.html#a3675944a3c2a0c577c7319d662134d1b">fl::smoothstep</a>(a, b, <a class="code hl_variable" href="dc/db7/examples_2_luminova_2luminova_8h_ae96c939a2a46590dc79c7d9ca8331dfe.html#ae96c939a2a46590dc79c7d9ca8331dfe">t</a>);     <span class="comment">// Smooth: 0→1</span></div>
-<div class="line"><a class="code hl_function" href="d4/d36/namespacefl_aa6f747fb354cae784bdd4c656cbdd9fb.html#aa6f747fb354cae784bdd4c656cbdd9fb">fl::step</a>(a, <a class="code hl_variable" href="dc/db7/examples_2_luminova_2luminova_8h_ae96c939a2a46590dc79c7d9ca8331dfe.html#ae96c939a2a46590dc79c7d9ca8331dfe">t</a>);              <span class="comment">// Step function</span></div>
-<div class="ttc" id="anamespacefl_aa6f747fb354cae784bdd4c656cbdd9fb_html_aa6f747fb354cae784bdd4c656cbdd9fb"><div class="ttname"><a href="d4/d36/namespacefl_aa6f747fb354cae784bdd4c656cbdd9fb.html#aa6f747fb354cae784bdd4c656cbdd9fb">fl::step</a></div><div class="ttdeci">constexpr enable_if&lt; is_fixed_point&lt; T &gt;::value, T &gt;::type step(T edge, T x) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="de/d62/fixed__point_8h_source.html#l00547">fixed_point.h:547</a></div></div>
-<div class="ttc" id="anamespacefl_afb42d6eb6443afc7223ce9b1a812f350_html_afb42d6eb6443afc7223ce9b1a812f350"><div class="ttname"><a href="d4/d36/namespacefl_afb42d6eb6443afc7223ce9b1a812f350.html#afb42d6eb6443afc7223ce9b1a812f350">fl::clamp</a></div><div class="ttdeci">constexpr enable_if&lt; is_fixed_point&lt; T &gt;::value, T &gt;::type clamp(T x, T lo, T hi) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="de/d62/fixed__point_8h_source.html#l00542">fixed_point.h:542</a></div></div>
+<div class="line"><a class="code hl_function" href="d4/d36/namespacefl_a391721290a9307391d39a0a897d9b9f4.html#a391721290a9307391d39a0a897d9b9f4">fl::clamp</a>(<a class="code hl_typedef" href="d4/d36/namespacefl_af658998b5a577acdd4ef0115f8e3643a.html#af658998b5a577acdd4ef0115f8e3643a">fl::sfixed_integer&lt;16, 16&gt;</a>(15.0f), a, b);  <span class="comment">// → 10.0</span></div>
+<div class="line"><a class="code hl_function" href="d4/d36/namespacefl_aca1b5358345a40dcc552e41138cfaa11.html#aca1b5358345a40dcc552e41138cfaa11">fl::smoothstep</a>(a, b, <a class="code hl_variable" href="dc/db7/examples_2_luminova_2luminova_8h_ae96c939a2a46590dc79c7d9ca8331dfe.html#ae96c939a2a46590dc79c7d9ca8331dfe">t</a>);     <span class="comment">// Smooth: 0→1</span></div>
+<div class="line"><a class="code hl_function" href="d4/d36/namespacefl_aa0b8d08b9903ece3fb5f220333b9e785.html#aa0b8d08b9903ece3fb5f220333b9e785">fl::step</a>(a, <a class="code hl_variable" href="dc/db7/examples_2_luminova_2luminova_8h_ae96c939a2a46590dc79c7d9ca8331dfe.html#ae96c939a2a46590dc79c7d9ca8331dfe">t</a>);              <span class="comment">// Step function</span></div>
+<div class="ttc" id="anamespacefl_a391721290a9307391d39a0a897d9b9f4_html_a391721290a9307391d39a0a897d9b9f4"><div class="ttname"><a href="d4/d36/namespacefl_a391721290a9307391d39a0a897d9b9f4.html#a391721290a9307391d39a0a897d9b9f4">fl::clamp</a></div><div class="ttdeci">constexpr enable_if&lt; is_fixed_point&lt; T &gt;::value, T &gt;::type clamp(T x, T lo, T hi) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="de/d62/fixed__point_8h_source.html#l00542">fixed_point.h:542</a></div></div>
+<div class="ttc" id="anamespacefl_aa0b8d08b9903ece3fb5f220333b9e785_html_aa0b8d08b9903ece3fb5f220333b9e785"><div class="ttname"><a href="d4/d36/namespacefl_aa0b8d08b9903ece3fb5f220333b9e785.html#aa0b8d08b9903ece3fb5f220333b9e785">fl::step</a></div><div class="ttdeci">constexpr enable_if&lt; is_fixed_point&lt; T &gt;::value, T &gt;::type step(T edge, T x) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="de/d62/fixed__point_8h_source.html#l00547">fixed_point.h:547</a></div></div>
 <div class="ttc" id="anamespacefl_afedf8c141bccc0f156238153a61fbb9f_html_afedf8c141bccc0f156238153a61fbb9f"><div class="ttname"><a href="d4/d36/namespacefl_afedf8c141bccc0f156238153a61fbb9f.html#afedf8c141bccc0f156238153a61fbb9f">fl::lerp</a></div><div class="ttdeci">FASTLED_FORCE_INLINE float lerp(float t, float a, float b)</div><div class="ttdef"><b>Definition</b> <a href="dc/df6/perlin__float_8h_source.html#l00050">perlin_float.h:50</a></div></div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md534"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md558"></a>
 Trigonometry (Ultra-Fast Lookup Tables)</h2>
 <div class="fragment"><div class="line"><span class="keyword">auto</span> angle = <a class="code hl_typedef" href="d4/d36/namespacefl_af658998b5a577acdd4ef0115f8e3643a.html#af658998b5a577acdd4ef0115f8e3643a">fl::sfixed_integer&lt;16, 16&gt;</a>(1.5708f);  <span class="comment">// π/2</span></div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// **Use sincos() instead of separate calls (30% faster)**</span></div>
 <div class="line"><span class="keyword">auto</span> sin_val = <a class="code hl_typedef" href="d4/d36/namespacefl_af658998b5a577acdd4ef0115f8e3643a.html#af658998b5a577acdd4ef0115f8e3643a">fl::sfixed_integer&lt;16, 16&gt;</a>(0.0f);</div>
 <div class="line"><span class="keyword">auto</span> cos_val = <a class="code hl_typedef" href="d4/d36/namespacefl_af658998b5a577acdd4ef0115f8e3643a.html#af658998b5a577acdd4ef0115f8e3643a">fl::sfixed_integer&lt;16, 16&gt;</a>(0.0f);</div>
-<div class="line"><a class="code hl_function" href="d4/d36/namespacefl_a3ca54b704b8f16ccd5392c4f8190f2fc.html#a3ca54b704b8f16ccd5392c4f8190f2fc">fl::sincos</a>(angle, sin_val, cos_val);</div>
+<div class="line"><a class="code hl_function" href="d4/d36/namespacefl_a8736d9eb2af15deb2e1667b0e3982cfd.html#a8736d9eb2af15deb2e1667b0e3982cfd">fl::sincos</a>(angle, sin_val, cos_val);</div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// Individual functions</span></div>
-<div class="line"><a class="code hl_function" href="d4/d36/namespacefl_abc07da8d8983da7016b55f7626e9c060.html#abc07da8d8983da7016b55f7626e9c060">fl::sin</a>(angle);      <span class="comment">// ~1.0</span></div>
-<div class="line"><a class="code hl_function" href="d4/d36/namespacefl_a9cda2472ab9bd68df745496533aa76e7.html#a9cda2472ab9bd68df745496533aa76e7">fl::cos</a>(angle);      <span class="comment">// ~0.0</span></div>
-<div class="line"><a class="code hl_function" href="d4/d36/namespacefl_af8da80a23f723ca01cc5102e6e362dce.html#af8da80a23f723ca01cc5102e6e362dce">fl::atan</a>(0.7f);</div>
-<div class="line"><a class="code hl_function" href="d4/d36/namespacefl_a1585dc027c4a40e3ff6fd47e878fde64.html#a1585dc027c4a40e3ff6fd47e878fde64">fl::atan2</a>(1.0f, 0.7f);  <span class="comment">// Angle from (x, y)</span></div>
-<div class="line"><a class="code hl_function" href="d4/d36/namespacefl_ad35f40484be56f5afb1c38dd5c80bd8a.html#ad35f40484be56f5afb1c38dd5c80bd8a">fl::asin</a>(0.7f);</div>
-<div class="line"><a class="code hl_function" href="d4/d36/namespacefl_a75cef545150868251ff8fc8a1f7e36c6.html#a75cef545150868251ff8fc8a1f7e36c6">fl::acos</a>(0.7f);</div>
-<div class="ttc" id="anamespacefl_a1585dc027c4a40e3ff6fd47e878fde64_html_a1585dc027c4a40e3ff6fd47e878fde64"><div class="ttname"><a href="d4/d36/namespacefl_a1585dc027c4a40e3ff6fd47e878fde64.html#a1585dc027c4a40e3ff6fd47e878fde64">fl::atan2</a></div><div class="ttdeci">enable_if&lt; is_fixed_point&lt; T &gt;::value, T &gt;::type atan2(T y, T x) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="de/d62/fixed__point_8h_source.html#l00599">fixed_point.h:599</a></div></div>
-<div class="ttc" id="anamespacefl_a75cef545150868251ff8fc8a1f7e36c6_html_a75cef545150868251ff8fc8a1f7e36c6"><div class="ttname"><a href="d4/d36/namespacefl_a75cef545150868251ff8fc8a1f7e36c6.html#a75cef545150868251ff8fc8a1f7e36c6">fl::acos</a></div><div class="ttdeci">enable_if&lt; is_fixed_point&lt; T &gt;::value, T &gt;::type acos(T x) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="de/d62/fixed__point_8h_source.html#l00609">fixed_point.h:609</a></div></div>
-<div class="ttc" id="anamespacefl_a9cda2472ab9bd68df745496533aa76e7_html_a9cda2472ab9bd68df745496533aa76e7"><div class="ttname"><a href="d4/d36/namespacefl_a9cda2472ab9bd68df745496533aa76e7.html#a9cda2472ab9bd68df745496533aa76e7">fl::cos</a></div><div class="ttdeci">enable_if&lt; is_fixed_point&lt; T &gt;::value, T &gt;::type cos(T angle) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="de/d62/fixed__point_8h_source.html#l00582">fixed_point.h:582</a></div></div>
-<div class="ttc" id="anamespacefl_abc07da8d8983da7016b55f7626e9c060_html_abc07da8d8983da7016b55f7626e9c060"><div class="ttname"><a href="d4/d36/namespacefl_abc07da8d8983da7016b55f7626e9c060.html#abc07da8d8983da7016b55f7626e9c060">fl::sin</a></div><div class="ttdeci">enable_if&lt; is_fixed_point&lt; T &gt;::value, T &gt;::type sin(T angle) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="de/d62/fixed__point_8h_source.html#l00577">fixed_point.h:577</a></div></div>
-<div class="ttc" id="anamespacefl_ad35f40484be56f5afb1c38dd5c80bd8a_html_ad35f40484be56f5afb1c38dd5c80bd8a"><div class="ttname"><a href="d4/d36/namespacefl_ad35f40484be56f5afb1c38dd5c80bd8a.html#ad35f40484be56f5afb1c38dd5c80bd8a">fl::asin</a></div><div class="ttdeci">enable_if&lt; is_fixed_point&lt; T &gt;::value, T &gt;::type asin(T x) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="de/d62/fixed__point_8h_source.html#l00604">fixed_point.h:604</a></div></div>
-<div class="ttc" id="anamespacefl_af8da80a23f723ca01cc5102e6e362dce_html_af8da80a23f723ca01cc5102e6e362dce"><div class="ttname"><a href="d4/d36/namespacefl_af8da80a23f723ca01cc5102e6e362dce.html#af8da80a23f723ca01cc5102e6e362dce">fl::atan</a></div><div class="ttdeci">enable_if&lt; is_fixed_point&lt; T &gt;::value, T &gt;::type atan(T x) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="de/d62/fixed__point_8h_source.html#l00594">fixed_point.h:594</a></div></div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md535"></a>
+<div class="line"><a class="code hl_function" href="d4/d36/namespacefl_a080e32a9d5b39b1674c35757eaa2daf9.html#a080e32a9d5b39b1674c35757eaa2daf9">fl::sin</a>(angle);      <span class="comment">// ~1.0</span></div>
+<div class="line"><a class="code hl_function" href="d4/d36/namespacefl_a2bda17f9c7e7ed8cc89536cfd39f35e2.html#a2bda17f9c7e7ed8cc89536cfd39f35e2">fl::cos</a>(angle);      <span class="comment">// ~0.0</span></div>
+<div class="line"><a class="code hl_function" href="d4/d36/namespacefl_a7fdfc02341f5ddcf1403886c5dbe1ab6.html#a7fdfc02341f5ddcf1403886c5dbe1ab6">fl::atan</a>(0.7f);</div>
+<div class="line"><a class="code hl_function" href="d4/d36/namespacefl_a3f94a990f615fc15646ea0a99f9fe3e5.html#a3f94a990f615fc15646ea0a99f9fe3e5">fl::atan2</a>(1.0f, 0.7f);  <span class="comment">// Angle from (x, y)</span></div>
+<div class="line"><a class="code hl_function" href="d4/d36/namespacefl_aac72fb46f61d17f5ad0a178c4910eaf6.html#aac72fb46f61d17f5ad0a178c4910eaf6">fl::asin</a>(0.7f);</div>
+<div class="line"><a class="code hl_function" href="d4/d36/namespacefl_a563d219a4c2a4a6b7c460e5443026d8b.html#a563d219a4c2a4a6b7c460e5443026d8b">fl::acos</a>(0.7f);</div>
+<div class="ttc" id="anamespacefl_a080e32a9d5b39b1674c35757eaa2daf9_html_a080e32a9d5b39b1674c35757eaa2daf9"><div class="ttname"><a href="d4/d36/namespacefl_a080e32a9d5b39b1674c35757eaa2daf9.html#a080e32a9d5b39b1674c35757eaa2daf9">fl::sin</a></div><div class="ttdeci">enable_if&lt; is_fixed_point&lt; T &gt;::value, T &gt;::type sin(T angle) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="de/d62/fixed__point_8h_source.html#l00577">fixed_point.h:577</a></div></div>
+<div class="ttc" id="anamespacefl_a2bda17f9c7e7ed8cc89536cfd39f35e2_html_a2bda17f9c7e7ed8cc89536cfd39f35e2"><div class="ttname"><a href="d4/d36/namespacefl_a2bda17f9c7e7ed8cc89536cfd39f35e2.html#a2bda17f9c7e7ed8cc89536cfd39f35e2">fl::cos</a></div><div class="ttdeci">enable_if&lt; is_fixed_point&lt; T &gt;::value, T &gt;::type cos(T angle) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="de/d62/fixed__point_8h_source.html#l00582">fixed_point.h:582</a></div></div>
+<div class="ttc" id="anamespacefl_a3f94a990f615fc15646ea0a99f9fe3e5_html_a3f94a990f615fc15646ea0a99f9fe3e5"><div class="ttname"><a href="d4/d36/namespacefl_a3f94a990f615fc15646ea0a99f9fe3e5.html#a3f94a990f615fc15646ea0a99f9fe3e5">fl::atan2</a></div><div class="ttdeci">enable_if&lt; is_fixed_point&lt; T &gt;::value, T &gt;::type atan2(T y, T x) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="de/d62/fixed__point_8h_source.html#l00599">fixed_point.h:599</a></div></div>
+<div class="ttc" id="anamespacefl_a563d219a4c2a4a6b7c460e5443026d8b_html_a563d219a4c2a4a6b7c460e5443026d8b"><div class="ttname"><a href="d4/d36/namespacefl_a563d219a4c2a4a6b7c460e5443026d8b.html#a563d219a4c2a4a6b7c460e5443026d8b">fl::acos</a></div><div class="ttdeci">enable_if&lt; is_fixed_point&lt; T &gt;::value, T &gt;::type acos(T x) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="de/d62/fixed__point_8h_source.html#l00609">fixed_point.h:609</a></div></div>
+<div class="ttc" id="anamespacefl_a7fdfc02341f5ddcf1403886c5dbe1ab6_html_a7fdfc02341f5ddcf1403886c5dbe1ab6"><div class="ttname"><a href="d4/d36/namespacefl_a7fdfc02341f5ddcf1403886c5dbe1ab6.html#a7fdfc02341f5ddcf1403886c5dbe1ab6">fl::atan</a></div><div class="ttdeci">enable_if&lt; is_fixed_point&lt; T &gt;::value, T &gt;::type atan(T x) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="de/d62/fixed__point_8h_source.html#l00594">fixed_point.h:594</a></div></div>
+<div class="ttc" id="anamespacefl_aac72fb46f61d17f5ad0a178c4910eaf6_html_aac72fb46f61d17f5ad0a178c4910eaf6"><div class="ttname"><a href="d4/d36/namespacefl_aac72fb46f61d17f5ad0a178c4910eaf6.html#aac72fb46f61d17f5ad0a178c4910eaf6">fl::asin</a></div><div class="ttdeci">enable_if&lt; is_fixed_point&lt; T &gt;::value, T &gt;::type asin(T x) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="de/d62/fixed__point_8h_source.html#l00604">fixed_point.h:604</a></div></div>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md559"></a>
 Roots &amp; Powers</h2>
 <div class="fragment"><div class="line"><span class="keyword">auto</span> <a class="code hl_variable" href="db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a> = <a class="code hl_typedef" href="d4/d36/namespacefl_af658998b5a577acdd4ef0115f8e3643a.html#af658998b5a577acdd4ef0115f8e3643a">fl::sfixed_integer&lt;16, 16&gt;</a>(4.0f);</div>
 <div class="line"> </div>
-<div class="line"><a class="code hl_function" href="d4/d36/namespacefl_a40c15aab45d44b7ca11f148cc2e997c1.html#a40c15aab45d44b7ca11f148cc2e997c1">fl::sqrt</a>(<a class="code hl_variable" href="db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>);         <span class="comment">// ~2.0</span></div>
-<div class="line"><a class="code hl_function" href="d4/d36/namespacefl_ac9909451e9cc21cf68cd8d35a01b464a.html#ac9909451e9cc21cf68cd8d35a01b464a">fl::rsqrt</a>(<a class="code hl_variable" href="db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>);        <span class="comment">// ~0.707 (1/√x)</span></div>
-<div class="line"><a class="code hl_function" href="d4/d36/namespacefl_a87e9ee08a07d2adf08a86b4bee28ce3a.html#a87e9ee08a07d2adf08a86b4bee28ce3a">fl::pow</a>(<a class="code hl_typedef" href="d4/d36/namespacefl_af658998b5a577acdd4ef0115f8e3643a.html#af658998b5a577acdd4ef0115f8e3643a">fl::sfixed_integer&lt;16, 16&gt;</a>(2.0f), <a class="code hl_variable" href="db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>);  <span class="comment">// 2^4 = 16.0</span></div>
-<div class="ttc" id="anamespacefl_a40c15aab45d44b7ca11f148cc2e997c1_html_a40c15aab45d44b7ca11f148cc2e997c1"><div class="ttname"><a href="d4/d36/namespacefl_a40c15aab45d44b7ca11f148cc2e997c1.html#a40c15aab45d44b7ca11f148cc2e997c1">fl::sqrt</a></div><div class="ttdeci">constexpr enable_if&lt; is_fixed_point&lt; T &gt;::value, T &gt;::type sqrt(T x) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="de/d62/fixed__point_8h_source.html#l00559">fixed_point.h:559</a></div></div>
-<div class="ttc" id="anamespacefl_a87e9ee08a07d2adf08a86b4bee28ce3a_html_a87e9ee08a07d2adf08a86b4bee28ce3a"><div class="ttname"><a href="d4/d36/namespacefl_a87e9ee08a07d2adf08a86b4bee28ce3a.html#a87e9ee08a07d2adf08a86b4bee28ce3a">fl::pow</a></div><div class="ttdeci">enable_if&lt; is_fixed_point&lt; T &gt;::value, T &gt;::type pow(T base, T exp) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="de/d62/fixed__point_8h_source.html#l00569">fixed_point.h:569</a></div></div>
-<div class="ttc" id="anamespacefl_ac9909451e9cc21cf68cd8d35a01b464a_html_ac9909451e9cc21cf68cd8d35a01b464a"><div class="ttname"><a href="d4/d36/namespacefl_ac9909451e9cc21cf68cd8d35a01b464a.html#ac9909451e9cc21cf68cd8d35a01b464a">fl::rsqrt</a></div><div class="ttdeci">constexpr enable_if&lt; is_fixed_point&lt; T &gt;::value, T &gt;::type rsqrt(T x) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="de/d62/fixed__point_8h_source.html#l00564">fixed_point.h:564</a></div></div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md536"></a>
+<div class="line"><a class="code hl_function" href="d4/d36/namespacefl_ae5cb57a6b1ba6c629a49f0fec021b6e9.html#ae5cb57a6b1ba6c629a49f0fec021b6e9">fl::sqrt</a>(<a class="code hl_variable" href="db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>);         <span class="comment">// ~2.0</span></div>
+<div class="line"><a class="code hl_function" href="d4/d36/namespacefl_a3e9f794d8976eb66ced2e65ba2f03605.html#a3e9f794d8976eb66ced2e65ba2f03605">fl::rsqrt</a>(<a class="code hl_variable" href="db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>);        <span class="comment">// ~0.707 (1/√x)</span></div>
+<div class="line"><a class="code hl_function" href="d4/d36/namespacefl_a97465826362d9baf9522c6e06f0067e3.html#a97465826362d9baf9522c6e06f0067e3">fl::pow</a>(<a class="code hl_typedef" href="d4/d36/namespacefl_af658998b5a577acdd4ef0115f8e3643a.html#af658998b5a577acdd4ef0115f8e3643a">fl::sfixed_integer&lt;16, 16&gt;</a>(2.0f), <a class="code hl_variable" href="db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>);  <span class="comment">// 2^4 = 16.0</span></div>
+<div class="ttc" id="anamespacefl_a3e9f794d8976eb66ced2e65ba2f03605_html_a3e9f794d8976eb66ced2e65ba2f03605"><div class="ttname"><a href="d4/d36/namespacefl_a3e9f794d8976eb66ced2e65ba2f03605.html#a3e9f794d8976eb66ced2e65ba2f03605">fl::rsqrt</a></div><div class="ttdeci">constexpr enable_if&lt; is_fixed_point&lt; T &gt;::value, T &gt;::type rsqrt(T x) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="de/d62/fixed__point_8h_source.html#l00564">fixed_point.h:564</a></div></div>
+<div class="ttc" id="anamespacefl_a97465826362d9baf9522c6e06f0067e3_html_a97465826362d9baf9522c6e06f0067e3"><div class="ttname"><a href="d4/d36/namespacefl_a97465826362d9baf9522c6e06f0067e3.html#a97465826362d9baf9522c6e06f0067e3">fl::pow</a></div><div class="ttdeci">enable_if&lt; is_fixed_point&lt; T &gt;::value, T &gt;::type pow(T base, T exp) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="de/d62/fixed__point_8h_source.html#l00569">fixed_point.h:569</a></div></div>
+<div class="ttc" id="anamespacefl_ae5cb57a6b1ba6c629a49f0fec021b6e9_html_ae5cb57a6b1ba6c629a49f0fec021b6e9"><div class="ttname"><a href="d4/d36/namespacefl_ae5cb57a6b1ba6c629a49f0fec021b6e9.html#ae5cb57a6b1ba6c629a49f0fec021b6e9">fl::sqrt</a></div><div class="ttdeci">constexpr enable_if&lt; is_fixed_point&lt; T &gt;::value, T &gt;::type sqrt(T x) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="de/d62/fixed__point_8h_source.html#l00559">fixed_point.h:559</a></div></div>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md560"></a>
 Arithmetic Operators</h2>
 <div class="fragment"><div class="line"><span class="keyword">auto</span> a = <a class="code hl_typedef" href="d4/d36/namespacefl_af658998b5a577acdd4ef0115f8e3643a.html#af658998b5a577acdd4ef0115f8e3643a">fl::sfixed_integer&lt;16, 16&gt;</a>(2.0f);</div>
 <div class="line"><span class="keyword">auto</span> b = <a class="code hl_typedef" href="d4/d36/namespacefl_af658998b5a577acdd4ef0115f8e3643a.html#af658998b5a577acdd4ef0115f8e3643a">fl::sfixed_integer&lt;16, 16&gt;</a>(0.5f);</div>
@@ -387,15 +388,15 @@ Arithmetic Operators</h2>
 <div class="line">a &lt; b;</div>
 <div class="line">a == b;</div>
 <div class="line">a &gt;= b;</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md537"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md561"></a>
 Modulo</h2>
 <div class="fragment"><div class="line"><span class="keyword">auto</span> a = <a class="code hl_typedef" href="d4/d36/namespacefl_af658998b5a577acdd4ef0115f8e3643a.html#af658998b5a577acdd4ef0115f8e3643a">fl::sfixed_integer&lt;16, 16&gt;</a>(7.5f);</div>
 <div class="line"><span class="keyword">auto</span> b = <a class="code hl_typedef" href="d4/d36/namespacefl_af658998b5a577acdd4ef0115f8e3643a.html#af658998b5a577acdd4ef0115f8e3643a">fl::sfixed_integer&lt;16, 16&gt;</a>(2.0f);</div>
 <div class="line"> </div>
-<div class="line"><a class="code hl_function" href="d4/d36/namespacefl_afaad98568eabfeefce40ae9fe181b9f2.html#afaad98568eabfeefce40ae9fe181b9f2">fl::mod</a>(a, b);  <span class="comment">// ≈ 1.5</span></div>
-<div class="ttc" id="anamespacefl_afaad98568eabfeefce40ae9fe181b9f2_html_afaad98568eabfeefce40ae9fe181b9f2"><div class="ttname"><a href="d4/d36/namespacefl_afaad98568eabfeefce40ae9fe181b9f2.html#afaad98568eabfeefce40ae9fe181b9f2">fl::mod</a></div><div class="ttdeci">constexpr enable_if&lt; is_fixed_point&lt; T &gt;::value, T &gt;::type mod(T a, T b) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="de/d62/fixed__point_8h_source.html#l00518">fixed_point.h:518</a></div></div>
+<div class="line"><a class="code hl_function" href="d4/d36/namespacefl_afdf027f74818424e988a3596f10d0587.html#afdf027f74818424e988a3596f10d0587">fl::mod</a>(a, b);  <span class="comment">// ≈ 1.5</span></div>
+<div class="ttc" id="anamespacefl_afdf027f74818424e988a3596f10d0587_html_afdf027f74818424e988a3596f10d0587"><div class="ttname"><a href="d4/d36/namespacefl_afdf027f74818424e988a3596f10d0587.html#afdf027f74818424e988a3596f10d0587">fl::mod</a></div><div class="ttdeci">constexpr enable_if&lt; is_fixed_point&lt; T &gt;::value, T &gt;::type mod(T a, T b) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="de/d62/fixed__point_8h_source.html#l00518">fixed_point.h:518</a></div></div>
 </div><!-- fragment --><hr  />
-<h1><a class="anchor" id="autotoc_md539"></a>
+<h1><a class="anchor" id="autotoc_md563"></a>
 Member Method API (Alternative)</h1>
 <p>You can also call methods directly on values (both styles work):</p>
 <div class="fragment"><div class="line"><span class="keyword">auto</span> <a class="code hl_variable" href="db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a> = <a class="code hl_typedef" href="d4/d36/namespacefl_af658998b5a577acdd4ef0115f8e3643a.html#af658998b5a577acdd4ef0115f8e3643a">fl::sfixed_integer&lt;16, 16&gt;</a>(2.7f);</div>
@@ -409,7 +410,7 @@ Member Method API (Alternative)</h1>
 <div class="line"><a class="code hl_variable" href="db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>.cos();</div>
 </div><!-- fragment --><p>Use whichever is more natural for your code—free-function (<code>fl::sin(x)</code>) or member (<code>x.sin()</code>).</p>
 <hr  />
-<h1><a class="anchor" id="autotoc_md541"></a>
+<h1><a class="anchor" id="autotoc_md565"></a>
 Choosing a Template Configuration</h1>
 <p><b>Decision tree (read top to bottom):</b></p>
 <div class="fragment"><div class="line">1. Is your value small (|x| &lt; 128)?</div>
@@ -443,7 +444,7 @@ Choosing a Template Configuration</h1>
 <td class="markdownTableBodyNone">Large numbers (±1M)   </td><td class="markdownTableBodyNone"><code>s24x8</code>   </td><td class="markdownTableBodyNone">±8M   </td><td class="markdownTableBodyNone">1/256   </td><td class="markdownTableBodyNone">4 bytes   </td></tr>
 </table>
 <hr  />
-<h1><a class="anchor" id="autotoc_md543"></a>
+<h1><a class="anchor" id="autotoc_md567"></a>
 Convenience Type Aliases</h1>
 <p>If the full template syntax is too verbose, short aliases are available:</p>
 <table class="markdownTable">
@@ -460,7 +461,7 @@ Convenience Type Aliases</h1>
 </table>
 <p><b>Full list:</b> <code>s0x32</code>, <code>s4x12</code>, <code>s8x8</code>, <code>s8x24</code>, <code>s12x4</code>, <code>s16x16</code>, <code>s24x8</code>, <code>u0x32</code>, <code>u4x12</code>, <code>u8x8</code>, <code>u8x24</code>, <code>u12x4</code>, <code>u16x16</code>, <code>u24x8</code></p>
 <hr  />
-<h1><a class="anchor" id="autotoc_md545"></a>
+<h1><a class="anchor" id="autotoc_md569"></a>
 Performance Characteristics</h1>
 <p><b>On embedded systems (ARM Cortex-M), fixed-point is 5-100x faster:</b></p><ul>
 <li><b>Addition</b>: 5-10x faster (native integer)</li>
@@ -471,7 +472,7 @@ Performance Characteristics</h1>
 <p><b>Why?</b> Embedded CPUs lack FPU, so floats use slow software emulation. Fixed-point uses native integer operations.</p>
 <p><b>Memory:</b> Highly efficient—<code>s16x16</code> is 4 bytes, <code>u8x8</code> is 2 bytes.</p>
 <hr  />
-<h1><a class="anchor" id="autotoc_md547"></a>
+<h1><a class="anchor" id="autotoc_md571"></a>
 Common Pitfalls and Solutions</h1>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -489,22 +490,22 @@ Common Pitfalls and Solutions</h1>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><b>Slow operations</b>   </td><td class="markdownTableBodyNone"><code>x / 2</code> is slower than it needs to be for powers of 2   </td><td class="markdownTableBodyNone">Use bit shifts: <code>x &gt;&gt; 1</code> (÷2), <code>x &lt;&lt; 2</code> (×4) — <b>5-10x faster</b>    </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><b>Lost decimals</b>   </td><td class="markdownTableBodyNone">Assigning to <code>uint8_t</code> directly: <code>uint8_t val = faded;</code> (no conversion)   </td><td class="markdownTableBodyNone">Use <code>.to_int()</code>: <code>uint8_t val = faded.to_int();</code>   </td></tr>
+<td class="markdownTableBodyNone"><b>Lost decimals</b>   </td><td class="markdownTableBodyNone">Assigning to <code><a class="el" href="df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a></code> directly: <code><a class="el" href="df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a> val = faded;</code> (no conversion)   </td><td class="markdownTableBodyNone">Use <code>.to_int()</code>: <code><a class="el" href="df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a> val = faded.to_int();</code>   </td></tr>
 </table>
 <hr  />
-<h1><a class="anchor" id="autotoc_md549"></a>
+<h1><a class="anchor" id="autotoc_md573"></a>
 Real FastLED Usage</h1>
-<h2><a class="anchor" id="autotoc_md550"></a>
+<h2><a class="anchor" id="autotoc_md574"></a>
 Easing Functions (<code>fl/ease.h</code>)</h2>
 <p>Smooth animations using fixed-point internally for speed: </p><div class="fragment"><div class="line"><span class="keyword">auto</span> <a class="code hl_variable" href="dc/db7/examples_2_luminova_2luminova_8h_ae96c939a2a46590dc79c7d9ca8331dfe.html#ae96c939a2a46590dc79c7d9ca8331dfe">t</a> = <a class="code hl_typedef" href="d4/d36/namespacefl_af658998b5a577acdd4ef0115f8e3643a.html#af658998b5a577acdd4ef0115f8e3643a">fl::sfixed_integer&lt;16, 16&gt;</a>(0.5f);  <span class="comment">// Time parameter</span></div>
 <div class="line"> </div>
-<div class="line"><span class="keyword">auto</span> eased = <a class="code hl_function" href="d4/d36/namespacefl_a3675944a3c2a0c577c7319d662134d1b.html#a3675944a3c2a0c577c7319d662134d1b">fl::smoothstep</a>(</div>
+<div class="line"><span class="keyword">auto</span> eased = <a class="code hl_function" href="d4/d36/namespacefl_aca1b5358345a40dcc552e41138cfaa11.html#aca1b5358345a40dcc552e41138cfaa11">fl::smoothstep</a>(</div>
 <div class="line">    <a class="code hl_typedef" href="d4/d36/namespacefl_af658998b5a577acdd4ef0115f8e3643a.html#af658998b5a577acdd4ef0115f8e3643a">fl::sfixed_integer&lt;16, 16&gt;</a>(0.0f),</div>
 <div class="line">    <a class="code hl_typedef" href="d4/d36/namespacefl_af658998b5a577acdd4ef0115f8e3643a.html#af658998b5a577acdd4ef0115f8e3643a">fl::sfixed_integer&lt;16, 16&gt;</a>(1.0f),</div>
 <div class="line">    <a class="code hl_variable" href="dc/db7/examples_2_luminova_2luminova_8h_ae96c939a2a46590dc79c7d9ca8331dfe.html#ae96c939a2a46590dc79c7d9ca8331dfe">t</a>);</div>
 <div class="line"> </div>
-<div class="line">uint8_t <a class="code hl_variable" href="d6/d05/_animartrix_8ino_ab0d80715bb4b382856cf250c1eeb9b53.html#ab0d80715bb4b382856cf250c1eeb9b53">brightness</a> = (eased * 255.0f).to_int();</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md551"></a>
+<div class="line"><a class="code hl_typedef" href="df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a> <a class="code hl_variable" href="d6/d05/_animartrix_8ino_ab0d80715bb4b382856cf250c1eeb9b53.html#ab0d80715bb4b382856cf250c1eeb9b53">brightness</a> = (eased * 255.0f).to_int();</div>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md575"></a>
 Animartrix 2D Effects (<code>src/fl/fx/2d/animartrix_detail/</code>)</h2>
 <p>Stores geometry as fixed-point for fast operations: </p><div class="fragment"><div class="line"><span class="keyword">struct </span>Geometry {</div>
 <div class="line">    <a class="code hl_typedef" href="d4/d36/namespacefl_af658998b5a577acdd4ef0115f8e3643a.html#af658998b5a577acdd4ef0115f8e3643a">fl::sfixed_integer&lt;16, 16&gt;</a> distance;   <span class="comment">// Polar distance</span></div>
@@ -514,32 +515,32 @@ Animartrix 2D Effects (<code>src/fl/fx/2d/animartrix_detail/</code>)</h2>
 <div class="line"> </div>
 <div class="line"><span class="comment">// Fast rotation with precomputed sin/cos</span></div>
 <div class="line"><a class="code hl_typedef" href="d4/d36/namespacefl_af658998b5a577acdd4ef0115f8e3643a.html#af658998b5a577acdd4ef0115f8e3643a">fl::sfixed_integer&lt;16, 16&gt;</a> sin_a, cos_a;</div>
-<div class="line"><a class="code hl_function" href="d4/d36/namespacefl_a3ca54b704b8f16ccd5392c4f8190f2fc.html#a3ca54b704b8f16ccd5392c4f8190f2fc">fl::sincos</a>(angle, sin_a, cos_a);</div>
+<div class="line"><a class="code hl_function" href="d4/d36/namespacefl_a8736d9eb2af15deb2e1667b0e3982cfd.html#a8736d9eb2af15deb2e1667b0e3982cfd">fl::sincos</a>(angle, sin_a, cos_a);</div>
 <div class="line"> </div>
 <div class="line"><span class="keyword">auto</span> rotated_x = cos_a * <a class="code hl_variable" href="db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a> - sin_a * <a class="code hl_variable" href="db/d49/_audio_2simple_2simple_8h_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a>;</div>
 <div class="line"><span class="keyword">auto</span> rotated_y = sin_a * <a class="code hl_variable" href="db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a> + cos_a * <a class="code hl_variable" href="db/d49/_audio_2simple_2simple_8h_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a>;</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md552"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md576"></a>
 Perlin Noise (2D Patterns)</h2>
 <p>Smooth terrain-like patterns for animations: </p><div class="fragment"><div class="line"><span class="keyword">auto</span> <a class="code hl_variable" href="de/d71/_fire2023_8h_a0b46167016d5b2cd0c800213002e1fad.html#a0b46167016d5b2cd0c800213002e1fad">noise</a> = perlin_s16x16::pnoise2d(<a class="code hl_variable" href="db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>, <a class="code hl_variable" href="db/d49/_audio_2simple_2simple_8h_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a>, fade_lut, perm);</div>
 <div class="line"><span class="comment">// Returns [-1, 1], converted to LED brightness</span></div>
 <div class="ttc" id="a_fire2023_8h_a0b46167016d5b2cd0c800213002e1fad_html_a0b46167016d5b2cd0c800213002e1fad"><div class="ttname"><a href="de/d71/_fire2023_8h_a0b46167016d5b2cd0c800213002e1fad.html#a0b46167016d5b2cd0c800213002e1fad">noise</a></div><div class="ttdeci">uint8_t noise[NUM_LAYERS][WIDTH][HEIGHT]</div><div class="ttdef"><b>Definition</b> <a href="de/d71/_fire2023_8h_source.html#l00097">Fire2023.h:97</a></div></div>
 </div><!-- fragment --><hr  />
-<h1><a class="anchor" id="autotoc_md554"></a>
+<h1><a class="anchor" id="autotoc_md578"></a>
 SIMD Versions (4x Parallel Processing)</h1>
 <p>Fixed-point SIMD types (<code>s0x32x4</code>, <code>s16x16x4</code>) are <b>fully implemented</b> with complete arithmetic and math operations. Float SIMD is not available on embedded targets.</p>
-<h2><a class="anchor" id="autotoc_md555"></a>
+<h2><a class="anchor" id="autotoc_md579"></a>
 What is SIMD?</h2>
 <p><b>SIMD</b> = "Single Instruction, Multiple Data" — process 4 values <b>simultaneously</b> with one CPU operation.</p>
 <p>Instead of: </p><div class="fragment"><div class="line">Loop 4 times: value[0], value[1], value[2], value[3]  ← Serial</div>
 </div><!-- fragment --><p>SIMD does: </p><div class="fragment"><div class="line">[value0, value1, value2, value3]  ← One operation on 4 lanes!</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md556"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md580"></a>
 Available SIMD Types</h2>
 <p>Currently implemented:</p><ul>
 <li><b><code>s0x32x4</code></b> - Normalized values (Q31 format, for [-1, 1] range)</li>
 <li><b><code>s16x16x4</code></b> - General fixed-point (Q16.16 format, most common)</li>
 </ul>
 <p>Not yet available: <code>u8x8x4</code>, <code>s8x24x4</code>, etc. (scalar versions are recommended for other types)</p>
-<h2><a class="anchor" id="autotoc_md557"></a>
+<h2><a class="anchor" id="autotoc_md581"></a>
 When to Use SIMD</h2>
 <ul>
 <li>✅ <b>Processing 4+ values with identical operations</b></li>
@@ -548,7 +549,7 @@ When to Use SIMD</h2>
 <li>✅ <b>Batch sin/cos/lerp/clamp on 4 angles or values simultaneously</b></li>
 <li>❌ <b>Processing single values</b> (overhead not worth it)</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md558"></a>
+<h2><a class="anchor" id="autotoc_md582"></a>
 SIMD Types and Creation</h2>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &quot;<a class="code" href="df/d96/s16x16x4_8h.html">fl/math/fixed_point/s16x16x4.h</a>&quot;</span></div>
 <div class="line"><span class="preprocessor">#include &quot;<a class="code" href="d1/dcf/s0x32x4_8h.html">fl/math/fixed_point/s0x32x4.h</a>&quot;</span></div>
@@ -567,9 +568,9 @@ SIMD Types and Creation</h2>
 <div class="line">vec.store(&amp;output[0]);</div>
 <div class="ttc" id="as0x32x4_8h_html"><div class="ttname"><a href="d1/dcf/s0x32x4_8h.html">s0x32x4.h</a></div><div class="ttdoc">SIMD 4-wide s0x32 fixed-point vector type.</div></div>
 <div class="ttc" id="as16x16x4_8h_html"><div class="ttname"><a href="df/d96/s16x16x4_8h.html">s16x16x4.h</a></div><div class="ttdoc">SIMD 4-wide s16x16 fixed-point vector type.</div></div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md559"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md583"></a>
 Currently Available Operations</h2>
-<h3><a class="anchor" id="autotoc_md560"></a>
+<h3><a class="anchor" id="autotoc_md584"></a>
 Arithmetic</h3>
 <div class="fragment"><div class="line"><span class="keyword">auto</span> a = s16x16x4::set1(s16x16(2.0f));</div>
 <div class="line"><span class="keyword">auto</span> b = s16x16x4::set1(s16x16(0.5f));</div>
@@ -583,14 +584,14 @@ Arithmetic</h3>
 <div class="line"><span class="comment">// Multiply: s0x32x4 × s16x16x4 → s16x16x4 (Q31 × Q16)</span></div>
 <div class="line"><span class="keyword">auto</span> normalized = s0x32x4::set1(s0x32(0.5f));  <span class="comment">// 0.5 normalized</span></div>
 <div class="line"><span class="keyword">auto</span> scaled = normalized * a;  <span class="comment">// Cross-type multiply</span></div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md561"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md585"></a>
 Comparison and Selection</h3>
 <div class="fragment"><div class="line"><span class="keyword">auto</span> min_val = a.min(b);    <span class="comment">// Element-wise minimum</span></div>
 <div class="line"><span class="keyword">auto</span> max_val = a.max(b);    <span class="comment">// Element-wise maximum</span></div>
 <div class="line"><span class="keyword">auto</span> clamped = a.clamp(s16x16x4::set1(s16x16(0.0f)),  <span class="comment">// Clamp to [0, 2]</span></div>
 <div class="line">                       s16x16x4::set1(s16x16(2.0f)));</div>
 <div class="line"><span class="keyword">auto</span> abs_val = a.abs();     <span class="comment">// Absolute value (branchless)</span></div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md562"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md586"></a>
 Math Functions</h3>
 <div class="fragment"><div class="line"><span class="comment">// Trigonometry</span></div>
 <div class="line"><span class="keyword">auto</span> sines = a.sin();       <span class="comment">// sin() of 4 angles (in radians)</span></div>
@@ -603,7 +604,7 @@ Math Functions</h3>
 <div class="line"><span class="comment">// Linear interpolation</span></div>
 <div class="line"><span class="keyword">auto</span> <a class="code hl_variable" href="dc/db7/examples_2_luminova_2luminova_8h_ae96c939a2a46590dc79c7d9ca8331dfe.html#ae96c939a2a46590dc79c7d9ca8331dfe">t</a> = s16x16x4::set1(s16x16(0.5f));</div>
 <div class="line"><span class="keyword">auto</span> interpolated = a.lerp(b, s16x16(0.5f));  <span class="comment">// Midpoint between a and b</span></div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md563"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md587"></a>
 Load/Store</h3>
 <div class="fragment"><div class="line"><span class="comment">// Load 4 values from array (unaligned access OK)</span></div>
 <div class="line">s16x16 data[4] = {1.0f, 2.0f, 3.0f, 4.0f};</div>
@@ -612,7 +613,7 @@ Load/Store</h3>
 <div class="line"><span class="comment">// Store 4 values back</span></div>
 <div class="line">s16x16 output[4];</div>
 <div class="line">vec.store(&amp;output[0]);</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md564"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md588"></a>
 Fixed-Point SIMD Operations (Fully Implemented)</h2>
 <p>All operations for <code>s0x32x4</code> and <code>s16x16x4</code> are fully implemented:</p>
 <table class="markdownTable">
@@ -642,7 +643,7 @@ Fixed-Point SIMD Operations (Fully Implemented)</h2>
 <td class="markdownTableBodyNone"><b>sincos</b>   </td><td class="markdownTableBodyNone">Combined sin/cos (more efficient)   </td></tr>
 </table>
 <p>See test file for comprehensive coverage: <code>tests/fl/simd.cpp</code> (30+ test cases)</p>
-<h2><a class="anchor" id="autotoc_md565"></a>
+<h2><a class="anchor" id="autotoc_md589"></a>
 Example: SIMD Array Processing</h2>
 <div class="fragment"><div class="line"><span class="comment">// ✅ Good: Process array of coordinates with SIMD arithmetic</span></div>
 <div class="line"><span class="keyword">struct </span>Point {</div>
@@ -667,7 +668,7 @@ Example: SIMD Array Processing</h2>
 <div class="line">    <span class="comment">// Result: all 4 x values scaled</span></div>
 <div class="line">    <span class="keywordflow">return</span> {result[0], result[1]};  <span class="comment">// Example (incomplete)</span></div>
 <div class="line">}</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md566"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md590"></a>
 When NOT to Use SIMD</h2>
 <div class="fragment"><div class="line"><span class="comment">// ❌ Bad: Using fixed-point SIMD for single values (overhead)</span></div>
 <div class="line"><span class="keyword">auto</span> angle_simd = s16x16x4::set1(s16x16(1.57f));</div>
@@ -676,47 +677,47 @@ When NOT to Use SIMD</h2>
 <div class="line"> </div>
 <div class="line"><span class="comment">// ✅ Good: Use scalar fixed-point for single values</span></div>
 <div class="line"><span class="keyword">auto</span> angle = s16x16(1.57f);</div>
-<div class="line"><span class="keyword">auto</span> sine = <a class="code hl_function" href="d4/d36/namespacefl_abc07da8d8983da7016b55f7626e9c060.html#abc07da8d8983da7016b55f7626e9c060">fl::sin</a>(angle);  <span class="comment">// Direct, no overhead</span></div>
+<div class="line"><span class="keyword">auto</span> sine = <a class="code hl_function" href="d4/d36/namespacefl_a080e32a9d5b39b1674c35757eaa2daf9.html#a080e32a9d5b39b1674c35757eaa2daf9">fl::sin</a>(angle);  <span class="comment">// Direct, no overhead</span></div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// ✅ Good: Use SIMD when processing 4+ values</span></div>
 <div class="line">s16x16 angles[4] = {0.0f, 1.57f, 3.14f, 4.71f};</div>
 <div class="line"><span class="keyword">auto</span> angles_simd = s16x16x4::load(&amp;angles[0]);</div>
 <div class="line"><span class="keyword">auto</span> sines = angles_simd.sin();  <span class="comment">// Efficient batch processing</span></div>
 </div><!-- fragment --><hr  />
-<h1><a class="anchor" id="autotoc_md568"></a>
+<h1><a class="anchor" id="autotoc_md592"></a>
 API Quick Reference</h1>
-<h2><a class="anchor" id="autotoc_md569"></a>
+<h2><a class="anchor" id="autotoc_md593"></a>
 Creation</h2>
 <div class="fragment"><div class="line"><a class="code hl_typedef" href="d4/d36/namespacefl_af658998b5a577acdd4ef0115f8e3643a.html#af658998b5a577acdd4ef0115f8e3643a">fl::sfixed_integer&lt;16, 16&gt;</a> <a class="code hl_variable" href="db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>(3.14f);</div>
 <div class="line"><a class="code hl_typedef" href="d4/d36/namespacefl_a8f164561f6287d9220ff336568cea837.html#a8f164561f6287d9220ff336568cea837">fl::ufixed_integer&lt;8, 8&gt;</a> <a class="code hl_variable" href="db/d49/_audio_2simple_2simple_8h_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a>(200.0f);</div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// From raw</span></div>
-<div class="line"><span class="keyword">auto</span> <a class="code hl_variable" href="de/d71/_fire2023_8h_a4e48336126ecdad27c0411a91b14bf5a.html#a4e48336126ecdad27c0411a91b14bf5a">z</a> = <a class="code hl_function" href="da/da0/classfl_1_1fixed__point_a6411ab4d7ef62d6ae1a3ceeec6b0c059.html#a6411ab4d7ef62d6ae1a3ceeec6b0c059">fl::sfixed_integer&lt;16, 16&gt;::from_raw</a>(0x10000);</div>
+<div class="line"><span class="keyword">auto</span> <a class="code hl_variable" href="de/d71/_fire2023_8h_a4e48336126ecdad27c0411a91b14bf5a.html#a4e48336126ecdad27c0411a91b14bf5a">z</a> = <a class="code hl_function" href="da/da0/classfl_1_1fixed__point_a8cce962867779eae2e4c7eaa0a27144e.html#a8cce962867779eae2e4c7eaa0a27144e">fl::sfixed_integer&lt;16, 16&gt;::from_raw</a>(0x10000);</div>
 <div class="ttc" id="a_fire2023_8h_a4e48336126ecdad27c0411a91b14bf5a_html_a4e48336126ecdad27c0411a91b14bf5a"><div class="ttname"><a href="de/d71/_fire2023_8h_a4e48336126ecdad27c0411a91b14bf5a.html#a4e48336126ecdad27c0411a91b14bf5a">z</a></div><div class="ttdeci">uint32_t z[NUM_LAYERS]</div><div class="ttdef"><b>Definition</b> <a href="de/d71/_fire2023_8h_source.html#l00093">Fire2023.h:93</a></div></div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md570"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md594"></a>
 Conversion</h2>
 <div class="fragment"><div class="line"><span class="keywordtype">float</span> f = <a class="code hl_variable" href="db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>.to_float();</div>
 <div class="line"><span class="keywordtype">int</span> i = <a class="code hl_variable" href="db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>.to_int();</div>
 <div class="line"><span class="keyword">auto</span> raw = <a class="code hl_variable" href="db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>.raw();</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md571"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md595"></a>
 Free-Function Math</h2>
-<div class="fragment"><div class="line"><a class="code hl_function" href="d4/d36/namespacefl_abc07da8d8983da7016b55f7626e9c060.html#abc07da8d8983da7016b55f7626e9c060">fl::sin</a>(<a class="code hl_variable" href="db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>), <a class="code hl_function" href="d4/d36/namespacefl_a9cda2472ab9bd68df745496533aa76e7.html#a9cda2472ab9bd68df745496533aa76e7">fl::cos</a>(<a class="code hl_variable" href="db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>), <a class="code hl_function" href="d4/d36/namespacefl_a40c15aab45d44b7ca11f148cc2e997c1.html#a40c15aab45d44b7ca11f148cc2e997c1">fl::sqrt</a>(<a class="code hl_variable" href="db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>)</div>
-<div class="line"><a class="code hl_function" href="d4/d36/namespacefl_a4b1911051ff514cded442be8dfa5cc2b.html#a4b1911051ff514cded442be8dfa5cc2b">fl::floor</a>(<a class="code hl_variable" href="db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>), <a class="code hl_function" href="d4/d36/namespacefl_a3147d73d9121eec8710b892112eda203.html#a3147d73d9121eec8710b892112eda203">fl::ceil</a>(<a class="code hl_variable" href="db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>), <a class="code hl_function" href="d4/d36/namespacefl_a4bf8681b8fe6ca3b6a9b792d0ec97634.html#a4bf8681b8fe6ca3b6a9b792d0ec97634">fl::fract</a>(<a class="code hl_variable" href="db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>)</div>
-<div class="line"><a class="code hl_function" href="d4/d36/namespacefl_afedf8c141bccc0f156238153a61fbb9f.html#afedf8c141bccc0f156238153a61fbb9f">fl::lerp</a>(a, b, <a class="code hl_variable" href="dc/db7/examples_2_luminova_2luminova_8h_ae96c939a2a46590dc79c7d9ca8331dfe.html#ae96c939a2a46590dc79c7d9ca8331dfe">t</a>), <a class="code hl_function" href="d4/d36/namespacefl_afb42d6eb6443afc7223ce9b1a812f350.html#afb42d6eb6443afc7223ce9b1a812f350">fl::clamp</a>(<a class="code hl_variable" href="db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>, lo, hi)</div>
-<div class="line"><a class="code hl_function" href="d4/d36/namespacefl_a3675944a3c2a0c577c7319d662134d1b.html#a3675944a3c2a0c577c7319d662134d1b">fl::smoothstep</a>(e0, e1, <a class="code hl_variable" href="db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>)</div>
-<div class="line"><a class="code hl_function" href="d4/d36/namespacefl_a3ca54b704b8f16ccd5392c4f8190f2fc.html#a3ca54b704b8f16ccd5392c4f8190f2fc">fl::sincos</a>(angle, sin_out, cos_out)</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md572"></a>
+<div class="fragment"><div class="line"><a class="code hl_function" href="d4/d36/namespacefl_a080e32a9d5b39b1674c35757eaa2daf9.html#a080e32a9d5b39b1674c35757eaa2daf9">fl::sin</a>(<a class="code hl_variable" href="db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>), <a class="code hl_function" href="d4/d36/namespacefl_a2bda17f9c7e7ed8cc89536cfd39f35e2.html#a2bda17f9c7e7ed8cc89536cfd39f35e2">fl::cos</a>(<a class="code hl_variable" href="db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>), <a class="code hl_function" href="d4/d36/namespacefl_ae5cb57a6b1ba6c629a49f0fec021b6e9.html#ae5cb57a6b1ba6c629a49f0fec021b6e9">fl::sqrt</a>(<a class="code hl_variable" href="db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>)</div>
+<div class="line"><a class="code hl_function" href="d4/d36/namespacefl_afc0b481c5e1581a1b21e988c119f8a86.html#afc0b481c5e1581a1b21e988c119f8a86">fl::floor</a>(<a class="code hl_variable" href="db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>), <a class="code hl_function" href="d4/d36/namespacefl_a4f76bde8d17a25790ec3382f979786c9.html#a4f76bde8d17a25790ec3382f979786c9">fl::ceil</a>(<a class="code hl_variable" href="db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>), <a class="code hl_function" href="d4/d36/namespacefl_a34ec1a3fec70639de9a12dbf87d8c26a.html#a34ec1a3fec70639de9a12dbf87d8c26a">fl::fract</a>(<a class="code hl_variable" href="db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>)</div>
+<div class="line"><a class="code hl_function" href="d4/d36/namespacefl_afedf8c141bccc0f156238153a61fbb9f.html#afedf8c141bccc0f156238153a61fbb9f">fl::lerp</a>(a, b, <a class="code hl_variable" href="dc/db7/examples_2_luminova_2luminova_8h_ae96c939a2a46590dc79c7d9ca8331dfe.html#ae96c939a2a46590dc79c7d9ca8331dfe">t</a>), <a class="code hl_function" href="d4/d36/namespacefl_a391721290a9307391d39a0a897d9b9f4.html#a391721290a9307391d39a0a897d9b9f4">fl::clamp</a>(<a class="code hl_variable" href="db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>, lo, hi)</div>
+<div class="line"><a class="code hl_function" href="d4/d36/namespacefl_aca1b5358345a40dcc552e41138cfaa11.html#aca1b5358345a40dcc552e41138cfaa11">fl::smoothstep</a>(e0, e1, <a class="code hl_variable" href="db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>)</div>
+<div class="line"><a class="code hl_function" href="d4/d36/namespacefl_a8736d9eb2af15deb2e1667b0e3982cfd.html#a8736d9eb2af15deb2e1667b0e3982cfd">fl::sincos</a>(angle, sin_out, cos_out)</div>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md596"></a>
 Arithmetic</h2>
 <div class="fragment"><div class="line">a + b, a - b, a * b, a / b, -a</div>
 <div class="line">a &gt;&gt; 1, a &lt;&lt; 2</div>
 <div class="line">a &lt; b, a == b, a &gt;= b</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md573"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md597"></a>
 Member Methods (Alternative)</h2>
 <div class="fragment"><div class="line"><a class="code hl_variable" href="db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>.sin(), <a class="code hl_variable" href="db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>.cos(), <a class="code hl_variable" href="db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>.sqrt()</div>
 <div class="line"><a class="code hl_variable" href="db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>.floor(), <a class="code hl_variable" href="db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>.ceil(), <a class="code hl_variable" href="db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>.fract()</div>
 <div class="line"><a class="code hl_variable" href="db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>.abs()</div>
 </div><!-- fragment --><hr  />
-<h1><a class="anchor" id="autotoc_md575"></a>
+<h1><a class="anchor" id="autotoc_md599"></a>
 Getting Started (Beginner Checklist)</h1>
 <p><b>✅ Step 1: Use the default configuration</b></p><ul>
 <li>Start with <b><code><a class="el" href="d4/d36/namespacefl_af658998b5a577acdd4ef0115f8e3643a.html#af658998b5a577acdd4ef0115f8e3643a">fl::sfixed_integer</a>&lt;16, 16&gt;</code></b> or its alias <b><code><a class="el" href="d9/d9f/classfl_1_1s16x16.html">fl::s16x16</a></code></b></li>
@@ -728,7 +729,7 @@ Getting Started (Beginner Checklist)</h1>
 <li>Compile and check that it works</li>
 </ul>
 <p><b>✅ Step 3: Convert back to output types</b></p><ul>
-<li>Use <code>.to_int()</code> to convert to <code>uint8_t</code> for LED brightness</li>
+<li>Use <code>.to_int()</code> to convert to <code><a class="el" href="df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a></code> for LED brightness</li>
 <li>Use <code>.to_float()</code> only if you need to pass to a float-expecting function</li>
 <li>Keep as fixed-point for intermediate calculations (faster!)</li>
 </ul>
@@ -738,7 +739,7 @@ Getting Started (Beginner Checklist)</h1>
 <li>That's it — API is identical</li>
 </ul>
 <p><b>✅ Step 5: Test it</b> </p><div class="fragment"><div class="line">bash test fixed_point</div>
-</div><!-- fragment --><h1><a class="anchor" id="autotoc_md576"></a>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md600"></a>
 Advanced: Next Steps</h1>
 <ol type="1">
 <li><b>Run the test suite</b>: <code>bash test fixed_point</code> — validates all implementations</li>
@@ -746,7 +747,7 @@ Advanced: Next Steps</h1>
 <li><b>Check accuracy bounds</b>: <code>tests/fl/fixed_point.cpp</code> for type-specific precision guarantees</li>
 <li><b>Benchmark your code</b>: Use profiling if performance matters (fixed-point should be plenty fast)</li>
 </ol>
-<h1><a class="anchor" id="autotoc_md577"></a>
+<h1><a class="anchor" id="autotoc_md601"></a>
 Key Files</h1>
 <ul>
 <li><b>Header</b>: <code>fl/stl/fixed_point.h</code> — Main template APIs and free-function math</li>
@@ -761,7 +762,7 @@ Key Files</h1>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="dir_0dd6897a8ae40540acd9d694849e950e.html">stl</a></li><li class="navelem"><a class="el" href="dir_3c51dff46694b5f772923d36a7088ffe.html">fixed_point</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:12 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:13 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

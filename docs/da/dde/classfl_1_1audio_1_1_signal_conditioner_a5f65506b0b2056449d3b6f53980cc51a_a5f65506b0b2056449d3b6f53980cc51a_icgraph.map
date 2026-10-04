@@ -1,0 +1,5 @@
+<map id="fl::audio::SignalConditioner::reset" name="fl::audio::SignalConditioner::reset">
+<area shape="rect" id="Node000001" title="Reset internal state (DC estimate, noise gate state)" alt="" coords="251,5,448,45"/>
+<area shape="rect" id="Node000002" href="$da/dde/classfl_1_1audio_1_1_signal_conditioner_ae9ddcc9d2ba1433ddd3f05944a17a995.html#ae9ddcc9d2ba1433ddd3f05944a17a995" title=" " alt="" coords="5,5,203,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="237,28,203,28,203,23,237,23"/>
+</map>

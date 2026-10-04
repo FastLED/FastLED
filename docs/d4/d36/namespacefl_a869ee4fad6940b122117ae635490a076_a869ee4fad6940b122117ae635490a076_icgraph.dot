@@ -1,0 +1,22 @@
+digraph "fl::psram_memory_resource"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::psram_memory_resource",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Get the PSRAM memory resource (wraps PSRamAllocate / PSRamDeallocate)."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::vector_psram::vector\l_psram",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/d7d/classfl_1_1vector__psram_aed3a651b8527501f2cb3247c945b7468.html#aed3a651b8527501f2cb3247c945b7468",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::vector_psram::vector\l_psram",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/d7d/classfl_1_1vector__psram_aa6a4a5b9bbc7f312cdf3bef23bb38337.html#aa6a4a5b9bbc7f312cdf3bef23bb38337",tooltip=" "];
+  Node2 -> Node4 [id="edge3_Node000002_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::vector_psram::vector\l_psram",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/d7d/classfl_1_1vector__psram_aad5b1489971adbb02679a0b0f924afdd.html#aad5b1489971adbb02679a0b0f924afdd",tooltip=" "];
+  Node2 -> Node5 [id="edge4_Node000002_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::vector_psram::operator=",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/d7d/classfl_1_1vector__psram_ad31d3cc589da5a4d287018d0aaaf6305.html#ad31d3cc589da5a4d287018d0aaaf6305",tooltip=" "];
+  Node2 -> Node6 [id="edge5_Node000002_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::vector_psram::operator=",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/d7d/classfl_1_1vector__psram_a701e01b0ed2eaa90cad53a4fae88025d.html#a701e01b0ed2eaa90cad53a4fae88025d",tooltip=" "];
+  Node1 -> Node7 [id="edge6_Node000001_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::vector_psram::vector\l_psram",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/d7d/classfl_1_1vector__psram_a95350d2528e2fd092ccbefb2432a1873.html#a95350d2528e2fd092ccbefb2432a1873",tooltip=" "];
+}

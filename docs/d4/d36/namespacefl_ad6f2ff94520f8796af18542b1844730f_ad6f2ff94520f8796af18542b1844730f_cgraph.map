@@ -1,0 +1,11 @@
+<map id="fl::buildBradfordMatrixQ16" name="fl::buildBradfordMatrixQ16">
+<area shape="rect" id="Node000001" title="Build the Bradford transform from source_white to destination_white." alt="" coords="5,55,200,80"/>
+<area shape="rect" id="Node000002" href="$df/d9e/namespacefl_1_1detail_a059959606a2f6831afbe363775710399.html#a059959606a2f6831afbe363775710399" title="One s16.16 matrix row against a vector, rounded and saturated." alt="" coords="271,5,429,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="166,52,272,31,273,36,168,57"/>
+<area shape="rect" id="Node000003" href="$df/d9e/namespacefl_1_1detail_a28fc4ef5fdd1fcf9a5868033fc0617b2.html#a28fc4ef5fdd1fcf9a5868033fc0617b2" title="The s16.16 building blocks the bind&#45;time builders share." alt="" coords="248,55,452,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="200,65,235,65,235,70,200,70"/>
+<area shape="rect" id="Node000004" href="$df/d9e/namespacefl_1_1detail_ad8dbf6e13640f3720b79e74c643def26.html#ad8dbf6e13640f3720b79e74c643def26" title="XYZ of chromaticity xy at luminance luminance, all s16.16; false for a non&#45;positive or out&#45;of&#45;simplex..." alt="" coords="259,104,441,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="168,77,273,99,272,104,166,83"/>
+<area shape="rect" id="Node000005" href="$de/d2f/_p_j_r_c_spectrum_analyzer_8h_a310eea447890e3471c6b27fd79dc94fc.html#a310eea447890e3471c6b27fd79dc94fc" title=" " alt="" coords="500,104,539,129"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="441,114,486,114,486,119,441,119"/>
+</map>

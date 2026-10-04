@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::UIButtonImpl",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d8d/classfl_1_1_u_i_button_impl.html",tooltip=" "];
+  Node0 [id="Node000000",label="mood_ring::Follower",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/dc9/classmood__ring_1_1_follower.html",tooltip="Smoothed one-pole follower with independent attack and release."];
 }

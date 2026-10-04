@@ -31,7 +31,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../df/da5/lib8tion_8h_adf8e83564c52b94d0ff5594aede0be28.html#adf8e83564c52b94d0ff5594aede0be28" target="_top" xlink:title="Generates a 16&#45;bit sine wave at a given BPM that oscillates within a given range.">
+<g id="a_Node000002"><a xlink:href="../../df/da5/lib8tion_8h_ac869590ebed22301d9a08cf7406128b3.html#ac869590ebed22301d9a08cf7406128b3" target="_top" xlink:title="Generates a 16&#45;bit sine wave at a given BPM that oscillates within a given range.">
 <polygon fill="white" stroke="#666666" points="187,-204 122,-204 122,-185 187,-185 187,-204"/>
 <text text-anchor="middle" x="154.5" y="-192" font-family="Helvetica,sans-Serif" font-size="10.00">beatsin16</text>
 </a>
@@ -49,7 +49,7 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../df/da5/lib8tion_8h_a696b9421eca961df0a68c7c6c3e983ab.html#a696b9421eca961df0a68c7c6c3e983ab" target="_top" xlink:title="Generates an 8&#45;bit sine wave at a given BPM that oscillates within a given range.">
+<g id="a_Node000003"><a xlink:href="../../df/da5/lib8tion_8h_aca012663c6c8fe9a7240bcbc76095ba9.html#aca012663c6c8fe9a7240bcbc76095ba9" target="_top" xlink:title="Generates an 8&#45;bit sine wave at a given BPM that oscillates within a given range.">
 <polygon fill="white" stroke="#666666" points="184,-167 125,-167 125,-148 184,-148 184,-167"/>
 <text text-anchor="middle" x="154.5" y="-155" font-family="Helvetica,sans-Serif" font-size="10.00">beatsin8</text>
 </a>

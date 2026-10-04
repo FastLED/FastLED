@@ -1,17 +1,30 @@
 <map id="fl::ChannelEvents::instance" name="fl::ChannelEvents::instance">
-<area shape="rect" id="Node000001" title=" " alt="" coords="292,146,435,186"/>
-<area shape="rect" id="Node000002" href="$d5/d8b/classfl_1_1_channel_aca6fc2d13573eb25aa436459fb7309e2.html#aca6fc2d13573eb25aa436459fb7309e2" title="Destructor." alt="" coords="43,5,206,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="339,136,298,88,272,64,243,44,205,30,207,25,245,40,275,60,302,84,343,133"/>
-<area shape="rect" id="Node000003" href="$d5/d8b/classfl_1_1_channel_a4ca6754b8f1a333ec18be19e505e56bc.html#a4ca6754b8f1a333ec18be19e505e56bc" title="Add this channel to the global controller draw list." alt="" coords="27,55,222,80"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="324,140,286,115,243,94,208,83,209,78,245,89,289,111,327,136"/>
-<area shape="rect" id="Node000004" href="$d5/d8b/classfl_1_1_channel_a4fd9736141ec00c1a8f5db47a0af1882.html#a4fd9736141ec00c1a8f5db47a0af1882" title="Apply reconfigurable settings from a ChannelConfig." alt="" coords="37,104,213,129"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="278,150,243,143,189,132,190,127,245,138,279,145"/>
-<area shape="rect" id="Node000005" href="$dd/dbb/class_c_fast_l_e_d_afdf3c3fcd91dcafbca741ae395570737.html#afdf3c3fcd91dcafbca741ae395570737" title="Access the channel event system." alt="" coords="32,153,217,179"/>
-<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="278,169,217,169,217,163,278,163"/>
-<area shape="rect" id="Node000006" href="$d5/d8b/classfl_1_1_channel_acb0aa97ad60c6c8a739a60610b2bc1f9.html#acb0aa97ad60c6c8a739a60610b2bc1f9" title="Create a new channel with optional mBus driver pinning." alt="" coords="55,203,195,228"/>
-<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="279,186,187,205,186,200,278,181"/>
-<area shape="rect" id="Node000007" href="$d5/d8b/classfl_1_1_channel_a0ba6c6bbdbae21db23f1310b9af6def9.html#a0ba6c6bbdbae21db23f1310b9af6def9" title="Remove this channel from the global controller draw list." alt="" coords="5,252,244,277"/>
-<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="326,196,288,220,245,242,205,254,203,249,243,237,285,216,323,192"/>
-<area shape="rect" id="Node000008" href="$d5/d8b/classfl_1_1_channel_a44414e176c7d2ef65fcdd390f6852322.html#a44414e176c7d2ef65fcdd390f6852322" title=" " alt="" coords="39,301,210,327"/>
-<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="343,199,301,247,275,271,245,291,211,305,209,300,243,286,272,267,298,243,339,195"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="511,246,653,286"/>
+<area shape="rect" id="Node000002" href="$d5/d8b/classfl_1_1_channel_a2cdf448e592885a6e905fbd3d68c833d.html#a2cdf448e592885a6e905fbd3d68c833d" title="Destructor." alt="" coords="262,5,425,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="570,233,556,189,534,138,503,87,483,64,461,44,444,34,424,27,426,22,446,29,464,40,487,60,507,83,539,135,561,187,575,232"/>
+<area shape="rect" id="Node000003" href="$d5/d8b/classfl_1_1_channel_a4ca6754b8f1a333ec18be19e505e56bc.html#a4ca6754b8f1a333ec18be19e505e56bc" title="Add this channel to the global controller draw list." alt="" coords="246,55,441,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="565,234,549,200,526,162,497,124,461,94,439,82,442,78,464,89,501,121,530,159,554,198,570,232"/>
+<area shape="rect" id="Node000004" href="$d5/d8b/classfl_1_1_channel_a4fd9736141ec00c1a8f5db47a0af1882.html#a4fd9736141ec00c1a8f5db47a0af1882" title="Apply reconfigurable settings from a ChannelConfig." alt="" coords="255,104,431,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="558,236,517,187,491,163,461,143,431,130,433,126,464,138,494,159,521,184,562,233"/>
+<area shape="rect" id="Node000005" href="$dd/dbb/class_c_fast_l_e_d_afdf3c3fcd91dcafbca741ae395570737.html#afdf3c3fcd91dcafbca741ae395570737" title="Access the channel event system." alt="" coords="251,153,436,179"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="543,240,505,215,462,192,427,181,429,176,464,188,508,210,546,235"/>
+<area shape="rect" id="Node000006" href="$d5/d8b/classfl_1_1_channel_acb0aa97ad60c6c8a739a60610b2bc1f9.html#acb0aa97ad60c6c8a739a60610b2bc1f9" title="Create a new channel with optional mBus driver pinning." alt="" coords="273,203,413,228"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="497,251,403,231,404,225,498,245"/>
+<area shape="rect" id="Node000007" href="$d5/d8b/classfl_1_1_channel_ad9a233b1ba5461dd9f955ab4caf67f01.html#ad9a233b1ba5461dd9f955ab4caf67f01" title=" " alt="" coords="21,228,161,253"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="497,264,161,247,161,242,497,259"/>
+<area shape="rect" id="Node000008" href="$d5/d8b/classfl_1_1_channel_ab8507a9fb4c6f089aa088d9668fd0325.html#ab8507a9fb4c6f089aa088d9668fd0325" title="Encode pixels into mChannelData and fire onChannelDataEncoded (#4566)." alt="" coords="250,304,437,329"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="498,287,404,307,403,301,497,281"/>
+<area shape="rect" id="Node000010" href="$d1/da7/namespacefl_1_1anonymous__namespace_02pipeline__binding_8cpp_8hpp_03_ae8fbc986ecc4d8004e199770fd89e2b7.html#ae8fbc986ecc4d8004e199770fd89e2b7" title=" " alt="" coords="226,378,461,447"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="539,296,464,343,404,380,401,375,461,338,536,291"/>
+<area shape="rect" id="Node000011" href="$d5/d8b/classfl_1_1_channel_a0ba6c6bbdbae21db23f1310b9af6def9.html#a0ba6c6bbdbae21db23f1310b9af6def9" title="Remove this channel from the global controller draw list." alt="" coords="224,472,463,497"/>
+<area shape="poly" id="edge12_Node000001_Node000011" title=" " alt="" coords="572,300,557,338,534,382,503,425,464,462,440,474,438,469,461,457,499,422,529,379,552,336,567,298"/>
+<area shape="rect" id="Node000012" href="$d5/d87/structfl_1_1_channel_options_ad12e16c7fd37d07cabadb738d9ddc4ad.html#ad12e16c7fd37d07cabadb738d9ddc4ad" title=" " alt="" coords="273,522,414,562"/>
+<area shape="poly" id="edge13_Node000001_Node000012" title=" " alt="" coords="576,300,563,347,541,404,508,461,488,488,464,511,441,525,415,535,413,530,439,521,461,507,484,484,504,458,536,402,558,345,571,298"/>
+<area shape="rect" id="Node000013" href="$d5/d8b/classfl_1_1_channel_addb05b5a8b6719a6a1f3856893931901.html#addb05b5a8b6719a6a1f3856893931901" title="Submit the encoded frame to driver: disabled&#45;driver drop + one&#45;shot diagnostic, enqueue,..." alt="" coords="251,587,436,612"/>
+<area shape="poly" id="edge14_Node000001_Node000013" title=" " alt="" coords="581,300,571,360,552,435,537,474,517,511,493,546,464,576,437,592,435,587,461,572,489,543,513,508,532,471,547,433,566,359,575,299"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="260,226,161,236,160,231,259,221"/>
+<area shape="rect" id="Node000009" href="$d5/d8b/classfl_1_1_channel_a44414e176c7d2ef65fcdd390f6852322.html#a44414e176c7d2ef65fcdd390f6852322" title=" " alt="" coords="5,445,176,471"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="245,336,225,344,187,368,153,396,104,447,101,443,149,392,184,364,223,340,243,331"/>
+<area shape="poly" id="edge11_Node000010_Node000010" title=" " alt="" coords="382,367,367,360,343,357,324,358,310,363,303,370,302,378,296,377,299,367,308,359,323,353,343,351,369,354,384,363"/>
+<area shape="poly" id="edge15_Node000013_Node000009" title=" " alt="" coords="243,585,223,576,184,552,149,524,101,473,104,469,153,520,187,548,225,572,245,580"/>
 </map>

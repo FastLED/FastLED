@@ -21,7 +21,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../dd/d76/namespacefl_1_1third__party_1_1hexwave_ae1d7f1bfbf1e38371ddb8430a353d7bf.html#ae1d7f1bfbf1e38371ddb8430a353d7bf" target="_top" xlink:title="Create and initialize a new HexWaveEngine.">
+<g id="a_Node000002"><a xlink:href="../../dd/d76/namespacefl_1_1third__party_1_1hexwave_a6ddfc96d0df884c137e6dbd8a0ace213.html#a6ddfc96d0df884c137e6dbd8a0ace213" target="_top" xlink:title="Create and initialize a new HexWaveEngine.">
 <polygon fill="white" stroke="#666666" points="311,-78 170,-78 170,-48 311,-48 311,-78"/>
 <text text-anchor="start" x="178" y="-66" font-family="Helvetica,sans-Serif" font-size="10.00">fl::third_party::hexwave</text>
 <text text-anchor="middle" x="240.5" y="-55" font-family="Helvetica,sans-Serif" font-size="10.00">::hexwave_engine_create</text>
@@ -40,7 +40,7 @@
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../dd/d76/namespacefl_1_1third__party_1_1hexwave_a02ab69db1ef35ecf2336643ebbd4e742.html#a02ab69db1ef35ecf2336643ebbd4e742" target="_top" xlink:title="Destroy a HexWaveEngine and free its resources.">
+<g id="a_Node000004"><a xlink:href="../../dd/d76/namespacefl_1_1third__party_1_1hexwave_a2ec99d613618bc4b1c466690be5bbc08.html#a2ec99d613618bc4b1c466690be5bbc08" target="_top" xlink:title="Destroy a HexWaveEngine and free its resources.">
 <polygon fill="white" stroke="#666666" points="314,-30 167,-30 167,0 314,0 314,-30"/>
 <text text-anchor="start" x="175" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">fl::third_party::hexwave</text>
 <text text-anchor="middle" x="240.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">::hexwave_engine_destroy</text>
@@ -59,7 +59,7 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../dd/d76/namespacefl_1_1third__party_1_1hexwave_aa3919fa11833cf2e47534f6941a764b1.html#aa3919fa11833cf2e47534f6941a764b1" target="_top" xlink:title="Initialize the hexwave library (DEPRECATED &#45; use hexwave_engine_create)">
+<g id="a_Node000003"><a xlink:href="../../dd/d76/namespacefl_1_1third__party_1_1hexwave_acf75dfc3efad30e0203f2adfcf379f2a.html#acf75dfc3efad30e0203f2adfcf379f2a" target="_top" xlink:title="Initialize the hexwave library (DEPRECATED &#45; use hexwave_engine_create)">
 <polygon fill="white" stroke="#666666" points="131,-78 0,-78 0,-48 131,-48 131,-78"/>
 <text text-anchor="start" x="8" y="-66" font-family="Helvetica,sans-Serif" font-size="10.00">fl::third_party::hexwave</text>
 <text text-anchor="middle" x="65.5" y="-55" font-family="Helvetica,sans-Serif" font-size="10.00">::hexwave_init</text>
@@ -87,7 +87,7 @@
 <!-- Node5 -->
 <g id="Node000005" class="node">
 <title>Node5</title>
-<g id="a_Node000005"><a xlink:href="../../dd/d76/namespacefl_1_1third__party_1_1hexwave_ad85887b0f8a194b325e94dce4942c60e.html#ad85887b0f8a194b325e94dce4942c60e" target="_top" xlink:title="Shutdown the hexwave library (DEPRECATED &#45; use hexwave_engine_destroy)">
+<g id="a_Node000005"><a xlink:href="../../dd/d76/namespacefl_1_1third__party_1_1hexwave_a5dfba6f4edb0d0eba22df4c0029fba45.html#a5dfba6f4edb0d0eba22df4c0029fba45" target="_top" xlink:title="Shutdown the hexwave library (DEPRECATED &#45; use hexwave_engine_destroy)">
 <polygon fill="white" stroke="#666666" points="131,-30 0,-30 0,0 131,0 131,-30"/>
 <text text-anchor="start" x="8" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">fl::third_party::hexwave</text>
 <text text-anchor="middle" x="65.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">::hexwave_shutdown</text>

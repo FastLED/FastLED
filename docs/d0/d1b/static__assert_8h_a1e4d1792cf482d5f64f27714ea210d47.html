@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -114,14 +114,18 @@ $(function(){initNavTree('d0/d1b/static__assert_8h_a1e4d1792cf482d5f64f27714ea21
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line">    <a class="code hl_define" href="../../df/d96/s16x16x4_8h_a341572979ede15faf001d87eb036acaf.html#a341572979ede15faf001d87eb036acaf">FL_STATIC_ASSERT_IMPL</a>((<a class="code hl_define" href="../../df/d96/s16x16x4_8h_a8500c1c4bacb65320a449fa8e973ea16.html#a8500c1c4bacb65320a449fa8e973ea16">FL_STATIC_ASSERT_EXPR</a>(__VA_ARGS__)))</div>
-<div class="ttc" id="as16x16x4_8h_a341572979ede15faf001d87eb036acaf_html_a341572979ede15faf001d87eb036acaf"><div class="ttname"><a href="../../df/d96/s16x16x4_8h_a341572979ede15faf001d87eb036acaf.html#a341572979ede15faf001d87eb036acaf">FL_STATIC_ASSERT_IMPL</a></div><div class="ttdeci">#define FL_STATIC_ASSERT_IMPL(expression)</div></div>
-<div class="ttc" id="as16x16x4_8h_a8500c1c4bacb65320a449fa8e973ea16_html_a8500c1c4bacb65320a449fa8e973ea16"><div class="ttname"><a href="../../df/d96/s16x16x4_8h_a8500c1c4bacb65320a449fa8e973ea16.html#a8500c1c4bacb65320a449fa8e973ea16">FL_STATIC_ASSERT_EXPR</a></div><div class="ttdeci">#define FL_STATIC_ASSERT_EXPR(...)</div></div>
+<b>Value:</b><div class="fragment"><div class="line">    <a class="code hl_define" href="../../d0/d1b/static__assert_8h_a341572979ede15faf001d87eb036acaf.html#a341572979ede15faf001d87eb036acaf">FL_STATIC_ASSERT_IMPL</a>((<a class="code hl_define" href="../../d0/d1b/static__assert_8h_a8500c1c4bacb65320a449fa8e973ea16.html#a8500c1c4bacb65320a449fa8e973ea16">FL_STATIC_ASSERT_EXPR</a>(__VA_ARGS__)))</div>
+<div class="ttc" id="astatic__assert_8h_a341572979ede15faf001d87eb036acaf_html_a341572979ede15faf001d87eb036acaf"><div class="ttname"><a href="../../d0/d1b/static__assert_8h_a341572979ede15faf001d87eb036acaf.html#a341572979ede15faf001d87eb036acaf">FL_STATIC_ASSERT_IMPL</a></div><div class="ttdeci">#define FL_STATIC_ASSERT_IMPL(expression)</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d1b/static__assert_8h_source.html#l00020">static_assert.h:20</a></div></div>
+<div class="ttc" id="astatic__assert_8h_a8500c1c4bacb65320a449fa8e973ea16_html_a8500c1c4bacb65320a449fa8e973ea16"><div class="ttname"><a href="../../d0/d1b/static__assert_8h_a8500c1c4bacb65320a449fa8e973ea16.html#a8500c1c4bacb65320a449fa8e973ea16">FL_STATIC_ASSERT_EXPR</a></div><div class="ttdeci">#define FL_STATIC_ASSERT_EXPR(...)</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d1b/static__assert_8h_source.html#l00055">static_assert.h:55</a></div></div>
+</div><!-- fragment --><dl class="section examples"><dt>Examples</dt><dd><a class="el" href="../../db/dce/hydropack_8ino-example.html#a0">hydropack.ino</a>.</dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="../../d0/d1b/static__assert_8h_source.html#l00071">71</a> of file <a class="el" href="../../d0/d1b/static__assert_8h_source.html">static_assert.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   71</span><span class="preprocessor">#define FL_STATIC_ASSERT(...)                                                 \</span></div>
+<div class="line"><span class="lineno">   72</span><span class="preprocessor">    FL_STATIC_ASSERT_IMPL((FL_STATIC_ASSERT_EXPR(__VA_ARGS__)))</span></div>
 </div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../df/d96/s16x16x4_8h_source.html#l00072">72</a> of file <a class="el" href="../../df/d96/s16x16x4_8h_source.html">s16x16x4.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   72</span>    }</div>
-<div class="line"><span class="lineno">   73</span> </div>
-</div><!-- fragment -->
+<p class="reference">Referenced by <a class="el" href="../../d6/d68/vector_8h_source.html#l00114">fl::FixedVector&lt; fl::u32, kMaxBatchSize &gt;::FixedVector()</a>, <a class="el" href="../../df/da2/noisepalette_8cpp_8hpp_source.html#l00019">fl::NoisePalette::NoisePalette()</a>, <a class="el" href="../../df/d99/slim__bridge__controller_8h_source.html#l00108">fl::SlimBridgeController&lt; DATA_PIN, TIMING, RGB_ORDER, WAIT_TIME, DriverTraits, XTRA0, DIRECT_SHOW &gt;::SlimBridgeController()</a>, <a class="el" href="../../d6/d64/fastled_8h_source.html#l01290">CFastLED::addLeds()</a>, <a class="el" href="../../d6/d64/fastled_8h_source.html#l01277">CFastLED::addLeds()</a>, <a class="el" href="../../df/d72/bit__cast_8h_source.html#l00048">fl::bit_cast()</a>, <a class="el" href="../../d3/d61/stl_2string_8cpp_8hpp_source.html#l00307">fl::string::compileTimeAssertions()</a>, <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00156">PixelController&lt; RGB_ORDER, LANES, MASK &gt;::copy()</a>, <a class="el" href="../../d1/d69/bitset_8h_source.html#l00013">FL_DISABLE_WARNING()</a>, <a class="el" href="../../dd/d67/function_8h_source.html#l00036">FL_DISABLE_WARNING()</a>, <a class="el" href="../../d3/da0/fastpin__base_8h_source.html#l00019">FL_DISABLE_WARNING()</a>, <a class="el" href="../../db/d24/type__traits_8cpp_8hpp_source.html#l00008">FL_DISABLE_WARNING()</a>, <a class="el" href="../../df/d63/type__traits_8h_source.html#l00240">fl::forward()</a>, <a class="el" href="../../d3/d41/pair_8h_source.html#l00125">fl::get()</a>, <a class="el" href="../../d3/d41/pair_8h_source.html#l00135">fl::get()</a>, <a class="el" href="../../d3/d41/pair_8h_source.html#l00115">fl::get()</a>, <a class="el" href="../../d0/d1b/charconv_8h_source.html#l00060">fl::detail::get_hex_int_width()</a>, and <a class="el" href="../../da/d4b/unique__ptr_8h_source.html#l00014">fl::default_delete&lt; T &gt;::operator()()</a>.</p>
+
 </div>
 </div>
 </div><!-- contents -->
@@ -131,7 +135,7 @@ $(function(){initNavTree('d0/d1b/static__assert_8h_a1e4d1792cf482d5f64f27714ea21
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_0dd6897a8ae40540acd9d694849e950e.html">stl</a></li><li class="navelem"><a class="el" href="../../d0/d1b/static__assert_8h.html">static_assert.h</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:01 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:05 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

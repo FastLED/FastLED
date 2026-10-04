@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -128,20 +128,20 @@ $(function(){initNavTree('df/d60/classfl_1_1net_1_1http_1_1_chunked_writer_a6cc4
 <div class="line"><span class="lineno">  179</span>    <span class="comment">// Overhead: hex-digits + &quot;\r\n&quot; + data + &quot;\r\n&quot;</span></div>
 <div class="line"><span class="lineno">  180</span>    <span class="comment">// Count hex digits needed</span></div>
 <div class="line"><span class="lineno">  181</span>    <span class="keywordtype">char</span> sizeHex[32];</div>
-<div class="line"><span class="lineno">  182</span>    <span class="keywordtype">int</span> hexLen = <a class="code hl_function" href="../../d4/d36/namespacefl_a57cbbc0e3769d2f6c4a7919e29646708.html#a57cbbc0e3769d2f6c4a7919e29646708">fl::snprintf</a>(sizeHex, <span class="keyword">sizeof</span>(sizeHex), <span class="stringliteral">&quot;%zx&quot;</span>, dataLen);</div>
+<div class="line"><span class="lineno">  182</span>    <span class="keywordtype">int</span> hexLen = <a class="code hl_function" href="../../d4/d36/namespacefl_a17646782eea1132270233120225036ac.html#a17646782eea1132270233120225036ac">fl::snprintf</a>(sizeHex, <span class="keyword">sizeof</span>(sizeHex), <span class="stringliteral">&quot;%zx&quot;</span>, dataLen);</div>
 <div class="line"><span class="lineno">  183</span>    <span class="keywordflow">return</span> <span class="keyword">static_cast&lt;</span><span class="keywordtype">size_t</span><span class="keyword">&gt;</span>(hexLen) + 2 + dataLen + 2; <span class="comment">// hex + \r\n + data + \r\n</span></div>
 <div class="line"><span class="lineno">  184</span>}</div>
-<div class="ttc" id="anamespacefl_a57cbbc0e3769d2f6c4a7919e29646708_html_a57cbbc0e3769d2f6c4a7919e29646708"><div class="ttname"><a href="../../d4/d36/namespacefl_a57cbbc0e3769d2f6c4a7919e29646708.html#a57cbbc0e3769d2f6c4a7919e29646708">fl::snprintf</a></div><div class="ttdeci">int snprintf(char *buffer, fl::size size, const char *format, const Args &amp;... args) FL_NOEXCEPT</div><div class="ttdoc">Snprintf-like formatting function that writes to a buffer.</div><div class="ttdef"><b>Definition</b> <a href="../../d6/dd1/stdio_8h_source.html#l00666">stdio.h:666</a></div></div>
+<div class="ttc" id="anamespacefl_a17646782eea1132270233120225036ac_html_a17646782eea1132270233120225036ac"><div class="ttname"><a href="../../d4/d36/namespacefl_a17646782eea1132270233120225036ac.html#a17646782eea1132270233120225036ac">fl::snprintf</a></div><div class="ttdeci">int snprintf(char *buffer, fl::size size, const char *format) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/d5f/stdio_8cpp_8hpp_source.html#l00292">stdio.cpp.hpp:292</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d6/dd1/stdio_8h_source.html#l00666">fl::snprintf()</a>.</p>
+<p class="reference">References <a class="el" href="../../df/d5f/stdio_8cpp_8hpp_source.html#l00292">fl::snprintf()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../da/d64/stream__transport_8cpp_8hpp_source.html#l00291">fl::net::http::HttpStreamTransport::writeResponse()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../da/d64/stream__transport_8cpp_8hpp_source.html#l00295">fl::net::http::HttpStreamTransport::writeResponse()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../df/d60/classfl_1_1net_1_1http_1_1_chunked_writer_a6cc4b9a8a90698f7d822d2116a24c566_a6cc4b9a8a90698f7d822d2116a24c566_cgraph.svg" width="100%" height="392"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../df/d60/classfl_1_1net_1_1http_1_1_chunked_writer_a6cc4b9a8a90698f7d822d2116a24c566_a6cc4b9a8a90698f7d822d2116a24c566_cgraph.svg" width="100%" height="300"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 <div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
@@ -160,7 +160,7 @@ $(function(){initNavTree('df/d60/classfl_1_1net_1_1http_1_1_chunked_writer_a6cc4
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d5/dc9/namespacefl_1_1net.html">net</a></li><li class="navelem"><a class="el" href="../../d1/d13/namespacefl_1_1net_1_1http.html">http</a></li><li class="navelem"><a class="el" href="../../df/d60/classfl_1_1net_1_1http_1_1_chunked_writer.html">ChunkedWriter</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:10 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:12 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

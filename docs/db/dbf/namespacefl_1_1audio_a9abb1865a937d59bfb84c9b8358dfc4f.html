@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -159,14 +159,14 @@ $(function(){initNavTree('db/dbf/namespacefl_1_1audio_a9abb1865a937d59bfb84c9b83
 <div class="line"><span class="lineno">  254</span>    <span class="keywordtype">float</span> gHi = <a class="code hl_function" href="../../db/dbf/namespacefl_1_1audio_a610a49f05f8bf305145207b418c9292d.html#a610a49f05f8bf305145207b418c9292d">fl_progmem_read_float</a>(&amp;curve.<a class="code hl_variable" href="../../db/dbf/namespacefl_1_1audio.html#aa3dfd9ddcda804e2304e3c577f4cc89f">gains</a>[hi]);</div>
 <div class="line"><span class="lineno">  255</span> </div>
 <div class="line"><span class="lineno">  256</span>    <span class="comment">// Log-frequency linear interpolation</span></div>
-<div class="line"><span class="lineno">  257</span>    <span class="keywordtype">float</span> logFrac = <a class="code hl_function" href="../../d4/d36/namespacefl_af3a8e787bc8bcd73dcddb8b47a826554.html#af3a8e787bc8bcd73dcddb8b47a826554">fl::logf</a>(freq_hz / fLo) / <a class="code hl_function" href="../../d4/d36/namespacefl_af3a8e787bc8bcd73dcddb8b47a826554.html#af3a8e787bc8bcd73dcddb8b47a826554">fl::logf</a>(fHi / fLo);</div>
+<div class="line"><span class="lineno">  257</span>    <span class="keywordtype">float</span> logFrac = <a class="code hl_function" href="../../d4/d36/namespacefl_a009a6061a9324e18ae194e4c16749297.html#a009a6061a9324e18ae194e4c16749297">fl::logf</a>(freq_hz / fLo) / <a class="code hl_function" href="../../d4/d36/namespacefl_a009a6061a9324e18ae194e4c16749297.html#a009a6061a9324e18ae194e4c16749297">fl::logf</a>(fHi / fLo);</div>
 <div class="line"><span class="lineno">  258</span>    <span class="keywordflow">return</span> gLo + (gHi - gLo) * logFrac;</div>
 <div class="line"><span class="lineno">  259</span>}</div>
 <div class="ttc" id="anamespacefl_1_1audio_a610a49f05f8bf305145207b418c9292d_html_a610a49f05f8bf305145207b418c9292d"><div class="ttname"><a href="../../db/dbf/namespacefl_1_1audio_a610a49f05f8bf305145207b418c9292d.html#a610a49f05f8bf305145207b418c9292d">fl::audio::fl_progmem_read_float</a></div><div class="ttdeci">float fl_progmem_read_float(const float *addr)</div><div class="ttdoc">Read a float from PROGMEM.</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d8b/mic__response__data_8h_source.html#l00025">mic_response_data.h:25</a></div></div>
 <div class="ttc" id="anamespacefl_1_1audio_html_a00591153abf495b32273ee767ec3235b"><div class="ttname"><a href="../../db/dbf/namespacefl_1_1audio.html#a00591153abf495b32273ee767ec3235b">fl::audio::MicResponseCurve::freqs</a></div><div class="ttdeci">const float * freqs</div><div class="ttdoc">Pointer to frequency array (PROGMEM)</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d8b/mic__response__data_8h_source.html#l00190">mic_response_data.h:190</a></div></div>
 <div class="ttc" id="anamespacefl_1_1audio_html_a51e06694e915fc8431f8c9531ae7cada"><div class="ttname"><a href="../../db/dbf/namespacefl_1_1audio.html#a51e06694e915fc8431f8c9531ae7cada">fl::audio::MicResponseCurve::count</a></div><div class="ttdeci">int count</div><div class="ttdoc">Number of data points.</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d8b/mic__response__data_8h_source.html#l00192">mic_response_data.h:192</a></div></div>
 <div class="ttc" id="anamespacefl_1_1audio_html_aa3dfd9ddcda804e2304e3c577f4cc89f"><div class="ttname"><a href="../../db/dbf/namespacefl_1_1audio.html#aa3dfd9ddcda804e2304e3c577f4cc89f">fl::audio::MicResponseCurve::gains</a></div><div class="ttdeci">const float * gains</div><div class="ttdoc">Pointer to gain array (PROGMEM)</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d8b/mic__response__data_8h_source.html#l00191">mic_response_data.h:191</a></div></div>
-<div class="ttc" id="anamespacefl_af3a8e787bc8bcd73dcddb8b47a826554_html_af3a8e787bc8bcd73dcddb8b47a826554"><div class="ttname"><a href="../../d4/d36/namespacefl_af3a8e787bc8bcd73dcddb8b47a826554.html#af3a8e787bc8bcd73dcddb8b47a826554">fl::logf</a></div><div class="ttdeci">float logf(float value) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00418">math.h:418</a></div></div>
+<div class="ttc" id="anamespacefl_a009a6061a9324e18ae194e4c16749297_html_a009a6061a9324e18ae194e4c16749297"><div class="ttname"><a href="../../d4/d36/namespacefl_a009a6061a9324e18ae194e4c16749297.html#a009a6061a9324e18ae194e4c16749297">fl::logf</a></div><div class="ttdeci">float logf(float value) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00418">math.h:418</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../d6/d8b/mic__response__data_8h_source.html#l00192">fl::audio::MicResponseCurve::count</a>, <a class="el" href="../../d6/d8b/mic__response__data_8h_source.html#l00025">fl_progmem_read_float()</a>, <a class="el" href="../../d6/d8b/mic__response__data_8h_source.html#l00190">fl::audio::MicResponseCurve::freqs</a>, <a class="el" href="../../d6/d8b/mic__response__data_8h_source.html#l00191">fl::audio::MicResponseCurve::gains</a>, and <a class="el" href="../../df/db1/math_8h_source.html#l00418">fl::logf()</a>.</p>
 
@@ -195,7 +195,7 @@ $(function(){initNavTree('db/dbf/namespacefl_1_1audio_a9abb1865a937d59bfb84c9b83
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../db/dbf/namespacefl_1_1audio.html">audio</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:07 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:11 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

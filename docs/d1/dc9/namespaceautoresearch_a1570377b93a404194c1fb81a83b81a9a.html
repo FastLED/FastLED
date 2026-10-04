@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -123,26 +123,34 @@ $(function(){initNavTree('d1/dc9/namespaceautoresearch_a1570377b93a404194c1fb81a
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d4/d9d/_auto_research_platform_8h_source.html#l00012">12</a> of file <a class="el" href="../../d4/d9d/_auto_research_platform_8h_source.html">AutoResearchPlatform.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   12</span>                             {</div>
-<div class="line"><span class="lineno">   13</span><span class="preprocessor">#if defined(FL_IS_STUB)</span></div>
-<div class="line"><span class="lineno">   14</span>    <span class="keywordflow">return</span> 1;  <span class="comment">// Stub: TX and RX same pin — NativeRxDevice monitors TX output directly</span></div>
-<div class="line"><span class="lineno">   15</span><span class="preprocessor">#elif defined(FL_IS_ESP_32S3)</span></div>
-<div class="line"><span class="lineno">   16</span>    <span class="keywordflow">return</span> 1;  <span class="comment">// ESP32-S3: Connect GPIO 1 (TX) to GPIO 2 (RX) with jumper wire</span></div>
-<div class="line"><span class="lineno">   17</span><span class="preprocessor">#elif defined(FL_IS_ESP_32S2)</span></div>
-<div class="line"><span class="lineno">   18</span>    <span class="keywordflow">return</span> 1;  <span class="comment">// ESP32-S2</span></div>
-<div class="line"><span class="lineno">   19</span><span class="preprocessor">#elif defined(FL_IS_ESP_32C6)</span></div>
-<div class="line"><span class="lineno">   20</span>    <span class="keywordflow">return</span> 1;  <span class="comment">// ESP32-C6 (RISC-V)</span></div>
-<div class="line"><span class="lineno">   21</span><span class="preprocessor">#elif defined(FL_IS_ESP_32C3)</span></div>
-<div class="line"><span class="lineno">   22</span>    <span class="keywordflow">return</span> 1;  <span class="comment">// ESP32-C3 (RISC-V)</span></div>
-<div class="line"><span class="lineno">   23</span><span class="preprocessor">#elif defined(FL_IS_ESP_32P4)</span></div>
-<div class="line"><span class="lineno">   24</span>    <span class="keywordflow">return</span> 5;  <span class="comment">// ESP32-P4: Connect GPIO 5 (TX) to GPIO 6 (RX) with jumper wire</span></div>
-<div class="line"><span class="lineno">   25</span><span class="preprocessor">#elif defined(FL_IS_TEENSY_4X)</span></div>
-<div class="line"><span class="lineno">   26</span>    <span class="keywordflow">return</span> 1;  <span class="comment">// Teensy 4.x: any GPIO works for TX</span></div>
-<div class="line"><span class="lineno">   27</span><span class="preprocessor">#else</span></div>
-<div class="line"><span class="lineno">   28</span>    <span class="keywordflow">return</span> 1;  <span class="comment">// ESP32 (classic) and other variants</span></div>
-<div class="line"><span class="lineno">   29</span><span class="preprocessor">#endif</span></div>
-<div class="line"><span class="lineno">   30</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../d4/d9d/_auto_research_platform_8h_source.html#l00018">18</a> of file <a class="el" href="../../d4/d9d/_auto_research_platform_8h_source.html">AutoResearchPlatform.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   18</span>                             {</div>
+<div class="line"><span class="lineno">   19</span><span class="preprocessor">#if defined(FL_IS_STUB)</span></div>
+<div class="line"><span class="lineno">   20</span>    <span class="keywordflow">return</span> 1;  <span class="comment">// Stub: TX and RX same pin — NativeRxDevice monitors TX output directly</span></div>
+<div class="line"><span class="lineno">   21</span><span class="preprocessor">#elif defined(FL_IS_ESP_32S3)</span></div>
+<div class="line"><span class="lineno">   22</span>    <span class="keywordflow">return</span> 1;  <span class="comment">// ESP32-S3: Connect GPIO 1 (TX) to GPIO 2 (RX) with jumper wire</span></div>
+<div class="line"><span class="lineno">   23</span><span class="preprocessor">#elif defined(FL_IS_ESP_32S2)</span></div>
+<div class="line"><span class="lineno">   24</span>    <span class="keywordflow">return</span> 1;  <span class="comment">// ESP32-S2</span></div>
+<div class="line"><span class="lineno">   25</span><span class="preprocessor">#elif defined(FL_IS_ESP_32C6)</span></div>
+<div class="line"><span class="lineno">   26</span>    <span class="keywordflow">return</span> 1;  <span class="comment">// ESP32-C6 (RISC-V)</span></div>
+<div class="line"><span class="lineno">   27</span><span class="preprocessor">#elif defined(FL_IS_ESP_32C3)</span></div>
+<div class="line"><span class="lineno">   28</span>    <span class="keywordflow">return</span> 1;  <span class="comment">// ESP32-C3 (RISC-V)</span></div>
+<div class="line"><span class="lineno">   29</span><span class="preprocessor">#elif defined(FL_IS_ESP_32P4)</span></div>
+<div class="line"><span class="lineno">   30</span>    <span class="keywordflow">return</span> 5;  <span class="comment">// ESP32-P4: Connect GPIO 5 (TX) to GPIO 6 (RX) with jumper wire</span></div>
+<div class="line"><span class="lineno">   31</span><span class="preprocessor">#elif defined(FL_IS_TEENSY_4X)</span></div>
+<div class="line"><span class="lineno">   32</span>    <span class="keywordflow">return</span> 1;  <span class="comment">// Teensy 4.x: any GPIO works for TX</span></div>
+<div class="line"><span class="lineno">   33</span><span class="preprocessor">#elif defined(FL_IS_ESP_32DEV)</span></div>
+<div class="line"><span class="lineno">   34</span>    <span class="comment">// ESP32 (classic): GPIO 33 → GPIO 34 jumper. GPIO34 is input-only</span></div>
+<div class="line"><span class="lineno">   35</span>    <span class="comment">// (no output driver, no boot-strap role) which makes it an ideal RX</span></div>
+<div class="line"><span class="lineno">   36</span>    <span class="comment">// pin, and 33/34 avoid GPIO0/1/3 (boot strap + UART0, see #3452).</span></div>
+<div class="line"><span class="lineno">   37</span>    <span class="comment">// The WROOM COM11 bench harness is physically wired 33 → 34</span></div>
+<div class="line"><span class="lineno">   38</span>    <span class="comment">// (verified electrically in FastLED#3569 — the previously-documented</span></div>
+<div class="line"><span class="lineno">   39</span>    <span class="comment">// 18 → 19 pair was never connected there).</span></div>
+<div class="line"><span class="lineno">   40</span>    <span class="keywordflow">return</span> 33;</div>
+<div class="line"><span class="lineno">   41</span><span class="preprocessor">#else</span></div>
+<div class="line"><span class="lineno">   42</span>    <span class="keywordflow">return</span> 1;  <span class="comment">// Other variants</span></div>
+<div class="line"><span class="lineno">   43</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">   44</span>}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -153,7 +161,7 @@ $(function(){initNavTree('d1/dc9/namespaceautoresearch_a1570377b93a404194c1fb81a
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d1/dc9/namespaceautoresearch.html">autoresearch</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:03 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -1,11 +1,19 @@
 <map id="fl::PixelIterator" name="fl::PixelIterator">
-<area shape="rect" id="Node000001" title=" " alt="" coords="73,313,191,339"/>
-<area shape="rect" id="Node000002" href="$d7/d27/structfl_1_1_rgbw.html" title=" " alt="" coords="5,211,80,236"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="40,250,40,270,46,288,60,301,77,311,75,316,57,306,42,291,34,270,34,250"/>
-<area shape="rect" id="Node000003" href="$d4/df9/structfl_1_1_rgbww.html" title="Per&#45;strip RGBWW configuration." alt="" coords="180,211,265,236"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="218,250,209,271,195,291,179,305,162,315,159,311,176,301,191,288,204,269,213,248"/>
-<area shape="rect" id="Node000004" href="$d7/df0/namespacefl_1_1colorimetric__detail.html#d1/d65/structfl_1_1colorimetric__detail_1_1_rgbcct_profile" title=" " alt="" coords="143,108,303,148"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="225,162,225,210,220,210,220,162"/>
-<area shape="rect" id="Node000005" href="$d4/d36/namespacefl.html#d5/db5/structfl_1_1_diode_profile" title=" " alt="" coords="164,5,281,31"/>
-<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="225,45,225,108,220,108,220,45"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="89,416,207,441"/>
+<area shape="rect" id="Node000002" href="$d7/d27/structfl_1_1_rgbw.html" title=" " alt="" coords="239,299,313,324"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="275,338,267,367,250,394,230,409,208,419,206,414,228,404,246,390,262,365,270,337"/>
+<area shape="rect" id="Node000003" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="193,196,351,236"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="276,249,278,298,273,298,271,250"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl.html#d5/db5/structfl_1_1_diode_profile" title=" " alt="" coords="72,93,189,119"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="158,125,178,141,211,170,244,194,241,198,208,174,174,145,155,129"/>
+<area shape="rect" id="Node000010" href="$d7/df0/namespacefl_1_1colorimetric__detail.html#d1/d65/structfl_1_1colorimetric__detail_1_1_rgbcct_profile" title=" " alt="" coords="5,196,165,236"/>
+<area shape="poly" id="edge9_Node000010_Node000004" title=" " alt="" coords="113,131,105,144,96,171,90,196,85,195,90,169,100,142,108,128"/>
+<area shape="rect" id="Node000005" href="$d4/dc0/structfl_1_1detail_1_1_control_block_base.html" title=" " alt="" coords="186,5,385,31"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="285,45,280,94,275,196,270,196,275,93,280,44"/>
+<area shape="rect" id="Node000008" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="390,93,535,119"/>
+<area shape="poly" id="edge6_Node000008_Node000005" title=" " alt="" coords="322,34,440,91,437,95,320,39"/>
+<area shape="poly" id="edge5_Node000003_Node000008" title=" " alt="" coords="432,128,307,198,304,194,429,123"/>
+<area shape="rect" id="Node000009" href="$d4/df9/structfl_1_1_rgbww.html" title="Per&#45;strip RGBWW configuration." alt="" coords="15,299,100,324"/>
+<area shape="poly" id="edge7_Node000001_Node000009" title=" " alt="" coords="33,335,24,349,17,371,18,380,23,390,37,403,53,413,90,423,88,428,51,418,33,408,19,394,13,382,11,371,19,347,29,332"/>
+<area shape="poly" id="edge8_Node000009_Node000010" title=" " alt="" coords="78,250,63,299,58,298,73,248"/>
 </map>

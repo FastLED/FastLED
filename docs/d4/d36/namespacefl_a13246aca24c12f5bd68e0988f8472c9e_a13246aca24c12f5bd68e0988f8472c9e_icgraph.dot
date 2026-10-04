@@ -1,0 +1,16 @@
+digraph "fl::hd108BrightnessHeader"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::hd108BrightnessHeader",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Generate HD108 per-channel gain header bytes."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::encodeHD108",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_abad7b4680c275886479984cc54800dfc.html#abad7b4680c275886479984cc54800dfc",tooltip="Encode pixel data in HD108 format with global brightness."];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::encodeHD108_HD",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a2a8030e1bbf76bc63c5c918bdcf8b298.html#a2a8030e1bbf76bc63c5c918bdcf8b298",tooltip="Encode pixel data in HD108 format with per-LED brightness."];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::PixelIterator::\lwriteHD108",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d09/classfl_1_1_pixel_iterator_a02a0090c88b4f5b4dde6805eefc017bc.html#a02a0090c88b4f5b4dde6805eefc017bc",tooltip="Encode pixels in HD108 format (zero allocation)"];
+}

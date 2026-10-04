@@ -1,0 +1,15 @@
+<map id="fl::Server::Server" name="fl::Server::Server">
+<area shape="rect" id="Node000001" title="Default constructor." alt="" coords="208,129,339,155"/>
+<area shape="rect" id="Node000002" href="$dc/ddb/classfl_1_1_remote_a549234968f4a850e2e774a27c0ca5ff2.html#a549234968f4a850e2e774a27c0ca5ff2" title="Construct with I/O callbacks, including streamed response output." alt="" coords="9,5,157,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="250,121,210,82,159,44,134,33,136,28,161,40,213,78,254,117"/>
+<area shape="rect" id="Node000003" href="$dc/d00/classfl_1_1_server_a84b9a09e9e43aa19f1eeb170813d757c.html#a84b9a09e9e43aa19f1eeb170813d757c" title=" " alt="" coords="17,55,148,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="233,126,159,94,126,83,128,78,161,89,235,121"/>
+<area shape="rect" id="Node000004" href="$dc/d00/classfl_1_1_server_af87a671067483ea6b778ec1756e0ce00.html#af87a671067483ea6b778ec1756e0ce00" title=" " alt="" coords="17,104,148,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="194,134,148,128,149,123,195,129"/>
+<area shape="rect" id="Node000005" href="$dc/d00/classfl_1_1_server_a8c72e6c60e55d37fbdc598d1a221b7b8.html#a8c72e6c60e55d37fbdc598d1a221b7b8" title=" " alt="" coords="12,153,153,179"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="195,155,154,160,153,154,194,149"/>
+<area shape="rect" id="Node000006" href="$dc/d00/classfl_1_1_server_a2f7c3d624a4333967371ebb989f15314.html#a2f7c3d624a4333967371ebb989f15314" title=" " alt="" coords="5,203,160,228"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="233,163,161,192,125,205,124,200,159,188,231,158"/>
+<area shape="rect" id="Node000007" href="$dc/d00/classfl_1_1_server_a4c07bac803c0e25c85c5b29209b8be52.html#a4c07bac803c0e25c85c5b29209b8be52" title=" " alt="" coords="5,252,160,277"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="253,167,212,205,161,242,133,254,131,249,159,237,209,201,249,163"/>
+</map>

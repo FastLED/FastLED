@@ -1,0 +1,38 @@
+digraph "fl::buildGamutMapRgbwQ16"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::buildGamutMapRgbwQ16",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Derive the mapper for a three-primary profile plus one white emitter."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::buildGamutMapRgbwFrom\lSolveQ16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a0bbd4600d1ada0552c6743d28a8683ea.html#a0bbd4600d1ada0552c6743d28a8683ea",tooltip="Bind a four-emitter map from an effective RGB solve and a white column already adapted into the same ..."];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::allocateEmitterDrivesQ16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a4c4252a212f90916fad278f35b001081.html#a4c4252a212f90916fad278f35b001081",tooltip="One pixel: XYZ in s16.16 to four drives, in the order red, green, blue, white, at whichever end of th..."];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::solveRgbDrivesQ16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_af5a0679639e0ad1db7feb7f9705df72f.html#af5a0679639e0ad1db7feb7f9705df72f",tooltip="One pixel: XYZ in s16.16 to three emitter drives in s16.16."];
+  Node2 -> Node5 [id="edge4_Node000002_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::buildWhiteAllocation\lFromSolveQ16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_ad44a9cdc62803567f2f78f6364abb36c.html#ad44a9cdc62803567f2f78f6364abb36c",tooltip="Bind from an RGB solve already adapted to the D65 working domain."];
+  Node5 -> Node6 [id="edge5_Node000005_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::q16FromFloatBits",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d36/namespacefl_ae477fa69441dfe37f8fe3d7f4e2b9445.html#ae477fa69441dfe37f8fe3d7f4e2b9445",tooltip="s16.16 of a float, rounded to nearest, computed from its IEEE-754 bits with integer arithmetic only –..."];
+  Node5 -> Node4 [id="edge6_Node000005_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node5 -> Node9 [id="edge7_Node000005_Node000009",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="xy",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d2f/_p_j_r_c_spectrum_analyzer_8h_a310eea447890e3471c6b27fd79dc94fc.html#a310eea447890e3471c6b27fd79dc94fc",tooltip=" "];
+  Node5 -> Node10 [id="edge8_Node000005_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="fl::detail::xyzColumnQ16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d9e/namespacefl_1_1detail_ad8dbf6e13640f3720b79e74c643def26.html#ad8dbf6e13640f3720b79e74c643def26",tooltip="XYZ of chromaticity xy at luminance luminance, all s16.16; false for a non-positive or out-of-simplex..."];
+  Node10 -> Node9 [id="edge9_Node000010_Node000009",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node4 [id="edge10_Node000002_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node11 [id="edge11_Node000002_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="fl::step",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_aa0b8d08b9903ece3fb5f220333b9e785.html#aa0b8d08b9903ece3fb5f220333b9e785",tooltip=" "];
+  Node2 -> Node12 [id="edge12_Node000002_Node000012",color="steelblue1",style="solid",tooltip=" "];
+  Node12 [id="Node000012",label="fl::xyzToOklabQ16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a4e06a4bfbce59ea143a3a844cdb084eb.html#a4e06a4bfbce59ea143a3a844cdb084eb",tooltip="XYZ (s16.16, D65-relative) -> OKLab (s16.16), L then a then b."];
+  Node1 -> Node13 [id="edge13_Node000001_Node000013",color="steelblue1",style="solid",tooltip=" "];
+  Node13 [id="Node000013",label="fl::buildRgbSolveMatrixQ16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_ad4e39b6ae17313fe651e8059338b8518.html#ad4e39b6ae17313fe651e8059338b8518",tooltip="Invert the emitter matrix for a three-emitter profile."];
+  Node13 -> Node14 [id="edge14_Node000013_Node000014",color="steelblue1",style="solid",tooltip=" "];
+  Node14 [id="Node000014",label="fl::buildRgbSolveMatrixFromQ16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a0a7d1e6f0f08ff52ebc895eb553c23e2.html#a0a7d1e6f0f08ff52ebc895eb553c23e2",tooltip="Build the inverse emitter matrix from a Q16 profile, without floats."];
+  Node14 -> Node15 [id="edge15_Node000014_Node000015",color="steelblue1",style="solid",tooltip=" "];
+  Node15 [id="Node000015",label="fl::invert3x3Q16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_acc62e8cbc43e6a7b23c7e7f5ebf72a1a.html#acc62e8cbc43e6a7b23c7e7f5ebf72a1a",tooltip="Inverse of an s16.16 3x3 matrix, in s16.16, computed without floats."];
+  Node13 -> Node6 [id="edge16_Node000013_Node000006",color="steelblue1",style="solid",tooltip=" "];
+}

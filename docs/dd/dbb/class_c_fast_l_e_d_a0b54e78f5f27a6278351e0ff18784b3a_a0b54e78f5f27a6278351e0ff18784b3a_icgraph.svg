@@ -32,7 +32,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../dd/dbb/class_c_fast_l_e_d_a361a5681c7acee5d6bba5241c271f803.html#a361a5681c7acee5d6bba5241c271f803" target="_top" xlink:title=" ">
+<g id="a_Node000002"><a xlink:href="../../dd/dbb/class_c_fast_l_e_d_a5ef9cf2f812ea249afac6d821d383102.html#a5ef9cf2f812ea249afac6d821d383102" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="163,-318 0,-318 0,-288 163,-288 163,-318"/>
 <text text-anchor="start" x="8" y="-306" font-family="Helvetica,sans-Serif" font-size="10.00">CFastLED::_FL_MAP_CLOCKED</text>
 <text text-anchor="middle" x="81.5" y="-295" font-family="Helvetica,sans-Serif" font-size="10.00">_CHIPSET</text>
@@ -51,7 +51,7 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../dd/dbb/class_c_fast_l_e_d_a65766ac9942b688c570e5d4d21c4387d.html#a65766ac9942b688c570e5d4d21c4387d" target="_top" xlink:title=" ">
+<g id="a_Node000003"><a xlink:href="../../dd/dbb/class_c_fast_l_e_d_aa2d2f1590da6d05244738f3fa890a015.html#aa2d2f1590da6d05244738f3fa890a015" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="163,-270 0,-270 0,-240 163,-240 163,-270"/>
 <text text-anchor="start" x="8" y="-258" font-family="Helvetica,sans-Serif" font-size="10.00">CFastLED::_FL_MAP_CLOCKED</text>
 <text text-anchor="middle" x="81.5" y="-247" font-family="Helvetica,sans-Serif" font-size="10.00">_CHIPSET</text>
@@ -70,7 +70,7 @@
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../dd/dbb/class_c_fast_l_e_d_aa5ccd9e883239eca8dc122ea894bd320.html#aa5ccd9e883239eca8dc122ea894bd320" target="_top" xlink:title=" ">
+<g id="a_Node000004"><a xlink:href="../../dd/dbb/class_c_fast_l_e_d_ac2dadf774c57bdcc3b5f8598ffad7a89.html#ac2dadf774c57bdcc3b5f8598ffad7a89" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="163,-222 0,-222 0,-192 163,-192 163,-222"/>
 <text text-anchor="start" x="8" y="-210" font-family="Helvetica,sans-Serif" font-size="10.00">CFastLED::_FL_MAP_CLOCKED</text>
 <text text-anchor="middle" x="81.5" y="-199" font-family="Helvetica,sans-Serif" font-size="10.00">_CHIPSET</text>
@@ -89,7 +89,7 @@
 <!-- Node5 -->
 <g id="Node000005" class="node">
 <title>Node5</title>
-<g id="a_Node000005"><a xlink:href="../../dd/dbb/class_c_fast_l_e_d_a66646e2d97a2b899fdc89c8042b3b18b.html#a66646e2d97a2b899fdc89c8042b3b18b" target="_top" xlink:title=" ">
+<g id="a_Node000005"><a xlink:href="../../dd/dbb/class_c_fast_l_e_d_ae7cbde43b044af5d72f1184b9ae7f9a6.html#ae7cbde43b044af5d72f1184b9ae7f9a6" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="163,-174 0,-174 0,-144 163,-144 163,-174"/>
 <text text-anchor="start" x="8" y="-162" font-family="Helvetica,sans-Serif" font-size="10.00">CFastLED::_FL_MAP_CLOCKED</text>
 <text text-anchor="middle" x="81.5" y="-151" font-family="Helvetica,sans-Serif" font-size="10.00">_CHIPSET</text>
@@ -108,7 +108,7 @@
 <!-- Node6 -->
 <g id="Node000006" class="node">
 <title>Node6</title>
-<g id="a_Node000006"><a xlink:href="../../dd/dbb/class_c_fast_l_e_d_a669d99b8f43d8af3f729ed4402ff0c2b.html#a669d99b8f43d8af3f729ed4402ff0c2b" target="_top" xlink:title="Add an SPI based CLEDController instance to the world (legacy path).">
+<g id="a_Node000006"><a xlink:href="../../dd/dbb/class_c_fast_l_e_d_aca1dcd4b968cb5dc74b199ecb39dcef0.html#aca1dcd4b968cb5dc74b199ecb39dcef0" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="163,-126 0,-126 0,-96 163,-96 163,-126"/>
 <text text-anchor="start" x="8" y="-114" font-family="Helvetica,sans-Serif" font-size="10.00">CFastLED::_FL_MAP_CLOCKED</text>
 <text text-anchor="middle" x="81.5" y="-103" font-family="Helvetica,sans-Serif" font-size="10.00">_CHIPSET</text>
@@ -127,7 +127,7 @@
 <!-- Node7 -->
 <g id="Node000007" class="node">
 <title>Node7</title>
-<g id="a_Node000007"><a xlink:href="../../dd/dbb/class_c_fast_l_e_d_a329eb39ac647740134acd8f26cd1ba2e.html#a329eb39ac647740134acd8f26cd1ba2e" target="_top" xlink:title=" ">
+<g id="a_Node000007"><a xlink:href="../../dd/dbb/class_c_fast_l_e_d_a490a499df39a363f57ddaa97bb31bba8.html#a490a499df39a363f57ddaa97bb31bba8" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="163,-78 0,-78 0,-48 163,-48 163,-78"/>
 <text text-anchor="start" x="8" y="-66" font-family="Helvetica,sans-Serif" font-size="10.00">CFastLED::_FL_MAP_CLOCKED</text>
 <text text-anchor="middle" x="81.5" y="-55" font-family="Helvetica,sans-Serif" font-size="10.00">_CHIPSET</text>

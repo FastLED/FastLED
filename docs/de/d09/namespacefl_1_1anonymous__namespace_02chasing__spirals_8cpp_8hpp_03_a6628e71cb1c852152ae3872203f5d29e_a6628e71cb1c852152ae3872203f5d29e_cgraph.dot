@@ -17,5 +17,5 @@ digraph "fl::anonymous_namespace{chasing_spirals::cpp::hpp}::simd4_processChanne
   Node5 [id="Node000005",label="fl::perlin_s16x16::lerp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d7d/structfl_1_1perlin__s16x16_a6a83fdcdabd10f11cc1d0be7b31114fc.html#a6a83fdcdabd10f11cc1d0be7b31114fc",tooltip=" "];
   Node1 -> Node1 [id="edge5_Node000001_Node000001",color="steelblue1",style="solid",tooltip=" "];
   Node1 -> Node6 [id="edge6_Node000001_Node000006",color="steelblue1",style="solid",tooltip=" "];
-  Node6 [id="Node000006",label="fl::sincos32_simd",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a3a23a29b7fae800b629360cd32fec586.html#a3a23a29b7fae800b629360cd32fec586",tooltip="Process 4 angles simultaneously, returning vectorized sin/cos values SIMD-optimized: vectorized angle..."];
+  Node6 [id="Node000006",label="fl::sincos32_simd",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a92f648bf72198076845339c6859d3e19.html#a92f648bf72198076845339c6859d3e19",tooltip="Process 4 angles simultaneously, returning vectorized sin/cos values SIMD-optimized: vectorized angle..."];
 }

@@ -1,8 +1,8 @@
 var crgb_8hpp =
 [
     [ "FUNCTION_SCALE8", "d0/d4b/crgb_8hpp_aa2324c5b390fb0d4ff09c5a531afb624.html#aa2324c5b390fb0d4ff09c5a531afb624", null ],
-    [ "fl::operator%", "d4/d36/namespacefl_a62be6e9ead7828a7e77701f350c0bf98.html#a62be6e9ead7828a7e77701f350c0bf98", null ],
-    [ "fl::operator*", "d4/d36/namespacefl_a4917373c924f558956838ff263988df1.html#a4917373c924f558956838ff263988df1", null ],
-    [ "fl::operator+", "d4/d36/namespacefl_a5377b318cc7ffbd2f67b0b6659e17b06.html#a5377b318cc7ffbd2f67b0b6659e17b06", null ],
-    [ "fl::operator-", "d4/d36/namespacefl_a55a3bd9a62a87342ecdfb3b8da78c590.html#a55a3bd9a62a87342ecdfb3b8da78c590", null ]
+    [ "fl::operator%", "d4/d36/namespacefl_ad9ee4f80f763d420b086e811a8839aa0.html#ad9ee4f80f763d420b086e811a8839aa0", null ],
+    [ "fl::operator*", "d4/d36/namespacefl_adf198f2d2f233b19e66caa449f2ee2f9.html#adf198f2d2f233b19e66caa449f2ee2f9", null ],
+    [ "fl::operator+", "d4/d36/namespacefl_a42dccf67f3a0ebd815d238370bf4b19c.html#a42dccf67f3a0ebd815d238370bf4b19c", null ],
+    [ "fl::operator-", "d4/d36/namespacefl_afd2e1ed543f7f97bec00268d0a181f7b.html#afd2e1ed543f7f97bec00268d0a181f7b", null ]
 ];

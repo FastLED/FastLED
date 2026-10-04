@@ -1,0 +1,9 @@
+<map id="calculate_unscaled_emitter_power_mW" name="calculate_unscaled_emitter_power_mW">
+<area shape="rect" id="Node000001" title="Charge already&#45;solved physical output bytes in source emitter order: RGB, RGBW, or RGB + warm white +..." alt="" coords="468,37,625,77"/>
+<area shape="rect" id="Node000002" href="$d3/d1d/group___power_gab0593d3b85bf91261f5a6288ec4ed71e.html#gab0593d3b85bf91261f5a6288ec4ed71e" title="One controller&#39;s demand at full brightness, in mW, including idle draw – the quantity the limiter sum..." alt="" coords="271,37,420,77"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="455,60,420,60,420,55,455,55"/>
+<area shape="rect" id="Node000003" href="$d3/d1d/group___power_gab33dbfb39f4368fffdc17807883c787e.html#gab33dbfb39f4368fffdc17807883c787e" title="Determines the highest brightness level you can use and still stay under the specified power budget f..." alt="" coords="18,5,210,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="257,48,210,41,210,36,257,43"/>
+<area shape="rect" id="Node000004" href="$dd/dbb/class_c_fast_l_e_d_a06a8bc368f2ef5816015b75ad54d1e6b.html#a06a8bc368f2ef5816015b75ad54d1e6b" title="Get estimated power consumption in milliwatts." alt="" coords="5,69,223,109"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="257,72,223,77,223,72,257,67"/>
+</map>

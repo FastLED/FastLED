@@ -1,0 +1,13 @@
+<map id="fl::Watchdog::lastResetCause" name="fl::Watchdog::lastResetCause">
+<area shape="rect" id="Node000001" title=" " alt="" coords="713,69,924,94"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="863,59,861,55,853,51,819,47,792,49,777,54,775,60,782,67,778,70,769,60,774,50,791,44,819,42,854,46,864,51,868,56"/>
+<area shape="rect" id="Node000002" href="$da/d45/classfl_1_1_watchdog_ab696554da1ddc4c1670dea326212ce7f.html#ab696554da1ddc4c1670dea326212ce7f" title="Detailed reset information including platform raw register + subcause id." alt="" coords="469,69,665,94"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="700,84,666,84,666,79,700,79"/>
+<area shape="rect" id="Node000003" href="$da/d45/classfl_1_1_watchdog_a6f22954acef5fe03607338bdeab11b97.html#a6f22954acef5fe03607338bdeab11b97" title=" " alt="" coords="213,29,411,69"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="455,70,411,64,412,59,456,65"/>
+<area shape="rect" id="Node000004" href="$df/d52/namespacefl_1_1platforms_a9c4e6070f18f939c4c98717a242f4a89.html#a9c4e6070f18f939c4c98717a242f4a89" title=" " alt="" coords="203,93,421,133"/>
+<area shape="poly" id="edge5_Node000002_Node000004" title=" " alt="" coords="456,98,422,102,421,97,455,93"/>
+<area shape="poly" id="edge4_Node000003_Node000003" title=" " alt="" coords="351,18,338,11,312,8,290,10,276,15,271,21,274,28,269,30,266,20,273,10,288,5,312,3,339,6,354,13"/>
+<area shape="rect" id="Node000005" href="$d7/d76/classfl_1_1_scoped_watchdog_a9c36ed18662dc1deb74850e729e11a31.html#a9c36ed18662dc1deb74850e729e11a31" title="Construct with an explicit timeout." alt="" coords="5,93,155,133"/>
+<area shape="poly" id="edge6_Node000004_Node000005" title=" " alt="" coords="189,116,155,116,155,111,189,111"/>
+</map>

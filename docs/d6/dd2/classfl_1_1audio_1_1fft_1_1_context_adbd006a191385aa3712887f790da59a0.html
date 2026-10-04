@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -152,35 +152,35 @@ $(function(){initNavTree('d6/dd2/classfl_1_1audio_1_1fft_1_1_context_adbd006a191
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d5/df1/fft__impl_8cpp_8hpp_source.html#l01010">1010</a> of file <a class="el" href="../../d5/df1/fft__impl_8cpp_8hpp_source.html">fft_impl.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno"> 1012</span>                                                               {</div>
-<div class="line"><span class="lineno"> 1013</span>        <span class="keyword">const</span> <span class="keywordtype">int</span> numRawBins = fftN / 2 + 1;</div>
-<div class="line"><span class="lineno"> 1014</span>        <span class="comment">// Compute loop bounds to skip out-of-range FFT bins</span></div>
-<div class="line"><span class="lineno"> 1015</span>        <span class="keyword">const</span> u16x16 rawBinHz(fs / <span class="keyword">static_cast&lt;</span><span class="keywordtype">float</span><span class="keyword">&gt;</span>(fftN));</div>
-<div class="line"><span class="lineno"> 1016</span>        <span class="keyword">const</span> u16x16 halfBin = rawBinHz &gt;&gt; 1;</div>
-<div class="line"><span class="lineno"> 1017</span>        <span class="keyword">const</span> u16x16 loEdge(<a class="code hl_variable" href="../../d6/dd2/classfl_1_1audio_1_1fft_1_1_context_a7825e743ab2f7be2767a297f1205e4ae.html#a7825e743ab2f7be2767a297f1205e4ae">mLogBinEdges</a>[binStart]);</div>
-<div class="line"><span class="lineno"> 1018</span>        <span class="keyword">const</span> u16x16 hiEdge(<a class="code hl_variable" href="../../d6/dd2/classfl_1_1audio_1_1fft_1_1_context_a7825e743ab2f7be2767a297f1205e4ae.html#a7825e743ab2f7be2767a297f1205e4ae">mLogBinEdges</a>[binEnd]);</div>
-<div class="line"><span class="lineno"> 1019</span> </div>
-<div class="line"><span class="lineno"> 1020</span>        <span class="keywordtype">int</span> kStart = 0;</div>
-<div class="line"><span class="lineno"> 1021</span>        <span class="keywordflow">if</span> (loEdge &gt; halfBin) {</div>
-<div class="line"><span class="lineno"> 1022</span>            kStart = <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(</div>
-<div class="line"><span class="lineno"> 1023</span>                <a class="code hl_function" href="../../db/d56/classfl_1_1u16x16_a76b587795d26b3b5385cd130ee4e86f7.html#a76b587795d26b3b5385cd130ee4e86f7">u16x16::ceil</a>((loEdge - halfBin) / rawBinHz).<a class="code hl_function" href="../../db/d56/classfl_1_1u16x16_abe2692bdeef863f4cb16be28c2dc2b0d.html#abe2692bdeef863f4cb16be28c2dc2b0d">to_int</a>());</div>
-<div class="line"><span class="lineno"> 1024</span>        }</div>
-<div class="line"><span class="lineno"> 1025</span>        <span class="keywordtype">int</span> kEnd = <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(</div>
-<div class="line"><span class="lineno"> 1026</span>            <a class="code hl_function" href="../../db/d56/classfl_1_1u16x16_a76b587795d26b3b5385cd130ee4e86f7.html#a76b587795d26b3b5385cd130ee4e86f7">u16x16::ceil</a>((hiEdge + halfBin) / rawBinHz).<a class="code hl_function" href="../../db/d56/classfl_1_1u16x16_abe2692bdeef863f4cb16be28c2dc2b0d.html#abe2692bdeef863f4cb16be28c2dc2b0d">to_int</a>());</div>
-<div class="line"><span class="lineno"> 1027</span>        <span class="keywordflow">if</span> (kEnd &gt; numRawBins) kEnd = numRawBins;</div>
-<div class="line"><span class="lineno"> 1028</span> </div>
-<div class="line"><span class="lineno"> 1029</span>        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = kStart; k &lt; kEnd; ++k) {</div>
-<div class="line"><span class="lineno"> 1030</span>            rawBinsI[lut[k]] += <span class="keyword">static_cast&lt;</span>u32<span class="keyword">&gt;</span>(mag[k]);</div>
-<div class="line"><span class="lineno"> 1031</span>        }</div>
-<div class="line"><span class="lineno"> 1032</span>    }</div>
-<div class="ttc" id="aclassfl_1_1audio_1_1fft_1_1_context_a7825e743ab2f7be2767a297f1205e4ae_html_a7825e743ab2f7be2767a297f1205e4ae"><div class="ttname"><a href="../../d6/dd2/classfl_1_1audio_1_1fft_1_1_context_a7825e743ab2f7be2767a297f1205e4ae.html#a7825e743ab2f7be2767a297f1205e4ae">fl::audio::fft::Context::mLogBinEdges</a></div><div class="ttdeci">fl::vector&lt; float &gt; mLogBinEdges</div><div class="ttdef"><b>Definition</b> <a href="../../d5/df1/fft__impl_8cpp_8hpp_source.html#l01087">fft_impl.cpp.hpp:1087</a></div></div>
-<div class="ttc" id="aclassfl_1_1u16x16_a76b587795d26b3b5385cd130ee4e86f7_html_a76b587795d26b3b5385cd130ee4e86f7"><div class="ttname"><a href="../../db/d56/classfl_1_1u16x16_a76b587795d26b3b5385cd130ee4e86f7.html#a76b587795d26b3b5385cd130ee4e86f7">fl::u16x16::ceil</a></div><div class="ttdeci">static constexpr FASTLED_FORCE_INLINE u16x16 ceil(u16x16 x) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d69/fixed__point_2u16x16_8h_source.html#l00133">u16x16.h:133</a></div></div>
-<div class="ttc" id="aclassfl_1_1u16x16_abe2692bdeef863f4cb16be28c2dc2b0d_html_abe2692bdeef863f4cb16be28c2dc2b0d"><div class="ttname"><a href="../../db/d56/classfl_1_1u16x16_abe2692bdeef863f4cb16be28c2dc2b0d.html#abe2692bdeef863f4cb16be28c2dc2b0d">fl::u16x16::to_int</a></div><div class="ttdeci">constexpr u32 to_int() const FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d69/fixed__point_2u16x16_8h_source.html#l00060">u16x16.h:60</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d5/df1/fft__impl_8cpp_8hpp_source.html#l01105">1105</a> of file <a class="el" href="../../d5/df1/fft__impl_8cpp_8hpp_source.html">fft_impl.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno"> 1107</span>                                                               {</div>
+<div class="line"><span class="lineno"> 1108</span>        <span class="keyword">const</span> <span class="keywordtype">int</span> numRawBins = fftN / 2 + 1;</div>
+<div class="line"><span class="lineno"> 1109</span>        <span class="comment">// Compute loop bounds to skip out-of-range FFT bins</span></div>
+<div class="line"><span class="lineno"> 1110</span>        <span class="keyword">const</span> u16x16 rawBinHz(fs / <span class="keyword">static_cast&lt;</span><span class="keywordtype">float</span><span class="keyword">&gt;</span>(fftN));</div>
+<div class="line"><span class="lineno"> 1111</span>        <span class="keyword">const</span> u16x16 halfBin = rawBinHz &gt;&gt; 1;</div>
+<div class="line"><span class="lineno"> 1112</span>        <span class="keyword">const</span> u16x16 loEdge(<a class="code hl_variable" href="../../d6/dd2/classfl_1_1audio_1_1fft_1_1_context_a7825e743ab2f7be2767a297f1205e4ae.html#a7825e743ab2f7be2767a297f1205e4ae">mLogBinEdges</a>[binStart]);</div>
+<div class="line"><span class="lineno"> 1113</span>        <span class="keyword">const</span> u16x16 hiEdge(<a class="code hl_variable" href="../../d6/dd2/classfl_1_1audio_1_1fft_1_1_context_a7825e743ab2f7be2767a297f1205e4ae.html#a7825e743ab2f7be2767a297f1205e4ae">mLogBinEdges</a>[binEnd]);</div>
+<div class="line"><span class="lineno"> 1114</span> </div>
+<div class="line"><span class="lineno"> 1115</span>        <span class="keywordtype">int</span> kStart = 0;</div>
+<div class="line"><span class="lineno"> 1116</span>        <span class="keywordflow">if</span> (loEdge &gt; halfBin) {</div>
+<div class="line"><span class="lineno"> 1117</span>            kStart = <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(</div>
+<div class="line"><span class="lineno"> 1118</span>                <a class="code hl_function" href="../../db/d56/classfl_1_1u16x16_aba5e85f608acff68b1489551968a0afd.html#aba5e85f608acff68b1489551968a0afd">u16x16::ceil</a>((loEdge - halfBin) / rawBinHz).<a class="code hl_function" href="../../db/d56/classfl_1_1u16x16_a7ba8e7bd84aa99ed03b7a94beed0af63.html#a7ba8e7bd84aa99ed03b7a94beed0af63">to_int</a>());</div>
+<div class="line"><span class="lineno"> 1119</span>        }</div>
+<div class="line"><span class="lineno"> 1120</span>        <span class="keywordtype">int</span> kEnd = <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(</div>
+<div class="line"><span class="lineno"> 1121</span>            <a class="code hl_function" href="../../db/d56/classfl_1_1u16x16_aba5e85f608acff68b1489551968a0afd.html#aba5e85f608acff68b1489551968a0afd">u16x16::ceil</a>((hiEdge + halfBin) / rawBinHz).<a class="code hl_function" href="../../db/d56/classfl_1_1u16x16_a7ba8e7bd84aa99ed03b7a94beed0af63.html#a7ba8e7bd84aa99ed03b7a94beed0af63">to_int</a>());</div>
+<div class="line"><span class="lineno"> 1122</span>        <span class="keywordflow">if</span> (kEnd &gt; numRawBins) kEnd = numRawBins;</div>
+<div class="line"><span class="lineno"> 1123</span> </div>
+<div class="line"><span class="lineno"> 1124</span>        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = kStart; k &lt; kEnd; ++k) {</div>
+<div class="line"><span class="lineno"> 1125</span>            rawBinsI[lut[k]] += <span class="keyword">static_cast&lt;</span>u32<span class="keyword">&gt;</span>(mag[k]);</div>
+<div class="line"><span class="lineno"> 1126</span>        }</div>
+<div class="line"><span class="lineno"> 1127</span>    }</div>
+<div class="ttc" id="aclassfl_1_1audio_1_1fft_1_1_context_a7825e743ab2f7be2767a297f1205e4ae_html_a7825e743ab2f7be2767a297f1205e4ae"><div class="ttname"><a href="../../d6/dd2/classfl_1_1audio_1_1fft_1_1_context_a7825e743ab2f7be2767a297f1205e4ae.html#a7825e743ab2f7be2767a297f1205e4ae">fl::audio::fft::Context::mLogBinEdges</a></div><div class="ttdeci">fl::vector&lt; float &gt; mLogBinEdges</div><div class="ttdef"><b>Definition</b> <a href="../../d5/df1/fft__impl_8cpp_8hpp_source.html#l01182">fft_impl.cpp.hpp:1182</a></div></div>
+<div class="ttc" id="aclassfl_1_1u16x16_a7ba8e7bd84aa99ed03b7a94beed0af63_html_a7ba8e7bd84aa99ed03b7a94beed0af63"><div class="ttname"><a href="../../db/d56/classfl_1_1u16x16_a7ba8e7bd84aa99ed03b7a94beed0af63.html#a7ba8e7bd84aa99ed03b7a94beed0af63">fl::u16x16::to_int</a></div><div class="ttdeci">constexpr u32 to_int() const FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d69/fixed__point_2u16x16_8h_source.html#l00061">u16x16.h:61</a></div></div>
+<div class="ttc" id="aclassfl_1_1u16x16_aba5e85f608acff68b1489551968a0afd_html_aba5e85f608acff68b1489551968a0afd"><div class="ttname"><a href="../../db/d56/classfl_1_1u16x16_aba5e85f608acff68b1489551968a0afd.html#aba5e85f608acff68b1489551968a0afd">fl::u16x16::ceil</a></div><div class="ttdeci">static constexpr FASTLED_FORCE_INLINE u16x16 ceil(u16x16 x) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d69/fixed__point_2u16x16_8h_source.html#l00142">u16x16.h:142</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d8/d69/fixed__point_2u16x16_8h_source.html#l00133">fl::u16x16::ceil()</a>, <a class="el" href="../../d5/df1/fft__impl_8cpp_8hpp_source.html#l01087">mLogBinEdges</a>, and <a class="el" href="../../d8/d69/fixed__point_2u16x16_8h_source.html#l00060">fl::u16x16::to_int()</a>.</p>
+<p class="reference">References <a class="el" href="../../d8/d69/fixed__point_2u16x16_8h_source.html#l00142">fl::u16x16::ceil()</a>, <a class="el" href="../../d5/df1/fft__impl_8cpp_8hpp_source.html#l01182">mLogBinEdges</a>, and <a class="el" href="../../d8/d69/fixed__point_2u16x16_8h_source.html#l00061">fl::u16x16::to_int()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d5/df1/fft__impl_8cpp_8hpp_source.html#l00867">runHybrid()</a>, and <a class="el" href="../../d5/df1/fft__impl_8cpp_8hpp_source.html#l00237">runLogRebin()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d5/df1/fft__impl_8cpp_8hpp_source.html#l00962">runHybrid()</a>, <a class="el" href="../../d5/df1/fft__impl_8cpp_8hpp_source.html#l00247">runLogRebin()</a>, and <a class="el" href="../../d5/df1/fft__impl_8cpp_8hpp_source.html#l00694">runOctaveWise()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -193,7 +193,7 @@ $(function(){initNavTree('d6/dd2/classfl_1_1audio_1_1fft_1_1_context_adbd006a191
 <div id="dynsection-1-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-1-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d6/dd2/classfl_1_1audio_1_1fft_1_1_context_adbd006a191385aa3712887f790da59a0_adbd006a191385aa3712887f790da59a0_icgraph.svg" width="600" height="115"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d6/dd2/classfl_1_1audio_1_1fft_1_1_context_adbd006a191385aa3712887f790da59a0_adbd006a191385aa3712887f790da59a0_icgraph.svg" width="600" height="179"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 
 </div>
@@ -205,7 +205,7 @@ $(function(){initNavTree('d6/dd2/classfl_1_1audio_1_1fft_1_1_context_adbd006a191
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../db/dbf/namespacefl_1_1audio.html">audio</a></li><li class="navelem"><a class="el" href="../../de/dee/namespacefl_1_1audio_1_1fft.html">fft</a></li><li class="navelem"><a class="el" href="../../d6/dd2/classfl_1_1audio_1_1fft_1_1_context.html">Context</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:08 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:11 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

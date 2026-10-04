@@ -1,45 +1,52 @@
 <map id="fl/build/fl.wdt+.cpp" name="fl/build/fl.wdt+.cpp">
-<area shape="rect" id="Node000001" title="Unity build: recursive includes from src/fl/wdt/." alt="" coords="158,5,302,31"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="5,79,132,104"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="205,33,109,75,106,71,203,28"/>
-<area shape="rect" id="Node000003" href="$d2/de0/arduino_8h.html" title=" " alt="" coords="157,79,303,104"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="233,31,233,65,227,65,227,31"/>
-<area shape="rect" id="Node000005" href="$df/ddb/fl_2wdt_2__build_8cpp_8hpp.html" title="Unity build header for fl/wdt/ directory." alt="" coords="413,79,569,104"/>
-<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="273,28,436,72,435,78,271,33"/>
-<area shape="rect" id="Node000004" href="$da/d99/has__include_8h.html" title=" " alt="" coords="155,152,297,177"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="232,104,230,139,225,138,227,104"/>
-<area shape="rect" id="Node000006" href="$d7/d7f/log_8h.html" title="Centralized logging categories for FastLED hardware interfaces and subsystems." alt="" coords="526,152,617,177"/>
-<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="506,102,550,141,546,145,502,106"/>
-<area shape="rect" id="Node000058" href="$dd/dee/delay_8h.html" title="Delay utilities for FastLED Includes nanosecond&#45;precision delays, cycle counting, and microsecond del..." alt="" coords="805,225,937,251"/>
-<area shape="poly" id="edge15_Node000005_Node000058" title=" " alt="" coords="523,102,830,218,828,223,521,107"/>
-<area shape="rect" id="Node000061" href="$d4/dc4/watchdog_8cpp_8hpp.html" title="Platform&#45;agnostic implementations for the unified watchdog API:" alt="" coords="321,152,501,177"/>
-<area shape="poly" id="edge22_Node000005_Node000061" title=" " alt="" coords="480,106,436,145,433,141,477,102"/>
-<area shape="rect" id="Node000007" href="$d1/dbc/sketch__macros_8h.html" title=" " alt="" coords="381,225,575,251"/>
-<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="558,179,506,219,502,215,555,175"/>
-<area shape="rect" id="Node000009" href="$d8/d00/strstream_8h.html" title=" " alt="" coords="600,225,729,251"/>
-<area shape="poly" id="edge7_Node000006_Node000009" title=" " alt="" coords="588,175,640,215,637,219,585,179"/>
-<area shape="rect" id="Node000056" href="$dd/d90/chrono_8h.html" title="FastLED chrono implementation &#45; duration types for time measurements." alt="" coords="727,299,837,324"/>
-<area shape="poly" id="edge12_Node000006_Node000056" title=" " alt="" coords="618,169,681,187,714,202,744,223,766,253,778,284,773,286,761,255,740,227,712,207,679,192,616,174"/>
-<area shape="rect" id="Node000025" href="$d4/d54/compiler__control_8h.html" title=" " alt="" coords="265,299,440,324"/>
-<area shape="poly" id="edge14_Node000006_Node000025" title=" " alt="" coords="526,179,431,204,391,217,370,227,362,240,357,255,354,285,348,285,352,254,357,238,367,223,389,212,429,199,525,174"/>
-<area shape="rect" id="Node000023" href="$df/d63/type__traits_8h.html" title=" " alt="" coords="515,299,651,324"/>
-<area shape="poly" id="edge8_Node000009_Node000023" title=" " alt="" coords="653,253,609,292,605,288,650,249"/>
-<area shape="rect" id="Node000016" href="$db/d01/noexcept_8h.html" title=" " alt="" coords="468,372,595,397"/>
-<area shape="poly" id="edge11_Node000009_Node000016" title=" " alt="" coords="617,253,550,274,522,287,505,300,500,314,502,329,516,360,511,362,496,331,495,313,501,297,519,282,548,269,615,248"/>
-<area shape="rect" id="Node000014" href="$d3/d7e/int_8h.html" title=" " alt="" coords="741,372,823,397"/>
-<area shape="poly" id="edge9_Node000023_Node000014" title=" " alt="" coords="616,322,737,365,736,370,614,327"/>
-<area shape="poly" id="edge10_Node000023_Node000016" title=" " alt="" coords="577,326,550,362,546,359,573,323"/>
-<area shape="poly" id="edge13_Node000056_Node000014" title=" " alt="" coords="785,324,785,358,779,358,779,324"/>
-<area shape="poly" id="edge19_Node000058_Node000023" title=" " alt="" coords="826,253,644,298,643,293,824,248"/>
-<area shape="poly" id="edge18_Node000058_Node000014" title=" " alt="" coords="925,248,963,260,997,277,1009,287,1017,298,1018,312,1011,326,983,345,938,360,838,379,837,374,937,355,980,340,1007,322,1012,311,1012,300,1005,290,994,281,961,265,924,253"/>
-<area shape="poly" id="edge21_Node000058_Node000016" title=" " alt="" coords="840,253,716,301,664,326,571,369,569,364,662,322,714,296,838,248"/>
-<area shape="poly" id="edge17_Node000058_Node000025" title=" " alt="" coords="805,251,450,299,449,294,805,246"/>
-<area shape="rect" id="Node000059" title=" " alt="" coords="1071,299,1242,324"/>
-<area shape="poly" id="edge16_Node000058_Node000059" title=" " alt="" coords="918,248,1098,293,1097,298,917,253"/>
-<area shape="rect" id="Node000060" title=" " alt="" coords="861,299,996,324"/>
-<area shape="poly" id="edge20_Node000058_Node000060" title=" " alt="" coords="883,249,913,286,909,290,879,253"/>
-<area shape="rect" id="Node000062" href="$d9/da3/watchdog_8h.html" title="Unified cross&#45;platform Watchdog Timer API for FastLED." alt="" coords="168,225,305,251"/>
-<area shape="poly" id="edge23_Node000061_Node000062" title=" " alt="" coords="384,180,279,222,277,218,382,175"/>
-<area shape="poly" id="edge24_Node000062_Node000016" title=" " alt="" coords="238,251,240,287,245,306,256,322,288,340,338,355,455,374,454,379,337,360,286,345,252,326,240,308,234,287,233,251"/>
-<area shape="poly" id="edge25_Node000062_Node000025" title=" " alt="" coords="257,248,323,289,321,294,254,253"/>
+<area shape="rect" id="Node000001" title="Unity build: recursive includes from src/fl/wdt/." alt="" coords="163,5,307,31"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="10,79,137,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="210,33,114,75,112,71,208,28"/>
+<area shape="rect" id="Node000003" href="$d2/de0/arduino_8h.html" title=" " alt="" coords="162,79,308,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="238,31,238,65,232,65,232,31"/>
+<area shape="rect" id="Node000005" href="$df/ddb/fl_2wdt_2__build_8cpp_8hpp.html" title="Unity build header for fl/wdt/ directory." alt="" coords="402,79,558,104"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="275,28,428,72,427,77,274,33"/>
+<area shape="rect" id="Node000004" href="$da/d99/has__include_8h.html" title=" " alt="" coords="96,152,238,177"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="226,106,190,144,186,140,222,102"/>
+<area shape="rect" id="Node000006" href="$d7/d7f/log_8h.html" title="Centralized logging categories for FastLED hardware interfaces and subsystems." alt="" coords="694,152,784,177"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="523,101,685,146,683,151,521,107"/>
+<area shape="rect" id="Node000025" href="$d4/d54/compiler__control_8h.html" title=" " alt="" coords="537,299,712,324"/>
+<area shape="poly" id="edge31_Node000005_Node000025" title=" " alt="" coords="490,103,611,285,607,288,486,106"/>
+<area shape="rect" id="Node000061" href="$dd/dee/delay_8h.html" title="Delay utilities for FastLED Includes nanosecond&#45;precision delays, cycle counting, and microsecond del..." alt="" coords="385,225,517,251"/>
+<area shape="poly" id="edge20_Node000005_Node000061" title=" " alt="" coords="481,105,459,212,454,211,475,104"/>
+<area shape="rect" id="Node000064" href="$d4/dc4/watchdog_8cpp_8hpp.html" title="Platform&#45;agnostic implementations for the unified watchdog API:" alt="" coords="262,152,442,177"/>
+<area shape="poly" id="edge27_Node000005_Node000064" title=" " alt="" coords="461,106,387,147,384,143,459,102"/>
+<area shape="rect" id="Node000007" href="$d1/dbc/sketch__macros_8h.html" title=" " alt="" coords="710,225,904,251"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="752,176,788,213,784,217,748,180"/>
+<area shape="rect" id="Node000009" href="$d8/d00/strstream_8h.html" title=" " alt="" coords="736,299,865,324"/>
+<area shape="poly" id="edge7_Node000006_Node000009" title=" " alt="" coords="728,180,714,194,702,212,696,231,700,249,722,274,750,291,747,295,718,278,695,252,691,231,698,210,710,191,724,176"/>
+<area shape="rect" id="Node000057" href="$d6/dd1/stdio_8h.html" title=" " alt="" coords="928,225,1027,251"/>
+<area shape="poly" id="edge12_Node000006_Node000057" title=" " alt="" coords="778,175,927,219,925,224,777,180"/>
+<area shape="rect" id="Node000059" href="$dd/d90/chrono_8h.html" title="FastLED chrono implementation &#45; duration types for time measurements." alt="" coords="1042,372,1153,397"/>
+<area shape="poly" id="edge17_Node000006_Node000059" title=" " alt="" coords="785,167,926,185,995,201,1021,212,1041,223,1066,254,1083,290,1093,327,1098,358,1093,358,1088,328,1078,292,1062,257,1037,227,1019,216,993,207,925,191,784,172"/>
+<area shape="poly" id="edge19_Node000006_Node000025" title=" " alt="" coords="731,179,690,227,643,289,639,286,686,224,727,176"/>
+<area shape="rect" id="Node000023" href="$df/d63/type__traits_8h.html" title=" " alt="" coords="756,372,892,397"/>
+<area shape="poly" id="edge8_Node000009_Node000023" title=" " alt="" coords="807,323,819,358,814,360,802,325"/>
+<area shape="rect" id="Node000016" href="$db/d01/noexcept_8h.html" title=" " alt="" coords="656,445,782,471"/>
+<area shape="poly" id="edge11_Node000009_Node000016" title=" " alt="" coords="788,326,767,347,747,373,734,403,726,432,721,431,729,401,742,371,763,344,784,323"/>
+<area shape="rect" id="Node000014" href="$d3/d7e/int_8h.html" title=" " alt="" coords="896,445,979,471"/>
+<area shape="poly" id="edge9_Node000023_Node000014" title=" " alt="" coords="844,395,909,436,906,440,841,400"/>
+<area shape="poly" id="edge10_Node000023_Node000016" title=" " alt="" coords="809,400,749,440,746,435,806,395"/>
+<area shape="poly" id="edge14_Node000057_Node000009" title=" " alt="" coords="950,253,843,296,841,291,948,248"/>
+<area shape="poly" id="edge15_Node000057_Node000023" title=" " alt="" coords="967,253,848,364,845,361,963,249"/>
+<area shape="poly" id="edge13_Node000057_Node000014" title=" " alt="" coords="982,251,985,314,983,356,975,398,957,435,952,433,970,396,978,355,980,314,977,251"/>
+<area shape="poly" id="edge16_Node000057_Node000016" title=" " alt="" coords="978,251,971,281,958,321,937,363,906,399,881,417,853,431,796,449,795,444,851,426,878,413,903,395,932,360,953,318,966,279,973,250"/>
+<area shape="poly" id="edge18_Node000059_Node000014" title=" " alt="" coords="1073,400,977,442,975,437,1071,395"/>
+<area shape="poly" id="edge24_Node000061_Node000023" title=" " alt="" coords="460,249,485,286,504,306,526,322,579,346,635,363,692,373,743,379,742,384,691,379,634,368,577,351,523,326,500,310,481,289,455,252"/>
+<area shape="poly" id="edge23_Node000061_Node000014" title=" " alt="" coords="456,250,466,286,476,305,490,322,519,341,561,360,669,394,785,423,883,444,882,449,784,428,667,400,559,365,517,346,487,326,472,308,461,288,450,252"/>
+<area shape="poly" id="edge26_Node000061_Node000016" title=" " alt="" coords="447,252,433,281,420,319,417,360,422,379,432,396,445,406,464,416,518,431,581,442,643,449,642,454,580,447,517,437,462,421,442,411,428,399,417,381,412,360,415,318,428,279,442,250"/>
+<area shape="poly" id="edge22_Node000061_Node000025" title=" " alt="" coords="480,248,584,291,582,296,478,253"/>
+<area shape="rect" id="Node000062" title=" " alt="" coords="30,299,200,324"/>
+<area shape="poly" id="edge21_Node000061_Node000062" title=" " alt="" coords="398,253,183,298,182,293,396,248"/>
+<area shape="rect" id="Node000063" title=" " alt="" coords="225,299,360,324"/>
+<area shape="poly" id="edge25_Node000061_Node000063" title=" " alt="" coords="427,253,332,295,330,291,424,248"/>
+<area shape="rect" id="Node000065" href="$d9/da3/watchdog_8h.html" title="Unified cross&#45;platform Watchdog Timer API for FastLED." alt="" coords="224,225,361,251"/>
+<area shape="poly" id="edge28_Node000064_Node000065" title=" " alt="" coords="344,179,313,217,309,213,340,176"/>
+<area shape="poly" id="edge29_Node000065_Node000016" title=" " alt="" coords="224,242,142,246,62,258,32,269,13,283,9,291,8,300,20,322,38,339,62,354,126,381,207,402,298,419,486,441,642,451,642,457,486,447,297,424,206,408,124,386,59,359,34,343,16,326,3,301,4,289,9,280,30,264,61,253,141,240,223,236"/>
+<area shape="poly" id="edge30_Node000065_Node000025" title=" " alt="" coords="346,248,558,293,557,298,345,253"/>
 </map>

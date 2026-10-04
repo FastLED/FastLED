@@ -7,7 +7,7 @@ var classfl_1_1fixed__point__base =
     [ "traits", "d1/d93/classfl_1_1fixed__point__base_a28febc8139cf4d777429b6ee4d02ef2b.html#a28febc8139cf4d777429b6ee4d02ef2b", null ],
     [ "unsigned_intermediate_type", "d1/d93/classfl_1_1fixed__point__base_a9511756e24c8a6088efc666f14384495.html#a9511756e24c8a6088efc666f14384495", null ],
     [ "unsigned_raw_type", "d1/d93/classfl_1_1fixed__point__base_a0183e7050a3d170074e354a667b6c7eb.html#a0183e7050a3d170074e354a667b6c7eb", null ],
-    [ "fixed_point_base", "d1/d93/classfl_1_1fixed__point__base_a0786e38948f8bbb5bf375a1ca1834cb7.html#a0786e38948f8bbb5bf375a1ca1834cb7", null ],
+    [ "fixed_point_base", "d1/d93/classfl_1_1fixed__point__base_a26b8ed3ee37acae094a7a781d332aa46.html#a26b8ed3ee37acae094a7a781d332aa46", null ],
     [ "fixed_point_base", "d1/d93/classfl_1_1fixed__point__base_a7d5ec0a6094704b89b61a42202cf9e60.html#a7d5ec0a6094704b89b61a42202cf9e60", null ],
     [ "fixed_point_base", "d1/d93/classfl_1_1fixed__point__base_a24d3f04b6038d53e5306e0c45196dcf2.html#a24d3f04b6038d53e5306e0c45196dcf2", null ],
     [ "_highest_bit_step", "d1/d93/classfl_1_1fixed__point__base_a6def1bbd163531a8ca9ba5dc771869e9.html#a6def1bbd163531a8ca9ba5dc771869e9", null ],

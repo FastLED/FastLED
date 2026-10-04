@@ -11,5 +11,5 @@ digraph "/home/runner/work/FastLED/FastLED/examples/SmartMatrix"
   dir_1bdc26e3376ec64d7901d7f7d36b78fc [label="SmartMatrix", fillcolor="#edf0f7", color="grey25", style="filled,bold", URL="dir_1bdc26e3376ec64d7901d7f7d36b78fc.html",tooltip=""];
   }
   dir_4d1829fa9bd13d7db71e765b2707b248 [label="fl", fillcolor="#edf0f7", color="red", style="filled", URL="dir_4d1829fa9bd13d7db71e765b2707b248.html",tooltip=""];
-  dir_1bdc26e3376ec64d7901d7f7d36b78fc->dir_4d1829fa9bd13d7db71e765b2707b248 [headlabel="1", labeldistance=1.5 headhref="dir_000168_000074.html" href="dir_000168_000074.html" color="steelblue1" fontcolor="steelblue1"];
+  dir_1bdc26e3376ec64d7901d7f7d36b78fc->dir_4d1829fa9bd13d7db71e765b2707b248 [headlabel="1", labeldistance=1.5 headhref="dir_000176_000077.html" href="dir_000176_000077.html" color="steelblue1" fontcolor="steelblue1"];
 }

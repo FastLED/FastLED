@@ -1,0 +1,44 @@
+<map id="fl::println" name="fl::println">
+<area shape="rect" id="Node000001" title=" " alt="" coords="1088,251,1168,276"/>
+<area shape="rect" id="Node000002" href="$d6/d35/classfl_1_1_async_logger_a43b98417e06216de6bad8e8bb2bbcf27.html#a43b98417e06216de6bad8e8bb2bbcf27" title=" " alt="" coords="867,21,1027,47"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1120,237,1112,198,1097,150,1073,101,1057,79,1038,60,1021,49,1024,45,1042,56,1061,76,1077,98,1102,148,1117,196,1126,236"/>
+<area shape="rect" id="Node000004" href="$d6/d35/classfl_1_1_async_logger_a0571151055f77663758951a2458c8a4d.html#a0571151055f77663758951a2458c8a4d" title="Flush up to N messages from queue (bounded flush)" alt="" coords="861,71,1032,96"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="1111,240,1081,192,1038,141,1006,117,974,98,977,94,1009,112,1042,137,1085,189,1116,237"/>
+<area shape="rect" id="Node000027" href="$df/d9e/namespacefl_1_1detail_ac2a75035d521670d882b8fb70a544dfa.html#ac2a75035d521670d882b8fb70a544dfa" title=" " alt="" coords="877,152,1017,177"/>
+<area shape="poly" id="edge10_Node000001_Node000027" title=" " alt="" coords="1104,242,1074,215,1039,191,1011,180,1013,175,1041,186,1078,211,1107,238"/>
+<area shape="rect" id="Node000030" href="$df/d9e/namespacefl_1_1detail_a01ce265464002715ace0011b84eaef82.html#a01ce265464002715ace0011b84eaef82" title=" " alt="" coords="853,201,1040,227"/>
+<area shape="poly" id="edge13_Node000001_Node000030" title=" " alt="" coords="1074,250,1039,241,997,229,998,224,1041,235,1076,245"/>
+<area shape="rect" id="Node000031" href="$df/d9e/namespacefl_1_1detail_a3f4abf89b63a6e3a055ba08695385e06.html#a3f4abf89b63a6e3a055ba08695385e06" title=" " alt="" coords="853,251,1040,276"/>
+<area shape="poly" id="edge14_Node000001_Node000031" title=" " alt="" coords="1074,266,1040,266,1040,261,1074,261"/>
+<area shape="rect" id="Node000032" href="$df/d9e/namespacefl_1_1detail_a568ac3883d60b291265fe2667aa3be73.html#a568ac3883d60b291265fe2667aa3be73" title=" " alt="" coords="853,300,1040,325"/>
+<area shape="poly" id="edge15_Node000001_Node000032" title=" " alt="" coords="1075,280,1041,290,995,302,994,297,1039,285,1074,275"/>
+<area shape="rect" id="Node000033" href="$de/d67/classfl_1_1_serial_port_a5b6c8265d8a3815b4dc58371bfbf0ce3.html#a5b6c8265d8a3815b4dc58371bfbf0ce3" title="Print newline only." alt="" coords="871,401,1022,427"/>
+<area shape="poly" id="edge16_Node000001_Node000033" title=" " alt="" coords="1117,290,1087,337,1066,362,1042,384,1003,404,1001,399,1038,380,1062,359,1082,334,1112,287"/>
+<area shape="rect" id="Node000034" href="$de/d67/classfl_1_1_serial_port_a59956b7e405022d909754417a8378d53.html#a59956b7e405022d909754417a8378d53" title="Print string with newline to serial output." alt="" coords="619,351,769,376"/>
+<area shape="poly" id="edge21_Node000001_Node000034" title=" " alt="" coords="1108,289,1079,316,1041,339,971,360,899,371,830,375,770,373,770,368,830,369,899,366,970,355,1039,334,1076,312,1105,285"/>
+<area shape="rect" id="Node000038" href="$d2/d8c/structfl_1_1_serial_writer_a8bb7f7db0d14829ac2b23241dc3b20c2.html#a8bb7f7db0d14829ac2b23241dc3b20c2" title=" " alt="" coords="864,451,1029,476"/>
+<area shape="poly" id="edge22_Node000001_Node000038" title=" " alt="" coords="1123,290,1113,324,1097,365,1073,405,1042,440,1020,453,1018,448,1038,436,1069,402,1092,362,1108,323,1118,289"/>
+<area shape="rect" id="Node000003" href="$d6/d35/classfl_1_1_async_logger_a980ff44240839c88a4475e9283873ba0.html#a980ff44240839c88a4475e9283873ba0" title=" " alt="" coords="583,5,805,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="853,31,806,28,806,22,853,25"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="884,70,853,61,805,45,758,33,760,28,806,39,854,55,885,65"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_abe5657de2c328256b3c15a1388b793aa.html#abe5657de2c328256b3c15a1388b793aa" title=" " alt="" coords="615,55,773,80"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="847,80,773,75,773,70,848,74"/>
+<area shape="rect" id="Node000006" href="$d5/d06/classfl_1_1detail_1_1_async_logger_service_task_ab5cd1a92bcf542222607179a5363c2e0.html#ab5cd1a92bcf542222607179a5363c2e0" title="Service all registered loggers (called by task)" alt="" coords="587,105,801,145"/>
+<area shape="poly" id="edge6_Node000004_Node000006" title=" " alt="" coords="856,101,802,110,801,105,855,96"/>
+<area shape="rect" id="Node000007" href="$d5/d06/classfl_1_1detail_1_1_async_logger_service_task_a76e22f26c5676ba890e783435db46aa6.html#a76e22f26c5676ba890e783435db46aa6" title=" " alt="" coords="316,77,535,117"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="573,115,535,111,535,105,573,109"/>
+<area shape="rect" id="Node000009" href="$d5/d06/classfl_1_1detail_1_1_async_logger_service_task_a90e57dbaf9bc274b5302c859efd53af3.html#a90e57dbaf9bc274b5302c859efd53af3" title=" " alt="" coords="5,99,268,153"/>
+<area shape="poly" id="edge9_Node000006_Node000009" title=" " alt="" coords="573,131,535,131,316,131,268,131,268,126,316,126,535,126,573,125"/>
+<area shape="poly" id="edge8_Node000007_Node000009" title=" " alt="" coords="303,112,269,115,268,110,302,106"/>
+<area shape="rect" id="Node000028" href="$df/d9e/namespacefl_1_1detail_a85a3d49210dcf42fadacd048bc3c9ccb.html#a85a3d49210dcf42fadacd048bc3c9ccb" title=" " alt="" coords="606,169,782,195"/>
+<area shape="poly" id="edge11_Node000027_Node000028" title=" " alt="" coords="863,173,783,179,782,173,863,168"/>
+<area shape="rect" id="Node000029" href="$df/d9e/namespacefl_1_1detail_af707b50c5c97d195639cfc95ceeb9a71.html#af707b50c5c97d195639cfc95ceeb9a71" title=" " alt="" coords="606,219,782,244"/>
+<area shape="poly" id="edge12_Node000027_Node000029" title=" " alt="" coords="881,183,854,191,806,209,757,221,756,216,805,203,853,186,879,178"/>
+<area shape="poly" id="edge17_Node000033_Node000034" title=" " alt="" coords="868,401,757,379,758,373,869,396"/>
+<area shape="rect" id="Node000035" href="$de/d67/classfl_1_1_serial_port_a79ff623cf0ffa2d357dfe443d24ea674.html#a79ff623cf0ffa2d357dfe443d24ea674" title="Print integer with newline to serial output." alt="" coords="619,400,769,425"/>
+<area shape="poly" id="edge18_Node000033_Node000035" title=" " alt="" coords="858,416,769,416,769,410,858,411"/>
+<area shape="rect" id="Node000036" href="$de/d67/classfl_1_1_serial_port_a172a3323a2a8539693b4fb3167d503c7.html#a172a3323a2a8539693b4fb3167d503c7" title="Print long integer with newline to serial output." alt="" coords="619,449,769,475"/>
+<area shape="poly" id="edge19_Node000033_Node000036" title=" " alt="" coords="866,432,762,452,761,447,865,427"/>
+<area shape="rect" id="Node000037" href="$de/d67/classfl_1_1_serial_port_ab950c76e90cce5f2ebed7ec9ff8b82a9.html#ab950c76e90cce5f2ebed7ec9ff8b82a9" title="Print generic unsigned integer with newline via SFINAE template Handles u32, unsigned long,..." alt="" coords="619,499,769,524"/>
+<area shape="poly" id="edge20_Node000033_Node000037" title=" " alt="" coords="867,434,855,440,840,452,832,464,822,477,807,490,771,504,769,499,804,485,818,474,827,461,836,448,852,436,865,429"/>
+</map>

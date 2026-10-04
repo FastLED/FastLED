@@ -1,0 +1,13 @@
+<map id="fl::IdTracker::IdTracker" name="fl::IdTracker::IdTracker">
+<area shape="rect" id="Node000001" title="Default constructor &#45; creates a new ID tracker instance." alt="" coords="5,104,168,129"/>
+<area shape="rect" id="Node000002" href="$d7/d2a/classfl_1_1_id_tracker_a5bd15264563829b3c92c15a9a382629d.html#a5bd15264563829b3c92c15a9a382629d" title="Clear all tracked pointers and reset ID counter." alt="" coords="245,5,381,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="105,102,153,71,215,40,236,32,238,37,217,44,156,75,108,106"/>
+<area shape="rect" id="Node000003" href="$d7/d2a/classfl_1_1_id_tracker_a56bb24bc646732f89a12f2234db9de7a.html#a56bb24bc646732f89a12f2234db9de7a" title="Get existing ID for pointer without creating a new one." alt="" coords="245,55,382,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="145,101,240,80,241,86,146,107"/>
+<area shape="rect" id="Node000004" href="$d7/d2a/classfl_1_1_id_tracker_ab6edcb56ed63c597f40588c512c86e1d.html#ab6edcb56ed63c597f40588c512c86e1d" title="Get existing ID for pointer, or create a new one if not found." alt="" coords="216,104,411,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="168,114,202,114,202,119,168,119"/>
+<area shape="rect" id="Node000005" href="$d7/d2a/classfl_1_1_id_tracker_a03367e7c567790065833b75db1b1823b.html#a03367e7c567790065833b75db1b1823b" title="Remove tracking for a pointer." alt="" coords="230,153,397,179"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="146,127,241,148,240,153,145,132"/>
+<area shape="rect" id="Node000006" href="$d7/d2a/classfl_1_1_id_tracker_aedf0d6b77f57ea4cc066c876a1bca53d.html#aedf0d6b77f57ea4cc066c876a1bca53d" title="Get the current number of tracked pointers." alt="" coords="248,203,379,228"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="108,127,156,157,217,188,242,196,240,201,215,192,154,162,105,132"/>
+</map>

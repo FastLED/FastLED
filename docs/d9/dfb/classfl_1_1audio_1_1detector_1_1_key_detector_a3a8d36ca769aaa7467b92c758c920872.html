@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -132,55 +132,55 @@ $(function(){initNavTree('d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_a
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d6/d88/key_8cpp_8hpp_source.html#l00335">335</a> of file <a class="el" href="../../d6/d88/key_8cpp_8hpp_source.html">key.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  335</span>                                                                                               {</div>
-<div class="line"><span class="lineno">  336</span>    <span class="comment">// Pearson correlation coefficient between chroma and rotated profile</span></div>
-<div class="line"><span class="lineno">  337</span>    <span class="comment">// Uses pre-computed profile statistics (calculated once in constructor)</span></div>
-<div class="line"><span class="lineno">  338</span> </div>
-<div class="line"><span class="lineno">  339</span>    <span class="comment">// Use pre-computed profile statistics based on which profile</span></div>
-<div class="line"><span class="lineno">  340</span>    <span class="keywordtype">float</span> profileMean, profileStdDev;</div>
-<div class="line"><span class="lineno">  341</span>    <span class="keywordflow">if</span> (profile == <a class="code hl_variable" href="../../d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_a45635c78e1a1ad52bada5bc005c36e30.html#a45635c78e1a1ad52bada5bc005c36e30">MAJOR_PROFILE</a>) {</div>
-<div class="line"><span class="lineno">  342</span>        profileMean = <a class="code hl_variable" href="../../d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_a434ca9a135e6ff44eef077f8f489081d.html#a434ca9a135e6ff44eef077f8f489081d">mMajorProfileMean</a>;</div>
-<div class="line"><span class="lineno">  343</span>        profileStdDev = <a class="code hl_variable" href="../../d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_aa91c57c9cdbeffc995745dedb0ec09c4.html#aa91c57c9cdbeffc995745dedb0ec09c4">mMajorProfileStdDev</a>;</div>
-<div class="line"><span class="lineno">  344</span>    } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  345</span>        profileMean = <a class="code hl_variable" href="../../d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_a6fb1dfc6c343b14345ef7dbc4552a639.html#a6fb1dfc6c343b14345ef7dbc4552a639">mMinorProfileMean</a>;</div>
-<div class="line"><span class="lineno">  346</span>        profileStdDev = <a class="code hl_variable" href="../../d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_a9e226028528732cc43e288a47ab06235.html#a9e226028528732cc43e288a47ab06235">mMinorProfileStdDev</a>;</div>
-<div class="line"><span class="lineno">  347</span>    }</div>
-<div class="line"><span class="lineno">  348</span>    <span class="keywordflow">if</span> (profileStdDev &lt; 1e-6f) profileStdDev = 1.0f;</div>
-<div class="line"><span class="lineno">  349</span> </div>
-<div class="line"><span class="lineno">  350</span>    <span class="comment">// Calculate chroma mean and std dev</span></div>
-<div class="line"><span class="lineno">  351</span>    <span class="keywordtype">float</span> chromaSum = 0.0f;</div>
-<div class="line"><span class="lineno">  352</span>    <span class="keywordtype">float</span> chromaSqSum = 0.0f;</div>
-<div class="line"><span class="lineno">  353</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; 12; i++) {</div>
-<div class="line"><span class="lineno">  354</span>        chromaSum += chroma[i];</div>
-<div class="line"><span class="lineno">  355</span>        chromaSqSum += chroma[i] * chroma[i];</div>
-<div class="line"><span class="lineno">  356</span>    }</div>
-<div class="line"><span class="lineno">  357</span>    <span class="keywordtype">float</span> chromaMean = chromaSum / 12.0f;</div>
-<div class="line"><span class="lineno">  358</span>    <span class="keywordtype">float</span> chromaStdDev = <a class="code hl_function" href="../../d4/d36/namespacefl_a0b5da884257d0f4003ead08f27915a2b.html#a0b5da884257d0f4003ead08f27915a2b">sqrtf</a>((chromaSqSum / 12.0f) - (chromaMean * chromaMean));</div>
-<div class="line"><span class="lineno">  359</span>    <span class="keywordflow">if</span> (chromaStdDev &lt; 1e-6f) chromaStdDev = 1.0f;</div>
-<div class="line"><span class="lineno">  360</span> </div>
-<div class="line"><span class="lineno">  361</span>    <span class="comment">// Calculate correlation with rotated profile</span></div>
-<div class="line"><span class="lineno">  362</span>    <span class="keywordtype">float</span> correlation = 0.0f;</div>
-<div class="line"><span class="lineno">  363</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; 12; i++) {</div>
-<div class="line"><span class="lineno">  364</span>        <span class="keywordtype">int</span> profileIdx = (i - rootNote + 12) % 12;  <span class="comment">// Rotate profile to match root</span></div>
-<div class="line"><span class="lineno">  365</span>        <span class="keywordtype">float</span> chromaNorm = (chroma[i] - chromaMean) / chromaStdDev;</div>
-<div class="line"><span class="lineno">  366</span>        <span class="keywordtype">float</span> profileNorm = (profile[profileIdx] - profileMean) / profileStdDev;</div>
-<div class="line"><span class="lineno">  367</span>        correlation += chromaNorm * profileNorm;</div>
-<div class="line"><span class="lineno">  368</span>    }</div>
-<div class="line"><span class="lineno">  369</span>    correlation /= 12.0f;  <span class="comment">// Average</span></div>
-<div class="line"><span class="lineno">  370</span> </div>
-<div class="line"><span class="lineno">  371</span>    <span class="keywordflow">return</span> correlation;</div>
-<div class="line"><span class="lineno">  372</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../d6/d88/key_8cpp_8hpp_source.html#l00333">333</a> of file <a class="el" href="../../d6/d88/key_8cpp_8hpp_source.html">key.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  333</span>                                                                                               {</div>
+<div class="line"><span class="lineno">  334</span>    <span class="comment">// Pearson correlation coefficient between chroma and rotated profile</span></div>
+<div class="line"><span class="lineno">  335</span>    <span class="comment">// Uses pre-computed profile statistics (calculated once in constructor)</span></div>
+<div class="line"><span class="lineno">  336</span> </div>
+<div class="line"><span class="lineno">  337</span>    <span class="comment">// Use pre-computed profile statistics based on which profile</span></div>
+<div class="line"><span class="lineno">  338</span>    <span class="keywordtype">float</span> profileMean, profileStdDev;</div>
+<div class="line"><span class="lineno">  339</span>    <span class="keywordflow">if</span> (profile == <a class="code hl_variable" href="../../d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_a45635c78e1a1ad52bada5bc005c36e30.html#a45635c78e1a1ad52bada5bc005c36e30">MAJOR_PROFILE</a>) {</div>
+<div class="line"><span class="lineno">  340</span>        profileMean = <a class="code hl_variable" href="../../d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_a434ca9a135e6ff44eef077f8f489081d.html#a434ca9a135e6ff44eef077f8f489081d">mMajorProfileMean</a>;</div>
+<div class="line"><span class="lineno">  341</span>        profileStdDev = <a class="code hl_variable" href="../../d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_aa91c57c9cdbeffc995745dedb0ec09c4.html#aa91c57c9cdbeffc995745dedb0ec09c4">mMajorProfileStdDev</a>;</div>
+<div class="line"><span class="lineno">  342</span>    } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  343</span>        profileMean = <a class="code hl_variable" href="../../d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_a6fb1dfc6c343b14345ef7dbc4552a639.html#a6fb1dfc6c343b14345ef7dbc4552a639">mMinorProfileMean</a>;</div>
+<div class="line"><span class="lineno">  344</span>        profileStdDev = <a class="code hl_variable" href="../../d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_a9e226028528732cc43e288a47ab06235.html#a9e226028528732cc43e288a47ab06235">mMinorProfileStdDev</a>;</div>
+<div class="line"><span class="lineno">  345</span>    }</div>
+<div class="line"><span class="lineno">  346</span>    <span class="keywordflow">if</span> (profileStdDev &lt; 1e-6f) profileStdDev = 1.0f;</div>
+<div class="line"><span class="lineno">  347</span> </div>
+<div class="line"><span class="lineno">  348</span>    <span class="comment">// Calculate chroma mean and std dev</span></div>
+<div class="line"><span class="lineno">  349</span>    <span class="keywordtype">float</span> chromaSum = 0.0f;</div>
+<div class="line"><span class="lineno">  350</span>    <span class="keywordtype">float</span> chromaSqSum = 0.0f;</div>
+<div class="line"><span class="lineno">  351</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; 12; i++) {</div>
+<div class="line"><span class="lineno">  352</span>        chromaSum += chroma[i];</div>
+<div class="line"><span class="lineno">  353</span>        chromaSqSum += chroma[i] * chroma[i];</div>
+<div class="line"><span class="lineno">  354</span>    }</div>
+<div class="line"><span class="lineno">  355</span>    <span class="keywordtype">float</span> chromaMean = chromaSum / 12.0f;</div>
+<div class="line"><span class="lineno">  356</span>    <span class="keywordtype">float</span> chromaStdDev = <a class="code hl_function" href="../../d4/d36/namespacefl_aa4ee5b2900fe7489cc2628422555eb62.html#aa4ee5b2900fe7489cc2628422555eb62">sqrtf</a>((chromaSqSum / 12.0f) - (chromaMean * chromaMean));</div>
+<div class="line"><span class="lineno">  357</span>    <span class="keywordflow">if</span> (chromaStdDev &lt; 1e-6f) chromaStdDev = 1.0f;</div>
+<div class="line"><span class="lineno">  358</span> </div>
+<div class="line"><span class="lineno">  359</span>    <span class="comment">// Calculate correlation with rotated profile</span></div>
+<div class="line"><span class="lineno">  360</span>    <span class="keywordtype">float</span> correlation = 0.0f;</div>
+<div class="line"><span class="lineno">  361</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; 12; i++) {</div>
+<div class="line"><span class="lineno">  362</span>        <span class="keywordtype">int</span> profileIdx = (i - rootNote + 12) % 12;  <span class="comment">// Rotate profile to match root</span></div>
+<div class="line"><span class="lineno">  363</span>        <span class="keywordtype">float</span> chromaNorm = (chroma[i] - chromaMean) / chromaStdDev;</div>
+<div class="line"><span class="lineno">  364</span>        <span class="keywordtype">float</span> profileNorm = (profile[profileIdx] - profileMean) / profileStdDev;</div>
+<div class="line"><span class="lineno">  365</span>        correlation += chromaNorm * profileNorm;</div>
+<div class="line"><span class="lineno">  366</span>    }</div>
+<div class="line"><span class="lineno">  367</span>    correlation /= 12.0f;  <span class="comment">// Average</span></div>
+<div class="line"><span class="lineno">  368</span> </div>
+<div class="line"><span class="lineno">  369</span>    <span class="keywordflow">return</span> correlation;</div>
+<div class="line"><span class="lineno">  370</span>}</div>
 <div class="ttc" id="aclassfl_1_1audio_1_1detector_1_1_key_detector_a434ca9a135e6ff44eef077f8f489081d_html_a434ca9a135e6ff44eef077f8f489081d"><div class="ttname"><a href="../../d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_a434ca9a135e6ff44eef077f8f489081d.html#a434ca9a135e6ff44eef077f8f489081d">fl::audio::detector::KeyDetector::mMajorProfileMean</a></div><div class="ttdeci">float mMajorProfileMean</div><div class="ttdef"><b>Definition</b> <a href="../../de/de5/key_8h_source.html#l00129">key.h:129</a></div></div>
 <div class="ttc" id="aclassfl_1_1audio_1_1detector_1_1_key_detector_a45635c78e1a1ad52bada5bc005c36e30_html_a45635c78e1a1ad52bada5bc005c36e30"><div class="ttname"><a href="../../d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_a45635c78e1a1ad52bada5bc005c36e30.html#a45635c78e1a1ad52bada5bc005c36e30">fl::audio::detector::KeyDetector::MAJOR_PROFILE</a></div><div class="ttdeci">static const float MAJOR_PROFILE[12]</div><div class="ttdef"><b>Definition</b> <a href="../../de/de5/key_8h_source.html#l00125">key.h:125</a></div></div>
 <div class="ttc" id="aclassfl_1_1audio_1_1detector_1_1_key_detector_a6fb1dfc6c343b14345ef7dbc4552a639_html_a6fb1dfc6c343b14345ef7dbc4552a639"><div class="ttname"><a href="../../d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_a6fb1dfc6c343b14345ef7dbc4552a639.html#a6fb1dfc6c343b14345ef7dbc4552a639">fl::audio::detector::KeyDetector::mMinorProfileMean</a></div><div class="ttdeci">float mMinorProfileMean</div><div class="ttdef"><b>Definition</b> <a href="../../de/de5/key_8h_source.html#l00131">key.h:131</a></div></div>
 <div class="ttc" id="aclassfl_1_1audio_1_1detector_1_1_key_detector_a9e226028528732cc43e288a47ab06235_html_a9e226028528732cc43e288a47ab06235"><div class="ttname"><a href="../../d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_a9e226028528732cc43e288a47ab06235.html#a9e226028528732cc43e288a47ab06235">fl::audio::detector::KeyDetector::mMinorProfileStdDev</a></div><div class="ttdeci">float mMinorProfileStdDev</div><div class="ttdef"><b>Definition</b> <a href="../../de/de5/key_8h_source.html#l00132">key.h:132</a></div></div>
 <div class="ttc" id="aclassfl_1_1audio_1_1detector_1_1_key_detector_aa91c57c9cdbeffc995745dedb0ec09c4_html_aa91c57c9cdbeffc995745dedb0ec09c4"><div class="ttname"><a href="../../d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_aa91c57c9cdbeffc995745dedb0ec09c4.html#aa91c57c9cdbeffc995745dedb0ec09c4">fl::audio::detector::KeyDetector::mMajorProfileStdDev</a></div><div class="ttdeci">float mMajorProfileStdDev</div><div class="ttdef"><b>Definition</b> <a href="../../de/de5/key_8h_source.html#l00130">key.h:130</a></div></div>
-<div class="ttc" id="anamespacefl_a0b5da884257d0f4003ead08f27915a2b_html_a0b5da884257d0f4003ead08f27915a2b"><div class="ttname"><a href="../../d4/d36/namespacefl_a0b5da884257d0f4003ead08f27915a2b.html#a0b5da884257d0f4003ead08f27915a2b">fl::sqrtf</a></div><div class="ttdeci">float sqrtf(float value) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00453">math.h:453</a></div></div>
+<div class="ttc" id="anamespacefl_aa4ee5b2900fe7489cc2628422555eb62_html_aa4ee5b2900fe7489cc2628422555eb62"><div class="ttname"><a href="../../d4/d36/namespacefl_aa4ee5b2900fe7489cc2628422555eb62.html#aa4ee5b2900fe7489cc2628422555eb62">fl::sqrtf</a></div><div class="ttdeci">float sqrtf(float value) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00453">math.h:453</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../de/de5/key_8h_source.html#l00125">MAJOR_PROFILE</a>, <a class="el" href="../../de/de5/key_8h_source.html#l00129">mMajorProfileMean</a>, <a class="el" href="../../de/de5/key_8h_source.html#l00130">mMajorProfileStdDev</a>, <a class="el" href="../../de/de5/key_8h_source.html#l00131">mMinorProfileMean</a>, <a class="el" href="../../de/de5/key_8h_source.html#l00132">mMinorProfileStdDev</a>, and <a class="el" href="../../df/db1/math_8h_source.html#l00453">fl::sqrtf()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d6/d88/key_8cpp_8hpp_source.html#l00303">detectKey()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d6/d88/key_8cpp_8hpp_source.html#l00301">detectKey()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -205,7 +205,7 @@ $(function(){initNavTree('d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_a
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../db/dbf/namespacefl_1_1audio.html">audio</a></li><li class="navelem"><a class="el" href="../../dd/d12/namespacefl_1_1audio_1_1detector.html">detector</a></li><li class="navelem"><a class="el" href="../../d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector.html">KeyDetector</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:08 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:11 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

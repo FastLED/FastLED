@@ -1,0 +1,40 @@
+<map id="fl/channels/capabilities.h" name="fl/channels/capabilities.h">
+<area shape="rect" id="Node000001" title="Declarative driver capabilities + channel&#45;request types for the Channel Manager&#39;s predicate / depende..." alt="" coords="446,5,628,31"/>
+<area shape="rect" id="Node000002" href="$d9/d8b/can__match_8cpp_8hpp.html" title="Implementation of fl::canMatch (#3186)." alt="" coords="616,152,839,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="626,32,668,49,704,77,717,95,724,116,730,151,725,152,719,117,712,97,701,81,665,54,624,37"/>
+<area shape="rect" id="Node000006" href="$de/dfb/can__match_8h.html" title="Free function that decides whether a ChannelRequest can be served by a driver&#39;s published capability ..." alt="" coords="512,79,690,104"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="559,39,593,77,589,80,555,43"/>
+<area shape="rect" id="Node000007" href="$d3/dc9/fl_2channels_2driver_8h.html" title=" " alt="" coords="424,152,570,177"/>
+<area shape="poly" id="edge23_Node000001_Node000007" title=" " alt="" coords="522,43,502,79,497,118,498,151,493,152,491,118,497,78,517,40"/>
+<area shape="rect" id="Node000029" href="$db/da0/capabilities_8cpp_8hpp.html" title="Out&#45;of&#45;line definitions for capabilities.h types (#3186)." alt="" coords="54,79,281,104"/>
+<area shape="poly" id="edge21_Node000001_Node000029" title=" " alt="" coords="465,36,228,81,227,76,464,31"/>
+<area shape="rect" id="Node000003" href="$d1/d97/fl_2channels_2__build_8cpp_8hpp.html" title=" " alt="" coords="391,401,582,427"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="773,180,839,210,873,230,905,252,930,275,946,301,948,328,943,342,934,355,916,365,886,374,795,389,582,409,582,404,795,384,884,369,914,360,930,351,938,339,943,327,941,303,926,279,902,256,871,234,836,215,771,185"/>
+<area shape="rect" id="Node000004" href="$d1/deb/fl_2__build_8cpp_8hpp.html" title=" " alt="" coords="334,475,462,500"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="463,437,415,477,411,472,460,433"/>
+<area shape="rect" id="Node000005" href="$d7/d44/fl_8channels_09_8cpp.html" title="Unity build: recursive includes from src/fl/channels/." alt="" coords="486,475,665,500"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="513,433,563,472,560,477,510,437"/>
+<area shape="poly" id="edge6_Node000006_Node000002" title=" " alt="" coords="635,108,708,149,706,154,632,113"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="574,114,516,154,513,150,571,110"/>
+<area shape="rect" id="Node000008" href="$d7/de5/_fast_l_e_d_8cpp_8hpp.html" title=" " alt="" coords="193,321,321,346"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="487,191,460,229,423,267,394,286,363,302,303,323,302,318,361,297,391,282,419,263,456,226,482,188"/>
+<area shape="rect" id="Node000011" href="$d4/d8e/spi__channel__adapter_8h.html" title="Adapter that wraps HW SPI controllers for ChannelManager." alt="" coords="238,225,409,265"/>
+<area shape="poly" id="edge9_Node000007_Node000011" title=" " alt="" coords="461,185,367,228,364,223,458,180"/>
+<area shape="rect" id="Node000014" href="$d3/de6/channel_8cpp_8hpp.html" title=" " alt="" coords="717,321,920,346"/>
+<area shape="poly" id="edge10_Node000007_Node000014" title=" " alt="" coords="584,172,660,189,699,204,735,223,762,246,785,272,815,319,810,322,781,276,758,250,732,228,696,209,659,194,583,177"/>
+<area shape="rect" id="Node000015" href="$df/dc5/fl_2channels_2driver_8cpp_8hpp.html" title=" " alt="" coords="26,233,214,258"/>
+<area shape="poly" id="edge12_Node000007_Node000015" title=" " alt="" coords="430,183,175,235,174,230,429,177"/>
+<area shape="rect" id="Node000016" href="$db/d45/manager_8h.html" title="Unified manager for channel drivers with priority&#45;based fallback." alt="" coords="534,233,700,258"/>
+<area shape="poly" id="edge14_Node000007_Node000016" title=" " alt="" coords="528,183,601,230,598,235,525,187"/>
+<area shape="rect" id="Node000027" href="$df/d99/slim__bridge__controller_8h.html" title="Shared &quot;slim bridge&quot; legacy addLeds&lt;&gt;() controller for channel drivers." alt="" coords="346,313,518,353"/>
+<area shape="poly" id="edge19_Node000007_Node000027" title=" " alt="" coords="493,192,468,266,445,314,440,312,463,264,488,190"/>
+<area shape="rect" id="Node000028" href="$d5/d9b/slim__spi__bridge__controller_8h.html" title="Shared &quot;slim bridge&quot; legacy addLeds&lt;ESPIChipsets ...&gt;() controller for the SPI channel API – driver&#45;a..." alt="" coords="542,313,692,353"/>
+<area shape="poly" id="edge20_Node000007_Node000028" title=" " alt="" coords="584,176,662,195,694,208,714,224,720,237,721,250,708,275,684,297,656,315,653,311,681,293,704,272,716,249,715,238,710,227,691,213,660,201,583,182"/>
+<area shape="poly" id="edge11_Node000014_Node000003" title=" " alt="" coords="758,352,535,404,534,399,756,346"/>
+<area shape="poly" id="edge13_Node000015_Node000003" title=" " alt="" coords="130,270,149,313,164,334,183,351,218,367,270,381,391,400,390,405,269,386,216,372,180,356,160,337,145,315,125,272"/>
+<area shape="poly" id="edge15_Node000016_Node000008" title=" " alt="" coords="556,264,335,316,305,323,304,318,334,311,555,259"/>
+<area shape="poly" id="edge16_Node000016_Node000014" title=" " alt="" coords="658,261,792,318,790,323,656,266"/>
+<area shape="poly" id="edge17_Node000016_Node000027" title=" " alt="" coords="581,266,474,316,472,311,579,261"/>
+<area shape="poly" id="edge18_Node000016_Node000028" title=" " alt="" coords="620,272,620,313,614,313,614,272"/>
+<area shape="poly" id="edge22_Node000029_Node000003" title=" " alt="" coords="132,112,85,139,40,176,22,196,11,218,9,241,16,264,40,299,67,320,100,335,142,351,205,372,270,388,391,405,391,410,269,393,203,377,140,356,98,340,64,325,36,303,11,266,3,241,6,217,18,193,36,172,82,135,129,108"/>
+</map>

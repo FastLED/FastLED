@@ -1,0 +1,5 @@
+<map id="fl::FluxScalar::fromRawQ16" name="fl::FluxScalar::fromRawQ16">
+<area shape="rect" id="Node000001" title="A limiter fraction already in s16.16, clamped to [0, 1]." alt="" coords="5,5,204,31"/>
+<area shape="rect" id="Node000002" href="$d0/d69/classfl_1_1_flux_scalar_a5a9296a2c583b737dad92df25efc0bc6.html#a5a9296a2c583b737dad92df25efc0bc6" title=" " alt="" coords="252,5,435,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="204,15,238,15,238,21,204,21"/>
+</map>

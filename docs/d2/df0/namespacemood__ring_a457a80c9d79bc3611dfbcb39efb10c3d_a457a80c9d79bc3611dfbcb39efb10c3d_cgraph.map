@@ -1,0 +1,7 @@
+<map id="mood_ring::ringDistance" name="mood_ring::ringDistance">
+<area shape="rect" id="Node000001" title="Shortest distance between two ring positions, in turns, in [0, 0.5]." alt="" coords="5,5,187,31"/>
+<area shape="rect" id="Node000002" href="$d2/df0/namespacemood__ring_ab42039ce856d86d3fa5f87978a9a1edd.html#ab42039ce856d86d3fa5f87978a9a1edd" title="Signed shortest offset from b to a on the ring, in (&#45;0.5, 0.5]." alt="" coords="235,5,397,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="187,15,221,15,221,21,187,21"/>
+<area shape="rect" id="Node000003" href="$d2/df0/namespacemood__ring_afd9d29472c525f39ef3e4d658dde6837.html#afd9d29472c525f39ef3e4d658dde6837" title="Wrap into [0, 1)." alt="" coords="445,5,611,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="398,15,431,15,431,21,398,21"/>
+</map>

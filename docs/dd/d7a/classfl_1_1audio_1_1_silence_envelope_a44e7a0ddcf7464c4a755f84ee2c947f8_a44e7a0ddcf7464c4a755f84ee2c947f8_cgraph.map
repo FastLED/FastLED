@@ -1,0 +1,9 @@
+<map id="fl::audio::SilenceEnvelope::update" name="fl::audio::SilenceEnvelope::update">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,195,45"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_af27046964143ce28bf18ce86d152ff93.html#af27046964143ce28bf18ce86d152ff93" title=" " alt="" coords="243,13,309,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="195,23,229,23,229,28,195,28"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a40a7b61a808fb87231530da119eae16f.html#a40a7b61a808fb87231530da119eae16f" title=" " alt="" coords="357,13,492,38"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="309,23,344,23,344,28,309,28"/>
+<area shape="rect" id="Node000004" href="$df/d9e/namespacefl_1_1detail_ad270ac5b02d0ed4162ad4c543af3140c.html#ad270ac5b02d0ed4162ad4c543af3140c" title=" " alt="" coords="540,13,713,38"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="492,23,526,23,526,28,492,28"/>
+</map>

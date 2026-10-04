@@ -1,0 +1,17 @@
+<map id="fl/channels/five_bit_semantics.h" name="fl/channels/five_bit_semantics.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="211,5,355,45"/>
+<area shape="rect" id="Node000002" href="$de/d14/spi__chipsets_8h.html" title="SPI LED chipset enumeration." alt="" coords="5,93,189,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="239,48,138,90,136,85,237,43"/>
+<area shape="rect" id="Node000003" href="$d3/dd6/gfx_2color__profile_8h.html" title=" " alt="" coords="265,93,415,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="299,44,325,80,321,84,294,47"/>
+<area shape="rect" id="Node000004" href="$db/d01/noexcept_8h.html" title=" " alt="" coords="219,167,346,192"/>
+<area shape="poly" id="edge8_Node000001_Node000004" title=" " alt="" coords="272,47,257,80,253,99,255,118,270,154,265,156,249,119,248,99,252,78,267,44"/>
+<area shape="rect" id="Node000007" href="$d3/d7e/int_8h.html" title=" " alt="" coords="440,93,523,119"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="331,43,441,86,439,91,329,48"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="333,121,303,158,299,154,328,117"/>
+<area shape="rect" id="Node000005" href="$df/dd8/stdint_8h.html" title=" " alt="" coords="399,167,502,192"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="359,116,422,157,419,161,356,121"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="391,240,510,265"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="453,192,453,226,448,226,448,192"/>
+<area shape="poly" id="edge7_Node000007_Node000005" title=" " alt="" coords="479,120,463,155,459,153,474,118"/>
+</map>

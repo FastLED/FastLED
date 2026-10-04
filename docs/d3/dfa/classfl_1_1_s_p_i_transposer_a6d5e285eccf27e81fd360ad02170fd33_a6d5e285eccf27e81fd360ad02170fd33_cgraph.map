@@ -1,0 +1,23 @@
+<map id="fl::SPITransposer::transpose16" name="fl::SPITransposer::transpose16">
+<area shape="rect" id="Node000001" title="Transpose 16 lanes of data into interleaved hex&#45;SPI format." alt="" coords="5,178,141,218"/>
+<area shape="rect" id="Node000002" href="$d0/d08/classfl_1_1span_a45157f503f151e36c679f688f10e3511.html#a45157f503f151e36c679f688f10e3511" title=" " alt="" coords="219,5,326,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="82,177,121,109,152,72,188,40,205,30,208,35,191,44,155,76,126,113,86,179"/>
+<area shape="rect" id="Node000003" href="$d2/d24/classfl_1_1vector_a826e60644841f9de2975448a8d6c2689.html#a826e60644841f9de2975448a8d6c2689" title=" " alt="" coords="215,55,331,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="92,176,134,137,188,97,217,83,220,87,191,102,137,141,96,180"/>
+<area shape="rect" id="Node000004" href="$dd/dd8/classfl_1_1_optional_a7bbfce2d0b0a17bb124b7b19a700efa5.html#a7bbfce2d0b0a17bb124b7b19a700efa5" title=" " alt="" coords="404,131,547,156"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="106,175,144,156,189,141,240,132,293,129,390,131,390,136,293,134,241,138,190,146,146,161,108,180"/>
+<area shape="rect" id="Node000005" href="$d3/dfa/classfl_1_1_s_p_i_transposer_ae44935fca59ebb46579c25fa8e55a990.html#ae44935fca59ebb46579c25fa8e55a990" title="Get byte from lane at given index, handling padding automatically." alt="" coords="205,206,341,246"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="142,205,191,212,191,217,141,210"/>
+<area shape="rect" id="Node000007" href="$d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa" title=" " alt="" coords="424,267,527,292"/>
+<area shape="poly" id="edge10_Node000001_Node000007" title=" " alt="" coords="106,216,145,238,190,255,247,268,306,275,410,279,410,285,305,281,246,273,189,261,143,242,104,221"/>
+<area shape="rect" id="Node000008" href="$dd/dd8/classfl_1_1_optional_ab632186cb644dfe62d8868f3fded297a.html#ab632186cb644dfe62d8868f3fded297a" title=" " alt="" coords="189,156,356,181"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="141,185,175,180,176,186,142,191"/>
+<area shape="rect" id="Node000009" href="$d2/d24/classfl_1_1vector_a673f4982dd5a998b3ced94ef480e5399.html#a673f4982dd5a998b3ced94ef480e5399" title=" " alt="" coords="209,321,336,347"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="95,217,136,258,191,300,219,314,216,319,188,304,133,262,91,220"/>
+<area shape="rect" id="Node000010" href="$d4/d36/namespacefl_af150f14cd8487140ece5a3ad3d26ce5a.html#af150f14cd8487140ece5a3ad3d26ce5a" title="Low&#45;level bit&#45;interleaving primitive for 16 lanes (ISR&#45;safe)" alt="" coords="196,371,349,411"/>
+<area shape="poly" id="edge11_Node000001_Node000010" title=" " alt="" coords="86,217,126,285,156,324,191,357,198,362,195,367,188,361,152,327,122,288,82,220"/>
+<area shape="rect" id="Node000006" href="$d0/d08/classfl_1_1span_a28135041ca9036a3efb34c1d0afe115b.html#a28135041ca9036a3efb34c1d0afe115b" title=" " alt="" coords="416,213,535,239"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="341,223,402,223,402,229,341,229"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="342,241,414,261,413,266,340,246"/>
+<area shape="poly" id="edge8_Node000008_Node000004" title=" " alt="" coords="356,156,390,151,391,157,357,161"/>
+</map>

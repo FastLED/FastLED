@@ -1,0 +1,9 @@
+<map id="fl::delayNanoseconds" name="fl::delayNanoseconds">
+<area shape="rect" id="Node000001" title="Delay for a compile&#45;time constant number of nanoseconds." alt="" coords="144,55,305,80"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a79c8f1dd8d5f676f8a207aefe96753e6.html#a79c8f1dd8d5f676f8a207aefe96753e6" title="Shorter alias for delayNanoseconds (template version)" alt="" coords="5,5,96,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="166,53,96,33,97,28,167,48"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_aa030949956c0fb5ca82c60631c335c45.html#aa030949956c0fb5ca82c60631c335c45" title="Shorter alias for delayNanoseconds (runtime version)" alt="" coords="5,55,96,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="130,70,96,70,96,65,130,65"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a4a5a945c8459b84e45edadba948993b7.html#a4a5a945c8459b84e45edadba948993b7" title="Shorter alias for delayNanoseconds with explicit clock frequency." alt="" coords="5,104,96,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="167,86,97,106,96,101,166,81"/>
+</map>

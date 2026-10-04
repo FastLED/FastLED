@@ -1,0 +1,7 @@
+<map id="fl::processPixelQ16" name="fl::processPixelQ16">
+<area shape="rect" id="Node000001" title="One pixel: an RGB8 code triple to three physical emitter drives in s16.16." alt="" coords="260,45,405,70"/>
+<area shape="rect" id="Node000002" href="$db/da5/classfl_1_1_color_managed_pixel_source_a07e179580f57628693c40d60c44ca7f4.html#a07e179580f57628693c40d60c44ca7f4" title="The colour&#45;managed path." alt="" coords="5,5,212,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="246,48,212,43,212,37,246,42"/>
+<area shape="rect" id="Node000003" href="$db/da5/classfl_1_1_color_managed_pixel_source_aa6493017bac09ea96dc19e61ee16fb18.html#aa6493017bac09ea96dc19e61ee16fb18" title="The same pixel, quantized once to 16 bits instead of to 8 (P8, #4042)." alt="" coords="5,69,212,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="246,72,212,77,212,72,246,67"/>
+</map>

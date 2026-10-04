@@ -1,0 +1,15 @@
+digraph "fl::anonymous_namespace{gamut_map::cpp::hpp}::RgbFeasible::operator()"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::anonymous_namespace\l\{gamut_map::cpp::hpp\}\l::RgbFeasible::operator()",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::anonymous_namespace\l\{gamut_map::cpp::hpp\}\l::gamutDrivesAreInRange",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/dfe/namespacefl_1_1anonymous__namespace_02gamut__map_8cpp_8hpp_03_a267b279ba30d4bf77aa03398dd34da65.html#a267b279ba30d4bf77aa03398dd34da65",tooltip="True when every drive is inside [0, 1], allowing slack ULP either side."];
+  Node2 -> Node2 [id="edge2_Node000002_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node3 [id="edge3_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::solveRgbDrivesQ16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_af5a0679639e0ad1db7feb7f9705df72f.html#af5a0679639e0ad1db7feb7f9705df72f",tooltip="One pixel: XYZ in s16.16 to three emitter drives in s16.16."];
+}

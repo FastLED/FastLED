@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -179,7 +179,7 @@ template&lt;typename PixelT, typename Coord, bool Overwrite&gt; </div>
 <div class="line"><span class="lineno">  688</span>    fc.<a class="code hl_variable" href="../../d6/d9a/namespacefl_1_1gfx_1_1detail.html#a48cf8626ddfcc49f140fe73d21a848c6">xmin</a> = xmin; fc.<a class="code hl_variable" href="../../d6/d9a/namespacefl_1_1gfx_1_1detail.html#a32acd964f67eccc5683459d4b9c977aa">xmax</a> = xmax;</div>
 <div class="line"><span class="lineno">  689</span>    fc.<a class="code hl_variable" href="../../d6/d9a/namespacefl_1_1gfx_1_1detail.html#a3278ca7da4d2b929455761fe6a52ebe1">rin2</a> = rin2; fc.<a class="code hl_variable" href="../../d6/d9a/namespacefl_1_1gfx_1_1detail.html#a2cc2e4ec9217abc891a20e33207b20d8">rout2</a> = rout2;</div>
 <div class="line"><span class="lineno">  690</span>    <a class="code hl_function" href="../../d6/d9a/namespacefl_1_1gfx_1_1detail_ace632a8bd8b1b176f9f882b536fc486c.html#ace632a8bd8b1b176f9f882b536fc486c">detail::computeBandShift</a>(band, fc.<a class="code hl_variable" href="../../d6/d9a/namespacefl_1_1gfx_1_1detail.html#ac5d6abd565f5f6109e6df05304b15b5b">band_shift</a>, fc.<a class="code hl_variable" href="../../d6/d9a/namespacefl_1_1gfx_1_1detail.html#a1a85f13e1cc26c50e11752d0b156b7e7">band_inv</a>);</div>
-<div class="line"><span class="lineno">  691</span>    fc.<a class="code hl_variable" href="../../d6/d9a/namespacefl_1_1gfx_1_1detail.html#a205fc4aa6fcac16d1c7612661063430f">color</a> = color;</div>
+<div class="line"><span class="lineno">  691</span>    fc.<a class="code hl_variable" href="../../d6/d9a/namespacefl_1_1gfx_1_1detail.html#a205fc4aa6fcac16d1c7612661063430f">color</a> = <a class="code hl_namespace" href="../../d5/d38/namespacefl_1_1color.html">color</a>;</div>
 <div class="line"><span class="lineno">  692</span> </div>
 <div class="line"><span class="lineno">  693</span>    fl::i32 cyfrac = (<span class="keyword">static_cast&lt;</span>fl::i32<span class="keyword">&gt;</span>(cyi) &lt;&lt; 8) - cy8;</div>
 <div class="line"><span class="lineno">  694</span>    fl::i32 d2c = dx2 + cyfrac * cyfrac;</div>
@@ -205,6 +205,7 @@ template&lt;typename PixelT, typename Coord, bool Overwrite&gt; </div>
 <div class="line"><span class="lineno">  714</span>        topd2 += topdelta; topdelta += 131072;</div>
 <div class="line"><span class="lineno">  715</span>    }</div>
 <div class="line"><span class="lineno">  716</span>}</div>
+<div class="ttc" id="anamespacefl_1_1color_html"><div class="ttname"><a href="../../d5/d38/namespacefl_1_1color.html">fl::color</a></div><div class="ttdef"><b>Definition</b> <a href="../../d0/df3/fl_2color_2rgbw_8h_source.html#l00009">rgbw.h:9</a></div></div>
 <div class="ttc" id="anamespacefl_1_1gfx_1_1detail_a6dfa4961e3abbbfbeeea1abe7d8d5259_html_a6dfa4961e3abbbfbeeea1abe7d8d5259"><div class="ttname"><a href="../../d6/d9a/namespacefl_1_1gfx_1_1detail_a6dfa4961e3abbbfbeeea1abe7d8d5259.html#a6dfa4961e3abbbfbeeea1abe7d8d5259">fl::gfx::detail::renderDiscRow</a></div><div class="ttdeci">void renderDiscRow(PixelT *buf, int w, int py, fl::i32 d2_row, const DiscCtx&lt; PixelT &gt; &amp;f)</div><div class="ttdoc">Render one scanline of a disc using incremental d².</div><div class="ttdef"><b>Definition</b> <a href="../../de/d34/primitives_8h_source.html#l00278">primitives.h:278</a></div></div>
 <div class="ttc" id="anamespacefl_1_1gfx_1_1detail_ab04a22e2927673d2692b4f3e354af564_html_ab04a22e2927673d2692b4f3e354af564"><div class="ttname"><a href="../../d6/d9a/namespacefl_1_1gfx_1_1detail_ab04a22e2927673d2692b4f3e354af564.html#ab04a22e2927673d2692b4f3e354af564">fl::gfx::detail::toFixed8</a></div><div class="ttdeci">fl::i32 toFixed8(Coord val)</div><div class="ttdoc">Convert any Coord type to 8.8 fixed-point (fl::i32).</div><div class="ttdef"><b>Definition</b> <a href="../../de/d34/primitives_8h_source.html#l00180">primitives.h:180</a></div></div>
 <div class="ttc" id="anamespacefl_1_1gfx_1_1detail_ace632a8bd8b1b176f9f882b536fc486c_html_ace632a8bd8b1b176f9f882b536fc486c"><div class="ttname"><a href="../../d6/d9a/namespacefl_1_1gfx_1_1detail_ace632a8bd8b1b176f9f882b536fc486c.html#ace632a8bd8b1b176f9f882b536fc486c">fl::gfx::detail::computeBandShift</a></div><div class="ttdeci">void computeBandShift(fl::i32 band, fl::u8 &amp;shift_out, fl::u16 &amp;inv_out)</div><div class="ttdoc">Precompute right-shift and reciprocal multiplier for AA division.</div><div class="ttdef"><b>Definition</b> <a href="../../de/d34/primitives_8h_source.html#l00209">primitives.h:209</a></div></div>
@@ -250,7 +251,7 @@ template&lt;typename PixelT, typename Coord, bool Overwrite&gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d0/d8b/namespacefl_1_1gfx.html">gfx</a></li><li class="navelem"><a class="el" href="../../d6/d9a/namespacefl_1_1gfx_1_1detail.html">detail</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:10 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:12 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

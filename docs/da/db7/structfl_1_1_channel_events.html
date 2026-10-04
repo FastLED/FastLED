@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -122,18 +122,18 @@ $(function(){initNavTree('da/db7/structfl_1_1_channel_events.html','../../'); in
 <div class="line"> </div>
 <div class="line"><span class="comment">// Remove a listener</span></div>
 <div class="line"><a class="code hl_variable" href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a>.channelEvents().onChannelCreated.remove(<span class="keywordtype">id</span>);</div>
-<div class="ttc" id="a_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9_html_a8e94985674086ea368e1d51cbc0f82a9"><div class="ttname"><a href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a></div><div class="ttdeci">FL_DISABLE_WARNING_PUSH FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS CFastLED FastLED</div><div class="ttdoc">Global LED strip management instance.</div><div class="ttdef"><b>Definition</b> <a href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_source.html#l00075">FastLED.cpp.hpp:75</a></div></div>
+<div class="ttc" id="a_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9_html_a8e94985674086ea368e1d51cbc0f82a9"><div class="ttname"><a href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a></div><div class="ttdeci">FL_DISABLE_WARNING_PUSH FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS CFastLED FastLED</div><div class="ttdoc">Global LED strip management instance.</div><div class="ttdef"><b>Definition</b> <a href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_source.html#l00090">FastLED.cpp.hpp:90</a></div></div>
 <div class="ttc" id="aclassfl_1_1_i_channel_a508a681f01ca7710ee20c9c0bc0c201a_html_a508a681f01ca7710ee20c9c0bc0c201a"><div class="ttname"><a href="../../d8/dcc/classfl_1_1_i_channel_a508a681f01ca7710ee20c9c0bc0c201a.html#a508a681f01ca7710ee20c9c0bc0c201a">fl::IChannel::name</a></div><div class="ttdeci">virtual const fl::string &amp; name() const =0</div><div class="ttdoc">User-specified or auto-generated name (e.g. &quot;Channel_3&quot;).</div></div>
 <div class="ttc" id="aclassfl_1_1_i_channel_html"><div class="ttname"><a href="../../d8/dcc/classfl_1_1_i_channel.html">fl::IChannel</a></div><div class="ttdoc">Polymorphic identification base for any channel in the system.</div><div class="ttdef"><b>Definition</b> <a href="../../d8/dd4/ichannel_8h_source.html#l00023">ichannel.h:23</a></div></div>
-<div class="ttc" id="alog_8h_a8ccae77aa5fe30a41f19d233cb0de2c1_html_a8ccae77aa5fe30a41f19d233cb0de2c1"><div class="ttname"><a href="../../d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a></div><div class="ttdeci">#define FL_DBG</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00388">log.h:388</a></div></div>
+<div class="ttc" id="alog_8h_a8ccae77aa5fe30a41f19d233cb0de2c1_html_a8ccae77aa5fe30a41f19d233cb0de2c1"><div class="ttname"><a href="../../d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a></div><div class="ttdeci">#define FL_DBG</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00564">log.h:564</a></div></div>
 </div><!-- fragment --><p>Event naming convention:</p><ul>
 <li>Past tense (Created, Added, Configured, Removed, Enqueued): fired after the action</li>
 <li>"Begin" prefix (BeginDestroy, BeginShow): fired before the action</li>
 <li>"End" prefix (EndShow): fired after a bracketed action</li>
 </ul>
-<p>Callbacks receive <code>const <a class="el" href="../../d8/dcc/classfl_1_1_i_channel.html" title="Polymorphic identification base for any channel in the system.">IChannel</a>&amp;</code> so the same listener works regardless of which <code><a class="el" href="../../d5/d8b/classfl_1_1_channel.html" title="LED channel for parallel output, pretty much a CPixelLEDController but with timing and pin informatio...">Channel</a>&lt;<a class="el" href="../../d4/d36/namespacefl_a7e1e94407fbd018269794d74ab7fb4c1.html#a7e1e94407fbd018269794d74ab7fb4c1" title="Driver identifier for compile-time bus selection.">Bus</a>, Chipset&gt;</code> instantiation produced the event. See <code><a class="el" href="../../d8/dd4/ichannel_8h.html" title="Type-erased base for the templated Channel&lt;Bus, Chipset&gt; family.">fl/channels/ichannel.h</a></code> and issue #2428. </p>
+<p>Callbacks receive <code>const <a class="el" href="../../d8/dcc/classfl_1_1_i_channel.html" title="Polymorphic identification base for any channel in the system.">IChannel</a>&amp;</code> so the same listener works regardless of which <code><a class="el" href="../../d5/d8b/classfl_1_1_channel.html" title="LED channel for parallel output, pretty much a CPixelLEDController but with timing and pin informatio...">Channel</a>&lt;<a class="el" href="../../d4/d36/namespacefl_a7e1e94407fbd018269794d74ab7fb4c1.html#a7e1e94407fbd018269794d74ab7fb4c1" title="Portable public bus selector.">Bus</a>, Chipset&gt;</code> instantiation produced the event. See <code><a class="el" href="../../d8/dd4/ichannel_8h.html" title="Type-erased base for the templated Channel&lt;Bus, Chipset&gt; family.">fl/channels/ichannel.h</a></code> and issue #2428. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d3/dd0/channel__events_8h_source.html#l00079">79</a> of file <a class="el" href="../../d3/dd0/channel__events_8h_source.html">channel_events.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d3/dd0/channel__events_8h_source.html#l00101">101</a> of file <a class="el" href="../../d3/dd0/channel__events_8h_source.html">channel_events.h</a>.</p>
 </div>
 <p><code>#include &lt;<a class="el" href="../../d3/dd0/channel__events_8h_source.html">channel_events.h</a>&gt;</code></p>
 <table class="memberdecls">
@@ -165,6 +165,10 @@ Public Attributes</h2></td></tr>
 <tr class="memitem:a6f026ee985cfe749d380ea07c3f1f311" id="r_a6f026ee985cfe749d380ea07c3f1f311"><td class="memItemLeft" align="right" valign="top">fl::function_list&lt; void(const <a class="el" href="../../d8/dcc/classfl_1_1_i_channel.html">IChannel</a> &amp;)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../da/db7/structfl_1_1_channel_events_a6f026ee985cfe749d380ea07c3f1f311.html#a6f026ee985cfe749d380ea07c3f1f311">onChannelRemoved</a></td></tr>
 <tr class="memdesc:a6f026ee985cfe749d380ea07c3f1f311"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fired after a <a class="el" href="../../d5/d8b/classfl_1_1_channel.html" title="LED channel for parallel output, pretty much a CPixelLEDController but with timing and pin informatio...">Channel</a> is removed from FastLED's controller list.  <br /></td></tr>
 <tr class="separator:a6f026ee985cfe749d380ea07c3f1f311"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4de3d40971930399f4a4380bc35bd61e" id="r_a4de3d40971930399f4a4380bc35bd61e"><td class="memItemLeft" align="right" valign="top">fl::function_list&lt; void(const <a class="el" href="../../d4/d36/namespacefl.html#d9/ddb/structfl_1_1_color_profile_event">ColorProfileEvent</a> &amp;)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../da/db7/structfl_1_1_channel_events_a4de3d40971930399f4a4380bc35bd61e.html#a4de3d40971930399f4a4380bc35bd61e">onColorProfileFallback</a></td></tr>
+<tr class="separator:a4de3d40971930399f4a4380bc35bd61e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a987d2254f6f9cb2e4236a8bc5199b817" id="r_a987d2254f6f9cb2e4236a8bc5199b817"><td class="memItemLeft" align="right" valign="top">fl::function_list&lt; void(const <a class="el" href="../../d4/d36/namespacefl.html#d9/ddb/structfl_1_1_color_profile_event">ColorProfileEvent</a> &amp;)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../da/db7/structfl_1_1_channel_events_a987d2254f6f9cb2e4236a8bc5199b817.html#a987d2254f6f9cb2e4236a8bc5199b817">onColorProfileWarning</a></td></tr>
+<tr class="separator:a987d2254f6f9cb2e4236a8bc5199b817"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <hr/>The documentation for this struct was generated from the following files:<ul>
 <li>fl/channels/<a class="el" href="../../d3/dd0/channel__events_8h_source.html">channel_events.h</a></li>
@@ -177,7 +181,7 @@ Public Attributes</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../da/db7/structfl_1_1_channel_events.html">ChannelEvents</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:04 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:08 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

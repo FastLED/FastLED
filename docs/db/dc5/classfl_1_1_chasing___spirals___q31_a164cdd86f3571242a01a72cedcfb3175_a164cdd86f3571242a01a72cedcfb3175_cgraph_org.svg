@@ -39,7 +39,7 @@
 <!-- Node5 -->
 <g id="Node000005" class="node">
 <title>Node5</title>
-<g id="a_Node000005"><a xlink:href="../../d4/d36/namespacefl_a3a23a29b7fae800b629360cd32fec586.html#a3a23a29b7fae800b629360cd32fec586" target="_top" xlink:title="Process 4 angles simultaneously, returning vectorized sin/cos values SIMD&#45;optimized: vectorized angle...">
+<g id="a_Node000005"><a xlink:href="../../d4/d36/namespacefl_a92f648bf72198076845339c6859d3e19.html#a92f648bf72198076845339c6859d3e19" target="_top" xlink:title="Process 4 angles simultaneously, returning vectorized sin/cos values SIMD&#45;optimized: vectorized angle...">
 <polygon fill="white" stroke="#666666" points="243,-19 142,-19 142,0 243,0 243,-19"/>
 <text text-anchor="middle" x="192.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::sincos32_simd</text>
 </a>

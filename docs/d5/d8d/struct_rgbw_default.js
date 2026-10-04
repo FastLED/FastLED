@@ -1,5 +1,5 @@
 var struct_rgbw_default =
 [
-    [ "RgbwDefault", "d5/d8d/struct_rgbw_default_a459af168147eaa5c866a973347c41ba5.html#a459af168147eaa5c866a973347c41ba5", null ],
-    [ "value", "d5/d8d/struct_rgbw_default_aa1f05c6121ba6c38a371d7c8ba80043d.html#aa1f05c6121ba6c38a371d7c8ba80043d", null ]
+    [ "RgbwDefault", "d5/d8d/struct_rgbw_default_ae7e3ebeead5bf6d90c2f6f92b48f452e.html#ae7e3ebeead5bf6d90c2f6f92b48f452e", null ],
+    [ "value", "d5/d8d/struct_rgbw_default_ae60d57fd637eea2802d0f25b620e9b47.html#ae60d57fd637eea2802d0f25b620e9b47", null ]
 ];

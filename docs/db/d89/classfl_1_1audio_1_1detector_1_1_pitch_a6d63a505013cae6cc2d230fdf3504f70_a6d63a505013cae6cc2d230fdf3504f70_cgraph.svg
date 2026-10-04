@@ -77,7 +77,7 @@ var sectionId = 'dynsection-0';
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../db/d89/classfl_1_1audio_1_1detector_1_1_pitch_aeaabc8e931d21d5d5d720a291ac130a0.html#aeaabc8e931d21d5d5d720a291ac130a0" target="_top" xlink:title=" ">
+<g id="a_Node000002"><a xlink:href="../../db/d89/classfl_1_1audio_1_1detector_1_1_pitch_ac8273067effc4595ca6c8c013894402c.html#ac8273067effc4595ca6c8c013894402c" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="275,-326 173,-326 173,-296 275,-296 275,-326"/>
 <text text-anchor="start" x="181" y="-314" font-family="Helvetica,sans-Serif" font-size="10.00">fl::audio::detector</text>
 <text text-anchor="middle" x="224" y="-303" font-family="Helvetica,sans-Serif" font-size="10.00">::Pitch::Pitch</text>
@@ -115,7 +115,7 @@ var sectionId = 'dynsection-0';
 <!-- Node13 -->
 <g id="Node000013" class="node">
 <title>Node13</title>
-<g id="a_Node000013"><a xlink:href="../../db/dbf/namespacefl_1_1audio_a7189558c538537464f1d31c91596631d.html#a7189558c538537464f1d31c91596631d" target="_top" xlink:title="Compute the time delta (in seconds) for an audio buffer.">
+<g id="a_Node000013"><a xlink:href="../../db/dbf/namespacefl_1_1audio_a8a5c097dfda178fb0d31e2060cb62ea9.html#a8a5c097dfda178fb0d31e2060cb62ea9" target="_top" xlink:title="Compute the time delta (in seconds) for an audio buffer.">
 <polygon fill="white" stroke="#666666" points="295.5,-200.5 152.5,-200.5 152.5,-181.5 295.5,-181.5 295.5,-200.5"/>
 <text text-anchor="middle" x="224" y="-188.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::audio::computeAudioDt</text>
 </a>
@@ -133,7 +133,7 @@ var sectionId = 'dynsection-0';
 <!-- Node14 -->
 <g id="Node000014" class="node">
 <title>Node14</title>
-<g id="a_Node000014"><a xlink:href="../../d0/d08/classfl_1_1span_a326aa9f29859fe8a92833fd5db12c3bb.html#a326aa9f29859fe8a92833fd5db12c3bb" target="_top" xlink:title=" ">
+<g id="a_Node000014"><a xlink:href="../../d0/d08/classfl_1_1span_a45157f503f151e36c679f688f10e3511.html#a45157f503f151e36c679f688f10e3511" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="264,-163.5 184,-163.5 184,-144.5 264,-144.5 264,-163.5"/>
 <text text-anchor="middle" x="224" y="-151.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::span::data</text>
 </a>
@@ -171,7 +171,7 @@ var sectionId = 'dynsection-0';
 <!-- Node17 -->
 <g id="Node000017" class="node">
 <title>Node17</title>
-<g id="a_Node000017"><a xlink:href="../../d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac" target="_top" xlink:title=" ">
+<g id="a_Node000017"><a xlink:href="../../d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="262.5,-67.5 185.5,-67.5 185.5,-48.5 262.5,-48.5 262.5,-67.5"/>
 <text text-anchor="middle" x="224" y="-55.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::span::size</text>
 </a>
@@ -303,7 +303,7 @@ var sectionId = 'dynsection-0';
 <!-- Node7 -->
 <g id="Node000007" class="node">
 <title>Node7</title>
-<g id="a_Node000007"><a xlink:href="../../d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909" target="_top" xlink:title=" ">
+<g id="a_Node000007"><a xlink:href="../../d4/d36/namespacefl_a07c69292ef50aa1083046faff1c52ead.html#a07c69292ef50aa1083046faff1c52ead" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="629.5,-322.5 579.5,-322.5 579.5,-303.5 629.5,-303.5 629.5,-322.5"/>
 <text text-anchor="middle" x="604.5" y="-310.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::max</text>
 </a>
@@ -321,7 +321,7 @@ var sectionId = 'dynsection-0';
 <!-- Node8 -->
 <g id="Node000008" class="node">
 <title>Node8</title>
-<g id="a_Node000008"><a xlink:href="../../d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb" target="_top" xlink:title=" ">
+<g id="a_Node000008"><a xlink:href="../../d4/d36/namespacefl_a2fdabb91a1f100dec8da21e4306aba05.html#a2fdabb91a1f100dec8da21e4306aba05" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="628,-285.5 581,-285.5 581,-266.5 628,-266.5 628,-285.5"/>
 <text text-anchor="middle" x="604.5" y="-273.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::min</text>
 </a>
@@ -357,7 +357,7 @@ var sectionId = 'dynsection-0';
 <!-- Node10 -->
 <g id="Node000010" class="node">
 <title>Node10</title>
-<g id="a_Node000010"><a xlink:href="../../d4/dad/classfl_1_1vector__basic_a9a248c6b3d33d24ef21e4275c4fbae8c.html#a9a248c6b3d33d24ef21e4275c4fbae8c" target="_top" xlink:title=" ">
+<g id="a_Node000010"><a xlink:href="../../d4/dad/classfl_1_1vector__basic_a3bdba8a50d37b2fd71bbec2b753fba3e.html#a3bdba8a50d37b2fd71bbec2b753fba3e" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="662.5,-211.5 546.5,-211.5 546.5,-192.5 662.5,-192.5 662.5,-211.5"/>
 <text text-anchor="middle" x="604.5" y="-199.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::vector_basic::size</text>
 </a>
@@ -384,7 +384,7 @@ var sectionId = 'dynsection-0';
 <!-- Node16 -->
 <g id="Node000016" class="node">
 <title>Node16</title>
-<g id="a_Node000016"><a xlink:href="../../d4/d36/namespacefl_aefed87cfefc8330419d3393867945e84.html#aefed87cfefc8330419d3393867945e84" target="_top" xlink:title=" ">
+<g id="a_Node000016"><a xlink:href="../../d4/d36/namespacefl_aea39aa3747a937b0dbefabdf22cf2bbc.html#aea39aa3747a937b0dbefabdf22cf2bbc" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="444.5,-115.5 398.5,-115.5 398.5,-96.5 444.5,-96.5 444.5,-115.5"/>
 <text text-anchor="middle" x="421.5" y="-103.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::abs</text>
 </a>

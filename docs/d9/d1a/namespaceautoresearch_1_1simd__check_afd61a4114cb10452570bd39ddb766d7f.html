@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -125,20 +125,19 @@ $(function(){initNavTree('d9/d1a/namespaceautoresearch_1_1simd__check_afd61a4114
 
 <p class="definition">Definition at line <a class="el" href="../../d7/dd1/_auto_research_simd_8h_source.html#l00152">152</a> of file <a class="el" href="../../d7/dd1/_auto_research_simd_8h_source.html">AutoResearchSimd.h</a>.</p>
 <div class="fragment"><div class="line"><span class="lineno">  152</span>                                 {</div>
-<div class="line"><span class="lineno">  153</span>    uint8_t a[16] = {100,50,200,10, 100,50,200,10, 100,50,200,10, 100,50,200,10};</div>
-<div class="line"><span class="lineno">  154</span>    uint8_t b[16] = {50,100,50,100, 50,100,50,100, 50,100,50,100, 50,100,50,100};</div>
-<div class="line"><span class="lineno">  155</span>    uint8_t expected[16] = {50,0,150,0, 50,0,150,0, 50,0,150,0, 50,0,150,0};</div>
-<div class="line"><span class="lineno">  156</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_afd9f334550c5839ec8307748aba15027.html#afd9f334550c5839ec8307748aba15027">uint8_t</a> <a class="code hl_variable" href="../../d8/d94/namespacetest__quick_a8c9b09f7da0aec94eb085625d9c04cdd.html#a8c9b09f7da0aec94eb085625d9c04cdd">output</a>[16] = {0};</div>
+<div class="line"><span class="lineno">  153</span>    <a class="code hl_typedef" href="../../df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a> a[16] = {100,50,200,10, 100,50,200,10, 100,50,200,10, 100,50,200,10};</div>
+<div class="line"><span class="lineno">  154</span>    <a class="code hl_typedef" href="../../df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a> b[16] = {50,100,50,100, 50,100,50,100, 50,100,50,100, 50,100,50,100};</div>
+<div class="line"><span class="lineno">  155</span>    <a class="code hl_typedef" href="../../df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a> expected[16] = {50,0,150,0, 50,0,150,0, 50,0,150,0, 50,0,150,0};</div>
+<div class="line"><span class="lineno">  156</span>    <a class="code hl_typedef" href="../../df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a> output[16] = {0};</div>
 <div class="line"><span class="lineno">  157</span>    store_u8_16(output, sub_sat_u8_16(load_u8_16(a), load_u8_16(b)));</div>
 <div class="line"><span class="lineno">  158</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="../../d9/d1a/namespaceautoresearch_1_1simd__check_aa8321b96507d37044dab6aa716022fa9.html#aa8321b96507d37044dab6aa716022fa9">compare_u8</a>(expected, output, 16);</div>
 <div class="line"><span class="lineno">  159</span>}</div>
 <div class="ttc" id="anamespaceautoresearch_1_1simd__check_aa8321b96507d37044dab6aa716022fa9_html_aa8321b96507d37044dab6aa716022fa9"><div class="ttname"><a href="../../d9/d1a/namespaceautoresearch_1_1simd__check_aa8321b96507d37044dab6aa716022fa9.html#aa8321b96507d37044dab6aa716022fa9">autoresearch::simd_check::compare_u8</a></div><div class="ttdeci">bool compare_u8(const uint8_t *a, const uint8_t *b, size_t n)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/dd1/_auto_research_simd_8h_source.html#l00028">AutoResearchSimd.h:28</a></div></div>
-<div class="ttc" id="anamespacefl_afd9f334550c5839ec8307748aba15027_html_afd9f334550c5839ec8307748aba15027"><div class="ttname"><a href="../../d4/d36/namespacefl_afd9f334550c5839ec8307748aba15027.html#afd9f334550c5839ec8307748aba15027">fl::uint8_t</a></div><div class="ttdeci">unsigned char uint8_t</div><div class="ttdef"><b>Definition</b> <a href="../../df/d96/s16x16x4_8h_source.html#l00209">s16x16x4.h:209</a></div></div>
-<div class="ttc" id="anamespacetest__quick_a8c9b09f7da0aec94eb085625d9c04cdd_html_a8c9b09f7da0aec94eb085625d9c04cdd"><div class="ttname"><a href="../../d8/d94/namespacetest__quick_a8c9b09f7da0aec94eb085625d9c04cdd.html#a8c9b09f7da0aec94eb085625d9c04cdd">test_quick.output</a></div><div class="ttdeci">output</div><div class="ttdef"><b>Definition</b> <a href="../../d8/def/test__quick_8py_source.html#l00050">test_quick.py:50</a></div></div>
+<div class="ttc" id="astdint_8h_aba7bc1797add20fe3efdf37ced1182c5_html_aba7bc1797add20fe3efdf37ced1182c5"><div class="ttname"><a href="../../df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a></div><div class="ttdeci">unsigned char uint8_t</div><div class="ttdef"><b>Definition</b> <a href="../../df/dd8/stdint_8h_source.html#l00208">stdint.h:208</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../d7/dd1/_auto_research_simd_8h_source.html#l00028">compare_u8()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d7/dd1/_auto_research_simd_8h_source.html#l01282">getTests()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d7/dd1/_auto_research_simd_8h_source.html#l01290">getTests()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -151,7 +150,7 @@ $(function(){initNavTree('d9/d1a/namespaceautoresearch_1_1simd__check_afd61a4114
 <div id="dynsection-1-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-1-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d9/d1a/namespaceautoresearch_1_1simd__check_afd61a4114cb10452570bd39ddb766d7f_afd61a4114cb10452570bd39ddb766d7f_icgraph.svg" width="100%" height="386"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d9/d1a/namespaceautoresearch_1_1simd__check_afd61a4114cb10452570bd39ddb766d7f_afd61a4114cb10452570bd39ddb766d7f_icgraph.svg" width="619" height="51"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 
 </div>
@@ -163,7 +162,7 @@ $(function(){initNavTree('d9/d1a/namespaceautoresearch_1_1simd__check_afd61a4114
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d1/dc9/namespaceautoresearch.html">autoresearch</a></li><li class="navelem"><a class="el" href="../../d9/d1a/namespaceautoresearch_1_1simd__check.html">simd_check</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:03 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

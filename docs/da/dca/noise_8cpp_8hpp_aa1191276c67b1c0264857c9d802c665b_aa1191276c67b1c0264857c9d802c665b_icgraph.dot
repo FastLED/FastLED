@@ -10,13 +10,13 @@ digraph "grad16"
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node2 [id="Node000002",label="inoise16_raw",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/df9/group___noise_generation_ga1e47a4e7acdbc675b4ecd0a021869a6f.html#ga1e47a4e7acdbc675b4ecd0a021869a6f",tooltip="16-bit, fixed point implementation of Perlin's noise without scaling."];
   Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="inoise16_raw",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/df9/group___noise_generation_gaadae53dd47894ba16f988d2afb3a4aa9.html#gaadae53dd47894ba16f988d2afb3a4aa9",tooltip=" "];
+  Node3 [id="Node000003",label="inoise16_raw",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/df9/group___noise_generation_gaadae53dd47894ba16f988d2afb3a4aa9.html#gaadae53dd47894ba16f988d2afb3a4aa9",tooltip="16-bit, fixed point implementation of Perlin's noise without scaling."];
   Node1 -> Node4 [id="edge3_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="inoise16_raw",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/df9/group___noise_generation_gae021f30d62fea75ea1397e1a81b28a59.html#gae021f30d62fea75ea1397e1a81b28a59",tooltip=" "];
+  Node4 [id="Node000004",label="inoise16_raw",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/df9/group___noise_generation_gae021f30d62fea75ea1397e1a81b28a59.html#gae021f30d62fea75ea1397e1a81b28a59",tooltip="16-bit, fixed point implementation of Perlin's noise without scaling."];
   Node4 -> Node5 [id="edge4_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node5 [id="Node000005",label="inoise16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/df9/group___noise_generation_ga84f51afa244b0b4eb39bada95a33acb8.html#ga84f51afa244b0b4eb39bada95a33acb8",tooltip="16-bit, fixed point implementation of Perlin's noise."];
   Node4 -> Node6 [id="edge5_Node000004_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node6 [id="Node000006",label="inoise16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/df9/group___noise_generation_gad2c041d7b65808890265ed62a75555bb.html#gad2c041d7b65808890265ed62a75555bb",tooltip=" "];
+  Node6 [id="Node000006",label="inoise16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/df9/group___noise_generation_gad2c041d7b65808890265ed62a75555bb.html#gad2c041d7b65808890265ed62a75555bb",tooltip="16-bit, fixed point implementation of Perlin's noise."];
   Node4 -> Node7 [id="edge6_Node000004_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node7 [id="Node000007",label="inoise16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/df9/group___noise_generation_ga6ae857dd0735e2ea05347ae11b587f9e.html#ga6ae857dd0735e2ea05347ae11b587f9e",tooltip=" "];
   Node4 -> Node8 [id="edge7_Node000004_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];

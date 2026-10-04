@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -130,8 +130,8 @@ $(function(){initNavTree('d9/d71/native__server_8cpp_8hpp_source.html','../../')
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>{</div>
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>}</div>
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>NativeHttpServer::~NativeHttpServer() <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>    stop();</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>NativeHttpServer::~NativeHttpServer() <a class="code hl_define" href="../../df/d96/s16x16x4_8h_abae81a69398c715960350e0a571b754a.html#abae81a69398c715960350e0a571b754a">FL_NO_EXCEPT</a> {</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>    <a class="code hl_function" href="../../d6/d4a/namespacefl_1_1net_1_1wifi_a5b7c7c5a58139608986b91726b7403cc.html#a5b7c7c5a58139608986b91726b7403cc">stop</a>();</div>
 <div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>}</div>
 <div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span> </div>
 <div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="keywordtype">bool</span> NativeHttpServer::start() {</div>
@@ -178,7 +178,7 @@ $(function(){initNavTree('d9/d71/native__server_8cpp_8hpp_source.html','../../')
 <div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span> </div>
 <div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>        conn.connection.onConnected(0);  <span class="comment">// Mark as connected immediately</span></div>
 <div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>        mNextClientId++;</div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>        mClients.push_back(<a class="code hl_function" href="../../d4/d36/namespacefl_a03eeb690d9582a74cb2e4a1f5a806e80.html#a03eeb690d9582a74cb2e4a1f5a806e80">fl::move</a>(conn));</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>        mClients.push_back(<a class="code hl_function" href="../../d4/d36/namespacefl_a0c8a67e528dcd96ee58216754a07a733.html#a0c8a67e528dcd96ee58216754a07a733">fl::move</a>(conn));</div>
 <div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>    }</div>
 <div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>}</div>
 <div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span> </div>
@@ -272,9 +272,9 @@ $(function(){initNavTree('d9/d71/native__server_8cpp_8hpp_source.html','../../')
 <div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span> </div>
 <div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span><a class="code hl_class" href="../../d2/d24/classfl_1_1vector.html">fl::vector&lt;u32&gt;</a> NativeHttpServer::getClientIds()<span class="keyword"> const </span>{</div>
 <div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>    <a class="code hl_class" href="../../d2/d24/classfl_1_1vector.html">fl::vector&lt;u32&gt;</a> ids;</div>
-<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span>    ids.<a class="code hl_function" href="../../d2/d24/classfl_1_1vector_a305fb6473faab9c2798479c057a58d50.html#a305fb6473faab9c2798479c057a58d50">reserve</a>(mClients.size());</div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span>    ids.<a class="code hl_function" href="../../d2/d24/classfl_1_1vector_a106fe3779897c81ef234f25952ed29d7.html#a106fe3779897c81ef234f25952ed29d7">reserve</a>(mClients.size());</div>
 <div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span>    <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; client : mClients) {</div>
-<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span>        ids.<a class="code hl_function" href="../../d2/d24/classfl_1_1vector_ae9a8cea8d4b81d8f2f10a2b007ac2980.html#ae9a8cea8d4b81d8f2f10a2b007ac2980">push_back</a>(client.clientId);</div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span>        ids.<a class="code hl_function" href="../../d2/d24/classfl_1_1vector_a82c3455c1a345460f95a0180c93b3fb0.html#a82c3455c1a345460f95a0180c93b3fb0">push_back</a>(client.clientId);</div>
 <div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span>    }</div>
 <div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>    <span class="keywordflow">return</span> ids;</div>
 <div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>}</div>
@@ -349,16 +349,17 @@ $(function(){initNavTree('d9/d71/native__server_8cpp_8hpp_source.html','../../')
 <div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span>} <span class="comment">// namespace fl</span></div>
 <div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span> </div>
 <div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span><span class="preprocessor">#endif </span><span class="comment">// FASTLED_HAS_NETWORKING</span></div>
-<div class="ttc" id="aclassfl_1_1span_html"><div class="ttname"><a href="../../d0/d08/classfl_1_1span.html">fl::span</a></div><div class="ttdef"><b>Definition</b> <a href="../../d4/d7a/span_8h_source.html#l00385">span.h:385</a></div></div>
-<div class="ttc" id="aclassfl_1_1vector_a305fb6473faab9c2798479c057a58d50_html_a305fb6473faab9c2798479c057a58d50"><div class="ttname"><a href="../../d2/d24/classfl_1_1vector_a305fb6473faab9c2798479c057a58d50.html#a305fb6473faab9c2798479c057a58d50">fl::vector::reserve</a></div><div class="ttdeci">void reserve(fl::size n) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d68/vector_8h_source.html#l00591">vector.h:591</a></div></div>
-<div class="ttc" id="aclassfl_1_1vector_ae9a8cea8d4b81d8f2f10a2b007ac2980_html_ae9a8cea8d4b81d8f2f10a2b007ac2980"><div class="ttname"><a href="../../d2/d24/classfl_1_1vector_ae9a8cea8d4b81d8f2f10a2b007ac2980.html#ae9a8cea8d4b81d8f2f10a2b007ac2980">fl::vector::push_back</a></div><div class="ttdeci">void push_back(const T &amp;value) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d68/vector_8h_source.html#l00624">vector.h:624</a></div></div>
+<div class="ttc" id="aclassfl_1_1span_html"><div class="ttname"><a href="../../d0/d08/classfl_1_1span.html">fl::span</a></div><div class="ttdef"><b>Definition</b> <a href="../../d4/d7a/span_8h_source.html#l00410">span.h:410</a></div></div>
+<div class="ttc" id="aclassfl_1_1vector_a106fe3779897c81ef234f25952ed29d7_html_a106fe3779897c81ef234f25952ed29d7"><div class="ttname"><a href="../../d2/d24/classfl_1_1vector_a106fe3779897c81ef234f25952ed29d7.html#a106fe3779897c81ef234f25952ed29d7">fl::vector::reserve</a></div><div class="ttdeci">void reserve(fl::size n) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d68/vector_8h_source.html#l00591">vector.h:591</a></div></div>
+<div class="ttc" id="aclassfl_1_1vector_a82c3455c1a345460f95a0180c93b3fb0_html_a82c3455c1a345460f95a0180c93b3fb0"><div class="ttname"><a href="../../d2/d24/classfl_1_1vector_a82c3455c1a345460f95a0180c93b3fb0.html#a82c3455c1a345460f95a0180c93b3fb0">fl::vector::push_back</a></div><div class="ttdeci">void push_back(const T &amp;value) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d68/vector_8h_source.html#l00624">vector.h:624</a></div></div>
 <div class="ttc" id="aclassfl_1_1vector_html"><div class="ttname"><a href="../../d2/d24/classfl_1_1vector.html">fl::vector</a></div><div class="ttdef"><b>Definition</b> <a href="../../d6/d68/vector_8h_source.html#l00449">vector.h:449</a></div></div>
-<div class="ttc" id="anamespacefl_a03eeb690d9582a74cb2e4a1f5a806e80_html_a03eeb690d9582a74cb2e4a1f5a806e80"><div class="ttname"><a href="../../d4/d36/namespacefl_a03eeb690d9582a74cb2e4a1f5a806e80.html#a03eeb690d9582a74cb2e4a1f5a806e80">fl::move</a></div><div class="ttdeci">constexpr remove_reference&lt; T &gt;::type &amp;&amp; move(T &amp;&amp;t) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d83/move_8h_source.html#l00028">move.h:28</a></div></div>
+<div class="ttc" id="anamespacefl_1_1net_1_1wifi_a5b7c7c5a58139608986b91726b7403cc_html_a5b7c7c5a58139608986b91726b7403cc"><div class="ttname"><a href="../../d6/d4a/namespacefl_1_1net_1_1wifi_a5b7c7c5a58139608986b91726b7403cc.html#a5b7c7c5a58139608986b91726b7403cc">fl::net::wifi::stop</a></div><div class="ttdeci">void stop() FL_NO_EXCEPT</div><div class="ttdoc">Stop WiFi entirely (STA and AP).</div><div class="ttdef"><b>Definition</b> <a href="../../dc/db2/wifi_8cpp_8hpp_source.html#l00042">wifi.cpp.hpp:42</a></div></div>
+<div class="ttc" id="anamespacefl_a0c8a67e528dcd96ee58216754a07a733_html_a0c8a67e528dcd96ee58216754a07a733"><div class="ttname"><a href="../../d4/d36/namespacefl_a0c8a67e528dcd96ee58216754a07a733.html#a0c8a67e528dcd96ee58216754a07a733">fl::move</a></div><div class="ttdeci">constexpr remove_reference&lt; T &gt;::type &amp;&amp; move(T &amp;&amp;t) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d83/move_8h_source.html#l00028">move.h:28</a></div></div>
 <div class="ttc" id="anamespacefl_html"><div class="ttname"><a href="../../d4/d36/namespacefl.html">fl</a></div><div class="ttdoc">Base definition for an LED controller.</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d4b/crgb_8hpp_source.html#l00179">crgb.hpp:179</a></div></div>
 <div class="ttc" id="anamespacefl_html_df/d77/structfl_1_1_connection_config"><div class="ttname"><a href="../../d4/d36/namespacefl.html#df/d77/structfl_1_1_connection_config">fl::ConnectionConfig</a></div><div class="ttdef"><b>Definition</b> <a href="../../d4/d67/connection_8h_source.html#l00018">connection.h:18</a></div></div>
 <div class="ttc" id="anative__server_8h_html"><div class="ttname"><a href="../../d7/d6b/native__server_8h.html">native_server.h</a></div></div>
 <div class="ttc" id="anoexcept_8h_html"><div class="ttname"><a href="../../db/d01/noexcept_8h.html">noexcept.h</a></div></div>
-<div class="ttc" id="as16x16x4_8h_af54aac016b86a178940aca20946a8002_html_af54aac016b86a178940aca20946a8002"><div class="ttname"><a href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></div><div class="ttdeci">#define FL_NOEXCEPT</div></div>
+<div class="ttc" id="as16x16x4_8h_abae81a69398c715960350e0a571b754a_html_abae81a69398c715960350e0a571b754a"><div class="ttname"><a href="../../df/d96/s16x16x4_8h_abae81a69398c715960350e0a571b754a.html#abae81a69398c715960350e0a571b754a">FL_NO_EXCEPT</a></div><div class="ttdeci">#define FL_NO_EXCEPT</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.3-->
@@ -366,7 +367,7 @@ $(function(){initNavTree('d9/d71/native__server_8cpp_8hpp_source.html','../../')
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_0dd6897a8ae40540acd9d694849e950e.html">stl</a></li><li class="navelem"><a class="el" href="../../dir_cdaac7ba5e9caead7c80e2b832ad4a37.html">asio</a></li><li class="navelem"><a class="el" href="../../dir_0f2bd2d50b17e2e1f42941f6b66850c3.html">http</a></li><li class="navelem"><a class="el" href="../../d9/d71/native__server_8cpp_8hpp.html">native_server.cpp.hpp</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:06:59 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:01 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

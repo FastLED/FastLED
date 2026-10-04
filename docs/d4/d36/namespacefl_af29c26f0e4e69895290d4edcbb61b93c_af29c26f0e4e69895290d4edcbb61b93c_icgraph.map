@@ -1,0 +1,8 @@
+<map id="fl::fiveBitSemanticsFor" name="fl::fiveBitSemanticsFor">
+<area shape="rect" id="Node000001" title="The 5&#45;bit semantics for chip, with profile overriding the chip&#39;s default when it is not NotApplicable..." alt="" coords="336,76,504,101"/>
+<area shape="rect" id="Node000002" href="$d1/da7/namespacefl_1_1anonymous__namespace_02pipeline__binding_8cpp_8hpp_03_a9b0cf72bec5a5c75a680086f93f41890.html#a9b0cf72bec5a5c75a680086f93f41890" title=" " alt="" coords="5,29,288,84"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="322,80,288,76,288,71,323,75"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_aba71524e25f179bf921dc7b760eb125d.html#aba71524e25f179bf921dc7b760eb125d" title="Identify the channel&#39;s final current/quantization choice without adding a virtual slot or storage to ..." alt="" coords="41,108,252,133"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="323,103,253,111,252,106,322,97"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="192,18,176,11,147,8,122,10,106,15,99,21,99,29,94,29,94,19,104,10,121,5,147,3,177,6,195,14"/>
+</map>

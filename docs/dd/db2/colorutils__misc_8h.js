@@ -1,9 +1,9 @@
 var colorutils__misc_8h =
 [
+    [ "TProgmemHSVPalette16", "dc/de5/struct_t_progmem_h_s_v_palette16.html", "dc/de5/struct_t_progmem_h_s_v_palette16" ],
+    [ "TProgmemHSVPalette32", "d7/d3c/struct_t_progmem_h_s_v_palette32.html", "d7/d3c/struct_t_progmem_h_s_v_palette32" ],
     [ "TProgmemPalette16", "dd/db2/colorutils__misc_8h_a2e2c47988086791244a547f098633a4a.html#a2e2c47988086791244a547f098633a4a", null ],
     [ "TProgmemPalette32", "dd/db2/colorutils__misc_8h_acbe65e7b11919a132bc2f148e448bacc.html#acbe65e7b11919a132bc2f148e448bacc", null ],
-    [ "TProgmemHSVPalette16", "dd/db2/colorutils__misc_8h_adbd588251756bab14ff486927105f919.html#adbd588251756bab14ff486927105f919", null ],
-    [ "TProgmemHSVPalette32", "dd/db2/colorutils__misc_8h_a1f9ebc9d3586db0e7dff5757b91b04ea.html#a1f9ebc9d3586db0e7dff5757b91b04ea", null ],
     [ "TProgmemRGBGradientPalette_byte", "dd/db2/colorutils__misc_8h_ac609526d053cb23ca61c11f04f548d21.html#ac609526d053cb23ca61c11f04f548d21", null ],
     [ "TProgmemRGBGradientPalette_bytes", "dd/db2/colorutils__misc_8h_a56cb3bce8ab7c903689192abedcc9699.html#a56cb3bce8ab7c903689192abedcc9699", null ],
     [ "TProgmemRGBGradientPaletteRef", "dd/db2/colorutils__misc_8h_a4bad7a1170b89ee523a67dfdb3e480a7.html#a4bad7a1170b89ee523a67dfdb3e480a7", null ],

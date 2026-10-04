@@ -8,5 +8,5 @@ digraph "fl::log_impl_float"
   rankdir="LR";
   Node1 [id="Node000001",label="fl::log_impl_float",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::detail::log_natural_",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d9e/namespacefl_1_1detail_aefd5cee30614d18a52adbf22fc83f4a8.html#aefd5cee30614d18a52adbf22fc83f4a8",tooltip=" "];
+  Node2 [id="Node000002",label="fl::detail::log_natural_",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d9e/namespacefl_1_1detail_ac8b57c29af1139c7ef72272fb8e62f32.html#ac8b57c29af1139c7ef72272fb8e62f32",tooltip=" "];
 }

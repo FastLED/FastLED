@@ -1,0 +1,23 @@
+<map id="fl::ChannelManager::waitForReady" name="fl::ChannelManager::waitForReady">
+<area shape="rect" id="Node000001" title="Wait for all drivers to become READY." alt="" coords="597,189,745,229"/>
+<area shape="rect" id="Node000002" href="$d2/d6b/classfl_1_1_channel_manager_a9d5c6d37df9f78ddacf9e44073b4fe18.html#a9d5c6d37df9f78ddacf9e44073b4fe18" title="Handle validation failures and the uncommon replacement flow outside the normal driver&#45;registration p..." alt="" coords="401,29,549,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="645,180,602,131,548,83,528,72,531,67,551,79,606,128,649,177"/>
+<area shape="rect" id="Node000007" href="$d2/d6b/classfl_1_1_channel_manager_a743b1256280a8a80b7d47d644088464e.html#a743b1256280a8a80b7d47d644088464e" title="Remove all drivers from the manager." alt="" coords="401,93,549,133"/>
+<area shape="poly" id="edge5_Node000001_Node000007" title=" " alt="" coords="620,185,548,148,523,136,525,131,551,143,623,180"/>
+<area shape="rect" id="Node000009" href="$d2/d6b/classfl_1_1_channel_manager_a51df52695220156ed2bf8998e347e5c9.html#a51df52695220156ed2bf8998e347e5c9" title="Poll drivers before frame starts to clear previous frame state." alt="" coords="401,157,549,197"/>
+<area shape="poly" id="edge7_Node000001_Node000009" title=" " alt="" coords="583,198,549,192,550,187,584,192"/>
+<area shape="rect" id="Node000010" href="$d2/d6b/classfl_1_1_channel_manager_a3b733c7354a68ef0935614419e77688b.html#a3b733c7354a68ef0935614419e77688b" title="Reset bus manager state, clearing all enqueued and transmitting channels." alt="" coords="401,221,549,261"/>
+<area shape="poly" id="edge8_Node000001_Node000010" title=" " alt="" coords="584,226,550,232,549,227,583,221"/>
+<area shape="rect" id="Node000011" href="$dd/dbb/class_c_fast_l_e_d_aeb27e6f97287c4add5056c7218a78c82.html#aeb27e6f97287c4add5056c7218a78c82" title="Wait for all channel bus transmissions to complete." alt="" coords="416,286,535,311"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="625,238,550,276,518,288,516,283,548,271,622,234"/>
+<area shape="rect" id="Node000012" href="$dd/dbb/class_c_fast_l_e_d_a234cfd99ebdb37ecd4aedf51484d74e2.html#a234cfd99ebdb37ecd4aedf51484d74e2" title="Wait for all channel bus transmissions to complete with timeout." alt="" coords="416,335,535,361"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="647,242,604,285,551,326,526,338,524,333,548,322,601,281,643,238"/>
+<area shape="rect" id="Node000003" href="$d2/d6b/classfl_1_1_channel_manager_ae6eb27ff8398726d8c5fcb9052ea9528.html#ae6eb27ff8398726d8c5fcb9052ea9528" title="Add a driver with priority (higher priority = preferred)" alt="" coords="205,29,353,69"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="387,52,354,52,354,47,387,47"/>
+<area shape="rect" id="Node000004" href="$d2/d6b/classfl_1_1_channel_manager_ab9c9a1f5d639849bdb5cf352dd22e0b2.html#ab9c9a1f5d639849bdb5cf352dd22e0b2" title="Register a single driver at a priority above the platform default and disable all others (compile&#45;tim..." alt="" coords="5,29,157,69"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="192,52,157,52,157,47,192,47"/>
+<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="115,18,103,11,81,8,62,10,51,15,47,21,49,28,44,30,42,20,48,11,61,5,81,3,105,6,117,13"/>
+<area shape="rect" id="Node000008" href="$dd/dbb/class_c_fast_l_e_d_aa98f1c4caa3fbef233d34ee757d29994.html#aa98f1c4caa3fbef233d34ee757d29994" title="Clear/reset FastLED state based on the provided flags." alt="" coords="218,165,341,190"/>
+<area shape="poly" id="edge6_Node000007_Node000008" title=" " alt="" coords="401,140,320,167,318,162,400,135"/>
+<area shape="poly" id="edge9_Node000010_Node000008" title=" " alt="" coords="400,220,318,193,320,188,401,214"/>
+</map>

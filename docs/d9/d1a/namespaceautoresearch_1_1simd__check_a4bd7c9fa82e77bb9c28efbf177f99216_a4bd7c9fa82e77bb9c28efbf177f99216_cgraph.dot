@@ -8,7 +8,7 @@ digraph "autoresearch::simd_check::runSimdTests"
   rankdir="LR";
   Node1 [id="Node000001",label="autoresearch::simd\l_check::runSimdTests",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Run the full SIMD test suite. Returns the number of failures."];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::sstream::clear",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d27/classfl_1_1sstream_a2020a3513ae92ed435685030c3127194.html#a2020a3513ae92ed435685030c3127194",tooltip=" "];
+  Node2 [id="Node000002",label="fl::sstream::clear",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d27/classfl_1_1sstream_a6984c3b59302280dc6d30fdd158552a8.html#a6984c3b59302280dc6d30fdd158552a8",tooltip=" "];
   Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
   Node3 [id="Node000003",label="autoresearch::simd\l_check::getTests",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d9/d1a/namespaceautoresearch_1_1simd__check_a81f34bf71b7b00b59cedf9fb126a6050.html#a81f34bf71b7b00b59cedf9fb126a6050",tooltip="Get the static test table. Used by both runSimdTests() and the RPC handler."];
   Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
@@ -104,5 +104,5 @@ digraph "autoresearch::simd_check::runSimdTests"
   Node3 -> Node76 [id="edge48_Node000003_Node000076",color="steelblue1",style="solid",tooltip=" "];
   Node76 [id="Node000076",label="autoresearch::simd\l_check::test_load_store\l_u32_4_boundary",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d9/d1a/namespaceautoresearch_1_1simd__check_a3c4a89219781c87baa192bc5f353ab38.html#a3c4a89219781c87baa192bc5f353ab38",tooltip=" "];
   Node1 -> Node116 [id="edge49_Node000001_Node000116",color="steelblue1",style="solid",tooltip=" "];
-  Node116 [id="Node000116",label="fl::sstream::str",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d27/classfl_1_1sstream_a08170cac6eba7241f099ae16730f6f8e.html#a08170cac6eba7241f099ae16730f6f8e",tooltip=" "];
+  Node116 [id="Node000116",label="fl::sstream::str",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d27/classfl_1_1sstream_a904115dfd2a7e462177b6409c9b842d6.html#a904115dfd2a7e462177b6409c9b842d6",tooltip=" "];
 }

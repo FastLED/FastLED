@@ -1,0 +1,5 @@
+<map id="fl::canMatch" name="fl::canMatch">
+<area shape="rect" id="Node000001" title="Test a request (single&#45;pin OR multi&#45;pin ganged) against a driver&#39;s published capability data." alt="" coords="188,13,289,38"/>
+<area shape="rect" id="Node000002" href="$d3/da0/classfl_1_1_i_channel_driver_af833f1345beb02e594973d41f3e3c798.html#af833f1345beb02e594973d41f3e3c798" title="Predicate: can this driver match a (single&#45; or multi&#45;pin) request?" alt="" coords="5,5,140,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="174,28,140,28,140,23,174,23"/>
+</map>

@@ -11,7 +11,7 @@
 <!-- Node1 -->
 <g id="Node000001" class="node">
 <title>Node1</title>
-<g id="a_Node000001"><a xlink:title=" ">
+<g id="a_Node000001"><a xlink:title="16&#45;bit, fixed point implementation of Perlin&#39;s noise without scaling.">
 <polygon fill="#999999" stroke="#666666" points="81,-19 0,-19 0,0 81,0 81,-19"/>
 <text text-anchor="middle" x="40.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">inoise16_raw</text>
 </a>

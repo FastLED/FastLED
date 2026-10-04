@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -127,67 +127,67 @@ $(function(){initNavTree('db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transpor
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../da/d64/stream__transport_8cpp_8hpp_source.html#l00158">158</a> of file <a class="el" href="../../da/d64/stream__transport_8cpp_8hpp_source.html">stream_transport.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  158</span>                                                                                   {</div>
-<div class="line"><span class="lineno">  159</span>    <span class="keyword">auto</span> it = <a class="code hl_variable" href="../../db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a8c4155a051be6c46a619077c497515d9.html#a8c4155a051be6c46a619077c497515d9">mPendingStreams</a>.find(idKey);</div>
-<div class="line"><span class="lineno">  160</span>    <span class="keywordflow">if</span> (it == <a class="code hl_variable" href="../../db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a8c4155a051be6c46a619077c497515d9.html#a8c4155a051be6c46a619077c497515d9">mPendingStreams</a>.end()) {</div>
-<div class="line"><span class="lineno">  161</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">  162</span>    }</div>
-<div class="line"><span class="lineno">  163</span>    <a class="code hl_struct" href="../../db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport.html#da/d0c/structfl_1_1net_1_1http_1_1_http_stream_transport_1_1_pending_stream">PendingStream</a>* pending = &amp;it-&gt;second;</div>
-<div class="line"><span class="lineno">  164</span> </div>
-<div class="line"><span class="lineno">  165</span>    <span class="comment">// Check for error</span></div>
-<div class="line"><span class="lineno">  166</span>    <span class="keywordflow">if</span> (msg.<a class="code hl_function" href="../../de/d40/classfl_1_1json_ac94ae67fc50a75046692cd52b2dfb3e6.html#ac94ae67fc50a75046692cd52b2dfb3e6">contains</a>(<span class="stringliteral">&quot;error&quot;</span>)) {</div>
-<div class="line"><span class="lineno">  167</span>        fl::task::Error err(msg[<span class="stringliteral">&quot;error&quot;</span>][<span class="stringliteral">&quot;message&quot;</span>].as_string().<a class="code hl_variable" href="../../d4/d36/namespacefl_a13766ae9e150185981f5096f90a439d7.html#a13766ae9e150185981f5096f90a439d7">value</a>());</div>
-<div class="line"><span class="lineno">  168</span>        pending-&gt;promise.complete_with_error(err);</div>
-<div class="line"><span class="lineno">  169</span>        <a class="code hl_variable" href="../../db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a8c4155a051be6c46a619077c497515d9.html#a8c4155a051be6c46a619077c497515d9">mPendingStreams</a>.erase(idKey);</div>
-<div class="line"><span class="lineno">  170</span>        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><span class="lineno">  171</span>    }</div>
-<div class="line"><span class="lineno">  172</span> </div>
-<div class="line"><span class="lineno">  173</span>    <span class="comment">// Check for ACK</span></div>
-<div class="line"><span class="lineno">  174</span>    <span class="keywordflow">if</span> (msg.<a class="code hl_function" href="../../de/d40/classfl_1_1json_ac94ae67fc50a75046692cd52b2dfb3e6.html#ac94ae67fc50a75046692cd52b2dfb3e6">contains</a>(<span class="stringliteral">&quot;result&quot;</span>) &amp;&amp; msg[<span class="stringliteral">&quot;result&quot;</span>].contains(<span class="stringliteral">&quot;acknowledged&quot;</span>)) {</div>
-<div class="line"><span class="lineno">  175</span>        <span class="keywordflow">if</span> (msg[<span class="stringliteral">&quot;result&quot;</span>][<span class="stringliteral">&quot;acknowledged&quot;</span>].as_bool() == <span class="keyword">true</span>) {</div>
-<div class="line"><span class="lineno">  176</span>            pending-&gt;ackReceived = <span class="keyword">true</span>;</div>
-<div class="line"><span class="lineno">  177</span>            <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><span class="lineno">  178</span>        }</div>
-<div class="line"><span class="lineno">  179</span>    }</div>
-<div class="line"><span class="lineno">  180</span> </div>
-<div class="line"><span class="lineno">  181</span>    <span class="comment">// Check for stream update</span></div>
-<div class="line"><span class="lineno">  182</span>    <span class="keywordflow">if</span> (msg.<a class="code hl_function" href="../../de/d40/classfl_1_1json_ac94ae67fc50a75046692cd52b2dfb3e6.html#ac94ae67fc50a75046692cd52b2dfb3e6">contains</a>(<span class="stringliteral">&quot;result&quot;</span>) &amp;&amp; msg[<span class="stringliteral">&quot;result&quot;</span>].contains(<span class="stringliteral">&quot;update&quot;</span>)) {</div>
-<div class="line"><span class="lineno">  183</span>        <span class="keywordflow">if</span> (pending-&gt;updateCallback &amp;&amp; *pending-&gt;updateCallback) {</div>
-<div class="line"><span class="lineno">  184</span>            (*pending-&gt;updateCallback)(msg[<span class="stringliteral">&quot;result&quot;</span>][<span class="stringliteral">&quot;update&quot;</span>]);</div>
-<div class="line"><span class="lineno">  185</span>        }</div>
-<div class="line"><span class="lineno">  186</span>        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><span class="lineno">  187</span>    }</div>
-<div class="line"><span class="lineno">  188</span> </div>
-<div class="line"><span class="lineno">  189</span>    <span class="comment">// Check for stream final (stop marker)</span></div>
-<div class="line"><span class="lineno">  190</span>    <span class="keywordflow">if</span> (msg.<a class="code hl_function" href="../../de/d40/classfl_1_1json_ac94ae67fc50a75046692cd52b2dfb3e6.html#ac94ae67fc50a75046692cd52b2dfb3e6">contains</a>(<span class="stringliteral">&quot;result&quot;</span>) &amp;&amp; msg[<span class="stringliteral">&quot;result&quot;</span>].contains(<span class="stringliteral">&quot;stop&quot;</span>)) {</div>
-<div class="line"><span class="lineno">  191</span>        <span class="keywordflow">if</span> (msg[<span class="stringliteral">&quot;result&quot;</span>][<span class="stringliteral">&quot;stop&quot;</span>].as_bool() == <span class="keyword">true</span>) {</div>
-<div class="line"><span class="lineno">  192</span>            <span class="comment">// Resolve with the value field if present, otherwise the full result</span></div>
-<div class="line"><span class="lineno">  193</span>            <span class="keywordflow">if</span> (msg[<span class="stringliteral">&quot;result&quot;</span>].contains(<span class="stringliteral">&quot;value&quot;</span>)) {</div>
-<div class="line"><span class="lineno">  194</span>                pending-&gt;promise.complete_with_value(msg[<span class="stringliteral">&quot;result&quot;</span>][<span class="stringliteral">&quot;value&quot;</span>]);</div>
-<div class="line"><span class="lineno">  195</span>            } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  196</span>                pending-&gt;promise.complete_with_value(msg[<span class="stringliteral">&quot;result&quot;</span>]);</div>
-<div class="line"><span class="lineno">  197</span>            }</div>
-<div class="line"><span class="lineno">  198</span>            <a class="code hl_variable" href="../../db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a8c4155a051be6c46a619077c497515d9.html#a8c4155a051be6c46a619077c497515d9">mPendingStreams</a>.erase(idKey);</div>
-<div class="line"><span class="lineno">  199</span>            <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><span class="lineno">  200</span>        }</div>
-<div class="line"><span class="lineno">  201</span>    }</div>
-<div class="line"><span class="lineno">  202</span> </div>
-<div class="line"><span class="lineno">  203</span>    <span class="comment">// Unrecognized message shape - treat as final</span></div>
-<div class="line"><span class="lineno">  204</span>    pending-&gt;<a class="code hl_variable" href="../../db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport.html#ab46945b59fbb0a89e59ae4f7bb1656bc">promise</a>.<a class="code hl_function" href="../../d0/d34/classfl_1_1task_1_1_promise_a626af66c4aaa780a2b0a0ee396f9a9db.html#a626af66c4aaa780a2b0a0ee396f9a9db">complete_with_value</a>(msg);</div>
-<div class="line"><span class="lineno">  205</span>    <a class="code hl_variable" href="../../db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a8c4155a051be6c46a619077c497515d9.html#a8c4155a051be6c46a619077c497515d9">mPendingStreams</a>.erase(idKey);</div>
-<div class="line"><span class="lineno">  206</span>    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><span class="lineno">  207</span>}</div>
-<div class="ttc" id="aclassfl_1_1json_ac94ae67fc50a75046692cd52b2dfb3e6_html_ac94ae67fc50a75046692cd52b2dfb3e6"><div class="ttname"><a href="../../de/d40/classfl_1_1json_ac94ae67fc50a75046692cd52b2dfb3e6.html#ac94ae67fc50a75046692cd52b2dfb3e6">fl::json::contains</a></div><div class="ttdeci">bool contains(size_t idx) const FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d05/json_8h_source.html#l00625">json.h:625</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../da/d64/stream__transport_8cpp_8hpp_source.html#l00162">162</a> of file <a class="el" href="../../da/d64/stream__transport_8cpp_8hpp_source.html">stream_transport.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  162</span>                                                                                   {</div>
+<div class="line"><span class="lineno">  163</span>    <span class="keyword">auto</span> it = <a class="code hl_variable" href="../../db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a8c4155a051be6c46a619077c497515d9.html#a8c4155a051be6c46a619077c497515d9">mPendingStreams</a>.find(idKey);</div>
+<div class="line"><span class="lineno">  164</span>    <span class="keywordflow">if</span> (it == <a class="code hl_variable" href="../../db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a8c4155a051be6c46a619077c497515d9.html#a8c4155a051be6c46a619077c497515d9">mPendingStreams</a>.end()) {</div>
+<div class="line"><span class="lineno">  165</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  166</span>    }</div>
+<div class="line"><span class="lineno">  167</span>    <a class="code hl_struct" href="../../db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport.html#da/d0c/structfl_1_1net_1_1http_1_1_http_stream_transport_1_1_pending_stream">PendingStream</a>* pending = &amp;it-&gt;second;</div>
+<div class="line"><span class="lineno">  168</span> </div>
+<div class="line"><span class="lineno">  169</span>    <span class="comment">// Check for error</span></div>
+<div class="line"><span class="lineno">  170</span>    <span class="keywordflow">if</span> (msg.<a class="code hl_function" href="../../de/d40/classfl_1_1json_aa8690461b881393386d9ff2d9e45ea03.html#aa8690461b881393386d9ff2d9e45ea03">contains</a>(<span class="stringliteral">&quot;error&quot;</span>)) {</div>
+<div class="line"><span class="lineno">  171</span>        fl::task::Error err(msg[<span class="stringliteral">&quot;error&quot;</span>][<span class="stringliteral">&quot;message&quot;</span>].as_string().<a class="code hl_variable" href="../../d4/d36/namespacefl_a13766ae9e150185981f5096f90a439d7.html#a13766ae9e150185981f5096f90a439d7">value</a>());</div>
+<div class="line"><span class="lineno">  172</span>        pending-&gt;promise.complete_with_error(err);</div>
+<div class="line"><span class="lineno">  173</span>        <a class="code hl_variable" href="../../db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a8c4155a051be6c46a619077c497515d9.html#a8c4155a051be6c46a619077c497515d9">mPendingStreams</a>.erase(idKey);</div>
+<div class="line"><span class="lineno">  174</span>        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  175</span>    }</div>
+<div class="line"><span class="lineno">  176</span> </div>
+<div class="line"><span class="lineno">  177</span>    <span class="comment">// Check for ACK</span></div>
+<div class="line"><span class="lineno">  178</span>    <span class="keywordflow">if</span> (msg.<a class="code hl_function" href="../../de/d40/classfl_1_1json_aa8690461b881393386d9ff2d9e45ea03.html#aa8690461b881393386d9ff2d9e45ea03">contains</a>(<span class="stringliteral">&quot;result&quot;</span>) &amp;&amp; msg[<span class="stringliteral">&quot;result&quot;</span>].contains(<span class="stringliteral">&quot;acknowledged&quot;</span>)) {</div>
+<div class="line"><span class="lineno">  179</span>        <span class="keywordflow">if</span> (msg[<span class="stringliteral">&quot;result&quot;</span>][<span class="stringliteral">&quot;acknowledged&quot;</span>].as_bool() == <span class="keyword">true</span>) {</div>
+<div class="line"><span class="lineno">  180</span>            pending-&gt;ackReceived = <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  181</span>            <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  182</span>        }</div>
+<div class="line"><span class="lineno">  183</span>    }</div>
+<div class="line"><span class="lineno">  184</span> </div>
+<div class="line"><span class="lineno">  185</span>    <span class="comment">// Check for stream update</span></div>
+<div class="line"><span class="lineno">  186</span>    <span class="keywordflow">if</span> (msg.<a class="code hl_function" href="../../de/d40/classfl_1_1json_aa8690461b881393386d9ff2d9e45ea03.html#aa8690461b881393386d9ff2d9e45ea03">contains</a>(<span class="stringliteral">&quot;result&quot;</span>) &amp;&amp; msg[<span class="stringliteral">&quot;result&quot;</span>].contains(<span class="stringliteral">&quot;update&quot;</span>)) {</div>
+<div class="line"><span class="lineno">  187</span>        <span class="keywordflow">if</span> (pending-&gt;updateCallback &amp;&amp; *pending-&gt;updateCallback) {</div>
+<div class="line"><span class="lineno">  188</span>            (*pending-&gt;updateCallback)(msg[<span class="stringliteral">&quot;result&quot;</span>][<span class="stringliteral">&quot;update&quot;</span>]);</div>
+<div class="line"><span class="lineno">  189</span>        }</div>
+<div class="line"><span class="lineno">  190</span>        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  191</span>    }</div>
+<div class="line"><span class="lineno">  192</span> </div>
+<div class="line"><span class="lineno">  193</span>    <span class="comment">// Check for stream final (stop marker)</span></div>
+<div class="line"><span class="lineno">  194</span>    <span class="keywordflow">if</span> (msg.<a class="code hl_function" href="../../de/d40/classfl_1_1json_aa8690461b881393386d9ff2d9e45ea03.html#aa8690461b881393386d9ff2d9e45ea03">contains</a>(<span class="stringliteral">&quot;result&quot;</span>) &amp;&amp; msg[<span class="stringliteral">&quot;result&quot;</span>].contains(<span class="stringliteral">&quot;stop&quot;</span>)) {</div>
+<div class="line"><span class="lineno">  195</span>        <span class="keywordflow">if</span> (msg[<span class="stringliteral">&quot;result&quot;</span>][<span class="stringliteral">&quot;stop&quot;</span>].as_bool() == <span class="keyword">true</span>) {</div>
+<div class="line"><span class="lineno">  196</span>            <span class="comment">// Resolve with the value field if present, otherwise the full result</span></div>
+<div class="line"><span class="lineno">  197</span>            <span class="keywordflow">if</span> (msg[<span class="stringliteral">&quot;result&quot;</span>].contains(<span class="stringliteral">&quot;value&quot;</span>)) {</div>
+<div class="line"><span class="lineno">  198</span>                pending-&gt;promise.complete_with_value(msg[<span class="stringliteral">&quot;result&quot;</span>][<span class="stringliteral">&quot;value&quot;</span>]);</div>
+<div class="line"><span class="lineno">  199</span>            } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  200</span>                pending-&gt;promise.complete_with_value(msg[<span class="stringliteral">&quot;result&quot;</span>]);</div>
+<div class="line"><span class="lineno">  201</span>            }</div>
+<div class="line"><span class="lineno">  202</span>            <a class="code hl_variable" href="../../db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a8c4155a051be6c46a619077c497515d9.html#a8c4155a051be6c46a619077c497515d9">mPendingStreams</a>.erase(idKey);</div>
+<div class="line"><span class="lineno">  203</span>            <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  204</span>        }</div>
+<div class="line"><span class="lineno">  205</span>    }</div>
+<div class="line"><span class="lineno">  206</span> </div>
+<div class="line"><span class="lineno">  207</span>    <span class="comment">// Unrecognized message shape - treat as final</span></div>
+<div class="line"><span class="lineno">  208</span>    pending-&gt;<a class="code hl_variable" href="../../db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport.html#ab46945b59fbb0a89e59ae4f7bb1656bc">promise</a>.<a class="code hl_function" href="../../d0/d34/classfl_1_1task_1_1_promise_a405b243e71218f4f50e6884505a0ec95.html#a405b243e71218f4f50e6884505a0ec95">complete_with_value</a>(msg);</div>
+<div class="line"><span class="lineno">  209</span>    <a class="code hl_variable" href="../../db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a8c4155a051be6c46a619077c497515d9.html#a8c4155a051be6c46a619077c497515d9">mPendingStreams</a>.erase(idKey);</div>
+<div class="line"><span class="lineno">  210</span>    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  211</span>}</div>
+<div class="ttc" id="aclassfl_1_1json_aa8690461b881393386d9ff2d9e45ea03_html_aa8690461b881393386d9ff2d9e45ea03"><div class="ttname"><a href="../../de/d40/classfl_1_1json_aa8690461b881393386d9ff2d9e45ea03.html#aa8690461b881393386d9ff2d9e45ea03">fl::json::contains</a></div><div class="ttdeci">bool contains(size_t idx) const FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d05/json_8h_source.html#l00790">json.h:790</a></div></div>
 <div class="ttc" id="aclassfl_1_1net_1_1http_1_1_http_stream_transport_a8c4155a051be6c46a619077c497515d9_html_a8c4155a051be6c46a619077c497515d9"><div class="ttname"><a href="../../db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a8c4155a051be6c46a619077c497515d9.html#a8c4155a051be6c46a619077c497515d9">fl::net::http::HttpStreamTransport::mPendingStreams</a></div><div class="ttdeci">fl::flat_map&lt; fl::string, PendingStream, fl::StringFastLess &gt; mPendingStreams</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d23/stream__transport_8h_source.html#l00199">stream_transport.h:199</a></div></div>
 <div class="ttc" id="aclassfl_1_1net_1_1http_1_1_http_stream_transport_html_ab46945b59fbb0a89e59ae4f7bb1656bc"><div class="ttname"><a href="../../db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport.html#ab46945b59fbb0a89e59ae4f7bb1656bc">fl::net::http::HttpStreamTransport::PendingStream::promise</a></div><div class="ttdeci">fl::task::Promise&lt; fl::json &gt; promise</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d23/stream__transport_8h_source.html#l00175">stream_transport.h:175</a></div></div>
 <div class="ttc" id="aclassfl_1_1net_1_1http_1_1_http_stream_transport_html_da/d0c/structfl_1_1net_1_1http_1_1_http_stream_transport_1_1_pending_stream"><div class="ttname"><a href="../../db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport.html#da/d0c/structfl_1_1net_1_1http_1_1_http_stream_transport_1_1_pending_stream">fl::net::http::HttpStreamTransport::PendingStream</a></div><div class="ttdef"><b>Definition</b> <a href="../../d8/d23/stream__transport_8h_source.html#l00174">stream_transport.h:174</a></div></div>
-<div class="ttc" id="aclassfl_1_1task_1_1_promise_a626af66c4aaa780a2b0a0ee396f9a9db_html_a626af66c4aaa780a2b0a0ee396f9a9db"><div class="ttname"><a href="../../d0/d34/classfl_1_1task_1_1_promise_a626af66c4aaa780a2b0a0ee396f9a9db.html#a626af66c4aaa780a2b0a0ee396f9a9db">fl::task::Promise::complete_with_value</a></div><div class="ttdeci">bool complete_with_value(const T &amp;value) FL_NOEXCEPT</div><div class="ttdoc">Complete the Promise with a result (used by networking library)</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d17/promise_8h_source.html#l00183">promise.h:183</a></div></div>
+<div class="ttc" id="aclassfl_1_1task_1_1_promise_a405b243e71218f4f50e6884505a0ec95_html_a405b243e71218f4f50e6884505a0ec95"><div class="ttname"><a href="../../d0/d34/classfl_1_1task_1_1_promise_a405b243e71218f4f50e6884505a0ec95.html#a405b243e71218f4f50e6884505a0ec95">fl::task::Promise::complete_with_value</a></div><div class="ttdeci">bool complete_with_value(const T &amp;value) FL_NO_EXCEPT</div><div class="ttdoc">Complete the Promise with a result (used by networking library)</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d17/promise_8h_source.html#l00183">promise.h:183</a></div></div>
 <div class="ttc" id="anamespacefl_a13766ae9e150185981f5096f90a439d7_html_a13766ae9e150185981f5096f90a439d7"><div class="ttname"><a href="../../d4/d36/namespacefl_a13766ae9e150185981f5096f90a439d7.html#a13766ae9e150185981f5096f90a439d7">fl::value</a></div><div class="ttdeci">constexpr int type_rank&lt; T &gt;::value</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d37/static__constexpr__defs_8cpp_8hpp_source.html#l00082">static_constexpr_defs.cpp.hpp:82</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d8/d23/stream__transport_8h_source.html#l00177">fl::net::http::HttpStreamTransport::PendingStream::ackReceived</a>, <a class="el" href="../../d6/d17/promise_8h_source.html#l00194">fl::task::Promise&lt; T &gt;::complete_with_error()</a>, <a class="el" href="../../d6/d17/promise_8h_source.html#l00183">fl::task::Promise&lt; T &gt;::complete_with_value()</a>, <a class="el" href="../../d4/d05/json_8h_source.html#l00625">fl::json::contains()</a>, <a class="el" href="../../d8/d23/stream__transport_8h_source.html#l00199">mPendingStreams</a>, <a class="el" href="../../d8/d23/stream__transport_8h_source.html#l00175">fl::net::http::HttpStreamTransport::PendingStream::promise</a>, <a class="el" href="../../dd/d37/static__constexpr__defs_8cpp_8hpp_source.html#l00082">fl::type_rank&lt; T &gt;::value</a>, and <a class="el" href="../../d8/d23/stream__transport_8h_source.html#l00176">fl::net::http::HttpStreamTransport::PendingStream::updateCallback</a>.</p>
+<p class="reference">References <a class="el" href="../../d8/d23/stream__transport_8h_source.html#l00177">fl::net::http::HttpStreamTransport::PendingStream::ackReceived</a>, <a class="el" href="../../d6/d17/promise_8h_source.html#l00194">fl::task::Promise&lt; T &gt;::complete_with_error()</a>, <a class="el" href="../../d6/d17/promise_8h_source.html#l00183">fl::task::Promise&lt; T &gt;::complete_with_value()</a>, <a class="el" href="../../d4/d05/json_8h_source.html#l00790">fl::json::contains()</a>, <a class="el" href="../../d8/d23/stream__transport_8h_source.html#l00199">mPendingStreams</a>, <a class="el" href="../../d8/d23/stream__transport_8h_source.html#l00175">fl::net::http::HttpStreamTransport::PendingStream::promise</a>, <a class="el" href="../../dd/d37/static__constexpr__defs_8cpp_8hpp_source.html#l00082">fl::type_rank&lt; T &gt;::value</a>, and <a class="el" href="../../d8/d23/stream__transport_8h_source.html#l00176">fl::net::http::HttpStreamTransport::PendingStream::updateCallback</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../da/d64/stream__transport_8cpp_8hpp_source.html#l00076">parseChunkedMessages()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../da/d64/stream__transport_8cpp_8hpp_source.html#l00080">parseChunkedMessages()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -212,7 +212,7 @@ $(function(){initNavTree('db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transpor
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d5/dc9/namespacefl_1_1net.html">net</a></li><li class="navelem"><a class="el" href="../../d1/d13/namespacefl_1_1net_1_1http.html">http</a></li><li class="navelem"><a class="el" href="../../db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport.html">HttpStreamTransport</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:10 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:12 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

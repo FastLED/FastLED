@@ -1,0 +1,11 @@
+<map id="fl::Channel::hasColorProfile" name="fl::Channel::hasColorProfile">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,45,203,70"/>
+<area shape="rect" id="Node000002" href="$d5/d8b/classfl_1_1_channel_aad464e566821832604d9e96e3d5cf8b2.html#aad464e566821832604d9e96e3d5cf8b2" title=" " alt="" coords="251,45,439,70"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="203,55,237,55,237,60,203,60"/>
+<area shape="rect" id="Node000003" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a796bbae17191ecc97fe3cbc408ccb4cf.html#a796bbae17191ecc97fe3cbc408ccb4cf" title=" " alt="" coords="487,37,623,77"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="439,55,473,55,473,60,439,60"/>
+<area shape="rect" id="Node000004" href="$d8/da0/classfl_1_1_c_l_e_d_controller_aa52e32cc0776be75975f5c5939ecb0f2.html#aa52e32cc0776be75975f5c5939ecb0f2" title="Template&#45;derived static&#45;profile controllers override this hook." alt="" coords="672,5,827,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="623,44,658,38,659,43,624,49"/>
+<area shape="rect" id="Node000005" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a553d065f7fc62ae2343ff49eae4e9f2d.html#a553d065f7fc62ae2343ff49eae4e9f2d" title=" " alt="" coords="671,69,828,109"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="624,66,657,72,656,77,623,71"/>
+</map>

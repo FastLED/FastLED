@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -121,27 +121,28 @@ $(function(){initNavTree('d4/d36/namespacefl_a59cfc69291a433ea9678882571644b89.h
 
 <p class="definition">Definition at line <a class="el" href="../../d1/dda/cstdlib_8cpp_8hpp_source.html#l00021">21</a> of file <a class="el" href="../../d1/dda/cstdlib_8cpp_8hpp_source.html">cstdlib.cpp.hpp</a>.</p>
 <div class="fragment"><div class="line"><span class="lineno">   21</span>                                                       {</div>
-<div class="line"><span class="lineno">   22</span><span class="preprocessor">#if defined(FL_IS_AVR) || defined(FL_IS_ESP8266) || defined(FL_IS_ARM) || defined(FL_IS_APOLLO3)</span></div>
-<div class="line"><span class="lineno">   23</span>    <span class="comment">// Many bare-metal toolchains (newlib-nano on STM32, nRF52, SAMD, RP2040,</span></div>
-<div class="line"><span class="lineno">   24</span>    <span class="comment">// Teensy, etc.) ship an aligned_alloc that internally calls</span></div>
-<div class="line"><span class="lineno">   25</span>    <span class="comment">// posix_memalign, which doesn&#39;t exist on bare-metal and causes an</span></div>
-<div class="line"><span class="lineno">   26</span>    <span class="comment">// &quot;undefined reference to `posix_memalign&#39;&quot; link error.</span></div>
-<div class="line"><span class="lineno">   27</span>    <span class="comment">// Fall back to plain malloc — sufficient for the alignments FastLED</span></div>
-<div class="line"><span class="lineno">   28</span>    <span class="comment">// actually requests on these constrained targets.</span></div>
-<div class="line"><span class="lineno">   29</span>    (void)alignment;</div>
-<div class="line"><span class="lineno">   30</span>    return ::malloc(size);</div>
-<div class="line"><span class="lineno">   31</span><span class="preprocessor">#elif defined(FL_IS_WIN)</span></div>
-<div class="line"><span class="lineno">   32</span>    return ::_aligned_malloc(size, alignment);</div>
-<div class="line"><span class="lineno">   33</span><span class="preprocessor">#elif defined(FL_IS_ESP32) &amp;&amp; !ESP_IDF_VERSION_4_OR_HIGHER</span></div>
-<div class="line"><span class="lineno">   34</span>    <span class="comment">// ESP-IDF 3.x toolchain (GCC 5.2 / newlib) does not provide</span></div>
-<div class="line"><span class="lineno">   35</span>    <span class="comment">// ::aligned_alloc. Fall back to plain malloc.</span></div>
-<div class="line"><span class="lineno">   36</span>    (void)alignment;</div>
-<div class="line"><span class="lineno">   37</span>    return ::malloc(size);</div>
-<div class="line"><span class="lineno">   38</span><span class="preprocessor">#else</span></div>
-<div class="line"><span class="lineno">   39</span>    <a class="code hl_typedef" href="../../da/d3c/namespacefl_1_1fl_ad95910fa68ff00bf006f4992b1b89256.html#ad95910fa68ff00bf006f4992b1b89256">fl::size_t</a> aligned_size = (size + alignment - 1) &amp; ~(alignment - 1);</div>
-<div class="line"><span class="lineno">   40</span>    return ::aligned_alloc(alignment, aligned_size);</div>
-<div class="line"><span class="lineno">   41</span><span class="preprocessor">#endif</span></div>
-<div class="line"><span class="lineno">   42</span>}</div>
+<div class="line"><span class="lineno">   22</span><span class="preprocessor">#if defined(FL_IS_AVR) || defined(FL_IS_ESP8266) || defined(FL_IS_ARM) || \</span></div>
+<div class="line"><span class="lineno">   23</span><span class="preprocessor">    defined(FL_IS_APOLLO3) || defined(FL_IS_CI13XX)</span></div>
+<div class="line"><span class="lineno">   24</span>    <span class="comment">// Many bare-metal toolchains (newlib-nano on STM32, nRF52, SAMD, RP2040,</span></div>
+<div class="line"><span class="lineno">   25</span>    <span class="comment">// Teensy, etc.) ship an aligned_alloc that internally calls</span></div>
+<div class="line"><span class="lineno">   26</span>    <span class="comment">// posix_memalign, which doesn&#39;t exist on bare-metal and causes an</span></div>
+<div class="line"><span class="lineno">   27</span>    <span class="comment">// &quot;undefined reference to `posix_memalign&#39;&quot; link error.</span></div>
+<div class="line"><span class="lineno">   28</span>    <span class="comment">// Fall back to plain malloc — sufficient for the alignments FastLED</span></div>
+<div class="line"><span class="lineno">   29</span>    <span class="comment">// actually requests on these constrained targets.</span></div>
+<div class="line"><span class="lineno">   30</span>    (void)alignment;</div>
+<div class="line"><span class="lineno">   31</span>    return ::malloc(size);</div>
+<div class="line"><span class="lineno">   32</span><span class="preprocessor">#elif defined(FL_IS_WIN)</span></div>
+<div class="line"><span class="lineno">   33</span>    return ::_aligned_malloc(size, alignment);</div>
+<div class="line"><span class="lineno">   34</span><span class="preprocessor">#elif defined(FL_IS_ESP32) &amp;&amp; !ESP_IDF_VERSION_4_OR_HIGHER</span></div>
+<div class="line"><span class="lineno">   35</span>    <span class="comment">// ESP-IDF 3.x toolchain (GCC 5.2 / newlib) does not provide</span></div>
+<div class="line"><span class="lineno">   36</span>    <span class="comment">// ::aligned_alloc. Fall back to plain malloc.</span></div>
+<div class="line"><span class="lineno">   37</span>    (void)alignment;</div>
+<div class="line"><span class="lineno">   38</span>    return ::malloc(size);</div>
+<div class="line"><span class="lineno">   39</span><span class="preprocessor">#else</span></div>
+<div class="line"><span class="lineno">   40</span>    <a class="code hl_typedef" href="../../da/d3c/namespacefl_1_1fl_ad95910fa68ff00bf006f4992b1b89256.html#ad95910fa68ff00bf006f4992b1b89256">fl::size_t</a> aligned_size = (size + alignment - 1) &amp; ~(alignment - 1);</div>
+<div class="line"><span class="lineno">   41</span>    return ::aligned_alloc(alignment, aligned_size);</div>
+<div class="line"><span class="lineno">   42</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">   43</span>}</div>
 <div class="ttc" id="anamespacefl_1_1fl_ad95910fa68ff00bf006f4992b1b89256_html_ad95910fa68ff00bf006f4992b1b89256"><div class="ttname"><a href="../../da/d3c/namespacefl_1_1fl_ad95910fa68ff00bf006f4992b1b89256.html#ad95910fa68ff00bf006f4992b1b89256">fl::fl::size_t</a></div><div class="ttdeci">__SIZE_TYPE__ size_t</div><div class="ttdef"><b>Definition</b> <a href="../../df/d96/s16x16x4_8h_source.html#l00016">s16x16x4.h:16</a></div></div>
 </div><!-- fragment -->
 </div>
@@ -153,7 +154,7 @@ $(function(){initNavTree('d4/d36/namespacefl_a59cfc69291a433ea9678882571644b89.h
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:04 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:07 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

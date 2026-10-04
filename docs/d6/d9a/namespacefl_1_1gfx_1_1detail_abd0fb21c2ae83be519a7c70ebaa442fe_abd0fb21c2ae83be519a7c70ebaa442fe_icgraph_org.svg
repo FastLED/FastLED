@@ -47,7 +47,7 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d0/d8b/namespacefl_1_1gfx_ab43aaa534398d0c1572e2ecbbffcd631.html#ab43aaa534398d0c1572e2ecbbffcd631" target="_top" xlink:title=" ">
+<g id="a_Node000003"><a xlink:href="../../d0/d8b/namespacefl_1_1gfx_a75d6dbe05ac9b2bf1f0e6c787e3fe1af.html#a75d6dbe05ac9b2bf1f0e6c787e3fe1af" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="270,-19 174,-19 174,0 270,0 270,-19"/>
 <text text-anchor="middle" x="222" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::gfx::drawRing</text>
 </a>
@@ -65,7 +65,7 @@
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../de/d5c/structfl_1_1gfx_1_1_canvas_a4592348ee30cf7896ccbed4e9c2c5b95.html#a4592348ee30cf7896ccbed4e9c2c5b95" target="_top" xlink:title=" ">
+<g id="a_Node000004"><a xlink:href="../../de/d5c/structfl_1_1gfx_1_1_canvas_a73498bc5bbbd6aa66fe3b8c3e5b5fc09.html#a73498bc5bbbd6aa66fe3b8c3e5b5fc09" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="138,-19 0,-19 0,0 138,0 138,-19"/>
 <text text-anchor="middle" x="69" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::gfx::Canvas::drawRing</text>
 </a>

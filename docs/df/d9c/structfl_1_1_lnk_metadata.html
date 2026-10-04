@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -109,7 +109,7 @@ $(function(){initNavTree('df/d9c/structfl_1_1_lnk_metadata.html','../../'); init
 <div class="contents">
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Metadata extracted from a <code>.lnk</code> asset link file. </p>
-<p>v1: parsed but not enforced; reserved for future integrity/fallback features. The runtime ignores everything except <code>primary</code>. </p>
+<p>The C++ side only resolves <code>primary</code>. The WASM browser loader verifies <code>sha256</code> and retries <code>fallback</code> (#4025); other platforms do not yet. </p>
 
 <p class="definition">Definition at line <a class="el" href="../../df/db8/url_8h_source.html#l00252">252</a> of file <a class="el" href="../../df/db8/url_8h_source.html">url.h</a>.</p>
 </div>
@@ -124,21 +124,21 @@ $(function(){initNavTree('df/d9c/structfl_1_1_lnk_metadata.html','../../'); init
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a3fd0b6eb3df4e97a3ee94ddb3c84f903" id="r_a3fd0b6eb3df4e97a3ee94ddb3c84f903"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d9c/structfl_1_1_lnk_metadata_a3fd0b6eb3df4e97a3ee94ddb3c84f903.html#a3fd0b6eb3df4e97a3ee94ddb3c84f903">isValid</a> () const <a class="el" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></td></tr>
-<tr class="separator:a3fd0b6eb3df4e97a3ee94ddb3c84f903"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7a75f751ee18920af603ea7af430d317" id="r_a7a75f751ee18920af603ea7af430d317"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d9c/structfl_1_1_lnk_metadata_a7a75f751ee18920af603ea7af430d317.html#a7a75f751ee18920af603ea7af430d317">operator bool</a> () const <a class="el" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></td></tr>
-<tr class="separator:a7a75f751ee18920af603ea7af430d317"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2de3b6caffcd1e3c67d5bdb819a4460b" id="r_a2de3b6caffcd1e3c67d5bdb819a4460b"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d9c/structfl_1_1_lnk_metadata_a2de3b6caffcd1e3c67d5bdb819a4460b.html#a2de3b6caffcd1e3c67d5bdb819a4460b">isValid</a> () const <a class="el" href="../../d4/d36/namespacefl_aa317f89ca911371e798d08a93770402f.html#aa317f89ca911371e798d08a93770402f">FL_NO_EXCEPT</a></td></tr>
+<tr class="separator:a2de3b6caffcd1e3c67d5bdb819a4460b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6d00d904d95b94d83f7f29328a213bc2" id="r_a6d00d904d95b94d83f7f29328a213bc2"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d9c/structfl_1_1_lnk_metadata_a6d00d904d95b94d83f7f29328a213bc2.html#a6d00d904d95b94d83f7f29328a213bc2">operator bool</a> () const <a class="el" href="../../d4/d36/namespacefl_aa317f89ca911371e798d08a93770402f.html#aa317f89ca911371e798d08a93770402f">FL_NO_EXCEPT</a></td></tr>
+<tr class="separator:a6d00d904d95b94d83f7f29328a213bc2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:a8cd205f61b3a7ae4939b323617bb65d1" id="r_a8cd205f61b3a7ae4939b323617bb65d1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d2/db7/classfl_1_1url.html">fl::url</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d9c/structfl_1_1_lnk_metadata_a8cd205f61b3a7ae4939b323617bb65d1.html#a8cd205f61b3a7ae4939b323617bb65d1">fallback</a></td></tr>
-<tr class="memdesc:a8cd205f61b3a7ae4939b323617bb65d1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mirror URL used if <code>primary</code> fails (reserved).  <br /></td></tr>
+<tr class="memdesc:a8cd205f61b3a7ae4939b323617bb65d1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mirror URL used if <code>primary</code> fails.  <br /></td></tr>
 <tr class="separator:a8cd205f61b3a7ae4939b323617bb65d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a007c97bf1558ec1b87db626ab99d0914" id="r_a007c97bf1558ec1b87db626ab99d0914"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d2/db7/classfl_1_1url.html">fl::url</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d9c/structfl_1_1_lnk_metadata_a007c97bf1558ec1b87db626ab99d0914.html#a007c97bf1558ec1b87db626ab99d0914">primary</a></td></tr>
 <tr class="memdesc:a007c97bf1558ec1b87db626ab99d0914"><td class="mdescLeft">&#160;</td><td class="mdescRight">First non-comment URL in the file.  <br /></td></tr>
 <tr class="separator:a007c97bf1558ec1b87db626ab99d0914"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad7b10e5d5f99568d5157c555c6127420" id="r_ad7b10e5d5f99568d5157c555c6127420"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d2/db2/classfl_1_1string.html">fl::string</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d9c/structfl_1_1_lnk_metadata_ad7b10e5d5f99568d5157c555c6127420.html#ad7b10e5d5f99568d5157c555c6127420">sha256</a></td></tr>
-<tr class="memdesc:ad7b10e5d5f99568d5157c555c6127420"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hex-encoded sha256 of the expected asset (reserved).  <br /></td></tr>
+<tr class="memdesc:ad7b10e5d5f99568d5157c555c6127420"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hex-encoded sha256 of the expected asset.  <br /></td></tr>
 <tr class="separator:ad7b10e5d5f99568d5157c555c6127420"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <hr/>The documentation for this struct was generated from the following file:<ul>
@@ -151,7 +151,7 @@ Public Attributes</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../df/d9c/structfl_1_1_lnk_metadata.html">LnkMetadata</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:05 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:09 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

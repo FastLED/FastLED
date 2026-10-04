@@ -1,7 +1,15 @@
 <map id="fl::task::Scheduler::update_tasks_of_type" name="fl::task::Scheduler::update_tasks_of_type">
-<area shape="rect" id="Node000001" title=" " alt="" coords="265,37,439,77"/>
-<area shape="rect" id="Node000002" href="$d2/d2b/classfl_1_1task_1_1_scheduler_a55942f7d4bf9dc02cf0c4b871b207722.html#a55942f7d4bf9dc02cf0c4b871b207722" title=" " alt="" coords="11,5,211,45"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="251,47,211,41,212,36,252,41"/>
-<area shape="rect" id="Node000003" href="$d2/d2b/classfl_1_1task_1_1_scheduler_a855c5a328c90cebcc0b5877612b6005b.html#a855c5a328c90cebcc0b5877612b6005b" title=" " alt="" coords="5,69,217,109"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="252,73,218,78,217,73,251,68"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="685,33,859,73"/>
+<area shape="rect" id="Node000002" href="$d2/d2b/classfl_1_1task_1_1_scheduler_a0f7928f8c5d46fcd68f1c9cbda6b88d2.html#a0f7928f8c5d46fcd68f1c9cbda6b88d2" title=" " alt="" coords="5,33,191,73"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="687,32,637,23,525,12,438,8,351,12,239,23,173,35,172,30,238,18,350,7,438,3,526,6,638,18,688,27"/>
+<area shape="rect" id="Node000003" href="$d2/d2b/classfl_1_1task_1_1_scheduler_a55942f7d4bf9dc02cf0c4b871b207722.html#a55942f7d4bf9dc02cf0c4b871b207722" title=" " alt="" coords="431,33,631,73"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="672,55,632,55,632,50,672,50"/>
+<area shape="rect" id="Node000005" href="$d2/d2b/classfl_1_1task_1_1_scheduler_a855c5a328c90cebcc0b5877612b6005b.html#a855c5a328c90cebcc0b5877612b6005b" title=" " alt="" coords="425,97,637,137"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="684,79,608,99,606,94,682,74"/>
+<area shape="rect" id="Node000004" href="$d2/d2b/classfl_1_1task_1_1_scheduler_aa8f55191b33b752cf474c0266f877133.html#aa8f55191b33b752cf474c0266f877133" title=" " alt="" coords="239,33,377,73"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="418,55,378,55,378,50,418,50"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="225,55,191,55,191,50,225,50"/>
+<area shape="rect" id="Node000006" href="$d2/d2b/classfl_1_1task_1_1_scheduler_ae25e57a0fa39469045c8459a0d3e1ae0.html#ae25e57a0fa39469045c8459a0d3e1ae0" title=" " alt="" coords="239,97,377,137"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="411,119,378,119,378,114,411,114"/>
+<area shape="poly" id="edge7_Node000006_Node000002" title=" " alt="" coords="228,95,163,75,165,70,229,90"/>
 </map>

@@ -8,7 +8,7 @@ digraph "fl::XYRasterSparse_RGB8::clear"
   rankdir="LR";
   Node1 [id="Node000001",label="fl::XYRasterSparse\l_RGB8::clear",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::XYRasterSparse\l_RGB8::XYRasterSparse_RGB8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/dd5/classfl_1_1_x_y_raster_sparse___r_g_b8_a03a0c8706ac98c7e5919ad74a1b2b547.html#a03a0c8706ac98c7e5919ad74a1b2b547",tooltip=" "];
+  Node2 [id="Node000002",label="fl::XYRasterSparse\l_RGB8::XYRasterSparse_RGB8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/dd5/classfl_1_1_x_y_raster_sparse___r_g_b8_a1194fcd858900d3218b5309b1679e37a.html#a1194fcd858900d3218b5309b1679e37a",tooltip=" "];
   Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
   Node3 [id="Node000003",label="fl::XYRasterSparse\l_RGB8::reset",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/dd5/classfl_1_1_x_y_raster_sparse___r_g_b8_a3165a961fd080eef323afb5e21e2a04f.html#a3165a961fd080eef323afb5e21e2a04f",tooltip=" "];
   Node3 -> Node2 [id="edge3_Node000003_Node000002",color="steelblue1",style="solid",tooltip=" "];

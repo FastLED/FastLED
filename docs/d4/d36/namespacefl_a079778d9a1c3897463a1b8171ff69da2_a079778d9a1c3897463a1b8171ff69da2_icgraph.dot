@@ -14,5 +14,5 @@ digraph "fl::upscaleRectangular"
   Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node4 [id="Node000004",label="fl::ScaleUp::draw",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d79/classfl_1_1_scale_up_a4a667682b8d113e18d4c9c95bda93262.html#a4a667682b8d113e18d4c9c95bda93262",tooltip="Render the effect by drawing delegate at low-res and scaling up."];
   Node2 -> Node5 [id="edge4_Node000002_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node5 [id="Node000005",label="fl::CRGB::upscale",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dd6/structfl_1_1_c_r_g_b_a9a8c1c3646e8decc74200a7f5215e190.html#a9a8c1c3646e8decc74200a7f5215e190",tooltip=" "];
+  Node5 [id="Node000005",label="fl::CRGB::upscale",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dd6/structfl_1_1_c_r_g_b_aff2a79ed9b50595f4017d559696d34fd.html#aff2a79ed9b50595f4017d559696d34fd",tooltip=" "];
 }

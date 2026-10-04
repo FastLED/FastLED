@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -119,46 +119,46 @@ $(function(){initNavTree('d1/dfb/colorutils_8h_aa1e0cd66825220bead12cfc1ab7f33c6
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="../../da/d3c/namespacefl_1_1fl_a7c327c33a6aec559eccccfb4b14e3aa2.html#a7c327c33a6aec559eccccfb4b14e3aa2">fract8</a></td>          <td class="paramname"><span class="paramname"><em>amountOfOverlay</em></span>&#160;)</td>
+          <td class="paramtype"><a class="el" href="../../d4/d36/namespacefl_a4f8ec02ccee51aa3af6db05861cdd4e5.html#a4f8ec02ccee51aa3af6db05861cdd4e5">fract8</a></td>          <td class="paramname"><span class="paramname"><em>amountOfOverlay</em></span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 <dl class="section examples"><dt>Examples</dt><dd><a class="el" href="../../d4/d87/_pride2015_8ino-example.html#a5">Pride2015.ino</a>.</dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="../../db/d4e/colorutils_8cpp_8hpp_source.html#l00022">22</a> of file <a class="el" href="../../db/d4e/colorutils_8cpp_8hpp_source.html">colorutils.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   22</span>                                                                          {</div>
-<div class="line"><span class="lineno">   23</span>    <span class="keywordflow">if</span> (amountOfOverlay == 0) {</div>
-<div class="line"><span class="lineno">   24</span>        <span class="keywordflow">return</span> existing;</div>
-<div class="line"><span class="lineno">   25</span>    }</div>
-<div class="line"><span class="lineno">   26</span> </div>
-<div class="line"><span class="lineno">   27</span>    <span class="keywordflow">if</span> (amountOfOverlay == 255) {</div>
-<div class="line"><span class="lineno">   28</span>        existing = overlay;</div>
-<div class="line"><span class="lineno">   29</span>        <span class="keywordflow">return</span> existing;</div>
-<div class="line"><span class="lineno">   30</span>    }</div>
-<div class="line"><span class="lineno">   31</span> </div>
-<div class="line"><span class="lineno">   32</span><span class="preprocessor">#if 0</span></div>
-<div class="line"><span class="lineno">   33</span>    <span class="comment">// Old blend method which unfortunately had some rounding errors</span></div>
-<div class="line"><span class="lineno">   34</span>    <a class="code hl_typedef" href="../../da/d3c/namespacefl_1_1fl_a7c327c33a6aec559eccccfb4b14e3aa2.html#a7c327c33a6aec559eccccfb4b14e3aa2">fract8</a> amountOfKeep = 255 - amountOfOverlay;</div>
-<div class="line"><span class="lineno">   35</span> </div>
-<div class="line"><span class="lineno">   36</span>    existing.red   = scale8_LEAVING_R1_DIRTY( existing.red,   amountOfKeep)</div>
-<div class="line"><span class="lineno">   37</span>                    + scale8_LEAVING_R1_DIRTY( overlay.red,    amountOfOverlay);</div>
-<div class="line"><span class="lineno">   38</span>    existing.green = scale8_LEAVING_R1_DIRTY( existing.green, amountOfKeep)</div>
-<div class="line"><span class="lineno">   39</span>                    + scale8_LEAVING_R1_DIRTY( overlay.green,  amountOfOverlay);</div>
-<div class="line"><span class="lineno">   40</span>    existing.blue  = scale8_LEAVING_R1_DIRTY( existing.blue,  amountOfKeep)</div>
-<div class="line"><span class="lineno">   41</span>                    + scale8_LEAVING_R1_DIRTY( overlay.blue,   amountOfOverlay);</div>
-<div class="line"><span class="lineno">   42</span> </div>
-<div class="line"><span class="lineno">   43</span>    cleanup_R1();</div>
-<div class="line"><span class="lineno">   44</span><span class="preprocessor">#else</span></div>
-<div class="line"><span class="lineno">   45</span>    <span class="comment">// Corrected blend method, with no loss-of-precision rounding errors</span></div>
-<div class="line"><span class="lineno">   46</span>    existing.red = blend8(existing.red, overlay.red, amountOfOverlay);</div>
-<div class="line"><span class="lineno">   47</span>    existing.green = blend8(existing.green, overlay.green, amountOfOverlay);</div>
-<div class="line"><span class="lineno">   48</span>    existing.blue = blend8(existing.blue, overlay.blue, amountOfOverlay);</div>
-<div class="line"><span class="lineno">   49</span><span class="preprocessor">#endif</span></div>
-<div class="line"><span class="lineno">   50</span> </div>
-<div class="line"><span class="lineno">   51</span>    <span class="keywordflow">return</span> existing;</div>
-<div class="line"><span class="lineno">   52</span>}</div>
-<div class="ttc" id="anamespacefl_1_1fl_a7c327c33a6aec559eccccfb4b14e3aa2_html_a7c327c33a6aec559eccccfb4b14e3aa2"><div class="ttname"><a href="../../da/d3c/namespacefl_1_1fl_a7c327c33a6aec559eccccfb4b14e3aa2.html#a7c327c33a6aec559eccccfb4b14e3aa2">fl::fl::fract8</a></div><div class="ttdeci">u8 fract8</div><div class="ttdoc">Fixed-Point Fractional Types.</div><div class="ttdef"><b>Definition</b> <a href="../../df/d96/s16x16x4_8h_source.html#l00161">s16x16x4.h:161</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../db/d4e/colorutils_8cpp_8hpp_source.html#l00087">87</a> of file <a class="el" href="../../db/d4e/colorutils_8cpp_8hpp_source.html">colorutils.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   87</span>                                                                          {</div>
+<div class="line"><span class="lineno">   88</span>    <span class="keywordflow">if</span> (amountOfOverlay == 0) {</div>
+<div class="line"><span class="lineno">   89</span>        <span class="keywordflow">return</span> existing;</div>
+<div class="line"><span class="lineno">   90</span>    }</div>
+<div class="line"><span class="lineno">   91</span> </div>
+<div class="line"><span class="lineno">   92</span>    <span class="keywordflow">if</span> (amountOfOverlay == 255) {</div>
+<div class="line"><span class="lineno">   93</span>        existing = overlay;</div>
+<div class="line"><span class="lineno">   94</span>        <span class="keywordflow">return</span> existing;</div>
+<div class="line"><span class="lineno">   95</span>    }</div>
+<div class="line"><span class="lineno">   96</span> </div>
+<div class="line"><span class="lineno">   97</span><span class="preprocessor">#if 0</span></div>
+<div class="line"><span class="lineno">   98</span>    <span class="comment">// Old blend method which unfortunately had some rounding errors</span></div>
+<div class="line"><span class="lineno">   99</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a4f8ec02ccee51aa3af6db05861cdd4e5.html#a4f8ec02ccee51aa3af6db05861cdd4e5">fract8</a> amountOfKeep = 255 - amountOfOverlay;</div>
+<div class="line"><span class="lineno">  100</span> </div>
+<div class="line"><span class="lineno">  101</span>    existing.red   = scale8_LEAVING_R1_DIRTY( existing.red,   amountOfKeep)</div>
+<div class="line"><span class="lineno">  102</span>                    + scale8_LEAVING_R1_DIRTY( overlay.red,    amountOfOverlay);</div>
+<div class="line"><span class="lineno">  103</span>    existing.green = scale8_LEAVING_R1_DIRTY( existing.green, amountOfKeep)</div>
+<div class="line"><span class="lineno">  104</span>                    + scale8_LEAVING_R1_DIRTY( overlay.green,  amountOfOverlay);</div>
+<div class="line"><span class="lineno">  105</span>    existing.blue  = scale8_LEAVING_R1_DIRTY( existing.blue,  amountOfKeep)</div>
+<div class="line"><span class="lineno">  106</span>                    + scale8_LEAVING_R1_DIRTY( overlay.blue,   amountOfOverlay);</div>
+<div class="line"><span class="lineno">  107</span> </div>
+<div class="line"><span class="lineno">  108</span>    cleanup_R1();</div>
+<div class="line"><span class="lineno">  109</span><span class="preprocessor">#else</span></div>
+<div class="line"><span class="lineno">  110</span>    <span class="comment">// Corrected blend method, with no loss-of-precision rounding errors</span></div>
+<div class="line"><span class="lineno">  111</span>    existing.red = blend8(existing.red, overlay.red, amountOfOverlay);</div>
+<div class="line"><span class="lineno">  112</span>    existing.green = blend8(existing.green, overlay.green, amountOfOverlay);</div>
+<div class="line"><span class="lineno">  113</span>    existing.blue = blend8(existing.blue, overlay.blue, amountOfOverlay);</div>
+<div class="line"><span class="lineno">  114</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">  115</span> </div>
+<div class="line"><span class="lineno">  116</span>    <span class="keywordflow">return</span> existing;</div>
+<div class="line"><span class="lineno">  117</span>}</div>
+<div class="ttc" id="anamespacefl_a4f8ec02ccee51aa3af6db05861cdd4e5_html_a4f8ec02ccee51aa3af6db05861cdd4e5"><div class="ttname"><a href="../../d4/d36/namespacefl_a4f8ec02ccee51aa3af6db05861cdd4e5.html#a4f8ec02ccee51aa3af6db05861cdd4e5">fl::fract8</a></div><div class="ttdeci">u8 fract8</div><div class="ttdoc">Fixed-Point Fractional Types.</div><div class="ttdef"><b>Definition</b> <a href="../../df/dd8/stdint_8h_source.html#l00160">stdint.h:160</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -169,7 +169,7 @@ $(function(){initNavTree('d1/dfb/colorutils_8h_aa1e0cd66825220bead12cfc1ab7f33c6
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d1/dfb/colorutils_8h.html">colorutils.h</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:01 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:04 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

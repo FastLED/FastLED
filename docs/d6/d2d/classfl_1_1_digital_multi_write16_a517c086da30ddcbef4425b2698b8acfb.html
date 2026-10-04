@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -118,25 +118,25 @@ $(function(){initNavTree('d6/d2d/classfl_1_1_digital_multi_write16_a517c086da30d
 <p>Write pre-transposed 16-bit data to the 16 pins. </p>
 <p>Each u16 in <code class="param">pin_data</code> is a bitmask where bit N → pin N. 1 = HIGH, 0 = LOW. Pins set to -1 during <a class="el" href="../../d6/d2d/classfl_1_1_digital_multi_write16_a6699dbdf2ad03ba529816467a0ce44cb.html#a6699dbdf2ad03ba529816467a0ce44cb" title="Initialize from 16 pin numbers. -1 means &quot;skip this bit position&quot;.">init()</a> are skipped. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../df/d98/pins_8cpp_8hpp_source.html#l00328">328</a> of file <a class="el" href="../../df/d98/pins_8cpp_8hpp_source.html">pins.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  328</span>                                                                {</div>
-<div class="line"><span class="lineno">  329</span>    <span class="keywordflow">for</span> (fl::size i = 0; i &lt; pin_data.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac">size</a>(); ++i) {</div>
-<div class="line"><span class="lineno">  330</span>        <span class="keyword">const</span> u16 word = pin_data[i];</div>
-<div class="line"><span class="lineno">  331</span>        <span class="keywordflow">for</span> (<a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a> n = 0; n &lt; 4; ++n) {</div>
-<div class="line"><span class="lineno">  332</span>            <span class="keyword">const</span> <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a> nib = (word &gt;&gt; (n * 4)) &amp; 0x0F;</div>
-<div class="line"><span class="lineno">  333</span>            <a class="code hl_function" href="../../d6/d2d/classfl_1_1_digital_multi_write16_ab2fbb0f68e3c32263d9bbaf0cc7b0ec8.html#ab2fbb0f68e3c32263d9bbaf0cc7b0ec8">applyNibble</a>(<a class="code hl_variable" href="../../d6/d2d/classfl_1_1_digital_multi_write16_a70e34467871280b08357a393f84358a2.html#a70e34467871280b08357a393f84358a2">mSetNib</a>[n][nib], <a class="code hl_variable" href="../../d6/d2d/classfl_1_1_digital_multi_write16_acd370c143b1538a1e75ff9fa9e4739fa.html#acd370c143b1538a1e75ff9fa9e4739fa">mClrNib</a>[n][nib]);</div>
-<div class="line"><span class="lineno">  334</span>        }</div>
-<div class="line"><span class="lineno">  335</span>    }</div>
-<div class="line"><span class="lineno">  336</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../df/d98/pins_8cpp_8hpp_source.html#l00322">322</a> of file <a class="el" href="../../df/d98/pins_8cpp_8hpp_source.html">pins.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  322</span>                                                                {</div>
+<div class="line"><span class="lineno">  323</span>    <span class="keywordflow">for</span> (fl::size i = 0; i &lt; pin_data.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa">size</a>(); ++i) {</div>
+<div class="line"><span class="lineno">  324</span>        <span class="keyword">const</span> u16 word = pin_data[i];</div>
+<div class="line"><span class="lineno">  325</span>        <span class="keywordflow">for</span> (<a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a> n = 0; n &lt; 4; ++n) {</div>
+<div class="line"><span class="lineno">  326</span>            <span class="keyword">const</span> <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a> nib = (word &gt;&gt; (n * 4)) &amp; 0x0F;</div>
+<div class="line"><span class="lineno">  327</span>            <a class="code hl_function" href="../../d6/d2d/classfl_1_1_digital_multi_write16_ab2fbb0f68e3c32263d9bbaf0cc7b0ec8.html#ab2fbb0f68e3c32263d9bbaf0cc7b0ec8">applyNibble</a>(<a class="code hl_variable" href="../../d6/d2d/classfl_1_1_digital_multi_write16_a70e34467871280b08357a393f84358a2.html#a70e34467871280b08357a393f84358a2">mSetNib</a>[n][nib], <a class="code hl_variable" href="../../d6/d2d/classfl_1_1_digital_multi_write16_acd370c143b1538a1e75ff9fa9e4739fa.html#acd370c143b1538a1e75ff9fa9e4739fa">mClrNib</a>[n][nib]);</div>
+<div class="line"><span class="lineno">  328</span>        }</div>
+<div class="line"><span class="lineno">  329</span>    }</div>
+<div class="line"><span class="lineno">  330</span>}</div>
 <div class="ttc" id="aclassfl_1_1_digital_multi_write16_a70e34467871280b08357a393f84358a2_html_a70e34467871280b08357a393f84358a2"><div class="ttname"><a href="../../d6/d2d/classfl_1_1_digital_multi_write16_a70e34467871280b08357a393f84358a2.html#a70e34467871280b08357a393f84358a2">fl::DigitalMultiWrite16::mSetNib</a></div><div class="ttdeci">PinList mSetNib[4][16]</div><div class="ttdef"><b>Definition</b> <a href="../../da/de1/pins_8h_source.html#l00123">pins.h:123</a></div></div>
-<div class="ttc" id="aclassfl_1_1_digital_multi_write16_ab2fbb0f68e3c32263d9bbaf0cc7b0ec8_html_ab2fbb0f68e3c32263d9bbaf0cc7b0ec8"><div class="ttname"><a href="../../d6/d2d/classfl_1_1_digital_multi_write16_ab2fbb0f68e3c32263d9bbaf0cc7b0ec8.html#ab2fbb0f68e3c32263d9bbaf0cc7b0ec8">fl::DigitalMultiWrite16::applyNibble</a></div><div class="ttdeci">static void applyNibble(const PinList &amp;set, const PinList &amp;clr)</div><div class="ttdef"><b>Definition</b> <a href="../../df/d98/pins_8cpp_8hpp_source.html#l00376">pins.cpp.hpp:376</a></div></div>
+<div class="ttc" id="aclassfl_1_1_digital_multi_write16_ab2fbb0f68e3c32263d9bbaf0cc7b0ec8_html_ab2fbb0f68e3c32263d9bbaf0cc7b0ec8"><div class="ttname"><a href="../../d6/d2d/classfl_1_1_digital_multi_write16_ab2fbb0f68e3c32263d9bbaf0cc7b0ec8.html#ab2fbb0f68e3c32263d9bbaf0cc7b0ec8">fl::DigitalMultiWrite16::applyNibble</a></div><div class="ttdeci">static void applyNibble(const PinList &amp;set, const PinList &amp;clr)</div><div class="ttdef"><b>Definition</b> <a href="../../df/d98/pins_8cpp_8hpp_source.html#l00370">pins.cpp.hpp:370</a></div></div>
 <div class="ttc" id="aclassfl_1_1_digital_multi_write16_acd370c143b1538a1e75ff9fa9e4739fa_html_acd370c143b1538a1e75ff9fa9e4739fa"><div class="ttname"><a href="../../d6/d2d/classfl_1_1_digital_multi_write16_acd370c143b1538a1e75ff9fa9e4739fa.html#acd370c143b1538a1e75ff9fa9e4739fa">fl::DigitalMultiWrite16::mClrNib</a></div><div class="ttdeci">PinList mClrNib[4][16]</div><div class="ttdef"><b>Definition</b> <a href="../../da/de1/pins_8h_source.html#l00124">pins.h:124</a></div></div>
-<div class="ttc" id="aclassfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac_html_aef7ee7eb5254da1ba1eb4f3e0173d0ac"><div class="ttname"><a href="../../d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac">fl::span::size</a></div><div class="ttdeci">constexpr fl::size size() const FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d7a/span_8h_source.html#l00458">span.h:458</a></div></div>
+<div class="ttc" id="aclassfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa_html_aaf3daca1c2c8f93b2ac7b319989b22fa"><div class="ttname"><a href="../../d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa">fl::span::size</a></div><div class="ttdeci">constexpr fl::size size() const FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d7a/span_8h_source.html#l00483">span.h:483</a></div></div>
 <div class="ttc" id="anamespacefl_a058ceeac48f181da463c2ba07401292c_html_a058ceeac48f181da463c2ba07401292c"><div class="ttname"><a href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a></div><div class="ttdeci">unsigned char u8</div><div class="ttdef"><b>Definition</b> <a href="../../df/dd8/stdint_8h_source.html#l00131">stdint.h:131</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../df/d98/pins_8cpp_8hpp_source.html#l00376">applyNibble()</a>, <a class="el" href="../../da/de1/pins_8h_source.html#l00124">mClrNib</a>, <a class="el" href="../../da/de1/pins_8h_source.html#l00123">mSetNib</a>, and <a class="el" href="../../d4/d7a/span_8h_source.html#l00458">fl::span&lt; T, Extent &gt;::size()</a>.</p>
+<p class="reference">References <a class="el" href="../../df/d98/pins_8cpp_8hpp_source.html#l00370">applyNibble()</a>, <a class="el" href="../../da/de1/pins_8h_source.html#l00124">mClrNib</a>, <a class="el" href="../../da/de1/pins_8h_source.html#l00123">mSetNib</a>, and <a class="el" href="../../d4/d7a/span_8h_source.html#l00483">fl::span&lt; T, Extent &gt;::size()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d6/d2d/classfl_1_1_digital_multi_write16_acddfa0f31daba041d8076772c5bdb8ee.html#acddfa0f31daba041d8076772c5bdb8ee">DigitalMultiWrite16()</a>, and <a class="el" href="../../df/d98/pins_8cpp_8hpp_source.html#l00385">fl::digitalMultiWrite16()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d6/d2d/classfl_1_1_digital_multi_write16_a6cc8227eb539b5fd0c2bbbfdc6a5a404.html#a6cc8227eb539b5fd0c2bbbfdc6a5a404">DigitalMultiWrite16()</a>, and <a class="el" href="../../df/d98/pins_8cpp_8hpp_source.html#l00379">fl::digitalMultiWrite16()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -161,7 +161,7 @@ $(function(){initNavTree('d6/d2d/classfl_1_1_digital_multi_write16_a517c086da30d
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d6/d2d/classfl_1_1_digital_multi_write16.html">DigitalMultiWrite16</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:05 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:08 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

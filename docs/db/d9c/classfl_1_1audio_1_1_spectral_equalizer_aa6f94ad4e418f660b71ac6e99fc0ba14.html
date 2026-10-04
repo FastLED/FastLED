@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -125,39 +125,38 @@ $(function(){initNavTree('db/d9c/classfl_1_1audio_1_1_spectral_equalizer_aa6f94a
 
 <p>Calculate A-weighting gains. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../db/dea/spectral__equalizer_8cpp_8hpp_source.html#l00078">78</a> of file <a class="el" href="../../db/dea/spectral__equalizer_8cpp_8hpp_source.html">spectral_equalizer.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   78</span>                                                 {</div>
-<div class="line"><span class="lineno">   79</span>    <span class="comment">// Use appropriate A-weighting curve based on number of bands</span></div>
-<div class="line"><span class="lineno">   80</span>    <span class="keyword">const</span> <span class="keywordtype">float</span>* curve = <span class="keyword">nullptr</span>;</div>
-<div class="line"><span class="lineno">   81</span>    size curveSize = 0;</div>
-<div class="line"><span class="lineno">   82</span> </div>
-<div class="line"><span class="lineno">   83</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_af4043dbd3a10668fa3eec1b3346f7db2.html#af4043dbd3a10668fa3eec1b3346f7db2">mConfig</a>.numBands == 16) {</div>
-<div class="line"><span class="lineno">   84</span>        curve = <a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_a0eb20c8ef2e65455e3846c42f1301074.html#a0eb20c8ef2e65455e3846c42f1301074">A_WEIGHTING_16BAND</a>;</div>
-<div class="line"><span class="lineno">   85</span>        curveSize = 16;</div>
-<div class="line"><span class="lineno">   86</span>    } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_af4043dbd3a10668fa3eec1b3346f7db2.html#af4043dbd3a10668fa3eec1b3346f7db2">mConfig</a>.numBands == 32) {</div>
-<div class="line"><span class="lineno">   87</span>        curve = <a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_adcdde01279175d76401d66e62521dfaf.html#adcdde01279175d76401d66e62521dfaf">A_WEIGHTING_32BAND</a>;</div>
-<div class="line"><span class="lineno">   88</span>        curveSize = 32;</div>
-<div class="line"><span class="lineno">   89</span>    } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">   90</span>        <span class="comment">// Unsupported band count - use flat gains</span></div>
-<div class="line"><span class="lineno">   91</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;SpectralEqualizer: A-weighting not defined for &quot;</span> &lt;&lt; <a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_af4043dbd3a10668fa3eec1b3346f7db2.html#af4043dbd3a10668fa3eec1b3346f7db2">mConfig</a>.numBands</div>
-<div class="line"><span class="lineno">   92</span>                &lt;&lt; <span class="stringliteral">&quot; bands, using flat gains&quot;</span>);</div>
-<div class="line"><span class="lineno">   93</span>        <a class="code hl_function" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_a98b8eafa2abe451f740b05be2260bdbb.html#a98b8eafa2abe451f740b05be2260bdbb">calculateFlatGains</a>();</div>
-<div class="line"><span class="lineno">   94</span>        <span class="keywordflow">return</span>;</div>
-<div class="line"><span class="lineno">   95</span>    }</div>
-<div class="line"><span class="lineno">   96</span> </div>
-<div class="line"><span class="lineno">   97</span>    <span class="comment">// Copy A-weighting coefficients to gains</span></div>
-<div class="line"><span class="lineno">   98</span>    <span class="keywordflow">for</span> (size i = 0; i &lt; <a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_af4043dbd3a10668fa3eec1b3346f7db2.html#af4043dbd3a10668fa3eec1b3346f7db2">mConfig</a>.numBands &amp;&amp; i &lt; curveSize; ++i) {</div>
-<div class="line"><span class="lineno">   99</span>        <a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_af6ff0afeba839e05b74faf1c03a20ff4.html#af6ff0afeba839e05b74faf1c03a20ff4">mGains</a>[i] = curve[i];</div>
-<div class="line"><span class="lineno">  100</span>    }</div>
-<div class="line"><span class="lineno">  101</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../db/dea/spectral__equalizer_8cpp_8hpp_source.html#l00076">76</a> of file <a class="el" href="../../db/dea/spectral__equalizer_8cpp_8hpp_source.html">spectral_equalizer.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   76</span>                                                 {</div>
+<div class="line"><span class="lineno">   77</span>    <span class="comment">// Use appropriate A-weighting curve based on number of bands</span></div>
+<div class="line"><span class="lineno">   78</span>    <span class="keyword">const</span> <span class="keywordtype">float</span>* curve = <span class="keyword">nullptr</span>;</div>
+<div class="line"><span class="lineno">   79</span>    size curveSize = 0;</div>
+<div class="line"><span class="lineno">   80</span> </div>
+<div class="line"><span class="lineno">   81</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_af4043dbd3a10668fa3eec1b3346f7db2.html#af4043dbd3a10668fa3eec1b3346f7db2">mConfig</a>.numBands == 16) {</div>
+<div class="line"><span class="lineno">   82</span>        curve = <a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_a0eb20c8ef2e65455e3846c42f1301074.html#a0eb20c8ef2e65455e3846c42f1301074">A_WEIGHTING_16BAND</a>;</div>
+<div class="line"><span class="lineno">   83</span>        curveSize = 16;</div>
+<div class="line"><span class="lineno">   84</span>    } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_af4043dbd3a10668fa3eec1b3346f7db2.html#af4043dbd3a10668fa3eec1b3346f7db2">mConfig</a>.numBands == 32) {</div>
+<div class="line"><span class="lineno">   85</span>        curve = <a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_adcdde01279175d76401d66e62521dfaf.html#adcdde01279175d76401d66e62521dfaf">A_WEIGHTING_32BAND</a>;</div>
+<div class="line"><span class="lineno">   86</span>        curveSize = 32;</div>
+<div class="line"><span class="lineno">   87</span>    } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">   88</span>        <span class="comment">// Unsupported band count - use flat gains</span></div>
+<div class="line"><span class="lineno">   89</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;SpectralEqualizer: A-weighting not defined for %s bands, using flat gains&quot;</span>, <a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_af4043dbd3a10668fa3eec1b3346f7db2.html#af4043dbd3a10668fa3eec1b3346f7db2">mConfig</a>.numBands);</div>
+<div class="line"><span class="lineno">   90</span>        <a class="code hl_function" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_a98b8eafa2abe451f740b05be2260bdbb.html#a98b8eafa2abe451f740b05be2260bdbb">calculateFlatGains</a>();</div>
+<div class="line"><span class="lineno">   91</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">   92</span>    }</div>
+<div class="line"><span class="lineno">   93</span> </div>
+<div class="line"><span class="lineno">   94</span>    <span class="comment">// Copy A-weighting coefficients to gains</span></div>
+<div class="line"><span class="lineno">   95</span>    <span class="keywordflow">for</span> (size i = 0; i &lt; <a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_af4043dbd3a10668fa3eec1b3346f7db2.html#af4043dbd3a10668fa3eec1b3346f7db2">mConfig</a>.numBands &amp;&amp; i &lt; curveSize; ++i) {</div>
+<div class="line"><span class="lineno">   96</span>        <a class="code hl_variable" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_af6ff0afeba839e05b74faf1c03a20ff4.html#af6ff0afeba839e05b74faf1c03a20ff4">mGains</a>[i] = curve[i];</div>
+<div class="line"><span class="lineno">   97</span>    }</div>
+<div class="line"><span class="lineno">   98</span>}</div>
 <div class="ttc" id="aclassfl_1_1audio_1_1_spectral_equalizer_a0eb20c8ef2e65455e3846c42f1301074_html_a0eb20c8ef2e65455e3846c42f1301074"><div class="ttname"><a href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_a0eb20c8ef2e65455e3846c42f1301074.html#a0eb20c8ef2e65455e3846c42f1301074">fl::audio::SpectralEqualizer::A_WEIGHTING_16BAND</a></div><div class="ttdeci">static constexpr float A_WEIGHTING_16BAND[16]</div><div class="ttdoc">A-weighting coefficients for 16-band frequency analysis These approximate the A-weighting curve acros...</div><div class="ttdef"><b>Definition</b> <a href="../../d7/dda/spectral__equalizer_8h_source.html#l00147">spectral_equalizer.h:147</a></div></div>
-<div class="ttc" id="aclassfl_1_1audio_1_1_spectral_equalizer_a98b8eafa2abe451f740b05be2260bdbb_html_a98b8eafa2abe451f740b05be2260bdbb"><div class="ttname"><a href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_a98b8eafa2abe451f740b05be2260bdbb.html#a98b8eafa2abe451f740b05be2260bdbb">fl::audio::SpectralEqualizer::calculateFlatGains</a></div><div class="ttdeci">void calculateFlatGains()</div><div class="ttdoc">Calculate flat gains (all 1.0)</div><div class="ttdef"><b>Definition</b> <a href="../../db/dea/spectral__equalizer_8cpp_8hpp_source.html#l00071">spectral_equalizer.cpp.hpp:71</a></div></div>
+<div class="ttc" id="aclassfl_1_1audio_1_1_spectral_equalizer_a98b8eafa2abe451f740b05be2260bdbb_html_a98b8eafa2abe451f740b05be2260bdbb"><div class="ttname"><a href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_a98b8eafa2abe451f740b05be2260bdbb.html#a98b8eafa2abe451f740b05be2260bdbb">fl::audio::SpectralEqualizer::calculateFlatGains</a></div><div class="ttdeci">void calculateFlatGains()</div><div class="ttdoc">Calculate flat gains (all 1.0)</div><div class="ttdef"><b>Definition</b> <a href="../../db/dea/spectral__equalizer_8cpp_8hpp_source.html#l00069">spectral_equalizer.cpp.hpp:69</a></div></div>
 <div class="ttc" id="aclassfl_1_1audio_1_1_spectral_equalizer_adcdde01279175d76401d66e62521dfaf_html_adcdde01279175d76401d66e62521dfaf"><div class="ttname"><a href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_adcdde01279175d76401d66e62521dfaf.html#adcdde01279175d76401d66e62521dfaf">fl::audio::SpectralEqualizer::A_WEIGHTING_32BAND</a></div><div class="ttdeci">static constexpr float A_WEIGHTING_32BAND[32]</div><div class="ttdoc">A-weighting coefficients for 32-band frequency analysis.</div><div class="ttdef"><b>Definition</b> <a href="../../d7/dda/spectral__equalizer_8h_source.html#l00167">spectral_equalizer.h:167</a></div></div>
 <div class="ttc" id="aclassfl_1_1audio_1_1_spectral_equalizer_af4043dbd3a10668fa3eec1b3346f7db2_html_af4043dbd3a10668fa3eec1b3346f7db2"><div class="ttname"><a href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_af4043dbd3a10668fa3eec1b3346f7db2.html#af4043dbd3a10668fa3eec1b3346f7db2">fl::audio::SpectralEqualizer::mConfig</a></div><div class="ttdeci">SpectralEqualizerConfig mConfig</div><div class="ttdef"><b>Definition</b> <a href="../../d7/dda/spectral__equalizer_8h_source.html#l00138">spectral_equalizer.h:138</a></div></div>
 <div class="ttc" id="aclassfl_1_1audio_1_1_spectral_equalizer_af6ff0afeba839e05b74faf1c03a20ff4_html_af6ff0afeba839e05b74faf1c03a20ff4"><div class="ttname"><a href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer_af6ff0afeba839e05b74faf1c03a20ff4.html#af6ff0afeba839e05b74faf1c03a20ff4">fl::audio::SpectralEqualizer::mGains</a></div><div class="ttdeci">vector&lt; float &gt; mGains</div><div class="ttdoc">Per-band gain multipliers.</div><div class="ttdef"><b>Definition</b> <a href="../../d7/dda/spectral__equalizer_8h_source.html#l00142">spectral_equalizer.h:142</a></div></div>
-<div class="ttc" id="alog_8h_a868b194fdb2234182e76042d9fde3062_html_a868b194fdb2234182e76042d9fde3062"><div class="ttname"><a href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a></div><div class="ttdeci">#define FL_WARN(X)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00276">log.h:276</a></div></div>
+<div class="ttc" id="alog_8h_a4804912fba6eed63e1afd84b8768aced_html_a4804912fba6eed63e1afd84b8768aced"><div class="ttname"><a href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a></div><div class="ttdeci">#define FL_WARN(...)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00440">log.h:440</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d7/dda/spectral__equalizer_8h_source.html#l00147">A_WEIGHTING_16BAND</a>, <a class="el" href="../../d7/dda/spectral__equalizer_8h_source.html#l00167">A_WEIGHTING_32BAND</a>, <a class="el" href="../../db/dea/spectral__equalizer_8cpp_8hpp_source.html#l00071">calculateFlatGains()</a>, <a class="el" href="../../d7/d7f/log_8h_source.html#l00276">FL_WARN</a>, <a class="el" href="../../d7/dda/spectral__equalizer_8h_source.html#l00138">mConfig</a>, and <a class="el" href="../../d7/dda/spectral__equalizer_8h_source.html#l00142">mGains</a>.</p>
+<p class="reference">References <a class="el" href="../../d7/dda/spectral__equalizer_8h_source.html#l00147">A_WEIGHTING_16BAND</a>, <a class="el" href="../../d7/dda/spectral__equalizer_8h_source.html#l00167">A_WEIGHTING_32BAND</a>, <a class="el" href="../../db/dea/spectral__equalizer_8cpp_8hpp_source.html#l00069">calculateFlatGains()</a>, <a class="el" href="../../d7/d7f/log_8h_source.html#l00440">FL_WARN</a>, <a class="el" href="../../d7/dda/spectral__equalizer_8h_source.html#l00138">mConfig</a>, and <a class="el" href="../../d7/dda/spectral__equalizer_8h_source.html#l00142">mGains</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../db/dea/spectral__equalizer_8cpp_8hpp_source.html#l00041">calculateGains()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
@@ -184,7 +183,7 @@ $(function(){initNavTree('db/d9c/classfl_1_1audio_1_1_spectral_equalizer_aa6f94a
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../db/dbf/namespacefl_1_1audio.html">audio</a></li><li class="navelem"><a class="el" href="../../db/d9c/classfl_1_1audio_1_1_spectral_equalizer.html">SpectralEqualizer</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:08 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:11 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

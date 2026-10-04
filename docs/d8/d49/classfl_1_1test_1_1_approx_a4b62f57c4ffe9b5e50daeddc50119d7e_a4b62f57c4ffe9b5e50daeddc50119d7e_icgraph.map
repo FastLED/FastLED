@@ -1,0 +1,27 @@
+<map id="fl::test::Approx::value" name="fl::test::Approx::value">
+<area shape="rect" id="Node000001" title=" " alt="" coords="475,252,636,277"/>
+<area shape="rect" id="Node000002" href="$d8/d49/classfl_1_1test_1_1_approx_a5f62ff397cd9539806bb3b42240fbc82.html#a5f62ff397cd9539806bb3b42240fbc82" title=" " alt="" coords="256,252,427,277"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="461,267,427,267,427,262,461,262"/>
+<area shape="rect" id="Node000003" href="$d8/d49/classfl_1_1test_1_1_approx_a8bbe79b1c3da80131278f458acb58517.html#a8bbe79b1c3da80131278f458acb58517" title="Set custom relative epsilon for comparison Comparison uses: epsilon * (scale + max(|a|,..." alt="" coords="21,5,193,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="330,240,314,197,288,143,252,89,231,65,206,44,186,33,189,28,210,40,234,61,257,86,293,141,318,195,335,238"/>
+<area shape="rect" id="Node000004" href="$d8/d49/classfl_1_1test_1_1_approx_a174fbec5227262f391edbfb5a80bb40c.html#a174fbec5227262f391edbfb5a80bb40c" title="Set absolute margin for comparison When margin &gt; 0, passes if |a &#45; b| &lt;= margin." alt="" coords="21,55,192,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="326,241,307,207,280,167,247,127,207,94,184,82,186,78,209,89,250,123,284,164,311,204,330,238"/>
+<area shape="rect" id="Node000005" href="$d8/d49/classfl_1_1test_1_1_approx_af427f7d1cb5ee3a4b8b7a9ab49923fba.html#af427f7d1cb5ee3a4b8b7a9ab49923fba" title=" " alt="" coords="9,104,205,129"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="320,243,272,192,241,165,207,143,180,132,182,127,209,138,244,161,276,188,324,240"/>
+<area shape="rect" id="Node000006" href="$d8/d49/classfl_1_1test_1_1_approx_adab5ff691de06b8237f1de397bb9f824.html#adab5ff691de06b8237f1de397bb9f824" title=" " alt="" coords="9,153,205,179"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="308,247,262,219,207,192,172,181,174,176,209,188,264,214,311,242"/>
+<area shape="rect" id="Node000007" href="$d8/d49/classfl_1_1test_1_1_approx_a1e51331940179c4e2c6e103dcba3a9dc.html#a1e51331940179c4e2c6e103dcba3a9dc" title=" " alt="" coords="11,203,202,228"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="266,252,167,231,169,225,267,247"/>
+<area shape="rect" id="Node000008" href="$d8/d49/classfl_1_1test_1_1_approx_a9f146c765bd68f02483c001dad3f487c.html#a9f146c765bd68f02483c001dad3f487c" title=" " alt="" coords="5,252,208,277"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="242,267,208,267,208,262,242,262"/>
+<area shape="rect" id="Node000009" href="$d8/d49/classfl_1_1test_1_1_approx_a4221af24ecd2c292a320d69694dfe8e6.html#a4221af24ecd2c292a320d69694dfe8e6" title=" " alt="" coords="5,301,208,327"/>
+<area shape="poly" id="edge8_Node000002_Node000009" title=" " alt="" coords="267,283,169,304,167,299,266,278"/>
+<area shape="rect" id="Node000010" href="$d8/d49/classfl_1_1test_1_1_approx_a7fc86921bd40393addee44d1961a401d.html#a7fc86921bd40393addee44d1961a401d" title=" " alt="" coords="5,351,208,376"/>
+<area shape="poly" id="edge9_Node000002_Node000010" title=" " alt="" coords="311,287,264,314,209,340,170,353,168,348,207,336,261,310,308,282"/>
+<area shape="rect" id="Node000011" href="$d8/d49/classfl_1_1test_1_1_approx_a3dc67a0bf4d9abd32cb751e4099eecbd.html#a3dc67a0bf4d9abd32cb751e4099eecbd" title=" " alt="" coords="11,400,202,425"/>
+<area shape="poly" id="edge10_Node000002_Node000011" title=" " alt="" coords="323,290,275,341,244,367,209,390,179,402,176,397,207,385,241,363,272,337,319,286"/>
+<area shape="rect" id="Node000012" href="$d8/d49/classfl_1_1test_1_1_approx_aa1fe7bf76ff0b7c4ef78dbff9d57690c.html#aa1fe7bf76ff0b7c4ef78dbff9d57690c" title=" " alt="" coords="5,449,208,475"/>
+<area shape="poly" id="edge11_Node000002_Node000012" title=" " alt="" coords="330,291,311,325,284,365,250,405,209,439,183,452,181,447,207,434,246,401,280,362,307,322,325,288"/>
+<area shape="rect" id="Node000013" href="$d8/d49/classfl_1_1test_1_1_approx_a4fed40f0dd8e25b8de37c2ef52a46b2f.html#a4fed40f0dd8e25b8de37c2ef52a46b2f" title="Set custom scale for comparison." alt="" coords="27,499,186,524"/>
+<area shape="poly" id="edge12_Node000002_Node000013" title=" " alt="" coords="334,292,318,335,292,388,256,442,234,467,210,488,186,501,184,496,206,484,230,463,252,439,287,385,313,333,329,290"/>
+</map>

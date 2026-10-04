@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -115,25 +115,25 @@ $(function(){initNavTree('dc/d82/classfl_1_1_corkscrew_a1e971821c581627a909fb06c
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d0/da5/corkscrew_8cpp_8hpp_source.html#l00456">456</a> of file <a class="el" href="../../d0/da5/corkscrew_8cpp_8hpp_source.html">corkscrew.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  456</span>                                                       {</div>
-<div class="line"><span class="lineno">  457</span>    <span class="comment">// Create a ScreenMap with the correct number of LEDs</span></div>
-<div class="line"><span class="lineno">  458</span>    fl::ScreenMap <a class="code hl_variable" href="../../df/d40/examples_2_corkscrew_2corkscrew_8h_a0f6106e4be0f5498d5b5b38c7fe51cc7.html#a0f6106e4be0f5498d5b5b38c7fe51cc7">screenMap</a>(<a class="code hl_variable" href="../../dc/d82/classfl_1_1_corkscrew_a3e319f1ab0f34dfc20eb3e9cc85ba13a.html#a3e319f1ab0f34dfc20eb3e9cc85ba13a">mNumLeds</a>, diameter);</div>
-<div class="line"><span class="lineno">  459</span>    </div>
-<div class="line"><span class="lineno">  460</span>    <span class="comment">// For each LED index, calculate its position and set it in the ScreenMap</span></div>
-<div class="line"><span class="lineno">  461</span>    <span class="keywordflow">for</span> (fl::u16 i = 0; i &lt; <a class="code hl_variable" href="../../dc/d82/classfl_1_1_corkscrew_a3e319f1ab0f34dfc20eb3e9cc85ba13a.html#a3e319f1ab0f34dfc20eb3e9cc85ba13a">mNumLeds</a>; ++i) {</div>
-<div class="line"><span class="lineno">  462</span>        <span class="comment">// Get the wrapped 2D position for this LED index in the cylindrical mapping</span></div>
-<div class="line"><span class="lineno">  463</span>        <a class="code hl_typedef" href="../../d4/d36/namespacefl_a48a8de5776a08438981ff547032a8401.html#a48a8de5776a08438981ff547032a8401">vec2f</a> position = <a class="code hl_function" href="../../dc/d82/classfl_1_1_corkscrew_a91822e7977cba22fdbbed631a57c9e37.html#a91822e7977cba22fdbbed631a57c9e37">at_exact</a>(i);</div>
-<div class="line"><span class="lineno">  464</span>        </div>
-<div class="line"><span class="lineno">  465</span>        <span class="comment">// Set the wrapped position in the ScreenMap</span></div>
-<div class="line"><span class="lineno">  466</span>        <a class="code hl_variable" href="../../df/d40/examples_2_corkscrew_2corkscrew_8h_a0f6106e4be0f5498d5b5b38c7fe51cc7.html#a0f6106e4be0f5498d5b5b38c7fe51cc7">screenMap</a>.<a class="code hl_function" href="../../d2/d78/classfl_1_1_screen_map_aced4058b2fbae9aa6531acb6108ad7c6.html#aced4058b2fbae9aa6531acb6108ad7c6">set</a>(i, position);</div>
-<div class="line"><span class="lineno">  467</span>    }</div>
-<div class="line"><span class="lineno">  468</span>    </div>
-<div class="line"><span class="lineno">  469</span>    <span class="keywordflow">return</span> <a class="code hl_variable" href="../../df/d40/examples_2_corkscrew_2corkscrew_8h_a0f6106e4be0f5498d5b5b38c7fe51cc7.html#a0f6106e4be0f5498d5b5b38c7fe51cc7">screenMap</a>;</div>
-<div class="line"><span class="lineno">  470</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../d0/da5/corkscrew_8cpp_8hpp_source.html#l00455">455</a> of file <a class="el" href="../../d0/da5/corkscrew_8cpp_8hpp_source.html">corkscrew.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  455</span>                                                       {</div>
+<div class="line"><span class="lineno">  456</span>    <span class="comment">// Create a ScreenMap with the correct number of LEDs</span></div>
+<div class="line"><span class="lineno">  457</span>    fl::ScreenMap <a class="code hl_variable" href="../../df/d40/examples_2_corkscrew_2corkscrew_8h_a0f6106e4be0f5498d5b5b38c7fe51cc7.html#a0f6106e4be0f5498d5b5b38c7fe51cc7">screenMap</a>(<a class="code hl_variable" href="../../dc/d82/classfl_1_1_corkscrew_a3e319f1ab0f34dfc20eb3e9cc85ba13a.html#a3e319f1ab0f34dfc20eb3e9cc85ba13a">mNumLeds</a>, diameter);</div>
+<div class="line"><span class="lineno">  458</span>    </div>
+<div class="line"><span class="lineno">  459</span>    <span class="comment">// For each LED index, calculate its position and set it in the ScreenMap</span></div>
+<div class="line"><span class="lineno">  460</span>    <span class="keywordflow">for</span> (fl::u16 i = 0; i &lt; <a class="code hl_variable" href="../../dc/d82/classfl_1_1_corkscrew_a3e319f1ab0f34dfc20eb3e9cc85ba13a.html#a3e319f1ab0f34dfc20eb3e9cc85ba13a">mNumLeds</a>; ++i) {</div>
+<div class="line"><span class="lineno">  461</span>        <span class="comment">// Get the wrapped 2D position for this LED index in the cylindrical mapping</span></div>
+<div class="line"><span class="lineno">  462</span>        <a class="code hl_typedef" href="../../d4/d36/namespacefl_a48a8de5776a08438981ff547032a8401.html#a48a8de5776a08438981ff547032a8401">vec2f</a> position = <a class="code hl_function" href="../../dc/d82/classfl_1_1_corkscrew_a91822e7977cba22fdbbed631a57c9e37.html#a91822e7977cba22fdbbed631a57c9e37">at_exact</a>(i);</div>
+<div class="line"><span class="lineno">  463</span>        </div>
+<div class="line"><span class="lineno">  464</span>        <span class="comment">// Set the wrapped position in the ScreenMap</span></div>
+<div class="line"><span class="lineno">  465</span>        <a class="code hl_variable" href="../../df/d40/examples_2_corkscrew_2corkscrew_8h_a0f6106e4be0f5498d5b5b38c7fe51cc7.html#a0f6106e4be0f5498d5b5b38c7fe51cc7">screenMap</a>.<a class="code hl_function" href="../../d2/d78/classfl_1_1_screen_map_abde1c7b50c81f91849a18997fd17afa3.html#abde1c7b50c81f91849a18997fd17afa3">set</a>(i, position);</div>
+<div class="line"><span class="lineno">  466</span>    }</div>
+<div class="line"><span class="lineno">  467</span>    </div>
+<div class="line"><span class="lineno">  468</span>    <span class="keywordflow">return</span> <a class="code hl_variable" href="../../df/d40/examples_2_corkscrew_2corkscrew_8h_a0f6106e4be0f5498d5b5b38c7fe51cc7.html#a0f6106e4be0f5498d5b5b38c7fe51cc7">screenMap</a>;</div>
+<div class="line"><span class="lineno">  469</span>}</div>
 <div class="ttc" id="aclassfl_1_1_corkscrew_a3e319f1ab0f34dfc20eb3e9cc85ba13a_html_a3e319f1ab0f34dfc20eb3e9cc85ba13a"><div class="ttname"><a href="../../dc/d82/classfl_1_1_corkscrew_a3e319f1ab0f34dfc20eb3e9cc85ba13a.html#a3e319f1ab0f34dfc20eb3e9cc85ba13a">fl::Corkscrew::mNumLeds</a></div><div class="ttdeci">fl::u16 mNumLeds</div><div class="ttdef"><b>Definition</b> <a href="../../db/d93/src_2fl_2gfx_2corkscrew_8h_source.html#l00223">corkscrew.h:223</a></div></div>
 <div class="ttc" id="aclassfl_1_1_corkscrew_a91822e7977cba22fdbbed631a57c9e37_html_a91822e7977cba22fdbbed631a57c9e37"><div class="ttname"><a href="../../dc/d82/classfl_1_1_corkscrew_a91822e7977cba22fdbbed631a57c9e37.html#a91822e7977cba22fdbbed631a57c9e37">fl::Corkscrew::at_exact</a></div><div class="ttdeci">vec2f at_exact(fl::u16 i) const</div><div class="ttdef"><b>Definition</b> <a href="../../d0/da5/corkscrew_8cpp_8hpp_source.html#l00121">corkscrew.cpp.hpp:121</a></div></div>
-<div class="ttc" id="aclassfl_1_1_screen_map_aced4058b2fbae9aa6531acb6108ad7c6_html_aced4058b2fbae9aa6531acb6108ad7c6"><div class="ttname"><a href="../../d2/d78/classfl_1_1_screen_map_aced4058b2fbae9aa6531acb6108ad7c6.html#aced4058b2fbae9aa6531acb6108ad7c6">fl::ScreenMap::set</a></div><div class="ttdeci">void set(u16 index, const vec2f &amp;p) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d05/screenmap_8cpp_8hpp_source.html#l00504">screenmap.cpp.hpp:504</a></div></div>
+<div class="ttc" id="aclassfl_1_1_screen_map_abde1c7b50c81f91849a18997fd17afa3_html_abde1c7b50c81f91849a18997fd17afa3"><div class="ttname"><a href="../../d2/d78/classfl_1_1_screen_map_abde1c7b50c81f91849a18997fd17afa3.html#abde1c7b50c81f91849a18997fd17afa3">fl::ScreenMap::set</a></div><div class="ttdeci">void set(u16 index, const vec2f &amp;p) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d05/screenmap_8cpp_8hpp_source.html#l00607">screenmap.cpp.hpp:607</a></div></div>
 <div class="ttc" id="aexamples_2_corkscrew_2corkscrew_8h_a0f6106e4be0f5498d5b5b38c7fe51cc7_html_a0f6106e4be0f5498d5b5b38c7fe51cc7"><div class="ttname"><a href="../../df/d40/examples_2_corkscrew_2corkscrew_8h_a0f6106e4be0f5498d5b5b38c7fe51cc7.html#a0f6106e4be0f5498d5b5b38c7fe51cc7">screenMap</a></div><div class="ttdeci">fl::ScreenMap screenMap</div><div class="ttdef"><b>Definition</b> <a href="../../df/d40/examples_2_corkscrew_2corkscrew_8h_source.html#l00101">Corkscrew.h:101</a></div></div>
 <div class="ttc" id="anamespacefl_a48a8de5776a08438981ff547032a8401_html_a48a8de5776a08438981ff547032a8401"><div class="ttname"><a href="../../d4/d36/namespacefl_a48a8de5776a08438981ff547032a8401.html#a48a8de5776a08438981ff547032a8401">fl::vec2f</a></div><div class="ttdeci">vec2&lt; float &gt; vec2f</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d67/geometry_8h_source.html#l00333">geometry.h:333</a></div></div>
 </div><!-- fragment -->
@@ -155,7 +155,7 @@ $(function(){initNavTree('dc/d82/classfl_1_1_corkscrew_a1e971821c581627a909fb06c
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../dc/d82/classfl_1_1_corkscrew.html">Corkscrew</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:05 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:08 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

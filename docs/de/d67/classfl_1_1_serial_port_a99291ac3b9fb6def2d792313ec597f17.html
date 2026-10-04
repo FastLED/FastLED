@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -155,7 +155,7 @@ template&lt;typename... Args&gt; </div>
 <div class="line"><span class="lineno">  281</span> </div>
 <div class="line"><span class="lineno">  282</span>    <span class="comment">// Format into a fixed-size buffer using fl::snprintf</span></div>
 <div class="line"><span class="lineno">  283</span>    <span class="keywordtype">char</span> buffer[256];  <span class="comment">// Maximum formatted string length</span></div>
-<div class="line"><span class="lineno">  284</span>    <span class="keywordtype">int</span> len = <a class="code hl_function" href="../../d4/d36/namespacefl_a57cbbc0e3769d2f6c4a7919e29646708.html#a57cbbc0e3769d2f6c4a7919e29646708">fl::snprintf</a>(buffer, <span class="keyword">sizeof</span>(buffer), <a class="code hl_function" href="../../d4/d36/namespacefl_aee6f6a125b8389786800233a69115983.html#aee6f6a125b8389786800233a69115983">format</a>, <a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>...);</div>
+<div class="line"><span class="lineno">  284</span>    <span class="keywordtype">int</span> len = <a class="code hl_function" href="../../d4/d36/namespacefl_a17646782eea1132270233120225036ac.html#a17646782eea1132270233120225036ac">fl::snprintf</a>(buffer, <span class="keyword">sizeof</span>(buffer), <a class="code hl_function" href="../../d4/d36/namespacefl_aee6f6a125b8389786800233a69115983.html#aee6f6a125b8389786800233a69115983">format</a>, <a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>...);</div>
 <div class="line"><span class="lineno">  285</span> </div>
 <div class="line"><span class="lineno">  286</span>    <span class="keywordflow">if</span> (len &lt; 0) {</div>
 <div class="line"><span class="lineno">  287</span>        <span class="keywordflow">return</span> 0;  <span class="comment">// Formatting error</span></div>
@@ -165,17 +165,17 @@ template&lt;typename... Args&gt; </div>
 <div class="line"><span class="lineno">  291</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="../../de/d67/classfl_1_1_serial_port_a3339b490d16bccad572b1ce0989abcb4.html#a3339b490d16bccad572b1ce0989abcb4">print</a>(buffer);</div>
 <div class="line"><span class="lineno">  292</span>}</div>
 <div class="ttc" id="aclassfl_1_1_serial_port_a3339b490d16bccad572b1ce0989abcb4_html_a3339b490d16bccad572b1ce0989abcb4"><div class="ttname"><a href="../../de/d67/classfl_1_1_serial_port_a3339b490d16bccad572b1ce0989abcb4.html#a3339b490d16bccad572b1ce0989abcb4">fl::SerialPort::print</a></div><div class="ttdeci">size_t print(const char *str)</div><div class="ttdoc">Print string to serial output.</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d5f/system_2serial_8cpp_8hpp_source.html#l00048">serial.cpp.hpp:48</a></div></div>
-<div class="ttc" id="anamespacefl_a57cbbc0e3769d2f6c4a7919e29646708_html_a57cbbc0e3769d2f6c4a7919e29646708"><div class="ttname"><a href="../../d4/d36/namespacefl_a57cbbc0e3769d2f6c4a7919e29646708.html#a57cbbc0e3769d2f6c4a7919e29646708">fl::snprintf</a></div><div class="ttdeci">int snprintf(char *buffer, fl::size size, const char *format, const Args &amp;... args) FL_NOEXCEPT</div><div class="ttdoc">Snprintf-like formatting function that writes to a buffer.</div><div class="ttdef"><b>Definition</b> <a href="../../d6/dd1/stdio_8h_source.html#l00666">stdio.h:666</a></div></div>
+<div class="ttc" id="anamespacefl_a17646782eea1132270233120225036ac_html_a17646782eea1132270233120225036ac"><div class="ttname"><a href="../../d4/d36/namespacefl_a17646782eea1132270233120225036ac.html#a17646782eea1132270233120225036ac">fl::snprintf</a></div><div class="ttdeci">int snprintf(char *buffer, fl::size size, const char *format) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/d5f/stdio_8cpp_8hpp_source.html#l00292">stdio.cpp.hpp:292</a></div></div>
 <div class="ttc" id="anamespacefl_aee6f6a125b8389786800233a69115983_html_aee6f6a125b8389786800233a69115983"><div class="ttname"><a href="../../d4/d36/namespacefl_aee6f6a125b8389786800233a69115983.html#aee6f6a125b8389786800233a69115983">fl::format</a></div><div class="ttdeci">fl::string format(const char *fmt)</div><div class="ttdoc">Format with no arguments.</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d0a/format_8h_source.html#l00439">format.h:439</a></div></div>
 <div class="ttc" id="aold_8h_a690f84001beb455ff2f2bbd5fdcc79d5_html_a690f84001beb455ff2f2bbd5fdcc79d5"><div class="ttname"><a href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a></div><div class="ttdeci">corkscrew_args args</div><div class="ttdef"><b>Definition</b> <a href="../../d7/da1/old_8h_source.html#l00149">old.h:149</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d7/da1/old_8h_source.html#l00149">args</a>, <a class="el" href="../../d0/d0a/format_8h_source.html#l00439">fl::format()</a>, <a class="el" href="../../d6/d5f/system_2serial_8cpp_8hpp_source.html#l00048">print()</a>, and <a class="el" href="../../d6/dd1/stdio_8h_source.html#l00666">fl::snprintf()</a>.</p>
+<p class="reference">References <a class="el" href="../../d7/da1/old_8h_source.html#l00149">args</a>, <a class="el" href="../../d0/d0a/format_8h_source.html#l00439">fl::format()</a>, <a class="el" href="../../d6/d5f/system_2serial_8cpp_8hpp_source.html#l00048">print()</a>, and <a class="el" href="../../df/d5f/stdio_8cpp_8hpp_source.html#l00292">fl::snprintf()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../de/d67/classfl_1_1_serial_port_a99291ac3b9fb6def2d792313ec597f17_a99291ac3b9fb6def2d792313ec597f17_cgraph.svg" width="100%" height="508"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../de/d67/classfl_1_1_serial_port_a99291ac3b9fb6def2d792313ec597f17_a99291ac3b9fb6def2d792313ec597f17_cgraph.svg" width="100%" height="484"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 
 </div>
@@ -187,7 +187,7 @@ template&lt;typename... Args&gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../de/d67/classfl_1_1_serial_port.html">SerialPort</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:10 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

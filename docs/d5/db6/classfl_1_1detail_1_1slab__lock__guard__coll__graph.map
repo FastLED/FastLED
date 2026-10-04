@@ -1,0 +1,5 @@
+<map id="fl::detail::slab_lock_guard" name="fl::detail::slab_lock_guard">
+<area shape="rect" id="Node000001" title="RAII guard for slab_mutex." alt="" coords="13,93,157,133"/>
+<area shape="rect" id="Node000002" href="$d9/dd9/classfl_1_1detail_1_1slab__mutex.html" title="Single&#45;threaded MCUs: no&#45;op." alt="" coords="5,5,164,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="87,44,87,93,82,93,82,44"/>
+</map>

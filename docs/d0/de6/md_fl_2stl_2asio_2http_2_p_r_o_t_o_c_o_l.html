@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -103,11 +103,11 @@ $(function(){initNavTree('d0/de6/md_fl_2stl_2asio_2http_2_p_r_o_t_o_c_o_l.html',
   <div class="headertitle"><div class="title">HTTP Streaming RPC Protocol Specification</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="autotoc_md446"></a></p>
-<h1><a class="anchor" id="autotoc_md447"></a>
+<div class="textblock"><p><a class="anchor" id="autotoc_md405"></a></p>
+<h1><a class="anchor" id="autotoc_md406"></a>
 Overview</h1>
 <p>This document specifies the protocol for JSON-RPC 2.0 communication over HTTP/1.1 with chunked transfer encoding. The protocol supports three RPC modes (SYNC, ASYNC, ASYNC_STREAM) with long-lived, bidirectional streaming connections.</p>
-<h1><a class="anchor" id="autotoc_md448"></a>
+<h1><a class="anchor" id="autotoc_md407"></a>
 Protocol Version</h1>
 <ul>
 <li><b>JSON-RPC</b>: 2.0 (full spec compliance)</li>
@@ -116,7 +116,7 @@ Protocol Version</h1>
 <li><b>Connection</b>: keep-alive (persistent connections)</li>
 </ul>
 <hr  />
-<h1><a class="anchor" id="autotoc_md450"></a>
+<h1><a class="anchor" id="autotoc_md409"></a>
 HTTP Request Format (Client → Server)</h1>
 <p>All RPC requests are sent as HTTP POST to the <code>/rpc</code> endpoint:</p>
 <div class="fragment"><div class="line">POST /rpc HTTP/1.1</div>
@@ -132,7 +132,7 @@ HTTP Request Format (Client → Server)</h1>
 <div class="line">...</div>
 <div class="line">0\r\n</div>
 <div class="line">\r\n</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md451"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md410"></a>
 Headers</h2>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -146,7 +146,7 @@ Headers</h2>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><code>Host</code>   </td><td class="markdownTableBodyNone"><code>&lt;server:port&gt;</code>   </td><td class="markdownTableBodyNone">Yes   </td><td class="markdownTableBodyNone">Server address   </td></tr>
 </table>
-<h2><a class="anchor" id="autotoc_md452"></a>
+<h2><a class="anchor" id="autotoc_md411"></a>
 JSON-RPC Request Format</h2>
 <p>Follows <a href="https://www.jsonrpc.org/specification">JSON-RPC 2.0 specification</a>:</p>
 <div class="fragment"><div class="line">{</div>
@@ -166,7 +166,7 @@ JSON-RPC Request Format</h2>
 </li>
 </ul>
 <hr  />
-<h1><a class="anchor" id="autotoc_md454"></a>
+<h1><a class="anchor" id="autotoc_md413"></a>
 HTTP Response Format (Server → Client)</h1>
 <p>All RPC responses are sent over a single long-lived HTTP response with chunked encoding:</p>
 <div class="fragment"><div class="line">HTTP/1.1 200 OK</div>
@@ -181,7 +181,7 @@ HTTP Response Format (Server → Client)</h1>
 <div class="line">...</div>
 <div class="line">0\r\n</div>
 <div class="line">\r\n</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md455"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md414"></a>
 Headers</h2>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -193,16 +193,16 @@ Headers</h2>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><code>Connection</code>   </td><td class="markdownTableBodyNone"><code>keep-alive</code>   </td><td class="markdownTableBodyNone">Yes   </td><td class="markdownTableBodyNone">Persistent connection   </td></tr>
 </table>
-<h2><a class="anchor" id="autotoc_md456"></a>
+<h2><a class="anchor" id="autotoc_md415"></a>
 JSON-RPC Response Format</h2>
-<h3><a class="anchor" id="autotoc_md457"></a>
+<h3><a class="anchor" id="autotoc_md416"></a>
 Success Response</h3>
 <div class="fragment"><div class="line">{</div>
 <div class="line">  &quot;jsonrpc&quot;: &quot;2.0&quot;,</div>
 <div class="line">  &quot;result&quot;: &lt;result-value&gt;,</div>
 <div class="line">  &quot;id&quot;: &lt;request-id&gt;</div>
 <div class="line">}</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md458"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md417"></a>
 Error Response</h3>
 <div class="fragment"><div class="line">{</div>
 <div class="line">  &quot;jsonrpc&quot;: &quot;2.0&quot;,</div>
@@ -222,9 +222,9 @@ Error Response</h3>
 <li><code>-32000</code> to <code>-32099</code>: Server-defined errors</li>
 </ul>
 <hr  />
-<h1><a class="anchor" id="autotoc_md460"></a>
+<h1><a class="anchor" id="autotoc_md419"></a>
 RPC Modes</h1>
-<h2><a class="anchor" id="autotoc_md461"></a>
+<h2><a class="anchor" id="autotoc_md420"></a>
 SYNC Mode (Immediate Response)</h2>
 <p><b>Behavior</b>: Server processes request and returns result immediately.</p>
 <p><b>Request Example</b>: </p><div class="fragment"><div class="line">POST /rpc HTTP/1.1</div>
@@ -253,7 +253,7 @@ SYNC Mode (Immediate Response)</h2>
 <div class="line">  |&lt;--Result------------|</div>
 <div class="line">  |                     |</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md463"></a>
+<h2><a class="anchor" id="autotoc_md422"></a>
 ASYNC Mode (ACK + Later Result)</h2>
 <p><b>Behavior</b>: Server sends immediate ACK, then processes request and sends result later.</p>
 <p><b>Request Example</b>: </p><div class="fragment"><div class="line">POST /rpc HTTP/1.1</div>
@@ -287,7 +287,7 @@ ASYNC Mode (ACK + Later Result)</h2>
 <div class="line">  |&lt;--Result------------|</div>
 <div class="line">  |                     |</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md465"></a>
+<h2><a class="anchor" id="autotoc_md424"></a>
 ASYNC_STREAM Mode (ACK + Updates + Final)</h2>
 <p><b>Behavior</b>: Server sends immediate ACK, then streams multiple updates, and finally sends result with <code>stop</code> marker.</p>
 <p><b>Request Example</b>: </p><div class="fragment"><div class="line">POST /rpc HTTP/1.1</div>
@@ -332,10 +332,10 @@ ASYNC_STREAM Mode (ACK + Updates + Final)</h2>
 <div class="line">  |                     |</div>
 </div><!-- fragment --><p><b>IMPORTANT</b>: The <code>stop</code> marker MUST be present in the final response to indicate end of stream.</p>
 <hr  />
-<h1><a class="anchor" id="autotoc_md467"></a>
+<h1><a class="anchor" id="autotoc_md426"></a>
 Heartbeat Protocol</h1>
 <p>To prevent connection timeouts and detect dead connections, both client and server send periodic heartbeat messages.</p>
-<h2><a class="anchor" id="autotoc_md468"></a>
+<h2><a class="anchor" id="autotoc_md427"></a>
 Ping (Request)</h2>
 <p>Sent by either party to check connection liveness:</p>
 <div class="fragment"><div class="line">{&quot;jsonrpc&quot;:&quot;2.0&quot;,&quot;method&quot;:&quot;rpc.ping&quot;,&quot;id&quot;:null}</div>
@@ -343,7 +343,7 @@ Ping (Request)</h2>
 <li><code>id</code> is <code>null</code> (notification, no response required if unimplemented)</li>
 <li>Method name <code>rpc.ping</code> is reserved for heartbeat</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md469"></a>
+<h2><a class="anchor" id="autotoc_md428"></a>
 Pong (Response)</h2>
 <p>Optional response to ping (if implemented):</p>
 <div class="fragment"><div class="line">{&quot;jsonrpc&quot;:&quot;2.0&quot;,&quot;result&quot;:&quot;pong&quot;,&quot;id&quot;:null}</div>
@@ -351,7 +351,7 @@ Pong (Response)</h2>
 <li>If server implements <code>rpc.ping</code>, it SHOULD respond with <code>"pong"</code></li>
 <li>If server does not implement <code>rpc.ping</code>, it MAY ignore the notification</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md470"></a>
+<h2><a class="anchor" id="autotoc_md429"></a>
 Heartbeat Timing</h2>
 <p><b>Default Configuration</b>:</p><ul>
 <li><b>Heartbeat Interval</b>: 30 seconds</li>
@@ -364,9 +364,9 @@ Heartbeat Timing</h2>
 <li>Client attempts reconnection with exponential backoff</li>
 </ol>
 <hr  />
-<h1><a class="anchor" id="autotoc_md472"></a>
+<h1><a class="anchor" id="autotoc_md431"></a>
 Connection Lifecycle</h1>
-<h2><a class="anchor" id="autotoc_md473"></a>
+<h2><a class="anchor" id="autotoc_md432"></a>
 Initial Connection</h2>
 <div class="fragment"><div class="line">Client                Server</div>
 <div class="line">  |                     |</div>
@@ -377,14 +377,14 @@ Initial Connection</h2>
 <div class="line">  |&lt;--HTTP 200 OK-------|</div>
 <div class="line">  |                     |</div>
 <div class="line">  | (connection established, streaming begins)</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md474"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md433"></a>
 Normal Operation</h2>
 <div class="fragment"><div class="line">Client                Server</div>
 <div class="line">  |&lt;====Requests=======&gt;|</div>
 <div class="line">  |&lt;====Responses=======|</div>
 <div class="line">  |&lt;====Heartbeats======|</div>
 <div class="line">  | (bidirectional streaming)</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md475"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md434"></a>
 Reconnection</h2>
 <p><b>Trigger</b>: Connection lost (timeout, network error, server restart)</p>
 <p><b>Exponential Backoff</b>:</p><ul>
@@ -409,9 +409,9 @@ Reconnection</h2>
 <div class="line">  | (streaming resumes) |</div>
 </div><!-- fragment --><p><b>Max Reconnection Attempts</b>: Configurable (default: unlimited)</p>
 <hr  />
-<h1><a class="anchor" id="autotoc_md477"></a>
+<h1><a class="anchor" id="autotoc_md436"></a>
 Error Handling</h1>
-<h2><a class="anchor" id="autotoc_md478"></a>
+<h2><a class="anchor" id="autotoc_md437"></a>
 Connection Errors</h2>
 <p><b>Scenarios</b>:</p><ul>
 <li>TCP connection refused</li>
@@ -423,7 +423,7 @@ Connection Errors</h2>
 <li>Attempt reconnection with exponential backoff</li>
 <li>Fire <code>onDisconnect()</code> callback</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md479"></a>
+<h2><a class="anchor" id="autotoc_md438"></a>
 HTTP Errors</h2>
 <p><b>Non-200 Status Codes</b>:</p><ul>
 <li><code>4xx</code> (Client Error): Log and report to user</li>
@@ -439,7 +439,7 @@ HTTP Errors</h2>
 <li>Close connection</li>
 <li>Attempt reconnection</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md480"></a>
+<h2><a class="anchor" id="autotoc_md439"></a>
 JSON-RPC Errors</h2>
 <p><b>Parse Errors</b> (-32700): </p><div class="fragment"><div class="line">{</div>
 <div class="line">  &quot;jsonrpc&quot;: &quot;2.0&quot;,</div>
@@ -469,9 +469,9 @@ JSON-RPC Errors</h2>
 <div class="line">  &quot;id&quot;: 1</div>
 <div class="line">}</div>
 </div><!-- fragment --><hr  />
-<h1><a class="anchor" id="autotoc_md482"></a>
+<h1><a class="anchor" id="autotoc_md441"></a>
 Security Considerations</h1>
-<h2><a class="anchor" id="autotoc_md483"></a>
+<h2><a class="anchor" id="autotoc_md442"></a>
 Transport Security</h2>
 <p><b>Production Deployments SHOULD</b>:</p><ul>
 <li>Use HTTPS (TLS/SSL) for all connections</li>
@@ -482,7 +482,7 @@ Transport Security</h2>
 <li>Describes HTTP (not HTTPS) for simplicity</li>
 <li>Implementation MUST support HTTPS upgrade path</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md484"></a>
+<h2><a class="anchor" id="autotoc_md443"></a>
 Authentication</h2>
 <p><b>Not Specified</b>: This protocol does not define authentication mechanisms.</p>
 <p><b>Recommendations</b>:</p><ul>
@@ -491,7 +491,7 @@ Authentication</h2>
 <li>Use API keys in custom headers</li>
 <li>Implement JSON-RPC method-level authorization</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md485"></a>
+<h2><a class="anchor" id="autotoc_md444"></a>
 Rate Limiting</h2>
 <p><b>Not Specified</b>: This protocol does not define rate limiting.</p>
 <p><b>Recommendations</b>:</p><ul>
@@ -500,9 +500,9 @@ Rate Limiting</h2>
 <li>Include <code>Retry-After</code> header with backoff time</li>
 </ul>
 <hr  />
-<h1><a class="anchor" id="autotoc_md487"></a>
+<h1><a class="anchor" id="autotoc_md446"></a>
 Implementation Requirements</h1>
-<h2><a class="anchor" id="autotoc_md488"></a>
+<h2><a class="anchor" id="autotoc_md447"></a>
 Client Requirements</h2>
 <p><b>MUST</b>:</p><ul>
 <li>Send HTTP POST to <code>/rpc</code> endpoint</li>
@@ -523,7 +523,7 @@ Client Requirements</h2>
 <li>Implement max reconnection attempts limit</li>
 <li>Support batch requests (multiple JSON-RPC requests in single HTTP request)</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md489"></a>
+<h2><a class="anchor" id="autotoc_md448"></a>
 Server Requirements</h2>
 <p><b>MUST</b>:</p><ul>
 <li>Accept HTTP POST on <code>/rpc</code> endpoint</li>
@@ -545,9 +545,9 @@ Server Requirements</h2>
 <li>Implement rate limiting per client</li>
 </ul>
 <hr  />
-<h1><a class="anchor" id="autotoc_md491"></a>
+<h1><a class="anchor" id="autotoc_md450"></a>
 Example Implementations</h1>
-<h2><a class="anchor" id="autotoc_md492"></a>
+<h2><a class="anchor" id="autotoc_md451"></a>
 SYNC Request/Response</h2>
 <p><b>Client Code</b> (pseudocode): </p><div class="fragment"><div class="line"><span class="comment">// Connect</span></div>
 <div class="line"><span class="keyword">auto</span> client = HttpStreamClient(<span class="stringliteral">&quot;localhost&quot;</span>, 8080);</div>
@@ -578,7 +578,7 @@ SYNC Request/Response</h2>
 <div class="ttc" id="a_client_validation_real_8h_a508ca9e4d4d5e9774c787fe3167fb996_html_a508ca9e4d4d5e9774c787fe3167fb996"><div class="ttname"><a href="../../d9/dce/_client_validation_real_8h_a508ca9e4d4d5e9774c787fe3167fb996.html#a508ca9e4d4d5e9774c787fe3167fb996">server</a></div><div class="ttdeci">fl::HttpServer server</div><div class="ttdef"><b>Definition</b> <a href="../../d9/dce/_client_validation_real_8h_source.html#l00038">ClientValidationReal.h:38</a></div></div>
 <div class="ttc" id="a_rpc_client_8ino_a2322979ac125e8fe8862058961e3d206_html_a2322979ac125e8fe8862058961e3d206"><div class="ttname"><a href="../../d8/db9/_rpc_client_8ino_a2322979ac125e8fe8862058961e3d206.html#a2322979ac125e8fe8862058961e3d206">remote</a></div><div class="ttdeci">fl::unique_ptr&lt; fl::Remote &gt; remote</div><div class="ttdef"><b>Definition</b> <a href="../../d8/db9/_rpc_client_8ino_source.html#l00043">RpcClient.ino:43</a></div></div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md494"></a>
+<h2><a class="anchor" id="autotoc_md453"></a>
 ASYNC Request/Response</h2>
 <p><b>Client Code</b> (pseudocode): </p><div class="fragment"><div class="line"><span class="comment">// Send ASYNC request</span></div>
 <div class="line">Json request = Json::object()</div>
@@ -607,7 +607,7 @@ ASYNC Request/Response</h2>
 <div class="line">    }).detach();</div>
 <div class="line">}, RpcMode::ASYNC);</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md496"></a>
+<h2><a class="anchor" id="autotoc_md455"></a>
 ASYNC_STREAM Request/Response</h2>
 <p><b>Client Code</b> (pseudocode): </p><div class="fragment"><div class="line"><span class="comment">// Send ASYNC_STREAM request</span></div>
 <div class="line">Json request = Json::object()</div>
@@ -648,9 +648,9 @@ ASYNC_STREAM Request/Response</h2>
 <div class="line">    }).detach();</div>
 <div class="line">}, RpcMode::ASYNC_STREAM);</div>
 </div><!-- fragment --><hr  />
-<h1><a class="anchor" id="autotoc_md498"></a>
+<h1><a class="anchor" id="autotoc_md457"></a>
 Protocol Extensions</h1>
-<h2><a class="anchor" id="autotoc_md499"></a>
+<h2><a class="anchor" id="autotoc_md458"></a>
 Batch Requests (Optional)</h2>
 <p>Multiple requests in single HTTP POST:</p>
 <p><b>Request</b>: </p><div class="fragment"><div class="line">[</div>
@@ -661,15 +661,15 @@ Batch Requests (Optional)</h2>
 <div class="line">  {&quot;jsonrpc&quot;:&quot;2.0&quot;,&quot;result&quot;:3,&quot;id&quot;:1},</div>
 <div class="line">  {&quot;jsonrpc&quot;:&quot;2.0&quot;,&quot;result&quot;:2,&quot;id&quot;:2}</div>
 <div class="line">]</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md500"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md459"></a>
 Notifications (No Response)</h2>
 <p>Request with <code>id: null</code>:</p>
 <p><b>Request</b>: </p><div class="fragment"><div class="line">{&quot;jsonrpc&quot;:&quot;2.0&quot;,&quot;method&quot;:&quot;log&quot;,&quot;params&quot;:[&quot;Hello&quot;],&quot;id&quot;:null}</div>
 </div><!-- fragment --><p><b>Response</b>: None (notification, no response expected)</p>
 <hr  />
-<h1><a class="anchor" id="autotoc_md502"></a>
+<h1><a class="anchor" id="autotoc_md461"></a>
 Compliance Checklist</h1>
-<h2><a class="anchor" id="autotoc_md503"></a>
+<h2><a class="anchor" id="autotoc_md462"></a>
 JSON-RPC 2.0 Compliance</h2>
 <ul class="check">
 <li class="checked">Support <code>jsonrpc: "2.0"</code> field in all requests/responses</li>
@@ -696,7 +696,7 @@ JSON-RPC 2.0 Compliance</h2>
 <li class="checked">Support notifications (<code>id: null</code>)</li>
 <li class="unchecked">Support batch requests (optional)</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md504"></a>
+<h2><a class="anchor" id="autotoc_md463"></a>
 HTTP/1.1 Compliance</h2>
 <ul class="check">
 <li class="checked">Support HTTP POST method</li>
@@ -713,7 +713,7 @@ HTTP/1.1 Compliance</h2>
 <ul class="check">
 <li class="checked">Support HTTP status codes (200, 4xx, 5xx)</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md505"></a>
+<h2><a class="anchor" id="autotoc_md464"></a>
 Custom Features</h2>
 <ul class="check">
 <li class="checked">SYNC mode (immediate response)</li>
@@ -734,7 +734,7 @@ Custom Features</h2>
 <li class="checked">Connection timeout detection</li>
 </ul>
 <hr  />
-<h1><a class="anchor" id="autotoc_md507"></a>
+<h1><a class="anchor" id="autotoc_md466"></a>
 References</h1>
 <ul>
 <li><a href="https://www.jsonrpc.org/specification">JSON-RPC 2.0 Specification</a></li>
@@ -742,7 +742,7 @@ References</h1>
 <li><a href="https://datatracker.ietf.org/doc/html/rfc7230#section-4.1">Chunked Transfer Encoding (RFC 7230 Section 4.1)</a></li>
 </ul>
 <hr  />
-<h1><a class="anchor" id="autotoc_md509"></a>
+<h1><a class="anchor" id="autotoc_md468"></a>
 Changelog</h1>
 <ul>
 <li><b>2026-02-16</b>: Initial protocol specification (v1.0) </li>
@@ -754,7 +754,7 @@ Changelog</h1>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:02 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

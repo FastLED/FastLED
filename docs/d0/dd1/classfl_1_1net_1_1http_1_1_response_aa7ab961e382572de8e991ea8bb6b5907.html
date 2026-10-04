@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -127,21 +127,21 @@ $(function(){initNavTree('d0/dd1/classfl_1_1net_1_1http_1_1_response_aa7ab961e38
 
 <p class="definition">Definition at line <a class="el" href="../../d6/d6a/fetch_8h_source.html#l00152">152</a> of file <a class="el" href="../../d6/d6a/fetch_8h_source.html">fetch.h</a>.</p>
 <div class="fragment"><div class="line"><span class="lineno">  152</span>                                   {</div>
-<div class="line"><span class="lineno">  153</span>        fl::json parsed = <a class="code hl_function" href="../../de/d40/classfl_1_1json_af7d8a65ad376b44e25bf9653bcac2405.html#af7d8a65ad376b44e25bf9653bcac2405">fl::json::parse</a>(<a class="code hl_variable" href="../../d0/dd1/classfl_1_1net_1_1http_1_1_response_a9f075fe8e41744122add14eb4132f861.html#a9f075fe8e41744122add14eb4132f861">mBody</a>);</div>
-<div class="line"><span class="lineno">  154</span>        <span class="keywordflow">if</span> (parsed.<a class="code hl_function" href="../../de/d40/classfl_1_1json_a59f212a0074c9bad4d2519ddf272bc8f.html#a59f212a0074c9bad4d2519ddf272bc8f">is_null</a>() &amp;&amp; (!<a class="code hl_variable" href="../../d0/dd1/classfl_1_1net_1_1http_1_1_response_a9f075fe8e41744122add14eb4132f861.html#a9f075fe8e41744122add14eb4132f861">mBody</a>.empty())) {</div>
+<div class="line"><span class="lineno">  153</span>        fl::json parsed = <a class="code hl_function" href="../../de/d40/classfl_1_1json_acfd0c418354f6fa20c838e2167ab9661.html#acfd0c418354f6fa20c838e2167ab9661">fl::json::parse</a>(<a class="code hl_variable" href="../../d0/dd1/classfl_1_1net_1_1http_1_1_response_a9f075fe8e41744122add14eb4132f861.html#a9f075fe8e41744122add14eb4132f861">mBody</a>);</div>
+<div class="line"><span class="lineno">  154</span>        <span class="keywordflow">if</span> (parsed.<a class="code hl_function" href="../../de/d40/classfl_1_1json_a81b39e8d1d60c09dff5c241846743262.html#a81b39e8d1d60c09dff5c241846743262">is_null</a>() &amp;&amp; (!<a class="code hl_variable" href="../../d0/dd1/classfl_1_1net_1_1http_1_1_response_a9f075fe8e41744122add14eb4132f861.html#a9f075fe8e41744122add14eb4132f861">mBody</a>.empty())) {</div>
 <div class="line"><span class="lineno">  155</span>            <span class="comment">// If parsing failed but we have content, return null JSON</span></div>
 <div class="line"><span class="lineno">  156</span>            <span class="comment">// This allows safe chaining: resp.json()[&quot;key&quot;] | default</span></div>
 <div class="line"><span class="lineno">  157</span>            <span class="keywordflow">return</span> fl::json(<span class="keyword">nullptr</span>);</div>
 <div class="line"><span class="lineno">  158</span>        }</div>
 <div class="line"><span class="lineno">  159</span>        <span class="keywordflow">return</span> parsed;</div>
 <div class="line"><span class="lineno">  160</span>    }</div>
-<div class="ttc" id="aclassfl_1_1json_a59f212a0074c9bad4d2519ddf272bc8f_html_a59f212a0074c9bad4d2519ddf272bc8f"><div class="ttname"><a href="../../de/d40/classfl_1_1json_a59f212a0074c9bad4d2519ddf272bc8f.html#a59f212a0074c9bad4d2519ddf272bc8f">fl::json::is_null</a></div><div class="ttdeci">bool is_null() const FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d05/json_8h_source.html#l00238">json.h:238</a></div></div>
-<div class="ttc" id="aclassfl_1_1json_af7d8a65ad376b44e25bf9653bcac2405_html_af7d8a65ad376b44e25bf9653bcac2405"><div class="ttname"><a href="../../de/d40/classfl_1_1json_af7d8a65ad376b44e25bf9653bcac2405.html#af7d8a65ad376b44e25bf9653bcac2405">fl::json::parse</a></div><div class="ttdeci">static json parse(const fl::string &amp;txt) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d05/json_8h_source.html#l00677">json.h:677</a></div></div>
+<div class="ttc" id="aclassfl_1_1json_a81b39e8d1d60c09dff5c241846743262_html_a81b39e8d1d60c09dff5c241846743262"><div class="ttname"><a href="../../de/d40/classfl_1_1json_a81b39e8d1d60c09dff5c241846743262.html#a81b39e8d1d60c09dff5c241846743262">fl::json::is_null</a></div><div class="ttdeci">bool is_null() const FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d05/json_8h_source.html#l00381">json.h:381</a></div></div>
+<div class="ttc" id="aclassfl_1_1json_acfd0c418354f6fa20c838e2167ab9661_html_acfd0c418354f6fa20c838e2167ab9661"><div class="ttname"><a href="../../de/d40/classfl_1_1json_acfd0c418354f6fa20c838e2167ab9661.html#acfd0c418354f6fa20c838e2167ab9661">fl::json::parse</a></div><div class="ttdeci">static json parse(const fl::string &amp;txt) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d05/json_8h_source.html#l00842">json.h:842</a></div></div>
 <div class="ttc" id="aclassfl_1_1net_1_1http_1_1_response_a9f075fe8e41744122add14eb4132f861_html_a9f075fe8e41744122add14eb4132f861"><div class="ttname"><a href="../../d0/dd1/classfl_1_1net_1_1http_1_1_response_a9f075fe8e41744122add14eb4132f861.html#a9f075fe8e41744122add14eb4132f861">fl::net::http::Response::mBody</a></div><div class="ttdeci">fl::string mBody</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d6a/fetch_8h_source.html#l00144">fetch.h:144</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d4/d05/json_8h_source.html#l00238">fl::json::is_null()</a>, <a class="el" href="../../d6/d6a/fetch_8h_source.html#l00144">mBody</a>, and <a class="el" href="../../d4/d05/json_8h_source.html#l00677">fl::json::parse()</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d05/json_8h_source.html#l00381">fl::json::is_null()</a>, <a class="el" href="../../d6/d6a/fetch_8h_source.html#l00144">mBody</a>, and <a class="el" href="../../d4/d05/json_8h_source.html#l00842">fl::json::parse()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../de/daa/fetch_8cpp_8hpp_source.html#l00649">json()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../de/daa/fetch_8cpp_8hpp_source.html#l00651">json()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -166,7 +166,7 @@ $(function(){initNavTree('d0/dd1/classfl_1_1net_1_1http_1_1_response_aa7ab961e38
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d5/dc9/namespacefl_1_1net.html">net</a></li><li class="navelem"><a class="el" href="../../d1/d13/namespacefl_1_1net_1_1http.html">http</a></li><li class="navelem"><a class="el" href="../../d0/dd1/classfl_1_1net_1_1http_1_1_response.html">Response</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:10 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:12 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

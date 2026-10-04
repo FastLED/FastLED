@@ -1,13 +1,22 @@
 <map id="fl::s16x16x4::from_raw" name="fl::s16x16x4::from_raw">
-<area shape="rect" id="Node000001" title=" " alt="" coords="757,70,928,95"/>
-<area shape="rect" id="Node000002" href="$d9/d1a/namespaceautoresearch_1_1simd__check_a31fa178fd9b80e3836f4a68e5f433705.html#a31fa178fd9b80e3836f4a68e5f433705" title=" " alt="" coords="545,5,699,45"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="779,69,699,48,700,43,781,64"/>
-<area shape="rect" id="Node000006" href="$d5/dfe/classfl_1_1fl_1_1s0x32_a928f995555b8c168aa9352e85a461f81.html#a928f995555b8c168aa9352e85a461f81" title=" " alt="" coords="541,70,703,95"/>
-<area shape="poly" id="edge4_Node000001_Node000006" title=" " alt="" coords="744,85,703,85,703,80,744,80"/>
-<area shape="rect" id="Node000007" href="$d1/d7f/structfl_1_1s16x16x4_ae9128fcc60f512b34ee38056527ff885.html#ae9128fcc60f512b34ee38056527ff885" title=" " alt="" coords="535,119,709,145"/>
-<area shape="poly" id="edge5_Node000001_Node000007" title=" " alt="" coords="772,101,680,122,679,117,771,96"/>
-<area shape="rect" id="Node000003" href="$d9/d1a/namespaceautoresearch_1_1simd__check_acd8ffc3b65508dec50abd9f9ed7a6f20.html#acd8ffc3b65508dec50abd9f9ed7a6f20" title=" " alt="" coords="264,5,487,45"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="531,28,487,28,487,23,531,23"/>
-<area shape="rect" id="Node000004" href="$db/d63/class_auto_research_remote_control_abb6600e8a1e8c4ef46ba29e7bd3b78b4.html#abb6600e8a1e8c4ef46ba29e7bd3b78b4" title="Register all RPC functions with shared autoresearch state." alt="" coords="5,5,216,45"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="250,28,216,28,216,23,250,23"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="511,169,681,194"/>
+<area shape="rect" id="Node000002" href="$d9/d1a/namespaceautoresearch_1_1simd__check_a31fa178fd9b80e3836f4a68e5f433705.html#a31fa178fd9b80e3836f4a68e5f433705" title=" " alt="" coords="292,5,447,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="574,160,526,110,495,83,461,60,438,48,440,43,464,55,498,79,529,106,578,157"/>
+<area shape="rect" id="Node000004" href="$d1/d7f/structfl_1_1s16x16x4_ad36cd0a3731ab65903e630bc9a0dfd00.html#ad36cd0a3731ab65903e630bc9a0dfd00" title=" " alt="" coords="301,70,438,95"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="563,164,516,136,462,109,428,98,430,93,464,104,519,131,566,159"/>
+<area shape="rect" id="Node000005" href="$d1/d7f/structfl_1_1s16x16x4_ab8ed6c45f486e364ab4f2712cb248193.html#ab8ed6c45f486e364ab4f2712cb248193" title="Element&#45;wise maximum." alt="" coords="300,119,439,145"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="523,168,428,147,429,142,524,163"/>
+<area shape="rect" id="Node000007" href="$d1/d7f/structfl_1_1s16x16x4_a1c933c8699fca08e55e6fc688e80ba20.html#a1c933c8699fca08e55e6fc688e80ba20" title="Element&#45;wise minimum." alt="" coords="302,169,437,194"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="497,184,437,184,437,179,497,179"/>
+<area shape="rect" id="Node000008" href="$d1/d7f/structfl_1_1s16x16x4_a52c28634d83b50639093045c8dd5bae8.html#a52c28634d83b50639093045c8dd5bae8" title=" " alt="" coords="284,218,455,243"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="524,200,429,221,428,215,523,194"/>
+<area shape="rect" id="Node000009" href="$d1/d7f/structfl_1_1s16x16x4_ab08ab33ae6d9e97c35d63a748c52a6be.html#ab08ab33ae6d9e97c35d63a748c52a6be" title=" " alt="" coords="276,267,463,293"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="566,204,519,232,464,258,430,270,428,265,462,254,516,227,563,199"/>
+<area shape="rect" id="Node000010" href="$d1/d7f/structfl_1_1s16x16x4_a8df844d163c02cd7b2896f2cc082017f.html#a8df844d163c02cd7b2896f2cc082017f" title=" " alt="" coords="276,317,463,342"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="578,206,530,258,499,285,464,308,437,319,435,314,461,303,495,280,527,254,574,203"/>
+<area shape="rect" id="Node000003" href="$d9/d1a/namespaceautoresearch_1_1simd__check_acd8ffc3b65508dec50abd9f9ed7a6f20.html#acd8ffc3b65508dec50abd9f9ed7a6f20" title=" " alt="" coords="5,5,228,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="279,28,228,28,228,23,279,23"/>
+<area shape="rect" id="Node000006" href="$d1/d7f/structfl_1_1s16x16x4_a2bf751e0b8ef9006cf8c915b446b87a8.html#a2bf751e0b8ef9006cf8c915b446b87a8" title="Clamp to [lo, hi]." alt="" coords="42,143,191,169"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="287,142,192,152,191,146,286,137"/>
+<area shape="poly" id="edge7_Node000007_Node000006" title=" " alt="" coords="288,176,191,166,192,161,288,171"/>
 </map>

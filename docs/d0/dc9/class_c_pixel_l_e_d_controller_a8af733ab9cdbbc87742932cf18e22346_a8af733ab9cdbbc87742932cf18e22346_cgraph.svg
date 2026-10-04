@@ -68,7 +68,7 @@ var sectionId = 'dynsection-0';
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../d8/da0/classfl_1_1_c_l_e_d_controller_ad9a3142e77c16f1e4e0d5384400a91dd.html#ad9a3142e77c16f1e4e0d5384400a91dd" target="_top" xlink:title=" ">
+<g id="a_Node000002"><a xlink:href="../../d8/da0/classfl_1_1_c_l_e_d_controller_a3f2b87f193fc384830563b6689e31e3e.html#a3f2b87f193fc384830563b6689e31e3e" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="267,-126 149,-126 149,-96 267,-96 267,-126"/>
 <text text-anchor="start" x="157" y="-114" font-family="Helvetica,sans-Serif" font-size="10.00">fl::CLEDController</text>
 <text text-anchor="middle" x="208" y="-103" font-family="Helvetica,sans-Serif" font-size="10.00">::getAdjustmentData</text>
@@ -87,7 +87,7 @@ var sectionId = 'dynsection-0';
 <!-- Node6 -->
 <g id="Node000006" class="node">
 <title>Node6</title>
-<g id="a_Node000006"><a xlink:href="../../d8/da0/classfl_1_1_c_l_e_d_controller_a280f23ed10b10068f0a7460f8977cb33.html#a280f23ed10b10068f0a7460f8977cb33" target="_top" xlink:title="Get the dithering option currently set for this controller.">
+<g id="a_Node000006"><a xlink:href="../../d8/da0/classfl_1_1_c_l_e_d_controller_a8ac52066b02a3ec4dda386f6c5ae4267.html#a8ac52066b02a3ec4dda386f6c5ae4267" target="_top" xlink:title="Get the dithering option currently set for this controller.">
 <polygon fill="white" stroke="#666666" points="259,-78 157,-78 157,-48 259,-48 259,-78"/>
 <text text-anchor="start" x="165" y="-66" font-family="Helvetica,sans-Serif" font-size="10.00">fl::CLEDController</text>
 <text text-anchor="middle" x="208" y="-55" font-family="Helvetica,sans-Serif" font-size="10.00">::getDither</text>
@@ -125,7 +125,7 @@ var sectionId = 'dynsection-0';
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d8/da0/classfl_1_1_c_l_e_d_controller_aac0e483e79124d23d3d1189e9301b740.html#aac0e483e79124d23d3d1189e9301b740" target="_top" xlink:title="Get the combined brightness/color adjustment for this controller.">
+<g id="a_Node000003"><a xlink:href="../../d8/da0/classfl_1_1_c_l_e_d_controller_af578764852f4bb08cb04a7a1be5a0bdc.html#af578764852f4bb08cb04a7a1be5a0bdc" target="_top" xlink:title="Get the combined brightness/color adjustment for this controller.">
 <polygon fill="white" stroke="#666666" points="405,-126 303,-126 303,-96 405,-96 405,-126"/>
 <text text-anchor="start" x="311" y="-114" font-family="Helvetica,sans-Serif" font-size="10.00">fl::CLEDController</text>
 <text text-anchor="middle" x="354" y="-103" font-family="Helvetica,sans-Serif" font-size="10.00">::getAdjustment</text>
@@ -144,7 +144,7 @@ var sectionId = 'dynsection-0';
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_a86dcfb931c3d2fb58f823a7f06d9dbf4.html#a86dcfb931c3d2fb58f823a7f06d9dbf4" target="_top" xlink:title="Calculates the combined color adjustment to the LEDs at a given scale, color correction,...">
+<g id="a_Node000004"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_ae7767f09e42fd7837cc58d11218174c3.html#ae7767f09e42fd7837cc58d11218174c3" target="_top" xlink:title="Calculates the combined color adjustment to the LEDs at a given scale, color correction,...">
 <polygon fill="#fff0f0" stroke="red" points="602,-120.5 441,-120.5 441,-101.5 602,-101.5 602,-120.5"/>
 <text text-anchor="middle" x="521.5" y="-108.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::CRGB::computeAdjustment</text>
 </a>

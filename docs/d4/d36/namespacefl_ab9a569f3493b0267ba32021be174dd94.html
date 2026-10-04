@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -132,13 +132,13 @@ $(function(){initNavTree('d4/d36/namespacefl_ab9a569f3493b0267ba32021be174dd94.h
 <p class="definition">Definition at line <a class="el" href="../../dd/d7a/cstdio_8cpp_8hpp_source.html#l00139">139</a> of file <a class="el" href="../../dd/d7a/cstdio_8cpp_8hpp_source.html">cstdio.cpp.hpp</a>.</p>
 <div class="fragment"><div class="line"><span class="lineno">  139</span>                                                                                             {</div>
 <div class="line"><span class="lineno">  140</span>    <span class="comment">// Follows Arduino Serial.readStringUntil() API - blocks until delimiter found</span></div>
-<div class="line"><span class="lineno">  141</span>    u32 startTime = <a class="code hl_function" href="../../d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a">fl::millis</a>();</div>
+<div class="line"><span class="lineno">  141</span>    u32 startTime = <a class="code hl_function" href="../../d4/d36/namespacefl_a3c0ba5842bfd029c404a38c8df2315f3.html#a3c0ba5842bfd029c404a38c8df2315f3">fl::millis</a>();</div>
 <div class="line"><span class="lineno">  142</span> </div>
 <div class="line"><span class="lineno">  143</span>    <span class="comment">// Read characters until we find delimiter or timeout</span></div>
 <div class="line"><span class="lineno">  144</span>    <span class="keywordflow">while</span> (<span class="keyword">true</span>) {</div>
 <div class="line"><span class="lineno">  145</span>        <span class="comment">// Check timeout (only if timeout is set)</span></div>
-<div class="line"><span class="lineno">  146</span>        <span class="keywordflow">if</span> (timeoutMs.<a class="code hl_function" href="../../dd/dd8/classfl_1_1_optional_ad5f53bf55f59f43884a71b107dee14c7.html#ad5f53bf55f59f43884a71b107dee14c7">has_value</a>()) {</div>
-<div class="line"><span class="lineno">  147</span>            <span class="keywordflow">if</span> (<a class="code hl_function" href="../../d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a">fl::millis</a>() - startTime &gt;= timeoutMs.<a class="code hl_function" href="../../dd/dd8/classfl_1_1_optional_a1a7216013ea48bf987511dae97d2915f.html#a1a7216013ea48bf987511dae97d2915f">value</a>()) {</div>
+<div class="line"><span class="lineno">  146</span>        <span class="keywordflow">if</span> (timeoutMs.<a class="code hl_function" href="../../dd/dd8/classfl_1_1_optional_ab632186cb644dfe62d8868f3fded297a.html#ab632186cb644dfe62d8868f3fded297a">has_value</a>()) {</div>
+<div class="line"><span class="lineno">  147</span>            <span class="keywordflow">if</span> (<a class="code hl_function" href="../../d4/d36/namespacefl_a3c0ba5842bfd029c404a38c8df2315f3.html#a3c0ba5842bfd029c404a38c8df2315f3">fl::millis</a>() - startTime &gt;= timeoutMs.<a class="code hl_function" href="../../dd/dd8/classfl_1_1_optional_ab25e3c3e5ff4f46e9688bf3f8dfbccd5.html#ab25e3c3e5ff4f46e9688bf3f8dfbccd5">value</a>()) {</div>
 <div class="line"><span class="lineno">  148</span>                <span class="comment">// Timeout occurred</span></div>
 <div class="line"><span class="lineno">  149</span>                <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
 <div class="line"><span class="lineno">  150</span>            }</div>
@@ -154,7 +154,7 @@ $(function(){initNavTree('d4/d36/namespacefl_ab9a569f3493b0267ba32021be174dd94.h
 <div class="line"><span class="lineno">  160</span>            <span class="comment">// minimum sleep that fl::delay(1) imposes on FreeRTOS</span></div>
 <div class="line"><span class="lineno">  161</span>            <span class="comment">// (vTaskDelay(1) = 1 tick = 1ms). The 1ms delay was too</span></div>
 <div class="line"><span class="lineno">  162</span>            <span class="comment">// slow for USB CDC multi-packet assembly (64-byte packets).</span></div>
-<div class="line"><span class="lineno">  163</span>            <a class="code hl_function" href="../../d4/d36/namespacefl_aea219cb806e210fa698fe53624fbc7ac.html#aea219cb806e210fa698fe53624fbc7ac">fl::delayMicroseconds</a>(1);</div>
+<div class="line"><span class="lineno">  163</span>            <a class="code hl_function" href="../../d4/d36/namespacefl_afd724068da70fdbc6a52b047d0d924e9.html#afd724068da70fdbc6a52b047d0d924e9">fl::delayMicroseconds</a>(1);</div>
 <div class="line"><span class="lineno">  164</span>            <span class="keywordflow">continue</span>;</div>
 <div class="line"><span class="lineno">  165</span>        }</div>
 <div class="line"><span class="lineno">  166</span> </div>
@@ -175,13 +175,13 @@ $(function(){initNavTree('d4/d36/namespacefl_ab9a569f3493b0267ba32021be174dd94.h
 <div class="line"><span class="lineno">  181</span>    <span class="comment">// Successfully read until delimiter</span></div>
 <div class="line"><span class="lineno">  182</span>    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
 <div class="line"><span class="lineno">  183</span>}</div>
-<div class="ttc" id="aclassfl_1_1_optional_a1a7216013ea48bf987511dae97d2915f_html_a1a7216013ea48bf987511dae97d2915f"><div class="ttname"><a href="../../dd/dd8/classfl_1_1_optional_a1a7216013ea48bf987511dae97d2915f.html#a1a7216013ea48bf987511dae97d2915f">fl::Optional::value</a></div><div class="ttdeci">T &amp; value() FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d62/optional_8h_source.html#l00112">optional.h:112</a></div></div>
-<div class="ttc" id="aclassfl_1_1_optional_ad5f53bf55f59f43884a71b107dee14c7_html_ad5f53bf55f59f43884a71b107dee14c7"><div class="ttname"><a href="../../dd/dd8/classfl_1_1_optional_ad5f53bf55f59f43884a71b107dee14c7.html#ad5f53bf55f59f43884a71b107dee14c7">fl::Optional::has_value</a></div><div class="ttdeci">bool has_value() const FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d62/optional_8h_source.html#l00042">optional.h:42</a></div></div>
+<div class="ttc" id="aclassfl_1_1_optional_ab25e3c3e5ff4f46e9688bf3f8dfbccd5_html_ab25e3c3e5ff4f46e9688bf3f8dfbccd5"><div class="ttname"><a href="../../dd/dd8/classfl_1_1_optional_ab25e3c3e5ff4f46e9688bf3f8dfbccd5.html#ab25e3c3e5ff4f46e9688bf3f8dfbccd5">fl::Optional::value</a></div><div class="ttdeci">T &amp; value() FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d62/optional_8h_source.html#l00112">optional.h:112</a></div></div>
+<div class="ttc" id="aclassfl_1_1_optional_ab632186cb644dfe62d8868f3fded297a_html_ab632186cb644dfe62d8868f3fded297a"><div class="ttname"><a href="../../dd/dd8/classfl_1_1_optional_ab632186cb644dfe62d8868f3fded297a.html#ab632186cb644dfe62d8868f3fded297a">fl::Optional::has_value</a></div><div class="ttdeci">bool has_value() const FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d62/optional_8h_source.html#l00042">optional.h:42</a></div></div>
 <div class="ttc" id="anamespacefl_a18e7608a302c3628c24710b27480641b_html_a18e7608a302c3628c24710b27480641b"><div class="ttname"><a href="../../d4/d36/namespacefl_a18e7608a302c3628c24710b27480641b.html#a18e7608a302c3628c24710b27480641b">fl::read</a></div><div class="ttdeci">int read()</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d7a/cstdio_8cpp_8hpp_source.html#l00127">cstdio.cpp.hpp:127</a></div></div>
-<div class="ttc" id="anamespacefl_a335fa6e4af7f0a011997ea0137d49b5a_html_a335fa6e4af7f0a011997ea0137d49b5a"><div class="ttname"><a href="../../d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a">fl::millis</a></div><div class="ttdeci">fl::u32 millis()</div><div class="ttdoc">Universal millisecond timer - returns milliseconds since system startup.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d18/chrono_8cpp_8hpp_source.html#l00064">chrono.cpp.hpp:64</a></div></div>
-<div class="ttc" id="anamespacefl_aea219cb806e210fa698fe53624fbc7ac_html_aea219cb806e210fa698fe53624fbc7ac"><div class="ttname"><a href="../../d4/d36/namespacefl_aea219cb806e210fa698fe53624fbc7ac.html#aea219cb806e210fa698fe53624fbc7ac">fl::delayMicroseconds</a></div><div class="ttdeci">void delayMicroseconds(u32 us)</div><div class="ttdoc">Delay for a given number of microseconds.</div><div class="ttdef"><b>Definition</b> <a href="../../d2/d03/delay_8cpp_8hpp_source.html#l00206">delay.cpp.hpp:206</a></div></div>
+<div class="ttc" id="anamespacefl_a3c0ba5842bfd029c404a38c8df2315f3_html_a3c0ba5842bfd029c404a38c8df2315f3"><div class="ttname"><a href="../../d4/d36/namespacefl_a3c0ba5842bfd029c404a38c8df2315f3.html#a3c0ba5842bfd029c404a38c8df2315f3">fl::millis</a></div><div class="ttdeci">fl::u32 millis()</div><div class="ttdoc">Universal millisecond timer - returns milliseconds since system startup.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d18/chrono_8cpp_8hpp_source.html#l00079">chrono.cpp.hpp:79</a></div></div>
+<div class="ttc" id="anamespacefl_afd724068da70fdbc6a52b047d0d924e9_html_afd724068da70fdbc6a52b047d0d924e9"><div class="ttname"><a href="../../d4/d36/namespacefl_afd724068da70fdbc6a52b047d0d924e9.html#afd724068da70fdbc6a52b047d0d924e9">fl::delayMicroseconds</a></div><div class="ttdeci">void delayMicroseconds(u32 us)</div><div class="ttdoc">Delay for a given number of microseconds.</div><div class="ttdef"><b>Definition</b> <a href="../../d2/d03/delay_8cpp_8hpp_source.html#l00206">delay.cpp.hpp:206</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d2/d03/delay_8cpp_8hpp_source.html#l00206">delayMicroseconds()</a>, <a class="el" href="../../dc/d62/optional_8h_source.html#l00042">fl::Optional&lt; T &gt;::has_value()</a>, <a class="el" href="../../db/d18/chrono_8cpp_8hpp_source.html#l00064">millis()</a>, <a class="el" href="../../dd/d7a/cstdio_8cpp_8hpp_source.html#l00127">read()</a>, and <a class="el" href="../../dc/d62/optional_8h_source.html#l00112">fl::Optional&lt; T &gt;::value()</a>.</p>
+<p class="reference">References <a class="el" href="../../d2/d03/delay_8cpp_8hpp_source.html#l00206">delayMicroseconds()</a>, <a class="el" href="../../dc/d62/optional_8h_source.html#l00042">fl::Optional&lt; T &gt;::has_value()</a>, <a class="el" href="../../db/d18/chrono_8cpp_8hpp_source.html#l00079">millis()</a>, <a class="el" href="../../dd/d7a/cstdio_8cpp_8hpp_source.html#l00127">read()</a>, and <a class="el" href="../../dc/d62/optional_8h_source.html#l00112">fl::Optional&lt; T &gt;::value()</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../dd/d7a/cstdio_8cpp_8hpp_source.html#l00185">readLine()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
@@ -196,7 +196,7 @@ $(function(){initNavTree('d4/d36/namespacefl_ab9a569f3493b0267ba32021be174dd94.h
 <div id="dynsection-1-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-1-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d4/d36/namespacefl_ab9a569f3493b0267ba32021be174dd94_ab9a569f3493b0267ba32021be174dd94_icgraph.svg" width="100%" height="382"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d4/d36/namespacefl_ab9a569f3493b0267ba32021be174dd94_ab9a569f3493b0267ba32021be174dd94_icgraph.svg" width="100%" height="364"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 
 </div>
@@ -208,7 +208,7 @@ $(function(){initNavTree('d4/d36/namespacefl_ab9a569f3493b0267ba32021be174dd94.h
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:04 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:08 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

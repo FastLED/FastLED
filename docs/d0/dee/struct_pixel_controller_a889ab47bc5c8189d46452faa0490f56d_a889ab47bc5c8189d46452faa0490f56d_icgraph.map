@@ -1,0 +1,13 @@
+<map id="PixelController::loadAndScaleChannel" name="PixelController::loadAndScaleChannel">
+<area shape="rect" id="Node000001" title="One source channel, loaded, dithered and scaled – loadAndScale&lt;SLOT&gt; with RO(SLOT) replaced by a runt..." alt="" coords="696,37,875,77"/>
+<area shape="rect" id="Node000002" href="$d0/dee/struct_pixel_controller_af9320cb2184eab8cd1745e520c68ca62.html#af9320cb2184eab8cd1745e520c68ca62" title="loadAndScaleRGBW before its wire reorder: RGB in source order plus W." alt="" coords="469,5,648,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="682,45,648,41,649,35,683,40"/>
+<area shape="rect" id="Node000005" href="$d0/dee/struct_pixel_controller_a36f10f439589e250d8608724be6136dc.html#a36f10f439589e250d8608724be6136dc" title="loadAndScaleRGBWW before its wire reorder. See loadAndScaleRGBWUnordered." alt="" coords="469,69,648,109"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="683,75,649,79,648,74,682,69"/>
+<area shape="rect" id="Node000003" href="$d0/dee/struct_pixel_controller_a5aa57de8397b498ea587b5f0c049ced5.html#a5aa57de8397b498ea587b5f0c049ced5" title=" " alt="" coords="243,5,421,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="455,28,422,28,422,23,455,23"/>
+<area shape="rect" id="Node000004" href="$d4/d28/group___chipsets_gaba9a2f023f2950dbcdf3c2482f765350.html#gaba9a2f023f2950dbcdf3c2482f765350" title="Main rendering function that converts RGB to RGBW and shows pixels." alt="" coords="5,5,195,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="229,28,195,28,195,23,229,23"/>
+<area shape="rect" id="Node000006" href="$d0/dee/struct_pixel_controller_a48468aafc35cdf4f317b7256c0221789.html#a48468aafc35cdf4f317b7256c0221789" title="Load + scale a single pixel to 5&#45;channel RGBWW (issue #2558)." alt="" coords="243,69,421,109"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="455,92,422,92,422,87,455,87"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="fl::SerialWriter::write" name="fl::SerialWriter::write">
+<area shape="rect" id="Node000001" title=" " alt="" coords="232,13,388,38"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a4c5381818ea42c674c16b43466bedef0.html#a4c5381818ea42c674c16b43466bedef0" title="Create a streamed JSON&#45;RPC ResponseSink that writes directly to serial." alt="" coords="5,5,184,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="218,28,184,28,184,23,218,23"/>
+</map>

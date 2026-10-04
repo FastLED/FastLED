@@ -1,0 +1,57 @@
+digraph "fl::EngineEvents::setFrameTaskListener"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::EngineEvents::setFrame\lTaskListener",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::EngineEvents::\l~EngineEvents",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/dca/classfl_1_1_engine_events_a97fdf26628d61f8f6b3c3588230e9980.html#a97fdf26628d61f8f6b3c3588230e9980",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::task::Scheduler\l::~Scheduler",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d2b/classfl_1_1task_1_1_scheduler_a07e49fd4a04cf6be953e625cac5e0078.html#a07e49fd4a04cf6be953e625cac5e0078",tooltip=" "];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::task::Scheduler\l::add_task",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d2b/classfl_1_1task_1_1_scheduler_ad1f60f825514d99a9ee0d06f564be1a7.html#ad1f60f825514d99a9ee0d06f564be1a7",tooltip=" "];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::detail::AsyncLoggerService\lTask::AsyncLoggerServiceTask",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d06/classfl_1_1detail_1_1_async_logger_service_task_a76e22f26c5676ba890e783435db46aa6.html#a76e22f26c5676ba890e783435db46aa6",tooltip=" "];
+  Node5 -> Node6 [id="edge5_Node000005_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::detail::AsyncLoggerService\lTask::~AsyncLoggerServiceTask",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d06/classfl_1_1detail_1_1_async_logger_service_task_a82e728d22c5bcc164c62953f3e8d6e6f.html#a82e728d22c5bcc164c62953f3e8d6e6f",tooltip=" "];
+  Node5 -> Node7 [id="edge6_Node000005_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::detail::AsyncLoggerService\lTask::SingletonShared\< AsyncLogger\lServiceTask \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d06/classfl_1_1detail_1_1_async_logger_service_task_a90e57dbaf9bc274b5302c859efd53af3.html#a90e57dbaf9bc274b5302c859efd53af3",tooltip=" "];
+  Node5 -> Node8 [id="edge7_Node000005_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl::detail::AsyncLoggerService\lTask::instance",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d5/d06/classfl_1_1detail_1_1_async_logger_service_task_acc200cb8837f82379821217fb4a6bc29.html#acc200cb8837f82379821217fb4a6bc29",tooltip=" "];
+  Node4 -> Node25 [id="edge8_Node000004_Node000025",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node25 [id="Node000025",label="fl::task::Handle::then",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/daf/classfl_1_1task_1_1_handle_a0d96031ff5c53ece780698c5f39d9d2b.html#a0d96031ff5c53ece780698c5f39d9d2b",tooltip="Sets the callback invoked when the task runs successfully."];
+  Node25 -> Node5 [id="edge9_Node000025_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node25 -> Node26 [id="edge10_Node000025_Node000026",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node26 [id="Node000026",label="fl::audio::Processor\l::createWithAutoInput",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d3/d6b/classfl_1_1audio_1_1_processor_ac25ffea2d1abf227cecff4e4a7448a5a.html#ac25ffea2d1abf227cecff4e4a7448a5a",tooltip=" "];
+  Node26 -> Node26 [id="edge11_Node000026_Node000026",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node25 -> Node34 [id="edge12_Node000025_Node000034",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node34 [id="Node000034",label="autoresearch::maybeRegister\lStubAutorun",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/dc9/namespaceautoresearch_a1868ca9225c807cbaf571228e6629e34.html#a1868ca9225c807cbaf571228e6629e34",tooltip="On FL_IS_STUB: register a one-shot async task that drives autoresearch."];
+  Node25 -> Node35 [id="edge13_Node000025_Node000035",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node35 [id="Node000035",label="fl::task::Handle::operator=",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/daf/classfl_1_1task_1_1_handle_ae0269eb6707f449059862fd1c7f57739.html#ae0269eb6707f449059862fd1c7f57739",tooltip="Moves a handle without changing the underlying task."];
+  Node25 -> Node36 [id="edge14_Node000025_Node000036",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node36 [id="Node000036",label="setup",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d3a/_async_8h_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d",tooltip=" "];
+  Node25 -> Node37 [id="edge15_Node000025_Node000037",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node37 [id="Node000037",label="autoresearch::setupRpcAsyncTask",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/dc9/namespaceautoresearch_a14b9dde802b1a01ef0d7f9ea258bd7f6.html#a14b9dde802b1a01ef0d7f9ea258bd7f6",tooltip="Setup async task for JSON-RPC processing."];
+  Node1 -> Node38 [id="edge16_Node000001_Node000038",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node38 [id="Node000038",label="fl::task::Scheduler\l::clear_all_tasks",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d2b/classfl_1_1task_1_1_scheduler_a137409a37a1c5cb8cdee568287404389.html#a137409a37a1c5cb8cdee568287404389",tooltip=" "];
+  Node1 -> Node39 [id="edge17_Node000001_Node000039",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node39 [id="Node000039",label="fl::task::Scheduler\l::update_frame_listener\l_registration",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d2b/classfl_1_1task_1_1_scheduler_ab23e409040ebd66d4ccd8fe53c939d90.html#ab23e409040ebd66d4ccd8fe53c939d90",tooltip=" "];
+  Node39 -> Node40 [id="edge18_Node000039_Node000040",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node40 [id="Node000040",label="fl::task::Scheduler\l::Singleton\< Scheduler \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d2b/classfl_1_1task_1_1_scheduler_a0f7928f8c5d46fcd68f1c9cbda6b88d2.html#a0f7928f8c5d46fcd68f1c9cbda6b88d2",tooltip=" "];
+  Node39 -> Node41 [id="edge19_Node000039_Node000041",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node41 [id="Node000041",label="fl::task::Scheduler\l::update",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d2b/classfl_1_1task_1_1_scheduler_a894dae01c9c6738eeae091f8fddeefb3.html#a894dae01c9c6738eeae091f8fddeefb3",tooltip=" "];
+  Node41 -> Node42 [id="edge20_Node000041_Node000042",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node42 [id="Node000042",label="fl::FxEngine::draw",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d60/classfl_1_1_fx_engine_ab4bd2776efb0a1fa06ccae2ea8a16c8b.html#ab4bd2776efb0a1fa06ccae2ea8a16c8b",tooltip="Renders the current effect or transition to the output buffer."];
+  Node41 -> Node43 [id="edge21_Node000041_Node000043",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node43 [id="Node000043",label="fl::task::run",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$db/d5c/namespacefl_1_1task_a2d40b476742263a3fa212e24b722e3ef.html#a2d40b476742263a3fa212e24b722e3ef",tooltip="Run selected task subsystems."];
+  Node39 -> Node103 [id="edge22_Node000039_Node000103",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node103 [id="Node000103",label="fl::task::Scheduler\l::update_tasks_of_type",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d2b/classfl_1_1task_1_1_scheduler_a523f729f91cfca13038bd39ca4838397.html#a523f729f91cfca13038bd39ca4838397",tooltip=" "];
+  Node103 -> Node40 [id="edge23_Node000103_Node000040",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node103 -> Node104 [id="edge24_Node000103_Node000104",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node104 [id="Node000104",label="fl::task::Scheduler\l::update_after_frame_tasks",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d2/d2b/classfl_1_1task_1_1_scheduler_a55942f7d4bf9dc02cf0c4b871b207722.html#a55942f7d4bf9dc02cf0c4b871b207722",tooltip=" "];
+  Node103 -> Node106 [id="edge25_Node000103_Node000106",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node106 [id="Node000106",label="fl::task::Scheduler\l::update_before_frame_tasks",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d2/d2b/classfl_1_1task_1_1_scheduler_a855c5a328c90cebcc0b5877612b6005b.html#a855c5a328c90cebcc0b5877612b6005b",tooltip=" "];
+}

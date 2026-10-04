@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -107,7 +107,7 @@ $(function(){initNavTree('d3/db6/slider_8cpp_8hpp_ade8043ede62066d1f4666a7eece35
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="../../df/d96/s16x16x4_8h_a373eeaf762a6a66a0a6984bd204a72dd.html#a373eeaf762a6a66a0a6984bd204a72dd">FL_DISABLE_WARNING_PUSH</a> FL_DISABLE_WARNING </td>
+          <td class="memname"><a class="el" href="../../d4/d54/compiler__control_8h_a373eeaf762a6a66a0a6984bd204a72dd.html#a373eeaf762a6a66a0a6984bd204a72dd">FL_DISABLE_WARNING_PUSH</a> FL_DISABLE_WARNING </td>
           <td>(</td>
           <td class="paramtype">float-</td>          <td class="paramname"><span class="paramname"><em>equal</em></span></td><td>)</td>
           <td></td>
@@ -118,12 +118,12 @@ $(function(){initNavTree('d3/db6/slider_8cpp_8hpp_ade8043ede62066d1f4666a7eece35
 <p class="definition">Definition at line <a class="el" href="../../d3/db6/slider_8cpp_8hpp_source.html#l00006">6</a> of file <a class="el" href="../../d3/db6/slider_8cpp_8hpp_source.html">slider.cpp.hpp</a>.</p>
 <div class="fragment"><div class="line"><span class="lineno">    8</span>             {</div>
 <div class="line"><span class="lineno">    9</span> </div>
-<div class="line"><span class="lineno">   10</span>UISlider::UISlider(<span class="keyword">const</span> <span class="keywordtype">char</span> *name, <span class="keywordtype">float</span> value, <span class="keywordtype">float</span> <a class="code hl_function" href="../../db/d97/_fast_l_e_d_8h_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb">min</a>, <span class="keywordtype">float</span> <a class="code hl_function" href="../../db/d97/_fast_l_e_d_8h_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909">max</a>, <span class="keywordtype">float</span> step) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></div>
-<div class="line"><span class="lineno">   11</span>    : mImpl(name, value, <a class="code hl_function" href="../../db/d97/_fast_l_e_d_8h_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb">min</a>, <a class="code hl_function" href="../../db/d97/_fast_l_e_d_8h_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909">max</a>, step), mListener(<span class="keyword">this</span>) {</div>
+<div class="line"><span class="lineno">   10</span>UISlider::UISlider(<span class="keyword">const</span> <span class="keywordtype">char</span> *name, <span class="keywordtype">float</span> value, <span class="keywordtype">float</span> <a class="code hl_function" href="../../d6/d64/fastled_8h_a2fdabb91a1f100dec8da21e4306aba05.html#a2fdabb91a1f100dec8da21e4306aba05">min</a>, <span class="keywordtype">float</span> <a class="code hl_function" href="../../d6/d64/fastled_8h_a07c69292ef50aa1083046faff1c52ead.html#a07c69292ef50aa1083046faff1c52ead">max</a>, <span class="keywordtype">float</span> step) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_abae81a69398c715960350e0a571b754a.html#abae81a69398c715960350e0a571b754a">FL_NO_EXCEPT</a></div>
+<div class="line"><span class="lineno">   11</span>    : mImpl(name, value, <a class="code hl_function" href="../../d6/d64/fastled_8h_a2fdabb91a1f100dec8da21e4306aba05.html#a2fdabb91a1f100dec8da21e4306aba05">min</a>, <a class="code hl_function" href="../../d6/d64/fastled_8h_a07c69292ef50aa1083046faff1c52ead.html#a07c69292ef50aa1083046faff1c52ead">max</a>, step), mListener(<span class="keyword">this</span>) {</div>
 <div class="line"><span class="lineno">   12</span>    mListener.addToEngineEventsOnce();</div>
 <div class="line"><span class="lineno">   13</span>}</div>
 <div class="line"><span class="lineno">   14</span> </div>
-<div class="line"><span class="lineno">   15</span><span class="keywordtype">void</span> UISlider::setValue(<span class="keywordtype">float</span> value) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">   15</span><span class="keywordtype">void</span> UISlider::setValue(<span class="keywordtype">float</span> value) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_abae81a69398c715960350e0a571b754a.html#abae81a69398c715960350e0a571b754a">FL_NO_EXCEPT</a> {</div>
 <div class="line"><span class="lineno">   16</span>    <span class="keywordtype">float</span> oldValue = mImpl.value();</div>
 <div class="line"><span class="lineno">   17</span>    mImpl.setValue(value);</div>
 <div class="line"><span class="lineno">   18</span>    <span class="comment">// Read back post-clamp value; only fire callbacks if the observable value</span></div>
@@ -138,7 +138,7 @@ $(function(){initNavTree('d3/db6/slider_8cpp_8hpp_ade8043ede62066d1f4666a7eece35
 <div class="line"><span class="lineno">   27</span>    }</div>
 <div class="line"><span class="lineno">   28</span>}</div>
 <div class="line"><span class="lineno">   29</span> </div>
-<div class="line"><span class="lineno">   30</span><span class="keywordtype">void</span> UISlider::Listener::onBeginFrame() <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">   30</span><span class="keywordtype">void</span> UISlider::Listener::onBeginFrame() <a class="code hl_define" href="../../df/d96/s16x16x4_8h_abae81a69398c715960350e0a571b754a.html#abae81a69398c715960350e0a571b754a">FL_NO_EXCEPT</a> {</div>
 <div class="line"><span class="lineno">   31</span>    UISlider &amp;owner = *mOwner;</div>
 <div class="line"><span class="lineno">   32</span>    <span class="keywordflow">if</span> (!owner.mLastFrameValueValid) {</div>
 <div class="line"><span class="lineno">   33</span>        owner.mLastFrameValue = owner.value();</div>
@@ -153,11 +153,11 @@ $(function(){initNavTree('d3/db6/slider_8cpp_8hpp_ade8043ede62066d1f4666a7eece35
 <div class="line"><span class="lineno">   42</span>}</div>
 <div class="line"><span class="lineno">   43</span> </div>
 <div class="line"><span class="lineno">   44</span>} <span class="comment">// namespace fl</span></div>
-<div class="ttc" id="a_fast_l_e_d_8h_a0356f07fb7a8f25752385fd8208b47fb_html_a0356f07fb7a8f25752385fd8208b47fb"><div class="ttname"><a href="../../db/d97/_fast_l_e_d_8h_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb">min</a></div><div class="ttdeci">FL_DISABLE_WARNING_PUSH U constexpr common_type_t&lt; T, U &gt; min(T a, U b) FL_NOEXCEPT</div><div class="ttdoc">Memory functions are available in fl:: namespace via fl/stl/cstring.h Using declarations cannot work ...</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00071">math.h:71</a></div></div>
-<div class="ttc" id="a_fast_l_e_d_8h_a19ba0dae8249e0cf164136846f85e909_html_a19ba0dae8249e0cf164136846f85e909"><div class="ttname"><a href="../../db/d97/_fast_l_e_d_8h_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909">max</a></div><div class="ttdeci">constexpr common_type_t&lt; T, U &gt; max(T a, U b) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00075">math.h:75</a></div></div>
-<div class="ttc" id="as16x16x4_8h_af54aac016b86a178940aca20946a8002_html_af54aac016b86a178940aca20946a8002"><div class="ttname"><a href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></div><div class="ttdeci">#define FL_NOEXCEPT</div></div>
+<div class="ttc" id="afastled_8h_a07c69292ef50aa1083046faff1c52ead_html_a07c69292ef50aa1083046faff1c52ead"><div class="ttname"><a href="../../d6/d64/fastled_8h_a07c69292ef50aa1083046faff1c52ead.html#a07c69292ef50aa1083046faff1c52ead">max</a></div><div class="ttdeci">constexpr common_type_t&lt; T, U &gt; max(T a, U b) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00075">math.h:75</a></div></div>
+<div class="ttc" id="afastled_8h_a2fdabb91a1f100dec8da21e4306aba05_html_a2fdabb91a1f100dec8da21e4306aba05"><div class="ttname"><a href="../../d6/d64/fastled_8h_a2fdabb91a1f100dec8da21e4306aba05.html#a2fdabb91a1f100dec8da21e4306aba05">min</a></div><div class="ttdeci">FL_DISABLE_WARNING_PUSH U constexpr common_type_t&lt; T, U &gt; min(T a, U b) FL_NO_EXCEPT</div><div class="ttdoc">Memory functions are available in fl:: namespace via fl/stl/cstring.h Using declarations cannot work ...</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00071">math.h:71</a></div></div>
+<div class="ttc" id="as16x16x4_8h_abae81a69398c715960350e0a571b754a_html_abae81a69398c715960350e0a571b754a"><div class="ttname"><a href="../../df/d96/s16x16x4_8h_abae81a69398c715960350e0a571b754a.html#abae81a69398c715960350e0a571b754a">FL_NO_EXCEPT</a></div><div class="ttdeci">#define FL_NO_EXCEPT</div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a>, <a class="el" href="../../df/db1/math_8h_source.html#l00075">max()</a>, <a class="el" href="../../df/db1/math_8h_source.html#l00071">min()</a>, <a class="el" href="../../da/df8/structfl_1_1_u_i_slider_1_1_listener_aabe5c75c21a2517d0f4c2c3475cf425a.html#aabe5c75c21a2517d0f4c2c3475cf425a">fl::UISlider::Listener::onBeginFrame()</a>, <a class="el" href="../../dd/d47/classfl_1_1_u_i_slider_ac3a27178025ccd73f55d54d1d8ebf592.html#ac3a27178025ccd73f55d54d1d8ebf592">fl::UISlider::setValue()</a>, <a class="el" href="../../de/d62/fixed__point_8h_source.html#l00547">fl::step()</a>, and <a class="el" href="../../dd/d37/static__constexpr__defs_8cpp_8hpp_source.html#l00082">fl::type_rank&lt; T &gt;::value</a>.</p>
+<p class="reference">References <a class="el" href="../../df/d96/s16x16x4_8h_abae81a69398c715960350e0a571b754a.html#abae81a69398c715960350e0a571b754a">FL_NO_EXCEPT</a>, <a class="el" href="../../df/db1/math_8h_source.html#l00075">max()</a>, <a class="el" href="../../df/db1/math_8h_source.html#l00071">min()</a>, <a class="el" href="../../da/df8/structfl_1_1_u_i_slider_1_1_listener_aa99403578982fdc5686b957f699f3103.html#aa99403578982fdc5686b957f699f3103">fl::UISlider::Listener::onBeginFrame()</a>, <a class="el" href="../../dd/d47/classfl_1_1_u_i_slider_a65bdc03ed6ca757fc00128d7929bbdc5.html#a65bdc03ed6ca757fc00128d7929bbdc5">fl::UISlider::setValue()</a>, <a class="el" href="../../de/d62/fixed__point_8h_source.html#l00547">fl::step()</a>, and <a class="el" href="../../dd/d37/static__constexpr__defs_8cpp_8hpp_source.html#l00082">fl::type_rank&lt; T &gt;::value</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -175,7 +175,7 @@ $(function(){initNavTree('d3/db6/slider_8cpp_8hpp_ade8043ede62066d1f4666a7eece35
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_a07f19b7f86e604d2aac7ea6a5a83e59.html">ui</a></li><li class="navelem"><a class="el" href="../../d3/db6/slider_8cpp_8hpp.html">slider.cpp.hpp</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:02 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:05 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

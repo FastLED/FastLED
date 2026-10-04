@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -127,22 +127,22 @@ $(function(){initNavTree('d7/d6b/native__server_8h_source.html','../../'); initR
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>    u32 clientId;  <span class="comment">// Unique identifier for this client</span></div>
 <div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>    <span class="comment">// Default constructor (required for fl::vector operations)</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>    ServerClientConnection() <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>    ServerClientConnection() <a class="code hl_define" href="../../df/d96/s16x16x4_8h_abae81a69398c715960350e0a571b754a.html#abae81a69398c715960350e0a571b754a">FL_NO_EXCEPT</a></div>
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>        : connection(ConnectionConfig())</div>
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>        , clientId(0)</div>
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>    {</div>
 <div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>    }</div>
 <div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span> </div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>    ServerClientConnection(ServerClientConnection&amp;&amp; other) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>        : socket(<a class="code hl_function" href="../../d4/d36/namespacefl_a03eeb690d9582a74cb2e4a1f5a806e80.html#a03eeb690d9582a74cb2e4a1f5a806e80">fl::move</a>(other.socket))</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>    ServerClientConnection(ServerClientConnection&amp;&amp; other) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_abae81a69398c715960350e0a571b754a.html#abae81a69398c715960350e0a571b754a">FL_NO_EXCEPT</a></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>        : socket(<a class="code hl_function" href="../../d4/d36/namespacefl_a0c8a67e528dcd96ee58216754a07a733.html#a0c8a67e528dcd96ee58216754a07a733">fl::move</a>(other.socket))</div>
 <div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>        , connection(other.connection)</div>
 <div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>        , clientId(other.clientId)</div>
 <div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    {</div>
 <div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    }</div>
 <div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span> </div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    ServerClientConnection&amp; operator=(ServerClientConnection&amp;&amp; other) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    ServerClientConnection&amp; operator=(ServerClientConnection&amp;&amp; other) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_abae81a69398c715960350e0a571b754a.html#abae81a69398c715960350e0a571b754a">FL_NO_EXCEPT</a> {</div>
 <div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>        <span class="keywordflow">if</span> (<span class="keyword">this</span> != &amp;other) {</div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>            socket = <a class="code hl_function" href="../../d4/d36/namespacefl_a03eeb690d9582a74cb2e4a1f5a806e80.html#a03eeb690d9582a74cb2e4a1f5a806e80">fl::move</a>(other.socket);</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>            socket = <a class="code hl_function" href="../../d4/d36/namespacefl_a0c8a67e528dcd96ee58216754a07a733.html#a0c8a67e528dcd96ee58216754a07a733">fl::move</a>(other.socket);</div>
 <div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>            connection = other.connection;</div>
 <div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>            clientId = other.clientId;</div>
 <div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>        }</div>
@@ -150,8 +150,8 @@ $(function(){initNavTree('d7/d6b/native__server_8h_source.html','../../'); initR
 <div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    }</div>
 <div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span> </div>
 <div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>    <span class="comment">// Not copyable (socket is not copyable)</span></div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    ServerClientConnection(<span class="keyword">const</span> ServerClientConnection&amp;) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> = <span class="keyword">delete</span>;</div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>    ServerClientConnection&amp; operator=(<span class="keyword">const</span> ServerClientConnection&amp;) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> = <span class="keyword">delete</span>;</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    ServerClientConnection(<span class="keyword">const</span> ServerClientConnection&amp;) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_abae81a69398c715960350e0a571b754a.html#abae81a69398c715960350e0a571b754a">FL_NO_EXCEPT</a> = <span class="keyword">delete</span>;</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>    ServerClientConnection&amp; operator=(<span class="keyword">const</span> ServerClientConnection&amp;) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_abae81a69398c715960350e0a571b754a.html#abae81a69398c715960350e0a571b754a">FL_NO_EXCEPT</a> = <span class="keyword">delete</span>;</div>
 <div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>};</div>
 <div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> </div>
 <div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span><span class="comment">// Native HTTP server using POSIX sockets</span></div>
@@ -160,11 +160,11 @@ $(function(){initNavTree('d7/d6b/native__server_8h_source.html','../../'); initR
 <div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span><span class="keyword">public</span>:</div>
 <div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    <span class="comment">// Constructor</span></div>
 <div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    NativeHttpServer(u16 port, <span class="keyword">const</span> ConnectionConfig&amp; config = ConnectionConfig());</div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    ~NativeHttpServer() <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a>;</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    ~NativeHttpServer() <a class="code hl_define" href="../../df/d96/s16x16x4_8h_abae81a69398c715960350e0a571b754a.html#abae81a69398c715960350e0a571b754a">FL_NO_EXCEPT</a>;</div>
 <div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span> </div>
 <div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>    <span class="comment">// Disable copy (socket ownership)</span></div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    NativeHttpServer(const NativeHttpServer&amp;) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> = delete;</div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    NativeHttpServer&amp; operator=(const NativeHttpServer&amp;) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> = delete;</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    NativeHttpServer(const NativeHttpServer&amp;) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_abae81a69398c715960350e0a571b754a.html#abae81a69398c715960350e0a571b754a">FL_NO_EXCEPT</a> = delete;</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    NativeHttpServer&amp; operator=(const NativeHttpServer&amp;) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_abae81a69398c715960350e0a571b754a.html#abae81a69398c715960350e0a571b754a">FL_NO_EXCEPT</a> = delete;</div>
 <div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span> </div>
 <div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    <span class="comment">// Server lifecycle</span></div>
 <div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    <span class="keywordtype">bool</span> start();             <span class="comment">// Start listening for connections</span></div>
@@ -220,10 +220,10 @@ $(function(){initNavTree('d7/d6b/native__server_8h_source.html','../../'); initR
 <div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span><span class="preprocessor">#endif </span><span class="comment">// FASTLED_HAS_NETWORKING</span></div>
 <div class="ttc" id="aconnection_8h_html"><div class="ttname"><a href="../../d4/d67/connection_8h.html">connection.h</a></div></div>
 <div class="ttc" id="aerror__code_8h_html"><div class="ttname"><a href="../../db/daa/error__code_8h.html">error_code.h</a></div></div>
-<div class="ttc" id="anamespacefl_a03eeb690d9582a74cb2e4a1f5a806e80_html_a03eeb690d9582a74cb2e4a1f5a806e80"><div class="ttname"><a href="../../d4/d36/namespacefl_a03eeb690d9582a74cb2e4a1f5a806e80.html#a03eeb690d9582a74cb2e4a1f5a806e80">fl::move</a></div><div class="ttdeci">constexpr remove_reference&lt; T &gt;::type &amp;&amp; move(T &amp;&amp;t) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d83/move_8h_source.html#l00028">move.h:28</a></div></div>
+<div class="ttc" id="anamespacefl_a0c8a67e528dcd96ee58216754a07a733_html_a0c8a67e528dcd96ee58216754a07a733"><div class="ttname"><a href="../../d4/d36/namespacefl_a0c8a67e528dcd96ee58216754a07a733.html#a0c8a67e528dcd96ee58216754a07a733">fl::move</a></div><div class="ttdeci">constexpr remove_reference&lt; T &gt;::type &amp;&amp; move(T &amp;&amp;t) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d83/move_8h_source.html#l00028">move.h:28</a></div></div>
 <div class="ttc" id="anamespacefl_html"><div class="ttname"><a href="../../d4/d36/namespacefl.html">fl</a></div><div class="ttdoc">Base definition for an LED controller.</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d4b/crgb_8hpp_source.html#l00179">crgb.hpp:179</a></div></div>
 <div class="ttc" id="anoexcept_8h_html"><div class="ttname"><a href="../../db/d01/noexcept_8h.html">noexcept.h</a></div></div>
-<div class="ttc" id="as16x16x4_8h_af54aac016b86a178940aca20946a8002_html_af54aac016b86a178940aca20946a8002"><div class="ttname"><a href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></div><div class="ttdeci">#define FL_NOEXCEPT</div></div>
+<div class="ttc" id="as16x16x4_8h_abae81a69398c715960350e0a571b754a_html_abae81a69398c715960350e0a571b754a"><div class="ttname"><a href="../../df/d96/s16x16x4_8h_abae81a69398c715960350e0a571b754a.html#abae81a69398c715960350e0a571b754a">FL_NO_EXCEPT</a></div><div class="ttdeci">#define FL_NO_EXCEPT</div></div>
 <div class="ttc" id="aspan_8h_html"><div class="ttname"><a href="../../d4/d7a/span_8h.html">span.h</a></div></div>
 <div class="ttc" id="astdint_8h_html"><div class="ttname"><a href="../../df/dd8/stdint_8h.html">stdint.h</a></div></div>
 <div class="ttc" id="astring_8h_html"><div class="ttname"><a href="../../da/d66/string_8h.html">string.h</a></div></div>
@@ -236,7 +236,7 @@ $(function(){initNavTree('d7/d6b/native__server_8h_source.html','../../'); initR
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_0dd6897a8ae40540acd9d694849e950e.html">stl</a></li><li class="navelem"><a class="el" href="../../dir_cdaac7ba5e9caead7c80e2b832ad4a37.html">asio</a></li><li class="navelem"><a class="el" href="../../dir_0f2bd2d50b17e2e1f42941f6b66850c3.html">http</a></li><li class="navelem"><a class="el" href="../../d7/d6b/native__server_8h.html">native_server.h</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:06:59 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:01 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -1,0 +1,5 @@
+<map id="PixelController::ditherActive" name="PixelController::ditherActive">
+<area shape="rect" id="Node000001" title="Is temporal dithering on for this frame? (any channel has a range)" alt="" coords="5,5,209,31"/>
+<area shape="rect" id="Node000002" href="$dd/d6c/structfl_1_1_binary_dither_a03a8abc13303993adc9f7e7e71e753ea.html#a03a8abc13303993adc9f7e7e71e753ea" title=" " alt="" coords="257,5,425,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="209,15,244,15,244,21,209,21"/>
+</map>

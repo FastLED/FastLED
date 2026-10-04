@@ -1,0 +1,6 @@
+<map id="fl::anonymous_namespace{uart_wave_encoder::cpp::hpp}::buildUartByte" name="fl::anonymous_namespace{uart_wave_encoder::cpp::hpp}::buildUartByte">
+<area shape="rect" id="Node000001" title="Build a UART data byte from two LED bit pulse counts." alt="" coords="5,29,201,84"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="70,29,70,19,76,10,87,5,103,3,122,6,133,13,130,18,120,11,103,8,89,10,79,14,75,21,75,29"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a715b655d8ee6017d3c827c5de110d59e.html#a715b655d8ee6017d3c827c5de110d59e" title=" " alt="" coords="249,44,296,69"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="202,54,236,54,236,59,202,59"/>
+</map>

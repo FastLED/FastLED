@@ -22,7 +22,7 @@
 <!-- Node1 -->
 <g id="Node000001" class="node">
 <title>Node1</title>
-<g id="a_Node000001"><a xlink:title="Demonstrates how to use multiple LED strips, each with their own data.">
+<g id="a_Node000001"><a xlink:title="Demonstrates how to use multiple LED strips of different lengths.">
 <polygon fill="#999999" stroke="#666666" points="153,-96 0,-96 0,-55 153,-55 153,-96"/>
 <text text-anchor="start" x="8" y="-84" font-family="Helvetica,sans-Serif" font-size="10.00">/home/runner/work/FastLED</text>
 <text text-anchor="start" x="8" y="-73" font-family="Helvetica,sans-Serif" font-size="10.00">/FastLED/examples/Multiple</text>

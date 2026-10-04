@@ -1,0 +1,18 @@
+digraph "fl::third_party::nsgif__parse_extension_application"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::third_party::nsgif\l__parse_extension_application",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Parse the application extension."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::third_party::nsgif\l__parse_frame_extensions",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d86/namespacefl_1_1third__party_a5410e7f71a88c6d1afbead077792f498.html#a5410e7f71a88c6d1afbead077792f498",tooltip="Parse the frame's extensions."];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::third_party::nsgif\l__process_frame",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d86/namespacefl_1_1third__party_a5544ea660bb409ce782aec2a3629f1fe.html#a5544ea660bb409ce782aec2a3629f1fe",tooltip="Attempts to initialise the next frame."];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::third_party::nsgif\l_data_scan",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d1/d86/namespacefl_1_1third__party_ac0c0b97e37911e82ef3974b049784c33.html#ac0c0b97e37911e82ef3974b049784c33",tooltip="Scan the source image data."];
+  Node3 -> Node8 [id="edge4_Node000003_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl::third_party::nsgif\l_frame_decode",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d1/d86/namespacefl_1_1third__party_a9bb55311de3b833317f3e05229a2d7e2.html#a9bb55311de3b833317f3e05229a2d7e2",tooltip="Decodes a GIF frame."];
+}

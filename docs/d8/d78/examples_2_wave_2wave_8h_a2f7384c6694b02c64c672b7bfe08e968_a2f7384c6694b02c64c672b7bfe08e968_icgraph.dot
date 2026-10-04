@@ -8,7 +8,7 @@ digraph "waveSim"
   rankdir="RL";
   Node1 [id="Node000001",label="waveSim",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::WaveCrgbGradientMap\l::WaveCrgbGradientMap",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/da7/classfl_1_1_wave_crgb_gradient_map_a9b166756923fe372df8089a1a0ceb781.html#a9b166756923fe372df8089a1a0ceb781",tooltip="Default constructor with no initial gradient."];
+  Node2 [id="Node000002",label="fl::WaveCrgbGradientMap\l::WaveCrgbGradientMap",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/da7/classfl_1_1_wave_crgb_gradient_map_aaab2ea8a875b305518c064d5e2d13476.html#aaab2ea8a875b305518c064d5e2d13476",tooltip="Default constructor with no initial gradient."];
   Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node3 [id="Node000003",label="loop",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d94/_wave2d_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f",tooltip=" "];
   Node1 -> Node4 [id="edge3_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];

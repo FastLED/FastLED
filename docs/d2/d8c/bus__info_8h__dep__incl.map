@@ -1,0 +1,21 @@
+<map id="fl/channels/bus_info.h" name="fl/channels/bus_info.h">
+<area shape="rect" id="Node000001" title="Portable bus/device introspection." alt="" coords="215,5,378,31"/>
+<area shape="rect" id="Node000002" href="$d6/d64/fastled_8h.html" title="central include file for FastLED, defines the CFastLED class/object" alt="" coords="90,86,175,111"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="262,39,158,88,155,84,259,34"/>
+<area shape="rect" id="Node000006" href="$df/df9/bus__info_8json_8h.html" title="JSON adapter for bus_info.h." alt="" coords="199,86,394,111"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="299,44,299,86,294,86,294,44"/>
+<area shape="rect" id="Node000007" href="$d7/d95/bus__info__impl_8cpp_8hpp.html" title="Unity&#45;build anchor for bus introspection." alt="" coords="419,79,569,119"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="339,33,448,76,446,81,337,38"/>
+<area shape="rect" id="Node000003" href="$d7/de5/_fast_l_e_d_8cpp_8hpp.html" title=" " alt="" coords="69,167,197,192"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="135,125,135,166,130,166,130,125"/>
+<area shape="rect" id="Node000004" href="$d7/dd5/__build_8cpp_8hpp.html" title=" " alt="" coords="5,240,121,265"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="114,204,76,242,73,238,110,200"/>
+<area shape="rect" id="Node000005" href="$dd/de2/src_8cpp.html" title="Unity build: flat includes from src/ root directory." alt="" coords="145,240,261,265"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="156,200,194,238,190,242,152,204"/>
+<area shape="rect" id="Node000008" href="$d1/d97/fl_2channels_2__build_8cpp_8hpp.html" title=" " alt="" coords="399,167,589,192"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="497,132,497,166,491,166,491,132"/>
+<area shape="rect" id="Node000009" href="$d1/deb/fl_2__build_8cpp_8hpp.html" title=" " alt="" coords="358,240,486,265"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="474,204,436,242,432,238,470,200"/>
+<area shape="rect" id="Node000010" href="$d7/d44/fl_8channels_09_8cpp.html" title="Unity build: recursive includes from src/fl/channels/." alt="" coords="510,240,689,265"/>
+<area shape="poly" id="edge9_Node000008_Node000010" title=" " alt="" coords="524,198,584,238,581,242,521,202"/>
+</map>

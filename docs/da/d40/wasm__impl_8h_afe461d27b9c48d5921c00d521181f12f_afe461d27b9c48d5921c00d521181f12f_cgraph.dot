@@ -18,6 +18,6 @@ digraph "loop"
   Node1 -> Node6 [id="edge5_Node000001_Node000006",color="steelblue1",style="solid",tooltip=" "];
   Node6 [id="Node000006",label="isOff",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d40/wasm__impl_8h_aeb51640c99faa5cf4dff56918d0070c3.html#aeb51640c99faa5cf4dff56918d0070c3",tooltip=" "];
   Node1 -> Node7 [id="edge6_Node000001_Node000007",color="steelblue1",style="solid",tooltip=" "];
-  Node7 [id="Node000007",label="fl::millis",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a",tooltip="Universal millisecond timer - returns milliseconds since system startup."];
+  Node7 [id="Node000007",label="fl::millis",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a3c0ba5842bfd029c404a38c8df2315f3.html#a3c0ba5842bfd029c404a38c8df2315f3",tooltip="Universal millisecond timer - returns milliseconds since system startup."];
   Node7 -> Node7 [id="edge7_Node000007_Node000007",color="steelblue1",style="solid",tooltip=" "];
 }

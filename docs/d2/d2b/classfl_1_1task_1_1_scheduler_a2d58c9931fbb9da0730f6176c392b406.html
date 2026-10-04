@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -132,24 +132,36 @@ $(function(){initNavTree('d2/d2b/classfl_1_1task_1_1_scheduler_a2d58c9931fbb9da0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/ded/scheduler_8cpp_8hpp_source.html#l00120">120</a> of file <a class="el" href="../../dd/ded/scheduler_8cpp_8hpp_source.html">scheduler.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  120</span>                                                                                          {</div>
-<div class="line"><span class="lineno">  121</span>        <span class="keywordflow">if</span> (!trace_label.<a class="code hl_function" href="../../de/d66/classfl_1_1basic__string_a409024020d4cdb01125a9b7fba3404b5.html#a409024020d4cdb01125a9b7fba3404b5">empty</a>()) {</div>
-<div class="line"><span class="lineno">  122</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(fl::string(<span class="stringliteral">&quot;[fl::task] Warning: no catch_() callback set for Task#&quot;</span>) &lt;&lt; task_id &lt;&lt; <span class="stringliteral">&quot; launched at &quot;</span> &lt;&lt; trace_label &lt;&lt; <span class="stringliteral">&quot;. Error: &quot;</span> &lt;&lt; error.message);</div>
-<div class="line"><span class="lineno">  123</span>    } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  124</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(fl::string(<span class="stringliteral">&quot;[fl/task] Warning: no catch_() callback set for Task#&quot;</span>) &lt;&lt; task_id &lt;&lt; <span class="stringliteral">&quot;. Error: &quot;</span> &lt;&lt; error.message);</div>
-<div class="line"><span class="lineno">  125</span>    }</div>
-<div class="line"><span class="lineno">  126</span>}</div>
-<div class="ttc" id="aclassfl_1_1basic__string_a409024020d4cdb01125a9b7fba3404b5_html_a409024020d4cdb01125a9b7fba3404b5"><div class="ttname"><a href="../../de/d66/classfl_1_1basic__string_a409024020d4cdb01125a9b7fba3404b5.html#a409024020d4cdb01125a9b7fba3404b5">fl::basic_string::empty</a></div><div class="ttdeci">bool empty() const FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/d4b/basic__string_8h_source.html#l00155">basic_string.h:155</a></div></div>
-<div class="ttc" id="alog_8h_a868b194fdb2234182e76042d9fde3062_html_a868b194fdb2234182e76042d9fde3062"><div class="ttname"><a href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a></div><div class="ttdeci">#define FL_WARN(X)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00276">log.h:276</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../dd/ded/scheduler_8cpp_8hpp_source.html#l00199">199</a> of file <a class="el" href="../../dd/ded/scheduler_8cpp_8hpp_source.html">scheduler.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  199</span>                                                                                          {</div>
+<div class="line"><span class="lineno">  200</span>    <a class="code hl_define" href="../../d4/d54/compiler__control_8h_a3600073df3d019f0b6288e9d59b3e883.html#a3600073df3d019f0b6288e9d59b3e883">FL_UNUSED</a>(task_id);  <span class="comment">// only consumed by FL_WARN, a no-op on small platforms</span></div>
+<div class="line"><span class="lineno">  201</span>    <a class="code hl_define" href="../../d4/d54/compiler__control_8h_a3600073df3d019f0b6288e9d59b3e883.html#a3600073df3d019f0b6288e9d59b3e883">FL_UNUSED</a>(error);</div>
+<div class="line"><span class="lineno">  202</span>    <span class="keywordflow">if</span> (!trace_label.<a class="code hl_function" href="../../de/d66/classfl_1_1basic__string_ac3effe716fde4667b05a52d78d74bbfb.html#ac3effe716fde4667b05a52d78d74bbfb">empty</a>()) {</div>
+<div class="line"><span class="lineno">  203</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;%s%s launched at %s. Error: %s&quot;</span>, fl::string(<span class="stringliteral">&quot;[fl::task] Warning: no catch_() callback set for Task#&quot;</span>), task_id, trace_label, error.message);</div>
+<div class="line"><span class="lineno">  204</span>    } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  205</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;%s%s. Error: %s&quot;</span>, fl::string(<span class="stringliteral">&quot;[fl/task] Warning: no catch_() callback set for Task#&quot;</span>), task_id, error.message);</div>
+<div class="line"><span class="lineno">  206</span>    }</div>
+<div class="line"><span class="lineno">  207</span>}</div>
+<div class="ttc" id="aclassfl_1_1basic__string_ac3effe716fde4667b05a52d78d74bbfb_html_ac3effe716fde4667b05a52d78d74bbfb"><div class="ttname"><a href="../../de/d66/classfl_1_1basic__string_ac3effe716fde4667b05a52d78d74bbfb.html#ac3effe716fde4667b05a52d78d74bbfb">fl::basic_string::empty</a></div><div class="ttdeci">bool empty() const FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/d4b/basic__string_8h_source.html#l00155">basic_string.h:155</a></div></div>
+<div class="ttc" id="acompiler__control_8h_a3600073df3d019f0b6288e9d59b3e883_html_a3600073df3d019f0b6288e9d59b3e883"><div class="ttname"><a href="../../d4/d54/compiler__control_8h_a3600073df3d019f0b6288e9d59b3e883.html#a3600073df3d019f0b6288e9d59b3e883">FL_UNUSED</a></div><div class="ttdeci">#define FL_UNUSED(x)</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d54/compiler__control_8h_source.html#l00905">compiler_control.h:905</a></div></div>
+<div class="ttc" id="alog_8h_a4804912fba6eed63e1afd84b8768aced_html_a4804912fba6eed63e1afd84b8768aced"><div class="ttname"><a href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a></div><div class="ttdeci">#define FL_WARN(...)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00440">log.h:440</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../df/d4b/basic__string_8h_source.html#l00155">fl::basic_string::empty()</a>, <a class="el" href="../../d7/d7f/log_8h_source.html#l00276">FL_WARN</a>, and <a class="el" href="../../d6/d17/promise_8h_source.html#l00040">fl::task::Error::message</a>.</p>
+<p class="reference">References <a class="el" href="../../df/d4b/basic__string_8h_source.html#l00155">fl::basic_string::empty()</a>, <a class="el" href="../../d4/d54/compiler__control_8h_source.html#l00905">FL_UNUSED</a>, <a class="el" href="../../d7/d7f/log_8h_source.html#l00440">FL_WARN</a>, and <a class="el" href="../../d6/d17/promise_8h_source.html#l00040">fl::task::Error::message</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d2/dd8/scheduler_8h_source.html#l00031">fl::Singleton&lt; Scheduler &gt;</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
 <div class="center"><iframe scrolling="no" frameborder="0" src="../../d2/d2b/classfl_1_1task_1_1_scheduler_a2d58c9931fbb9da0730f6176c392b406_a2d58c9931fbb9da0730f6176c392b406_cgraph.svg" width="364" height="51"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+<div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
+<div id="dynsection-1-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-1-content" class="dyncontent" style="display:none;">
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d2/d2b/classfl_1_1task_1_1_scheduler_a2d58c9931fbb9da0730f6176c392b406_a2d58c9931fbb9da0730f6176c392b406_icgraph.svg" width="383" height="51"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 
 </div>
@@ -161,7 +173,7 @@ $(function(){initNavTree('d2/d2b/classfl_1_1task_1_1_scheduler_a2d58c9931fbb9da0
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../db/d5c/namespacefl_1_1task.html">task</a></li><li class="navelem"><a class="el" href="../../d2/d2b/classfl_1_1task_1_1_scheduler.html">Scheduler</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:10 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:12 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

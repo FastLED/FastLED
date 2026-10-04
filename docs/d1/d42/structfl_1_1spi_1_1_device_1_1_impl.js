@@ -8,7 +8,7 @@ var structfl_1_1spi_1_1_device_1_1_impl =
       [ "tx_buffer", "d1/d42/structfl_1_1spi_1_1_device_1_1_impl.html#ab4b1ba743d4201d6ac5fc99402ee475f", null ]
     ] ],
     [ "Impl", "d1/d42/structfl_1_1spi_1_1_device_1_1_impl_ac985511624c2ef2f3cc3d748019a4b28.html#ac985511624c2ef2f3cc3d748019a4b28", null ],
-    [ "~Impl", "d1/d42/structfl_1_1spi_1_1_device_1_1_impl_ad6bd471086d6a46ce30763dd64fe96e3.html#ad6bd471086d6a46ce30763dd64fe96e3", null ],
+    [ "~Impl", "d1/d42/structfl_1_1spi_1_1_device_1_1_impl_a8cd497d1492230bd03dedd61465e42eb.html#a8cd497d1492230bd03dedd61465e42eb", null ],
     [ "async_state", "d1/d42/structfl_1_1spi_1_1_device_1_1_impl_a53f6645936fbff90f0cc8b9af7140fb3.html#a53f6645936fbff90f0cc8b9af7140fb3", null ],
     [ "bus_handle", "d1/d42/structfl_1_1spi_1_1_device_1_1_impl_a64b3a1d5c865bc93a48d1b2d7a6d2160.html#a64b3a1d5c865bc93a48d1b2d7a6d2160", null ],
     [ "config", "d1/d42/structfl_1_1spi_1_1_device_1_1_impl_ae7aaa9eeec6f47191a82f066ac9b7129.html#ae7aaa9eeec6f47191a82f066ac9b7129", null ],

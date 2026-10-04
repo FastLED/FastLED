@@ -1,0 +1,9 @@
+<map id="fl::ColorManagedPixelSource::temporalDitherEnabled" name="fl::ColorManagedPixelSource::temporalDitherEnabled">
+<area shape="rect" id="Node000001" title="True when the channel asked for dither this frame." alt="" coords="260,69,467,109"/>
+<area shape="rect" id="Node000002" href="$db/da5/classfl_1_1_color_managed_pixel_source_a07e179580f57628693c40d60c44ca7f4.html#a07e179580f57628693c40d60c44ca7f4" title="The colour&#45;managed path." alt="" coords="5,5,212,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="269,68,188,48,189,43,270,63"/>
+<area shape="rect" id="Node000003" href="$db/da5/classfl_1_1_color_managed_pixel_source_a5282ff6c865aba683ab2953135ca4c09.html#a5282ff6c865aba683ab2953135ca4c09" title="Physical RGBW solve when a matching profile is bound; otherwise the legacy RGB&#45;to&#45;RGBW conversion." alt="" coords="5,69,212,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="247,92,212,92,212,87,247,87"/>
+<area shape="rect" id="Node000004" href="$db/da5/classfl_1_1_color_managed_pixel_source_aefb49429ee466d02d5c2ece50524da34.html#aefb49429ee466d02d5c2ece50524da34" title="Physical two&#45;white solve when a matching RGBWW profile is bound; otherwise the legacy conversion." alt="" coords="5,133,212,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="270,115,189,136,188,131,269,110"/>
+</map>

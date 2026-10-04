@@ -1,0 +1,23 @@
+<map id="/home/runner/work/FastLED/FastLED/examples/MoodRing/room_sense.h" name="/home/runner/work/FastLED/FastLED/examples/MoodRing/room_sense.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="248,5,463,60"/>
+<area shape="rect" id="Node000002" href="$d5/db2/_mood_ring_8ino.html" title="A ring that listens to the room and lights the room back." alt="" coords="5,416,220,471"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="271,68,241,87,216,110,189,147,167,187,150,231,137,274,122,355,116,416,111,416,117,355,132,273,145,229,162,185,184,144,212,106,238,83,268,64"/>
+<area shape="rect" id="Node000003" href="$dd/dcd/layers_8h.html" title=" " alt="" coords="512,211,727,265"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="417,65,477,106,504,133,529,161,586,209,583,213,525,165,500,137,474,110,414,69"/>
+<area shape="rect" id="Node000005" href="$d1/d75/mood__painter_8h.html" title=" " alt="" coords="151,313,365,368"/>
+<area shape="poly" id="edge7_Node000001_Node000005" title=" " alt="" coords="277,69,255,87,238,109,227,135,222,162,223,218,234,271,249,312,244,314,229,272,217,219,216,161,222,133,233,107,251,84,274,65"/>
+<area shape="rect" id="Node000007" href="$df/da3/mood__palette_8h.html" title=" " alt="" coords="248,108,463,163"/>
+<area shape="poly" id="edge8_Node000001_Node000007" title=" " alt="" coords="358,74,358,108,353,108,353,74"/>
+<area shape="rect" id="Node000009" href="$da/d97/room__sense_8cpp.html" title=" " alt="" coords="539,108,753,163"/>
+<area shape="poly" id="edge12_Node000001_Node000009" title=" " alt="" coords="445,62,571,105,569,110,443,67"/>
+<area shape="rect" id="Node000004" href="$d9/d6b/layers_8cpp.html" title=" " alt="" coords="512,313,727,368"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="622,279,622,313,617,313,617,279"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="513,272,353,316,351,311,511,266"/>
+<area shape="poly" id="edge5_Node000005_Node000002" title=" " alt="" coords="210,378,152,418,149,414,207,374"/>
+<area shape="rect" id="Node000006" href="$d8/da5/mood__painter_8cpp.html" title=" " alt="" coords="244,416,459,471"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="294,377,329,414,325,418,290,380"/>
+<area shape="poly" id="edge9_Node000007_Node000003" title=" " alt="" coords="438,165,551,208,550,213,436,170"/>
+<area shape="poly" id="edge10_Node000007_Node000005" title=" " alt="" coords="297,173,278,191,263,212,254,237,251,264,255,313,250,313,246,264,249,236,258,209,274,187,293,169"/>
+<area shape="rect" id="Node000008" href="$d1/d31/mood__palette_8cpp.html" title=" " alt="" coords="273,211,488,265"/>
+<area shape="poly" id="edge11_Node000007_Node000008" title=" " alt="" coords="368,175,377,210,371,211,363,177"/>
+</map>

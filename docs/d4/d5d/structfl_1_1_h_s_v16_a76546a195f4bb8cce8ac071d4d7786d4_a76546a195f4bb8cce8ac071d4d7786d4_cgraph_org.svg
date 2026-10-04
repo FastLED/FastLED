@@ -20,7 +20,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../d4/d5d/structfl_1_1_h_s_v16_afb1735cc73fa0e364b7a24893e2f6f8b.html#afb1735cc73fa0e364b7a24893e2f6f8b" target="_top" xlink:title=" ">
+<g id="a_Node000002"><a xlink:href="../../d4/d5d/structfl_1_1_h_s_v16_acac3ff8bdd1e5038d2c7551084659bd9.html#acac3ff8bdd1e5038d2c7551084659bd9" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="254,-242 155,-242 155,-223 254,-223 254,-242"/>
 <text text-anchor="middle" x="204.5" y="-230" font-family="Helvetica,sans-Serif" font-size="10.00">fl::HSV16::HSV16</text>
 </a>
@@ -38,7 +38,7 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d4/d36/namespacefl_adbc9938a37fd2f52f4c865a78914f420.html#adbc9938a37fd2f52f4c865a78914f420" target="_top" xlink:title=" ">
+<g id="a_Node000003"><a xlink:href="../../d4/d36/namespacefl_a4bfb168f4c6c19a8c0298b937b8baa46.html#a4bfb168f4c6c19a8c0298b937b8baa46" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="236.5,-205 172.5,-205 172.5,-186 236.5,-186 236.5,-205"/>
 <text text-anchor="middle" x="204.5" y="-193" font-family="Helvetica,sans-Serif" font-size="10.00">fl::ease16</text>
 </a>
@@ -74,7 +74,7 @@
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../d4/d36/namespacefl_a8b74797175db9120ba049e55c58a38e8.html#a8b74797175db9120ba049e55c58a38e8" target="_top" xlink:title="16&#45;bit cubic ease&#45;in function Takes an input value 0&#45;65535 and returns an eased value 0&#45;65535">
+<g id="a_Node000004"><a xlink:href="../../d4/d36/namespacefl_aade57814832c8c6c9e7fdb51667a79e3.html#aade57814832c8c6c9e7fdb51667a79e3" target="_top" xlink:title="16&#45;bit cubic ease&#45;in function Takes an input value 0&#45;65535 and returns an eased value 0&#45;65535">
 <polygon fill="white" stroke="#666666" points="398.5,-372 298.5,-372 298.5,-353 398.5,-353 398.5,-372"/>
 <text text-anchor="middle" x="348.5" y="-360" font-family="Helvetica,sans-Serif" font-size="10.00">fl::easeInCubic16</text>
 </a>
@@ -92,7 +92,7 @@
 <!-- Node5 -->
 <g id="Node000005" class="node">
 <title>Node5</title>
-<g id="a_Node000005"><a xlink:href="../../d4/d36/namespacefl_ad8823354aeba367c5186ac293c2af395.html#ad8823354aeba367c5186ac293c2af395" target="_top" xlink:title="16&#45;bit cubic ease&#45;in/ease&#45;out function Takes an input value 0&#45;65535 and returns an eased value 0&#45;6553...">
+<g id="a_Node000005"><a xlink:href="../../d4/d36/namespacefl_a228b572c909bfab4f3a32ab7eec136d9.html#a228b572c909bfab4f3a32ab7eec136d9" target="_top" xlink:title="16&#45;bit cubic ease&#45;in/ease&#45;out function Takes an input value 0&#45;65535 and returns an eased value 0&#45;6553...">
 <polygon fill="white" stroke="#666666" points="407,-335 290,-335 290,-316 407,-316 407,-335"/>
 <text text-anchor="middle" x="348.5" y="-323" font-family="Helvetica,sans-Serif" font-size="10.00">fl::easeInOutCubic16</text>
 </a>
@@ -110,7 +110,7 @@
 <!-- Node6 -->
 <g id="Node000006" class="node">
 <title>Node6</title>
-<g id="a_Node000006"><a xlink:href="../../d4/d36/namespacefl_aff27cf9c4119c4732f1663150a29bc7a.html#aff27cf9c4119c4732f1663150a29bc7a" target="_top" xlink:title="16&#45;bit quadratic ease&#45;in/ease&#45;out function Takes an input value 0&#45;65535 and returns an eased value 0&#45;...">
+<g id="a_Node000006"><a xlink:href="../../d4/d36/namespacefl_a89b5f61735be1dc4eb839356aeffdb8e.html#a89b5f61735be1dc4eb839356aeffdb8e" target="_top" xlink:title="16&#45;bit quadratic ease&#45;in/ease&#45;out function Takes an input value 0&#45;65535 and returns an eased value 0&#45;...">
 <polygon fill="white" stroke="#666666" points="406.5,-298 290.5,-298 290.5,-279 406.5,-279 406.5,-298"/>
 <text text-anchor="middle" x="348.5" y="-286" font-family="Helvetica,sans-Serif" font-size="10.00">fl::easeInOutQuad16</text>
 </a>
@@ -128,7 +128,7 @@
 <!-- Node7 -->
 <g id="Node000007" class="node">
 <title>Node7</title>
-<g id="a_Node000007"><a xlink:href="../../d4/d36/namespacefl_ab1554ada73484848739ca7aa2862e5f1.html#ab1554ada73484848739ca7aa2862e5f1" target="_top" xlink:title="16&#45;bit sine ease&#45;in/ease&#45;out function Takes an input value 0&#45;65535 and returns an eased value 0&#45;65535">
+<g id="a_Node000007"><a xlink:href="../../d4/d36/namespacefl_ac3e3429a30b372112b01bb3dc4c58a75.html#ac3e3429a30b372112b01bb3dc4c58a75" target="_top" xlink:title="16&#45;bit sine ease&#45;in/ease&#45;out function Takes an input value 0&#45;65535 and returns an eased value 0&#45;65535">
 <polygon fill="white" stroke="#666666" points="404,-261 293,-261 293,-242 404,-242 404,-261"/>
 <text text-anchor="middle" x="348.5" y="-249" font-family="Helvetica,sans-Serif" font-size="10.00">fl::easeInOutSine16</text>
 </a>
@@ -146,7 +146,7 @@
 <!-- Node13 -->
 <g id="Node000013" class="node">
 <title>Node13</title>
-<g id="a_Node000013"><a xlink:href="../../d4/d36/namespacefl_a65b52c144968bcdb8a1c2594cc9f57af.html#a65b52c144968bcdb8a1c2594cc9f57af" target="_top" xlink:title="16&#45;bit quadratic ease&#45;in function Takes an input value 0&#45;65535 and returns an eased value 0&#45;65535">
+<g id="a_Node000013"><a xlink:href="../../d4/d36/namespacefl_a3db4cfda08ca6b6b07d947c31ce7eeda.html#a3db4cfda08ca6b6b07d947c31ce7eeda" target="_top" xlink:title="16&#45;bit quadratic ease&#45;in function Takes an input value 0&#45;65535 and returns an eased value 0&#45;65535">
 <polygon fill="white" stroke="#666666" points="397.5,-224 299.5,-224 299.5,-205 397.5,-205 397.5,-224"/>
 <text text-anchor="middle" x="348.5" y="-212" font-family="Helvetica,sans-Serif" font-size="10.00">fl::easeInQuad16</text>
 </a>
@@ -164,7 +164,7 @@
 <!-- Node14 -->
 <g id="Node000014" class="node">
 <title>Node14</title>
-<g id="a_Node000014"><a xlink:href="../../d4/d36/namespacefl_a9d07775cc4c7d6733b433f0775ef3975.html#a9d07775cc4c7d6733b433f0775ef3975" target="_top" xlink:title="16&#45;bit sine ease&#45;in function Takes an input value 0&#45;65535 and returns an eased value 0&#45;65535">
+<g id="a_Node000014"><a xlink:href="../../d4/d36/namespacefl_ac4abd0f696b93cb31403b73b4a6dbbda.html#ac4abd0f696b93cb31403b73b4a6dbbda" target="_top" xlink:title="16&#45;bit sine ease&#45;in function Takes an input value 0&#45;65535 and returns an eased value 0&#45;65535">
 <polygon fill="white" stroke="#666666" points="395.5,-187 301.5,-187 301.5,-168 395.5,-168 395.5,-187"/>
 <text text-anchor="middle" x="348.5" y="-175" font-family="Helvetica,sans-Serif" font-size="10.00">fl::easeInSine16</text>
 </a>
@@ -182,7 +182,7 @@
 <!-- Node15 -->
 <g id="Node000015" class="node">
 <title>Node15</title>
-<g id="a_Node000015"><a xlink:href="../../d4/d36/namespacefl_abad5ed43fd0a80c537f41bddf4bd5bcc.html#abad5ed43fd0a80c537f41bddf4bd5bcc" target="_top" xlink:title="16&#45;bit cubic ease&#45;out function Takes an input value 0&#45;65535 and returns an eased value 0&#45;65535">
+<g id="a_Node000015"><a xlink:href="../../d4/d36/namespacefl_ab0dd24505ff5bbcf9f5b9c3930e2be9f.html#ab0dd24505ff5bbcf9f5b9c3930e2be9f" target="_top" xlink:title="16&#45;bit cubic ease&#45;out function Takes an input value 0&#45;65535 and returns an eased value 0&#45;65535">
 <polygon fill="white" stroke="#666666" points="402.5,-150 294.5,-150 294.5,-131 402.5,-131 402.5,-150"/>
 <text text-anchor="middle" x="348.5" y="-138" font-family="Helvetica,sans-Serif" font-size="10.00">fl::easeOutCubic16</text>
 </a>
@@ -200,7 +200,7 @@
 <!-- Node16 -->
 <g id="Node000016" class="node">
 <title>Node16</title>
-<g id="a_Node000016"><a xlink:href="../../d4/d36/namespacefl_a8ab1577ba0a80cdab339d7a637c10516.html#a8ab1577ba0a80cdab339d7a637c10516" target="_top" xlink:title="16&#45;bit quadratic ease&#45;out function Takes an input value 0&#45;65535 and returns an eased value 0&#45;65535">
+<g id="a_Node000016"><a xlink:href="../../d4/d36/namespacefl_afc093a197fd94bcce19b3ba9e6cb4295.html#afc093a197fd94bcce19b3ba9e6cb4295" target="_top" xlink:title="16&#45;bit quadratic ease&#45;out function Takes an input value 0&#45;65535 and returns an eased value 0&#45;65535">
 <polygon fill="white" stroke="#666666" points="402,-113 295,-113 295,-94 402,-94 402,-113"/>
 <text text-anchor="middle" x="348.5" y="-101" font-family="Helvetica,sans-Serif" font-size="10.00">fl::easeOutQuad16</text>
 </a>
@@ -218,7 +218,7 @@
 <!-- Node17 -->
 <g id="Node000017" class="node">
 <title>Node17</title>
-<g id="a_Node000017"><a xlink:href="../../d4/d36/namespacefl_ac7e0036bfa0fd076b4f57e1aa67e9cb5.html#ac7e0036bfa0fd076b4f57e1aa67e9cb5" target="_top" xlink:title="16&#45;bit sine ease&#45;out function Takes an input value 0&#45;65535 and returns an eased value 0&#45;65535">
+<g id="a_Node000017"><a xlink:href="../../d4/d36/namespacefl_a407f6f9f63c9a625b24286167f916b80.html#a407f6f9f63c9a625b24286167f916b80" target="_top" xlink:title="16&#45;bit sine ease&#45;out function Takes an input value 0&#45;65535 and returns an eased value 0&#45;65535">
 <polygon fill="white" stroke="#666666" points="545,-122 443,-122 443,-103 545,-103 545,-122"/>
 <text text-anchor="middle" x="494" y="-110" font-family="Helvetica,sans-Serif" font-size="10.00">fl::easeOutSine16</text>
 </a>
@@ -236,7 +236,7 @@
 <!-- Node8 -->
 <g id="Node000008" class="node">
 <title>Node8</title>
-<g id="a_Node000008"><a xlink:href="../../d4/d36/namespacefl_a289ad302494249edde0b6b9e28c831f1.html#a289ad302494249edde0b6b9e28c831f1" target="_top" xlink:title=" ">
+<g id="a_Node000008"><a xlink:href="../../d4/d36/namespacefl_a80da3135f548026670d076d3aaa6ad64.html#a80da3135f548026670d076d3aaa6ad64" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="522.5,-187 465.5,-187 465.5,-168 522.5,-168 522.5,-187"/>
 <text text-anchor="middle" x="494" y="-175" font-family="Helvetica,sans-Serif" font-size="10.00">fl::cos32</text>
 </a>
@@ -254,7 +254,7 @@
 <!-- Node9 -->
 <g id="Node000009" class="node">
 <title>Node9</title>
-<g id="a_Node000009"><a xlink:href="../../d4/d36/namespacefl_a37a484f9e39484372eee81c7a66fad7d.html#a37a484f9e39484372eee81c7a66fad7d" target="_top" xlink:title=" ">
+<g id="a_Node000009"><a xlink:href="../../d4/d36/namespacefl_a01a1bfd1f04c51e03c650527c00a1a78.html#a01a1bfd1f04c51e03c650527c00a1a78" target="_top" xlink:title=" ">
 <polygon fill="#fff0f0" stroke="red" points="636,-154 581,-154 581,-135 636,-135 636,-154"/>
 <text text-anchor="middle" x="608.5" y="-142" font-family="Helvetica,sans-Serif" font-size="10.00">fl::sin32</text>
 </a>
@@ -308,7 +308,7 @@
 <!-- Node20 -->
 <g id="Node000020" class="node">
 <title>Node20</title>
-<g id="a_Node000020"><a xlink:href="../../d1/d12/group__intmap_gaa22e4ff6f570b2e2662c77854c5c6148.html#gaa22e4ff6f570b2e2662c77854c5c6148" target="_top" xlink:title=" ">
+<g id="a_Node000020"><a xlink:href="../../d1/d12/group__intmap_gaf1e18c44c9fc522a0b4c6569e6968c7d.html#gaf1e18c44c9fc522a0b4c6569e6968c7d" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="538.5,-56 449.5,-56 449.5,-37 538.5,-37 538.5,-56"/>
 <text text-anchor="middle" x="494" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">fl::map16_to_8</text>
 </a>
@@ -326,7 +326,7 @@
 <!-- Node21 -->
 <g id="Node000021" class="node">
 <title>Node21</title>
-<g id="a_Node000021"><a xlink:href="../../d1/d12/group__intmap_ga8e50a18fc577d3c0aafcdc300de507ef.html#ga8e50a18fc577d3c0aafcdc300de507ef" target="_top" xlink:title=" ">
+<g id="a_Node000021"><a xlink:href="../../d1/d12/group__intmap_ga98849014fcdc2903af18cf9335f90120.html#ga98849014fcdc2903af18cf9335f90120" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="541.5,-19 446.5,-19 446.5,0 541.5,0 541.5,-19"/>
 <text text-anchor="middle" x="494" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::map32_to_16</text>
 </a>

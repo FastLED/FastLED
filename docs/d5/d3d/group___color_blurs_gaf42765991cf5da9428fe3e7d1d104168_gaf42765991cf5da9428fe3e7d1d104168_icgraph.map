@@ -1,0 +1,29 @@
+<map id="fl::gfx::blurColumns" name="fl::gfx::blurColumns">
+<area shape="rect" id="Node000001" title="Perform a blur1d() on every column of a rectangular matrix (span version)." alt="" coords="549,153,699,179"/>
+<area shape="rect" id="Node000002" href="$d5/d3d/group___color_blurs_ga3428db078adfbef639066912c565524d.html#ga3428db078adfbef639066912c565524d" title="Two&#45;dimensional blur filter (Canvas version, no XYMap)." alt="" coords="373,29,481,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="599,145,555,106,500,68,475,57,477,52,503,64,558,102,602,141"/>
+<area shape="rect" id="Node000003" href="$d5/d3d/group___color_blurs_ga648b01339a6b68fecbcb933df57db297.html#ga648b01339a6b68fecbcb933df57db297" title="Two&#45;dimensional blur filter (span version)." alt="" coords="373,79,481,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="581,150,500,118,468,107,470,102,502,113,583,145"/>
+<area shape="rect" id="Node000011" href="$d4/d36/namespacefl_ab0715912a2d3a56d26d50646e09a9a7a.html#ab0715912a2d3a56d26d50646e09a9a7a" title=" " alt="" coords="367,128,487,153"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="535,157,487,151,487,146,536,152"/>
+<area shape="rect" id="Node000012" href="$d4/d36/namespacefl_a93d43f1f6ae6fb3d508d9efa345a928b.html#a93d43f1f6ae6fb3d508d9efa345a928b" title=" " alt="" coords="367,177,487,203"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="536,179,487,185,487,180,535,174"/>
+<area shape="rect" id="Node000013" href="$d4/d36/namespacefl_a77d38967f4f485997b0e8f103d0e6265.html#a77d38967f4f485997b0e8f103d0e6265" title=" " alt="" coords="367,227,487,252"/>
+<area shape="poly" id="edge12_Node000001_Node000013" title=" " alt="" coords="581,187,502,218,469,229,468,224,500,213,579,182"/>
+<area shape="rect" id="Node000014" href="$d5/d3d/group___color_blurs_gaa89dcea812283cf8810e33293bc42b61.html#gaa89dcea812283cf8810e33293bc42b61" title="Legacy raw&#45;pointer version of blurColumns." alt="" coords="352,276,501,301"/>
+<area shape="poly" id="edge13_Node000001_Node000014" title=" " alt="" coords="602,191,558,229,503,267,477,278,475,273,500,262,555,225,599,187"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a1536d773f821945c46dd5d263a417bfd.html#a1536d773f821945c46dd5d263a417bfd" title=" " alt="" coords="211,5,289,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="371,76,351,68,303,44,279,33,281,28,305,40,353,64,373,71"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a297e1492a0d4d3959a013cc8225de491.html#a297e1492a0d4d3959a013cc8225de491" title=" " alt="" coords="211,55,289,80"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="359,85,289,75,290,70,359,80"/>
+<area shape="rect" id="Node000009" href="$d4/d36/namespacefl_a767ccbb27b9aa74ce239e64de4ed7329.html#a767ccbb27b9aa74ce239e64de4ed7329" title=" " alt="" coords="211,104,289,129"/>
+<area shape="poly" id="edge8_Node000003_Node000009" title=" " alt="" coords="359,104,290,114,289,108,359,98"/>
+<area shape="rect" id="Node000010" href="$d5/d3d/group___color_blurs_ga57679a9975e1a8c894511a39a9a6aef1.html#ga57679a9975e1a8c894511a39a9a6aef1" title="Legacy raw&#45;pointer version of blur2d." alt="" coords="196,153,304,179"/>
+<area shape="poly" id="edge9_Node000003_Node000010" title=" " alt="" coords="370,111,353,118,305,143,279,156,277,151,303,138,351,113,368,106"/>
+<area shape="rect" id="Node000006" href="$dc/d2b/classfl_1_1_blend2d_ad965648c61fd795366282d3b797a612f.html#ad965648c61fd795366282d3b797a612f" title=" " alt="" coords="11,5,142,31"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="197,55,121,33,123,28,198,50"/>
+<area shape="rect" id="Node000007" href="$d4/df2/classfl_1_1_luminova_aa775ddcb74da9d8ae057ac8e4c3c50cc.html#aa775ddcb74da9d8ae057ac8e4c3c50cc" title=" " alt="" coords="5,55,148,80"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="197,70,148,70,148,65,197,65"/>
+<area shape="rect" id="Node000008" href="$d6/d5f/classfl_1_1_wave_fx_a52f77dc9e40955e24c4223c82f3f5848.html#a52f77dc9e40955e24c4223c82f3f5848" title="Render wave to LED array." alt="" coords="11,104,142,129"/>
+<area shape="poly" id="edge7_Node000005_Node000008" title=" " alt="" coords="198,85,123,106,121,101,197,80"/>
+</map>

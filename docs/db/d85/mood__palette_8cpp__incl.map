@@ -1,0 +1,27 @@
+<map id="/home/runner/work/FastLED/FastLED/examples/MoodRing/mood_palette.cpp" name="/home/runner/work/FastLED/FastLED/examples/MoodRing/mood_palette.cpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="80,5,295,60"/>
+<area shape="rect" id="Node000002" href="$df/da3/mood__palette_8h.html" title=" " alt="" coords="176,108,300,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="205,59,226,95,222,97,201,61"/>
+<area shape="rect" id="Node000006" href="$d4/da5/ring__canvas_8h.html" title=" " alt="" coords="82,181,194,207"/>
+<area shape="poly" id="edge15_Node000001_Node000006" title=" " alt="" coords="181,61,166,109,148,169,143,167,161,107,176,60"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="254,255,339,280"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="245,133,289,241,284,243,240,135"/>
+<area shape="rect" id="Node000004" href="$df/dd8/stdint_8h.html" title=" " alt="" coords="127,255,229,280"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="236,135,208,208,192,243,187,241,204,206,231,133"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="223,136,167,175,164,171,220,131"/>
+<area shape="rect" id="Node000025" href="$da/dd8/room__sense_8h.html" title=" " alt="" coords="320,181,433,207"/>
+<area shape="poly" id="edge9_Node000002_Node000025" title=" " alt="" coords="261,131,343,173,341,177,259,136"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="119,328,237,353"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="181,280,181,314,175,314,175,280"/>
+<area shape="poly" id="edge6_Node000006_Node000003" title=" " alt="" coords="165,204,259,247,257,251,162,209"/>
+<area shape="poly" id="edge8_Node000006_Node000004" title=" " alt="" coords="147,206,167,241,162,244,142,208"/>
+<area shape="rect" id="Node000007" href="$d4/d7a/span_8h.html" title=" " alt="" coords="5,255,103,280"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="126,209,80,248,77,243,123,205"/>
+<area shape="poly" id="edge10_Node000025_Node000003" title=" " alt="" coords="366,209,322,248,318,244,362,205"/>
+<area shape="poly" id="edge14_Node000025_Node000004" title=" " alt="" coords="346,209,224,252,223,247,344,204"/>
+<area shape="rect" id="Node000026" href="$de/dd5/audio__processor_8h.html" title=" " alt="" coords="415,255,605,280"/>
+<area shape="poly" id="edge11_Node000025_Node000026" title=" " alt="" coords="399,204,477,246,475,250,397,209"/>
+<area shape="rect" id="Node000028" href="$df/d6a/shared__ptr_8h.html" title=" " alt="" coords="376,328,511,353"/>
+<area shape="poly" id="edge13_Node000025_Node000028" title=" " alt="" coords="381,206,390,239,404,279,427,316,423,318,400,281,385,241,376,207"/>
+<area shape="poly" id="edge12_Node000026_Node000028" title=" " alt="" coords="501,282,465,320,462,316,497,279"/>
+</map>

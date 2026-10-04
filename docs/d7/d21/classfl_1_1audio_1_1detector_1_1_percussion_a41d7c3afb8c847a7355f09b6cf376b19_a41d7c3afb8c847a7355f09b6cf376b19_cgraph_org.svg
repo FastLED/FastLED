@@ -49,7 +49,7 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d7/d21/classfl_1_1audio_1_1detector_1_1_percussion_a5d485545a7be7c444cfac4a138fbbcbc.html#a5d485545a7be7c444cfac4a138fbbcbc" target="_top" xlink:title=" ">
+<g id="a_Node000003"><a xlink:href="../../d7/d21/classfl_1_1audio_1_1detector_1_1_percussion_a916894598b1ebf040061f174e5009d93.html#a916894598b1ebf040061f174e5009d93" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="460.5,-317.5 326.5,-317.5 326.5,-287.5 460.5,-287.5 460.5,-317.5"/>
 <text text-anchor="start" x="334.5" y="-305.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::audio::detector</text>
 <text text-anchor="middle" x="393.5" y="-294.5" font-family="Helvetica,sans-Serif" font-size="10.00">::Percussion::Percussion</text>
@@ -88,7 +88,7 @@
 <!-- Node5 -->
 <g id="Node000005" class="node">
 <title>Node5</title>
-<g id="a_Node000005"><a xlink:href="../../db/dbf/namespacefl_1_1audio_a7189558c538537464f1d31c91596631d.html#a7189558c538537464f1d31c91596631d" target="_top" xlink:title="Compute the time delta (in seconds) for an audio buffer.">
+<g id="a_Node000005"><a xlink:href="../../db/dbf/namespacefl_1_1audio_a8a5c097dfda178fb0d31e2060cb62ea9.html#a8a5c097dfda178fb0d31e2060cb62ea9" target="_top" xlink:title="Compute the time delta (in seconds) for an audio buffer.">
 <polygon fill="white" stroke="#666666" points="465,-210 322,-210 322,-191 465,-191 465,-210"/>
 <text text-anchor="middle" x="393.5" y="-198" font-family="Helvetica,sans-Serif" font-size="10.00">fl::audio::computeAudioDt</text>
 </a>
@@ -125,7 +125,7 @@
 <!-- Node9 -->
 <g id="Node000009" class="node">
 <title>Node9</title>
-<g id="a_Node000009"><a xlink:href="../../d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909" target="_top" xlink:title=" ">
+<g id="a_Node000009"><a xlink:href="../../d4/d36/namespacefl_a07c69292ef50aa1083046faff1c52ead.html#a07c69292ef50aa1083046faff1c52ead" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="575.5,-130 525.5,-130 525.5,-111 575.5,-111 575.5,-130"/>
 <text text-anchor="middle" x="550.5" y="-118" font-family="Helvetica,sans-Serif" font-size="10.00">fl::max</text>
 </a>
@@ -162,7 +162,7 @@
 <!-- Node7 -->
 <g id="Node000007" class="node">
 <title>Node7</title>
-<g id="a_Node000007"><a xlink:href="../../d4/d36/namespacefl_aefed87cfefc8330419d3393867945e84.html#aefed87cfefc8330419d3393867945e84" target="_top" xlink:title=" ">
+<g id="a_Node000007"><a xlink:href="../../d4/d36/namespacefl_aea39aa3747a937b0dbefabdf22cf2bbc.html#aea39aa3747a937b0dbefabdf22cf2bbc" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="573.5,-204 527.5,-204 527.5,-185 573.5,-185 573.5,-204"/>
 <text text-anchor="middle" x="550.5" y="-192" font-family="Helvetica,sans-Serif" font-size="10.00">fl::abs</text>
 </a>
@@ -180,7 +180,7 @@
 <!-- Node8 -->
 <g id="Node000008" class="node">
 <title>Node8</title>
-<g id="a_Node000008"><a xlink:href="../../d4/d36/namespacefl_afb42d6eb6443afc7223ce9b1a812f350.html#afb42d6eb6443afc7223ce9b1a812f350" target="_top" xlink:title=" ">
+<g id="a_Node000008"><a xlink:href="../../d4/d36/namespacefl_a391721290a9307391d39a0a897d9b9f4.html#a391721290a9307391d39a0a897d9b9f4" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="580,-167 521,-167 521,-148 580,-148 580,-167"/>
 <text text-anchor="middle" x="550.5" y="-155" font-family="Helvetica,sans-Serif" font-size="10.00">fl::clamp</text>
 </a>
@@ -207,7 +207,7 @@
 <!-- Node10 -->
 <g id="Node000010" class="node">
 <title>Node10</title>
-<g id="a_Node000010"><a xlink:href="../../d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb" target="_top" xlink:title=" ">
+<g id="a_Node000010"><a xlink:href="../../d4/d36/namespacefl_a2fdabb91a1f100dec8da21e4306aba05.html#a2fdabb91a1f100dec8da21e4306aba05" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="574,-93 527,-93 527,-74 574,-74 574,-93"/>
 <text text-anchor="middle" x="550.5" y="-81" font-family="Helvetica,sans-Serif" font-size="10.00">fl::min</text>
 </a>
@@ -243,7 +243,7 @@
 <!-- Node12 -->
 <g id="Node000012" class="node">
 <title>Node12</title>
-<g id="a_Node000012"><a xlink:href="../../d4/d36/namespacefl_a2a5359f49a46263d1eb1fcdfe99b7bd5.html#a2a5359f49a46263d1eb1fcdfe99b7bd5" target="_top" xlink:title=" ">
+<g id="a_Node000012"><a xlink:href="../../d4/d36/namespacefl_af27046964143ce28bf18ce86d152ff93.html#af27046964143ce28bf18ce86d152ff93" target="_top" xlink:title=" ">
 <polygon fill="#fff0f0" stroke="red" points="575.5,-56 525.5,-56 525.5,-37 575.5,-37 575.5,-56"/>
 <text text-anchor="middle" x="550.5" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">fl::expf</text>
 </a>
@@ -258,19 +258,19 @@
 </a>
 </g>
 </g>
-<!-- Node14 -->
-<g id="Node000014" class="node">
-<title>Node14</title>
-<g id="a_Node000014"><a xlink:href="../../d4/d36/namespacefl_af3a8e787bc8bcd73dcddb8b47a826554.html#af3a8e787bc8bcd73dcddb8b47a826554" target="_top" xlink:title=" ">
+<!-- Node16 -->
+<g id="Node000016" class="node">
+<title>Node16</title>
+<g id="a_Node000016"><a xlink:href="../../d4/d36/namespacefl_a009a6061a9324e18ae194e4c16749297.html#a009a6061a9324e18ae194e4c16749297" target="_top" xlink:title=" ">
 <polygon fill="#fff0f0" stroke="red" points="574,-19 527,-19 527,0 574,0 574,-19"/>
 <text text-anchor="middle" x="550.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::logf</text>
 </a>
 </g>
 </g>
-<!-- Node11&#45;&gt;Node14 -->
-<g id="edge12_Node000011_Node000014" class="edge">
-<title>Node11&#45;&gt;Node14</title>
-<g id="a_edge12_Node000011_Node000014"><a xlink:title=" ">
+<!-- Node11&#45;&gt;Node16 -->
+<g id="edge12_Node000011_Node000016" class="edge">
+<title>Node11&#45;&gt;Node16</title>
+<g id="a_edge12_Node000011_Node000016"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M432.02,-56.49C458.12,-46.05 492.56,-32.28 517.39,-22.34"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="518.74,-25.57 526.73,-18.61 516.14,-19.07 518.74,-25.57"/>
 </a>

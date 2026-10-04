@@ -12,7 +12,7 @@
 <area shape="poly" id="edge14_Node000001_Node000014" title=" " alt="" coords="133,251,297,344,294,349,130,256"/>
 <area shape="rect" id="Node000016" href="$d5/d25/_demo_reel100_8ino_ae67f05643df1798b39ca5b88496dcebf.html#ae67f05643df1798b39ca5b88496dcebf" title=" " alt="" coords="297,203,366,228"/>
 <area shape="poly" id="edge19_Node000001_Node000016" title=" " alt="" coords="211,226,282,218,283,223,212,232"/>
-<area shape="rect" id="Node000003" href="$df/da5/lib8tion_8h_a696b9421eca961df0a68c7c6c3e983ab.html#a696b9421eca961df0a68c7c6c3e983ab" title="Generates an 8&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="480,5,559,31"/>
+<area shape="rect" id="Node000003" href="$df/da5/lib8tion_8h_aca012663c6c8fe9a7240bcbc76095ba9.html#aca012663c6c8fe9a7240bcbc76095ba9" title="Generates an 8&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="480,5,559,31"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="349,102,394,72,451,40,466,33,468,38,453,44,397,76,352,106"/>
 <area shape="rect" id="Node000004" href="$d1/dfb/colorutils_8h_a3d488dd1e2d27e99307310527e51cad3.html#a3d488dd1e2d27e99307310527e51cad3" title=" " alt="" coords="452,55,587,80"/>
 <area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="356,108,456,81,458,86,358,113"/>
@@ -20,14 +20,14 @@
 <area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="357,114,471,114,471,119,357,119"/>
 <area shape="rect" id="Node000007" href="$d1/dfb/colorutils_8h_a399e4e094995b8e97420b89a2dd6548b.html#a399e4e094995b8e97420b89a2dd6548b" title=" " alt="" coords="460,203,579,228"/>
 <area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="367,254,458,229,459,234,368,259"/>
-<area shape="rect" id="Node000008" href="$d2/d0d/group___random_gaaaff3e84c6ab2cf5f71400a4b6958beb.html#gaaaff3e84c6ab2cf5f71400a4b6958beb" title="Generate a 16&#45;bit random number." alt="" coords="639,329,727,355"/>
+<area shape="rect" id="Node000008" href="$d2/d0d/group___random_ga6f816735a0bd63bfc78bebbc7c5f12b9.html#ga6f816735a0bd63bfc78bebbc7c5f12b9" title="Generate a 16&#45;bit random number." alt="" coords="639,329,727,355"/>
 <area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="368,271,626,327,625,332,367,276"/>
-<area shape="rect" id="Node000009" href="$d2/d0d/group___random_gadb05544426b14ef8d85fb2eb73cb8a0a.html#gadb05544426b14ef8d85fb2eb73cb8a0a" title="Generate an 8&#45;bit random number." alt="" coords="643,267,723,292"/>
+<area shape="rect" id="Node000009" href="$d2/d0d/group___random_gafb55d95e3e866dce182f149535903dd8.html#gafb55d95e3e866dce182f149535903dd8" title="Generate an 8&#45;bit random number." alt="" coords="643,267,723,292"/>
 <area shape="poly" id="edge8_Node000006_Node000009" title=" " alt="" coords="368,265,630,275,629,280,367,270"/>
 <area shape="poly" id="edge11_Node000010_Node000007" title=" " alt="" coords="364,171,458,197,456,202,362,177"/>
-<area shape="rect" id="Node000011" href="$df/da5/lib8tion_8h_adf8e83564c52b94d0ff5594aede0be28.html#adf8e83564c52b94d0ff5594aede0be28" title="Generates a 16&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="476,153,563,179"/>
+<area shape="rect" id="Node000011" href="$df/da5/lib8tion_8h_ac869590ebed22301d9a08cf7406128b3.html#ac869590ebed22301d9a08cf7406128b3" title="Generates a 16&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="476,153,563,179"/>
 <area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="363,163,462,163,462,169,363,169"/>
-<area shape="rect" id="Node000013" href="$d1/dfb/colorutils_8h_a5e33a6635101019cce6b0936c9415a6f.html#a5e33a6635101019cce6b0936c9415a6f" title="Fill a range of LEDs with a rainbow of colors." alt="" coords="635,404,732,429"/>
+<area shape="rect" id="Node000013" href="$d1/dfb/colorutils_8h_a72ee3324d8c70c52743313f46676204f.html#a72ee3324d8c70c52743313f46676204f" title="Fill a range of LEDs with a rainbow of colors." alt="" coords="635,404,732,429"/>
 <area shape="poly" id="edge13_Node000012_Node000013" title=" " alt="" coords="557,414,621,414,621,419,557,419"/>
 <area shape="poly" id="edge18_Node000014_Node000012" title=" " alt="" coords="380,376,469,401,468,406,379,381"/>
 <area shape="rect" id="Node000015" href="$d5/d25/_demo_reel100_8ino_ab00a79f2963c57048ec1d9271fbfb2dd.html#ab00a79f2963c57048ec1d9271fbfb2dd" title=" " alt="" coords="476,355,563,380"/>

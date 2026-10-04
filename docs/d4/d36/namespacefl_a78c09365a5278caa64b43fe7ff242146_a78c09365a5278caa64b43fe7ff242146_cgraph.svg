@@ -114,7 +114,7 @@ var sectionId = 'dynsection-0';
 <!-- Node5 -->
 <g id="Node000005" class="node">
 <title>Node5</title>
-<g id="a_Node000005"><a xlink:href="../../db/d4a/classfl_1_1_singleton_shared_a138a66e14b03a073e9a15565e823b203.html#a138a66e14b03a073e9a15565e823b203" target="_top" xlink:title=" ">
+<g id="a_Node000005"><a xlink:href="../../db/d4a/classfl_1_1_singleton_shared_a1ec246efec2c46bc053a64fe7e8170ad.html#a1ec246efec2c46bc053a64fe7e8170ad" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="1016,-143.34 908,-143.34 908,-113.34 1016,-113.34 1016,-143.34"/>
 <text text-anchor="start" x="916" y="-131.34" font-family="Helvetica,sans-Serif" font-size="10.00">fl::SingletonShared</text>
 <text text-anchor="middle" x="962" y="-120.34" font-family="Helvetica,sans-Serif" font-size="10.00">::instance</text>
@@ -130,20 +130,20 @@ var sectionId = 'dynsection-0';
 </a>
 </g>
 </g>
-<!-- Node17 -->
-<g id="Node000017" class="node">
-<title>Node17</title>
-<g id="a_Node000017"><a xlink:href="../../d5/d06/classfl_1_1detail_1_1_async_logger_service_task_acc200cb8837f82379821217fb4a6bc29.html#acc200cb8837f82379821217fb4a6bc29" target="_top" xlink:title=" ">
+<!-- Node11 -->
+<g id="Node000011" class="node">
+<title>Node11</title>
+<g id="a_Node000011"><a xlink:href="../../d5/d06/classfl_1_1detail_1_1_async_logger_service_task_acc200cb8837f82379821217fb4a6bc29.html#acc200cb8837f82379821217fb4a6bc29" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="312,-169.34 151,-169.34 151,-139.34 312,-139.34 312,-169.34"/>
 <text text-anchor="start" x="159" y="-157.34" font-family="Helvetica,sans-Serif" font-size="10.00">fl::detail::AsyncLoggerService</text>
 <text text-anchor="middle" x="231.5" y="-146.34" font-family="Helvetica,sans-Serif" font-size="10.00">Task::instance</text>
 </a>
 </g>
 </g>
-<!-- Node1&#45;&gt;Node17 -->
-<g id="edge11_Node000001_Node000017" class="edge">
-<title>Node1&#45;&gt;Node17</title>
-<g id="a_edge11_Node000001_Node000017"><a xlink:title=" ">
+<!-- Node1&#45;&gt;Node11 -->
+<g id="edge11_Node000001_Node000011" class="edge">
+<title>Node1&#45;&gt;Node11</title>
+<g id="a_edge11_Node000001_Node000011"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M103.77,-196.22C125.7,-188.97 152.13,-180.24 175.17,-172.63"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="176.41,-175.9 184.81,-169.44 174.22,-169.25 176.41,-175.9"/>
 </a>
@@ -189,7 +189,7 @@ var sectionId = 'dynsection-0';
 <!-- Node6 -->
 <g id="Node000006" class="node">
 <title>Node6</title>
-<g id="a_Node000006"><a xlink:href="../../db/d4a/classfl_1_1_singleton_shared_a7892d697818750c1f7611dea073ff66e.html#a7892d697818750c1f7611dea073ff66e" target="_top" xlink:title=" ">
+<g id="a_Node000006"><a xlink:href="../../db/d4a/classfl_1_1_singleton_shared_a03c9eb23cd0cb903d5ae8fd44b1a4984.html#a03c9eb23cd0cb903d5ae8fd44b1a4984" target="_top" xlink:title=" ">
 <polygon fill="#fff0f0" stroke="red" points="1160,-191.34 1052,-191.34 1052,-161.34 1160,-161.34 1160,-191.34"/>
 <text text-anchor="start" x="1060" y="-179.34" font-family="Helvetica,sans-Serif" font-size="10.00">fl::SingletonShared</text>
 <text text-anchor="middle" x="1106" y="-168.34" font-family="Helvetica,sans-Serif" font-size="10.00">::instanceInner</text>
@@ -205,39 +205,39 @@ var sectionId = 'dynsection-0';
 </a>
 </g>
 </g>
-<!-- Node14 -->
-<g id="Node000014" class="node">
-<title>Node14</title>
-<g id="a_Node000014"><a xlink:href="../../df/d9e/namespacefl_1_1detail_a6bef973c17637a167f1f94d7db03905c.html#a6bef973c17637a167f1f94d7db03905c" target="_top" xlink:title=" ">
+<!-- Node8 -->
+<g id="Node000008" class="node">
+<title>Node8</title>
+<g id="a_Node000008"><a xlink:href="../../df/d9e/namespacefl_1_1detail_a6bef973c17637a167f1f94d7db03905c.html#a6bef973c17637a167f1f94d7db03905c" target="_top" xlink:title=" ">
 <polygon fill="#fff0f0" stroke="red" points="1159.5,-143.34 1052.5,-143.34 1052.5,-113.34 1159.5,-113.34 1159.5,-143.34"/>
 <text text-anchor="start" x="1060.5" y="-131.34" font-family="Helvetica,sans-Serif" font-size="10.00">fl::detail::singleton</text>
 <text text-anchor="middle" x="1106" y="-120.34" font-family="Helvetica,sans-Serif" font-size="10.00">_registry_get</text>
 </a>
 </g>
 </g>
-<!-- Node5&#45;&gt;Node14 -->
-<g id="edge9_Node000005_Node000014" class="edge">
-<title>Node5&#45;&gt;Node14</title>
-<g id="a_edge9_Node000005_Node000014"><a xlink:title=" ">
+<!-- Node5&#45;&gt;Node8 -->
+<g id="edge9_Node000005_Node000008" class="edge">
+<title>Node5&#45;&gt;Node8</title>
+<g id="a_edge9_Node000005_Node000008"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M1016.28,-128.34C1024.76,-128.34 1033.61,-128.34 1042.29,-128.34"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="1042.37,-131.84 1052.37,-128.34 1042.37,-124.84 1042.37,-131.84"/>
 </a>
 </g>
 </g>
-<!-- Node16 -->
-<g id="Node000016" class="node">
-<title>Node16</title>
-<g id="a_Node000016"><a xlink:href="../../df/d9e/namespacefl_1_1detail_af558e779ba2417d4cf14bdb1cbfd3d34.html#af558e779ba2417d4cf14bdb1cbfd3d34" target="_top" xlink:title=" ">
+<!-- Node10 -->
+<g id="Node000010" class="node">
+<title>Node10</title>
+<g id="a_Node000010"><a xlink:href="../../df/d9e/namespacefl_1_1detail_af558e779ba2417d4cf14bdb1cbfd3d34.html#af558e779ba2417d4cf14bdb1cbfd3d34" target="_top" xlink:title=" ">
 <polygon fill="#fff0f0" stroke="red" points="1159.5,-95.34 1052.5,-95.34 1052.5,-65.34 1159.5,-65.34 1159.5,-95.34"/>
 <text text-anchor="start" x="1060.5" y="-83.34" font-family="Helvetica,sans-Serif" font-size="10.00">fl::detail::singleton</text>
 <text text-anchor="middle" x="1106" y="-72.34" font-family="Helvetica,sans-Serif" font-size="10.00">_registry_set</text>
 </a>
 </g>
 </g>
-<!-- Node5&#45;&gt;Node16 -->
-<g id="edge10_Node000005_Node000016" class="edge">
-<title>Node5&#45;&gt;Node16</title>
-<g id="a_edge10_Node000005_Node000016"><a xlink:title=" ">
+<!-- Node5&#45;&gt;Node10 -->
+<g id="edge10_Node000005_Node000010" class="edge">
+<title>Node5&#45;&gt;Node10</title>
+<g id="a_edge10_Node000005_Node000010"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M1007.54,-113.29C1021.29,-108.64 1036.58,-103.47 1050.89,-98.63"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="1052.27,-101.86 1060.62,-95.34 1050.02,-95.23 1052.27,-101.86"/>
 </a>
@@ -252,140 +252,140 @@ var sectionId = 'dynsection-0';
 </a>
 </g>
 </g>
-<!-- Node18 -->
-<g id="Node000018" class="node">
-<title>Node18</title>
-<g id="a_Node000018"><a xlink:href="../../d5/d06/classfl_1_1detail_1_1_async_logger_service_task_a3bff7aaa6e1158fbbee95055b3458285.html#a3bff7aaa6e1158fbbee95055b3458285" target="_top" xlink:title=" ">
+<!-- Node12 -->
+<g id="Node000012" class="node">
+<title>Node12</title>
+<g id="a_Node000012"><a xlink:href="../../d5/d06/classfl_1_1detail_1_1_async_logger_service_task_a76e22f26c5676ba890e783435db46aa6.html#a76e22f26c5676ba890e783435db46aa6" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="513,-141.34 349,-141.34 349,-111.34 513,-111.34 513,-141.34"/>
 <text text-anchor="start" x="357" y="-129.34" font-family="Helvetica,sans-Serif" font-size="10.00">fl::detail::AsyncLoggerService</text>
 <text text-anchor="middle" x="431" y="-118.34" font-family="Helvetica,sans-Serif" font-size="10.00">Task::AsyncLoggerServiceTask</text>
 </a>
 </g>
 </g>
-<!-- Node17&#45;&gt;Node18 -->
-<g id="edge12_Node000017_Node000018" class="edge">
-<title>Node17&#45;&gt;Node18</title>
-<g id="a_edge12_Node000017_Node000018"><a xlink:title=" ">
+<!-- Node11&#45;&gt;Node12 -->
+<g id="edge12_Node000011_Node000012" class="edge">
+<title>Node11&#45;&gt;Node12</title>
+<g id="a_edge12_Node000011_Node000012"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M312.26,-143.03C321.05,-141.79 330.05,-140.51 338.96,-139.25"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="339.57,-142.7 348.98,-137.83 338.58,-135.77 339.57,-142.7"/>
 </a>
 </g>
 </g>
-<!-- Node19 -->
-<g id="Node000019" class="node">
-<title>Node19</title>
-<g id="a_Node000019"><a xlink:href="../../d2/d2b/classfl_1_1task_1_1_scheduler_ad1f60f825514d99a9ee0d06f564be1a7.html#ad1f60f825514d99a9ee0d06f564be1a7" target="_top" xlink:title=" ">
+<!-- Node13 -->
+<g id="Node000013" class="node">
+<title>Node13</title>
+<g id="a_Node000013"><a xlink:href="../../d2/d2b/classfl_1_1task_1_1_scheduler_ad1f60f825514d99a9ee0d06f564be1a7.html#ad1f60f825514d99a9ee0d06f564be1a7" target="_top" xlink:title=" ">
 <polygon fill="#fff0f0" stroke="red" points="861,-133.34 757,-133.34 757,-103.34 861,-103.34 861,-133.34"/>
 <text text-anchor="start" x="765" y="-121.34" font-family="Helvetica,sans-Serif" font-size="10.00">fl::task::Scheduler</text>
 <text text-anchor="middle" x="809" y="-110.34" font-family="Helvetica,sans-Serif" font-size="10.00">::add_task</text>
 </a>
 </g>
 </g>
-<!-- Node18&#45;&gt;Node19 -->
-<g id="edge13_Node000018_Node000019" class="edge">
-<title>Node18&#45;&gt;Node19</title>
-<g id="a_edge13_Node000018_Node000019"><a xlink:title=" ">
+<!-- Node12&#45;&gt;Node13 -->
+<g id="edge13_Node000012_Node000013" class="edge">
+<title>Node12&#45;&gt;Node13</title>
+<g id="a_edge13_Node000012_Node000013"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M513.12,-124.62C583.17,-123.13 682.84,-121 746.48,-119.65"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="746.83,-123.14 756.76,-119.43 746.68,-116.15 746.83,-123.14"/>
 </a>
 </g>
 </g>
-<!-- Node20 -->
-<g id="Node000020" class="node">
-<title>Node20</title>
-<g id="a_Node000020"><a xlink:href="../../db/d5c/namespacefl_1_1task_a0f002cad452f6b7f8dff6ba2b8f0f8b8.html#a0f002cad452f6b7f8dff6ba2b8f0f8b8" target="_top" xlink:title=" ">
+<!-- Node16 -->
+<g id="Node000016" class="node">
+<title>Node16</title>
+<g id="a_Node000016"><a xlink:href="../../db/d5c/namespacefl_1_1task_ad990b0044cf3097520e9afa9aa6b27f5.html#ad990b0044cf3097520e9afa9aa6b27f5" target="_top" xlink:title="Creates a task that runs at a fixed millisecond interval.">
 <polygon fill="#fff0f0" stroke="red" points="681.5,-83.84 577.5,-83.84 577.5,-64.84 681.5,-64.84 681.5,-83.84"/>
 <text text-anchor="middle" x="629.5" y="-71.84" font-family="Helvetica,sans-Serif" font-size="10.00">fl::task::every_ms</text>
 </a>
 </g>
 </g>
-<!-- Node18&#45;&gt;Node20 -->
-<g id="edge14_Node000018_Node000020" class="edge">
-<title>Node18&#45;&gt;Node20</title>
-<g id="a_edge14_Node000018_Node000020"><a xlink:title=" ">
+<!-- Node12&#45;&gt;Node16 -->
+<g id="edge14_Node000012_Node000016" class="edge">
+<title>Node12&#45;&gt;Node16</title>
+<g id="a_edge14_Node000012_Node000016"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M488.84,-111.3C518.62,-103.42 554.61,-93.9 582.6,-86.49"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="583.75,-89.8 592.52,-83.86 581.96,-83.04 583.75,-89.8"/>
 </a>
 </g>
 </g>
-<!-- Node22 -->
-<g id="Node000022" class="node">
-<title>Node22</title>
-<g id="a_Node000022"><a xlink:href="../../d2/d2b/classfl_1_1task_1_1_scheduler_a266030d285c7f6ae31eb3c619cee8693.html#a266030d285c7f6ae31eb3c619cee8693" target="_top" xlink:title=" ">
+<!-- Node18 -->
+<g id="Node000018" class="node">
+<title>Node18</title>
+<g id="a_Node000018"><a xlink:href="../../d2/d2b/classfl_1_1task_1_1_scheduler_a266030d285c7f6ae31eb3c619cee8693.html#a266030d285c7f6ae31eb3c619cee8693" target="_top" xlink:title=" ">
 <polygon fill="#fff0f0" stroke="red" points="861,-187.34 757,-187.34 757,-157.34 861,-157.34 861,-187.34"/>
 <text text-anchor="start" x="765" y="-175.34" font-family="Helvetica,sans-Serif" font-size="10.00">fl::task::Scheduler</text>
 <text text-anchor="middle" x="809" y="-164.34" font-family="Helvetica,sans-Serif" font-size="10.00">::instance</text>
 </a>
 </g>
 </g>
-<!-- Node18&#45;&gt;Node22 -->
-<g id="edge15_Node000018_Node000022" class="edge">
-<title>Node18&#45;&gt;Node22</title>
-<g id="a_edge15_Node000018_Node000022"><a xlink:title=" ">
+<!-- Node12&#45;&gt;Node18 -->
+<g id="edge15_Node000012_Node000018" class="edge">
+<title>Node12&#45;&gt;Node18</title>
+<g id="a_edge15_Node000012_Node000018"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M464.98,-141.49C487.99,-151.22 519.7,-163.01 549,-168.34 615.78,-180.5 693.85,-179.71 746.68,-177.02"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="747.11,-180.5 756.9,-176.45 746.72,-173.51 747.11,-180.5"/>
 </a>
 </g>
 </g>
-<!-- Node25 -->
-<g id="Node000025" class="node">
-<title>Node25</title>
-<g id="a_Node000025"><a xlink:href="../../d5/d06/classfl_1_1detail_1_1_async_logger_service_task_ab5cd1a92bcf542222607179a5363c2e0.html#ab5cd1a92bcf542222607179a5363c2e0" target="_top" xlink:title="Service all registered loggers (called by task)">
+<!-- Node21 -->
+<g id="Node000021" class="node">
+<title>Node21</title>
+<g id="a_Node000021"><a xlink:href="../../d5/d06/classfl_1_1detail_1_1_async_logger_service_task_ab5cd1a92bcf542222607179a5363c2e0.html#ab5cd1a92bcf542222607179a5363c2e0" target="_top" xlink:title="Service all registered loggers (called by task)">
 <polygon fill="#fff0f0" stroke="red" points="710,-46.34 549,-46.34 549,-16.34 710,-16.34 710,-46.34"/>
 <text text-anchor="start" x="557" y="-34.34" font-family="Helvetica,sans-Serif" font-size="10.00">fl::detail::AsyncLoggerService</text>
 <text text-anchor="middle" x="629.5" y="-23.34" font-family="Helvetica,sans-Serif" font-size="10.00">Task::serviceLoggers</text>
 </a>
 </g>
 </g>
-<!-- Node18&#45;&gt;Node25 -->
-<g id="edge16_Node000018_Node000025" class="edge">
-<title>Node18&#45;&gt;Node25</title>
-<g id="a_edge16_Node000018_Node000025"><a xlink:title=" ">
+<!-- Node12&#45;&gt;Node21 -->
+<g id="edge16_Node000012_Node000021" class="edge">
+<title>Node12&#45;&gt;Node21</title>
+<g id="a_edge16_Node000012_Node000021"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M453.1,-111.28C475.87,-95.58 513.63,-71.11 549,-55.34 553.38,-53.39 557.96,-51.54 562.62,-49.8"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="564,-53.02 572.25,-46.38 561.66,-46.43 564,-53.02"/>
 </a>
 </g>
 </g>
-<!-- Node32 -->
-<g id="Node000032" class="node">
-<title>Node32</title>
-<g id="a_Node000032"><a xlink:href="../../de/daf/classfl_1_1task_1_1_handle_a01b05372acab06bd2197d033aafe8cb9.html#a01b05372acab06bd2197d033aafe8cb9" target="_top" xlink:title=" ">
+<!-- Node29 -->
+<g id="Node000029" class="node">
+<title>Node29</title>
+<g id="a_Node000029"><a xlink:href="../../de/daf/classfl_1_1task_1_1_handle_a0d96031ff5c53ece780698c5f39d9d2b.html#a0d96031ff5c53ece780698c5f39d9d2b" target="_top" xlink:title="Sets the callback invoked when the task runs successfully.">
 <polygon fill="#fff0f0" stroke="red" points="688.5,-159.84 570.5,-159.84 570.5,-140.84 688.5,-140.84 688.5,-159.84"/>
 <text text-anchor="middle" x="629.5" y="-147.84" font-family="Helvetica,sans-Serif" font-size="10.00">fl::task::Handle::then</text>
 </a>
 </g>
 </g>
-<!-- Node18&#45;&gt;Node32 -->
-<g id="edge18_Node000018_Node000032" class="edge">
-<title>Node18&#45;&gt;Node32</title>
-<g id="a_edge18_Node000018_Node000032"><a xlink:title=" ">
+<!-- Node12&#45;&gt;Node29 -->
+<g id="edge18_Node000012_Node000029" class="edge">
+<title>Node12&#45;&gt;Node29</title>
+<g id="a_edge18_Node000012_Node000029"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M513.06,-136.24C528.69,-138.15 544.92,-140.13 560.11,-141.99"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="560.08,-145.51 570.43,-143.25 560.93,-138.56 560.08,-145.51"/>
 </a>
 </g>
 </g>
-<!-- Node25&#45;&gt;Node4 -->
-<g id="edge17_Node000025_Node000004" class="edge">
-<title>Node25&#45;&gt;Node4</title>
-<g id="a_edge17_Node000025_Node000004"><a xlink:title=" ">
+<!-- Node21&#45;&gt;Node4 -->
+<g id="edge17_Node000021_Node000004" class="edge">
+<title>Node21&#45;&gt;Node4</title>
+<g id="a_edge17_Node000021_Node000004"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M710.16,-31.34C718.68,-31.34 727.31,-31.34 735.74,-31.34"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="735.89,-34.84 745.89,-31.34 735.89,-27.84 735.89,-34.84"/>
 </a>
 </g>
 </g>
-<!-- Node32&#45;&gt;Node19 -->
-<g id="edge19_Node000032_Node000019" class="edge">
-<title>Node32&#45;&gt;Node19</title>
-<g id="a_edge19_Node000032_Node000019"><a xlink:title=" ">
+<!-- Node29&#45;&gt;Node13 -->
+<g id="edge19_Node000029_Node000013" class="edge">
+<title>Node29&#45;&gt;Node13</title>
+<g id="a_edge19_Node000029_Node000013"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M683.28,-140.83C703.3,-137.22 726.26,-133.08 746.98,-129.34"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="747.73,-132.76 756.95,-127.54 746.49,-125.87 747.73,-132.76"/>
 </a>
 </g>
 </g>
-<!-- Node32&#45;&gt;Node22 -->
-<g id="edge20_Node000032_Node000022" class="edge">
-<title>Node32&#45;&gt;Node22</title>
-<g id="a_edge20_Node000032_Node000022"><a xlink:title=" ">
+<!-- Node29&#45;&gt;Node18 -->
+<g id="edge20_Node000029_Node000018" class="edge">
+<title>Node29&#45;&gt;Node18</title>
+<g id="a_edge20_Node000029_Node000018"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M688.62,-157.55C707.3,-159.86 728.05,-162.43 746.94,-164.77"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="746.57,-168.25 756.92,-166.01 747.43,-161.31 746.57,-168.25"/>
 </a>

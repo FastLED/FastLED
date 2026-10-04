@@ -1,0 +1,32 @@
+<map id="fl::weak_ptr::lock" name="fl::weak_ptr::lock">
+<area shape="rect" id="Node000001" title=" " alt="" coords="867,272,1000,297"/>
+<area shape="rect" id="Node000002" href="$d3/d6b/classfl_1_1audio_1_1_processor_ac25ffea2d1abf227cecff4e4a7448a5a.html#ac25ffea2d1abf227cecff4e4a7448a5a" title=" " alt="" coords="644,214,808,254"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="866,271,807,257,809,251,868,266"/>
+<area shape="rect" id="Node000010" href="$dc/da5/classfl_1_1_gamma8_a1e23628420de45c97d2b741722445024.html#a1e23628420de45c97d2b741722445024" title=" " alt="" coords="633,312,819,337"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="854,303,793,315,792,309,853,297"/>
+<area shape="poly" id="edge9_Node000002_Node000002" title=" " alt="" coords="761,202,748,195,726,193,706,195,695,199,690,205,692,213,687,214,685,204,691,195,705,189,726,187,750,190,763,198"/>
+<area shape="rect" id="Node000003" href="$d4/d9d/classfl_1_1audio_1_1_audio_manager_a50a318328d3ab7153dd90b4f7c63c5c0.html#a50a318328d3ab7153dd90b4f7c63c5c0" title=" " alt="" coords="377,129,585,155"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="658,212,515,157,517,152,660,207"/>
+<area shape="rect" id="Node000009" href="$d4/d9d/classfl_1_1audio_1_1_audio_manager_a836eb15d1067209d94b7e6108bb7ec97.html#a836eb15d1067209d94b7e6108bb7ec97" title=" " alt="" coords="377,221,585,247"/>
+<area shape="poly" id="edge8_Node000002_Node000009" title=" " alt="" coords="630,237,585,237,585,231,630,231"/>
+<area shape="rect" id="Node000004" href="$dd/dbb/class_c_fast_l_e_d_aa6902ef0c06d6419b56e76662db6c5b9.html#aa6902ef0c06d6419b56e76662db6c5b9" title="Add an audio input and return an auto&#45;pumped Processor." alt="" coords="110,5,225,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="453,122,398,82,364,61,328,45,276,30,224,23,225,18,277,25,330,39,367,56,401,77,456,118"/>
+<area shape="rect" id="Node000005" href="$dd/dbb/class_c_fast_l_e_d_a4c80cc41fe64d47acf02e810c57768d4.html#a4c80cc41fe64d47acf02e810c57768d4" title="Add a pre&#45;created audio input and return an auto&#45;pumped Processor." alt="" coords="110,55,225,80"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="434,127,329,94,224,76,225,71,330,89,436,122"/>
+<area shape="rect" id="Node000006" href="$dd/dbb/class_c_fast_l_e_d_aa25cbb36c9196a7c2da75e86e6209792.html#aa25cbb36c9196a7c2da75e86e6209792" title="Add a UIAudio element and return an auto&#45;pumped Processor." alt="" coords="110,104,225,129"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="363,135,225,124,225,119,364,130"/>
+<area shape="rect" id="Node000007" href="$d4/d9d/classfl_1_1audio_1_1_audio_manager_a2e4d915622d2cd1e00f2a3ffa0f2e729.html#a2e4d915622d2cd1e00f2a3ffa0f2e729" title=" " alt="" coords="63,153,271,179"/>
+<area shape="poly" id="edge6_Node000003_Node000007" title=" " alt="" coords="364,154,272,161,271,155,364,148"/>
+<area shape="rect" id="Node000008" href="$d2/d4d/classfl_1_1_u_i_audio_abded80a334cc5bd5708e3cad6fc585e8.html#abded80a334cc5bd5708e3cad6fc585e8" title=" " alt="" coords="87,203,247,228"/>
+<area shape="poly" id="edge7_Node000003_Node000008" title=" " alt="" coords="433,162,330,193,248,208,247,203,329,187,432,157"/>
+<area shape="poly" id="edge15_Node000010_Node000010" title=" " alt="" coords="763,302,752,294,726,291,704,293,693,297,690,303,696,310,692,314,685,304,689,294,703,288,726,285,755,289,766,298"/>
+<area shape="rect" id="Node000011" href="$d4/d36/namespacefl_ab3b16ea2da444a2539d082aae754217f.html#ab3b16ea2da444a2539d082aae754217f" title="Encode complete UCS7604 frame (preamble + padding + pixel data)" alt="" coords="409,340,553,365"/>
+<area shape="poly" id="edge11_Node000010_Node000011" title=" " alt="" coords="620,339,554,347,553,342,619,334"/>
+<area shape="rect" id="Node000012" href="$dd/d78/classfl_1_1_u_c_s7604_controller_t_a0b8dc7f2f0f2e0a2ed3461aa905080ea.html#a0b8dc7f2f0f2e0a2ed3461aa905080ea" title=" " alt="" coords="5,253,329,351"/>
+<area shape="poly" id="edge16_Node000010_Node000012" title=" " alt="" coords="619,323,330,311,330,306,620,318"/>
+<area shape="rect" id="Node000013" href="$dc/d8d/namespacefl_1_1anonymous__namespace_02channel_8cpp_8hpp_03_a5f78780348edce94192b57b45f1778b4.html#a5f78780348edce94192b57b45f1778b4" title="Encode UCS7604 pixel data into the channel data buffer." alt="" coords="41,399,293,439"/>
+<area shape="poly" id="edge17_Node000010_Node000013" title=" " alt="" coords="686,345,639,364,586,381,511,395,435,406,294,418,293,413,434,401,510,390,585,375,637,359,684,340"/>
+<area shape="poly" id="edge12_Node000011_Node000012" title=" " alt="" coords="395,342,329,331,330,326,396,336"/>
+<area shape="poly" id="edge13_Node000011_Node000013" title=" " alt="" coords="408,371,263,402,262,397,407,366"/>
+<area shape="poly" id="edge14_Node000013_Node000013" title=" " alt="" coords="221,388,202,381,167,378,137,380,118,385,112,391,115,398,110,400,106,390,116,380,136,375,167,373,203,375,223,383"/>
+</map>

@@ -1,6 +1,8 @@
 var classfl_1_1audio_1_1fft_1_1_context =
 [
     [ "FftScratch", "d6/dd2/classfl_1_1audio_1_1fft_1_1_context.html#de/de8/structfl_1_1audio_1_1fft_1_1_context_1_1_fft_scratch", [
+      [ "coverageMaxQueue", "d6/dd2/classfl_1_1audio_1_1fft_1_1_context.html#a2a20a1e4a0351c083bb2b27713faa996", null ],
+      [ "cqSnapshot", "d6/dd2/classfl_1_1audio_1_1fft_1_1_context.html#a9d9760681d727a0791c2f235c8ee61fb", null ],
       [ "fftOut", "d6/dd2/classfl_1_1audio_1_1fft_1_1_context.html#a6cd3891ca146742fe84554eb2122419b", null ],
       [ "im", "d6/dd2/classfl_1_1audio_1_1fft_1_1_context.html#a4ff08ff4b131cc42069621a981d65f53", null ],
       [ "mag", "d6/dd2/classfl_1_1audio_1_1fft_1_1_context.html#a70518125b4df5fd0cd5868be9ef01d76", null ],
@@ -15,7 +17,7 @@ var classfl_1_1audio_1_1fft_1_1_context =
       [ "numBins", "d6/dd2/classfl_1_1audio_1_1fft_1_1_context.html#a95c95c111c27c82c11417bd9e9d56174", null ]
     ] ],
     [ "Context", "d6/dd2/classfl_1_1audio_1_1fft_1_1_context_aa9f15ea3ca14b6f9b518a1878bafae71.html#aa9f15ea3ca14b6f9b518a1878bafae71", null ],
-    [ "~Context", "d6/dd2/classfl_1_1audio_1_1fft_1_1_context_ae1e381b93edadc811a3058cce3173807.html#ae1e381b93edadc811a3058cce3173807", null ],
+    [ "~Context", "d6/dd2/classfl_1_1audio_1_1fft_1_1_context_a0a3170171f8fa9e9fdd2aaae22dbd3df.html#a0a3170171f8fa9e9fdd2aaae22dbd3df", null ],
     [ "applyWindow", "d6/dd2/classfl_1_1audio_1_1fft_1_1_context_a1f39ef1ff22ecf5406281e75646c277d.html#a1f39ef1ff22ecf5406281e75646c277d", null ],
     [ "batchMag", "d6/dd2/classfl_1_1audio_1_1fft_1_1_context_a6b647975b14585b339ed202336c22186.html#a6b647975b14585b339ed202336c22186", null ],
     [ "buildLinearBinLut", "d6/dd2/classfl_1_1audio_1_1fft_1_1_context_a95d6be40e4f54c55ee3c6a818b3b4d0c.html#a95d6be40e4f54c55ee3c6a818b3b4d0c", null ],
@@ -42,6 +44,8 @@ var classfl_1_1audio_1_1fft_1_1_context =
     [ "runOctaveWise", "d6/dd2/classfl_1_1audio_1_1fft_1_1_context_afe9dcd43e0591f626db7127bbc638f73.html#afe9dcd43e0591f626db7127bbc638f73", null ],
     [ "sampleSize", "d6/dd2/classfl_1_1audio_1_1fft_1_1_context_aba4d26ec17f538366d3ebc6389f6d80e.html#aba4d26ec17f538366d3ebc6389f6d80e", null ],
     [ "scratch", "d6/dd2/classfl_1_1audio_1_1fft_1_1_context_a82a3d10a1ff9d7feb09e0672e7e44059.html#a82a3d10a1ff9d7feb09e0672e7e44059", null ],
+    [ "mCoverageFirst", "d6/dd2/classfl_1_1audio_1_1fft_1_1_context_aa1fc4916693f90e9b39b8f3dddcdbb5d.html#aa1fc4916693f90e9b39b8f3dddcdbb5d", null ],
+    [ "mCoverageLast", "d6/dd2/classfl_1_1audio_1_1fft_1_1_context_a6e0ce85734df8761dff3668926c3a43f.html#a6e0ce85734df8761dff3668926c3a43f", null ],
     [ "mCqCfg", "d6/dd2/classfl_1_1audio_1_1fft_1_1_context_aa6cdc4ecc17d20e0dacd11f9281c27f6.html#aa6cdc4ecc17d20e0dacd11f9281c27f6", null ],
     [ "mFftOut", "d6/dd2/classfl_1_1audio_1_1fft_1_1_context_ac11eaf7abc1f6f09a68dfecf275c7dce.html#ac11eaf7abc1f6f09a68dfecf275c7dce", null ],
     [ "mFftrCfg", "d6/dd2/classfl_1_1audio_1_1fft_1_1_context_affec3f85464efea1142487aa93502495.html#affec3f85464efea1142487aa93502495", null ],

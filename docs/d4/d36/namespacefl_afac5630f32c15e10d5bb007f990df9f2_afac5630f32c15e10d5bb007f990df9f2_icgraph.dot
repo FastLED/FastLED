@@ -1,0 +1,16 @@
+digraph "fl::delayNanoseconds"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::delayNanoseconds",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Delay for a compile-time constant number of nanoseconds."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::delayNs",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a79c8f1dd8d5f676f8a207aefe96753e6.html#a79c8f1dd8d5f676f8a207aefe96753e6",tooltip="Shorter alias for delayNanoseconds (template version)"];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::delayNs",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_aa030949956c0fb5ca82c60631c335c45.html#aa030949956c0fb5ca82c60631c335c45",tooltip="Shorter alias for delayNanoseconds (runtime version)"];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::delayNs",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a4a5a945c8459b84e45edadba948993b7.html#a4a5a945c8459b84e45edadba948993b7",tooltip="Shorter alias for delayNanoseconds with explicit clock frequency."];
+}

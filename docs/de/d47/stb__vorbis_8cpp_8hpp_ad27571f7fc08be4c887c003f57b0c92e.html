@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -128,16 +128,17 @@ $(function(){initNavTree('de/d47/stb__vorbis_8cpp_8hpp_ad27571f7fc08be4c887c003f
 <div class="line">   var = f-&gt;acc &amp; <a class="code hl_define" href="../../de/d47/stb__vorbis_8cpp_8hpp_ae775f38b526f0a59f62026ae9a6d80dc.html#ae775f38b526f0a59f62026ae9a6d80dc">FL_STBV_FAST_HUFFMAN_TABLE_MASK</a>;                    \</div>
 <div class="line">   var = c-&gt;fast_huffman[var];                                \</div>
 <div class="line">   if (var &gt;= 0) {                                            \</div>
-<div class="line">      int32_t n = c-&gt;codeword_lengths[var];                       \</div>
+<div class="line">      <a class="code hl_typedef" href="../../df/dd8/stdint_8h_af3e33cc018d447145f25467049c67d67.html#af3e33cc018d447145f25467049c67d67">int32_t</a> n = c-&gt;codeword_lengths[var];                       \</div>
 <div class="line">      f-&gt;acc &gt;&gt;= n;                                           \</div>
 <div class="line">      f-&gt;valid_bits -= n;                                     \</div>
 <div class="line">      if (f-&gt;valid_bits &lt; 0) { f-&gt;valid_bits = 0; var = -1; } \</div>
 <div class="line">   } <span class="keywordflow">else</span> {                                                   \</div>
-<div class="line">      var = <a class="code hl_function" href="../../d2/d59/namespacefl_1_1third__party_1_1vorbis_a9b43af9a5f7057413dc76898ce30d7fe.html#a9b43af9a5f7057413dc76898ce30d7fe">codebook_decode_scalar_raw</a>(f,c);                  \</div>
+<div class="line">      var = <a class="code hl_function" href="../../d2/d59/namespacefl_1_1third__party_1_1vorbis_a65c4ff8ccfcdd310c5a53c8454de31dd.html#a65c4ff8ccfcdd310c5a53c8454de31dd">codebook_decode_scalar_raw</a>(f,c);                  \</div>
 <div class="line">   }</div>
-<div class="ttc" id="anamespacefl_1_1third__party_1_1vorbis_a9b43af9a5f7057413dc76898ce30d7fe_html_a9b43af9a5f7057413dc76898ce30d7fe"><div class="ttname"><a href="../../d2/d59/namespacefl_1_1third__party_1_1vorbis_a9b43af9a5f7057413dc76898ce30d7fe.html#a9b43af9a5f7057413dc76898ce30d7fe">fl::third_party::vorbis::codebook_decode_scalar_raw</a></div><div class="ttdeci">static int32_t codebook_decode_scalar_raw(vorb *f, Codebook *c) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../de/d47/stb__vorbis_8cpp_8hpp_source.html#l01384">stb_vorbis.cpp.hpp:1384</a></div></div>
+<div class="ttc" id="anamespacefl_1_1third__party_1_1vorbis_a65c4ff8ccfcdd310c5a53c8454de31dd_html_a65c4ff8ccfcdd310c5a53c8454de31dd"><div class="ttname"><a href="../../d2/d59/namespacefl_1_1third__party_1_1vorbis_a65c4ff8ccfcdd310c5a53c8454de31dd.html#a65c4ff8ccfcdd310c5a53c8454de31dd">fl::third_party::vorbis::codebook_decode_scalar_raw</a></div><div class="ttdeci">static int32_t codebook_decode_scalar_raw(vorb *f, Codebook *c) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../de/d47/stb__vorbis_8cpp_8hpp_source.html#l01384">stb_vorbis.cpp.hpp:1384</a></div></div>
 <div class="ttc" id="astb__vorbis_8cpp_8hpp_a1f949448698752aee67db30679ce9a87_html_a1f949448698752aee67db30679ce9a87"><div class="ttname"><a href="../../de/d47/stb__vorbis_8cpp_8hpp_a1f949448698752aee67db30679ce9a87.html#a1f949448698752aee67db30679ce9a87">FL_STB_VORBIS_FAST_HUFFMAN_LENGTH</a></div><div class="ttdeci">#define FL_STB_VORBIS_FAST_HUFFMAN_LENGTH</div><div class="ttdef"><b>Definition</b> <a href="../../de/d47/stb__vorbis_8cpp_8hpp_source.html#l00160">stb_vorbis.cpp.hpp:160</a></div></div>
 <div class="ttc" id="astb__vorbis_8cpp_8hpp_ae775f38b526f0a59f62026ae9a6d80dc_html_ae775f38b526f0a59f62026ae9a6d80dc"><div class="ttname"><a href="../../de/d47/stb__vorbis_8cpp_8hpp_ae775f38b526f0a59f62026ae9a6d80dc.html#ae775f38b526f0a59f62026ae9a6d80dc">FL_STBV_FAST_HUFFMAN_TABLE_MASK</a></div><div class="ttdeci">#define FL_STBV_FAST_HUFFMAN_TABLE_MASK</div><div class="ttdef"><b>Definition</b> <a href="../../de/d47/stb__vorbis_8cpp_8hpp_source.html#l00351">stb_vorbis.cpp.hpp:351</a></div></div>
+<div class="ttc" id="astdint_8h_af3e33cc018d447145f25467049c67d67_html_af3e33cc018d447145f25467049c67d67"><div class="ttname"><a href="../../df/dd8/stdint_8h_af3e33cc018d447145f25467049c67d67.html#af3e33cc018d447145f25467049c67d67">int32_t</a></div><div class="ttdeci">fl::i32 int32_t</div><div class="ttdef"><b>Definition</b> <a href="../../df/dd8/stdint_8h_source.html#l00219">stdint.h:219</a></div></div>
 </div><!-- fragment -->
 <p class="definition">Definition at line <a class="el" href="../../de/d47/stb__vorbis_8cpp_8hpp_source.html#l01445">1445</a> of file <a class="el" href="../../de/d47/stb__vorbis_8cpp_8hpp_source.html">stb_vorbis.cpp.hpp</a>.</p>
 <div class="fragment"><div class="line"><span class="lineno"> 1445</span><span class="preprocessor">#define FL_STBV_DECODE_RAW(var, f,c)                                  \</span></div>
@@ -163,7 +164,7 @@ $(function(){initNavTree('de/d47/stb__vorbis_8cpp_8hpp_ad27571f7fc08be4c887c003f
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_c30bdf76ce759a4eae8387be42921388.html">third_party</a></li><li class="navelem"><a class="el" href="../../dir_bce8f08b121a5277aa3b9c71bf7738d1.html">stb</a></li><li class="navelem"><a class="el" href="../../de/d47/stb__vorbis_8cpp_8hpp.html">stb_vorbis.cpp.hpp</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:02 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:05 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

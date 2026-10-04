@@ -6,8 +6,8 @@ var classfl_1_1_http_request_parser =
       [ "READ_BODY", "d1/d66/classfl_1_1_http_request_parser_a6f4730df9ad480d1ca88a96d24455353.html#a6f4730df9ad480d1ca88a96d24455353afe6a70a324e7374830c715907e4e1859", null ],
       [ "COMPLETE", "d1/d66/classfl_1_1_http_request_parser_a6f4730df9ad480d1ca88a96d24455353.html#a6f4730df9ad480d1ca88a96d24455353a4078fa542b93dc597953efd621b20608", null ]
     ] ],
-    [ "HttpRequestParser", "d1/d66/classfl_1_1_http_request_parser_ac944b90e08be275f68725f3eb90aa9a9.html#ac944b90e08be275f68725f3eb90aa9a9", null ],
-    [ "~HttpRequestParser", "d1/d66/classfl_1_1_http_request_parser_a213b8e5364137b2bdbab2d3d63e5cde5.html#a213b8e5364137b2bdbab2d3d63e5cde5", null ],
+    [ "HttpRequestParser", "d1/d66/classfl_1_1_http_request_parser_aa96df41b185e2b39804b1f20e4c1805c.html#aa96df41b185e2b39804b1f20e4c1805c", null ],
+    [ "~HttpRequestParser", "d1/d66/classfl_1_1_http_request_parser_a61dfe1f51234c24a2e63819a6dbd3d72.html#a61dfe1f51234c24a2e63819a6dbd3d72", null ],
     [ "consume", "d1/d66/classfl_1_1_http_request_parser_a0df4202cea9928351645d3458be72606.html#a0df4202cea9928351645d3458be72606", null ],
     [ "feed", "d1/d66/classfl_1_1_http_request_parser_af4a63c8924d5303f91d862eec5ee2067.html#af4a63c8924d5303f91d862eec5ee2067", null ],
     [ "findCRLF", "d1/d66/classfl_1_1_http_request_parser_a83023e5fea6c39cf21ca31edb2d6f302.html#a83023e5fea6c39cf21ca31edb2d6f302", null ],

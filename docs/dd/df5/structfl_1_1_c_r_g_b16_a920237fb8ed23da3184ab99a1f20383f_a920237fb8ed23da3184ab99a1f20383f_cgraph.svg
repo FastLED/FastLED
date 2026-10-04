@@ -31,7 +31,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../dd/df5/structfl_1_1_c_r_g_b16_a86482cfd8f2385a291b9eb81fbf577d0.html#a86482cfd8f2385a291b9eb81fbf577d0" target="_top" xlink:title=" ">
+<g id="a_Node000002"><a xlink:href="../../dd/df5/structfl_1_1_c_r_g_b16_a45235c1e453e1b299945492cfcd28ad6.html#a45235c1e453e1b299945492cfcd28ad6" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="282,-93 168,-93 168,-74 282,-74 282,-93"/>
 <text text-anchor="middle" x="225" y="-81" font-family="Helvetica,sans-Serif" font-size="10.00">fl::CRGB16::CRGB16</text>
 </a>
@@ -49,7 +49,7 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d5/dec/classfl_1_1u8x8_a7e4afb60be35fded1580db7b9f469280.html#a7e4afb60be35fded1580db7b9f469280" target="_top" xlink:title=" ">
+<g id="a_Node000003"><a xlink:href="../../d5/dec/classfl_1_1u8x8_ae37a790ceb434cad1bed806fd44fd4b7.html#ae37a790ceb434cad1bed806fd44fd4b7" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="277.5,-56 172.5,-56 172.5,-37 277.5,-37 277.5,-56"/>
 <text text-anchor="middle" x="225" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">fl::u8x8::from_raw</text>
 </a>
@@ -67,7 +67,7 @@
 <!-- Node5 -->
 <g id="Node000005" class="node">
 <title>Node5</title>
-<g id="a_Node000005"><a xlink:href="../../d5/dec/classfl_1_1u8x8_a6f24da2ef3b9c2ec020e488f86d26631.html#a6f24da2ef3b9c2ec020e488f86d26631" target="_top" xlink:title=" ">
+<g id="a_Node000005"><a xlink:href="../../d5/dec/classfl_1_1u8x8_aabf11bb97dfd521efe4bbc614c0f6748.html#aabf11bb97dfd521efe4bbc614c0f6748" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="398,-19 321,-19 321,0 398,0 398,-19"/>
 <text text-anchor="middle" x="359.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::u8x8::raw</text>
 </a>
@@ -85,7 +85,7 @@
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../d5/dec/classfl_1_1u8x8_af0bfb544ff5558dc2bcb3986ddbfa1b8.html#af0bfb544ff5558dc2bcb3986ddbfa1b8" target="_top" xlink:title=" ">
+<g id="a_Node000004"><a xlink:href="../../d5/dec/classfl_1_1u8x8_ae17cf77779037edfe2e9d23bdaa645cb.html#ae17cf77779037edfe2e9d23bdaa645cb" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="401,-56 318,-56 318,-37 401,-37 401,-56"/>
 <text text-anchor="middle" x="359.5" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">fl::u8x8::u8x8</text>
 </a>

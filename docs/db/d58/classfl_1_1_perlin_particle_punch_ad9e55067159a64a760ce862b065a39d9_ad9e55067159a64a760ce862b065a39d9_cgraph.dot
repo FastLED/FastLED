@@ -18,9 +18,9 @@ digraph "fl::PerlinParticlePunch::renderAmbient"
   Node2 -> Node6 [id="edge5_Node000002_Node000006",color="steelblue1",style="solid",tooltip=" "];
   Node6 [id="Node000006",label="map8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d19/group___linear_interpolation_gaeb360269bf892a49b96b9ea8248ea8a7.html#gaeb360269bf892a49b96b9ea8248ea8a7",tooltip="Map from one full-range 8-bit value into a narrower range of 8-bit values, possibly a range of hues."];
   Node1 -> Node7 [id="edge6_Node000001_Node000007",color="steelblue1",style="solid",tooltip=" "];
-  Node7 [id="Node000007",label="fl::CRGB::nscale8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dd6/structfl_1_1_c_r_g_b_aa272170bea8120f101f27ebd2c323b55.html#aa272170bea8120f101f27ebd2c323b55",tooltip="Scale down a RGB to N/256ths of its current brightness, using \"plain math\" dimming rules."];
+  Node7 [id="Node000007",label="fl::CRGB::nscale8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dd6/structfl_1_1_c_r_g_b_a88ec345b046910f4ddf5cd4d793e7e88.html#a88ec345b046910f4ddf5cd4d793e7e88",tooltip="Scale down a RGB to N/256ths of its current brightness, using \"plain math\" dimming rules."];
   Node7 -> Node8 [id="edge7_Node000007_Node000008",color="steelblue1",style="solid",tooltip=" "];
-  Node8 [id="Node000008",label="fl::CRGB::CRGB",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dd6/structfl_1_1_c_r_g_b_adb891cc4fe8f5ac2188d72c13c0256fd.html#adb891cc4fe8f5ac2188d72c13c0256fd",tooltip="Default constructor."];
+  Node8 [id="Node000008",label="fl::CRGB::CRGB",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dd6/structfl_1_1_c_r_g_b_a910ee467a963ad6805026ad83873e52b.html#a910ee467a963ad6805026ad83873e52b",tooltip="Default constructor."];
   Node1 -> Node9 [id="edge8_Node000001_Node000009",color="steelblue1",style="solid",tooltip=" "];
   Node9 [id="Node000009",label="offset",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d",tooltip=" "];
   Node1 -> Node10 [id="edge9_Node000001_Node000010",color="steelblue1",style="solid",tooltip=" "];

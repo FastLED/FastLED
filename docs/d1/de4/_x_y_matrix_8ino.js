@@ -10,7 +10,7 @@ var _x_y_matrix_8ino =
     [ "loop", "d1/de4/_x_y_matrix_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f", null ],
     [ "setup", "d1/de4/_x_y_matrix_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d", null ],
     [ "XY", "d1/de4/_x_y_matrix_8ino_a7aa2d780d14ccc2f3ce3c493e01999eb.html#a7aa2d780d14ccc2f3ce3c493e01999eb", null ],
-    [ "XYsafe", "d1/de4/_x_y_matrix_8ino_ad98bdc172624acb23ec638fa20968961.html#ad98bdc172624acb23ec638fa20968961", null ],
+    [ "XYsafe", "d1/de4/_x_y_matrix_8ino_a9ff6efd2c3949595f58f3e40cdd3e6dc.html#a9ff6efd2c3949595f58f3e40cdd3e6dc", null ],
     [ "kMatrixHeight", "d1/de4/_x_y_matrix_8ino_ae39cabe8e0435a52a03468662a4aa343.html#ae39cabe8e0435a52a03468662a4aa343", null ],
     [ "kMatrixSerpentineLayout", "d1/de4/_x_y_matrix_8ino_a122b5cb9087d873c6247c05882c1695c.html#a122b5cb9087d873c6247c05882c1695c", null ],
     [ "kMatrixVertical", "d1/de4/_x_y_matrix_8ino_a461a53cf8309c9e35c907f9eaf0ecbc5.html#a461a53cf8309c9e35c907f9eaf0ecbc5", null ],

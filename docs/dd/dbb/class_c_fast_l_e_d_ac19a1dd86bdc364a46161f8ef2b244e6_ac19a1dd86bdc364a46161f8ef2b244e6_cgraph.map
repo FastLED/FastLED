@@ -1,0 +1,5 @@
+<map id="CFastLED::addLeds" name="CFastLED::addLeds">
+<area shape="rect" id="Node000001" title="Add a block based parallel output CLEDController instance to the world." alt="" coords="5,5,149,31"/>
+<area shape="rect" id="Node000002" href="$dd/dbb/class_c_fast_l_e_d_af05a7eb54282b7c43293e2905b7405bb.html#af05a7eb54282b7c43293e2905b7405bb" title="Add a CLEDController instance to the world." alt="" coords="197,5,341,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="150,15,184,15,184,21,150,21"/>
+</map>

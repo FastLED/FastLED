@@ -1,0 +1,9 @@
+<map id="mood_ring::FlowLayer" name="mood_ring::FlowLayer">
+<area shape="rect" id="Node000001" title="Busy room without a beat." alt="" coords="185,123,351,148"/>
+<area shape="rect" id="Node000002" href="$d8/dc9/classmood__ring_1_1_follower.html" title="Smoothed one&#45;pole follower with independent attack and release." alt="" coords="5,13,160,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="116,43,250,120,247,125,113,47"/>
+<area shape="rect" id="Node000003" href="$db/deb/classmood__ring_1_1_flow_layer.html#d3/d4f/structmood__ring_1_1_flow_layer_1_1_grain" title=" " alt="" coords="185,5,351,45"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="271,59,271,122,265,122,265,59"/>
+<area shape="rect" id="Node000004" href="$da/d03/classmood__ring_1_1_xorshift.html" title="Small deterministic RNG for sparkle. No libc, no global state." alt="" coords="376,13,525,38"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="423,48,335,101,291,125,289,120,332,96,420,43"/>
+</map>

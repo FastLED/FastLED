@@ -1,0 +1,21 @@
+digraph "fl::third_party::nsgif__colour_table_decode"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::third_party::nsgif\l__colour_table_decode",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Extract a GIF colour table into a LibNSGIF colour table buffer."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::third_party::nsgif\l__colour_table_extract",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d86/namespacefl_1_1third__party_af0e6caee94b8038dc36959de5ae22f41.html#af0e6caee94b8038dc36959de5ae22f41",tooltip="Extract a GIF colour table into a LibNSGIF colour table buffer."];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::third_party::nsgif\l__parse_colour_table",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d86/namespacefl_1_1third__party_a19fba0f55b21ea4a0addf0568bd68d2b.html#a19fba0f55b21ea4a0addf0568bd68d2b",tooltip="Get a frame's colour table."];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::third_party::nsgif\l__process_frame",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d1/d86/namespacefl_1_1third__party_a5544ea660bb409ce782aec2a3629f1fe.html#a5544ea660bb409ce782aec2a3629f1fe",tooltip="Attempts to initialise the next frame."];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::third_party::nsgif\l_data_scan",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d1/d86/namespacefl_1_1third__party_ac0c0b97e37911e82ef3974b049784c33.html#ac0c0b97e37911e82ef3974b049784c33",tooltip="Scan the source image data."];
+  Node2 -> Node5 [id="edge5_Node000002_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node10 [id="edge6_Node000001_Node000010",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="fl::third_party::nsgif\l_local_palette",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d86/namespacefl_1_1third__party_a4b8fe20eb5f26c94e8bb4991820b4ca3.html#a4b8fe20eb5f26c94e8bb4991820b4ca3",tooltip="Get the local colour palette for a frame."];
+}

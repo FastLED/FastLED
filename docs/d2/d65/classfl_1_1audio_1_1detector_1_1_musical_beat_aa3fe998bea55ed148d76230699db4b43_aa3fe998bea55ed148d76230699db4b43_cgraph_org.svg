@@ -30,7 +30,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_a13472c5b2c18bcd9cc92903b52b18faa.html#a13472c5b2c18bcd9cc92903b52b18faa" target="_top" xlink:title=" ">
+<g id="a_Node000002"><a xlink:href="../../d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_abc7b8eaf6fe345fbd930f17ab2c5f5ea.html#abc7b8eaf6fe345fbd930f17ab2c5f5ea" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="319,-78 170,-78 170,-48 319,-48 319,-78"/>
 <text text-anchor="start" x="178" y="-66" font-family="Helvetica,sans-Serif" font-size="10.00">fl::audio::detector</text>
 <text text-anchor="middle" x="244.5" y="-55" font-family="Helvetica,sans-Serif" font-size="10.00">::MusicalBeat::MusicalBeat</text>

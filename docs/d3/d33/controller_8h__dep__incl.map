@@ -1,10 +1,10 @@
 <map id="controller.h" name="controller.h">
 <area shape="rect" id="Node000001" title=" " alt="" coords="3234,5,3329,31"/>
-<area shape="rect" id="Node000002" href="$db/d97/_fast_l_e_d_8h.html" title="central include file for FastLED, defines the CFastLED class/object" alt="" coords="3253,387,3339,412"/>
+<area shape="rect" id="Node000002" href="$d6/d64/fastled_8h.html" title="central include file for FastLED, defines the CFastLED class/object" alt="" coords="3253,387,3339,412"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="3343,28,3432,49,3529,79,3572,97,3607,117,3631,139,3638,151,3640,163,3640,247,3638,270,3631,291,3620,310,3605,326,3568,353,3523,372,3474,386,3425,394,3339,401,3339,395,3424,389,3473,381,3522,367,3566,348,3602,322,3615,307,3626,289,3632,269,3635,247,3635,164,3633,153,3627,142,3604,121,3570,102,3527,84,3430,54,3341,33"/>
 <area shape="rect" id="Node000006" href="$d6/ddc/fastspi_8h.html" title="Serial peripheral interface (SPI) definitions per platform." alt="" coords="3281,152,3359,177"/>
 <area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="3291,44,3319,151,3314,152,3285,45"/>
-<area shape="rect" id="Node000010" href="$d7/dc2/fl_2system_2_fast_l_e_d_8h.html" title="Internal FastLED header for implementation files." alt="" coords="2322,79,2465,104"/>
+<area shape="rect" id="Node000010" href="$d0/d69/fl_2system_2fastled_8h.html" title="Internal FastLED header for implementation files." alt="" coords="2322,79,2465,104"/>
 <area shape="poly" id="edge12_Node000001_Node000010" title=" " alt="" coords="3220,27,2465,87,2465,82,3220,22"/>
 <area shape="rect" id="Node000056" href="$d1/d2a/power__mgt_8cpp_8hpp.html" title=" " alt="" coords="2953,387,3103,412"/>
 <area shape="poly" id="edge81_Node000001_Node000056" title=" " alt="" coords="3268,44,3038,388,3034,385,3264,41"/>

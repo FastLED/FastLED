@@ -38,7 +38,7 @@
 <!-- Node7 -->
 <g id="Node000007" class="node">
 <title>Node7</title>
-<g id="a_Node000007"><a xlink:href="../../db/d8a/blur_8cpp_8hpp_a298850b988ba912f4ad05845cda11866.html#a298850b988ba912f4ad05845cda11866" target="_top" xlink:title=" ">
+<g id="a_Node000007"><a xlink:href="../../db/d8a/blur_8cpp_8hpp_a7ad6acb87618f9c72ed564a723b60380.html#a7ad6acb87618f9c72ed564a723b60380" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="119,-19 90,-19 90,0 119,0 119,-19"/>
 <text text-anchor="middle" x="104.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">XY</text>
 </a>
@@ -56,7 +56,7 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d8/df9/group___noise_generation_gaeb72246ebd597b60a7e575173accf2fd.html#gaeb72246ebd597b60a7e575173accf2fd" target="_top" xlink:title=" ">
+<g id="a_Node000003"><a xlink:href="../../d8/df9/group___noise_generation_gaeb72246ebd597b60a7e575173accf2fd.html#gaeb72246ebd597b60a7e575173accf2fd" target="_top" xlink:title="8&#45;Bit, fixed point implementation of Perlin&#39;s noise.">
 <polygon fill="white" stroke="#666666" points="223,-56 171,-56 171,-37 223,-37 223,-56"/>
 <text text-anchor="middle" x="197" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">inoise8</text>
 </a>
@@ -74,7 +74,7 @@
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../d8/d5c/group___noise_gaa3db0f2f3777cf5bb7a4dd1359dba4fe.html#gaa3db0f2f3777cf5bb7a4dd1359dba4fe" target="_top" xlink:title=" ">
+<g id="a_Node000004"><a xlink:href="../../d8/d5c/group___noise_gaa3db0f2f3777cf5bb7a4dd1359dba4fe.html#gaa3db0f2f3777cf5bb7a4dd1359dba4fe" target="_top" xlink:title="8&#45;bit, fixed point implementation of Perlin&#39;s noise without scaling.">
 <polygon fill="#fff0f0" stroke="red" points="334,-56 259,-56 259,-37 334,-37 334,-56"/>
 <text text-anchor="middle" x="296.5" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">inoise8_raw</text>
 </a>

@@ -1,33 +1,39 @@
 <map id="fl::spi::MultiLaneDevice::write" name="fl::spi::MultiLaneDevice::write">
-<area shape="rect" id="Node000001" title="Convenience method &#45; write multiple lanes in parallel (variadic template)" alt="" coords="5,47,180,87"/>
-<area shape="rect" id="Node000002" href="$da/d3c/namespacefl_1_1fl_a0bddf371925d8c4e94b88e9d7b35d259.html#a0bddf371925d8c4e94b88e9d7b35d259" title=" " alt="" coords="271,5,375,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="180,46,257,29,258,35,181,51"/>
-<area shape="rect" id="Node000003" href="$d3/d73/classfl_1_1_fixed_vector_a80bca5389482eea467efb7d9cb96a332.html#a80bca5389482eea467efb7d9cb96a332" title=" " alt="" coords="228,55,419,80"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="180,65,214,65,214,70,180,70"/>
-<area shape="rect" id="Node000004" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_a547b2f30f70e16dbb22762f3f2370254.html#a547b2f30f70e16dbb22762f3f2370254" title="Internal implementation &#45; write all lanes atomically." alt="" coords="236,105,411,145"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="174,85,230,99,228,104,173,90"/>
-<area shape="rect" id="Node000005" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_a97018959f2c77546fa12f2a0adb2f540.html#a97018959f2c77546fa12f2a0adb2f540" title="Flush all lanes (transpose and transmit)" alt="" coords="467,239,641,279"/>
-<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="360,143,508,230,506,235,357,147"/>
-<area shape="rect" id="Node000009" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_a522448a9b9b59c86768f41c9498dbe5a.html#a522448a9b9b59c86768f41c9498dbe5a" title="Check if device is initialized." alt="" coords="689,47,864,87"/>
-<area shape="poly" id="edge14_Node000004_Node000009" title=" " alt="" coords="404,102,466,90,574,77,675,69,676,75,575,82,467,95,405,107"/>
-<area shape="rect" id="Node000028" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_a44c55402b14a1d2962aaea6d0574b46a.html#a44c55402b14a1d2962aaea6d0574b46a" title="Wait for pending transmission to complete." alt="" coords="467,105,641,145"/>
-<area shape="poly" id="edge15_Node000004_Node000028" title=" " alt="" coords="411,122,453,122,453,127,411,127"/>
-<area shape="rect" id="Node000006" href="$d0/d08/classfl_1_1span_a326aa9f29859fe8a92833fd5db12c3bb.html#a326aa9f29859fe8a92833fd5db12c3bb" title=" " alt="" coords="723,112,830,137"/>
-<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="573,237,623,192,654,168,688,148,709,138,711,143,691,152,657,173,626,196,577,241"/>
-<area shape="rect" id="Node000007" href="$d7/d93/classfl_1_1expected_abbee0bb98c9bf0a1391cb3e810ea4fd5.html#abbee0bb98c9bf0a1391cb3e810ea4fd5" title="Create error result." alt="" coords="703,161,851,187"/>
-<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="595,237,688,197,714,188,716,193,690,202,597,242"/>
-<area shape="poly" id="edge7_Node000005_Node000009" title=" " alt="" coords="571,237,688,99,699,91,702,96,691,103,575,241"/>
-<area shape="rect" id="Node000010" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_a66a4df428de2fc83a006ad0544e56b1b.html#a66a4df428de2fc83a006ad0544e56b1b" title="Get access to a specific lane." alt="" coords="689,211,864,251"/>
-<area shape="poly" id="edge8_Node000005_Node000010" title=" " alt="" coords="641,246,676,241,676,247,642,251"/>
-<area shape="rect" id="Node000011" href="$d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac" title=" " alt="" coords="725,276,828,301"/>
-<area shape="poly" id="edge9_Node000005_Node000011" title=" " alt="" coords="642,268,711,277,711,283,641,273"/>
-<area shape="rect" id="Node000012" href="$d7/d93/classfl_1_1expected_ae712d6f5942009caa637e9181d47d40b.html#ae712d6f5942009caa637e9181d47d40b" title="Create successful result." alt="" coords="698,325,855,351"/>
-<area shape="poly" id="edge10_Node000005_Node000012" title=" " alt="" coords="602,277,690,311,714,319,712,324,688,317,600,282"/>
-<area shape="rect" id="Node000016" href="$d3/dfa/classfl_1_1_s_p_i_transposer_ab685cdd1edcc4b507a91d7dbfd5ba41b.html#ab685cdd1edcc4b507a91d7dbfd5ba41b" title="Transpose 2 lanes of data into interleaved dual&#45;SPI format." alt="" coords="709,375,845,415"/>
-<area shape="poly" id="edge11_Node000005_Node000016" title=" " alt="" coords="579,278,628,319,691,361,703,367,701,372,688,366,625,323,575,282"/>
-<area shape="rect" id="Node000023" href="$d3/dfa/classfl_1_1_s_p_i_transposer_a409565f20b2d6f03c19989cc7a53b91d.html#a409565f20b2d6f03c19989cc7a53b91d" title="Transpose 4 lanes of data into interleaved quad&#45;SPI format." alt="" coords="709,439,845,479"/>
-<area shape="poly" id="edge12_Node000005_Node000023" title=" " alt="" coords="569,278,616,350,651,390,691,425,699,430,696,435,688,429,647,394,612,353,564,281"/>
-<area shape="rect" id="Node000026" href="$d3/dfa/classfl_1_1_s_p_i_transposer_a33641c518e945549b98264fed476ff12.html#a33641c518e945549b98264fed476ff12" title="Transpose 8 lanes of data into interleaved octal&#45;SPI format." alt="" coords="709,503,845,543"/>
-<area shape="poly" id="edge13_Node000005_Node000026" title=" " alt="" coords="564,279,580,322,607,378,644,438,666,465,691,489,698,495,695,499,688,493,662,469,639,441,602,381,576,324,559,280"/>
-<area shape="poly" id="edge16_Node000028_Node000009" title=" " alt="" coords="632,102,684,88,686,93,633,107"/>
+<area shape="rect" id="Node000001" title="Convenience method &#45; write multiple lanes in parallel (variadic template)" alt="" coords="5,349,180,389"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a94488336a5db985fbda1bbd317bffc6a.html#a94488336a5db985fbda1bbd317bffc6a" title=" " alt="" coords="279,307,367,332"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="180,347,265,329,266,334,181,353"/>
+<area shape="rect" id="Node000003" href="$d3/d73/classfl_1_1_fixed_vector_a9ff115fd1e26c9cd822f251e61a1bc72.html#a9ff115fd1e26c9cd822f251e61a1bc72" title=" " alt="" coords="228,356,419,381"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="180,366,214,366,214,371,180,371"/>
+<area shape="rect" id="Node000004" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_a547b2f30f70e16dbb22762f3f2370254.html#a547b2f30f70e16dbb22762f3f2370254" title="Internal implementation &#45; write all lanes atomically." alt="" coords="236,406,411,446"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="174,386,230,400,228,405,173,391"/>
+<area shape="rect" id="Node000005" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_a97018959f2c77546fa12f2a0adb2f540.html#a97018959f2c77546fa12f2a0adb2f540" title="Flush all lanes (transpose and transmit)" alt="" coords="467,253,641,293"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="391,403,417,390,477,346,524,301,528,305,480,351,420,395,393,408"/>
+<area shape="rect" id="Node000009" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_a522448a9b9b59c86768f41c9498dbe5a.html#a522448a9b9b59c86768f41c9498dbe5a" title="Check if device is initialized." alt="" coords="689,463,864,503"/>
+<area shape="poly" id="edge20_Node000004_Node000009" title=" " alt="" coords="405,443,467,455,575,468,676,476,675,481,574,474,466,461,404,449"/>
+<area shape="rect" id="Node000028" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_a44c55402b14a1d2962aaea6d0574b46a.html#a44c55402b14a1d2962aaea6d0574b46a" title="Wait for pending transmission to complete." alt="" coords="467,406,641,446"/>
+<area shape="poly" id="edge21_Node000004_Node000028" title=" " alt="" coords="411,423,453,423,453,429,411,429"/>
+<area shape="rect" id="Node000006" href="$d0/d08/classfl_1_1span_a45157f503f151e36c679f688f10e3511.html#a45157f503f151e36c679f688f10e3511" title=" " alt="" coords="912,264,1019,289"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="586,250,633,226,689,206,738,196,777,191,816,194,865,206,907,227,942,252,939,257,905,231,863,211,816,199,777,196,739,201,690,211,635,230,588,255"/>
+<area shape="rect" id="Node000007" href="$d7/d93/classfl_1_1expected_a5a61d98092eb4671f7add861bd663d2f.html#a5a61d98092eb4671f7add861bd663d2f" title="Create error result." alt="" coords="703,5,851,31"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="559,251,575,208,601,151,639,92,662,65,688,41,698,35,701,39,691,45,666,69,643,95,606,154,580,210,564,253"/>
+<area shape="poly" id="edge7_Node000005_Node000009" title=" " alt="" coords="571,291,631,374,664,415,691,443,709,455,706,459,688,447,660,419,627,377,567,294"/>
+<area shape="rect" id="Node000010" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_a66a4df428de2fc83a006ad0544e56b1b.html#a66a4df428de2fc83a006ad0544e56b1b" title="Get access to a specific lane." alt="" coords="689,55,864,95"/>
+<area shape="poly" id="edge8_Node000005_Node000010" title=" " alt="" coords="565,251,612,181,647,140,688,105,696,100,699,104,691,109,651,144,617,184,569,254"/>
+<area shape="rect" id="Node000011" href="$d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa" title=" " alt="" coords="914,320,1017,345"/>
+<area shape="poly" id="edge9_Node000005_Node000011" title=" " alt="" coords="571,291,591,318,619,348,652,377,690,398,737,413,776,417,815,412,863,398,905,378,939,353,942,357,907,383,865,403,816,417,776,423,736,419,688,403,649,381,615,352,587,321,567,295"/>
+<area shape="rect" id="Node000012" href="$d7/d93/classfl_1_1expected_aace779907e6f9b82b8480260eed069cf.html#aace779907e6f9b82b8480260eed069cf" title="Create successful result." alt="" coords="698,120,855,145"/>
+<area shape="poly" id="edge10_Node000005_Node000012" title=" " alt="" coords="574,250,624,207,688,162,719,148,721,153,691,167,627,211,578,254"/>
+<area shape="rect" id="Node000016" href="$d3/dfa/classfl_1_1_s_p_i_transposer_a685b1154e9612d603229bb9895a6e75e.html#a685b1154e9612d603229bb9895a6e75e" title="Transpose 2 lanes of data into interleaved dual&#45;SPI format." alt="" coords="709,221,845,261"/>
+<area shape="poly" id="edge11_Node000005_Node000016" title=" " alt="" coords="641,257,695,250,695,255,642,263"/>
+<area shape="rect" id="Node000023" href="$d3/dfa/classfl_1_1_s_p_i_transposer_a3e0c7621e15a368bfe879182c97638fc.html#a3e0c7621e15a368bfe879182c97638fc" title="Transpose 4 lanes of data into interleaved quad&#45;SPI format." alt="" coords="709,285,845,325"/>
+<area shape="poly" id="edge14_Node000005_Node000023" title=" " alt="" coords="642,283,695,290,695,296,641,288"/>
+<area shape="rect" id="Node000026" href="$d3/dfa/classfl_1_1_s_p_i_transposer_a2cf424ab57c25a1fa79f98ebb4d6c04a.html#a2cf424ab57c25a1fa79f98ebb4d6c04a" title="Transpose 8 lanes of data into interleaved octal&#45;SPI format." alt="" coords="709,349,845,389"/>
+<area shape="poly" id="edge17_Node000005_Node000026" title=" " alt="" coords="596,291,690,334,707,341,705,346,688,339,594,295"/>
+<area shape="poly" id="edge12_Node000016_Node000006" title=" " alt="" coords="846,251,899,261,898,267,845,256"/>
+<area shape="poly" id="edge13_Node000016_Node000011" title=" " alt="" coords="837,258,865,270,933,311,930,315,863,275,835,263"/>
+<area shape="poly" id="edge15_Node000023_Node000006" title=" " alt="" coords="845,292,898,284,898,289,846,297"/>
+<area shape="poly" id="edge16_Node000023_Node000011" title=" " alt="" coords="846,312,901,320,900,326,845,317"/>
+<area shape="poly" id="edge18_Node000026_Node000006" title=" " alt="" coords="835,346,863,334,911,305,929,294,932,299,913,310,865,339,838,351"/>
+<area shape="poly" id="edge19_Node000026_Node000011" title=" " alt="" coords="845,353,900,342,901,348,846,358"/>
+<area shape="poly" id="edge22_Node000028_Node000009" title=" " alt="" coords="633,443,686,457,684,462,632,449"/>
 </map>

@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -109,20 +109,32 @@ $(function(){initNavTree('da/d79/_auto_research_ble_8cpp_source.html','../../');
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment">// BLE transport creation/destruction is handled by</span></div>
 <div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment">// AutoResearchRemoteControl::startBleRemote()/stopBleRemote() in AutoResearchRemote.cpp.</span></div>
 <div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span> </div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#include &quot;<a class="code" href="../../da/dec/_auto_research_ble_8h.html">AutoResearchBle.h</a>&quot;</span></div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span> </div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment">// Global BLE state</span></div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno"><a class="line" href="../../da/d79/_auto_research_ble_8cpp_a6aed8d835f5d459d1f4df0d659120c39.html#a6aed8d835f5d459d1f4df0d659120c39">   10</a></span><span class="keyword">static</span> <a class="code hl_struct" href="../../da/dec/_auto_research_ble_8h.html#d9/d5f/struct_auto_research_ble_state">AutoResearchBleState</a> <a class="code hl_variable" href="../../da/d79/_auto_research_ble_8cpp_a6aed8d835f5d459d1f4df0d659120c39.html#a6aed8d835f5d459d1f4df0d659120c39">s_ble_state</a>;</div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span> </div>
-<div class="foldopen" id="foldopen00012" data-start="{" data-end="}">
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno"><a class="line" href="../../da/d79/_auto_research_ble_8cpp_a148423e1a23c3528f5499ffd84bbd65a.html#a148423e1a23c3528f5499ffd84bbd65a">   12</a></span><a class="code hl_struct" href="../../da/dec/_auto_research_ble_8h.html#d9/d5f/struct_auto_research_ble_state">AutoResearchBleState</a>&amp; <a class="code hl_function" href="../../da/d79/_auto_research_ble_8cpp_a148423e1a23c3528f5499ffd84bbd65a.html#a148423e1a23c3528f5499ffd84bbd65a">getBleState</a>() {</div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span>    <span class="keywordflow">return</span> <a class="code hl_variable" href="../../da/d79/_auto_research_ble_8cpp_a6aed8d835f5d459d1f4df0d659120c39.html#a6aed8d835f5d459d1f4df0d659120c39">s_ble_state</a>;</div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span>}</div>
-</div>
-<div class="ttc" id="a_auto_research_ble_8cpp_a148423e1a23c3528f5499ffd84bbd65a_html_a148423e1a23c3528f5499ffd84bbd65a"><div class="ttname"><a href="../../da/d79/_auto_research_ble_8cpp_a148423e1a23c3528f5499ffd84bbd65a.html#a148423e1a23c3528f5499ffd84bbd65a">getBleState</a></div><div class="ttdeci">AutoResearchBleState &amp; getBleState()</div><div class="ttdoc">Get current BLE autoresearch state.</div><div class="ttdef"><b>Definition</b> <a href="#l00012">AutoResearchBle.cpp:12</a></div></div>
-<div class="ttc" id="a_auto_research_ble_8cpp_a6aed8d835f5d459d1f4df0d659120c39_html_a6aed8d835f5d459d1f4df0d659120c39"><div class="ttname"><a href="../../da/d79/_auto_research_ble_8cpp_a6aed8d835f5d459d1f4df0d659120c39.html#a6aed8d835f5d459d1f4df0d659120c39">s_ble_state</a></div><div class="ttdeci">static AutoResearchBleState s_ble_state</div><div class="ttdef"><b>Definition</b> <a href="#l00010">AutoResearchBle.cpp:10</a></div></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment">// Gate the entire file out under low-memory mode -- the LowMemory bring-up</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment">// surface (AutoResearchLowMemory.h) doesn&#39;t use BLE state and the full</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment">// fl::net BLE stack does not fit on parts like LPC845-BRK (64 KB flash).</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment">// Matches the conditional structure in AutoResearch.ino itself.</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &quot;<a class="code" href="../../d1/dbc/sketch__macros_8h.html">fl/system/sketch_macros.h</a>&quot;</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#if FL_PLATFORM_HAS_LARGE_MEMORY</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &quot;<a class="code" href="../../da/dec/_auto_research_ble_8h.html">AutoResearchBle.h</a>&quot;</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#include &quot;<a class="code" href="../../d4/d0b/singleton_8h.html">fl/stl/singleton.h</a>&quot;</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span> </div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="keyword">struct </span>BleStateHolder {</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>    AutoResearchBleState <a class="code hl_variable" href="../../d9/dce/_client_validation_real_8h_adc6e5733fc3c22f0a7b2914188c49c90.html#adc6e5733fc3c22f0a7b2914188c49c90">state</a>;</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>};</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span> </div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><a class="code hl_struct" href="../../da/dec/_auto_research_ble_8h.html#d9/d5f/struct_auto_research_ble_state">AutoResearchBleState</a>&amp; <a class="code hl_function" href="../../da/dec/_auto_research_ble_8h_a148423e1a23c3528f5499ffd84bbd65a.html#a148423e1a23c3528f5499ffd84bbd65a">getBleState</a>() {</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="../../d9/d5b/classfl_1_1_singleton_ad5cb1b704e17768f75802673abb0ff75.html#ad5cb1b704e17768f75802673abb0ff75">fl::Singleton&lt;BleStateHolder&gt;::instance</a>().state;</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>}</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#endif  </span><span class="comment">// FL_PLATFORM_HAS_LARGE_MEMORY</span></div>
+<div class="ttc" id="a_auto_research_ble_8h_a148423e1a23c3528f5499ffd84bbd65a_html_a148423e1a23c3528f5499ffd84bbd65a"><div class="ttname"><a href="../../da/dec/_auto_research_ble_8h_a148423e1a23c3528f5499ffd84bbd65a.html#a148423e1a23c3528f5499ffd84bbd65a">getBleState</a></div><div class="ttdeci">AutoResearchBleState &amp; getBleState()</div><div class="ttdoc">Get current BLE autoresearch state.</div></div>
 <div class="ttc" id="a_auto_research_ble_8h_html"><div class="ttname"><a href="../../da/dec/_auto_research_ble_8h.html">AutoResearchBle.h</a></div></div>
-<div class="ttc" id="a_auto_research_ble_8h_html_d9/d5f/struct_auto_research_ble_state"><div class="ttname"><a href="../../da/dec/_auto_research_ble_8h.html#d9/d5f/struct_auto_research_ble_state">AutoResearchBleState</a></div><div class="ttdoc">State for BLE autoresearch.</div><div class="ttdef"><b>Definition</b> <a href="../../da/dec/_auto_research_ble_8h_source.html#l00022">AutoResearchBle.h:22</a></div></div>
+<div class="ttc" id="a_auto_research_ble_8h_html_d9/d5f/struct_auto_research_ble_state"><div class="ttname"><a href="../../da/dec/_auto_research_ble_8h.html#d9/d5f/struct_auto_research_ble_state">AutoResearchBleState</a></div><div class="ttdoc">State for BLE autoresearch.</div><div class="ttdef"><b>Definition</b> <a href="../../da/dec/_auto_research_ble_8h_source.html#l00037">AutoResearchBle.h:37</a></div></div>
+<div class="ttc" id="a_client_validation_real_8h_adc6e5733fc3c22f0a7b2914188c49c90_html_adc6e5733fc3c22f0a7b2914188c49c90"><div class="ttname"><a href="../../d9/dce/_client_validation_real_8h_adc6e5733fc3c22f0a7b2914188c49c90.html#adc6e5733fc3c22f0a7b2914188c49c90">state</a></div><div class="ttdeci">TestState state</div><div class="ttdef"><b>Definition</b> <a href="../../d9/dce/_client_validation_real_8h_source.html#l00049">ClientValidationReal.h:49</a></div></div>
+<div class="ttc" id="aclassfl_1_1_singleton_ad5cb1b704e17768f75802673abb0ff75_html_ad5cb1b704e17768f75802673abb0ff75"><div class="ttname"><a href="../../d9/d5b/classfl_1_1_singleton_ad5cb1b704e17768f75802673abb0ff75.html#ad5cb1b704e17768f75802673abb0ff75">fl::Singleton::instance</a></div><div class="ttdeci">static T &amp; instance() FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d0b/singleton_8h_source.html#l00041">singleton.h:41</a></div></div>
+<div class="ttc" id="asingleton_8h_html"><div class="ttname"><a href="../../d4/d0b/singleton_8h.html">singleton.h</a></div></div>
+<div class="ttc" id="asketch__macros_8h_html"><div class="ttname"><a href="../../d1/dbc/sketch__macros_8h.html">sketch_macros.h</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.3-->
@@ -130,7 +142,7 @@ $(function(){initNavTree('da/d79/_auto_research_ble_8cpp_source.html','../../');
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_c839598b40e1646daff68c7b4defdc81.html">AutoResearch</a></li><li class="navelem"><a class="el" href="../../da/d79/_auto_research_ble_8cpp.html">AutoResearchBle.cpp</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:06:58 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:08:59 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

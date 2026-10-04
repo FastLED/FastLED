@@ -1,0 +1,16 @@
+<map id="fl::anonymous_namespace{gamut_map::cpp::hpp}::scaleGamutQ16" name="fl::anonymous_namespace{gamut_map::cpp::hpp}::scaleGamutQ16">
+<area shape="rect" id="Node000001" title="Scale an s16.16 value by an s16.16 factor, rounding to nearest." alt="" coords="749,81,945,136"/>
+<area shape="poly" id="edge9_Node000001_Node000001" title=" " alt="" coords="888,70,873,63,847,60,826,62,812,67,805,73,805,81,800,81,800,71,809,62,825,57,847,55,875,58,890,66"/>
+<area shape="rect" id="Node000002" href="$d3/dfe/namespacefl_1_1anonymous__namespace_02gamut__map_8cpp_8hpp_03_abfc9fa8f8ad7312ff2b66f7f052b80be.html#abfc9fa8f8ad7312ff2b66f7f052b80be" title="XYZ of the candidate at factor of the target&#39;s chroma." alt="" coords="505,81,701,136"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="736,111,701,111,701,106,736,106"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="644,70,629,63,603,60,582,62,568,67,561,73,561,81,556,81,556,71,565,62,581,57,603,55,631,58,646,66"/>
+<area shape="rect" id="Node000003" href="$d3/dfe/namespacefl_1_1anonymous__namespace_02gamut__map_8cpp_8hpp_03_afa155bfbd32ee5bf3a6c83b6187d3974.html#afa155bfbd32ee5bf3a6c83b6187d3974" title="The feasible chroma interval at the target&#39;s own lightness, as factors of the target&#39;s chroma." alt="" coords="261,29,457,84"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="491,88,457,80,458,75,492,82"/>
+<area shape="rect" id="Node000005" href="$d3/dfe/namespacefl_1_1anonymous__namespace_02gamut__map_8cpp_8hpp_03_acab6ba92f373afb8b7168f0c4d0cd038.html#acab6ba92f373afb8b7168f0c4d0cd038" title="Largest chroma factor the hull accepts, by a fixed count of halvings." alt="" coords="261,132,457,187"/>
+<area shape="poly" id="edge7_Node000002_Node000005" title=" " alt="" coords="492,134,458,142,457,136,491,129"/>
+<area shape="poly" id="edge4_Node000003_Node000003" title=" " alt="" coords="400,18,385,11,359,8,338,10,324,15,317,21,317,29,312,29,312,19,321,10,337,5,359,3,387,6,402,14"/>
+<area shape="rect" id="Node000004" href="$d3/dfe/namespacefl_1_1anonymous__namespace_02gamut__map_8cpp_8hpp_03_af702395fa5236acf87a3588a536c83d6.html#af702395fa5236acf87a3588a536c83d6" title="The highest lightness at or below requested whose feasible chroma interval the probe scan can still f..." alt="" coords="5,29,213,84"/>
+<area shape="poly" id="edge5_Node000003_Node000004" title=" " alt="" coords="248,59,213,59,213,54,248,54"/>
+<area shape="poly" id="edge6_Node000004_Node000004" title=" " alt="" coords="151,18,136,11,109,8,87,10,73,15,66,21,66,29,61,29,61,19,70,10,86,5,109,3,137,6,153,14"/>
+<area shape="poly" id="edge8_Node000005_Node000005" title=" " alt="" coords="400,121,385,114,359,111,338,113,324,117,317,124,317,132,312,132,312,122,321,113,337,107,359,105,387,108,402,116"/>
+</map>

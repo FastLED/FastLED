@@ -1,0 +1,13 @@
+digraph "fl/fs/embedded/embedded_fs.cpp.hpp"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  Node1 [id="Node000001",label="fl/fs/embedded/embedded\l_fs.cpp.hpp",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Body of fl::getEmbeddedFs()."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl/fs/embedded/_build.cpp.hpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/df3/fl_2fs_2embedded_2__build_8cpp_8hpp.html",tooltip="Unity-build aggregate for embedded (on-chip flash) storage."];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl/build/fl.fs.embedded+.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d32/fl_8fs_8embedded_09_8cpp.html",tooltip="Unity build entry-point for embedded (on-chip flash) storage, kept out of fl.system+...."];
+}

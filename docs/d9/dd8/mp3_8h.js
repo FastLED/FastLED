@@ -12,15 +12,15 @@ var mp3_8h =
       [ "samples", "d1/d86/namespacefl_1_1third__party.html#aa469d57f2fddf30ecf02b634696ef7d1", null ],
       [ "version", "d1/d86/namespacefl_1_1third__party.html#a3874429e505a6027bca73998a75893c8", null ]
     ] ],
-    [ "fl::third_party::Mp3HelixDecoder", "df/d1a/classfl_1_1third__party_1_1_mp3_helix_decoder.html", "df/d1a/classfl_1_1third__party_1_1_mp3_helix_decoder" ],
-    [ "fl::third_party::Mp3HelixDecoder::FrameInfo", "df/d1a/classfl_1_1third__party_1_1_mp3_helix_decoder.html#d6/d2a/structfl_1_1third__party_1_1_mp3_helix_decoder_1_1_frame_info", [
-      [ "bitrate", "df/d1a/classfl_1_1third__party_1_1_mp3_helix_decoder.html#aaf1e597aebcde733cd236287e07fa356", null ],
-      [ "bitsPerSample", "df/d1a/classfl_1_1third__party_1_1_mp3_helix_decoder.html#a1205c8f48497cd06392ff6a71bfe31ee", null ],
-      [ "layer", "df/d1a/classfl_1_1third__party_1_1_mp3_helix_decoder.html#a7a17df006f4de21b03a7f53b0e088012", null ],
-      [ "nChans", "df/d1a/classfl_1_1third__party_1_1_mp3_helix_decoder.html#a63ada5d75dfa5687af0212270aa013da", null ],
-      [ "outputSamps", "df/d1a/classfl_1_1third__party_1_1_mp3_helix_decoder.html#a5265d9e2e02b5f2903b734f1e79d0735", null ],
-      [ "samprate", "df/d1a/classfl_1_1third__party_1_1_mp3_helix_decoder.html#aa876938aa009ed98a1d4529f0c24528e", null ],
-      [ "version", "df/d1a/classfl_1_1third__party_1_1_mp3_helix_decoder.html#ae920093730740c03bde1e21748ddf0be", null ]
+    [ "fl::third_party::Mp3FrameInfo", "d1/d86/namespacefl_1_1third__party.html#d5/d93/structfl_1_1third__party_1_1_mp3_frame_info", [
+      [ "bitrate", "d1/d86/namespacefl_1_1third__party.html#a376793574161f474499f8042202ea2cc", null ],
+      [ "bitsPerSample", "d1/d86/namespacefl_1_1third__party.html#a9fc2b44c137b4a1f52e446081f90bcc7", null ],
+      [ "layer", "d1/d86/namespacefl_1_1third__party.html#a5ae9610c831d706905907eb5efebe47e", null ],
+      [ "nChans", "d1/d86/namespacefl_1_1third__party.html#ae19c4a306a3c808af3f4ee7513caa40c", null ],
+      [ "outputSamps", "d1/d86/namespacefl_1_1third__party.html#a7488d9b4c1b55d73b6f2d7de659e16d1", null ],
+      [ "samprate", "d1/d86/namespacefl_1_1third__party.html#a36c786e8b8d4dd8d6414a9ff4daed8e0", null ],
+      [ "version", "d1/d86/namespacefl_1_1third__party.html#af8668fdc731f6910db5b2219513d12fa", null ]
     ] ],
+    [ "fl::third_party::Mp3Minimp3Decoder", "db/d81/classfl_1_1third__party_1_1_mp3_minimp3_decoder.html", "db/d81/classfl_1_1third__party_1_1_mp3_minimp3_decoder" ],
     [ "fl::FASTLED_SHARED_PTR", "d4/d36/namespacefl_a4b48a65a1c5ff9d8b9c8a1d58bd2b994.html#a4b48a65a1c5ff9d8b9c8a1d58bd2b994", null ]
 ];

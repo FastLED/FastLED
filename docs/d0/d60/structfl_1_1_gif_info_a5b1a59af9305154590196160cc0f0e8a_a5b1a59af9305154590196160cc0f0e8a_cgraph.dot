@@ -8,5 +8,5 @@ digraph "fl::GifInfo::GifInfo"
   rankdir="LR";
   Node1 [id="Node000001",label="fl::GifInfo::GifInfo",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::GifInfo::GifInfo",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d60/structfl_1_1_gif_info_a55f0e6d1fabc92bc4245094fffea724b.html#a55f0e6d1fabc92bc4245094fffea724b",tooltip=" "];
+  Node2 [id="Node000002",label="fl::GifInfo::GifInfo",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d60/structfl_1_1_gif_info_a416600c704eda5e59d7513295801d19b.html#a416600c704eda5e59d7513295801d19b",tooltip=" "];
 }

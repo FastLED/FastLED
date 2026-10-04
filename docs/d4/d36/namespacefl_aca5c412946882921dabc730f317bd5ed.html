@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -110,7 +110,7 @@ $(function(){initNavTree('d4/d36/namespacefl_aca5c412946882921dabc730f317bd5ed.h
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="../../da/d3c/namespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c.html#a7573a66f01c09f14a1ff0411f8e1153c">fl::u8</a> fl::getBytesPerPixel </td>
+          <td class="memname"><a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> fl::getBytesPerPixel </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="../../d4/d36/namespacefl_aef30cbd1dac648887ffa5dc1086b0164.html#aef30cbd1dac648887ffa5dc1086b0164">PixelFormat</a></td>          <td class="paramname"><span class="paramname"><em>format</em></span></td><td>)</td>
           <td></td>
@@ -123,23 +123,25 @@ $(function(){initNavTree('d4/d36/namespacefl_aca5c412946882921dabc730f317bd5ed.h
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/dcd/pixel_8h_source.html#l00015">15</a> of file <a class="el" href="../../dd/dcd/pixel_8h_source.html">pixel.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   15</span>                                                 {</div>
-<div class="line"><span class="lineno">   16</span>    <span class="keywordflow">switch</span> (<a class="code hl_function" href="../../d4/d36/namespacefl_aee6f6a125b8389786800233a69115983.html#aee6f6a125b8389786800233a69115983">format</a>) {</div>
-<div class="line"><span class="lineno">   17</span>        <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="../../d4/d36/namespacefl_aef30cbd1dac648887ffa5dc1086b0164.html#aef30cbd1dac648887ffa5dc1086b0164a3b73e4d15701467ed72f157ffaff680a">PixelFormat::RGB565</a>: <span class="keywordflow">return</span> 2;</div>
-<div class="line"><span class="lineno">   18</span>        <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="../../d4/d36/namespacefl_aef30cbd1dac648887ffa5dc1086b0164.html#aef30cbd1dac648887ffa5dc1086b0164a30ff380a3be74628024063a99fba10f0">PixelFormat::RGB888</a>: <span class="keywordflow">return</span> 3;</div>
-<div class="line"><span class="lineno">   19</span>        <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="../../d4/d36/namespacefl_aef30cbd1dac648887ffa5dc1086b0164.html#aef30cbd1dac648887ffa5dc1086b0164a165f06116e7b8d9b2481dfc805db4619">PixelFormat::RGBA8888</a>: <span class="keywordflow">return</span> 4;</div>
-<div class="line"><span class="lineno">   20</span>        <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="../../d4/d36/namespacefl_aef30cbd1dac648887ffa5dc1086b0164.html#aef30cbd1dac648887ffa5dc1086b0164a7e1d7a172afeb2743e03365a92cfd7e1">PixelFormat::YUV420</a>: <span class="keywordflow">return</span> 1; <span class="comment">// Simplified for luminance component</span></div>
-<div class="line"><span class="lineno">   21</span>        <span class="keywordflow">default</span>: <span class="keywordflow">return</span> 3;</div>
-<div class="line"><span class="lineno">   22</span>    }</div>
-<div class="line"><span class="lineno">   23</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../dd/dcd/pixel_8h_source.html#l00019">19</a> of file <a class="el" href="../../dd/dcd/pixel_8h_source.html">pixel.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   19</span>                                                 {</div>
+<div class="line"><span class="lineno">   20</span>    <span class="keywordflow">switch</span> (<a class="code hl_function" href="../../d4/d36/namespacefl_aee6f6a125b8389786800233a69115983.html#aee6f6a125b8389786800233a69115983">format</a>) {</div>
+<div class="line"><span class="lineno">   21</span>        <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="../../d4/d36/namespacefl_aef30cbd1dac648887ffa5dc1086b0164.html#aef30cbd1dac648887ffa5dc1086b0164a3b73e4d15701467ed72f157ffaff680a">PixelFormat::RGB565</a>: <span class="keywordflow">return</span> 2;</div>
+<div class="line"><span class="lineno">   22</span>        <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="../../d4/d36/namespacefl_aef30cbd1dac648887ffa5dc1086b0164.html#aef30cbd1dac648887ffa5dc1086b0164a30ff380a3be74628024063a99fba10f0">PixelFormat::RGB888</a>: <span class="keywordflow">return</span> 3;</div>
+<div class="line"><span class="lineno">   23</span>        <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="../../d4/d36/namespacefl_aef30cbd1dac648887ffa5dc1086b0164.html#aef30cbd1dac648887ffa5dc1086b0164a165f06116e7b8d9b2481dfc805db4619">PixelFormat::RGBA8888</a>: <span class="keywordflow">return</span> 4;</div>
+<div class="line"><span class="lineno">   24</span>        <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="../../d4/d36/namespacefl_aef30cbd1dac648887ffa5dc1086b0164.html#aef30cbd1dac648887ffa5dc1086b0164a7e1d7a172afeb2743e03365a92cfd7e1">PixelFormat::YUV420</a>: <span class="keywordflow">return</span> 1; <span class="comment">// Simplified for luminance component</span></div>
+<div class="line"><span class="lineno">   25</span>        <span class="keywordflow">case</span> <a class="code hl_enumvalue" href="../../d4/d36/namespacefl_aef30cbd1dac648887ffa5dc1086b0164.html#aef30cbd1dac648887ffa5dc1086b0164a34e9e3d49d8b00d661e23385d26043c9">PixelFormat::Rgb16</a>: <span class="keywordflow">return</span> 6;</div>
+<div class="line"><span class="lineno">   26</span>        <span class="keywordflow">default</span>: <span class="keywordflow">return</span> 0;</div>
+<div class="line"><span class="lineno">   27</span>    }</div>
+<div class="line"><span class="lineno">   28</span>}</div>
 <div class="ttc" id="anamespacefl_aee6f6a125b8389786800233a69115983_html_aee6f6a125b8389786800233a69115983"><div class="ttname"><a href="../../d4/d36/namespacefl_aee6f6a125b8389786800233a69115983.html#aee6f6a125b8389786800233a69115983">fl::format</a></div><div class="ttdeci">fl::string format(const char *fmt)</div><div class="ttdoc">Format with no arguments.</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d0a/format_8h_source.html#l00439">format.h:439</a></div></div>
 <div class="ttc" id="anamespacefl_aef30cbd1dac648887ffa5dc1086b0164_html_aef30cbd1dac648887ffa5dc1086b0164a165f06116e7b8d9b2481dfc805db4619"><div class="ttname"><a href="../../d4/d36/namespacefl_aef30cbd1dac648887ffa5dc1086b0164.html#aef30cbd1dac648887ffa5dc1086b0164a165f06116e7b8d9b2481dfc805db4619">fl::PixelFormat::RGBA8888</a></div><div class="ttdeci">@ RGBA8888</div><div class="ttdef"><b>Definition</b> <a href="../../dd/dcd/pixel_8h_source.html#l00010">pixel.h:10</a></div></div>
 <div class="ttc" id="anamespacefl_aef30cbd1dac648887ffa5dc1086b0164_html_aef30cbd1dac648887ffa5dc1086b0164a30ff380a3be74628024063a99fba10f0"><div class="ttname"><a href="../../d4/d36/namespacefl_aef30cbd1dac648887ffa5dc1086b0164.html#aef30cbd1dac648887ffa5dc1086b0164a30ff380a3be74628024063a99fba10f0">fl::PixelFormat::RGB888</a></div><div class="ttdeci">@ RGB888</div><div class="ttdef"><b>Definition</b> <a href="../../dd/dcd/pixel_8h_source.html#l00009">pixel.h:9</a></div></div>
+<div class="ttc" id="anamespacefl_aef30cbd1dac648887ffa5dc1086b0164_html_aef30cbd1dac648887ffa5dc1086b0164a34e9e3d49d8b00d661e23385d26043c9"><div class="ttname"><a href="../../d4/d36/namespacefl_aef30cbd1dac648887ffa5dc1086b0164.html#aef30cbd1dac648887ffa5dc1086b0164a34e9e3d49d8b00d661e23385d26043c9">fl::PixelFormat::Rgb16</a></div><div class="ttdeci">@ Rgb16</div><div class="ttdef"><b>Definition</b> <a href="../../dd/dcd/pixel_8h_source.html#l00015">pixel.h:15</a></div></div>
 <div class="ttc" id="anamespacefl_aef30cbd1dac648887ffa5dc1086b0164_html_aef30cbd1dac648887ffa5dc1086b0164a3b73e4d15701467ed72f157ffaff680a"><div class="ttname"><a href="../../d4/d36/namespacefl_aef30cbd1dac648887ffa5dc1086b0164.html#aef30cbd1dac648887ffa5dc1086b0164a3b73e4d15701467ed72f157ffaff680a">fl::PixelFormat::RGB565</a></div><div class="ttdeci">@ RGB565</div><div class="ttdef"><b>Definition</b> <a href="../../dd/dcd/pixel_8h_source.html#l00008">pixel.h:8</a></div></div>
 <div class="ttc" id="anamespacefl_aef30cbd1dac648887ffa5dc1086b0164_html_aef30cbd1dac648887ffa5dc1086b0164a7e1d7a172afeb2743e03365a92cfd7e1"><div class="ttname"><a href="../../d4/d36/namespacefl_aef30cbd1dac648887ffa5dc1086b0164.html#aef30cbd1dac648887ffa5dc1086b0164a7e1d7a172afeb2743e03365a92cfd7e1">fl::PixelFormat::YUV420</a></div><div class="ttdeci">@ YUV420</div><div class="ttdef"><b>Definition</b> <a href="../../dd/dcd/pixel_8h_source.html#l00011">pixel.h:11</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d0/d0a/format_8h_source.html#l00439">format()</a>, <a class="el" href="../../dd/dcd/pixel_8h_source.html#l00008">RGB565</a>, <a class="el" href="../../dd/dcd/pixel_8h_source.html#l00009">RGB888</a>, <a class="el" href="../../dd/dcd/pixel_8h_source.html#l00010">RGBA8888</a>, and <a class="el" href="../../dd/dcd/pixel_8h_source.html#l00011">YUV420</a>.</p>
+<p class="reference">References <a class="el" href="../../d0/d0a/format_8h_source.html#l00439">format()</a>, <a class="el" href="../../dd/dcd/pixel_8h_source.html#l00015">Rgb16</a>, <a class="el" href="../../dd/dcd/pixel_8h_source.html#l00008">RGB565</a>, <a class="el" href="../../dd/dcd/pixel_8h_source.html#l00009">RGB888</a>, <a class="el" href="../../dd/dcd/pixel_8h_source.html#l00010">RGBA8888</a>, and <a class="el" href="../../dd/dcd/pixel_8h_source.html#l00011">YUV420</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../d9/dc2/third__party_2_t_jpg___decoder_2driver_8cpp_8hpp_source.html#l00271">fl::third_party::TJpgInstanceDecoder::allocateFrameBuffer()</a>, and <a class="el" href="../../d9/dc2/third__party_2_t_jpg___decoder_2driver_8cpp_8hpp_source.html#l00279">fl::third_party::TJpgInstanceDecoder::getBytesPerPixel()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
@@ -166,7 +168,7 @@ $(function(){initNavTree('d4/d36/namespacefl_aca5c412946882921dabc730f317bd5ed.h
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:04 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:07 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

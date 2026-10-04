@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -108,12 +108,9 @@ $(function(){initNavTree('de/dc0/struct_power_model_r_g_b_w.html','../../'); ini
 </div><!--header-->
 <div class="contents">
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>RGBW LED power consumption model. </p>
-<dl class="section note"><dt>Note</dt><dd>Future API enhancement - not yet implemented in power calculations </dd>
-<dd>
-Currently forwards to <a class="el" href="../../dc/d4d/struct_power_model_r_g_b.html" title="RGB LED power consumption model Used for standard 3-channel LEDs (WS2812, WS2812B,...">PowerModelRGB</a>, ignoring white channel </dd></dl>
+<div class="textblock"><p>RGBW LED power consumption model Used for 4-channel LEDs (SK6812 RGBW and similar). </p>
 
-<p class="definition">Definition at line <a class="el" href="../../dc/d5b/power__mgt_8h_source.html#l00056">56</a> of file <a class="el" href="../../dc/d5b/power__mgt_8h_source.html">power_mgt.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dc/d5b/power__mgt_8h_source.html#l00057">57</a> of file <a class="el" href="../../dc/d5b/power__mgt_8h_source.html">power_mgt.h</a>.</p>
 </div>
 <p><code>#include &lt;<a class="el" href="../../dc/d5b/power__mgt_8h_source.html">power_mgt.h</a>&gt;</code></p>
 <table class="memberdecls">
@@ -126,7 +123,7 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:aed0376cee301a684b5b27763b9f15836"><td class="mdescLeft">&#160;</td><td class="mdescRight">Custom RGBW power model.  <br /></td></tr>
 <tr class="separator:aed0376cee301a684b5b27763b9f15836"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aaca8cbfd4a2b24930f0be607fd02c0a2" id="r_aaca8cbfd4a2b24930f0be607fd02c0a2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d9/d13/cpp__compat_8h_a72f0657181cca64b44eb186b707eb380.html#a72f0657181cca64b44eb186b707eb380">constexpr</a> <a class="el" href="../../dc/d4d/struct_power_model_r_g_b.html">PowerModelRGB</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/dc0/struct_power_model_r_g_b_w_aaca8cbfd4a2b24930f0be607fd02c0a2.html#aaca8cbfd4a2b24930f0be607fd02c0a2">toRGB</a> () const</td></tr>
-<tr class="memdesc:aaca8cbfd4a2b24930f0be607fd02c0a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert to RGB model (extracts RGB components, preserves exponent)  <br /></td></tr>
+<tr class="memdesc:aaca8cbfd4a2b24930f0be607fd02c0a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">The RGB emitters alone, without the white one.  <br /></td></tr>
 <tr class="separator:aaca8cbfd4a2b24930f0be607fd02c0a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
@@ -160,7 +157,7 @@ Public Attributes</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../de/dc0/struct_power_model_r_g_b_w.html">PowerModelRGBW</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:03 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

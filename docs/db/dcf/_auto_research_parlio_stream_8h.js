@@ -1,5 +1,8 @@
 var _auto_research_parlio_stream_8h =
 [
+    [ "autoresearch::parlio_stream::ParlioLedState", "d6/d84/namespaceautoresearch_1_1parlio__stream.html#df/d8a/structautoresearch_1_1parlio__stream_1_1_parlio_led_state", [
+      [ "leds", "d6/d84/namespaceautoresearch_1_1parlio__stream.html#a39569cdfe26b59322fc3275727fb25ce", null ]
+    ] ],
     [ "autoresearch::parlio_stream::ValidateResult", "d6/d84/namespaceautoresearch_1_1parlio__stream.html#d9/dc3/structautoresearch_1_1parlio__stream_1_1_validate_result", [
       [ "base_tx_pin", "d6/d84/namespaceautoresearch_1_1parlio__stream.html#a83627b37a7e2b1d2a6f05082aaba1859", null ],
       [ "bytes_total", "d6/d84/namespaceautoresearch_1_1parlio__stream.html#a21dbe4bd827c45b5db16a461ffdf1557", null ],
@@ -27,7 +30,9 @@ var _auto_research_parlio_stream_8h =
       [ "worker_isr_count", "d6/d84/namespaceautoresearch_1_1parlio__stream.html#a10daf3eea39fa3b8fd4277b95abfa680", null ]
     ] ],
     [ "autoresearch::parlio_stream::isFastLedOutputPinValid", "d6/d84/namespaceautoresearch_1_1parlio__stream_ad71f1c168c6b35a807d76735a49d0922.html#ad71f1c168c6b35a807d76735a49d0922", null ],
+    [ "autoresearch::parlio_stream::parlioLedState", "d6/d84/namespaceautoresearch_1_1parlio__stream_a7d18c0c4db81a3b668bc140972185e9b.html#a7d18c0c4db81a3b668bc140972185e9b", null ],
     [ "autoresearch::parlio_stream::validateParlioStreaming", "d6/d84/namespaceautoresearch_1_1parlio__stream_a83a87dbb8fccb4873f303d9821c35f0f.html#a83a87dbb8fccb4873f303d9821c35f0f", null ],
     [ "autoresearch::parlio_stream::kMaxIterations", "d6/d84/namespaceautoresearch_1_1parlio__stream_ab0719c679ee8c49ad6a72a0041fd92f5.html#ab0719c679ee8c49ad6a72a0041fd92f5", null ],
-    [ "autoresearch::parlio_stream::kMaxLanes", "d6/d84/namespaceautoresearch_1_1parlio__stream_a97189ef8f9ac11832817b86de9a692b4.html#a97189ef8f9ac11832817b86de9a692b4", null ]
+    [ "autoresearch::parlio_stream::kMaxLanes", "d6/d84/namespaceautoresearch_1_1parlio__stream_a97189ef8f9ac11832817b86de9a692b4.html#a97189ef8f9ac11832817b86de9a692b4", null ],
+    [ "autoresearch::parlio_stream::kMaxLeds", "d6/d84/namespaceautoresearch_1_1parlio__stream_af007581d13b6ccc4b492855fdc7d9f4f.html#af007581d13b6ccc4b492855fdc7d9f4f", null ]
 ];

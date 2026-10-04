@@ -1,8 +1,8 @@
 <map id="fl::sin_impl_float" name="fl::sin_impl_float">
 <area shape="rect" id="Node000001" title=" " alt="" coords="601,1182,731,1207"/>
-<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a0eb3f52b9cb3c29e1c8d8716c69b20ee.html#a0eb3f52b9cb3c29e1c8d8716c69b20ee" title=" " alt="" coords="493,1157,551,1182"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a1f7f9198b8a35e91ca0463f3c44ff280.html#a1f7f9198b8a35e91ca0463f3c44ff280" title=" " alt="" coords="493,1157,551,1182"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="587,1184,550,1177,551,1172,588,1178"/>
-<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a4ba2744fe96375793e6f7a98b188d343.html#a4ba2744fe96375793e6f7a98b188d343" title=" " alt="" coords="491,1206,553,1231"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a367128bb231fab59275e129d3dc3d909.html#a367128bb231fab59275e129d3dc3d909" title=" " alt="" coords="491,1206,553,1231"/>
 <area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="588,1210,554,1216,553,1211,587,1205"/>
 <area shape="rect" id="Node000004" href="$d5/df8/classfl_1_1detail_1_1_biquad_filter_impl_a5f8d3f476d1cd47dc8cf7e400f54d42e.html#a5f8d3f476d1cd47dc8cf7e400f54d42e" title=" " alt="" coords="267,5,429,45"/>
 <area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="489,1196,488,1194,479,1164,473,1116,468,982,471,621,474,431,472,262,462,131,453,86,440,59,427,46,431,42,445,56,458,85,467,130,477,261,479,431,477,621,473,982,478,1116,484,1162,493,1192,494,1194"/>
@@ -78,9 +78,9 @@
 <area shape="poly" id="edge47_Node000003_Node000048" title=" " alt="" coords="523,1245,516,1413,502,1660,491,1784,479,1893,463,1977,454,2005,445,2023,431,2035,427,2031,441,2020,450,2003,458,1975,473,1893,486,1784,496,1660,511,1413,517,1245"/>
 <area shape="rect" id="Node000050" href="$d5/df8/classfl_1_1detail_1_1_biquad_filter_impl_a87ef930beb2a9a390e975050f01209ed.html#a87ef930beb2a9a390e975050f01209ed" title=" " alt="" coords="267,2083,429,2123"/>
 <area shape="poly" id="edge48_Node000003_Node000050" title=" " alt="" coords="523,1245,516,1423,502,1684,492,1817,479,1933,463,2022,455,2053,445,2072,431,2085,427,2081,441,2069,450,2051,458,2021,474,1932,486,1816,497,1684,511,1422,517,1245"/>
-<area shape="rect" id="Node000052" href="$d4/d36/namespacefl_a28596d605076b71796a1086a14dae486.html#a28596d605076b71796a1086a14dae486" title=" " alt="" coords="309,2147,387,2173"/>
+<area shape="rect" id="Node000052" href="$d4/d36/namespacefl_a367783a969c81c95e5ca6306af08d575.html#a367783a969c81c95e5ca6306af08d575" title=" " alt="" coords="309,2147,387,2173"/>
 <area shape="poly" id="edge49_Node000003_Node000052" title=" " alt="" coords="523,1245,518,1434,505,1717,495,1860,482,1986,465,2083,456,2116,445,2136,433,2147,418,2155,388,2162,387,2157,416,2150,430,2143,441,2133,451,2114,460,2082,476,1986,490,1860,500,1717,512,1434,518,1245"/>
-<area shape="rect" id="Node000053" href="$d4/d36/namespacefl_acf73de79003240e094606328dac4cc57.html#acf73de79003240e094606328dac4cc57" title=" " alt="" coords="309,2197,387,2222"/>
+<area shape="rect" id="Node000053" href="$d4/d36/namespacefl_ae1d2c16e69e95bd74fb67cae7be050f5.html#ae1d2c16e69e95bd74fb67cae7be050f5" title=" " alt="" coords="309,2197,387,2222"/>
 <area shape="poly" id="edge50_Node000003_Node000053" title=" " alt="" coords="523,1245,519,1444,507,1743,497,1894,483,2028,466,2130,456,2165,445,2187,433,2198,418,2205,388,2212,387,2207,416,2200,430,2193,441,2184,451,2163,461,2129,478,2028,491,1894,501,1743,513,1444,518,1245"/>
 <area shape="rect" id="Node000054" href="$db/dd7/classfl_1_1_noise_bias1_d_a0069f377570d18bafbd101055259f19b.html#a0069f377570d18bafbd101055259f19b" title="Inject a shaped bump. Multiple triggers per frame accumulate additively." alt="" coords="262,2246,434,2271"/>
 <area shape="poly" id="edge51_Node000003_Node000054" title=" " alt="" coords="523,1245,520,1453,508,1767,498,1927,485,2069,467,2177,457,2213,445,2236,431,2248,428,2244,441,2233,452,2211,462,2175,480,2068,493,1927,503,1767,514,1452,518,1245"/>

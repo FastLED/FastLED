@@ -128,7 +128,7 @@
 <!-- Node56 -->
 <g id="Node000056" class="node">
 <title>Node56</title>
-<g id="a_Node000056"><a xlink:href="../../d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a" target="_top" xlink:title="Universal millisecond timer &#45; returns milliseconds since system startup.">
+<g id="a_Node000056"><a xlink:href="../../d4/d36/namespacefl_a3c0ba5842bfd029c404a38c8df2315f3.html#a3c0ba5842bfd029c404a38c8df2315f3" target="_top" xlink:title="Universal millisecond timer &#45; returns milliseconds since system startup.">
 <polygon fill="white" stroke="#666666" points="499.5,-500 443.5,-500 443.5,-481 499.5,-481 499.5,-500"/>
 <text text-anchor="middle" x="471.5" y="-488" font-family="Helvetica,sans-Serif" font-size="10.00">fl::millis</text>
 </a>
@@ -227,7 +227,7 @@
 <!-- Node5 -->
 <g id="Node000005" class="node">
 <title>Node5</title>
-<g id="a_Node000005"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_a2792268a864ed3d46b191c20fd56ff87.html#a2792268a864ed3d46b191c20fd56ff87" target="_top" xlink:title=" ">
+<g id="a_Node000005"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_aa93f4f0e5197ba7d957ac3d32ce76c52.html#aa93f4f0e5197ba7d957ac3d32ce76c52" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="528.5,-851 414.5,-851 414.5,-832 528.5,-832 528.5,-851"/>
 <text text-anchor="middle" x="471.5" y="-839" font-family="Helvetica,sans-Serif" font-size="10.00">fl::CRGB::colorBoost</text>
 </a>
@@ -281,7 +281,7 @@
 <!-- Node30 -->
 <g id="Node000030" class="node">
 <title>Node30</title>
-<g id="a_Node000030"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_aa272170bea8120f101f27ebd2c323b55.html#aa272170bea8120f101f27ebd2c323b55" target="_top" xlink:title="Scale down a RGB to N/256ths of its current brightness, using &quot;plain math&quot; dimming rules.">
+<g id="a_Node000030"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_a88ec345b046910f4ddf5cd4d793e7e88.html#a88ec345b046910f4ddf5cd4d793e7e88" target="_top" xlink:title="Scale down a RGB to N/256ths of its current brightness, using &quot;plain math&quot; dimming rules.">
 <polygon fill="white" stroke="#666666" points="521.5,-1036 421.5,-1036 421.5,-1017 521.5,-1017 521.5,-1036"/>
 <text text-anchor="middle" x="471.5" y="-1024" font-family="Helvetica,sans-Serif" font-size="10.00">fl::CRGB::nscale8</text>
 </a>
@@ -326,7 +326,7 @@
 <!-- Node6 -->
 <g id="Node000006" class="node">
 <title>Node6</title>
-<g id="a_Node000006"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_adb891cc4fe8f5ac2188d72c13c0256fd.html#adb891cc4fe8f5ac2188d72c13c0256fd" target="_top" xlink:title="Default constructor.">
+<g id="a_Node000006"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_a910ee467a963ad6805026ad83873e52b.html#a910ee467a963ad6805026ad83873e52b" target="_top" xlink:title="Default constructor.">
 <polygon fill="white" stroke="#666666" points="675.5,-962 585.5,-962 585.5,-943 675.5,-943 675.5,-962"/>
 <text text-anchor="middle" x="630.5" y="-950" font-family="Helvetica,sans-Serif" font-size="10.00">fl::CRGB::CRGB</text>
 </a>
@@ -605,7 +605,7 @@
 <!-- Node51 -->
 <g id="Node000051" class="node">
 <title>Node51</title>
-<g id="a_Node000051"><a xlink:href="../../d4/d36/namespacefl_a9cda2472ab9bd68df745496533aa76e7.html#a9cda2472ab9bd68df745496533aa76e7" target="_top" xlink:title=" ">
+<g id="a_Node000051"><a xlink:href="../../d4/d36/namespacefl_a2bda17f9c7e7ed8cc89536cfd39f35e2.html#a2bda17f9c7e7ed8cc89536cfd39f35e2" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="494,-555 449,-555 449,-536 494,-536 494,-555"/>
 <text text-anchor="middle" x="471.5" y="-543" font-family="Helvetica,sans-Serif" font-size="10.00">fl::cos</text>
 </a>
@@ -623,7 +623,7 @@
 <!-- Node52 -->
 <g id="Node000052" class="node">
 <title>Node52</title>
-<g id="a_Node000052"><a xlink:href="../../d8/df9/group___noise_generation_gaeb72246ebd597b60a7e575173accf2fd.html#gaeb72246ebd597b60a7e575173accf2fd" target="_top" xlink:title=" ">
+<g id="a_Node000052"><a xlink:href="../../d8/df9/group___noise_generation_gaeb72246ebd597b60a7e575173accf2fd.html#gaeb72246ebd597b60a7e575173accf2fd" target="_top" xlink:title="8&#45;Bit, fixed point implementation of Perlin&#39;s noise.">
 <polygon fill="#fff0f0" stroke="red" points="497.5,-703 445.5,-703 445.5,-684 497.5,-684 497.5,-703"/>
 <text text-anchor="middle" x="471.5" y="-691" font-family="Helvetica,sans-Serif" font-size="10.00">inoise8</text>
 </a>
@@ -686,7 +686,7 @@
 <!-- Node59 -->
 <g id="Node000059" class="node">
 <title>Node59</title>
-<g id="a_Node000059"><a xlink:href="../../d4/d36/namespacefl_abc07da8d8983da7016b55f7626e9c060.html#abc07da8d8983da7016b55f7626e9c060" target="_top" xlink:title=" ">
+<g id="a_Node000059"><a xlink:href="../../d4/d36/namespacefl_a080e32a9d5b39b1674c35757eaa2daf9.html#a080e32a9d5b39b1674c35757eaa2daf9" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="493,-592 450,-592 450,-573 493,-573 493,-592"/>
 <text text-anchor="middle" x="471.5" y="-580" font-family="Helvetica,sans-Serif" font-size="10.00">fl::sin</text>
 </a>
@@ -911,7 +911,7 @@
 <!-- Node64 -->
 <g id="Node000064" class="node">
 <title>Node64</title>
-<g id="a_Node000064"><a xlink:href="../../d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909" target="_top" xlink:title=" ">
+<g id="a_Node000064"><a xlink:href="../../d4/d36/namespacefl_a07c69292ef50aa1083046faff1c52ead.html#a07c69292ef50aa1083046faff1c52ead" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="496.5,-426 446.5,-426 446.5,-407 496.5,-407 496.5,-426"/>
 <text text-anchor="middle" x="471.5" y="-414" font-family="Helvetica,sans-Serif" font-size="10.00">fl::max</text>
 </a>
@@ -929,7 +929,7 @@
 <!-- Node65 -->
 <g id="Node000065" class="node">
 <title>Node65</title>
-<g id="a_Node000065"><a xlink:href="../../db/d97/_fast_l_e_d_8h_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909" target="_top" xlink:title=" ">
+<g id="a_Node000065"><a xlink:href="../../d6/d64/fastled_8h_a07c69292ef50aa1083046faff1c52ead.html#a07c69292ef50aa1083046faff1c52ead" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="490.5,-389 452.5,-389 452.5,-370 490.5,-370 490.5,-389"/>
 <text text-anchor="middle" x="471.5" y="-377" font-family="Helvetica,sans-Serif" font-size="10.00">max</text>
 </a>
@@ -983,7 +983,7 @@
 <!-- Node82 -->
 <g id="Node000082" class="node">
 <title>Node82</title>
-<g id="a_Node000082"><a xlink:href="../../d4/d36/namespacefl_a82abb457c658bd2a01ace4c815407143.html#a82abb457c658bd2a01ace4c815407143" target="_top" xlink:title=" ">
+<g id="a_Node000082"><a xlink:href="../../d4/d36/namespacefl_abc50d87bc1c0976e38aecd896887133e.html#abc50d87bc1c0976e38aecd896887133e" target="_top" xlink:title=" ">
 <polygon fill="#fff0f0" stroke="red" points="332.5,-167 274.5,-167 274.5,-148 332.5,-148 332.5,-167"/>
 <text text-anchor="middle" x="303.5" y="-155" font-family="Helvetica,sans-Serif" font-size="10.00">fl::fmodf</text>
 </a>

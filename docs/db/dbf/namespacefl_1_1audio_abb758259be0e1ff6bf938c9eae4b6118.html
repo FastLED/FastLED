@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -151,12 +151,12 @@ $(function(){initNavTree('db/dbf/namespacefl_1_1audio_abb758259be0e1ff6bf938c9ea
 <div class="line"><span class="lineno">  299</span>    <span class="keywordtype">int</span> validCount = 0;</div>
 <div class="line"><span class="lineno">  300</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; numBins; ++i) {</div>
 <div class="line"><span class="lineno">  301</span>        <span class="keywordflow">if</span> (binCenters[i] &gt; 0.0f) {</div>
-<div class="line"><span class="lineno">  302</span>            logSum += <a class="code hl_function" href="../../d4/d36/namespacefl_af3a8e787bc8bcd73dcddb8b47a826554.html#af3a8e787bc8bcd73dcddb8b47a826554">fl::logf</a>(binCenters[i]);</div>
+<div class="line"><span class="lineno">  302</span>            logSum += <a class="code hl_function" href="../../d4/d36/namespacefl_a009a6061a9324e18ae194e4c16749297.html#a009a6061a9324e18ae194e4c16749297">fl::logf</a>(binCenters[i]);</div>
 <div class="line"><span class="lineno">  303</span>            ++validCount;</div>
 <div class="line"><span class="lineno">  304</span>        }</div>
 <div class="line"><span class="lineno">  305</span>    }</div>
 <div class="line"><span class="lineno">  306</span>    <span class="keywordtype">float</span> f_ref = (validCount &gt; 0)</div>
-<div class="line"><span class="lineno">  307</span>        ? <a class="code hl_function" href="../../d4/d36/namespacefl_a2a5359f49a46263d1eb1fcdfe99b7bd5.html#a2a5359f49a46263d1eb1fcdfe99b7bd5">fl::expf</a>(logSum / <span class="keyword">static_cast&lt;</span><span class="keywordtype">float</span><span class="keyword">&gt;</span>(validCount))</div>
+<div class="line"><span class="lineno">  307</span>        ? <a class="code hl_function" href="../../d4/d36/namespacefl_af27046964143ce28bf18ce86d152ff93.html#af27046964143ce28bf18ce86d152ff93">fl::expf</a>(logSum / <span class="keyword">static_cast&lt;</span><span class="keywordtype">float</span><span class="keyword">&gt;</span>(validCount))</div>
 <div class="line"><span class="lineno">  308</span>        : 1000.0f;</div>
 <div class="line"><span class="lineno">  309</span> </div>
 <div class="line"><span class="lineno">  310</span>    <span class="comment">// Compute raw gains</span></div>
@@ -176,10 +176,10 @@ $(function(){initNavTree('db/dbf/namespacefl_1_1audio_abb758259be0e1ff6bf938c9ea
 <div class="line"><span class="lineno">  324</span>    <span class="keywordtype">float</span> outLogSum = 0.0f;</div>
 <div class="line"><span class="lineno">  325</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; numBins; ++i) {</div>
 <div class="line"><span class="lineno">  326</span>        <span class="keywordflow">if</span> (out[i] &gt; 0.0f) {</div>
-<div class="line"><span class="lineno">  327</span>            outLogSum += <a class="code hl_function" href="../../d4/d36/namespacefl_af3a8e787bc8bcd73dcddb8b47a826554.html#af3a8e787bc8bcd73dcddb8b47a826554">fl::logf</a>(out[i]);</div>
+<div class="line"><span class="lineno">  327</span>            outLogSum += <a class="code hl_function" href="../../d4/d36/namespacefl_a009a6061a9324e18ae194e4c16749297.html#a009a6061a9324e18ae194e4c16749297">fl::logf</a>(out[i]);</div>
 <div class="line"><span class="lineno">  328</span>        }</div>
 <div class="line"><span class="lineno">  329</span>    }</div>
-<div class="line"><span class="lineno">  330</span>    <span class="keywordtype">float</span> geoMean = <a class="code hl_function" href="../../d4/d36/namespacefl_a2a5359f49a46263d1eb1fcdfe99b7bd5.html#a2a5359f49a46263d1eb1fcdfe99b7bd5">fl::expf</a>(outLogSum / <span class="keyword">static_cast&lt;</span><span class="keywordtype">float</span><span class="keyword">&gt;</span>(numBins));</div>
+<div class="line"><span class="lineno">  330</span>    <span class="keywordtype">float</span> geoMean = <a class="code hl_function" href="../../d4/d36/namespacefl_af27046964143ce28bf18ce86d152ff93.html#af27046964143ce28bf18ce86d152ff93">fl::expf</a>(outLogSum / <span class="keyword">static_cast&lt;</span><span class="keywordtype">float</span><span class="keyword">&gt;</span>(numBins));</div>
 <div class="line"><span class="lineno">  331</span>    <span class="keywordflow">if</span> (geoMean &gt; 0.001f) {</div>
 <div class="line"><span class="lineno">  332</span>        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; numBins; ++i) {</div>
 <div class="line"><span class="lineno">  333</span>            out[i] /= geoMean;</div>
@@ -187,8 +187,8 @@ $(function(){initNavTree('db/dbf/namespacefl_1_1audio_abb758259be0e1ff6bf938c9ea
 <div class="line"><span class="lineno">  335</span>    }</div>
 <div class="line"><span class="lineno">  336</span>}</div>
 <div class="ttc" id="anamespacefl_1_1audio_af91427a06670b3079df66588c73cd4b7_html_af91427a06670b3079df66588c73cd4b7"><div class="ttname"><a href="../../db/dbf/namespacefl_1_1audio_af91427a06670b3079df66588c73cd4b7.html#af91427a06670b3079df66588c73cd4b7">fl::audio::computePinkNoiseGain</a></div><div class="ttdeci">float computePinkNoiseGain(float freq_hz, float f_ref)</div><div class="ttdoc">Compute pink noise compensation gain for a single frequency.</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d8b/mic__response__data_8h_source.html#l00284">mic_response_data.h:284</a></div></div>
-<div class="ttc" id="anamespacefl_a2a5359f49a46263d1eb1fcdfe99b7bd5_html_a2a5359f49a46263d1eb1fcdfe99b7bd5"><div class="ttname"><a href="../../d4/d36/namespacefl_a2a5359f49a46263d1eb1fcdfe99b7bd5.html#a2a5359f49a46263d1eb1fcdfe99b7bd5">fl::expf</a></div><div class="ttdeci">float expf(float value) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00398">math.h:398</a></div></div>
-<div class="ttc" id="anamespacefl_af3a8e787bc8bcd73dcddb8b47a826554_html_af3a8e787bc8bcd73dcddb8b47a826554"><div class="ttname"><a href="../../d4/d36/namespacefl_af3a8e787bc8bcd73dcddb8b47a826554.html#af3a8e787bc8bcd73dcddb8b47a826554">fl::logf</a></div><div class="ttdeci">float logf(float value) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00418">math.h:418</a></div></div>
+<div class="ttc" id="anamespacefl_a009a6061a9324e18ae194e4c16749297_html_a009a6061a9324e18ae194e4c16749297"><div class="ttname"><a href="../../d4/d36/namespacefl_a009a6061a9324e18ae194e4c16749297.html#a009a6061a9324e18ae194e4c16749297">fl::logf</a></div><div class="ttdeci">float logf(float value) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00418">math.h:418</a></div></div>
+<div class="ttc" id="anamespacefl_af27046964143ce28bf18ce86d152ff93_html_af27046964143ce28bf18ce86d152ff93"><div class="ttname"><a href="../../d4/d36/namespacefl_af27046964143ce28bf18ce86d152ff93.html#af27046964143ce28bf18ce86d152ff93">fl::expf</a></div><div class="ttdeci">float expf(float value) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00398">math.h:398</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../d6/d8b/mic__response__data_8h_source.html#l00284">computePinkNoiseGain()</a>, <a class="el" href="../../df/db1/math_8h_source.html#l00398">fl::expf()</a>, and <a class="el" href="../../df/db1/math_8h_source.html#l00418">fl::logf()</a>.</p>
 
@@ -198,7 +198,7 @@ $(function(){initNavTree('db/dbf/namespacefl_1_1audio_abb758259be0e1ff6bf938c9ea
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../db/dbf/namespacefl_1_1audio_abb758259be0e1ff6bf938c9eae4b6118_abb758259be0e1ff6bf938c9eae4b6118_cgraph.svg" width="100%" height="419"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../db/dbf/namespacefl_1_1audio_abb758259be0e1ff6bf938c9eae4b6118_abb758259be0e1ff6bf938c9eae4b6118_cgraph.svg" width="100%" height="401"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 <div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
@@ -217,7 +217,7 @@ $(function(){initNavTree('db/dbf/namespacefl_1_1audio_abb758259be0e1ff6bf938c9ea
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../db/dbf/namespacefl_1_1audio.html">audio</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:07 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:11 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

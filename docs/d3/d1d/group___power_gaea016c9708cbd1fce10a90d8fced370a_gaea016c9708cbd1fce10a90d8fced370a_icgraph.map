@@ -1,0 +1,7 @@
+<map id="controller_dither_reserve_mW" name="controller_dither_reserve_mW">
+<area shape="rect" id="Node000001" title="dither_reserve_mW() for a controller that dithers, and zero for one that does not: a mode other than ..." alt="" coords="271,45,489,70"/>
+<area shape="rect" id="Node000002" href="$d3/d1d/group___power_gab33dbfb39f4368fffdc17807883c787e.html#gab33dbfb39f4368fffdc17807883c787e" title="Determines the highest brightness level you can use and still stay under the specified power budget f..." alt="" coords="18,5,210,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="260,46,210,40,211,34,261,40"/>
+<area shape="rect" id="Node000003" href="$dd/dbb/class_c_fast_l_e_d_a06a8bc368f2ef5816015b75ad54d1e6b.html#a06a8bc368f2ef5816015b75ad54d1e6b" title="Get estimated power consumption in milliwatts." alt="" coords="5,69,223,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="261,74,223,79,222,74,260,69"/>
+</map>

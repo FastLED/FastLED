@@ -32,7 +32,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../d4/d36/namespacefl_abe4e89a0a574f2abfa9c1bb53b9bd343.html#abe4e89a0a574f2abfa9c1bb53b9bd343" target="_top" xlink:title="Configure async logger automatic servicing task.">
+<g id="a_Node000002"><a xlink:href="../../d4/d36/namespacefl_aa724af6bce4780d93d1b20804ebe3e69.html#aa724af6bce4780d93d1b20804ebe3e69" target="_top" xlink:title="Configure async logger automatic servicing task.">
 <polygon fill="white" stroke="#666666" points="156,-24.5 0,-24.5 0,-5.5 156,-5.5 156,-24.5"/>
 <text text-anchor="middle" x="78" y="-12.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::configureAsyncLogService</text>
 </a>

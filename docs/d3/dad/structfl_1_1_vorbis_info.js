@@ -1,6 +1,6 @@
 var structfl_1_1_vorbis_info =
 [
-    [ "VorbisInfo", "d3/dad/structfl_1_1_vorbis_info_a9b314f8123551c2d2464f4554ecd6a81.html#a9b314f8123551c2d2464f4554ecd6a81", null ],
+    [ "VorbisInfo", "d3/dad/structfl_1_1_vorbis_info_add6b5dbc2b034c2b3fefd5c326a351ef.html#add6b5dbc2b034c2b3fefd5c326a351ef", null ],
     [ "VorbisInfo", "d3/dad/structfl_1_1_vorbis_info_a46878a5abd68e7d7daab147f47e25549.html#a46878a5abd68e7d7daab147f47e25549", null ],
     [ "channels", "d3/dad/structfl_1_1_vorbis_info_ab22c0afa83d3590834f59f2e14bc373b.html#ab22c0afa83d3590834f59f2e14bc373b", null ],
     [ "isValid", "d3/dad/structfl_1_1_vorbis_info_a563a7c5113a92115f6d7485722bc206f.html#a563a7c5113a92115f6d7485722bc206f", null ],

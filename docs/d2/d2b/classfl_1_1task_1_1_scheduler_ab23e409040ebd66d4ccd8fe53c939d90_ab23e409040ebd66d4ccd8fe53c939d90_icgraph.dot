@@ -1,0 +1,47 @@
+digraph "fl::task::Scheduler::update_frame_listener_registration"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::task::Scheduler\l::update_frame_listener\l_registration",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::task::Scheduler\l::Singleton\< Scheduler \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d2b/classfl_1_1task_1_1_scheduler_a0f7928f8c5d46fcd68f1c9cbda6b88d2.html#a0f7928f8c5d46fcd68f1c9cbda6b88d2",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::task::Scheduler\l::update",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d2b/classfl_1_1task_1_1_scheduler_a894dae01c9c6738eeae091f8fddeefb3.html#a894dae01c9c6738eeae091f8fddeefb3",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::FxEngine::draw",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d60/classfl_1_1_fx_engine_ab4bd2776efb0a1fa06ccae2ea8a16c8b.html#ab4bd2776efb0a1fa06ccae2ea8a16c8b",tooltip="Renders the current effect or transition to the output buffer."];
+  Node3 -> Node5 [id="edge4_Node000003_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::task::run",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d5c/namespacefl_1_1task_a2d40b476742263a3fa212e24b722e3ef.html#a2d40b476742263a3fa212e24b722e3ef",tooltip="Run selected task subsystems."];
+  Node5 -> Node6 [id="edge5_Node000005_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::task::await_top\l_level",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$db/d5c/namespacefl_1_1task_ab96dc4828a01d1cff109d355d8ffc23d.html#ab96dc4828a01d1cff109d355d8ffc23d",tooltip="Synchronously wait for a promise to complete (ONLY safe in top-level contexts)"];
+  Node5 -> Node14 [id="edge6_Node000005_Node000014",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node14 [id="Node000014",label="fl::detail::delay_impl",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$df/d9e/namespacefl_1_1detail_a83cc378dd24fb46853fc05f394c60dc0.html#a83cc378dd24fb46853fc05f394c60dc0",tooltip="Internal delay implementation used by the public fl::delay wrapper."];
+  Node5 -> Node37 [id="edge7_Node000005_Node000037",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node37 [id="Node000037",label="fl::net::http::fetch\l_update",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d13/namespacefl_1_1net_1_1http_a25ef84b119ebfab47c0ecec96a224181.html#a25ef84b119ebfab47c0ecec96a224181",tooltip="Legacy manual update for fetch promises (use fl::task::run() for new code)"];
+  Node5 -> Node38 [id="edge8_Node000005_Node000038",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node38 [id="Node000038",label="loop",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/dba/_loopback_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f",tooltip=" "];
+  Node5 -> Node39 [id="edge9_Node000005_Node000039",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node39 [id="Node000039",label="fl::net::http::FetchEngine\lListener::onEndFrame",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d37/classfl_1_1net_1_1http_1_1_fetch_engine_listener_a5c4b1669a29e122fd11f9b2f48641e1f.html#a5c4b1669a29e122fd11f9b2f48641e1f",tooltip=" "];
+  Node5 -> Node40 [id="edge10_Node000005_Node000040",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node40 [id="Node000040",label="throttleToMaxRefreshRate",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d7/de5/_fast_l_e_d_8cpp_8hpp_ac6c7e827ae13a7bc3da907399f25142f.html#ac6c7e827ae13a7bc3da907399f25142f",tooltip=" "];
+  Node5 -> Node44 [id="edge11_Node000005_Node000044",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node44 [id="Node000044",label="fl::ChannelManager\l::waitForCondition",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d2/d6b/classfl_1_1_channel_manager_ad2dad2fdb0279c8f211fd524025e14f0.html#ad2dad2fdb0279c8f211fd524025e14f0",tooltip="Wait until a condition is met, with check-pump-delay logic."];
+  Node5 -> Node59 [id="edge12_Node000005_Node000059",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node59 [id="Node000059",label="fl::IChannelDriver\l::waitForCondition",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d3/da0/classfl_1_1_i_channel_driver_a699840e6b4d11e9215de9e4a7e8f8c3d.html#a699840e6b4d11e9215de9e4a7e8f8c3d",tooltip=" "];
+  Node1 -> Node65 [id="edge13_Node000001_Node000065",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node65 [id="Node000065",label="fl::task::Scheduler\l::update_tasks_of_type",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d2b/classfl_1_1task_1_1_scheduler_a523f729f91cfca13038bd39ca4838397.html#a523f729f91cfca13038bd39ca4838397",tooltip=" "];
+  Node65 -> Node2 [id="edge14_Node000065_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node65 -> Node66 [id="edge15_Node000065_Node000066",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node66 [id="Node000066",label="fl::task::Scheduler\l::update_after_frame_tasks",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d2b/classfl_1_1task_1_1_scheduler_a55942f7d4bf9dc02cf0c4b871b207722.html#a55942f7d4bf9dc02cf0c4b871b207722",tooltip=" "];
+  Node66 -> Node67 [id="edge16_Node000066_Node000067",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node67 [id="Node000067",label="fl::task::Scheduler\l::onEndFrame",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d2b/classfl_1_1task_1_1_scheduler_aa8f55191b33b752cf474c0266f877133.html#aa8f55191b33b752cf474c0266f877133",tooltip=" "];
+  Node67 -> Node2 [id="edge17_Node000067_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node65 -> Node68 [id="edge18_Node000065_Node000068",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node68 [id="Node000068",label="fl::task::Scheduler\l::update_before_frame_tasks",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d2b/classfl_1_1task_1_1_scheduler_a855c5a328c90cebcc0b5877612b6005b.html#a855c5a328c90cebcc0b5877612b6005b",tooltip=" "];
+  Node68 -> Node69 [id="edge19_Node000068_Node000069",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node69 [id="Node000069",label="fl::task::Scheduler\l::onBeginFrame",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d2b/classfl_1_1task_1_1_scheduler_ae25e57a0fa39469045c8459a0d3e1ae0.html#ae25e57a0fa39469045c8459a0d3e1ae0",tooltip=" "];
+  Node69 -> Node2 [id="edge20_Node000069_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+}

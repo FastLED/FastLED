@@ -20,7 +20,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../d0/d3a/classfl_1_1_spi_a31eb97eb2c48918544f4481b01dea9ca.html#a31eb97eb2c48918544f4481b01dea9ca" target="_top" xlink:title="Default constructor &#45; creates device in error state.">
+<g id="a_Node000002"><a xlink:href="../../d0/d3a/classfl_1_1_spi_a2a1c4c8c0347c154e6620a4384cb0e3b.html#a2a1c4c8c0347c154e6620a4384cb0e3b" target="_top" xlink:title="Default constructor &#45; creates device in error state.">
 <polygon fill="white" stroke="#666666" points="166,-19 101,-19 101,0 166,0 166,-19"/>
 <text text-anchor="middle" x="133.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::Spi::Spi</text>
 </a>

@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -154,36 +154,36 @@ $(function(){initNavTree('d4/d36/namespacefl_a0cca52aaf53d5949a14512e8102e5bd9.h
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../df/d5d/rgbw_8cpp_8hpp_source.html#l00540">540</a> of file <a class="el" href="../../df/d5d/rgbw_8cpp_8hpp_source.html">rgbw.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  542</span>                                                              {</div>
-<div class="line"><span class="lineno">  543</span> </div>
-<div class="line"><span class="lineno">  544</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a> out[4] = {b0, b1, b2, 0};</div>
-<div class="line"><span class="lineno">  545</span>    <span class="keywordflow">switch</span> (w_placement) {</div>
-<div class="line"><span class="lineno">  546</span>    <span class="comment">// unrolled loop for speed.</span></div>
-<div class="line"><span class="lineno">  547</span>    <span class="keywordflow">case</span> <a class="code hl_variable" href="../../db/d07/eorder_8h_a1c2c31bdae62536639d0b1f52cf0cf65.html#a1c2c31bdae62536639d0b1f52cf0cf65">W3</a>:</div>
-<div class="line"><span class="lineno">  548</span>        out[3] = w;</div>
-<div class="line"><span class="lineno">  549</span>        <span class="keywordflow">break</span>;</div>
-<div class="line"><span class="lineno">  550</span>    <span class="keywordflow">case</span> <a class="code hl_variable" href="../../db/d07/eorder_8h_a43fdb5ecea06114978d7ec508c23e7bb.html#a43fdb5ecea06114978d7ec508c23e7bb">W2</a>:</div>
-<div class="line"><span class="lineno">  551</span>        out[3] = out[2];  <span class="comment">// memmove and copy.</span></div>
-<div class="line"><span class="lineno">  552</span>        out[2] = w;</div>
-<div class="line"><span class="lineno">  553</span>        <span class="keywordflow">break</span>;</div>
-<div class="line"><span class="lineno">  554</span>    <span class="keywordflow">case</span> <a class="code hl_variable" href="../../db/d07/eorder_8h_ac43b0d5a4bcd859892b86fedd9eea9bc.html#ac43b0d5a4bcd859892b86fedd9eea9bc">W1</a>:</div>
-<div class="line"><span class="lineno">  555</span>        out[3] = out[2];</div>
-<div class="line"><span class="lineno">  556</span>        out[2] = out[1];</div>
-<div class="line"><span class="lineno">  557</span>        out[1] = w;</div>
-<div class="line"><span class="lineno">  558</span>        <span class="keywordflow">break</span>;</div>
-<div class="line"><span class="lineno">  559</span>    <span class="keywordflow">case</span> <a class="code hl_variable" href="../../db/d07/eorder_8h_a73dbc7c2338408af23183ab72fb50fe3.html#a73dbc7c2338408af23183ab72fb50fe3">W0</a>:</div>
-<div class="line"><span class="lineno">  560</span>        out[3] = out[2];</div>
-<div class="line"><span class="lineno">  561</span>        out[2] = out[1];</div>
-<div class="line"><span class="lineno">  562</span>        out[1] = out[0];</div>
-<div class="line"><span class="lineno">  563</span>        out[0] = w;</div>
-<div class="line"><span class="lineno">  564</span>        <span class="keywordflow">break</span>;</div>
-<div class="line"><span class="lineno">  565</span>    }</div>
-<div class="line"><span class="lineno">  566</span>    *out_b0 = out[0];</div>
-<div class="line"><span class="lineno">  567</span>    *out_b1 = out[1];</div>
-<div class="line"><span class="lineno">  568</span>    *out_b2 = out[2];</div>
-<div class="line"><span class="lineno">  569</span>    *out_b3 = out[3];</div>
-<div class="line"><span class="lineno">  570</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../df/d5d/rgbw_8cpp_8hpp_source.html#l00678">678</a> of file <a class="el" href="../../df/d5d/rgbw_8cpp_8hpp_source.html">rgbw.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  680</span>                                                              {</div>
+<div class="line"><span class="lineno">  681</span> </div>
+<div class="line"><span class="lineno">  682</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a> out[4] = {b0, b1, b2, 0};</div>
+<div class="line"><span class="lineno">  683</span>    <span class="keywordflow">switch</span> (w_placement) {</div>
+<div class="line"><span class="lineno">  684</span>    <span class="comment">// unrolled loop for speed.</span></div>
+<div class="line"><span class="lineno">  685</span>    <span class="keywordflow">case</span> <a class="code hl_variable" href="../../db/d07/eorder_8h_a1c2c31bdae62536639d0b1f52cf0cf65.html#a1c2c31bdae62536639d0b1f52cf0cf65">W3</a>:</div>
+<div class="line"><span class="lineno">  686</span>        out[3] = w;</div>
+<div class="line"><span class="lineno">  687</span>        <span class="keywordflow">break</span>;</div>
+<div class="line"><span class="lineno">  688</span>    <span class="keywordflow">case</span> <a class="code hl_variable" href="../../db/d07/eorder_8h_a43fdb5ecea06114978d7ec508c23e7bb.html#a43fdb5ecea06114978d7ec508c23e7bb">W2</a>:</div>
+<div class="line"><span class="lineno">  689</span>        out[3] = out[2];  <span class="comment">// memmove and copy.</span></div>
+<div class="line"><span class="lineno">  690</span>        out[2] = w;</div>
+<div class="line"><span class="lineno">  691</span>        <span class="keywordflow">break</span>;</div>
+<div class="line"><span class="lineno">  692</span>    <span class="keywordflow">case</span> <a class="code hl_variable" href="../../db/d07/eorder_8h_ac43b0d5a4bcd859892b86fedd9eea9bc.html#ac43b0d5a4bcd859892b86fedd9eea9bc">W1</a>:</div>
+<div class="line"><span class="lineno">  693</span>        out[3] = out[2];</div>
+<div class="line"><span class="lineno">  694</span>        out[2] = out[1];</div>
+<div class="line"><span class="lineno">  695</span>        out[1] = w;</div>
+<div class="line"><span class="lineno">  696</span>        <span class="keywordflow">break</span>;</div>
+<div class="line"><span class="lineno">  697</span>    <span class="keywordflow">case</span> <a class="code hl_variable" href="../../db/d07/eorder_8h_a73dbc7c2338408af23183ab72fb50fe3.html#a73dbc7c2338408af23183ab72fb50fe3">W0</a>:</div>
+<div class="line"><span class="lineno">  698</span>        out[3] = out[2];</div>
+<div class="line"><span class="lineno">  699</span>        out[2] = out[1];</div>
+<div class="line"><span class="lineno">  700</span>        out[1] = out[0];</div>
+<div class="line"><span class="lineno">  701</span>        out[0] = w;</div>
+<div class="line"><span class="lineno">  702</span>        <span class="keywordflow">break</span>;</div>
+<div class="line"><span class="lineno">  703</span>    }</div>
+<div class="line"><span class="lineno">  704</span>    *out_b0 = out[0];</div>
+<div class="line"><span class="lineno">  705</span>    *out_b1 = out[1];</div>
+<div class="line"><span class="lineno">  706</span>    *out_b2 = out[2];</div>
+<div class="line"><span class="lineno">  707</span>    *out_b3 = out[3];</div>
+<div class="line"><span class="lineno">  708</span>}</div>
 <div class="ttc" id="aeorder_8h_a1c2c31bdae62536639d0b1f52cf0cf65_html_a1c2c31bdae62536639d0b1f52cf0cf65"><div class="ttname"><a href="../../db/d07/eorder_8h_a1c2c31bdae62536639d0b1f52cf0cf65.html#a1c2c31bdae62536639d0b1f52cf0cf65">W3</a></div><div class="ttdeci">constexpr EOrderW W3</div><div class="ttdef"><b>Definition</b> <a href="../../db/d07/eorder_8h_source.html#l00024">eorder.h:24</a></div></div>
 <div class="ttc" id="aeorder_8h_a43fdb5ecea06114978d7ec508c23e7bb_html_a43fdb5ecea06114978d7ec508c23e7bb"><div class="ttname"><a href="../../db/d07/eorder_8h_a43fdb5ecea06114978d7ec508c23e7bb.html#a43fdb5ecea06114978d7ec508c23e7bb">W2</a></div><div class="ttdeci">constexpr EOrderW W2</div><div class="ttdef"><b>Definition</b> <a href="../../db/d07/eorder_8h_source.html#l00025">eorder.h:25</a></div></div>
 <div class="ttc" id="aeorder_8h_a73dbc7c2338408af23183ab72fb50fe3_html_a73dbc7c2338408af23183ab72fb50fe3"><div class="ttname"><a href="../../db/d07/eorder_8h_a73dbc7c2338408af23183ab72fb50fe3.html#a73dbc7c2338408af23183ab72fb50fe3">W0</a></div><div class="ttdeci">constexpr EOrderW W0</div><div class="ttdef"><b>Definition</b> <a href="../../db/d07/eorder_8h_source.html#l00027">eorder.h:27</a></div></div>
@@ -192,13 +192,13 @@ $(function(){initNavTree('d4/d36/namespacefl_a0cca52aaf53d5949a14512e8102e5bd9.h
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../d3/dbc/fl_2gfx_2eorder_8h_source.html#l00027">W0</a>, <a class="el" href="../../d3/dbc/fl_2gfx_2eorder_8h_source.html#l00026">W1</a>, <a class="el" href="../../d3/dbc/fl_2gfx_2eorder_8h_source.html#l00025">W2</a>, and <a class="el" href="../../d3/dbc/fl_2gfx_2eorder_8h_source.html#l00024">W3</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00591">PixelController&lt; RGB_ORDER, LANES, MASK &gt;::loadAndScaleRGBW()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../da/df1/color__managed__source_8cpp_8hpp_source.html#l00093">fl::ColorManagedPixelSource::loadAndScaleRGBW()</a>, <a class="el" href="../../db/d65/fl_2chipsets_2encoders_2pixel__iterator_8h_source.html#l00273">fl::PixelIterator::loadAndScaleRGBW()</a>, and <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00563">PixelController&lt; RGB_ORDER, LANES, MASK &gt;::loadAndScaleRGBW()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d4/d36/namespacefl_a0cca52aaf53d5949a14512e8102e5bd9_a0cca52aaf53d5949a14512e8102e5bd9_icgraph.svg" width="648" height="51"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d4/d36/namespacefl_a0cca52aaf53d5949a14512e8102e5bd9_a0cca52aaf53d5949a14512e8102e5bd9_icgraph.svg" width="100%" height="434"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 
 </div>
@@ -210,7 +210,7 @@ $(function(){initNavTree('d4/d36/namespacefl_a0cca52aaf53d5949a14512e8102e5bd9.h
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:04 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:08 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

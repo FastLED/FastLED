@@ -58,7 +58,7 @@
 <!-- Node24 -->
 <g id="Node000024" class="node">
 <title>Node24</title>
-<g id="a_Node000024"><a xlink:href="../../df/d9e/namespacefl_1_1detail_a0e57418c3c6a452bf97d32535eaf84d3.html#a0e57418c3c6a452bf97d32535eaf84d3" target="_top" xlink:title="BF1 for 4&#45;lane Wave8.">
+<g id="a_Node000024"><a xlink:href="../../df/d9e/namespacefl_1_1detail_a8c8ad126a88d2a88b8b3524ee264374e.html#a8c8ad126a88d2a88b8b3524ee264374e" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="512,-52 364,-52 364,-22 512,-22 512,-52"/>
 <text text-anchor="start" x="372" y="-40" font-family="Helvetica,sans-Serif" font-size="10.00">fl::detail::wave8_transpose</text>
 <text text-anchor="middle" x="438" y="-29" font-family="Helvetica,sans-Serif" font-size="10.00">_4_bf1</text>
@@ -77,7 +77,7 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../df/d9e/namespacefl_1_1detail_af8a68cecaea535bce87ed6b98d58b149.html#af8a68cecaea535bce87ed6b98d58b149" target="_top" xlink:title="Transpose 16 lanes of Wave3Byte data into interleaved format.">
+<g id="a_Node000003"><a xlink:href="../../df/d9e/namespacefl_1_1detail_af60deb9998d29f24a69577743e9d7138.html#af60deb9998d29f24a69577743e9d7138" target="_top" xlink:title="Transpose 16 lanes of Wave3Byte data via the spread&#45;LUT path (#2533).">
 <polygon fill="white" stroke="#666666" points="328,-437.5 163,-437.5 163,-418.5 328,-418.5 328,-437.5"/>
 <text text-anchor="middle" x="245.5" y="-425.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::detail::wave3_transpose_16</text>
 </a>
@@ -95,7 +95,7 @@
 <!-- Node5 -->
 <g id="Node000005" class="node">
 <title>Node5</title>
-<g id="a_Node000005"><a xlink:href="../../df/d9e/namespacefl_1_1detail_a1c33564a267c6374d9afeb116447102f.html#a1c33564a267c6374d9afeb116447102f" target="_top" xlink:title="Transpose 16 lanes of Wave8Byte data into interleaved format.">
+<g id="a_Node000005"><a xlink:href="../../df/d9e/namespacefl_1_1detail_a78e359dd2cb7c2a0f069ea1aec2127e2.html#a78e359dd2cb7c2a0f069ea1aec2127e2" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="328,-382.5 163,-382.5 163,-363.5 328,-363.5 328,-382.5"/>
 <text text-anchor="middle" x="245.5" y="-370.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::detail::wave8_transpose_16</text>
 </a>
@@ -113,7 +113,7 @@
 <!-- Node8 -->
 <g id="Node000008" class="node">
 <title>Node8</title>
-<g id="a_Node000008"><a xlink:href="../../df/d9e/namespacefl_1_1detail_aeaedcff33498750d790f9feff188eb2a.html#aeaedcff33498750d790f9feff188eb2a" target="_top" xlink:title="BF1: chipset&#45;aware direct encode for Wave8 16&#45;lane (#2548 deep&#45;dive).">
+<g id="a_Node000008"><a xlink:href="../../df/d9e/namespacefl_1_1detail_a2246793f026761f46f74b20ec3c2ecf5.html#a2246793f026761f46f74b20ec3c2ecf5" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="319.5,-345 171.5,-345 171.5,-315 319.5,-315 319.5,-345"/>
 <text text-anchor="start" x="179.5" y="-333" font-family="Helvetica,sans-Serif" font-size="10.00">fl::detail::wave8_transpose</text>
 <text text-anchor="middle" x="245.5" y="-322" font-family="Helvetica,sans-Serif" font-size="10.00">_16_bf1</text>
@@ -132,7 +132,7 @@
 <!-- Node10 -->
 <g id="Node000010" class="node">
 <title>Node10</title>
-<g id="a_Node000010"><a xlink:href="../../df/d9e/namespacefl_1_1detail_a7dc59e9346ffd0bb292aab29f8bc3627.html#a7dc59e9346ffd0bb292aab29f8bc3627" target="_top" xlink:title="Pipe2: transpose 16&#45;lane × 2&#45;byte&#45;positions in one fused call.">
+<g id="a_Node000010"><a xlink:href="../../df/d9e/namespacefl_1_1detail_a3e2f81102679a4106e51e9fc98689fe9.html#a3e2f81102679a4106e51e9fc98689fe9" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="319.5,-297 171.5,-297 171.5,-267 319.5,-267 319.5,-297"/>
 <text text-anchor="start" x="179.5" y="-285" font-family="Helvetica,sans-Serif" font-size="10.00">fl::detail::wave8_transpose</text>
 <text text-anchor="middle" x="245.5" y="-274" font-family="Helvetica,sans-Serif" font-size="10.00">_16x2_pipe2</text>
@@ -151,7 +151,7 @@
 <!-- Node12 -->
 <g id="Node000012" class="node">
 <title>Node12</title>
-<g id="a_Node000012"><a xlink:href="../../df/d9e/namespacefl_1_1detail_afb22507e740cb45f08daa8486da8bc6f.html#afb22507e740cb45f08daa8486da8bc6f" target="_top" xlink:title="BF1 + pipe4: 4&#45;position software&#45;pipelined BF1 (#2548 deep&#45;dive).">
+<g id="a_Node000012"><a xlink:href="../../df/d9e/namespacefl_1_1detail_a841fcbbd4ddde3afa4d59afc8313c5b7.html#a841fcbbd4ddde3afa4d59afc8313c5b7" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="319.5,-249 171.5,-249 171.5,-219 319.5,-219 319.5,-249"/>
 <text text-anchor="start" x="179.5" y="-237" font-family="Helvetica,sans-Serif" font-size="10.00">fl::detail::wave8_transpose</text>
 <text text-anchor="middle" x="245.5" y="-226" font-family="Helvetica,sans-Serif" font-size="10.00">_16x4_bf1_pipe4</text>
@@ -170,7 +170,7 @@
 <!-- Node14 -->
 <g id="Node000014" class="node">
 <title>Node14</title>
-<g id="a_Node000014"><a xlink:href="../../df/d9e/namespacefl_1_1detail_a60c5eda3b70551f1f5cf466822abdc3f.html#a60c5eda3b70551f1f5cf466822abdc3f" target="_top" xlink:title="Pipe4: transpose 16&#45;lane × 4&#45;byte&#45;positions in one fused call.">
+<g id="a_Node000014"><a xlink:href="../../df/d9e/namespacefl_1_1detail_a57dba27509eb14138b146602310552cd.html#a57dba27509eb14138b146602310552cd" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="319.5,-201 171.5,-201 171.5,-171 319.5,-171 319.5,-201"/>
 <text text-anchor="start" x="179.5" y="-189" font-family="Helvetica,sans-Serif" font-size="10.00">fl::detail::wave8_transpose</text>
 <text text-anchor="middle" x="245.5" y="-178" font-family="Helvetica,sans-Serif" font-size="10.00">_16x4_pipe4</text>
@@ -319,7 +319,7 @@
 <!-- Node17 -->
 <g id="Node000017" class="node">
 <title>Node17</title>
-<g id="a_Node000017"><a xlink:href="../../df/d9e/namespacefl_1_1detail_a6407553e7cf821f4f7727bd01b890b6c.html#a6407553e7cf821f4f7727bd01b890b6c" target="_top" xlink:title="Transpose 8 lanes of Wave3Byte data into interleaved format.">
+<g id="a_Node000017"><a xlink:href="../../df/d9e/namespacefl_1_1detail_ac947073ef56b660e06edb6a04b8f9d51.html#ac947073ef56b660e06edb6a04b8f9d51" target="_top" xlink:title="Transpose 8 lanes of Wave3Byte data via the spread&#45;LUT path (#2533).">
 <polygon fill="white" stroke="#666666" points="325,-152.5 166,-152.5 166,-133.5 325,-133.5 325,-152.5"/>
 <text text-anchor="middle" x="245.5" y="-140.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::detail::wave3_transpose_8</text>
 </a>
@@ -337,7 +337,7 @@
 <!-- Node19 -->
 <g id="Node000019" class="node">
 <title>Node19</title>
-<g id="a_Node000019"><a xlink:href="../../df/d9e/namespacefl_1_1detail_a28048c15bb5d847dd9c0e186ac8acfa6.html#a28048c15bb5d847dd9c0e186ac8acfa6" target="_top" xlink:title="Transpose 8 lanes of Wave8Byte data into interleaved format.">
+<g id="a_Node000019"><a xlink:href="../../df/d9e/namespacefl_1_1detail_a756967b8dca3cdde3223444819a7bed0.html#a756967b8dca3cdde3223444819a7bed0" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="325,-115.5 166,-115.5 166,-96.5 325,-96.5 325,-115.5"/>
 <text text-anchor="middle" x="245.5" y="-103.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::detail::wave8_transpose_8</text>
 </a>
@@ -355,7 +355,7 @@
 <!-- Node22 -->
 <g id="Node000022" class="node">
 <title>Node22</title>
-<g id="a_Node000022"><a xlink:href="../../df/d9e/namespacefl_1_1detail_a231be5f311080ab2a8fe4414ee17dcfd.html#a231be5f311080ab2a8fe4414ee17dcfd" target="_top" xlink:title="BF1 for 8&#45;lane Wave8 — same algebraic identity as 16&#45;lane BF1.">
+<g id="a_Node000022"><a xlink:href="../../df/d9e/namespacefl_1_1detail_a8e8d7e6c2826be5e6cb9ac7de5eaf9c4.html#a8e8d7e6c2826be5e6cb9ac7de5eaf9c4" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="319.5,-78 171.5,-78 171.5,-48 319.5,-48 319.5,-78"/>
 <text text-anchor="start" x="179.5" y="-66" font-family="Helvetica,sans-Serif" font-size="10.00">fl::detail::wave8_transpose</text>
 <text text-anchor="middle" x="245.5" y="-55" font-family="Helvetica,sans-Serif" font-size="10.00">_8_bf1</text>

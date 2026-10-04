@@ -1,0 +1,6 @@
+<map id="fl::Watchdog::shouldEscapeToBootloader" name="fl::Watchdog::shouldEscapeToBootloader">
+<area shape="rect" id="Node000001" title="True when the escape is enabled and the board has hit the consecutive&#45;watchdog&#45;reset threshold." alt="" coords="5,29,204,69"/>
+<area shape="rect" id="Node000002" href="$da/d45/classfl_1_1_watchdog_abde207d5474f84d8af78a41687c4c109.html#abde207d5474f84d8af78a41687c4c109" title=" " alt="" coords="252,29,440,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="204,47,239,47,239,52,204,52"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="301,30,299,20,306,10,322,5,346,3,374,6,389,13,387,18,372,11,346,8,323,10,309,15,304,21,306,28"/>
+</map>

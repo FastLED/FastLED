@@ -8,5 +8,5 @@ digraph "fl::detail::AsyncLoggerServiceTask::setInterval"
   rankdir="RL";
   Node1 [id="Node000001",label="fl::detail::AsyncLoggerService\lTask::setInterval",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Change the service interval (default 16ms)"];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::configureAsyncLogService",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_abe4e89a0a574f2abfa9c1bb53b9bd343.html#abe4e89a0a574f2abfa9c1bb53b9bd343",tooltip="Configure async logger automatic servicing task."];
+  Node2 [id="Node000002",label="fl::configureAsyncLogService",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_aa724af6bce4780d93d1b20804ebe3e69.html#aa724af6bce4780d93d1b20804ebe3e69",tooltip="Configure async logger automatic servicing task."];
 }

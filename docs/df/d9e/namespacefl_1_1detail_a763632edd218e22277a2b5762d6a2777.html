@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -119,21 +119,19 @@ $(function(){initNavTree('df/d9e/namespacefl_1_1detail_a763632edd218e22277a2b576
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dc/d6b/allocator_8cpp_8hpp_source.html#l00256">256</a> of file <a class="el" href="../../dc/d6b/allocator_8cpp_8hpp_source.html">allocator.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  256</span>                                                                       {</div>
-<div class="line"><span class="lineno">  257</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; slab_registry_count; i++) {</div>
-<div class="line"><span class="lineno">  258</span>        <span class="keywordflow">if</span> (slab_registry[i].block_size == block_size &amp;&amp;</div>
-<div class="line"><span class="lineno">  259</span>            slab_registry[i].slab_size == slab_size) {</div>
-<div class="line"><span class="lineno">  260</span>            <span class="keywordflow">return</span> slab_registry[i].<a class="code hl_variable" href="../../dd/d64/namespacefl_1_1detail_1_1anonymous__namespace_02allocator_8cpp_8hpp_03.html#a81ed336ca509caafd0b2c1d63adcceaf">allocator</a>;</div>
-<div class="line"><span class="lineno">  261</span>        }</div>
-<div class="line"><span class="lineno">  262</span>    }</div>
-<div class="line"><span class="lineno">  263</span>    <span class="keywordflow">return</span> <span class="keyword">nullptr</span>;</div>
-<div class="line"><span class="lineno">  264</span>}</div>
-<div class="ttc" id="anamespacefl_1_1detail_1_1anonymous__namespace_02allocator_8cpp_8hpp_03_html_a81ed336ca509caafd0b2c1d63adcceaf"><div class="ttname"><a href="../../dd/d64/namespacefl_1_1detail_1_1anonymous__namespace_02allocator_8cpp_8hpp_03.html#a81ed336ca509caafd0b2c1d63adcceaf">fl::detail::anonymous_namespace{allocator.cpp.hpp}::SlabRegistryEntry::allocator</a></div><div class="ttdeci">void * allocator</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d6b/allocator_8cpp_8hpp_source.html#l00249">allocator.cpp.hpp:249</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../dc/d6b/allocator_8cpp_8hpp_source.html#l00274">274</a> of file <a class="el" href="../../dc/d6b/allocator_8cpp_8hpp_source.html">allocator.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  274</span>                                                                       {</div>
+<div class="line"><span class="lineno">  275</span>    <span class="keyword">auto</span>&amp; s = slab_registry_state();</div>
+<div class="line"><span class="lineno">  276</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; s.count; i++) {</div>
+<div class="line"><span class="lineno">  277</span>        <span class="keywordflow">if</span> (s.entries[i].block_size == block_size &amp;&amp;</div>
+<div class="line"><span class="lineno">  278</span>            s.entries[i].slab_size == slab_size) {</div>
+<div class="line"><span class="lineno">  279</span>            <span class="keywordflow">return</span> s.entries[i].allocator;</div>
+<div class="line"><span class="lineno">  280</span>        }</div>
+<div class="line"><span class="lineno">  281</span>    }</div>
+<div class="line"><span class="lineno">  282</span>    <span class="keywordflow">return</span> <span class="keyword">nullptr</span>;</div>
+<div class="line"><span class="lineno">  283</span>}</div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../dc/d6b/allocator_8cpp_8hpp_source.html#l00249">fl::detail::anonymous_namespace{allocator.cpp.hpp}::SlabRegistryEntry::allocator</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../da/da9/allocator_8h_source.html#l00743">fl::allocator_slab&lt; T, SLAB_SIZE &gt;::get_allocator()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../da/da9/allocator_8h_source.html#l00757">fl::allocator_slab&lt; T, SLAB_SIZE &gt;::get_allocator()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -151,7 +149,7 @@ $(function(){initNavTree('df/d9e/namespacefl_1_1detail_a763632edd218e22277a2b576
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../df/d9e/namespacefl_1_1detail.html">detail</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:09 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:11 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

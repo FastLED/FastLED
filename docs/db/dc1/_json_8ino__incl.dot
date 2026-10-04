@@ -19,7 +19,14 @@ digraph "/home/runner/work/FastLED/FastLED/examples/Json/Json.ino"
   Node6 [id="Node000006",label="fl/stl/json.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d05/json_8h.html",tooltip="FastLED's Elegant JSON Library: fl::json"];
   Node6 -> Node7 [id="edge7_Node000006_Node000007",color="steelblue1",style="solid",tooltip=" "];
   Node7 [id="Node000007",label="fl/stl/json/types.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d7/d5e/fl_2stl_2json_2types_8h.html",tooltip=" "];
-  Node7 -> Node14 [id="edge8_Node000007_Node000014",color="steelblue1",style="solid",tooltip=" "];
+  Node7 -> Node27 [id="edge8_Node000007_Node000027",color="steelblue1",style="solid",tooltip=" "];
+  Node27 [id="Node000027",label="fl/stl/bit_cast.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$df/d72/bit__cast_8h.html",tooltip=" "];
+  Node27 -> Node14 [id="edge9_Node000027_Node000014",color="steelblue1",style="solid",tooltip=" "];
   Node14 [id="Node000014",label="fl/stl/noexcept.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d01/noexcept_8h.html",tooltip=" "];
-  Node6 -> Node14 [id="edge9_Node000006_Node000014",color="steelblue1",style="solid",tooltip=" "];
+  Node27 -> Node19 [id="edge10_Node000027_Node000019",color="steelblue1",style="solid",tooltip=" "];
+  Node19 [id="Node000019",label="fl/stl/static_assert.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d1b/static__assert_8h.html",tooltip="Portable compile-time assertion wrapper."];
+  Node7 -> Node14 [id="edge11_Node000007_Node000014",color="steelblue1",style="solid",tooltip=" "];
+  Node6 -> Node27 [id="edge12_Node000006_Node000027",color="steelblue1",style="solid",tooltip=" "];
+  Node6 -> Node14 [id="edge13_Node000006_Node000014",color="steelblue1",style="solid",tooltip=" "];
+  Node6 -> Node19 [id="edge14_Node000006_Node000019",color="steelblue1",style="solid",tooltip=" "];
 }

@@ -1,0 +1,28 @@
+<map id="fl::rgb_2_rgbw_exact" name="fl::rgb_2_rgbw_exact">
+<area shape="rect" id="Node000001" title="Converts RGB to RGBW using a color transfer method from saturated color channels to white." alt="" coords="952,130,1108,155"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a5d7f88cea77f862d6c24639b5a0cd916.html#a5d7f88cea77f862d6c24639b5a0cd916" title="Converts RGB to RGBW using one of the functions." alt="" coords="501,105,615,130"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="997,125,954,102,903,84,862,77,820,74,736,79,660,92,600,107,599,102,659,87,735,74,820,69,863,72,905,79,956,97,999,120"/>
+<area shape="rect" id="Node000009" href="$d4/d36/namespacefl_a25c2dc6d7ea89abcd4c49a3f47db92a8.html#a25c2dc6d7ea89abcd4c49a3f47db92a8" title=" " alt="" coords="705,158,904,183"/>
+<area shape="poly" id="edge7_Node000001_Node000009" title=" " alt="" coords="938,157,905,161,904,156,938,151"/>
+<area shape="rect" id="Node000011" href="$d4/d36/namespacefl_ac181c9536b6f0d1d772a4bd18f48a543.html#ac181c9536b6f0d1d772a4bd18f48a543" title=" " alt="" coords="705,208,904,248"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="988,163,905,197,868,210,866,205,903,192,986,158"/>
+<area shape="rect" id="Node000013" href="$d4/d36/namespacefl_ada2d5e03b4fc0a4720ff3fcbc0769945.html#ada2d5e03b4fc0a4720ff3fcbc0769945" title=" " alt="" coords="731,93,879,133"/>
+<area shape="poly" id="edge13_Node000001_Node000013" title=" " alt="" coords="938,133,879,126,879,120,938,128"/>
+<area shape="rect" id="Node000003" href="$d3/d1d/group___power_ga01ec0d809cace073e7c92f323cbd38a1.html#ga01ec0d809cace073e7c92f323cbd38a1" title="Same, for a strip driven through the RGBW conversion." alt="" coords="248,5,395,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="513,102,410,60,378,48,380,43,412,55,515,97"/>
+<area shape="rect" id="Node000004" href="$d0/dee/struct_pixel_controller_af9320cb2184eab8cd1745e520c68ca62.html#af9320cb2184eab8cd1745e520c68ca62" title="loadAndScaleRGBW before its wire reorder: RGB in source order plus W." alt="" coords="232,69,411,109"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="488,112,411,103,411,97,488,106"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_af3542d7e69706a23e59f68a803550161.html#af3542d7e69706a23e59f68a803550161" title=" " alt="" coords="265,134,378,159"/>
+<area shape="poly" id="edge5_Node000002_Node000007" title=" " alt="" coords="488,129,378,142,378,137,487,123"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_a147010e2e1d4169b136516045ad0cbc0.html#a147010e2e1d4169b136516045ad0cbc0" title=" " alt="" coords="265,183,378,209"/>
+<area shape="poly" id="edge6_Node000002_Node000008" title=" " alt="" coords="493,136,460,148,412,173,374,186,373,181,410,168,458,143,491,131"/>
+<area shape="rect" id="Node000005" href="$d0/dee/struct_pixel_controller_a5aa57de8397b498ea587b5f0c049ced5.html#a5aa57de8397b498ea587b5f0c049ced5" title=" " alt="" coords="5,69,184,109"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="218,92,184,92,184,87,218,87"/>
+<area shape="poly" id="edge8_Node000009_Node000002" title=" " alt="" coords="731,158,614,132,615,127,732,152"/>
+<area shape="rect" id="Node000010" href="$d4/d36/namespacefl_a823f540ad25f0e9dc4c14c875f838193.html#a823f540ad25f0e9dc4c14c875f838193" title=" " alt="" coords="459,158,657,183"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="691,173,658,173,658,168,691,168"/>
+<area shape="poly" id="edge11_Node000011_Node000002" title=" " alt="" coords="718,205,704,197,689,184,679,171,670,159,656,148,614,130,616,125,659,143,674,156,684,168,693,180,707,192,721,200"/>
+<area shape="rect" id="Node000012" href="$d4/d36/namespacefl_a2dc78dc64b1ed3a6e75c666e177031f7.html#a2dc78dc64b1ed3a6e75c666e177031f7" title=" " alt="" coords="459,208,657,248"/>
+<area shape="poly" id="edge12_Node000011_Node000012" title=" " alt="" coords="691,231,658,231,658,225,691,225"/>
+<area shape="poly" id="edge14_Node000013_Node000002" title=" " alt="" coords="716,117,615,119,615,114,716,112"/>
+</map>

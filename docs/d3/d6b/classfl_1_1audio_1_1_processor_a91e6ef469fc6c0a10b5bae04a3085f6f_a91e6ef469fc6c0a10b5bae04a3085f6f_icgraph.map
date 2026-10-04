@@ -1,0 +1,23 @@
+<map id="fl::audio::Processor::getMoodAnalyzer" name="fl::audio::Processor::getMoodAnalyzer">
+<area shape="rect" id="Node000001" title=" " alt="" coords="673,113,819,153"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="778,101,767,95,746,92,728,94,717,99,713,105,715,112,710,114,708,104,713,95,726,89,746,87,769,90,781,97"/>
+<area shape="rect" id="Node000002" href="$d3/d6b/classfl_1_1audio_1_1_processor_a1cbf6fafc3f07b73ef988f1227878c6b.html#a1cbf6fafc3f07b73ef988f1227878c6b" title=" " alt="" coords="480,157,625,197"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="661,155,627,163,625,158,659,150"/>
+<area shape="rect" id="Node000007" href="$d3/d6b/classfl_1_1audio_1_1_processor_af66738de8f1984a0e2c39fd0fe035e47.html#af66738de8f1984a0e2c39fd0fe035e47" title=" " alt="" coords="480,69,625,109"/>
+<area shape="poly" id="edge9_Node000001_Node000007" title=" " alt="" coords="659,116,625,109,627,103,661,111"/>
+<area shape="poly" id="edge5_Node000002_Node000002" title=" " alt="" coords="585,145,574,139,553,136,534,138,523,143,519,149,522,156,516,158,514,148,520,139,533,133,553,131,575,134,588,141"/>
+<area shape="rect" id="Node000003" href="$dc/d25/classmood__ring_1_1_room_listener_a6675b5c8e716836ea18e1f3ea22705f0.html#a6675b5c8e716836ea18e1f3ea22705f0" title=" " alt="" coords="243,69,432,109"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="498,154,431,124,399,112,401,107,433,119,500,149"/>
+<area shape="rect" id="Node000005" href="$d8/dea/classfl_1_1audio_1_1_reactive_abb87257694541a069b81479727a19bd4.html#abb87257694541a069b81479727a19bd4" title=" " alt="" coords="268,221,407,261"/>
+<area shape="poly" id="edge6_Node000002_Node000005" title=" " alt="" coords="472,204,406,224,404,219,471,199"/>
+<area shape="rect" id="Node000006" href="$d3/d6b/classfl_1_1audio_1_1_processor_a3209b620bdf4732030f5ed259cc7fce5.html#a3209b620bdf4732030f5ed259cc7fce5" title=" " alt="" coords="265,157,410,197"/>
+<area shape="poly" id="edge7_Node000002_Node000006" title=" " alt="" coords="467,180,410,180,410,175,467,175"/>
+<area shape="rect" id="Node000004" href="$dc/d25/classmood__ring_1_1_room_listener_a101688d3da23eff686cdd2e709b3bc77.html#a101688d3da23eff686cdd2e709b3bc77" title="Poll the Processor and refresh sense(). Call once per frame." alt="" coords="5,69,195,109"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="229,92,195,92,195,87,229,87"/>
+<area shape="poly" id="edge8_Node000006_Node000006" title=" " alt="" coords="373,146,361,139,337,136,317,138,305,143,300,149,302,156,297,158,295,148,301,138,316,133,337,131,362,134,376,141"/>
+<area shape="poly" id="edge10_Node000007_Node000003" title=" " alt="" coords="466,92,432,92,432,87,466,87"/>
+<area shape="poly" id="edge13_Node000007_Node000006" title=" " alt="" coords="491,117,388,160,386,155,489,112"/>
+<area shape="poly" id="edge11_Node000007_Node000007" title=" " alt="" coords="585,57,574,51,553,48,534,50,523,55,519,61,522,68,516,70,514,60,520,51,533,45,553,43,575,46,588,53"/>
+<area shape="rect" id="Node000008" href="$d8/dea/classfl_1_1audio_1_1_reactive_ace7130f9f2538cbf332aaacecf05640b.html#ace7130f9f2538cbf332aaacecf05640b" title=" " alt="" coords="268,5,407,45"/>
+<area shape="poly" id="edge12_Node000007_Node000008" title=" " alt="" coords="471,68,404,48,406,43,472,63"/>
+</map>

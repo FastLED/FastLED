@@ -1,0 +1,49 @@
+<map id="fl::SlimSpiBridgeController::showPixels" name="fl::SlimSpiBridgeController::showPixels">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,157,199,197"/>
+<area shape="rect" id="Node000002" href="$de/d07/classfl_1_1_slim_spi_bridge_controller_a32e9f92b46f6abd8cb40146ea4d5efc2.html#a32e9f92b46f6abd8cb40146ea4d5efc2" title="Encode it into out using the writer selected by CHIPSET." alt="" coords="247,5,440,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="121,155,174,106,208,79,245,55,258,48,261,53,248,60,212,83,177,110,124,159"/>
+<area shape="rect" id="Node000003" href="$d8/da0/classfl_1_1_c_l_e_d_controller_aecc3faff509bcff7c673f374bd4a1f0c.html#aecc3faff509bcff7c673f374bd4a1f0c" title=" " alt="" coords="275,93,411,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="178,155,261,132,263,137,179,160"/>
+<area shape="rect" id="Node000004" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a0e8bceabb4653371dfd1f84bfb139e5f.html#a0e8bceabb4653371dfd1f84bfb139e5f" title=" " alt="" coords="275,157,411,197"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="199,175,261,175,261,180,199,180"/>
+<area shape="rect" id="Node000005" href="$d2/d6b/classfl_1_1_channel_manager_a58d12a4cf75bb181c7093141240bb94b.html#a58d12a4cf75bb181c7093141240bb94b" title="Get the singleton WITHOUT registering platform default drivers." alt="" coords="505,184,653,224"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="179,195,247,207,375,213,491,209,491,214,375,218,246,212,178,200"/>
+<area shape="rect" id="Node000012" href="$de/d07/classfl_1_1_slim_spi_bridge_controller_ad342cd44bd75c6d02679ca04b6d4f895.html#ad342cd44bd75c6d02679ca04b6d4f895" title="Resolve the driver for this frame." alt="" coords="247,284,440,324"/>
+<area shape="poly" id="edge13_Node000001_Node000012" title=" " alt="" coords="142,195,293,275,291,280,140,200"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="300,94,297,84,304,74,320,69,343,67,371,70,386,77,383,82,369,75,343,72,321,74,307,79,302,85,305,92"/>
+<area shape="rect" id="Node000006" href="$d2/d6b/classfl_1_1_channel_manager_a3f0e1823366151d87c97be78f4273755.html#a3f0e1823366151d87c97be78f4273755" title="Constructor." alt="" coords="744,120,892,160"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="653,182,730,161,731,166,654,187"/>
+<area shape="rect" id="Node000010" href="$d9/d5b/classfl_1_1_singleton_ad5cb1b704e17768f75802673abb0ff75.html#ad5cb1b704e17768f75802673abb0ff75" title=" " alt="" coords="737,185,899,210"/>
+<area shape="poly" id="edge11_Node000005_Node000010" title=" " alt="" coords="653,199,723,197,723,203,653,205"/>
+<area shape="poly" id="edge7_Node000006_Node000006" title=" " alt="" coords="774,120,771,110,778,101,794,95,818,93,846,96,861,103,858,108,844,101,818,99,795,101,781,105,776,111,779,119"/>
+<area shape="rect" id="Node000007" href="$de/dca/classfl_1_1_engine_events_a98984c55652e174bb2384d85935c581b.html#a98984c55652e174bb2384d85935c581b" title=" " alt="" coords="965,70,1176,95"/>
+<area shape="poly" id="edge8_Node000006_Node000007" title=" " alt="" coords="892,121,1000,96,1001,101,893,126"/>
+<area shape="rect" id="Node000008" href="$d2/d6b/classfl_1_1_channel_manager_ae0d96adf1576f8fe62b937685991e3b5.html#ae0d96adf1576f8fe62b937685991e3b5" title=" " alt="" coords="980,120,1161,160"/>
+<area shape="poly" id="edge9_Node000006_Node000008" title=" " alt="" coords="892,146,966,146,966,152,892,151"/>
+<area shape="poly" id="edge10_Node000008_Node000006" title=" " alt="" coords="980,134,906,134,906,129,980,129"/>
+<area shape="rect" id="Node000011" href="$d4/d36/namespacefl_a1e67c0c24ebcd98fcf8554753d1639a6.html#a1e67c0c24ebcd98fcf8554753d1639a6" title=" " alt="" coords="1001,185,1140,210"/>
+<area shape="poly" id="edge12_Node000010_Node000011" title=" " alt="" coords="899,195,987,195,987,200,899,200"/>
+<area shape="poly" id="edge22_Node000012_Node000005" title=" " alt="" coords="389,281,487,239,515,227,517,232,489,244,391,286"/>
+<area shape="rect" id="Node000013" href="$d4/d36/namespacefl_a5c5f559ae1d1471f8e955679de86b08a.html#a5c5f559ae1d1471f8e955679de86b08a" title="Concrete ChannelManager driver name for a portable bus." alt="" coords="509,254,649,279"/>
+<area shape="poly" id="edge14_Node000012_Node000013" title=" " alt="" coords="440,286,495,277,496,282,441,291"/>
+<area shape="rect" id="Node000015" href="$de/d66/classfl_1_1basic__string_ac7b40587b637d254d009cc32f530fb83.html#ac7b40587b637d254d009cc32f530fb83" title=" " alt="" coords="502,315,657,341"/>
+<area shape="poly" id="edge16_Node000012_Node000015" title=" " alt="" coords="441,311,489,316,488,321,440,316"/>
+<area shape="rect" id="Node000025" href="$d2/db2/classfl_1_1string_af72684ed7d6b211b41ace065de0bcfe7.html#af72684ed7d6b211b41ace065de0bcfe7" title=" " alt="" coords="500,365,659,390"/>
+<area shape="poly" id="edge21_Node000012_Node000025" title=" " alt="" coords="403,321,489,349,519,358,517,363,487,355,402,327"/>
+<area shape="rect" id="Node000026" href="$d2/d6b/classfl_1_1_channel_manager_ad872b4d8bce2be12821c7856e0e578de.html#ad872b4d8bce2be12821c7856e0e578de" title="Select best driver for channel data (used by Channel::showPixels)" alt="" coords="488,465,671,505"/>
+<area shape="poly" id="edge23_Node000012_Node000026" title=" " alt="" coords="372,322,543,455,540,459,369,326"/>
+<area shape="rect" id="Node000014" href="$d4/d36/namespacefl_a313a46963a17ff064df5ec718d6ba181.html#a313a46963a17ff064df5ec718d6ba181" title=" " alt="" coords="768,234,868,259"/>
+<area shape="poly" id="edge15_Node000013_Node000014" title=" " alt="" coords="649,258,754,249,755,255,650,263"/>
+<area shape="rect" id="Node000016" href="$de/d66/classfl_1_1basic__string_a8a58fba79da87be2d1783cd652afeadc.html#a8a58fba79da87be2d1783cd652afeadc" title=" " alt="" coords="739,308,897,348"/>
+<area shape="poly" id="edge17_Node000015_Node000016" title=" " alt="" coords="657,325,725,325,725,331,657,331"/>
+<area shape="rect" id="Node000018" href="$de/d66/classfl_1_1basic__string_a0625094a763be3f500174030c18eff86.html#a0625094a763be3f500174030c18eff86" title=" " alt="" coords="723,373,913,398"/>
+<area shape="poly" id="edge19_Node000015_Node000018" title=" " alt="" coords="634,338,752,367,751,372,632,343"/>
+<area shape="rect" id="Node000022" href="$de/d66/classfl_1_1basic__string_a0fcfaea1e856f9a1fb0b73a2b19ff3bc.html#a0fcfaea1e856f9a1fb0b73a2b19ff3bc" title=" " alt="" coords="719,422,917,447"/>
+<area shape="poly" id="edge20_Node000015_Node000022" title=" " alt="" coords="649,338,672,350,688,364,697,379,705,394,720,407,734,415,732,419,717,412,701,397,692,382,684,368,669,354,646,343"/>
+<area shape="poly" id="edge18_Node000016_Node000016" title=" " alt="" coords="774,308,771,298,778,289,794,283,818,281,846,284,861,291,858,296,844,289,818,287,795,289,781,293,776,299,779,307"/>
+<area shape="rect" id="Node000027" href="$de/d66/classfl_1_1basic__string_ac3effe716fde4667b05a52d78d74bbfb.html#ac3effe716fde4667b05a52d78d74bbfb" title=" " alt="" coords="987,501,1154,526"/>
+<area shape="poly" id="edge24_Node000026_Node000027" title=" " alt="" coords="671,488,973,505,973,510,671,493"/>
+<area shape="rect" id="Node000028" href="$d2/d6b/classfl_1_1_channel_manager_a5974057ac91c969e848ff49fb46aaabb.html#a5974057ac91c969e848ff49fb46aaabb" title="Silent counterpart to getDriverByName()." alt="" coords="743,523,893,563"/>
+<area shape="poly" id="edge25_Node000026_Node000028" title=" " alt="" coords="664,503,730,519,729,524,663,508"/>
+<area shape="poly" id="edge26_Node000028_Node000027" title=" " alt="" coords="893,531,973,522,974,527,894,537"/>
+</map>

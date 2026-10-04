@@ -1,0 +1,28 @@
+<map id="fl::SourceProfile::d65" name="fl::SourceProfile::d65">
+<area shape="rect" id="Node000001" title=" " alt="" coords="824,77,979,102"/>
+<area shape="rect" id="Node000002" href="$da/d81/structfl_1_1_source_profile_a9ac4e110c4d2e959475a2f9cd237361f.html#a9ac4e110c4d2e959475a2f9cd237361f" title=" " alt="" coords="645,5,776,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="849,75,770,48,772,43,850,70"/>
+<area shape="rect" id="Node000005" href="$da/d81/structfl_1_1_source_profile_acb18816eaab37f4c50cdf041c4f50750.html#acb18816eaab37f4c50cdf041c4f50750" title=" " alt="" coords="645,69,776,109"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="810,92,776,92,776,87,810,87"/>
+<area shape="rect" id="Node000006" href="$da/d81/structfl_1_1_source_profile_af2c687f77eb11afc242a0004593a0a78.html#af2c687f77eb11afc242a0004593a0a78" title=" " alt="" coords="645,155,776,195"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="861,110,757,157,755,152,858,105"/>
+<area shape="rect" id="Node000003" href="$d2/dec/namespacefl_1_1fled_a7f3ddd09003b75b034315f97ceb84673.html#a7f3ddd09003b75b034315f97ceb84673" title=" " alt="" coords="235,63,403,89"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="632,38,404,68,403,63,632,33"/>
+<area shape="rect" id="Node000004" href="$d0/d4b/classfl_1_1_video_ab6ec01681e1f8473a372e6be674426d4.html#ab6ec01681e1f8473a372e6be674426d4" title="The colour&#45;pipeline source profile the file declares (or the default tuple of its pixel format)." alt="" coords="5,63,172,89"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="221,79,172,79,172,73,221,73"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="631,89,403,82,404,76,632,84"/>
+<area shape="rect" id="Node000007" href="$da/d81/structfl_1_1_source_profile_aaf226459c5df5ab2e93bfc4b59078800.html#aaf226459c5df5ab2e93bfc4b59078800" title=" " alt="" coords="467,113,597,153"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="631,159,597,151,598,146,633,154"/>
+<area shape="rect" id="Node000008" href="$da/d81/structfl_1_1_source_profile_aebd5c778d592b6b83ad80d137eef242c.html#aebd5c778d592b6b83ad80d137eef242c" title=" " alt="" coords="467,241,597,281"/>
+<area shape="poly" id="edge8_Node000006_Node000008" title=" " alt="" coords="658,203,576,243,573,239,655,198"/>
+<area shape="rect" id="Node000017" href="$da/d81/structfl_1_1_source_profile_a518fe9df76e61fdc8cb2e8e3cbe71f4a.html#a518fe9df76e61fdc8cb2e8e3cbe71f4a" title=" " alt="" coords="467,177,597,217"/>
+<area shape="poly" id="edge13_Node000006_Node000017" title=" " alt="" coords="632,187,598,192,597,186,632,182"/>
+<area shape="rect" id="Node000009" href="$df/d9e/namespacefl_1_1detail_ab5f23307c864de5b8f5c5da7224062ab.html#ab5f23307c864de5b8f5c5da7224062ab" title=" " alt="" coords="233,177,406,217"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="452,240,386,220,387,215,454,235"/>
+<area shape="rect" id="Node000013" href="$d5/d87/structfl_1_1_channel_options_ad1a3ce776ce7ceb22e42d100bb6b4044.html#ad1a3ce776ce7ceb22e42d100bb6b4044" title=" " alt="" coords="220,241,419,281"/>
+<area shape="poly" id="edge10_Node000008_Node000013" title=" " alt="" coords="453,264,419,264,419,259,453,259"/>
+<area shape="rect" id="Node000014" href="$d5/d87/structfl_1_1_channel_options_a186d9e21c9c012c5eb869a22eff28574.html#a186d9e21c9c012c5eb869a22eff28574" title=" " alt="" coords="249,329,390,369"/>
+<area shape="poly" id="edge11_Node000008_Node000014" title=" " alt="" coords="471,289,370,332,368,327,469,284"/>
+<area shape="poly" id="edge12_Node000014_Node000014" title=" " alt="" coords="355,318,342,311,319,308,299,310,287,315,283,321,285,328,280,330,277,320,284,310,298,305,319,303,344,306,357,313"/>
+<area shape="poly" id="edge14_Node000017_Node000003" title=" " alt="" coords="476,173,465,168,339,91,342,86,468,163,478,169"/>
+</map>

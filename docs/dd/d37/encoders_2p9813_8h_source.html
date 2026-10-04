@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -116,7 +116,7 @@ $(function(){initNavTree('dd/d37/encoders_2p9813_8h_source.html','../../'); init
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span></div>
 <div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> InputIterator, <span class="keyword">typename</span> OutputIterator&gt;</div>
 <div class="foldopen" id="foldopen00033" data-start="{" data-end="}">
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno"><a class="line" href="../../d4/d36/namespacefl_aef406227ddbce2fa87c85d82c6f5a0ea.html#aef406227ddbce2fa87c85d82c6f5a0ea">   33</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="../../d4/d36/namespacefl_aef406227ddbce2fa87c85d82c6f5a0ea.html#aef406227ddbce2fa87c85d82c6f5a0ea">encodeP9813</a>(InputIterator first, InputIterator last, OutputIterator out) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno"><a class="line" href="../../d4/d36/namespacefl_a03a7f96ad883b08c7cffeead48c72fc9.html#a03a7f96ad883b08c7cffeead48c72fc9">   33</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a03a7f96ad883b08c7cffeead48c72fc9.html#a03a7f96ad883b08c7cffeead48c72fc9">encodeP9813</a>(InputIterator first, InputIterator last, OutputIterator out) <a class="code hl_variable" href="../../d4/d36/namespacefl_aa317f89ca911371e798d08a93770402f.html#aa317f89ca911371e798d08a93770402f">FL_NO_EXCEPT</a> {</div>
 <div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>    <span class="comment">// Start boundary: 4 bytes of 0x00</span></div>
 <div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    *out++ = 0x00;</div>
 <div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    *out++ = 0x00;</div>
@@ -128,7 +128,7 @@ $(function(){initNavTree('dd/d37/encoders_2p9813_8h_source.html','../../'); init
 <div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>        <span class="keyword">const</span> <a class="code hl_class" href="../../d4/dca/classfl_1_1array.html">fl::array&lt;u8, BYTES_PER_PIXEL_RGB&gt;</a>&amp; pixel = *first;</div>
 <div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
 <div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>        <span class="comment">// P9813 flag byte: 0xC0 | checksum (BGR order: 0=B, 1=G, 2=R)</span></div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>        <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a> flag = <a class="code hl_function" href="../../d4/d36/namespacefl_ae023c80fd2ff1cc36fda200e72ab52f5.html#ae023c80fd2ff1cc36fda200e72ab52f5">p9813FlagByte</a>(pixel[2], pixel[1], pixel[0]);  <span class="comment">// r, g, b</span></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>        <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a> flag = <a class="code hl_function" href="../../d4/d36/namespacefl_ad3a95a2f9e5b2c3c54b375af01a57488.html#ad3a95a2f9e5b2c3c54b375af01a57488">p9813FlagByte</a>(pixel[2], pixel[1], pixel[0]);  <span class="comment">// r, g, b</span></div>
 <div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span> </div>
 <div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>        *out++ = flag;</div>
 <div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>        *out++ = pixel[0];  <span class="comment">// Index 0 (BGR order: Blue)</span></div>
@@ -151,12 +151,12 @@ $(function(){initNavTree('dd/d37/encoders_2p9813_8h_source.html','../../'); init
 <div class="ttc" id="aclassfl_1_1array_html"><div class="ttname"><a href="../../d4/dca/classfl_1_1array.html">fl::array</a></div><div class="ttdoc">A fixed-size array implementation similar to std::array.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d63/array_8h_source.html#l00027">array.h:27</a></div></div>
 <div class="ttc" id="aencoder__constants_8h_html"><div class="ttname"><a href="../../d7/ddb/encoder__constants_8h.html">encoder_constants.h</a></div><div class="ttdoc">Constants for SPI chipset encoders.</div></div>
 <div class="ttc" id="aencoder__utils_8h_html"><div class="ttname"><a href="../../d5/d4f/encoder__utils_8h.html">encoder_utils.h</a></div><div class="ttdoc">Shared utilities for SPI chipset encoders.</div></div>
+<div class="ttc" id="anamespacefl_a03a7f96ad883b08c7cffeead48c72fc9_html_a03a7f96ad883b08c7cffeead48c72fc9"><div class="ttname"><a href="../../d4/d36/namespacefl_a03a7f96ad883b08c7cffeead48c72fc9.html#a03a7f96ad883b08c7cffeead48c72fc9">fl::encodeP9813</a></div><div class="ttdeci">void encodeP9813(InputIterator first, InputIterator last, OutputIterator out) FL_NO_EXCEPT</div><div class="ttdoc">Encode pixel data in P9813 format.</div><div class="ttdef"><b>Definition</b> <a href="#l00033">p9813.h:33</a></div></div>
 <div class="ttc" id="anamespacefl_a058ceeac48f181da463c2ba07401292c_html_a058ceeac48f181da463c2ba07401292c"><div class="ttname"><a href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a></div><div class="ttdeci">unsigned char u8</div><div class="ttdef"><b>Definition</b> <a href="../../df/dd8/stdint_8h_source.html#l00131">stdint.h:131</a></div></div>
-<div class="ttc" id="anamespacefl_ae023c80fd2ff1cc36fda200e72ab52f5_html_ae023c80fd2ff1cc36fda200e72ab52f5"><div class="ttname"><a href="../../d4/d36/namespacefl_ae023c80fd2ff1cc36fda200e72ab52f5.html#ae023c80fd2ff1cc36fda200e72ab52f5">fl::p9813FlagByte</a></div><div class="ttdeci">u8 p9813FlagByte(u8 r, u8 g, u8 b) FL_NOEXCEPT</div><div class="ttdoc">Generate P9813 flag byte from RGB components.</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d4f/encoder__utils_8h_source.html#l00052">encoder_utils.h:52</a></div></div>
-<div class="ttc" id="anamespacefl_aef406227ddbce2fa87c85d82c6f5a0ea_html_aef406227ddbce2fa87c85d82c6f5a0ea"><div class="ttname"><a href="../../d4/d36/namespacefl_aef406227ddbce2fa87c85d82c6f5a0ea.html#aef406227ddbce2fa87c85d82c6f5a0ea">fl::encodeP9813</a></div><div class="ttdeci">void encodeP9813(InputIterator first, InputIterator last, OutputIterator out) FL_NOEXCEPT</div><div class="ttdoc">Encode pixel data in P9813 format.</div><div class="ttdef"><b>Definition</b> <a href="#l00033">p9813.h:33</a></div></div>
+<div class="ttc" id="anamespacefl_aa317f89ca911371e798d08a93770402f_html_aa317f89ca911371e798d08a93770402f"><div class="ttname"><a href="../../d4/d36/namespacefl_aa317f89ca911371e798d08a93770402f.html#aa317f89ca911371e798d08a93770402f">fl::FL_NO_EXCEPT</a></div><div class="ttdeci">InputGamut g FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/df8/fl_2gfx_2rgbw_8h_source.html#l00121">rgbw.h:121</a></div></div>
+<div class="ttc" id="anamespacefl_ad3a95a2f9e5b2c3c54b375af01a57488_html_ad3a95a2f9e5b2c3c54b375af01a57488"><div class="ttname"><a href="../../d4/d36/namespacefl_ad3a95a2f9e5b2c3c54b375af01a57488.html#ad3a95a2f9e5b2c3c54b375af01a57488">fl::p9813FlagByte</a></div><div class="ttdeci">u8 p9813FlagByte(u8 r, u8 g, u8 b) FL_NO_EXCEPT</div><div class="ttdoc">Generate P9813 flag byte from RGB components.</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d4f/encoder__utils_8h_source.html#l00052">encoder_utils.h:52</a></div></div>
 <div class="ttc" id="anamespacefl_html"><div class="ttname"><a href="../../d4/d36/namespacefl.html">fl</a></div><div class="ttdoc">Base definition for an LED controller.</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d4b/crgb_8hpp_source.html#l00179">crgb.hpp:179</a></div></div>
 <div class="ttc" id="anoexcept_8h_html"><div class="ttname"><a href="../../db/d01/noexcept_8h.html">noexcept.h</a></div></div>
-<div class="ttc" id="as16x16x4_8h_af54aac016b86a178940aca20946a8002_html_af54aac016b86a178940aca20946a8002"><div class="ttname"><a href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></div><div class="ttdeci">#define FL_NOEXCEPT</div></div>
 <div class="ttc" id="astdint_8h_html"><div class="ttname"><a href="../../df/dd8/stdint_8h.html">stdint.h</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
@@ -165,7 +165,7 @@ $(function(){initNavTree('dd/d37/encoders_2p9813_8h_source.html','../../'); init
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_4bca70778167b44495d699f593f26052.html">chipsets</a></li><li class="navelem"><a class="el" href="../../dir_d192c7b937ee683426e0e6cba42a0235.html">encoders</a></li><li class="navelem"><a class="el" href="../../dd/d37/encoders_2p9813_8h.html">p9813.h</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:06:59 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:00 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -1,0 +1,27 @@
+<map id="third_party/minimp3/minimp3.h" name="third_party/minimp3/minimp3.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="373,5,527,45"/>
+<area shape="rect" id="Node000002" href="$d4/d54/compiler__control_8h.html" title=" " alt="" coords="132,93,307,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="396,48,267,91,265,86,394,43"/>
+<area shape="rect" id="Node000006" href="$db/d01/noexcept_8h.html" title=" " alt="" coords="341,240,468,265"/>
+<area shape="poly" id="edge13_Node000001_Node000006" title=" " alt="" coords="417,47,392,68,372,95,363,120,361,142,373,191,390,228,385,230,367,193,356,142,358,119,368,92,388,64,414,43"/>
+<area shape="rect" id="Node000007" href="$dd/daa/int__asm_8h.html" title="Integer arithmetic with a guaranteed instruction shape." alt="" coords="382,93,518,119"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="453,46,453,79,447,79,447,46"/>
+<area shape="rect" id="Node000009" href="$dd/d8d/cstring_8h.html" title=" " alt="" coords="543,93,653,119"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="487,43,565,84,563,89,484,48"/>
+<area shape="rect" id="Node000010" href="$df/dd8/stdint_8h.html" title=" " alt="" coords="632,167,735,192"/>
+<area shape="poly" id="edge14_Node000001_Node000010" title=" " alt="" coords="528,29,564,36,601,49,637,66,667,92,676,105,682,121,687,152,682,153,677,123,671,108,663,95,634,71,599,53,563,42,527,34"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,240,180,265"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="211,121,114,231,110,228,207,117"/>
+<area shape="rect" id="Node000004" href="$d1/ddf/align_8h.html" title="Alignment macros and utilities for FastLED." alt="" coords="190,167,289,192"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="225,118,235,153,230,154,220,120"/>
+<area shape="poly" id="edge5_Node000004_Node000003" title=" " alt="" coords="217,194,130,236,128,232,215,190"/>
+<area shape="rect" id="Node000005" href="$d7/d84/cstddef_8h.html" title=" " alt="" coords="204,240,317,265"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="245,192,256,226,251,228,240,193"/>
+<area shape="poly" id="edge6_Node000004_Node000006" title=" " alt="" coords="267,190,366,232,364,237,265,194"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="383,167,536,192"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="454,119,459,153,453,154,449,119"/>
+<area shape="poly" id="edge12_Node000009_Node000006" title=" " alt="" coords="596,120,579,156,566,176,549,194,509,220,466,238,463,233,506,216,546,190,562,173,575,153,591,118"/>
+<area shape="poly" id="edge10_Node000009_Node000010" title=" " alt="" coords="613,117,661,156,657,160,610,121"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="624,240,743,265"/>
+<area shape="poly" id="edge11_Node000010_Node000011" title=" " alt="" coords="686,192,686,226,681,226,681,192"/>
+</map>

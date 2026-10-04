@@ -49,7 +49,7 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d3/da6/classfl_1_1audio_1_1detector_1_1_transient_ac484ad1d903a32bde41a310beaf65ebf.html#ac484ad1d903a32bde41a310beaf65ebf" target="_top" xlink:title=" ">
+<g id="a_Node000003"><a xlink:href="../../d3/da6/classfl_1_1audio_1_1detector_1_1_transient_ae5e2b0826eb29164b1d684d328bf3d89.html#ae5e2b0826eb29164b1d684d328bf3d89" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="430.5,-234 313.5,-234 313.5,-204 430.5,-204 430.5,-234"/>
 <text text-anchor="start" x="321.5" y="-222" font-family="Helvetica,sans-Serif" font-size="10.00">fl::audio::detector</text>
 <text text-anchor="middle" x="372" y="-211" font-family="Helvetica,sans-Serif" font-size="10.00">::Transient::Transient</text>
@@ -145,7 +145,7 @@
 <!-- Node5 -->
 <g id="Node000005" class="node">
 <title>Node5</title>
-<g id="a_Node000005"><a xlink:href="../../d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909" target="_top" xlink:title=" ">
+<g id="a_Node000005"><a xlink:href="../../d4/d36/namespacefl_a07c69292ef50aa1083046faff1c52ead.html#a07c69292ef50aa1083046faff1c52ead" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="544,-180.5 494,-180.5 494,-161.5 544,-161.5 544,-180.5"/>
 <text text-anchor="middle" x="519" y="-168.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::max</text>
 </a>
@@ -163,7 +163,7 @@
 <!-- Node8 -->
 <g id="Node000008" class="node">
 <title>Node8</title>
-<g id="a_Node000008"><a xlink:href="../../d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb" target="_top" xlink:title=" ">
+<g id="a_Node000008"><a xlink:href="../../d4/d36/namespacefl_a2fdabb91a1f100dec8da21e4306aba05.html#a2fdabb91a1f100dec8da21e4306aba05" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="542.5,-48.5 495.5,-48.5 495.5,-29.5 542.5,-29.5 542.5,-48.5"/>
 <text text-anchor="middle" x="519" y="-36.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::min</text>
 </a>

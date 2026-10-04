@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -112,17 +112,17 @@ $(function(){initNavTree('d4/d36/namespacefl_a17c02dececf5a72efa9f5e747bc56ae4.h
         <tr>
           <td class="memname">fl::u16 fl::rgb888ToRgb565 </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="../../da/d3c/namespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c.html#a7573a66f01c09f14a1ff0411f8e1153c">fl::u8</a></td>          <td class="paramname"><span class="paramname"><em>r</em></span>, </td>
+          <td class="paramtype"><a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a></td>          <td class="paramname"><span class="paramname"><em>r</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="../../da/d3c/namespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c.html#a7573a66f01c09f14a1ff0411f8e1153c">fl::u8</a></td>          <td class="paramname"><span class="paramname"><em>g</em></span>, </td>
+          <td class="paramtype"><a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a></td>          <td class="paramname"><span class="paramname"><em>g</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="../../da/d3c/namespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c.html#a7573a66f01c09f14a1ff0411f8e1153c">fl::u8</a></td>          <td class="paramname"><span class="paramname"><em>b</em></span>&#160;)</td>
+          <td class="paramtype"><a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a></td>          <td class="paramname"><span class="paramname"><em>b</em></span>&#160;)</td>
         </tr>
       </table>
   </td>
@@ -132,11 +132,14 @@ $(function(){initNavTree('d4/d36/namespacefl_a17c02dececf5a72efa9f5e747bc56ae4.h
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/dcd/pixel_8h_source.html#l00029">29</a> of file <a class="el" href="../../dd/dcd/pixel_8h_source.html">pixel.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   29</span>                                                    {</div>
-<div class="line"><span class="lineno">   30</span>    <span class="keywordflow">return</span> ((r &amp; 0xF8) &lt;&lt; 8) | ((g &amp; 0xFC) &lt;&lt; 3) | (b &gt;&gt; 3);</div>
-<div class="line"><span class="lineno">   31</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../dd/dcd/pixel_8h_source.html#l00034">34</a> of file <a class="el" href="../../dd/dcd/pixel_8h_source.html">pixel.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   34</span>                                                    {</div>
+<div class="line"><span class="lineno">   35</span>    <span class="keywordflow">return</span> ((r &amp; 0xF8) &lt;&lt; 8) | ((<a class="code hl_variable" href="../../d4/d36/namespacefl_abb8ff746cce2b11a90718afba1cfec1b.html#abb8ff746cce2b11a90718afba1cfec1b">g</a> &amp; 0xFC) &lt;&lt; 3) | (b &gt;&gt; 3);</div>
+<div class="line"><span class="lineno">   36</span>}</div>
+<div class="ttc" id="anamespacefl_abb8ff746cce2b11a90718afba1cfec1b_html_abb8ff746cce2b11a90718afba1cfec1b"><div class="ttname"><a href="../../d4/d36/namespacefl_abb8ff746cce2b11a90718afba1cfec1b.html#abb8ff746cce2b11a90718afba1cfec1b">fl::g</a></div><div class="ttdeci">InputGamut g</div><div class="ttdef"><b>Definition</b> <a href="../../df/df8/fl_2gfx_2rgbw_8h_source.html#l00124">rgbw.h:124</a></div></div>
 </div><!-- fragment -->
+<p class="reference">References <a class="el" href="../../df/df8/fl_2gfx_2rgbw_8h_source.html#l00124">g</a>.</p>
+
 </div>
 </div>
 </div><!-- contents -->
@@ -146,7 +149,7 @@ $(function(){initNavTree('d4/d36/namespacefl_a17c02dececf5a72efa9f5e747bc56ae4.h
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:04 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:08 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

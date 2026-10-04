@@ -1,5 +1,7 @@
 <map id="fl::Channel" name="fl::Channel">
 <area shape="rect" id="Node000001" title="LED channel for parallel output, pretty much a CPixelLEDController but with timing and pin informatio..." alt="" coords="145,287,235,312"/>
+<area shape="rect" id="Node000006" href="$d7/ddc/classfl_1_1_static_profile_channel.html" title="A compile&#45;time profile channel." alt="" coords="105,361,275,401"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="193,326,193,361,187,361,187,326"/>
 <area shape="rect" id="Node000002" href="$d0/dc9/class_c_pixel_l_e_d_controller.html" title=" " alt="" coords="5,197,156,237"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="119,243,176,284,173,289,116,248"/>
 <area shape="rect" id="Node000003" href="$d8/da0/classfl_1_1_c_l_e_d_controller.html" title=" " alt="" coords="15,5,135,31"/>

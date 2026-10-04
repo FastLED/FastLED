@@ -58,7 +58,7 @@
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../d0/d8b/namespacefl_1_1gfx_a773e8c5d88d58ddd941bdfb1fe1043cf.html#a773e8c5d88d58ddd941bdfb1fe1043cf" target="_top" xlink:title="Higher&#45;precision dim overload (UNORM16).">
+<g id="a_Node000004"><a xlink:href="../../d0/d8b/namespacefl_1_1gfx_a15d9dd43b60330da909bac9402ce67e8.html#a15d9dd43b60330da909bac9402ce67e8" target="_top" xlink:title="Higher&#45;precision dim overload (UNORM16).">
 <polygon fill="white" stroke="#666666" points="144.5,-93 30.5,-93 30.5,-74 144.5,-74 144.5,-93"/>
 <text text-anchor="middle" x="87.5" y="-81" font-family="Helvetica,sans-Serif" font-size="10.00">fl::gfx::blurGaussian</text>
 </a>
@@ -76,7 +76,7 @@
 <!-- Node5 -->
 <g id="Node000005" class="node">
 <title>Node5</title>
-<g id="a_Node000005"><a xlink:href="../../d0/d8b/namespacefl_1_1gfx_a2d0276b48f273dfb519f75e12846b0d4.html#a2d0276b48f273dfb519f75e12846b0d4" target="_top" xlink:title="Compile&#45;time Gaussian blur with independent H/V radii.">
+<g id="a_Node000005"><a xlink:href="../../d0/d8b/namespacefl_1_1gfx_a45b1aab14593cbdfababf7e10bdf9696.html#a45b1aab14593cbdfababf7e10bdf9696" target="_top" xlink:title="Compile&#45;time Gaussian blur with independent H/V radii.">
 <polygon fill="#fff0f0" stroke="red" points="144.5,-56 30.5,-56 30.5,-37 144.5,-37 144.5,-56"/>
 <text text-anchor="middle" x="87.5" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">fl::gfx::blurGaussian</text>
 </a>

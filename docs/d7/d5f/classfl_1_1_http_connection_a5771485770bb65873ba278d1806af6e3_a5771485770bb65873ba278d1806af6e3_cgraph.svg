@@ -32,7 +32,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../d4/d36/namespacefl_a50131c41da2f619067d98360de35fa27.html#a50131c41da2f619067d98360de35fa27" target="_top" xlink:title="Public delay wrapper that keeps bare Arduino delay() preferred after using fl::delay; while still all...">
+<g id="a_Node000002"><a xlink:href="../../d4/d36/namespacefl_a19da680141593b475c4d1d3c1c0a8409.html#a19da680141593b475c4d1d3c1c0a8409" target="_top" xlink:title="Public delay wrapper that keeps bare Arduino delay() preferred after using fl::delay; while still all...">
 <polygon fill="white" stroke="#666666" points="223,-24.5 167,-24.5 167,-5.5 223,-5.5 223,-24.5"/>
 <text text-anchor="middle" x="195" y="-12.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::delay</text>
 </a>
@@ -59,7 +59,7 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../df/d9e/namespacefl_1_1detail_abd6e1e8189dbbbf28d720923205bd0dd.html#abd6e1e8189dbbbf28d720923205bd0dd" target="_top" xlink:title="Internal delay implementation used by the public fl::delay wrapper.">
+<g id="a_Node000003"><a xlink:href="../../df/d9e/namespacefl_1_1detail_a83cc378dd24fb46853fc05f394c60dc0.html#a83cc378dd24fb46853fc05f394c60dc0" target="_top" xlink:title="Internal delay implementation used by the public fl::delay wrapper.">
 <polygon fill="white" stroke="#666666" points="375,-24.5 259,-24.5 259,-5.5 375,-5.5 375,-24.5"/>
 <text text-anchor="middle" x="317" y="-12.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::detail::delay_impl</text>
 </a>

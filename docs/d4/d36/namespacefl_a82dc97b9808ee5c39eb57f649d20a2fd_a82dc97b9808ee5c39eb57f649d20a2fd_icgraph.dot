@@ -8,9 +8,9 @@ digraph "fl::cos_impl_float"
   rankdir="RL";
   Node1 [id="Node000001",label="fl::cos_impl_float",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::cos",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_ad9f01c0057d7f4d6937793dcdf7bf59c.html#ad9f01c0057d7f4d6937793dcdf7bf59c",tooltip=" "];
+  Node2 [id="Node000002",label="fl::cos",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_ac0894f1902eceb19e930fb1e94f2632c.html#ac0894f1902eceb19e930fb1e94f2632c",tooltip=" "];
   Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::cosf",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_ad87db990a26723fa560bc364734ea6cc.html#ad87db990a26723fa560bc364734ea6cc",tooltip=" "];
+  Node3 [id="Node000003",label="fl::cosf",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_ac01366c0ac52fd6d3aeab8b11d69310b.html#ac01366c0ac52fd6d3aeab8b11d69310b",tooltip=" "];
   Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node4 [id="Node000004",label="fl::detail::BiquadFilter\lImpl::bandpass",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/df8/classfl_1_1detail_1_1_biquad_filter_impl_a5f8d3f476d1cd47dc8cf7e400f54d42e.html#a5f8d3f476d1cd47dc8cf7e400f54d42e",tooltip=" "];
   Node4 -> Node5 [id="edge4_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
@@ -76,7 +76,7 @@ digraph "fl::cos_impl_float"
   Node36 -> Node37 [id="edge34_Node000036_Node000037",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node37 [id="Node000037",label="fl::BiquadFilter::notch",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d3a/classfl_1_1_biquad_filter_a53656d08e878652495c7e70b7d97e188.html#a53656d08e878652495c7e70b7d97e188",tooltip=" "];
   Node3 -> Node38 [id="edge35_Node000003_Node000038",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node38 [id="Node000038",label="fl::sincos",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a28596d605076b71796a1086a14dae486.html#a28596d605076b71796a1086a14dae486",tooltip=" "];
+  Node38 [id="Node000038",label="fl::sincos",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a367783a969c81c95e5ca6306af08d575.html#a367783a969c81c95e5ca6306af08d575",tooltip=" "];
   Node3 -> Node39 [id="edge36_Node000003_Node000039",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node39 [id="Node000039",label="fl::sincos",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_acf73de79003240e094606328dac4cc57.html#acf73de79003240e094606328dac4cc57",tooltip=" "];
+  Node39 [id="Node000039",label="fl::sincos",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_ae1d2c16e69e95bd74fb67cae7be050f5.html#ae1d2c16e69e95bd74fb67cae7be050f5",tooltip=" "];
 }

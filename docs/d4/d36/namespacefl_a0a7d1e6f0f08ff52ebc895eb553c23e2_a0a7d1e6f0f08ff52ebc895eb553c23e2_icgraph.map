@@ -1,0 +1,22 @@
+<map id="fl::buildRgbSolveMatrixFromQ16" name="fl::buildRgbSolveMatrixFromQ16">
+<area shape="rect" id="Node000001" title="Build the inverse emitter matrix from a Q16 profile, without floats." alt="" coords="787,132,1019,157"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_ad4e39b6ae17313fe651e8059338b8518.html#ad4e39b6ae17313fe651e8059338b8518" title="Invert the emitter matrix for a three&#45;emitter profile." alt="" coords="540,132,739,157"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="773,147,739,147,739,142,773,142"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a1bb1d650499ca2df115738f4c75464dc.html#a1bb1d650499ca2df115738f4c75464dc" title="Derive the mapper for a three&#45;emitter profile." alt="" coords="296,5,464,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="609,126,556,89,491,52,436,33,438,28,493,48,559,84,612,121"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_ac4d398fdc18a6dbc27b1b07aa647bf0d.html#ac4d398fdc18a6dbc27b1b07aa647bf0d" title="Bind a source declaration and a device profile into a pipeline." alt="" coords="5,35,220,60"/>
+<area shape="poly" id="edge9_Node000002_Node000004" title=" " alt="" coords="592,129,544,113,491,98,350,73,220,58,220,52,351,67,493,93,546,108,594,124"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_ac53a775b79932ae3fe7e03b287639d43.html#ac53a775b79932ae3fe7e03b287639d43" title="Derive the mapper for a three&#45;primary profile plus one white emitter." alt="" coords="278,107,482,132"/>
+<area shape="poly" id="edge4_Node000002_Node000007" title=" " alt="" coords="526,136,482,132,483,127,527,131"/>
+<area shape="rect" id="Node000009" href="$d4/d36/namespacefl_a948408716d579dc42f02ad68245c3450.html#a948408716d579dc42f02ad68245c3450" title="Derive the mapper for a three&#45;primary profile plus two white emitters." alt="" coords="273,156,487,181"/>
+<area shape="poly" id="edge7_Node000002_Node000009" title=" " alt="" coords="527,158,488,161,487,156,526,152"/>
+<area shape="rect" id="Node000010" href="$d4/d36/namespacefl_af90e10614e44cf7b6b860f5516528724.html#af90e10614e44cf7b6b860f5516528724" title="Derive the allocation for three primaries plus two white emitters." alt="" coords="268,205,492,231"/>
+<area shape="poly" id="edge10_Node000002_Node000010" title=" " alt="" coords="592,165,493,197,447,208,445,203,491,191,590,160"/>
+<area shape="rect" id="Node000011" href="$d4/d36/namespacefl_a97deed3552ced20bbf44992b9d1845ac.html#a97deed3552ced20bbf44992b9d1845ac" title="Derive the allocation for a three&#45;primary profile plus one white emitter." alt="" coords="281,255,479,280"/>
+<area shape="poly" id="edge11_Node000002_Node000011" title=" " alt="" coords="615,168,561,208,493,246,460,257,458,252,491,241,558,203,611,164"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="282,31,220,38,220,33,282,26"/>
+<area shape="rect" id="Node000008" href="$db/d33/namespacefl_1_1anonymous__namespace_02pipeline_8cpp_8hpp_03_aece1643892391c10a9c9de9a2f21ab11.html#aece1643892391c10a9c9de9a2f21ab11" title=" " alt="" coords="15,113,211,168"/>
+<area shape="poly" id="edge5_Node000007_Node000008" title=" " alt="" coords="265,131,211,136,211,130,264,126"/>
+<area shape="poly" id="edge6_Node000008_Node000008" title=" " alt="" coords="157,102,141,95,113,92,89,94,73,99,66,105,66,113,61,113,61,103,71,94,88,89,113,87,143,90,160,98"/>
+<area shape="poly" id="edge8_Node000009_Node000008" title=" " alt="" coords="259,159,210,154,211,148,259,153"/>
+</map>

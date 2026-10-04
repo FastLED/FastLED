@@ -10,7 +10,7 @@ digraph "fl::ifstream::available"
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node2 [id="Node000002",label="fl::FileSystem::loadJpeg",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d37/classfl_1_1_file_system_ac981ecdba46591c28acab92177fe70f9.html#ac981ecdba46591c28acab92177fe70f9",tooltip=" "];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::loadJpegFromSD",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_af51a63f8fa4612beb1f1e320c9a79731.html#af51a63f8fa4612beb1f1e320c9a79731",tooltip=" "];
+  Node3 [id="Node000003",label="fl::loadJpegFromSD",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a02f1bd8446cb6c80855b1afcb281f713.html#a02f1bd8446cb6c80855b1afcb281f713",tooltip=" "];
   Node1 -> Node4 [id="edge3_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node4 [id="Node000004",label="fl::FileSystem::readText",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d37/classfl_1_1_file_system_a0188b7f45ef58f2bdb3718d3cffbd3f0.html#a0188b7f45ef58f2bdb3718d3cffbd3f0",tooltip=" "];
   Node4 -> Node5 [id="edge4_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];

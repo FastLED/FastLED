@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::url::Span",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/db7/classfl_1_1url.html#d2/d9e/structfl_1_1url_1_1_span",tooltip=" "];
+  Node0 [id="Node000000",label="PowerModelRGB",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d4d/struct_power_model_r_g_b.html",tooltip="RGB LED power consumption model Used for standard 3-channel LEDs (WS2812, WS2812B,..."];
 }

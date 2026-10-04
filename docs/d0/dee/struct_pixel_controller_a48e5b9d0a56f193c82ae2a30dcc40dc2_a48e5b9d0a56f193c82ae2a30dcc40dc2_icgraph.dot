@@ -6,7 +6,7 @@ digraph "PixelController::loadAndScale0"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="RL";
-  Node1 [id="Node000001",label="PixelController::loadAnd\lScale0",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 [id="Node000001",label="PixelController::loadAnd\lScale0",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="non-template alias of loadAndScale<0>()"];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node2 [id="Node000002",label="PixelController::loadAnd\lScaleRGB",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/dee/struct_pixel_controller_a6c9543d0dd9cb216d7ba0f363c032436.html#a6c9543d0dd9cb216d7ba0f363c032436",tooltip=" "];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
@@ -22,7 +22,7 @@ digraph "PixelController::loadAndScale0"
   Node7 [id="Node000007",label="APA102Controller::showPixels\lGammaBitShift",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d96/class_a_p_a102_controller_a040f761b3d3bb30a9275f96548ec5ef7.html#a040f761b3d3bb30a9275f96548ec5ef7",tooltip=" "];
   Node7 -> Node5 [id="edge8_Node000007_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node1 -> Node8 [id="edge9_Node000001_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node8 [id="Node000008",label="PixelController::loadAnd\lScaleRGBW",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/dee/struct_pixel_controller_a650a6bebd28bdd32f404579c891ca98d.html#a650a6bebd28bdd32f404579c891ca98d",tooltip=" "];
+  Node8 [id="Node000008",label="PixelController::loadAnd\lScaleRGBW",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/dee/struct_pixel_controller_a5aa57de8397b498ea587b5f0c049ced5.html#a5aa57de8397b498ea587b5f0c049ced5",tooltip=" "];
   Node8 -> Node9 [id="edge10_Node000008_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node9 [id="Node000009",label="RGBWEmulatedController\l::showPixels",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d28/group___chipsets_gaba9a2f023f2950dbcdf3c2482f765350.html#gaba9a2f023f2950dbcdf3c2482f765350",tooltip="Main rendering function that converts RGB to RGBW and shows pixels."];
   Node1 -> Node10 [id="edge11_Node000001_Node000010",dir="back",color="steelblue1",style="solid",tooltip=" "];

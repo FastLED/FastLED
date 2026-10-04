@@ -8,5 +8,5 @@ digraph "fl::WLED::stubRequestSource"
   rankdir="RL";
   Node1 [id="Node000001",label="fl::WLED::stubRequestSource",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Stub request source callback."];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::WLED::WLED",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d9f/classfl_1_1_w_l_e_d_aac647eb33edf4763608c393c494ba749.html#aac647eb33edf4763608c393c494ba749",tooltip="Construct WLED with default stub I/O callbacks."];
+  Node2 [id="Node000002",label="fl::WLED::WLED",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d9f/classfl_1_1_w_l_e_d_a9d5d435fd3881e1e962b27e61d5b58eb.html#a9d5d435fd3881e1e962b27e61d5b58eb",tooltip="Construct WLED with default stub I/O callbacks."];
 }

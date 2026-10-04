@@ -11,7 +11,7 @@
 <!-- Node1 -->
 <g id="Node000001" class="node">
 <title>Node1</title>
-<g id="a_Node000001"><a xlink:title="Complete pipeline: load → dither → scale (THE MAGIC HAPPENS HERE!) Order is critical: pixel + dither ...">
+<g id="a_Node000001"><a xlink:title="Complete pipeline: load â†’ dither â†’ scale (THE MAGIC HAPPENS HERE!) Order is critical: pixel + dit...">
 <polygon fill="#999999" stroke="#666666" points="134,-61.5 0,-61.5 0,-31.5 134,-31.5 134,-61.5"/>
 <text text-anchor="start" x="8" y="-49.5" font-family="Helvetica,sans-Serif" font-size="10.00">PixelController::loadAnd</text>
 <text text-anchor="middle" x="67" y="-38.5" font-family="Helvetica,sans-Serif" font-size="10.00">Scale</text>
@@ -40,8 +40,8 @@
 <g id="Node000004" class="node">
 <title>Node4</title>
 <g id="a_Node000004"><a xlink:href="../../d0/dee/struct_pixel_controller_af1d6dbfe39be747916896dc44c730a29.html#af1d6dbfe39be747916896dc44c730a29" target="_top" xlink:title="Add dither offset to pixel value (BEFORE scaling).">
-<polygon fill="white" stroke="#666666" points="299.5,-56 177.5,-56 177.5,-37 299.5,-37 299.5,-56"/>
-<text text-anchor="middle" x="238.5" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">PixelController::dither</text>
+<polygon fill="white" stroke="#666666" points="299.5,-19 177.5,-19 177.5,0 299.5,0 299.5,-19"/>
+<text text-anchor="middle" x="238.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">PixelController::dither</text>
 </a>
 </g>
 </g>
@@ -49,26 +49,26 @@
 <g id="edge4_Node000001_Node000004" class="edge">
 <title>Node1&#45;&gt;Node4</title>
 <g id="a_edge4_Node000001_Node000004"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M134.02,-46.5C144.98,-46.5 156.38,-46.5 167.43,-46.5"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="167.47,-50 177.47,-46.5 167.47,-43 167.47,-50"/>
-</a>
-</g>
-</g>
-<!-- Node5 -->
-<g id="Node000005" class="node">
-<title>Node5</title>
-<g id="a_Node000005"><a xlink:href="../../d0/dee/struct_pixel_controller_a2268d03939af0ad8fcb478ad6c9f33c7.html#a2268d03939af0ad8fcb478ad6c9f33c7" target="_top" xlink:title="Read a byte of LED data.">
-<polygon fill="white" stroke="#666666" points="307,-19 170,-19 170,0 307,0 307,-19"/>
-<text text-anchor="middle" x="238.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">PixelController::loadByte</text>
-</a>
-</g>
-</g>
-<!-- Node1&#45;&gt;Node5 -->
-<g id="edge6_Node000001_Node000005" class="edge">
-<title>Node1&#45;&gt;Node5</title>
-<g id="a_edge6_Node000001_Node000005"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M134.02,-32.09C150.49,-28.49 167.95,-24.68 183.75,-21.23"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="184.84,-24.58 193.86,-19.03 183.35,-17.74 184.84,-24.58"/>
+</a>
+</g>
+</g>
+<!-- Node6 -->
+<g id="Node000006" class="node">
+<title>Node6</title>
+<g id="a_Node000006"><a xlink:href="../../d0/dee/struct_pixel_controller_a2268d03939af0ad8fcb478ad6c9f33c7.html#a2268d03939af0ad8fcb478ad6c9f33c7" target="_top" xlink:title="Read a byte of LED data.">
+<polygon fill="white" stroke="#666666" points="307,-56 170,-56 170,-37 307,-37 307,-56"/>
+<text text-anchor="middle" x="238.5" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">PixelController::loadByte</text>
+</a>
+</g>
+</g>
+<!-- Node1&#45;&gt;Node6 -->
+<g id="edge7_Node000001_Node000006" class="edge">
+<title>Node1&#45;&gt;Node6</title>
+<g id="a_edge7_Node000001_Node000006"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M134.02,-46.5C142.5,-46.5 151.25,-46.5 159.9,-46.5"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="159.99,-50 169.99,-46.5 159.99,-43 159.99,-50"/>
 </a>
 </g>
 </g>
@@ -103,17 +103,35 @@
 <g id="edge5_Node000004_Node000002" class="edge">
 <title>Node4&#45;&gt;Node2</title>
 <g id="a_edge5_Node000004_Node000002"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M299.56,-46.5C310.15,-46.5 321.38,-46.5 332.6,-46.5"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="332.88,-50 342.88,-46.5 332.88,-43 332.88,-50"/>
+<path fill="none" stroke="#63b8ff" d="M287.14,-19.03C311.43,-23.89 341.17,-29.83 366.75,-34.95"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="366.21,-38.41 376.7,-36.94 367.58,-31.55 366.21,-38.41"/>
 </a>
 </g>
 </g>
-<!-- Node5&#45;&gt;Node2 -->
-<g id="edge7_Node000005_Node000002" class="edge">
-<title>Node5&#45;&gt;Node2</title>
-<g id="a_edge7_Node000005_Node000002"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M287.14,-19.03C311.43,-23.89 341.17,-29.83 366.75,-34.95"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="366.21,-38.41 376.7,-36.94 367.58,-31.55 366.21,-38.41"/>
+<!-- Node5 -->
+<g id="Node000005" class="node">
+<title>Node5</title>
+<g id="a_Node000005"><a xlink:href="../../dd/d6c/structfl_1_1_binary_dither_a855eeda5bd1b617b06acd895eeba5b03.html#a855eeda5bd1b617b06acd895eeba5b03" target="_top" xlink:title="Add the offset to a source byte, before scaling. Black is never lifted.">
+<polygon fill="white" stroke="#666666" points="487,-19 364,-19 364,0 487,0 487,-19"/>
+<text text-anchor="middle" x="425.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::BinaryDither::apply</text>
+</a>
+</g>
+</g>
+<!-- Node4&#45;&gt;Node5 -->
+<g id="edge6_Node000004_Node000005" class="edge">
+<title>Node4&#45;&gt;Node5</title>
+<g id="a_edge6_Node000004_Node000005"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M299.56,-9.5C316.76,-9.5 335.67,-9.5 353.46,-9.5"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="353.79,-13 363.79,-9.5 353.79,-6 353.79,-13"/>
+</a>
+</g>
+</g>
+<!-- Node6&#45;&gt;Node2 -->
+<g id="edge8_Node000006_Node000002" class="edge">
+<title>Node6&#45;&gt;Node2</title>
+<g id="a_edge8_Node000006_Node000002"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M307.07,-46.5C315.46,-46.5 324.14,-46.5 332.81,-46.5"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="332.96,-50 342.96,-46.5 332.96,-43 332.96,-50"/>
 </a>
 </g>
 </g>

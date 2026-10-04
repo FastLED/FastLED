@@ -14,9 +14,9 @@ digraph "loop"
   Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
   Node4 [id="Node000004",label="fl::Tile2x2_u8_wrap::at",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d21/classfl_1_1_tile2x2__u8__wrap_a706ef3a4bc4a436faa4c253e26768c23.html#a706ef3a4bc4a436faa4c253e26768c23",tooltip=" "];
   Node3 -> Node5 [id="edge4_Node000003_Node000005",color="steelblue1",style="solid",tooltip=" "];
-  Node5 [id="Node000005",label="fl::CRGB::colorBoost",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dd6/structfl_1_1_c_r_g_b_a2792268a864ed3d46b191c20fd56ff87.html#a2792268a864ed3d46b191c20fd56ff87",tooltip=" "];
+  Node5 [id="Node000005",label="fl::CRGB::colorBoost",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dd6/structfl_1_1_c_r_g_b_aa93f4f0e5197ba7d957ac3d32ce76c52.html#aa93f4f0e5197ba7d957ac3d32ce76c52",tooltip=" "];
   Node5 -> Node6 [id="edge5_Node000005_Node000006",color="steelblue1",style="solid",tooltip=" "];
-  Node6 [id="Node000006",label="fl::CRGB::CRGB",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dd6/structfl_1_1_c_r_g_b_adb891cc4fe8f5ac2188d72c13c0256fd.html#adb891cc4fe8f5ac2188d72c13c0256fd",tooltip="Default constructor."];
+  Node6 [id="Node000006",label="fl::CRGB::CRGB",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dd6/structfl_1_1_c_r_g_b_a910ee467a963ad6805026ad83873e52b.html#a910ee467a963ad6805026ad83873e52b",tooltip="Default constructor."];
   Node5 -> Node7 [id="edge6_Node000005_Node000007",color="steelblue1",style="solid",tooltip=" "];
   Node7 [id="Node000007",label="fl::HSV16::colorBoost",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d5d/structfl_1_1_h_s_v16_a76546a195f4bb8cce8ac071d4d7786d4.html#a76546a195f4bb8cce8ac071d4d7786d4",tooltip=" "];
   Node3 -> Node2 [id="edge7_Node000003_Node000002",color="steelblue1",style="solid",tooltip=" "];
@@ -25,7 +25,7 @@ digraph "loop"
   Node3 -> Node29 [id="edge9_Node000003_Node000029",color="steelblue1",style="solid",tooltip=" "];
   Node29 [id="Node000029",label="luminanceFunction",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/df4/_color_boost_8h_adfecdb1dca929dcc593f71298bbf23c1.html#adfecdb1dca929dcc593f71298bbf23c1",tooltip=" "];
   Node3 -> Node30 [id="edge10_Node000003_Node000030",color="steelblue1",style="solid",tooltip=" "];
-  Node30 [id="Node000030",label="fl::CRGB::nscale8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dd6/structfl_1_1_c_r_g_b_aa272170bea8120f101f27ebd2c323b55.html#aa272170bea8120f101f27ebd2c323b55",tooltip="Scale down a RGB to N/256ths of its current brightness, using \"plain math\" dimming rules."];
+  Node30 [id="Node000030",label="fl::CRGB::nscale8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dd6/structfl_1_1_c_r_g_b_a88ec345b046910f4ddf5cd4d793e7e88.html#a88ec345b046910f4ddf5cd4d793e7e88",tooltip="Scale down a RGB to N/256ths of its current brightness, using \"plain math\" dimming rules."];
   Node30 -> Node6 [id="edge11_Node000030_Node000006",color="steelblue1",style="solid",tooltip=" "];
   Node3 -> Node31 [id="edge12_Node000003_Node000031",color="steelblue1",style="solid",tooltip=" "];
   Node31 [id="Node000031",label="saturationFunction",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/df4/_color_boost_8h_a184414d582661cfbf65e890bdf64fb95.html#a184414d582661cfbf65e890bdf64fb95",tooltip=" "];
@@ -61,13 +61,13 @@ digraph "loop"
   Node50 -> Node5 [id="edge30_Node000050_Node000005",color="steelblue1",style="solid",tooltip=" "];
   Node50 -> Node38 [id="edge31_Node000050_Node000038",color="steelblue1",style="solid",tooltip=" "];
   Node50 -> Node51 [id="edge32_Node000050_Node000051",color="steelblue1",style="solid",tooltip=" "];
-  Node51 [id="Node000051",label="fl::cos",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a9cda2472ab9bd68df745496533aa76e7.html#a9cda2472ab9bd68df745496533aa76e7",tooltip=" "];
+  Node51 [id="Node000051",label="fl::cos",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a2bda17f9c7e7ed8cc89536cfd39f35e2.html#a2bda17f9c7e7ed8cc89536cfd39f35e2",tooltip=" "];
   Node50 -> Node28 [id="edge33_Node000050_Node000028",color="steelblue1",style="solid",tooltip=" "];
   Node50 -> Node52 [id="edge34_Node000050_Node000052",color="steelblue1",style="solid",tooltip=" "];
-  Node52 [id="Node000052",label="inoise8",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d8/df9/group___noise_generation_gaeb72246ebd597b60a7e575173accf2fd.html#gaeb72246ebd597b60a7e575173accf2fd",tooltip=" "];
+  Node52 [id="Node000052",label="inoise8",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d8/df9/group___noise_generation_gaeb72246ebd597b60a7e575173accf2fd.html#gaeb72246ebd597b60a7e575173accf2fd",tooltip="8-Bit, fixed point implementation of Perlin's noise."];
   Node50 -> Node29 [id="edge35_Node000050_Node000029",color="steelblue1",style="solid",tooltip=" "];
   Node50 -> Node56 [id="edge36_Node000050_Node000056",color="steelblue1",style="solid",tooltip=" "];
-  Node56 [id="Node000056",label="fl::millis",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a",tooltip="Universal millisecond timer - returns milliseconds since system startup."];
+  Node56 [id="Node000056",label="fl::millis",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a3c0ba5842bfd029c404a38c8df2315f3.html#a3c0ba5842bfd029c404a38c8df2315f3",tooltip="Universal millisecond timer - returns milliseconds since system startup."];
   Node56 -> Node56 [id="edge37_Node000056_Node000056",color="steelblue1",style="solid",tooltip=" "];
   Node50 -> Node57 [id="edge38_Node000050_Node000057",color="steelblue1",style="solid",tooltip=" "];
   Node57 [id="Node000057",label="noiseScale",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d06/curr_8h_a67e738ebdddbd30452ca2372ca10708b.html#a67e738ebdddbd30452ca2372ca10708b",tooltip=" "];
@@ -75,7 +75,7 @@ digraph "loop"
   Node58 [id="Node000058",label="noiseSpeed",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d06/curr_8h_a0006020893b797106e81f5bf34b8d06f.html#a0006020893b797106e81f5bf34b8d06f",tooltip=" "];
   Node50 -> Node31 [id="edge40_Node000050_Node000031",color="steelblue1",style="solid",tooltip=" "];
   Node50 -> Node59 [id="edge41_Node000050_Node000059",color="steelblue1",style="solid",tooltip=" "];
-  Node59 [id="Node000059",label="fl::sin",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_abc07da8d8983da7016b55f7626e9c060.html#abc07da8d8983da7016b55f7626e9c060",tooltip=" "];
+  Node59 [id="Node000059",label="fl::sin",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a080e32a9d5b39b1674c35757eaa2daf9.html#a080e32a9d5b39b1674c35757eaa2daf9",tooltip=" "];
   Node1 -> Node60 [id="edge42_Node000001_Node000060",color="steelblue1",style="solid",tooltip=" "];
   Node60 [id="Node000060",label="drawWave",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d06/curr_8h_a4b2149c246013cb6bcde35e7bc4bf332.html#a4b2149c246013cb6bcde35e7bc4bf332",tooltip=" "];
   Node60 -> Node61 [id="edge43_Node000060_Node000061",color="steelblue1",style="solid",tooltip=" "];
@@ -85,9 +85,9 @@ digraph "loop"
   Node60 -> Node63 [id="edge45_Node000060_Node000063",color="steelblue1",style="solid",tooltip=" "];
   Node63 [id="Node000063",label="processWaveAutoTrigger",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d06/curr_8h_a85b6d2ee052b034ecc0b34171af3c290.html#a85b6d2ee052b034ecc0b34171af3c290",tooltip=" "];
   Node63 -> Node64 [id="edge46_Node000063_Node000064",color="steelblue1",style="solid",tooltip=" "];
-  Node64 [id="Node000064",label="fl::max",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909",tooltip=" "];
+  Node64 [id="Node000064",label="fl::max",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a07c69292ef50aa1083046faff1c52ead.html#a07c69292ef50aa1083046faff1c52ead",tooltip=" "];
   Node63 -> Node65 [id="edge47_Node000063_Node000065",color="steelblue1",style="solid",tooltip=" "];
-  Node65 [id="Node000065",label="max",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d97/_fast_l_e_d_8h_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909",tooltip=" "];
+  Node65 [id="Node000065",label="max",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d64/fastled_8h_a07c69292ef50aa1083046faff1c52ead.html#a07c69292ef50aa1083046faff1c52ead",tooltip=" "];
   Node63 -> Node69 [id="edge48_Node000063_Node000069",color="steelblue1",style="solid",tooltip=" "];
   Node69 [id="Node000069",label="triggerWaveRipple",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d06/curr_8h_a5dc08f8e3d58e4fd7f9e3cec7509983c.html#a5dc08f8e3d58e4fd7f9e3cec7509983c",tooltip=" "];
   Node69 -> Node2 [id="edge49_Node000069_Node000002",color="steelblue1",style="solid",tooltip=" "];
@@ -111,7 +111,7 @@ digraph "loop"
   Node80 -> Node81 [id="edge59_Node000080_Node000081",color="steelblue1",style="solid",tooltip=" "];
   Node81 [id="Node000081",label="autoAdvance",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d06/curr_8h_a293490e1538dc7b6221087f935c4bb88.html#a293490e1538dc7b6221087f935c4bb88",tooltip=" "];
   Node80 -> Node82 [id="edge60_Node000080_Node000082",color="steelblue1",style="solid",tooltip=" "];
-  Node82 [id="Node000082",label="fl::fmodf",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d36/namespacefl_a82abb457c658bd2a01ace4c815407143.html#a82abb457c658bd2a01ace4c815407143",tooltip=" "];
+  Node82 [id="Node000082",label="fl::fmodf",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d36/namespacefl_abc50d87bc1c0976e38aecd896887133e.html#abc50d87bc1c0976e38aecd896887133e",tooltip=" "];
   Node80 -> Node86 [id="edge61_Node000080_Node000086",color="steelblue1",style="solid",tooltip=" "];
   Node86 [id="Node000086",label="positionCoarse",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d06/curr_8h_afede82fc6e8ef5f15a79fc75e937b5d9.html#afede82fc6e8ef5f15a79fc75e937b5d9",tooltip=" "];
   Node80 -> Node87 [id="edge62_Node000080_Node000087",color="steelblue1",style="solid",tooltip=" "];

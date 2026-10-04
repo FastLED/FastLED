@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -108,10 +108,12 @@ $(function(){initNavTree('d7/d43/classfl_1_1_fs_impl.html','../../'); initResiza
 </div><!--header-->
 <div class="contents">
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p class="definition">Definition at line <a class="el" href="../../d6/d8d/file__system_8h_source.html#l00086">86</a> of file <a class="el" href="../../d6/d8d/file__system_8h_source.html">file_system.h</a>.</p>
+<div class="textblock"><p>A mounted storage medium. </p>
+<p>Backends subclass this; sketches never see it except as the opaque <code>FsImplPtr</code> a factory hands to <code><a class="el" href="../../df/d37/classfl_1_1_file_system_a95ebc6d10b6361bca689dffa4b824c28.html#a95ebc6d10b6361bca689dffa4b824c28">FileSystem::begin()</a></code>. </p>
+
+<p class="definition">Definition at line <a class="el" href="../../de/d34/backend_8h_source.html#l00029">29</a> of file <a class="el" href="../../de/d34/backend_8h_source.html">backend.h</a>.</p>
 </div>
-<p><code>#include &lt;<a class="el" href="../../d6/d8d/file__system_8h_source.html">file_system.h</a>&gt;</code></p>
+<p><code>#include &lt;<a class="el" href="../../de/d34/backend_8h_source.html">backend.h</a>&gt;</code></p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Inheritance diagram for fl::FsImpl:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -127,21 +129,25 @@ Classes</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a78eb2a9f3bcd1c61ade8b3357e758383" id="r_a78eb2a9f3bcd1c61ade8b3357e758383"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d43/classfl_1_1_fs_impl_a78eb2a9f3bcd1c61ade8b3357e758383.html#a78eb2a9f3bcd1c61ade8b3357e758383">FsImpl</a> () <a class="el" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a>=default</td></tr>
-<tr class="separator:a78eb2a9f3bcd1c61ade8b3357e758383"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af068e096ecba647d9b6254049ac08510" id="r_af068e096ecba647d9b6254049ac08510"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d43/classfl_1_1_fs_impl_af068e096ecba647d9b6254049ac08510.html#af068e096ecba647d9b6254049ac08510">~FsImpl</a> () <a class="el" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></td></tr>
-<tr class="separator:af068e096ecba647d9b6254049ac08510"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae8e8fc88e3de2fcf50278d6c7b40e293" id="r_ae8e8fc88e3de2fcf50278d6c7b40e293"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d43/classfl_1_1_fs_impl_ae8e8fc88e3de2fcf50278d6c7b40e293.html#ae8e8fc88e3de2fcf50278d6c7b40e293">FsImpl</a> () <a class="el" href="../../d4/d36/namespacefl_aa317f89ca911371e798d08a93770402f.html#aa317f89ca911371e798d08a93770402f">FL_NO_EXCEPT</a>=default</td></tr>
+<tr class="separator:ae8e8fc88e3de2fcf50278d6c7b40e293"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9cb2fd75a27eccaccb4fef70a930cb53" id="r_a9cb2fd75a27eccaccb4fef70a930cb53"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d43/classfl_1_1_fs_impl_a9cb2fd75a27eccaccb4fef70a930cb53.html#a9cb2fd75a27eccaccb4fef70a930cb53">~FsImpl</a> () <a class="el" href="../../d4/d36/namespacefl_aa317f89ca911371e798d08a93770402f.html#aa317f89ca911371e798d08a93770402f">FL_NO_EXCEPT</a></td></tr>
+<tr class="separator:a9cb2fd75a27eccaccb4fef70a930cb53"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a779cbcda6304f0c02dacd1cc7db3600f" id="r_a779cbcda6304f0c02dacd1cc7db3600f"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d43/classfl_1_1_fs_impl_a779cbcda6304f0c02dacd1cc7db3600f.html#a779cbcda6304f0c02dacd1cc7db3600f">begin</a> ()=0</td></tr>
+<tr class="memdesc:a779cbcda6304f0c02dacd1cc7db3600f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mount. False if the medium is absent, unformatted, or unreadable.  <br /></td></tr>
 <tr class="separator:a779cbcda6304f0c02dacd1cc7db3600f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aca625b924bb20f7ead661119d1e8bdb7" id="r_aca625b924bb20f7ead661119d1e8bdb7"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d43/classfl_1_1_fs_impl_aca625b924bb20f7ead661119d1e8bdb7.html#aca625b924bb20f7ead661119d1e8bdb7">end</a> ()=0</td></tr>
+<tr class="memdesc:aca625b924bb20f7ead661119d1e8bdb7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Unmount. Must be safe to call on a backend that never mounted.  <br /></td></tr>
 <tr class="separator:aca625b924bb20f7ead661119d1e8bdb7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:add244f7486d54bb669079ba50f6a9b4d" id="r_add244f7486d54bb669079ba50f6a9b4d"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d43/classfl_1_1_fs_impl_add244f7486d54bb669079ba50f6a9b4d.html#add244f7486d54bb669079ba50f6a9b4d">ls</a> (<a class="el" href="../../df/d9e/structfl_1_1_fs_impl_1_1_visitor.html">Visitor</a> &amp;visitor)</td></tr>
+<tr class="memdesc:add244f7486d54bb669079ba50f6a9b4d"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="../../dd/dd8/classfl_1_1_optional.html">Optional</a> directory listing.  <br /></td></tr>
 <tr class="separator:add244f7486d54bb669079ba50f6a9b4d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ada394ba2b3d1d6fb5711c5d06e98b359" id="r_ada394ba2b3d1d6fb5711c5d06e98b359"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="../../d4/d36/namespacefl_a985073893930f8a7596f2aab50885e90.html#a985073893930f8a7596f2aab50885e90">filebuf_ptr</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d43/classfl_1_1_fs_impl_ada394ba2b3d1d6fb5711c5d06e98b359.html#ada394ba2b3d1d6fb5711c5d06e98b359">openRead</a> (const char *path)=0</td></tr>
+<tr class="memdesc:ada394ba2b3d1d6fb5711c5d06e98b359"><td class="mdescLeft">&#160;</td><td class="mdescRight">Null handle if the file does not exist or cannot be opened.  <br /></td></tr>
 <tr class="separator:ada394ba2b3d1d6fb5711c5d06e98b359"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>fl/system/<a class="el" href="../../d6/d8d/file__system_8h_source.html">file_system.h</a></li>
+<li>fl/fs/<a class="el" href="../../de/d34/backend_8h_source.html">backend.h</a></li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -150,7 +156,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d7/d43/classfl_1_1_fs_impl.html">FsImpl</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:05 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:09 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

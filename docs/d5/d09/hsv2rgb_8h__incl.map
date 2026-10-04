@@ -2,8 +2,8 @@
 <area shape="rect" id="Node000001" title="Functions to convert from the HSV colorspace to the RGB colorspace." alt="" coords="436,5,523,31"/>
 <area shape="rect" id="Node000002" href="$df/dcc/fl_2gfx_2crgb_8h.html" title="Defines the 8&#45;bit red, green, and blue (RGB) pixel type in the fl namespace." alt="" coords="387,79,486,104"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="475,32,453,68,448,66,470,30"/>
-<area shape="rect" id="Node000057" href="$d2/d4f/hsv_8h.html" title="Defines the hue, saturation, and value (HSV) pixel struct." alt="" coords="662,152,755,177"/>
-<area shape="poly" id="edge23_Node000001_Node000057" title=" " alt="" coords="499,29,680,142,677,147,496,33"/>
+<area shape="rect" id="Node000050" href="$d2/d4f/hsv_8h.html" title="Defines the hue, saturation, and value (HSV) pixel struct." alt="" coords="662,152,755,177"/>
+<area shape="poly" id="edge23_Node000001_Node000050" title=" " alt="" coords="499,29,680,142,677,147,496,33"/>
 <area shape="rect" id="Node000003" href="$d3/d7e/int_8h.html" title=" " alt="" coords="362,299,445,324"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="438,105,410,285,405,285,432,104"/>
 <area shape="rect" id="Node000006" href="$d4/d54/compiler__control_8h.html" title=" " alt="" coords="649,225,824,251"/>
@@ -12,8 +12,8 @@
 <area shape="poly" id="edge22_Node000002_Node000010" title=" " alt="" coords="388,101,299,118,246,133,191,153,138,179,88,211,45,252,13,300,8,312,12,322,23,332,39,340,83,355,188,373,187,378,82,360,37,345,20,336,8,326,3,312,8,297,41,248,85,207,135,174,189,148,244,128,297,113,387,95"/>
 <area shape="rect" id="Node000011" href="$db/d19/ease_8h.html" title=" " alt="" coords="229,152,343,177"/>
 <area shape="poly" id="edge9_Node000002_Node000011" title=" " alt="" coords="414,106,324,148,322,144,411,102"/>
-<area shape="rect" id="Node000056" title=" " alt="" coords="440,152,505,177"/>
-<area shape="poly" id="edge21_Node000002_Node000056" title=" " alt="" coords="445,103,463,138,458,141,440,106"/>
+<area shape="rect" id="Node000049" title=" " alt="" coords="440,152,505,177"/>
+<area shape="poly" id="edge21_Node000002_Node000049" title=" " alt="" coords="445,103,463,138,458,141,440,106"/>
 <area shape="rect" id="Node000004" href="$df/dd8/stdint_8h.html" title=" " alt="" coords="352,372,455,397"/>
 <area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="406,324,406,358,401,358,401,324"/>
 <area shape="rect" id="Node000007" title=" " alt="" coords="589,372,764,397"/>
@@ -36,7 +36,7 @@
 <area shape="poly" id="edge16_Node000024_Node000008" title=" " alt="" coords="571,249,609,287,605,291,568,253"/>
 <area shape="poly" id="edge17_Node000024_Node000010" title=" " alt="" coords="549,253,511,289,458,326,397,353,336,371,334,366,395,348,455,322,508,285,546,249"/>
 <area shape="poly" id="edge19_Node000028_Node000010" title=" " alt="" coords="127,322,226,364,224,369,125,326"/>
-<area shape="poly" id="edge24_Node000057_Node000003" title=" " alt="" coords="662,173,574,190,526,205,481,228,446,256,421,288,416,285,443,253,478,223,524,200,573,184,661,168"/>
-<area shape="poly" id="edge25_Node000057_Node000006" title=" " alt="" coords="716,177,730,212,725,214,711,179"/>
-<area shape="poly" id="edge26_Node000057_Node000010" title=" " alt="" coords="757,174,792,186,823,202,835,213,843,224,844,238,839,252,822,274,799,293,739,323,668,345,590,359,512,368,440,373,342,376,342,371,440,368,511,363,589,354,666,339,737,318,796,288,818,270,834,249,839,237,838,226,831,216,820,207,790,191,755,179"/>
+<area shape="poly" id="edge24_Node000050_Node000003" title=" " alt="" coords="662,173,574,190,526,205,481,228,446,256,421,288,416,285,443,253,478,223,524,200,573,184,661,168"/>
+<area shape="poly" id="edge25_Node000050_Node000006" title=" " alt="" coords="716,177,730,212,725,214,711,179"/>
+<area shape="poly" id="edge26_Node000050_Node000010" title=" " alt="" coords="757,174,792,186,823,202,835,213,843,224,844,238,839,252,822,274,799,293,739,323,668,345,590,359,512,368,440,373,342,376,342,371,440,368,511,363,589,354,666,339,737,318,796,288,818,270,834,249,839,237,838,226,831,216,820,207,790,191,755,179"/>
 </map>

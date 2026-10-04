@@ -8,5 +8,5 @@ digraph "fl::gfx::blur_detail::pixel_ops&lt; CRGB16 &gt;::ch"
   rankdir="LR";
   Node1 [id="Node000001",label="fl::gfx::blur_detail\l::pixel_ops\< CRGB16 \>::ch",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::u8x8::raw",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/dec/classfl_1_1u8x8_a6f24da2ef3b9c2ec020e488f86d26631.html#a6f24da2ef3b9c2ec020e488f86d26631",tooltip=" "];
+  Node2 [id="Node000002",label="fl::u8x8::raw",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/dec/classfl_1_1u8x8_aabf11bb97dfd521efe4bbc614c0f6748.html#aabf11bb97dfd521efe4bbc614c0f6748",tooltip=" "];
 }

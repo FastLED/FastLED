@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -108,13 +108,16 @@ $(function(){initNavTree('d7/de5/_fast_l_e_d_8cpp_8hpp.html','../../'); initResi
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><code>#include &lt;<a class="el" href="../../df/dd8/stdint_8h_source.html">stdint.h</a>&gt;</code><br />
-<code>#include &quot;<a class="el" href="../../db/d97/_fast_l_e_d_8h_source.html">FastLED.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d6/d64/fastled_8h_source.html">FastLED.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../db/dc0/engine__events_8h_source.html">fl/system/engine_events.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d4/d54/compiler__control_8h_source.html">fl/stl/compiler_control.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d8/d1b/all__drivers_8h_source.html">fl/channels/all_drivers.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d5/d7b/channel_8h_source.html">fl/channels/channel.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d3/dd0/channel__events_8h_source.html">fl/channels/channel_events.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../dd/d68/five__bit__semantics_8h_source.html">fl/channels/five_bit_semantics.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../db/d45/manager_8h_source.html">fl/channels/manager.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d7/dcc/pipeline__binding_8h_source.html">fl/channels/pipeline_binding.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../dc/d2d/power__prepass_8h_source.html">fl/channels/power_prepass.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d1/d1b/trace_8h_source.html">fl/system/trace.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d3/dc9/fl_2channels_2driver_8h_source.html">fl/channels/driver.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../df/d8e/wait__spin__budget_8h_source.html">fl/channels/detail/wait_spin_budget.h</a>&quot;</code><br />
@@ -124,6 +127,7 @@ $(function(){initNavTree('d7/de5/_fast_l_e_d_8cpp_8hpp.html','../../'); initResi
 <code>#include &quot;<a class="el" href="../../d7/d7f/log_8h_source.html">fl/log/log.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../dc/da7/assert_8h_source.html">fl/stl/assert.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../da/d68/audio__manager_8h_source.html">fl/audio/audio_manager.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d0/d90/ui_2audio_8h_source.html">fl/ui/audio.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../de/d9a/hsv2rgb_8h_source.html">hsv2rgb.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d3/d7e/int_8h_source.html">fl/stl/int.h</a>&quot;</code><br />
 <code>#include &quot;platforms/init.h&quot;</code><br />
@@ -158,7 +162,7 @@ Macros</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a0c54ccf760a43d54af03f5490f32a248" id="r_a0c54ccf760a43d54af03f5490f32a248"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../df/d96/s16x16x4_8h_afde174fbd5fd09901dcac3f36aed38d8.html#afde174fbd5fd09901dcac3f36aed38d8">FL_LINK_WEAK</a> int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_a0c54ccf760a43d54af03f5490f32a248.html#a0c54ccf760a43d54af03f5490f32a248">atexit</a> (void(*)())</td></tr>
+<tr class="memitem:a0c54ccf760a43d54af03f5490f32a248" id="r_a0c54ccf760a43d54af03f5490f32a248"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d4/d54/compiler__control_8h_afde174fbd5fd09901dcac3f36aed38d8.html#afde174fbd5fd09901dcac3f36aed38d8">FL_LINK_WEAK</a> int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_a0c54ccf760a43d54af03f5490f32a248.html#a0c54ccf760a43d54af03f5490f32a248">atexit</a> (void(*)())</td></tr>
 <tr class="separator:a0c54ccf760a43d54af03f5490f32a248"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gac8cbbec5959529df8322a72cd277954d" id="r_gac8cbbec5959529df8322a72cd277954d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/d1d/group___power_gac8cbbec5959529df8322a72cd277954d.html#gac8cbbec5959529df8322a72cd277954d">delay_at_max_brightness_for_power</a> (fl::u16 ms)</td></tr>
 <tr class="memdesc:gac8cbbec5959529df8322a72cd277954d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Similar to <a class="el" href="../../dd/dbb/class_c_fast_l_e_d_a6819ff831058a710d4582dfc09817202.html#a6819ff831058a710d4582dfc09817202" title="Delay for the given number of milliseconds.">CFastLED::delay()</a>, but pre-adjusts brightness to keep below the power threshold.  <br /></td></tr>
@@ -174,6 +178,8 @@ Functions</h2></td></tr>
 <tr class="memitem:ga510b6ca1ea6da7f0f89dcf353f19ffde" id="r_ga510b6ca1ea6da7f0f89dcf353f19ffde"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/d1d/group___power_ga510b6ca1ea6da7f0f89dcf353f19ffde.html#ga510b6ca1ea6da7f0f89dcf353f19ffde">show_at_max_brightness_for_power</a> ()</td></tr>
 <tr class="memdesc:ga510b6ca1ea6da7f0f89dcf353f19ffde"><td class="mdescLeft">&#160;</td><td class="mdescRight">Similar to <a class="el" href="../../dd/dbb/class_c_fast_l_e_d_a3adb23ec5f919524928d576002cb45de.html#a3adb23ec5f919524928d576002cb45de" title="Update all our controllers with the current led colors.">CFastLED::show()</a>, but pre-adjusts brightness to keep below the power threshold.  <br /></td></tr>
 <tr class="separator:ga510b6ca1ea6da7f0f89dcf353f19ffde"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac6c7e827ae13a7bc3da907399f25142f" id="r_ac6c7e827ae13a7bc3da907399f25142f"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_ac6c7e827ae13a7bc3da907399f25142f.html#ac6c7e827ae13a7bc3da907399f25142f">throttleToMaxRefreshRate</a> (fl::u32 minMicros) <a class="el" href="../../df/d96/s16x16x4_8h_abae81a69398c715960350e0a571b754a.html#abae81a69398c715960350e0a571b754a">FL_NO_EXCEPT</a></td></tr>
+<tr class="separator:ac6c7e827ae13a7bc3da907399f25142f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
 Variables</h2></td></tr>
@@ -183,7 +189,7 @@ Variables</h2></td></tr>
 <tr class="memitem:a3446fe5aa2dfbbefc2d54110644c707a" id="r_a3446fe5aa2dfbbefc2d54110644c707a"><td class="memItemLeft" align="right" valign="top">fl::u32&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_a3446fe5aa2dfbbefc2d54110644c707a.html#a3446fe5aa2dfbbefc2d54110644c707a">_retry_cnt</a> =0</td></tr>
 <tr class="memdesc:a3446fe5aa2dfbbefc2d54110644c707a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Global frame retry counter, used for debugging ESP implementations.  <br /></td></tr>
 <tr class="separator:a3446fe5aa2dfbbefc2d54110644c707a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8e94985674086ea368e1d51cbc0f82a9" id="r_a8e94985674086ea368e1d51cbc0f82a9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../df/d96/s16x16x4_8h_a373eeaf762a6a66a0a6984bd204a72dd.html#a373eeaf762a6a66a0a6984bd204a72dd">FL_DISABLE_WARNING_PUSH</a> <a class="el" href="../../df/d96/s16x16x4_8h_a36f5f9a23a3191a00a5c0de50038b164.html#a36f5f9a23a3191a00a5c0de50038b164">FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS</a> <a class="el" href="../../dd/dbb/class_c_fast_l_e_d.html">CFastLED</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a></td></tr>
+<tr class="memitem:a8e94985674086ea368e1d51cbc0f82a9" id="r_a8e94985674086ea368e1d51cbc0f82a9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d4/d54/compiler__control_8h_a373eeaf762a6a66a0a6984bd204a72dd.html#a373eeaf762a6a66a0a6984bd204a72dd">FL_DISABLE_WARNING_PUSH</a> <a class="el" href="../../d4/d54/compiler__control_8h_a36f5f9a23a3191a00a5c0de50038b164.html#a36f5f9a23a3191a00a5c0de50038b164">FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS</a> <a class="el" href="../../dd/dbb/class_c_fast_l_e_d.html">CFastLED</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a></td></tr>
 <tr class="memdesc:a8e94985674086ea368e1d51cbc0f82a9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Global LED strip management instance.  <br /></td></tr>
 <tr class="separator:a8e94985674086ea368e1d51cbc0f82a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5e96c73fe5bb9ccfc0284cb0f471b654" id="r_a5e96c73fe5bb9ccfc0284cb0f471b654"><td class="memItemLeft" align="right" valign="top">static void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_a5e96c73fe5bb9ccfc0284cb0f471b654.html#a5e96c73fe5bb9ccfc0284cb0f471b654">gControllersData</a> [<a class="el" href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_a0782d884c985fcd71fcaed142b6e9b5b.html#a0782d884c985fcd71fcaed142b6e9b5b">MAX_CLED_CONTROLLERS</a>]</td></tr>
@@ -207,7 +213,7 @@ Variables</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d7/de5/_fast_l_e_d_8cpp_8hpp.html">FastLED.cpp.hpp</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:01 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:03 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

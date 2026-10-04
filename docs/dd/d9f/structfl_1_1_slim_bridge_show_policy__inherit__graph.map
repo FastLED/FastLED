@@ -1,0 +1,7 @@
+<map id="fl::SlimBridgeShowPolicy&lt; DIRECT_SHOW &gt;" name="fl::SlimBridgeShowPolicy&lt; DIRECT_SHOW &gt;">
+<area shape="rect" id="Node000001" title="How a SlimBridgeController reaches its driver." alt="" coords="108,5,291,45"/>
+<area shape="rect" id="Node000002" href="$d9/df1/structfl_1_1_slim_bridge_show_policy_3_01false_01_4.html" title="Default: registered with ChannelManager, which owns enable/disable and flushes every registered drive..." alt="" coords="5,108,188,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="172,57,118,110,114,106,168,53"/>
+<area shape="rect" id="Node000003" href="$d6/d05/structfl_1_1_slim_bridge_show_policy_3_01true_01_4.html" title="Direct: no registry, so there is no runtime enable/disable or exclusive&#45;driver selection,..." alt="" coords="212,108,395,148"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="231,53,286,106,282,110,227,57"/>
+</map>

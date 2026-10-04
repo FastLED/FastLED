@@ -6,5 +6,7 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::chrono::duration\l\< Rep, Period \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d11/classfl_1_1chrono_1_1duration.html",tooltip="Represents a time duration."];
+  Node0 [id="Node000000",label="fl::callable_traits\l\< decltype(&T::operator())\>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl.html",tooltip=" "];
+  Node0 -> Node1 [id="edge108_Node000000_Node000001",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 [id="Node000001",label="fl::callable_traits\l\< T, typename enable\l_if\< is_member_function\l_pointer\< decltype(&T::\loperator())\>::value \>::type \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d70/structfl_1_1callable__traits_3_01_t_00_01typename_01enable__if_3_01is__member__function__pointer65f1b3b0e87f6c6e9a19e7685d261d87.html",tooltip=" "];
 }

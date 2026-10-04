@@ -1,0 +1,15 @@
+digraph "mp3d_synth"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="mp3d_synth",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="mp3d_scale_pcm",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/da0/minimp3__synth__fixed_8h_ae2e45da3974839a55352e86204519654.html#ae2e45da3974839a55352e86204519654",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="mp3d_synth_pair",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/da0/minimp3__synth__fixed_8h_aa984adb924d02fb8553fc60b937c4a8b.html#aa984adb924d02fb8553fc60b937c4a8b",tooltip=" "];
+  Node3 -> Node2 [id="edge3_Node000003_Node000002",color="steelblue1",style="solid",tooltip=" "];
+}

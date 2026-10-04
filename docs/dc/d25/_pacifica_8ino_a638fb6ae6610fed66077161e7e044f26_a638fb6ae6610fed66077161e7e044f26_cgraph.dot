@@ -8,7 +8,7 @@ digraph "pacifica_add_whitecaps"
   rankdir="LR";
   Node1 [id="Node000001",label="pacifica_add_whitecaps",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="beat8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/da5/lib8tion_8h_a7195cd79b30358b151154623586631aa.html#a7195cd79b30358b151154623586631aa",tooltip="Generates an 8-bit \"sawtooth\" wave at a given BPM."];
+  Node2 [id="Node000002",label="beat8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/da5/lib8tion_8h_a6931d7f79bebd9c76e29fb41aafe5e9e.html#a6931d7f79bebd9c76e29fb41aafe5e9e",tooltip="Generates an 8-bit \"sawtooth\" wave at a given BPM."];
   Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="beatsin8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/da5/lib8tion_8h_a696b9421eca961df0a68c7c6c3e983ab.html#a696b9421eca961df0a68c7c6c3e983ab",tooltip="Generates an 8-bit sine wave at a given BPM that oscillates within a given range."];
+  Node3 [id="Node000003",label="beatsin8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/da5/lib8tion_8h_aca012663c6c8fe9a7240bcbc76095ba9.html#aca012663c6c8fe9a7240bcbc76095ba9",tooltip="Generates an 8-bit sine wave at a given BPM that oscillates within a given range."];
 }

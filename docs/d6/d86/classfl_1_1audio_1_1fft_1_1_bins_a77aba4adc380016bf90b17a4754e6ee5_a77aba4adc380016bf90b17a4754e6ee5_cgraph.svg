@@ -32,7 +32,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../d6/d86/classfl_1_1audio_1_1fft_1_1_bins_ade488bc3098777f5b1f7508bb57b2cf7.html#ade488bc3098777f5b1f7508bb57b2cf7" target="_top" xlink:title=" ">
+<g id="a_Node000002"><a xlink:href="../../d6/d86/classfl_1_1audio_1_1fft_1_1_bins_a2368d4e9325d033e94ed24c698e32d31.html#a2368d4e9325d033e94ed24c698e32d31" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="234,-30 135,-30 135,0 234,0 234,-30"/>
 <text text-anchor="start" x="143" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">fl::audio::fft::Bins</text>
 <text text-anchor="middle" x="184.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">::Bins</text>

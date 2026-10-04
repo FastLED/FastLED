@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="autoresearch::animartrix\l_check::PerlinBenchResult",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d1b/namespaceautoresearch_1_1animartrix__check.html#d2/d49/structautoresearch_1_1animartrix__check_1_1_perlin_bench_result",tooltip=" "];
+  Node0 [id="Node000000",label="autoresearch::low_memory\l::RemoteState",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d1c/structautoresearch_1_1low__memory_1_1_remote_state.html",tooltip=" "];
 }

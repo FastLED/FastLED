@@ -10,13 +10,13 @@ var classfl_1_1allocator__psram =
     [ "reference", "d3/df2/classfl_1_1allocator__psram_a59827e4a8057d0062df82373def766cb.html#a59827e4a8057d0062df82373def766cb", null ],
     [ "size_type", "d3/df2/classfl_1_1allocator__psram_a70a5648973b46d9402312afec2764c7a.html#a70a5648973b46d9402312afec2764c7a", null ],
     [ "value_type", "d3/df2/classfl_1_1allocator__psram_a4f7906997a45b45160437851d8888145.html#a4f7906997a45b45160437851d8888145", null ],
-    [ "allocator_psram", "d3/df2/classfl_1_1allocator__psram_a81c8a72ac0af84096c047c9b5e4a1ba0.html#a81c8a72ac0af84096c047c9b5e4a1ba0", null ],
-    [ "allocator_psram", "d3/df2/classfl_1_1allocator__psram_a664dcc1e5a691a8b165752a93fbe8690.html#a664dcc1e5a691a8b165752a93fbe8690", null ],
-    [ "~allocator_psram", "d3/df2/classfl_1_1allocator__psram_a4c74bcc532666a361ca3dea512a49c9c.html#a4c74bcc532666a361ca3dea512a49c9c", null ],
-    [ "allocate", "d3/df2/classfl_1_1allocator__psram_ab3f96bc0317a449c09804587f080ec18.html#ab3f96bc0317a449c09804587f080ec18", null ],
-    [ "allocate_at_least", "d3/df2/classfl_1_1allocator__psram_ad5e1ac0eda2d13b78f7766722e996493.html#ad5e1ac0eda2d13b78f7766722e996493", null ],
-    [ "construct", "d3/df2/classfl_1_1allocator__psram_a7721f2de302b14b1e034daa91614b672.html#a7721f2de302b14b1e034daa91614b672", null ],
-    [ "deallocate", "d3/df2/classfl_1_1allocator__psram_accc1e806cdbb69959940ba6862408f2c.html#accc1e806cdbb69959940ba6862408f2c", null ],
-    [ "destroy", "d3/df2/classfl_1_1allocator__psram_a75e565fc1a7bda0f3f8ee9375028a07c.html#a75e565fc1a7bda0f3f8ee9375028a07c", null ],
-    [ "reallocate", "d3/df2/classfl_1_1allocator__psram_ab4948c7788c3f5b6db215ff0e24d37fa.html#ab4948c7788c3f5b6db215ff0e24d37fa", null ]
+    [ "allocator_psram", "d3/df2/classfl_1_1allocator__psram_ae10bbf36fd258f48d104239d5be8a7c9.html#ae10bbf36fd258f48d104239d5be8a7c9", null ],
+    [ "allocator_psram", "d3/df2/classfl_1_1allocator__psram_a8f091beaae6a4c7d49dac51a087d6732.html#a8f091beaae6a4c7d49dac51a087d6732", null ],
+    [ "~allocator_psram", "d3/df2/classfl_1_1allocator__psram_ac7ccff77a49f80cc2ee77a83f0187d96.html#ac7ccff77a49f80cc2ee77a83f0187d96", null ],
+    [ "allocate", "d3/df2/classfl_1_1allocator__psram_aa2198aa7d9be4393d658d36dbf501f40.html#aa2198aa7d9be4393d658d36dbf501f40", null ],
+    [ "allocate_at_least", "d3/df2/classfl_1_1allocator__psram_a798d23dc5ff8467007562809de85befb.html#a798d23dc5ff8467007562809de85befb", null ],
+    [ "construct", "d3/df2/classfl_1_1allocator__psram_a11bfa0cd1657619bb820d2301cd39cee.html#a11bfa0cd1657619bb820d2301cd39cee", null ],
+    [ "deallocate", "d3/df2/classfl_1_1allocator__psram_a42b1c9e5b7f58b05561e406ca53a79b6.html#a42b1c9e5b7f58b05561e406ca53a79b6", null ],
+    [ "destroy", "d3/df2/classfl_1_1allocator__psram_aea662423ae39de34eac9f442771a7e48.html#aea662423ae39de34eac9f442771a7e48", null ],
+    [ "reallocate", "d3/df2/classfl_1_1allocator__psram_aa6c4d394b3875e28f9d1a7be21ce43ce.html#aa6c4d394b3875e28f9d1a7be21ce43ce", null ]
 ];

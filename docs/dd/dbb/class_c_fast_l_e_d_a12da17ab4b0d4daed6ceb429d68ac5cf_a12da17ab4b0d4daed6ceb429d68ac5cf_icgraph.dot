@@ -23,6 +23,8 @@ digraph "CFastLED::channels"
   Node1 -> Node7 [id="edge9_Node000001_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node7 [id="Node000007",label="CFastLED::clear",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dbb/class_c_fast_l_e_d_aa98f1c4caa3fbef233d34ee757d29994.html#aa98f1c4caa3fbef233d34ee757d29994",tooltip="Clear/reset FastLED state based on the provided flags."];
   Node1 -> Node8 [id="edge10_Node000001_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node8 [id="Node000008",label="CFastLED::remove",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dbb/class_c_fast_l_e_d_a4b9554c79ac12669a804e715ec55f2ef.html#a4b9554c79ac12669a804e715ec55f2ef",tooltip="Remove a channel from the LED controller list."];
-  Node8 -> Node7 [id="edge11_Node000008_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl::powerChannelCodecPolicy",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_aba71524e25f179bf921dc7b760eb125d.html#aba71524e25f179bf921dc7b760eb125d",tooltip="Identify the channel's final current/quantization choice without adding a virtual slot or storage to ..."];
+  Node1 -> Node9 [id="edge11_Node000001_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="CFastLED::remove",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dbb/class_c_fast_l_e_d_a4b9554c79ac12669a804e715ec55f2ef.html#a4b9554c79ac12669a804e715ec55f2ef",tooltip="Remove a channel from the LED controller list."];
+  Node9 -> Node7 [id="edge12_Node000009_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
 }

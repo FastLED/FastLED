@@ -1,7 +1,7 @@
 var classfl_1_1audio_1_1detector_1_1_equalizer_detector =
 [
-    [ "EqualizerDetector", "d6/ddf/classfl_1_1audio_1_1detector_1_1_equalizer_detector_a3f8cf150db9a60e9bad0ce8147c3586c.html#a3f8cf150db9a60e9bad0ce8147c3586c", null ],
-    [ "~EqualizerDetector", "d6/ddf/classfl_1_1audio_1_1detector_1_1_equalizer_detector_a54bcd91a63476c263a89b1193d771535.html#a54bcd91a63476c263a89b1193d771535", null ],
+    [ "EqualizerDetector", "d6/ddf/classfl_1_1audio_1_1detector_1_1_equalizer_detector_ae8842d7e0b14cb8138b5e69e7e4af8a9.html#ae8842d7e0b14cb8138b5e69e7e4af8a9", null ],
+    [ "~EqualizerDetector", "d6/ddf/classfl_1_1audio_1_1detector_1_1_equalizer_detector_aa9caeacb31bb02777b86006317f4ead4.html#aa9caeacb31bb02777b86006317f4ead4", null ],
     [ "computeBinCenters", "d6/ddf/classfl_1_1audio_1_1detector_1_1_equalizer_detector_aada0630bff50683427a6e81d0d647685.html#aada0630bff50683427a6e81d0d647685", null ],
     [ "configure", "d6/ddf/classfl_1_1audio_1_1detector_1_1_equalizer_detector_a88188f71bc78dc8603f86597cec368a2.html#a88188f71bc78dc8603f86597cec368a2", null ],
     [ "fireCallbacks", "d6/ddf/classfl_1_1audio_1_1detector_1_1_equalizer_detector_ae3334e69f676a89f2cc0bafafd17a41e.html#ae3334e69f676a89f2cc0bafafd17a41e", null ],

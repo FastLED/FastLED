@@ -1,0 +1,12 @@
+digraph "fl::encodeLinearEmitterQ16"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::encodeLinearEmitterQ16",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Scale one linear emitter and invert its physical response, using the identical final stage as process..."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::applyFluxScalar",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a7c62484da7de035da5b8a23dcb1f127f.html#a7c62484da7de035da5b8a23dcb1f127f",tooltip="Scale every drive by one scalar, in place."];
+}

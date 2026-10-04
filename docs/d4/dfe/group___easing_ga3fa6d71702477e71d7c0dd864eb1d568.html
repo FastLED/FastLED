@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -107,9 +107,9 @@ $(function(){initNavTree('d4/dfe/group___easing_ga3fa6d71702477e71d7c0dd864eb1d5
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="../../df/da2/group__lib8tion_gac735bdef91ee1e80778434336a622138.html#gac735bdef91ee1e80778434336a622138">LIB8STATIC</a> <a class="el" href="../../da/d3c/namespacefl_1_1fl_a7c327c33a6aec559eccccfb4b14e3aa2.html#a7c327c33a6aec559eccccfb4b14e3aa2">fract8</a> ease8InOutCubic </td>
+          <td class="memname"><a class="el" href="../../df/da2/group__lib8tion_gac735bdef91ee1e80778434336a622138.html#gac735bdef91ee1e80778434336a622138">LIB8STATIC</a> <a class="el" href="../../d4/d36/namespacefl_a4f8ec02ccee51aa3af6db05861cdd4e5.html#a4f8ec02ccee51aa3af6db05861cdd4e5">fract8</a> ease8InOutCubic </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="../../da/d3c/namespacefl_1_1fl_a7c327c33a6aec559eccccfb4b14e3aa2.html#a7c327c33a6aec559eccccfb4b14e3aa2">fract8</a></td>          <td class="paramname"><span class="paramname"><em>i</em></span></td><td>)</td>
+          <td class="paramtype"><a class="el" href="../../d4/d36/namespacefl_a4f8ec02ccee51aa3af6db05861cdd4e5.html#a4f8ec02ccee51aa3af6db05861cdd4e5">fract8</a></td>          <td class="paramname"><span class="paramname"><em>i</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -122,27 +122,26 @@ $(function(){initNavTree('d4/dfe/group___easing_ga3fa6d71702477e71d7c0dd864eb1d5
 <div class="fragment"><div class="line"><span class="lineno">  575</span>{</div>
 <div class="line"><span class="lineno">  576</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> ii  = scale8_LEAVING_R1_DIRTY(  i, i);</div>
 <div class="line"><span class="lineno">  577</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> iii = scale8_LEAVING_R1_DIRTY( ii, i);</div>
-<div class="line"><span class="lineno">  578</span> </div>
-<div class="line"><span class="lineno">  579</span>    fl::u16 r1 = (3 * (fl::u16)(ii)) - ( 2 * (fl::u16)(iii));</div>
-<div class="line"><span class="lineno">  580</span> </div>
-<div class="line"><span class="lineno">  581</span>    <span class="comment">/* the code generated for the above *&#39;s automatically</span></div>
-<div class="line"><span class="lineno">  582</span><span class="comment">       cleans up R1, so there&#39;s no need to explicitily call</span></div>
-<div class="line"><span class="lineno">  583</span><span class="comment">       cleanup_R1(); */</span></div>
-<div class="line"><span class="lineno">  584</span> </div>
-<div class="line"><span class="lineno">  585</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a> = r1;</div>
-<div class="line"><span class="lineno">  586</span> </div>
-<div class="line"><span class="lineno">  587</span>    <span class="comment">// if we got &quot;256&quot;, return 255:</span></div>
-<div class="line"><span class="lineno">  588</span>    <span class="keywordflow">if</span>( r1 &amp; 0x100 ) {</div>
-<div class="line"><span class="lineno">  589</span>        <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a> = 255;</div>
-<div class="line"><span class="lineno">  590</span>    }</div>
-<div class="line"><span class="lineno">  591</span>    <span class="keywordflow">return</span> <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>;</div>
-<div class="line"><span class="lineno">  592</span>}</div>
+<div class="line"><span class="lineno">  578</span>    <span class="comment">// Do not rely on the generated multiplication instructions to restore</span></div>
+<div class="line"><span class="lineno">  579</span>    <span class="comment">// AVR&#39;s zero register: honor the _LEAVING_R1_DIRTY contract explicitly.</span></div>
+<div class="line"><span class="lineno">  580</span>    cleanup_R1();</div>
+<div class="line"><span class="lineno">  581</span> </div>
+<div class="line"><span class="lineno">  582</span>    fl::u16 r1 = (3 * (fl::u16)(ii)) - ( 2 * (fl::u16)(iii));</div>
+<div class="line"><span class="lineno">  583</span> </div>
+<div class="line"><span class="lineno">  584</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a> = r1;</div>
+<div class="line"><span class="lineno">  585</span> </div>
+<div class="line"><span class="lineno">  586</span>    <span class="comment">// if we got &quot;256&quot;, return 255:</span></div>
+<div class="line"><span class="lineno">  587</span>    <span class="keywordflow">if</span>( r1 &amp; 0x100 ) {</div>
+<div class="line"><span class="lineno">  588</span>        <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a> = 255;</div>
+<div class="line"><span class="lineno">  589</span>    }</div>
+<div class="line"><span class="lineno">  590</span>    <span class="keywordflow">return</span> <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>;</div>
+<div class="line"><span class="lineno">  591</span>}</div>
 <div class="ttc" id="anamespacefl_a058ceeac48f181da463c2ba07401292c_html_a058ceeac48f181da463c2ba07401292c"><div class="ttname"><a href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a></div><div class="ttdeci">unsigned char u8</div><div class="ttdef"><b>Definition</b> <a href="../../df/dd8/stdint_8h_source.html#l00131">stdint.h:131</a></div></div>
 <div class="ttc" id="anamespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99_html_a8fa65f6529fc3eb6a174cb304a4bfc99"><div class="ttname"><a href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">fl::result</a></div><div class="ttdeci">expected&lt; T, E &gt; result</div><div class="ttdoc">Alias for expected (Rust-style naming)</div><div class="ttdef"><b>Definition</b> <a href="../../de/d93/result_8h_source.html#l00031">result.h:31</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../d2/d0f/fl_2math_2lib8static_8h_source.html#l00012">LIB8STATIC</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../df/da5/lib8tion_8h_source.html#l00705">cubicwave8()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../df/da5/lib8tion_8h_source.html#l00704">cubicwave8()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -160,7 +159,7 @@ $(function(){initNavTree('d4/dfe/group___easing_ga3fa6d71702477e71d7c0dd864eb1d5
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/dfe/group___easing.html">Easing Functions</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:02 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

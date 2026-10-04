@@ -10,12 +10,12 @@
 <area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="433,173,359,200,357,195,431,168"/>
 <area shape="rect" id="Node000010" href="$d4/d36/namespacefl_acd0a507416e189416846f413ec672a37.html#acd0a507416e189416846f413ec672a37" title="Resolve port IDs for an array of PinInfo in&#45;place." alt="" coords="258,262,345,287"/>
 <area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="464,179,430,216,385,252,346,268,344,263,383,247,426,212,460,176"/>
-<area shape="rect" id="Node000003" href="$d6/d2d/classfl_1_1_digital_multi_write16_acddfa0f31daba041d8076772c5bdb8ee.html#acddfa0f31daba041d8076772c5bdb8ee" title=" " alt="" coords="5,41,171,81"/>
+<area shape="rect" id="Node000003" href="$d6/d2d/classfl_1_1_digital_multi_write16_a6cc8227eb539b5fd0c2bbbfdc6a5a404.html#a6cc8227eb539b5fd0c2bbbfdc6a5a404" title=" " alt="" coords="5,41,171,81"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="206,44,171,50,170,45,205,39"/>
 <area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="234,131,218,124,130,84,132,79,220,119,236,126"/>
 <area shape="rect" id="Node000006" href="$d4/d36/namespacefl_ab5bc76750f7a0b948186397c6581fbf3.html#ab5bc76750f7a0b948186397c6581fbf3" title="Convenience free function — creates a temporary DigitalMultiWrite16, initializes it,..." alt="" coords="7,141,169,166"/>
 <area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="205,156,170,156,170,151,205,151"/>
-<area shape="rect" id="Node000008" href="$d9/d21/classfl_1_1_digital_multi_write8_ad9c5db6010bb7ec249d2a525b69125dc.html#ad9c5db6010bb7ec249d2a525b69125dc" title=" " alt="" coords="9,193,167,233"/>
+<area shape="rect" id="Node000008" href="$d9/d21/classfl_1_1_digital_multi_write8_ad0c4c021c3a11369ace26461b7f1b0c3.html#ad0c4c021c3a11369ace26461b7f1b0c3" title=" " alt="" coords="9,193,167,233"/>
 <area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="208,218,167,217,167,212,208,213"/>
 <area shape="rect" id="Node000009" href="$d4/d36/namespacefl_a0beee42fe65dbc34d13920741a3237ed.html#a0beee42fe65dbc34d13920741a3237ed" title="Convenience free function — creates a temporary DigitalMultiWrite8, initializes it,..." alt="" coords="11,258,165,283"/>
 <area shape="poly" id="edge9_Node000007_Node000009" title=" " alt="" coords="210,243,140,261,139,255,208,238"/>

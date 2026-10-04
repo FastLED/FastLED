@@ -8,5 +8,5 @@ digraph "fl::audio::SynthParams::SynthParams"
   rankdir="LR";
   Node1 [id="Node000001",label="fl::audio::SynthParams\l::SynthParams",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Full parameter constructor."];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::audio::SynthParams\l::SynthParams",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d57/structfl_1_1audio_1_1_synth_params_a63f7b1e9db2a72f25099ff38f83fd458.html#a63f7b1e9db2a72f25099ff38f83fd458",tooltip="Default constructor - sawtooth wave."];
+  Node2 [id="Node000002",label="fl::audio::SynthParams\l::SynthParams",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d57/structfl_1_1audio_1_1_synth_params_aa262fdc37ccd31997200af70b83fac57.html#aa262fdc37ccd31997200af70b83fac57",tooltip="Default constructor - sawtooth wave."];
 }

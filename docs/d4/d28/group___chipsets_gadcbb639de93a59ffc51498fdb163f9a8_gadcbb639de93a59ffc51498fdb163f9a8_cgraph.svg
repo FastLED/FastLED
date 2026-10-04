@@ -32,7 +32,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../d8/da0/classfl_1_1_c_l_e_d_controller_ab8e1ee460f25af890c1d40479e4c5b09.html#ab8e1ee460f25af890c1d40479e4c5b09" target="_top" xlink:title="How many LEDs does this controller manage?">
+<g id="a_Node000002"><a xlink:href="../../d8/da0/classfl_1_1_c_l_e_d_controller_a4c61b86add1463a4f968b88d803e0737.html#a4c61b86add1463a4f968b88d803e0737" target="_top" xlink:title="How many LEDs does this controller manage?">
 <polygon fill="white" stroke="#666666" points="314,-30 212,-30 212,0 314,0 314,-30"/>
 <text text-anchor="start" x="220" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">fl::CLEDController</text>
 <text text-anchor="middle" x="263" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">::size</text>

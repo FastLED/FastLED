@@ -1,0 +1,50 @@
+<map id="fl::EngineEvents::setFrameTaskListener" name="fl::EngineEvents::setFrameTaskListener">
+<area shape="rect" id="Node000001" title=" " alt="" coords="1053,307,1248,347"/>
+<area shape="rect" id="Node000002" href="$de/dca/classfl_1_1_engine_events_a97fdf26628d61f8f6b3c3588230e9980.html#a97fdf26628d61f8f6b3c3588230e9980" title=" " alt="" coords="849,179,984,219"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1111,301,1061,267,1004,234,977,222,980,217,1007,229,1064,263,1114,297"/>
+<area shape="rect" id="Node000003" href="$d2/d2b/classfl_1_1task_1_1_scheduler_a07e49fd4a04cf6be953e625cac5e0078.html#a07e49fd4a04cf6be953e625cac5e0078" title=" " alt="" coords="847,243,986,283"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="1063,306,986,285,987,280,1064,301"/>
+<area shape="rect" id="Node000004" href="$d2/d2b/classfl_1_1task_1_1_scheduler_ad1f60f825514d99a9ee0d06f564be1a7.html#ad1f60f825514d99a9ee0d06f564be1a7" title=" " alt="" coords="847,307,986,347"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="1039,330,986,330,986,325,1039,325"/>
+<area shape="rect" id="Node000038" href="$d2/d2b/classfl_1_1task_1_1_scheduler_a137409a37a1c5cb8cdee568287404389.html#a137409a37a1c5cb8cdee568287404389" title=" " alt="" coords="847,371,986,411"/>
+<area shape="poly" id="edge16_Node000001_Node000038" title=" " alt="" coords="1064,354,987,375,986,370,1063,348"/>
+<area shape="rect" id="Node000039" href="$d2/d2b/classfl_1_1task_1_1_scheduler_ab23e409040ebd66d4ccd8fe53c939d90.html#ab23e409040ebd66d4ccd8fe53c939d90" title=" " alt="" coords="828,453,1005,508"/>
+<area shape="poly" id="edge17_Node000001_Node000039" title=" " alt="" coords="1109,357,1007,426,961,456,958,451,1004,421,1106,353"/>
+<area shape="rect" id="Node000005" href="$d5/d06/classfl_1_1detail_1_1_async_logger_service_task_a76e22f26c5676ba890e783435db46aa6.html#a76e22f26c5676ba890e783435db46aa6" title=" " alt="" coords="328,307,547,347"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="833,330,547,330,547,325,833,325"/>
+<area shape="rect" id="Node000025" href="$de/daf/classfl_1_1task_1_1_handle_a0d96031ff5c53ece780698c5f39d9d2b.html#a0d96031ff5c53ece780698c5f39d9d2b" title="Sets the callback invoked when the task runs successfully." alt="" coords="615,208,772,233"/>
+<area shape="poly" id="edge8_Node000004_Node000025" title=" " alt="" coords="843,305,827,298,764,265,714,236,716,231,767,261,829,293,845,300"/>
+<area shape="rect" id="Node000006" href="$d5/d06/classfl_1_1detail_1_1_async_logger_service_task_a82e728d22c5bcc164c62953f3e8d6e6f.html#a82e728d22c5bcc164c62953f3e8d6e6f" title=" " alt="" coords="21,235,252,275"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="339,307,220,278,222,273,340,301"/>
+<area shape="rect" id="Node000007" href="$d5/d06/classfl_1_1detail_1_1_async_logger_service_task_a90e57dbaf9bc274b5302c859efd53af3.html#a90e57dbaf9bc274b5302c859efd53af3" title=" " alt="" coords="5,300,268,355"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="314,330,268,330,268,325,314,325"/>
+<area shape="rect" id="Node000008" href="$d5/d06/classfl_1_1detail_1_1_async_logger_service_task_acc200cb8837f82379821217fb4a6bc29.html#acc200cb8837f82379821217fb4a6bc29" title=" " alt="" coords="29,379,244,419"/>
+<area shape="poly" id="edge7_Node000005_Node000008" title=" " alt="" coords="340,353,222,382,220,377,339,348"/>
+<area shape="poly" id="edge9_Node000025_Node000005" title=" " alt="" coords="662,243,615,270,560,296,522,310,520,305,558,292,612,265,660,238"/>
+<area shape="rect" id="Node000026" href="$d3/d6b/classfl_1_1audio_1_1_processor_ac25ffea2d1abf227cecff4e4a7448a5a.html#ac25ffea2d1abf227cecff4e4a7448a5a" title=" " alt="" coords="355,79,519,119"/>
+<area shape="poly" id="edge10_Node000025_Node000026" title=" " alt="" coords="664,202,616,167,558,134,518,119,520,114,560,129,619,162,667,197"/>
+<area shape="rect" id="Node000034" href="$d1/dc9/namespaceautoresearch_a1868ca9225c807cbaf571228e6629e34.html#a1868ca9225c807cbaf571228e6629e34" title="On FL_IS_STUB: register a one&#45;shot async task that drives autoresearch." alt="" coords="330,143,545,183"/>
+<area shape="poly" id="edge12_Node000025_Node000034" title=" " alt="" coords="622,208,526,186,528,181,623,202"/>
+<area shape="rect" id="Node000035" href="$de/daf/classfl_1_1task_1_1_handle_ae0269eb6707f449059862fd1c7f57739.html#ae0269eb6707f449059862fd1c7f57739" title="Moves a handle without changing the underlying task." alt="" coords="340,208,535,233"/>
+<area shape="poly" id="edge13_Node000025_Node000035" title=" " alt="" coords="601,223,535,223,535,218,601,218"/>
+<area shape="rect" id="Node000036" href="$d3/d3a/_async_8h_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="408,257,467,283"/>
+<area shape="poly" id="edge14_Node000025_Node000036" title=" " alt="" coords="614,239,468,267,467,262,613,233"/>
+<area shape="rect" id="Node000037" href="$d1/dc9/namespaceautoresearch_a14b9dde802b1a01ef0d7f9ea258bd7f6.html#a14b9dde802b1a01ef0d7f9ea258bd7f6" title="Setup async task for JSON&#45;RPC processing." alt="" coords="316,5,559,31"/>
+<area shape="poly" id="edge15_Node000025_Node000037" title=" " alt="" coords="678,197,660,162,633,121,598,80,557,46,531,33,534,28,560,41,602,76,637,118,664,159,683,194"/>
+<area shape="poly" id="edge11_Node000026_Node000026" title=" " alt="" coords="481,68,466,61,437,58,413,60,398,65,392,71,395,78,390,80,387,70,395,60,411,55,437,53,467,56,483,63"/>
+<area shape="rect" id="Node000040" href="$d2/d2b/classfl_1_1task_1_1_scheduler_a0f7928f8c5d46fcd68f1c9cbda6b88d2.html#a0f7928f8c5d46fcd68f1c9cbda6b88d2" title=" " alt="" coords="345,599,530,639"/>
+<area shape="poly" id="edge18_Node000039_Node000040" title=" " alt="" coords="855,517,781,549,651,585,531,608,530,603,650,580,779,543,853,512"/>
+<area shape="rect" id="Node000041" href="$d2/d2b/classfl_1_1task_1_1_scheduler_a894dae01c9c6738eeae091f8fddeefb3.html#a894dae01c9c6738eeae091f8fddeefb3" title=" " alt="" coords="624,414,763,454"/>
+<area shape="poly" id="edge19_Node000039_Node000041" title=" " alt="" coords="814,462,762,451,763,446,815,457"/>
+<area shape="rect" id="Node000103" href="$d2/d2b/classfl_1_1task_1_1_scheduler_a523f729f91cfca13038bd39ca4838397.html#a523f729f91cfca13038bd39ca4838397" title=" " alt="" coords="607,494,780,534"/>
+<area shape="poly" id="edge22_Node000039_Node000103" title=" " alt="" coords="815,499,780,504,780,498,814,493"/>
+<area shape="rect" id="Node000042" href="$d4/d60/classfl_1_1_fx_engine_ab4bd2776efb0a1fa06ccae2ea8a16c8b.html#ab4bd2776efb0a1fa06ccae2ea8a16c8b" title="Renders the current effect or transition to the output buffer." alt="" coords="368,421,507,447"/>
+<area shape="poly" id="edge20_Node000041_Node000042" title=" " alt="" coords="610,437,507,437,507,431,610,431"/>
+<area shape="rect" id="Node000043" href="$db/d5c/namespacefl_1_1task_a2d40b476742263a3fa212e24b722e3ef.html#a2d40b476742263a3fa212e24b722e3ef" title="Run selected task subsystems." alt="" coords="390,372,485,397"/>
+<area shape="poly" id="edge21_Node000041_Node000043" title=" " alt="" coords="610,421,484,396,485,391,611,416"/>
+<area shape="poly" id="edge23_Node000103_Node000040" title=" " alt="" coords="651,543,607,568,560,590,525,602,523,597,558,585,605,563,648,539"/>
+<area shape="rect" id="Node000104" href="$d2/d2b/classfl_1_1task_1_1_scheduler_a55942f7d4bf9dc02cf0c4b871b207722.html#a55942f7d4bf9dc02cf0c4b871b207722" title=" " alt="" coords="337,535,537,575"/>
+<area shape="poly" id="edge24_Node000103_Node000104" title=" " alt="" coords="593,533,538,542,537,537,592,528"/>
+<area shape="rect" id="Node000106" href="$d2/d2b/classfl_1_1task_1_1_scheduler_a855c5a328c90cebcc0b5877612b6005b.html#a855c5a328c90cebcc0b5877612b6005b" title=" " alt="" coords="331,471,543,511"/>
+<area shape="poly" id="edge25_Node000103_Node000106" title=" " alt="" coords="593,508,543,503,544,498,593,502"/>
+</map>

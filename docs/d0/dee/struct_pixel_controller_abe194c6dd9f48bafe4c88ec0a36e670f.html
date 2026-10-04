@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -114,7 +114,7 @@ template&lt;int SLOT&gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static <a class="el" href="../../df/d96/s16x16x4_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> <a class="el" href="../../d0/dee/struct_pixel_controller.html">PixelController</a>&lt; <a class="el" href="../../d3/d8b/_parallel___i_o_8ino_a87eecf85eebf5be8fb74183807e8e2f0.html#a87eecf85eebf5be8fb74183807e8e2f0">RGB_ORDER</a>, LANES, MASK &gt;::dither </td>
+          <td class="memname">static <a class="el" href="../../d4/d54/compiler__control_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> <a class="el" href="../../d0/dee/struct_pixel_controller.html">PixelController</a>&lt; <a class="el" href="../../d3/d8b/_parallel___i_o_8ino_a87eecf85eebf5be8fb74183807e8e2f0.html#a87eecf85eebf5be8fb74183807e8e2f0">RGB_ORDER</a>, LANES, MASK &gt;::dither </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="../../d0/dee/struct_pixel_controller.html">PixelController</a>&lt; <a class="el" href="../../d3/d8b/_parallel___i_o_8ino_a87eecf85eebf5be8fb74183807e8e2f0.html#a87eecf85eebf5be8fb74183807e8e2f0">RGB_ORDER</a>, LANES, MASK &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em></em></span>, </td>
         </tr>
@@ -152,18 +152,19 @@ template&lt;int SLOT&gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>b + d, clamped to 255 </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00438">438</a> of file <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html">pixel_controller.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  438</span>{ <span class="keywordflow">return</span> <a class="code hl_struct" href="../../d0/dee/struct_pixel_controller.html">b</a> ? <a class="code hl_struct" href="../../d0/dee/struct_pixel_controller.html">fl::qadd8</a>(<a class="code hl_struct" href="../../d0/dee/struct_pixel_controller.html">b</a>,<a class="code hl_variable" href="../../d0/dee/struct_pixel_controller_a5ad48a201e6f48a4ff1fa9936e590324.html#a5ad48a201e6f48a4ff1fa9936e590324">d</a>) : 0; }</div>
-<div class="ttc" id="astruct_pixel_controller_a5ad48a201e6f48a4ff1fa9936e590324_html_a5ad48a201e6f48a4ff1fa9936e590324"><div class="ttname"><a href="../../d0/dee/struct_pixel_controller_a5ad48a201e6f48a4ff1fa9936e590324.html#a5ad48a201e6f48a4ff1fa9936e590324">PixelController::d</a></div><div class="ttdeci">fl::u8 d[3]</div><div class="ttdoc">[DITHER] Current dither offset per R,G,B channel (toggles via stepDithering)</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d4d/pixel__controller_8h_source.html#l00106">pixel_controller.h:106</a></div></div>
-<div class="ttc" id="astruct_pixel_controller_html"><div class="ttname"><a href="../../d0/dee/struct_pixel_controller.html">PixelController</a></div><div class="ttdoc">Pixel controller class.</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d4d/pixel__controller_8h_source.html#l00102">pixel_controller.h:102</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00349">349</a> of file <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html">pixel_controller.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  349</span>{ <span class="keywordflow">return</span> <a class="code hl_function" href="../../dd/d6c/structfl_1_1_binary_dither_a855eeda5bd1b617b06acd895eeba5b03.html#a855eeda5bd1b617b06acd895eeba5b03">fl::Dither::apply</a>(<a class="code hl_struct" href="../../d0/dee/struct_pixel_controller.html">b</a>, <a class="code hl_variable" href="../../d0/dee/struct_pixel_controller_a5ad48a201e6f48a4ff1fa9936e590324.html#a5ad48a201e6f48a4ff1fa9936e590324">d</a>); }</div>
+<div class="ttc" id="astruct_pixel_controller_a5ad48a201e6f48a4ff1fa9936e590324_html_a5ad48a201e6f48a4ff1fa9936e590324"><div class="ttname"><a href="../../d0/dee/struct_pixel_controller_a5ad48a201e6f48a4ff1fa9936e590324.html#a5ad48a201e6f48a4ff1fa9936e590324">PixelController::d</a></div><div class="ttdeci">fl::u8 d[3]</div><div class="ttdoc">[DITHER] Current dither offset per R,G,B channel (toggles via stepDithering)</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d4d/pixel__controller_8h_source.html#l00108">pixel_controller.h:108</a></div></div>
+<div class="ttc" id="astruct_pixel_controller_html"><div class="ttname"><a href="../../d0/dee/struct_pixel_controller.html">PixelController</a></div><div class="ttdoc">Pixel controller class.</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d4d/pixel__controller_8h_source.html#l00104">pixel_controller.h:104</a></div></div>
+<div class="ttc" id="astructfl_1_1_binary_dither_a855eeda5bd1b617b06acd895eeba5b03_html_a855eeda5bd1b617b06acd895eeba5b03"><div class="ttname"><a href="../../dd/d6c/structfl_1_1_binary_dither_a855eeda5bd1b617b06acd895eeba5b03.html#a855eeda5bd1b617b06acd895eeba5b03">fl::BinaryDither::apply</a></div><div class="ttdeci">static FASTLED_FORCE_INLINE u8 apply(u8 b, u8 d) FL_NO_EXCEPT</div><div class="ttdoc">Add the offset to a source byte, before scaling. Black is never lifted.</div><div class="ttdef"><b>Definition</b> <a href="../../da/d08/binary__dither_8h_source.html#l00198">binary_dither.h:198</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00130">PixelController()</a>, <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00106">d</a>, and <a class="el" href="../../df/d96/s16x16x4_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a>.</p>
+<p class="reference">References <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00136">PixelController()</a>, <a class="el" href="../../da/d08/binary__dither_8h_source.html#l00198">fl::BinaryDither::apply()</a>, <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00108">d</a>, and <a class="el" href="../../d4/d54/compiler__control_8h_source.html#l00819">FASTLED_FORCE_INLINE</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d0/dee/struct_pixel_controller_abe194c6dd9f48bafe4c88ec0a36e670f_abe194c6dd9f48bafe4c88ec0a36e670f_cgraph.svg" width="646" height="60"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d0/dee/struct_pixel_controller_abe194c6dd9f48bafe4c88ec0a36e670f_abe194c6dd9f48bafe4c88ec0a36e670f_cgraph.svg" width="646" height="110"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 
 </div>
@@ -175,7 +176,7 @@ template&lt;int SLOT&gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d0/dee/struct_pixel_controller.html">PixelController</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:03 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

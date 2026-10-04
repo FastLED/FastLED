@@ -1,0 +1,15 @@
+<map id="fl::detail::ScaledPixelIteratorRGB16::advance" name="fl::detail::ScaledPixelIteratorRGB16::advance">
+<area shape="rect" id="Node000001" title="Advance to next pixel (or mark as end)" alt="" coords="547,101,752,141"/>
+<area shape="rect" id="Node000002" href="$d7/d4d/classfl_1_1detail_1_1_scaled_pixel_iterator_r_g_b16_a4d98eed68f0aff426cc09f38f0b0d9c4.html#a4d98eed68f0aff426cc09f38f0b0d9c4" title="Construct from PixelIterator." alt="" coords="259,101,499,141"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="533,124,499,124,499,119,533,119"/>
+<area shape="rect" id="Node000004" href="$d7/d4d/classfl_1_1detail_1_1_scaled_pixel_iterator_r_g_b16_ae66bc05d2254955d49f1d486a080e5da.html#ae66bc05d2254955d49f1d486a080e5da" title="Pre&#45;increment operator." alt="" coords="5,5,211,45"/>
+<area shape="poly" id="edge6_Node000001_Node000004" title=" " alt="" coords="544,101,498,92,210,43,211,38,499,87,545,96"/>
+<area shape="rect" id="Node000005" href="$d7/d4d/classfl_1_1detail_1_1_scaled_pixel_iterator_r_g_b16_a4e1a7b684bf087bebe07ea44639dc16e.html#a4e1a7b684bf087bebe07ea44639dc16e" title="Post&#45;increment operator." alt="" coords="5,197,211,237"/>
+<area shape="poly" id="edge7_Node000001_Node000005" title=" " alt="" coords="545,147,499,156,211,205,210,199,498,151,544,142"/>
+<area shape="rect" id="Node000003" href="$d7/d4d/classfl_1_1detail_1_1_scaled_pixel_iterator_r_g_b16_aba026e1323f9e8cf5e2393645bc44018.html#aba026e1323f9e8cf5e2393645bc44018" title="Inequality comparison." alt="" coords="5,69,211,109"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="245,108,210,104,211,99,245,103"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="314,99,210,60,174,48,176,43,212,55,316,94"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="304,148,260,165,212,188,178,200,176,195,210,183,258,160,302,143"/>
+<area shape="rect" id="Node000006" href="$d7/d4d/classfl_1_1detail_1_1_scaled_pixel_iterator_r_g_b16_af2b587946fb876a6e17494d426af4d1f.html#af2b587946fb876a6e17494d426af4d1f" title="Equality comparison." alt="" coords="5,133,211,173"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="245,140,211,144,210,139,245,134"/>
+</map>

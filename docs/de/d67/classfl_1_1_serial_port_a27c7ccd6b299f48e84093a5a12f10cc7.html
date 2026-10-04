@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -112,7 +112,7 @@ template&lt;typename T&gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="../../da/d3c/namespacefl_1_1fl.html#da/dbd/structfl_1_1fl_1_1enable__if">fl::enable_if</a>&lt; <a class="el" href="../../db/dee/structfl_1_1fl_1_1is__multi__byte__integer.html">fl::is_multi_byte_integer</a>&lt; T &gt;<a class="el" href="../../d4/d36/namespacefl_a13766ae9e150185981f5096f90a439d7.html#a13766ae9e150185981f5096f90a439d7">::value</a> &amp;&amp;!<a class="el" href="../../d5/db2/structfl_1_1fl_1_1is__signed.html">fl::is_signed</a>&lt; T &gt;<a class="el" href="../../d4/d36/namespacefl_a13766ae9e150185981f5096f90a439d7.html#a13766ae9e150185981f5096f90a439d7">::value</a>, <a class="el" href="../../d4/d36/namespacefl_a8a657d5e3d1c15816e367eada17134c9.html#a8a657d5e3d1c15816e367eada17134c9">size_t</a> &gt;::type fl::SerialPort::print </td>
+          <td class="memname"><a class="el" href="../../d4/d36/namespacefl.html#d5/d67/structfl_1_1enable__if">fl::enable_if</a>&lt; <a class="el" href="../../d6/d36/structfl_1_1is__multi__byte__integer.html">fl::is_multi_byte_integer</a>&lt; T &gt;<a class="el" href="../../d4/d36/namespacefl_a13766ae9e150185981f5096f90a439d7.html#a13766ae9e150185981f5096f90a439d7">::value</a> &amp;&amp;!<a class="el" href="../../da/d44/structfl_1_1is__signed.html">fl::is_signed</a>&lt; T &gt;<a class="el" href="../../d4/d36/namespacefl_a13766ae9e150185981f5096f90a439d7.html#a13766ae9e150185981f5096f90a439d7">::value</a>, <a class="el" href="../../d4/d36/namespacefl_a8a657d5e3d1c15816e367eada17134c9.html#a8a657d5e3d1c15816e367eada17134c9">size_t</a> &gt;::type fl::SerialPort::print </td>
           <td>(</td>
           <td class="paramtype">T</td>          <td class="paramname"><span class="paramname"><em>value</em></span></td><td>)</td>
           <td></td>
@@ -133,14 +133,13 @@ template&lt;typename T&gt; </div>
 <div class="line"><span class="lineno">   77</span> </div>
 <div class="line"><span class="lineno">   78</span>    <span class="comment">// Use utoa64 for all types - it handles both 32-bit and 64-bit values</span></div>
 <div class="line"><span class="lineno">   79</span>    <span class="comment">// This avoids needing C++17 constexpr if</span></div>
-<div class="line"><span class="lineno">   80</span>    <a class="code hl_function" href="../../d4/d36/namespacefl_a2d12ae4decce550cd9809a6687f112e2.html#a2d12ae4decce550cd9809a6687f112e2">fl::utoa64</a>(<span class="keyword">static_cast&lt;</span><a class="code hl_typedef" href="../../d4/d36/namespacefl_add3f775ccb36323b444c97c36b6bb694.html#add3f775ccb36323b444c97c36b6bb694">fl::u64</a><span class="keyword">&gt;</span>(<a class="code hl_variable" href="../../d4/d36/namespacefl_a13766ae9e150185981f5096f90a439d7.html#a13766ae9e150185981f5096f90a439d7">value</a>), buffer, 10);</div>
+<div class="line"><span class="lineno">   80</span>    <a class="code hl_function" href="../../d4/d36/namespacefl_aa60cdd7a91156d23e724b99f4719e849.html#aa60cdd7a91156d23e724b99f4719e849">fl::utoa64</a>(<span class="keyword">static_cast&lt;</span>fl::u64<span class="keyword">&gt;</span>(<a class="code hl_variable" href="../../d4/d36/namespacefl_a13766ae9e150185981f5096f90a439d7.html#a13766ae9e150185981f5096f90a439d7">value</a>), buffer, 10);</div>
 <div class="line"><span class="lineno">   81</span> </div>
 <div class="line"><span class="lineno">   82</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="../../de/d67/classfl_1_1_serial_port_a3339b490d16bccad572b1ce0989abcb4.html#a3339b490d16bccad572b1ce0989abcb4">print</a>(buffer);</div>
 <div class="line"><span class="lineno">   83</span>}</div>
 <div class="ttc" id="aclassfl_1_1_serial_port_a3339b490d16bccad572b1ce0989abcb4_html_a3339b490d16bccad572b1ce0989abcb4"><div class="ttname"><a href="../../de/d67/classfl_1_1_serial_port_a3339b490d16bccad572b1ce0989abcb4.html#a3339b490d16bccad572b1ce0989abcb4">fl::SerialPort::print</a></div><div class="ttdeci">size_t print(const char *str)</div><div class="ttdoc">Print string to serial output.</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d5f/system_2serial_8cpp_8hpp_source.html#l00048">serial.cpp.hpp:48</a></div></div>
 <div class="ttc" id="anamespacefl_a13766ae9e150185981f5096f90a439d7_html_a13766ae9e150185981f5096f90a439d7"><div class="ttname"><a href="../../d4/d36/namespacefl_a13766ae9e150185981f5096f90a439d7.html#a13766ae9e150185981f5096f90a439d7">fl::value</a></div><div class="ttdeci">constexpr int type_rank&lt; T &gt;::value</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d37/static__constexpr__defs_8cpp_8hpp_source.html#l00082">static_constexpr_defs.cpp.hpp:82</a></div></div>
-<div class="ttc" id="anamespacefl_a2d12ae4decce550cd9809a6687f112e2_html_a2d12ae4decce550cd9809a6687f112e2"><div class="ttname"><a href="../../d4/d36/namespacefl_a2d12ae4decce550cd9809a6687f112e2.html#a2d12ae4decce550cd9809a6687f112e2">fl::utoa64</a></div><div class="ttdeci">int utoa64(u64 value, char *sp, int radix)</div><div class="ttdoc">Convert unsigned 64-bit integer to string buffer in given radix.</div><div class="ttdef"><b>Definition</b> <a href="../../de/dd9/charconv_8cpp_8hpp_source.html#l00162">charconv.cpp.hpp:162</a></div></div>
-<div class="ttc" id="anamespacefl_add3f775ccb36323b444c97c36b6bb694_html_add3f775ccb36323b444c97c36b6bb694"><div class="ttname"><a href="../../d4/d36/namespacefl_add3f775ccb36323b444c97c36b6bb694.html#add3f775ccb36323b444c97c36b6bb694">fl::u64</a></div><div class="ttdeci">fl::u64 u64</div><div class="ttdef"><b>Definition</b> <a href="../../df/d96/s16x16x4_8h_source.html#l00221">s16x16x4.h:221</a></div></div>
+<div class="ttc" id="anamespacefl_aa60cdd7a91156d23e724b99f4719e849_html_aa60cdd7a91156d23e724b99f4719e849"><div class="ttname"><a href="../../d4/d36/namespacefl_aa60cdd7a91156d23e724b99f4719e849.html#aa60cdd7a91156d23e724b99f4719e849">fl::utoa64</a></div><div class="ttdeci">int utoa64(u64 value, char *sp, int radix)</div><div class="ttdoc">Convert unsigned 64-bit integer to string buffer in given radix.</div><div class="ttdef"><b>Definition</b> <a href="../../de/dd9/charconv_8cpp_8hpp_source.html#l00162">charconv.cpp.hpp:162</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../d6/d5f/system_2serial_8cpp_8hpp_source.html#l00048">print()</a>, <a class="el" href="../../dd/d37/static__constexpr__defs_8cpp_8hpp_source.html#l00082">fl::type_rank&lt; T &gt;::value</a>, and <a class="el" href="../../de/dd9/charconv_8cpp_8hpp_source.html#l00162">fl::utoa64()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
@@ -160,7 +159,7 @@ template&lt;typename T&gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../de/d67/classfl_1_1_serial_port.html">SerialPort</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:10 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

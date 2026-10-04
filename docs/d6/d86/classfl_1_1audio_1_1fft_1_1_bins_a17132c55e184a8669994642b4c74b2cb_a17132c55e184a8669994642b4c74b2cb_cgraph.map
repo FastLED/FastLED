@@ -1,0 +1,9 @@
+<map id="fl::audio::fft::Bins::freqToBin" name="fl::audio::fft::Bins::freqToBin">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,137,45"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a009a6061a9324e18ae194e4c16749297.html#a009a6061a9324e18ae194e4c16749297" title=" " alt="" coords="185,13,248,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="138,23,172,23,172,28,138,28"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a083789a22e6f21134e65d0d0ed247858.html#a083789a22e6f21134e65d0d0ed247858" title=" " alt="" coords="296,13,427,38"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="248,23,282,23,282,28,248,28"/>
+<area shape="rect" id="Node000004" href="$df/d9e/namespacefl_1_1detail_ac8b57c29af1139c7ef72272fb8e62f32.html#ac8b57c29af1139c7ef72272fb8e62f32" title=" " alt="" coords="475,13,637,38"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="427,23,461,23,461,28,427,28"/>
+</map>

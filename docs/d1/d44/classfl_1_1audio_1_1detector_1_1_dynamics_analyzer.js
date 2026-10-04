@@ -1,7 +1,7 @@
 var classfl_1_1audio_1_1detector_1_1_dynamics_analyzer =
 [
-    [ "DynamicsAnalyzer", "d1/d44/classfl_1_1audio_1_1detector_1_1_dynamics_analyzer_aa8a4ef019e910367c98fa1f66571729c.html#aa8a4ef019e910367c98fa1f66571729c", null ],
-    [ "~DynamicsAnalyzer", "d1/d44/classfl_1_1audio_1_1detector_1_1_dynamics_analyzer_a3c2233a53f842cc2b693fc9809789ff2.html#a3c2233a53f842cc2b693fc9809789ff2", null ],
+    [ "DynamicsAnalyzer", "d1/d44/classfl_1_1audio_1_1detector_1_1_dynamics_analyzer_a1158e5aaeab789e44bead6ab0d1a908c.html#a1158e5aaeab789e44bead6ab0d1a908c", null ],
+    [ "~DynamicsAnalyzer", "d1/d44/classfl_1_1audio_1_1detector_1_1_dynamics_analyzer_ab54459961a51e4fb86449c9f5668dd9c.html#ab54459961a51e4fb86449c9f5668dd9c", null ],
     [ "calculateTrend", "d1/d44/classfl_1_1audio_1_1detector_1_1_dynamics_analyzer_a424f47752d2ac267e60cc86d3bc75178.html#a424f47752d2ac267e60cc86d3bc75178", null ],
     [ "fireCallbacks", "d1/d44/classfl_1_1audio_1_1detector_1_1_dynamics_analyzer_aacf5fe81076d9321a219fa1c449f7610.html#aacf5fe81076d9321a219fa1c449f7610", null ],
     [ "getAverageRMS", "d1/d44/classfl_1_1audio_1_1detector_1_1_dynamics_analyzer_aab48e2f04a292c2ab025fb533afe0f26.html#aab48e2f04a292c2ab025fb533afe0f26", null ],

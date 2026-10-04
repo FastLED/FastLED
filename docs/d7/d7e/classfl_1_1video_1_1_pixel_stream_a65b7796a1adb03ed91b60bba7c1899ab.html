@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -115,18 +115,21 @@ $(function(){initNavTree('d7/d7e/classfl_1_1video_1_1_pixel_stream_a65b7796a1adb
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d2/db2/pixel__stream_8cpp_8hpp_source.html#l00107">107</a> of file <a class="el" href="../../d2/db2/pixel__stream_8cpp_8hpp_source.html">pixel_stream.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  107</span>                              {</div>
-<div class="line"><span class="lineno">  108</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d7/d7e/classfl_1_1video_1_1_pixel_stream_a677c4665fedc0ec38f8e57e2b02455f7.html#a677c4665fedc0ec38f8e57e2b02455f7">mType</a> == <a class="code hl_enumvalue" href="../../d7/d7e/classfl_1_1video_1_1_pixel_stream_af7e361137e1b718c7216d5cc99eb0e83.html#af7e361137e1b718c7216d5cc99eb0e83a7554dabb8e163cdaefadc9f794ea2cd7">kStreaming</a>) {</div>
-<div class="line"><span class="lineno">  109</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">  110</span>    }</div>
-<div class="line"><span class="lineno">  111</span>    <span class="keywordflow">return</span> !<a class="code hl_variable" href="../../d7/d7e/classfl_1_1video_1_1_pixel_stream_a12777a8d83cc78f8938d8e7efdb724d7.html#a12777a8d83cc78f8938d8e7efdb724d7">mHandle</a>-&gt;available();</div>
-<div class="line"><span class="lineno">  112</span>}</div>
-<div class="ttc" id="aclassfl_1_1video_1_1_pixel_stream_a12777a8d83cc78f8938d8e7efdb724d7_html_a12777a8d83cc78f8938d8e7efdb724d7"><div class="ttname"><a href="../../d7/d7e/classfl_1_1video_1_1_pixel_stream_a12777a8d83cc78f8938d8e7efdb724d7.html#a12777a8d83cc78f8938d8e7efdb724d7">fl::video::PixelStream::mHandle</a></div><div class="ttdeci">fl::filebuf_ptr mHandle</div><div class="ttdef"><b>Definition</b> <a href="../../d3/dfa/pixel__stream_8h_source.html#l00065">pixel_stream.h:65</a></div></div>
-<div class="ttc" id="aclassfl_1_1video_1_1_pixel_stream_a677c4665fedc0ec38f8e57e2b02455f7_html_a677c4665fedc0ec38f8e57e2b02455f7"><div class="ttname"><a href="../../d7/d7e/classfl_1_1video_1_1_pixel_stream_a677c4665fedc0ec38f8e57e2b02455f7.html#a677c4665fedc0ec38f8e57e2b02455f7">fl::video::PixelStream::mType</a></div><div class="ttdeci">Type mType</div><div class="ttdef"><b>Definition</b> <a href="../../d3/dfa/pixel__stream_8h_source.html#l00066">pixel_stream.h:66</a></div></div>
-<div class="ttc" id="aclassfl_1_1video_1_1_pixel_stream_af7e361137e1b718c7216d5cc99eb0e83_html_af7e361137e1b718c7216d5cc99eb0e83a7554dabb8e163cdaefadc9f794ea2cd7"><div class="ttname"><a href="../../d7/d7e/classfl_1_1video_1_1_pixel_stream_af7e361137e1b718c7216d5cc99eb0e83.html#af7e361137e1b718c7216d5cc99eb0e83a7554dabb8e163cdaefadc9f794ea2cd7">fl::video::PixelStream::kStreaming</a></div><div class="ttdeci">@ kStreaming</div><div class="ttdef"><b>Definition</b> <a href="../../d3/dfa/pixel__stream_8h_source.html#l00030">pixel_stream.h:30</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d2/db2/pixel__stream_8cpp_8hpp_source.html#l00264">264</a> of file <a class="el" href="../../d2/db2/pixel__stream_8cpp_8hpp_source.html">pixel_stream.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  264</span>                              {</div>
+<div class="line"><span class="lineno">  265</span>    <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../d7/d7e/classfl_1_1video_1_1_pixel_stream_a12777a8d83cc78f8938d8e7efdb724d7.html#a12777a8d83cc78f8938d8e7efdb724d7">mHandle</a>) {</div>
+<div class="line"><span class="lineno">  266</span>        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  267</span>    }</div>
+<div class="line"><span class="lineno">  268</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d7/d7e/classfl_1_1video_1_1_pixel_stream_a677c4665fedc0ec38f8e57e2b02455f7.html#a677c4665fedc0ec38f8e57e2b02455f7">mType</a> == <a class="code hl_enumvalue" href="../../d7/d7e/classfl_1_1video_1_1_pixel_stream_af7e361137e1b718c7216d5cc99eb0e83.html#af7e361137e1b718c7216d5cc99eb0e83a7554dabb8e163cdaefadc9f794ea2cd7">kStreaming</a>) {</div>
+<div class="line"><span class="lineno">  269</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  270</span>    }</div>
+<div class="line"><span class="lineno">  271</span>    <span class="keywordflow">return</span> !<a class="code hl_variable" href="../../d7/d7e/classfl_1_1video_1_1_pixel_stream_a12777a8d83cc78f8938d8e7efdb724d7.html#a12777a8d83cc78f8938d8e7efdb724d7">mHandle</a>-&gt;available();</div>
+<div class="line"><span class="lineno">  272</span>}</div>
+<div class="ttc" id="aclassfl_1_1video_1_1_pixel_stream_a12777a8d83cc78f8938d8e7efdb724d7_html_a12777a8d83cc78f8938d8e7efdb724d7"><div class="ttname"><a href="../../d7/d7e/classfl_1_1video_1_1_pixel_stream_a12777a8d83cc78f8938d8e7efdb724d7.html#a12777a8d83cc78f8938d8e7efdb724d7">fl::video::PixelStream::mHandle</a></div><div class="ttdeci">fl::filebuf_ptr mHandle</div><div class="ttdef"><b>Definition</b> <a href="../../d3/dfa/pixel__stream_8h_source.html#l00074">pixel_stream.h:74</a></div></div>
+<div class="ttc" id="aclassfl_1_1video_1_1_pixel_stream_a677c4665fedc0ec38f8e57e2b02455f7_html_a677c4665fedc0ec38f8e57e2b02455f7"><div class="ttname"><a href="../../d7/d7e/classfl_1_1video_1_1_pixel_stream_a677c4665fedc0ec38f8e57e2b02455f7.html#a677c4665fedc0ec38f8e57e2b02455f7">fl::video::PixelStream::mType</a></div><div class="ttdeci">Type mType</div><div class="ttdef"><b>Definition</b> <a href="../../d3/dfa/pixel__stream_8h_source.html#l00075">pixel_stream.h:75</a></div></div>
+<div class="ttc" id="aclassfl_1_1video_1_1_pixel_stream_af7e361137e1b718c7216d5cc99eb0e83_html_af7e361137e1b718c7216d5cc99eb0e83a7554dabb8e163cdaefadc9f794ea2cd7"><div class="ttname"><a href="../../d7/d7e/classfl_1_1video_1_1_pixel_stream_af7e361137e1b718c7216d5cc99eb0e83.html#af7e361137e1b718c7216d5cc99eb0e83a7554dabb8e163cdaefadc9f794ea2cd7">fl::video::PixelStream::kStreaming</a></div><div class="ttdeci">@ kStreaming</div><div class="ttdef"><b>Definition</b> <a href="../../d3/dfa/pixel__stream_8h_source.html#l00031">pixel_stream.h:31</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d3/dfa/pixel__stream_8h_source.html#l00030">kStreaming</a>, <a class="el" href="../../d3/dfa/pixel__stream_8h_source.html#l00065">mHandle</a>, and <a class="el" href="../../d3/dfa/pixel__stream_8h_source.html#l00066">mType</a>.</p>
+<p class="reference">References <a class="el" href="../../d3/dfa/pixel__stream_8h_source.html#l00031">kStreaming</a>, <a class="el" href="../../d3/dfa/pixel__stream_8h_source.html#l00074">mHandle</a>, and <a class="el" href="../../d3/dfa/pixel__stream_8h_source.html#l00075">mType</a>.</p>
 
 </div>
 </div>
@@ -137,7 +140,7 @@ $(function(){initNavTree('d7/d7e/classfl_1_1video_1_1_pixel_stream_a65b7796a1adb
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d7/dbc/namespacefl_1_1video.html">video</a></li><li class="navelem"><a class="el" href="../../d7/d7e/classfl_1_1video_1_1_pixel_stream.html">PixelStream</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:11 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:13 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

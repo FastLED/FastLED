@@ -1,0 +1,7 @@
+<map id="fl::busKeepAlive" name="fl::busKeepAlive">
+<area shape="rect" id="Node000001" title=" " alt="" coords="197,31,324,56"/>
+<area shape="rect" id="Node000002" href="$dd/dbb/class_c_fast_l_e_d_ab1fc0970c9280020e713ae86c7539374.html#ab1fc0970c9280020e713ae86c7539374" title="Add an SPI controller on a selected ESP&#45;IDF host." alt="" coords="5,5,149,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="183,35,149,31,150,25,184,30"/>
+<area shape="rect" id="Node000003" href="$dd/dbb/class_c_fast_l_e_d_ac6910f4593686faa50bfd942056af78a.html#ac6910f4593686faa50bfd942056af78a" title="Add an SPI based CLEDController instance to the world (legacy path)." alt="" coords="5,55,149,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="184,56,150,61,149,55,183,51"/>
+</map>

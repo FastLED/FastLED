@@ -1,0 +1,13 @@
+<map id="fl::ColorPipelineHooks" name="fl::ColorPipelineHooks">
+<area shape="rect" id="Node000001" title=" " alt="" coords="123,313,288,339"/>
+<area shape="rect" id="Node000002" href="$d0/d09/classfl_1_1_pixel_iterator.html" title=" " alt="" coords="147,225,264,251"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="208,265,208,313,203,313,203,265"/>
+<area shape="rect" id="Node000003" href="$d7/d27/structfl_1_1_rgbw.html" title=" " alt="" coords="47,108,121,133"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="80,147,79,175,81,188,87,200,99,212,114,221,147,231,145,236,112,225,96,216,83,203,76,190,73,175,75,147"/>
+<area shape="rect" id="Node000004" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="5,5,163,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="87,59,87,108,81,108,81,59"/>
+<area shape="rect" id="Node000010" href="$d4/df9/structfl_1_1_rgbww.html" title="Per&#45;strip RGBWW configuration." alt="" coords="285,108,371,133"/>
+<area shape="poly" id="edge4_Node000002_Node000010" title=" " alt="" coords="327,148,318,177,301,203,281,218,259,228,257,223,278,213,297,200,313,174,322,147"/>
+<area shape="rect" id="Node000011" href="$d7/df0/namespacefl_1_1colorimetric__detail.html#d1/d65/structfl_1_1colorimetric__detail_1_1_rgbcct_profile" title=" " alt="" coords="248,5,408,45"/>
+<area shape="poly" id="edge5_Node000010_Node000011" title=" " alt="" coords="331,59,331,108,325,108,325,59"/>
+</map>

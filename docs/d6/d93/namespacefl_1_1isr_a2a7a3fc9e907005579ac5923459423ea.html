@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -107,7 +107,7 @@ $(function(){initNavTree('d6/d93/namespacefl_1_1isr_a2a7a3fc9e907005579ac5923459
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="../../df/d96/s16x16x4_8h_ad12102840a95770657e94a62c99a82ec.html#ad12102840a95770657e94a62c99a82ec">FL_OPTIMIZE_FUNCTION</a> <a class="el" href="../../df/d96/s16x16x4_8h_adcb7795cd6f85159b3087db18279685e.html#adcb7795cd6f85159b3087db18279685e">FL_IRAM</a> <a class="el" href="../../df/d96/s16x16x4_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> void fl::isr::memset_zero_word </td>
+          <td class="memname"><a class="el" href="../../d4/d54/compiler__control_8h_ad12102840a95770657e94a62c99a82ec.html#ad12102840a95770657e94a62c99a82ec">FL_OPTIMIZE_FUNCTION</a> <a class="el" href="../../d4/d54/compiler__control_8h_adcb7795cd6f85159b3087db18279685e.html#adcb7795cd6f85159b3087db18279685e">FL_IRAM</a> <a class="el" href="../../d4/d54/compiler__control_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> void fl::isr::memset_zero_word </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a> *</td>          <td class="paramname"><span class="paramname"><em>dest</em></span>, </td>
         </tr>
@@ -131,7 +131,7 @@ $(function(){initNavTree('d6/d93/namespacefl_1_1isr_a2a7a3fc9e907005579ac5923459
 
 <p class="definition">Definition at line <a class="el" href="../../dd/d48/memcpy_8h_source.html#l00121">121</a> of file <a class="el" href="../../dd/d48/memcpy_8h_source.html">memcpy.h</a>.</p>
 <div class="fragment"><div class="line"><span class="lineno">  121</span>                                              {</div>
-<div class="line"><span class="lineno">  122</span>    u32* dest32 = <a class="code hl_function" href="../../d4/d36/namespacefl_ad200a6a214a70194b7c33fd67af6cea4.html#ad200a6a214a70194b7c33fd67af6cea4">fl::bit_cast&lt;u32*&gt;</a>(dest);</div>
+<div class="line"><span class="lineno">  122</span>    u32* dest32 = <a class="code hl_function" href="../../d4/d36/namespacefl_aab9d4e461519c66fc958efc9e9ba2efa.html#aab9d4e461519c66fc958efc9e9ba2efa">fl::bit_cast&lt;u32*&gt;</a>(dest);</div>
 <div class="line"><span class="lineno">  123</span>    <span class="keywordtype">size_t</span> count32 = count / 4;</div>
 <div class="line"><span class="lineno">  124</span>    <span class="keywordtype">size_t</span> remainder = count % 4;</div>
 <div class="line"><span class="lineno">  125</span> </div>
@@ -146,7 +146,7 @@ $(function(){initNavTree('d6/d93/namespacefl_1_1isr_a2a7a3fc9e907005579ac5923459
 <div class="line"><span class="lineno">  134</span>}</div>
 <div class="ttc" id="anamespacefl_1_1isr_a51ec8e6b0dbf1f6f1c4a1fd77702f9a9_html_a51ec8e6b0dbf1f6f1c4a1fd77702f9a9"><div class="ttname"><a href="../../d6/d93/namespacefl_1_1isr_a51ec8e6b0dbf1f6f1c4a1fd77702f9a9.html#a51ec8e6b0dbf1f6f1c4a1fd77702f9a9">fl::isr::memset_zero_byte</a></div><div class="ttdeci">FL_OPTIMIZE_FUNCTION FL_IRAM FASTLED_FORCE_INLINE void memset_zero_byte(u8 *dest, size_t count)</div><div class="ttdoc">ISR-safe memset replacement (byte-by-byte zero)</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d48/memcpy_8h_source.html#l00110">memcpy.h:110</a></div></div>
 <div class="ttc" id="anamespacefl_a058ceeac48f181da463c2ba07401292c_html_a058ceeac48f181da463c2ba07401292c"><div class="ttname"><a href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a></div><div class="ttdeci">unsigned char u8</div><div class="ttdef"><b>Definition</b> <a href="../../df/dd8/stdint_8h_source.html#l00131">stdint.h:131</a></div></div>
-<div class="ttc" id="anamespacefl_ad200a6a214a70194b7c33fd67af6cea4_html_ad200a6a214a70194b7c33fd67af6cea4"><div class="ttname"><a href="../../d4/d36/namespacefl_ad200a6a214a70194b7c33fd67af6cea4.html#ad200a6a214a70194b7c33fd67af6cea4">fl::bit_cast</a></div><div class="ttdeci">To bit_cast(const From &amp;from) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/d72/bit__cast_8h_source.html#l00048">bit_cast.h:48</a></div></div>
+<div class="ttc" id="anamespacefl_aab9d4e461519c66fc958efc9e9ba2efa_html_aab9d4e461519c66fc958efc9e9ba2efa"><div class="ttname"><a href="../../d4/d36/namespacefl_aab9d4e461519c66fc958efc9e9ba2efa.html#aab9d4e461519c66fc958efc9e9ba2efa">fl::bit_cast</a></div><div class="ttdeci">To bit_cast(const From &amp;from) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/d72/bit__cast_8h_source.html#l00048">bit_cast.h:48</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../df/d72/bit__cast_8h_source.html#l00048">fl::bit_cast()</a>, and <a class="el" href="../../dd/d48/memcpy_8h_source.html#l00110">memset_zero_byte()</a>.</p>
 
@@ -175,7 +175,7 @@ $(function(){initNavTree('d6/d93/namespacefl_1_1isr_a2a7a3fc9e907005579ac5923459
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d6/d93/namespacefl_1_1isr.html">isr</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:10 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:12 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -6,5 +6,6 @@ var _analog_output_8ino =
     [ "colorBars", "d5/d17/_analog_output_8ino_a41443fd94d659dbb2ce2e63bbcca8a41.html#a41443fd94d659dbb2ce2e63bbcca8a41", null ],
     [ "loop", "d5/d17/_analog_output_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f", null ],
     [ "setup", "d5/d17/_analog_output_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d", null ],
-    [ "showAnalogRGB", "d5/d17/_analog_output_8ino_a493f802fe26dce77f378873f891158f8.html#a493f802fe26dce77f378873f891158f8", null ]
+    [ "showAnalogRGB", "d5/d17/_analog_output_8ino_a493f802fe26dce77f378873f891158f8.html#a493f802fe26dce77f378873f891158f8", null ],
+    [ "leds", "d5/d17/_analog_output_8ino_a1039e408783ef35dd94161e35efe8ee9.html#a1039e408783ef35dd94161e35efe8ee9", null ]
 ];

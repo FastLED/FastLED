@@ -1,0 +1,13 @@
+<map id="fl::makeScaledPixelRangeRGBW" name="fl::makeScaledPixelRangeRGBW">
+<area shape="rect" id="Node000001" title="Create RGBW input iterator range from PixelIterator." alt="" coords="569,130,800,155"/>
+<area shape="poly" id="edge5_Node000001_Node000001" title=" " alt="" coords="727,121,716,112,685,109,660,111,646,116,643,121,650,128,647,132,638,122,643,112,658,106,685,103,718,107,730,117"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_ab3b16ea2da444a2539d082aae754217f.html#ab3b16ea2da444a2539d082aae754217f" title="Encode complete UCS7604 frame (preamble + padding + pixel data)" alt="" coords="377,101,521,126"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="569,131,521,125,522,120,569,126"/>
+<area shape="rect" id="Node000005" href="$d0/d09/classfl_1_1_pixel_iterator_a7bf3c7049670ed21763877da0947b91e.html#a7bf3c7049670ed21763877da0947b91e" title=" " alt="" coords="387,151,512,191"/>
+<area shape="poly" id="edge6_Node000001_Node000005" title=" " alt="" coords="565,160,513,166,512,161,564,154"/>
+<area shape="rect" id="Node000003" href="$dd/d78/classfl_1_1_u_c_s7604_controller_t_a0b8dc7f2f0f2e0a2ed3461aa905080ea.html#a0b8dc7f2f0f2e0a2ed3461aa905080ea" title=" " alt="" coords="5,5,329,104"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="374,100,329,91,330,86,375,95"/>
+<area shape="rect" id="Node000004" href="$dc/d8d/namespacefl_1_1anonymous__namespace_02channel_8cpp_8hpp_03_a5f78780348edce94192b57b45f1778b4.html#a5f78780348edce94192b57b45f1778b4" title="Encode UCS7604 pixel data into the channel data buffer." alt="" coords="41,152,293,192"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="374,132,265,155,264,149,373,126"/>
+<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="215,140,198,133,167,131,140,133,124,138,118,143,121,151,116,153,112,142,121,133,139,127,167,125,200,128,217,135"/>
+</map>

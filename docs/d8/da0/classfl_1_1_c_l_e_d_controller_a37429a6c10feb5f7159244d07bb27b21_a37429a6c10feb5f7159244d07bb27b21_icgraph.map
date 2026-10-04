@@ -1,0 +1,12 @@
+<map id="fl::CLEDController::applyRgbw" name="fl::CLEDController::applyRgbw">
+<area shape="rect" id="Node000001" title=" " alt="" coords="605,49,741,89"/>
+<area shape="rect" id="Node000002" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a5deb7f24434255cda4210316a43b7507.html#a5deb7f24434255cda4210316a43b7507" title="Configure a chipset&#45;owned RGBW policy that public white&#45;channel setters cannot replace." alt="" coords="421,5,557,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="591,52,557,44,558,39,592,47"/>
+<area shape="rect" id="Node000003" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a364042729b1cf127821d255d67f0f91c.html#a364042729b1cf127821d255d67f0f91c" title=" " alt="" coords="421,93,557,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="592,91,558,100,557,95,591,86"/>
+<area shape="poly" id="edge5_Node000003_Node000003" title=" " alt="" coords="520,81,509,75,489,72,472,74,461,79,458,85,460,92,454,94,452,84,458,75,470,69,489,67,511,70,523,77"/>
+<area shape="rect" id="Node000004" href="$d4/d28/group___chipsets_gad119f2555688176da39dc9f8e18479c0.html#gad119f2555688176da39dc9f8e18479c0" title="Constructor with optional RGBW configuration." alt="" coords="91,49,288,89"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="408,104,288,86,289,81,408,99"/>
+<area shape="rect" id="Node000005" href="$dd/d78/classfl_1_1_u_c_s7604_controller_t_a5b824ab62c030a131878f46d505dfbc6.html#a5b824ab62c030a131878f46d505dfbc6" title=" " alt="" coords="5,114,373,198"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="408,127,374,132,373,127,407,122"/>
+</map>

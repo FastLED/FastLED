@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -158,7 +158,7 @@ Users must handle chipset-specific padding at application level before calling <
 <div class="line"><span class="comment">// Async usage (fire and forget)</span></div>
 <div class="line"><span class="keyword">auto</span> <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a> = spi.write(lane0, lane1, lane2, lane3);</div>
 <div class="line"><span class="keywordflow">if</span> (!<a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>.ok) {</div>
-<div class="line">    <a class="code hl_define" href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;Write failed: &quot;</span> &lt;&lt; <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>.error);</div>
+<div class="line">    <a class="code hl_define" href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;Write failed: &quot;</span> &lt;&lt; <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>.error);</div>
 <div class="line">}</div>
 <div class="line"><span class="comment">// ... do other work while transmission happens in background ...</span></div>
 <div class="line"> </div>
@@ -166,7 +166,7 @@ Users must handle chipset-specific padding at application level before calling <
 <div class="line">spi.write(lane0, lane1, lane2, lane3);</div>
 <div class="line">spi.wait();  <span class="comment">// Block until transmission completes</span></div>
 <div class="ttc" id="aclassfl_1_1array_html"><div class="ttname"><a href="../../d4/dca/classfl_1_1array.html">fl::array</a></div><div class="ttdoc">A fixed-size array implementation similar to std::array.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d63/array_8h_source.html#l00027">array.h:27</a></div></div>
-<div class="ttc" id="alog_8h_a868b194fdb2234182e76042d9fde3062_html_a868b194fdb2234182e76042d9fde3062"><div class="ttname"><a href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a></div><div class="ttdeci">#define FL_WARN(X)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00276">log.h:276</a></div></div>
+<div class="ttc" id="alog_8h_a4804912fba6eed63e1afd84b8768aced_html_a4804912fba6eed63e1afd84b8768aced"><div class="ttname"><a href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a></div><div class="ttdeci">#define FL_WARN(...)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00440">log.h:440</a></div></div>
 <div class="ttc" id="anamespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99_html_a8fa65f6529fc3eb6a174cb304a4bfc99"><div class="ttname"><a href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">fl::result</a></div><div class="ttdeci">expected&lt; T, E &gt; result</div><div class="ttdoc">Alias for expected (Rust-style naming)</div><div class="ttdef"><b>Definition</b> <a href="../../de/d93/result_8h_source.html#l00031">result.h:31</a></div></div>
 </div><!-- fragment --> </dd></dl>
 
@@ -175,18 +175,18 @@ Users must handle chipset-specific padding at application level before calling <
 <div class="line"><span class="lineno">  120</span>        <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../d0/d3a/classfl_1_1_spi_acc258d50138806dd886fdc9d52972f1e.html#acc258d50138806dd886fdc9d52972f1e">device</a>) {</div>
 <div class="line"><span class="lineno">  121</span>            <span class="keywordflow">return</span> WriteResult(<span class="stringliteral">&quot;SPI device not initialized&quot;</span>);</div>
 <div class="line"><span class="lineno">  122</span>        }</div>
-<div class="line"><span class="lineno">  123</span>        <span class="keywordflow">return</span> <a class="code hl_variable" href="../../d0/d3a/classfl_1_1_spi_acc258d50138806dd886fdc9d52972f1e.html#acc258d50138806dd886fdc9d52972f1e">device</a>-&gt;write(<a class="code hl_function" href="../../da/d3c/namespacefl_1_1fl_a0bddf371925d8c4e94b88e9d7b35d259.html#a0bddf371925d8c4e94b88e9d7b35d259">fl::forward&lt;Spans&gt;</a>(lanes)...);</div>
+<div class="line"><span class="lineno">  123</span>        <span class="keywordflow">return</span> <a class="code hl_variable" href="../../d0/d3a/classfl_1_1_spi_acc258d50138806dd886fdc9d52972f1e.html#acc258d50138806dd886fdc9d52972f1e">device</a>-&gt;write(<a class="code hl_function" href="../../d4/d36/namespacefl_a94488336a5db985fbda1bbd317bffc6a.html#a94488336a5db985fbda1bbd317bffc6a">fl::forward&lt;Spans&gt;</a>(lanes)...);</div>
 <div class="line"><span class="lineno">  124</span>    }</div>
 <div class="ttc" id="aclassfl_1_1_spi_acc258d50138806dd886fdc9d52972f1e_html_acc258d50138806dd886fdc9d52972f1e"><div class="ttname"><a href="../../d0/d3a/classfl_1_1_spi_acc258d50138806dd886fdc9d52972f1e.html#acc258d50138806dd886fdc9d52972f1e">fl::Spi::device</a></div><div class="ttdeci">fl::unique_ptr&lt; spi::MultiLaneDevice &gt; device</div><div class="ttdef"><b>Definition</b> <a href="../../d9/df0/channels_2spi_8h_source.html#l00142">spi.h:142</a></div></div>
-<div class="ttc" id="anamespacefl_1_1fl_a0bddf371925d8c4e94b88e9d7b35d259_html_a0bddf371925d8c4e94b88e9d7b35d259"><div class="ttname"><a href="../../da/d3c/namespacefl_1_1fl_a0bddf371925d8c4e94b88e9d7b35d259.html#a0bddf371925d8c4e94b88e9d7b35d259">fl::fl::forward</a></div><div class="ttdeci">constexpr T &amp;&amp; forward(typename remove_reference&lt; T &gt;::type &amp;t) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/d96/s16x16x4_8h_source.html#l00234">s16x16x4.h:234</a></div></div>
+<div class="ttc" id="anamespacefl_a94488336a5db985fbda1bbd317bffc6a_html_a94488336a5db985fbda1bbd317bffc6a"><div class="ttname"><a href="../../d4/d36/namespacefl_a94488336a5db985fbda1bbd317bffc6a.html#a94488336a5db985fbda1bbd317bffc6a">fl::forward</a></div><div class="ttdeci">constexpr T &amp;&amp; forward(typename remove_reference&lt; T &gt;::type &amp;t) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/d63/type__traits_8h_source.html#l00234">type_traits.h:234</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d9/df0/channels_2spi_8h_source.html#l00142">device</a>, and <a class="el" href="../../df/d96/s16x16x4_8h_source.html#l00234">fl::fl::forward()</a>.</p>
+<p class="reference">References <a class="el" href="../../d9/df0/channels_2spi_8h_source.html#l00142">device</a>, and <a class="el" href="../../df/d63/type__traits_8h_source.html#l00234">fl::forward()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d0/d3a/classfl_1_1_spi_a0d6d16ad9ed421596f657c16a5552cc0_a0d6d16ad9ed421596f657c16a5552cc0_cgraph.svg" width="262" height="36"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d0/d3a/classfl_1_1_spi_a0d6d16ad9ed421596f657c16a5552cc0_a0d6d16ad9ed421596f657c16a5552cc0_cgraph.svg" width="246" height="36"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 
 </div>
@@ -198,7 +198,7 @@ Users must handle chipset-specific padding at application level before calling <
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d0/d3a/classfl_1_1_spi.html">Spi</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:10 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

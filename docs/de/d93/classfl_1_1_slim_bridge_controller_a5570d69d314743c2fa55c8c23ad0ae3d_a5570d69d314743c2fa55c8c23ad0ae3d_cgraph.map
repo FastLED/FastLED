@@ -1,0 +1,11 @@
+<map id="fl::SlimBridgeController::SlimBridgeController" name="fl::SlimBridgeController::SlimBridgeController">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,47,179,87"/>
+<area shape="rect" id="Node000002" href="$d5/df4/classfl_1_1_channel_data_a6b9f458d31f0bcd8f7448a9c801d7297.html#a6b9f458d31f0bcd8f7448a9c801d7297" title="Create channel transmission data (modern variant&#45;based API)" alt="" coords="227,29,397,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="179,55,213,51,213,56,180,60"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a21751c1ec9df05c6e1090cb5c302c846.html#a21751c1ec9df05c6e1090cb5c302c846" title="Convert compile&#45;time CHIPSET type to runtime timing config." alt="" coords="232,79,392,104"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="180,74,219,78,218,84,179,79"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af" title=" " alt="" coords="445,5,571,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="397,29,431,25,432,30,398,34"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a0c8a67e528dcd96ee58216754a07a733.html#a0c8a67e528dcd96ee58216754a07a733" title=" " alt="" coords="471,55,545,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="398,50,457,58,457,63,397,56"/>
+</map>

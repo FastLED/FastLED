@@ -20,7 +20,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_a04a5f8d4d52c62efb40aa95af8ebb160.html#a04a5f8d4d52c62efb40aa95af8ebb160" target="_top" xlink:title="Allow construction from a HSV16 color Enables automatic conversion from HSV16 to CRGB.">
+<g id="a_Node000002"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_a3f41e230cef41109477d0ef93be03639.html#a3f41e230cef41109477d0ef93be03639" target="_top" xlink:title="Allow construction from a HSV16 color Enables automatic conversion from HSV16 to CRGB.">
 <polygon fill="white" stroke="#666666" points="416.5,-130 326.5,-130 326.5,-111 416.5,-111 416.5,-130"/>
 <text text-anchor="middle" x="371.5" y="-118" font-family="Helvetica,sans-Serif" font-size="10.00">fl::CRGB::CRGB</text>
 </a>
@@ -74,7 +74,7 @@
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_a2792268a864ed3d46b191c20fd56ff87.html#a2792268a864ed3d46b191c20fd56ff87" target="_top" xlink:title=" ">
+<g id="a_Node000004"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_aa93f4f0e5197ba7d957ac3d32ce76c52.html#aa93f4f0e5197ba7d957ac3d32ce76c52" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="266,-93 152,-93 152,-74 266,-74 266,-93"/>
 <text text-anchor="middle" x="209" y="-81" font-family="Helvetica,sans-Serif" font-size="10.00">fl::CRGB::colorBoost</text>
 </a>
@@ -92,7 +92,7 @@
 <!-- Node5 -->
 <g id="Node000005" class="node">
 <title>Node5</title>
-<g id="a_Node000005"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_a7ab42a01a8409317af6940e030462703.html#a7ab42a01a8409317af6940e030462703" target="_top" xlink:title=" ">
+<g id="a_Node000005"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b_a858b169846b5113e2b3c57de1548b789.html#a858b169846b5113e2b3c57de1548b789" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="115,-167 1,-167 1,-148 115,-148 115,-167"/>
 <text text-anchor="middle" x="58" y="-155" font-family="Helvetica,sans-Serif" font-size="10.00">fl::CRGB::colorBoost</text>
 </a>

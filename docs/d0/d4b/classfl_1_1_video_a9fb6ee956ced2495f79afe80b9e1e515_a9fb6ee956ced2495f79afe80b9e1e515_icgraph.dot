@@ -8,8 +8,14 @@ digraph "fl::Video::error"
   rankdir="RL";
   Node1 [id="Node000001",label="fl::Video::error",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::Video::operator=",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d4b/classfl_1_1_video_a958384d2d775d417cec22426ff39e14f.html#a958384d2d775d417cec22426ff39e14f",tooltip=" "];
+  Node2 [id="Node000002",label="fl::Video::operator=",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d4b/classfl_1_1_video_aaa9f25d798fdfad22dc20153c7efe99a.html#aaa9f25d798fdfad22dc20153c7efe99a",tooltip=" "];
   Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::Video::setError",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d4b/classfl_1_1_video_aac7b058619f930019c9f5fc3691c7609.html#aac7b058619f930019c9f5fc3691c7609",tooltip=" "];
-  Node3 -> Node3 [id="edge3_Node000003_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::Video::setAdmissionError",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d4b/classfl_1_1_video_a510e3f591075769fca2179731e265137.html#a510e3f591075769fca2179731e265137",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::Video::begin",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d4b/classfl_1_1_video_a2a116cafd5588cce6f34c68c59d186f7.html#a2a116cafd5588cce6f34c68c59d186f7",tooltip=" "];
+  Node4 -> Node4 [id="edge4_Node000004_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 -> Node2 [id="edge5_Node000004_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node5 [id="edge6_Node000001_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::Video::setError",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d4b/classfl_1_1_video_a080e837b2f8628c0966168c11e104f6c.html#a080e837b2f8628c0966168c11e104f6c",tooltip=" "];
+  Node5 -> Node5 [id="edge7_Node000005_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
 }

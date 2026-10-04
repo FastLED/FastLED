@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -109,7 +109,7 @@ $(function(){initNavTree('d7/d5d/classfl_1_1spi_1_1_transaction_ae1a9c9739de90f5
         <tr>
           <td class="memname">bool fl::spi::Transaction::wait </td>
           <td>(</td>
-          <td class="paramtype">u32</td>          <td class="paramname"><span class="paramname"><em>timeout_ms</em></span><span class="paramdefsep"> = </span><span class="paramdefval">(<a class="el" href="../../d6/d7c/structfl_1_1numeric__limits.html">fl::numeric_limits</a>&lt;u32&gt;<a class="el" href="../../d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909">::max</a>)()</span></td><td>)</td>
+          <td class="paramtype">u32</td>          <td class="paramname"><span class="paramname"><em>timeout_ms</em></span><span class="paramdefsep"> = </span><span class="paramdefval">(<a class="el" href="../../d6/d7c/structfl_1_1numeric__limits.html">fl::numeric_limits</a>&lt;u32&gt;<a class="el" href="../../d4/d36/namespacefl_a07c69292ef50aa1083046faff1c52ead.html#a07c69292ef50aa1083046faff1c52ead">::max</a>)()</span></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -124,67 +124,70 @@ $(function(){initNavTree('d7/d5d/classfl_1_1spi_1_1_transaction_ae1a9c9739de90f5
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>true if completed, false on timeout </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d0/daf/device_8cpp_8hpp_source.html#l00411">411</a> of file <a class="el" href="../../d0/daf/device_8cpp_8hpp_source.html">device.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  411</span>                                     {</div>
-<div class="line"><span class="lineno">  412</span>    <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../d7/d5d/classfl_1_1spi_1_1_transaction_a1af88efdb384f2f03d18b1ee67feab12.html#a1af88efdb384f2f03d18b1ee67feab12">pImpl</a>) {</div>
-<div class="line"><span class="lineno">  413</span>        <span class="keywordflow">return</span> <span class="keyword">true</span>;  <span class="comment">// Already completed (or invalid)</span></div>
-<div class="line"><span class="lineno">  414</span>    }</div>
-<div class="line"><span class="lineno">  415</span> </div>
-<div class="line"><span class="lineno">  416</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d7/d5d/classfl_1_1spi_1_1_transaction_a1af88efdb384f2f03d18b1ee67feab12.html#a1af88efdb384f2f03d18b1ee67feab12">pImpl</a>-&gt;completed) {</div>
-<div class="line"><span class="lineno">  417</span>        <span class="keywordflow">return</span> <span class="keyword">true</span>;  <span class="comment">// Already completed</span></div>
-<div class="line"><span class="lineno">  418</span>    }</div>
-<div class="line"><span class="lineno">  419</span> </div>
-<div class="line"><span class="lineno">  420</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d7/d5d/classfl_1_1spi_1_1_transaction_a1af88efdb384f2f03d18b1ee67feab12.html#a1af88efdb384f2f03d18b1ee67feab12">pImpl</a>-&gt;cancelled) {</div>
-<div class="line"><span class="lineno">  421</span>        <a class="code hl_variable" href="../../d7/d5d/classfl_1_1spi_1_1_transaction_a1af88efdb384f2f03d18b1ee67feab12.html#a1af88efdb384f2f03d18b1ee67feab12">pImpl</a>-&gt;completed = <span class="keyword">true</span>;</div>
-<div class="line"><span class="lineno">  422</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;  <span class="comment">// Was cancelled</span></div>
-<div class="line"><span class="lineno">  423</span>    }</div>
-<div class="line"><span class="lineno">  424</span> </div>
-<div class="line"><span class="lineno">  425</span>    <span class="comment">// Check if device is still valid</span></div>
-<div class="line"><span class="lineno">  426</span>    <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../d7/d5d/classfl_1_1spi_1_1_transaction_a1af88efdb384f2f03d18b1ee67feab12.html#a1af88efdb384f2f03d18b1ee67feab12">pImpl</a>-&gt;device) {</div>
-<div class="line"><span class="lineno">  427</span>        <a class="code hl_variable" href="../../d7/d5d/classfl_1_1spi_1_1_transaction_a1af88efdb384f2f03d18b1ee67feab12.html#a1af88efdb384f2f03d18b1ee67feab12">pImpl</a>-&gt;completed = <span class="keyword">true</span>;</div>
-<div class="line"><span class="lineno">  428</span>        <a class="code hl_variable" href="../../d7/d5d/classfl_1_1spi_1_1_transaction_a1af88efdb384f2f03d18b1ee67feab12.html#a1af88efdb384f2f03d18b1ee67feab12">pImpl</a>-&gt;result = fl::task::Error(<span class="stringliteral">&quot;Device pointer is null&quot;</span>);</div>
-<div class="line"><span class="lineno">  429</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">  430</span>    }</div>
-<div class="line"><span class="lineno">  431</span> </div>
-<div class="line"><span class="lineno">  432</span>    <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../d7/d5d/classfl_1_1spi_1_1_transaction_a1af88efdb384f2f03d18b1ee67feab12.html#a1af88efdb384f2f03d18b1ee67feab12">pImpl</a>-&gt;device-&gt;isReady()) {</div>
-<div class="line"><span class="lineno">  433</span>        <a class="code hl_variable" href="../../d7/d5d/classfl_1_1spi_1_1_transaction_a1af88efdb384f2f03d18b1ee67feab12.html#a1af88efdb384f2f03d18b1ee67feab12">pImpl</a>-&gt;completed = <span class="keyword">true</span>;</div>
-<div class="line"><span class="lineno">  434</span>        <a class="code hl_variable" href="../../d7/d5d/classfl_1_1spi_1_1_transaction_a1af88efdb384f2f03d18b1ee67feab12.html#a1af88efdb384f2f03d18b1ee67feab12">pImpl</a>-&gt;result = fl::task::Error(<span class="stringliteral">&quot;Device not ready&quot;</span>);</div>
-<div class="line"><span class="lineno">  435</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">  436</span>    }</div>
-<div class="line"><span class="lineno">  437</span> </div>
+<p class="definition">Definition at line <a class="el" href="../../d0/daf/device_8cpp_8hpp_source.html#l00408">408</a> of file <a class="el" href="../../d0/daf/device_8cpp_8hpp_source.html">device.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  408</span>                                     {</div>
+<div class="line"><span class="lineno">  409</span>    <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../d7/d5d/classfl_1_1spi_1_1_transaction_a1af88efdb384f2f03d18b1ee67feab12.html#a1af88efdb384f2f03d18b1ee67feab12">pImpl</a>) {</div>
+<div class="line"><span class="lineno">  410</span>        <span class="keywordflow">return</span> <span class="keyword">true</span>;  <span class="comment">// Already completed (or invalid)</span></div>
+<div class="line"><span class="lineno">  411</span>    }</div>
+<div class="line"><span class="lineno">  412</span> </div>
+<div class="line"><span class="lineno">  413</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d7/d5d/classfl_1_1spi_1_1_transaction_a1af88efdb384f2f03d18b1ee67feab12.html#a1af88efdb384f2f03d18b1ee67feab12">pImpl</a>-&gt;completed) {</div>
+<div class="line"><span class="lineno">  414</span>        <span class="keywordflow">return</span> <span class="keyword">true</span>;  <span class="comment">// Already completed</span></div>
+<div class="line"><span class="lineno">  415</span>    }</div>
+<div class="line"><span class="lineno">  416</span> </div>
+<div class="line"><span class="lineno">  417</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d7/d5d/classfl_1_1spi_1_1_transaction_a1af88efdb384f2f03d18b1ee67feab12.html#a1af88efdb384f2f03d18b1ee67feab12">pImpl</a>-&gt;cancelled) {</div>
+<div class="line"><span class="lineno">  418</span>        <a class="code hl_variable" href="../../d7/d5d/classfl_1_1spi_1_1_transaction_a1af88efdb384f2f03d18b1ee67feab12.html#a1af88efdb384f2f03d18b1ee67feab12">pImpl</a>-&gt;completed = <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  419</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;  <span class="comment">// Was cancelled</span></div>
+<div class="line"><span class="lineno">  420</span>    }</div>
+<div class="line"><span class="lineno">  421</span> </div>
+<div class="line"><span class="lineno">  422</span>    <span class="comment">// Check if device is still valid</span></div>
+<div class="line"><span class="lineno">  423</span>    <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../d7/d5d/classfl_1_1spi_1_1_transaction_a1af88efdb384f2f03d18b1ee67feab12.html#a1af88efdb384f2f03d18b1ee67feab12">pImpl</a>-&gt;device) {</div>
+<div class="line"><span class="lineno">  424</span>        <a class="code hl_variable" href="../../d7/d5d/classfl_1_1spi_1_1_transaction_a1af88efdb384f2f03d18b1ee67feab12.html#a1af88efdb384f2f03d18b1ee67feab12">pImpl</a>-&gt;completed = <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  425</span>        <a class="code hl_variable" href="../../d7/d5d/classfl_1_1spi_1_1_transaction_a1af88efdb384f2f03d18b1ee67feab12.html#a1af88efdb384f2f03d18b1ee67feab12">pImpl</a>-&gt;result = fl::task::Error(<span class="stringliteral">&quot;Device pointer is null&quot;</span>);</div>
+<div class="line"><span class="lineno">  426</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  427</span>    }</div>
+<div class="line"><span class="lineno">  428</span> </div>
+<div class="line"><span class="lineno">  429</span>    <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../d7/d5d/classfl_1_1spi_1_1_transaction_a1af88efdb384f2f03d18b1ee67feab12.html#a1af88efdb384f2f03d18b1ee67feab12">pImpl</a>-&gt;device-&gt;isReady()) {</div>
+<div class="line"><span class="lineno">  430</span>        <a class="code hl_variable" href="../../d7/d5d/classfl_1_1spi_1_1_transaction_a1af88efdb384f2f03d18b1ee67feab12.html#a1af88efdb384f2f03d18b1ee67feab12">pImpl</a>-&gt;completed = <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  431</span>        <a class="code hl_variable" href="../../d7/d5d/classfl_1_1spi_1_1_transaction_a1af88efdb384f2f03d18b1ee67feab12.html#a1af88efdb384f2f03d18b1ee67feab12">pImpl</a>-&gt;result = fl::task::Error(<span class="stringliteral">&quot;Device not ready&quot;</span>);</div>
+<div class="line"><span class="lineno">  432</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  433</span>    }</div>
+<div class="line"><span class="lineno">  434</span> </div>
+<div class="line"><span class="lineno">  435</span><span class="preprocessor">#ifdef FASTLED_LOG_SPI_ENABLED</span></div>
+<div class="line"><span class="lineno">  436</span>    u32 start_time = <a class="code hl_function" href="../../d4/d36/namespacefl_a3c0ba5842bfd029c404a38c8df2315f3.html#a3c0ba5842bfd029c404a38c8df2315f3">fl::millis</a>();</div>
+<div class="line"><span class="lineno">  437</span><span class="preprocessor">#endif</span></div>
 <div class="line"><span class="lineno">  438</span>    <span class="comment">// Wait for the hardware to complete</span></div>
-<div class="line"><span class="lineno">  439</span>    u32 start_time = <a class="code hl_function" href="../../d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a">fl::millis</a>();</div>
-<div class="line"><span class="lineno">  440</span>    <span class="keywordtype">bool</span> <a class="code hl_enumvalue" href="../../da/dba/namespacefl_1_1asio_a71ea0ec019fe8379abb69a2b643ed5da.html#a71ea0ec019fe8379abb69a2b643ed5daa260ca9dd8a4577fc00b7bd5810298076">success</a> = <a class="code hl_variable" href="../../d7/d5d/classfl_1_1spi_1_1_transaction_a1af88efdb384f2f03d18b1ee67feab12.html#a1af88efdb384f2f03d18b1ee67feab12">pImpl</a>-&gt;device-&gt;waitComplete(timeout_ms);</div>
-<div class="line"><span class="lineno">  441</span> </div>
-<div class="line"><span class="lineno">  442</span>    <span class="keywordflow">if</span> (success) {</div>
-<div class="line"><span class="lineno">  443</span>        <span class="comment">// Clear async state in device</span></div>
-<div class="line"><span class="lineno">  444</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d7/d5d/classfl_1_1spi_1_1_transaction_a1af88efdb384f2f03d18b1ee67feab12.html#a1af88efdb384f2f03d18b1ee67feab12">pImpl</a>-&gt;device-&gt;pImpl) {</div>
-<div class="line"><span class="lineno">  445</span>            <a class="code hl_variable" href="../../d7/d5d/classfl_1_1spi_1_1_transaction_a1af88efdb384f2f03d18b1ee67feab12.html#a1af88efdb384f2f03d18b1ee67feab12">pImpl</a>-&gt;device-&gt;pImpl-&gt;async_state.active = <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">  446</span>        }</div>
-<div class="line"><span class="lineno">  447</span>        <a class="code hl_variable" href="../../d7/d5d/classfl_1_1spi_1_1_transaction_a1af88efdb384f2f03d18b1ee67feab12.html#a1af88efdb384f2f03d18b1ee67feab12">pImpl</a>-&gt;completed = <span class="keyword">true</span>;</div>
-<div class="line"><span class="lineno">  448</span>        <a class="code hl_variable" href="../../d7/d5d/classfl_1_1spi_1_1_transaction_a1af88efdb384f2f03d18b1ee67feab12.html#a1af88efdb384f2f03d18b1ee67feab12">pImpl</a>-&gt;result = <a class="code hl_variable" href="../../d4/d36/namespacefl_aa51c7c6f506ca9d9f3db40422b352b11.html#aa51c7c6f506ca9d9f3db40422b352b11">fl::nullopt</a>;</div>
-<div class="line"><span class="lineno">  449</span> </div>
-<div class="line"><span class="lineno">  450</span>        u32 elapsed = <a class="code hl_function" href="../../d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a">fl::millis</a>() - start_time;</div>
-<div class="line"><span class="lineno">  451</span>        <a class="code hl_define" href="../../d8/d1c/group__log__hw__interfaces_ga178692e92d575c24c831f587f2165911.html#ga178692e92d575c24c831f587f2165911">FL_LOG_SPI</a>(<span class="stringliteral">&quot;Transaction: Completed successfully (waited &quot;</span> &lt;&lt; elapsed &lt;&lt; <span class="stringliteral">&quot;ms)&quot;</span>);</div>
+<div class="line"><span class="lineno">  439</span>    <span class="keywordtype">bool</span> <a class="code hl_enumvalue" href="../../da/dba/namespacefl_1_1asio_a71ea0ec019fe8379abb69a2b643ed5da.html#a71ea0ec019fe8379abb69a2b643ed5daa260ca9dd8a4577fc00b7bd5810298076">success</a> = <a class="code hl_variable" href="../../d7/d5d/classfl_1_1spi_1_1_transaction_a1af88efdb384f2f03d18b1ee67feab12.html#a1af88efdb384f2f03d18b1ee67feab12">pImpl</a>-&gt;device-&gt;waitComplete(timeout_ms);</div>
+<div class="line"><span class="lineno">  440</span> </div>
+<div class="line"><span class="lineno">  441</span>    <span class="keywordflow">if</span> (success) {</div>
+<div class="line"><span class="lineno">  442</span>        <span class="comment">// Clear async state in device</span></div>
+<div class="line"><span class="lineno">  443</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d7/d5d/classfl_1_1spi_1_1_transaction_a1af88efdb384f2f03d18b1ee67feab12.html#a1af88efdb384f2f03d18b1ee67feab12">pImpl</a>-&gt;device-&gt;pImpl) {</div>
+<div class="line"><span class="lineno">  444</span>            <a class="code hl_variable" href="../../d7/d5d/classfl_1_1spi_1_1_transaction_a1af88efdb384f2f03d18b1ee67feab12.html#a1af88efdb384f2f03d18b1ee67feab12">pImpl</a>-&gt;device-&gt;pImpl-&gt;async_state.active = <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  445</span>        }</div>
+<div class="line"><span class="lineno">  446</span>        <a class="code hl_variable" href="../../d7/d5d/classfl_1_1spi_1_1_transaction_a1af88efdb384f2f03d18b1ee67feab12.html#a1af88efdb384f2f03d18b1ee67feab12">pImpl</a>-&gt;completed = <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  447</span>        <a class="code hl_variable" href="../../d7/d5d/classfl_1_1spi_1_1_transaction_a1af88efdb384f2f03d18b1ee67feab12.html#a1af88efdb384f2f03d18b1ee67feab12">pImpl</a>-&gt;result = <a class="code hl_variable" href="../../d4/d36/namespacefl_aa51c7c6f506ca9d9f3db40422b352b11.html#aa51c7c6f506ca9d9f3db40422b352b11">fl::nullopt</a>;</div>
+<div class="line"><span class="lineno">  448</span> </div>
+<div class="line"><span class="lineno">  449</span><span class="preprocessor">#ifdef FASTLED_LOG_SPI_ENABLED</span></div>
+<div class="line"><span class="lineno">  450</span>        <a class="code hl_define" href="../../d8/d1c/group__log__hw__interfaces_gad110e32042dacf3d1607d9905ded4a8b.html#gad110e32042dacf3d1607d9905ded4a8b">FL_LOG_SPI</a>(<span class="stringliteral">&quot;Transaction: Completed successfully (waited %sms)&quot;</span>, <a class="code hl_function" href="../../d4/d36/namespacefl_a3c0ba5842bfd029c404a38c8df2315f3.html#a3c0ba5842bfd029c404a38c8df2315f3">fl::millis</a>() - start_time);</div>
+<div class="line"><span class="lineno">  451</span><span class="preprocessor">#endif</span></div>
 <div class="line"><span class="lineno">  452</span>        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
 <div class="line"><span class="lineno">  453</span>    } <span class="keywordflow">else</span> {</div>
 <div class="line"><span class="lineno">  454</span>        <span class="comment">// Timeout occurred</span></div>
 <div class="line"><span class="lineno">  455</span>        <a class="code hl_variable" href="../../d7/d5d/classfl_1_1spi_1_1_transaction_a1af88efdb384f2f03d18b1ee67feab12.html#a1af88efdb384f2f03d18b1ee67feab12">pImpl</a>-&gt;completed = <span class="keyword">true</span>;</div>
 <div class="line"><span class="lineno">  456</span>        <a class="code hl_variable" href="../../d7/d5d/classfl_1_1spi_1_1_transaction_a1af88efdb384f2f03d18b1ee67feab12.html#a1af88efdb384f2f03d18b1ee67feab12">pImpl</a>-&gt;result = fl::task::Error(<span class="stringliteral">&quot;Transaction timeout&quot;</span>);</div>
-<div class="line"><span class="lineno">  457</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;Transaction: Timeout after &quot;</span> &lt;&lt; timeout_ms &lt;&lt; <span class="stringliteral">&quot;ms&quot;</span>);</div>
+<div class="line"><span class="lineno">  457</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;Transaction: Timeout after %sms&quot;</span>, timeout_ms);</div>
 <div class="line"><span class="lineno">  458</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
 <div class="line"><span class="lineno">  459</span>    }</div>
 <div class="line"><span class="lineno">  460</span>}</div>
 <div class="ttc" id="aclassfl_1_1spi_1_1_transaction_a1af88efdb384f2f03d18b1ee67feab12_html_a1af88efdb384f2f03d18b1ee67feab12"><div class="ttname"><a href="../../d7/d5d/classfl_1_1spi_1_1_transaction_a1af88efdb384f2f03d18b1ee67feab12.html#a1af88efdb384f2f03d18b1ee67feab12">fl::spi::Transaction::pImpl</a></div><div class="ttdeci">fl::unique_ptr&lt; Impl &gt; pImpl</div><div class="ttdef"><b>Definition</b> <a href="../../d0/db6/transaction_8h_source.html#l00078">transaction.h:78</a></div></div>
-<div class="ttc" id="agroup__log__hw__interfaces_ga178692e92d575c24c831f587f2165911_html_ga178692e92d575c24c831f587f2165911"><div class="ttname"><a href="../../d8/d1c/group__log__hw__interfaces_ga178692e92d575c24c831f587f2165911.html#ga178692e92d575c24c831f587f2165911">FL_LOG_SPI</a></div><div class="ttdeci">#define FL_LOG_SPI(X)</div><div class="ttdoc">Serial Peripheral Interface (SPI) logging Logs SPI configuration, initialization, and transfers.</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00474">log.h:474</a></div></div>
-<div class="ttc" id="alog_8h_a868b194fdb2234182e76042d9fde3062_html_a868b194fdb2234182e76042d9fde3062"><div class="ttname"><a href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a></div><div class="ttdeci">#define FL_WARN(X)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00276">log.h:276</a></div></div>
+<div class="ttc" id="agroup__log__hw__interfaces_gad110e32042dacf3d1607d9905ded4a8b_html_gad110e32042dacf3d1607d9905ded4a8b"><div class="ttname"><a href="../../d8/d1c/group__log__hw__interfaces_gad110e32042dacf3d1607d9905ded4a8b.html#gad110e32042dacf3d1607d9905ded4a8b">FL_LOG_SPI</a></div><div class="ttdeci">#define FL_LOG_SPI(...)</div><div class="ttdoc">Serial Peripheral Interface (SPI) logging Logs SPI configuration, initialization, and transfers.</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00657">log.h:657</a></div></div>
+<div class="ttc" id="alog_8h_a4804912fba6eed63e1afd84b8768aced_html_a4804912fba6eed63e1afd84b8768aced"><div class="ttname"><a href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a></div><div class="ttdeci">#define FL_WARN(...)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00440">log.h:440</a></div></div>
 <div class="ttc" id="anamespacefl_1_1asio_a71ea0ec019fe8379abb69a2b643ed5da_html_a71ea0ec019fe8379abb69a2b643ed5daa260ca9dd8a4577fc00b7bd5810298076"><div class="ttname"><a href="../../da/dba/namespacefl_1_1asio_a71ea0ec019fe8379abb69a2b643ed5da.html#a71ea0ec019fe8379abb69a2b643ed5daa260ca9dd8a4577fc00b7bd5810298076">fl::asio::errc::success</a></div><div class="ttdeci">@ success</div><div class="ttdef"><b>Definition</b> <a href="../../db/daa/error__code_8h_source.html#l00014">error_code.h:14</a></div></div>
-<div class="ttc" id="anamespacefl_a335fa6e4af7f0a011997ea0137d49b5a_html_a335fa6e4af7f0a011997ea0137d49b5a"><div class="ttname"><a href="../../d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a">fl::millis</a></div><div class="ttdeci">fl::u32 millis()</div><div class="ttdoc">Universal millisecond timer - returns milliseconds since system startup.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d18/chrono_8cpp_8hpp_source.html#l00064">chrono.cpp.hpp:64</a></div></div>
+<div class="ttc" id="anamespacefl_a3c0ba5842bfd029c404a38c8df2315f3_html_a3c0ba5842bfd029c404a38c8df2315f3"><div class="ttname"><a href="../../d4/d36/namespacefl_a3c0ba5842bfd029c404a38c8df2315f3.html#a3c0ba5842bfd029c404a38c8df2315f3">fl::millis</a></div><div class="ttdeci">fl::u32 millis()</div><div class="ttdoc">Universal millisecond timer - returns milliseconds since system startup.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d18/chrono_8cpp_8hpp_source.html#l00079">chrono.cpp.hpp:79</a></div></div>
 <div class="ttc" id="anamespacefl_aa51c7c6f506ca9d9f3db40422b352b11_html_aa51c7c6f506ca9d9f3db40422b352b11"><div class="ttname"><a href="../../d4/d36/namespacefl_aa51c7c6f506ca9d9f3db40422b352b11.html#aa51c7c6f506ca9d9f3db40422b352b11">fl::nullopt</a></div><div class="ttdeci">constexpr nullopt_t nullopt</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d62/optional_8h_source.html#l00013">optional.h:13</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d7/d7f/log_8h_source.html#l00474">FL_LOG_SPI</a>, <a class="el" href="../../d7/d7f/log_8h_source.html#l00276">FL_WARN</a>, <a class="el" href="../../db/d18/chrono_8cpp_8hpp_source.html#l00064">fl::millis()</a>, <a class="el" href="../../dc/d62/optional_8h_source.html#l00013">fl::nullopt</a>, and <a class="el" href="../../d0/db6/transaction_8h_source.html#l00078">pImpl</a>.</p>
+<p class="reference">References <a class="el" href="../../d7/d7f/log_8h_source.html#l00657">FL_LOG_SPI</a>, <a class="el" href="../../d7/d7f/log_8h_source.html#l00440">FL_WARN</a>, <a class="el" href="../../db/d18/chrono_8cpp_8hpp_source.html#l00079">fl::millis()</a>, <a class="el" href="../../dc/d62/optional_8h_source.html#l00013">fl::nullopt</a>, and <a class="el" href="../../d0/db6/transaction_8h_source.html#l00078">pImpl</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d0/daf/device_8cpp_8hpp_source.html#l00402">~Transaction()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d0/daf/device_8cpp_8hpp_source.html#l00399">~Transaction()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -209,7 +212,7 @@ $(function(){initNavTree('d7/d5d/classfl_1_1spi_1_1_transaction_ae1a9c9739de90f5
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d4/d68/namespacefl_1_1spi.html">spi</a></li><li class="navelem"><a class="el" href="../../d7/d5d/classfl_1_1spi_1_1_transaction.html">Transaction</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:10 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:12 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

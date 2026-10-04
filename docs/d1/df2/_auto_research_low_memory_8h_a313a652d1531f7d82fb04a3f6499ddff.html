@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -123,26 +123,34 @@ $(function(){initNavTree('d1/df2/_auto_research_low_memory_8h_a313a652d1531f7d82
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d1/df2/_auto_research_low_memory_8h_source.html#l00303">303</a> of file <a class="el" href="../../d1/df2/_auto_research_low_memory_8h_source.html">AutoResearchLowMemory.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  303</span>                                        {</div>
-<div class="line"><span class="lineno">  304</span>    <a class="code hl_function" href="../../da/d45/classfl_1_1_watchdog_a09a903bdc23fddbb6caac87080a2a567.html#a09a903bdc23fddbb6caac87080a2a567">fl::Watchdog::instance</a>().<a class="code hl_function" href="../../da/d45/classfl_1_1_watchdog_a2e9027915eb87ddad815dc2cabbf01f5.html#a2e9027915eb87ddad815dc2cabbf01f5">feed</a>();</div>
-<div class="line"><span class="lineno">  305</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../dd/d64/namespaceanonymous__namespace_02_auto_research_low_memory_8h_03_a41037f1a47a52ae878c54662f6893d77.html#a41037f1a47a52ae878c54662f6893d77">g_low_memory_remote</a>) {</div>
-<div class="line"><span class="lineno">  306</span>        <a class="code hl_variable" href="../../dd/d64/namespaceanonymous__namespace_02_auto_research_low_memory_8h_03_a41037f1a47a52ae878c54662f6893d77.html#a41037f1a47a52ae878c54662f6893d77">g_low_memory_remote</a>-&gt;<a class="code hl_function" href="../../dc/ddb/classfl_1_1_remote_a4579a9af2b68eb330345740407ef37fd.html#a4579a9af2b68eb330345740407ef37fd">update</a>(<a class="code hl_function" href="../../d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a">millis</a>());</div>
-<div class="line"><span class="lineno">  307</span>    }</div>
-<div class="line"><span class="lineno">  308</span>}</div>
-<div class="ttc" id="aclassfl_1_1_remote_a4579a9af2b68eb330345740407ef37fd_html_a4579a9af2b68eb330345740407ef37fd"><div class="ttname"><a href="../../dc/ddb/classfl_1_1_remote_a4579a9af2b68eb330345740407ef37fd.html#a4579a9af2b68eb330345740407ef37fd">fl::Remote::update</a></div><div class="ttdeci">size_t update(u32 currentTimeMs)</div><div class="ttdoc">Main update: pull + tick + push (overrides Server::update)</div><div class="ttdef"><b>Definition</b> <a href="../../db/d04/remote_8cpp_8hpp_source.html#l00272">remote.cpp.hpp:272</a></div></div>
-<div class="ttc" id="aclassfl_1_1_watchdog_a09a903bdc23fddbb6caac87080a2a567_html_a09a903bdc23fddbb6caac87080a2a567"><div class="ttname"><a href="../../da/d45/classfl_1_1_watchdog_a09a903bdc23fddbb6caac87080a2a567.html#a09a903bdc23fddbb6caac87080a2a567">fl::Watchdog::instance</a></div><div class="ttdeci">static Watchdog &amp; instance() FL_NOEXCEPT</div></div>
-<div class="ttc" id="aclassfl_1_1_watchdog_a2e9027915eb87ddad815dc2cabbf01f5_html_a2e9027915eb87ddad815dc2cabbf01f5"><div class="ttname"><a href="../../da/d45/classfl_1_1_watchdog_a2e9027915eb87ddad815dc2cabbf01f5.html#a2e9027915eb87ddad815dc2cabbf01f5">fl::Watchdog::feed</a></div><div class="ttdeci">void feed() FL_NOEXCEPT</div></div>
-<div class="ttc" id="anamespaceanonymous__namespace_02_auto_research_low_memory_8h_03_a41037f1a47a52ae878c54662f6893d77_html_a41037f1a47a52ae878c54662f6893d77"><div class="ttname"><a href="../../dd/d64/namespaceanonymous__namespace_02_auto_research_low_memory_8h_03_a41037f1a47a52ae878c54662f6893d77.html#a41037f1a47a52ae878c54662f6893d77">anonymous_namespace{AutoResearchLowMemory.h}::g_low_memory_remote</a></div><div class="ttdeci">fl::Remote * g_low_memory_remote</div><div class="ttdef"><b>Definition</b> <a href="../../d1/df2/_auto_research_low_memory_8h_source.html#l00070">AutoResearchLowMemory.h:70</a></div></div>
-<div class="ttc" id="anamespacefl_a335fa6e4af7f0a011997ea0137d49b5a_html_a335fa6e4af7f0a011997ea0137d49b5a"><div class="ttname"><a href="../../d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a">fl::millis</a></div><div class="ttdeci">fl::u32 millis()</div><div class="ttdoc">Universal millisecond timer - returns milliseconds since system startup.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d18/chrono_8cpp_8hpp_source.html#l00064">chrono.cpp.hpp:64</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d1/df2/_auto_research_low_memory_8h_source.html#l00523">523</a> of file <a class="el" href="../../d1/df2/_auto_research_low_memory_8h_source.html">AutoResearchLowMemory.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  523</span>                                        {</div>
+<div class="line"><span class="lineno">  524</span>    <a class="code hl_function" href="../../da/d45/classfl_1_1_watchdog_a1e8bbc71d53587db65db2d3b81f23334.html#a1e8bbc71d53587db65db2d3b81f23334">fl::Watchdog::instance</a>().<a class="code hl_function" href="../../da/d45/classfl_1_1_watchdog_a871fd275acc0c885381a8dc5ff6dde22.html#a871fd275acc0c885381a8dc5ff6dde22">feed</a>();</div>
+<div class="line"><span class="lineno">  525</span>    <a class="code hl_function" href="../../d2/d9f/namespaceautoresearch_1_1low__memory_a595ea1a952d6e6465edca7d66ca81941.html#a595ea1a952d6e6465edca7d66ca81941">autoresearch::low_memory::remoteState</a>().<a class="code hl_variable" href="../../df/d1c/structautoresearch_1_1low__memory_1_1_remote_state_aacfaaa67ff73ae9298bab007eeb2a92d.html#aacfaaa67ff73ae9298bab007eeb2a92d">remote</a>.<a class="code hl_function" href="../../dc/ddb/classfl_1_1_remote_a4579a9af2b68eb330345740407ef37fd.html#a4579a9af2b68eb330345740407ef37fd">update</a>(<a class="code hl_function" href="../../d4/d36/namespacefl_a3c0ba5842bfd029c404a38c8df2315f3.html#a3c0ba5842bfd029c404a38c8df2315f3">millis</a>());</div>
+<div class="line"><span class="lineno">  526</span>}</div>
+<div class="ttc" id="aclassfl_1_1_remote_a4579a9af2b68eb330345740407ef37fd_html_a4579a9af2b68eb330345740407ef37fd"><div class="ttname"><a href="../../dc/ddb/classfl_1_1_remote_a4579a9af2b68eb330345740407ef37fd.html#a4579a9af2b68eb330345740407ef37fd">fl::Remote::update</a></div><div class="ttdeci">size_t update(u32 currentTimeMs)</div><div class="ttdoc">Main update: pull + tick + push (overrides Server::update)</div><div class="ttdef"><b>Definition</b> <a href="../../db/d04/remote_8cpp_8hpp_source.html#l00347">remote.cpp.hpp:347</a></div></div>
+<div class="ttc" id="aclassfl_1_1_watchdog_a1e8bbc71d53587db65db2d3b81f23334_html_a1e8bbc71d53587db65db2d3b81f23334"><div class="ttname"><a href="../../da/d45/classfl_1_1_watchdog_a1e8bbc71d53587db65db2d3b81f23334.html#a1e8bbc71d53587db65db2d3b81f23334">fl::Watchdog::instance</a></div><div class="ttdeci">static Watchdog &amp; instance() FL_NO_EXCEPT</div></div>
+<div class="ttc" id="aclassfl_1_1_watchdog_a871fd275acc0c885381a8dc5ff6dde22_html_a871fd275acc0c885381a8dc5ff6dde22"><div class="ttname"><a href="../../da/d45/classfl_1_1_watchdog_a871fd275acc0c885381a8dc5ff6dde22.html#a871fd275acc0c885381a8dc5ff6dde22">fl::Watchdog::feed</a></div><div class="ttdeci">void feed() FL_NO_EXCEPT</div></div>
+<div class="ttc" id="anamespaceautoresearch_1_1low__memory_a595ea1a952d6e6465edca7d66ca81941_html_a595ea1a952d6e6465edca7d66ca81941"><div class="ttname"><a href="../../d2/d9f/namespaceautoresearch_1_1low__memory_a595ea1a952d6e6465edca7d66ca81941.html#a595ea1a952d6e6465edca7d66ca81941">autoresearch::low_memory::remoteState</a></div><div class="ttdeci">RemoteState &amp; remoteState()</div><div class="ttdef"><b>Definition</b> <a href="../../d1/df2/_auto_research_low_memory_8h_source.html#l00153">AutoResearchLowMemory.h:153</a></div></div>
+<div class="ttc" id="anamespacefl_a3c0ba5842bfd029c404a38c8df2315f3_html_a3c0ba5842bfd029c404a38c8df2315f3"><div class="ttname"><a href="../../d4/d36/namespacefl_a3c0ba5842bfd029c404a38c8df2315f3.html#a3c0ba5842bfd029c404a38c8df2315f3">fl::millis</a></div><div class="ttdeci">fl::u32 millis()</div><div class="ttdoc">Universal millisecond timer - returns milliseconds since system startup.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d18/chrono_8cpp_8hpp_source.html#l00079">chrono.cpp.hpp:79</a></div></div>
+<div class="ttc" id="astructautoresearch_1_1low__memory_1_1_remote_state_aacfaaa67ff73ae9298bab007eeb2a92d_html_aacfaaa67ff73ae9298bab007eeb2a92d"><div class="ttname"><a href="../../df/d1c/structautoresearch_1_1low__memory_1_1_remote_state_aacfaaa67ff73ae9298bab007eeb2a92d.html#aacfaaa67ff73ae9298bab007eeb2a92d">autoresearch::low_memory::RemoteState::remote</a></div><div class="ttdeci">fl::Remote remote</div><div class="ttdef"><b>Definition</b> <a href="../../d1/df2/_auto_research_low_memory_8h_source.html#l00146">AutoResearchLowMemory.h:146</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../da/d45/classfl_1_1_watchdog_a2e9027915eb87ddad815dc2cabbf01f5.html#a2e9027915eb87ddad815dc2cabbf01f5">fl::Watchdog::feed()</a>, <a class="el" href="../../d1/df2/_auto_research_low_memory_8h_source.html#l00070">anonymous_namespace{AutoResearchLowMemory.h}::g_low_memory_remote</a>, <a class="el" href="../../da/d45/classfl_1_1_watchdog_a09a903bdc23fddbb6caac87080a2a567.html#a09a903bdc23fddbb6caac87080a2a567">fl::Watchdog::instance()</a>, and <a class="el" href="../../db/d04/remote_8cpp_8hpp_source.html#l00272">fl::Remote::update()</a>.</p>
+<p class="reference">References <a class="el" href="../../da/d45/classfl_1_1_watchdog_a871fd275acc0c885381a8dc5ff6dde22.html#a871fd275acc0c885381a8dc5ff6dde22">fl::Watchdog::feed()</a>, <a class="el" href="../../da/d45/classfl_1_1_watchdog_a1e8bbc71d53587db65db2d3b81f23334.html#a1e8bbc71d53587db65db2d3b81f23334">fl::Watchdog::instance()</a>, <a class="el" href="../../d1/df2/_auto_research_low_memory_8h_source.html#l00146">autoresearch::low_memory::RemoteState::remote</a>, <a class="el" href="../../d1/df2/_auto_research_low_memory_8h_source.html#l00153">autoresearch::low_memory::remoteState()</a>, and <a class="el" href="../../db/d04/remote_8cpp_8hpp_source.html#l00347">fl::Remote::update()</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../dd/dc8/_auto_research_8ino_source.html#l00017">loop()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d1/df2/_auto_research_low_memory_8h_a313a652d1531f7d82fb04a3f6499ddff_a313a652d1531f7d82fb04a3f6499ddff_cgraph.svg" width="100%" height="511"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d1/df2/_auto_research_low_memory_8h_a313a652d1531f7d82fb04a3f6499ddff_a313a652d1531f7d82fb04a3f6499ddff_cgraph.svg" width="100%" height="584"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+</div>
+<div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
+<div id="dynsection-1-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-1-content" class="dyncontent" style="display:none;">
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d1/df2/_auto_research_low_memory_8h_a313a652d1531f7d82fb04a3f6499ddff_a313a652d1531f7d82fb04a3f6499ddff_icgraph.svg" width="332" height="36"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 
 </div>
@@ -154,7 +162,7 @@ $(function(){initNavTree('d1/df2/_auto_research_low_memory_8h_a313a652d1531f7d82
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_c839598b40e1646daff68c7b4defdc81.html">AutoResearch</a></li><li class="navelem"><a class="el" href="../../d1/df2/_auto_research_low_memory_8h.html">AutoResearchLowMemory.h</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:00 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:02 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

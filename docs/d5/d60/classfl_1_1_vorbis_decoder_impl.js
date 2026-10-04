@@ -1,7 +1,7 @@
 var classfl_1_1_vorbis_decoder_impl =
 [
-    [ "VorbisDecoderImpl", "d5/d60/classfl_1_1_vorbis_decoder_impl_aba8a9b94fd0205ca5913fc489321689b.html#aba8a9b94fd0205ca5913fc489321689b", null ],
-    [ "~VorbisDecoderImpl", "d5/d60/classfl_1_1_vorbis_decoder_impl_ac928daeb14aa2a5fc84a571593af5bd7.html#ac928daeb14aa2a5fc84a571593af5bd7", null ],
+    [ "VorbisDecoderImpl", "d5/d60/classfl_1_1_vorbis_decoder_impl_aba810c77a4fb9631679ee48d6f77b6f8.html#aba810c77a4fb9631679ee48d6f77b6f8", null ],
+    [ "~VorbisDecoderImpl", "d5/d60/classfl_1_1_vorbis_decoder_impl_aab1bc82cb67ddadd25548e229a5b23b3.html#aab1bc82cb67ddadd25548e229a5b23b3", null ],
     [ "begin", "d5/d60/classfl_1_1_vorbis_decoder_impl_a4644463805453a06acb0429fb3bec9db.html#a4644463805453a06acb0429fb3bec9db", null ],
     [ "decodeNextFrame", "d5/d60/classfl_1_1_vorbis_decoder_impl_ad5350eca0f2a13f5e65d27c1ebcf926e.html#ad5350eca0f2a13f5e65d27c1ebcf926e", null ],
     [ "end", "d5/d60/classfl_1_1_vorbis_decoder_impl_a776149891b89686b05ffb093117116e4.html#a776149891b89686b05ffb093117116e4", null ],

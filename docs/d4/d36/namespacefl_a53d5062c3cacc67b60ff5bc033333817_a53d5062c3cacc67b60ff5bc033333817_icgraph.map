@@ -1,0 +1,55 @@
+<map id="fl::make_pair" name="fl::make_pair">
+<area shape="rect" id="Node000001" title=" " alt="" coords="865,329,972,355"/>
+<area shape="rect" id="Node000002" href="$d8/df5/classfl_1_1_animartrix_ab181ac36b1ee242f426692ad636997e2.html#ab181ac36b1ee242f426692ad636997e2" title=" " alt="" coords="589,5,815,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="914,315,909,259,894,185,881,147,864,110,843,75,816,45,797,33,800,29,819,41,847,72,869,107,886,145,899,184,914,258,919,315"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_adc2a6d67292f87361ce6d24c000d1ef0.html#adc2a6d67292f87361ce6d24c000d1ef0" title="Create RGB input iterator range from PixelIterator." alt="" coords="593,329,811,355"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="851,345,811,345,811,339,851,339"/>
+<area shape="rect" id="Node000017" href="$d4/d36/namespacefl_a64843c3c531d347a67e40093a6a41d99.html#a64843c3c531d347a67e40093a6a41d99" title="Create 16&#45;bit RGB input iterator range from PixelIterator." alt="" coords="607,403,797,443"/>
+<area shape="poly" id="edge18_Node000001_Node000017" title=" " alt="" coords="872,362,757,406,755,401,870,357"/>
+<area shape="rect" id="Node000018" href="$d4/d36/namespacefl_a6b4108d3bdb4fef9ebac608e652146fc.html#a6b4108d3bdb4fef9ebac608e652146fc" title="Create RGBW input iterator range from PixelIterator." alt="" coords="587,168,817,193"/>
+<area shape="poly" id="edge20_Node000001_Node000018" title=" " alt="" coords="888,323,719,196,722,192,891,319"/>
+<area shape="rect" id="Node000019" href="$d4/d36/namespacefl_aee850565d7c7536162d49010c6df90d2.html#aee850565d7c7536162d49010c6df90d2" title="Create RGBWW input iterator range from PixelIterator (issue #2558)" alt="" coords="607,79,797,119"/>
+<area shape="poly" id="edge24_Node000001_Node000019" title=" " alt="" coords="910,316,899,276,880,226,853,176,836,153,816,133,796,120,798,116,819,129,840,150,857,173,885,224,904,274,915,315"/>
+<area shape="rect" id="Node000021" href="$d4/d36/namespacefl_acabc73bc4c4ef4f3745eb06e549846ce.html#acabc73bc4c4ef4f3745eb06e549846ce" title="Pack a single 16&#45;bit RGB pixel into two 8&#45;bit CRGB pixels for WS2816." alt="" coords="625,468,779,493"/>
+<area shape="poly" id="edge28_Node000001_Node000021" title=" " alt="" coords="905,368,869,414,846,438,819,458,780,473,778,468,816,453,842,434,865,411,900,365"/>
+<area shape="rect" id="Node000023" href="$d8/df5/classfl_1_1_animartrix_a118db54d95215b25d680d3feff82fec4.html#a118db54d95215b25d680d3feff82fec4" title="Override the factory for a specific built&#45;in animation enum." alt="" coords="601,517,803,543"/>
+<area shape="poly" id="edge30_Node000001_Node000023" title=" " alt="" coords="912,369,899,401,879,439,853,477,819,508,798,520,795,515,816,504,848,473,874,436,894,399,907,367"/>
+<area shape="poly" id="edge7_Node000003_Node000003" title=" " alt="" coords="741,320,730,311,702,308,679,310,667,315,664,320,671,328,667,331,659,321,663,311,678,305,702,303,732,306,744,315"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_ab3b16ea2da444a2539d082aae754217f.html#ab3b16ea2da444a2539d082aae754217f" title="Encode complete UCS7604 frame (preamble + padding + pixel data)" alt="" coords="386,144,530,169"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="681,320,621,253,581,216,537,184,510,172,512,167,540,180,585,212,625,249,685,316"/>
+<area shape="rect" id="Node000007" href="$d0/d09/classfl_1_1_pixel_iterator_a9640a51a858d2ef2d5902b619e917fd2.html#a9640a51a858d2ef2d5902b619e917fd2" title="Encode pixels in APA102/DOTSTAR format (zero allocation)" alt="" coords="395,386,521,426"/>
+<area shape="poly" id="edge8_Node000003_Node000007" title=" " alt="" coords="627,360,587,370,522,389,521,384,586,365,626,355"/>
+<area shape="rect" id="Node000008" href="$d0/d09/classfl_1_1_pixel_iterator_a07d906959ea2d0d4e3a279086d7216a4.html#a07d906959ea2d0d4e3a279086d7216a4" title="Encode pixels in LPD6803 format (zero allocation)" alt="" coords="395,450,521,490"/>
+<area shape="poly" id="edge9_Node000003_Node000008" title=" " alt="" coords="600,362,588,369,572,386,564,403,556,421,540,440,522,452,519,448,537,436,552,418,560,401,568,383,585,365,598,358"/>
+<area shape="rect" id="Node000009" href="$d0/d09/classfl_1_1_pixel_iterator_acb49f0204f4338b5eca0f6cd098d52e5.html#acb49f0204f4338b5eca0f6cd098d52e5" title="Encode pixels in LPD8806 format (zero allocation)" alt="" coords="395,514,521,554"/>
+<area shape="poly" id="edge10_Node000003_Node000009" title=" " alt="" coords="596,364,588,369,575,385,568,400,564,434,561,468,554,486,541,504,522,518,519,513,537,500,549,483,555,467,559,433,563,399,570,382,585,365,592,359"/>
+<area shape="rect" id="Node000010" href="$d0/d09/classfl_1_1_pixel_iterator_ad9c8c154c364cca40e697f3c4c348c3b.html#ad9c8c154c364cca40e697f3c4c348c3b" title="Encode pixels in P9813 format (zero allocation)" alt="" coords="395,578,521,618"/>
+<area shape="poly" id="edge11_Node000003_Node000010" title=" " alt="" coords="594,365,589,369,571,393,563,416,561,440,563,465,566,490,565,515,558,541,541,568,523,582,519,578,537,564,553,539,559,515,560,490,558,465,556,440,558,415,566,390,585,366,590,361"/>
+<area shape="rect" id="Node000011" href="$d0/d09/classfl_1_1_pixel_iterator_ae9ca06bccf1975db771de8137e434f1e.html#ae9ca06bccf1975db771de8137e434f1e" title="Encode pixels in SK9822 format (zero allocation)" alt="" coords="395,642,521,682"/>
+<area shape="poly" id="edge12_Node000003_Node000011" title=" " alt="" coords="594,364,589,369,566,401,558,432,558,464,563,496,568,529,569,562,561,597,541,632,523,647,519,643,537,628,556,595,564,562,562,529,557,497,552,464,552,431,562,398,585,366,590,361"/>
+<area shape="rect" id="Node000012" href="$d0/d09/classfl_1_1_pixel_iterator_a16da75a201e466267cf87b812ab51cf5.html#a16da75a201e466267cf87b812ab51cf5" title="Encode pixels in SM16716 format (zero allocation)" alt="" coords="395,706,521,746"/>
+<area shape="poly" id="edge13_Node000003_Node000012" title=" " alt="" coords="594,364,589,369,573,389,562,408,552,448,554,487,562,527,570,568,573,610,565,652,555,674,541,696,522,711,519,707,537,692,551,671,560,650,568,609,565,569,557,528,549,488,547,447,557,407,568,386,585,366,590,361"/>
+<area shape="rect" id="Node000013" href="$d0/d09/classfl_1_1_pixel_iterator_a17a37d2bd4715577c03022af30cfdacf.html#a17a37d2bd4715577c03022af30cfdacf" title="Encode RGB pixels with the required TM1908 command prefix." alt="" coords="395,194,521,234"/>
+<area shape="poly" id="edge14_Node000003_Node000013" title=" " alt="" coords="669,324,609,287,537,248,511,236,513,232,540,244,611,283,671,320"/>
+<area shape="rect" id="Node000014" href="$d0/d09/classfl_1_1_pixel_iterator_a89656a999ae23d22f1fea46efe5caa5c.html#a89656a999ae23d22f1fea46efe5caa5c" title="Encode pixels in WS2801 format (zero allocation)" alt="" coords="395,258,521,298"/>
+<area shape="poly" id="edge15_Node000003_Node000014" title=" " alt="" coords="639,328,520,297,522,292,640,323"/>
+<area shape="rect" id="Node000015" href="$d0/d09/classfl_1_1_pixel_iterator_a1721f5b7254da8f849cd9be3a6c7fc16.html#a1721f5b7254da8f849cd9be3a6c7fc16" title="Encode pixels in WS2803 format (zero allocation)" alt="" coords="395,322,521,362"/>
+<area shape="poly" id="edge16_Node000003_Node000015" title=" " alt="" coords="580,345,521,345,521,339,580,339"/>
+<area shape="rect" id="Node000016" href="$d0/d09/classfl_1_1_pixel_iterator_a7bf3c7049670ed21763877da0947b91e.html#a7bf3c7049670ed21763877da0947b91e" title=" " alt="" coords="395,79,521,119"/>
+<area shape="poly" id="edge17_Node000003_Node000016" title=" " alt="" coords="678,321,584,206,563,167,553,150,537,133,519,122,522,117,540,129,558,147,568,164,589,203,682,317"/>
+<area shape="rect" id="Node000005" href="$dd/d78/classfl_1_1_u_c_s7604_controller_t_a0b8dc7f2f0f2e0a2ed3461aa905080ea.html#a0b8dc7f2f0f2e0a2ed3461aa905080ea" title=" " alt="" coords="5,49,329,147"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="381,144,329,133,330,128,382,139"/>
+<area shape="rect" id="Node000006" href="$dc/d8d/namespacefl_1_1anonymous__namespace_02channel_8cpp_8hpp_03_a5f78780348edce94192b57b45f1778b4.html#a5f78780348edce94192b57b45f1778b4" title="Encode UCS7604 pixel data into the channel data buffer." alt="" coords="41,195,293,235"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="381,175,268,198,267,193,380,170"/>
+<area shape="poly" id="edge6_Node000006_Node000006" title=" " alt="" coords="217,184,200,177,167,174,139,176,122,181,116,187,119,194,114,196,110,186,119,176,138,171,167,169,201,171,219,179"/>
+<area shape="poly" id="edge19_Node000017_Node000017" title=" " alt="" coords="739,392,726,385,702,382,681,384,669,389,664,395,667,402,661,404,659,394,666,384,680,379,702,377,727,380,741,387"/>
+<area shape="poly" id="edge21_Node000018_Node000004" title=" " alt="" coords="573,171,530,166,531,161,573,165"/>
+<area shape="poly" id="edge23_Node000018_Node000016" title=" " alt="" coords="649,166,518,122,520,117,651,161"/>
+<area shape="poly" id="edge22_Node000018_Node000018" title=" " alt="" coords="741,158,730,150,702,147,679,149,667,154,664,159,671,166,667,170,659,160,663,150,678,144,702,141,732,145,744,154"/>
+<area shape="poly" id="edge27_Node000019_Node000016" title=" " alt="" coords="593,102,521,102,521,97,593,97"/>
+<area shape="poly" id="edge25_Node000019_Node000019" title=" " alt="" coords="739,68,726,61,702,58,681,60,669,65,664,71,667,78,661,80,659,70,666,60,680,55,702,53,727,56,741,63"/>
+<area shape="rect" id="Node000020" href="$d0/d09/classfl_1_1_pixel_iterator_a30435861daddaa6b7a3ba1d482f89418.html#a30435861daddaa6b7a3ba1d482f89418" title="Encode RGBWW pixels into 12&#45;channel TM1812 IC frames." alt="" coords="377,15,539,55"/>
+<area shape="poly" id="edge26_Node000019_Node000020" title=" " alt="" coords="611,78,534,58,535,53,613,73"/>
+<area shape="rect" id="Node000022" href="$d4/d36/namespacefl_a13921ab63664ac04043398f986046c46.html#a13921ab63664ac04043398f986046c46" title="Encode 16&#45;bit RGB pixel data into dual 8&#45;bit RGB format for WS2816." alt="" coords="389,771,527,796"/>
+<area shape="poly" id="edge29_Node000021_Node000022" title=" " alt="" coords="613,492,589,508,567,538,559,568,559,599,564,630,569,662,570,694,562,727,541,760,524,773,521,769,537,756,557,725,564,694,563,663,559,631,554,599,554,568,563,536,585,504,610,487"/>
+</map>

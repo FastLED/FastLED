@@ -1,0 +1,19 @@
+<map id="fl::SlimBridgeShowPolicy&lt; false &gt;::enabled" name="fl::SlimBridgeShowPolicy&lt; false &gt;::enabled">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,53,188,93"/>
+<area shape="rect" id="Node000002" href="$d2/d6b/classfl_1_1_channel_manager_ae70d9cebc1ac3a2f621d1d8e489bf818.html#ae70d9cebc1ac3a2f621d1d8e489bf818" title="Check if a driver is enabled by name." alt="" coords="236,21,384,61"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="188,56,222,51,223,56,189,62"/>
+<area shape="rect" id="Node000003" href="$d2/d6b/classfl_1_1_channel_manager_a58d12a4cf75bb181c7093141240bb94b.html#a58d12a4cf75bb181c7093141240bb94b" title="Get the singleton WITHOUT registering platform default drivers." alt="" coords="236,85,384,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="189,84,223,89,222,94,188,89"/>
+<area shape="rect" id="Node000004" href="$d2/d6b/classfl_1_1_channel_manager_a3f0e1823366151d87c97be78f4273755.html#a3f0e1823366151d87c97be78f4273755" title="Constructor." alt="" coords="439,55,587,95"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="384,91,425,85,426,91,385,97"/>
+<area shape="rect" id="Node000008" href="$d9/d5b/classfl_1_1_singleton_ad5cb1b704e17768f75802673abb0ff75.html#ad5cb1b704e17768f75802673abb0ff75" title=" " alt="" coords="432,120,595,145"/>
+<area shape="poly" id="edge8_Node000003_Node000008" title=" " alt="" coords="385,112,419,117,418,122,384,117"/>
+<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="475,56,473,46,479,37,493,31,513,29,537,32,550,39,547,44,535,37,513,34,494,36,482,41,478,47,480,54"/>
+<area shape="rect" id="Node000005" href="$de/dca/classfl_1_1_engine_events_a98984c55652e174bb2384d85935c581b.html#a98984c55652e174bb2384d85935c581b" title=" " alt="" coords="643,5,853,31"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="587,54,642,41,681,31,682,36,643,46,588,60"/>
+<area shape="rect" id="Node000006" href="$d2/d6b/classfl_1_1_channel_manager_ae0d96adf1576f8fe62b937685991e3b5.html#ae0d96adf1576f8fe62b937685991e3b5" title=" " alt="" coords="657,55,839,95"/>
+<area shape="poly" id="edge6_Node000004_Node000006" title=" " alt="" coords="587,81,643,82,643,87,587,86"/>
+<area shape="poly" id="edge7_Node000006_Node000004" title=" " alt="" coords="657,69,601,69,601,64,657,64"/>
+<area shape="rect" id="Node000009" href="$d4/d36/namespacefl_a1e67c0c24ebcd98fcf8554753d1639a6.html#a1e67c0c24ebcd98fcf8554753d1639a6" title=" " alt="" coords="679,120,817,145"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="595,130,665,130,665,135,595,135"/>
+</map>

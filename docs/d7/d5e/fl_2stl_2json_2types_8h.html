@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -103,6 +103,7 @@ $(function(){initNavTree('d7/d5e/fl_2stl_2json_2types_8h.html','../../'); initRe
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
 <a href="#namespaces">Namespaces</a> &#124;
+<a href="#define-members">Macros</a> &#124;
 <a href="#typedef-members">Typedefs</a> &#124;
 <a href="#func-members">Functions</a>  </div>
   <div class="headertitle"><div class="title">types.h File Reference</div></div>
@@ -126,7 +127,10 @@ $(function(){initNavTree('d7/d5e/fl_2stl_2json_2types_8h.html','../../'); initRe
 <code>#include &quot;<a class="el" href="../../d7/d7f/log_8h_source.html">fl/log/log.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d6/d17/promise_8h_source.html">fl/task/promise.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d2/d1d/string__view_8h_source.html">fl/stl/string_view.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../df/d72/bit__cast_8h_source.html">fl/stl/bit_cast.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d1/dbc/sketch__macros_8h_source.html">fl/system/sketch_macros.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../db/d01/noexcept_8h_source.html">fl/stl/noexcept.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d1/d4e/types__impl_8h_source.html">fl/stl/json/types_impl.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for types.h:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -170,8 +174,6 @@ Classes</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/d86/structfl_1_1json__value_1_1const__iterator_1_1_key_value.html">fl::json_value::const_iterator::KeyValue</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d2/daa/structfl_1_1json__value_1_1_is_array_visitor.html">fl::json_value::IsArrayVisitor</a></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d2/d46/classfl_1_1json__value_1_1iterator.html">fl::json_value::iterator</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/df2/structfl_1_1json__value_1_1iterator_1_1_key_value.html">fl::json_value::iterator::KeyValue</a></td></tr>
@@ -179,8 +181,6 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/dc4/structfl_1_1_numeric_extract_visitor.html">fl::NumericExtractVisitor&lt; T &gt;</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/dee/structfl_1_1parse__result.html">fl::parse_result&lt; T &gt;</a></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/d37/structfl_1_1_size_visitor.html">fl::SizeVisitor</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/d51/structfl_1_1_string_conversion_visitor.html">fl::StringConversionVisitor</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -190,6 +190,14 @@ Namespaces</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></td></tr>
 <tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">Base definition for an LED controller. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d9e/namespacefl_1_1detail.html">fl::detail</a></td></tr>
+<tr class="memdesc:df/d9e/namespacefl_1_1detail"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compile-time linker keep-alive hook for a single <code><a class="el" href="../../d4/d36/namespacefl_a7e1e94407fbd018269794d74ab7fb4c1.html#a7e1e94407fbd018269794d74ab7fb4c1" title="Portable public bus selector.">fl::Bus</a></code>. <br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
+Macros</h2></td></tr>
+<tr class="memitem:a1f445422d76f3d86827978d18672d6b3" id="r_a1f445422d76f3d86827978d18672d6b3"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d5e/fl_2stl_2json_2types_8h_a1f445422d76f3d86827978d18672d6b3.html#a1f445422d76f3d86827978d18672d6b3">FL_JSON_FLOAT_ENABLED</a>&#160;&#160;&#160;<a class="el" href="../../d1/dbc/sketch__macros_8h_aa36e829478fc8510b54790b7fa56c0d5.html#aa36e829478fc8510b54790b7fa56c0d5">FL_PLATFORM_HAS_LARGE_MEMORY</a></td></tr>
+<tr class="separator:a1f445422d76f3d86827978d18672d6b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
 Typedefs</h2></td></tr>
@@ -204,6 +212,20 @@ Functions</h2></td></tr>
 <tr class="separator:a4dc845732ac50ad1c741441afd7d6739"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a97c26892f428477baf5a2bc8114ae8ed" id="r_a97c26892f428477baf5a2bc8114ae8ed"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../dc/dec/structfl_1_1json__value.html">json_value</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a97c26892f428477baf5a2bc8114ae8ed.html#a97c26892f428477baf5a2bc8114ae8ed">fl::get_null_json_value</a> ()</td></tr>
 <tr class="separator:a97c26892f428477baf5a2bc8114ae8ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad6fc745d1d8bee0db59fb31ed462bdc6" id="r_ad6fc745d1d8bee0db59fb31ed462bdc6"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d9e/namespacefl_1_1detail_ad6fc745d1d8bee0db59fb31ed462bdc6.html#ad6fc745d1d8bee0db59fb31ed462bdc6">fl::detail::json_double_to_float</a> (double <a class="el" href="../../d4/d36/namespacefl_a13766ae9e150185981f5096f90a439d7.html#a13766ae9e150185981f5096f90a439d7">value</a>) <a class="el" href="../../d4/d36/namespacefl_aa317f89ca911371e798d08a93770402f.html#aa317f89ca911371e798d08a93770402f">FL_NO_EXCEPT</a></td></tr>
+<tr class="separator:ad6fc745d1d8bee0db59fb31ed462bdc6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:add233ed042de71cbca5a99df66428412" id="r_add233ed042de71cbca5a99df66428412"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d9e/namespacefl_1_1detail_add233ed042de71cbca5a99df66428412.html#add233ed042de71cbca5a99df66428412">fl::detail::json_float_to_double</a> (float <a class="el" href="../../d4/d36/namespacefl_a13766ae9e150185981f5096f90a439d7.html#a13766ae9e150185981f5096f90a439d7">value</a>) <a class="el" href="../../d4/d36/namespacefl_aa317f89ca911371e798d08a93770402f.html#aa317f89ca911371e798d08a93770402f">FL_NO_EXCEPT</a></td></tr>
+<tr class="separator:add233ed042de71cbca5a99df66428412"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a72ba9d4ebcbf32f6cf48ad4b703a0c93" id="r_a72ba9d4ebcbf32f6cf48ad4b703a0c93"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d9e/namespacefl_1_1detail_a72ba9d4ebcbf32f6cf48ad4b703a0c93.html#a72ba9d4ebcbf32f6cf48ad4b703a0c93">fl::detail::json_floor_log2_u64</a> (<a class="el" href="../../df/dd8/stdint_8h_a46762d78d719ea1edce386124c4aa46b.html#a46762d78d719ea1edce386124c4aa46b">u64</a> <a class="el" href="../../d4/d36/namespacefl_a13766ae9e150185981f5096f90a439d7.html#a13766ae9e150185981f5096f90a439d7">value</a>) <a class="el" href="../../d4/d36/namespacefl_aa317f89ca911371e798d08a93770402f.html#aa317f89ca911371e798d08a93770402f">FL_NO_EXCEPT</a></td></tr>
+<tr class="separator:a72ba9d4ebcbf32f6cf48ad4b703a0c93"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acae0baf80d07c6f83472307cf2249745" id="r_acae0baf80d07c6f83472307cf2249745"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../df/dd8/stdint_8h_a46762d78d719ea1edce386124c4aa46b.html#a46762d78d719ea1edce386124c4aa46b">u64</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d9e/namespacefl_1_1detail_acae0baf80d07c6f83472307cf2249745.html#acae0baf80d07c6f83472307cf2249745">fl::detail::json_ieee754_double_bits_from_float_bits</a> (u32 bits) <a class="el" href="../../d4/d36/namespacefl_aa317f89ca911371e798d08a93770402f.html#aa317f89ca911371e798d08a93770402f">FL_NO_EXCEPT</a></td></tr>
+<tr class="separator:acae0baf80d07c6f83472307cf2249745"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa03c61eb23e4644533363efb3f241b43" id="r_aa03c61eb23e4644533363efb3f241b43"><td class="memItemLeft" align="right" valign="top">u32&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d9e/namespacefl_1_1detail_aa03c61eb23e4644533363efb3f241b43.html#aa03c61eb23e4644533363efb3f241b43">fl::detail::json_ieee754_float_bits_from_double_bits</a> (<a class="el" href="../../df/dd8/stdint_8h_a46762d78d719ea1edce386124c4aa46b.html#a46762d78d719ea1edce386124c4aa46b">u64</a> bits) <a class="el" href="../../d4/d36/namespacefl_aa317f89ca911371e798d08a93770402f.html#aa317f89ca911371e798d08a93770402f">FL_NO_EXCEPT</a></td></tr>
+<tr class="separator:aa03c61eb23e4644533363efb3f241b43"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac6d9fecf5d4445598dbdcec5f0551b04" id="r_ac6d9fecf5d4445598dbdcec5f0551b04"><td class="memItemLeft" align="right" valign="top">u32&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d9e/namespacefl_1_1detail_ac6d9fecf5d4445598dbdcec5f0551b04.html#ac6d9fecf5d4445598dbdcec5f0551b04">fl::detail::json_ieee754_float_bits_from_scaled_u64</a> (u32 <a class="el" href="../../d4/d36/namespacefl_ae9cb72220451d872199e999b6371d92d.html#ae9cb72220451d872199e999b6371d92d">sign</a>, <a class="el" href="../../df/dd8/stdint_8h_a46762d78d719ea1edce386124c4aa46b.html#a46762d78d719ea1edce386124c4aa46b">u64</a> magnitude, int binary_exp) <a class="el" href="../../d4/d36/namespacefl_aa317f89ca911371e798d08a93770402f.html#aa317f89ca911371e798d08a93770402f">FL_NO_EXCEPT</a></td></tr>
+<tr class="separator:ac6d9fecf5d4445598dbdcec5f0551b04"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a152770a547cabc62a45d5f241084a3e7" id="r_a152770a547cabc62a45d5f241084a3e7"><td class="memItemLeft" align="right" valign="top">u32&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d9e/namespacefl_1_1detail_a152770a547cabc62a45d5f241084a3e7.html#a152770a547cabc62a45d5f241084a3e7">fl::detail::json_round_shift_right_u64</a> (<a class="el" href="../../df/dd8/stdint_8h_a46762d78d719ea1edce386124c4aa46b.html#a46762d78d719ea1edce386124c4aa46b">u64</a> <a class="el" href="../../d4/d36/namespacefl_a13766ae9e150185981f5096f90a439d7.html#a13766ae9e150185981f5096f90a439d7">value</a>, int shift) <a class="el" href="../../d4/d36/namespacefl_aa317f89ca911371e798d08a93770402f.html#aa317f89ca911371e798d08a93770402f">FL_NO_EXCEPT</a></td></tr>
+<tr class="separator:a152770a547cabc62a45d5f241084a3e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -212,7 +234,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_0dd6897a8ae40540acd9d694849e950e.html">stl</a></li><li class="navelem"><a class="el" href="../../dir_bece5bd422522ba24eaac630b57b9c09.html">json</a></li><li class="navelem"><a class="el" href="../../d7/d5e/fl_2stl_2json_2types_8h.html">types.h</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:01 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:05 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

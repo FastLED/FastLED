@@ -84,19 +84,19 @@ var sectionId = 'dynsection-0';
 </a>
 </g>
 </g>
-<!-- Node9 -->
-<g id="Node000009" class="node">
-<title>Node9</title>
-<g id="a_Node000009"><a xlink:href="../../d0/dee/struct_pixel_controller_a56e7ebce42fbb5808bed5d5f4fb3218b.html#a56e7ebce42fbb5808bed5d5f4fb3218b" target="_top" xlink:title="Scale a value using the per&#45;channel scale data.">
+<!-- Node10 -->
+<g id="Node000010" class="node">
+<title>Node10</title>
+<g id="a_Node000010"><a xlink:href="../../d0/dee/struct_pixel_controller_a56e7ebce42fbb5808bed5d5f4fb3218b.html#a56e7ebce42fbb5808bed5d5f4fb3218b" target="_top" xlink:title="Scale a value using the per&#45;channel scale data.">
 <polygon fill="white" stroke="#666666" points="298,-41.06 179,-41.06 179,-22.06 298,-22.06 298,-41.06"/>
 <text text-anchor="middle" x="238.5" y="-29.06" font-family="Helvetica,sans-Serif" font-size="10.00">PixelController::scale</text>
 </a>
 </g>
 </g>
-<!-- Node1&#45;&gt;Node9 -->
-<g id="edge12_Node000001_Node000009" class="edge">
-<title>Node1&#45;&gt;Node9</title>
-<g id="a_edge12_Node000001_Node000009"><a xlink:title=" ">
+<!-- Node1&#45;&gt;Node10 -->
+<g id="edge12_Node000001_Node000010" class="edge">
+<title>Node1&#45;&gt;Node10</title>
+<g id="a_edge12_Node000001_Node000010"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M135.29,-44.26C146.31,-42.89 157.75,-41.47 168.82,-40.1"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="169.36,-43.56 178.85,-38.85 168.5,-36.61 169.36,-43.56"/>
 </a>
@@ -141,7 +141,7 @@ var sectionId = 'dynsection-0';
 <!-- Node6 -->
 <g id="Node000006" class="node">
 <title>Node6</title>
-<g id="a_Node000006"><a xlink:href="../../d0/dee/struct_pixel_controller_adad75cb77a4eab720f2ee1023b643a59.html#adad75cb77a4eab720f2ee1023b643a59" target="_top" xlink:title="Complete pipeline: load → dither → scale (THE MAGIC HAPPENS HERE!) Order is critical: pixel + dither ...">
+<g id="a_Node000006"><a xlink:href="../../d0/dee/struct_pixel_controller_adad75cb77a4eab720f2ee1023b643a59.html#adad75cb77a4eab720f2ee1023b643a59" target="_top" xlink:title="Complete pipeline: load â†’ dither â†’ scale (THE MAGIC HAPPENS HERE!) Order is critical: pixel + dit...">
 <polygon fill="white" stroke="#666666" points="488,-81.56 354,-81.56 354,-51.56 488,-51.56 488,-81.56"/>
 <text text-anchor="start" x="362" y="-69.56" font-family="Helvetica,sans-Serif" font-size="10.00">PixelController::loadAnd</text>
 <text text-anchor="middle" x="421" y="-58.56" font-family="Helvetica,sans-Serif" font-size="10.00">Scale</text>
@@ -197,7 +197,7 @@ var sectionId = 'dynsection-0';
 <g id="Node000007" class="node">
 <title>Node7</title>
 <g id="a_Node000007"><a xlink:href="../../d0/dee/struct_pixel_controller_af1d6dbfe39be747916896dc44c730a29.html#af1d6dbfe39be747916896dc44c730a29" target="_top" xlink:title="Add dither offset to pixel value (BEFORE scaling).">
-<polygon fill="white" stroke="#666666" points="665.5,-81.06 543.5,-81.06 543.5,-62.06 665.5,-62.06 665.5,-81.06"/>
+<polygon fill="#fff0f0" stroke="red" points="665.5,-81.06 543.5,-81.06 543.5,-62.06 665.5,-62.06 665.5,-81.06"/>
 <text text-anchor="middle" x="604.5" y="-69.06" font-family="Helvetica,sans-Serif" font-size="10.00">PixelController::dither</text>
 </a>
 </g>
@@ -211,19 +211,19 @@ var sectionId = 'dynsection-0';
 </a>
 </g>
 </g>
-<!-- Node8 -->
-<g id="Node000008" class="node">
-<title>Node8</title>
-<g id="a_Node000008"><a xlink:href="../../d0/dee/struct_pixel_controller_a2268d03939af0ad8fcb478ad6c9f33c7.html#a2268d03939af0ad8fcb478ad6c9f33c7" target="_top" xlink:title="Read a byte of LED data.">
+<!-- Node9 -->
+<g id="Node000009" class="node">
+<title>Node9</title>
+<g id="a_Node000009"><a xlink:href="../../d0/dee/struct_pixel_controller_a2268d03939af0ad8fcb478ad6c9f33c7.html#a2268d03939af0ad8fcb478ad6c9f33c7" target="_top" xlink:title="Read a byte of LED data.">
 <polygon fill="white" stroke="#666666" points="673,-44.06 536,-44.06 536,-25.06 673,-25.06 673,-44.06"/>
 <text text-anchor="middle" x="604.5" y="-32.06" font-family="Helvetica,sans-Serif" font-size="10.00">PixelController::loadByte</text>
 </a>
 </g>
 </g>
-<!-- Node6&#45;&gt;Node8 -->
-<g id="edge10_Node000006_Node000008" class="edge">
-<title>Node6&#45;&gt;Node8</title>
-<g id="a_edge10_Node000006_Node000008"><a xlink:title=" ">
+<!-- Node6&#45;&gt;Node9 -->
+<g id="edge10_Node000006_Node000009" class="edge">
+<title>Node6&#45;&gt;Node9</title>
+<g id="a_edge10_Node000006_Node000009"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M488.04,-54.92C504.74,-51.97 522.66,-48.82 539.27,-45.89"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="540.18,-49.28 549.42,-44.1 538.97,-42.39 540.18,-49.28"/>
 </a>
@@ -238,19 +238,19 @@ var sectionId = 'dynsection-0';
 </a>
 </g>
 </g>
-<!-- Node8&#45;&gt;Node3 -->
-<g id="edge11_Node000008_Node000003" class="edge">
-<title>Node8&#45;&gt;Node3</title>
-<g id="a_edge11_Node000008_Node000003"><a xlink:title=" ">
+<!-- Node9&#45;&gt;Node3 -->
+<g id="edge11_Node000009_Node000003" class="edge">
+<title>Node9&#45;&gt;Node3</title>
+<g id="a_edge11_Node000009_Node000003"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M653.14,-44.09C677.43,-48.95 707.17,-54.9 732.75,-60.01"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="732.21,-63.47 742.7,-62 733.58,-56.61 732.21,-63.47"/>
 </a>
 </g>
 </g>
-<!-- Node9&#45;&gt;Node3 -->
-<g id="edge13_Node000009_Node000003" class="edge">
-<title>Node9&#45;&gt;Node3</title>
-<g id="a_edge13_Node000009_Node000003"><a xlink:title=" ">
+<!-- Node10&#45;&gt;Node3 -->
+<g id="edge13_Node000010_Node000003" class="edge">
+<title>Node10&#45;&gt;Node3</title>
+<g id="a_edge13_Node000010_Node000003"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M286.42,-22.05C366.74,-7.48 535.27,15.58 673,-15.56 707.87,-23.45 744.52,-42.97 767.42,-56.74"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="765.72,-59.8 776.07,-62.06 769.39,-53.84 765.72,-59.8"/>
 </a>

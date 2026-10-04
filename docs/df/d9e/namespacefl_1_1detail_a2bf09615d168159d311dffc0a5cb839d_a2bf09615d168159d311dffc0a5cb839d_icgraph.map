@@ -1,0 +1,47 @@
+<map id="fl::detail::getWaitSpinBudgetUs" name="fl::detail::getWaitSpinBudgetUs">
+<area shape="rect" id="Node000001" title="Get the current tiered&#45;wait spin budget (microseconds)." alt="" coords="792,227,1016,252"/>
+<area shape="rect" id="Node000002" href="$dd/dbb/class_c_fast_l_e_d_a4993b380a3b9ae22dcb48d5035dec8ec.html#a4993b380a3b9ae22dcb48d5035dec8ec" title=" " alt="" coords="505,124,744,149"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="855,224,660,152,661,147,857,219"/>
+<area shape="rect" id="Node000004" href="$d7/de5/_fast_l_e_d_8cpp_8hpp_ac6c7e827ae13a7bc3da907399f25142f.html#ac6c7e827ae13a7bc3da907399f25142f" title=" " alt="" coords="529,197,721,223"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="778,229,721,223,721,217,779,224"/>
+<area shape="rect" id="Node000008" href="$d2/d6b/classfl_1_1_channel_manager_ad2dad2fdb0279c8f211fd524025e14f0.html#ad2dad2fdb0279c8f211fd524025e14f0" title="Wait until a condition is met, with check&#45;pump&#45;delay logic." alt="" coords="551,247,699,287"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="779,255,699,263,699,257,778,249"/>
+<area shape="rect" id="Node000023" href="$d3/da0/classfl_1_1_i_channel_driver_a699840e6b4d11e9215de9e4a7e8f8c3d.html#a699840e6b4d11e9215de9e4a7e8f8c3d" title=" " alt="" coords="555,443,695,483"/>
+<area shape="poly" id="edge17_Node000001_Node000023" title=" " alt="" coords="878,263,653,445,649,441,875,259"/>
+<area shape="rect" id="Node000003" href="$dd/dbb/class_c_fast_l_e_d_a3f3784703c6700e385a1b746c421c94e.html#a3f3784703c6700e385a1b746c421c94e" title="Get the current tiered&#45;wait spin budget (microseconds)." alt="" coords="227,99,457,124"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="491,127,457,124,458,119,492,122"/>
+<area shape="rect" id="Node000005" href="$dd/dbb/class_c_fast_l_e_d_a93471b4babe96100496e8e25062cba3f.html#a93471b4babe96100496e8e25062cba3f" title="Update all our controllers with the current led colors, using the passed in brightness." alt="" coords="280,148,404,173"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="537,198,404,174,405,169,538,192"/>
+<area shape="rect" id="Node000006" href="$dd/dbb/class_c_fast_l_e_d_a50e30222e81562a7ef334dbe4fdfa856.html#a50e30222e81562a7ef334dbe4fdfa856" title="Set all leds on all controllers to the given color/scale." alt="" coords="263,197,421,223"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="515,213,422,213,422,207,515,207"/>
+<area shape="rect" id="Node000007" href="$dd/dbb/class_c_fast_l_e_d_aeb7bd3e8f2dbced6284a2182191d5fcb.html#aeb7bd3e8f2dbced6284a2182191d5fcb" title="Clear the leds, wiping the local array of data." alt="" coords="31,5,153,31"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="248,201,225,187,210,169,202,151,199,115,197,79,190,62,177,45,152,30,155,26,180,41,195,59,202,78,205,114,208,150,215,166,228,183,251,197"/>
+<area shape="rect" id="Node000009" href="$d2/d6b/classfl_1_1_channel_manager_af3041b5d8b20269dc1909667d8714de6.html#af3041b5d8b20269dc1909667d8714de6" title="Wait for all drivers to become READY." alt="" coords="268,247,416,287"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="537,270,416,270,416,265,537,265"/>
+<area shape="rect" id="Node000021" href="$d2/d6b/classfl_1_1_channel_manager_a10a6b64316d63740f381ea73eb322d3a.html#a10a6b64316d63740f381ea73eb322d3a" title=" " alt="" coords="247,329,437,369"/>
+<area shape="poly" id="edge15_Node000008_Node000021" title=" " alt="" coords="542,294,413,331,412,326,541,289"/>
+<area shape="rect" id="Node000010" href="$d2/d6b/classfl_1_1_channel_manager_a9d5c6d37df9f78ddacf9e44073b4fe18.html#a9d5c6d37df9f78ddacf9e44073b4fe18" title="Handle validation failures and the uncommon replacement flow outside the normal driver&#45;registration p..." alt="" coords="18,55,166,95"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="254,254,225,236,211,220,204,204,199,172,195,140,189,125,177,109,161,98,165,93,181,105,193,122,201,139,205,171,209,202,216,217,228,232,257,250"/>
+<area shape="rect" id="Node000015" href="$d2/d6b/classfl_1_1_channel_manager_a743b1256280a8a80b7d47d644088464e.html#a743b1256280a8a80b7d47d644088464e" title="Remove all drivers from the manager." alt="" coords="18,119,166,159"/>
+<area shape="poly" id="edge10_Node000009_Node000015" title=" " alt="" coords="254,251,225,236,209,220,200,204,192,189,177,173,157,162,160,157,180,169,196,186,205,202,213,217,228,232,256,246"/>
+<area shape="rect" id="Node000017" href="$d2/d6b/classfl_1_1_channel_manager_a51df52695220156ed2bf8998e347e5c9.html#a51df52695220156ed2bf8998e347e5c9" title="Poll drivers before frame starts to clear previous frame state." alt="" coords="18,183,166,223"/>
+<area shape="poly" id="edge11_Node000009_Node000017" title=" " alt="" coords="254,248,165,225,167,220,255,243"/>
+<area shape="rect" id="Node000018" href="$d2/d6b/classfl_1_1_channel_manager_a3b733c7354a68ef0935614419e77688b.html#a3b733c7354a68ef0935614419e77688b" title="Reset bus manager state, clearing all enqueued and transmitting channels." alt="" coords="18,247,166,287"/>
+<area shape="poly" id="edge12_Node000009_Node000018" title=" " alt="" coords="254,270,166,270,166,265,254,265"/>
+<area shape="rect" id="Node000019" href="$dd/dbb/class_c_fast_l_e_d_aeb27e6f97287c4add5056c7218a78c82.html#aeb27e6f97287c4add5056c7218a78c82" title="Wait for all channel bus transmissions to complete." alt="" coords="33,312,151,337"/>
+<area shape="poly" id="edge13_Node000009_Node000019" title=" " alt="" coords="255,290,149,315,147,309,254,285"/>
+<area shape="rect" id="Node000020" href="$dd/dbb/class_c_fast_l_e_d_a234cfd99ebdb37ecd4aedf51484d74e2.html#a234cfd99ebdb37ecd4aedf51484d74e2" title="Wait for all channel bus transmissions to complete with timeout." alt="" coords="33,361,151,387"/>
+<area shape="poly" id="edge14_Node000009_Node000020" title=" " alt="" coords="277,295,228,319,204,335,180,351,146,364,144,359,177,346,201,331,225,314,275,290"/>
+<area shape="rect" id="Node000022" href="$d2/d6b/classfl_1_1_channel_manager_a00529005793bae555511bc496817c0bc.html#a00529005793bae555511bc496817c0bc" title="Trigger transmission of batched channel data." alt="" coords="18,411,166,451"/>
+<area shape="poly" id="edge16_Node000021_Node000022" title=" " alt="" coords="269,376,154,414,153,409,267,371"/>
+<area shape="rect" id="Node000024" href="$d3/da0/classfl_1_1_i_channel_driver_afbfde94b6b6b17fec987a9f5d4a28e6e.html#afbfde94b6b6b17fec987a9f5d4a28e6e" title=" " alt="" coords="275,411,409,451"/>
+<area shape="poly" id="edge18_Node000023_Node000024" title=" " alt="" coords="541,457,409,442,410,436,541,451"/>
+<area shape="rect" id="Node000025" href="$d3/da0/classfl_1_1_i_channel_driver_ae5607fcac412ea2dc9a63704862fb6dd.html#ae5607fcac412ea2dc9a63704862fb6dd" title="Wait for driver to become READY." alt="" coords="275,475,409,515"/>
+<area shape="poly" id="edge19_Node000023_Node000025" title=" " alt="" coords="541,475,410,490,409,485,541,470"/>
+<area shape="rect" id="Node000028" href="$d3/da0/classfl_1_1_i_channel_driver_aee84e43543461834b1cf985f011279da.html#aee84e43543461834b1cf985f011279da" title=" " alt="" coords="247,539,437,579"/>
+<area shape="poly" id="edge22_Node000023_Node000028" title=" " alt="" coords="563,491,458,530,420,542,418,537,456,525,561,486"/>
+<area shape="rect" id="Node000026" href="$de/d93/classfl_1_1_slim_bridge_controller_a3f96c4f996f9f95f0ddb285fcab60dc9.html#a3f96c4f996f9f95f0ddb285fcab60dc9" title=" " alt="" coords="5,475,179,515"/>
+<area shape="poly" id="edge20_Node000025_Node000026" title=" " alt="" coords="261,498,179,498,179,493,261,493"/>
+<area shape="rect" id="Node000027" href="$d3/da0/classfl_1_1_i_channel_driver_ad74d21cf8f6a7a94f9bd2227fd458a0b.html#ad74d21cf8f6a7a94f9bd2227fd458a0b" title="Block until this driver finishes any in&#45;flight transmit." alt="" coords="25,539,159,579"/>
+<area shape="poly" id="edge21_Node000025_Node000027" title=" " alt="" coords="262,519,160,545,159,540,260,513"/>
+</map>

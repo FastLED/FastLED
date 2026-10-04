@@ -1,6 +1,6 @@
 var structfl_1_1_mp3_info =
 [
-    [ "Mp3Info", "d7/df3/structfl_1_1_mp3_info_a2166b11379f6047b8be1e93b95971b51.html#a2166b11379f6047b8be1e93b95971b51", null ],
+    [ "Mp3Info", "d7/df3/structfl_1_1_mp3_info_a2ba2fe341c02a07d13074d0c145faec5.html#a2ba2fe341c02a07d13074d0c145faec5", null ],
     [ "Mp3Info", "d7/df3/structfl_1_1_mp3_info_a0ea00b0361dc5c92f005afe6ec7f4379.html#a0ea00b0361dc5c92f005afe6ec7f4379", null ],
     [ "bitrate", "d7/df3/structfl_1_1_mp3_info_a7443530810e4e7cb7abf8f30ef13d3de.html#a7443530810e4e7cb7abf8f30ef13d3de", null ],
     [ "channels", "d7/df3/structfl_1_1_mp3_info_a395ebdb8aad58dc6e8e5f78a7d183d93.html#a395ebdb8aad58dc6e8e5f78a7d183d93", null ],

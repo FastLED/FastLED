@@ -1,10 +1,10 @@
 <map id="inoise8_raw" name="inoise8_raw">
-<area shape="rect" id="Node000001" title=" " alt="" coords="569,233,669,258"/>
+<area shape="rect" id="Node000001" title="8&#45;bit, fixed point implementation of Perlin&#39;s noise without scaling." alt="" coords="569,233,669,258"/>
 <area shape="rect" id="Node000002" href="$d8/df9/group___noise_generation_ga149ba5b04496ee4b4f33a77fe4934b4b.html#ga149ba5b04496ee4b4f33a77fe4934b4b" title="8&#45;Bit, fixed point implementation of Perlin&#39;s noise." alt="" coords="452,184,521,209"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="571,231,520,212,522,207,573,226"/>
-<area shape="rect" id="Node000003" href="$d8/df9/group___noise_generation_ga241eb59109b1d0a39daca3466d216721.html#ga241eb59109b1d0a39daca3466d216721" title=" " alt="" coords="452,233,521,258"/>
+<area shape="rect" id="Node000003" href="$d8/df9/group___noise_generation_ga241eb59109b1d0a39daca3466d216721.html#ga241eb59109b1d0a39daca3466d216721" title="8&#45;Bit, fixed point implementation of Perlin&#39;s noise." alt="" coords="452,233,521,258"/>
 <area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="556,248,522,248,522,243,556,243"/>
-<area shape="rect" id="Node000004" href="$d8/df9/group___noise_generation_gaeb72246ebd597b60a7e575173accf2fd.html#gaeb72246ebd597b60a7e575173accf2fd" title=" " alt="" coords="452,282,521,308"/>
+<area shape="rect" id="Node000004" href="$d8/df9/group___noise_generation_gaeb72246ebd597b60a7e575173accf2fd.html#gaeb72246ebd597b60a7e575173accf2fd" title="8&#45;Bit, fixed point implementation of Perlin&#39;s noise." alt="" coords="452,282,521,308"/>
 <area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="573,266,522,285,520,280,571,261"/>
 <area shape="rect" id="Node000005" href="$d4/df2/classfl_1_1_luminova_aa775ddcb74da9d8ae057ac8e4c3c50cc.html#aa775ddcb74da9d8ae057ac8e4c3c50cc" title=" " alt="" coords="14,12,157,37"/>
 <area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="452,274,450,271,435,241,430,212,433,158,434,133,432,108,422,85,402,61,375,41,344,27,311,17,277,11,210,9,150,14,150,9,210,4,278,6,313,12,346,22,378,37,406,57,427,82,437,107,440,132,438,158,435,212,440,239,454,268,456,271"/>

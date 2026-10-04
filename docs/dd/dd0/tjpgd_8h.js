@@ -59,7 +59,7 @@ var tjpgd_8h =
       [ "fl::third_party::JDR_FMT2", "d1/d86/namespacefl_1_1third__party_aea3d5777f4bc88fde963e058f01c5210.html#aea3d5777f4bc88fde963e058f01c5210a69175b94e511fd3326a054c5c1624dff", null ],
       [ "fl::third_party::JDR_FMT3", "d1/d86/namespacefl_1_1third__party_aea3d5777f4bc88fde963e058f01c5210.html#aea3d5777f4bc88fde963e058f01c5210abd2b92a9d4d9a917010db7a746504243", null ]
     ] ],
-    [ "fl::third_party::jd_decomp", "d1/d86/namespacefl_1_1third__party_a1acdb649cac7b6781f38ce6bc98544f3.html#a1acdb649cac7b6781f38ce6bc98544f3", null ],
-    [ "fl::third_party::jd_decomp_progressive", "d1/d86/namespacefl_1_1third__party_aaf721b6e8ef2ebf5cb1d01b538ba0537.html#aaf721b6e8ef2ebf5cb1d01b538ba0537", null ],
-    [ "fl::third_party::jd_prepare", "d1/d86/namespacefl_1_1third__party_a7e9634408d6a93fae66e7b4e4f39107f.html#a7e9634408d6a93fae66e7b4e4f39107f", null ]
+    [ "fl::third_party::jd_decomp", "d1/d86/namespacefl_1_1third__party_a0f6ca86bbc32f564ef84bdb00854b227.html#a0f6ca86bbc32f564ef84bdb00854b227", null ],
+    [ "fl::third_party::jd_decomp_progressive", "d1/d86/namespacefl_1_1third__party_a764200d3b9acdb0aaf1b983143810af6.html#a764200d3b9acdb0aaf1b983143810af6", null ],
+    [ "fl::third_party::jd_prepare", "d1/d86/namespacefl_1_1third__party_a1de38e6310ca1a7044032788368e48cf.html#a1de38e6310ca1a7044032788368e48cf", null ]
 ];

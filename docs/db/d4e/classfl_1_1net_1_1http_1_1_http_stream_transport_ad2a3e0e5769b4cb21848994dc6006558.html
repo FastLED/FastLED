@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -123,31 +123,31 @@ $(function(){initNavTree('db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transpor
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../da/d64/stream__transport_8cpp_8hpp_source.html#l00063">63</a> of file <a class="el" href="../../da/d64/stream__transport_8cpp_8hpp_source.html">stream_transport.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   63</span>                                                         {</div>
-<div class="line"><span class="lineno">   64</span>    <span class="keywordflow">if</span> (<span class="keywordtype">id</span>.is_int()) {</div>
-<div class="line"><span class="lineno">   65</span>        <span class="keywordtype">char</span> buf[32];</div>
-<div class="line"><span class="lineno">   66</span>        <a class="code hl_function" href="../../d4/d36/namespacefl_a57cbbc0e3769d2f6c4a7919e29646708.html#a57cbbc0e3769d2f6c4a7919e29646708">fl::snprintf</a>(buf, <span class="keyword">sizeof</span>(buf), <span class="stringliteral">&quot;%d&quot;</span>, <span class="keywordtype">id</span>.as_int().<a class="code hl_variable" href="../../d4/d36/namespacefl_a13766ae9e150185981f5096f90a439d7.html#a13766ae9e150185981f5096f90a439d7">value</a>());</div>
-<div class="line"><span class="lineno">   67</span>        <span class="keywordflow">return</span> fl::string(buf);</div>
-<div class="line"><span class="lineno">   68</span>    }</div>
-<div class="line"><span class="lineno">   69</span>    <span class="keywordflow">if</span> (<span class="keywordtype">id</span>.is_string()) {</div>
-<div class="line"><span class="lineno">   70</span>        <span class="keywordflow">return</span> <span class="keywordtype">id</span>.as_string().value();</div>
-<div class="line"><span class="lineno">   71</span>    }</div>
-<div class="line"><span class="lineno">   72</span>    <span class="comment">// Fallback for other types - use string representation</span></div>
-<div class="line"><span class="lineno">   73</span>    <span class="keywordflow">return</span> <span class="keywordtype">id</span>.to_string();</div>
-<div class="line"><span class="lineno">   74</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../da/d64/stream__transport_8cpp_8hpp_source.html#l00067">67</a> of file <a class="el" href="../../da/d64/stream__transport_8cpp_8hpp_source.html">stream_transport.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   67</span>                                                         {</div>
+<div class="line"><span class="lineno">   68</span>    <span class="keywordflow">if</span> (<span class="keywordtype">id</span>.is_int()) {</div>
+<div class="line"><span class="lineno">   69</span>        <span class="keywordtype">char</span> buf[32];</div>
+<div class="line"><span class="lineno">   70</span>        <a class="code hl_function" href="../../d4/d36/namespacefl_a17646782eea1132270233120225036ac.html#a17646782eea1132270233120225036ac">fl::snprintf</a>(buf, <span class="keyword">sizeof</span>(buf), <span class="stringliteral">&quot;%d&quot;</span>, <span class="keywordtype">id</span>.as_int().<a class="code hl_variable" href="../../d4/d36/namespacefl_a13766ae9e150185981f5096f90a439d7.html#a13766ae9e150185981f5096f90a439d7">value</a>());</div>
+<div class="line"><span class="lineno">   71</span>        <span class="keywordflow">return</span> fl::string(buf);</div>
+<div class="line"><span class="lineno">   72</span>    }</div>
+<div class="line"><span class="lineno">   73</span>    <span class="keywordflow">if</span> (<span class="keywordtype">id</span>.is_string()) {</div>
+<div class="line"><span class="lineno">   74</span>        <span class="keywordflow">return</span> <span class="keywordtype">id</span>.as_string().value();</div>
+<div class="line"><span class="lineno">   75</span>    }</div>
+<div class="line"><span class="lineno">   76</span>    <span class="comment">// Fallback for other types - use string representation</span></div>
+<div class="line"><span class="lineno">   77</span>    <span class="keywordflow">return</span> <span class="keywordtype">id</span>.to_string();</div>
+<div class="line"><span class="lineno">   78</span>}</div>
 <div class="ttc" id="anamespacefl_a13766ae9e150185981f5096f90a439d7_html_a13766ae9e150185981f5096f90a439d7"><div class="ttname"><a href="../../d4/d36/namespacefl_a13766ae9e150185981f5096f90a439d7.html#a13766ae9e150185981f5096f90a439d7">fl::value</a></div><div class="ttdeci">constexpr int type_rank&lt; T &gt;::value</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d37/static__constexpr__defs_8cpp_8hpp_source.html#l00082">static_constexpr_defs.cpp.hpp:82</a></div></div>
-<div class="ttc" id="anamespacefl_a57cbbc0e3769d2f6c4a7919e29646708_html_a57cbbc0e3769d2f6c4a7919e29646708"><div class="ttname"><a href="../../d4/d36/namespacefl_a57cbbc0e3769d2f6c4a7919e29646708.html#a57cbbc0e3769d2f6c4a7919e29646708">fl::snprintf</a></div><div class="ttdeci">int snprintf(char *buffer, fl::size size, const char *format, const Args &amp;... args) FL_NOEXCEPT</div><div class="ttdoc">Snprintf-like formatting function that writes to a buffer.</div><div class="ttdef"><b>Definition</b> <a href="../../d6/dd1/stdio_8h_source.html#l00666">stdio.h:666</a></div></div>
+<div class="ttc" id="anamespacefl_a17646782eea1132270233120225036ac_html_a17646782eea1132270233120225036ac"><div class="ttname"><a href="../../d4/d36/namespacefl_a17646782eea1132270233120225036ac.html#a17646782eea1132270233120225036ac">fl::snprintf</a></div><div class="ttdeci">int snprintf(char *buffer, fl::size size, const char *format) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/d5f/stdio_8cpp_8hpp_source.html#l00292">stdio.cpp.hpp:292</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d6/dd1/stdio_8h_source.html#l00666">fl::snprintf()</a>, and <a class="el" href="../../dd/d37/static__constexpr__defs_8cpp_8hpp_source.html#l00082">fl::type_rank&lt; T &gt;::value</a>.</p>
+<p class="reference">References <a class="el" href="../../df/d5f/stdio_8cpp_8hpp_source.html#l00292">fl::snprintf()</a>, and <a class="el" href="../../dd/d37/static__constexpr__defs_8cpp_8hpp_source.html#l00082">fl::type_rank&lt; T &gt;::value</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../da/d64/stream__transport_8cpp_8hpp_source.html#l00076">parseChunkedMessages()</a>, <a class="el" href="../../da/d64/stream__transport_8cpp_8hpp_source.html#l00219">rpc()</a>, and <a class="el" href="../../da/d64/stream__transport_8cpp_8hpp_source.html#l00246">rpcStream()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../da/d64/stream__transport_8cpp_8hpp_source.html#l00080">parseChunkedMessages()</a>, <a class="el" href="../../da/d64/stream__transport_8cpp_8hpp_source.html#l00223">rpc()</a>, and <a class="el" href="../../da/d64/stream__transport_8cpp_8hpp_source.html#l00250">rpcStream()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_ad2a3e0e5769b4cb21848994dc6006558_ad2a3e0e5769b4cb21848994dc6006558_cgraph.svg" width="100%" height="392"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_ad2a3e0e5769b4cb21848994dc6006558_ad2a3e0e5769b4cb21848994dc6006558_cgraph.svg" width="100%" height="300"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 <div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
@@ -166,7 +166,7 @@ $(function(){initNavTree('db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transpor
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d5/dc9/namespacefl_1_1net.html">net</a></li><li class="navelem"><a class="el" href="../../d1/d13/namespacefl_1_1net_1_1http.html">http</a></li><li class="navelem"><a class="el" href="../../db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport.html">HttpStreamTransport</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:10 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:12 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

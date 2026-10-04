@@ -2,7 +2,7 @@ var classfl_1_1_font_renderer =
 [
     [ "ScaledMetrics", "d8/d34/structfl_1_1_font_renderer_1_1_scaled_metrics.html", "d8/d34/structfl_1_1_font_renderer_1_1_scaled_metrics" ],
     [ "FontRenderer", "da/db8/classfl_1_1_font_renderer_a1583a3bccb02b958dab07761b251ea4a.html#a1583a3bccb02b958dab07761b251ea4a", null ],
-    [ "~FontRenderer", "da/db8/classfl_1_1_font_renderer_a19f32a315d81072e71c4ef86e0003ca9.html#a19f32a315d81072e71c4ef86e0003ca9", null ],
+    [ "~FontRenderer", "da/db8/classfl_1_1_font_renderer_aa13fc053435be4c841b319b5287e86dd.html#aa13fc053435be4c841b319b5287e86dd", null ],
     [ "getAdvance", "da/db8/classfl_1_1_font_renderer_aedae114d5021bc4cd1ccb5340c0c9cd2.html#aedae114d5021bc4cd1ccb5340c0c9cd2", null ],
     [ "getKerning", "da/db8/classfl_1_1_font_renderer_a4d85cbb8cdb98db8bd89009d82c58aa1.html#a4d85cbb8cdb98db8bd89009d82c58aa1", null ],
     [ "getScaledMetrics", "da/db8/classfl_1_1_font_renderer_afc4a9582c70bc15d9d45bab5b901822f.html#afc4a9582c70bc15d9d45bab5b901822f", null ],

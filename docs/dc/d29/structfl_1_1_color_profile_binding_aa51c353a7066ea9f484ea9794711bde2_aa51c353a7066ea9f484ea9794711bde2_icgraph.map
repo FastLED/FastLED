@@ -1,0 +1,15 @@
+<map id="fl::ColorProfileBinding::active" name="fl::ColorProfileBinding::active">
+<area shape="rect" id="Node000001" title=" " alt="" coords="645,55,808,95"/>
+<area shape="rect" id="Node000002" href="$d5/d87/structfl_1_1_channel_options_a7d33849ac993a966ad630ffcf58de219.html#a7d33849ac993a966ad630ffcf58de219" title=" " alt="" coords="456,55,597,95"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="632,78,597,78,597,73,632,73"/>
+<area shape="rect" id="Node000003" href="$d5/d8b/classfl_1_1_channel_a4fd9736141ec00c1a8f5db47a0af1882.html#a4fd9736141ec00c1a8f5db47a0af1882" title="Apply reconfigurable settings from a ChannelConfig." alt="" coords="232,5,408,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="442,55,366,33,368,28,443,50"/>
+<area shape="rect" id="Node000004" href="$d5/d87/structfl_1_1_channel_options_ad12e16c7fd37d07cabadb738d9ddc4ad.html#ad12e16c7fd37d07cabadb738d9ddc4ad" title=" " alt="" coords="249,55,391,95"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="442,78,391,78,391,73,442,73"/>
+<area shape="rect" id="Node000005" href="$d5/d87/structfl_1_1_channel_options_a4bcab07ce7acee2d92062812de5dc3db.html#a4bcab07ce7acee2d92062812de5dc3db" title=" " alt="" coords="243,119,397,159"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="449,102,386,122,384,117,448,97"/>
+<area shape="rect" id="Node000006" href="$d5/d87/structfl_1_1_channel_options_acbc2993fb9a87e850f9d5b3671fd74b3.html#acbc2993fb9a87e850f9d5b3671fd74b3" title=" " alt="" coords="13,87,176,127"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="230,129,176,122,177,116,230,124"/>
+<area shape="rect" id="Node000007" href="$d5/d87/structfl_1_1_channel_options_ab51176d4f609c5351d98770e1ff36074.html#ab51176d4f609c5351d98770e1ff36074" title=" " alt="" coords="5,151,184,191"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="230,155,185,161,184,156,229,149"/>
+</map>

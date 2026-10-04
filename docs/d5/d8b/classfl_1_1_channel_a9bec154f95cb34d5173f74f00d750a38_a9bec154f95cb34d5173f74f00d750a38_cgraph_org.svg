@@ -20,7 +20,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../da/d98/classfl_1_1_atomic_fake_ae7cc69cf515cdd4f11f4ed9b44b0ef83.html#ae7cc69cf515cdd4f11f4ed9b44b0ef83" target="_top" xlink:title=" ">
+<g id="a_Node000002"><a xlink:href="../../da/d98/classfl_1_1_atomic_fake_afd218278a31df3bd8c4efa79e1ab4b75.html#afd218278a31df3bd8c4efa79e1ab4b75" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="280,-19 141,-19 141,0 280,0 280,-19"/>
 <text text-anchor="middle" x="210.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::AtomicFake::fetch_add</text>
 </a>

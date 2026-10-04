@@ -34,11 +34,11 @@ digraph "fl/gfx/hsv16.cpp.hpp"
   Node6 -> Node13 [id="edge17_Node000006_Node000013",color="steelblue1",style="solid",tooltip=" "];
   Node2 -> Node13 [id="edge18_Node000002_Node000013",color="steelblue1",style="solid",tooltip=" "];
   Node1 -> Node8 [id="edge19_Node000001_Node000008",color="steelblue1",style="solid",tooltip=" "];
-  Node1 -> Node56 [id="edge20_Node000001_Node000056",color="steelblue1",style="solid",tooltip=" "];
-  Node56 [id="Node000056",label="fl/math/intmap.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d72/fl_2math_2intmap_8h.html",tooltip="Integer mapping functions between different integer sizes."];
-  Node56 -> Node57 [id="edge21_Node000056_Node000057",color="steelblue1",style="solid",tooltip=" "];
-  Node57 [id="Node000057",label="platforms/intmap.h",height=0.2,width=0.4,color="grey60", fillcolor="#E0E0E0", style="filled",tooltip=" "];
-  Node56 -> Node8 [id="edge22_Node000056_Node000008",color="steelblue1",style="solid",tooltip=" "];
-  Node56 -> Node13 [id="edge23_Node000056_Node000013",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node49 [id="edge20_Node000001_Node000049",color="steelblue1",style="solid",tooltip=" "];
+  Node49 [id="Node000049",label="fl/math/intmap.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d72/fl_2math_2intmap_8h.html",tooltip="Integer mapping functions between different integer sizes."];
+  Node49 -> Node50 [id="edge21_Node000049_Node000050",color="steelblue1",style="solid",tooltip=" "];
+  Node50 [id="Node000050",label="platforms/intmap.h",height=0.2,width=0.4,color="grey60", fillcolor="#E0E0E0", style="filled",tooltip=" "];
+  Node49 -> Node8 [id="edge22_Node000049_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node49 -> Node13 [id="edge23_Node000049_Node000013",color="steelblue1",style="solid",tooltip=" "];
   Node1 -> Node6 [id="edge24_Node000001_Node000006",color="steelblue1",style="solid",tooltip=" "];
 }

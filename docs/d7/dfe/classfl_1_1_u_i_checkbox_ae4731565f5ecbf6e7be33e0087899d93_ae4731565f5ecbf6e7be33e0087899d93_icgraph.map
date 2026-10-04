@@ -1,0 +1,26 @@
+<map id="fl::UICheckbox::value" name="fl::UICheckbox::value">
+<area shape="rect" id="Node000001" title=" " alt="" coords="509,239,669,265"/>
+<area shape="rect" id="Node000002" href="$d7/dfe/classfl_1_1_u_i_checkbox_a8d5e8b269b432999be1b99430299c2a3.html#a8d5e8b269b432999be1b99430299c2a3" title=" " alt="" coords="255,135,457,161"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="555,235,460,185,401,163,402,158,462,180,557,230"/>
+<area shape="rect" id="Node000004" href="$d7/dfe/classfl_1_1_u_i_checkbox_a5d413140ce10a8dd7f52db94eaf80045.html#a5d413140ce10a8dd7f52db94eaf80045" title=" " alt="" coords="35,5,173,45"/>
+<area shape="poly" id="edge7_Node000001_Node000004" title=" " alt="" coords="569,230,524,177,493,149,460,125,387,90,310,64,237,47,173,36,174,31,238,42,312,59,389,85,463,120,497,145,527,173,573,227"/>
+<area shape="rect" id="Node000005" href="$de/d6f/structfl_1_1_u_i_checkbox_1_1_listener_a34f6ded56bf9ae4306bf9307aaaff94e.html#a34f6ded56bf9ae4306bf9307aaaff94e" title=" " alt="" coords="16,184,192,224"/>
+<area shape="poly" id="edge8_Node000001_Node000005" title=" " alt="" coords="495,245,461,241,192,215,192,210,462,236,496,240"/>
+<area shape="rect" id="Node000007" href="$d7/dfe/classfl_1_1_u_i_checkbox_a1874b453d951428966ba8aa2284e34f9.html#a1874b453d951428966ba8aa2284e34f9" title=" " alt="" coords="9,249,199,274"/>
+<area shape="poly" id="edge11_Node000001_Node000007" title=" " alt="" coords="495,256,199,262,199,257,495,251"/>
+<area shape="rect" id="Node000008" href="$d7/dfe/classfl_1_1_u_i_checkbox_aa4a01acf93b10b8cd8f3444fa17304c1.html#aa4a01acf93b10b8cd8f3444fa17304c1" title=" " alt="" coords="251,290,461,315"/>
+<area shape="poly" id="edge9_Node000001_Node000008" title=" " alt="" coords="517,270,416,293,415,287,516,265"/>
+<area shape="rect" id="Node000009" href="$d7/dfe/classfl_1_1_u_i_checkbox_a6c3f579bc70caab8424fd3f299c85a0f.html#a6c3f579bc70caab8424fd3f299c85a0f" title=" " alt="" coords="256,339,456,365"/>
+<area shape="poly" id="edge10_Node000001_Node000009" title=" " alt="" coords="560,275,515,303,462,329,423,342,422,337,460,324,513,298,557,270"/>
+<area shape="rect" id="Node000010" href="$d6/d1a/examples_2_downscale_2downscale_8h_a893c59eb458bea800b5e5e5c1bf57fcd.html#a893c59eb458bea800b5e5e5c1bf57fcd" title=" " alt="" coords="289,389,423,414"/>
+<area shape="poly" id="edge12_Node000001_Node000010" title=" " alt="" coords="573,278,527,330,496,357,463,380,425,394,423,389,460,375,493,353,523,326,569,274"/>
+<area shape="rect" id="Node000003" href="$de/d6f/structfl_1_1_u_i_checkbox_1_1_listener_a54b5d9c6cb1355b080e04178591c4e39.html#a54b5d9c6cb1355b080e04178591c4e39" title=" " alt="" coords="16,69,192,109"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="287,135,190,112,191,107,288,130"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="324,130,268,95,202,60,172,48,174,43,204,55,271,90,326,125"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="285,166,193,187,191,182,284,161"/>
+<area shape="rect" id="Node000006" href="$d7/dfe/classfl_1_1_u_i_checkbox_a48efde8234646b754b8033d5eee7151f.html#a48efde8234646b754b8033d5eee7151f" title=" " alt="" coords="5,134,203,159"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="241,150,203,150,203,145,241,145"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="326,171,271,205,204,238,166,251,164,246,202,234,268,200,324,166"/>
+<area shape="rect" id="Node000011" href="$d6/d1a/examples_2_downscale_2downscale_8h_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="75,389,133,414"/>
+<area shape="poly" id="edge13_Node000010_Node000011" title=" " alt="" coords="275,404,134,404,134,399,275,399"/>
+</map>

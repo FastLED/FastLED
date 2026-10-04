@@ -35,4 +35,8 @@ digraph "LedRopeTCL"
   Node17 -> Node11 [id="edge14_Node000011_Node000017",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mSourceXYMap",fontcolor="grey" ];
   Node17 [id="Node000017",label="fl::shared_ptr\< XYMap \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d1/d74/classfl_1_1shared__ptr.html",tooltip=" "];
   Node13 -> Node17 [id="edge15_Node000017_Node000013",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< XYMap \>",fontcolor="grey" ];
+  Node18 -> Node11 [id="edge16_Node000011_Node000018",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mShapes",fontcolor="grey" ];
+  Node18 [id="Node000018",label="fl::vector\< fl::ScreenMap\l::Shape \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d2/d24/classfl_1_1vector.html",tooltip=" "];
+  Node7 -> Node18 [id="edge17_Node000018_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node10 -> Node18 [id="edge18_Node000018_Node000010",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::ScreenMap::Shape \>",fontcolor="grey" ];
 }

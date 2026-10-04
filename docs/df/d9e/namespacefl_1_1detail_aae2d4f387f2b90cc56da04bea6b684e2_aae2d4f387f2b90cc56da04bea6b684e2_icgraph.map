@@ -1,0 +1,22 @@
+<map id="fl::detail::get_hex_int_width" name="fl::detail::get_hex_int_width">
+<area shape="rect" id="Node000001" title="Compile&#45;time integer width determination (default &#45; triggers error)" alt="" coords="549,133,684,173"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="647,121,636,115,617,112,599,114,589,119,585,125,587,132,582,134,580,124,586,115,598,109,617,107,638,110,650,117"/>
+<area shape="rect" id="Node000002" href="$df/d9e/namespacefl_1_1detail_a946f0126ee721d3c4346f076401cd745.html#a946f0126ee721d3c4346f076401cd745" title="Specialization for 1&#45;byte types (int8_t, uint8_t, char, etc.)" alt="" coords="367,5,501,45"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="583,126,544,92,500,60,479,48,482,43,503,55,548,88,586,122"/>
+<area shape="rect" id="Node000003" href="$df/d9e/namespacefl_1_1detail_aef72137d7a8e9a9fa9606cbaaac41263.html#aef72137d7a8e9a9fa9606cbaaac41263" title="Specialization for 2&#45;byte types (int16_t, uint16_t, short, etc.)" alt="" coords="367,69,501,109"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="545,131,491,112,492,107,547,126"/>
+<area shape="rect" id="Node000004" href="$df/d9e/namespacefl_1_1detail_ae61ccef7e31db8a607f1805aa38e946c.html#ae61ccef7e31db8a607f1805aa38e946c" title="Specialization for 4&#45;byte types (int32_t, uint32_t, int, etc.)" alt="" coords="367,133,501,173"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="536,156,502,156,502,151,536,151"/>
+<area shape="rect" id="Node000005" href="$df/d9e/namespacefl_1_1detail_ac16f7309952946644a6635cdcd049609.html#ac16f7309952946644a6635cdcd049609" title="Specialization for 8&#45;byte types (i64, u64, long long, etc.)" alt="" coords="367,197,501,237"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="547,180,492,200,491,195,545,175"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a5c4c5b465e1c1abf5f044dfa8a5612a0.html#a5c4c5b465e1c1abf5f044dfa8a5612a0" title="Convert an integer value to hexadecimal string representation." alt="" coords="393,262,475,287"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="587,185,549,219,503,252,476,264,474,259,500,247,545,215,584,181"/>
+<area shape="rect" id="Node000007" href="$d2/de0/namespacefl_1_1printf__detail_af74e526ceb7f3433e994b769a2083c16.html#af74e526ceb7f3433e994b769a2083c16" title=" " alt="" coords="193,191,319,231"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="384,260,311,233,313,228,386,255"/>
+<area shape="rect" id="Node000008" href="$d2/de0/namespacefl_1_1printf__detail_a625c526c363fc98b2cba6a79d6f73da9.html#a625c526c363fc98b2cba6a79d6f73da9" title=" " alt="" coords="193,255,319,295"/>
+<area shape="poly" id="edge8_Node000006_Node000008" title=" " alt="" coords="379,277,319,277,319,272,379,272"/>
+<area shape="rect" id="Node000009" href="$d2/de0/namespacefl_1_1printf__detail_a8df18f60f30ea041a86a1919d0af2062.html#a8df18f60f30ea041a86a1919d0af2062" title=" " alt="" coords="193,319,319,359"/>
+<area shape="poly" id="edge9_Node000006_Node000009" title=" " alt="" coords="386,295,313,321,311,316,384,290"/>
+<area shape="rect" id="Node000010" href="$d2/de0/namespacefl_1_1printf__detail_a7ca04cb319627978e8dfe806e55ee58f.html#a7ca04cb319627978e8dfe806e55ee58f" title=" " alt="" coords="5,319,145,359"/>
+<area shape="poly" id="edge10_Node000009_Node000010" title=" " alt="" coords="179,341,146,341,146,336,179,336"/>
+</map>

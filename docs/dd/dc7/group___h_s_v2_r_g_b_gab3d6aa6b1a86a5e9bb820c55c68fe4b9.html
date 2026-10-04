@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -131,201 +131,220 @@ $(function(){initNavTree('dd/dc7/group___h_s_v2_r_g_b_gab3d6aa6b1a86a5e9bb820c55
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>the approximate HSV equivalent of the RGB value </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d6/db5/hsv2rgb_8cpp_8hpp_source.html#l00551">551</a> of file <a class="el" href="../../d6/db5/hsv2rgb_8cpp_8hpp_source.html">hsv2rgb.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  552</span>{</div>
-<div class="line"><span class="lineno">  553</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> r = rgb.r;</div>
-<div class="line"><span class="lineno">  554</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> g = rgb.g;</div>
-<div class="line"><span class="lineno">  555</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> b = rgb.b;</div>
-<div class="line"><span class="lineno">  556</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> h, s, v;</div>
-<div class="line"><span class="lineno">  557</span> </div>
-<div class="line"><span class="lineno">  558</span>    <span class="comment">// find desaturation</span></div>
-<div class="line"><span class="lineno">  559</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> desat = 255;</div>
-<div class="line"><span class="lineno">  560</span>    <span class="keywordflow">if</span>( r &lt; desat) desat = r;</div>
-<div class="line"><span class="lineno">  561</span>    <span class="keywordflow">if</span>( g &lt; desat) desat = g;</div>
-<div class="line"><span class="lineno">  562</span>    <span class="keywordflow">if</span>( b &lt; desat) desat = b;</div>
-<div class="line"><span class="lineno">  563</span> </div>
-<div class="line"><span class="lineno">  564</span>    <span class="comment">// remove saturation from all channels</span></div>
-<div class="line"><span class="lineno">  565</span>    r -= desat;</div>
-<div class="line"><span class="lineno">  566</span>    g -= desat;</div>
-<div class="line"><span class="lineno">  567</span>    b -= desat;</div>
-<div class="line"><span class="lineno">  568</span> </div>
-<div class="line"><span class="lineno">  569</span>    <span class="comment">//Serial.print(&quot;desat=&quot;); Serial.print(desat); Serial.println(&quot;&quot;);</span></div>
-<div class="line"><span class="lineno">  570</span> </div>
-<div class="line"><span class="lineno">  571</span>    <span class="comment">//uint8_t orig_desat = sqrt16( desat * 256);</span></div>
-<div class="line"><span class="lineno">  572</span>    <span class="comment">//Serial.print(&quot;orig_desat=&quot;); Serial.print(orig_desat); Serial.println(&quot;&quot;);</span></div>
+<p class="definition">Definition at line <a class="el" href="../../d6/db5/hsv2rgb_8cpp_8hpp_source.html#l00559">559</a> of file <a class="el" href="../../d6/db5/hsv2rgb_8cpp_8hpp_source.html">hsv2rgb.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  560</span>{</div>
+<div class="line"><span class="lineno">  561</span>    <span class="comment">// These channels can exceed 255 while saturation is being undone. Keep</span></div>
+<div class="line"><span class="lineno">  562</span>    <span class="comment">// the intermediate values wide until they are normalized below.</span></div>
+<div class="line"><span class="lineno">  563</span>    fl::u16 r = rgb.r;</div>
+<div class="line"><span class="lineno">  564</span>    fl::u16 <a class="code hl_variable" href="../../d4/d36/namespacefl_abb8ff746cce2b11a90718afba1cfec1b.html#abb8ff746cce2b11a90718afba1cfec1b">g</a> = rgb.g;</div>
+<div class="line"><span class="lineno">  565</span>    fl::u16 b = rgb.b;</div>
+<div class="line"><span class="lineno">  566</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> h, s, v;</div>
+<div class="line"><span class="lineno">  567</span> </div>
+<div class="line"><span class="lineno">  568</span>    <span class="comment">// find desaturation</span></div>
+<div class="line"><span class="lineno">  569</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> desat = 255;</div>
+<div class="line"><span class="lineno">  570</span>    <span class="keywordflow">if</span>( r &lt; desat) desat = r;</div>
+<div class="line"><span class="lineno">  571</span>    <span class="keywordflow">if</span>( g &lt; desat) desat = <a class="code hl_variable" href="../../d4/d36/namespacefl_abb8ff746cce2b11a90718afba1cfec1b.html#abb8ff746cce2b11a90718afba1cfec1b">g</a>;</div>
+<div class="line"><span class="lineno">  572</span>    <span class="keywordflow">if</span>( b &lt; desat) desat = b;</div>
 <div class="line"><span class="lineno">  573</span> </div>
-<div class="line"><span class="lineno">  574</span>    <span class="comment">// saturation is opposite of desaturation</span></div>
-<div class="line"><span class="lineno">  575</span>    s = 255 - desat;</div>
-<div class="line"><span class="lineno">  576</span>    <span class="comment">//Serial.print(&quot;s.1=&quot;); Serial.print(s); Serial.println(&quot;&quot;);</span></div>
-<div class="line"><span class="lineno">  577</span> </div>
-<div class="line"><span class="lineno">  578</span>    <span class="keywordflow">if</span>( s != 255 ) {</div>
-<div class="line"><span class="lineno">  579</span>        <span class="comment">// undo &#39;dimming&#39; of saturation</span></div>
-<div class="line"><span class="lineno">  580</span>        s = 255 - fl::sqrt16( (255-s) * 256);</div>
-<div class="line"><span class="lineno">  581</span>    }</div>
-<div class="line"><span class="lineno">  582</span>    <span class="comment">// without lib8tion: float ... ew ... sqrt... double ew, or rather, ew ^ 0.5</span></div>
-<div class="line"><span class="lineno">  583</span>    <span class="comment">// if( s != 255 ) s = (255 - (256.0 * sqrt( (float)(255-s) / 256.0)));</span></div>
-<div class="line"><span class="lineno">  584</span>    <span class="comment">//Serial.print(&quot;s.2=&quot;); Serial.print(s); Serial.println(&quot;&quot;);</span></div>
-<div class="line"><span class="lineno">  585</span> </div>
-<div class="line"><span class="lineno">  586</span> </div>
-<div class="line"><span class="lineno">  587</span>    <span class="comment">// at least one channel is now zero</span></div>
-<div class="line"><span class="lineno">  588</span>    <span class="comment">// if all three channels are zero, we had a</span></div>
-<div class="line"><span class="lineno">  589</span>    <span class="comment">// shade of gray.</span></div>
-<div class="line"><span class="lineno">  590</span>    <span class="keywordflow">if</span>( (r + g + b) == 0) {</div>
-<div class="line"><span class="lineno">  591</span>        <span class="comment">// we pick hue zero for no special reason</span></div>
-<div class="line"><span class="lineno">  592</span>        <span class="keywordflow">return</span> <a class="code hl_typedef" href="../../dd/dc7/group___h_s_v2_r_g_b_ga259e6d3ae92ca32d2390e7d8eaa1c7ae.html#ga259e6d3ae92ca32d2390e7d8eaa1c7ae">CHSV</a>( 0, 0, 255 - s);</div>
-<div class="line"><span class="lineno">  593</span>    }</div>
-<div class="line"><span class="lineno">  594</span> </div>
-<div class="line"><span class="lineno">  595</span>    <span class="comment">// scale all channels up to compensate for desaturation</span></div>
-<div class="line"><span class="lineno">  596</span>    <span class="keywordflow">if</span>( s &lt; 255) {</div>
-<div class="line"><span class="lineno">  597</span>        <span class="keywordflow">if</span>( s == 0) s = 1;</div>
-<div class="line"><span class="lineno">  598</span>        fl::u32 scaleup = 65535 / (s);</div>
-<div class="line"><span class="lineno">  599</span>        r = ((fl::u32)(r) * scaleup) / 256;</div>
-<div class="line"><span class="lineno">  600</span>        g = ((fl::u32)(g) * scaleup) / 256;</div>
-<div class="line"><span class="lineno">  601</span>        b = ((fl::u32)(b) * scaleup) / 256;</div>
-<div class="line"><span class="lineno">  602</span>    }</div>
-<div class="line"><span class="lineno">  603</span>    <span class="comment">//Serial.print(&quot;r.2=&quot;); Serial.print(r); Serial.println(&quot;&quot;);</span></div>
-<div class="line"><span class="lineno">  604</span>    <span class="comment">//Serial.print(&quot;g.2=&quot;); Serial.print(g); Serial.println(&quot;&quot;);</span></div>
-<div class="line"><span class="lineno">  605</span>    <span class="comment">//Serial.print(&quot;b.2=&quot;); Serial.print(b); Serial.println(&quot;&quot;);</span></div>
-<div class="line"><span class="lineno">  606</span> </div>
-<div class="line"><span class="lineno">  607</span>    fl::u16 total = r + g + b;</div>
-<div class="line"><span class="lineno">  608</span> </div>
-<div class="line"><span class="lineno">  609</span>    <span class="comment">//Serial.print(&quot;total=&quot;); Serial.print(total); Serial.println(&quot;&quot;);</span></div>
-<div class="line"><span class="lineno">  610</span> </div>
-<div class="line"><span class="lineno">  611</span>    <span class="comment">// scale all channels up to compensate for low values</span></div>
-<div class="line"><span class="lineno">  612</span>    <span class="keywordflow">if</span>( total &lt; 255) {</div>
-<div class="line"><span class="lineno">  613</span>        <span class="keywordflow">if</span>( total == 0) total = 1;</div>
-<div class="line"><span class="lineno">  614</span>        fl::u32 scaleup = 65535 / (total);</div>
-<div class="line"><span class="lineno">  615</span>        r = ((fl::u32)(r) * scaleup) / 256;</div>
-<div class="line"><span class="lineno">  616</span>        g = ((fl::u32)(g) * scaleup) / 256;</div>
-<div class="line"><span class="lineno">  617</span>        b = ((fl::u32)(b) * scaleup) / 256;</div>
-<div class="line"><span class="lineno">  618</span>    }</div>
-<div class="line"><span class="lineno">  619</span>    <span class="comment">//Serial.print(&quot;r.3=&quot;); Serial.print(r); Serial.println(&quot;&quot;);</span></div>
-<div class="line"><span class="lineno">  620</span>    <span class="comment">//Serial.print(&quot;g.3=&quot;); Serial.print(g); Serial.println(&quot;&quot;);</span></div>
-<div class="line"><span class="lineno">  621</span>    <span class="comment">//Serial.print(&quot;b.3=&quot;); Serial.print(b); Serial.println(&quot;&quot;);</span></div>
-<div class="line"><span class="lineno">  622</span> </div>
-<div class="line"><span class="lineno">  623</span>    <span class="keywordflow">if</span>( total &gt; 255 ) {</div>
-<div class="line"><span class="lineno">  624</span>        v = 255;</div>
-<div class="line"><span class="lineno">  625</span>    } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  626</span>        v = qadd8(desat,total);</div>
-<div class="line"><span class="lineno">  627</span>        <span class="comment">// undo &#39;dimming&#39; of brightness</span></div>
-<div class="line"><span class="lineno">  628</span>        <span class="keywordflow">if</span>( v != 255) v = fl::sqrt16( v * 256);</div>
-<div class="line"><span class="lineno">  629</span>        <span class="comment">// without lib8tion: float ... ew ... sqrt... double ew, or rather, ew ^ 0.5</span></div>
-<div class="line"><span class="lineno">  630</span>        <span class="comment">// if( v != 255) v = (256.0 * sqrt( (float)(v) / 256.0));</span></div>
-<div class="line"><span class="lineno">  631</span> </div>
-<div class="line"><span class="lineno">  632</span>    }</div>
-<div class="line"><span class="lineno">  633</span> </div>
-<div class="line"><span class="lineno">  634</span>    <span class="comment">//Serial.print(&quot;v=&quot;); Serial.print(v); Serial.println(&quot;&quot;);</span></div>
-<div class="line"><span class="lineno">  635</span> </div>
-<div class="line"><span class="lineno">  636</span> </div>
-<div class="line"><span class="lineno">  637</span><span class="preprocessor">#if 0</span></div>
-<div class="line"><span class="lineno">  638</span> </div>
-<div class="line"><span class="lineno">  639</span>    <span class="comment">//#else</span></div>
-<div class="line"><span class="lineno">  640</span>    <span class="keywordflow">if</span>( v != 255) {</div>
-<div class="line"><span class="lineno">  641</span>        <span class="comment">// this part could probably use refinement/rethinking,</span></div>
-<div class="line"><span class="lineno">  642</span>        <span class="comment">// (but it doesn&#39;t overflow &amp; wrap anymore)</span></div>
-<div class="line"><span class="lineno">  643</span>        fl::u16 s16;</div>
-<div class="line"><span class="lineno">  644</span>        s16 = (s * 256);</div>
-<div class="line"><span class="lineno">  645</span>        s16 /= v;</div>
-<div class="line"><span class="lineno">  646</span>        <span class="comment">//Serial.print(&quot;s16=&quot;); Serial.print(s16); Serial.println(&quot;&quot;);</span></div>
-<div class="line"><span class="lineno">  647</span>        <span class="keywordflow">if</span>( s16 &lt; 256) {</div>
-<div class="line"><span class="lineno">  648</span>            s = s16;</div>
-<div class="line"><span class="lineno">  649</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  650</span>            s = 255; <span class="comment">// clamp to prevent overflow</span></div>
-<div class="line"><span class="lineno">  651</span>        }</div>
-<div class="line"><span class="lineno">  652</span>    }</div>
-<div class="line"><span class="lineno">  653</span><span class="preprocessor">#endif</span></div>
-<div class="line"><span class="lineno">  654</span> </div>
-<div class="line"><span class="lineno">  655</span>    <span class="comment">//Serial.print(&quot;s.3=&quot;); Serial.print(s); Serial.println(&quot;&quot;);</span></div>
-<div class="line"><span class="lineno">  656</span> </div>
-<div class="line"><span class="lineno">  657</span> </div>
-<div class="line"><span class="lineno">  658</span>    <span class="comment">// since this wasn&#39;t a pure shade of gray,</span></div>
-<div class="line"><span class="lineno">  659</span>    <span class="comment">// the interesting question is what hue is it</span></div>
-<div class="line"><span class="lineno">  660</span> </div>
-<div class="line"><span class="lineno">  661</span> </div>
-<div class="line"><span class="lineno">  662</span> </div>
-<div class="line"><span class="lineno">  663</span>    <span class="comment">// start with which channel is highest</span></div>
-<div class="line"><span class="lineno">  664</span>    <span class="comment">// (ties don&#39;t matter)</span></div>
-<div class="line"><span class="lineno">  665</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> highest = r;</div>
-<div class="line"><span class="lineno">  666</span>    <span class="keywordflow">if</span>( g &gt; highest) highest = g;</div>
-<div class="line"><span class="lineno">  667</span>    <span class="keywordflow">if</span>( b &gt; highest) highest = b;</div>
+<div class="line"><span class="lineno">  574</span>    <span class="comment">// remove saturation from all channels</span></div>
+<div class="line"><span class="lineno">  575</span>    r -= desat;</div>
+<div class="line"><span class="lineno">  576</span>    <a class="code hl_variable" href="../../d4/d36/namespacefl_abb8ff746cce2b11a90718afba1cfec1b.html#abb8ff746cce2b11a90718afba1cfec1b">g</a> -= desat;</div>
+<div class="line"><span class="lineno">  577</span>    b -= desat;</div>
+<div class="line"><span class="lineno">  578</span> </div>
+<div class="line"><span class="lineno">  579</span>    <span class="comment">//Serial.print(&quot;desat=&quot;); Serial.print(desat); Serial.println(&quot;&quot;);</span></div>
+<div class="line"><span class="lineno">  580</span> </div>
+<div class="line"><span class="lineno">  581</span>    <span class="comment">//uint8_t orig_desat = sqrt16( desat * 256);</span></div>
+<div class="line"><span class="lineno">  582</span>    <span class="comment">//Serial.print(&quot;orig_desat=&quot;); Serial.print(orig_desat); Serial.println(&quot;&quot;);</span></div>
+<div class="line"><span class="lineno">  583</span> </div>
+<div class="line"><span class="lineno">  584</span>    <span class="comment">// saturation is opposite of desaturation</span></div>
+<div class="line"><span class="lineno">  585</span>    s = 255 - desat;</div>
+<div class="line"><span class="lineno">  586</span>    <span class="comment">//Serial.print(&quot;s.1=&quot;); Serial.print(s); Serial.println(&quot;&quot;);</span></div>
+<div class="line"><span class="lineno">  587</span> </div>
+<div class="line"><span class="lineno">  588</span>    <span class="keywordflow">if</span>( s != 255 ) {</div>
+<div class="line"><span class="lineno">  589</span>        <span class="comment">// undo &#39;dimming&#39; of saturation</span></div>
+<div class="line"><span class="lineno">  590</span>        s = 255 - fl::sqrt16( (255-s) * 256);</div>
+<div class="line"><span class="lineno">  591</span>    }</div>
+<div class="line"><span class="lineno">  592</span>    <span class="comment">// without lib8tion: float ... ew ... sqrt... double ew, or rather, ew ^ 0.5</span></div>
+<div class="line"><span class="lineno">  593</span>    <span class="comment">// if( s != 255 ) s = (255 - (256.0 * sqrt( (float)(255-s) / 256.0)));</span></div>
+<div class="line"><span class="lineno">  594</span>    <span class="comment">//Serial.print(&quot;s.2=&quot;); Serial.print(s); Serial.println(&quot;&quot;);</span></div>
+<div class="line"><span class="lineno">  595</span> </div>
+<div class="line"><span class="lineno">  596</span> </div>
+<div class="line"><span class="lineno">  597</span>    <span class="comment">// at least one channel is now zero</span></div>
+<div class="line"><span class="lineno">  598</span>    <span class="comment">// if all three channels are zero, we had a</span></div>
+<div class="line"><span class="lineno">  599</span>    <span class="comment">// shade of gray.</span></div>
+<div class="line"><span class="lineno">  600</span>    <span class="keywordflow">if</span>( (r + g + b) == 0) {</div>
+<div class="line"><span class="lineno">  601</span>        <span class="comment">// we pick hue zero for no special reason</span></div>
+<div class="line"><span class="lineno">  602</span>        <span class="keywordflow">return</span> <a class="code hl_typedef" href="../../dd/dc7/group___h_s_v2_r_g_b_ga259e6d3ae92ca32d2390e7d8eaa1c7ae.html#ga259e6d3ae92ca32d2390e7d8eaa1c7ae">CHSV</a>( 0, 0, 255 - s);</div>
+<div class="line"><span class="lineno">  603</span>    }</div>
+<div class="line"><span class="lineno">  604</span> </div>
+<div class="line"><span class="lineno">  605</span>    <span class="comment">// scale all channels up to compensate for desaturation</span></div>
+<div class="line"><span class="lineno">  606</span>    <span class="keywordflow">if</span>( s &lt; 255) {</div>
+<div class="line"><span class="lineno">  607</span>        <span class="keywordflow">if</span>( s == 0) s = 1;</div>
+<div class="line"><span class="lineno">  608</span>        fl::u32 scaleup = 65535 / (s);</div>
+<div class="line"><span class="lineno">  609</span>        r = ((fl::u32)(r) * scaleup) / 256;</div>
+<div class="line"><span class="lineno">  610</span>        <a class="code hl_variable" href="../../d4/d36/namespacefl_abb8ff746cce2b11a90718afba1cfec1b.html#abb8ff746cce2b11a90718afba1cfec1b">g</a> = ((fl::u32)(<a class="code hl_variable" href="../../d4/d36/namespacefl_abb8ff746cce2b11a90718afba1cfec1b.html#abb8ff746cce2b11a90718afba1cfec1b">g</a>) * scaleup) / 256;</div>
+<div class="line"><span class="lineno">  611</span>        b = ((fl::u32)(b) * scaleup) / 256;</div>
+<div class="line"><span class="lineno">  612</span>    }</div>
+<div class="line"><span class="lineno">  613</span>    <span class="comment">//Serial.print(&quot;r.2=&quot;); Serial.print(r); Serial.println(&quot;&quot;);</span></div>
+<div class="line"><span class="lineno">  614</span>    <span class="comment">//Serial.print(&quot;g.2=&quot;); Serial.print(g); Serial.println(&quot;&quot;);</span></div>
+<div class="line"><span class="lineno">  615</span>    <span class="comment">//Serial.print(&quot;b.2=&quot;); Serial.print(b); Serial.println(&quot;&quot;);</span></div>
+<div class="line"><span class="lineno">  616</span> </div>
+<div class="line"><span class="lineno">  617</span>    fl::u16 total = r + <a class="code hl_variable" href="../../d4/d36/namespacefl_abb8ff746cce2b11a90718afba1cfec1b.html#abb8ff746cce2b11a90718afba1cfec1b">g</a> + b;</div>
+<div class="line"><span class="lineno">  618</span> </div>
+<div class="line"><span class="lineno">  619</span>    <span class="comment">//Serial.print(&quot;total=&quot;); Serial.print(total); Serial.println(&quot;&quot;);</span></div>
+<div class="line"><span class="lineno">  620</span> </div>
+<div class="line"><span class="lineno">  621</span>    <span class="comment">// Normalize the channels to the range expected by the hue approximation.</span></div>
+<div class="line"><span class="lineno">  622</span>    <span class="comment">// This scales low totals up as before, and also scales high totals down</span></div>
+<div class="line"><span class="lineno">  623</span>    <span class="comment">// instead of letting wide intermediates wrap when stored in u8 channels.</span></div>
+<div class="line"><span class="lineno">  624</span>    <span class="keywordflow">if</span>( total != 255) {</div>
+<div class="line"><span class="lineno">  625</span>        <span class="keywordflow">if</span>( total == 0) total = 1;</div>
+<div class="line"><span class="lineno">  626</span>        fl::u32 scaleup = 65535 / (total);</div>
+<div class="line"><span class="lineno">  627</span>        r = ((fl::u32)(r) * scaleup) / 256;</div>
+<div class="line"><span class="lineno">  628</span>        <a class="code hl_variable" href="../../d4/d36/namespacefl_abb8ff746cce2b11a90718afba1cfec1b.html#abb8ff746cce2b11a90718afba1cfec1b">g</a> = ((fl::u32)(<a class="code hl_variable" href="../../d4/d36/namespacefl_abb8ff746cce2b11a90718afba1cfec1b.html#abb8ff746cce2b11a90718afba1cfec1b">g</a>) * scaleup) / 256;</div>
+<div class="line"><span class="lineno">  629</span>        b = ((fl::u32)(b) * scaleup) / 256;</div>
+<div class="line"><span class="lineno">  630</span>    }</div>
+<div class="line"><span class="lineno">  631</span>    <span class="comment">//Serial.print(&quot;r.3=&quot;); Serial.print(r); Serial.println(&quot;&quot;);</span></div>
+<div class="line"><span class="lineno">  632</span>    <span class="comment">//Serial.print(&quot;g.3=&quot;); Serial.print(g); Serial.println(&quot;&quot;);</span></div>
+<div class="line"><span class="lineno">  633</span>    <span class="comment">//Serial.print(&quot;b.3=&quot;); Serial.print(b); Serial.println(&quot;&quot;);</span></div>
+<div class="line"><span class="lineno">  634</span> </div>
+<div class="line"><span class="lineno">  635</span>    <span class="keywordflow">if</span>( total &gt; 255 ) {</div>
+<div class="line"><span class="lineno">  636</span>        v = 255;</div>
+<div class="line"><span class="lineno">  637</span>    } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  638</span>        v = qadd8(desat,total);</div>
+<div class="line"><span class="lineno">  639</span>        <span class="comment">// undo &#39;dimming&#39; of brightness</span></div>
+<div class="line"><span class="lineno">  640</span>        <span class="keywordflow">if</span>( v != 255) v = fl::sqrt16( v * 256);</div>
+<div class="line"><span class="lineno">  641</span>        <span class="comment">// without lib8tion: float ... ew ... sqrt... double ew, or rather, ew ^ 0.5</span></div>
+<div class="line"><span class="lineno">  642</span>        <span class="comment">// if( v != 255) v = (256.0 * sqrt( (float)(v) / 256.0));</span></div>
+<div class="line"><span class="lineno">  643</span> </div>
+<div class="line"><span class="lineno">  644</span>    }</div>
+<div class="line"><span class="lineno">  645</span> </div>
+<div class="line"><span class="lineno">  646</span>    <span class="comment">//Serial.print(&quot;v=&quot;); Serial.print(v); Serial.println(&quot;&quot;);</span></div>
+<div class="line"><span class="lineno">  647</span> </div>
+<div class="line"><span class="lineno">  648</span> </div>
+<div class="line"><span class="lineno">  649</span><span class="preprocessor">#if 0</span></div>
+<div class="line"><span class="lineno">  650</span> </div>
+<div class="line"><span class="lineno">  651</span>    <span class="comment">//#else</span></div>
+<div class="line"><span class="lineno">  652</span>    <span class="keywordflow">if</span>( v != 255) {</div>
+<div class="line"><span class="lineno">  653</span>        <span class="comment">// this part could probably use refinement/rethinking,</span></div>
+<div class="line"><span class="lineno">  654</span>        <span class="comment">// (but it doesn&#39;t overflow &amp; wrap anymore)</span></div>
+<div class="line"><span class="lineno">  655</span>        fl::u16 s16;</div>
+<div class="line"><span class="lineno">  656</span>        s16 = (s * 256);</div>
+<div class="line"><span class="lineno">  657</span>        s16 /= v;</div>
+<div class="line"><span class="lineno">  658</span>        <span class="comment">//Serial.print(&quot;s16=&quot;); Serial.print(s16); Serial.println(&quot;&quot;);</span></div>
+<div class="line"><span class="lineno">  659</span>        <span class="keywordflow">if</span>( s16 &lt; 256) {</div>
+<div class="line"><span class="lineno">  660</span>            s = s16;</div>
+<div class="line"><span class="lineno">  661</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  662</span>            s = 255; <span class="comment">// clamp to prevent overflow</span></div>
+<div class="line"><span class="lineno">  663</span>        }</div>
+<div class="line"><span class="lineno">  664</span>    }</div>
+<div class="line"><span class="lineno">  665</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">  666</span> </div>
+<div class="line"><span class="lineno">  667</span>    <span class="comment">//Serial.print(&quot;s.3=&quot;); Serial.print(s); Serial.println(&quot;&quot;);</span></div>
 <div class="line"><span class="lineno">  668</span> </div>
-<div class="line"><span class="lineno">  669</span>    <span class="keywordflow">if</span>( highest == r ) {</div>
-<div class="line"><span class="lineno">  670</span>        <span class="comment">// Red is highest.</span></div>
-<div class="line"><span class="lineno">  671</span>        <span class="comment">// Hue could be Purple/Pink-Red,Red-Orange,Orange-Yellow</span></div>
-<div class="line"><span class="lineno">  672</span>        <span class="keywordflow">if</span>( g == 0 ) {</div>
-<div class="line"><span class="lineno">  673</span>            <span class="comment">// if green is zero, we&#39;re in Purple/Pink-Red</span></div>
-<div class="line"><span class="lineno">  674</span>            h = (<a class="code hl_enumvalue" href="../../d8/dd0/chsv_8h_ad9ddfe125d67fbae6d1d97d81e165113.html#ad9ddfe125d67fbae6d1d97d81e165113">HUE_PURPLE</a> + <a class="code hl_enumvalue" href="../../d8/dd0/chsv_8h_a515793a3d9d94a597202b1e0d0eeb0b6.html#a515793a3d9d94a597202b1e0d0eeb0b6">HUE_PINK</a>) / 2;</div>
-<div class="line"><span class="lineno">  675</span>            h += scale8( qsub8(r, 128), <a class="code hl_define" href="../../d6/db5/hsv2rgb_8cpp_8hpp_a1be0cbec46d1a717dc14ccc5e1195f9a.html#a1be0cbec46d1a717dc14ccc5e1195f9a">FIXFRAC8</a>(48,128));</div>
-<div class="line"><span class="lineno">  676</span>        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> ( (r - g) &gt; g) {</div>
-<div class="line"><span class="lineno">  677</span>            <span class="comment">// if R-G &gt; G then we&#39;re in Red-Orange</span></div>
-<div class="line"><span class="lineno">  678</span>            h = <a class="code hl_enumvalue" href="../../d8/dd0/chsv_8h_a3dc911111328f70b1472cb2d81412be4.html#a3dc911111328f70b1472cb2d81412be4">HUE_RED</a>;</div>
-<div class="line"><span class="lineno">  679</span>            h += scale8( g, <a class="code hl_define" href="../../d6/db5/hsv2rgb_8cpp_8hpp_a1be0cbec46d1a717dc14ccc5e1195f9a.html#a1be0cbec46d1a717dc14ccc5e1195f9a">FIXFRAC8</a>(32,85));</div>
-<div class="line"><span class="lineno">  680</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  681</span>            <span class="comment">// R-G &lt; G, we&#39;re in Orange-Yellow</span></div>
-<div class="line"><span class="lineno">  682</span>            h = <a class="code hl_enumvalue" href="../../d8/dd0/chsv_8h_ac39c1e3818b2596555367436c77f9ef0.html#ac39c1e3818b2596555367436c77f9ef0">HUE_ORANGE</a>;</div>
-<div class="line"><span class="lineno">  683</span>            h += scale8( qsub8((g - 85) + (171 - r), 4), <a class="code hl_define" href="../../d6/db5/hsv2rgb_8cpp_8hpp_a1be0cbec46d1a717dc14ccc5e1195f9a.html#a1be0cbec46d1a717dc14ccc5e1195f9a">FIXFRAC8</a>(32,85)); <span class="comment">//221</span></div>
-<div class="line"><span class="lineno">  684</span>        }</div>
-<div class="line"><span class="lineno">  685</span> </div>
-<div class="line"><span class="lineno">  686</span>    } <span class="keywordflow">else</span> <span class="keywordflow">if</span> ( highest == g) {</div>
-<div class="line"><span class="lineno">  687</span>        <span class="comment">// Green is highest</span></div>
-<div class="line"><span class="lineno">  688</span>        <span class="comment">// Hue could be Yellow-Green, Green-Aqua</span></div>
-<div class="line"><span class="lineno">  689</span>        <span class="keywordflow">if</span>( b == 0) {</div>
-<div class="line"><span class="lineno">  690</span>            <span class="comment">// if Blue is zero, we&#39;re in Yellow-Green</span></div>
-<div class="line"><span class="lineno">  691</span>            <span class="comment">//   G = 171..255</span></div>
-<div class="line"><span class="lineno">  692</span>            <span class="comment">//   R = 171..  0</span></div>
-<div class="line"><span class="lineno">  693</span>            h = <a class="code hl_enumvalue" href="../../d8/dd0/chsv_8h_a86d36d3b9102a626e09437ac24ddb39c.html#a86d36d3b9102a626e09437ac24ddb39c">HUE_YELLOW</a>;</div>
-<div class="line"><span class="lineno">  694</span>            <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> radj = scale8( qsub8(171,r),   47); <span class="comment">//171..0 -&gt; 0..171 -&gt; 0..31</span></div>
-<div class="line"><span class="lineno">  695</span>            <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> gadj = scale8( qsub8(g,171),   96); <span class="comment">//171..255 -&gt; 0..84 -&gt; 0..31;</span></div>
-<div class="line"><span class="lineno">  696</span>            <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> rgadj = radj + gadj;</div>
-<div class="line"><span class="lineno">  697</span>            <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> hueadv = rgadj / 2;</div>
-<div class="line"><span class="lineno">  698</span>            h += hueadv;</div>
-<div class="line"><span class="lineno">  699</span>            <span class="comment">//h += scale8( qadd8( 4, qadd8((g - 128), (128 - r))),</span></div>
-<div class="line"><span class="lineno">  700</span>            <span class="comment">//             FIXFRAC8(32,255)); //</span></div>
-<div class="line"><span class="lineno">  701</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  702</span>            <span class="comment">// if Blue is nonzero we&#39;re in Green-Aqua</span></div>
-<div class="line"><span class="lineno">  703</span>            <span class="keywordflow">if</span>( (g-b) &gt; b) {</div>
-<div class="line"><span class="lineno">  704</span>                h = <a class="code hl_enumvalue" href="../../d8/dd0/chsv_8h_a7dd2fe1a5927b6a54d04a6726bc38688.html#a7dd2fe1a5927b6a54d04a6726bc38688">HUE_GREEN</a>;</div>
-<div class="line"><span class="lineno">  705</span>                h += scale8( b, <a class="code hl_define" href="../../d6/db5/hsv2rgb_8cpp_8hpp_a1be0cbec46d1a717dc14ccc5e1195f9a.html#a1be0cbec46d1a717dc14ccc5e1195f9a">FIXFRAC8</a>(32,85));</div>
-<div class="line"><span class="lineno">  706</span>            } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  707</span>                h = <a class="code hl_enumvalue" href="../../d8/dd0/chsv_8h_a450fdef941bd9df9922c7ec763dcfe1c.html#a450fdef941bd9df9922c7ec763dcfe1c">HUE_AQUA</a>;</div>
-<div class="line"><span class="lineno">  708</span>                h += scale8( qsub8(b, 85), <a class="code hl_define" href="../../d6/db5/hsv2rgb_8cpp_8hpp_a1be0cbec46d1a717dc14ccc5e1195f9a.html#a1be0cbec46d1a717dc14ccc5e1195f9a">FIXFRAC8</a>(8,42));</div>
-<div class="line"><span class="lineno">  709</span>            }</div>
+<div class="line"><span class="lineno">  669</span> </div>
+<div class="line"><span class="lineno">  670</span>    <span class="comment">// since this wasn&#39;t a pure shade of gray,</span></div>
+<div class="line"><span class="lineno">  671</span>    <span class="comment">// the interesting question is what hue is it</span></div>
+<div class="line"><span class="lineno">  672</span> </div>
+<div class="line"><span class="lineno">  673</span> </div>
+<div class="line"><span class="lineno">  674</span> </div>
+<div class="line"><span class="lineno">  675</span>    <span class="comment">// start with which channel is highest</span></div>
+<div class="line"><span class="lineno">  676</span>    <span class="comment">// (ties don&#39;t matter)</span></div>
+<div class="line"><span class="lineno">  677</span>    fl::u16 highest = r;</div>
+<div class="line"><span class="lineno">  678</span>    <span class="keywordflow">if</span>( g &gt; highest) highest = <a class="code hl_variable" href="../../d4/d36/namespacefl_abb8ff746cce2b11a90718afba1cfec1b.html#abb8ff746cce2b11a90718afba1cfec1b">g</a>;</div>
+<div class="line"><span class="lineno">  679</span>    <span class="keywordflow">if</span>( b &gt; highest) highest = b;</div>
+<div class="line"><span class="lineno">  680</span> </div>
+<div class="line"><span class="lineno">  681</span>    <span class="keywordflow">if</span>( highest == r ) {</div>
+<div class="line"><span class="lineno">  682</span>        <span class="comment">// Red is highest.</span></div>
+<div class="line"><span class="lineno">  683</span>        <span class="comment">// Hue could be Purple/Pink-Red,Red-Orange,Orange-Yellow</span></div>
+<div class="line"><span class="lineno">  684</span>        <span class="keywordflow">if</span>( g == 0 ) {</div>
+<div class="line"><span class="lineno">  685</span>            <span class="comment">// if green is zero, we&#39;re in Purple/Pink-Red</span></div>
+<div class="line"><span class="lineno">  686</span>            h = (<a class="code hl_enumvalue" href="../../d8/dd0/chsv_8h_ad9ddfe125d67fbae6d1d97d81e165113.html#ad9ddfe125d67fbae6d1d97d81e165113">HUE_PURPLE</a> + <a class="code hl_enumvalue" href="../../d8/dd0/chsv_8h_a515793a3d9d94a597202b1e0d0eeb0b6.html#a515793a3d9d94a597202b1e0d0eeb0b6">HUE_PINK</a>) / 2;</div>
+<div class="line"><span class="lineno">  687</span>            h += scale8( qsub8(r, 128), <a class="code hl_define" href="../../d6/db5/hsv2rgb_8cpp_8hpp_a1be0cbec46d1a717dc14ccc5e1195f9a.html#a1be0cbec46d1a717dc14ccc5e1195f9a">FIXFRAC8</a>(48,128));</div>
+<div class="line"><span class="lineno">  688</span>        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> ( (r - g) &gt; g) {</div>
+<div class="line"><span class="lineno">  689</span>            <span class="comment">// if R-G &gt; G then we&#39;re in Red-Orange</span></div>
+<div class="line"><span class="lineno">  690</span>            h = <a class="code hl_enumvalue" href="../../d8/dd0/chsv_8h_a3dc911111328f70b1472cb2d81412be4.html#a3dc911111328f70b1472cb2d81412be4">HUE_RED</a>;</div>
+<div class="line"><span class="lineno">  691</span>            h += scale8( g, <a class="code hl_define" href="../../d6/db5/hsv2rgb_8cpp_8hpp_a1be0cbec46d1a717dc14ccc5e1195f9a.html#a1be0cbec46d1a717dc14ccc5e1195f9a">FIXFRAC8</a>(32,85));</div>
+<div class="line"><span class="lineno">  692</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  693</span>            <span class="comment">// R-G &lt; G, we&#39;re in Orange-Yellow.</span></div>
+<div class="line"><span class="lineno">  694</span>            <span class="comment">//</span></div>
+<div class="line"><span class="lineno">  695</span>            <span class="comment">// This used to read `(g - 85) + (171 - r)`. Reaching this branch</span></div>
+<div class="line"><span class="lineno">  696</span>            <span class="comment">// requires g &gt;= r/2, and r is the largest channel, so r &gt; 171 is</span></div>
+<div class="line"><span class="lineno">  697</span>            <span class="comment">// the normal case here -- making (171 - r) negative. The sum was</span></div>
+<div class="line"><span class="lineno">  698</span>            <span class="comment">// then truncated to u8 by qsub8() and wrapped to a large value,</span></div>
+<div class="line"><span class="lineno">  699</span>            <span class="comment">// sending orange out into the greens: rgb(255,153,0) returned hue</span></div>
+<div class="line"><span class="lineno">  700</span>            <span class="comment">// 122 instead of ~26. See issue #436.</span></div>
+<div class="line"><span class="lineno">  701</span>            <span class="comment">//</span></div>
+<div class="line"><span class="lineno">  702</span>            <span class="comment">// (255 - r) is the same measure of &quot;how far r has fallen&quot; but</span></div>
+<div class="line"><span class="lineno">  703</span>            <span class="comment">// cannot go negative, and the sum (g - 85) + (255 - r) has a</span></div>
+<div class="line"><span class="lineno">  704</span>            <span class="comment">// minimum of ~42 over this branch&#39;s own entry condition, so the</span></div>
+<div class="line"><span class="lineno">  705</span>            <span class="comment">// wrap is structurally impossible rather than merely unlikely.</span></div>
+<div class="line"><span class="lineno">  706</span>            <span class="comment">// Spans ~42..170, hence FIXFRAC8(32,170) to land the top of the</span></div>
+<div class="line"><span class="lineno">  707</span>            <span class="comment">// range on HUE_YELLOW.</span></div>
+<div class="line"><span class="lineno">  708</span>            h = <a class="code hl_enumvalue" href="../../d8/dd0/chsv_8h_ac39c1e3818b2596555367436c77f9ef0.html#ac39c1e3818b2596555367436c77f9ef0">HUE_ORANGE</a>;</div>
+<div class="line"><span class="lineno">  709</span>            h += scale8( qsub8((g - 85) + (255 - r), 4), <a class="code hl_define" href="../../d6/db5/hsv2rgb_8cpp_8hpp_a1be0cbec46d1a717dc14ccc5e1195f9a.html#a1be0cbec46d1a717dc14ccc5e1195f9a">FIXFRAC8</a>(32,170));</div>
 <div class="line"><span class="lineno">  710</span>        }</div>
 <div class="line"><span class="lineno">  711</span> </div>
-<div class="line"><span class="lineno">  712</span>    } <span class="keywordflow">else</span> <span class="comment">/* highest == b */</span> {</div>
-<div class="line"><span class="lineno">  713</span>        <span class="comment">// Blue is highest</span></div>
-<div class="line"><span class="lineno">  714</span>        <span class="comment">// Hue could be Aqua/Blue-Blue, Blue-Purple, Purple-Pink</span></div>
-<div class="line"><span class="lineno">  715</span>        <span class="keywordflow">if</span>( r == 0) {</div>
-<div class="line"><span class="lineno">  716</span>            <span class="comment">// if red is zero, we&#39;re in Aqua/Blue-Blue</span></div>
-<div class="line"><span class="lineno">  717</span>            h = <a class="code hl_enumvalue" href="../../d8/dd0/chsv_8h_a450fdef941bd9df9922c7ec763dcfe1c.html#a450fdef941bd9df9922c7ec763dcfe1c">HUE_AQUA</a> + ((<a class="code hl_enumvalue" href="../../d8/dd0/chsv_8h_a0bc03fd4cb114300a7ae711b977a7dbc.html#a0bc03fd4cb114300a7ae711b977a7dbc">HUE_BLUE</a> - <a class="code hl_enumvalue" href="../../d8/dd0/chsv_8h_a450fdef941bd9df9922c7ec763dcfe1c.html#a450fdef941bd9df9922c7ec763dcfe1c">HUE_AQUA</a>) / 4);</div>
-<div class="line"><span class="lineno">  718</span>            h += scale8( qsub8(b, 128), <a class="code hl_define" href="../../d6/db5/hsv2rgb_8cpp_8hpp_a1be0cbec46d1a717dc14ccc5e1195f9a.html#a1be0cbec46d1a717dc14ccc5e1195f9a">FIXFRAC8</a>(24,128));</div>
-<div class="line"><span class="lineno">  719</span>        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> ( (b-r) &gt; r) {</div>
-<div class="line"><span class="lineno">  720</span>            <span class="comment">// B-R &gt; R, we&#39;re in Blue-Purple</span></div>
-<div class="line"><span class="lineno">  721</span>            h = <a class="code hl_enumvalue" href="../../d8/dd0/chsv_8h_a0bc03fd4cb114300a7ae711b977a7dbc.html#a0bc03fd4cb114300a7ae711b977a7dbc">HUE_BLUE</a>;</div>
-<div class="line"><span class="lineno">  722</span>            h += scale8( r, <a class="code hl_define" href="../../d6/db5/hsv2rgb_8cpp_8hpp_a1be0cbec46d1a717dc14ccc5e1195f9a.html#a1be0cbec46d1a717dc14ccc5e1195f9a">FIXFRAC8</a>(32,85));</div>
-<div class="line"><span class="lineno">  723</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  724</span>            <span class="comment">// B-R &lt; R, we&#39;re in Purple-Pink</span></div>
-<div class="line"><span class="lineno">  725</span>            h = <a class="code hl_enumvalue" href="../../d8/dd0/chsv_8h_ad9ddfe125d67fbae6d1d97d81e165113.html#ad9ddfe125d67fbae6d1d97d81e165113">HUE_PURPLE</a>;</div>
-<div class="line"><span class="lineno">  726</span>            h += scale8( qsub8(r, 85), <a class="code hl_define" href="../../d6/db5/hsv2rgb_8cpp_8hpp_a1be0cbec46d1a717dc14ccc5e1195f9a.html#a1be0cbec46d1a717dc14ccc5e1195f9a">FIXFRAC8</a>(32,85));</div>
-<div class="line"><span class="lineno">  727</span>        }</div>
-<div class="line"><span class="lineno">  728</span>    }</div>
-<div class="line"><span class="lineno">  729</span> </div>
-<div class="line"><span class="lineno">  730</span>    h += 1;</div>
-<div class="line"><span class="lineno">  731</span>    <span class="keywordflow">return</span> <a class="code hl_typedef" href="../../dd/dc7/group___h_s_v2_r_g_b_ga259e6d3ae92ca32d2390e7d8eaa1c7ae.html#ga259e6d3ae92ca32d2390e7d8eaa1c7ae">CHSV</a>( h, s, v);</div>
-<div class="line"><span class="lineno">  732</span>}</div>
-<div class="ttc" id="achsv_8h_a0bc03fd4cb114300a7ae711b977a7dbc_html_a0bc03fd4cb114300a7ae711b977a7dbc"><div class="ttname"><a href="../../d8/dd0/chsv_8h_a0bc03fd4cb114300a7ae711b977a7dbc.html#a0bc03fd4cb114300a7ae711b977a7dbc">HUE_BLUE</a></div><div class="ttdeci">@ HUE_BLUE</div><div class="ttdoc">Blue (225°)</div><div class="ttdef"><b>Definition</b> <a href="../../d2/d4f/hsv_8h_source.html#l00103">hsv.h:103</a></div></div>
-<div class="ttc" id="achsv_8h_a3dc911111328f70b1472cb2d81412be4_html_a3dc911111328f70b1472cb2d81412be4"><div class="ttname"><a href="../../d8/dd0/chsv_8h_a3dc911111328f70b1472cb2d81412be4.html#a3dc911111328f70b1472cb2d81412be4">HUE_RED</a></div><div class="ttdeci">@ HUE_RED</div><div class="ttdoc">Red (0°)</div><div class="ttdef"><b>Definition</b> <a href="../../d2/d4f/hsv_8h_source.html#l00098">hsv.h:98</a></div></div>
-<div class="ttc" id="achsv_8h_a450fdef941bd9df9922c7ec763dcfe1c_html_a450fdef941bd9df9922c7ec763dcfe1c"><div class="ttname"><a href="../../d8/dd0/chsv_8h_a450fdef941bd9df9922c7ec763dcfe1c.html#a450fdef941bd9df9922c7ec763dcfe1c">HUE_AQUA</a></div><div class="ttdeci">@ HUE_AQUA</div><div class="ttdoc">Aqua (180°)</div><div class="ttdef"><b>Definition</b> <a href="../../d2/d4f/hsv_8h_source.html#l00102">hsv.h:102</a></div></div>
-<div class="ttc" id="achsv_8h_a515793a3d9d94a597202b1e0d0eeb0b6_html_a515793a3d9d94a597202b1e0d0eeb0b6"><div class="ttname"><a href="../../d8/dd0/chsv_8h_a515793a3d9d94a597202b1e0d0eeb0b6.html#a515793a3d9d94a597202b1e0d0eeb0b6">HUE_PINK</a></div><div class="ttdeci">@ HUE_PINK</div><div class="ttdoc">Pink (315°)</div><div class="ttdef"><b>Definition</b> <a href="../../d2/d4f/hsv_8h_source.html#l00105">hsv.h:105</a></div></div>
-<div class="ttc" id="achsv_8h_a7dd2fe1a5927b6a54d04a6726bc38688_html_a7dd2fe1a5927b6a54d04a6726bc38688"><div class="ttname"><a href="../../d8/dd0/chsv_8h_a7dd2fe1a5927b6a54d04a6726bc38688.html#a7dd2fe1a5927b6a54d04a6726bc38688">HUE_GREEN</a></div><div class="ttdeci">@ HUE_GREEN</div><div class="ttdoc">Green (135°)</div><div class="ttdef"><b>Definition</b> <a href="../../d2/d4f/hsv_8h_source.html#l00101">hsv.h:101</a></div></div>
-<div class="ttc" id="achsv_8h_a86d36d3b9102a626e09437ac24ddb39c_html_a86d36d3b9102a626e09437ac24ddb39c"><div class="ttname"><a href="../../d8/dd0/chsv_8h_a86d36d3b9102a626e09437ac24ddb39c.html#a86d36d3b9102a626e09437ac24ddb39c">HUE_YELLOW</a></div><div class="ttdeci">@ HUE_YELLOW</div><div class="ttdoc">Yellow (90°)</div><div class="ttdef"><b>Definition</b> <a href="../../d2/d4f/hsv_8h_source.html#l00100">hsv.h:100</a></div></div>
-<div class="ttc" id="achsv_8h_ac39c1e3818b2596555367436c77f9ef0_html_ac39c1e3818b2596555367436c77f9ef0"><div class="ttname"><a href="../../d8/dd0/chsv_8h_ac39c1e3818b2596555367436c77f9ef0.html#ac39c1e3818b2596555367436c77f9ef0">HUE_ORANGE</a></div><div class="ttdeci">@ HUE_ORANGE</div><div class="ttdoc">Orange (45°)</div><div class="ttdef"><b>Definition</b> <a href="../../d2/d4f/hsv_8h_source.html#l00099">hsv.h:99</a></div></div>
-<div class="ttc" id="achsv_8h_ad9ddfe125d67fbae6d1d97d81e165113_html_ad9ddfe125d67fbae6d1d97d81e165113"><div class="ttname"><a href="../../d8/dd0/chsv_8h_ad9ddfe125d67fbae6d1d97d81e165113.html#ad9ddfe125d67fbae6d1d97d81e165113">HUE_PURPLE</a></div><div class="ttdeci">@ HUE_PURPLE</div><div class="ttdoc">Purple (270°)</div><div class="ttdef"><b>Definition</b> <a href="../../d2/d4f/hsv_8h_source.html#l00104">hsv.h:104</a></div></div>
+<div class="line"><span class="lineno">  712</span>    } <span class="keywordflow">else</span> <span class="keywordflow">if</span> ( highest == g) {</div>
+<div class="line"><span class="lineno">  713</span>        <span class="comment">// Green is highest</span></div>
+<div class="line"><span class="lineno">  714</span>        <span class="comment">// Hue could be Yellow-Green, Green-Aqua</span></div>
+<div class="line"><span class="lineno">  715</span>        <span class="keywordflow">if</span>( b == 0) {</div>
+<div class="line"><span class="lineno">  716</span>            <span class="comment">// if Blue is zero, we&#39;re in Yellow-Green</span></div>
+<div class="line"><span class="lineno">  717</span>            <span class="comment">//   G = 171..255</span></div>
+<div class="line"><span class="lineno">  718</span>            <span class="comment">//   R = 171..  0</span></div>
+<div class="line"><span class="lineno">  719</span>            h = <a class="code hl_enumvalue" href="../../d8/dd0/chsv_8h_a86d36d3b9102a626e09437ac24ddb39c.html#a86d36d3b9102a626e09437ac24ddb39c">HUE_YELLOW</a>;</div>
+<div class="line"><span class="lineno">  720</span>            <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> radj = scale8( qsub8(171,r),   47); <span class="comment">//171..0 -&gt; 0..171 -&gt; 0..31</span></div>
+<div class="line"><span class="lineno">  721</span>            <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> gadj = scale8( qsub8(g,171),   96); <span class="comment">//171..255 -&gt; 0..84 -&gt; 0..31;</span></div>
+<div class="line"><span class="lineno">  722</span>            <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> rgadj = radj + gadj;</div>
+<div class="line"><span class="lineno">  723</span>            <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> hueadv = rgadj / 2;</div>
+<div class="line"><span class="lineno">  724</span>            h += hueadv;</div>
+<div class="line"><span class="lineno">  725</span>            <span class="comment">//h += scale8( qadd8( 4, qadd8((g - 128), (128 - r))),</span></div>
+<div class="line"><span class="lineno">  726</span>            <span class="comment">//             FIXFRAC8(32,255)); //</span></div>
+<div class="line"><span class="lineno">  727</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  728</span>            <span class="comment">// if Blue is nonzero we&#39;re in Green-Aqua</span></div>
+<div class="line"><span class="lineno">  729</span>            <span class="keywordflow">if</span>( (g-b) &gt; b) {</div>
+<div class="line"><span class="lineno">  730</span>                h = <a class="code hl_enumvalue" href="../../d8/dd0/chsv_8h_a7dd2fe1a5927b6a54d04a6726bc38688.html#a7dd2fe1a5927b6a54d04a6726bc38688">HUE_GREEN</a>;</div>
+<div class="line"><span class="lineno">  731</span>                h += scale8( b, <a class="code hl_define" href="../../d6/db5/hsv2rgb_8cpp_8hpp_a1be0cbec46d1a717dc14ccc5e1195f9a.html#a1be0cbec46d1a717dc14ccc5e1195f9a">FIXFRAC8</a>(32,85));</div>
+<div class="line"><span class="lineno">  732</span>            } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  733</span>                h = <a class="code hl_enumvalue" href="../../d8/dd0/chsv_8h_a450fdef941bd9df9922c7ec763dcfe1c.html#a450fdef941bd9df9922c7ec763dcfe1c">HUE_AQUA</a>;</div>
+<div class="line"><span class="lineno">  734</span>                h += scale8( qsub8(b, 85), <a class="code hl_define" href="../../d6/db5/hsv2rgb_8cpp_8hpp_a1be0cbec46d1a717dc14ccc5e1195f9a.html#a1be0cbec46d1a717dc14ccc5e1195f9a">FIXFRAC8</a>(8,42));</div>
+<div class="line"><span class="lineno">  735</span>            }</div>
+<div class="line"><span class="lineno">  736</span>        }</div>
+<div class="line"><span class="lineno">  737</span> </div>
+<div class="line"><span class="lineno">  738</span>    } <span class="keywordflow">else</span> <span class="comment">/* highest == b */</span> {</div>
+<div class="line"><span class="lineno">  739</span>        <span class="comment">// Blue is highest</span></div>
+<div class="line"><span class="lineno">  740</span>        <span class="comment">// Hue could be Aqua/Blue-Blue, Blue-Purple, Purple-Pink</span></div>
+<div class="line"><span class="lineno">  741</span>        <span class="keywordflow">if</span>( r == 0) {</div>
+<div class="line"><span class="lineno">  742</span>            <span class="comment">// if red is zero, we&#39;re in Aqua/Blue-Blue</span></div>
+<div class="line"><span class="lineno">  743</span>            h = <a class="code hl_enumvalue" href="../../d8/dd0/chsv_8h_a450fdef941bd9df9922c7ec763dcfe1c.html#a450fdef941bd9df9922c7ec763dcfe1c">HUE_AQUA</a> + ((<a class="code hl_enumvalue" href="../../d8/dd0/chsv_8h_a0bc03fd4cb114300a7ae711b977a7dbc.html#a0bc03fd4cb114300a7ae711b977a7dbc">HUE_BLUE</a> - <a class="code hl_enumvalue" href="../../d8/dd0/chsv_8h_a450fdef941bd9df9922c7ec763dcfe1c.html#a450fdef941bd9df9922c7ec763dcfe1c">HUE_AQUA</a>) / 4);</div>
+<div class="line"><span class="lineno">  744</span>            h += scale8( qsub8(b, 128), <a class="code hl_define" href="../../d6/db5/hsv2rgb_8cpp_8hpp_a1be0cbec46d1a717dc14ccc5e1195f9a.html#a1be0cbec46d1a717dc14ccc5e1195f9a">FIXFRAC8</a>(24,128));</div>
+<div class="line"><span class="lineno">  745</span>        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> ( (b-r) &gt; r) {</div>
+<div class="line"><span class="lineno">  746</span>            <span class="comment">// B-R &gt; R, we&#39;re in Blue-Purple</span></div>
+<div class="line"><span class="lineno">  747</span>            h = <a class="code hl_enumvalue" href="../../d8/dd0/chsv_8h_a0bc03fd4cb114300a7ae711b977a7dbc.html#a0bc03fd4cb114300a7ae711b977a7dbc">HUE_BLUE</a>;</div>
+<div class="line"><span class="lineno">  748</span>            h += scale8( r, <a class="code hl_define" href="../../d6/db5/hsv2rgb_8cpp_8hpp_a1be0cbec46d1a717dc14ccc5e1195f9a.html#a1be0cbec46d1a717dc14ccc5e1195f9a">FIXFRAC8</a>(32,85));</div>
+<div class="line"><span class="lineno">  749</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  750</span>            <span class="comment">// B-R &lt; R, we&#39;re in Purple-Pink</span></div>
+<div class="line"><span class="lineno">  751</span>            h = <a class="code hl_enumvalue" href="../../d8/dd0/chsv_8h_ad9ddfe125d67fbae6d1d97d81e165113.html#ad9ddfe125d67fbae6d1d97d81e165113">HUE_PURPLE</a>;</div>
+<div class="line"><span class="lineno">  752</span>            h += scale8( qsub8(r, 85), <a class="code hl_define" href="../../d6/db5/hsv2rgb_8cpp_8hpp_a1be0cbec46d1a717dc14ccc5e1195f9a.html#a1be0cbec46d1a717dc14ccc5e1195f9a">FIXFRAC8</a>(32,85));</div>
+<div class="line"><span class="lineno">  753</span>        }</div>
+<div class="line"><span class="lineno">  754</span>    }</div>
+<div class="line"><span class="lineno">  755</span> </div>
+<div class="line"><span class="lineno">  756</span>    h += 1;</div>
+<div class="line"><span class="lineno">  757</span>    <span class="keywordflow">return</span> <a class="code hl_typedef" href="../../dd/dc7/group___h_s_v2_r_g_b_ga259e6d3ae92ca32d2390e7d8eaa1c7ae.html#ga259e6d3ae92ca32d2390e7d8eaa1c7ae">CHSV</a>( h, s, v);</div>
+<div class="line"><span class="lineno">  758</span>}</div>
+<div class="ttc" id="achsv_8h_a0bc03fd4cb114300a7ae711b977a7dbc_html_a0bc03fd4cb114300a7ae711b977a7dbc"><div class="ttname"><a href="../../d8/dd0/chsv_8h_a0bc03fd4cb114300a7ae711b977a7dbc.html#a0bc03fd4cb114300a7ae711b977a7dbc">HUE_BLUE</a></div><div class="ttdeci">@ HUE_BLUE</div><div class="ttdoc">Blue (225°)</div><div class="ttdef"><b>Definition</b> <a href="../../d2/d4f/hsv_8h_source.html#l00129">hsv.h:129</a></div></div>
+<div class="ttc" id="achsv_8h_a3dc911111328f70b1472cb2d81412be4_html_a3dc911111328f70b1472cb2d81412be4"><div class="ttname"><a href="../../d8/dd0/chsv_8h_a3dc911111328f70b1472cb2d81412be4.html#a3dc911111328f70b1472cb2d81412be4">HUE_RED</a></div><div class="ttdeci">@ HUE_RED</div><div class="ttdoc">Red (0°)</div><div class="ttdef"><b>Definition</b> <a href="../../d2/d4f/hsv_8h_source.html#l00124">hsv.h:124</a></div></div>
+<div class="ttc" id="achsv_8h_a450fdef941bd9df9922c7ec763dcfe1c_html_a450fdef941bd9df9922c7ec763dcfe1c"><div class="ttname"><a href="../../d8/dd0/chsv_8h_a450fdef941bd9df9922c7ec763dcfe1c.html#a450fdef941bd9df9922c7ec763dcfe1c">HUE_AQUA</a></div><div class="ttdeci">@ HUE_AQUA</div><div class="ttdoc">Aqua (180°)</div><div class="ttdef"><b>Definition</b> <a href="../../d2/d4f/hsv_8h_source.html#l00128">hsv.h:128</a></div></div>
+<div class="ttc" id="achsv_8h_a515793a3d9d94a597202b1e0d0eeb0b6_html_a515793a3d9d94a597202b1e0d0eeb0b6"><div class="ttname"><a href="../../d8/dd0/chsv_8h_a515793a3d9d94a597202b1e0d0eeb0b6.html#a515793a3d9d94a597202b1e0d0eeb0b6">HUE_PINK</a></div><div class="ttdeci">@ HUE_PINK</div><div class="ttdoc">Pink (315°)</div><div class="ttdef"><b>Definition</b> <a href="../../d2/d4f/hsv_8h_source.html#l00131">hsv.h:131</a></div></div>
+<div class="ttc" id="achsv_8h_a7dd2fe1a5927b6a54d04a6726bc38688_html_a7dd2fe1a5927b6a54d04a6726bc38688"><div class="ttname"><a href="../../d8/dd0/chsv_8h_a7dd2fe1a5927b6a54d04a6726bc38688.html#a7dd2fe1a5927b6a54d04a6726bc38688">HUE_GREEN</a></div><div class="ttdeci">@ HUE_GREEN</div><div class="ttdoc">Green (135°)</div><div class="ttdef"><b>Definition</b> <a href="../../d2/d4f/hsv_8h_source.html#l00127">hsv.h:127</a></div></div>
+<div class="ttc" id="achsv_8h_a86d36d3b9102a626e09437ac24ddb39c_html_a86d36d3b9102a626e09437ac24ddb39c"><div class="ttname"><a href="../../d8/dd0/chsv_8h_a86d36d3b9102a626e09437ac24ddb39c.html#a86d36d3b9102a626e09437ac24ddb39c">HUE_YELLOW</a></div><div class="ttdeci">@ HUE_YELLOW</div><div class="ttdoc">Yellow (90°)</div><div class="ttdef"><b>Definition</b> <a href="../../d2/d4f/hsv_8h_source.html#l00126">hsv.h:126</a></div></div>
+<div class="ttc" id="achsv_8h_ac39c1e3818b2596555367436c77f9ef0_html_ac39c1e3818b2596555367436c77f9ef0"><div class="ttname"><a href="../../d8/dd0/chsv_8h_ac39c1e3818b2596555367436c77f9ef0.html#ac39c1e3818b2596555367436c77f9ef0">HUE_ORANGE</a></div><div class="ttdeci">@ HUE_ORANGE</div><div class="ttdoc">Orange (45°)</div><div class="ttdef"><b>Definition</b> <a href="../../d2/d4f/hsv_8h_source.html#l00125">hsv.h:125</a></div></div>
+<div class="ttc" id="achsv_8h_ad9ddfe125d67fbae6d1d97d81e165113_html_ad9ddfe125d67fbae6d1d97d81e165113"><div class="ttname"><a href="../../d8/dd0/chsv_8h_ad9ddfe125d67fbae6d1d97d81e165113.html#ad9ddfe125d67fbae6d1d97d81e165113">HUE_PURPLE</a></div><div class="ttdeci">@ HUE_PURPLE</div><div class="ttdoc">Purple (270°)</div><div class="ttdef"><b>Definition</b> <a href="../../d2/d4f/hsv_8h_source.html#l00130">hsv.h:130</a></div></div>
 <div class="ttc" id="agroup___h_s_v2_r_g_b_ga259e6d3ae92ca32d2390e7d8eaa1c7ae_html_ga259e6d3ae92ca32d2390e7d8eaa1c7ae"><div class="ttname"><a href="../../dd/dc7/group___h_s_v2_r_g_b_ga259e6d3ae92ca32d2390e7d8eaa1c7ae.html#ga259e6d3ae92ca32d2390e7d8eaa1c7ae">CHSV</a></div><div class="ttdeci">fl::hsv8 CHSV</div><div class="ttdef"><b>Definition</b> <a href="../../d8/dd0/chsv_8h_source.html#l00011">chsv.h:11</a></div></div>
-<div class="ttc" id="ahsv2rgb_8cpp_8hpp_a1be0cbec46d1a717dc14ccc5e1195f9a_html_a1be0cbec46d1a717dc14ccc5e1195f9a"><div class="ttname"><a href="../../d6/db5/hsv2rgb_8cpp_8hpp_a1be0cbec46d1a717dc14ccc5e1195f9a.html#a1be0cbec46d1a717dc14ccc5e1195f9a">FIXFRAC8</a></div><div class="ttdeci">#define FIXFRAC8(N, D)</div><div class="ttdoc">Convert a fractional input into a constant.</div><div class="ttdef"><b>Definition</b> <a href="../../d6/db5/hsv2rgb_8cpp_8hpp_source.html#l00546">hsv2rgb.cpp.hpp:546</a></div></div>
+<div class="ttc" id="ahsv2rgb_8cpp_8hpp_a1be0cbec46d1a717dc14ccc5e1195f9a_html_a1be0cbec46d1a717dc14ccc5e1195f9a"><div class="ttname"><a href="../../d6/db5/hsv2rgb_8cpp_8hpp_a1be0cbec46d1a717dc14ccc5e1195f9a.html#a1be0cbec46d1a717dc14ccc5e1195f9a">FIXFRAC8</a></div><div class="ttdeci">#define FIXFRAC8(N, D)</div><div class="ttdoc">Convert a fractional input into a constant.</div><div class="ttdef"><b>Definition</b> <a href="../../d6/db5/hsv2rgb_8cpp_8hpp_source.html#l00554">hsv2rgb.cpp.hpp:554</a></div></div>
 <div class="ttc" id="anamespacefl_a058ceeac48f181da463c2ba07401292c_html_a058ceeac48f181da463c2ba07401292c"><div class="ttname"><a href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a></div><div class="ttdeci">unsigned char u8</div><div class="ttdef"><b>Definition</b> <a href="../../df/dd8/stdint_8h_source.html#l00131">stdint.h:131</a></div></div>
+<div class="ttc" id="anamespacefl_abb8ff746cce2b11a90718afba1cfec1b_html_abb8ff746cce2b11a90718afba1cfec1b"><div class="ttname"><a href="../../d4/d36/namespacefl_abb8ff746cce2b11a90718afba1cfec1b.html#abb8ff746cce2b11a90718afba1cfec1b">fl::g</a></div><div class="ttdeci">InputGamut g</div><div class="ttdef"><b>Definition</b> <a href="../../df/df8/fl_2gfx_2rgbw_8h_source.html#l00124">rgbw.h:124</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d6/db5/hsv2rgb_8cpp_8hpp_source.html#l00546">FIXFRAC8</a>, <a class="el" href="../../d2/d4f/hsv_8h_source.html#l00102">HUE_AQUA</a>, <a class="el" href="../../d2/d4f/hsv_8h_source.html#l00103">HUE_BLUE</a>, <a class="el" href="../../d2/d4f/hsv_8h_source.html#l00101">HUE_GREEN</a>, <a class="el" href="../../d2/d4f/hsv_8h_source.html#l00099">HUE_ORANGE</a>, <a class="el" href="../../d2/d4f/hsv_8h_source.html#l00105">HUE_PINK</a>, <a class="el" href="../../d2/d4f/hsv_8h_source.html#l00104">HUE_PURPLE</a>, <a class="el" href="../../d2/d4f/hsv_8h_source.html#l00098">HUE_RED</a>, and <a class="el" href="../../d2/d4f/hsv_8h_source.html#l00100">HUE_YELLOW</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/db5/hsv2rgb_8cpp_8hpp_source.html#l00554">FIXFRAC8</a>, <a class="el" href="../../d2/d4f/hsv_8h_source.html#l00128">HUE_AQUA</a>, <a class="el" href="../../d2/d4f/hsv_8h_source.html#l00129">HUE_BLUE</a>, <a class="el" href="../../d2/d4f/hsv_8h_source.html#l00127">HUE_GREEN</a>, <a class="el" href="../../d2/d4f/hsv_8h_source.html#l00125">HUE_ORANGE</a>, <a class="el" href="../../d2/d4f/hsv_8h_source.html#l00131">HUE_PINK</a>, <a class="el" href="../../d2/d4f/hsv_8h_source.html#l00130">HUE_PURPLE</a>, <a class="el" href="../../d2/d4f/hsv_8h_source.html#l00124">HUE_RED</a>, and <a class="el" href="../../d2/d4f/hsv_8h_source.html#l00126">HUE_YELLOW</a>.</p>
 
 </div>
 </div>
@@ -336,7 +355,7 @@ $(function(){initNavTree('dd/dc7/group___h_s_v2_r_g_b_gab3d6aa6b1a86a5e9bb820c55
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dd/dc7/group___h_s_v2_r_g_b.html">HSV to RGB Conversion Functions</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:02 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

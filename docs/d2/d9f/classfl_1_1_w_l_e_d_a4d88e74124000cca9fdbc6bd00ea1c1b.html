@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -132,13 +132,15 @@ $(function(){initNavTree('d2/d9f/classfl_1_1_w_l_e_d_a4d88e74124000cca9fdbc6bd00
 </dl>
 <p>Called when <a class="el" href="../../dc/ddb/classfl_1_1_remote.html" title="JSON-RPC server with scheduling support.">Remote</a> has a response to send. Logs FL_ERROR to indicate this needs to be implemented. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d3/da5/wled_8cpp_8hpp_source.html#l00020">20</a> of file <a class="el" href="../../d3/da5/wled_8cpp_8hpp_source.html">wled.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   20</span>                                                  {</div>
-<div class="line"><span class="lineno">   21</span>    <a class="code hl_define" href="../../d7/d7f/log_8h_a87d1cd42c16d2496128dd8b10bd737e8.html#a87d1cd42c16d2496128dd8b10bd737e8">FL_ERROR</a>(<span class="stringliteral">&quot;WLED::stubResponseSink: Not implemented - provide a real ResponseSink callback&quot;</span>);</div>
-<div class="line"><span class="lineno">   22</span>}</div>
-<div class="ttc" id="alog_8h_a87d1cd42c16d2496128dd8b10bd737e8_html_a87d1cd42c16d2496128dd8b10bd737e8"><div class="ttname"><a href="../../d7/d7f/log_8h_a87d1cd42c16d2496128dd8b10bd737e8.html#a87d1cd42c16d2496128dd8b10bd737e8">FL_ERROR</a></div><div class="ttdeci">#define FL_ERROR(X)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00219">log.h:219</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d3/da5/wled_8cpp_8hpp_source.html#l00021">21</a> of file <a class="el" href="../../d3/da5/wled_8cpp_8hpp_source.html">wled.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   21</span>                                                  {</div>
+<div class="line"><span class="lineno">   22</span>    <a class="code hl_define" href="../../d4/d54/compiler__control_8h_a3600073df3d019f0b6288e9d59b3e883.html#a3600073df3d019f0b6288e9d59b3e883">FL_UNUSED</a>(response);  <span class="comment">// only consumed by FL_ERROR, a no-op on small platforms</span></div>
+<div class="line"><span class="lineno">   23</span>    <a class="code hl_define" href="../../d7/d7f/log_8h_aa90e3b2c36c6225140f46a86c6ac19e2.html#aa90e3b2c36c6225140f46a86c6ac19e2">FL_ERROR</a>(<span class="stringliteral">&quot;WLED::stubResponseSink: Not implemented - provide a real ResponseSink callback&quot;</span>);</div>
+<div class="line"><span class="lineno">   24</span>}</div>
+<div class="ttc" id="acompiler__control_8h_a3600073df3d019f0b6288e9d59b3e883_html_a3600073df3d019f0b6288e9d59b3e883"><div class="ttname"><a href="../../d4/d54/compiler__control_8h_a3600073df3d019f0b6288e9d59b3e883.html#a3600073df3d019f0b6288e9d59b3e883">FL_UNUSED</a></div><div class="ttdeci">#define FL_UNUSED(x)</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d54/compiler__control_8h_source.html#l00905">compiler_control.h:905</a></div></div>
+<div class="ttc" id="alog_8h_aa90e3b2c36c6225140f46a86c6ac19e2_html_aa90e3b2c36c6225140f46a86c6ac19e2"><div class="ttname"><a href="../../d7/d7f/log_8h_aa90e3b2c36c6225140f46a86c6ac19e2.html#aa90e3b2c36c6225140f46a86c6ac19e2">FL_ERROR</a></div><div class="ttdeci">#define FL_ERROR(...)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00372">log.h:372</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d7/d7f/log_8h_source.html#l00219">FL_ERROR</a>.</p>
+<p class="reference">References <a class="el" href="../../d7/d7f/log_8h_source.html#l00372">FL_ERROR</a>, and <a class="el" href="../../d4/d54/compiler__control_8h_source.html#l00905">FL_UNUSED</a>.</p>
 
 </div>
 </div>
@@ -149,7 +151,7 @@ $(function(){initNavTree('d2/d9f/classfl_1_1_w_l_e_d_a4d88e74124000cca9fdbc6bd00
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d2/d9f/classfl_1_1_w_l_e_d.html">WLED</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:07 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:10 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

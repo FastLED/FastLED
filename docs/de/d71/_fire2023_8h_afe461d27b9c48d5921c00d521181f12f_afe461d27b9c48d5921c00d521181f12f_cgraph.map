@@ -2,7 +2,7 @@
 <area shape="rect" id="Node000001" title=" " alt="" coords="5,92,56,117"/>
 <area shape="rect" id="Node000002" href="$de/d71/_fire2023_8h_abe327b12b434120ecf20ae3f46800983.html#abe327b12b434120ecf20ae3f46800983" title=" " alt="" coords="104,55,183,80"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="56,94,90,82,92,87,57,99"/>
-<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a" title="Universal millisecond timer &#45; returns milliseconds since system startup." alt="" coords="106,128,181,153"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_a3c0ba5842bfd029c404a38c8df2315f3.html#a3c0ba5842bfd029c404a38c8df2315f3" title="Universal millisecond timer &#45; returns milliseconds since system startup." alt="" coords="106,128,181,153"/>
 <area shape="poly" id="edge6_Node000001_Node000008" title=" " alt="" coords="57,110,94,122,92,127,56,115"/>
 <area shape="rect" id="Node000003" href="$d1/dfb/colorutils_8h_a3d488dd1e2d27e99307310527e51cad3.html#a3d488dd1e2d27e99307310527e51cad3" title=" " alt="" coords="231,5,365,31"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="182,52,244,32,245,37,184,57"/>
@@ -10,7 +10,7 @@
 <area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="183,65,245,65,245,70,183,70"/>
 <area shape="rect" id="Node000007" href="$de/d71/_fire2023_8h_a540e832f2b3e0101e36d4155f5cfe6b9.html#a540e832f2b3e0101e36d4155f5cfe6b9" title=" " alt="" coords="279,104,317,129"/>
 <area shape="poly" id="edge5_Node000002_Node000007" title=" " alt="" coords="184,77,267,104,265,109,182,82"/>
-<area shape="rect" id="Node000005" href="$d8/df9/group___noise_generation_gae021f30d62fea75ea1397e1a81b28a59.html#gae021f30d62fea75ea1397e1a81b28a59" title=" " alt="" coords="413,55,521,80"/>
+<area shape="rect" id="Node000005" href="$d8/df9/group___noise_generation_gae021f30d62fea75ea1397e1a81b28a59.html#gae021f30d62fea75ea1397e1a81b28a59" title="16&#45;bit, fixed point implementation of Perlin&#39;s noise without scaling." alt="" coords="413,55,521,80"/>
 <area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="337,65,399,65,399,70,337,70"/>
 <area shape="poly" id="edge7_Node000008_Node000008" title=" " alt="" coords="124,129,120,120,122,110,130,104,143,101,159,105,166,113,162,116,156,109,143,107,132,109,126,113,125,119,129,127"/>
 </map>

@@ -1,0 +1,19 @@
+digraph "fl::third_party::nsgif__parse_header"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::third_party::nsgif\l__parse_header",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Read GIF header."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::third_party::nsgif\l_data_scan",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d86/namespacefl_1_1third__party_ac0c0b97e37911e82ef3974b049784c33.html#ac0c0b97e37911e82ef3974b049784c33",tooltip="Scan the source image data."];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::third_party::Software\lGifDecoder::loadMoreData",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d7a/classfl_1_1third__party_1_1_software_gif_decoder_a23415e85e4d756c59dffdda7f53648e5.html#a23415e85e4d756c59dffdda7f53648e5",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::third_party::Software\lGifDecoder::begin",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d7a/classfl_1_1third__party_1_1_software_gif_decoder_a51c0546955c88a0302d420297e41dcd8.html#a51c0546955c88a0302d420297e41dcd8",tooltip=" "];
+  Node3 -> Node5 [id="edge4_Node000003_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::third_party::Software\lGifDecoder::decode",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d7a/classfl_1_1third__party_1_1_software_gif_decoder_a1d7b183d4ccf0be989f4e1a366bfa666.html#a1d7b183d4ccf0be989f4e1a366bfa666",tooltip=" "];
+  Node5 -> Node5 [id="edge5_Node000005_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+}

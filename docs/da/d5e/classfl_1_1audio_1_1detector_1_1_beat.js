@@ -1,7 +1,7 @@
 var classfl_1_1audio_1_1detector_1_1_beat =
 [
-    [ "Beat", "da/d5e/classfl_1_1audio_1_1detector_1_1_beat_a5d0c0991a3fca6c956d5bd53566edf8e.html#a5d0c0991a3fca6c956d5bd53566edf8e", null ],
-    [ "~Beat", "da/d5e/classfl_1_1audio_1_1detector_1_1_beat_a8015bb04d312d1e0b4efba50c7810400.html#a8015bb04d312d1e0b4efba50c7810400", null ],
+    [ "Beat", "da/d5e/classfl_1_1audio_1_1detector_1_1_beat_a98dae7a8a99b751bb97317427f007069.html#a98dae7a8a99b751bb97317427f007069", null ],
+    [ "~Beat", "da/d5e/classfl_1_1audio_1_1detector_1_1_beat_af83682b803c2eb9d1d8ee48756c31014.html#af83682b803c2eb9d1d8ee48756c31014", null ],
     [ "calculateSpectralFlux", "da/d5e/classfl_1_1audio_1_1detector_1_1_beat_a701d977e14d16a120397bf86a8c62b2e.html#a701d977e14d16a120397bf86a8c62b2e", null ],
     [ "detectBeat", "da/d5e/classfl_1_1audio_1_1detector_1_1_beat_a26a843e43155e71abbbe19e1f95e2aaf.html#a26a843e43155e71abbbe19e1f95e2aaf", null ],
     [ "fireCallbacks", "da/d5e/classfl_1_1audio_1_1detector_1_1_beat_acdda306ca7ded24b10fc3063595ab3b3.html#acdda306ca7ded24b10fc3063595ab3b3", null ],

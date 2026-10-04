@@ -85,7 +85,7 @@ var sectionId = 'dynsection-0';
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d8/df9/group___noise_generation_gaadae53dd47894ba16f988d2afb3a4aa9.html#gaadae53dd47894ba16f988d2afb3a4aa9" target="_top" xlink:title=" ">
+<g id="a_Node000003"><a xlink:href="../../d8/df9/group___noise_generation_gaadae53dd47894ba16f988d2afb3a4aa9.html#gaadae53dd47894ba16f988d2afb3a4aa9" target="_top" xlink:title="16&#45;bit, fixed point implementation of Perlin&#39;s noise without scaling.">
 <polygon fill="white" stroke="#666666" points="339,-351 258,-351 258,-332 339,-332 339,-351"/>
 <text text-anchor="middle" x="298.5" y="-339" font-family="Helvetica,sans-Serif" font-size="10.00">inoise16_raw</text>
 </a>
@@ -103,7 +103,7 @@ var sectionId = 'dynsection-0';
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../d8/df9/group___noise_generation_gae021f30d62fea75ea1397e1a81b28a59.html#gae021f30d62fea75ea1397e1a81b28a59" target="_top" xlink:title=" ">
+<g id="a_Node000004"><a xlink:href="../../d8/df9/group___noise_generation_gae021f30d62fea75ea1397e1a81b28a59.html#gae021f30d62fea75ea1397e1a81b28a59" target="_top" xlink:title="16&#45;bit, fixed point implementation of Perlin&#39;s noise without scaling.">
 <polygon fill="white" stroke="#666666" points="339,-314 258,-314 258,-295 339,-295 339,-314"/>
 <text text-anchor="middle" x="298.5" y="-302" font-family="Helvetica,sans-Serif" font-size="10.00">inoise16_raw</text>
 </a>
@@ -157,7 +157,7 @@ var sectionId = 'dynsection-0';
 <!-- Node6 -->
 <g id="Node000006" class="node">
 <title>Node6</title>
-<g id="a_Node000006"><a xlink:href="../../d8/df9/group___noise_generation_gad2c041d7b65808890265ed62a75555bb.html#gad2c041d7b65808890265ed62a75555bb" target="_top" xlink:title=" ">
+<g id="a_Node000006"><a xlink:href="../../d8/df9/group___noise_generation_gad2c041d7b65808890265ed62a75555bb.html#gad2c041d7b65808890265ed62a75555bb" target="_top" xlink:title="16&#45;bit, fixed point implementation of Perlin&#39;s noise.">
 <polygon fill="white" stroke="#666666" points="222,-333 164,-333 164,-314 222,-314 222,-333"/>
 <text text-anchor="middle" x="193" y="-321" font-family="Helvetica,sans-Serif" font-size="10.00">inoise16</text>
 </a>

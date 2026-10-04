@@ -30,7 +30,7 @@ digraph "fl/gfx/hsv16.h"
   Node9 -> Node11 [id="edge13_Node000009_Node000011",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node11 [id="Node000011",label="noise.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d31/noise_8h.html",tooltip="Functions to generate and fill arrays with noise."];
   Node11 -> Node12 [id="edge14_Node000011_Node000012",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node12 [id="Node000012",label="FastLED.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$db/d97/_fast_l_e_d_8h.html",tooltip="central include file for FastLED, defines the CFastLED class/object"];
+  Node12 [id="Node000012",label="FastLED.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d6/d64/fastled_8h.html",tooltip="central include file for FastLED, defines the CFastLED class/object"];
   Node11 -> Node16 [id="edge15_Node000011_Node000016",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node16 [id="Node000016",label="noisegen.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d8/d10/noisegen_8h.html",tooltip="Noise generation classes."];
   Node16 -> Node10 [id="edge16_Node000016_Node000010",dir="back",color="steelblue1",style="solid",tooltip=" "];

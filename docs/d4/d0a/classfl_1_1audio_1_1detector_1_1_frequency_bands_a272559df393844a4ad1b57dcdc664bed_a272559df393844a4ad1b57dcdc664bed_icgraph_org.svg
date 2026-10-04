@@ -21,7 +21,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../d4/d0a/classfl_1_1audio_1_1detector_1_1_frequency_bands_a1658e5ac4d9ad508b8c6ce603f6bf22e.html#a1658e5ac4d9ad508b8c6ce603f6bf22e" target="_top" xlink:title=" ">
+<g id="a_Node000002"><a xlink:href="../../d4/d0a/classfl_1_1audio_1_1detector_1_1_frequency_bands_a10bcb7076f1f0d5104024b1b5af5d726.html#a10bcb7076f1f0d5104024b1b5af5d726" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="167,-41 0,-41 0,0 167,0 167,-41"/>
 <text text-anchor="start" x="8" y="-29" font-family="Helvetica,sans-Serif" font-size="10.00">fl::audio::detector</text>
 <text text-anchor="start" x="8" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">::FrequencyBands::~Frequency</text>

@@ -1,15 +1,19 @@
 <map id="CFastLED::setTemperature" name="CFastLED::setTemperature">
 <area shape="rect" id="Node000001" title="Set a global color temperature." alt="" coords="5,77,197,102"/>
-<area shape="rect" id="Node000002" href="$d8/da0/classfl_1_1_c_l_e_d_controller_ad9e0dfb8b8b333d9e48c7695b202710c.html#ad9e0dfb8b8b333d9e48c7695b202710c" title="Get the first LED controller in the linked list of controllers." alt="" coords="245,5,381,45"/>
+<area shape="rect" id="Node000002" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a4d10d41f89ce46d06fd504c2019dc291.html#a4d10d41f89ce46d06fd504c2019dc291" title="Get the first LED controller in the linked list of controllers." alt="" coords="245,5,381,45"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="144,74,232,47,234,52,145,79"/>
-<area shape="rect" id="Node000006" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a87abe437742b3f2b06943fafd4404aef.html#a87abe437742b3f2b06943fafd4404aef" title="Get the next controller in the linked list after this one." alt="" coords="245,69,381,109"/>
+<area shape="rect" id="Node000006" href="$d8/da0/classfl_1_1_c_l_e_d_controller_ad9abf4aa42ae3bb2876f82857514a7be.html#ad9abf4aa42ae3bb2876f82857514a7be" title="Get the next controller in the linked list after this one." alt="" coords="245,69,381,109"/>
 <area shape="poly" id="edge4_Node000001_Node000006" title=" " alt="" coords="198,87,232,87,232,92,198,92"/>
-<area shape="rect" id="Node000007" href="$d8/da0/classfl_1_1_c_l_e_d_controller_ad103f413ebe589774651e8a5c9f352a0.html#ad103f413ebe589774651e8a5c9f352a0" title="Set the color temperature, aka white point, for this controller." alt="" coords="245,133,381,173"/>
+<area shape="rect" id="Node000007" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a436416f75884d028d60cc2de24480d81.html#a436416f75884d028d60cc2de24480d81" title="Set the color temperature, aka white point, for this controller." alt="" coords="245,133,381,173"/>
 <area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="145,100,234,127,232,132,144,105"/>
-<area shape="rect" id="Node000003" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a7e91fc8f83d62c9da5e5c3d6d1bc10ce.html#a7e91fc8f83d62c9da5e5c3d6d1bc10ce" title="Protected constructor with registration mode." alt="" coords="429,69,565,109"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="372,43,427,62,425,67,371,48"/>
-<area shape="rect" id="Node000004" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a9e51518d1427463dffd596c69c6f3e46.html#a9e51518d1427463dffd596c69c6f3e46" title="Add this controller to the linked list." alt="" coords="613,69,749,109"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="566,87,600,87,600,92,566,92"/>
-<area shape="poly" id="edge5_Node000006_Node000003" title=" " alt="" coords="382,87,416,87,416,92,382,92"/>
-<area shape="poly" id="edge7_Node000007_Node000003" title=" " alt="" coords="371,131,425,111,427,116,372,136"/>
+<area shape="rect" id="Node000003" href="$d8/da0/classfl_1_1_c_l_e_d_controller_ae0828dffacb43dca565ddf8145153ed0.html#ae0828dffacb43dca565ddf8145153ed0" title="Protected constructor with registration mode." alt="" coords="465,65,601,105"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="382,41,452,61,450,66,381,46"/>
+<area shape="rect" id="Node000004" href="$d8/da0/classfl_1_1_c_l_e_d_controller_af0c5f56a02ad4e919df8181d3b267390.html#af0c5f56a02ad4e919df8181d3b267390" title="Add this controller to the linked list." alt="" coords="693,65,829,105"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="601,83,680,83,680,88,601,88"/>
+<area shape="poly" id="edge5_Node000006_Node000003" title=" " alt="" coords="381,85,450,84,451,89,381,91"/>
+<area shape="poly" id="edge7_Node000007_Node000003" title=" " alt="" coords="378,131,454,107,456,112,379,136"/>
+<area shape="rect" id="Node000008" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a86cf56f34d65e24324a27d7bde59a6cd.html#a86cf56f34d65e24324a27d7bde59a6cd" title=" " alt="" coords="429,130,636,185"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="381,152,416,153,416,158,381,157"/>
+<area shape="rect" id="Node000009" href="$d8/da0/classfl_1_1_c_l_e_d_controller_aa52e32cc0776be75975f5c5939ecb0f2.html#aa52e32cc0776be75975f5c5939ecb0f2" title="Template&#45;derived static&#45;profile controllers override this hook." alt="" coords="684,137,839,177"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="636,155,671,155,671,160,636,160"/>
 </map>

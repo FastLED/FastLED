@@ -1,0 +1,14 @@
+<map id="fl::CLEDController::setTemperature" name="fl::CLEDController::setTemperature">
+<area shape="rect" id="Node000001" title="Set the color temperature, aka white point, for this controller." alt="" coords="5,91,141,131"/>
+<area shape="rect" id="Node000002" href="$d8/da0/classfl_1_1_c_l_e_d_controller_ae0828dffacb43dca565ddf8145153ed0.html#ae0828dffacb43dca565ddf8145153ed0" title="Protected constructor with registration mode." alt="" coords="225,55,361,95"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="141,97,211,85,212,91,142,102"/>
+<area shape="rect" id="Node000005" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a86cf56f34d65e24324a27d7bde59a6cd.html#a86cf56f34d65e24324a27d7bde59a6cd" title=" " alt="" coords="189,119,396,174"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="142,119,176,125,176,130,141,124"/>
+<area shape="rect" id="Node000003" href="$d8/da0/classfl_1_1_c_l_e_d_controller_af0c5f56a02ad4e919df8181d3b267390.html#af0c5f56a02ad4e919df8181d3b267390" title="Add this controller to the linked list." alt="" coords="453,5,589,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="361,57,439,40,440,45,362,63"/>
+<area shape="rect" id="Node000004" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a346ffe73124af2abf1ccf82a96daee72.html#a346ffe73124af2abf1ccf82a96daee72" title="Check if this controller is in the linked list." alt="" coords="647,35,783,75"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="590,33,634,40,633,45,589,38"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="647,61,375,73,375,68,647,55"/>
+<area shape="rect" id="Node000006" href="$d8/da0/classfl_1_1_c_l_e_d_controller_aa52e32cc0776be75975f5c5939ecb0f2.html#aa52e32cc0776be75975f5c5939ecb0f2" title="Template&#45;derived static&#45;profile controllers override this hook." alt="" coords="444,127,599,167"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="396,144,431,144,431,149,396,149"/>
+</map>

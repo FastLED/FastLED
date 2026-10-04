@@ -7,6 +7,6 @@ var align_8h =
     [ "FL_ALIGN_BYTES", "d1/ddf/align_8h_aa370858e259cc6b3837eb99921bec432.html#aa370858e259cc6b3837eb99921bec432", null ],
     [ "FL_ALIGN_MAX", "d1/ddf/align_8h_a31f878ac21758b6e670cd8575335cdf9.html#a31f878ac21758b6e670cd8575335cdf9", null ],
     [ "FL_ALIGNAS", "d1/ddf/align_8h_aea56bd2a3313a0cf0eb877a46ca42086.html#aea56bd2a3313a0cf0eb877a46ca42086", null ],
-    [ "fl::assume_aligned", "d4/d36/namespacefl_a7b01a5ac18798d10b1b11d1f853ec8c6.html#a7b01a5ac18798d10b1b11d1f853ec8c6", null ],
-    [ "fl::assume_aligned", "d4/d36/namespacefl_a79ac109b4ed308c1363d4c70089c9e69.html#a79ac109b4ed308c1363d4c70089c9e69", null ]
+    [ "fl::assume_aligned", "d4/d36/namespacefl_a0ce3eb2fe48f00e76ad13bdfb202698e.html#a0ce3eb2fe48f00e76ad13bdfb202698e", null ],
+    [ "fl::assume_aligned", "d4/d36/namespacefl_a4a4817b5d81db64c21600ea061ba36d0.html#a4a4817b5d81db64c21600ea061ba36d0", null ]
 ];

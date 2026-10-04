@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -104,11 +104,11 @@ $(function(){initNavTree('d8/def/test__quick_8py_source.html','../../'); initRes
 </div><!--header-->
 <div class="contents">
 <a href="../../d8/def/test__quick_8py.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno"><a class="line" href="../../d8/d94/namespacetest__quick.html">    1</a></span><span class="keyword">import</span> os</div>
-<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="keyword">import</span> subprocess</div>
-<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="keyword">import</span> sys</div>
-<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="keyword">import</span> time</div>
-<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span> </div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="keyword">import</span> httpx</div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="keyword">import</span> sys</div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="keyword">import</span> time</div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span> </div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="keyword">import</span> httpx</div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="keyword">from</span> running_process <span class="keyword">import</span> STDOUT, RunningProcess</div>
 <div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span> </div>
 <div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span> </div>
 <div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment"># Get absolute paths</span></div>
@@ -123,44 +123,53 @@ $(function(){initNavTree('d8/def/test__quick_8py_source.html','../../'); initRes
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><a class="code hl_function" href="../../d9/dce/_client_validation_real_8h_a61602dbe1913a3b1a801bc0608a74e72.html#a61602dbe1913a3b1a801bc0608a74e72">print</a>(f<span class="stringliteral">&quot;  DLL: {dll_path}&quot;</span>)</div>
 <div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
 <div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment"># Start server in background</span></div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno"><a class="line" href="../../d8/d94/namespacetest__quick_a13dc1c558463c07f13b4d6ac2ef74a22.html#a13dc1c558463c07f13b4d6ac2ef74a22">   21</a></span>proc = subprocess.Popen(</div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>    [runner_path, dll_path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=<span class="keyword">True</span></div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>)</div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="comment"># Wait for server to start</span></div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>time.sleep(1.5)</div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="comment"># Try to connect</span></div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="keywordflow">try</span>:</div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>    <a class="code hl_function" href="../../d9/dce/_client_validation_real_8h_a61602dbe1913a3b1a801bc0608a74e72.html#a61602dbe1913a3b1a801bc0608a74e72">print</a>(<span class="stringliteral">&quot;\nTesting GET /&quot;</span>)</div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno"><a class="line" href="../../d8/d94/namespacetest__quick_a00071f2b3e01fb8d2b4e70970ed2d6ce.html#a00071f2b3e01fb8d2b4e70970ed2d6ce">   31</a></span>    response = httpx.get(<span class="stringliteral">&quot;http://localhost:8080/&quot;</span>, timeout=5.0)</div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>    <a class="code hl_function" href="../../d9/dce/_client_validation_real_8h_a61602dbe1913a3b1a801bc0608a74e72.html#a61602dbe1913a3b1a801bc0608a74e72">print</a>(f<span class="stringliteral">&quot;✓ Status: {response.status_code}&quot;</span>)</div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>    <a class="code hl_function" href="../../d9/dce/_client_validation_real_8h_a61602dbe1913a3b1a801bc0608a74e72.html#a61602dbe1913a3b1a801bc0608a74e72">print</a>(f<span class="stringliteral">&quot;  Response: {response.text!r}\n&quot;</span>)</div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    <a class="code hl_function" href="../../d9/dce/_client_validation_real_8h_a61602dbe1913a3b1a801bc0608a74e72.html#a61602dbe1913a3b1a801bc0608a74e72">print</a>(<span class="stringliteral">&quot;Testing GET /ping&quot;</span>)</div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    response = httpx.get(<span class="stringliteral">&quot;http://localhost:8080/ping&quot;</span>, timeout=5.0)</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno"><a class="line" href="../../d8/d94/namespacetest__quick_a13dc1c558463c07f13b4d6ac2ef74a22.html#a13dc1c558463c07f13b4d6ac2ef74a22">   21</a></span>proc = RunningProcess(</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>    [runner_path, dll_path],</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>    auto_run=<span class="keyword">True</span>,</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>    capture=<span class="keyword">True</span>,</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>    stderr=STDOUT,</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>    encoding=<span class="stringliteral">&quot;utf-8&quot;</span>,</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>    errors=<span class="stringliteral">&quot;replace&quot;</span>,</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>)</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="comment"># Wait for server to start</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>time.sleep(1.5)</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="comment"># Try to connect</span></div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="keywordflow">try</span>:</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    <a class="code hl_function" href="../../d9/dce/_client_validation_real_8h_a61602dbe1913a3b1a801bc0608a74e72.html#a61602dbe1913a3b1a801bc0608a74e72">print</a>(<span class="stringliteral">&quot;\nTesting GET /&quot;</span>)</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno"><a class="line" href="../../d8/d94/namespacetest__quick_a00071f2b3e01fb8d2b4e70970ed2d6ce.html#a00071f2b3e01fb8d2b4e70970ed2d6ce">   36</a></span>    response = httpx.get(<span class="stringliteral">&quot;http://localhost:8080/&quot;</span>, timeout=5.0)</div>
 <div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    <a class="code hl_function" href="../../d9/dce/_client_validation_real_8h_a61602dbe1913a3b1a801bc0608a74e72.html#a61602dbe1913a3b1a801bc0608a74e72">print</a>(f<span class="stringliteral">&quot;✓ Status: {response.status_code}&quot;</span>)</div>
 <div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    <a class="code hl_function" href="../../d9/dce/_client_validation_real_8h_a61602dbe1913a3b1a801bc0608a74e72.html#a61602dbe1913a3b1a801bc0608a74e72">print</a>(f<span class="stringliteral">&quot;  Response: {response.text!r}\n&quot;</span>)</div>
 <div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    <a class="code hl_function" href="../../d9/dce/_client_validation_real_8h_a61602dbe1913a3b1a801bc0608a74e72.html#a61602dbe1913a3b1a801bc0608a74e72">print</a>(<span class="stringliteral">&quot;Testing GET /status&quot;</span>)</div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    response = httpx.get(<span class="stringliteral">&quot;http://localhost:8080/status&quot;</span>, timeout=5.0)</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    <a class="code hl_function" href="../../d9/dce/_client_validation_real_8h_a61602dbe1913a3b1a801bc0608a74e72.html#a61602dbe1913a3b1a801bc0608a74e72">print</a>(<span class="stringliteral">&quot;Testing GET /ping&quot;</span>)</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    response = httpx.get(<span class="stringliteral">&quot;http://localhost:8080/ping&quot;</span>, timeout=5.0)</div>
 <div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    <a class="code hl_function" href="../../d9/dce/_client_validation_real_8h_a61602dbe1913a3b1a801bc0608a74e72.html#a61602dbe1913a3b1a801bc0608a74e72">print</a>(f<span class="stringliteral">&quot;✓ Status: {response.status_code}&quot;</span>)</div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    <a class="code hl_function" href="../../d9/dce/_client_validation_real_8h_a61602dbe1913a3b1a801bc0608a74e72.html#a61602dbe1913a3b1a801bc0608a74e72">print</a>(f<span class="stringliteral">&quot;  Response (JSON): {response.json()}\n&quot;</span>)</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    <a class="code hl_function" href="../../d9/dce/_client_validation_real_8h_a61602dbe1913a3b1a801bc0608a74e72.html#a61602dbe1913a3b1a801bc0608a74e72">print</a>(f<span class="stringliteral">&quot;  Response: {response.text!r}\n&quot;</span>)</div>
 <div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> </div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    <a class="code hl_function" href="../../d9/dce/_client_validation_real_8h_a61602dbe1913a3b1a801bc0608a74e72.html#a61602dbe1913a3b1a801bc0608a74e72">print</a>(<span class="stringliteral">&quot;✓ All tests passed!&quot;</span>)</div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    sys.exit(0)</div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="keywordflow">except</span> Exception <span class="keyword">as</span> e:</div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    <a class="code hl_function" href="../../d9/dce/_client_validation_real_8h_a61602dbe1913a3b1a801bc0608a74e72.html#a61602dbe1913a3b1a801bc0608a74e72">print</a>(f<span class="stringliteral">&quot;\n✗ Error: {e}&quot;</span>)</div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>    <span class="comment"># Print server output for debugging</span></div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno"><a class="line" href="../../d8/d94/namespacetest__quick_a8c3bfc80cf8d06d96864286f8e0dcd84.html#a8c3bfc80cf8d06d96864286f8e0dcd84">   50</a></span>    output, _ = proc.communicate(timeout=1)</div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    <a class="code hl_function" href="../../d9/dce/_client_validation_real_8h_a61602dbe1913a3b1a801bc0608a74e72.html#a61602dbe1913a3b1a801bc0608a74e72">print</a>(f<span class="stringliteral">&quot;\nServer output:\n{output}&quot;</span>)</div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    sys.exit(1)</div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span><span class="keywordflow">finally</span>:</div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    proc.terminate()</div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    <span class="keywordflow">try</span>:</div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>        proc.wait(timeout=1)</div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    <span class="keywordflow">except</span>:</div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>        proc.kill()</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    <a class="code hl_function" href="../../d9/dce/_client_validation_real_8h_a61602dbe1913a3b1a801bc0608a74e72.html#a61602dbe1913a3b1a801bc0608a74e72">print</a>(<span class="stringliteral">&quot;Testing GET /status&quot;</span>)</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    response = httpx.get(<span class="stringliteral">&quot;http://localhost:8080/status&quot;</span>, timeout=5.0)</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>    <a class="code hl_function" href="../../d9/dce/_client_validation_real_8h_a61602dbe1913a3b1a801bc0608a74e72.html#a61602dbe1913a3b1a801bc0608a74e72">print</a>(f<span class="stringliteral">&quot;✓ Status: {response.status_code}&quot;</span>)</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    <a class="code hl_function" href="../../d9/dce/_client_validation_real_8h_a61602dbe1913a3b1a801bc0608a74e72.html#a61602dbe1913a3b1a801bc0608a74e72">print</a>(f<span class="stringliteral">&quot;  Response (JSON): {response.json()}\n&quot;</span>)</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span> </div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    <a class="code hl_function" href="../../d9/dce/_client_validation_real_8h_a61602dbe1913a3b1a801bc0608a74e72.html#a61602dbe1913a3b1a801bc0608a74e72">print</a>(<span class="stringliteral">&quot;✓ All tests passed!&quot;</span>)</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    sys.exit(0)</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span><span class="keywordflow">except</span> Exception <span class="keyword">as</span> e:</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    <a class="code hl_function" href="../../d9/dce/_client_validation_real_8h_a61602dbe1913a3b1a801bc0608a74e72.html#a61602dbe1913a3b1a801bc0608a74e72">print</a>(f<span class="stringliteral">&quot;\n✗ Error: {e}&quot;</span>)</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    <span class="comment"># Print server output for debugging</span></div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    proc.terminate()</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    <span class="keywordflow">try</span>:</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno"><a class="line" href="../../d8/d94/namespacetest__quick_a0530a940497229bd5bc5d59a8f38ae10.html#a0530a940497229bd5bc5d59a8f38ae10">   57</a></span>        proc.wait(timeout=1)</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    <span class="keywordflow">except</span> TimeoutError:</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>        <span class="keywordflow">pass</span></div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>    <a class="code hl_function" href="../../d9/dce/_client_validation_real_8h_a61602dbe1913a3b1a801bc0608a74e72.html#a61602dbe1913a3b1a801bc0608a74e72">print</a>(f<span class="stringliteral">&quot;\nServer output:\n{proc.stdout}&quot;</span>)</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    sys.exit(1)</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span><span class="keywordflow">finally</span>:</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>    proc.terminate()</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    <span class="keywordflow">try</span>:</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>        proc.wait(timeout=1)</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    <span class="keywordflow">except</span>:</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>        proc.kill()</div>
 <div class="ttc" id="a_client_validation_real_8h_a61602dbe1913a3b1a801bc0608a74e72_html_a61602dbe1913a3b1a801bc0608a74e72"><div class="ttname"><a href="../../d9/dce/_client_validation_real_8h_a61602dbe1913a3b1a801bc0608a74e72.html#a61602dbe1913a3b1a801bc0608a74e72">print</a></div><div class="ttdeci">Serial print(&quot;Error: &quot;)</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
@@ -169,7 +178,7 @@ $(function(){initNavTree('d8/def/test__quick_8py_source.html','../../'); initRes
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_2e1cb969a724d6e5361be673f84b357b.html">Asio</a></li><li class="navelem"><a class="el" href="../../dir_37c21fcc6acaf68b5eee5909dd6494ed.html">Server</a></li><li class="navelem"><a class="el" href="../../d8/def/test__quick_8py.html">test_quick.py</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:06:58 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:08:59 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

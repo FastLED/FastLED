@@ -29,8 +29,8 @@ digraph "third_party/TJpg_Decoder/src/TJpg_Decoder.cpp.hpp"
   Node7 -> Node13 [id="edge11_Node000007_Node000013",color="steelblue1",style="solid",tooltip=" "];
   Node6 -> Node10 [id="edge12_Node000006_Node000010",color="steelblue1",style="solid",tooltip=" "];
   Node6 -> Node13 [id="edge13_Node000006_Node000013",color="steelblue1",style="solid",tooltip=" "];
-  Node6 -> Node54 [id="edge14_Node000006_Node000054",color="steelblue1",style="solid",tooltip=" "];
-  Node54 [id="Node000054",label="tjpgdcnf.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d41/tjpgdcnf_8h.html",tooltip=" "];
+  Node6 -> Node55 [id="edge14_Node000006_Node000055",color="steelblue1",style="solid",tooltip=" "];
+  Node55 [id="Node000055",label="tjpgdcnf.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d41/tjpgdcnf_8h.html",tooltip=" "];
   Node2 -> Node10 [id="edge15_Node000002_Node000010",color="steelblue1",style="solid",tooltip=" "];
   Node2 -> Node7 [id="edge16_Node000002_Node000007",color="steelblue1",style="solid",tooltip=" "];
   Node2 -> Node13 [id="edge17_Node000002_Node000013",color="steelblue1",style="solid",tooltip=" "];

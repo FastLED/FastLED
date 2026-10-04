@@ -18,11 +18,11 @@ digraph "fl::get_flexio_async_logger_isr"
   Node2 -> Node5 [id="edge6_Node000002_Node000005",color="steelblue1",style="solid",tooltip=" "];
   Node5 [id="Node000005",label="fl::detail::ActiveLogger\lRegistry::instance",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d7b/structfl_1_1detail_1_1_active_logger_registry_a0ba7ba9bde21bfc28ef06006930c34f1.html#a0ba7ba9bde21bfc28ef06006930c34f1",tooltip=" "];
   Node5 -> Node6 [id="edge7_Node000005_Node000006",color="steelblue1",style="solid",tooltip=" "];
-  Node6 [id="Node000006",label="fl::SingletonShared\l::instance",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$db/d4a/classfl_1_1_singleton_shared_a138a66e14b03a073e9a15565e823b203.html#a138a66e14b03a073e9a15565e823b203",tooltip=" "];
-  Node2 -> Node18 [id="edge8_Node000002_Node000018",color="steelblue1",style="solid",tooltip=" "];
-  Node18 [id="Node000018",label="fl::detail::AsyncLoggerService\lTask::instance",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d06/classfl_1_1detail_1_1_async_logger_service_task_acc200cb8837f82379821217fb4a6bc29.html#acc200cb8837f82379821217fb4a6bc29",tooltip=" "];
-  Node18 -> Node19 [id="edge9_Node000018_Node000019",color="steelblue1",style="solid",tooltip=" "];
-  Node19 [id="Node000019",label="fl::detail::AsyncLoggerService\lTask::AsyncLoggerServiceTask",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d5/d06/classfl_1_1detail_1_1_async_logger_service_task_a3bff7aaa6e1158fbbee95055b3458285.html#a3bff7aaa6e1158fbbee95055b3458285",tooltip=" "];
+  Node6 [id="Node000006",label="fl::SingletonShared\l::instance",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$db/d4a/classfl_1_1_singleton_shared_a1ec246efec2c46bc053a64fe7e8170ad.html#a1ec246efec2c46bc053a64fe7e8170ad",tooltip=" "];
+  Node2 -> Node12 [id="edge8_Node000002_Node000012",color="steelblue1",style="solid",tooltip=" "];
+  Node12 [id="Node000012",label="fl::detail::AsyncLoggerService\lTask::instance",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d06/classfl_1_1detail_1_1_async_logger_service_task_acc200cb8837f82379821217fb4a6bc29.html#acc200cb8837f82379821217fb4a6bc29",tooltip=" "];
+  Node12 -> Node13 [id="edge9_Node000012_Node000013",color="steelblue1",style="solid",tooltip=" "];
+  Node13 [id="Node000013",label="fl::detail::AsyncLoggerService\lTask::AsyncLoggerServiceTask",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d5/d06/classfl_1_1detail_1_1_async_logger_service_task_a76e22f26c5676ba890e783435db46aa6.html#a76e22f26c5676ba890e783435db46aa6",tooltip=" "];
   Node2 -> Node6 [id="edge10_Node000002_Node000006",color="steelblue1",style="solid",tooltip=" "];
   Node1 -> Node1 [id="edge11_Node000001_Node000001",color="steelblue1",style="solid",tooltip=" "];
 }

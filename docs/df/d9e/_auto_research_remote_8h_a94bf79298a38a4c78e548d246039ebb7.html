@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -119,7 +119,7 @@ $(function(){initNavTree('df/d9e/_auto_research_remote_8h_a94bf79298a38a4c78e548
       </table>
 </div><div class="memdoc">
 
-<p>Print JSON directly to Serial, bypassing <a class="el" href="../../d4/d36/namespacefl_adfaedbd8e1ada269a7733e58ff142aea.html#adfaedbd8e1ada269a7733e58ff142aea">fl::println</a> and ScopedLogDisable This ensures RPC responses are always visible regardless of log level. </p>
+<p>Print JSON directly to Serial, bypassing <a class="el" href="../../d4/d36/namespacefl_ab058ac6ae882a8344f79b01b40eb6e02.html#ab058ac6ae882a8344f79b01b40eb6e02">fl::println</a> and ScopedLogDisable This ensures RPC responses are always visible regardless of log level. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">json</td><td>JSON object to output </td></tr>
@@ -127,28 +127,6 @@ $(function(){initNavTree('df/d9e/_auto_research_remote_8h_a94bf79298a38a4c78e548
   </table>
   </dd>
 </dl>
-
-<p class="definition">Definition at line <a class="el" href="../../db/dfb/_auto_research_remote_8cpp_source.html#l00054">54</a> of file <a class="el" href="../../db/dfb/_auto_research_remote_8cpp_source.html">AutoResearchRemote.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   54</span>                                                          {</div>
-<div class="line"><span class="lineno">   55</span>    <span class="comment">// Serialize and print response</span></div>
-<div class="line"><span class="lineno">   56</span>    <a class="code hl_class" href="../../d2/db2/classfl_1_1string.html">fl::string</a> formatted = <a class="code hl_function" href="../../d4/d36/namespacefl_a453c4513b6c26a2104cdf91921eb2742.html#a453c4513b6c26a2104cdf91921eb2742">fl::formatJsonResponse</a>(json, prefix);</div>
-<div class="line"><span class="lineno">   57</span>    <a class="code hl_function" href="../../d4/d36/namespacefl_adfaedbd8e1ada269a7733e58ff142aea.html#adfaedbd8e1ada269a7733e58ff142aea">fl::println</a>(formatted.<a class="code hl_function" href="../../de/d66/classfl_1_1basic__string_adc70863b5a29972d3e45c5e5b31e6686.html#adc70863b5a29972d3e45c5e5b31e6686">c_str</a>());</div>
-<div class="line"><span class="lineno">   58</span>    <a class="code hl_function" href="../../d4/d36/namespacefl_aeb5a9565995f4532282c8e93a3acb401.html#aeb5a9565995f4532282c8e93a3acb401">fl::flush</a>();</div>
-<div class="line"><span class="lineno">   59</span>}</div>
-<div class="ttc" id="aclassfl_1_1basic__string_adc70863b5a29972d3e45c5e5b31e6686_html_adc70863b5a29972d3e45c5e5b31e6686"><div class="ttname"><a href="../../de/d66/classfl_1_1basic__string_adc70863b5a29972d3e45c5e5b31e6686.html#adc70863b5a29972d3e45c5e5b31e6686">fl::basic_string::c_str</a></div><div class="ttdeci">const char * c_str() const FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d86/basic__string_8cpp_8hpp_source.html#l00032">basic_string.cpp.hpp:32</a></div></div>
-<div class="ttc" id="aclassfl_1_1string_html"><div class="ttname"><a href="../../d2/db2/classfl_1_1string.html">fl::string</a></div><div class="ttdef"><b>Definition</b> <a href="../../da/d66/string_8h_source.html#l00193">string.h:193</a></div></div>
-<div class="ttc" id="anamespacefl_a453c4513b6c26a2104cdf91921eb2742_html_a453c4513b6c26a2104cdf91921eb2742"><div class="ttname"><a href="../../d4/d36/namespacefl_a453c4513b6c26a2104cdf91921eb2742.html#a453c4513b6c26a2104cdf91921eb2742">fl::formatJsonResponse</a></div><div class="ttdeci">fl::string formatJsonResponse(const fl::json &amp;response, const char *prefix)</div><div class="ttdoc">Serialize JSON response to a string.</div><div class="ttdef"><b>Definition</b> <a href="../../d2/d6d/remote_2transport_2serial_8cpp_8hpp_source.html#l00012">serial.cpp.hpp:12</a></div></div>
-<div class="ttc" id="anamespacefl_adfaedbd8e1ada269a7733e58ff142aea_html_adfaedbd8e1ada269a7733e58ff142aea"><div class="ttname"><a href="../../d4/d36/namespacefl_adfaedbd8e1ada269a7733e58ff142aea.html#adfaedbd8e1ada269a7733e58ff142aea">fl::println</a></div><div class="ttdeci">void println(const char *str) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d7a/cstdio_8cpp_8hpp_source.html#l00094">cstdio.cpp.hpp:94</a></div></div>
-<div class="ttc" id="anamespacefl_aeb5a9565995f4532282c8e93a3acb401_html_aeb5a9565995f4532282c8e93a3acb401"><div class="ttname"><a href="../../d4/d36/namespacefl_aeb5a9565995f4532282c8e93a3acb401.html#aeb5a9565995f4532282c8e93a3acb401">fl::flush</a></div><div class="ttdeci">bool flush(u32 timeoutMs)</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d7a/cstdio_8cpp_8hpp_source.html#l00208">cstdio.cpp.hpp:208</a></div></div>
-</div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d1/d86/basic__string_8cpp_8hpp_source.html#l00032">fl::basic_string::c_str()</a>, <a class="el" href="../../dd/d7a/cstdio_8cpp_8hpp_source.html#l00208">fl::flush()</a>, <a class="el" href="../../d2/d6d/remote_2transport_2serial_8cpp_8hpp_source.html#l00012">fl::formatJsonResponse()</a>, and <a class="el" href="../../dd/d7a/cstdio_8cpp_8hpp_source.html#l00094">fl::println()</a>.</p>
-<div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
-  <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
-<div id="dynsection-0-summary" class="dynsummary" style="display:block;">
-</div>
-<div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../df/d9e/_auto_research_remote_8h_a94bf79298a38a4c78e548d246039ebb7_a94bf79298a38a4c78e548d246039ebb7_cgraph.svg" width="100%" height="563"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
-</div>
 
 </div>
 </div>
@@ -159,7 +137,7 @@ $(function(){initNavTree('df/d9e/_auto_research_remote_8h_a94bf79298a38a4c78e548
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_c839598b40e1646daff68c7b4defdc81.html">AutoResearch</a></li><li class="navelem"><a class="el" href="../../df/d9e/_auto_research_remote_8h.html">AutoResearchRemote.h</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:00 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:02 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -38,7 +38,7 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d4/d36/namespacefl_ab48f77d450cf05f81e3cb66a588e5ae5.html#ab48f77d450cf05f81e3cb66a588e5ae5" target="_top" xlink:title=" ">
+<g id="a_Node000003"><a xlink:href="../../d4/d36/namespacefl_a2c2a565c361b0fc8eced9bd0552e67ce.html#a2c2a565c361b0fc8eced9bd0552e67ce" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="410,-111 344,-111 344,-92 410,-92 410,-111"/>
 <text text-anchor="middle" x="377" y="-99" font-family="Helvetica,sans-Serif" font-size="10.00">fl::gamma</text>
 </a>
@@ -65,7 +65,7 @@
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_ad54fc4759a533ca8fb29bd32ba982291.html#ad54fc4759a533ca8fb29bd32ba982291" target="_top" xlink:title=" ">
+<g id="a_Node000004"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_acf62d2e1fa0e10fed6c06699798c0325.html#acf62d2e1fa0e10fed6c06699798c0325" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="422,-74 332,-74 332,-55 422,-55 422,-74"/>
 <text text-anchor="middle" x="377" y="-62" font-family="Helvetica,sans-Serif" font-size="10.00">fl::s16x16::pow</text>
 </a>
@@ -83,7 +83,7 @@
 <!-- Node12 -->
 <g id="Node000012" class="node">
 <title>Node12</title>
-<g id="a_Node000012"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_aa048b427f50f28993a67941e0f303a65.html#aa048b427f50f28993a67941e0f303a65" target="_top" xlink:title=" ">
+<g id="a_Node000012"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_a7b25b9c301243694aa32f9754bec11d2.html#a7b25b9c301243694aa32f9754bec11d2" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="421,-37 333,-37 333,-18 421,-18 421,-37"/>
 <text text-anchor="middle" x="377" y="-25" font-family="Helvetica,sans-Serif" font-size="10.00">fl::s16x16::raw</text>
 </a>
@@ -101,7 +101,7 @@
 <!-- Node5 -->
 <g id="Node000005" class="node">
 <title>Node5</title>
-<g id="a_Node000005"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_a5e82494e286448e4cad2de1b302b9168.html#a5e82494e286448e4cad2de1b302b9168" target="_top" xlink:title=" ">
+<g id="a_Node000005"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_ada6cb5198c9b09c4299cd8ab059951e7.html#ada6cb5198c9b09c4299cd8ab059951e7" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="708,-56 603,-56 603,-37 708,-37 708,-56"/>
 <text text-anchor="middle" x="655.5" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">fl::s16x16::s16x16</text>
 </a>
@@ -119,7 +119,7 @@
 <!-- Node6 -->
 <g id="Node000006" class="node">
 <title>Node6</title>
-<g id="a_Node000006"><a xlink:href="../../d4/d36/namespacefl_ae393fecb8f433ee4b88027955350bdc8.html#ae393fecb8f433ee4b88027955350bdc8" target="_top" xlink:title=" ">
+<g id="a_Node000006"><a xlink:href="../../d4/d36/namespacefl_ad01db2eb12a95fcdbd62fd8835caf4e2.html#ad01db2eb12a95fcdbd62fd8835caf4e2" target="_top" xlink:title=" ">
 <polygon fill="#fff0f0" stroke="red" points="536,-93 489,-93 489,-74 536,-74 536,-93"/>
 <text text-anchor="middle" x="512.5" y="-81" font-family="Helvetica,sans-Serif" font-size="10.00">fl::exp</text>
 </a>
@@ -137,7 +137,7 @@
 <!-- Node9 -->
 <g id="Node000009" class="node">
 <title>Node9</title>
-<g id="a_Node000009"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_a734cbfe41dc1bf7b316cf49fe5eade08.html#a734cbfe41dc1bf7b316cf49fe5eade08" target="_top" xlink:title=" ">
+<g id="a_Node000009"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_aa8872f5e9b5eca91dc38110ce53e2785.html#aa8872f5e9b5eca91dc38110ce53e2785" target="_top" xlink:title=" ">
 <polygon fill="#fff0f0" stroke="red" points="567,-56 458,-56 458,-37 567,-37 567,-56"/>
 <text text-anchor="middle" x="512.5" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">fl::s16x16::exp2_fp</text>
 </a>
@@ -155,7 +155,7 @@
 <!-- Node13 -->
 <g id="Node000013" class="node">
 <title>Node13</title>
-<g id="a_Node000013"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_a02cc018cfdcf668c4636d708695af362.html#a02cc018cfdcf668c4636d708695af362" target="_top" xlink:title=" ">
+<g id="a_Node000013"><a xlink:href="../../d9/d9f/classfl_1_1s16x16_ad21eb6937e5bb9e575a3ae6960ac9a94.html#ad21eb6937e5bb9e575a3ae6960ac9a94" target="_top" xlink:title=" ">
 <polygon fill="#fff0f0" stroke="red" points="565.5,-19 459.5,-19 459.5,0 565.5,0 565.5,-19"/>
 <text text-anchor="middle" x="512.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::s16x16::log2_fp</text>
 </a>

@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -117,12 +117,12 @@ $(function(){initNavTree('da/db8/classfl_1_1_font_renderer_ab05cccca03e2d2576c86
 
 <p class="definition">Definition at line <a class="el" href="../../dd/dc4/truetype_8cpp_8hpp_source.html#l00241">241</a> of file <a class="el" href="../../dd/dc4/truetype_8cpp_8hpp_source.html">truetype.cpp.hpp</a>.</p>
 <div class="fragment"><div class="line"><span class="lineno">  241</span>                                                              {</div>
-<div class="line"><span class="lineno">  242</span>    <span class="keywordflow">if</span> (str.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_a1e467b483bfd364c93ae966e5bd4e427.html#a1e467b483bfd364c93ae966e5bd4e427">empty</a>() || !<a class="code hl_variable" href="../../da/db8/classfl_1_1_font_renderer_a1b181c353a40e645a2dfa57c0c53046c.html#a1b181c353a40e645a2dfa57c0c53046c">mFont</a>) <span class="keywordflow">return</span> 0.0f;</div>
+<div class="line"><span class="lineno">  242</span>    <span class="keywordflow">if</span> (str.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_a28135041ca9036a3efb34c1d0afe115b.html#a28135041ca9036a3efb34c1d0afe115b">empty</a>() || !<a class="code hl_variable" href="../../da/db8/classfl_1_1_font_renderer_a1b181c353a40e645a2dfa57c0c53046c.html#a1b181c353a40e645a2dfa57c0c53046c">mFont</a>) <span class="keywordflow">return</span> 0.0f;</div>
 <div class="line"><span class="lineno">  243</span> </div>
 <div class="line"><span class="lineno">  244</span>    <span class="keywordtype">float</span> <a class="code hl_variable" href="../../d4/d36/namespacefl_a82c4062f46dbbd85ea8b41690bda4729.html#a82c4062f46dbbd85ea8b41690bda4729">width</a> = 0.0f;</div>
 <div class="line"><span class="lineno">  245</span>    i32 prevCodepoint = 0;</div>
 <div class="line"><span class="lineno">  246</span> </div>
-<div class="line"><span class="lineno">  247</span>    <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; str.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac">size</a>(); ++i) {</div>
+<div class="line"><span class="lineno">  247</span>    <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; str.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa">size</a>(); ++i) {</div>
 <div class="line"><span class="lineno">  248</span>        i32 codepoint = <span class="keyword">static_cast&lt;</span>i32<span class="keyword">&gt;</span>(<span class="keyword">static_cast&lt;</span><span class="keywordtype">unsigned</span> <span class="keywordtype">char</span><span class="keyword">&gt;</span>(str[i]));</div>
 <div class="line"><span class="lineno">  249</span> </div>
 <div class="line"><span class="lineno">  250</span>        <span class="comment">// Add kerning adjustment if this isn&#39;t the first character</span></div>
@@ -140,11 +140,11 @@ $(function(){initNavTree('da/db8/classfl_1_1_font_renderer_ab05cccca03e2d2576c86
 <div class="ttc" id="aclassfl_1_1_font_renderer_a1b181c353a40e645a2dfa57c0c53046c_html_a1b181c353a40e645a2dfa57c0c53046c"><div class="ttname"><a href="../../da/db8/classfl_1_1_font_renderer_a1b181c353a40e645a2dfa57c0c53046c.html#a1b181c353a40e645a2dfa57c0c53046c">fl::FontRenderer::mFont</a></div><div class="ttdeci">FontPtr mFont</div><div class="ttdef"><b>Definition</b> <a href="../../d0/dee/truetype_8h_source.html#l00179">truetype.h:179</a></div></div>
 <div class="ttc" id="aclassfl_1_1_font_renderer_a4d85cbb8cdb98db8bd89009d82c58aa1_html_a4d85cbb8cdb98db8bd89009d82c58aa1"><div class="ttname"><a href="../../da/db8/classfl_1_1_font_renderer_a4d85cbb8cdb98db8bd89009d82c58aa1.html#a4d85cbb8cdb98db8bd89009d82c58aa1">fl::FontRenderer::getKerning</a></div><div class="ttdeci">float getKerning(i32 codepoint1, i32 codepoint2) const</div><div class="ttdef"><b>Definition</b> <a href="../../dd/dc4/truetype_8cpp_8hpp_source.html#l00231">truetype.cpp.hpp:231</a></div></div>
 <div class="ttc" id="aclassfl_1_1_font_renderer_aedae114d5021bc4cd1ccb5340c0c9cd2_html_aedae114d5021bc4cd1ccb5340c0c9cd2"><div class="ttname"><a href="../../da/db8/classfl_1_1_font_renderer_aedae114d5021bc4cd1ccb5340c0c9cd2.html#aedae114d5021bc4cd1ccb5340c0c9cd2">fl::FontRenderer::getAdvance</a></div><div class="ttdeci">float getAdvance(i32 codepoint) const</div><div class="ttdef"><b>Definition</b> <a href="../../dd/dc4/truetype_8cpp_8hpp_source.html#l00225">truetype.cpp.hpp:225</a></div></div>
-<div class="ttc" id="aclassfl_1_1span_a1e467b483bfd364c93ae966e5bd4e427_html_a1e467b483bfd364c93ae966e5bd4e427"><div class="ttname"><a href="../../d0/d08/classfl_1_1span_a1e467b483bfd364c93ae966e5bd4e427.html#a1e467b483bfd364c93ae966e5bd4e427">fl::span::empty</a></div><div class="ttdeci">constexpr bool empty() const FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d7a/span_8h_source.html#l00510">span.h:510</a></div></div>
-<div class="ttc" id="aclassfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac_html_aef7ee7eb5254da1ba1eb4f3e0173d0ac"><div class="ttname"><a href="../../d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac">fl::span::size</a></div><div class="ttdeci">constexpr fl::size size() const FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d7a/span_8h_source.html#l00458">span.h:458</a></div></div>
+<div class="ttc" id="aclassfl_1_1span_a28135041ca9036a3efb34c1d0afe115b_html_a28135041ca9036a3efb34c1d0afe115b"><div class="ttname"><a href="../../d0/d08/classfl_1_1span_a28135041ca9036a3efb34c1d0afe115b.html#a28135041ca9036a3efb34c1d0afe115b">fl::span::empty</a></div><div class="ttdeci">constexpr bool empty() const FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d7a/span_8h_source.html#l00535">span.h:535</a></div></div>
+<div class="ttc" id="aclassfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa_html_aaf3daca1c2c8f93b2ac7b319989b22fa"><div class="ttname"><a href="../../d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa">fl::span::size</a></div><div class="ttdeci">constexpr fl::size size() const FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d7a/span_8h_source.html#l00483">span.h:483</a></div></div>
 <div class="ttc" id="anamespacefl_a82c4062f46dbbd85ea8b41690bda4729_html_a82c4062f46dbbd85ea8b41690bda4729"><div class="ttname"><a href="../../d4/d36/namespacefl_a82c4062f46dbbd85ea8b41690bda4729.html#a82c4062f46dbbd85ea8b41690bda4729">fl::width</a></div><div class="ttdeci">u8 width</div><div class="ttdef"><b>Definition</b> <a href="../../d4/df5/blur_8h_source.html#l00186">blur.h:186</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d4/d7a/span_8h_source.html#l00510">fl::span&lt; T, Extent &gt;::empty()</a>, <a class="el" href="../../dd/dc4/truetype_8cpp_8hpp_source.html#l00225">getAdvance()</a>, <a class="el" href="../../dd/dc4/truetype_8cpp_8hpp_source.html#l00231">getKerning()</a>, <a class="el" href="../../d0/dee/truetype_8h_source.html#l00179">mFont</a>, <a class="el" href="../../d4/d7a/span_8h_source.html#l00458">fl::span&lt; T, Extent &gt;::size()</a>, and <a class="el" href="../../d4/df5/blur_8h_source.html#l00186">fl::width</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d7a/span_8h_source.html#l00535">fl::span&lt; T, Extent &gt;::empty()</a>, <a class="el" href="../../dd/dc4/truetype_8cpp_8hpp_source.html#l00225">getAdvance()</a>, <a class="el" href="../../dd/dc4/truetype_8cpp_8hpp_source.html#l00231">getKerning()</a>, <a class="el" href="../../d0/dee/truetype_8h_source.html#l00179">mFont</a>, <a class="el" href="../../d4/d7a/span_8h_source.html#l00483">fl::span&lt; T, Extent &gt;::size()</a>, and <a class="el" href="../../d4/df5/blur_8h_source.html#l00186">fl::width</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -162,7 +162,7 @@ $(function(){initNavTree('da/db8/classfl_1_1_font_renderer_ab05cccca03e2d2576c86
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../da/db8/classfl_1_1_font_renderer.html">FontRenderer</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:05 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:09 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

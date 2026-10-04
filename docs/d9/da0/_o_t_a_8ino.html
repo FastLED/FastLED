@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -110,7 +110,7 @@ $(function(){initNavTree('d9/da0/_o_t_a_8ino.html','../../'); initResizable(true
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Minimal OTA (Over-The-Air) update example for ESP32 @filter: (platform is esp32) </p>
 <p>This example demonstrates the FastLED OTA functionality for ESP32 devices. It provides both Arduino IDE OTA and web-based firmware updates.</p>
-<p>PLATFORMIO REQUIREMENTS: Add these lines to your platformio.ini:</p>
+<p>PROJECT REQUIREMENTS: Add these lines to your platformio.ini:</p>
 <p>[env:esp32] platform = espressif32 board = esp32dev framework = arduino lib_deps = fastled/FastLED upload_protocol = esptool ; or 'espota' for OTA uploads upload_port = &lt;device&gt;.local ; replace &lt;device&gt; with your hostname for OTA uploads monitor_speed = 115200</p>
 <p>FEATURES:</p><ul>
 <li>One-line setup for Wi-Fi (async mode)</li>
@@ -178,10 +178,8 @@ $(function(){initNavTree('d9/da0/_o_t_a_8ino.html','../../'); initResizable(true
 </ul>
 </li>
 <li>ESP32-C3 compilation fails with "assembler not found"<ul>
-<li>PlatformIO RISC-V toolchain corruption (not OTA code issue)</li>
-<li>Fix: pio system prune &amp;&amp; pio pkg install &ndash;platform espressif32</li>
-<li>Alternative: Delete ~/.platformio/packages/toolchain-riscv32-esp</li>
-<li>See: <a href="https://github.com/platformio/platform-espressif32/issues/1224">https://github.com/platformio/platform-espressif32/issues/1224</a></li>
+<li>RISC-V toolchain cache corruption (not OTA code issue)</li>
+<li>Fix: <code>fbuild purge</code> and rebuild so the toolchain is fetched again</li>
 </ul>
 </li>
 <li>Performance: LED animations stutter or slow<ul>
@@ -234,7 +232,7 @@ Functions</h2></td></tr>
 Variables</h2></td></tr>
 <tr class="memitem:ac4fbed25c9d82b26a56813f4892022d8" id="r_ac4fbed25c9d82b26a56813f4892022d8"><td class="memItemLeft" align="right" valign="top">static const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d9/da0/_o_t_a_8ino_ac4fbed25c9d82b26a56813f4892022d8.html#ac4fbed25c9d82b26a56813f4892022d8">HOSTNAME</a> = &quot;my-device&quot;</td></tr>
 <tr class="separator:ac4fbed25c9d82b26a56813f4892022d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad7b7eb0b3e04af91bdd64715226c3c68" id="r_ad7b7eb0b3e04af91bdd64715226c3c68"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d9/da0/_o_t_a_8ino_ad7b7eb0b3e04af91bdd64715226c3c68.html#ad7b7eb0b3e04af91bdd64715226c3c68">hue</a> = 0</td></tr>
+<tr class="memitem:ad7b7eb0b3e04af91bdd64715226c3c68" id="r_ad7b7eb0b3e04af91bdd64715226c3c68"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d9/da0/_o_t_a_8ino_ad7b7eb0b3e04af91bdd64715226c3c68.html#ad7b7eb0b3e04af91bdd64715226c3c68">hue</a> = 0</td></tr>
 <tr class="separator:ad7b7eb0b3e04af91bdd64715226c3c68"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1b4f26a01e11d7eb2848bc41b0f6dd9d" id="r_a1b4f26a01e11d7eb2848bc41b0f6dd9d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../dd/dc7/group___h_s_v2_r_g_b_ga65c1895006b38f8c5114118b6a170327.html#ga65c1895006b38f8c5114118b6a170327">CRGB</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d9/da0/_o_t_a_8ino_a1b4f26a01e11d7eb2848bc41b0f6dd9d.html#a1b4f26a01e11d7eb2848bc41b0f6dd9d">leds</a> [<a class="el" href="../../d6/d05/_animartrix_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd">NUM_LEDS</a>]</td></tr>
 <tr class="separator:a1b4f26a01e11d7eb2848bc41b0f6dd9d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -256,7 +254,7 @@ Variables</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_eac272bf06e1a19d91dddf31559e454b.html">OTA</a></li><li class="navelem"><a class="el" href="../../d9/da0/_o_t_a_8ino.html">OTA.ino</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:00 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:02 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

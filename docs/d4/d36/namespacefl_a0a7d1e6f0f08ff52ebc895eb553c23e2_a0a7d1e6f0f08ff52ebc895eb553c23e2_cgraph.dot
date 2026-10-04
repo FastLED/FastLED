@@ -1,0 +1,12 @@
+digraph "fl::buildRgbSolveMatrixFromQ16"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::buildRgbSolveMatrixFromQ16",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Build the inverse emitter matrix from a Q16 profile, without floats."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::invert3x3Q16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_acc62e8cbc43e6a7b23c7e7f5ebf72a1a.html#acc62e8cbc43e6a7b23c7e7f5ebf72a1a",tooltip="Inverse of an s16.16 3x3 matrix, in s16.16, computed without floats."];
+}

@@ -14,15 +14,15 @@
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="383,131,457,110,458,115,384,136"/>
 <area shape="rect" id="Node000004" href="$dd/d03/classfl_1_1net_1_1http_1_1_fetch_options_a30a374b7a5c6aebe22544bc097519f69.html#a30a374b7a5c6aebe22544bc097519f69" title="Get the URL for this request." alt="" coords="685,77,896,102"/>
 <area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="638,87,672,87,672,92,638,92"/>
-<area shape="rect" id="Node000006" href="$d0/d34/classfl_1_1task_1_1_promise_a70811e463c0161394aae6e29b442b266.html#a70811e463c0161394aae6e29b442b266" title="Create a resolved Promise with value." alt="" coords="477,293,611,333"/>
+<area shape="rect" id="Node000006" href="$d0/d34/classfl_1_1task_1_1_promise_a973eed5d2fbd0bc5e227af3488b04fcf.html#a973eed5d2fbd0bc5e227af3488b04fcf" title="Create a resolved Promise with value." alt="" coords="477,293,611,333"/>
 <area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="386,289,463,300,463,305,385,294"/>
 <area shape="rect" id="Node000012" href="$d0/dd1/classfl_1_1net_1_1http_1_1_response_af9dec231f54603a4e87ea1c8dc9499d8.html#af9dec231f54603a4e87ea1c8dc9499d8" title=" " alt="" coords="462,229,626,269"/>
 <area shape="poly" id="edge10_Node000005_Node000012" title=" " alt="" coords="385,268,448,260,448,265,386,274"/>
-<area shape="rect" id="Node000007" href="$d0/d34/classfl_1_1task_1_1_promise_a4ae6da8172cc69a1dbbc7a01bc86f959.html#a4ae6da8172cc69a1dbbc7a01bc86f959" title="Default constructor &#45; creates invalid Promise." alt="" coords="944,323,1079,363"/>
+<area shape="rect" id="Node000007" href="$d0/d34/classfl_1_1task_1_1_promise_ae75706ae1089e184850eb571f0b8c3aa.html#ae75706ae1089e184850eb571f0b8c3aa" title="Default constructor &#45; creates invalid Promise." alt="" coords="944,323,1079,363"/>
 <area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="612,315,931,335,930,340,611,320"/>
-<area shape="rect" id="Node000008" href="$d0/d34/classfl_1_1task_1_1_promise_a9fd2b38e45453a1061acc972d64a2bed.html#a9fd2b38e45453a1061acc972d64a2bed" title="Create a pending Promise." alt="" coords="723,351,858,391"/>
+<area shape="rect" id="Node000008" href="$d0/d34/classfl_1_1task_1_1_promise_abdb44418713e7f012b6860d6cf6aa69a.html#abdb44418713e7f012b6860d6cf6aa69a" title="Create a pending Promise." alt="" coords="723,351,858,391"/>
 <area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="612,326,711,349,709,355,611,331"/>
-<area shape="rect" id="Node000010" href="$d0/d34/classfl_1_1task_1_1_promise_a2eccb92f3cd894efe9a728eea2db7c45.html#a2eccb92f3cd894efe9a728eea2db7c45" title="Get the result value (only valid if is_resolved() returns true)" alt="" coords="723,236,858,276"/>
+<area shape="rect" id="Node000010" href="$d0/d34/classfl_1_1task_1_1_promise_aa523169946167b53608c4a86d79b6969.html#aa523169946167b53608c4a86d79b6969" title="Get the result value (only valid if is_resolved() returns true)" alt="" coords="723,236,858,276"/>
 <area shape="poly" id="edge9_Node000006_Node000010" title=" " alt="" coords="611,295,709,272,711,277,612,300"/>
 <area shape="poly" id="edge8_Node000008_Node000007" title=" " alt="" coords="858,359,930,350,931,356,859,365"/>
 <area shape="poly" id="edge12_Node000013_Node000003" title=" " alt="" coords="384,43,458,63,457,68,383,48"/>

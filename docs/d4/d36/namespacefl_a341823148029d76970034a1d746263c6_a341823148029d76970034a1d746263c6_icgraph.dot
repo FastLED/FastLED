@@ -1,0 +1,17 @@
+digraph "fl::foldAdaptationIntoSourceMatrix"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::foldAdaptationIntoSource\lMatrix",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Pre-multiply the adaptation into a source matrix, in place."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::buildStreamingPipelineQ16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_ac4d398fdc18a6dbc27b1b07aa647bf0d.html#ac4d398fdc18a6dbc27b1b07aa647bf0d",tooltip="Bind a source declaration and a device profile into a pipeline."];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::buildPipelineForBinding",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_ab00dbc8e93b9e8d57787730e08c3bbe9.html#ab00dbc8e93b9e8d57787730e08c3bbe9",tooltip="Build the streaming pipeline a binding describes."];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::anonymous_namespace\l\{pipeline_binding::cpp\l::hpp\}::buildPipelineForChannel\lBinding",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/da7/namespacefl_1_1anonymous__namespace_02pipeline__binding_8cpp_8hpp_03_a481e67680332928d645c53886e4475f1.html#a481e67680332928d645c53886e4475f1",tooltip=" "];
+  Node4 -> Node4 [id="edge4_Node000004_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+}

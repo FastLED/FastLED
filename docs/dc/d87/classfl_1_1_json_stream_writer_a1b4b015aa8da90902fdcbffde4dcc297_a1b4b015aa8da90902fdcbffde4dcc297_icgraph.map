@@ -1,0 +1,28 @@
+<map id="fl::JsonStreamWriter::prefixForValue" name="fl::JsonStreamWriter::prefixForValue">
+<area shape="rect" id="Node000001" title=" " alt="" coords="620,149,772,189"/>
+<area shape="rect" id="Node000002" href="$dc/d87/classfl_1_1_json_stream_writer_a3a0a655ea6c73db649c77c94dfac17ba.html#a3a0a655ea6c73db649c77c94dfac17ba" title=" " alt="" coords="220,119,372,159"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="606,165,372,148,372,142,606,159"/>
+<area shape="rect" id="Node000004" href="$dc/d87/classfl_1_1_json_stream_writer_a81158695fcfd1cc11381037298e32bd5.html#a81158695fcfd1cc11381037298e32bd5" title=" " alt="" coords="220,55,372,95"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="609,148,571,138,372,93,373,88,573,133,610,142"/>
+<area shape="rect" id="Node000005" href="$dc/d87/classfl_1_1_json_stream_writer_ae80de483597cef3f68f88ce3750a7166.html#ae80de483597cef3f68f88ce3750a7166" title=" " alt="" coords="420,241,572,281"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="643,197,573,231,546,243,544,238,571,226,641,193"/>
+<area shape="rect" id="Node000006" href="$dc/d87/classfl_1_1_json_stream_writer_a89eaef0354e5d6de26eb07f417bee3d2.html#a89eaef0354e5d6de26eb07f417bee3d2" title=" " alt="" coords="420,177,572,217"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="607,184,573,189,572,183,606,179"/>
+<area shape="rect" id="Node000008" href="$dc/d87/classfl_1_1_json_stream_writer_a2ecc1d3e71b84e6e5b3fb72b17dec1f1.html#a2ecc1d3e71b84e6e5b3fb72b17dec1f1" title=" " alt="" coords="420,305,572,345"/>
+<area shape="poly" id="edge10_Node000001_Node000008" title=" " alt="" coords="672,201,629,249,574,295,553,307,550,302,570,290,625,245,668,198"/>
+<area shape="rect" id="Node000009" href="$dc/d87/classfl_1_1_json_stream_writer_ad9c67d766680b5df2039717a0543def9.html#ad9c67d766680b5df2039717a0543def9" title=" " alt="" coords="420,11,572,51"/>
+<area shape="poly" id="edge11_Node000001_Node000009" title=" " alt="" coords="660,141,618,107,571,72,538,54,541,49,573,68,622,103,664,137"/>
+<area shape="rect" id="Node000003" href="$dc/d87/classfl_1_1_json_stream_writer_a2753c84c62a46e1af87fb2c3af20b86b.html#a2753c84c62a46e1af87fb2c3af20b86b" title=" " alt="" coords="13,119,165,159"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="206,142,165,142,165,137,206,137"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="218,102,155,122,153,117,217,97"/>
+<area shape="poly" id="edge7_Node000006_Node000003" title=" " alt="" coords="406,195,316,187,220,174,163,162,164,157,220,169,316,181,407,189"/>
+<area shape="rect" id="Node000007" href="$dc/d87/classfl_1_1_json_stream_writer_a08a7ff9853ca8a037e6ff452cf66b805.html#a08a7ff9853ca8a037e6ff452cf66b805" title=" " alt="" coords="220,258,372,298"/>
+<area shape="poly" id="edge8_Node000006_Node000007" title=" " alt="" coords="434,224,347,260,345,256,432,219"/>
+<area shape="poly" id="edge9_Node000007_Node000007" title=" " alt="" coords="330,246,318,239,296,237,277,239,265,243,261,249,263,257,258,258,256,248,262,239,276,233,296,231,320,234,332,242"/>
+<area shape="poly" id="edge12_Node000009_Node000002" title=" " alt="" coords="455,61,373,110,348,122,346,117,371,105,452,57"/>
+<area shape="poly" id="edge13_Node000009_Node000004" title=" " alt="" coords="407,54,373,61,372,56,406,48"/>
+<area shape="rect" id="Node000010" href="$d7/dd1/classfl_1_1_rpc_a16bb9675b8d15f3713e49fbb5a8b05a3.html#a16bb9675b8d15f3713e49fbb5a8b05a3" title="Process a JSON&#45;RPC request." alt="" coords="239,5,353,31"/>
+<area shape="poly" id="edge14_Node000009_Node000010" title=" " alt="" coords="406,28,354,24,354,19,406,23"/>
+<area shape="rect" id="Node000011" href="$d7/dd1/classfl_1_1_rpc_acfc87927e9e6affe54e4f2861adac5fd.html#acfc87927e9e6affe54e4f2861adac5fd" title="For notifications (no id), returns nullopt." alt="" coords="5,5,172,31"/>
+<area shape="poly" id="edge15_Node000010_Node000011" title=" " alt="" coords="224,21,172,21,172,15,224,15"/>
+</map>

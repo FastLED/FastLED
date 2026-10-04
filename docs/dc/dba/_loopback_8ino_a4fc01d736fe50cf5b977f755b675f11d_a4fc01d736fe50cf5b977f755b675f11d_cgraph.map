@@ -1,13 +1,13 @@
 <map id="setup" name="setup">
 <area shape="rect" id="Node000001" title=" " alt="" coords="5,205,64,230"/>
-<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a" title="Universal millisecond timer &#45; returns milliseconds since system startup." alt="" coords="172,155,247,181"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a3c0ba5842bfd029c404a38c8df2315f3.html#a3c0ba5842bfd029c404a38c8df2315f3" title="Universal millisecond timer &#45; returns milliseconds since system startup." alt="" coords="172,155,247,181"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="64,205,111,189,158,177,159,182,113,195,65,210"/>
 <area shape="rect" id="Node000003" href="$da/d78/classfl_1_1asio_1_1http_1_1_response_ab07b6f9e44bc8aba1f780b0230f5be21.html#ab07b6f9e44bc8aba1f780b0230f5be21" title="Factory method for 200 OK response." alt="" coords="112,205,307,230"/>
 <area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="64,215,99,215,99,220,64,220"/>
 <area shape="rect" id="Node000012" href="$dc/dba/_loopback_8ino_a3c7b93186aa45d9ff5d239f0d88f6008.html#a3c7b93186aa45d9ff5d239f0d88f6008" title=" " alt="" coords="160,262,259,287"/>
 <area shape="poly" id="edge22_Node000001_Node000012" title=" " alt="" coords="65,224,158,255,156,260,63,229"/>
 <area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="180,157,174,147,178,137,190,131,209,129,233,132,243,141,240,145,231,137,209,134,191,136,182,141,180,146,185,154"/>
-<area shape="rect" id="Node000004" href="$da/d78/classfl_1_1asio_1_1http_1_1_response_a1a8b4038fa86119ce80f6b9857c7eee3.html#a1a8b4038fa86119ce80f6b9857c7eee3" title=" " alt="" coords="355,197,525,237"/>
+<area shape="rect" id="Node000004" href="$da/d78/classfl_1_1asio_1_1http_1_1_response_ae28f4e35fd245247a0f5f800be3364d2.html#ae28f4e35fd245247a0f5f800be3364d2" title=" " alt="" coords="355,197,525,237"/>
 <area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="307,224,341,224,341,229,307,229"/>
 <area shape="poly" id="edge19_Node000004_Node000003" title=" " alt="" coords="354,211,320,211,320,206,354,206"/>
 <area shape="poly" id="edge5_Node000004_Node000004" title=" " alt="" coords="399,198,397,188,403,178,418,173,440,171,466,174,480,181,477,186,464,179,440,176,419,178,406,183,402,189,404,196"/>
@@ -33,8 +33,8 @@
 <area shape="poly" id="edge16_Node000009_Node000009" title=" " alt="" coords="618,286,615,276,622,266,636,261,659,259,684,262,698,269,696,274,683,267,659,264,638,266,625,271,620,277,623,284"/>
 <area shape="poly" id="edge18_Node000010_Node000004" title=" " alt="" coords="616,352,593,342,572,327,555,307,548,287,543,267,532,248,537,245,548,265,553,285,560,304,575,323,596,337,619,347"/>
 <area shape="poly" id="edge21_Node000011_Node000004" title=" " alt="" coords="612,416,590,406,571,391,558,373,550,354,547,318,545,283,541,266,531,249,536,246,546,264,550,283,552,318,555,353,562,370,575,387,593,401,614,411"/>
-<area shape="rect" id="Node000013" href="$df/da5/lib8tion_8h_a696b9421eca961df0a68c7c6c3e983ab.html#a696b9421eca961df0a68c7c6c3e983ab" title="Generates an 8&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="401,262,479,287"/>
+<area shape="rect" id="Node000013" href="$df/da5/lib8tion_8h_aca012663c6c8fe9a7240bcbc76095ba9.html#aca012663c6c8fe9a7240bcbc76095ba9" title="Generates an 8&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="401,262,479,287"/>
 <area shape="poly" id="edge23_Node000012_Node000013" title=" " alt="" coords="259,272,387,272,387,277,259,277"/>
-<area shape="rect" id="Node000014" href="$d1/dfb/colorutils_8h_afba4db18577c19e39c54f1c5793741b7.html#afba4db18577c19e39c54f1c5793741b7" title="Fill a range of LEDs with a solid color." alt="" coords="402,311,478,337"/>
+<area shape="rect" id="Node000014" href="$d1/dfb/colorutils_8h_a3198008d7f952f27c3c83aeefedec06b.html#a3198008d7f952f27c3c83aeefedec06b" title="Fill a range of LEDs with a solid color." alt="" coords="402,311,478,337"/>
 <area shape="poly" id="edge24_Node000012_Node000014" title=" " alt="" coords="260,283,389,311,388,316,258,288"/>
 </map>

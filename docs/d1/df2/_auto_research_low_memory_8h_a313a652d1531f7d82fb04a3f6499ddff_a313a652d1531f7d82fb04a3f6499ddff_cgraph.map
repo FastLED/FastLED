@@ -1,23 +1,34 @@
 <map id="autoResearchLowMemoryLoop" name="autoResearchLowMemoryLoop">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,79,228,104"/>
-<area shape="rect" id="Node000002" href="$da/d45/classfl_1_1_watchdog_a2e9027915eb87ddad815dc2cabbf01f5.html#a2e9027915eb87ddad815dc2cabbf01f5" title=" " alt="" coords="289,29,428,55"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="179,76,282,55,283,60,180,81"/>
-<area shape="rect" id="Node000003" href="$da/d45/classfl_1_1_watchdog_a09a903bdc23fddbb6caac87080a2a567.html#a09a903bdc23fddbb6caac87080a2a567" title=" " alt="" coords="276,79,441,104"/>
-<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="228,89,262,89,262,94,228,94"/>
-<area shape="rect" id="Node000005" href="$dc/ddb/classfl_1_1_remote_a4579a9af2b68eb330345740407ef37fd.html#a4579a9af2b68eb330345740407ef37fd" title="Main update: pull + tick + push (overrides Server::update)" alt="" coords="287,152,430,177"/>
-<area shape="poly" id="edge6_Node000001_Node000005" title=" " alt="" coords="160,102,304,145,302,151,159,107"/>
-<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="323,31,316,21,320,11,334,5,359,3,389,6,401,15,397,20,387,11,359,8,336,10,323,15,321,20,327,28"/>
-<area shape="rect" id="Node000004" href="$da/d45/classfl_1_1_watchdog_aa289ba7fe21f2add007ae8680e51249a.html#aa289ba7fe21f2add007ae8680e51249a" title=" " alt="" coords="489,53,664,79"/>
-<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="441,79,475,75,476,80,442,84"/>
-<area shape="poly" id="edge5_Node000004_Node000004" title=" " alt="" coords="547,55,541,45,544,35,556,29,577,27,601,30,612,39,608,43,599,35,577,32,558,34,548,39,546,44,551,52"/>
-<area shape="rect" id="Node000006" href="$de/d40/classfl_1_1json_af8bc0968107152344bfa8468bba76f54.html#af8bc0968107152344bfa8468bba76f54" title=" " alt="" coords="520,103,633,128"/>
-<area shape="poly" id="edge7_Node000005_Node000006" title=" " alt="" coords="415,149,506,128,507,134,416,155"/>
-<area shape="rect" id="Node000007" href="$dc/d00/classfl_1_1_server_a4b8b9821566f8389e43734b90ae36798.html#a4b8b9821566f8389e43734b90ae36798" title="Pull requests from source, process, queue responses." alt="" coords="521,152,633,177"/>
-<area shape="poly" id="edge8_Node000005_Node000007" title=" " alt="" coords="431,162,507,162,507,167,431,167"/>
-<area shape="rect" id="Node000009" href="$dc/d00/classfl_1_1_server_a049bc5d74287eaf42b1b4b8086e7213d.html#a049bc5d74287eaf42b1b4b8086e7213d" title="Push queued responses to sink." alt="" coords="517,201,636,227"/>
-<area shape="poly" id="edge10_Node000005_Node000009" title=" " alt="" coords="416,175,507,196,506,201,415,180"/>
-<area shape="rect" id="Node000010" href="$dc/ddb/classfl_1_1_remote_a3653f4ef8d9753d8577e3c18a07d3e0a.html#a3653f4ef8d9753d8577e3c18a07d3e0a" title="Process scheduled calls (call regularly)" alt="" coords="516,251,637,276"/>
-<area shape="poly" id="edge11_Node000005_Node000010" title=" " alt="" coords="381,175,430,205,490,236,513,244,511,249,488,240,427,210,378,180"/>
-<area shape="rect" id="Node000008" href="$da/d3c/namespacefl_1_1fl_a14315b21314f12a4c40dde841fcc4c8a.html#a14315b21314f12a4c40dde841fcc4c8a" title=" " alt="" coords="712,152,803,177"/>
-<area shape="poly" id="edge9_Node000007_Node000008" title=" " alt="" coords="633,162,698,162,698,167,633,167"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,108,228,133"/>
+<area shape="rect" id="Node000002" href="$da/d45/classfl_1_1_watchdog_a871fd275acc0c885381a8dc5ff6dde22.html#a871fd275acc0c885381a8dc5ff6dde22" title=" " alt="" coords="307,29,445,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="151,105,275,63,305,55,306,60,277,69,153,110"/>
+<area shape="rect" id="Node000003" href="$da/d45/classfl_1_1_watchdog_a1e8bbc71d53587db65db2d3b81f23334.html#a1e8bbc71d53587db65db2d3b81f23334" title=" " alt="" coords="293,79,459,104"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="228,105,280,100,280,105,229,111"/>
+<area shape="rect" id="Node000005" href="$d2/d9f/namespaceautoresearch_1_1low__memory_a595ea1a952d6e6465edca7d66ca81941.html#a595ea1a952d6e6465edca7d66ca81941" title=" " alt="" coords="276,129,476,169"/>
+<area shape="poly" id="edge6_Node000001_Node000005" title=" " alt="" coords="229,130,262,134,262,139,228,135"/>
+<area shape="rect" id="Node000012" href="$dc/ddb/classfl_1_1_remote_a4579a9af2b68eb330345740407ef37fd.html#a4579a9af2b68eb330345740407ef37fd" title="Main update: pull + tick + push (overrides Server::update)" alt="" coords="305,249,447,275"/>
+<area shape="poly" id="edge12_Node000001_Node000012" title=" " alt="" coords="143,131,341,240,338,245,140,136"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="338,31,330,21,334,11,350,5,376,3,409,7,422,16,418,20,407,11,376,8,351,10,337,15,335,20,342,27"/>
+<area shape="rect" id="Node000004" href="$da/d45/classfl_1_1_watchdog_ac01eedccb9f606463033025109f1d7d4.html#ac01eedccb9f606463033025109f1d7d4" title=" " alt="" coords="524,79,699,104"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="459,89,510,89,510,94,459,94"/>
+<area shape="poly" id="edge5_Node000004_Node000004" title=" " alt="" coords="578,80,570,70,574,60,588,54,611,52,640,56,651,65,648,69,638,61,611,57,589,59,578,64,576,70,582,77"/>
+<area shape="rect" id="Node000006" href="$db/d4a/classfl_1_1_singleton_shared_a1ec246efec2c46bc053a64fe7e8170ad.html#a1ec246efec2c46bc053a64fe7e8170ad" title=" " alt="" coords="539,129,683,169"/>
+<area shape="poly" id="edge7_Node000005_Node000006" title=" " alt="" coords="476,146,525,146,525,151,476,151"/>
+<area shape="rect" id="Node000007" href="$db/d4a/classfl_1_1_singleton_shared_a03c9eb23cd0cb903d5ae8fd44b1a4984.html#a03c9eb23cd0cb903d5ae8fd44b1a4984" title=" " alt="" coords="747,61,891,101"/>
+<area shape="poly" id="edge8_Node000006_Node000007" title=" " alt="" coords="672,126,744,102,745,107,674,131"/>
+<area shape="rect" id="Node000009" href="$df/d9e/namespacefl_1_1detail_a6bef973c17637a167f1f94d7db03905c.html#a6bef973c17637a167f1f94d7db03905c" title=" " alt="" coords="747,125,890,165"/>
+<area shape="poly" id="edge10_Node000006_Node000009" title=" " alt="" coords="684,145,733,144,734,149,684,150"/>
+<area shape="rect" id="Node000011" href="$df/d9e/namespacefl_1_1detail_af558e779ba2417d4cf14bdb1cbfd3d34.html#af558e779ba2417d4cf14bdb1cbfd3d34" title=" " alt="" coords="747,189,890,229"/>
+<area shape="poly" id="edge11_Node000006_Node000011" title=" " alt="" coords="682,166,737,182,735,187,681,171"/>
+<area shape="poly" id="edge9_Node000007_Node000007" title=" " alt="" coords="780,61,778,51,784,42,798,36,819,34,843,37,856,44,853,49,841,42,819,39,799,41,787,46,783,52,785,60"/>
+<area shape="rect" id="Node000013" href="$de/d40/classfl_1_1json_ae7744bee3369b3debf7e30e4a4a18526.html#ae7744bee3369b3debf7e30e4a4a18526" title=" " alt="" coords="555,200,668,225"/>
+<area shape="poly" id="edge13_Node000012_Node000013" title=" " alt="" coords="437,247,540,225,542,230,438,252"/>
+<area shape="rect" id="Node000014" href="$dc/d00/classfl_1_1_server_a4b8b9821566f8389e43734b90ae36798.html#a4b8b9821566f8389e43734b90ae36798" title="Pull requests from source, process, queue responses." alt="" coords="555,249,667,275"/>
+<area shape="poly" id="edge14_Node000012_Node000014" title=" " alt="" coords="448,259,542,259,542,265,448,265"/>
+<area shape="rect" id="Node000016" href="$dc/d00/classfl_1_1_server_a049bc5d74287eaf42b1b4b8086e7213d.html#a049bc5d74287eaf42b1b4b8086e7213d" title="Push queued responses to sink." alt="" coords="552,299,671,324"/>
+<area shape="poly" id="edge16_Node000012_Node000016" title=" " alt="" coords="438,272,539,294,538,299,437,277"/>
+<area shape="rect" id="Node000017" href="$dc/ddb/classfl_1_1_remote_a3653f4ef8d9753d8577e3c18a07d3e0a.html#a3653f4ef8d9753d8577e3c18a07d3e0a" title="Process scheduled calls (call regularly)" alt="" coords="551,348,672,373"/>
+<area shape="poly" id="edge17_Node000012_Node000017" title=" " alt="" coords="400,272,456,303,525,334,546,342,544,347,523,339,454,307,398,277"/>
+<area shape="rect" id="Node000015" href="$d4/d36/namespacefl_a0c8a67e528dcd96ee58216754a07a733.html#a0c8a67e528dcd96ee58216754a07a733" title=" " alt="" coords="781,253,856,279"/>
+<area shape="poly" id="edge15_Node000014_Node000015" title=" " alt="" coords="668,260,767,262,767,268,667,266"/>
 </map>

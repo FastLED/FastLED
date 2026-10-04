@@ -1,0 +1,30 @@
+<map id="mood_ring::BreathLayer::render" name="mood_ring::BreathLayer::render">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,218,184,258"/>
+<area shape="rect" id="Node000002" href="$d7/d17/classmood__ring_1_1_ring_canvas_a934e886cf19788c75da6736a7aa93594.html#a934e886cf19788c75da6736a7aa93594" title="Add the same colour to every pixel." alt="" coords="233,14,409,54"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="117,215,286,61,289,65,120,219"/>
+<area shape="rect" id="Node000004" href="$d7/d17/classmood__ring_1_1_ring_canvas_a8ce8023931622ce858d582d136bdb0aa.html#a8ce8023931622ce858d582d136bdb0aa" title="Add a smooth lobe centred at pos (turns) with half&#45;width sigma (turns)." alt="" coords="233,156,409,196"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="169,215,233,197,235,203,170,220"/>
+<area shape="rect" id="Node000011" href="$d2/df0/namespacemood__ring_adab294c0032e0fa5dc8e0564ca2755d9.html#adab294c0032e0fa5dc8e0564ca2755d9" title="Colour at position t in [0, 1] along the family, at value v." alt="" coords="232,278,411,304"/>
+<area shape="poly" id="edge12_Node000001_Node000011" title=" " alt="" coords="181,255,254,273,253,278,179,260"/>
+<area shape="rect" id="Node000014" href="$d4/d36/namespacefl_a080e32a9d5b39b1674c35757eaa2daf9.html#a080e32a9d5b39b1674c35757eaa2daf9" title=" " alt="" coords="293,328,350,353"/>
+<area shape="poly" id="edge15_Node000001_Node000014" title=" " alt="" coords="128,256,177,285,233,313,280,328,278,333,231,318,174,289,125,260"/>
+<area shape="rect" id="Node000003" href="$d7/d17/classmood__ring_1_1_ring_canvas_adb6c86fac2a08a1eb6b90ccbd5175945.html#adb6c86fac2a08a1eb6b90ccbd5175945" title=" " alt="" coords="688,71,864,111"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="409,13,462,6,520,3,581,5,641,15,693,35,738,61,735,66,690,40,639,20,581,10,520,8,462,12,410,18"/>
+<area shape="poly" id="edge11_Node000004_Node000003" title=" " alt="" coords="337,154,386,104,420,78,458,59,489,50,521,45,587,44,649,52,704,65,703,70,648,57,586,49,522,50,490,55,460,64,423,83,390,108,340,158"/>
+<area shape="rect" id="Node000005" href="$d2/df0/namespacemood__ring_ab43ea5c75d08a1720cd203f23fa2e271.html#ab43ea5c75d08a1720cd203f23fa2e271" title="Smooth bump: 1 at distance 0, 0 at distance &gt;= sigma." alt="" coords="481,74,618,100"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="360,154,458,110,483,101,485,106,460,115,362,159"/>
+<area shape="rect" id="Node000006" href="$d7/d17/classmood__ring_1_1_ring_canvas_a81f966f51d1a1fa5ae99acedff21de32.html#a81f966f51d1a1fa5ae99acedff21de32" title="Add to one pixel, index wrapped." alt="" coords="461,124,637,164"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="409,161,447,156,448,161,410,167"/>
+<area shape="rect" id="Node000007" href="$d7/d17/classmood__ring_1_1_ring_canvas_a5947d6f56eb548da07254d89f2ce32e7.html#a5947d6f56eb548da07254d89f2ce32e7" title="Position of pixel i in turns." alt="" coords="461,188,637,228"/>
+<area shape="poly" id="edge7_Node000004_Node000007" title=" " alt="" coords="410,186,448,192,447,197,409,191"/>
+<area shape="rect" id="Node000008" href="$d2/df0/namespacemood__ring_a457a80c9d79bc3611dfbcb39efb10c3d.html#a457a80c9d79bc3611dfbcb39efb10c3d" title="Shortest distance between two ring positions, in turns, in [0, 0.5]." alt="" coords="459,253,640,278"/>
+<area shape="poly" id="edge9_Node000004_Node000008" title=" " alt="" coords="362,194,460,238,485,246,483,252,458,243,360,199"/>
+<area shape="poly" id="edge6_Node000006_Node000003" title=" " alt="" coords="634,122,677,112,678,117,635,127"/>
+<area shape="poly" id="edge8_Node000007_Node000003" title=" " alt="" coords="611,186,639,174,689,146,734,117,737,121,692,151,641,179,613,191"/>
+<area shape="rect" id="Node000009" href="$d2/df0/namespacemood__ring_ab42039ce856d86d3fa5f87978a9a1edd.html#ab42039ce856d86d3fa5f87978a9a1edd" title="Signed shortest offset from b to a on the ring, in (&#45;0.5, 0.5]." alt="" coords="695,253,857,278"/>
+<area shape="poly" id="edge10_Node000008_Node000009" title=" " alt="" coords="640,263,681,263,681,268,640,268"/>
+<area shape="rect" id="Node000012" href="$d2/df0/namespacemood__ring_a921a91f885103df5f519114e82f24105.html#a921a91f885103df5f519114e82f24105" title=" " alt="" coords="477,302,621,328"/>
+<area shape="poly" id="edge13_Node000011_Node000012" title=" " alt="" coords="411,298,464,303,463,309,411,303"/>
+<area shape="rect" id="Node000013" href="$d2/df0/namespacemood__ring_a2f7eb4f980c458d8e1be8c412b5483f6.html#a2f7eb4f980c458d8e1be8c412b5483f6" title=" " alt="" coords="477,352,622,377"/>
+<area shape="poly" id="edge14_Node000011_Node000013" title=" " alt="" coords="377,301,412,313,460,337,485,345,483,350,458,342,410,318,375,306"/>
+</map>

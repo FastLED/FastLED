@@ -1,0 +1,50 @@
+digraph "fl::net::NetworkDetector::isAnyNetworkActive"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::net::NetworkDetector\l::isAnyNetworkActive",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="throttleToMaxRefreshRate",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/de5/_fast_l_e_d_8cpp_8hpp_ac6c7e827ae13a7bc3da907399f25142f.html#ac6c7e827ae13a7bc3da907399f25142f",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="CFastLED::show",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dbb/class_c_fast_l_e_d_a93471b4babe96100496e8e25062cba3f.html#a93471b4babe96100496e8e25062cba3f",tooltip="Update all our controllers with the current led colors, using the passed in brightness."];
+  Node2 -> Node4 [id="edge3_Node000002_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="CFastLED::showColor",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dbb/class_c_fast_l_e_d_a50e30222e81562a7ef334dbe4fdfa856.html#a50e30222e81562a7ef334dbe4fdfa856",tooltip="Set all leds on all controllers to the given color/scale."];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="CFastLED::clear",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dbb/class_c_fast_l_e_d_aeb7bd3e8f2dbced6284a2182191d5fcb.html#aeb7bd3e8f2dbced6284a2182191d5fcb",tooltip="Clear the leds, wiping the local array of data."];
+  Node1 -> Node6 [id="edge5_Node000001_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::ChannelManager\l::waitForCondition",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d6b/classfl_1_1_channel_manager_ad2dad2fdb0279c8f211fd524025e14f0.html#ad2dad2fdb0279c8f211fd524025e14f0",tooltip="Wait until a condition is met, with check-pump-delay logic."];
+  Node6 -> Node7 [id="edge6_Node000006_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::ChannelManager\l::waitForReady",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d6b/classfl_1_1_channel_manager_af3041b5d8b20269dc1909667d8714de6.html#af3041b5d8b20269dc1909667d8714de6",tooltip="Wait for all drivers to become READY."];
+  Node7 -> Node8 [id="edge7_Node000007_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl::ChannelManager\l::addDriverSlow",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d2/d6b/classfl_1_1_channel_manager_a9d5c6d37df9f78ddacf9e44073b4fe18.html#a9d5c6d37df9f78ddacf9e44073b4fe18",tooltip="Handle validation failures and the uncommon replacement flow outside the normal driver-registration p..."];
+  Node7 -> Node13 [id="edge8_Node000007_Node000013",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node13 [id="Node000013",label="fl::ChannelManager\l::clearAllDrivers",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d2/d6b/classfl_1_1_channel_manager_a743b1256280a8a80b7d47d644088464e.html#a743b1256280a8a80b7d47d644088464e",tooltip="Remove all drivers from the manager."];
+  Node7 -> Node15 [id="edge9_Node000007_Node000015",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node15 [id="Node000015",label="fl::ChannelManager\l::onBeginFrame",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d6b/classfl_1_1_channel_manager_a51df52695220156ed2bf8998e347e5c9.html#a51df52695220156ed2bf8998e347e5c9",tooltip="Poll drivers before frame starts to clear previous frame state."];
+  Node7 -> Node16 [id="edge10_Node000007_Node000016",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node16 [id="Node000016",label="fl::ChannelManager\l::reset",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d2/d6b/classfl_1_1_channel_manager_a3b733c7354a68ef0935614419e77688b.html#a3b733c7354a68ef0935614419e77688b",tooltip="Reset bus manager state, clearing all enqueued and transmitting channels."];
+  Node7 -> Node17 [id="edge11_Node000007_Node000017",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node17 [id="Node000017",label="CFastLED::wait",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dbb/class_c_fast_l_e_d_aeb27e6f97287c4add5056c7218a78c82.html#aeb27e6f97287c4add5056c7218a78c82",tooltip="Wait for all channel bus transmissions to complete."];
+  Node7 -> Node18 [id="edge12_Node000007_Node000018",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node18 [id="Node000018",label="CFastLED::wait",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dbb/class_c_fast_l_e_d_a234cfd99ebdb37ecd4aedf51484d74e2.html#a234cfd99ebdb37ecd4aedf51484d74e2",tooltip="Wait for all channel bus transmissions to complete with timeout."];
+  Node6 -> Node19 [id="edge13_Node000006_Node000019",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node19 [id="Node000019",label="fl::ChannelManager\l::waitForReadyOrDraining",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d6b/classfl_1_1_channel_manager_a10a6b64316d63740f381ea73eb322d3a.html#a10a6b64316d63740f381ea73eb322d3a",tooltip=" "];
+  Node19 -> Node20 [id="edge14_Node000019_Node000020",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node20 [id="Node000020",label="fl::ChannelManager\l::onEndFrame",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d6b/classfl_1_1_channel_manager_a00529005793bae555511bc496817c0bc.html#a00529005793bae555511bc496817c0bc",tooltip="Trigger transmission of batched channel data."];
+  Node1 -> Node21 [id="edge15_Node000001_Node000021",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node21 [id="Node000021",label="fl::IChannelDriver\l::waitForCondition",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/da0/classfl_1_1_i_channel_driver_a699840e6b4d11e9215de9e4a7e8f8c3d.html#a699840e6b4d11e9215de9e4a7e8f8c3d",tooltip=" "];
+  Node21 -> Node22 [id="edge16_Node000021_Node000022",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node22 [id="Node000022",label="fl::IChannelDriver\l::operator=",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/da0/classfl_1_1_i_channel_driver_afbfde94b6b6b17fec987a9f5d4a28e6e.html#afbfde94b6b6b17fec987a9f5d4a28e6e",tooltip=" "];
+  Node21 -> Node23 [id="edge17_Node000021_Node000023",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node23 [id="Node000023",label="fl::IChannelDriver\l::waitForReady",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/da0/classfl_1_1_i_channel_driver_ae5607fcac412ea2dc9a63704862fb6dd.html#ae5607fcac412ea2dc9a63704862fb6dd",tooltip="Wait for driver to become READY."];
+  Node23 -> Node24 [id="edge18_Node000023_Node000024",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node24 [id="Node000024",label="fl::SlimBridgeController\l::showPixels",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d93/classfl_1_1_slim_bridge_controller_a3f96c4f996f9f95f0ddb285fcab60dc9.html#a3f96c4f996f9f95f0ddb285fcab60dc9",tooltip=" "];
+  Node23 -> Node25 [id="edge19_Node000023_Node000025",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node25 [id="Node000025",label="fl::IChannelDriver\l::waitDone",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/da0/classfl_1_1_i_channel_driver_ad74d21cf8f6a7a94f9bd2227fd458a0b.html#ad74d21cf8f6a7a94f9bd2227fd458a0b",tooltip="Block until this driver finishes any in-flight transmit."];
+  Node21 -> Node26 [id="edge20_Node000021_Node000026",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node26 [id="Node000026",label="fl::IChannelDriver\l::waitForReadyOrDraining",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/da0/classfl_1_1_i_channel_driver_aee84e43543461834b1cf985f011279da.html#aee84e43543461834b1cf985f011279da",tooltip=" "];
+}

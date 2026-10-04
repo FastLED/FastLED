@@ -47,7 +47,7 @@
   </g>
 </defs>
 <script type="application/ecmascript">
-var viewWidth = 785;
+var viewWidth = 787;
 var viewHeight = 142;
 var sectionId = 'dynsection-0';
 </script>
@@ -83,39 +83,39 @@ var sectionId = 'dynsection-0';
 </a>
 </g>
 </g>
-<!-- Node4 -->
-<g id="Node000004" class="node">
-<title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../d8/da0/classfl_1_1_c_l_e_d_controller_a5e115bf146729c8868c918538feb06df.html#a5e115bf146729c8868c918538feb06df" target="_top" xlink:title="Check if this controller is in the linked list.">
+<!-- Node5 -->
+<g id="Node000005" class="node">
+<title>Node5</title>
+<g id="a_Node000005"><a xlink:href="../../d8/da0/classfl_1_1_c_l_e_d_controller_a346ffe73124af2abf1ccf82a96daee72.html#a346ffe73124af2abf1ccf82a96daee72" target="_top" xlink:title="Check if this controller is in the linked list.">
 <polygon fill="white" stroke="#666666" points="491,-88 389,-88 389,-58 491,-58 491,-88"/>
 <text text-anchor="start" x="397" y="-76" font-family="Helvetica,sans-Serif" font-size="10.00">fl::CLEDController</text>
 <text text-anchor="middle" x="440" y="-65" font-family="Helvetica,sans-Serif" font-size="10.00">::isInList</text>
 </a>
 </g>
 </g>
-<!-- Node1&#45;&gt;Node4 -->
-<g id="edge3_Node000001_Node000004" class="edge">
-<title>Node1&#45;&gt;Node4</title>
-<g id="a_edge3_Node000001_Node000004"><a xlink:title=" ">
+<!-- Node1&#45;&gt;Node5 -->
+<g id="edge4_Node000001_Node000005" class="edge">
+<title>Node1&#45;&gt;Node5</title>
+<g id="a_edge4_Node000001_Node000005"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M179.34,-75.24C241.67,-74.7 323.37,-74 378.34,-73.52"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="378.66,-77.02 388.63,-73.43 378.6,-70.02 378.66,-77.02"/>
 </a>
 </g>
 </g>
-<!-- Node7 -->
-<g id="Node000007" class="node">
-<title>Node7</title>
-<g id="a_Node000007"><a xlink:href="../../d8/da0/classfl_1_1_c_l_e_d_controller_a2929056de1378423feb303e26f015c1c.html#a2929056de1378423feb303e26f015c1c" target="_top" xlink:title="Remove this controller from the draw list.">
+<!-- Node8 -->
+<g id="Node000008" class="node">
+<title>Node8</title>
+<g id="a_Node000008"><a xlink:href="../../d8/da0/classfl_1_1_c_l_e_d_controller_a94b61a1117536f4ca62d34397623ed45.html#a94b61a1117536f4ca62d34397623ed45" target="_top" xlink:title="Remove this controller from the draw list.">
 <polygon fill="white" stroke="#666666" points="343,-30 215,-30 215,0 343,0 343,-30"/>
 <text text-anchor="start" x="223" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">fl::CLEDController</text>
 <text text-anchor="middle" x="279" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">::removeFromDrawList</text>
 </a>
 </g>
 </g>
-<!-- Node1&#45;&gt;Node7 -->
-<g id="edge7_Node000001_Node000007" class="edge">
-<title>Node1&#45;&gt;Node7</title>
-<g id="a_edge7_Node000001_Node000007"><a xlink:title=" ">
+<!-- Node1&#45;&gt;Node8 -->
+<g id="edge8_Node000001_Node000008" class="edge">
+<title>Node1&#45;&gt;Node8</title>
+<g id="a_edge8_Node000001_Node000008"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M119.8,-66.47C147.08,-57.59 188.47,-44.13 222.07,-33.2"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="223.35,-36.46 231.77,-30.04 221.18,-29.81 223.35,-36.46"/>
 </a>
@@ -124,7 +124,7 @@ var sectionId = 'dynsection-0';
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d9/d5b/classfl_1_1_singleton_a47fdc044003ec27f9e9833f7f5418e01.html#a47fdc044003ec27f9e9833f7f5418e01" target="_top" xlink:title=" ">
+<g id="a_Node000003"><a xlink:href="../../d9/d5b/classfl_1_1_singleton_ad5cb1b704e17768f75802673abb0ff75.html#ad5cb1b704e17768f75802673abb0ff75" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="501,-128.5 379,-128.5 379,-109.5 501,-109.5 501,-128.5"/>
 <text text-anchor="middle" x="440" y="-116.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::Singleton::instance</text>
 </a>
@@ -139,32 +139,31 @@ var sectionId = 'dynsection-0';
 </a>
 </g>
 </g>
-<!-- Node5 -->
-<g id="Node000005" class="node">
-<title>Node5</title>
-<g id="a_Node000005"><a xlink:href="../../d8/da0/classfl_1_1_c_l_e_d_controller_a7e91fc8f83d62c9da5e5c3d6d1bc10ce.html#a7e91fc8f83d62c9da5e5c3d6d1bc10ce" target="_top" xlink:title="Protected constructor with registration mode.">
-<polygon fill="white" stroke="#666666" points="639,-45 537,-45 537,-15 639,-15 639,-45"/>
-<text text-anchor="start" x="545" y="-33" font-family="Helvetica,sans-Serif" font-size="10.00">fl::CLEDController</text>
-<text text-anchor="middle" x="588" y="-22" font-family="Helvetica,sans-Serif" font-size="10.00">::CLEDController</text>
+<!-- Node4 -->
+<g id="Node000004" class="node">
+<title>Node4</title>
+<g id="a_Node000004"><a xlink:href="../../d4/d36/namespacefl_a1e67c0c24ebcd98fcf8554753d1639a6.html#a1e67c0c24ebcd98fcf8554753d1639a6" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="641,-128.5 537,-128.5 537,-109.5 641,-109.5 641,-128.5"/>
+<text text-anchor="middle" x="589" y="-116.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::FL_ALIGN_AS_T</text>
 </a>
 </g>
 </g>
-<!-- Node4&#45;&gt;Node5 -->
-<g id="edge4_Node000004_Node000005" class="edge">
-<title>Node4&#45;&gt;Node5</title>
-<g id="a_edge4_Node000004_Node000005"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M491.24,-58.2C502.72,-54.82 515.02,-51.2 526.86,-47.71"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="528.06,-51.01 536.66,-44.83 526.08,-44.29 528.06,-51.01"/>
+<!-- Node3&#45;&gt;Node4 -->
+<g id="edge3_Node000003_Node000004" class="edge">
+<title>Node3&#45;&gt;Node4</title>
+<g id="a_edge3_Node000003_Node000004"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M501.21,-119C509.56,-119 518.14,-119 526.5,-119"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="526.57,-122.5 536.57,-119 526.57,-115.5 526.57,-122.5"/>
 </a>
 </g>
 </g>
 <!-- Node6 -->
 <g id="Node000006" class="node">
 <title>Node6</title>
-<g id="a_Node000006"><a xlink:href="../../d8/da0/classfl_1_1_c_l_e_d_controller_a9e51518d1427463dffd596c69c6f3e46.html#a9e51518d1427463dffd596c69c6f3e46" target="_top" xlink:title="Add this controller to the linked list.">
-<polygon fill="white" stroke="#666666" points="777,-66 675,-66 675,-36 777,-36 777,-66"/>
-<text text-anchor="start" x="683" y="-54" font-family="Helvetica,sans-Serif" font-size="10.00">fl::CLEDController</text>
-<text text-anchor="middle" x="726" y="-43" font-family="Helvetica,sans-Serif" font-size="10.00">::addToList</text>
+<g id="a_Node000006"><a xlink:href="../../d8/da0/classfl_1_1_c_l_e_d_controller_ae0828dffacb43dca565ddf8145153ed0.html#ae0828dffacb43dca565ddf8145153ed0" target="_top" xlink:title="Protected constructor with registration mode.">
+<polygon fill="white" stroke="#666666" points="640,-45 538,-45 538,-15 640,-15 640,-45"/>
+<text text-anchor="start" x="546" y="-33" font-family="Helvetica,sans-Serif" font-size="10.00">fl::CLEDController</text>
+<text text-anchor="middle" x="589" y="-22" font-family="Helvetica,sans-Serif" font-size="10.00">::CLEDController</text>
 </a>
 </g>
 </g>
@@ -172,54 +171,73 @@ var sectionId = 'dynsection-0';
 <g id="edge5_Node000005_Node000006" class="edge">
 <title>Node5&#45;&gt;Node6</title>
 <g id="a_edge5_Node000005_Node000006"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M639.25,-37.76C647.63,-39.05 656.39,-40.41 664.98,-41.73"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="664.53,-45.2 674.95,-43.27 665.6,-38.29 664.53,-45.2"/>
+<path fill="none" stroke="#63b8ff" d="M491.18,-58.32C502.99,-54.87 515.7,-51.15 527.9,-47.58"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="528.93,-50.92 537.55,-44.76 526.97,-44.21 528.93,-50.92"/>
 </a>
 </g>
 </g>
-<!-- Node6&#45;&gt;Node4 -->
-<g id="edge6_Node000006_Node000004" class="edge">
-<title>Node6&#45;&gt;Node4</title>
-<g id="a_edge6_Node000006_Node000004"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M674.9,-54.88C626.39,-58.64 552.8,-64.34 501.14,-68.34"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="500.82,-64.86 491.12,-69.12 501.36,-71.83 500.82,-64.86"/>
+<!-- Node7 -->
+<g id="Node000007" class="node">
+<title>Node7</title>
+<g id="a_Node000007"><a xlink:href="../../d8/da0/classfl_1_1_c_l_e_d_controller_af0c5f56a02ad4e919df8181d3b267390.html#af0c5f56a02ad4e919df8181d3b267390" target="_top" xlink:title="Add this controller to the linked list.">
+<polygon fill="white" stroke="#666666" points="779,-66 677,-66 677,-36 779,-36 779,-66"/>
+<text text-anchor="start" x="685" y="-54" font-family="Helvetica,sans-Serif" font-size="10.00">fl::CLEDController</text>
+<text text-anchor="middle" x="728" y="-43" font-family="Helvetica,sans-Serif" font-size="10.00">::addToList</text>
 </a>
 </g>
 </g>
-<!-- Node7&#45;&gt;Node7 -->
-<g id="edge8_Node000007_Node000007" class="edge">
-<title>Node7&#45;&gt;Node7</title>
-<g id="a_edge8_Node000007_Node000007"><a xlink:title=" ">
+<!-- Node6&#45;&gt;Node7 -->
+<g id="edge6_Node000006_Node000007" class="edge">
+<title>Node6&#45;&gt;Node7</title>
+<g id="a_edge6_Node000006_Node000007"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M640.24,-37.7C648.89,-39.03 657.97,-40.42 666.85,-41.78"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="666.36,-45.24 676.77,-43.3 667.42,-38.33 666.36,-45.24"/>
+</a>
+</g>
+</g>
+<!-- Node7&#45;&gt;Node5 -->
+<g id="edge7_Node000007_Node000005" class="edge">
+<title>Node7&#45;&gt;Node5</title>
+<g id="a_edge7_Node000007_Node000005"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M676.91,-54.85C627.97,-58.62 553.42,-64.35 501.26,-68.36"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="500.85,-64.89 491.14,-69.14 501.38,-71.87 500.85,-64.89"/>
+</a>
+</g>
+</g>
+<!-- Node8&#45;&gt;Node8 -->
+<g id="edge9_Node000008_Node000008" class="edge">
+<title>Node8&#45;&gt;Node8</title>
+<g id="a_edge9_Node000008_Node000008"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M250.88,-30.28C244.62,-39.41 254,-48 279,-48 293.84,-48 303.18,-44.97 307.01,-40.6"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="310.51,-40.32 307.12,-30.28 303.51,-40.23 310.51,-40.32"/>
 </a>
 </g>
 </g>
-<!-- Node8 -->
-<g id="Node000008" class="node">
-<title>Node8</title>
-<g id="a_Node000008"><a xlink:href="../../d8/da0/classfl_1_1_c_l_e_d_controller_ab883396db2a06fb83865cbdcae94c07f.html#ab883396db2a06fb83865cbdcae94c07f" target="_top" xlink:title="Remove a controller from the linked list.">
+<!-- Node9 -->
+<g id="Node000009" class="node">
+<title>Node9</title>
+<g id="a_Node000009"><a xlink:href="../../d8/da0/classfl_1_1_c_l_e_d_controller_aacb3d253e9dae374e488b91f068cd660.html#aacb3d253e9dae374e488b91f068cd660" target="_top" xlink:title="Remove a controller from the linked list.">
 <polygon fill="white" stroke="#666666" points="491,-34 389,-34 389,-4 491,-4 491,-34"/>
 <text text-anchor="start" x="397" y="-22" font-family="Helvetica,sans-Serif" font-size="10.00">fl::CLEDController</text>
 <text text-anchor="middle" x="440" y="-11" font-family="Helvetica,sans-Serif" font-size="10.00">::removeFromList</text>
 </a>
 </g>
 </g>
-<!-- Node7&#45;&gt;Node8 -->
-<g id="edge9_Node000007_Node000008" class="edge">
-<title>Node7&#45;&gt;Node8</title>
-<g id="a_edge9_Node000007_Node000008"><a xlink:title=" ">
+<!-- Node8&#45;&gt;Node9 -->
+<g id="edge10_Node000008_Node000009" class="edge">
+<title>Node8&#45;&gt;Node9</title>
+<g id="a_edge10_Node000008_Node000009"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M343.3,-16.59C354.83,-16.88 366.85,-17.18 378.31,-17.47"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="378.56,-20.98 388.65,-17.73 378.74,-13.98 378.56,-20.98"/>
 </a>
 </g>
 </g>
-<!-- Node8&#45;&gt;Node5 -->
-<g id="edge10_Node000008_Node000005" class="edge">
-<title>Node8&#45;&gt;Node5</title>
-<g id="a_edge10_Node000008_Node000005"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M491.24,-22.79C502.6,-23.64 514.77,-24.56 526.5,-25.44"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="526.43,-28.95 536.66,-26.21 526.95,-21.97 526.43,-28.95"/>
+<!-- Node9&#45;&gt;Node6 -->
+<g id="edge11_Node000009_Node000006" class="edge">
+<title>Node9&#45;&gt;Node6</title>
+<g id="a_edge11_Node000009_Node000006"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M491.18,-22.75C502.87,-23.63 515.45,-24.57 527.54,-25.48"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="527.32,-28.97 537.55,-26.22 527.84,-21.99 527.32,-28.97"/>
 </a>
 </g>
 </g>

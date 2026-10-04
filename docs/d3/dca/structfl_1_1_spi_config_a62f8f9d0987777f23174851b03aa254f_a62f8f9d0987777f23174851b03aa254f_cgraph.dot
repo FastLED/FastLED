@@ -8,5 +8,5 @@ digraph "fl::SpiConfig::SpiConfig"
   rankdir="LR";
   Node1 [id="Node000001",label="fl::SpiConfig::SpiConfig",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Construct single-lane SPI config."];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::SpiConfig::SpiConfig",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/dca/structfl_1_1_spi_config_a09c10e494bdaca77e2f78dba6940f81a.html#a09c10e494bdaca77e2f78dba6940f81a",tooltip=" "];
+  Node2 [id="Node000002",label="fl::SpiConfig::SpiConfig",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/dca/structfl_1_1_spi_config_ab2b2efac1d97b6c1c2ee02d55e27c476.html#ab2b2efac1d97b6c1c2ee02d55e27c476",tooltip=" "];
 }

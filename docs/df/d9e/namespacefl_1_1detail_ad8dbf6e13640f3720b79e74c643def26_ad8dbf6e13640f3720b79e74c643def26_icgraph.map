@@ -1,0 +1,29 @@
+<map id="fl::detail::xyzColumnQ16" name="fl::detail::xyzColumnQ16">
+<area shape="rect" id="Node000001" title="XYZ of chromaticity xy at luminance luminance, all s16.16; false for a non&#45;positive or out&#45;of&#45;simplex..." alt="" coords="1007,85,1189,111"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_ad6f2ff94520f8796af18542b1844730f.html#ad6f2ff94520f8796af18542b1844730f" title="Build the Bradford transform from source_white to destination_white." alt="" coords="764,56,959,81"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="993,88,959,83,959,78,994,82"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_a5ceffc39c2bae8d63b8b8d3fe8459dcb.html#a5ceffc39c2bae8d63b8b8d3fe8459dcb" title="Quantize the source matrix for primaries." alt="" coords="770,7,953,32"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="1054,82,958,46,918,35,920,29,960,41,1056,77"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_ad44a9cdc62803567f2f78f6364abb36c.html#ad44a9cdc62803567f2f78f6364abb36c" title="Bind from an RGB solve already adapted to the D65 working domain." alt="" coords="775,106,948,146"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="993,113,948,118,948,113,993,108"/>
+<area shape="rect" id="Node000012" href="$db/d33/namespacefl_1_1anonymous__namespace_02pipeline_8cpp_8hpp_03_ab9c7864cd6f59dbfa968671bb8d9c3c6.html#ab9c7864cd6f59dbfa968671bb8d9c3c6" title=" " alt="" coords="253,231,449,285"/>
+<area shape="poly" id="edge14_Node000001_Node000012" title=" " alt="" coords="1060,119,1013,141,959,161,823,197,685,224,556,242,450,253,449,248,556,237,684,218,822,192,958,155,1011,136,1058,114"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_ac4d398fdc18a6dbc27b1b07aa647bf0d.html#ac4d398fdc18a6dbc27b1b07aa647bf0d" title="Bind a source declaration and a device profile into a pipeline." alt="" coords="501,5,716,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="783,56,672,33,673,28,784,51"/>
+<area shape="rect" id="Node000006" href="$db/d33/namespacefl_1_1anonymous__namespace_02pipeline_8cpp_8hpp_03_aece1643892391c10a9c9de9a2f21ab11.html#aece1643892391c10a9c9de9a2f21ab11" title=" " alt="" coords="5,117,201,172"/>
+<area shape="poly" id="edge4_Node000002_Node000006" title=" " alt="" coords="751,76,520,92,384,104,250,121,202,128,201,123,249,115,384,99,519,86,750,71"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_ab00dbc8e93b9e8d57787730e08c3bbe9.html#ab00dbc8e93b9e8d57787730e08c3bbe9" title="Build the streaming pipeline a binding describes." alt="" coords="256,5,447,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="488,21,447,21,447,15,488,15"/>
+<area shape="poly" id="edge5_Node000006_Node000006" title=" " alt="" coords="145,106,130,99,103,96,81,98,67,103,60,109,60,117,55,117,55,107,64,98,80,93,103,91,131,94,147,102"/>
+<area shape="poly" id="edge7_Node000007_Node000003" title=" " alt="" coords="756,21,716,21,716,16,756,16"/>
+<area shape="rect" id="Node000009" href="$d4/d36/namespacefl_a0bbd4600d1ada0552c6743d28a8683ea.html#a0bbd4600d1ada0552c6743d28a8683ea" title="Bind a four&#45;emitter map from an effective RGB solve and a white column already adapted into the same ..." alt="" coords="503,106,714,146"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="761,129,714,129,714,123,761,123"/>
+<area shape="rect" id="Node000011" href="$d4/d36/namespacefl_a97deed3552ced20bbf44992b9d1845ac.html#a97deed3552ced20bbf44992b9d1845ac" title="Derive the allocation for a three&#45;primary profile plus one white emitter." alt="" coords="509,171,708,196"/>
+<area shape="poly" id="edge13_Node000008_Node000011" title=" " alt="" coords="762,151,666,173,665,168,761,146"/>
+<area shape="poly" id="edge12_Node000009_Node000006" title=" " alt="" coords="489,133,202,144,201,138,489,128"/>
+<area shape="rect" id="Node000010" href="$d4/d36/namespacefl_ac53a775b79932ae3fe7e03b287639d43.html#ac53a775b79932ae3fe7e03b287639d43" title="Derive the mapper for a three&#45;primary profile plus one white emitter." alt="" coords="249,157,453,183"/>
+<area shape="poly" id="edge10_Node000009_Node000010" title=" " alt="" coords="490,149,427,160,426,155,489,144"/>
+<area shape="poly" id="edge11_Node000010_Node000006" title=" " alt="" coords="236,161,201,157,202,152,236,156"/>
+<area shape="poly" id="edge15_Node000012_Node000006" title=" " alt="" coords="277,227,163,174,165,170,279,222"/>
+<area shape="poly" id="edge16_Node000012_Node000012" title=" " alt="" coords="393,220,378,212,351,209,329,211,315,216,308,222,308,231,303,231,303,220,312,212,328,206,351,204,379,207,395,215"/>
+</map>

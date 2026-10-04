@@ -1,0 +1,5 @@
+<map id="fl::buildWave10LutForMaxBaud" name="fl::buildWave10LutForMaxBaud">
+<area shape="rect" id="Node000001" title="Build a UART waveform LUT with a backend&#45;specific baud ceiling." alt="" coords="5,5,228,31"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a715b655d8ee6017d3c827c5de110d59e.html#a715b655d8ee6017d3c827c5de110d59e" title=" " alt="" coords="276,5,323,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="228,15,263,15,263,21,228,21"/>
+</map>

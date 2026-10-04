@@ -12,9 +12,9 @@ digraph "loop"
   Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
   Node3 [id="Node000003",label="HeatColor",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/dfb/colorutils_8h_aac6ad82ff641101be4fba19db9fc5dbe.html#aac6ad82ff641101be4fba19db9fc5dbe",tooltip=" "];
   Node2 -> Node4 [id="edge3_Node000002_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="random8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d0d/group___random_gadb05544426b14ef8d85fb2eb73cb8a0a.html#gadb05544426b14ef8d85fb2eb73cb8a0a",tooltip="Generate an 8-bit random number."];
+  Node4 [id="Node000004",label="random8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d0d/group___random_gafb55d95e3e866dce182f149535903dd8.html#gafb55d95e3e866dce182f149535903dd8",tooltip="Generate an 8-bit random number."];
   Node1 -> Node5 [id="edge4_Node000001_Node000005",color="steelblue1",style="solid",tooltip=" "];
-  Node5 [id="Node000005",label="random16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d0d/group___random_gaaaff3e84c6ab2cf5f71400a4b6958beb.html#gaaaff3e84c6ab2cf5f71400a4b6958beb",tooltip="Generate a 16-bit random number."];
+  Node5 [id="Node000005",label="random16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d0d/group___random_ga6f816735a0bd63bfc78bebbc7c5f12b9.html#ga6f816735a0bd63bfc78bebbc7c5f12b9",tooltip="Generate a 16-bit random number."];
   Node1 -> Node6 [id="edge5_Node000001_Node000006",color="steelblue1",style="solid",tooltip=" "];
-  Node6 [id="Node000006",label="random16_add_entropy",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d0d/group___random_ga0e666fa5d6f48dd714ff7a76102dd41b.html#ga0e666fa5d6f48dd714ff7a76102dd41b",tooltip="Add entropy into the random number generator."];
+  Node6 [id="Node000006",label="random16_add_entropy",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d0d/group___random_gad94c82089c999a357b29f6a97fdcb95a.html#gad94c82089c999a357b29f6a97fdcb95a",tooltip="Add entropy into the random number generator."];
 }

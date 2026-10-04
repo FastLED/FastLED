@@ -17,4 +17,6 @@ digraph "fl::TypeConversionResult::errorMessage"
   Node5 [id="Node000005",label="fl::Rpc::handle",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/dd1/classfl_1_1_rpc_a16bb9675b8d15f3713e49fbb5a8b05a3.html#a16bb9675b8d15f3713e49fbb5a8b05a3",tooltip="Process a JSON-RPC request."];
   Node5 -> Node6 [id="edge5_Node000005_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node6 [id="Node000006",label="fl::Rpc::handle_maybe",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/dd1/classfl_1_1_rpc_acfc87927e9e6affe54e4f2861adac5fd.html#acfc87927e9e6affe54e4f2861adac5fd",tooltip="For notifications (no id), returns nullopt."];
+  Node1 -> Node7 [id="edge6_Node000001_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::detail::RuntimeRpcBinding\l::invoke",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d66/classfl_1_1detail_1_1_runtime_rpc_binding_a8779fc39547c9b53b45731aea8b6017f.html#a8779fc39547c9b53b45731aea8b6017f",tooltip=" "];
 }

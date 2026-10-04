@@ -1,0 +1,7 @@
+<map id="fl::Server::setResponseStreamSink" name="fl::Server::setResponseStreamSink">
+<area shape="rect" id="Node000001" title="Set streaming response sink callback." alt="" coords="208,31,455,56"/>
+<area shape="rect" id="Node000002" href="$dc/ddb/classfl_1_1_remote_a549234968f4a850e2e774a27c0ca5ff2.html#a549234968f4a850e2e774a27c0ca5ff2" title="Construct with I/O callbacks, including streamed response output." alt="" coords="9,5,157,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="194,32,157,28,157,23,195,27"/>
+<area shape="rect" id="Node000003" href="$dc/d00/classfl_1_1_server_a4c07bac803c0e25c85c5b29209b8be52.html#a4c07bac803c0e25c85c5b29209b8be52" title=" " alt="" coords="5,55,160,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="194,59,161,63,160,57,194,54"/>
+</map>

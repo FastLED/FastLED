@@ -1,0 +1,40 @@
+<map id="fl::json::is_object" name="fl::json::is_object">
+<area shape="rect" id="Node000001" title=" " alt="" coords="861,277,992,303"/>
+<area shape="rect" id="Node000002" href="$d7/d7e/classfl_1_1video_1_1_pixel_stream_a2d2bc6715c9d04166f12a4d316bbfcd3.html#a2d2bc6715c9d04166f12a4d316bbfcd3" title=" " alt="" coords="401,302,561,342"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="848,298,562,319,562,314,847,293"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a3efa7e455248fb5a75c7f92b3d6385a5.html#a3efa7e455248fb5a75c7f92b3d6385a5" title="Encode a CRGB pixel buffer as a versioned JSON object." alt="" coords="665,152,772,177"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="904,269,864,229,839,208,812,191,771,176,773,171,815,186,842,204,868,225,908,265"/>
+<area shape="rect" id="Node000004" href="$d2/d78/classfl_1_1_screen_map_a743a04622f1801c125fda4f0b06f0241.html#a743a04622f1801c125fda4f0b06f0241" title=" " alt="" coords="391,129,571,155"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="913,266,898,235,876,200,847,167,812,142,776,127,739,118,700,114,661,113,588,120,528,132,527,127,587,115,661,108,700,109,739,113,778,122,815,137,851,163,880,197,902,232,918,263"/>
+<area shape="rect" id="Node000010" href="$d3/d7d/classfl_1_1_fled_ac2a1d5b10d2b60ff22e811e8d0683ea6.html#ac2a1d5b10d2b60ff22e811e8d0683ea6" title=" " alt="" coords="153,252,298,277"/>
+<area shape="poly" id="edge18_Node000001_Node000010" title=" " alt="" coords="847,290,298,270,298,265,847,285"/>
+<area shape="rect" id="Node000012" href="$d4/d36/namespacefl_af5b1b8fc1c0c9b0ca902a74f6185c772.html#af5b1b8fc1c0c9b0ca902a74f6185c772" title=" " alt="" coords="627,201,811,227"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="880,275,812,249,757,229,759,224,814,243,882,270"/>
+<area shape="rect" id="Node000013" href="$d2/dec/namespacefl_1_1fled_a70c2c11d86838827adae2071d3f74a98.html#a70c2c11d86838827adae2071d3f74a98" title=" " alt="" coords="624,353,813,379"/>
+<area shape="poly" id="edge13_Node000001_Node000013" title=" " alt="" coords="882,310,814,337,759,356,757,351,812,331,880,305"/>
+<area shape="rect" id="Node000017" href="$d2/d9f/classfl_1_1_w_l_e_d_a073f5478071f0b32ea9ac80cf3fd236c.html#a073f5478071f0b32ea9ac80cf3fd236c" title="Set WLED state from JSON object." alt="" coords="649,403,788,428"/>
+<area shape="poly" id="edge19_Node000001_Node000017" title=" " alt="" coords="908,315,868,355,842,376,815,394,787,405,785,400,812,389,839,372,864,351,904,311"/>
+<area shape="rect" id="Node000018" href="$d3/d7d/classfl_1_1_fled_ae8384481fbda8784188ee7e0312be19f.html#ae8384481fbda8784188ee7e0312be19f" title=" " alt="" coords="652,452,785,477"/>
+<area shape="poly" id="edge20_Node000001_Node000018" title=" " alt="" coords="916,317,877,380,849,414,815,443,787,456,785,451,812,438,845,410,873,377,911,314"/>
+<area shape="rect" id="Node000005" href="$d7/d35/_fx_sd_card_8ino_a31b8310bfbbef87ba721eb0104ea6119.html#a31b8310bfbbef87ba721eb0104ea6119" title=" " alt="" coords="138,104,313,129"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="377,134,313,128,313,123,377,129"/>
+<area shape="rect" id="Node000007" href="$d2/d78/classfl_1_1_screen_map_ac2fe735edb33b2506307a638a769343e.html#ac2fe735edb33b2506307a638a769343e" title=" " alt="" coords="135,153,315,179"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="378,154,316,160,315,155,377,149"/>
+<area shape="rect" id="Node000008" href="$df/d37/classfl_1_1_file_system_a76449b10863a3dee0631213504e817cc.html#a76449b10863a3dee0631213504e817cc" title=" " alt="" coords="116,203,335,228"/>
+<area shape="poly" id="edge7_Node000004_Node000008" title=" " alt="" coords="434,162,339,193,289,205,288,200,338,187,432,157"/>
+<area shape="rect" id="Node000009" href="$df/d37/classfl_1_1_file_system_ad9bf0f8a5e0afcbbb85575c9f8785fc9.html#ad9bf0f8a5e0afcbbb85575c9f8785fc9" title=" " alt="" coords="112,5,339,31"/>
+<area shape="poly" id="edge8_Node000004_Node000009" title=" " alt="" coords="454,122,402,82,371,62,338,44,305,33,307,28,340,40,374,57,406,78,457,118"/>
+<area shape="poly" id="edge9_Node000004_Node000010" title=" " alt="" coords="457,166,405,205,340,242,299,255,298,250,338,237,402,200,453,161"/>
+<area shape="rect" id="Node000011" href="$d1/ddb/_chromancer_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="196,55,255,80"/>
+<area shape="poly" id="edge10_Node000004_Node000011" title=" " alt="" coords="435,127,338,94,254,75,256,70,339,89,436,122"/>
+<area shape="rect" id="Node000006" href="$d7/d35/_fx_sd_card_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="5,104,64,129"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="124,119,64,119,64,114,124,114"/>
+<area shape="poly" id="edge12_Node000012_Node000004" title=" " alt="" coords="654,200,623,191,519,157,521,152,625,186,656,195"/>
+<area shape="poly" id="edge14_Node000013_Node000002" title=" " alt="" coords="636,353,561,339,562,334,637,348"/>
+<area shape="rect" id="Node000014" href="$d2/dec/namespacefl_1_1fled_aedd6037bff6e743643ad2f68e499a55f.html#aedd6037bff6e743643ad2f68e499a55f" title=" " alt="" coords="387,416,576,441"/>
+<area shape="poly" id="edge15_Node000013_Node000014" title=" " alt="" coords="658,385,625,394,577,407,534,418,532,413,575,402,623,389,656,380"/>
+<area shape="rect" id="Node000015" href="$d3/d7d/classfl_1_1_fled_a82065df35839f5d0a45741b3a6358eba.html#a82065df35839f5d0a45741b3a6358eba" title=" " alt="" coords="409,367,553,392"/>
+<area shape="poly" id="edge16_Node000013_Node000015" title=" " alt="" coords="611,375,553,378,553,373,610,369"/>
+<area shape="rect" id="Node000016" href="$d3/d7d/classfl_1_1_fled_ac13c8d779ec4dca021c79fff351fb855.html#ac13c8d779ec4dca021c79fff351fb855" title=" " alt="" coords="150,367,301,392"/>
+<area shape="poly" id="edge17_Node000015_Node000016" title=" " alt="" coords="395,382,301,382,301,377,395,377"/>
+</map>

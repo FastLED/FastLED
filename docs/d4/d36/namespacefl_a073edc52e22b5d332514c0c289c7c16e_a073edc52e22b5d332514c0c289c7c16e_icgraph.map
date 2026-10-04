@@ -1,0 +1,5 @@
+<map id="fl::encodeLPD8806" name="fl::encodeLPD8806">
+<area shape="rect" id="Node000001" title="Encode pixel data in LPD8806 format." alt="" coords="179,13,321,38"/>
+<area shape="rect" id="Node000002" href="$d0/d09/classfl_1_1_pixel_iterator_acb49f0204f4338b5eca0f6cd098d52e5.html#acb49f0204f4338b5eca0f6cd098d52e5" title="Encode pixels in LPD8806 format (zero allocation)" alt="" coords="5,5,131,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="165,28,131,28,131,23,165,23"/>
+</map>

@@ -1,0 +1,19 @@
+<map id="third_party/minimp3/minimp3.h" name="third_party/minimp3/minimp3.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="271,5,426,45"/>
+<area shape="rect" id="Node000002" href="$d7/d4e/_auto_research_mp3_8h.html" title="On&#45;device verification of the fixed&#45;point MP3 decoder." alt="" coords="5,93,244,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="292,53,189,96,187,91,290,48"/>
+<area shape="rect" id="Node000003" href="$d3/df6/mp3_8cpp_8hpp.html" title=" " alt="" coords="269,108,429,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="351,59,351,108,346,108,346,59"/>
+<area shape="rect" id="Node000007" href="$d1/d74/third__party_2minimp3_2__build_8cpp_8hpp.html" title="Unity build integration for the vendored minimp3 decoder." alt="" coords="465,101,619,141"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="401,49,504,98,502,103,399,54"/>
+<area shape="rect" id="Node000004" href="$d7/df8/fl_2codec_2__build_8cpp_8hpp.html" title=" " alt="" coords="258,196,429,221"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="350,147,347,196,341,195,344,147"/>
+<area shape="rect" id="Node000005" href="$d1/deb/fl_2__build_8cpp_8hpp.html" title=" " alt="" coords="118,269,246,295"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="306,229,209,272,207,267,304,224"/>
+<area shape="rect" id="Node000006" href="$dd/dad/fl_8codec_09_8cpp.html" title="Unity build: recursive includes from src/fl/codec/." alt="" coords="271,269,429,295"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="348,235,352,269,346,269,343,235"/>
+<area shape="rect" id="Node000008" href="$d3/d75/third__party_2__build_8cpp_8hpp.html" title=" " alt="" coords="453,196,644,221"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="547,154,550,195,545,196,542,155"/>
+<area shape="rect" id="Node000009" href="$da/d76/third__party_09_8cpp.html" title="Unity build: recursive includes from src/third_party/." alt="" coords="459,269,638,295"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="551,235,551,269,546,269,546,235"/>
+</map>

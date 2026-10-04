@@ -1,0 +1,52 @@
+digraph "fl::third_party::SoftwareGifDecoder::decode"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::third_party::Software\lGifDecoder::decode",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::third_party::Software\lGifDecoder::convertBitmapToFrame",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d7a/classfl_1_1third__party_1_1_software_gif_decoder_ad03490ed63da457ee7cc716fc4328b58.html#ad03490ed63da457ee7cc716fc4328b58",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::unique_ptr::get",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d2e/classfl_1_1unique__ptr_a736032151c8ba9d69c13cd171daae88f.html#a736032151c8ba9d69c13cd171daae88f",tooltip=" "];
+  Node2 -> Node4 [id="edge3_Node000002_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::make_shared",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af",tooltip=" "];
+  Node2 -> Node5 [id="edge4_Node000002_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::third_party::Software\lGifDecoder::setError",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d7a/classfl_1_1third__party_1_1_software_gif_decoder_af68838686c8534f2ae4ba8ded76b9352.html#af68838686c8534f2ae4ba8ded76b9352",tooltip=" "];
+  Node1 -> Node1 [id="edge5_Node000001_Node000001",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node6 [id="edge6_Node000001_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::third_party::Software\lGifDecoder::loadMoreData",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d7a/classfl_1_1third__party_1_1_software_gif_decoder_a23415e85e4d756c59dffdda7f53648e5.html#a23415e85e4d756c59dffdda7f53648e5",tooltip=" "];
+  Node6 -> Node7 [id="edge7_Node000006_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::memcpy",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a35ff6755912c639a5e5bd35fc59e57ff.html#a35ff6755912c639a5e5bd35fc59e57ff",tooltip=" "];
+  Node6 -> Node8 [id="edge8_Node000006_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl::third_party::nsgif\l_data_complete",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d86/namespacefl_1_1third__party_a5d07cbbbbe58f08cc76b5eda20924e9f.html#a5d07cbbbbe58f08cc76b5eda20924e9f",tooltip="Tell libnsgif that all the gif data has been provided."];
+  Node8 -> Node9 [id="edge9_Node000008_Node000009",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="fl::end",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_aa45736aab5ddedf688b0c3efaedbf0f7.html#aa45736aab5ddedf688b0c3efaedbf0f7",tooltip=" "];
+  Node6 -> Node10 [id="edge10_Node000006_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="fl::third_party::nsgif\l_data_scan",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d86/namespacefl_1_1third__party_ac0c0b97e37911e82ef3974b049784c33.html#ac0c0b97e37911e82ef3974b049784c33",tooltip="Scan the source image data."];
+  Node10 -> Node11 [id="edge11_Node000010_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="fl::third_party::lzw\l_context_create",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d1/d86/namespacefl_1_1third__party_a1900c68b60368e75d141f2ad1c389bd7.html#a1900c68b60368e75d141f2ad1c389bd7",tooltip="Create an LZW decompression context."];
+  Node10 -> Node13 [id="edge12_Node000010_Node000013",color="steelblue1",style="solid",tooltip=" "];
+  Node13 [id="Node000013",label="fl::third_party::nsgif\l__colour_table_extract",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d1/d86/namespacefl_1_1third__party_af0e6caee94b8038dc36959de5ae22f41.html#af0e6caee94b8038dc36959de5ae22f41",tooltip="Extract a GIF colour table into a LibNSGIF colour table buffer."];
+  Node10 -> Node15 [id="edge13_Node000010_Node000015",color="steelblue1",style="solid",tooltip=" "];
+  Node15 [id="Node000015",label="fl::third_party::nsgif\l__error_from_lzw",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d86/namespacefl_1_1third__party_ae3e48730e489dcacd34fdfcd72fea2c5.html#ae3e48730e489dcacd34fdfcd72fea2c5",tooltip="Convert an LZW result code to equivalent GIF result code."];
+  Node10 -> Node16 [id="edge14_Node000010_Node000016",color="steelblue1",style="solid",tooltip=" "];
+  Node16 [id="Node000016",label="fl::third_party::nsgif\l__parse_header",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d1/d86/namespacefl_1_1third__party_a29298d662478224cecdb280cb53df245.html#a29298d662478224cecdb280cb53df245",tooltip="Read GIF header."];
+  Node10 -> Node18 [id="edge15_Node000010_Node000018",color="steelblue1",style="solid",tooltip=" "];
+  Node18 [id="Node000018",label="fl::third_party::nsgif\l__parse_logical_screen\l_descriptor",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d86/namespacefl_1_1third__party_a54fd4d50d4e39bede0531b9ff01f2852.html#a54fd4d50d4e39bede0531b9ff01f2852",tooltip="Read Logical Screen Descriptor."];
+  Node10 -> Node19 [id="edge16_Node000010_Node000019",color="steelblue1",style="solid",tooltip=" "];
+  Node19 [id="Node000019",label="fl::third_party::nsgif\l__process_frame",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d1/d86/namespacefl_1_1third__party_a5544ea660bb409ce782aec2a3629f1fe.html#a5544ea660bb409ce782aec2a3629f1fe",tooltip="Attempts to initialise the next frame."];
+  Node19 -> Node9 [id="edge17_Node000019_Node000009",color="steelblue1",style="solid",tooltip=" "];
+  Node6 -> Node59 [id="edge18_Node000006_Node000059",color="steelblue1",style="solid",tooltip=" "];
+  Node59 [id="Node000059",label="fl::third_party::nsgif\l_strerror",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d86/namespacefl_1_1third__party_ae190a2225389e0e52586f7c55cf43544.html#ae190a2225389e0e52586f7c55cf43544",tooltip="Convert an error code to a string."];
+  Node6 -> Node5 [id="edge19_Node000006_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node60 [id="edge20_Node000001_Node000060",color="steelblue1",style="solid",tooltip=" "];
+  Node60 [id="Node000060",label="fl::third_party::nsgif\l_frame_decode",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d86/namespacefl_1_1third__party_a9bb55311de3b833317f3e05229a2d7e2.html#a9bb55311de3b833317f3e05229a2d7e2",tooltip="Decodes a GIF frame."];
+  Node60 -> Node61 [id="edge21_Node000060_Node000061",color="steelblue1",style="solid",tooltip=" "];
+  Node61 [id="Node000061",label="fl::third_party::nsgif\l__frame_next",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d86/namespacefl_1_1third__party_abbc0f2c29819834c0e69d3b9d223c4b4.html#abbc0f2c29819834c0e69d3b9d223c4b4",tooltip=" "];
+  Node60 -> Node19 [id="edge22_Node000060_Node000019",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node59 [id="edge23_Node000001_Node000059",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node5 [id="edge24_Node000001_Node000005",color="steelblue1",style="solid",tooltip=" "];
+}

@@ -1,0 +1,16 @@
+<map id="fl::ChannelManager::findDriverByName" name="fl::ChannelManager::findDriverByName">
+<area shape="rect" id="Node000001" title="Silent counterpart to getDriverByName()." alt="" coords="731,63,881,103"/>
+<area shape="rect" id="Node000002" href="$d2/d6b/classfl_1_1_channel_manager_acbe360b557e4c86b42bb163f25dd1262.html#acbe360b557e4c86b42bb163f25dd1262" title="Get driver by name for affinity binding." alt="" coords="517,5,665,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="717,62,665,48,666,42,718,57"/>
+<area shape="rect" id="Node000003" href="$d5/d8b/classfl_1_1_channel_a1ac53e5596ff3b71fd028a159eb542fb.html#a1ac53e5596ff3b71fd028a159eb542fb" title="Cold slow&#45;path helper for showPixels()." alt="" coords="247,63,452,103"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="716,85,452,85,452,80,716,80"/>
+<area shape="rect" id="Node000005" href="$d2/d6b/classfl_1_1_channel_manager_ad872b4d8bce2be12821c7856e0e578de.html#ad872b4d8bce2be12821c7856e0e578de" title="Select best driver for channel data (used by Channel::showPixels)" alt="" coords="500,120,683,160"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="718,109,667,123,666,117,717,104"/>
+<area shape="rect" id="Node000004" href="$d5/d8b/classfl_1_1_channel_a44414e176c7d2ef65fcdd390f6852322.html#a44414e176c7d2ef65fcdd390f6852322" title=" " alt="" coords="17,70,187,95"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="233,85,188,85,188,80,233,80"/>
+<area shape="poly" id="edge7_Node000005_Node000003" title=" " alt="" coords="492,119,434,105,435,100,494,114"/>
+<area shape="rect" id="Node000006" href="$de/d07/classfl_1_1_slim_spi_bridge_controller_ad342cd44bd75c6d02679ca04b6d4f895.html#ad342cd44bd75c6d02679ca04b6d4f895" title="Resolve the driver for this frame." alt="" coords="253,127,446,167"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="486,146,446,147,446,141,486,140"/>
+<area shape="rect" id="Node000007" href="$de/d07/classfl_1_1_slim_spi_bridge_controller_abbd35c320bbde28d28f84e1014e0e77f.html#abbd35c320bbde28d28f84e1014e0e77f" title=" " alt="" coords="5,127,199,167"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="239,149,199,149,199,144,239,144"/>
+</map>

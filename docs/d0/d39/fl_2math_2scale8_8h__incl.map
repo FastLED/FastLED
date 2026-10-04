@@ -4,12 +4,12 @@
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="452,33,324,77,322,72,450,28"/>
 <area shape="rect" id="Node000006" href="$d4/d54/compiler__control_8h.html" title=" " alt="" coords="397,152,571,177"/>
 <area shape="poly" id="edge26_Node000001_Node000006" title=" " alt="" coords="458,33,435,46,413,63,400,82,399,92,402,103,421,126,446,143,442,148,417,130,398,105,394,93,395,80,409,59,432,42,456,28"/>
-<area shape="rect" id="Node000057" href="$d5/d11/fastled__config_8h.html" title="Contains definitions that can be used to configure FastLED at compile time." alt="" coords="580,79,705,104"/>
-<area shape="poly" id="edge23_Node000001_Node000057" title=" " alt="" coords="511,28,606,71,603,75,508,33"/>
-<area shape="rect" id="Node000058" href="$d2/d0f/fl_2math_2lib8static_8h.html" title="Defines static inlining macros for lib8tion functions." alt="" coords="412,79,556,104"/>
-<area shape="poly" id="edge24_Node000001_Node000058" title=" " alt="" coords="487,31,487,65,481,65,481,31"/>
-<area shape="rect" id="Node000059" title=" " alt="" coords="730,79,873,104"/>
-<area shape="poly" id="edge27_Node000001_Node000059" title=" " alt="" coords="536,28,738,73,736,78,534,33"/>
+<area shape="rect" id="Node000050" href="$d5/d11/fastled__config_8h.html" title="Contains definitions that can be used to configure FastLED at compile time." alt="" coords="580,79,705,104"/>
+<area shape="poly" id="edge23_Node000001_Node000050" title=" " alt="" coords="511,28,606,71,603,75,508,33"/>
+<area shape="rect" id="Node000051" href="$d2/d0f/fl_2math_2lib8static_8h.html" title="Defines static inlining macros for lib8tion functions." alt="" coords="412,79,556,104"/>
+<area shape="poly" id="edge24_Node000001_Node000051" title=" " alt="" coords="487,31,487,65,481,65,481,31"/>
+<area shape="rect" id="Node000052" title=" " alt="" coords="730,79,873,104"/>
+<area shape="poly" id="edge27_Node000001_Node000052" title=" " alt="" coords="536,28,738,73,736,78,534,33"/>
 <area shape="rect" id="Node000003" href="$d3/d7e/int_8h.html" title=" " alt="" coords="277,299,360,324"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="282,104,295,151,318,285,313,286,289,153,277,105"/>
 <area shape="poly" id="edge4_Node000002_Node000006" title=" " alt="" coords="310,101,438,145,436,150,309,107"/>
@@ -17,8 +17,8 @@
 <area shape="poly" id="edge22_Node000002_Node000010" title=" " alt="" coords="227,96,187,100,144,110,102,127,66,154,32,195,12,235,8,255,10,277,17,299,29,322,54,348,86,365,84,370,51,352,25,326,12,301,5,278,3,255,7,233,27,192,62,150,99,122,142,105,186,95,226,90"/>
 <area shape="rect" id="Node000011" href="$db/d19/ease_8h.html" title=" " alt="" coords="165,152,280,177"/>
 <area shape="poly" id="edge9_Node000002_Node000011" title=" " alt="" coords="269,106,242,143,237,140,265,103"/>
-<area shape="rect" id="Node000056" title=" " alt="" coords="75,152,141,177"/>
-<area shape="poly" id="edge21_Node000002_Node000056" title=" " alt="" coords="250,106,149,149,147,144,248,102"/>
+<area shape="rect" id="Node000049" title=" " alt="" coords="75,152,141,177"/>
+<area shape="poly" id="edge21_Node000002_Node000049" title=" " alt="" coords="250,106,149,149,147,144,248,102"/>
 <area shape="rect" id="Node000004" href="$df/dd8/stdint_8h.html" title=" " alt="" coords="267,372,370,397"/>
 <area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="321,324,321,358,316,358,316,324"/>
 <area shape="rect" id="Node000007" title=" " alt="" coords="447,372,622,397"/>
@@ -41,5 +41,5 @@
 <area shape="poly" id="edge16_Node000024_Node000008" title=" " alt="" coords="436,249,472,287,468,290,432,253"/>
 <area shape="poly" id="edge17_Node000024_Node000010" title=" " alt="" coords="421,252,405,289,391,309,374,326,349,339,313,351,229,372,228,367,311,346,347,334,370,322,387,305,400,286,416,250"/>
 <area shape="poly" id="edge19_Node000028_Node000010" title=" " alt="" coords="133,323,146,358,141,360,128,325"/>
-<area shape="poly" id="edge25_Node000058_Node000006" title=" " alt="" coords="487,104,487,138,481,138,481,104"/>
+<area shape="poly" id="edge25_Node000051_Node000006" title=" " alt="" coords="487,104,487,138,481,138,481,104"/>
 </map>

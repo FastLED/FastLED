@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -103,11 +103,13 @@ $(function(){initNavTree('db/d51/remote_2transport_2serial_8h.html','../../'); i
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
 <a href="#namespaces">Namespaces</a> &#124;
-<a href="#func-members">Functions</a>  </div>
+<a href="#func-members">Functions</a> &#124;
+<a href="#var-members">Variables</a>  </div>
   <div class="headertitle"><div class="title">serial.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><code>#include &quot;<a class="el" href="../../d4/d05/json_8h_source.html">fl/stl/json.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d7/d7f/log_8h_source.html">fl/log/log.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../dd/dee/delay_8h_source.html">fl/system/delay.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d3/d7e/int_8h_source.html">fl/stl/int.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d9/dc0/cctype_8h_source.html">fl/stl/cctype.h</a>&quot;</code><br />
@@ -120,6 +122,7 @@ $(function(){initNavTree('db/d51/remote_2transport_2serial_8h.html','../../'); i
 <code>#include &quot;<a class="el" href="../../da/d66/string_8h_source.html">fl/stl/string.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d8/d00/strstream_8h_source.html">fl/stl/strstream.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d2/d1d/string__view_8h_source.html">fl/stl/string_view.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d9/d77/response__stream_8h_source.html">fl/remote/rpc/response_stream.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for serial.h:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -132,7 +135,7 @@ $(function(){initNavTree('db/d51/remote_2transport_2serial_8h.html','../../'); i
 <div id="dynsection-1-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-1-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d9/d69/remote_2transport_2serial_8h__dep__incl.svg" width="100%" height="536"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d9/d69/remote_2transport_2serial_8h__dep__incl.svg" width="436" height="330"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 </div>
 <p><a href="../../db/d51/remote_2transport_2serial_8h_source.html">Go to the source code of this file.</a></p>
@@ -143,7 +146,7 @@ Classes</h2></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Serial adapter using fl:: input functions (<a class="el" href="../../d4/d36/namespacefl_a01186a22a1055c583d5408c116c84ffa.html#a01186a22a1055c583d5408c116c84ffa">fl::available</a>, <a class="el" href="../../d4/d36/namespacefl_a18e7608a302c3628c24710b27480641b.html#a18e7608a302c3628c24710b27480641b">fl::read</a>)  <a href="../../db/dc3/structfl_1_1_serial_reader.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d2/d8c/structfl_1_1_serial_writer.html">fl::SerialWriter</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Serial adapter using fl:: output functions (<a class="el" href="../../d4/d36/namespacefl_adfaedbd8e1ada269a7733e58ff142aea.html#adfaedbd8e1ada269a7733e58ff142aea">fl::println</a>)  <a href="../../d2/d8c/structfl_1_1_serial_writer.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Serial adapter using fl:: output functions (<a class="el" href="../../d4/d36/namespacefl_ab058ac6ae882a8344f79b01b40eb6e02.html#ab058ac6ae882a8344f79b01b40eb6e02">fl::println</a>)  <a href="../../d2/d8c/structfl_1_1_serial_writer.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
@@ -155,11 +158,13 @@ Namespaces</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:a6913bcc5545eb4b029ec170d48a14766" id="r_a6913bcc5545eb4b029ec170d48a14766"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d4/d36/namespacefl.html#d0/ddd/classfl_1_1function">fl::function</a>&lt; <a class="el" href="../../d4/d36/namespacefl_a451542d0bf4d13f0bc00e055c18e6726.html#a451542d0bf4d13f0bc00e055c18e6726">fl::optional</a>&lt; <a class="el" href="../../de/d40/classfl_1_1json.html">fl::json</a> &gt;()&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a6913bcc5545eb4b029ec170d48a14766.html#a6913bcc5545eb4b029ec170d48a14766">fl::createSerialRequestSource</a> (const char *prefix=&quot;&quot;)</td></tr>
-<tr class="memdesc:a6913bcc5545eb4b029ec170d48a14766"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a JSON-RPC RequestSource that reads from fl:: serial input.  <br /></td></tr>
 <tr class="separator:a6913bcc5545eb4b029ec170d48a14766"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aaaad760134ff434244ec0bfb2740a8f7" id="r_aaaad760134ff434244ec0bfb2740a8f7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d4/d36/namespacefl.html#d0/ddd/classfl_1_1function">fl::function</a>&lt; void(const <a class="el" href="../../de/d40/classfl_1_1json.html">fl::json</a> &amp;)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_aaaad760134ff434244ec0bfb2740a8f7.html#aaaad760134ff434244ec0bfb2740a8f7">fl::createSerialResponseSink</a> (const char *prefix=&quot;REMOTE: &quot;)</td></tr>
 <tr class="memdesc:aaaad760134ff434244ec0bfb2740a8f7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a JSON-RPC ResponseSink that writes to fl:: serial output.  <br /></td></tr>
 <tr class="separator:aaaad760134ff434244ec0bfb2740a8f7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4c5381818ea42c674c16b43466bedef0" id="r_a4c5381818ea42c674c16b43466bedef0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d4/d36/namespacefl_ab8c335f7d3dc59b74fb27598610f9abf.html#ab8c335f7d3dc59b74fb27598610f9abf">fl::ResponseStreamSink</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a4c5381818ea42c674c16b43466bedef0.html#a4c5381818ea42c674c16b43466bedef0">fl::createSerialResponseStreamSink</a> (const char *prefix=&quot;REMOTE: &quot;) FL_NO_EXCEPT</td></tr>
+<tr class="memdesc:a4c5381818ea42c674c16b43466bedef0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a streamed JSON-RPC ResponseSink that writes directly to serial.  <br /></td></tr>
+<tr class="separator:a4c5381818ea42c674c16b43466bedef0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7167ab7d0c24c14e0576b7df33c212b6" id="r_a7167ab7d0c24c14e0576b7df33c212b6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d5/db3/structfl_1_1pair.html">fl::pair</a>&lt; <a class="el" href="../../d4/d36/namespacefl.html#d0/ddd/classfl_1_1function">fl::function</a>&lt; <a class="el" href="../../d4/d36/namespacefl_a451542d0bf4d13f0bc00e055c18e6726.html#a451542d0bf4d13f0bc00e055c18e6726">fl::optional</a>&lt; <a class="el" href="../../de/d40/classfl_1_1json.html">fl::json</a> &gt;()&gt;, <a class="el" href="../../d4/d36/namespacefl.html#d0/ddd/classfl_1_1function">fl::function</a>&lt; void(const <a class="el" href="../../de/d40/classfl_1_1json.html">fl::json</a> &amp;)&gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a7167ab7d0c24c14e0576b7df33c212b6.html#a7167ab7d0c24c14e0576b7df33c212b6">fl::createSerialTransport</a> (const char *responsePrefix=&quot;REMOTE: &quot;, const char *requestPrefix=&quot;&quot;)</td></tr>
 <tr class="memdesc:a7167ab7d0c24c14e0576b7df33c212b6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create RequestSource and ResponseSink pair for serial I/O.  <br /></td></tr>
 <tr class="separator:a7167ab7d0c24c14e0576b7df33c212b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -180,6 +185,12 @@ Functions</h2></td></tr>
 <tr class="memitem:a7cbb518d527a0cec0393f52826600e27"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a7cbb518d527a0cec0393f52826600e27.html#a7cbb518d527a0cec0393f52826600e27">fl::writeSerialLine</a> (SerialOut &amp;serial, const <a class="el" href="../../d2/db2/classfl_1_1string.html">fl::string</a> &amp;str)</td></tr>
 <tr class="memdesc:a7cbb518d527a0cec0393f52826600e27"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write a string with newline to a serial-like output.  <br /></td></tr>
 <tr class="separator:a7cbb518d527a0cec0393f52826600e27"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
+Variables</h2></td></tr>
+<tr class="memitem:ab276238644cfb70f02cdb445e299bc02" id="r_ab276238644cfb70f02cdb445e299bc02"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d9/d13/cpp__compat_8h_a72f0657181cca64b44eb186b707eb380.html#a72f0657181cca64b44eb186b707eb380">constexpr</a> fl::size&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_ab276238644cfb70f02cdb445e299bc02.html#ab276238644cfb70f02cdb445e299bc02">fl::kDroppedRequestWarnBytes</a> = 64</td></tr>
+<tr class="memdesc:ab276238644cfb70f02cdb445e299bc02"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a JSON-RPC RequestSource that reads from fl:: serial input.  <br /></td></tr>
+<tr class="separator:ab276238644cfb70f02cdb445e299bc02"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -188,7 +199,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_d08a73fbb994b1f7f5700d569dcb8c8c.html">remote</a></li><li class="navelem"><a class="el" href="../../dir_92161b200cdbe4c9190331b3a63d6484.html">transport</a></li><li class="navelem"><a class="el" href="../../db/d51/remote_2transport_2serial_8h.html">serial.h</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:01 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:05 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

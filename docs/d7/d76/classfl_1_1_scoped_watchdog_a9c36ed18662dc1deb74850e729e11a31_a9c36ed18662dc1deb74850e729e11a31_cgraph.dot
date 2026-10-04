@@ -1,0 +1,59 @@
+digraph "fl::ScopedWatchdog::ScopedWatchdog"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::ScopedWatchdog\l::ScopedWatchdog",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Construct with an explicit timeout."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::Watchdog::feed",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d45/classfl_1_1_watchdog_a871fd275acc0c885381a8dc5ff6dde22.html#a871fd275acc0c885381a8dc5ff6dde22",tooltip=" "];
+  Node2 -> Node2 [id="edge2_Node000002_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node3 [id="edge3_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::Watchdog::instance",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d45/classfl_1_1_watchdog_a1e8bbc71d53587db65db2d3b81f23334.html#a1e8bbc71d53587db65db2d3b81f23334",tooltip=" "];
+  Node3 -> Node4 [id="edge4_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::Watchdog::Watchdog",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d45/classfl_1_1_watchdog_ac01eedccb9f606463033025109f1d7d4.html#ac01eedccb9f606463033025109f1d7d4",tooltip=" "];
+  Node4 -> Node4 [id="edge5_Node000004_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node5 [id="edge6_Node000001_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::platforms::scopedWatchdog\lActiveCount",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d52/namespacefl_1_1platforms_adf84ed604d7db9d7d892f17567ad6b05.html#adf84ed604d7db9d7d892f17567ad6b05",tooltip=" "];
+  Node5 -> Node5 [id="edge7_Node000005_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node6 [id="edge8_Node000001_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::platforms::scopedWatchdog\lFirstInit",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d52/namespacefl_1_1platforms_a9c4e6070f18f939c4c98717a242f4a89.html#a9c4e6070f18f939c4c98717a242f4a89",tooltip=" "];
+  Node6 -> Node7 [id="edge9_Node000006_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::Watchdog::begin",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d45/classfl_1_1_watchdog_a5bebf35204e4bb3b0862c7947a615ae5.html#a5bebf35204e4bb3b0862c7947a615ae5",tooltip=" "];
+  Node7 -> Node7 [id="edge10_Node000007_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node6 -> Node8 [id="edge11_Node000006_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl::ResetInfo::describe",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/dbf/structfl_1_1_reset_info_a2aa6f03524fc878c308833697500c267.html#a2aa6f03524fc878c308833697500c267",tooltip="Write a single-line human-readable description into the caller's buffer."];
+  Node8 -> Node9 [id="edge12_Node000008_Node000009",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="fl::ResetInfo::causeName",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$df/dbf/structfl_1_1_reset_info_a9ce14c359efb7e14ffa2aef2edd7ac30.html#a9ce14c359efb7e14ffa2aef2edd7ac30",tooltip="Cause name (zero-cost, static string_view)."];
+  Node8 -> Node11 [id="edge13_Node000008_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="fl::string_view::size",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/ddb/classfl_1_1string__view_a1f01562d1ddc12b6f0f7ccffb45a924e.html#a1f01562d1ddc12b6f0f7ccffb45a924e",tooltip=" "];
+  Node8 -> Node12 [id="edge14_Node000008_Node000012",color="steelblue1",style="solid",tooltip=" "];
+  Node12 [id="Node000012",label="fl::ResetInfo::subcauseName",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/dbf/structfl_1_1_reset_info_a63a9ed2c011b5e6e05f8d8e16029208f.html#a63a9ed2c011b5e6e05f8d8e16029208f",tooltip="Platform-specific subcause name (zero-cost, static string_view)."];
+  Node8 -> Node13 [id="edge15_Node000008_Node000013",color="steelblue1",style="solid",tooltip=" "];
+  Node13 [id="Node000013",label="fl::platforms::writeChar",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d52/namespacefl_1_1platforms_a1de4057be623d8c591f3a87dcd656904.html#a1de4057be623d8c591f3a87dcd656904",tooltip=" "];
+  Node8 -> Node14 [id="edge16_Node000008_Node000014",color="steelblue1",style="solid",tooltip=" "];
+  Node14 [id="Node000014",label="fl::platforms::writeHex",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d52/namespacefl_1_1platforms_a882f0441518a63193642fd38e5eac4dc.html#a882f0441518a63193642fd38e5eac4dc",tooltip=" "];
+  Node8 -> Node15 [id="edge17_Node000008_Node000015",color="steelblue1",style="solid",tooltip=" "];
+  Node15 [id="Node000015",label="fl::platforms::writeNulIfRoom",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d52/namespacefl_1_1platforms_a08fabe4263f10db079c093542e675289.html#a08fabe4263f10db079c093542e675289",tooltip=" "];
+  Node8 -> Node16 [id="edge18_Node000008_Node000016",color="steelblue1",style="solid",tooltip=" "];
+  Node16 [id="Node000016",label="fl::platforms::writeView",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d52/namespacefl_1_1platforms_a4343ac1eda6ccabc8c85df2a463dbde5.html#a4343ac1eda6ccabc8c85df2a463dbde5",tooltip=" "];
+  Node6 -> Node17 [id="edge19_Node000006_Node000017",color="steelblue1",style="solid",tooltip=" "];
+  Node17 [id="Node000017",label="fl::Watchdog::hasCrashReport",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d45/classfl_1_1_watchdog_ae4fcf2d5aa1349482f92109e7c52a026.html#ae4fcf2d5aa1349482f92109e7c52a026",tooltip=" "];
+  Node17 -> Node17 [id="edge20_Node000017_Node000017",color="steelblue1",style="solid",tooltip=" "];
+  Node6 -> Node3 [id="edge21_Node000006_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node6 -> Node18 [id="edge22_Node000006_Node000018",color="steelblue1",style="solid",tooltip=" "];
+  Node18 [id="Node000018",label="fl::Watchdog::lastResetInfo",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d45/classfl_1_1_watchdog_ab696554da1ddc4c1670dea326212ce7f.html#ab696554da1ddc4c1670dea326212ce7f",tooltip="Detailed reset information including platform raw register + subcause id."];
+  Node18 -> Node19 [id="edge23_Node000018_Node000019",color="steelblue1",style="solid",tooltip=" "];
+  Node19 [id="Node000019",label="fl::Watchdog::lastResetCause",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d45/classfl_1_1_watchdog_ad1a555c1987d8f0af67769eddfededa2.html#ad1a555c1987d8f0af67769eddfededa2",tooltip=" "];
+  Node19 -> Node19 [id="edge24_Node000019_Node000019",color="steelblue1",style="solid",tooltip=" "];
+  Node6 -> Node20 [id="edge25_Node000006_Node000020",color="steelblue1",style="solid",tooltip=" "];
+  Node20 [id="Node000020",label="fl::platforms::scopedWatchdog\lPause3s",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d52/namespacefl_1_1platforms_a460ff523e94c9045bd67fd73dceb241d.html#a460ff523e94c9045bd67fd73dceb241d",tooltip=" "];
+  Node20 -> Node21 [id="edge26_Node000020_Node000021",color="steelblue1",style="solid",tooltip=" "];
+  Node21 [id="Node000021",label="fl::delay",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d36/namespacefl_a19da680141593b475c4d1d3c1c0a8409.html#a19da680141593b475c4d1d3c1c0a8409",tooltip="Public delay wrapper that keeps bare Arduino delay() preferred after using fl::delay; while still all..."];
+  Node21 -> Node21 [id="edge27_Node000021_Node000021",color="steelblue1",style="solid",tooltip=" "];
+  Node6 -> Node44 [id="edge28_Node000006_Node000044",color="steelblue1",style="solid",tooltip=" "];
+  Node44 [id="Node000044",label="fl::platforms::scopedWatchdog\lPrintLine",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d52/namespacefl_1_1platforms_a42093bf9a001d1b707836870382ff2c1.html#a42093bf9a001d1b707836870382ff2c1",tooltip=" "];
+  Node1 -> Node44 [id="edge29_Node000001_Node000044",color="steelblue1",style="solid",tooltip=" "];
+}

@@ -1,0 +1,15 @@
+<map id="CFastLED::setDriverEnabled" name="CFastLED::setDriverEnabled">
+<area shape="rect" id="Node000001" title="Enable or disable a channel driver by name at runtime." alt="" coords="5,66,208,91"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a1cc01267f6bdd7251959883412b11bbb.html#a1cc01267f6bdd7251959883412b11bbb" title="Get the global ChannelManager singleton instance." alt="" coords="257,37,403,62"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="203,63,243,58,243,63,204,69"/>
+<area shape="rect" id="Node000011" href="$d2/d6b/classfl_1_1_channel_manager_a01e7253722ba94ec9e418c2abd33a8fd.html#a01e7253722ba94ec9e418c2abd33a8fd" title="Enable or disable a driver by name at runtime." alt="" coords="256,87,404,127"/>
+<area shape="poly" id="edge7_Node000001_Node000011" title=" " alt="" coords="208,89,242,93,242,98,208,94"/>
+<area shape="rect" id="Node000003" href="$d2/d6b/classfl_1_1_channel_manager_a76013c6913045962ce5bb8d227e760b3.html#a76013c6913045962ce5bb8d227e760b3" title="Get the global singleton instance." alt="" coords="452,29,600,69"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="404,47,438,47,438,52,404,52"/>
+<area shape="rect" id="Node000004" href="$d2/d6b/classfl_1_1_channel_manager_a3f0e1823366151d87c97be78f4273755.html#a3f0e1823366151d87c97be78f4273755" title="Constructor." alt="" coords="844,29,992,69"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="600,44,648,43,796,43,831,43,830,49,796,48,648,48,600,49"/>
+<area shape="rect" id="Node000008" href="$d2/d6b/classfl_1_1_channel_manager_a58d12a4cf75bb181c7093141240bb94b.html#a58d12a4cf75bb181c7093141240bb94b" title="Get the singleton WITHOUT registering platform default drivers." alt="" coords="648,57,796,97"/>
+<area shape="poly" id="edge5_Node000003_Node000008" title=" " alt="" coords="601,57,634,62,634,67,600,63"/>
+<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="881,30,879,20,885,11,898,5,918,3,941,6,953,13,951,17,939,11,918,8,899,10,888,15,884,21,886,28"/>
+<area shape="poly" id="edge6_Node000008_Node000004" title=" " alt="" coords="796,64,830,59,830,65,797,69"/>
+</map>

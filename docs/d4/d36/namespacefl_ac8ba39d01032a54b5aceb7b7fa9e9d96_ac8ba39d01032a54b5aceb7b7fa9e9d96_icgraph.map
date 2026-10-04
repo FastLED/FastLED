@@ -1,0 +1,15 @@
+<map id="fl::static_pointer_cast" name="fl::static_pointer_cast">
+<area shape="rect" id="Node000001" title=" " alt="" coords="472,67,633,93"/>
+<area shape="rect" id="Node000002" href="$d1/d1c/classfl_1_1audio_1_1_i_synth_oscillator_a789f29da94da34e7d2a187b8cc8f5048.html#a789f29da94da34e7d2a187b8cc8f5048" title="Factory function to create an oscillator with specified engine and parameters." alt="" coords="239,19,424,59"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="470,67,424,59,425,53,471,62"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a6686e75551a5b773a549d1499db5e9f1.html#a6686e75551a5b773a549d1499db5e9f1" title=" " alt="" coords="249,95,414,121"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="459,95,414,100,414,95,458,89"/>
+<area shape="rect" id="Node000003" href="$d1/d1c/classfl_1_1audio_1_1_i_synth_oscillator_a48f66a677506627672de7f30a58acffb.html#a48f66a677506627672de7f30a58acffb" title="Factory function to create an oscillator with specified engine and shape." alt="" coords="5,5,191,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="224,35,191,33,191,28,225,30"/>
+<area shape="rect" id="Node000005" href="$d7/d27/structfl_1_1_rgbw_a077febf3c54991cff190f1d386b5364e.html#a077febf3c54991cff190f1d386b5364e" title=" " alt="" coords="39,70,157,95"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="234,100,157,92,157,86,235,95"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a26302da668bb9cbbb581cbbc03ac66c8.html#a26302da668bb9cbbb581cbbc03ac66c8" title=" " alt="" coords="15,119,181,145"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="235,121,181,126,181,121,234,115"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_a095bd2a80fbd37b26940105ada764223.html#a095bd2a80fbd37b26940105ada764223" title=" " alt="" coords="15,169,181,194"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="285,128,191,160,151,171,150,166,190,155,283,123"/>
+</map>

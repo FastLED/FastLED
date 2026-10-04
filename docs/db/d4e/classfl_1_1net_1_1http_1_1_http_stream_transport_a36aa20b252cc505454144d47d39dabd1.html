@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -123,33 +123,33 @@ $(function(){initNavTree('db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transpor
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../da/d64/stream__transport_8cpp_8hpp_source.html#l00416">416</a> of file <a class="el" href="../../da/d64/stream__transport_8cpp_8hpp_source.html">stream_transport.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  416</span>                                              {</div>
-<div class="line"><span class="lineno">  417</span>    <span class="keywordflow">if</span> (!<a class="code hl_function" href="../../db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a8237da9613a0a0c2bffbd8bfddd1f50e.html#a8237da9613a0a0c2bffbd8bfddd1f50e">isConnected</a>()) {</div>
-<div class="line"><span class="lineno">  418</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">  419</span>    }</div>
-<div class="line"><span class="lineno">  420</span> </div>
-<div class="line"><span class="lineno">  421</span>    <span class="comment">// Read incoming data from socket</span></div>
-<div class="line"><span class="lineno">  422</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a> buffer[1024];</div>
-<div class="line"><span class="lineno">  423</span>    <span class="keywordtype">int</span> bytesRead = <a class="code hl_function" href="../../db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a4fa3d87f839a758646743092409b8cb1.html#a4fa3d87f839a758646743092409b8cb1">recvData</a>(buffer);</div>
+<p class="definition">Definition at line <a class="el" href="../../da/d64/stream__transport_8cpp_8hpp_source.html#l00420">420</a> of file <a class="el" href="../../da/d64/stream__transport_8cpp_8hpp_source.html">stream_transport.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  420</span>                                              {</div>
+<div class="line"><span class="lineno">  421</span>    <span class="keywordflow">if</span> (!<a class="code hl_function" href="../../db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a8237da9613a0a0c2bffbd8bfddd1f50e.html#a8237da9613a0a0c2bffbd8bfddd1f50e">isConnected</a>()) {</div>
+<div class="line"><span class="lineno">  422</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  423</span>    }</div>
 <div class="line"><span class="lineno">  424</span> </div>
-<div class="line"><span class="lineno">  425</span>    <span class="keywordflow">if</span> (bytesRead &lt; 0) {</div>
-<div class="line"><span class="lineno">  426</span>        <span class="comment">// Error reading from socket</span></div>
-<div class="line"><span class="lineno">  427</span>        <a class="code hl_variable" href="../../db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_aece3e7939d33a5175b0ff7545c703327.html#aece3e7939d33a5175b0ff7545c703327">mConnection</a>.onDisconnected();</div>
-<div class="line"><span class="lineno">  428</span>        <a class="code hl_function" href="../../db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_ac903b0c43a022a373bda24dac11bed24.html#ac903b0c43a022a373bda24dac11bed24">disconnect</a>();</div>
-<div class="line"><span class="lineno">  429</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">  430</span>    }</div>
-<div class="line"><span class="lineno">  431</span> </div>
-<div class="line"><span class="lineno">  432</span>    <span class="keywordflow">if</span> (bytesRead == 0) {</div>
-<div class="line"><span class="lineno">  433</span>        <span class="comment">// No data available (non-blocking socket)</span></div>
-<div class="line"><span class="lineno">  434</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">  435</span>    }</div>
-<div class="line"><span class="lineno">  436</span> </div>
-<div class="line"><span class="lineno">  437</span>    <span class="comment">// Feed data to chunked reader</span></div>
-<div class="line"><span class="lineno">  438</span>    <a class="code hl_variable" href="../../db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a03bff9819084656e0084d39ffcf59d58.html#a03bff9819084656e0084d39ffcf59d58">mReader</a>.feed(fl::span&lt;const u8&gt;(buffer, <span class="keyword">static_cast&lt;</span><span class="keywordtype">size_t</span><span class="keyword">&gt;</span>(bytesRead)));</div>
-<div class="line"><span class="lineno">  439</span> </div>
-<div class="line"><span class="lineno">  440</span>    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><span class="lineno">  441</span>}</div>
+<div class="line"><span class="lineno">  425</span>    <span class="comment">// Read incoming data from socket</span></div>
+<div class="line"><span class="lineno">  426</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a> buffer[1024];</div>
+<div class="line"><span class="lineno">  427</span>    <span class="keywordtype">int</span> bytesRead = <a class="code hl_function" href="../../db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a4fa3d87f839a758646743092409b8cb1.html#a4fa3d87f839a758646743092409b8cb1">recvData</a>(buffer);</div>
+<div class="line"><span class="lineno">  428</span> </div>
+<div class="line"><span class="lineno">  429</span>    <span class="keywordflow">if</span> (bytesRead &lt; 0) {</div>
+<div class="line"><span class="lineno">  430</span>        <span class="comment">// Error reading from socket</span></div>
+<div class="line"><span class="lineno">  431</span>        <a class="code hl_variable" href="../../db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_aece3e7939d33a5175b0ff7545c703327.html#aece3e7939d33a5175b0ff7545c703327">mConnection</a>.onDisconnected();</div>
+<div class="line"><span class="lineno">  432</span>        <a class="code hl_function" href="../../db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_ac903b0c43a022a373bda24dac11bed24.html#ac903b0c43a022a373bda24dac11bed24">disconnect</a>();</div>
+<div class="line"><span class="lineno">  433</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  434</span>    }</div>
+<div class="line"><span class="lineno">  435</span> </div>
+<div class="line"><span class="lineno">  436</span>    <span class="keywordflow">if</span> (bytesRead == 0) {</div>
+<div class="line"><span class="lineno">  437</span>        <span class="comment">// No data available (non-blocking socket)</span></div>
+<div class="line"><span class="lineno">  438</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  439</span>    }</div>
+<div class="line"><span class="lineno">  440</span> </div>
+<div class="line"><span class="lineno">  441</span>    <span class="comment">// Feed data to chunked reader</span></div>
+<div class="line"><span class="lineno">  442</span>    <a class="code hl_variable" href="../../db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a03bff9819084656e0084d39ffcf59d58.html#a03bff9819084656e0084d39ffcf59d58">mReader</a>.feed(fl::span&lt;const u8&gt;(buffer, <span class="keyword">static_cast&lt;</span><span class="keywordtype">size_t</span><span class="keyword">&gt;</span>(bytesRead)));</div>
+<div class="line"><span class="lineno">  443</span> </div>
+<div class="line"><span class="lineno">  444</span>    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  445</span>}</div>
 <div class="ttc" id="aclassfl_1_1net_1_1http_1_1_http_stream_transport_a03bff9819084656e0084d39ffcf59d58_html_a03bff9819084656e0084d39ffcf59d58"><div class="ttname"><a href="../../db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a03bff9819084656e0084d39ffcf59d58.html#a03bff9819084656e0084d39ffcf59d58">fl::net::http::HttpStreamTransport::mReader</a></div><div class="ttdeci">ChunkedReader mReader</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d23/stream__transport_8h_source.html#l00181">stream_transport.h:181</a></div></div>
 <div class="ttc" id="aclassfl_1_1net_1_1http_1_1_http_stream_transport_a4fa3d87f839a758646743092409b8cb1_html_a4fa3d87f839a758646743092409b8cb1"><div class="ttname"><a href="../../db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a4fa3d87f839a758646743092409b8cb1.html#a4fa3d87f839a758646743092409b8cb1">fl::net::http::HttpStreamTransport::recvData</a></div><div class="ttdeci">virtual int recvData(fl::span&lt; u8 &gt; buffer)=0</div><div class="ttdoc">Receive raw data from connection.</div></div>
 <div class="ttc" id="aclassfl_1_1net_1_1http_1_1_http_stream_transport_a8237da9613a0a0c2bffbd8bfddd1f50e_html_a8237da9613a0a0c2bffbd8bfddd1f50e"><div class="ttname"><a href="../../db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a8237da9613a0a0c2bffbd8bfddd1f50e.html#a8237da9613a0a0c2bffbd8bfddd1f50e">fl::net::http::HttpStreamTransport::isConnected</a></div><div class="ttdeci">virtual bool isConnected() const =0</div><div class="ttdoc">Check if connected.</div></div>
@@ -159,7 +159,7 @@ $(function(){initNavTree('db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transpor
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_ac903b0c43a022a373bda24dac11bed24.html#ac903b0c43a022a373bda24dac11bed24">disconnect()</a>, <a class="el" href="../../db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a8237da9613a0a0c2bffbd8bfddd1f50e.html#a8237da9613a0a0c2bffbd8bfddd1f50e">isConnected()</a>, <a class="el" href="../../d8/d23/stream__transport_8h_source.html#l00164">mConnection</a>, <a class="el" href="../../d8/d23/stream__transport_8h_source.html#l00181">mReader</a>, and <a class="el" href="../../db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a4fa3d87f839a758646743092409b8cb1.html#a4fa3d87f839a758646743092409b8cb1">recvData()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../da/d64/stream__transport_8cpp_8hpp_source.html#l00265">readRequest()</a>, and <a class="el" href="../../da/d64/stream__transport_8cpp_8hpp_source.html#l00324">update()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../da/d64/stream__transport_8cpp_8hpp_source.html#l00269">readRequest()</a>, and <a class="el" href="../../da/d64/stream__transport_8cpp_8hpp_source.html#l00328">update()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -184,7 +184,7 @@ $(function(){initNavTree('db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transpor
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d5/dc9/namespacefl_1_1net.html">net</a></li><li class="navelem"><a class="el" href="../../d1/d13/namespacefl_1_1net_1_1http.html">http</a></li><li class="navelem"><a class="el" href="../../db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport.html">HttpStreamTransport</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:10 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:12 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

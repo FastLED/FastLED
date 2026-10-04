@@ -1,5 +1,7 @@
 <map id="fl::anonymous_namespace{channel::cpp::hpp}::ReorderingPixelIteratorAny::getReorderBufferTLS" name="fl::anonymous_namespace{channel::cpp::hpp}::ReorderingPixelIteratorAny::getReorderBufferTLS">
-<area shape="rect" id="Node000001" title="Get thread&#45;local buffer for addressing transformation." alt="" coords="361,5,628,60"/>
-<area shape="rect" id="Node000002" href="$d1/da3/classfl_1_1anonymous__namespace_02channel_8cpp_8hpp_03_1_1_reordering_pixel_iterator_any_aa1c4c1904aaafaf72a448c787f2e3129.html#aa1c4c1904aaafaf72a448c787f2e3129" title="Construct pixel iterator with optional addressing transformation." alt="" coords="5,5,313,60"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="347,35,313,35,313,30,347,30"/>
+<area shape="rect" id="Node000001" title="Get thread&#45;local buffer for addressing transformation." alt="" coords="640,5,907,60"/>
+<area shape="rect" id="Node000002" href="$d1/da3/classfl_1_1anonymous__namespace_02channel_8cpp_8hpp_03_1_1_reordering_pixel_iterator_any_a9e01c286d101be49c2971c027ca5baf9.html#a9e01c286d101be49c2971c027ca5baf9" title="Construct pixel iterator with optional addressing transformation." alt="" coords="284,5,592,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="626,35,592,35,592,30,626,30"/>
+<area shape="rect" id="Node000003" href="$d1/da3/classfl_1_1anonymous__namespace_02channel_8cpp_8hpp_03_1_1_reordering_pixel_iterator_any_a4659a84578b6464cee3ad9bfe4b0a0b7.html#a4659a84578b6464cee3ad9bfe4b0a0b7" title=" " alt="" coords="5,5,236,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="270,35,236,35,236,30,270,30"/>
 </map>

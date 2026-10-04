@@ -1,15 +1,32 @@
 <map id="fl/remote/rpc/json_arg_converter.h" name="fl/remote/rpc/json_arg_converter.h">
-<area shape="rect" id="Node000001" title=" " alt="" coords="83,5,219,45"/>
-<area shape="rect" id="Node000002" href="$de/d43/typed__rpc__binding_8h.html" title=" " alt="" coords="77,93,224,133"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="153,59,153,93,148,93,148,59"/>
-<area shape="rect" id="Node000003" href="$dc/d92/response__aware__binding_8h.html" title=" " alt="" coords="5,255,173,295"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="130,146,109,182,98,220,93,255,88,254,93,219,104,180,125,143"/>
-<area shape="rect" id="Node000004" href="$d5/dab/rpc__invokers_8h.html" title=" " alt="" coords="119,181,321,207"/>
-<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="179,142,212,179,208,183,175,146"/>
-<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="190,216,122,257,119,252,187,212"/>
-<area shape="rect" id="Node000005" href="$d5/d8f/rpc_8cpp_8hpp.html" title=" " alt="" coords="191,343,375,368"/>
-<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="225,220,231,256,242,294,258,320,274,341,270,344,253,323,238,296,225,257,219,221"/>
-<area shape="rect" id="Node000010" href="$df/d30/rpc__registry_8h.html" title=" " alt="" coords="253,262,449,287"/>
-<area shape="poly" id="edge6_Node000004_Node000010" title=" " alt="" coords="252,212,333,259,330,264,250,216"/>
-<area shape="poly" id="edge7_Node000010_Node000005" title=" " alt="" coords="334,299,295,344,291,341,330,296"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="147,5,283,45"/>
+<area shape="rect" id="Node000002" href="$d4/d19/runtime__rpc__binding_8h.html" title=" " alt="" coords="8,255,168,295"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="201,59,100,256,95,253,196,56"/>
+<area shape="rect" id="Node000024" href="$de/d43/typed__rpc__binding_8h.html" title=" " alt="" coords="239,93,385,133"/>
+<area shape="poly" id="edge10_Node000001_Node000024" title=" " alt="" coords="248,52,292,91,289,95,245,56"/>
+<area shape="rect" id="Node000003" href="$df/d16/remote_2rpc_2rpc_8h.html" title=" " alt="" coords="293,350,435,375"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="162,296,328,347,326,353,161,301"/>
+<area shape="rect" id="Node000023" href="$de/dbf/runtime__rpc__binding_8cpp_8hpp.html" title="Non&#45;template RuntimeRpcBinding::invoke body (FastLED #3246 Tier 1A)." alt="" coords="5,343,165,383"/>
+<area shape="poly" id="edge8_Node000002_Node000023" title=" " alt="" coords="90,309,89,343,83,342,84,309"/>
+<area shape="rect" id="Node000004" href="$db/d04/remote_8cpp_8hpp.html" title=" " alt="" coords="344,504,531,529"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="419,378,455,398,471,412,484,430,488,451,481,472,468,491,453,505,449,502,464,487,476,469,483,450,479,432,467,416,452,403,417,383"/>
+<area shape="rect" id="Node000008" href="$d6/d06/remote_8h.html" title=" " alt="" coords="325,431,469,456"/>
+<area shape="poly" id="edge4_Node000003_Node000008" title=" " alt="" coords="377,387,395,429,390,431,372,389"/>
+<area shape="rect" id="Node000021" href="$d5/d8f/rpc_8cpp_8hpp.html" title=" " alt="" coords="117,431,301,456"/>
+<area shape="poly" id="edge6_Node000003_Node000021" title=" " alt="" coords="330,384,233,433,231,428,328,379"/>
+<area shape="poly" id="edge5_Node000008_Node000004" title=" " alt="" coords="413,467,433,503,429,505,408,470"/>
+<area shape="rect" id="Node000022" href="$de/d1e/fl_2remote_2rpc_2__build_8cpp_8hpp.html" title=" " alt="" coords="68,504,271,529"/>
+<area shape="poly" id="edge7_Node000021_Node000022" title=" " alt="" coords="198,470,178,505,173,503,194,467"/>
+<area shape="poly" id="edge9_Node000023_Node000022" title=" " alt="" coords="90,396,96,426,108,455,129,482,154,502,150,506,125,485,103,457,91,427,85,397"/>
+<area shape="rect" id="Node000025" href="$dc/d92/response__aware__binding_8h.html" title=" " alt="" coords="464,255,632,295"/>
+<area shape="poly" id="edge11_Node000024_Node000025" title=" " alt="" coords="359,138,427,179,526,252,523,257,424,184,357,143"/>
+<area shape="rect" id="Node000026" href="$d5/dab/rpc__invokers_8h.html" title=" " alt="" coords="211,181,413,207"/>
+<area shape="poly" id="edge12_Node000024_Node000026" title=" " alt="" coords="315,147,315,181,309,181,309,147"/>
+<area shape="poly" id="edge18_Node000026_Node000002" title=" " alt="" coords="267,214,143,257,141,252,265,209"/>
+<area shape="poly" id="edge14_Node000026_Node000021" title=" " alt="" coords="276,216,252,233,233,256,215,303,208,353,207,398,210,430,205,431,202,398,202,353,210,302,228,253,249,229,273,211"/>
+<area shape="poly" id="edge13_Node000026_Node000025" title=" " alt="" coords="360,208,492,252,490,257,358,213"/>
+<area shape="rect" id="Node000027" href="$df/d30/rpc__registry_8h.html" title=" " alt="" coords="243,262,439,287"/>
+<area shape="poly" id="edge15_Node000026_Node000027" title=" " alt="" coords="324,219,339,261,334,263,319,221"/>
+<area shape="poly" id="edge17_Node000027_Node000003" title=" " alt="" coords="350,300,363,349,358,350,345,301"/>
+<area shape="poly" id="edge16_Node000027_Node000021" title=" " alt="" coords="323,299,283,344,220,432,215,429,279,341,319,295"/>
 </map>

@@ -56,20 +56,20 @@
 </a>
 </g>
 </g>
-<!-- Node30 -->
-<g id="Node000030" class="node">
-<title>Node30</title>
-<g id="a_Node000030"><a xlink:href="../../d7/d5f/classfl_1_1_http_connection_a9f989774f6254b213699ab4cd688d858.html#a9f989774f6254b213699ab4cd688d858" target="_top" xlink:title=" ">
+<!-- Node27 -->
+<g id="Node000027" class="node">
+<title>Node27</title>
+<g id="a_Node000027"><a xlink:href="../../d7/d5f/classfl_1_1_http_connection_a9f989774f6254b213699ab4cd688d858.html#a9f989774f6254b213699ab4cd688d858" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="423,-30 280,-30 280,0 423,0 423,-30"/>
 <text text-anchor="start" x="288" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">fl::HttpConnection</text>
 <text text-anchor="middle" x="351.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">::resetReconnectAttempts</text>
 </a>
 </g>
 </g>
-<!-- Node2&#45;&gt;Node30 -->
-<g id="edge5_Node000002_Node000030" class="edge">
-<title>Node2&#45;&gt;Node30</title>
-<g id="a_edge5_Node000002_Node000030"><a xlink:title=" ">
+<!-- Node2&#45;&gt;Node27 -->
+<g id="edge5_Node000002_Node000027" class="edge">
+<title>Node2&#45;&gt;Node27</title>
+<g id="a_edge5_Node000002_Node000027"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M244.14,-31.21C252.42,-29.94 261.18,-28.61 269.96,-27.27"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="270.51,-30.73 279.87,-25.76 269.46,-23.81 270.51,-30.73"/>
 </a>
@@ -78,7 +78,7 @@
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../d4/d36/namespacefl_a50131c41da2f619067d98360de35fa27.html#a50131c41da2f619067d98360de35fa27" target="_top" xlink:title="Public delay wrapper that keeps bare Arduino delay() preferred after using fl::delay; while still all...">
+<g id="a_Node000004"><a xlink:href="../../d4/d36/namespacefl_a19da680141593b475c4d1d3c1c0a8409.html#a19da680141593b475c4d1d3c1c0a8409" target="_top" xlink:title="Public delay wrapper that keeps bare Arduino delay() preferred after using fl::delay; while still all...">
 <polygon fill="#fff0f0" stroke="red" points="549,-72.5 493,-72.5 493,-53.5 549,-53.5 549,-72.5"/>
 <text text-anchor="middle" x="521" y="-60.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::delay</text>
 </a>
@@ -102,20 +102,20 @@
 </a>
 </g>
 </g>
-<!-- Node31 -->
-<g id="Node000031" class="node">
-<title>Node31</title>
-<g id="a_Node000031"><a xlink:href="../../d7/d5f/classfl_1_1_http_connection_afec0714bfaf76f6dd676f76f5faa8c43.html#afec0714bfaf76f6dd676f76f5faa8c43" target="_top" xlink:title=" ">
+<!-- Node28 -->
+<g id="Node000028" class="node">
+<title>Node28</title>
+<g id="a_Node000028"><a xlink:href="../../d7/d5f/classfl_1_1_http_connection_afec0714bfaf76f6dd676f76f5faa8c43.html#afec0714bfaf76f6dd676f76f5faa8c43" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="583,-30 459,-30 459,0 583,0 583,-30"/>
 <text text-anchor="start" x="467" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">fl::HttpConnection</text>
 <text text-anchor="middle" x="521" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">::resetReconnectState</text>
 </a>
 </g>
 </g>
-<!-- Node30&#45;&gt;Node31 -->
-<g id="edge6_Node000030_Node000031" class="edge">
-<title>Node30&#45;&gt;Node31</title>
-<g id="a_edge6_Node000030_Node000031"><a xlink:title=" ">
+<!-- Node27&#45;&gt;Node28 -->
+<g id="edge6_Node000027_Node000028" class="edge">
+<title>Node27&#45;&gt;Node28</title>
+<g id="a_edge6_Node000027_Node000028"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M423.05,-15C431.5,-15 440.14,-15 448.61,-15"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="448.82,-18.5 458.82,-15 448.82,-11.5 448.82,-18.5"/>
 </a>

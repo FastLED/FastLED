@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -107,7 +107,7 @@ $(function(){initNavTree('d5/df1/fft__impl_8cpp_8hpp.html','../../'); initResiza
   <div class="headertitle"><div class="title">fft_impl.cpp.hpp File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &quot;<a class="el" href="../../d7/dc2/fl_2system_2_fast_l_e_d_8h_source.html">fl/system/fastled.h</a>&quot;</code><br />
+<div class="textblock"><code>#include &quot;<a class="el" href="../../d0/d69/fl_2system_2fastled_8h_source.html">fl/system/fastled.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d1/dda/cq__kernel_8h_source.html">third_party/cq_kernel/cq_kernel.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../dc/da7/kiss__fftr_8h_source.html">third_party/cq_kernel/kiss_fftr.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../de/db2/fft__backend_8h_source.html">fl/audio/fft/fft_backend.h</a>&quot;</code><br />
@@ -125,6 +125,7 @@ $(function(){initNavTree('d5/df1/fft__impl_8cpp_8hpp.html','../../'); initResiza
 <code>#include &quot;<a class="el" href="../../dd/d8d/cstring_8h_source.html">fl/stl/cstring.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d4/d0b/singleton_8h_source.html">fl/stl/singleton.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../db/d01/noexcept_8h_source.html">fl/stl/noexcept.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../dc/da7/assert_8h_source.html">fl/stl/assert.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for fft_impl.cpp.hpp:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -193,10 +194,22 @@ Macros</h2></td></tr>
 <div id="dynsection-2-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-2-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d7/d76/structfl_1_1audio_1_1fft_1_1_context_1_1_fft_scratch__coll__graph.svg" width="100%" height="485"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d7/d76/structfl_1_1audio_1_1fft_1_1_context_1_1_fft_scratch__coll__graph.svg" width="100%" height="538"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 <center><span class="legend">[<a target="top" href="../../graph_legend.html">legend</a>]</span></center></div>
 <table class="fieldtable">
 <tr><th colspan="3">Class Members</th></tr>
+<tr><td class="fieldtype">
+<a id="a2a20a1e4a0351c083bb2b27713faa996" name="a2a20a1e4a0351c083bb2b27713faa996"></a><a class="el" href="../../d2/d24/classfl_1_1vector.html">vector</a>&lt; u16 &gt;</td>
+<td class="fieldname">
+coverageMaxQueue</td>
+<td class="fielddoc">
+</td></tr>
+<tr><td class="fieldtype">
+<a id="a9d9760681d727a0791c2f235c8ee61fb" name="a9d9760681d727a0791c2f235c8ee61fb"></a><a class="el" href="../../d2/d24/classfl_1_1vector.html">vector</a>&lt; float &gt;</td>
+<td class="fieldname">
+cqSnapshot</td>
+<td class="fielddoc">
+</td></tr>
 <tr><td class="fieldtype">
 <a id="a6cd3891ca146742fe84554eb2122419b" name="a6cd3891ca146742fe84554eb2122419b"></a><a class="el" href="../../d2/d24/classfl_1_1vector.html">vector</a>&lt; <a class="el" href="../../d0/dc9/kiss__fft_8h.html#d4/d47/structkiss__fft__cpx">kiss_fft_cpx</a> &gt;</td>
 <td class="fieldname">
@@ -292,7 +305,7 @@ numBins</td>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_80b55e5ea7143e3a561e896c6c19b58f.html">audio</a></li><li class="navelem"><a class="el" href="../../dir_945806df7450bb6349c55f94e1489bef.html">fft</a></li><li class="navelem"><a class="el" href="../../d5/df1/fft__impl_8cpp_8hpp.html">fft_impl.cpp.hpp</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:01 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:03 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

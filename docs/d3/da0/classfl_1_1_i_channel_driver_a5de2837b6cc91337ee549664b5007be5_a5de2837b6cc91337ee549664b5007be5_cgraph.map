@@ -1,0 +1,6 @@
+<map id="fl::IChannelDriver::getDriverCapabilities" name="fl::IChannelDriver::getDriverCapabilities">
+<area shape="rect" id="Node000001" title="Driver&#45;wide capability descriptor (declarative form)." alt="" coords="5,29,173,69"/>
+<area shape="poly" id="edge2_Node000001_Node000001" title=" " alt="" coords="52,30,50,20,56,11,69,5,89,3,113,6,125,13,123,18,111,11,89,8,70,10,59,15,55,21,57,28"/>
+<area shape="rect" id="Node000002" href="$d3/da0/classfl_1_1_i_channel_driver_a73d5ab2becbd3e1cc037b423498463cf.html#a73d5ab2becbd3e1cc037b423498463cf" title="Get driver capabilities (clockless, SPI, or both)" alt="" coords="221,29,356,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="174,47,208,47,208,52,174,52"/>
+</map>

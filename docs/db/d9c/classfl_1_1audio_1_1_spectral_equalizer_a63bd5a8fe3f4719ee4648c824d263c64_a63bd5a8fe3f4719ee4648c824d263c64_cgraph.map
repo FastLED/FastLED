@@ -1,7 +1,7 @@
 <map id="fl::audio::SpectralEqualizer::configure" name="fl::audio::SpectralEqualizer::configure">
 <area shape="rect" id="Node000001" title="Configure the spectral equalizer This calculates per&#45;band gain multipliers based on the selected curv..." alt="" coords="5,29,200,69"/>
 <area shape="poly" id="edge7_Node000001_Node000001" title=" " alt="" coords="57,30,55,20,62,10,78,5,103,3,131,6,146,13,144,18,129,11,103,8,79,10,65,15,60,21,63,28"/>
-<area shape="rect" id="Node000002" href="$db/d9c/classfl_1_1audio_1_1_spectral_equalizer_a35ee44583dde1fd3908700b39aa5a165.html#a35ee44583dde1fd3908700b39aa5a165" title=" " alt="" coords="248,29,443,69"/>
+<area shape="rect" id="Node000002" href="$db/d9c/classfl_1_1audio_1_1_spectral_equalizer_a72d6e75386c93d059c15d330e92de73c.html#a72d6e75386c93d059c15d330e92de73c" title=" " alt="" coords="248,29,443,69"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="200,56,234,56,234,61,200,61"/>
 <area shape="rect" id="Node000003" href="$db/d9c/classfl_1_1audio_1_1_spectral_equalizer_a52e8f221c9fe9cba4ac96f387cc1f726.html#a52e8f221c9fe9cba4ac96f387cc1f726" title="Calculate gains based on current curve." alt="" coords="248,93,443,133"/>
 <area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="180,67,257,87,255,92,179,72"/>

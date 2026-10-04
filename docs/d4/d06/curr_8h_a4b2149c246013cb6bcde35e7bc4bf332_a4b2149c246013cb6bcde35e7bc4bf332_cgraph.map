@@ -22,15 +22,15 @@
 <area shape="poly" id="edge21_Node000001_Node000021" title=" " alt="" coords="57,429,65,465,81,515,108,567,125,591,146,612,153,617,150,622,142,616,121,595,103,570,76,517,60,467,52,430"/>
 <area shape="rect" id="Node000003" href="$d4/d06/curr_8h_ad324268bf9b662f9320bf42c8d611ed3.html#ad324268bf9b662f9320bf42c8d611ed3" title=" " alt="" coords="395,5,497,31"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="270,77,374,39,394,33,395,38,376,45,272,82"/>
-<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909" title=" " alt="" coords="413,55,479,80"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a07c69292ef50aa1083046faff1c52ead.html#a07c69292ef50aa1083046faff1c52ead" title=" " alt="" coords="413,55,479,80"/>
 <area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="243,226,293,162,330,123,373,89,398,77,400,82,376,94,334,127,297,165,247,230"/>
-<area shape="rect" id="Node000006" href="$db/d97/_fast_l_e_d_8h_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909" title=" " alt="" coords="421,104,471,129"/>
+<area shape="rect" id="Node000006" href="$d6/d64/fastled_8h_a07c69292ef50aa1083046faff1c52ead.html#a07c69292ef50aa1083046faff1c52ead" title=" " alt="" coords="421,104,471,129"/>
 <area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="250,226,302,184,373,138,407,125,409,129,376,143,305,188,253,230"/>
-<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb" title=" " alt="" coords="415,153,477,179"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_a2fdabb91a1f100dec8da21e4306aba05.html#a2fdabb91a1f100dec8da21e4306aba05" title=" " alt="" coords="415,153,477,179"/>
 <area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="270,225,374,187,401,178,403,183,376,193,272,230"/>
-<area shape="rect" id="Node000008" href="$db/d97/_fast_l_e_d_8h_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb" title="Memory functions are available in fl:: namespace via fl/stl/cstring.h Using declarations cannot work ..." alt="" coords="423,203,469,228"/>
+<area shape="rect" id="Node000008" href="$d6/d64/fastled_8h_a2fdabb91a1f100dec8da21e4306aba05.html#a2fdabb91a1f100dec8da21e4306aba05" title="Memory functions are available in fl:: namespace via fl/stl/cstring.h Using declarations cannot work ..." alt="" coords="423,203,469,228"/>
 <area shape="poly" id="edge7_Node000004_Node000008" title=" " alt="" coords="326,227,409,217,409,222,327,232"/>
-<area shape="rect" id="Node000009" href="$d2/d0d/group___random_gaaaff3e84c6ab2cf5f71400a4b6958beb.html#gaaaff3e84c6ab2cf5f71400a4b6958beb" title="Generate a 16&#45;bit random number." alt="" coords="402,252,490,277"/>
+<area shape="rect" id="Node000009" href="$d2/d0d/group___random_ga6f816735a0bd63bfc78bebbc7c5f12b9.html#ga6f816735a0bd63bfc78bebbc7c5f12b9" title="Generate a 16&#45;bit random number." alt="" coords="402,252,490,277"/>
 <area shape="poly" id="edge8_Node000004_Node000009" title=" " alt="" coords="327,248,389,256,388,261,326,254"/>
 <area shape="poly" id="edge9_Node000004_Node000010" title=" " alt="" coords="296,251,328,271,341,286,348,301,353,330,358,359,365,373,377,387,382,391,378,395,373,391,360,376,353,361,348,331,343,302,336,289,325,275,294,256"/>
 <area shape="rect" id="Node000013" href="$d4/d06/curr_8h_adc7abb6903f06705ec67ff18b9fd14de.html#adc7abb6903f06705ec67ff18b9fd14de" title=" " alt="" coords="381,301,511,327"/>
@@ -39,6 +39,6 @@
 <area shape="poly" id="edge13_Node000004_Node000014" title=" " alt="" coords="290,251,328,271,344,287,353,304,361,320,376,336,387,343,384,347,373,340,357,323,348,307,340,290,325,275,288,256"/>
 <area shape="rect" id="Node000011" href="$df/d40/examples_2_corkscrew_2corkscrew_8h_a51f14a1e7c3bfcb462552862987a4a24.html#a51f14a1e7c3bfcb462552862987a4a24" title=" " alt="" coords="565,375,653,400"/>
 <area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="517,399,551,394,552,399,518,404"/>
-<area shape="rect" id="Node000012" href="$d2/d0d/group___random_gadb05544426b14ef8d85fb2eb73cb8a0a.html#gadb05544426b14ef8d85fb2eb73cb8a0a" title="Generate an 8&#45;bit random number." alt="" coords="569,424,649,449"/>
+<area shape="rect" id="Node000012" href="$d2/d0d/group___random_gafb55d95e3e866dce182f149535903dd8.html#gafb55d95e3e866dce182f149535903dd8" title="Generate an 8&#45;bit random number." alt="" coords="569,424,649,449"/>
 <area shape="poly" id="edge11_Node000010_Node000012" title=" " alt="" coords="518,420,556,426,555,432,517,426"/>
 </map>

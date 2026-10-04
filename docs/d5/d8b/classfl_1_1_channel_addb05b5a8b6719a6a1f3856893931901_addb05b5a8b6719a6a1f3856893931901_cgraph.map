@@ -1,0 +1,27 @@
+<map id="fl::Channel::submitFrame" name="fl::Channel::submitFrame">
+<area shape="rect" id="Node000001" title="Submit the encoded frame to driver: disabled&#45;driver drop + one&#45;shot diagnostic, enqueue,..." alt="" coords="5,70,191,95"/>
+<area shape="rect" id="Node000002" href="$d2/d6b/classfl_1_1_channel_manager_a871198b57c8651618341584e88affa15.html#a871198b57c8651618341584e88affa15" title="Look up a driver&#39;s registration status without logging on miss." alt="" coords="239,5,387,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="146,67,225,46,226,51,147,73"/>
+<area shape="rect" id="Node000004" href="$da/db7/structfl_1_1_channel_events_aa02eba6c71d0300625657d33cefceab9.html#aa02eba6c71d0300625657d33cefceab9" title=" " alt="" coords="447,63,589,103"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="191,80,433,80,433,85,191,85"/>
+<area shape="rect" id="Node000007" href="$d2/d6b/classfl_1_1_channel_manager_a76013c6913045962ce5bb8d227e760b3.html#a76013c6913045962ce5bb8d227e760b3" title="Get the global singleton instance." alt="" coords="239,127,387,167"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="142,93,233,120,231,125,141,98"/>
+<area shape="rect" id="Node000003" href="$de/d66/classfl_1_1basic__string_ac3effe716fde4667b05a52d78d74bbfb.html#ac3effe716fde4667b05a52d78d74bbfb" title=" " alt="" coords="435,13,601,38"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="387,23,421,23,421,28,387,28"/>
+<area shape="rect" id="Node000005" href="$d9/d5b/classfl_1_1_singleton_ad5cb1b704e17768f75802673abb0ff75.html#ad5cb1b704e17768f75802673abb0ff75" title=" " alt="" coords="649,74,812,99"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="590,81,636,82,636,88,590,87"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a1e67c0c24ebcd98fcf8554753d1639a6.html#a1e67c0c24ebcd98fcf8554753d1639a6" title=" " alt="" coords="896,74,1035,99"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="812,84,882,84,882,89,812,89"/>
+<area shape="rect" id="Node000008" href="$d2/d6b/classfl_1_1_channel_manager_a3f0e1823366151d87c97be78f4273755.html#a3f0e1823366151d87c97be78f4273755" title="Constructor." alt="" coords="657,177,805,217"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="381,164,435,176,543,188,643,194,643,199,542,194,434,181,380,169"/>
+<area shape="rect" id="Node000012" href="$d2/d6b/classfl_1_1_channel_manager_a58d12a4cf75bb181c7093141240bb94b.html#a58d12a4cf75bb181c7093141240bb94b" title="Get the singleton WITHOUT registering platform default drivers." alt="" coords="444,127,592,167"/>
+<area shape="poly" id="edge12_Node000007_Node000012" title=" " alt="" coords="387,144,430,144,430,149,387,149"/>
+<area shape="poly" id="edge8_Node000008_Node000008" title=" " alt="" coords="691,178,689,168,695,158,709,153,731,151,755,154,769,161,766,166,754,159,731,156,710,158,698,163,694,169,696,176"/>
+<area shape="rect" id="Node000009" href="$de/dca/classfl_1_1_engine_events_a98984c55652e174bb2384d85935c581b.html#a98984c55652e174bb2384d85935c581b" title=" " alt="" coords="860,127,1071,153"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="804,176,859,163,898,153,899,158,861,168,805,182"/>
+<area shape="rect" id="Node000010" href="$d2/d6b/classfl_1_1_channel_manager_ae0d96adf1576f8fe62b937685991e3b5.html#ae0d96adf1576f8fe62b937685991e3b5" title=" " alt="" coords="875,177,1056,217"/>
+<area shape="poly" id="edge10_Node000008_Node000010" title=" " alt="" coords="805,203,861,204,861,209,805,208"/>
+<area shape="poly" id="edge11_Node000010_Node000008" title=" " alt="" coords="874,191,818,191,818,186,874,186"/>
+<area shape="poly" id="edge14_Node000012_Node000005" title=" " alt="" coords="589,124,671,101,673,106,591,129"/>
+<area shape="poly" id="edge13_Node000012_Node000008" title=" " alt="" coords="593,162,644,174,643,179,592,167"/>
+</map>

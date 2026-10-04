@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -141,11 +141,11 @@ $(function(){initNavTree('db/d89/classfl_1_1audio_1_1detector_1_1_pitch_a219e860
 <div class="line"><span class="lineno">  181</span> </div>
 <div class="line"><span class="lineno">  182</span>    <span class="comment">// Confidence is primarily based on peak strength</span></div>
 <div class="line"><span class="lineno">  183</span>    <span class="comment">// Autocorrelation ranges from -1 to 1, but we only care about positive peaks</span></div>
-<div class="line"><span class="lineno">  184</span>    <span class="keywordtype">float</span> confidence = <a class="code hl_function" href="../../d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909">fl::max</a>(0.0f, <a class="code hl_function" href="../../d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb">fl::min</a>(1.0f, peakValue));</div>
+<div class="line"><span class="lineno">  184</span>    <span class="keywordtype">float</span> confidence = <a class="code hl_function" href="../../d4/d36/namespacefl_a07c69292ef50aa1083046faff1c52ead.html#a07c69292ef50aa1083046faff1c52ead">fl::max</a>(0.0f, <a class="code hl_function" href="../../d4/d36/namespacefl_a2fdabb91a1f100dec8da21e4306aba05.html#a2fdabb91a1f100dec8da21e4306aba05">fl::min</a>(1.0f, peakValue));</div>
 <div class="line"><span class="lineno">  185</span> </div>
 <div class="line"><span class="lineno">  186</span>    <span class="comment">// Calculate clarity by comparing peak to surrounding values</span></div>
 <div class="line"><span class="lineno">  187</span>    <span class="comment">// Look at ±10% of the period</span></div>
-<div class="line"><span class="lineno">  188</span>    <span class="keywordtype">int</span> windowSize = <a class="code hl_function" href="../../d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909">fl::max</a>(2, peakLag / 10);</div>
+<div class="line"><span class="lineno">  188</span>    <span class="keywordtype">int</span> windowSize = <a class="code hl_function" href="../../d4/d36/namespacefl_a07c69292ef50aa1083046faff1c52ead.html#a07c69292ef50aa1083046faff1c52ead">fl::max</a>(2, peakLag / 10);</div>
 <div class="line"><span class="lineno">  189</span>    <span class="keywordtype">float</span> neighborSum = 0.0f;</div>
 <div class="line"><span class="lineno">  190</span>    <span class="keywordtype">int</span> neighborCount = 0;</div>
 <div class="line"><span class="lineno">  191</span> </div>
@@ -154,7 +154,7 @@ $(function(){initNavTree('db/d89/classfl_1_1audio_1_1detector_1_1_pitch_a219e860
 <div class="line"><span class="lineno">  194</span> </div>
 <div class="line"><span class="lineno">  195</span>        <span class="keywordtype">int</span> lag = peakLag + <a class="code hl_function" href="../../d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d">offset</a>;</div>
 <div class="line"><span class="lineno">  196</span>        <span class="keywordflow">if</span> (lag &gt;= <a class="code hl_variable" href="../../db/d89/classfl_1_1audio_1_1detector_1_1_pitch_ac705a5b453bd8b77e47f8573c4f4b63e.html#ac705a5b453bd8b77e47f8573c4f4b63e">mMinPeriod</a> &amp;&amp; lag &lt;= <a class="code hl_variable" href="../../db/d89/classfl_1_1audio_1_1detector_1_1_pitch_aaebf336c186941df8d8443f5f83c2ed0.html#aaebf336c186941df8d8443f5f83c2ed0">mMaxPeriod</a> &amp;&amp; lag &lt; <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(autocorr.size())) {</div>
-<div class="line"><span class="lineno">  197</span>            neighborSum += <a class="code hl_function" href="../../d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909">fl::max</a>(0.0f, autocorr[<span class="keyword">static_cast&lt;</span>size<span class="keyword">&gt;</span>(lag)]);</div>
+<div class="line"><span class="lineno">  197</span>            neighborSum += <a class="code hl_function" href="../../d4/d36/namespacefl_a07c69292ef50aa1083046faff1c52ead.html#a07c69292ef50aa1083046faff1c52ead">fl::max</a>(0.0f, autocorr[<span class="keyword">static_cast&lt;</span>size<span class="keyword">&gt;</span>(lag)]);</div>
 <div class="line"><span class="lineno">  198</span>            neighborCount++;</div>
 <div class="line"><span class="lineno">  199</span>        }</div>
 <div class="line"><span class="lineno">  200</span>    }</div>
@@ -165,7 +165,7 @@ $(function(){initNavTree('db/d89/classfl_1_1audio_1_1detector_1_1_pitch_a219e860
 <div class="line"><span class="lineno">  205</span>        <span class="comment">// Peak should be significantly higher than neighbors</span></div>
 <div class="line"><span class="lineno">  206</span>        <span class="comment">// If peak is 2x higher, that&#39;s good; if it&#39;s similar, reduce confidence</span></div>
 <div class="line"><span class="lineno">  207</span>        <span class="keywordflow">if</span> (neighborAvg &gt; 1e-6f) {</div>
-<div class="line"><span class="lineno">  208</span>            <span class="keywordtype">float</span> clarity = <a class="code hl_function" href="../../d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb">fl::min</a>(1.0f, (peakValue - neighborAvg) / neighborAvg);</div>
+<div class="line"><span class="lineno">  208</span>            <span class="keywordtype">float</span> clarity = <a class="code hl_function" href="../../d4/d36/namespacefl_a2fdabb91a1f100dec8da21e4306aba05.html#a2fdabb91a1f100dec8da21e4306aba05">fl::min</a>(1.0f, (peakValue - neighborAvg) / neighborAvg);</div>
 <div class="line"><span class="lineno">  209</span>            confidence *= (0.7f + 0.3f * clarity);  <span class="comment">// Weight clarity at 30%</span></div>
 <div class="line"><span class="lineno">  210</span>        }</div>
 <div class="line"><span class="lineno">  211</span>    }</div>
@@ -175,8 +175,8 @@ $(function(){initNavTree('db/d89/classfl_1_1audio_1_1detector_1_1_pitch_a219e860
 <div class="ttc" id="aclassfl_1_1audio_1_1detector_1_1_pitch_aaebf336c186941df8d8443f5f83c2ed0_html_aaebf336c186941df8d8443f5f83c2ed0"><div class="ttname"><a href="../../db/d89/classfl_1_1audio_1_1detector_1_1_pitch_aaebf336c186941df8d8443f5f83c2ed0.html#aaebf336c186941df8d8443f5f83c2ed0">fl::audio::detector::Pitch::mMaxPeriod</a></div><div class="ttdeci">int mMaxPeriod</div><div class="ttdef"><b>Definition</b> <a href="../../d0/daf/pitch_8h_source.html#l00087">pitch.h:87</a></div></div>
 <div class="ttc" id="aclassfl_1_1audio_1_1detector_1_1_pitch_ac705a5b453bd8b77e47f8573c4f4b63e_html_ac705a5b453bd8b77e47f8573c4f4b63e"><div class="ttname"><a href="../../db/d89/classfl_1_1audio_1_1detector_1_1_pitch_ac705a5b453bd8b77e47f8573c4f4b63e.html#ac705a5b453bd8b77e47f8573c4f4b63e">fl::audio::detector::Pitch::mMinPeriod</a></div><div class="ttdeci">int mMinPeriod</div><div class="ttdef"><b>Definition</b> <a href="../../d0/daf/pitch_8h_source.html#l00086">pitch.h:86</a></div></div>
 <div class="ttc" id="adirect_8h_ae2738c620ee3ab857c9656b3bf86a24d_html_ae2738c620ee3ab857c9656b3bf86a24d"><div class="ttname"><a href="../../d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d">offset</a></div><div class="ttdeci">fl::UISlider offset(&quot;Offset&quot;, 0.0f, 0.0f, 1.0f, 0.01f)</div></div>
-<div class="ttc" id="anamespacefl_a0356f07fb7a8f25752385fd8208b47fb_html_a0356f07fb7a8f25752385fd8208b47fb"><div class="ttname"><a href="../../d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb">fl::min</a></div><div class="ttdeci">FL_DISABLE_WARNING_PUSH U constexpr common_type_t&lt; T, U &gt; min(T a, U b) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00071">math.h:71</a></div></div>
-<div class="ttc" id="anamespacefl_a19ba0dae8249e0cf164136846f85e909_html_a19ba0dae8249e0cf164136846f85e909"><div class="ttname"><a href="../../d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909">fl::max</a></div><div class="ttdeci">constexpr common_type_t&lt; T, U &gt; max(T a, U b) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00075">math.h:75</a></div></div>
+<div class="ttc" id="anamespacefl_a07c69292ef50aa1083046faff1c52ead_html_a07c69292ef50aa1083046faff1c52ead"><div class="ttname"><a href="../../d4/d36/namespacefl_a07c69292ef50aa1083046faff1c52ead.html#a07c69292ef50aa1083046faff1c52ead">fl::max</a></div><div class="ttdeci">constexpr common_type_t&lt; T, U &gt; max(T a, U b) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00075">math.h:75</a></div></div>
+<div class="ttc" id="anamespacefl_a2fdabb91a1f100dec8da21e4306aba05_html_a2fdabb91a1f100dec8da21e4306aba05"><div class="ttname"><a href="../../d4/d36/namespacefl_a2fdabb91a1f100dec8da21e4306aba05.html#a2fdabb91a1f100dec8da21e4306aba05">fl::min</a></div><div class="ttdeci">FL_DISABLE_WARNING_PUSH U constexpr common_type_t&lt; T, U &gt; min(T a, U b) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00071">math.h:71</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../df/db1/math_8h_source.html#l00075">fl::max()</a>, <a class="el" href="../../df/db1/math_8h_source.html#l00071">fl::min()</a>, <a class="el" href="../../d0/daf/pitch_8h_source.html#l00087">mMaxPeriod</a>, <a class="el" href="../../d0/daf/pitch_8h_source.html#l00086">mMinPeriod</a>, <a class="el" href="../../d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d">offset()</a>, and <a class="el" href="../../d5/d47/basic__vector_8h_source.html#l00042">fl::vector_basic::size()</a>.</p>
 
@@ -205,7 +205,7 @@ $(function(){initNavTree('db/d89/classfl_1_1audio_1_1detector_1_1_pitch_a219e860
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../db/dbf/namespacefl_1_1audio.html">audio</a></li><li class="navelem"><a class="el" href="../../dd/d12/namespacefl_1_1audio_1_1detector.html">detector</a></li><li class="navelem"><a class="el" href="../../db/d89/classfl_1_1audio_1_1detector_1_1_pitch.html">Pitch</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:08 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:11 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

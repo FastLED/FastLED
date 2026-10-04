@@ -1,9 +1,9 @@
 var group___beat_generators =
 [
-    [ "fl::beat16", "d6/d6c/group___beat_generators_ga120dfa6dac7fa3d3958ae1e30b64e1d7.html#ga120dfa6dac7fa3d3958ae1e30b64e1d7", null ],
-    [ "fl::beat8", "d6/d6c/group___beat_generators_ga7195cd79b30358b151154623586631aa.html#ga7195cd79b30358b151154623586631aa", null ],
-    [ "fl::beat88", "d6/d6c/group___beat_generators_gac4b5cef78b913f63a26012d69ca37889.html#gac4b5cef78b913f63a26012d69ca37889", null ],
-    [ "fl::beatsin16", "d6/d6c/group___beat_generators_gadf8e83564c52b94d0ff5594aede0be28.html#gadf8e83564c52b94d0ff5594aede0be28", null ],
-    [ "fl::beatsin8", "d6/d6c/group___beat_generators_ga696b9421eca961df0a68c7c6c3e983ab.html#ga696b9421eca961df0a68c7c6c3e983ab", null ],
-    [ "fl::beatsin88", "d6/d6c/group___beat_generators_ga4c4a1bcd3ca4f16cf04f1344afd601cc.html#ga4c4a1bcd3ca4f16cf04f1344afd601cc", null ]
+    [ "fl::beat16", "d6/d6c/group___beat_generators_gad335b2b96f9dd59cac724dc1177b6373.html#gad335b2b96f9dd59cac724dc1177b6373", null ],
+    [ "fl::beat8", "d6/d6c/group___beat_generators_ga6931d7f79bebd9c76e29fb41aafe5e9e.html#ga6931d7f79bebd9c76e29fb41aafe5e9e", null ],
+    [ "fl::beat88", "d6/d6c/group___beat_generators_ga6675df99171a44d0d463eba91be86a2f.html#ga6675df99171a44d0d463eba91be86a2f", null ],
+    [ "fl::beatsin16", "d6/d6c/group___beat_generators_gac869590ebed22301d9a08cf7406128b3.html#gac869590ebed22301d9a08cf7406128b3", null ],
+    [ "fl::beatsin8", "d6/d6c/group___beat_generators_gaca012663c6c8fe9a7240bcbc76095ba9.html#gaca012663c6c8fe9a7240bcbc76095ba9", null ],
+    [ "fl::beatsin88", "d6/d6c/group___beat_generators_gab37e7f1a7b32b98c793c4f2cb15afc5d.html#gab37e7f1a7b32b98c793c4f2cb15afc5d", null ]
 ];

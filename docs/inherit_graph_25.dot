@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="CEveryNMillisDynamic",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d72/class_c_every_n_millis_dynamic.html",tooltip="Create the CEveryNMillisDynamic class for dynamic millisecond intervals."];
+  Node0 [id="Node000000",label="autoresearch::timing\l_drift::DriftResult",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d88/namespaceautoresearch_1_1timing__drift.html#d2/de9/structautoresearch_1_1timing__drift_1_1_drift_result",tooltip=" "];
 }

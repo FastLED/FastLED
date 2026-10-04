@@ -21,7 +21,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../d4/d36/namespacefl_ad87db990a26723fa560bc364734ea6cc.html#ad87db990a26723fa560bc364734ea6cc" target="_top" xlink:title=" ">
+<g id="a_Node000002"><a xlink:href="../../d4/d36/namespacefl_ac01366c0ac52fd6d3aeab8b11d69310b.html#ac01366c0ac52fd6d3aeab8b11d69310b" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="211.5,-478 162.5,-478 162.5,-459 211.5,-459 211.5,-478"/>
 <text text-anchor="middle" x="187" y="-466" font-family="Helvetica,sans-Serif" font-size="10.00">fl::cosf</text>
 </a>
@@ -94,7 +94,7 @@
 <!-- Node17 -->
 <g id="Node000017" class="node">
 <title>Node17</title>
-<g id="a_Node000017"><a xlink:href="../../d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb" target="_top" xlink:title=" ">
+<g id="a_Node000017"><a xlink:href="../../d4/d36/namespacefl_a2fdabb91a1f100dec8da21e4306aba05.html#a2fdabb91a1f100dec8da21e4306aba05" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="357,-56 310,-56 310,-37 357,-37 357,-56"/>
 <text text-anchor="middle" x="333.5" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">fl::min</text>
 </a>
@@ -130,7 +130,7 @@
 <!-- Node23 -->
 <g id="Node000023" class="node">
 <title>Node23</title>
-<g id="a_Node000023"><a xlink:href="../../d4/d36/namespacefl_a4ba2744fe96375793e6f7a98b188d343.html#a4ba2744fe96375793e6f7a98b188d343" target="_top" xlink:title=" ">
+<g id="a_Node000023"><a xlink:href="../../d4/d36/namespacefl_a367128bb231fab59275e129d3dc3d909.html#a367128bb231fab59275e129d3dc3d909" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="210.5,-441 163.5,-441 163.5,-422 210.5,-422 210.5,-441"/>
 <text text-anchor="middle" x="187" y="-429" font-family="Helvetica,sans-Serif" font-size="10.00">fl::sinf</text>
 </a>
@@ -166,7 +166,7 @@
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../df/d9e/namespacefl_1_1detail_ab42e702a90f152dbad7d35ea9eab976a.html#ab42e702a90f152dbad7d35ea9eab976a" target="_top" xlink:title=" ">
+<g id="a_Node000004"><a xlink:href="../../df/d9e/namespacefl_1_1detail_ac2273fa1bad46159181e978dff14b9b2.html#ac2273fa1bad46159181e978dff14b9b2" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="552,-478 430,-478 430,-459 552,-459 552,-478"/>
 <text text-anchor="middle" x="491" y="-466" font-family="Helvetica,sans-Serif" font-size="10.00">fl::detail::cos_reduce_</text>
 </a>
@@ -184,7 +184,7 @@
 <!-- Node5 -->
 <g id="Node000005" class="node">
 <title>Node5</title>
-<g id="a_Node000005"><a xlink:href="../../df/d9e/namespacefl_1_1detail_a525aa6aacdb5d3d48ebe21adb14da430.html#a525aa6aacdb5d3d48ebe21adb14da430" target="_top" xlink:title=" ">
+<g id="a_Node000005"><a xlink:href="../../df/d9e/namespacefl_1_1detail_a6a0079ec5177e72b0e64470ba18a332e.html#a6a0079ec5177e72b0e64470ba18a332e" target="_top" xlink:title=" ">
 <polygon fill="#fff0f0" stroke="red" points="708,-459 588,-459 588,-440 708,-440 708,-459"/>
 <text text-anchor="middle" x="648" y="-447" font-family="Helvetica,sans-Serif" font-size="10.00">fl::detail::sin_reduce_</text>
 </a>
@@ -202,7 +202,7 @@
 <!-- Node8 -->
 <g id="Node000008" class="node">
 <title>Node8</title>
-<g id="a_Node000008"><a xlink:href="../../d4/d36/namespacefl_a680a4050712ddcb48b6107ce5294a82f.html#a680a4050712ddcb48b6107ce5294a82f" target="_top" xlink:title=" ">
+<g id="a_Node000008"><a xlink:href="../../d4/d36/namespacefl_adb63d3a6e58a41ac639c371abe6be324.html#adb63d3a6e58a41ac639c371abe6be324" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="358.5,-130 308.5,-130 308.5,-111 358.5,-111 358.5,-130"/>
 <text text-anchor="middle" x="333.5" y="-118" font-family="Helvetica,sans-Serif" font-size="10.00">fl::ceilf</text>
 </a>
@@ -239,7 +239,7 @@
 <!-- Node11 -->
 <g id="Node000011" class="node">
 <title>Node11</title>
-<g id="a_Node000011"><a xlink:href="../../d4/d36/namespacefl_a2e35dfe73de1a16365fb9ff78ad5230a.html#a2e35dfe73de1a16365fb9ff78ad5230a" target="_top" xlink:title=" ">
+<g id="a_Node000011"><a xlink:href="../../d4/d36/namespacefl_acbab7965ace60152d4d09abd92544e7e.html#acbab7965ace60152d4d09abd92544e7e" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="360.5,-93 306.5,-93 306.5,-74 360.5,-74 360.5,-93"/>
 <text text-anchor="middle" x="333.5" y="-81" font-family="Helvetica,sans-Serif" font-size="10.00">fl::floorf</text>
 </a>
@@ -293,7 +293,7 @@
 <!-- Node16 -->
 <g id="Node000016" class="node">
 <title>Node16</title>
-<g id="a_Node000016"><a xlink:href="../../d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909" target="_top" xlink:title=" ">
+<g id="a_Node000016"><a xlink:href="../../d4/d36/namespacefl_a07c69292ef50aa1083046faff1c52ead.html#a07c69292ef50aa1083046faff1c52ead" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="358.5,-241 308.5,-241 308.5,-222 358.5,-222 358.5,-241"/>
 <text text-anchor="middle" x="333.5" y="-229" font-family="Helvetica,sans-Serif" font-size="10.00">fl::max</text>
 </a>
@@ -320,7 +320,7 @@
 <!-- Node18 -->
 <g id="Node000018" class="node">
 <title>Node18</title>
-<g id="a_Node000018"><a xlink:href="../../d4/d36/namespacefl_a0b5da884257d0f4003ead08f27915a2b.html#a0b5da884257d0f4003ead08f27915a2b" target="_top" xlink:title=" ">
+<g id="a_Node000018"><a xlink:href="../../d4/d36/namespacefl_aa4ee5b2900fe7489cc2628422555eb62.html#aa4ee5b2900fe7489cc2628422555eb62" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="359,-167 308,-167 308,-148 359,-148 359,-167"/>
 <text text-anchor="middle" x="333.5" y="-155" font-family="Helvetica,sans-Serif" font-size="10.00">fl::sqrtf</text>
 </a>
@@ -401,7 +401,7 @@
 <!-- Node22 -->
 <g id="Node000022" class="node">
 <title>Node22</title>
-<g id="a_Node000022"><a xlink:href="../../d1/dfb/colorutils_8h_a5e33a6635101019cce6b0936c9415a6f.html#a5e33a6635101019cce6b0936c9415a6f" target="_top" xlink:title="Fill a range of LEDs with a rainbow of colors.">
+<g id="a_Node000022"><a xlink:href="../../d1/dfb/colorutils_8h_a72ee3324d8c70c52743313f46676204f.html#a72ee3324d8c70c52743313f46676204f" target="_top" xlink:title="Fill a range of LEDs with a rainbow of colors.">
 <polygon fill="white" stroke="#666666" points="370,-19 297,-19 297,0 370,0 370,-19"/>
 <text text-anchor="middle" x="333.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fill_rainbow</text>
 </a>

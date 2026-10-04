@@ -14,5 +14,5 @@ digraph "fl::Chasing_Spirals_Q31::draw"
   Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
   Node4 [id="Node000004",label="showAnalogRGB",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d17/_analog_output_8ino_a493f802fe26dce77f378873f891158f8.html#a493f802fe26dce77f378873f891158f8",tooltip=" "];
   Node1 -> Node5 [id="edge4_Node000001_Node000005",color="steelblue1",style="solid",tooltip=" "];
-  Node5 [id="Node000005",label="fl::sincos32_simd",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a3a23a29b7fae800b629360cd32fec586.html#a3a23a29b7fae800b629360cd32fec586",tooltip="Process 4 angles simultaneously, returning vectorized sin/cos values SIMD-optimized: vectorized angle..."];
+  Node5 [id="Node000005",label="fl::sincos32_simd",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a92f648bf72198076845339c6859d3e19.html#a92f648bf72198076845339c6859d3e19",tooltip="Process 4 angles simultaneously, returning vectorized sin/cos values SIMD-optimized: vectorized angle..."];
 }

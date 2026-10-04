@@ -1,0 +1,13 @@
+<map id="fl::buildWhiteAllocationFromSolveQ16" name="fl::buildWhiteAllocationFromSolveQ16">
+<area shape="rect" id="Node000001" title="Bind from an RGB solve already adapted to the D65 working domain." alt="" coords="760,66,933,106"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a0bbd4600d1ada0552c6743d28a8683ea.html#a0bbd4600d1ada0552c6743d28a8683ea" title="Bind a four&#45;emitter map from an effective RGB solve and a white column already adapted into the same ..." alt="" coords="501,37,712,77"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="746,76,712,72,712,67,747,71"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a97deed3552ced20bbf44992b9d1845ac.html#a97deed3552ced20bbf44992b9d1845ac" title="Derive the allocation for a three&#45;primary profile plus one white emitter." alt="" coords="507,101,706,127"/>
+<area shape="poly" id="edge6_Node000001_Node000005" title=" " alt="" coords="747,100,707,105,706,100,746,95"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_ac53a775b79932ae3fe7e03b287639d43.html#ac53a775b79932ae3fe7e03b287639d43" title="Derive the mapper for a three&#45;primary profile plus one white emitter." alt="" coords="249,19,453,44"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="487,48,453,44,454,39,488,42"/>
+<area shape="rect" id="Node000004" href="$db/d33/namespacefl_1_1anonymous__namespace_02pipeline_8cpp_8hpp_03_aece1643892391c10a9c9de9a2f21ab11.html#aece1643892391c10a9c9de9a2f21ab11" title=" " alt="" coords="5,29,201,84"/>
+<area shape="poly" id="edge5_Node000002_Node000004" title=" " alt="" coords="487,59,202,59,202,54,487,54"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="236,46,202,49,201,44,236,40"/>
+<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="145,18,130,11,103,8,81,10,67,15,60,21,60,29,55,29,55,19,64,10,80,5,103,3,131,6,147,14"/>
+</map>

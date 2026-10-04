@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -160,7 +160,7 @@ template&lt;typename PixelT, bool Overwrite&gt; </div>
 <div class="line"><span class="lineno">  289</span>    <span class="comment">// Phase 2: Outer AA fringe (left)</span></div>
 <div class="line"><span class="lineno">  290</span>    <span class="keywordflow">while</span> (px &lt;= f.xmax &amp;&amp; d2 &gt;= f.<a class="code hl_variable" href="../../d6/d9a/namespacefl_1_1gfx_1_1detail.html#a3278ca7da4d2b929455761fe6a52ebe1">rin2</a> &amp;&amp; d2 &lt; f.<a class="code hl_variable" href="../../d6/d9a/namespacefl_1_1gfx_1_1detail.html#a2cc2e4ec9217abc891a20e33207b20d8">rout2</a>) {</div>
 <div class="line"><span class="lineno">  291</span>        fl::u16 diff = <span class="keyword">static_cast&lt;</span>fl::u16<span class="keyword">&gt;</span>(<span class="keyword">static_cast&lt;</span>fl::u32<span class="keyword">&gt;</span>(f.<a class="code hl_variable" href="../../d6/d9a/namespacefl_1_1gfx_1_1detail.html#a2cc2e4ec9217abc891a20e33207b20d8">rout2</a> - d2) &gt;&gt; f.<a class="code hl_variable" href="../../d6/d9a/namespacefl_1_1gfx_1_1detail.html#ac5d6abd565f5f6109e6df05304b15b5b">band_shift</a>);</div>
-<div class="line"><span class="lineno">  292</span>        <a class="code hl_typedef" href="../../da/d3c/namespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c.html#a7573a66f01c09f14a1ff0411f8e1153c">fl::u8</a> br = <span class="keyword">static_cast&lt;</span><a class="code hl_typedef" href="../../da/d3c/namespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c.html#a7573a66f01c09f14a1ff0411f8e1153c">fl::u8</a><span class="keyword">&gt;</span>((diff * f.<a class="code hl_variable" href="../../d6/d9a/namespacefl_1_1gfx_1_1detail.html#a1a85f13e1cc26c50e11752d0b156b7e7">band_inv</a>) &gt;&gt; 8);</div>
+<div class="line"><span class="lineno">  292</span>        <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> br = <span class="keyword">static_cast&lt;</span><a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a><span class="keyword">&gt;</span>((diff * f.<a class="code hl_variable" href="../../d6/d9a/namespacefl_1_1gfx_1_1detail.html#a1a85f13e1cc26c50e11752d0b156b7e7">band_inv</a>) &gt;&gt; 8);</div>
 <div class="line"><span class="lineno">  293</span>        PixelT c = f.<a class="code hl_variable" href="../../d6/d9a/namespacefl_1_1gfx_1_1detail.html#a205fc4aa6fcac16d1c7612661063430f">color</a>; c.nscale8(br);</div>
 <div class="line"><span class="lineno">  294</span>        <span class="keywordflow">if</span> (Overwrite) *ptr = c; <span class="keywordflow">else</span> *ptr += c;</div>
 <div class="line"><span class="lineno">  295</span>        d2 += xd; xd += 131072; ++ptr; ++px;</div>
@@ -179,7 +179,6 @@ template&lt;typename PixelT, bool Overwrite&gt; </div>
 <div class="line"><span class="lineno">  308</span>        d2 += xd; xd += 131072; ++ptr; ++px;</div>
 <div class="line"><span class="lineno">  309</span>    }</div>
 <div class="line"><span class="lineno">  310</span>}</div>
-<div class="ttc" id="anamespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c_html_a7573a66f01c09f14a1ff0411f8e1153c"><div class="ttname"><a href="../../da/d3c/namespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c.html#a7573a66f01c09f14a1ff0411f8e1153c">fl::fl::u8</a></div><div class="ttdeci">unsigned char u8</div><div class="ttdef"><b>Definition</b> <a href="../../df/d96/s16x16x4_8h_source.html#l00132">s16x16x4.h:132</a></div></div>
 <div class="ttc" id="anamespacefl_1_1gfx_1_1detail_html_a1a85f13e1cc26c50e11752d0b156b7e7"><div class="ttname"><a href="../../d6/d9a/namespacefl_1_1gfx_1_1detail.html#a1a85f13e1cc26c50e11752d0b156b7e7">fl::gfx::detail::DiscCtx::band_inv</a></div><div class="ttdeci">fl::u16 band_inv</div><div class="ttdef"><b>Definition</b> <a href="../../de/d34/primitives_8h_source.html#l00257">primitives.h:257</a></div></div>
 <div class="ttc" id="anamespacefl_1_1gfx_1_1detail_html_a205fc4aa6fcac16d1c7612661063430f"><div class="ttname"><a href="../../d6/d9a/namespacefl_1_1gfx_1_1detail.html#a205fc4aa6fcac16d1c7612661063430f">fl::gfx::detail::DiscCtx::color</a></div><div class="ttdeci">PixelT color</div><div class="ttdef"><b>Definition</b> <a href="../../de/d34/primitives_8h_source.html#l00258">primitives.h:258</a></div></div>
 <div class="ttc" id="anamespacefl_1_1gfx_1_1detail_html_a2cc2e4ec9217abc891a20e33207b20d8"><div class="ttname"><a href="../../d6/d9a/namespacefl_1_1gfx_1_1detail.html#a2cc2e4ec9217abc891a20e33207b20d8">fl::gfx::detail::DiscCtx::rout2</a></div><div class="ttdeci">fl::i32 rout2</div><div class="ttdef"><b>Definition</b> <a href="../../de/d34/primitives_8h_source.html#l00255">primitives.h:255</a></div></div>
@@ -217,7 +216,7 @@ template&lt;typename PixelT, bool Overwrite&gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d0/d8b/namespacefl_1_1gfx.html">gfx</a></li><li class="navelem"><a class="el" href="../../d6/d9a/namespacefl_1_1gfx_1_1detail.html">detail</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:10 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:12 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

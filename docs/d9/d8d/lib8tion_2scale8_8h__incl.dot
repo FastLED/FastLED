@@ -14,12 +14,12 @@ digraph "lib8tion/scale8.h"
   Node4 [id="Node000004",label="fl/gfx/crgb.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$df/dcc/fl_2gfx_2crgb_8h.html",tooltip="Defines the 8-bit red, green, and blue (RGB) pixel type in the fl namespace."];
   Node4 -> Node8 [id="edge4_Node000004_Node000008",color="steelblue1",style="solid",tooltip=" "];
   Node8 [id="Node000008",label="fl/stl/compiler_control.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d54/compiler__control_8h.html",tooltip=" "];
-  Node3 -> Node59 [id="edge5_Node000003_Node000059",color="steelblue1",style="solid",tooltip=" "];
-  Node59 [id="Node000059",label="fastled_config.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d11/fastled__config_8h.html",tooltip="Contains definitions that can be used to configure FastLED at compile time."];
-  Node3 -> Node60 [id="edge6_Node000003_Node000060",color="steelblue1",style="solid",tooltip=" "];
-  Node60 [id="Node000060",label="fl/math/lib8static.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d0f/fl_2math_2lib8static_8h.html",tooltip="Defines static inlining macros for lib8tion functions."];
-  Node60 -> Node8 [id="edge7_Node000060_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node52 [id="edge5_Node000003_Node000052",color="steelblue1",style="solid",tooltip=" "];
+  Node52 [id="Node000052",label="fastled_config.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d11/fastled__config_8h.html",tooltip="Contains definitions that can be used to configure FastLED at compile time."];
+  Node3 -> Node53 [id="edge6_Node000003_Node000053",color="steelblue1",style="solid",tooltip=" "];
+  Node53 [id="Node000053",label="fl/math/lib8static.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d0f/fl_2math_2lib8static_8h.html",tooltip="Defines static inlining macros for lib8tion functions."];
+  Node53 -> Node8 [id="edge7_Node000053_Node000008",color="steelblue1",style="solid",tooltip=" "];
   Node3 -> Node8 [id="edge8_Node000003_Node000008",color="steelblue1",style="solid",tooltip=" "];
-  Node3 -> Node61 [id="edge9_Node000003_Node000061",color="steelblue1",style="solid",tooltip=" "];
-  Node61 [id="Node000061",label="platforms/scale8.h",height=0.2,width=0.4,color="grey60", fillcolor="#E0E0E0", style="filled",tooltip=" "];
+  Node3 -> Node54 [id="edge9_Node000003_Node000054",color="steelblue1",style="solid",tooltip=" "];
+  Node54 [id="Node000054",label="platforms/scale8.h",height=0.2,width=0.4,color="grey60", fillcolor="#E0E0E0", style="filled",tooltip=" "];
 }

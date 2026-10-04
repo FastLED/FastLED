@@ -1,6 +1,6 @@
 <map id="fl/channels/rx.h" name="fl/channels/rx.h">
 <area shape="rect" id="Node000001" title="Common RX interfaces and shared types." alt="" coords="737,5,859,31"/>
-<area shape="rect" id="Node000002" href="$db/d97/_fast_l_e_d_8h.html" title="central include file for FastLED, defines the CFastLED class/object" alt="" coords="263,174,349,199"/>
+<area shape="rect" id="Node000002" href="$d6/d64/fastled_8h.html" title="central include file for FastLED, defines the CFastLED class/object" alt="" coords="263,174,349,199"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="746,37,603,81,337,176,335,171,601,76,744,32"/>
 <area shape="rect" id="Node000006" href="$de/d4c/rx_8cpp_8hpp.html" title="Implementation of RxDevice factory." alt="" coords="1135,86,1299,111"/>
 <area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="873,31,1156,83,1155,89,872,36"/>

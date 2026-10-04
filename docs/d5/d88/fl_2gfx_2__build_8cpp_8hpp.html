@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -108,25 +108,36 @@ $(function(){initNavTree('d5/d88/fl_2gfx_2__build_8cpp_8hpp.html','../../'); ini
 
 <p class="definition">Definition in file <a class="el" href="../../d5/d88/fl_2gfx_2__build_8cpp_8hpp_source.html">_build.cpp.hpp</a>.</p>
 </div><div class="textblock"><code>#include &quot;<a class="el" href="../../db/d8a/blur_8cpp_8hpp_source.html">fl/gfx/blur.cpp.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d3/d80/chromatic__adaptation_8cpp_8hpp_source.html">fl/gfx/chromatic_adaptation.cpp.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d0/d70/colorimetric__response_8cpp_8hpp_source.html">fl/gfx/colorimetric_response.cpp.hpp</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../db/d4e/colorutils_8cpp_8hpp_source.html">fl/gfx/colorutils.cpp.hpp</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d0/da5/corkscrew_8cpp_8hpp_source.html">fl/gfx/corkscrew.cpp.hpp</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d2/d25/crgb__extra_8cpp_8hpp_source.html">fl/gfx/crgb_extra.cpp.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../dc/d7d/crgb__json_8cpp_8hpp_source.html">fl/gfx/crgb_json.cpp.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d4/da6/device__solve_8cpp_8hpp_source.html">fl/gfx/device_solve.cpp.hpp</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../dd/d9e/downscale_8cpp_8hpp_source.html">fl/gfx/downscale.cpp.hpp</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d2/d78/fill_8cpp_8hpp_source.html">fl/gfx/fill.cpp.hpp</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d8/d89/five__bit__hd__gamma_8cpp_8hpp_source.html">fl/gfx/five_bit_hd_gamma.cpp.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d7/da2/flux__scalar_8cpp_8hpp_source.html">fl/gfx/flux_scalar.cpp.hpp</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../dd/d85/gamma__lut_8cpp_8hpp_source.html">fl/gfx/gamma_lut.cpp.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d2/dc8/gamut__map_8cpp_8hpp_source.html">fl/gfx/gamut_map.cpp.hpp</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../dc/d33/gradient_8cpp_8hpp_source.html">fl/gfx/gradient.cpp.hpp</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d8/d2f/hsv16_8cpp_8hpp_source.html">fl/gfx/hsv16.cpp.hpp</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d0/deb/leds_8cpp_8hpp_source.html">fl/gfx/leds.cpp.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d2/d41/oklab__q16_8cpp_8hpp_source.html">fl/gfx/oklab_q16.cpp.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d4/d9b/pipeline_8cpp_8hpp_source.html">fl/gfx/pipeline.cpp.hpp</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d7/de9/raster__sparse_8cpp_8hpp_source.html">fl/gfx/raster_sparse.cpp.hpp</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d0/d38/rectangular__draw__buffer_8cpp_8hpp_source.html">fl/gfx/rectangular_draw_buffer.cpp.hpp</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../df/d5d/rgbw_8cpp_8hpp_source.html">fl/gfx/rgbw.cpp.hpp</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d9/d12/rgbw__colorimetric_8cpp_8hpp_source.html">fl/gfx/rgbw_colorimetric.cpp.hpp</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../df/d0b/rgbww_8cpp_8hpp_source.html">fl/gfx/rgbww.cpp.hpp</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d5/d77/sample_8cpp_8hpp_source.html">fl/gfx/sample.cpp.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d2/d31/source__xyz_8cpp_8hpp_source.html">fl/gfx/source_xyz.cpp.hpp</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d6/df1/splat_8cpp_8hpp_source.html">fl/gfx/splat.cpp.hpp</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d9/d7d/tile2x2_8cpp_8hpp_source.html">fl/gfx/tile2x2.cpp.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d7/d5f/transfer_8cpp_8hpp_source.html">fl/gfx/transfer.cpp.hpp</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../df/dfb/upscale_8cpp_8hpp_source.html">fl/gfx/upscale.cpp.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d3/d33/white__allocation_8cpp_8hpp_source.html">fl/gfx/white_allocation.cpp.hpp</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d0/dd8/xypath_8cpp_8hpp_source.html">fl/gfx/xypath.cpp.hpp</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../db/de0/xypath__impls_8cpp_8hpp_source.html">fl/gfx/xypath_impls.cpp.hpp</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../df/dfa/xypath__renderer_8cpp_8hpp_source.html">fl/gfx/xypath_renderer.cpp.hpp</a>&quot;</code><br />
@@ -155,7 +166,7 @@ $(function(){initNavTree('d5/d88/fl_2gfx_2__build_8cpp_8hpp.html','../../'); ini
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_c9349635bab014644c82face402cd66f.html">gfx</a></li><li class="navelem"><a class="el" href="../../d5/d88/fl_2gfx_2__build_8cpp_8hpp.html">_build.cpp.hpp</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:02 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:03 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

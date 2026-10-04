@@ -1,0 +1,15 @@
+<map id="fl::SpiChipsetConfig::SpiChipsetConfig" name="fl::SpiChipsetConfig::SpiChipsetConfig">
+<area shape="rect" id="Node000001" title="Constructor." alt="" coords="201,165,349,205"/>
+<area shape="rect" id="Node000002" href="$d8/d5b/structfl_1_1_spi_chipset_config_a92cb7f1e1d9da73ca5647b77385389c4.html#a92cb7f1e1d9da73ca5647b77385389c4" title="Copy constructor." alt="" coords="5,5,153,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="249,156,206,107,152,59,132,48,135,43,155,55,210,104,253,153"/>
+<area shape="rect" id="Node000003" href="$d8/d5b/structfl_1_1_spi_chipset_config_ac9302a14cb0fdb82f5fdc962860f8c55.html#ac9302a14cb0fdb82f5fdc962860f8c55" title="Move constructor." alt="" coords="5,69,153,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="224,161,152,124,127,112,129,107,155,119,227,156"/>
+<area shape="rect" id="Node000004" href="$d8/d5b/structfl_1_1_spi_chipset_config_a340d241d6c3c3b8fdd5755add74cb02e.html#a340d241d6c3c3b8fdd5755add74cb02e" title="Inequality operator." alt="" coords="5,133,153,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="187,174,153,168,154,163,188,168"/>
+<area shape="rect" id="Node000005" href="$d8/d5b/structfl_1_1_spi_chipset_config_ae97f107e8260684001a9708b85d03103.html#ae97f107e8260684001a9708b85d03103" title="Copy assignment." alt="" coords="5,197,153,237"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="188,202,154,208,153,203,187,197"/>
+<area shape="rect" id="Node000006" href="$d8/d5b/structfl_1_1_spi_chipset_config_a2720732ffe0aea600a069b5282eb70e6.html#a2720732ffe0aea600a069b5282eb70e6" title="Move assignment." alt="" coords="5,261,153,301"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="227,214,155,252,129,264,127,259,152,247,224,210"/>
+<area shape="rect" id="Node000007" href="$d8/d5b/structfl_1_1_spi_chipset_config_a9c0ec5208d3b00c7a9943a80933c853d.html#a9c0ec5208d3b00c7a9943a80933c853d" title="Equality operator." alt="" coords="5,325,153,365"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="253,218,210,267,155,315,135,328,132,323,152,311,206,263,249,215"/>
+</map>

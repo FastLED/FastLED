@@ -35,19 +35,19 @@
 </a>
 </g>
 </g>
-<!-- Node8 -->
-<g id="Node000008" class="node">
-<title>Node8</title>
-<g id="a_Node000008"><a xlink:href="../../d4/d36/namespacefl_adc2740ea40d7bd7ec8f2d1539cbcfb5f.html#adc2740ea40d7bd7ec8f2d1539cbcfb5f" target="_top" xlink:title=" ">
+<!-- Node9 -->
+<g id="Node000009" class="node">
+<title>Node9</title>
+<g id="a_Node000009"><a xlink:href="../../d4/d36/namespacefl_adc2740ea40d7bd7ec8f2d1539cbcfb5f.html#adc2740ea40d7bd7ec8f2d1539cbcfb5f" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="441,-49.5 381,-49.5 381,-30.5 441,-30.5 441,-49.5"/>
 <text text-anchor="middle" x="411" y="-37.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::strtoul</text>
 </a>
 </g>
 </g>
-<!-- Node1&#45;&gt;Node8 -->
-<g id="edge7_Node000001_Node000008" class="edge">
-<title>Node1&#45;&gt;Node8</title>
-<g id="a_edge7_Node000001_Node000008"><a xlink:title=" ">
+<!-- Node1&#45;&gt;Node9 -->
+<g id="edge8_Node000001_Node000009" class="edge">
+<title>Node1&#45;&gt;Node9</title>
+<g id="a_edge8_Node000001_Node000009"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M466.87,-48.94C457.94,-47.48 449.02,-46.03 441.05,-44.73"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="466.48,-52.42 476.92,-50.57 467.61,-45.51 466.48,-52.42"/>
 </a>
@@ -92,10 +92,10 @@
 <!-- Node5 -->
 <g id="Node000005" class="node">
 <title>Node5</title>
-<g id="a_Node000005"><a xlink:href="../../df/d26/structfl_1_1detail_1_1_json_to_integer_visitor_af6b7c80f7dc3f5161f65b46cf9f1e29e.html#af6b7c80f7dc3f5161f65b46cf9f1e29e" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="330.5,-116 202.5,-116 202.5,-86 330.5,-86 330.5,-116"/>
-<text text-anchor="start" x="210.5" y="-104" font-family="Helvetica,sans-Serif" font-size="10.00">fl::detail::JsonToInteger</text>
-<text text-anchor="middle" x="266.5" y="-93" font-family="Helvetica,sans-Serif" font-size="10.00">Visitor::operator()</text>
+<g id="a_Node000005"><a xlink:href="../../df/d9e/namespacefl_1_1detail_a76b76b140c873739ef9bd06595222d49.html#a76b76b140c873739ef9bd06595222d49" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="329,-116 204,-116 204,-86 329,-86 329,-116"/>
+<text text-anchor="start" x="212" y="-104" font-family="Helvetica,sans-Serif" font-size="10.00">fl::detail::json_convert</text>
+<text text-anchor="middle" x="266.5" y="-93" font-family="Helvetica,sans-Serif" font-size="10.00">_to_i64_core</text>
 </a>
 </g>
 </g>
@@ -103,73 +103,77 @@
 <g id="edge4_Node000002_Node000005" class="edge">
 <title>Node2&#45;&gt;Node5</title>
 <g id="a_edge4_Node000002_Node000005"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M373.85,-101C360.75,-101 345.53,-101 330.77,-101"/>
+<path fill="none" stroke="#63b8ff" d="M373.57,-101C360.08,-101 344.39,-101 329.27,-101"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="373.86,-104.5 383.86,-101 373.86,-97.5 373.86,-104.5"/>
-</a>
-</g>
-</g>
-<!-- Node6 -->
-<g id="Node000006" class="node">
-<title>Node6</title>
-<g id="a_Node000006"><a xlink:href="../../dc/d75/namespacefl_1_1wled_a0e1b21aa8cf41f28a4973d7444282fce.html#a0e1b21aa8cf41f28a4973d7444282fce" target="_top" xlink:title="Parse all fields from a segment JSON object into a WLEDSegment.">
-<polygon fill="white" stroke="#666666" points="345,-67.5 188,-67.5 188,-48.5 345,-48.5 345,-67.5"/>
-<text text-anchor="middle" x="266.5" y="-55.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::wled::parseSegmentFields</text>
-</a>
-</g>
-</g>
-<!-- Node2&#45;&gt;Node6 -->
-<g id="edge5_Node000002_Node000006" class="edge">
-<title>Node2&#45;&gt;Node6</title>
-<g id="a_edge5_Node000002_Node000006"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M376.51,-87.81C366.46,-84.08 355.35,-80.17 345,-77 333.87,-73.59 321.7,-70.38 310.37,-67.59"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="375.55,-91.19 386.14,-91.45 378.03,-84.64 375.55,-91.19"/>
 </a>
 </g>
 </g>
 <!-- Node7 -->
 <g id="Node000007" class="node">
 <title>Node7</title>
-<g id="a_Node000007"><a xlink:href="../../d2/d9f/classfl_1_1_w_l_e_d_a073f5478071f0b32ea9ac80cf3fd236c.html#a073f5478071f0b32ea9ac80cf3fd236c" target="_top" xlink:title="Set WLED state from JSON object.">
+<g id="a_Node000007"><a xlink:href="../../dc/d75/namespacefl_1_1wled_a0e1b21aa8cf41f28a4973d7444282fce.html#a0e1b21aa8cf41f28a4973d7444282fce" target="_top" xlink:title="Parse all fields from a segment JSON object into a WLEDSegment.">
+<polygon fill="white" stroke="#666666" points="345,-67.5 188,-67.5 188,-48.5 345,-48.5 345,-67.5"/>
+<text text-anchor="middle" x="266.5" y="-55.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::wled::parseSegmentFields</text>
+</a>
+</g>
+</g>
+<!-- Node2&#45;&gt;Node7 -->
+<g id="edge6_Node000002_Node000007" class="edge">
+<title>Node2&#45;&gt;Node7</title>
+<g id="a_edge6_Node000002_Node000007"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M376.51,-87.81C366.46,-84.08 355.35,-80.17 345,-77 333.87,-73.59 321.7,-70.38 310.37,-67.59"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="375.55,-91.19 386.14,-91.45 378.03,-84.64 375.55,-91.19"/>
+</a>
+</g>
+</g>
+<!-- Node6 -->
+<g id="Node000006" class="node">
+<title>Node6</title>
+<g id="a_Node000006"><a xlink:href="../../d4/d6d/structfl_1_1detail_1_1_json_to_type_3_01_t_00_01typename_01fl_1_1enable__if_3_01fl_1_1is__integrb61ac40ff3cd50738ee6844952e661f6_a246a38b2ffe26d7b9e52dd371640453b.html#a246a38b2ffe26d7b9e52dd371640453b" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="148,-160 4,-160 4,-86 148,-86 148,-160"/>
+<text text-anchor="start" x="12" y="-148" font-family="Helvetica,sans-Serif" font-size="10.00">fl::detail::JsonToType</text>
+<text text-anchor="start" x="12" y="-137" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; T, typename fl::enable</text>
+<text text-anchor="start" x="12" y="-126" font-family="Helvetica,sans-Serif" font-size="10.00">_if&lt; fl::is_integral&lt; T</text>
+<text text-anchor="start" x="12" y="-115" font-family="Helvetica,sans-Serif" font-size="10.00"> &gt;::value &amp;&amp;!fl::is_same</text>
+<text text-anchor="start" x="12" y="-104" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; T, bool &gt;::value &gt;::type</text>
+<text text-anchor="middle" x="76" y="-93" font-family="Helvetica,sans-Serif" font-size="10.00"> &gt;::convert</text>
+</a>
+</g>
+</g>
+<!-- Node5&#45;&gt;Node6 -->
+<g id="edge5_Node000005_Node000006" class="edge">
+<title>Node5&#45;&gt;Node6</title>
+<g id="a_edge5_Node000005_Node000006"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M193.59,-109.39C178.65,-111.14 162.92,-112.97 148.02,-114.71"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="194.25,-112.84 203.78,-108.2 193.44,-105.89 194.25,-112.84"/>
+</a>
+</g>
+</g>
+<!-- Node8 -->
+<g id="Node000008" class="node">
+<title>Node8</title>
+<g id="a_Node000008"><a xlink:href="../../d2/d9f/classfl_1_1_w_l_e_d_a073f5478071f0b32ea9ac80cf3fd236c.html#a073f5478071f0b32ea9ac80cf3fd236c" target="_top" xlink:title="Set WLED state from JSON object.">
 <polygon fill="white" stroke="#666666" points="128,-67.5 24,-67.5 24,-48.5 128,-48.5 128,-67.5"/>
 <text text-anchor="middle" x="76" y="-55.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::WLED::setState</text>
 </a>
 </g>
 </g>
-<!-- Node6&#45;&gt;Node7 -->
-<g id="edge6_Node000006_Node000007" class="edge">
-<title>Node6&#45;&gt;Node7</title>
-<g id="a_edge6_Node000006_Node000007"><a xlink:title=" ">
+<!-- Node7&#45;&gt;Node8 -->
+<g id="edge7_Node000007_Node000008" class="edge">
+<title>Node7&#45;&gt;Node8</title>
+<g id="a_edge7_Node000007_Node000008"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M177.32,-58C160.49,-58 143.4,-58 128.21,-58"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="177.74,-61.5 187.74,-58 177.74,-54.5 177.74,-61.5"/>
-</a>
-</g>
-</g>
-<!-- Node9 -->
-<g id="Node000009" class="node">
-<title>Node9</title>
-<g id="a_Node000009"><a xlink:href="../../d1/d7d/classfl_1_1net_1_1http_1_1_chunked_reader_a18905da777bbff809d0dd61115fe1559.html#a18905da777bbff809d0dd61115fe1559" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="342.5,-30 190.5,-30 190.5,0 342.5,0 342.5,-30"/>
-<text text-anchor="start" x="198.5" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">fl::net::http::ChunkedReader</text>
-<text text-anchor="middle" x="266.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">::parseChunkSize</text>
-</a>
-</g>
-</g>
-<!-- Node8&#45;&gt;Node9 -->
-<g id="edge8_Node000008_Node000009" class="edge">
-<title>Node8&#45;&gt;Node9</title>
-<g id="a_edge8_Node000008_Node000009"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M370.87,-33.13C362.02,-31.58 352.35,-29.89 342.57,-28.17"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="370.36,-36.6 380.82,-34.88 371.57,-29.71 370.36,-36.6"/>
 </a>
 </g>
 </g>
 <!-- Node10 -->
 <g id="Node000010" class="node">
 <title>Node10</title>
-<g id="a_Node000010"><a xlink:href="../../d1/d7d/classfl_1_1net_1_1http_1_1_chunked_reader_a6844d30c9da5e403aa2f6dd06f30c85d.html#a6844d30c9da5e403aa2f6dd06f30c85d" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="152,-30 0,-30 0,0 152,0 152,-30"/>
-<text text-anchor="start" x="8" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">fl::net::http::ChunkedReader</text>
-<text text-anchor="middle" x="76" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">::feed</text>
+<g id="a_Node000010"><a xlink:href="../../d1/d7d/classfl_1_1net_1_1http_1_1_chunked_reader_a18905da777bbff809d0dd61115fe1559.html#a18905da777bbff809d0dd61115fe1559" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="342.5,-30 190.5,-30 190.5,0 342.5,0 342.5,-30"/>
+<text text-anchor="start" x="198.5" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">fl::net::http::ChunkedReader</text>
+<text text-anchor="middle" x="266.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">::parseChunkSize</text>
 </a>
 </g>
 </g>
@@ -177,6 +181,25 @@
 <g id="edge9_Node000009_Node000010" class="edge">
 <title>Node9&#45;&gt;Node10</title>
 <g id="a_edge9_Node000009_Node000010"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M370.87,-33.13C362.02,-31.58 352.35,-29.89 342.57,-28.17"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="370.36,-36.6 380.82,-34.88 371.57,-29.71 370.36,-36.6"/>
+</a>
+</g>
+</g>
+<!-- Node11 -->
+<g id="Node000011" class="node">
+<title>Node11</title>
+<g id="a_Node000011"><a xlink:href="../../d1/d7d/classfl_1_1net_1_1http_1_1_chunked_reader_a6844d30c9da5e403aa2f6dd06f30c85d.html#a6844d30c9da5e403aa2f6dd06f30c85d" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="152,-30 0,-30 0,0 152,0 152,-30"/>
+<text text-anchor="start" x="8" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">fl::net::http::ChunkedReader</text>
+<text text-anchor="middle" x="76" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">::feed</text>
+</a>
+</g>
+</g>
+<!-- Node10&#45;&gt;Node11 -->
+<g id="edge10_Node000010_Node000011" class="edge">
+<title>Node10&#45;&gt;Node11</title>
+<g id="a_edge10_Node000010_Node000011"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M180.31,-15C170.9,-15 161.37,-15 152.09,-15"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="180.46,-18.5 190.46,-15 180.46,-11.5 180.46,-18.5"/>
 </a>

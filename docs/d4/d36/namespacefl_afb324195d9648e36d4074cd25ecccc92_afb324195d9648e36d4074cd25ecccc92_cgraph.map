@@ -1,0 +1,18 @@
+<map id="fl::processPixelQ16" name="fl::processPixelQ16">
+<area shape="rect" id="Node000001" title="One pixel: an RGB8 code triple to three physical emitter drives in s16.16." alt="" coords="5,56,151,81"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a7c62484da7de035da5b8a23dcb1f127f.html#a7c62484da7de035da5b8a23dcb1f127f" title="Scale every drive by one scalar, in place." alt="" coords="220,31,363,56"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="151,57,206,51,206,56,152,63"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a84551faf2eec485523c64ea69ec0c782.html#a84551faf2eec485523c64ea69ec0c782" title="Pre&#45;response linear emitter light for a power prepass." alt="" coords="199,80,384,105"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="152,74,185,78,185,83,151,80"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_aad6443800e7b03380f9a2283f02c1279.html#aad6443800e7b03380f9a2283f02c1279" title="Decode one 8&#45;bit source code to u16 linear light under transfer." alt="" coords="449,5,611,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="345,77,383,65,407,52,431,40,454,32,455,37,433,44,409,57,385,70,347,82"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_ab239d57d5a4481bf9688ac54d3f328b8.html#ab239d57d5a4481bf9688ac54d3f328b8" title="One pixel: u16 linear RGB &#45;&gt; s16.16 XYZ." alt="" coords="448,55,612,80"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="384,80,434,75,435,80,385,85"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a37b9b061238b860167bb06b975520fd6.html#a37b9b061238b860167bb06b975520fd6" title="One pixel: XYZ in s16.16 to in&#45;gamut emitter drives in s16.16." alt="" coords="432,156,628,181"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="333,103,477,149,475,154,331,108"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_af5a0679639e0ad1db7feb7f9705df72f.html#af5a0679639e0ad1db7feb7f9705df72f" title="One pixel: XYZ in s16.16 to three emitter drives in s16.16." alt="" coords="676,107,843,132"/>
+<area shape="poly" id="edge8_Node000003_Node000007" title=" " alt="" coords="384,95,662,111,662,116,384,101"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="589,153,685,132,687,138,590,159"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_a4e06a4bfbce59ea143a3a844cdb084eb.html#a4e06a4bfbce59ea143a3a844cdb084eb" title="XYZ (s16.16, D65&#45;relative) &#45;&gt; OKLab (s16.16), L then a then b." alt="" coords="690,156,829,181"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="628,166,676,166,676,171,628,171"/>
+</map>

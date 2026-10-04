@@ -1,5 +1,11 @@
 <map id="fl::audio::AutoGain::applyGain" name="fl::audio::AutoGain::applyGain">
-<area shape="rect" id="Node000001" title="Apply gain to audio samples." alt="" coords="5,5,148,45"/>
-<area shape="rect" id="Node000002" href="$d4/dad/classfl_1_1vector__basic_a9a248c6b3d33d24ef21e4275c4fbae8c.html#a9a248c6b3d33d24ef21e4275c4fbae8c" title=" " alt="" coords="196,13,351,38"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="148,23,182,23,182,28,148,28"/>
+<area shape="rect" id="Node000001" title="Apply gain to audio samples." alt="" coords="5,73,148,113"/>
+<area shape="rect" id="Node000002" href="$d2/d24/classfl_1_1vector_a6bcea23da2d1c39846ec89a5119310ff.html#a6bcea23da2d1c39846ec89a5119310ff" title=" " alt="" coords="215,5,333,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="121,70,195,40,215,32,217,37,197,44,123,75"/>
+<area shape="rect" id="Node000003" href="$d2/d24/classfl_1_1vector_a82c3455c1a345460f95a0180c93b3fb0.html#a82c3455c1a345460f95a0180c93b3fb0" title=" " alt="" coords="196,55,352,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="148,81,182,76,183,82,149,86"/>
+<area shape="rect" id="Node000004" href="$d2/d24/classfl_1_1vector_a106fe3779897c81ef234f25952ed29d7.html#a106fe3779897c81ef234f25952ed29d7" title=" " alt="" coords="206,104,342,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="149,99,193,104,192,109,148,104"/>
+<area shape="rect" id="Node000005" href="$d4/dad/classfl_1_1vector__basic_a3bdba8a50d37b2fd71bbec2b753fba3e.html#a3bdba8a50d37b2fd71bbec2b753fba3e" title=" " alt="" coords="197,153,351,179"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="126,110,197,138,220,146,218,151,195,143,124,115"/>
 </map>

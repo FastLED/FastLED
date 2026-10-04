@@ -8,7 +8,15 @@ digraph "fl::third_party::Mp3StreamDecoderImpl::begin"
   rankdir="LR";
   Node1 [id="Node000001",label="fl::third_party::Mp3Stream\lDecoderImpl::begin",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::make_unique",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a3fd92c727664a77396403265415789d3.html#a3fd92c727664a77396403265415789d3",tooltip=" "];
+  Node2 [id="Node000002",label="fl::make_unique",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a257ae39a291866e014a2eeb4abe2a29c.html#a257ae39a291866e014a2eeb4abe2a29c",tooltip=" "];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::fl::forward",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d3c/namespacefl_1_1fl_a0bddf371925d8c4e94b88e9d7b35d259.html#a0bddf371925d8c4e94b88e9d7b35d259",tooltip=" "];
+  Node3 [id="Node000003",label="fl::forward",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a94488336a5db985fbda1bbd317bffc6a.html#a94488336a5db985fbda1bbd317bffc6a",tooltip=" "];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::third_party::Mp3Memory\lAllocateArray",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d86/namespacefl_1_1third__party_a4d5c2dfbbbfc1b8bd319e72cddeb98c0.html#a4d5c2dfbbbfc1b8bd319e72cddeb98c0",tooltip=" "];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::third_party::Mp3Memory\lAllocate",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d86/namespacefl_1_1third__party_ade011edeee5e091027b05a085b36275b.html#ade011edeee5e091027b05a085b36275b",tooltip=" "];
+  Node5 -> Node6 [id="edge5_Node000005_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::Malloc",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a95dbc431c0b3451c8ffd336fe2793a47.html#a95dbc431c0b3451c8ffd336fe2793a47",tooltip=" "];
+  Node1 -> Node7 [id="edge6_Node000001_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::third_party::Mp3Stream\lDecoderImpl::resetVbrState",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d0f/classfl_1_1third__party_1_1_mp3_stream_decoder_impl_afde4378e251ba25d98eb2c72f2f5fd13.html#afde4378e251ba25d98eb2c72f2f5fd13",tooltip=" "];
 }

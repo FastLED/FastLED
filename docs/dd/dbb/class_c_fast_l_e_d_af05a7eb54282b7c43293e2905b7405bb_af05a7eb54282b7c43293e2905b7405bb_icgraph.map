@@ -1,5 +1,17 @@
 <map id="CFastLED::addLeds" name="CFastLED::addLeds">
-<area shape="rect" id="Node000001" title="Add a CLEDController instance to the world." alt="" coords="271,13,415,38"/>
-<area shape="rect" id="Node000002" href="$dd/dbb/class_c_fast_l_e_d_a669d99b8f43d8af3f729ed4402ff0c2b.html#a669d99b8f43d8af3f729ed4402ff0c2b" title="Add an SPI based CLEDController instance to the world (legacy path)." alt="" coords="5,5,223,45"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="257,28,223,28,223,23,257,23"/>
+<area shape="rect" id="Node000001" title="Add a CLEDController instance to the world." alt="" coords="540,119,684,145"/>
+<area shape="rect" id="Node000002" href="$dd/dbb/class_c_fast_l_e_d_aca1dcd4b968cb5dc74b199ecb39dcef0.html#aca1dcd4b968cb5dc74b199ecb39dcef0" title=" " alt="" coords="273,5,490,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="581,114,540,86,491,60,460,48,462,43,493,55,542,81,584,109"/>
+<area shape="rect" id="Node000003" href="$dd/dbb/class_c_fast_l_e_d_ab1fc0970c9280020e713ae86c7539374.html#ab1fc0970c9280020e713ae86c7539374" title="Add an SPI controller on a selected ESP&#45;IDF host." alt="" coords="309,70,453,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="538,119,441,98,442,93,539,114"/>
+<area shape="rect" id="Node000004" href="$dd/dbb/class_c_fast_l_e_d_ae7c045e0fba8c99385b5976a7d84f880.html#ae7c045e0fba8c99385b5976a7d84f880" title=" " alt="" coords="309,119,453,145"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="526,135,454,135,454,129,526,129"/>
+<area shape="rect" id="Node000005" href="$dd/dbb/class_c_fast_l_e_d_aa3d2f2d78cf038db796b2fe9a35d0273.html#aa3d2f2d78cf038db796b2fe9a35d0273" title=" " alt="" coords="271,169,492,194"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="539,150,442,171,441,166,538,145"/>
+<area shape="rect" id="Node000006" href="$dd/dbb/class_c_fast_l_e_d_af1153950c8ddecb6a8f53b9f76187ef9.html#af1153950c8ddecb6a8f53b9f76187ef9" title=" " alt="" coords="271,218,492,243"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="584,155,543,182,493,208,454,220,452,215,491,203,540,178,581,151"/>
+<area shape="rect" id="Node000007" href="$dd/dbb/class_c_fast_l_e_d_a4fb94311febea463f730cd5f85f0de0f.html#a4fb94311febea463f730cd5f85f0de0f" title="Add an SPI controller with an explicit ESP&#45;IDF SPI host." alt="" coords="5,193,223,218"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="257,222,222,218,223,213,257,216"/>
+<area shape="rect" id="Node000008" href="$dd/dbb/class_c_fast_l_e_d_a7a6a0bd952643368315f254c0db8cd64.html#a7a6a0bd952643368315f254c0db8cd64" title="Add an SPI based CLEDController via Channel API." alt="" coords="5,242,223,267"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="257,244,223,248,222,242,257,239"/>
 </map>

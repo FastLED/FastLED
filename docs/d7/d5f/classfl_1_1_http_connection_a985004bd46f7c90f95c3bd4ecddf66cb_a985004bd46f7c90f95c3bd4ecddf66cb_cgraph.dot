@@ -21,10 +21,10 @@ digraph "fl::HttpConnection::onEvent"
   Node6 -> Node7 [id="edge7_Node000006_Node000007",color="steelblue1",style="solid",tooltip=" "];
   Node7 [id="Node000007",label="fl::HttpConnection\l::calculateBackoffDelay",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d7/d5f/classfl_1_1_http_connection_a5771485770bb65873ba278d1806af6e3.html#a5771485770bb65873ba278d1806af6e3",tooltip=" "];
   Node6 -> Node4 [id="edge8_Node000006_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node1 -> Node34 [id="edge9_Node000001_Node000034",color="steelblue1",style="solid",tooltip=" "];
-  Node34 [id="Node000034",label="fl::HttpConnection\l::onDisconnected",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d5f/classfl_1_1_http_connection_a2cc7c7f25e39d7282a114019671c74f7.html#a2cc7c7f25e39d7282a114019671c74f7",tooltip=" "];
-  Node34 -> Node6 [id="edge10_Node000034_Node000006",color="steelblue1",style="solid",tooltip=" "];
-  Node1 -> Node35 [id="edge11_Node000001_Node000035",color="steelblue1",style="solid",tooltip=" "];
-  Node35 [id="Node000035",label="fl::HttpConnection\l::onError",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d5f/classfl_1_1_http_connection_a11271f645780988c74b3b3a9173a5595.html#a11271f645780988c74b3b3a9173a5595",tooltip=" "];
-  Node35 -> Node34 [id="edge12_Node000035_Node000034",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node31 [id="edge9_Node000001_Node000031",color="steelblue1",style="solid",tooltip=" "];
+  Node31 [id="Node000031",label="fl::HttpConnection\l::onDisconnected",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d5f/classfl_1_1_http_connection_a2cc7c7f25e39d7282a114019671c74f7.html#a2cc7c7f25e39d7282a114019671c74f7",tooltip=" "];
+  Node31 -> Node6 [id="edge10_Node000031_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node32 [id="edge11_Node000001_Node000032",color="steelblue1",style="solid",tooltip=" "];
+  Node32 [id="Node000032",label="fl::HttpConnection\l::onError",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d5f/classfl_1_1_http_connection_a11271f645780988c74b3b3a9173a5595.html#a11271f645780988c74b3b3a9173a5595",tooltip=" "];
+  Node32 -> Node31 [id="edge12_Node000032_Node000031",color="steelblue1",style="solid",tooltip=" "];
 }

@@ -1,0 +1,18 @@
+<map id="fl::channelManager" name="fl::channelManager">
+<area shape="rect" id="Node000001" title="Get the global ChannelManager singleton instance." alt="" coords="5,92,152,117"/>
+<area shape="rect" id="Node000002" href="$d2/d6b/classfl_1_1_channel_manager_a76013c6913045962ce5bb8d227e760b3.html#a76013c6913045962ce5bb8d227e760b3" title="Get the global singleton instance." alt="" coords="200,85,348,125"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="152,102,187,102,187,107,152,107"/>
+<area shape="rect" id="Node000003" href="$d2/d6b/classfl_1_1_channel_manager_a3f0e1823366151d87c97be78f4273755.html#a3f0e1823366151d87c97be78f4273755" title="Constructor." alt="" coords="599,55,747,95"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="348,97,585,79,586,84,348,102"/>
+<area shape="rect" id="Node000007" href="$d2/d6b/classfl_1_1_channel_manager_a58d12a4cf75bb181c7093141240bb94b.html#a58d12a4cf75bb181c7093141240bb94b" title="Get the singleton WITHOUT registering platform default drivers." alt="" coords="396,113,544,153"/>
+<area shape="poly" id="edge7_Node000002_Node000007" title=" " alt="" coords="349,113,382,117,382,123,348,118"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="635,56,633,46,639,37,653,31,673,29,697,32,710,39,707,44,695,37,673,34,654,36,642,41,638,47,640,54"/>
+<area shape="rect" id="Node000004" href="$de/dca/classfl_1_1_engine_events_a98984c55652e174bb2384d85935c581b.html#a98984c55652e174bb2384d85935c581b" title=" " alt="" coords="803,5,1013,31"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="747,54,802,41,841,31,842,36,803,46,748,60"/>
+<area shape="rect" id="Node000005" href="$d2/d6b/classfl_1_1_channel_manager_ae0d96adf1576f8fe62b937685991e3b5.html#ae0d96adf1576f8fe62b937685991e3b5" title=" " alt="" coords="817,55,999,95"/>
+<area shape="poly" id="edge5_Node000003_Node000005" title=" " alt="" coords="747,81,803,82,803,87,747,86"/>
+<area shape="poly" id="edge6_Node000005_Node000003" title=" " alt="" coords="817,69,761,69,761,64,817,64"/>
+<area shape="poly" id="edge8_Node000007_Node000003" title=" " alt="" coords="541,110,588,97,590,102,542,115"/>
+<area shape="rect" id="Node000008" href="$d9/d5b/classfl_1_1_singleton_ad5cb1b704e17768f75802673abb0ff75.html#ad5cb1b704e17768f75802673abb0ff75" title=" " alt="" coords="592,120,755,145"/>
+<area shape="poly" id="edge9_Node000007_Node000008" title=" " alt="" coords="544,130,579,130,579,135,544,135"/>
+</map>

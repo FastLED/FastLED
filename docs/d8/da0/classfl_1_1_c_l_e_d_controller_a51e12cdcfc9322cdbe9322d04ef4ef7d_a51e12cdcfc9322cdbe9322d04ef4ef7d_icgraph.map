@@ -1,0 +1,28 @@
+<map id="fl::CLEDController::getEnabled" name="fl::CLEDController::getEnabled">
+<area shape="rect" id="Node000001" title=" " alt="" coords="633,170,769,210"/>
+<area shape="rect" id="Node000002" href="$d5/d8b/classfl_1_1_channel_a731cf000c626f23ed3499b3b5d2aa513.html#a731cf000c626f23ed3499b3b5d2aa513" title=" " alt="" coords="423,5,585,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="681,159,641,101,614,71,584,46,560,33,562,28,587,41,618,67,645,98,685,156"/>
+<area shape="rect" id="Node000003" href="$dd/dbb/class_c_fast_l_e_d_a93471b4babe96100496e8e25062cba3f.html#a93471b4babe96100496e8e25062cba3f" title="Update all our controllers with the current led colors, using the passed in brightness." alt="" coords="233,267,357,292"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="621,216,586,225,358,271,357,266,585,219,619,211"/>
+<area shape="rect" id="Node000004" href="$dd/dbb/class_c_fast_l_e_d_a50e30222e81562a7ef334dbe4fdfa856.html#a50e30222e81562a7ef334dbe4fdfa856" title="Set all leds on all controllers to the given color/scale." alt="" coords="216,92,375,117"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="619,169,585,161,374,120,375,115,586,155,621,164"/>
+<area shape="rect" id="Node000006" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a8f27a2edcb3d6238d4a542bf319a44a5.html#a8f27a2edcb3d6238d4a542bf319a44a5" title=" " alt="" coords="430,170,578,210"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="619,193,578,193,578,187,619,187"/>
+<area shape="rect" id="Node000007" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a09de74c31c4363912267bac4b395e5b0.html#a09de74c31c4363912267bac4b395e5b0" title=" " alt="" coords="430,55,578,95"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="659,164,584,116,548,98,551,93,587,112,662,160"/>
+<area shape="rect" id="Node000008" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a957dc13956139baff8e5947dcd45a7c6.html#a957dc13956139baff8e5947dcd45a7c6" title=" " alt="" coords="436,285,572,325"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="662,220,587,268,551,287,548,282,584,264,659,216"/>
+<area shape="rect" id="Node000009" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a1ca4ae71475314978355961ee2a392c4.html#a1ca4ae71475314978355961ee2a392c4" title="Write the data to the LEDs managed by this controller." alt="" coords="432,349,576,389"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="684,223,644,281,617,312,587,339,567,351,564,346,584,335,613,308,640,278,680,220"/>
+<area shape="rect" id="Node000005" href="$dd/dbb/class_c_fast_l_e_d_aeb7bd3e8f2dbced6284a2182191d5fcb.html#aeb7bd3e8f2dbced6284a2182191d5fcb" title="Clear the leds, wiping the local array of data." alt="" coords="25,92,148,117"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="202,107,148,107,148,102,202,102"/>
+<area shape="poly" id="edge7_Node000007_Node000004" title=" " alt="" coords="416,90,375,96,374,91,416,85"/>
+<area shape="poly" id="edge10_Node000009_Node000003" title=" " alt="" coords="438,346,422,339,322,294,325,290,424,334,440,341"/>
+<area shape="rect" id="Node000010" href="$d8/da0/classfl_1_1_c_l_e_d_controller_af05507dfcd5212fde80c557c63fbd018.html#af05507dfcd5212fde80c557c63fbd018" title=" " alt="" coords="227,349,363,389"/>
+<area shape="poly" id="edge11_Node000009_Node000010" title=" " alt="" coords="418,371,364,371,364,366,418,366"/>
+<area shape="rect" id="Node000011" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a6c295e80958b0f814f6771902521478b.html#a6c295e80958b0f814f6771902521478b" title="Clear out/zero out the given number of LEDs." alt="" coords="19,389,155,429"/>
+<area shape="poly" id="edge12_Node000010_Node000011" title=" " alt="" coords="214,387,155,398,154,393,213,382"/>
+<area shape="rect" id="Node000012" href="$d5/d8b/classfl_1_1_channel_a56c6fceae41ac78584e120f7e01f7aff.html#a56c6fceae41ac78584e120f7e01f7aff" title="Show the LEDs with optional brightness scaling." alt="" coords="5,315,168,340"/>
+<area shape="poly" id="edge14_Node000010_Node000012" title=" " alt="" coords="213,355,151,343,152,337,214,350"/>
+<area shape="poly" id="edge13_Node000011_Node000011" title=" " alt="" coords="122,377,109,370,87,367,67,369,55,374,50,380,53,388,48,389,45,379,51,370,65,364,87,362,111,365,124,372"/>
+</map>

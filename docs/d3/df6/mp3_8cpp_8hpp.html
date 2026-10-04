@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -103,6 +103,8 @@ $(function(){initNavTree('d3/df6/mp3_8cpp_8hpp.html','../../'); initResizable(tr
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
 <a href="#namespaces">Namespaces</a> &#124;
+<a href="#typedef-members">Typedefs</a> &#124;
+<a href="#func-members">Functions</a> &#124;
 <a href="#var-members">Variables</a>  </div>
   <div class="headertitle"><div class="title">mp3.cpp.hpp File Reference</div></div>
 </div><!--header-->
@@ -110,7 +112,9 @@ $(function(){initNavTree('d3/df6/mp3_8cpp_8hpp.html','../../'); initResizable(tr
 <div class="textblock"><code>#include &quot;<a class="el" href="../../d9/dd8/mp3_8h_source.html">fl/codec/mp3.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../df/d72/bit__cast_8h_source.html">fl/stl/bit_cast.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../dd/d8d/cstring_8h_source.html">fl/stl/cstring.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d5/db1/mp3dec_8h_source.html">third_party/libhelix_mp3/pub/mp3dec.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d4/d0b/singleton_8h_source.html">fl/stl/singleton.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../da/dcf/minimp3_8h_source.html">third_party/minimp3/minimp3.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d6/d31/mp3__vbr__tag_8h_source.html">fl/codec/mp3_vbr_tag.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../db/d01/noexcept_8h_source.html">fl/stl/noexcept.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for mp3.cpp.hpp:</div>
@@ -141,6 +145,27 @@ Namespaces</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d86/namespacefl_1_1third__party.html">fl::third_party</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d62/namespacefl_1_1third__party_1_1anonymous__namespace_02mp3_8cpp_8hpp_03.html">fl::third_party::anonymous_namespace{mp3.cpp.hpp}</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
+Typedefs</h2></td></tr>
+<tr class="memitem:a51ea26074f7c7015c2b1563c60800336" id="r_a51ea26074f7c7015c2b1563c60800336"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d86/namespacefl_1_1third__party_a51ea26074f7c7015c2b1563c60800336.html#a51ea26074f7c7015c2b1563c60800336">fl::third_party::Mp3SelectedDecoder</a> = <a class="el" href="../../db/d81/classfl_1_1third__party_1_1_mp3_minimp3_decoder.html">Mp3Minimp3Decoder</a></td></tr>
+<tr class="separator:a51ea26074f7c7015c2b1563c60800336"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:ad8cb451044798d9b219abe5c594addf9" id="r_ad8cb451044798d9b219abe5c594addf9"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d62/namespacefl_1_1third__party_1_1anonymous__namespace_02mp3_8cpp_8hpp_03_ad8cb451044798d9b219abe5c594addf9.html#ad8cb451044798d9b219abe5c594addf9">fl::third_party::anonymous_namespace{mp3.cpp.hpp}::minimp3Version</a> (const <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> *header) <a class="el" href="../../d4/d36/namespacefl_aa317f89ca911371e798d08a93770402f.html#aa317f89ca911371e798d08a93770402f">FL_NO_EXCEPT</a></td></tr>
+<tr class="separator:ad8cb451044798d9b219abe5c594addf9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ade011edeee5e091027b05a085b36275b" id="r_ade011edeee5e091027b05a085b36275b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d4/d54/compiler__control_8h_a48fe2d767fcee494e951ac8d132dfda5.html#a48fe2d767fcee494e951ac8d132dfda5">FL_NO_INLINE</a> void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d86/namespacefl_1_1third__party_ade011edeee5e091027b05a085b36275b.html#ade011edeee5e091027b05a085b36275b">fl::third_party::Mp3MemoryAllocate</a> (fl::size bytes, <a class="el" href="../../d1/d86/namespacefl_1_1third__party_a82cc36c3cbb4e1437e96c72aeefbca1e.html#a82cc36c3cbb4e1437e96c72aeefbca1e">Mp3MemoryTag</a> tag) <a class="el" href="../../d4/d36/namespacefl_aa317f89ca911371e798d08a93770402f.html#aa317f89ca911371e798d08a93770402f">FL_NO_EXCEPT</a></td></tr>
+<tr class="separator:ade011edeee5e091027b05a085b36275b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4d5c2dfbbbfc1b8bd319e72cddeb98c0" id="r_a4d5c2dfbbbfc1b8bd319e72cddeb98c0"><td class="memTemplParams" colspan="2">template&lt;typename T&gt; </td></tr>
+<tr class="memitem:a4d5c2dfbbbfc1b8bd319e72cddeb98c0"><td class="memTemplItemLeft" align="right" valign="top">T *&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d1/d86/namespacefl_1_1third__party_a4d5c2dfbbbfc1b8bd319e72cddeb98c0.html#a4d5c2dfbbbfc1b8bd319e72cddeb98c0">fl::third_party::Mp3MemoryAllocateArray</a> (fl::size count, <a class="el" href="../../d1/d86/namespacefl_1_1third__party_a82cc36c3cbb4e1437e96c72aeefbca1e.html#a82cc36c3cbb4e1437e96c72aeefbca1e">Mp3MemoryTag</a> tag) <a class="el" href="../../d4/d36/namespacefl_aa317f89ca911371e798d08a93770402f.html#aa317f89ca911371e798d08a93770402f">FL_NO_EXCEPT</a></td></tr>
+<tr class="separator:a4d5c2dfbbbfc1b8bd319e72cddeb98c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af532cf6d52f5562fccd6a552d309973b" id="r_af532cf6d52f5562fccd6a552d309973b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d86/namespacefl_1_1third__party_af532cf6d52f5562fccd6a552d309973b.html#af532cf6d52f5562fccd6a552d309973b">fl::third_party::Mp3MemoryFree</a> (void *ptr, fl::size bytes, <a class="el" href="../../d1/d86/namespacefl_1_1third__party_a82cc36c3cbb4e1437e96c72aeefbca1e.html#a82cc36c3cbb4e1437e96c72aeefbca1e">Mp3MemoryTag</a> tag) <a class="el" href="../../d4/d36/namespacefl_aa317f89ca911371e798d08a93770402f.html#aa317f89ca911371e798d08a93770402f">FL_NO_EXCEPT</a></td></tr>
+<tr class="separator:af532cf6d52f5562fccd6a552d309973b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2ef32f004e474c2f7fc868b863ee25e2" id="r_a2ef32f004e474c2f7fc868b863ee25e2"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d86/namespacefl_1_1third__party_a2ef32f004e474c2f7fc868b863ee25e2.html#a2ef32f004e474c2f7fc868b863ee25e2">fl::third_party::Mp3MemoryTagName</a> (<a class="el" href="../../d1/d86/namespacefl_1_1third__party_a82cc36c3cbb4e1437e96c72aeefbca1e.html#a82cc36c3cbb4e1437e96c72aeefbca1e">Mp3MemoryTag</a> tag) <a class="el" href="../../d4/d36/namespacefl_aa317f89ca911371e798d08a93770402f.html#aa317f89ca911371e798d08a93770402f">FL_NO_EXCEPT</a></td></tr>
+<tr class="separator:a2ef32f004e474c2f7fc868b863ee25e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
 Variables</h2></td></tr>
@@ -154,7 +179,7 @@ Variables</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_10dd822f9fdc91e4cdf1760ae6c69186.html">codec</a></li><li class="navelem"><a class="el" href="../../d3/df6/mp3_8cpp_8hpp.html">mp3.cpp.hpp</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:01 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:03 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

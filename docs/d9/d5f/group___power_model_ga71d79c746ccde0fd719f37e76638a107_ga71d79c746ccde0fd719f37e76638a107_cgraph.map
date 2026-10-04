@@ -1,0 +1,9 @@
+<map id="get_white_emitter_mW" name="get_white_emitter_mW">
+<area shape="rect" id="Node000001" title="The white&#45;emitter draw the caller declared, or zero if they declared only an RGB model." alt="" coords="5,5,180,31"/>
+<area shape="rect" id="Node000002" href="$d1/d2a/power__mgt_8cpp_8hpp_a96a9190022832e655b9a01a3e0167d8c.html#a96a9190022832e655b9a01a3e0167d8c" title=" " alt="" coords="228,5,384,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="180,15,214,15,214,21,180,21"/>
+<area shape="rect" id="Node000003" href="$d9/d5b/classfl_1_1_singleton_ad5cb1b704e17768f75802673abb0ff75.html#ad5cb1b704e17768f75802673abb0ff75" title=" " alt="" coords="432,5,595,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="384,15,418,15,418,21,384,21"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a1e67c0c24ebcd98fcf8554753d1639a6.html#a1e67c0c24ebcd98fcf8554753d1639a6" title=" " alt="" coords="643,5,781,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="595,15,629,15,629,21,595,21"/>
+</map>

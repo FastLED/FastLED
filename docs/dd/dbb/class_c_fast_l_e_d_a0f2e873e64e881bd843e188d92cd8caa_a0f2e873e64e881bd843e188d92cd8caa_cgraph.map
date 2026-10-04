@@ -1,5 +1,7 @@
 <map id="CFastLED::onEndFrame" name="CFastLED::onEndFrame">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,176,31"/>
-<area shape="rect" id="Node000002" href="$de/dca/classfl_1_1_engine_events_aa8599b4b32e5a46f46503a6b75d0fe43.html#aa8599b4b32e5a46f46503a6b75d0fe43" title=" " alt="" coords="224,5,439,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="176,15,210,15,210,21,176,21"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,13,176,38"/>
+<area shape="rect" id="Node000002" href="$de/dca/classfl_1_1_engine_events_a5f428b668b5a7d0d46b7d251b62d00a0.html#a5f428b668b5a7d0d46b7d251b62d00a0" title=" " alt="" coords="224,13,439,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="176,23,210,23,210,28,176,28"/>
+<area shape="rect" id="Node000003" href="$db/da2/classfl_1_1_engine_events_1_1_listener_a64cffa0a94c052aa7d41974d7fa4b614.html#a64cffa0a94c052aa7d41974d7fa4b614" title=" " alt="" coords="487,5,673,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="439,23,473,23,473,28,439,28"/>
 </map>

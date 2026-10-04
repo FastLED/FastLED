@@ -1,6 +1,6 @@
 var classfl_1_1_weighted_moving_average =
 [
-    [ "WeightedMovingAverage", "df/d16/classfl_1_1_weighted_moving_average_a1818e1ad53606cffc664454b6a22e95b.html#a1818e1ad53606cffc664454b6a22e95b", null ],
+    [ "WeightedMovingAverage", "df/d16/classfl_1_1_weighted_moving_average_a3a53f767136466de4ab785e0b65d0ae5.html#a3a53f767136466de4ab785e0b65d0ae5", null ],
     [ "WeightedMovingAverage", "df/d16/classfl_1_1_weighted_moving_average_aa2642d7e93020ed33c6b2ec83de1c94b.html#aa2642d7e93020ed33c6b2ec83de1c94b", null ],
     [ "capacity", "df/d16/classfl_1_1_weighted_moving_average_af003144009a97670b91ff8cfff7a1a6f.html#af003144009a97670b91ff8cfff7a1a6f", null ],
     [ "full", "df/d16/classfl_1_1_weighted_moving_average_af042e971811d9a0992ecf22627903d8e.html#af042e971811d9a0992ecf22627903d8e", null ],

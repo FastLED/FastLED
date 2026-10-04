@@ -1,0 +1,61 @@
+digraph "fl/fs/backend.h"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  Node1 [id="Node000001",label="fl/fs/backend.h",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="The interface a storage backend implements."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl/fs/fs.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d26/fs_8h.html",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="/home/runner/work/FastLED\l/FastLED/examples/Fx/FxSdCard\l/FxSdCard.ino",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d35/_fx_sd_card_8ino.html",tooltip="Play a mapped video off an SD card."];
+  Node2 -> Node4 [id="edge3_Node000002_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl/codec/file_system\l_codecs.cpp.hpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d4b/file__system__codecs_8cpp_8hpp.html",tooltip="FileSystem codec methods — compiled in fl.codec+ module."];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl/codec/_build.cpp.hpp",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d7/df8/fl_2codec_2__build_8cpp_8hpp.html",tooltip=" "];
+  Node2 -> Node8 [id="edge5_Node000002_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl/fled/fled.cpp.hpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d4d/fled_8cpp_8hpp.html",tooltip=" "];
+  Node8 -> Node9 [id="edge6_Node000008_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="fl/fled/_build.cpp.hpp",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d9/d9a/fl_2fled_2__build_8cpp_8hpp.html",tooltip="Unity build header for fl/fled/ directory."];
+  Node2 -> Node11 [id="edge7_Node000002_Node000011",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="fl/fs/embedded/embedded_fs.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d9a/embedded__fs_8h.html",tooltip="Storage built into the microcontroller itself."];
+  Node11 -> Node12 [id="edge8_Node000011_Node000012",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node12 [id="Node000012",label="fl/fs/embedded/embedded\l_fs.cpp.hpp",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d26/embedded__fs_8cpp_8hpp.html",tooltip="Body of fl::getEmbeddedFs()."];
+  Node2 -> Node15 [id="edge9_Node000002_Node000015",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node15 [id="Node000015",label="fl/fs/fs.cpp.hpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d6e/fs_8cpp_8hpp.html",tooltip=" "];
+  Node15 -> Node16 [id="edge10_Node000015_Node000016",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node16 [id="Node000016",label="fl/fs/_build.cpp.hpp",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d0/dc9/fl_2fs_2__build_8cpp_8hpp.html",tooltip="Unity-build aggregate for the filesystem subsystem."];
+  Node2 -> Node18 [id="edge11_Node000002_Node000018",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node18 [id="Node000018",label="fl/fs/read.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d7e/read_8h.html",tooltip="Decoding files into FastLED types."];
+  Node18 -> Node19 [id="edge12_Node000018_Node000019",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node19 [id="Node000019",label="fl/fs/read.cpp.hpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d86/read_8cpp_8hpp.html",tooltip="Bodies for the format helpers declared in fl/fs/read.h."];
+  Node19 -> Node16 [id="edge13_Node000019_Node000016",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node18 -> Node20 [id="edge14_Node000018_Node000020",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node20 [id="Node000020",label="fl/system/file_system.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d6/d8d/file__system_8h.html",tooltip="Compatibility forwarder."];
+  Node2 -> Node22 [id="edge15_Node000002_Node000022",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node22 [id="Node000022",label="fl/fs/sd/file_system\l_sd.cpp.hpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d55/file__system__sd_8cpp_8hpp.html",tooltip="SD-card support split off from file_system.cpp.hpp so the linker can tree-shake the entire SD chain w..."];
+  Node22 -> Node23 [id="edge16_Node000022_Node000023",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node23 [id="Node000023",label="fl/fs/sd/_build.cpp.hpp",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$dc/d30/fl_2fs_2sd_2__build_8cpp_8hpp.html",tooltip="Unity-build aggregate for SD-card support."];
+  Node2 -> Node25 [id="edge17_Node000002_Node000025",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node25 [id="Node000025",label="fl/fs/sd/file_system_sd.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d19/file__system__sd_8h.html",tooltip="Header pair for file_system_sd.cpp.hpp."];
+  Node2 -> Node20 [id="edge18_Node000002_Node000020",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node26 [id="edge19_Node000002_Node000026",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node26 [id="Node000026",label="fl/video/pixel_stream.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/dfa/pixel__stream_8h.html",tooltip=" "];
+  Node26 -> Node27 [id="edge20_Node000026_Node000027",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node27 [id="Node000027",label="fl/fx/video.cpp.hpp",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d6/d37/video_8cpp_8hpp.html",tooltip=" "];
+  Node26 -> Node30 [id="edge21_Node000026_Node000030",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node30 [id="Node000030",label="fl/video/frame_interpolator.cpp.hpp",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$da/dfa/frame__interpolator_8cpp_8hpp.html",tooltip=" "];
+  Node26 -> Node33 [id="edge22_Node000026_Node000033",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node33 [id="Node000033",label="fl/video/pixel_stream.cpp.hpp",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d2/db2/pixel__stream_8cpp_8hpp.html",tooltip=" "];
+  Node26 -> Node34 [id="edge23_Node000026_Node000034",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node34 [id="Node000034",label="fl/video/video_impl.cpp.hpp",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d6/db7/video__impl_8cpp_8hpp.html",tooltip=" "];
+  Node2 -> Node34 [id="edge24_Node000002_Node000034",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node35 [id="edge25_Node000002_Node000035",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node35 [id="Node000035",label="third_party/TJpg_Decoder\l/driver.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d7a/third__party_2_t_jpg___decoder_2driver_8h.html",tooltip=" "];
+  Node35 -> Node36 [id="edge26_Node000035_Node000036",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node36 [id="Node000036",label="fl/codec/jpeg.cpp.hpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d39/jpeg_8cpp_8hpp.html",tooltip=" "];
+  Node36 -> Node5 [id="edge27_Node000036_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node35 -> Node37 [id="edge28_Node000035_Node000037",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node37 [id="Node000037",label="third_party/TJpg_Decoder\l/driver.cpp.hpp",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d9/dc2/third__party_2_t_jpg___decoder_2driver_8cpp_8hpp.html",tooltip=" "];
+}

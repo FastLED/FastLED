@@ -85,7 +85,7 @@ var sectionId = 'dynsection-0';
 <!-- Node17 -->
 <g id="Node000017" class="node">
 <title>Node17</title>
-<g id="a_Node000017"><a xlink:href="../../d4/d36/namespacefl_a2bccb5decc8613e4b6e232e0a881578f.html#a2bccb5decc8613e4b6e232e0a881578f" target="_top" xlink:title="Alias for millis64() &#45; returns 64&#45;bit millisecond time.">
+<g id="a_Node000017"><a xlink:href="../../d4/d36/namespacefl_a3c694ad275c33c6adaab59f370858771.html#a3c694ad275c33c6adaab59f370858771" target="_top" xlink:title="Alias for millis64() &#45; returns 64&#45;bit millisecond time.">
 <polygon fill="white" stroke="#666666" points="375,-19 324,-19 324,0 375,0 375,-19"/>
 <text text-anchor="middle" x="349.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::time</text>
 </a>
@@ -103,7 +103,7 @@ var sectionId = 'dynsection-0';
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d4/d36/namespacefl_ad87db990a26723fa560bc364734ea6cc.html#ad87db990a26723fa560bc364734ea6cc" target="_top" xlink:title=" ">
+<g id="a_Node000003"><a xlink:href="../../d4/d36/namespacefl_ac01366c0ac52fd6d3aeab8b11d69310b.html#ac01366c0ac52fd6d3aeab8b11d69310b" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="374,-185 325,-185 325,-166 374,-166 374,-185"/>
 <text text-anchor="middle" x="349.5" y="-173" font-family="Helvetica,sans-Serif" font-size="10.00">fl::cosf</text>
 </a>
@@ -157,7 +157,7 @@ var sectionId = 'dynsection-0';
 <!-- Node15 -->
 <g id="Node000015" class="node">
 <title>Node15</title>
-<g id="a_Node000015"><a xlink:href="../../d4/d36/namespacefl_a4ba2744fe96375793e6f7a98b188d343.html#a4ba2744fe96375793e6f7a98b188d343" target="_top" xlink:title=" ">
+<g id="a_Node000015"><a xlink:href="../../d4/d36/namespacefl_a367128bb231fab59275e129d3dc3d909.html#a367128bb231fab59275e129d3dc3d909" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="373,-74 326,-74 326,-55 373,-55 373,-74"/>
 <text text-anchor="middle" x="349.5" y="-62" font-family="Helvetica,sans-Serif" font-size="10.00">fl::sinf</text>
 </a>
@@ -202,7 +202,7 @@ var sectionId = 'dynsection-0';
 <!-- Node9 -->
 <g id="Node000009" class="node">
 <title>Node9</title>
-<g id="a_Node000009"><a xlink:href="../../d8/df9/group___noise_generation_gae021f30d62fea75ea1397e1a81b28a59.html#gae021f30d62fea75ea1397e1a81b28a59" target="_top" xlink:title=" ">
+<g id="a_Node000009"><a xlink:href="../../d8/df9/group___noise_generation_gae021f30d62fea75ea1397e1a81b28a59.html#gae021f30d62fea75ea1397e1a81b28a59" target="_top" xlink:title="16&#45;bit, fixed point implementation of Perlin&#39;s noise without scaling.">
 <polygon fill="#fff0f0" stroke="red" points="557,-148 476,-148 476,-129 557,-129 557,-148"/>
 <text text-anchor="middle" x="516.5" y="-136" font-family="Helvetica,sans-Serif" font-size="10.00">inoise16_raw</text>
 </a>
@@ -220,7 +220,7 @@ var sectionId = 'dynsection-0';
 <!-- Node12 -->
 <g id="Node000012" class="node">
 <title>Node12</title>
-<g id="a_Node000012"><a xlink:href="../../d4/d36/namespacefl_ab29e8b6f887f0b299a405c90c001bca6.html#ab29e8b6f887f0b299a405c90c001bca6" target="_top" xlink:title=" ">
+<g id="a_Node000012"><a xlink:href="../../d4/d36/namespacefl_a79191ada4f49db2b5bd307b16629d306.html#a79191ada4f49db2b5bd307b16629d306" target="_top" xlink:title=" ">
 <polygon fill="#fff0f0" stroke="red" points="582,-111 451,-111 451,-92 582,-92 582,-111"/>
 <text text-anchor="middle" x="516.5" y="-99" font-family="Helvetica,sans-Serif" font-size="10.00">fl::map_range_clamped</text>
 </a>
@@ -265,7 +265,7 @@ var sectionId = 'dynsection-0';
 <!-- Node18 -->
 <g id="Node000018" class="node">
 <title>Node18</title>
-<g id="a_Node000018"><a xlink:href="../../d4/d36/namespacefl_ac8ee0e5ecac16a6ee42def0436a43663.html#ac8ee0e5ecac16a6ee42def0436a43663" target="_top" xlink:title="64&#45;bit millisecond timer &#45; returns milliseconds since system startup without wraparound">
+<g id="a_Node000018"><a xlink:href="../../d4/d36/namespacefl_a822570130e003c9bdf7307e2a29bc9ab.html#a822570130e003c9bdf7307e2a29bc9ab" target="_top" xlink:title="64&#45;bit millisecond timer &#45; returns milliseconds since system startup without wraparound">
 <polygon fill="#fff0f0" stroke="red" points="550.5,-19 482.5,-19 482.5,0 550.5,0 550.5,-19"/>
 <text text-anchor="middle" x="516.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::millis64</text>
 </a>

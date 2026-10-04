@@ -1,0 +1,21 @@
+<map id="fl::FluxScalar::FluxScalar" name="fl::FluxScalar::FluxScalar">
+<area shape="rect" id="Node000001" title=" " alt="" coords="819,80,1001,105"/>
+<area shape="rect" id="Node000002" href="$d0/d69/classfl_1_1_flux_scalar_a44e1a0d893692edbb2bd37bd9fef876b.html#a44e1a0d893692edbb2bd37bd9fef876b" title="Multiplicative composition, commutative: combining brightness and the limiter in either order gives t..." alt="" coords="558,5,769,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="864,77,770,45,727,33,728,28,771,39,866,72"/>
+<area shape="rect" id="Node000003" href="$d0/d69/classfl_1_1_flux_scalar_aa0b3144c87fcec1496103e76d7977630.html#aa0b3144c87fcec1496103e76d7977630" title="setBrightness(b) as the linear flux scalar b/255." alt="" coords="556,55,771,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="805,85,771,81,771,76,805,79"/>
+<area shape="rect" id="Node000006" href="$d0/d69/classfl_1_1_flux_scalar_a376416b1aa03264d9affb67875bb1766.html#a376416b1aa03264d9affb67875bb1766" title="A limiter fraction already in s16.16, clamped to [0, 1]." alt="" coords="301,107,500,132"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="805,101,500,117,500,112,805,95"/>
+<area shape="rect" id="Node000007" href="$d0/d69/classfl_1_1_flux_scalar_aecccb32c6da23b8d889ad0d5367b1439.html#aecccb32c6da23b8d889ad0d5367b1439" title="Identity. Drives pass through unchanged." alt="" coords="590,156,737,181"/>
+<area shape="poly" id="edge8_Node000001_Node000007" title=" " alt="" coords="857,112,771,139,708,158,707,153,770,134,856,107"/>
+<area shape="rect" id="Node000004" href="$db/da5/classfl_1_1_color_managed_pixel_source_a840318a93b26254902901cdefd55cd35.html#a840318a93b26254902901cdefd55cd35" title="Frame&#45;local brightness is applied to the source&#39;s owned pipeline on shared tiers; only managed iterat..." alt="" coords="297,42,504,82"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="542,68,504,67,504,61,543,62"/>
+<area shape="rect" id="Node000005" href="$d1/da7/namespacefl_1_1anonymous__namespace_02pipeline__binding_8cpp_8hpp_03_ac06021128ae811d9bb3c04b8a3e98d77.html#ac06021128ae811d9bb3c04b8a3e98d77" title="Builds the managed iterator in the caller&#39;s storage." alt="" coords="5,56,245,111"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="284,74,246,77,245,71,283,68"/>
+<area shape="poly" id="edge5_Node000005_Node000005" title=" " alt="" coords="171,45,155,38,125,35,101,37,85,41,77,48,78,56,72,56,72,46,82,37,100,31,125,29,156,32,174,40"/>
+<area shape="poly" id="edge7_Node000006_Node000005" title=" " alt="" coords="290,108,245,102,246,96,290,102"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_ac4d398fdc18a6dbc27b1b07aa647bf0d.html#ac4d398fdc18a6dbc27b1b07aa647bf0d" title="Bind a source declaration and a device profile into a pipeline." alt="" coords="293,156,508,181"/>
+<area shape="poly" id="edge9_Node000007_Node000008" title=" " alt="" coords="576,171,508,171,508,166,576,166"/>
+<area shape="rect" id="Node000009" href="$d4/d36/namespacefl_ab00dbc8e93b9e8d57787730e08c3bbe9.html#ab00dbc8e93b9e8d57787730e08c3bbe9" title="Build the streaming pipeline a binding describes." alt="" coords="30,156,221,181"/>
+<area shape="poly" id="edge10_Node000008_Node000009" title=" " alt="" coords="280,171,221,171,221,166,280,166"/>
+</map>

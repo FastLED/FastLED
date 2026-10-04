@@ -1,0 +1,47 @@
+<map id="autoresearch::flex_io::buildDeviceInfo" name="autoresearch::flex_io::buildDeviceInfo">
+<area shape="rect" id="Node000001" title="Build the device&#45;info JSON returned by the flexIoDeviceInfo RPC." alt="" coords="5,211,156,251"/>
+<area shape="rect" id="Node000002" href="$de/d40/classfl_1_1json_af90f2900d83afc831235728d14b6aa89.html#af90f2900d83afc831235728d14b6aa89" title=" " alt="" coords="227,5,334,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="87,210,103,173,128,128,161,81,202,40,213,33,216,37,206,44,165,84,132,131,108,176,92,212"/>
+<area shape="rect" id="Node000004" href="$d6/de6/namespaceautoresearch_1_1flex__io_ad65d2d40462eb7994ada240ee44bf83b.html#ad65d2d40462eb7994ada240ee44bf83b" title="Convenience — first non&#45;empty driver name, or &quot;&lt;none&gt;&quot; if empty." alt="" coords="204,333,357,373"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="108,249,152,284,205,318,216,324,214,329,203,323,149,288,104,254"/>
+<area shape="rect" id="Node000005" href="$d2/db2/classfl_1_1string_af72684ed7d6b211b41ace065de0bcfe7.html#af72684ed7d6b211b41ace065de0bcfe7" title=" " alt="" coords="427,223,585,248"/>
+<area shape="poly" id="edge8_Node000001_Node000005" title=" " alt="" coords="156,229,413,232,413,237,156,235"/>
+<area shape="rect" id="Node000006" href="$d6/de6/namespaceautoresearch_1_1flex__io_a95988818b200e04cba93b8ab803eeed0.html#a95988818b200e04cba93b8ab803eeed0" title="Return the list of registered driver names." alt="" coords="405,361,607,401"/>
+<area shape="poly" id="edge20_Node000001_Node000006" title=" " alt="" coords="93,250,110,282,134,319,166,355,205,382,255,399,308,406,361,406,410,400,410,406,361,411,308,412,254,404,203,387,162,359,130,322,105,285,88,253"/>
+<area shape="rect" id="Node000017" href="$d6/de6/namespaceautoresearch_1_1flex__io_ab0047a84310704ed6daeccc397206bd9.html#ab0047a84310704ed6daeccc397206bd9" title="ESP&#45;IDF version string, or &quot;n/a&quot; on non&#45;ESP32 targets." alt="" coords="211,269,350,309"/>
+<area shape="poly" id="edge9_Node000001_Node000017" title=" " alt="" coords="152,249,199,262,197,268,150,254"/>
+<area shape="rect" id="Node000019" href="$de/d40/classfl_1_1json_ae7744bee3369b3debf7e30e4a4a18526.html#ae7744bee3369b3debf7e30e4a4a18526" title=" " alt="" coords="224,448,337,473"/>
+<area shape="poly" id="edge12_Node000001_Node000019" title=" " alt="" coords="92,250,108,287,133,334,165,383,206,427,226,440,223,444,202,431,161,387,128,337,103,290,87,253"/>
+<area shape="rect" id="Node000020" href="$de/d40/classfl_1_1json_a963c715e78b5508488bad0cea5203919.html#a963c715e78b5508488bad0cea5203919" title=" " alt="" coords="209,104,352,129"/>
+<area shape="poly" id="edge13_Node000001_Node000020" title=" " alt="" coords="103,209,148,174,203,140,220,132,222,137,205,144,151,179,107,213"/>
+<area shape="rect" id="Node000028" href="$de/d40/classfl_1_1json_a2973a868c9dc87ee871bc400414920c9.html#a2973a868c9dc87ee871bc400414920c9" title=" " alt="" coords="234,55,327,80"/>
+<area shape="poly" id="edge21_Node000001_Node000028" title=" " alt="" coords="92,209,136,150,167,117,203,89,220,80,222,85,205,94,171,121,140,154,97,213"/>
+<area shape="rect" id="Node000029" href="$d6/de6/namespaceautoresearch_1_1flex__io_afdd631fa4430fe8538a015a4fb499b71.html#afdd631fa4430fe8538a015a4fb499b71" title="Platform identification string derived from build&#45;time macros." alt="" coords="211,154,350,194"/>
+<area shape="poly" id="edge25_Node000001_Node000029" title=" " alt="" coords="150,209,197,195,199,200,152,214"/>
+<area shape="rect" id="Node000003" href="$de/d40/classfl_1_1json_a53d3876e579581337439bdede3c7dad6.html#a53d3876e579581337439bdede3c7dad6" title=" " alt="" coords="456,5,556,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="334,15,442,15,442,21,334,21"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="337,330,356,319,370,304,379,290,388,275,404,261,424,251,427,255,407,266,392,279,383,293,374,308,359,323,339,335"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="358,360,392,364,392,369,357,365"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_a1cc01267f6bdd7251959883412b11bbb.html#a1cc01267f6bdd7251959883412b11bbb" title="Get the global ChannelManager singleton instance." alt="" coords="659,343,806,368"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="607,367,645,362,646,368,607,372"/>
+<area shape="rect" id="Node000016" href="$d2/d24/classfl_1_1vector_a82c3455c1a345460f95a0180c93b3fb0.html#a82c3455c1a345460f95a0180c93b3fb0" title=" " alt="" coords="655,392,811,417"/>
+<area shape="poly" id="edge7_Node000006_Node000016" title=" " alt="" coords="607,389,641,392,641,398,607,394"/>
+<area shape="poly" id="edge10_Node000017_Node000005" title=" " alt="" coords="349,270,438,249,439,254,351,275"/>
+<area shape="rect" id="Node000018" href="$d1/d27/classfl_1_1sstream_a904115dfd2a7e462177b6409c9b842d6.html#a904115dfd2a7e462177b6409c9b842d6" title=" " alt="" coords="448,276,564,301"/>
+<area shape="poly" id="edge11_Node000017_Node000018" title=" " alt="" coords="350,286,434,286,434,291,350,291"/>
+<area shape="poly" id="edge14_Node000020_Node000003" title=" " alt="" coords="330,102,356,89,370,77,379,65,388,52,404,40,441,25,443,30,407,44,392,56,383,68,374,81,359,94,332,106"/>
+<area shape="rect" id="Node000021" href="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af" title=" " alt="" coords="443,104,569,129"/>
+<area shape="poly" id="edge15_Node000020_Node000021" title=" " alt="" coords="352,114,430,114,430,119,352,119"/>
+<area shape="rect" id="Node000022" href="$d4/d36/namespacefl_a0c8a67e528dcd96ee58216754a07a733.html#a0c8a67e528dcd96ee58216754a07a733" title=" " alt="" coords="469,153,543,179"/>
+<area shape="poly" id="edge16_Node000020_Node000022" title=" " alt="" coords="340,127,456,152,454,158,339,132"/>
+<area shape="rect" id="Node000023" href="$de/d40/classfl_1_1json_a30b29298cde88f21011d0588729d4797.html#a30b29298cde88f21011d0588729d4797" title=" " alt="" coords="451,55,561,80"/>
+<area shape="poly" id="edge17_Node000020_Node000023" title=" " alt="" coords="339,101,437,80,438,85,340,107"/>
+<area shape="rect" id="Node000024" href="$de/d40/classfl_1_1json_a429a58af2f793adfefd3d900b9468307.html#a429a58af2f793adfefd3d900b9468307" title=" " alt="" coords="659,19,806,59"/>
+<area shape="poly" id="edge18_Node000023_Node000024" title=" " alt="" coords="561,58,645,47,646,53,561,63"/>
+<area shape="rect" id="Node000025" href="$de/d40/classfl_1_1json_a769328e7906ef56e498609120b37f385.html#a769328e7906ef56e498609120b37f385" title=" " alt="" coords="676,84,789,109"/>
+<area shape="poly" id="edge19_Node000023_Node000025" title=" " alt="" coords="561,72,663,85,662,90,561,77"/>
+<area shape="poly" id="edge22_Node000028_Node000003" title=" " alt="" coords="327,55,442,29,443,34,328,60"/>
+<area shape="poly" id="edge23_Node000028_Node000021" title=" " alt="" coords="328,75,435,98,434,104,327,80"/>
+<area shape="poly" id="edge24_Node000028_Node000023" title=" " alt="" coords="328,65,438,65,438,70,328,70"/>
+<area shape="poly" id="edge26_Node000029_Node000005" title=" " alt="" coords="351,190,446,216,445,222,349,195"/>
+</map>

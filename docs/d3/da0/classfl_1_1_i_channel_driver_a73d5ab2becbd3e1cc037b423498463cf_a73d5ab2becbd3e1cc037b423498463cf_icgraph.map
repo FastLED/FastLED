@@ -1,0 +1,8 @@
+<map id="fl::IChannelDriver::getCapabilities" name="fl::IChannelDriver::getCapabilities">
+<area shape="rect" id="Node000001" title="Get driver capabilities (clockless, SPI, or both)" alt="" coords="404,29,539,69"/>
+<area shape="rect" id="Node000002" href="$d3/da0/classfl_1_1_i_channel_driver_a5de2837b6cc91337ee549664b5007be5.html#a5de2837b6cc91337ee549664b5007be5" title="Driver&#45;wide capability descriptor (declarative form)." alt="" coords="188,29,356,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="390,52,356,52,356,47,390,47"/>
+<area shape="poly" id="edge3_Node000002_Node000002" title=" " alt="" coords="305,18,294,11,272,8,253,10,242,15,238,21,240,28,235,30,233,20,238,11,252,5,272,3,295,6,308,13"/>
+<area shape="rect" id="Node000003" href="$d3/da0/classfl_1_1_i_channel_driver_af833f1345beb02e594973d41f3e3c798.html#af833f1345beb02e594973d41f3e3c798" title="Predicate: can this driver match a (single&#45; or multi&#45;pin) request?" alt="" coords="5,29,140,69"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="174,52,140,52,140,47,174,47"/>
+</map>

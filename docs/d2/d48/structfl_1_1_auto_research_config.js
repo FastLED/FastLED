@@ -1,9 +1,11 @@
 var structfl_1_1_auto_research_config =
 [
-    [ "AutoResearchConfig", "d2/d48/structfl_1_1_auto_research_config_a89044378db1da0e237a21a69398ae7f1.html#a89044378db1da0e237a21a69398ae7f1", null ],
+    [ "AutoResearchConfig", "d2/d48/structfl_1_1_auto_research_config_aabab603ef86a0cfd21fc91bbd8f163fe.html#aabab603ef86a0cfd21fc91bbd8f163fe", null ],
     [ "base_strip_size", "d2/d48/structfl_1_1_auto_research_config_a6e4b187687731223b8e80c63a2a9b343.html#a6e4b187687731223b8e80c63a2a9b343", null ],
     [ "driver_name", "d2/d48/structfl_1_1_auto_research_config_a68c1a2aebcd4bd71d7f1898087154178.html#a68c1a2aebcd4bd71d7f1898087154178", null ],
     [ "encoder", "d2/d48/structfl_1_1_auto_research_config_a87746081fdd712d8e1cf28e588df6ec1.html#a87746081fdd712d8e1cf28e588df6ec1", null ],
+    [ "legacy_chipsets", "d2/d48/structfl_1_1_auto_research_config_add6ba60a95a128ec077306f6718948a7.html#add6ba60a95a128ec077306f6718948a7", null ],
+    [ "legacy_rgbw", "d2/d48/structfl_1_1_auto_research_config_a7f6413ce5aefd4312df7c798f1205901.html#a7f6413ce5aefd4312df7c798f1205901", null ],
     [ "rx_buffer", "d2/d48/structfl_1_1_auto_research_config_ac70bd6178e99c8d84ab44baca7e467dd.html#ac70bd6178e99c8d84ab44baca7e467dd", null ],
     [ "rx_channel", "d2/d48/structfl_1_1_auto_research_config_a96b3b6cd10c50bfefc63fc657a7d2f95.html#a96b3b6cd10c50bfefc63fc657a7d2f95", null ],
     [ "rx_type", "d2/d48/structfl_1_1_auto_research_config_a3607db61530778ede51a8a19c06d7fba.html#a3607db61530778ede51a8a19c06d7fba", null ],

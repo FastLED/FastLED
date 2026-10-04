@@ -1,0 +1,5 @@
+<map id="fl::audio::NoiseFloorTracker::update" name="fl::audio::NoiseFloorTracker::update">
+<area shape="rect" id="Node000001" title="Update noise floor estimate with new observation." alt="" coords="252,5,451,45"/>
+<area shape="rect" id="Node000002" href="$d6/d2a/classfl_1_1audio_1_1_noise_floor_tracker_a67312c79a21f11fd5acaf38587bc25ea.html#a67312c79a21f11fd5acaf38587bc25ea" title=" " alt="" coords="5,5,204,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="238,28,204,28,204,23,238,23"/>
+</map>

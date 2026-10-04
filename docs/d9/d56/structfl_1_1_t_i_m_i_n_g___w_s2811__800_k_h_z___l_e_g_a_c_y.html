@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -110,25 +110,25 @@ $(function(){initNavTree('d9/d56/structfl_1_1_t_i_m_i_n_g___w_s2811__800_k_h_z__
 <div class="textblock"><p>WS2811 @ 800kHz (fast mode, half the timing of 400kHz mode) </p>
 <dl class="section see"><dt>See also</dt><dd>WS2811 800kHz: T0H=250ns, T0L=1000ns, T1H=600ns, T1L=650ns (half of 400kHz spec) </dd>
 <dd>
-Conversion: <a class="el" href="../../d9/d56/structfl_1_1_t_i_m_i_n_g___w_s2811__800_k_h_z___l_e_g_a_c_y_a79269a9a460eb949ab322646093cb8ed.html#a79269a9a460eb949ab322646093cb8eda2059445abc44d3ffec2acad1631f032d">T1</a>=T0H=250, <a class="el" href="../../d9/d56/structfl_1_1_t_i_m_i_n_g___w_s2811__800_k_h_z___l_e_g_a_c_y_a79269a9a460eb949ab322646093cb8ed.html#a79269a9a460eb949ab322646093cb8eda2930622e0bcf0411133810262aba5888">T2</a>=(T1H-T0H)=350, <a class="el" href="../../d9/d56/structfl_1_1_t_i_m_i_n_g___w_s2811__800_k_h_z___l_e_g_a_c_y_a79269a9a460eb949ab322646093cb8ed.html#a79269a9a460eb949ab322646093cb8eda4eda338b49b211cb871984a78e84a7b1">T3</a>=T1L=650 </dd>
+Conversion: <a class="el" href="../../d9/d56/structfl_1_1_t_i_m_i_n_g___w_s2811__800_k_h_z___l_e_g_a_c_y_a1bd2633b5e56e42d7f68737308877451.html#a1bd2633b5e56e42d7f68737308877451a2059445abc44d3ffec2acad1631f032d">T1</a>=T0H=250, <a class="el" href="../../d9/d56/structfl_1_1_t_i_m_i_n_g___w_s2811__800_k_h_z___l_e_g_a_c_y_a1bd2633b5e56e42d7f68737308877451.html#a1bd2633b5e56e42d7f68737308877451a2930622e0bcf0411133810262aba5888">T2</a>=(T1H-T0H)=350, <a class="el" href="../../d9/d56/structfl_1_1_t_i_m_i_n_g___w_s2811__800_k_h_z___l_e_g_a_c_y_a1bd2633b5e56e42d7f68737308877451.html#a1bd2633b5e56e42d7f68737308877451a4eda338b49b211cb871984a78e84a7b1">T3</a>=T1L=650 </dd>
 <dd>
 Actual frequency: 1250ns cycle = 800kHz </dd></dl>
 <dl class="section note"><dt>Note</dt><dd>WS2811 supports both 400kHz and 800kHz modes (configurable via pins 7&amp;8) </dd>
 <dd>
 Reset time increased to 280us for reliability (datasheet minimum is 50us) </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d0/d3f/led__timing_8h_source.html#l00424">424</a> of file <a class="el" href="../../d0/d3f/led__timing_8h_source.html">led_timing.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d0/d3f/led__timing_8h_source.html#l00519">519</a> of file <a class="el" href="../../d0/d3f/led__timing_8h_source.html">led_timing.h</a>.</p>
 </div>
 <p><code>#include &lt;<a class="el" href="../../d0/d3f/led__timing_8h_source.html">led_timing.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
 Public Types</h2></td></tr>
-<tr class="memitem:a79269a9a460eb949ab322646093cb8ed" id="r_a79269a9a460eb949ab322646093cb8ed"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom">: u32 { <a class="el" href="../../d9/d56/structfl_1_1_t_i_m_i_n_g___w_s2811__800_k_h_z___l_e_g_a_c_y_a79269a9a460eb949ab322646093cb8ed.html#a79269a9a460eb949ab322646093cb8eda2059445abc44d3ffec2acad1631f032d">T1</a> = 250
-, <a class="el" href="../../d9/d56/structfl_1_1_t_i_m_i_n_g___w_s2811__800_k_h_z___l_e_g_a_c_y_a79269a9a460eb949ab322646093cb8ed.html#a79269a9a460eb949ab322646093cb8eda2930622e0bcf0411133810262aba5888">T2</a> = 350
-, <a class="el" href="../../d9/d56/structfl_1_1_t_i_m_i_n_g___w_s2811__800_k_h_z___l_e_g_a_c_y_a79269a9a460eb949ab322646093cb8ed.html#a79269a9a460eb949ab322646093cb8eda4eda338b49b211cb871984a78e84a7b1">T3</a> = 650
-, <a class="el" href="../../d9/d56/structfl_1_1_t_i_m_i_n_g___w_s2811__800_k_h_z___l_e_g_a_c_y_a79269a9a460eb949ab322646093cb8ed.html#a79269a9a460eb949ab322646093cb8eda0d7516b79c377f5ce9bd1e8c5581afd8">RESET</a> = 280
+<tr class="memitem:a1bd2633b5e56e42d7f68737308877451" id="r_a1bd2633b5e56e42d7f68737308877451"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom">: u32 { <a class="el" href="../../d9/d56/structfl_1_1_t_i_m_i_n_g___w_s2811__800_k_h_z___l_e_g_a_c_y_a1bd2633b5e56e42d7f68737308877451.html#a1bd2633b5e56e42d7f68737308877451a2059445abc44d3ffec2acad1631f032d">T1</a> = 250
+, <a class="el" href="../../d9/d56/structfl_1_1_t_i_m_i_n_g___w_s2811__800_k_h_z___l_e_g_a_c_y_a1bd2633b5e56e42d7f68737308877451.html#a1bd2633b5e56e42d7f68737308877451a2930622e0bcf0411133810262aba5888">T2</a> = 350
+, <a class="el" href="../../d9/d56/structfl_1_1_t_i_m_i_n_g___w_s2811__800_k_h_z___l_e_g_a_c_y_a1bd2633b5e56e42d7f68737308877451.html#a1bd2633b5e56e42d7f68737308877451a4eda338b49b211cb871984a78e84a7b1">T3</a> = 650
+, <a class="el" href="../../d9/d56/structfl_1_1_t_i_m_i_n_g___w_s2811__800_k_h_z___l_e_g_a_c_y_a1bd2633b5e56e42d7f68737308877451.html#a1bd2633b5e56e42d7f68737308877451a0d7516b79c377f5ce9bd1e8c5581afd8">RESET</a> = 280
  }</td></tr>
-<tr class="separator:a79269a9a460eb949ab322646093cb8ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="separator:a1bd2633b5e56e42d7f68737308877451"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <hr/>The documentation for this struct was generated from the following file:<ul>
 <li>fl/chipsets/<a class="el" href="../../d0/d3f/led__timing_8h_source.html">led_timing.h</a></li>
@@ -140,7 +140,7 @@ Public Types</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d9/d56/structfl_1_1_t_i_m_i_n_g___w_s2811__800_k_h_z___l_e_g_a_c_y.html">TIMING_WS2811_800KHZ_LEGACY</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:10 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

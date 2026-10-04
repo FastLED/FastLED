@@ -152,7 +152,7 @@
 <!-- Node6 -->
 <g id="Node000006" class="node">
 <title>Node6</title>
-<g id="a_Node000006"><a xlink:href="../../d0/d34/classfl_1_1task_1_1_promise_a70811e463c0161394aae6e29b442b266.html#a70811e463c0161394aae6e29b442b266" target="_top" xlink:title="Create a resolved Promise with value.">
+<g id="a_Node000006"><a xlink:href="../../d0/d34/classfl_1_1task_1_1_promise_a973eed5d2fbd0bc5e227af3488b04fcf.html#a973eed5d2fbd0bc5e227af3488b04fcf" target="_top" xlink:title="Create a resolved Promise with value.">
 <polygon fill="white" stroke="#666666" points="454.5,-73 353.5,-73 353.5,-43 454.5,-43 454.5,-73"/>
 <text text-anchor="start" x="361.5" y="-61" font-family="Helvetica,sans-Serif" font-size="10.00">fl::task::Promise::</text>
 <text text-anchor="middle" x="404" y="-50" font-family="Helvetica,sans-Serif" font-size="10.00">resolve</text>
@@ -190,7 +190,7 @@
 <!-- Node7 -->
 <g id="Node000007" class="node">
 <title>Node7</title>
-<g id="a_Node000007"><a xlink:href="../../d0/d34/classfl_1_1task_1_1_promise_a4ae6da8172cc69a1dbbc7a01bc86f959.html#a4ae6da8172cc69a1dbbc7a01bc86f959" target="_top" xlink:title="Default constructor &#45; creates invalid Promise.">
+<g id="a_Node000007"><a xlink:href="../../d0/d34/classfl_1_1task_1_1_promise_ae75706ae1089e184850eb571f0b8c3aa.html#ae75706ae1089e184850eb571f0b8c3aa" target="_top" xlink:title="Default constructor &#45; creates invalid Promise.">
 <polygon fill="white" stroke="#666666" points="805,-51 704,-51 704,-21 805,-21 805,-51"/>
 <text text-anchor="start" x="712" y="-39" font-family="Helvetica,sans-Serif" font-size="10.00">fl::task::Promise::</text>
 <text text-anchor="middle" x="754.5" y="-28" font-family="Helvetica,sans-Serif" font-size="10.00">Promise</text>
@@ -209,7 +209,7 @@
 <!-- Node8 -->
 <g id="Node000008" class="node">
 <title>Node8</title>
-<g id="a_Node000008"><a xlink:href="../../d0/d34/classfl_1_1task_1_1_promise_a9fd2b38e45453a1061acc972d64a2bed.html#a9fd2b38e45453a1061acc972d64a2bed" target="_top" xlink:title="Create a pending Promise.">
+<g id="a_Node000008"><a xlink:href="../../d0/d34/classfl_1_1task_1_1_promise_abdb44418713e7f012b6860d6cf6aa69a.html#abdb44418713e7f012b6860d6cf6aa69a" target="_top" xlink:title="Create a pending Promise.">
 <polygon fill="#fff0f0" stroke="red" points="639.5,-30 538.5,-30 538.5,0 639.5,0 639.5,-30"/>
 <text text-anchor="start" x="546.5" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">fl::task::Promise::</text>
 <text text-anchor="middle" x="589" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">create</text>
@@ -228,7 +228,7 @@
 <!-- Node10 -->
 <g id="Node000010" class="node">
 <title>Node10</title>
-<g id="a_Node000010"><a xlink:href="../../d0/d34/classfl_1_1task_1_1_promise_a2eccb92f3cd894efe9a728eea2db7c45.html#a2eccb92f3cd894efe9a728eea2db7c45" target="_top" xlink:title="Get the result value (only valid if is_resolved() returns true)">
+<g id="a_Node000010"><a xlink:href="../../d0/d34/classfl_1_1task_1_1_promise_aa523169946167b53608c4a86d79b6969.html#aa523169946167b53608c4a86d79b6969" target="_top" xlink:title="Get the result value (only valid if is_resolved() returns true)">
 <polygon fill="#fff0f0" stroke="red" points="639.5,-116 538.5,-116 538.5,-86 639.5,-86 639.5,-116"/>
 <text text-anchor="start" x="546.5" y="-104" font-family="Helvetica,sans-Serif" font-size="10.00">fl::task::Promise::</text>
 <text text-anchor="middle" x="589" y="-93" font-family="Helvetica,sans-Serif" font-size="10.00">value</text>

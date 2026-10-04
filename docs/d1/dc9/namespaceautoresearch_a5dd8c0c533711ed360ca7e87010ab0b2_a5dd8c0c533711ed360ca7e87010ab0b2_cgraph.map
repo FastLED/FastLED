@@ -1,0 +1,5 @@
+<map id="autoresearch::runRpPioContentionTest" name="autoresearch::runRpPioContentionTest">
+<area shape="rect" id="Node000001" title="Reproduce FastLED#1471&#39;s PIO state&#45;machine contention on real RP silicon." alt="" coords="5,5,276,31"/>
+<area shape="rect" id="Node000002" href="$de/d40/classfl_1_1json_ae7744bee3369b3debf7e30e4a4a18526.html#ae7744bee3369b3debf7e30e4a4a18526" title=" " alt="" coords="324,5,437,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="276,15,311,15,311,21,276,21"/>
+</map>

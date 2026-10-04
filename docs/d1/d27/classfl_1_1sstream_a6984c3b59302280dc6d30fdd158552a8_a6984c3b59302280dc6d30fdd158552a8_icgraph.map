@@ -1,0 +1,15 @@
+<map id="fl::sstream::clear" name="fl::sstream::clear">
+<area shape="rect" id="Node000001" title=" " alt="" coords="583,63,713,88"/>
+<area shape="rect" id="Node000002" href="$d6/dfe/namespacesimd__test_ada70deca98a60672910d9e941b2c6244.html#ada70deca98a60672910d9e941b2c6244" title="Print summary table of all test results." alt="" coords="341,5,534,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="589,61,534,46,487,33,488,28,535,41,591,56"/>
+<area shape="rect" id="Node000004" href="$d9/d1a/namespaceautoresearch_1_1simd__check_a4bd7c9fa82e77bb9c28efbf177f99216.html#a4bd7c9fa82e77bb9c28efbf177f99216" title="Run the full SIMD test suite. Returns the number of failures." alt="" coords="356,55,519,95"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="569,78,519,78,519,73,569,73"/>
+<area shape="rect" id="Node000005" href="$d8/da0/class_driver_test_runner_aecda4c92e3d610584564ddf0d2f81e8e.html#aecda4c92e3d610584564ddf0d2f81e8e" title="Validate that all expected drivers are present." alt="" coords="340,119,535,159"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="593,95,505,122,503,117,592,90"/>
+<area shape="rect" id="Node000003" href="$d6/df8/_s_i_m_d_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="173,5,231,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="327,21,232,21,232,15,327,15"/>
+<area shape="rect" id="Node000006" href="$d8/da0/class_driver_test_runner_aaab05c61d961d92ff48a5746076f8de6.html#aaab05c61d961d92ff48a5746076f8de6" title="Run all tests: validation + driver tests." alt="" coords="112,119,292,159"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="326,142,292,142,292,137,326,137"/>
+<area shape="rect" id="Node000007" href="$d8/de2/_driver_test_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="5,127,64,152"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="98,142,64,142,64,137,98,137"/>
+</map>

@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -136,6 +136,257 @@ Files</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top"><a href="db/da4/task_8h_source.html"><span class="icondoc"></span></a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="db/da4/task_8h.html">task.h</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<p>A cooperative scheduler for sketches that need to do more than one thing at a time.</p>
+<p>Instead of a <code><a class="el" href="d5/d17/_analog_output_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f">loop()</a></code> full of <code>delay()</code> calls and interleaved <code>millis()</code> comparisons, you register small callbacks that each own their own schedule. <code><a class="el" href="db/d5c/namespacefl_1_1task_a2d40b476742263a3fa212e24b722e3ef.html#a2d40b476742263a3fa212e24b722e3ef" title="Run selected task subsystems.">fl::task::run()</a></code> executes whichever ones are due and returns. Adding a feature means adding a task — the existing tasks don't change.</p>
+<p>Everything here is in namespace <code><a class="el" href="db/d5c/namespacefl_1_1task.html">fl::task</a></code> and is pulled in by <code>#include &lt;FastLED.h&gt;</code>.</p>
+<h1><a class="anchor" id="autotoc_md617"></a>
+Quick Start</h1>
+<div class="fragment"><div class="line"><span class="preprocessor">#include &lt;FastLED.h&gt;</span></div>
+<div class="line"><span class="preprocessor">#include &quot;<a class="code" href="db/da4/task_8h.html">fl/task/task.h</a>&quot;</span></div>
+<div class="line"> </div>
+<div class="line"><span class="preprocessor">#define NUM_LEDS 60</span></div>
+<div class="line"><a class="code hl_typedef" href="dd/dc7/group___h_s_v2_r_g_b_ga65c1895006b38f8c5114118b6a170327.html#ga65c1895006b38f8c5114118b6a170327">CRGB</a> <a class="code hl_variable" href="d5/d17/_analog_output_8ino_a1039e408783ef35dd94161e35efe8ee9.html#a1039e408783ef35dd94161e35efe8ee9">leds</a>[<a class="code hl_define" href="d6/d05/_animartrix_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd">NUM_LEDS</a>];</div>
+<div class="line"> </div>
+<div class="line"><span class="keywordtype">void</span> <a class="code hl_function" href="d5/d17/_analog_output_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d">setup</a>() {</div>
+<div class="line">    <a class="code hl_variable" href="d7/de5/_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a>.addLeds&lt;WS2812, 6&gt;(<a class="code hl_variable" href="d5/d17/_analog_output_8ino_a1039e408783ef35dd94161e35efe8ee9.html#a1039e408783ef35dd94161e35efe8ee9">leds</a>, <a class="code hl_define" href="d6/d05/_animartrix_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd">NUM_LEDS</a>);</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment">// Two blinkers on independent schedules</span></div>
+<div class="line">    <a class="code hl_function" href="db/d5c/namespacefl_1_1task_ad990b0044cf3097520e9afa9aa6b27f5.html#ad990b0044cf3097520e9afa9aa6b27f5">fl::task::every_ms</a>(700).<a class="code hl_function" href="de/daf/classfl_1_1task_1_1_handle_a0d96031ff5c53ece780698c5f39d9d2b.html#a0d96031ff5c53ece780698c5f39d9d2b">then</a>([] {</div>
+<div class="line">        <span class="keyword">static</span> <span class="keywordtype">bool</span> on = <span class="keyword">false</span>;</div>
+<div class="line">        on = !on;</div>
+<div class="line">        <a class="code hl_variable" href="d5/d17/_analog_output_8ino_a1039e408783ef35dd94161e35efe8ee9.html#a1039e408783ef35dd94161e35efe8ee9">leds</a>[0] = on ? <a class="code hl_enumvalue" href="da/dd6/structfl_1_1_c_r_g_b_add5b03a29164cfe4d6e6f36185244a9b.html#add5b03a29164cfe4d6e6f36185244a9ba438f7535208e979d29ac4fb3b96cb5ce">CRGB::Red</a> : <a class="code hl_enumvalue" href="da/dd6/structfl_1_1_c_r_g_b_add5b03a29164cfe4d6e6f36185244a9b.html#add5b03a29164cfe4d6e6f36185244a9bae7cccd0ac63e453ee6a924be685ce307">CRGB::Black</a>;</div>
+<div class="line">    });</div>
+<div class="line"> </div>
+<div class="line">    <a class="code hl_function" href="db/d5c/namespacefl_1_1task_ad990b0044cf3097520e9afa9aa6b27f5.html#ad990b0044cf3097520e9afa9aa6b27f5">fl::task::every_ms</a>(400).<a class="code hl_function" href="de/daf/classfl_1_1task_1_1_handle_a0d96031ff5c53ece780698c5f39d9d2b.html#a0d96031ff5c53ece780698c5f39d9d2b">then</a>([] {</div>
+<div class="line">        <span class="keyword">static</span> <span class="keywordtype">bool</span> on = <span class="keyword">false</span>;</div>
+<div class="line">        on = !on;</div>
+<div class="line">        <a class="code hl_variable" href="d5/d17/_analog_output_8ino_a1039e408783ef35dd94161e35efe8ee9.html#a1039e408783ef35dd94161e35efe8ee9">leds</a>[1] = on ? <a class="code hl_enumvalue" href="da/dd6/structfl_1_1_c_r_g_b_add5b03a29164cfe4d6e6f36185244a9b.html#add5b03a29164cfe4d6e6f36185244a9baa500c0dfa78aad62db9372a286f58423">CRGB::Blue</a> : <a class="code hl_enumvalue" href="da/dd6/structfl_1_1_c_r_g_b_add5b03a29164cfe4d6e6f36185244a9b.html#add5b03a29164cfe4d6e6f36185244a9bae7cccd0ac63e453ee6a924be685ce307">CRGB::Black</a>;</div>
+<div class="line">    });</div>
+<div class="line"> </div>
+<div class="line">    <span class="comment">// One task owns the hardware push</span></div>
+<div class="line">    <a class="code hl_function" href="db/d5c/namespacefl_1_1task_a7972dc3aa503dbb109098b96ba8df203.html#a7972dc3aa503dbb109098b96ba8df203">fl::task::at_framerate</a>(60).<a class="code hl_function" href="de/daf/classfl_1_1task_1_1_handle_a0d96031ff5c53ece780698c5f39d9d2b.html#a0d96031ff5c53ece780698c5f39d9d2b">then</a>([] { <a class="code hl_variable" href="d7/de5/_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a>.show(); });</div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line"><span class="keywordtype">void</span> <a class="code hl_function" href="d5/d17/_analog_output_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f">loop</a>() {</div>
+<div class="line">    <a class="code hl_function" href="db/d5c/namespacefl_1_1task_a2d40b476742263a3fa212e24b722e3ef.html#a2d40b476742263a3fa212e24b722e3ef">fl::task::run</a>();  <span class="comment">// run whatever is due, then return</span></div>
+<div class="line">}</div>
+<div class="ttc" id="a_analog_output_8ino_a1039e408783ef35dd94161e35efe8ee9_html_a1039e408783ef35dd94161e35efe8ee9"><div class="ttname"><a href="d5/d17/_analog_output_8ino_a1039e408783ef35dd94161e35efe8ee9.html#a1039e408783ef35dd94161e35efe8ee9">leds</a></div><div class="ttdeci">CRGB leds[1]</div><div class="ttdef"><b>Definition</b> <a href="d5/d17/_analog_output_8ino_source.html#l00026">AnalogOutput.ino:26</a></div></div>
+<div class="ttc" id="a_analog_output_8ino_a4fc01d736fe50cf5b977f755b675f11d_html_a4fc01d736fe50cf5b977f755b675f11d"><div class="ttname"><a href="d5/d17/_analog_output_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d">setup</a></div><div class="ttdeci">void setup()</div><div class="ttdef"><b>Definition</b> <a href="d5/d17/_analog_output_8ino_source.html#l00058">AnalogOutput.ino:58</a></div></div>
+<div class="ttc" id="a_analog_output_8ino_afe461d27b9c48d5921c00d521181f12f_html_afe461d27b9c48d5921c00d521181f12f"><div class="ttname"><a href="d5/d17/_analog_output_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f">loop</a></div><div class="ttdeci">void loop()</div><div class="ttdef"><b>Definition</b> <a href="d5/d17/_analog_output_8ino_source.html#l00047">AnalogOutput.ino:47</a></div></div>
+<div class="ttc" id="a_animartrix_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd_html_a4c4ae9a4146ce8d6a5debc90300d9abd"><div class="ttname"><a href="d6/d05/_animartrix_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd">NUM_LEDS</a></div><div class="ttdeci">#define NUM_LEDS</div><div class="ttdef"><b>Definition</b> <a href="d6/d05/_animartrix_8ino_source.html#l00079">Animartrix.ino:79</a></div></div>
+<div class="ttc" id="a_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9_html_a8e94985674086ea368e1d51cbc0f82a9"><div class="ttname"><a href="d7/de5/_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a></div><div class="ttdeci">FL_DISABLE_WARNING_PUSH FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS CFastLED FastLED</div><div class="ttdoc">Global LED strip management instance.</div><div class="ttdef"><b>Definition</b> <a href="d7/de5/_fast_l_e_d_8cpp_8hpp_source.html#l00090">FastLED.cpp.hpp:90</a></div></div>
+<div class="ttc" id="aclassfl_1_1task_1_1_handle_a0d96031ff5c53ece780698c5f39d9d2b_html_a0d96031ff5c53ece780698c5f39d9d2b"><div class="ttname"><a href="de/daf/classfl_1_1task_1_1_handle_a0d96031ff5c53ece780698c5f39d9d2b.html#a0d96031ff5c53ece780698c5f39d9d2b">fl::task::Handle::then</a></div><div class="ttdeci">Handle &amp; then(function&lt; void()&gt; on_then) FL_NO_EXCEPT</div><div class="ttdoc">Sets the callback invoked when the task runs successfully.</div><div class="ttdef"><b>Definition</b> <a href="df/db6/task_8cpp_8hpp_source.html#l00276">task.cpp.hpp:276</a></div></div>
+<div class="ttc" id="agroup___h_s_v2_r_g_b_ga65c1895006b38f8c5114118b6a170327_html_ga65c1895006b38f8c5114118b6a170327"><div class="ttname"><a href="dd/dc7/group___h_s_v2_r_g_b_ga65c1895006b38f8c5114118b6a170327.html#ga65c1895006b38f8c5114118b6a170327">CRGB</a></div><div class="ttdeci">fl::CRGB CRGB</div><div class="ttdef"><b>Definition</b> <a href="db/dd1/crgb_8h_source.html#l00025">crgb.h:25</a></div></div>
+<div class="ttc" id="anamespacefl_1_1task_a2d40b476742263a3fa212e24b722e3ef_html_a2d40b476742263a3fa212e24b722e3ef"><div class="ttname"><a href="db/d5c/namespacefl_1_1task_a2d40b476742263a3fa212e24b722e3ef.html#a2d40b476742263a3fa212e24b722e3ef">fl::task::run</a></div><div class="ttdeci">void run(fl::u32 microseconds, ExecFlags flags)</div><div class="ttdoc">Run selected task subsystems.</div><div class="ttdef"><b>Definition</b> <a href="dc/de9/executor_8cpp_8hpp_source.html#l00075">executor.cpp.hpp:75</a></div></div>
+<div class="ttc" id="anamespacefl_1_1task_a7972dc3aa503dbb109098b96ba8df203_html_a7972dc3aa503dbb109098b96ba8df203"><div class="ttname"><a href="db/d5c/namespacefl_1_1task_a7972dc3aa503dbb109098b96ba8df203.html#a7972dc3aa503dbb109098b96ba8df203">fl::task::at_framerate</a></div><div class="ttdeci">Handle at_framerate(int fps)</div><div class="ttdoc">Creates a task that runs at a fixed frame rate.</div><div class="ttdef"><b>Definition</b> <a href="df/db6/task_8cpp_8hpp_source.html#l00328">task.cpp.hpp:328</a></div></div>
+<div class="ttc" id="anamespacefl_1_1task_ad990b0044cf3097520e9afa9aa6b27f5_html_ad990b0044cf3097520e9afa9aa6b27f5"><div class="ttname"><a href="db/d5c/namespacefl_1_1task_ad990b0044cf3097520e9afa9aa6b27f5.html#ad990b0044cf3097520e9afa9aa6b27f5">fl::task::every_ms</a></div><div class="ttdeci">Handle every_ms(int interval_ms)</div><div class="ttdoc">Creates a task that runs at a fixed millisecond interval.</div><div class="ttdef"><b>Definition</b> <a href="df/db6/task_8cpp_8hpp_source.html#l00320">task.cpp.hpp:320</a></div></div>
+<div class="ttc" id="astructfl_1_1_c_r_g_b_add5b03a29164cfe4d6e6f36185244a9b_html_add5b03a29164cfe4d6e6f36185244a9ba438f7535208e979d29ac4fb3b96cb5ce"><div class="ttname"><a href="da/dd6/structfl_1_1_c_r_g_b_add5b03a29164cfe4d6e6f36185244a9b.html#add5b03a29164cfe4d6e6f36185244a9ba438f7535208e979d29ac4fb3b96cb5ce">fl::CRGB::Red</a></div><div class="ttdeci">@ Red</div><div class="ttdoc">&lt;div style=&#39;background:#FF0000;width:4em;height:4em;&#39;&gt;&lt;/div&gt;</div><div class="ttdef"><b>Definition</b> <a href="df/dcc/fl_2gfx_2crgb_8h_source.html#l00629">crgb.h:629</a></div></div>
+<div class="ttc" id="astructfl_1_1_c_r_g_b_add5b03a29164cfe4d6e6f36185244a9b_html_add5b03a29164cfe4d6e6f36185244a9baa500c0dfa78aad62db9372a286f58423"><div class="ttname"><a href="da/dd6/structfl_1_1_c_r_g_b_add5b03a29164cfe4d6e6f36185244a9b.html#add5b03a29164cfe4d6e6f36185244a9baa500c0dfa78aad62db9372a286f58423">fl::CRGB::Blue</a></div><div class="ttdeci">@ Blue</div><div class="ttdoc">&lt;div style=&#39;background:#0000FF;width:4em;height:4em;&#39;&gt;&lt;/div&gt;</div><div class="ttdef"><b>Definition</b> <a href="df/dcc/fl_2gfx_2crgb_8h_source.html#l00519">crgb.h:519</a></div></div>
+<div class="ttc" id="astructfl_1_1_c_r_g_b_add5b03a29164cfe4d6e6f36185244a9b_html_add5b03a29164cfe4d6e6f36185244a9bae7cccd0ac63e453ee6a924be685ce307"><div class="ttname"><a href="da/dd6/structfl_1_1_c_r_g_b_add5b03a29164cfe4d6e6f36185244a9b.html#add5b03a29164cfe4d6e6f36185244a9bae7cccd0ac63e453ee6a924be685ce307">fl::CRGB::Black</a></div><div class="ttdeci">@ Black</div><div class="ttdoc">&lt;div style=&#39;background:#000000;width:4em;height:4em;&#39;&gt;&lt;/div&gt;</div><div class="ttdef"><b>Definition</b> <a href="df/dcc/fl_2gfx_2crgb_8h_source.html#l00517">crgb.h:517</a></div></div>
+<div class="ttc" id="atask_8h_html"><div class="ttname"><a href="db/da4/task_8h.html">task.h</a></div></div>
+</div><!-- fragment --><p>A runnable version of this is in <a href="../../../examples/Async"><code>examples/Async</code></a>.</p>
+<h1><a class="anchor" id="autotoc_md618"></a>
+Why</h1>
+<p>The usual embedded tutorial teaches a single polling loop. That works until the second feature arrives. Once WiFi, MQTT, a button, and an animation all share one <code><a class="el" href="d5/d17/_analog_output_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f">loop()</a></code>, the timing of each is entangled with the others: a blocking read stalls the animation, and every new feature has to be woven through the code already there.</p>
+<p>With tasks, a new feature is a new registration:</p>
+<div class="fragment"><div class="line"><a class="code hl_function" href="db/d5c/namespacefl_1_1task_ad990b0044cf3097520e9afa9aa6b27f5.html#ad990b0044cf3097520e9afa9aa6b27f5">fl::task::every_ms</a>(50).<a class="code hl_function" href="de/daf/classfl_1_1task_1_1_handle_a0d96031ff5c53ece780698c5f39d9d2b.html#a0d96031ff5c53ece780698c5f39d9d2b">then</a>([] { mqtt.poll(); });</div>
+</div><!-- fragment --><p>Nothing above it changes.</p>
+<h1><a class="anchor" id="autotoc_md619"></a>
+<code>fl::task::run()</code> — the pump</h1>
+<p><b><code>run()</code> must be called from <code><a class="el" href="d5/d17/_analog_output_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f">loop()</a></code> for time-based tasks.</b> Frame tasks are the exception: <code>before_frame()</code> and <code>after_frame()</code> are pumped automatically by the FastLED frame lifecycle. If you never call <code>run()</code>, <code>every_ms()</code> and <code>at_framerate()</code> tasks never fire.</p>
+<div class="fragment"><div class="line"><span class="keywordtype">void</span> <a class="code hl_function" href="d5/d17/_analog_output_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f">loop</a>() {</div>
+<div class="line">    <a class="code hl_function" href="db/d5c/namespacefl_1_1task_a2d40b476742263a3fa212e24b722e3ef.html#a2d40b476742263a3fa212e24b722e3ef">fl::task::run</a>();</div>
+<div class="line">}</div>
+</div><!-- fragment --><table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Call   </th><th class="markdownTableHeadNone">Effect    </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>run()</code>   </td><td class="markdownTableBodyNone">Pump everything, then yield for 1 ms (the default)    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>run(0)</code>   </td><td class="markdownTableBodyNone">Pump everything, no yield    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>run(250, ExecFlags::SYSTEM)</code>   </td><td class="markdownTableBodyNone">OS-level yield only — for driver/DMA wait loops    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>run(1000, ExecFlags::TASKS \| ExecFlags::COROUTINES)</code>   </td><td class="markdownTableBodyNone">Pump tasks and coroutines, skip the OS yield   </td></tr>
+</table>
+<p><code>ExecFlags</code> selects which subsystems get pumped:</p>
+<ul>
+<li><code>TASKS</code> — the scheduler (your <code>every_ms</code> / <code>at_framerate</code> callbacks) plus the executor (HTTP fetches, HTTP server, and other registered runners)</li>
+<li><code>COROUTINES</code> — platform coroutines</li>
+<li><code>SYSTEM</code> — a pure OS yield, so lower-priority work such as the WiFi/lwIP stack gets CPU</li>
+<li><code>ALL</code> — all of the above (the default)</li>
+</ul>
+<p>The 1 ms default yield is what keeps a busy render loop from starving the network stack.</p>
+<blockquote class="doxtable">
+<p>Some subsystems bump the scheduler on their own — the FX engine does so when an audio processor is attached, so audio samples are current for the frame being drawn. Treat that as an implementation detail: call <code>run()</code> yourself. </p>
+</blockquote>
+<h1><a class="anchor" id="autotoc_md620"></a>
+Creating tasks</h1>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Builder   </th><th class="markdownTableHeadNone">Fires    </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code><a class="el" href="db/d5c/namespacefl_1_1task_ad990b0044cf3097520e9afa9aa6b27f5.html#ad990b0044cf3097520e9afa9aa6b27f5" title="Creates a task that runs at a fixed millisecond interval.">fl::task::every_ms(int interval_ms)</a></code>   </td><td class="markdownTableBodyNone">Every <code>interval_ms</code>, forever    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code><a class="el" href="db/d5c/namespacefl_1_1task_a7972dc3aa503dbb109098b96ba8df203.html#a7972dc3aa503dbb109098b96ba8df203" title="Creates a task that runs at a fixed frame rate.">fl::task::at_framerate(int fps)</a></code>   </td><td class="markdownTableBodyNone"><code>fps</code> times a second, forever    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code><a class="el" href="db/d5c/namespacefl_1_1task_a1865fb97f123e1ba94b5885c03c272fd.html#a1865fb97f123e1ba94b5885c03c272fd" title="Frame tasks recur: every overload below schedules a task that runs once per FastLED frame and keeps d...">fl::task::before_frame()</a></code>   </td><td class="markdownTableBodyNone">Before every FastLED render, until canceled    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code><a class="el" href="db/d5c/namespacefl_1_1task_a2cf7a502efaac92b3c0228e4c19a3c62.html#a2cf7a502efaac92b3c0228e4c19a3c62" title="Creates a task that runs after every FastLED frame until canceled.">fl::task::after_frame()</a></code>   </td><td class="markdownTableBodyNone">After every FastLED render, until canceled    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code><a class="el" href="db/d5c/namespacefl_1_1task_a5122e88cce37c48ef7b7c9360e3b7f53.html#a5122e88cce37c48ef7b7c9360e3b7f53" title="Creates and starts an OS-level coroutine task.">fl::task::coroutine</a>(const CoroutineConfig&amp;)</code>   </td><td class="markdownTableBodyNone">Once, on its own OS task (see below)   </td></tr>
+</table>
+<p>Each builder has an overload taking a <code>TracePoint</code> — pass the <code>FL_TRACE</code> macro and the scheduler can name the task in warnings, which is worth doing once you have more than a few:</p>
+<div class="fragment"><div class="line"><a class="code hl_function" href="db/d5c/namespacefl_1_1task_ad990b0044cf3097520e9afa9aa6b27f5.html#ad990b0044cf3097520e9afa9aa6b27f5">fl::task::every_ms</a>(100, <a class="code hl_define" href="d1/d1b/trace_8h_a8f0cce5e62eddca8e714394e36b14ac1.html#a8f0cce5e62eddca8e714394e36b14ac1">FL_TRACE</a>).<a class="code hl_function" href="de/daf/classfl_1_1task_1_1_handle_a0d96031ff5c53ece780698c5f39d9d2b.html#a0d96031ff5c53ece780698c5f39d9d2b">then</a>([] { <span class="comment">/* ... */</span> });</div>
+<div class="ttc" id="atrace_8h_a8f0cce5e62eddca8e714394e36b14ac1_html_a8f0cce5e62eddca8e714394e36b14ac1"><div class="ttname"><a href="d1/d1b/trace_8h_a8f0cce5e62eddca8e714394e36b14ac1.html#a8f0cce5e62eddca8e714394e36b14ac1">FL_TRACE</a></div><div class="ttdeci">#define FL_TRACE</div><div class="ttdoc">A macro to capture the current source file, line number, and time.</div><div class="ttdef"><b>Definition</b> <a href="d1/d1b/trace_8h_source.html#l00102">trace.h:102</a></div></div>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md621"></a>
+The fluent API</h1>
+<div class="fragment"><div class="line"><span class="keyword">auto</span> handle = <a class="code hl_function" href="db/d5c/namespacefl_1_1task_ad990b0044cf3097520e9afa9aa6b27f5.html#ad990b0044cf3097520e9afa9aa6b27f5">fl::task::every_ms</a>(250, <a class="code hl_define" href="d1/d1b/trace_8h_a8f0cce5e62eddca8e714394e36b14ac1.html#a8f0cce5e62eddca8e714394e36b14ac1">FL_TRACE</a>)</div>
+<div class="line">    .<a class="code hl_function" href="de/daf/classfl_1_1task_1_1_handle_a0d96031ff5c53ece780698c5f39d9d2b.html#a0d96031ff5c53ece780698c5f39d9d2b">then</a>([] { <span class="comment">/* the work */</span> })</div>
+<div class="line">    .catch_([](<span class="keyword">const</span> <a class="code hl_struct" href="d4/dda/structfl_1_1task_1_1_error.html">fl::task::Error</a>&amp; e) { <a class="code hl_define" href="d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;task failed: &quot;</span> &lt;&lt; e.<a class="code hl_variable" href="d4/dda/structfl_1_1task_1_1_error_a9d13c369974bf5417e2ccd9f3687988f.html#a9d13c369974bf5417e2ccd9f3687988f">message</a>); });</div>
+<div class="ttc" id="alog_8h_a4804912fba6eed63e1afd84b8768aced_html_a4804912fba6eed63e1afd84b8768aced"><div class="ttname"><a href="d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a></div><div class="ttdeci">#define FL_WARN(...)</div><div class="ttdef"><b>Definition</b> <a href="d7/d7f/log_8h_source.html#l00440">log.h:440</a></div></div>
+<div class="ttc" id="astructfl_1_1task_1_1_error_a9d13c369974bf5417e2ccd9f3687988f_html_a9d13c369974bf5417e2ccd9f3687988f"><div class="ttname"><a href="d4/dda/structfl_1_1task_1_1_error_a9d13c369974bf5417e2ccd9f3687988f.html#a9d13c369974bf5417e2ccd9f3687988f">fl::task::Error::message</a></div><div class="ttdeci">fl::string message</div><div class="ttdef"><b>Definition</b> <a href="d6/d17/promise_8h_source.html#l00040">promise.h:40</a></div></div>
+<div class="ttc" id="astructfl_1_1task_1_1_error_html"><div class="ttname"><a href="d4/dda/structfl_1_1task_1_1_error.html">fl::task::Error</a></div><div class="ttdoc">Error type for promises.</div><div class="ttdef"><b>Definition</b> <a href="d6/d17/promise_8h_source.html#l00039">promise.h:39</a></div></div>
+</div><!-- fragment --><ul>
+<li><b><code>.then(callback)</code></b> — sets the work <em>and registers the task with the scheduler</em>. There is no separate "add" step, and a task without a <code>.then()</code> never runs.</li>
+<li><b><code>.catch_(callback)</code></b> — error handler. Optional, and it does not register anything on its own; always call <code>.then()</code>.</li>
+<li><b><code>.cancel()</code></b> — marks the task dead. The scheduler drops it on the next <code>update()</code>.</li>
+</ul>
+<p>The returned <code>Handle</code> is a shared handle — copying it is cheap, and letting it go out of scope does <em>not</em> cancel the task, because the scheduler holds its own copy. Keep the handle only if you intend to <code>.cancel()</code> or re-time it later:</p>
+<div class="fragment"><div class="line"><span class="keyword">auto</span> <a class="code hl_function" href="d5/d4d/_blink_parallel_8ino_a29584c4a240c144644e81dfab0090635.html#a29584c4a240c144644e81dfab0090635">blink</a> = <a class="code hl_function" href="db/d5c/namespacefl_1_1task_ad990b0044cf3097520e9afa9aa6b27f5.html#ad990b0044cf3097520e9afa9aa6b27f5">fl::task::every_ms</a>(500).<a class="code hl_function" href="de/daf/classfl_1_1task_1_1_handle_a0d96031ff5c53ece780698c5f39d9d2b.html#a0d96031ff5c53ece780698c5f39d9d2b">then</a>([] { <a class="code hl_variable" href="d4/d0c/_blur_8ino_aac80e317e5bde15da9ff90feeccbc5ef.html#aac80e317e5bde15da9ff90feeccbc5ef">toggle</a>(); });</div>
+<div class="line"><a class="code hl_function" href="d5/d4d/_blink_parallel_8ino_a29584c4a240c144644e81dfab0090635.html#a29584c4a240c144644e81dfab0090635">blink</a>.set_interval_ms(100);   <span class="comment">// speed it up</span></div>
+<div class="line"><a class="code hl_function" href="d5/d4d/_blink_parallel_8ino_a29584c4a240c144644e81dfab0090635.html#a29584c4a240c144644e81dfab0090635">blink</a>.cancel();               <span class="comment">// stop it</span></div>
+<div class="ttc" id="a_blink_parallel_8ino_a29584c4a240c144644e81dfab0090635_html_a29584c4a240c144644e81dfab0090635"><div class="ttname"><a href="d5/d4d/_blink_parallel_8ino_a29584c4a240c144644e81dfab0090635.html#a29584c4a240c144644e81dfab0090635">blink</a></div><div class="ttdeci">void blink(CRGB color, int times)</div><div class="ttdef"><b>Definition</b> <a href="d5/d4d/_blink_parallel_8ino_source.html#l00054">BlinkParallel.ino:54</a></div></div>
+<div class="ttc" id="a_blur_8ino_aac80e317e5bde15da9ff90feeccbc5ef_html_aac80e317e5bde15da9ff90feeccbc5ef"><div class="ttname"><a href="d4/d0c/_blur_8ino_aac80e317e5bde15da9ff90feeccbc5ef.html#aac80e317e5bde15da9ff90feeccbc5ef">toggle</a></div><div class="ttdeci">bool toggle</div><div class="ttdef"><b>Definition</b> <a href="d4/d0c/_blur_8ino_source.html#l00012">Blur.ino:12</a></div></div>
+</div><!-- fragment --><p><code>every_ms</code>, <code>at_framerate</code>, <code>before_frame</code>, and <code>after_frame</code> tasks recur until canceled. Coroutines run once. Frame tasks do not require <code>run()</code>; engine frame events dispatch them automatically.</p>
+<p>Callbacks run on whichever thread called <code>run()</code> or initiated the frame and are not preempted — keep each one short. A callback that blocks for 200 ms delays every other task by 200 ms.</p>
+<h1><a class="anchor" id="autotoc_md622"></a>
+Promises</h1>
+<p>Anything asynchronous returns a <code><a class="el" href="d0/d34/classfl_1_1task_1_1_promise.html" title="Promise class that provides fluent .then() and .catch_() semantics This is a lightweight wrapper arou...">fl::task::Promise</a>&lt;T&gt;</code> with the same <code>.then()</code> / <code>.catch_()</code> shape:</p>
+<div class="fragment"><div class="line"><span class="preprocessor">#include &quot;<a class="code" href="dd/d56/http_8h.html">fl/net/http.h</a>&quot;</span></div>
+<div class="line"> </div>
+<div class="line"><a class="code hl_function" href="d1/d13/namespacefl_1_1net_1_1http_aa69a7e5a3706b6fb7c8627f19c7b10d2.html#aa69a7e5a3706b6fb7c8627f19c7b10d2">fl::net::http::fetch_get</a>(<span class="stringliteral">&quot;http://fastled.io&quot;</span>)</div>
+<div class="line">    .then([](<span class="keyword">const</span> <a class="code hl_class" href="d0/dd1/classfl_1_1net_1_1http_1_1_response.html">fl::net::http::Response</a>&amp; resp) {</div>
+<div class="line">        <a class="code hl_define" href="d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;got &quot;</span> &lt;&lt; resp.<a class="code hl_function" href="d0/dd1/classfl_1_1net_1_1http_1_1_response_a132a43b868349beb535f0fbd31fc659e.html#a132a43b868349beb535f0fbd31fc659e">text</a>());</div>
+<div class="line">    })</div>
+<div class="line">    .catch_([](<span class="keyword">const</span> <a class="code hl_struct" href="d4/dda/structfl_1_1task_1_1_error.html">fl::task::Error</a>&amp; err) {</div>
+<div class="line">        <a class="code hl_define" href="d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;fetch failed: &quot;</span> &lt;&lt; err.<a class="code hl_variable" href="d4/dda/structfl_1_1task_1_1_error_a9d13c369974bf5417e2ccd9f3687988f.html#a9d13c369974bf5417e2ccd9f3687988f">message</a>);</div>
+<div class="line">    });</div>
+<div class="ttc" id="aclassfl_1_1net_1_1http_1_1_response_a132a43b868349beb535f0fbd31fc659e_html_a132a43b868349beb535f0fbd31fc659e"><div class="ttname"><a href="d0/dd1/classfl_1_1net_1_1http_1_1_response_a132a43b868349beb535f0fbd31fc659e.html#a132a43b868349beb535f0fbd31fc659e">fl::net::http::Response::text</a></div><div class="ttdeci">const fl::string &amp; text() const</div><div class="ttdoc">Response body as text (like JavaScript response.text())</div><div class="ttdef"><b>Definition</b> <a href="d6/d6a/fetch_8h_source.html#l00095">fetch.h:95</a></div></div>
+<div class="ttc" id="aclassfl_1_1net_1_1http_1_1_response_html"><div class="ttname"><a href="d0/dd1/classfl_1_1net_1_1http_1_1_response.html">fl::net::http::Response</a></div><div class="ttdoc">HTTP response class (unified interface)</div><div class="ttdef"><b>Definition</b> <a href="d6/d6a/fetch_8h_source.html#l00078">fetch.h:78</a></div></div>
+<div class="ttc" id="ahttp_8h_html"><div class="ttname"><a href="dd/d56/http_8h.html">http.h</a></div><div class="ttdoc">fl::net::http — High-level HTTP client and server facade</div></div>
+<div class="ttc" id="anamespacefl_1_1net_1_1http_aa69a7e5a3706b6fb7c8627f19c7b10d2_html_aa69a7e5a3706b6fb7c8627f19c7b10d2"><div class="ttname"><a href="d1/d13/namespacefl_1_1net_1_1http_aa69a7e5a3706b6fb7c8627f19c7b10d2.html#aa69a7e5a3706b6fb7c8627f19c7b10d2">fl::net::http::fetch_get</a></div><div class="ttdeci">fl::task::Promise&lt; Response &gt; fetch_get(const fl::string &amp;url, const FetchOptions &amp;request)</div><div class="ttdoc">HTTP GET request.</div><div class="ttdef"><b>Definition</b> <a href="de/daa/fetch_8cpp_8hpp_source.html#l00512">fetch.cpp.hpp:512</a></div></div>
+</div><!-- fragment --><p>The promise completes while the executor is pumped, so this still requires <code>run()</code> in <code><a class="el" href="d5/d17/_analog_output_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f">loop()</a></code>. You can also create and settle your own:</p>
+<div class="fragment"><div class="line"><span class="keyword">auto</span> p = <a class="code hl_function" href="d0/d34/classfl_1_1task_1_1_promise_abdb44418713e7f012b6860d6cf6aa69a.html#abdb44418713e7f012b6860d6cf6aa69a">fl::task::Promise&lt;int&gt;::create</a>();</div>
+<div class="line"><span class="comment">// ... later, from wherever the answer arrives:</span></div>
+<div class="line">p.complete_with_value(42);</div>
+<div class="ttc" id="aclassfl_1_1task_1_1_promise_abdb44418713e7f012b6860d6cf6aa69a_html_abdb44418713e7f012b6860d6cf6aa69a"><div class="ttname"><a href="d0/d34/classfl_1_1task_1_1_promise_abdb44418713e7f012b6860d6cf6aa69a.html#abdb44418713e7f012b6860d6cf6aa69a">fl::task::Promise::create</a></div><div class="ttdeci">static Promise&lt; T &gt; create() FL_NO_EXCEPT</div><div class="ttdoc">Create a pending Promise.</div><div class="ttdef"><b>Definition</b> <a href="d6/d17/promise_8h_source.html#l00061">promise.h:61</a></div></div>
+</div><!-- fragment --><p><code>Promise&lt;T&gt;::resolve(value)</code> and <code>Promise&lt;T&gt;::reject(error)</code> build already-settled promises, which is handy for early returns and for tests.</p>
+<h1><a class="anchor" id="autotoc_md623"></a>
+<code>await</code> — sequential async</h1>
+<p>Callbacks are awkward when the logic is genuinely sequential: <em>fetch, wait for the reply, then apply it</em>. Both <code>await</code> forms give you that back, and both return a <code>PromiseResult&lt;T&gt;</code> — check <code>ok()</code> before <code>value()</code>:</p>
+<div class="fragment"><div class="line"><span class="keyword">auto</span> result = <a class="code hl_function" href="db/d5c/namespacefl_1_1task_ab96dc4828a01d1cff109d355d8ffc23d.html#ab96dc4828a01d1cff109d355d8ffc23d">fl::task::await_top_level</a>(<a class="code hl_function" href="d1/d13/namespacefl_1_1net_1_1http_aa69a7e5a3706b6fb7c8627f19c7b10d2.html#aa69a7e5a3706b6fb7c8627f19c7b10d2">fl::net::http::fetch_get</a>(<span class="stringliteral">&quot;http://fastled.io&quot;</span>));</div>
+<div class="line"><span class="keywordflow">if</span> (result.ok()) {</div>
+<div class="line">    apply(result.value().text());</div>
+<div class="line">} <span class="keywordflow">else</span> {</div>
+<div class="line">    <a class="code hl_define" href="d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;fetch failed: &quot;</span> &lt;&lt; result.error().message);</div>
+<div class="line">}</div>
+<div class="ttc" id="anamespacefl_1_1task_ab96dc4828a01d1cff109d355d8ffc23d_html_ab96dc4828a01d1cff109d355d8ffc23d"><div class="ttname"><a href="db/d5c/namespacefl_1_1task_ab96dc4828a01d1cff109d355d8ffc23d.html#ab96dc4828a01d1cff109d355d8ffc23d">fl::task::await_top_level</a></div><div class="ttdeci">PromiseResult&lt; T &gt; await_top_level(Promise&lt; T &gt; p)</div><div class="ttdoc">Synchronously wait for a promise to complete (ONLY safe in top-level contexts)</div><div class="ttdef"><b>Definition</b> <a href="dd/d40/executor_8h_source.html#l00184">executor.h:184</a></div></div>
+</div><!-- fragment --><table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone"></th><th class="markdownTableHeadNone">Where   </th><th class="markdownTableHeadNone">Cost    </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>await_top_level(p)</code>   </td><td class="markdownTableBodyNone">Arduino <code><a class="el" href="d5/d17/_analog_output_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f">loop()</a></code> / <code>main()</code>, every platform   </td><td class="markdownTableBodyNone">Busy-waits, calling <code>run(1000)</code> in a loop — other tasks still run, but the CPU is spinning    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>await(p)</code>   </td><td class="markdownTableBodyNone">Inside a coroutine — ESP32 and host builds   </td><td class="markdownTableBodyNone">Blocks that coroutine only, at zero CPU cost; everything else keeps running   </td></tr>
+</table>
+<p>Prefer <code>await()</code> when you have a coroutine to put the work on. <code>await_top_level()</code> refuses to nest more than a few levels deep and gives up rather than hanging forever.</p>
+<h1><a class="anchor" id="autotoc_md624"></a>
+Coroutines</h1>
+<p>A coroutine is a real OS task (a FreeRTOS task on ESP32, a <code>std::thread</code> on host builds), so it can block on <code>await()</code> without stalling the animation.</p>
+<div class="fragment"><div class="line"><span class="preprocessor">#include &quot;<a class="code" href="dd/d56/http_8h.html">fl/net/http.h</a>&quot;</span></div>
+<div class="line"> </div>
+<div class="line"><span class="keyword">auto</span> worker = <a class="code hl_function" href="db/d5c/namespacefl_1_1task_a5122e88cce37c48ef7b7c9360e3b7f53.html#a5122e88cce37c48ef7b7c9360e3b7f53">fl::task::coroutine</a>({</div>
+<div class="line">    .func = [] {</div>
+<div class="line">        <span class="keyword">auto</span> r = <a class="code hl_function" href="db/d5c/namespacefl_1_1task_a85deae5ae9d4c15fc28125ffd9a7637b.html#a85deae5ae9d4c15fc28125ffd9a7637b">fl::task::await</a>(<a class="code hl_function" href="d1/d13/namespacefl_1_1net_1_1http_aa69a7e5a3706b6fb7c8627f19c7b10d2.html#aa69a7e5a3706b6fb7c8627f19c7b10d2">fl::net::http::fetch_get</a>(<span class="stringliteral">&quot;http://my-server/color&quot;</span>));</div>
+<div class="line">        <span class="keywordflow">if</span> (r.ok()) {</div>
+<div class="line">            apply_color(r.value().text());</div>
+<div class="line">        }</div>
+<div class="line">    },</div>
+<div class="line">    .name = <span class="stringliteral">&quot;color-fetch&quot;</span>,</div>
+<div class="line">});</div>
+<div class="ttc" id="anamespacefl_1_1task_a5122e88cce37c48ef7b7c9360e3b7f53_html_a5122e88cce37c48ef7b7c9360e3b7f53"><div class="ttname"><a href="db/d5c/namespacefl_1_1task_a5122e88cce37c48ef7b7c9360e3b7f53.html#a5122e88cce37c48ef7b7c9360e3b7f53">fl::task::coroutine</a></div><div class="ttdeci">Handle coroutine(const CoroutineConfig &amp;config)</div><div class="ttdoc">Creates and starts an OS-level coroutine task.</div><div class="ttdef"><b>Definition</b> <a href="df/db6/task_8cpp_8hpp_source.html#l00364">task.cpp.hpp:364</a></div></div>
+<div class="ttc" id="anamespacefl_1_1task_a85deae5ae9d4c15fc28125ffd9a7637b_html_a85deae5ae9d4c15fc28125ffd9a7637b"><div class="ttname"><a href="db/d5c/namespacefl_1_1task_a85deae5ae9d4c15fc28125ffd9a7637b.html#a85deae5ae9d4c15fc28125ffd9a7637b">fl::task::await</a></div><div class="ttdeci">PromiseResult&lt; T &gt; await(Promise&lt; T &gt; p, fl::u32 timeout_ms=fl::platforms::kAwaitDefaultTimeoutMs) FL_NO_EXCEPT</div><div class="ttdoc">Await promise completion in a coroutine (Trampoline to platform implementation)</div><div class="ttdef"><b>Definition</b> <a href="dd/d40/executor_8h_source.html#l00307">executor.h:307</a></div></div>
+</div><!-- fragment --><p><code>CoroutineConfig</code> fields:</p>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Field   </th><th class="markdownTableHeadNone">Default   </th><th class="markdownTableHeadNone">Notes    </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>func</code>   </td><td class="markdownTableBodyNone">—   </td><td class="markdownTableBodyNone">The body. Required.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>name</code>   </td><td class="markdownTableBodyNone"><code>"task"</code>   </td><td class="markdownTableBodyNone">Shows up in RTOS task listings    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>stack_size</code>   </td><td class="markdownTableBodyNone"><code>4096</code>   </td><td class="markdownTableBodyNone">Bytes    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>priority</code>   </td><td class="markdownTableBodyNone"><code>5</code>   </td><td class="markdownTableBodyNone">RTOS priority    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>core_id</code>   </td><td class="markdownTableBodyNone">unset   </td><td class="markdownTableBodyNone">Pin to a CPU core on multi-core parts    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>trace</code>   </td><td class="markdownTableBodyNone">unset   </td><td class="markdownTableBodyNone"><code>FL_TRACE</code> for diagnostics   </td></tr>
+</table>
+<p>The handle is RAII: <code>worker.stop()</code> ends it, and so does letting the handle go out of scope. From inside the body, <code><a class="el" href="db/d5c/namespacefl_1_1task_af022846676fa6b1c8acf02b97ddd5634.html#af022846676fa6b1c8acf02b97ddd5634" title="Terminates the currently executing coroutine.">fl::task::exit_current()</a></code> self-deletes.</p>
+<h1><a class="anchor" id="autotoc_md625"></a>
+Platform support</h1>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone"></th><th class="markdownTableHeadNone">Scheduler (<code>every_ms</code>, <code>at_framerate</code>)   </th><th class="markdownTableHeadNone"><code>await_top_level</code>   </th><th class="markdownTableHeadNone"><code>coroutine()</code> + <code>await</code>    </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">AVR / small MCUs   </td><td class="markdownTableBodyNone">✅   </td><td class="markdownTableBodyNone">✅   </td><td class="markdownTableBodyNone">❌ no-op    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">ESP32 family   </td><td class="markdownTableBodyNone">✅   </td><td class="markdownTableBodyNone">✅   </td><td class="markdownTableBodyNone">✅ FreeRTOS task    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">Teensy 4.x   </td><td class="markdownTableBodyNone">✅   </td><td class="markdownTableBodyNone">✅   </td><td class="markdownTableBodyNone">✅    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">Other Arduino / ARM   </td><td class="markdownTableBodyNone">✅   </td><td class="markdownTableBodyNone">✅   </td><td class="markdownTableBodyNone">❌ no-op    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">Host / stub (tests)   </td><td class="markdownTableBodyNone">✅   </td><td class="markdownTableBodyNone">✅   </td><td class="markdownTableBodyNone">✅ <code>std::thread</code>    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">WASM   </td><td class="markdownTableBodyNone">✅   </td><td class="markdownTableBodyNone">✅   </td><td class="markdownTableBodyNone">✅   </td></tr>
+</table>
+<p>Code using coroutines still compiles everywhere; where there is no support, <code><a class="el" href="db/d5c/namespacefl_1_1task_a5122e88cce37c48ef7b7c9360e3b7f53.html#a5122e88cce37c48ef7b7c9360e3b7f53" title="Creates and starts an OS-level coroutine task.">fl::task::coroutine()</a></code> is a no-op, so don't depend on the body having run.</p>
+<h1><a class="anchor" id="autotoc_md626"></a>
+Gotchas</h1>
+<ul>
+<li><b>No <code>run()</code>, no time-based tasks.</b> Frame tasks follow FastLED frame events instead.</li>
+<li><b><code>.then()</code> is what registers.</b> A handle with only <code>.catch_()</code> is inert.</li>
+<li><b>Don't block in a callback.</b> Everything else waits behind it. Long or blocking work belongs in a coroutine.</li>
+<li><b>Intervals are floors, not guarantees.</b> A task due every 10 ms fires on the first <code>run()</code> at or after the deadline; a slow callback elsewhere pushes it out.</li>
+<li><b>Timing comes from <code>millis()</code>.</b> Sub-millisecond scheduling is not what this is for.</li>
+</ul>
+<h1><a class="anchor" id="autotoc_md627"></a>
+Files</h1>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">File   </th><th class="markdownTableHeadNone">Contents    </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code><a class="el" href="db/da4/task_8h.html">task.h</a></code>   </td><td class="markdownTableBodyNone"><code>Handle</code>, the builders, <code>CoroutineConfig</code>    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code><a class="el" href="d2/dd8/scheduler_8h.html" title="Task scheduler — manages timer and frame-based tasks.">scheduler.h</a></code>   </td><td class="markdownTableBodyNone"><code>Scheduler</code> — task storage and dispatch    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code><a class="el" href="dd/d40/executor_8h.html" title="Task executor — runs registered task runners and manages the run loop.">executor.h</a></code>   </td><td class="markdownTableBodyNone"><code>run()</code>, <code>ExecFlags</code>, <code>Runner</code>, <code>await</code>, <code>await_top_level</code>    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code><a class="el" href="d6/d17/promise_8h.html" title="Promise-based fluent API for FastLED - standalone async primitives.">promise.h</a></code>   </td><td class="markdownTableBodyNone"><code>Promise&lt;T&gt;</code>    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code><a class="el" href="d7/d93/promise__result_8h.html">promise_result.h</a></code>   </td><td class="markdownTableBodyNone"><code>PromiseResult&lt;T&gt;</code>, <code>Error</code>   </td></tr>
+</table>
+<h1><a class="anchor" id="autotoc_md628"></a>
+See also</h1>
+<ul>
+<li><a href="../../../examples/Async"><code>examples/Async</code></a> — the quick start, runnable</li>
+<li><a href="../net/http.h"><code>src/fl/net/http.h</code></a> — <code>fetch_get</code> and the HTTP server</li>
+<li><a class="el" href="d7/d5f/src_2fl_2audio_2_r_e_a_d_m_e_8md.html"><code>src/fl/audio/README.md</code></a> — audio callbacks, which ride on this scheduler </li>
+</ul>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.3-->
@@ -143,7 +394,7 @@ Files</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="dir_3c55ea006e4dd4fc925403c373dc7c52.html">task</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:12 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:13 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

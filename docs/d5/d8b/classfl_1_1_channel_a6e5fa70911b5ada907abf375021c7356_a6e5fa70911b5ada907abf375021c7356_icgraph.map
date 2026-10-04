@@ -1,0 +1,5 @@
+<map id="fl::Channel::getChipset" name="fl::Channel::getChipset">
+<area shape="rect" id="Node000001" title="Get the chipset configuration variant." alt="" coords="264,5,433,31"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_aba71524e25f179bf921dc7b760eb125d.html#aba71524e25f179bf921dc7b760eb125d" title="Identify the channel&#39;s final current/quantization choice without adding a virtual slot or storage to ..." alt="" coords="5,5,216,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="250,21,216,21,216,15,250,15"/>
+</map>

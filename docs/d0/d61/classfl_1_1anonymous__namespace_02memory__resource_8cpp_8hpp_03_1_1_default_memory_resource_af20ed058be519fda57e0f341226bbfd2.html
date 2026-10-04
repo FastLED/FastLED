@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -134,22 +134,22 @@ $(function(){initNavTree('d0/d61/classfl_1_1anonymous__namespace_02memory__resou
 
 <p>Default: returns nullptr (not supported). Override for realloc-capable resources. </p>
 
-<p>Reimplemented from <a class="el" href="../../db/d13/classfl_1_1memory__resource_a6898c8e228e6caa93d1c79292692ca0d.html#a6898c8e228e6caa93d1c79292692ca0d">fl::memory_resource</a>.</p>
+<p>Reimplemented from <a class="el" href="../../db/d13/classfl_1_1memory__resource_ad1a5b50b76cba44afdc298a629776baa.html#ad1a5b50b76cba44afdc298a629776baa">fl::memory_resource</a>.</p>
 
 <p class="definition">Definition at line <a class="el" href="../../d1/d16/memory__resource_8cpp_8hpp_source.html#l00038">38</a> of file <a class="el" href="../../d1/d16/memory__resource_8cpp_8hpp_source.html">memory_resource.cpp.hpp</a>.</p>
 <div class="fragment"><div class="line"><span class="lineno">   38</span>                                                                              {</div>
 <div class="line"><span class="lineno">   39</span>        <span class="keywordtype">void</span>* <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a> = <a class="code hl_function" href="../../d4/d36/namespacefl_aae1ec340fbf142bdbd24d22307f15303.html#aae1ec340fbf142bdbd24d22307f15303">fl::realloc</a>(p, new_bytes);</div>
 <div class="line"><span class="lineno">   40</span>        <span class="keywordflow">if</span> (<a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a> &amp;&amp; new_bytes &gt; old_bytes) {</div>
 <div class="line"><span class="lineno">   41</span>            <span class="comment">// Zero-initialize newly allocated region</span></div>
-<div class="line"><span class="lineno">   42</span>            <a class="code hl_function" href="../../d4/d36/namespacefl_a44a195439ac7fa303b4b0b0c956605be.html#a44a195439ac7fa303b4b0b0c956605be">fl::memset</a>(<span class="keyword">static_cast&lt;</span><span class="keywordtype">char</span>*<span class="keyword">&gt;</span>(<a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>) + old_bytes, 0, new_bytes - old_bytes);</div>
+<div class="line"><span class="lineno">   42</span>            <a class="code hl_function" href="../../d4/d36/namespacefl_a9416b2c34c489ae11032cb58c2d3c58c.html#a9416b2c34c489ae11032cb58c2d3c58c">fl::memset</a>(<span class="keyword">static_cast&lt;</span><span class="keywordtype">char</span>*<span class="keyword">&gt;</span>(<a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>) + old_bytes, 0, new_bytes - old_bytes);</div>
 <div class="line"><span class="lineno">   43</span>        }</div>
 <div class="line"><span class="lineno">   44</span>        <span class="keywordflow">return</span> <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>;</div>
 <div class="line"><span class="lineno">   45</span>    }</div>
-<div class="ttc" id="anamespacefl_a44a195439ac7fa303b4b0b0c956605be_html_a44a195439ac7fa303b4b0b0c956605be"><div class="ttname"><a href="../../d4/d36/namespacefl_a44a195439ac7fa303b4b0b0c956605be.html#a44a195439ac7fa303b4b0b0c956605be">fl::memset</a></div><div class="ttdeci">void * memset(void *s, int c, size_t n) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/da3/cstring_8cpp_8hpp_source.html#l00125">cstring.cpp.hpp:125</a></div></div>
 <div class="ttc" id="anamespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99_html_a8fa65f6529fc3eb6a174cb304a4bfc99"><div class="ttname"><a href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">fl::result</a></div><div class="ttdeci">expected&lt; T, E &gt; result</div><div class="ttdoc">Alias for expected (Rust-style naming)</div><div class="ttdef"><b>Definition</b> <a href="../../de/d93/result_8h_source.html#l00031">result.h:31</a></div></div>
+<div class="ttc" id="anamespacefl_a9416b2c34c489ae11032cb58c2d3c58c_html_a9416b2c34c489ae11032cb58c2d3c58c"><div class="ttname"><a href="../../d4/d36/namespacefl_a9416b2c34c489ae11032cb58c2d3c58c.html#a9416b2c34c489ae11032cb58c2d3c58c">fl::memset</a></div><div class="ttdeci">void * memset(void *s, int c, size_t n) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/da3/cstring_8cpp_8hpp_source.html#l00143">cstring.cpp.hpp:143</a></div></div>
 <div class="ttc" id="anamespacefl_aae1ec340fbf142bdbd24d22307f15303_html_aae1ec340fbf142bdbd24d22307f15303"><div class="ttname"><a href="../../d4/d36/namespacefl_aae1ec340fbf142bdbd24d22307f15303.html#aae1ec340fbf142bdbd24d22307f15303">fl::realloc</a></div><div class="ttdeci">void * realloc(void *ptr, size_t new_size)</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d1c/malloc_8cpp_8hpp_source.html#l00026">malloc.cpp.hpp:26</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../df/da3/cstring_8cpp_8hpp_source.html#l00125">fl::memset()</a>, and <a class="el" href="../../d5/d1c/malloc_8cpp_8hpp_source.html#l00026">fl::realloc()</a>.</p>
+<p class="reference">References <a class="el" href="../../df/da3/cstring_8cpp_8hpp_source.html#l00143">fl::memset()</a>, and <a class="el" href="../../d5/d1c/malloc_8cpp_8hpp_source.html#l00026">fl::realloc()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -167,7 +167,7 @@ $(function(){initNavTree('d0/d61/classfl_1_1anonymous__namespace_02memory__resou
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d1/d59/namespacefl_1_1anonymous__namespace_02memory__resource_8cpp_8hpp_03.html">anonymous_namespace{memory_resource.cpp.hpp}</a></li><li class="navelem"><a class="el" href="../../d0/d61/classfl_1_1anonymous__namespace_02memory__resource_8cpp_8hpp_03_1_1_default_memory_resource.html">DefaultMemoryResource</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:07 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:11 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -12,6 +12,8 @@ var dir_10dd822f9fdc91e4cdf1760ae6c69186 =
     [ "jpeg.h", "d3/d31/jpeg_8h.html", "d3/d31/jpeg_8h" ],
     [ "mp3.cpp.hpp", "d3/df6/mp3_8cpp_8hpp.html", "d3/df6/mp3_8cpp_8hpp" ],
     [ "mp3.h", "d9/dd8/mp3_8h.html", "d9/dd8/mp3_8h" ],
+    [ "mp3_memory.h", "db/d32/mp3__memory_8h.html", "db/d32/mp3__memory_8h" ],
+    [ "mp3_vbr_tag.h", "d6/d31/mp3__vbr__tag_8h.html", "d6/d31/mp3__vbr__tag_8h" ],
     [ "mp4_parser.cpp.hpp", "d4/d97/mp4__parser_8cpp_8hpp.html", "d4/d97/mp4__parser_8cpp_8hpp" ],
     [ "mp4_parser.h", "d4/d45/mp4__parser_8h.html", "d4/d45/mp4__parser_8h" ],
     [ "mpeg1.cpp.hpp", "d2/d10/mpeg1_8cpp_8hpp.html", null ],

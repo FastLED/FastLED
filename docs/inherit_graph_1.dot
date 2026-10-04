@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="_MP3FrameInfo",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/db1/mp3dec_8h.html#db/df5/struct___m_p3_frame_info",tooltip=" "];
+  Node0 [id="Node000000",label="autoresearch::animartrix\l_check::PerlinBenchState",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/d6a/structautoresearch_1_1animartrix__check_1_1_perlin_bench_state.html",tooltip=" "];
 }

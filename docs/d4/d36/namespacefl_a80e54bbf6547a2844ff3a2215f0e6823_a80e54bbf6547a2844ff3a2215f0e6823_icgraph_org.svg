@@ -65,7 +65,7 @@
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../d2/d59/namespacefl_1_1third__party_1_1vorbis_a8ecc3d0cde7d77139e457803bb24a971.html#a8ecc3d0cde7d77139e457803bb24a971" target="_top" xlink:title=" ">
+<g id="a_Node000004"><a xlink:href="../../d2/d59/namespacefl_1_1third__party_1_1vorbis_aae606f220000226d31f2813b49db3ded.html#aae606f220000226d31f2813b49db3ded" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="300,-52 153,-52 153,-22 300,-22 300,-52"/>
 <text text-anchor="start" x="161" y="-40" font-family="Helvetica,sans-Serif" font-size="10.00">fl::third_party::vorbis</text>
 <text text-anchor="middle" x="226.5" y="-29" font-family="Helvetica,sans-Serif" font-size="10.00">::compute_sorted_huffman</text>
@@ -84,7 +84,7 @@
 <!-- Node5 -->
 <g id="Node000005" class="node">
 <title>Node5</title>
-<g id="a_Node000005"><a xlink:href="../../d2/d59/namespacefl_1_1third__party_1_1vorbis_ab0378c0ee05eb1d0e59a6e72b4e011f7.html#ab0378c0ee05eb1d0e59a6e72b4e011f7" target="_top" xlink:title=" ">
+<g id="a_Node000005"><a xlink:href="../../d2/d59/namespacefl_1_1third__party_1_1vorbis_a7d8979585d46acb349aa988deba85a8e.html#a7d8979585d46acb349aa988deba85a8e" target="_top" xlink:title=" ">
 <polygon fill="#fff0f0" stroke="red" points="117,-30 0,-30 0,0 117,0 117,-30"/>
 <text text-anchor="start" x="8" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">fl::third_party::vorbis</text>
 <text text-anchor="middle" x="58.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">::start_decoder</text>

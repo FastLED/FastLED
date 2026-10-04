@@ -1,0 +1,8 @@
+<map id="mood_ring::RoomListener::begin" name="mood_ring::RoomListener::begin">
+<area shape="rect" id="Node000001" title="Install the event callbacks. Call once after the Processor exists." alt="" coords="5,47,195,87"/>
+<area shape="rect" id="Node000002" href="$dc/d25/classmood__ring_1_1_room_listener_aa65b7aea6531835fdba11cb37ce9384c.html#aa65b7aea6531835fdba11cb37ce9384c" title=" " alt="" coords="243,5,432,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="194,48,229,42,230,47,195,53"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a3c0ba5842bfd029c404a38c8df2315f3.html#a3c0ba5842bfd029c404a38c8df2315f3" title="Universal millisecond timer &#45; returns milliseconds since system startup." alt="" coords="300,94,375,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="195,80,287,96,286,101,194,85"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="299,96,290,86,295,76,311,70,337,67,371,71,383,81,380,85,369,76,337,73,312,75,298,80,296,85,303,92"/>
+</map>

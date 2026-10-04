@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -124,86 +124,86 @@ $(function(){initNavTree('d4/d36/namespacefl_af0cf9a03d28b70d9ab7b5586984a423f.h
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d1/dda/cstdlib_8cpp_8hpp_source.html#l00085">85</a> of file <a class="el" href="../../d1/dda/cstdlib_8cpp_8hpp_source.html">cstdlib.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   85</span>                                                      {</div>
-<div class="line"><span class="lineno">   86</span>    <span class="keywordflow">if</span> (!str) {</div>
-<div class="line"><span class="lineno">   87</span>        <span class="keywordflow">if</span> (endptr) {</div>
-<div class="line"><span class="lineno">   88</span>            *endptr = <span class="keyword">const_cast&lt;</span><span class="keywordtype">char</span>*<span class="keyword">&gt;</span>(str);</div>
-<div class="line"><span class="lineno">   89</span>        }</div>
-<div class="line"><span class="lineno">   90</span>        <span class="keywordflow">return</span> 0;</div>
-<div class="line"><span class="lineno">   91</span>    }</div>
-<div class="line"><span class="lineno">   92</span> </div>
-<div class="line"><span class="lineno">   93</span>    <span class="keyword">const</span> <span class="keywordtype">char</span>* p = str;</div>
-<div class="line"><span class="lineno">   94</span>    <span class="keywordtype">long</span> <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a> = 0;</div>
-<div class="line"><span class="lineno">   95</span>    <span class="keywordtype">bool</span> negative = <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">   96</span> </div>
-<div class="line"><span class="lineno">   97</span>    <span class="comment">// Skip leading whitespace</span></div>
-<div class="line"><span class="lineno">   98</span>    <span class="keywordflow">while</span> (*p == <span class="charliteral">&#39; &#39;</span> || *p == <span class="charliteral">&#39;\t&#39;</span> || *p == <span class="charliteral">&#39;\n&#39;</span> || *p == <span class="charliteral">&#39;\r&#39;</span> || *p == <span class="charliteral">&#39;\f&#39;</span> || *p == <span class="charliteral">&#39;\v&#39;</span>) {</div>
-<div class="line"><span class="lineno">   99</span>        p++;</div>
-<div class="line"><span class="lineno">  100</span>    }</div>
-<div class="line"><span class="lineno">  101</span> </div>
-<div class="line"><span class="lineno">  102</span>    <span class="comment">// Handle sign</span></div>
-<div class="line"><span class="lineno">  103</span>    <span class="keywordflow">if</span> (*p == <span class="charliteral">&#39;-&#39;</span>) {</div>
-<div class="line"><span class="lineno">  104</span>        negative = <span class="keyword">true</span>;</div>
-<div class="line"><span class="lineno">  105</span>        p++;</div>
-<div class="line"><span class="lineno">  106</span>    } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (*p == <span class="charliteral">&#39;+&#39;</span>) {</div>
+<p class="definition">Definition at line <a class="el" href="../../d1/dda/cstdlib_8cpp_8hpp_source.html#l00087">87</a> of file <a class="el" href="../../d1/dda/cstdlib_8cpp_8hpp_source.html">cstdlib.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   87</span>                                                      {</div>
+<div class="line"><span class="lineno">   88</span>    <span class="keywordflow">if</span> (!str) {</div>
+<div class="line"><span class="lineno">   89</span>        <span class="keywordflow">if</span> (endptr) {</div>
+<div class="line"><span class="lineno">   90</span>            *endptr = <span class="keyword">const_cast&lt;</span><span class="keywordtype">char</span>*<span class="keyword">&gt;</span>(str);</div>
+<div class="line"><span class="lineno">   91</span>        }</div>
+<div class="line"><span class="lineno">   92</span>        <span class="keywordflow">return</span> 0;</div>
+<div class="line"><span class="lineno">   93</span>    }</div>
+<div class="line"><span class="lineno">   94</span> </div>
+<div class="line"><span class="lineno">   95</span>    <span class="keyword">const</span> <span class="keywordtype">char</span>* p = str;</div>
+<div class="line"><span class="lineno">   96</span>    <span class="keywordtype">long</span> <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a> = 0;</div>
+<div class="line"><span class="lineno">   97</span>    <span class="keywordtype">bool</span> negative = <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">   98</span> </div>
+<div class="line"><span class="lineno">   99</span>    <span class="comment">// Skip leading whitespace</span></div>
+<div class="line"><span class="lineno">  100</span>    <span class="keywordflow">while</span> (*p == <span class="charliteral">&#39; &#39;</span> || *p == <span class="charliteral">&#39;\t&#39;</span> || *p == <span class="charliteral">&#39;\n&#39;</span> || *p == <span class="charliteral">&#39;\r&#39;</span> || *p == <span class="charliteral">&#39;\f&#39;</span> || *p == <span class="charliteral">&#39;\v&#39;</span>) {</div>
+<div class="line"><span class="lineno">  101</span>        p++;</div>
+<div class="line"><span class="lineno">  102</span>    }</div>
+<div class="line"><span class="lineno">  103</span> </div>
+<div class="line"><span class="lineno">  104</span>    <span class="comment">// Handle sign</span></div>
+<div class="line"><span class="lineno">  105</span>    <span class="keywordflow">if</span> (*p == <span class="charliteral">&#39;-&#39;</span>) {</div>
+<div class="line"><span class="lineno">  106</span>        negative = <span class="keyword">true</span>;</div>
 <div class="line"><span class="lineno">  107</span>        p++;</div>
-<div class="line"><span class="lineno">  108</span>    }</div>
-<div class="line"><span class="lineno">  109</span> </div>
-<div class="line"><span class="lineno">  110</span>    <span class="comment">// Auto-detect base if base is 0</span></div>
-<div class="line"><span class="lineno">  111</span>    <span class="keywordflow">if</span> (base == 0) {</div>
-<div class="line"><span class="lineno">  112</span>        <span class="keywordflow">if</span> (*p == <span class="charliteral">&#39;0&#39;</span>) {</div>
-<div class="line"><span class="lineno">  113</span>            <span class="keywordflow">if</span> (*(p + 1) == <span class="charliteral">&#39;x&#39;</span> || *(p + 1) == <span class="charliteral">&#39;X&#39;</span>) {</div>
-<div class="line"><span class="lineno">  114</span>                base = 16;</div>
-<div class="line"><span class="lineno">  115</span>                p += 2;</div>
-<div class="line"><span class="lineno">  116</span>            } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  117</span>                base = 8;</div>
-<div class="line"><span class="lineno">  118</span>                p++;</div>
-<div class="line"><span class="lineno">  119</span>            }</div>
-<div class="line"><span class="lineno">  120</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  121</span>            base = 10;</div>
-<div class="line"><span class="lineno">  122</span>        }</div>
-<div class="line"><span class="lineno">  123</span>    } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (base == 16) {</div>
-<div class="line"><span class="lineno">  124</span>        <span class="comment">// Skip optional 0x/0X prefix for base 16</span></div>
-<div class="line"><span class="lineno">  125</span>        <span class="keywordflow">if</span> (*p == <span class="charliteral">&#39;0&#39;</span> &amp;&amp; (*(p + 1) == <span class="charliteral">&#39;x&#39;</span> || *(p + 1) == <span class="charliteral">&#39;X&#39;</span>)) {</div>
-<div class="line"><span class="lineno">  126</span>            p += 2;</div>
-<div class="line"><span class="lineno">  127</span>        }</div>
-<div class="line"><span class="lineno">  128</span>    }</div>
-<div class="line"><span class="lineno">  129</span> </div>
-<div class="line"><span class="lineno">  130</span>    <span class="comment">// Validate base</span></div>
-<div class="line"><span class="lineno">  131</span>    <span class="keywordflow">if</span> (base &lt; 2 || base &gt; 36) {</div>
-<div class="line"><span class="lineno">  132</span>        <span class="keywordflow">if</span> (endptr) {</div>
-<div class="line"><span class="lineno">  133</span>            *endptr = <span class="keyword">const_cast&lt;</span><span class="keywordtype">char</span>*<span class="keyword">&gt;</span>(str);</div>
-<div class="line"><span class="lineno">  134</span>        }</div>
-<div class="line"><span class="lineno">  135</span>        <span class="keywordflow">return</span> 0;</div>
-<div class="line"><span class="lineno">  136</span>    }</div>
-<div class="line"><span class="lineno">  137</span> </div>
-<div class="line"><span class="lineno">  138</span>    <span class="comment">// Parse digits</span></div>
-<div class="line"><span class="lineno">  139</span>    <span class="keyword">const</span> <span class="keywordtype">char</span>* start = p;</div>
-<div class="line"><span class="lineno">  140</span>    <span class="keywordflow">while</span> (*p &amp;&amp; <a class="code hl_function" href="../../d4/d36/namespacefl_a64c69c989d579913924d0aa4ff9ded7c.html#a64c69c989d579913924d0aa4ff9ded7c">isDigitInBase</a>(*p, base)) {</div>
-<div class="line"><span class="lineno">  141</span>        <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a> = <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a> * base + <a class="code hl_function" href="../../d4/d36/namespacefl_a0497a09eced515feabd41bb9b821754f.html#a0497a09eced515feabd41bb9b821754f">charToDigit</a>(*p);</div>
-<div class="line"><span class="lineno">  142</span>        p++;</div>
-<div class="line"><span class="lineno">  143</span>    }</div>
-<div class="line"><span class="lineno">  144</span> </div>
-<div class="line"><span class="lineno">  145</span>    <span class="comment">// Set endptr to point to first invalid character</span></div>
-<div class="line"><span class="lineno">  146</span>    <span class="keywordflow">if</span> (endptr) {</div>
-<div class="line"><span class="lineno">  147</span>        <span class="keywordflow">if</span> (p == start) {</div>
-<div class="line"><span class="lineno">  148</span>            <span class="comment">// No digits parsed</span></div>
-<div class="line"><span class="lineno">  149</span>            *endptr = <span class="keyword">const_cast&lt;</span><span class="keywordtype">char</span>*<span class="keyword">&gt;</span>(str);</div>
-<div class="line"><span class="lineno">  150</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  151</span>            *endptr = <span class="keyword">const_cast&lt;</span><span class="keywordtype">char</span>*<span class="keyword">&gt;</span>(p);</div>
-<div class="line"><span class="lineno">  152</span>        }</div>
-<div class="line"><span class="lineno">  153</span>    }</div>
-<div class="line"><span class="lineno">  154</span> </div>
-<div class="line"><span class="lineno">  155</span>    <span class="keywordflow">return</span> negative ? -<a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a> : <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>;</div>
-<div class="line"><span class="lineno">  156</span>}</div>
-<div class="ttc" id="anamespacefl_a0497a09eced515feabd41bb9b821754f_html_a0497a09eced515feabd41bb9b821754f"><div class="ttname"><a href="../../d4/d36/namespacefl_a0497a09eced515feabd41bb9b821754f.html#a0497a09eced515feabd41bb9b821754f">fl::charToDigit</a></div><div class="ttdeci">static int charToDigit(char c)</div><div class="ttdef"><b>Definition</b> <a href="../../d1/dda/cstdlib_8cpp_8hpp_source.html#l00072">cstdlib.cpp.hpp:72</a></div></div>
-<div class="ttc" id="anamespacefl_a64c69c989d579913924d0aa4ff9ded7c_html_a64c69c989d579913924d0aa4ff9ded7c"><div class="ttname"><a href="../../d4/d36/namespacefl_a64c69c989d579913924d0aa4ff9ded7c.html#a64c69c989d579913924d0aa4ff9ded7c">fl::isDigitInBase</a></div><div class="ttdeci">static bool isDigitInBase(char c, int base)</div><div class="ttdef"><b>Definition</b> <a href="../../d1/dda/cstdlib_8cpp_8hpp_source.html#l00055">cstdlib.cpp.hpp:55</a></div></div>
+<div class="line"><span class="lineno">  108</span>    } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (*p == <span class="charliteral">&#39;+&#39;</span>) {</div>
+<div class="line"><span class="lineno">  109</span>        p++;</div>
+<div class="line"><span class="lineno">  110</span>    }</div>
+<div class="line"><span class="lineno">  111</span> </div>
+<div class="line"><span class="lineno">  112</span>    <span class="comment">// Auto-detect base if base is 0</span></div>
+<div class="line"><span class="lineno">  113</span>    <span class="keywordflow">if</span> (base == 0) {</div>
+<div class="line"><span class="lineno">  114</span>        <span class="keywordflow">if</span> (*p == <span class="charliteral">&#39;0&#39;</span>) {</div>
+<div class="line"><span class="lineno">  115</span>            <span class="keywordflow">if</span> (*(p + 1) == <span class="charliteral">&#39;x&#39;</span> || *(p + 1) == <span class="charliteral">&#39;X&#39;</span>) {</div>
+<div class="line"><span class="lineno">  116</span>                base = 16;</div>
+<div class="line"><span class="lineno">  117</span>                p += 2;</div>
+<div class="line"><span class="lineno">  118</span>            } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  119</span>                base = 8;</div>
+<div class="line"><span class="lineno">  120</span>                p++;</div>
+<div class="line"><span class="lineno">  121</span>            }</div>
+<div class="line"><span class="lineno">  122</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  123</span>            base = 10;</div>
+<div class="line"><span class="lineno">  124</span>        }</div>
+<div class="line"><span class="lineno">  125</span>    } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (base == 16) {</div>
+<div class="line"><span class="lineno">  126</span>        <span class="comment">// Skip optional 0x/0X prefix for base 16</span></div>
+<div class="line"><span class="lineno">  127</span>        <span class="keywordflow">if</span> (*p == <span class="charliteral">&#39;0&#39;</span> &amp;&amp; (*(p + 1) == <span class="charliteral">&#39;x&#39;</span> || *(p + 1) == <span class="charliteral">&#39;X&#39;</span>)) {</div>
+<div class="line"><span class="lineno">  128</span>            p += 2;</div>
+<div class="line"><span class="lineno">  129</span>        }</div>
+<div class="line"><span class="lineno">  130</span>    }</div>
+<div class="line"><span class="lineno">  131</span> </div>
+<div class="line"><span class="lineno">  132</span>    <span class="comment">// Validate base</span></div>
+<div class="line"><span class="lineno">  133</span>    <span class="keywordflow">if</span> (base &lt; 2 || base &gt; 36) {</div>
+<div class="line"><span class="lineno">  134</span>        <span class="keywordflow">if</span> (endptr) {</div>
+<div class="line"><span class="lineno">  135</span>            *endptr = <span class="keyword">const_cast&lt;</span><span class="keywordtype">char</span>*<span class="keyword">&gt;</span>(str);</div>
+<div class="line"><span class="lineno">  136</span>        }</div>
+<div class="line"><span class="lineno">  137</span>        <span class="keywordflow">return</span> 0;</div>
+<div class="line"><span class="lineno">  138</span>    }</div>
+<div class="line"><span class="lineno">  139</span> </div>
+<div class="line"><span class="lineno">  140</span>    <span class="comment">// Parse digits</span></div>
+<div class="line"><span class="lineno">  141</span>    <span class="keyword">const</span> <span class="keywordtype">char</span>* start = p;</div>
+<div class="line"><span class="lineno">  142</span>    <span class="keywordflow">while</span> (*p &amp;&amp; <a class="code hl_function" href="../../d4/d36/namespacefl_a64c69c989d579913924d0aa4ff9ded7c.html#a64c69c989d579913924d0aa4ff9ded7c">isDigitInBase</a>(*p, base)) {</div>
+<div class="line"><span class="lineno">  143</span>        <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a> = <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a> * base + <a class="code hl_function" href="../../d4/d36/namespacefl_a0497a09eced515feabd41bb9b821754f.html#a0497a09eced515feabd41bb9b821754f">charToDigit</a>(*p);</div>
+<div class="line"><span class="lineno">  144</span>        p++;</div>
+<div class="line"><span class="lineno">  145</span>    }</div>
+<div class="line"><span class="lineno">  146</span> </div>
+<div class="line"><span class="lineno">  147</span>    <span class="comment">// Set endptr to point to first invalid character</span></div>
+<div class="line"><span class="lineno">  148</span>    <span class="keywordflow">if</span> (endptr) {</div>
+<div class="line"><span class="lineno">  149</span>        <span class="keywordflow">if</span> (p == start) {</div>
+<div class="line"><span class="lineno">  150</span>            <span class="comment">// No digits parsed</span></div>
+<div class="line"><span class="lineno">  151</span>            *endptr = <span class="keyword">const_cast&lt;</span><span class="keywordtype">char</span>*<span class="keyword">&gt;</span>(str);</div>
+<div class="line"><span class="lineno">  152</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  153</span>            *endptr = <span class="keyword">const_cast&lt;</span><span class="keywordtype">char</span>*<span class="keyword">&gt;</span>(p);</div>
+<div class="line"><span class="lineno">  154</span>        }</div>
+<div class="line"><span class="lineno">  155</span>    }</div>
+<div class="line"><span class="lineno">  156</span> </div>
+<div class="line"><span class="lineno">  157</span>    <span class="keywordflow">return</span> negative ? -<a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a> : <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>;</div>
+<div class="line"><span class="lineno">  158</span>}</div>
+<div class="ttc" id="anamespacefl_a0497a09eced515feabd41bb9b821754f_html_a0497a09eced515feabd41bb9b821754f"><div class="ttname"><a href="../../d4/d36/namespacefl_a0497a09eced515feabd41bb9b821754f.html#a0497a09eced515feabd41bb9b821754f">fl::charToDigit</a></div><div class="ttdeci">static int charToDigit(char c)</div><div class="ttdef"><b>Definition</b> <a href="../../d1/dda/cstdlib_8cpp_8hpp_source.html#l00074">cstdlib.cpp.hpp:74</a></div></div>
+<div class="ttc" id="anamespacefl_a64c69c989d579913924d0aa4ff9ded7c_html_a64c69c989d579913924d0aa4ff9ded7c"><div class="ttname"><a href="../../d4/d36/namespacefl_a64c69c989d579913924d0aa4ff9ded7c.html#a64c69c989d579913924d0aa4ff9ded7c">fl::isDigitInBase</a></div><div class="ttdeci">static bool isDigitInBase(char c, int base)</div><div class="ttdef"><b>Definition</b> <a href="../../d1/dda/cstdlib_8cpp_8hpp_source.html#l00057">cstdlib.cpp.hpp:57</a></div></div>
 <div class="ttc" id="anamespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99_html_a8fa65f6529fc3eb6a174cb304a4bfc99"><div class="ttname"><a href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">fl::result</a></div><div class="ttdeci">expected&lt; T, E &gt; result</div><div class="ttdoc">Alias for expected (Rust-style naming)</div><div class="ttdef"><b>Definition</b> <a href="../../de/d93/result_8h_source.html#l00031">result.h:31</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d1/dda/cstdlib_8cpp_8hpp_source.html#l00072">charToDigit()</a>, and <a class="el" href="../../d1/dda/cstdlib_8cpp_8hpp_source.html#l00055">isDigitInBase()</a>.</p>
+<p class="reference">References <a class="el" href="../../d1/dda/cstdlib_8cpp_8hpp_source.html#l00074">charToDigit()</a>, and <a class="el" href="../../d1/dda/cstdlib_8cpp_8hpp_source.html#l00057">isDigitInBase()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d1/dda/cstdlib_8cpp_8hpp_source.html#l00230">atoi()</a>, <a class="el" href="../../d1/dda/cstdlib_8cpp_8hpp_source.html#l00234">atol()</a>, <a class="el" href="../../df/d36/json__visitors_8h_source.html#l00057">fl::detail::JsonToIntegerVisitor&lt; T &gt;::operator()()</a>, and <a class="el" href="../../de/d2c/json__helpers_8cpp_8hpp_source.html#l00067">fl::wled::parseSegmentFields()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d1/dda/cstdlib_8cpp_8hpp_source.html#l00232">atoi()</a>, <a class="el" href="../../d1/dda/cstdlib_8cpp_8hpp_source.html#l00236">atol()</a>, <a class="el" href="../../db/df7/json__dispatch_8cpp_8hpp_source.html#l00017">fl::detail::json_convert_to_i64_core()</a>, and <a class="el" href="../../de/d2c/json__helpers_8cpp_8hpp_source.html#l00067">fl::wled::parseSegmentFields()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -216,7 +216,7 @@ $(function(){initNavTree('d4/d36/namespacefl_af0cf9a03d28b70d9ab7b5586984a423f.h
 <div id="dynsection-1-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-1-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d4/d36/namespacefl_af0cf9a03d28b70d9ab7b5586984a423f_af0cf9a03d28b70d9ab7b5586984a423f_icgraph.svg" width="527" height="200"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d4/d36/namespacefl_af0cf9a03d28b70d9ab7b5586984a423f_af0cf9a03d28b70d9ab7b5586984a423f_icgraph.svg" width="580" height="222"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 
 </div>
@@ -228,7 +228,7 @@ $(function(){initNavTree('d4/d36/namespacefl_af0cf9a03d28b70d9ab7b5586984a423f.h
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:04 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:08 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

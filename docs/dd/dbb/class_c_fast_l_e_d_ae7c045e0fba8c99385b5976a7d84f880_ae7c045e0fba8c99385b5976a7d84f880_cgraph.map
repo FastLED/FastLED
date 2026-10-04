@@ -1,0 +1,9 @@
+<map id="CFastLED::addLeds" name="CFastLED::addLeds">
+<area shape="rect" id="Node000001" title="Add a block based parallel output CLEDController instance to the world." alt="" coords="5,31,149,56"/>
+<area shape="rect" id="Node000002" href="$dd/dbb/class_c_fast_l_e_d_af05a7eb54282b7c43293e2905b7405bb.html#af05a7eb54282b7c43293e2905b7405bb" title="Add a CLEDController instance to the world." alt="" coords="197,5,341,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="149,31,184,27,184,32,150,36"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a617e5ddee673007123ec891a051965fc.html#a617e5ddee673007123ec891a051965fc" title=" " alt="" coords="206,55,333,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="150,50,193,55,192,60,149,55"/>
+<area shape="rect" id="Node000004" href="$db/d77/structfl_1_1detail_1_1_bus_keep_alive_impl_aa550845c70a7a9d04a667e7718fbbe07.html#aa550845c70a7a9d04a667e7718fbbe07" title=" " alt="" coords="389,47,561,87"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="333,65,376,65,376,70,333,70"/>
+</map>

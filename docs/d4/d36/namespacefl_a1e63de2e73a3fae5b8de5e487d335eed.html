@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -119,7 +119,7 @@ $(function(){initNavTree('d4/d36/namespacefl_a1e63de2e73a3fae5b8de5e487d335eed.h
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="../../da/d3c/namespacefl_1_1fl_a7c327c33a6aec559eccccfb4b14e3aa2.html#a7c327c33a6aec559eccccfb4b14e3aa2">fract8</a></td>          <td class="paramname"><span class="paramname"><em>amountOfOverlay</em></span>, </td>
+          <td class="paramtype"><a class="el" href="../../d4/d36/namespacefl_a4f8ec02ccee51aa3af6db05861cdd4e5.html#a4f8ec02ccee51aa3af6db05861cdd4e5">fract8</a></td>          <td class="paramname"><span class="paramname"><em>amountOfOverlay</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -129,60 +129,60 @@ $(function(){initNavTree('d4/d36/namespacefl_a1e63de2e73a3fae5b8de5e487d335eed.h
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d4e/colorutils_8cpp_8hpp_source.html#l00077">77</a> of file <a class="el" href="../../db/d4e/colorutils_8cpp_8hpp_source.html">colorutils.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   78</span>                                                   {</div>
-<div class="line"><span class="lineno">   79</span>    <span class="keywordflow">if</span> (amountOfOverlay == 0) {</div>
-<div class="line"><span class="lineno">   80</span>        <span class="keywordflow">return</span> existing;</div>
-<div class="line"><span class="lineno">   81</span>    }</div>
-<div class="line"><span class="lineno">   82</span> </div>
-<div class="line"><span class="lineno">   83</span>    <span class="keywordflow">if</span> (amountOfOverlay == 255) {</div>
-<div class="line"><span class="lineno">   84</span>        existing = overlay;</div>
-<div class="line"><span class="lineno">   85</span>        <span class="keywordflow">return</span> existing;</div>
-<div class="line"><span class="lineno">   86</span>    }</div>
-<div class="line"><span class="lineno">   87</span> </div>
-<div class="line"><span class="lineno">   88</span>    <a class="code hl_typedef" href="../../da/d3c/namespacefl_1_1fl_a7c327c33a6aec559eccccfb4b14e3aa2.html#a7c327c33a6aec559eccccfb4b14e3aa2">fract8</a> amountOfKeep = 255 - amountOfOverlay;</div>
-<div class="line"><span class="lineno">   89</span> </div>
-<div class="line"><span class="lineno">   90</span>    <a class="code hl_typedef" href="../../da/d3c/namespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c.html#a7573a66f01c09f14a1ff0411f8e1153c">fl::u8</a> huedelta8 = overlay.hue - existing.hue;</div>
-<div class="line"><span class="lineno">   91</span> </div>
-<div class="line"><span class="lineno">   92</span>    <span class="keywordflow">if</span> (directionCode == <a class="code hl_enumvalue" href="../../d4/d36/namespacefl_a0a0558a9d844a5f0ed4c50bfb3fde849.html#a0a0558a9d844a5f0ed4c50bfb3fde849a2d88d70c631fdecd19f0e5537c019d5c">SHORTEST_HUES</a>) {</div>
-<div class="line"><span class="lineno">   93</span>        directionCode = <a class="code hl_enumvalue" href="../../d4/d36/namespacefl_a0a0558a9d844a5f0ed4c50bfb3fde849.html#a0a0558a9d844a5f0ed4c50bfb3fde849a968b2e75f979fd2f0fe11eaeaf9406a2">FORWARD_HUES</a>;</div>
-<div class="line"><span class="lineno">   94</span>        <span class="keywordflow">if</span> (huedelta8 &gt; 127) {</div>
-<div class="line"><span class="lineno">   95</span>            directionCode = <a class="code hl_enumvalue" href="../../d4/d36/namespacefl_a0a0558a9d844a5f0ed4c50bfb3fde849.html#a0a0558a9d844a5f0ed4c50bfb3fde849aca95836d9983c3070f877ba1b80d95c6">BACKWARD_HUES</a>;</div>
-<div class="line"><span class="lineno">   96</span>        }</div>
-<div class="line"><span class="lineno">   97</span>    }</div>
-<div class="line"><span class="lineno">   98</span> </div>
-<div class="line"><span class="lineno">   99</span>    <span class="keywordflow">if</span> (directionCode == <a class="code hl_enumvalue" href="../../d4/d36/namespacefl_a0a0558a9d844a5f0ed4c50bfb3fde849.html#a0a0558a9d844a5f0ed4c50bfb3fde849a2e531a3d46a47fde8830d374a2cf41f5">LONGEST_HUES</a>) {</div>
-<div class="line"><span class="lineno">  100</span>        directionCode = <a class="code hl_enumvalue" href="../../d4/d36/namespacefl_a0a0558a9d844a5f0ed4c50bfb3fde849.html#a0a0558a9d844a5f0ed4c50bfb3fde849a968b2e75f979fd2f0fe11eaeaf9406a2">FORWARD_HUES</a>;</div>
-<div class="line"><span class="lineno">  101</span>        <span class="keywordflow">if</span> (huedelta8 &lt; 128) {</div>
-<div class="line"><span class="lineno">  102</span>            directionCode = <a class="code hl_enumvalue" href="../../d4/d36/namespacefl_a0a0558a9d844a5f0ed4c50bfb3fde849.html#a0a0558a9d844a5f0ed4c50bfb3fde849aca95836d9983c3070f877ba1b80d95c6">BACKWARD_HUES</a>;</div>
-<div class="line"><span class="lineno">  103</span>        }</div>
-<div class="line"><span class="lineno">  104</span>    }</div>
-<div class="line"><span class="lineno">  105</span> </div>
-<div class="line"><span class="lineno">  106</span>    <span class="keywordflow">if</span> (directionCode == <a class="code hl_enumvalue" href="../../d4/d36/namespacefl_a0a0558a9d844a5f0ed4c50bfb3fde849.html#a0a0558a9d844a5f0ed4c50bfb3fde849a968b2e75f979fd2f0fe11eaeaf9406a2">FORWARD_HUES</a>) {</div>
-<div class="line"><span class="lineno">  107</span>        existing.hue = existing.hue + scale8(huedelta8, amountOfOverlay);</div>
-<div class="line"><span class="lineno">  108</span>    } <span class="keywordflow">else</span> <span class="comment">/* directionCode == BACKWARD_HUES */</span></div>
-<div class="line"><span class="lineno">  109</span>    {</div>
-<div class="line"><span class="lineno">  110</span>        huedelta8 = -huedelta8;</div>
-<div class="line"><span class="lineno">  111</span>        existing.hue = existing.hue - scale8(huedelta8, amountOfOverlay);</div>
-<div class="line"><span class="lineno">  112</span>    }</div>
-<div class="line"><span class="lineno">  113</span> </div>
-<div class="line"><span class="lineno">  114</span>    existing.sat = scale8_LEAVING_R1_DIRTY(existing.sat, amountOfKeep) +</div>
-<div class="line"><span class="lineno">  115</span>                   scale8_LEAVING_R1_DIRTY(overlay.sat, amountOfOverlay);</div>
-<div class="line"><span class="lineno">  116</span>    existing.val = scale8_LEAVING_R1_DIRTY(existing.val, amountOfKeep) +</div>
-<div class="line"><span class="lineno">  117</span>                   scale8_LEAVING_R1_DIRTY(overlay.val, amountOfOverlay);</div>
-<div class="line"><span class="lineno">  118</span> </div>
-<div class="line"><span class="lineno">  119</span>    cleanup_R1();</div>
-<div class="line"><span class="lineno">  120</span> </div>
-<div class="line"><span class="lineno">  121</span>    <span class="keywordflow">return</span> existing;</div>
-<div class="line"><span class="lineno">  122</span>}</div>
-<div class="ttc" id="anamespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c_html_a7573a66f01c09f14a1ff0411f8e1153c"><div class="ttname"><a href="../../da/d3c/namespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c.html#a7573a66f01c09f14a1ff0411f8e1153c">fl::fl::u8</a></div><div class="ttdeci">unsigned char u8</div><div class="ttdef"><b>Definition</b> <a href="../../df/d96/s16x16x4_8h_source.html#l00132">s16x16x4.h:132</a></div></div>
-<div class="ttc" id="anamespacefl_1_1fl_a7c327c33a6aec559eccccfb4b14e3aa2_html_a7c327c33a6aec559eccccfb4b14e3aa2"><div class="ttname"><a href="../../da/d3c/namespacefl_1_1fl_a7c327c33a6aec559eccccfb4b14e3aa2.html#a7c327c33a6aec559eccccfb4b14e3aa2">fl::fl::fract8</a></div><div class="ttdeci">u8 fract8</div><div class="ttdoc">Fixed-Point Fractional Types.</div><div class="ttdef"><b>Definition</b> <a href="../../df/d96/s16x16x4_8h_source.html#l00161">s16x16x4.h:161</a></div></div>
-<div class="ttc" id="anamespacefl_a0a0558a9d844a5f0ed4c50bfb3fde849_html_a0a0558a9d844a5f0ed4c50bfb3fde849a2d88d70c631fdecd19f0e5537c019d5c"><div class="ttname"><a href="../../d4/d36/namespacefl_a0a0558a9d844a5f0ed4c50bfb3fde849.html#a0a0558a9d844a5f0ed4c50bfb3fde849a2d88d70c631fdecd19f0e5537c019d5c">fl::SHORTEST_HUES</a></div><div class="ttdeci">@ SHORTEST_HUES</div><div class="ttdoc">Hue goes whichever way is shortest.</div><div class="ttdef"><b>Definition</b> <a href="../../dd/db2/colorutils__misc_8h_source.html#l00037">colorutils_misc.h:37</a></div></div>
-<div class="ttc" id="anamespacefl_a0a0558a9d844a5f0ed4c50bfb3fde849_html_a0a0558a9d844a5f0ed4c50bfb3fde849a2e531a3d46a47fde8830d374a2cf41f5"><div class="ttname"><a href="../../d4/d36/namespacefl_a0a0558a9d844a5f0ed4c50bfb3fde849.html#a0a0558a9d844a5f0ed4c50bfb3fde849a2e531a3d46a47fde8830d374a2cf41f5">fl::LONGEST_HUES</a></div><div class="ttdeci">@ LONGEST_HUES</div><div class="ttdoc">Hue goes whichever way is longest.</div><div class="ttdef"><b>Definition</b> <a href="../../dd/db2/colorutils__misc_8h_source.html#l00038">colorutils_misc.h:38</a></div></div>
-<div class="ttc" id="anamespacefl_a0a0558a9d844a5f0ed4c50bfb3fde849_html_a0a0558a9d844a5f0ed4c50bfb3fde849a968b2e75f979fd2f0fe11eaeaf9406a2"><div class="ttname"><a href="../../d4/d36/namespacefl_a0a0558a9d844a5f0ed4c50bfb3fde849.html#a0a0558a9d844a5f0ed4c50bfb3fde849a968b2e75f979fd2f0fe11eaeaf9406a2">fl::FORWARD_HUES</a></div><div class="ttdeci">@ FORWARD_HUES</div><div class="ttdoc">Hue always goes clockwise around the color wheel.</div><div class="ttdef"><b>Definition</b> <a href="../../dd/db2/colorutils__misc_8h_source.html#l00035">colorutils_misc.h:35</a></div></div>
-<div class="ttc" id="anamespacefl_a0a0558a9d844a5f0ed4c50bfb3fde849_html_a0a0558a9d844a5f0ed4c50bfb3fde849aca95836d9983c3070f877ba1b80d95c6"><div class="ttname"><a href="../../d4/d36/namespacefl_a0a0558a9d844a5f0ed4c50bfb3fde849.html#a0a0558a9d844a5f0ed4c50bfb3fde849aca95836d9983c3070f877ba1b80d95c6">fl::BACKWARD_HUES</a></div><div class="ttdeci">@ BACKWARD_HUES</div><div class="ttdoc">Hue always goes counter-clockwise around the color wheel.</div><div class="ttdef"><b>Definition</b> <a href="../../dd/db2/colorutils__misc_8h_source.html#l00036">colorutils_misc.h:36</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../db/d4e/colorutils_8cpp_8hpp_source.html#l00157">157</a> of file <a class="el" href="../../db/d4e/colorutils_8cpp_8hpp_source.html">colorutils.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  158</span>                                                   {</div>
+<div class="line"><span class="lineno">  159</span>    <span class="keywordflow">if</span> (amountOfOverlay == 0) {</div>
+<div class="line"><span class="lineno">  160</span>        <span class="keywordflow">return</span> existing;</div>
+<div class="line"><span class="lineno">  161</span>    }</div>
+<div class="line"><span class="lineno">  162</span> </div>
+<div class="line"><span class="lineno">  163</span>    <span class="keywordflow">if</span> (amountOfOverlay == 255) {</div>
+<div class="line"><span class="lineno">  164</span>        existing = overlay;</div>
+<div class="line"><span class="lineno">  165</span>        <span class="keywordflow">return</span> existing;</div>
+<div class="line"><span class="lineno">  166</span>    }</div>
+<div class="line"><span class="lineno">  167</span> </div>
+<div class="line"><span class="lineno">  168</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a4f8ec02ccee51aa3af6db05861cdd4e5.html#a4f8ec02ccee51aa3af6db05861cdd4e5">fract8</a> amountOfKeep = 255 - amountOfOverlay;</div>
+<div class="line"><span class="lineno">  169</span> </div>
+<div class="line"><span class="lineno">  170</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> huedelta8 = overlay.hue - existing.hue;</div>
+<div class="line"><span class="lineno">  171</span> </div>
+<div class="line"><span class="lineno">  172</span>    <span class="keywordflow">if</span> (directionCode == <a class="code hl_enumvalue" href="../../d4/d36/namespacefl_a0a0558a9d844a5f0ed4c50bfb3fde849.html#a0a0558a9d844a5f0ed4c50bfb3fde849a2d88d70c631fdecd19f0e5537c019d5c">SHORTEST_HUES</a>) {</div>
+<div class="line"><span class="lineno">  173</span>        directionCode = <a class="code hl_enumvalue" href="../../d4/d36/namespacefl_a0a0558a9d844a5f0ed4c50bfb3fde849.html#a0a0558a9d844a5f0ed4c50bfb3fde849a968b2e75f979fd2f0fe11eaeaf9406a2">FORWARD_HUES</a>;</div>
+<div class="line"><span class="lineno">  174</span>        <span class="keywordflow">if</span> (huedelta8 &gt; 127) {</div>
+<div class="line"><span class="lineno">  175</span>            directionCode = <a class="code hl_enumvalue" href="../../d4/d36/namespacefl_a0a0558a9d844a5f0ed4c50bfb3fde849.html#a0a0558a9d844a5f0ed4c50bfb3fde849aca95836d9983c3070f877ba1b80d95c6">BACKWARD_HUES</a>;</div>
+<div class="line"><span class="lineno">  176</span>        }</div>
+<div class="line"><span class="lineno">  177</span>    }</div>
+<div class="line"><span class="lineno">  178</span> </div>
+<div class="line"><span class="lineno">  179</span>    <span class="keywordflow">if</span> (directionCode == <a class="code hl_enumvalue" href="../../d4/d36/namespacefl_a0a0558a9d844a5f0ed4c50bfb3fde849.html#a0a0558a9d844a5f0ed4c50bfb3fde849a2e531a3d46a47fde8830d374a2cf41f5">LONGEST_HUES</a>) {</div>
+<div class="line"><span class="lineno">  180</span>        directionCode = <a class="code hl_enumvalue" href="../../d4/d36/namespacefl_a0a0558a9d844a5f0ed4c50bfb3fde849.html#a0a0558a9d844a5f0ed4c50bfb3fde849a968b2e75f979fd2f0fe11eaeaf9406a2">FORWARD_HUES</a>;</div>
+<div class="line"><span class="lineno">  181</span>        <span class="keywordflow">if</span> (huedelta8 &lt; 128) {</div>
+<div class="line"><span class="lineno">  182</span>            directionCode = <a class="code hl_enumvalue" href="../../d4/d36/namespacefl_a0a0558a9d844a5f0ed4c50bfb3fde849.html#a0a0558a9d844a5f0ed4c50bfb3fde849aca95836d9983c3070f877ba1b80d95c6">BACKWARD_HUES</a>;</div>
+<div class="line"><span class="lineno">  183</span>        }</div>
+<div class="line"><span class="lineno">  184</span>    }</div>
+<div class="line"><span class="lineno">  185</span> </div>
+<div class="line"><span class="lineno">  186</span>    <span class="keywordflow">if</span> (directionCode == <a class="code hl_enumvalue" href="../../d4/d36/namespacefl_a0a0558a9d844a5f0ed4c50bfb3fde849.html#a0a0558a9d844a5f0ed4c50bfb3fde849a968b2e75f979fd2f0fe11eaeaf9406a2">FORWARD_HUES</a>) {</div>
+<div class="line"><span class="lineno">  187</span>        existing.hue = existing.hue + scale8(huedelta8, amountOfOverlay);</div>
+<div class="line"><span class="lineno">  188</span>    } <span class="keywordflow">else</span> <span class="comment">/* directionCode == BACKWARD_HUES */</span></div>
+<div class="line"><span class="lineno">  189</span>    {</div>
+<div class="line"><span class="lineno">  190</span>        huedelta8 = -huedelta8;</div>
+<div class="line"><span class="lineno">  191</span>        existing.hue = existing.hue - scale8(huedelta8, amountOfOverlay);</div>
+<div class="line"><span class="lineno">  192</span>    }</div>
+<div class="line"><span class="lineno">  193</span> </div>
+<div class="line"><span class="lineno">  194</span>    existing.sat = scale8_LEAVING_R1_DIRTY(existing.sat, amountOfKeep) +</div>
+<div class="line"><span class="lineno">  195</span>                   scale8_LEAVING_R1_DIRTY(overlay.sat, amountOfOverlay);</div>
+<div class="line"><span class="lineno">  196</span>    existing.val = scale8_LEAVING_R1_DIRTY(existing.val, amountOfKeep) +</div>
+<div class="line"><span class="lineno">  197</span>                   scale8_LEAVING_R1_DIRTY(overlay.val, amountOfOverlay);</div>
+<div class="line"><span class="lineno">  198</span> </div>
+<div class="line"><span class="lineno">  199</span>    cleanup_R1();</div>
+<div class="line"><span class="lineno">  200</span> </div>
+<div class="line"><span class="lineno">  201</span>    <span class="keywordflow">return</span> existing;</div>
+<div class="line"><span class="lineno">  202</span>}</div>
+<div class="ttc" id="anamespacefl_a058ceeac48f181da463c2ba07401292c_html_a058ceeac48f181da463c2ba07401292c"><div class="ttname"><a href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a></div><div class="ttdeci">unsigned char u8</div><div class="ttdef"><b>Definition</b> <a href="../../df/dd8/stdint_8h_source.html#l00131">stdint.h:131</a></div></div>
+<div class="ttc" id="anamespacefl_a0a0558a9d844a5f0ed4c50bfb3fde849_html_a0a0558a9d844a5f0ed4c50bfb3fde849a2d88d70c631fdecd19f0e5537c019d5c"><div class="ttname"><a href="../../d4/d36/namespacefl_a0a0558a9d844a5f0ed4c50bfb3fde849.html#a0a0558a9d844a5f0ed4c50bfb3fde849a2d88d70c631fdecd19f0e5537c019d5c">fl::SHORTEST_HUES</a></div><div class="ttdeci">@ SHORTEST_HUES</div><div class="ttdoc">Hue goes whichever way is shortest.</div><div class="ttdef"><b>Definition</b> <a href="../../dd/db2/colorutils__misc_8h_source.html#l00057">colorutils_misc.h:57</a></div></div>
+<div class="ttc" id="anamespacefl_a0a0558a9d844a5f0ed4c50bfb3fde849_html_a0a0558a9d844a5f0ed4c50bfb3fde849a2e531a3d46a47fde8830d374a2cf41f5"><div class="ttname"><a href="../../d4/d36/namespacefl_a0a0558a9d844a5f0ed4c50bfb3fde849.html#a0a0558a9d844a5f0ed4c50bfb3fde849a2e531a3d46a47fde8830d374a2cf41f5">fl::LONGEST_HUES</a></div><div class="ttdeci">@ LONGEST_HUES</div><div class="ttdoc">Hue goes whichever way is longest.</div><div class="ttdef"><b>Definition</b> <a href="../../dd/db2/colorutils__misc_8h_source.html#l00058">colorutils_misc.h:58</a></div></div>
+<div class="ttc" id="anamespacefl_a0a0558a9d844a5f0ed4c50bfb3fde849_html_a0a0558a9d844a5f0ed4c50bfb3fde849a968b2e75f979fd2f0fe11eaeaf9406a2"><div class="ttname"><a href="../../d4/d36/namespacefl_a0a0558a9d844a5f0ed4c50bfb3fde849.html#a0a0558a9d844a5f0ed4c50bfb3fde849a968b2e75f979fd2f0fe11eaeaf9406a2">fl::FORWARD_HUES</a></div><div class="ttdeci">@ FORWARD_HUES</div><div class="ttdoc">Hue always goes clockwise around the color wheel.</div><div class="ttdef"><b>Definition</b> <a href="../../dd/db2/colorutils__misc_8h_source.html#l00055">colorutils_misc.h:55</a></div></div>
+<div class="ttc" id="anamespacefl_a0a0558a9d844a5f0ed4c50bfb3fde849_html_a0a0558a9d844a5f0ed4c50bfb3fde849aca95836d9983c3070f877ba1b80d95c6"><div class="ttname"><a href="../../d4/d36/namespacefl_a0a0558a9d844a5f0ed4c50bfb3fde849.html#a0a0558a9d844a5f0ed4c50bfb3fde849aca95836d9983c3070f877ba1b80d95c6">fl::BACKWARD_HUES</a></div><div class="ttdeci">@ BACKWARD_HUES</div><div class="ttdoc">Hue always goes counter-clockwise around the color wheel.</div><div class="ttdef"><b>Definition</b> <a href="../../dd/db2/colorutils__misc_8h_source.html#l00056">colorutils_misc.h:56</a></div></div>
+<div class="ttc" id="anamespacefl_a4f8ec02ccee51aa3af6db05861cdd4e5_html_a4f8ec02ccee51aa3af6db05861cdd4e5"><div class="ttname"><a href="../../d4/d36/namespacefl_a4f8ec02ccee51aa3af6db05861cdd4e5.html#a4f8ec02ccee51aa3af6db05861cdd4e5">fl::fract8</a></div><div class="ttdeci">u8 fract8</div><div class="ttdoc">Fixed-Point Fractional Types.</div><div class="ttdef"><b>Definition</b> <a href="../../df/dd8/stdint_8h_source.html#l00160">stdint.h:160</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../dd/db2/colorutils__misc_8h_source.html#l00036">BACKWARD_HUES</a>, <a class="el" href="../../dd/db2/colorutils__misc_8h_source.html#l00035">FORWARD_HUES</a>, <a class="el" href="../../dd/db2/colorutils__misc_8h_source.html#l00038">LONGEST_HUES</a>, and <a class="el" href="../../dd/db2/colorutils__misc_8h_source.html#l00037">SHORTEST_HUES</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/db2/colorutils__misc_8h_source.html#l00056">BACKWARD_HUES</a>, <a class="el" href="../../dd/db2/colorutils__misc_8h_source.html#l00055">FORWARD_HUES</a>, <a class="el" href="../../dd/db2/colorutils__misc_8h_source.html#l00058">LONGEST_HUES</a>, and <a class="el" href="../../dd/db2/colorutils__misc_8h_source.html#l00057">SHORTEST_HUES</a>.</p>
 
 </div>
 </div>
@@ -193,7 +193,7 @@ $(function(){initNavTree('d4/d36/namespacefl_a1e63de2e73a3fae5b8de5e487d335eed.h
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:04 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:08 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

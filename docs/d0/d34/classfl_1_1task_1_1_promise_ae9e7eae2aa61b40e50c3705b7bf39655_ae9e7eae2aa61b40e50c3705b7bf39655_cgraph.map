@@ -1,0 +1,9 @@
+<map id="fl::task::Promise::catch_" name="fl::task::Promise::catch_">
+<area shape="rect" id="Node000001" title="Register error callback &#45; returns reference for chaining." alt="" coords="5,63,140,103"/>
+<area shape="rect" id="Node000002" href="$d0/d34/classfl_1_1task_1_1_promise_ae75706ae1089e184850eb571f0b8c3aa.html#ae75706ae1089e184850eb571f0b8c3aa" title="Default constructor &#45; creates invalid Promise." alt="" coords="188,5,323,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="136,60,177,47,179,52,138,65"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a0c8a67e528dcd96ee58216754a07a733.html#a0c8a67e528dcd96ee58216754a07a733" title=" " alt="" coords="218,70,293,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="140,80,204,80,204,85,140,85"/>
+<area shape="rect" id="Node000004" href="$d0/d34/classfl_1_1task_1_1_promise_a4df3cf33aa75a0482148e9d6bf1d34eb.html#a4df3cf33aa75a0482148e9d6bf1d34eb" title="Check if Promise is valid." alt="" coords="188,120,323,160"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="138,100,179,113,177,118,136,105"/>
+</map>

@@ -25,6 +25,5 @@ var searchData=
   ['http_2eh_22',['http.h',['../dd/d56/http_8h.html',1,'']]],
   ['http_5fparser_2ecpp_2ehpp_23',['http_parser.cpp.hpp',['../d8/dd7/http__parser_8cpp_8hpp.html',1,'']]],
   ['http_5fparser_2eh_24',['http_parser.h',['../d0/dd7/http__parser_8h.html',1,'']]],
-  ['huffman_2ehpp_25',['huffman.hpp',['../db/d7a/huffman_8hpp.html',1,'']]],
-  ['hufftabs_2ehpp_26',['hufftabs.hpp',['../da/d57/hufftabs_8hpp.html',1,'']]]
+  ['hydropack_2eino_25',['hydropack.ino',['../dc/d14/hydropack_8ino.html',1,'']]]
 ];

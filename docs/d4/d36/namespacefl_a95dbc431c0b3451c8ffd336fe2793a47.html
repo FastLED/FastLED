@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -115,23 +115,23 @@ $(function(){initNavTree('d4/d36/namespacefl_a95dbc431c0b3451c8ffd336fe2793a47.h
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dc/d6b/allocator_8cpp_8hpp_source.html#l00152">152</a> of file <a class="el" href="../../dc/d6b/allocator_8cpp_8hpp_source.html">allocator.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  152</span>                          { </div>
-<div class="line"><span class="lineno">  153</span>    <span class="keywordtype">void</span>* ptr = Alloc(size); </div>
-<div class="line"><span class="lineno">  154</span>    </div>
-<div class="line"><span class="lineno">  155</span><span class="preprocessor">#if defined(FASTLED_TESTING)</span></div>
-<div class="line"><span class="lineno">  156</span>    <span class="keywordflow">if</span> (gMallocFreeHook &amp;&amp; ptr) {</div>
-<div class="line"><span class="lineno">  157</span>        MemoryGuard allows_hook;    </div>
-<div class="line"><span class="lineno">  158</span>        <span class="keywordflow">if</span> (allows_hook.enabled()) {</div>
-<div class="line"><span class="lineno">  159</span>            gMallocFreeHook-&gt;onMalloc(ptr, size);</div>
-<div class="line"><span class="lineno">  160</span>        }</div>
-<div class="line"><span class="lineno">  161</span>    }</div>
-<div class="line"><span class="lineno">  162</span><span class="preprocessor">#endif</span></div>
-<div class="line"><span class="lineno">  163</span>    </div>
-<div class="line"><span class="lineno">  164</span>    <span class="keywordflow">return</span> ptr;</div>
-<div class="line"><span class="lineno">  165</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../dc/d6b/allocator_8cpp_8hpp_source.html#l00164">164</a> of file <a class="el" href="../../dc/d6b/allocator_8cpp_8hpp_source.html">allocator.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  164</span>                          { </div>
+<div class="line"><span class="lineno">  165</span>    <span class="keywordtype">void</span>* ptr = Alloc(size); </div>
+<div class="line"><span class="lineno">  166</span>    </div>
+<div class="line"><span class="lineno">  167</span><span class="preprocessor">#if defined(FASTLED_TESTING)</span></div>
+<div class="line"><span class="lineno">  168</span>    <span class="keywordflow">if</span> (malloc_free_hook() &amp;&amp; ptr) {</div>
+<div class="line"><span class="lineno">  169</span>        MemoryGuard allows_hook;    </div>
+<div class="line"><span class="lineno">  170</span>        <span class="keywordflow">if</span> (allows_hook.enabled()) {</div>
+<div class="line"><span class="lineno">  171</span>            malloc_free_hook()-&gt;onMalloc(ptr, size);</div>
+<div class="line"><span class="lineno">  172</span>        }</div>
+<div class="line"><span class="lineno">  173</span>    }</div>
+<div class="line"><span class="lineno">  174</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">  175</span>    </div>
+<div class="line"><span class="lineno">  176</span>    <span class="keywordflow">return</span> ptr;</div>
+<div class="line"><span class="lineno">  177</span>}</div>
 </div><!-- fragment -->
-<p class="reference">Referenced by <a class="el" href="../../da/da9/allocator_8h_source.html#l00219">fl::allocator&lt; U &gt;::allocate()</a>, <a class="el" href="../../da/da9/allocator_8h_source.html#l00306">fl::allocator_realloc&lt; U &gt;::allocate()</a>, <a class="el" href="../../da/da9/allocator_8h_source.html#l00621">fl::SlabAllocator&lt; T, SLAB_SIZE &gt;::allocate()</a>, <a class="el" href="../../da/da9/allocator_8h_source.html#l00487">fl::SlabAllocator&lt; T, SLAB_SIZE &gt;::createSlab()</a>, <a class="el" href="../../d1/d16/memory__resource_8cpp_8hpp_source.html#l00025">fl::anonymous_namespace{memory_resource.cpp.hpp}::DefaultMemoryResource::do_allocate()</a>, <a class="el" href="../../d7/da8/lzw_8cpp_8hpp_source.html#l00104">fl::third_party::lzw_context_create()</a>, <a class="el" href="../../dc/d63/third__party_2libnsgif_2src_2gif_8cpp_8hpp_source.html#l01273">fl::third_party::nsgif__get_frame()</a>, <a class="el" href="../../dc/d63/third__party_2libnsgif_2src_2gif_8cpp_8hpp_source.html#l00302">fl::third_party::nsgif__record_frame()</a>, and <a class="el" href="../../dc/d63/third__party_2libnsgif_2src_2gif_8cpp_8hpp_source.html#l01493">fl::third_party::nsgif_create()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../da/da9/allocator_8h_source.html#l00220">fl::allocator&lt; U &gt;::allocate()</a>, <a class="el" href="../../da/da9/allocator_8h_source.html#l00307">fl::allocator_realloc&lt; U &gt;::allocate()</a>, <a class="el" href="../../da/da9/allocator_8h_source.html#l00625">fl::SlabAllocator&lt; T, SLAB_SIZE &gt;::allocate()</a>, <a class="el" href="../../da/da9/allocator_8h_source.html#l00491">fl::SlabAllocator&lt; T, SLAB_SIZE &gt;::createSlab()</a>, <a class="el" href="../../d1/d16/memory__resource_8cpp_8hpp_source.html#l00025">fl::anonymous_namespace{memory_resource.cpp.hpp}::DefaultMemoryResource::do_allocate()</a>, <a class="el" href="../../d7/da8/lzw_8cpp_8hpp_source.html#l00104">fl::third_party::lzw_context_create()</a>, <a class="el" href="../../d3/df6/mp3_8cpp_8hpp_source.html#l00080">fl::third_party::Mp3MemoryAllocate()</a>, <a class="el" href="../../dc/d63/third__party_2libnsgif_2src_2gif_8cpp_8hpp_source.html#l01273">fl::third_party::nsgif__get_frame()</a>, <a class="el" href="../../dc/d63/third__party_2libnsgif_2src_2gif_8cpp_8hpp_source.html#l00302">fl::third_party::nsgif__record_frame()</a>, and <a class="el" href="../../dc/d63/third__party_2libnsgif_2src_2gif_8cpp_8hpp_source.html#l01493">fl::third_party::nsgif_create()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -149,7 +149,7 @@ $(function(){initNavTree('d4/d36/namespacefl_a95dbc431c0b3451c8ffd336fe2793a47.h
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:04 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:08 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -1,6 +1,6 @@
 var classfl_1_1detail_1_1_moving_average_impl =
 [
-    [ "MovingAverageImpl", "dc/d5d/classfl_1_1detail_1_1_moving_average_impl_aa7914852c1d23a8ee34ab2947fa9fc08.html#aa7914852c1d23a8ee34ab2947fa9fc08", null ],
+    [ "MovingAverageImpl", "dc/d5d/classfl_1_1detail_1_1_moving_average_impl_a0bf5dcbf447f649646c8a770cdb409c0.html#a0bf5dcbf447f649646c8a770cdb409c0", null ],
     [ "MovingAverageImpl", "dc/d5d/classfl_1_1detail_1_1_moving_average_impl_a4090f4c1fec157190ef68940c203ab3d.html#a4090f4c1fec157190ef68940c203ab3d", null ],
     [ "capacity", "dc/d5d/classfl_1_1detail_1_1_moving_average_impl_ace63c992b6341b03fb8a4800cbffbb2b.html#ace63c992b6341b03fb8a4800cbffbb2b", null ],
     [ "divByCount", "dc/d5d/classfl_1_1detail_1_1_moving_average_impl_acba6d89f51a328ecb961d46863e7ab51.html#acba6d89f51a328ecb961d46863e7ab51", null ],

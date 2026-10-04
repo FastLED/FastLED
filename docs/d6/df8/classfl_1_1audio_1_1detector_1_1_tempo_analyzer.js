@@ -6,8 +6,8 @@ var classfl_1_1audio_1_1detector_1_1_tempo_analyzer =
       [ "onsetCount", "d6/df8/classfl_1_1audio_1_1detector_1_1_tempo_analyzer.html#a34bab82ac50235d53c1eb81072de4553", null ],
       [ "score", "d6/df8/classfl_1_1audio_1_1detector_1_1_tempo_analyzer.html#ace4a338aa35dd0aac993eb2365502c14", null ]
     ] ],
-    [ "TempoAnalyzer", "d6/df8/classfl_1_1audio_1_1detector_1_1_tempo_analyzer_a8f5e18f161b94036334fbe0c924ba6e2.html#a8f5e18f161b94036334fbe0c924ba6e2", null ],
-    [ "~TempoAnalyzer", "d6/df8/classfl_1_1audio_1_1detector_1_1_tempo_analyzer_ad4e015a56da87e725882351ec7a4d980.html#ad4e015a56da87e725882351ec7a4d980", null ],
+    [ "TempoAnalyzer", "d6/df8/classfl_1_1audio_1_1detector_1_1_tempo_analyzer_ab7ad3de965b9807d90b4fa272f11b14c.html#ab7ad3de965b9807d90b4fa272f11b14c", null ],
+    [ "~TempoAnalyzer", "d6/df8/classfl_1_1audio_1_1detector_1_1_tempo_analyzer_a6c649320c7e42d614fd49ef779aa4a34.html#a6c649320c7e42d614fd49ef779aa4a34", null ],
     [ "calculateIntervalScore", "d6/df8/classfl_1_1audio_1_1detector_1_1_tempo_analyzer_af6cec5c9a6b3bc7b7151a75ef743d9df.html#af6cec5c9a6b3bc7b7151a75ef743d9df", null ],
     [ "calculateSpectralFlux", "d6/df8/classfl_1_1audio_1_1detector_1_1_tempo_analyzer_a2af9c06e55473b5a8358465e2d65073d.html#a2af9c06e55473b5a8358465e2d65073d", null ],
     [ "calculateTempoConfidence", "d6/df8/classfl_1_1audio_1_1detector_1_1_tempo_analyzer_a885f5ae4f2af44a2591c801f1562da9b.html#a885f5ae4f2af44a2591c801f1562da9b", null ],

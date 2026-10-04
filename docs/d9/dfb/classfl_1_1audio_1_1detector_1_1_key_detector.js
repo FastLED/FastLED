@@ -1,7 +1,7 @@
 var classfl_1_1audio_1_1detector_1_1_key_detector =
 [
-    [ "KeyDetector", "d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_a12c201dd6ae7d01f6e70bee677021c91.html#a12c201dd6ae7d01f6e70bee677021c91", null ],
-    [ "~KeyDetector", "d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_a57430bc4ecf2c75f65ab5d6c04ff7a79.html#a57430bc4ecf2c75f65ab5d6c04ff7a79", null ],
+    [ "KeyDetector", "d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_aa1af15ea7a68324ed4e6494d5bc06e2e.html#aa1af15ea7a68324ed4e6494d5bc06e2e", null ],
+    [ "~KeyDetector", "d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_a38d5bdf889b8bbc7163f901ea9bb5492.html#a38d5bdf889b8bbc7163f901ea9bb5492", null ],
     [ "correlateWithProfile", "d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_a3a8d36ca769aaa7467b92c758c920872.html#a3a8d36ca769aaa7467b92c758c920872", null ],
     [ "detectKey", "d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_ae2d1af0f50f4b2fb44631b6a36cfb370.html#ae2d1af0f50f4b2fb44631b6a36cfb370", null ],
     [ "extractChroma", "d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_a9391921c3f778c8b151f5f6c7c2e8dd1.html#a9391921c3f778c8b151f5f6c7c2e8dd1", null ],

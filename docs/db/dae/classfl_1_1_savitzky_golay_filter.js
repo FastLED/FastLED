@@ -1,6 +1,6 @@
 var classfl_1_1_savitzky_golay_filter =
 [
-    [ "SavitzkyGolayFilter", "db/dae/classfl_1_1_savitzky_golay_filter_a928790be808b531b1973d9cfbe78a6b1.html#a928790be808b531b1973d9cfbe78a6b1", null ],
+    [ "SavitzkyGolayFilter", "db/dae/classfl_1_1_savitzky_golay_filter_a02c1950dcd21bdb2ac74db2a8a9f0ddb.html#a02c1950dcd21bdb2ac74db2a8a9f0ddb", null ],
     [ "SavitzkyGolayFilter", "db/dae/classfl_1_1_savitzky_golay_filter_ad857d27ea89249f348fa811978e1c95b.html#ad857d27ea89249f348fa811978e1c95b", null ],
     [ "capacity", "db/dae/classfl_1_1_savitzky_golay_filter_a52fb5be7bef37ccb800a59abe88e6f2b.html#a52fb5be7bef37ccb800a59abe88e6f2b", null ],
     [ "full", "db/dae/classfl_1_1_savitzky_golay_filter_aa855a6edab2bb95b9c49353810b0edcb.html#aa855a6edab2bb95b9c49353810b0edcb", null ],

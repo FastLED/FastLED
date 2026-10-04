@@ -11,5 +11,5 @@ digraph "/home/runner/work/FastLED/FastLED/examples/Fire2012WithPalette"
   dir_251c36837ef2b5132d93dde41ef3cbc8 [label="Fire2012WithPalette", fillcolor="#edf0f7", color="grey25", style="filled,bold", URL="dir_251c36837ef2b5132d93dde41ef3cbc8.html",tooltip=""];
   }
   dir_4d1829fa9bd13d7db71e765b2707b248 [label="fl", fillcolor="#edf0f7", color="red", style="filled", URL="dir_4d1829fa9bd13d7db71e765b2707b248.html",tooltip=""];
-  dir_251c36837ef2b5132d93dde41ef3cbc8->dir_4d1829fa9bd13d7db71e765b2707b248 [headlabel="1", labeldistance=1.5 headhref="dir_000067_000074.html" href="dir_000067_000074.html" color="steelblue1" fontcolor="steelblue1"];
+  dir_251c36837ef2b5132d93dde41ef3cbc8->dir_4d1829fa9bd13d7db71e765b2707b248 [headlabel="1", labeldistance=1.5 headhref="dir_000070_000077.html" href="dir_000070_000077.html" color="steelblue1" fontcolor="steelblue1"];
 }

@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -128,7 +128,7 @@ $(function(){initNavTree('da/d94/attack__decay__filter__impl_8h_source.html','..
 <div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>            <a class="code hl_variable" href="../../d8/dc2/classfl_1_1detail_1_1_attack_decay_filter_impl_aa84af84685a537c4aaa09194a39c4c47.html#aa84af84685a537c4aaa09194a39c4c47">mY</a> = input;  <span class="comment">// No smoothing when tau &lt;= 0</span></div>
 <div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>            <span class="keywordflow">return</span> <a class="code hl_variable" href="../../d8/dc2/classfl_1_1detail_1_1_attack_decay_filter_impl_aa84af84685a537c4aaa09194a39c4c47.html#aa84af84685a537c4aaa09194a39c4c47">mY</a>;</div>
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>        }</div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>        T <a class="code hl_struct" href="../../d4/d15/structfl_1_1decay.html">decay</a> = <a class="code hl_function" href="../../d4/d36/namespacefl_ae393fecb8f433ee4b88027955350bdc8.html#ae393fecb8f433ee4b88027955350bdc8">fl::exp</a>(-(dt_seconds / tau));</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>        T <a class="code hl_struct" href="../../d4/d15/structfl_1_1decay.html">decay</a> = <a class="code hl_function" href="../../d4/d36/namespacefl_ad01db2eb12a95fcdbd62fd8835caf4e2.html#ad01db2eb12a95fcdbd62fd8835caf4e2">fl::exp</a>(-(dt_seconds / tau));</div>
 <div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>        <a class="code hl_variable" href="../../d8/dc2/classfl_1_1detail_1_1_attack_decay_filter_impl_aa84af84685a537c4aaa09194a39c4c47.html#aa84af84685a537c4aaa09194a39c4c47">mY</a> = input + (<a class="code hl_variable" href="../../d8/dc2/classfl_1_1detail_1_1_attack_decay_filter_impl_aa84af84685a537c4aaa09194a39c4c47.html#aa84af84685a537c4aaa09194a39c4c47">mY</a> - input) * <a class="code hl_struct" href="../../d4/d15/structfl_1_1decay.html">decay</a>;</div>
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>        <span class="keywordflow">return</span> <a class="code hl_variable" href="../../d8/dc2/classfl_1_1detail_1_1_attack_decay_filter_impl_aa84af84685a537c4aaa09194a39c4c47.html#aa84af84685a537c4aaa09194a39c4c47">mY</a>;</div>
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>    }</div>
@@ -158,8 +158,8 @@ $(function(){initNavTree('da/d94/attack__decay__filter__impl_8h_source.html','..
 <div class="ttc" id="aclassfl_1_1detail_1_1_attack_decay_filter_impl_ab24a9892e148abbab2e4dea418368c5d_html_ab24a9892e148abbab2e4dea418368c5d"><div class="ttname"><a href="../../d8/dc2/classfl_1_1detail_1_1_attack_decay_filter_impl_ab24a9892e148abbab2e4dea418368c5d.html#ab24a9892e148abbab2e4dea418368c5d">fl::detail::AttackDecayFilterImpl::mAttackTau</a></div><div class="ttdeci">T mAttackTau</div><div class="ttdef"><b>Definition</b> <a href="#l00033">attack_decay_filter_impl.h:33</a></div></div>
 <div class="ttc" id="aclassfl_1_1detail_1_1_attack_decay_filter_impl_add3a37e5ea534059356211fa6f25ddfd_html_add3a37e5ea534059356211fa6f25ddfd"><div class="ttname"><a href="../../d8/dc2/classfl_1_1detail_1_1_attack_decay_filter_impl_add3a37e5ea534059356211fa6f25ddfd.html#add3a37e5ea534059356211fa6f25ddfd">fl::detail::AttackDecayFilterImpl::setDecayTau</a></div><div class="ttdeci">void setDecayTau(T tau_seconds)</div><div class="ttdef"><b>Definition</b> <a href="#l00028">attack_decay_filter_impl.h:28</a></div></div>
 <div class="ttc" id="amath_8h_html"><div class="ttname"><a href="../../df/db1/math_8h.html">math.h</a></div></div>
-<div class="ttc" id="anamespacefl_1_1detail_html"><div class="ttname"><a href="../../df/d9e/namespacefl_1_1detail.html">fl::detail</a></div><div class="ttdoc">Compile-time linker keep-alive hook for a single fl::Bus.</div><div class="ttdef"><b>Definition</b> <a href="../../d5/dd5/bus__traits_8h_source.html#l00048">bus_traits.h:48</a></div></div>
-<div class="ttc" id="anamespacefl_ae393fecb8f433ee4b88027955350bdc8_html_ae393fecb8f433ee4b88027955350bdc8"><div class="ttname"><a href="../../d4/d36/namespacefl_ae393fecb8f433ee4b88027955350bdc8.html#ae393fecb8f433ee4b88027955350bdc8">fl::exp</a></div><div class="ttdeci">enable_if&lt; is_fixed_point&lt; T &gt;::value, T &gt;::type exp(T x) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../de/d62/fixed__point_8h_source.html#l00642">fixed_point.h:642</a></div></div>
+<div class="ttc" id="anamespacefl_1_1detail_html"><div class="ttname"><a href="../../df/d9e/namespacefl_1_1detail.html">fl::detail</a></div><div class="ttdoc">Compile-time linker keep-alive hook for a single fl::Bus.</div><div class="ttdef"><b>Definition</b> <a href="../../d1/db8/bus__info_8h_source.html#l00057">bus_info.h:57</a></div></div>
+<div class="ttc" id="anamespacefl_ad01db2eb12a95fcdbd62fd8835caf4e2_html_ad01db2eb12a95fcdbd62fd8835caf4e2"><div class="ttname"><a href="../../d4/d36/namespacefl_ad01db2eb12a95fcdbd62fd8835caf4e2.html#ad01db2eb12a95fcdbd62fd8835caf4e2">fl::exp</a></div><div class="ttdeci">enable_if&lt; is_fixed_point&lt; T &gt;::value, T &gt;::type exp(T x) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../de/d62/fixed__point_8h_source.html#l00642">fixed_point.h:642</a></div></div>
 <div class="ttc" id="anamespacefl_html"><div class="ttname"><a href="../../d4/d36/namespacefl.html">fl</a></div><div class="ttdoc">Base definition for an LED controller.</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d4b/crgb_8hpp_source.html#l00179">crgb.hpp:179</a></div></div>
 <div class="ttc" id="astructfl_1_1decay_html"><div class="ttname"><a href="../../d4/d15/structfl_1_1decay.html">fl::decay</a></div><div class="ttdef"><b>Definition</b> <a href="../../df/d63/type__traits_8h_source.html#l00310">type_traits.h:310</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
@@ -169,7 +169,7 @@ $(function(){initNavTree('da/d94/attack__decay__filter__impl_8h_source.html','..
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_94896ea2d28e1d34f24a1dbbb9436aa8.html">math</a></li><li class="navelem"><a class="el" href="../../dir_b162c0e1dee2f42cb5802fa0d1152141.html">filter</a></li><li class="navelem"><a class="el" href="../../da/d94/attack__decay__filter__impl_8h.html">attack_decay_filter_impl.h</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:06:59 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:01 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

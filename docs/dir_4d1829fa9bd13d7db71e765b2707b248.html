@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -125,9 +125,15 @@ Directories</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top"><span class="iconfclosed"></span>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dir_10dd822f9fdc91e4cdf1760ae6c69186.html">codec</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top"><span class="iconfclosed"></span>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dir_c6197854394a4ba223304cdddfb4f881.html">color</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top"><span class="iconfclosed"></span>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dir_d5597cc0ea618692ff61f4f95c52a8d9.html">control</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top"><span class="iconfclosed"></span>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dir_99036044bfbb3e3b0cc79102ca66e382.html">fled</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top"><span class="iconfclosed"></span>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dir_20029ed6a9de90604a8f51f99b514d92.html">font</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top"><span class="iconfclosed"></span>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dir_defadf1938929596e66bcac4675bfead.html">fs</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top"><span class="iconfclosed"></span>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dir_d90d106199f3fa0759eaa8cec7e30de8.html">fx</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -162,6 +168,8 @@ Directories</h2></td></tr>
 Files</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top"><a href="d1/deb/fl_2__build_8cpp_8hpp_source.html"><span class="icondoc"></span></a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="d1/deb/fl_2__build_8cpp_8hpp.html">_build.cpp.hpp</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top"><a href="d5/df0/spi__bus_8h_source.html"><span class="icondoc"></span></a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="d5/df0/spi__bus_8h.html">spi_bus.h</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p>This document introduces the FastLED core library housed under <code>src/fl/</code>, first by listing its headers, then by progressively expanding into an educational guide for two audiences:</p><ul>
@@ -169,7 +177,7 @@ Files</h2></td></tr>
 <li>Experienced C++ developers exploring the <code>fl::</code> API as a cross‑platform, STL‑free foundation</li>
 </ul>
 <p>FastLED avoids direct dependencies on the C++ standard library in embedded contexts and offers its own STL‑like building blocks in the <code>fl::</code> namespace.</p>
-<h1><a class="anchor" id="autotoc_md288"></a>
+<h1><a class="anchor" id="autotoc_md346"></a>
 Table of Contents</h1>
 <ul>
 <li>Overview and Quick Start</li>
@@ -186,9 +194,9 @@ Table of Contents</h1>
 <li>Guidance for C++ Developers</li>
 </ul>
 <hr  />
-<h1><a class="anchor" id="autotoc_md290"></a>
+<h1><a class="anchor" id="autotoc_md348"></a>
 Overview and Quick Start</h1>
-<h2><a class="anchor" id="autotoc_md291"></a>
+<h2><a class="anchor" id="autotoc_md349"></a>
 What is <code>fl::</code>?</h2>
 <p><code>fl::</code> is FastLED’s cross‑platform foundation layer. It provides containers, algorithms, memory utilities, math, graphics primitives, async/concurrency, I/O, and platform shims designed to work consistently across embedded targets and host builds. It replaces common <code>std::</code> facilities with equivalents tailored for embedded constraints and portability.</p>
 <p><a class="el" href="db/d42/struct_key.html">Key</a> properties:</p><ul>
@@ -197,7 +205,7 @@ What is <code>fl::</code>?</h2>
 <li>Consistent naming and behavior across compilers/toolchains</li>
 <li>Prefer composable, header‑driven utilities</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md292"></a>
+<h2><a class="anchor" id="autotoc_md350"></a>
 Goals and design constraints</h2>
 <ul>
 <li>Avoid fragile dependencies on <code>std::</code> in embedded builds; prefer <code>fl::</code> types</li>
@@ -206,7 +214,7 @@ Goals and design constraints</h2>
 <li>Offer safe RAII ownership types and moveable wrappers for resource management</li>
 <li>Keep APIs flexible by preferring non‑owning views (<code><a class="el" href="d0/d08/classfl_1_1span.html">fl::span</a></code>) as function parameters</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md293"></a>
+<h2><a class="anchor" id="autotoc_md351"></a>
 Naming and idioms</h2>
 <ul>
 <li>Names live in the <code>fl::</code> namespace</li>
@@ -214,18 +222,18 @@ Naming and idioms</h2>
 <li>Use <code><a class="el" href="d1/d74/classfl_1_1shared__ptr.html">fl::shared_ptr</a>&lt;T&gt;</code> / <code><a class="el" href="d6/d2e/classfl_1_1unique__ptr.html">fl::unique_ptr</a>&lt;T&gt;</code> instead of raw pointers</li>
 <li>Favor explicit ownership and lifetimes; avoid manual <code>new</code>/<code>delete</code></li>
 </ul>
-<h2><a class="anchor" id="autotoc_md294"></a>
+<h2><a class="anchor" id="autotoc_md352"></a>
 Getting started: common building blocks</h2>
 <p>Include the top‑level header you need, or just include <code>FastLED.h</code> in sketches. When writing platform‑agnostic C++ within this repo, include the specific <code>fl/</code> headers you use.</p>
 <p>Common types to reach for:</p><ul>
 <li>Containers and views: <code><a class="el" href="d2/d24/classfl_1_1vector.html">fl::vector</a>&lt;T&gt;</code>, <code><a class="el" href="dc/dfe/classfl_1_1deque.html">fl::deque</a>&lt;T&gt;</code>, <code><a class="el" href="d0/d08/classfl_1_1span.html">fl::span</a>&lt;T&gt;</code>, <code>fl::slice&lt;T&gt;</code></li>
-<li>Strings and streams: <code><a class="el" href="d2/db2/classfl_1_1string.html">fl::string</a></code>, <code><a class="el" href="d1/de8/classfl_1_1ostream.html">fl::ostream</a></code>, <code><a class="el" href="d1/d27/classfl_1_1sstream.html">fl::sstream</a></code>, <code><a class="el" href="d4/d36/namespacefl_a35654c87c0c1b42e33a713c2badbb9fe.html#a35654c87c0c1b42e33a713c2badbb9fe" title="Printf-like formatting function that prints directly to the platform output.">fl::printf</a></code></li>
+<li>Strings and streams: <code><a class="el" href="d2/db2/classfl_1_1string.html">fl::string</a></code>, <code><a class="el" href="d1/de8/classfl_1_1ostream.html">fl::ostream</a></code>, <code><a class="el" href="d1/d27/classfl_1_1sstream.html">fl::sstream</a></code>, <code><a class="el" href="d4/d36/namespacefl_a546c74e8a97d8c3dedc2501f6273b51a.html#a546c74e8a97d8c3dedc2501f6273b51a">fl::printf</a></code></li>
 <li>Optionals and variants: <code><a class="el" href="d4/d36/namespacefl_a451542d0bf4d13f0bc00e055c18e6726.html#a451542d0bf4d13f0bc00e055c18e6726">fl::optional</a>&lt;T&gt;</code>, <code>fl::variant&lt;...&gt;</code></li>
 <li>Memory/ownership: <code><a class="el" href="d6/d2e/classfl_1_1unique__ptr.html">fl::unique_ptr</a>&lt;T&gt;</code>, <code><a class="el" href="d1/d74/classfl_1_1shared__ptr.html">fl::shared_ptr</a>&lt;T&gt;</code>, <code><a class="el" href="d1/dd6/classfl_1_1weak__ptr.html">fl::weak_ptr</a>&lt;T&gt;</code></li>
 <li>Functional: <code><a class="el" href="d4/d36/namespacefl.html#d0/ddd/classfl_1_1function">fl::function</a>&lt;Signature&gt;</code> (in <code><a class="el" href="dd/d67/function_8h.html">fl/stl/function.h</a></code>), <code>fl::function_list&lt;Signature&gt;</code> (in <code><a class="el" href="dd/d67/function_8h.html">fl/stl/function.h</a></code>)</li>
 <li>Concurrency: <code><a class="el" href="d4/d36/namespacefl_ac7786473cac1091981a6fe1e6606bb15.html#ac7786473cac1091981a6fe1e6606bb15" title="Thread abstraction for FastLED.">fl::thread</a></code>, <code><a class="el" href="d4/d36/namespacefl_af14175b9ccd89d0e7f3f567cb358d52f.html#af14175b9ccd89d0e7f3f567cb358d52f">fl::mutex</a></code>, <code>fl::thread_local</code></li>
 <li>Async: <code>fl::promise&lt;T&gt;</code>, <code><a class="el" href="db/d5c/namespacefl_1_1task.html">fl::task</a></code></li>
-<li>Math: <code><a class="el" href="df/d12/namespacefl_1_1math.html">fl::math</a></code>, <code><a class="el" href="d4/d36/namespacefl_a37a484f9e39484372eee81c7a66fad7d.html#a37a484f9e39484372eee81c7a66fad7d">fl::sin32</a></code>, <code>fl::random</code>, <code><a class="el" href="d4/d36/namespacefl_ab48f77d450cf05f81e3cb66a588e5ae5.html#ab48f77d450cf05f81e3cb66a588e5ae5">fl::gamma</a></code>, <code>fl::gradient</code></li>
+<li>Math: <code><a class="el" href="df/d12/namespacefl_1_1math.html">fl::math</a></code>, <code><a class="el" href="d4/d36/namespacefl_a01a1bfd1f04c51e03c650527c00a1a78.html#a01a1bfd1f04c51e03c650527c00a1a78">fl::sin32</a></code>, <code>fl::random</code>, <code><a class="el" href="d4/d36/namespacefl_a2c2a565c361b0fc8eced9bd0552e67ce.html#a2c2a565c361b0fc8eced9bd0552e67ce">fl::gamma</a></code>, <code>fl::gradient</code></li>
 <li>Graphics: <code>fl::raster</code>, <code>fl::screenmap</code>, <code>fl::rectangular_draw_buffer</code>, <code><a class="el" href="d4/d36/namespacefl_a2bd6c765c4dbccf31b10bddf7f22b5e4.html#a2bd6c765c4dbccf31b10bddf7f22b5e4">fl::downscale</a></code>, <code>fl::supersample</code></li>
 <li>Color: <code>fl::hsv</code>, <code>fl::hsv16</code>, <code>fl::colorutils</code></li>
 <li>JSON: <code><a class="el" href="de/d40/classfl_1_1json.html">fl::json</a></code> with safe defaults and ergonomic access</li>
@@ -241,39 +249,39 @@ Getting started: common building blocks</h2>
 <div class="line"> </div>
 <div class="line"><span class="keywordtype">void</span> example() {</div>
 <div class="line">    <a class="code hl_class" href="d2/d24/classfl_1_1vector.html">fl::vector&lt;int&gt;</a> data;</div>
-<div class="line">    data.<a class="code hl_function" href="d2/d24/classfl_1_1vector_ae9a8cea8d4b81d8f2f10a2b007ac2980.html#ae9a8cea8d4b81d8f2f10a2b007ac2980">push_back</a>(1);</div>
-<div class="line">    data.<a class="code hl_function" href="d2/d24/classfl_1_1vector_ae9a8cea8d4b81d8f2f10a2b007ac2980.html#ae9a8cea8d4b81d8f2f10a2b007ac2980">push_back</a>(2);</div>
-<div class="line">    data.<a class="code hl_function" href="d2/d24/classfl_1_1vector_ae9a8cea8d4b81d8f2f10a2b007ac2980.html#ae9a8cea8d4b81d8f2f10a2b007ac2980">push_back</a>(3);</div>
+<div class="line">    data.<a class="code hl_function" href="d2/d24/classfl_1_1vector_a82c3455c1a345460f95a0180c93b3fb0.html#a82c3455c1a345460f95a0180c93b3fb0">push_back</a>(1);</div>
+<div class="line">    data.<a class="code hl_function" href="d2/d24/classfl_1_1vector_a82c3455c1a345460f95a0180c93b3fb0.html#a82c3455c1a345460f95a0180c93b3fb0">push_back</a>(2);</div>
+<div class="line">    data.<a class="code hl_function" href="d2/d24/classfl_1_1vector_a82c3455c1a345460f95a0180c93b3fb0.html#a82c3455c1a345460f95a0180c93b3fb0">push_back</a>(3);</div>
 <div class="line"> </div>
 <div class="line">    process(<a class="code hl_class" href="d0/d08/classfl_1_1span.html">fl::span&lt;const int&gt;</a>(data));</div>
 <div class="line"> </div>
-<div class="line">    <span class="keyword">auto</span> ptr = <a class="code hl_function" href="d4/d36/namespacefl_a3fd92c727664a77396403265415789d3.html#a3fd92c727664a77396403265415789d3">fl::make_unique&lt;int&gt;</a>(42);</div>
+<div class="line">    <span class="keyword">auto</span> ptr = <a class="code hl_function" href="d4/d36/namespacefl_a257ae39a291866e014a2eeb4abe2a29c.html#a257ae39a291866e014a2eeb4abe2a29c">fl::make_unique&lt;int&gt;</a>(42);</div>
 <div class="line">    <span class="comment">// Exclusive ownership; automatically freed when leaving scope</span></div>
 <div class="line">}</div>
-<div class="ttc" id="aclassfl_1_1span_html"><div class="ttname"><a href="d0/d08/classfl_1_1span.html">fl::span</a></div><div class="ttdef"><b>Definition</b> <a href="d4/d7a/span_8h_source.html#l00385">span.h:385</a></div></div>
-<div class="ttc" id="aclassfl_1_1vector_ae9a8cea8d4b81d8f2f10a2b007ac2980_html_ae9a8cea8d4b81d8f2f10a2b007ac2980"><div class="ttname"><a href="d2/d24/classfl_1_1vector_ae9a8cea8d4b81d8f2f10a2b007ac2980.html#ae9a8cea8d4b81d8f2f10a2b007ac2980">fl::vector::push_back</a></div><div class="ttdeci">void push_back(const T &amp;value) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="d6/d68/vector_8h_source.html#l00624">vector.h:624</a></div></div>
+<div class="ttc" id="aclassfl_1_1span_html"><div class="ttname"><a href="d0/d08/classfl_1_1span.html">fl::span</a></div><div class="ttdef"><b>Definition</b> <a href="d4/d7a/span_8h_source.html#l00410">span.h:410</a></div></div>
+<div class="ttc" id="aclassfl_1_1vector_a82c3455c1a345460f95a0180c93b3fb0_html_a82c3455c1a345460f95a0180c93b3fb0"><div class="ttname"><a href="d2/d24/classfl_1_1vector_a82c3455c1a345460f95a0180c93b3fb0.html#a82c3455c1a345460f95a0180c93b3fb0">fl::vector::push_back</a></div><div class="ttdeci">void push_back(const T &amp;value) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="d6/d68/vector_8h_source.html#l00624">vector.h:624</a></div></div>
 <div class="ttc" id="aclassfl_1_1vector_html"><div class="ttname"><a href="d2/d24/classfl_1_1vector.html">fl::vector</a></div><div class="ttdef"><b>Definition</b> <a href="d6/d68/vector_8h_source.html#l00449">vector.h:449</a></div></div>
 <div class="ttc" id="amemory_8h_html"><div class="ttname"><a href="dc/d18/memory_8h.html">memory.h</a></div></div>
-<div class="ttc" id="anamespacefl_a3fd92c727664a77396403265415789d3_html_a3fd92c727664a77396403265415789d3"><div class="ttname"><a href="d4/d36/namespacefl_a3fd92c727664a77396403265415789d3.html#a3fd92c727664a77396403265415789d3">fl::make_unique</a></div><div class="ttdeci">fl::enable_if&lt;!fl::is_array&lt; T &gt;::value, unique_ptr&lt; T &gt; &gt;::type make_unique(Args &amp;&amp;... args) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="da/d4b/unique__ptr_8h_source.html#l00261">unique_ptr.h:261</a></div></div>
+<div class="ttc" id="anamespacefl_a257ae39a291866e014a2eeb4abe2a29c_html_a257ae39a291866e014a2eeb4abe2a29c"><div class="ttname"><a href="d4/d36/namespacefl_a257ae39a291866e014a2eeb4abe2a29c.html#a257ae39a291866e014a2eeb4abe2a29c">fl::make_unique</a></div><div class="ttdeci">fl::enable_if&lt;!fl::is_array&lt; T &gt;::value, unique_ptr&lt; T &gt; &gt;::type make_unique(Args &amp;&amp;... args) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="da/d4b/unique__ptr_8h_source.html#l00261">unique_ptr.h:261</a></div></div>
 <div class="ttc" id="aspan_8h_html"><div class="ttname"><a href="d4/d7a/span_8h.html">span.h</a></div></div>
 <div class="ttc" id="avector_8h_html"><div class="ttname"><a href="d6/d68/vector_8h.html">vector.h</a></div></div>
 </div><!-- fragment --><p>Example: JSON with safe default access</p>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &quot;<a class="code" href="d4/d05/json_8h.html">fl/stl/json.h</a>&quot;</span></div>
 <div class="line"> </div>
 <div class="line"><span class="keywordtype">void</span> json_example(<span class="keyword">const</span> <a class="code hl_class" href="d2/db2/classfl_1_1string.html">fl::string</a>&amp; jsonStr) {</div>
-<div class="line">    <a class="code hl_class" href="de/d40/classfl_1_1json.html">fl::json</a> json = <a class="code hl_function" href="de/d40/classfl_1_1json_af7d8a65ad376b44e25bf9653bcac2405.html#af7d8a65ad376b44e25bf9653bcac2405">fl::json::parse</a>(jsonStr);</div>
+<div class="line">    <a class="code hl_class" href="de/d40/classfl_1_1json.html">fl::json</a> json = <a class="code hl_function" href="de/d40/classfl_1_1json_acfd0c418354f6fa20c838e2167ab9661.html#acfd0c418354f6fa20c838e2167ab9661">fl::json::parse</a>(jsonStr);</div>
 <div class="line">    <span class="keywordtype">int</span> <a class="code hl_variable" href="d6/d05/_animartrix_8ino_ab0d80715bb4b382856cf250c1eeb9b53.html#ab0d80715bb4b382856cf250c1eeb9b53">brightness</a> = json[<span class="stringliteral">&quot;config&quot;</span>][<span class="stringliteral">&quot;brightness&quot;</span>] | 128;  <span class="comment">// default if missing</span></div>
 <div class="line">    <span class="keywordtype">bool</span> enabled = json[<span class="stringliteral">&quot;enabled&quot;</span>] | <span class="keyword">false</span>;</div>
 <div class="line">}</div>
 <div class="ttc" id="a_animartrix_8ino_ab0d80715bb4b382856cf250c1eeb9b53_html_ab0d80715bb4b382856cf250c1eeb9b53"><div class="ttname"><a href="d6/d05/_animartrix_8ino_ab0d80715bb4b382856cf250c1eeb9b53.html#ab0d80715bb4b382856cf250c1eeb9b53">brightness</a></div><div class="ttdeci">fl::UISlider brightness(&quot;Brightness&quot;, BRIGHTNESS, 0, 255)</div></div>
-<div class="ttc" id="aclassfl_1_1json_af7d8a65ad376b44e25bf9653bcac2405_html_af7d8a65ad376b44e25bf9653bcac2405"><div class="ttname"><a href="de/d40/classfl_1_1json_af7d8a65ad376b44e25bf9653bcac2405.html#af7d8a65ad376b44e25bf9653bcac2405">fl::json::parse</a></div><div class="ttdeci">static json parse(const fl::string &amp;txt) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="d4/d05/json_8h_source.html#l00677">json.h:677</a></div></div>
-<div class="ttc" id="aclassfl_1_1json_html"><div class="ttname"><a href="de/d40/classfl_1_1json.html">fl::json</a></div><div class="ttdef"><b>Definition</b> <a href="d4/d05/json_8h_source.html#l00128">json.h:128</a></div></div>
-<div class="ttc" id="aclassfl_1_1string_html"><div class="ttname"><a href="d2/db2/classfl_1_1string.html">fl::string</a></div><div class="ttdef"><b>Definition</b> <a href="da/d66/string_8h_source.html#l00193">string.h:193</a></div></div>
+<div class="ttc" id="aclassfl_1_1json_acfd0c418354f6fa20c838e2167ab9661_html_acfd0c418354f6fa20c838e2167ab9661"><div class="ttname"><a href="de/d40/classfl_1_1json_acfd0c418354f6fa20c838e2167ab9661.html#acfd0c418354f6fa20c838e2167ab9661">fl::json::parse</a></div><div class="ttdeci">static json parse(const fl::string &amp;txt) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="d4/d05/json_8h_source.html#l00842">json.h:842</a></div></div>
+<div class="ttc" id="aclassfl_1_1json_html"><div class="ttname"><a href="de/d40/classfl_1_1json.html">fl::json</a></div><div class="ttdef"><b>Definition</b> <a href="d4/d05/json_8h_source.html#l00261">json.h:261</a></div></div>
+<div class="ttc" id="aclassfl_1_1string_html"><div class="ttname"><a href="d2/db2/classfl_1_1string.html">fl::string</a></div><div class="ttdef"><b>Definition</b> <a href="da/d66/string_8h_source.html#l00202">string.h:202</a></div></div>
 <div class="ttc" id="ajson_8h_html"><div class="ttname"><a href="d4/d05/json_8h.html">json.h</a></div><div class="ttdoc">FastLED&#39;s Elegant JSON Library: fl::json</div></div>
 </div><!-- fragment --><hr  />
-<h1><a class="anchor" id="autotoc_md296"></a>
+<h1><a class="anchor" id="autotoc_md354"></a>
 Header Groups (5 major areas)</h1>
-<h2><a class="anchor" id="autotoc_md297"></a>
+<h2><a class="anchor" id="autotoc_md355"></a>
 1) STL‑like data structures and core utilities</h2>
 <p>Containers, views, algorithms, compile‑time utilities, memory/ownership, portability helpers.</p>
 <ul>
@@ -346,7 +354,7 @@ Header Groups (5 major areas)</h1>
 <li><code><a class="el" href="df/d72/bit__cast_8h.html">bit_cast.h</a></code>: Safe bit reinterpretation where supported, with fallbacks.</li>
 <li><code><a class="el" href="d4/d0b/singleton_8h.html">singleton.h</a></code>: Simple singleton helper for cases requiring global access.</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md298"></a>
+<h2><a class="anchor" id="autotoc_md356"></a>
 2) Graphics, geometry, and rendering</h2>
 <p>Rasterization, coordinate mappings, paths, grids, resampling, draw buffers, and related glue.</p>
 <ul>
@@ -384,14 +392,14 @@ Header Groups (5 major areas)</h1>
 <li><code>corkscrew.h</code>: Experimental path/trajectory utilities for visual effects.</li>
 <li><code><a class="el" href="dc/d36/wave__simulation_8h.html">wave_simulation.h</a></code> / <code><a class="el" href="dd/d8e/wave__simulation__real_8h.html">wave_simulation_real.h</a></code>: Simulated wave dynamics for organic effects.</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md299"></a>
+<h2><a class="anchor" id="autotoc_md357"></a>
 3) Color, math, and signal processing</h2>
 <p>Color models, gradients, gamma, math helpers, random, noise, mapping, and basic DSP.</p>
 <ul>
 <li>Color and palettes: <code>colorutils.h</code>, <code><a class="el" href="dd/db2/colorutils__misc_8h.html">colorutils_misc.h</a></code>, <code><a class="el" href="d2/d4f/hsv_8h.html" title="Defines the hue, saturation, and value (HSV) pixel struct.">hsv.h</a></code>, <code><a class="el" href="d0/d1a/hsv16_8h.html">hsv16.h</a></code>, <code><a class="el" href="db/dfe/gradient_8h.html">gradient.h</a></code>, <code><a class="el" href="d2/d78/fill_8h.html">fill.h</a></code>, <code><a class="el" href="dc/d44/five__bit__hd__gamma_8h.html" title="Declares functions for five-bit gamma correction.">five_bit_hd_gamma.h</a></code>, <code>gamma.h</code></li>
 <li>Math and mapping: <code><a class="el" href="df/db1/math_8h.html">math.h</a></code>, <code>math_macros.h</code>, <code><a class="el" href="d3/d84/sin32_8h.html">math/sin32.h</a></code>, <code>map_range.h</code>, <code><a class="el" href="d1/d79/random_8h.html">random.h</a></code>, <code><a class="el" href="db/d54/lut_8h.html">lut.h</a></code>, <code>clamp.h</code>, <code><a class="el" href="df/db0/clear_8h.html">clear.h</a></code>, <code><a class="el" href="d3/daf/splat_8h.html">splat.h</a></code>, <code><a class="el" href="d2/d80/transform_8h.html">transform.h</a></code></li>
 <li>Noise and waves: <code><a class="el" href="d4/d3f/noise__woryley_8h.html">noise_woryley.h</a></code>, <code><a class="el" href="dc/d36/wave__simulation_8h.html">wave_simulation.h</a></code>, <code><a class="el" href="dd/d8e/wave__simulation__real_8h.html">wave_simulation_real.h</a></code></li>
-<li>DSP and audio: <code><a class="el" href="d7/d76/fft_8h.html">fft.h</a></code>, <code><a class="el" href="df/d73/fft__impl_8h.html">fft_impl.h</a></code>, <code>audio.h</code>, <code>audio_reactive.h</code></li>
+<li>DSP and audio: <code><a class="el" href="d7/d76/fft_8h.html">fft.h</a></code>, <code><a class="el" href="df/d73/fft__impl_8h.html">fft_impl.h</a></code>, <code>audio.h</code>, <code><a class="el" href="d1/d9a/audio__reactive_8h.html">audio_reactive.h</a></code></li>
 <li>Time utilities: <code><a class="el" href="de/df7/time_8h.html">time.h</a></code>, <code><a class="el" href="d0/d87/time__alpha_8h.html">time_alpha.h</a></code></li>
 </ul>
 <p>Per‑header quick descriptions:</p>
@@ -416,11 +424,11 @@ Header Groups (5 major areas)</h1>
 <li><code>wave_simulation*.h</code>: Wavefield simulation (also referenced in graphics).</li>
 <li><code><a class="el" href="d7/d76/fft_8h.html">fft.h</a></code> / <code><a class="el" href="df/d73/fft__impl_8h.html">fft_impl.h</a></code>: Fast Fourier Transform interfaces and backends.</li>
 <li><code>audio.h</code>: Audio input/stream abstractions for host/platforms that support it.</li>
-<li><code>audio_reactive.h</code>: Utilities to drive visuals from audio features.</li>
+<li><code><a class="el" href="d1/d9a/audio__reactive_8h.html">audio_reactive.h</a></code>: Utilities to drive visuals from audio features.</li>
 <li><code><a class="el" href="de/df7/time_8h.html">time.h</a></code>: Timekeeping helpers (millis/micros abstractions when available).</li>
 <li><code><a class="el" href="d0/d87/time__alpha_8h.html">time_alpha.h</a></code>: Smoothed/exponential time‑based interpolation helpers.</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md300"></a>
+<h2><a class="anchor" id="autotoc_md358"></a>
 4) Concurrency, async, and functional</h2>
 <p>Threads, synchronization, async primitives, eventing, and callable utilities.</p>
 <ul>
@@ -444,13 +452,13 @@ Header Groups (5 major areas)</h1>
 <li><code><a class="el" href="db/dc0/engine__events_8h.html">engine_events.h</a></code>: Event channel definitions for engine‑style systems.</li>
 <li><code><a class="el" href="d8/da8/isr_8h.html" title="Umbrella header for ISR subsystem.">isr.h</a></code>: Cross-platform interrupt service routine (ISR) attachment API for timer and GPIO interrupts.</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md301"></a>
+<h2><a class="anchor" id="autotoc_md359"></a>
 5) I/O, JSON, and text/formatting</h2>
 <p>Streams, strings, formatted output, bytestreams, filesystem, JSON.</p>
 <ul>
 <li>Text and streams: <code><a class="el" href="da/d66/string_8h.html">string.h</a></code>, <code>str.h</code>, <code><a class="el" href="dc/d64/ostream_8h.html">ostream.h</a></code>, <code><a class="el" href="db/dc9/istream_8h.html">istream.h</a></code>, <code><a class="el" href="da/da4/sstream_8h.html">sstream.h</a></code>, <code><a class="el" href="d8/d00/strstream_8h.html">strstream.h</a></code>, <code>printf.h</code></li>
 <li>JSON: <code><a class="el" href="d4/d05/json_8h.html" title="FastLED&#39;s Elegant JSON Library: fl::json">json.h</a></code></li>
-<li>Bytestreams and I/O: <code>bytestream.h</code>, <code>bytestreammemory.h</code>, <code>io.h</code>, <code><a class="el" href="d6/d8d/file__system_8h.html">file_system.h</a></code>, <code><a class="el" href="d6/d6a/fetch_8h.html" title="Unified HTTP fetch API for FastLED (cross-platform)">fetch.h</a></code></li>
+<li>Bytestreams and I/O: <code>bytestream.h</code>, <code>bytestreammemory.h</code>, <code>io.h</code>, <code><a class="el" href="d6/d8d/file__system_8h.html" title="Compatibility forwarder.">file_system.h</a></code>, <code><a class="el" href="d6/d6a/fetch_8h.html" title="Unified HTTP fetch API for FastLED (cross-platform)">fetch.h</a></code></li>
 </ul>
 <p>Per‑header quick descriptions:</p>
 <ul>
@@ -462,13 +470,13 @@ Header Groups (5 major areas)</h1>
 <li><code>bytestream.h</code>: Sequential byte I/O abstraction for buffers/streams.</li>
 <li><code>bytestreammemory.h</code>: In‑memory byte stream implementation.</li>
 <li><code>io.h</code>: General I/O helpers for files/streams where available.</li>
-<li><code><a class="el" href="d6/d8d/file__system_8h.html">file_system.h</a></code>: Minimal filesystem adapter for host platforms.</li>
+<li><code><a class="el" href="d6/d8d/file__system_8h.html" title="Compatibility forwarder.">file_system.h</a></code>: Minimal filesystem adapter for host platforms.</li>
 <li><code><a class="el" href="d6/d6a/fetch_8h.html" title="Unified HTTP fetch API for FastLED (cross-platform)">fetch.h</a></code>: Basic fetch/request helpers for network‑capable hosts. </li>
 </ul>
-<h1><a class="anchor" id="autotoc_md302"></a>
+<h1><a class="anchor" id="autotoc_md360"></a>
 Comprehensive Module Breakdown</h1>
 <p>This section groups headers by domain, explains their role, and shows minimal usage snippets. Names shown are representative; see the header list above for the full inventory.</p>
-<h2><a class="anchor" id="autotoc_md303"></a>
+<h2><a class="anchor" id="autotoc_md361"></a>
 Containers and Views</h2>
 <ul>
 <li>Sequence and associative containers: <code><a class="el" href="d6/d68/vector_8h.html">vector.h</a></code>, <code><a class="el" href="dc/d44/deque_8h.html">deque.h</a></code>, <code><a class="el" href="d8/d38/queue_8h.html">queue.h</a></code>, <code><a class="el" href="d4/da1/priority__queue_8h.html">priority_queue.h</a></code>, <code><a class="el" href="d4/d13/set_8h.html">set.h</a></code>, <code><a class="el" href="dc/db7/map_8h.html">map.h</a></code>, <code><a class="el" href="df/d26/unordered__set_8h.html">unordered_set.h</a></code>, <code>hash_map.h</code>, <code>hash_set.h</code>, <code><a class="el" href="d5/ddf/rbtree_8h.html">rbtree.h</a></code></li>
@@ -480,10 +488,11 @@ Containers and Views</h2>
 <div class="line"> </div>
 <div class="line"><span class="keywordtype">size_t</span> count_nonzero(<a class="code hl_class" href="d0/d08/classfl_1_1span.html">fl::span&lt;const uint8_t&gt;</a> bytes) {</div>
 <div class="line">    <span class="keywordtype">size_t</span> count = 0;</div>
-<div class="line">    <span class="keywordflow">for</span> (uint8_t b : bytes) { <span class="keywordflow">if</span> (b != 0) { ++count; } }</div>
+<div class="line">    <span class="keywordflow">for</span> (<a class="code hl_typedef" href="df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a> b : bytes) { <span class="keywordflow">if</span> (b != 0) { ++count; } }</div>
 <div class="line">    <span class="keywordflow">return</span> count;</div>
 <div class="line">}</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md304"></a>
+<div class="ttc" id="astdint_8h_aba7bc1797add20fe3efdf37ced1182c5_html_aba7bc1797add20fe3efdf37ced1182c5"><div class="ttname"><a href="df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a></div><div class="ttdeci">unsigned char uint8_t</div><div class="ttdef"><b>Definition</b> <a href="df/dd8/stdint_8h_source.html#l00208">stdint.h:208</a></div></div>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md362"></a>
 Strings and Streams</h2>
 <ul>
 <li>Text types and streaming: <code><a class="el" href="da/d66/string_8h.html">string.h</a></code>, <code>str.h</code>, <code><a class="el" href="dc/d64/ostream_8h.html">ostream.h</a></code>, <code><a class="el" href="db/dc9/istream_8h.html">istream.h</a></code>, <code><a class="el" href="da/da4/sstream_8h.html">sstream.h</a></code>, <code><a class="el" href="d8/d00/strstream_8h.html">strstream.h</a></code>, <code>printf.h</code></li>
@@ -495,16 +504,16 @@ Strings and Streams</h2>
 <div class="line"><a class="code hl_class" href="d2/db2/classfl_1_1string.html">fl::string</a> greet(<span class="keyword">const</span> <a class="code hl_class" href="d2/db2/classfl_1_1string.html">fl::string</a>&amp; name) {</div>
 <div class="line">    <a class="code hl_class" href="d1/d27/classfl_1_1sstream.html">fl::sstream</a> ss;</div>
 <div class="line">    ss &lt;&lt; <span class="stringliteral">&quot;Hello, &quot;</span> &lt;&lt; name &lt;&lt; <span class="stringliteral">&quot;!&quot;</span>;</div>
-<div class="line">    <span class="keywordflow">return</span> ss.<a class="code hl_function" href="d1/d27/classfl_1_1sstream_a08170cac6eba7241f099ae16730f6f8e.html#a08170cac6eba7241f099ae16730f6f8e">str</a>();</div>
+<div class="line">    <span class="keywordflow">return</span> ss.<a class="code hl_function" href="d1/d27/classfl_1_1sstream_a904115dfd2a7e462177b6409c9b842d6.html#a904115dfd2a7e462177b6409c9b842d6">str</a>();</div>
 <div class="line">}</div>
-<div class="ttc" id="aclassfl_1_1sstream_a08170cac6eba7241f099ae16730f6f8e_html_a08170cac6eba7241f099ae16730f6f8e"><div class="ttname"><a href="d1/d27/classfl_1_1sstream_a08170cac6eba7241f099ae16730f6f8e.html#a08170cac6eba7241f099ae16730f6f8e">fl::sstream::str</a></div><div class="ttdeci">string str() const FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="d8/d00/strstream_8h_source.html#l00043">strstream.h:43</a></div></div>
+<div class="ttc" id="aclassfl_1_1sstream_a904115dfd2a7e462177b6409c9b842d6_html_a904115dfd2a7e462177b6409c9b842d6"><div class="ttname"><a href="d1/d27/classfl_1_1sstream_a904115dfd2a7e462177b6409c9b842d6.html#a904115dfd2a7e462177b6409c9b842d6">fl::sstream::str</a></div><div class="ttdeci">string str() const FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="d8/d00/strstream_8h_source.html#l00043">strstream.h:43</a></div></div>
 <div class="ttc" id="aclassfl_1_1sstream_html"><div class="ttname"><a href="d1/d27/classfl_1_1sstream.html">fl::sstream</a></div><div class="ttdef"><b>Definition</b> <a href="d8/d00/strstream_8h_source.html#l00034">strstream.h:34</a></div></div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md305"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md363"></a>
 Memory and Ownership</h2>
 <ul>
 <li>Smart pointers and utilities: <code><a class="el" href="da/d4b/unique__ptr_8h.html">unique_ptr.h</a></code>, <code><a class="el" href="df/d6a/shared__ptr_8h.html">shared_ptr.h</a></code>, <code><a class="el" href="dc/db4/weak__ptr_8h.html">weak_ptr.h</a></code>, <code><a class="el" href="d0/d44/scoped__ptr_8h.html">scoped_ptr.h</a></code>, <code>scoped_array.h</code>, <code><a class="el" href="da/da9/allocator_8h.html">allocator.h</a></code>, <code><a class="el" href="dc/d18/memory_8h.html">memory.h</a></code>, <code>memfill.h</code></li>
 </ul>
-<p>Why: RAII ownership with explicit semantics. Prefer <code><a class="el" href="d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af">fl::make_shared</a>&lt;T&gt;()</code>/<code><a class="el" href="d4/d36/namespacefl_a3fd92c727664a77396403265415789d3.html#a3fd92c727664a77396403265415789d3">fl::make_unique</a>&lt;T&gt;()</code> patterns where available, or direct constructors provided by these headers.</p>
+<p>Why: RAII ownership with explicit semantics. Prefer <code><a class="el" href="d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af">fl::make_shared</a>&lt;T&gt;()</code>/<code><a class="el" href="d4/d36/namespacefl_a257ae39a291866e014a2eeb4abe2a29c.html#a257ae39a291866e014a2eeb4abe2a29c">fl::make_unique</a>&lt;T&gt;()</code> patterns where available, or direct constructors provided by these headers.</p>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &quot;../fl/stl/shared_ptr.h&quot;</span></div>
 <div class="line"> </div>
 <div class="line"><span class="keyword">struct </span>Widget { <span class="keywordtype">int</span> value; };</div>
@@ -514,7 +523,7 @@ Memory and Ownership</h2>
 <div class="line">    <span class="keyword">auto</span> w2 = w; <span class="comment">// shared ownership</span></div>
 <div class="line">}</div>
 <div class="ttc" id="aclassfl_1_1shared__ptr_html"><div class="ttname"><a href="d1/d74/classfl_1_1shared__ptr.html">fl::shared_ptr</a></div><div class="ttdef"><b>Definition</b> <a href="df/d6a/shared__ptr_8h_source.html#l00155">shared_ptr.h:155</a></div></div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md306"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md364"></a>
 Functional Utilities</h2>
 <ul>
 <li>Callables and lists: <code><a class="el" href="dd/d67/function_8h.html">fl/stl/function.h</a></code>, <code><a class="el" href="d8/dea/functional_8h.html">functional.h</a></code></li>
@@ -530,7 +539,7 @@ Functional Utilities</h2>
 <div class="line">    handlers(200); <span class="comment">// invoke all</span></div>
 <div class="line">}</div>
 <div class="ttc" id="afunction_8h_html"><div class="ttname"><a href="dd/d67/function_8h.html">function.h</a></div></div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md307"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md365"></a>
 Concurrency and Async</h2>
 <ul>
 <li>Threads and synchronization: <code><a class="el" href="db/dd5/thread_8h.html">thread.h</a></code>, <code><a class="el" href="d0/df8/mutex_8h.html" title="Platform-independent mutex interface.">mutex.h</a></code>, <code><a class="el" href="d8/d7a/thread__local_8h.html">thread_local.h</a></code></li>
@@ -542,7 +551,7 @@ Concurrency and Async</h2>
 <div class="line"> </div>
 <div class="line">fl::task::promise&lt;int&gt; compute_async(); <span class="comment">// returns a moveable wrapper around a future-like result</span></div>
 <div class="ttc" id="apromise_8h_html"><div class="ttname"><a href="d6/d17/promise_8h.html">promise.h</a></div><div class="ttdoc">Promise-based fluent API for FastLED - standalone async primitives.</div></div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md308"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md366"></a>
 Interrupt Service Routines (ISR)</h2>
 <ul>
 <li>Cross-platform ISR API: <code><a class="el" href="d8/da8/isr_8h.html" title="Umbrella header for ISR subsystem.">isr.h</a></code></li>
@@ -567,7 +576,7 @@ Interrupt Service Routines (ISR)</h2>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &quot;<a class="code" href="d8/da8/isr_8h.html">fl/stl/isr.h</a>&quot;</span></div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// Counter updated from ISR (use atomic or volatile for shared state)</span></div>
-<div class="line"><span class="keyword">static</span> <span class="keyword">volatile</span> uint32_t tick_count = 0;</div>
+<div class="line"><span class="keyword">static</span> <span class="keyword">volatile</span> <a class="code hl_typedef" href="df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a> tick_count = 0;</div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// ISR handler - must be fast and IRAM-safe on ESP32</span></div>
 <div class="line"><span class="keyword">static</span> <span class="keywordtype">void</span> my_timer_isr(<span class="keywordtype">void</span>* user_data) {</div>
@@ -590,17 +599,18 @@ Interrupt Service Routines (ISR)</h2>
 <div class="line">        <span class="comment">// ISR is now active</span></div>
 <div class="line">        <a class="code hl_define" href="d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a>(<span class="stringliteral">&quot;Timer ISR attached successfully&quot;</span>);</div>
 <div class="line">    } <span class="keywordflow">else</span> {</div>
-<div class="line">        <a class="code hl_define" href="d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;Failed to attach ISR: &quot;</span> &lt;&lt; <a class="code hl_function" href="d6/d93/namespacefl_1_1isr_a7603b9e69d51c703d829c702ba9fa29a.html#a7603b9e69d51c703d829c702ba9fa29a">fl::isr::get_error_string</a>(result));</div>
+<div class="line">        <a class="code hl_define" href="d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;Failed to attach ISR: &quot;</span> &lt;&lt; <a class="code hl_function" href="d6/d93/namespacefl_1_1isr_a7603b9e69d51c703d829c702ba9fa29a.html#a7603b9e69d51c703d829c702ba9fa29a">fl::isr::get_error_string</a>(result));</div>
 <div class="line">    }</div>
 <div class="line">}</div>
-<div class="ttc" id="a_analog_output_8ino_a4fc01d736fe50cf5b977f755b675f11d_html_a4fc01d736fe50cf5b977f755b675f11d"><div class="ttname"><a href="d5/d17/_analog_output_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d">setup</a></div><div class="ttdeci">void setup()</div><div class="ttdef"><b>Definition</b> <a href="d5/d17/_analog_output_8ino_source.html#l00065">AnalogOutput.ino:65</a></div></div>
+<div class="ttc" id="a_analog_output_8ino_a4fc01d736fe50cf5b977f755b675f11d_html_a4fc01d736fe50cf5b977f755b675f11d"><div class="ttname"><a href="d5/d17/_analog_output_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d">setup</a></div><div class="ttdeci">void setup()</div><div class="ttdef"><b>Definition</b> <a href="d5/d17/_analog_output_8ino_source.html#l00058">AnalogOutput.ino:58</a></div></div>
 <div class="ttc" id="aisr_8h_html"><div class="ttname"><a href="d8/da8/isr_8h.html">isr.h</a></div><div class="ttdoc">Umbrella header for ISR subsystem.</div></div>
-<div class="ttc" id="alog_8h_a868b194fdb2234182e76042d9fde3062_html_a868b194fdb2234182e76042d9fde3062"><div class="ttname"><a href="d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a></div><div class="ttdeci">#define FL_WARN(X)</div><div class="ttdef"><b>Definition</b> <a href="d7/d7f/log_8h_source.html#l00276">log.h:276</a></div></div>
-<div class="ttc" id="alog_8h_a8ccae77aa5fe30a41f19d233cb0de2c1_html_a8ccae77aa5fe30a41f19d233cb0de2c1"><div class="ttname"><a href="d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a></div><div class="ttdeci">#define FL_DBG</div><div class="ttdef"><b>Definition</b> <a href="d7/d7f/log_8h_source.html#l00388">log.h:388</a></div></div>
+<div class="ttc" id="alog_8h_a4804912fba6eed63e1afd84b8768aced_html_a4804912fba6eed63e1afd84b8768aced"><div class="ttname"><a href="d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a></div><div class="ttdeci">#define FL_WARN(...)</div><div class="ttdef"><b>Definition</b> <a href="d7/d7f/log_8h_source.html#l00440">log.h:440</a></div></div>
+<div class="ttc" id="alog_8h_a8ccae77aa5fe30a41f19d233cb0de2c1_html_a8ccae77aa5fe30a41f19d233cb0de2c1"><div class="ttname"><a href="d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a></div><div class="ttdeci">#define FL_DBG</div><div class="ttdef"><b>Definition</b> <a href="d7/d7f/log_8h_source.html#l00564">log.h:564</a></div></div>
 <div class="ttc" id="anamespacefl_1_1isr_a1930f383e19a9199d0845846bc01a60c_html_a1930f383e19a9199d0845846bc01a60c"><div class="ttname"><a href="d6/d93/namespacefl_1_1isr_a1930f383e19a9199d0845846bc01a60c.html#a1930f383e19a9199d0845846bc01a60c">fl::isr::ISR_FLAG_IRAM_SAFE</a></div><div class="ttdeci">constexpr u32 ISR_FLAG_IRAM_SAFE</div><div class="ttdef"><b>Definition</b> <a href="d2/d6f/constants_8h_source.html#l00021">constants.h:21</a></div></div>
 <div class="ttc" id="anamespacefl_1_1isr_a5d882da3a1d346e782048222b578ab49_html_a5d882da3a1d346e782048222b578ab49"><div class="ttname"><a href="d6/d93/namespacefl_1_1isr_a5d882da3a1d346e782048222b578ab49.html#a5d882da3a1d346e782048222b578ab49">fl::isr::attach_timer_handler</a></div><div class="ttdeci">int attach_timer_handler(const config &amp;cfg, handle *out_handle)</div><div class="ttdoc">Attach a timer-based ISR handler.</div><div class="ttdef"><b>Definition</b> <a href="db/d55/handler_8cpp_8hpp_source.html#l00010">handler.cpp.hpp:10</a></div></div>
 <div class="ttc" id="anamespacefl_1_1isr_a7603b9e69d51c703d829c702ba9fa29a_html_a7603b9e69d51c703d829c702ba9fa29a"><div class="ttname"><a href="d6/d93/namespacefl_1_1isr_a7603b9e69d51c703d829c702ba9fa29a.html#a7603b9e69d51c703d829c702ba9fa29a">fl::isr::get_error_string</a></div><div class="ttdeci">const char * get_error_string(int error_code)</div><div class="ttdoc">Get platform-specific error description.</div><div class="ttdef"><b>Definition</b> <a href="db/d55/handler_8cpp_8hpp_source.html#l00034">handler.cpp.hpp:34</a></div></div>
 <div class="ttc" id="anamespacefl_1_1isr_ac0499cce3cc603ceec00299251cfbd1c_html_ac0499cce3cc603ceec00299251cfbd1c"><div class="ttname"><a href="d6/d93/namespacefl_1_1isr_ac0499cce3cc603ceec00299251cfbd1c.html#ac0499cce3cc603ceec00299251cfbd1c">fl::isr::ISR_PRIORITY_MEDIUM</a></div><div class="ttdeci">constexpr u8 ISR_PRIORITY_MEDIUM</div><div class="ttdef"><b>Definition</b> <a href="d2/d6f/constants_8h_source.html#l00015">constants.h:15</a></div></div>
+<div class="ttc" id="astdint_8h_ae8a835bf6e050b01cc449644a343aa73_html_ae8a835bf6e050b01cc449644a343aa73"><div class="ttname"><a href="df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a></div><div class="ttdeci">fl::u32 uint32_t</div><div class="ttdef"><b>Definition</b> <a href="df/dd8/stdint_8h_source.html#l00218">stdint.h:218</a></div></div>
 <div class="ttc" id="astructfl_1_1isr_1_1config_a23911ea225755b826fbe9b08f09affd4_html_a23911ea225755b826fbe9b08f09affd4"><div class="ttname"><a href="df/d97/structfl_1_1isr_1_1config_a23911ea225755b826fbe9b08f09affd4.html#a23911ea225755b826fbe9b08f09affd4">fl::isr::config::handler</a></div><div class="ttdeci">handler_fn handler</div><div class="ttdef"><b>Definition</b> <a href="dd/dee/handler_8h_source.html#l00020">handler.h:20</a></div></div>
 <div class="ttc" id="astructfl_1_1isr_1_1config_a4d9419980897ce3f876762f948e3d22d_html_a4d9419980897ce3f876762f948e3d22d"><div class="ttname"><a href="df/d97/structfl_1_1isr_1_1config_a4d9419980897ce3f876762f948e3d22d.html#a4d9419980897ce3f876762f948e3d22d">fl::isr::config::frequency_hz</a></div><div class="ttdeci">u32 frequency_hz</div><div class="ttdef"><b>Definition</b> <a href="dd/dee/handler_8h_source.html#l00022">handler.h:22</a></div></div>
 <div class="ttc" id="astructfl_1_1isr_1_1config_a565eb64f2ec145ee194c61242949f7dd_html_a565eb64f2ec145ee194c61242949f7dd"><div class="ttname"><a href="df/d97/structfl_1_1isr_1_1config_a565eb64f2ec145ee194c61242949f7dd.html#a565eb64f2ec145ee194c61242949f7dd">fl::isr::config::user_data</a></div><div class="ttdeci">void * user_data</div><div class="ttdef"><b>Definition</b> <a href="dd/dee/handler_8h_source.html#l00021">handler.h:21</a></div></div>
@@ -612,8 +622,8 @@ Interrupt Service Routines (ISR)</h2>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &quot;<a class="code" href="d8/da8/isr_8h.html">fl/stl/isr.h</a>&quot;</span></div>
 <div class="line"> </div>
 <div class="line"><span class="keyword">struct </span>ISRContext {</div>
-<div class="line">    <span class="keyword">volatile</span> uint32_t count;</div>
-<div class="line">    <span class="keyword">volatile</span> uint32_t max_count;</div>
+<div class="line">    <span class="keyword">volatile</span> <a class="code hl_typedef" href="df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a> count;</div>
+<div class="line">    <span class="keyword">volatile</span> <a class="code hl_typedef" href="df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a> max_count;</div>
 <div class="line">};</div>
 <div class="line"> </div>
 <div class="line"><span class="keyword">static</span> <span class="keywordtype">void</span> counting_isr(<span class="keywordtype">void</span>* user_data) {</div>
@@ -637,19 +647,19 @@ Interrupt Service Routines (ISR)</h2>
 <div class="line">    <a class="code hl_struct" href="d5/d17/structfl_1_1isr_1_1handle.html">fl::isr::handle</a> handle;</div>
 <div class="line">    <span class="keywordflow">if</span> (<a class="code hl_function" href="d6/d93/namespacefl_1_1isr_a5d882da3a1d346e782048222b578ab49.html#a5d882da3a1d346e782048222b578ab49">fl::isr::attach_timer_handler</a>(config, &amp;handle) == 0) {</div>
 <div class="line">        <span class="comment">// Run for a while</span></div>
-<div class="line">        <a class="code hl_function" href="d4/d36/namespacefl_a50131c41da2f619067d98360de35fa27.html#a50131c41da2f619067d98360de35fa27">delay</a>(100);</div>
+<div class="line">        <a class="code hl_function" href="d4/d36/namespacefl_a19da680141593b475c4d1d3c1c0a8409.html#a19da680141593b475c4d1d3c1c0a8409">delay</a>(100);</div>
 <div class="line"> </div>
 <div class="line">        <span class="comment">// Temporarily disable ISR</span></div>
 <div class="line">        <a class="code hl_function" href="d6/d93/namespacefl_1_1isr_a3e96bda02235339898c1613125aff9d9.html#a3e96bda02235339898c1613125aff9d9">fl::isr::disable_handler</a>(handle);</div>
 <div class="line">        <a class="code hl_define" href="d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a>(<span class="stringliteral">&quot;ISR disabled, count: &quot;</span> &lt;&lt; ctx.count);</div>
 <div class="line"> </div>
-<div class="line">        <a class="code hl_function" href="d4/d36/namespacefl_a50131c41da2f619067d98360de35fa27.html#a50131c41da2f619067d98360de35fa27">delay</a>(100);</div>
+<div class="line">        <a class="code hl_function" href="d4/d36/namespacefl_a19da680141593b475c4d1d3c1c0a8409.html#a19da680141593b475c4d1d3c1c0a8409">delay</a>(100);</div>
 <div class="line"> </div>
 <div class="line">        <span class="comment">// Re-enable ISR</span></div>
 <div class="line">        <a class="code hl_function" href="d6/d93/namespacefl_1_1isr_a42aaf9eb081a4d48f8465f7645567674.html#a42aaf9eb081a4d48f8465f7645567674">fl::isr::enable_handler</a>(handle);</div>
 <div class="line">        <a class="code hl_define" href="d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a>(<span class="stringliteral">&quot;ISR re-enabled&quot;</span>);</div>
 <div class="line"> </div>
-<div class="line">        <a class="code hl_function" href="d4/d36/namespacefl_a50131c41da2f619067d98360de35fa27.html#a50131c41da2f619067d98360de35fa27">delay</a>(100);</div>
+<div class="line">        <a class="code hl_function" href="d4/d36/namespacefl_a19da680141593b475c4d1d3c1c0a8409.html#a19da680141593b475c4d1d3c1c0a8409">delay</a>(100);</div>
 <div class="line"> </div>
 <div class="line">        <span class="comment">// Clean up when done</span></div>
 <div class="line">        <a class="code hl_function" href="d6/d93/namespacefl_1_1isr_a29c0b8a68aa4b89155f40b914eaaa4fb.html#a29c0b8a68aa4b89155f40b914eaaa4fb">fl::isr::detach_handler</a>(handle);</div>
@@ -660,7 +670,7 @@ Interrupt Service Routines (ISR)</h2>
 <div class="ttc" id="anamespacefl_1_1isr_a29c0b8a68aa4b89155f40b914eaaa4fb_html_a29c0b8a68aa4b89155f40b914eaaa4fb"><div class="ttname"><a href="d6/d93/namespacefl_1_1isr_a29c0b8a68aa4b89155f40b914eaaa4fb.html#a29c0b8a68aa4b89155f40b914eaaa4fb">fl::isr::detach_handler</a></div><div class="ttdeci">int detach_handler(handle &amp;h)</div><div class="ttdoc">Detach an ISR handler.</div><div class="ttdef"><b>Definition</b> <a href="db/d55/handler_8cpp_8hpp_source.html#l00018">handler.cpp.hpp:18</a></div></div>
 <div class="ttc" id="anamespacefl_1_1isr_a3e96bda02235339898c1613125aff9d9_html_a3e96bda02235339898c1613125aff9d9"><div class="ttname"><a href="d6/d93/namespacefl_1_1isr_a3e96bda02235339898c1613125aff9d9.html#a3e96bda02235339898c1613125aff9d9">fl::isr::disable_handler</a></div><div class="ttdeci">int disable_handler(handle &amp;h)</div><div class="ttdoc">Disable an ISR temporarily (without detaching).</div><div class="ttdef"><b>Definition</b> <a href="db/d55/handler_8cpp_8hpp_source.html#l00026">handler.cpp.hpp:26</a></div></div>
 <div class="ttc" id="anamespacefl_1_1isr_a42aaf9eb081a4d48f8465f7645567674_html_a42aaf9eb081a4d48f8465f7645567674"><div class="ttname"><a href="d6/d93/namespacefl_1_1isr_a42aaf9eb081a4d48f8465f7645567674.html#a42aaf9eb081a4d48f8465f7645567674">fl::isr::enable_handler</a></div><div class="ttdeci">int enable_handler(handle &amp;h)</div><div class="ttdoc">Enable an ISR (after temporary disable).</div><div class="ttdef"><b>Definition</b> <a href="db/d55/handler_8cpp_8hpp_source.html#l00022">handler.cpp.hpp:22</a></div></div>
-<div class="ttc" id="anamespacefl_a50131c41da2f619067d98360de35fa27_html_a50131c41da2f619067d98360de35fa27"><div class="ttname"><a href="d4/d36/namespacefl_a50131c41da2f619067d98360de35fa27.html#a50131c41da2f619067d98360de35fa27">fl::delay</a></div><div class="ttdeci">void delay(u32 ms, bool run_async=true) FL_NOEXCEPT</div><div class="ttdoc">Public delay wrapper that keeps bare Arduino delay() preferred after using fl::delay; while still all...</div><div class="ttdef"><b>Definition</b> <a href="dd/dee/delay_8h_source.html#l00098">delay.h:98</a></div></div>
+<div class="ttc" id="anamespacefl_a19da680141593b475c4d1d3c1c0a8409_html_a19da680141593b475c4d1d3c1c0a8409"><div class="ttname"><a href="d4/d36/namespacefl_a19da680141593b475c4d1d3c1c0a8409.html#a19da680141593b475c4d1d3c1c0a8409">fl::delay</a></div><div class="ttdeci">void delay(u32 ms, bool run_async=true) FL_NO_EXCEPT</div><div class="ttdoc">Public delay wrapper that keeps bare Arduino delay() preferred after using fl::delay; while still all...</div><div class="ttdef"><b>Definition</b> <a href="dd/dee/delay_8h_source.html#l00098">delay.h:98</a></div></div>
 </div><!-- fragment --><p>GPIO interrupt example:</p>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &quot;<a class="code" href="d8/da8/isr_8h.html">fl/stl/isr.h</a>&quot;</span></div>
 <div class="line"> </div>
@@ -677,7 +687,7 @@ Interrupt Service Routines (ISR)</h2>
 <div class="line">    config.<a class="code hl_variable" href="df/d97/structfl_1_1isr_1_1config_a9ca21ab64285b9824211e3810c2bded6.html#a9ca21ab64285b9824211e3810c2bded6">flags</a> = <a class="code hl_variable" href="d6/d93/namespacefl_1_1isr_a310ea2de65c76b6d2511e6fe706b10d9.html#a310ea2de65c76b6d2511e6fe706b10d9">fl::isr::ISR_FLAG_EDGE_RISING</a>;  <span class="comment">// Trigger on rising edge</span></div>
 <div class="line"> </div>
 <div class="line">    <a class="code hl_struct" href="d5/d17/structfl_1_1isr_1_1handle.html">fl::isr::handle</a> handle;</div>
-<div class="line">    uint8_t button_pin = 2;  <span class="comment">// GPIO pin number</span></div>
+<div class="line">    <a class="code hl_typedef" href="df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a> button_pin = 2;  <span class="comment">// GPIO pin number</span></div>
 <div class="line"> </div>
 <div class="line">    <span class="keywordflow">if</span> (<a class="code hl_function" href="d6/d93/namespacefl_1_1isr_a8e682d294060352052ae134b4b7ec40e.html#a8e682d294060352052ae134b4b7ec40e">fl::isr::attach_external_handler</a>(button_pin, config, &amp;handle) == 0) {</div>
 <div class="line">        <a class="code hl_define" href="d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a>(<span class="stringliteral">&quot;Button ISR attached to pin &quot;</span> &lt;&lt; button_pin);</div>
@@ -719,7 +729,7 @@ Interrupt Service Routines (ISR)</h2>
 <li><code>ISR_PRIORITY_CRITICAL</code> (4+): Experimental, may require assembly on some platforms</li>
 </ul>
 <p>See <code>src/fl/isr.h</code> for complete API documentation and platform-specific configuration flags.</p>
-<h2><a class="anchor" id="autotoc_md309"></a>
+<h2><a class="anchor" id="autotoc_md367"></a>
 Category-Based Logging</h2>
 <ul>
 <li>Category logging system: <code><a class="el" href="d7/d7f/log_8h.html" title="Centralized logging categories for FastLED hardware interfaces and subsystems.">log.h</a></code>, integrated via <code>dbg.h</code></li>
@@ -774,16 +784,16 @@ Category-Based Logging</h2>
 </div><!-- fragment --><p><b>Logging in your code:</b></p>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &quot;<a class="code" href="d7/d7f/log_8h.html">fl/log/log.h</a>&quot;</span></div>
 <div class="line"> </div>
-<div class="line"><span class="keywordtype">void</span> myCustomDriver::initialize(uint32_t freq_hz) {</div>
+<div class="line"><span class="keywordtype">void</span> myCustomDriver::initialize(<a class="code hl_typedef" href="df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a> freq_hz) {</div>
 <div class="line">    FL_LOG_I2S(<span class="stringliteral">&quot;I2S initialized&quot;</span>);</div>
 <div class="line">    FL_LOG_I2S(<span class="stringliteral">&quot;  Frequency: &quot;</span> &lt;&lt; freq_hz &lt;&lt; <span class="stringliteral">&quot; Hz&quot;</span>);</div>
 <div class="line">    FL_LOG_I2S(<span class="stringliteral">&quot;  Buffer size: &quot;</span> &lt;&lt; mBufferSize &lt;&lt; <span class="stringliteral">&quot; bytes&quot;</span>);</div>
 <div class="line">}</div>
 <div class="line"> </div>
 <div class="line"><span class="keywordtype">void</span> myCustomDriver::transmit(<a class="code hl_class" href="d0/d08/classfl_1_1span.html">fl::span&lt;const uint8_t&gt;</a> data) {</div>
-<div class="line">    FL_LOG_I2S(<span class="stringliteral">&quot;Transmitting &quot;</span> &lt;&lt; data.<a class="code hl_function" href="d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac">size</a>() &lt;&lt; <span class="stringliteral">&quot; bytes&quot;</span>);</div>
+<div class="line">    FL_LOG_I2S(<span class="stringliteral">&quot;Transmitting &quot;</span> &lt;&lt; data.<a class="code hl_function" href="d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa">size</a>() &lt;&lt; <span class="stringliteral">&quot; bytes&quot;</span>);</div>
 <div class="line">}</div>
-<div class="ttc" id="aclassfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac_html_aef7ee7eb5254da1ba1eb4f3e0173d0ac"><div class="ttname"><a href="d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac">fl::span::size</a></div><div class="ttdeci">constexpr fl::size size() const FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="d4/d7a/span_8h_source.html#l00458">span.h:458</a></div></div>
+<div class="ttc" id="aclassfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa_html_aaf3daca1c2c8f93b2ac7b319989b22fa"><div class="ttname"><a href="d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa">fl::span::size</a></div><div class="ttdeci">constexpr fl::size size() const FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="d4/d7a/span_8h_source.html#l00483">span.h:483</a></div></div>
 <div class="ttc" id="alog_8h_html"><div class="ttname"><a href="d7/d7f/log_8h.html">log.h</a></div><div class="ttdoc">Centralized logging categories for FastLED hardware interfaces and subsystems.</div></div>
 </div><!-- fragment --><p><b>Implementation details:</b></p><ul>
 <li>Pure compile-time control via preprocessor</li>
@@ -792,7 +802,7 @@ Category-Based Logging</h2>
 <li>No runtime state, no memory overhead, no performance cost</li>
 <li>Users can implement their own runtime control if needed via wrapper functions</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md310"></a>
+<h2><a class="anchor" id="autotoc_md368"></a>
 Math, Random, and DSP</h2>
 <ul>
 <li>Core math and helpers: <code><a class="el" href="df/db1/math_8h.html">math.h</a></code>, <code>math_macros.h</code>, <code><a class="el" href="d3/d84/sin32_8h.html">math/sin32.h</a></code>, <code><a class="el" href="d1/d79/random_8h.html">random.h</a></code>, <code>map_range.h</code></li>
@@ -802,17 +812,17 @@ Math, Random, and DSP</h2>
 <p>Why: Efficient numeric operations for LED effects, audio reactivity, and transforms.</p>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &quot;fl/gamma.h&quot;</span></div>
 <div class="line"> </div>
-<div class="line">uint8_t apply_gamma(uint8_t v) {</div>
+<div class="line"><a class="code hl_typedef" href="df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a> apply_gamma(<a class="code hl_typedef" href="df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a> v) {</div>
 <div class="line">    <span class="keywordflow">return</span> fl::gamma::correct8(v);</div>
 <div class="line">}</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md311"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md369"></a>
 Geometry and Grids</h2>
 <ul>
 <li>Basic geometry: <code>point.h</code>, <code><a class="el" href="d4/d67/geometry_8h.html">geometry.h</a></code></li>
 <li>Grid traversal and simplification: <code><a class="el" href="da/d15/grid_8h.html">grid.h</a></code>, <code><a class="el" href="d9/d42/traverse__grid_8h.html">traverse_grid.h</a></code>, <code><a class="el" href="d8/da7/line__simplification_8h.html">line_simplification.h</a></code></li>
 </ul>
 <p>Why: Building blocks for 2D/3D layouts and path operations.</p>
-<h2><a class="anchor" id="autotoc_md312"></a>
+<h2><a class="anchor" id="autotoc_md370"></a>
 Graphics, Rasterization, and Resampling</h2>
 <ul>
 <li>Raster and buffers: <code><a class="el" href="d1/d1e/raster_8h.html">raster.h</a></code>, <code><a class="el" href="d4/df9/raster__sparse_8h.html">raster_sparse.h</a></code>, <code><a class="el" href="d9/df3/rectangular__draw__buffer_8h.html">rectangular_draw_buffer.h</a></code></li>
@@ -824,7 +834,7 @@ Graphics, Rasterization, and Resampling</h2>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &quot;fl/downscale.h&quot;</span></div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// Downscale a high‑res buffer to a target raster (API varies by adapter)</span></div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md313"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md371"></a>
 Graphics Deep Dive</h3>
 <p>This section explains how the major graphics utilities fit together and how to use them effectively for high‑quality, high‑performance rendering on LED strips, matrices, and complex shapes.</p>
 <ul>
@@ -946,24 +956,24 @@ Graphics Deep Dive</h3>
 <li><p class="startli">Examples</p>
 <p class="startli">1) Manual per‑frame draw (push every frame)</p>
 <p class="startli">```cpp #include &lt;FastLED.h&gt; #include "fl/math/corkscrew.h" #include "fl/grid.h" #include "fl/time.h"</p>
-<p class="startli">// Your physical LED buffer constexpr uint16_t NUM_LEDS = 144; <a class="el" href="dd/dc7/group___h_s_v2_r_g_b_ga65c1895006b38f8c5114118b6a170327.html#ga65c1895006b38f8c5114118b6a170327">CRGB</a> leds[NUM_LEDS];</p>
+<p class="startli">// Your physical LED buffer constexpr <a class="el" href="df/dd8/stdint_8h_af8b57fa1249a1e2d5cd3c80296874419.html#af8b57fa1249a1e2d5cd3c80296874419">uint16_t</a> NUM_LEDS = 144; <a class="el" href="dd/dc7/group___h_s_v2_r_g_b_ga65c1895006b38f8c5114118b6a170327.html#ga65c1895006b38f8c5114118b6a170327">CRGB</a> leds[NUM_LEDS];</p>
 <p class="startli">// Define a corkscrew geometry (e.g., 19 turns tightly wrapped) fl::Corkscrew::Input input(/*totalTurns=*/19.0f, /*numLeds=*/NUM_LEDS); <a class="el" href="dc/d82/classfl_1_1_corkscrew.html">fl::Corkscrew</a> cork(input);</p>
-<p class="startli">// A simple rectangular source grid to draw into (unwrapped cylinder) // Match the corkscrew's recommended rectangle const uint16_t W = cork.cylinder_width(); const uint16_t H = cork.cylinder_height(); <a class="el" href="d1/db9/classfl_1_1_grid.html">fl::Grid&lt;CRGB&gt;</a> rect(W, H);</p>
-<p class="startli">void draw_pattern(uint32_t t_ms) { // Example: time‑animated gradient on the unwrapped cylinder for (uint16_t y = 0; y &lt; H; ++y) { for (uint16_t x = 0; x &lt; W; ++x) { uint8_t hue = uint8_t((x * 255u) / (W ? W : 1)) + uint8_t((t_ms / 10) &amp; 0xFF); rect(x, y) = <a class="el" href="dd/dc7/group___h_s_v2_r_g_b_ga259e6d3ae92ca32d2390e7d8eaa1c7ae.html#ga259e6d3ae92ca32d2390e7d8eaa1c7ae">CHSV(hue, 255, 255)</a>; } } }</p>
-<p class="startli">void project_to_strip() { // For each LED index i on the physical strip, sample the unwrapped // rectangle using the subpixel footprint from at_wrap(i) for (uint16_t i = 0; i &lt; NUM_LEDS; ++i) { auto tile = cork.at_wrap(float(i)); // tile.at(u,v) gives {absolute_pos, alpha} // Blend the 2x2 neighborhood from the rectangular buffer uint16_t r = 0, g = 0, b = 0, a_sum = 0; for (uint16_t vy = 0; vy &lt; 2; ++vy) { for (uint16_t vx = 0; vx &lt; 2; ++vx) { auto entry = tile.at(vx, vy); // pair&lt;vec2i16, u8&gt; const auto pos = entry.first; // absolute cylinder coords const uint8_t a = entry.second; // alpha 0..255 if (pos.x &gt;= 0 &amp;&amp; pos.x &lt; int(W) &amp;&amp; pos.y &gt;= 0 &amp;&amp; pos.y &lt; int(H) &amp;&amp; a &gt; 0) { const <a class="el" href="dd/dc7/group___h_s_v2_r_g_b_ga65c1895006b38f8c5114118b6a170327.html#ga65c1895006b38f8c5114118b6a170327">CRGB</a>&amp; c = rect(uint16_t(pos.x), uint16_t(pos.y)); r += uint16_t(c.r) * a; g += uint16_t(c.g) * a; b += uint16_t(c.b) * a; a_sum += a; } } } if (a_sum == 0) { leds[i] = <a class="el" href="da/dd6/structfl_1_1_c_r_g_b_add5b03a29164cfe4d6e6f36185244a9b.html#add5b03a29164cfe4d6e6f36185244a9bae7cccd0ac63e453ee6a924be685ce307" title="&lt;div style=&#39;background:#000000;width:4em;height:4em;&#39;&gt;&lt;/div&gt;">CRGB::Black</a>; } else { leds[i].r = uint8_t(r / a_sum); leds[i].g = uint8_t(g / a_sum); leds[i].b = uint8_t(b / a_sum); } } }</p>
+<p class="startli">// A simple rectangular source grid to draw into (unwrapped cylinder) // Match the corkscrew's recommended rectangle const <a class="el" href="df/dd8/stdint_8h_af8b57fa1249a1e2d5cd3c80296874419.html#af8b57fa1249a1e2d5cd3c80296874419">uint16_t</a> W = cork.cylinder_width(); const <a class="el" href="df/dd8/stdint_8h_af8b57fa1249a1e2d5cd3c80296874419.html#af8b57fa1249a1e2d5cd3c80296874419">uint16_t</a> H = cork.cylinder_height(); <a class="el" href="d1/db9/classfl_1_1_grid.html">fl::Grid&lt;CRGB&gt;</a> rect(W, H);</p>
+<p class="startli">void draw_pattern(uint32_t t_ms) { // Example: time‑animated gradient on the unwrapped cylinder for (<a class="el" href="df/dd8/stdint_8h_af8b57fa1249a1e2d5cd3c80296874419.html#af8b57fa1249a1e2d5cd3c80296874419">uint16_t</a> y = 0; y &lt; H; ++y) { for (<a class="el" href="df/dd8/stdint_8h_af8b57fa1249a1e2d5cd3c80296874419.html#af8b57fa1249a1e2d5cd3c80296874419">uint16_t</a> x = 0; x &lt; W; ++x) { <a class="el" href="df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a> hue = <a class="el" href="df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a>((x * 255u) / (W ? W : 1)) + <a class="el" href="df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a>((t_ms / 10) &amp; 0xFF); rect(x, y) = <a class="el" href="dd/dc7/group___h_s_v2_r_g_b_ga259e6d3ae92ca32d2390e7d8eaa1c7ae.html#ga259e6d3ae92ca32d2390e7d8eaa1c7ae">CHSV(hue, 255, 255)</a>; } } }</p>
+<p class="startli">void project_to_strip() { // For each LED index i on the physical strip, sample the unwrapped // rectangle using the subpixel footprint from at_wrap(i) for (<a class="el" href="df/dd8/stdint_8h_af8b57fa1249a1e2d5cd3c80296874419.html#af8b57fa1249a1e2d5cd3c80296874419">uint16_t</a> i = 0; i &lt; NUM_LEDS; ++i) { auto tile = cork.at_wrap(float(i)); // tile.at(u,v) gives {absolute_pos, alpha} // Blend the 2x2 neighborhood from the rectangular buffer <a class="el" href="df/dd8/stdint_8h_af8b57fa1249a1e2d5cd3c80296874419.html#af8b57fa1249a1e2d5cd3c80296874419">uint16_t</a> r = 0, g = 0, b = 0, a_sum = 0; for (<a class="el" href="df/dd8/stdint_8h_af8b57fa1249a1e2d5cd3c80296874419.html#af8b57fa1249a1e2d5cd3c80296874419">uint16_t</a> vy = 0; vy &lt; 2; ++vy) { for (<a class="el" href="df/dd8/stdint_8h_af8b57fa1249a1e2d5cd3c80296874419.html#af8b57fa1249a1e2d5cd3c80296874419">uint16_t</a> vx = 0; vx &lt; 2; ++vx) { auto entry = tile.at(vx, vy); // pair&lt;vec2i16, u8&gt; const auto pos = entry.first; // absolute cylinder coords const <a class="el" href="df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a> a = entry.second; // alpha 0..255 if (pos.x &gt;= 0 &amp;&amp; pos.x &lt; int(W) &amp;&amp; pos.y &gt;= 0 &amp;&amp; pos.y &lt; int(H) &amp;&amp; a &gt; 0) { const <a class="el" href="dd/dc7/group___h_s_v2_r_g_b_ga65c1895006b38f8c5114118b6a170327.html#ga65c1895006b38f8c5114118b6a170327">CRGB</a>&amp; c = rect(<a class="el" href="df/dd8/stdint_8h_af8b57fa1249a1e2d5cd3c80296874419.html#af8b57fa1249a1e2d5cd3c80296874419">uint16_t</a>(pos.x), <a class="el" href="df/dd8/stdint_8h_af8b57fa1249a1e2d5cd3c80296874419.html#af8b57fa1249a1e2d5cd3c80296874419">uint16_t</a>(pos.y)); r += <a class="el" href="df/dd8/stdint_8h_af8b57fa1249a1e2d5cd3c80296874419.html#af8b57fa1249a1e2d5cd3c80296874419">uint16_t</a>(c.r) * a; g += <a class="el" href="df/dd8/stdint_8h_af8b57fa1249a1e2d5cd3c80296874419.html#af8b57fa1249a1e2d5cd3c80296874419">uint16_t</a>(c.g) * a; b += <a class="el" href="df/dd8/stdint_8h_af8b57fa1249a1e2d5cd3c80296874419.html#af8b57fa1249a1e2d5cd3c80296874419">uint16_t</a>(c.b) * a; a_sum += a; } } } if (a_sum == 0) { leds[i] = <a class="el" href="da/dd6/structfl_1_1_c_r_g_b_add5b03a29164cfe4d6e6f36185244a9b.html#add5b03a29164cfe4d6e6f36185244a9bae7cccd0ac63e453ee6a924be685ce307" title="&lt;div style=&#39;background:#000000;width:4em;height:4em;&#39;&gt;&lt;/div&gt;">CRGB::Black</a>; } else { leds[i].r = <a class="el" href="df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a>(r / a_sum); leds[i].g = <a class="el" href="df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a>(g / a_sum); leds[i].b = <a class="el" href="df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a>(b / a_sum); } } }</p>
 <p class="startli">void <a class="el" href="d5/d17/_analog_output_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d">setup()</a> { FastLED.addLeds&lt;WS2812B, 5, GRB&gt;(leds, NUM_LEDS); }</p>
-<p class="startli">void <a class="el" href="d5/d17/_analog_output_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f">loop()</a> { uint32_t t = <a class="el" href="d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a" title="Universal millisecond timer - returns milliseconds since system startup.">fl::millis()</a>; draw_pattern(t); project_to_strip(); FastLED.show(); } ```</p>
+<p class="startli">void <a class="el" href="d5/d17/_analog_output_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f">loop()</a> { <a class="el" href="df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a> t = <a class="el" href="d4/d36/namespacefl_a3c0ba5842bfd029c404a38c8df2315f3.html#a3c0ba5842bfd029c404a38c8df2315f3" title="Universal millisecond timer - returns milliseconds since system startup.">fl::millis()</a>; draw_pattern(t); project_to_strip(); FastLED.show(); } ```</p>
 <p class="startli">2) Automate with task::before_frame (draw right before render)</p>
 <p class="startli">Use the per‑frame task API; no direct EngineEvents binding is needed. Per‑frame tasks are scheduled via <code><a class="el" href="db/d5c/namespacefl_1_1task.html">fl::task</a></code> and integrated with the frame lifecycle by the async system.</p>
-<p class="startli">```cpp #include &lt;FastLED.h&gt; #include "fl/task.h" #include "fl/async.h" #include "fl/math/corkscrew.h" #include "fl/grid.h"</p>
-<p class="startli">constexpr uint16_t NUM_LEDS = 144; <a class="el" href="dd/dc7/group___h_s_v2_r_g_b_ga65c1895006b38f8c5114118b6a170327.html#ga65c1895006b38f8c5114118b6a170327">CRGB</a> leds[NUM_LEDS];</p>
-<p class="startli"><a class="el" href="dc/d82/classfl_1_1_corkscrew.html">fl::Corkscrew</a> cork(fl::Corkscrew::Input(19.0f, NUM_LEDS)); const uint16_t W = cork.cylinder_width(); const uint16_t H = cork.cylinder_height(); <a class="el" href="d1/db9/classfl_1_1_grid.html">fl::Grid&lt;CRGB&gt;</a> rect(W, H);</p>
+<p class="startli">```cpp #include &lt;FastLED.h&gt; #include "fl/math/corkscrew.h" #include "fl/grid.h"</p>
+<p class="startli">constexpr <a class="el" href="df/dd8/stdint_8h_af8b57fa1249a1e2d5cd3c80296874419.html#af8b57fa1249a1e2d5cd3c80296874419">uint16_t</a> NUM_LEDS = 144; <a class="el" href="dd/dc7/group___h_s_v2_r_g_b_ga65c1895006b38f8c5114118b6a170327.html#ga65c1895006b38f8c5114118b6a170327">CRGB</a> leds[NUM_LEDS];</p>
+<p class="startli"><a class="el" href="dc/d82/classfl_1_1_corkscrew.html">fl::Corkscrew</a> cork(fl::Corkscrew::Input(19.0f, NUM_LEDS)); const <a class="el" href="df/dd8/stdint_8h_af8b57fa1249a1e2d5cd3c80296874419.html#af8b57fa1249a1e2d5cd3c80296874419">uint16_t</a> W = cork.cylinder_width(); const <a class="el" href="df/dd8/stdint_8h_af8b57fa1249a1e2d5cd3c80296874419.html#af8b57fa1249a1e2d5cd3c80296874419">uint16_t</a> H = cork.cylinder_height(); <a class="el" href="d1/db9/classfl_1_1_grid.html">fl::Grid&lt;CRGB&gt;</a> rect(W, H);</p>
 <p class="startli">static void draw_pattern(uint32_t t_ms, fl::Grid&lt;CRGB&gt;&amp; dst); static void project_to_strip(const fl::Corkscrew&amp; c, const fl::Grid&lt;CRGB&gt;&amp; src, CRGB* out, uint16_t n);</p>
 <p class="startli">void <a class="el" href="d5/d17/_analog_output_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d">setup()</a> { FastLED.addLeds&lt;WS2812B, 5, GRB&gt;(leds, NUM_LEDS);</p>
-<p class="startli">// Register a before_frame task that runs immediately before each render <a class="el" href="db/d5c/namespacefl_1_1task_a72de96aef948cac07c81c8595499b61f.html#a72de96aef948cac07c81c8595499b61f">fl::task::before_frame()</a>.then([&amp;](){ uint32_t t = <a class="el" href="d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a" title="Universal millisecond timer - returns milliseconds since system startup.">fl::millis()</a>; draw_pattern(t, rect); project_to_strip(cork, rect, leds, NUM_LEDS); }); }</p>
-<p class="startli">void <a class="el" href="d5/d17/_analog_output_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f">loop()</a> { // The before_frame task is invoked automatically at the right time FastLED.show(); // Optionally pump other async work fl::async_yield(); } ```</p><ul>
+<p class="startli">// Register a before_frame task that runs immediately before each render <a class="el" href="db/d5c/namespacefl_1_1task_a1865fb97f123e1ba94b5885c03c272fd.html#a1865fb97f123e1ba94b5885c03c272fd" title="Frame tasks recur: every overload below schedules a task that runs once per FastLED frame and keeps d...">fl::task::before_frame()</a>.then([&amp;](){ <a class="el" href="df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a> t = <a class="el" href="d4/d36/namespacefl_a3c0ba5842bfd029c404a38c8df2315f3.html#a3c0ba5842bfd029c404a38c8df2315f3" title="Universal millisecond timer - returns milliseconds since system startup.">fl::millis()</a>; draw_pattern(t, rect); project_to_strip(cork, rect, leds, NUM_LEDS); }); }</p>
+<p class="startli">void <a class="el" href="d5/d17/_analog_output_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f">loop()</a> { // The before_frame task is invoked automatically at the right time FastLED.show(); } ```</p><ul>
 <li>The manual approach gives explicit control each frame.</li>
-<li>The <code>task::before_frame()</code> approach schedules work just‑in‑time before rendering without manual event wiring. Use <code>task::after_frame()</code> for post‑render work.</li>
+<li>The <code>task::before_frame()</code> approach schedules recurring work just‑in‑time before rendering without manual event wiring. Use <code>task::after_frame()</code> for recurring post‑render work; keep the returned handle and call <code>.cancel()</code> to stop either task.</li>
 </ul>
 </li>
 </ul>
@@ -995,22 +1005,22 @@ Graphics Deep Dive</h3>
 </ul>
 </li>
 </ul>
-<h2><a class="anchor" id="autotoc_md314"></a>
+<h2><a class="anchor" id="autotoc_md372"></a>
 JSON Utilities</h2>
 <ul>
 <li>Safe JSON access: <code><a class="el" href="d4/d05/json_8h.html" title="FastLED&#39;s Elegant JSON Library: fl::json">json.h</a></code></li>
 </ul>
 <p>Why: Ergonomic, crash‑resistant access with defaulting operator (<code>|</code>). Prefer the <code><a class="el" href="de/d40/classfl_1_1json.html">fl::json</a></code> API for new code.</p>
-<div class="fragment"><div class="line"><a class="code hl_class" href="de/d40/classfl_1_1json.html">fl::json</a> cfg = <a class="code hl_function" href="de/d40/classfl_1_1json_af7d8a65ad376b44e25bf9653bcac2405.html#af7d8a65ad376b44e25bf9653bcac2405">fl::json::parse</a>(<span class="stringliteral">&quot;{\&quot;enabled\&quot;:true}&quot;</span>);</div>
+<div class="fragment"><div class="line"><a class="code hl_class" href="de/d40/classfl_1_1json.html">fl::json</a> cfg = <a class="code hl_function" href="de/d40/classfl_1_1json_acfd0c418354f6fa20c838e2167ab9661.html#acfd0c418354f6fa20c838e2167ab9661">fl::json::parse</a>(<span class="stringliteral">&quot;{\&quot;enabled\&quot;:true}&quot;</span>);</div>
 <div class="line"><span class="keywordtype">bool</span> enabled = cfg[<span class="stringliteral">&quot;enabled&quot;</span>] | <span class="keyword">false</span>;</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md315"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md373"></a>
 I/O and Filesystem</h2>
 <ul>
 <li>Basic I/O and streams: <code>io.h</code>, <code><a class="el" href="dc/d64/ostream_8h.html">ostream.h</a></code>, <code><a class="el" href="db/dc9/istream_8h.html">istream.h</a></code>, <code><a class="el" href="da/da4/sstream_8h.html">sstream.h</a></code>, <code>printf.h</code></li>
-<li>Filesystem adapters: <code><a class="el" href="d6/d8d/file__system_8h.html">file_system.h</a></code></li>
+<li>Filesystem adapters: <code><a class="el" href="d6/d8d/file__system_8h.html" title="Compatibility forwarder.">file_system.h</a></code></li>
 </ul>
 <p>Why: Cross‑platform text formatting, buffered I/O, and optional file access on host builds.</p>
-<h2><a class="anchor" id="autotoc_md316"></a>
+<h2><a class="anchor" id="autotoc_md374"></a>
 Algorithms and Utilities</h2>
 <ul>
 <li>Algorithms and transforms: <code><a class="el" href="df/dd9/algorithm_8h.html">algorithm.h</a></code>, <code><a class="el" href="d2/d80/transform_8h.html">transform.h</a></code>, <code><a class="el" href="d5/db6/range__access_8h.html">range_access.h</a></code></li>
@@ -1018,9 +1028,9 @@ Algorithms and Utilities</h2>
 <li>Platform shims and control: <code><a class="el" href="d4/d54/compiler__control_8h.html">compiler_control.h</a></code>, <code>force_inline.h</code>, <code>virtual_if_not_avr.h</code>, <code>has_define.h</code>, <code>register.h</code>, <code>warn.h</code>, <code><a class="el" href="d1/d1b/trace_8h.html">trace.h</a></code>, <code>dbg.h</code>, <code><a class="el" href="dc/da7/assert_8h.html">assert.h</a></code>, <code>unused.h</code>, <code><a class="el" href="db/db5/export_8h.html" title="Cross-platform export macros for FastLED dynamic library support.">export.h</a></code>, <code><a class="el" href="d3/d4b/dll_8h.html" title="FastLED dynamic library interface - lightweight header for external callers.">dll.h</a></code></li>
 </ul>
 <p>Why: Familiar patterns with embedded‑appropriate implementations and compiler‑portable controls.</p>
-<h2><a class="anchor" id="autotoc_md317"></a>
+<h2><a class="anchor" id="autotoc_md375"></a>
 Audio and Reactive Systems</h2>
-<h2><a class="anchor" id="autotoc_md318"></a>
+<h2><a class="anchor" id="autotoc_md376"></a>
 UI System (JSON UI)</h2>
 <p>FastLED includes a JSON‑driven UI layer that can expose controls (sliders, buttons, checkboxes, number fields, dropdowns, titles, descriptions, help, audio visualizers) for interactive demos and remote control.</p>
 <ul>
@@ -1076,13 +1086,13 @@ UI System (JSON UI)</h2>
 <div class="line">    UIGroup group(<span class="stringliteral">&quot;Main&quot;</span>, <a class="code hl_variable" href="d6/d05/_animartrix_8ino_a58efcf1f2669930226a84ca59b21650e.html#a58efcf1f2669930226a84ca59b21650e">title</a>, desc, <a class="code hl_variable" href="d6/d05/_animartrix_8ino_ab0d80715bb4b382856cf250c1eeb9b53.html#ab0d80715bb4b382856cf250c1eeb9b53">brightness</a>, enabled, mode, reset, help);</div>
 <div class="line"> </div>
 <div class="line">    <span class="comment">// Callbacks are pumped via EngineEvents; they trigger when values change</span></div>
-<div class="line">    <a class="code hl_variable" href="d6/d05/_animartrix_8ino_ab0d80715bb4b382856cf250c1eeb9b53.html#ab0d80715bb4b382856cf250c1eeb9b53">brightness</a>.onChanged([](UISlider&amp; s){ <a class="code hl_variable" href="d7/de5/_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a>.setBrightness((uint8_t)s); });</div>
+<div class="line">    <a class="code hl_variable" href="d6/d05/_animartrix_8ino_ab0d80715bb4b382856cf250c1eeb9b53.html#ab0d80715bb4b382856cf250c1eeb9b53">brightness</a>.onChanged([](UISlider&amp; s){ <a class="code hl_variable" href="d7/de5/_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a>.setBrightness((<a class="code hl_typedef" href="df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a>)s); });</div>
 <div class="line">    enabled.onChanged([](UICheckbox&amp; c){ <span class="comment">/* toggle effect */</span> });</div>
 <div class="line">    mode.onChanged([](UIDropdown&amp; d){ <span class="comment">/* change program by d.as_int() */</span> });</div>
 <div class="line">    reset.onClicked([](){ <span class="comment">/* reset animation state */</span> });</div>
 <div class="line">}</div>
 <div class="ttc" id="a_animartrix_8ino_a58efcf1f2669930226a84ca59b21650e_html_a58efcf1f2669930226a84ca59b21650e"><div class="ttname"><a href="d6/d05/_animartrix_8ino_a58efcf1f2669930226a84ca59b21650e.html#a58efcf1f2669930226a84ca59b21650e">title</a></div><div class="ttdeci">fl::UITitle title(&quot;Animartrix&quot;)</div></div>
-<div class="ttc" id="a_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9_html_a8e94985674086ea368e1d51cbc0f82a9"><div class="ttname"><a href="d7/de5/_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a></div><div class="ttdeci">FL_DISABLE_WARNING_PUSH FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS CFastLED FastLED</div><div class="ttdoc">Global LED strip management instance.</div><div class="ttdef"><b>Definition</b> <a href="d7/de5/_fast_l_e_d_8cpp_8hpp_source.html#l00075">FastLED.cpp.hpp:75</a></div></div>
+<div class="ttc" id="a_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9_html_a8e94985674086ea368e1d51cbc0f82a9"><div class="ttname"><a href="d7/de5/_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a></div><div class="ttdeci">FL_DISABLE_WARNING_PUSH FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS CFastLED FastLED</div><div class="ttdoc">Global LED strip management instance.</div><div class="ttdef"><b>Definition</b> <a href="d7/de5/_fast_l_e_d_8cpp_8hpp_source.html#l00090">FastLED.cpp.hpp:90</a></div></div>
 <div class="ttc" id="aui_8h_html"><div class="ttname"><a href="d9/d3b/ui_8h.html">ui.h</a></div><div class="ttdoc">Aggregator header for the fl/ui/ family of per-element UI types.</div></div>
 </div><!-- fragment --><p class="startli">Help component (see <code><a class="el" href="d7/d34/_u_i_test_8ino.html">examples/UITest/UITest.ino</a></code>): </p><div class="fragment"><div class="line">UIHelp helpMarkdown(</div>
 <div class="line">    R<span class="stringliteral">&quot;(# FastLED UI\nThis area supports markdown, code blocks, and links.)&quot;);</span></div>
@@ -1095,7 +1105,7 @@ UI System (JSON UI)</h2>
 <div class="line">    }</div>
 <div class="line">    <a class="code hl_variable" href="d7/de5/_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a>.show();</div>
 <div class="line">}</div>
-<div class="ttc" id="a_analog_output_8ino_afe461d27b9c48d5921c00d521181f12f_html_afe461d27b9c48d5921c00d521181f12f"><div class="ttname"><a href="d5/d17/_analog_output_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f">loop</a></div><div class="ttdeci">void loop()</div><div class="ttdef"><b>Definition</b> <a href="d5/d17/_analog_output_8ino_source.html#l00054">AnalogOutput.ino:54</a></div></div>
+<div class="ttc" id="a_analog_output_8ino_afe461d27b9c48d5921c00d521181f12f_html_afe461d27b9c48d5921c00d521181f12f"><div class="ttname"><a href="d5/d17/_analog_output_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f">loop</a></div><div class="ttdeci">void loop()</div><div class="ttdef"><b>Definition</b> <a href="d5/d17/_analog_output_8ino_source.html#l00047">AnalogOutput.ino:47</a></div></div>
 <div class="ttc" id="a_animartrix_8ino_a09940ad25ff9f7998b1dca9f5a76303d_html_a09940ad25ff9f7998b1dca9f5a76303d"><div class="ttname"><a href="d6/d05/_animartrix_8ino_a09940ad25ff9f7998b1dca9f5a76303d.html#a09940ad25ff9f7998b1dca9f5a76303d">audio</a></div><div class="ttdeci">fl::UIAudio audio(&quot;Audio Input&quot;)</div></div>
 </div><!-- fragment --></li>
 <li><b>Platform bridge: sending and receiving JSON</b><ul>
@@ -1126,11 +1136,11 @@ UI System (JSON UI)</h2>
 <li>Ensure <code>EngineEvents</code> are active so UI updates are exported and applied on frame boundaries.</li>
 </ul>
 </li>
-<li>Audio adapters and analysis: <code>audio.h</code>, <code>audio_reactive.h</code></li>
+<li>Audio adapters and analysis: <code>audio.h</code>, <code><a class="el" href="d1/d9a/audio__reactive_8h.html">audio_reactive.h</a></code></li>
 <li>Engine hooks: <code><a class="el" href="db/dc0/engine__events_8h.html">engine_events.h</a></code></li>
 </ul>
 <p>Why: Build effects that respond to input signals.</p>
-<h2><a class="anchor" id="autotoc_md320"></a>
+<h2><a class="anchor" id="autotoc_md377"></a>
 Miscellaneous and Specialized</h2>
 <ul>
 <li>Wave simulation: <code><a class="el" href="dc/d36/wave__simulation_8h.html">wave_simulation.h</a></code>, <code><a class="el" href="dd/d8e/wave__simulation__real_8h.html">wave_simulation_real.h</a></code></li>
@@ -1138,7 +1148,7 @@ Miscellaneous and Specialized</h2>
 <li>Path/visual experimentation: <code>corkscrew.h</code></li>
 </ul>
 <hr  />
-<h1><a class="anchor" id="autotoc_md322"></a>
+<h1><a class="anchor" id="autotoc_md379"></a>
 Guidance for New Users</h1>
 <ul>
 <li>If you are writing sketches: include <code>FastLED.h</code> and follow examples in <code>examples/</code>. The <code>fl::</code> headers power those features under the hood.</li>
@@ -1146,7 +1156,7 @@ Guidance for New Users</h1>
 <li>Favor smart pointers and moveable wrappers for resource management. Avoid raw pointers and manual <code>delete</code>.</li>
 <li>Use <code><a class="el" href="de/d40/classfl_1_1json.html">fl::json</a></code> for robust JSON handling with safe defaults.</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md323"></a>
+<h1><a class="anchor" id="autotoc_md380"></a>
 Guidance for C++ Developers</h1>
 <ul>
 <li>Treat <code>fl::</code> as an embedded‑friendly STL. Many concepts mirror the standard library but are tuned for constrained targets and consistent compiler support.</li>
@@ -1162,7 +1172,7 @@ Guidance for C++ Developers</h1>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:12 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:13 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

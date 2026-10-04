@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -123,29 +123,29 @@ $(function(){initNavTree('db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transpor
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../da/d64/stream__transport_8cpp_8hpp_source.html#l00392">392</a> of file <a class="el" href="../../da/d64/stream__transport_8cpp_8hpp_source.html">stream_transport.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  392</span>                                        {</div>
-<div class="line"><span class="lineno">  393</span>    <span class="keywordflow">if</span> (!<a class="code hl_function" href="../../db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a8237da9613a0a0c2bffbd8bfddd1f50e.html#a8237da9613a0a0c2bffbd8bfddd1f50e">isConnected</a>()) {</div>
-<div class="line"><span class="lineno">  394</span>        <span class="keywordflow">return</span>;</div>
-<div class="line"><span class="lineno">  395</span>    }</div>
-<div class="line"><span class="lineno">  396</span> </div>
-<div class="line"><span class="lineno">  397</span>    <span class="comment">// Create heartbeat request (rpc.ping notification)</span></div>
-<div class="line"><span class="lineno">  398</span>    fl::json heartbeat = <a class="code hl_function" href="../../de/d40/classfl_1_1json_af8bc0968107152344bfa8468bba76f54.html#af8bc0968107152344bfa8468bba76f54">fl::json::object</a>();</div>
-<div class="line"><span class="lineno">  399</span>    heartbeat.<a class="code hl_function" href="../../de/d40/classfl_1_1json_af272c33451fcfba68454595a4f6d8444.html#af272c33451fcfba68454595a4f6d8444">set</a>(<span class="stringliteral">&quot;jsonrpc&quot;</span>, <span class="stringliteral">&quot;2.0&quot;</span>);</div>
-<div class="line"><span class="lineno">  400</span>    heartbeat.<a class="code hl_function" href="../../de/d40/classfl_1_1json_af272c33451fcfba68454595a4f6d8444.html#af272c33451fcfba68454595a4f6d8444">set</a>(<span class="stringliteral">&quot;method&quot;</span>, <span class="stringliteral">&quot;rpc.ping&quot;</span>);</div>
-<div class="line"><span class="lineno">  401</span>    heartbeat.<a class="code hl_function" href="../../de/d40/classfl_1_1json_af272c33451fcfba68454595a4f6d8444.html#af272c33451fcfba68454595a4f6d8444">set</a>(<span class="stringliteral">&quot;id&quot;</span>, fl::json());  <span class="comment">// null value</span></div>
-<div class="line"><span class="lineno">  402</span> </div>
-<div class="line"><span class="lineno">  403</span>    <span class="comment">// Write as response (uses same chunked encoding)</span></div>
-<div class="line"><span class="lineno">  404</span>    <a class="code hl_function" href="../../db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a07968575a3145c9accb1a6386674af9b.html#a07968575a3145c9accb1a6386674af9b">writeResponse</a>(heartbeat);</div>
-<div class="line"><span class="lineno">  405</span>}</div>
-<div class="ttc" id="aclassfl_1_1json_af272c33451fcfba68454595a4f6d8444_html_af272c33451fcfba68454595a4f6d8444"><div class="ttname"><a href="../../de/d40/classfl_1_1json_af272c33451fcfba68454595a4f6d8444.html#af272c33451fcfba68454595a4f6d8444">fl::json::set</a></div><div class="ttdeci">void set(const fl::string &amp;key, const json &amp;value) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d05/json_8h_source.html#l00701">json.h:701</a></div></div>
-<div class="ttc" id="aclassfl_1_1json_af8bc0968107152344bfa8468bba76f54_html_af8bc0968107152344bfa8468bba76f54"><div class="ttname"><a href="../../de/d40/classfl_1_1json_af8bc0968107152344bfa8468bba76f54.html#af8bc0968107152344bfa8468bba76f54">fl::json::object</a></div><div class="ttdeci">static json object() FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d05/json_8h_source.html#l00692">json.h:692</a></div></div>
-<div class="ttc" id="aclassfl_1_1net_1_1http_1_1_http_stream_transport_a07968575a3145c9accb1a6386674af9b_html_a07968575a3145c9accb1a6386674af9b"><div class="ttname"><a href="../../db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a07968575a3145c9accb1a6386674af9b.html#a07968575a3145c9accb1a6386674af9b">fl::net::http::HttpStreamTransport::writeResponse</a></div><div class="ttdeci">void writeResponse(const fl::json &amp;response)</div><div class="ttdoc">Write JSON-RPC response to stream.</div><div class="ttdef"><b>Definition</b> <a href="../../da/d64/stream__transport_8cpp_8hpp_source.html#l00291">stream_transport.cpp.hpp:291</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../da/d64/stream__transport_8cpp_8hpp_source.html#l00396">396</a> of file <a class="el" href="../../da/d64/stream__transport_8cpp_8hpp_source.html">stream_transport.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  396</span>                                        {</div>
+<div class="line"><span class="lineno">  397</span>    <span class="keywordflow">if</span> (!<a class="code hl_function" href="../../db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a8237da9613a0a0c2bffbd8bfddd1f50e.html#a8237da9613a0a0c2bffbd8bfddd1f50e">isConnected</a>()) {</div>
+<div class="line"><span class="lineno">  398</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">  399</span>    }</div>
+<div class="line"><span class="lineno">  400</span> </div>
+<div class="line"><span class="lineno">  401</span>    <span class="comment">// Create heartbeat request (rpc.ping notification)</span></div>
+<div class="line"><span class="lineno">  402</span>    fl::json heartbeat = <a class="code hl_function" href="../../de/d40/classfl_1_1json_ae7744bee3369b3debf7e30e4a4a18526.html#ae7744bee3369b3debf7e30e4a4a18526">fl::json::object</a>();</div>
+<div class="line"><span class="lineno">  403</span>    heartbeat.<a class="code hl_function" href="../../de/d40/classfl_1_1json_a2973a868c9dc87ee871bc400414920c9.html#a2973a868c9dc87ee871bc400414920c9">set</a>(<span class="stringliteral">&quot;jsonrpc&quot;</span>, <span class="stringliteral">&quot;2.0&quot;</span>);</div>
+<div class="line"><span class="lineno">  404</span>    heartbeat.<a class="code hl_function" href="../../de/d40/classfl_1_1json_a2973a868c9dc87ee871bc400414920c9.html#a2973a868c9dc87ee871bc400414920c9">set</a>(<span class="stringliteral">&quot;method&quot;</span>, <span class="stringliteral">&quot;rpc.ping&quot;</span>);</div>
+<div class="line"><span class="lineno">  405</span>    heartbeat.<a class="code hl_function" href="../../de/d40/classfl_1_1json_a2973a868c9dc87ee871bc400414920c9.html#a2973a868c9dc87ee871bc400414920c9">set</a>(<span class="stringliteral">&quot;id&quot;</span>, fl::json());  <span class="comment">// null value</span></div>
+<div class="line"><span class="lineno">  406</span> </div>
+<div class="line"><span class="lineno">  407</span>    <span class="comment">// Write as response (uses same chunked encoding)</span></div>
+<div class="line"><span class="lineno">  408</span>    <a class="code hl_function" href="../../db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a07968575a3145c9accb1a6386674af9b.html#a07968575a3145c9accb1a6386674af9b">writeResponse</a>(heartbeat);</div>
+<div class="line"><span class="lineno">  409</span>}</div>
+<div class="ttc" id="aclassfl_1_1json_a2973a868c9dc87ee871bc400414920c9_html_a2973a868c9dc87ee871bc400414920c9"><div class="ttname"><a href="../../de/d40/classfl_1_1json_a2973a868c9dc87ee871bc400414920c9.html#a2973a868c9dc87ee871bc400414920c9">fl::json::set</a></div><div class="ttdeci">void set(const fl::string &amp;key, const json &amp;value) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d05/json_8h_source.html#l00866">json.h:866</a></div></div>
+<div class="ttc" id="aclassfl_1_1json_ae7744bee3369b3debf7e30e4a4a18526_html_ae7744bee3369b3debf7e30e4a4a18526"><div class="ttname"><a href="../../de/d40/classfl_1_1json_ae7744bee3369b3debf7e30e4a4a18526.html#ae7744bee3369b3debf7e30e4a4a18526">fl::json::object</a></div><div class="ttdeci">static json object() FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d05/json_8h_source.html#l00857">json.h:857</a></div></div>
+<div class="ttc" id="aclassfl_1_1net_1_1http_1_1_http_stream_transport_a07968575a3145c9accb1a6386674af9b_html_a07968575a3145c9accb1a6386674af9b"><div class="ttname"><a href="../../db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a07968575a3145c9accb1a6386674af9b.html#a07968575a3145c9accb1a6386674af9b">fl::net::http::HttpStreamTransport::writeResponse</a></div><div class="ttdeci">void writeResponse(const fl::json &amp;response)</div><div class="ttdoc">Write JSON-RPC response to stream.</div><div class="ttdef"><b>Definition</b> <a href="../../da/d64/stream__transport_8cpp_8hpp_source.html#l00295">stream_transport.cpp.hpp:295</a></div></div>
 <div class="ttc" id="aclassfl_1_1net_1_1http_1_1_http_stream_transport_a8237da9613a0a0c2bffbd8bfddd1f50e_html_a8237da9613a0a0c2bffbd8bfddd1f50e"><div class="ttname"><a href="../../db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a8237da9613a0a0c2bffbd8bfddd1f50e.html#a8237da9613a0a0c2bffbd8bfddd1f50e">fl::net::http::HttpStreamTransport::isConnected</a></div><div class="ttdeci">virtual bool isConnected() const =0</div><div class="ttdoc">Check if connected.</div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a8237da9613a0a0c2bffbd8bfddd1f50e.html#a8237da9613a0a0c2bffbd8bfddd1f50e">isConnected()</a>, <a class="el" href="../../d4/d05/json_8h_source.html#l00692">fl::json::object()</a>, <a class="el" href="../../d4/d05/json_8h_source.html#l00701">fl::json::set()</a>, and <a class="el" href="../../da/d64/stream__transport_8cpp_8hpp_source.html#l00291">writeResponse()</a>.</p>
+<p class="reference">References <a class="el" href="../../db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a8237da9613a0a0c2bffbd8bfddd1f50e.html#a8237da9613a0a0c2bffbd8bfddd1f50e">isConnected()</a>, <a class="el" href="../../d4/d05/json_8h_source.html#l00857">fl::json::object()</a>, <a class="el" href="../../d4/d05/json_8h_source.html#l00866">fl::json::set()</a>, and <a class="el" href="../../da/d64/stream__transport_8cpp_8hpp_source.html#l00295">writeResponse()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../da/d64/stream__transport_8cpp_8hpp_source.html#l00324">update()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../da/d64/stream__transport_8cpp_8hpp_source.html#l00328">update()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -170,7 +170,7 @@ $(function(){initNavTree('db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transpor
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d5/dc9/namespacefl_1_1net.html">net</a></li><li class="navelem"><a class="el" href="../../d1/d13/namespacefl_1_1net_1_1http.html">http</a></li><li class="navelem"><a class="el" href="../../db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport.html">HttpStreamTransport</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:10 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:12 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

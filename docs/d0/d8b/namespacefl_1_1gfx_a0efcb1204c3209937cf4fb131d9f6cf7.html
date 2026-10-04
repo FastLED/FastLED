@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -155,7 +155,7 @@ template&lt;typename PixelT, typename Coord&gt; </div>
 </div><div class="memdoc">
 
 <p>============================================================================ </p>
-<h1><a class="anchor" id="autotoc_md208"></a>
+<h1><a class="anchor" id="autotoc_md232"></a>
 CANVAS API (Primary - Cache Optimal)</h1>
 <p>Graphics operations work on rectangular <a class="el" href="../../de/d5c/structfl_1_1gfx_1_1_canvas.html" title="Simple rectangular canvas for graphics operations Combines a pixel buffer with dimensions for cache-o...">Canvas</a> objects with direct row-major indexing. All drawing functions use row-major indexing for cache-optimal performance.</p>
 <p>Wu antialiased line drawing </p><dl class="params"><dt>Parameters</dt><dd>
@@ -170,10 +170,11 @@ CANVAS API (Primary - Cache Optimal)</h1>
 <p class="definition">Definition at line <a class="el" href="../../de/d34/primitives_8h_source.html#l00643">643</a> of file <a class="el" href="../../de/d34/primitives_8h_source.html">primitives.h</a>.</p>
 <div class="fragment"><div class="line"><span class="lineno">  645</span>                                      {</div>
 <div class="line"><span class="lineno">  646</span>    <span class="keywordflow">if</span> (mode == <a class="code hl_enumvalue" href="../../d4/d36/namespacefl_aab6ed0b359875688b3da1f727f781ae2.html#aab6ed0b359875688b3da1f727f781ae2a6fa3e4534ff9ce44bbe7cd6a8e8adabd">fl::DrawMode::DRAW_MODE_OVERWRITE</a>)</div>
-<div class="line"><span class="lineno">  647</span>        <a class="code hl_function" href="../../d6/d9a/namespacefl_1_1gfx_1_1detail_a4c7133be2d3aef492af1968ce467b55d.html#a4c7133be2d3aef492af1968ce467b55d">detail::drawLineCore&lt;PixelT, Coord, true&gt;</a>(canvas, color, x0, y0, x1, y1);</div>
+<div class="line"><span class="lineno">  647</span>        <a class="code hl_function" href="../../d6/d9a/namespacefl_1_1gfx_1_1detail_a4c7133be2d3aef492af1968ce467b55d.html#a4c7133be2d3aef492af1968ce467b55d">detail::drawLineCore&lt;PixelT, Coord, true&gt;</a>(canvas, <a class="code hl_namespace" href="../../d5/d38/namespacefl_1_1color.html">color</a>, x0, y0, x1, y1);</div>
 <div class="line"><span class="lineno">  648</span>    <span class="keywordflow">else</span></div>
-<div class="line"><span class="lineno">  649</span>        <a class="code hl_function" href="../../d6/d9a/namespacefl_1_1gfx_1_1detail_a4c7133be2d3aef492af1968ce467b55d.html#a4c7133be2d3aef492af1968ce467b55d">detail::drawLineCore&lt;PixelT, Coord, false&gt;</a>(canvas, color, x0, y0, x1, y1);</div>
+<div class="line"><span class="lineno">  649</span>        <a class="code hl_function" href="../../d6/d9a/namespacefl_1_1gfx_1_1detail_a4c7133be2d3aef492af1968ce467b55d.html#a4c7133be2d3aef492af1968ce467b55d">detail::drawLineCore&lt;PixelT, Coord, false&gt;</a>(canvas, <a class="code hl_namespace" href="../../d5/d38/namespacefl_1_1color.html">color</a>, x0, y0, x1, y1);</div>
 <div class="line"><span class="lineno">  650</span>}</div>
+<div class="ttc" id="anamespacefl_1_1color_html"><div class="ttname"><a href="../../d5/d38/namespacefl_1_1color.html">fl::color</a></div><div class="ttdef"><b>Definition</b> <a href="../../d0/df3/fl_2color_2rgbw_8h_source.html#l00009">rgbw.h:9</a></div></div>
 <div class="ttc" id="anamespacefl_1_1gfx_1_1detail_a4c7133be2d3aef492af1968ce467b55d_html_a4c7133be2d3aef492af1968ce467b55d"><div class="ttname"><a href="../../d6/d9a/namespacefl_1_1gfx_1_1detail_a4c7133be2d3aef492af1968ce467b55d.html#a4c7133be2d3aef492af1968ce467b55d">fl::gfx::detail::drawLineCore</a></div><div class="ttdeci">void drawLineCore(Canvas&lt; PixelT &gt; &amp;canvas, const PixelT &amp;color, Coord x0, Coord y0, Coord x1, Coord y1)</div><div class="ttdef"><b>Definition</b> <a href="../../de/d34/primitives_8h_source.html#l00530">primitives.h:530</a></div></div>
 <div class="ttc" id="anamespacefl_aab6ed0b359875688b3da1f727f781ae2_html_aab6ed0b359875688b3da1f727f781ae2a6fa3e4534ff9ce44bbe7cd6a8e8adabd"><div class="ttname"><a href="../../d4/d36/namespacefl_aab6ed0b359875688b3da1f727f781ae2.html#aab6ed0b359875688b3da1f727f781ae2a6fa3e4534ff9ce44bbe7cd6a8e8adabd">fl::DrawMode::DRAW_MODE_OVERWRITE</a></div><div class="ttdeci">@ DRAW_MODE_OVERWRITE</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d35/draw__mode_8h_source.html#l00005">draw_mode.h:5</a></div></div>
 </div><!-- fragment -->
@@ -204,7 +205,7 @@ CANVAS API (Primary - Cache Optimal)</h1>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d0/d8b/namespacefl_1_1gfx.html">gfx</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:10 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:12 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

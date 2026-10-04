@@ -1,0 +1,31 @@
+<map id="fl::makeScaledPixelRangeRGB" name="fl::makeScaledPixelRangeRGB">
+<area shape="rect" id="Node000001" title="Create RGB input iterator range from PixelIterator." alt="" coords="569,414,787,439"/>
+<area shape="poly" id="edge5_Node000001_Node000001" title=" " alt="" coords="719,405,708,396,678,393,654,395,641,400,638,405,645,412,641,416,633,406,637,396,653,390,678,387,710,391,722,401"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_ab3b16ea2da444a2539d082aae754217f.html#ab3b16ea2da444a2539d082aae754217f" title="Encode complete UCS7604 frame (preamble + padding + pixel data)" alt="" coords="377,101,521,126"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="667,401,649,347,619,277,576,204,550,170,520,141,499,128,502,124,523,137,554,167,580,201,624,275,654,345,672,400"/>
+<area shape="rect" id="Node000005" href="$d0/d09/classfl_1_1_pixel_iterator_a9640a51a858d2ef2d5902b619e917fd2.html#a9640a51a858d2ef2d5902b619e917fd2" title="Encode pixels in APA102/DOTSTAR format (zero allocation)" alt="" coords="387,151,512,191"/>
+<area shape="poly" id="edge6_Node000001_Node000005" title=" " alt="" coords="663,403,641,361,609,308,568,253,520,205,502,193,505,188,523,201,572,250,613,305,645,358,667,400"/>
+<area shape="rect" id="Node000006" href="$d0/d09/classfl_1_1_pixel_iterator_a07d906959ea2d0d4e3a279086d7216a4.html#a07d906959ea2d0d4e3a279086d7216a4" title="Encode pixels in LPD6803 format (zero allocation)" alt="" coords="387,215,512,255"/>
+<area shape="poly" id="edge7_Node000001_Node000006" title=" " alt="" coords="657,405,599,339,561,302,520,269,500,257,503,253,523,264,565,298,603,335,661,401"/>
+<area shape="rect" id="Node000007" href="$d0/d09/classfl_1_1_pixel_iterator_acb49f0204f4338b5eca0f6cd098d52e5.html#acb49f0204f4338b5eca0f6cd098d52e5" title="Encode pixels in LPD8806 format (zero allocation)" alt="" coords="387,279,512,319"/>
+<area shape="poly" id="edge8_Node000001_Node000007" title=" " alt="" coords="645,409,588,372,520,333,496,321,499,316,523,328,590,368,648,404"/>
+<area shape="rect" id="Node000008" href="$d0/d09/classfl_1_1_pixel_iterator_ad9c8c154c364cca40e697f3c4c348c3b.html#ad9c8c154c364cca40e697f3c4c348c3b" title="Encode pixels in P9813 format (zero allocation)" alt="" coords="387,343,512,383"/>
+<area shape="poly" id="edge9_Node000001_Node000008" title=" " alt="" coords="618,413,511,383,513,377,619,408"/>
+<area shape="rect" id="Node000009" href="$d0/d09/classfl_1_1_pixel_iterator_ae9ca06bccf1975db771de8137e434f1e.html#ae9ca06bccf1975db771de8137e434f1e" title="Encode pixels in SK9822 format (zero allocation)" alt="" coords="387,407,512,447"/>
+<area shape="poly" id="edge10_Node000001_Node000009" title=" " alt="" coords="555,429,512,429,512,424,555,424"/>
+<area shape="rect" id="Node000010" href="$d0/d09/classfl_1_1_pixel_iterator_a16da75a201e466267cf87b812ab51cf5.html#a16da75a201e466267cf87b812ab51cf5" title="Encode pixels in SM16716 format (zero allocation)" alt="" coords="387,471,512,511"/>
+<area shape="poly" id="edge11_Node000001_Node000010" title=" " alt="" coords="619,446,513,476,511,471,618,441"/>
+<area shape="rect" id="Node000011" href="$d0/d09/classfl_1_1_pixel_iterator_a17a37d2bd4715577c03022af30cfdacf.html#a17a37d2bd4715577c03022af30cfdacf" title="Encode RGB pixels with the required TM1908 command prefix." alt="" coords="387,535,512,575"/>
+<area shape="poly" id="edge12_Node000001_Node000011" title=" " alt="" coords="648,449,590,486,523,525,499,537,496,532,520,520,588,481,645,445"/>
+<area shape="rect" id="Node000012" href="$d0/d09/classfl_1_1_pixel_iterator_a89656a999ae23d22f1fea46efe5caa5c.html#a89656a999ae23d22f1fea46efe5caa5c" title="Encode pixels in WS2801 format (zero allocation)" alt="" coords="387,599,512,639"/>
+<area shape="poly" id="edge13_Node000001_Node000012" title=" " alt="" coords="661,452,603,518,565,555,523,589,503,601,500,596,520,584,561,551,599,514,657,448"/>
+<area shape="rect" id="Node000013" href="$d0/d09/classfl_1_1_pixel_iterator_a1721f5b7254da8f849cd9be3a6c7fc16.html#a1721f5b7254da8f849cd9be3a6c7fc16" title="Encode pixels in WS2803 format (zero allocation)" alt="" coords="387,663,512,703"/>
+<area shape="poly" id="edge14_Node000001_Node000013" title=" " alt="" coords="667,453,645,495,613,548,572,603,523,653,505,665,502,660,520,649,568,600,609,545,641,493,663,451"/>
+<area shape="rect" id="Node000014" href="$d0/d09/classfl_1_1_pixel_iterator_a7bf3c7049670ed21763877da0947b91e.html#a7bf3c7049670ed21763877da0947b91e" title=" " alt="" coords="387,727,512,767"/>
+<area shape="poly" id="edge15_Node000001_Node000014" title=" " alt="" coords="672,453,653,507,622,576,579,650,553,685,523,717,507,729,504,724,520,713,549,682,574,648,617,574,648,505,667,451"/>
+<area shape="rect" id="Node000003" href="$dd/d78/classfl_1_1_u_c_s7604_controller_t_a0b8dc7f2f0f2e0a2ed3461aa905080ea.html#a0b8dc7f2f0f2e0a2ed3461aa905080ea" title=" " alt="" coords="5,5,329,104"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="374,100,329,91,330,86,375,95"/>
+<area shape="rect" id="Node000004" href="$dc/d8d/namespacefl_1_1anonymous__namespace_02channel_8cpp_8hpp_03_a5f78780348edce94192b57b45f1778b4.html#a5f78780348edce94192b57b45f1778b4" title="Encode UCS7604 pixel data into the channel data buffer." alt="" coords="41,152,293,192"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="374,132,265,155,264,149,373,126"/>
+<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="215,140,198,133,167,131,140,133,124,138,118,143,121,151,116,153,112,142,121,133,139,127,167,125,200,128,217,135"/>
+</map>

@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -119,30 +119,30 @@ $(function(){initNavTree('d4/d36/namespacefl_ad9927f98d169c838ddb33a6b020cb0c8.h
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dc/d6b/allocator_8cpp_8hpp_source.html#l00119">119</a> of file <a class="el" href="../../dc/d6b/allocator_8cpp_8hpp_source.html">allocator.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  119</span>                                            {</div>
-<div class="line"><span class="lineno">  120</span> </div>
-<div class="line"><span class="lineno">  121</span>    <span class="keywordtype">void</span> *ptr = Alloc(size);</div>
-<div class="line"><span class="lineno">  122</span>    <span class="keywordflow">if</span> (ptr &amp;&amp; zero) {</div>
-<div class="line"><span class="lineno">  123</span>        <a class="code hl_function" href="../../d4/d36/namespacefl_a44a195439ac7fa303b4b0b0c956605be.html#a44a195439ac7fa303b4b0b0c956605be">fl::memset</a>(ptr, 0, size);</div>
-<div class="line"><span class="lineno">  124</span>    }</div>
-<div class="line"><span class="lineno">  125</span>    </div>
-<div class="line"><span class="lineno">  126</span><span class="preprocessor">#if defined(FASTLED_TESTING)</span></div>
-<div class="line"><span class="lineno">  127</span>    <span class="keywordflow">if</span> (gMallocFreeHook &amp;&amp; ptr) {</div>
-<div class="line"><span class="lineno">  128</span>        MemoryGuard allows_hook;</div>
-<div class="line"><span class="lineno">  129</span>        <span class="keywordflow">if</span> (allows_hook.enabled()) {</div>
-<div class="line"><span class="lineno">  130</span>            gMallocFreeHook-&gt;onMalloc(ptr, size);</div>
-<div class="line"><span class="lineno">  131</span>        }</div>
-<div class="line"><span class="lineno">  132</span>    }</div>
-<div class="line"><span class="lineno">  133</span><span class="preprocessor">#endif</span></div>
-<div class="line"><span class="lineno">  134</span>    </div>
-<div class="line"><span class="lineno">  135</span>    <span class="keywordflow">return</span> ptr;</div>
-<div class="line"><span class="lineno">  136</span>}</div>
-<div class="ttc" id="anamespacefl_a44a195439ac7fa303b4b0b0c956605be_html_a44a195439ac7fa303b4b0b0c956605be"><div class="ttname"><a href="../../d4/d36/namespacefl_a44a195439ac7fa303b4b0b0c956605be.html#a44a195439ac7fa303b4b0b0c956605be">fl::memset</a></div><div class="ttdeci">void * memset(void *s, int c, size_t n) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/da3/cstring_8cpp_8hpp_source.html#l00125">cstring.cpp.hpp:125</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../dc/d6b/allocator_8cpp_8hpp_source.html#l00131">131</a> of file <a class="el" href="../../dc/d6b/allocator_8cpp_8hpp_source.html">allocator.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  131</span>                                            {</div>
+<div class="line"><span class="lineno">  132</span> </div>
+<div class="line"><span class="lineno">  133</span>    <span class="keywordtype">void</span> *ptr = Alloc(size);</div>
+<div class="line"><span class="lineno">  134</span>    <span class="keywordflow">if</span> (ptr &amp;&amp; zero) {</div>
+<div class="line"><span class="lineno">  135</span>        <a class="code hl_function" href="../../d4/d36/namespacefl_a9416b2c34c489ae11032cb58c2d3c58c.html#a9416b2c34c489ae11032cb58c2d3c58c">fl::memset</a>(ptr, 0, size);</div>
+<div class="line"><span class="lineno">  136</span>    }</div>
+<div class="line"><span class="lineno">  137</span>    </div>
+<div class="line"><span class="lineno">  138</span><span class="preprocessor">#if defined(FASTLED_TESTING)</span></div>
+<div class="line"><span class="lineno">  139</span>    <span class="keywordflow">if</span> (malloc_free_hook() &amp;&amp; ptr) {</div>
+<div class="line"><span class="lineno">  140</span>        MemoryGuard allows_hook;</div>
+<div class="line"><span class="lineno">  141</span>        <span class="keywordflow">if</span> (allows_hook.enabled()) {</div>
+<div class="line"><span class="lineno">  142</span>            malloc_free_hook()-&gt;onMalloc(ptr, size);</div>
+<div class="line"><span class="lineno">  143</span>        }</div>
+<div class="line"><span class="lineno">  144</span>    }</div>
+<div class="line"><span class="lineno">  145</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">  146</span>    </div>
+<div class="line"><span class="lineno">  147</span>    <span class="keywordflow">return</span> ptr;</div>
+<div class="line"><span class="lineno">  148</span>}</div>
+<div class="ttc" id="anamespacefl_a9416b2c34c489ae11032cb58c2d3c58c_html_a9416b2c34c489ae11032cb58c2d3c58c"><div class="ttname"><a href="../../d4/d36/namespacefl_a9416b2c34c489ae11032cb58c2d3c58c.html#a9416b2c34c489ae11032cb58c2d3c58c">fl::memset</a></div><div class="ttdeci">void * memset(void *s, int c, size_t n) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/da3/cstring_8cpp_8hpp_source.html#l00143">cstring.cpp.hpp:143</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../df/da3/cstring_8cpp_8hpp_source.html#l00125">memset()</a>.</p>
+<p class="reference">References <a class="el" href="../../df/da3/cstring_8cpp_8hpp_source.html#l00143">memset()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../da/da9/allocator_8h_source.html#l00119">fl::PSRamAllocator&lt; T &gt;::Alloc()</a>, and <a class="el" href="../../d1/d16/memory__resource_8cpp_8hpp_source.html#l00054">fl::anonymous_namespace{memory_resource.cpp.hpp}::PSRamMemoryResource::do_allocate()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../da/da9/allocator_8h_source.html#l00120">fl::PSRamAllocator&lt; T &gt;::Alloc()</a>, and <a class="el" href="../../d1/d16/memory__resource_8cpp_8hpp_source.html#l00054">fl::anonymous_namespace{memory_resource.cpp.hpp}::PSRamMemoryResource::do_allocate()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -167,7 +167,7 @@ $(function(){initNavTree('d4/d36/namespacefl_ad9927f98d169c838ddb33a6b020cb0c8.h
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:04 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:08 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

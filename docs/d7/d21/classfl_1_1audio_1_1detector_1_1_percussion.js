@@ -1,9 +1,9 @@
 var classfl_1_1audio_1_1detector_1_1_percussion =
 [
-    [ "Percussion", "d7/d21/classfl_1_1audio_1_1detector_1_1_percussion_a5d485545a7be7c444cfac4a138fbbcbc.html#a5d485545a7be7c444cfac4a138fbbcbc", null ],
-    [ "~Percussion", "d7/d21/classfl_1_1audio_1_1detector_1_1_percussion_ad8d078eee7a2ba456483e35ef51ed4be.html#ad8d078eee7a2ba456483e35ef51ed4be", null ],
-    [ "Percussion", "d7/d21/classfl_1_1audio_1_1detector_1_1_percussion_a5d485545a7be7c444cfac4a138fbbcbc.html#a5d485545a7be7c444cfac4a138fbbcbc", null ],
-    [ "~Percussion", "d7/d21/classfl_1_1audio_1_1detector_1_1_percussion_a0bd6b7b63294ae1789db0eee84da6dab.html#a0bd6b7b63294ae1789db0eee84da6dab", null ],
+    [ "Percussion", "d7/d21/classfl_1_1audio_1_1detector_1_1_percussion_a916894598b1ebf040061f174e5009d93.html#a916894598b1ebf040061f174e5009d93", null ],
+    [ "~Percussion", "d7/d21/classfl_1_1audio_1_1detector_1_1_percussion_a8c3493791c3c131ebf9dfc9863e87c75.html#a8c3493791c3c131ebf9dfc9863e87c75", null ],
+    [ "Percussion", "d7/d21/classfl_1_1audio_1_1detector_1_1_percussion_a916894598b1ebf040061f174e5009d93.html#a916894598b1ebf040061f174e5009d93", null ],
+    [ "~Percussion", "d7/d21/classfl_1_1audio_1_1detector_1_1_percussion_a34c611521e53a892bc12e27d5a9be301.html#a34c611521e53a892bc12e27d5a9be301", null ],
     [ "applyCrossBandRejection", "d7/d21/classfl_1_1audio_1_1detector_1_1_percussion_a5105369e0d46776e751d28842f3f746c.html#a5105369e0d46776e751d28842f3f746c", null ],
     [ "computeConfidences", "d7/d21/classfl_1_1audio_1_1detector_1_1_percussion_a8b836e2f8040cec1ade89c25bd63f0c7.html#a8b836e2f8040cec1ade89c25bd63f0c7", null ],
     [ "computeFeatures", "d7/d21/classfl_1_1audio_1_1detector_1_1_percussion_acd79429b74af50271f64f14fe1b8d1f4.html#acd79429b74af50271f64f14fe1b8d1f4", null ],

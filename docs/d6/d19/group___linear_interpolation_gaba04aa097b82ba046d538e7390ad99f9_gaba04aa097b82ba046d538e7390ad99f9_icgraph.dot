@@ -8,5 +8,5 @@ digraph "lerp16by16"
   rankdir="RL";
   Node1 [id="Node000001",label="lerp16by16",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Linear interpolation between two unsigned 16-bit values, with 16-bit fraction."];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::CRGB::lerp16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dd6/structfl_1_1_c_r_g_b_a9867e6adfce24affd82eef51bf73f712.html#a9867e6adfce24affd82eef51bf73f712",tooltip="Return a new CRGB object after performing a linear interpolation between this object and the passed i..."];
+  Node2 [id="Node000002",label="fl::CRGB::lerp16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dd6/structfl_1_1_c_r_g_b_aad1e21cb83751d912d4b02799621dea4.html#aad1e21cb83751d912d4b02799621dea4",tooltip="Return a new CRGB object after performing a linear interpolation between this object and the passed i..."];
 }

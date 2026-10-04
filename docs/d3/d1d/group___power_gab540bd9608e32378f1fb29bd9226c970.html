@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -130,6 +130,11 @@ $(function(){initNavTree('d3/d1d/group___power_gab540bd9608e32378f1fb29bd9226c97
 </div><div class="memdoc">
 
 <p>Determines the highest brightness level you can use and still stay under the specified power budget for a given set of LEDs. </p>
+<p>What the budget bounds, stated rather than implied (#4156 R4):</p>
+<ul>
+<li><b>The baseline is not scalable.</b> <code>PowerModel::dark_mW</code> is drawn per LED at every brightness including zero, so it is subtracted from the budget first and only the remainder is divided among the emitters. A budget at or below the baseline returns <b>0</b>: no brightness meets it, and a lit strip would be promising a bound that cannot be held at any setting.</li>
+<li><b>The bound is on the pre-dither frame.</b> Demand is computed from the <code><a class="el" href="../../dd/dc7/group___h_s_v2_r_g_b_ga65c1895006b38f8c5114118b6a170327.html#ga65c1895006b38f8c5114118b6a170327">CRGB</a></code> values, and <code>BINARY_DITHER</code> adds its offset afterwards, inside the encoder. That offset is shared across the frame, so a dithered frame can exceed the budgeted demand by up to one native code per channel per pixel &ndash; about 0.8 mW per LED on the default WS2812 model. The multi-frame mean is what the budget holds; a single latched frame can sit that much above it.</li>
+</ul>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">ledbuffer</td><td>the LED data to check </td></tr>
@@ -139,38 +144,30 @@ $(function(){initNavTree('d3/d1d/group___power_gab540bd9608e32378f1fb29bd9226c97
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>a limited brightness value. No higher than the target brightness, but may be lower depending on the power limit. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a limited brightness value. No higher than the target brightness, but may be lower depending on the power limit. Zero when the budget is at or below the unscalable baseline. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d1/d2a/power__mgt_8cpp_8hpp_source.html#l00192">192</a> of file <a class="el" href="../../d1/d2a/power__mgt_8cpp_8hpp_source.html">power_mgt.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  192</span>                                                                                                                             {</div>
-<div class="line"><span class="lineno">  193</span>    fl::u32 total_mW = <a class="code hl_function" href="../../d3/d1d/group___power_gafdf503b02fd644c3398d34f27c3d363d.html#gafdf503b02fd644c3398d34f27c3d363d">calculate_unscaled_power_mW</a>( ledbuffer, numLeds);</div>
-<div class="line"><span class="lineno">  194</span> </div>
-<div class="line"><span class="lineno">  195</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> target_brightness_scaled = <a class="code hl_function" href="../../d1/d2a/power__mgt_8cpp_8hpp_adcd9338466b0f22161f7281bfc7cdcdf.html#adcd9338466b0f22161f7281bfc7cdcdf">map_power_value</a>(target_brightness);</div>
-<div class="line"><span class="lineno">  196</span>    fl::u32 requested_power_mW = <a class="code hl_function" href="../../d3/d1d/group___power_ga681489b02b2825095fd40db45906bf26.html#ga681489b02b2825095fd40db45906bf26">scale_power_for_brightness</a>(total_mW, target_brightness);</div>
-<div class="line"><span class="lineno">  197</span> </div>
-<div class="line"><span class="lineno">  198</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> recommended_brightness = target_brightness;</div>
-<div class="line"><span class="lineno">  199</span>    <span class="keywordflow">if</span>(requested_power_mW &gt; max_power_mW) { </div>
-<div class="line"><span class="lineno">  200</span>        <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> recommended_scaled = (fl::u32)(target_brightness_scaled * (fl::u32)(max_power_mW)) / requested_power_mW;</div>
-<div class="line"><span class="lineno">  201</span>        recommended_brightness = <a class="code hl_function" href="../../d1/d2a/power__mgt_8cpp_8hpp_a3beac85272db71b8f8a1c58f9e041b2e.html#a3beac85272db71b8f8a1c58f9e041b2e">unmap_power_value</a>(recommended_scaled);</div>
-<div class="line"><span class="lineno">  202</span>    }</div>
-<div class="line"><span class="lineno">  203</span> </div>
-<div class="line"><span class="lineno">  204</span>    <span class="keywordflow">return</span> recommended_brightness;</div>
-<div class="line"><span class="lineno">  205</span>}</div>
-<div class="ttc" id="agroup___power_ga681489b02b2825095fd40db45906bf26_html_ga681489b02b2825095fd40db45906bf26"><div class="ttname"><a href="../../d3/d1d/group___power_ga681489b02b2825095fd40db45906bf26.html#ga681489b02b2825095fd40db45906bf26">scale_power_for_brightness</a></div><div class="ttdeci">fl::u32 scale_power_for_brightness(fl::u32 total_mW, fl::u8 brightness)</div><div class="ttdoc">Applies the configured power-scaling response to a total power value.</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d2a/power__mgt_8cpp_8hpp_source.html#l00126">power_mgt.cpp.hpp:126</a></div></div>
-<div class="ttc" id="agroup___power_gafdf503b02fd644c3398d34f27c3d363d_html_gafdf503b02fd644c3398d34f27c3d363d"><div class="ttname"><a href="../../d3/d1d/group___power_gafdf503b02fd644c3398d34f27c3d363d.html#gafdf503b02fd644c3398d34f27c3d363d">calculate_unscaled_power_mW</a></div><div class="ttdeci">fl::u32 calculate_unscaled_power_mW(fl::span&lt; const CRGB &gt; leds)</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d2a/power__mgt_8cpp_8hpp_source.html#l00158">power_mgt.cpp.hpp:158</a></div></div>
-<div class="ttc" id="anamespacefl_a058ceeac48f181da463c2ba07401292c_html_a058ceeac48f181da463c2ba07401292c"><div class="ttname"><a href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a></div><div class="ttdeci">unsigned char u8</div><div class="ttdef"><b>Definition</b> <a href="../../df/dd8/stdint_8h_source.html#l00131">stdint.h:131</a></div></div>
-<div class="ttc" id="apower__mgt_8cpp_8hpp_a3beac85272db71b8f8a1c58f9e041b2e_html_a3beac85272db71b8f8a1c58f9e041b2e"><div class="ttname"><a href="../../d1/d2a/power__mgt_8cpp_8hpp_a3beac85272db71b8f8a1c58f9e041b2e.html#a3beac85272db71b8f8a1c58f9e041b2e">unmap_power_value</a></div><div class="ttdeci">static fl::u8 unmap_power_value(fl::u8 scaled_brightness)</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d2a/power__mgt_8cpp_8hpp_source.html#l00118">power_mgt.cpp.hpp:118</a></div></div>
-<div class="ttc" id="apower__mgt_8cpp_8hpp_adcd9338466b0f22161f7281bfc7cdcdf_html_adcd9338466b0f22161f7281bfc7cdcdf"><div class="ttname"><a href="../../d1/d2a/power__mgt_8cpp_8hpp_adcd9338466b0f22161f7281bfc7cdcdf.html#adcd9338466b0f22161f7281bfc7cdcdf">map_power_value</a></div><div class="ttdeci">static fl::u8 map_power_value(fl::u8 brightness)</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d2a/power__mgt_8cpp_8hpp_source.html#l00110">power_mgt.cpp.hpp:110</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d1/d2a/power__mgt_8cpp_8hpp_source.html#l00431">431</a> of file <a class="el" href="../../d1/d2a/power__mgt_8cpp_8hpp_source.html">power_mgt.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  431</span>                                                                                                                             {</div>
+<div class="line"><span class="lineno">  432</span>    <span class="keyword">const</span> fl::u32 total_mW = <a class="code hl_function" href="../../d3/d1d/group___power_gafdf503b02fd644c3398d34f27c3d363d.html#gafdf503b02fd644c3398d34f27c3d363d">calculate_unscaled_power_mW</a>( ledbuffer, numLeds);</div>
+<div class="line"><span class="lineno">  433</span>    <span class="keyword">const</span> fl::u32 fixed_mW = <a class="code hl_function" href="../../d1/d2a/power__mgt_8cpp_8hpp_a4ef2b434985b31da5b717f40a2e78e2b.html#a4ef2b434985b31da5b717f40a2e78e2b">fixed_power_mW</a>(numLeds);</div>
+<div class="line"><span class="lineno">  434</span>    <span class="keyword">const</span> fl::u32 controllable_mW = total_mW &gt; fixed_mW ? total_mW - fixed_mW : 0;</div>
+<div class="line"><span class="lineno">  435</span> </div>
+<div class="line"><span class="lineno">  436</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="../../d1/d2a/power__mgt_8cpp_8hpp_ac08dcfea7df964dcb9e1f2617c5f0b17.html#ac08dcfea7df964dcb9e1f2617c5f0b17">brightness_within_budget</a>(fixed_mW, controllable_mW, target_brightness,</div>
+<div class="line"><span class="lineno">  437</span>                                    max_power_mW);</div>
+<div class="line"><span class="lineno">  438</span>}</div>
+<div class="ttc" id="agroup___power_gafdf503b02fd644c3398d34f27c3d363d_html_gafdf503b02fd644c3398d34f27c3d363d"><div class="ttname"><a href="../../d3/d1d/group___power_gafdf503b02fd644c3398d34f27c3d363d.html#gafdf503b02fd644c3398d34f27c3d363d">calculate_unscaled_power_mW</a></div><div class="ttdeci">fl::u32 calculate_unscaled_power_mW(fl::span&lt; const CRGB &gt; leds)</div><div class="ttdoc">Determines how many milliwatts the current LED data would draw at max brightness (255)</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d2a/power__mgt_8cpp_8hpp_source.html#l00241">power_mgt.cpp.hpp:241</a></div></div>
+<div class="ttc" id="apower__mgt_8cpp_8hpp_a4ef2b434985b31da5b717f40a2e78e2b_html_a4ef2b434985b31da5b717f40a2e78e2b"><div class="ttname"><a href="../../d1/d2a/power__mgt_8cpp_8hpp_a4ef2b434985b31da5b717f40a2e78e2b.html#a4ef2b434985b31da5b717f40a2e78e2b">fixed_power_mW</a></div><div class="ttdeci">static fl::u32 fixed_power_mW(fl::u32 led_count)</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d2a/power__mgt_8cpp_8hpp_source.html#l00366">power_mgt.cpp.hpp:366</a></div></div>
+<div class="ttc" id="apower__mgt_8cpp_8hpp_ac08dcfea7df964dcb9e1f2617c5f0b17_html_ac08dcfea7df964dcb9e1f2617c5f0b17"><div class="ttname"><a href="../../d1/d2a/power__mgt_8cpp_8hpp_ac08dcfea7df964dcb9e1f2617c5f0b17.html#ac08dcfea7df964dcb9e1f2617c5f0b17">brightness_within_budget</a></div><div class="ttdeci">static fl::u8 brightness_within_budget(fl::u32 fixed_mW, fl::u32 controllable_mW, fl::u8 target_brightness, fl::u32 max_power_mW)</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d2a/power__mgt_8cpp_8hpp_source.html#l00374">power_mgt.cpp.hpp:374</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d1/d2a/power__mgt_8cpp_8hpp_source.html#l00158">calculate_unscaled_power_mW()</a>, <a class="el" href="../../d1/d2a/power__mgt_8cpp_8hpp_source.html#l00110">map_power_value()</a>, <a class="el" href="../../d1/d2a/power__mgt_8cpp_8hpp_source.html#l00126">scale_power_for_brightness()</a>, and <a class="el" href="../../d1/d2a/power__mgt_8cpp_8hpp_source.html#l00118">unmap_power_value()</a>.</p>
+<p class="reference">References <a class="el" href="../../d1/d2a/power__mgt_8cpp_8hpp_source.html#l00374">brightness_within_budget()</a>, <a class="el" href="../../d1/d2a/power__mgt_8cpp_8hpp_source.html#l00241">calculate_unscaled_power_mW()</a>, and <a class="el" href="../../d1/d2a/power__mgt_8cpp_8hpp_source.html#l00366">fixed_power_mW()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d1/d2a/power__mgt_8cpp_8hpp_source.html#l00188">calculate_max_brightness_for_power_vmA()</a>, and <a class="el" href="../../db/d97/_fast_l_e_d_8h_source.html#l01459">CFastLED::setMaxPowerInMilliWatts()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d1/d2a/power__mgt_8cpp_8hpp_source.html#l00427">calculate_max_brightness_for_power_vmA()</a>, and <a class="el" href="../../d6/d64/fastled_8h_source.html#l01697">CFastLED::setMaxPowerInMilliWatts()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d3/d1d/group___power_gab540bd9608e32378f1fb29bd9226c970_gab540bd9608e32378f1fb29bd9226c970_cgraph.svg" width="100%" height="451"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d3/d1d/group___power_gab540bd9608e32378f1fb29bd9226c970_gab540bd9608e32378f1fb29bd9226c970_cgraph.svg" width="100%" height="459"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 <div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
@@ -189,7 +186,7 @@ $(function(){initNavTree('d3/d1d/group___power_gab540bd9608e32378f1fb29bd9226c97
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d3/d1d/group___power.html">Power Management Functions</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:02 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

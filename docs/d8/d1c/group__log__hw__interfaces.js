@@ -1,10 +1,11 @@
 var group__log__hw__interfaces =
 [
-    [ "FL_LOG_AUDIO", "d8/d1c/group__log__hw__interfaces_gac249abe93dfe0537d35c1d705e264367.html#gac249abe93dfe0537d35c1d705e264367", null ],
-    [ "FL_LOG_FLEXIO", "d8/d1c/group__log__hw__interfaces_ga1748d0b3f063eb043ef6262ed9fc9fdc.html#ga1748d0b3f063eb043ef6262ed9fc9fdc", null ],
-    [ "FL_LOG_INTERRUPT", "d8/d1c/group__log__hw__interfaces_ga85e7dee349c0b327bc0c2edf6c18bd78.html#ga85e7dee349c0b327bc0c2edf6c18bd78", null ],
-    [ "FL_LOG_OBJECTFLED", "d8/d1c/group__log__hw__interfaces_ga4ea2a0108034ce71c1c30e174d4af193.html#ga4ea2a0108034ce71c1c30e174d4af193", null ],
-    [ "FL_LOG_PARLIO", "d8/d1c/group__log__hw__interfaces_ga2341a5d8fb66847f56a33f7ff3ea2bfe.html#ga2341a5d8fb66847f56a33f7ff3ea2bfe", null ],
-    [ "FL_LOG_RMT", "d8/d1c/group__log__hw__interfaces_ga545996bf85f98149d39229dc84a86ca2.html#ga545996bf85f98149d39229dc84a86ca2", null ],
-    [ "FL_LOG_SPI", "d8/d1c/group__log__hw__interfaces_ga178692e92d575c24c831f587f2165911.html#ga178692e92d575c24c831f587f2165911", null ]
+    [ "FL_HAS_RMT_LOG", "d8/d1c/group__log__hw__interfaces_ga1fb306537ed70f983240298bfc765cb3.html#ga1fb306537ed70f983240298bfc765cb3", null ],
+    [ "FL_LOG_AUDIO", "d8/d1c/group__log__hw__interfaces_gad4a0e084cff7559bcaa76d79a803130a.html#gad4a0e084cff7559bcaa76d79a803130a", null ],
+    [ "FL_LOG_FLEXIO", "d8/d1c/group__log__hw__interfaces_ga8a2bac7c0c46cb688911d97c4447863e.html#ga8a2bac7c0c46cb688911d97c4447863e", null ],
+    [ "FL_LOG_INTERRUPT", "d8/d1c/group__log__hw__interfaces_ga4babc22c9c98967422cdfe2347bbd925.html#ga4babc22c9c98967422cdfe2347bbd925", null ],
+    [ "FL_LOG_OBJECTFLED", "d8/d1c/group__log__hw__interfaces_ga68f0009d43e4c8b6e6ba4cba69936a87.html#ga68f0009d43e4c8b6e6ba4cba69936a87", null ],
+    [ "FL_LOG_PARLIO", "d8/d1c/group__log__hw__interfaces_gaabe93a6e635fdbe2bc0f1d6ad0e7b1d5.html#gaabe93a6e635fdbe2bc0f1d6ad0e7b1d5", null ],
+    [ "FL_LOG_RMT", "d8/d1c/group__log__hw__interfaces_gada0b131dfaeedb6220767788fb3d5bc6.html#gada0b131dfaeedb6220767788fb3d5bc6", null ],
+    [ "FL_LOG_SPI", "d8/d1c/group__log__hw__interfaces_gad110e32042dacf3d1607d9905ded4a8b.html#gad110e32042dacf3d1607d9905ded4a8b", null ]
 ];

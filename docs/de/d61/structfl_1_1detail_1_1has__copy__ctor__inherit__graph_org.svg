@@ -45,7 +45,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../dd/dca/structfl_1_1fl_1_1integral__constant.html" target="_top" xlink:title=" ">
+<g id="a_Node000002"><a xlink:href="../../d1/d55/structfl_1_1integral__constant.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="105.5,-207 25.5,-207 25.5,-188 105.5,-188 105.5,-207"/>
 <text text-anchor="middle" x="65.5" y="-195" font-family="Helvetica,sans-Serif" font-size="10.00">fl::false_type</text>
 </a>
@@ -63,9 +63,9 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../dd/dca/structfl_1_1fl_1_1integral__constant.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="128,-284 3,-284 3,-254 128,-254 128,-284"/>
-<text text-anchor="start" x="11" y="-272" font-family="Helvetica,sans-Serif" font-size="10.00">fl::fl::integral_constant</text>
+<g id="a_Node000003"><a xlink:href="../../d1/d55/structfl_1_1integral__constant.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="122,-284 9,-284 9,-254 122,-254 122,-284"/>
+<text text-anchor="start" x="17" y="-272" font-family="Helvetica,sans-Serif" font-size="10.00">fl::integral_constant</text>
 <text text-anchor="middle" x="65.5" y="-261" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; T, v &gt;</text>
 </a>
 </g>

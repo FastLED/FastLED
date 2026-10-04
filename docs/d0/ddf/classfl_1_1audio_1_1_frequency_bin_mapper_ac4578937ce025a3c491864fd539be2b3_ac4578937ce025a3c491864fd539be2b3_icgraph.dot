@@ -8,5 +8,5 @@ digraph "fl::audio::FrequencyBinMapper::getTrebleEnergy"
   rankdir="RL";
   Node1 [id="Node000001",label="fl::audio::FrequencyBinMapper\l::getTrebleEnergy",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Get treble energy (average of bins 14-15 in 16-bin mode)"];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::audio::FrequencyBinMapper\l::~FrequencyBinMapper",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper_a87d17b79660b18efcade392935222299.html#a87d17b79660b18efcade392935222299",tooltip=" "];
+  Node2 [id="Node000002",label="fl::audio::FrequencyBinMapper\l::~FrequencyBinMapper",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper_ad3defb9c89dd3eaa32d10b1c5832eff5.html#ad3defb9c89dd3eaa32d10b1c5832eff5",tooltip=" "];
 }

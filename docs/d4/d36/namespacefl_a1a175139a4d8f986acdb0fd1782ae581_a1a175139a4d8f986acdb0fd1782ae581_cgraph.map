@@ -1,0 +1,15 @@
+<map id="fl::wave8" name="fl::wave8">
+<area shape="rect" id="Node000001" title="Public single&#45;lane wave8 encoder." alt="" coords="5,34,87,59"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_ae04391e974d85253d110a69a3f0f3c79.html#ae04391e974d85253d110a69a3f0f3c79" title=" " alt="" coords="379,7,494,33"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="74,31,102,20,134,12,195,5,256,3,366,8,365,14,256,8,195,10,135,17,104,25,76,36"/>
+<area shape="rect" id="Node000005" href="$d6/d93/namespacefl_1_1isr_ac523cbf336c4932a0edbd894800e1d26.html#ac523cbf336c4932a0edbd894800e1d26" title="ISR&#45;optimized 32&#45;bit block copy for 4&#45;byte aligned memory." alt="" coords="365,61,508,86"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="76,57,104,68,135,76,191,83,247,85,351,81,352,86,247,90,190,88,134,81,102,73,74,62"/>
+<area shape="rect" id="Node000006" href="$df/d9e/namespacefl_1_1detail_aa731fdf58a33695ff45eee66bb3c8ff6.html#aa731fdf58a33695ff45eee66bb3c8ff6" title=" " alt="" coords="135,27,317,67"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="87,44,121,44,121,49,87,49"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_aab9d4e461519c66fc958efc9e9ba2efa.html#aab9d4e461519c66fc958efc9e9ba2efa" title=" " alt="" coords="556,7,645,33"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="494,17,542,17,542,23,494,23"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a35ff6755912c639a5e5bd35fc59e57ff.html#a35ff6755912c639a5e5bd35fc59e57ff" title=" " alt="" coords="693,7,788,33"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="645,17,680,17,680,23,645,23"/>
+<area shape="poly" id="edge6_Node000006_Node000002" title=" " alt="" coords="317,32,365,26,366,31,318,38"/>
+<area shape="poly" id="edge7_Node000006_Node000005" title=" " alt="" coords="318,55,352,60,351,65,317,61"/>
+</map>

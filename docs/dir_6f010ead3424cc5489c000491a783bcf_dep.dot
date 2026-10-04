@@ -11,5 +11,5 @@ digraph "/home/runner/work/FastLED/FastLED/examples/Audio/simple"
   dir_6f010ead3424cc5489c000491a783bcf [label="simple", fillcolor="#edf0f7", color="grey25", style="filled,bold", URL="dir_6f010ead3424cc5489c000491a783bcf.html",tooltip=""];
   }
   dir_4d1829fa9bd13d7db71e765b2707b248 [label="fl", fillcolor="#edf0f7", color="red", style="filled", URL="dir_4d1829fa9bd13d7db71e765b2707b248.html",tooltip=""];
-  dir_6f010ead3424cc5489c000491a783bcf->dir_4d1829fa9bd13d7db71e765b2707b248 [headlabel="15", labeldistance=1.5 headhref="dir_000167_000074.html" href="dir_000167_000074.html" color="steelblue1" fontcolor="steelblue1"];
+  dir_6f010ead3424cc5489c000491a783bcf->dir_4d1829fa9bd13d7db71e765b2707b248 [headlabel="15", labeldistance=1.5 headhref="dir_000175_000077.html" href="dir_000175_000077.html" color="steelblue1" fontcolor="steelblue1"];
 }

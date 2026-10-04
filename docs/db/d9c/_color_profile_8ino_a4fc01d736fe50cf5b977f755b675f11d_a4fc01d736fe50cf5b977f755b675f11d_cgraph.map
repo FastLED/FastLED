@@ -1,0 +1,18 @@
+<map id="setup" name="setup">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,84,64,109"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_ada630a354f12bb99f8e128d5ae619fbb.html#ada630a354f12bb99f8e128d5ae619fbb" title="Build a ClocklessChipset from a compile&#45;time TIMING trait." alt="" coords="115,43,251,68"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="63,86,122,69,124,74,65,91"/>
+<area shape="rect" id="Node000005" href="$d5/d87/structfl_1_1_channel_options_a186d9e21c9c012c5eb869a22eff28574.html#a186d9e21c9c012c5eb869a22eff28574" title=" " alt="" coords="112,117,253,157"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="65,102,99,111,98,116,63,107"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_ac9a2f17d2637c5e026c02f677cd47c57.html#ac9a2f17d2637c5e026c02f677cd47c57" title="Extract the encoder selector from a compile&#45;time TIMING type." alt="" coords="324,5,439,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="250,40,310,29,311,34,251,45"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a21751c1ec9df05c6e1090cb5c302c846.html#a21751c1ec9df05c6e1090cb5c302c846" title="Convert compile&#45;time CHIPSET type to runtime timing config." alt="" coords="301,55,461,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="251,57,288,59,288,64,251,62"/>
+<area shape="poly" id="edge8_Node000005_Node000005" title=" " alt="" coords="154,117,153,107,157,98,167,92,183,90,200,93,210,100,207,105,198,98,183,95,169,97,161,102,158,108,160,116"/>
+<area shape="rect" id="Node000006" href="$da/d81/structfl_1_1_source_profile_aebd5c778d592b6b83ad80d137eef242c.html#aebd5c778d592b6b83ad80d137eef242c" title=" " alt="" coords="316,117,447,157"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="254,134,302,134,302,139,254,139"/>
+<area shape="rect" id="Node000007" href="$da/d81/structfl_1_1_source_profile_a0751fcad63d8efb4f3ac55baa3c1ec52.html#a0751fcad63d8efb4f3ac55baa3c1ec52" title=" " alt="" coords="509,85,640,125"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="446,123,495,115,496,120,447,129"/>
+<area shape="rect" id="Node000008" href="$da/d81/structfl_1_1_source_profile_af2c687f77eb11afc242a0004593a0a78.html#af2c687f77eb11afc242a0004593a0a78" title=" " alt="" coords="509,149,640,189"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="447,145,496,153,495,158,446,150"/>
+</map>

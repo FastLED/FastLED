@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -142,7 +142,7 @@ $(function(){initNavTree('da/d2a/namespacefl_1_1format__detail_a55e63a30ab96d32c
 <div class="line"><span class="lineno">  127</span>    }</div>
 <div class="line"><span class="lineno">  128</span> </div>
 <div class="line"><span class="lineno">  129</span>    fl::size padding = <span class="keyword">static_cast&lt;</span>fl::size<span class="keyword">&gt;</span>(spec.<a class="code hl_variable" href="../../da/d2a/namespacefl_1_1format__detail.html#ab79eaf0e4cb49a89bb5c79dcd1f117d9">width</a>) - value_len;</div>
-<div class="line"><span class="lineno">  130</span>    <span class="keywordtype">char</span> <a class="code hl_function" href="../../d4/d36/namespacefl_adcb5659fbbbaeacd61311af24c1d5461.html#adcb5659fbbbaeacd61311af24c1d5461">fill</a> = spec.<a class="code hl_variable" href="../../da/d2a/namespacefl_1_1format__detail.html#aef8ec6062585e08626b8253c3d94104d">fill</a>;</div>
+<div class="line"><span class="lineno">  130</span>    <span class="keywordtype">char</span> <a class="code hl_function" href="../../d4/d36/namespacefl_ac31c6f49efa46f0ef98990c892a6f0c0.html#ac31c6f49efa46f0ef98990c892a6f0c0">fill</a> = spec.<a class="code hl_variable" href="../../da/d2a/namespacefl_1_1format__detail.html#aef8ec6062585e08626b8253c3d94104d">fill</a>;</div>
 <div class="line"><span class="lineno">  131</span> </div>
 <div class="line"><span class="lineno">  132</span>    <span class="keywordtype">char</span> align = spec.<a class="code hl_variable" href="../../da/d2a/namespacefl_1_1format__detail.html#a6c0f39e684c99fcb9bbafb45760407c3">align</a>;</div>
 <div class="line"><span class="lineno">  133</span>    <span class="keywordflow">if</span> (align == <span class="charliteral">&#39;\0&#39;</span>) {</div>
@@ -158,7 +158,7 @@ $(function(){initNavTree('da/d2a/namespacefl_1_1format__detail_a55e63a30ab96d32c
 <div class="line"><span class="lineno">  143</span>    } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (align == <span class="charliteral">&#39;&gt;&#39;</span>) {</div>
 <div class="line"><span class="lineno">  144</span>        <span class="comment">// Right align: padding then value</span></div>
 <div class="line"><span class="lineno">  145</span>        <span class="keywordflow">for</span> (fl::size i = 0; i &lt; padding; ++i) {</div>
-<div class="line"><span class="lineno">  146</span>            <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>.append(<a class="code hl_function" href="../../d4/d36/namespacefl_adcb5659fbbbaeacd61311af24c1d5461.html#adcb5659fbbbaeacd61311af24c1d5461">fill</a>);</div>
+<div class="line"><span class="lineno">  146</span>            <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>.append(<a class="code hl_function" href="../../d4/d36/namespacefl_ac31c6f49efa46f0ef98990c892a6f0c0.html#ac31c6f49efa46f0ef98990c892a6f0c0">fill</a>);</div>
 <div class="line"><span class="lineno">  147</span>        }</div>
 <div class="line"><span class="lineno">  148</span>        <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>.append(<a class="code hl_variable" href="../../d4/d36/namespacefl_a13766ae9e150185981f5096f90a439d7.html#a13766ae9e150185981f5096f90a439d7">value</a>);</div>
 <div class="line"><span class="lineno">  149</span>    } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (align == <span class="charliteral">&#39;^&#39;</span>) {</div>
@@ -166,11 +166,11 @@ $(function(){initNavTree('da/d2a/namespacefl_1_1format__detail_a55e63a30ab96d32c
 <div class="line"><span class="lineno">  151</span>        fl::size left_pad = padding / 2;</div>
 <div class="line"><span class="lineno">  152</span>        fl::size right_pad = padding - left_pad;</div>
 <div class="line"><span class="lineno">  153</span>        <span class="keywordflow">for</span> (fl::size i = 0; i &lt; left_pad; ++i) {</div>
-<div class="line"><span class="lineno">  154</span>            <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>.append(<a class="code hl_function" href="../../d4/d36/namespacefl_adcb5659fbbbaeacd61311af24c1d5461.html#adcb5659fbbbaeacd61311af24c1d5461">fill</a>);</div>
+<div class="line"><span class="lineno">  154</span>            <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>.append(<a class="code hl_function" href="../../d4/d36/namespacefl_ac31c6f49efa46f0ef98990c892a6f0c0.html#ac31c6f49efa46f0ef98990c892a6f0c0">fill</a>);</div>
 <div class="line"><span class="lineno">  155</span>        }</div>
 <div class="line"><span class="lineno">  156</span>        <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>.append(<a class="code hl_variable" href="../../d4/d36/namespacefl_a13766ae9e150185981f5096f90a439d7.html#a13766ae9e150185981f5096f90a439d7">value</a>);</div>
 <div class="line"><span class="lineno">  157</span>        <span class="keywordflow">for</span> (fl::size i = 0; i &lt; right_pad; ++i) {</div>
-<div class="line"><span class="lineno">  158</span>            <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>.append(<a class="code hl_function" href="../../d4/d36/namespacefl_adcb5659fbbbaeacd61311af24c1d5461.html#adcb5659fbbbaeacd61311af24c1d5461">fill</a>);</div>
+<div class="line"><span class="lineno">  158</span>            <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>.append(<a class="code hl_function" href="../../d4/d36/namespacefl_ac31c6f49efa46f0ef98990c892a6f0c0.html#ac31c6f49efa46f0ef98990c892a6f0c0">fill</a>);</div>
 <div class="line"><span class="lineno">  159</span>        }</div>
 <div class="line"><span class="lineno">  160</span>    }</div>
 <div class="line"><span class="lineno">  161</span>}</div>
@@ -180,7 +180,7 @@ $(function(){initNavTree('da/d2a/namespacefl_1_1format__detail_a55e63a30ab96d32c
 <div class="ttc" id="anamespacefl_1_1format__detail_html_aef8ec6062585e08626b8253c3d94104d"><div class="ttname"><a href="../../da/d2a/namespacefl_1_1format__detail.html#aef8ec6062585e08626b8253c3d94104d">fl::format_detail::FormatSpec::fill</a></div><div class="ttdeci">char fill</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d0a/format_8h_source.html#l00054">format.h:54</a></div></div>
 <div class="ttc" id="anamespacefl_a13766ae9e150185981f5096f90a439d7_html_a13766ae9e150185981f5096f90a439d7"><div class="ttname"><a href="../../d4/d36/namespacefl_a13766ae9e150185981f5096f90a439d7.html#a13766ae9e150185981f5096f90a439d7">fl::value</a></div><div class="ttdeci">constexpr int type_rank&lt; T &gt;::value</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d37/static__constexpr__defs_8cpp_8hpp_source.html#l00082">static_constexpr_defs.cpp.hpp:82</a></div></div>
 <div class="ttc" id="anamespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99_html_a8fa65f6529fc3eb6a174cb304a4bfc99"><div class="ttname"><a href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">fl::result</a></div><div class="ttdeci">expected&lt; T, E &gt; result</div><div class="ttdoc">Alias for expected (Rust-style naming)</div><div class="ttdef"><b>Definition</b> <a href="../../de/d93/result_8h_source.html#l00031">result.h:31</a></div></div>
-<div class="ttc" id="anamespacefl_adcb5659fbbbaeacd61311af24c1d5461_html_adcb5659fbbbaeacd61311af24c1d5461"><div class="ttname"><a href="../../d4/d36/namespacefl_adcb5659fbbbaeacd61311af24c1d5461.html#adcb5659fbbbaeacd61311af24c1d5461">fl::fill</a></div><div class="ttdeci">void fill(Iterator first, Iterator last, const T &amp;value) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/dd9/algorithm_8h_source.html#l00204">algorithm.h:204</a></div></div>
+<div class="ttc" id="anamespacefl_ac31c6f49efa46f0ef98990c892a6f0c0_html_ac31c6f49efa46f0ef98990c892a6f0c0"><div class="ttname"><a href="../../d4/d36/namespacefl_ac31c6f49efa46f0ef98990c892a6f0c0.html#ac31c6f49efa46f0ef98990c892a6f0c0">fl::fill</a></div><div class="ttdeci">void fill(Iterator first, Iterator last, const T &amp;value) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/dd9/algorithm_8h_source.html#l00204">algorithm.h:204</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../d0/d0a/format_8h_source.html#l00055">fl::format_detail::FormatSpec::align</a>, <a class="el" href="../../df/dd9/algorithm_8h_source.html#l00204">fl::fill()</a>, <a class="el" href="../../d0/d0a/format_8h_source.html#l00054">fl::format_detail::FormatSpec::fill</a>, <a class="el" href="../../dd/d37/static__constexpr__defs_8cpp_8hpp_source.html#l00082">fl::type_rank&lt; T &gt;::value</a>, and <a class="el" href="../../d0/d0a/format_8h_source.html#l00059">fl::format_detail::FormatSpec::width</a>.</p>
 
@@ -209,7 +209,7 @@ $(function(){initNavTree('da/d2a/namespacefl_1_1format__detail_a55e63a30ab96d32c
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../da/d2a/namespacefl_1_1format__detail.html">format_detail</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:10 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:12 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -108,12 +108,12 @@ $(function(){initNavTree('d5/daf/asset_8cpp_8hpp.html','../../'); initResizable(
 </div><!--header-->
 <div class="contents">
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Runtime implementation of <code><a class="el" href="../../d4/d36/namespacefl_a0a4f1a4cca802944a086c97fe689f2a6.html#a0a4f1a4cca802944a086c97fe689f2a6" title="Resolve an asset handle to a URL (or local file path) at runtime.">fl::resolve_asset</a></code>. </p>
+<div class="textblock"><p>Runtime implementation of <code><a class="el" href="../../d4/d36/namespacefl_a81bde756e968f84da523d8a7a8fa22dc.html#a81bde756e968f84da523d8a7a8fa22dc" title="Resolve an asset handle to a URL (or local file path) at runtime.">fl::resolve_asset</a></code>. </p>
 <p>Part of the v1 asset pipeline (FastLED issue #2284). v1 platforms are WASM and host/stub only. Other platforms (e.g. ESP32) are handled by the fallback branch below, which currently returns an empty <code><a class="el" href="../../d2/db7/classfl_1_1url.html">fl::url</a></code>. TODO(#2284): ESP32 LittleFS / SD-card resolution is future work. </p>
 
 <p class="definition">Definition in file <a class="el" href="../../d5/daf/asset_8cpp_8hpp_source.html">asset.cpp.hpp</a>.</p>
 </div><div class="textblock"><code>#include &quot;<a class="el" href="../../d3/d3e/asset_8h_source.html">fl/asset/asset.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../de/d25/fstream_8h_source.html">fl/stl/fstream.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../de/d25/fstream_8h_source.html">fl/fs/fstream.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../db/d01/noexcept_8h_source.html">fl/stl/noexcept.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../da/d66/string_8h_source.html">fl/stl/string.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d2/d1d/string__view_8h_source.html">fl/stl/string_view.h</a>&quot;</code><br />
@@ -153,17 +153,17 @@ Namespaces</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a38e7d1ca3a3f86b6d275e3489e9dd008" id="r_a38e7d1ca3a3f86b6d275e3489e9dd008"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d2/db7/classfl_1_1url.html">fl::url</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/dde/namespacefl_1_1asset__detail_a38e7d1ca3a3f86b6d275e3489e9dd008.html#a38e7d1ca3a3f86b6d275e3489e9dd008">fl::asset_detail::lookup_registry</a> (<a class="el" href="../../d0/ddb/classfl_1_1string__view.html">fl::string_view</a> path) <a class="el" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></td></tr>
-<tr class="memdesc:a38e7d1ca3a3f86b6d275e3489e9dd008"><td class="mdescLeft">&#160;</td><td class="mdescRight">Look up an asset path in the registry. Returns invalid url() on miss.  <br /></td></tr>
-<tr class="separator:a38e7d1ca3a3f86b6d275e3489e9dd008"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afd8b21d9436eca955d033abc6ba74ea6" id="r_afd8b21d9436eca955d033abc6ba74ea6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_afd8b21d9436eca955d033abc6ba74ea6.html#afd8b21d9436eca955d033abc6ba74ea6">fl::register_asset</a> (<a class="el" href="../../d0/ddb/classfl_1_1string__view.html">fl::string_view</a> path, const <a class="el" href="../../d2/db7/classfl_1_1url.html">fl::url</a> &amp;u) <a class="el" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></td></tr>
-<tr class="memdesc:afd8b21d9436eca955d033abc6ba74ea6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Public helper: plug an asset mapping at runtime.  <br /></td></tr>
-<tr class="separator:afd8b21d9436eca955d033abc6ba74ea6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab3fb9f509aa0f90e62ae74553d95cbcd" id="r_ab3fb9f509aa0f90e62ae74553d95cbcd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d2/d24/classfl_1_1vector.html">fl::vector</a>&lt; <a class="el" href="../../de/dde/namespacefl_1_1asset__detail.html#da/dfc/structfl_1_1asset__detail_1_1_asset_entry">AssetEntry</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/dde/namespacefl_1_1asset__detail_ab3fb9f509aa0f90e62ae74553d95cbcd.html#ab3fb9f509aa0f90e62ae74553d95cbcd">fl::asset_detail::registry</a> () <a class="el" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></td></tr>
-<tr class="separator:ab3fb9f509aa0f90e62ae74553d95cbcd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0a4f1a4cca802944a086c97fe689f2a6" id="r_a0a4f1a4cca802944a086c97fe689f2a6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d2/db7/classfl_1_1url.html">fl::url</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a0a4f1a4cca802944a086c97fe689f2a6.html#a0a4f1a4cca802944a086c97fe689f2a6">fl::resolve_asset</a> (const <a class="el" href="../../d9/dac/classfl_1_1asset__ref.html">asset_ref</a> &amp;a) <a class="el" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></td></tr>
-<tr class="memdesc:a0a4f1a4cca802944a086c97fe689f2a6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resolve an asset handle to a URL (or local file path) at runtime.  <br /></td></tr>
-<tr class="separator:a0a4f1a4cca802944a086c97fe689f2a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a776e5f0c23608e92e5870a6ae65f8622" id="r_a776e5f0c23608e92e5870a6ae65f8622"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d2/db7/classfl_1_1url.html">fl::url</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/dde/namespacefl_1_1asset__detail_a776e5f0c23608e92e5870a6ae65f8622.html#a776e5f0c23608e92e5870a6ae65f8622">fl::asset_detail::lookup_registry</a> (<a class="el" href="../../d0/ddb/classfl_1_1string__view.html">fl::string_view</a> path) <a class="el" href="../../d4/d36/namespacefl_aa317f89ca911371e798d08a93770402f.html#aa317f89ca911371e798d08a93770402f">FL_NO_EXCEPT</a></td></tr>
+<tr class="memdesc:a776e5f0c23608e92e5870a6ae65f8622"><td class="mdescLeft">&#160;</td><td class="mdescRight">Look up an asset path in the registry. Returns invalid url() on miss.  <br /></td></tr>
+<tr class="separator:a776e5f0c23608e92e5870a6ae65f8622"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6d447c072711c31db831690901388c48" id="r_a6d447c072711c31db831690901388c48"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a6d447c072711c31db831690901388c48.html#a6d447c072711c31db831690901388c48">fl::register_asset</a> (<a class="el" href="../../d0/ddb/classfl_1_1string__view.html">fl::string_view</a> path, const <a class="el" href="../../d2/db7/classfl_1_1url.html">fl::url</a> &amp;u) <a class="el" href="../../d4/d36/namespacefl_aa317f89ca911371e798d08a93770402f.html#aa317f89ca911371e798d08a93770402f">FL_NO_EXCEPT</a></td></tr>
+<tr class="memdesc:a6d447c072711c31db831690901388c48"><td class="mdescLeft">&#160;</td><td class="mdescRight">Public helper: plug an asset mapping at runtime.  <br /></td></tr>
+<tr class="separator:a6d447c072711c31db831690901388c48"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a57b29aabca70a29be3054a6b5814c41e" id="r_a57b29aabca70a29be3054a6b5814c41e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d2/d24/classfl_1_1vector.html">fl::vector</a>&lt; <a class="el" href="../../de/dde/namespacefl_1_1asset__detail.html#da/dfc/structfl_1_1asset__detail_1_1_asset_entry">AssetEntry</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/dde/namespacefl_1_1asset__detail_a57b29aabca70a29be3054a6b5814c41e.html#a57b29aabca70a29be3054a6b5814c41e">fl::asset_detail::registry</a> () <a class="el" href="../../d4/d36/namespacefl_aa317f89ca911371e798d08a93770402f.html#aa317f89ca911371e798d08a93770402f">FL_NO_EXCEPT</a></td></tr>
+<tr class="separator:a57b29aabca70a29be3054a6b5814c41e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a81bde756e968f84da523d8a7a8fa22dc" id="r_a81bde756e968f84da523d8a7a8fa22dc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d2/db7/classfl_1_1url.html">fl::url</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a81bde756e968f84da523d8a7a8fa22dc.html#a81bde756e968f84da523d8a7a8fa22dc">fl::resolve_asset</a> (const <a class="el" href="../../d9/dac/classfl_1_1asset__ref.html">asset_ref</a> &amp;a) <a class="el" href="../../d4/d36/namespacefl_aa317f89ca911371e798d08a93770402f.html#aa317f89ca911371e798d08a93770402f">FL_NO_EXCEPT</a></td></tr>
+<tr class="memdesc:a81bde756e968f84da523d8a7a8fa22dc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resolve an asset handle to a URL (or local file path) at runtime.  <br /></td></tr>
+<tr class="separator:a81bde756e968f84da523d8a7a8fa22dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <hr/><h2 class="groupheader">Class Documentation</h2>
 <a name="da/dfc/structfl_1_1asset__detail_1_1_asset_entry" id="da/dfc/structfl_1_1asset__detail_1_1_asset_entry"></a>
@@ -209,7 +209,7 @@ Resolved URL (or <a href="file://">file://</a> for host). </td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_eff4b1cee199829b919575338b577c1e.html">asset</a></li><li class="navelem"><a class="el" href="../../d5/daf/asset_8cpp_8hpp.html">asset.cpp.hpp</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:01 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:03 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -1,0 +1,5 @@
+<map id="fl::encodeWS2812_RGBWW" name="fl::encodeWS2812_RGBWW">
+<area shape="rect" id="Node000001" title="Encode 5&#45;byte pixel data in WS2812 format (issue #2558, RGBWW)." alt="" coords="179,13,377,38"/>
+<area shape="rect" id="Node000002" href="$d0/d09/classfl_1_1_pixel_iterator_a7bf3c7049670ed21763877da0947b91e.html#a7bf3c7049670ed21763877da0947b91e" title=" " alt="" coords="5,5,131,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="165,28,131,28,131,23,165,23"/>
+</map>

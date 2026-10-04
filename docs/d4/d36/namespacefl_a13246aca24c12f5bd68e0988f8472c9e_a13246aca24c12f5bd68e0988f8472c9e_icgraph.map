@@ -1,0 +1,9 @@
+<map id="fl::hd108BrightnessHeader" name="fl::hd108BrightnessHeader">
+<area shape="rect" id="Node000001" title="Generate HD108 per&#45;channel gain header bytes." alt="" coords="209,55,404,80"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_abad7b4680c275886479984cc54800dfc.html#abad7b4680c275886479984cc54800dfc" title="Encode pixel data in HD108 format with global brightness." alt="" coords="19,5,148,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="235,54,141,33,142,28,236,49"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a2a8030e1bbf76bc63c5c918bdcf8b298.html#a2a8030e1bbf76bc63c5c918bdcf8b298" title="Encode pixel data in HD108 format with per&#45;LED brightness." alt="" coords="5,55,161,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="196,70,162,70,162,65,196,65"/>
+<area shape="rect" id="Node000004" href="$d0/d09/classfl_1_1_pixel_iterator_a02a0090c88b4f5b4dde6805eefc017bc.html#a02a0090c88b4f5b4dde6805eefc017bc" title="Encode pixels in HD108 format (zero allocation)" alt="" coords="21,105,146,145"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="244,86,147,111,145,106,243,81"/>
+</map>

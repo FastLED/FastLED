@@ -30,7 +30,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../d4/d0a/classfl_1_1audio_1_1detector_1_1_frequency_bands_a6c8300555da22b456d88352b3e1049b7.html#a6c8300555da22b456d88352b3e1049b7" target="_top" xlink:title=" ">
+<g id="a_Node000002"><a xlink:href="../../d4/d0a/classfl_1_1audio_1_1detector_1_1_frequency_bands_af4b6fda82fc29436511da80f75774129.html#af4b6fda82fc29436511da80f75774129" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="338,-213 179,-213 179,-172 338,-172 338,-213"/>
 <text text-anchor="start" x="187" y="-201" font-family="Helvetica,sans-Serif" font-size="10.00">fl::audio::detector</text>
 <text text-anchor="start" x="187" y="-190" font-family="Helvetica,sans-Serif" font-size="10.00">::FrequencyBands::Frequency</text>
@@ -70,7 +70,7 @@
 <!-- Node5 -->
 <g id="Node000005" class="node">
 <title>Node5</title>
-<g id="a_Node000005"><a xlink:href="../../d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb" target="_top" xlink:title=" ">
+<g id="a_Node000005"><a xlink:href="../../d4/d36/namespacefl_a2fdabb91a1f100dec8da21e4306aba05.html#a2fdabb91a1f100dec8da21e4306aba05" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="422.5,-100 375.5,-100 375.5,-81 422.5,-81 422.5,-100"/>
 <text text-anchor="middle" x="399" y="-88" font-family="Helvetica,sans-Serif" font-size="10.00">fl::min</text>
 </a>
@@ -88,7 +88,7 @@
 <!-- Node6 -->
 <g id="Node000006" class="node">
 <title>Node6</title>
-<g id="a_Node000006"><a xlink:href="../../db/dbf/namespacefl_1_1audio_a7189558c538537464f1d31c91596631d.html#a7189558c538537464f1d31c91596631d" target="_top" xlink:title="Compute the time delta (in seconds) for an audio buffer.">
+<g id="a_Node000006"><a xlink:href="../../db/dbf/namespacefl_1_1audio_a8a5c097dfda178fb0d31e2060cb62ea9.html#a8a5c097dfda178fb0d31e2060cb62ea9" target="_top" xlink:title="Compute the time delta (in seconds) for an audio buffer.">
 <polygon fill="white" stroke="#666666" points="330,-56 187,-56 187,-37 330,-37 330,-56"/>
 <text text-anchor="middle" x="258.5" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">fl::audio::computeAudioDt</text>
 </a>
@@ -106,7 +106,7 @@
 <!-- Node7 -->
 <g id="Node000007" class="node">
 <title>Node7</title>
-<g id="a_Node000007"><a xlink:href="../../d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac" target="_top" xlink:title=" ">
+<g id="a_Node000007"><a xlink:href="../../d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="297,-19 220,-19 220,0 297,0 297,-19"/>
 <text text-anchor="middle" x="258.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::span::size</text>
 </a>
@@ -124,7 +124,7 @@
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909" target="_top" xlink:title=" ">
+<g id="a_Node000004"><a xlink:href="../../d4/d36/namespacefl_a07c69292ef50aa1083046faff1c52ead.html#a07c69292ef50aa1083046faff1c52ead" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="424,-143 374,-143 374,-124 424,-124 424,-143"/>
 <text text-anchor="middle" x="399" y="-131" font-family="Helvetica,sans-Serif" font-size="10.00">fl::max</text>
 </a>

@@ -8,15 +8,15 @@ digraph "fillFrameBufferFire"
   rankdir="LR";
   Node1 [id="Node000001",label="fillFrameBufferFire",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::CRGB::colorBoost",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dd6/structfl_1_1_c_r_g_b_a2792268a864ed3d46b191c20fd56ff87.html#a2792268a864ed3d46b191c20fd56ff87",tooltip=" "];
+  Node2 [id="Node000002",label="fl::CRGB::colorBoost",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dd6/structfl_1_1_c_r_g_b_aa93f4f0e5197ba7d957ac3d32ce76c52.html#aa93f4f0e5197ba7d957ac3d32ce76c52",tooltip=" "];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::CRGB::CRGB",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dd6/structfl_1_1_c_r_g_b_adb891cc4fe8f5ac2188d72c13c0256fd.html#adb891cc4fe8f5ac2188d72c13c0256fd",tooltip="Default constructor."];
+  Node3 [id="Node000003",label="fl::CRGB::CRGB",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dd6/structfl_1_1_c_r_g_b_a910ee467a963ad6805026ad83873e52b.html#a910ee467a963ad6805026ad83873e52b",tooltip="Default constructor."];
   Node2 -> Node4 [id="edge3_Node000002_Node000004",color="steelblue1",style="solid",tooltip=" "];
   Node4 [id="Node000004",label="fl::HSV16::colorBoost",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d5d/structfl_1_1_h_s_v16_a76546a195f4bb8cce8ac071d4d7786d4.html#a76546a195f4bb8cce8ac071d4d7786d4",tooltip=" "];
   Node4 -> Node5 [id="edge4_Node000004_Node000005",color="steelblue1",style="solid",tooltip=" "];
-  Node5 [id="Node000005",label="fl::HSV16::HSV16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d5d/structfl_1_1_h_s_v16_afb1735cc73fa0e364b7a24893e2f6f8b.html#afb1735cc73fa0e364b7a24893e2f6f8b",tooltip=" "];
+  Node5 [id="Node000005",label="fl::HSV16::HSV16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d5d/structfl_1_1_h_s_v16_acac3ff8bdd1e5038d2c7551084659bd9.html#acac3ff8bdd1e5038d2c7551084659bd9",tooltip=" "];
   Node4 -> Node6 [id="edge5_Node000004_Node000006",color="steelblue1",style="solid",tooltip=" "];
-  Node6 [id="Node000006",label="fl::ease16",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d36/namespacefl_adbc9938a37fd2f52f4c865a78914f420.html#adbc9938a37fd2f52f4c865a78914f420",tooltip=" "];
+  Node6 [id="Node000006",label="fl::ease16",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d36/namespacefl_a4bfb168f4c6c19a8c0298b937b8baa46.html#a4bfb168f4c6c19a8c0298b937b8baa46",tooltip=" "];
   Node4 -> Node21 [id="edge6_Node000004_Node000021",color="steelblue1",style="solid",tooltip=" "];
   Node21 [id="Node000021",label="fl::HSV16::ToRGB",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d5d/structfl_1_1_h_s_v16_a66d9cc0fccee4175baaef83f1a2d7d7d.html#a66d9cc0fccee4175baaef83f1a2d7d7d",tooltip=" "];
   Node1 -> Node25 [id="edge7_Node000001_Node000025",color="steelblue1",style="solid",tooltip=" "];
@@ -40,7 +40,7 @@ digraph "fillFrameBufferFire"
   Node30 -> Node34 [id="edge16_Node000030_Node000034",color="steelblue1",style="solid",tooltip=" "];
   Node34 [id="Node000034",label="inoise16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/df9/group___noise_generation_gaa452e57f154ab8d6d692375dba1ef5cb.html#gaa452e57f154ab8d6d692375dba1ef5cb",tooltip=" "];
   Node34 -> Node35 [id="edge17_Node000034_Node000035",color="steelblue1",style="solid",tooltip=" "];
-  Node35 [id="Node000035",label="inoise16_raw",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d8/df9/group___noise_generation_gae021f30d62fea75ea1397e1a81b28a59.html#gae021f30d62fea75ea1397e1a81b28a59",tooltip=" "];
+  Node35 [id="Node000035",label="inoise16_raw",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d8/df9/group___noise_generation_gae021f30d62fea75ea1397e1a81b28a59.html#gae021f30d62fea75ea1397e1a81b28a59",tooltip="16-bit, fixed point implementation of Perlin's noise without scaling."];
   Node1 -> Node37 [id="edge18_Node000001_Node000037",color="steelblue1",style="solid",tooltip=" "];
   Node37 [id="Node000037",label="luminanceFunction",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/df4/_color_boost_8h_adfecdb1dca929dcc593f71298bbf23c1.html#adfecdb1dca929dcc593f71298bbf23c1",tooltip=" "];
   Node1 -> Node38 [id="edge19_Node000001_Node000038",color="steelblue1",style="solid",tooltip=" "];

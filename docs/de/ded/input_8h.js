@@ -24,8 +24,8 @@ var input_8h =
       [ "fl::audio::TeensyI2S::I2SPort::I2S1", "d5/d5b/namespacefl_1_1audio_1_1_teensy_i2_s_a5c334373b5e02f0d9aeb9255a16be07f.html#a5c334373b5e02f0d9aeb9255a16be07faf52dbbdea00729f874ffc668735ef445", null ],
       [ "fl::audio::TeensyI2S::I2SPort::I2S2", "d5/d5b/namespacefl_1_1audio_1_1_teensy_i2_s_a5c334373b5e02f0d9aeb9255a16be07f.html#a5c334373b5e02f0d9aeb9255a16be07fa85bc70f69df5958976b9d4650ee07208", null ]
     ] ],
-    [ "fl::audio::TeensyI2S::getPinCLK", "d5/d5b/namespacefl_1_1audio_1_1_teensy_i2_s_aaf0f048705bb3fc909d2dd1540052858.html#aaf0f048705bb3fc909d2dd1540052858", null ],
-    [ "fl::audio::TeensyI2S::getPinSD", "d5/d5b/namespacefl_1_1audio_1_1_teensy_i2_s_a3a4595ecf32ef89e2c79900ddff859ef.html#a3a4595ecf32ef89e2c79900ddff859ef", null ],
-    [ "fl::audio::TeensyI2S::getPinWS", "d5/d5b/namespacefl_1_1audio_1_1_teensy_i2_s_a8ce1940f8366667991e3463ff0575805.html#a8ce1940f8366667991e3463ff0575805", null ],
+    [ "fl::audio::TeensyI2S::getPinCLK", "d5/d5b/namespacefl_1_1audio_1_1_teensy_i2_s_ac51a17187c429877df04e554dedd7980.html#ac51a17187c429877df04e554dedd7980", null ],
+    [ "fl::audio::TeensyI2S::getPinSD", "d5/d5b/namespacefl_1_1audio_1_1_teensy_i2_s_a7a47bb78863bd21923daed63ef05d8d5.html#a7a47bb78863bd21923daed63ef05d8d5", null ],
+    [ "fl::audio::TeensyI2S::getPinWS", "d5/d5b/namespacefl_1_1audio_1_1_teensy_i2_s_a0a940fa4fc70782117a3c718df55869b.html#a0a940fa4fc70782117a3c718df55869b", null ],
     [ "fl::audio::platform_create_audio_input", "db/dbf/namespacefl_1_1audio_a584ff0ffe4e7ce2fb4a5bffda5eb32b5.html#a584ff0ffe4e7ce2fb4a5bffda5eb32b5", null ]
 ];

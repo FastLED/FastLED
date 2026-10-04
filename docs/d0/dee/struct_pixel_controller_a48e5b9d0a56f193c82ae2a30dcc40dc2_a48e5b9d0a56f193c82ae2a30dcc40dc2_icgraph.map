@@ -1,8 +1,8 @@
 <map id="PixelController::loadAndScale0" name="PixelController::loadAndScale0">
-<area shape="rect" id="Node000001" title=" " alt="" coords="1016,200,1195,240"/>
+<area shape="rect" id="Node000001" title="non&#45;template alias of loadAndScale&lt;0&gt;()" alt="" coords="1016,200,1195,240"/>
 <area shape="rect" id="Node000002" href="$d0/dee/struct_pixel_controller_a6c9543d0dd9cb216d7ba0f363c032436.html#a6c9543d0dd9cb216d7ba0f363c032436" title=" " alt="" coords="789,113,968,153"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1038,197,931,156,933,151,1040,193"/>
-<area shape="rect" id="Node000008" href="$d0/dee/struct_pixel_controller_a650a6bebd28bdd32f404579c891ca98d.html#a650a6bebd28bdd32f404579c891ca98d" title=" " alt="" coords="789,200,968,240"/>
+<area shape="rect" id="Node000008" href="$d0/dee/struct_pixel_controller_a5aa57de8397b498ea587b5f0c049ced5.html#a5aa57de8397b498ea587b5f0c049ced5" title=" " alt="" coords="789,200,968,240"/>
 <area shape="poly" id="edge9_Node000001_Node000008" title=" " alt="" coords="1002,223,968,223,968,217,1002,217"/>
 <area shape="rect" id="Node000010" href="$d0/dee/struct_pixel_controller_a48468aafc35cdf4f317b7256c0221789.html#a48468aafc35cdf4f317b7256c0221789" title="Load + scale a single pixel to 5&#45;channel RGBWW (issue #2558)." alt="" coords="789,264,968,304"/>
 <area shape="poly" id="edge11_Node000001_Node000010" title=" " alt="" coords="1021,246,951,267,949,261,1020,241"/>

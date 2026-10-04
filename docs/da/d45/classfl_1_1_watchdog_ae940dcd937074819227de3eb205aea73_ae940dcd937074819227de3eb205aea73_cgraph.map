@@ -1,0 +1,11 @@
+<map id="fl::Watchdog::escapeToBootloaderIfLooping" name="fl::Watchdog::escapeToBootloaderIfLooping">
+<area shape="rect" id="Node000001" title="Reboot into the bootloader if this looks like a boot loop." alt="" coords="5,61,247,101"/>
+<area shape="rect" id="Node000002" href="$da/d45/classfl_1_1_watchdog_ae9d453ddb3610f25574411571c147c1e.html#ae9d453ddb3610f25574411571c147c1e" title=" " alt="" coords="305,29,483,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="246,64,292,59,292,64,247,70"/>
+<area shape="rect" id="Node000003" href="$da/d45/classfl_1_1_watchdog_a25cd2a8bd5dcdfc24f0f30e8eae1a8ff.html#a25cd2a8bd5dcdfc24f0f30e8eae1a8ff" title="True when the escape is enabled and the board has hit the consecutive&#45;watchdog&#45;reset threshold." alt="" coords="295,93,493,133"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="247,93,282,97,281,103,246,98"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="349,30,347,20,354,10,370,5,394,3,422,6,437,13,435,18,420,11,394,8,371,10,357,15,352,21,354,28"/>
+<area shape="rect" id="Node000004" href="$da/d45/classfl_1_1_watchdog_abde207d5474f84d8af78a41687c4c109.html#abde207d5474f84d8af78a41687c4c109" title=" " alt="" coords="541,93,729,133"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="493,111,528,111,528,116,493,116"/>
+<area shape="poly" id="edge5_Node000004_Node000004" title=" " alt="" coords="591,94,588,84,595,74,611,69,635,67,663,70,678,77,676,82,662,75,635,72,612,74,598,79,593,85,596,92"/>
+</map>

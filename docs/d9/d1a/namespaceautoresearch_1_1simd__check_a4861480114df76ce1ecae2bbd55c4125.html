@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -112,17 +112,17 @@ $(function(){initNavTree('d9/d1a/namespaceautoresearch_1_1simd__check_a486148011
         <tr>
           <td class="memname">void autoresearch::simd_check::ref_scale_u8_16 </td>
           <td>(</td>
-          <td class="paramtype">const uint8_t *</td>          <td class="paramname"><span class="paramname"><em>v</em></span>, </td>
+          <td class="paramtype">const <a class="el" href="../../df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a> *</td>          <td class="paramname"><span class="paramname"><em>v</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">uint8_t</td>          <td class="paramname"><span class="paramname"><em>scale</em></span>, </td>
+          <td class="paramtype"><a class="el" href="../../df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a></td>          <td class="paramname"><span class="paramname"><em>scale</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">uint8_t *</td>          <td class="paramname"><span class="paramname"><em>out</em></span>&#160;)</td>
+          <td class="paramtype"><a class="el" href="../../df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a> *</td>          <td class="paramname"><span class="paramname"><em>out</em></span>&#160;)</td>
         </tr>
       </table>
   </td>
@@ -135,10 +135,12 @@ $(function(){initNavTree('d9/d1a/namespaceautoresearch_1_1simd__check_a486148011
 <p class="definition">Definition at line <a class="el" href="../../d7/dd1/_auto_research_simd_8h_source.html#l00782">782</a> of file <a class="el" href="../../d7/dd1/_auto_research_simd_8h_source.html">AutoResearchSimd.h</a>.</p>
 <div class="fragment"><div class="line"><span class="lineno">  782</span>                                                                           {</div>
 <div class="line"><span class="lineno">  783</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; 16; i++) {</div>
-<div class="line"><span class="lineno">  784</span>        out[i] = (uint8_t)(((uint16_t)v[i] * <a class="code hl_variable" href="../../d3/dac/_fx_noise_ring_8ino_ae6325d6552afdaddd577e0ccce29ceba.html#ae6325d6552afdaddd577e0ccce29ceba">scale</a>) &gt;&gt; 8);</div>
+<div class="line"><span class="lineno">  784</span>        out[i] = (<a class="code hl_typedef" href="../../df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a>)(((<a class="code hl_typedef" href="../../df/dd8/stdint_8h_af8b57fa1249a1e2d5cd3c80296874419.html#af8b57fa1249a1e2d5cd3c80296874419">uint16_t</a>)v[i] * <a class="code hl_variable" href="../../d3/dac/_fx_noise_ring_8ino_ae6325d6552afdaddd577e0ccce29ceba.html#ae6325d6552afdaddd577e0ccce29ceba">scale</a>) &gt;&gt; 8);</div>
 <div class="line"><span class="lineno">  785</span>    }</div>
 <div class="line"><span class="lineno">  786</span>}</div>
 <div class="ttc" id="a_fx_noise_ring_8ino_ae6325d6552afdaddd577e0ccce29ceba_html_ae6325d6552afdaddd577e0ccce29ceba"><div class="ttname"><a href="../../d3/dac/_fx_noise_ring_8ino_ae6325d6552afdaddd577e0ccce29ceba.html#ae6325d6552afdaddd577e0ccce29ceba">scale</a></div><div class="ttdeci">fl::UISlider scale(&quot;Scale&quot;, 4,.1, 4,.1)</div></div>
+<div class="ttc" id="astdint_8h_aba7bc1797add20fe3efdf37ced1182c5_html_aba7bc1797add20fe3efdf37ced1182c5"><div class="ttname"><a href="../../df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a></div><div class="ttdeci">unsigned char uint8_t</div><div class="ttdef"><b>Definition</b> <a href="../../df/dd8/stdint_8h_source.html#l00208">stdint.h:208</a></div></div>
+<div class="ttc" id="astdint_8h_af8b57fa1249a1e2d5cd3c80296874419_html_af8b57fa1249a1e2d5cd3c80296874419"><div class="ttname"><a href="../../df/dd8/stdint_8h_af8b57fa1249a1e2d5cd3c80296874419.html#af8b57fa1249a1e2d5cd3c80296874419">uint16_t</a></div><div class="ttdeci">fl::u16 uint16_t</div><div class="ttdef"><b>Definition</b> <a href="../../df/dd8/stdint_8h_source.html#l00213">stdint.h:213</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../d3/dac/_fx_noise_ring_8ino_ae6325d6552afdaddd577e0ccce29ceba.html#ae6325d6552afdaddd577e0ccce29ceba">scale</a>.</p>
 
@@ -148,7 +150,7 @@ $(function(){initNavTree('d9/d1a/namespaceautoresearch_1_1simd__check_a486148011
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d9/d1a/namespaceautoresearch_1_1simd__check_a4861480114df76ce1ecae2bbd55c4125_a4861480114df76ce1ecae2bbd55c4125_icgraph.svg" width="100%" height="386"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d9/d1a/namespaceautoresearch_1_1simd__check_a4861480114df76ce1ecae2bbd55c4125_a4861480114df76ce1ecae2bbd55c4125_icgraph.svg" width="100%" height="300"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 
 </div>
@@ -160,7 +162,7 @@ $(function(){initNavTree('d9/d1a/namespaceautoresearch_1_1simd__check_a486148011
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d1/dc9/namespaceautoresearch.html">autoresearch</a></li><li class="navelem"><a class="el" href="../../d9/d1a/namespaceautoresearch_1_1simd__check.html">simd_check</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:03 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

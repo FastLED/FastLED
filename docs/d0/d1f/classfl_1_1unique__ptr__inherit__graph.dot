@@ -69,10 +69,16 @@ digraph "fl::unique_ptr&lt; T, Deleter &gt;"
   Node30 [id="Node000030",label="fl::unique_ptr\< fl\l::task::Coroutine \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d6/d2e/classfl_1_1unique__ptr.html",tooltip=" "];
   Node1 -> Node31 [id="edge32_Node000001_Node000031",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::u8[]\>",fontcolor="grey" ];
   Node31 [id="Node000031",label="fl::unique_ptr\< fl\l::u8[]\>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d6/d2e/classfl_1_1unique__ptr.html",tooltip=" "];
-  Node1 -> Node32 [id="edge33_Node000001_Node000032",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::i16[]\>",fontcolor="grey" ];
-  Node32 [id="Node000032",label="fl::unique_ptr\< fl\l::i16[]\>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d6/d2e/classfl_1_1unique__ptr.html",tooltip=" "];
-  Node1 -> Node33 [id="edge34_Node000001_Node000033",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::third_party::\lMp3HelixDecoder \>",fontcolor="grey" ];
-  Node33 [id="Node000033",label="fl::unique_ptr\< fl\l::third_party::Mp3HelixDecoder \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d6/d2e/classfl_1_1unique__ptr.html",tooltip=" "];
-  Node1 -> Node34 [id="edge35_Node000001_Node000034",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< T[], Deleter \>",fontcolor="grey" ];
-  Node34 [id="Node000034",label="fl::unique_ptr\< T[]\l, Deleter \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$df/dcd/classfl_1_1unique__ptr_3_01_t_0f_0e_00_01_deleter_01_4.html",tooltip=" "];
+  Node1 -> Node32 [id="edge33_Node000001_Node000032",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::i16[], fl::third\l_party::Mp3MemoryDeleter\l\< fl::i16 \> \>",fontcolor="grey" ];
+  Node32 [id="Node000032",label="fl::unique_ptr\< fl\l::i16[], fl::third_party\l::Mp3MemoryDeleter\< fl\l::i16 \> \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d6/d2e/classfl_1_1unique__ptr.html",tooltip=" "];
+  Node1 -> Node33 [id="edge34_Node000001_Node000033",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< mp3dec_t, fl::third\l_party::Mp3MemoryDeleter\l\< mp3dec_t \> \>",fontcolor="grey" ];
+  Node33 [id="Node000033",label="fl::unique_ptr\< mp3dec\l_t, fl::third_party::Mp3Memory\lDeleter\< mp3dec_t \> \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d6/d2e/classfl_1_1unique__ptr.html",tooltip=" "];
+  Node1 -> Node34 [id="edge35_Node000001_Node000034",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< mp3dec_scratch_t,\l fl::third_party::Mp3Memory\lDeleter\< mp3dec_scratch_t \> \>",fontcolor="grey" ];
+  Node34 [id="Node000034",label="fl::unique_ptr\< mp3dec\l_scratch_t, fl::third\l_party::Mp3MemoryDeleter\l\< mp3dec_scratch_t \> \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d6/d2e/classfl_1_1unique__ptr.html",tooltip=" "];
+  Node1 -> Node35 [id="edge36_Node000001_Node000035",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::third_party::\lMp3Minimp3Decoder \>",fontcolor="grey" ];
+  Node35 [id="Node000035",label="fl::unique_ptr\< fl\l::third_party::Mp3Minimp3Decoder \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d6/d2e/classfl_1_1unique__ptr.html",tooltip=" "];
+  Node1 -> Node36 [id="edge37_Node000001_Node000036",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::u8[], fl::third\l_party::Mp3MemoryDeleter\l\< fl::u8 \> \>",fontcolor="grey" ];
+  Node36 [id="Node000036",label="fl::unique_ptr\< fl\l::u8[], fl::third_party\l::Mp3MemoryDeleter\< fl\l::u8 \> \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d6/d2e/classfl_1_1unique__ptr.html",tooltip=" "];
+  Node1 -> Node37 [id="edge38_Node000001_Node000037",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< T[], Deleter \>",fontcolor="grey" ];
+  Node37 [id="Node000037",label="fl::unique_ptr\< T[]\l, Deleter \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$df/dcd/classfl_1_1unique__ptr_3_01_t_0f_0e_00_01_deleter_01_4.html",tooltip=" "];
 }

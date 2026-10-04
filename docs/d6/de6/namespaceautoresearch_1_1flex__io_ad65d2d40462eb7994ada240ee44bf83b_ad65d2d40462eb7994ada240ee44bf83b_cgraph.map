@@ -1,0 +1,13 @@
+<map id="autoresearch::flex_io::firstDriverName" name="autoresearch::flex_io::firstDriverName">
+<area shape="rect" id="Node000001" title="Convenience — first non&#45;empty driver name, or &quot;&lt;none&gt;&quot; if empty." alt="" coords="5,27,159,67"/>
+<area shape="rect" id="Node000002" href="$d2/db2/classfl_1_1string_af72684ed7d6b211b41ace065de0bcfe7.html#af72684ed7d6b211b41ace065de0bcfe7" title=" " alt="" coords="228,5,387,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="158,35,214,27,215,33,159,40"/>
+<area shape="rect" id="Node000003" href="$d6/de6/namespaceautoresearch_1_1flex__io_a95988818b200e04cba93b8ab803eeed0.html#a95988818b200e04cba93b8ab803eeed0" title="Return the list of registered driver names." alt="" coords="207,55,408,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="159,54,194,59,193,64,158,59"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a1cc01267f6bdd7251959883412b11bbb.html#a1cc01267f6bdd7251959883412b11bbb" title="Get the global ChannelManager singleton instance." alt="" coords="461,37,607,63"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="408,61,447,57,447,62,409,67"/>
+<area shape="rect" id="Node000013" href="$d2/d24/classfl_1_1vector_a82c3455c1a345460f95a0180c93b3fb0.html#a82c3455c1a345460f95a0180c93b3fb0" title=" " alt="" coords="456,87,612,112"/>
+<area shape="poly" id="edge5_Node000003_Node000013" title=" " alt="" coords="409,83,443,87,442,92,408,89"/>
+<area shape="rect" id="Node000005" href="$d2/d6b/classfl_1_1_channel_manager_a76013c6913045962ce5bb8d227e760b3.html#a76013c6913045962ce5bb8d227e760b3" title="Get the global singleton instance." alt="" coords="660,30,808,70"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="608,47,646,47,646,53,608,53"/>
+</map>

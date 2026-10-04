@@ -17,7 +17,7 @@ digraph "fl::HttpConnection::onConnected"
   Node4 -> Node5 [id="edge5_Node000004_Node000005",color="steelblue1",style="solid",tooltip=" "];
   Node5 [id="Node000005",label="fl::HttpConnection\l::calculateBackoffDelay",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d5f/classfl_1_1_http_connection_a5771485770bb65873ba278d1806af6e3.html#a5771485770bb65873ba278d1806af6e3",tooltip=" "];
   Node5 -> Node6 [id="edge6_Node000005_Node000006",color="steelblue1",style="solid",tooltip=" "];
-  Node6 [id="Node000006",label="fl::delay",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d36/namespacefl_a50131c41da2f619067d98360de35fa27.html#a50131c41da2f619067d98360de35fa27",tooltip="Public delay wrapper that keeps bare Arduino delay() preferred after using fl::delay; while still all..."];
+  Node6 [id="Node000006",label="fl::delay",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d36/namespacefl_a19da680141593b475c4d1d3c1c0a8409.html#a19da680141593b475c4d1d3c1c0a8409",tooltip="Public delay wrapper that keeps bare Arduino delay() preferred after using fl::delay; while still all..."];
   Node6 -> Node6 [id="edge7_Node000006_Node000006",color="steelblue1",style="solid",tooltip=" "];
   Node4 -> Node2 [id="edge8_Node000004_Node000002",color="steelblue1",style="solid",tooltip=" "];
 }

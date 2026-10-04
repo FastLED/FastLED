@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -137,12 +137,12 @@ Files</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<h1><a class="anchor" id="autotoc_md382"></a>
+<h1><a class="anchor" id="autotoc_md470"></a>
 Overview</h1>
 <p>This module provides HTTP/1.1 streaming transport for FastLED's JSON-RPC system, enabling bidirectional communication over HTTP using chunked transfer encoding. The transport supports three RPC modes: SYNC (immediate response), ASYNC (ACK + later result), and ASYNC_STREAM (ACK + multiple updates + final result).</p>
-<h1><a class="anchor" id="autotoc_md383"></a>
+<h1><a class="anchor" id="autotoc_md471"></a>
 Architecture Components</h1>
-<h2><a class="anchor" id="autotoc_md384"></a>
+<h2><a class="anchor" id="autotoc_md472"></a>
 Component Hierarchy</h2>
 <div class="fragment"><div class="line">Remote (application layer)</div>
 <div class="line">    ↓</div>
@@ -155,9 +155,9 @@ Component Hierarchy</h2>
 <div class="line">ChunkedReader / ChunkedWriter (HTTP/1.1 encoding)</div>
 <div class="line">    ↓</div>
 <div class="line">TCP Socket (platform-specific: POSIX, ESP-IDF, etc.)</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md385"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md473"></a>
 Core Components</h2>
-<h3><a class="anchor" id="autotoc_md386"></a>
+<h3><a class="anchor" id="autotoc_md474"></a>
 1. ChunkedReader / ChunkedWriter</h3>
 <p><b>Purpose</b>: Parse and generate HTTP/1.1 chunked transfer encoding</p>
 <p><b>Files</b>:</p><ul>
@@ -170,7 +170,7 @@ Core Components</h2>
 <div class="line">    ChunkedReader();</div>
 <div class="line"> </div>
 <div class="line">    <span class="comment">// Feed data from socket</span></div>
-<div class="line">    <span class="keywordtype">void</span> feed(<span class="keyword">const</span> uint8_t* data, <span class="keywordtype">size_t</span> len);</div>
+<div class="line">    <span class="keywordtype">void</span> feed(<span class="keyword">const</span> <a class="code hl_typedef" href="df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a>* data, <span class="keywordtype">size_t</span> len);</div>
 <div class="line"> </div>
 <div class="line">    <span class="comment">// Check if complete chunk is available</span></div>
 <div class="line">    <span class="keywordtype">bool</span> hasChunk() <span class="keyword">const</span>;</div>
@@ -199,20 +199,21 @@ Core Components</h2>
 <div class="line">};</div>
 <div class="ttc" id="aclassfl_1_1vector_html"><div class="ttname"><a href="d2/d24/classfl_1_1vector.html">fl::vector</a></div><div class="ttdef"><b>Definition</b> <a href="d6/d68/vector_8h_source.html#l00449">vector.h:449</a></div></div>
 <div class="ttc" id="anamespacefl_a451542d0bf4d13f0bc00e055c18e6726_html_a451542d0bf4d13f0bc00e055c18e6726"><div class="ttname"><a href="d4/d36/namespacefl_a451542d0bf4d13f0bc00e055c18e6726.html#a451542d0bf4d13f0bc00e055c18e6726">fl::optional</a></div><div class="ttdeci">Optional&lt; T &gt; optional</div><div class="ttdef"><b>Definition</b> <a href="dc/d62/optional_8h_source.html#l00016">optional.h:16</a></div></div>
+<div class="ttc" id="astdint_8h_aba7bc1797add20fe3efdf37ced1182c5_html_aba7bc1797add20fe3efdf37ced1182c5"><div class="ttname"><a href="df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a></div><div class="ttdeci">unsigned char uint8_t</div><div class="ttdef"><b>Definition</b> <a href="df/dd8/stdint_8h_source.html#l00208">stdint.h:208</a></div></div>
 </div><!-- fragment --><p><b>ChunkedWriter API</b>: </p><div class="fragment"><div class="line"><span class="keyword">class </span>ChunkedWriter {</div>
 <div class="line"><span class="keyword">public</span>:</div>
 <div class="line">    <span class="comment">// Constructor</span></div>
 <div class="line">    ChunkedWriter();</div>
 <div class="line"> </div>
 <div class="line">    <span class="comment">// Write chunk (returns formatted chunk data)</span></div>
-<div class="line">    <a class="code hl_class" href="d2/d24/classfl_1_1vector.html">fl::vector&lt;uint8_t&gt;</a> writeChunk(<span class="keyword">const</span> uint8_t* data, <span class="keywordtype">size_t</span> len);</div>
+<div class="line">    <a class="code hl_class" href="d2/d24/classfl_1_1vector.html">fl::vector&lt;uint8_t&gt;</a> writeChunk(<span class="keyword">const</span> <a class="code hl_typedef" href="df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a>* data, <span class="keywordtype">size_t</span> len);</div>
 <div class="line"> </div>
 <div class="line">    <span class="comment">// Write final chunk (size 0)</span></div>
 <div class="line">    <a class="code hl_class" href="d2/d24/classfl_1_1vector.html">fl::vector&lt;uint8_t&gt;</a> writeFinal();</div>
 <div class="line"> </div>
 <div class="line"><span class="keyword">private</span>:</div>
 <div class="line">    <span class="comment">// Format chunk: &lt;size-hex&gt;\r\n&lt;data&gt;\r\n</span></div>
-<div class="line">    <span class="keyword">static</span> <a class="code hl_class" href="d2/d24/classfl_1_1vector.html">fl::vector&lt;uint8_t&gt;</a> formatChunk(<span class="keyword">const</span> uint8_t* data, <span class="keywordtype">size_t</span> len);</div>
+<div class="line">    <span class="keyword">static</span> <a class="code hl_class" href="d2/d24/classfl_1_1vector.html">fl::vector&lt;uint8_t&gt;</a> formatChunk(<span class="keyword">const</span> <a class="code hl_typedef" href="df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a>* data, <span class="keywordtype">size_t</span> len);</div>
 <div class="line">};</div>
 </div><!-- fragment --><p><b>Chunked Encoding Format</b>: </p><div class="fragment"><div class="line">&lt;chunk-size-hex&gt;\r\n</div>
 <div class="line">&lt;chunk-data&gt;</div>
@@ -224,7 +225,7 @@ Core Components</h2>
 <div class="line">0\r\n</div>
 <div class="line">\r\n</div>
 </div><!-- fragment --><hr  />
-<h3><a class="anchor" id="autotoc_md388"></a>
+<h3><a class="anchor" id="autotoc_md476"></a>
 2. HttpParser</h3>
 <p><b>Purpose</b>: Parse HTTP/1.1 request and response messages</p>
 <p><b>Files</b>:</p><ul>
@@ -245,7 +246,7 @@ Core Components</h2>
 <div class="line">    HttpRequestParser();</div>
 <div class="line"> </div>
 <div class="line">    <span class="comment">// Feed data from socket</span></div>
-<div class="line">    <span class="keywordtype">void</span> feed(<span class="keyword">const</span> uint8_t* data, <span class="keywordtype">size_t</span> len);</div>
+<div class="line">    <span class="keywordtype">void</span> feed(<span class="keyword">const</span> <a class="code hl_typedef" href="df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a>* data, <span class="keywordtype">size_t</span> len);</div>
 <div class="line"> </div>
 <div class="line">    <span class="comment">// Check if request is complete</span></div>
 <div class="line">    <span class="keywordtype">bool</span> isComplete() <span class="keyword">const</span>;</div>
@@ -271,7 +272,7 @@ Core Components</h2>
 <div class="line">    <span class="keywordtype">size_t</span> mContentLength;</div>
 <div class="line">    <span class="keywordtype">bool</span> mIsChunked;</div>
 <div class="line">};</div>
-<div class="ttc" id="aclassfl_1_1string_html"><div class="ttname"><a href="d2/db2/classfl_1_1string.html">fl::string</a></div><div class="ttdef"><b>Definition</b> <a href="da/d66/string_8h_source.html#l00193">string.h:193</a></div></div>
+<div class="ttc" id="aclassfl_1_1string_html"><div class="ttname"><a href="d2/db2/classfl_1_1string.html">fl::string</a></div><div class="ttdef"><b>Definition</b> <a href="da/d66/string_8h_source.html#l00202">string.h:202</a></div></div>
 <div class="ttc" id="anamespacefl_a2bda8d4be5cd1e5967ca4912fcfb8c9a_html_a2bda8d4be5cd1e5967ca4912fcfb8c9a"><div class="ttname"><a href="d4/d36/namespacefl_a2bda8d4be5cd1e5967ca4912fcfb8c9a.html#a2bda8d4be5cd1e5967ca4912fcfb8c9a">fl::map</a></div><div class="ttdeci">MapRedBlackTree&lt; Key, T, Compare, fl::allocator_slab&lt; char &gt; &gt; map</div><div class="ttdef"><b>Definition</b> <a href="dc/db7/map_8h_source.html#l00283">map.h:283</a></div></div>
 </div><!-- fragment --><p><b>HttpResponseParser API</b>: </p><div class="fragment"><div class="line"><span class="keyword">struct </span>HttpResponse {</div>
 <div class="line">    <a class="code hl_class" href="d2/db2/classfl_1_1string.html">fl::string</a> version;          <span class="comment">// &quot;HTTP/1.1&quot;</span></div>
@@ -287,7 +288,7 @@ Core Components</h2>
 <div class="line">    HttpResponseParser();</div>
 <div class="line"> </div>
 <div class="line">    <span class="comment">// Feed data from socket</span></div>
-<div class="line">    <span class="keywordtype">void</span> feed(<span class="keyword">const</span> uint8_t* data, <span class="keywordtype">size_t</span> len);</div>
+<div class="line">    <span class="keywordtype">void</span> feed(<span class="keyword">const</span> <a class="code hl_typedef" href="df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a>* data, <span class="keywordtype">size_t</span> len);</div>
 <div class="line"> </div>
 <div class="line">    <span class="comment">// Check if response is complete</span></div>
 <div class="line">    <span class="keywordtype">bool</span> isComplete() <span class="keyword">const</span>;</div>
@@ -314,7 +315,7 @@ Core Components</h2>
 <div class="line">    <span class="keywordtype">bool</span> mIsChunked;</div>
 <div class="line">};</div>
 </div><!-- fragment --><hr  />
-<h3><a class="anchor" id="autotoc_md390"></a>
+<h3><a class="anchor" id="autotoc_md478"></a>
 3. HttpConnection</h3>
 <p><b>Purpose</b>: Manage HTTP connection lifecycle with reconnection and heartbeat</p>
 <p><b>Files</b>:</p><ul>
@@ -332,7 +333,7 @@ Core Components</h2>
 <div class="line">    };</div>
 <div class="line"> </div>
 <div class="line">    <span class="comment">// Constructor</span></div>
-<div class="line">    HttpConnection(<span class="keyword">const</span> <span class="keywordtype">char</span>* host, uint16_t port);</div>
+<div class="line">    HttpConnection(<span class="keyword">const</span> <span class="keywordtype">char</span>* host, <a class="code hl_typedef" href="df/dd8/stdint_8h_af8b57fa1249a1e2d5cd3c80296874419.html#af8b57fa1249a1e2d5cd3c80296874419">uint16_t</a> port);</div>
 <div class="line"> </div>
 <div class="line">    <span class="comment">// Connection management</span></div>
 <div class="line">    <span class="keywordtype">bool</span> connect();                 <span class="comment">// Initiate connection</span></div>
@@ -343,18 +344,18 @@ Core Components</h2>
 <div class="line"> </div>
 <div class="line">    <span class="comment">// Auto-reconnect settings</span></div>
 <div class="line">    <span class="keywordtype">void</span> setAutoReconnect(<span class="keywordtype">bool</span> enable);</div>
-<div class="line">    <span class="keywordtype">void</span> setReconnectInterval(uint32_t minMs, uint32_t maxMs);</div>
+<div class="line">    <span class="keywordtype">void</span> setReconnectInterval(<a class="code hl_typedef" href="df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a> minMs, <a class="code hl_typedef" href="df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a> maxMs);</div>
 <div class="line"> </div>
 <div class="line">    <span class="comment">// Heartbeat/keepalive settings</span></div>
-<div class="line">    <span class="keywordtype">void</span> setHeartbeatInterval(uint32_t intervalMs);</div>
-<div class="line">    <span class="keywordtype">void</span> setTimeout(uint32_t timeoutMs);</div>
+<div class="line">    <span class="keywordtype">void</span> setHeartbeatInterval(<a class="code hl_typedef" href="df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a> intervalMs);</div>
+<div class="line">    <span class="keywordtype">void</span> setTimeout(<a class="code hl_typedef" href="df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a> timeoutMs);</div>
 <div class="line"> </div>
 <div class="line">    <span class="comment">// Update loop (handles reconnection, heartbeat, timeout detection)</span></div>
-<div class="line">    <span class="keywordtype">void</span> update(uint32_t currentTimeMs);</div>
+<div class="line">    <span class="keywordtype">void</span> update(<a class="code hl_typedef" href="df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a> currentTimeMs);</div>
 <div class="line"> </div>
 <div class="line">    <span class="comment">// Socket I/O (platform-specific implementations provided by subclasses)</span></div>
-<div class="line">    <span class="keyword">virtual</span> <span class="keywordtype">int</span> send(<span class="keyword">const</span> uint8_t* data, <span class="keywordtype">size_t</span> len) = 0;</div>
-<div class="line">    <span class="keyword">virtual</span> <span class="keywordtype">int</span> recv(uint8_t* buffer, <span class="keywordtype">size_t</span> maxLen) = 0;</div>
+<div class="line">    <span class="keyword">virtual</span> <span class="keywordtype">int</span> send(<span class="keyword">const</span> <a class="code hl_typedef" href="df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a>* data, <span class="keywordtype">size_t</span> len) = 0;</div>
+<div class="line">    <span class="keyword">virtual</span> <span class="keywordtype">int</span> recv(<a class="code hl_typedef" href="df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a>* buffer, <span class="keywordtype">size_t</span> maxLen) = 0;</div>
 <div class="line">    <span class="keyword">virtual</span> <span class="keywordtype">bool</span> isSocketConnected() <span class="keyword">const</span> = 0;</div>
 <div class="line"> </div>
 <div class="line"><span class="keyword">protected</span>:</div>
@@ -365,24 +366,26 @@ Core Components</h2>
 <div class="line"><span class="keyword">private</span>:</div>
 <div class="line">    State mState;</div>
 <div class="line">    <a class="code hl_class" href="d2/db2/classfl_1_1string.html">fl::string</a> mHost;</div>
-<div class="line">    uint16_t mPort;</div>
+<div class="line">    <a class="code hl_typedef" href="df/dd8/stdint_8h_af8b57fa1249a1e2d5cd3c80296874419.html#af8b57fa1249a1e2d5cd3c80296874419">uint16_t</a> mPort;</div>
 <div class="line"> </div>
 <div class="line">    <span class="comment">// Auto-reconnect</span></div>
 <div class="line">    <span class="keywordtype">bool</span> mAutoReconnect;</div>
-<div class="line">    uint32_t mReconnectIntervalMin;  <span class="comment">// Min backoff (default: 1000ms)</span></div>
-<div class="line">    uint32_t mReconnectIntervalMax;  <span class="comment">// Max backoff (default: 30000ms)</span></div>
-<div class="line">    uint32_t mReconnectIntervalCurrent;</div>
-<div class="line">    uint32_t mLastReconnectAttempt;</div>
+<div class="line">    <a class="code hl_typedef" href="df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a> mReconnectIntervalMin;  <span class="comment">// Min backoff (default: 1000ms)</span></div>
+<div class="line">    <a class="code hl_typedef" href="df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a> mReconnectIntervalMax;  <span class="comment">// Max backoff (default: 30000ms)</span></div>
+<div class="line">    <a class="code hl_typedef" href="df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a> mReconnectIntervalCurrent;</div>
+<div class="line">    <a class="code hl_typedef" href="df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a> mLastReconnectAttempt;</div>
 <div class="line">    <span class="keywordtype">int</span> mReconnectAttempts;</div>
 <div class="line"> </div>
 <div class="line">    <span class="comment">// Heartbeat</span></div>
-<div class="line">    uint32_t mHeartbeatInterval;     <span class="comment">// Default: 30000ms (30s)</span></div>
-<div class="line">    uint32_t mLastHeartbeat;</div>
+<div class="line">    <a class="code hl_typedef" href="df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a> mHeartbeatInterval;     <span class="comment">// Default: 30000ms (30s)</span></div>
+<div class="line">    <a class="code hl_typedef" href="df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a> mLastHeartbeat;</div>
 <div class="line"> </div>
 <div class="line">    <span class="comment">// Timeout detection</span></div>
-<div class="line">    uint32_t mTimeout;               <span class="comment">// Default: 60000ms (60s)</span></div>
-<div class="line">    uint32_t mLastActivity;</div>
+<div class="line">    <a class="code hl_typedef" href="df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a> mTimeout;               <span class="comment">// Default: 60000ms (60s)</span></div>
+<div class="line">    <a class="code hl_typedef" href="df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a> mLastActivity;</div>
 <div class="line">};</div>
+<div class="ttc" id="astdint_8h_ae8a835bf6e050b01cc449644a343aa73_html_ae8a835bf6e050b01cc449644a343aa73"><div class="ttname"><a href="df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a></div><div class="ttdeci">fl::u32 uint32_t</div><div class="ttdef"><b>Definition</b> <a href="df/dd8/stdint_8h_source.html#l00218">stdint.h:218</a></div></div>
+<div class="ttc" id="astdint_8h_af8b57fa1249a1e2d5cd3c80296874419_html_af8b57fa1249a1e2d5cd3c80296874419"><div class="ttname"><a href="df/dd8/stdint_8h_af8b57fa1249a1e2d5cd3c80296874419.html#af8b57fa1249a1e2d5cd3c80296874419">uint16_t</a></div><div class="ttdeci">fl::u16 uint16_t</div><div class="ttdef"><b>Definition</b> <a href="df/dd8/stdint_8h_source.html#l00213">stdint.h:213</a></div></div>
 </div><!-- fragment --><p><b>Reconnection Logic</b>:</p><ul>
 <li>Exponential backoff: 1s, 2s, 4s, 8s, ..., max 30s</li>
 <li>Reset backoff on successful connection</li>
@@ -394,7 +397,7 @@ Core Components</h2>
 <li>Disconnect on timeout, trigger reconnect if enabled</li>
 </ul>
 <hr  />
-<h3><a class="anchor" id="autotoc_md392"></a>
+<h3><a class="anchor" id="autotoc_md480"></a>
 4. NativeHttpClient / NativeHttpServer</h3>
 <p><b>Purpose</b>: Platform-specific HTTP client/server implementations using POSIX sockets</p>
 <p><b>Files</b>:</p><ul>
@@ -406,12 +409,12 @@ Core Components</h2>
 <p><b>NativeHttpClient API</b>: </p><div class="fragment"><div class="line"><span class="keyword">class </span>NativeHttpClient : <span class="keyword">public</span> HttpConnection {</div>
 <div class="line"><span class="keyword">public</span>:</div>
 <div class="line">    <span class="comment">// Constructor</span></div>
-<div class="line">    NativeHttpClient(<span class="keyword">const</span> <span class="keywordtype">char</span>* host, uint16_t port);</div>
+<div class="line">    NativeHttpClient(<span class="keyword">const</span> <span class="keywordtype">char</span>* host, <a class="code hl_typedef" href="df/dd8/stdint_8h_af8b57fa1249a1e2d5cd3c80296874419.html#af8b57fa1249a1e2d5cd3c80296874419">uint16_t</a> port);</div>
 <div class="line">    ~NativeHttpClient();</div>
 <div class="line"> </div>
 <div class="line">    <span class="comment">// Socket I/O (POSIX implementation)</span></div>
-<div class="line">    <span class="keywordtype">int</span> send(<span class="keyword">const</span> uint8_t* data, <span class="keywordtype">size_t</span> len) <span class="keyword">override</span>;</div>
-<div class="line">    <span class="keywordtype">int</span> recv(uint8_t* buffer, <span class="keywordtype">size_t</span> maxLen) <span class="keyword">override</span>;</div>
+<div class="line">    <span class="keywordtype">int</span> send(<span class="keyword">const</span> <a class="code hl_typedef" href="df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a>* data, <span class="keywordtype">size_t</span> len) <span class="keyword">override</span>;</div>
+<div class="line">    <span class="keywordtype">int</span> recv(<a class="code hl_typedef" href="df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a>* buffer, <span class="keywordtype">size_t</span> maxLen) <span class="keyword">override</span>;</div>
 <div class="line">    <span class="keywordtype">bool</span> isSocketConnected() <span class="keyword">const override</span>;</div>
 <div class="line"> </div>
 <div class="line"><span class="keyword">protected</span>:</div>
@@ -425,7 +428,7 @@ Core Components</h2>
 </div><!-- fragment --><p><b>NativeHttpServer API</b>: </p><div class="fragment"><div class="line"><span class="keyword">struct </span>HttpClientConnection {</div>
 <div class="line">    <span class="keywordtype">int</span> socket;                     <span class="comment">// Client socket descriptor</span></div>
 <div class="line">    <a class="code hl_class" href="d2/db2/classfl_1_1string.html">fl::string</a> remoteAddr;          <span class="comment">// Client IP address</span></div>
-<div class="line">    uint16_t remotePort;            <span class="comment">// Client port</span></div>
+<div class="line">    <a class="code hl_typedef" href="df/dd8/stdint_8h_af8b57fa1249a1e2d5cd3c80296874419.html#af8b57fa1249a1e2d5cd3c80296874419">uint16_t</a> remotePort;            <span class="comment">// Client port</span></div>
 <div class="line">    HttpRequestParser parser;       <span class="comment">// Request parser for this client</span></div>
 <div class="line">    ChunkedWriter writer;           <span class="comment">// Response writer for this client</span></div>
 <div class="line">};</div>
@@ -433,7 +436,7 @@ Core Components</h2>
 <div class="line"><span class="keyword">class </span>NativeHttpServer {</div>
 <div class="line"><span class="keyword">public</span>:</div>
 <div class="line">    <span class="comment">// Constructor</span></div>
-<div class="line">    NativeHttpServer(uint16_t port);</div>
+<div class="line">    NativeHttpServer(<a class="code hl_typedef" href="df/dd8/stdint_8h_af8b57fa1249a1e2d5cd3c80296874419.html#af8b57fa1249a1e2d5cd3c80296874419">uint16_t</a> port);</div>
 <div class="line">    ~NativeHttpServer();</div>
 <div class="line"> </div>
 <div class="line">    <span class="comment">// Server lifecycle</span></div>
@@ -448,14 +451,14 @@ Core Components</h2>
 <div class="line">    <span class="comment">// Request handling</span></div>
 <div class="line">    <a class="code hl_typedef" href="d4/d36/namespacefl_a451542d0bf4d13f0bc00e055c18e6726.html#a451542d0bf4d13f0bc00e055c18e6726">fl::optional&lt;HttpRequest&gt;</a> readRequest(<span class="keywordtype">int</span> clientId);</div>
 <div class="line">    <span class="keywordtype">void</span> writeResponse(<span class="keywordtype">int</span> clientId, <span class="keyword">const</span> HttpResponse&amp; response);</div>
-<div class="line">    <span class="keywordtype">void</span> writeChunk(<span class="keywordtype">int</span> clientId, <span class="keyword">const</span> uint8_t* data, <span class="keywordtype">size_t</span> len);</div>
+<div class="line">    <span class="keywordtype">void</span> writeChunk(<span class="keywordtype">int</span> clientId, <span class="keyword">const</span> <a class="code hl_typedef" href="df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a>* data, <span class="keywordtype">size_t</span> len);</div>
 <div class="line">    <span class="keywordtype">void</span> writeChunkFinal(<span class="keywordtype">int</span> clientId);</div>
 <div class="line"> </div>
 <div class="line">    <span class="comment">// Close client</span></div>
 <div class="line">    <span class="keywordtype">void</span> closeClient(<span class="keywordtype">int</span> clientId);</div>
 <div class="line"> </div>
 <div class="line"><span class="keyword">private</span>:</div>
-<div class="line">    uint16_t mPort;</div>
+<div class="line">    <a class="code hl_typedef" href="df/dd8/stdint_8h_af8b57fa1249a1e2d5cd3c80296874419.html#af8b57fa1249a1e2d5cd3c80296874419">uint16_t</a> mPort;</div>
 <div class="line">    <span class="keywordtype">int</span> mListenSocket;</div>
 <div class="line">    <a class="code hl_typedef" href="d4/d36/namespacefl_a2bda8d4be5cd1e5967ca4912fcfb8c9a.html#a2bda8d4be5cd1e5967ca4912fcfb8c9a">fl::map&lt;int, HttpClientConnection&gt;</a> mClients;</div>
 <div class="line"> </div>
@@ -463,7 +466,7 @@ Core Components</h2>
 <div class="line">    <span class="keywordtype">void</span> acceptClient();</div>
 <div class="line">};</div>
 </div><!-- fragment --><hr  />
-<h3><a class="anchor" id="autotoc_md394"></a>
+<h3><a class="anchor" id="autotoc_md482"></a>
 5. HttpStreamTransport</h3>
 <p><b>Purpose</b>: Base class for HTTP streaming transport, implements RequestSource/ResponseSink for Remote</p>
 <p><b>Files</b>:</p><ul>
@@ -473,7 +476,7 @@ Core Components</h2>
 <p><b>HttpStreamTransport API</b>: </p><div class="fragment"><div class="line"><span class="keyword">class </span>HttpStreamTransport {</div>
 <div class="line"><span class="keyword">public</span>:</div>
 <div class="line">    <span class="comment">// Constructor</span></div>
-<div class="line">    HttpStreamTransport(<span class="keyword">const</span> <span class="keywordtype">char</span>* host, uint16_t port);</div>
+<div class="line">    HttpStreamTransport(<span class="keyword">const</span> <span class="keywordtype">char</span>* host, <a class="code hl_typedef" href="df/dd8/stdint_8h_af8b57fa1249a1e2d5cd3c80296874419.html#af8b57fa1249a1e2d5cd3c80296874419">uint16_t</a> port);</div>
 <div class="line">    <span class="keyword">virtual</span> ~HttpStreamTransport() = <span class="keywordflow">default</span>;</div>
 <div class="line"> </div>
 <div class="line">    <span class="comment">// Connection management</span></div>
@@ -488,17 +491,17 @@ Core Components</h2>
 <div class="line">    <span class="keywordtype">void</span> writeResponse(<span class="keyword">const</span> <a class="code hl_class" href="de/d40/classfl_1_1json.html">fl::json</a>&amp; response);</div>
 <div class="line"> </div>
 <div class="line">    <span class="comment">// Update loop (handles reconnection, heartbeat, I/O)</span></div>
-<div class="line">    <span class="keyword">virtual</span> <span class="keywordtype">void</span> update(uint32_t currentTimeMs) = 0;</div>
+<div class="line">    <span class="keyword">virtual</span> <span class="keywordtype">void</span> update(<a class="code hl_typedef" href="df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a> currentTimeMs) = 0;</div>
 <div class="line"> </div>
 <div class="line">    <span class="comment">// Configuration</span></div>
 <div class="line">    <span class="keywordtype">void</span> setAutoReconnect(<span class="keywordtype">bool</span> enable);</div>
-<div class="line">    <span class="keywordtype">void</span> setHeartbeatInterval(uint32_t intervalMs);</div>
-<div class="line">    <span class="keywordtype">void</span> setTimeout(uint32_t timeoutMs);</div>
+<div class="line">    <span class="keywordtype">void</span> setHeartbeatInterval(<a class="code hl_typedef" href="df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a> intervalMs);</div>
+<div class="line">    <span class="keywordtype">void</span> setTimeout(<a class="code hl_typedef" href="df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a> timeoutMs);</div>
 <div class="line"> </div>
 <div class="line"><span class="keyword">protected</span>:</div>
 <div class="line">    <span class="comment">// Platform-specific socket I/O</span></div>
-<div class="line">    <span class="keyword">virtual</span> <span class="keywordtype">int</span> send(<span class="keyword">const</span> uint8_t* data, <span class="keywordtype">size_t</span> len) = 0;</div>
-<div class="line">    <span class="keyword">virtual</span> <span class="keywordtype">int</span> recv(uint8_t* buffer, <span class="keywordtype">size_t</span> maxLen) = 0;</div>
+<div class="line">    <span class="keyword">virtual</span> <span class="keywordtype">int</span> send(<span class="keyword">const</span> <a class="code hl_typedef" href="df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a>* data, <span class="keywordtype">size_t</span> len) = 0;</div>
+<div class="line">    <span class="keyword">virtual</span> <span class="keywordtype">int</span> recv(<a class="code hl_typedef" href="df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a>* buffer, <span class="keywordtype">size_t</span> maxLen) = 0;</div>
 <div class="line"> </div>
 <div class="line">    <span class="comment">// Request/response parsing helpers</span></div>
 <div class="line">    <a class="code hl_typedef" href="d4/d36/namespacefl_a451542d0bf4d13f0bc00e055c18e6726.html#a451542d0bf4d13f0bc00e055c18e6726">fl::optional&lt;fl::json&gt;</a> parseJsonFromChunk(<span class="keyword">const</span> <a class="code hl_class" href="d2/d24/classfl_1_1vector.html">fl::vector&lt;uint8_t&gt;</a>&amp; chunk);</div>
@@ -510,10 +513,10 @@ Core Components</h2>
 <div class="line">    <a class="code hl_class" href="da/d7f/classfl_1_1queue.html">fl::queue&lt;fl::json&gt;</a> mRequestQueue;   <span class="comment">// Buffered requests</span></div>
 <div class="line">    <a class="code hl_class" href="da/d7f/classfl_1_1queue.html">fl::queue&lt;fl::json&gt;</a> mResponseQueue;  <span class="comment">// Buffered responses</span></div>
 <div class="line">};</div>
-<div class="ttc" id="aclassfl_1_1json_html"><div class="ttname"><a href="de/d40/classfl_1_1json.html">fl::json</a></div><div class="ttdef"><b>Definition</b> <a href="d4/d05/json_8h_source.html#l00128">json.h:128</a></div></div>
+<div class="ttc" id="aclassfl_1_1json_html"><div class="ttname"><a href="de/d40/classfl_1_1json.html">fl::json</a></div><div class="ttdef"><b>Definition</b> <a href="d4/d05/json_8h_source.html#l00261">json.h:261</a></div></div>
 <div class="ttc" id="aclassfl_1_1queue_html"><div class="ttname"><a href="da/d7f/classfl_1_1queue.html">fl::queue</a></div><div class="ttdoc">A first-in, first-out (FIFO) queue container adapter.</div><div class="ttdef"><b>Definition</b> <a href="d8/d38/queue_8h_source.html#l00017">queue.h:17</a></div></div>
 </div><!-- fragment --><hr  />
-<h3><a class="anchor" id="autotoc_md396"></a>
+<h3><a class="anchor" id="autotoc_md484"></a>
 6. HttpStreamClient</h3>
 <p><b>Purpose</b>: Client-side HTTP streaming for RPC</p>
 <p><b>Files</b>:</p><ul>
@@ -523,7 +526,7 @@ Core Components</h2>
 <p><b>HttpStreamClient API</b>: </p><div class="fragment"><div class="line"><span class="keyword">class </span>HttpStreamClient : <span class="keyword">public</span> HttpStreamTransport {</div>
 <div class="line"><span class="keyword">public</span>:</div>
 <div class="line">    <span class="comment">// Constructor</span></div>
-<div class="line">    HttpStreamClient(<span class="keyword">const</span> <span class="keywordtype">char</span>* host, uint16_t port);</div>
+<div class="line">    HttpStreamClient(<span class="keyword">const</span> <span class="keywordtype">char</span>* host, <a class="code hl_typedef" href="df/dd8/stdint_8h_af8b57fa1249a1e2d5cd3c80296874419.html#af8b57fa1249a1e2d5cd3c80296874419">uint16_t</a> port);</div>
 <div class="line">    ~HttpStreamClient();</div>
 <div class="line"> </div>
 <div class="line">    <span class="comment">// Connection management (overrides)</span></div>
@@ -532,7 +535,7 @@ Core Components</h2>
 <div class="line">    <span class="keywordtype">bool</span> isConnected() <span class="keyword">const override</span>;</div>
 <div class="line"> </div>
 <div class="line">    <span class="comment">// Update loop (overrides)</span></div>
-<div class="line">    <span class="keywordtype">void</span> update(uint32_t currentTimeMs) <span class="keyword">override</span>;</div>
+<div class="line">    <span class="keywordtype">void</span> update(<a class="code hl_typedef" href="df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a> currentTimeMs) <span class="keyword">override</span>;</div>
 <div class="line"> </div>
 <div class="line">    <span class="comment">// Send RPC request (client → server)</span></div>
 <div class="line">    <span class="keywordtype">void</span> sendRequest(<span class="keyword">const</span> <a class="code hl_class" href="de/d40/classfl_1_1json.html">fl::json</a>&amp; request);</div>
@@ -542,8 +545,8 @@ Core Components</h2>
 <div class="line"> </div>
 <div class="line"><span class="keyword">protected</span>:</div>
 <div class="line">    <span class="comment">// Platform-specific socket I/O (delegates to NativeHttpClient)</span></div>
-<div class="line">    <span class="keywordtype">int</span> send(<span class="keyword">const</span> uint8_t* data, <span class="keywordtype">size_t</span> len) <span class="keyword">override</span>;</div>
-<div class="line">    <span class="keywordtype">int</span> recv(uint8_t* buffer, <span class="keywordtype">size_t</span> maxLen) <span class="keyword">override</span>;</div>
+<div class="line">    <span class="keywordtype">int</span> send(<span class="keyword">const</span> <a class="code hl_typedef" href="df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a>* data, <span class="keywordtype">size_t</span> len) <span class="keyword">override</span>;</div>
+<div class="line">    <span class="keywordtype">int</span> recv(<a class="code hl_typedef" href="df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a>* buffer, <span class="keywordtype">size_t</span> maxLen) <span class="keyword">override</span>;</div>
 <div class="line"> </div>
 <div class="line"><span class="keyword">private</span>:</div>
 <div class="line">    NativeHttpClient mClient;</div>
@@ -568,10 +571,10 @@ Core Components</h2>
 <div class="line">    delay(10);</div>
 <div class="line">}</div>
 <div class="ttc" id="a_rpc_client_8ino_a2322979ac125e8fe8862058961e3d206_html_a2322979ac125e8fe8862058961e3d206"><div class="ttname"><a href="d8/db9/_rpc_client_8ino_a2322979ac125e8fe8862058961e3d206.html#a2322979ac125e8fe8862058961e3d206">remote</a></div><div class="ttdeci">fl::unique_ptr&lt; fl::Remote &gt; remote</div><div class="ttdef"><b>Definition</b> <a href="d8/db9/_rpc_client_8ino_source.html#l00043">RpcClient.ino:43</a></div></div>
-<div class="ttc" id="aclassfl_1_1_remote_html"><div class="ttname"><a href="dc/ddb/classfl_1_1_remote.html">fl::Remote</a></div><div class="ttdoc">JSON-RPC server with scheduling support.</div><div class="ttdef"><b>Definition</b> <a href="d6/d06/remote_8h_source.html#l00040">remote.h:40</a></div></div>
-<div class="ttc" id="anamespacefl_a87ae8a24cc8b709a64f39370e71846af_html_a87ae8a24cc8b709a64f39370e71846af"><div class="ttname"><a href="d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af">fl::make_shared</a></div><div class="ttdeci">shared_ptr&lt; T &gt; make_shared(Args &amp;&amp;... args) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="df/d6a/shared__ptr_8h_source.html#l00414">shared_ptr.h:414</a></div></div>
+<div class="ttc" id="aclassfl_1_1_remote_html"><div class="ttname"><a href="dc/ddb/classfl_1_1_remote.html">fl::Remote</a></div><div class="ttdoc">JSON-RPC server with scheduling support.</div><div class="ttdef"><b>Definition</b> <a href="d6/d06/remote_8h_source.html#l00042">remote.h:42</a></div></div>
+<div class="ttc" id="anamespacefl_a87ae8a24cc8b709a64f39370e71846af_html_a87ae8a24cc8b709a64f39370e71846af"><div class="ttname"><a href="d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af">fl::make_shared</a></div><div class="ttdeci">shared_ptr&lt; T &gt; make_shared(Args &amp;&amp;... args) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="df/d6a/shared__ptr_8h_source.html#l00414">shared_ptr.h:414</a></div></div>
 </div><!-- fragment --><hr  />
-<h3><a class="anchor" id="autotoc_md398"></a>
+<h3><a class="anchor" id="autotoc_md486"></a>
 7. HttpStreamServer</h3>
 <p><b>Purpose</b>: Server-side HTTP streaming for RPC</p>
 <p><b>Files</b>:</p><ul>
@@ -581,7 +584,7 @@ Core Components</h2>
 <p><b>HttpStreamServer API</b>: </p><div class="fragment"><div class="line"><span class="keyword">class </span>HttpStreamServer : <span class="keyword">public</span> HttpStreamTransport {</div>
 <div class="line"><span class="keyword">public</span>:</div>
 <div class="line">    <span class="comment">// Constructor</span></div>
-<div class="line">    HttpStreamServer(uint16_t port);</div>
+<div class="line">    HttpStreamServer(<a class="code hl_typedef" href="df/dd8/stdint_8h_af8b57fa1249a1e2d5cd3c80296874419.html#af8b57fa1249a1e2d5cd3c80296874419">uint16_t</a> port);</div>
 <div class="line">    ~HttpStreamServer();</div>
 <div class="line"> </div>
 <div class="line">    <span class="comment">// Server lifecycle</span></div>
@@ -595,12 +598,12 @@ Core Components</h2>
 <div class="line">    <span class="keywordtype">bool</span> isConnected() <span class="keyword">const override</span>;  <span class="comment">// True if any client connected</span></div>
 <div class="line"> </div>
 <div class="line">    <span class="comment">// Update loop (overrides)</span></div>
-<div class="line">    <span class="keywordtype">void</span> update(uint32_t currentTimeMs) <span class="keyword">override</span>;</div>
+<div class="line">    <span class="keywordtype">void</span> update(<a class="code hl_typedef" href="df/dd8/stdint_8h_ae8a835bf6e050b01cc449644a343aa73.html#ae8a835bf6e050b01cc449644a343aa73">uint32_t</a> currentTimeMs) <span class="keyword">override</span>;</div>
 <div class="line"> </div>
 <div class="line"><span class="keyword">protected</span>:</div>
 <div class="line">    <span class="comment">// Socket I/O (multi-client)</span></div>
-<div class="line">    <span class="keywordtype">int</span> send(<span class="keyword">const</span> uint8_t* data, <span class="keywordtype">size_t</span> len) <span class="keyword">override</span>;</div>
-<div class="line">    <span class="keywordtype">int</span> recv(uint8_t* buffer, <span class="keywordtype">size_t</span> maxLen) <span class="keyword">override</span>;</div>
+<div class="line">    <span class="keywordtype">int</span> send(<span class="keyword">const</span> <a class="code hl_typedef" href="df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a>* data, <span class="keywordtype">size_t</span> len) <span class="keyword">override</span>;</div>
+<div class="line">    <span class="keywordtype">int</span> recv(<a class="code hl_typedef" href="df/dd8/stdint_8h_aba7bc1797add20fe3efdf37ced1182c5.html#aba7bc1797add20fe3efdf37ced1182c5">uint8_t</a>* buffer, <span class="keywordtype">size_t</span> maxLen) <span class="keyword">override</span>;</div>
 <div class="line"> </div>
 <div class="line"><span class="keyword">private</span>:</div>
 <div class="line">    NativeHttpServer mServer;</div>
@@ -633,9 +636,9 @@ Core Components</h2>
 <div class="line">}</div>
 <div class="ttc" id="a_client_validation_real_8h_a508ca9e4d4d5e9774c787fe3167fb996_html_a508ca9e4d4d5e9774c787fe3167fb996"><div class="ttname"><a href="d9/dce/_client_validation_real_8h_a508ca9e4d4d5e9774c787fe3167fb996.html#a508ca9e4d4d5e9774c787fe3167fb996">server</a></div><div class="ttdeci">fl::HttpServer server</div><div class="ttdef"><b>Definition</b> <a href="d9/dce/_client_validation_real_8h_source.html#l00038">ClientValidationReal.h:38</a></div></div>
 </div><!-- fragment --><hr  />
-<h1><a class="anchor" id="autotoc_md400"></a>
+<h1><a class="anchor" id="autotoc_md488"></a>
 HTTP Streaming RPC Protocol</h1>
-<h2><a class="anchor" id="autotoc_md401"></a>
+<h2><a class="anchor" id="autotoc_md489"></a>
 Request Format (Client → Server)</h2>
 <div class="fragment"><div class="line">POST /rpc HTTP/1.1</div>
 <div class="line">Host: localhost:8080</div>
@@ -647,9 +650,9 @@ Request Format (Client → Server)</h2>
 <div class="line">{&quot;jsonrpc&quot;:&quot;2.0&quot;,&quot;method&quot;:&quot;add&quot;,&quot;params&quot;:[1,2],&quot;id&quot;:1}\r\n</div>
 <div class="line">0\r\n</div>
 <div class="line">\r\n</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md402"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md490"></a>
 Response Formats (Server → Client)</h2>
-<h3><a class="anchor" id="autotoc_md403"></a>
+<h3><a class="anchor" id="autotoc_md491"></a>
 SYNC Mode (Immediate Response)</h3>
 <div class="fragment"><div class="line">HTTP/1.1 200 OK</div>
 <div class="line">Content-Type: application/json</div>
@@ -659,7 +662,7 @@ SYNC Mode (Immediate Response)</h3>
 <div class="line">{&quot;jsonrpc&quot;:&quot;2.0&quot;,&quot;result&quot;:3,&quot;id&quot;:1}\r\n</div>
 <div class="line">0\r\n</div>
 <div class="line">\r\n</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md404"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md492"></a>
 ASYNC Mode (ACK + Later Result)</h3>
 <div class="fragment"><div class="line">HTTP/1.1 200 OK</div>
 <div class="line">Content-Type: application/json</div>
@@ -671,7 +674,7 @@ ASYNC Mode (ACK + Later Result)</h3>
 <div class="line">{&quot;jsonrpc&quot;:&quot;2.0&quot;,&quot;result&quot;:{&quot;value&quot;:42},&quot;id&quot;:1}\r\n</div>
 <div class="line">0\r\n</div>
 <div class="line">\r\n</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md405"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md493"></a>
 ASYNC_STREAM Mode (ACK + Multiple Updates + Final)</h3>
 <div class="fragment"><div class="line">HTTP/1.1 200 OK</div>
 <div class="line">Content-Type: application/json</div>
@@ -687,7 +690,7 @@ ASYNC_STREAM Mode (ACK + Multiple Updates + Final)</h3>
 <div class="line">{&quot;jsonrpc&quot;:&quot;2.0&quot;,&quot;result&quot;:{&quot;value&quot;:100,&quot;stop&quot;:true},&quot;id&quot;:1}\r\n</div>
 <div class="line">0\r\n</div>
 <div class="line">\r\n</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md406"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md494"></a>
 Heartbeat (Bidirectional)</h2>
 <p>Send periodically to keep connection alive:</p>
 <div class="fragment"><div class="line">&lt;chunk-size&gt;\r\n</div>
@@ -696,7 +699,7 @@ Heartbeat (Bidirectional)</h2>
 <div class="fragment"><div class="line">&lt;chunk-size&gt;\r\n</div>
 <div class="line">{&quot;jsonrpc&quot;:&quot;2.0&quot;,&quot;result&quot;:&quot;pong&quot;,&quot;id&quot;:null}\r\n</div>
 </div><!-- fragment --><hr  />
-<h1><a class="anchor" id="autotoc_md408"></a>
+<h1><a class="anchor" id="autotoc_md496"></a>
 Connection Lifecycle</h1>
 <div class="fragment"><div class="line">[DISCONNECTED] --connect()--&gt; [CONNECTING] --success--&gt; [CONNECTED]</div>
 <div class="line">       ^                           |                         |</div>
@@ -723,9 +726,9 @@ Connection Lifecycle</h1>
 <li><code>mReconnectInterval</code> (dynamic): Backoff delay between reconnect attempts</li>
 </ul>
 <hr  />
-<h1><a class="anchor" id="autotoc_md410"></a>
+<h1><a class="anchor" id="autotoc_md498"></a>
 Data Flow</h1>
-<h2><a class="anchor" id="autotoc_md411"></a>
+<h2><a class="anchor" id="autotoc_md499"></a>
 Client Request Flow</h2>
 <div class="fragment"><div class="line">User Code</div>
 <div class="line">    |</div>
@@ -743,7 +746,7 @@ Client Request Flow</h2>
 <div class="line">    |</div>
 <div class="line">    v</div>
 <div class="line">TCP Socket → Server</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md412"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md500"></a>
 Server Response Flow</h2>
 <div class="fragment"><div class="line">TCP Socket ← Client</div>
 <div class="line">    |</div>
@@ -777,32 +780,32 @@ Server Response Flow</h2>
 <div class="line">    v</div>
 <div class="line">TCP Socket → Client</div>
 </div><!-- fragment --><hr  />
-<h1><a class="anchor" id="autotoc_md414"></a>
+<h1><a class="anchor" id="autotoc_md502"></a>
 Error Handling</h1>
-<h2><a class="anchor" id="autotoc_md415"></a>
+<h2><a class="anchor" id="autotoc_md503"></a>
 Connection Errors</h2>
 <ul>
 <li><b>Connection refused</b>: Immediate reconnect if auto-reconnect enabled</li>
 <li><b>Connection timeout</b>: Exponential backoff before retry</li>
 <li><b>Connection lost</b>: Detect via socket error or heartbeat timeout, trigger reconnect</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md416"></a>
+<h2><a class="anchor" id="autotoc_md504"></a>
 Protocol Errors</h2>
 <ul>
 <li><b>Invalid HTTP</b>: Close connection, log error</li>
 <li><b>Invalid JSON-RPC</b>: Send error response per JSON-RPC 2.0 spec</li>
 <li><b>Malformed chunk</b>: Close connection, log error</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md417"></a>
+<h2><a class="anchor" id="autotoc_md505"></a>
 Timeout Errors</h2>
 <ul>
 <li><b>Heartbeat timeout</b>: No pong received within timeout → disconnect → reconnect</li>
 <li><b>Request timeout</b>: No response within timeout → cancel request, return error</li>
 </ul>
 <hr  />
-<h1><a class="anchor" id="autotoc_md419"></a>
+<h1><a class="anchor" id="autotoc_md507"></a>
 Platform Support</h1>
-<h2><a class="anchor" id="autotoc_md420"></a>
+<h2><a class="anchor" id="autotoc_md508"></a>
 Native Platform (POSIX Sockets)</h2>
 <p><b>Supported</b>:</p><ul>
 <li>Linux (POSIX)</li>
@@ -811,10 +814,10 @@ Native Platform (POSIX Sockets)</h2>
 </ul>
 <p><b>Implementation</b>:</p><ul>
 <li><code>NativeHttpClient</code> uses POSIX <code>socket()</code>, <code>connect()</code>, <code>send()</code>, <code>recv()</code></li>
-<li><code>NativeHttpServer</code> uses POSIX <code>bind()</code>, <code>listen()</code>, <code>accept()</code></li>
+<li><code>NativeHttpServer</code> uses POSIX <code>bind()</code>, <code><a class="el" href="d5/db2/_mood_ring_8ino_a42597c77e7107c8990b0773ee956f77e.html#a42597c77e7107c8990b0773ee956f77e">listen()</a></code>, <code>accept()</code></li>
 <li>Non-blocking sockets with <code>select()</code> or <code>poll()</code> for multi-client</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md421"></a>
+<h2><a class="anchor" id="autotoc_md509"></a>
 ESP32 Platform (Future)</h2>
 <p><b>Planned</b>:</p><ul>
 <li>ESP-IDF HTTP client (esp_http_client)</li>
@@ -824,9 +827,9 @@ ESP32 Platform (Future)</h2>
 </ul>
 <p><b>Not Implemented Yet</b>: ESP32 support will be added in future iterations</p>
 <hr  />
-<h1><a class="anchor" id="autotoc_md423"></a>
+<h1><a class="anchor" id="autotoc_md511"></a>
 Testing Strategy</h1>
-<h2><a class="anchor" id="autotoc_md424"></a>
+<h2><a class="anchor" id="autotoc_md512"></a>
 Unit Tests</h2>
 <ol type="1">
 <li><b>Chunked Encoding</b>: Test ChunkedReader/ChunkedWriter with known inputs</li>
@@ -834,7 +837,7 @@ Unit Tests</h2>
 <li><b>Connection State Machine</b>: Test reconnection, heartbeat, timeout logic</li>
 <li><b>Mock Transport</b>: Test HttpStreamTransport with mock socket layer</li>
 </ol>
-<h2><a class="anchor" id="autotoc_md425"></a>
+<h2><a class="anchor" id="autotoc_md513"></a>
 Integration Tests</h2>
 <ol type="1">
 <li><b>Loopback RPC</b>: Client + Server on native platform, all RPC modes</li>
@@ -842,7 +845,7 @@ Integration Tests</h2>
 <li><b>Reconnection Test</b>: Simulate connection loss, verify auto-reconnect</li>
 <li><b>Heartbeat Test</b>: Long-idle connection, verify ping/pong</li>
 </ol>
-<h2><a class="anchor" id="autotoc_md426"></a>
+<h2><a class="anchor" id="autotoc_md514"></a>
 Examples</h2>
 <ol type="1">
 <li><b>RpcServer</b>: Native server with SYNC/ASYNC/ASYNC_STREAM methods (<code>examples/Asio/RpcServer/</code>)</li>
@@ -850,23 +853,23 @@ Examples</h2>
 <li><b>RpcBidirectional</b>: Client + Server in same process, loopback (<code>examples/Asio/RpcBidirectional/</code>)</li>
 </ol>
 <hr  />
-<h1><a class="anchor" id="autotoc_md428"></a>
+<h1><a class="anchor" id="autotoc_md516"></a>
 Performance Considerations</h1>
-<h2><a class="anchor" id="autotoc_md429"></a>
+<h2><a class="anchor" id="autotoc_md517"></a>
 Latency</h2>
 <ul>
 <li><b>Chunked encoding overhead</b>: Minimal (~10 bytes per chunk)</li>
 <li><b>HTTP overhead</b>: ~100 bytes per request/response (headers)</li>
 <li><b>JSON parsing</b>: Optimized with FastLED's native JSON parser</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md430"></a>
+<h2><a class="anchor" id="autotoc_md518"></a>
 Throughput</h2>
 <ul>
 <li><b>Single connection</b>: ~1000 req/s on localhost (native platform)</li>
 <li><b>Multiple connections</b>: Server scales with thread pool (future)</li>
 <li><b>Streaming</b>: Multiple responses per request, minimal latency</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md431"></a>
+<h2><a class="anchor" id="autotoc_md519"></a>
 Memory</h2>
 <ul>
 <li><b>Per-connection overhead</b>: ~1KB (buffers, state)</li>
@@ -874,9 +877,9 @@ Memory</h2>
 <li><b>Chunked buffers</b>: Dynamic allocation, freed after chunk processed</li>
 </ul>
 <hr  />
-<h1><a class="anchor" id="autotoc_md433"></a>
+<h1><a class="anchor" id="autotoc_md521"></a>
 Security Considerations</h1>
-<h2><a class="anchor" id="autotoc_md434"></a>
+<h2><a class="anchor" id="autotoc_md522"></a>
 NOT Implemented</h2>
 <p>This is a basic transport layer for development/testing. The following security features are <b>NOT implemented</b>:</p>
 <ul>
@@ -889,9 +892,9 @@ NOT Implemented</h2>
 </ul>
 <p><b>For Production Use</b>: Add HTTPS (TLS), authentication (tokens, OAuth), and rate limiting</p>
 <hr  />
-<h1><a class="anchor" id="autotoc_md436"></a>
+<h1><a class="anchor" id="autotoc_md524"></a>
 Next Steps (Implementation)</h1>
-<h2><a class="anchor" id="autotoc_md437"></a>
+<h2><a class="anchor" id="autotoc_md525"></a>
 Phase 2: HTTP Streaming Transport Layer</h2>
 <ol type="1">
 <li>✅ <b>Task 2.1</b>: Design HTTP Transport Architecture (THIS DOCUMENT)</li>
@@ -901,7 +904,7 @@ Phase 2: HTTP Streaming Transport Layer</h2>
 <li><b>Task 2.5</b>: Implement Native HTTP Client</li>
 <li><b>Task 2.6</b>: Implement Native HTTP Server</li>
 </ol>
-<h2><a class="anchor" id="autotoc_md438"></a>
+<h2><a class="anchor" id="autotoc_md526"></a>
 Phase 3: HTTP Streaming RPC Integration</h2>
 <ol type="1">
 <li><b>Task 3.1</b>: Design HTTP Streaming RPC Protocol (see <a class="el" href="de/d13/_p_r_o_t_o_c_o_l_8md.html">PROTOCOL.md</a>)</li>
@@ -919,7 +922,7 @@ Phase 3: HTTP Streaming RPC Integration</h2>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="dir_0dd6897a8ae40540acd9d694849e950e.html">stl</a></li><li class="navelem"><a class="el" href="dir_cdaac7ba5e9caead7c80e2b832ad4a37.html">asio</a></li><li class="navelem"><a class="el" href="dir_0f2bd2d50b17e2e1f42941f6b66850c3.html">http</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:12 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:13 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

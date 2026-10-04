@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -123,28 +123,28 @@ $(function(){initNavTree('d5/da0/structfl_1_1_serializer_visitor_a06463a4acd3ace
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/da5/json_8cpp_8hpp_source.html#l01179">1179</a> of file <a class="el" href="../../db/da5/json_8cpp_8hpp_source.html">json.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno"> 1179</span>                                {</div>
-<div class="line"><span class="lineno"> 1180</span><span class="preprocessor">#if FL_PLATFORM_HAS_LARGE_MEMORY</span></div>
-<div class="line"><span class="lineno"> 1181</span>        <span class="comment">// Integer-only bits -&gt; decimal (FastLED #3022 phase 2). Default 3-digit</span></div>
-<div class="line"><span class="lineno"> 1182</span>        <span class="comment">// precision matches the previous `num_str.append(f, 3)` contract.</span></div>
-<div class="line"><span class="lineno"> 1183</span>        <a class="code hl_function" href="../../d5/da0/structfl_1_1_serializer_visitor_ac5af592192eb458ff776d6a38f5dbc24.html#ac5af592192eb458ff776d6a38f5dbc24">append_str</a>(<a class="code hl_function" href="../../d4/d36/namespacefl_a0376dbe06bf02a5ae533e9177aac59a4.html#a0376dbe06bf02a5ae533e9177aac59a4">fl::ieee754_format_decimal</a>(<a class="code hl_function" href="../../d4/d36/namespacefl_ad200a6a214a70194b7c33fd67af6cea4.html#ad200a6a214a70194b7c33fd67af6cea4">fl::bit_cast&lt;u32&gt;</a>(f), 3));</div>
-<div class="line"><span class="lineno"> 1184</span><span class="preprocessor">#else</span></div>
-<div class="line"><span class="lineno"> 1185</span>        <span class="comment">// Low-memory targets gate the float decimal codec to drop</span></div>
-<div class="line"><span class="lineno"> 1186</span>        <span class="comment">// `ieee754_format_decimal` (594 B) + `kPow10Mant` LUT (824 B) from the</span></div>
-<div class="line"><span class="lineno"> 1187</span>        <span class="comment">// link. The integer-only RPC contract on LPC8xx / AVR-class targets</span></div>
-<div class="line"><span class="lineno"> 1188</span>        <span class="comment">// never serializes float values; this writes a stub for the rare cases</span></div>
-<div class="line"><span class="lineno"> 1189</span>        <span class="comment">// where a `json(float)` round-trip happens to be exercised in test</span></div>
-<div class="line"><span class="lineno"> 1190</span>        <span class="comment">// code that also runs on Low-memory. See FastLED #3082.</span></div>
-<div class="line"><span class="lineno"> 1191</span>        (void)f;</div>
-<div class="line"><span class="lineno"> 1192</span>        <a class="code hl_function" href="../../d5/da0/structfl_1_1_serializer_visitor_ac5af592192eb458ff776d6a38f5dbc24.html#ac5af592192eb458ff776d6a38f5dbc24">append_str</a>(fl::string(<span class="stringliteral">&quot;0&quot;</span>));</div>
-<div class="line"><span class="lineno"> 1193</span><span class="preprocessor">#endif</span></div>
-<div class="line"><span class="lineno"> 1194</span>    }</div>
-<div class="ttc" id="anamespacefl_a0376dbe06bf02a5ae533e9177aac59a4_html_a0376dbe06bf02a5ae533e9177aac59a4"><div class="ttname"><a href="../../d4/d36/namespacefl_a0376dbe06bf02a5ae533e9177aac59a4.html#a0376dbe06bf02a5ae533e9177aac59a4">fl::ieee754_format_decimal</a></div><div class="ttdeci">fl::string ieee754_format_decimal(u32 bits, int precision) FL_NOEXCEPT</div><div class="ttdoc">Format IEEE 754 single-precision bits as decimal text.</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d05/ieee754__string_8cpp_8hpp_source.html#l00439">ieee754_string.cpp.hpp:439</a></div></div>
-<div class="ttc" id="anamespacefl_ad200a6a214a70194b7c33fd67af6cea4_html_ad200a6a214a70194b7c33fd67af6cea4"><div class="ttname"><a href="../../d4/d36/namespacefl_ad200a6a214a70194b7c33fd67af6cea4.html#ad200a6a214a70194b7c33fd67af6cea4">fl::bit_cast</a></div><div class="ttdeci">To bit_cast(const From &amp;from) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/d72/bit__cast_8h_source.html#l00048">bit_cast.h:48</a></div></div>
-<div class="ttc" id="astructfl_1_1_serializer_visitor_ac5af592192eb458ff776d6a38f5dbc24_html_ac5af592192eb458ff776d6a38f5dbc24"><div class="ttname"><a href="../../d5/da0/structfl_1_1_serializer_visitor_ac5af592192eb458ff776d6a38f5dbc24.html#ac5af592192eb458ff776d6a38f5dbc24">fl::SerializerVisitor::append_str</a></div><div class="ttdeci">void append_str(const fl::string &amp;str)</div><div class="ttdef"><b>Definition</b> <a href="../../db/da5/json_8cpp_8hpp_source.html#l01135">json.cpp.hpp:1135</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../db/da5/json_8cpp_8hpp_source.html#l01207">1207</a> of file <a class="el" href="../../db/da5/json_8cpp_8hpp_source.html">json.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno"> 1207</span>                                {</div>
+<div class="line"><span class="lineno"> 1208</span><span class="preprocessor">#if FL_PLATFORM_HAS_LARGE_MEMORY</span></div>
+<div class="line"><span class="lineno"> 1209</span>        <span class="comment">// Integer-only bits -&gt; decimal (FastLED #3022 phase 2). Default 3-digit</span></div>
+<div class="line"><span class="lineno"> 1210</span>        <span class="comment">// precision matches the previous `num_str.append(f, 3)` contract.</span></div>
+<div class="line"><span class="lineno"> 1211</span>        <a class="code hl_function" href="../../d5/da0/structfl_1_1_serializer_visitor_ac5af592192eb458ff776d6a38f5dbc24.html#ac5af592192eb458ff776d6a38f5dbc24">append_str</a>(<a class="code hl_function" href="../../d4/d36/namespacefl_ac74eb20d2f7901ced609d305d3c8623e.html#ac74eb20d2f7901ced609d305d3c8623e">fl::ieee754_format_decimal</a>(<a class="code hl_function" href="../../d4/d36/namespacefl_aab9d4e461519c66fc958efc9e9ba2efa.html#aab9d4e461519c66fc958efc9e9ba2efa">fl::bit_cast&lt;u32&gt;</a>(f), 3));</div>
+<div class="line"><span class="lineno"> 1212</span><span class="preprocessor">#else</span></div>
+<div class="line"><span class="lineno"> 1213</span>        <span class="comment">// Low-memory targets gate the float decimal codec to drop</span></div>
+<div class="line"><span class="lineno"> 1214</span>        <span class="comment">// `ieee754_format_decimal` (594 B) + `kPow10Mant` LUT (824 B) from the</span></div>
+<div class="line"><span class="lineno"> 1215</span>        <span class="comment">// link. The integer-only RPC contract on LPC8xx / AVR-class targets</span></div>
+<div class="line"><span class="lineno"> 1216</span>        <span class="comment">// never serializes float values; this writes a stub for the rare cases</span></div>
+<div class="line"><span class="lineno"> 1217</span>        <span class="comment">// where a `json(float)` round-trip happens to be exercised in test</span></div>
+<div class="line"><span class="lineno"> 1218</span>        <span class="comment">// code that also runs on Low-memory. See FastLED #3082.</span></div>
+<div class="line"><span class="lineno"> 1219</span>        (void)f;</div>
+<div class="line"><span class="lineno"> 1220</span>        <a class="code hl_function" href="../../d5/da0/structfl_1_1_serializer_visitor_ac5af592192eb458ff776d6a38f5dbc24.html#ac5af592192eb458ff776d6a38f5dbc24">append_str</a>(fl::string(<span class="stringliteral">&quot;0&quot;</span>));</div>
+<div class="line"><span class="lineno"> 1221</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno"> 1222</span>    }</div>
+<div class="ttc" id="anamespacefl_aab9d4e461519c66fc958efc9e9ba2efa_html_aab9d4e461519c66fc958efc9e9ba2efa"><div class="ttname"><a href="../../d4/d36/namespacefl_aab9d4e461519c66fc958efc9e9ba2efa.html#aab9d4e461519c66fc958efc9e9ba2efa">fl::bit_cast</a></div><div class="ttdeci">To bit_cast(const From &amp;from) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/d72/bit__cast_8h_source.html#l00048">bit_cast.h:48</a></div></div>
+<div class="ttc" id="anamespacefl_ac74eb20d2f7901ced609d305d3c8623e_html_ac74eb20d2f7901ced609d305d3c8623e"><div class="ttname"><a href="../../d4/d36/namespacefl_ac74eb20d2f7901ced609d305d3c8623e.html#ac74eb20d2f7901ced609d305d3c8623e">fl::ieee754_format_decimal</a></div><div class="ttdeci">fl::string ieee754_format_decimal(u32 bits, int precision) FL_NO_EXCEPT</div><div class="ttdoc">Format IEEE 754 single-precision bits as decimal text.</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d05/ieee754__string_8cpp_8hpp_source.html#l00439">ieee754_string.cpp.hpp:439</a></div></div>
+<div class="ttc" id="astructfl_1_1_serializer_visitor_ac5af592192eb458ff776d6a38f5dbc24_html_ac5af592192eb458ff776d6a38f5dbc24"><div class="ttname"><a href="../../d5/da0/structfl_1_1_serializer_visitor_ac5af592192eb458ff776d6a38f5dbc24.html#ac5af592192eb458ff776d6a38f5dbc24">fl::SerializerVisitor::append_str</a></div><div class="ttdeci">void append_str(const fl::string &amp;str)</div><div class="ttdef"><b>Definition</b> <a href="../../db/da5/json_8cpp_8hpp_source.html#l01163">json.cpp.hpp:1163</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../db/da5/json_8cpp_8hpp_source.html#l01135">append_str()</a>, <a class="el" href="../../df/d72/bit__cast_8h_source.html#l00048">fl::bit_cast()</a>, and <a class="el" href="../../d9/d05/ieee754__string_8cpp_8hpp_source.html#l00439">fl::ieee754_format_decimal()</a>.</p>
+<p class="reference">References <a class="el" href="../../db/da5/json_8cpp_8hpp_source.html#l01163">append_str()</a>, <a class="el" href="../../df/d72/bit__cast_8h_source.html#l00048">fl::bit_cast()</a>, and <a class="el" href="../../d9/d05/ieee754__string_8cpp_8hpp_source.html#l00439">fl::ieee754_format_decimal()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -162,7 +162,7 @@ $(function(){initNavTree('d5/da0/structfl_1_1_serializer_visitor_a06463a4acd3ace
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d5/da0/structfl_1_1_serializer_visitor.html">SerializerVisitor</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:10 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

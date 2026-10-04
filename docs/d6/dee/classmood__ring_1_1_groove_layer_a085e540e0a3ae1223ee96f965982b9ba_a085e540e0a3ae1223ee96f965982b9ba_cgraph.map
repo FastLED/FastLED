@@ -1,0 +1,38 @@
+<map id="mood_ring::GrooveLayer::render" name="mood_ring::GrooveLayer::render">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,347,188,387"/>
+<area shape="rect" id="Node000002" href="$d7/d17/classmood__ring_1_1_ring_canvas_a934e886cf19788c75da6736a7aa93594.html#a934e886cf19788c75da6736a7aa93594" title="Add the same colour to every pixel." alt="" coords="239,14,415,54"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="107,346,160,256,234,143,297,63,301,66,238,146,164,259,112,348"/>
+<area shape="rect" id="Node000004" href="$d7/d17/classmood__ring_1_1_ring_canvas_a8ce8023931622ce858d582d136bdb0aa.html#a8ce8023931622ce858d582d136bdb0aa" title="Add a smooth lobe centred at pos (turns) with half&#45;width sigma (turns)." alt="" coords="239,157,415,197"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="120,345,289,203,293,207,124,349"/>
+<area shape="rect" id="Node000010" href="$d2/df0/namespacemood__ring_afd9d29472c525f39ef3e4d658dde6837.html#afd9d29472c525f39ef3e4d658dde6837" title="Wrap into [0, 1)." alt="" coords="919,279,1084,304"/>
+<area shape="poly" id="edge20_Node000001_Node000010" title=" " alt="" coords="188,346,236,339,421,320,606,306,905,291,905,297,606,311,421,325,236,344,189,352"/>
+<area shape="rect" id="Node000011" href="$d2/df0/namespacemood__ring_adab294c0032e0fa5dc8e0564ca2755d9.html#adab294c0032e0fa5dc8e0564ca2755d9" title="Colour at position t in [0, 1] along the family, at value v." alt="" coords="237,355,416,380"/>
+<area shape="poly" id="edge13_Node000001_Node000011" title=" " alt="" coords="189,365,223,365,223,370,189,370"/>
+<area shape="rect" id="Node000014" href="$d2/df0/namespacemood__ring_ada2698a8209f4d0bfe8a5b9a5d70d5e2.html#ada2698a8209f4d0bfe8a5b9a5d70d5e2" title=" " alt="" coords="245,404,408,429"/>
+<area shape="poly" id="edge16_Node000001_Node000014" title=" " alt="" coords="189,384,254,398,253,404,188,389"/>
+<area shape="rect" id="Node000015" href="$d4/d36/namespacefl_a080e32a9d5b39b1674c35757eaa2daf9.html#a080e32a9d5b39b1674c35757eaa2daf9" title=" " alt="" coords="298,453,355,479"/>
+<area shape="poly" id="edge17_Node000001_Node000015" title=" " alt="" coords="131,385,180,413,237,439,286,455,284,460,235,444,178,417,129,390"/>
+<area shape="rect" id="Node000016" href="$d2/df0/namespacemood__ring_a093a60b56a881ff84ef24fae7de0194d.html#a093a60b56a881ff84ef24fae7de0194d" title="0 below e0, 1 above e1, smooth in between." alt="" coords="236,503,417,528"/>
+<area shape="poly" id="edge18_Node000001_Node000016" title=" " alt="" coords="117,386,168,438,201,465,237,489,251,495,249,500,235,494,198,470,164,441,113,389"/>
+<area shape="rect" id="Node000003" href="$d7/d17/classmood__ring_1_1_ring_canvas_adb6c86fac2a08a1eb6b90ccbd5175945.html#adb6c86fac2a08a1eb6b90ccbd5175945" title=" " alt="" coords="695,71,871,111"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="415,13,467,6,526,3,588,5,647,15,699,35,744,61,742,66,697,40,646,20,587,11,526,8,468,12,415,18"/>
+<area shape="poly" id="edge12_Node000004_Node000003" title=" " alt="" coords="342,154,392,104,426,78,464,59,496,50,528,45,593,44,656,52,710,65,709,70,655,58,593,50,528,51,497,56,466,64,429,83,396,108,346,158"/>
+<area shape="rect" id="Node000005" href="$d2/df0/namespacemood__ring_ab43ea5c75d08a1720cd203f23fa2e271.html#ab43ea5c75d08a1720cd203f23fa2e271" title="Smooth bump: 1 at distance 0, 0 at distance &gt;= sigma." alt="" coords="487,75,625,100"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="366,154,464,110,491,101,493,106,466,115,368,159"/>
+<area shape="rect" id="Node000006" href="$d7/d17/classmood__ring_1_1_ring_canvas_a81f966f51d1a1fa5ae99acedff21de32.html#a81f966f51d1a1fa5ae99acedff21de32" title="Add to one pixel, index wrapped." alt="" coords="468,125,644,165"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="415,162,454,156,455,161,415,167"/>
+<area shape="rect" id="Node000007" href="$d7/d17/classmood__ring_1_1_ring_canvas_a5947d6f56eb548da07254d89f2ce32e7.html#a5947d6f56eb548da07254d89f2ce32e7" title="Position of pixel i in turns." alt="" coords="468,189,644,229"/>
+<area shape="poly" id="edge7_Node000004_Node000007" title=" " alt="" coords="415,186,455,192,454,197,415,191"/>
+<area shape="rect" id="Node000008" href="$d2/df0/namespacemood__ring_a457a80c9d79bc3611dfbcb39efb10c3d.html#a457a80c9d79bc3611dfbcb39efb10c3d" title="Shortest distance between two ring positions, in turns, in [0, 0.5]." alt="" coords="465,253,647,279"/>
+<area shape="poly" id="edge9_Node000004_Node000008" title=" " alt="" coords="368,194,466,238,493,247,491,252,464,243,366,199"/>
+<area shape="poly" id="edge6_Node000006_Node000003" title=" " alt="" coords="641,122,684,112,685,117,642,127"/>
+<area shape="poly" id="edge8_Node000007_Node000003" title=" " alt="" coords="618,186,645,174,696,146,741,117,744,121,699,151,648,179,620,191"/>
+<area shape="rect" id="Node000009" href="$d2/df0/namespacemood__ring_ab42039ce856d86d3fa5f87978a9a1edd.html#ab42039ce856d86d3fa5f87978a9a1edd" title="Signed shortest offset from b to a on the ring, in (&#45;0.5, 0.5]." alt="" coords="701,253,864,279"/>
+<area shape="poly" id="edge10_Node000008_Node000009" title=" " alt="" coords="647,263,688,263,688,269,647,269"/>
+<area shape="poly" id="edge11_Node000009_Node000010" title=" " alt="" coords="865,273,905,277,905,283,864,278"/>
+<area shape="rect" id="Node000012" href="$d2/df0/namespacemood__ring_a921a91f885103df5f519114e82f24105.html#a921a91f885103df5f519114e82f24105" title=" " alt="" coords="484,453,628,479"/>
+<area shape="poly" id="edge14_Node000011_Node000012" title=" " alt="" coords="381,377,418,390,475,417,524,444,521,448,472,421,416,395,379,382"/>
+<area shape="rect" id="Node000013" href="$d2/df0/namespacemood__ring_a2f7eb4f980c458d8e1be8c412b5483f6.html#a2f7eb4f980c458d8e1be8c412b5483f6" title=" " alt="" coords="483,355,629,380"/>
+<area shape="poly" id="edge15_Node000011_Node000013" title=" " alt="" coords="416,365,469,365,469,370,416,370"/>
+<area shape="poly" id="edge19_Node000016_Node000012" title=" " alt="" coords="386,500,482,479,483,484,387,505"/>
+</map>

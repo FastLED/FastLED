@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -151,31 +151,31 @@ $(function(){initNavTree('df/da2/group__lib8tion_ga0de3f6d9c9fab80100c4c7daabf90
 <p>Preprocessor-based class "template" for <a class="el" href="../../de/d1d/class_c_every_n_time.html" title="Time interval checking class.">CEveryNTime</a>, used with <code>EVERY_N_TIME</code> timekeepers. </p>
 <p>Classes to implement <a class="el" href="../../df/da2/group__lib8tion_ga90e084b8253af257a0257a23aeef53e1.html#ga90e084b8253af257a0257a23aeef53e1" title="Checks whether to execute a block of code every N milliseconds.">EVERY_N_MILLIS</a>, <a class="el" href="../../df/da2/group__lib8tion_gaf4a00b9c39c12d777b99808d18f959fb.html#gaf4a00b9c39c12d777b99808d18f959fb" title="Checks whether to execute a block of code every N seconds.">EVERY_N_SECONDS</a>, <a class="el" href="../../df/da2/group__lib8tion_gac1512a67df37be930a2015eca7219bad.html#gac1512a67df37be930a2015eca7219bad" title="Checks whether to execute a block of code every N minutes.">EVERY_N_MINUTES</a>, <a class="el" href="../../df/da2/group__lib8tion_ga15cbb1cba95ba3a57f08ef0f65dacd28.html#ga15cbb1cba95ba3a57f08ef0f65dacd28" title="Checks whether to execute a block of code every N hours.">EVERY_N_HOURS</a>, and <a class="el" href="../../df/da2/group__lib8tion_ga860bac35464e2c83c313e92a59e0e39a.html#ga860bac35464e2c83c313e92a59e0e39a" title="Checks whether to execute a block of code every N bseconds.">EVERY_N_BSECONDS</a>. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../df/da5/lib8tion_8h_source.html#l00763">763</a> of file <a class="el" href="../../df/da5/lib8tion_8h_source.html">lib8tion.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  763</span><span class="preprocessor">#define INSTANTIATE_EVERY_N_TIME_PERIODS(NAME,TIMETYPE,TIMEGETTER) \</span></div>
-<div class="line"><span class="lineno">  764</span><span class="preprocessor">class NAME {    \</span></div>
-<div class="line"><span class="lineno">  765</span><span class="preprocessor">public: \</span></div>
-<div class="line"><span class="lineno">  766</span><span class="preprocessor">    TIMETYPE mPrevTrigger;  \</span></div>
-<div class="line"><span class="lineno">  767</span><span class="preprocessor">    TIMETYPE mPeriod;   \</span></div>
-<div class="line"><span class="lineno">  768</span><span class="preprocessor">    \</span></div>
-<div class="line"><span class="lineno">  769</span><span class="preprocessor">    NAME() { reset(); mPeriod = 1; }; \</span></div>
-<div class="line"><span class="lineno">  770</span><span class="preprocessor">    NAME(TIMETYPE period) { reset(); setPeriod(period); };    \</span></div>
-<div class="line"><span class="lineno">  771</span><span class="preprocessor">    void setPeriod( TIMETYPE period) { mPeriod = period; }; \</span></div>
-<div class="line"><span class="lineno">  772</span><span class="preprocessor">    TIMETYPE getTime() { return (TIMETYPE)(TIMEGETTER()); };    \</span></div>
-<div class="line"><span class="lineno">  773</span><span class="preprocessor">    TIMETYPE getPeriod() { return mPeriod; };   \</span></div>
-<div class="line"><span class="lineno">  774</span><span class="preprocessor">    TIMETYPE getElapsed() { return getTime() - mPrevTrigger; }  \</span></div>
-<div class="line"><span class="lineno">  775</span><span class="preprocessor">    TIMETYPE getRemaining() { return mPeriod - getElapsed(); }  \</span></div>
-<div class="line"><span class="lineno">  776</span><span class="preprocessor">    TIMETYPE getLastTriggerTime() { return mPrevTrigger; }  \</span></div>
-<div class="line"><span class="lineno">  777</span><span class="preprocessor">    bool ready() { \</span></div>
-<div class="line"><span class="lineno">  778</span><span class="preprocessor">        bool isReady = (getElapsed() &gt;= mPeriod);   \</span></div>
-<div class="line"><span class="lineno">  779</span><span class="preprocessor">        if( isReady ) { reset(); }  \</span></div>
-<div class="line"><span class="lineno">  780</span><span class="preprocessor">        return isReady; \</span></div>
-<div class="line"><span class="lineno">  781</span><span class="preprocessor">    }   \</span></div>
-<div class="line"><span class="lineno">  782</span><span class="preprocessor">    void reset() { mPrevTrigger = getTime(); }; \</span></div>
-<div class="line"><span class="lineno">  783</span><span class="preprocessor">    void trigger() { mPrevTrigger = getTime() - mPeriod; }; \</span></div>
-<div class="line"><span class="lineno">  784</span><span class="preprocessor">        \</span></div>
-<div class="line"><span class="lineno">  785</span><span class="preprocessor">    operator bool() { return ready(); } \</span></div>
-<div class="line"><span class="lineno">  786</span><span class="preprocessor">};</span></div>
+<p class="definition">Definition at line <a class="el" href="../../df/da5/lib8tion_8h_source.html#l00762">762</a> of file <a class="el" href="../../df/da5/lib8tion_8h_source.html">lib8tion.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  762</span><span class="preprocessor">#define INSTANTIATE_EVERY_N_TIME_PERIODS(NAME,TIMETYPE,TIMEGETTER) \</span></div>
+<div class="line"><span class="lineno">  763</span><span class="preprocessor">class NAME {    \</span></div>
+<div class="line"><span class="lineno">  764</span><span class="preprocessor">public: \</span></div>
+<div class="line"><span class="lineno">  765</span><span class="preprocessor">    TIMETYPE mPrevTrigger;  \</span></div>
+<div class="line"><span class="lineno">  766</span><span class="preprocessor">    TIMETYPE mPeriod;   \</span></div>
+<div class="line"><span class="lineno">  767</span><span class="preprocessor">    \</span></div>
+<div class="line"><span class="lineno">  768</span><span class="preprocessor">    NAME() { reset(); mPeriod = 1; }; \</span></div>
+<div class="line"><span class="lineno">  769</span><span class="preprocessor">    NAME(TIMETYPE period) { reset(); setPeriod(period); };    \</span></div>
+<div class="line"><span class="lineno">  770</span><span class="preprocessor">    void setPeriod( TIMETYPE period) { mPeriod = period; }; \</span></div>
+<div class="line"><span class="lineno">  771</span><span class="preprocessor">    TIMETYPE getTime() { return (TIMETYPE)(TIMEGETTER()); };    \</span></div>
+<div class="line"><span class="lineno">  772</span><span class="preprocessor">    TIMETYPE getPeriod() { return mPeriod; };   \</span></div>
+<div class="line"><span class="lineno">  773</span><span class="preprocessor">    TIMETYPE getElapsed() { return getTime() - mPrevTrigger; }  \</span></div>
+<div class="line"><span class="lineno">  774</span><span class="preprocessor">    TIMETYPE getRemaining() { return mPeriod - getElapsed(); }  \</span></div>
+<div class="line"><span class="lineno">  775</span><span class="preprocessor">    TIMETYPE getLastTriggerTime() { return mPrevTrigger; }  \</span></div>
+<div class="line"><span class="lineno">  776</span><span class="preprocessor">    bool ready() { \</span></div>
+<div class="line"><span class="lineno">  777</span><span class="preprocessor">        bool isReady = (getElapsed() &gt;= mPeriod);   \</span></div>
+<div class="line"><span class="lineno">  778</span><span class="preprocessor">        if( isReady ) { reset(); }  \</span></div>
+<div class="line"><span class="lineno">  779</span><span class="preprocessor">        return isReady; \</span></div>
+<div class="line"><span class="lineno">  780</span><span class="preprocessor">    }   \</span></div>
+<div class="line"><span class="lineno">  781</span><span class="preprocessor">    void reset() { mPrevTrigger = getTime(); }; \</span></div>
+<div class="line"><span class="lineno">  782</span><span class="preprocessor">    void trigger() { mPrevTrigger = getTime() - mPeriod; }; \</span></div>
+<div class="line"><span class="lineno">  783</span><span class="preprocessor">        \</span></div>
+<div class="line"><span class="lineno">  784</span><span class="preprocessor">    operator bool() { return ready(); } \</span></div>
+<div class="line"><span class="lineno">  785</span><span class="preprocessor">};</span></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -186,7 +186,7 @@ $(function(){initNavTree('df/da2/group__lib8tion_ga0de3f6d9c9fab80100c4c7daabf90
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../df/da2/group__lib8tion.html">Fast Math Functions</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:02 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

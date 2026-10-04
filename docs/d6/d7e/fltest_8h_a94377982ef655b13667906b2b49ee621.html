@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -118,18 +118,18 @@ $(function(){initNavTree('d6/d7e/fltest_8h_a94377982ef655b13667906b2b49ee621.htm
 <div class="line">        <span class="keyword">auto</span> _fl_serial_print = [](<span class="keyword">const</span> <span class="keywordtype">char</span>* msg) { serial_obj.print(msg); }; \</div>
 <div class="line">        <a class="code hl_class" href="../../db/d3d/classfl_1_1test_1_1_serial_reporter.html">fl::test::SerialReporter</a> _fl_reporter(_fl_serial_print);                \</div>
 <div class="line">        fl::test::TestContext::instance().setReporter(&amp;_fl_reporter);           \</div>
-<div class="line">        <span class="keywordtype">int</span> _fl_result = <a class="code hl_function" href="../../df/d4b/classfl_1_1test_1_1_test_context_a85d598a63f584e0789d0669265b1bda2.html#a85d598a63f584e0789d0669265b1bda2">fl::test::TestContext::instance</a>().<a class="code hl_function" href="../../df/d4b/classfl_1_1test_1_1_test_context_ab01316d34b992b0d61e3044015025d5f.html#ab01316d34b992b0d61e3044015025d5f">run</a>();               \</div>
+<div class="line">        <span class="keywordtype">int</span> _fl_result = <a class="code hl_function" href="../../df/d4b/classfl_1_1test_1_1_test_context_a378c3641d1badbd4a803bcec03c77873.html#a378c3641d1badbd4a803bcec03c77873">fl::test::TestContext::instance</a>().<a class="code hl_function" href="../../df/d4b/classfl_1_1test_1_1_test_context_a36748ae69085618807abe819e352da62.html#a36748ae69085618807abe819e352da62">run</a>();               \</div>
 <div class="line">        if (_fl_result == 0) {                                                   \</div>
 <div class="line">            serial_obj.println(<span class="stringliteral">&quot;\n=== ALL TESTS PASSED ===&quot;</span>);                   \</div>
 <div class="line">        } <span class="keywordflow">else</span> {                                                                 \</div>
 <div class="line">            serial_obj.println(<span class="stringliteral">&quot;\n=== TESTS FAILED ===&quot;</span>);                       \</div>
 <div class="line">        }                                                                        \</div>
-<div class="line">        while (<span class="keyword">true</span>) { <a class="code hl_function" href="../../d4/d36/namespacefl_a50131c41da2f619067d98360de35fa27.html#a50131c41da2f619067d98360de35fa27">delay</a>(1000); }  <span class="comment">/* Halt after tests */</span>                   \</div>
+<div class="line">        while (<span class="keyword">true</span>) { <a class="code hl_function" href="../../d4/d36/namespacefl_a19da680141593b475c4d1d3c1c0a8409.html#a19da680141593b475c4d1d3c1c0a8409">delay</a>(1000); }  <span class="comment">/* Halt after tests */</span>                   \</div>
 <div class="line">    } <span class="keywordflow">while</span> (0)</div>
 <div class="ttc" id="aclassfl_1_1test_1_1_serial_reporter_html"><div class="ttname"><a href="../../db/d3d/classfl_1_1test_1_1_serial_reporter.html">fl::test::SerialReporter</a></div><div class="ttdoc">Serial reporter for embedded devices Usage: SerialReporter reporter(mySerialPrint); fl::test::TestCon...</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d7e/fltest_8h_source.html#l00519">fltest.h:519</a></div></div>
-<div class="ttc" id="aclassfl_1_1test_1_1_test_context_a85d598a63f584e0789d0669265b1bda2_html_a85d598a63f584e0789d0669265b1bda2"><div class="ttname"><a href="../../df/d4b/classfl_1_1test_1_1_test_context_a85d598a63f584e0789d0669265b1bda2.html#a85d598a63f584e0789d0669265b1bda2">fl::test::TestContext::instance</a></div><div class="ttdeci">static TestContext &amp; instance() FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d27/fltest_8cpp_8hpp_source.html#l00097">fltest.cpp.hpp:97</a></div></div>
-<div class="ttc" id="aclassfl_1_1test_1_1_test_context_ab01316d34b992b0d61e3044015025d5f_html_ab01316d34b992b0d61e3044015025d5f"><div class="ttname"><a href="../../df/d4b/classfl_1_1test_1_1_test_context_ab01316d34b992b0d61e3044015025d5f.html#ab01316d34b992b0d61e3044015025d5f">fl::test::TestContext::run</a></div><div class="ttdeci">int run(int argc=0, const char *const *argv=nullptr) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d27/fltest_8cpp_8hpp_source.html#l00112">fltest.cpp.hpp:112</a></div></div>
-<div class="ttc" id="anamespacefl_a50131c41da2f619067d98360de35fa27_html_a50131c41da2f619067d98360de35fa27"><div class="ttname"><a href="../../d4/d36/namespacefl_a50131c41da2f619067d98360de35fa27.html#a50131c41da2f619067d98360de35fa27">fl::delay</a></div><div class="ttdeci">void delay(u32 ms, bool run_async=true) FL_NOEXCEPT</div><div class="ttdoc">Public delay wrapper that keeps bare Arduino delay() preferred after using fl::delay; while still all...</div><div class="ttdef"><b>Definition</b> <a href="../../dd/dee/delay_8h_source.html#l00098">delay.h:98</a></div></div>
+<div class="ttc" id="aclassfl_1_1test_1_1_test_context_a36748ae69085618807abe819e352da62_html_a36748ae69085618807abe819e352da62"><div class="ttname"><a href="../../df/d4b/classfl_1_1test_1_1_test_context_a36748ae69085618807abe819e352da62.html#a36748ae69085618807abe819e352da62">fl::test::TestContext::run</a></div><div class="ttdeci">int run(int argc=0, const char *const *argv=nullptr) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d27/fltest_8cpp_8hpp_source.html#l00113">fltest.cpp.hpp:113</a></div></div>
+<div class="ttc" id="aclassfl_1_1test_1_1_test_context_a378c3641d1badbd4a803bcec03c77873_html_a378c3641d1badbd4a803bcec03c77873"><div class="ttname"><a href="../../df/d4b/classfl_1_1test_1_1_test_context_a378c3641d1badbd4a803bcec03c77873.html#a378c3641d1badbd4a803bcec03c77873">fl::test::TestContext::instance</a></div><div class="ttdeci">static TestContext &amp; instance() FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d27/fltest_8cpp_8hpp_source.html#l00098">fltest.cpp.hpp:98</a></div></div>
+<div class="ttc" id="anamespacefl_a19da680141593b475c4d1d3c1c0a8409_html_a19da680141593b475c4d1d3c1c0a8409"><div class="ttname"><a href="../../d4/d36/namespacefl_a19da680141593b475c4d1d3c1c0a8409.html#a19da680141593b475c4d1d3c1c0a8409">fl::delay</a></div><div class="ttdeci">void delay(u32 ms, bool run_async=true) FL_NO_EXCEPT</div><div class="ttdoc">Public delay wrapper that keeps bare Arduino delay() preferred after using fl::delay; while still all...</div><div class="ttdef"><b>Definition</b> <a href="../../dd/dee/delay_8h_source.html#l00098">delay.h:98</a></div></div>
 </div><!-- fragment -->
 <p class="definition">Definition at line <a class="el" href="../../d6/d7e/fltest_8h_source.html#l01960">1960</a> of file <a class="el" href="../../d6/d7e/fltest_8h_source.html">fltest.h</a>.</p>
 <div class="fragment"><div class="line"><span class="lineno"> 1960</span><span class="preprocessor">#define FL_RUN_ALL_TESTS_ARDUINO(serial_obj)                                    \</span></div>
@@ -155,7 +155,7 @@ $(function(){initNavTree('d6/d7e/fltest_8h_a94377982ef655b13667906b2b49ee621.htm
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_5d2815a49ec2007abb1596088c137828.html">test</a></li><li class="navelem"><a class="el" href="../../d6/d7e/fltest_8h.html">fltest.h</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:02 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:05 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

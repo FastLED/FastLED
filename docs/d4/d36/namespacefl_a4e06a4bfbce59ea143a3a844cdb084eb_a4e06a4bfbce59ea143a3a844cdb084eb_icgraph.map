@@ -1,0 +1,39 @@
+<map id="fl::xyzToOklabQ16" name="fl::xyzToOklabQ16">
+<area shape="rect" id="Node000001" title="XYZ (s16.16, D65&#45;relative) &#45;&gt; OKLab (s16.16), L then a then b." alt="" coords="820,237,959,263"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_ab9c27d964a0667a59fc93cdba7caeb69.html#ab9c27d964a0667a59fc93cdba7caeb69" title="Build a mapper from a bind&#45;time solve already transformed into D65 working coordinates." alt="" coords="535,56,772,81"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="869,228,827,178,770,127,729,102,689,84,691,79,732,97,774,123,830,174,873,225"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_a0bbd4600d1ada0552c6743d28a8683ea.html#a0bbd4600d1ada0552c6743d28a8683ea" title="Bind a four&#45;emitter map from an effective RGB solve and a white column already adapted into the same ..." alt="" coords="548,137,759,177"/>
+<area shape="poly" id="edge5_Node000001_Node000007" title=" " alt="" coords="854,233,815,211,771,191,737,179,738,174,773,186,817,207,857,228"/>
+<area shape="rect" id="Node000010" href="$d4/d36/namespacefl_afff4e9bb0e778bb7459488538fb1d86d.html#afff4e9bb0e778bb7459488538fb1d86d" title="Bind a five&#45;emitter map from one effective RGB solve and two white columns, all in the same D65 worki..." alt="" coords="542,201,765,241"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="806,242,765,237,765,232,807,237"/>
+<area shape="rect" id="Node000012" href="$d4/d36/namespacefl_aff71f788bfac3a8885b0e622af3d2b4d.html#aff71f788bfac3a8885b0e622af3d2b4d" title="One pixel: XYZ in s16.16 to four in&#45;gamut drives, red, green, blue, white." alt="" coords="550,265,757,291"/>
+<area shape="poly" id="edge14_Node000001_Node000012" title=" " alt="" coords="807,262,757,268,756,263,806,257"/>
+<area shape="rect" id="Node000017" href="$d4/d36/namespacefl_a2145e99048b45f249d35f24940689595.html#a2145e99048b45f249d35f24940689595" title="One pixel: XYZ in s16.16 to five in&#45;gamut drives – red, green, blue, white1, white2." alt="" coords="544,315,763,340"/>
+<area shape="poly" id="edge17_Node000001_Node000017" title=" " alt="" coords="852,271,773,305,726,317,725,312,771,299,850,266"/>
+<area shape="rect" id="Node000018" href="$d4/d36/namespacefl_a37b9b061238b860167bb06b975520fd6.html#a37b9b061238b860167bb06b975520fd6" title="One pixel: XYZ in s16.16 to in&#45;gamut emitter drives in s16.16." alt="" coords="555,364,751,389"/>
+<area shape="poly" id="edge19_Node000001_Node000018" title=" " alt="" coords="870,275,829,317,802,338,773,355,744,366,742,361,771,350,799,333,825,313,867,271"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a1bb1d650499ca2df115738f4c75464dc.html#a1bb1d650499ca2df115738f4c75464dc" title="Derive the mapper for a three&#45;emitter profile." alt="" coords="293,5,461,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="569,56,447,33,448,28,570,51"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_ac4d398fdc18a6dbc27b1b07aa647bf0d.html#ac4d398fdc18a6dbc27b1b07aa647bf0d" title="Bind a source declaration and a device profile into a pipeline." alt="" coords="5,31,220,56"/>
+<area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="521,65,220,51,220,46,521,60"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="280,30,221,36,220,30,279,25"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_ac53a775b79932ae3fe7e03b287639d43.html#ac53a775b79932ae3fe7e03b287639d43" title="Derive the mapper for a three&#45;primary profile plus one white emitter." alt="" coords="275,107,479,132"/>
+<area shape="poly" id="edge6_Node000007_Node000008" title=" " alt="" coords="534,143,471,135,472,129,535,138"/>
+<area shape="rect" id="Node000009" href="$db/d33/namespacefl_1_1anonymous__namespace_02pipeline_8cpp_8hpp_03_aece1643892391c10a9c9de9a2f21ab11.html#aece1643892391c10a9c9de9a2f21ab11" title=" " alt="" coords="15,168,211,223"/>
+<area shape="poly" id="edge9_Node000007_Node000009" title=" " alt="" coords="534,168,211,191,211,186,534,162"/>
+<area shape="poly" id="edge7_Node000008_Node000009" title=" " alt="" coords="320,138,209,170,208,165,319,133"/>
+<area shape="poly" id="edge8_Node000009_Node000009" title=" " alt="" coords="157,157,141,150,113,147,89,149,74,153,67,160,67,168,61,168,62,158,71,149,88,143,113,141,142,144,159,152"/>
+<area shape="poly" id="edge13_Node000010_Node000009" title=" " alt="" coords="528,218,211,203,211,197,529,212"/>
+<area shape="rect" id="Node000011" href="$d4/d36/namespacefl_a948408716d579dc42f02ad68245c3450.html#a948408716d579dc42f02ad68245c3450" title="Derive the mapper for a three&#45;primary profile plus two white emitters." alt="" coords="270,259,485,284"/>
+<area shape="poly" id="edge11_Node000010_Node000011" title=" " alt="" coords="531,246,447,261,447,256,530,241"/>
+<area shape="poly" id="edge12_Node000011_Node000009" title=" " alt="" coords="319,257,208,225,209,220,320,252"/>
+<area shape="rect" id="Node000013" href="$d4/d36/namespacefl_aa231682eff63cbd83ee299e6079baeae.html#aa231682eff63cbd83ee299e6079baeae" title=" " alt="" coords="268,312,487,337"/>
+<area shape="poly" id="edge15_Node000012_Node000013" title=" " alt="" coords="565,296,453,315,453,309,564,290"/>
+<area shape="rect" id="Node000014" href="$d4/d36/namespacefl_ad0e379781735f3c39ad9cc2d724f08d4.html#ad0e379781735f3c39ad9cc2d724f08d4" title="Like processPixelQ16, but solves the physical 4/5&#45;emitter hull." alt="" coords="23,312,202,337"/>
+<area shape="poly" id="edge16_Node000013_Node000014" title=" " alt="" coords="255,327,202,327,202,322,255,322"/>
+<area shape="poly" id="edge18_Node000017_Node000013" title=" " alt="" coords="530,329,487,328,487,323,530,323"/>
+<area shape="rect" id="Node000019" href="$d4/d36/namespacefl_a84551faf2eec485523c64ea69ec0c782.html#a84551faf2eec485523c64ea69ec0c782" title="Pre&#45;response linear emitter light for a power prepass." alt="" coords="285,364,470,389"/>
+<area shape="poly" id="edge20_Node000018_Node000019" title=" " alt="" coords="541,379,470,379,470,374,541,374"/>
+<area shape="rect" id="Node000020" href="$d4/d36/namespacefl_afb324195d9648e36d4074cd25ecccc92.html#afb324195d9648e36d4074cd25ecccc92" title="One pixel: an RGB8 code triple to three physical emitter drives in s16.16." alt="" coords="40,364,185,389"/>
+<area shape="poly" id="edge21_Node000019_Node000020" title=" " alt="" coords="271,379,185,379,185,374,271,374"/>
+</map>

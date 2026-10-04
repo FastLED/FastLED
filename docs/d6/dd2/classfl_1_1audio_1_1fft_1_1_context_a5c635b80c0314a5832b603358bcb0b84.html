@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -123,26 +123,26 @@ $(function(){initNavTree('d6/dd2/classfl_1_1audio_1_1fft_1_1_context_a5c635b80c0
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d5/df1/fft__impl_8cpp_8hpp_source.html#l00419">419</a> of file <a class="el" href="../../d5/df1/fft__impl_8cpp_8hpp_source.html">fft_impl.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  419</span>                              {</div>
-<div class="line"><span class="lineno">  420</span>        <span class="keywordtype">int</span> n = <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(<a class="code hl_variable" href="../../d6/dd2/classfl_1_1audio_1_1fft_1_1_context_a7825e743ab2f7be2767a297f1205e4ae.html#a7825e743ab2f7be2767a297f1205e4ae">mLogBinEdges</a>.size());</div>
-<div class="line"><span class="lineno">  421</span>        <a class="code hl_variable" href="../../d6/dd2/classfl_1_1audio_1_1fft_1_1_context_a9ef2481b411c7f139984e15f951d7682.html#a9ef2481b411c7f139984e15f951d7682">mLogBinEdgesQ16</a>.resize(n);</div>
-<div class="line"><span class="lineno">  422</span>        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; n; ++i) {</div>
-<div class="line"><span class="lineno">  423</span>            <a class="code hl_variable" href="../../d6/dd2/classfl_1_1audio_1_1fft_1_1_context_a9ef2481b411c7f139984e15f951d7682.html#a9ef2481b411c7f139984e15f951d7682">mLogBinEdgesQ16</a>[i] = u16x16(<a class="code hl_variable" href="../../d6/dd2/classfl_1_1audio_1_1fft_1_1_context_a7825e743ab2f7be2767a297f1205e4ae.html#a7825e743ab2f7be2767a297f1205e4ae">mLogBinEdges</a>[i]);</div>
-<div class="line"><span class="lineno">  424</span>        }</div>
-<div class="line"><span class="lineno">  425</span>    }</div>
-<div class="ttc" id="aclassfl_1_1audio_1_1fft_1_1_context_a7825e743ab2f7be2767a297f1205e4ae_html_a7825e743ab2f7be2767a297f1205e4ae"><div class="ttname"><a href="../../d6/dd2/classfl_1_1audio_1_1fft_1_1_context_a7825e743ab2f7be2767a297f1205e4ae.html#a7825e743ab2f7be2767a297f1205e4ae">fl::audio::fft::Context::mLogBinEdges</a></div><div class="ttdeci">fl::vector&lt; float &gt; mLogBinEdges</div><div class="ttdef"><b>Definition</b> <a href="../../d5/df1/fft__impl_8cpp_8hpp_source.html#l01087">fft_impl.cpp.hpp:1087</a></div></div>
-<div class="ttc" id="aclassfl_1_1audio_1_1fft_1_1_context_a9ef2481b411c7f139984e15f951d7682_html_a9ef2481b411c7f139984e15f951d7682"><div class="ttname"><a href="../../d6/dd2/classfl_1_1audio_1_1fft_1_1_context_a9ef2481b411c7f139984e15f951d7682.html#a9ef2481b411c7f139984e15f951d7682">fl::audio::fft::Context::mLogBinEdgesQ16</a></div><div class="ttdeci">fl::vector&lt; u16x16 &gt; mLogBinEdgesQ16</div><div class="ttdef"><b>Definition</b> <a href="../../d5/df1/fft__impl_8cpp_8hpp_source.html#l01088">fft_impl.cpp.hpp:1088</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d5/df1/fft__impl_8cpp_8hpp_source.html#l00429">429</a> of file <a class="el" href="../../d5/df1/fft__impl_8cpp_8hpp_source.html">fft_impl.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  429</span>                              {</div>
+<div class="line"><span class="lineno">  430</span>        <span class="keywordtype">int</span> n = <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(<a class="code hl_variable" href="../../d6/dd2/classfl_1_1audio_1_1fft_1_1_context_a7825e743ab2f7be2767a297f1205e4ae.html#a7825e743ab2f7be2767a297f1205e4ae">mLogBinEdges</a>.size());</div>
+<div class="line"><span class="lineno">  431</span>        <a class="code hl_variable" href="../../d6/dd2/classfl_1_1audio_1_1fft_1_1_context_a9ef2481b411c7f139984e15f951d7682.html#a9ef2481b411c7f139984e15f951d7682">mLogBinEdgesQ16</a>.resize(n);</div>
+<div class="line"><span class="lineno">  432</span>        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; n; ++i) {</div>
+<div class="line"><span class="lineno">  433</span>            <a class="code hl_variable" href="../../d6/dd2/classfl_1_1audio_1_1fft_1_1_context_a9ef2481b411c7f139984e15f951d7682.html#a9ef2481b411c7f139984e15f951d7682">mLogBinEdgesQ16</a>[i] = u16x16(<a class="code hl_variable" href="../../d6/dd2/classfl_1_1audio_1_1fft_1_1_context_a7825e743ab2f7be2767a297f1205e4ae.html#a7825e743ab2f7be2767a297f1205e4ae">mLogBinEdges</a>[i]);</div>
+<div class="line"><span class="lineno">  434</span>        }</div>
+<div class="line"><span class="lineno">  435</span>    }</div>
+<div class="ttc" id="aclassfl_1_1audio_1_1fft_1_1_context_a7825e743ab2f7be2767a297f1205e4ae_html_a7825e743ab2f7be2767a297f1205e4ae"><div class="ttname"><a href="../../d6/dd2/classfl_1_1audio_1_1fft_1_1_context_a7825e743ab2f7be2767a297f1205e4ae.html#a7825e743ab2f7be2767a297f1205e4ae">fl::audio::fft::Context::mLogBinEdges</a></div><div class="ttdeci">fl::vector&lt; float &gt; mLogBinEdges</div><div class="ttdef"><b>Definition</b> <a href="../../d5/df1/fft__impl_8cpp_8hpp_source.html#l01182">fft_impl.cpp.hpp:1182</a></div></div>
+<div class="ttc" id="aclassfl_1_1audio_1_1fft_1_1_context_a9ef2481b411c7f139984e15f951d7682_html_a9ef2481b411c7f139984e15f951d7682"><div class="ttname"><a href="../../d6/dd2/classfl_1_1audio_1_1fft_1_1_context_a9ef2481b411c7f139984e15f951d7682.html#a9ef2481b411c7f139984e15f951d7682">fl::audio::fft::Context::mLogBinEdgesQ16</a></div><div class="ttdeci">fl::vector&lt; u16x16 &gt; mLogBinEdgesQ16</div><div class="ttdef"><b>Definition</b> <a href="../../d5/df1/fft__impl_8cpp_8hpp_source.html#l01183">fft_impl.cpp.hpp:1183</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d5/df1/fft__impl_8cpp_8hpp_source.html#l01087">mLogBinEdges</a>, and <a class="el" href="../../d5/df1/fft__impl_8cpp_8hpp_source.html#l01088">mLogBinEdgesQ16</a>.</p>
+<p class="reference">References <a class="el" href="../../d5/df1/fft__impl_8cpp_8hpp_source.html#l01182">mLogBinEdges</a>, and <a class="el" href="../../d5/df1/fft__impl_8cpp_8hpp_source.html#l01183">mLogBinEdgesQ16</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d5/df1/fft__impl_8cpp_8hpp_source.html#l00742">initHybrid()</a>, and <a class="el" href="../../d5/df1/fft__impl_8cpp_8hpp_source.html#l00178">initLogRebin()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d5/df1/fft__impl_8cpp_8hpp_source.html#l00837">initHybrid()</a>, and <a class="el" href="../../d5/df1/fft__impl_8cpp_8hpp_source.html#l00188">initLogRebin()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d6/dd2/classfl_1_1audio_1_1fft_1_1_context_a5c635b80c0314a5832b603358bcb0b84_a5c635b80c0314a5832b603358bcb0b84_icgraph.svg" width="590" height="115"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d6/dd2/classfl_1_1audio_1_1fft_1_1_context_a5c635b80c0314a5832b603358bcb0b84_a5c635b80c0314a5832b603358bcb0b84_icgraph.svg" width="100%" height="424"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 
 </div>
@@ -154,7 +154,7 @@ $(function(){initNavTree('d6/dd2/classfl_1_1audio_1_1fft_1_1_context_a5c635b80c0
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../db/dbf/namespacefl_1_1audio.html">audio</a></li><li class="navelem"><a class="el" href="../../de/dee/namespacefl_1_1audio_1_1fft.html">fft</a></li><li class="navelem"><a class="el" href="../../d6/dd2/classfl_1_1audio_1_1fft_1_1_context.html">Context</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:08 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:11 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

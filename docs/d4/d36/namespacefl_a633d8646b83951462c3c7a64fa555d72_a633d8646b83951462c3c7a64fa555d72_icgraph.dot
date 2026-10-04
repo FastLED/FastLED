@@ -1,0 +1,15 @@
+digraph "fl::hdMinimumField"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::hdMinimumField",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="The lowest field the managed HD path may choose: the configured flicker floor for a secondary slow-PW..."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::anonymous_namespace\l\{pipeline_binding::cpp\l::hpp\}::encodeColorPipelineManagedSpi",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/da7/namespacefl_1_1anonymous__namespace_02pipeline__binding_8cpp_8hpp_03_a9b0cf72bec5a5c75a680086f93f41890.html#a9b0cf72bec5a5c75a680086f93f41890",tooltip=" "];
+  Node2 -> Node2 [id="edge2_Node000002_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node3 [id="edge3_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::powerChannelCodecPolicy",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_aba71524e25f179bf921dc7b760eb125d.html#aba71524e25f179bf921dc7b760eb125d",tooltip="Identify the channel's final current/quantization choice without adding a virtual slot or storage to ..."];
+}

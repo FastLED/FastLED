@@ -1,0 +1,11 @@
+<map id="fl::anonymous_namespace{uart_wave_encoder::cpp::hpp}::fitUartWave" name="fl::anonymous_namespace{uart_wave_encoder::cpp::hpp}::fitUartWave">
+<area shape="rect" id="Node000001" title="Evaluate whether P pulses/LED&#45;bit can represent the timing." alt="" coords="5,29,201,84"/>
+<area shape="poly" id="edge6_Node000001_Node000001" title=" " alt="" coords="56,29,56,19,64,10,80,5,103,3,131,6,147,14,144,18,130,11,103,8,81,10,67,15,61,21,61,29"/>
+<area shape="rect" id="Node000002" href="$d4/d85/namespacefl_1_1anonymous__namespace_02uart__wave__encoder_8cpp_8hpp_03_aa2816818418ae1089aca605342874942.html#aa2816818418ae1089aca605342874942" title="Absolute value of difference (unsigned&#45;safe)" alt="" coords="497,29,693,84"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="201,39,249,34,349,29,450,34,484,37,483,42,449,39,349,35,250,39,202,44"/>
+<area shape="rect" id="Node000003" href="$d4/d85/namespacefl_1_1anonymous__namespace_02uart__wave__encoder_8cpp_8hpp_03_a3a8bfbba05647c73093a9daf05c4d871.html#a3a8bfbba05647c73093a9daf05c4d871" title="Compute HIGH pulse count for a given timing value." alt="" coords="249,73,449,128"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="202,72,236,78,235,83,201,77"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="548,29,548,19,556,10,572,5,595,3,623,6,639,14,636,18,622,11,595,8,573,10,559,15,553,21,553,29"/>
+<area shape="poly" id="edge4_Node000003_Node000002" title=" " alt="" coords="449,80,483,74,484,79,450,85"/>
+<area shape="poly" id="edge5_Node000003_Node000003" title=" " alt="" coords="302,73,302,63,310,54,326,49,349,47,377,50,393,58,390,62,376,55,349,52,327,54,313,59,307,65,307,73"/>
+</map>

@@ -8,9 +8,9 @@ digraph "loop"
   rankdir="LR";
   Node1 [id="Node000001",label="loop",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="beatsin16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/da5/lib8tion_8h_adf8e83564c52b94d0ff5594aede0be28.html#adf8e83564c52b94d0ff5594aede0be28",tooltip="Generates a 16-bit sine wave at a given BPM that oscillates within a given range."];
+  Node2 [id="Node000002",label="beatsin16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/da5/lib8tion_8h_ac869590ebed22301d9a08cf7406128b3.html#ac869590ebed22301d9a08cf7406128b3",tooltip="Generates a 16-bit sine wave at a given BPM that oscillates within a given range."];
   Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="beatsin8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/da5/lib8tion_8h_a696b9421eca961df0a68c7c6c3e983ab.html#a696b9421eca961df0a68c7c6c3e983ab",tooltip="Generates an 8-bit sine wave at a given BPM that oscillates within a given range."];
+  Node3 [id="Node000003",label="beatsin8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/da5/lib8tion_8h_aca012663c6c8fe9a7240bcbc76095ba9.html#aca012663c6c8fe9a7240bcbc76095ba9",tooltip="Generates an 8-bit sine wave at a given BPM that oscillates within a given range."];
   Node1 -> Node4 [id="edge3_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];
   Node4 [id="Node000004",label="MyColorFromPaletteExtended",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/da0/_fx_water_8h_a670576df9fad5345a1bde6cb513f6864.html#a670576df9fad5345a1bde6cb513f6864",tooltip=" "];
   Node4 -> Node5 [id="edge4_Node000004_Node000005",color="steelblue1",style="solid",tooltip=" "];

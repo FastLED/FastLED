@@ -40,7 +40,7 @@
 <!-- Node5 -->
 <g id="Node000005" class="node">
 <title>Node5</title>
-<g id="a_Node000005"><a xlink:href="../../d3/d6b/classfl_1_1audio_1_1_processor_a61ce1f257379bf01fff3d90b5e67283a.html#a61ce1f257379bf01fff3d90b5e67283a" target="_top" xlink:title=" ">
+<g id="a_Node000005"><a xlink:href="../../d3/d6b/classfl_1_1audio_1_1_processor_aedac80c40562e9175616124e8a13eff0.html#aedac80c40562e9175616124e8a13eff0" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="289,-141.89 164,-141.89 164,-111.89 289,-111.89 289,-141.89"/>
 <text text-anchor="start" x="172" y="-129.89" font-family="Helvetica,sans-Serif" font-size="10.00">fl::audio::Processor</text>
 <text text-anchor="middle" x="226.5" y="-118.89" font-family="Helvetica,sans-Serif" font-size="10.00">::getBackbeatStrength</text>
@@ -59,7 +59,7 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d4/d36/namespacefl_a3fd92c727664a77396403265415789d3.html#a3fd92c727664a77396403265415789d3" target="_top" xlink:title=" ">
+<g id="a_Node000003"><a xlink:href="../../d4/d36/namespacefl_a257ae39a291866e014a2eeb4abe2a29c.html#a257ae39a291866e014a2eeb4abe2a29c" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="438,-213.39 344,-213.39 344,-194.39 438,-194.39 438,-213.39"/>
 <text text-anchor="middle" x="391" y="-201.39" font-family="Helvetica,sans-Serif" font-size="10.00">fl::make_unique</text>
 </a>
@@ -77,9 +77,9 @@
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../da/d3c/namespacefl_1_1fl_a0bddf371925d8c4e94b88e9d7b35d259.html#a0bddf371925d8c4e94b88e9d7b35d259" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="594,-217.39 516,-217.39 516,-198.39 594,-198.39 594,-217.39"/>
-<text text-anchor="middle" x="555" y="-205.39" font-family="Helvetica,sans-Serif" font-size="10.00">fl::fl::forward</text>
+<g id="a_Node000004"><a xlink:href="../../d4/d36/namespacefl_a94488336a5db985fbda1bbd317bffc6a.html#a94488336a5db985fbda1bbd317bffc6a" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="588,-217.39 522,-217.39 522,-198.39 588,-198.39 588,-217.39"/>
+<text text-anchor="middle" x="555" y="-205.39" font-family="Helvetica,sans-Serif" font-size="10.00">fl::forward</text>
 </a>
 </g>
 </g>
@@ -87,8 +87,8 @@
 <g id="edge3_Node000003_Node000004" class="edge">
 <title>Node3&#45;&gt;Node4</title>
 <g id="a_edge3_Node000003_Node000004"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M438.42,-205.04C459.47,-205.56 484.36,-206.17 505.64,-206.7"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="505.68,-210.2 515.76,-206.95 505.85,-203.2 505.68,-210.2"/>
+<path fill="none" stroke="#63b8ff" d="M438.42,-205.04C461.51,-205.61 489.2,-206.29 511.7,-206.85"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="511.87,-210.35 521.95,-207.1 512.04,-203.35 511.87,-210.35"/>
 </a>
 </g>
 </g>
@@ -122,7 +122,7 @@
 <!-- Node7 -->
 <g id="Node000007" class="node">
 <title>Node7</title>
-<g id="a_Node000007"><a xlink:href="../../d3/d6b/classfl_1_1audio_1_1_processor_af9b4813c41a58b77ddaaf1327819ec21.html#af9b4813c41a58b77ddaaf1327819ec21" target="_top" xlink:title=" ">
+<g id="a_Node000007"><a xlink:href="../../d3/d6b/classfl_1_1audio_1_1_processor_a1cbbdc13b1f098f9821ca4969144eb18.html#a1cbbdc13b1f098f9821ca4969144eb18" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="454,-141.89 328,-141.89 328,-111.89 454,-111.89 454,-141.89"/>
 <text text-anchor="start" x="336" y="-129.89" font-family="Helvetica,sans-Serif" font-size="10.00">fl::audio::Processor</text>
 <text text-anchor="middle" x="391" y="-118.89" font-family="Helvetica,sans-Serif" font-size="10.00">::getBackbeatDetector</text>
@@ -159,7 +159,7 @@
 <!-- Node8 -->
 <g id="Node000008" class="node">
 <title>Node8</title>
-<g id="a_Node000008"><a xlink:href="../../d3/d6b/classfl_1_1audio_1_1_processor_ac09406be98e613b4f9c26a87538198e2.html#ac09406be98e613b4f9c26a87538198e2" target="_top" xlink:title=" ">
+<g id="a_Node000008"><a xlink:href="../../d3/d6b/classfl_1_1audio_1_1_processor_a6da7fb360f6d5b869e1f6e861cbcb8af.html#a6da7fb360f6d5b869e1f6e861cbcb8af" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="765,-123.89 656,-123.89 656,-93.89 765,-93.89 765,-123.89"/>
 <text text-anchor="start" x="664" y="-111.89" font-family="Helvetica,sans-Serif" font-size="10.00">fl::audio::Processor</text>
 <text text-anchor="middle" x="710.5" y="-100.89" font-family="Helvetica,sans-Serif" font-size="10.00">::getBeatDetector</text>
@@ -196,7 +196,7 @@
 <!-- Node10 -->
 <g id="Node000010" class="node">
 <title>Node10</title>
-<g id="a_Node000010"><a xlink:href="../../d3/d6b/classfl_1_1audio_1_1_processor_ade806d07af52e3d281939cebce7643d5.html#ade806d07af52e3d281939cebce7643d5" target="_top" xlink:title=" ">
+<g id="a_Node000010"><a xlink:href="../../d3/d6b/classfl_1_1audio_1_1_processor_a1650c78facd0315c55a22a1095e0014b.html#a1650c78facd0315c55a22a1095e0014b" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="910,-42.89 801,-42.89 801,-12.89 910,-12.89 910,-42.89"/>
 <text text-anchor="start" x="809" y="-30.89" font-family="Helvetica,sans-Serif" font-size="10.00">fl::audio::Processor</text>
 <text text-anchor="middle" x="855.5" y="-19.89" font-family="Helvetica,sans-Serif" font-size="10.00">::registerDetector</text>
@@ -215,7 +215,7 @@
 <!-- Node11 -->
 <g id="Node000011" class="node">
 <title>Node11</title>
-<g id="a_Node000011"><a xlink:href="../../d3/d6b/classfl_1_1audio_1_1_processor_a96d6f7467ad8a83eda659dd743cc7b3a.html#a96d6f7467ad8a83eda659dd743cc7b3a" target="_top" xlink:title=" ">
+<g id="a_Node000011"><a xlink:href="../../d3/d6b/classfl_1_1audio_1_1_processor_a786a73eb640d5b8531dcde9c15b37a38.html#a786a73eb640d5b8531dcde9c15b37a38" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="620,-80.89 490,-80.89 490,-50.89 620,-50.89 620,-80.89"/>
 <text text-anchor="start" x="498" y="-68.89" font-family="Helvetica,sans-Serif" font-size="10.00">fl::audio::Processor</text>
 <text text-anchor="middle" x="555" y="-57.89" font-family="Helvetica,sans-Serif" font-size="10.00">::getDownbeatDetector</text>

@@ -8,18 +8,20 @@
 <area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="216,131,282,124,283,129,217,137"/>
 <area shape="rect" id="Node000005" href="$d0/dee/struct_pixel_controller_a6c9543d0dd9cb216d7ba0f363c032436.html#a6c9543d0dd9cb216d7ba0f363c032436" title=" " alt="" coords="281,154,460,194"/>
 <area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="217,155,268,160,267,166,216,160"/>
-<area shape="rect" id="Node000014" href="$d0/dee/struct_pixel_controller_a0d99d9815e7e416eaedb964c6bc1dffb.html#a0d99d9815e7e416eaedb964c6bc1dffb" title="Get the length of the LED strip." alt="" coords="295,219,446,244"/>
-<area shape="poly" id="edge11_Node000001_Node000014" title=" " alt="" coords="142,156,198,180,265,203,297,213,296,218,263,209,196,185,140,161"/>
-<area shape="rect" id="Node000015" href="$d0/dee/struct_pixel_controller_ac7cb7840989882cce60218ac43dbe8ef.html#ac7cb7840989882cce60218ac43dbe8ef" title="Step the dithering forward &#45; creates triangular wave that toggles between pixels." alt="" coords="264,268,477,293"/>
-<area shape="poly" id="edge12_Node000001_Node000015" title=" " alt="" coords="127,157,184,205,223,231,265,254,283,261,281,266,263,259,221,236,181,209,124,161"/>
-<area shape="rect" id="Node000006" href="$d0/dee/struct_pixel_controller_a48e5b9d0a56f193c82ae2a30dcc40dc2.html#a48e5b9d0a56f193c82ae2a30dcc40dc2" title=" " alt="" coords="525,90,704,130"/>
-<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="447,151,524,131,526,136,448,157"/>
-<area shape="rect" id="Node000012" href="$d0/dee/struct_pixel_controller_a03f2b754c6b37aaab7686a80efad4b97.html#a03f2b754c6b37aaab7686a80efad4b97" title=" " alt="" coords="525,154,704,194"/>
-<area shape="poly" id="edge7_Node000005_Node000012" title=" " alt="" coords="460,171,511,171,511,177,460,177"/>
-<area shape="rect" id="Node000013" href="$d0/dee/struct_pixel_controller_a6038e16d538ff9dcdfd179f42e7bd64e.html#a6038e16d538ff9dcdfd179f42e7bd64e" title=" " alt="" coords="525,218,704,258"/>
-<area shape="poly" id="edge9_Node000005_Node000013" title=" " alt="" coords="448,191,526,212,524,217,447,197"/>
-<area shape="rect" id="Node000007" href="$d0/dee/struct_pixel_controller_adad75cb77a4eab720f2ee1023b643a59.html#adad75cb77a4eab720f2ee1023b643a59" title="Complete pipeline: load → dither → scale (THE MAGIC HAPPENS HERE!) Order is critical: pixel + dither ..." alt="" coords="752,154,931,194"/>
-<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="687,128,757,148,756,153,686,133"/>
-<area shape="poly" id="edge8_Node000012_Node000007" title=" " alt="" coords="705,171,738,171,738,177,705,177"/>
-<area shape="poly" id="edge10_Node000013_Node000007" title=" " alt="" coords="686,215,756,195,757,200,687,220"/>
+<area shape="rect" id="Node000015" href="$d0/dee/struct_pixel_controller_a0d99d9815e7e416eaedb964c6bc1dffb.html#a0d99d9815e7e416eaedb964c6bc1dffb" title="Get the length of the LED strip." alt="" coords="295,219,446,244"/>
+<area shape="poly" id="edge11_Node000001_Node000015" title=" " alt="" coords="142,156,198,180,265,203,297,213,296,218,263,209,196,185,140,161"/>
+<area shape="rect" id="Node000016" href="$d0/dee/struct_pixel_controller_ac7cb7840989882cce60218ac43dbe8ef.html#ac7cb7840989882cce60218ac43dbe8ef" title="Step the dithering forward &#45; creates triangular wave that toggles between pixels." alt="" coords="264,272,477,297"/>
+<area shape="poly" id="edge12_Node000001_Node000016" title=" " alt="" coords="128,157,185,204,224,231,265,254,294,266,292,270,263,259,221,236,182,209,124,161"/>
+<area shape="rect" id="Node000006" href="$d0/dee/struct_pixel_controller_a48e5b9d0a56f193c82ae2a30dcc40dc2.html#a48e5b9d0a56f193c82ae2a30dcc40dc2" title="non&#45;template alias of loadAndScale&lt;0&gt;()" alt="" coords="525,86,704,126"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="442,151,528,127,530,132,444,157"/>
+<area shape="rect" id="Node000013" href="$d0/dee/struct_pixel_controller_a03f2b754c6b37aaab7686a80efad4b97.html#a03f2b754c6b37aaab7686a80efad4b97" title="non&#45;template alias of loadAndScale&lt;1&gt;()" alt="" coords="525,150,704,190"/>
+<area shape="poly" id="edge7_Node000005_Node000013" title=" " alt="" coords="460,170,511,169,512,174,460,175"/>
+<area shape="rect" id="Node000014" href="$d0/dee/struct_pixel_controller_a6038e16d538ff9dcdfd179f42e7bd64e.html#a6038e16d538ff9dcdfd179f42e7bd64e" title="non&#45;template alias of loadAndScale&lt;2&gt;()" alt="" coords="525,214,704,254"/>
+<area shape="poly" id="edge9_Node000005_Node000014" title=" " alt="" coords="453,191,520,208,519,213,452,197"/>
+<area shape="rect" id="Node000007" href="$d0/dee/struct_pixel_controller_adad75cb77a4eab720f2ee1023b643a59.html#adad75cb77a4eab720f2ee1023b643a59" title="Complete pipeline: load â†’ dither â†’ scale (THE MAGIC HAPPENS HERE!) Order is critical: pixel + dit..." alt="" coords="752,150,931,190"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="687,124,757,144,756,149,686,129"/>
+<area shape="poly" id="edge8_Node000013_Node000007" title=" " alt="" coords="705,167,738,167,738,173,705,173"/>
+<area shape="poly" id="edge10_Node000014_Node000007" title=" " alt="" coords="686,211,756,191,757,196,687,216"/>
+<area shape="rect" id="Node000017" href="$dd/d6c/structfl_1_1_binary_dither_aec4f7e267899df2091d71250efa816be.html#aec4f7e267899df2091d71250efa816be" title="Next pixel: toggle each offset to its complement in [0, e], so neighbours dither in opposite directio..." alt="" coords="537,279,693,304"/>
+<area shape="poly" id="edge13_Node000016_Node000017" title=" " alt="" coords="478,285,523,286,523,292,477,290"/>
 </map>

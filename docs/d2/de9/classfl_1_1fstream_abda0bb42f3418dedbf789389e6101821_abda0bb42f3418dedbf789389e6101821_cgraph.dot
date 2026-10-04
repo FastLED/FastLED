@@ -8,5 +8,5 @@ digraph "fl::fstream::operator="
   rankdir="LR";
   Node1 [id="Node000001",label="fl::fstream::operator=",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::fstream::fstream",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/de9/classfl_1_1fstream_a58f76c0b27a85fc52e15167d6dc8d182.html#a58f76c0b27a85fc52e15167d6dc8d182",tooltip=" "];
+  Node2 [id="Node000002",label="fl::fstream::fstream",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/de9/classfl_1_1fstream_a9ec4e730e81b5495733247ea153e8465.html#a9ec4e730e81b5495733247ea153e8465",tooltip=" "];
 }

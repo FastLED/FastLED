@@ -1,0 +1,10 @@
+<map id="fl::asset_detail::path_has_parent_segment_at" name="fl::asset_detail::path_has_parent_segment_at">
+<area shape="rect" id="Node000001" title="Recursive constexpr walk looking for any &quot;..&quot; segment." alt="" coords="536,29,721,69"/>
+<area shape="poly" id="edge4_Node000001_Node000001" title=" " alt="" coords="666,18,653,11,629,8,607,10,595,15,590,21,592,28,587,30,585,20,591,10,606,5,629,3,655,6,669,13"/>
+<area shape="rect" id="Node000002" href="$de/dde/namespacefl_1_1asset__detail_af3160b1622d71d956ba2060fb607a1ae.html#af3160b1622d71d956ba2060fb607a1ae" title="Compile&#45;time check: returns true if the string contains a &quot;..&quot; segment." alt="" coords="323,29,488,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="522,52,488,52,488,47,522,47"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_aef6a13aad515bc3cb336e5a7ecc828d8.html#aef6a13aad515bc3cb336e5a7ecc828d8" title="Construct an asset handle from a relative sketch path at runtime." alt="" coords="201,37,275,62"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="309,52,275,52,275,47,309,47"/>
+<area shape="rect" id="Node000004" href="$d2/d4d/classfl_1_1_u_i_audio_acf6e4a510c9c1d373e140acb7097be99.html#acf6e4a510c9c1d373e140acb7097be99" title="Asset&#45;handle overload (issue #2284)." alt="" coords="5,37,153,62"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="188,52,154,52,154,47,188,47"/>
+</map>

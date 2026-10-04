@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -129,15 +129,15 @@ $(function(){initNavTree('d6/ddf/classfl_1_1audio_1_1detector_1_1_equalizer_dete
 <div class="line"><span class="lineno">  116</span>    <span class="keywordtype">float</span> fmin = <a class="code hl_variable" href="../../d6/ddf/classfl_1_1audio_1_1detector_1_1_equalizer_detector_af889fffc62339f25347d973305b9c5f4.html#af889fffc62339f25347d973305b9c5f4">mConfig</a>.minFreq;</div>
 <div class="line"><span class="lineno">  117</span>    <span class="keywordtype">float</span> fmax = <a class="code hl_variable" href="../../d6/ddf/classfl_1_1audio_1_1detector_1_1_equalizer_detector_af889fffc62339f25347d973305b9c5f4.html#af889fffc62339f25347d973305b9c5f4">mConfig</a>.maxFreq;</div>
 <div class="line"><span class="lineno">  118</span>    <span class="keywordflow">if</span> (fmax &lt;= fmin) fmax = fmin * 2.0f;</div>
-<div class="line"><span class="lineno">  119</span>    <span class="keywordtype">float</span> m = <a class="code hl_function" href="../../d4/d36/namespacefl_af3a8e787bc8bcd73dcddb8b47a826554.html#af3a8e787bc8bcd73dcddb8b47a826554">fl::logf</a>(fmax / fmin);</div>
+<div class="line"><span class="lineno">  119</span>    <span class="keywordtype">float</span> m = <a class="code hl_function" href="../../d4/d36/namespacefl_a009a6061a9324e18ae194e4c16749297.html#a009a6061a9324e18ae194e4c16749297">fl::logf</a>(fmax / fmin);</div>
 <div class="line"><span class="lineno">  120</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; <a class="code hl_variable" href="../../d6/ddf/classfl_1_1audio_1_1detector_1_1_equalizer_detector_aa1e2ffd7344e1fdb924c6b274c715f6b.html#aa1e2ffd7344e1fdb924c6b274c715f6b">kNumBins</a>; ++i) {</div>
-<div class="line"><span class="lineno">  121</span>        out[i] = fmin * <a class="code hl_function" href="../../d4/d36/namespacefl_a2a5359f49a46263d1eb1fcdfe99b7bd5.html#a2a5359f49a46263d1eb1fcdfe99b7bd5">fl::expf</a>(m * <span class="keyword">static_cast&lt;</span><span class="keywordtype">float</span><span class="keyword">&gt;</span>(i) / <span class="keyword">static_cast&lt;</span><span class="keywordtype">float</span><span class="keyword">&gt;</span>(<a class="code hl_variable" href="../../d6/ddf/classfl_1_1audio_1_1detector_1_1_equalizer_detector_aa1e2ffd7344e1fdb924c6b274c715f6b.html#aa1e2ffd7344e1fdb924c6b274c715f6b">kNumBins</a> - 1));</div>
+<div class="line"><span class="lineno">  121</span>        out[i] = fmin * <a class="code hl_function" href="../../d4/d36/namespacefl_af27046964143ce28bf18ce86d152ff93.html#af27046964143ce28bf18ce86d152ff93">fl::expf</a>(m * <span class="keyword">static_cast&lt;</span><span class="keywordtype">float</span><span class="keyword">&gt;</span>(i) / <span class="keyword">static_cast&lt;</span><span class="keywordtype">float</span><span class="keyword">&gt;</span>(<a class="code hl_variable" href="../../d6/ddf/classfl_1_1audio_1_1detector_1_1_equalizer_detector_aa1e2ffd7344e1fdb924c6b274c715f6b.html#aa1e2ffd7344e1fdb924c6b274c715f6b">kNumBins</a> - 1));</div>
 <div class="line"><span class="lineno">  122</span>    }</div>
 <div class="line"><span class="lineno">  123</span>}</div>
 <div class="ttc" id="aclassfl_1_1audio_1_1detector_1_1_equalizer_detector_aa1e2ffd7344e1fdb924c6b274c715f6b_html_aa1e2ffd7344e1fdb924c6b274c715f6b"><div class="ttname"><a href="../../d6/ddf/classfl_1_1audio_1_1detector_1_1_equalizer_detector_aa1e2ffd7344e1fdb924c6b274c715f6b.html#aa1e2ffd7344e1fdb924c6b274c715f6b">fl::audio::detector::EqualizerDetector::kNumBins</a></div><div class="ttdeci">static constexpr int kNumBins</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d84/equalizer_8h_source.html#l00085">equalizer.h:85</a></div></div>
 <div class="ttc" id="aclassfl_1_1audio_1_1detector_1_1_equalizer_detector_af889fffc62339f25347d973305b9c5f4_html_af889fffc62339f25347d973305b9c5f4"><div class="ttname"><a href="../../d6/ddf/classfl_1_1audio_1_1detector_1_1_equalizer_detector_af889fffc62339f25347d973305b9c5f4.html#af889fffc62339f25347d973305b9c5f4">fl::audio::detector::EqualizerDetector::mConfig</a></div><div class="ttdeci">EqualizerConfig mConfig</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d84/equalizer_8h_source.html#l00126">equalizer.h:126</a></div></div>
-<div class="ttc" id="anamespacefl_a2a5359f49a46263d1eb1fcdfe99b7bd5_html_a2a5359f49a46263d1eb1fcdfe99b7bd5"><div class="ttname"><a href="../../d4/d36/namespacefl_a2a5359f49a46263d1eb1fcdfe99b7bd5.html#a2a5359f49a46263d1eb1fcdfe99b7bd5">fl::expf</a></div><div class="ttdeci">float expf(float value) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00398">math.h:398</a></div></div>
-<div class="ttc" id="anamespacefl_af3a8e787bc8bcd73dcddb8b47a826554_html_af3a8e787bc8bcd73dcddb8b47a826554"><div class="ttname"><a href="../../d4/d36/namespacefl_af3a8e787bc8bcd73dcddb8b47a826554.html#af3a8e787bc8bcd73dcddb8b47a826554">fl::logf</a></div><div class="ttdeci">float logf(float value) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00418">math.h:418</a></div></div>
+<div class="ttc" id="anamespacefl_a009a6061a9324e18ae194e4c16749297_html_a009a6061a9324e18ae194e4c16749297"><div class="ttname"><a href="../../d4/d36/namespacefl_a009a6061a9324e18ae194e4c16749297.html#a009a6061a9324e18ae194e4c16749297">fl::logf</a></div><div class="ttdeci">float logf(float value) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00418">math.h:418</a></div></div>
+<div class="ttc" id="anamespacefl_af27046964143ce28bf18ce86d152ff93_html_af27046964143ce28bf18ce86d152ff93"><div class="ttname"><a href="../../d4/d36/namespacefl_af27046964143ce28bf18ce86d152ff93.html#af27046964143ce28bf18ce86d152ff93">fl::expf</a></div><div class="ttdeci">float expf(float value) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00398">math.h:398</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../df/db1/math_8h_source.html#l00398">fl::expf()</a>, <a class="el" href="../../d4/d84/equalizer_8h_source.html#l00085">kNumBins</a>, <a class="el" href="../../df/db1/math_8h_source.html#l00418">fl::logf()</a>, and <a class="el" href="../../d4/d84/equalizer_8h_source.html#l00126">mConfig</a>.</p>
 
@@ -147,7 +147,7 @@ $(function(){initNavTree('d6/ddf/classfl_1_1audio_1_1detector_1_1_equalizer_dete
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d6/ddf/classfl_1_1audio_1_1detector_1_1_equalizer_detector_aada0630bff50683427a6e81d0d647685_aada0630bff50683427a6e81d0d647685_cgraph.svg" width="100%" height="382"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d6/ddf/classfl_1_1audio_1_1detector_1_1_equalizer_detector_aada0630bff50683427a6e81d0d647685_aada0630bff50683427a6e81d0d647685_cgraph.svg" width="100%" height="364"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 <div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
@@ -166,7 +166,7 @@ $(function(){initNavTree('d6/ddf/classfl_1_1audio_1_1detector_1_1_equalizer_dete
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../db/dbf/namespacefl_1_1audio.html">audio</a></li><li class="navelem"><a class="el" href="../../dd/d12/namespacefl_1_1audio_1_1detector.html">detector</a></li><li class="navelem"><a class="el" href="../../d6/ddf/classfl_1_1audio_1_1detector_1_1_equalizer_detector.html">EqualizerDetector</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:08 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:11 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

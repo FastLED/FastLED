@@ -1,0 +1,28 @@
+digraph "fl::UIAudio::UIAudio"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::UIAudio::UIAudio",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Asset-handle overload (issue #2284)."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::asset",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_aef6a13aad515bc3cb336e5a7ecc828d8.html#aef6a13aad515bc3cb336e5a7ecc828d8",tooltip="Construct an asset handle from a relative sketch path at runtime."];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::asset_detail::clen",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/dde/namespacefl_1_1asset__detail_ab640fd2b3331b8b8d8433d230ca51e97.html#ab640fd2b3331b8b8d8433d230ca51e97",tooltip="Compile-time length of a null-terminated C string."];
+  Node3 -> Node3 [id="edge3_Node000003_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node4 [id="edge4_Node000002_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::asset_detail::path\l_has_parent_segment",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/dde/namespacefl_1_1asset__detail_af3160b1622d71d956ba2060fb607a1ae.html#af3160b1622d71d956ba2060fb607a1ae",tooltip="Compile-time check: returns true if the string contains a \"..\" segment."];
+  Node4 -> Node5 [id="edge5_Node000004_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::asset_detail::path\l_has_parent_segment_at",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$de/dde/namespacefl_1_1asset__detail_a1c12afce1a486fc8068a00a637db4f10.html#a1c12afce1a486fc8068a00a637db4f10",tooltip="Recursive constexpr walk looking for any \"..\" segment."];
+  Node5 -> Node5 [id="edge6_Node000005_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node7 [id="edge7_Node000001_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::resolve_asset",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a81bde756e968f84da523d8a7a8fa22dc.html#a81bde756e968f84da523d8a7a8fa22dc",tooltip="Resolve an asset handle to a URL (or local file path) at runtime."];
+  Node7 -> Node8 [id="edge8_Node000007_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl::url::isValid",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/db7/classfl_1_1url_a6dcebd6dbc34c371c2fb1ac23c4f8a94.html#a6dcebd6dbc34c371c2fb1ac23c4f8a94",tooltip=" "];
+  Node7 -> Node9 [id="edge9_Node000007_Node000009",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="fl::asset_detail::lookup\l_registry",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/dde/namespacefl_1_1asset__detail_a776e5f0c23608e92e5870a6ae65f8622.html#a776e5f0c23608e92e5870a6ae65f8622",tooltip="Look up an asset path in the registry. Returns invalid url() on miss."];
+  Node9 -> Node10 [id="edge10_Node000009_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="fl::asset_detail::registry",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/dde/namespacefl_1_1asset__detail_a57b29aabca70a29be3054a6b5814c41e.html#a57b29aabca70a29be3054a6b5814c41e",tooltip=" "];
+}

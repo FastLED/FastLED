@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -107,16 +107,23 @@ $(function(){initNavTree('d5/d87/ios_8cpp_8hpp_source.html','../../'); initResiz
 <div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span> </div>
 <div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="keyword">namespace </span><a class="code hl_namespace" href="../../d4/d36/namespacefl.html">fl</a> {</div>
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span> </div>
-<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment">// Manipulator instances</span></div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno"><a class="line" href="../../d4/d36/namespacefl_a7d28f9733ea0f73846ce8511b1aceb8f.html#a7d28f9733ea0f73846ce8511b1aceb8f">    6</a></span><span class="keyword">const</span> <a class="code hl_struct" href="../../d4/d36/namespacefl.html#d3/db6/structfl_1_1hex__t">hex_t</a> <a class="code hl_variable" href="../../d4/d36/namespacefl_a7d28f9733ea0f73846ce8511b1aceb8f.html#a7d28f9733ea0f73846ce8511b1aceb8f">hex</a>;</div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno"><a class="line" href="../../d4/d36/namespacefl_a13d6187bc2348e7de025f9cc8f68a868.html#a13d6187bc2348e7de025f9cc8f68a868">    7</a></span><span class="keyword">const</span> <a class="code hl_struct" href="../../d4/d36/namespacefl.html#d1/d0f/structfl_1_1dec__t">dec_t</a> <a class="code hl_variable" href="../../d4/d36/namespacefl_a13d6187bc2348e7de025f9cc8f68a868.html#a13d6187bc2348e7de025f9cc8f68a868">dec</a>;</div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno"><a class="line" href="../../d4/d36/namespacefl_aa5a289730983b95522b1370e668434c2.html#aa5a289730983b95522b1370e668434c2">    8</a></span><span class="keyword">const</span> <a class="code hl_struct" href="../../d4/d36/namespacefl.html#d5/d9f/structfl_1_1oct__t">oct_t</a> <a class="code hl_variable" href="../../d4/d36/namespacefl_aa5a289730983b95522b1370e668434c2.html#aa5a289730983b95522b1370e668434c2">oct</a>;</div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span> </div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span>} <span class="comment">// namespace fl</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment">// Manipulator instances — empty-struct markers used as `operator&lt;&lt;` tag</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment">// dispatch (`cout &lt;&lt; hex`). Each is `sizeof == 1` in practice. Public</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment">// API surface with the same source-compat constraint as `fl::cout` /</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment">// `fl::cin`: renaming to `hex()` etc. would break every existing user</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment">// stream expression. Migration deferred; annotated for the linter.</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment">// FL_LINT_ALLOW_GLOBAL(stream manipulator tag `hex` — public API surface, empty struct, ~1 byte per manipulator)</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno"><a class="line" href="../../d4/d36/namespacefl_a7d28f9733ea0f73846ce8511b1aceb8f.html#a7d28f9733ea0f73846ce8511b1aceb8f">   11</a></span><span class="keyword">const</span> <a class="code hl_struct" href="../../d4/d36/namespacefl.html#d3/db6/structfl_1_1hex__t">hex_t</a> <a class="code hl_variable" href="../../d4/d36/namespacefl_a7d28f9733ea0f73846ce8511b1aceb8f.html#a7d28f9733ea0f73846ce8511b1aceb8f">hex</a>;</div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment">// FL_LINT_ALLOW_GLOBAL(stream manipulator tag `dec` — see `hex` above)</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno"><a class="line" href="../../d4/d36/namespacefl_a13d6187bc2348e7de025f9cc8f68a868.html#a13d6187bc2348e7de025f9cc8f68a868">   13</a></span><span class="keyword">const</span> <a class="code hl_struct" href="../../d4/d36/namespacefl.html#d1/d0f/structfl_1_1dec__t">dec_t</a> <a class="code hl_variable" href="../../d4/d36/namespacefl_a13d6187bc2348e7de025f9cc8f68a868.html#a13d6187bc2348e7de025f9cc8f68a868">dec</a>;</div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment">// FL_LINT_ALLOW_GLOBAL(stream manipulator tag `oct` — see `hex` above)</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno"><a class="line" href="../../d4/d36/namespacefl_aa5a289730983b95522b1370e668434c2.html#aa5a289730983b95522b1370e668434c2">   15</a></span><span class="keyword">const</span> <a class="code hl_struct" href="../../d4/d36/namespacefl.html#d5/d9f/structfl_1_1oct__t">oct_t</a> <a class="code hl_variable" href="../../d4/d36/namespacefl_aa5a289730983b95522b1370e668434c2.html#aa5a289730983b95522b1370e668434c2">oct</a>;</div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span> </div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>} <span class="comment">// namespace fl</span></div>
 <div class="ttc" id="aios_8h_html"><div class="ttname"><a href="../../df/dd5/ios_8h.html">ios.h</a></div></div>
-<div class="ttc" id="anamespacefl_a13d6187bc2348e7de025f9cc8f68a868_html_a13d6187bc2348e7de025f9cc8f68a868"><div class="ttname"><a href="../../d4/d36/namespacefl_a13d6187bc2348e7de025f9cc8f68a868.html#a13d6187bc2348e7de025f9cc8f68a868">fl::dec</a></div><div class="ttdeci">const dec_t dec</div><div class="ttdef"><b>Definition</b> <a href="#l00007">ios.cpp.hpp:7</a></div></div>
-<div class="ttc" id="anamespacefl_a7d28f9733ea0f73846ce8511b1aceb8f_html_a7d28f9733ea0f73846ce8511b1aceb8f"><div class="ttname"><a href="../../d4/d36/namespacefl_a7d28f9733ea0f73846ce8511b1aceb8f.html#a7d28f9733ea0f73846ce8511b1aceb8f">fl::hex</a></div><div class="ttdeci">const hex_t hex</div><div class="ttdef"><b>Definition</b> <a href="#l00006">ios.cpp.hpp:6</a></div></div>
-<div class="ttc" id="anamespacefl_aa5a289730983b95522b1370e668434c2_html_aa5a289730983b95522b1370e668434c2"><div class="ttname"><a href="../../d4/d36/namespacefl_aa5a289730983b95522b1370e668434c2.html#aa5a289730983b95522b1370e668434c2">fl::oct</a></div><div class="ttdeci">const oct_t oct</div><div class="ttdef"><b>Definition</b> <a href="#l00008">ios.cpp.hpp:8</a></div></div>
+<div class="ttc" id="anamespacefl_a13d6187bc2348e7de025f9cc8f68a868_html_a13d6187bc2348e7de025f9cc8f68a868"><div class="ttname"><a href="../../d4/d36/namespacefl_a13d6187bc2348e7de025f9cc8f68a868.html#a13d6187bc2348e7de025f9cc8f68a868">fl::dec</a></div><div class="ttdeci">const dec_t dec</div><div class="ttdef"><b>Definition</b> <a href="#l00013">ios.cpp.hpp:13</a></div></div>
+<div class="ttc" id="anamespacefl_a7d28f9733ea0f73846ce8511b1aceb8f_html_a7d28f9733ea0f73846ce8511b1aceb8f"><div class="ttname"><a href="../../d4/d36/namespacefl_a7d28f9733ea0f73846ce8511b1aceb8f.html#a7d28f9733ea0f73846ce8511b1aceb8f">fl::hex</a></div><div class="ttdeci">const hex_t hex</div><div class="ttdef"><b>Definition</b> <a href="#l00011">ios.cpp.hpp:11</a></div></div>
+<div class="ttc" id="anamespacefl_aa5a289730983b95522b1370e668434c2_html_aa5a289730983b95522b1370e668434c2"><div class="ttname"><a href="../../d4/d36/namespacefl_aa5a289730983b95522b1370e668434c2.html#aa5a289730983b95522b1370e668434c2">fl::oct</a></div><div class="ttdeci">const oct_t oct</div><div class="ttdef"><b>Definition</b> <a href="#l00015">ios.cpp.hpp:15</a></div></div>
 <div class="ttc" id="anamespacefl_html"><div class="ttname"><a href="../../d4/d36/namespacefl.html">fl</a></div><div class="ttdoc">Base definition for an LED controller.</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d4b/crgb_8hpp_source.html#l00179">crgb.hpp:179</a></div></div>
 <div class="ttc" id="anamespacefl_html_d1/d0f/structfl_1_1dec__t"><div class="ttname"><a href="../../d4/d36/namespacefl.html#d1/d0f/structfl_1_1dec__t">fl::dec_t</a></div><div class="ttdef"><b>Definition</b> <a href="../../df/dd5/ios_8h_source.html#l00031">ios.h:31</a></div></div>
 <div class="ttc" id="anamespacefl_html_d3/db6/structfl_1_1hex__t"><div class="ttname"><a href="../../d4/d36/namespacefl.html#d3/db6/structfl_1_1hex__t">fl::hex_t</a></div><div class="ttdef"><b>Definition</b> <a href="../../df/dd5/ios_8h_source.html#l00024">ios.h:24</a></div></div>
@@ -128,7 +135,7 @@ $(function(){initNavTree('d5/d87/ios_8cpp_8hpp_source.html','../../'); initResiz
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_0dd6897a8ae40540acd9d694849e950e.html">stl</a></li><li class="navelem"><a class="el" href="../../d5/d87/ios_8cpp_8hpp.html">ios.cpp.hpp</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:06:59 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:01 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

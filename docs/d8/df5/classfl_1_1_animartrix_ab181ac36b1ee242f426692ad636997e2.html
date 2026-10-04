@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -128,14 +128,14 @@ $(function(){initNavTree('d8/df5/classfl_1_1_animartrix_ab181ac36b1ee242f426692a
 <div class="line"><span class="lineno">  327</span>        fl::vector&lt;fl::pair&lt;int, fl::string&gt;&gt; list;</div>
 <div class="line"><span class="lineno">  328</span>        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; static_cast&lt;int&gt;(<a class="code hl_enumvalue" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a7f6bda7fc2e7bb47999cf29dcd28221d">AnimartrixAnim::NUM_ANIMATIONS</a>); i++) {</div>
 <div class="line"><span class="lineno">  329</span>            AnimartrixAnimInfo info = <a class="code hl_function" href="../../d4/d36/namespacefl_a237b7dc0213d359c7b1f08294bda0326.html#a237b7dc0213d359c7b1f08294bda0326">getAnimartrixInfo</a>(i);</div>
-<div class="line"><span class="lineno">  330</span>            list.<a class="code hl_function" href="../../d2/d24/classfl_1_1vector_ae9a8cea8d4b81d8f2f10a2b007ac2980.html#ae9a8cea8d4b81d8f2f10a2b007ac2980">push_back</a>(<a class="code hl_function" href="../../d4/d36/namespacefl_a9f32cf31427769f3900630cb3506f2c6.html#a9f32cf31427769f3900630cb3506f2c6">fl::make_pair</a>(info.id, fl::string(info.name)));</div>
+<div class="line"><span class="lineno">  330</span>            list.<a class="code hl_function" href="../../d2/d24/classfl_1_1vector_a82c3455c1a345460f95a0180c93b3fb0.html#a82c3455c1a345460f95a0180c93b3fb0">push_back</a>(<a class="code hl_function" href="../../d4/d36/namespacefl_a53d5062c3cacc67b60ff5bc033333817.html#a53d5062c3cacc67b60ff5bc033333817">fl::make_pair</a>(info.id, fl::string(info.name)));</div>
 <div class="line"><span class="lineno">  331</span>        }</div>
 <div class="line"><span class="lineno">  332</span>        <span class="keywordflow">return</span> list;</div>
 <div class="line"><span class="lineno">  333</span>    }</div>
-<div class="ttc" id="aclassfl_1_1vector_ae9a8cea8d4b81d8f2f10a2b007ac2980_html_ae9a8cea8d4b81d8f2f10a2b007ac2980"><div class="ttname"><a href="../../d2/d24/classfl_1_1vector_ae9a8cea8d4b81d8f2f10a2b007ac2980.html#ae9a8cea8d4b81d8f2f10a2b007ac2980">fl::vector::push_back</a></div><div class="ttdeci">void push_back(const T &amp;value) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d68/vector_8h_source.html#l00624">vector.h:624</a></div></div>
+<div class="ttc" id="aclassfl_1_1vector_a82c3455c1a345460f95a0180c93b3fb0_html_a82c3455c1a345460f95a0180c93b3fb0"><div class="ttname"><a href="../../d2/d24/classfl_1_1vector_a82c3455c1a345460f95a0180c93b3fb0.html#a82c3455c1a345460f95a0180c93b3fb0">fl::vector::push_back</a></div><div class="ttdeci">void push_back(const T &amp;value) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d68/vector_8h_source.html#l00624">vector.h:624</a></div></div>
 <div class="ttc" id="anamespacefl_a237b7dc0213d359c7b1f08294bda0326_html_a237b7dc0213d359c7b1f08294bda0326"><div class="ttname"><a href="../../d4/d36/namespacefl_a237b7dc0213d359c7b1f08294bda0326.html#a237b7dc0213d359c7b1f08294bda0326">fl::getAnimartrixInfo</a></div><div class="ttdeci">AnimartrixAnimInfo getAnimartrixInfo(int index)</div><div class="ttdef"><b>Definition</b> <a href="../../d3/dc3/animartrix_8hpp_source.html#l00198">animartrix.hpp:198</a></div></div>
 <div class="ttc" id="anamespacefl_a4717e431b6c23ec1a1afb5161dc1aa69_html_a4717e431b6c23ec1a1afb5161dc1aa69a7f6bda7fc2e7bb47999cf29dcd28221d"><div class="ttname"><a href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a7f6bda7fc2e7bb47999cf29dcd28221d">fl::AnimartrixAnim::NUM_ANIMATIONS</a></div><div class="ttdeci">@ NUM_ANIMATIONS</div><div class="ttdef"><b>Definition</b> <a href="../../d3/dc3/animartrix_8hpp_source.html#l00085">animartrix.hpp:85</a></div></div>
-<div class="ttc" id="anamespacefl_a9f32cf31427769f3900630cb3506f2c6_html_a9f32cf31427769f3900630cb3506f2c6"><div class="ttname"><a href="../../d4/d36/namespacefl_a9f32cf31427769f3900630cb3506f2c6.html#a9f32cf31427769f3900630cb3506f2c6">fl::make_pair</a></div><div class="ttdeci">pair&lt; typename fl::decay&lt; T1 &gt;::type, typename fl::decay&lt; T2 &gt;::type &gt; make_pair(T1 &amp;&amp;t, T2 &amp;&amp;u) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d3/d41/pair_8h_source.html#l00095">pair.h:95</a></div></div>
+<div class="ttc" id="anamespacefl_a53d5062c3cacc67b60ff5bc033333817_html_a53d5062c3cacc67b60ff5bc033333817"><div class="ttname"><a href="../../d4/d36/namespacefl_a53d5062c3cacc67b60ff5bc033333817.html#a53d5062c3cacc67b60ff5bc033333817">fl::make_pair</a></div><div class="ttdeci">pair&lt; typename fl::decay&lt; T1 &gt;::type, typename fl::decay&lt; T2 &gt;::type &gt; make_pair(T1 &amp;&amp;t, T2 &amp;&amp;u) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d3/d41/pair_8h_source.html#l00095">pair.h:95</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../d3/dc3/animartrix_8hpp_source.html#l00198">fl::getAnimartrixInfo()</a>, <a class="el" href="../../d3/dc3/animartrix_8hpp_source.html#l00183">fl::AnimartrixAnimInfo::id</a>, <a class="el" href="../../d3/d41/pair_8h_source.html#l00095">fl::make_pair()</a>, <a class="el" href="../../d3/dc3/animartrix_8hpp_source.html#l00184">fl::AnimartrixAnimInfo::name</a>, <a class="el" href="../../d3/dc3/animartrix_8hpp_source.html#l00085">fl::NUM_ANIMATIONS</a>, and <a class="el" href="../../da/d23/list_8h_source.html#l00371">fl::list&lt; T &gt;::push_back()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
@@ -155,7 +155,7 @@ $(function(){initNavTree('d8/df5/classfl_1_1_animartrix_ab181ac36b1ee242f426692a
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d8/df5/classfl_1_1_animartrix.html">Animartrix</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:04 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:08 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

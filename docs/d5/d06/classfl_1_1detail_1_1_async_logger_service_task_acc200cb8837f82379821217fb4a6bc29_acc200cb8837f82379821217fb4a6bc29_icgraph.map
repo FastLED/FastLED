@@ -1,6 +1,6 @@
 <map id="fl::detail::AsyncLoggerServiceTask::instance" name="fl::detail::AsyncLoggerServiceTask::instance">
 <area shape="rect" id="Node000001" title=" " alt="" coords="532,561,747,601"/>
-<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_abe4e89a0a574f2abfa9c1bb53b9bd343.html#abe4e89a0a574f2abfa9c1bb53b9bd343" title="Configure async logger automatic servicing task." alt="" coords="276,527,484,553"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_aa724af6bce4780d93d1b20804ebe3e69.html#aa724af6bce4780d93d1b20804ebe3e69" title="Configure async logger automatic servicing task." alt="" coords="276,527,484,553"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="518,565,460,555,460,550,519,559"/>
 <area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a78c09365a5278caa64b43fe7ff242146.html#a78c09365a5278caa64b43fe7ff242146" title="Template&#45;based logger accessor with auto&#45;registration and enablement check." alt="" coords="304,601,456,641"/>
 <area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="518,603,457,612,456,607,518,597"/>

@@ -1,7 +1,7 @@
 <map id="pacifica_add_whitecaps" name="pacifica_add_whitecaps">
 <area shape="rect" id="Node000001" title=" " alt="" coords="5,31,181,56"/>
-<area shape="rect" id="Node000002" href="$df/da5/lib8tion_8h_a7195cd79b30358b151154623586631aa.html#a7195cd79b30358b151154623586631aa" title="Generates an 8&#45;bit &quot;sawtooth&quot; wave at a given BPM." alt="" coords="239,5,298,31"/>
+<area shape="rect" id="Node000002" href="$df/da5/lib8tion_8h_a6931d7f79bebd9c76e29fb41aafe5e9e.html#a6931d7f79bebd9c76e29fb41aafe5e9e" title="Generates an 8&#45;bit &quot;sawtooth&quot; wave at a given BPM." alt="" coords="239,5,298,31"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="181,28,225,22,226,27,182,33"/>
-<area shape="rect" id="Node000003" href="$df/da5/lib8tion_8h_a696b9421eca961df0a68c7c6c3e983ab.html#a696b9421eca961df0a68c7c6c3e983ab" title="Generates an 8&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="229,55,308,80"/>
+<area shape="rect" id="Node000003" href="$df/da5/lib8tion_8h_aca012663c6c8fe9a7240bcbc76095ba9.html#aca012663c6c8fe9a7240bcbc76095ba9" title="Generates an 8&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="229,55,308,80"/>
 <area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="182,53,216,58,216,63,181,58"/>
 </map>

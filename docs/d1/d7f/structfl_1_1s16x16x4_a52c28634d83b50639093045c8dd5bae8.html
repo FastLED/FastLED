@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -110,7 +110,7 @@ $(function(){initNavTree('d1/d7f/structfl_1_1s16x16x4_a52c28634d83b50639093045c8
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="../../df/d96/s16x16x4_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> <a class="el" href="../../d1/d7f/structfl_1_1s16x16x4.html">s16x16x4</a> fl::s16x16x4::operator* </td>
+          <td class="memname"><a class="el" href="../../d4/d54/compiler__control_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> <a class="el" href="../../d1/d7f/structfl_1_1s16x16x4.html">s16x16x4</a> fl::s16x16x4::operator* </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="../../d1/d7f/structfl_1_1s16x16x4.html">s16x16x4</a></td>          <td class="paramname"><span class="paramname"><em>b</em></span></td><td>)</td>
           <td> const</td>
@@ -123,15 +123,22 @@ $(function(){initNavTree('d1/d7f/structfl_1_1s16x16x4_a52c28634d83b50639093045c8
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../df/d96/s16x16x4_8h_source.html#l00055">55</a> of file <a class="el" href="../../df/d96/s16x16x4_8h_source.html">s16x16x4.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   55</span>                                                              {</div>
-<div class="line"><span class="lineno">   56</span>        <span class="comment">// Q16 × Q16 = Q32 → shift right 16 → Q16</span></div>
-<div class="line"><span class="lineno">   57</span>        <span class="keywordflow">return</span> <a class="code hl_function" href="../../d1/d7f/structfl_1_1s16x16x4_a9779c1f01acf93469171a665b5ae329c.html#a9779c1f01acf93469171a665b5ae329c">from_raw</a>(simd::mulhi_i32_4(<a class="code hl_variable" href="../../d1/d7f/structfl_1_1s16x16x4_ab28f260d1c5d58a97d8e92331fa3b5c5.html#ab28f260d1c5d58a97d8e92331fa3b5c5">raw</a>, b.raw));</div>
-<div class="line"><span class="lineno">   58</span>    }</div>
-<div class="ttc" id="astructfl_1_1s16x16x4_a9779c1f01acf93469171a665b5ae329c_html_a9779c1f01acf93469171a665b5ae329c"><div class="ttname"><a href="../../d1/d7f/structfl_1_1s16x16x4_a9779c1f01acf93469171a665b5ae329c.html#a9779c1f01acf93469171a665b5ae329c">fl::s16x16x4::from_raw</a></div><div class="ttdeci">static FASTLED_FORCE_INLINE s16x16x4 from_raw(simd::simd_u32x4 r)</div><div class="ttdef"><b>Definition</b> <a href="../../df/d96/s16x16x4_8h_source.html#l00024">s16x16x4.h:24</a></div></div>
-<div class="ttc" id="astructfl_1_1s16x16x4_ab28f260d1c5d58a97d8e92331fa3b5c5_html_ab28f260d1c5d58a97d8e92331fa3b5c5"><div class="ttname"><a href="../../d1/d7f/structfl_1_1s16x16x4_ab28f260d1c5d58a97d8e92331fa3b5c5.html#ab28f260d1c5d58a97d8e92331fa3b5c5">fl::s16x16x4::raw</a></div><div class="ttdeci">simd::simd_u32x4 raw</div><div class="ttdef"><b>Definition</b> <a href="../../df/d96/s16x16x4_8h_source.html#l00020">s16x16x4.h:20</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../df/d96/s16x16x4_8h_source.html#l00059">59</a> of file <a class="el" href="../../df/d96/s16x16x4_8h_source.html">s16x16x4.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   59</span>                                                              {</div>
+<div class="line"><span class="lineno">   60</span>        <span class="comment">// Q16 × Q16 = Q32 → shift right 16 → Q16</span></div>
+<div class="line"><span class="lineno">   61</span>        <span class="keywordflow">return</span> <a class="code hl_function" href="../../d1/d7f/structfl_1_1s16x16x4_a9779c1f01acf93469171a665b5ae329c.html#a9779c1f01acf93469171a665b5ae329c">from_raw</a>(simd::mulhi_i32_4(<a class="code hl_variable" href="../../d1/d7f/structfl_1_1s16x16x4_ab28f260d1c5d58a97d8e92331fa3b5c5.html#ab28f260d1c5d58a97d8e92331fa3b5c5">raw</a>, b.raw));</div>
+<div class="line"><span class="lineno">   62</span>    }</div>
+<div class="ttc" id="astructfl_1_1s16x16x4_a9779c1f01acf93469171a665b5ae329c_html_a9779c1f01acf93469171a665b5ae329c"><div class="ttname"><a href="../../d1/d7f/structfl_1_1s16x16x4_a9779c1f01acf93469171a665b5ae329c.html#a9779c1f01acf93469171a665b5ae329c">fl::s16x16x4::from_raw</a></div><div class="ttdeci">static FASTLED_FORCE_INLINE s16x16x4 from_raw(simd::simd_u32x4 r)</div><div class="ttdef"><b>Definition</b> <a href="../../df/d96/s16x16x4_8h_source.html#l00028">s16x16x4.h:28</a></div></div>
+<div class="ttc" id="astructfl_1_1s16x16x4_ab28f260d1c5d58a97d8e92331fa3b5c5_html_ab28f260d1c5d58a97d8e92331fa3b5c5"><div class="ttname"><a href="../../d1/d7f/structfl_1_1s16x16x4_ab28f260d1c5d58a97d8e92331fa3b5c5.html#ab28f260d1c5d58a97d8e92331fa3b5c5">fl::s16x16x4::raw</a></div><div class="ttdeci">simd::simd_u32x4 raw</div><div class="ttdef"><b>Definition</b> <a href="../../df/d96/s16x16x4_8h_source.html#l00024">s16x16x4.h:24</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../df/d96/s16x16x4_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d54/compiler__control_8h_source.html#l00819">FASTLED_FORCE_INLINE</a>, <a class="el" href="../../df/d96/s16x16x4_8h_source.html#l00028">from_raw()</a>, and <a class="el" href="../../df/d96/s16x16x4_8h_source.html#l00024">raw</a>.</p>
+<div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
+<div id="dynsection-0-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-0-content" class="dyncontent" style="display:none;">
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d1/d7f/structfl_1_1s16x16x4_a52c28634d83b50639093045c8dd5bae8_a52c28634d83b50639093045c8dd5bae8_cgraph.svg" width="400" height="36"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
 
 </div>
 </div>
@@ -142,7 +149,7 @@ $(function(){initNavTree('d1/d7f/structfl_1_1s16x16x4_a52c28634d83b50639093045c8
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d1/d7f/structfl_1_1s16x16x4.html">s16x16x4</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:09 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

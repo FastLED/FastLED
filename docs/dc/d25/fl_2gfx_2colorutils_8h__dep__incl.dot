@@ -9,7 +9,7 @@ digraph "fl/gfx/colorutils.h"
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node2 [id="Node000002",label="colorutils.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/dfb/colorutils_8h.html",tooltip=" "];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="FastLED.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d97/_fast_l_e_d_8h.html",tooltip="central include file for FastLED, defines the CFastLED class/object"];
+  Node3 [id="Node000003",label="FastLED.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d64/fastled_8h.html",tooltip="central include file for FastLED, defines the CFastLED class/object"];
   Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node4 [id="Node000004",label="FastLED.cpp.hpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/de5/_fast_l_e_d_8cpp_8hpp.html",tooltip=" "];
   Node4 -> Node5 [id="edge4_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
@@ -25,7 +25,7 @@ digraph "fl/gfx/colorutils.h"
   Node8 -> Node3 [id="edge10_Node000008_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node8 -> Node7 [id="edge11_Node000008_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node8 -> Node9 [id="edge12_Node000008_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node9 [id="Node000009",label="fl/system/fastled.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d7/dc2/fl_2system_2_fast_l_e_d_8h.html",tooltip="Internal FastLED header for implementation files."];
+  Node9 [id="Node000009",label="fl/system/fastled.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d0/d69/fl_2system_2fastled_8h.html",tooltip="Internal FastLED header for implementation files."];
   Node9 -> Node3 [id="edge13_Node000009_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node9 -> Node7 [id="edge14_Node000009_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node9 -> Node38 [id="edge15_Node000009_Node000038",dir="back",color="steelblue1",style="solid",tooltip=" "];
@@ -36,7 +36,7 @@ digraph "fl/gfx/colorutils.h"
   Node56 [id="Node000056",label="pixelset.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d46/pixelset_8h.html",tooltip="Declares classes for managing logical groups of LEDs."];
   Node56 -> Node3 [id="edge18_Node000056_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node1 -> Node61 [id="edge19_Node000001_Node000061",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node61 [id="Node000061",label="fl/audio/audio_reactive.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/da8/src_2fl_2audio_2audio__reactive_8h.html",tooltip=" "];
+  Node61 [id="Node000061",label="fl/audio/audio_reactive.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d9a/audio__reactive_8h.html",tooltip=" "];
   Node61 -> Node62 [id="edge20_Node000061_Node000062",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node62 [id="Node000062",label="fl/audio/audio_reactive.cpp.hpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/dc5/audio__reactive_8cpp_8hpp.html",tooltip=" "];
   Node62 -> Node22 [id="edge21_Node000062_Node000022",dir="back",color="steelblue1",style="solid",tooltip=" "];

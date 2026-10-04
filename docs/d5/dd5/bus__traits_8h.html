@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -108,7 +108,7 @@ $(function(){initNavTree('d5/dd5/bus__traits_8h.html','../../'); initResizable(t
 </div><!--header-->
 <div class="contents">
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Per-driver traits keyed on <code><a class="el" href="../../d4/d36/namespacefl_a7e1e94407fbd018269794d74ab7fb4c1.html#a7e1e94407fbd018269794d74ab7fb4c1" title="Driver identifier for compile-time bus selection.">fl::Bus</a></code>. </p>
+<div class="textblock"><p>Per-driver traits keyed on <code><a class="el" href="../../d4/d36/namespacefl_a7e1e94407fbd018269794d74ab7fb4c1.html#a7e1e94407fbd018269794d74ab7fb4c1" title="Portable public bus selector.">fl::Bus</a></code>. </p>
 <p>Each concrete driver provides a specialization of <code>BusTraits&lt;Bus::X&gt;</code> (typically in a <code><a class="el" href="../../d5/dd5/bus__traits_8h.html" title="Per-driver traits keyed on fl::Bus.">bus_traits.h</a></code> adjacent to the driver header). The specialization carries:</p><ul>
 <li><code>using Driver = ...;</code> the concrete driver class.</li>
 <li><code>static Driver&amp; instance();</code> Meyers singleton accessor.</li>
@@ -139,12 +139,12 @@ $(function(){initNavTree('d5/dd5/bus__traits_8h.html','../../'); initResizable(t
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/da1/structfl_1_1_bus_supports.html">fl::BusSupports&lt; B, Chipset &gt;</a></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/da1/structfl_1_1_bus_supports.html">fl::BusSupports&lt; B, Chipset, Which &gt;</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Capability check: does bus <code>B</code> accept chipset family <code>Chipset</code>?  <a href="../../d7/da1/structfl_1_1_bus_supports.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d77/structfl_1_1detail_1_1_bus_keep_alive_impl.html">fl::detail::BusKeepAliveImpl&lt; B &gt;</a></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d77/structfl_1_1detail_1_1_bus_keep_alive_impl.html">fl::detail::BusKeepAliveImpl&lt; B, Which &gt;</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d32/structfl_1_1detail_1_1_bus_keep_alive_impl_3_01fl_1_1_bus_1_1_a_u_t_o_01_4.html">fl::detail::BusKeepAliveImpl&lt; fl::Bus::AUTO &gt;</a></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d0/d55/structfl_1_1detail_1_1_bus_keep_alive_impl_3_01fl_1_1_bus_1_1_a_u_t_o_00_01_which_01_4.html">fl::detail::BusKeepAliveImpl&lt; fl::Bus::AUTO, Which &gt;</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
@@ -153,22 +153,25 @@ Namespaces</h2></td></tr>
 <tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">Base definition for an LED controller. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d9e/namespacefl_1_1detail.html">fl::detail</a></td></tr>
-<tr class="memdesc:df/d9e/namespacefl_1_1detail"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compile-time linker keep-alive hook for a single <code><a class="el" href="../../d4/d36/namespacefl_a7e1e94407fbd018269794d74ab7fb4c1.html#a7e1e94407fbd018269794d74ab7fb4c1" title="Driver identifier for compile-time bus selection.">fl::Bus</a></code>. <br /></td></tr>
+<tr class="memdesc:df/d9e/namespacefl_1_1detail"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compile-time linker keep-alive hook for a single <code><a class="el" href="../../d4/d36/namespacefl_a7e1e94407fbd018269794d74ab7fb4c1.html#a7e1e94407fbd018269794d74ab7fb4c1" title="Portable public bus selector.">fl::Bus</a></code>. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a8c9581ee64dea557a2d7ffcf4630bec2" id="r_a8c9581ee64dea557a2d7ffcf4630bec2"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="../../d4/d36/namespacefl_a7e1e94407fbd018269794d74ab7fb4c1.html#a7e1e94407fbd018269794d74ab7fb4c1">Bus</a> B&gt; </td></tr>
-<tr class="memitem:a8c9581ee64dea557a2d7ffcf4630bec2"><td class="memTemplItemLeft" align="right" valign="top">int&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../df/d9e/namespacefl_1_1detail_a8c9581ee64dea557a2d7ffcf4630bec2.html#a8c9581ee64dea557a2d7ffcf4630bec2">fl::detail::bus_register_one</a> () <a class="el" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></td></tr>
-<tr class="memdesc:a8c9581ee64dea557a2d7ffcf4630bec2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Helper used by <code>enableDrivers&lt;<a class="el" href="../../d4/d36/namespacefl_a7e1e94407fbd018269794d74ab7fb4c1.html#a7e1e94407fbd018269794d74ab7fb4c1" title="Driver identifier for compile-time bus selection.">Bus</a>...&gt;()</code> to expand the parameter pack.  <br /></td></tr>
-<tr class="separator:a8c9581ee64dea557a2d7ffcf4630bec2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8bdfeae36dbe71a7dad7a07eeaa99124" id="r_a8bdfeae36dbe71a7dad7a07eeaa99124"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="../../d4/d36/namespacefl_a7e1e94407fbd018269794d74ab7fb4c1.html#a7e1e94407fbd018269794d74ab7fb4c1">fl::Bus</a> B&gt; </td></tr>
-<tr class="memitem:a8bdfeae36dbe71a7dad7a07eeaa99124"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a8bdfeae36dbe71a7dad7a07eeaa99124.html#a8bdfeae36dbe71a7dad7a07eeaa99124">fl::busKeepAlive</a> () <a class="el" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></td></tr>
-<tr class="separator:a8bdfeae36dbe71a7dad7a07eeaa99124"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab0c09fdd63b2abba1d47564d65351f07" id="r_ab0c09fdd63b2abba1d47564d65351f07"><td class="memTemplParams" colspan="2">template&lt;Bus... Buses&gt; </td></tr>
-<tr class="memitem:ab0c09fdd63b2abba1d47564d65351f07"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_ab0c09fdd63b2abba1d47564d65351f07.html#ab0c09fdd63b2abba1d47564d65351f07">fl::enableDrivers</a> () <a class="el" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></td></tr>
-<tr class="memdesc:ab0c09fdd63b2abba1d47564d65351f07"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register the named drivers with <code><a class="el" href="../../d2/d6b/classfl_1_1_channel_manager.html" title="Unified channel manager with priority-based driver selection.">ChannelManager</a></code> for runtime selection.  <br /></td></tr>
-<tr class="separator:ab0c09fdd63b2abba1d47564d65351f07"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6b7efbeea7699deae6735d39556daf2b" id="r_a6b7efbeea7699deae6735d39556daf2b"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="../../d4/d36/namespacefl_a7e1e94407fbd018269794d74ab7fb4c1.html#a7e1e94407fbd018269794d74ab7fb4c1">Bus</a> B, <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> Which = 0&gt; </td></tr>
+<tr class="memitem:a6b7efbeea7699deae6735d39556daf2b"><td class="memTemplItemLeft" align="right" valign="top">int&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../df/d9e/namespacefl_1_1detail_a6b7efbeea7699deae6735d39556daf2b.html#a6b7efbeea7699deae6735d39556daf2b">fl::detail::bus_register_one</a> () <a class="el" href="../../d4/d36/namespacefl_aa317f89ca911371e798d08a93770402f.html#aa317f89ca911371e798d08a93770402f">FL_NO_EXCEPT</a></td></tr>
+<tr class="memdesc:a6b7efbeea7699deae6735d39556daf2b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Helper used by <code>enableDrivers&lt;<a class="el" href="../../d4/d36/namespacefl_a7e1e94407fbd018269794d74ab7fb4c1.html#a7e1e94407fbd018269794d74ab7fb4c1" title="Portable public bus selector.">Bus</a>...&gt;()</code> to expand the parameter pack.  <br /></td></tr>
+<tr class="separator:a6b7efbeea7699deae6735d39556daf2b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a617e5ddee673007123ec891a051965fc" id="r_a617e5ddee673007123ec891a051965fc"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="../../d4/d36/namespacefl_a7e1e94407fbd018269794d74ab7fb4c1.html#a7e1e94407fbd018269794d74ab7fb4c1">fl::Bus</a> B, <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> Which = 0&gt; </td></tr>
+<tr class="memitem:a617e5ddee673007123ec891a051965fc"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a617e5ddee673007123ec891a051965fc.html#a617e5ddee673007123ec891a051965fc">fl::busKeepAlive</a> () <a class="el" href="../../d4/d36/namespacefl_aa317f89ca911371e798d08a93770402f.html#aa317f89ca911371e798d08a93770402f">FL_NO_EXCEPT</a></td></tr>
+<tr class="separator:a617e5ddee673007123ec891a051965fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab9a2506773f65595ae2842b815a86fbd" id="r_ab9a2506773f65595ae2842b815a86fbd"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="../../d4/d36/namespacefl_a7e1e94407fbd018269794d74ab7fb4c1.html#a7e1e94407fbd018269794d74ab7fb4c1">Bus</a> B, <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> Which = 0&gt; </td></tr>
+<tr class="memitem:ab9a2506773f65595ae2842b815a86fbd"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_ab9a2506773f65595ae2842b815a86fbd.html#ab9a2506773f65595ae2842b815a86fbd">fl::enableDriver</a> () <a class="el" href="../../d4/d36/namespacefl_aa317f89ca911371e798d08a93770402f.html#aa317f89ca911371e798d08a93770402f">FL_NO_EXCEPT</a></td></tr>
+<tr class="separator:ab9a2506773f65595ae2842b815a86fbd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a99f1c4304afd5acb2276d957e3a02e36" id="r_a99f1c4304afd5acb2276d957e3a02e36"><td class="memTemplParams" colspan="2">template&lt;Bus... Buses&gt; </td></tr>
+<tr class="memitem:a99f1c4304afd5acb2276d957e3a02e36"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a99f1c4304afd5acb2276d957e3a02e36.html#a99f1c4304afd5acb2276d957e3a02e36">fl::enableDrivers</a> () <a class="el" href="../../d4/d36/namespacefl_aa317f89ca911371e798d08a93770402f.html#aa317f89ca911371e798d08a93770402f">FL_NO_EXCEPT</a></td></tr>
+<tr class="memdesc:a99f1c4304afd5acb2276d957e3a02e36"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register the named drivers with <code><a class="el" href="../../d2/d6b/classfl_1_1_channel_manager.html" title="Unified channel manager with priority-based driver selection.">ChannelManager</a></code> for runtime selection.  <br /></td></tr>
+<tr class="separator:a99f1c4304afd5acb2276d957e3a02e36"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -177,7 +180,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_217dd1d1f80f936dd132dc9fc88b57d1.html">channels</a></li><li class="navelem"><a class="el" href="../../d5/dd5/bus__traits_8h.html">bus_traits.h</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:01 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:03 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

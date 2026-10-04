@@ -1,14 +1,14 @@
 <map id="test_json_response" name="test_json_response">
 <area shape="rect" id="Node000001" title="APPROACH 3: JSON Response Handling with FastLED&#39;s ideal JSON API This demonstrates fetch responses wi..." alt="" coords="5,190,152,215"/>
-<area shape="rect" id="Node000002" href="$de/d40/classfl_1_1json_ac94ae67fc50a75046692cd52b2dfb3e6.html#ac94ae67fc50a75046692cd52b2dfb3e6" title=" " alt="" coords="217,91,345,117"/>
+<area shape="rect" id="Node000002" href="$de/d40/classfl_1_1json_aa8690461b881393386d9ff2d9e45ea03.html#aa8690461b881393386d9ff2d9e45ea03" title=" " alt="" coords="217,91,345,117"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="96,188,141,157,199,126,216,119,218,124,201,130,144,162,99,192"/>
 <area shape="rect" id="Node000003" href="$d1/d13/namespacefl_1_1net_1_1http_aa69a7e5a3706b6fb7c8627f19c7b10d2.html#aa69a7e5a3706b6fb7c8627f19c7b10d2" title="HTTP GET request." alt="" coords="200,141,363,166"/>
 <area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="131,187,215,167,216,172,132,193"/>
-<area shape="rect" id="Node000018" href="$d1/dfb/colorutils_8h_afba4db18577c19e39c54f1c5793741b7.html#afba4db18577c19e39c54f1c5793741b7" title="Fill a range of LEDs with a solid color." alt="" coords="243,190,319,215"/>
+<area shape="rect" id="Node000018" href="$d1/dfb/colorutils_8h_a3198008d7f952f27c3c83aeefedec06b.html#a3198008d7f952f27c3c83aeefedec06b" title="Fill a range of LEDs with a solid color." alt="" coords="243,190,319,215"/>
 <area shape="poly" id="edge13_Node000001_Node000018" title=" " alt="" coords="152,200,229,200,229,205,152,205"/>
-<area shape="rect" id="Node000019" href="$de/d40/classfl_1_1json_a43ce94fce4fd30a5904062a3d46ccb4a.html#a43ce94fce4fd30a5904062a3d46ccb4a" title=" " alt="" coords="219,239,344,265"/>
+<area shape="rect" id="Node000019" href="$de/d40/classfl_1_1json_a8148217e7ad42cc5f0bd87542e5d24ef.html#a8148217e7ad42cc5f0bd87542e5d24ef" title=" " alt="" coords="219,239,344,265"/>
 <area shape="poly" id="edge14_Node000001_Node000019" title=" " alt="" coords="132,213,216,233,215,239,131,218"/>
-<area shape="rect" id="Node000020" href="$de/d40/classfl_1_1json_a7deadb5bf7dbc14de40b50534f529430.html#a7deadb5bf7dbc14de40b50534f529430" title=" " alt="" coords="232,289,331,314"/>
+<area shape="rect" id="Node000020" href="$de/d40/classfl_1_1json_a0d525987446d7ef8e7c2bde0097f36aa.html#a0d525987446d7ef8e7c2bde0097f36aa" title=" " alt="" coords="232,289,331,314"/>
 <area shape="poly" id="edge15_Node000001_Node000020" title=" " alt="" coords="99,213,145,243,201,274,221,282,219,287,199,278,142,248,96,218"/>
 <area shape="rect" id="Node000004" href="$dd/d03/classfl_1_1net_1_1http_1_1_fetch_options_a921e92a7b887e568cef838ffe44cfe2c.html#a921e92a7b887e568cef838ffe44cfe2c" title="Set request body." alt="" coords="411,133,597,173"/>
 <area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="363,151,397,151,397,156,363,156"/>
@@ -22,7 +22,7 @@
 <area shape="poly" id="edge11_Node000003_Node000017" title=" " alt="" coords="326,138,420,111,421,116,327,143"/>
 <area shape="rect" id="Node000005" href="$dd/d03/classfl_1_1net_1_1http_1_1_fetch_options_a2886f08f0354d8631626717882dd9611.html#a2886f08f0354d8631626717882dd9611" title=" " alt="" coords="645,69,832,109"/>
 <area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="577,131,651,110,653,115,579,136"/>
-<area shape="rect" id="Node000008" href="$d0/d34/classfl_1_1task_1_1_promise_a70811e463c0161394aae6e29b442b266.html#a70811e463c0161394aae6e29b442b266" title="Create a resolved Promise with value." alt="" coords="671,293,806,333"/>
+<area shape="rect" id="Node000008" href="$d0/d34/classfl_1_1task_1_1_promise_a973eed5d2fbd0bc5e227af3488b04fcf.html#a973eed5d2fbd0bc5e227af3488b04fcf" title="Create a resolved Promise with value." alt="" coords="671,293,806,333"/>
 <area shape="poly" id="edge6_Node000007_Node000008" title=" " alt="" coords="580,289,658,300,657,305,580,294"/>
 <area shape="rect" id="Node000014" href="$d0/dd1/classfl_1_1net_1_1http_1_1_response_af9dec231f54603a4e87ea1c8dc9499d8.html#af9dec231f54603a4e87ea1c8dc9499d8" title=" " alt="" coords="657,229,821,269"/>
 <area shape="poly" id="edge7_Node000007_Node000014" title=" " alt="" coords="580,268,642,260,643,265,580,274"/>

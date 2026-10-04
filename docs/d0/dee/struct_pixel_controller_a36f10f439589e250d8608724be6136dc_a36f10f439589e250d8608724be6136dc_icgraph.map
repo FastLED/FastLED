@@ -1,0 +1,5 @@
+<map id="PixelController::loadAndScaleRGBWWUnordered" name="PixelController::loadAndScaleRGBWWUnordered">
+<area shape="rect" id="Node000001" title="loadAndScaleRGBWW before its wire reorder. See loadAndScaleRGBWUnordered." alt="" coords="232,5,411,45"/>
+<area shape="rect" id="Node000002" href="$d0/dee/struct_pixel_controller_a48468aafc35cdf4f317b7256c0221789.html#a48468aafc35cdf4f317b7256c0221789" title="Load + scale a single pixel to 5&#45;channel RGBWW (issue #2558)." alt="" coords="5,5,184,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="218,28,184,28,184,23,218,23"/>
+</map>

@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -139,7 +139,7 @@ $(function(){initNavTree('de/da4/group___noise_fill_gafc9c1dede253ccae52a1cde23b
       </table>
 </div><div class="memdoc">
 
-<p>Fill a 1D 8-bit buffer with noise, using <a class="el" href="../../d8/df9/group___noise_generation_gaa452e57f154ab8d6d692375dba1ef5cb.html#gaa452e57f154ab8d6d692375dba1ef5cb">inoise16()</a> </p>
+<p>Fill a 1D 8-bit buffer with noise, using <a class="el" href="../../d8/df9/group___noise_generation_gaa452e57f154ab8d6d692375dba1ef5cb.html#gaa452e57f154ab8d6d692375dba1ef5cb" title="16-bit, fixed point implementation of Perlin&#39;s noise.">inoise16()</a> </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">pData</td><td>the array of data to fill with noise values </td></tr>
@@ -152,30 +152,30 @@ $(function(){initNavTree('de/da4/group___noise_fill_gafc9c1dede253ccae52a1cde23b
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="../../da/dca/noise_8cpp_8hpp_source.html#l00688">688</a> of file <a class="el" href="../../da/dca/noise_8cpp_8hpp_source.html">noise.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  688</span>                                                                                                       {</div>
-<div class="line"><span class="lineno">  689</span>  fl::u32 _xx = <a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>;</div>
-<div class="line"><span class="lineno">  690</span>  fl::u32 scx = <a class="code hl_variable" href="../../d3/dac/_fx_noise_ring_8ino_ae6325d6552afdaddd577e0ccce29ceba.html#ae6325d6552afdaddd577e0ccce29ceba">scale</a>;</div>
-<div class="line"><span class="lineno">  691</span>  <span class="keywordflow">for</span>(<span class="keywordtype">int</span> o = 0; o &lt; <a class="code hl_variable" href="../../d3/d4e/_noise_playground_8h_a453bb447145d05bae0b0ad07d33f3f0c.html#a453bb447145d05bae0b0ad07d33f3f0c">octaves</a>; ++o) {</div>
-<div class="line"><span class="lineno">  692</span>    <span class="keywordflow">for</span>(<span class="keywordtype">int</span> i = 0,xx=_xx; i &lt; num_points; ++i, xx+=scx) {</div>
-<div class="line"><span class="lineno">  693</span>      fl::u32 accum = (<a class="code hl_function" href="../../d8/df9/group___noise_generation_gaa452e57f154ab8d6d692375dba1ef5cb.html#gaa452e57f154ab8d6d692375dba1ef5cb">inoise16</a>(xx,time))&gt;&gt;o;</div>
-<div class="line"><span class="lineno">  694</span>      accum += (pData[i]&lt;&lt;8);</div>
-<div class="line"><span class="lineno">  695</span>      <span class="keywordflow">if</span>(accum &gt; 65535) { accum = 65535; }</div>
-<div class="line"><span class="lineno">  696</span>      pData[i] = accum&gt;&gt;8;</div>
-<div class="line"><span class="lineno">  697</span>    }</div>
-<div class="line"><span class="lineno">  698</span> </div>
-<div class="line"><span class="lineno">  699</span>    _xx &lt;&lt;= 1;</div>
-<div class="line"><span class="lineno">  700</span>    scx &lt;&lt;= 1;</div>
-<div class="line"><span class="lineno">  701</span>  }</div>
-<div class="line"><span class="lineno">  702</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../da/dca/noise_8cpp_8hpp_source.html#l00725">725</a> of file <a class="el" href="../../da/dca/noise_8cpp_8hpp_source.html">noise.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  725</span>                                                                                                       {</div>
+<div class="line"><span class="lineno">  726</span>  fl::u32 _xx = <a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>;</div>
+<div class="line"><span class="lineno">  727</span>  fl::u32 scx = <a class="code hl_variable" href="../../d3/dac/_fx_noise_ring_8ino_ae6325d6552afdaddd577e0ccce29ceba.html#ae6325d6552afdaddd577e0ccce29ceba">scale</a>;</div>
+<div class="line"><span class="lineno">  728</span>  <span class="keywordflow">for</span>(<span class="keywordtype">int</span> o = 0; o &lt; <a class="code hl_variable" href="../../d3/d4e/_noise_playground_8h_a453bb447145d05bae0b0ad07d33f3f0c.html#a453bb447145d05bae0b0ad07d33f3f0c">octaves</a>; ++o) {</div>
+<div class="line"><span class="lineno">  729</span>    <span class="keywordflow">for</span>(<span class="keywordtype">int</span> i = 0,xx=_xx; i &lt; num_points; ++i, xx+=scx) {</div>
+<div class="line"><span class="lineno">  730</span>      fl::u32 accum = (<a class="code hl_function" href="../../d8/df9/group___noise_generation_gaa452e57f154ab8d6d692375dba1ef5cb.html#gaa452e57f154ab8d6d692375dba1ef5cb">inoise16</a>(xx,time))&gt;&gt;o;</div>
+<div class="line"><span class="lineno">  731</span>      accum += (pData[i]&lt;&lt;8);</div>
+<div class="line"><span class="lineno">  732</span>      <span class="keywordflow">if</span>(accum &gt; 65535) { accum = 65535; }</div>
+<div class="line"><span class="lineno">  733</span>      pData[i] = accum&gt;&gt;8;</div>
+<div class="line"><span class="lineno">  734</span>    }</div>
+<div class="line"><span class="lineno">  735</span> </div>
+<div class="line"><span class="lineno">  736</span>    _xx &lt;&lt;= 1;</div>
+<div class="line"><span class="lineno">  737</span>    scx &lt;&lt;= 1;</div>
+<div class="line"><span class="lineno">  738</span>  }</div>
+<div class="line"><span class="lineno">  739</span>}</div>
 <div class="ttc" id="a_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc_html_a6150e0515f7202e2fb518f7206ed97dc"><div class="ttname"><a href="../../db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a></div><div class="ttdeci">int x</div><div class="ttdef"><b>Definition</b> <a href="../../db/d49/_audio_2simple_2simple_8h_source.html#l00092">simple.h:92</a></div></div>
 <div class="ttc" id="a_fx_noise_ring_8ino_ae6325d6552afdaddd577e0ccce29ceba_html_ae6325d6552afdaddd577e0ccce29ceba"><div class="ttname"><a href="../../d3/dac/_fx_noise_ring_8ino_ae6325d6552afdaddd577e0ccce29ceba.html#ae6325d6552afdaddd577e0ccce29ceba">scale</a></div><div class="ttdeci">fl::UISlider scale(&quot;Scale&quot;, 4,.1, 4,.1)</div></div>
 <div class="ttc" id="a_noise_playground_8h_a453bb447145d05bae0b0ad07d33f3f0c_html_a453bb447145d05bae0b0ad07d33f3f0c"><div class="ttname"><a href="../../d3/d4e/_noise_playground_8h_a453bb447145d05bae0b0ad07d33f3f0c.html#a453bb447145d05bae0b0ad07d33f3f0c">octaves</a></div><div class="ttdeci">uint8_t octaves</div><div class="ttdef"><b>Definition</b> <a href="../../d3/d4e/_noise_playground_8h_source.html#l00030">NoisePlayground.h:30</a></div></div>
-<div class="ttc" id="agroup___noise_generation_gaa452e57f154ab8d6d692375dba1ef5cb_html_gaa452e57f154ab8d6d692375dba1ef5cb"><div class="ttname"><a href="../../d8/df9/group___noise_generation_gaa452e57f154ab8d6d692375dba1ef5cb.html#gaa452e57f154ab8d6d692375dba1ef5cb">inoise16</a></div><div class="ttdeci">fl::u16 inoise16(fl::u32 x, fl::u32 y, fl::u32 z, fl::u32 t)</div><div class="ttdef"><b>Definition</b> <a href="../../da/dca/noise_8cpp_8hpp_source.html#l00425">noise.cpp.hpp:425</a></div></div>
+<div class="ttc" id="agroup___noise_generation_gaa452e57f154ab8d6d692375dba1ef5cb_html_gaa452e57f154ab8d6d692375dba1ef5cb"><div class="ttname"><a href="../../d8/df9/group___noise_generation_gaa452e57f154ab8d6d692375dba1ef5cb.html#gaa452e57f154ab8d6d692375dba1ef5cb">inoise16</a></div><div class="ttdeci">fl::u16 inoise16(fl::u32 x, fl::u32 y, fl::u32 z, fl::u32 t)</div><div class="ttdoc">16-bit, fixed point implementation of Perlin&#39;s noise.</div><div class="ttdef"><b>Definition</b> <a href="../../da/dca/noise_8cpp_8hpp_source.html#l00462">noise.cpp.hpp:462</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../da/dca/noise_8cpp_8hpp_source.html#l00425">inoise16()</a>, <a class="el" href="../../d3/d4e/_noise_playground_8h_source.html#l00030">octaves</a>, <a class="el" href="../../d3/dac/_fx_noise_ring_8ino_ae6325d6552afdaddd577e0ccce29ceba.html#ae6325d6552afdaddd577e0ccce29ceba">scale</a>, and <a class="el" href="../../db/d49/_audio_2simple_2simple_8h_source.html#l00092">x</a>.</p>
+<p class="reference">References <a class="el" href="../../da/dca/noise_8cpp_8hpp_source.html#l00462">inoise16()</a>, <a class="el" href="../../d3/d4e/_noise_playground_8h_source.html#l00030">octaves</a>, <a class="el" href="../../d3/dac/_fx_noise_ring_8ino_ae6325d6552afdaddd577e0ccce29ceba.html#ae6325d6552afdaddd577e0ccce29ceba">scale</a>, and <a class="el" href="../../db/d49/_audio_2simple_2simple_8h_source.html#l00092">x</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../da/dca/noise_8cpp_8hpp_source.html#l00858">fill_noise16()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../da/dca/noise_8cpp_8hpp_source.html#l00895">fill_noise16()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -200,7 +200,7 @@ $(function(){initNavTree('de/da4/group___noise_fill_gafc9c1dede253ccae52a1cde23b
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../de/da4/group___noise_fill.html">Noise Fill Functions</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:02 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

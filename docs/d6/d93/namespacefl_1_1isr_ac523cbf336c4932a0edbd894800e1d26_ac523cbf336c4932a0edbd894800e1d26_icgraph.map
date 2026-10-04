@@ -2,11 +2,11 @@
 <area shape="rect" id="Node000001" title="ISR&#45;optimized 32&#45;bit block copy for 4&#45;byte aligned memory." alt="" coords="505,439,648,464"/>
 <area shape="rect" id="Node000002" href="$d6/d93/namespacefl_1_1isr_a87ccebcc8a496958569065ad778ac76d.html#a87ccebcc8a496958569065ad778ac76d" title="ISR&#45;optimized memcpy with alignment detection and switch dispatch." alt="" coords="289,203,408,228"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="552,431,360,230,364,226,556,427"/>
-<area shape="rect" id="Node000011" href="$d4/d36/namespacefl_a5b15f08d117ed2b984fbd6881dbbde51.html#a5b15f08d117ed2b984fbd6881dbbde51" title="Convert byte to 8 Wave8Bit structures using nibble LUT." alt="" coords="58,400,139,425"/>
+<area shape="rect" id="Node000011" href="$d4/d36/namespacefl_a1a175139a4d8f986acdb0fd1782ae581.html#a1a175139a4d8f986acdb0fd1782ae581" title="Public single&#45;lane wave8 encoder." alt="" coords="58,400,139,425"/>
 <area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="491,447,139,419,140,413,492,442"/>
-<area shape="rect" id="Node000012" href="$df/d9e/namespacefl_1_1detail_a2538a6e0d2d28d4194ec004bf5fe6003.html#a2538a6e0d2d28d4194ec004bf5fe6003" title="Helper: Convert byte to Wave8Byte using nibble LUT (internal use only)" alt="" coords="257,481,440,521"/>
+<area shape="rect" id="Node000012" href="$df/d9e/namespacefl_1_1detail_aa731fdf58a33695ff45eee66bb3c8ff6.html#aa731fdf58a33695ff45eee66bb3c8ff6" title=" " alt="" coords="257,481,440,521"/>
 <area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="504,470,441,484,440,478,503,464"/>
-<area shape="rect" id="Node000017" href="$df/d9e/namespacefl_1_1detail_a66fa111cf8d1f98b7ecda4f2d97b8d75.html#a66fa111cf8d1f98b7ecda4f2d97b8d75" title="Byte&#45;indexed expansion (#2526): one indexed 8&#45;byte copy." alt="" coords="240,768,457,793"/>
+<area shape="rect" id="Node000017" href="$df/d9e/namespacefl_1_1detail_ac79066fcad09cc0ca9d99714ee037ec4.html#ac79066fcad09cc0ca9d99714ee037ec4" title=" " alt="" coords="240,768,457,793"/>
 <area shape="poly" id="edge17_Node000001_Node000017" title=" " alt="" coords="561,477,361,769,357,766,557,474"/>
 <area shape="rect" id="Node000003" href="$d4/d36/namespacefl_aff1a1fcfdff1c1d20f8e4144e31a10cd.html#aff1a1fcfdff1c1d20f8e4144e31a10cd" title=" " alt="" coords="5,5,192,31"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="330,193,307,159,275,119,236,78,191,44,167,33,169,28,193,40,239,74,279,115,311,156,335,190"/>

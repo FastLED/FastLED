@@ -1,10 +1,10 @@
 var equalizer_8cpp_8hpp =
 [
     [ "fl::audio::detector::anonymous_namespace{equalizer.cpp.hpp}::applyScaling", "dd/dab/namespacefl_1_1audio_1_1detector_1_1anonymous__namespace_02equalizer_8cpp_8hpp_03_a2453925bbae4e1b50541dd85dd4b5cbb.html#a2453925bbae4e1b50541dd85dd4b5cbb", null ],
-    [ "fl::audio::detector::anonymous_namespace{equalizer.cpp.hpp}::kBassEnd", "dd/dab/namespacefl_1_1audio_1_1detector_1_1anonymous__namespace_02equalizer_8cpp_8hpp_03_ac3229b2443a837c3f6e904b22c1e51ff.html#ac3229b2443a837c3f6e904b22c1e51ff", null ],
-    [ "fl::audio::detector::anonymous_namespace{equalizer.cpp.hpp}::kBassStart", "dd/dab/namespacefl_1_1audio_1_1detector_1_1anonymous__namespace_02equalizer_8cpp_8hpp_03_abd452a6b2dfde37930f2d4b02061adaa.html#abd452a6b2dfde37930f2d4b02061adaa", null ],
-    [ "fl::audio::detector::anonymous_namespace{equalizer.cpp.hpp}::kMidEnd", "dd/dab/namespacefl_1_1audio_1_1detector_1_1anonymous__namespace_02equalizer_8cpp_8hpp_03_a8182b7bc470d3c1fa1c16fc30037ca37.html#a8182b7bc470d3c1fa1c16fc30037ca37", null ],
-    [ "fl::audio::detector::anonymous_namespace{equalizer.cpp.hpp}::kMidStart", "dd/dab/namespacefl_1_1audio_1_1detector_1_1anonymous__namespace_02equalizer_8cpp_8hpp_03_acfa7b92a39c819679e3cfb48662ac65d.html#acfa7b92a39c819679e3cfb48662ac65d", null ],
-    [ "fl::audio::detector::anonymous_namespace{equalizer.cpp.hpp}::kTrebleEnd", "dd/dab/namespacefl_1_1audio_1_1detector_1_1anonymous__namespace_02equalizer_8cpp_8hpp_03_a925577fa7c8f8e69258201d2643f2a45.html#a925577fa7c8f8e69258201d2643f2a45", null ],
-    [ "fl::audio::detector::anonymous_namespace{equalizer.cpp.hpp}::kTrebleStart", "dd/dab/namespacefl_1_1audio_1_1detector_1_1anonymous__namespace_02equalizer_8cpp_8hpp_03_a651a4e69a9dfcff87fc4487a412829d0.html#a651a4e69a9dfcff87fc4487a412829d0", null ]
+    [ "fl::audio::detector::anonymous_namespace{equalizer.cpp.hpp}::kBassEnd", "dd/dab/namespacefl_1_1audio_1_1detector_1_1anonymous__namespace_02equalizer_8cpp_8hpp_03_a4e0cc4906bd595664c9259bde92b8b14.html#a4e0cc4906bd595664c9259bde92b8b14", null ],
+    [ "fl::audio::detector::anonymous_namespace{equalizer.cpp.hpp}::kBassStart", "dd/dab/namespacefl_1_1audio_1_1detector_1_1anonymous__namespace_02equalizer_8cpp_8hpp_03_a5fe5890a681c5cf0f9889cf1d74ec17b.html#a5fe5890a681c5cf0f9889cf1d74ec17b", null ],
+    [ "fl::audio::detector::anonymous_namespace{equalizer.cpp.hpp}::kMidEnd", "dd/dab/namespacefl_1_1audio_1_1detector_1_1anonymous__namespace_02equalizer_8cpp_8hpp_03_aa10704265dbb17cac21f946cb31af19d.html#aa10704265dbb17cac21f946cb31af19d", null ],
+    [ "fl::audio::detector::anonymous_namespace{equalizer.cpp.hpp}::kMidStart", "dd/dab/namespacefl_1_1audio_1_1detector_1_1anonymous__namespace_02equalizer_8cpp_8hpp_03_a3a561dfe871f0f2db7e22d05df375785.html#a3a561dfe871f0f2db7e22d05df375785", null ],
+    [ "fl::audio::detector::anonymous_namespace{equalizer.cpp.hpp}::kTrebleEnd", "dd/dab/namespacefl_1_1audio_1_1detector_1_1anonymous__namespace_02equalizer_8cpp_8hpp_03_ab8407549fd7be31dc9ea74417bfc3e0e.html#ab8407549fd7be31dc9ea74417bfc3e0e", null ],
+    [ "fl::audio::detector::anonymous_namespace{equalizer.cpp.hpp}::kTrebleStart", "dd/dab/namespacefl_1_1audio_1_1detector_1_1anonymous__namespace_02equalizer_8cpp_8hpp_03_aa04e34999d6fc464b7a7d0632a9e749e.html#aa04e34999d6fc464b7a7d0632a9e749e", null ]
 ];

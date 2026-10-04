@@ -31,10 +31,12 @@ digraph "fl::audio::fft::Impl"
   Node19 [id="Node000019",label="fl::vector\< kiss_fft\l_cpx \>",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d2/d24/classfl_1_1vector.html",tooltip=" "];
   Node20 -> Node3 [id="edge12_Node000003_Node000020",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mLinearBinLut\nmLogBinLut\nmLogBinLutBass\nmLogBinLutMid",fontcolor="grey" ];
   Node20 [id="Node000020",label="fl::vector\< u8 \>",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d2/d24/classfl_1_1vector.html",tooltip=" "];
-  Node21 -> Node2 [id="edge13_Node000002_Node000021",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mDeleter",fontcolor="grey" ];
-  Node21 [id="Node000021",label="fl::default_delete\l\< fl::audio::fft::Context \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d5/d2b/structfl_1_1default__delete.html",tooltip=" "];
-  Node22 -> Node21 [id="edge14_Node000021_Node000022",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::audio::fft::Context \>",fontcolor="grey" ];
-  Node22 [id="Node000022",label="fl::default_delete\< T \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d5/d2b/structfl_1_1default__delete.html",tooltip=" "];
-  Node23 -> Node2 [id="edge15_Node000002_Node000023",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::audio::fft::Context \>",fontcolor="grey" ];
-  Node23 [id="Node000023",label="fl::unique_ptr\< T,\l Deleter \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d6/d2e/classfl_1_1unique__ptr.html",tooltip=" "];
+  Node21 -> Node3 [id="edge13_Node000003_Node000021",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mCoverageFirst\nmCoverageLast",fontcolor="grey" ];
+  Node21 [id="Node000021",label="fl::vector\< u16 \>",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d2/d24/classfl_1_1vector.html",tooltip=" "];
+  Node22 -> Node2 [id="edge14_Node000002_Node000022",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mDeleter",fontcolor="grey" ];
+  Node22 [id="Node000022",label="fl::default_delete\l\< fl::audio::fft::Context \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d5/d2b/structfl_1_1default__delete.html",tooltip=" "];
+  Node23 -> Node22 [id="edge15_Node000022_Node000023",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::audio::fft::Context \>",fontcolor="grey" ];
+  Node23 [id="Node000023",label="fl::default_delete\< T \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d5/d2b/structfl_1_1default__delete.html",tooltip=" "];
+  Node24 -> Node2 [id="edge16_Node000002_Node000024",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::audio::fft::Context \>",fontcolor="grey" ];
+  Node24 [id="Node000024",label="fl::unique_ptr\< T,\l Deleter \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d6/d2e/classfl_1_1unique__ptr.html",tooltip=" "];
 }

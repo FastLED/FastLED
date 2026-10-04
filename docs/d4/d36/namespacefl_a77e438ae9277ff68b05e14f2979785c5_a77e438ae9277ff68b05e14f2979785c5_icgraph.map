@@ -1,0 +1,37 @@
+<map id="fl::colorPipelineHooks" name="fl::colorPipelineHooks">
+<area shape="rect" id="Node000001" title="The installed hooks." alt="" coords="877,240,1040,265"/>
+<area shape="rect" id="Node000002" href="$d1/da3/classfl_1_1anonymous__namespace_02channel_8cpp_8hpp_03_1_1_reordering_pixel_iterator_any_a9e01c286d101be49c2971c027ca5baf9.html#a9e01c286d101be49c2971c027ca5baf9" title="Construct pixel iterator with optional addressing transformation." alt="" coords="516,11,824,65"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="942,229,898,160,865,122,828,90,787,68,789,63,831,85,869,118,902,157,947,227"/>
+<area shape="rect" id="Node000004" href="$d1/da3/classfl_1_1anonymous__namespace_02channel_8cpp_8hpp_03_1_1_reordering_pixel_iterator_any_ad2dd4dd0cdc8474d6d8fb5232d3f027c.html#ad2dd4dd0cdc8474d6d8fb5232d3f027c" title=" " alt="" coords="511,100,829,155"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="930,233,884,201,828,170,796,157,797,152,830,165,887,196,933,229"/>
+<area shape="rect" id="Node000005" href="$d3/d1d/group___power_gab0593d3b85bf91261f5a6288ec4ed71e.html#gab0593d3b85bf91261f5a6288ec4ed71e" title="One controller&#39;s demand at full brightness, in mW, including idle draw – the quantity the limiter sum..." alt="" coords="595,179,745,219"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="875,240,744,216,745,210,876,235"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_a2321ecc6a20f28d25814f956eded8304.html#a2321ecc6a20f28d25814f956eded8304" title="Point the hooks at the real implementations." alt="" coords="588,265,752,305"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="864,266,753,278,752,273,863,260"/>
+<area shape="rect" id="Node000013" href="$d4/d36/namespacefl_a4d523439a3a0b7fdf7187bccdc1479b6.html#a4d523439a3a0b7fdf7187bccdc1479b6" title=" " alt="" coords="570,329,770,369"/>
+<area shape="poly" id="edge13_Node000001_Node000013" title=" " alt="" coords="926,274,881,298,830,319,771,335,769,330,828,314,879,293,923,270"/>
+<area shape="rect" id="Node000017" href="$dc/d8d/namespacefl_1_1anonymous__namespace_02channel_8cpp_8hpp_03_a4c50b51e7f906d0ba16a6842c8d62a2a.html#a4c50b51e7f906d0ba16a6842c8d62a2a" title="Shared color&#45;managed SPI override check." alt="" coords="557,417,783,472"/>
+<area shape="poly" id="edge17_Node000001_Node000017" title=" " alt="" coords="941,278,894,330,864,358,831,383,795,403,758,420,756,415,793,398,828,378,860,354,890,326,937,274"/>
+<area shape="rect" id="Node000003" href="$d1/da3/classfl_1_1anonymous__namespace_02channel_8cpp_8hpp_03_1_1_reordering_pixel_iterator_any_a4659a84578b6464cee3ad9bfe4b0a0b7.html#a4659a84578b6464cee3ad9bfe4b0a0b7" title=" " alt="" coords="232,5,463,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="502,38,463,37,463,32,502,33"/>
+<area shape="rect" id="Node000006" href="$d3/d1d/group___power_gab33dbfb39f4368fffdc17807883c787e.html#gab33dbfb39f4368fffdc17807883c787e" title="Determines the highest brightness level you can use and still stay under the specified power budget f..." alt="" coords="251,85,443,125"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="581,189,510,168,485,154,461,139,430,127,432,122,464,134,488,149,512,164,582,184"/>
+<area shape="rect" id="Node000007" href="$dd/dbb/class_c_fast_l_e_d_a06a8bc368f2ef5816015b75ad54d1e6b.html#a06a8bc368f2ef5816015b75ad54d1e6b" title="Get estimated power consumption in milliwatts." alt="" coords="239,149,456,189"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="582,194,456,182,457,176,582,188"/>
+<area shape="rect" id="Node000009" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a45a956371f28c961495b1d4c46c9fca2.html#a45a956371f28c961495b1d4c46c9fca2" title=" " alt="" coords="255,213,439,253"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="574,272,439,250,440,245,575,267"/>
+<area shape="rect" id="Node000010" href="$d5/d8b/classfl_1_1_channel_ad9a233b1ba5461dd9f955ab4caf67f01.html#ad9a233b1ba5461dd9f955ab4caf67f01" title=" " alt="" coords="277,277,417,303"/>
+<area shape="poly" id="edge9_Node000008_Node000010" title=" " alt="" coords="574,289,418,292,417,286,574,284"/>
+<area shape="rect" id="Node000011" href="$d5/d87/structfl_1_1_channel_options_ad12e16c7fd37d07cabadb738d9ddc4ad.html#ad12e16c7fd37d07cabadb738d9ddc4ad" title=" " alt="" coords="277,327,418,367"/>
+<area shape="poly" id="edge10_Node000008_Node000011" title=" " alt="" coords="575,306,419,336,418,331,574,300"/>
+<area shape="rect" id="Node000012" href="$d5/d87/structfl_1_1_channel_options_ab68678563049eea05cd43d8bf88c2c00.html#ab68678563049eea05cd43d8bf88c2c00" title=" " alt="" coords="277,415,418,455"/>
+<area shape="poly" id="edge11_Node000008_Node000012" title=" " alt="" coords="575,295,542,304,512,319,497,333,488,348,480,364,464,381,435,402,403,418,401,413,432,397,461,377,475,361,483,345,492,329,509,314,540,299,573,290"/>
+<area shape="poly" id="edge12_Node000012_Node000012" title=" " alt="" coords="390,404,375,397,347,394,323,396,308,401,303,407,306,414,301,416,298,406,305,396,322,391,347,389,376,392,392,399"/>
+<area shape="rect" id="Node000014" href="$d5/d87/structfl_1_1_channel_options_a4bcab07ce7acee2d92062812de5dc3db.html#a4bcab07ce7acee2d92062812de5dc3db" title=" " alt="" coords="271,479,424,519"/>
+<area shape="poly" id="edge14_Node000013_Node000014" title=" " alt="" coords="557,361,534,370,512,383,495,403,489,424,482,447,464,469,446,481,426,490,423,485,443,476,461,465,477,445,484,423,491,400,509,379,531,365,555,356"/>
+<area shape="rect" id="Node000015" href="$d5/d87/structfl_1_1_channel_options_acbc2993fb9a87e850f9d5b3671fd74b3.html#acbc2993fb9a87e850f9d5b3671fd74b3" title=" " alt="" coords="13,447,176,487"/>
+<area shape="poly" id="edge15_Node000014_Node000015" title=" " alt="" coords="257,491,176,480,177,475,257,485"/>
+<area shape="rect" id="Node000016" href="$d5/d87/structfl_1_1_channel_options_ab51176d4f609c5351d98770e1ff36074.html#ab51176d4f609c5351d98770e1ff36074" title=" " alt="" coords="5,511,184,551"/>
+<area shape="poly" id="edge16_Node000014_Node000016" title=" " alt="" coords="257,513,185,523,184,517,257,508"/>
+<area shape="poly" id="edge18_Node000017_Node000017" title=" " alt="" coords="718,407,701,399,670,396,644,398,627,403,620,409,620,417,614,417,615,407,625,398,643,393,670,391,702,394,721,402"/>
+</map>

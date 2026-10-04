@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -132,109 +132,106 @@ $(function(){initNavTree('d3/daf/classfl_1_1_spi_channel_engine_adapter_ae820ac9
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>true on success, false on error </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d6/d93/spi__channel__adapter_8cpp_8hpp_source.html#l00340">340</a> of file <a class="el" href="../../d6/d93/spi__channel__adapter_8cpp_8hpp_source.html">spi_channel_adapter.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  340</span>                                                                                 {</div>
-<div class="line"><span class="lineno">  341</span>    <span class="keywordflow">if</span> (channels.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_a1e467b483bfd364c93ae966e5bd4e427.html#a1e467b483bfd364c93ae966e5bd4e427">empty</a>()) {</div>
-<div class="line"><span class="lineno">  342</span>        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><span class="lineno">  343</span>    }</div>
-<div class="line"><span class="lineno">  344</span> </div>
-<div class="line"><span class="lineno">  345</span>    <span class="comment">// Extract clock pin and data pin from first channel (all same in batch)</span></div>
-<div class="line"><span class="lineno">  346</span>    <span class="keyword">const</span> <span class="keyword">auto</span>&amp; chipset = channels[0]-&gt;getChipset();</div>
-<div class="line"><span class="lineno">  347</span>    <span class="keywordflow">if</span> (!chipset.is&lt;SpiChipsetConfig&gt;()) {</div>
-<div class="line"><span class="lineno">  348</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;SpiChannelEngineAdapter: Non-SPI chipset in transmitBatch&quot;</span>);</div>
-<div class="line"><span class="lineno">  349</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">  350</span>    }</div>
-<div class="line"><span class="lineno">  351</span> </div>
-<div class="line"><span class="lineno">  352</span>    <span class="keyword">const</span> SpiChipsetConfig&amp; spiConfig = chipset.get&lt;SpiChipsetConfig&gt;();</div>
-<div class="line"><span class="lineno">  353</span>    <span class="keywordtype">int</span> clockPin = spiConfig.clockPin;</div>
-<div class="line"><span class="lineno">  354</span>    <span class="keywordtype">int</span> dataPin = channels[0]-&gt;getPin();  <span class="comment">// MOSI pin from channel config</span></div>
-<div class="line"><span class="lineno">  355</span> </div>
-<div class="line"><span class="lineno">  356</span>    <span class="comment">// Select controller for this clock pin</span></div>
-<div class="line"><span class="lineno">  357</span>    <span class="keywordtype">int</span> controllerIndex = <a class="code hl_function" href="../../d3/daf/classfl_1_1_spi_channel_engine_adapter_addb2a22bcf137545fb546ff8632cfe24.html#addb2a22bcf137545fb546ff8632cfe24">selectControllerForClockPin</a>(clockPin);</div>
-<div class="line"><span class="lineno">  358</span>    <span class="keywordflow">if</span> (controllerIndex &lt; 0) {</div>
-<div class="line"><span class="lineno">  359</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;SpiChannelEngineAdapter: No available controller for clock pin &quot;</span> &lt;&lt; clockPin);</div>
-<div class="line"><span class="lineno">  360</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">  361</span>    }</div>
-<div class="line"><span class="lineno">  362</span> </div>
-<div class="line"><span class="lineno">  363</span>    <a class="code hl_struct" href="../../df/db7/structfl_1_1_spi_channel_engine_adapter_1_1_controller_info.html">ControllerInfo</a>&amp; ctrl = <a class="code hl_variable" href="../../d3/daf/classfl_1_1_spi_channel_engine_adapter_a6dba3e738bd35217d1f1809cd719f66c.html#a6dba3e738bd35217d1f1809cd719f66c">mControllers</a>[controllerIndex];</div>
-<div class="line"><span class="lineno">  364</span> </div>
-<div class="line"><span class="lineno">  365</span>    <span class="comment">// Initialize controller if needed</span></div>
-<div class="line"><span class="lineno">  366</span>    <span class="keywordflow">if</span> (!<a class="code hl_function" href="../../d3/daf/classfl_1_1_spi_channel_engine_adapter_aa21579fa8f44cb319dda04d9d48c95d0.html#aa21579fa8f44cb319dda04d9d48c95d0">initializeControllerIfNeeded</a>(ctrl, clockPin, dataPin)) {</div>
-<div class="line"><span class="lineno">  367</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">  368</span>    }</div>
-<div class="line"><span class="lineno">  369</span> </div>
-<div class="line"><span class="lineno">  370</span>    <span class="comment">// Transmit using selected controller</span></div>
-<div class="line"><span class="lineno">  371</span>    <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; channel : channels) {</div>
-<div class="line"><span class="lineno">  372</span>        <span class="keywordflow">if</span> (!channel) {</div>
-<div class="line"><span class="lineno">  373</span>            <span class="keywordflow">continue</span>;</div>
-<div class="line"><span class="lineno">  374</span>        }</div>
-<div class="line"><span class="lineno">  375</span> </div>
-<div class="line"><span class="lineno">  376</span>        <span class="comment">// Mark channel as in use</span></div>
-<div class="line"><span class="lineno">  377</span>        channel-&gt;setInUse(<span class="keyword">true</span>);</div>
-<div class="line"><span class="lineno">  378</span> </div>
-<div class="line"><span class="lineno">  379</span>        <span class="comment">// Get encoded data</span></div>
-<div class="line"><span class="lineno">  380</span>        <span class="keyword">const</span> <span class="keyword">auto</span>&amp; data = channel-&gt;getData();</div>
-<div class="line"><span class="lineno">  381</span>        <span class="keywordflow">if</span> (data.empty()) {</div>
-<div class="line"><span class="lineno">  382</span>            <a class="code hl_define" href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;SpiChannelEngineAdapter: Empty channel data&quot;</span>);</div>
-<div class="line"><span class="lineno">  383</span>            channel-&gt;setInUse(<span class="keyword">false</span>);</div>
-<div class="line"><span class="lineno">  384</span>            <span class="keywordflow">continue</span>;</div>
-<div class="line"><span class="lineno">  385</span>        }</div>
-<div class="line"><span class="lineno">  386</span> </div>
-<div class="line"><span class="lineno">  387</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a>(<span class="stringliteral">&quot;SpiChannelEngineAdapter: Transmitting channel via &quot;</span> &lt;&lt; ctrl.name</div>
-<div class="line"><span class="lineno">  388</span>               &lt;&lt; <span class="stringliteral">&quot; (pin &quot;</span> &lt;&lt; channel-&gt;getPin() &lt;&lt; <span class="stringliteral">&quot;, &quot;</span> &lt;&lt; data.size() &lt;&lt; <span class="stringliteral">&quot; bytes)&quot;</span>);</div>
-<div class="line"><span class="lineno">  389</span> </div>
-<div class="line"><span class="lineno">  390</span>        <span class="comment">// Acquire DMA buffer</span></div>
-<div class="line"><span class="lineno">  391</span>        DMABuffer dmaBuffer = ctrl.controller-&gt;acquireDMABuffer(data.size());</div>
-<div class="line"><span class="lineno">  392</span>        <span class="keywordflow">if</span> (!dmaBuffer.ok()) {</div>
-<div class="line"><span class="lineno">  393</span>            <a class="code hl_define" href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;SpiChannelEngineAdapter: Failed to acquire DMA buffer (error &quot;</span></div>
-<div class="line"><span class="lineno">  394</span>                   &lt;&lt; <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(dmaBuffer.error()) &lt;&lt; <span class="stringliteral">&quot;)&quot;</span>);</div>
-<div class="line"><span class="lineno">  395</span>            channel-&gt;setInUse(<span class="keyword">false</span>);</div>
-<div class="line"><span class="lineno">  396</span>            <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">  397</span>        }</div>
-<div class="line"><span class="lineno">  398</span> </div>
-<div class="line"><span class="lineno">  399</span>        <span class="comment">// Copy data to DMA buffer</span></div>
-<div class="line"><span class="lineno">  400</span>        fl::span&lt;u8&gt; buffer = dmaBuffer.data();</div>
-<div class="line"><span class="lineno">  401</span>        <span class="keywordflow">if</span> (buffer.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac">size</a>() &lt; data.size()) {</div>
-<div class="line"><span class="lineno">  402</span>            <a class="code hl_define" href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;SpiChannelEngineAdapter: DMA buffer too small (&quot;</span></div>
-<div class="line"><span class="lineno">  403</span>                   &lt;&lt; buffer.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac">size</a>() &lt;&lt; <span class="stringliteral">&quot; &lt; &quot;</span> &lt;&lt; data.size() &lt;&lt; <span class="stringliteral">&quot;)&quot;</span>);</div>
-<div class="line"><span class="lineno">  404</span>            channel-&gt;setInUse(<span class="keyword">false</span>);</div>
-<div class="line"><span class="lineno">  405</span>            <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">  406</span>        }</div>
-<div class="line"><span class="lineno">  407</span> </div>
-<div class="line"><span class="lineno">  408</span>        <a class="code hl_function" href="../../d4/d36/namespacefl_a0393d1d09fff5bccc427802cc22e756d.html#a0393d1d09fff5bccc427802cc22e756d">fl::memcpy</a>(buffer.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_a326aa9f29859fe8a92833fd5db12c3bb.html#a326aa9f29859fe8a92833fd5db12c3bb">data</a>(), data.data(), data.size());</div>
-<div class="line"><span class="lineno">  409</span> </div>
-<div class="line"><span class="lineno">  410</span>        <span class="comment">// Transmit (async mode for non-blocking operation)</span></div>
-<div class="line"><span class="lineno">  411</span>        <span class="keywordflow">if</span> (!ctrl.controller-&gt;transmit(TransmitMode::ASYNC)) {</div>
-<div class="line"><span class="lineno">  412</span>            <a class="code hl_define" href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;SpiChannelEngineAdapter: Transmission failed&quot;</span>);</div>
-<div class="line"><span class="lineno">  413</span>            channel-&gt;setInUse(<span class="keyword">false</span>);</div>
-<div class="line"><span class="lineno">  414</span>            <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">  415</span>        }</div>
-<div class="line"><span class="lineno">  416</span> </div>
-<div class="line"><span class="lineno">  417</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a>(<span class="stringliteral">&quot;SpiChannelEngineAdapter: Transmission queued successfully&quot;</span>);</div>
-<div class="line"><span class="lineno">  418</span>    }</div>
-<div class="line"><span class="lineno">  419</span> </div>
-<div class="line"><span class="lineno">  420</span>    <span class="comment">// Wait for transmission to complete (synchronous for now)</span></div>
-<div class="line"><span class="lineno">  421</span>    <span class="comment">// TODO: Make fully async by returning BUSY state and polling in poll()</span></div>
-<div class="line"><span class="lineno">  422</span>    <span class="keywordflow">if</span> (!ctrl.controller-&gt;waitComplete(1000)) {  <span class="comment">// 1 second timeout</span></div>
-<div class="line"><span class="lineno">  423</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;SpiChannelEngineAdapter: Transmission timeout&quot;</span>);</div>
-<div class="line"><span class="lineno">  424</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">  425</span>    }</div>
-<div class="line"><span class="lineno">  426</span> </div>
-<div class="line"><span class="lineno">  427</span>    <a class="code hl_define" href="../../d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a>(<span class="stringliteral">&quot;SpiChannelEngineAdapter: Batch transmission complete&quot;</span>);</div>
-<div class="line"><span class="lineno">  428</span>    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><span class="lineno">  429</span>}</div>
-<div class="ttc" id="aclassfl_1_1_spi_channel_engine_adapter_a6dba3e738bd35217d1f1809cd719f66c_html_a6dba3e738bd35217d1f1809cd719f66c"><div class="ttname"><a href="../../d3/daf/classfl_1_1_spi_channel_engine_adapter_a6dba3e738bd35217d1f1809cd719f66c.html#a6dba3e738bd35217d1f1809cd719f66c">fl::SpiChannelEngineAdapter::mControllers</a></div><div class="ttdeci">fl::vector&lt; ControllerInfo &gt; mControllers</div><div class="ttdoc">All managed controllers.</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d8e/spi__channel__adapter_8h_source.html#l00180">spi_channel_adapter.h:180</a></div></div>
-<div class="ttc" id="aclassfl_1_1_spi_channel_engine_adapter_aa21579fa8f44cb319dda04d9d48c95d0_html_aa21579fa8f44cb319dda04d9d48c95d0"><div class="ttname"><a href="../../d3/daf/classfl_1_1_spi_channel_engine_adapter_aa21579fa8f44cb319dda04d9d48c95d0.html#aa21579fa8f44cb319dda04d9d48c95d0">fl::SpiChannelEngineAdapter::initializeControllerIfNeeded</a></div><div class="ttdeci">bool initializeControllerIfNeeded(ControllerInfo &amp;ctrl, int clockPin, int dataPin)</div><div class="ttdoc">Initialize controller if needed for this clock pin.</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d93/spi__channel__adapter_8cpp_8hpp_source.html#l00151">spi_channel_adapter.cpp.hpp:151</a></div></div>
-<div class="ttc" id="aclassfl_1_1_spi_channel_engine_adapter_addb2a22bcf137545fb546ff8632cfe24_html_addb2a22bcf137545fb546ff8632cfe24"><div class="ttname"><a href="../../d3/daf/classfl_1_1_spi_channel_engine_adapter_addb2a22bcf137545fb546ff8632cfe24.html#addb2a22bcf137545fb546ff8632cfe24">fl::SpiChannelEngineAdapter::selectControllerForClockPin</a></div><div class="ttdeci">int selectControllerForClockPin(int clockPin)</div><div class="ttdoc">Select best controller for a given clock pin.</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d93/spi__channel__adapter_8cpp_8hpp_source.html#l00101">spi_channel_adapter.cpp.hpp:101</a></div></div>
-<div class="ttc" id="aclassfl_1_1span_a1e467b483bfd364c93ae966e5bd4e427_html_a1e467b483bfd364c93ae966e5bd4e427"><div class="ttname"><a href="../../d0/d08/classfl_1_1span_a1e467b483bfd364c93ae966e5bd4e427.html#a1e467b483bfd364c93ae966e5bd4e427">fl::span::empty</a></div><div class="ttdeci">constexpr bool empty() const FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d7a/span_8h_source.html#l00510">span.h:510</a></div></div>
-<div class="ttc" id="aclassfl_1_1span_a326aa9f29859fe8a92833fd5db12c3bb_html_a326aa9f29859fe8a92833fd5db12c3bb"><div class="ttname"><a href="../../d0/d08/classfl_1_1span_a326aa9f29859fe8a92833fd5db12c3bb.html#a326aa9f29859fe8a92833fd5db12c3bb">fl::span::data</a></div><div class="ttdeci">const T * data() const FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d7a/span_8h_source.html#l00461">span.h:461</a></div></div>
-<div class="ttc" id="aclassfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac_html_aef7ee7eb5254da1ba1eb4f3e0173d0ac"><div class="ttname"><a href="../../d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac">fl::span::size</a></div><div class="ttdeci">constexpr fl::size size() const FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d7a/span_8h_source.html#l00458">span.h:458</a></div></div>
-<div class="ttc" id="alog_8h_a868b194fdb2234182e76042d9fde3062_html_a868b194fdb2234182e76042d9fde3062"><div class="ttname"><a href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a></div><div class="ttdeci">#define FL_WARN(X)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00276">log.h:276</a></div></div>
-<div class="ttc" id="alog_8h_a8ccae77aa5fe30a41f19d233cb0de2c1_html_a8ccae77aa5fe30a41f19d233cb0de2c1"><div class="ttname"><a href="../../d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a></div><div class="ttdeci">#define FL_DBG</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00388">log.h:388</a></div></div>
-<div class="ttc" id="anamespacefl_a0393d1d09fff5bccc427802cc22e756d_html_a0393d1d09fff5bccc427802cc22e756d"><div class="ttname"><a href="../../d4/d36/namespacefl_a0393d1d09fff5bccc427802cc22e756d.html#a0393d1d09fff5bccc427802cc22e756d">fl::memcpy</a></div><div class="ttdeci">void * memcpy(void *dest, const void *src, size_t n) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/da3/cstring_8cpp_8hpp_source.html#l00110">cstring.cpp.hpp:110</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d6/d93/spi__channel__adapter_8cpp_8hpp_source.html#l00339">339</a> of file <a class="el" href="../../d6/d93/spi__channel__adapter_8cpp_8hpp_source.html">spi_channel_adapter.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  339</span>                                                                                 {</div>
+<div class="line"><span class="lineno">  340</span>    <span class="keywordflow">if</span> (channels.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_a28135041ca9036a3efb34c1d0afe115b.html#a28135041ca9036a3efb34c1d0afe115b">empty</a>()) {</div>
+<div class="line"><span class="lineno">  341</span>        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  342</span>    }</div>
+<div class="line"><span class="lineno">  343</span> </div>
+<div class="line"><span class="lineno">  344</span>    <span class="comment">// Extract clock pin and data pin from first channel (all same in batch)</span></div>
+<div class="line"><span class="lineno">  345</span>    <span class="keyword">const</span> <span class="keyword">auto</span>&amp; chipset = channels[0]-&gt;getChipset();</div>
+<div class="line"><span class="lineno">  346</span>    <span class="keywordflow">if</span> (!chipset.is&lt;SpiChipsetConfig&gt;()) {</div>
+<div class="line"><span class="lineno">  347</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;SpiChannelEngineAdapter: Non-SPI chipset in transmitBatch&quot;</span>);</div>
+<div class="line"><span class="lineno">  348</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  349</span>    }</div>
+<div class="line"><span class="lineno">  350</span> </div>
+<div class="line"><span class="lineno">  351</span>    <span class="keyword">const</span> SpiChipsetConfig&amp; spiConfig = chipset.get&lt;SpiChipsetConfig&gt;();</div>
+<div class="line"><span class="lineno">  352</span>    <span class="keywordtype">int</span> clockPin = spiConfig.clockPin;</div>
+<div class="line"><span class="lineno">  353</span>    <span class="keywordtype">int</span> dataPin = channels[0]-&gt;getPin();  <span class="comment">// MOSI pin from channel config</span></div>
+<div class="line"><span class="lineno">  354</span> </div>
+<div class="line"><span class="lineno">  355</span>    <span class="comment">// Select controller for this clock pin</span></div>
+<div class="line"><span class="lineno">  356</span>    <span class="keywordtype">int</span> controllerIndex = <a class="code hl_function" href="../../d3/daf/classfl_1_1_spi_channel_engine_adapter_a936b8c5850c0d4cc727bc654385c2c4e.html#a936b8c5850c0d4cc727bc654385c2c4e">selectControllerForClockPin</a>(clockPin, spiConfig.spiBus);</div>
+<div class="line"><span class="lineno">  357</span>    <span class="keywordflow">if</span> (controllerIndex &lt; 0) {</div>
+<div class="line"><span class="lineno">  358</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;SpiChannelEngineAdapter: No available controller for clock pin %s&quot;</span>, clockPin);</div>
+<div class="line"><span class="lineno">  359</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  360</span>    }</div>
+<div class="line"><span class="lineno">  361</span> </div>
+<div class="line"><span class="lineno">  362</span>    <a class="code hl_struct" href="../../df/db7/structfl_1_1_spi_channel_engine_adapter_1_1_controller_info.html">ControllerInfo</a>&amp; ctrl = <a class="code hl_variable" href="../../d3/daf/classfl_1_1_spi_channel_engine_adapter_a6dba3e738bd35217d1f1809cd719f66c.html#a6dba3e738bd35217d1f1809cd719f66c">mControllers</a>[controllerIndex];</div>
+<div class="line"><span class="lineno">  363</span> </div>
+<div class="line"><span class="lineno">  364</span>    <span class="comment">// Initialize controller if needed</span></div>
+<div class="line"><span class="lineno">  365</span>    <span class="keywordflow">if</span> (!<a class="code hl_function" href="../../d3/daf/classfl_1_1_spi_channel_engine_adapter_aa21579fa8f44cb319dda04d9d48c95d0.html#aa21579fa8f44cb319dda04d9d48c95d0">initializeControllerIfNeeded</a>(ctrl, clockPin, dataPin)) {</div>
+<div class="line"><span class="lineno">  366</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  367</span>    }</div>
+<div class="line"><span class="lineno">  368</span> </div>
+<div class="line"><span class="lineno">  369</span>    <span class="comment">// Transmit using selected controller</span></div>
+<div class="line"><span class="lineno">  370</span>    <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; channel : channels) {</div>
+<div class="line"><span class="lineno">  371</span>        <span class="keywordflow">if</span> (!channel) {</div>
+<div class="line"><span class="lineno">  372</span>            <span class="keywordflow">continue</span>;</div>
+<div class="line"><span class="lineno">  373</span>        }</div>
+<div class="line"><span class="lineno">  374</span> </div>
+<div class="line"><span class="lineno">  375</span>        <span class="comment">// Mark channel as in use</span></div>
+<div class="line"><span class="lineno">  376</span>        channel-&gt;setInUse(<span class="keyword">true</span>);</div>
+<div class="line"><span class="lineno">  377</span> </div>
+<div class="line"><span class="lineno">  378</span>        <span class="comment">// Get encoded data</span></div>
+<div class="line"><span class="lineno">  379</span>        <span class="keyword">const</span> <span class="keyword">auto</span>&amp; data = channel-&gt;getData();</div>
+<div class="line"><span class="lineno">  380</span>        <span class="keywordflow">if</span> (data.empty()) {</div>
+<div class="line"><span class="lineno">  381</span>            <a class="code hl_define" href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;SpiChannelEngineAdapter: Empty channel data&quot;</span>);</div>
+<div class="line"><span class="lineno">  382</span>            channel-&gt;setInUse(<span class="keyword">false</span>);</div>
+<div class="line"><span class="lineno">  383</span>            <span class="keywordflow">continue</span>;</div>
+<div class="line"><span class="lineno">  384</span>        }</div>
+<div class="line"><span class="lineno">  385</span> </div>
+<div class="line"><span class="lineno">  386</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a>(<span class="stringliteral">&quot;SpiChannelEngineAdapter: Transmitting channel via %s (pin %s, %s bytes)&quot;</span>, ctrl.name, channel-&gt;getPin(), data.size());</div>
+<div class="line"><span class="lineno">  387</span> </div>
+<div class="line"><span class="lineno">  388</span>        <span class="comment">// Acquire DMA buffer</span></div>
+<div class="line"><span class="lineno">  389</span>        DMABuffer dmaBuffer = ctrl.controller-&gt;acquireDMABuffer(data.size());</div>
+<div class="line"><span class="lineno">  390</span>        <span class="keywordflow">if</span> (!dmaBuffer.ok()) {</div>
+<div class="line"><span class="lineno">  391</span>            <a class="code hl_define" href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;SpiChannelEngineAdapter: Failed to acquire DMA buffer (error %s)&quot;</span>, <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(dmaBuffer.error()));</div>
+<div class="line"><span class="lineno">  392</span>            channel-&gt;setInUse(<span class="keyword">false</span>);</div>
+<div class="line"><span class="lineno">  393</span>            <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  394</span>        }</div>
+<div class="line"><span class="lineno">  395</span> </div>
+<div class="line"><span class="lineno">  396</span>        <span class="comment">// Copy data to DMA buffer</span></div>
+<div class="line"><span class="lineno">  397</span>        fl::span&lt;u8&gt; buffer = dmaBuffer.data();</div>
+<div class="line"><span class="lineno">  398</span>        <span class="keywordflow">if</span> (buffer.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa">size</a>() &lt; data.size()) {</div>
+<div class="line"><span class="lineno">  399</span>            <a class="code hl_define" href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;SpiChannelEngineAdapter: DMA buffer too small (%s &lt; %s)&quot;</span>, buffer.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa">size</a>(), data.size());</div>
+<div class="line"><span class="lineno">  400</span>            channel-&gt;setInUse(<span class="keyword">false</span>);</div>
+<div class="line"><span class="lineno">  401</span>            <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  402</span>        }</div>
+<div class="line"><span class="lineno">  403</span> </div>
+<div class="line"><span class="lineno">  404</span>        <a class="code hl_function" href="../../d4/d36/namespacefl_a35ff6755912c639a5e5bd35fc59e57ff.html#a35ff6755912c639a5e5bd35fc59e57ff">fl::memcpy</a>(buffer.<a class="code hl_function" href="../../d0/d08/classfl_1_1span_a45157f503f151e36c679f688f10e3511.html#a45157f503f151e36c679f688f10e3511">data</a>(), data.data(), data.size());</div>
+<div class="line"><span class="lineno">  405</span> </div>
+<div class="line"><span class="lineno">  406</span>        <span class="comment">// Transmit (async mode for non-blocking operation)</span></div>
+<div class="line"><span class="lineno">  407</span>        <span class="keywordflow">if</span> (!ctrl.controller-&gt;transmit(TransmitMode::ASYNC)) {</div>
+<div class="line"><span class="lineno">  408</span>            <a class="code hl_define" href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;SpiChannelEngineAdapter: Transmission failed&quot;</span>);</div>
+<div class="line"><span class="lineno">  409</span>            channel-&gt;setInUse(<span class="keyword">false</span>);</div>
+<div class="line"><span class="lineno">  410</span>            <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  411</span>        }</div>
+<div class="line"><span class="lineno">  412</span> </div>
+<div class="line"><span class="lineno">  413</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a>(<span class="stringliteral">&quot;SpiChannelEngineAdapter: Transmission queued successfully&quot;</span>);</div>
+<div class="line"><span class="lineno">  414</span>    }</div>
+<div class="line"><span class="lineno">  415</span> </div>
+<div class="line"><span class="lineno">  416</span>    <span class="comment">// Wait for transmission to complete (synchronous for now)</span></div>
+<div class="line"><span class="lineno">  417</span>    <span class="comment">// TODO: Make fully async by returning BUSY state and polling in poll()</span></div>
+<div class="line"><span class="lineno">  418</span>    <span class="keywordflow">if</span> (!ctrl.controller-&gt;waitComplete(1000)) {  <span class="comment">// 1 second timeout</span></div>
+<div class="line"><span class="lineno">  419</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a>(<span class="stringliteral">&quot;SpiChannelEngineAdapter: Transmission timeout&quot;</span>);</div>
+<div class="line"><span class="lineno">  420</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  421</span>    }</div>
+<div class="line"><span class="lineno">  422</span> </div>
+<div class="line"><span class="lineno">  423</span>    <a class="code hl_define" href="../../d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a>(<span class="stringliteral">&quot;SpiChannelEngineAdapter: Batch transmission complete&quot;</span>);</div>
+<div class="line"><span class="lineno">  424</span>    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  425</span>}</div>
+<div class="ttc" id="aclassfl_1_1_spi_channel_engine_adapter_a6dba3e738bd35217d1f1809cd719f66c_html_a6dba3e738bd35217d1f1809cd719f66c"><div class="ttname"><a href="../../d3/daf/classfl_1_1_spi_channel_engine_adapter_a6dba3e738bd35217d1f1809cd719f66c.html#a6dba3e738bd35217d1f1809cd719f66c">fl::SpiChannelEngineAdapter::mControllers</a></div><div class="ttdeci">fl::vector&lt; ControllerInfo &gt; mControllers</div><div class="ttdoc">All managed controllers.</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d8e/spi__channel__adapter_8h_source.html#l00182">spi_channel_adapter.h:182</a></div></div>
+<div class="ttc" id="aclassfl_1_1_spi_channel_engine_adapter_a936b8c5850c0d4cc727bc654385c2c4e_html_a936b8c5850c0d4cc727bc654385c2c4e"><div class="ttname"><a href="../../d3/daf/classfl_1_1_spi_channel_engine_adapter_a936b8c5850c0d4cc727bc654385c2c4e.html#a936b8c5850c0d4cc727bc654385c2c4e">fl::SpiChannelEngineAdapter::selectControllerForClockPin</a></div><div class="ttdeci">int selectControllerForClockPin(int clockPin, Esp32SpiBus requestedBus) FL_NO_EXCEPT</div><div class="ttdoc">Select best controller for a given clock pin.</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d93/spi__channel__adapter_8cpp_8hpp_source.html#l00099">spi_channel_adapter.cpp.hpp:99</a></div></div>
+<div class="ttc" id="aclassfl_1_1_spi_channel_engine_adapter_aa21579fa8f44cb319dda04d9d48c95d0_html_aa21579fa8f44cb319dda04d9d48c95d0"><div class="ttname"><a href="../../d3/daf/classfl_1_1_spi_channel_engine_adapter_aa21579fa8f44cb319dda04d9d48c95d0.html#aa21579fa8f44cb319dda04d9d48c95d0">fl::SpiChannelEngineAdapter::initializeControllerIfNeeded</a></div><div class="ttdeci">bool initializeControllerIfNeeded(ControllerInfo &amp;ctrl, int clockPin, int dataPin)</div><div class="ttdoc">Initialize controller if needed for this clock pin.</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d93/spi__channel__adapter_8cpp_8hpp_source.html#l00153">spi_channel_adapter.cpp.hpp:153</a></div></div>
+<div class="ttc" id="aclassfl_1_1span_a28135041ca9036a3efb34c1d0afe115b_html_a28135041ca9036a3efb34c1d0afe115b"><div class="ttname"><a href="../../d0/d08/classfl_1_1span_a28135041ca9036a3efb34c1d0afe115b.html#a28135041ca9036a3efb34c1d0afe115b">fl::span::empty</a></div><div class="ttdeci">constexpr bool empty() const FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d7a/span_8h_source.html#l00535">span.h:535</a></div></div>
+<div class="ttc" id="aclassfl_1_1span_a45157f503f151e36c679f688f10e3511_html_a45157f503f151e36c679f688f10e3511"><div class="ttname"><a href="../../d0/d08/classfl_1_1span_a45157f503f151e36c679f688f10e3511.html#a45157f503f151e36c679f688f10e3511">fl::span::data</a></div><div class="ttdeci">const T * data() const FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d7a/span_8h_source.html#l00486">span.h:486</a></div></div>
+<div class="ttc" id="aclassfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa_html_aaf3daca1c2c8f93b2ac7b319989b22fa"><div class="ttname"><a href="../../d0/d08/classfl_1_1span_aaf3daca1c2c8f93b2ac7b319989b22fa.html#aaf3daca1c2c8f93b2ac7b319989b22fa">fl::span::size</a></div><div class="ttdeci">constexpr fl::size size() const FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d7a/span_8h_source.html#l00483">span.h:483</a></div></div>
+<div class="ttc" id="alog_8h_a4804912fba6eed63e1afd84b8768aced_html_a4804912fba6eed63e1afd84b8768aced"><div class="ttname"><a href="../../d7/d7f/log_8h_a4804912fba6eed63e1afd84b8768aced.html#a4804912fba6eed63e1afd84b8768aced">FL_WARN</a></div><div class="ttdeci">#define FL_WARN(...)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00440">log.h:440</a></div></div>
+<div class="ttc" id="alog_8h_a8ccae77aa5fe30a41f19d233cb0de2c1_html_a8ccae77aa5fe30a41f19d233cb0de2c1"><div class="ttname"><a href="../../d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a></div><div class="ttdeci">#define FL_DBG</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00564">log.h:564</a></div></div>
+<div class="ttc" id="anamespacefl_a35ff6755912c639a5e5bd35fc59e57ff_html_a35ff6755912c639a5e5bd35fc59e57ff"><div class="ttname"><a href="../../d4/d36/namespacefl_a35ff6755912c639a5e5bd35fc59e57ff.html#a35ff6755912c639a5e5bd35fc59e57ff">fl::memcpy</a></div><div class="ttdeci">void * memcpy(void *dest, const void *src, size_t n) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/da3/cstring_8cpp_8hpp_source.html#l00128">cstring.cpp.hpp:128</a></div></div>
 <div class="ttc" id="astructfl_1_1_spi_channel_engine_adapter_1_1_controller_info_html"><div class="ttname"><a href="../../df/db7/structfl_1_1_spi_channel_engine_adapter_1_1_controller_info.html">fl::SpiChannelEngineAdapter::ControllerInfo</a></div><div class="ttdoc">Information about a registered SPI hardware controller.</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d8e/spi__channel__adapter_8h_source.html#l00127">spi_channel_adapter.h:127</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d1/d09/fl_2channels_2config_8h_source.html#l00104">fl::SpiChipsetConfig::clockPin</a>, <a class="el" href="../../d4/d8e/spi__channel__adapter_8h_source.html#l00128">fl::SpiChannelEngineAdapter::ControllerInfo::controller</a>, <a class="el" href="../../d4/d7a/span_8h_source.html#l00461">fl::span&lt; T, Extent &gt;::data()</a>, <a class="el" href="../../d7/d7f/log_8h_source.html#l00388">FL_DBG</a>, <a class="el" href="../../d7/d7f/log_8h_source.html#l00276">FL_WARN</a>, <a class="el" href="../../d6/d93/spi__channel__adapter_8cpp_8hpp_source.html#l00151">initializeControllerIfNeeded()</a>, <a class="el" href="../../d4/d8e/spi__channel__adapter_8h_source.html#l00180">mControllers</a>, <a class="el" href="../../df/da3/cstring_8cpp_8hpp_source.html#l00110">fl::memcpy()</a>, <a class="el" href="../../d4/d8e/spi__channel__adapter_8h_source.html#l00130">fl::SpiChannelEngineAdapter::ControllerInfo::name</a>, <a class="el" href="../../d6/d93/spi__channel__adapter_8cpp_8hpp_source.html#l00101">selectControllerForClockPin()</a>, <a class="el" href="../../df/d4b/basic__string_8h_source.html#l00153">fl::basic_string::size()</a>, and <a class="el" href="../../d4/d7a/span_8h_source.html#l00458">fl::span&lt; T, Extent &gt;::size()</a>.</p>
+<p class="reference">References <a class="el" href="../../d1/d09/fl_2channels_2config_8h_source.html#l00105">fl::SpiChipsetConfig::clockPin</a>, <a class="el" href="../../d4/d8e/spi__channel__adapter_8h_source.html#l00128">fl::SpiChannelEngineAdapter::ControllerInfo::controller</a>, <a class="el" href="../../d4/d7a/span_8h_source.html#l00486">fl::span&lt; T, Extent &gt;::data()</a>, <a class="el" href="../../d7/d7f/log_8h_source.html#l00564">FL_DBG</a>, <a class="el" href="../../d7/d7f/log_8h_source.html#l00440">FL_WARN</a>, <a class="el" href="../../d6/d93/spi__channel__adapter_8cpp_8hpp_source.html#l00153">initializeControllerIfNeeded()</a>, <a class="el" href="../../d4/d8e/spi__channel__adapter_8h_source.html#l00182">mControllers</a>, <a class="el" href="../../df/da3/cstring_8cpp_8hpp_source.html#l00128">fl::memcpy()</a>, <a class="el" href="../../d4/d8e/spi__channel__adapter_8h_source.html#l00130">fl::SpiChannelEngineAdapter::ControllerInfo::name</a>, <a class="el" href="../../d6/d93/spi__channel__adapter_8cpp_8hpp_source.html#l00099">selectControllerForClockPin()</a>, <a class="el" href="../../df/d4b/basic__string_8h_source.html#l00153">fl::basic_string::size()</a>, <a class="el" href="../../d4/d7a/span_8h_source.html#l00483">fl::span&lt; T, Extent &gt;::size()</a>, and <a class="el" href="../../d1/d09/fl_2channels_2config_8h_source.html#l00107">fl::SpiChipsetConfig::spiBus</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../d6/d93/spi__channel__adapter_8cpp_8hpp_source.html#l00229">show()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
@@ -261,7 +258,7 @@ $(function(){initNavTree('d3/daf/classfl_1_1_spi_channel_engine_adapter_ae820ac9
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d3/daf/classfl_1_1_spi_channel_engine_adapter.html">SpiChannelEngineAdapter</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:10 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

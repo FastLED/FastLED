@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -118,33 +118,33 @@ $(function(){initNavTree('d7/d70/classfl_1_1spi_1_1_multi_lane_device_a68cfb14b1
 <p>Shutdown hardware and release resources. </p>
 <dl class="section note"><dt>Note</dt><dd>Waits for pending transmissions to complete </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../dc/d95/multi__lane__device_8cpp_8hpp_source.html#l00264">264</a> of file <a class="el" href="../../dc/d95/multi__lane__device_8cpp_8hpp_source.html">multi_lane_device.cpp.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  264</span>                          {</div>
-<div class="line"><span class="lineno">  265</span>    <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a.html#a8bc84fc4f04afca27bd5746cc2c2b06a">pImpl</a> || !<a class="code hl_variable" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a.html#a8bc84fc4f04afca27bd5746cc2c2b06a">pImpl</a>-&gt;initialized) {</div>
-<div class="line"><span class="lineno">  266</span>        <span class="keywordflow">return</span>;</div>
-<div class="line"><span class="lineno">  267</span>    }</div>
-<div class="line"><span class="lineno">  268</span> </div>
-<div class="line"><span class="lineno">  269</span>    <span class="comment">// Wait for pending operations</span></div>
-<div class="line"><span class="lineno">  270</span>    <a class="code hl_function" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a44c55402b14a1d2962aaea6d0574b46a.html#a44c55402b14a1d2962aaea6d0574b46a">waitComplete</a>();</div>
-<div class="line"><span class="lineno">  271</span> </div>
-<div class="line"><span class="lineno">  272</span>    <span class="comment">// Release hardware backend</span></div>
-<div class="line"><span class="lineno">  273</span>    <a class="code hl_variable" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a.html#a8bc84fc4f04afca27bd5746cc2c2b06a">pImpl</a>-&gt;releaseBackend();</div>
-<div class="line"><span class="lineno">  274</span> </div>
-<div class="line"><span class="lineno">  275</span>    <span class="comment">// Clear lane buffers</span></div>
-<div class="line"><span class="lineno">  276</span>    <span class="keywordflow">for</span> (<span class="keyword">auto</span>&amp; <a class="code hl_function" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a66a4df428de2fc83a006ad0544e56b1b.html#a66a4df428de2fc83a006ad0544e56b1b">lane</a> : <a class="code hl_variable" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a.html#a8bc84fc4f04afca27bd5746cc2c2b06a">pImpl</a>-&gt;lanes) {</div>
-<div class="line"><span class="lineno">  277</span>        <a class="code hl_function" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a66a4df428de2fc83a006ad0544e56b1b.html#a66a4df428de2fc83a006ad0544e56b1b">lane</a>.clear();</div>
-<div class="line"><span class="lineno">  278</span>    }</div>
-<div class="line"><span class="lineno">  279</span> </div>
-<div class="line"><span class="lineno">  280</span>    <a class="code hl_define" href="../../d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a>(<span class="stringliteral">&quot;MultiLaneDevice: Shutdown complete&quot;</span>);</div>
-<div class="line"><span class="lineno">  281</span>}</div>
-<div class="ttc" id="aclassfl_1_1spi_1_1_multi_lane_device_a44c55402b14a1d2962aaea6d0574b46a_html_a44c55402b14a1d2962aaea6d0574b46a"><div class="ttname"><a href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a44c55402b14a1d2962aaea6d0574b46a.html#a44c55402b14a1d2962aaea6d0574b46a">fl::spi::MultiLaneDevice::waitComplete</a></div><div class="ttdeci">bool waitComplete(u32 timeout_ms=(fl::numeric_limits&lt; u32 &gt;::max)())</div><div class="ttdoc">Wait for pending transmission to complete.</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d95/multi__lane__device_8cpp_8hpp_source.html#l00447">multi_lane_device.cpp.hpp:447</a></div></div>
-<div class="ttc" id="aclassfl_1_1spi_1_1_multi_lane_device_a66a4df428de2fc83a006ad0544e56b1b_html_a66a4df428de2fc83a006ad0544e56b1b"><div class="ttname"><a href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a66a4df428de2fc83a006ad0544e56b1b.html#a66a4df428de2fc83a006ad0544e56b1b">fl::spi::MultiLaneDevice::lane</a></div><div class="ttdeci">Lane &amp; lane(size_t lane_id)</div><div class="ttdoc">Get access to a specific lane.</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d95/multi__lane__device_8cpp_8hpp_source.html#l00287">multi_lane_device.cpp.hpp:287</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../dc/d95/multi__lane__device_8cpp_8hpp_source.html#l00263">263</a> of file <a class="el" href="../../dc/d95/multi__lane__device_8cpp_8hpp_source.html">multi_lane_device.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  263</span>                          {</div>
+<div class="line"><span class="lineno">  264</span>    <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a.html#a8bc84fc4f04afca27bd5746cc2c2b06a">pImpl</a> || !<a class="code hl_variable" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a.html#a8bc84fc4f04afca27bd5746cc2c2b06a">pImpl</a>-&gt;initialized) {</div>
+<div class="line"><span class="lineno">  265</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">  266</span>    }</div>
+<div class="line"><span class="lineno">  267</span> </div>
+<div class="line"><span class="lineno">  268</span>    <span class="comment">// Wait for pending operations</span></div>
+<div class="line"><span class="lineno">  269</span>    <a class="code hl_function" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a44c55402b14a1d2962aaea6d0574b46a.html#a44c55402b14a1d2962aaea6d0574b46a">waitComplete</a>();</div>
+<div class="line"><span class="lineno">  270</span> </div>
+<div class="line"><span class="lineno">  271</span>    <span class="comment">// Release hardware backend</span></div>
+<div class="line"><span class="lineno">  272</span>    <a class="code hl_variable" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a.html#a8bc84fc4f04afca27bd5746cc2c2b06a">pImpl</a>-&gt;releaseBackend();</div>
+<div class="line"><span class="lineno">  273</span> </div>
+<div class="line"><span class="lineno">  274</span>    <span class="comment">// Clear lane buffers</span></div>
+<div class="line"><span class="lineno">  275</span>    <span class="keywordflow">for</span> (<span class="keyword">auto</span>&amp; <a class="code hl_function" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a66a4df428de2fc83a006ad0544e56b1b.html#a66a4df428de2fc83a006ad0544e56b1b">lane</a> : <a class="code hl_variable" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a.html#a8bc84fc4f04afca27bd5746cc2c2b06a">pImpl</a>-&gt;lanes) {</div>
+<div class="line"><span class="lineno">  276</span>        <a class="code hl_function" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a66a4df428de2fc83a006ad0544e56b1b.html#a66a4df428de2fc83a006ad0544e56b1b">lane</a>.clear();</div>
+<div class="line"><span class="lineno">  277</span>    }</div>
+<div class="line"><span class="lineno">  278</span> </div>
+<div class="line"><span class="lineno">  279</span>    <a class="code hl_define" href="../../d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a>(<span class="stringliteral">&quot;MultiLaneDevice: Shutdown complete&quot;</span>);</div>
+<div class="line"><span class="lineno">  280</span>}</div>
+<div class="ttc" id="aclassfl_1_1spi_1_1_multi_lane_device_a44c55402b14a1d2962aaea6d0574b46a_html_a44c55402b14a1d2962aaea6d0574b46a"><div class="ttname"><a href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a44c55402b14a1d2962aaea6d0574b46a.html#a44c55402b14a1d2962aaea6d0574b46a">fl::spi::MultiLaneDevice::waitComplete</a></div><div class="ttdeci">bool waitComplete(u32 timeout_ms=(fl::numeric_limits&lt; u32 &gt;::max)())</div><div class="ttdoc">Wait for pending transmission to complete.</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d95/multi__lane__device_8cpp_8hpp_source.html#l00443">multi_lane_device.cpp.hpp:443</a></div></div>
+<div class="ttc" id="aclassfl_1_1spi_1_1_multi_lane_device_a66a4df428de2fc83a006ad0544e56b1b_html_a66a4df428de2fc83a006ad0544e56b1b"><div class="ttname"><a href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a66a4df428de2fc83a006ad0544e56b1b.html#a66a4df428de2fc83a006ad0544e56b1b">fl::spi::MultiLaneDevice::lane</a></div><div class="ttdeci">Lane &amp; lane(size_t lane_id)</div><div class="ttdoc">Get access to a specific lane.</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d95/multi__lane__device_8cpp_8hpp_source.html#l00286">multi_lane_device.cpp.hpp:286</a></div></div>
 <div class="ttc" id="aclassfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a_html_a8bc84fc4f04afca27bd5746cc2c2b06a"><div class="ttname"><a href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a8bc84fc4f04afca27bd5746cc2c2b06a.html#a8bc84fc4f04afca27bd5746cc2c2b06a">fl::spi::MultiLaneDevice::pImpl</a></div><div class="ttdeci">fl::unique_ptr&lt; Impl &gt; pImpl</div><div class="ttdef"><b>Definition</b> <a href="../../da/dc3/multi__lane__device_8h_source.html#l00197">multi_lane_device.h:197</a></div></div>
-<div class="ttc" id="alog_8h_a8ccae77aa5fe30a41f19d233cb0de2c1_html_a8ccae77aa5fe30a41f19d233cb0de2c1"><div class="ttname"><a href="../../d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a></div><div class="ttdeci">#define FL_DBG</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00388">log.h:388</a></div></div>
+<div class="ttc" id="alog_8h_a8ccae77aa5fe30a41f19d233cb0de2c1_html_a8ccae77aa5fe30a41f19d233cb0de2c1"><div class="ttname"><a href="../../d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a></div><div class="ttdeci">#define FL_DBG</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00564">log.h:564</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d7/d7f/log_8h_source.html#l00388">FL_DBG</a>, <a class="el" href="../../dc/d95/multi__lane__device_8cpp_8hpp_source.html#l00287">lane()</a>, <a class="el" href="../../da/dc3/multi__lane__device_8h_source.html#l00197">pImpl</a>, and <a class="el" href="../../dc/d95/multi__lane__device_8cpp_8hpp_source.html#l00447">waitComplete()</a>.</p>
+<p class="reference">References <a class="el" href="../../d7/d7f/log_8h_source.html#l00564">FL_DBG</a>, <a class="el" href="../../dc/d95/multi__lane__device_8cpp_8hpp_source.html#l00286">lane()</a>, <a class="el" href="../../da/dc3/multi__lane__device_8h_source.html#l00197">pImpl</a>, and <a class="el" href="../../dc/d95/multi__lane__device_8cpp_8hpp_source.html#l00443">waitComplete()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dc/d95/multi__lane__device_8cpp_8hpp_source.html#l00072">~MultiLaneDevice()</a>, and <a class="el" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a512a780a7050fa0e91e83c5dba1e17bc.html#a512a780a7050fa0e91e83c5dba1e17bc">operator=()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dc/d95/multi__lane__device_8cpp_8hpp_source.html#l00071">~MultiLaneDevice()</a>, and <a class="el" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device_a552f915191464193c98a7a385a6eb05b.html#a552f915191464193c98a7a385a6eb05b">operator=()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -169,7 +169,7 @@ $(function(){initNavTree('d7/d70/classfl_1_1spi_1_1_multi_lane_device_a68cfb14b1
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d4/d68/namespacefl_1_1spi.html">spi</a></li><li class="navelem"><a class="el" href="../../d7/d70/classfl_1_1spi_1_1_multi_lane_device.html">MultiLaneDevice</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:10 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:12 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

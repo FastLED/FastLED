@@ -31,7 +31,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.9.15</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.10.6</span>
    </div>
   </td>
  </tr>
@@ -136,19 +136,19 @@ $(function(){initNavTree('df/d35/namespacefl_1_1anonymous__namespace_02corkscrew
 
 <p class="definition">Definition at line <a class="el" href="../../d0/da5/corkscrew_8cpp_8hpp_source.html#l00056">56</a> of file <a class="el" href="../../d0/da5/corkscrew_8cpp_8hpp_source.html">corkscrew.cpp.hpp</a>.</p>
 <div class="fragment"><div class="line"><span class="lineno">   56</span>                                                                                                             {</div>
-<div class="line"><span class="lineno">   57</span>    <a class="code hl_define" href="../../df/d96/s16x16x4_8h_a3600073df3d019f0b6288e9d59b3e883.html#a3600073df3d019f0b6288e9d59b3e883">FL_UNUSED</a>(gapParams);</div>
+<div class="line"><span class="lineno">   57</span>    <a class="code hl_define" href="../../d4/d54/compiler__control_8h_a3600073df3d019f0b6288e9d59b3e883.html#a3600073df3d019f0b6288e9d59b3e883">FL_UNUSED</a>(gapParams);</div>
 <div class="line"><span class="lineno">   58</span>    </div>
 <div class="line"><span class="lineno">   59</span>    <span class="comment">// Calculate optimal width and height</span></div>
 <div class="line"><span class="lineno">   60</span>    <span class="keywordtype">float</span> ledsPerTurn = <span class="keyword">static_cast&lt;</span><span class="keywordtype">float</span><span class="keyword">&gt;</span>(numLeds) / totalTurns;</div>
-<div class="line"><span class="lineno">   61</span>    fl::u16 calc_width = <span class="keyword">static_cast&lt;</span>fl::u16<span class="keyword">&gt;</span>(<a class="code hl_function" href="../../d4/d36/namespacefl_a3147d73d9121eec8710b892112eda203.html#a3147d73d9121eec8710b892112eda203">fl::ceil</a>(ledsPerTurn));</div>
+<div class="line"><span class="lineno">   61</span>    fl::u16 calc_width = <span class="keyword">static_cast&lt;</span>fl::u16<span class="keyword">&gt;</span>(<a class="code hl_function" href="../../d4/d36/namespacefl_a4f76bde8d17a25790ec3382f979786c9.html#a4f76bde8d17a25790ec3382f979786c9">fl::ceil</a>(ledsPerTurn));</div>
 <div class="line"><span class="lineno">   62</span>    </div>
-<div class="line"><span class="lineno">   63</span>    fl::u16 height_from_turns = <span class="keyword">static_cast&lt;</span>fl::u16<span class="keyword">&gt;</span>(<a class="code hl_function" href="../../d4/d36/namespacefl_a3147d73d9121eec8710b892112eda203.html#a3147d73d9121eec8710b892112eda203">fl::ceil</a>(totalTurns));</div>
+<div class="line"><span class="lineno">   63</span>    fl::u16 height_from_turns = <span class="keyword">static_cast&lt;</span>fl::u16<span class="keyword">&gt;</span>(<a class="code hl_function" href="../../d4/d36/namespacefl_a4f76bde8d17a25790ec3382f979786c9.html#a4f76bde8d17a25790ec3382f979786c9">fl::ceil</a>(totalTurns));</div>
 <div class="line"><span class="lineno">   64</span>    fl::u16 calc_height;</div>
 <div class="line"><span class="lineno">   65</span>    </div>
 <div class="line"><span class="lineno">   66</span>    <span class="comment">// If the grid would have more pixels than LEDs, adjust height to better match</span></div>
 <div class="line"><span class="lineno">   67</span>    <span class="keywordflow">if</span> (calc_width * height_from_turns &gt; numLeds) {</div>
 <div class="line"><span class="lineno">   68</span>        <span class="comment">// Calculate height that better matches LED count</span></div>
-<div class="line"><span class="lineno">   69</span>        calc_height = <span class="keyword">static_cast&lt;</span>fl::u16<span class="keyword">&gt;</span>(<a class="code hl_function" href="../../d4/d36/namespacefl_a3147d73d9121eec8710b892112eda203.html#a3147d73d9121eec8710b892112eda203">fl::ceil</a>(<span class="keyword">static_cast&lt;</span><span class="keywordtype">float</span><span class="keyword">&gt;</span>(numLeds) / <span class="keyword">static_cast&lt;</span><span class="keywordtype">float</span><span class="keyword">&gt;</span>(calc_width)));</div>
+<div class="line"><span class="lineno">   69</span>        calc_height = <span class="keyword">static_cast&lt;</span>fl::u16<span class="keyword">&gt;</span>(<a class="code hl_function" href="../../d4/d36/namespacefl_a4f76bde8d17a25790ec3382f979786c9.html#a4f76bde8d17a25790ec3382f979786c9">fl::ceil</a>(<span class="keyword">static_cast&lt;</span><span class="keywordtype">float</span><span class="keyword">&gt;</span>(numLeds) / <span class="keyword">static_cast&lt;</span><span class="keywordtype">float</span><span class="keyword">&gt;</span>(calc_width)));</div>
 <div class="line"><span class="lineno">   70</span>    } <span class="keywordflow">else</span> {</div>
 <div class="line"><span class="lineno">   71</span>        calc_height = height_from_turns;</div>
 <div class="line"><span class="lineno">   72</span>    }</div>
@@ -156,12 +156,12 @@ $(function(){initNavTree('df/d35/namespacefl_1_1anonymous__namespace_02corkscrew
 <div class="line"><span class="lineno">   74</span>    *<a class="code hl_variable" href="../../d4/d36/namespacefl_a82c4062f46dbbd85ea8b41690bda4729.html#a82c4062f46dbbd85ea8b41690bda4729">width</a> = calc_width;</div>
 <div class="line"><span class="lineno">   75</span>    *<a class="code hl_variable" href="../../d4/d36/namespacefl_a2cda7f93ddbdf70cb1b9f8ab2430ffc1.html#a2cda7f93ddbdf70cb1b9f8ab2430ffc1">height</a> = calc_height;</div>
 <div class="line"><span class="lineno">   76</span>}</div>
+<div class="ttc" id="acompiler__control_8h_a3600073df3d019f0b6288e9d59b3e883_html_a3600073df3d019f0b6288e9d59b3e883"><div class="ttname"><a href="../../d4/d54/compiler__control_8h_a3600073df3d019f0b6288e9d59b3e883.html#a3600073df3d019f0b6288e9d59b3e883">FL_UNUSED</a></div><div class="ttdeci">#define FL_UNUSED(x)</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d54/compiler__control_8h_source.html#l00905">compiler_control.h:905</a></div></div>
 <div class="ttc" id="anamespacefl_a2cda7f93ddbdf70cb1b9f8ab2430ffc1_html_a2cda7f93ddbdf70cb1b9f8ab2430ffc1"><div class="ttname"><a href="../../d4/d36/namespacefl_a2cda7f93ddbdf70cb1b9f8ab2430ffc1.html#a2cda7f93ddbdf70cb1b9f8ab2430ffc1">fl::height</a></div><div class="ttdeci">u8 u8 height</div><div class="ttdef"><b>Definition</b> <a href="../../d4/df5/blur_8h_source.html#l00186">blur.h:186</a></div></div>
-<div class="ttc" id="anamespacefl_a3147d73d9121eec8710b892112eda203_html_a3147d73d9121eec8710b892112eda203"><div class="ttname"><a href="../../d4/d36/namespacefl_a3147d73d9121eec8710b892112eda203.html#a3147d73d9121eec8710b892112eda203">fl::ceil</a></div><div class="ttdeci">constexpr enable_if&lt; is_fixed_point&lt; T &gt;::value, T &gt;::type ceil(T x) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../de/d62/fixed__point_8h_source.html#l00508">fixed_point.h:508</a></div></div>
+<div class="ttc" id="anamespacefl_a4f76bde8d17a25790ec3382f979786c9_html_a4f76bde8d17a25790ec3382f979786c9"><div class="ttname"><a href="../../d4/d36/namespacefl_a4f76bde8d17a25790ec3382f979786c9.html#a4f76bde8d17a25790ec3382f979786c9">fl::ceil</a></div><div class="ttdeci">constexpr enable_if&lt; is_fixed_point&lt; T &gt;::value, T &gt;::type ceil(T x) FL_NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../de/d62/fixed__point_8h_source.html#l00508">fixed_point.h:508</a></div></div>
 <div class="ttc" id="anamespacefl_a82c4062f46dbbd85ea8b41690bda4729_html_a82c4062f46dbbd85ea8b41690bda4729"><div class="ttname"><a href="../../d4/d36/namespacefl_a82c4062f46dbbd85ea8b41690bda4729.html#a82c4062f46dbbd85ea8b41690bda4729">fl::width</a></div><div class="ttdeci">u8 width</div><div class="ttdef"><b>Definition</b> <a href="../../d4/df5/blur_8h_source.html#l00186">blur.h:186</a></div></div>
-<div class="ttc" id="as16x16x4_8h_a3600073df3d019f0b6288e9d59b3e883_html_a3600073df3d019f0b6288e9d59b3e883"><div class="ttname"><a href="../../df/d96/s16x16x4_8h_a3600073df3d019f0b6288e9d59b3e883.html#a3600073df3d019f0b6288e9d59b3e883">FL_UNUSED</a></div><div class="ttdeci">#define FL_UNUSED(x)</div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d0/da5/corkscrew_8cpp_8hpp_source.html#l00056">calculateDimensions()</a>, <a class="el" href="../../de/d62/fixed__point_8h_source.html#l00508">fl::ceil()</a>, <a class="el" href="../../df/d96/s16x16x4_8h_a3600073df3d019f0b6288e9d59b3e883.html#a3600073df3d019f0b6288e9d59b3e883">FL_UNUSED</a>, <a class="el" href="../../d4/df5/blur_8h_source.html#l00186">fl::height</a>, and <a class="el" href="../../d4/df5/blur_8h_source.html#l00186">fl::width</a>.</p>
+<p class="reference">References <a class="el" href="../../d0/da5/corkscrew_8cpp_8hpp_source.html#l00056">calculateDimensions()</a>, <a class="el" href="../../de/d62/fixed__point_8h_source.html#l00508">fl::ceil()</a>, <a class="el" href="../../d4/d54/compiler__control_8h_source.html#l00905">FL_UNUSED</a>, <a class="el" href="../../d4/df5/blur_8h_source.html#l00186">fl::height</a>, and <a class="el" href="../../d4/df5/blur_8h_source.html#l00186">fl::width</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../d0/da5/corkscrew_8cpp_8hpp_source.html#l00056">calculateDimensions()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
@@ -188,7 +188,7 @@ $(function(){initNavTree('df/d35/namespacefl_1_1anonymous__namespace_02corkscrew
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../df/d35/namespacefl_1_1anonymous__namespace_02corkscrew_8cpp_8hpp_03.html">anonymous_namespace{corkscrew.cpp.hpp}</a></li>
-    <li class="footer">Generated on Tue Jun 16 2026 00:07:07 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sun Oct 4 2026 23:09:10 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

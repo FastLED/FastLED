@@ -26,9 +26,9 @@ digraph "fl::isr::memcpy_32"
   Node2 -> Node10 [id="edge9_Node000002_Node000010",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node10 [id="Node000010",label="fl::wave8Untranspose_8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a09da435857ae2a973d727792b25bcaaf.html#a09da435857ae2a973d727792b25bcaaf",tooltip=" "];
   Node1 -> Node11 [id="edge10_Node000001_Node000011",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node11 [id="Node000011",label="fl::wave8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a5b15f08d117ed2b984fbd6881dbbde51.html#a5b15f08d117ed2b984fbd6881dbbde51",tooltip="Convert byte to 8 Wave8Bit structures using nibble LUT."];
+  Node11 [id="Node000011",label="fl::wave8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a1a175139a4d8f986acdb0fd1782ae581.html#a1a175139a4d8f986acdb0fd1782ae581",tooltip="Public single-lane wave8 encoder."];
   Node1 -> Node12 [id="edge11_Node000001_Node000012",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node12 [id="Node000012",label="fl::detail::wave8_convert\l_byte_to_wave8byte",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d9e/namespacefl_1_1detail_a2538a6e0d2d28d4194ec004bf5fe6003.html#a2538a6e0d2d28d4194ec004bf5fe6003",tooltip="Helper: Convert byte to Wave8Byte using nibble LUT (internal use only)"];
+  Node12 [id="Node000012",label="fl::detail::wave8_convert\l_byte_to_wave8byte",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d9e/namespacefl_1_1detail_aa731fdf58a33695ff45eee66bb3c8ff6.html#aa731fdf58a33695ff45eee66bb3c8ff6",tooltip=" "];
   Node12 -> Node11 [id="edge12_Node000012_Node000011",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node12 -> Node13 [id="edge13_Node000012_Node000013",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node13 [id="Node000013",label="fl::wave8Transpose_16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a428be465fbb9564d7cf8e7badeb0ea99.html#a428be465fbb9564d7cf8e7badeb0ea99",tooltip=" "];
@@ -39,7 +39,7 @@ digraph "fl::isr::memcpy_32"
   Node12 -> Node16 [id="edge16_Node000012_Node000016",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node16 [id="Node000016",label="fl::wave8Transpose_8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_ad0e6c4abefa2d795fcdba18f0d5c1573.html#ad0e6c4abefa2d795fcdba18f0d5c1573",tooltip=" "];
   Node1 -> Node17 [id="edge17_Node000001_Node000017",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node17 [id="Node000017",label="fl::detail::wave8_expand_byte",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d9e/namespacefl_1_1detail_a66fa111cf8d1f98b7ecda4f2d97b8d75.html#a66fa111cf8d1f98b7ecda4f2d97b8d75",tooltip="Byte-indexed expansion (#2526): one indexed 8-byte copy."];
+  Node17 [id="Node000017",label="fl::detail::wave8_expand_byte",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d9e/namespacefl_1_1detail_ac79066fcad09cc0ca9d99714ee037ec4.html#ac79066fcad09cc0ca9d99714ee037ec4",tooltip=" "];
   Node17 -> Node18 [id="edge18_Node000017_Node000018",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node18 [id="Node000018",label="fl::wave8Transpose_16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a6d3dde4b59c470212560afa6b6d7a712.html#a6d3dde4b59c470212560afa6b6d7a712",tooltip=" "];
   Node17 -> Node19 [id="edge19_Node000017_Node000019",dir="back",color="steelblue1",style="solid",tooltip=" "];
