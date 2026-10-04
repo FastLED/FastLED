@@ -42,6 +42,9 @@ jobs:
         with:
           python-version: '3.10'
 
+      - name: Install uv for pinned esptool
+        uses: astral-sh/setup-uv@v6
+
       - name: Set up fbuild (install + cache)
         uses: FastLED/fbuild/.github/actions/setup@main
         with:
@@ -52,4 +55,6 @@ jobs:
       # OTA and mDNS alongside FastLED (symlinked in through src_dir) so the
       # library-selection path is exercised against real third-party deps.
       - name: Build kitchensink project with fbuild
-        run: fbuild ci/kitchensink build
+        run: |
+          uv --version
+          fbuild ci/kitchensink build
