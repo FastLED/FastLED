@@ -740,14 +740,14 @@ APOLLO3_RED_BOARD = Board(
     board_name="apollo3_red",
     real_board_name="SparkFun_RedBoard_Artemis_ATP",
     platform=APOLLO3_2_2_0,
-    platform_packages="framework-arduinoapollo3@https://github.com/sparkfun/Arduino_Apollo3#v2.2.0",
+    platform_packages="framework-arduinoapollo3@https://github.com/sparkfun/Arduino_Apollo3/releases/download/v2.2.0/Arduino_Apollo3.tar.gz",
 )
 
 APOLLO3_SPARKFUN_THING_PLUS_EXPLORABLE = Board(
     board_name="apollo3_thing_explorable",
     real_board_name="SparkFun_Thing_Plus_expLoRaBLE",
     platform=APOLLO3_2_2_0,
-    platform_packages="framework-arduinoapollo3@https://github.com/sparkfun/Arduino_Apollo3#v2.2.0",
+    platform_packages="framework-arduinoapollo3@https://github.com/sparkfun/Arduino_Apollo3/releases/download/v2.2.0/Arduino_Apollo3.tar.gz",
 )
 
 ESP32DEV = Board(
