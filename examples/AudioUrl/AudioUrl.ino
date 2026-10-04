@@ -48,7 +48,10 @@ void loop() {
     int32_t peak = 0;
     while (fl::audio::Sample sample = audio.next()) {
         for (size_t i = 0; i < sample.pcm().size(); ++i) {
-            int32_t v = abs(sample.pcm()[i]);
+            int32_t v = sample.pcm()[i];
+            if (v < 0) {
+                v = -v;
+            }
             if (v > peak) {
                 peak = v;
             }
