@@ -756,7 +756,10 @@ APOLLO3_SPARKFUN_THING_PLUS_EXPLORABLE = Board(
 
 ESP32DEV = Board(
     board_name="esp32dev",
-    platform=ESP32_IDF_5_3_PIOARDUINO,
+    # Keep the size reference on Arduino-ESP32 3.3.11. The 5.3 platform
+    # resolved 3.1.0 and put both Blink and Apa102 over their frozen caps;
+    # the 5.5.5 platform restores the documented framework baseline (#4690).
+    platform=ESP32_IDF_5_5_5_PIOARDUINO,
     board_partitions="huge_app.csv",
     # Size-strip flags for the CI binary-size reference target
     # (check_esp32_size.yml — 330 KB ceiling). Previously these lived in
