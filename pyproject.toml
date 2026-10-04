@@ -5,9 +5,12 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    # Pin to fbuild 2.5.36 for ESP-IDF 3.3 and 4.4 SDK compatibility.
+    # Pin to fbuild 2.5.37 for ESP32-C2 and ESP32-H2 SDK compatibility.
     #
     # Pin history:
+    #   2.5.37 -- repairs the packaged C2/H2 Bluetooth header layout and
+    #              drops -fuse-cxa-atexit for their GCC 14 SDKs
+    #              (FastLED/fbuild#1651, FastLED#4687).
     #   2.5.36 -- links IDF 4.4 radio archives from the SDK ld directory,
     #              including libphy.a for WiFi examples
     #              (FastLED/fbuild#1650, FastLED#4686).
@@ -291,7 +294,7 @@ dependencies = [
     # primitive (FastLED/fbuild#532, #577/#580), and an
     # http-connect-timeout fix on the managed-zccache client
     # (FastLED/fbuild#573).
-    "fbuild==2.5.36",
+    "fbuild==2.5.37",
     # Decodes the FastLED/boards `usb-vids.proto.zstd` registry artifact in
     # ci/util/audit_usb_registry.py. Declared explicitly rather than relied on
     # transitively (clang-tool-chain-bins pulls it in today) so the documented
