@@ -16,7 +16,13 @@ FL_EXTERN_C_BEGIN
 // IWYU pragma: begin_keep
 #include "driver/uart.h"
 // IWYU pragma: end_keep
+#if ESP_IDF_VERSION_4_OR_HIGHER
 #include "esp_rom_uart.h"
+#else
+// IWYU pragma: begin_keep
+#include "rom/uart.h"
+// IWYU pragma: end_keep
+#endif
 // IWYU pragma: begin_keep
 #include "freertos/FreeRTOS.h"  // For vTaskDelay
 // IWYU pragma: end_keep
@@ -27,7 +33,13 @@ FL_EXTERN_C_END
 
 // Compatibility: esp_rom_output_tx_one_char was added in ESP-IDF 5.3.
 // Older IDF versions only have esp_rom_uart_tx_one_char.
-#if ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(5, 3, 0)
+#if !ESP_IDF_VERSION_4_OR_HIGHER
+#define esp_rom_output_tx_one_char(c) uart_tx_one_char(c)
+#define UART_SIGNAL_TXD_INV UART_INVERSE_TXD
+#define UART_SIGNAL_RXD_INV UART_INVERSE_RXD
+#define UART_SIGNAL_RTS_INV UART_INVERSE_RTS
+#define UART_SIGNAL_CTS_INV UART_INVERSE_CTS
+#elif ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(5, 3, 0)
 #define esp_rom_output_tx_one_char(c) esp_rom_uart_tx_one_char(c)
 #endif
 
@@ -378,7 +390,7 @@ size_t UartEsp32::write(const u8* buffer, size_t size) FL_NO_EXCEPT {
     if (mBuffered) {
         // Use uart_write_bytes() - handles raw binary data
         // ESP-IDF UART driver handles the buffer internally
-        int written = uart_write_bytes(port, buffer, size);
+        int written = uart_write_bytes(port, static_cast<const char*>(static_cast<const void*>(buffer)), size);
         return (written < 0) ? 0 : static_cast<size_t>(written);
     } else {
         // Fallback to ROM UART (byte-by-byte)

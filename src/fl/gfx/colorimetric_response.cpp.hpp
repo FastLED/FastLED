@@ -11,6 +11,19 @@
 
 #include "fl/gfx/colorimetric_response.h"
 
+#if defined(__GNUC__) && !defined(__clang__) && __GNUC__ < 6
+namespace fl {
+namespace colorimetric_response {
+namespace profiles {
+const EmitterProfile WS2812B = EmitterProfile::rgb(
+    "ws2812b/placeholder/uncalibrated", Chromaticity(.640f, .330f),
+    Chromaticity(.300f, .600f), Chromaticity(.150f, .060f), 1.0f, 1.0f, 1.0f,
+    "placeholder", "uncalibrated");
+} // namespace profiles
+} // namespace colorimetric_response
+} // namespace fl
+#endif
+
 #if FASTLED_RGBW_COLORIMETRIC
 
 namespace fl {

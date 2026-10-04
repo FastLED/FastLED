@@ -3,6 +3,7 @@
 // IWYU pragma: private
 
 #include "platforms/esp/is_esp.h"
+#include "platforms/esp/esp_version.h"
 
 // ESP32 Hardware SPI implementation using native ESP-IDF driver
 // This file uses driver/spi_master.h for pure ESP-IDF builds without Arduino framework
@@ -31,6 +32,11 @@ FL_DISABLE_WARNING_DEPRECATED_REGISTER
 FL_EXTERN_C_END
 
 namespace fl {
+
+#if !ESP_IDF_VERSION_4_OR_HIGHER
+#define SPI2_HOST HSPI_HOST
+#define SPI3_HOST VSPI_HOST
+#endif
 
 // Determine default SPI host based on chip variant
 #if defined(FL_IS_ESP_32S2) || defined(FL_IS_ESP_32S3) || \
@@ -135,7 +141,14 @@ public:
         bus_config.flags = SPICOMMON_BUSFLAG_MASTER;
 
         // Initialize bus with auto DMA
-        esp_err_t ret = spi_bus_initialize(mHost, &bus_config, SPI_DMA_CH_AUTO);
+#if ESP_IDF_VERSION_4_OR_HIGHER
+        const int dma_channel = SPI_DMA_CH_AUTO;
+#else
+        // IDF 3.3 has no automatic allocation. HSPI and VSPI use distinct
+        // DMA channels with the same numeric IDs as their host constants.
+        const int dma_channel = static_cast<i32>(mHost);
+#endif
+        esp_err_t ret = spi_bus_initialize(mHost, &bus_config, dma_channel);
         if (ret != ESP_OK) {
             FL_WARN("SPI bus init failed: %s", ret);
             return;
