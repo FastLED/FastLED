@@ -3,6 +3,7 @@
 // IWYU pragma: private
 
 #include "platforms/esp/is_esp.h"
+#include "platforms/esp/esp_version.h"
 
 // ESP32 Hardware SPI implementation using native ESP-IDF driver
 // This file uses driver/spi_master.h for pure ESP-IDF builds without Arduino framework
@@ -31,6 +32,12 @@ FL_DISABLE_WARNING_DEPRECATED_REGISTER
 FL_EXTERN_C_END
 
 namespace fl {
+
+#if !ESP_IDF_VERSION_4_OR_HIGHER
+#define SPI2_HOST HSPI_HOST
+#define SPI3_HOST VSPI_HOST
+#define SPI_DMA_CH_AUTO 1
+#endif
 
 // Determine default SPI host based on chip variant
 #if defined(FL_IS_ESP_32S2) || defined(FL_IS_ESP_32S3) || \

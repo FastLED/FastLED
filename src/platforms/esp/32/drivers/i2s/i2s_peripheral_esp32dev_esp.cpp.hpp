@@ -56,7 +56,7 @@ FL_EXTERN_C_BEGIN
 #include "esp_err.h"
 #include "esp_heap_caps.h"
 #include "esp_intr_alloc.h"
-#include "esp_rom_gpio.h"  // esp_rom_gpio_connect_out_signal (replaces gpio_matrix_out)
+#include "platforms/esp/32/core/rom_gpio_compat.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "rom/lldesc.h"

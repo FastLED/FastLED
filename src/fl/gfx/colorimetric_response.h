@@ -422,10 +422,14 @@ struct EmitterProfile {
 using RgbColorimetricProfile = EmitterProfile;
 
 namespace profiles {
+#if defined(__GNUC__) && !defined(__clang__) && __GNUC__ < 6
+extern const EmitterProfile WS2812B;
+#else
 static constexpr EmitterProfile WS2812B = EmitterProfile::rgb(
     "ws2812b/placeholder/uncalibrated", Chromaticity(.640f, .330f),
     Chromaticity(.300f, .600f), Chromaticity(.150f, .060f), 1.0f, 1.0f, 1.0f,
     "placeholder", "uncalibrated");
+#endif
 }  // namespace profiles
 
 // Cache derived from `EmitterProfile`: precomputed XYZ primaries, inverse

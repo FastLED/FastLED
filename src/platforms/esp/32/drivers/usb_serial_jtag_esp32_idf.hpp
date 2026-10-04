@@ -13,7 +13,13 @@
 
 // ESP-IDF headers (only in .cpp.hpp, not in .h)
 FL_EXTERN_C_BEGIN
+#if ESP_IDF_VERSION_4_OR_HIGHER
 #include "esp_rom_uart.h"
+#else
+// IWYU pragma: begin_keep
+#include "rom/uart.h"
+// IWYU pragma: end_keep
+#endif
 
 // USB-Serial JTAG driver is only available on ESP32-S3, C3, C6, H2 with IDF 4.4+
 #if defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C3) || \
@@ -36,7 +42,9 @@ FL_EXTERN_C_END
 
 // Compatibility: esp_rom_output_tx_one_char was added in ESP-IDF 5.3.
 // Older IDF versions only have esp_rom_uart_tx_one_char.
-#if ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(5, 3, 0)
+#if !ESP_IDF_VERSION_4_OR_HIGHER
+#define esp_rom_output_tx_one_char(c) uart_tx_one_char(c)
+#elif ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(5, 3, 0)
 #define esp_rom_output_tx_one_char(c) esp_rom_uart_tx_one_char(c)
 #endif
 

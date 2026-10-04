@@ -12,9 +12,14 @@
 
 #include "fl/gfx/colorimetric_response.h"
 #include "fl/math/math.h"
+#include "fl/stl/static_assert.h"
 
 using namespace fl;
 using namespace fl::colorimetric_response;
+
+#if !defined(__GNUC__) || defined(__clang__) || __GNUC__ >= 6
+FL_STATIC_ASSERT(fl::profiles::WS2812B.lum_r == 1.0f, "WS2812B stays constexpr");
+#endif
 
 
 FL_TEST_CASE("xyY_to_XYZ: round trip vs. direct math") {

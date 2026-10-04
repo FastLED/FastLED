@@ -26,7 +26,7 @@ FL_EXTERN_C_BEGIN
 // IWYU pragma: begin_keep
 #include "driver/gpio.h"
 #include "esp_heap_caps.h"
-#include "esp_rom_gpio.h"
+#include "platforms/esp/32/core/rom_gpio_compat.h"
 #include "esp_timer.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
