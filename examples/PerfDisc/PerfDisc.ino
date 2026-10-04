@@ -2,7 +2,8 @@
 /// @brief   Benchmark drawDisc on AVR (32x8 canvas, blend mode)
 /// @example PerfDisc.ino
 
-// @filter: (board is not ATtiny1604)
+// @filter: (memory is low)
+// The benchmark's 768 B framebuffer requires more than 1 KB SRAM with stack.
 
 #include <Arduino.h>
 #include <FastLED.h>

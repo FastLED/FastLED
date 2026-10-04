@@ -281,6 +281,7 @@ class Board:
             "attiny4313",  # 256B RAM
             "attiny1604",  # 1KB RAM (ATtinyxy4)
             "digispark-tiny",  # 512B RAM
+            "atmega8a",  # 1KB RAM
         }
         if self.board_name.lower() in tiny_memory_boards:
             return "tiny"

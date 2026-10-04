@@ -427,6 +427,13 @@ def generate_build_info_json_from_existing_build(
             f"build_info_{example}.json" if example else "build_info.json"
         )
         build_info_path = build_dir / build_info_filename
+        try:
+            build_info_path.resolve().relative_to(build_dir.resolve())
+        except ValueError as e:
+            raise ValueError(
+                f"build-info path escapes build directory: {build_info_path}"
+            ) from e
+        build_info_path.parent.mkdir(parents=True, exist_ok=True)
         with open(build_info_path, "w") as f:
             json.dump(data, f, indent=4, sort_keys=True)
         print(f"Generated {build_info_filename} from {source} at {build_info_path}")

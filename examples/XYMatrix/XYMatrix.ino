@@ -31,8 +31,14 @@
 
 
 // Params for width and height
+#if FL_PLATFORM_HAS_TINY_MEMORY
+// A 16x16 CRGB matrix uses 768 B before controller state and stack.
+const uint8_t kMatrixWidth = 4;
+const uint8_t kMatrixHeight = 4;
+#else
 const uint8_t kMatrixWidth = 16;
 const uint8_t kMatrixHeight = 16;
+#endif
 
 // Param for different pixel layouts
 const bool    kMatrixSerpentineLayout = true;
@@ -222,5 +228,4 @@ void loop()
     }
     FastLED.show();
 }
-
 

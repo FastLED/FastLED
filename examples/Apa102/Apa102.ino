@@ -4,7 +4,12 @@
 #include <FastLED.h>
 #include <lib8tion.h>
 
-#define NUM_LEDS  20
+#if FL_PLATFORM_HAS_TINY_MEMORY
+// Leave room for the controller and stack on parts with as little as 256 B SRAM.
+#define NUM_LEDS 8
+#else
+#define NUM_LEDS 20
+#endif
 
 // Defaults come from the board (platforms/default_pins.h) rather than a
 // literal, because a literal is a guess about hardware this sketch cannot
