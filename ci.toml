@@ -198,7 +198,7 @@ uv       = { via = "setup-uv", max = "13MB", lockfile = true, per = "platform", 
 # largest 124336222 B = 118.6 MiB -> 119 MiB. 119 x 3 = 357 MiB >= 309.9 MiB.
 # `evict = "lru"` is mandatory here (CACHE-029): the 357 MiB footprint clears
 # the 256 MiB floor at which unbounded entry count becomes a budget threat.
-rust-lint = { via = "ci-lint", max = "119MB", lockfile = true, per = "os", min = "1MB", evict = "lru" }
+rust-lint = { prefix = "rust-lint-", max = "119MB", lockfile = true, per = "os", min = "1MB", evict = "lru" }
 
 # Nearest-ancestor promotion is NOT declared. setup-soldr owns the `m<n>` lineage
 # label; the fbuild composite and template_unit_test.yml write bare content
