@@ -1,0 +1,291 @@
+# ci.toml — FastLED/FastLED's CI contract. Checked and planned by ci-lint
+# (zackees/ci.yml). Nothing here generates YAML: it bounds what the YAML may
+# do and decides what each run selects.
+#
+# This file is CACHE-ONLY policy, on purpose. FastLED runs 121 workflow files
+# of its own shape (73 board builds fanning into build_template.yml, plus
+# unit/example/qemu/size lanes); none of that is rewritten here. What this
+# declares is the ceiling on the repository's Actions cache, which as of
+# 2026-10-05 sat at 8.898 GiB of GitHub's 10 GiB per-repo cap across 12
+# entries — 89% — with no declared bound at all. Three of those entries are
+# 8.52 GiB: one board's build, keyed three times, one entry per board
+# (esp32s3 / attiny85 / leonardo, all from source commit 763fb4d9). A fourth
+# board variant does not fit: GitHub refuses the save and every later board
+# PR runs cold.
+#
+# SIZING RULE, stated once because everything below follows from it: every
+# `max` is at or above the largest entry MEASURED live in this repository, and
+# every `max x cardinality` product is at or above its family's measured live
+# total. Over-stating costs headroom. Under-stating makes `ci-lint cache
+# janitor` delete a live cache — that is the dangerous direction, so every
+# number below is measured-up-from, never rounded-down-to.
+#
+# Measurements: `gh api --paginate
+# "repos/FastLED/FastLED/actions/caches?per_page=100"`, read-only, 2026-10-05.
+# Sizes in ci_lint are binary (1MB = 1024^2 B, 1GB = 1024^3 B), so all ceilings
+# below are MiB and all totals are GiB.
+schema  = 3
+profile = "fastled-cache-policy"
+linter  = "zackees/ci.yml@dfc7e7d8e0e266db5b71355b281220ab3b0c563f"
+
+# ── Platforms ────────────────────────────────────────────────────────────────
+# The runner OSes the reusable templates are actually invoked with, at the
+# fleet's pinned labels:
+#   unit_test_linux.yml:42      -> ubuntu-latest
+#   unit_test_windows.yml:37    -> windows-latest
+#   unit_test_macos.yml:20      -> matrix [macos-15-intel, macos-15]
+#   example_test_{linux,macos,windows}.yml, build_wasm.yml:49 -> same set
+#
+# `target` is the host triple of each lane's native test run. FastLED has no
+# Rust cross-compile matrix: its one Rust crate (ci/lint_cpp_rs, the C++ lint
+# backend) builds natively on the runner that lints, so a host triple is the
+# honest value here and CT-006 has no workspace to compare against.
+#
+# NOT DECLARED AS PLATFORMS: the 73 board builds. They all run on Linux and
+# compile for an MCU target (attiny85, esp32s3, ...), not for a runner the
+# fleet hosts; there is no runner label that corresponds to "an ATtiny", so
+# modelling them as platforms would invent a fleet runner that does not exist.
+# Their real axis — the board — is a cache-cardinality question, answered in
+# `[cache.family.fbuild]` below.
+#
+# These values are the CORRECTION, not the description: 20 workflows say
+# `runs-on: ubuntu-latest` and one caller set says `windows-latest`. Both are
+# floating labels and both fire RUN-001 in precheck. That finding is left
+# standing — see the PR body.
+[platforms]
+linux-x64   = { target = "x86_64-unknown-linux-gnu",    runs-on = "ubuntu-24.04",   group = "linux" }
+windows-x64 = { target = "x86_64-pc-windows-msvc",      runs-on = "windows-2025",   group = "windows" }
+macos-arm64 = { target = "aarch64-apple-darwin",        runs-on = "macos-15",       group = "macos" }
+macos-x64   = { target = "x86_64-apple-darwin",         runs-on = "macos-15-intel", group = "macos" }
+
+# ── Suites ───────────────────────────────────────────────────────────────────
+# The repository's real entry points, as literal `run:` lines. `./test`,
+# `bash lint` and `./compile` are committed shims (`test`, `lint`, `ci-compile`)
+# that dispatch into ci/*.py.
+[suites]
+unit     = { run = "./test --clang --no-parallel --unit", required = true }
+lint-cpp = { run = "bash lint --cpp", required = true }
+lint-rs  = { run = "uv run soldr cargo test --release --manifest-path ci/lint_cpp_rs/Cargo.toml", required = true }
+lint-js  = { run = "bash lint --js" }
+py       = { run = "uv run test.py --py --clean" }
+board    = { run = "./compile --no-interactive --no-parallel" }
+iwyu     = { run = "uv run ci/ci-iwyu.py --verbose" }
+example  = { run = "./test --clang --examples" }
+
+# ── Flows ────────────────────────────────────────────────────────────────────
+[flow.pr]
+platforms = ["linux-x64"]
+suites    = ["unit", "lint-cpp", "lint-rs"]
+budget    = { critical-path = "60m" }
+
+[flow.main]
+extends = "pr"
+cache   = "write"
+# pre-prune is DELIBERATELY NOT set. Setting it would drop CACHE-004's
+# lockfile-change-peak term and make the arithmetic fit — but FastLED has no
+# pre-prune step. The nearest thing is build_template.yml:121, which purges
+# exactly one platform subdirectory (FastLED#3543/#3547), not the family's
+# superseded generations. Declaring `pre-prune = true` would make the check
+# pass by asserting a mechanism the repository does not have.
+
+[flow.release]
+platforms = "all"
+suites    = "all"
+
+[flow.nightly]
+extends   = "release"
+schedule  = "daily"
+cache     = "write"
+janitor   = true
+
+# ── Tags ─────────────────────────────────────────────────────────────────────
+[tags]
+ci-full = { add = { platforms = "all", suites = ["example", "iwyu"] } }
+
+# ── Caches ───────────────────────────────────────────────────────────────────
+# Measured 2026-10-05 (read-only GET, 12 entries, 9554148763 B = 8.898 GiB =
+# 89% of the 10 GiB cap). Per-family live totals:
+#
+#   family          entries   live bytes        largest entry
+#   fbuild-v1-*          3   9146665611 B   3062998798 B (esp32s3)
+#   fbuild-install-v1-*  1     33618051 B     33618051 B
+#   setup-uv-1-*         5     48921863 B     12247376 B
+#   rust-lint-<OS>-*     3    324943238 B    124336222 B
+#                      ---
+#                       12   9554148763 B  (8.898 GiB)
+[cache]
+# The declared footprint is 9 GiB = 9216 MiB, against a measured 8.898 GiB:
+# 318 MiB of headroom over today's real bytes and 1024 MiB under GitHub's cap.
+# That headroom is the whole finding — see the fbuild family note below.
+budget   = "9GB"
+write-on = ["main", "nightly"]
+never    = ["linked-tests", "nextest-archives", "wheels", "incremental", "target-dir", "perf-results"]
+# No retired families: nothing in this repository's live listing is a dead
+# generation. fbuild's action.yml also writes fbuild-pkgs-v1-* and
+# fbuild-build-v1-* (its split mode), but no FastLED caller enables split mode
+# (`cache-mode` is never passed at any of the 4 call sites), so there is
+# nothing to retire and nothing to declare for them.
+retired  = []
+# PR pushes add no cache entries of their own. The fbuild composite's `save`
+# input is the switch and PR runs restore only; setup-uv's save-cache is not
+# narrowed to a writer flow either, so the PR delta budget is honestly zero.
+pr       = { mode = "none", families = [], max-per-pr = "0MB", budget = "0MB", trim = "on-close" }
+
+[cache.family]
+# THE DOMINANT FAMILY, AND THE REASON FOR THIS FILE.
+#
+# Written by `FastLED/fbuild/.github/actions/setup@main`, a composite action in
+# ANOTHER repository, floating ref, from 4 call sites (build_template.yml:87,
+# build_clone_and_compile.yml:53, build_esp_extra_libs.yml:49,
+# mp3_cpu_audit.yml:75). Its build-cache key is:
+#
+#   fbuild-${{ inputs.cache-version }}-${{ runner.os }}-${{ runner.arch }}-${{ fbuild-hash }}-${{ inputs.cache-key-extra }}
+#
+# with cache-version defaulting to "v1" (action.yml:48) — hence the `fbuild-v1-`
+# prefix — and fbuild-hash = sha256[:16] of the wheel's dist-info RECORD.
+#
+# `cache-key-extra` is the axis that matters. For the 73 board builds
+# (build_template.yml:99) it is:
+#
+#   ${{ steps.fbuild_board.outputs.name }}-${{ hashFiles('platformio.ini', 'library.json', 'pyproject.toml', 'uv.lock', 'ci/boards.py') }}
+#
+# i.e. `<board>-<content hash>`. The board segment is scraped at runtime by a
+# shell step (build_template.yml:76-84), not a matrix variable. So this family
+# is keyed PER BOARD: its cardinality is the board count (~73 workflows), not
+# the platform count (4) and not the OS count (3).
+#
+# WHY `per = "none"` WITH A FAMILY-SIZED `max`:
+# `max` is documented as the per-instance cap and `per` supplies the
+# multiplier. There is no `per` value for "per board", and the alternative
+# readings are both wrong in a way that costs bytes:
+#   per = "platform" -> x4. 2921 MiB x 4 = 11.4 GiB > the 10 GiB cap, while
+#       the 3 live entries are one OS (Linux) on one arch (X64). Multiplies
+#       3 real entries by 4.
+#   per = "os" -> x3, same overcount, same failure.
+# Neither axis describes the real key. So `per = "none"` (cardinality 1) and
+# `max` carries the whole family's measured footprint.
+#
+# `max = "8723MB"` = 9146465611 B measured / 1048576 = 8722.9 MiB, rounded UP
+# to 8723 MiB. That is >= the family's live bytes, so `ci-lint cache janitor`'s
+# LRU footprint (max x cardinality = 8723 MiB) keeps all 3 live entries and
+# evicts a 4th board only once the family is genuinely over. Stating `max` as
+# the single-entry size (2921 MiB) instead would hand the janitor a 3.3x
+# UNDER-count and it would delete two live caches — the dangerous direction,
+# and exactly what this sizing rule exists to prevent.
+#
+# `lockfile = true` and it HURTS, and is left true anyway. The key hashes
+# pyproject.toml / platformio.ini / library.json / ci/boards.py, so any one of
+# those changing creates a new generation that coexists with the old one for a
+# moment — the textbook lockfile-change peak. See the CACHE-004 arithmetic in
+# the PR body: it is why the declaration does not fit, and that is the finding.
+fbuild   = { via = "ci-lint", max = "8723MB", lockfile = true, per = "none", min = "1MB", evict = "lru" }
+# fbuild's pip install dir. Board-independent by construction (no
+# cache-key-extra on this key), 1 live entry, 33618051 B = 32.1 MiB -> 33 MiB.
+fbuild-install = { via = "ci-lint", max = "33MB", lockfile = true, per = "none", min = "1MB" }
+# astral-sh/setup-uv's own built-in cache, from 13 call sites. The live
+# generation is the v1 spelling (`setup-uv-1-<arch>-<platform>-<osver>-<ver>...`),
+# accepted as a legacy prefix of via = "setup-uv". 5 entries, 48921863 B =
+# 46.7 MiB total, largest 12247376 B = 11.7 MiB. Declared per = "platform" (4)
+# at 13 MiB = 52 MiB, which covers the measured total with room for one more
+# Python floor. `lockfile = true`: the key hashes `cache-dependency-glob`
+# (**/pyproject.toml) at 6 of the call sites.
+uv       = { via = "setup-uv", max = "13MB", lockfile = true, per = "platform", min = "1KB" }
+# The Rust C++ linter's build dir (ci/lint_cpp_rs/target) plus its fingerprint,
+# from template_unit_test.yml:76-89 via actions/cache@v4. Key is
+# `rust-lint-<runner.os>-<hashFiles(ci/lint_cpp_rs/{Cargo.lock,Cargo.toml,src/**/*.rs})>`,
+# so cardinality is the OS count (3) — this is the one family where `per = "os"`
+# is the real axis, not a fudge. 3 entries, 324943238 B = 309.9 MiB total,
+# largest 124336222 B = 118.6 MiB -> 119 MiB. 119 x 3 = 357 MiB >= 309.9 MiB.
+# `evict = "lru"` is mandatory here (CACHE-029): the 357 MiB footprint clears
+# the 256 MiB floor at which unbounded entry count becomes a budget threat.
+rust-lint = { via = "ci-lint", max = "119MB", lockfile = true, per = "os", min = "1MB", evict = "lru" }
+
+# Nearest-ancestor promotion is NOT declared. setup-soldr owns the `m<n>` lineage
+# label; the fbuild composite and template_unit_test.yml write bare content
+# hashes (`-a15eeba81a924165...`), which destroy ancestry at save time
+# (CACHE-031). Opting in would be a promise nothing implements.
+[cache.promote]
+mode = "off"
+
+# ── Local ────────────────────────────────────────────────────────────────────
+# bosn.toml exists at the repository root (a `cpu` stack over
+# ci/codec_cpu/Dockerfile with linux-host / linux-cycles tasks). No
+# `[local.gate.*]` keys: FastLED ships no local-gate.toml and no
+# `[local.gate]` in this ci.toml, and a partial `[local.gate]` would make
+# `ci-lint local-gate` demand one that does not exist.
+[local]
+runner = "bosn"
+lanes  = ["unit", "lint-cpp"]
+cache  = "off"
+
+# ── Allow ────────────────────────────────────────────────────────────────────
+# The fan-in entry points. FastLED has 121 workflow files, so this table names
+# the reusable templates and the PR/master entry workflows rather than all 121;
+# it is the declared set, not a description of every YAML file.
+[allow.workflows]
+"build_template.yml"             = ["unit", "lint-cpp", "lint-rs", "py", "board"]
+"build_template_binary_size.yml" = ["unit", "lint-cpp", "board"]
+"template_unit_test.yml"         = ["unit", "lint-cpp", "lint-rs", "py"]
+"template_example_test.yml"      = ["example", "unit"]
+"qemu_template.yml"              = ["unit"]
+"unit_test_linux.yml"            = ["unit", "lint-cpp", "lint-rs", "py"]
+"unit_test_windows.yml"          = ["unit"]
+"unit_test_macos.yml"            = ["unit"]
+"example_test_linux.yml"         = ["example"]
+"example_test_macos.yml"         = ["example"]
+"example_test_windows.yml"       = ["example"]
+
+[allow]
+# Every ref a workflow actually reaches for, including the composite action's
+# own transitive steps (actions/setup-python@v6, actions/cache@v5,
+# actions/cache/restore@v5, actions/cache/save@v5 — required because the
+# fbuild composite pins v5 while template_unit_test.yml pins v4).
+#
+# NOT ONE OF THESE IS SHA-PINNED. Every ref in this repository is a floating
+# major tag or a branch: `FastLED/fbuild/.github/actions/setup@main` is a
+# branch ref in another repository, and it is the action that owns 8.52 GiB of
+# this cache. SEC-004 fires on all of them and is left firing.
+actions           = [
+  "actions/checkout",
+  "actions/setup-python",
+  "actions/upload-artifact",
+  "actions/cache",
+  "actions/cache/restore",
+  "actions/cache/save",
+  "actions/create-github-app-token",
+  "actions/github-script",
+  "astral-sh/setup-uv",
+  "arduino/arduino-lint-action",
+  "arduino/setup-arduino-cli",
+  "FastLED/fbuild/.github/actions/setup",
+  "anthropics/claude-code-action",
+  "peaceiris/actions-gh-pages",
+  "xt0rted/pull-request-comment-branch",
+]
+tools             = ["uv", "python3", "soldr", "git", "clang-query", "gcc", "g++"]
+secrets           = []
+# The one place a platform/board is selected at runtime:
+# build_template.yml:76-84 scrapes the board from `inputs.args`.
+platform-selector = ".github/workflows/build_template.yml"
+platform-code     = [".github/workflows/build_template.yml", "ci/boards/boards.py", "ci/boards.py"]
+
+# The sanctioned raw actions/cache* location. FastLED has no local
+# .github/actions directory: the cache steps live inside the EXTERNAL fbuild
+# composite (FastLED/fbuild .github/actions/setup/action.yml:126,217,228,274,312,327,341)
+# and in template_unit_test.yml:87. CACHE-001 reports both as being outside the
+# declared wrapper directory; left standing rather than pointing `only-in` at
+# another repository's file.
+[allow.cache-actions]
+only-in = ".github/actions/setup"
+
+# FastLED does not use zackees/setup-soldr anywhere. Declared empty rather than
+# omitted because schema 3 requires the table; an empty table asserts nothing
+# about a wrapper that does not exist here.
+[allow.setup-soldr]
+only-in = ".github/actions/setup"
+
+# FastLED publishes no wheel to PyPI — its release lane ships Arduino/PlatformIO
+# library artifacts (library.json, library.properties), not Python packages.
+# Declared explicitly so its absence is a decision rather than an omission.
+[publish]
+pypi = { auth = "oidc", environment = "pypi", mode = "rehearsal" }
