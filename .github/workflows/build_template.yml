@@ -102,6 +102,20 @@ jobs:
           # so key the install cache solely on the fbuild pin in pyproject.
           # The action ignores this input on older revisions (no-op).
           install-cache-key-extra: ${{ hashFiles('pyproject.toml') }}
+          # PR-context board jobs RESTORE but never SAVE. A PR's cache is
+          # written under `refs/pull/<N>/merge`, a scope no other run can
+          # ever read (master pushes key off `refs/heads/master`), so every
+          # PR board job was minting a private multi-GiB entry that only the
+          # same PR's later commits could hit — and only if the PR were
+          # updated again. This drove the Actions cache to 280.75 GiB over
+          # 157 entries against a 10 GiB target.
+          #
+          # `save: 'false'` is restore-only: fbuild's setup action swaps
+          # `actions/cache@v5` for `actions/cache/restore@v5`, so PR builds
+          # keep the full warm-cache benefit (they restore the master-scope
+          # entry via restore-keys) while contributing zero new entries.
+          # Pushes to master keep the default `save: 'true'`.
+          save: ${{ github.event_name != 'pull_request' }}
 
       # Purge stale platform tarballs whose sha256 no longer matches what
       # the current pin resolves to. The fbuild-cache restore-keys fall
