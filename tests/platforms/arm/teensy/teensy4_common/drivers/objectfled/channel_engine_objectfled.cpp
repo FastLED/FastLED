@@ -11,6 +11,7 @@
 #include "fl/channels/driver.h"
 #include "fl/gfx/rectangular_draw_buffer.h"
 #include "test.h"
+#include "third_party/object_fled/src/ObjectFLEDBitdataSize.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
 
@@ -500,6 +501,28 @@ FL_TEST_CASE("ObjectFLED engine - capabilities are unified clockless + SPI (#342
     // peripherals -- one engine for both clockless and SPI modes".
     FL_CHECK(caps.supportsClockless == true);
     FL_CHECK(caps.supportsSpi == true);
+}
+
+// #4711: bitdata is sized to min(numbytes, 2*BYTES_PER_DMA)*32 words and
+// never shrinks. BYTES_PER_DMA = 150, so 300 bytes is the single-shot cap.
+FL_TEST_CASE("ObjectFLED bitdata - sized to frame, capped at double buffer") {
+    FL_CHECK_EQ(objectfled::bitdataWordsFor(1, 150), 32u);
+    FL_CHECK_EQ(objectfled::bitdataWordsFor(192, 150), 192u * 32);
+    FL_CHECK_EQ(objectfled::bitdataWordsFor(300, 150), 300u * 32);
+    FL_CHECK_EQ(objectfled::bitdataWordsFor(301, 150), 300u * 32);
+    FL_CHECK_EQ(objectfled::bitdataWordsFor(3000, 150), 300u * 32);
+}
+
+FL_TEST_CASE("ObjectFLED bitdata - capacity grows, never shrinks") {
+    uint32_t cap = 0;
+    cap = objectfled::grownBitdataWords(cap, 192, 150);
+    FL_CHECK_EQ(cap, 192u * 32);
+    cap = objectfled::grownBitdataWords(cap, 1, 150);
+    FL_CHECK_EQ(cap, 192u * 32);
+    cap = objectfled::grownBitdataWords(cap, 3000, 150);
+    FL_CHECK_EQ(cap, 300u * 32);
+    cap = objectfled::grownBitdataWords(cap, 192, 150);
+    FL_CHECK_EQ(cap, 300u * 32);
 }
 
 #endif // FASTLED_STUB_IMPL

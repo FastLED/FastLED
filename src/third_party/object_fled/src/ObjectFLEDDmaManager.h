@@ -60,8 +60,25 @@ class ObjectFLEDDmaManager {
     DMAChannel dma3;
     DMASetting dma2next;
 
+    /// Ensure bitdata holds a frame of `numbytes` bytes per strip (#4711).
+    /// Grows (never shrinks) to min(numbytes, 2*BYTES_PER_DMA)*32 words.
+    /// Call only while the DMA is idle (after acquire()), since it may free
+    /// the buffer the ISR reads. Returns false if allocation fails.
+    bool ensureBitdata(uint32_t numbytes);
+
+    // DMA bit buffer, heap-allocated on first show() and sized to the
+    // largest frame seen instead of a fixed 38,400 B DMAMEM array (#4711).
+    // Teensy 4 malloc serves OCRAM2 (_heap_start = end of .bss.dma up to
+    // the end of RAM in imxrt1062*.ld), the same DMA-capable region as
+    // DMAMEM. The buffer is 32-byte aligned for arm_dcache_flush_delete.
+    //
+    // Raw owning pointer by design (cpp-standards "Long-Lived Pointers"):
+    // its only owner is this process-lifetime singleton, it is replaced
+    // only in ensureBitdata() while no DMA/ISR is running, and neither the
+    // ISR nor the DMA engine can hold a shared_ptr reference.
+    uint32_t* bitdata = nullptr;
+    uint32_t bitdataWords = 0;
     // DMAMEM buffers must be static to work with section attributes
-    static FL_DMAMEM uint32_t bitdata[BYTES_PER_DMA * 64] __attribute__((aligned(32)));
     static FL_DMAMEM uint32_t bitmask[4] __attribute__((aligned(32)));
 
     // Shared state for ISR. These are written once in showInternal()
@@ -85,6 +102,7 @@ class ObjectFLEDDmaManager {
     ObjectFLEDDmaManager& operator=(const ObjectFLEDDmaManager&) = delete;
 
     void* mCurrentOwner = nullptr;
+    void* mBitdataAlloc = nullptr;  // unaligned malloc() block behind bitdata
 };
 
 } // namespace fl

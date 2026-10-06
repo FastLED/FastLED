@@ -1,0 +1,26 @@
+#pragma once
+
+// Host-testable sizing for ObjectFLEDDmaManager's DMA bit buffer (#4711).
+// Kept free of Teensy headers so tests/ can exercise it on the host.
+
+#include "fl/stl/stdint.h"
+
+namespace objectfled {
+
+/// Words of bitdata a frame of `numbytes` bytes per strip needs.
+/// showInternal() fills min(numbytes, 2*bytesPerDma) bytes, 32 words each.
+/// A frame larger than 2*bytesPerDma uses the ESG double buffer, which
+/// needs the full 2*bytesPerDma*32 words, so this is also its size.
+constexpr uint32_t bitdataWordsFor(uint32_t numbytes, uint32_t bytesPerDma) {
+    return (numbytes < 2 * bytesPerDma ? numbytes : 2 * bytesPerDma) * 32;
+}
+
+/// New capacity after seeing a frame of `numbytes`: grows, never shrinks.
+constexpr uint32_t grownBitdataWords(uint32_t currentWords, uint32_t numbytes,
+                                     uint32_t bytesPerDma) {
+    return bitdataWordsFor(numbytes, bytesPerDma) > currentWords
+               ? bitdataWordsFor(numbytes, bytesPerDma)
+               : currentWords;
+}
+
+} // namespace objectfled
