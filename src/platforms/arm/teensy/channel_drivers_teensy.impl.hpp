@@ -22,6 +22,13 @@ namespace fl {
 namespace platforms {
 
 inline void enableAllChannelDrivers() FL_NO_EXCEPT {
+#if defined(FL_IS_TEENSY_4X)
+    // FlexIO (priority 8), ObjectFLED and the unified SPI adapter. These used
+    // to register on first ChannelManager::instance() access, i.e. before the
+    // enableDrivers<> calls below; keep that order so FlexIO keeps priority 8
+    // (#4708).
+    registerAllTeensyChannelDrivers();
+#endif
     fl::enableDrivers<
         fl::Bus::BIT_BANG
 #if defined(FL_IS_TEENSY_4X)
@@ -31,9 +38,6 @@ inline void enableAllChannelDrivers() FL_NO_EXCEPT {
     >();
 #if defined(FL_IS_TEENSY_4X)
     fl::enableDriver<fl::Bus::FLEX_IO, 1>();
-    // FlexIO at priority 8 and the unified SPI adapter used to register on
-    // first ChannelManager::instance() access (#4708).
-    registerAllTeensyChannelDrivers();
 #endif
 }
 

@@ -12,6 +12,7 @@
 #include "fl/stl/function.h"
 #include "fl/stl/chrono.h"  // platform-specific time implementation
 #include "fl/stl/noexcept.h"
+#include "platforms/stub/delay.h"  // FL_STUB_SKIP_TIMING
 
 // Forward declare delay override (defined in time_stub.cpp.hpp)
 extern fl::function<void(fl::u32)> g_delay_override;
@@ -39,7 +40,7 @@ void delay(fl::u32 ms) FL_NO_EXCEPT {
 void delayMicroseconds(fl::u32 us) FL_NO_EXCEPT {
     // Fast-exit example runs (delay override installed) skip the sleep too:
     // bit-bang reset pulses would otherwise sleep once per show() (#4709).
-    if (g_delay_override) {
+    if (FL_STUB_SKIP_TIMING()) {
         return;
     }
     fl::this_thread::sleep_for(fl::chrono::microseconds(us));

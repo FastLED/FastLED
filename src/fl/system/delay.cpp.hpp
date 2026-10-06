@@ -41,26 +41,11 @@ namespace fl {
 // Runtime delayNanoseconds implementations
 // ============================================================================
 
-namespace {
-// Fast-exit host example runs install a delay override; bit-bang wire timing
-// (BitBangChannelDriver on the stub) then must not busy-spin either, or every
-// show() costs milliseconds of real time (#4709).
-inline bool skipStubTiming() FL_NO_EXCEPT {
-#if defined(FASTLED_STUB_IMPL) && (!defined(ARDUINO) || defined(FASTLED_USE_STUB_ARDUINO))
-  return isDelayOverrideActive();
-#else
-  return false;
-#endif
-}
-}  // namespace
-
 void delayNanoseconds(fl::u32 ns) FL_NO_EXCEPT {
-  if (skipStubTiming()) return;
   delayNanoseconds_impl(ns);
 }
 
 void delayNanoseconds(fl::u32 ns, fl::u32 hz) FL_NO_EXCEPT {
-  if (skipStubTiming()) return;
   delayNanoseconds_impl(ns, hz);
 }
 

@@ -9,6 +9,14 @@
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/noexcept.h"
 
+#if !defined(ARDUINO) || defined(FASTLED_USE_STUB_ARDUINO)
+// Defined in platforms/stub/time_stub.cpp.hpp.
+bool isDelayOverrideActive(void) FL_NO_EXCEPT;
+#define FL_STUB_SKIP_TIMING() isDelayOverrideActive()
+#else
+#define FL_STUB_SKIP_TIMING() false
+#endif
+
 /// @file platforms/stub/delay.h
 /// Stub platform-specific nanosecond-precision delay utilities
 /// Uses generic delay_cycles for cycle-accurate delays
@@ -29,6 +37,10 @@ namespace fl {
 /// @param ns Number of nanoseconds
 /// @param hz CPU frequency in Hz
 FASTLED_FORCE_INLINE void delayNanoseconds_impl(u32 ns, u32 hz) FL_NO_EXCEPT {
+  // Fast-exit host example runs install a delay override; wire-timing spins
+  // (bit-bang drivers on the stub) are skipped too, or every show() costs
+  // milliseconds of real time (#4709).
+  if (FL_STUB_SKIP_TIMING()) return;
   u32 cycles = cycles_from_ns_stub(ns, hz);
   if (cycles == 0) return;
   delay_cycles_generic(cycles);

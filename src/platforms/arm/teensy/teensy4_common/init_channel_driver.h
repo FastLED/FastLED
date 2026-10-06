@@ -14,8 +14,8 @@ namespace platforms {
 
 /// @brief Initialize channel drivers for Teensy 4.x
 ///
-/// No-op (#4708): drivers are opt-in, as on ESP32. See
-/// registerAllTeensyChannelDrivers().
+/// Registers only the platform-default ObjectFLED engine (#4708). See
+/// registerAllTeensyChannelDrivers() for the full set.
 ///
 /// @note Implementation is in src/platforms/arm/teensy/teensy4_common/init_channel_driver_mxrt1062.cpp.hpp
 void initChannelDrivers() FL_NO_EXCEPT;

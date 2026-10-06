@@ -70,8 +70,6 @@
 //   * `FASTLED_TESTING` is set     -> 1 (host unit tests need full diagnostics)
 //   * `NDEBUG` is set (release)    -> 0 (drop ~55 KB of FL_WARN/FL_LOG strings
 //                                      on ESP32-S3 NEOPIXEL Blink; see #2886)
-//   * `!SKETCH_HAS_LARGE_MEMORY`   -> 0 (tiny/small tiers: also silences the
-//                                      FL_WARN_LIT / FL_LOG_LIT lite macros)
 //   * otherwise (debug builds)     -> 1 (preserve current behavior)
 //
 // Users who want logs back on a release build define
@@ -89,9 +87,7 @@
   #endif
 #else
   #ifndef FASTLED_LOG_VERBOSITY
-    #if defined(NDEBUG) || !SKETCH_HAS_LARGE_MEMORY
-      // Tiny/small-memory tiers default to silent too (#4709): the
-      // FL_WARN_LIT / FL_LOG_LIT literals otherwise stay linked there.
+    #ifdef NDEBUG
       #define FASTLED_LOG_VERBOSITY 0
     #else
       #define FASTLED_LOG_VERBOSITY 1
