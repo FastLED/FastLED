@@ -273,6 +273,39 @@ BOOTSEL but not in application mode has a firmware problem; one that fails even
 in BOOTSEL has a cable/power/hardware problem, and no software recovery will
 help.
 
+### Teensy 4.x: boot guard for wedges before USB starts
+
+A Teensy 4.x firmware that hangs or faults **before `usb_init()`** never
+enumerates. The kernel log shows `USB disconnect` after the HalfKay flash and
+then nothing, and on another port you may see `Cannot enable. Maybe the USB
+cable is bad?`. The host cannot reach a board in this state. Neither
+`fbuild deploy`'s soft reboot nor any other host-side tool can reach it, on Linux or Windows.
+The core's fault handler (`unused_interrupt_vector`) records CrashReport,
+serves `usb_isr()` for 8 s and reboots. Before `usb_init()` that does not
+enumerate, so a crash in that window loops forever.
+
+AutoResearch recovers from this on the chip. `AutoResearchStartupHook.cpp`
+(`startup_early_hook`, which runs before USB):
+
+- counts boots in a reset-surviving OCRAM record at `0x2027FF60`, the cache
+  line just below the core's CrashReport (`0x2027FF80`);
+- arms WDOG3 for 30 s, so a pre-USB hang becomes a reset;
+- on the third boot that never reached `loop()`, zeroes the count and calls
+  `_reboot_Teensyduino_()`. The board then enumerates as **16c0:0478**
+  (HalfKay) and the next `fbuild deploy` flashes it.
+
+Reaching `loop()` zeroes the count, so watchdog resets after that (e.g.
+`--watchdog-soak`) never escape. Recovery takes about 25 s for a crash loop
+(3 x 8 s fault handler) and about 60 s for a hang. The `fbuild deploy` that flashed the
+bad firmware still times out, but the board is waiting in HalfKay for the next
+one. Build with `-DAUTORESEARCH_DEBUG_EARLY_HANG` to test the guard: the
+firmware hangs before USB on every boot and must come back as 16c0:0478 with
+no button press.
+
+**Limitation:** only firmware that contains this hook can escape. Firmware
+without it (other sketches, or AutoResearch before this guard) still needs the
+program button if it wedges before USB.
+
 ### Validation Levels
 
 Pick the narrowest validation level that proves the claim:

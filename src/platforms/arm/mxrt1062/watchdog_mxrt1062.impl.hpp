@@ -42,6 +42,8 @@
 #define FL_WATCHDOG_PERSIST_BYTES 16
 #define FL_WATCHDOG_MAX_TIMEOUT_MS 120000u
 
+extern "C" void _reboot_Teensyduino_(void);  // Teensyduino cores/teensy4/usb.c
+
 namespace fl {
 namespace platforms {
 
@@ -335,7 +337,13 @@ bool Watchdog::onTimeout(fl::function<void()>) FL_NO_EXCEPT { return false; }
 bool Watchdog::setPauseOnDebug(bool) FL_NO_EXCEPT { return false; }
 bool Watchdog::writeCrashLog(fl::span<const fl::u8>) FL_NO_EXCEPT { return false; }
 fl::size Watchdog::readCrashLog(fl::span<fl::u8>) const FL_NO_EXCEPT { return 0; }
-bool Watchdog::rebootIntoBootloader() FL_NO_EXCEPT { return false; }
+bool Watchdog::rebootIntoBootloader() FL_NO_EXCEPT {
+    // bkpt #251: the MKL02 bootloader chip sees the halt and starts HalfKay
+    // (16c0:0478). Leave the RTWDOG off so it cannot reset HalfKay.
+    disable();
+    _reboot_Teensyduino_();
+    return false;  // only reached if the bootloader chip did not respond
+}
 
 bool Watchdog::setWindow(fl::u32, fl::u32) FL_NO_EXCEPT { return false; }
 bool Watchdog::hasCrashReport() const FL_NO_EXCEPT { return false; }
