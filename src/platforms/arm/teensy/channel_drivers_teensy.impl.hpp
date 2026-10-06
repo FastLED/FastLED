@@ -15,6 +15,7 @@
 #include "platforms/arm/teensy/teensy4_common/drivers/flexio/bus_traits.h"      // ok platform headers // IWYU pragma: keep
 #include "platforms/arm/teensy/teensy4_common/drivers/lpuart/bus_traits.h"      // ok platform headers // IWYU pragma: keep
 #include "platforms/arm/teensy/teensy4_common/drivers/objectfled/bus_traits.h"  // ok platform headers // IWYU pragma: keep
+#include "platforms/arm/teensy/teensy4_common/init_channel_driver.h"  // ok platform headers // IWYU pragma: keep
 #endif
 
 namespace fl {
@@ -30,6 +31,9 @@ inline void enableAllChannelDrivers() FL_NO_EXCEPT {
     >();
 #if defined(FL_IS_TEENSY_4X)
     fl::enableDriver<fl::Bus::FLEX_IO, 1>();
+    // FlexIO at priority 8 and the unified SPI adapter used to register on
+    // first ChannelManager::instance() access (#4708).
+    registerAllTeensyChannelDrivers();
 #endif
 }
 

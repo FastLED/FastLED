@@ -37,7 +37,11 @@ void delay(fl::u32 ms) FL_NO_EXCEPT {
 }
 
 void delayMicroseconds(fl::u32 us) FL_NO_EXCEPT {
-    // No override for microseconds (precise hardware timing)
+    // Fast-exit example runs (delay override installed) skip the sleep too:
+    // bit-bang reset pulses would otherwise sleep once per show() (#4709).
+    if (g_delay_override) {
+        return;
+    }
     fl::this_thread::sleep_for(fl::chrono::microseconds(us));
 }
 

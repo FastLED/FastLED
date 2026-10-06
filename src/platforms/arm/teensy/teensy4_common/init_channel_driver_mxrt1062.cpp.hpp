@@ -145,13 +145,19 @@ static void addObjectFLEDIfPossible(ChannelManager& manager) {
 
 namespace platforms {
 
-/// @brief Initialize channel drivers for Teensy 4.x
+/// @brief Initialize channel drivers for Teensy 4.x (no-op, #4708).
 ///
-/// Called lazily on first access to ChannelManager::instance().
-/// Registers platform-specific drivers (SPI hardware, ObjectFLED DMA) with the bus manager.
-void initChannelDrivers() {
-    FL_DBG("Teensy 4.x: Lazy initialization of channel drivers");
+/// Drivers do NOT auto-register on first `ChannelManager::instance()`
+/// access: that pulled FlexIO, ObjectFLED and the unified SPI adapter into
+/// every Channel-API sketch, and Teensy 4 places code in ITCM (RAM1) by
+/// default, so it cost ~72 KB of RAM1. This matches ESP32 post-#2469.
+/// Runtime selection (`FastLED.add(cfg)`, `FastLED.enableAllDrivers()`)
+/// registers them via `registerAllTeensyChannelDrivers()`.
+void initChannelDrivers() FL_NO_EXCEPT {
+}
 
+/// @brief Register every Teensy 4.x channel driver (enableAllDrivers path).
+void registerAllTeensyChannelDrivers() FL_NO_EXCEPT {
     auto& manager = channelManager();
 
     // Register FlexIO engine for clockless strips on FlexIO-capable pins (priority 8)
@@ -162,8 +168,6 @@ void initChannelDrivers() {
 
     // Register true SPI hardware (priority 6-7)
     detail::addSpiHardwareIfPossible(manager);
-
-    FL_DBG("Teensy 4.x: Channel drivers initialized");
 }
 
 } // namespace platforms
