@@ -8,14 +8,20 @@
 ///      falling edges into CVAL3/CVAL5.
 ///   3. Each falling-edge capture triggers a DMA request after both registers
 ///      are valid. A Teensy DMAChannel copies the 16-bit rising and falling
-///      capture values into a RAM buffer as one 32-bit minor loop.
-///   4. After the DMA transfer completes (buffer full or auto-disable), an ISR
-///      sets a completion flag.
-///   5. Software computes pulse widths as 16-bit deltas between consecutive
-///      captures. 16-bit wraparound is safe because the longest expected pulse
-///      (~280 us reset) is well within the ~437 us wrap period at 150 MHz.
-///   6. Tick deltas are converted to nanoseconds:
-///        ns = (u64)delta_ticks * 1000000000ULL / F_BUS_ACTUAL
+///      capture values into a small circular ring (kRingPairs pairs) as one
+///      32-bit minor loop.
+///   4. The DMA interrupts at each half of the ring. The ISR decodes the
+///      completed half into WS2812 bytes (fl::channels::rx::
+///      Ws2812StreamDecoder), carrying the partial bit/byte across halves.
+///      A half overwritten before decode is reported as CAPTURE_OVERRUN.
+///   5. wait() declares the frame over after signal_range_max_ns of no DMA
+///      progress, stops the DMA and decodes the partial last half.
+///   6. Pulse widths are 16-bit deltas between captures (a counter wrap
+///      inside a pulse is handled by unsigned subtraction), converted to ns
+///      with a Q16.16 multiply.
+///
+/// Memory is the decoded bytes (3 per RGB LED) plus a 1 KB ring, independent
+/// of frame length.
 
 #pragma once
 
@@ -47,6 +53,7 @@
 #include "fl/stl/result.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/bit_cast.h"
+#include "fl/channels/rx/ws2812_stream_decoder.h"
 
 // IWYU pragma: begin_keep
 #include <Arduino.h>
@@ -184,209 +191,47 @@ static const FlexPwmPinInfo *lookupPin(int pin) {
     return nullptr;
 }
 
-// ---------------------------------------------------------------------------
-// Decode helpers (same algorithm as ESP32 RMT RX decoder)
-// ---------------------------------------------------------------------------
-
-/// Convert 16-bit tick delta to nanoseconds using the bus clock frequency.
-///
-/// #3416 RX-LOW-3: 16-bit deltas wrap at (65536 / F_BUS_ACTUAL) seconds.
-/// At F_BUS_ACTUAL = 150 MHz this is ~437 us. The longest legal WS2812
-/// pulse we care about is the reset LOW (>= 50 us). Some older WS2811
-/// strands have ~280 us reset minimums. F_BUS_ACTUAL is not a constexpr
-/// on Teensyduino so a true static_assert isn't possible; the safety
-/// invariant is: F_BUS_ACTUAL must stay >= ~210 MHz for the 16-bit
-/// timestamp window to contain a 300 us pulse. Default Teensy 4.x bus
-/// is 150 MHz which leaves ~437 us headroom.
-///
-/// #3416 RX-LOW-4: replace the per-edge 64-bit divide with a Q16.16
-/// fixed-point multiply. At F_BUS_ACTUAL=150 MHz the conversion
-/// factor is 1e9/F_BUS_ACTUAL = 6.666... ns/tick. Pre-scaled to Q16.16
-/// once at first call, then a 1-cycle UMULL replaces the ~30-cycle
-/// 64-bit divide. Saves ~150k cycles per 100-LED frame (~250us at
-/// 600 MHz CPU). Initial computation happens on first call instead
-/// of constexpr because F_BUS_ACTUAL is a runtime variable on Teensy.
-static inline u32 tickDeltaNs(u16 t0, u16 t1) {
-    static u32 ns_per_tick_q16 = 0;
-    if (ns_per_tick_q16 == 0) {
-        // ns_per_tick_q16 = (1e9 / F_BUS_ACTUAL) << 16
-        // = 1e9 << 16 / F_BUS_ACTUAL, but 1e9 << 16 overflows u32;
-        // use u64 intermediate then truncate.
-        ns_per_tick_q16 = static_cast<u32>(
-            (static_cast<u64>(1000000000ULL) << 16) / F_BUS_ACTUAL);
-    }
-    u16 delta = static_cast<u16>(t1 - t0);  // handles wraparound
-    return static_cast<u32>(
-        (static_cast<u64>(delta) * ns_per_tick_q16) >> 16);
-}
-
-/// Decode a single bit from high/low nanosecond durations.
-///
-/// **Always returns 0 or 1** (never -1). Bench evidence (#3219, 5-LED test):
-/// when a single bit's HIGH duration landed marginally outside T0H_max but
-/// also outside T1H_min, the old "return -1" path made the decoder `continue`
-/// past that bit -- which dropped one bit from the stream and SHIFTED every
-/// downstream bit forward by one position in its byte. A single edge-of-
-/// tolerance pulse then propagated through the rest of the frame as
-/// cascading byte/LED errors (e.g. Pattern B 5-LED: one bit error caused
-/// all 5 LEDs to fail with `R: 0x55 -> 0xAB` left-shift). Classifying by
-/// the midpoint between t0h_max and t1h_min keeps byte alignment intact;
-/// at worst a single LSB flips in the affected bit's byte instead of
-/// poisoning everything that follows.
-static inline int decodeBit(u32 high_ns, u32 low_ns,
-                            const ChipsetTiming4Phase &timing) {
-    (void)low_ns;  // HIGH-only classification is more robust to TX/RX skew
-    const u32 midpoint =
-        (timing.t0h_max_ns + timing.t1h_min_ns) / 2u;
-    return (high_ns >= midpoint) ? 1 : 0;
-}
-
-/// Decode a bit when the following LOW phase is a reset/gap or was not
-/// Decode a bit when the following LOW phase is a reset/gap or was not
-/// captured. WS2812 bit value is encoded by HIGH width; LOW validation is only
-/// possible for intra-frame bit periods. Returns 0, 1, or -1 (out-of-range);
-/// the caller checks `< 0` to count decode errors.
-static inline int decodeBitFromHigh(u32 high_ns,
-                                    const ChipsetTiming4Phase &timing) {
-    if (high_ns >= timing.t0h_min_ns && high_ns <= timing.t0h_max_ns) {
-        return 0;
-    }
-    if (high_ns >= timing.t1h_min_ns && high_ns <= timing.t1h_max_ns) {
-        return 1;
-    }
-    return -1;
-}
-
-/// Check if a low-duration pulse qualifies as a reset.
-static inline bool isResetPulse(u32 low_ns,
-                                const ChipsetTiming4Phase &timing) {
-    return low_ns >= (static_cast<u32>(timing.reset_min_us) * 1000u);
-}
-
-/// Check if a pulse is a gap to tolerate (longer than normal but shorter
-/// than reset). A gap must be LONGER than any valid bit LOW pulse to avoid
-/// incorrectly skipping normal protocol data.
-static inline bool isGapPulse(u32 low_ns,
-                              const ChipsetTiming4Phase &timing) {
-    if (timing.gap_tolerance_ns == 0) {
-        return false;
-    }
-    u32 reset_ns = static_cast<u32>(timing.reset_min_us) * 1000u;
-    // Gap must be longer than the longest valid bit LOW pulse
-    u32 max_valid_low = (timing.t0l_max_ns > timing.t1l_max_ns)
-                            ? timing.t0l_max_ns
-                            : timing.t1l_max_ns;
-    return low_ns > max_valid_low && low_ns < reset_ns &&
-           low_ns <= timing.gap_tolerance_ns;
-}
-
-/// Decode an EdgeTime buffer into bytes (MSB-first).
-///
-/// Polarity-aware decoder: uses the HIGH/LOW labels from the gap-aware
-/// edge builder. Edges come in HIGH/LOW pairs representing one bit each.
-/// If polarity is wrong (noise), skip and resync on the next HIGH edge.
-///
-/// #3416 adaptive midpoint: a single pre-pass over the HIGH durations
-/// finds the bimodal split point (min + max) / 2 rather than relying on
-/// the static `(t0h_max + t1h_min) / 2` midpoint derived from the
-/// chipset timing spec. Many TX implementations (notably FlexIO at
-/// kFlexIOBaudDiv=18) emit '1' bits at ~950 ns HIGH vs the spec
-/// nominal of 580 ns; receiver jitter can push a marginal '0' bit
-/// above the static 402 ns threshold and a marginal '1' bit below it.
-/// The observed-distribution midpoint (~635 ns for FlexIO) better
-/// separates the two clusters under jitter.
-static fl::result<u32, DecodeError>
-decodeEdges(const ChipsetTiming4Phase &timing,
-            fl::span<const EdgeTime> edges, fl::span<u8> bytes_out) {
-    if (edges.size() == 0 || bytes_out.size() == 0) {
-        return fl::result<u32, DecodeError>::success(0);
-    }
-
-    // Pre-scan to compute observed-distribution midpoint.
-    u32 high_min = 0xFFFFFFFFu;
-    u32 high_max = 0u;
-    u32 high_samples = 0;
-    for (size_t k = 0; k + 1 < edges.size(); k += 2) {
-        if (!edges[k].high) continue;  // polarity error, skip
-        u32 h = edges[k].ns;
-        if (h < 100u || h > 1500u) continue;  // outlier (idle/glitch)
-        if (h < high_min) high_min = h;
-        if (h > high_max) high_max = h;
-        ++high_samples;
-    }
-    u32 adaptive_midpoint = (timing.t0h_max_ns + timing.t1h_min_ns) / 2u;
-    if (high_samples >= 16 && high_max > high_min + 200u) {
-        // Enough samples to trust the observed distribution.
-        adaptive_midpoint = (high_min + high_max) / 2u;
-    }
-
-    u32 byte_index = 0;
-    u8 current_byte = 0;
-    // #3416 RX-MED-7: widen bit_count from u8 to u32 so accidental
-    // comparison against size_t or unsigned arithmetic doesn't promote
-    // into a surprise. The actual range is 0..8 either way.
-    u32 bit_count = 0;
-    u32 error_count = 0;
-    u32 total_bits = 0;
-    u32 resync_count = 0;
-
-    size_t i = 0;
-    while (i + 1 < edges.size()) {
-        // Expect edges[i] = HIGH, edges[i+1] = LOW
-        if (!edges[i].high) {
-            // Polarity error: skip this edge and resync on next HIGH
-            ++resync_count;
-            ++i;
-            continue;
-        }
-
-        u32 high_ns = edges[i].ns;
-        int bit = -1;
-        if (i + 1 < edges.size() && !edges[i + 1].high) {
-            u32 low_ns = edges[i + 1].ns;
-            bit = decodeBit(high_ns, low_ns, timing);
-            i += 2;
-        } else {
-            bit = decodeBitFromHigh(high_ns, timing);            i += 1;
-        }
-        ++total_bits;
-
-        if (bit < 0) {
-            ++error_count;
-            continue;
-        }
-
-        current_byte = (current_byte << 1) | static_cast<u8>(bit);
-        ++bit_count;
-
-        if (bit_count == 8) {
-            if (byte_index >= bytes_out.size()) {
-                return fl::result<u32, DecodeError>::failure(
-                    DecodeError::BUFFER_OVERFLOW);
-            }
-            bytes_out[byte_index++] = current_byte;
-            current_byte = 0;
-            bit_count = 0;
-        }
-    }
-
-    // Handle partial final byte (left-align remaining bits)
-    if (bit_count > 0 && byte_index < bytes_out.size()) {
-        bytes_out[byte_index++] =
-            static_cast<u8>(current_byte << (8 - bit_count));
-    }
-
-    // Check error rate (>10% is considered too high)
-    if (total_bits > 0 &&
-        (error_count * 10) > total_bits) {
-        return fl::result<u32, DecodeError>::failure(
-            DecodeError::HIGH_ERROR_RATE);
-    }
-
-    return fl::result<u32, DecodeError>::success(byte_index);
-}
-
 } // anonymous namespace
+
+// ---------------------------------------------------------------------------
+// Streaming capture ring
+// ---------------------------------------------------------------------------
+//
+// The DMA writes (rise, fall) capture pairs into a fixed circular ring and
+// raises an interrupt at each half (INTHALF) and at the wrap (INTMAJOR). The
+// ISR decodes the half the DMA just left straight into the decoded-byte
+// buffer, so a frame of any length costs its decoded bytes (3 B per RGB LED)
+// plus this ring, instead of 4 B per bit of stored timestamps.
+//
+// Sizing (kRingHalfPairs): one WS2812 bit (one pair) arrives every ~1.25 us,
+// so a 128-pair half fills in 160 us. The ISR for a half must finish before
+// the DMA wraps back into it, one half-time after the interrupt is raised,
+// so the budget per half is 160 us including interrupt latency. Measured on
+// a Teensy 4.0 at 600 MHz over 1000-LED frames (isrMaxCycles in
+// diagnosticsToJson): a half decodes in ~9.8k cycles (16 us, 10 % of the
+// budget); the worst ISR seen, preempted by ObjectFLED's refill ISR, took
+// 53k cycles (88 us), still 72 us inside the budget. Zero overruns over
+// 128-frame soaks with ObjectFLED and FlexIO TX. Ring = 2 x 128 pairs x 4 B
+// = 1 KB. A late ISR is detected (the DMA write position is inside the half
+// being decoded) and reported as DecodeError::CAPTURE_OVERRUN.
+static constexpr u32 kRingHalfPairs = 128;
+static constexpr u32 kRingPairs = 2 * kRingHalfPairs;
+/// First edges kept for getRawEdgeTimes() diagnostics.
+static constexpr u32 kDiagEdges = 256;
+
+// In DTCM (default .bss on Teensy 4): DMA-accessible and never cached, so
+// the ISR needs no cache maintenance per half.
+static u16 sCaptureRing[kRingPairs * 2] __attribute__((aligned(32)));  // FL_LINT_ALLOW_GLOBAL(DMA ring for the single active FlexPWM RX instance)
+
+// Since-boot totals across captures, for soak reporting.
+static volatile u32 sPeakIsrCycles = 0;  // FL_LINT_ALLOW_GLOBAL(FlexPWM RX ISR statistics since boot)
+static volatile u32 sTotalOverruns = 0;  // FL_LINT_ALLOW_GLOBAL(FlexPWM RX ISR statistics since boot)
+static volatile u32 sTotalFrames = 0;  // FL_LINT_ALLOW_GLOBAL(FlexPWM RX ISR statistics since boot)
+
+static ChipsetTiming4Phase defaultStreamTiming() {
+    const ChipsetTiming ws2812b{250, 625, 375, 280, "WS2812B"};
+    return make4PhaseTiming(ws2812b, 150);
+}
 
 // ---------------------------------------------------------------------------
 // FlexPwmRxChannelImpl -- private implementation
@@ -403,6 +248,10 @@ class FlexPwmRxChannelImpl : public FlexPwmRxChannel {
         if (mConfigured) {
             mDma.disable();
             mDma.detachInterrupt();
+            NVIC_SET_PRIORITY(IRQ_DMA_CH0 + (mDma.channel & 15), 128);
+        }
+        if (sActiveInstance == this) {
+            sActiveInstance = nullptr;
         }
         if (mPinInfo && mPinInfo->mux_register) {
             // Restore to ALT5 (GPIO) without SION, default PAD_CTL.
@@ -427,30 +276,42 @@ class FlexPwmRxChannelImpl : public FlexPwmRxChannel {
   private:
     void configureFlexPwm();
     void configureDma();
-    void buildEdgeTimesFromCaptures();
+    void serviceHalf();
+    void drain();
+    u32 dmaWritePair() const;
 
     static void dmaIsr();
     static FlexPwmRxChannelImpl *sActiveInstance;
 
     friend fl::json FlexPwmRxChannel::diagnosticsToJson(int requested_pin) FL_NO_EXCEPT;
+    friend fl::json FlexPwmRxChannel::streamStatsToJson() FL_NO_EXCEPT;
 
     int mPin = -1;
     const FlexPwmPinInfo *mPinInfo = nullptr;
 
-    // DMA
     DMAChannel mDma;
-    fl::vector<u16> mCaptureBuffer; // Raw 16-bit capture values from DMA
-    size_t mBufferSize = 512;       // Requested buffer size in edge-pairs
+
+    // Streaming decode state. The ISR owns mDecoder and mNextHalf while the
+    // DMA runs; drain() masks interrupts before the thread touches them.
+    channels::rx::Ws2812StreamDecoder mDecoder;
+    fl::vector<u8> mDecoded;  // decoded bytes, sized from buffer_size
+    fl::vector<EdgeTime> mDiagEdges;
+    volatile u32 mNextHalf = 0;    // ring half the ISR decodes next
+    volatile u32 mHalvesDone = 0;  // halves decoded by the ISR this frame
+    volatile u32 mOverruns = 0;    // halves overwritten before decode
+    volatile u32 mIsrCount = 0;
+    volatile u32 mIsrMaxCycles = 0;
+    volatile u32 mIsrTotalCycles = 0;
+    u32 mTailPairs = 0;  // pairs drained from the partial last half
 
     // State
     volatile bool mReceiveDone = false;
     bool mConfigured = false;
     bool mStartLow = true;
-    u16 mArmedCiter = 0;
 
-    // Decoded edge cache (built from mCaptureBuffer or injected)
-    fl::vector<EdgeTime> mEdges;
-    bool mEdgesValid = false;
+    // injectEdges() test path: decoded by the batch decoder.
+    fl::vector<EdgeTime> mInjectedEdges;
+    bool mInjected = false;
 
     // Config
     u32 mSignalRangeMaxNs = 100000;
@@ -485,45 +346,49 @@ bool FlexPwmRxChannelImpl::begin(const RxConfig &config) {
         }
     }
 
-    mBufferSize = config.buffer_size;
-    // #3416 RX-MED-6: signal_range_max_ns / 1000 is used as the idle
-    // threshold in wait() to declare frame-end via inactivity. Default
-    // 100us is fine for WS2812 (50us reset minimum) but tighter LED
-    // chipsets with shorter inter-byte gaps (e.g. TM1814/APA106 with
-    // ~80us reset) need this lowered via RxConfig. Already exposed
-    // through the public config struct -- documented here for the
-    // implementation reader.
+    // The capture ring is shared: one capture at a time. A capture still
+    // running on another instance is stopped and reported as overrun.
+    if (sActiveInstance && sActiveInstance != this &&
+        !sActiveInstance->mReceiveDone) {
+        sActiveInstance->mDma.disable();
+        sActiveInstance->mDecoder.markOverrun();
+        sActiveInstance->mDecoder.flush();
+        sActiveInstance->mReceiveDone = true;
+    }
+    // Stop a previous capture before its decoder state is reset under it.
+    if (mConfigured) {
+        mDma.disable();
+        mDma.clearInterrupt();
+    }
+
+    // #3416 RX-MED-6: signal_range_max_ns / 1000 is the inactivity window
+    // wait() uses to declare frame end.
     mSignalRangeMaxNs = config.signal_range_max_ns;
     mStartLow = config.start_low;
     mReceiveDone = false;
-    mEdgesValid = false;
-    mEdges.clear();
+    mInjected = false;
+    mInjectedEdges.clear();
 
-    // Allocate capture buffer: 2 captures per bit (rising + falling).
-    // Cap to 8192 captures to avoid exhausting Teensy RAM (~16KB buffer).
-    // For 100 LEDs × 24 bits = 2400 bits, we need ~4800 captures.
-    // #3416 RX-LOW-2: mBufferSize is named in EDGE PAIRS but
-    // RxConfig::buffer_size is documented as EDGES. Doubling here means
-    // the user-facing limit is actually half of what they think. A
-    // request like buffer_size=10000 silently caps to 4096 edge-pairs
-    // = 4096 bits = ~170 LEDs. For ~600+ LED strips this is dramatically
-    // undersized and the DMA wraps mid-frame.
-    size_t cap_count = mBufferSize * 2;
-    if (cap_count > 8192) {
-        cap_count = 8192;
-    }
-    mCaptureBuffer.clear();
-    mCaptureBuffer.reserve(cap_count);
-    for (size_t i = 0; i < cap_count; ++i) {
-        mCaptureBuffer.push_back(0);
-    }
-    // The zero-fill above leaves dirty D-cache lines over the buffer. If
-    // one is evicted after the DMA has written that line, it overwrites
-    // 8 capture pairs with zeros (seen as `H0 L0 ... H0` runs of 16 edges
-    // and ~20% byte corruption at 100 LEDs). Clean + invalidate before
-    // the DMA is armed so the CPU holds no dirty copy during capture.
-    arm_dcache_flush_delete(mCaptureBuffer.data(),
-                            mCaptureBuffer.size() * sizeof(u16));
+    // Only decoded bytes are kept, so memory is O(frame bytes), not
+    // O(edges). The old buffer held buffer_size capture pairs (one per bit),
+    // so keep that frame capacity: buffer_size bits = buffer_size / 8 bytes.
+    // +1 holds a partial final byte.
+    const size_t decoded_capacity = config.buffer_size / 8u + 1u;
+    mDecoded.clear();
+    mDecoded.resize(decoded_capacity);
+    mDiagEdges.resize(kDiagEdges);
+
+    mNextHalf = 0;
+    mHalvesDone = 0;
+    mOverruns = 0;
+    mIsrCount = 0;
+    mIsrMaxCycles = 0;
+    mIsrTotalCycles = 0;
+    mTailPairs = 0;
+    const ChipsetTiming4Phase stream_timing =
+        config.stream_timing ? *config.stream_timing : defaultStreamTiming();
+    mDecoder.reset(stream_timing, channels::rx::flexPwmNsPerTickQ16(F_BUS_ACTUAL),
+                   fl::span<u8>(mDecoded), fl::span<EdgeTime>(mDiagEdges));
 
     configureFlexPwm();
     configureDma();
@@ -604,7 +469,7 @@ void FlexPwmRxChannelImpl::configureFlexPwm() {
     // INIT and VAL0..VAL5 are double-buffered: a write only reaches the
     // counter once MCTRL.LDOK is set for the submodule. Without the LDOK
     // below the counter kept the Teensyduino analogWrite default period
-    // (VAL1 = 33464 ticks, 4.482 kHz) while tickDeltaNs() assumes a 65536
+    // (VAL1 = 33464 ticks, 4.482 kHz) while flexPwmTickDeltaNs() assumes a 65536
     // tick wrap. Every ~223 us one HIGH or LOW straddling the wrap then
     // measured ~214 us too long: a LOW was dropped as a gap, and a HIGH
     // turned a 0 bit into a 1 -- the residual random 0->1 flips (#3406).
@@ -679,6 +544,11 @@ void FlexPwmRxChannelImpl::configureDma() {
         capture_reg = &(mPinInfo->pwm->SM[mPinInfo->submodule].CVAL4);
     }
 
+    // Circular ring: one 4-byte minor loop (rise, fall) per hardware request,
+    // kRingPairs minor loops per major loop. DLASTSGA rewinds DADDR to the
+    // ring start at each major-loop end, and with DREQ clear the channel
+    // keeps running, so the ring is reused until wait() stops it. Interrupts
+    // at the half (INTHALF) and the end (INTMAJOR) of each pass.
     mDma.begin();
     mDma.TCD->SADDR = const_cast<u16 *>(capture_reg);
     mDma.TCD->SOFF = 4;
@@ -687,24 +557,24 @@ void FlexPwmRxChannelImpl::configureDma() {
         DMA_TCD_NBYTES_MLOFFYES_NBYTES(4) |
         DMA_TCD_NBYTES_MLOFFYES_MLOFF(-8) |
         DMA_TCD_NBYTES_SMLOE;
-    mDma.TCD->SLAST = 0;
-    mDma.TCD->DADDR = mCaptureBuffer.data();
+    // The minor-loop offset is not applied after the last minor loop of a
+    // major loop; SLAST is applied instead. Rewind the two SOFF steps here,
+    // or every pass after the first reads CVAL4/CVAL5 (bench: the second
+    // ring pass decoded as all zeros and the channel then stopped).
+    mDma.TCD->SLAST = -8;
+    mDma.TCD->DADDR = sCaptureRing;
     mDma.TCD->DOFF = 2;
-    mDma.TCD->CITER = mCaptureBuffer.size() / 2;
-    mDma.TCD->DLASTSGA = 0;
-    mDma.TCD->BITER = mCaptureBuffer.size() / 2;
-    mDma.TCD->CSR = DMA_TCD_CSR_DREQ;
+    mDma.TCD->CITER = kRingPairs;
+    mDma.TCD->DLASTSGA = -static_cast<i32>(sizeof(sCaptureRing));
+    mDma.TCD->BITER = kRingPairs;
+    mDma.TCD->CSR = DMA_TCD_CSR_INTHALF | DMA_TCD_CSR_INTMAJOR;
 
-    // #3416 RX-MED-1: mArmedCiter is sampled BEFORE the 50us settle +
-    // ARMA bounce and BEFORE mDma.enable(). The wait() loop uses this
-    // as a baseline to detect "DMA never moved" failures. Sampling here
-    // matches BITER (CITER hasn't been decremented yet); sampling later
-    // (after enable + settle) would false-positive a successful capture
-    // as TIMEOUT if the TX side had already begun by then.
-    mArmedCiter = mDma.TCD->CITER;
     mDma.triggerAtHardwareEvent(mPinInfo->dma_source);
-    mDma.interruptAtCompletion();
     mDma.attachInterrupt(dmaIsr);
+    // Below the default priority (128) so a TX driver's refill ISR
+    // (ObjectFLED ESG chunks, FlexIO ring) preempts this decode: the decode
+    // has a whole ring half of slack, a TX refill has less.
+    NVIC_SET_PRIORITY(IRQ_DMA_CH0 + (mDma.channel & 15), 192);
 
     // Settle delay: the IOMUXC pad-mux switch in configureFlexPwm() can latch
     // a spurious edge into CVAL2/CVAL3 BEFORE the real TX starts. Re-arm the
@@ -746,14 +616,94 @@ void FlexPwmRxChannelImpl::configureDma() {
 }
 
 // ---------------------------------------------------------------------------
-// DMA ISR
+// DMA ISR: decode one ring half
 // ---------------------------------------------------------------------------
 
-void FlexPwmRxChannelImpl::dmaIsr() {
-    if (sActiveInstance) {
-        sActiveInstance->mDma.clearInterrupt();
-        sActiveInstance->mReceiveDone = true;
+/// Index of the pair the DMA writes next, 0..kRingPairs-1. CITER counts the
+/// minor loops left in the current pass and reloads from BITER at the wrap.
+u32 FlexPwmRxChannelImpl::dmaWritePair() const {
+    const u32 citer = mDma.TCD->CITER;
+    return (kRingPairs - citer) % kRingPairs;
+}
+
+void FlexPwmRxChannelImpl::serviceHalf() {
+    const u32 half = mNextHalf;
+    // The DMA must be writing the other half. If it is already inside this
+    // one, it finished the other half and wrapped: captures were lost.
+    if ((dmaWritePair() / kRingHalfPairs) == half) {
+        ++mOverruns;
+        mDecoder.markOverrun();
     }
+    mDecoder.push(fl::span<const u16>(sCaptureRing)
+                      .subspan(half * kRingHalfPairs * 2, kRingHalfPairs * 2));
+    // Re-check: did the DMA overwrite this half while we decoded it?
+    if ((dmaWritePair() / kRingHalfPairs) == half) {
+        ++mOverruns;
+        mDecoder.markOverrun();
+    }
+    mNextHalf = half ^ 1u;
+    mHalvesDone = mHalvesDone + 1;
+}
+
+void FlexPwmRxChannelImpl::dmaIsr() {
+    FlexPwmRxChannelImpl *self = sActiveInstance;
+    if (!self) {
+        return;
+    }
+    const u32 t0 = ARM_DWT_CYCCNT;
+    self->mDma.clearInterrupt();
+    if (self->mReceiveDone) {
+        // drain() already decoded this half (an IRQ latched in the NVIC
+        // while it ran with interrupts masked). Nothing left to do.
+        asm volatile("dsb" ::: "memory");
+        return;
+    }
+    self->serviceHalf();
+    const u32 cycles = ARM_DWT_CYCCNT - t0;
+    self->mIsrCount = self->mIsrCount + 1;
+    self->mIsrTotalCycles = self->mIsrTotalCycles + cycles;
+    if (cycles > self->mIsrMaxCycles) {
+        self->mIsrMaxCycles = cycles;
+    }
+    if (cycles > sPeakIsrCycles) {
+        sPeakIsrCycles = cycles;
+    }
+    // Make the DMA_CINT write land before return so the NVIC does not
+    // re-enter for the same request (Teensyduino FlexSerial pattern).
+    asm volatile("dsb" ::: "memory");
+}
+
+/// Stop the capture and decode what the ISR has not: a pending half whose
+/// interrupt has not run yet, then the partial half up to the DMA position.
+void FlexPwmRxChannelImpl::drain() {
+    if (mReceiveDone) {
+        return;
+    }
+    mDma.disable();
+    noInterrupts();
+    if (DMA_INT & (1u << mDma.channel)) {
+        mDma.clearInterrupt();
+        serviceHalf();
+    }
+    const u32 pos = dmaWritePair();
+    const u32 half = mNextHalf;
+    const u32 half_start = half * kRingHalfPairs;
+    if (pos >= half_start && pos < half_start + kRingHalfPairs) {
+        mTailPairs = pos - half_start;
+        mDecoder.push(fl::span<const u16>(sCaptureRing)
+                          .subspan(half_start * 2, mTailPairs * 2));
+    } else {
+        // The DMA is in the other half with this one still undecoded: a
+        // completion interrupt was lost.
+        ++mOverruns;
+        mDecoder.markOverrun();
+    }
+    NVIC_CLEAR_PENDING(IRQ_DMA_CH0 + (mDma.channel & 15));
+    mDecoder.flush();
+    sTotalOverruns = sTotalOverruns + mOverruns;
+    sTotalFrames = sTotalFrames + 1;
+    mReceiveDone = true;
+    interrupts();
 }
 
 // ---------------------------------------------------------------------------
@@ -761,191 +711,46 @@ void FlexPwmRxChannelImpl::dmaIsr() {
 // ---------------------------------------------------------------------------
 
 bool FlexPwmRxChannelImpl::finished() const {
-    // #3416 RX-LOW-5: only the ISR-confirmed completion flag is checked
-    // here. The inactivity-based detection (sampling DADDR progress) is
-    // implemented inside wait() instead, where we hold the polling
-    // state. This function is therefore a thin ISR-flag accessor.
     return mReceiveDone;
 }
 
 RxWaitResult FlexPwmRxChannelImpl::wait(u32 timeout_ms) {
-    u32 start = millis();
-    // Compare progress against the CITER captured at arm time, not at wait
-    // entry. capture() calls FastLED.wait() before rx_channel->wait(), so by
-    // the time we enter here the TX may already have completed and the DMA
-    // may have already drained one frame -- a wait-entry sample would equal
-    // the current value and falsely classify a successful capture as TIMEOUT.
-    const u16 armed_citer = mArmedCiter;
-    u16 last_citer = mDma.TCD->CITER;
+    if (mInjected) {
+        return RxWaitResult::SUCCESS;
+    }
+    if (mReceiveDone) {
+        return mDecoder.stats().pairs > 0 ? RxWaitResult::SUCCESS
+                                          : RxWaitResult::TIMEOUT;
+    }
+    const u32 start = millis();
+    // Progress = halves decoded by the ISR plus the DMA position. capture()
+    // calls FastLED.wait() before this, so the frame may already be over.
+    auto progress = [this]() -> u32 {
+        return mHalvesDone * kRingHalfPairs + dmaWritePair();
+    };
+    u32 last_progress = progress();
     u32 last_change_time = micros();
-    bool exited_on_timeout = false;
 
-    while (!mReceiveDone) {
-        u32 now_ms = millis();
-        if ((now_ms - start) >= timeout_ms) {
-            // Hit caller's timeout. Don't claim SUCCESS unless DMA actually
-            // moved -- if CITER is still at its initial value we got zero
-            // edges and must report TIMEOUT honestly so capture() can bail
-            // and runMultiTest() can emit a real failure instead of decoding
-            // a stale/empty buffer.
-            exited_on_timeout = true;
+    while (true) {
+        if ((millis() - start) >= timeout_ms) {
             break;
         }
-
-        // Check DMA progress for inactivity-based frame detection.
-        // Use CITER (remaining iterations) instead of DADDR, because
-        // destinationBuffer() creates circular DMA that wraps DADDR.
-        u16 current_citer = mDma.TCD->CITER;
-        u32 now_us = micros();
-
-        if (current_citer != last_citer) {
-            last_citer = current_citer;
+        const u32 current = progress();
+        const u32 now_us = micros();
+        if (current != last_progress) {
+            last_progress = current;
             last_change_time = now_us;
-        } else {
-            // No progress -- check if idle long enough to declare frame done
-            u32 idle_us = now_us - last_change_time;
-            if (idle_us >= (mSignalRangeMaxNs / 1000)) {
-                // Frame complete due to inactivity
-                break;
-            }
+        } else if ((now_us - last_change_time) >= (mSignalRangeMaxNs / 1000)) {
+            break;  // idle long enough: frame complete
         }
-
         yield();
     }
 
-    // Honesty: distinguish "actually got data" from "timeout with nothing".
-    //   - mReceiveDone              -> full buffer, definitely SUCCESS
-    //   - CITER moved since arm     -> partial buffer, SUCCESS (caller decodes
-    //                                   what arrived; inactivity-detection
-    //                                   path lands here)
-    //   - CITER unchanged since arm -> nothing arrived; do not pretend it did
-    const u16 current_citer = mDma.TCD->CITER;
-    const bool dma_progressed = mReceiveDone || (current_citer != armed_citer);
-    if (!dma_progressed) {
+    drain();
+    if (mDecoder.stats().pairs == 0) {
         return RxWaitResult::TIMEOUT;
     }
-    (void)exited_on_timeout;  // retained for future telemetry; see #3219
     return RxWaitResult::SUCCESS;
-}
-
-// ---------------------------------------------------------------------------
-// buildEdgeTimesFromCaptures() -- convert raw captures to EdgeTime
-// ---------------------------------------------------------------------------
-
-void FlexPwmRxChannelImpl::buildEdgeTimesFromCaptures() {
-    if (mEdgesValid) {
-        return;
-    }
-    mEdges.clear();
-
-    // Determine how many captures the DMA actually wrote.
-    //
-    // Two methods, depending on whether the DMA completed its major loop:
-    //   1. If DMA completion ISR fired (mReceiveDone=true), the entire buffer
-    //      was filled. CITER has already reloaded from BITER, so BITER-CITER=0
-    //      is misleading — we actually have a full buffer.
-    //   2. If DMA is still running or timed out, BITER-CITER gives the number
-    //      of completed bit-pair transfers. Each transfer writes two captures.
-    //
-    // We also check the DONE bit in TCD->CSR as a secondary indicator.
-    u16 biter = mDma.TCD->BITER;
-    u16 citer = mDma.TCD->CITER;
-    bool dma_done = mReceiveDone || (mDma.TCD->CSR & DMA_TCD_CSR_DONE);
-    size_t captures_written = 0;
-
-    if (dma_done) {
-        // #3416 RX-CRIT-2: when DMA completion ISR fires, the entire
-        // buffer is filled regardless of whether CITER has reloaded from
-        // BITER. The previous "dma_done && (biter == citer)" branch
-        // narrowly handled the post-reload case; the dma_done +
-        // biter != citer case (DREQ halt at major-loop end where the
-        // hardware briefly leaves CITER==0) fell through to the
-        // `biter >= citer` residual-count branch and reported
-        // captures_written=0, producing the silent mid-frame dropout
-        // visible in raw_sample as `H214753` huge HIGH gaps.
-        captures_written = mCaptureBuffer.size();
-    } else if (biter >= citer) {
-        captures_written = static_cast<size_t>(biter - citer) * 2u;
-    }
-    if (captures_written > mCaptureBuffer.size()) {
-        captures_written = mCaptureBuffer.size();
-    }
-
-    // CRITICAL: Invalidate D-cache for the capture buffer region.
-    // DMA writes bypass the CPU cache, so we must invalidate to see
-    // the data DMA actually wrote. Without this, the CPU reads stale
-    // cache lines and gets all-zero capture values.
-    //
-    // Cortex-M7 L1 cache lines are 32 bytes. arm_dcache_delete is only
-    // safe when both the start address and the size are 32-byte-aligned;
-    // a partial-line invalidate can leave 1-31 stale bytes adjacent to
-    // the invalidated region. Stale bytes with set bits leaking into a
-    // freshly-DMA'd buffer matches the residual 0->1 random byte-flip
-    // pattern from #3406 / #3359.
-    if (captures_written > 0) {
-        const fl::uptr kCacheLine = 32u;
-        const fl::uptr raw_addr = fl::ptr_to_int(mCaptureBuffer.data());
-        const fl::uptr end_addr = raw_addr + captures_written * sizeof(u16);
-        const fl::uptr aligned_start = raw_addr & ~(kCacheLine - 1u);
-        const fl::uptr aligned_end =
-            (end_addr + kCacheLine - 1u) & ~(kCacheLine - 1u);
-        arm_dcache_delete(fl::int_to_ptr<void>(aligned_start),
-                          aligned_end - aligned_start);
-    }
-
-    if (captures_written < 2) {
-        mEdgesValid = true;
-        return;
-    }
-
-    // Skip leading phantom pairs (#3219, #3409). The pad-mux switch + DMA
-    // arm sequence can latch a stray rising+falling pair before the TX
-    // driver emits its first real bit. It has a plausible HIGH (~230 ns)
-    // but is followed by an idle gap before the real frame; keeping it
-    // shifts every decoded bit by one ((0xF0,0x0F,0xAA) -> (0x78,0x07,0xD5)).
-    // Drop any leading pair whose following LOW is a gap, not just the LOW.
-    size_t start_i = 0;
-    while (start_i + 3 < captures_written &&
-           tickDeltaNs(mCaptureBuffer[start_i + 1],
-                       mCaptureBuffer[start_i + 2]) > 5000) {
-        start_i += 2;
-    }
-
-    // Build EdgeTime pairs from paired rising/falling captures. DMA writes
-    // [rise0, fall0, rise1, fall1, ...]. High time is the delta inside a pair;
-    // low time is the delta from one pair's falling edge to the next pair's
-    // rising edge.
-    for (size_t i = start_i; i + 3 < captures_written; i += 2) {
-        u16 rise = mCaptureBuffer[i];
-        u16 fall = mCaptureBuffer[i + 1];
-        u16 next_rise = mCaptureBuffer[i + 2];
-        u32 high_ns = tickDeltaNs(rise, fall);
-        u32 low_ns = tickDeltaNs(fall, next_rise);
-
-        mEdges.push_back(EdgeTime(true, high_ns));
-
-        if (low_ns > 5000) {
-            continue;
-        }
-
-        mEdges.push_back(EdgeTime(false, low_ns));
-    }
-
-    size_t last_pair = captures_written - 2;
-    u32 final_high_ns =
-        tickDeltaNs(mCaptureBuffer[last_pair], mCaptureBuffer[last_pair + 1]);
-    mEdges.push_back(EdgeTime(true, final_high_ns));
-
-#ifdef FL_DEBUG
-    FL_WARN("[FlexPWM EDGE] total=" << mEdges.size());
-    if (mEdges.size() >= 8) {
-        FL_WARN("[FlexPWM E] 0:" << ((mEdges[0].high?"H":"L")) << mEdges[0].ns << " 1:" << ((mEdges[1].high?"H":"L")) << mEdges[1].ns << " 2:" << ((mEdges[2].high?"H":"L")) << mEdges[2].ns << " 3:" << ((mEdges[3].high?"H":"L")) << mEdges[3].ns);
-        size_t mid = mEdges.size() / 2;
-        FL_WARN("[FlexPWM E@" << mid << "] " << ((mEdges[mid].high?"H":"L")) << mEdges[mid].ns << " " << ((mEdges[mid+1].high?"H":"L")) << (mEdges[mid+1].ns) << " " << ((mEdges[mid+2].high?"H":"L")) << (mEdges[mid+2].ns) << " " << ((mEdges[mid+3].high?"H":"L")) << (mEdges[mid+3].ns));
-    }
-#endif
-
-    mEdgesValid = true;
 }
 
 // ---------------------------------------------------------------------------
@@ -955,14 +760,15 @@ void FlexPwmRxChannelImpl::buildEdgeTimesFromCaptures() {
 fl::result<u32, DecodeError>
 FlexPwmRxChannelImpl::decode(const ChipsetTiming4Phase &timing,
                               fl::span<u8> out) {
-    buildEdgeTimesFromCaptures();
-
-    if (mEdges.size() == 0) {
-        return fl::result<u32, DecodeError>::success(0);
+    if (mInjected) {
+        return channels::rx::decodeFlexPwmEdges(
+            timing,
+            fl::span<const EdgeTime>(mInjectedEdges),
+            out);
     }
-
-    fl::span<const EdgeTime> edge_span(mEdges.data(), mEdges.size());
-    return decodeEdges(timing, edge_span, out);
+    drain();
+    mDecoder.finish(timing);
+    return mDecoder.copyTo(out);
 }
 
 // ---------------------------------------------------------------------------
@@ -971,17 +777,22 @@ FlexPwmRxChannelImpl::decode(const ChipsetTiming4Phase &timing,
 
 size_t FlexPwmRxChannelImpl::getRawEdgeTimes(fl::span<EdgeTime> out,
                                               size_t offset) {
-    buildEdgeTimesFromCaptures();
-
-    if (offset >= mEdges.size()) {
+    // Streaming keeps only the first kDiagEdges edges of the frame.
+    const EdgeTime *src = mDiagEdges.data();
+    size_t count = mDecoder.diagEdgeCount();
+    if (mInjected) {
+        src = mInjectedEdges.data();
+        count = mInjectedEdges.size();
+    } else {
+        drain();
+    }
+    if (offset >= count) {
         return 0;
     }
-
-    size_t available = mEdges.size() - offset;
-    size_t to_copy = (available < out.size()) ? available : out.size();
-
+    const size_t available = count - offset;
+    const size_t to_copy = (available < out.size()) ? available : out.size();
     for (size_t i = 0; i < to_copy; ++i) {
-        out[i] = mEdges[offset + i];
+        out[i] = src[offset + i];
     }
     return to_copy;
 }
@@ -991,17 +802,18 @@ size_t FlexPwmRxChannelImpl::getRawEdgeTimes(fl::span<EdgeTime> out,
 // ---------------------------------------------------------------------------
 
 // #3416 RX-LOW-6: this is a TEST-ONLY entry point. It bypasses the
-// DMA capture path and pre-loads the decoder with synthetic edges.
-// `mReceiveDone = true` short-circuits subsequent wait() calls; the
-// fixture must call begin() again before a real capture or it will
-// immediately return SUCCESS without arming DMA.
+// DMA capture path and pre-loads the batch decoder with synthetic edges.
+// The fixture must call begin() again before a real capture.
 bool FlexPwmRxChannelImpl::injectEdges(fl::span<const EdgeTime> edges) {
-    mEdges.clear();
-    mEdges.reserve(edges.size());
-    for (size_t i = 0; i < edges.size(); ++i) {
-        mEdges.push_back(edges[i]);
+    if (mConfigured) {
+        mDma.disable();
     }
-    mEdgesValid = true;
+    mInjectedEdges.clear();
+    mInjectedEdges.reserve(edges.size());
+    for (size_t i = 0; i < edges.size(); ++i) {
+        mInjectedEdges.push_back(edges[i]);
+    }
+    mInjected = true;
     mReceiveDone = true;
     return true;
 }
@@ -1036,6 +848,22 @@ static void flexPwmDiagSetPtr(fl::json &obj, const char *key,
     flexPwmDiagSetU32(obj, key, flexPwmDiagPtrToU32(ptr));
 }
 
+fl::json FlexPwmRxChannel::streamStatsToJson() FL_NO_EXCEPT {
+    fl::json out = fl::json::object();
+    FlexPwmRxChannelImpl *active = FlexPwmRxChannelImpl::sActiveInstance;
+    if (active) {
+        out.set("pairs", static_cast<i64>(active->mDecoder.stats().pairs));
+        out.set("isrCount", static_cast<i64>(active->mIsrCount));
+        out.set("isrMaxCycles", static_cast<i64>(active->mIsrMaxCycles));
+        out.set("overruns", static_cast<i64>(active->mOverruns));
+    }
+    out.set("ringBytes", static_cast<i64>(sizeof(sCaptureRing)));
+    out.set("isrPeakCyclesSinceBoot", static_cast<i64>(sPeakIsrCycles));
+    out.set("overrunsSinceBoot", static_cast<i64>(sTotalOverruns));
+    out.set("framesSinceBoot", static_cast<i64>(sTotalFrames));
+    return out;
+}
+
 fl::json FlexPwmRxChannel::diagnosticsToJson(int requested_pin) FL_NO_EXCEPT {
     fl::json out = fl::json::object();
     out.set("format", "flexpwm-rx-diag-v1");
@@ -1068,9 +896,29 @@ fl::json FlexPwmRxChannel::diagnosticsToJson(int requested_pin) FL_NO_EXCEPT {
     out.set("activePinMatches", active->mPin == requested_pin);
     out.set("configured", active->mConfigured);
     out.set("receiveDone", static_cast<bool>(active->mReceiveDone));
-    out.set("edgesValid", active->mEdgesValid);
-    out.set("edgeCount", static_cast<i64>(active->mEdges.size()));
-    out.set("captureBufferSize", static_cast<i64>(active->mCaptureBuffer.size()));
+    // Streaming capture: ring geometry, ISR cost and overruns.
+    const channels::rx::Ws2812StreamDecoder::Stats &st = active->mDecoder.stats();
+    out.set("ringPairs", static_cast<i64>(kRingPairs));
+    out.set("ringBytes", static_cast<i64>(sizeof(sCaptureRing)));
+    out.set("decodedCapacity", static_cast<i64>(active->mDecoded.size()));
+    out.set("pairs", static_cast<i64>(st.pairs));
+    out.set("bits", static_cast<i64>(st.bits));
+    out.set("bitErrors", static_cast<i64>(st.errors));
+    out.set("fullBytes", static_cast<i64>(st.fullBytes));
+    out.set("halvesDone", static_cast<i64>(active->mHalvesDone));
+    out.set("tailPairs", static_cast<i64>(active->mTailPairs));
+    out.set("overruns", static_cast<i64>(active->mOverruns));
+    out.set("isrCount", static_cast<i64>(active->mIsrCount));
+    out.set("isrMaxCycles", static_cast<i64>(active->mIsrMaxCycles));
+    out.set("isrTotalCycles", static_cast<i64>(active->mIsrTotalCycles));
+    out.set("cpuHz", static_cast<i64>(F_CPU_ACTUAL));
+    out.set("isrPeakCyclesSinceBoot", static_cast<i64>(sPeakIsrCycles));
+    out.set("overrunsSinceBoot", static_cast<i64>(sTotalOverruns));
+    out.set("framesSinceBoot", static_cast<i64>(sTotalFrames));
+    out.set("calibratedMidpointNs", static_cast<i64>(st.calibratedMidpointNs));
+    out.set("frameMidpointNs", static_cast<i64>(st.frameMidpointNs));
+    out.set("nearThresholdBits", static_cast<i64>(st.exceptions));
+    out.set("inexact", st.inexact);
     out.set("signalRangeMaxNs", static_cast<i64>(active->mSignalRangeMaxNs));
 
     // Pin pad / GPIO state for the RX pin itself. Lets us tell if the pad
