@@ -69,11 +69,16 @@ bool ObjectFLEDDmaManager::ensureBitdata(uint32_t numbytes) {
     // Over-allocate and align the start to a 32-byte cache line. The size
     // is a multiple of 128 B, so arm_dcache_flush_delete() never touches a
     // line shared with other heap data.
+    // Free the old (too small) buffer first: it can't serve this frame, and
+    // freeing it lets the allocator reuse that space for the larger block.
+    fl::free(mBitdataAlloc);
+    mBitdataAlloc = nullptr;
+    bitdata = nullptr;
+    bitdataWords = 0;
     void* block = fl::malloc(words * sizeof(uint32_t) + 31);
     if (block == nullptr) {
-        return false;  // keep the old (smaller) buffer; caller drops frame
+        return false;  // caller drops the frame
     }
-    fl::free(mBitdataAlloc);
     mBitdataAlloc = block;
     bitdata = reinterpret_cast<uint32_t*>(
         (reinterpret_cast<uintptr_t>(block) + 31) & ~uintptr_t(31));

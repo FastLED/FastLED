@@ -653,8 +653,12 @@ void ObjectFLED::showInternal(bool regenerateFrameBuffer) {
 	// acquire()). On allocation failure drop the frame rather than arm the
 	// DMA on a null or too-small buffer.
 	if (!dma.ensureBitdata(dma.numbytes)) {
-		FL_WARN("ObjectFLED: out of memory for the DMA bit buffer ("
-			<< dma.numbytes << " bytes/strip); frame dropped");
+		static bool warned = false;  // warn once; don't flood serial per frame
+		if (!warned) {
+			warned = true;
+			FL_WARN("ObjectFLED: out of memory for the DMA bit buffer ("
+				<< dma.numbytes << " bytes/strip); frames dropped");
+		}
 		dma.release(this);
 		return;
 	}
@@ -676,9 +680,11 @@ void ObjectFLED::showInternal(bool regenerateFrameBuffer) {
 	clear_objectfled_xbar_dma_status();
 
 	// fill the DMA transmit buffer
-	memset(dma.bitdata, 0, dma.bitdataWords * sizeof(uint32_t));	// >= min(numbytes, 2*BPD)*32 words32
 	uint32_t count = dma.numbytes;					//bytes per strip
 	if (count > BYTES_PER_DMA*2) count = BYTES_PER_DMA*2;
+	// Clear only what this frame fills (count*32 words, at least one byte's
+	// worth for fillbits' do/while); ensureBitdata() guaranteed the capacity.
+	memset(dma.bitdata, 0, objectfled::bitdataWordsFor(count, BYTES_PER_DMA) * sizeof(uint32_t));
 	dma.framebuffer_index = count;					//ptr to framebuffer last byte output
 
 	//Sets each pin mask in bitdata32[BYTES_PER_DMA*64] for every 0 bit of pin's frameBuffer block bytes
@@ -795,7 +801,8 @@ void ObjectFLED::isr(void)
 	// buffer memset in showInternal at frame start initialises only the
 	// half DMA reads first; this per-ISR memset initialises the OTHER
 	// half before each refill so the |= invariant holds.
-	// Only the >2*BPD path reaches here, where bitdataWords == 2*BPD*32.
+	// Only the >2*BPD path reaches here, where bitdataWords == 2*BPD*32
+	// (static_assert in ObjectFLEDDmaManager.h).
 	memset(dest, 0, BYTES_PER_DMA * 32 * sizeof(uint32_t));
 	uint32_t index = dma.framebuffer_index;
 	uint32_t count = dma.numbytes - dma.framebuffer_index;

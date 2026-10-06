@@ -506,6 +506,7 @@ FL_TEST_CASE("ObjectFLED engine - capabilities are unified clockless + SPI (#342
 // #4711: bitdata is sized to min(numbytes, 2*BYTES_PER_DMA)*32 words and
 // never shrinks. BYTES_PER_DMA = 150, so 300 bytes is the single-shot cap.
 FL_TEST_CASE("ObjectFLED bitdata - sized to frame, capped at double buffer") {
+    FL_CHECK_EQ(objectfled::bitdataWordsFor(0, 150), 32u);  // fillbits writes >= 1 byte
     FL_CHECK_EQ(objectfled::bitdataWordsFor(1, 150), 32u);
     FL_CHECK_EQ(objectfled::bitdataWordsFor(192, 150), 192u * 32);
     FL_CHECK_EQ(objectfled::bitdataWordsFor(300, 150), 300u * 32);

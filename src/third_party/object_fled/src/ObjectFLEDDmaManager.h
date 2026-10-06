@@ -7,6 +7,7 @@
 #include <Arduino.h>
 #include "DMAChannel.h"
 #include "platforms/arm/teensy/teensy4_common/dmamem.h"
+#include "ObjectFLEDBitdataSize.h"
 
 namespace fl {
 
@@ -19,7 +20,8 @@ namespace fl {
 // the residual 0->1 phantom bit flips clustered at 20-LED boundaries
 // observed in #3406. At BYTES_PER_DMA=120 the major loop runs 1200 us, so
 // the ISR has plenty of margin to refill before the next chunk starts.
-// Memory cost: bitdata grows from 15 KB to 30 KB in DMAMEM (OCRAM2).
+// Memory cost: bitdata is at most BYTES_PER_DMA*256 bytes (38,400 B at
+// 150), heap-allocated in OCRAM2 and sized to the frame (#4711).
 #ifndef BYTES_PER_DMA
 // EXPERIMENT: 150 makes our 100-LED test fit in a single major loop
 // (numbytes=300 <= BYTES_PER_DMA*2=300) so the ESG/ISR refill path is
@@ -36,6 +38,12 @@ namespace fl {
 static_assert(BYTES_PER_DMA >= 90,
               "BYTES_PER_DMA must be >= 90 to keep the ISR refill margin "
               "ahead of the DMA major-loop tick. See #3406 round-2 race.");
+
+// The ISR refills one BYTES_PER_DMA*32-word half of bitdata, which needs
+// the >2*BYTES_PER_DMA path to own the full double buffer.
+static_assert(objectfled::bitdataWordsFor(2 * BYTES_PER_DMA + 1, BYTES_PER_DMA) ==
+                  2 * BYTES_PER_DMA * 32,
+              "ObjectFLED ISR half-buffer refill needs a full double buffer");
 
 /// Singleton manager for shared ObjectFLED DMA resources
 ///
