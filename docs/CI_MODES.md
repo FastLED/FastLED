@@ -82,3 +82,17 @@ The package registry crawler may read a new default-branch version before
 the tag exists. The release gate prevents an untested GitHub tag/release, but
 cannot prevent that external crawler from reading the merged version while
 the exact-SHA full sweep runs. Plan release timing with that constraint.
+
+## Gap: in-place upgrades keep deleted sources (FastLED #4704)
+
+Every CI build, `uno_r4_wifi` included, compiles a clean checkout, so it
+never sees a source file that an earlier release shipped and a later one
+removed. Arduino compiles every `.c`/`.cpp`/`.S` under `src/`, and a user
+who unpacks a new release over an old copy keeps those files. 3.10.6
+renamed `src/fl/build/fl.system.sd+.cpp` to `fl.fs.sd+.cpp`. Overlaid on
+3.10.5, both unity units defined `fl::FileSystem::beginSd(int)` and the
+link failed. A deleted or renamed compiled source must now stay behind as
+an empty tombstone, so the overlay overwrites the stale copy.
+`release.yml` enforces this before tagging by running
+`ci/check_released_sources.py`, which compares the candidate with the
+previous release tag.
