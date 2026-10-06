@@ -6,6 +6,7 @@
 
 #include <Arduino.h>
 #include "DMAChannel.h"
+#include "platforms/arm/teensy/teensy4_common/dmamem.h"
 
 namespace fl {
 
@@ -60,8 +61,8 @@ class ObjectFLEDDmaManager {
     DMASetting dma2next;
 
     // DMAMEM buffers must be static to work with section attributes
-    static DMAMEM uint32_t bitdata[BYTES_PER_DMA * 64] __attribute__((used, aligned(32)));
-    static DMAMEM uint32_t bitmask[4] __attribute__((used, aligned(32)));
+    static FL_DMAMEM uint32_t bitdata[BYTES_PER_DMA * 64] __attribute__((aligned(32)));
+    static FL_DMAMEM uint32_t bitmask[4] __attribute__((aligned(32)));
 
     // Shared state for ISR. These are written once in showInternal()
     // before DMA arms and then read by the ISR refill path. The ARM Cortex-M7

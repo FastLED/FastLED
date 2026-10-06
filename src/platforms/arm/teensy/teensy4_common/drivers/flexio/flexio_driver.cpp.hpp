@@ -16,6 +16,7 @@
 #include <Arduino.h>
 #include <imxrt.h>
 #include <DMAChannel.h>
+#include "platforms/arm/teensy/teensy4_common/dmamem.h"
 // IWYU pragma: end_keep
 
 // The Teensy framework defines FLEXIO2_* as macros that expand to struct member
@@ -144,7 +145,7 @@ static u32 sLatchCycles = 0;  // FL_LINT_ALLOW_GLOBAL(DMA-ISR-shared driver stat
 static FlexIOPinInfo sCurrentPinInfo{};
 
 static constexpr u32 kMaxPixelBytes = 4096;
-DMAMEM static u32 sPixelBuffer[kMaxPixelBytes / 4] __attribute__((aligned(32)));
+FL_DMAMEM static u32 sPixelBuffer[kMaxPixelBytes / 4] __attribute__((aligned(32)));
 
 static volatile u32 sDmaErrorCount = 0;  // FL_LINT_ALLOW_GLOBAL(DMA-ISR-shared driver state; single T4 peripheral instance)
 static volatile u32 sLastDmaEs = 0;  // FL_LINT_ALLOW_GLOBAL(DMA-ISR-shared driver state; single T4 peripheral instance)

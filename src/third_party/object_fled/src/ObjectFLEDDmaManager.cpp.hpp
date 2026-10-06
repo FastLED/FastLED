@@ -4,12 +4,13 @@
 
 #include "ObjectFLEDDmaManager.h"
 #include "fl/system/delay.h"
+#include "platforms/arm/teensy/teensy4_common/dmamem.h"
 
 namespace fl {
 
 // Define static members
-DMAMEM uint32_t ObjectFLEDDmaManager::bitdata[BYTES_PER_DMA * 64] __attribute__((used, aligned(32)));
-DMAMEM uint32_t ObjectFLEDDmaManager::bitmask[4] __attribute__((used, aligned(32)));
+FL_DMAMEM uint32_t ObjectFLEDDmaManager::bitdata[BYTES_PER_DMA * 64] __attribute__((aligned(32)));
+FL_DMAMEM uint32_t ObjectFLEDDmaManager::bitmask[4] __attribute__((aligned(32)));
 
 // #3416 OF-HIGH-1 / CodeRabbit-flagged: save/restore PRIMASK rather than
 // unconditionally re-enabling interrupts, so we don't clobber the

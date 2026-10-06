@@ -88,14 +88,19 @@ ObjectFLED::ObjectFLED(uint16_t numLEDs, void *drawBuf, uint8_t config, uint8_t 
 	if (numPins > NUM_DIGITAL_PINS) {
 		// #3416 OF-LOW-2: warn on silent truncation so users debugging
 		// "why is my multi-strip setup short on pins" see the cause.
-		Serial.printf("ObjectFLED: numPins=%u exceeds NUM_DIGITAL_PINS=%u; truncating\r\n",
-		              numPins, NUM_DIGITAL_PINS);
+		// Serial.print, not Serial.printf: printf links ~16 KB of newlib
+		// formatting into ITCM (RAM1) for every Teensy 4 sketch (#4709).
+		Serial.print("ObjectFLED: numPins=");
+		Serial.print((unsigned)numPins);
+		Serial.print(" exceeds NUM_DIGITAL_PINS=");
+		Serial.print((unsigned)NUM_DIGITAL_PINS);
+		Serial.print("; truncating\r\n");
 		numPins = NUM_DIGITAL_PINS;
 	}
 	// CodeRabbit-flagged on PR #3419: guard against numPins=0 which
 	// would otherwise divide by zero in stripLen = numLEDs / numpinsLocal.
 	if (numPins == 0) {
-		Serial.printf("ObjectFLED: numPins=0 is invalid; abandoning init\r\n");
+		Serial.print("ObjectFLED: numPins=0 is invalid; abandoning init\r\n");
 		numpinsLocal = 0;
 		stripLen = 0;
 		initialized = false;
@@ -106,8 +111,13 @@ ObjectFLED::ObjectFLED(uint16_t numLEDs, void *drawBuf, uint8_t config, uint8_t 
 	// #3416 OF-LOW-8: warn if numLEDs doesn't divide evenly across pins
 	// -- tail LEDs are silently dropped from the per-strip stride.
 	if (numpinsLocal > 0 && numLEDs % numpinsLocal != 0) {
-		Serial.printf("ObjectFLED: numLEDs=%u not divisible by numpins=%u; last %u LED(s) ignored\r\n",
-		              numLEDs, numpinsLocal, (unsigned)(numLEDs % numpinsLocal));
+		Serial.print("ObjectFLED: numLEDs=");
+		Serial.print((unsigned)numLEDs);
+		Serial.print(" not divisible by numpins=");
+		Serial.print((unsigned)numpinsLocal);
+		Serial.print("; last ");
+		Serial.print((unsigned)(numLEDs % numpinsLocal));
+		Serial.print(" LED(s) ignored\r\n");
 	}
 	memcpy(pinlist, pinList, numpinsLocal);
 	if ((params & 0x3F) < 6) {

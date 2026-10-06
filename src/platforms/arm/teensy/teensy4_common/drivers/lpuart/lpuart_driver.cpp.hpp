@@ -14,6 +14,7 @@
 #include <Arduino.h>
 #include <imxrt.h>
 #include <DMAChannel.h>
+#include "platforms/arm/teensy/teensy4_common/dmamem.h"
 // IWYU pragma: end_keep
 
 namespace fl {
@@ -191,7 +192,7 @@ static volatile u32 sLpLastFrameEndUs = 0;  // FL_LINT_ALLOW_GLOBAL(DMA-ISR-shar
 // Max strip size: 1024 raw bytes -> 4096 UART bytes. Larger strips would
 // need a heap allocation; defer to FX-MED-2-style truncation warning.
 static constexpr u32 kMaxRawBytes = 1024;
-DMAMEM static u8 sLpUartBuffer[kMaxRawBytes * 4] __attribute__((aligned(32)));
+FL_DMAMEM static u8 sLpUartBuffer[kMaxRawBytes * 4] __attribute__((aligned(32)));
 
 // ============================================================================
 // Pin + clock + LPUART setup

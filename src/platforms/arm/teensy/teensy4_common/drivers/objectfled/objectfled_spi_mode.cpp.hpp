@@ -64,6 +64,7 @@
 #include <Arduino.h>
 #include <imxrt.h>
 #include <DMAChannel.h>
+#include "platforms/arm/teensy/teensy4_common/dmamem.h"
 // IWYU pragma: end_keep
 
 // xbar_connect() is declared inside Teensyduino's pwm.c without a public
@@ -125,7 +126,7 @@ static ObjectFLEDSPIPinInfo sSpiCurrentPins{};
 // Pre-encoded DMA bit-pattern buffer. DMAMEM = OCRAM2 (uncached on T4),
 // matches dma.bitdata in ObjectFLEDDmaManager. 32-byte aligned so the
 // SADDR satisfies eDMA 32-bit beat alignment.
-static DMAMEM u32 sSpiBitPattern[kSpiMaxOutputWords] __attribute__((used, aligned(32)));
+FL_DMAMEM static u32 sSpiBitPattern[kSpiMaxOutputWords] __attribute__((aligned(32)));
 
 // Saved IOMUXC pad-mux values so deinit() can restore pad ALT5 (GPIO).
 static u32 sSpiSavedMosiMux = 0;  // FL_LINT_ALLOW_GLOBAL(DMA-ISR-shared driver state; single T4 peripheral instance)
