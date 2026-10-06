@@ -1,6 +1,7 @@
 #pragma once
 
 // IWYU pragma: private
+// ok no namespace fl - macro-only header
 
 /// @file dmamem.h
 /// @brief FL_DMAMEM: Teensy 4 DMAMEM placement without `used`.
