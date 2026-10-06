@@ -568,15 +568,15 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
     FL_NO_INLINE void emitRecoveryWarning(
         size_t original_symbols, size_t reduced_symbols,
         size_t external_words) FL_NO_EXCEPT {
-        // Gate the entire body on FASTLED_LOG_RUNTIME_ENABLED. In release
-        // builds (NDEBUG -> FASTLED_LOG_VERBOSITY=0 per Stage 1) the
+        // Gate the entire body on FL_HAS_WARN. When FL_WARN is
+        // compiled out (FL_LOG_LEVEL < 2, the default since #4712) the
         // FL_WARN(msg.str()) call at the bottom is a no-op, but the
         // `fl::sstream msg;` construction and 15 `operator<<` chain calls
         // above happen unconditionally - they have observable side effects
         // on msg's internal buffer that the optimizer can't prove away.
         // Gating collapses the FL_NO_INLINE helper to an effectively-empty
         // function in release (~5 B vs ~410 B). See #2917 / #2886.
-#if FASTLED_LOG_RUNTIME_ENABLED
+#if FL_HAS_WARN
         fl::sstream msg;
         msg << "\n========================================\n"
             << "RMT ALLOCATION RECOVERY - ACTION REQUIRED\n"

@@ -14,8 +14,9 @@ board = esp32-s3-devkitm-1
 framework = arduino
 build_flags =
     -DFASTLED_SUPPRESS_ARDUINO_CHIP_DEBUG_REPORT=1
-    ; FASTLED_LOG_VERBOSITY defaults to 0 in release builds (NDEBUG)
-    ; since FastLED #2890 — no explicit flag needed.
+    ; FL_LOG_LEVEL defaults to 0 (no logs) in release builds (NDEBUG,
+    ; #2890) and to 1 (FL_ERROR only, FL_WARN compiled out; #4712)
+    ; otherwise. -DFL_LOG_LEVEL=2 restores full logs.
 board_build.sdkconfig_defaults =
     sdkconfig.defaults
     <path-to-installed-framework-arduinoespressif32>/tools/sdkconfig.defaults.esp32s3
@@ -39,7 +40,7 @@ To measure your own build: `bash bloat esp32s3 --build` then `jq '.total_flash' 
 
 | # | Lever | How to enable | Savings | Status | PR |
 |---:|---|---|---:|:---:|---|
-| 1 | `FASTLED_LOG_VERBOSITY=0` | **Default on release builds** (NDEBUG); `-DFASTLED_LOG_VERBOSITY=1` to restore | **−37,812 B from this flag alone** + post-Stage-1 cascade (see below) totalling **≈ −50,391 B** (388,380 → 337,989 B on master post-#2957) | ✅ | #2890 + cascade |
+| 1 | `FASTLED_LOG_VERBOSITY=0` | **Default on release builds** (NDEBUG); `-DFL_LOG_LEVEL=2` (or legacy `-DFASTLED_LOG_VERBOSITY=1`) to restore | **−37,812 B from this flag alone** + post-Stage-1 cascade (see below) totalling **≈ −50,391 B** (388,380 → 337,989 B on master post-#2957) | ✅ | #2890 + cascade |
 | 2 | `tools/sdkconfig_for_smallest_fastled.defaults` | `board_build.sdkconfig_defaults` in `platformio.ini`. **Includes `CONFIG_NEWLIB_NANO_FORMAT=y`** which drops the standard newlib printf cluster — see Stage 3 detail below. | **−59,224 B measured** (339,962 → 280,738 B on `f43f76701a`) | ✅ | #2896 + #2915 |
 | 3 | `-DFL_RMT_STATIC_ALLOCATION=1` | `build_flags`; one fixed FastLED TX strip initialized in `setup()`, with no late add/remove, pin/timing reconfiguration, or RMT5 RX allocation | **−4,395 B symbol flash, −108 B RAM** versus the default dynamic Blink build; see the isolated before/after audit below | ✅ | PR #2846; issue #4567 |
 | 4 | `-DFASTLED_SUPPRESS_ARDUINO_CHIP_DEBUG_REPORT=1` | `build_flags`; strong-overrides the Arduino-ESP32 boot-banner gate | ~3 KB | 📊 | #2894 |
@@ -65,14 +66,14 @@ Row 1 is empirically confirmed by the 2026-06-06 audit (see the [#2886 audit com
 
 ### 1. `FASTLED_LOG_VERBOSITY=0` (the big one)
 
-**Mechanism:** `src/fl/log/log.h:66-92`. The unset default resolves as `FASTLED_TESTING` → 1, `NDEBUG` → 0, otherwise → 1. At level 0 the `FL_WARN` / `FL_INFO` / `FL_ERROR` / `FL_PRINT` / `FL_DBG` macros expand to `do {} while(0)`, so the optimizer drops the formatted-stream operator chain and the linker drops every literal carried with it.
+**Mechanism:** `src/fl/log/log.h` resolves `FL_LOG_LEVEL` (0 = off, 1 = errors only, 2 = full) as `FASTLED_TESTING` → 2, explicit `FL_LOG_LEVEL`, legacy `FASTLED_LOG_VERBOSITY` (0 → 0, ≥1 → 2), `NDEBUG` → 0, otherwise → 1. Since #4712 the non-release default (1) already compiles out `FL_WARN` / `FL_INFO` / `FL_DBG`, so most of the pool below is gone without any flag; level 0 additionally drops `FL_ERROR` / `FL_PRINT`. At level 0 the `FL_WARN` / `FL_INFO` / `FL_ERROR` / `FL_PRINT` / `FL_DBG` macros expand to `do {} while(0)`, so the optimizer drops the formatted-stream operator chain and the linker drops every literal carried with it.
 
 **Where the savings come from (per #2886 top-25):**
 
 - ~58 KB from the `ClocklessIdf5` ctor's transitive `FL_WARN` rodata pool (75 sites in `channel_driver_rmt.cpp.hpp`, 59 in `rmt_memory_manager.cpp.hpp`, 6 in `manager.cpp.hpp`, 5 in `channel.cpp.hpp`).
 - Additional ~5-10 KB scattered across smaller call sites (`createChannel`, `reconfigureForNetwork`, `handleAllocateTxFailure`, `Rmt5EncoderImpl::initialize`).
 
-**To restore on a release build** (e.g. for field debugging): add `-DFASTLED_LOG_VERBOSITY=1` to `build_flags`.
+**To restore full logs** (e.g. for field debugging): add `-DFL_LOG_LEVEL=2` (or the legacy `-DFASTLED_LOG_VERBOSITY=1`) to `build_flags`.
 
 **To force off on a non-release build** (e.g. measuring savings without an NDEBUG rebuild): add `-DFASTLED_LOG_VERBOSITY=0` to `build_flags`.
 
@@ -146,7 +147,7 @@ bash bloat esp32s3 --build --profile slim   # log-off + smallest sdkconfig overl
 bash bloat esp32s3 --build --compare        # default vs. slim, side by side
 ```
 
-**Note:** the default `bash bloat esp32s3` image is built **without** `-DNDEBUG` / `FASTLED_LOG_VERBOSITY=0`, so log verbosity resolves to 1 (see `src/fl/log/log.h`). It is not the log-off release config described above. For reference, default Blink at `0811ca88af` measured 374,588 B attributed / 459,560 B `firmware.bin` (#4564).
+**Note:** the default `bash bloat esp32s3` image is built **without** `-DNDEBUG` / `FASTLED_LOG_VERBOSITY=0`, so `FL_LOG_LEVEL` resolves to 1 (errors only since #4712; see `src/fl/log/log.h`). It is not the log-off release config described above. For reference, default Blink at `0811ca88af` measured 374,588 B attributed / 459,560 B `firmware.bin` (#4564).
 
 The slim profile applies `FASTLED_LOG_VERBOSITY=0` plus `tools/sdkconfig_for_smallest_fastled.defaults`, and fails if `libespcoredump.a` or `diag_log_add` remain linked. It writes `.build/symbols/esp32s3-slim/` (`report.json`, `report.md`, and `provenance.json` recording the applied flags and overlay). Because slim disables field-debug logs and coredumps it is opt-in; the ordinary ratchet baseline `tests/data/esp32s3_bloat_baseline.txt` still tracks the default image and is unchanged.
 

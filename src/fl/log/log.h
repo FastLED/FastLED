@@ -41,84 +41,83 @@
 #endif
 
 // =============================================================================
-// FASTLED_LOG_VERBOSITY - release-mode knob to no-op FL_WARN/FL_INFO/
-//                          FL_ERROR/FL_PRINT and free ~20-40 KB of
-//                          `.flash.rodata` string-pool bloat on embedded
-//                          builds. See FastLED #2773 item 2.3.
+// FL_LOG_LEVEL - compile-time log level. Each `FL_WARN(...)` call site
+// bakes a `__FILE__ + __LINE__ + message` literal into `.flash.rodata`; on
+// ESP32 that pool is ~37-58 KB (FastLED #2773, #2886, #4712).
 // =============================================================================
 //
-// Each `FL_WARN(...)` / `FL_INFO(...)` / `FL_ERROR(...)` / `FL_PRINT(...)`
-// call site bakes a `__FILE__ + __LINE__ + user-supplied message` literal
-// into `.flash.rodata`. On the ESP32-S3 NEOPIXEL Blink build that pool is
-// ~57 KB - the single biggest `.rodata` contributor (see the audit on
-// #2473). The strings are live only because their call sites are live.
+// Levels (higher = more output):
 //
-// Levels (mirror standard log-verbosity conventions; higher = more output):
+//   * 0 (off)    -> FL_ERROR/FL_WARN/FL_INFO/FL_PRINT/FL_DBG and
+//                   FL_WARN_LIT/FL_LOG_LIT expand to no-ops.
+//   * 1 (errors) -> FL_ERROR (real failures) and FL_PRINT (output the sketch
+//                   asked for explicitly) fire; FL_WARN/FL_INFO/FL_DBG
+//                   compile out. FL_WARN_LIT/FL_LOG_LIT (one literal, no
+//                   stream machinery; used by the LPC845 bring-up check)
+//                   stay live.
+//   * 2 (full)   -> everything above plus FL_WARN/FL_INFO, and FL_DBG under
+//                   its own FASTLED_HAS_DBG gate.
 //
-//   * `FASTLED_LOG_VERBOSITY == 0` -> ALL of FL_WARN/FL_INFO/FL_ERROR/
-//     FL_PRINT/FL_DBG expand to `do {} while(0)`. Strings, `fl::sstream`
-//     uses, and any transitive `fl::println` references vanish; the
-//     downstream printf chain may shrink further as a result.
-//   * `FASTLED_LOG_VERBOSITY == 1` -> current behavior; FL_WARN /
-//     FL_INFO / FL_ERROR / FL_PRINT fire on platforms where
-//     `SKETCH_HAS_LARGE_MEMORY` is set. FL_DBG follows its existing
-//     `FASTLED_HAS_DBG` gate.
-//   * `FASTLED_LOG_VERBOSITY >= 2` -> reserved for future "even noisier
-//     than debug" output; currently equivalent to level 1.
+// FL_ERROR/FL_WARN/FL_INFO/FL_PRINT additionally require
+// SKETCH_HAS_LARGE_MEMORY (AVR/ATtiny/LPC845 never run the full pipeline).
 //
-// Default selection (in resolution order):
+// Resolution order:
 //
-//   * `FASTLED_TESTING` is set     -> 1 (host unit tests need full diagnostics)
-//   * `NDEBUG` is set (release)    -> 0 (drop ~55 KB of FL_WARN/FL_LOG strings
-//                                      on ESP32-S3 NEOPIXEL Blink; see #2886)
-//   * otherwise (debug builds)     -> 1 (preserve current behavior)
+//   1. `FASTLED_TESTING`                 -> 2 (host tests need diagnostics)
+//   2. `FL_LOG_LEVEL` set by user        -> that value
+//   3. `FASTLED_LOG_VERBOSITY` set (legacy knob, kept for back-compat)
+//                                        -> 0 stays 0; any value >= 1 maps
+//                                           to 2, because
+//                                           `-DFASTLED_LOG_VERBOSITY=1` has
+//                                           always meant "full logs"
+//   4. `NDEBUG` (release builds)         -> 0
+//   5. otherwise (e.g. Arduino IDE)      -> 1 (errors only, #4712)
 //
-// Users who want logs back on a release build define
-// `-DFASTLED_LOG_VERBOSITY=1` in their build flags or
-// `#define FASTLED_LOG_VERBOSITY 1` before `#include <FastLED.h>`. The
-// per-channel logging defines (`FASTLED_LOG_RMT_ENABLED`, `FASTLED_LOG_SPI_ENABLED`,
-// etc.) are still gated by their own `#define`s - only the verbosity floor
-// changes here.
+// To restore full logs add `-DFL_LOG_LEVEL=2` to the build flags, or
+// `#define FL_LOG_LEVEL 2` before `#include <FastLED.h>`. The legacy
+// `-DFASTLED_LOG_VERBOSITY=1` still works. Per-channel logging defines
+// (`FASTLED_LOG_RMT_ENABLED`, ...) keep their own `#define`s.
 #ifdef FASTLED_TESTING
-  // Host unit tests always want the full diagnostic stream so assertion
-  // and warning messages can be checked in CI.
-  #if !defined(FASTLED_LOG_VERBOSITY) || FASTLED_LOG_VERBOSITY < 1
-    #undef FASTLED_LOG_VERBOSITY
-    #define FASTLED_LOG_VERBOSITY 1
-  #endif
-#else
-  #ifndef FASTLED_LOG_VERBOSITY
-    #ifdef NDEBUG
-      #define FASTLED_LOG_VERBOSITY 0
+  #undef FL_LOG_LEVEL
+  #define FL_LOG_LEVEL 2
+#elif !defined(FL_LOG_LEVEL)
+  #if defined(FASTLED_LOG_VERBOSITY)
+    #if FASTLED_LOG_VERBOSITY >= 1
+      #define FL_LOG_LEVEL 2
     #else
-      #define FASTLED_LOG_VERBOSITY 1
+      #define FL_LOG_LEVEL 0
     #endif
+  #elif defined(NDEBUG)
+    #define FL_LOG_LEVEL 0
+  #else
+    #define FL_LOG_LEVEL 1
   #endif
 #endif
 
-// Resolved compile-time gate. Logging fires only when BOTH the platform
-// has a sufficient memory budget AND the user hasn't opted out via
-// `FASTLED_LOG_VERBOSITY=0`. The two gates are independent - embedded
-// targets without `SKETCH_HAS_LARGE_MEMORY` are no-op regardless of the
-// verbosity knob (matching the pre-#2773 behavior on AVR/ATtiny).
-#if SKETCH_HAS_LARGE_MEMORY && (FASTLED_LOG_VERBOSITY >= 1)
+// Error-level gate: the log pipeline is linked and FL_ERROR / FL_PRINT fire.
+// Callers guarding error-only helpers (one-shot flags, names used in
+// FL_ERROR messages) use this.
+#if SKETCH_HAS_LARGE_MEMORY && (FL_LOG_LEVEL >= 1)
   #define FASTLED_LOG_RUNTIME_ENABLED 1
 #else
   #define FASTLED_LOG_RUNTIME_ENABLED 0
 #endif
 
-// Public resolved gate for FL_WARN call sites and their supporting helpers.
-// Prefer this over coupling callers to FASTLED_LOG_RUNTIME_ENABLED, which is
-// the shared implementation gate for several log severities.
-#define FL_HAS_WARN FASTLED_LOG_RUNTIME_ENABLED
+// Public resolved gate for FL_WARN / FL_INFO call sites and their supporting
+// helpers. Requires the full level (2).
+#if SKETCH_HAS_LARGE_MEMORY && (FL_LOG_LEVEL >= 2)
+  #define FL_HAS_WARN 1
+#else
+  #define FL_HAS_WARN 0
+#endif
 
 // Lite gate for FL_WARN_LIT / FL_LOG_LIT - string-literal-only macros that
 // route through fl::println without the sstream / operator<< / log_emit
 // chain. These are intentionally usable on Low-memory targets (LPC845,
 // AVR, ATtiny) where the full FL_WARN pipeline is too expensive - the
 // caller pays for one `fl::println(const char*)` symbol and the literal
-// bytes, nothing more. See FastLED #3002 (LPC845 bring-up).
-#if FASTLED_LOG_VERBOSITY >= 1
+// bytes, nothing more. Live at level >= 1. See FastLED #3002.
+#if FL_LOG_LEVEL >= 1
   #define FASTLED_LOG_LITE_ENABLED 1
 #else
   #define FASTLED_LOG_LITE_ENABLED 0
@@ -367,7 +366,7 @@ inline void async_log_emit_auto(Logger& logger,
 #define FL_ERROR(...) _FL_VA_DISPATCH(_FL_ERROR_S, _FL_ERROR_M, __VA_ARGS__)(__VA_ARGS__)
 #define FL_ERROR_IF(COND, ...) do { if (COND) FL_ERROR(__VA_ARGS__); } while(0)
 #else
-// No-op macros - either memory-constrained platform or FASTLED_LOG_VERBOSITY=0.
+// No-op macros - memory-constrained platform or FL_LOG_LEVEL=0.
 // Args are dropped entirely (matching pre-#3272 behaviour of FL_*_F). See
 // commit notes - earlier draft used `sstream_noop()` type-check but that
 // forced evaluation of args declared only under FASTLED_LOG_*_ENABLED.
@@ -430,7 +429,7 @@ inline void async_log_emit_auto(Logger& logger,
     } \
 } while(0)
 #else
-// No-op macros - either memory-constrained platform or FASTLED_LOG_VERBOSITY=0.
+// No-op macros - memory-constrained platform or FL_LOG_LEVEL < 2.
 // Args dropped entirely - see the corresponding FL_ERROR section above for
 // the rationale (pre-existing call sites declare some args only under
 // FASTLED_LOG_*_ENABLED, so any `if(false)` type-check would force a build
@@ -477,7 +476,7 @@ inline void async_log_emit_auto(Logger& logger,
 #endif
 
 #ifndef FL_INFO
-#if FASTLED_LOG_RUNTIME_ENABLED
+#if FL_HAS_WARN
 // FL_INFO: one literal or stream expression; printf-style is a compile error
 // (#4709).
 #define FL_INFO(...) _FL_VA_DISPATCH(_FL_INFO_S, _FL_INFO_M, __VA_ARGS__)(__VA_ARGS__)
@@ -493,7 +492,7 @@ inline void async_log_emit_auto(Logger& logger,
     } \
 } while(0)
 #else
-// No-op macros - either memory-constrained platform or FASTLED_LOG_VERBOSITY=0.
+// No-op macros - memory-constrained platform or FL_LOG_LEVEL < 2.
 #define FL_INFO(...) _FL_LOG_CHECK(__VA_ARGS__)
 #define FL_INFO_IF(COND, ...) _FL_LOG_CHECK(__VA_ARGS__)
 #define FL_INFO_ONCE(...) _FL_LOG_CHECK(__VA_ARGS__)
@@ -513,17 +512,17 @@ inline void async_log_emit_auto(Logger& logger,
 
 // Debug printing control:
 // - FASTLED_DISABLE_DBG=1: Explicitly disable FL_DBG output (highest priority)
-// - FASTLED_LOG_VERBOSITY=0: Disable FL_DBG along with all other macros
+// - FL_LOG_LEVEL < 2: Disable FL_DBG (needs the full log level)
 // - FASTLED_FORCE_DBG: Force enable FL_DBG (auto-set for debug builds)
 // - SKETCH_HAS_LARGE_MEMORY: Enable FL_DBG when platform has enough memory
 //
-// Priority: FASTLED_DISABLE_DBG > FASTLED_LOG_VERBOSITY > FASTLED_FORCE_DBG > SKETCH_HAS_LARGE_MEMORY
+// Priority: FASTLED_DISABLE_DBG > FL_LOG_LEVEL > FASTLED_FORCE_DBG > SKETCH_HAS_LARGE_MEMORY
 #if defined(FASTLED_DISABLE_DBG) && FASTLED_DISABLE_DBG
 // Explicit disable takes highest priority - useful for reducing serial spam
 #define FASTLED_HAS_DBG 0
 #define _FASTLED_DGB(X) FL_DBG_NO_OP(X)
-#elif FASTLED_LOG_VERBOSITY < 1
-// FASTLED_LOG_VERBOSITY=0 disables FL_DBG too. See #2773 item 2.3.
+#elif FL_LOG_LEVEL < 2
+// FL_DBG needs the full log level (2). See #2773 item 2.3 and #4712.
 #define FASTLED_HAS_DBG 0
 #define _FASTLED_DGB(X) FL_DBG_NO_OP(X)
 #elif !defined(FASTLED_FORCE_DBG) && !SKETCH_HAS_LARGE_MEMORY
