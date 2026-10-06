@@ -133,14 +133,18 @@ public:
 #elif defined(FL_IS_ESP_32C5)
 
 // GPIO 13,14 (USB_D*), 15-18,20-22 used by default for SPI flash.
-#define FASTLED_UNUSABLE_PIN_MASK (0ULL | _FL_BIT(13) | _FL_BIT(14) | _FL_BIT(15) | _FL_BIT(16) | _FL_BIT(17) | _FL_BIT(18) | _FL_BIT(20) | _FL_BIT(21) | _FL_BIT(22))
+// GPIO 19 is VDD_SPI, the flash power supply by default (ESP32-C5 datasheet
+// pin overview); driving it browns out the flash.
+#define FASTLED_UNUSABLE_PIN_MASK (0ULL | _FL_BIT(13) | _FL_BIT(14) | _FL_BIT(15) | _FL_BIT(16) | _FL_BIT(17) | _FL_BIT(18) | _FL_BIT(19) | _FL_BIT(20) | _FL_BIT(21) | _FL_BIT(22))
 
 #elif defined(FL_IS_ESP_32C6)
 
 // GPIO 12/13 are native USB D-/D+ on ESP32-C6 USB-Serial/JTAG boards; using
 // them as FastLED outputs can sever the active serial/upload connection.
-// GPIO 24-26 and 28-30 are reserved/unusable on ESP32-C6 packages.
-#define FASTLED_UNUSABLE_PIN_MASK (0ULL | _FL_BIT(12) | _FL_BIT(13) | _FL_BIT(24) | _FL_BIT(25) | _FL_BIT(26) | _FL_BIT(28) | _FL_BIT(29) | _FL_BIT(30))
+// GPIO 24-26 and 28-30 are the SPI flash pins. GPIO 27 is VDD_SPI, the flash
+// power supply by default (ESP32-C6 datasheet "Restrictions for GPIOs");
+// driving it browns out the flash.
+#define FASTLED_UNUSABLE_PIN_MASK (0ULL | _FL_BIT(12) | _FL_BIT(13) | _FL_BIT(24) | _FL_BIT(25) | _FL_BIT(26) | _FL_BIT(27) | _FL_BIT(28) | _FL_BIT(29) | _FL_BIT(30))
 
 #elif defined(FL_IS_ESP_32P4)
 // 55 GPIO pins. ESPIDF defines all pins as valid.

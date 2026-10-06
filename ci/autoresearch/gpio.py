@@ -349,7 +349,7 @@ async def run_pin_discovery(
                     f"GPIO {p} ({reason})" for p, reason in sorted(unique_pins.items())
                 )
                 print(
-                    f"   {Fore.CYAN}Skipped per FastLED pin-validity map: "
+                    f"   {Fore.CYAN}Skipped (pin-validity map, console link, or flash/PSRAM): "
                     f"{summary}{Style.RESET_ALL}"
                 )
 
