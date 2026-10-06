@@ -74,7 +74,7 @@ def test_rp2350w_ble_transport_uses_btstack_with_singleton_state() -> None:
     assert "BleNotifyQueue notifications" in source
     assert "notifications.chunkSize" in source
     assert "notifications.advance" in source
-    assert "notify failed: \" << " in source
+    assert 'notify failed: " << ' in source
 
 
 def test_rp2350w_ble_disconnect_clears_pending_notification_state() -> None:

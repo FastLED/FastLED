@@ -244,7 +244,15 @@ fl::json AutoResearchRemoteControl::findConnectedPinsImpl(const fl::json& args) 
     };
 
     fl::json skipped_pins = fl::json::array();
+    // Each pin is recorded once: the all-pairs scan below visits a pin many
+    // times, and an unbounded array exhausts heap on ESP32 (see testedPairs).
+    fl::u64 skipped_mask = 0;
     auto recordSkip = [&](int p, const char* reason) {
+        const fl::u64 bit = (p >= 0 && p < 64) ? (fl::u64(1) << p) : 0;
+        if (skipped_mask & bit) {
+            return;
+        }
+        skipped_mask |= bit;
         fl::json entry = fl::json::object();
         entry.set("pin", static_cast<int64_t>(p));
         entry.set("reason", reason);
@@ -274,75 +282,50 @@ fl::json AutoResearchRemoteControl::findConnectedPinsImpl(const fl::json& args) 
         return (rx_when_tx_low == LOW) && (rx_when_tx_high == HIGH);
     };
 
-    // Search for connected adjacent pin pairs (n, n+1)
+    // Search every pin pair (a, b) in the range, both directions. Bench
+    // jumpers are not always on neighbouring pins (a Teensy 4.0 wired across
+    // the board was invisible to the old adjacent-only (n, n+1) scan).
+    // Cost: 2 probes x ~4 ms per pair; a 0-40 range is ~6 s.
     int found_tx = -1;
     int found_rx = -1;
     fl::json tested_pairs = fl::json::array();
 
-    for (int pin = start_pin; pin < end_pin; pin++) {
-        int tx_candidate = pin;
-        int rx_candidate = pin + 1;
+    // Drive `tx`, read `rx`; skips (and records) a driver that can't output.
+    auto tryDirection = [&](int tx, int rx) -> bool {
+        if (!isFastLedValidOutputPin(tx)) {
+            recordSkip(tx, isFastLedInputOnlyPin(tx) ? "input-only" : "not-output-capable");
+            return false;
+        }
+        return testPinPair(tx, rx);
+    };
 
+    for (int a = start_pin; a <= end_pin && found_tx < 0; a++) {
         // FastLED #3446: hands off the platform's reserved pads
-        // (SPI flash 6-11, USB-JTAG 20, …) — driving them locks the
+        // (SPI flash 6-11, USB-JTAG 20, ...) -- driving them locks the
         // chip up or corrupts the live flash transaction. The
         // FASTLED_UNUSABLE_PIN_MASK is per-chip authoritative.
-        if (isFastLedReservedPin(tx_candidate)) {
-            recordSkip(tx_candidate, "reserved-by-FastLED");
+        if (isFastLedReservedPin(a)) {
+            recordSkip(a, "reserved-by-FastLED");
             continue;
         }
-        if (isFastLedReservedPin(rx_candidate)) {
-            recordSkip(rx_candidate, "reserved-by-FastLED");
-            continue;
-        }
-
-        fl::json pair = fl::json::object();
-        pair.set("tx", static_cast<int64_t>(tx_candidate));
-        pair.set("rx", static_cast<int64_t>(rx_candidate));
-
-        // Test TX→RX direction. Skip when the TX side can't actually
-        // drive output (e.g. input-only GPIO34-39 on classic ESP32).
-        if (!isFastLedValidOutputPin(tx_candidate)) {
-            recordSkip(tx_candidate, "input-only");
-        } else {
-            bool connected_forward = testPinPair(tx_candidate, rx_candidate);
-            if (connected_forward) {
-                pair.set("connected", true);
-                pair.set("direction", "forward");
-                tested_pairs.push_back(pair);
-                found_tx = tx_candidate;
-                found_rx = rx_candidate;
+        for (int b = a + 1; b <= end_pin; b++) {
+            if (isFastLedReservedPin(b)) {
+                recordSkip(b, "reserved-by-FastLED");
+                continue;
+            }
+            if (tryDirection(a, b)) {
+                found_tx = a;
+                found_rx = b;
                 FL_DBG("[PIN PROBE] Found connected pair: TX=" << found_tx << " -> RX=" << found_rx);
                 break;
             }
+            if (tryDirection(b, a)) {
+                found_tx = b;  // Reversed: b drives a
+                found_rx = a;
+                FL_DBG("[PIN PROBE] Found connected pair (reversed): TX=" << found_tx << " -> RX=" << found_rx);
+                break;
+            }
         }
-
-        // Test RX→TX direction (reversed). Same drive-capability gate:
-        // if the would-be-driver is input-only, skip — `pinMode(p, OUTPUT)`
-        // is silently ignored and the test produces a false negative.
-        if (isFastLedInputOnlyPin(rx_candidate)) {
-            recordSkip(rx_candidate, "input-only");
-            tested_pairs.push_back(pair);
-            continue;
-        }
-        if (!isFastLedValidOutputPin(rx_candidate)) {
-            recordSkip(rx_candidate, "not-output-capable");
-            tested_pairs.push_back(pair);
-            continue;
-        }
-        bool connected_reverse = testPinPair(rx_candidate, tx_candidate);
-        if (connected_reverse) {
-            pair.set("connected", true);
-            pair.set("direction", "reverse");
-            tested_pairs.push_back(pair);
-            found_tx = rx_candidate;  // Swap since reversed
-            found_rx = tx_candidate;
-            FL_DBG("[PIN PROBE] Found connected pair (reversed): TX=" << found_tx << " -> RX=" << found_rx);
-            break;
-        }
-
-        pair.set("connected", false);
-        tested_pairs.push_back(pair);
     }
 
     // NOTE: testedPairs array omitted - causes heap exhaustion on ESP32 (21+ objects = ~1500 bytes)
@@ -409,7 +392,7 @@ fl::json AutoResearchRemoteControl::findConnectedPinsImpl(const fl::json& args) 
     } else {
         response.set("success", true);  // Function succeeded, just no pins found
         response.set("found", false);
-        response.set("message", "No connected pin pairs found. Please connect a jumper wire between adjacent GPIO pins.");
+        response.set("message", "No connected pin pairs found. Please connect a jumper wire between two GPIO pins.");
     }
 
     return response;
