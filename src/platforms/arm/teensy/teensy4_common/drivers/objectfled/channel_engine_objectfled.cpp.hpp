@@ -145,7 +145,7 @@ void ChannelEngineObjectFLED::enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT {
         if (!validation.valid) {
             FL_WARN("================================================================================");
             FL_WARN("FASTLED ERROR: Strip on pin " << pin << " is INVALID and has been disabled");
-            FL_WARN((validation.error_message ? validation.error_message : ""));
+            FL_WARN(validation.error_message);
             FL_WARN("================================================================================");
         }
     }
@@ -255,7 +255,7 @@ bool ChannelEngineObjectFLED::startTimingGroup(TimingGroup& group) FL_NO_EXCEPT 
         // Validate pin
         auto validation = mPeripheral->validatePin(pin);
         if (!validation.valid) {
-            FL_LOG_OBJECTFLED("ChannelEngineObjectFLED: Pin %s invalid: %s", (int)pin, validation.error_message);
+            FL_LOG_OBJECTFLED("ChannelEngineObjectFLED: Pin " << ((int)pin) << " invalid: " << validation.error_message);
             continue;
         }
 

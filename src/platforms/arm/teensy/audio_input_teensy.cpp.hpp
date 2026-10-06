@@ -95,7 +95,7 @@ Teensy_I2S_Audio::Teensy_I2S_Audio(const audio::ConfigI2S& config)
     if (mConfig.mSampleRate != 44100) {
         mHasError = true;
         mErrorMessage = "Teensy Audio Library only supports 44100Hz sample rate";
-        FL_WARN(mErrorMessage.c_str());
+        FL_WARN(mErrorMessage);
         return;
     }
 
@@ -103,7 +103,7 @@ Teensy_I2S_Audio::Teensy_I2S_Audio(const audio::ConfigI2S& config)
     if (mConfig.mBitResolution != 16) {
         mHasError = true;
         mErrorMessage = "Teensy Audio Library only supports 16-bit resolution";
-        FL_WARN(mErrorMessage.c_str());
+        FL_WARN(mErrorMessage);
         return;
     }
 
@@ -112,7 +112,7 @@ Teensy_I2S_Audio::Teensy_I2S_Audio(const audio::ConfigI2S& config)
     if (static_cast<audio::TeensyI2S::I2SPort>(mConfig.mI2sNum) == audio::TeensyI2S::I2SPort::I2S2) {
         mHasError = true;
         mErrorMessage = "I2S2 is not available on Teensy 3.x (only I2S1 supported)";
-        FL_WARN(mErrorMessage.c_str());
+        FL_WARN(mErrorMessage);
         return;
     }
 #endif
@@ -138,7 +138,7 @@ Teensy_I2S_Audio::Teensy_I2S_Audio(const audio::ConfigI2S& config)
     else {
         mHasError = true;
         mErrorMessage = "Invalid I2S port selection";
-        FL_WARN(mErrorMessage.c_str());
+        FL_WARN(mErrorMessage);
         return;
     }
 }

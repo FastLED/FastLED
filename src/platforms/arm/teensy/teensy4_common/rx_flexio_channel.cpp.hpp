@@ -579,9 +579,7 @@ void FlexIoRxChannelImpl::dmaIsr() {
 bool FlexIoRxChannelImpl::begin(const RxConfig &config) {
     mPinInfo = lookupFlexIo1Pin(mPin);
     if (!mPinInfo) {
-        FL_WARN("[FlexIO RX] Pin %s has no FLEXIO1 mux mapping on Teensy 4.x (only a small "
-                   "subset is enabled; see rx_flexio_channel.cpp.hpp). See "
-                   "FastLED#2764.", mPin);
+        FL_WARN("[FlexIO RX] Pin " << mPin << " has no FLEXIO1 mux mapping on Teensy 4.x (only a small subset is enabled; see rx_flexio_channel.cpp.hpp). See FastLED#2764.");
         return false;
     }
 
@@ -672,7 +670,7 @@ RxWaitResult FlexIoRxChannelImpl::wait(u32 timeout_ms) {
     const u32 biter = mDma.TCD->BITER & 0x7FFFu;
     const u32 transfers_done = (biter > citer) ? (biter - citer) : 0u;
     if (transfers_done == 0u) {
-        FL_WARN("[FlexIO RX] empty-buffer SUCCESS reclassified as TIMEOUT (transfers=0/%s)", biter);
+        FL_WARN("[FlexIO RX] empty-buffer SUCCESS reclassified as TIMEOUT (transfers=0/" << biter << ")");
         return RxWaitResult::TIMEOUT;
     }
     return RxWaitResult::SUCCESS;
@@ -746,9 +744,7 @@ bool FlexIoRxChannelImpl::injectEdges(fl::span<const EdgeTime> edges) {
 fl::shared_ptr<FlexIoRxChannel> FlexIoRxChannel::create(int pin) {
     const FlexIo1PinInfo *info = lookupFlexIo1Pin(pin);
     if (!info) {
-        FL_WARN("[FlexIO RX] Pin %s has no FLEXIO1 mux mapping (Phase 1B initial map is "
-                   "minimal; expand kFlexIo1Pins[] as bench tests qualify "
-                   "additional pins). See FastLED#2764.", pin);
+        FL_WARN("[FlexIO RX] Pin " << pin << " has no FLEXIO1 mux mapping (Phase 1B initial map is minimal; expand kFlexIo1Pins[] as bench tests qualify additional pins). See FastLED#2764.");
         return fl::shared_ptr<FlexIoRxChannel>();
     }
     return fl::make_shared<FlexIoRxChannelImpl>(pin);

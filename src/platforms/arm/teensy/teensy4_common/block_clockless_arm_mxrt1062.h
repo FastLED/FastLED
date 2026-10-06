@@ -76,7 +76,7 @@ protected:
         }
         IChannelDriver& driver = Traits::instance();
         if (!ChannelManager::registry().isDriverEnabled(driver.getName().c_str())) {
-            FL_WARN_ONCE("FlexibleInlineBlockClocklessController: driver '" << driver.getName().c_str()
+            FL_WARN_ONCE("FlexibleInlineBlockClocklessController: driver '" << driver.getName()
                          << "' is disabled - dropping frame");
             return;
         }
@@ -85,7 +85,7 @@ protected:
             if (mData[i]->isInUse()) { inUse = true; }
         }
         if (inUse && !driver.waitForReady()) {
-            FL_WARN_ONCE("FlexibleInlineBlockClocklessController: driver '" << driver.getName().c_str()
+            FL_WARN_ONCE("FlexibleInlineBlockClocklessController: driver '" << driver.getName()
                          << "' did not become ready in time - dropping frame");
             return;
         }
