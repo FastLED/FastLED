@@ -262,6 +262,8 @@ static void flexio_pin_init(const FlexIOPinInfo& pin_info) {
 // to ALT5 (GPIO5) output and drive it LOW for >=60 us so the receiver
 // captures a clean LOW idle. flexio_show() restores ALT4 | SION once the
 // shifter is clocking out the LOW preamble word.
+static constexpr u32 kFlexIOMuxAlt4Sion = 4u | 0x10u;  // ALT4 (FlexIO2) + SION
+
 static void flexio_pin_park_low(const FlexIOPinInfo& pin_info) {
     // ALT5 == GPIO5 mode on all Teensy 4.x B0/B1 pads we map.
     // Use Arduino's ::pinMode/::digitalWriteFast (the fl:: overloads
@@ -625,21 +627,24 @@ bool flexio_show(const u8* pixel_data, u32 num_bytes) {
     // CITER mis-matched with actual words queued (an off-by-one
     // over-shift). The hardware self-starts cleanly.
 
+    // The pad must return to FlexIO inside the ~10 us LOW preamble, so
+    // no ISR may run between starting the shifter and the mux write.
+    noInterrupts();
     sDmaChannel->enable();
     // #3416 FX-CRIT-2: enable shifter-empty -> DMA request now that
     // both the TCD and the channel are fully armed. The first DMA
     // request fires on the next FLEXEN-induced SSF=HIGH transition.
     FLEXIO2_SHIFTSDEN = (1u << 0);
-    // Wait for the DMA to load the preamble word (the shifter-status flag
-    // drops when SHIFTBUF is written), then give the pad back to FlexIO
-    // while it is shifting out LOW.
+    // Wait until the DMA has written the preamble word (CITER drops below
+    // the word count), then hand the pad back while it shifts out LOW.
     {
         const u32 load_start = micros();
-        while ((FLEXIO2_SHIFTSTAT & 1u) &&
+        while (sDmaChannel->TCD->CITER_ELINKNO >= num_words &&
                (u32)(micros() - load_start) < 5u) {
         }
     }
-    *(sCurrentPinInfo.mux_reg) = 4 | 0x10;
+    *(sCurrentPinInfo.mux_reg) = kFlexIOMuxAlt4Sion;
+    interrupts();
 
     return true;
 }

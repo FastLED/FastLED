@@ -592,7 +592,10 @@ void FlexPwmRxChannelImpl::configureFlexPwm() {
     // tick wrap. Every ~223 us one HIGH or LOW straddling the wrap then
     // measured ~214 us too long: a LOW was dropped as a gap, and a HIGH
     // turned a 0 bit into a 1 -- the residual random 0->1 flips (#3406).
-    pwm->MCTRL |= FLEXPWM_MCTRL_CLDOK(1 << sm);
+    // Write CLDOK/LDOK without echoing back pending LDOK bits: a plain
+    // read-modify-write would set and clear this submodule's LDOK at once.
+    pwm->MCTRL = (pwm->MCTRL & ~FLEXPWM_MCTRL_LDOK(0x0F)) |
+                 FLEXPWM_MCTRL_CLDOK(1 << sm);
     pwm->SM[sm].INIT = 0;
     pwm->SM[sm].VAL1 = 0xFFFF;
     pwm->SM[sm].VAL0 = 0;
@@ -600,7 +603,8 @@ void FlexPwmRxChannelImpl::configureFlexPwm() {
     pwm->SM[sm].VAL3 = 0;
     pwm->SM[sm].VAL4 = 0;
     pwm->SM[sm].VAL5 = 0;
-    pwm->MCTRL |= FLEXPWM_MCTRL_LDOK(1 << sm);
+    pwm->MCTRL = (pwm->MCTRL & ~FLEXPWM_MCTRL_LDOK(0x0F)) |
+                 FLEXPWM_MCTRL_LDOK(1 << sm);
 
     if (!mPinInfo->channel_b) {
         // Channel A capture configuration (CAPTCTRLA / CAPTCOMPA)
@@ -702,19 +706,21 @@ void FlexPwmRxChannelImpl::configureDma() {
     // that decodes bit 0 as 1 (0x55 -> 0xD5). Pop both FIFOs by reading
     // their CVAL registers until the CNT fields read zero.
     auto &smr = mPinInfo->pwm->SM[mPinInfo->submodule];
-    // CA0CNT/CA1CNT (and CB0CNT/CB1CNT) live in bits 10..15.
-    const u16 kFifoCountMask = 0xFC00u;
+    const u16 kFifoCountMaskA =
+        FLEXPWM_SMCAPTCTRLA_CA0CNT(7) | FLEXPWM_SMCAPTCTRLA_CA1CNT(7);
+    const u16 kFifoCountMaskB =
+        FLEXPWM_SMCAPTCTRLB_CB0CNT(7) | FLEXPWM_SMCAPTCTRLB_CB1CNT(7);
     if (!mPinInfo->channel_b) {
         smr.CAPTCTRLA &= ~static_cast<u16>(FLEXPWM_SMCAPTCTRLA_ARMA);
         smr.CAPTCTRLA |= FLEXPWM_SMCAPTCTRLA_ARMA;
-        for (int n = 0; n < 16 && (smr.CAPTCTRLA & kFifoCountMask); ++n) {
+        for (int n = 0; n < 16 && (smr.CAPTCTRLA & kFifoCountMaskA); ++n) {
             (void)smr.CVAL2;
             (void)smr.CVAL3;
         }
     } else {
         smr.CAPTCTRLB &= ~static_cast<u16>(FLEXPWM_SMCAPTCTRLB_ARMB);
         smr.CAPTCTRLB |= FLEXPWM_SMCAPTCTRLB_ARMB;
-        for (int n = 0; n < 16 && (smr.CAPTCTRLB & kFifoCountMask); ++n) {
+        for (int n = 0; n < 16 && (smr.CAPTCTRLB & kFifoCountMaskB); ++n) {
             (void)smr.CVAL4;
             (void)smr.CVAL5;
         }
