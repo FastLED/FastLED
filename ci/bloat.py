@@ -39,10 +39,10 @@ Lessons baked in (see agents/docs/binary-size-analysis.md):
       it, the biggest single-symbol contributor on ESP32-S3 Blink (the
       NEOPIXEL chipset ctor's FL_WARN/FL_LOG string pool, ~58 KB) shows
       up as anonymous bytes against main.cpp.o.
-    - The dominant flash-bloat lever on ESP32-S3 is `FASTLED_LOG_VERBOSITY=0`
-      (FastLED PR #2791). That single define recovers ~43-58 KB of FL_WARN
-      string pool with no behavioural change for users who only need release-
-      mode logging.
+    - The dominant flash-bloat lever on ESP32-S3 is the log level
+      (`FL_LOG_LEVEL`, src/fl/log/log.h). The FL_WARN string pool is
+      ~43-58 KB; since #4712 it is compiled out by default (level 1, errors
+      only) and `FASTLED_LOG_VERBOSITY=0` (level 0) also drops FL_ERROR.
     - Over-budget builds: `bash bloat <board>` will retry the build with
       `fbuild build --bloat-analysis` (which sets `-Wl,--noinhibit-exec`)
       so the ELF survives even when the linker reports a region overflow.

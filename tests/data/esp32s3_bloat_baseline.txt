@@ -1,3 +1,9 @@
+# 2026-10-06, PR #4717 (issue #4712): -24,284 B, 392019 -> 367735. Default
+# log level on non-NDEBUG builds is 1 (FL_ERROR only): FL_WARN / FL_INFO /
+# FL_DBG compile out. Measured by CI run 37427203380 (bloat regression job);
+# the local before/after delta was -24,572 B, the usual few-hundred-byte
+# local/CI difference.
+
 # 2026-10-06, PR #4710 (meta #4709): -6,780 B, 398799 -> 392019, claiming
 # the saving from making printf-form logging a compile error. All 959 log
 # sites became stream form, so the fl::printf engine (parse_format_spec,
@@ -307,4 +313,4 @@
 # the CI Blink report contains no ResponseLutsQ16 symbol. The local fbuild
 # symbol total remains ~4 KB higher for the same source (FastLED/fbuild#1456),
 # so this ratchet uses the CI measurement from PR #4511.
-392019
+367735

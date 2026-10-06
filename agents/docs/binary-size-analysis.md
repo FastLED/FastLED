@@ -33,7 +33,7 @@ bash bloat esp32s3 --build --profile slim
 bash bloat esp32s3 --build --compare
 ```
 
-**The default `bash bloat` image is NOT the documented release config.** It is built without `-DNDEBUG` and without `FASTLED_LOG_VERBOSITY=0`, so `src/fl/log/log.h` resolves log verbosity to 1 and the `FL_WARN` string pool stays linked. Reference default-image numbers from the issue: Blink at `0811ca88af` measured 374,588 B attributed / 459,560 B `firmware.bin`.
+**The default `bash bloat` image is NOT the documented release config.** It is built without `-DNDEBUG`, so `src/fl/log/log.h` resolves `FL_LOG_LEVEL` to 1 (errors only, since #4712): `FL_ERROR`/`FL_PRINT` stay linked, the `FL_WARN`/`FL_INFO` string pool does not. Before #4712 the default was full logging; reference numbers from that era: Blink at `0811ca88af` measured 374,588 B attributed / 459,560 B `firmware.bin`.
 
 `--profile slim` applies `-DFASTLED_LOG_VERBOSITY=0` plus `tools/sdkconfig_for_smallest_fastled.defaults`, and fails the run if `libespcoredump.a` or `diag_log_add` are still linked (proof the overlay actually took effect). Output goes to `.build/symbols/esp32s3-slim/` alongside a `provenance.json` recording the flags and overlay used.
 
@@ -60,13 +60,14 @@ These are the gotchas the wrapper handles for you. They are documented here so t
 
 2. **Map-derived synthesis is what makes the report useful.** fbuild PR #427 parses `.rodata.<owner>.str1.<N>` input-section names and attributes those bytes to the owning function. Without it, the single biggest contributor on ESP32-S3 Blink (the NEOPIXEL chipset ctor's `FL_WARN`/`FL_LOG` string pool, ~58 KB / 15 %) appears as anonymous bytes against `main.cpp.o` and there's no way to chase it. The `source: "map-derived"` field on each symbol tags rows whose attribution came from this synthesis pass; treat them with the same trust as `source: "nm"` rows.
 
-3. **The dominant flash lever on ESP32-S3 is `FASTLED_LOG_VERBOSITY=0`.** FastLED PR #2791 introduced this build-time knob. Setting it (define before `#include <FastLED.h>`) collapses ~43-58 KB of FL_WARN string pool with zero behaviour change for users who don't need release-mode logging. **Always check whether this knob is set before chasing other optimisations — it's a single define that dominates everything else.** Since #2890 (Stage 1 of #2886), the default flips to `0` automatically when `NDEBUG` is set (release builds).
+3. **The dominant flash lever on ESP32 is the log level.** `FL_LOG_LEVEL` (`src/fl/log/log.h`) is 0 = off, 1 = errors only (`FL_ERROR`, `FL_PRINT`, `FL_WARN_LIT`), 2 = full (`FL_WARN`/`FL_INFO`/`FL_DBG`). The `FL_WARN` string pool is ~37-58 KB. Defaults: 0 under `NDEBUG` (#2890), 1 otherwise (#4712), 2 under `FASTLED_TESTING`. The legacy `FASTLED_LOG_VERBOSITY` (#2791) still works: 0 = off, 1 = full. **When a size measurement looks off, check the effective level first — it dominates everything else.**
 
    ### Release-build flash savers (in order of impact)
 
    | Lever | How to enable | Savings | Source |
    |---|---|---:|---|
-   | `FASTLED_LOG_VERBOSITY=0` | Now the release default (NDEBUG); explicit `-DFASTLED_LOG_VERBOSITY=1` to restore | ~43-58 KB | #2791 + #2890 |
+   | `FL_LOG_LEVEL` 1 (errors only) | Default on non-`NDEBUG` builds; `-DFL_LOG_LEVEL=2` (or legacy `-DFASTLED_LOG_VERBOSITY=1`) restores full logs | ~37-50 KB | #4712 |
+   | `FL_LOG_LEVEL` 0 / `FASTLED_LOG_VERBOSITY=0` | Release default (NDEBUG); also drops `FL_ERROR`/`FL_PRINT` | a few KB more than level 1 | #2791 + #2890 |
    | `tools/sdkconfig_for_smallest_fastled.defaults` | `board_build.sdkconfig_defaults` in `platformio.ini`; disables coredump, IDF log, bootloader log, panic-print + **switches newlib to nano printf (#2915 — biggest single lever)** | ~30-45 KB | #2895 + #2915 (Stage 3) |
    | `-DFASTLED_SUPPRESS_ARDUINO_CHIP_DEBUG_REPORT=1` | `build_flags`; strong-overrides the Arduino-ESP32 boot-banner gate | ~3 KB | #2894 (Stage 2) |
    | `-DFL_RMT_STATIC_ALLOCATION=1` | `build_flags`; exactly one fixed TX strip, no late add/remove, runtime reconfiguration, or RMT5 RX allocation | −4,395 B symbol flash and −108 B RAM versus default dynamic Blink; whole `firmware.bin` is 4,640 B smaller on the same candidate. The isolated ledger before/after results (including its 192 B whole-bin increase) are in `docs/SLIM_ESP32S3.md`. | #2846; issue #4567 |
