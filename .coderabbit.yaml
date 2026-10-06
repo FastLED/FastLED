@@ -573,8 +573,9 @@ reviews:
         FL_LOG_LEVEL, legacy FASTLED_LOG_VERBOSITY, NDEBUG => 0,
         otherwise => 1. See src/fl/log/log.h.
 
-        Flag any PR that wraps an existing or new FL_WARN(...) /
-        FL_ERROR(...) site in an additional `#if !defined(...)` or
-        `#ifdef FASTLED_LOG_*` block that would suppress the call on
-        non-release builds by default — that breaks the
-        developer-visibility contract above.
+        Flag any PR that wraps an existing or new FL_ERROR(...) site in an
+        additional `#if !defined(...)` or `#ifdef FASTLED_LOG_*` block that
+        would suppress the call on non-release builds by default — that
+        breaks the developer-visibility contract above.
+        For FL_WARN(...), flag an additional guard only if it prevents
+        -DFL_LOG_LEVEL=2 (including FASTLED_TESTING) from restoring the call.
