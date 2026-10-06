@@ -693,6 +693,15 @@ void ObjectFLED::showInternal(bool regenerateFrameBuffer) {
 		// the channel mid-window if ERQ is set, leaving a brief gap
 		// where the channel is armed without ESG. Just write the final
 		// value directly.
+		//
+		// But clear DONE first: the previous frame leaves dma2 with
+		// CSR.DONE set, and the eDMA does not honour ESG written while
+		// DONE is set. At the end of chunk 1 the channel then applied
+		// DLASTSGA (the dma2next TCD address) as a DADDR offset instead of
+		// loading dma2next, took a destination bus error (DMA_ES = DBE on
+		// channel 2) and stopped clearing pins, so every bit from byte
+		// BYTES_PER_DMA onward went out as '1' (101 LEDs: LED 50+ = 0xFF).
+		dma.dma2.clearComplete();
 		dma.dma2.TCD->CSR = DMA_TCD_CSR_INTMAJOR | DMA_TCD_CSR_ESG;
 		dma.dma2next.TCD->SADDR = dma.bitdata + BYTES_PER_DMA*32;
 		dma.dma2next.TCD->CITER_ELINKNO = BYTES_PER_DMA * 8;
