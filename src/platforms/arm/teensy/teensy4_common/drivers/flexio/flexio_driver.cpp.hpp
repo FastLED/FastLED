@@ -629,6 +629,10 @@ bool flexio_show(const u8* pixel_data, u32 num_bytes) {
 
     // The pad must return to FlexIO inside the ~10 us LOW preamble, so
     // no ISR may run between starting the shifter and the mux write.
+    // Save PRIMASK so a caller that already masked interrupts keeps them
+    // masked on return.
+    u32 primask;
+    __asm__ volatile("mrs %0, primask" : "=r"(primask));
     noInterrupts();
     sDmaChannel->enable();
     // #3416 FX-CRIT-2: enable shifter-empty -> DMA request now that
@@ -637,9 +641,13 @@ bool flexio_show(const u8* pixel_data, u32 num_bytes) {
     FLEXIO2_SHIFTSDEN = (1u << 0);
     // Wait until the DMA has written the preamble word (CITER drops below
     // the word count), then hand the pad back while it shifts out LOW.
-    const u32 load_start = micros();
+    // Deadline on the DWT cycle counter: with interrupts masked the
+    // Teensy micros() saturates at the current millisecond boundary, so a
+    // micros() timeout can spin forever if the DMA never loads.
+    const u32 load_start = ARM_DWT_CYCCNT;
+    const u32 load_timeout = (F_CPU_ACTUAL / 1000000u) * 5u;
     while (sDmaChannel->TCD->CITER_ELINKNO >= num_words) {
-        if ((u32)(micros() - load_start) >= 5u) {
+        if ((u32)(ARM_DWT_CYCCNT - load_start) >= load_timeout) {
             // Preamble never reached SHIFTBUF: handing the pad back now
             // could put FlexIO's idle HIGH on the wire. Abort the frame
             // and leave the pad parked LOW on GPIO.
@@ -647,13 +655,13 @@ bool flexio_show(const u8* pixel_data, u32 num_bytes) {
             sDmaChannel->disable();
             FLEXIO2_CTRL &= ~1u;
             sDmaComplete = true;
-            interrupts();
+            if (!primask) interrupts();
             FL_LOG_FLEXIO("FlexIO: preamble load timed out; frame aborted");
             return false;
         }
     }
     *(sCurrentPinInfo.mux_reg) = kFlexIOMuxAlt4Sion;
-    interrupts();
+    if (!primask) interrupts();
 
     return true;
 }

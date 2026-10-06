@@ -469,6 +469,22 @@ bool FlexPwmRxChannelImpl::begin(const RxConfig &config) {
         return false;
     }
 
+    // Capture reprograms the whole submodule (CTRL, INIT, VAL0..5, LDOK),
+    // so any PWM output sharing it -- e.g. analogWrite on pin 7, which is
+    // FlexPWM1 SM3 B next to pin 8's SM3 A -- would silently change.
+    // Refuse instead of clobbering a sibling that has its output enabled.
+    {
+        const u8 sm = mPinInfo->submodule;
+        const u16 sm_out = FLEXPWM_OUTEN_PWMA_EN(1u << sm) |
+                           FLEXPWM_OUTEN_PWMB_EN(1u << sm) |
+                           FLEXPWM_OUTEN_PWMX_EN(1u << sm);
+        if (mPinInfo->pwm->OUTEN & sm_out) {
+            FL_WARN("Pin " << mPin << ": FlexPWM submodule " << int(sm)
+                    << " has an active PWM output; capture would alter it");
+            return false;
+        }
+    }
+
     mBufferSize = config.buffer_size;
     // #3416 RX-MED-6: signal_range_max_ns / 1000 is used as the idle
     // threshold in wait() to declare frame-end via inactivity. Default
