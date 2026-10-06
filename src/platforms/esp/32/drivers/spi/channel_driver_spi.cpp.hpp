@@ -546,7 +546,7 @@ void ChannelEngineSpi::beginBatchedTransmission(
             // Without this delay, LEDs interpret the next batch as frame continuation,
             // causing alternating black/color frames (protocol violation).
             if (batchIdx + 1 < numBatches) {
-                FL_DBG_EVERY(100, "ChannelEngineSpi: Inserting reset delay (" << timing.reset_us << " Î¼s) between batches");
+                FL_DBG_EVERY(100, "ChannelEngineSpi: Inserting reset delay (" << timing.reset_us << " us) between batches");
                 fl::delayMicroseconds(timing.reset_us);
             }
         }
@@ -1021,14 +1021,14 @@ bool ChannelEngineSpi::createChannel(SpiChannelState *state, gpio_num_t pin,
         return false;
     }
 
-    // Verify actual clock frequency (tolerance: Â±500 kHz for wave8)
+    // Verify actual clock frequency (tolerance: +/-500 kHz for wave8)
     int actual_freq_khz = 0;
     spi_device_get_actual_freq(state->spi_device, &actual_freq_khz);
     const int requested_freq_khz = static_cast<int>(spi_clock_hz / 1000);
     FL_DBG("ChannelEngineSpi: Actual SPI clock frequency: " << actual_freq_khz << " kHz (requested " << requested_freq_khz << " kHz)");
     if (actual_freq_khz < requested_freq_khz - 500 ||
         actual_freq_khz > requested_freq_khz + 500) {
-        FL_WARN_ONCE("ChannelEngineSpi: Clock frequency mismatch - requested " << requested_freq_khz << " kHz, actual " << actual_freq_khz << " kHz (tolerance: Â±500kHz)");
+        FL_WARN_ONCE("ChannelEngineSpi: Clock frequency mismatch - requested " << requested_freq_khz << " kHz, actual " << actual_freq_khz << " kHz (tolerance: +/-500kHz)");
     }
 
     // NOTE: Do NOT call gpio_set_drive_capability() here.
