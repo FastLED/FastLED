@@ -637,10 +637,19 @@ bool flexio_show(const u8* pixel_data, u32 num_bytes) {
     FLEXIO2_SHIFTSDEN = (1u << 0);
     // Wait until the DMA has written the preamble word (CITER drops below
     // the word count), then hand the pad back while it shifts out LOW.
-    {
-        const u32 load_start = micros();
-        while (sDmaChannel->TCD->CITER_ELINKNO >= num_words &&
-               (u32)(micros() - load_start) < 5u) {
+    const u32 load_start = micros();
+    while (sDmaChannel->TCD->CITER_ELINKNO >= num_words) {
+        if ((u32)(micros() - load_start) >= 5u) {
+            // Preamble never reached SHIFTBUF: handing the pad back now
+            // could put FlexIO's idle HIGH on the wire. Abort the frame
+            // and leave the pad parked LOW on GPIO.
+            FLEXIO2_SHIFTSDEN = 0;
+            sDmaChannel->disable();
+            FLEXIO2_CTRL &= ~1u;
+            sDmaComplete = true;
+            interrupts();
+            FL_LOG_FLEXIO("FlexIO: preamble load timed out; frame aborted");
+            return false;
         }
     }
     *(sCurrentPinInfo.mux_reg) = kFlexIOMuxAlt4Sion;
