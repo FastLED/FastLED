@@ -284,23 +284,27 @@ The core's fault handler (`unused_interrupt_vector`) records CrashReport,
 serves `usb_isr()` for 8 s and reboots. Before `usb_init()` that does not
 enumerate, so a crash in that window loops forever.
 
-AutoResearch recovers from this on the chip. `AutoResearchStartupHook.cpp`
-(`startup_early_hook`, which runs before USB):
+AutoResearch recovers from this on the chip through the core's early-boot
+loop guard, `FL_WATCHDOG_BOOT_GUARD(3, 30000)` in
+`AutoResearchStartupHook.cpp` (API: `src/fl/wdt/boot_guard.h`). On Teensy 4.x
+the platform (`src/platforms/arm/mxrt1062/watchdog_boot_guard_mxrt1062.h`)
+expands it to `startup_early_hook`, which runs before USB and:
 
 - counts boots in a reset-surviving OCRAM record at `0x2027FF60`, the cache
   line just below the core's CrashReport (`0x2027FF80`);
 - arms WDOG3 for 30 s, so a pre-USB hang becomes a reset;
-- on the third boot that never reached `loop()`, zeroes the count and calls
+- on the third boot that never became healthy, zeroes the count and calls
   `_reboot_Teensyduino_()`. The board then enumerates as **16c0:0478**
   (HalfKay) and the next `fbuild deploy` flashes it.
 
-Reaching `loop()` zeroes the count, so watchdog resets after that (e.g.
-`--watchdog-soak`) never escape. Recovery takes about 25 s for a crash loop
-(3 x 8 s fault handler) and about 60 s for a hang. The `fbuild deploy` that flashed the
-bad firmware still times out, but the board is waiting in HalfKay for the next
-one. Build with `-DAUTORESEARCH_DEBUG_EARLY_HANG` to test the guard: the
-firmware hangs before USB on every boot and must come back as 16c0:0478 with
-no button press.
+The end of `setup()` calls `FastLED.watchdog().markBootHealthy()`, which zeroes the count,
+so watchdog resets after that (e.g. `--watchdog-soak`) never escape. Recovery
+takes about 16 s for a crash loop (2 x 8 s fault handler; the third boot
+escapes at once) and about 60 s for a hang (2 x 30 s). The `fbuild deploy` that flashed the bad firmware still times out, but
+the board is waiting in HalfKay for the next one. Build with
+`-DFL_WATCHDOG_DEBUG_EARLY_HANG` to test the guard: the firmware hangs before
+USB on every boot and must come back as 16c0:0478 with no button press. On
+platforms without an early-boot hook the macro is a no-op.
 
 **Limitation:** only firmware that contains this hook can escape. Firmware
 without it (other sketches, or AutoResearch before this guard) still needs the

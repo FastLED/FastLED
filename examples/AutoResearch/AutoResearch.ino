@@ -366,17 +366,13 @@ using RemoteControlSingleton = fl::Singleton<AutoResearchRemoteControl>;
 uint32_t frame_counter = 0;
 
 
-// Teensy 4 WDOG3 startup recovery lives in AutoResearchStartupHook.cpp.
-// Keeping the extern "C" hook out of this .ino avoids Arduino prototype
-// generation with C++ linkage during fbuild deploy.
+// The early-boot loop guard (FL_WATCHDOG_BOOT_GUARD) lives in
+// AutoResearchStartupHook.cpp.
 
 // Consecutive watchdog resets before AutoResearch gives up and drops into the
 // bootloader (#3713). Three tolerates a one-off glitch or a deliberate
 // watchdog-recovery test while still escaping quickly enough to matter on an
 // unattended bench.
-// Defined in AutoResearchStartupHook.cpp (no-op off Teensy 4.x).
-void autoResearchBootGuardMarkHealthy();
-
 #ifndef AUTORESEARCH_BOOTLOADER_ESCAPE_RESETS
 #define AUTORESEARCH_BOOTLOADER_ESCAPE_RESETS 3
 #endif
@@ -596,6 +592,10 @@ void setup() {
     printStreamRaw("ready", readyData);
 
     delay(2000);
+
+    // Early-boot guard (AutoResearchStartupHook.cpp): this boot got through
+    // setup(), so reset the count of boots that never got this far.
+    FastLED.watchdog().markBootHealthy();
 }
 
 // ============================================================================
@@ -619,13 +619,6 @@ void loop() {
     // feeds on construction (now) and again on destruction (end of scope).
     FL_WATCHDOG_AUTO(AUTORESEARCH_WATCHDOG_TIMEOUT_MS);
 
-    // Teensy 4.x boot guard (AutoResearchStartupHook.cpp): this boot reached
-    // loop(), so reset the count of boots that never got this far.
-    static bool boot_guard_marked = false;
-    if (!boot_guard_marked) {
-        boot_guard_marked = true;
-        autoResearchBootGuardMarkHealthy();
-    }
 
     // Aggressively pump async tasks (including JSON-RPC task)
     // This ensures RPC commands are processed frequently even without delay() calls
