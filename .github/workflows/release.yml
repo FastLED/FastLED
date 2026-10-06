@@ -64,6 +64,9 @@ jobs:
           CANDIDATE_SHA: ${{ inputs.candidate_sha }}
         run: uv run python ci/release_gate.py verify --sha "$CANDIDATE_SHA"
 
+      - name: Require tombstones for removed sources (FastLED #4704)
+        run: uv run python ci/check_released_sources.py --rev HEAD
+
       - name: Read the version on master
         id: v
         env:
