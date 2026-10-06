@@ -1,7 +1,8 @@
-# 2026-10-06, PR #4717 (issue #4712): -24,572 B, 392019 -> 367447. Default
+# 2026-10-06, PR #4717 (issue #4712): -24,284 B, 392019 -> 367735. Default
 # log level on non-NDEBUG builds is 1 (FL_ERROR only): FL_WARN / FL_INFO /
-# FL_DBG compile out. -24,572 B is the local before/after delta on top of
-# #4710; re-pin to the CI bloat job's image_flash if it differs.
+# FL_DBG compile out. Measured by CI run 37427203380 (bloat regression job);
+# the local before/after delta was -24,572 B, the usual few-hundred-byte
+# local/CI difference.
 
 # 2026-10-06, PR #4710 (meta #4709): -6,780 B, 398799 -> 392019, claiming
 # the saving from making printf-form logging a compile error. All 959 log
@@ -312,4 +313,4 @@
 # the CI Blink report contains no ResponseLutsQ16 symbol. The local fbuild
 # symbol total remains ~4 KB higher for the same source (FastLED/fbuild#1456),
 # so this ratchet uses the CI measurement from PR #4511.
-367447
+367735
