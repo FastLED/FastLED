@@ -100,8 +100,7 @@ class RmtMemoryManager4 {
                        size_t &out_words) FL_NO_EXCEPT {
         for (const auto &alloc : mAllocations) {
             if (alloc.channel_id == channel_id && alloc.is_tx) {
-                FL_WARN("RmtMemoryManager4: TX channel %s already allocated",
-                          channel_id);
+                FL_WARN("RmtMemoryManager4: TX channel " << channel_id << " already allocated");
                 return false;
             }
         }
@@ -114,9 +113,7 @@ class RmtMemoryManager4 {
                 detail::kRmt4TxIdleWords <= availableWords()) {
                 desired = detail::kRmt4TxIdleWords; // Graceful demotion.
             } else {
-                FL_WARN("RmtMemoryManager4: TX allocation refused, pool "
-                          "exhausted (want %s, have %s / %s)",
-                          desired, availableWords(), mPoolWords);
+                FL_WARN("RmtMemoryManager4: TX allocation refused, pool exhausted (want " << desired << ", have " << availableWords() << " / " << mPoolWords << ")");
                 return false;
             }
         }
@@ -135,8 +132,7 @@ class RmtMemoryManager4 {
                        size_t &out_words) FL_NO_EXCEPT {
         for (const auto &alloc : mAllocations) {
             if (alloc.channel_id == channel_id && !alloc.is_tx) {
-                FL_WARN("RmtMemoryManager4: RX channel %s already allocated",
-                          channel_id);
+                FL_WARN("RmtMemoryManager4: RX channel " << channel_id << " already allocated");
                 return false;
             }
         }
@@ -145,10 +141,7 @@ class RmtMemoryManager4 {
             return false;
         }
         if (symbols > availableWords()) {
-            FL_WARN(
-                "RmtMemoryManager4: RX allocation refused, pool exhausted "
-                "(want %s, have %s / %s)",
-                symbols, availableWords(), mPoolWords);
+            FL_WARN("RmtMemoryManager4: RX allocation refused, pool exhausted (want " << symbols << ", have " << availableWords() << " / " << mPoolWords << ")");
             return false;
         }
 

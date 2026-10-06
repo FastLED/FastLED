@@ -1,8 +1,9 @@
 #pragma once
 
 #include "fl/system/sketch_macros.h"
+#include "fl/stl/static_assert.h"  // FL_STATIC_ASSERT for the printf-form ban
 #include "fl/stl/strstream.h"  // IWYU pragma: keep - Required by FL_WARN/FL_ERROR/FL_DBG macros
-#include "fl/stl/stdio.h"      // IWYU pragma: keep - Required by formatted log macros
+#include "fl/stl/stdio.h"      // IWYU pragma: keep - fl::print / fl::println for log output
 #include "fl/stl/chrono.h"       // IWYU pragma: keep - Required by FL_WARN_EVERY/FL_DBG_EVERY/FL_PRINT_EVERY macros
 #include "fl/stl/compiler_control.h"  // IWYU pragma: keep - FL_NO_INLINE for log_emit
 
@@ -186,20 +187,6 @@ const char* log_kind_name(log_kind kind) FL_NO_INLINE FL_NO_EXCEPT;
 void log_emit_prefix(log_kind kind, const char* file, int line) FL_NO_INLINE FL_NO_EXCEPT;
 void log_emit_newline() FL_NO_INLINE FL_NO_EXCEPT;
 
-template <typename... Args>
-void log_emit_f(log_kind kind, const char* file, int line, const char* format,
-                const Args&... args) FL_NO_EXCEPT {
-    log_emit_prefix(kind, file, line);
-    fl::printf(format, args...);
-    log_emit_newline();
-}
-
-template <typename... Args>
-fl::string log_format_string(const char* format, const Args&... args) FL_NO_EXCEPT {
-    char buffer[256];
-    fl::snprintf(buffer, sizeof(buffer), format, args...);
-    return fl::string(buffer);
-}
 // Takes `body` by non-const lvalue reference (not `&&`) because the
 // macro's `fl::sstream() << X` expression has type `sstream&` (the
 // returned lvalue ref from chained operator<<). The underlying
@@ -310,11 +297,11 @@ inline void async_log_emit_auto(Logger& logger,
 // =============================================================================
 // Unified-dispatch helpers for FL_WARN / FL_ERROR / FL_INFO / FL_PRINT (#3272)
 // =============================================================================
-// One `FL_WARN(...)` macro accepts BOTH stream-style and printf-style:
+// `FL_WARN(...)` takes exactly one argument, a literal or a stream chain:
 //
 //   FL_WARN("plain literal")            // 1 literal -> direct format path
 //   FL_WARN("foo " << x << " bar")      // 1 stream expression -> sstream
-//   FL_WARN("got %d items", n)          // 2 args -> printf form  (log_emit_f)
+//   FL_WARN("got %d items", n)          // 2+ args -> compile error (#4709)
 //
 // Macro-level dispatch (rather than C++ overload resolution) is required
 // because the single-arg stream form is a chained `<<` expression - it
@@ -322,11 +309,12 @@ inline void async_log_emit_auto(Logger& logger,
 // Routing through a function call would force the `<<` chain to evaluate
 // standalone, which fails (`const char*` has no `operator<<(float)`).
 //
-// The dispatch supports up to 16 user arguments in the printf form. The
+// The dispatch recognizes up to 16 arguments so the banned form gets a clear
+// static_assert instead of a preprocessor error. The
 // filler list `_FL_M*15, _FL_S` is positioned so the (17 - argc)-th element
 // of the merged list lands at the `NAME` slot:
 //   1 user arg  -> NAME = _FL_S  (lazy literal/stream dispatch)
-//   2..16 args -> NAME = _FL_M  (multi  -> printf)
+//   2..16 args -> NAME = _FL_M  (multi  -> banned printf form)
 #define _FL_VA_PICK17( \
     _1, _2, _3, _4, _5, _6, _7, _8, \
     _9, _10, _11, _12, _13, _14, _15, _16, \
@@ -337,22 +325,36 @@ inline void async_log_emit_auto(Logger& logger,
         _M, _M, _M, _M, _M, _M, _M, _M, \
         _M, _M, _M, _M, _M, _M, _M, _S)
 
+// printf-style log formatting is banned (#4709). `FL_WARN("x=%d", x)` links
+// the whole fl::printf engine (format spec parser, width, integer/float
+// formatters) into every image that logs; on Teensy 4 that code lives in
+// RAM1. Every log macro's multi-argument form therefore fails to compile,
+// including the no-op variants used on small platforms, so a sketch fails
+// the same way on every board. Use stream form: `FL_WARN("x=" << x)`, and
+// `fl::to_hex(v)` in place of `%x`.
+#define _FL_LOG_PRINTF_BANNED(...) do { \
+    FL_STATIC_ASSERT(sizeof(#__VA_ARGS__) == 0, \
+        "FastLED: printf-style log formatting is not allowed; use stream " \
+        "form, e.g. FL_WARN(\"x=\" << x). See FastLED#4709."); \
+} while(0)
+#define _FL_LOG_NOOP_S(X) do { } while(0)
+// Compile-time check for no-op log variants: one argument is accepted and
+// dropped, more than one is the banned printf form.
+#define _FL_LOG_CHECK(...) _FL_VA_DISPATCH(_FL_LOG_NOOP_S, _FL_LOG_PRINTF_BANNED, __VA_ARGS__)(__VA_ARGS__)
+
 // =============================================================================
 // Error Macros (FL_ERROR)
 // =============================================================================
 
-// Per-kind dispatch helpers - _FL_*_S = single-arg stream form; _FL_*_M = multi-arg printf form.
+// Per-kind dispatch helpers - _FL_*_S = single-arg stream form; _FL_*_M = banned printf form.
 #define _FL_ERROR_S(X) ::fl::detail::log_emit_auto( \
     ::fl::detail::log_kind::ERROR, \
     ::fl::fastled_file_offset(__FILE__), int(__LINE__), \
     ::fl::detail::log_seed() << X)
-#define _FL_ERROR_M(...) ::fl::detail::log_emit_f( \
-    ::fl::detail::log_kind::ERROR, \
-    ::fl::fastled_file_offset(__FILE__), int(__LINE__), \
-    __VA_ARGS__)
+#define _FL_ERROR_M(...) _FL_LOG_PRINTF_BANNED(__VA_ARGS__)
 
 #ifndef FASTLED_ERROR
-// FASTLED_ERROR: Supports both stream-style (<<) and printf-style formatting via
+// FASTLED_ERROR: Stream-style (<<) only; printf-style is a compile error (#4709). Dispatch via
 // argument-count dispatch - see #3272.
 #define FASTLED_ERROR(...) _FL_VA_DISPATCH(_FL_ERROR_S, _FL_ERROR_M, __VA_ARGS__)(__VA_ARGS__)
 #define FASTLED_ERROR_IF(COND, ...) do { if (COND) FASTLED_ERROR(__VA_ARGS__); } while(0)
@@ -360,8 +362,8 @@ inline void async_log_emit_auto(Logger& logger,
 
 #ifndef FL_ERROR
 #if FASTLED_LOG_RUNTIME_ENABLED
-// FL_ERROR: unified entry point - accepts both `"foo " << x` and `"foo %d", x`
-// via macro-level argument-count dispatch. See #3272.
+// FL_ERROR: one literal or `"foo " << x` stream expression; `"foo %d", x` is a
+// compile error (#4709).
 #define FL_ERROR(...) _FL_VA_DISPATCH(_FL_ERROR_S, _FL_ERROR_M, __VA_ARGS__)(__VA_ARGS__)
 #define FL_ERROR_IF(COND, ...) do { if (COND) FL_ERROR(__VA_ARGS__); } while(0)
 #else
@@ -369,8 +371,8 @@ inline void async_log_emit_auto(Logger& logger,
 // Args are dropped entirely (matching pre-#3272 behaviour of FL_*_F). See
 // commit notes - earlier draft used `sstream_noop()` type-check but that
 // forced evaluation of args declared only under FASTLED_LOG_*_ENABLED.
-#define FL_ERROR(...) do { } while(0)
-#define FL_ERROR_IF(COND, ...) do { } while(0)
+#define FL_ERROR(...) _FL_LOG_CHECK(__VA_ARGS__)
+#define FL_ERROR_IF(COND, ...) _FL_LOG_CHECK(__VA_ARGS__)
 #endif
 #endif
 
@@ -378,18 +380,15 @@ inline void async_log_emit_auto(Logger& logger,
 // Warning Macros (FL_WARN)
 // =============================================================================
 
-// Per-kind dispatch helpers - _FL_WARN_S = single-arg stream form; _FL_WARN_M = multi-arg printf form.
+// Per-kind dispatch helpers - _FL_WARN_S = single-arg stream form; _FL_WARN_M = banned printf form.
 #define _FL_WARN_S(X) ::fl::detail::log_emit_auto( \
     ::fl::detail::log_kind::WARN, \
     ::fl::fastled_file_offset(__FILE__), int(__LINE__), \
     ::fl::detail::log_seed() << X)
-#define _FL_WARN_M(...) ::fl::detail::log_emit_f( \
-    ::fl::detail::log_kind::WARN, \
-    ::fl::fastled_file_offset(__FILE__), int(__LINE__), \
-    __VA_ARGS__)
+#define _FL_WARN_M(...) _FL_LOG_PRINTF_BANNED(__VA_ARGS__)
 
 #ifndef FASTLED_WARN
-// FASTLED_WARN: Supports both stream-style (<<) and printf-style formatting via
+// FASTLED_WARN: Stream-style (<<) only; printf-style is a compile error (#4709). Dispatch via
 // argument-count dispatch - see #3272.
 #define FASTLED_WARN(...) _FL_VA_DISPATCH(_FL_WARN_S, _FL_WARN_M, __VA_ARGS__)(__VA_ARGS__)
 #define FASTLED_WARN_IF(COND, ...) do { if (COND) FASTLED_WARN(__VA_ARGS__); } while(0)
@@ -397,9 +396,8 @@ inline void async_log_emit_auto(Logger& logger,
 
 #ifndef FL_WARN
 #if FL_HAS_WARN
-// FL_WARN: unified entry point - accepts both `"foo " << x` and `"foo %d", x`
-// via macro-level argument-count dispatch. Single-arg -> stream form (legacy
-// compatible); two-or-more args -> printf form. See #3272 and #2963.
+// FL_WARN: one literal or `"foo " << x` stream expression; `"foo %d", x` is a
+// compile error (#4709).
 #define FL_WARN(...) _FL_VA_DISPATCH(_FL_WARN_S, _FL_WARN_M, __VA_ARGS__)(__VA_ARGS__)
 #define FL_WARN_IF(COND, ...) do { if (COND) FL_WARN(__VA_ARGS__); } while(0)
 
@@ -437,12 +435,12 @@ inline void async_log_emit_auto(Logger& logger,
 // the rationale (pre-existing call sites declare some args only under
 // FASTLED_LOG_*_ENABLED, so any `if(false)` type-check would force a build
 // error).
-#define FL_WARN(...) do { } while(0)
-#define FL_WARN_IF(COND, ...) do { } while(0)
-#define FL_WARN_ONCE(...) do { } while(0)
-#define FL_WARN_FMT(...) do { } while(0)
-#define FL_WARN_FMT_IF(COND, ...) do { } while(0)
-#define FL_WARN_EVERY(MILLIS, ...) do { } while(0)
+#define FL_WARN(...) _FL_LOG_CHECK(__VA_ARGS__)
+#define FL_WARN_IF(COND, ...) _FL_LOG_CHECK(__VA_ARGS__)
+#define FL_WARN_ONCE(...) _FL_LOG_CHECK(__VA_ARGS__)
+#define FL_WARN_FMT(...) _FL_LOG_CHECK(__VA_ARGS__)
+#define FL_WARN_FMT_IF(COND, ...) _FL_LOG_CHECK(__VA_ARGS__)
+#define FL_WARN_EVERY(MILLIS, ...) _FL_LOG_CHECK(__VA_ARGS__)
 #endif
 #endif
 
@@ -464,18 +462,15 @@ inline void async_log_emit_auto(Logger& logger,
 // Info Macros (FL_INFO)
 // =============================================================================
 
-// Per-kind dispatch helpers - _FL_INFO_S = single-arg stream form; _FL_INFO_M = multi-arg printf form.
+// Per-kind dispatch helpers - _FL_INFO_S = single-arg stream form; _FL_INFO_M = banned printf form.
 #define _FL_INFO_S(X) ::fl::detail::log_emit_auto( \
     ::fl::detail::log_kind::INFO, \
     ::fl::fastled_file_offset(__FILE__), int(__LINE__), \
     ::fl::detail::log_seed() << X)
-#define _FL_INFO_M(...) ::fl::detail::log_emit_f( \
-    ::fl::detail::log_kind::INFO, \
-    ::fl::fastled_file_offset(__FILE__), int(__LINE__), \
-    __VA_ARGS__)
+#define _FL_INFO_M(...) _FL_LOG_PRINTF_BANNED(__VA_ARGS__)
 
 #ifndef FASTLED_INFO
-// FASTLED_INFO: Supports both stream-style (<<) and printf-style formatting via
+// FASTLED_INFO: Stream-style (<<) only; printf-style is a compile error (#4709). Dispatch via
 // argument-count dispatch - see #3272.
 #define FASTLED_INFO(...) _FL_VA_DISPATCH(_FL_INFO_S, _FL_INFO_M, __VA_ARGS__)(__VA_ARGS__)
 #define FASTLED_INFO_IF(COND, ...) do { if (COND) FASTLED_INFO(__VA_ARGS__); } while(0)
@@ -483,10 +478,8 @@ inline void async_log_emit_auto(Logger& logger,
 
 #ifndef FL_INFO
 #if FASTLED_LOG_RUNTIME_ENABLED
-// FL_INFO: unified entry point - accepts both stream- and printf-style. See #3272.
-// Note: master never had an FL_INFO_F variant, so no `_F` alias is introduced
-// here. The unified FL_INFO already accepts printf-style; new code should call
-// FL_INFO("fmt %d", x) directly.
+// FL_INFO: one literal or stream expression; printf-style is a compile error
+// (#4709).
 #define FL_INFO(...) _FL_VA_DISPATCH(_FL_INFO_S, _FL_INFO_M, __VA_ARGS__)(__VA_ARGS__)
 #define FL_INFO_IF(COND, ...) do { if (COND) FL_INFO(__VA_ARGS__); } while(0)
 
@@ -501,9 +494,9 @@ inline void async_log_emit_auto(Logger& logger,
 } while(0)
 #else
 // No-op macros - either memory-constrained platform or FASTLED_LOG_VERBOSITY=0.
-#define FL_INFO(...) do { } while(0)
-#define FL_INFO_IF(COND, ...) do { } while(0)
-#define FL_INFO_ONCE(...) do { } while(0)
+#define FL_INFO(...) _FL_LOG_CHECK(__VA_ARGS__)
+#define FL_INFO_IF(COND, ...) _FL_LOG_CHECK(__VA_ARGS__)
+#define FL_INFO_ONCE(...) _FL_LOG_CHECK(__VA_ARGS__)
 #endif
 #endif
 
@@ -544,14 +537,11 @@ inline void async_log_emit_auto(Logger& logger,
     ::fl::detail::log_kind::INFO, \
     ::fl::fastled_file_offset(__FILE__), int(__LINE__), \
     ::fl::detail::log_seed() << X)
-#define _FL_DBG_M(...) fl::detail::log_emit_f( \
-    fl::detail::log_kind::INFO, \
-    fl::fastled_file_offset(__FILE__), int(__LINE__), \
-    __VA_ARGS__)
+#define _FL_DBG_M(...) _FL_LOG_PRINTF_BANNED(__VA_ARGS__)
 #endif
 
 #ifndef _FL_DBG_M
-#define _FL_DBG_M(...) do { } while(0)
+#define _FL_DBG_M(...) _FL_LOG_PRINTF_BANNED(__VA_ARGS__)
 #endif
 #define FASTLED_DBG(...) _FL_VA_DISPATCH(_FASTLED_DGB, _FL_DBG_M, __VA_ARGS__)(__VA_ARGS__)
 
@@ -576,7 +566,7 @@ inline void async_log_emit_auto(Logger& logger,
     } \
 } while(0)
 #else
-#define FL_DBG_EVERY(MILLIS, ...) do { } while(0)
+#define FL_DBG_EVERY(MILLIS, ...) _FL_LOG_CHECK(__VA_ARGS__)
 #endif
 #endif
 
@@ -617,11 +607,11 @@ inline void async_log_emit_auto(Logger& logger,
 // Per-form dispatch helpers - _FL_PRINT_S = stream; _FL_PRINT_M = printf.
 // Unlike FL_WARN, no "<file>(<line>): WARN:" prefix is prepended.
 #define _FL_PRINT_S(X) ::fl::detail::print_emit_auto(::fl::detail::log_seed() << X)
-#define _FL_PRINT_M(...) do { ::fl::printf(__VA_ARGS__); ::fl::printf("\n"); } while(0)
+#define _FL_PRINT_M(...) _FL_LOG_PRINTF_BANNED(__VA_ARGS__)
 
 #ifndef FL_PRINT
 #if FASTLED_LOG_RUNTIME_ENABLED
-// FL_PRINT: unified entry point - accepts both stream- and printf-style.
+// FL_PRINT: one literal or stream expression; printf-style is a compile error (#4709).
 // No "WARN:" / "file(line):" prefix (unlike FL_WARN). See #3272.
 #define FL_PRINT(...) _FL_VA_DISPATCH(_FL_PRINT_S, _FL_PRINT_M, __VA_ARGS__)(__VA_ARGS__)
 
@@ -637,8 +627,8 @@ inline void async_log_emit_auto(Logger& logger,
 } while(0)
 #else
 // No-op macro for memory-constrained platforms
-#define FL_PRINT(...) do { } while(0)
-#define FL_PRINT_EVERY(MILLIS, ...) do { } while(0)
+#define FL_PRINT(...) _FL_LOG_CHECK(__VA_ARGS__)
+#define FL_PRINT_EVERY(MILLIS, ...) _FL_LOG_CHECK(__VA_ARGS__)
 #endif
 #endif
 
@@ -654,7 +644,7 @@ inline void async_log_emit_auto(Logger& logger,
 #ifdef FASTLED_LOG_SPI_ENABLED
     #define FL_LOG_SPI(...) FL_WARN(__VA_ARGS__)
 #else
-    #define FL_LOG_SPI(...) do { } while(0)
+    #define FL_LOG_SPI(...) _FL_LOG_CHECK(__VA_ARGS__)
 #endif
 
 /// @brief Remote Control Module (RMT) logging (ESP32)
@@ -664,7 +654,7 @@ inline void async_log_emit_auto(Logger& logger,
     #define FL_LOG_RMT(...) FL_WARN(__VA_ARGS__)
 #else
     #define FL_HAS_RMT_LOG 0
-    #define FL_LOG_RMT(...) do { } while(0)
+    #define FL_LOG_RMT(...) _FL_LOG_CHECK(__VA_ARGS__)
 #endif
 
 /// @brief Parallel I/O (Parlio) logging (ESP32-P4)
@@ -672,7 +662,7 @@ inline void async_log_emit_auto(Logger& logger,
 #ifdef FASTLED_LOG_PARLIO_ENABLED
     #define FL_LOG_PARLIO(...) FL_WARN(__VA_ARGS__)
 #else
-    #define FL_LOG_PARLIO(...) do { } while(0)
+    #define FL_LOG_PARLIO(...) _FL_LOG_CHECK(__VA_ARGS__)
 #endif
 
 /// @brief Audio processing logging
@@ -680,7 +670,7 @@ inline void async_log_emit_auto(Logger& logger,
 #ifdef FASTLED_LOG_AUDIO_ENABLED
     #define FL_LOG_AUDIO(...) FL_WARN(__VA_ARGS__)
 #else
-    #define FL_LOG_AUDIO(...) do { } while(0)
+    #define FL_LOG_AUDIO(...) _FL_LOG_CHECK(__VA_ARGS__)
 #endif
 
 /// @brief Interrupt handling logging
@@ -688,7 +678,7 @@ inline void async_log_emit_auto(Logger& logger,
 #ifdef FASTLED_LOG_INTERRUPT_ENABLED
     #define FL_LOG_INTERRUPT(...) FL_WARN(__VA_ARGS__)
 #else
-    #define FL_LOG_INTERRUPT(...) do { } while(0)
+    #define FL_LOG_INTERRUPT(...) _FL_LOG_CHECK(__VA_ARGS__)
 #endif
 
 /// @brief FlexIO logging (Teensy 4.x)
@@ -696,7 +686,7 @@ inline void async_log_emit_auto(Logger& logger,
 #ifdef FASTLED_LOG_FLEXIO_ENABLED
     #define FL_LOG_FLEXIO(...) FL_WARN(__VA_ARGS__)
 #else
-    #define FL_LOG_FLEXIO(...) do { } while(0)
+    #define FL_LOG_FLEXIO(...) _FL_LOG_CHECK(__VA_ARGS__)
 #endif
 
 /// @brief ObjectFLED logging (Teensy 4.x)
@@ -704,7 +694,7 @@ inline void async_log_emit_auto(Logger& logger,
 #ifdef FASTLED_LOG_OBJECTFLED_ENABLED
     #define FL_LOG_OBJECTFLED(...) FL_WARN(__VA_ARGS__)
 #else
-    #define FL_LOG_OBJECTFLED(...) do { } while(0)
+    #define FL_LOG_OBJECTFLED(...) _FL_LOG_CHECK(__VA_ARGS__)
 #endif
 
 /// @}
@@ -771,15 +761,15 @@ inline void async_log_emit_auto(Logger& logger,
 /// @param X Stream-style expression (e.g., "msg " << var)
 /// @warning This macro uses heap allocation (fl::string) and should NOT be used in ISR context
 /// @see FL_LOG_ASYNC_ISR for ISR-safe const char* only variant
-// Per-form dispatch helpers - _S = stream form, _M = printf form. Pushes the
+// Per-form dispatch helpers - _S = stream form, _M = banned printf form. Pushes the
 // composed message to the caller-provided AsyncLogger instance.
 #define _FL_LOG_ASYNC_S(logger, X) do { \
     ::fl::detail::async_log_emit_auto((logger), ::fl::detail::log_seed() << X); \
 } while(0)
-#define _FL_LOG_ASYNC_M(logger, ...) do { (logger).push(::fl::detail::log_format_string(__VA_ARGS__)); } while(0)
+#define _FL_LOG_ASYNC_M(logger, ...) _FL_LOG_PRINTF_BANNED(__VA_ARGS__)
 
 // Unified async-log dispatch (#3272). Single-arg payload -> stream form (legacy
-// compatible); two-or-more args -> printf form via log_format_string.
+// compatible); two-or-more args -> compile error (#4709).
 #define FL_LOG_ASYNC(logger, ...) _FL_VA_DISPATCH(_FL_LOG_ASYNC_S, _FL_LOG_ASYNC_M, __VA_ARGS__)(logger, __VA_ARGS__)
 
 /// @brief ISR-safe async logging macro (const char* literals only, zero heap allocation)

@@ -136,8 +136,7 @@ class ParlioRxSampler final : public RxDevice {
         esp_err_t err =
             parlio_rx_unit_receive(mUnit, mBuffer, kCaptureBytes, &recv_cfg);
         if (err != ESP_OK) {
-            FL_WARN("ParlioRxSampler: receive queue failed: %s",
-                      esp_err_to_name(err));
+            FL_WARN("ParlioRxSampler: receive queue failed: " << esp_err_to_name(err));
             return false;
         }
 
@@ -170,8 +169,7 @@ class ParlioRxSampler final : public RxDevice {
             // transfers overwrite each other).
             resetUnit();
         } else if (err != ESP_OK) {
-            FL_WARN("ParlioRxSampler: wait failed: %s",
-                      esp_err_to_name(err));
+            FL_WARN("ParlioRxSampler: wait failed: " << esp_err_to_name(err));
             return RxWaitResult::TIMEOUT;
         }
 
@@ -284,8 +282,7 @@ class ParlioRxSampler final : public RxDevice {
         mBuffer = static_cast<u8 *>(
             heap_caps_calloc(1, kCaptureBytes, MALLOC_CAP_DMA));
         if (mBuffer == nullptr) {
-            FL_WARN("ParlioRxSampler: DMA buffer alloc failed (%d bytes)",
-                      static_cast<int>(kCaptureBytes));
+            FL_WARN("ParlioRxSampler: DMA buffer alloc failed (" << (static_cast<int>(kCaptureBytes)) << " bytes)");
             return false;
         }
         return true;
@@ -308,8 +305,7 @@ class ParlioRxSampler final : public RxDevice {
 
         esp_err_t err = parlio_new_rx_unit(&unit_cfg, &mUnit);
         if (err != ESP_OK) {
-            FL_WARN("ParlioRxSampler: rx unit create failed: %s",
-                      esp_err_to_name(err));
+            FL_WARN("ParlioRxSampler: rx unit create failed: " << esp_err_to_name(err));
             mUnit = nullptr;
             return false;
         }
@@ -324,24 +320,21 @@ class ParlioRxSampler final : public RxDevice {
 
         err = parlio_new_rx_soft_delimiter(&delim_cfg, &mDelimiter);
         if (err != ESP_OK) {
-            FL_WARN("ParlioRxSampler: soft delimiter create failed: %s",
-                      esp_err_to_name(err));
+            FL_WARN("ParlioRxSampler: soft delimiter create failed: " << esp_err_to_name(err));
             teardown();
             return false;
         }
 
         err = parlio_rx_unit_enable(mUnit, true);
         if (err != ESP_OK) {
-            FL_WARN("ParlioRxSampler: rx unit enable failed: %s",
-                      esp_err_to_name(err));
+            FL_WARN("ParlioRxSampler: rx unit enable failed: " << esp_err_to_name(err));
             teardown();
             return false;
         }
 
         err = parlio_rx_soft_delimiter_start_stop(mUnit, mDelimiter, true);
         if (err != ESP_OK) {
-            FL_WARN("ParlioRxSampler: soft delimiter start failed: %s",
-                      esp_err_to_name(err));
+            FL_WARN("ParlioRxSampler: soft delimiter start failed: " << esp_err_to_name(err));
             teardown();
             return false;
         }

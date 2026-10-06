@@ -681,7 +681,7 @@ RxWaitResult LpcSctRxChannel::wait(u32 timeout_ms) FL_NO_EXCEPT {
 fl::result<u32, DecodeError> LpcSctRxChannel::decode(const ChipsetTiming4Phase& timing,
                                                      fl::span<u8> out) FL_NO_EXCEPT {
     if (mEdges.empty()) {
-        FL_WARN("LpcSctRxChannel::decode: No edges recorded for pin %s", mPin);
+        FL_WARN("LpcSctRxChannel::decode: No edges recorded for pin " << mPin);
         return fl::result<u32, DecodeError>::failure(DecodeError::INVALID_ARGUMENT);
     }
     return fl::channels::rx::decodeWs2812Edges(

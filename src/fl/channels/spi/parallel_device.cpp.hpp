@@ -139,10 +139,10 @@ ParallelDevice::ParallelDevice(const Config& config)
     // Validate configuration
     size_t num_pins = config.gpio_pins.size();
     if (num_pins == 0 || num_pins > 32) {
-        FL_WARN("ParallelDevice: Invalid number of GPIO pins (%s), must be 1-32", num_pins);
+        FL_WARN("ParallelDevice: Invalid number of GPIO pins (" << num_pins << "), must be 1-32");
     }
 
-    FL_DBG("ParallelDevice: Created with %s GPIO pins", num_pins);
+    FL_DBG("ParallelDevice: Created with " << num_pins << " GPIO pins");
 }
 
 ParallelDevice::~ParallelDevice() FL_NO_EXCEPT {
@@ -194,7 +194,7 @@ fl::optional<fl::task::Error> ParallelDevice::begin() {
 
     if (use_isr) {
         // ISR-based backend
-        FL_DBG("ParallelDevice: Initializing ISR mode (width=%s)", (int)backend_width);
+        FL_DBG("ParallelDevice: Initializing ISR mode (width=" << ((int)backend_width) << ")");
 
         // Note: These need to be heap-allocated for type-erasure
         // For now, return error indicating ISR mode not yet implemented
@@ -202,7 +202,7 @@ fl::optional<fl::task::Error> ParallelDevice::begin() {
 
     } else {
         // Bit-bang (blocking) backend
-        FL_DBG("ParallelDevice: Initializing bit-bang mode (width=%s)", (int)backend_width);
+        FL_DBG("ParallelDevice: Initializing bit-bang mode (width=" << ((int)backend_width) << ")");
 
         // Note: These need to be heap-allocated for type-erasure
         // For now, return error indicating bit-bang mode not yet implemented

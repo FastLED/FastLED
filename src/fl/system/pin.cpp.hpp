@@ -184,7 +184,7 @@ int ensureIsrActive() {
 
     int result = fl::isr::attach_timer_handler(cfg, &st.isr_handle);
     if (result != 0) {
-        FL_WARN("PWM: ISR attach failed: %s", fl::isr::get_error_string(result));
+        FL_WARN("PWM: ISR attach failed: " << (fl::isr::get_error_string(result)));
         return result;
     }
     st.isr_active = true;
@@ -294,14 +294,14 @@ int setPwmFrequency(int pin, u32 frequency_hz) {
         // Native path
         int result = platforms::setPwmFrequencyNative(pin, frequency_hz);
         if (result != 0) {
-            FL_WARN("setPwmFrequency: Native backend failed: %s", result);
+            FL_WARN("setPwmFrequency: Native backend failed: " << result);
             return result;
         }
 
         // Allocate tracking slot
         ch = pwm_state::allocate();
         if (!ch) {
-            FL_WARN("setPwmFrequency: All %s channels in use", static_cast<int>(pwm_state::MAX_PWM_CHANNELS));
+            FL_WARN("setPwmFrequency: All " << (static_cast<int>(pwm_state::MAX_PWM_CHANNELS)) << " channels in use");
             return -2;
         }
 
@@ -314,14 +314,14 @@ int setPwmFrequency(int pin, u32 frequency_hz) {
 
     // ISR software fallback path
     if (frequency_hz > pwm_state::MAX_ISR_PWM_FREQUENCY) {
-        FL_WARN("setPwmFrequency: ISR fallback max %s Hz, requested %s", pwm_state::MAX_ISR_PWM_FREQUENCY, frequency_hz);
+        FL_WARN("setPwmFrequency: ISR fallback max " << (pwm_state::MAX_ISR_PWM_FREQUENCY) << " Hz, requested " << frequency_hz);
         return -1;
     }
 
     // Allocate channel
     ch = pwm_state::allocate();
     if (!ch) {
-        FL_WARN("setPwmFrequency: All %s channels in use", static_cast<int>(pwm_state::MAX_PWM_CHANNELS));
+        FL_WARN("setPwmFrequency: All " << (static_cast<int>(pwm_state::MAX_PWM_CHANNELS)) << " channels in use");
         return -2;
     }
 

@@ -86,8 +86,7 @@ FL_NO_INLINE void log_emit(log_kind kind, const char* file, int line, fl::sstrea
 
 FL_NO_INLINE void log_emit_literal(log_kind kind, const char* file, int line,
                                    const char* body) FL_NO_EXCEPT {
-    // Mirror log_emit_f's existing printf specializations so this safe
-    // literal path adds no large four-argument formatter instantiation.
+    // Prefix + literal + newline, with no formatter involved.
     log_emit_prefix(kind, file, line);
     fl::print(body);
     log_emit_newline();

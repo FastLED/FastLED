@@ -106,8 +106,7 @@ protected:
         // not "enqueue and hope" -- silently enqueuing to a disabled driver
         // is the #2517 silent-drop failure mode.
         if (!ChannelManager::registry().isDriverEnabled(driver->getName().c_str())) {
-            FL_WARN_ONCE("SlimSpiBridgeController: driver '%s' is disabled - dropping frame",
-                         driver->getName().c_str());
+            FL_WARN_ONCE("SlimSpiBridgeController: driver '" << driver->getName() << "' is disabled - dropping frame");
             return;
         }
 
@@ -116,8 +115,7 @@ protected:
         // than racing the driver's in-progress transfer.
         if (mData->isInUse()) {
             if (!driver->waitForReady()) {
-                FL_WARN_ONCE("SlimSpiBridgeController: driver '%s' did not become ready in "
-                             "time - dropping frame", driver->getName().c_str());
+                FL_WARN_ONCE("SlimSpiBridgeController: driver '" << driver->getName() << "' did not become ready in time - dropping frame");
                 return;
             }
         }
@@ -174,8 +172,7 @@ private:
 
 #if FASTLED_LOG_RUNTIME_ENABLED
         if (!driver && !mBusWarned) {
-            FL_ERROR("SlimSpiBridgeController: no compatible driver found for bus '%s' - "
-                     "cannot transmit", busKey.c_str());
+            FL_ERROR("SlimSpiBridgeController: no compatible driver found for bus '" << busKey << "' - cannot transmit");
             mBusWarned = true;
         }
 #endif  // FASTLED_LOG_RUNTIME_ENABLED

@@ -167,7 +167,7 @@ bool I2sSpiPeripheralEsp::initialize(const I2sSpiConfig &config) FL_NO_EXCEPT {
     }
 
     if (config.num_lanes < 1 || config.num_lanes > 16) {
-        FL_WARN("I2sSpiPeripheralEsp: Invalid num_lanes: %s", config.num_lanes);
+        FL_WARN("I2sSpiPeripheralEsp: Invalid num_lanes: " << config.num_lanes);
         return false;
     }
 
@@ -348,7 +348,7 @@ bool I2sSpiPeripheralEsp::initialize(const I2sSpiConfig &config) FL_NO_EXCEPT {
         ETS_I2S0_INTR_SOURCE, ESP_INTR_FLAG_IRAM, &isrHandler, this,
         &mIntrHandle);
     if (intr_err != ESP_OK) {
-        FL_WARN("I2sSpiPeripheralEsp: Failed to allocate interrupt: %s", intr_err);
+        FL_WARN("I2sSpiPeripheralEsp: Failed to allocate interrupt: " << intr_err);
         heap_caps_free(mDmaDescs);
         mDmaDescs = nullptr;
         mDmaDescCount = 0;
@@ -365,7 +365,7 @@ bool I2sSpiPeripheralEsp::initialize(const I2sSpiConfig &config) FL_NO_EXCEPT {
     }
 
     mInitialized = true;
-    FL_DBG("I2sSpiPeripheralEsp: Native I2S init with %s lanes, %s MHz clock", config.num_lanes, clockMHz);
+    FL_DBG("I2sSpiPeripheralEsp: Native I2S init with " << config.num_lanes << " lanes, " << clockMHz << " MHz clock");
     return true;
 }
 

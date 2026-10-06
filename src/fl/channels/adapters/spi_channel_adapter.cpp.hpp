@@ -42,13 +42,13 @@ fl::shared_ptr<SpiChannelEngineAdapter> SpiChannelEngineAdapter::create(
     // Register all controllers
     for (size_t i = 0; i < hwControllers.size(); i++) {
         if (!hwControllers[i]) {
-            FL_WARN("SpiChannelEngineAdapter: Null controller at index %s", i);
+            FL_WARN("SpiChannelEngineAdapter: Null controller at index " << i);
             continue;
         }
 
         adapter->mControllers.emplace_back(hwControllers[i], priorities[i], names[i]);
 
-        FL_DBG("SpiChannelEngineAdapter: Registered controller '%s' (priority %s, lanes: %s)", names[i], priorities[i], static_cast<int>(hwControllers[i]->getLaneCount()));
+        FL_DBG("SpiChannelEngineAdapter: Registered controller '" << names[i] << "' (priority " << priorities[i] << ", lanes: " << (static_cast<int>(hwControllers[i]->getLaneCount())) << ")");
     }
 
     if (adapter->mControllers.empty()) {
@@ -66,7 +66,7 @@ SpiChannelEngineAdapter::SpiChannelEngineAdapter(const char* name)
 }
 
 SpiChannelEngineAdapter::~SpiChannelEngineAdapter() FL_NO_EXCEPT {
-    FL_DBG("SpiChannelEngineAdapter: Destructor for '%s'", mName);
+    FL_DBG("SpiChannelEngineAdapter: Destructor for '" << mName << "'");
 
     // Clear any enqueued channels that were never transmitted
     // This prevents infinite loop in poll() which returns DRAINING if enqueued channels exist
@@ -160,7 +160,7 @@ bool SpiChannelEngineAdapter::initializeControllerIfNeeded(
                 return true;  // Already configured for this pin
             }
         }
-        FL_WARN("SpiChannelEngineAdapter: Controller %s already initialized with different clock pin", ctrl.name);
+        FL_WARN("SpiChannelEngineAdapter: Controller " << ctrl.name << " already initialized with different clock pin");
         return false;
     }
 
@@ -176,7 +176,7 @@ bool SpiChannelEngineAdapter::initializeControllerIfNeeded(
         config.max_transfer_sz = 65536;
 
         if (!ctrl.controller->begin(&config)) {
-            FL_WARN("SpiChannelEngineAdapter: Failed to initialize %s", ctrl.name);
+            FL_WARN("SpiChannelEngineAdapter: Failed to initialize " << ctrl.name);
             return false;
         }
     } else {
@@ -188,7 +188,7 @@ bool SpiChannelEngineAdapter::initializeControllerIfNeeded(
     ctrl.isInitialized = true;
     ctrl.assignedClockPins.push_back(clockPin);
 
-    FL_DBG("SpiChannelEngineAdapter: Initialized %s with clock pin %s", ctrl.name, clockPin);
+    FL_DBG("SpiChannelEngineAdapter: Initialized " << ctrl.name << " with clock pin " << clockPin);
 
     return true;
 }
@@ -223,7 +223,7 @@ void SpiChannelEngineAdapter::enqueue(ChannelDataPtr channelData) {
     }
 
     mEnqueuedChannels.push_back(channelData);
-    FL_DBG("SpiChannelEngineAdapter: Enqueued channel (total: %s)", mEnqueuedChannels.size());
+    FL_DBG("SpiChannelEngineAdapter: Enqueued channel (total: " << mEnqueuedChannels.size() << ")");
 }
 
 void SpiChannelEngineAdapter::show() {
@@ -231,7 +231,7 @@ void SpiChannelEngineAdapter::show() {
         return;
     }
 
-    FL_DBG("SpiChannelEngineAdapter: show() called with %s channels", mEnqueuedChannels.size());
+    FL_DBG("SpiChannelEngineAdapter: show() called with " << mEnqueuedChannels.size() << " channels");
 
     // Move enqueued channels to transmitting list
     mTransmittingChannels = fl::move(mEnqueuedChannels);
@@ -241,16 +241,16 @@ void SpiChannelEngineAdapter::show() {
     // Channels with the same clock pin can share SPI bus configuration
     auto groups = groupByClockPin(mTransmittingChannels);
 
-    FL_DBG("SpiChannelEngineAdapter: Grouped into %s clock pin groups", groups.size());
+    FL_DBG("SpiChannelEngineAdapter: Grouped into " << groups.size() << " clock pin groups");
 
     // Transmit each group sequentially
     for (size_t i = 0; i < groups.size(); i++) {
         const ClockPinGroup& group = groups[i];
 
-        FL_DBG("SpiChannelEngineAdapter: Transmitting group with clock pin %s (%s channels)", group.clockPin, group.channels.size());
+        FL_DBG("SpiChannelEngineAdapter: Transmitting group with clock pin " << group.clockPin << " (" << group.channels.size() << " channels)");
 
         if (!transmitBatch(group.channels)) {
-            FL_WARN("SpiChannelEngineAdapter: Failed to transmit batch for clock pin %s", group.clockPin);
+            FL_WARN("SpiChannelEngineAdapter: Failed to transmit batch for clock pin " << group.clockPin);
             // Continue with other groups rather than aborting entirely
         }
     }
@@ -274,7 +274,7 @@ IChannelDriver::DriverState SpiChannelEngineAdapter::poll() {
 
     // All controllers idle - release transmitting channels
     if (!mTransmittingChannels.empty()) {
-        FL_DBG("SpiChannelEngineAdapter: Releasing %s completed channels", mTransmittingChannels.size());
+        FL_DBG("SpiChannelEngineAdapter: Releasing " << mTransmittingChannels.size() << " completed channels");
 
         for (const auto& channel : mTransmittingChannels) {
             if (channel) {
@@ -355,7 +355,7 @@ bool SpiChannelEngineAdapter::transmitBatch(fl::span<const ChannelDataPtr> chann
     // Select controller for this clock pin
     int controllerIndex = selectControllerForClockPin(clockPin, spiConfig.spiBus);
     if (controllerIndex < 0) {
-        FL_WARN("SpiChannelEngineAdapter: No available controller for clock pin %s", clockPin);
+        FL_WARN("SpiChannelEngineAdapter: No available controller for clock pin " << clockPin);
         return false;
     }
 
@@ -383,12 +383,12 @@ bool SpiChannelEngineAdapter::transmitBatch(fl::span<const ChannelDataPtr> chann
             continue;
         }
 
-        FL_DBG("SpiChannelEngineAdapter: Transmitting channel via %s (pin %s, %s bytes)", ctrl.name, channel->getPin(), data.size());
+        FL_DBG("SpiChannelEngineAdapter: Transmitting channel via " << ctrl.name << " (pin " << channel->getPin() << ", " << data.size() << " bytes)");
 
         // Acquire DMA buffer
         DMABuffer dmaBuffer = ctrl.controller->acquireDMABuffer(data.size());
         if (!dmaBuffer.ok()) {
-            FL_WARN("SpiChannelEngineAdapter: Failed to acquire DMA buffer (error %s)", static_cast<int>(dmaBuffer.error()));
+            FL_WARN("SpiChannelEngineAdapter: Failed to acquire DMA buffer (error " << (static_cast<int>(dmaBuffer.error())) << ")");
             channel->setInUse(false);
             return false;
         }
@@ -396,7 +396,7 @@ bool SpiChannelEngineAdapter::transmitBatch(fl::span<const ChannelDataPtr> chann
         // Copy data to DMA buffer
         fl::span<u8> buffer = dmaBuffer.data();
         if (buffer.size() < data.size()) {
-            FL_WARN("SpiChannelEngineAdapter: DMA buffer too small (%s < %s)", buffer.size(), data.size());
+            FL_WARN("SpiChannelEngineAdapter: DMA buffer too small (" << buffer.size() << " < " << data.size() << ")");
             channel->setInUse(false);
             return false;
         }

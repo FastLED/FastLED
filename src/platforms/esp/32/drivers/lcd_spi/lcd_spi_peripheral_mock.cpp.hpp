@@ -96,7 +96,7 @@ LcdSpiPeripheralMockImpl::~LcdSpiPeripheralMockImpl() {}
 bool LcdSpiPeripheralMockImpl::initialize(
     const LcdSpiConfig &config) FL_NO_EXCEPT {
     if (config.num_lanes == 0 || config.num_lanes > 16) {
-        FL_WARN("LcdSpiPeripheralMock: Invalid num_lanes: %s", config.num_lanes);
+        FL_WARN("LcdSpiPeripheralMock: Invalid num_lanes: " << config.num_lanes);
         return false;
     }
     // Issue #2270: mirror the real peripheral's owner-aware teardown so
@@ -134,7 +134,7 @@ u16 *LcdSpiPeripheralMockImpl::allocateBuffer(size_t size_bytes) FL_NO_EXCEPT {
     buffer = aligned_alloc(64, aligned_size);
 #endif
     if (buffer == nullptr) {
-        FL_WARN("LcdSpiPeripheralMock: Failed to allocate buffer (%s bytes)", aligned_size);
+        FL_WARN("LcdSpiPeripheralMock: Failed to allocate buffer (" << aligned_size << " bytes)");
     }
     return static_cast<u16 *>(buffer);
 }

@@ -120,10 +120,7 @@ inline void solveI2sClockDivider(u32 target_hz,
             (static_cast<u64>(kI2sBaseClkHz) * static_cast<u64>(d.a)) /
             (static_cast<u64>(d.n) * static_cast<u64>(d.a) +
              static_cast<u64>(d.b)));
-        FL_WARN("I2S: pixel clock %u Hz is below the minimum this divider "
-                  "can reach; clamping to ~%u Hz",
-                  static_cast<unsigned>(effective_hz),
-                  static_cast<unsigned>(achieved_hz));
+        FL_WARN("I2S: pixel clock " << (static_cast<unsigned>(effective_hz)) << " Hz is below the minimum this divider can reach; clamping to ~" << (static_cast<unsigned>(achieved_hz)) << " Hz");
     }
     *out_N = d.n;
     *out_A = d.a;
@@ -329,7 +326,7 @@ bool I2sPeripheralEsp32DevEsp::initialize(
     esp_err_t err = esp_intr_alloc(interrupt_source, 0,
                                    &i2s_dma_isr_trampoline, this, &mIsrHandle);
     if (err != ESP_OK) {
-        FL_WARN("I2sPeripheralEsp32DevEsp: esp_intr_alloc failed err=%s", static_cast<int>(err));
+        FL_WARN("I2sPeripheralEsp32DevEsp: esp_intr_alloc failed err=" << (static_cast<int>(err)));
         i2sPortRelease(i2s_device, kI2sClocklessOwner);
         return false;
     }
@@ -427,8 +424,7 @@ bool I2sPeripheralEsp32DevEsp::transmit(const u8 *buffer,
         lldesc_t* grown = static_cast<lldesc_t*>(
             heap_caps_malloc(desc_count * sizeof(lldesc_t), MALLOC_CAP_DMA));
         if (!grown) {
-            FL_WARN("I2sPeripheralEsp32DevEsp: descriptor chain alloc failed (%s links)",
-                      static_cast<int>(desc_count));
+            FL_WARN("I2sPeripheralEsp32DevEsp: descriptor chain alloc failed (" << (static_cast<int>(desc_count)) << " links)");
             return false;
         }
         if (mDescriptors) {
@@ -480,7 +476,7 @@ bool I2sPeripheralEsp32DevEsp::transmit(const u8 *buffer,
 
     esp_err_t err = esp_intr_enable(mIsrHandle);
     if (err != ESP_OK) {
-        FL_WARN("I2sPeripheralEsp32DevEsp: esp_intr_enable failed err=%s", static_cast<int>(err));
+        FL_WARN("I2sPeripheralEsp32DevEsp: esp_intr_enable failed err=" << (static_cast<int>(err)));
         i2s->int_ena.val = 0;
         return false;
     }
@@ -573,8 +569,7 @@ bool I2sPeripheralEsp32DevEsp::routeLanePin(u8 lane, i32 gpio_pin) FL_NO_EXCEPT 
     esp_err_t err = gpio_set_direction(static_cast<gpio_num_t>(gpio_pin),
                                         GPIO_MODE_OUTPUT);
     if (err != ESP_OK) {
-        FL_WARN("I2sPeripheralEsp32DevEsp: gpio_set_direction failed pin=%s err=%s",
-                  static_cast<int>(gpio_pin), static_cast<int>(err));
+        FL_WARN("I2sPeripheralEsp32DevEsp: gpio_set_direction failed pin=" << (static_cast<int>(gpio_pin)) << " err=" << (static_cast<int>(err)));
         return false;
     }
 

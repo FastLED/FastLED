@@ -910,12 +910,14 @@ FL_TEST_CASE("[#4333] falling back to the legacy path warns once") {
     CRGB leds[1] = {};
     fl::vector<fl::string> lines;
     fl::inject_print_handler([&](const char* text) { lines.push_back(fl::string(text)); });
+    fl::inject_println_handler([&](const char* text) { lines.push_back(fl::string(text)); });
 
     ChannelOptions options;
     options.requestColorManagement(SourceProfile::linearSrgb());   // no profile
     ChannelConfig config(ClocklessChipset(), leds, RGB, options);
     ChannelPtr channel = Channel::create(config);
     fl::clear_print_handler();
+    fl::clear_println_handler();
 
     FL_REQUIRE(channel != nullptr);
     FL_REQUIRE(channel->hasColorProfileFallback());
@@ -941,6 +943,7 @@ FL_TEST_CASE("[#4333] strict mode says it disabled the channel, not that it fell
     fl::vector<fl::string> lines;
     FastLED.setColorManagementStrict(true);
     fl::inject_print_handler([&](const char* text) { lines.push_back(fl::string(text)); });
+    fl::inject_println_handler([&](const char* text) { lines.push_back(fl::string(text)); });
 
     ChannelOptions options;
     options.requestColorManagement(SourceProfile::linearSrgb());
@@ -948,6 +951,7 @@ FL_TEST_CASE("[#4333] strict mode says it disabled the channel, not that it fell
     ChannelPtr channel = Channel::create(config);
 
     fl::clear_print_handler();
+    fl::clear_println_handler();
     FastLED.setColorManagementStrict(false);
 
     FL_REQUIRE(channel != nullptr);
@@ -970,12 +974,14 @@ FL_TEST_CASE("[#4333] a channel that gets its profile says nothing") {
     CRGB leds[1] = {};
     fl::vector<fl::string> lines;
     fl::inject_print_handler([&](const char* text) { lines.push_back(fl::string(text)); });
+    fl::inject_println_handler([&](const char* text) { lines.push_back(fl::string(text)); });
 
     ChannelOptions options;
     FL_REQUIRE(options.setColorProfile(kFixtureProfile, SourceProfile::linearSrgb()));
     ChannelConfig config(ClocklessChipset(), leds, RGB, options);
     ChannelPtr channel = Channel::create(config);
     fl::clear_print_handler();
+    fl::clear_println_handler();
 
     FL_REQUIRE(channel != nullptr);
     FL_CHECK_FALSE(channel->hasColorProfileFallback());
@@ -1002,9 +1008,11 @@ FL_TEST_CASE("[#4333] and it stays quiet on every reconfigure after the first") 
     // counted here -- the case above owns that one.
     fl::vector<fl::string> lines;
     fl::inject_print_handler([&](const char* text) { lines.push_back(fl::string(text)); });
+    fl::inject_println_handler([&](const char* text) { lines.push_back(fl::string(text)); });
     channel->applyConfig(config);
     channel->applyConfig(config);
     fl::clear_print_handler();
+    fl::clear_println_handler();
 
     for (fl::size i = 0; i < lines.size(); ++i) {
         FL_CHECK(lines[i].find("color management") == fl::string::npos);
@@ -1024,9 +1032,11 @@ FL_TEST_CASE("[#4345] a profile that builds no pipeline reports fallback, not Co
 
     fl::vector<fl::string> lines;
     fl::inject_print_handler([&](const char* t) { lines.push_back(fl::string(t)); });
+    fl::inject_println_handler([&](const char* t) { lines.push_back(fl::string(t)); });
     ChannelConfig config(ClocklessChipset(), leds, RGB, options);
     ChannelPtr channel = Channel::create(config);
     fl::clear_print_handler();
+    fl::clear_println_handler();
 
     FL_REQUIRE(channel != nullptr);
     // The binding is still owned -- this is not a rejection, it is an honest
@@ -1053,9 +1063,11 @@ FL_TEST_CASE("[#4345] a usable profile still reports Configured and stays quiet"
 
     fl::vector<fl::string> lines;
     fl::inject_print_handler([&](const char* t) { lines.push_back(fl::string(t)); });
+    fl::inject_println_handler([&](const char* t) { lines.push_back(fl::string(t)); });
     ChannelConfig config(ClocklessChipset(), leds, RGB, options);
     ChannelPtr channel = Channel::create(config);
     fl::clear_print_handler();
+    fl::clear_println_handler();
 
     FL_REQUIRE(channel != nullptr);
     FL_CHECK(channel->isColorManaged());

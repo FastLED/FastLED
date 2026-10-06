@@ -438,16 +438,16 @@ FL_TEST_CASE("warning macros do not interfere with control flow") {
 // to stream form and multi-arg calls to printf form.
 // ============================================================================
 
-FL_TEST_CASE("FL_WARN unified - printf-style without _F suffix") {
+FL_TEST_CASE("FL_WARN unified - stream form with values") {
     FL_SUBCASE("FL_WARN with printf format and one arg") {
         int n = 42;
-        FL_WARN("Count: %d", n);
+        FL_WARN("Count: " << n);
         FL_CHECK(true);
     }
 
     FL_SUBCASE("FL_WARN with printf format and multiple args") {
         int x = 7, y = 11;
-        FL_WARN("x=%d y=%d", x, y);
+        FL_WARN("x=" << x << " y=" << y);
         FL_CHECK(true);
     }
 
@@ -459,21 +459,21 @@ FL_TEST_CASE("FL_WARN unified - printf-style without _F suffix") {
 
     FL_SUBCASE("FL_WARN alias still compiles") {
         int n = 5;
-        FL_WARN("Legacy: %d", n);
+        FL_WARN("Legacy: " << n);
         FL_CHECK(true);
     }
 
 }
 
-FL_TEST_CASE("FL_ERROR unified - printf-style without _F suffix") {
+FL_TEST_CASE("FL_ERROR unified - stream form with values") {
     FL_SUBCASE("FL_ERROR with printf format") {
         int code = -1;
-        FL_ERROR("Error code: %d", code);
+        FL_ERROR("Error code: " << code);
         FL_CHECK(true);
     }
 
     FL_SUBCASE("FL_ERROR alias still compiles") {
-        FL_ERROR("Legacy err: %s", "oops");
+        FL_ERROR("Legacy err: " << ("oops"));
         FL_CHECK(true);
     }
 
@@ -521,12 +521,39 @@ FL_TEST_CASE("unified logging wrappers keep literals off the stream path") {
     FL_CHECK_EQ(async.find("sstream"), fl::string::npos);
 }
 
+// #4709: printf-style log formatting is a compile error. A static_assert
+// cannot be caught at runtime, so check the expansion instead: every log
+// macro's multi-argument form must route to _FL_LOG_PRINTF_BANNED.
+FL_TEST_CASE("printf-form log calls expand to the compile-time ban") {
+    const char* const expansions[] = {
+        FL_TEST_STRINGIZE(FL_WARN("x=%d", 1)),
+        FL_TEST_STRINGIZE(FL_ERROR("x=%d", 1)),
+        FL_TEST_STRINGIZE(FL_INFO("x=%d", 1)),
+        FL_TEST_STRINGIZE(FL_PRINT("x=%d", 1)),
+        FL_TEST_STRINGIZE(FL_DBG("x=%d", 1)),
+        FL_TEST_STRINGIZE(FASTLED_WARN("x=%d", 1)),
+        FL_TEST_STRINGIZE(FASTLED_ERROR("x=%d", 1)),
+        FL_TEST_STRINGIZE(FL_WARN_IF(true, "x=%d", 1)),
+        FL_TEST_STRINGIZE(FL_WARN_ONCE("x=%d", 1)),
+        FL_TEST_STRINGIZE(FL_WARN_EVERY(10, "x=%d", 1)),
+        FL_TEST_STRINGIZE(FL_LOG_ASYNC(logger, "x=%d", 1)),
+        FL_TEST_STRINGIZE(_FL_LOG_CHECK("x=%d", 1)),
+    };
+    for (const char* text : expansions) {
+        const fl::string expansion(text);
+        FL_CHECK_NE(expansion.find("printf-style log formatting is not allowed"), fl::string::npos);
+    }
+    // The one-argument forms stay legal.
+    const fl::string ok = FL_TEST_STRINGIZE(_FL_LOG_CHECK("x=" << 1));
+    FL_CHECK_EQ(ok.find("printf-style"), fl::string::npos);
+}
+
 #undef FL_TEST_STRINGIZE
 #undef FL_TEST_STRINGIZE_IMPL
 
-FL_TEST_CASE("FL_INFO unified - printf-style") {
+FL_TEST_CASE("FL_INFO unified - stream form with values") {
     FL_SUBCASE("FL_INFO with printf format") {
-        FL_INFO("info: %d", 123);
+        FL_INFO("info: " << (123));
         FL_CHECK(true);
     }
 
@@ -536,9 +563,9 @@ FL_TEST_CASE("FL_INFO unified - printf-style") {
     }
 }
 
-FL_TEST_CASE("FL_INFO_IF unified - printf-style") {
+FL_TEST_CASE("FL_INFO_IF unified - stream form with values") {
     FL_SUBCASE("FL_INFO_IF with printf format and true condition") {
-        FL_INFO_IF(true, "info conditional fmt %d", 9);
+        FL_INFO_IF(true, "info conditional fmt " << (9));
         FL_CHECK(true);
     }
 
@@ -548,9 +575,9 @@ FL_TEST_CASE("FL_INFO_IF unified - printf-style") {
     }
 }
 
-FL_TEST_CASE("FL_PRINT unified - printf-style") {
+FL_TEST_CASE("FL_PRINT unified - stream form with values") {
     FL_SUBCASE("FL_PRINT with printf format") {
-        FL_PRINT("printed: %d", 99);
+        FL_PRINT("printed: " << (99));
         FL_CHECK(true);
     }
 
@@ -560,19 +587,19 @@ FL_TEST_CASE("FL_PRINT unified - printf-style") {
     }
 
     FL_SUBCASE("FL_PRINT alias still compiles") {
-        FL_PRINT("Legacy: %s", "abc");
+        FL_PRINT("Legacy: " << ("abc"));
         FL_CHECK(true);
     }
 }
 
-FL_TEST_CASE("FL_WARN_IF unified - printf-style") {
+FL_TEST_CASE("FL_WARN_IF unified - stream form with values") {
     FL_SUBCASE("FL_WARN_IF with printf format and true condition") {
-        FL_WARN_IF(true, "conditional fmt %d", 7);
+        FL_WARN_IF(true, "conditional fmt " << (7));
         FL_CHECK(true);
     }
 
     FL_SUBCASE("FL_WARN_IF with printf format and false condition") {
-        FL_WARN_IF(false, "conditional fmt %d", 7);
+        FL_WARN_IF(false, "conditional fmt " << (7));
         FL_CHECK(true);
     }
 }

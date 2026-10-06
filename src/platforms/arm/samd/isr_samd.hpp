@@ -459,7 +459,7 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) F
     timer->COUNT16.CTRLA.reg |= TC_CTRLA_ENABLE;
     tc_wait_sync(timer);
 
-    FL_DBG("Timer started at %s Hz on TC%s", config.frequency_hz, static_cast<int>(timer_idx));
+    FL_DBG("Timer started at " << config.frequency_hz << " Hz on TC" << (static_cast<int>(timer_idx)));
 
     // Release ownership - pointer is now managed by the C API (timer_handles + out_handle)
     handle_owner.release();

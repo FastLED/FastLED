@@ -66,7 +66,7 @@ ChannelDriverPARLIOImpl::ChannelDriverPARLIOImpl(size_t data_width) FL_NO_EXCEPT
     // Validate data width
     if (data_width != 1 && data_width != 2 && data_width != 4 &&
         data_width != 8 && data_width != 16) {
-        FL_WARN("PARLIO: Invalid data_width=%s (must be 1, 2, 4, 8, or 16)", data_width);
+        FL_WARN("PARLIO: Invalid data_width=" << data_width << " (must be 1, 2, 4, 8, or 16)");
         // Constructor will still complete, but initialization will fail
         return;
     }
@@ -213,7 +213,7 @@ void ChannelDriverPARLIOImpl::show() FL_NO_EXCEPT {
                 }
             }
             if (!has_unique_pins) {
-                FL_LOG_PARLIO("PARLIO: Channels in group %s have non-unique pins", group.mTiming.name);
+                FL_LOG_PARLIO("PARLIO: Channels in group " << group.mTiming.name << " have non-unique pins");
             }
         }
 
@@ -307,14 +307,14 @@ void ChannelDriverPARLIOImpl::beginTransmission(
     // Validate channel count is within bounds
     size_t channel_count = channelData.size();
     if (channel_count > 16) {
-        FL_WARN("PARLIO: Too many channels (got %s, max 16)", channel_count);
+        FL_WARN("PARLIO: Too many channels (got " << channel_count << ", max 16)");
         return;
     }
 
     // Validate channel count matches data_width constraints
     size_t required_width = selectDataWidth(channel_count);
     if (required_width != mDataWidth) {
-        FL_WARN("PARLIO: Channel count %s requires data_width=%s but this instance is data_width=%s", channel_count, required_width, mDataWidth);
+        FL_WARN("PARLIO: Channel count " << channel_count << " requires data_width=" << required_width << " but this instance is data_width=" << mDataWidth);
         return;
     }
 
@@ -323,7 +323,7 @@ void ChannelDriverPARLIOImpl::beginTransmission(
     for (size_t i = 0; i < channel_count; i++) {
         int pin = channelData[i]->getPin();
         if (!isValidParlioOutputPin(pin)) {
-            FL_WARN("PARLIO: Invalid output GPIO %s for this ESP32 target; refusing to configure PARLIO", pin);
+            FL_WARN("PARLIO: Invalid output GPIO " << pin << " for this ESP32 target; refusing to configure PARLIO");
             return;
         }
         pins.push_back(pin);
@@ -343,7 +343,7 @@ void ChannelDriverPARLIOImpl::beginTransmission(
 
     for (size_t i = 0; i < channelData.size(); i++) {
         if (!channelData[i]) {
-            FL_WARN("PARLIO: Null channel data at index %s", i);
+            FL_WARN("PARLIO: Null channel data at index " << i);
             return;
         }
 
@@ -368,7 +368,7 @@ void ChannelDriverPARLIOImpl::beginTransmission(
 
     // Initialize HAL if needed
     if (!mDriver.initialize(mDataWidth, pins, timing, maxLeds)) {
-        FL_WARN("PARLIO: HAL initialization failed (data_width=%s, channels=%s, maxLeds=%s). Try reducing FL_ESP_PARLIO_MAX_LEDS_PER_CHANNEL or FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES", mDataWidth, channel_count, maxLeds);
+        FL_WARN("PARLIO: HAL initialization failed (data_width=" << mDataWidth << ", channels=" << channel_count << ", maxLeds=" << maxLeds << "). Try reducing FL_ESP_PARLIO_MAX_LEDS_PER_CHANNEL or FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES");
         return;
     }
 
@@ -407,7 +407,7 @@ void ChannelDriverPARLIOImpl::prepareScratchBuffer(
 
         // Safety check: Skip empty channels (shouldn't happen in normal operation)
         if (srcData.size() == 0 || dataSize == 0) {
-            FL_WARN("PARLIO: Channel %s has empty data (size=%s), skipping transmission", i, srcData.size());
+            FL_WARN("PARLIO: Channel " << i << " has empty data (size=" << srcData.size() << "), skipping transmission");
             return;  // Abort transmission - channel not ready
         }
 
@@ -571,13 +571,13 @@ void ChannelDriverPARLIO::beginClocklessTransmission(
 
     size_t channel_count = channelData.size();
     if (channel_count > 16) {
-        FL_WARN("PARLIO: Too many clockless channels (got %s, max 16)", channel_count);
+        FL_WARN("PARLIO: Too many clockless channels (got " << channel_count << ", max 16)");
         return;
     }
 
     size_t required_width = selectDataWidth(channel_count);
     if (required_width == 0) {
-        FL_WARN("PARLIO: Invalid clockless channel count %s", channel_count);
+        FL_WARN("PARLIO: Invalid clockless channel count " << channel_count);
         return;
     }
 

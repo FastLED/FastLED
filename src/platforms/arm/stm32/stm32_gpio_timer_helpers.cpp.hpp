@@ -267,7 +267,7 @@ bool configurePinAsTimerAF(u8 pin, TIM_TypeDef* timer, u32 speed) {
 
     if (af_mode == (u32)NC) {
         // Pin doesn't support Timer AF
-        FL_WARN("STM32: Pin %s does not support Timer AF", pin);
+        FL_WARN("STM32: Pin " << pin << " does not support Timer AF");
         return false;
     }
 
@@ -496,7 +496,7 @@ bool initTimerPWM(TIM_HandleTypeDef* htim, TIM_TypeDef* timer, u32 frequency_hz)
     u32 max_period = is_32bit ? 0xFFFFFFFF : 0xFFFF;
 
     if (period > max_period) {
-        FL_WARN("STM32: Timer period %s exceeds max %s", period, max_period);
+        FL_WARN("STM32: Timer period " << period << " exceeds max " << max_period);
         return false;
     }
 

@@ -242,7 +242,7 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) F
 
     // Check frequency bounds (practical limits for RP2350)
     if (config.frequency_hz > 1000000) {
-        FL_WARN("attachTimerHandler: frequency %s Hz exceeds 1 MHz limit", config.frequency_hz);
+        FL_WARN("attachTimerHandler: frequency " << config.frequency_hz << " Hz exceeds 1 MHz limit");
         return -2;  // Invalid frequency
     }
 
@@ -295,7 +295,7 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) F
         irq_set_priority(TIMER_ALARM_IRQ_NUM(timer_hw, alarm_num), nvic_priority);
     }
 
-    FL_DBG("Timer started at %s Hz on alarm %s", config.frequency_hz, static_cast<int>(alarm_num));
+    FL_DBG("Timer started at " << config.frequency_hz << " Hz on alarm " << (static_cast<int>(alarm_num)));
 
     // Release ownership - pointer is now managed by the C API (alarm_handles + out_handle)
     handle_owner.release();
@@ -318,13 +318,13 @@ int attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* ou
     }
 
     if (pin >= 30) {
-        FL_WARN("attachExternalHandler: invalid pin %s (RP2350 has 30 GPIO pins)", static_cast<int>(pin));
+        FL_WARN("attachExternalHandler: invalid pin " << (static_cast<int>(pin)) << " (RP2350 has 30 GPIO pins)");
         return -1;  // Invalid parameter
     }
 
     // Check if pin already has a handler
     if (gpio_handles[pin] != nullptr) {
-        FL_WARN("attachExternalHandler: pin %s already has an attached handler", static_cast<int>(pin));
+        FL_WARN("attachExternalHandler: pin " << (static_cast<int>(pin)) << " already has an attached handler");
         return -3;  // Resource already in use
     }
 
@@ -379,7 +379,7 @@ int attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* ou
         irq_set_priority(IO_IRQ_BANK0, nvic_priority);
     }
 
-    FL_DBG("GPIO interrupt attached on pin %s with events 0x%s", static_cast<int>(pin), fl::to_hex(events));
+    FL_DBG("GPIO interrupt attached on pin " << (static_cast<int>(pin)) << " with events 0x" << (fl::to_hex(events)));
 
     // Release ownership - pointer is now managed by the C API (gpio_handles + out_handle)
     handle_owner.release();

@@ -101,7 +101,7 @@ class FsImplWasm : public fl::FsImpl {
                 // FL_DBG("Opened file: " << _path);
             } else {
                 out = fl::filebuf_ptr();
-                FL_DBG("File not found: %s", _path);
+                FL_DBG("File not found: " << _path);
             }
         }
         return out;
@@ -264,10 +264,9 @@ EMSCRIPTEN_KEEPALIVE bool jsDeclareFile(const char *path, size_t len) {
 
 EMSCRIPTEN_KEEPALIVE void fastled_declare_files(const char* jsonStr) {
     fl::wasm::declareManifestFiles(jsonStr, [](const fl::string &path, size_t size) {
-        FL_DBG("Declaring file %s with size %zu. These will become available "
-                 "as File system paths within the app.", path.c_str(), size);
+        FL_DBG("Declaring file " << path.c_str() << " with size " << size << ". These will become available as File system paths within the app.");
         if (!jsDeclareFile(path.c_str(), size)) {
-            FL_WARN("Failed to declare manifest file: %s", path.c_str());
+            FL_WARN("Failed to declare manifest file: " << path.c_str());
         }
     });
 }

@@ -93,7 +93,7 @@ int teensy_attach_timer_handler(const isr_config_t& config, isr_handle_t* handle
 
     // Check frequency bounds (Teensy IntervalTimer supports ~1 Hz to ~150 kHz typical)
     if (config.frequency_hz > 150000) {
-        FL_WARN("Teensy timer frequency %s Hz may be too high (max ~150 kHz)", config.frequency_hz);
+        FL_WARN("Teensy timer frequency " << config.frequency_hz << " Hz may be too high (max ~150 kHz)");
     }
 
     // Allocate platform handle data

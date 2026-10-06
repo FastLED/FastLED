@@ -218,7 +218,7 @@ bool VideoImpl::updateBufferFromStream(fl::u32 now) {
             }
             recycled_frame = mFrameInterpolator->erase(frame_to_erase);
             if (!recycled_frame) {
-                FL_WARN("erase failed for frame: %s", frame_to_erase);
+                FL_WARN("erase failed for frame: " << frame_to_erase);
                 return false;
             }
         }
@@ -310,7 +310,7 @@ bool VideoImpl::updateBufferFromFile(fl::u32 now, bool forward) {
             }
             recycled_frame = mFrameInterpolator->erase(frame_to_erase);
             if (!recycled_frame) {
-                FL_WARN("erase failed for frame: %s", frame_to_erase);
+                FL_WARN("erase failed for frame: " << frame_to_erase);
                 return false;
             }
         }
@@ -365,7 +365,7 @@ bool VideoImpl::updateBufferIfNecessary(fl::u32 prev, fl::u32 now) {
     case PixelStream::kStreaming:
         return updateBufferFromStream(now);
     default:
-        FL_WARN("Unknown type: %s", fl::u32(type));
+        FL_WARN("Unknown type: " << (fl::u32(type)));
         return false;
     }
 }

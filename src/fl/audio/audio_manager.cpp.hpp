@@ -20,7 +20,7 @@ shared_ptr<Processor> AudioManager::add(const Config &config) {
     fl::string errorMsg;
     auto input = IInput::create(config, &errorMsg);
     if (!input) {
-        FL_WARN("Failed to create audio input: %s", errorMsg);
+        FL_WARN("Failed to create audio input: " << errorMsg);
         return nullptr;
     }
     input->start();

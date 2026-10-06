@@ -33,7 +33,7 @@ esp32_create_audio_input(const audio::Config &config,
 #else
         const char *ERROR_MESSAGE =
             "I2S audio not supported on this ESP32 variant (no I2S hardware)";
-        FL_WARN("%s", ERROR_MESSAGE);
+        FL_WARN(ERROR_MESSAGE);
         if (error_message) {
             *error_message = ERROR_MESSAGE;
         }
@@ -49,7 +49,7 @@ esp32_create_audio_input(const audio::Config &config,
 #else
         const char *ERROR_MESSAGE = "PDM audio not supported on this ESP32 "
                                     "variant (no PDM RX hardware)";
-        FL_WARN("%s", ERROR_MESSAGE);
+        FL_WARN(ERROR_MESSAGE);
         if (error_message) {
             *error_message = ERROR_MESSAGE;
         }
@@ -57,7 +57,7 @@ esp32_create_audio_input(const audio::Config &config,
 #endif
     }
     const char *ERROR_MESSAGE = "Unsupported audio configuration";
-    FL_WARN("%s", ERROR_MESSAGE);
+    FL_WARN(ERROR_MESSAGE);
     if (error_message) {
         *error_message = ERROR_MESSAGE;
     }

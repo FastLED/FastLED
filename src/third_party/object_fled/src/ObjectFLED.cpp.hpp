@@ -88,14 +88,19 @@ ObjectFLED::ObjectFLED(uint16_t numLEDs, void *drawBuf, uint8_t config, uint8_t 
 	if (numPins > NUM_DIGITAL_PINS) {
 		// #3416 OF-LOW-2: warn on silent truncation so users debugging
 		// "why is my multi-strip setup short on pins" see the cause.
-		Serial.printf("ObjectFLED: numPins=%u exceeds NUM_DIGITAL_PINS=%u; truncating\r\n",
-		              numPins, NUM_DIGITAL_PINS);
+		// Serial.print, not Serial.printf: printf links ~16 KB of newlib
+		// formatting into ITCM (RAM1) for every Teensy 4 sketch (#4709).
+		Serial.print("ObjectFLED: numPins=");
+		Serial.print((unsigned)numPins);
+		Serial.print(" exceeds NUM_DIGITAL_PINS=");
+		Serial.print((unsigned)NUM_DIGITAL_PINS);
+		Serial.print("; truncating\r\n");
 		numPins = NUM_DIGITAL_PINS;
 	}
 	// CodeRabbit-flagged on PR #3419: guard against numPins=0 which
 	// would otherwise divide by zero in stripLen = numLEDs / numpinsLocal.
 	if (numPins == 0) {
-		Serial.printf("ObjectFLED: numPins=0 is invalid; abandoning init\r\n");
+		Serial.print("ObjectFLED: numPins=0 is invalid; abandoning init\r\n");
 		numpinsLocal = 0;
 		stripLen = 0;
 		initialized = false;
@@ -106,8 +111,13 @@ ObjectFLED::ObjectFLED(uint16_t numLEDs, void *drawBuf, uint8_t config, uint8_t 
 	// #3416 OF-LOW-8: warn if numLEDs doesn't divide evenly across pins
 	// -- tail LEDs are silently dropped from the per-strip stride.
 	if (numpinsLocal > 0 && numLEDs % numpinsLocal != 0) {
-		Serial.printf("ObjectFLED: numLEDs=%u not divisible by numpins=%u; last %u LED(s) ignored\r\n",
-		              numLEDs, numpinsLocal, (unsigned)(numLEDs % numpinsLocal));
+		Serial.print("ObjectFLED: numLEDs=");
+		Serial.print((unsigned)numLEDs);
+		Serial.print(" not divisible by numpins=");
+		Serial.print((unsigned)numpinsLocal);
+		Serial.print("; last ");
+		Serial.print((unsigned)(numLEDs % numpinsLocal));
+		Serial.print(" LED(s) ignored\r\n");
 	}
 	memcpy(pinlist, pinList, numpinsLocal);
 	if ((params & 0x3F) < 6) {
@@ -225,8 +235,8 @@ void ObjectFLED::begin(void) {
 		auto validation = objectfled::validate_teensy4_pin(pin);
 		if (!validation.valid) {
 			FL_WARN("================================================================================");
-			FL_WARN("FASTLED ERROR: Pin %s is INVALID and has been disabled", (int)pin);
-			FL_WARN("%s", validation.error_message);
+			FL_WARN("FASTLED ERROR: Pin " << (int)pin << " is INVALID and has been disabled");
+			FL_WARN(validation.error_message);
 			FL_WARN("================================================================================");
 			continue;
 		}
@@ -234,8 +244,8 @@ void ObjectFLED::begin(void) {
 		// Check for warnings (pin is valid but may have issues)
 		if (validation.error_message != nullptr) {
 			FL_WARN("================================================================================");
-			FL_WARN("FASTLED WARNING: Pin %s may have issues", (int)pin);
-			FL_WARN("%s", validation.error_message);
+			FL_WARN("FASTLED WARNING: Pin " << (int)pin << " may have issues");
+			FL_WARN(validation.error_message);
 			FL_WARN("================================================================================");
 		}
 
@@ -244,7 +254,7 @@ void ObjectFLED::begin(void) {
 		uint8_t offset = ((uint32_t)portOutputRegister(pin) - (uint32_t)&GPIO6_DR) >> 14;
 		if (offset > 3) {
 			FL_WARN("================================================================================");
-			FL_WARN("FASTLED ERROR: Pin %s does not map to GPIO6-9 (offset=%s)", (int)pin, (int)offset);
+			FL_WARN("FASTLED ERROR: Pin " << (int)pin << " does not map to GPIO6-9 (offset=" << (int)offset << ")");
 			FL_WARN("This pin may be a ground/power/read-only pin - strip disabled");
 			FL_WARN("================================================================================");
 			continue;
@@ -269,7 +279,7 @@ void ObjectFLED::begin(void) {
 	if (validPinCount == 0) {
 		FL_WARN("================================================================================");
 		FL_WARN("FASTLED CRITICAL ERROR: No valid pins configured!");
-		FL_WARN("All %s pins failed validation.", (int)numpinsLocal);
+		FL_WARN("All " << (int)numpinsLocal << " pins failed validation.");
 		FL_WARN("ObjectFLED driver is disabled - no LEDs will be updated.");
 		FL_WARN("================================================================================");
 		numpinsLocal = 0;
@@ -278,7 +288,7 @@ void ObjectFLED::begin(void) {
 
 	if (validPinCount < numpinsLocal) {
 		FL_WARN("================================================================================");
-		FL_WARN("FASTLED WARNING: Only %s of %s pins are valid", (int)validPinCount, (int)numpinsLocal);
+		FL_WARN("FASTLED WARNING: Only " << (int)validPinCount << " of " << (int)numpinsLocal << " pins are valid");
 		FL_WARN("Strips on invalid pins will not function.");
 		FL_WARN("================================================================================");
 	}

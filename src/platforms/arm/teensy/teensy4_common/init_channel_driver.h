@@ -14,11 +14,17 @@ namespace platforms {
 
 /// @brief Initialize channel drivers for Teensy 4.x
 ///
-/// Registers platform-specific drivers (SPI hardware) with the ChannelManager.
-/// This function is called lazily on first access to the ChannelManager singleton.
+/// Registers only the platform-default ObjectFLED engine (#4708). See
+/// registerAllTeensyChannelDrivers() for the full set.
 ///
 /// @note Implementation is in src/platforms/arm/teensy/teensy4_common/init_channel_driver_mxrt1062.cpp.hpp
 void initChannelDrivers() FL_NO_EXCEPT;
+
+/// @brief Register FlexIO, ObjectFLED and unified SPI drivers.
+///
+/// Called from `fl::enableAllDrivers()` so runtime driver selection keeps
+/// every Teensy 4.x driver available.
+void registerAllTeensyChannelDrivers() FL_NO_EXCEPT;
 
 }  // namespace platforms
 }  // namespace fl

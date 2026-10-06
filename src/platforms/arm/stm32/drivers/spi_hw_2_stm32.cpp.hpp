@@ -247,15 +247,15 @@ bool SPIDualSTM32::begin(const SpiHw2::Config& config) {
 
     // Validate pins using GPIO helper functions
     if (!isValidPin(mClockPin)) {
-        FL_WARN("SPIDualSTM32: Invalid clock pin %s", static_cast<int>(mClockPin));
+        FL_WARN("SPIDualSTM32: Invalid clock pin " << (static_cast<int>(mClockPin)));
         return false;
     }
     if (!isValidPin(mData0Pin)) {
-        FL_WARN("SPIDualSTM32: Invalid data0 pin %s", static_cast<int>(mData0Pin));
+        FL_WARN("SPIDualSTM32: Invalid data0 pin " << (static_cast<int>(mData0Pin)));
         return false;
     }
     if (!isValidPin(mData1Pin)) {
-        FL_WARN("SPIDualSTM32: Invalid data1 pin %s", static_cast<int>(mData1Pin));
+        FL_WARN("SPIDualSTM32: Invalid data1 pin " << (static_cast<int>(mData1Pin)));
         return false;
     }
 
@@ -272,9 +272,9 @@ bool SPIDualSTM32::begin(const SpiHw2::Config& config) {
     }
 
     FL_DBG("SPIDualSTM32: GPIO pins configured successfully");
-    FL_DBG("  Clock pin: %s", static_cast<int>(mClockPin));
-    FL_DBG("  Data0 pin: %s", static_cast<int>(mData0Pin));
-    FL_DBG("  Data1 pin: %s", static_cast<int>(mData1Pin));
+    FL_DBG("  Clock pin: " << (static_cast<int>(mClockPin)));
+    FL_DBG("  Data0 pin: " << (static_cast<int>(mData0Pin)));
+    FL_DBG("  Data1 pin: " << (static_cast<int>(mData1Pin)));
 #endif
 
     // Configure Timer for clock generation
@@ -282,7 +282,7 @@ bool SPIDualSTM32::begin(const SpiHw2::Config& config) {
     // Select timer based on bus_id
     mTimer = selectTimer(mBusId);
     if (mTimer == nullptr) {
-        FL_WARN("SPIDualSTM32: Failed to select timer for bus %s", mBusId);
+        FL_WARN("SPIDualSTM32: Failed to select timer for bus " << mBusId);
         return false;
     }
 
@@ -301,12 +301,12 @@ bool SPIDualSTM32::begin(const SpiHw2::Config& config) {
     }
 
     FL_DBG("SPIDualSTM32: Timer configured successfully");
-    FL_DBG("  Timer: TIM%s", ((mTimer == TIM2) ? "2" : (mTimer == TIM3) ? "3" : (mTimer == TIM4) ? "4"
+    FL_DBG("  Timer: TIM" << (((mTimer == TIM2) ? "2" : (mTimer == TIM3) ? "3" : (mTimer == TIM4) ? "4"
 #ifdef FASTLED_STM32_HAS_TIM5
          : (mTimer == TIM5) ? "5"
 #endif
-         : "?"));
-    FL_DBG("  Clock speed: %s Hz", mClockSpeedHz);
+         : "?")));
+    FL_DBG("  Clock speed: " << mClockSpeedHz << " Hz");
 #endif
 
     // Configure DMA streams for data lanes
@@ -316,7 +316,7 @@ bool SPIDualSTM32::begin(const SpiHw2::Config& config) {
     mDMAStream1 = getDMAStream(mTimer, mBusId, 1);
 
     if (mDMAStream0 == nullptr || mDMAStream1 == nullptr) {
-        FL_WARN("SPIDualSTM32: Failed to select DMA streams for bus %s", mBusId);
+        FL_WARN("SPIDualSTM32: Failed to select DMA streams for bus " << mBusId);
         mTimer = nullptr;
         mDMAStream0 = nullptr;
         mDMAStream1 = nullptr;
@@ -338,9 +338,9 @@ bool SPIDualSTM32::begin(const SpiHw2::Config& config) {
     enableDMAClock(getDMAController(mDMAStream1));
 
     FL_DBG("SPIDualSTM32: DMA streams selected successfully");
-    FL_DBG("  Stream 0: %s", (void*)mDMAStream0);
-    FL_DBG("  Stream 1: %s", (void*)mDMAStream1);
-    FL_DBG("  DMA channel: %s", dma_channel);
+    FL_DBG("  Stream 0: " << ((void*)mDMAStream0));
+    FL_DBG("  Stream 1: " << ((void*)mDMAStream1));
+    FL_DBG("  DMA channel: " << dma_channel);
 
     // Note: DMA stream configuration (addresses, sizes) happens in transmit()
     // because we need to know the buffer addresses and sizes at that time.
@@ -571,8 +571,8 @@ bool SPIDualSTM32::transmit(TransmitMode mode) {
     }
 
     FL_DBG("SPIDualSTM32: DMA transmission started");
-    FL_DBG("  Buffer size per lane: %s bytes", buffer_size_per_lane);
-    FL_DBG("  Total bytes: %s", mCurrentTotalSize);
+    FL_DBG("  Buffer size per lane: " << buffer_size_per_lane << " bytes");
+    FL_DBG("  Total bytes: " << mCurrentTotalSize);
 
     mTransactionActive = true;
     return true;
@@ -608,7 +608,7 @@ bool SPIDualSTM32::waitComplete(u32 timeout_ms) {
         if (timeout_enabled) {
             u32 elapsed_ms = fl::millis() - start_ms;
             if (elapsed_ms >= timeout_ms) {
-                FL_WARN("SPIDualSTM32: DMA transfer timeout after %s ms", elapsed_ms);
+                FL_WARN("SPIDualSTM32: DMA transfer timeout after " << elapsed_ms << " ms");
 
                 // Emergency stop: disable DMA and timer
                 stopDMA(mDMAStream0);

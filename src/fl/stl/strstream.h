@@ -234,6 +234,14 @@ class sstream {
         return *this;
     }
 
+    // Pointers print as "0x<hex>", like printf's %p. Without this overload a
+    // non-char pointer converts to bool and prints "true" (#4709).
+    sstream &operator<<(const void *ptr) FL_NO_EXCEPT {
+        mStr.append("0x");
+        mStr.append(fl::to_hex(reinterpret_cast<fl::uptr>(ptr), false)); // ok reinterpret cast
+        return *this;
+    }
+
     sstream &operator<<(const float &f) FL_NO_EXCEPT {
         // multiply by 100 and round to get 2 decimal places
         mStr.append(f);

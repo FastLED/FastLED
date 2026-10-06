@@ -44,7 +44,7 @@ WasmAudioInput::WasmAudioInput()
     // Set global instance for C callback
     fl::Singleton<WasmAudioInputHolder>::instance().ptr = this;
 
-    FL_DBG("WasmAudioInput created - ring buffer: %s slots x %s samples", RING_BUFFER_SLOTS, BLOCK_SIZE);
+    FL_DBG("WasmAudioInput created - ring buffer: " << RING_BUFFER_SLOTS << " slots x " << BLOCK_SIZE << " samples");
 }
 
 WasmAudioInput::~WasmAudioInput() {
@@ -126,7 +126,7 @@ void WasmAudioInput::pushSamples(const fl::i16* samples, int count, fl::u32 time
     }
 
     if (count <= 0 || count > BLOCK_SIZE) {
-        FL_WARN("WasmAudioInput::pushSamples - invalid block size: %s (max %s)", count, BLOCK_SIZE);
+        FL_WARN("WasmAudioInput::pushSamples - invalid block size: " << count << " (max " << BLOCK_SIZE << ")");
         return;
     }
 
@@ -153,7 +153,7 @@ void WasmAudioInput::flushAccumBuffer() {
     if (isFull()) {
         mDroppedBlocks++;
         if (mDroppedBlocks % 100 == 1) {
-            FL_WARN("WasmAudioInput ring buffer overflow - dropped %s blocks total", mDroppedBlocks);
+            FL_WARN("WasmAudioInput ring buffer overflow - dropped " << mDroppedBlocks << " blocks total");
         }
         mRingBuffer[mTail].valid = false;
         mTail = nextIndex(mTail);

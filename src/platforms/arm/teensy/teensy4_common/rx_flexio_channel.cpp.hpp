@@ -88,6 +88,7 @@
 
 // IWYU pragma: private
 
+#include "fl/stl/charconv.h"  // fl::to_hex
 #include "platforms/arm/teensy/is_teensy.h"
 
 #if defined(FL_IS_TEENSY_4X)
@@ -332,8 +333,7 @@ static void flexio1_clock_init() {
     // ceiling, then gate the clock back on. Standard "change divider
     // while gated" sequence to avoid mid-divider glitches.
 
-    FL_WARN("[FlexIO RX] pre-init: CCGR5=0x%x CDCDR=0x%x",
-              CCM_CCGR5, CCM_CDCDR);
+    FL_WARN("[FlexIO RX] pre-init: CCGR5=0x" << (fl::to_hex(CCM_CCGR5)) << " CDCDR=0x" << (fl::to_hex(CCM_CDCDR)));
 
     // 1. Gate FLEXIO1 clock OFF so we can safely reprogram CDCDR.
     CCM_CCGR5 &= ~CCM_CCGR5_FLEXIO1(0x3);
@@ -356,14 +356,11 @@ static void flexio1_clock_init() {
     __asm__ volatile("dsb 0xF" ::: "memory");
     __asm__ volatile("isb 0xF" ::: "memory");
 
-    FL_WARN("[FlexIO RX] post-init: CCGR5=0x%x CDCDR=0x%x",
-              CCM_CCGR5, CCM_CDCDR);
+    FL_WARN("[FlexIO RX] post-init: CCGR5=0x" << (fl::to_hex(CCM_CCGR5)) << " CDCDR=0x" << (fl::to_hex(CCM_CDCDR)));
 
     // Diagnostic: read VERID @ +0x000 (should be non-zero if bus clock is on)
     volatile u32 *flexio1_verid = (volatile u32 *)(kFLEXIO1_BASE + 0x000);
-    FL_WARN("[FlexIO RX] FLEXIO1 VERID=0x%x PARAM=0x%x CTRL=0x%x",
-              *flexio1_verid, *(volatile u32 *)(kFLEXIO1_BASE + 0x004),
-              FLEXIO1_CTRL);
+    FL_WARN("[FlexIO RX] FLEXIO1 VERID=0x" << (fl::to_hex(*flexio1_verid)) << " PARAM=0x" << (fl::to_hex(*(volatile u32 *)(kFLEXIO1_BASE + 0x004))) << " CTRL=0x" << (fl::to_hex(FLEXIO1_CTRL)));
 
     // Memory barrier so the CCM writes have actually committed before any
     // downstream code touches FLEXIO1_CTRL. Without this, the very next
@@ -398,17 +395,14 @@ static void flexio1_pin_init(const FlexIo1PinInfo &pin_info) {
     // and FLEXIO1 PIN status so we can see whether the mux writes
     // committed and whether FLEXIO1 sees pad activity on the selected
     // input pin.
-    FL_WARN("[FlexIO RX] post-pin-init: pin=%d flexio_pin=%d mux_reg=0x%x pad_reg=0x%x",
-              (int)pin_info.teensy_pin, (int)pin_info.flexio_pin,
-              *(pin_info.mux_reg), *(pin_info.pad_reg));
+    FL_WARN("[FlexIO RX] post-pin-init: pin=" << ((int)pin_info.teensy_pin) << " flexio_pin=" << ((int)pin_info.flexio_pin) << " mux_reg=0x" << (fl::to_hex(*(pin_info.mux_reg))) << " pad_reg=0x" << (fl::to_hex(*(pin_info.pad_reg))));
 
     // FLEXIO1 PIN @ +0x00C reflects the live state of each input pin.
     // If our pad routing works, bit `flexio_pin` should track the pad.
     // (offset 0x040 â€” used in the earlier iter 5 diagnostic â€” was the
     // wrong register and read 0 unconditionally.)
     volatile u32 *flexio1_pin_reg = (volatile u32 *)(kFLEXIO1_BASE + 0x00C);
-    FL_WARN("[FlexIO RX] FLEXIO1 PIN=0x%x (expect bit %d to track pad)",
-              *flexio1_pin_reg, (int)pin_info.flexio_pin);
+    FL_WARN("[FlexIO RX] FLEXIO1 PIN=0x" << (fl::to_hex(*flexio1_pin_reg)) << " (expect bit " << ((int)pin_info.flexio_pin) << " to track pad)");
 }
 
 // ---------------------------------------------------------------------------
@@ -579,9 +573,7 @@ void FlexIoRxChannelImpl::dmaIsr() {
 bool FlexIoRxChannelImpl::begin(const RxConfig &config) {
     mPinInfo = lookupFlexIo1Pin(mPin);
     if (!mPinInfo) {
-        FL_WARN("[FlexIO RX] Pin %s has no FLEXIO1 mux mapping on Teensy 4.x (only a small "
-                   "subset is enabled; see rx_flexio_channel.cpp.hpp). See "
-                   "FastLED#2764.", mPin);
+        FL_WARN("[FlexIO RX] Pin " << mPin << " has no FLEXIO1 mux mapping on Teensy 4.x (only a small subset is enabled; see rx_flexio_channel.cpp.hpp). See FastLED#2764.");
         return false;
     }
 
@@ -654,9 +646,7 @@ RxWaitResult FlexIoRxChannelImpl::wait(u32 timeout_ms) {
             const u32 citer = mDma.TCD->CITER & 0x7FFFu;
             const u32 biter = mDma.TCD->BITER & 0x7FFFu;
             const u32 transfers_done = (biter > citer) ? (biter - citer) : 0u;
-            FL_WARN("[FlexIO RX] TIMEOUT %sms done=%s/%s err=%s SHIFTSTAT=0x%x",
-                      timeout_ms, transfers_done, biter,
-                      (mDma.error() ? 1 : 0), FLEXIO1_SHIFTSTAT);
+            FL_WARN("[FlexIO RX] TIMEOUT " << timeout_ms << "ms done=" << transfers_done << "/" << biter << " err=" << ((mDma.error() ? 1 : 0)) << " SHIFTSTAT=0x" << (fl::to_hex(FLEXIO1_SHIFTSTAT)));
             return RxWaitResult::TIMEOUT;
         }
     }
@@ -672,7 +662,7 @@ RxWaitResult FlexIoRxChannelImpl::wait(u32 timeout_ms) {
     const u32 biter = mDma.TCD->BITER & 0x7FFFu;
     const u32 transfers_done = (biter > citer) ? (biter - citer) : 0u;
     if (transfers_done == 0u) {
-        FL_WARN("[FlexIO RX] empty-buffer SUCCESS reclassified as TIMEOUT (transfers=0/%s)", biter);
+        FL_WARN("[FlexIO RX] empty-buffer SUCCESS reclassified as TIMEOUT (transfers=0/" << biter << ")");
         return RxWaitResult::TIMEOUT;
     }
     return RxWaitResult::SUCCESS;
@@ -746,9 +736,7 @@ bool FlexIoRxChannelImpl::injectEdges(fl::span<const EdgeTime> edges) {
 fl::shared_ptr<FlexIoRxChannel> FlexIoRxChannel::create(int pin) {
     const FlexIo1PinInfo *info = lookupFlexIo1Pin(pin);
     if (!info) {
-        FL_WARN("[FlexIO RX] Pin %s has no FLEXIO1 mux mapping (Phase 1B initial map is "
-                   "minimal; expand kFlexIo1Pins[] as bench tests qualify "
-                   "additional pins). See FastLED#2764.", pin);
+        FL_WARN("[FlexIO RX] Pin " << pin << " has no FLEXIO1 mux mapping (Phase 1B initial map is minimal; expand kFlexIo1Pins[] as bench tests qualify additional pins). See FastLED#2764.");
         return fl::shared_ptr<FlexIoRxChannel>();
     }
     return fl::make_shared<FlexIoRxChannelImpl>(pin);

@@ -220,7 +220,7 @@ bool ChannelManager::removeDriver(fl::shared_ptr<IChannelDriver> driver) {
     }
 
     // Engine not found
-    FL_WARN("ChannelManager::removeDriver() - Engine %s not found in registry", driver.get());
+    FL_WARN("ChannelManager::removeDriver() - Engine " << driver.get() << " not found in registry");
     return false;
 }
 

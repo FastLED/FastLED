@@ -1,3 +1,10 @@
+# 2026-10-06, PR #4710 (meta #4709): -6,780 B, 398799 -> 392019, claiming
+# the saving from making printf-form logging a compile error. All 959 log
+# sites became stream form, so the fl::printf engine (parse_format_spec,
+# apply_width, format_integral, ...) no longer links into Blink; the ESP32
+# RMT driver's logs were its last users. Measured by CI run 37421506562
+# (bloat regression job) on this PR.
+
 # 2026-10-03: pin ESP32-S3 to pioarduino 55.03.311 explicitly. fbuild 2.5.28
 # silently substituted that platform for the requested 54.03.20 release, so
 # the 401971 B baseline was never measured against the declared platform.
@@ -300,4 +307,4 @@
 # the CI Blink report contains no ResponseLutsQ16 symbol. The local fbuild
 # symbol total remains ~4 KB higher for the same source (FastLED/fbuild#1456),
 # so this ratchet uses the CI measurement from PR #4511.
-398799
+392019

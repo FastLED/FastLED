@@ -190,9 +190,9 @@ void Scheduler::update_frame_listener_registration() FL_NO_EXCEPT {
 void Scheduler::warn_no_then(int task_id, const fl::string& trace_label) {
     FL_UNUSED(task_id);  // only consumed by FL_WARN, a no-op on small platforms
     if (!trace_label.empty()) {
-        FL_WARN("%s%s launched at %s", fl::string("[fl::task] Warning: no then() callback set for Task#"), task_id, trace_label);
+        FL_WARN("[fl::task] Warning: no then() callback set for Task#" << task_id << " launched at " << trace_label);
     } else {
-        FL_WARN("%s%s", fl::string("[fl::task] Warning: no then() callback set for Task#"), task_id);
+        FL_WARN("[fl::task] Warning: no then() callback set for Task#" << task_id);
     }
 }
 
@@ -200,9 +200,9 @@ void Scheduler::warn_no_catch(int task_id, const fl::string& trace_label, const 
     FL_UNUSED(task_id);  // only consumed by FL_WARN, a no-op on small platforms
     FL_UNUSED(error);
     if (!trace_label.empty()) {
-        FL_WARN("%s%s launched at %s. Error: %s", fl::string("[fl::task] Warning: no catch_() callback set for Task#"), task_id, trace_label, error.message);
+        FL_WARN("[fl::task] Warning: no catch_() callback set for Task#" << task_id << " launched at " << trace_label << ". Error: " << error.message);
     } else {
-        FL_WARN("%s%s. Error: %s", fl::string("[fl/task] Warning: no catch_() callback set for Task#"), task_id, error.message);
+        FL_WARN("[fl/task] Warning: no catch_() callback set for Task#" << task_id << ". Error: " << error.message);
     }
 }
 

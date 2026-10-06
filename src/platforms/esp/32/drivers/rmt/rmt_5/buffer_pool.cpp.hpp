@@ -62,12 +62,12 @@ int RMTBufferPool::allocateOrResizeSlot(fl::size size) FL_NO_EXCEPT {
             // Resize this buffer
             u8* newData = static_cast<u8*>(fl::InternalRealloc(slot.data, size));
             if (!newData) {
-                FL_WARN("RMTBufferPool: Failed to realloc internal buffer from %s to %s bytes", slot.capacity, size);
+                FL_WARN("RMTBufferPool: Failed to realloc internal buffer from " << slot.capacity << " to " << size << " bytes");
                 return -1;
             }
             slot.data = newData;
             slot.capacity = size;
-            FL_LOG_RMT("RMTBufferPool: Resized buffer %s to %s bytes", i, size);
+            FL_LOG_RMT("RMTBufferPool: Resized buffer " << i << " to " << size << " bytes");
             return static_cast<int>(i);
         }
     }
@@ -76,14 +76,14 @@ int RMTBufferPool::allocateOrResizeSlot(fl::size size) FL_NO_EXCEPT {
     BufferSlot newSlot;
     newSlot.data = static_cast<u8*>(fl::InternalAlloc(size));
     if (!newSlot.data) {
-        FL_WARN("RMTBufferPool: Failed to allocate new internal buffer of %s bytes", size);
+        FL_WARN("RMTBufferPool: Failed to allocate new internal buffer of " << size << " bytes");
         return -1;
     }
     newSlot.capacity = size;
     newSlot.inUse = false;
 
     mInternalBuffers.push_back(newSlot);
-    FL_LOG_RMT("RMTBufferPool: Allocated new buffer %s with %s bytes", (mInternalBuffers.size() - 1), size);
+    FL_LOG_RMT("RMTBufferPool: Allocated new buffer " << ((mInternalBuffers.size() - 1)) << " with " << size << " bytes");
     return static_cast<int>(mInternalBuffers.size() - 1);
 }
 
@@ -130,11 +130,11 @@ fl::span<u8> RMTBufferPool::acquireDMA(fl::size size) FL_NO_EXCEPT {
 
         mDMABuffer.data = static_cast<u8*>(fl::DMAAlloc(size));
         if (!mDMABuffer.data) {
-            FL_WARN("RMTBufferPool: Failed to allocate DMA buffer of %s bytes", size);
+            FL_WARN("RMTBufferPool: Failed to allocate DMA buffer of " << size << " bytes");
             return fl::span<u8>();
         }
         mDMABuffer.capacity = size;
-        FL_LOG_RMT("RMTBufferPool: Allocated DMA buffer with %s bytes", size);
+        FL_LOG_RMT("RMTBufferPool: Allocated DMA buffer with " << size << " bytes");
     }
 
     mDMABuffer.inUse = true;
@@ -158,7 +158,7 @@ void RMTBufferPool::releaseInternal(fl::span<u8> buffer) FL_NO_EXCEPT {
         }
     }
 
-    FL_WARN("RMTBufferPool: Attempted to release unknown buffer %s", static_cast<void*>(bufferPtr));
+    FL_WARN("RMTBufferPool: Attempted to release unknown buffer " << (static_cast<void*>(bufferPtr)));
 }
 
 void RMTBufferPool::releaseDMA() FL_NO_EXCEPT {

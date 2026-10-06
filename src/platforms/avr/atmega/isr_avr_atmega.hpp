@@ -186,7 +186,7 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) F
     u8 prescaler_idx;
     u16 ocr_value;
     if (!calculate_timer_config(config.frequency_hz, prescaler_idx, ocr_value)) {
-        FL_WARN("AVR ISR: frequency %s Hz out of range", config.frequency_hz);
+        FL_WARN("AVR ISR: frequency " << config.frequency_hz << " Hz out of range");
         return -2;  // Invalid frequency (out of range)
     }
 
@@ -197,10 +197,10 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) F
     i32 freq_error = static_cast<i32>(actual_freq) - static_cast<i32>(config.frequency_hz);
     i32 error_pct = (freq_error * 100) / static_cast<i32>(config.frequency_hz);
     if (error_pct > 5 || error_pct < -5) {
-        FL_WARN("AVR ISR: frequency error %s% (requested %s Hz, actual %s Hz)", error_pct, config.frequency_hz, actual_freq);
+        FL_WARN("AVR ISR: frequency error " << error_pct << "% (requested " << config.frequency_hz << " Hz, actual " << actual_freq << " Hz)");
     }
 
-    FL_DBG("AVR ISR: Timer1 config: prescaler=%s, OCR1A=%s, actual_freq=%s Hz", PRESCALERS[prescaler_idx].value, ocr_value, actual_freq);
+    FL_DBG("AVR ISR: Timer1 config: prescaler=" << PRESCALERS[prescaler_idx].value << ", OCR1A=" << ocr_value << ", actual_freq=" << actual_freq << " Hz");
 
     // Store configuration
     handle_data->mIsTimer = true;
@@ -237,7 +237,7 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) F
 
     handle_data->mIsEnabled = true;
 
-    FL_DBG("AVR ISR: Timer1 started at %s Hz", actual_freq);
+    FL_DBG("AVR ISR: Timer1 started at " << actual_freq << " Hz");
 
     // Populate output handle
     if (out_handle) {
