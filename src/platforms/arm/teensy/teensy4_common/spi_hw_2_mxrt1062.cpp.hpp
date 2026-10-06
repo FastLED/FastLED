@@ -126,7 +126,7 @@ bool SpiHw2MXRT1062::begin(const SpiHw2::Config& config) {
 
     // Validate bus_num against mBusId if driver has pre-assigned ID
     if (mBusId != -1 && config.bus_num != static_cast<u8>(mBusId)) {
-        FL_WARN("SpiHw2MXRT1062: Bus mismatch - expected %s, got %s", mBusId, static_cast<int>(config.bus_num));
+        FL_WARN("SpiHw2MXRT1062: Bus mismatch - expected " << mBusId << ", got " << static_cast<int>(config.bus_num));
         return false;
     }
 
@@ -146,7 +146,7 @@ bool SpiHw2MXRT1062::begin(const SpiHw2::Config& config) {
             mBusId = 2;
             break;
         default:
-            FL_WARN("SpiHw2MXRT1062: Invalid bus number %s", static_cast<int>(bus_num));
+            FL_WARN("SpiHw2MXRT1062: Invalid bus number " << static_cast<int>(bus_num));
             return false;
     }
 
@@ -186,9 +186,9 @@ bool SpiHw2MXRT1062::begin(const SpiHw2::Config& config) {
     }
 
     if (!pins_valid) {
-        FL_WARN("SpiHw2MXRT1062: Invalid pin combination for bus %s", mBusId);
-        FL_WARN("  Expected: SCK=%s D0=%s D1=%s", (int)valid_pins[mBusId].sck, (int)valid_pins[mBusId].mosi, (int)valid_pins[mBusId].miso);
-        FL_WARN("  Got: SCK=%s D0=%s D1=%s", (int)mClockPin, (int)mData0Pin, (int)mData1Pin);
+        FL_WARN("SpiHw2MXRT1062: Invalid pin combination for bus " << mBusId);
+        FL_WARN("  Expected: SCK=" << (int)valid_pins[mBusId].sck << " D0=" << (int)valid_pins[mBusId].mosi << " D1=" << (int)valid_pins[mBusId].miso);
+        FL_WARN("  Got: SCK=" << (int)mClockPin << " D0=" << (int)mData0Pin << " D1=" << (int)mData1Pin);
         return false;
     }
 

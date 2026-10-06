@@ -95,7 +95,7 @@ Teensy_I2S_Audio::Teensy_I2S_Audio(const audio::ConfigI2S& config)
     if (mConfig.mSampleRate != 44100) {
         mHasError = true;
         mErrorMessage = "Teensy Audio Library only supports 44100Hz sample rate";
-        FL_WARN("%s", mErrorMessage.c_str());
+        FL_WARN(mErrorMessage.c_str());
         return;
     }
 
@@ -103,7 +103,7 @@ Teensy_I2S_Audio::Teensy_I2S_Audio(const audio::ConfigI2S& config)
     if (mConfig.mBitResolution != 16) {
         mHasError = true;
         mErrorMessage = "Teensy Audio Library only supports 16-bit resolution";
-        FL_WARN("%s", mErrorMessage.c_str());
+        FL_WARN(mErrorMessage.c_str());
         return;
     }
 
@@ -112,7 +112,7 @@ Teensy_I2S_Audio::Teensy_I2S_Audio(const audio::ConfigI2S& config)
     if (static_cast<audio::TeensyI2S::I2SPort>(mConfig.mI2sNum) == audio::TeensyI2S::I2SPort::I2S2) {
         mHasError = true;
         mErrorMessage = "I2S2 is not available on Teensy 3.x (only I2S1 supported)";
-        FL_WARN("%s", mErrorMessage.c_str());
+        FL_WARN(mErrorMessage.c_str());
         return;
     }
 #endif
@@ -138,7 +138,7 @@ Teensy_I2S_Audio::Teensy_I2S_Audio(const audio::ConfigI2S& config)
     else {
         mHasError = true;
         mErrorMessage = "Invalid I2S port selection";
-        FL_WARN("%s", mErrorMessage.c_str());
+        FL_WARN(mErrorMessage.c_str());
         return;
     }
 }
@@ -181,7 +181,7 @@ void Teensy_I2S_Audio::start() {
 #endif
 
     // Log channel selection
-    FL_WARN("  Channel: %s", ((mConfig.mAudioChannel == audio::AudioChannel::Left) ? "Left" :
+    FL_WARN("  Channel: " << ((mConfig.mAudioChannel == audio::AudioChannel::Left) ? "Left" :
                               (mConfig.mAudioChannel == audio::AudioChannel::Right) ? "Right" : "Both (downmixed)"));
 }
 
@@ -321,7 +321,7 @@ fl::shared_ptr<audio::IInput> teensy_create_audio_input(
         return audio;
     } else if (config.is<audio::ConfigPdm>()) {
         const char* ERROR_MESSAGE = "PDM audio not supported in Teensy Audio Library implementation";
-        FL_WARN("%s", ERROR_MESSAGE);
+        FL_WARN(ERROR_MESSAGE);
         if (error_message) {
             *error_message = ERROR_MESSAGE;
         }
@@ -329,7 +329,7 @@ fl::shared_ptr<audio::IInput> teensy_create_audio_input(
     }
 
     const char* ERROR_MESSAGE = "Unsupported audio configuration for Teensy";
-    FL_WARN("%s", ERROR_MESSAGE);
+    FL_WARN(ERROR_MESSAGE);
     if (error_message) {
         *error_message = ERROR_MESSAGE;
     }
@@ -345,7 +345,7 @@ fl::shared_ptr<audio::IInput> teensy_create_audio_input(
 ) FL_NO_EXCEPT {
     FL_UNUSED(config);
     const char* ERROR_MESSAGE = "Teensy I2S audio is not available on this board.";
-    FL_WARN("%s", ERROR_MESSAGE);
+    FL_WARN(ERROR_MESSAGE);
     if (error_message) {
         *error_message = ERROR_MESSAGE;
     }

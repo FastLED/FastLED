@@ -465,7 +465,7 @@ FlexPwmRxChannelImpl *FlexPwmRxChannelImpl::sActiveInstance = nullptr;
 bool FlexPwmRxChannelImpl::begin(const RxConfig &config) {
     mPinInfo = lookupPin(mPin);
     if (!mPinInfo) {
-        FL_WARN("Pin %s does not support FlexPWM capture on Teensy 4.x", mPin);
+        FL_WARN("Pin " << mPin << " does not support FlexPWM capture on Teensy 4.x");
         return false;
     }
 
@@ -949,7 +949,7 @@ bool FlexPwmRxChannelImpl::injectEdges(fl::span<const EdgeTime> edges) {
 fl::shared_ptr<FlexPwmRxChannel> FlexPwmRxChannel::create(int pin) {
     const FlexPwmPinInfo *info = lookupPin(pin);
     if (!info) {
-        FL_WARN("Pin %s does not support FlexPWM capture on Teensy 4.x", pin);
+        FL_WARN("Pin " << pin << " does not support FlexPWM capture on Teensy 4.x");
         return fl::shared_ptr<FlexPwmRxChannel>();
     }
     return fl::make_shared<FlexPwmRxChannelImpl>(pin);

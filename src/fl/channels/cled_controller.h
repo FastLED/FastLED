@@ -93,9 +93,7 @@ protected:
         if (chipset == nullptr) {
             return false;
         }
-        FL_WARN("%s has fixed R,G,B,W output; %s is unsupported and was "
-                  "ignored",
-                  chipset, operation);
+        FL_WARN(chipset << " has fixed R,G,B,W output; " << operation << " is unsupported and was ignored");
         return true;
     }
 
