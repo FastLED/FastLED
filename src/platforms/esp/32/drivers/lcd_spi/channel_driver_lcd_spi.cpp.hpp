@@ -101,7 +101,7 @@ bool ChannelDriverLcdSpi::allocateRingBuffers(
     for (size_t i = 0; i < kRingBufferCount; i++) {
         mRingBuffers[i] = mPeripheral->allocateBuffer(slotCapacityBytes);
         if (mRingBuffers[i] == nullptr) {
-            FL_WARN("ChannelDriverLcdSpi: ring buffer alloc failed slot %s", i);
+            FL_WARN("ChannelDriverLcdSpi: ring buffer alloc failed slot " << i);
             freeRingBuffers();
             return false;
         }

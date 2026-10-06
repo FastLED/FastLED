@@ -73,7 +73,7 @@ void BuildupDetector::update(shared_ptr<Context> context) {
             mCurrentBuildup.duration = 0;
             mCurrentBuildup.active = true;
 
-            FL_DBG("BuildupDetector: Buildup started (intensity=%s)", intensity);
+            FL_DBG("BuildupDetector: Buildup started (intensity=" << intensity << ")");
 
             mFireBuildupStart = true;
         }
@@ -102,7 +102,7 @@ void BuildupDetector::update(shared_ptr<Context> context) {
 
         // Check if buildup should end
         if (shouldEndBuildup()) {
-            FL_DBG("BuildupDetector: Buildup ended (duration=%sms)", mCurrentBuildup.duration);
+            FL_DBG("BuildupDetector: Buildup ended (duration=" << mCurrentBuildup.duration << "ms)");
 
             mBuildupActive = false;
             mCurrentBuildup.active = false;

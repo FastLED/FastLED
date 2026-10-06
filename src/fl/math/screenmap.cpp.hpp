@@ -76,7 +76,7 @@ fl::vector<float> jsonArrayToFloatVector(const fl::json& jsonArray) {
         if (!parseResult.has_error()) {
             result.push_back(parseResult.get_value());
         } else {
-            FL_WARN("jsonArrayToFloatVector: parse_result<float> has error: %s", parseResult.get_error().message);
+            FL_WARN("jsonArrayToFloatVector: parse_result<float> has error: " << parseResult.get_error().message);
         }
     }
     
@@ -475,7 +475,7 @@ void ScreenMap::toJson(const fl::flat_map<string, ScreenMap> &segmentMaps,
     size_t idx = 0;
     for (const auto& kv : segmentMaps) {
         if (kv.second.getLength() == 0) {
-            FL_WARN("ScreenMap::toJson called with empty segment: %s", fl::string(kv.first));
+            FL_WARN("ScreenMap::toJson called with empty segment: " << (fl::string(kv.first)));
             continue;
         }
 
@@ -541,7 +541,7 @@ void ScreenMap::toJson(const fl::flat_map<string, ScreenMap> &segmentMaps,
     doc->set("segments", segmentsArr);
 
     fl::string debugStr = doc->to_string();
-    FL_WARN("ScreenMap::toJson generated JSON: %s", debugStr);
+    FL_WARN("ScreenMap::toJson generated JSON: " << debugStr);
 #endif
 }
 

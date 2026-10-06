@@ -38,7 +38,7 @@ string Blend2d::fxName() const {
 void Blend2d::add(Fx2dPtr layer, const Params &p) {
     if (!layer->getXYMap().isRectangularGrid()) {
         if (!getXYMap().isRectangularGrid()) {
-            FL_WARN("Blend2d has a xymap, but so does the Sub layer %s, the sub layer will have it's map replaced with a rectangular map, to avoid double transformation.", layer->fxName());
+            FL_WARN("Blend2d has a xymap, but so does the Sub layer " << layer->fxName() << ", the sub layer will have it's map replaced with a rectangular map, to avoid double transformation.");
             layer->setXYMap(XYMap::constructRectangularGrid(layer->getWidth(), layer->getHeight()));
         }
     }

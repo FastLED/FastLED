@@ -163,7 +163,7 @@ bool SpiPeripheralMockImpl::initializeBus(const SpiBusConfig& config) FL_NO_EXCE
 
     // Validate config
     if (config.sclk_pin < 0) {
-        FL_WARN("SpiPeripheralMock: Invalid SCLK pin: %s", config.sclk_pin);
+        FL_WARN("SpiPeripheralMock: Invalid SCLK pin: " << config.sclk_pin);
         return false;
     }
 
@@ -187,12 +187,12 @@ bool SpiPeripheralMockImpl::addDevice(const SpiDeviceConfig& config) FL_NO_EXCEP
 
     // Validate config
     if (config.clock_speed_hz <= 0) {
-        FL_WARN("SpiPeripheralMock: Invalid clock speed: %s", config.clock_speed_hz);
+        FL_WARN("SpiPeripheralMock: Invalid clock speed: " << config.clock_speed_hz);
         return false;
     }
 
     if (config.queue_size <= 0) {
-        FL_WARN("SpiPeripheralMock: Invalid queue size: %s", config.queue_size);
+        FL_WARN("SpiPeripheralMock: Invalid queue size: " << config.queue_size);
         return false;
     }
 
@@ -256,7 +256,7 @@ bool SpiPeripheralMockImpl::queueTransaction(const SpiTransaction& trans) FL_NO_
 
     // Check queue capacity
     if (mQueuedTransactions.size() >= mMaxQueueSize) {
-        FL_WARN("SpiPeripheralMock: Transaction queue full (%s)", mMaxQueueSize);
+        FL_WARN("SpiPeripheralMock: Transaction queue full (" << mMaxQueueSize << ")");
         return false;
     }
 
@@ -360,7 +360,7 @@ u8* SpiPeripheralMockImpl::allocateDma(size_t size) FL_NO_EXCEPT {
 #endif
 
     if (buffer == nullptr) {
-        FL_WARN("SpiPeripheralMock: Failed to allocate buffer (%s bytes)", aligned_size);
+        FL_WARN("SpiPeripheralMock: Failed to allocate buffer (" << aligned_size << " bytes)");
     }
 
     return static_cast<u8*>(buffer);

@@ -147,7 +147,7 @@ bool LcdSpiPeripheralEsp::initialize(const LcdSpiConfig &config) FL_NO_EXCEPT {
     }
 
     if (config.num_lanes < 1 || config.num_lanes > 16) {
-        FL_WARN("LcdSpiPeripheralEsp: Invalid num_lanes: %s", config.num_lanes);
+        FL_WARN("LcdSpiPeripheralEsp: Invalid num_lanes: " << config.num_lanes);
         return false;
     }
 
@@ -205,7 +205,7 @@ bool LcdSpiPeripheralEsp::initialize(const LcdSpiConfig &config) FL_NO_EXCEPT {
 
     esp_err_t err = esp_lcd_new_i80_bus(&bus_config, &mI80Bus);
     if (err != ESP_OK) {
-        FL_WARN("LcdSpiPeripheralEsp: Failed to create I80 bus: %s", err);
+        FL_WARN("LcdSpiPeripheralEsp: Failed to create I80 bus: " << err);
         return false;
     }
 
@@ -224,7 +224,7 @@ bool LcdSpiPeripheralEsp::initialize(const LcdSpiConfig &config) FL_NO_EXCEPT {
     mLastTransmitSize = 0;
     mInitialized = true;
     mOwner = config.owner;
-    FL_DBG("LcdSpiPeripheralEsp: Initialized with %s lanes, %s Hz clock, owner=%s", config.num_lanes, config.clock_hz, static_cast<int>(config.owner));
+    FL_DBG("LcdSpiPeripheralEsp: Initialized with " << config.num_lanes << " lanes, " << config.clock_hz << " Hz clock, owner=" << (static_cast<int>(config.owner)));
     return true;
 }
 
@@ -478,11 +478,11 @@ bool LcdSpiPeripheralEsp::waitTransmitDone(u32 timeout_ms) FL_NO_EXCEPT {
         mLastWaitForSlotTimeout = false;
     }
     if (mLastPanelIoRecreateError != ESP_OK) {
-        FL_WARN("LcdSpiPeripheralEsp: panel IO recreate failed: %s", static_cast<int>(mLastPanelIoRecreateError));
+        FL_WARN("LcdSpiPeripheralEsp: panel IO recreate failed: " << (static_cast<int>(mLastPanelIoRecreateError)));
         mLastPanelIoRecreateError = ESP_OK;
     }
     if (mLastTxColorError != ESP_OK) {
-        FL_WARN("LcdSpiPeripheralEsp: tx_color failed: %s", static_cast<int>(mLastTxColorError));
+        FL_WARN("LcdSpiPeripheralEsp: tx_color failed: " << (static_cast<int>(mLastTxColorError)));
         mLastTxColorError = ESP_OK;
     }
     return true;

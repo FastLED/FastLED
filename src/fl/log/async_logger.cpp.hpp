@@ -20,7 +20,7 @@ namespace detail {
     void printLoggerDisabledError(const char* category_name, const char* define_name) {
         FL_UNUSED(category_name);  // only consumed by FL_ERROR, a no-op on small platforms
         FL_UNUSED(define_name);
-        FL_ERROR("%s ASYNC LOGGING NOT ENABLED. Add '#define %s' before including FastLED.h", category_name, define_name);
+        FL_ERROR("" << category_name << " ASYNC LOGGING NOT ENABLED. Add '#define " << define_name << "' before including FastLED.h");
     }
 } // namespace detail
 

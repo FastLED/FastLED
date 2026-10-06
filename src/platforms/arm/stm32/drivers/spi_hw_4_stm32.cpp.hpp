@@ -241,23 +241,23 @@ bool SPIQuadSTM32::begin(const SpiHw4::Config& config) {
 
     // Validate all pins using GPIO helper functions
     if (!isValidPin(mClockPin)) {
-        FL_WARN("SPIQuadSTM32: Invalid clock pin %s", static_cast<int>(mClockPin));
+        FL_WARN("SPIQuadSTM32: Invalid clock pin " << (static_cast<int>(mClockPin)));
         return false;
     }
     if (!isValidPin(mData0Pin)) {
-        FL_WARN("SPIQuadSTM32: Invalid data0 pin %s", static_cast<int>(mData0Pin));
+        FL_WARN("SPIQuadSTM32: Invalid data0 pin " << (static_cast<int>(mData0Pin)));
         return false;
     }
     if (!isValidPin(mData1Pin)) {
-        FL_WARN("SPIQuadSTM32: Invalid data1 pin %s", static_cast<int>(mData1Pin));
+        FL_WARN("SPIQuadSTM32: Invalid data1 pin " << (static_cast<int>(mData1Pin)));
         return false;
     }
     if (!isValidPin(mData2Pin)) {
-        FL_WARN("SPIQuadSTM32: Invalid data2 pin %s", static_cast<int>(mData2Pin));
+        FL_WARN("SPIQuadSTM32: Invalid data2 pin " << (static_cast<int>(mData2Pin)));
         return false;
     }
     if (!isValidPin(mData3Pin)) {
-        FL_WARN("SPIQuadSTM32: Invalid data3 pin %s", static_cast<int>(mData3Pin));
+        FL_WARN("SPIQuadSTM32: Invalid data3 pin " << (static_cast<int>(mData3Pin)));
         return false;
     }
 
@@ -282,8 +282,8 @@ bool SPIQuadSTM32::begin(const SpiHw4::Config& config) {
     }
 
     FL_DBG("SPIQuadSTM32: GPIO pins configured successfully");
-    FL_DBG("  Clock pin: %s", static_cast<int>(mClockPin));
-    FL_DBG("  Data pins: %s, %s, %s, %s", static_cast<int>(mData0Pin), static_cast<int>(mData1Pin), static_cast<int>(mData2Pin), static_cast<int>(mData3Pin));
+    FL_DBG("  Clock pin: " << (static_cast<int>(mClockPin)));
+    FL_DBG("  Data pins: " << (static_cast<int>(mData0Pin)) << ", " << (static_cast<int>(mData1Pin)) << ", " << (static_cast<int>(mData2Pin)) << ", " << (static_cast<int>(mData3Pin)));
 #endif
 
     // TODO: Implement remaining hardware initialization

@@ -27,7 +27,7 @@ Spi::Spi(const SpiConfig& config)
     // Validate number of lanes
     size_t num_lanes = config.data_pins.size();
     if (num_lanes < 1 || num_lanes > 8) {
-        FL_WARN("fl::Spi: Invalid number of data pins (%s), must be 1-8", num_lanes);
+        FL_WARN("fl::Spi: Invalid number of data pins (" << num_lanes << "), must be 1-8");
         error_code = SPIError::NOT_INITIALIZED;
         return;
     }
@@ -44,7 +44,7 @@ Spi::Spi(const SpiConfig& config)
 
     // Create device
     device = fl::make_unique<spi::MultiLaneDevice>(ml_config);
-    FL_DBG("fl::Spi: Created MultiLaneDevice with %s lane(s)", num_lanes);
+    FL_DBG("fl::Spi: Created MultiLaneDevice with " << num_lanes << " lane(s)");
 
     // Initialize device
     auto begin_result = device->begin();

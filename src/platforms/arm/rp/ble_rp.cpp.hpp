@@ -86,7 +86,7 @@ static void scheduleNotification(TransportState* state) {
     if (result != ERROR_CODE_SUCCESS) {
         state->notification_scheduled = false;
         runtime.notification_callback_pending = false;
-        FL_WARN("[BLE RP] notification scheduling failed: %u", static_cast<unsigned>(result));
+        FL_WARN("[BLE RP] notification scheduling failed: " << (static_cast<unsigned>(result)));
     }
 }
 
@@ -117,11 +117,10 @@ static void onNotificationReady(void* context) {
         // and never draining. Warn once per payload, then drop it so the
         // queue keeps moving.
         if (state->notify_failures == 0) {
-            FL_WARN("[BLE RP] notify failed: %u", static_cast<unsigned>(result));
+            FL_WARN("[BLE RP] notify failed: " << (static_cast<unsigned>(result)));
         }
         if (++state->notify_failures >= kMaxNotifyRetries) {
-            FL_WARN("[BLE RP] dropping undeliverable response after %u attempts",
-                      static_cast<unsigned>(kMaxNotifyRetries));
+            FL_WARN("[BLE RP] dropping undeliverable response after " << (static_cast<unsigned>(kMaxNotifyRetries)) << " attempts");
             state->notify_failures = 0;
             state->notifications.dropFront();
         }
@@ -222,7 +221,7 @@ TransportState* createTransport(const char* device_name) FL_NO_EXCEPT {
 
     runtime.active = state;
     BTstack.setup(device_name);
-    FL_WARN("[BLE RP] GATT server started: %s", device_name);
+    FL_WARN("[BLE RP] GATT server started: " << device_name);
     return holder.release();
 }
 
@@ -288,8 +287,7 @@ getTransportCallbacks(TransportState* state) FL_NO_EXCEPT {
         }
         if (!state->notifications.push(state->last_tx_value.c_str(),
                                        state->last_tx_value.size())) {
-            FL_WARN("[BLE RP] TX queue full, dropping response (%u bytes)",
-                      static_cast<unsigned>(state->last_tx_value.size()));
+            FL_WARN("[BLE RP] TX queue full, dropping response (" << (static_cast<unsigned>(state->last_tx_value.size())) << " bytes)");
             // Still (re-)arm the drain: the queue may have filled because a
             // previous scheduling attempt failed, and nothing else retries.
             scheduleNotification(state);

@@ -544,7 +544,7 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) F
         nrf_timer_task_trigger(timer, NRF_TIMER_TASK_START);
     }
 
-    FL_DBG("Timer started at %s Hz on TIMER%s channel %s", config.frequency_hz, timer_idx, static_cast<int>(channel));
+    FL_DBG("Timer started at " << config.frequency_hz << " Hz on TIMER" << timer_idx << " channel " << (static_cast<int>(channel)));
 
     // Release ownership - pointer is now managed by the C API (timer_handles + out_handle)
     handle_owner.release();
@@ -616,7 +616,7 @@ int attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* ou
     NVIC_SetPriority(GPIOTE_IRQn, nvic_priority) FL_NO_EXCEPT;
     NVIC_EnableIRQ(GPIOTE_IRQn) FL_NO_EXCEPT;
 
-    FL_DBG("GPIO interrupt attached on pin %s GPIOTE channel %s", static_cast<int>(pin), static_cast<int>(gpiote_ch));
+    FL_DBG("GPIO interrupt attached on pin " << (static_cast<int>(pin)) << " GPIOTE channel " << (static_cast<int>(gpiote_ch)));
 
     // Release ownership - pointer is now managed by the C API (gpiote_handles + out_handle)
     handle_owner.release();

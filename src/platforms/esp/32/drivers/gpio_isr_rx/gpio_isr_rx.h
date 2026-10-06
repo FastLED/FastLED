@@ -79,7 +79,7 @@ struct EdgeTimestamp {
  * if (rx->wait(100) == RxWaitResult::SUCCESS) {
  *     // Get captured edges
  *     fl::span<const EdgeTimestamp> edges = rx->getEdges();
- *     FL_DBG("Captured %s edges", edges.size());
+ *     FL_DBG("Captured " << edges.size() << " edges");
  * }
  * @endcode
  */

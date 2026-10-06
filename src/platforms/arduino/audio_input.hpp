@@ -93,7 +93,7 @@ public:
         if (!success) {
             mHasError = true;
             mErrorMessage = "Failed to initialize Arduino I2S";
-            FL_WARN("%s", mErrorMessage.c_str());
+            FL_WARN("" << mErrorMessage.c_str());
             return;
         }
 
@@ -209,7 +209,7 @@ fl::shared_ptr<audio::IInput> arduino_create_audio_input(const audio::Config& co
         return fl::make_shared<Arduino_I2S_Audio>(i2s_config);
     } else if (config.is<audio::ConfigPdm>()) {
         const char* ERROR_MESSAGE = "PDM audio not supported in Arduino I2S implementation";
-        FL_WARN("%s", ERROR_MESSAGE);
+        FL_WARN("" << ERROR_MESSAGE);
         if (error_message) {
             *error_message = ERROR_MESSAGE;
         }
@@ -217,7 +217,7 @@ fl::shared_ptr<audio::IInput> arduino_create_audio_input(const audio::Config& co
     }
 
     const char* ERROR_MESSAGE = "Unsupported audio configuration for Arduino";
-    FL_WARN("%s", ERROR_MESSAGE);
+    FL_WARN("" << ERROR_MESSAGE);
     if (error_message) {
         *error_message = ERROR_MESSAGE;
     }
@@ -234,7 +234,7 @@ fl::shared_ptr<audio::IInput> arduino_create_audio_input(const audio::Config& co
 #else
     const char* ERROR_MESSAGE = "Arduino I2S library not available - please install I2S library";
 #endif
-    FL_WARN("%s", ERROR_MESSAGE);
+    FL_WARN("" << ERROR_MESSAGE);
     if (error_message) {
         *error_message = ERROR_MESSAGE;
     }

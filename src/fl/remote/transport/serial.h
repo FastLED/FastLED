@@ -169,10 +169,7 @@ createSerialRequestSource(const char* prefix = "") {
             // so a 64-byte line can fall under the threshold and stay silent,
             // and the reported count would understate what was received.
             if (line->size() >= kDroppedRequestWarnBytes) {
-                FL_WARN("[RPC] discarded a %u byte line that does not begin "
-                          "with '{'; a request that arrived truncated looks "
-                          "exactly like this",
-                          static_cast<unsigned>(line->size()));
+                FL_WARN("[RPC] discarded a " << (static_cast<unsigned>(line->size())) << " byte line that does not begin with '{'; a request that arrived truncated looks exactly like this");
             }
             return fl::nullopt;
         }

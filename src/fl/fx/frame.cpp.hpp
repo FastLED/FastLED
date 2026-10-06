@@ -73,11 +73,11 @@ void Frame::drawXY(fl::span<CRGB> leds, const XYMap &xyMap, DrawMode draw_mode) 
             fl::u32 in_idx = xyMap(w, h);
             fl::u32 out_idx = count++;
             if (in_idx >= mPixelsCount) {
-                FL_WARN("Frame::drawXY: in index out of range: %s", in_idx);
+                FL_WARN("Frame::drawXY: in index out of range: " << in_idx);
                 continue;
             }
             if (out_idx >= mPixelsCount) {
-                FL_WARN("Frame::drawXY: out index out of range: %s", out_idx);
+                FL_WARN("Frame::drawXY: out index out of range: " << out_idx);
                 continue;
             }
             switch (draw_mode) {

@@ -21,7 +21,7 @@ namespace fl {
 bool Remote::unbind(const fl::string& name) {
     bool removed = mRpc.unbind(name.c_str());
     if (removed) {
-        FL_DBG("Unregistered RPC function: %s", name);
+        FL_DBG("Unregistered RPC function: " << name);
     }
     return removed;
 }
@@ -41,7 +41,7 @@ void Remote::sendAsyncResponse(const char* method, const fl::json& result) {
     fl::string methodName(method);
     auto it = mAsyncRequests.find(methodName);
     if (it == mAsyncRequests.end()) {
-        FL_WARN("No pending async request for method: %s", method);
+        FL_WARN("No pending async request for method: " << method);
         return;
     }
 
@@ -57,7 +57,7 @@ void Remote::sendAsyncResponse(const char* method, const fl::json& result) {
     // Send via response sink
     if (mResponseSink) {
         mResponseSink(response);
-        FL_DBG("Sent async response for %s (id=%s)", method, requestId);
+        FL_DBG("Sent async response for " << method << " (id=" << requestId << ")");
     }
 }
 
@@ -65,7 +65,7 @@ void Remote::sendStreamUpdate(const char* method, const fl::json& update) {
     fl::string methodName(method);
     auto it = mAsyncRequests.find(methodName);
     if (it == mAsyncRequests.end()) {
-        FL_WARN("No pending async request for method: %s", method);
+        FL_WARN("No pending async request for method: " << method);
         return;
     }
 
@@ -84,7 +84,7 @@ void Remote::sendStreamUpdate(const char* method, const fl::json& update) {
     // Send via response sink
     if (mResponseSink) {
         mResponseSink(response);
-        FL_DBG("Sent stream update for %s (id=%s)", method, requestId);
+        FL_DBG("Sent stream update for " << method << " (id=" << requestId << ")");
     }
 }
 
@@ -92,7 +92,7 @@ void Remote::sendStreamFinal(const char* method, const fl::json& result) {
     fl::string methodName(method);
     auto it = mAsyncRequests.find(methodName);
     if (it == mAsyncRequests.end()) {
-        FL_WARN("No pending async request for method: %s", method);
+        FL_WARN("No pending async request for method: " << method);
         return;
     }
 
@@ -112,7 +112,7 @@ void Remote::sendStreamFinal(const char* method, const fl::json& result) {
     // Send via response sink
     if (mResponseSink) {
         mResponseSink(response);
-        FL_DBG("Sent stream final for %s (id=%s)", method, requestId);
+        FL_DBG("Sent stream final for " << method << " (id=" << requestId << ")");
     }
 }
 #else  // !FL_PLATFORM_HAS_LARGE_MEMORY
@@ -193,7 +193,7 @@ fl::json Remote::processRpc(const fl::json& request) {
         fl::string methodName = request["method"].as_string().value_or("");
         int requestId = request["id"].as_int().value_or(0);
         mAsyncRequests[methodName] = {requestId, receivedAt};
-        FL_DBG("Stored request ID for %s (id=%s)", methodName.c_str(), requestId);
+        FL_DBG("Stored request ID for " << methodName.c_str() << " (id=" << requestId << ")");
     }
 #endif
 
@@ -255,7 +255,7 @@ void Remote::scheduleFunction(u32 timestamp, u32 receivedAt, const fl::json& jso
         }
     });
 
-    FL_DBG("Scheduled RPC: %s at %s", funcName, timestamp);
+    FL_DBG("Scheduled RPC: " << funcName << " at " << timestamp);
 }
 
 void Remote::recordResult(const fl::string& funcName, const fl::json& result, u32 scheduledAt, u32 receivedAt, u32 executedAt, bool wasScheduled) {

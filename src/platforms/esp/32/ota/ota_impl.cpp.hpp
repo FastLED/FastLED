@@ -427,24 +427,24 @@ bool checkBasicAuth(httpd_req_t *req, const char* password) {
 bool validateESP32Firmware(const u8* data, size_t len) {
     // Need at least 24 bytes for ESP32 image header
     if (len < 24) {
-        FL_WARN("Firmware validation: header too small (%s bytes)", len);
+        FL_WARN("Firmware validation: header too small (" << len << " bytes)");
         return false;
     }
 
     // Check ESP32 magic byte (0xE9)
     if (data[0] != 0xE9) {
-        FL_WARN("Firmware validation: invalid magic byte 0x%s (expected 0xE9)", (int)data[0]);
+        FL_WARN("Firmware validation: invalid magic byte 0x" << ((int)data[0]) << " (expected 0xE9)");
         return false;
     }
 
     // Check segment count is reasonable (1-16)
     u8 segments = data[1];
     if (segments == 0 || segments > 16) {
-        FL_WARN("Firmware validation: invalid segment count %s", (int)segments);
+        FL_WARN("Firmware validation: invalid segment count " << ((int)segments));
         return false;
     }
 
-    FL_DBG("Firmware validation passed: magic=0xE9, segments=%s", (int)segments);
+    FL_DBG("Firmware validation passed: magic=0xE9, segments=" << ((int)segments));
     return true;
 }
 
@@ -676,7 +676,7 @@ public:
 
         // Initialize mDNS
         if (!initMDNS(mHostname.c_str())) {
-            FL_WARN("mDNS init failed - device won't be discoverable at %s.local", mHostname.c_str());
+            FL_WARN("mDNS init failed - device won't be discoverable at " << mHostname.c_str() << ".local");
             mFailedServices |= (u8)fl::net::ota::Service::MDNS_FAILED;
         }
 
@@ -710,7 +710,7 @@ public:
 
         // Initialize mDNS
         if (!initMDNS(mHostname.c_str())) {
-            FL_WARN("mDNS init failed - device won't be discoverable at %s.local", mHostname.c_str());
+            FL_WARN("mDNS init failed - device won't be discoverable at " << mHostname.c_str() << ".local");
             mFailedServices |= (u8)fl::net::ota::Service::MDNS_FAILED;
         }
 
@@ -800,7 +800,7 @@ private:
                 // differ across IDF versions; route through void* to avoid
                 // reinterpret_cast (project lint forbids it).
                 const void* ip_ptr = &event->ip_info.ip;
-                FL_DBG("WiFi: Got IP address: %s", ip4addr_ntoa(static_cast<const ip4_addr_t*>(ip_ptr)));
+                FL_DBG("WiFi: Got IP address: " << (ip4addr_ntoa(static_cast<const ip4_addr_t*>(ip_ptr))));
                 self->mWifiConnected = true;
             }
         }
@@ -815,14 +815,14 @@ private:
         // Note: This is safe to call multiple times
         esp_err_t err = esp_netif_init();
         if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
-            FL_WARN("esp_netif_init failed: %s", esp_err_to_name(err));
+            FL_WARN("esp_netif_init failed: " << esp_err_to_name(err));
             return false;
         }
 
         // Create default event loop (if not already created)
         err = esp_event_loop_create_default();
         if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
-            FL_WARN("esp_event_loop_create_default failed: %s", esp_err_to_name(err));
+            FL_WARN("esp_event_loop_create_default failed: " << esp_err_to_name(err));
             return false;
         }
 
@@ -844,7 +844,7 @@ private:
                                                     this,
                                                     nullptr);
         if (err != ESP_OK) {
-            FL_WARN("Failed to register WIFI_EVENT handler: %s", esp_err_to_name(err));
+            FL_WARN("Failed to register WIFI_EVENT handler: " << esp_err_to_name(err));
             return false;
         }
 
@@ -854,7 +854,7 @@ private:
                                                     this,
                                                     nullptr);
         if (err != ESP_OK) {
-            FL_WARN("Failed to register IP_EVENT handler: %s", esp_err_to_name(err));
+            FL_WARN("Failed to register IP_EVENT handler: " << esp_err_to_name(err));
             return false;
         }
 
@@ -862,14 +862,14 @@ private:
         wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
         err = esp_wifi_init(&cfg);
         if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
-            FL_WARN("esp_wifi_init failed: %s", esp_err_to_name(err));
+            FL_WARN("esp_wifi_init failed: " << esp_err_to_name(err));
             return false;
         }
 
         // Set WiFi mode to STA (Station)
         err = esp_wifi_set_mode(WIFI_MODE_STA);
         if (err != ESP_OK) {
-            FL_WARN("esp_wifi_set_mode failed: %s", esp_err_to_name(err));
+            FL_WARN("esp_wifi_set_mode failed: " << esp_err_to_name(err));
             return false;
         }
 
@@ -881,28 +881,28 @@ private:
 
         err = esp_wifi_set_config(WIFI_IF_STA, &wifi_config);
         if (err != ESP_OK) {
-            FL_WARN("esp_wifi_set_config failed: %s", esp_err_to_name(err));
+            FL_WARN("esp_wifi_set_config failed: " << esp_err_to_name(err));
             return false;
         }
 
         // Set hostname (must be done before starting WiFi)
         err = esp_netif_set_hostname(sta_netif, mHostname.c_str());
         if (err != ESP_OK) {
-            FL_WARN("esp_netif_set_hostname failed: %s", esp_err_to_name(err));
+            FL_WARN("esp_netif_set_hostname failed: " << esp_err_to_name(err));
             // Non-fatal, continue
         }
 
         // Start WiFi
         err = esp_wifi_start();
         if (err != ESP_OK) {
-            FL_WARN("esp_wifi_start failed: %s", esp_err_to_name(err));
+            FL_WARN("esp_wifi_start failed: " << esp_err_to_name(err));
             return false;
         }
 
         // Connect to AP (async)
         err = esp_wifi_connect();
         if (err != ESP_OK) {
-            FL_WARN("esp_wifi_connect failed: %s", esp_err_to_name(err));
+            FL_WARN("esp_wifi_connect failed: " << esp_err_to_name(err));
             return false;
         }
 
@@ -995,7 +995,7 @@ private:
                              int expected_size, const char* expected_md5, int cmd) {
         // Only handle FLASH command (0) for now
         if (cmd != 0) {
-            FL_WARN("OTA: Unsupported command %s (only FLASH supported)", cmd);
+            FL_WARN("OTA: Unsupported command " << cmd << " (only FLASH supported)");
             if (mErrorCb) {
                 mErrorCb("Unsupported OTA command");
             }
@@ -1031,7 +1031,7 @@ private:
         fl::memcpy(&tcp_addr, client_addr, sizeof(struct sockaddr_in));
         tcp_addr.sin_port = lwip_htons(port);
 
-        FL_DBG("OTA: Connecting to client TCP server on port %s", port);
+        FL_DBG("OTA: Connecting to client TCP server on port " << port);
         if (lwip_connect(tcp_socket, (struct sockaddr*)&tcp_addr, sizeof(tcp_addr)) < 0) {
             FL_WARN("OTA: Failed to connect to client TCP server");
             if (mErrorCb) {
@@ -1044,7 +1044,7 @@ private:
             return;
         }
 
-        FL_DBG("OTA: TCP connected, receiving firmware (%s bytes)", expected_size);
+        FL_DBG("OTA: TCP connected, receiving firmware (" << expected_size << " bytes)");
 
         // Get OTA partition
         const esp_partition_t* update_partition = esp_ota_get_next_update_partition(nullptr);
@@ -1064,7 +1064,7 @@ private:
         esp_ota_handle_t ota_handle;
         esp_err_t err = esp_ota_begin(update_partition, expected_size, &ota_handle);
         if (err != ESP_OK) {
-            FL_WARN("OTA: esp_ota_begin failed: %s", esp_err_to_name(err));
+            FL_WARN("OTA: esp_ota_begin failed: " << esp_err_to_name(err));
             if (mErrorCb) {
                 mErrorCb("OTA begin failed");
             }
@@ -1107,7 +1107,7 @@ private:
             // Write to flash
             err = esp_ota_write(ota_handle, buffer, received);
             if (err != ESP_OK) {
-                FL_WARN("OTA: esp_ota_write failed: %s", esp_err_to_name(err));
+                FL_WARN("OTA: esp_ota_write failed: " << esp_err_to_name(err));
                 if (mErrorCb) {
                     mErrorCb("Flash write failed");
                 }
@@ -1146,8 +1146,8 @@ private:
         }
         computed_md5[32] = '\0';
 
-        FL_DBG("OTA: Expected MD5: %s", expected_md5);
-        FL_DBG("OTA: Computed MD5: %s", computed_md5);
+        FL_DBG("OTA: Expected MD5: " << expected_md5);
+        FL_DBG("OTA: Computed MD5: " << computed_md5);
 
         if (strcmp(computed_md5, expected_md5) != 0) {
             FL_WARN("OTA: MD5 mismatch!");
@@ -1166,7 +1166,7 @@ private:
         // Finalize OTA
         err = esp_ota_end(ota_handle);
         if (err != ESP_OK) {
-            FL_WARN("OTA: esp_ota_end failed: %s", esp_err_to_name(err));
+            FL_WARN("OTA: esp_ota_end failed: " << esp_err_to_name(err));
             if (mErrorCb) {
                 mErrorCb("OTA finalization failed");
             }
@@ -1179,7 +1179,7 @@ private:
         // Set boot partition
         err = esp_ota_set_boot_partition(update_partition);
         if (err != ESP_OK) {
-            FL_WARN("OTA: Failed to set boot partition: %s", esp_err_to_name(err));
+            FL_WARN("OTA: Failed to set boot partition: " << esp_err_to_name(err));
             if (mErrorCb) {
                 mErrorCb("Failed to set boot partition");
             }
@@ -1257,7 +1257,7 @@ private:
             }
 
             buffer[len] = '\0';
-            FL_DBG("OTA: Received UDP packet: %s", buffer);
+            FL_DBG("OTA: Received UDP packet: " << buffer);
 
             // Parse command: "<cmd> <port> <size> <md5>\n"
             int cmd, port, size;
@@ -1289,7 +1289,7 @@ private:
                 }
 
                 buffer[len] = '\0';
-                FL_DBG("OTA: Received auth response: %s", buffer);
+                FL_DBG("OTA: Received auth response: " << buffer);
 
                 // Parse auth response: "200 <cnonce> <response>\n"
                 int auth_cmd;
@@ -1320,7 +1320,7 @@ private:
                   (struct sockaddr*)&client_addr, client_len);
 
             // Handle TCP connection for firmware upload
-            FL_DBG("OTA: Ready for TCP connection on client port %s", port);
+            FL_DBG("OTA: Ready for TCP connection on client port " << port);
             self->handleFirmwareUpload(&client_addr, port, size, md5, cmd);
         }
 

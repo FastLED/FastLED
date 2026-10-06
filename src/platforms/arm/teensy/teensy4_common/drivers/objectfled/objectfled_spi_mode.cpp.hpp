@@ -182,11 +182,11 @@ bool objectfled_spi_lookup_pins(u8 mosi_pin, u8 sclk_pin,
     if (mosi_pin >= NUM_DIGITAL_PINS) return false;
     if (sclk_pin >= NUM_DIGITAL_PINS) return false;
     if (!pin_is_gpio6(mosi_pin)) {
-        FL_LOG_OBJECTFLED("ObjectFLED_SPI: MOSI pin %s is not on GPIO6", (int)mosi_pin);
+        FL_LOG_OBJECTFLED("ObjectFLED_SPI: MOSI pin " << ((int)mosi_pin) << " is not on GPIO6");
         return false;
     }
     if (!pin_is_gpio6(sclk_pin)) {
-        FL_LOG_OBJECTFLED("ObjectFLED_SPI: SCLK pin %s is not on GPIO6", (int)sclk_pin);
+        FL_LOG_OBJECTFLED("ObjectFLED_SPI: SCLK pin " << ((int)sclk_pin) << " is not on GPIO6");
         return false;
     }
 
@@ -369,19 +369,14 @@ bool objectfled_spi_init(const ObjectFLEDSPIPinInfo& pin_info,
     }
 
     if (clock_hz < kSpiClockMinHz) {
-        FL_LOG_OBJECTFLED("ObjectFLED_SPI: clock %s Hz below floor; clamp to %s",
-                            (int)clock_hz, (int)kSpiClockMinHz);
+        FL_LOG_OBJECTFLED("ObjectFLED_SPI: clock " << ((int)clock_hz) << " Hz below floor; clamp to " << ((int)kSpiClockMinHz));
         clock_hz = kSpiClockMinHz;
     } else if (clock_hz > kSpiClockMaxHz) {
-        FL_LOG_OBJECTFLED("ObjectFLED_SPI: clock %s Hz above ceiling; clamp to %s",
-                            (int)clock_hz, (int)kSpiClockMaxHz);
+        FL_LOG_OBJECTFLED("ObjectFLED_SPI: clock " << ((int)clock_hz) << " Hz above ceiling; clamp to " << ((int)kSpiClockMaxHz));
         clock_hz = kSpiClockMaxHz;
     }
 
-    FL_LOG_OBJECTFLED("ObjectFLED_SPI: init MOSI=%s(bit %s) SCLK=%s(bit %s) @ %s Hz",
-                        (int)pin_info.mosi_pin, (int)pin_info.mosi_bit,
-                        (int)pin_info.sclk_pin, (int)pin_info.sclk_bit,
-                        (int)clock_hz);
+    FL_LOG_OBJECTFLED("ObjectFLED_SPI: init MOSI=" << ((int)pin_info.mosi_pin) << "(bit " << ((int)pin_info.mosi_bit) << ") SCLK=" << ((int)pin_info.sclk_pin) << "(bit " << ((int)pin_info.sclk_bit) << ") @ " << ((int)clock_hz) << " Hz");
     // CCM gate for FlexPWM2. The macro is at bits 18-19 of CCGR4 (NOT
     // bits 22-23 as an earlier draft had it -- writing to the wrong bits
     // left FlexPWM2 ungated, and the first SM0CTRL2 write bus-faulted
@@ -486,8 +481,7 @@ bool objectfled_spi_show(fl::span<const u8> buffer) FL_NO_EXCEPT {
         // APA102/SK9822 frame with no caller visibility, corrupting the
         // strip output. The header documents that invalid arguments return
         // false; honor that contract.
-        FL_LOG_OBJECTFLED("ObjectFLED_SPI: num_bytes=%s exceeds max %s; rejecting",
-                            (int)num_bytes, (int)kSpiMaxInputBytes);
+        FL_LOG_OBJECTFLED("ObjectFLED_SPI: num_bytes=" << ((int)num_bytes) << " exceeds max " << ((int)kSpiMaxInputBytes) << "; rejecting");
         return false;
     }
 
@@ -607,8 +601,7 @@ void objectfled_spi_wait() FL_NO_EXCEPT {
             }
             TMR3_ENBL &= ~1u;  // stop QTimer3 channel 0
             sSpiDmaComplete = true;
-            FL_LOG_OBJECTFLED("ObjectFLED_SPI: wait timed out after %s ms -- recovering",
-                                (int)timeout_ms);
+            FL_LOG_OBJECTFLED("ObjectFLED_SPI: wait timed out after " << ((int)timeout_ms) << " ms -- recovering");
             break;
         }
     }

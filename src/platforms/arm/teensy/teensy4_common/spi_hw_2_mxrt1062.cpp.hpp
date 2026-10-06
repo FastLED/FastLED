@@ -228,10 +228,10 @@ bool SpiHw2MXRT1062::begin(const SpiHw2::Config& config) {
 
         port->CFGR1 = cfgr1;
 
-        FL_LOG_SPI("SpiHw2MXRT1062: Configured CFGR1=%s (OUTCFG enabled for dual-mode)", cfgr1);
+        FL_LOG_SPI("SpiHw2MXRT1062: Configured CFGR1=" << cfgr1 << " (OUTCFG enabled for dual-mode)");
     }
 
-    FL_LOG_SPI("SpiHw2MXRT1062: Initialized on bus %s clock=%sHz pins: CLK=%s D0=%s D1=%s", mBusId, mClockSpeed, (int)mClockPin, (int)mData0Pin, (int)mData1Pin);
+    FL_LOG_SPI("SpiHw2MXRT1062: Initialized on bus " << mBusId << " clock=" << mClockSpeed << "Hz pins: CLK=" << ((int)mClockPin) << " D0=" << ((int)mData0Pin) << " D1=" << ((int)mData1Pin));
 
     mInitialized = true;
     mTransactionActive = false;
@@ -290,7 +290,7 @@ bool SpiHw2MXRT1062::transmit(TransmitMode mode) {
         return true;  // Nothing to transmit
     }
 
-    FL_LOG_SPI("SpiHw2MXRT1062: Transmitting %s bytes via LPSPI bus %s", mCurrentTotalSize, mBusId);
+    FL_LOG_SPI("SpiHw2MXRT1062: Transmitting " << mCurrentTotalSize << " bytes via LPSPI bus " << mBusId);
 
     // Begin SPI transaction with configured clock speed
     mSPI->beginTransaction(fl::platforms::teensy::LpspiSettings(mClockSpeed, MSBFIRST, SPI_MODE0));

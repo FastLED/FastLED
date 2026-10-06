@@ -298,7 +298,7 @@ Tracking issue for the per-platform audit: **#4018**.
 - **Use `FL_DBG("message" << var)`** for debug prints (easily stripped in release builds)
 - **Use `FL_WARN("message" << var)`** for warnings (persist into release builds)
 - **Avoid `fl::printf`, `fl::print`, `fl::println`** - prefer FL_DBG/FL_WARN macros instead
-- Note: FL_DBG and FL_WARN use stream-style `<<` operator, NOT printf-style formatting
+- **printf-style log formatting is a compile error** (#4709): every log macro (`FL_WARN`, `FL_ERROR`, `FL_INFO`, `FL_DBG`, `FL_PRINT`, `FL_LOG_*`, `FASTLED_*`, `FL_LOG_ASYNC`) takes one literal or one `<<` stream chain. `FL_WARN("x=%d", x)` fails with a static_assert because it links the whole `fl::printf` engine (RAM1 on Teensy 4). Write `FL_WARN("x=" << x)`; use `fl::to_hex(v)` for `%x`.
 
 ## Teensy 3.x `__cxa_guard` Conflicts
 - **Problem**: Function-local statics with non-trivial constructors generate implicit `__cxa_guard_*` function calls. If Teensy's `<new.h>` is included after the compiler sees the static, the signatures conflict.

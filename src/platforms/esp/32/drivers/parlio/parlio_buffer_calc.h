@@ -239,7 +239,7 @@ struct ParlioBufferCalculator {
 #endif
             dmaBufferCapacity = perBufferCap;
 
-            FL_LOG_PARLIO("PARLIO: Ring buffer capped at %s bytes/buffer (uncapped: %s, total cap: %s bytes)", dmaBufferCapacity, uncappedCapacity, totalCapBytes);
+            FL_LOG_PARLIO("PARLIO: Ring buffer capped at " << dmaBufferCapacity << " bytes/buffer (uncapped: " << uncappedCapacity << ", total cap: " << totalCapBytes << " bytes)");
         }
 
         dmaBufferCapacity += safetyMargin;

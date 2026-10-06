@@ -496,7 +496,7 @@ bool flexio_init(const FlexIOPinInfo& pin_info, u32 t0h_ns, u32 t1h_ns,
         flexio_deinit();
     }
 
-    FL_LOG_FLEXIO("FlexIO: init pin %d (FlexIO2:%d)", (int)pin_info.teensy_pin, (int)pin_info.flexio_pin);
+    FL_LOG_FLEXIO("FlexIO: init pin " << ((int)pin_info.teensy_pin) << " (FlexIO2:" << ((int)pin_info.flexio_pin) << ")");
 
     flexio_clock_init();
     flexio_pin_init(pin_info);
@@ -546,8 +546,7 @@ bool flexio_show(const u8* pixel_data, u32 num_bytes) {
         // #3416 FX-MED-2: warn loudly so the user sees that their strip
         // is being silently truncated rather than discovering tail LEDs
         // are dark. kMaxInputBytes = 1024 bytes = 341 RGB LEDs.
-        FL_LOG_FLEXIO("FlexIO: strip truncated -- requested %d bytes exceeds buffer cap %d (~341 RGB LEDs max). Tail LEDs will not update.",
-                        (int)num_bytes, (int)kMaxInputBytes);
+        FL_LOG_FLEXIO("FlexIO: strip truncated -- requested " << ((int)num_bytes) << " bytes exceeds buffer cap " << ((int)kMaxInputBytes) << " (~341 RGB LEDs max). Tail LEDs will not update.");
         num_bytes = kMaxInputBytes;
     }
 
@@ -648,8 +647,7 @@ void flexio_wait() {
                 sDmaChannel->clearError();
             }
             sDmaComplete = true;
-            FL_LOG_FLEXIO("FlexIO: flexio_wait() timed out after %u ms -- recovering",
-                            (unsigned)timeout_ms);
+            FL_LOG_FLEXIO("FlexIO: flexio_wait() timed out after " << ((unsigned)timeout_ms) << " ms -- recovering");
             return;
         }
     }

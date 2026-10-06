@@ -118,7 +118,7 @@ bool I2sLcdCamPeripheralEsp::initialize(const I2sLcdCamConfig& config) FL_NO_EXC
 
     // Validate configuration
     if (config.num_lanes < 1 || config.num_lanes > 16) {
-        FL_WARN("I2sLcdCamPeripheralEsp: Invalid num_lanes: %s", config.num_lanes);
+        FL_WARN("I2sLcdCamPeripheralEsp: Invalid num_lanes: " << config.num_lanes);
         return false;
     }
 
@@ -158,7 +158,7 @@ bool I2sLcdCamPeripheralEsp::initialize(const I2sLcdCamConfig& config) FL_NO_EXC
     // Create I80 bus
     esp_err_t err = esp_lcd_new_i80_bus(&bus_config, &mI80Bus);
     if (err != ESP_OK) {
-        FL_WARN("I2sLcdCamPeripheralEsp: Failed to create I80 bus: %s", err);
+        FL_WARN("I2sLcdCamPeripheralEsp: Failed to create I80 bus: " << err);
         return false;
     }
 
@@ -181,7 +181,7 @@ bool I2sLcdCamPeripheralEsp::initialize(const I2sLcdCamConfig& config) FL_NO_EXC
     // Create panel IO
     err = esp_lcd_new_panel_io_i80(mI80Bus, &io_config, &mPanelIo);
     if (err != ESP_OK) {
-        FL_WARN("I2sLcdCamPeripheralEsp: Failed to create panel IO: %s", err);
+        FL_WARN("I2sLcdCamPeripheralEsp: Failed to create panel IO: " << err);
         esp_lcd_del_i80_bus(mI80Bus);
         mI80Bus = nullptr;
         return false;

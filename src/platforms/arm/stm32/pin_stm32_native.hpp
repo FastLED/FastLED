@@ -61,7 +61,7 @@ inline void pinMode(int pin, PinMode mode) FL_NO_EXCEPT {
     u32 pin_mask = fl::stm32::getGPIOPin(pin);
 
     if (port == nullptr || pin_mask == 0) {
-        FL_WARN("STM32: Invalid pin %s", pin);
+        FL_WARN("STM32: Invalid pin " << pin);
         return;
     }
 
@@ -125,7 +125,7 @@ inline void pinMode(int pin, PinMode mode) FL_NO_EXCEPT {
             GPIO_InitStruct.Pull = GPIO_PULLDOWN;
             break;
         default:
-            FL_WARN("STM32: Unknown pin mode %s for pin %s", static_cast<int>(mode), pin);
+            FL_WARN("STM32: Unknown pin mode " << (static_cast<int>(mode)) << " for pin " << pin);
             return;
     }
 
@@ -199,14 +199,14 @@ inline u16 analogRead(int pin) FL_NO_EXCEPT {
     // These are only available when STM32duino core is present
     PinName pin_name = digitalPinToPinName(pin);
     if (pin_name == NC) {
-        FL_WARN("STM32: Invalid pin %s", pin);
+        FL_WARN("STM32: Invalid pin " << pin);
         return 0;
     }
 
     // Find ADC instance and channel for this pin using STM32duino pinmap
     u32 function = pinmap_find_function(pin_name, PinMap_ADC);
     if (function == (u32)NC) {
-        FL_WARN("STM32: Pin %s does not support ADC", pin);
+        FL_WARN("STM32: Pin " << pin << " does not support ADC");
         return 0;
     }
 
@@ -215,7 +215,7 @@ inline u16 analogRead(int pin) FL_NO_EXCEPT {
     u32 adc_channel = STM_PIN_CHANNEL(function);
 
     if (adc_instance == nullptr) {
-        FL_WARN("STM32: Failed to get ADC instance for pin %s", pin);
+        FL_WARN("STM32: Failed to get ADC instance for pin " << pin);
         return 0;
     }
 
@@ -331,7 +331,7 @@ inline void analogWrite(int pin, u16 val) FL_NO_EXCEPT {
     // These are only available when STM32duino core is present
     PinName pin_name = digitalPinToPinName(pin);
     if (pin_name == NC) {
-        FL_WARN("STM32: Invalid pin %s", pin);
+        FL_WARN("STM32: Invalid pin " << pin);
         return;
     }
 
@@ -352,7 +352,7 @@ inline void analogWrite(int pin, u16 val) FL_NO_EXCEPT {
     u32 timer_channel = STM_PIN_CHANNEL(function);
 
     if (timer_instance == nullptr) {
-        FL_WARN("STM32: Failed to get Timer instance for pin %s", pin);
+        FL_WARN("STM32: Failed to get Timer instance for pin " << pin);
         return;
     }
 
@@ -364,7 +364,7 @@ inline void analogWrite(int pin, u16 val) FL_NO_EXCEPT {
         case 3: hal_channel = TIM_CHANNEL_3; break;
         case 4: hal_channel = TIM_CHANNEL_4; break;
         default:
-            FL_WARN("STM32: Invalid timer channel %s", timer_channel);
+            FL_WARN("STM32: Invalid timer channel " << timer_channel);
             return;
     }
 
@@ -374,7 +374,7 @@ inline void analogWrite(int pin, u16 val) FL_NO_EXCEPT {
     u32 pin_mask = STM_GPIO_PIN(pin_name);
 
     if (port == nullptr) {
-        FL_WARN("STM32: Failed to get GPIO port for pin %s", pin);
+        FL_WARN("STM32: Failed to get GPIO port for pin " << pin);
         return;
     }
 

@@ -359,7 +359,7 @@ bool SPIDualSAMD51::begin(const SpiHw2::Config& config) {
     // For now, we'll use polling mode and document the DMA requirements
     mDmaChannel = -1;  // Mark as not using DMA
 
-    FL_WARN("SPIDualSAMD51: Initialized on SERCOM%s at %s MHz (polling mode - DMA can be added later)", sercom_num, (f_cpu / (2 * (baud_div + 1)) / 1000000.0));
+    FL_WARN("SPIDualSAMD51: Initialized on SERCOM" << sercom_num << " at " << ((f_cpu / (2 * (baud_div + 1)) / 1000000.0)) << " MHz (polling mode - DMA can be added later)");
 
     mInitialized = true;
     return true;

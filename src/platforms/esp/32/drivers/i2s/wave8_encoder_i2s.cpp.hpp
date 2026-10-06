@@ -21,7 +21,7 @@ size_t wave8EncodeI2sSingleLane(
     // Calculate required output size
     const size_t required_words = wave8CalculateI2sOutputSize(input.size());
     if (output.size() < required_words) {
-        FL_WARN("wave8EncodeI2sSingleLane: Output buffer too small (need %s words, have %s)", required_words, output.size());
+        FL_WARN("wave8EncodeI2sSingleLane: Output buffer too small (need " << required_words << " words, have " << output.size() << ")");
         return 0;
     }
 

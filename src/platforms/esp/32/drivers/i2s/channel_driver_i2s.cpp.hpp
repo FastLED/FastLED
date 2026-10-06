@@ -324,8 +324,8 @@ bool ChannelEngineI2S::beginTransmission(fl::span<const ChannelDataPtr> channelD
         u32 clock_hz = calculateI2sClockHz(ct);
         mConfig.pclk_hz = clock_hz;
 
-        FL_DBG("ChannelEngineI2S: Built Wave8 LUT for timing T1=%sns, T2=%sns, T3=%sns", timing.t1_ns, timing.t2_ns, timing.t3_ns);
-        FL_DBG("ChannelEngineI2S: I2S clock set to %s Hz", clock_hz);
+        FL_DBG("ChannelEngineI2S: Built Wave8 LUT for timing T1=" << timing.t1_ns << "ns, T2=" << timing.t2_ns << "ns, T3=" << timing.t3_ns << "ns");
+        FL_DBG("ChannelEngineI2S: I2S clock set to " << clock_hz << " Hz");
     }
 
     // Initialize or reconfigure if needed
@@ -394,7 +394,7 @@ bool ChannelEngineI2S::beginTransmission(fl::span<const ChannelDataPtr> channelD
         pconfig.max_transfer_bytes = data_size;
         mBufferSize = data_size;
 
-        FL_DBG("ChannelEngineI2S: Wave8 buffer size = %s bytes (%s words) for %s LEDs", data_size, total_words, mNumLeds);
+        FL_DBG("ChannelEngineI2S: Wave8 buffer size = " << data_size << " bytes (" << total_words << " words) for " << mNumLeds << " LEDs");
 #else
         // Legacy transpose encoding
         const u64 data_words =

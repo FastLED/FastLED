@@ -38,7 +38,7 @@ bool SpiHw1Stub::begin(const SpiHw1::Config& config) FL_NO_EXCEPT {
 }
 
 void SpiHw1Stub::end() FL_NO_EXCEPT {
-    FL_LOG_SPI("SpiHw1Stub::end() called, mInitialized=%s", (mInitialized ? "true" : "false"));
+    FL_LOG_SPI("SpiHw1Stub::end() called, mInitialized=" << ((mInitialized ? "true" : "false")));
     if (!mInitialized) {
         FL_LOG_SPI("SpiHw1Stub::end() already ended, returning");
         return;  // Already ended - idempotent

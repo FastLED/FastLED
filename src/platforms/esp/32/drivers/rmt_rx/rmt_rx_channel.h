@@ -55,7 +55,7 @@ namespace fl {
  *     fl::vector<uint8_t> bytes;
  *     auto result = rx->decode(rx_timing, fl::back_inserter(bytes));
  *     if (result.ok()) {
- *         FL_DBG("Decoded %s bytes", result.value());
+ *         FL_DBG("Decoded " << result.value() << " bytes");
  *     }
  * }
  * @endcode
@@ -199,7 +199,7 @@ public:
      *     uint8_t buffer[256];
      *     auto result = rx->decode(rx_timing, buffer);
      *     if (result.ok()) {
-     *         FL_DBG("Decoded %s bytes", result.value());
+     *         FL_DBG("Decoded " << result.value() << " bytes");
      *     }
      * }
      * @endcode
@@ -228,7 +228,7 @@ public:
      * EdgeTime edges[100];
      * size_t count = rx->getRawEdgeTimes(edges);
      * for (size_t i = 0; i < count; i++) {
-     *     FL_DBG("%s%sns", (edges[i].high ? "HIGH " : "LOW "), edges[i].ns);
+     *     FL_DBG("" << ((edges[i].high ? "HIGH " : "LOW ")) << edges[i].ns << "ns");
      * }
      * @endcode
      */

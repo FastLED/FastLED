@@ -69,7 +69,7 @@ void JsonConsole::update() FL_NO_EXCEPT {
 }
 
 bool JsonConsole::executeCommand(const fl::string& command) FL_NO_EXCEPT {
-    FL_WARN("JsonConsole::executeCommand called with: '%s'", command.c_str());
+    FL_WARN("JsonConsole::executeCommand called with: '" << command.c_str() << "'");
     
     if (command.empty()) {
         FL_WARN("JsonConsole::executeCommand: Command is empty");
@@ -86,7 +86,7 @@ bool JsonConsole::executeCommand(const fl::string& command) FL_NO_EXCEPT {
         trimmed = trimmed.substr(0, trimmed.size()-1);
     }
     
-    FL_WARN("JsonConsole::executeCommand: Trimmed command: '%s'", trimmed.c_str());
+    FL_WARN("JsonConsole::executeCommand: Trimmed command: '" << trimmed.c_str() << "'");
     
     if (trimmed.empty()) {
         FL_WARN("JsonConsole::executeCommand: Trimmed command is empty");
@@ -153,11 +153,11 @@ void JsonConsole::readInputFromSerial() FL_NO_EXCEPT {
 }
 
 void JsonConsole::parseCommand(const fl::string& command) FL_NO_EXCEPT {
-    FL_WARN("JsonConsole::parseCommand: Parsing command '%s'", command.c_str());
+    FL_WARN("JsonConsole::parseCommand: Parsing command '" << command.c_str() << "'");
     
     // Look for pattern: "name: value"
     i16 colonPos = command.find(':');
-    FL_WARN("JsonConsole::parseCommand: Colon position: %s", colonPos);
+    FL_WARN("JsonConsole::parseCommand: Colon position: " << colonPos);
     
     if (colonPos == -1) {
         writeOutput("Error: Command format should be 'name: value'");
@@ -168,8 +168,8 @@ void JsonConsole::parseCommand(const fl::string& command) FL_NO_EXCEPT {
     fl::string name = command.substring(0, static_cast<fl::size>(colonPos - 1));
     fl::string valueStr = command.substring(static_cast<fl::size>(colonPos + 1), command.size());
     
-    FL_WARN("JsonConsole::parseCommand: Raw name: '%s'", name.c_str());
-    FL_WARN("JsonConsole::parseCommand: Raw valueStr: '%s'", valueStr.c_str());
+    FL_WARN("JsonConsole::parseCommand: Raw name: '" << name.c_str() << "'");
+    FL_WARN("JsonConsole::parseCommand: Raw valueStr: '" << valueStr.c_str() << "'");
     
     // Trim whitespace from name and value
     while (!name.empty() && name[name.size()-1] == ' ') {
@@ -179,8 +179,8 @@ void JsonConsole::parseCommand(const fl::string& command) FL_NO_EXCEPT {
         valueStr = valueStr.substring(1, valueStr.size());
     }
     
-    FL_WARN("JsonConsole::parseCommand: Trimmed name: '%s'", name.c_str());
-    FL_WARN("JsonConsole::parseCommand: Trimmed valueStr: '%s'", valueStr.c_str());
+    FL_WARN("JsonConsole::parseCommand: Trimmed name: '" << name.c_str() << "'");
+    FL_WARN("JsonConsole::parseCommand: Trimmed valueStr: '" << valueStr.c_str() << "'");
     
     if (name.empty() || valueStr.empty()) {
         writeOutput("Error: Both name and value are required");
@@ -214,10 +214,10 @@ void JsonConsole::parseCommand(const fl::string& command) FL_NO_EXCEPT {
 }
 
 bool JsonConsole::setSliderValue(const fl::string& name, float value) FL_NO_EXCEPT {
-    FL_WARN("JsonConsole::setSliderValue: Looking for component '%s' with value %s", name.c_str(), value);
-    FL_WARN("JsonConsole: Component mapping size: %s", mComponentNameToId.size());
+    FL_WARN("JsonConsole::setSliderValue: Looking for component '" << name.c_str() << "' with value " << value);
+    FL_WARN("JsonConsole: Component mapping size: " << mComponentNameToId.size());
     for (const auto& pair : mComponentNameToId) {
-        FL_WARN("JsonConsole: Available component: '%s' -> ID %s", pair.first.c_str(), pair.second);
+        FL_WARN("JsonConsole: Available component: '" << pair.first.c_str() << "' -> ID " << pair.second);
     }
     
     int componentId = -1;
@@ -230,7 +230,7 @@ bool JsonConsole::setSliderValue(const fl::string& name, float value) FL_NO_EXCE
     if (endptr != cstr && *endptr == '\0' && parsed >= 0 && parsed <= 2147483647L) {
         // Successfully parsed as a valid integer ID
         componentId = static_cast<int>(parsed);
-        FL_WARN("JsonConsole: Using numeric ID: %s", componentId);
+        FL_WARN("JsonConsole: Using numeric ID: " << componentId);
     } else {
         // Not a valid integer, try to find component ID by name
         auto it = mComponentNameToId.find(name);
@@ -245,12 +245,12 @@ bool JsonConsole::setSliderValue(const fl::string& name, float value) FL_NO_EXCE
         }
         
         if (!componentIdPtr) {
-            FL_WARN("JsonConsole: Component '%s' not found in mapping", name.c_str());
+            FL_WARN("JsonConsole: Component '" << name.c_str() << "' not found in mapping");
             return false; // Component not found
         }
         
         componentId = *componentIdPtr;
-        FL_WARN("JsonConsole: Found component ID: %s", componentId);
+        FL_WARN("JsonConsole: Found component ID: " << componentId);
     }
     
     // Create JSON to update the component using new json
@@ -265,7 +265,7 @@ bool JsonConsole::setSliderValue(const fl::string& name, float value) FL_NO_EXCE
     // Convert to string and send to driver
     fl::string jsonStr = doc.to_string();
     
-    FL_WARN("JsonConsole: Sending JSON to driver: %s", jsonStr.c_str());
+    FL_WARN("JsonConsole: Sending JSON to driver: " << jsonStr.c_str());
     mUpdateEngineState(jsonStr.c_str());
     
     // Force immediate processing of pending updates (for testing environments)

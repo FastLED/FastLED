@@ -161,7 +161,7 @@ I2sLcdCamPeripheralMockImpl::~I2sLcdCamPeripheralMockImpl() {
 bool I2sLcdCamPeripheralMockImpl::initialize(const I2sLcdCamConfig& config) FL_NO_EXCEPT {
     // Validate config
     if (config.num_lanes == 0 || config.num_lanes > 16) {
-        FL_WARN("I2sLcdCamPeripheralMock: Invalid num_lanes: %s", config.num_lanes);
+        FL_WARN("I2sLcdCamPeripheralMock: Invalid num_lanes: " << config.num_lanes);
         return false;
     }
 
@@ -198,7 +198,7 @@ u16* I2sLcdCamPeripheralMockImpl::allocateBuffer(size_t size_bytes) FL_NO_EXCEPT
 #endif
 
     if (buffer == nullptr) {
-        FL_WARN("I2sLcdCamPeripheralMock: Failed to allocate buffer (%s bytes)", aligned_size);
+        FL_WARN("I2sLcdCamPeripheralMock: Failed to allocate buffer (" << aligned_size << " bytes)");
     }
 
     return static_cast<u16*>(buffer);

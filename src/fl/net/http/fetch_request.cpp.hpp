@@ -201,7 +201,7 @@ void FetchRequest::handle_dns_lookup() {
     // Pump async system before DNS to keep server responsive
     fl::task::run(1000);
 
-    FL_WARN("[FETCH] Resolving hostname: %s", mHostname);
+    FL_WARN("[FETCH] Resolving hostname: " << mHostname);
 
     // DNS lookup (blocking 10-100ms, but acceptable)
     // Note: localhost is typically instant due to OS caching
@@ -241,7 +241,7 @@ void FetchRequest::handle_dns_lookup() {
     fl::memcpy(&addr_ptr, mDnsResult->h_addr_list, sizeof(addr_ptr));
     fl::memcpy(&server_addr.sin_addr, addr_ptr, mDnsResult->h_length);
 
-    FL_WARN("[FETCH] Waiting for connection to %s:%s", mHostname, mPort);
+    FL_WARN("[FETCH] Waiting for connection to " << mHostname << ":" << mPort);
 
     connect(mSocketFd, (sockaddr*)&server_addr, sizeof(server_addr));
     // connect() returns immediately with EINPROGRESS/WSAEWOULDBLOCK (expected)
