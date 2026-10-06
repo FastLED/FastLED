@@ -56,6 +56,20 @@ const UNITY_EXPECTED_BUILD_FILES: &[&str] = &[
     "fl/build/extras+.cpp",
 ];
 
+// Empty files kept under the name of a renamed/removed build unit so that a
+// release unpacked over an older one overwrites the stale unit (FastLED
+// #4704). They compile to nothing and are exempt from the build-file checks.
+// `ci/check_released_sources.py` requires them at release time.
+const UNITY_TOMBSTONE_BUILD_FILES: &[&str] = &["fl.system.sd+.cpp"];
+
+fn unity_is_build_unit(path: &Path) -> bool {
+    path.extension().and_then(|ext| ext.to_str()) == Some("cpp")
+        && !path
+            .file_name()
+            .and_then(|name| name.to_str())
+            .is_some_and(|name| UNITY_TOMBSTONE_BUILD_FILES.contains(&name))
+}
+
 const UNITY_DANGEROUS_WILDCARDS: &[&str] = &[
     "+<*.cpp>",
     "+<platforms/**/*.cpp>",
