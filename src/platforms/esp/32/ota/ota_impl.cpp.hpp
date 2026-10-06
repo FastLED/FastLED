@@ -3,6 +3,7 @@
 /// @file platforms/esp/32/ota/ota_impl.cpp
 /// ESP32-specific OTA implementation
 
+#include "fl/stl/charconv.h"  // fl::to_hex
 #include "platforms/esp/is_esp.h"
 
 #if defined(FL_IS_ESP32)
@@ -433,7 +434,7 @@ bool validateESP32Firmware(const u8* data, size_t len) {
 
     // Check ESP32 magic byte (0xE9)
     if (data[0] != 0xE9) {
-        FL_WARN("Firmware validation: invalid magic byte 0x" << ((int)data[0]) << " (expected 0xE9)");
+        FL_WARN("Firmware validation: invalid magic byte 0x" << fl::to_hex(static_cast<fl::u32>(data[0])) << " (expected 0xE9)");
         return false;
     }
 

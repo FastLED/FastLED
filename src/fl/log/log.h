@@ -3,7 +3,7 @@
 #include "fl/system/sketch_macros.h"
 #include "fl/stl/static_assert.h"  // FL_STATIC_ASSERT for the printf-form ban
 #include "fl/stl/strstream.h"  // IWYU pragma: keep - Required by FL_WARN/FL_ERROR/FL_DBG macros
-#include "fl/stl/stdio.h"      // IWYU pragma: keep - Required by formatted log macros
+#include "fl/stl/stdio.h"      // IWYU pragma: keep - fl::print / fl::println for log output
 #include "fl/stl/chrono.h"       // IWYU pragma: keep - Required by FL_WARN_EVERY/FL_DBG_EVERY/FL_PRINT_EVERY macros
 #include "fl/stl/compiler_control.h"  // IWYU pragma: keep - FL_NO_INLINE for log_emit
 
@@ -187,20 +187,6 @@ const char* log_kind_name(log_kind kind) FL_NO_INLINE FL_NO_EXCEPT;
 void log_emit_prefix(log_kind kind, const char* file, int line) FL_NO_INLINE FL_NO_EXCEPT;
 void log_emit_newline() FL_NO_INLINE FL_NO_EXCEPT;
 
-template <typename... Args>
-void log_emit_f(log_kind kind, const char* file, int line, const char* format,
-                const Args&... args) FL_NO_EXCEPT {
-    log_emit_prefix(kind, file, line);
-    fl::printf(format, args...);
-    log_emit_newline();
-}
-
-template <typename... Args>
-fl::string log_format_string(const char* format, const Args&... args) FL_NO_EXCEPT {
-    char buffer[256];
-    fl::snprintf(buffer, sizeof(buffer), format, args...);
-    return fl::string(buffer);
-}
 // Takes `body` by non-const lvalue reference (not `&&`) because the
 // macro's `fl::sstream() << X` expression has type `sstream&` (the
 // returned lvalue ref from chained operator<<). The underlying
@@ -376,8 +362,8 @@ inline void async_log_emit_auto(Logger& logger,
 
 #ifndef FL_ERROR
 #if FASTLED_LOG_RUNTIME_ENABLED
-// FL_ERROR: unified entry point - accepts both `"foo " << x` and `"foo %d", x`
-// via macro-level argument-count dispatch. See #3272.
+// FL_ERROR: one literal or `"foo " << x` stream expression; `"foo %d", x` is a
+// compile error (#4709).
 #define FL_ERROR(...) _FL_VA_DISPATCH(_FL_ERROR_S, _FL_ERROR_M, __VA_ARGS__)(__VA_ARGS__)
 #define FL_ERROR_IF(COND, ...) do { if (COND) FL_ERROR(__VA_ARGS__); } while(0)
 #else
@@ -410,9 +396,8 @@ inline void async_log_emit_auto(Logger& logger,
 
 #ifndef FL_WARN
 #if FL_HAS_WARN
-// FL_WARN: unified entry point - accepts both `"foo " << x` and `"foo %d", x`
-// via macro-level argument-count dispatch. Single-arg -> stream form (legacy
-// compatible); two-or-more args -> compile error (#4709).
+// FL_WARN: one literal or `"foo " << x` stream expression; `"foo %d", x` is a
+// compile error (#4709).
 #define FL_WARN(...) _FL_VA_DISPATCH(_FL_WARN_S, _FL_WARN_M, __VA_ARGS__)(__VA_ARGS__)
 #define FL_WARN_IF(COND, ...) do { if (COND) FL_WARN(__VA_ARGS__); } while(0)
 

@@ -981,7 +981,7 @@ bool Server::start(int port) {
     config.server_port = static_cast<u16>(port);
     if (mRoutes.size() > (fl::numeric_limits<u16>::max)()) {
         mLastError = "Too many HTTP routes";
-        FL_WARN("" << ("[HTTP] Too many routes for ESP-IDF HTTP server"));
+        FL_WARN("[HTTP] Too many routes for ESP-IDF HTTP server");
         task::Executor::instance().unregister_runner(mAsyncRunner.get());
         mAsyncRunner.reset();
         return false;

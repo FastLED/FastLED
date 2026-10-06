@@ -19,7 +19,7 @@ namespace platforms {
 // headers don't pull in fl/log/log.h.
 void scopedWatchdogPrintLine(fl::string_view sv) FL_NO_EXCEPT {
     FL_UNUSED(sv);  // only consumed by FL_WARN, a no-op on small platforms
-    FL_WARN("" << sv);
+    FL_WARN(sv);
 }
 
 // Wraps fl::delay() — portable across stub/WASM/embedded.

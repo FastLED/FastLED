@@ -595,7 +595,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             << "FastLED will continue with reduced buffer size.\n"
             << "Performance may be degraded during WiFi/network activity.\n"
             << "========================================";
-        FL_WARN("" << msg.str());
+        FL_WARN(msg.str());
 #else
         (void)original_symbols;
         (void)reduced_symbols;
@@ -698,7 +698,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             << "\n"
             << "LEDs on pin " << pin << " will NOT work!\n"
             << "========================================";
-        FL_ERROR("" << msg.str());
+        FL_ERROR(msg.str());
 #else
         (void)retry_count;
         (void)original_symbols;

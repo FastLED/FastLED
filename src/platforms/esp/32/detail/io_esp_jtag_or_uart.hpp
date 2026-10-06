@@ -8,7 +8,7 @@
 
 #include "platforms/esp/is_esp.h"
 
-#include "fl/log/log.h"  // FL_PRINT("" << (used by reportInitDiagnosticsIfNeeded))
+#include "fl/log/log.h"  // FL_PRINT (used by reportInitDiagnosticsIfNeeded)
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/singleton.h"
 #include "platforms/esp/32/drivers/uart_esp32.h"

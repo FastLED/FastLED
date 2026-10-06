@@ -228,7 +228,7 @@ public:
      * EdgeTime edges[100];
      * size_t count = rx->getRawEdgeTimes(edges);
      * for (size_t i = 0; i < count; i++) {
-     *     FL_DBG("" << ((edges[i].high ? "HIGH " : "LOW ")) << edges[i].ns << "ns");
+     *     FL_DBG((edges[i].high ? "HIGH " : "LOW ") << edges[i].ns << "ns");
      * }
      * @endcode
      */

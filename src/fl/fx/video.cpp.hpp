@@ -52,11 +52,11 @@ bool Video::begin(filebuf_ptr handle) {
     }
     if (!handle) {
         setAdmissionError("filebuf is null");
-        FL_DBG("" << mError.c_str());
+        FL_DBG(mError);
         return false;
     }
     if (mError.size()) {
-        FL_DBG("" << mError.c_str());
+        FL_DBG(mError);
         return false;
     }
     if (!mImpl->begin(handle)) {
@@ -74,7 +74,7 @@ bool Video::draw(fl::u32 now, fl::span<CRGB> leds) {
         return false;
     }
     if (!mImpl) {
-        FL_WARN_IF(!mError.empty(), "" << mError.c_str());
+        FL_WARN_IF(!mError.empty(), mError);
         return false;
     }
     bool ok = mImpl->draw(now, leds);

@@ -11,6 +11,7 @@
 // Only compile this file for ESP32-C3/C6 RISC-V platforms
 
 // ok no namespace fl
+#include "fl/stl/charconv.h"  // fl::to_hex
 #include "platforms/esp/is_esp.h"
 
 #if defined(FL_IS_ESP32) && (defined(FL_IS_ESP_32C3) || defined(FL_IS_ESP_32C6))
@@ -74,7 +75,7 @@ esp_err_t fastled_riscv_install_interrupt(
             return ESP_ERR_NOT_SUPPORTED;
     }
 
-    FL_LOG_INTERRUPT("Installing interrupt source=" << source << " priority=" << priority << " flags=0x" << flags);
+    FL_LOG_INTERRUPT("Installing interrupt source=" << source << " priority=" << priority << " flags=0x" << fl::to_hex(static_cast<fl::u32>(flags)));
 
     esp_err_t err = esp_intr_alloc(source, flags, handler, arg, handle);
 

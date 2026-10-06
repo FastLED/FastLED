@@ -585,7 +585,7 @@ public:
                 reinterpret_cast<intr_handle_t*>(&mIsrContext.intr_handle)  // ok reinterpret cast  // Store handle
             );
 
-            FL_DBG("esp_intr_alloc result: " << esp_err_to_name(err) << " (0x" << (fl::to_hex(err)) << ")");
+            FL_DBG("esp_intr_alloc result: " << esp_err_to_name(err) << " (0x" << fl::to_hex(static_cast<fl::u32>(err)) << ")");
 
             if (err != ESP_OK) {
                 FL_WARN("Failed to register GPIO interrupt: " << esp_err_to_name(err) << " - interrupt source=" << ETS_GPIO_INTR_SOURCE << " flags=0x" << (fl::to_hex(flags)));
