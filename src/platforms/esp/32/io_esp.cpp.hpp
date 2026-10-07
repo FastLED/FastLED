@@ -28,7 +28,7 @@
 
 #if FL_ESP_USE_IDF_SERIAL
 // Use ESP-IDF UART driver via fl::platforms wrapper
-// Note: uart_esp32_idf.hpp is included via drivers/_build.hpp
+// UART input/output links through its independent provider translation unit.
 #include "platforms/esp/32/io_esp_idf.hpp"
 #else
 // Use Arduino Serial interface

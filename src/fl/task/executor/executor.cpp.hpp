@@ -1,3 +1,5 @@
+// ok no header - public declarations remain in fl/task/executor.h
+
 #include "fl/task/executor.h"
 #include "fl/task/task_pump.h"
 #include "fl/stl/atomic.h"

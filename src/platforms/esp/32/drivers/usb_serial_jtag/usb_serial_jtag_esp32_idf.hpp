@@ -5,7 +5,7 @@
 #include "platforms/is_platform.h"
 #ifdef FL_IS_ESP32
 
-#include "usb_serial_jtag_esp32.h"
+#include "platforms/esp/32/drivers/usb_serial_jtag_esp32.h"
 #include "fl/log/log.h"  // FL_WARN
 #include "fl/stl/assert.h"
 #include "fl/stl/noexcept.h"
