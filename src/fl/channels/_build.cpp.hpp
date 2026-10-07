@@ -18,11 +18,8 @@
 #include "fl/channels/options.cpp.hpp"
 #include "fl/channels/pipeline_binding.cpp.hpp"
 #include "fl/channels/uart_wave_encoder.cpp.hpp"
-#include "fl/channels/validation.cpp.hpp"
 #include "fl/channels/wave3.cpp.hpp"
 #include "fl/channels/wave8.cpp.hpp"
 
 // begin sub directory includes
-#include "fl/channels/adapters/_build.cpp.hpp"
 #include "fl/channels/detail/_build.cpp.hpp"
-#include "fl/channels/spi/_build.cpp.hpp"

@@ -7,3 +7,4 @@
 #include "fl/channels/detail/validation/platform.cpp.hpp"
 #include "fl/channels/detail/validation/result_formatter.cpp.hpp"
 #include "fl/channels/detail/validation/rx_test.cpp.hpp"
+#include "fl/channels/detail/validation/validation.cpp.hpp"

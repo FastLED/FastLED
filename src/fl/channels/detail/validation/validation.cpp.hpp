@@ -1,6 +1,7 @@
 // src/fl/channels/validation.cpp.hpp
 //
 // Validation test logic implementation - stateless single-test execution
+// ok no header - public validation types are declared in fl/channels/validation.h
 
 #include "fl/channels/validation.h"
 #include "fl/system/fastled.h"

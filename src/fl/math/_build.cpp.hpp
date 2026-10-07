@@ -17,6 +17,4 @@
 
 // begin sub directory includes
 #include "fl/math/fixed_point/_build.cpp.hpp"
-#include "fl/math/noise/_build.cpp.hpp"
 #include "fl/math/simd/_build.cpp.hpp"
-#include "fl/math/wave/_build.cpp.hpp"

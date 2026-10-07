@@ -242,6 +242,20 @@ exception-support change is needed. 3.10.3 also retains real RMT; 3.10.6 has
 the capability bug. Corrected current saves 322,360 B versus 3.10.6, with a
 101,544 B gap to 3.10.3. Extra unwind tables account for 77,236 B of that gap.
 
+Eighth hosted measurement is 356,243 B (local +16 B), saving 88 B. Exact
+baseline is pinned at b73fd43631; corrected run 37600653172 passes.
+
+Ninth candidate isolates I2S/UART/RX implementations, channel SPI/adapters,
+validation diagnostics, math wave/noise, stream IO and JSON writer. SPI manager
+construction/accessor retain the original singleton and startup behavior while
+operations compile separately. Method bodies and exception support are unchanged.
+Legacy real-RMT4 Blink is 356,569 B flash / 17,648 B DRAM: another 7,732 B
+saved, 330,092 B below 3.10.6, leaving 93,812 B versus 3.10.3. Allocated unwind
+tables drop by 7,724 B. Modern Blink 304,563 B; gist 297,419 B; S3 local
+356,207 B, with RAM unchanged. All 418 native sanitizer units/examples plus
+full examples, full Python, lint and review pass. Legacy multiple SPI buses/RX
+and modern SPI/RX examples compile. Reports and maps: ninth-combined-*.
+
 Use the default dynamic driver configuration. Keep scheduler pumping, network
 yielding, multiple strips, and reconfiguration available. Optimize symbol reachability
 and redundant state first, then use actual board images to decide further changes.

@@ -1,4 +1,7 @@
+// ok no header - public declaration remains in fl/stl/istream.h
+#include "fl/stl/string.h"
 #include "fl/stl/istream.h"
+#include "fl/stl/cstdio.h"
 #include "fl/math/math.h"
 #include "fl/stl/compiler_control.h"
 //#include <stddef.h>
