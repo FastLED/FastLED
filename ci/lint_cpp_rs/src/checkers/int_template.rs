@@ -209,7 +209,7 @@ const INT_TEMPLATE_ARG_BASELINE: &[(&str, usize)] = &[
     ("src/fl/gfx/fill.h", 3),
     ("src/fl/gfx/primitives.h", 7),
     ("src/fl/gfx/rgbw_colorimetric.cpp.hpp", 2),
-    ("src/fl/gfx/rgbww.cpp.hpp", 4),
+    ("src/fl/gfx/pixel_conversion/rgbww.cpp.hpp", 4),
     ("src/fl/gfx/drawing/sample.cpp.hpp", 10),
     ("src/fl/gfx/paths/xypath.cpp.hpp", 1),
     ("src/fl/gfx/paths/xypath_impls.cpp.hpp", 3),

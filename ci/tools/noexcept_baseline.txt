@@ -3366,7 +3366,7 @@ src/fl/gfx/hsv16/crgb_extra.cpp.hpp|CRGB CRGB::colorBoost(EaseType saturation_fu
 src/fl/gfx/hsv16/crgb_extra.cpp.hpp|CRGB& CRGB::setHSV(u8 hue, u8 sat, u8 val) {
 src/fl/gfx/hsv16/crgb_extra.cpp.hpp|CRGB& CRGB::setHue(u8 hue) {
 src/fl/gfx/hsv16/crgb_extra.cpp.hpp|CRGB::CRGB(const HSV16& rhs) {
-src/fl/gfx/crgb_extra.cpp.hpp|CRGB::CRGB(const hsv8& rhs) {
+src/fl/gfx/pixel_conversion/crgb_extra.cpp.hpp|CRGB::CRGB(const hsv8& rhs) {
 src/fl/gfx/hsv16/crgb_extra.cpp.hpp|HSV16 CRGB::toHSV16() const {
 src/fl/gfx/hsv16/crgb_extra.cpp.hpp|void CRGB::colorBoost(const CRGB* src, CRGB* dst, size_t count, EaseType saturation_function, EaseType luminance_function) {
 src/fl/gfx/downscale.cpp.hpp|void downscale(const CRGB *src, const XYMap &srcXY, CRGB *dst, const XYMap &dstXY) {
@@ -3585,15 +3585,15 @@ src/fl/gfx/rectangular_draw_buffer.h|u32 getMaxBytesInStrip() const;
 src/fl/gfx/rectangular_draw_buffer.h|u32 getTotalBytes() const;
 src/fl/gfx/rectangular_draw_buffer.h|void getBlockInfo(u32 *num_strips, u32 *bytes_per_strip, u32 *total_bytes) const;
 src/fl/gfx/rectangular_draw_buffer.h|void queue(const DrawItem &item);
-src/fl/gfx/rgbw.cpp.hpp|inline u8 divide_by_3(u8 x) {
-src/fl/gfx/rgbw.cpp.hpp|inline u8 min3(u8 a, u8 b, u8 c) {
-src/fl/gfx/rgbw.cpp.hpp|void rgb_2_rgbw_exact(u16 w_color_temperature, u8 r, u8 g, u8 b, u8 r_scale, u8 g_scale, u8 b_scale, u8 *out_r, u8 *out_g, u8 *out_b, u8 *out_w) {
-src/fl/gfx/rgbw.cpp.hpp|void rgb_2_rgbw_max_brightness(u16 w_color_temperature, u8 r, u8 g, u8 b, u8 r_scale, u8 g_scale, u8 b_scale, u8 *out_r, u8 *out_g, u8 *out_b, u8 *out_w) {
-src/fl/gfx/rgbw.cpp.hpp|void rgb_2_rgbw_null_white_pixel(u16 w_color_temperature, u8 r, u8 g, u8 b, u8 r_scale, u8 g_scale, u8 b_scale, u8 *out_r, u8 *out_g, u8 *out_b, u8 *out_w) {
-src/fl/gfx/rgbw.cpp.hpp|void rgb_2_rgbw_user_function(u16 w_color_temperature, u8 r, u8 g, u8 b, u8 r_scale, u8 g_scale, u8 b_scale, u8 *out_r, u8 *out_g, u8 *out_b, u8 *out_w) {
-src/fl/gfx/rgbw.cpp.hpp|void rgb_2_rgbw_white_boosted(u16 w_color_temperature, u8 r, u8 g, u8 b, u8 r_scale, u8 g_scale, u8 b_scale, u8 *out_r, u8 *out_g, u8 *out_b, u8 *out_w) {
-src/fl/gfx/rgbw.cpp.hpp|void rgbw_partial_reorder(EOrderW w_placement, u8 b0, u8 b1, u8 b2, u8 w, u8 *out_b0, u8 *out_b1, u8 *out_b2, u8 *out_b3) {
-src/fl/gfx/rgbw.cpp.hpp|void set_rgb_2_rgbw_function(rgb_2_rgbw_function func) {
+src/fl/gfx/pixel_conversion/rgbw.cpp.hpp|inline u8 divide_by_3(u8 x) {
+src/fl/gfx/pixel_conversion/rgbw.cpp.hpp|inline u8 min3(u8 a, u8 b, u8 c) {
+src/fl/gfx/pixel_conversion/rgbw.cpp.hpp|void rgb_2_rgbw_exact(u16 w_color_temperature, u8 r, u8 g, u8 b, u8 r_scale, u8 g_scale, u8 b_scale, u8 *out_r, u8 *out_g, u8 *out_b, u8 *out_w) {
+src/fl/gfx/pixel_conversion/rgbw.cpp.hpp|void rgb_2_rgbw_max_brightness(u16 w_color_temperature, u8 r, u8 g, u8 b, u8 r_scale, u8 g_scale, u8 b_scale, u8 *out_r, u8 *out_g, u8 *out_b, u8 *out_w) {
+src/fl/gfx/pixel_conversion/rgbw.cpp.hpp|void rgb_2_rgbw_null_white_pixel(u16 w_color_temperature, u8 r, u8 g, u8 b, u8 r_scale, u8 g_scale, u8 b_scale, u8 *out_r, u8 *out_g, u8 *out_b, u8 *out_w) {
+src/fl/gfx/pixel_conversion/rgbw.cpp.hpp|void rgb_2_rgbw_user_function(u16 w_color_temperature, u8 r, u8 g, u8 b, u8 r_scale, u8 g_scale, u8 b_scale, u8 *out_r, u8 *out_g, u8 *out_b, u8 *out_w) {
+src/fl/gfx/pixel_conversion/rgbw.cpp.hpp|void rgb_2_rgbw_white_boosted(u16 w_color_temperature, u8 r, u8 g, u8 b, u8 r_scale, u8 g_scale, u8 b_scale, u8 *out_r, u8 *out_g, u8 *out_b, u8 *out_w) {
+src/fl/gfx/pixel_conversion/rgbw.cpp.hpp|void rgbw_partial_reorder(EOrderW w_placement, u8 b0, u8 b1, u8 b2, u8 w, u8 *out_b0, u8 *out_b1, u8 *out_b2, u8 *out_b3) {
+src/fl/gfx/pixel_conversion/rgbw.cpp.hpp|void set_rgb_2_rgbw_function(rgb_2_rgbw_function func) {
 src/fl/gfx/drawing/sample.cpp.hpp|CRGB sample(const CRGB *grid, const XYMap &xyMap, float x, float y, SampleMode mode) {
 src/fl/gfx/drawing/sample.cpp.hpp|CRGB sampleBilinear(const CRGB *grid, const XYMap &xyMap, float x, float y) {
 src/fl/gfx/drawing/sample.cpp.hpp|CRGB sampleNearest(const CRGB *grid, const XYMap &xyMap, float x, float y) {
@@ -6451,7 +6451,7 @@ src/fl/stl/shared_ptr.cpp.hpp|void ControlBlockBase::add_shared_ref() {
 src/fl/stl/singleton.cpp.hpp|void singleton_registry_set(const char* key, void* value) {
 src/fl/stl/singleton.cpp.hpp|void* singleton_registry_get(const char* key) {
 src/fl/stl/string.cpp.hpp|string &string::append(const CRGB &rgb) {
-src/fl/stl/string.cpp.hpp|string &string::append(const Tile2x2_u8_wrap &tile) {
+src/fl/gfx/tile2x2_format.cpp.hpp|string &string::append(const Tile2x2_u8_wrap &tile) {
 src/fl/stl/string.cpp.hpp|string &string::append(const XYMap &map) {
 src/fl/stl/string.cpp.hpp|string &string::append(const audio::fft::Bins &str) {
 src/fl/stl/string.cpp.hpp|string &string::append(const json_value& val) {
@@ -6491,8 +6491,8 @@ src/fl/stl/string_interner.h|fl::string intern(const string_view& sv);
 src/fl/stl/string_interner.h|fl::string intern(const string_view& sv);
 src/fl/stl/string_interner.h|void clear();
 src/fl/stl/string_interner.h|void reserve(fl::size count);
-src/fl/stl/strstream.cpp.hpp|sstream &sstream::operator<<(const Tile2x2_u8 &subpixel) {
-src/fl/stl/strstream.cpp.hpp|sstream &sstream::operator<<(const Tile2x2_u8_wrap &tile) {
+src/fl/gfx/tile2x2_format.cpp.hpp|sstream &sstream::operator<<(const Tile2x2_u8 &subpixel) {
+src/fl/gfx/tile2x2_format.cpp.hpp|sstream &sstream::operator<<(const Tile2x2_u8_wrap &tile) {
 src/fl/stl/strstream.cpp.hpp|sstream &sstream::operator<<(const audio::fft::Bins &bins) {
 src/fl/stl/strstream.cpp.hpp|sstream& operator<<(sstream& ss, const dec_t&) {
 src/fl/stl/strstream.cpp.hpp|sstream& operator<<(sstream& ss, const hex_t&) {

@@ -25,6 +25,8 @@ const UNITY_SECTION_SUB_DIR: &str = "// begin sub directory includes";
 const UNITY_REQUIRED_PRE_HEADERS: &[&str] = &["platforms/new.h", "fl/system/arduino.h"];
 
 const UNITY_EXPECTED_BUILD_FILES: &[&str] = &[
+    "fl/build/fl.gfx.flux_scalar+.cpp",
+    "fl/build/fl.gfx.pixel_conversion+.cpp",
     "fl/build/src.cpp",
     "fl/build/fl.asset+.cpp",
     "fl/build/fl.audio+.cpp",

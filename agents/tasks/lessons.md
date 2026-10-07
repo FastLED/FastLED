@@ -536,3 +536,12 @@
 - AST inventories must count a source declaration once across unity units,
   while retaining separate declarations on distinct lines. Moving a feature
   into its own unit must not multiply existing header debt.
+- Legacy ESP32 unwind relocations can extract archives for functions whose
+  text is later discarded. Follow every retained archive dependency in the
+  map before judging a unit split; moving one live function may leave other
+  unused delegates or formatters retaining the same archive.
+- Source moves must update the numerical pipeline guards and their actual
+  cross-compiler fixtures. Keep their function lists and assertions intact.
+- Moving root implementations under src/fl also brings them into AST lint
+  scope. Match existing public declaration markers rather than adding debt
+  allowances; FL_NO_EXCEPT remains the project's no-op marker.

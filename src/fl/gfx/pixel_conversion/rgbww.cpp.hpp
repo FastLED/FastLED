@@ -1,4 +1,7 @@
-﻿/// @file rgbww.cpp.hpp
+// IWYU pragma: private
+// ok no header - public declarations remain in fl/gfx/rgbww.h.
+
+/// @file rgbww.cpp.hpp
 /// Dispatch + implementations for the 5-channel RGB->RGBWW path
 /// (issue #2558, Phase 3 of #2545).
 ///

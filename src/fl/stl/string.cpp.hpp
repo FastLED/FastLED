@@ -6,7 +6,6 @@
 #include "fl/math/geometry.h"             // for vec2
 #include "fl/stl/int.h"                  // for size, u16, u8
 #include "fl/gfx/crgb.h"                 // for CRGB
-#include "fl/gfx/tile2x2.h"
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/static_assert.h"
 #include "fl/math/xymap.h"
@@ -235,33 +234,6 @@ string &string::append(const XYMap &map) {
     append(map.getWidth());
     append(",");
     append(map.getHeight());
-    append(")");
-    return *this;
-}
-
-string &string::append(const Tile2x2_u8_wrap &tile) {
-    Tile2x2_u8_wrap::Entry data[4] = {
-        tile.at(0, 0),
-        tile.at(0, 1),
-        tile.at(1, 0),
-        tile.at(1, 1),
-    };
-
-    append("Tile2x2_u8_wrap(");
-    for (int i = 0; i < 4; i++) {
-        vec2<u16> pos = data[i].first;
-        u8 alpha = data[i].second;
-        append("(");
-        append(pos.x);
-        append(",");
-        append(pos.y);
-        append(",");
-        append(alpha);
-        append(")");
-        if (i < 3) {
-            append(",");
-        }
-    }
     append(")");
     return *this;
 }
