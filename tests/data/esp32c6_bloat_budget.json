@@ -2,7 +2,7 @@
   "board": "esp32c6",
   "example": "Blink",
   "profile": "default",
-  "image_flash": 403818,
+  "image_flash": 403794,
   "total_ram": 29888,
-  "reference": "#4740: Arduino-ESP32 3.3.5 / IDF 5.5.1, fbuild 2.5.37. Attributed RAM omits singleton storage; ParlioEngine separately enforces a 2048-byte encoding-storage ceiling at compile time. Board RAM measured separately."
+  "reference": "#4740: Arduino-ESP32 3.3.5 / IDF 5.5.1, fbuild 2.5.37. Attributed RAM omits singleton storage; ParlioEngine separately enforces a 2048-byte encoding-storage ceiling at compile time. Board RAM measured separately.; #4744 compact configuration ratchet"
 }

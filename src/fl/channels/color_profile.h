@@ -58,13 +58,13 @@ struct ColorProfileStorage {
 /// Immutable profile binding carried by a channel.
 struct ColorProfileBinding {
     fl::shared_ptr<const ColorProfileStorage> mStorage;
+    const EmitterProfile* mStaticProfile = nullptr;
     SourceProfile mSource = SourceProfile::linearSrgb();
-    GamutPolicy mGamut = GamutPolicy::ChromaCompress;
     Chromaticity mTargetWhite;
+    GamutPolicy mGamut = GamutPolicy::ChromaCompress;
     bool mHasTargetWhite = false;
     bool mRequested = false;
     bool mUseGlobalSourceDefault = false;
-    const EmitterProfile* mStaticProfile = nullptr;
 
     bool active() const FL_NO_EXCEPT { return static_cast<bool>(mStorage) || mStaticProfile != nullptr; }
     const EmitterProfile* profile() const FL_NO_EXCEPT { return mStaticProfile != nullptr ? mStaticProfile : (mStorage ? &mStorage->mProfile : nullptr); }

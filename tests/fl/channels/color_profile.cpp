@@ -42,6 +42,15 @@ ChannelPtr makeChannelWithLocalProfile(CRGB* leds) {
 
 }  // namespace
 
+FL_TEST_CASE("ColorProfileBinding stores its fields without avoidable padding") {
+    const fl::size payload = sizeof(fl::shared_ptr<const ColorProfileStorage>) +
+        sizeof(const EmitterProfile*) + sizeof(SourceProfile) +
+        sizeof(Chromaticity) + sizeof(GamutPolicy) + 3 * sizeof(bool);
+    const fl::size alignment = alignof(ColorProfileBinding);
+    const fl::size ceiling = ((payload + alignment - 1) / alignment) * alignment;
+    FL_CHECK_LE(sizeof(ColorProfileBinding), ceiling);
+}
+
 FL_TEST_CASE("SourceProfile provides independent named and custom source spaces") {
     const SourceProfile srgb = SourceProfile::srgbBt709();
     FL_CHECK_EQ(srgb.transfer, TransferFunction::Srgb);
