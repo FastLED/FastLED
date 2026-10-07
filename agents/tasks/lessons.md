@@ -517,3 +517,11 @@
   selected a fallback and hid stale RMT4 interfaces.
 - Use absolute source and destination paths when refreshing a scratch worktree
   from a command whose working directory is that worktree.
+- After splitting unity units, test headers in both include orders: platform
+  detection must precede thread/atomic selection in every translation unit.
+  Different ThreadLocal layouts under the same template symbol are an ODR bug.
+- Report lint from its exit code and violation summary. The terminal banner
+  "linting completed" also appears after failures; it does not mean a pass.
+- AST inventories must count a source declaration once across unity units,
+  while retaining separate declarations on distinct lines. Moving a feature
+  into its own unit must not multiply existing header debt.

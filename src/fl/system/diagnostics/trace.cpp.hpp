@@ -1,3 +1,4 @@
+// ok no header - public declaration remains in parent directory.
 /**
  * @file trace.cpp
  * @brief Implementation of internal call stack tracking for debugging
@@ -6,7 +7,7 @@
  * that uses a fixed-size buffer to store function names during execution.
  */
 
-#include "fl/system/trace.h" // ok no header - public declaration remains in parent directory.
+#include "fl/system/trace.h"
 
 #include "fl/stl/vector.h"
 #include "fl/stl/string.h"

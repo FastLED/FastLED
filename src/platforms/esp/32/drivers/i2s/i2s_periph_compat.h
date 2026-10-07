@@ -41,7 +41,6 @@ FL_EXTERN_C_BEGIN
 #if !ESP_IDF_VERSION_6_OR_HIGHER
 // IWYU pragma: begin_keep
 #include "driver/periph_ctrl.h"  // for periph_module_enable / periph_module_disable
-#include "soc/soc_caps.h"
 // IWYU pragma: end_keep
 #else
 // IDF 6.x+ — periph_module_* was removed. Route through the LL API that
@@ -58,7 +57,6 @@ FL_EXTERN_C_BEGIN
 // IWYU pragma: begin_keep
 #include "hal/i2s_ll.h"
 #include "esp_private/periph_ctrl.h"  // PERIPH_RCC_ATOMIC() critical section
-#include "soc/soc_caps.h"
 // IWYU pragma: end_keep
 #endif
 

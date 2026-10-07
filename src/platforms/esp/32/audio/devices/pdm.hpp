@@ -20,7 +20,9 @@
 
 #ifndef FASTLED_ESP32_PDM_SUPPORTED
 // IWYU pragma: begin_keep
+#if ESP_IDF_VERSION_4_OR_HIGHER
 #include "soc/soc_caps.h"
+#endif
 // IWYU pragma: end_keep
 #if defined(SOC_I2S_SUPPORTS_PDM_RX) && SOC_I2S_SUPPORTS_PDM_RX
 #if ESP_IDF_VERSION_5_OR_HIGHER

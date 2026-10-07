@@ -13,7 +13,9 @@
 #include "fl/stl/shared_ptr.h"
 
 #include "platforms/esp/esp_version.h"  // IWYU pragma: keep
+#if ESP_IDF_VERSION_4_OR_HIGHER
 #include "soc/soc_caps.h"  // IWYU pragma: keep
+#endif
 
 // The PARLIO *RX* driver (driver/parlio_rx.h) first shipped in ESP-IDF 5.3.
 // Earlier IDFs (5.1 / 5.2, i.e. Arduino-ESP32 3.0.x) already define the C6

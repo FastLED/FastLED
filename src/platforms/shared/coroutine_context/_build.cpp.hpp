@@ -1,3 +1,5 @@
+// IWYU pragma: private
+
 /// @brief Generic coroutine contexts, linked independently.
 
 // begin current directory includes

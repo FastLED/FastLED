@@ -313,6 +313,13 @@ fl::u32 calculate_unscaled_power_mW( const CRGB* ledbuffer, fl::u16 numLeds ) //
 // is stated rather than hidden -- closing it needs demand evaluated per
 // candidate brightness, which is a pixel walk per step of the limiter's
 // search.
+static void warn_undeclared_white_power() FL_NO_EXCEPT {
+    FL_WARN_ONCE("power: controller is in RGBW mode but the power model "
+                 "declares no white emitter, so the budget covers three "
+                 "of its four diodes. Call "
+                 "FastLED.setPowerModel(PowerModelRGBW(...)) to fix it.");
+}
+
 fl::u32 calculate_unscaled_power_mW(fl::span<const CRGB> leds, const fl::Rgbw& rgbw) {
     const fl::u8 white_mW = gWhiteEmitterPower().mW;
     // `!rgbw.active()` is a fast path, not a different answer: the only
@@ -326,10 +333,7 @@ fl::u32 calculate_unscaled_power_mW(fl::span<const CRGB> leds, const fl::Rgbw& r
     // there is nothing to charge the fourth diode at.
     if (!rgbw.active() || white_mW == 0) {
         if (rgbw.active()) {
-            FL_WARN_ONCE("power: controller is in RGBW mode but the power model "
-                         "declares no white emitter, so the budget covers three "
-                         "of its four diodes. Call "
-                         "FastLED.setPowerModel(PowerModelRGBW(...)) to fix it.");
+            warn_undeclared_white_power();
         }
         return calculate_unscaled_power_mW(leds);
     }
@@ -469,16 +473,19 @@ fl::u8 calculate_max_brightness_for_power_mW(const CRGB* ledbuffer, fl::u16 numL
 	                                max_power_mW);
 }
 
-// The RGBW estimate, once something has stored an Rgbw into a controller.
-// Reached through a pointer so that the conversion (~1 KB on AVR) links only
-// into sketches that configure RGBW; until then every stored white config is
-// absent, and the RGB estimate is the answer the overload would give.
+// A declared white power model installs the RGBW estimate. Output
+// configuration alone does not retain conversion code in sketches that never
+// estimate power. With no white draw declared, the controller path retains
+// the documented RGB fallback and diagnostic.
 typedef fl::u32 (*rgbw_power_fn)(fl::span<const CRGB>, const fl::Rgbw&);
 // FL_LINT_ALLOW_GLOBAL(one zero-initialized pointer in .bss; a Singleton would add its init code to every limiter sketch)
 static rgbw_power_fn gRgbwPowerEstimate = nullptr;
+// FL_LINT_ALLOW_GLOBAL(zero-initialized activation flag preserves controller opt-in without retaining conversion code)
+static bool gRgbwPowerEnabled = false;
 
 void fl::detail::enable_rgbw_power_estimate() FL_NO_EXCEPT {
-    gRgbwPowerEstimate = static_cast<rgbw_power_fn>(&calculate_unscaled_power_mW);
+    // Preserve the controller opt-in independently of the declared model.
+    gRgbwPowerEnabled = true;
 }
 
 fl::u32 controller_unscaled_power_mW(const fl::CLEDController& controller) {
@@ -506,7 +513,12 @@ fl::u32 controller_unscaled_power_mW(const fl::CLEDController& controller) {
     // No stored Rgbw reads as RgbwInvalid, which the overload answers with the
     // RGB estimate; asking for it directly skips copying the Rgbw value.
     const fl::Rgbw* rgbw = controller.rgbwConfig();
-    return rgbw && gRgbwPowerEstimate ? gRgbwPowerEstimate(leds, *rgbw)
+    if (rgbw && gRgbwPowerEnabled && rgbw->active() &&
+        gWhiteEmitterPower().mW == 0) {
+        warn_undeclared_white_power();
+        return calculate_unscaled_power_mW(leds);
+    }
+    return rgbw && gRgbwPowerEnabled && gRgbwPowerEstimate ? gRgbwPowerEstimate(leds, *rgbw)
                                       : calculate_unscaled_power_mW(leds);
 }
 
@@ -973,12 +985,14 @@ void set_power_model(const PowerModelRGB& model) {
     // declaration from an earlier RGBW model standing would charge this one
     // for a diode the caller just said it does not have.
     gWhiteEmitterPower().mW = 0;
+    gRgbwPowerEstimate = nullptr;
     gRgbwwEmitterPower().declared = false;
 }
 
 void set_power_model(const PowerModelRGBW& model) {
     apply_rgb_power_model(model.toRGB());
     gWhiteEmitterPower().mW = model.white_mW;
+    gRgbwPowerEstimate = static_cast<rgbw_power_fn>(&calculate_unscaled_power_mW);
     gRgbwwEmitterPower().declared = false;
 }
 
@@ -987,6 +1001,7 @@ void set_power_model(const PowerModelRGBWW& model) {
     // weights for a managed five-emitter pipeline.
     apply_rgb_power_model(model.toRGB());
     gWhiteEmitterPower().mW = 0;
+    gRgbwPowerEstimate = nullptr;
     gRgbwwEmitterPower().model = model;
     gRgbwwEmitterPower().declared = true;
 }

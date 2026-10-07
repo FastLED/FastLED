@@ -382,6 +382,9 @@ def build_setup_env(compiler: CompilerDetection, build_mode: str) -> dict[str, s
     available.
     """
     env = os.environ.copy()
+    if sys.platform == "win32":
+        # Native Meson owns the sanitizer link flags, including -shared-libasan.
+        env["CLANG_TOOL_CHAIN_NO_SHARED_ASAN"] = "1"
     if compiler.cache_binary:
         env.setdefault("ZCCACHE_STRICT_PATHS", "absolute")
 

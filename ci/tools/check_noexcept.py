@@ -397,13 +397,18 @@ def find_missing_noexcept(scope: str = "all") -> list[NoexceptHit]:
     max_workers = max(len(tus), os.cpu_count() or len(tus))
 
     all_hits: list[NoexceptHit] = []
+    seen_locations: set[tuple[str, int]] = set()
     with ThreadPoolExecutor(max_workers=max_workers) as pool:
         futures = [
             pool.submit(_run_clang_query, clang_query, tu, file_regex)
             for tu, file_regex in tus
         ]
         for future in futures:
-            all_hits.extend(future.result())
+            for hit in future.result():
+                location = (hit.path, hit.line)
+                if location not in seen_locations:
+                    seen_locations.add(location)
+                    all_hits.append(hit)
     return all_hits
 
 

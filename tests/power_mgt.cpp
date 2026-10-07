@@ -542,6 +542,39 @@ class RegisteredController : public CLEDController {
     void init() FL_NO_EXCEPT override {}
 };
 
+FL_TEST_CASE("Power estimate - RGBW configuration and model setter orders") {
+    ScopedDefaultPowerModel guard;
+    CRGB leds[3] = {CRGB::White, CRGB::White, CRGB::White};
+    const fl::Rgbw rgbw(fl::kRGBWDefaultColorTemp,
+                        fl::RGBW_MODE::kRGBWExactColors);
+    const PowerModelRGBW white_model(80, 55, 75, 100, 5);
+    RegisteredController controller;
+    controller.setLeds(leds, 3);
+
+    // Output first: an undeclared white keeps the existing RGB fallback.
+    set_power_model(PowerModelRGB());
+    controller.setRgbw(rgbw);
+    FL_CHECK_EQ(controller_unscaled_power_mW(controller), 642);
+    set_power_model(white_model);
+    FL_CHECK_EQ(controller_unscaled_power_mW(controller), 313);
+
+    // Reconfiguration retracts the white declaration, including RGBWW's
+    // legacy folded RGB model; redeclaring RGBW restores its fourth emitter.
+    set_power_model(PowerModelRGB());
+    FL_CHECK_EQ(controller_unscaled_power_mW(controller), 642);
+    set_power_model(PowerModelRGBWW(80, 55, 75, 100, 100, 5));
+    FL_CHECK_EQ(controller_unscaled_power_mW(controller),
+                calculate_unscaled_power_mW(fl::span<const CRGB>(leds, 3)));
+    set_power_model(white_model);
+    FL_CHECK_EQ(controller_unscaled_power_mW(controller), 313);
+
+    // Model first: storing output afterward must preserve the estimator.
+    controller.setRgbw(fl::RgbwInvalid::value());
+    FL_CHECK_EQ(controller_unscaled_power_mW(controller), 642);
+    controller.setRgbw(rgbw);
+    FL_CHECK_EQ(controller_unscaled_power_mW(controller), 313);
+}
+
 #if FL_COLOR_PIPELINE_SHARED && !FL_PLATFORM_HAS_TINY_MEMORY
 class ManagedRegisteredController : public RegisteredController {
   public:

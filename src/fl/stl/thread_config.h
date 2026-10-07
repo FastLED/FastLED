@@ -8,6 +8,7 @@
 /// Use this header when you only need to check if multithreading is enabled.
 
 #include "fl/stl/has_include.h"
+#include "platforms/is_platform.h" // IWYU pragma: keep
 
 // Platform-specific FASTLED_MULTITHREADED detection
 // Each platform defines this based on its threading capabilities

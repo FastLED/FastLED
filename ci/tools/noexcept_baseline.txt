@@ -6968,10 +6968,10 @@ src/fl/task/coroutine/task.cpp.hpp|void auto_register_with_scheduler() override 
 src/fl/task/task.cpp.hpp|void auto_register_with_scheduler() override {
 src/fl/task/task.cpp.hpp|void execute_catch(const Error& error) override {
 src/fl/task/coroutine/task.cpp.hpp|void execute_catch(const Error&) override {}
-src/fl/task/coroutine/task.cpp.hpp|void execute_then() override {
+src/fl/task/task.cpp.hpp|void execute_then() override {
 src/fl/task/coroutine/task.cpp.hpp|void execute_then() override {}
 src/fl/task/coroutine/task.cpp.hpp|void exit_current() { Coroutine::exitCurrent(); }
-src/fl/task/coroutine/task.cpp.hpp|void set_canceled() override {
+src/fl/task/task.cpp.hpp|void set_canceled() override {
 src/fl/task/coroutine/task.cpp.hpp|void set_canceled() override { mCanceled = true; }
 src/fl/task/task.cpp.hpp|void set_catch(function<void(const Error&)> on_catch) override {
 src/fl/task/coroutine/task.cpp.hpp|void set_catch(function<void(const Error&)>) override { /* Coroutine tasks don't use catch */ }
