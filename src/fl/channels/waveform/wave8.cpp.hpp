@@ -1,3 +1,5 @@
+// ok no header - public declarations remain in fl/channels/wave8.h
+
 /// @file wave8.cpp
 /// @brief Waveform generation and transposition implementation
 ///

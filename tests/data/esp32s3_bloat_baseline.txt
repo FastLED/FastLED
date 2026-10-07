@@ -1,3 +1,9 @@
+# 2026-10-07, issue #4707 eleventh pass: hosted image_flash=356227 B,
+# run 37604777484 at 9dbea6ec07; local 356211 B. Isolating tracking,
+# blur and managed profile implementations saves 14384 B on legacy real
+# RMT4 Blink (326373 B), with a measured 40 B S3 layout cost.
+# Pin that exact measured cost without discretionary headroom.
+
 # 2026-10-07, issue #4707 tenth pass: hosted image_flash=356187 B,
 # run 37603441257 at ccd2853fba; local 356171 B. Optional dispatcher,
 # JSON and UI units save another 36 B on S3; verified legacy RMT4
@@ -381,4 +387,4 @@
 # the CI Blink report contains no ResponseLutsQ16 symbol. The local fbuild
 # symbol total remains ~4 KB higher for the same source (FastLED/fbuild#1456),
 # so this ratchet uses the CI measurement from PR #4511.
-356187
+356227

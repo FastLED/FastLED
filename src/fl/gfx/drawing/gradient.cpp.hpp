@@ -1,8 +1,12 @@
+// ok no header: public declarations remain in fl/gfx.
 
 #include "fl/gfx/gradient.h"
 #include "fl/stl/assert.h"
 #include "fl/gfx/colorutils.h"
 #include "fl/stl/noexcept.h"
+
+#include "fl/math/math.h"
+#include "fl/stl/move.h"
 
 namespace fl {
 

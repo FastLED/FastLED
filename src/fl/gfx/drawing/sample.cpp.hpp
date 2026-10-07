@@ -1,3 +1,4 @@
+// ok no header: public declarations remain in fl/gfx.
 #include "fl/gfx/sample.h"
 
 #include "fl/math/math.h"

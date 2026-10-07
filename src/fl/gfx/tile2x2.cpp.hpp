@@ -30,10 +30,6 @@ Tile2x2_u8_wrap::Tile2x2_u8_wrap() {
     mData[1][1] = {vec2<u16>(1, 1), 0};
 }
 
-void Tile2x2_u8::Rasterize(const span<const Tile2x2_u8> &tiles,
-                           XYRasterU8Sparse *out_raster) {
-    out_raster->rasterize(tiles);
-}
 
 void Tile2x2_u8::draw(const CRGB &color, const XYMap &xymap, fl::span<CRGB> out) const {
     XYDrawComposited visitor(color, xymap, out);

@@ -8,17 +8,13 @@
 #include "fl/channels/capabilities.cpp.hpp"
 #include "fl/channels/channel_events.cpp.hpp"
 #include "fl/channels/color_profile.cpp.hpp"
-#include "fl/channels/config.cpp.hpp"
 #include "fl/channels/data.cpp.hpp"
 #include "fl/channels/driver.cpp.hpp"
 #include "fl/channels/five_bit_semantics.cpp.hpp"
 #include "fl/channels/id_tracker.cpp.hpp"
 #include "fl/channels/manager.cpp.hpp"
-#include "fl/channels/options.cpp.hpp"
 #include "fl/channels/pipeline_binding.cpp.hpp"
 #include "fl/channels/uart_wave_encoder.cpp.hpp"
-#include "fl/channels/wave3.cpp.hpp"
-#include "fl/channels/wave8.cpp.hpp"
 
 // begin sub directory includes
 #include "fl/channels/detail/_build.cpp.hpp"

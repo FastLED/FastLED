@@ -1,9 +1,13 @@
+// ok no header: public declarations remain in fl/gfx.
 
 #include "fl/gfx/rectangular_draw_buffer.h"
 #include "fl/stl/allocator.h"
 #include "fl/gfx/rgbw.h"
 #include "fl/stl/string.h"
 #include "fl/stl/cstring.h"  // for fl::memset()
+
+#include "fl/math/math.h"
+#include "fl/stl/assert.h"
 
 namespace fl {
 

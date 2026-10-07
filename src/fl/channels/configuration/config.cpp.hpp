@@ -1,3 +1,5 @@
+// ok no header - public declarations remain in fl/channels/config.h
+
 /// @file config.cpp
 /// @brief Implementation of ChannelConfig and MultiChannelConfig
 

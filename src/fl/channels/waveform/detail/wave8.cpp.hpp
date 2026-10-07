@@ -1,3 +1,5 @@
+// ok no header - public declarations remain in fl/channels/detail/wave8.h
+
 /// @file wave8.cpp.hpp
 /// @brief Out-of-line definitions for wave8 transposition internals.
 ///
