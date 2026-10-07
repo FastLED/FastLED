@@ -7,6 +7,7 @@
 
 #include "fl/stl/stdint.h"
 #include "fl/stl/cstddef.h"
+#include "fl/stl/cstdio.h"  // for fl::serial_begin
 #include "fl/stl/stdio.h"  // for fl::snprintf
 #include "fl/stl/type_traits.h"  // for enable_if and is_multi_byte_integer
 
@@ -43,8 +44,11 @@ public:
      *
      * Note: On some platforms (host), baud rate is ignored.
      * On embedded platforms, this configures the UART hardware.
+     *
+     * Inline so that, on AVR, the strong reference to Arduino's `Serial`
+     * made by fl::serial_begin() lands in the caller's object (#4725).
      */
-    void begin(u32 baudRate = 115200);
+    void begin(u32 baudRate = 115200) FL_NO_EXCEPT { fl::serial_begin(baudRate); }
 
     /**
      * @brief Close serial communication

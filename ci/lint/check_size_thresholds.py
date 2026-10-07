@@ -116,10 +116,11 @@ FROZEN_THRESHOLDS: dict[str, dict[str, frozenset[int]]] = {
     },
     "check_uno_size.yml": {
         # real ceiling — ATmega328P 32 KB flash. Apa102 was tightened
-        # 12050 → 9300 in 7edaf80f0 (real optimisation, not a bump).
+        # 12050 → 9300 in 7edaf80f0 and 9300 → 8500 in #4725 (weak AVR
+        # `Serial`, Apa102 measured 4510 → 3682 B); real optimisations, not bumps.
         # `build` job: hard check. `build_no_forced_inline` job: -1 (no check).
         "max_size": frozenset({11000, -1}),
-        "max_size_apa102": frozenset({9300, -1}),
+        "max_size_apa102": frozenset({8500, -1}),
     },
 }
 

@@ -14,10 +14,6 @@ namespace fl {
 // SerialPort Implementation
 // ============================================================================
 
-void SerialPort::begin(u32 baudRate) {
-    fl::serial_begin(baudRate);
-}
-
 void SerialPort::end() {
     // Most platforms don't need explicit end() call
     // Serial is always available for debugging
