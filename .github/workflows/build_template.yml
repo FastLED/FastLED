@@ -132,6 +132,28 @@ jobs:
       # subtree and skip the delete transparently. See
       # FastLED/FastLED#3543 + #3547 for the LPC-transfer incident and
       # cache-key gap that motivated this.
+      # A restored fbuild cache can hold esptool tool venvs whose bin/python
+      # launcher no longer resolves on this runner (dangling interpreter
+      # symlink), so `esptool.py elf2image` fails with exit 127 / ENOENT on a
+      # random ESP job (FastLED/fbuild#1655). fbuild treats the directory as
+      # installed and never revalidates it. Remove any esptool install whose
+      # launcher can't start; fbuild re-downloads it on first use. Drop this
+      # step once fbuild validates cached tool venvs itself.
+      - name: Purge broken esptool venvs from restored fbuild cache
+        shell: bash
+        run: |
+          set -euo pipefail
+          root="${RUNNER_TEMP}/fbuild-cache/toolchains"
+          [ -d "$root" ] || exit 0
+          while IFS= read -r tooldir; do
+            py="$tooldir/bin/python"
+            if [ ! -e "$py" ] || ! "$py" -c "" >/dev/null 2>&1; then
+              install_root="$(dirname "$(dirname "$tooldir")")"
+              echo "purging broken esptool venv: $install_root"
+              rm -rf "$install_root"
+            fi
+          done < <(find "$root" -type d -path "*/.fbuild-tools/esptool" 2>/dev/null)
+
       - name: Purge stale platform tarballs from restored fbuild cache
         shell: bash
         run: |

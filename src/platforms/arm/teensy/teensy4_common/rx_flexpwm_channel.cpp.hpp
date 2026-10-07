@@ -469,6 +469,22 @@ bool FlexPwmRxChannelImpl::begin(const RxConfig &config) {
         return false;
     }
 
+    // Capture reprograms the whole submodule (CTRL, INIT, VAL0..5, LDOK),
+    // so any PWM output sharing it -- e.g. analogWrite on pin 7, which is
+    // FlexPWM1 SM3 B next to pin 8's SM3 A -- would silently change.
+    // Refuse instead of clobbering a sibling that has its output enabled.
+    {
+        const u8 sm = mPinInfo->submodule;
+        const u16 sm_out = FLEXPWM_OUTEN_PWMA_EN(1u << sm) |
+                           FLEXPWM_OUTEN_PWMB_EN(1u << sm) |
+                           FLEXPWM_OUTEN_PWMX_EN(1u << sm);
+        if (mPinInfo->pwm->OUTEN & sm_out) {
+            FL_WARN("Pin " << mPin << ": FlexPWM submodule " << int(sm)
+                    << " has an active PWM output; capture would alter it");
+            return false;
+        }
+    }
+
     mBufferSize = config.buffer_size;
     // #3416 RX-MED-6: signal_range_max_ns / 1000 is used as the idle
     // threshold in wait() to declare frame-end via inactivity. Default
@@ -501,6 +517,13 @@ bool FlexPwmRxChannelImpl::begin(const RxConfig &config) {
     for (size_t i = 0; i < cap_count; ++i) {
         mCaptureBuffer.push_back(0);
     }
+    // The zero-fill above leaves dirty D-cache lines over the buffer. If
+    // one is evicted after the DMA has written that line, it overwrites
+    // 8 capture pairs with zeros (seen as `H0 L0 ... H0` runs of 16 edges
+    // and ~20% byte corruption at 100 LEDs). Clean + invalidate before
+    // the DMA is armed so the CPU holds no dirty copy during capture.
+    arm_dcache_flush_delete(mCaptureBuffer.data(),
+                            mCaptureBuffer.size() * sizeof(u16));
 
     configureFlexPwm();
     configureDma();
@@ -571,10 +594,24 @@ void FlexPwmRxChannelImpl::configureFlexPwm() {
     // CLK_SEL = 0 (IPBus clock), INIT_SEL = 0 (local sync)
     pwm->SM[sm].CTRL2 = 0;
 
-    // CTRL: Full cycle reload, prescaler = 0 (divide by 1)
-    pwm->SM[sm].CTRL = FLEXPWM_SMCTRL_FULL;
+    // CTRL: Full cycle reload, prescaler = 0 (divide by 1). LDMOD makes the
+    // buffered INIT/VALx registers load as soon as LDOK is set below instead
+    // of waiting for the next reload of the old period.
+    pwm->SM[sm].CTRL = FLEXPWM_SMCTRL_FULL | FLEXPWM_SMCTRL_LDMOD;
 
-    // Free-running counter: INIT = 0, VAL1 = 0xFFFF (max period)
+    // Free-running counter: INIT = 0, VAL1 = 0xFFFF (max period).
+    //
+    // INIT and VAL0..VAL5 are double-buffered: a write only reaches the
+    // counter once MCTRL.LDOK is set for the submodule. Without the LDOK
+    // below the counter kept the Teensyduino analogWrite default period
+    // (VAL1 = 33464 ticks, 4.482 kHz) while tickDeltaNs() assumes a 65536
+    // tick wrap. Every ~223 us one HIGH or LOW straddling the wrap then
+    // measured ~214 us too long: a LOW was dropped as a gap, and a HIGH
+    // turned a 0 bit into a 1 -- the residual random 0->1 flips (#3406).
+    // Write CLDOK/LDOK without echoing back pending LDOK bits: a plain
+    // read-modify-write would set and clear this submodule's LDOK at once.
+    pwm->MCTRL = (pwm->MCTRL & ~FLEXPWM_MCTRL_LDOK(0x0F)) |
+                 FLEXPWM_MCTRL_CLDOK(1 << sm);
     pwm->SM[sm].INIT = 0;
     pwm->SM[sm].VAL1 = 0xFFFF;
     pwm->SM[sm].VAL0 = 0;
@@ -582,6 +619,8 @@ void FlexPwmRxChannelImpl::configureFlexPwm() {
     pwm->SM[sm].VAL3 = 0;
     pwm->SM[sm].VAL4 = 0;
     pwm->SM[sm].VAL5 = 0;
+    pwm->MCTRL = (pwm->MCTRL & ~FLEXPWM_MCTRL_LDOK(0x0F)) |
+                 FLEXPWM_MCTRL_LDOK(1 << sm);
 
     if (!mPinInfo->channel_b) {
         // Channel A capture configuration (CAPTCTRLA / CAPTCOMPA)
@@ -674,16 +713,33 @@ void FlexPwmRxChannelImpl::configureDma() {
     // Without this, ~1 in 7 frames sees a whole-frame 1-bit shift signature
     // ((0xF0,0x0F,0xAA) decoded as (0xE0,0x1F,0x55)) -- #3406 Round-4 Run 7.
     delayMicroseconds(50);
+    //
+    // The ARMA toggle does NOT empty the capture FIFOs. A rising edge
+    // captured before arming (a previous frame or the pre-test toggles)
+    // stays in the edge-0 FIFO (bench: CAPTCTRLA.CA0CNT == 1 at arm). The
+    // frame's first real rise is then dropped, and the first DMA read pairs
+    // the stale rise with bit 0's fall: a HIGH of tens to hundreds of us
+    // that decodes bit 0 as 1 (0x55 -> 0xD5). Pop both FIFOs by reading
+    // their CVAL registers until the CNT fields read zero.
+    auto &smr = mPinInfo->pwm->SM[mPinInfo->submodule];
+    const u16 kFifoCountMaskA =
+        FLEXPWM_SMCAPTCTRLA_CA0CNT(7) | FLEXPWM_SMCAPTCTRLA_CA1CNT(7);
+    const u16 kFifoCountMaskB =
+        FLEXPWM_SMCAPTCTRLB_CB0CNT(7) | FLEXPWM_SMCAPTCTRLB_CB1CNT(7);
     if (!mPinInfo->channel_b) {
-        mPinInfo->pwm->SM[mPinInfo->submodule].CAPTCTRLA &=
-            ~static_cast<u16>(FLEXPWM_SMCAPTCTRLA_ARMA);
-        mPinInfo->pwm->SM[mPinInfo->submodule].CAPTCTRLA |=
-            FLEXPWM_SMCAPTCTRLA_ARMA;
+        smr.CAPTCTRLA &= ~static_cast<u16>(FLEXPWM_SMCAPTCTRLA_ARMA);
+        smr.CAPTCTRLA |= FLEXPWM_SMCAPTCTRLA_ARMA;
+        for (int n = 0; n < 16 && (smr.CAPTCTRLA & kFifoCountMaskA); ++n) {
+            (void)smr.CVAL2;
+            (void)smr.CVAL3;
+        }
     } else {
-        mPinInfo->pwm->SM[mPinInfo->submodule].CAPTCTRLB &=
-            ~static_cast<u16>(FLEXPWM_SMCAPTCTRLB_ARMB);
-        mPinInfo->pwm->SM[mPinInfo->submodule].CAPTCTRLB |=
-            FLEXPWM_SMCAPTCTRLB_ARMB;
+        smr.CAPTCTRLB &= ~static_cast<u16>(FLEXPWM_SMCAPTCTRLB_ARMB);
+        smr.CAPTCTRLB |= FLEXPWM_SMCAPTCTRLB_ARMB;
+        for (int n = 0; n < 16 && (smr.CAPTCTRLB & kFifoCountMaskB); ++n) {
+            (void)smr.CVAL4;
+            (void)smr.CVAL5;
+        }
     }
 
     mDma.enable();
@@ -842,16 +898,24 @@ void FlexPwmRxChannelImpl::buildEdgeTimesFromCaptures() {
         return;
     }
 
-    // Build EdgeTime pairs from paired rising/falling captures. DMA writes
-    // [rise0, fall0, rise1, fall1, ...]. High time is the delta inside a pair;
-    // low time is the delta from one pair's falling edge to the next pair's
-    // rising edge.
-    // Build EdgeTime pairs from paired rising/falling captures. DMA writes
-    // [rise0, fall0, rise1, fall1, ...]. High time is the delta inside a pair;
-    // low time is the delta from one pair's falling edge to the next pair's
-    // rising edge.
+    // Skip leading phantom pairs (#3219, #3409). The pad-mux switch + DMA
+    // arm sequence can latch a stray rising+falling pair before the TX
+    // driver emits its first real bit. It has a plausible HIGH (~230 ns)
+    // but is followed by an idle gap before the real frame; keeping it
+    // shifts every decoded bit by one ((0xF0,0x0F,0xAA) -> (0x78,0x07,0xD5)).
+    // Drop any leading pair whose following LOW is a gap, not just the LOW.
+    size_t start_i = 0;
+    while (start_i + 3 < captures_written &&
+           tickDeltaNs(mCaptureBuffer[start_i + 1],
+                       mCaptureBuffer[start_i + 2]) > 5000) {
+        start_i += 2;
+    }
 
-    for (size_t i = 0; i + 3 < captures_written; i += 2) {
+    // Build EdgeTime pairs from paired rising/falling captures. DMA writes
+    // [rise0, fall0, rise1, fall1, ...]. High time is the delta inside a pair;
+    // low time is the delta from one pair's falling edge to the next pair's
+    // rising edge.
+    for (size_t i = start_i; i + 3 < captures_written; i += 2) {
         u16 rise = mCaptureBuffer[i];
         u16 fall = mCaptureBuffer[i + 1];
         u16 next_rise = mCaptureBuffer[i + 2];

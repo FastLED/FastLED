@@ -4,12 +4,13 @@
 
 #include "ObjectFLEDDmaManager.h"
 #include "fl/system/delay.h"
+#include "ObjectFLEDBitdataSize.h"
+#include "fl/stl/malloc.h"
 #include "platforms/arm/teensy/teensy4_common/dmamem.h"
 
 namespace fl {
 
 // Define static members
-FL_DMAMEM uint32_t ObjectFLEDDmaManager::bitdata[BYTES_PER_DMA * 64] __attribute__((aligned(32)));
 FL_DMAMEM uint32_t ObjectFLEDDmaManager::bitmask[4] __attribute__((aligned(32)));
 
 // #3416 OF-HIGH-1 / CodeRabbit-flagged: save/restore PRIMASK rather than
@@ -57,6 +58,32 @@ void ObjectFLEDDmaManager::waitForCompletion() {
     // ObjectFLED::~ObjectFLED) but defensive callers should also gate
     // on busy()==0 which factors in LATCH_DELAY. Documented here so
     // the next reader doesn't mistake "DMA done" for "frame done".
+}
+
+bool ObjectFLEDDmaManager::ensureBitdata(uint32_t numbytes) {
+    const uint32_t words =
+        objectfled::grownBitdataWords(bitdataWords, numbytes, BYTES_PER_DMA);
+    if (words == bitdataWords && bitdata != nullptr) {
+        return true;
+    }
+    // Over-allocate and align the start to a 32-byte cache line. The size
+    // is a multiple of 128 B, so arm_dcache_flush_delete() never touches a
+    // line shared with other heap data.
+    // Free the old (too small) buffer first: it can't serve this frame, and
+    // freeing it lets the allocator reuse that space for the larger block.
+    fl::free(mBitdataAlloc);
+    mBitdataAlloc = nullptr;
+    bitdata = nullptr;
+    bitdataWords = 0;
+    void* block = fl::malloc(words * sizeof(uint32_t) + 31);
+    if (block == nullptr) {
+        return false;  // caller drops the frame
+    }
+    mBitdataAlloc = block;
+    bitdata = reinterpret_cast<uint32_t*>(
+        (reinterpret_cast<uintptr_t>(block) + 31) & ~uintptr_t(31));
+    bitdataWords = words;
+    return true;
 }
 
 bool ObjectFLEDDmaManager::isBusy() {
