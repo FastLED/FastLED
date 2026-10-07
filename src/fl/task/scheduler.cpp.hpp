@@ -1,4 +1,5 @@
 #include "fl/task/scheduler.h"
+#include "fl/task/task_pump.h"
 #include "fl/stl/singleton.h"
 #include "fl/stl/chrono.h"
 #include "fl/log/log.h"
@@ -24,7 +25,11 @@ void Scheduler::onEndFrame() FL_NO_EXCEPT { update_after_frame_tasks(); }
 
 // Scheduler implementation
 Scheduler& Scheduler::instance() {
-    return fl::Singleton<Scheduler>::instance();
+    Scheduler& scheduler = fl::Singleton<Scheduler>::instance();
+    detail::set_scheduler_pump([]() {
+        fl::Singleton<Scheduler>::instance().update();
+    });
+    return scheduler;
 }
 
 int Scheduler::add_task(Handle t) {

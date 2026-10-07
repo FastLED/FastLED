@@ -50,6 +50,7 @@
 #include "fl/stl/stdint.h"      // for u8
 #include "fl/stl/vector.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/compiler_control.h"
 
 namespace fl {
 namespace task {
@@ -80,6 +81,11 @@ namespace detail {
 /// @brief Get reference to thread-local await recursion depth
 /// @return Reference to the thread-local await depth counter (internal implementation detail)
 int& await_depth_tls();
+
+// Keep task dispatch at the call site so SYSTEM-only callers omit it.
+// The dispatcher pumps only task subsystems initialized by their users.
+void pump_tasks() FL_NO_EXCEPT;
+void run_impl(fl::u32 microseconds, ExecFlags flags, void (*pump)()) FL_NO_EXCEPT;
 } // namespace detail
 
 /// @brief Generic task runner interface
@@ -133,7 +139,11 @@ private:
 ///
 /// @param microseconds  Budget in microseconds (default 1000 = 1ms)
 /// @param flags         Which subsystems to pump (default ALL)
-void run(fl::u32 microseconds = 1000, ExecFlags flags = ExecFlags::ALL);
+FASTLED_FORCE_INLINE void run(fl::u32 microseconds = 1000,
+                              ExecFlags flags = ExecFlags::ALL) FL_NO_EXCEPT {
+    detail::run_impl(microseconds, flags,
+                     (flags & ExecFlags::TASKS) ? detail::pump_tasks : nullptr);
+}
 
 
 

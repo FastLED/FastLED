@@ -35,7 +35,7 @@
 ///
 /// // Transmit pixels
 /// uint8_t pixels[] = {0xFF, 0x00, 0x00};  // Red pixel
-/// mock.transmit(channel_handle, encoder, pixels, sizeof(pixels));
+/// mock.transmit(channel_handle, encoder, pixels);
 ///
 /// // Simulate transmission complete (trigger callback)
 /// mock.simulateTransmitDone(channel_handle);
@@ -69,6 +69,7 @@
 #include "fl/chipsets/led_timing.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/stdint.h"
+#include "fl/stl/int.h"
 #include "fl/stl/span.h"
 #include "fl/stl/noexcept.h"
 
@@ -114,7 +115,7 @@ public:
     bool enableChannel(void* channel_handle) FL_NO_EXCEPT override = 0;
     bool disableChannel(void* channel_handle) FL_NO_EXCEPT override = 0;
     bool transmit(void* channel_handle, void* encoder_handle,
-                  const u8* buffer, size_t buffer_size) FL_NO_EXCEPT override = 0;
+                  fl::span<const u8> buffer) FL_NO_EXCEPT override = 0;
     bool waitAllDone(void* channel_handle, u32 timeout_ms) FL_NO_EXCEPT override = 0;
     void* createEncoder(const ChipsetTiming& timing,
                         u32 resolution_hz) FL_NO_EXCEPT override = 0;
@@ -124,7 +125,8 @@ public:
                             Rmt5TxDoneCallback callback,
                             void* user_ctx) FL_NO_EXCEPT override = 0;
     void configureLogging() FL_NO_EXCEPT override = 0;
-    bool syncCache(void* buffer, size_t size) FL_NO_EXCEPT override = 0;
+    bool syncCache(fl::span<u8> buffer) FL_NO_EXCEPT override = 0;
+    bool canTransmitDirectly(const void* buffer) const FL_NO_EXCEPT override = 0;
     u8* allocateDmaBuffer(size_t size) FL_NO_EXCEPT override = 0;
     void freeDmaBuffer(u8* buffer) FL_NO_EXCEPT override = 0;
 
@@ -135,6 +137,8 @@ public:
     /// @brief Transmission record (captured pixel data)
     struct TransmissionRecord {
         fl::vector<u8> buffer_copy;  ///< Copy of transmitted pixel data
+        fl::uptr channel_address;        ///< Opaque mock channel handle
+        fl::uptr buffer_address;     ///< Address only; never dereferenced after TX
         size_t buffer_size;                ///< Size of buffer in bytes
         int gpio_pin;                      ///< GPIO pin number
         ChipsetTiming timing;              ///< LED chipset timing
@@ -155,7 +159,7 @@ public:
     ///
     /// Use in tests to advance the simulation:
     /// ```cpp
-    /// driver.transmit(channel, encoder, pixels, size);
+    /// driver.transmit(channel, encoder, pixels);
     /// mock.simulateTransmitDone(channel);  // Trigger callback
     /// driver.poll();  // Process completion
     /// ```
@@ -171,6 +175,11 @@ public:
     /// CHECK_FALSE(result);  // Should fail
     /// ```
     virtual void setTransmitFailure(bool should_fail) FL_NO_EXCEPT = 0;
+    virtual void setEnableFailure(bool should_fail) FL_NO_EXCEPT = 0;
+    virtual void setResetFailure(bool should_fail) FL_NO_EXCEPT = 0;
+    virtual void setEncoderFailure(bool should_fail) FL_NO_EXCEPT = 0;
+    virtual void setCallbackFailure(bool should_fail) FL_NO_EXCEPT = 0;
+    virtual void setDirectTransmission(bool supported) FL_NO_EXCEPT = 0;
 
     /// @brief Limit how many TX channels can exist at once (0 = unlimited)
     ///

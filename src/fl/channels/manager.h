@@ -281,13 +281,12 @@ private:
         const fl::string* engineName,
         AddDriverSlowReason reason) FL_NO_EXCEPT;
 
-    /// @brief Wait until a condition is met, with check-pump-delay logic
-    /// @param condition Function that returns true when waiting should stop
+    /// @brief Shared wait loop for READY and READY-or-DRAINING checks
+    /// @param allowDraining Also accept DRAINING when true
     /// @param timeoutMs Optional timeout in milliseconds (0 = no timeout)
     /// @return true if condition was met, false if timeout occurred
     /// @note Runs async_run() on each iteration and delays intelligently to avoid busy-waiting
-    template<typename Condition>
-    bool waitForCondition(Condition condition, u32 timeoutMs = 1000) FL_NO_EXCEPT;
+    bool waitForState(bool allowDraining, u32 timeoutMs) FL_NO_EXCEPT;
 
     void notifyPollNeeded() FL_NO_EXCEPT;
     bool waitForPollNeededSignal(u32 timeoutMs) FL_NO_EXCEPT;

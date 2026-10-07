@@ -244,7 +244,7 @@ FL_TEST_CASE("RMT5 mock - capture transmission data") {
 
     // Transmit pixel data
     uint8_t pixels[] = {0xFF, 0x00, 0x00};  // Red pixel
-    bool success = mock.transmit(channel, encoder, pixels, sizeof(pixels));
+    bool success = mock.transmit(channel, encoder, pixels);
     FL_CHECK(success);
 
     // Verify transmission was captured
@@ -279,9 +279,9 @@ FL_TEST_CASE("RMT5 mock - multiple transmissions") {
     uint8_t pixels2[] = {0x00, 0xFF, 0x00};  // Green
     uint8_t pixels3[] = {0x00, 0x00, 0xFF};  // Blue
 
-    mock.transmit(channel, encoder, pixels1, sizeof(pixels1));
-    mock.transmit(channel, encoder, pixels2, sizeof(pixels2));
-    mock.transmit(channel, encoder, pixels3, sizeof(pixels3));
+    mock.transmit(channel, encoder, pixels1);
+    mock.transmit(channel, encoder, pixels2);
+    mock.transmit(channel, encoder, pixels3);
 
     // Verify all three transmissions were captured
     const auto& history = mock.getTransmissionHistory();
@@ -309,7 +309,7 @@ FL_TEST_CASE("RMT5 mock - clear transmission history") {
     void* encoder = mock.createEncoder(timing, 40000000);
 
     uint8_t pixels[] = {0xFF, 0x00, 0x00};
-    mock.transmit(channel, encoder, pixels, sizeof(pixels));
+    mock.transmit(channel, encoder, pixels);
 
     FL_CHECK(mock.getTransmissionHistory().size() == 1);
 
@@ -339,7 +339,7 @@ FL_TEST_CASE("RMT5 mock - get last transmission data") {
 
     // Transmit
     uint8_t pixels[] = {0xAA, 0xBB, 0xCC};
-    mock.transmit(channel, encoder, pixels, sizeof(pixels));
+    mock.transmit(channel, encoder, pixels);
 
     // Verify last transmission
     auto last_data = mock.getLastTransmissionData();
@@ -373,7 +373,7 @@ FL_TEST_CASE("RMT5 mock - inject transmission failure") {
     mock.setTransmitFailure(true);
 
     uint8_t pixels[] = {0xFF, 0x00, 0x00};
-    bool success = mock.transmit(channel, encoder, pixels, sizeof(pixels));
+    bool success = mock.transmit(channel, encoder, pixels);
     FL_CHECK_FALSE(success);
 
     // No transmission should be captured
@@ -381,7 +381,7 @@ FL_TEST_CASE("RMT5 mock - inject transmission failure") {
 
     // Disable failure injection
     mock.setTransmitFailure(false);
-    success = mock.transmit(channel, encoder, pixels, sizeof(pixels));
+    success = mock.transmit(channel, encoder, pixels);
     FL_CHECK(success);
     FL_CHECK(mock.getTransmissionHistory().size() == 1);
 
@@ -403,7 +403,7 @@ FL_TEST_CASE("RMT5 mock - transmit without enabling channel") {
     void* encoder = mock.createEncoder(timing, 40000000);
 
     uint8_t pixels[] = {0xFF, 0x00, 0x00};
-    bool success = mock.transmit(channel, encoder, pixels, sizeof(pixels));
+    bool success = mock.transmit(channel, encoder, pixels);
     FL_CHECK_FALSE(success);  // Should fail - channel not enabled
 
     // Cleanup
@@ -430,13 +430,13 @@ FL_TEST_CASE("RMT5 mock - transmission counter") {
     void* encoder = mock.createEncoder(timing, 40000000);
 
     uint8_t pixels[] = {0xFF, 0x00, 0x00};
-    mock.transmit(channel, encoder, pixels, sizeof(pixels));
+    mock.transmit(channel, encoder, pixels);
     FL_CHECK(mock.getTransmissionCount() == 1);
 
-    mock.transmit(channel, encoder, pixels, sizeof(pixels));
+    mock.transmit(channel, encoder, pixels);
     FL_CHECK(mock.getTransmissionCount() == 2);
 
-    mock.transmit(channel, encoder, pixels, sizeof(pixels));
+    mock.transmit(channel, encoder, pixels);
     FL_CHECK(mock.getTransmissionCount() == 3);
 
     // Cleanup

@@ -34,6 +34,34 @@ validation passed 417/417 unit/example jobs after the final source changes.
 Host/SDK/QEMU evidence does not claim physical waveforms; SPI SDK initialization
 timed out on both versions while direct ownership accounting passed.
 
+## ESP32 flash and RAM regression (#4707)
+
+- [x] Reopen the issue and record controlled 3.10.3 versus master evidence.
+- [x] Remove unnecessary subsystem linkage from LED-only execution paths.
+- [x] Reduce RMT queue/state and channel dispatch overhead without limiting strips or runtime configuration.
+- [x] Measure identical Blink and CD77 gist builds with one toolchain before and after.
+- [x] Run focused behavior tests, C++/lint gates, and code review.
+- [x] Publish a feature PR and update the issue with measured savings and remaining costs.
+
+### Review
+
+- Controlled ESP32 image flash: Blink 313,767 -> 307,031 B (-6,736 B);
+  CD77 gist 306,275 -> 299,943 B (-6,332 B). Static RAM falls 392 B and
+  368 B respectively. ESP32-S3 ratchet falls 367,407 -> 359,003 B (-8,404 B).
+- The controlled 3.10.3 flash baselines are 287,689 B and 274,921 B;
+  the remaining gaps are 19,342 B and 25,022 B. Keep #4707 open.
+- Full native gate passes 319 units and 95 examples; focused RMT and executor
+  sanitizer runs, lint, and ESP32/ESP32-S3 board builds pass. Physical hardware
+  behavior and hosted full CI remain unverified.
+
+### Plan
+
+Use the default dynamic driver configuration. Keep scheduler pumping, network
+yielding, multiple strips, and reconfiguration available. Optimize symbol reachability
+and redundant state first, then use actual board images to decide further changes.
+The original reporter's build and the controlled fbuild comparison are separate
+measurements; only compare matching examples, flags, and frameworks.
+
 ## ESP32-S3 binary-size Batch 3 (#2856)
 
 - [x] Audit every tracking item against current master and merged PR history.

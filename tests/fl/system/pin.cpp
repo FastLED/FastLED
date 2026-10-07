@@ -298,6 +298,27 @@ FL_TEST_CASE("pwm_pinmode_disables_pwm") {
     FL_REQUIRE_EQ(fl::pwmEnd(20), 0);
 }
 
+FL_TEST_CASE("pwm_pinmode_cleanup_preserves_other_channel_and_restarts") {
+    FL_REQUIRE_EQ(fl::setPwmFrequency(20, 100), 0);
+    FL_REQUIRE_EQ(fl::setPwmFrequency(21, 200), 0);
+    fl::analogWrite(20, 128);
+    fl::analogWrite(21, 64);
+
+    // Releasing one pin must leave the shared ISR available to the other.
+    fl::pinMode(20, fl::PinMode::Input);
+    FL_REQUIRE_EQ(fl::getPwmFrequency(20), 0u);
+    FL_REQUIRE_EQ(fl::getPwmFrequency(21), 200u);
+    fl::analogWrite(21, 192);
+
+    // Releasing the last pin tears down the ISR. A subsequent allocation
+    // must attach it again and restore its cleanup callback.
+    fl::pinMode(21, fl::PinMode::Input);
+    FL_REQUIRE_EQ(fl::getPwmFrequency(21), 0u);
+    FL_REQUIRE_EQ(fl::setPwmFrequency(20, 300), 0);
+    fl::analogWrite(20, 128);
+    FL_REQUIRE_EQ(fl::pwmEnd(20), 0);
+}
+
 FL_TEST_CASE("pwm_pinmode_releases_channel") {
     // Allocate all 8 channels
     for (int i = 0; i < 8; i++) {

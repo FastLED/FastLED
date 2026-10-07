@@ -9,8 +9,18 @@
 
 namespace fl {
 
-template<typename Condition>
-bool IChannelDriver::waitForCondition(Condition condition, u32 timeoutMs) {
+IChannelDriver::DriverState::DriverState(Value v) FL_NO_EXCEPT
+    : state(v), error() {}
+
+IChannelDriver::DriverState::DriverState(Value v, const fl::string& e) FL_NO_EXCEPT
+    : state(v), error(e) {}
+
+bool IChannelDriver::waitForState(bool allowDraining, u32 timeoutMs) FL_NO_EXCEPT {
+    const auto condition = [this, allowDraining]() {
+        const auto state = poll().state;
+        return state == IChannelDriver::DriverState::READY ||
+               (allowDraining && state == IChannelDriver::DriverState::DRAINING);
+    };
     const u32 startTime = timeoutMs > 0 ? millis() : 0;
 
     // Tier 1: instant non-blocking check.
@@ -45,7 +55,7 @@ bool IChannelDriver::waitForCondition(Condition condition, u32 timeoutMs) {
         }
 
         // Adaptive yield (refs #2815, generalizes the #2493 ESP32-P4 carve-out):
-        // see the matching comment in ChannelManager::waitForCondition for the
+        // see the matching comment in ChannelManager::waitForState for the
         // full rationale. The deep yield is only needed when a radio is
         // actually up; otherwise the FreeRTOS tick floor is pure timing drift.
         if (fl::NetworkDetector::isAnyNetworkActive()) {
@@ -61,21 +71,11 @@ bool IChannelDriver::waitForCondition(Condition condition, u32 timeoutMs) {
 }
 
 bool IChannelDriver::waitForReady(u32 timeoutMs) {
-    // wait until the driver is in a READY state.
-    bool ok = waitForCondition([this]() {
-        auto state = poll();
-        return state.state == IChannelDriver::DriverState::READY;
-    }, timeoutMs);
-    return ok;
+    return waitForState(false, timeoutMs);
 }
 
 bool IChannelDriver::waitForReadyOrDraining(u32 timeoutMs) {
-    // wait until the driver is in a READY or DRAINING state.
-    bool ok = waitForCondition([this]() {
-        auto state = poll();
-        return state.state == IChannelDriver::DriverState::READY || state.state == IChannelDriver::DriverState::DRAINING;
-    }, timeoutMs);
-    return ok;
+    return waitForState(true, timeoutMs);
 }
 
 }  // namespace fl

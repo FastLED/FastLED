@@ -1,4 +1,4 @@
-﻿// IWYU pragma: private
+// IWYU pragma: private
 
 /// @file rmt5_peripheral_esp.cpp
 /// @brief Real ESP32 RMT5 peripheral implementation
@@ -18,8 +18,6 @@
 #include "fl/chipsets/led_timing.h"
 #include "fl/system/delay.h"
 #include "fl/log/log.h"
-#include "fl/log/log.h"
-#include "fl/log/log.h"
 #include "fl/stl/bit_cast.h"
 
 // Include ESP-IDF headers ONLY in .cpp file
@@ -32,6 +30,7 @@ FL_EXTERN_C_BEGIN
 // IWYU pragma: end_keep
 #include "esp_cache.h"
 #include "esp_heap_caps.h"
+#include "esp_memory_utils.h"
 #include "esp_log.h"
 // IWYU pragma: begin_keep
 #include "freertos/FreeRTOS.h"
@@ -74,80 +73,18 @@ FL_NO_INLINE FL_COLD void emitRmt5EncoderCreateFailure(
 struct Rmt5EncoderImpl;
 
 //=============================================================================
-// Implementation Class (internal)
-//=============================================================================
-
-/// @brief Internal implementation of Rmt5PeripheralESP
-///
-/// This class contains all ESP-IDF-specific implementation details.
-class Rmt5PeripheralESPImpl : public Rmt5PeripheralESP {
-public:
-    Rmt5PeripheralESPImpl() FL_NO_EXCEPT;
-    ~Rmt5PeripheralESPImpl() override;
-
-    // IRMT5Peripheral Interface Implementation
-    bool createTxChannel(const Rmt5ChannelConfig& config,
-                         void** out_handle) FL_NO_EXCEPT override;
-    bool deleteChannel(void* channel_handle) FL_NO_EXCEPT override;
-    bool enableChannel(void* channel_handle) FL_NO_EXCEPT override;
-    bool disableChannel(void* channel_handle) FL_NO_EXCEPT override;
-    bool transmit(void* channel_handle, void* encoder_handle,
-                  const u8* buffer, size_t buffer_size) FL_NO_EXCEPT override;
-    bool waitAllDone(void* channel_handle, u32 timeout_ms) FL_NO_EXCEPT override;
-    void* createEncoder(const ChipsetTiming& timing,
-                        u32 resolution_hz) FL_NO_EXCEPT override;
-    void deleteEncoder(void* encoder_handle) FL_NO_EXCEPT override;
-    bool resetEncoder(void* encoder_handle) FL_NO_EXCEPT override;
-    bool registerTxCallback(void* channel_handle,
-                            Rmt5TxDoneCallback callback,
-                            void* user_ctx) FL_NO_EXCEPT override;
-    void configureLogging() FL_NO_EXCEPT override;
-    bool syncCache(void* buffer, size_t size) FL_NO_EXCEPT override;
-    u8* allocateDmaBuffer(size_t size) FL_NO_EXCEPT override;
-    void freeDmaBuffer(u8* buffer) FL_NO_EXCEPT override;
-
-private:
-    /// @brief Disable cache sync after ESP_ERR_INVALID_ARG error
-    ///
-    /// When esp_cache_msync() returns ESP_ERR_INVALID_ARG, further calls will
-    /// likely fail too. We disable subsequent calls to avoid error spam while
-    /// keeping memory barriers for ordering guarantees.
-    bool mCacheSyncDisabled = false;
-};
-
-//=============================================================================
 // Singleton Instance
 //=============================================================================
 
 Rmt5PeripheralESP& Rmt5PeripheralESP::instance() FL_NO_EXCEPT {
-    return Singleton<Rmt5PeripheralESPImpl>::instance();
-}
-
-//=============================================================================
-// Destructor (base class)
-//=============================================================================
-
-Rmt5PeripheralESP::~Rmt5PeripheralESP() {
-    // Empty - implementation in Rmt5PeripheralESPImpl
-}
-
-//=============================================================================
-// Constructor / Destructor (implementation)
-//=============================================================================
-
-Rmt5PeripheralESPImpl::Rmt5PeripheralESPImpl() FL_NO_EXCEPT {
-}
-
-Rmt5PeripheralESPImpl::~Rmt5PeripheralESPImpl() {
-    // Channels and encoders are managed by ChannelEngineRMT
-    // No global cleanup needed here
+    return Singleton<Rmt5PeripheralESP>::instance();
 }
 
 //=============================================================================
 // Channel Lifecycle Methods
 //=============================================================================
 
-bool Rmt5PeripheralESPImpl::createTxChannel(const Rmt5ChannelConfig& config,
+bool Rmt5PeripheralESP::createTxChannel(const Rmt5ChannelConfig& config,
                                              void** out_handle) FL_NO_EXCEPT {
     if (out_handle == nullptr) {
         FL_WARN("Rmt5PeripheralESP: out_handle is nullptr");
@@ -206,7 +143,7 @@ bool Rmt5PeripheralESPImpl::createTxChannel(const Rmt5ChannelConfig& config,
     return true;
 }
 
-bool Rmt5PeripheralESPImpl::deleteChannel(void* channel_handle) FL_NO_EXCEPT {
+bool Rmt5PeripheralESP::deleteChannel(void* channel_handle) FL_NO_EXCEPT {
     if (channel_handle == nullptr) {
         FL_WARN("Rmt5PeripheralESP: channel_handle is nullptr");
         return false;
@@ -224,7 +161,7 @@ bool Rmt5PeripheralESPImpl::deleteChannel(void* channel_handle) FL_NO_EXCEPT {
     return true;
 }
 
-bool Rmt5PeripheralESPImpl::enableChannel(void* channel_handle) FL_NO_EXCEPT {
+bool Rmt5PeripheralESP::enableChannel(void* channel_handle) FL_NO_EXCEPT {
     if (channel_handle == nullptr) {
         FL_WARN("Rmt5PeripheralESP: channel_handle is nullptr");
         return false;
@@ -244,7 +181,7 @@ bool Rmt5PeripheralESPImpl::enableChannel(void* channel_handle) FL_NO_EXCEPT {
     return true;
 }
 
-bool Rmt5PeripheralESPImpl::disableChannel(void* channel_handle) FL_NO_EXCEPT {
+bool Rmt5PeripheralESP::disableChannel(void* channel_handle) FL_NO_EXCEPT {
     if (channel_handle == nullptr) {
         FL_WARN("Rmt5PeripheralESP: channel_handle is nullptr");
         return false;
@@ -266,9 +203,9 @@ bool Rmt5PeripheralESPImpl::disableChannel(void* channel_handle) FL_NO_EXCEPT {
 // Transmission Methods
 //=============================================================================
 
-bool Rmt5PeripheralESPImpl::transmit(void* channel_handle, void* encoder_handle,
-                                      const u8* buffer, size_t buffer_size) FL_NO_EXCEPT {
-    if (channel_handle == nullptr || encoder_handle == nullptr || buffer == nullptr) {
+bool Rmt5PeripheralESP::transmit(void* channel_handle, void* encoder_handle,
+                                      fl::span<const u8> buffer) FL_NO_EXCEPT {
+    if (channel_handle == nullptr || encoder_handle == nullptr || buffer.data() == nullptr) {
         FL_WARN("Rmt5PeripheralESP: Invalid parameter (nullptr)");
         return false;
     }
@@ -282,7 +219,7 @@ bool Rmt5PeripheralESPImpl::transmit(void* channel_handle, void* encoder_handle,
     tx_config.loop_count = 0;  // No loop
     tx_config.flags.eot_level = 0;  // End-of-transmission level
 
-    esp_err_t err = rmt_transmit(channel, encoder, buffer, buffer_size, &tx_config);
+    esp_err_t err = rmt_transmit(channel, encoder, buffer.data(), buffer.size(), &tx_config);
     if (err != ESP_OK) {
         FL_WARN("RMT5_PERIPH: rmt_transmit() FAILED: " << esp_err_to_name(err));
         return false;
@@ -291,7 +228,7 @@ bool Rmt5PeripheralESPImpl::transmit(void* channel_handle, void* encoder_handle,
     return true;
 }
 
-bool Rmt5PeripheralESPImpl::waitAllDone(void* channel_handle, u32 timeout_ms) FL_NO_EXCEPT {
+bool Rmt5PeripheralESP::waitAllDone(void* channel_handle, u32 timeout_ms) FL_NO_EXCEPT {
     if (channel_handle == nullptr) {
         FL_WARN("Rmt5PeripheralESP: channel_handle is nullptr");
         return false;
@@ -359,7 +296,7 @@ static bool FL_IRAM txDoneCallbackWrapper(
         ctx->user_ctx);
 }
 
-bool Rmt5PeripheralESPImpl::registerTxCallback(void* channel_handle,
+bool Rmt5PeripheralESP::registerTxCallback(void* channel_handle,
                                                 Rmt5TxDoneCallback callback,
                                                 void* user_ctx) FL_NO_EXCEPT {
     if (channel_handle == nullptr || callback == nullptr) {
@@ -397,7 +334,7 @@ bool Rmt5PeripheralESPImpl::registerTxCallback(void* channel_handle,
 // Platform Configuration
 //=============================================================================
 
-void Rmt5PeripheralESPImpl::configureLogging() FL_NO_EXCEPT {
+void Rmt5PeripheralESP::configureLogging() FL_NO_EXCEPT {
     // Suppress ESP-IDF RMT "no free channels" errors (expected during time-multiplexing)
     // Only show critical RMT errors (ESP_LOG_ERROR and above)
     esp_log_level_set("rmt", ESP_LOG_WARN);
@@ -409,8 +346,14 @@ void Rmt5PeripheralESPImpl::configureLogging() FL_NO_EXCEPT {
     FL_LOG_RMT("RMT5_PERIPH: Logging configured (RMT: WARN, cache: NONE)");
 }
 
-bool Rmt5PeripheralESPImpl::syncCache(void* buffer, size_t size) FL_NO_EXCEPT {
-    if (buffer == nullptr || size == 0) {
+bool Rmt5PeripheralESP::canTransmitDirectly(const void* buffer) const FL_NO_EXCEPT {
+    // Non-DMA encoders run from interrupt context and need internal SRAM.
+    // ChannelData already owns such memory when no PSRAM is available.
+    return esp_ptr_internal(buffer);
+}
+
+bool Rmt5PeripheralESP::syncCache(fl::span<u8> buffer) FL_NO_EXCEPT {
+    if (buffer.data() == nullptr || buffer.empty()) {
         return true;  // No-op for null/empty buffers
     }
 
@@ -436,8 +379,8 @@ bool Rmt5PeripheralESPImpl::syncCache(void* buffer, size_t size) FL_NO_EXCEPT {
     // The UNALIGNED flag allows the operation to proceed, relying on memory
     // barriers for ordering guarantees.
     esp_err_t err = esp_cache_msync(
-        buffer,
-        size,
+        buffer.data(),
+        buffer.size(),
         ESP_CACHE_MSYNC_FLAG_DIR_C2M | ESP_CACHE_MSYNC_FLAG_UNALIGNED);
 
     // Memory barrier: Ensure cache sync completes before DMA submission
@@ -469,7 +412,7 @@ bool Rmt5PeripheralESPImpl::syncCache(void* buffer, size_t size) FL_NO_EXCEPT {
 // DMA Memory Management
 //=============================================================================
 
-u8* Rmt5PeripheralESPImpl::allocateDmaBuffer(size_t size) FL_NO_EXCEPT {
+u8* Rmt5PeripheralESP::allocateDmaBuffer(size_t size) FL_NO_EXCEPT {
     if (size == 0) {
         FL_WARN("Rmt5PeripheralESP: Cannot allocate zero-size buffer");
         return nullptr;
@@ -492,7 +435,7 @@ u8* Rmt5PeripheralESPImpl::allocateDmaBuffer(size_t size) FL_NO_EXCEPT {
     return buffer;
 }
 
-void Rmt5PeripheralESPImpl::freeDmaBuffer(u8* buffer) FL_NO_EXCEPT {
+void Rmt5PeripheralESP::freeDmaBuffer(u8* buffer) FL_NO_EXCEPT {
     if (buffer == nullptr) {
         return;  // Safe no-op
     }
@@ -746,7 +689,7 @@ private:
 // Encoder Management Implementation
 //=============================================================================
 
-void* Rmt5PeripheralESPImpl::createEncoder(const ChipsetTiming& timing,
+void* Rmt5PeripheralESP::createEncoder(const ChipsetTiming& timing,
                                             u32 resolution_hz) FL_NO_EXCEPT {
     Rmt5EncoderImpl* encoder = Rmt5EncoderImpl::create(timing, resolution_hz);
     if (encoder == nullptr) {
@@ -758,7 +701,7 @@ void* Rmt5PeripheralESPImpl::createEncoder(const ChipsetTiming& timing,
     return static_cast<void*>(encoder->getHandle());
 }
 
-void Rmt5PeripheralESPImpl::deleteEncoder(void* encoder_handle) FL_NO_EXCEPT {
+void Rmt5PeripheralESP::deleteEncoder(void* encoder_handle) FL_NO_EXCEPT {
     if (encoder_handle == nullptr) {
         return;  // Safe no-op
     }
@@ -775,7 +718,7 @@ void Rmt5PeripheralESPImpl::deleteEncoder(void* encoder_handle) FL_NO_EXCEPT {
     FL_LOG_RMT("RMT5_PERIPH: Encoder deleted successfully");
 }
 
-bool Rmt5PeripheralESPImpl::resetEncoder(void* encoder_handle) FL_NO_EXCEPT {
+bool Rmt5PeripheralESP::resetEncoder(void* encoder_handle) FL_NO_EXCEPT {
     if (encoder_handle == nullptr) {
         FL_WARN("Rmt5PeripheralESP: Invalid encoder handle (nullptr)");
         return false;
