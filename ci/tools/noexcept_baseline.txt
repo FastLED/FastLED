@@ -4412,13 +4412,13 @@ src/fl/math/screenmap.cpp.hpp|ScreenMap::ScreenMap(const ScreenMap &other) {
 src/fl/math/screenmap.cpp.hpp|ScreenMap::ScreenMap(const vec2f *lut, u32 length, float diameter) : length(length), mDiameter(diameter) {
 src/fl/math/screenmap.cpp.hpp|ScreenMap::ScreenMap(int count, float diameter, fl::function<void(int, vec2f& pt_out)> func) : length(count), mDiameter(diameter) {
 src/fl/math/screenmap.cpp.hpp|ScreenMap::ScreenMap(u32 length, float mDiameter) : length(length), mDiameter(mDiameter) {
-src/fl/math/screenmap.cpp.hpp|bool ScreenMap::ParseJson(const char *jsonStrScreenMap, const char *screenMapName, ScreenMap *screenmap, string *err) {
-src/fl/math/screenmap.cpp.hpp|bool ScreenMap::ParseJson(const char *jsonStrScreenMap, fl::flat_map<string, ScreenMap> *segmentMaps, string *err) {
+src/fl/math/screenmap_json/screenmap_json.cpp.hpp|bool ScreenMap::ParseJson(const char *jsonStrScreenMap, const char *screenMapName, ScreenMap *screenmap, string *err) {
+src/fl/math/screenmap_json/screenmap_json.cpp.hpp|bool ScreenMap::ParseJson(const char *jsonStrScreenMap, fl::flat_map<string, ScreenMap> *segmentMaps, string *err) {
 src/fl/math/screenmap.cpp.hpp|bool ScreenMap::hasSourceXYMap() const {
 src/fl/math/screenmap.cpp.hpp|const XYMap* ScreenMap::getXYMap() const {
 src/fl/math/screenmap.cpp.hpp|const XYMapPtr& ScreenMap::getSourceXYMapPtr() const {
 src/fl/math/screenmap.cpp.hpp|const vec2f &ScreenMap::empty() {
-src/fl/math/screenmap.cpp.hpp|fl::vector<float> jsonArrayToFloatVector(const fl::json& jsonArray) {
+src/fl/math/screenmap_json/screenmap_json.cpp.hpp|fl::vector<float> jsonArrayToFloatVector(const fl::json& jsonArray) {
 src/fl/math/screenmap.cpp.hpp|float ScreenMap::getDiameter() const { return mDiameter; }
 src/fl/math/screenmap.cpp.hpp|u32 ScreenMap::getLength() const { return length; }
 src/fl/math/screenmap.cpp.hpp|vec2f ScreenMap::getBounds() const {
@@ -4427,8 +4427,8 @@ src/fl/math/screenmap.cpp.hpp|void ScreenMap::addOffset(const vec2f &p) {
 src/fl/math/screenmap.cpp.hpp|void ScreenMap::set(u16 index, const vec2f &p) {
 src/fl/math/screenmap.cpp.hpp|void ScreenMap::setDiameter(float diameter) { mDiameter = diameter; }
 src/fl/math/screenmap.cpp.hpp|void ScreenMap::setSourceXYMap(const fl::shared_ptr<XYMap>& xymap) {
-src/fl/math/screenmap.cpp.hpp|void ScreenMap::toJson(const fl::flat_map<string, ScreenMap> &segmentMaps, fl::json *doc) {
-src/fl/math/screenmap.cpp.hpp|void ScreenMap::toJsonStr(const fl::flat_map<string, ScreenMap> &segmentMaps, string *jsonBuffer) {
+src/fl/math/screenmap_json/screenmap_json.cpp.hpp|void ScreenMap::toJson(const fl::flat_map<string, ScreenMap> &segmentMaps, fl::json *doc) {
+src/fl/math/screenmap_json/screenmap_json.cpp.hpp|void ScreenMap::toJsonStr(const fl::flat_map<string, ScreenMap> &segmentMaps, string *jsonBuffer) {
 src/fl/math/transform.cpp.hpp|Matrix3x3f TransformFloat::compile() const {
 src/fl/math/transform.cpp.hpp|Transform16 Transform16::ToBounds(alpha16 max_value) {
 src/fl/math/transform.cpp.hpp|Transform16 Transform16::ToBounds(const vec2<alpha16> &min, const vec2<alpha16> &max, alpha16 rotation) {
@@ -6317,48 +6317,48 @@ src/fl/stl/istream.h|typename fl::enable_if< fl::is_same<T, fl::size>::value || 
 src/fl/stl/istream.h|void clear() {
 src/fl/stl/istream.h|void clear() { mFailed = false; }
 src/fl/stl/istream.h|void skipWhitespace();
-src/fl/stl/json.cpp.hpp|ArrayType classify_array(const json_array& arr) {
-src/fl/stl/json.cpp.hpp|JsonToken next_token(fl::span<const char>& out_value) {
-src/fl/stl/json.cpp.hpp|JsonToken scan_array_lookahead(fl::span<const char>& out_span) {
-src/fl/stl/json.cpp.hpp|JsonTokenizer(bool enable_lookahead = true) : mInput(nullptr), mLen(0), mPos(0), mEnableLookahead(enable_lookahead) {}
-src/fl/stl/json.cpp.hpp|ParseState on_token(JsonToken token, const fl::span<const char>& value) override {
-src/fl/stl/json.cpp.hpp|ParseState on_token(JsonToken token, const fl::span<const char>& value) override {
-src/fl/stl/json.cpp.hpp|bool has_escape_sequences(const fl::span<const char>& span) {
-src/fl/stl/json.cpp.hpp|bool is_valid() const {
-src/fl/stl/json.cpp.hpp|bool json_value::parse2_validate_only(const fl::string& txt) {
-src/fl/stl/json.cpp.hpp|bool json_value::parse2_validate_only(fl::string_view txt) {
-src/fl/stl/json.cpp.hpp|bool parse(const fl::string& input, JsonVisitor& visitor) {
-src/fl/stl/json.cpp.hpp|bool parse(fl::string_view input, JsonVisitor& visitor) {
-src/fl/stl/json.cpp.hpp|bool parse_float_array(const fl::span<const char>& span, fl::vector<T>& out_vec) {
-src/fl/stl/json.cpp.hpp|bool parse_int_array(const fl::span<const char>& span, fl::vector<T>& out_vec) {
-src/fl/stl/json.cpp.hpp|fl::shared_ptr<json_value> get_result() {
-src/fl/stl/json.cpp.hpp|fl::shared_ptr<json_value> json_value::parse2(const fl::string& txt) {
-src/fl/stl/json.cpp.hpp|fl::shared_ptr<json_value> optimize_array(fl::shared_ptr<json_value> array_val) {
-src/fl/stl/json.cpp.hpp|fl::string json::normalize_json_string(const char* jsonStr) {
-src/fl/stl/json.cpp.hpp|fl::string json::to_string_native() const {
-src/fl/stl/json.cpp.hpp|fl::string json_value::to_string() const {
-src/fl/stl/json.cpp.hpp|fl::string serializeValue(const json_value& value);
-src/fl/stl/json.cpp.hpp|fl::string unescape_string(const fl::span<const char>& span) {
-src/fl/stl/json.cpp.hpp|json_object& get_empty_json_obj() {
-src/fl/stl/json.cpp.hpp|json_value& get_null_json_value() {
-src/fl/stl/json.cpp.hpp|static bool canBeRepresentedAsFloat(double value) {
-src/fl/stl/json.cpp.hpp|virtual ParseState on_token(JsonToken token, const fl::span<const char>& value) = 0;
-src/fl/stl/json.cpp.hpp|void accept(const bool& b) { append(b ? "true" : "false"); }
-src/fl/stl/json.cpp.hpp|void accept(const fl::nullptr_t&) { append("null"); }
-src/fl/stl/json.cpp.hpp|void accept(const fl::string& s) { append_escaped(s); }
-src/fl/stl/json.cpp.hpp|void accept(const fl::vector<float>& floats) {
-src/fl/stl/json.cpp.hpp|void accept(const fl::vector<i16>& audio) {
-src/fl/stl/json.cpp.hpp|void accept(const fl::vector<u8>& bytes) {
-src/fl/stl/json.cpp.hpp|void accept(const float& f) {
-src/fl/stl/json.cpp.hpp|void accept(const i64& i) {
-src/fl/stl/json.cpp.hpp|void accept(const json_array& arr) {
-src/fl/stl/json.cpp.hpp|void accept(const json_object& obj) {
-src/fl/stl/json.cpp.hpp|void append(const char* str) {
-src/fl/stl/json.cpp.hpp|void append_escaped(const fl::string& str) {
-src/fl/stl/json.cpp.hpp|void append_str(const fl::string& str) {
-src/fl/stl/json.cpp.hpp|void push_value(const fl::shared_ptr<json_value>& val) {
-src/fl/stl/json.cpp.hpp|void serialize_value(const json_value* value) {
-src/fl/stl/json.cpp.hpp|void skip_whitespace() {
+src/fl/stl/json/json.cpp.hpp|ArrayType classify_array(const json_array& arr) {
+src/fl/stl/json/json.cpp.hpp|JsonToken next_token(fl::span<const char>& out_value) {
+src/fl/stl/json/json.cpp.hpp|JsonToken scan_array_lookahead(fl::span<const char>& out_span) {
+src/fl/stl/json/json.cpp.hpp|JsonTokenizer(bool enable_lookahead = true) : mInput(nullptr), mLen(0), mPos(0), mEnableLookahead(enable_lookahead) {}
+src/fl/stl/json/json.cpp.hpp|ParseState on_token(JsonToken token, const fl::span<const char>& value) override {
+src/fl/stl/json/json.cpp.hpp|ParseState on_token(JsonToken token, const fl::span<const char>& value) override {
+src/fl/stl/json/json.cpp.hpp|bool has_escape_sequences(const fl::span<const char>& span) {
+src/fl/stl/json/json.cpp.hpp|bool is_valid() const {
+src/fl/stl/json/json.cpp.hpp|bool json_value::parse2_validate_only(const fl::string& txt) {
+src/fl/stl/json/json.cpp.hpp|bool json_value::parse2_validate_only(fl::string_view txt) {
+src/fl/stl/json/json.cpp.hpp|bool parse(const fl::string& input, JsonVisitor& visitor) {
+src/fl/stl/json/json.cpp.hpp|bool parse(fl::string_view input, JsonVisitor& visitor) {
+src/fl/stl/json/json.cpp.hpp|bool parse_float_array(const fl::span<const char>& span, fl::vector<T>& out_vec) {
+src/fl/stl/json/json.cpp.hpp|bool parse_int_array(const fl::span<const char>& span, fl::vector<T>& out_vec) {
+src/fl/stl/json/json.cpp.hpp|fl::shared_ptr<json_value> get_result() {
+src/fl/stl/json/json.cpp.hpp|fl::shared_ptr<json_value> json_value::parse2(const fl::string& txt) {
+src/fl/stl/json/json.cpp.hpp|fl::shared_ptr<json_value> optimize_array(fl::shared_ptr<json_value> array_val) {
+src/fl/stl/json/json.cpp.hpp|fl::string json::normalize_json_string(const char* jsonStr) {
+src/fl/stl/json/json.cpp.hpp|fl::string json::to_string_native() const {
+src/fl/stl/json/json.cpp.hpp|fl::string json_value::to_string() const {
+src/fl/stl/json/json.cpp.hpp|fl::string serializeValue(const json_value& value);
+src/fl/stl/json/json.cpp.hpp|fl::string unescape_string(const fl::span<const char>& span) {
+src/fl/stl/json/json.cpp.hpp|json_object& get_empty_json_obj() {
+src/fl/stl/json/json.cpp.hpp|json_value& get_null_json_value() {
+src/fl/stl/json/json.cpp.hpp|static bool canBeRepresentedAsFloat(double value) {
+src/fl/stl/json/json.cpp.hpp|virtual ParseState on_token(JsonToken token, const fl::span<const char>& value) = 0;
+src/fl/stl/json/json.cpp.hpp|void accept(const bool& b) { append(b ? "true" : "false"); }
+src/fl/stl/json/json.cpp.hpp|void accept(const fl::nullptr_t&) { append("null"); }
+src/fl/stl/json/json.cpp.hpp|void accept(const fl::string& s) { append_escaped(s); }
+src/fl/stl/json/json.cpp.hpp|void accept(const fl::vector<float>& floats) {
+src/fl/stl/json/json.cpp.hpp|void accept(const fl::vector<i16>& audio) {
+src/fl/stl/json/json.cpp.hpp|void accept(const fl::vector<u8>& bytes) {
+src/fl/stl/json/json.cpp.hpp|void accept(const float& f) {
+src/fl/stl/json/json.cpp.hpp|void accept(const i64& i) {
+src/fl/stl/json/json.cpp.hpp|void accept(const json_array& arr) {
+src/fl/stl/json/json.cpp.hpp|void accept(const json_object& obj) {
+src/fl/stl/json/json.cpp.hpp|void append(const char* str) {
+src/fl/stl/json/json.cpp.hpp|void append_escaped(const fl::string& str) {
+src/fl/stl/json/json.cpp.hpp|void append_str(const fl::string& str) {
+src/fl/stl/json/json.cpp.hpp|void push_value(const fl::shared_ptr<json_value>& val) {
+src/fl/stl/json/json.cpp.hpp|void serialize_value(const json_value* value) {
+src/fl/stl/json/json.cpp.hpp|void skip_whitespace() {
 src/fl/stl/json/types.h|void operator()(const fl::nullptr_t&) {
 src/fl/stl/malloc.cpp.hpp|int abs(int x) {
 src/fl/stl/malloc.cpp.hpp|void free(void* ptr) {
@@ -6454,7 +6454,6 @@ src/fl/stl/string.cpp.hpp|string &string::append(const CRGB &rgb) {
 src/fl/stl/string.cpp.hpp|string &string::append(const Tile2x2_u8_wrap &tile) {
 src/fl/stl/string.cpp.hpp|string &string::append(const XYMap &map) {
 src/fl/stl/string.cpp.hpp|string &string::append(const audio::fft::Bins &str) {
-src/fl/stl/string.cpp.hpp|string &string::append(const json& val) {
 src/fl/stl/string.cpp.hpp|string &string::append(const json_value& val) {
 src/fl/stl/string.cpp.hpp|string &string::appendCRGB(const CRGB &rgb) {
 src/fl/stl/string.cpp.hpp|string& string::intern() {
@@ -7090,3 +7089,4 @@ src/fl/video/video_impl.h|void setTimeScale(float timeScale);
 # Generated with:
 # Known missing FL_NO_EXCEPT signatures for ci/tools/check_noexcept.py.
 # New entries fail the default unified C++ linter.
+src/fl/channels/dynamic/cfastled.cpp.hpp|void CFastLED::enableAllDrivers() {

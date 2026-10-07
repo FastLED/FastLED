@@ -10,6 +10,10 @@
 #include "fl/channels/config.h"
 #include "fl/channels/manager.h"
 #include "fl/log/log.h"
+void CFastLED::enableAllDrivers() {
+	fl::enableAllDrivers();
+}
+
 fl::ChannelPtr CFastLED::add(const fl::ChannelConfig& config) {
     // Issue #2459: the non-template `FastLED.add(cfg)` path is the runtime-
     // selection mode. To make sure `cfg.options.mBus` (or priority dispatch

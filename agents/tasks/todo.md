@@ -224,6 +224,29 @@ tables drop by 7,724 B. Modern Blink 304,563 B; gist 297,419 B; S3 local
 full examples, full Python, lint and review pass. Legacy multiple SPI buses/RX
 and modern SPI/RX examples compile. Reports and maps: ninth-combined-*.
 
+Ninth source published at 442efc18f4; issue comment and PR updated with the
+corrected legacy driver qualification. Hosted run 37602445886 passes; its S3 image is 356,223 B (local +16 B).
+The baseline now claims that exact measured saving. Issue #4707 remains open.
+
+Tenth pass plan:
+- [x] Isolate optional driver dispatcher and its CFastLED facade.
+- [x] Isolate JSON/string formatting and ScreenMap JSON bridges.
+- [x] Isolate shared UI implementations while preserving explicit feature use.
+- [x] Measure matching legacy/modern Blink, gist and S3 images; verify RMT4.
+- [ ] Run integrated lint, sanitizer/native examples, Python and SDK examples;
+  review and publish measured results.
+
+Tenth local measurements: legacy real-RMT4 Blink 340,757 B / 17,648 B
+static DRAM, another 15,812 B saved. Modern Blink 304,547 B; gist 297,399 B;
+S3 356,171 B. RAM unchanged. Unwind tables drop by 15,776 B; extra
+FastLED unwind tables versus 3.10.3 are now 52,896 B of the 78,000 B gap.
+Integrated lint, all 322 sanitizer units/96 examples, full Python (301.70 s),
+and legacy/modern SPI/RX builds pass. Root code review is clean. The separate
+full example wrapper has completed examples and is finishing its slow Python
+selection. Source is ready for feature-branch publication; hosted gate pending.
+JSON remains retained by optional ActiveStripData in the platform unity unit;
+its independent subtree is the next concrete closure after this validation.
+
 Use the default dynamic driver configuration. Keep scheduler pumping, network
 yielding, multiple strips, and reconfiguration available. Optimize symbol reachability
 and redundant state first, then use actual board images to decide further changes.
