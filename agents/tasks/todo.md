@@ -82,7 +82,7 @@ timed out on both versions while direct ownership accounting passed.
 Third pass:
 - [x] Trial unified TX/RX accounting without changing global/shared pool limits.
 - [x] Exercise real global-pool allocation, reservations, rollback and reset natively.
-- [x] Validate retained test coverage and publish the measured rejection.
+- [x] Validate retained test coverage and publish the measurements (corrected below).
 
 Unified accounting saved 8 B static RAM and default image flash:
 Blink 306,119 -> 306,055 B (-64 B), S3 357,663 -> 357,591 B (-72 B).
@@ -99,7 +99,7 @@ Fourth pass:
   the same mixed-metric error.
 - [x] Remove unnecessary locale initialization roots from scoped locks and
   isolate unused ESP32 condition-variable code without changing synchronization.
-- [ ] Measure matching default images, validate behavior/build routing, review,
+- [x] Measure matching default images, validate behavior/build routing, review,
   and publish the retained changes and remaining regression.
 
 Fourth-pass local image_flash: Blink 305,127 B, gist 298,023 B, S3 356,675 B.
@@ -115,6 +115,15 @@ current-tree C++ lint and the 18-file code review pass.
 Hosted run 37584376133 measures image_flash 356,691 B, 16 B above local,
 and static RAM 77,392 B. Pin this exact value; its first gate failed only
 because the additional 988 B saving had not yet been claimed in the ratchet.
+Full Python rerun passes 1,750 tests after official WASM clean regeneration
+repairs a stale include-path cache; WASM Blink also builds. Corrected hosted
+gate 37584819636 passed completely at 0c3a21114e. Both prior review threads
+are resolved. Full platform CI remains a separate gate before merging.
+
+Next candidate: private EngineEvents listener inline capacity 16 -> 4 would
+save 96 B singleton RAM and 96 B per snapshot stack frame on ESP32 while
+preserving unlimited spillover. Investigate allocation/per-frame costs and
+cover more than 16 listeners, priority and snapshot mutation before retaining.
 
 Use the default dynamic driver configuration. Keep scheduler pumping, network
 yielding, multiple strips, and reconfiguration available. Optimize symbol reachability
