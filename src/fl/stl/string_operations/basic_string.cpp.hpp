@@ -872,4 +872,23 @@ void basic_string::setSharedHolder(const fl::shared_ptr<StringHolder>& holder) {
     mStorage = NotNullStringHolderPtr(holder);
 }
 
+// Optional hexadecimal and octal append operations.
+
+basic_string& basic_string::appendHex(i32 val) { char b[64]={0}; int l=fl::itoa(val,b,16); write(b,l); return *this; }
+basic_string& basic_string::appendHex(u32 val) { char b[64]={0}; int l=fl::utoa32(val,b,16); write(b,l); return *this; }
+basic_string& basic_string::appendHex(i64 val) { char b[64]={0}; int l=fl::itoa64(val,b,16); write(b,l); return *this; }
+basic_string& basic_string::appendHex(u64 val) { char b[64]={0}; int l=fl::utoa64(val,b,16); write(b,l); return *this; }
+basic_string& basic_string::appendHex(i16 val) { return appendHex(static_cast<i32>(val)); }
+basic_string& basic_string::appendHex(u16 val) { return appendHex(static_cast<u32>(val)); }
+basic_string& basic_string::appendHex(i8 val) { return appendHex(static_cast<i32>(val)); }
+basic_string& basic_string::appendHex(u8 val) { return appendHex(static_cast<u32>(val)); }
+basic_string& basic_string::appendOct(i32 val) { char b[64]={0}; int l=fl::itoa(val,b,8); write(b,l); return *this; }
+basic_string& basic_string::appendOct(u32 val) { char b[64]={0}; int l=fl::utoa32(val,b,8); write(b,l); return *this; }
+basic_string& basic_string::appendOct(i64 val) { char b[64]={0}; int l=fl::itoa64(val,b,8); write(b,l); return *this; }
+basic_string& basic_string::appendOct(u64 val) { char b[64]={0}; int l=fl::utoa64(val,b,8); write(b,l); return *this; }
+basic_string& basic_string::appendOct(i16 val) { return appendOct(static_cast<i32>(val)); }
+basic_string& basic_string::appendOct(u16 val) { return appendOct(static_cast<u32>(val)); }
+basic_string& basic_string::appendOct(i8 val) { return appendOct(static_cast<i32>(val)); }
+basic_string& basic_string::appendOct(u8 val) { return appendOct(static_cast<u32>(val)); }
+
 } // namespace fl
