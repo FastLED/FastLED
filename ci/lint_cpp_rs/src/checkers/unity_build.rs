@@ -103,6 +103,7 @@ const UNITY_EXPECTED_BUILD_FILES: &[&str] = &[
     "fl/build/platforms.arm.teensy+.cpp",
     "fl/build/platforms.shared.coroutine_context+.cpp",
     "fl/build/platforms.shared.mock+.cpp",
+    "fl/build/platforms.shared.bitbang+.cpp",
     "fl/build/platforms.shared.active_strip_data+.cpp",
     "fl/build/platforms.channel_drivers+.cpp",
     "fl/build/platforms.shared.spi_manager.operations+.cpp",

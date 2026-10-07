@@ -12,5 +12,4 @@
 #include "platforms/shared/spi_types.cpp.hpp"
 
 // begin sub directory includes
-#include "platforms/shared/bitbang/_build.cpp.hpp"
 #include "platforms/shared/spi_bitbang/_build.cpp.hpp"
