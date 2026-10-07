@@ -11,6 +11,7 @@
 #include "fl/channels/rx/decode_ws2812.h"
 #include "fl/system/delay.h"
 #include "fl/stl/cstring.h"
+#include "fl/stl/singleton.h"
 // IWYU pragma: begin_keep
 #include "hardware/clocks.h"
 #include "hardware/gpio.h"
@@ -30,9 +31,6 @@ struct PioRxCaptureBuffers {
     u32 words[kRpPioRxEdgeCapacity];
     RpPioRxEdgeStorage edges;
 };
-
-// FL_LINT_ALLOW_GLOBAL(static DMA capture target; must stay in static storage, not heap or lazy-init)
-PioRxCaptureBuffers gPioRxCaptureBuffers;
 
 const pio_instr kPioRxDurationTemplate[kPioRxProgramLength] = {};
 
@@ -192,8 +190,13 @@ bool RpPioRxDevice::begin(const RxConfig& config) FL_NO_EXCEPT {
     // DMA needs one stable, contiguous destination. This shared pool is
     // exclusive while a capture is armed; PIO TX and PIO RX use separate
     // resource-manager claims, so a PIO1 TX can run while PIO0 owns it.
-    mDmaWords = gPioRxCaptureBuffers.words;
-    mEdges = &gPioRxCaptureBuffers.edges;
+    // Singleton constructs in aligned static storage without allocating on
+    // the heap. On-use construction also lets TX-only images discard this
+    // RX pool and its constructor. The exclusive capture claim above protects
+    // initialization and use of the shared pool.
+    auto& capture_buffers = Singleton<PioRxCaptureBuffers>::instance();
+    mDmaWords = capture_buffers.words;
+    mEdges = &capture_buffers.edges;
     mEdges->clear();
     fl::memset(mDmaWords, 0, mDmaWordCount * sizeof(*mDmaWords));
     dma_channel_config dma_config = dma_channel_get_default_config(static_cast<uint>(dma_channel));
