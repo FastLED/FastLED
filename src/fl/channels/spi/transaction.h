@@ -40,25 +40,25 @@ public:
     /// @brief Wait for transaction to complete
     /// @param timeout_ms Maximum time to wait
     /// @returns true if completed, false on timeout
-    bool wait(u32 timeout_ms = (fl::numeric_limits<u32>::max)());
+    bool wait(u32 timeout_ms = (fl::numeric_limits<u32>::max)()) FL_NO_EXCEPT;
 
     /// @brief Check if transaction is complete
     /// @returns true if done, false if still in progress
-    bool isDone() const;
+    bool isDone() const FL_NO_EXCEPT;
 
     /// @brief Check if transaction is still in progress
     /// @returns true if pending, false if complete
-    bool isPending() const;
+    bool isPending() const FL_NO_EXCEPT;
 
     /// @brief Cancel pending transaction (if supported by platform)
     /// @returns true if cancelled, false if not cancellable
     /// @note Not all platforms support cancellation
-    bool cancel();
+    bool cancel() FL_NO_EXCEPT;
 
     /// @brief Get result of completed transaction
     /// @returns Result indicating success or error
     /// @warning Only valid after isDone() returns true
-    fl::optional<fl::task::Error> getResult() const;
+    fl::optional<fl::task::Error> getResult() const FL_NO_EXCEPT;
 
     /// @brief Destructor - automatically waits for completion
     /// @note Ensures transaction completes before destruction

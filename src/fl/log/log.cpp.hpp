@@ -98,7 +98,7 @@ FL_NO_INLINE void log_emit_literal(log_kind kind, const char* file, int line,
 // Debug Output Helpers
 // ============================================================================
 
-const char *fastled_file_offset(const char *file) {
+const char *fastled_file_offset(const char *file) FL_NO_EXCEPT {
     const char *p = file;
     const char *last_slash = nullptr;
 

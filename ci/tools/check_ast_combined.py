@@ -37,6 +37,7 @@ from ci.tools.check_noexcept import (
     NoexceptCheckError,
     NoexceptHit,
     _find_clang_query,
+    _raise_on_query_errors,
 )
 from ci.tools.check_noexcept import (
     _read_source_signature as _noexcept_read_source_signature,
@@ -109,14 +110,7 @@ def _run_combined_clang_query(
         errors="replace",
     )
     output = result.stdout + "\n" + result.stderr
-    if result.returncode != 0:
-        raise NoexceptCheckError(output.strip() or "clang-query failed")
-    if (
-        "Error parsing argument" in output
-        or "Error parsing matcher" in output
-        or "Matcher not found" in output
-    ):
-        raise NoexceptCheckError(output.strip())
+    _raise_on_query_errors(result.returncode, output)
 
     noexcept_hits: list[NoexceptHit] = []
     array_param_hits: list[ArrayParamHit] = []

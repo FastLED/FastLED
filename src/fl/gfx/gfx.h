@@ -1,5 +1,7 @@
 #pragma once
 
+#include "fl/stl/noexcept.h"
+
 /// @file fl/gfx/gfx.h
 /// @brief 2D antialiased graphics for LED matrices
 ///
@@ -77,26 +79,26 @@ class Canvas {
 
     template<typename Coord>
     FASTLED_FORCE_INLINE void drawLine(const RGB_T& color, Coord x0, Coord y0, Coord x1, Coord y1,
-                                       DrawMode mode = DrawMode::DRAW_MODE_BLEND) {
+                                       DrawMode mode = DrawMode::DRAW_MODE_BLEND) FL_NO_EXCEPT {
         mImpl.drawLine(color, x0, y0, x1, y1, mode);
     }
 
     template<typename Coord>
     FASTLED_FORCE_INLINE void drawDisc(const RGB_T& color, Coord cx, Coord cy, Coord r,
-                                       DrawMode mode = DrawMode::DRAW_MODE_BLEND) {
+                                       DrawMode mode = DrawMode::DRAW_MODE_BLEND) FL_NO_EXCEPT {
         mImpl.drawDisc(color, cx, cy, r, mode);
     }
 
     template<typename Coord>
     FASTLED_FORCE_INLINE void drawRing(const RGB_T& color, Coord cx, Coord cy, Coord r, Coord thickness,
-                                       DrawMode mode = DrawMode::DRAW_MODE_BLEND) {
+                                       DrawMode mode = DrawMode::DRAW_MODE_BLEND) FL_NO_EXCEPT {
         mImpl.drawRing(color, cx, cy, r, thickness, mode);
     }
 
     template<typename Coord>
     FASTLED_FORCE_INLINE void drawStrokeLine(const RGB_T& color, Coord x0, Coord y0, Coord x1, Coord y1,
                                              Coord thickness, LineCap cap = LineCap::FLAT,
-                                             DrawMode mode = DrawMode::DRAW_MODE_BLEND) {
+                                             DrawMode mode = DrawMode::DRAW_MODE_BLEND) FL_NO_EXCEPT {
         mImpl.drawStrokeLine(color, x0, y0, x1, y1, thickness, cap, mode);
     }
 };

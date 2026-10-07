@@ -7,6 +7,7 @@
 #include "fl/stl/align.h"
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/stdint.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -39,7 +40,7 @@ struct FL_ALIGNAS(4) Wave3BitExpansionLut {
 ///
 /// @param timing ChipsetTiming struct with T1, T2, T3 in nanoseconds
 /// @return true if wave3 encoding is possible for this chipset
-bool canUseWave3(const ChipsetTiming& timing);
+bool canUseWave3(const ChipsetTiming& timing) FL_NO_EXCEPT;
 
 /// @brief Calculate the clock frequency for wave3 encoding
 ///
@@ -47,7 +48,7 @@ bool canUseWave3(const ChipsetTiming& timing);
 ///
 /// @param timing ChipsetTiming struct with T1, T2, T3 in nanoseconds
 /// @return Clock frequency in Hz (e.g., 2400000 for WS2812)
-u32 wave3ClockFrequencyHz(const ChipsetTiming& timing);
+u32 wave3ClockFrequencyHz(const ChipsetTiming& timing) FL_NO_EXCEPT;
 
 /// @brief Build a Wave3BitExpansionLut from chipset timing data
 ///
@@ -56,50 +57,50 @@ u32 wave3ClockFrequencyHz(const ChipsetTiming& timing);
 ///
 /// @param timing ChipsetTiming struct containing T1, T2, T3 in nanoseconds
 /// @return Populated Wave3BitExpansionLut lookup table (32 bytes)
-Wave3BitExpansionLut buildWave3ExpansionLUT(const ChipsetTiming& timing);
+Wave3BitExpansionLut buildWave3ExpansionLUT(const ChipsetTiming& timing) FL_NO_EXCEPT;
 
 // Forward declaration; implementation is out-of-line in detail/wave3.cpp.hpp
 void wave3(u8 lane,
            const Wave3BitExpansionLut& lut,
-           u8 (&FL_RESTRICT_PARAM output)[sizeof(Wave3Byte)]);
+           u8 (&FL_RESTRICT_PARAM output)[sizeof(Wave3Byte)]) FL_NO_EXCEPT;
 
 // Public transposition functions (implementations in wave3.cpp.hpp)
 void wave3Transpose_2(
     const u8 (&FL_RESTRICT_PARAM lanes)[2],
     const Wave3BitExpansionLut& lut,
-    u8 (&FL_RESTRICT_PARAM output)[2 * sizeof(Wave3Byte)]);
+    u8 (&FL_RESTRICT_PARAM output)[2 * sizeof(Wave3Byte)]) FL_NO_EXCEPT;
 
 void wave3Transpose_4(
     const u8 (&FL_RESTRICT_PARAM lanes)[4],
     const Wave3BitExpansionLut& lut,
-    u8 (&FL_RESTRICT_PARAM output)[4 * sizeof(Wave3Byte)]);
+    u8 (&FL_RESTRICT_PARAM output)[4 * sizeof(Wave3Byte)]) FL_NO_EXCEPT;
 
 void wave3Transpose_8(
     const u8 (&FL_RESTRICT_PARAM lanes)[8],
     const Wave3BitExpansionLut& lut,
-    u8 (&FL_RESTRICT_PARAM output)[8 * sizeof(Wave3Byte)]);
+    u8 (&FL_RESTRICT_PARAM output)[8 * sizeof(Wave3Byte)]) FL_NO_EXCEPT;
 
 void wave3Transpose_16(
     const u8 (&FL_RESTRICT_PARAM lanes)[16],
     const Wave3BitExpansionLut& lut,
-    u8 (&FL_RESTRICT_PARAM output)[16 * sizeof(Wave3Byte)]);
+    u8 (&FL_RESTRICT_PARAM output)[16 * sizeof(Wave3Byte)]) FL_NO_EXCEPT;
 
 // Untranspose functions (for testing - reverse the transpose operation)
 void wave3Untranspose_2(
     const u8 (&FL_RESTRICT_PARAM transposed)[2 * sizeof(Wave3Byte)],
-    u8 (&FL_RESTRICT_PARAM output)[2 * sizeof(Wave3Byte)]);
+    u8 (&FL_RESTRICT_PARAM output)[2 * sizeof(Wave3Byte)]) FL_NO_EXCEPT;
 
 void wave3Untranspose_4(
     const u8 (&FL_RESTRICT_PARAM transposed)[4 * sizeof(Wave3Byte)],
-    u8 (&FL_RESTRICT_PARAM output)[4 * sizeof(Wave3Byte)]);
+    u8 (&FL_RESTRICT_PARAM output)[4 * sizeof(Wave3Byte)]) FL_NO_EXCEPT;
 
 void wave3Untranspose_8(
     const u8 (&FL_RESTRICT_PARAM transposed)[8 * sizeof(Wave3Byte)],
-    u8 (&FL_RESTRICT_PARAM output)[8 * sizeof(Wave3Byte)]);
+    u8 (&FL_RESTRICT_PARAM output)[8 * sizeof(Wave3Byte)]) FL_NO_EXCEPT;
 
 void wave3Untranspose_16(
     const u8 (&FL_RESTRICT_PARAM transposed)[16 * sizeof(Wave3Byte)],
-    u8 (&FL_RESTRICT_PARAM output)[16 * sizeof(Wave3Byte)]);
+    u8 (&FL_RESTRICT_PARAM output)[16 * sizeof(Wave3Byte)]) FL_NO_EXCEPT;
 
 } // namespace fl
 

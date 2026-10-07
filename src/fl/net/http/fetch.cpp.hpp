@@ -46,13 +46,13 @@ namespace http {
 // Promise storage moved to FetchManager singleton
 
 // Use existing WASM fetch infrastructure
-void fetch(const fl::string& url, const FetchCallback& callback) {
+void fetch(const fl::string& url, const FetchCallback& callback) FL_NO_EXCEPT {
     // Use the existing WASM fetch implementation - no conversion needed since both use fl::response
     ::fl::wasm_fetch.get(url).response(callback);
 }
 
 // Internal helper to execute a fetch request and return a promise
-fl::task::Promise<Response> execute_fetch_request(const fl::string& url, const FetchOptions& request) {
+fl::task::Promise<Response> execute_fetch_request(const fl::string& url, const FetchOptions& request) FL_NO_EXCEPT {
     // Create a promise for this request
     auto promise = fl::task::Promise<Response>::create();
     
@@ -96,7 +96,7 @@ namespace {
 
 /*
 // Helper: Perform synchronous HTTP request (DEPRECATED - now async with fl::task)
-response perform_http_request(const fl::string& url, const FetchOptions& request) {
+response perform_http_request(const fl::string& url, const FetchOptions& request) FL_NO_EXCEPT {
     ParsedURL parsed = parse_url(url);
 
     if (!parsed.valid) {
@@ -347,7 +347,7 @@ response perform_http_request(const fl::string& url, const FetchOptions& request
 
 } // anonymous namespace
 
-void fetch(const fl::string& url, const FetchCallback& callback) {
+void fetch(const fl::string& url, const FetchCallback& callback) FL_NO_EXCEPT {
     // Use async execute_fetch_request and attach callback to promise
     execute_fetch_request(url, FetchOptions(url))
         .then([callback](const Response& resp) {
@@ -362,7 +362,7 @@ void fetch(const fl::string& url, const FetchCallback& callback) {
 }
 
 // Internal helper to execute a fetch request and return a promise
-fl::task::Promise<Response> execute_fetch_request(const fl::string& url, const FetchOptions& request) {
+fl::task::Promise<Response> execute_fetch_request(const fl::string& url, const FetchOptions& request) FL_NO_EXCEPT {
     // Create promise for this request
     auto promise = fl::task::Promise<Response>::create();
 
@@ -401,14 +401,14 @@ fl::task::Promise<Response> execute_fetch_request(const fl::string& url, const F
 #else
 // ========== True Stub Implementation (no networking) ==========
 
-void fetch(const fl::string& url, const FetchCallback& callback) {
+void fetch(const fl::string& url, const FetchCallback& callback) FL_NO_EXCEPT {
     (void)url;
     Response resp(501, "Not Implemented");
     resp.set_text("HTTP fetch not supported on this platform");
     callback(resp);
 }
 
-fl::task::Promise<Response> execute_fetch_request(const fl::string& url, const FetchOptions& request) {
+fl::task::Promise<Response> execute_fetch_request(const fl::string& url, const FetchOptions& request) FL_NO_EXCEPT {
     FL_UNUSED(request);
     FL_UNUSED(url);  // only consumed by FL_WARN, a no-op on small platforms
     FL_WARN("HTTP fetch is not supported on this platform. URL: " << url);
@@ -435,17 +435,17 @@ public:
         EngineEvents::removeListener(this);
     }
 
-    void onEndFrame() override {
+    void onEndFrame() FL_NO_EXCEPT override {
         // Update all async tasks (fetch, timers, etc.) at the end of each frame
         fl::task::run(0);
     }
 };
 
-FetchManager& FetchManager::instance() {
+FetchManager& FetchManager::instance() FL_NO_EXCEPT {
     return fl::Singleton<FetchManager>::instance();
 }
 
-void FetchManager::register_promise(const fl::task::Promise<Response>& promise) {
+void FetchManager::register_promise(const fl::task::Promise<Response>& promise) FL_NO_EXCEPT {
     // Auto-register with async system and engine listener on first promise
     if (mActivePromises.empty()) {
         task::Executor::instance().register_runner(this);
@@ -459,7 +459,7 @@ void FetchManager::register_promise(const fl::task::Promise<Response>& promise) 
     mActivePromises.push_back(promise);
 }
 
-void FetchManager::update() {
+void FetchManager::update() FL_NO_EXCEPT {
     // Update all active promises first
     for (auto& promise : mActivePromises) {
         if (promise.valid()) {
@@ -481,19 +481,19 @@ void FetchManager::update() {
     }
 }
 
-bool FetchManager::has_active_tasks() const {
+bool FetchManager::has_active_tasks() const FL_NO_EXCEPT {
     return !mActivePromises.empty();
 }
 
-size_t FetchManager::active_task_count() const {
+size_t FetchManager::active_task_count() const FL_NO_EXCEPT {
     return mActivePromises.size();
 }
 
-fl::size FetchManager::active_requests() const {
+fl::size FetchManager::active_requests() const FL_NO_EXCEPT {
     return mActivePromises.size();
 }
 
-void FetchManager::cleanup_completed_promises() {
+void FetchManager::cleanup_completed_promises() FL_NO_EXCEPT {
     // Rebuild vector without completed promises
     fl::vector<fl::task::Promise<Response>> active_promises;
     for (const auto& promise : mActivePromises) {
@@ -509,7 +509,7 @@ void FetchManager::cleanup_completed_promises() {
 
 // ========== Public API Functions ==========
 
-fl::task::Promise<Response> fetch_get(const fl::string& url, const FetchOptions& request) {
+fl::task::Promise<Response> fetch_get(const fl::string& url, const FetchOptions& request) FL_NO_EXCEPT {
     // Create a new request with GET method
     FetchOptions get_request(url, RequestOptions("GET"));
     
@@ -526,7 +526,7 @@ fl::task::Promise<Response> fetch_get(const fl::string& url, const FetchOptions&
     return execute_fetch_request(url, get_request);
 }
 
-fl::task::Promise<Response> fetch_post(const fl::string& url, const FetchOptions& request) {
+fl::task::Promise<Response> fetch_post(const fl::string& url, const FetchOptions& request) FL_NO_EXCEPT {
     // Create a new request with POST method
     FetchOptions post_request(url, RequestOptions("POST"));
     
@@ -543,7 +543,7 @@ fl::task::Promise<Response> fetch_post(const fl::string& url, const FetchOptions
     return execute_fetch_request(url, post_request);
 }
 
-fl::task::Promise<Response> fetch_put(const fl::string& url, const FetchOptions& request) {
+fl::task::Promise<Response> fetch_put(const fl::string& url, const FetchOptions& request) FL_NO_EXCEPT {
     // Create a new request with PUT method
     FetchOptions put_request(url, RequestOptions("PUT"));
     
@@ -560,7 +560,7 @@ fl::task::Promise<Response> fetch_put(const fl::string& url, const FetchOptions&
     return execute_fetch_request(url, put_request);
 }
 
-fl::task::Promise<Response> fetch_delete(const fl::string& url, const FetchOptions& request) {
+fl::task::Promise<Response> fetch_delete(const fl::string& url, const FetchOptions& request) FL_NO_EXCEPT {
     // Create a new request with DELETE method
     FetchOptions delete_request(url, RequestOptions("DELETE"));
     
@@ -577,7 +577,7 @@ fl::task::Promise<Response> fetch_delete(const fl::string& url, const FetchOptio
     return execute_fetch_request(url, delete_request);
 }
 
-fl::task::Promise<Response> fetch_head(const fl::string& url, const FetchOptions& request) {
+fl::task::Promise<Response> fetch_head(const fl::string& url, const FetchOptions& request) FL_NO_EXCEPT {
     // Create a new request with HEAD method
     FetchOptions head_request(url, RequestOptions("HEAD"));
     
@@ -594,7 +594,7 @@ fl::task::Promise<Response> fetch_head(const fl::string& url, const FetchOptions
     return execute_fetch_request(url, head_request);
 }
 
-fl::task::Promise<Response> fetch_http_options(const fl::string& url, const FetchOptions& request) {
+fl::task::Promise<Response> fetch_http_options(const fl::string& url, const FetchOptions& request) FL_NO_EXCEPT {
     // Create a new request with OPTIONS method
     FetchOptions options_request(url, RequestOptions("OPTIONS"));
     
@@ -611,7 +611,7 @@ fl::task::Promise<Response> fetch_http_options(const fl::string& url, const Fetc
     return execute_fetch_request(url, options_request);
 }
 
-fl::task::Promise<Response> fetch_patch(const fl::string& url, const FetchOptions& request) {
+fl::task::Promise<Response> fetch_patch(const fl::string& url, const FetchOptions& request) FL_NO_EXCEPT {
     // Create a new request with PATCH method
     FetchOptions patch_request(url, RequestOptions("PATCH"));
     
@@ -628,7 +628,7 @@ fl::task::Promise<Response> fetch_patch(const fl::string& url, const FetchOption
     return execute_fetch_request(url, patch_request);
 }
 
-fl::task::Promise<Response> fetch_request(const fl::string& url, const RequestOptions& options) {
+fl::task::Promise<Response> fetch_request(const fl::string& url, const RequestOptions& options) FL_NO_EXCEPT {
     // Create a FetchOptions with the provided options
     FetchOptions request(url, options);
     
@@ -636,19 +636,19 @@ fl::task::Promise<Response> fetch_request(const fl::string& url, const RequestOp
     return execute_fetch_request(url, request);
 }
 
-void fetch_update() {
+void fetch_update() FL_NO_EXCEPT {
     // Legacy function - use fl::task::run() for new code
     // This provides backwards compatibility for existing code
     fl::task::run(0);
 }
 
-fl::size fetch_active_requests() {
+fl::size fetch_active_requests() FL_NO_EXCEPT {
     return FetchManager::instance().active_requests();
 }
 
 // ========== Response Class Method Implementations ==========
 
-fl::json Response::json() const {
+fl::json Response::json() const FL_NO_EXCEPT {
     if (!mJsonParsed) {
         if (is_json() || mBody.find("{") != fl::string::npos || mBody.find("[") != fl::string::npos) {
             mCachedJson = parse_json_body();

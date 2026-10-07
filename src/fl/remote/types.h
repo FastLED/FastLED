@@ -3,6 +3,7 @@
 #include "fl/stl/json.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/string.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -23,7 +24,7 @@ struct RpcResult {
      * @brief Serialize result to JSON object (compact single-line format)
      * @return JSON object with all result fields
      */
-    fl::json to_json() const;
+    fl::json to_json() const FL_NO_EXCEPT;
 };
 
 /**
@@ -38,15 +39,15 @@ enum class RemoteClearFlags : u8 {
 };
 
 // Bitwise operators for RemoteClearFlags
-inline RemoteClearFlags operator|(RemoteClearFlags a, RemoteClearFlags b) {
+inline RemoteClearFlags operator|(RemoteClearFlags a, RemoteClearFlags b) FL_NO_EXCEPT {
     return static_cast<RemoteClearFlags>(static_cast<u8>(a) | static_cast<u8>(b));
 }
 
-inline RemoteClearFlags operator&(RemoteClearFlags a, RemoteClearFlags b) {
+inline RemoteClearFlags operator&(RemoteClearFlags a, RemoteClearFlags b) FL_NO_EXCEPT {
     return static_cast<RemoteClearFlags>(static_cast<u8>(a) & static_cast<u8>(b));
 }
 
-inline bool operator!(RemoteClearFlags flags) {
+inline bool operator!(RemoteClearFlags flags) FL_NO_EXCEPT {
     return static_cast<u8>(flags) == 0;
 }
 

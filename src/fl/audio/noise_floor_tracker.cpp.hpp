@@ -6,23 +6,23 @@
 namespace fl {
 namespace audio {
 
-NoiseFloorTracker::NoiseFloorTracker() {
+NoiseFloorTracker::NoiseFloorTracker() FL_NO_EXCEPT {
     configure(NoiseFloorTrackerConfig{});
     mStats.currentFloor = mCurrentFloor;  // Initialize stats to match internal state
 }
 
-NoiseFloorTracker::NoiseFloorTracker(const NoiseFloorTrackerConfig& config) {
+NoiseFloorTracker::NoiseFloorTracker(const NoiseFloorTrackerConfig& config) FL_NO_EXCEPT {
     configure(config);
     mStats.currentFloor = mCurrentFloor;  // Initialize stats to match internal state
 }
 
 NoiseFloorTracker::~NoiseFloorTracker() FL_NO_EXCEPT = default;
 
-void NoiseFloorTracker::configure(const NoiseFloorTrackerConfig& config) {
+void NoiseFloorTracker::configure(const NoiseFloorTrackerConfig& config) FL_NO_EXCEPT {
     mConfig = config;
 }
 
-void NoiseFloorTracker::reset() {
+void NoiseFloorTracker::reset() FL_NO_EXCEPT {
     mCurrentFloor = 100.0f;
     mLastHysteresisFloor = 0.0f;  // Start at 0 to allow initial floor rise
     mBelowFloorCount = 0;
@@ -33,7 +33,7 @@ void NoiseFloorTracker::reset() {
     mStats.inHysteresis = false;
 }
 
-void NoiseFloorTracker::update(float timedomainLevel, float frequencydomainLevel) {
+void NoiseFloorTracker::update(float timedomainLevel, float frequencydomainLevel) FL_NO_EXCEPT {
     if (!mConfig.enabled) {
         return;
     }
@@ -62,18 +62,18 @@ void NoiseFloorTracker::update(float timedomainLevel, float frequencydomainLevel
     mStats.currentFloor = mCurrentFloor;
 }
 
-float NoiseFloorTracker::normalize(float level) const {
+float NoiseFloorTracker::normalize(float level) const FL_NO_EXCEPT {
     // Remove noise floor from signal, clamped to non-negative
     const float normalized = level - mCurrentFloor;
     return fl::max(0.0f, normalized);
 }
 
-bool NoiseFloorTracker::isAboveFloor(float level) const {
+bool NoiseFloorTracker::isAboveFloor(float level) const FL_NO_EXCEPT {
     // Check if signal exceeds floor plus hysteresis margin
     return level > (mCurrentFloor + mConfig.hysteresisMargin);
 }
 
-void NoiseFloorTracker::updateFloor(float level) {
+void NoiseFloorTracker::updateFloor(float level) FL_NO_EXCEPT {
     // Exponential moving average tracking of noise floor
     // with asymmetric rates for rise (attack) and fall (decay)
     //
@@ -114,7 +114,7 @@ void NoiseFloorTracker::updateFloor(float level) {
     mCurrentFloor = fl::max(mConfig.minFloor, fl::min(mConfig.maxFloor, mCurrentFloor));
 }
 
-float NoiseFloorTracker::combineDomains(float timeLevel, float freqLevel) const {
+float NoiseFloorTracker::combineDomains(float timeLevel, float freqLevel) const FL_NO_EXCEPT {
     // If no frequency-domain metric provided, use time-domain only
     if (freqLevel < 0.0f) {
         return timeLevel;

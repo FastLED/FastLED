@@ -4,6 +4,7 @@
 #include "fl/stl/string.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/span.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -24,12 +25,12 @@ struct Mp4TrackInfo {
 
 // Parse an MP4 container and extract H.264 track info.
 // Only handles single-track H.264 video (avc1 codec).
-Mp4TrackInfo parseMp4(fl::span<const fl::u8> data, fl::string* error = nullptr);
+Mp4TrackInfo parseMp4(fl::span<const fl::u8> data, fl::string* error = nullptr) FL_NO_EXCEPT;
 
 // Extract H.264 NAL units from MP4 mdat section, converting AVCC→Annex B format.
 // Prepends 0x00000001 start codes to each NAL unit.
 fl::vector<fl::u8> extractH264NalUnits(fl::span<const fl::u8> data,
                                         const Mp4TrackInfo& track,
-                                        fl::string* error = nullptr);
+                                        fl::string* error = nullptr) FL_NO_EXCEPT;
 
 } // namespace fl

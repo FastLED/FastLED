@@ -140,9 +140,9 @@ public:
 	FL_DISABLE_WARNING_POP
 
 	/// @copydoc Pin::hi()
-	virtual void select() override { hi(); }
+	virtual void select() FL_NO_EXCEPT override { hi(); }
 	/// @copydoc Pin::lo()
-	virtual void release() override { lo(); }
+	virtual void release() FL_NO_EXCEPT override { lo(); }
 	/// Checks if the pin is currently `HIGH`
 	virtual bool isSelected() FL_NO_EXCEPT override {
 		if (mPort) { return (*mPort & mPinMask) == mPinMask; }

@@ -3,6 +3,7 @@
 #include "fl/stl/chrono.h"
 #include "fl/log/log.h"
 #include "fl/stl/compiler_control.h"  // IWYU pragma: keep - FL_UNUSED
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace task {
@@ -23,11 +24,11 @@ void Scheduler::onBeginFrame() FL_NO_EXCEPT {
 void Scheduler::onEndFrame() FL_NO_EXCEPT { update_after_frame_tasks(); }
 
 // Scheduler implementation
-Scheduler& Scheduler::instance() {
+Scheduler& Scheduler::instance() FL_NO_EXCEPT {
     return fl::Singleton<Scheduler>::instance();
 }
 
-int Scheduler::add_task(Handle t) {
+int Scheduler::add_task(Handle t) FL_NO_EXCEPT {
     if (t.is_valid()) {
         for (const Handle& existing : mTasks) {
             if (existing.mImpl == t.mImpl) {
@@ -60,7 +61,7 @@ void Scheduler::clear_all_tasks() FL_NO_EXCEPT {
     }
 }
 
-void Scheduler::update() {
+void Scheduler::update() FL_NO_EXCEPT {
     u32 current_time = fl::millis();
 
     // Use index-based iteration to avoid iterator invalidation issues
@@ -103,7 +104,7 @@ void Scheduler::update() {
     update_frame_listener_registration();
 }
 
-void Scheduler::update_before_frame_tasks() {
+void Scheduler::update_before_frame_tasks() FL_NO_EXCEPT {
     if (mUpdatingBeforeFrameTasks) {
         return;
     }
@@ -112,7 +113,7 @@ void Scheduler::update_before_frame_tasks() {
     mUpdatingBeforeFrameTasks = false;
 }
 
-void Scheduler::update_after_frame_tasks() {
+void Scheduler::update_after_frame_tasks() FL_NO_EXCEPT {
     if (mUpdatingAfterFrameTasks) {
         return;
     }
@@ -121,7 +122,7 @@ void Scheduler::update_after_frame_tasks() {
     mUpdatingAfterFrameTasks = false;
 }
 
-void Scheduler::update_tasks_of_type(TaskType task_type) {
+void Scheduler::update_tasks_of_type(TaskType task_type) FL_NO_EXCEPT {
     u32 current_time = fl::millis();
 
     remove_inactive_tasks();
@@ -187,7 +188,7 @@ void Scheduler::update_frame_listener_registration() FL_NO_EXCEPT {
     mFrameListenerRegistered = false;
 }
 
-void Scheduler::warn_no_then(int task_id, const fl::string& trace_label) {
+void Scheduler::warn_no_then(int task_id, const fl::string& trace_label) FL_NO_EXCEPT {
     FL_UNUSED(task_id);  // only consumed by FL_WARN, a no-op on small platforms
     if (!trace_label.empty()) {
         FL_WARN("[fl::task] Warning: no then() callback set for Task#" << task_id << " launched at " << trace_label);
@@ -196,7 +197,7 @@ void Scheduler::warn_no_then(int task_id, const fl::string& trace_label) {
     }
 }
 
-void Scheduler::warn_no_catch(int task_id, const fl::string& trace_label, const Error& error) {
+void Scheduler::warn_no_catch(int task_id, const fl::string& trace_label, const Error& error) FL_NO_EXCEPT {
     FL_UNUSED(task_id);  // only consumed by FL_WARN, a no-op on small platforms
     FL_UNUSED(error);
     if (!trace_label.empty()) {

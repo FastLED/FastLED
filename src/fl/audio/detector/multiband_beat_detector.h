@@ -74,43 +74,43 @@ struct MultiBandBeatDetectorConfig {
 class MultiBandBeat {
 public:
     MultiBandBeat() FL_NO_EXCEPT;
-    explicit MultiBandBeat(const MultiBandBeatDetectorConfig& config);
+    explicit MultiBandBeat(const MultiBandBeatDetectorConfig& config) FL_NO_EXCEPT;
     ~MultiBandBeat() FL_NO_EXCEPT;
 
     /// Configure the multi-band beat detector
-    void configure(const MultiBandBeatDetectorConfig& config);
+    void configure(const MultiBandBeatDetectorConfig& config) FL_NO_EXCEPT;
 
     /// Detect beats in all frequency bands
     /// @param frequencyBins 16-element array of frequency bin magnitudes
-    void detectBeats(span<const float> frequencyBins);
+    void detectBeats(span<const float> frequencyBins) FL_NO_EXCEPT;
 
     /// Check if a bass beat was detected in the last frame
     /// @return True if bass energy increased beyond threshold
-    bool isBassBeat() const;
+    bool isBassBeat() const FL_NO_EXCEPT;
 
     /// Check if a mid beat was detected in the last frame
     /// @return True if mid energy increased beyond threshold
-    bool isMidBeat() const;
+    bool isMidBeat() const FL_NO_EXCEPT;
 
     /// Check if a treble beat was detected in the last frame
     /// @return True if treble energy increased beyond threshold
-    bool isTrebleBeat() const;
+    bool isTrebleBeat() const FL_NO_EXCEPT;
 
     /// Get current bass energy (0.0-1.0)
-    float getBassEnergy() const;
+    float getBassEnergy() const FL_NO_EXCEPT;
 
     /// Get current mid energy (0.0-1.0)
-    float getMidEnergy() const;
+    float getMidEnergy() const FL_NO_EXCEPT;
 
     /// Get current treble energy (0.0-1.0)
-    float getTrebleEnergy() const;
+    float getTrebleEnergy() const FL_NO_EXCEPT;
 
     /// Check if multiple bands triggered simultaneously (strong beat)
     /// @return True if 2+ bands detected beats
-    bool isMultiBandBeat() const;
+    bool isMultiBandBeat() const FL_NO_EXCEPT;
 
     /// Reset internal state (clear history, reset cooldowns)
-    void reset();
+    void reset() FL_NO_EXCEPT;
 
     /// Get statistics (for debugging/monitoring)
     struct Stats {
@@ -123,7 +123,7 @@ public:
         float trebleEnergy = 0.0f;  // Current treble energy
     };
 
-    const Stats& getStats() const { return mStats; }
+    const Stats& getStats() const FL_NO_EXCEPT { return mStats; }
 
 private:
     /// Detect beat in a specific frequency band
@@ -133,22 +133,22 @@ private:
     /// @param cooldownCounter Frame counter for beat cooldown
     /// @return True if beat detected
     bool detectBandBeat(float currentEnergy, float previousEnergy,
-                       float threshold, u32& cooldownCounter);
+                       float threshold, u32& cooldownCounter) FL_NO_EXCEPT;
 
     /// Calculate energy for bass band (bins 0-1)
     /// @param frequencyBins 16-element array of frequency bins
     /// @return Average energy in bass range
-    float calculateBassEnergy(span<const float> frequencyBins) const;
+    float calculateBassEnergy(span<const float> frequencyBins) const FL_NO_EXCEPT;
 
     /// Calculate energy for mid band (bins 6-7)
     /// @param frequencyBins 16-element array of frequency bins
     /// @return Average energy in mid range
-    float calculateMidEnergy(span<const float> frequencyBins) const;
+    float calculateMidEnergy(span<const float> frequencyBins) const FL_NO_EXCEPT;
 
     /// Calculate energy for treble band (bins 14-15)
     /// @param frequencyBins 16-element array of frequency bins
     /// @return Average energy in treble range
-    float calculateTrebleEnergy(span<const float> frequencyBins) const;
+    float calculateTrebleEnergy(span<const float> frequencyBins) const FL_NO_EXCEPT;
 
     MultiBandBeatDetectorConfig mConfig;
     Stats mStats;

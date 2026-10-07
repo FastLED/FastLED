@@ -425,13 +425,8 @@ def _require_ast_tool() -> None:
 
 
 def run_noexcept_ast_check(file_path: str | None = None) -> CheckerResults:
-    """Run the clang-query FL_NO_EXCEPT ratchet used by default C++ lint."""
-    from ci.tools.check_noexcept import (
-        DEFAULT_BASELINE,
-        diff_against_baseline,
-        find_missing_noexcept,
-        load_baseline,
-    )
+    """Run strict clang-query FL_NO_EXCEPT enforcement used by default C++ lint."""
+    from ci.tools.check_noexcept import find_missing_noexcept
 
     scope = "all"
     rel_file: str | None = None
@@ -444,6 +439,8 @@ def run_noexcept_ast_check(file_path: str | None = None) -> CheckerResults:
             scope = "platforms"
         elif rel_file.startswith("src/third_party/"):
             scope = "third_party"
+        elif rel_file.startswith("src/") and "/" not in rel_file[4:]:
+            scope = "root"
         else:
             # Outside owned src scopes — nothing to check for this file.
             return CheckerResults()
@@ -457,8 +454,7 @@ def run_noexcept_ast_check(file_path: str | None = None) -> CheckerResults:
         if rel_file is not None:
             hits = [hit for hit in hits if hit.path == rel_file]
 
-        new_hits, _stale = diff_against_baseline(hits, load_baseline(DEFAULT_BASELINE))
-        for hit in new_hits:
+        for hit in hits:
             abs_path = str(PROJECT_ROOT / hit.path)
             results.add_violation(
                 abs_path, hit.line, f"Missing FL_NO_EXCEPT: {hit.line_text}"
@@ -480,7 +476,7 @@ def run_noexcept_ast_check(file_path: str | None = None) -> CheckerResults:
             PROJECT_ROOT / "ci" / "lint_cpp" / "run_all_checkers.py",
             PROJECT_ROOT / "ci" / "tools" / "check_noexcept.py",
         ],
-        baseline_path=PROJECT_ROOT / DEFAULT_BASELINE if DEFAULT_BASELINE else None,
+        baseline_path=None,
         runner=_run,
     )
 
@@ -513,15 +509,6 @@ def run_combined_ast_check() -> tuple[CheckerResults, CheckerResults]:
         load_baseline as load_array_baseline,
     )
     from ci.tools.check_ast_combined import find_combined_hits
-    from ci.tools.check_noexcept import (
-        DEFAULT_BASELINE as NOEXCEPT_BASELINE,
-    )
-    from ci.tools.check_noexcept import (
-        diff_against_baseline as noexcept_diff,
-    )
-    from ci.tools.check_noexcept import (
-        load_baseline as load_noexcept_baseline,
-    )
 
     _require_ast_tool()
 
@@ -530,10 +517,7 @@ def run_combined_ast_check() -> tuple[CheckerResults, CheckerResults]:
         array_param_results = CheckerResults()
         noexcept_hits, array_param_hits = find_combined_hits("all")
 
-        new_noexcept, _stale_n = noexcept_diff(
-            noexcept_hits, load_noexcept_baseline(NOEXCEPT_BASELINE)
-        )
-        for hit in new_noexcept:
+        for hit in noexcept_hits:
             abs_path = str(PROJECT_ROOT / hit.path)
             noexcept_results.add_violation(
                 abs_path, hit.line, f"Missing FL_NO_EXCEPT: {hit.line_text}"
@@ -547,12 +531,11 @@ def run_combined_ast_check() -> tuple[CheckerResults, CheckerResults]:
             array_param_results.add_violation(
                 abs_path, hit.line, _diagnostic_for_hit(hit)
             )
-        print("✅ Combined clang-query AST ratchet ran successfully")
+        print("✅ Combined clang-query AST checks ran successfully")
         return noexcept_results, array_param_results
 
     # Cache wrapper. Fingerprint over the same inputs both checks share
-    # (src/fl + platforms + third_party + both tool sources + both
-    # baselines). cached_ast_check stores ONE CheckerResults at a time,
+    # (all src files, tool sources, and the array-param baseline). cached_ast_check stores ONE CheckerResults at a time,
     # so we wrap each direction separately around the same _shape()
     # call - first hit populates both caches, subsequent hits replay
     # without re-running clang-query.
@@ -578,7 +561,7 @@ def run_combined_ast_check() -> tuple[CheckerResults, CheckerResults]:
         name="noexcept_ast",
         scope="all",
         tool_sources=tool_sources,
-        baseline_path=PROJECT_ROOT / NOEXCEPT_BASELINE if NOEXCEPT_BASELINE else None,
+        baseline_path=None,
         runner=_runner_noexcept,
     )
     array_param_cached = cached_ast_check(

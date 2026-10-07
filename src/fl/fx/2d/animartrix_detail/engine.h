@@ -51,13 +51,13 @@ struct Engine {
 
     fl::optional<fl::u32> currentTime;
 
-    Engine(Context *ctx) : mCtx(ctx) {}
+    Engine(Context *ctx) FL_NO_EXCEPT : mCtx(ctx) {}
     ~Engine() FL_NO_EXCEPT;
 
-    void setTime(fl::u32 t) { currentTime = t; }
-    fl::u32 getTime() { return currentTime.has_value() ? currentTime.value() : fl::millis(); }
+    void setTime(fl::u32 t) FL_NO_EXCEPT { currentTime = t; }
+    fl::u32 getTime() FL_NO_EXCEPT { return currentTime.has_value() ? currentTime.value() : fl::millis(); }
 
-    void init(int w, int h) {
+    void init(int w, int h) FL_NO_EXCEPT {
         animation = render_parameters();
         timings = oscillators();
         move = modulators();
@@ -76,51 +76,51 @@ struct Engine {
         timings.master_speed = 0.01;
     }
 
-    void setSpeedFactor(float speed) { this->speed_factor = speed; }
+    void setSpeedFactor(float speed) FL_NO_EXCEPT { this->speed_factor = speed; }
 
     // Method wrappers that delegate to standalone functions
-    void calculate_oscillators(oscillators &t) {
+    void calculate_oscillators(oscillators &t) FL_NO_EXCEPT {
         fl::calculate_oscillators(t, move, getTime(), speed_factor);
     }
 
-    void run_default_oscillators(float master_speed = 0.005) {
+    void run_default_oscillators(float master_speed = 0.005) FL_NO_EXCEPT {
         fl::run_default_oscillators(timings, move, getTime(), speed_factor, master_speed);
     }
 
-    FASTLED_FORCE_INLINE float render_value(render_parameters &anim) {
+    FASTLED_FORCE_INLINE float render_value(render_parameters &anim) FL_NO_EXCEPT {
         return fl::render_value(anim);
     }
 
-    FASTLED_FORCE_INLINE rgb rgb_sanity_check(rgb &p) {
+    FASTLED_FORCE_INLINE rgb rgb_sanity_check(rgb &p) FL_NO_EXCEPT {
         return fl::rgb_sanity_check(p);
     }
 
-    void get_ready() {
+    void get_ready() FL_NO_EXCEPT {
         fl::get_ready(a, b);
     }
 
-    void logOutput() {
+    void logOutput() FL_NO_EXCEPT {
         fl::logOutput(b);
     }
 
-    void logFrame() {
+    void logFrame() FL_NO_EXCEPT {
         fl::logFrame(c);
     }
 
     // Color blend wrappers
-    float subtract(float &x, float &y) { return fl::subtract(x, y); }
-    float multiply(float &x, float &y) { return fl::multiply(x, y); }
-    float add(float &x, float &y) { return fl::add(x, y); }
-    float screen(float &x, float &y) { return fl::screen(x, y); }
-    float colordodge(float &x, float &y) { return fl::colordodge(x, y); }
-    float colorburn(float &x, float &y) { return fl::colorburn(x, y); }
+    float subtract(float &x, float &y) FL_NO_EXCEPT { return fl::subtract(x, y); }
+    float multiply(float &x, float &y) FL_NO_EXCEPT { return fl::multiply(x, y); }
+    float add(float &x, float &y) FL_NO_EXCEPT { return fl::add(x, y); }
+    float screen(float &x, float &y) FL_NO_EXCEPT { return fl::screen(x, y); }
+    float colordodge(float &x, float &y) FL_NO_EXCEPT { return fl::colordodge(x, y); }
+    float colorburn(float &x, float &y) FL_NO_EXCEPT { return fl::colorburn(x, y); }
 
-    FASTLED_FORCE_INLINE void setPixelColorInternal(int x, int y, rgb pixel) {
+    FASTLED_FORCE_INLINE void setPixelColorInternal(int x, int y, rgb pixel) FL_NO_EXCEPT {
         fl::u16 idx = mCtx->xyMapFn(x, y, mCtx->xyMapUserData);
         mCtx->leds[idx] = CRGB(pixel.red, pixel.green, pixel.blue);
     }
 
-    FASTLED_FORCE_INLINE fl::u16 xyMap(fl::u16 x, fl::u16 y) {
+    FASTLED_FORCE_INLINE fl::u16 xyMap(fl::u16 x, fl::u16 y) FL_NO_EXCEPT {
         return mCtx->xyMapFn(x, y, mCtx->xyMapUserData);
     }
 };
@@ -130,7 +130,7 @@ inline Engine::~Engine() FL_NO_EXCEPT = default;
 inline Context::~Context() FL_NO_EXCEPT = default;
 
 // Initialize context with grid dimensions
-inline void init(Context &ctx, int w, int h) {
+inline void init(Context &ctx, int w, int h) FL_NO_EXCEPT {
     if (!ctx.mEngine) {
         ctx.mEngine = fl::make_unique<Engine>(&ctx);
     }
@@ -140,7 +140,7 @@ inline void init(Context &ctx, int w, int h) {
 }
 
 // Set time for deterministic rendering
-inline void setTime(Context &ctx, fl::u32 t) {
+inline void setTime(Context &ctx, fl::u32 t) FL_NO_EXCEPT {
     ctx.currentTime = t;
     if (ctx.mEngine) {
         ctx.mEngine->setTime(t);

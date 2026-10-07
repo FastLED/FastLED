@@ -9,12 +9,13 @@
 #include "platforms/win/socket_win.h" // ok platform headers  // IWYU pragma: keep
 #else
 #include "platforms/posix/socket_posix.h" // ok platform headers  // IWYU pragma: keep
+#include "fl/stl/noexcept.h"
 #endif
 
 namespace fl {
 namespace asio {
 
-error_code error_code::from_errno(int e) {
+error_code error_code::from_errno(int e) FL_NO_EXCEPT {
     switch (e) {
     case 0:
         return error_code();
@@ -57,7 +58,7 @@ error_code error_code::from_errno(int e) {
 namespace fl {
 namespace asio {
 
-error_code error_code::from_errno(int) {
+error_code error_code::from_errno(int) FL_NO_EXCEPT {
     return error_code(errc::unknown, "networking not available");
 }
 

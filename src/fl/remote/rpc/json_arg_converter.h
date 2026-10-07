@@ -8,6 +8,7 @@
 #include "fl/remote/rpc/type_conversion_result.h"
 #include "fl/remote/rpc/json_to_type.h"
 #include "fl/stl/span.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -69,9 +70,9 @@ class JsonArgConverter<R(Args...)> {
 public:
     // Map Args to storage types (handles const char* → ConstCharPtrWrapper)
     using args_tuple = fl::tuple<typename rpc_storage_type<Args>::type...>;
-    static constexpr fl::size argCount() { return sizeof...(Args); }
+    static constexpr fl::size argCount() FL_NO_EXCEPT { return sizeof...(Args); }
 
-    static fl::tuple<args_tuple, TypeConversionResult> convert(const json& jsonArgs) {
+    static fl::tuple<args_tuple, TypeConversionResult> convert(const json& jsonArgs) FL_NO_EXCEPT {
         TypeConversionResult result;
         // Value-init so the early-return branches below (not an array,
         // arg-count mismatch) don't return an indeterminate tuple —
@@ -98,14 +99,14 @@ public:
 private:
     template <fl::size... Is>
     static void convertArgs(const json& jsonArgs, args_tuple& tuple,
-                           TypeConversionResult& result, index_sequence<Is...>) {
+                           TypeConversionResult& result, index_sequence<Is...>) FL_NO_EXCEPT {
         // Fold expression equivalent using initializer list
         int dummy[] = {0, (convertArg<Is>(jsonArgs, tuple, result), 0)...};
         (void)dummy;
     }
 
     template <fl::size I>
-    static void convertArg(const json& jsonArgs, args_tuple& tuple, TypeConversionResult& result) {
+    static void convertArg(const json& jsonArgs, args_tuple& tuple, TypeConversionResult& result) FL_NO_EXCEPT {
         if (result.hasError()) return;
 
         // Use the stripped type (no const/ref) for conversion and storage
@@ -132,9 +133,9 @@ template <typename R>
 class JsonArgConverter<R()> {
 public:
     using args_tuple = fl::tuple<>;
-    static constexpr fl::size argCount() { return 0; }
+    static constexpr fl::size argCount() FL_NO_EXCEPT { return 0; }
 
-    static fl::tuple<args_tuple, TypeConversionResult> convert(const json& jsonArgs) {
+    static fl::tuple<args_tuple, TypeConversionResult> convert(const json& jsonArgs) FL_NO_EXCEPT {
         TypeConversionResult result;
         // Value-init so the early-return branches below (not an array,
         // arg-count mismatch) don't return an indeterminate tuple —

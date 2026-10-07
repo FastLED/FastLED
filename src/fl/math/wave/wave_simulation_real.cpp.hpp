@@ -4,6 +4,7 @@
 
 #include "fl/math/math.h"
 #include "fl/math/wave/wave_simulation_real.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -16,7 +17,7 @@ namespace wave_detail { // Anonymous namespace for internal linkage
 // Convert float to fixed Q15.
 // i16 float_to_fixed(float f) { return (i16)(f * FIXED_SCALE); }
 
-i16 float_to_fixed(float f) {
+i16 float_to_fixed(float f) FL_NO_EXCEPT {
     f = fl::clamp(f, -1.0f, 1.0f);
     if (f < 0.0f) {
         return static_cast<i16>(f * 32768.0f);
@@ -26,7 +27,7 @@ i16 float_to_fixed(float f) {
 }
 
 // Convert fixed Q15 to float.
-float fixed_to_float(i16 f) {
+float fixed_to_float(i16 f) FL_NO_EXCEPT {
     // return ((float)f) / FIXED_SCALE;
     if (f < 0) {
         return static_cast<float>(f) / 32768.0f; // Negative values
@@ -71,7 +72,7 @@ WaveSimulation1D_Real::WaveSimulation1D_Real(u32 len, float courantSq,
     // Additional initialization can be added here if needed.
 }
 
-void WaveSimulation1D_Real::setSpeed(float something) {
+void WaveSimulation1D_Real::setSpeed(float something) FL_NO_EXCEPT {
     // See constructor for clamp rationale.
     mCourantSq = wave_detail::float_to_fixed(fl::clamp(something, 0.0f, 1.0f));
 }
@@ -81,13 +82,13 @@ void WaveSimulation1D_Real::setDampening(int damp) FL_NO_EXCEPT {
     mDampDecayQ15 = wave_detail::compute_damp_decay_q15(damp);
 }
 
-int WaveSimulation1D_Real::getDampenening() const { return mDampenening; }
+int WaveSimulation1D_Real::getDampenening() const FL_NO_EXCEPT { return mDampenening; }
 
-float WaveSimulation1D_Real::getSpeed() const {
+float WaveSimulation1D_Real::getSpeed() const FL_NO_EXCEPT {
     return wave_detail::fixed_to_float(mCourantSq);
 }
 
-i16 WaveSimulation1D_Real::geti16(fl::size x) const {
+i16 WaveSimulation1D_Real::geti16(fl::size x) const FL_NO_EXCEPT {
     if (x >= length) {
         FL_WARN("Out of range.");
         return 0;
@@ -96,7 +97,7 @@ i16 WaveSimulation1D_Real::geti16(fl::size x) const {
     return curr[x + 1];
 }
 
-i16 WaveSimulation1D_Real::geti16Previous(fl::size x) const {
+i16 WaveSimulation1D_Real::geti16Previous(fl::size x) const FL_NO_EXCEPT {
     if (x >= length) {
         FL_WARN("Out of range.");
         return 0;
@@ -105,7 +106,7 @@ i16 WaveSimulation1D_Real::geti16Previous(fl::size x) const {
     return prev[x + 1];
 }
 
-float WaveSimulation1D_Real::getf(fl::size x) const {
+float WaveSimulation1D_Real::getf(fl::size x) const FL_NO_EXCEPT {
     if (x >= length) {
         FL_WARN("Out of range.");
         return 0.0f;
@@ -115,9 +116,9 @@ float WaveSimulation1D_Real::getf(fl::size x) const {
     return wave_detail::fixed_to_float(curr[x + 1]);
 }
 
-bool WaveSimulation1D_Real::has(fl::size x) const { return (x < length); }
+bool WaveSimulation1D_Real::has(fl::size x) const FL_NO_EXCEPT { return (x < length); }
 
-void WaveSimulation1D_Real::set(fl::size x, float value) {
+void WaveSimulation1D_Real::set(fl::size x, float value) FL_NO_EXCEPT {
     if (x >= length) {
         FL_WARN("warning X value too high");
         return;
@@ -126,7 +127,7 @@ void WaveSimulation1D_Real::set(fl::size x, float value) {
     curr[x + 1] = wave_detail::float_to_fixed(value);
 }
 
-void WaveSimulation1D_Real::update() {
+void WaveSimulation1D_Real::update() FL_NO_EXCEPT {
     i16 *curr = (whichGrid == 0) ? grid1.data() : grid2.data();
     i16 *next = (whichGrid == 0) ? grid2.data() : grid1.data();
 
@@ -213,7 +214,7 @@ WaveSimulation2D_Real::WaveSimulation2D_Real(PsramStorage,
     grid2.resize((W + 2) * (H + 2));
 }
 
-void WaveSimulation2D_Real::setSpeed(float something) {
+void WaveSimulation2D_Real::setSpeed(float something) FL_NO_EXCEPT {
     // See constructor for clamp rationale.
     mCourantSq = wave_detail::float_to_fixed(fl::clamp(something, 0.0f, 0.5f));
 }
@@ -223,13 +224,13 @@ void WaveSimulation2D_Real::setDampening(int damp) FL_NO_EXCEPT {
     mDampDecayQ15 = wave_detail::compute_damp_decay_q15(damp);
 }
 
-int WaveSimulation2D_Real::getDampenening() const { return mDampening; }
+int WaveSimulation2D_Real::getDampenening() const FL_NO_EXCEPT { return mDampening; }
 
-float WaveSimulation2D_Real::getSpeed() const {
+float WaveSimulation2D_Real::getSpeed() const FL_NO_EXCEPT {
     return wave_detail::fixed_to_float(mCourantSq);
 }
 
-float WaveSimulation2D_Real::getf(fl::size x, fl::size y) const {
+float WaveSimulation2D_Real::getf(fl::size x, fl::size y) const FL_NO_EXCEPT {
     if (x >= width || y >= height) {
         FL_WARN("Out of range: " << x << ", " << y);
         return 0.0f;
@@ -238,7 +239,7 @@ float WaveSimulation2D_Real::getf(fl::size x, fl::size y) const {
     return wave_detail::fixed_to_float(curr[(y + 1) * stride + (x + 1)]);
 }
 
-i16 WaveSimulation2D_Real::geti16(fl::size x, fl::size y) const {
+i16 WaveSimulation2D_Real::geti16(fl::size x, fl::size y) const FL_NO_EXCEPT {
     if (x >= width || y >= height) {
         FL_WARN("Out of range: " << x << ", " << y);
         return 0;
@@ -247,7 +248,7 @@ i16 WaveSimulation2D_Real::geti16(fl::size x, fl::size y) const {
     return curr[(y + 1) * stride + (x + 1)];
 }
 
-i16 WaveSimulation2D_Real::geti16Previous(fl::size x, fl::size y) const {
+i16 WaveSimulation2D_Real::geti16Previous(fl::size x, fl::size y) const FL_NO_EXCEPT {
     if (x >= width || y >= height) {
         FL_WARN("Out of range: " << x << ", " << y);
         return 0;
@@ -256,16 +257,16 @@ i16 WaveSimulation2D_Real::geti16Previous(fl::size x, fl::size y) const {
     return prev[(y + 1) * stride + (x + 1)];
 }
 
-bool WaveSimulation2D_Real::has(fl::size x, fl::size y) const {
+bool WaveSimulation2D_Real::has(fl::size x, fl::size y) const FL_NO_EXCEPT {
     return (x < width && y < height);
 }
 
-void WaveSimulation2D_Real::setf(fl::size x, fl::size y, float value) {
+void WaveSimulation2D_Real::setf(fl::size x, fl::size y, float value) FL_NO_EXCEPT {
     i16 v = wave_detail::float_to_fixed(value);
     return seti16(x, y, v);
 }
 
-void WaveSimulation2D_Real::seti16(fl::size x, fl::size y, i16 value) {
+void WaveSimulation2D_Real::seti16(fl::size x, fl::size y, i16 value) FL_NO_EXCEPT {
     if (x >= width || y >= height) {
         FL_WARN("Out of range: " << x << ", " << y);
         return;
@@ -274,7 +275,7 @@ void WaveSimulation2D_Real::seti16(fl::size x, fl::size y, i16 value) {
     curr[(y + 1) * stride + (x + 1)] = value;
 }
 
-void WaveSimulation2D_Real::update() {
+void WaveSimulation2D_Real::update() FL_NO_EXCEPT {
     i16 *curr = (whichGrid == 0 ? grid1.data() : grid2.data());
     i16 *next = (whichGrid == 0 ? grid2.data() : grid1.data());
 

@@ -7,6 +7,7 @@
 #include "fl/gfx/tile2x2.h"
 #include "fl/math/math.h"
 #include "fl/stl/compiler_control.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -15,10 +16,10 @@ namespace fl {
 // ===========================================================================
 
 FlowField::FlowField(const XYMap &xyMap, const Params &params)
-    : Fx2d(xyMap), mParams(params),
+    FL_NO_EXCEPT : Fx2d(xyMap), mParams(params),
       mNoiseBias(xyMap.getWidth(), xyMap.getHeight(), 0.01f, 0.5f) {}
 
-void FlowField::draw(DrawContext context) {
+void FlowField::draw(DrawContext context) FL_NO_EXCEPT {
     u32 t_ms = mTimeWarp.update(context.now);
     u32 dt_ms = t_ms - mLastWarpedMs;
     mLastWarpedMs = t_ms;
@@ -30,7 +31,7 @@ void FlowField::draw(DrawContext context) {
     drawImpl(context, dt_ms, t_ms);
 }
 
-void FlowField::noisePunch(float amplitude, BumpShape shape) {
+void FlowField::noisePunch(float amplitude, BumpShape shape) FL_NO_EXCEPT {
     float cx = getWidth() * 0.5f;
     float cy = getHeight() * 0.5f;
     float wx = getWidth() * 0.4f;
@@ -40,12 +41,12 @@ void FlowField::noisePunch(float amplitude, BumpShape shape) {
 }
 
 void FlowField::noisePunchX(float center, float width, float amplitude,
-                             BumpShape shape) {
+                             BumpShape shape) FL_NO_EXCEPT {
     mNoiseBias.triggerX(center, width, amplitude, shape);
 }
 
 void FlowField::noisePunchY(float center, float width, float amplitude,
-                             BumpShape shape) {
+                             BumpShape shape) FL_NO_EXCEPT {
     mNoiseBias.triggerY(center, width, amplitude, shape);
 }
 
@@ -57,7 +58,7 @@ void FlowField::noisePunchY(float center, float width, float amplitude,
 //  Perlin2D
 // ---------------------------------------------------------------------------
 
-void FlowFieldFloat::Perlin2D::init(u32 seed) {
+void FlowFieldFloat::Perlin2D::init(u32 seed) FL_NO_EXCEPT {
     u8 p[256];
     for (int i = 0; i < 256; i++)
         p[i] = (u8)i;
@@ -75,7 +76,7 @@ void FlowFieldFloat::Perlin2D::init(u32 seed) {
     }
 }
 
-float FlowFieldFloat::Perlin2D::noise(float x, float y) const {
+float FlowFieldFloat::Perlin2D::noise(float x, float y) const FL_NO_EXCEPT {
     int xi = ((int)floorf(x)) & 255;
     int yi = ((int)floorf(y)) & 255;
     float xf = x - floorf(x);
@@ -92,7 +93,7 @@ float FlowFieldFloat::Perlin2D::noise(float x, float y) const {
     return lerp(x1, x2, v);
 }
 
-float FlowFieldFloat::Perlin2D::grad(int h, float x, float y) {
+float FlowFieldFloat::Perlin2D::grad(int h, float x, float y) FL_NO_EXCEPT {
     switch (h & 7) {
     case 0:
         return x + y;
@@ -116,7 +117,7 @@ float FlowFieldFloat::Perlin2D::grad(int h, float x, float y) {
 // ---------------------------------------------------------------------------
 
 FlowFieldFloat::FlowFieldFloat(const XYMap &xyMap, const Params &params)
-    : FlowField(xyMap, params) {
+    FL_NO_EXCEPT : FlowField(xyMap, params) {
     int w = (int)getWidth();
     int h = (int)getHeight();
     int n = w * h;
@@ -134,16 +135,16 @@ FlowFieldFloat::FlowFieldFloat(const XYMap &xyMap, const Params &params)
     mNoiseGenY.init(1337);
 }
 
-float FlowFieldFloat::fmodPos(float x, float m) {
+float FlowFieldFloat::fmodPos(float x, float m) FL_NO_EXCEPT {
     float r = fmodf(x, m);
     return r < 0.0f ? r + m : r;
 }
 
-float FlowFieldFloat::clampf(float v, float lo, float hi) {
+float FlowFieldFloat::clampf(float v, float lo, float hi) FL_NO_EXCEPT {
     return (v < lo) ? lo : (v > hi) ? hi : v;
 }
 
-u8 FlowFieldFloat::f2u8(float v) {
+u8 FlowFieldFloat::f2u8(float v) FL_NO_EXCEPT {
     int i = (int)v;
     if (i < 0)
         return 0;
@@ -152,7 +153,7 @@ u8 FlowFieldFloat::f2u8(float v) {
     return (u8)i;
 }
 
-CRGB FlowFieldFloat::rainbow(float t, float speed, float phase) {
+CRGB FlowFieldFloat::rainbow(float t, float speed, float phase) FL_NO_EXCEPT {
     float hue = fmodPos(t * speed + phase, 1.0f);
     CHSV hsv((u8)(hue * 255.0f), 255, 255);
     CRGB rgb;
@@ -161,7 +162,7 @@ CRGB FlowFieldFloat::rainbow(float t, float speed, float phase) {
 }
 
 void FlowFieldFloat::drawDot(float cx, float cy, float diam,
-                                  u8 cr, u8 cg, u8 cb) {
+                                  u8 cr, u8 cg, u8 cb) FL_NO_EXCEPT {
     int w = (int)getWidth();
     int h = (int)getHeight();
     float rad = diam * 0.5f;
@@ -187,7 +188,7 @@ void FlowFieldFloat::drawDot(float cx, float cy, float diam,
 }
 
 void FlowFieldFloat::drawAALine(float x0, float y0, float x1, float y1,
-                                   float t, float colorShift) {
+                                   float t, float colorShift) FL_NO_EXCEPT {
     int w = (int)getWidth();
     int h = (int)getHeight();
     float dx = x1 - x0;
@@ -232,7 +233,7 @@ void FlowFieldFloat::drawAALine(float x0, float y0, float x1, float y1,
     }
 }
 
-void FlowFieldFloat::emitLissajousLine(float t) {
+void FlowFieldFloat::emitLissajousLine(float t) FL_NO_EXCEPT {
     int w = (int)getWidth();
     int h = (int)getHeight();
     float cx = (w - 1) * 0.5f;
@@ -254,7 +255,7 @@ void FlowFieldFloat::emitLissajousLine(float t) {
     drawDot(x2, y2, discDiam, endB.r, endB.g, endB.b);
 }
 
-void FlowFieldFloat::emitOrbitalDots(float t) {
+void FlowFieldFloat::emitOrbitalDots(float t) FL_NO_EXCEPT {
     int w = (int)getWidth();
     int h = (int)getHeight();
     int minDim = fl::min(w, h);
@@ -274,7 +275,7 @@ void FlowFieldFloat::emitOrbitalDots(float t) {
     }
 }
 
-void FlowFieldFloat::flowPrepare(float t) {
+void FlowFieldFloat::flowPrepare(float t) FL_NO_EXCEPT {
     int w = (int)getWidth();
     int h = (int)getHeight();
     const float kBaseFreq = 0.23f;
@@ -310,7 +311,7 @@ void FlowFieldFloat::flowPrepare(float t) {
     }
 }
 
-void FlowFieldFloat::flowAdvect(float dt) {
+void FlowFieldFloat::flowAdvect(float dt) FL_NO_EXCEPT {
     int w = (int)getWidth();
     int h = (int)getHeight();
     float halfLife = fl::max(mParams.persistence, 0.001f);
@@ -354,7 +355,7 @@ void FlowFieldFloat::flowAdvect(float dt) {
     }
 }
 
-void FlowFieldFloat::drawFlowVectors(fl::span<CRGB> leds) {
+void FlowFieldFloat::drawFlowVectors(fl::span<CRGB> leds) FL_NO_EXCEPT {
     int w = (int)getWidth();
     int h = (int)getHeight();
 
@@ -431,7 +432,7 @@ void FlowFieldFloat::drawFlowVectors(fl::span<CRGB> leds) {
     }
 }
 
-void FlowFieldFloat::drawImpl(DrawContext context, u32 dt_ms, u32 t_ms) {
+void FlowFieldFloat::drawImpl(DrawContext context, u32 dt_ms, u32 t_ms) FL_NO_EXCEPT {
     float dt = dt_ms * 0.001f;
     float t = t_ms * 0.001f;
 
@@ -488,7 +489,7 @@ static constexpr i32 FP_255 = 255 * FP_ONE;           // 255.0
 //  Perm table init — Fisher-Yates shuffle (replaces Perlin2D::init)
 // ---------------------------------------------------------------------------
 
-void FlowFieldFP::initPerm256(u8 *perm, u32 seed) {
+void FlowFieldFP::initPerm256(u8 *perm, u32 seed) FL_NO_EXCEPT {
     for (int i = 0; i < 256; i++)
         perm[i] = (u8)i;
     u32 s = seed;
@@ -506,7 +507,7 @@ void FlowFieldFP::initPerm256(u8 *perm, u32 seed) {
 // ---------------------------------------------------------------------------
 
 FlowFieldFP::FlowFieldFP(const XYMap &xyMap, const Params &params)
-    : FlowField(xyMap, params) {
+    FL_NO_EXCEPT : FlowField(xyMap, params) {
     int w = (int)getWidth();
     int h = (int)getHeight();
 
@@ -521,7 +522,7 @@ FlowFieldFP::FlowFieldFP(const XYMap &xyMap, const Params &params)
 
 }
 
-void FlowFieldFP::syncParams() {
+void FlowFieldFP::syncParams() FL_NO_EXCEPT {
     mColorShift_fp = s16x16(mParams.color_shift);
     mFlowShift_fp = s16x16(mParams.flow_shift);
     mEndpointSpeed_fp = s16x16(mParams.endpoint_speed);
@@ -534,18 +535,18 @@ void FlowFieldFP::syncParams() {
     mFlowAmpY_fp = s16x16(mParams.flow_amp_y);
 }
 
-i32 FlowFieldFP::clamp_q16(i32 v, i32 lo, i32 hi) {
+i32 FlowFieldFP::clamp_q16(i32 v, i32 lo, i32 hi) FL_NO_EXCEPT {
     return (v < lo) ? lo : (v > hi) ? hi : v;
 }
 
-u8 FlowFieldFP::q16_to_u8(i32 v) {
+u8 FlowFieldFP::q16_to_u8(i32 v) FL_NO_EXCEPT {
     i32 integer = v >> 16;
     if (integer < 0) return 0;
     if (integer > 255) return 255;
     return (u8)integer;
 }
 
-CRGB FlowFieldFP::rainbow(s16x16 t, s16x16 speed, s16x16 phase) {
+CRGB FlowFieldFP::rainbow(s16x16 t, s16x16 speed, s16x16 phase) FL_NO_EXCEPT {
     constexpr s16x16 one(1.0f);
     constexpr s16x16 fp_255(255.0f);
     s16x16 hue_raw = t * speed + phase;
@@ -566,7 +567,7 @@ CRGB FlowFieldFP::rainbow(s16x16 t, s16x16 speed, s16x16 phase) {
 // ---------------------------------------------------------------------------
 
 void FlowFieldFP::drawDot(s16x16 cx, s16x16 cy, s16x16 diam,
-                            u8 cr, u8 cg, u8 cb) {
+                            u8 cr, u8 cg, u8 cb) FL_NO_EXCEPT {
     int w = mState.width;
     int h = mState.height;
     constexpr s16x16 half(0.5f);
@@ -613,7 +614,7 @@ void FlowFieldFP::drawDot(s16x16 cx, s16x16 cy, s16x16 diam,
 }
 
 void FlowFieldFP::drawAALine(s16x16 x0, s16x16 y0, s16x16 x1, s16x16 y1,
-                               s16x16 t, s16x16 colorShift) {
+                               s16x16 t, s16x16 colorShift) FL_NO_EXCEPT {
     int w = mState.width;
     int h = mState.height;
     s16x16 dx = x1 - x0;
@@ -675,7 +676,7 @@ void FlowFieldFP::drawAALine(s16x16 x0, s16x16 y0, s16x16 x1, s16x16 y1,
     }
 }
 
-void FlowFieldFP::emitLissajousLine(s16x16 t) {
+void FlowFieldFP::emitLissajousLine(s16x16 t) FL_NO_EXCEPT {
     int w = mState.width;
     int h = mState.height;
     constexpr s16x16 half(0.5f);
@@ -719,7 +720,7 @@ void FlowFieldFP::emitLissajousLine(s16x16 t) {
     drawDot(x2, y2, discDiam, endB.r, endB.g, endB.b);
 }
 
-void FlowFieldFP::emitOrbitalDots(s16x16 t) {
+void FlowFieldFP::emitOrbitalDots(s16x16 t) FL_NO_EXCEPT {
     int w = mState.width;
     int h = mState.height;
     int minDim = fl::min(w, h);
@@ -750,7 +751,7 @@ void FlowFieldFP::emitOrbitalDots(s16x16 t) {
 //  flowPrepare — fixed-point Perlin noise via perlin_s16x16::pnoise2d_raw()
 // ---------------------------------------------------------------------------
 
-void FlowFieldFP::flowPrepare(s16x16 t) {
+void FlowFieldFP::flowPrepare(s16x16 t) FL_NO_EXCEPT {
     int w = mState.width;
     int h = mState.height;
     constexpr s16x16 kBaseFreq(0.23f);
@@ -810,7 +811,7 @@ void FlowFieldFP::flowPrepare(s16x16 t) {
 //  flowAdvect — Q16.16 hot path (~80% of frame time)
 // ---------------------------------------------------------------------------
 
-void FlowFieldFP::flowAdvect(i32 dt_raw) {
+void FlowFieldFP::flowAdvect(i32 dt_raw) FL_NO_EXCEPT {
     int w = mState.width;
     int h = mState.height;
 
@@ -900,7 +901,7 @@ void FlowFieldFP::flowAdvect(i32 dt_raw) {
 //  Flow vector overlay — fixed-point version
 // ---------------------------------------------------------------------------
 
-void FlowFieldFP::drawFlowVectors(fl::span<CRGB> leds) {
+void FlowFieldFP::drawFlowVectors(fl::span<CRGB> leds) FL_NO_EXCEPT {
     int w = mState.width;
     int h = mState.height;
 
@@ -980,7 +981,7 @@ void FlowFieldFP::drawFlowVectors(fl::span<CRGB> leds) {
 //  drawImpl — main entry point
 // ---------------------------------------------------------------------------
 
-void FlowFieldFP::drawImpl(DrawContext context, u32 dt_ms, u32 t_ms) {
+void FlowFieldFP::drawImpl(DrawContext context, u32 dt_ms, u32 t_ms) FL_NO_EXCEPT {
     syncParams();
 
     s16x16 dt = s16x16(dt_ms * 0.001f);

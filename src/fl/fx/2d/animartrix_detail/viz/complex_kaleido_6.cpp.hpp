@@ -2,13 +2,14 @@
 #include "fl/fx/2d/animartrix_detail/viz/complex_kaleido_6.h"
 #include "fl/fx/2d/animartrix_detail/render_value_fp.h"
 #include "fl/fx/2d/animartrix_detail/perlin_float.h"
+#include "fl/stl/noexcept.h"
 
 FL_FAST_MATH_BEGIN
 FL_OPTIMIZATION_LEVEL_O3_BEGIN
 
 namespace fl {
 
-void Complex_Kaleido_6::draw(Context &ctx) {
+void Complex_Kaleido_6::draw(Context &ctx) FL_NO_EXCEPT {
     auto *e = ctx.mEngine.get();
     e->get_ready();
 
@@ -64,7 +65,7 @@ void Complex_Kaleido_6::draw(Context &ctx) {
 // Fixed-Point Implementation of Complex_Kaleido_6
 // ============================================================================
 
-void Complex_Kaleido_6_FP::draw(Context &ctx) {
+void Complex_Kaleido_6_FP::draw(Context &ctx) FL_NO_EXCEPT {
     auto *e = ctx.mEngine.get();
     e->get_ready();
     mState.ensureCache(e);

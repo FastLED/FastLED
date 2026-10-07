@@ -18,7 +18,7 @@
 namespace fl {
 
 NativeHttpServer::NativeHttpServer(u16 port, const ConnectionConfig& config)
-    : mPort(port)
+    FL_NO_EXCEPT : mPort(port)
     , mIsListening(false)
     , mNextClientId(1)
     , mConfig(config)
@@ -29,7 +29,7 @@ NativeHttpServer::~NativeHttpServer() FL_NO_EXCEPT {
     stop();
 }
 
-bool NativeHttpServer::start() {
+bool NativeHttpServer::start() FL_NO_EXCEPT {
     if (mIsListening) {
         return true;  // Already listening
     }
@@ -42,7 +42,7 @@ bool NativeHttpServer::start() {
     return false;
 }
 
-void NativeHttpServer::stop() {
+void NativeHttpServer::stop() FL_NO_EXCEPT {
     // Disconnect all clients
     disconnectAllClients();
 
@@ -51,11 +51,11 @@ void NativeHttpServer::stop() {
     mIsListening = false;
 }
 
-bool NativeHttpServer::isListening() const {
+bool NativeHttpServer::isListening() const FL_NO_EXCEPT {
     return mIsListening;
 }
 
-void NativeHttpServer::acceptClients() {
+void NativeHttpServer::acceptClients() FL_NO_EXCEPT {
     if (!mIsListening) {
         return;
     }
@@ -77,24 +77,24 @@ void NativeHttpServer::acceptClients() {
     }
 }
 
-size_t NativeHttpServer::getClientCount() const {
+size_t NativeHttpServer::getClientCount() const FL_NO_EXCEPT {
     return mClients.size();
 }
 
-bool NativeHttpServer::hasClient(u32 clientId) const {
+bool NativeHttpServer::hasClient(u32 clientId) const FL_NO_EXCEPT {
     return findClient(clientId) != nullptr;
 }
 
-void NativeHttpServer::disconnectClient(u32 clientId) {
+void NativeHttpServer::disconnectClient(u32 clientId) FL_NO_EXCEPT {
     removeClient(clientId);
 }
 
-void NativeHttpServer::disconnectAllClients() {
+void NativeHttpServer::disconnectAllClients() FL_NO_EXCEPT {
     // tcp::socket closes automatically in destructor
     mClients.clear();
 }
 
-int NativeHttpServer::send(u32 clientId, fl::span<const u8> data) {
+int NativeHttpServer::send(u32 clientId, fl::span<const u8> data) FL_NO_EXCEPT {
     ServerClientConnection* client = findClient(clientId);
     if (!client || !client->socket.is_open()) {
         return -1;
@@ -115,7 +115,7 @@ int NativeHttpServer::send(u32 clientId, fl::span<const u8> data) {
     return static_cast<int>(n);
 }
 
-int NativeHttpServer::recv(u32 clientId, fl::span<u8> buffer) {
+int NativeHttpServer::recv(u32 clientId, fl::span<u8> buffer) FL_NO_EXCEPT {
     ServerClientConnection* client = findClient(clientId);
     if (!client || !client->socket.is_open()) {
         return -1;
@@ -139,14 +139,14 @@ int NativeHttpServer::recv(u32 clientId, fl::span<u8> buffer) {
     return static_cast<int>(n);
 }
 
-void NativeHttpServer::broadcast(fl::span<const u8> data) {
+void NativeHttpServer::broadcast(fl::span<const u8> data) FL_NO_EXCEPT {
     // Send to all clients
     for (auto& client : mClients) {
         send(client.clientId, data);
     }
 }
 
-void NativeHttpServer::update(u32 currentTimeMs) {
+void NativeHttpServer::update(u32 currentTimeMs) FL_NO_EXCEPT {
     // Check for dead connections
     for (size_t i = 0; i < mClients.size(); ) {
         auto& client = mClients[i];
@@ -165,7 +165,7 @@ void NativeHttpServer::update(u32 currentTimeMs) {
     }
 }
 
-fl::vector<u32> NativeHttpServer::getClientIds() const {
+fl::vector<u32> NativeHttpServer::getClientIds() const FL_NO_EXCEPT {
     fl::vector<u32> ids;
     ids.reserve(mClients.size());
     for (const auto& client : mClients) {
@@ -174,7 +174,7 @@ fl::vector<u32> NativeHttpServer::getClientIds() const {
     return ids;
 }
 
-bool NativeHttpServer::platformStartListening() {
+bool NativeHttpServer::platformStartListening() FL_NO_EXCEPT {
     asio::error_code ec = mAcceptor.open(mPort);
     if (ec) {
         return false;
@@ -192,11 +192,11 @@ bool NativeHttpServer::platformStartListening() {
     return true;
 }
 
-void NativeHttpServer::platformStopListening() {
+void NativeHttpServer::platformStopListening() FL_NO_EXCEPT {
     mAcceptor.close();
 }
 
-ServerClientConnection* NativeHttpServer::findClient(u32 clientId) {
+ServerClientConnection* NativeHttpServer::findClient(u32 clientId) FL_NO_EXCEPT {
     for (auto& client : mClients) {
         if (client.clientId == clientId) {
             return &client;
@@ -205,7 +205,7 @@ ServerClientConnection* NativeHttpServer::findClient(u32 clientId) {
     return nullptr;
 }
 
-const ServerClientConnection* NativeHttpServer::findClient(u32 clientId) const {
+const ServerClientConnection* NativeHttpServer::findClient(u32 clientId) const FL_NO_EXCEPT {
     for (const auto& client : mClients) {
         if (client.clientId == clientId) {
             return &client;
@@ -214,7 +214,7 @@ const ServerClientConnection* NativeHttpServer::findClient(u32 clientId) const {
     return nullptr;
 }
 
-void NativeHttpServer::removeClient(u32 clientId) {
+void NativeHttpServer::removeClient(u32 clientId) FL_NO_EXCEPT {
     for (size_t i = 0; i < mClients.size(); ++i) {
         if (mClients[i].clientId == clientId) {
             // Socket closes automatically in destructor
@@ -224,7 +224,7 @@ void NativeHttpServer::removeClient(u32 clientId) {
     }
 }
 
-bool NativeHttpServer::isSocketConnected(const asio::ip::tcp::socket& sock) const {
+bool NativeHttpServer::isSocketConnected(const asio::ip::tcp::socket& sock) const FL_NO_EXCEPT {
     if (!sock.is_open()) {
         return false;
     }

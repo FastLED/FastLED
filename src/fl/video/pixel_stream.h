@@ -38,24 +38,24 @@ class PixelStream {
     // seek(0, beg) succeeds → kFile, fails → kStreaming.
     bool begin(fl::filebuf_ptr h) FL_NO_EXCEPT;
 
-    void close();
-    i32 bytesPerFrame();
-    bool readPixel(CRGB *dst);
+    void close() FL_NO_EXCEPT;
+    i32 bytesPerFrame() FL_NO_EXCEPT;
+    bool readPixel(CRGB *dst) FL_NO_EXCEPT;
     bool readSample(PixelSample *out) FL_NO_EXCEPT;
-    size_t readBytes(u8 *dst, size_t len);
+    size_t readBytes(u8 *dst, size_t len) FL_NO_EXCEPT;
 
-    bool readFrame(Frame *frame);
-    bool readFrameAt(fl::u32 frameNumber, Frame *frame);
-    bool hasFrame(fl::u32 frameNumber);
-    i32 framesRemaining() const; // -1 if this is a stream.
-    i32 framesDisplayed() const;
-    bool available() const;
-    bool atEnd() const;
+    bool readFrame(Frame *frame) FL_NO_EXCEPT;
+    bool readFrameAt(fl::u32 frameNumber, Frame *frame) FL_NO_EXCEPT;
+    bool hasFrame(fl::u32 frameNumber) FL_NO_EXCEPT;
+    i32 framesRemaining() const FL_NO_EXCEPT; // -1 if this is a stream.
+    i32 framesDisplayed() const FL_NO_EXCEPT;
+    bool available() const FL_NO_EXCEPT;
+    bool atEnd() const FL_NO_EXCEPT;
 
-    i32 bytesRemaining() const;
-    i32 bytesRemainingInFrame() const;
-    bool rewind(); // Returns false for non-seekable streams.
-    Type getType() const;
+    i32 bytesRemaining() const FL_NO_EXCEPT;
+    i32 bytesRemainingInFrame() const FL_NO_EXCEPT;
+    bool rewind() FL_NO_EXCEPT; // Returns false for non-seekable streams.
+    Type getType() const FL_NO_EXCEPT;
 
     // FLED v1 container accessors. True/non-empty only when begin() found
     // a valid FLED header on a seekable handle; otherwise empty / false.

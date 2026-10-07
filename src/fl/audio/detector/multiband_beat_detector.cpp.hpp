@@ -6,20 +6,20 @@ namespace fl {
 namespace audio {
 namespace detector {
 
-MultiBandBeat::MultiBandBeat() = default;
+MultiBandBeat::MultiBandBeat() FL_NO_EXCEPT = default;
 
-MultiBandBeat::MultiBandBeat(const MultiBandBeatDetectorConfig& config) {
+MultiBandBeat::MultiBandBeat(const MultiBandBeatDetectorConfig& config) FL_NO_EXCEPT {
     configure(config);
 }
 
 MultiBandBeat::~MultiBandBeat() FL_NO_EXCEPT = default;
 
-void MultiBandBeat::configure(const MultiBandBeatDetectorConfig& config) {
+void MultiBandBeat::configure(const MultiBandBeatDetectorConfig& config) FL_NO_EXCEPT {
     mConfig = config;
     reset();
 }
 
-void MultiBandBeat::detectBeats(span<const float> frequencyBins) {
+void MultiBandBeat::detectBeats(span<const float> frequencyBins) FL_NO_EXCEPT {
     // Verify input size
     if (frequencyBins.size() < 16) {
         // Invalid input - reset beat flags
@@ -82,31 +82,31 @@ void MultiBandBeat::detectBeats(span<const float> frequencyBins) {
     mCurrentFrame++;
 }
 
-bool MultiBandBeat::isBassBeat() const {
+bool MultiBandBeat::isBassBeat() const FL_NO_EXCEPT {
     return mBassBeat;
 }
 
-bool MultiBandBeat::isMidBeat() const {
+bool MultiBandBeat::isMidBeat() const FL_NO_EXCEPT {
     return mMidBeat;
 }
 
-bool MultiBandBeat::isTrebleBeat() const {
+bool MultiBandBeat::isTrebleBeat() const FL_NO_EXCEPT {
     return mTrebleBeat;
 }
 
-float MultiBandBeat::getBassEnergy() const {
+float MultiBandBeat::getBassEnergy() const FL_NO_EXCEPT {
     return mBassEnergy;
 }
 
-float MultiBandBeat::getMidEnergy() const {
+float MultiBandBeat::getMidEnergy() const FL_NO_EXCEPT {
     return mMidEnergy;
 }
 
-float MultiBandBeat::getTrebleEnergy() const {
+float MultiBandBeat::getTrebleEnergy() const FL_NO_EXCEPT {
     return mTrebleEnergy;
 }
 
-bool MultiBandBeat::isMultiBandBeat() const {
+bool MultiBandBeat::isMultiBandBeat() const FL_NO_EXCEPT {
     u32 bandCount = 0;
     if (mBassBeat) bandCount++;
     if (mMidBeat) bandCount++;
@@ -114,7 +114,7 @@ bool MultiBandBeat::isMultiBandBeat() const {
     return bandCount >= 2;
 }
 
-void MultiBandBeat::reset() {
+void MultiBandBeat::reset() FL_NO_EXCEPT {
     mBassBeat = false;
     mMidBeat = false;
     mTrebleBeat = false;
@@ -143,7 +143,7 @@ void MultiBandBeat::reset() {
 }
 
 bool MultiBandBeat::detectBandBeat(float currentEnergy, float previousEnergy,
-                                           float threshold, u32& cooldownCounter) {
+                                           float threshold, u32& cooldownCounter) FL_NO_EXCEPT {
     // Check if cooldown is active
     if (cooldownCounter > 0) {
         return false;
@@ -176,7 +176,7 @@ bool MultiBandBeat::detectBandBeat(float currentEnergy, float previousEnergy,
     return false;
 }
 
-float MultiBandBeat::calculateBassEnergy(span<const float> frequencyBins) const {
+float MultiBandBeat::calculateBassEnergy(span<const float> frequencyBins) const FL_NO_EXCEPT {
     // Average bins 0-1 (20-80 Hz)
     float sum = 0.0f;
     for (size i = BASS_BIN_START; i < BASS_BIN_END; ++i) {
@@ -185,7 +185,7 @@ float MultiBandBeat::calculateBassEnergy(span<const float> frequencyBins) const 
     return sum / static_cast<float>(BASS_BIN_END - BASS_BIN_START);
 }
 
-float MultiBandBeat::calculateMidEnergy(span<const float> frequencyBins) const {
+float MultiBandBeat::calculateMidEnergy(span<const float> frequencyBins) const FL_NO_EXCEPT {
     // Average bins 6-7 (320-640 Hz)
     float sum = 0.0f;
     for (size i = MID_BIN_START; i < MID_BIN_END; ++i) {
@@ -194,7 +194,7 @@ float MultiBandBeat::calculateMidEnergy(span<const float> frequencyBins) const {
     return sum / static_cast<float>(MID_BIN_END - MID_BIN_START);
 }
 
-float MultiBandBeat::calculateTrebleEnergy(span<const float> frequencyBins) const {
+float MultiBandBeat::calculateTrebleEnergy(span<const float> frequencyBins) const FL_NO_EXCEPT {
     // Average bins 14-15 (5120-16000 Hz)
     float sum = 0.0f;
     for (size i = TREBLE_BIN_START; i < TREBLE_BIN_END; ++i) {

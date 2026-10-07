@@ -55,7 +55,7 @@ public:
 class FastLEDTeensyAudioConnection : public TeensyAudioConnection {
 public:
     FastLEDTeensyAudioConnection(AudioStream& source, unsigned char sourceOutput,
-                                 AudioStream& destination, unsigned char destinationInput)
+                                 AudioStream& destination, unsigned char destinationInput) FL_NO_EXCEPT
         : TeensyAudioConnection(source, sourceOutput, destination, destinationInput) {}
     virtual ~FastLEDTeensyAudioConnection() = default;
 };
@@ -81,9 +81,9 @@ public:
     // Dequeue oldest block
     bool dequeueBlock(fl::vector<fl::i16>& samples, u8& channel, u32& timestamp) FL_NO_EXCEPT;
 
-    fl::size getQueueSize() const { return mBlockQueue.size(); }
-    u64 getTotalBlocksReceived() const { return mTotalBlocksReceived; }
-    u64 getTotalBlocksDropped() const { return mTotalBlocksDropped; }
+    fl::size getQueueSize() const FL_NO_EXCEPT { return mBlockQueue.size(); }
+    u64 getTotalBlocksReceived() const FL_NO_EXCEPT { return mTotalBlocksReceived; }
+    u64 getTotalBlocksDropped() const FL_NO_EXCEPT { return mTotalBlocksDropped; }
 
 private:
     struct QueuedBlock {
@@ -122,7 +122,7 @@ public:
     static constexpr int TARGET_BUFFER_SIZE = AUDIO_BLOCK_SAMPLES * BLOCKS_TO_ACCUMULATE;
 
     Teensy_I2S_Audio(const audio::ConfigI2S& config) FL_NO_EXCEPT;
-    ~Teensy_I2S_Audio() override;
+    ~Teensy_I2S_Audio() FL_NO_EXCEPT override;
 
     void start() FL_NO_EXCEPT override;
     void stop() FL_NO_EXCEPT override;

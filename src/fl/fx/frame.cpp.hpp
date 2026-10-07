@@ -11,7 +11,7 @@
 #include "fl/stl/noexcept.h"
 namespace fl {
 
-Frame::Frame(int pixels_count) : mPixelsCount(pixels_count), mRgb(), mIsFromCodec(false) {
+Frame::Frame(int pixels_count) FL_NO_EXCEPT : mPixelsCount(pixels_count), mRgb(), mIsFromCodec(false) {
     mRgb.resize(pixels_count);
     if (pixels_count > 0) {
         fl::memset((u8*)mRgb.data(), 0, pixels_count * sizeof(CRGB));
@@ -19,7 +19,7 @@ Frame::Frame(int pixels_count) : mPixelsCount(pixels_count), mRgb(), mIsFromCode
 }
 
 Frame::Frame(fl::u8* pixels, fl::u16 width, fl::u16 height, PixelFormat format, fl::u32 timestamp)
-    : mPixelsCount(static_cast<size_t>(width) * height), mRgb(),
+    FL_NO_EXCEPT : mPixelsCount(static_cast<size_t>(width) * height), mRgb(),
       mWidth(width), mHeight(height), mFormat(format), mTimestamp(timestamp), mIsFromCodec(true) {
 
     mRgb.resize(mPixelsCount);
@@ -31,7 +31,7 @@ Frame::Frame(fl::u8* pixels, fl::u16 width, fl::u16 height, PixelFormat format, 
     }
 }
 
-Frame::Frame(const Frame& other)
+Frame::Frame(const Frame& other) FL_NO_EXCEPT
     : mPixelsCount(other.mPixelsCount), mRgb(),
       mWidth(other.mWidth), mHeight(other.mHeight), mFormat(other.mFormat),
       mTimestamp(other.mTimestamp), mIsFromCodec(other.mIsFromCodec) {
@@ -46,7 +46,7 @@ Frame::~Frame() FL_NO_EXCEPT {
     // Vector will handle memory cleanup automatically
 }
 
-void Frame::draw(fl::span<CRGB> leds, DrawMode draw_mode) const {
+void Frame::draw(fl::span<CRGB> leds, DrawMode draw_mode) const FL_NO_EXCEPT {
     if (!mRgb.empty()) {
         switch (draw_mode) {
         case DrawMode::DRAW_MODE_BLEND:  // DRAW_MODE_BLEND is for gfx primitives; treat as overwrite for Frame
@@ -64,7 +64,7 @@ void Frame::draw(fl::span<CRGB> leds, DrawMode draw_mode) const {
     }
 }
 
-void Frame::drawXY(fl::span<CRGB> leds, const XYMap &xyMap, DrawMode draw_mode) const {
+void Frame::drawXY(fl::span<CRGB> leds, const XYMap &xyMap, DrawMode draw_mode) const FL_NO_EXCEPT {
     const u16 width = xyMap.getWidth();
     const u16 height = xyMap.getHeight();
     fl::u32 count = 0;
@@ -96,14 +96,14 @@ void Frame::drawXY(fl::span<CRGB> leds, const XYMap &xyMap, DrawMode draw_mode) 
     }
 }
 
-void Frame::clear() {
+void Frame::clear() FL_NO_EXCEPT {
     if (mPixelsCount > 0 && !mRgb.empty()) {
         fl::memset((u8*)mRgb.data(), 0, mPixelsCount * sizeof(CRGB));
     }
 }
 
 void Frame::interpolate(const Frame &frame1, const Frame &frame2,
-                        u8 amountofFrame2, fl::span<CRGB> pixels) {
+                        u8 amountofFrame2, fl::span<CRGB> pixels) FL_NO_EXCEPT {
     if (frame1.size() != frame2.size()) {
         return; // Frames must have the same size
     }
@@ -123,7 +123,7 @@ void Frame::interpolate(const Frame &frame1, const Frame &frame2,
 }
 
 void Frame::interpolate(const Frame &frame1, const Frame &frame2,
-                        u8 amountOfFrame2) {
+                        u8 amountOfFrame2) FL_NO_EXCEPT {
     if (frame1.size() != frame2.size() || frame1.size() != mPixelsCount) {
         FL_DBG("Frames must have the same size");
         return; // Frames must have the same size
@@ -131,14 +131,14 @@ void Frame::interpolate(const Frame &frame1, const Frame &frame2,
     interpolate(frame1, frame2, amountOfFrame2, rgb());
 }
 
-bool Frame::isValid() const {
+bool Frame::isValid() const FL_NO_EXCEPT {
     if (mIsFromCodec) {
         return mWidth > 0 && mHeight > 0 && !mRgb.empty();
     }
     return !mRgb.empty();
 }
 
-void Frame::convertPixelsToRgb(fl::u8* pixels, PixelFormat format) {
+void Frame::convertPixelsToRgb(fl::u8* pixels, PixelFormat format) FL_NO_EXCEPT {
     CRGB* rgbData = mRgb.data();
 
     switch (format) {

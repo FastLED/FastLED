@@ -11,6 +11,7 @@
 #include "fl/math/math.h"
 #include "fl/math/math.h"
 #include "fl/stl/compiler_control.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -35,24 +36,24 @@ FL_ALIGNAS(64) static const fl::u8 PERLIN_NOISE[] = {
     222, 114, 67,  29,  24,  72,  243, 141, 128, 195, 78,  66,  215, 61,  156,
     180};
 
-FASTLED_FORCE_INLINE fl::u8 P(fl::u8 x) {
+FASTLED_FORCE_INLINE fl::u8 P(fl::u8 x) FL_NO_EXCEPT {
     const fl::u8 idx = x & 255;
     const fl::u8 *ptr = PERLIN_NOISE + idx;
     return *ptr;
 }
 
 // Perlin fade curve: 6t^5 - 15t^4 + 10t^3
-FASTLED_FORCE_INLINE float fade(float t) {
+FASTLED_FORCE_INLINE float fade(float t) FL_NO_EXCEPT {
     return t * t * t * (t * (t * 6 - 15) + 10);
 }
 
 // Linear interpolation
-FASTLED_FORCE_INLINE float lerp(float t, float a, float b) {
+FASTLED_FORCE_INLINE float lerp(float t, float a, float b) FL_NO_EXCEPT {
     return a + t * (b - a);
 }
 
 // Gradient function
-FASTLED_FORCE_INLINE float grad(int hash, float x, float y, float z) {
+FASTLED_FORCE_INLINE float grad(int hash, float x, float y, float z) FL_NO_EXCEPT {
     int h = hash & 15;       /* CONVERT LO 4 BITS OF HASH CODE */
     float u = h < 8 ? x : y, /* INTO 12 GRADIENT DIRECTIONS.   */
         v = h < 4                ? y
@@ -62,7 +63,7 @@ FASTLED_FORCE_INLINE float grad(int hash, float x, float y, float z) {
 }
 
 // 3D Perlin noise
-FASTLED_FORCE_INLINE float pnoise(float x, float y, float z) {
+FASTLED_FORCE_INLINE float pnoise(float x, float y, float z) FL_NO_EXCEPT {
     int X = (int)fl::floorf(x) & 255, /* FIND UNIT CUBE THAT */
         Y = (int)fl::floorf(y) & 255, /* CONTAINS POINT.     */
         Z = (int)fl::floorf(z) & 255;

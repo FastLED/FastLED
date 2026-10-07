@@ -2,18 +2,16 @@
 """AST-backed FL_NO_EXCEPT enforcement for FastLED-owned src/ code.
 
 The check uses clang-query to find function declarations/definitions in
-src/fl/**, src/platforms/**, and src/third_party/** whose parsed AST is not
+root src files, src/fl/**, src/platforms/**, and src/third_party/** whose parsed AST is not
 nothrow, then filters source signatures that are already annotated with
 FL_NO_EXCEPT/noexcept or have an explicit suppression comment.
 
-Default mode compares current findings against a checked-in baseline. This
-keeps normal C++ lint strict for newly introduced misses while allowing the
-existing annotation backlog to be ratcheted down deliberately.
+Every non-exempt finding fails the check. Historical baselines cannot suppress
+missing annotations or be regenerated to grandfather existing findings.
 
 Usage:
     uv run python ci/tools/check_noexcept.py
     uv run python ci/tools/check_noexcept.py --scope platforms
-    uv run python ci/tools/check_noexcept.py --update-baseline
 """
 
 from __future__ import annotations
@@ -23,7 +21,6 @@ import os
 import re
 import shutil
 import sys
-from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -31,7 +28,6 @@ from running_process import PIPE, RunningProcess
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
-DEFAULT_BASELINE = PROJECT_ROOT / "ci" / "tools" / "noexcept_baseline.txt"
 
 _TU_PLATFORMS = "ci/tools/_noexcept_check_platforms_tu.cpp"
 _TU_FL_ALL = "ci/tools/_noexcept_check_fl_tu.cpp"  # legacy fallback only
@@ -97,6 +93,7 @@ def _scope_tus(scope: str) -> list[tuple[str, str]]:
         return _fl_subdir_tus()
     if scope == "all":
         return [
+            *_SCOPES["root"],
             (platforms_tu, ".*src.platforms.*"),
             *_fl_subdir_tus(),
             (third_party_tu, ".*src.third_party.*"),
@@ -105,6 +102,9 @@ def _scope_tus(scope: str) -> list[tuple[str, str]]:
 
 
 _SCOPES: dict[str, list[tuple[str, str]]] = {
+    # Root FastLED APIs are assembled by this existing canonical source router.
+    # On normalized POSIX paths this matcher selects files directly under src/.
+    "root": [("src/fl/build/src.cpp", ".*src.[^/]+$")],
     "platforms": [(_TU_PLATFORMS, ".*src.platforms.*")],
     "fl": [(_TU_FL_ALL, ".*src.fl.*")],
     "third_party": [(_TU_THIRD_PARTY, ".*src.third_party.*")],
@@ -126,7 +126,11 @@ _COMPILER_ARGS = [
     "-DFASTLED_STUB_IMPL",
     "-DFASTLED_TESTING",
     "-DFASTLED_NO_AUTO_NAMESPACE",
-    "-fno-exceptions",
+    # Parser-only contract validation: force the supported external override
+    # even on the host. Production builds keep their own exception policy.
+    "-DFL_NO_EXCEPT=noexcept",
+    "-DFL_HAS_NOEXCEPT=1",
+    "-fexceptions",
 ]
 
 _MATCH_OUTPUT_RE = re.compile(r"(src[\\/]\S+):(\d+):\d+: note: .root. binds here")
@@ -135,8 +139,6 @@ _SUPPRESS_RE = re.compile(
     r"noexcept\s+not\s+required|nolint)\b",
     re.IGNORECASE,
 )
-_HAS_NOEXCEPT_RE = re.compile(r"\b(?:FL_NO_EXCEPT|noexcept)\b")
-_LAMBDA_SOURCE_RE = re.compile(r"\[[^\]]*\]\s*\(")
 _DESTRUCTOR_SOURCE_RE = re.compile(r"(?:^|[^\w:])~\w+\s*\(")
 _MACRO_INVOCATION_RE = re.compile(r"^\s*[A-Z][A-Z0-9_]*\s*\(")
 
@@ -176,62 +178,11 @@ def build_query(file_regex: str) -> str:
 
 
 def normalize_signature(signature: str) -> str:
-    """Collapse a source signature into a stable one-line baseline key."""
+    """Collapse a source signature into a stable one-line identity."""
     without_comments = " ".join(
         line.split("//", 1)[0].strip() for line in signature.splitlines()
     )
     return re.sub(r"\s+", " ", without_comments).strip()
-
-
-def load_baseline(path: Path = DEFAULT_BASELINE) -> Counter[str]:
-    """Load the checked-in baseline as a counted set of signature keys."""
-    baseline: Counter[str] = Counter()
-    if not path.exists():
-        return baseline
-    for raw_line in path.read_text(encoding="utf-8").splitlines():
-        line = raw_line.strip()
-        if not line or line.startswith("#"):
-            continue
-        baseline[line] += 1
-    return baseline
-
-
-def write_baseline(hits: list[NoexceptHit], path: Path = DEFAULT_BASELINE) -> None:
-    """Write a deterministic baseline for the current AST findings."""
-    keys = sorted(hit.baseline_key for hit in hits)
-    content = [
-        "# Known missing FL_NO_EXCEPT signatures for ci/tools/check_noexcept.py.",
-        "# Generated with:",
-        "#   uv run python ci/tools/check_noexcept.py --scope all --update-baseline",
-        "#",
-        "# Format: src/path|normalized source signature",
-        "# New entries fail the default unified C++ linter.",
-        "",
-    ]
-    content.extend(keys)
-    path.write_text("\n".join(content) + "\n", encoding="utf-8")
-
-
-def diff_against_baseline(
-    hits: list[NoexceptHit], baseline: Counter[str]
-) -> tuple[list[NoexceptHit], list[str]]:
-    """Return non-baselined hits and stale baseline keys."""
-    remaining = baseline.copy()
-    new_hits: list[NoexceptHit] = []
-    current: Counter[str] = Counter()
-
-    for hit in hits:
-        key = hit.baseline_key
-        current[key] += 1
-        if remaining[key] > 0:
-            remaining[key] -= 1
-        else:
-            new_hits.append(hit)
-
-    stale: list[str] = []
-    for key, count in (baseline - current).items():
-        stale.extend([key] * count)
-    return new_hits, stale
 
 
 def _find_clang_query() -> list[str]:
@@ -280,30 +231,36 @@ def _read_source_signature(filepath: str, line_num: int) -> tuple[str, str]:
         raw = lines[idx].rstrip()
         signature_lines.append(raw)
         code = raw.split("//", 1)[0]
-        for ch in code:
+        for column, ch in enumerate(code):
             if ch == "(":
                 paren_depth += 1
                 found_open = True
             elif ch == ")":
                 paren_depth -= 1
             elif ch in (";", "{") and found_open and paren_depth == 0:
+                # Only the declaration determines this function's contract.
+                # An annotated lambda in a same-line body must not exempt
+                # its enclosing, unannotated function (#4773).
+                tail = raw[column + 1 :]
+                signature_lines[-1] = raw[: column + 1]
+                if tail.lstrip().startswith("//"):
+                    signature_lines[-1] += tail
                 return display_line, "\n".join(signature_lines)
 
     return display_line, "\n".join(signature_lines)
 
 
 def _signature_is_exempt(signature: str) -> bool:
-    """Return True for annotations and documented non-actionable constructs."""
+    """Return True for documented suppressions and non-actionable constructs."""
     if not signature:
         return True
     if _SUPPRESS_RE.search(signature):
         return True
 
     code = "\n".join(line.split("//", 1)[0] for line in signature.splitlines())
-    if _HAS_NOEXCEPT_RE.search(code):
-        return True
-    if _LAMBDA_SOURCE_RE.search(code):
-        return True
+    # isNoThrow() already removes functions with a real nonthrowing contract.
+    # Tokens in return/callback types, or noexcept(false), cannot excuse an AST
+    # finding for this function (#4773).
     if _DESTRUCTOR_SOURCE_RE.search(code):
         return True
     if _MACRO_INVOCATION_RE.match(code):
@@ -311,6 +268,22 @@ def _signature_is_exempt(signature: str) -> bool:
     if 'extern "C"' in code:
         return True
     return False
+
+
+_COMPILER_ERROR_RE = re.compile(r"(?m)^(?:.*?:\d+(?::\d+)?:\s*)?(?:fatal\s+)?error:")
+
+
+def _raise_on_query_errors(returncode: int, output: str) -> None:
+    """Reject incomplete ASTs, including clang-query's zero-exit parse failures."""
+    if returncode != 0:
+        raise NoexceptCheckError(output.strip() or "clang-query failed")
+    if (
+        _COMPILER_ERROR_RE.search(output)
+        or "Error parsing argument" in output
+        or "Error parsing matcher" in output
+        or "Matcher not found" in output
+    ):
+        raise NoexceptCheckError(output.strip())
 
 
 def _run_clang_query(
@@ -332,14 +305,7 @@ def _run_clang_query(
         timeout=300,
     )
     output = result.stdout + "\n" + result.stderr
-    if result.returncode != 0:
-        raise NoexceptCheckError(output.strip() or "clang-query failed")
-    if (
-        "Error parsing argument" in output
-        or "Error parsing matcher" in output
-        or "Matcher not found" in output
-    ):
-        raise NoexceptCheckError(output.strip())
+    _raise_on_query_errors(result.returncode, output)
 
     hits: list[NoexceptHit] = []
     seen: set[tuple[str, int]] = set()
@@ -422,7 +388,7 @@ def _print_hits(hits: list[NoexceptHit]) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser(
         description=(
-            "Check for missing FL_NO_EXCEPT in src/fl, src/platforms, and "
+            "Check for missing FL_NO_EXCEPT in root src, src/fl, src/platforms, and "
             "src/third_party using clang-query AST analysis."
         )
     )
@@ -433,20 +399,9 @@ def main() -> int:
         help="Which owned src scope to check (default: all)",
     )
     parser.add_argument(
-        "--baseline",
-        type=Path,
-        default=DEFAULT_BASELINE,
-        help="Baseline file for existing missing annotations",
-    )
-    parser.add_argument(
         "--no-baseline",
         action="store_true",
-        help="Report every current finding instead of only new findings",
-    )
-    parser.add_argument(
-        "--update-baseline",
-        action="store_true",
-        help="Rewrite the baseline with the current findings",
+        help="Compatibility alias: every invocation is strict and ignores baselines",
     )
     args = parser.parse_args()
 
@@ -456,36 +411,14 @@ def main() -> int:
         print(f"ERROR: {exc}")
         return 1
 
-    if args.update_baseline:
-        write_baseline(hits, args.baseline)
-        print(f"Wrote {len(hits)} FL_NO_EXCEPT baseline entries to {args.baseline}")
+    if not hits:
+        print("All checked owned src functions have FL_NO_EXCEPT.")
         return 0
 
-    if args.no_baseline:
-        report_hits = hits
-        stale: list[str] = []
-    else:
-        report_hits, stale = diff_against_baseline(hits, load_baseline(args.baseline))
-
-    if stale:
-        print(
-            f"NOTE: {len(stale)} stale FL_NO_EXCEPT baseline entrie(s) can be pruned."
-        )
-        print("      Re-run with --update-baseline after intentional cleanup.")
-        print()
-
-    if not report_hits:
-        print("All non-baselined owned src functions have FL_NO_EXCEPT.")
-        print(f"Known baseline entries: {len(hits) - len(report_hits)}")
-        return 0
-
-    print(f"Found {len(report_hits)} non-baselined function(s) missing FL_NO_EXCEPT:")
+    print(f"Found {len(hits)} function(s) missing FL_NO_EXCEPT:")
     print()
-    _print_hits(report_hits)
-    print(
-        "Add FL_NO_EXCEPT, add a documented suppression comment, or update the "
-        "baseline only for deliberate existing debt."
-    )
+    _print_hits(hits)
+    print("Add FL_NO_EXCEPT or a documented contract-specific suppression comment.")
     return 1
 
 

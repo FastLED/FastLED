@@ -44,7 +44,7 @@ namespace {
 }
 
 
-float SoundUtil::rms_to_dB(enum MicType type, float rms_loudness) {
+float SoundUtil::rms_to_dB(enum MicType type, float rms_loudness) FL_NO_EXCEPT {
     switch (type) {
         case MicTypeInmp441:
             return inmp441_rms_to_dB(rms_loudness);
@@ -56,7 +56,7 @@ float SoundUtil::rms_to_dB(enum MicType type, float rms_loudness) {
 }
 
 
-float SoundUtil::rms(const i16 *samples, size_t num_samples) {
+float SoundUtil::rms(const i16 *samples, size_t num_samples) FL_NO_EXCEPT {
     u64 sum_of_squares = 0;
     for (size_t i = 0; i < num_samples; ++i) {
         sum_of_squares += samples[i] * samples[i];

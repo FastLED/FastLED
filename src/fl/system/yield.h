@@ -1,4 +1,5 @@
 #pragma once
+#include "fl/stl/noexcept.h"
 
 /// @file fl/system/yield.h
 /// @brief Platform-aware cooperative yield for FastLED
@@ -24,6 +25,6 @@ namespace fl {
 /// On single-threaded non-RTOS platforms, this is a no-op.
 ///
 /// Safe to call from any thread or FreeRTOS task.
-void yield();
+void yield() FL_NO_EXCEPT;
 
 } // namespace fl

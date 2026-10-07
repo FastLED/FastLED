@@ -3,6 +3,7 @@
 
 #define FASTLED_INTERNAL
 #include "fl/system/fastled.h"
+#include "fl/stl/noexcept.h"
 
 // This file implements simplex noise, which is an improved Perlin noise. This
 // implementation is a fixed-point version that avoids all uses of floating
@@ -71,7 +72,7 @@ static fl::u8 const simplex[64][4] = {
 
 // hash is 0..0xff, x is 0.12 fixed point
 // returns *.12 fixed-point value
-static fl::i32 grad(fl::u8 hash, fl::i32 x) {
+static fl::i32 grad(fl::u8 hash, fl::i32 x) FL_NO_EXCEPT {
     fl::u8 h = hash & 15;
     fl::i32 grad = 1 + (h&7); // Gradient value 1.0, 2.0, ..., 8.0
     if ((h&8) != 0) {
@@ -80,21 +81,21 @@ static fl::i32 grad(fl::u8 hash, fl::i32 x) {
     return grad * x; // Multiply the gradient with the distance (integer * 0.12 = *.12)
 }
 
-static fl::i32 grad(fl::u8 hash, fl::i32 x, fl::i32 y) {
+static fl::i32 grad(fl::u8 hash, fl::i32 x, fl::i32 y) FL_NO_EXCEPT {
     fl::u8 h = hash & 7;      // Convert low 3 bits of hash code
     fl::i32 u = h < 4 ? x : y; // into 8 simple gradient directions,
     fl::i32 v = h < 4 ? y : x; // and compute the dot product with (x,y).
     return ((h&1) != 0 ? -u : u) + ((h&2) != 0 ? -2*v : 2*v);
 }
 
-static fl::i32 grad(fl::u8 hash, fl::i32 x, fl::i32 y, fl::i32 z) {
+static fl::i32 grad(fl::u8 hash, fl::i32 x, fl::i32 y, fl::i32 z) FL_NO_EXCEPT {
     fl::i32 h = hash & 15;                                // Convert low 4 bits of hash code into 12 simple
     fl::i32 u = h < 8 ? x : y;                            // gradient directions, and compute dot product.
     fl::i32 v = h < 4 ? y : (h == 12 || h == 14 ? x : z); // Fix repeats at h = 12 to 15
     return ((h&1) != 0 ? -u : u) + ((h&2) != 0 ? -v : v);
 }
 
-static fl::i32 grad(fl::u8 hash, fl::i32 x, fl::i32 y, fl::i32 z, fl::i32 t) {
+static fl::i32 grad(fl::u8 hash, fl::i32 x, fl::i32 y, fl::i32 z, fl::i32 t) FL_NO_EXCEPT {
     fl::u8 h = hash & 31;      // Convert low 5 bits of hash code into 32 simple
     fl::i32 u = h < 24 ? x : y; // gradient directions, and compute dot product.
     fl::i32 v = h < 16 ? y : z;
@@ -103,7 +104,7 @@ static fl::i32 grad(fl::u8 hash, fl::i32 x, fl::i32 y, fl::i32 z, fl::i32 t) {
 }
 
 // 1D simplex noise.
-fl::u16 snoise16(fl::u32 x) {
+fl::u16 snoise16(fl::u32 x) FL_NO_EXCEPT {
     fl::u32 i0 = x >> 12;
     fl::u32 i1 = i0 + 1;
     fl::i32 x0 = x & 0xfff;   // .12
@@ -126,7 +127,7 @@ fl::u16 snoise16(fl::u32 x) {
 }
 
 // 2D simplex noise.
-fl::u16 snoise16(fl::u32 x, fl::u32 y) {
+fl::u16 snoise16(fl::u32 x, fl::u32 y) FL_NO_EXCEPT {
     const u64 F2 = 1572067135; // .32: F2 = 0.5*(sqrt(3.0)-1.0)
     const u64 G2 = 907633384;  // .32: G2 = (3.0-Math.sqrt(3.0))/6.0
 
@@ -193,7 +194,7 @@ fl::u16 snoise16(fl::u32 x, fl::u32 y) {
 }
 
 // 3D simplex noise.
-fl::u16 snoise16(fl::u32 x, fl::u32 y, fl::u32 z) {
+fl::u16 snoise16(fl::u32 x, fl::u32 y, fl::u32 z) FL_NO_EXCEPT {
     // Simple skewing factors for the 3D case
     const u64 F3 = 1431655764; // .32: 0.333333333
     const u64 G3 = 715827884;  // .32: 0.166666667
@@ -325,7 +326,7 @@ fl::u16 snoise16(fl::u32 x, fl::u32 y, fl::u32 z) {
 }
 
 // 4D simplex noise.
-fl::u16 snoise16(fl::u32 x, fl::u32 y, fl::u32 z, fl::u32 w) {
+fl::u16 snoise16(fl::u32 x, fl::u32 y, fl::u32 z, fl::u32 w) FL_NO_EXCEPT {
     // The skewing and unskewing factors are hairy again for the 4D case
     const u64 F4 = 331804471; // .30: (Math.sqrt(5.0)-1.0)/4.0 = 0.30901699437494745
     const u64 G4 = 593549882; // .32: (5.0-Math.sqrt(5.0))/20.0 = 0.1381966011250105

@@ -8,21 +8,21 @@ namespace fl {
 namespace audio {
 namespace detector {
 
-MusicalBeat::MusicalBeat() = default;
+MusicalBeat::MusicalBeat() FL_NO_EXCEPT = default;
 
-MusicalBeat::MusicalBeat(const MusicalBeatDetectorConfig& config) {
+MusicalBeat::MusicalBeat(const MusicalBeatDetectorConfig& config) FL_NO_EXCEPT {
     configure(config);
 }
 
 MusicalBeat::~MusicalBeat() FL_NO_EXCEPT = default;
 
-void MusicalBeat::configure(const MusicalBeatDetectorConfig& config) {
+void MusicalBeat::configure(const MusicalBeatDetectorConfig& config) FL_NO_EXCEPT {
     mConfig = config;
     mIBIHistory.clear();
     reset();
 }
 
-void MusicalBeat::processSample(bool onsetDetected, float onsetStrength) {
+void MusicalBeat::processSample(bool onsetDetected, float onsetStrength) FL_NO_EXCEPT {
     mBeatDetected = false;
     mLastBeatConfidence = 0.0f;
     mCurrentFrame++;
@@ -75,19 +75,19 @@ void MusicalBeat::processSample(bool onsetDetected, float onsetStrength) {
     }
 }
 
-bool MusicalBeat::isBeat() const {
+bool MusicalBeat::isBeat() const FL_NO_EXCEPT {
     return mBeatDetected && (mLastBeatConfidence >= mConfig.minBeatConfidence);
 }
 
-float MusicalBeat::getBPM() const {
+float MusicalBeat::getBPM() const FL_NO_EXCEPT {
     return mCurrentBPM;
 }
 
-float MusicalBeat::getBeatConfidence() const {
+float MusicalBeat::getBeatConfidence() const FL_NO_EXCEPT {
     return mLastBeatConfidence;
 }
 
-float MusicalBeat::getAverageIBI() const {
+float MusicalBeat::getAverageIBI() const FL_NO_EXCEPT {
     if (mIBIHistory.empty()) {
         return 0.0f;
     }
@@ -102,7 +102,7 @@ float MusicalBeat::getAverageIBI() const {
            static_cast<float>(mConfig.sampleRate);
 }
 
-void MusicalBeat::reset() {
+void MusicalBeat::reset() FL_NO_EXCEPT {
     mBeatDetected = false;
     mLastBeatConfidence = 0.0f;
     mCurrentBPM = 120.0f;  // Default to common tempo
@@ -119,7 +119,7 @@ void MusicalBeat::reset() {
     mStats.ibiCount = 0;
 }
 
-bool MusicalBeat::validateBeat(float onsetStrength) {
+bool MusicalBeat::validateBeat(float onsetStrength) FL_NO_EXCEPT {
     // First beat always validates (no history to compare)
     if (mLastBeatFrame == 0) {
         return true;
@@ -149,7 +149,7 @@ bool MusicalBeat::validateBeat(float onsetStrength) {
     return (actualFrames >= minExpected) && (actualFrames <= maxExpected);
 }
 
-float MusicalBeat::calculateBeatConfidence(float currentIBI) {
+float MusicalBeat::calculateBeatConfidence(float currentIBI) FL_NO_EXCEPT {
     // Confidence based on temporal consistency
     if (mIBIHistory.size() < 2) {
         // Not enough history - return moderate confidence
@@ -180,7 +180,7 @@ float MusicalBeat::calculateBeatConfidence(float currentIBI) {
     return (confidence * 0.7f) + (ibiBonus * 0.3f);
 }
 
-void MusicalBeat::updateBPMEstimate() {
+void MusicalBeat::updateBPMEstimate() FL_NO_EXCEPT {
     if (mIBIHistory.empty()) {
         return;
     }
@@ -204,7 +204,7 @@ void MusicalBeat::updateBPMEstimate() {
     mCurrentBPM = fl::max(mConfig.minBPM, fl::min(mConfig.maxBPM, mCurrentBPM));
 }
 
-bool MusicalBeat::isValidIBI(float ibi) const {
+bool MusicalBeat::isValidIBI(float ibi) const FL_NO_EXCEPT {
     if (ibi <= 0.0f) {
         return false;
     }
@@ -216,7 +216,7 @@ bool MusicalBeat::isValidIBI(float ibi) const {
     return (bpm >= mConfig.minBPM) && (bpm <= mConfig.maxBPM);
 }
 
-float MusicalBeat::calculateIBIStdDev() const {
+float MusicalBeat::calculateIBIStdDev() const FL_NO_EXCEPT {
     if (mIBIHistory.size() < 2) {
         return 0.0f;
     }

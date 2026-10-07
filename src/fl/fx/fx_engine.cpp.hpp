@@ -8,22 +8,22 @@
 namespace fl {
 
 FxEngine::FxEngine(u16 numLeds, bool interpolate)
-    : mTimeFunction(0), mCompositor(numLeds), mCurrId(0),
+    FL_NO_EXCEPT : mTimeFunction(0), mCompositor(numLeds), mCurrId(0),
       mInterpolate(interpolate) {
     mEffects.reserve(FASTLED_FX_ENGINE_MAX_FX);
 }
 
 FxEngine::~FxEngine() FL_NO_EXCEPT {}
 
-void FxEngine::pushAudioFrame(const AudioFrame &frame) {
+void FxEngine::pushAudioFrame(const AudioFrame &frame) FL_NO_EXCEPT {
     mAudioBack.push_back(frame);
 }
 
-void FxEngine::setAudio(fl::shared_ptr<fl::audio::Processor> proc) {
+void FxEngine::setAudio(fl::shared_ptr<fl::audio::Processor> proc) FL_NO_EXCEPT {
     mAudioProcessor = fl::move(proc);
 }
 
-int FxEngine::addFx(FxPtr effect) {
+int FxEngine::addFx(FxPtr effect) FL_NO_EXCEPT {
     float fps = 0;
     if (mInterpolate && effect->hasFixedFrameRate(&fps)) {
         // Wrap the effect in a VideoFxWrapper so that we can get
@@ -44,7 +44,7 @@ int FxEngine::addFx(FxPtr effect) {
     return mCounter++;
 }
 
-bool FxEngine::nextFx(u16 duration) {
+bool FxEngine::nextFx(u16 duration) FL_NO_EXCEPT {
     bool ok = mEffects.next(mCurrId, &mCurrId, true);
     if (!ok) {
         return false;
@@ -53,7 +53,7 @@ bool FxEngine::nextFx(u16 duration) {
     return true;
 }
 
-bool FxEngine::setNextFx(int index, u16 duration) {
+bool FxEngine::setNextFx(int index, u16 duration) FL_NO_EXCEPT {
     if (!mEffects.has(index)) {
         return false;
     }
@@ -63,7 +63,7 @@ bool FxEngine::setNextFx(int index, u16 duration) {
     return true;
 }
 
-FxPtr FxEngine::removeFx(int index) {
+FxPtr FxEngine::removeFx(int index) FL_NO_EXCEPT {
     if (!mEffects.has(index)) {
         return FxPtr();
     }
@@ -84,7 +84,7 @@ FxPtr FxEngine::removeFx(int index) {
     return removedFx;
 }
 
-FxPtr FxEngine::getFx(int id) {
+FxPtr FxEngine::getFx(int id) FL_NO_EXCEPT {
     if (mEffects.has(id)) {
         FxPtr fx;
         mEffects.get(id, &fx);
@@ -93,7 +93,7 @@ FxPtr FxEngine::getFx(int id) {
     return FxPtr();
 }
 
-bool FxEngine::draw(fl::u32 now, fl::span<CRGB> finalBuffer) {
+bool FxEngine::draw(fl::u32 now, fl::span<CRGB> finalBuffer) FL_NO_EXCEPT {
     mTimeFunction.update(now);
     fl::u32 warpedTime = mTimeFunction.time();
 

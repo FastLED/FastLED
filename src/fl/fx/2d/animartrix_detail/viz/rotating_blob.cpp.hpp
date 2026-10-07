@@ -2,13 +2,14 @@
 #include "fl/fx/2d/animartrix_detail/viz/rotating_blob.h"
 #include "fl/fx/2d/animartrix_detail/render_value_fp.h"
 #include "fl/fx/2d/animartrix_detail/perlin_float.h"
+#include "fl/stl/noexcept.h"
 
 FL_FAST_MATH_BEGIN
 FL_OPTIMIZATION_LEVEL_O3_BEGIN
 
 namespace fl {
 
-void Rotating_Blob::draw(Context &ctx) {
+void Rotating_Blob::draw(Context &ctx) FL_NO_EXCEPT {
     auto *e = ctx.mEngine.get();
     e->get_ready();
 
@@ -71,7 +72,7 @@ void Rotating_Blob::draw(Context &ctx) {
 // Fixed-Point Implementation of Rotating_Blob
 // ============================================================================
 
-void Rotating_Blob_FP::draw(Context &ctx) {
+void Rotating_Blob_FP::draw(Context &ctx) FL_NO_EXCEPT {
     auto *e = ctx.mEngine.get();
     e->get_ready();
     mState.ensureCache(e);

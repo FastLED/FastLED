@@ -4,29 +4,30 @@
 #include "fl/gfx/leds.h"
 #include "fl/gfx/raster_sparse.h"
 #include "fl/gfx/tile2x2.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
-void XYRasterU8Sparse::draw(const CRGB &color, const XYMap &xymap, fl::span<CRGB> out) {
+void XYRasterU8Sparse::draw(const CRGB &color, const XYMap &xymap, fl::span<CRGB> out) FL_NO_EXCEPT {
     XYDrawComposited visitor(color, xymap, out);
     draw(xymap, visitor);
 }
 
-void XYRasterU8Sparse::draw(const CRGB &color, Leds *leds) {
+void XYRasterU8Sparse::draw(const CRGB &color, Leds *leds) FL_NO_EXCEPT {
     draw(color, leds->xymap(), leds->rgb());
 }
 
 void XYRasterU8Sparse::drawGradient(const Gradient &gradient,
-                                    const XYMap &xymap, fl::span<CRGB> out) {
+                                    const XYMap &xymap, fl::span<CRGB> out) FL_NO_EXCEPT {
     XYDrawGradient visitor(gradient, xymap, out);
     draw(xymap, visitor);
 }
 
-void XYRasterU8Sparse::drawGradient(const Gradient &gradient, Leds *leds) {
+void XYRasterU8Sparse::drawGradient(const Gradient &gradient, Leds *leds) FL_NO_EXCEPT {
     drawGradient(gradient, leds->xymap(), leds->rgb());
 }
 
-void XYRasterU8Sparse::rasterize(const span<const Tile2x2_u8> &tiles) {
+void XYRasterU8Sparse::rasterize(const span<const Tile2x2_u8> &tiles) FL_NO_EXCEPT {
     // Tile2x2_u8::Rasterize(tiles, this, mAbsoluteBoundsSet ? &mAbsoluteBounds
     // : nullptr);
     if (tiles.size() == 0) {
@@ -46,7 +47,7 @@ void XYRasterU8Sparse::rasterize(const span<const Tile2x2_u8> &tiles) {
 }
 
 void XYRasterU8Sparse::rasterize_internal(const Tile2x2_u8 &tile,
-                                          const rect<u16> *optional_bounds) {
+                                          const rect<u16> *optional_bounds) FL_NO_EXCEPT {
     const vec2<u16> &origin = tile.origin();
     for (int x = 0; x < 2; ++x) {
         for (int y = 0; y < 2; ++y) {
@@ -67,7 +68,7 @@ void XYRasterU8Sparse::rasterize_internal(const Tile2x2_u8 &tile,
 } // namespace fl
 
 // XYRasterSparse_RGB8 implementation
-void fl::XYRasterSparse_RGB8::draw(const XYMap &xymap, fl::span<CRGB> out) {
+void fl::XYRasterSparse_RGB8::draw(const XYMap &xymap, fl::span<CRGB> out) FL_NO_EXCEPT {
     for (const auto &it : mSparseGrid) {
         auto pt = it.first;
         if (!xymap.has(pt.x, pt.y)) {
@@ -82,6 +83,6 @@ void fl::XYRasterSparse_RGB8::draw(const XYMap &xymap, fl::span<CRGB> out) {
     }
 }
 
-void fl::XYRasterSparse_RGB8::draw(Leds *leds) {
+void fl::XYRasterSparse_RGB8::draw(Leds *leds) FL_NO_EXCEPT {
     draw(leds->xymap(), leds->rgb());
 }

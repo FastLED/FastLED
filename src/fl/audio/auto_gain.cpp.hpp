@@ -8,17 +8,17 @@
 namespace fl {
 namespace audio {
 
-AutoGain::AutoGain() {
+AutoGain::AutoGain() FL_NO_EXCEPT {
     configure(AutoGainConfig{});
 }
 
-AutoGain::AutoGain(const AutoGainConfig& config) {
+AutoGain::AutoGain(const AutoGainConfig& config) FL_NO_EXCEPT {
     configure(config);
 }
 
 AutoGain::~AutoGain() FL_NO_EXCEPT = default;
 
-void AutoGain::configure(const AutoGainConfig& config) {
+void AutoGain::configure(const AutoGainConfig& config) FL_NO_EXCEPT {
     mConfig = config;
     resolvePreset();
     // Initialize peak envelope to targetRMSLevel so initial gain is ~1.0
@@ -26,7 +26,7 @@ void AutoGain::configure(const AutoGainConfig& config) {
     mStats.peakEnvelope = mConfig.targetRMSLevel;
 }
 
-void AutoGain::resolvePreset() {
+void AutoGain::resolvePreset() FL_NO_EXCEPT {
     switch (mConfig.preset) {
     case AGCPreset::AGCPreset_Normal:
         mPeakDecayTau = 3.3f;
@@ -62,7 +62,7 @@ void AutoGain::resolvePreset() {
     mPeakEnvelope = AttackDecayFilter<float>(0.01f, mPeakDecayTau, mConfig.targetRMSLevel);
 }
 
-void AutoGain::reset() {
+void AutoGain::reset() FL_NO_EXCEPT {
     mPeakEnvelope.reset(mConfig.targetRMSLevel);
     mIntegrator = 0.0f;
     mLastGain = 1.0f;
@@ -75,7 +75,7 @@ void AutoGain::reset() {
     mStats.samplesProcessed = 0;
 }
 
-Sample AutoGain::process(const Sample& sample) {
+Sample AutoGain::process(const Sample& sample) FL_NO_EXCEPT {
     // Pass through if disabled
     if (!mConfig.enabled) {
         return sample;
@@ -145,7 +145,7 @@ Sample AutoGain::process(const Sample& sample) {
     return Sample(impl);
 }
 
-float AutoGain::computeTargetGain() {
+float AutoGain::computeTargetGain() FL_NO_EXCEPT {
     const float peakEnv = mPeakEnvelope.value();
 
     // Avoid division by very small numbers
@@ -156,7 +156,7 @@ float AutoGain::computeTargetGain() {
     return mConfig.targetRMSLevel / peakEnv;
 }
 
-float AutoGain::updatePIController(float targetGain, float dt) {
+float AutoGain::updatePIController(float targetGain, float dt) FL_NO_EXCEPT {
     const float error = targetGain - mLastGain;
 
     // Bug 4 fix: Use absolute error threshold when gain is small to avoid
@@ -196,7 +196,7 @@ float AutoGain::updatePIController(float targetGain, float dt) {
     return unclamped;
 }
 
-void AutoGain::applyGain(const vector<i16>& input, float gain, vector<i16>& output) {
+void AutoGain::applyGain(const vector<i16>& input, float gain, vector<i16>& output) FL_NO_EXCEPT {
     output.clear();
     output.reserve(input.size());
 

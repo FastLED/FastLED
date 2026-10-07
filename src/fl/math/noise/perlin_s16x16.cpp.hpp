@@ -6,12 +6,13 @@
 
 #include "fl/stl/compiler_control.h"
 #include "fl/fx/2d/animartrix_detail/perlin_s16x16.h"
+#include "fl/stl/noexcept.h"
 
 FL_OPTIMIZATION_LEVEL_O3_BEGIN
 
 namespace fl {
 
-void perlin_s16x16::init_fade_lut(fl::i32 *table) {
+void perlin_s16x16::init_fade_lut(fl::i32 *table) FL_NO_EXCEPT {
     for (int i = 0; i <= 256; i++) {
         fl::i64 t = static_cast<fl::i64>(i) * (HP_ONE / 256);
         fl::i64 t2 = (t * t) >> HP_BITS;
@@ -26,14 +27,14 @@ void perlin_s16x16::init_fade_lut(fl::i32 *table) {
 
 fl::s16x16 perlin_s16x16::pnoise2d(fl::s16x16 fx, fl::s16x16 fy,
                                           const fl::i32 *fade_lut,
-                                          const fl::u8 *perm) {
+                                          const fl::u8 *perm) FL_NO_EXCEPT {
     return fl::s16x16::from_raw(
         pnoise2d_raw(fx.raw(), fy.raw(), fade_lut, perm));
 }
 
 fl::i32 perlin_s16x16::pnoise2d_raw(fl::i32 fx_raw, fl::i32 fy_raw,
                                             const fl::i32 *fade_lut,
-                                            const fl::u8 *perm) {
+                                            const fl::u8 *perm) FL_NO_EXCEPT {
     int X, Y;
     fl::i32 x, y;
     floor_frac(fx_raw, X, x);
@@ -61,12 +62,12 @@ fl::i32 perlin_s16x16::pnoise2d_raw(fl::i32 fx_raw, fl::i32 fy_raw,
 }
 
  void perlin_s16x16::floor_frac(fl::i32 fp16, int &ifloor,
-                                            fl::i32 &frac24) {
+                                            fl::i32 &frac24) FL_NO_EXCEPT {
     ifloor = fp16 >> FP_BITS;
     frac24 = (fp16 & (FP_ONE - 1)) << (HP_BITS - FP_BITS);
 }
 
- fl::i32 perlin_s16x16::fade(fl::i32 t, const fl::i32 *table) {
+ fl::i32 perlin_s16x16::fade(fl::i32 t, const fl::i32 *table) FL_NO_EXCEPT {
     fl::u32 idx = static_cast<fl::u32>(t) >> 16;
     fl::i32 frac = t & 0xFFFF;
     fl::i32 a = table[idx];
@@ -75,12 +76,12 @@ fl::i32 perlin_s16x16::pnoise2d_raw(fl::i32 fx_raw, fl::i32 fy_raw,
         (static_cast<fl::i64>(frac) * (b - a)) >> 16);
 }
 
- fl::i32 perlin_s16x16::lerp(fl::i32 t, fl::i32 a, fl::i32 b) {
+ fl::i32 perlin_s16x16::lerp(fl::i32 t, fl::i32 a, fl::i32 b) FL_NO_EXCEPT {
     return a + static_cast<fl::i32>(
         (static_cast<fl::i64>(t) * (b - a)) >> HP_BITS);
 }
 
- fl::i32 perlin_s16x16::grad(int hash, fl::i32 x, fl::i32 y) {
+ fl::i32 perlin_s16x16::grad(int hash, fl::i32 x, fl::i32 y) FL_NO_EXCEPT {
     struct GradCoeff { fl::i8 cx; fl::i8 cy; };
     constexpr GradCoeff lut[16] = {
         { 1,  1}, {-1,  1}, { 1, -1}, {-1, -1},
@@ -94,14 +95,14 @@ fl::i32 perlin_s16x16::pnoise2d_raw(fl::i32 fx_raw, fl::i32 fy_raw,
 
 fl::s16x16 perlin_s16x16::pnoise3d(fl::s16x16 fx, fl::s16x16 fy, fl::s16x16 fz,
                                           const fl::i32 *fade_lut,
-                                          const fl::u8 *perm) {
+                                          const fl::u8 *perm) FL_NO_EXCEPT {
     return fl::s16x16::from_raw(
         pnoise3d_raw(fx.raw(), fy.raw(), fz.raw(), fade_lut, perm));
 }
 
 fl::i32 perlin_s16x16::pnoise3d_raw(fl::i32 fx_raw, fl::i32 fy_raw, fl::i32 fz_raw,
                                             const fl::i32 *fade_lut,
-                                            const fl::u8 *perm) {
+                                            const fl::u8 *perm) FL_NO_EXCEPT {
     int X, Y, Z;
     fl::i32 x, y, z;
     floor_frac(fx_raw, X, x);
@@ -137,7 +138,7 @@ fl::i32 perlin_s16x16::pnoise3d_raw(fl::i32 fx_raw, fl::i32 fy_raw, fl::i32 fz_r
     return result >> (HP_BITS - fl::s16x16::FRAC_BITS);
 }
 
-fl::i32 perlin_s16x16::grad3d(int hash, fl::i32 x, fl::i32 y, fl::i32 z) {
+fl::i32 perlin_s16x16::grad3d(int hash, fl::i32 x, fl::i32 y, fl::i32 z) FL_NO_EXCEPT {
     // Matches float grad(hash, x, y, z) from perlin_float.h:
     //   h = hash & 15
     //   u = h < 8 ? x : y

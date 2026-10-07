@@ -14,11 +14,11 @@ public:
     EnergyAnalyzer() FL_NO_EXCEPT;
     ~EnergyAnalyzer() FL_NO_EXCEPT override;
 
-    void update(shared_ptr<Context> context) override;
-    void fireCallbacks() override;
-    bool needsFFT() const override { return false; }  // Uses RMS from Sample
-    const char* getName() const override { return "EnergyAnalyzer"; }
-    void reset() override;
+    void update(shared_ptr<Context> context) FL_NO_EXCEPT override;
+    void fireCallbacks() FL_NO_EXCEPT override;
+    bool needsFFT() const FL_NO_EXCEPT override { return false; }  // Uses RMS from Sample
+    const char* getName() const FL_NO_EXCEPT override { return "EnergyAnalyzer"; }
+    void reset() FL_NO_EXCEPT override;
 
     // Callbacks (multiple listeners supported)
     function_list<void(float rms)> onEnergy;
@@ -27,16 +27,16 @@ public:
     function_list<void(float normalizedRms)> onNormalizedEnergy;  // 0-1 range
 
     // State access
-    float getRMS() const { return mCurrentRMS; }
-    float getPeak() const { return mPeak; }
-    float getAverageEnergy() const { return mAverageEnergy; }
-    float getMinEnergy() const { return mMinEnergy; }
-    float getMaxEnergy() const { return mMaxEnergy; }
-    float getNormalizedRMS() const { return mNormalizedRMS; }  // 0-1 range
+    float getRMS() const FL_NO_EXCEPT { return mCurrentRMS; }
+    float getPeak() const FL_NO_EXCEPT { return mPeak; }
+    float getAverageEnergy() const FL_NO_EXCEPT { return mAverageEnergy; }
+    float getMinEnergy() const FL_NO_EXCEPT { return mMinEnergy; }
+    float getMaxEnergy() const FL_NO_EXCEPT { return mMaxEnergy; }
+    float getNormalizedRMS() const FL_NO_EXCEPT { return mNormalizedRMS; }  // 0-1 range
 
     // Configuration
-    void setPeakDecay(float decay) { mPeakDecay = decay; }
-    void setHistorySize(int size);
+    void setPeakDecay(float decay) FL_NO_EXCEPT { mPeakDecay = decay; }
+    void setHistorySize(int size) FL_NO_EXCEPT;
 
 private:
     float mCurrentRMS;
@@ -57,8 +57,8 @@ private:
     // History for average calculation (O(1) running sum)
     MovingAverage<float, 0> mEnergyAvg{43};
 
-    void updatePeak(float energy, u32 timestamp);
-    void updateAverage(float energy);
+    void updatePeak(float energy, u32 timestamp) FL_NO_EXCEPT;
+    void updateAverage(float energy) FL_NO_EXCEPT;
 };
 
 } // namespace detector

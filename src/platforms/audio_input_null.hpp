@@ -10,9 +10,9 @@ class Null_Audio : public audio::IInput {
 public:
     ~Null_Audio() = default;
     // Starts the audio source.
-    void start() override {}
+    void start() FL_NO_EXCEPT override {}
     // Stops the audio source, call this before light sleep.
-    void stop() override {}
+    void stop() FL_NO_EXCEPT override {}
 
     bool error(fl::string* msg = nullptr) FL_NO_EXCEPT override {
         if (msg) {

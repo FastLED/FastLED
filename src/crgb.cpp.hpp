@@ -14,7 +14,7 @@
 
 
 
-fl::string CRGB::toString() const {
+fl::string CRGB::toString() const FL_NO_EXCEPT {
     fl::string out;
     out.append("CRGB(");
     out.append(fl::i16(r));
@@ -27,7 +27,7 @@ fl::string CRGB::toString() const {
 }
 
 CRGB CRGB::computeAdjustment(fl::u8 scale, const CRGB &colorCorrection,
-                             const CRGB &colorTemperature) {
+                             const CRGB &colorTemperature) FL_NO_EXCEPT {
 #if defined(NO_CORRECTION) && (NO_CORRECTION == 1)
     return CRGB(scale, scale, scale);
 #else
@@ -52,12 +52,12 @@ CRGB CRGB::computeAdjustment(fl::u8 scale, const CRGB &colorCorrection,
 #endif
 }
 
-CRGB CRGB::blend(const CRGB &p1, const CRGB &p2, fract8 amountOfP2) {
+CRGB CRGB::blend(const CRGB &p1, const CRGB &p2, fract8 amountOfP2) FL_NO_EXCEPT {
     return CRGB(fl::blend8(p1.r, p2.r, amountOfP2), fl::blend8(p1.g, p2.g, amountOfP2),
                 fl::blend8(p1.b, p2.b, amountOfP2));
 }
 
-CRGB CRGB::blendAlphaMaxChannel(const CRGB &upper, const CRGB &lower) {
+CRGB CRGB::blendAlphaMaxChannel(const CRGB &upper, const CRGB &lower) FL_NO_EXCEPT {
     // Use luma of upper pixel as alpha (0..255)
     fl::u8 max_component = 0;
     for (int i = 0; i < 3; ++i) {
@@ -72,32 +72,32 @@ CRGB CRGB::blendAlphaMaxChannel(const CRGB &upper, const CRGB &lower) {
 }
 
 void CRGB::downscale(const CRGB *src, const fl::XYMap &srcXY, CRGB *dst,
-                     const fl::XYMap &dstXY) {
+                     const fl::XYMap &dstXY) FL_NO_EXCEPT {
     fl::downscale(src, srcXY, dst, dstXY);
 }
 
 void CRGB::upscale(const CRGB *src, const fl::XYMap &srcXY, CRGB *dst,
-                   const fl::XYMap &dstXY) {
+                   const fl::XYMap &dstXY) FL_NO_EXCEPT {
     FL_WARN_IF(srcXY.getType() != fl::XYMap::kLineByLine, "Upscaling only works with a src matrix that is rectangular");
     fl::u16 w = srcXY.getWidth();
     fl::u16 h = srcXY.getHeight();
     fl::upscale(src, dst, w, h, dstXY);
 }
 
-CRGB &CRGB::nscale8(fl::u8 scaledown) {
+CRGB &CRGB::nscale8(fl::u8 scaledown) FL_NO_EXCEPT {
     nscale8x3(r, g, b, scaledown);
     return *this;
 }
 
 /// Add one CRGB to another, saturating at 0xFF for each channel
-CRGB &CRGB::operator+=(const CRGB &rhs) {
+CRGB &CRGB::operator+=(const CRGB &rhs) FL_NO_EXCEPT {
     r = qadd8(r, rhs.r);
     g = qadd8(g, rhs.g);
     b = qadd8(b, rhs.b);
     return *this;
 }
 
-CRGB CRGB::lerp8(const CRGB &other, fract8 amountOf2) const {
+CRGB CRGB::lerp8(const CRGB &other, fract8 amountOf2) const FL_NO_EXCEPT {
     CRGB ret;
 
     ret.r = lerp8by8(r, other.r, amountOf2);
@@ -107,7 +107,7 @@ CRGB CRGB::lerp8(const CRGB &other, fract8 amountOf2) const {
     return ret;
 }
 
-CRGB &CRGB::fadeToBlackBy(fl::u8 fadefactor) {
+CRGB &CRGB::fadeToBlackBy(fl::u8 fadefactor) FL_NO_EXCEPT {
     nscale8x3(r, g, b, 255 - fadefactor);
     return *this;
 }

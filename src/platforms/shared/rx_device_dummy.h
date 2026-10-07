@@ -44,7 +44,7 @@ public:
     }
 
     fl::result<u32, DecodeError> decode(const ChipsetTiming4Phase &timing,
-                                               fl::span<u8> out) override FL_NO_EXCEPT {
+                                               fl::span<u8> out) FL_NO_EXCEPT override {
         (void)timing;
         (void)out;
         warnOnce();

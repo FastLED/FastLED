@@ -12,12 +12,12 @@ namespace fl {
 // ============================================================================
 
 ifstream::ifstream(const char* path, ios::openmode mode)
-    : mLastRead(0), mGood(false), mEof(false), mFail(true) {
+    FL_NO_EXCEPT : mLastRead(0), mGood(false), mEof(false), mFail(true) {
     open(path, mode);
 }
 
 ifstream::ifstream(filebuf_ptr handle)
-    : mHandle(handle), mLastRead(0), mGood(false), mEof(false), mFail(true) {
+    FL_NO_EXCEPT : mHandle(handle), mLastRead(0), mGood(false), mEof(false), mFail(true) {
     updateState();
 }
 
@@ -25,7 +25,7 @@ ifstream::~ifstream() FL_NO_EXCEPT {
     close();
 }
 
-void ifstream::open(const char* path, ios::openmode mode) {
+void ifstream::open(const char* path, ios::openmode mode) FL_NO_EXCEPT {
     close();
 
     // Build fopen mode string
@@ -43,7 +43,7 @@ void ifstream::open(const char* path, ios::openmode mode) {
     }
 }
 
-void ifstream::close() {
+void ifstream::close() FL_NO_EXCEPT {
     if (mHandle && mHandle->is_open()) {
         mHandle->close();
         // After successful close: keep good() = true to match std::ofstream behavior
@@ -58,7 +58,7 @@ void ifstream::close() {
     }
 }
 
-ifstream& ifstream::read(char* buffer, fl::size_t count) {
+ifstream& ifstream::read(char* buffer, fl::size_t count) FL_NO_EXCEPT {
     mLastRead = 0;
     if (mHandle && mHandle->is_open()) {
         mLastRead = mHandle->read(buffer, count);
@@ -67,14 +67,14 @@ ifstream& ifstream::read(char* buffer, fl::size_t count) {
     return *this;
 }
 
-fl::size_t ifstream::tellg() {
+fl::size_t ifstream::tellg() FL_NO_EXCEPT {
     if (!mHandle) {
         return 0;
     }
     return mHandle->tell();
 }
 
-ifstream& ifstream::seekg(fl::size_t pos, ios::seekdir dir) {
+ifstream& ifstream::seekg(fl::size_t pos, ios::seekdir dir) FL_NO_EXCEPT {
     if (mHandle && mHandle->is_open()) {
         seek_dir seek_direction =
             (dir == ios::seekdir::beg) ? seek_dir::beg :
@@ -85,21 +85,21 @@ ifstream& ifstream::seekg(fl::size_t pos, ios::seekdir dir) {
     return *this;
 }
 
-int ifstream::error() const {
+int ifstream::error() const FL_NO_EXCEPT {
     if (!mHandle) {
         return fl::io::err_bad_file;
     }
     return mHandle->error_code();
 }
 
-const char* ifstream::error_message() const {
+const char* ifstream::error_message() const FL_NO_EXCEPT {
     if (!mHandle) {
         return "No handle";
     }
     return mHandle->error_message();
 }
 
-void ifstream::clear_error() {
+void ifstream::clear_error() FL_NO_EXCEPT {
     if (mHandle) {
         mHandle->clear_error();
     }
@@ -112,12 +112,12 @@ void ifstream::clear_error() {
 // ============================================================================
 
 ofstream::ofstream(const char* path, ios::openmode mode)
-    : mGood(false), mEof(false), mFail(true), mLocalError(0) {
+    FL_NO_EXCEPT : mGood(false), mEof(false), mFail(true), mLocalError(0) {
     open(path, mode);
 }
 
 ofstream::ofstream(filebuf_ptr handle)
-    : mHandle(handle), mGood(false), mEof(false), mFail(true), mLocalError(0) {
+    FL_NO_EXCEPT : mHandle(handle), mGood(false), mEof(false), mFail(true), mLocalError(0) {
     updateState();
 }
 
@@ -125,7 +125,7 @@ ofstream::~ofstream() FL_NO_EXCEPT {
     close();
 }
 
-void ofstream::open(const char* path, ios::openmode mode) {
+void ofstream::open(const char* path, ios::openmode mode) FL_NO_EXCEPT {
     close();
 
     // Build fopen mode string
@@ -151,7 +151,7 @@ void ofstream::open(const char* path, ios::openmode mode) {
     }
 }
 
-void ofstream::close() {
+void ofstream::close() FL_NO_EXCEPT {
     if (mHandle && mHandle->is_open()) {
         mHandle->close();
         // After successful close: keep good() = true to match std::ofstream behavior
@@ -166,7 +166,7 @@ void ofstream::close() {
     }
 }
 
-ofstream& ofstream::write(const char* data, fl::size_t count) {
+ofstream& ofstream::write(const char* data, fl::size_t count) FL_NO_EXCEPT {
     if (mHandle && mHandle->is_open()) {
         fl::size_t written = mHandle->write(data, count);
         if (written != count) {
@@ -183,7 +183,7 @@ ofstream& ofstream::write(const char* data, fl::size_t count) {
     return *this;
 }
 
-int ofstream::error() const {
+int ofstream::error() const FL_NO_EXCEPT {
     if (mLocalError != 0) {
         return mLocalError;
     }
@@ -193,7 +193,7 @@ int ofstream::error() const {
     return mHandle->error_code();
 }
 
-const char* ofstream::error_message() const {
+const char* ofstream::error_message() const FL_NO_EXCEPT {
     if (mLocalError != 0) {
 #ifdef FASTLED_TESTING
         return fl::strerror(mLocalError);
@@ -207,7 +207,7 @@ const char* ofstream::error_message() const {
     return mHandle->error_message();
 }
 
-void ofstream::clear_error() {
+void ofstream::clear_error() FL_NO_EXCEPT {
     mLocalError = 0;
     if (mHandle) {
         mHandle->clear_error();
@@ -221,12 +221,12 @@ void ofstream::clear_error() {
 // ============================================================================
 
 fstream::fstream(const char* path, ios::openmode mode)
-    : mLastRead(0), mGood(false), mEof(false), mFail(true), mLocalError(0) {
+    FL_NO_EXCEPT : mLastRead(0), mGood(false), mEof(false), mFail(true), mLocalError(0) {
     open(path, mode);
 }
 
 fstream::fstream(filebuf_ptr handle)
-    : mHandle(handle), mLastRead(0), mGood(false), mEof(false), mFail(true), mLocalError(0) {
+    FL_NO_EXCEPT : mHandle(handle), mLastRead(0), mGood(false), mEof(false), mFail(true), mLocalError(0) {
     updateState();
 }
 
@@ -234,7 +234,7 @@ fstream::~fstream() FL_NO_EXCEPT {
     close();
 }
 
-void fstream::open(const char* path, ios::openmode mode) {
+void fstream::open(const char* path, ios::openmode mode) FL_NO_EXCEPT {
     close();
 
     // Build fopen mode string for read+write
@@ -259,7 +259,7 @@ void fstream::open(const char* path, ios::openmode mode) {
     }
 }
 
-void fstream::close() {
+void fstream::close() FL_NO_EXCEPT {
     if (mHandle && mHandle->is_open()) {
         mHandle->close();
         // After successful close: keep good() = true to match std::ofstream behavior
@@ -274,7 +274,7 @@ void fstream::close() {
     }
 }
 
-fstream& fstream::read(char* buffer, fl::size_t count) {
+fstream& fstream::read(char* buffer, fl::size_t count) FL_NO_EXCEPT {
     mLastRead = 0;
     if (mHandle && mHandle->is_open()) {
         mLastRead = mHandle->read(buffer, count);
@@ -283,7 +283,7 @@ fstream& fstream::read(char* buffer, fl::size_t count) {
     return *this;
 }
 
-fstream& fstream::write(const char* data, fl::size_t count) {
+fstream& fstream::write(const char* data, fl::size_t count) FL_NO_EXCEPT {
     if (mHandle && mHandle->is_open()) {
         fl::size_t written = mHandle->write(data, count);
         if (written != count) {
@@ -300,14 +300,14 @@ fstream& fstream::write(const char* data, fl::size_t count) {
     return *this;
 }
 
-fl::size_t fstream::tellg() {
+fl::size_t fstream::tellg() FL_NO_EXCEPT {
     if (!mHandle) {
         return 0;
     }
     return mHandle->tell();
 }
 
-fstream& fstream::seekg(fl::size_t pos, ios::seekdir dir) {
+fstream& fstream::seekg(fl::size_t pos, ios::seekdir dir) FL_NO_EXCEPT {
     if (mHandle && mHandle->is_open()) {
         seek_dir seek_direction =
             (dir == ios::seekdir::beg) ? seek_dir::beg :
@@ -318,7 +318,7 @@ fstream& fstream::seekg(fl::size_t pos, ios::seekdir dir) {
     return *this;
 }
 
-int fstream::error() const {
+int fstream::error() const FL_NO_EXCEPT {
     if (mLocalError != 0) {
         return mLocalError;
     }
@@ -328,7 +328,7 @@ int fstream::error() const {
     return mHandle->error_code();
 }
 
-const char* fstream::error_message() const {
+const char* fstream::error_message() const FL_NO_EXCEPT {
     if (mLocalError != 0) {
 #ifdef FASTLED_TESTING
         return fl::strerror(mLocalError);
@@ -342,7 +342,7 @@ const char* fstream::error_message() const {
     return mHandle->error_message();
 }
 
-void fstream::clear_error() {
+void fstream::clear_error() FL_NO_EXCEPT {
     mLocalError = 0;
     if (mHandle) {
         mHandle->clear_error();

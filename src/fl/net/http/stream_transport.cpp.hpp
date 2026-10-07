@@ -16,39 +16,39 @@ namespace http {
 
 StreamHandle::StreamHandle(fl::task::Promise<fl::json> p,
                            fl::shared_ptr<fl::function<void(const fl::json&)>> updateCb)
-    : mPromise(fl::move(p))
+    FL_NO_EXCEPT : mPromise(fl::move(p))
     , mUpdateCallback(fl::move(updateCb)) {
 }
 
-StreamHandle& StreamHandle::onData(fl::function<void(const fl::json&)> cb) {
+StreamHandle& StreamHandle::onData(fl::function<void(const fl::json&)> cb) FL_NO_EXCEPT {
     if (mUpdateCallback) {
         *mUpdateCallback = fl::move(cb);
     }
     return *this;
 }
 
-StreamHandle& StreamHandle::then(fl::function<void(const fl::json&)> cb) {
+StreamHandle& StreamHandle::then(fl::function<void(const fl::json&)> cb) FL_NO_EXCEPT {
     mPromise.then(fl::move(cb));
     return *this;
 }
 
-StreamHandle& StreamHandle::catch_(fl::function<void(const fl::task::Error&)> cb) {
+StreamHandle& StreamHandle::catch_(fl::function<void(const fl::task::Error&)> cb) FL_NO_EXCEPT {
     mPromise.catch_(fl::move(cb));
     return *this;
 }
 
-fl::task::Promise<fl::json>& StreamHandle::promise() {
+fl::task::Promise<fl::json>& StreamHandle::promise() FL_NO_EXCEPT {
     return mPromise;
 }
 
-bool StreamHandle::valid() const {
+bool StreamHandle::valid() const FL_NO_EXCEPT {
     return mPromise.valid();
 }
 
 // --- HttpStreamTransport implementation ---
 
 HttpStreamTransport::HttpStreamTransport(const fl::string& host, u16 port, u32 heartbeatIntervalMs)
-    : mConnection(ConnectionConfig{})  // Use default config
+    FL_NO_EXCEPT : mConnection(ConnectionConfig{})  // Use default config
     , mLastHeartbeatSent(0)
     , mLastHeartbeatReceived(0)
     , mHeartbeatInterval(heartbeatIntervalMs)
@@ -64,7 +64,7 @@ HttpStreamTransport::~HttpStreamTransport() FL_NO_EXCEPT {
     // Subclasses must clean up in their own destructors
 }
 
-fl::string HttpStreamTransport::idToString(const fl::json& id) {
+fl::string HttpStreamTransport::idToString(const fl::json& id) FL_NO_EXCEPT {
     if (id.is_int()) {
         char buf[32];
         fl::snprintf(buf, sizeof(buf), "%d", id.as_int().value());
@@ -77,7 +77,7 @@ fl::string HttpStreamTransport::idToString(const fl::json& id) {
     return id.to_string();
 }
 
-void HttpStreamTransport::parseChunkedMessages() {
+void HttpStreamTransport::parseChunkedMessages() FL_NO_EXCEPT {
     for (;;) {
         size_t chunkSize = mReader.nextChunkSize();
         if (chunkSize == 0) {
@@ -130,7 +130,7 @@ void HttpStreamTransport::parseChunkedMessages() {
     }
 }
 
-bool HttpStreamTransport::resolveRpc(const fl::json& msg, const fl::string& idKey) {
+bool HttpStreamTransport::resolveRpc(const fl::json& msg, const fl::string& idKey) FL_NO_EXCEPT {
     auto it = mPendingCalls.find(idKey);
     if (it == mPendingCalls.end()) {
         return false;
@@ -159,7 +159,7 @@ bool HttpStreamTransport::resolveRpc(const fl::json& msg, const fl::string& idKe
     return true;
 }
 
-bool HttpStreamTransport::resolveRpcStream(const fl::json& msg, const fl::string& idKey) {
+bool HttpStreamTransport::resolveRpcStream(const fl::json& msg, const fl::string& idKey) FL_NO_EXCEPT {
     auto it = mPendingStreams.find(idKey);
     if (it == mPendingStreams.end()) {
         return false;
@@ -210,7 +210,7 @@ bool HttpStreamTransport::resolveRpcStream(const fl::json& msg, const fl::string
     return true;
 }
 
-fl::task::Promise<fl::json> HttpStreamTransport::rpc(const fl::string& method, const fl::json& params) {
+fl::task::Promise<fl::json> HttpStreamTransport::rpc(const fl::string& method, const fl::json& params) FL_NO_EXCEPT {
     int id = mNextCallId++;
     fl::json request = fl::json::object();
     request.set("jsonrpc", "2.0");
@@ -220,7 +220,7 @@ fl::task::Promise<fl::json> HttpStreamTransport::rpc(const fl::string& method, c
     return rpc(request);
 }
 
-fl::task::Promise<fl::json> HttpStreamTransport::rpc(const fl::json& fullRequest) {
+fl::task::Promise<fl::json> HttpStreamTransport::rpc(const fl::json& fullRequest) FL_NO_EXCEPT {
     fl::task::Promise<fl::json> p = fl::task::Promise<fl::json>::create();
 
     if (!isConnected()) {
@@ -237,7 +237,7 @@ fl::task::Promise<fl::json> HttpStreamTransport::rpc(const fl::json& fullRequest
     return p;
 }
 
-StreamHandle HttpStreamTransport::rpcStream(const fl::string& method, const fl::json& params) {
+StreamHandle HttpStreamTransport::rpcStream(const fl::string& method, const fl::json& params) FL_NO_EXCEPT {
     int id = mNextCallId++;
     fl::json request = fl::json::object();
     request.set("jsonrpc", "2.0");
@@ -247,7 +247,7 @@ StreamHandle HttpStreamTransport::rpcStream(const fl::string& method, const fl::
     return rpcStream(request);
 }
 
-StreamHandle HttpStreamTransport::rpcStream(const fl::json& fullRequest) {
+StreamHandle HttpStreamTransport::rpcStream(const fl::json& fullRequest) FL_NO_EXCEPT {
     auto updateCb = fl::make_shared<fl::function<void(const fl::json&)>>();
     fl::task::Promise<fl::json> p = fl::task::Promise<fl::json>::create();
 
@@ -266,7 +266,7 @@ StreamHandle HttpStreamTransport::rpcStream(const fl::json& fullRequest) {
     return StreamHandle(p, updateCb);
 }
 
-fl::optional<fl::json> HttpStreamTransport::readRequest() {
+fl::optional<fl::json> HttpStreamTransport::readRequest() FL_NO_EXCEPT {
     if (!isConnected()) {
         return fl::nullopt;
     }
@@ -292,7 +292,7 @@ fl::optional<fl::json> HttpStreamTransport::readRequest() {
     return front;
 }
 
-void HttpStreamTransport::writeResponse(const fl::json& response) {
+void HttpStreamTransport::writeResponse(const fl::json& response) FL_NO_EXCEPT {
     if (!isConnected()) {
         return;
     }
@@ -325,7 +325,7 @@ void HttpStreamTransport::writeResponse(const fl::json& response) {
     mLastHeartbeatSent = getCurrentTimeMs();
 }
 
-void HttpStreamTransport::update(u32 currentTimeMs) {
+void HttpStreamTransport::update(u32 currentTimeMs) FL_NO_EXCEPT {
     // Update connection state
     mConnection.update(currentTimeMs);
     bool nowConnected = isConnected();
@@ -358,42 +358,42 @@ void HttpStreamTransport::update(u32 currentTimeMs) {
     parseChunkedMessages();
 }
 
-void HttpStreamTransport::setOnConnect(StateCallback callback) {
+void HttpStreamTransport::setOnConnect(StateCallback callback) FL_NO_EXCEPT {
     mOnConnect = callback;
 }
 
-void HttpStreamTransport::setOnDisconnect(StateCallback callback) {
+void HttpStreamTransport::setOnDisconnect(StateCallback callback) FL_NO_EXCEPT {
     mOnDisconnect = callback;
 }
 
-void HttpStreamTransport::setHeartbeatInterval(u32 intervalMs) {
+void HttpStreamTransport::setHeartbeatInterval(u32 intervalMs) FL_NO_EXCEPT {
     mHeartbeatInterval = intervalMs;
 }
 
-u32 HttpStreamTransport::getHeartbeatInterval() const {
+u32 HttpStreamTransport::getHeartbeatInterval() const FL_NO_EXCEPT {
     return mHeartbeatInterval;
 }
 
-void HttpStreamTransport::setTimeout(u32 timeoutMs) {
+void HttpStreamTransport::setTimeout(u32 timeoutMs) FL_NO_EXCEPT {
     mTimeoutMs = timeoutMs;
 }
 
-u32 HttpStreamTransport::getTimeout() const {
+u32 HttpStreamTransport::getTimeout() const FL_NO_EXCEPT {
     return mTimeoutMs;
 }
 
-u32 HttpStreamTransport::getCurrentTimeMs() const {
+u32 HttpStreamTransport::getCurrentTimeMs() const FL_NO_EXCEPT {
     // Default implementation uses system time
     // Subclasses can override for testing
     return fl::millis();
 }
 
-void HttpStreamTransport::triggerReconnect() {
+void HttpStreamTransport::triggerReconnect() FL_NO_EXCEPT {
     // Default implementation does nothing
     // Subclasses should override to implement reconnection logic
 }
 
-void HttpStreamTransport::sendHeartbeat() {
+void HttpStreamTransport::sendHeartbeat() FL_NO_EXCEPT {
     if (!isConnected()) {
         return;
     }
@@ -408,7 +408,7 @@ void HttpStreamTransport::sendHeartbeat() {
     writeResponse(heartbeat);
 }
 
-void HttpStreamTransport::checkHeartbeatTimeout(u32 currentTimeMs) {
+void HttpStreamTransport::checkHeartbeatTimeout(u32 currentTimeMs) FL_NO_EXCEPT {
     u32 timeSinceLastReceived = currentTimeMs - mLastHeartbeatReceived;
     if (timeSinceLastReceived >= getTimeout()) {
         // Heartbeat timeout - connection is dead
@@ -417,7 +417,7 @@ void HttpStreamTransport::checkHeartbeatTimeout(u32 currentTimeMs) {
     }
 }
 
-bool HttpStreamTransport::processIncomingData() {
+bool HttpStreamTransport::processIncomingData() FL_NO_EXCEPT {
     if (!isConnected()) {
         return false;
     }
@@ -444,7 +444,7 @@ bool HttpStreamTransport::processIncomingData() {
     return true;
 }
 
-void HttpStreamTransport::handleConnectionStateChange(u32 currentTimeMs) {
+void HttpStreamTransport::handleConnectionStateChange(u32 currentTimeMs) FL_NO_EXCEPT {
     if (isConnected()) {
         // Just connected — use the caller-provided timestamp to avoid
         // unsigned-underflow races between getCurrentTimeMs() and the

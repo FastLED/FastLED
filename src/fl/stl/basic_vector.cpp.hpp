@@ -13,19 +13,19 @@ namespace fl {
 
 // ======= TRIVIAL ELEMENT HELPERS =======
 
-void vector_basic::trivial_copy(void* dst, const void* src, fl::size count) const {
+void vector_basic::trivial_copy(void* dst, const void* src, fl::size count) const FL_NO_EXCEPT {
     fl::memcpy(dst, src, count * mElementSize);
 }
 
-void vector_basic::trivial_move_left(void* dst, const void* src, fl::size count) const {
+void vector_basic::trivial_move_left(void* dst, const void* src, fl::size count) const FL_NO_EXCEPT {
     fl::memmove(dst, src, count * mElementSize);
 }
 
-void vector_basic::trivial_default_construct(void* ptr, fl::size count) const {
+void vector_basic::trivial_default_construct(void* ptr, fl::size count) const FL_NO_EXCEPT {
     fl::memset(ptr, 0, count * mElementSize);
 }
 
-void vector_basic::trivial_swap(void* a, void* b) const {
+void vector_basic::trivial_swap(void* a, void* b) const FL_NO_EXCEPT {
     // Stack buffer for small elements, heap for large
     char stack_buf[64];
     void* tmp;
@@ -46,7 +46,7 @@ void vector_basic::trivial_swap(void* a, void* b) const {
 
 // ======= CAPACITY / GROWTH =======
 
-void vector_basic::ensure_capacity(fl::size n) {
+void vector_basic::ensure_capacity(fl::size n) FL_NO_EXCEPT {
     if (n <= mCapacity) return;
     fl::size new_capacity = (3 * mCapacity) / 2;
     if (new_capacity < n) {
@@ -55,7 +55,7 @@ void vector_basic::ensure_capacity(fl::size n) {
     grow_to(new_capacity);
 }
 
-void vector_basic::grow_to(fl::size new_capacity) {
+void vector_basic::grow_to(fl::size new_capacity) FL_NO_EXCEPT {
     // PATH 1: Try in-place reallocate if on heap and trivially copyable
     if (!isInline() && mArray && !mOps) {
         void* result = mResource->reallocate(mArray, mCapacity * mElementSize,
@@ -94,13 +94,13 @@ void vector_basic::grow_to(fl::size new_capacity) {
     mCapacity = new_capacity;
 }
 
-void vector_basic::reserve_impl(fl::size n) {
+void vector_basic::reserve_impl(fl::size n) FL_NO_EXCEPT {
     if (n > mCapacity) {
         grow_to(n);
     }
 }
 
-void vector_basic::shrink_to_fit_impl() {
+void vector_basic::shrink_to_fit_impl() FL_NO_EXCEPT {
     if (mSize == 0) {
         if (!isInline() && mArray) {
             mResource->deallocate(mArray, mCapacity * mElementSize);
@@ -149,7 +149,7 @@ void vector_basic::shrink_to_fit_impl() {
 
 // ======= PUSH / POP =======
 
-void vector_basic::push_back_copy_impl(const void* element) {
+void vector_basic::push_back_copy_impl(const void* element) FL_NO_EXCEPT {
     ensure_capacity(mSize + 1);
     if (mSize >= mCapacity) return;  // allocation failed
     void* dst = element_ptr(mSize);
@@ -161,7 +161,7 @@ void vector_basic::push_back_copy_impl(const void* element) {
     ++mSize;
 }
 
-void vector_basic::push_back_move_impl(void* element) {
+void vector_basic::push_back_move_impl(void* element) FL_NO_EXCEPT {
     ensure_capacity(mSize + 1);
     if (mSize >= mCapacity) return;  // allocation failed
     FASTLED_ASSERT(mArray != nullptr, "mArray null after ensure_capacity in push_back_move");
@@ -174,7 +174,7 @@ void vector_basic::push_back_move_impl(void* element) {
     ++mSize;
 }
 
-void vector_basic::pop_back_impl() {
+void vector_basic::pop_back_impl() FL_NO_EXCEPT {
     if (mSize == 0) return;
     --mSize;
     if (mOps) {
@@ -185,7 +185,7 @@ void vector_basic::pop_back_impl() {
 
 // ======= CLEAR =======
 
-void vector_basic::clear_impl() {
+void vector_basic::clear_impl() FL_NO_EXCEPT {
     if (mArray && mSize > 0) {
         if (mOps) {
             mOps->destroy_n(mArray, mSize);
@@ -197,12 +197,12 @@ void vector_basic::clear_impl() {
 
 // ======= ERASE =======
 
-void vector_basic::erase_impl(fl::size index) {
+void vector_basic::erase_impl(fl::size index) FL_NO_EXCEPT {
     if (index >= mSize) return;
     erase_range_impl(index, 1);
 }
 
-void vector_basic::erase_range_impl(fl::size first_index, fl::size count) {
+void vector_basic::erase_range_impl(fl::size first_index, fl::size count) FL_NO_EXCEPT {
     if (count == 0 || first_index >= mSize) return;
     if (first_index + count > mSize) {
         count = mSize - first_index;
@@ -235,7 +235,7 @@ void vector_basic::erase_range_impl(fl::size first_index, fl::size count) {
 
 // ======= INSERT =======
 
-void vector_basic::insert_copy_impl(fl::size index, const void* element) {
+void vector_basic::insert_copy_impl(fl::size index, const void* element) FL_NO_EXCEPT {
     if (index > mSize) index = mSize;
     ensure_capacity(mSize + 1);
     if (mSize >= mCapacity) return;  // allocation failed
@@ -266,7 +266,7 @@ void vector_basic::insert_copy_impl(fl::size index, const void* element) {
     ++mSize;
 }
 
-void vector_basic::insert_move_impl(fl::size index, void* element) {
+void vector_basic::insert_move_impl(fl::size index, void* element) FL_NO_EXCEPT {
     if (index > mSize) index = mSize;
     ensure_capacity(mSize + 1);
     if (mSize >= mCapacity) return;  // allocation failed
@@ -294,7 +294,7 @@ void vector_basic::insert_move_impl(fl::size index, void* element) {
 
 // ======= RESIZE =======
 
-void vector_basic::resize_impl(fl::size n) {
+void vector_basic::resize_impl(fl::size n) FL_NO_EXCEPT {
     if (n == mSize) return;
 
     if (n < mSize) {
@@ -327,7 +327,7 @@ void vector_basic::resize_impl(fl::size n) {
     mSize = n;
 }
 
-void vector_basic::resize_value_impl(fl::size n, const void* value) {
+void vector_basic::resize_value_impl(fl::size n, const void* value) FL_NO_EXCEPT {
     if (n == mSize) return;
 
     if (n < mSize) {
@@ -357,7 +357,7 @@ void vector_basic::resize_value_impl(fl::size n, const void* value) {
 
 // ======= SWAP =======
 
-void vector_basic::swap_impl(vector_basic& other) {
+void vector_basic::swap_impl(vector_basic& other) FL_NO_EXCEPT {
     // Swap all members. This works correctly even with inline buffers
     // because we swap the offset too, and the inline data stays in place.
     // HOWEVER: if either vector uses inline storage, we need to handle

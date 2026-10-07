@@ -22,12 +22,12 @@ public:
     Percussion() FL_NO_EXCEPT;
     ~Percussion() FL_NO_EXCEPT override;
 
-    void update(shared_ptr<Context> context) override;
-    void fireCallbacks() override;
-    bool needsFFT() const override { return true; }
-    bool needsFFTHistory() const override { return false; }
-    const char* getName() const override { return "Percussion"; }
-    void reset() override;
+    void update(shared_ptr<Context> context) FL_NO_EXCEPT override;
+    void fireCallbacks() FL_NO_EXCEPT override;
+    bool needsFFT() const FL_NO_EXCEPT override { return true; }
+    bool needsFFTHistory() const FL_NO_EXCEPT override { return false; }
+    const char* getName() const FL_NO_EXCEPT override { return "Percussion"; }
+    void reset() FL_NO_EXCEPT override;
 
     // Callbacks (multiple listeners supported)
     function_list<void(PercussionType type)> onPercussionHit;
@@ -37,32 +37,32 @@ public:
     function_list<void()> onTom;
 
     // State access (polling getters)
-    bool isKick() const { return mKickDetected; }
-    bool isSnare() const { return mSnareDetected; }
-    bool isHiHat() const { return mHiHatDetected; }
-    bool isTom() const { return mTomDetected; }
+    bool isKick() const FL_NO_EXCEPT { return mKickDetected; }
+    bool isSnare() const FL_NO_EXCEPT { return mSnareDetected; }
+    bool isHiHat() const FL_NO_EXCEPT { return mHiHatDetected; }
+    bool isTom() const FL_NO_EXCEPT { return mTomDetected; }
 
     // Confidence (0.0 - 1.0)
-    float getKickConfidence() const { return mKickConfidence; }
-    float getSnareConfidence() const { return mSnareConfidence; }
-    float getHiHatConfidence() const { return mHiHatConfidence; }
-    float getTomConfidence() const { return mTomConfidence; }
+    float getKickConfidence() const FL_NO_EXCEPT { return mKickConfidence; }
+    float getSnareConfidence() const FL_NO_EXCEPT { return mSnareConfidence; }
+    float getHiHatConfidence() const FL_NO_EXCEPT { return mHiHatConfidence; }
+    float getTomConfidence() const FL_NO_EXCEPT { return mTomConfidence; }
 
     // Feature inspection (for calibration / testing)
-    float getBassToTotalRatio() const { return mBassToTotal; }
-    float getTrebleToTotalRatio() const { return mTrebleToTotal; }
-    float getClickRatio() const { return mClickRatio; }
-    float getTrebleFlatness() const { return mTrebleFlatness; }
-    float getMidToTrebleRatio() const { return mMidToTreble; }
-    float getOnsetSharpness() const { return mOnsetSharpness; }
-    float getSubBassProxy() const { return mSubBassProxy; }
-    float getZeroCrossingFactor() const { return mZeroCrossingFactor; }
+    float getBassToTotalRatio() const FL_NO_EXCEPT { return mBassToTotal; }
+    float getTrebleToTotalRatio() const FL_NO_EXCEPT { return mTrebleToTotal; }
+    float getClickRatio() const FL_NO_EXCEPT { return mClickRatio; }
+    float getTrebleFlatness() const FL_NO_EXCEPT { return mTrebleFlatness; }
+    float getMidToTrebleRatio() const FL_NO_EXCEPT { return mMidToTreble; }
+    float getOnsetSharpness() const FL_NO_EXCEPT { return mOnsetSharpness; }
+    float getSubBassProxy() const FL_NO_EXCEPT { return mSubBassProxy; }
+    float getZeroCrossingFactor() const FL_NO_EXCEPT { return mZeroCrossingFactor; }
 
     // Configuration
-    void setKickThreshold(float threshold) { mKickThreshold = threshold; }
-    void setSnareThreshold(float threshold) { mSnareThreshold = threshold; }
-    void setHiHatThreshold(float threshold) { mHiHatThreshold = threshold; }
-    void setTomThreshold(float threshold) { mTomThreshold = threshold; }
+    void setKickThreshold(float threshold) FL_NO_EXCEPT { mKickThreshold = threshold; }
+    void setSnareThreshold(float threshold) FL_NO_EXCEPT { mSnareThreshold = threshold; }
+    void setHiHatThreshold(float threshold) FL_NO_EXCEPT { mHiHatThreshold = threshold; }
+    void setTomThreshold(float threshold) FL_NO_EXCEPT { mTomThreshold = threshold; }
 
 private:
     // Per-frame detection state
@@ -110,9 +110,9 @@ private:
     static constexpr u32 TOM_COOLDOWN_MS = 100;
 
     // Feature computation
-    void computeFeatures(const fft::Bins& fft);
-    void computeConfidences();
-    void applyCrossBandRejection();
+    void computeFeatures(const fft::Bins& fft) FL_NO_EXCEPT;
+    void computeConfidences() FL_NO_EXCEPT;
+    void applyCrossBandRejection() FL_NO_EXCEPT;
 };
 
 } // namespace detector

@@ -10,7 +10,7 @@
 #include "fl/system/sketch_macros.h"
 
 
-CLEDController::~CLEDController() {
+CLEDController::~CLEDController() FL_NO_EXCEPT {
 #if SKETCH_HAS_LARGE_MEMORY
     // Remove from draw list on destruction to prevent dangling pointers
     // Note: Not enabled on memory-constrained platforms (AVR, ESP8266, etc.)
@@ -21,17 +21,17 @@ CLEDController::~CLEDController() {
 }
 
 /// Create an led controller object, add it to the chain of controllers
-CLEDController::CLEDController() : mLeds(), mSettings() {
+CLEDController::CLEDController() FL_NO_EXCEPT : mLeds(), mSettings() {
     addToList();
 }
 
-CLEDController::CLEDController(RegistrationMode mode) : mLeds(), mSettings() {
+CLEDController::CLEDController(RegistrationMode mode) FL_NO_EXCEPT : mLeds(), mSettings() {
     if (mode == RegistrationMode::AutoRegister) {
         addToList();
     }
 }
 
-void CLEDController::addToList() {
+void CLEDController::addToList() FL_NO_EXCEPT {
     // Don't add if already in list
     #if SKETCH_HAS_LARGE_MEMORY // Mostly for AVR, the isInList() check adds memory overhead on these tight platforms.
     if (isInList()) {
@@ -45,7 +45,7 @@ void CLEDController::addToList() {
     mPTail = this;
 }
 
-bool CLEDController::isInList() const {
+bool CLEDController::isInList() const FL_NO_EXCEPT {
     CLEDController* curr = mPHead;
     while (curr != nullptr) {
         if (curr == this) {
@@ -56,7 +56,7 @@ bool CLEDController::isInList() const {
     return false;
 }
 
-void CLEDController::clearLedDataInternal(int nLeds) {
+void CLEDController::clearLedDataInternal(int nLeds) FL_NO_EXCEPT {
     // On common code that runs on avr, every byte counts.
     //
     // mLeds spans one lane, not the whole buffer. A parallel controller is
@@ -77,7 +77,7 @@ void CLEDController::clearLedDataInternal(int nLeds) {
 
 }
 
-void CLEDController::removeFromList(CLEDController* controller) {
+void CLEDController::removeFromList(CLEDController* controller) FL_NO_EXCEPT {
     if (controller == nullptr) {
         return;
     }
@@ -121,7 +121,7 @@ fl::shared_ptr<fl::StreamingPipelineQ16> CLEDController::colorPipeline() const F
 }
 #endif
 
-ColorAdjustment CLEDController::getAdjustmentData(fl::u8 brightness) {
+ColorAdjustment CLEDController::getAdjustmentData(fl::u8 brightness) FL_NO_EXCEPT {
     // *premixed = getAdjustment(brightness);
     // if (color_correction) {
     //     *color_correction = getAdjustment(255);

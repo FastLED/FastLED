@@ -38,32 +38,32 @@ class NullFileHandle : public filebuf {
     NullFileHandle() FL_NO_EXCEPT = default;
     ~NullFileHandle() FL_NO_EXCEPT override {}
 
-    bool is_open() const override { return false; }
-    fl::size_t size() const override { return 0; }
-    fl::size_t read(char *dst, fl::size_t bytesToRead) override {
+    bool is_open() const FL_NO_EXCEPT override { return false; }
+    fl::size_t size() const FL_NO_EXCEPT override { return 0; }
+    fl::size_t read(char *dst, fl::size_t bytesToRead) FL_NO_EXCEPT override {
         FASTLED_UNUSED(dst);
         FASTLED_UNUSED(bytesToRead);
         return 0;
     }
-    fl::size_t write(const char *data, fl::size_t count) override {
+    fl::size_t write(const char *data, fl::size_t count) FL_NO_EXCEPT override {
         FASTLED_UNUSED(data);
         FASTLED_UNUSED(count);
         return 0;
     }
-    fl::size_t tell() override { return 0; }
-    const char *path() const override { return "nullptr filebuf"; }
-    bool seek(fl::size_t pos, seek_dir dir) override {
+    fl::size_t tell() FL_NO_EXCEPT override { return 0; }
+    const char *path() const FL_NO_EXCEPT override { return "nullptr filebuf"; }
+    bool seek(fl::size_t pos, seek_dir dir) FL_NO_EXCEPT override {
         FASTLED_UNUSED(pos);
         FASTLED_UNUSED(dir);
         return false;
     }
     using filebuf::seek; // single-arg overload
-    void close() override {}
-    bool is_eof() const override { return true; }
-    bool has_error() const override { return false; }
-    void clear_error() override {}
-    int error_code() const override { return 0; }
-    const char *error_message() const override { return "NullFileHandle"; }
+    void close() FL_NO_EXCEPT override {}
+    bool is_eof() const FL_NO_EXCEPT override { return true; }
+    bool has_error() const FL_NO_EXCEPT override { return false; }
+    void clear_error() FL_NO_EXCEPT override {}
+    int error_code() const FL_NO_EXCEPT override { return 0; }
+    const char *error_message() const FL_NO_EXCEPT override { return "NullFileHandle"; }
 };
 
 class NullFileSystem : public FsImpl {
@@ -74,10 +74,10 @@ class NullFileSystem : public FsImpl {
     }
     ~NullFileSystem() FL_NO_EXCEPT override {}
 
-    bool begin() override { return true; }
-    void end() override {}
+    bool begin() FL_NO_EXCEPT override { return true; }
+    void end() FL_NO_EXCEPT override {}
 
-    filebuf_ptr openRead(const char *_path) override {
+    filebuf_ptr openRead(const char *_path) FL_NO_EXCEPT override {
         FASTLED_UNUSED(_path);
         fl::shared_ptr<NullFileHandle> ptr = fl::make_shared<NullFileHandle>();
         filebuf_ptr out = ptr;
@@ -93,7 +93,7 @@ class NullFileSystem : public FsImpl {
 // keeping all SD library code (~15 KB on ESP32-S3) out of sketches that
 // don't use it. See FastLED #2773 item 1.2.
 
-bool FileSystem::begin(FsImplPtr platform_filesystem) {
+bool FileSystem::begin(FsImplPtr platform_filesystem) FL_NO_EXCEPT {
     mFs = platform_filesystem;
     if (!mFs) {
         return false;
@@ -106,15 +106,15 @@ Fled FileSystem::loadFled(const char *path) FL_NO_EXCEPT {
     return Fled::load(*this, path);
 }
 
-FileSystem::FileSystem() : mFs() {}
+FileSystem::FileSystem() FL_NO_EXCEPT : mFs() {}
 
-void FileSystem::end() {
+void FileSystem::end() FL_NO_EXCEPT {
     if (mFs) {
         mFs->end();
     }
 }
 
-bool FileSystem::readJson(const char *path, json *doc) {
+bool FileSystem::readJson(const char *path, json *doc) FL_NO_EXCEPT {
     string text;
     if (!readText(path, &text)) {
         return false;
@@ -126,7 +126,7 @@ bool FileSystem::readJson(const char *path, json *doc) {
 }
 
 bool FileSystem::readScreenMaps(const char *path,
-                                fl::flat_map<string, ScreenMap> *out, string *error) {
+                                fl::flat_map<string, ScreenMap> *out, string *error) FL_NO_EXCEPT {
     string text;
     if (!readText(path, &text)) {
         FL_WARN("Failed to read file: " << path);
@@ -147,7 +147,7 @@ bool FileSystem::readScreenMaps(const char *path,
 }
 
 bool FileSystem::readScreenMap(const char *path, const char *name,
-                               ScreenMap *out, string *error) {
+                               ScreenMap *out, string *error) FL_NO_EXCEPT {
     string text;
     if (!readText(path, &text)) {
         FL_WARN("Failed to read file: " << path);
@@ -167,7 +167,7 @@ bool FileSystem::readScreenMap(const char *path, const char *name,
     return true;
 }
 
-fl::ifstream FileSystem::openRead(const char *path) {
+fl::ifstream FileSystem::openRead(const char *path) FL_NO_EXCEPT {
     if (!mFs) {
         // Defensive: default-constructed FileSystem or one whose begin*()
         // call failed has a null backend. Returning a closed ifstream
@@ -177,7 +177,7 @@ fl::ifstream FileSystem::openRead(const char *path) {
     return fl::ifstream(mFs->openRead(path));
 }
 Video FileSystem::openVideo(const char *path, fl::size pixelsPerFrame, float fps,
-                            fl::size nFrameHistory) {
+                            fl::size nFrameHistory) FL_NO_EXCEPT {
     Video video(pixelsPerFrame, fps, nFrameHistory);
     fl::ifstream file = openRead(path);
     if (!file.is_open()) {
@@ -188,7 +188,7 @@ Video FileSystem::openVideo(const char *path, fl::size pixelsPerFrame, float fps
     return video;
 }
 
-bool FileSystem::readText(const char *path, fl::string *out) {
+bool FileSystem::readText(const char *path, fl::string *out) FL_NO_EXCEPT {
     fl::ifstream file = openRead(path);
     if (!file.is_open()) {
         FL_WARN("Failed to open file: " << path);

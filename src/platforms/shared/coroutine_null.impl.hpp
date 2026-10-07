@@ -22,8 +22,8 @@ public:
         : mName(fl::move(name)), mFunction(fl::move(function)) {}
 
     ~TaskCoroutineNull() override = default;
-    void stop() override {}
-    bool isRunning() const override { return false; }
+    void stop() FL_NO_EXCEPT override {}
+    bool isRunning() const FL_NO_EXCEPT override { return false; }
 
 private:
     fl::string mName;

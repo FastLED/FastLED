@@ -4,6 +4,7 @@
 #include "fl/stl/string.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/span.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -11,10 +12,10 @@ namespace fl {
 // Used by JSON-RPC to transfer binary blobs as base64 strings.
 
 // Encode binary data to a base64 string.
-fl::string base64_encode(fl::span<const fl::u8> data);
+fl::string base64_encode(fl::span<const fl::u8> data) FL_NO_EXCEPT;
 
 // Decode a base64 string back to binary data.
 // Returns empty vector on invalid input.
-fl::vector<fl::u8> base64_decode(const fl::string& encoded);
+fl::vector<fl::u8> base64_decode(const fl::string& encoded) FL_NO_EXCEPT;
 
 } // namespace fl

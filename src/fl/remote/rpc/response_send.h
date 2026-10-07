@@ -50,7 +50,7 @@ public:
      * @param sink Function to send JSON responses
      */
     ResponseSend(const fl::json& requestId, fl::function<void(const fl::json&)> sink)
-        : mRequestId(requestId), mResponseSink(fl::move(sink)), mIsFinal(false) {}
+        FL_NO_EXCEPT : mRequestId(requestId), mResponseSink(fl::move(sink)), mIsFinal(false) {}
 
     // Non-copyable but movable
     ResponseSend(const ResponseSend&) FL_NO_EXCEPT = delete;
@@ -65,7 +65,7 @@ public:
      * Creates a JSON-RPC response:
      * {"jsonrpc": "2.0", "result": <result>, "id": <requestId>}
      */
-    void send(const fl::json& result) {
+    void send(const fl::json& result) FL_NO_EXCEPT {
         if (!mResponseSink || mIsFinal) {
             return;
         }
@@ -85,7 +85,7 @@ public:
      * Creates a JSON-RPC response with "update" marker:
      * {"jsonrpc": "2.0", "result": {"update": <update>}, "id": <requestId>}
      */
-    void sendUpdate(const fl::json& update) {
+    void sendUpdate(const fl::json& update) FL_NO_EXCEPT {
         if (!mResponseSink || mIsFinal) {
             return;
         }
@@ -111,7 +111,7 @@ public:
      *
      * After calling sendFinal(), no more responses can be sent.
      */
-    void sendFinal(const fl::json& result) {
+    void sendFinal(const fl::json& result) FL_NO_EXCEPT {
         if (!mResponseSink || mIsFinal) {
             return;
         }
@@ -135,7 +135,7 @@ public:
      * @brief Check if final response has been sent
      * @return true if sendFinal() was called, false otherwise
      */
-    bool isFinal() const {
+    bool isFinal() const FL_NO_EXCEPT {
         return mIsFinal;
     }
 
@@ -143,7 +143,7 @@ public:
      * @brief Get the request ID
      * @return The JSON-RPC request ID
      */
-    const fl::json& requestId() const {
+    const fl::json& requestId() const FL_NO_EXCEPT {
         return mRequestId;
     }
 

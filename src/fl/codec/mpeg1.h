@@ -22,7 +22,7 @@ struct Mpeg1Info {
 
     // Constructor for easy initialization
     Mpeg1Info(fl::u16 w, fl::u16 h, fl::u16 fps)
-        : width(w), height(h), frameRate(fps), isValid(true) {}
+        FL_NO_EXCEPT : width(w), height(h), frameRate(fps), isValid(true) {}
 };
 
 // Re-export MPEG1 configuration from third_party
@@ -32,20 +32,20 @@ using Mpeg1Config = third_party::Mpeg1Config;
 class Mpeg1 {
 public:
     // Create an MPEG1 decoder for the current platform
-    static IDecoderPtr createDecoder(const Mpeg1Config& config, fl::string* error_message = nullptr);
+    static IDecoderPtr createDecoder(const Mpeg1Config& config, fl::string* error_message = nullptr) FL_NO_EXCEPT;
 
     // Create an MPEG1 decoder with default config (Streaming, 30fps, no audio)
-    static IDecoderPtr createDecoder(fl::string* error_message = nullptr) {
+    static IDecoderPtr createDecoder(fl::string* error_message = nullptr) FL_NO_EXCEPT {
         Mpeg1Config config; // Uses defaults
         return createDecoder(config, error_message);
     }
 
     // Check if MPEG1 decoding is supported on this platform
-    static bool isSupported();
+    static bool isSupported() FL_NO_EXCEPT;
 
     // Parse MPEG1 metadata from byte data without creating a decoder
     // This is a fast, lightweight operation that only reads the MPEG1 header
-    static Mpeg1Info parseMpeg1Info(fl::span<const fl::u8> data, fl::string* error_message = nullptr);
+    static Mpeg1Info parseMpeg1Info(fl::span<const fl::u8> data, fl::string* error_message = nullptr) FL_NO_EXCEPT;
 };
 
 } // namespace fl

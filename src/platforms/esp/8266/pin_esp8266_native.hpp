@@ -26,7 +26,7 @@ extern "C" {
 #include "fl/stl/noexcept.h"
     // IWYU pragma: end_keep
     // ADC function from ESP8266 SDK (user_interface.h)
-    fl::u16 system_adc_read(void) FL_NO_EXCEPT;
+    fl::u16 system_adc_read(void);
 }
 FL_EXTERN_C_END
 

@@ -12,7 +12,7 @@ namespace audio {
 namespace detector {
 
 BuildupDetector::BuildupDetector()
-    : mBuildupActive(false)
+    FL_NO_EXCEPT : mBuildupActive(false)
     , mPeakFired(false)
     , mEnergyHistoryIndex(0)
     , mEnergyHistorySize(0)
@@ -37,7 +37,7 @@ BuildupDetector::BuildupDetector()
 
 BuildupDetector::~BuildupDetector() FL_NO_EXCEPT = default;
 
-void BuildupDetector::update(shared_ptr<Context> context) {
+void BuildupDetector::update(shared_ptr<Context> context) FL_NO_EXCEPT {
     if (!context) {
         FL_WARN("BuildupDetector::update: null context");
         return;
@@ -116,7 +116,7 @@ void BuildupDetector::update(shared_ptr<Context> context) {
     mLastUpdateTime = timestamp;
 }
 
-void BuildupDetector::fireCallbacks() {
+void BuildupDetector::fireCallbacks() FL_NO_EXCEPT {
     if (mFireBuildupStart) {
         if (onBuildupStart) onBuildupStart();
         mFireBuildupStart = false;
@@ -139,7 +139,7 @@ void BuildupDetector::fireCallbacks() {
     }
 }
 
-void BuildupDetector::reset() {
+void BuildupDetector::reset() FL_NO_EXCEPT {
     mBuildupActive = false;
     mPeakFired = false;
     mEnergyHistoryIndex = 0;
@@ -162,7 +162,7 @@ void BuildupDetector::reset() {
     mCurrentBuildup = Buildup();
 }
 
-float BuildupDetector::calculateEnergyTrend() const {
+float BuildupDetector::calculateEnergyTrend() const FL_NO_EXCEPT {
     if (mEnergyHistorySize < 8 || !mEnergySG.full()) {
         return 0.0f;  // Not enough data
     }
@@ -181,7 +181,7 @@ float BuildupDetector::calculateEnergyTrend() const {
     return fl::max(0.0f, fl::min(2.0f, riseRate));  // Clamp to [0, 2]
 }
 
-float BuildupDetector::calculateTrebleTrend() const {
+float BuildupDetector::calculateTrebleTrend() const FL_NO_EXCEPT {
     if (mTrebleHistorySize < 4 || !mTrebleSG.full()) {
         return 0.0f;  // Not enough data
     }
@@ -199,7 +199,7 @@ float BuildupDetector::calculateTrebleTrend() const {
     return fl::max(0.0f, fl::min(2.0f, riseRate));  // Clamp to [0, 2]
 }
 
-float BuildupDetector::calculateBuildupIntensity(float energyTrend, float trebleTrend, float rms) const {
+float BuildupDetector::calculateBuildupIntensity(float energyTrend, float trebleTrend, float rms) const FL_NO_EXCEPT {
     // Buildup intensity is a combination of:
     // - Energy rise trend (50%)
     // - Treble rise trend (30%)
@@ -216,7 +216,7 @@ float BuildupDetector::calculateBuildupIntensity(float energyTrend, float treble
     return fl::max(0.0f, fl::min(1.0f, intensity));
 }
 
-bool BuildupDetector::shouldStartBuildup(float intensity) const {
+bool BuildupDetector::shouldStartBuildup(float intensity) const FL_NO_EXCEPT {
     // Start buildup if:
     // 1. Intensity exceeds threshold
     // 2. Energy is rising (positive trend)
@@ -232,7 +232,7 @@ bool BuildupDetector::shouldStartBuildup(float intensity) const {
            energyTrend >= mEnergyRiseThreshold;
 }
 
-bool BuildupDetector::shouldEndBuildup() const {
+bool BuildupDetector::shouldEndBuildup() const FL_NO_EXCEPT {
     if (!mBuildupActive) {
         return false;
     }
@@ -260,7 +260,7 @@ bool BuildupDetector::shouldEndBuildup() const {
     return false;
 }
 
-bool BuildupDetector::shouldPeak() const {
+bool BuildupDetector::shouldPeak() const FL_NO_EXCEPT {
     if (!mBuildupActive || mPeakFired) {
         return false;
     }
@@ -280,7 +280,7 @@ bool BuildupDetector::shouldPeak() const {
     return durationOk && (nearEnd || highIntensity || atMax);
 }
 
-void BuildupDetector::updateEnergyHistory(float energy) {
+void BuildupDetector::updateEnergyHistory(float energy) FL_NO_EXCEPT {
     mEnergyHistory[mEnergyHistoryIndex] = energy;
     mEnergyHistoryIndex = (mEnergyHistoryIndex + 1) % 32;
 
@@ -289,7 +289,7 @@ void BuildupDetector::updateEnergyHistory(float energy) {
     }
 }
 
-void BuildupDetector::updateTrebleHistory(float treble) {
+void BuildupDetector::updateTrebleHistory(float treble) FL_NO_EXCEPT {
     mTrebleHistory[mTrebleHistoryIndex] = treble;
     mTrebleHistoryIndex = (mTrebleHistoryIndex + 1) % 16;
 
@@ -298,7 +298,7 @@ void BuildupDetector::updateTrebleHistory(float treble) {
     }
 }
 
-float BuildupDetector::getTrebleEnergy(const fft::Bins& fft) const {
+float BuildupDetector::getTrebleEnergy(const fft::Bins& fft) const FL_NO_EXCEPT {
     // Calculate high-frequency energy (top 25% of bins)
     int startBin = static_cast<int>(fft.raw().size() * 0.75f);
     float energy = 0.0f;

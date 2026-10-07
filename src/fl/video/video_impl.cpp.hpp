@@ -17,36 +17,36 @@ namespace video {
 
 VideoImpl::VideoImpl(size_t pixelsPerFrame, float fpsVideo,
                      size_t nFramesInBuffer)
-    : mPixelsPerFrame(pixelsPerFrame),
+    FL_NO_EXCEPT : mPixelsPerFrame(pixelsPerFrame),
       mFrameInterpolator(
           fl::make_shared<FrameInterpolator>(fl::max(1, nFramesInBuffer), fpsVideo)) {}
 
-void VideoImpl::pause(fl::u32 now) {
+void VideoImpl::pause(fl::u32 now) FL_NO_EXCEPT {
     if (!mTime) {
         mTime = fl::make_shared<TimeWarp>(now);
     }
     mTime->pause(now);
 }
-void VideoImpl::resume(fl::u32 now) {
+void VideoImpl::resume(fl::u32 now) FL_NO_EXCEPT {
     if (!mTime) {
         mTime = fl::make_shared<TimeWarp>(now);
     }
     mTime->resume(now);
 }
 
-void VideoImpl::setTimeScale(float timeScale) {
+void VideoImpl::setTimeScale(float timeScale) FL_NO_EXCEPT {
     mTimeScale = timeScale;
     if (mTime) {
         mTime->setSpeed(timeScale);
     }
 }
 
-void VideoImpl::setFade(fl::u32 fadeInTime, fl::u32 fadeOutTime) {
+void VideoImpl::setFade(fl::u32 fadeInTime, fl::u32 fadeOutTime) FL_NO_EXCEPT {
     mFadeInTime = fadeInTime;
     mFadeOutTime = fadeOutTime;
 }
 
-bool VideoImpl::needsFrame(fl::u32 now) const {
+bool VideoImpl::needsFrame(fl::u32 now) const FL_NO_EXCEPT {
     fl::u32 f1, f2;
     bool out = mFrameInterpolator->needsFrame(now, &f1, &f2);
     return out;
@@ -66,19 +66,19 @@ bool VideoImpl::begin(filebuf_ptr h) FL_NO_EXCEPT {
     return true;
 }
 
-void VideoImpl::end() {
+void VideoImpl::end() FL_NO_EXCEPT {
     mFrameInterpolator->clear();
     // Removed resetFrameCounter and setStartTime calls
     mStream.reset();
 }
 
-bool VideoImpl::full() const { return mFrameInterpolator->getFrames()->full(); }
+bool VideoImpl::full() const FL_NO_EXCEPT { return mFrameInterpolator->getFrames()->full(); }
 
-bool VideoImpl::draw(fl::u32 now, Frame *frame) {
+bool VideoImpl::draw(fl::u32 now, Frame *frame) FL_NO_EXCEPT {
     return draw(now, frame->rgb());
 }
 
-i32 VideoImpl::durationMicros() const {
+i32 VideoImpl::durationMicros() const FL_NO_EXCEPT {
     if (!mStream) {
         return -1;
     }
@@ -91,7 +91,7 @@ i32 VideoImpl::durationMicros() const {
     return (frames * micros_per_frame); // Convert to milliseconds
 }
 
-bool VideoImpl::draw(fl::u32 now, fl::span<CRGB> leds) {
+bool VideoImpl::draw(fl::u32 now, fl::span<CRGB> leds) FL_NO_EXCEPT {
     if (!mTime) {
         mTime = fl::make_shared<TimeWarp>(now);
         mTime->setSpeed(mTimeScale);
@@ -171,7 +171,7 @@ bool VideoImpl::readSample(PixelSample *out) FL_NO_EXCEPT {
     return mStream && mStream->readSample(out);
 }
 
-bool VideoImpl::updateBufferFromStream(fl::u32 now) {
+bool VideoImpl::updateBufferFromStream(fl::u32 now) FL_NO_EXCEPT {
     FASTLED_ASSERT(mTime, "mTime is null");
     if (!mStream) {
         FL_WARN("no stream");
@@ -261,7 +261,7 @@ bool VideoImpl::updateBufferFromStream(fl::u32 now) {
     return true;
 }
 
-bool VideoImpl::updateBufferFromFile(fl::u32 now, bool forward) {
+bool VideoImpl::updateBufferFromFile(fl::u32 now, bool forward) FL_NO_EXCEPT {
     fl::u32 currFrameNumber = 0;
     fl::u32 nextFrameNumber = 0;
     bool needs_frame =
@@ -355,7 +355,7 @@ bool VideoImpl::updateBufferFromFile(fl::u32 now, bool forward) {
     return true;
 }
 
-bool VideoImpl::updateBufferIfNecessary(fl::u32 prev, fl::u32 now) {
+bool VideoImpl::updateBufferIfNecessary(fl::u32 prev, fl::u32 now) FL_NO_EXCEPT {
     const bool forward = now >= prev;
 
     PixelStream::Type type = mStream->getType();
@@ -370,7 +370,7 @@ bool VideoImpl::updateBufferIfNecessary(fl::u32 prev, fl::u32 now) {
     }
 }
 
-bool VideoImpl::rewind() {
+bool VideoImpl::rewind() FL_NO_EXCEPT {
     if (!mStream || !mStream->rewind()) {
         return false;
     }

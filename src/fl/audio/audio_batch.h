@@ -68,32 +68,32 @@ class AudioBatch {
     AudioBatch() FL_NO_EXCEPT = default;
     explicit AudioBatch(fl::span<const AudioFrame> frames,
                         audio::Processor *proc = nullptr)
-        : mFrames(frames), mProc(proc) {}
+        FL_NO_EXCEPT : mFrames(frames), mProc(proc) {}
 
     AudioBatch(const AudioBatch &) FL_NO_EXCEPT = delete;
     AudioBatch &operator=(const AudioBatch &) FL_NO_EXCEPT = delete;
 
     // --- Cheap: peak aggregates over AudioFrames (compute-once) ---
-    float bass() const { ensurePeaks(); return mPeaks.bass; }
-    float mid() const { ensurePeaks(); return mPeaks.mid; }
-    float treble() const { ensurePeaks(); return mPeaks.treble; }
-    float volume() const { ensurePeaks(); return mPeaks.volume; }
-    bool beat() const { ensurePeaks(); return mPeaks.beat; }
+    float bass() const FL_NO_EXCEPT { ensurePeaks(); return mPeaks.bass; }
+    float mid() const FL_NO_EXCEPT { ensurePeaks(); return mPeaks.mid; }
+    float treble() const FL_NO_EXCEPT { ensurePeaks(); return mPeaks.treble; }
+    float volume() const FL_NO_EXCEPT { ensurePeaks(); return mPeaks.volume; }
+    bool beat() const FL_NO_EXCEPT { ensurePeaks(); return mPeaks.beat; }
 
     // --- Expensive: lazy snapshots from Processor (compute-once) ---
-    const VibeLevels &vibe() const;
-    const EqLevels &equalizer() const;
-    const PercussionState &percussion() const;
+    const VibeLevels &vibe() const FL_NO_EXCEPT;
+    const EqLevels &equalizer() const FL_NO_EXCEPT;
+    const PercussionState &percussion() const FL_NO_EXCEPT;
 
     // --- Raw frame access ---
-    fl::span<const AudioFrame> frames() const { return mFrames; }
-    bool empty() const { return mFrames.empty(); }
-    fl::size frameCount() const { return mFrames.size(); }
-    bool hasProcessor() const { return mProc != nullptr; }
+    fl::span<const AudioFrame> frames() const FL_NO_EXCEPT { return mFrames; }
+    bool empty() const FL_NO_EXCEPT { return mFrames.empty(); }
+    fl::size frameCount() const FL_NO_EXCEPT { return mFrames.size(); }
+    bool hasProcessor() const FL_NO_EXCEPT { return mProc != nullptr; }
 
     // --- Range-based for over raw frames ---
-    const AudioFrame *begin() const { return mFrames.begin(); }
-    const AudioFrame *end() const { return mFrames.end(); }
+    const AudioFrame *begin() const FL_NO_EXCEPT { return mFrames.begin(); }
+    const AudioFrame *end() const FL_NO_EXCEPT { return mFrames.end(); }
 
   private:
     fl::span<const AudioFrame> mFrames;
@@ -115,7 +115,7 @@ class AudioBatch {
     mutable bool mPercComputed = false;
     mutable PercussionState mPerc;
 
-    void ensurePeaks() const;
+    void ensurePeaks() const FL_NO_EXCEPT;
 };
 
 } // namespace fl

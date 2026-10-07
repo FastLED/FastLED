@@ -12,13 +12,13 @@
 namespace fl {
 
 ButtonLowLevel::ButtonLowLevel(int pin, ButtonStrategy strategy)
-    : mPin(pin) {
+    FL_NO_EXCEPT : mPin(pin) {
     setStrategy(strategy);
 }
 
 ButtonLowLevel::~ButtonLowLevel() FL_NO_EXCEPT {}
 
-bool ButtonLowLevel::highLowFloating() {
+bool ButtonLowLevel::highLowFloating() FL_NO_EXCEPT {
     // High-low floating detection: Set pin to high, check if high,
     // set pin to low, check if low. If both conditions are true,
     // the pin is floating and therefore the button is not pressed.
@@ -37,7 +37,7 @@ bool ButtonLowLevel::highLowFloating() {
     return pressed;
 }
 
-bool ButtonLowLevel::isPressed() {
+bool ButtonLowLevel::isPressed() FL_NO_EXCEPT {
     switch (mStrategy) {
     case ButtonStrategy::kHighLowFloating:
         return highLowFloating();
@@ -54,9 +54,9 @@ bool ButtonLowLevel::isPressed() {
 }
 
 Button::Button(int pin, ButtonStrategy strategy)
-    : mButton(pin, strategy), mListener(this), mPressedLastFrame(false), mClickedThisFrame(false) {}
+    FL_NO_EXCEPT : mButton(pin, strategy), mListener(this), mPressedLastFrame(false), mClickedThisFrame(false) {}
 
-void Button::Listener::onEndFrame() {
+void Button::Listener::onEndFrame() FL_NO_EXCEPT {
     const bool pressed_curr_frame = mOwner->mButton.isPressed();
     const bool pressed_last_frame = mOwner->mPressedLastFrame;
     // Rising edge of isPressed() == one click event for this frame.
@@ -71,7 +71,7 @@ void Button::Listener::onEndFrame() {
     }
 }
 
-Button::Listener::Listener(Button *owner) : mOwner(owner) {
+Button::Listener::Listener(Button *owner) FL_NO_EXCEPT : mOwner(owner) {
     addToEngineEventsOnce();
 }
 
@@ -81,7 +81,7 @@ Button::Listener::~Listener() FL_NO_EXCEPT {
     }
 }
 
-void Button::Listener::addToEngineEventsOnce() {
+void Button::Listener::addToEngineEventsOnce() FL_NO_EXCEPT {
     if (added) {
         return;
     }
@@ -89,14 +89,14 @@ void Button::Listener::addToEngineEventsOnce() {
     added = true;
 }
 
-int Button::onClick(function<void()> callback) {
+int Button::onClick(function<void()> callback) FL_NO_EXCEPT {
     int id = mOnClickCallbacks.add(callback);
     return id;
 }
 
 
 
-void ButtonLowLevel::setStrategy(ButtonStrategy strategy) {
+void ButtonLowLevel::setStrategy(ButtonStrategy strategy) FL_NO_EXCEPT {
     mStrategy = strategy;
     switch (mStrategy) {
     case ButtonStrategy::kHighLowFloating:

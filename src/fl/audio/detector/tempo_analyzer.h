@@ -17,12 +17,12 @@ public:
     TempoAnalyzer() FL_NO_EXCEPT;
     ~TempoAnalyzer() FL_NO_EXCEPT override;
 
-    void update(shared_ptr<Context> context) override;
-    void fireCallbacks() override;
-    bool needsFFT() const override { return true; }
-    bool needsFFTHistory() const override { return true; }
-    const char* getName() const override { return "TempoAnalyzer"; }
-    void reset() override;
+    void update(shared_ptr<Context> context) FL_NO_EXCEPT override;
+    void fireCallbacks() FL_NO_EXCEPT override;
+    bool needsFFT() const FL_NO_EXCEPT override { return true; }
+    bool needsFFTHistory() const FL_NO_EXCEPT override { return true; }
+    const char* getName() const FL_NO_EXCEPT override { return "TempoAnalyzer"; }
+    void reset() FL_NO_EXCEPT override;
 
     // Callbacks (multiple listeners supported)
     function_list<void(float bpm)> onTempo;
@@ -32,18 +32,18 @@ public:
     function_list<void()> onTempoUnstable;
 
     // State access
-    float getBPM() const { return mCurrentBPM; }
-    float getConfidence() const { return mConfidence; }
-    bool isStable() const { return mIsStable; }
-    float getStability() const { return mStability; }
+    float getBPM() const FL_NO_EXCEPT { return mCurrentBPM; }
+    float getConfidence() const FL_NO_EXCEPT { return mConfidence; }
+    bool isStable() const FL_NO_EXCEPT { return mIsStable; }
+    float getStability() const FL_NO_EXCEPT { return mStability; }
 
     // Configuration
-    void setMinBPM(float minBPM) { mMinBPM = minBPM; }
-    void setMaxBPM(float maxBPM) { mMaxBPM = maxBPM; }
-    void setStabilityThreshold(float threshold) { mStabilityThreshold = threshold; }
+    void setMinBPM(float minBPM) FL_NO_EXCEPT { mMinBPM = minBPM; }
+    void setMaxBPM(float maxBPM) FL_NO_EXCEPT { mMaxBPM = maxBPM; }
+    void setStabilityThreshold(float threshold) FL_NO_EXCEPT { mStabilityThreshold = threshold; }
 
     // Scoring (public for testability)
-    float calculateIntervalScore(u32 interval);
+    float calculateIntervalScore(u32 interval) FL_NO_EXCEPT;
 
 private:
     // Current tempo state
@@ -105,14 +105,14 @@ private:
     bool mHasPrevTimestamp = false;
 
     // Internal methods
-    float calculateSpectralFlux(const fft::Bins& fft);
-    void updateAdaptiveThreshold();
-    bool detectOnset(u32 timestamp);
-    void updateHypotheses(u32 timestamp);
-    void pruneHypotheses();
-    void updateCurrentTempo();
-    void updateStability();
-    float calculateTempoConfidence(const TempoHypothesis& hyp);
+    float calculateSpectralFlux(const fft::Bins& fft) FL_NO_EXCEPT;
+    void updateAdaptiveThreshold() FL_NO_EXCEPT;
+    bool detectOnset(u32 timestamp) FL_NO_EXCEPT;
+    void updateHypotheses(u32 timestamp) FL_NO_EXCEPT;
+    void pruneHypotheses() FL_NO_EXCEPT;
+    void updateCurrentTempo() FL_NO_EXCEPT;
+    void updateStability() FL_NO_EXCEPT;
+    float calculateTempoConfidence(const TempoHypothesis& hyp) FL_NO_EXCEPT;
 };
 
 } // namespace detector

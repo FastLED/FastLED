@@ -89,13 +89,13 @@ public:
 
     /// Register method with config (name, function, optional metadata)
     template<typename Callable>
-    void bind(const Config<Callable>& config) {
+    void bind(const Config<Callable>& config) FL_NO_EXCEPT {
         mRpc.bind(config);
     }
 
     /// Register method by name, function, and optional mode (default SYNC)
     template<typename Callable>
-    void bind(const char* name, Callable fn, fl::RpcMode mode = fl::RpcMode::SYNC) {
+    void bind(const char* name, Callable fn, fl::RpcMode mode = fl::RpcMode::SYNC) FL_NO_EXCEPT {
         bind(fl::Rpc::Config<Callable>{name, fl::move(fn), mode});
     }
 
@@ -104,7 +104,7 @@ public:
     /// The ResponseSend& parameter provides send(), sendUpdate(), sendFinal() methods
     void bindAsync(const char* name,
                    fl::function<void(fl::ResponseSend&, const fl::json&)> fn,
-                   fl::RpcMode mode = fl::RpcMode::ASYNC) {
+                   fl::RpcMode mode = fl::RpcMode::ASYNC) FL_NO_EXCEPT {
         mRpc.bindAsync(name, fl::move(fn), mode);
     }
 
@@ -115,15 +115,15 @@ public:
 
     /// Get bound method by name for direct C++ invocation
     template<class Sig>
-    fl::BindResult<Sig> get(const char* name) const {
+    fl::BindResult<Sig> get(const char* name) const FL_NO_EXCEPT {
         return mRpc.get<Sig>(name);
     }
 
     /// Check if method is registered
-    bool has(const fl::string& name) const;
+    bool has(const fl::string& name) const FL_NO_EXCEPT;
 
     /// Unregister method by name
-    bool unbind(const fl::string& name);
+    bool unbind(const fl::string& name) FL_NO_EXCEPT;
 
     // =========================================================================
     // RPC Processing
@@ -131,17 +131,17 @@ public:
 
     /// Process JSON-RPC request (with optional "timestamp" field for scheduling)
     /// Returns JSON-RPC response: {"result": ...} or {"error": {...}}
-    fl::json processRpc(const fl::json& request);
+    fl::json processRpc(const fl::json& request) FL_NO_EXCEPT;
 
     // =========================================================================
     // Server Coordination
     // =========================================================================
 
     /// Main update: pull + tick + push (overrides Server::update)
-    size_t update(u32 currentTimeMs);
+    size_t update(u32 currentTimeMs) FL_NO_EXCEPT;
 
     /// Process scheduled calls (call regularly)
-    size_t tick(u32 currentTimeMs);
+    size_t tick(u32 currentTimeMs) FL_NO_EXCEPT;
 
     // Note: pull() and push() inherited from Server<fl::json, fl::json>
 
@@ -150,26 +150,26 @@ public:
     // =========================================================================
 
     /// Get number of pending scheduled calls
-    size_t pendingCount() const;
+    size_t pendingCount() const FL_NO_EXCEPT;
 
     /// Clear state (bitwise OR of ClearFlags)
-    void clear(ClearFlags flags);
+    void clear(ClearFlags flags) FL_NO_EXCEPT;
 
     // =========================================================================
     // Schema
     // =========================================================================
 
     /// Get method information for all registered methods
-    fl::vector<MethodInfo> methods() const;
+    fl::vector<MethodInfo> methods() const FL_NO_EXCEPT;
 
     /// Returns flat schema document
     /// Format: {"schema": [["methodName", "returnType", [["param1", "type1"], ...]], ...]}
-    fl::json schema() const {
+    fl::json schema() const FL_NO_EXCEPT {
         return mRpc.schema();
     }
 
     /// Get number of registered methods
-    fl::size count() const {
+    fl::size count() const FL_NO_EXCEPT {
         return mRpc.count();
     }
 
@@ -179,15 +179,15 @@ public:
 
     /// Send async response for a previously-called async method
     /// The request ID is automatically retrieved from internal storage
-    void sendAsyncResponse(const char* method, const fl::json& result);
+    void sendAsyncResponse(const char* method, const fl::json& result) FL_NO_EXCEPT;
 
     /// Send stream update for a streaming async method (ASYNC_STREAM mode)
     /// The request ID is automatically retrieved from internal storage
-    void sendStreamUpdate(const char* method, const fl::json& update);
+    void sendStreamUpdate(const char* method, const fl::json& update) FL_NO_EXCEPT;
 
     /// Send final stream response for a streaming async method (ASYNC_STREAM mode)
     /// The request ID is automatically retrieved from internal storage and method is removed
-    void sendStreamFinal(const char* method, const fl::json& result);
+    void sendStreamFinal(const char* method, const fl::json& result) FL_NO_EXCEPT;
 
     // =========================================================================
     // Error Reporting (Unsolicited Notifications)
@@ -198,11 +198,11 @@ public:
     /// Use this for error-only state reporting where logging would fail due
     /// to serial backpressure.
     /// Format: {"jsonrpc":"2.0","method":"__error","params":{"message":"..."}}
-    void reportError(const fl::string& message);
+    void reportError(const fl::string& message) FL_NO_EXCEPT;
 
     /// Send an error notification with structured data
     /// Format: {"jsonrpc":"2.0","method":"__error","params":<data>}
-    void reportError(const fl::json& data);
+    void reportError(const fl::json& data) FL_NO_EXCEPT;
 
 protected:
     // Storage for async request IDs (method name -> request ID).
@@ -217,8 +217,8 @@ protected:
     };
 #if FL_PLATFORM_HAS_LARGE_MEMORY
     fl::unordered_map<fl::string, AsyncRequest> mAsyncRequests;
-    void scheduleFunction(u32 timestamp, u32 receivedAt, const fl::json& jsonRpcRequest);
-    void recordResult(const fl::string& funcName, const fl::json& result, u32 scheduledAt, u32 receivedAt, u32 executedAt, bool wasScheduled);
+    void scheduleFunction(u32 timestamp, u32 receivedAt, const fl::json& jsonRpcRequest) FL_NO_EXCEPT;
+    void recordResult(const fl::string& funcName, const fl::json& result, u32 scheduledAt, u32 receivedAt, u32 executedAt, bool wasScheduled) FL_NO_EXCEPT;
 #endif
 
     // Method registry and execution

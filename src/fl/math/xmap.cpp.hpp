@@ -6,7 +6,7 @@
 namespace fl {
 
 XMap XMap::constructWithUserFunction(u16 length, XFunction xFunction,
-                                     u16 offset) {
+                                     u16 offset) FL_NO_EXCEPT {
     XMap out = XMap(length, kFunction);
     out.xFunction = xFunction;
     out.mOffset = offset;
@@ -15,20 +15,20 @@ XMap XMap::constructWithUserFunction(u16 length, XFunction xFunction,
 
 XMap XMap::constructWithLookUpTable(u16 length,
                                     const u16 *lookUpTable,
-                                    u16 offset) {
+                                    u16 offset) FL_NO_EXCEPT {
     XMap out = XMap(length, kLookUpTable);
     out.mData = lookUpTable;
     out.mOffset = offset;
     return out;
 }
 
-XMap::XMap(u16 length, bool is_reverse, u16 offset) {
+XMap::XMap(u16 length, bool is_reverse, u16 offset) FL_NO_EXCEPT {
     type = is_reverse ? kReverse : kLinear;
     this->length = length;
     this->mOffset = offset;
 }
 
-XMap::XMap(const XMap &other) {
+XMap::XMap(const XMap &other) FL_NO_EXCEPT {
     type = other.type;
     length = other.length;
     xFunction = other.xFunction;
@@ -37,7 +37,7 @@ XMap::XMap(const XMap &other) {
     mOffset = other.mOffset;
 }
 
-void XMap::convertToLookUpTable() {
+void XMap::convertToLookUpTable() FL_NO_EXCEPT {
     if (type == kLookUpTable) {
         return;
     }
@@ -52,7 +52,7 @@ void XMap::convertToLookUpTable() {
     xFunction = nullptr;
 }
 
-u16 XMap::mapToIndex(u16 x) const {
+u16 XMap::mapToIndex(u16 x) const FL_NO_EXCEPT {
     u16 index;
     switch (type) {
     case kLinear:
@@ -74,12 +74,12 @@ u16 XMap::mapToIndex(u16 x) const {
     return index + mOffset;
 }
 
-u16 XMap::getLength() const { return length; }
+u16 XMap::getLength() const FL_NO_EXCEPT { return length; }
 
-XMap::Type XMap::getType() const { return type; }
+XMap::Type XMap::getType() const FL_NO_EXCEPT { return type; }
 
 XMap::XMap(u16 length, Type type)
-    : length(length), type(type), mOffset(0) {}
+    FL_NO_EXCEPT : length(length), type(type), mOffset(0) {}
 
 XMap &XMap::operator=(const XMap &other) FL_NO_EXCEPT {
     if (this != &other) {

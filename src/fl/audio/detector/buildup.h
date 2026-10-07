@@ -53,12 +53,12 @@ public:
     ~BuildupDetector() FL_NO_EXCEPT override;
 
     // Detector interface
-    void update(shared_ptr<Context> context) override;
-    void fireCallbacks() override;
-    bool needsFFT() const override { return true; }
-    bool needsFFTHistory() const override { return false; }
-    const char* getName() const override { return "BuildupDetector"; }
-    void reset() override;
+    void update(shared_ptr<Context> context) FL_NO_EXCEPT override;
+    void fireCallbacks() FL_NO_EXCEPT override;
+    bool needsFFT() const FL_NO_EXCEPT override { return true; }
+    bool needsFFTHistory() const FL_NO_EXCEPT override { return false; }
+    const char* getName() const FL_NO_EXCEPT override { return "BuildupDetector"; }
+    void reset() FL_NO_EXCEPT override;
 
     // Event callbacks (multiple listeners supported)
     function_list<void()> onBuildupStart;                      // Fired when buildup starts
@@ -68,16 +68,16 @@ public:
     function_list<void(const Buildup&)> onBuildup;             // Fired every frame during buildup
 
     // State access
-    bool isBuilding() const { return mBuildupActive; }
-    float getIntensity() const { return mCurrentBuildup.intensity; }
-    float getProgress() const { return mCurrentBuildup.progress; }
-    const Buildup& getBuildup() const { return mCurrentBuildup; }
+    bool isBuilding() const FL_NO_EXCEPT { return mBuildupActive; }
+    float getIntensity() const FL_NO_EXCEPT { return mCurrentBuildup.intensity; }
+    float getProgress() const FL_NO_EXCEPT { return mCurrentBuildup.progress; }
+    const Buildup& getBuildup() const FL_NO_EXCEPT { return mCurrentBuildup; }
 
     // Configuration
-    void setMinDuration(u32 ms) { mMinDuration = ms; }
-    void setMaxDuration(u32 ms) { mMaxDuration = ms; }
-    void setIntensityThreshold(float threshold) { mIntensityThreshold = threshold; }
-    void setEnergyRiseThreshold(float threshold) { mEnergyRiseThreshold = threshold; }
+    void setMinDuration(u32 ms) FL_NO_EXCEPT { mMinDuration = ms; }
+    void setMaxDuration(u32 ms) FL_NO_EXCEPT { mMaxDuration = ms; }
+    void setIntensityThreshold(float threshold) FL_NO_EXCEPT { mIntensityThreshold = threshold; }
+    void setEnergyRiseThreshold(float threshold) FL_NO_EXCEPT { mEnergyRiseThreshold = threshold; }
 
 private:
     // Current buildup state
@@ -113,15 +113,15 @@ private:
     shared_ptr<const fft::Bins> mRetainedFFT;
 
     // Analysis methods
-    float calculateEnergyTrend() const;      // Calculate energy rise trend
-    float calculateTrebleTrend() const;      // Calculate treble rise trend
-    float calculateBuildupIntensity(float energyTrend, float trebleTrend, float rms) const;
-    bool shouldStartBuildup(float intensity) const;
-    bool shouldEndBuildup() const;
-    bool shouldPeak() const;
-    void updateEnergyHistory(float energy);
-    void updateTrebleHistory(float treble);
-    float getTrebleEnergy(const fft::Bins& fft) const;
+    float calculateEnergyTrend() const FL_NO_EXCEPT;      // Calculate energy rise trend
+    float calculateTrebleTrend() const FL_NO_EXCEPT;      // Calculate treble rise trend
+    float calculateBuildupIntensity(float energyTrend, float trebleTrend, float rms) const FL_NO_EXCEPT;
+    bool shouldStartBuildup(float intensity) const FL_NO_EXCEPT;
+    bool shouldEndBuildup() const FL_NO_EXCEPT;
+    bool shouldPeak() const FL_NO_EXCEPT;
+    void updateEnergyHistory(float energy) FL_NO_EXCEPT;
+    void updateTrebleHistory(float treble) FL_NO_EXCEPT;
+    float getTrebleEnergy(const fft::Bins& fft) const FL_NO_EXCEPT;
 
     // Pending callback flags
     bool mFireBuildupStart = false;

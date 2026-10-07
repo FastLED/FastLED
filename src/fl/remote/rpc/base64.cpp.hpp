@@ -1,5 +1,6 @@
 #include "fl/remote/rpc/base64.h"
 #include "fl/stl/cstring.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -8,7 +9,7 @@ namespace {
 static const char kBase64Chars[] =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-static int base64_char_index(char c) {
+static int base64_char_index(char c) FL_NO_EXCEPT {
     if (c >= 'A' && c <= 'Z') return c - 'A';
     if (c >= 'a' && c <= 'z') return c - 'a' + 26;
     if (c >= '0' && c <= '9') return c - '0' + 52;
@@ -19,7 +20,7 @@ static int base64_char_index(char c) {
 
 } // namespace
 
-fl::string base64_encode(fl::span<const fl::u8> data) {
+fl::string base64_encode(fl::span<const fl::u8> data) FL_NO_EXCEPT {
     fl::string out;
     if (data.empty()) return out;
 
@@ -59,7 +60,7 @@ fl::string base64_encode(fl::span<const fl::u8> data) {
     return out;
 }
 
-fl::vector<fl::u8> base64_decode(const fl::string& encoded) {
+fl::vector<fl::u8> base64_decode(const fl::string& encoded) FL_NO_EXCEPT {
     fl::vector<fl::u8> out;
     if (encoded.empty()) return out;
 

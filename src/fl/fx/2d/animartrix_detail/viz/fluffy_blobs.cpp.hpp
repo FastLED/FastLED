@@ -2,13 +2,14 @@
 #include "fl/fx/2d/animartrix_detail/viz/fluffy_blobs.h"
 #include "fl/fx/2d/animartrix_detail/render_value_fp.h"
 #include "fl/fx/2d/animartrix_detail/perlin_float.h"
+#include "fl/stl/noexcept.h"
 
 FL_FAST_MATH_BEGIN
 FL_OPTIMIZATION_LEVEL_O3_BEGIN
 
 namespace fl {
 
-void Fluffy_Blobs::draw(Context &ctx) {
+void Fluffy_Blobs::draw(Context &ctx) FL_NO_EXCEPT {
     auto *e = ctx.mEngine.get();
 
     e->timings.master_speed = 0.015;
@@ -115,7 +116,7 @@ void Fluffy_Blobs::draw(Context &ctx) {
 // Fixed-Point Implementation of Fluffy_Blobs
 // ============================================================================
 
-void Fluffy_Blobs_FP::draw(Context &ctx) {
+void Fluffy_Blobs_FP::draw(Context &ctx) FL_NO_EXCEPT {
     auto *e = ctx.mEngine.get();
     mState.ensureCache(e);
     const fl::i32 *fade_lut = fl::assume_aligned<16>(mState.fade_lut);

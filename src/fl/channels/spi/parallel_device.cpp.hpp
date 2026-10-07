@@ -27,7 +27,7 @@ namespace spi {
 // Config Implementation (to avoid circular dependency with Spi class)
 // ============================================================================
 
-ParallelDevice::Config::Config()
+ParallelDevice::Config::Config() FL_NO_EXCEPT
     : clock_pin(0xFF)
     , mode(SpiParallelMode::AUTO)
     , timer_hz(1600000) {
@@ -45,7 +45,7 @@ struct ParallelDevice::Impl {
     u8 backend_width;  // 1, 2, 4, 8, 16, or 32
 
     Impl(const Config& cfg)
-        : config(cfg)
+        FL_NO_EXCEPT : config(cfg)
         , initialized(false)
         , backend(nullptr)
         , is_isr_mode(false)
@@ -58,7 +58,7 @@ struct ParallelDevice::Impl {
         }
     }
 
-    void releaseBackend() {
+    void releaseBackend() FL_NO_EXCEPT {
         if (!backend) return;
 
         // Stop ISR if in ISR mode
@@ -98,7 +98,7 @@ namespace {
 /// @param clear_masks Output array of 256 clear masks
 void buildDefaultLUT(const fl::vector<u8>& gpio_pins,
                      u32* set_masks,
-                     u32* clear_masks) {
+                     u32* clear_masks) FL_NO_EXCEPT {
     size_t num_pins = gpio_pins.size();
 
     // For each possible byte value (0-255)
@@ -134,7 +134,7 @@ void buildDefaultLUT(const fl::vector<u8>& gpio_pins,
 // ============================================================================
 
 ParallelDevice::ParallelDevice(const Config& config)
-    : pImpl(fl::make_unique<Impl>(config)) {
+    FL_NO_EXCEPT : pImpl(fl::make_unique<Impl>(config)) {
 
     // Validate configuration
     size_t num_pins = config.gpio_pins.size();
@@ -151,7 +151,7 @@ ParallelDevice::~ParallelDevice() FL_NO_EXCEPT {
     }
 }
 
-fl::optional<fl::task::Error> ParallelDevice::begin() {
+fl::optional<fl::task::Error> ParallelDevice::begin() FL_NO_EXCEPT {
     if (!pImpl) {
         return fl::task::Error("Device not initialized");
     }
@@ -213,7 +213,7 @@ fl::optional<fl::task::Error> ParallelDevice::begin() {
     return fl::nullopt;
 }
 
-void ParallelDevice::end() {
+void ParallelDevice::end() FL_NO_EXCEPT {
     if (!pImpl || !pImpl->initialized) {
         return;
     }
@@ -227,11 +227,11 @@ void ParallelDevice::end() {
     FL_DBG("ParallelDevice: Shutdown complete");
 }
 
-bool ParallelDevice::isReady() const {
+bool ParallelDevice::isReady() const FL_NO_EXCEPT {
     return pImpl && pImpl->initialized && pImpl->backend != nullptr;
 }
 
-Result<Transaction> ParallelDevice::write(const u8* data, size_t size) {
+Result<Transaction> ParallelDevice::write(const u8* data, size_t size) FL_NO_EXCEPT {
     if (!isReady()) {
         return Result<Transaction>::failure(SPIError::NOT_INITIALIZED,
             "Device not initialized");
@@ -248,7 +248,7 @@ Result<Transaction> ParallelDevice::write(const u8* data, size_t size) {
         "ParallelDevice::write() not yet implemented");
 }
 
-bool ParallelDevice::waitComplete(u32 timeout_ms) {
+bool ParallelDevice::waitComplete(u32 timeout_ms) FL_NO_EXCEPT {
     (void)timeout_ms;  // Unused parameter - reserved for future implementation
     if (!isReady()) {
         return false;
@@ -261,7 +261,7 @@ bool ParallelDevice::waitComplete(u32 timeout_ms) {
     return true;  // Placeholder
 }
 
-bool ParallelDevice::isBusy() const {
+bool ParallelDevice::isBusy() const FL_NO_EXCEPT {
     if (!isReady()) {
         return false;
     }
@@ -270,7 +270,7 @@ bool ParallelDevice::isBusy() const {
     return false;  // Placeholder
 }
 
-void ParallelDevice::configureLUT(const u32* set_masks, const u32* clear_masks) {
+void ParallelDevice::configureLUT(const u32* set_masks, const u32* clear_masks) FL_NO_EXCEPT {
     if (!set_masks || !clear_masks) {
         FL_WARN("ParallelDevice: Invalid LUT pointers");
         return;
@@ -281,7 +281,7 @@ void ParallelDevice::configureLUT(const u32* set_masks, const u32* clear_masks) 
     FL_DBG("ParallelDevice: LUT configuration not yet implemented");
 }
 
-const ParallelDevice::Config& ParallelDevice::getConfig() const {
+const ParallelDevice::Config& ParallelDevice::getConfig() const FL_NO_EXCEPT {
     static const Config empty_config;
     return pImpl ? pImpl->config : empty_config;
 }

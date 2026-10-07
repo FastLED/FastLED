@@ -9,6 +9,7 @@
 #include "fl/stl/compiler_control.h"
 #include "fl/fx/2d/animartrix_detail/core_types.h"
 #include "fl/fx/2d/animartrix_detail/perlin_float.h"
+#include "fl/stl/noexcept.h"
 
 #ifndef PI
 #define PI 3.1415926535897932384626433832795
@@ -27,7 +28,7 @@ namespace fl {
 inline void render_polar_lookup_table(float cx, float cy,
                                       fl::vector<fl::vector<float>> &polar_theta,
                                       fl::vector<fl::vector<float>> &distance,
-                                      int num_x, int num_y) {
+                                      int num_x, int num_y) FL_NO_EXCEPT {
     polar_theta.resize(num_x, fl::vector<float>(num_y, 0.0f));
     distance.resize(num_x, fl::vector<float>(num_y, 0.0f));
 
@@ -44,7 +45,7 @@ inline void render_polar_lookup_table(float cx, float cy,
 // Calculate oscillators from timing ratios
 // Computes linear, radial, directional, and noise_angle modulators
 inline void calculate_oscillators(oscillators &timings, modulators &move,
-                                   fl::u32 current_time, float speed_factor) {
+                                   fl::u32 current_time, float speed_factor) FL_NO_EXCEPT {
     double runtime = current_time * timings.master_speed * speed_factor;
 
     for (int i = 0; i < num_oscillators; i++) {
@@ -58,7 +59,7 @@ inline void calculate_oscillators(oscillators &timings, modulators &move,
 // Set up standard oscillator configuration
 inline void run_default_oscillators(oscillators &timings, modulators &move,
                                      fl::u32 current_time, float speed_factor,
-                                     float master_speed = 0.005) {
+                                     float master_speed = 0.005) FL_NO_EXCEPT {
     timings.master_speed = master_speed;
 
     timings.ratio[0] = 1;
@@ -88,7 +89,7 @@ inline void run_default_oscillators(oscillators &timings, modulators &move,
 
 // Float mapping maintaining 32 bit precision
 FASTLED_FORCE_INLINE float map_float(float x, float in_min, float in_max, float out_min,
-                       float out_max) {
+                       float out_max) FL_NO_EXCEPT {
     float result =
         (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
     if (result < out_min)
@@ -100,7 +101,7 @@ FASTLED_FORCE_INLINE float map_float(float x, float in_min, float in_max, float 
 
 // Main noise field renderer with clamping
 // Converts polar coordinates to cartesian, applies transformations, and renders Perlin noise
-FASTLED_FORCE_INLINE float render_value(render_parameters &animation) {
+FASTLED_FORCE_INLINE float render_value(render_parameters &animation) FL_NO_EXCEPT {
     // Convert polar coordinates back to cartesian ones
     float newx = (animation.offset_x + animation.center_x -
                   (FL_COS_F(animation.angle) * animation.dist)) *
@@ -127,7 +128,7 @@ FASTLED_FORCE_INLINE float render_value(render_parameters &animation) {
 }
 
 // Clamp RGB values to [0, 255]
-FASTLED_FORCE_INLINE rgb rgb_sanity_check(rgb &pixel) {
+FASTLED_FORCE_INLINE rgb rgb_sanity_check(rgb &pixel) FL_NO_EXCEPT {
     if (pixel.red < 0)
         pixel.red = 0;
     if (pixel.green < 0)
@@ -146,33 +147,33 @@ FASTLED_FORCE_INLINE rgb rgb_sanity_check(rgb &pixel) {
 }
 
 // Color blend functions
-inline float subtract(float &a, float &b) { return a - b; }
+inline float subtract(float &a, float &b) FL_NO_EXCEPT { return a - b; }
 
-inline float multiply(float &a, float &b) { return a * b / 255.f; }
+inline float multiply(float &a, float &b) FL_NO_EXCEPT { return a * b / 255.f; }
 
-inline float add(float &a, float &b) { return a + b; }
+inline float add(float &a, float &b) FL_NO_EXCEPT { return a + b; }
 
-inline float screen(float &a, float &b) {
+inline float screen(float &a, float &b) FL_NO_EXCEPT {
     return (1 - (1 - a / 255.f) * (1 - b / 255.f)) * 255.f;
 }
 
-inline float colordodge(float &a, float &b) { return (a / (255.f - b)) * 255.f; }
+inline float colordodge(float &a, float &b) FL_NO_EXCEPT { return (a / (255.f - b)) * 255.f; }
 
-inline float colorburn(float &a, float &b) {
+inline float colorburn(float &a, float &b) FL_NO_EXCEPT {
     return (1 - ((1 - a / 255.f) / (b / 255.f))) * 255.f;
 }
 
 // Timing functions (performance measurement)
-inline void get_ready(unsigned long &a, unsigned long &b) {
+inline void get_ready(unsigned long &a, unsigned long &b) FL_NO_EXCEPT {
     a = fl::micros();
     b = fl::micros(); // logOutput
 }
 
-inline void logOutput(unsigned long &b) {
+inline void logOutput(unsigned long &b) FL_NO_EXCEPT {
     b = fl::micros();
 }
 
-inline void logFrame(unsigned long &c) {
+inline void logFrame(unsigned long &c) FL_NO_EXCEPT {
     c = fl::micros();
 }
 

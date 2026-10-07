@@ -171,7 +171,7 @@ TaskCoroutinePtr TaskCoroutineESP32::create(
         affinity = static_cast<BaseType_t>(core_id);
     }
 
-    TaskCoroutinePtr task(new TaskCoroutineESP32()) FL_NO_EXCEPT;  // ok bare allocation
+    TaskCoroutinePtr task(new TaskCoroutineESP32());  // ok bare allocation
     auto* impl = static_cast<TaskCoroutineESP32*>(task.get());
     impl->mName = fl::move(name);
     impl->mFunction = fl::move(function);

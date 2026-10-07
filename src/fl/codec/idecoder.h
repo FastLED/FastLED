@@ -37,43 +37,43 @@ public:
     virtual ~IDecoder() FL_NO_EXCEPT = default;
 
     // Lifecycle methods
-    virtual bool begin(fl::filebuf_ptr stream) = 0;
-    virtual void end() = 0;
-    virtual bool isReady() const = 0;
-    virtual bool hasError(fl::string* msg = nullptr) const = 0;
+    virtual bool begin(fl::filebuf_ptr stream) FL_NO_EXCEPT = 0;
+    virtual void end() FL_NO_EXCEPT = 0;
+    virtual bool isReady() const FL_NO_EXCEPT = 0;
+    virtual bool hasError(fl::string* msg = nullptr) const FL_NO_EXCEPT = 0;
 
     // Decoding methods
-    virtual DecodeResult decode() = 0;
-    virtual Frame getCurrentFrame() = 0;
-    virtual bool hasMoreFrames() const = 0;
+    virtual DecodeResult decode() FL_NO_EXCEPT = 0;
+    virtual Frame getCurrentFrame() FL_NO_EXCEPT = 0;
+    virtual bool hasMoreFrames() const FL_NO_EXCEPT = 0;
 
     // Optional methods for advanced usage
-    virtual fl::u32 getFrameCount() const { return 0; }
-    virtual fl::u32 getCurrentFrameIndex() const { return 0; }
-    virtual bool seek(fl::u32 frameIndex) { (void)frameIndex; return false; }
+    virtual fl::u32 getFrameCount() const FL_NO_EXCEPT { return 0; }
+    virtual fl::u32 getCurrentFrameIndex() const FL_NO_EXCEPT { return 0; }
+    virtual bool seek(fl::u32 frameIndex) FL_NO_EXCEPT { (void)frameIndex; return false; }
 
     // Audio support (optional - default implementations for decoders without audio)
-    virtual bool hasAudio() const { return false; }
-    virtual void setAudioCallback(AudioFrameCallback callback) { (void)callback; }
-    virtual int getAudioSampleRate() const { return 0; }
+    virtual bool hasAudio() const FL_NO_EXCEPT { return false; }
+    virtual void setAudioCallback(AudioFrameCallback callback) FL_NO_EXCEPT { (void)callback; }
+    virtual int getAudioSampleRate() const FL_NO_EXCEPT { return 0; }
 };
 
 // Null decoder implementation for unsupported platforms
 class NullDecoder : public IDecoder {
 public:
-    bool begin(fl::filebuf_ptr) override { return false; }
-    void end() override {}
-    bool isReady() const override { return false; }
-    bool hasError(fl::string* msg = nullptr) const override {
+    bool begin(fl::filebuf_ptr) FL_NO_EXCEPT override { return false; }
+    void end() FL_NO_EXCEPT override {}
+    bool isReady() const FL_NO_EXCEPT override { return false; }
+    bool hasError(fl::string* msg = nullptr) const FL_NO_EXCEPT override {
         if (msg) {
             *msg = "Codec not supported on this platform";
         }
         return true;
     }
 
-    DecodeResult decode() override { return DecodeResult::UnsupportedFormat; }
-    Frame getCurrentFrame() override { return Frame(0); }
-    bool hasMoreFrames() const override { return false; }
+    DecodeResult decode() FL_NO_EXCEPT override { return DecodeResult::UnsupportedFormat; }
+    Frame getCurrentFrame() FL_NO_EXCEPT override { return Frame(0); }
+    bool hasMoreFrames() const FL_NO_EXCEPT override { return false; }
 };
 
 // Smart pointer typedef - must come after class definition

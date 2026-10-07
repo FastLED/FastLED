@@ -8,28 +8,28 @@ namespace fl {
 
 namespace {
 struct Visitor {
-    Visitor(u8 index) : index(index) {}
-    void accept(const CRGBPalette16 *palette) {
+    Visitor(u8 index) FL_NO_EXCEPT : index(index) {}
+    void accept(const CRGBPalette16 *palette) FL_NO_EXCEPT {
         CRGB c = ColorFromPalette(*palette, index);
         return_val = c;
     }
 
-    void accept(const CRGBPalette32 *palette) {
+    void accept(const CRGBPalette32 *palette) FL_NO_EXCEPT {
         CRGB c = ColorFromPalette(*palette, index);
         return_val = c;
     }
 
-    void accept(const CRGBPalette256 *palette) {
+    void accept(const CRGBPalette256 *palette) FL_NO_EXCEPT {
         CRGB c = ColorFromPaletteExtended(*palette, index);
         return_val = c;
     }
 
-    void accept(const Gradient::GradientFunction &func) {
+    void accept(const Gradient::GradientFunction &func) FL_NO_EXCEPT {
         CRGB c = func(index);
         return_val = c;
     }
 
-    template <typename T> void accept(const T &obj) {
+    template <typename T> void accept(const T &obj) FL_NO_EXCEPT {
         // This should never be called, but we need to provide a default
         // implementation to avoid compilation errors.
         accept(&obj);
@@ -41,7 +41,7 @@ struct Visitor {
 
 struct VisitorFill {
     VisitorFill(span<const u8> indices, span<CRGB> output)
-        : output(output), indices(indices) {
+        FL_NO_EXCEPT : output(output), indices(indices) {
         // This assert was triggering on the corkscrew example. Not sure why
         // but the corrective action of taking the min was corrective action.
         // FASTLED_ASSERT(
@@ -50,31 +50,31 @@ struct VisitorFill {
         //     "\nSize was" << indices.size() << " and " << output.size());
         n = fl::min(indices.size(), output.size());
     }
-    void accept(const CRGBPalette16 *palette) {
+    void accept(const CRGBPalette16 *palette) FL_NO_EXCEPT {
         for (fl::size i = 0; i < n; ++i) {
             output[i] = ColorFromPalette(*palette, indices[i]);
         }
     }
 
-    void accept(const CRGBPalette32 *palette) {
+    void accept(const CRGBPalette32 *palette) FL_NO_EXCEPT {
         for (fl::size i = 0; i < n; ++i) {
             output[i] = ColorFromPalette(*palette, indices[i]);
         }
     }
 
-    void accept(const CRGBPalette256 *palette) {
+    void accept(const CRGBPalette256 *palette) FL_NO_EXCEPT {
         for (fl::size i = 0; i < n; ++i) {
             output[i] = ColorFromPaletteExtended(*palette, indices[i]);
         }
     }
 
-    void accept(const Gradient::GradientFunction &func) {
+    void accept(const Gradient::GradientFunction &func) FL_NO_EXCEPT {
         for (fl::size i = 0; i < n; ++i) {
             output[i] = func(indices[i]);
         }
     }
 
-    template <typename T> void accept(const T &obj) {
+    template <typename T> void accept(const T &obj) FL_NO_EXCEPT {
         // This should never be called, but we need to provide a default
         // implementation to avoid compilation errors.
         accept(&obj);
@@ -87,26 +87,26 @@ struct VisitorFill {
 
 } // namespace
 
-CRGB Gradient::colorAt(u8 index) const {
+CRGB Gradient::colorAt(u8 index) const FL_NO_EXCEPT {
     Visitor visitor(index);
     mVariant.visit(visitor);
     return visitor.return_val;
 }
 
-template <typename T> Gradient::Gradient(T *palette) { set(palette); }
+template <typename T> Gradient::Gradient(T *palette) FL_NO_EXCEPT { set(palette); }
 
-Gradient::Gradient(const Gradient &other) : mVariant(other.mVariant) {}
+Gradient::Gradient(const Gradient &other) FL_NO_EXCEPT : mVariant(other.mVariant) {}
 
 Gradient::Gradient(Gradient &&other) FL_NO_EXCEPT
     : mVariant(move(other.mVariant)) {}
 
-void Gradient::set(const CRGBPalette32 *palette) { mVariant = palette; }
+void Gradient::set(const CRGBPalette32 *palette) FL_NO_EXCEPT { mVariant = palette; }
 
-void Gradient::set(const CRGBPalette256 *palette) { mVariant = palette; }
+void Gradient::set(const CRGBPalette256 *palette) FL_NO_EXCEPT { mVariant = palette; }
 
-void Gradient::set(const CRGBPalette16 *palette) { mVariant = palette; }
+void Gradient::set(const CRGBPalette16 *palette) FL_NO_EXCEPT { mVariant = palette; }
 
-void Gradient::set(const GradientFunction &func) { mVariant = func; }
+void Gradient::set(const GradientFunction &func) FL_NO_EXCEPT { mVariant = func; }
 
 Gradient &Gradient::operator=(const Gradient &other) FL_NO_EXCEPT {
     if (this != &other) {
@@ -115,30 +115,30 @@ Gradient &Gradient::operator=(const Gradient &other) FL_NO_EXCEPT {
     return *this;
 }
 
-void Gradient::fill(span<const u8> input, span<CRGB> output) const {
+void Gradient::fill(span<const u8> input, span<CRGB> output) const FL_NO_EXCEPT {
     VisitorFill visitor(input, output);
     mVariant.visit(visitor);
 }
 
-CRGB GradientInlined::colorAt(u8 index) const {
+CRGB GradientInlined::colorAt(u8 index) const FL_NO_EXCEPT {
     Visitor visitor(index);
     mVariant.visit(visitor);
     return visitor.return_val;
 }
 void GradientInlined::fill(span<const u8> input,
-                           span<CRGB> output) const {
+                           span<CRGB> output) const FL_NO_EXCEPT {
     VisitorFill visitor(input, output);
     mVariant.visit(visitor);
 }
 
-Gradient::Gradient(const GradientInlined &other) {
+Gradient::Gradient(const GradientInlined &other) FL_NO_EXCEPT {
     // Visitor is cumbersome but guarantees all paths are handled.
     struct Copy {
-        Copy(Gradient &owner) : mOwner(owner) {}
-        void accept(const CRGBPalette16 &palette) { mOwner.set(&palette); }
-        void accept(const CRGBPalette32 &palette) { mOwner.set(&palette); }
-        void accept(const CRGBPalette256 &palette) { mOwner.set(&palette); }
-        void accept(const GradientFunction &func) { mOwner.set(func); }
+        Copy(Gradient &owner) FL_NO_EXCEPT : mOwner(owner) {}
+        void accept(const CRGBPalette16 &palette) FL_NO_EXCEPT { mOwner.set(&palette); }
+        void accept(const CRGBPalette32 &palette) FL_NO_EXCEPT { mOwner.set(&palette); }
+        void accept(const CRGBPalette256 &palette) FL_NO_EXCEPT { mOwner.set(&palette); }
+        void accept(const GradientFunction &func) FL_NO_EXCEPT { mOwner.set(func); }
         Gradient &mOwner;
     };
     Copy copy_to_self(*this);

@@ -45,7 +45,7 @@ public:
 
     virtual void init() FL_NO_EXCEPT override;
     virtual void clearLeds(int nLeds) FL_NO_EXCEPT override;
-    virtual u16 getMaxRefreshRate() const override { return 400; }
+    virtual u16 getMaxRefreshRate() const FL_NO_EXCEPT override { return 400; }
 
 protected:
     virtual void showPixels(PixelController<RGB_ORDER> &pixels) FL_NO_EXCEPT override;
@@ -79,7 +79,7 @@ static inline u8 _pair_from_byte(u8 b, u8 groupIdx) FL_NO_EXCEPT {
 }
 
 template<EOrder RGB_ORDER>
-inline u8 UARTController_ESP8266<RGB_ORDER>::encode2Bits(u8 twoBits) {
+inline u8 UARTController_ESP8266<RGB_ORDER>::encode2Bits(u8 twoBits) FL_NO_EXCEPT {
     // twoBits layout: bit1 (MSB) | bit0 (LSB)
     // Map: 00->0x88, 01->0x8C, 10->0xC8, 11->0xCC
     static const u8 LUT[4] = { 0x88, 0x8C, 0xC8, 0xCC };
@@ -87,7 +87,7 @@ inline u8 UARTController_ESP8266<RGB_ORDER>::encode2Bits(u8 twoBits) {
 }
 
 template<EOrder RGB_ORDER>
-inline void UARTController_ESP8266<RGB_ORDER>::encodeByte(u8 b, u8* out4) {
+inline void UARTController_ESP8266<RGB_ORDER>::encodeByte(u8 b, u8* out4) FL_NO_EXCEPT {
     out4[0] = encode2Bits(_pair_from_byte(b, 0));
     out4[1] = encode2Bits(_pair_from_byte(b, 1));
     out4[2] = encode2Bits(_pair_from_byte(b, 2));
@@ -95,12 +95,12 @@ inline void UARTController_ESP8266<RGB_ORDER>::encodeByte(u8 b, u8* out4) {
 }
 
 template<EOrder RGB_ORDER>
-inline void UARTController_ESP8266<RGB_ORDER>::uartFlush() {
+inline void UARTController_ESP8266<RGB_ORDER>::uartFlush() FL_NO_EXCEPT {
     Serial1.flush(); // blocks until TX buffer drained
 }
 
 template<EOrder RGB_ORDER>
-void UARTController_ESP8266<RGB_ORDER>::beginUartIfNeeded() {
+void UARTController_ESP8266<RGB_ORDER>::beginUartIfNeeded() FL_NO_EXCEPT {
     // Re-init every show() is unnecessary; only if not begun or baud changed.
     static u32 s_currentBaud = 0;
     if (s_currentBaud != mBaud) {
@@ -113,12 +113,12 @@ void UARTController_ESP8266<RGB_ORDER>::beginUartIfNeeded() {
 }
 
 template<EOrder RGB_ORDER>
-void UARTController_ESP8266<RGB_ORDER>::init() {
+void UARTController_ESP8266<RGB_ORDER>::init() FL_NO_EXCEPT {
     beginUartIfNeeded();
 }
 
 template<EOrder RGB_ORDER>
-void UARTController_ESP8266<RGB_ORDER>::clearLeds(int nLeds) {
+void UARTController_ESP8266<RGB_ORDER>::clearLeds(int nLeds) FL_NO_EXCEPT {
     // Send zeros as a quick clear.
     // Build a tiny zero frame for one LED and reuse.
     const int bytesPerLed = 12; // 24 bits -> 12 UART bytes
@@ -135,7 +135,7 @@ void UARTController_ESP8266<RGB_ORDER>::clearLeds(int nLeds) {
 }
 
 template<EOrder RGB_ORDER>
-void UARTController_ESP8266<RGB_ORDER>::showPixels(PixelController<RGB_ORDER> &pixels) {
+void UARTController_ESP8266<RGB_ORDER>::showPixels(PixelController<RGB_ORDER> &pixels) FL_NO_EXCEPT {
     beginUartIfNeeded();
 
     const int n = pixels.mLen;

@@ -45,11 +45,11 @@ struct UCS7604CurrentControl {
 
     /// Construct from single brightness value (all channels)
     explicit UCS7604CurrentControl(u8 brightness)
-        : r(brightness & 0xF), g(brightness & 0xF), b(brightness & 0xF), w(brightness & 0xF) {}
+        FL_NO_EXCEPT : r(brightness & 0xF), g(brightness & 0xF), b(brightness & 0xF), w(brightness & 0xF) {}
 
     /// Construct from individual channel values
     UCS7604CurrentControl(u8 r_, u8 g_, u8 b_, u8 w_)
-        : r(r_ & 0xF), g(g_ & 0xF), b(b_ & 0xF), w(w_ & 0xF) {}
+        FL_NO_EXCEPT : r(r_ & 0xF), g(g_ & 0xF), b(b_ & 0xF), w(w_ & 0xF) {}
 };
 
 /// @brief Build UCS7604 preamble (15 bytes)
@@ -70,7 +70,7 @@ struct UCS7604CurrentControl {
 template <typename OutputIterator>
 void buildUCS7604Preamble(OutputIterator out, UCS7604Mode mode,
                           u8 r_current, u8 g_current,
-                          u8 b_current, u8 w_current) {
+                          u8 b_current, u8 w_current) FL_NO_EXCEPT {
     // Sync pattern (6 bytes)
     *out++ = 0xFF;
     *out++ = 0xFF;
@@ -105,7 +105,7 @@ void buildUCS7604Preamble(OutputIterator out, UCS7604Mode mode,
 /// @param out Output iterator for encoded bytes
 /// @note Writes 3 bytes per pixel (RGB order)
 template <typename InputIterator, typename OutputIterator>
-void encodeUCS7604_8bit_RGB(InputIterator first, InputIterator last, OutputIterator out) {
+void encodeUCS7604_8bit_RGB(InputIterator first, InputIterator last, OutputIterator out) FL_NO_EXCEPT {
     while (first != last) {
         const auto& pixel = *first;
         *out++ = pixel[0];  // R
@@ -123,7 +123,7 @@ void encodeUCS7604_8bit_RGB(InputIterator first, InputIterator last, OutputItera
 /// @param out Output iterator for encoded bytes
 /// @note Writes 4 bytes per pixel (RGBW order)
 template <typename InputIterator, typename OutputIterator>
-void encodeUCS7604_8bit_RGBW(InputIterator first, InputIterator last, OutputIterator out) {
+void encodeUCS7604_8bit_RGBW(InputIterator first, InputIterator last, OutputIterator out) FL_NO_EXCEPT {
     while (first != last) {
         const auto& pixel = *first;
         *out++ = pixel[0];  // R
@@ -214,7 +214,7 @@ void encodeUCS7604_16bit_RGB_wide(PixelIterator& pixels, OutputIterator out) FL_
 /// @note Writes 8 bytes per pixel (R16_hi, R16_lo, G16_hi, G16_lo, B16_hi, B16_lo, W16_hi, W16_lo)
 template <typename InputIterator, typename OutputIterator>
 void encodeUCS7604_16bit_RGBW(InputIterator first, InputIterator last, OutputIterator out,
-                               const Gamma8& gamma) {
+                               const Gamma8& gamma) FL_NO_EXCEPT {
     while (first != last) {
         const auto& pixel = *first;
 

@@ -11,12 +11,13 @@
 #include "fl/math/math.h"
 
 #include "hsv2rgb.h"
+#include "fl/stl/noexcept.h"
 
 
 /// HSV to RGB implementation in raw C, platform independent
-void hsv2rgb_raw_C (const CHSV & hsv, CRGB & rgb);
+void hsv2rgb_raw_C (const CHSV & hsv, CRGB & rgb) FL_NO_EXCEPT;
 /// HSV to RGB implementation in raw C, for the AVR platform only
-void hsv2rgb_raw_avr(const CHSV & hsv, CRGB & rgb);
+void hsv2rgb_raw_avr(const CHSV & hsv, CRGB & rgb) FL_NO_EXCEPT;
 
 #if defined(FL_IS_AVR) && !defined(FL_IS_AVR_ATTINY)
 void hsv2rgb_raw(const CHSV & hsv, CRGB & rgb)
@@ -25,7 +26,7 @@ void hsv2rgb_raw(const CHSV & hsv, CRGB & rgb)
 }
 #else
 void hsv2rgb_raw(const CHSV & hsv, CRGB & rgb)
-{
+FL_NO_EXCEPT {
     hsv2rgb_raw_C( hsv, rgb);
 }
 #endif
@@ -43,14 +44,14 @@ void hsv2rgb_raw(const CHSV & hsv, CRGB & rgb)
 #define HSV_SECTION_3 (0x40)
 
 /// Inline version of hsv2rgb_spectrum which returns a CRGB object.
-CRGB hsv2rgb_spectrum( const CHSV& hsv) {
+CRGB hsv2rgb_spectrum( const CHSV& hsv) FL_NO_EXCEPT {
     CRGB rgb;
     hsv2rgb_spectrum(hsv, rgb);
     return rgb;
 }
 
 void hsv2rgb_raw_C (const CHSV & hsv, CRGB & rgb)
-{
+FL_NO_EXCEPT {
     // Convert hue, saturation and brightness ( HSV/HSB ) to RGB
     // "Dimming" is used on saturation and brightness to make
     // the output more visually linear.
@@ -235,7 +236,7 @@ void hsv2rgb_raw_avr(const CHSV & hsv, CRGB & rgb)
 #endif
 
 void hsv2rgb_spectrum( const CHSV& hsv, CRGB& rgb)
-{
+FL_NO_EXCEPT {
     CHSV hsv2(hsv);
     hsv2.hue = scale8( hsv2.hue, 191);
     hsv2rgb_raw(hsv2, rgb);
@@ -259,14 +260,14 @@ void hsv2rgb_spectrum( const CHSV& hsv, CRGB& rgb)
 #define K85  85
 /// @endcond
 
-CRGB hsv2rgb_rainbow( const CHSV& hsv) {
+CRGB hsv2rgb_rainbow( const CHSV& hsv) FL_NO_EXCEPT {
     CRGB rgb;
     hsv2rgb_rainbow(hsv, rgb);
     return rgb;
 }
 
 void hsv2rgb_rainbow( const CHSV& hsv, CRGB& rgb)
-{
+FL_NO_EXCEPT {
     // Yellow has a higher inherent brightness than
     // any other color; 'pure' yellow is perceived to
     // be 93% as bright as white.  In order to make
@@ -500,7 +501,7 @@ void hsv2rgb_rainbow( const CHSV& hsv, CRGB& rgb)
     rgb.b = b;
 }
 
-void hsv2rgb_fullspectrum( const CHSV& hsv, CRGB& rgb) {
+void hsv2rgb_fullspectrum( const CHSV& hsv, CRGB& rgb) FL_NO_EXCEPT {
   const auto f = [](const int n, const fl::u8 h) -> fl::u32 {
     constexpr int kZero = 0 << 8;
     constexpr int kOne  = 1 << 8;
@@ -519,32 +520,32 @@ void hsv2rgb_fullspectrum( const CHSV& hsv, CRGB& rgb) {
 }
 
 /// Inline version of hsv2rgb_fullspectrum which returns a CRGB object.
-CRGB hsv2rgb_fullspectrum( const CHSV& hsv) {
+CRGB hsv2rgb_fullspectrum( const CHSV& hsv) FL_NO_EXCEPT {
     CRGB rgb;
     hsv2rgb_fullspectrum(hsv, rgb);
     return rgb;
 }
 
 
-void hsv2rgb_raw(const CHSV * phsv, CRGB * prgb, int numLeds) {
+void hsv2rgb_raw(const CHSV * phsv, CRGB * prgb, int numLeds) FL_NO_EXCEPT {
     for(int i = 0; i < numLeds; ++i) {
         hsv2rgb_raw(phsv[i], prgb[i]);
     }
 }
 
-void hsv2rgb_rainbow( const CHSV* phsv, CRGB * prgb, int numLeds) {
+void hsv2rgb_rainbow( const CHSV* phsv, CRGB * prgb, int numLeds) FL_NO_EXCEPT {
     for(int i = 0; i < numLeds; ++i) {
         hsv2rgb_rainbow(phsv[i], prgb[i]);
     }
 }
 
-void hsv2rgb_spectrum( const CHSV* phsv, CRGB * prgb, int numLeds) {
+void hsv2rgb_spectrum( const CHSV* phsv, CRGB * prgb, int numLeds) FL_NO_EXCEPT {
     for(int i = 0; i < numLeds; ++i) {
         hsv2rgb_spectrum(phsv[i], prgb[i]);
     }
 }
 
-void hsv2rgb_fullspectrum( const CHSV* phsv, CRGB * prgb, int numLeds) {
+void hsv2rgb_fullspectrum( const CHSV* phsv, CRGB * prgb, int numLeds) FL_NO_EXCEPT {
     for (int i = 0; i < numLeds; ++i) {
         hsv2rgb_fullspectrum(phsv[i], prgb[i]);
     }
@@ -557,7 +558,7 @@ void hsv2rgb_fullspectrum( const CHSV* phsv, CRGB * prgb, int numLeds) {
 // nearly as fast as the normal HSV-to-RGB conversion.
 // See extended notes in the .h file.
 CHSV rgb2hsv_approximate( const CRGB& rgb)
-{
+FL_NO_EXCEPT {
     // These channels can exceed 255 while saturation is being undone. Keep
     // the intermediate values wide until they are normalized below.
     fl::u16 r = rgb.r;

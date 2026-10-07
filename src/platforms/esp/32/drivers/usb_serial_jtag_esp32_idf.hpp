@@ -54,7 +54,7 @@ namespace fl {
 // UsbSerialJtagEsp32 Implementation
 // ============================================================================
 
-UsbSerialJtagEsp32::UsbSerialJtagEsp32(const UsbSerialJtagConfig& config)
+UsbSerialJtagEsp32::UsbSerialJtagEsp32(const UsbSerialJtagConfig& config) FL_NO_EXCEPT
     : mConfig(config)
     , mBuffered(false)
     , mInstalledDriver(false)

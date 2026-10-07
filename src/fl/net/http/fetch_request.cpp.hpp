@@ -176,7 +176,7 @@ FetchRequest::~FetchRequest() FL_NO_EXCEPT {
     close_socket();
 }
 
-void FetchRequest::update() {
+void FetchRequest::update() FL_NO_EXCEPT {
     switch (mState) {
         case DNS_LOOKUP:
             handle_dns_lookup();
@@ -197,7 +197,7 @@ void FetchRequest::update() {
     }
 }
 
-void FetchRequest::handle_dns_lookup() {
+void FetchRequest::handle_dns_lookup() FL_NO_EXCEPT {
     // Pump async system before DNS to keep server responsive
     fl::task::run(1000);
 
@@ -250,7 +250,7 @@ void FetchRequest::handle_dns_lookup() {
     mStateStartTime = fl::millis();
 }
 
-void FetchRequest::handle_connecting() {
+void FetchRequest::handle_connecting() FL_NO_EXCEPT {
     fd_set write_fds;
     FD_ZERO(&write_fds);
     FD_SET(mSocketFd, &write_fds);
@@ -295,7 +295,7 @@ void FetchRequest::handle_connecting() {
     }
 }
 
-void FetchRequest::handle_sending() {
+void FetchRequest::handle_sending() FL_NO_EXCEPT {
     ssize_t sent = send(mSocketFd,
                         mRequestBuffer.c_str() + mBytesSent,
                         mRequestBuffer.size() - mBytesSent,
@@ -317,7 +317,7 @@ void FetchRequest::handle_sending() {
     }
 }
 
-void FetchRequest::handle_receiving() {
+void FetchRequest::handle_receiving() FL_NO_EXCEPT {
     char buffer[4096];
     ssize_t bytes = recv(mSocketFd, buffer, sizeof(buffer), 0);
 
@@ -342,7 +342,7 @@ void FetchRequest::handle_receiving() {
     }
 }
 
-Response FetchRequest::parse_http_response(const fl::string& raw) {
+Response FetchRequest::parse_http_response(const fl::string& raw) FL_NO_EXCEPT {
     const char* data = raw.c_str();
     const size_t len = raw.size();
 
@@ -413,7 +413,7 @@ Response FetchRequest::parse_http_response(const fl::string& raw) {
     return resp;
 }
 
-void FetchRequest::complete_success(const Response& resp) {
+void FetchRequest::complete_success(const Response& resp) FL_NO_EXCEPT {
     close_socket();
     mState = COMPLETED;
 
@@ -422,7 +422,7 @@ void FetchRequest::complete_success(const Response& resp) {
     }
 }
 
-void FetchRequest::complete_error(const char* message) {
+void FetchRequest::complete_error(const char* message) FL_NO_EXCEPT {
     close_socket();
     mState = FAILED;
 
@@ -431,7 +431,7 @@ void FetchRequest::complete_error(const char* message) {
     }
 }
 
-void FetchRequest::close_socket() {
+void FetchRequest::close_socket() FL_NO_EXCEPT {
     if (mSocketFd != kInvalidSocketHandle) {
         CLOSE_SOCKET(mSocketFd);
         mSocketFd = kInvalidSocketHandle;

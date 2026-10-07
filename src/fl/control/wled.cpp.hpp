@@ -3,29 +3,30 @@
 #include "fl/log/log.h"
 #include "fl/log/log.h"
 #include "fl/stl/compiler_control.h"  // IWYU pragma: keep - FL_UNUSED
+#include "fl/stl/noexcept.h"
 namespace fl {
 
 // WLED Constructor and Stub Implementations
 
-WLED::WLED()
+WLED::WLED() FL_NO_EXCEPT
     : Remote(
         [this]() { return stubRequestSource(); },
         [this](const fl::json& response) { stubResponseSink(response); }
     ) {}
 
-fl::optional<fl::json> WLED::stubRequestSource() {
+fl::optional<fl::json> WLED::stubRequestSource() FL_NO_EXCEPT {
     FL_ERROR("WLED::stubRequestSource: Not implemented - provide a real RequestSource callback");
     return fl::nullopt;
 }
 
-void WLED::stubResponseSink(const fl::json& response) {
+void WLED::stubResponseSink(const fl::json& response) FL_NO_EXCEPT {
     FL_UNUSED(response);  // only consumed by FL_ERROR, a no-op on small platforms
     FL_ERROR("WLED::stubResponseSink: Not implemented - provide a real ResponseSink callback");
 }
 
 // WLED State Management
 
-void WLED::setState(const fl::json& wledState) {
+void WLED::setState(const fl::json& wledState) FL_NO_EXCEPT {
     if (!wledState.has_value()) {
         FL_WARN("WLED: setState called with invalid JSON");
         return;
@@ -404,7 +405,7 @@ void WLED::setState(const fl::json& wledState) {
     }
 }
 
-fl::json WLED::getState() const {
+fl::json WLED::getState() const FL_NO_EXCEPT {
     fl::json state = fl::json::object();
     state.set("on", mWledOn);
     state.set("bri", static_cast<i64>(mWledBri));
@@ -509,7 +510,7 @@ fl::json WLED::getState() const {
     return state;
 }
 
-fl::json WLED::getPlaylistConfig() const {
+fl::json WLED::getPlaylistConfig() const FL_NO_EXCEPT {
     fl::json playlist = fl::json::object();
 
     // Preset IDs
@@ -547,7 +548,7 @@ fl::json WLED::getPlaylistConfig() const {
     return playlist;
 }
 
-const WLEDSegment* WLED::findSegmentById(u8 id) const {
+const WLEDSegment* WLED::findSegmentById(u8 id) const FL_NO_EXCEPT {
     for (const auto& seg : mSegments) {
         if (seg.mId == id) {
             return &seg;

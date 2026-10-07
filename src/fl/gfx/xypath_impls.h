@@ -56,10 +56,10 @@ class XYPathParams {
 class XYPathGenerator {
   public:
     virtual ~XYPathGenerator() FL_NO_EXCEPT = default; // Add virtual destructor for proper cleanup
-    virtual const string name() const = 0;
-    virtual vec2f compute(float alpha) = 0;
+    virtual const string name() const FL_NO_EXCEPT = 0;
+    virtual vec2f compute(float alpha) FL_NO_EXCEPT = 0;
     // No writes when returning false.
-    virtual bool hasDrawBounds(rect<i16> *bounds) {
+    virtual bool hasDrawBounds(rect<i16> *bounds) FL_NO_EXCEPT {
         FASTLED_UNUSED(bounds);
         return false;
     }
@@ -102,16 +102,16 @@ class CatmullRomParams : public XYPathParams {
     CatmullRomParams() FL_NO_EXCEPT {}
 
     // Add a point to the path
-    void addPoint(vec2f p) { points.push_back(p); }
+    void addPoint(vec2f p) FL_NO_EXCEPT { points.push_back(p); }
 
     // Add a point with separate x,y coordinates
-    void addPoint(float x, float y) { points.push_back(vec2f(x, y)); }
+    void addPoint(float x, float y) FL_NO_EXCEPT { points.push_back(vec2f(x, y)); }
 
     // Clear all control points
-    void clear() { points.clear(); }
+    void clear() FL_NO_EXCEPT { points.clear(); }
 
     // Get the number of control points
-    fl::size size() const { return points.size(); }
+    fl::size size() const FL_NO_EXCEPT { return points.size(); }
 
     // Vector of control points
     fl::vector<vec2f> points;
@@ -122,12 +122,12 @@ class CatmullRomParams : public XYPathParams {
 
 class PointPath : public XYPathGenerator {
   public:
-    PointPath(float x, float y);
-    PointPath(vec2f p);
-    vec2f compute(float alpha) override;
-    const string name() const override;
-    void set(float x, float y);
-    void set(vec2f p);
+    PointPath(float x, float y) FL_NO_EXCEPT;
+    PointPath(vec2f p) FL_NO_EXCEPT;
+    vec2f compute(float alpha) FL_NO_EXCEPT override;
+    const string name() const FL_NO_EXCEPT override;
+    void set(float x, float y) FL_NO_EXCEPT;
+    void set(vec2f p) FL_NO_EXCEPT;
 
   private:
     vec2f mPoint;
@@ -135,15 +135,15 @@ class PointPath : public XYPathGenerator {
 
 class LinePath : public XYPathGenerator {
   public:
-    LinePath(const LinePathParamsPtr &params = fl::make_shared<LinePathParams>());
-    LinePath(float x0, float y0, float x1, float y1);
-    vec2f compute(float alpha) override;
-    const string name() const override;
-    void set(float x0, float y0, float x1, float y1);
-    void set(const LinePathParams &p);
+    LinePath(const LinePathParamsPtr &params = fl::make_shared<LinePathParams>()) FL_NO_EXCEPT;
+    LinePath(float x0, float y0, float x1, float y1) FL_NO_EXCEPT;
+    vec2f compute(float alpha) FL_NO_EXCEPT override;
+    const string name() const FL_NO_EXCEPT override;
+    void set(float x0, float y0, float x1, float y1) FL_NO_EXCEPT;
+    void set(const LinePathParams &p) FL_NO_EXCEPT;
 
-    LinePathParams &params();
-    const LinePathParams &params() const;
+    LinePathParams &params() FL_NO_EXCEPT;
+    const LinePathParams &params() const FL_NO_EXCEPT;
 
   private:
     fl::shared_ptr<LinePathParams> mParams;
@@ -152,25 +152,25 @@ class LinePath : public XYPathGenerator {
 class CirclePath : public XYPathGenerator {
   public:
     CirclePath() FL_NO_EXCEPT;
-    vec2f compute(float alpha) override;
-    const string name() const override;
+    vec2f compute(float alpha) FL_NO_EXCEPT override;
+    const string name() const FL_NO_EXCEPT override;
 };
 
 class HeartPath : public XYPathGenerator {
   public:
     HeartPath() FL_NO_EXCEPT;
-    vec2f compute(float alpha) override;
-    const string name() const override;
+    vec2f compute(float alpha) FL_NO_EXCEPT override;
+    const string name() const FL_NO_EXCEPT override;
 };
 
 class ArchimedeanSpiralPath : public XYPathGenerator {
   public:
-    ArchimedeanSpiralPath(u8 turns = 3, float radius = 1.0f);
-    vec2f compute(float alpha) override;
-    const string name() const override;
+    ArchimedeanSpiralPath(u8 turns = 3, float radius = 1.0f) FL_NO_EXCEPT;
+    vec2f compute(float alpha) FL_NO_EXCEPT override;
+    const string name() const FL_NO_EXCEPT override;
 
-    void setTurns(u8 turns);
-    void setRadius(float radius);
+    void setTurns(u8 turns) FL_NO_EXCEPT;
+    void setRadius(float radius) FL_NO_EXCEPT;
 
   private:
     u8 mTurns; // Number of spiral turns
@@ -184,16 +184,16 @@ class RosePath : public XYPathGenerator {
     // For n/d even: produces 2n petals
     // For n and d coprime: produces n petals if n is odd, 2n petals if n is
     // even
-    RosePath(const fl::shared_ptr<RosePathParams> &p = fl::make_shared<RosePathParams>());
-    RosePath(u8 n = 3, u8 d = 1);
-    vec2f compute(float alpha) override;
-    const string name() const override;
+    RosePath(const fl::shared_ptr<RosePathParams> &p = fl::make_shared<RosePathParams>()) FL_NO_EXCEPT;
+    RosePath(u8 n = 3, u8 d = 1) FL_NO_EXCEPT;
+    vec2f compute(float alpha) FL_NO_EXCEPT override;
+    const string name() const FL_NO_EXCEPT override;
 
-    RosePathParams &params();
-    const RosePathParams &params() const;
+    RosePathParams &params() FL_NO_EXCEPT;
+    const RosePathParams &params() const FL_NO_EXCEPT;
 
-    void setN(u8 n);
-    void setD(u8 d);
+    void setN(u8 n) FL_NO_EXCEPT;
+    void setD(u8 d) FL_NO_EXCEPT;
 
   private:
     fl::shared_ptr<RosePathParams> mParams;
@@ -204,12 +204,12 @@ class PhyllotaxisPath : public XYPathGenerator {
     // c is a scaling factor, angle is the divergence angle in degrees (often
     // 137.5° - the golden angle)
     PhyllotaxisPath(
-        const fl::shared_ptr<PhyllotaxisParams> &p = fl::make_shared<PhyllotaxisParams>());
-    vec2f compute(float alpha) override;
-    const string name() const override;
+        const fl::shared_ptr<PhyllotaxisParams> &p = fl::make_shared<PhyllotaxisParams>()) FL_NO_EXCEPT;
+    vec2f compute(float alpha) FL_NO_EXCEPT override;
+    const string name() const FL_NO_EXCEPT override;
 
-    PhyllotaxisParams &params();
-    const PhyllotaxisParams &params() const;
+    PhyllotaxisParams &params() FL_NO_EXCEPT;
+    const PhyllotaxisParams &params() const FL_NO_EXCEPT;
 
   private:
     fl::shared_ptr<PhyllotaxisParams> mParams;
@@ -222,19 +222,19 @@ class GielisCurvePath : public XYPathGenerator {
     // m: symmetry parameter (number of rotational symmetries)
     // n1, n2, n3: shape parameters
     GielisCurvePath(
-        const fl::shared_ptr<GielisCurveParams> &p = fl::make_shared<GielisCurveParams>());
-    vec2f compute(float alpha) override;
-    const string name() const override;
+        const fl::shared_ptr<GielisCurveParams> &p = fl::make_shared<GielisCurveParams>()) FL_NO_EXCEPT;
+    vec2f compute(float alpha) FL_NO_EXCEPT override;
+    const string name() const FL_NO_EXCEPT override;
 
-    GielisCurveParams &params();
-    const GielisCurveParams &params() const;
+    GielisCurveParams &params() FL_NO_EXCEPT;
+    const GielisCurveParams &params() const FL_NO_EXCEPT;
 
-    void setA(float a);
-    void setB(float b);
-    void setM(float m);
-    void setN1(float n1);
-    void setN2(float n2);
-    void setN3(float n3);
+    void setA(float a) FL_NO_EXCEPT;
+    void setB(float b) FL_NO_EXCEPT;
+    void setM(float m) FL_NO_EXCEPT;
+    void setN1(float n1) FL_NO_EXCEPT;
+    void setN2(float n2) FL_NO_EXCEPT;
+    void setN3(float n3) FL_NO_EXCEPT;
 
   private:
     fl::shared_ptr<GielisCurveParams> mParams;
@@ -245,32 +245,32 @@ class GielisCurvePath : public XYPathGenerator {
 /// them.
 class CatmullRomPath : public XYPathGenerator {
   public:
-    CatmullRomPath(const fl::shared_ptr<CatmullRomParams> &p = fl::make_shared<CatmullRomParams>());
+    CatmullRomPath(const fl::shared_ptr<CatmullRomParams> &p = fl::make_shared<CatmullRomParams>()) FL_NO_EXCEPT;
 
     /// Add a point in [0,1]² to the path
-    void addPoint(vec2f p);
+    void addPoint(vec2f p) FL_NO_EXCEPT;
 
     /// Add a point with separate x,y coordinates
-    void addPoint(float x, float y);
+    void addPoint(float x, float y) FL_NO_EXCEPT;
 
     /// Clear all control points
-    void clear();
+    void clear() FL_NO_EXCEPT;
 
     /// Get the number of control points
-    fl::size size() const;
+    fl::size size() const FL_NO_EXCEPT;
 
-    vec2f compute(float alpha) override;
-    const string name() const override;
+    vec2f compute(float alpha) FL_NO_EXCEPT override;
+    const string name() const FL_NO_EXCEPT override;
 
-    CatmullRomParams &params();
-    const CatmullRomParams &params() const;
+    CatmullRomParams &params() FL_NO_EXCEPT;
+    const CatmullRomParams &params() const FL_NO_EXCEPT;
 
   private:
     fl::shared_ptr<CatmullRomParams> mParams;
 
     // Helper function to interpolate between points using Catmull-Rom spline
     vec2f interpolate(const vec2f &p0, const vec2f &p1, const vec2f &p2,
-                      const vec2f &p3, float t) const;
+                      const vec2f &p3, float t) const FL_NO_EXCEPT;
 };
 
 // Smart pointer for CatmullRomPath

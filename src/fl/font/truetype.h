@@ -69,10 +69,10 @@ struct GlyphBitmap {
     GlyphBitmap() FL_NO_EXCEPT : width(0), height(0), xOffset(0), yOffset(0) {}
 
     // Returns true if this bitmap has valid data
-    bool valid() const { return !data.empty() && width > 0 && height > 0; }
+    bool valid() const FL_NO_EXCEPT { return !data.empty() && width > 0 && height > 0; }
 
     // Get pixel value at (x, y) - returns 0 if out of bounds
-    u8 getPixel(i32 x, i32 y) const {
+    u8 getPixel(i32 x, i32 y) const FL_NO_EXCEPT {
         if (data.empty() || x < 0 || y < 0 || x >= width || y >= height) {
             return 0;
         }
@@ -85,42 +85,42 @@ class Font {
 public:
     // Load the default embedded font (Covenant5x5 - 9.9KB, 5x5 pixel font)
     // Returns nullptr if loading fails
-    static fl::shared_ptr<Font> loadDefault();
+    static fl::shared_ptr<Font> loadDefault() FL_NO_EXCEPT;
 
     // Load a font from raw TrueType data (.ttf file contents)
     // Returns nullptr if the font data is invalid
-    static fl::shared_ptr<Font> load(fl::span<const u8> fontData);
+    static fl::shared_ptr<Font> load(fl::span<const u8> fontData) FL_NO_EXCEPT;
 
     // Load a specific font from a TrueType collection (.ttc file)
     // fontIndex: 0-based index of the font in the collection
-    static fl::shared_ptr<Font> load(fl::span<const u8> fontData, i32 fontIndex);
+    static fl::shared_ptr<Font> load(fl::span<const u8> fontData, i32 fontIndex) FL_NO_EXCEPT;
 
     virtual ~Font() FL_NO_EXCEPT = default;
 
     // Get the number of fonts in this file (1 for .ttf, possibly more for .ttc)
-    virtual i32 getNumFonts() const = 0;
+    virtual i32 getNumFonts() const FL_NO_EXCEPT = 0;
 
     // Get overall font metrics (unscaled)
-    virtual FontMetrics getMetrics() const = 0;
+    virtual FontMetrics getMetrics() const FL_NO_EXCEPT = 0;
 
     // Get scale factor to achieve a specific pixel height
-    virtual float getScaleForPixelHeight(float pixelHeight) const = 0;
+    virtual float getScaleForPixelHeight(float pixelHeight) const FL_NO_EXCEPT = 0;
 
     // Get glyph metrics for a unicode codepoint (unscaled)
-    virtual GlyphMetrics getGlyphMetrics(i32 codepoint) const = 0;
+    virtual GlyphMetrics getGlyphMetrics(i32 codepoint) const FL_NO_EXCEPT = 0;
 
     // Get kerning adjustment between two characters (unscaled)
     // Returns the adjustment to add to advance width
-    virtual i32 getKerning(i32 codepoint1, i32 codepoint2) const = 0;
+    virtual i32 getKerning(i32 codepoint1, i32 codepoint2) const FL_NO_EXCEPT = 0;
 
     // Render a single character to a grayscale bitmap
     // Returns an empty GlyphBitmap if the character doesn't exist
-    virtual GlyphBitmap renderGlyph(i32 codepoint, float scale) const = 0;
+    virtual GlyphBitmap renderGlyph(i32 codepoint, float scale) const FL_NO_EXCEPT = 0;
 
     // Render with antialiasing control
     // oversampleX/Y: 1 = no oversampling, 2+ = oversample for smoother edges
     virtual GlyphBitmap renderGlyph(i32 codepoint, float scale,
-                                    i32 oversampleX, i32 oversampleY) const = 0;
+                                    i32 oversampleX, i32 oversampleY) const FL_NO_EXCEPT = 0;
 
 protected:
     Font() FL_NO_EXCEPT = default;
@@ -132,48 +132,48 @@ using FontPtr = fl::shared_ptr<Font>;
 class FontRenderer {
 public:
     // Create a renderer for the given font at the specified pixel height
-    FontRenderer(FontPtr font, float pixelHeight);
+    FontRenderer(FontPtr font, float pixelHeight) FL_NO_EXCEPT;
 
     ~FontRenderer() FL_NO_EXCEPT;
 
     // Check if renderer is valid
-    bool valid() const { return mFont != nullptr; }
+    bool valid() const FL_NO_EXCEPT { return mFont != nullptr; }
 
     // Get the pixel height this renderer was created with
-    float pixelHeight() const { return mPixelHeight; }
+    float pixelHeight() const FL_NO_EXCEPT { return mPixelHeight; }
 
     // Get the scale factor being used
-    float scale() const { return mScale; }
+    float scale() const FL_NO_EXCEPT { return mScale; }
 
     // Get scaled font metrics
     struct ScaledMetrics {
         float ascent;
         float descent;
         float lineGap;
-        float lineHeight() const { return ascent - descent + lineGap; }
+        float lineHeight() const FL_NO_EXCEPT { return ascent - descent + lineGap; }
     };
-    ScaledMetrics getScaledMetrics() const;
+    ScaledMetrics getScaledMetrics() const FL_NO_EXCEPT;
 
     // Render a character at the current size
     // Uses 2x2 oversampling by default for smooth edges on LED displays
-    GlyphBitmap render(i32 codepoint) const;
+    GlyphBitmap render(i32 codepoint) const FL_NO_EXCEPT;
 
     // Render with custom oversampling
-    GlyphBitmap render(i32 codepoint, i32 oversampleX, i32 oversampleY) const;
+    GlyphBitmap render(i32 codepoint, i32 oversampleX, i32 oversampleY) const FL_NO_EXCEPT;
 
     // Render without antialiasing (1x1 oversampling)
-    GlyphBitmap renderNoAA(i32 codepoint) const;
+    GlyphBitmap renderNoAA(i32 codepoint) const FL_NO_EXCEPT;
 
     // Get the advance width for a character (in pixels)
-    float getAdvance(i32 codepoint) const;
+    float getAdvance(i32 codepoint) const FL_NO_EXCEPT;
 
     // Get kerning between two characters (in pixels)
-    float getKerning(i32 codepoint1, i32 codepoint2) const;
+    float getKerning(i32 codepoint1, i32 codepoint2) const FL_NO_EXCEPT;
 
     // Calculate the width of a string (in pixels)
     // Includes kerning between characters
-    float measureString(const char* str) const;
-    float measureString(fl::span<const char> str) const;
+    float measureString(const char* str) const FL_NO_EXCEPT;
+    float measureString(fl::span<const char> str) const FL_NO_EXCEPT;
 
 private:
     FontPtr mFont;

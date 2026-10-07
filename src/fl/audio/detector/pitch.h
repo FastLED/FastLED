@@ -35,11 +35,11 @@ public:
     Pitch() FL_NO_EXCEPT;
     ~Pitch() FL_NO_EXCEPT override;
 
-    void update(shared_ptr<Context> context) override;
-    void fireCallbacks() override;
-    bool needsFFT() const override { return false; }  // Uses PCM data directly
-    const char* getName() const override { return "Pitch"; }
-    void reset() override;
+    void update(shared_ptr<Context> context) FL_NO_EXCEPT override;
+    void fireCallbacks() FL_NO_EXCEPT override;
+    bool needsFFT() const FL_NO_EXCEPT override { return false; }  // Uses PCM data directly
+    const char* getName() const FL_NO_EXCEPT override { return "Pitch"; }
+    void reset() FL_NO_EXCEPT override;
 
     // Callbacks (multiple listeners supported)
     function_list<void(float hz)> onPitch;  // Continuous pitch updates
@@ -48,17 +48,17 @@ public:
     function_list<void(u8 voiced)> onVoiced;  // Fires when voiced/unvoiced state changes
 
     // State access
-    float getPitch() const { return mCurrentPitch; }
-    float getConfidence() const { return mConfidence; }
-    bool isVoiced() const { return mIsVoiced; }  // True if pitched sound detected
-    float getSmoothedPitch() const { return mSmoothedPitch; }
+    float getPitch() const FL_NO_EXCEPT { return mCurrentPitch; }
+    float getConfidence() const FL_NO_EXCEPT { return mConfidence; }
+    bool isVoiced() const FL_NO_EXCEPT { return mIsVoiced; }  // True if pitched sound detected
+    float getSmoothedPitch() const FL_NO_EXCEPT { return mSmoothedPitch; }
 
     // Configuration
-    void setMinFrequency(float hz) { mMinFrequency = hz; updatePeriodRange(); }
-    void setMaxFrequency(float hz) { mMaxFrequency = hz; updatePeriodRange(); }
-    void setConfidenceThreshold(float threshold) { mConfidenceThreshold = threshold; }
-    void setSmoothingFactor(float) { /* OneEuroFilter adapts automatically */ }
-    void setPitchChangeSensitivity(float sensitivity) { mPitchChangeSensitivity = sensitivity; }
+    void setMinFrequency(float hz) FL_NO_EXCEPT { mMinFrequency = hz; updatePeriodRange(); }
+    void setMaxFrequency(float hz) FL_NO_EXCEPT { mMaxFrequency = hz; updatePeriodRange(); }
+    void setConfidenceThreshold(float threshold) FL_NO_EXCEPT { mConfidenceThreshold = threshold; }
+    void setSmoothingFactor(float) FL_NO_EXCEPT { /* OneEuroFilter adapts automatically */ }
+    void setPitchChangeSensitivity(float sensitivity) FL_NO_EXCEPT { mPitchChangeSensitivity = sensitivity; }
 
 private:
     // Current state
@@ -91,14 +91,14 @@ private:
     vector<float> mAutocorrelation;
 
     // Helper methods
-    void updatePeriodRange();
-    float calculateAutocorrelation(const i16* pcm, size numSamples);
-    float periodToFrequency(int period) const;
-    int frequencyToPeriod(float frequency) const;
-    float calculateConfidence(const vector<float>& autocorr, int peakLag) const;
-    int findBestPeakLag(const vector<float>& autocorr) const;
-    void updatePitchSmoothing(float newPitch);
-    bool shouldReportPitchChange(float newPitch) const;
+    void updatePeriodRange() FL_NO_EXCEPT;
+    float calculateAutocorrelation(const i16* pcm, size numSamples) FL_NO_EXCEPT;
+    float periodToFrequency(int period) const FL_NO_EXCEPT;
+    int frequencyToPeriod(float frequency) const FL_NO_EXCEPT;
+    float calculateConfidence(const vector<float>& autocorr, int peakLag) const FL_NO_EXCEPT;
+    int findBestPeakLag(const vector<float>& autocorr) const FL_NO_EXCEPT;
+    void updatePitchSmoothing(float newPitch) FL_NO_EXCEPT;
+    bool shouldReportPitchChange(float newPitch) const FL_NO_EXCEPT;
 };
 
 } // namespace detector

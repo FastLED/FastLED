@@ -12,10 +12,11 @@ are blended by the the max luminance of the components.
 #include "fl/stl/stdint.h"
 #include "fl/math/xymap.h"
 #include "fl/log/log.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
-Blend2d::Blend2d(const XYMap &xymap) : Fx2d(xymap) {
+Blend2d::Blend2d(const XYMap &xymap) FL_NO_EXCEPT : Fx2d(xymap) {
     // Warning, the xyMap will be the final transrformation applied to the
     // frame. If the delegate Fx2d layers have their own transformation then
     // both will be applied.
@@ -23,7 +24,7 @@ Blend2d::Blend2d(const XYMap &xymap) : Fx2d(xymap) {
     mFrameTransform = fl::make_shared<Frame>(mXyMap.getTotal());
 }
 
-string Blend2d::fxName() const {
+string Blend2d::fxName() const FL_NO_EXCEPT {
     fl::string out = "LayeredFx2d(";
     for (size_t i = 0; i < mLayers.size(); ++i) {
         out += mLayers[i].fx->fxName();
@@ -35,7 +36,7 @@ string Blend2d::fxName() const {
     return out;
 }
 
-void Blend2d::add(Fx2dPtr layer, const Params &p) {
+void Blend2d::add(Fx2dPtr layer, const Params &p) FL_NO_EXCEPT {
     if (!layer->getXYMap().isRectangularGrid()) {
         if (!getXYMap().isRectangularGrid()) {
             FL_WARN("Blend2d has a xymap, but so does the Sub layer " << layer->fxName() << ", the sub layer will have it's map replaced with a rectangular map, to avoid double transformation.");
@@ -48,12 +49,12 @@ void Blend2d::add(Fx2dPtr layer, const Params &p) {
     mLayers.push_back(entry);
 }
 
-void Blend2d::add(Fx2d &layer, const Params &p) {
+void Blend2d::add(Fx2d &layer, const Params &p) FL_NO_EXCEPT {
     Fx2dPtr fx = fl::make_shared_no_tracking(layer);
     this->add(fx, p);
 }
 
-void Blend2d::draw(DrawContext context) {
+void Blend2d::draw(DrawContext context) FL_NO_EXCEPT {
     mFrame->clear();
     mFrameTransform->clear();
 
@@ -101,9 +102,9 @@ void Blend2d::draw(DrawContext context) {
                             DrawMode::DRAW_MODE_OVERWRITE);
 }
 
-void Blend2d::clear() { mLayers.clear(); }
+void Blend2d::clear() FL_NO_EXCEPT { mLayers.clear(); }
 
-bool Blend2d::setParams(Fx2dPtr fx, const Params &p) {
+bool Blend2d::setParams(Fx2dPtr fx, const Params &p) FL_NO_EXCEPT {
     u8 blur_amount = p.blur_amount;
     u8 blur_passes = p.blur_passes;
     for (auto &layer : mLayers) {
@@ -118,7 +119,7 @@ bool Blend2d::setParams(Fx2dPtr fx, const Params &p) {
     return false;
 }
 
-bool Blend2d::setParams(Fx2d &fx, const Params &p) {
+bool Blend2d::setParams(Fx2d &fx, const Params &p) FL_NO_EXCEPT {
 
     Fx2dPtr fxPtr = fl::make_shared_no_tracking(fx);
     return setParams(fxPtr, p);

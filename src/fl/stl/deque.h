@@ -191,87 +191,87 @@ public:
         friend class deque;
 
     public:
-        iterator(deque* dq, fl::size index) : mDeque(dq), mIndex(index) {}
+        iterator(deque* dq, fl::size index) FL_NO_EXCEPT : mDeque(dq), mIndex(index) {}
 
-        T& operator*() const {
+        T& operator*() const FL_NO_EXCEPT {
             return (*mDeque)[mIndex];
         }
 
-        T* operator->() const {
+        T* operator->() const FL_NO_EXCEPT {
             return &(*mDeque)[mIndex];
         }
 
-        iterator& operator++() {
+        iterator& operator++() FL_NO_EXCEPT {
             ++mIndex;
             return *this;
         }
 
-        iterator operator++(int) {
+        iterator operator++(int) FL_NO_EXCEPT {
             iterator temp = *this;
             ++mIndex;
             return temp;
         }
 
-        iterator& operator--() {
+        iterator& operator--() FL_NO_EXCEPT {
             --mIndex;
             return *this;
         }
 
-        iterator operator--(int) {
+        iterator operator--(int) FL_NO_EXCEPT {
             iterator temp = *this;
             --mIndex;
             return temp;
         }
 
-        iterator& operator+=(fl::size n) {
+        iterator& operator+=(fl::size n) FL_NO_EXCEPT {
             mIndex += n;
             return *this;
         }
 
-        iterator operator+(fl::size n) const {
+        iterator operator+(fl::size n) const FL_NO_EXCEPT {
             iterator temp = *this;
             return temp += n;
         }
 
-        iterator& operator-=(fl::size n) {
+        iterator& operator-=(fl::size n) FL_NO_EXCEPT {
             mIndex -= n;
             return *this;
         }
 
-        iterator operator-(fl::size n) const {
+        iterator operator-(fl::size n) const FL_NO_EXCEPT {
             iterator temp = *this;
             return temp -= n;
         }
 
-        fl::size operator-(const iterator& other) const {
+        fl::size operator-(const iterator& other) const FL_NO_EXCEPT {
             return mIndex - other.mIndex;
         }
 
-        T& operator[](fl::size n) const {
+        T& operator[](fl::size n) const FL_NO_EXCEPT {
             return (*mDeque)[mIndex + n];
         }
 
-        bool operator==(const iterator& other) const {
+        bool operator==(const iterator& other) const FL_NO_EXCEPT {
             return mDeque == other.mDeque && mIndex == other.mIndex;
         }
 
-        bool operator!=(const iterator& other) const {
+        bool operator!=(const iterator& other) const FL_NO_EXCEPT {
             return !(*this == other);
         }
 
-        bool operator<(const iterator& other) const {
+        bool operator<(const iterator& other) const FL_NO_EXCEPT {
             return mIndex < other.mIndex;
         }
 
-        bool operator<=(const iterator& other) const {
+        bool operator<=(const iterator& other) const FL_NO_EXCEPT {
             return mIndex <= other.mIndex;
         }
 
-        bool operator>(const iterator& other) const {
+        bool operator>(const iterator& other) const FL_NO_EXCEPT {
             return mIndex > other.mIndex;
         }
 
-        bool operator>=(const iterator& other) const {
+        bool operator>=(const iterator& other) const FL_NO_EXCEPT {
             return mIndex >= other.mIndex;
         }
     };
@@ -291,90 +291,90 @@ public:
         friend class deque;
 
     public:
-        const_iterator(const deque* dq, fl::size index) : mDeque(dq), mIndex(index) {}
+        const_iterator(const deque* dq, fl::size index) FL_NO_EXCEPT : mDeque(dq), mIndex(index) {}
 
         // Implicit conversion from iterator to const_iterator
-        const_iterator(const iterator& it) : mDeque(it.mDeque), mIndex(it.mIndex) {}
+        const_iterator(const iterator& it) FL_NO_EXCEPT : mDeque(it.mDeque), mIndex(it.mIndex) {}
 
-        const T& operator*() const {
+        const T& operator*() const FL_NO_EXCEPT {
             return (*mDeque)[mIndex];
         }
 
-        const T* operator->() const {
+        const T* operator->() const FL_NO_EXCEPT {
             return &(*mDeque)[mIndex];
         }
 
-        const_iterator& operator++() {
+        const_iterator& operator++() FL_NO_EXCEPT {
             ++mIndex;
             return *this;
         }
 
-        const_iterator operator++(int) {
+        const_iterator operator++(int) FL_NO_EXCEPT {
             const_iterator temp = *this;
             ++mIndex;
             return temp;
         }
 
-        const_iterator& operator--() {
+        const_iterator& operator--() FL_NO_EXCEPT {
             --mIndex;
             return *this;
         }
 
-        const_iterator operator--(int) {
+        const_iterator operator--(int) FL_NO_EXCEPT {
             const_iterator temp = *this;
             --mIndex;
             return temp;
         }
 
-        const_iterator& operator+=(fl::size n) {
+        const_iterator& operator+=(fl::size n) FL_NO_EXCEPT {
             mIndex += n;
             return *this;
         }
 
-        const_iterator operator+(fl::size n) const {
+        const_iterator operator+(fl::size n) const FL_NO_EXCEPT {
             const_iterator temp = *this;
             return temp += n;
         }
 
-        const_iterator& operator-=(fl::size n) {
+        const_iterator& operator-=(fl::size n) FL_NO_EXCEPT {
             mIndex -= n;
             return *this;
         }
 
-        const_iterator operator-(fl::size n) const {
+        const_iterator operator-(fl::size n) const FL_NO_EXCEPT {
             const_iterator temp = *this;
             return temp -= n;
         }
 
-        fl::size operator-(const const_iterator& other) const {
+        fl::size operator-(const const_iterator& other) const FL_NO_EXCEPT {
             return mIndex - other.mIndex;
         }
 
-        const T& operator[](fl::size n) const {
+        const T& operator[](fl::size n) const FL_NO_EXCEPT {
             return (*mDeque)[mIndex + n];
         }
 
-        bool operator==(const const_iterator& other) const {
+        bool operator==(const const_iterator& other) const FL_NO_EXCEPT {
             return mDeque == other.mDeque && mIndex == other.mIndex;
         }
 
-        bool operator!=(const const_iterator& other) const {
+        bool operator!=(const const_iterator& other) const FL_NO_EXCEPT {
             return !(*this == other);
         }
 
-        bool operator<(const const_iterator& other) const {
+        bool operator<(const const_iterator& other) const FL_NO_EXCEPT {
             return mIndex < other.mIndex;
         }
 
-        bool operator<=(const const_iterator& other) const {
+        bool operator<=(const const_iterator& other) const FL_NO_EXCEPT {
             return mIndex <= other.mIndex;
         }
 
-        bool operator>(const const_iterator& other) const {
+        bool operator>(const const_iterator& other) const FL_NO_EXCEPT {
             return mIndex > other.mIndex;
         }
 
-        bool operator>=(const const_iterator& other) const {
+        bool operator>=(const const_iterator& other) const FL_NO_EXCEPT {
             return mIndex >= other.mIndex;
         }
     };
@@ -387,7 +387,7 @@ public:
 
     explicit deque(memory_resource* resource) FL_NO_EXCEPT : mResource(resource) {}
 
-    explicit deque(fl::size count, const T& value = T()) : deque() {
+    explicit deque(fl::size count, const T& value = T()) FL_NO_EXCEPT : deque() {
         resize(count, value);
     }
 
@@ -399,7 +399,7 @@ public:
         *this = fl::move(other);
     }
 
-    deque(fl::initializer_list<T> init) : deque() {
+    deque(fl::initializer_list<T> init) FL_NO_EXCEPT : deque() {
         for (const auto& value : init) {
             push_back(value);
         }
@@ -452,17 +452,17 @@ public:
     }
 
     // Element access
-    T& operator[](fl::size index) {
+    T& operator[](fl::size index) FL_NO_EXCEPT {
         fl::size c, o; locate(index, c, o);
         return mMap[c][o];
     }
 
-    const T& operator[](fl::size index) const {
+    const T& operator[](fl::size index) const FL_NO_EXCEPT {
         fl::size c, o; locate(index, c, o);
         return mMap[c][o];
     }
 
-    T& at(fl::size index) {
+    T& at(fl::size index) FL_NO_EXCEPT {
         if (index >= mSize) {
             // Bounds error: return front in embedded context (matching the
             // pre-#3270 deque's documented fallback).
@@ -472,7 +472,7 @@ public:
         return mMap[c][o];
     }
 
-    const T& at(fl::size index) const {
+    const T& at(fl::size index) const FL_NO_EXCEPT {
         if (index >= mSize) {
             return front();
         }
@@ -480,20 +480,20 @@ public:
         return mMap[c][o];
     }
 
-    T& front() {
+    T& front() FL_NO_EXCEPT {
         return mMap[mFrontMapIdx][mFrontOffset];
     }
 
-    const T& front() const {
+    const T& front() const FL_NO_EXCEPT {
         return mMap[mFrontMapIdx][mFrontOffset];
     }
 
-    T& back() {
+    T& back() FL_NO_EXCEPT {
         fl::size c, o; locate(mSize - 1, c, o);
         return mMap[c][o];
     }
 
-    const T& back() const {
+    const T& back() const FL_NO_EXCEPT {
         fl::size c, o; locate(mSize - 1, c, o);
         return mMap[c][o];
     }
@@ -520,7 +520,7 @@ public:
     // a chunk-size-quantized value (multiple of kChunkSize). The old
     // vector-style deque reported exact element capacity; chunked deques
     // report whole-chunk capacity. See FastLED #3270 migration plan.
-    fl::size capacity() const {
+    fl::size capacity() const FL_NO_EXCEPT {
         fl::size allocated = 0;
         for (fl::size i = 0; i < mMapCapacity; ++i) {
             if (mMap[i] != nullptr) ++allocated;
@@ -528,7 +528,7 @@ public:
         return allocated * kChunkSize;
     }
 
-    fl::size max_size() const {
+    fl::size max_size() const FL_NO_EXCEPT {
         return static_cast<fl::size>(-1) / sizeof(T);
     }
 
@@ -560,7 +560,7 @@ public:
     // Release chunks that hold no live elements. After return, only the
     // chunks spanning [front .. back] remain allocated. Capacity is
     // quantized to kChunkSize and equals ceil(size / kChunkSize) * kChunkSize.
-    void shrink_to_fit() {
+    void shrink_to_fit() FL_NO_EXCEPT {
         if (mSize == 0) {
             // Release every chunk and the map itself.
             for (fl::size i = 0; i < mMapCapacity; ++i) {
@@ -586,7 +586,7 @@ public:
 
     memory_resource* get_memory_resource() const FL_NO_EXCEPT { return mResource; }
 
-    void clear() {
+    void clear() FL_NO_EXCEPT {
         for (fl::size i = 0; i < mSize; ++i) {
             fl::size c, o; locate(i, c, o);
             mMap[c][o].~T();
@@ -599,7 +599,7 @@ public:
         mFrontOffset = 0;
     }
 
-    void push_back(const T& value) {
+    void push_back(const T& value) FL_NO_EXCEPT {
         ensure_back_room();
         fl::size global = mFrontOffset + mSize;
         fl::size c = mFrontMapIdx + global / kChunkSize;
@@ -608,7 +608,7 @@ public:
         ++mSize;
     }
 
-    void push_back(T&& value) {
+    void push_back(T&& value) FL_NO_EXCEPT {
         ensure_back_room();
         fl::size global = mFrontOffset + mSize;
         fl::size c = mFrontMapIdx + global / kChunkSize;
@@ -617,7 +617,7 @@ public:
         ++mSize;
     }
 
-    void push_front(const T& value) {
+    void push_front(const T& value) FL_NO_EXCEPT {
         ensure_front_room();
         if (mFrontOffset == 0) {
             --mFrontMapIdx;
@@ -629,7 +629,7 @@ public:
         ++mSize;
     }
 
-    void push_front(T&& value) {
+    void push_front(T&& value) FL_NO_EXCEPT {
         ensure_front_room();
         if (mFrontOffset == 0) {
             --mFrontMapIdx;
@@ -641,14 +641,14 @@ public:
         ++mSize;
     }
 
-    void pop_back() {
+    void pop_back() FL_NO_EXCEPT {
         if (mSize == 0) return;
         fl::size c, o; locate(mSize - 1, c, o);
         mMap[c][o].~T();
         --mSize;
     }
 
-    void pop_front() {
+    void pop_front() FL_NO_EXCEPT {
         if (mSize == 0) return;
         mMap[mFrontMapIdx][mFrontOffset].~T();
         ++mFrontOffset;
@@ -659,16 +659,16 @@ public:
         --mSize;
     }
 
-    void resize(fl::size new_size) {
+    void resize(fl::size new_size) FL_NO_EXCEPT {
         resize(new_size, T());
     }
 
-    void resize(fl::size new_size, const T& value) {
+    void resize(fl::size new_size, const T& value) FL_NO_EXCEPT {
         while (mSize < new_size) push_back(value);
         while (mSize > new_size) pop_back();
     }
 
-    void swap(deque& other) {
+    void swap(deque& other) FL_NO_EXCEPT {
         if (this != &other) {
             T** t_map = mMap;
             fl::size t_cap = mMapCapacity;
@@ -702,7 +702,7 @@ public:
     // assignment then pop_back. Requires CopyConstructible + CopyAssignable
     // T, the same contract as std::deque::insert.
 
-    iterator insert(const_iterator pos, const T& value) {
+    iterator insert(const_iterator pos, const T& value) FL_NO_EXCEPT {
         fl::size idx = pos.mIndex;
         if (idx == mSize) {
             push_back(value);
@@ -718,7 +718,7 @@ public:
         return iterator(this, idx);
     }
 
-    iterator insert(const_iterator pos, T&& value) {
+    iterator insert(const_iterator pos, T&& value) FL_NO_EXCEPT {
         fl::size idx = pos.mIndex;
         if (idx == mSize) {
             push_back(fl::move(value));
@@ -734,7 +734,7 @@ public:
         return iterator(this, idx);
     }
 
-    iterator insert(const_iterator pos, fl::size count, const T& value) {
+    iterator insert(const_iterator pos, fl::size count, const T& value) FL_NO_EXCEPT {
         fl::size idx = pos.mIndex;
         if (count == 0) return iterator(this, idx);
         fl::size old_size = mSize;
@@ -756,7 +756,7 @@ public:
         return iterator(this, idx);
     }
 
-    iterator erase(const_iterator pos) {
+    iterator erase(const_iterator pos) FL_NO_EXCEPT {
         if (pos == end()) return end();
         fl::size idx = pos.mIndex;
         for (fl::size i = idx; i + 1 < mSize; ++i) {
@@ -766,7 +766,7 @@ public:
         return iterator(this, idx);
     }
 
-    iterator erase(const_iterator first, const_iterator last) {
+    iterator erase(const_iterator first, const_iterator last) FL_NO_EXCEPT {
         fl::size start_idx = first.mIndex;
         if (first == last) return iterator(this, start_idx);
         fl::size count = last.mIndex - first.mIndex;
@@ -780,7 +780,7 @@ public:
     }
 
     template<typename... Args>
-    iterator emplace(const_iterator pos, Args&&... args) {
+    iterator emplace(const_iterator pos, Args&&... args) FL_NO_EXCEPT {
         fl::size idx = pos.mIndex;
         if (idx == mSize) {
             emplace_back(fl::forward<Args>(args)...);
@@ -797,7 +797,7 @@ public:
     }
 
     template<typename... Args>
-    T& emplace_back(Args&&... args) {
+    T& emplace_back(Args&&... args) FL_NO_EXCEPT {
         ensure_back_room();
         fl::size global = mFrontOffset + mSize;
         fl::size c = mFrontMapIdx + global / kChunkSize;
@@ -808,7 +808,7 @@ public:
     }
 
     template<typename... Args>
-    T& emplace_front(Args&&... args) {
+    T& emplace_front(Args&&... args) FL_NO_EXCEPT {
         ensure_front_room();
         if (mFrontOffset == 0) {
             --mFrontMapIdx;
@@ -821,14 +821,14 @@ public:
         return mMap[mFrontMapIdx][mFrontOffset];
     }
 
-    void assign(fl::size count, const T& value) {
+    void assign(fl::size count, const T& value) FL_NO_EXCEPT {
         clear();
         for (fl::size i = 0; i < count; ++i) {
             push_back(value);
         }
     }
 
-    bool operator==(const deque& other) const {
+    bool operator==(const deque& other) const FL_NO_EXCEPT {
         if (mSize != other.mSize) return false;
         for (fl::size i = 0; i < mSize; ++i) {
             if ((*this)[i] != other[i]) return false;
@@ -838,7 +838,7 @@ public:
 
     bool operator!=(const deque& other) const FL_NO_EXCEPT { return !(*this == other); }
 
-    bool operator<(const deque& other) const {
+    bool operator<(const deque& other) const FL_NO_EXCEPT {
         fl::size min_size = mSize < other.mSize ? mSize : other.mSize;
         for (fl::size i = 0; i < min_size; ++i) {
             if ((*this)[i] < other[i]) return true;

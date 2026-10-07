@@ -18,43 +18,43 @@ class Tile2x2_u8 {
 
   public:
     static void Rasterize(const span<const Tile2x2_u8> &tiles,
-                          XYRasterU8Sparse *output);
+                          XYRasterU8Sparse *output) FL_NO_EXCEPT;
 
     Tile2x2_u8() FL_NO_EXCEPT = default;
-    Tile2x2_u8(const vec2<u16> &origin) : mOrigin(origin) {}
+    Tile2x2_u8(const vec2<u16> &origin) FL_NO_EXCEPT : mOrigin(origin) {}
     Tile2x2_u8(const Tile2x2_u8 &) FL_NO_EXCEPT = default;
     Tile2x2_u8 &operator=(const Tile2x2_u8 &) FL_NO_EXCEPT = default;
     Tile2x2_u8(Tile2x2_u8 &&) FL_NO_EXCEPT = default;
 
-    void scale(u8 scale);
+    void scale(u8 scale) FL_NO_EXCEPT;
 
-    void setOrigin(u16 x, u16 y) { mOrigin = vec2<u16>(x, y); }
+    void setOrigin(u16 x, u16 y) FL_NO_EXCEPT { mOrigin = vec2<u16>(x, y); }
 
-    u8 &operator()(int x, int y) { return at(x, y); }
-    u8 &at(int x, int y) { return mTile[y][x]; }
-    const u8 &at(int x, int y) const { return mTile[y][x]; }
+    u8 &operator()(int x, int y) FL_NO_EXCEPT { return at(x, y); }
+    u8 &at(int x, int y) FL_NO_EXCEPT { return mTile[y][x]; }
+    const u8 &at(int x, int y) const FL_NO_EXCEPT { return mTile[y][x]; }
 
-    u8 &lower_left() { return at(0, 0); }
-    u8 &upper_left() { return at(0, 1); }
-    u8 &lower_right() { return at(1, 0); }
-    u8 &upper_right() { return at(1, 1); }
+    u8 &lower_left() FL_NO_EXCEPT { return at(0, 0); }
+    u8 &upper_left() FL_NO_EXCEPT { return at(0, 1); }
+    u8 &lower_right() FL_NO_EXCEPT { return at(1, 0); }
+    u8 &upper_right() FL_NO_EXCEPT { return at(1, 1); }
 
-    const u8 &lower_left() const { return at(0, 0); }
-    const u8 &upper_left() const { return at(0, 1); }
-    const u8 &lower_right() const { return at(1, 0); }
-    const u8 &upper_right() const { return at(1, 1); }
+    const u8 &lower_left() const FL_NO_EXCEPT { return at(0, 0); }
+    const u8 &upper_left() const FL_NO_EXCEPT { return at(0, 1); }
+    const u8 &lower_right() const FL_NO_EXCEPT { return at(1, 0); }
+    const u8 &upper_right() const FL_NO_EXCEPT { return at(1, 1); }
 
-    u8 maxValue() const;
+    u8 maxValue() const FL_NO_EXCEPT;
 
-    static Tile2x2_u8 MaxTile(const Tile2x2_u8 &a, const Tile2x2_u8 &b);
+    static Tile2x2_u8 MaxTile(const Tile2x2_u8 &a, const Tile2x2_u8 &b) FL_NO_EXCEPT;
 
-    vec2<u16> origin() const { return mOrigin; }
+    vec2<u16> origin() const FL_NO_EXCEPT { return mOrigin; }
 
     /// bounds => [begin_x, end_x) (where end_x is exclusive)
-    rect<u16> bounds() const;
+    rect<u16> bounds() const FL_NO_EXCEPT;
 
     // Draws the subpixel tile to the led array.
-    void draw(const CRGB &color, const XYMap &xymap, fl::span<CRGB> out) const;
+    void draw(const CRGB &color, const XYMap &xymap, fl::span<CRGB> out) const FL_NO_EXCEPT;
 
     // Inlined, yet customizable drawing access. This will only send you pixels
     // that are within the bounds of the XYMap.
@@ -62,7 +62,7 @@ class Tile2x2_u8 {
     // You have an array of Tile2x2_u8 in a draw list and you need to dispatch
     // them fast. Templates will inline completely for max speed.
     template <typename XYVisitor>
-    void draw(const XYMap &xymap, XYVisitor &visitor) const {
+    void draw(const XYMap &xymap, XYVisitor &visitor) const FL_NO_EXCEPT {
         for (u16 x = 0; x < 2; ++x) {
             for (u16 y = 0; y < 2; ++y) {
                 u8 value = at(x, y);
@@ -104,17 +104,17 @@ class Tile2x2_u8_wrap {
     using Data = Entry[2][2];
 
     Tile2x2_u8_wrap() FL_NO_EXCEPT;
-    Tile2x2_u8_wrap(const Tile2x2_u8 &from, u16 width);
-    Tile2x2_u8_wrap(const Tile2x2_u8 &from, u16 width, u16 height);
+    Tile2x2_u8_wrap(const Tile2x2_u8 &from, u16 width) FL_NO_EXCEPT;
+    Tile2x2_u8_wrap(const Tile2x2_u8 &from, u16 width, u16 height) FL_NO_EXCEPT;
 
-    Tile2x2_u8_wrap(const Data& data);
+    Tile2x2_u8_wrap(const Data& data) FL_NO_EXCEPT;
 
     // Returns the absolute position and the alpha.
-    Entry &at(u16 x, u16 y);
-    const Entry &at(u16 x, u16 y) const;
+    Entry &at(u16 x, u16 y) FL_NO_EXCEPT;
+    const Entry &at(u16 x, u16 y) const FL_NO_EXCEPT;
 
     // Interpolates between two wrapped tiles and returns up to 2 interpolated tiles
-    static vector_fixed<Tile2x2_u8_wrap, 2> Interpolate(const Tile2x2_u8_wrap& a, const Tile2x2_u8_wrap& b, float t);
+    static vector_fixed<Tile2x2_u8_wrap, 2> Interpolate(const Tile2x2_u8_wrap& a, const Tile2x2_u8_wrap& b, float t) FL_NO_EXCEPT;
 
   private:
     Data mData = {};

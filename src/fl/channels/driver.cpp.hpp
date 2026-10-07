@@ -10,7 +10,7 @@
 namespace fl {
 
 template<typename Condition>
-bool IChannelDriver::waitForCondition(Condition condition, u32 timeoutMs) {
+bool IChannelDriver::waitForCondition(Condition condition, u32 timeoutMs) FL_NO_EXCEPT {
     const u32 startTime = timeoutMs > 0 ? millis() : 0;
 
     // Tier 1: instant non-blocking check.
@@ -60,7 +60,7 @@ bool IChannelDriver::waitForCondition(Condition condition, u32 timeoutMs) {
     return true;  // Condition met
 }
 
-bool IChannelDriver::waitForReady(u32 timeoutMs) {
+bool IChannelDriver::waitForReady(u32 timeoutMs) FL_NO_EXCEPT {
     // wait until the driver is in a READY state.
     bool ok = waitForCondition([this]() {
         auto state = poll();
@@ -69,7 +69,7 @@ bool IChannelDriver::waitForReady(u32 timeoutMs) {
     return ok;
 }
 
-bool IChannelDriver::waitForReadyOrDraining(u32 timeoutMs) {
+bool IChannelDriver::waitForReadyOrDraining(u32 timeoutMs) FL_NO_EXCEPT {
     // wait until the driver is in a READY or DRAINING state.
     bool ok = waitForCondition([this]() {
         auto state = poll();

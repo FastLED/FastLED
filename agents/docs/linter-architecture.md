@@ -152,9 +152,9 @@ FL_LINT_AB=1 bash lint --cpp                      # A/B parity check vs Python o
 
 ## When to still use Python
 
-As of PR #3293, **all single-file content checkers and cross-file structural checks run in the Rust crate** (`ci/lint_cpp_rs/`). The Python tier is reserved exclusively for the two remaining Tier-4 AST ratchets (across three Python files) that need libclang / clang-query, which the Rust binary cannot model today:
+As of PR #3293, **all single-file content checkers and cross-file structural checks run in the Rust crate** (`ci/lint_cpp_rs/`). The Python tier is reserved exclusively for Tier-4 AST checks that need libclang / clang-query, which the Rust binary cannot model today:
 
-- **AST ratchets only**: `run_noexcept_ast_check` and `run_array_param_ast_check` in `ci/lint_cpp/run_all_checkers.py`, backed by `ci/lint_cpp/noexcept_checker.py`, `ci/tools/check_noexcept.py`, and `ci/tools/check_array_params.py`. These compare AST query output against a checked-in baseline so the violation count can only drop, not grow.
+- **AST checks only**: `run_noexcept_ast_check` and `run_array_param_ast_check` in `ci/lint_cpp/run_all_checkers.py`, backed by `ci/tools/check_noexcept.py` and `ci/tools/check_array_params.py`. Missing `FL_NO_EXCEPT` annotations fail directly, with no grandfathered baseline or baseline-writing option. The array-parameter check retains its separate baseline ratchet. The host inventory includes root source APIs and canonical unity units; platform-specific branches also require target compiler validation.
 
 Everything else — unity-build structure, test aggregation, PCH file shape, `BareLibmChecker`, `BareNoInlineChecker`, `BareSnprintfChecker`, `LegacyLogMacroChecker`, `MacroPrefixChecker`, `PublicSettingsPatternChecker`, `FlNoUnderscoreChecker`, etc. — now lives under `ci/lint_cpp_rs/src/checkers/`.
 

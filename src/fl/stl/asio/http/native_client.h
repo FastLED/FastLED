@@ -19,9 +19,9 @@ namespace fl {
 class NativeHttpClient {
 public:
     // Constructor (Asio-compatible: accepts endpoint)
-    NativeHttpClient(const asio::ip::tcp::endpoint& ep, const ConnectionConfig& config = ConnectionConfig());
+    NativeHttpClient(const asio::ip::tcp::endpoint& ep, const ConnectionConfig& config = ConnectionConfig()) FL_NO_EXCEPT;
     // Legacy constructor (backward compatible)
-    NativeHttpClient(const string& host, u16 port, const ConnectionConfig& config = ConnectionConfig());
+    NativeHttpClient(const string& host, u16 port, const ConnectionConfig& config = ConnectionConfig()) FL_NO_EXCEPT;
     ~NativeHttpClient() FL_NO_EXCEPT;
 
     // Disable copy (socket ownership)
@@ -29,34 +29,34 @@ public:
     NativeHttpClient& operator=(const NativeHttpClient&) FL_NO_EXCEPT = delete;
 
     // Connection management
-    bool connect();           // Initiate connection
-    void disconnect();        // Close connection
-    void close();            // Permanent close (no reconnect)
-    bool isConnected() const;
-    ConnectionState getState() const;
+    bool connect() FL_NO_EXCEPT;           // Initiate connection
+    void disconnect() FL_NO_EXCEPT;        // Close connection
+    void close() FL_NO_EXCEPT;            // Permanent close (no reconnect)
+    bool isConnected() const FL_NO_EXCEPT;
+    ConnectionState getState() const FL_NO_EXCEPT;
 
     // Socket I/O
-    int send(fl::span<const u8> data);
-    int recv(fl::span<u8> buffer);
+    int send(fl::span<const u8> data) FL_NO_EXCEPT;
+    int recv(fl::span<u8> buffer) FL_NO_EXCEPT;
 
     // Update loop (handles reconnection, heartbeat)
-    void update(u32 currentTimeMs);
+    void update(u32 currentTimeMs) FL_NO_EXCEPT;
 
     // Heartbeat
-    bool shouldSendHeartbeat(u32 currentTimeMs) const;
-    void onHeartbeatSent();
-    void onHeartbeatReceived();
+    bool shouldSendHeartbeat(u32 currentTimeMs) const FL_NO_EXCEPT;
+    void onHeartbeatSent() FL_NO_EXCEPT;
+    void onHeartbeatReceived() FL_NO_EXCEPT;
 
     // Reconnection state
-    u32 getReconnectDelayMs() const;
-    u32 getReconnectAttempts() const;
+    u32 getReconnectDelayMs() const FL_NO_EXCEPT;
+    u32 getReconnectAttempts() const FL_NO_EXCEPT;
 
     // Access the endpoint
-    const asio::ip::tcp::endpoint& endpoint() const { return mEndpoint; }
+    const asio::ip::tcp::endpoint& endpoint() const FL_NO_EXCEPT { return mEndpoint; }
 
     // Access the underlying tcp::socket
-    asio::ip::tcp::socket& socket() { return mSocket; }
-    const asio::ip::tcp::socket& socket() const { return mSocket; }
+    asio::ip::tcp::socket& socket() FL_NO_EXCEPT { return mSocket; }
+    const asio::ip::tcp::socket& socket() const FL_NO_EXCEPT { return mSocket; }
 
 private:
     asio::ip::tcp::endpoint mEndpoint;
@@ -64,9 +64,9 @@ private:
     HttpConnection mConnection;
 
     // Platform-specific connection
-    bool platformConnect();
-    void platformDisconnect();
-    bool isSocketConnected() const;
+    bool platformConnect() FL_NO_EXCEPT;
+    void platformDisconnect() FL_NO_EXCEPT;
+    bool isSocketConnected() const FL_NO_EXCEPT;
 };
 
 } // namespace fl

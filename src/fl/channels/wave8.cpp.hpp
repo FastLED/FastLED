@@ -12,6 +12,7 @@
 #include "fl/channels/detail/wave8.h"
 #include "fl/chipsets/led_timing.h"
 #include "fl/stl/isr/memcpy.h"
+#include "fl/stl/noexcept.h"
 
 FL_OPTIMIZATION_LEVEL_O3_BEGIN
 
@@ -24,7 +25,7 @@ namespace fl {
 FL_OPTIMIZE_FUNCTION FL_IRAM
 void wave8Transpose_2(const u8 (&FL_RESTRICT_PARAM lanes)[2],
                       const Wave8BitExpansionLut &lut,
-                      u8 (&FL_RESTRICT_PARAM output)[2 * sizeof(Wave8Byte)]) {
+                      u8 (&FL_RESTRICT_PARAM output)[2 * sizeof(Wave8Byte)]) FL_NO_EXCEPT {
     // Allocate waveform buffers on stack (16 Wave8Bit total: 8 packed bytes per lane × 2 lanes)
     // Each Wave8Byte is 8 bytes (8 Wave8Bit × 1 byte each)
     // Layout: [Lane0_bit7, Lane0_bit6, ..., Lane0_bit0, Lane1_bit7, Lane1_bit6, ..., Lane1_bit0]
@@ -41,7 +42,7 @@ void wave8Transpose_2(const u8 (&FL_RESTRICT_PARAM lanes)[2],
 FL_OPTIMIZE_FUNCTION FL_IRAM
 void wave8Transpose_4(const u8 (&FL_RESTRICT_PARAM lanes)[4],
                       const Wave8BitExpansionLut &lut,
-                      u8 (&FL_RESTRICT_PARAM output)[4 * sizeof(Wave8Byte)]) {
+                      u8 (&FL_RESTRICT_PARAM output)[4 * sizeof(Wave8Byte)]) FL_NO_EXCEPT {
     // Allocate waveform buffers on stack (32 Wave8Bit total: 8 packed bytes per lane × 4 lanes)
     Wave8Byte laneWaveformSymbols[4];
 
@@ -57,7 +58,7 @@ void wave8Transpose_4(const u8 (&FL_RESTRICT_PARAM lanes)[4],
 FL_OPTIMIZE_FUNCTION FL_IRAM
 void wave8Transpose_8(const u8 (&FL_RESTRICT_PARAM lanes)[8],
                       const Wave8BitExpansionLut &lut,
-                      u8 (&FL_RESTRICT_PARAM output)[8 * sizeof(Wave8Byte)]) {
+                      u8 (&FL_RESTRICT_PARAM output)[8 * sizeof(Wave8Byte)]) FL_NO_EXCEPT {
     // Allocate waveform buffers on stack (64 Wave8Bit total: 8 packed bytes per lane × 8 lanes)
     Wave8Byte laneWaveformSymbols[8];
 
@@ -73,7 +74,7 @@ void wave8Transpose_8(const u8 (&FL_RESTRICT_PARAM lanes)[8],
 FL_OPTIMIZE_FUNCTION FL_IRAM
 void wave8Transpose_16(const u8 (&FL_RESTRICT_PARAM lanes)[16],
                        const Wave8BitExpansionLut &lut,
-                       u8 (&FL_RESTRICT_PARAM output)[16 * sizeof(Wave8Byte)]) {
+                       u8 (&FL_RESTRICT_PARAM output)[16 * sizeof(Wave8Byte)]) FL_NO_EXCEPT {
     // Allocate waveform buffers on stack (128 Wave8Bit total: 8 packed bytes per lane × 16 lanes)
     Wave8Byte laneWaveformSymbols[16];
 
@@ -93,7 +94,7 @@ void wave8Transpose_16(const u8 (&FL_RESTRICT_PARAM lanes)[16],
 FL_OPTIMIZE_FUNCTION FL_IRAM
 void wave8Transpose_2(const u8 (&FL_RESTRICT_PARAM lanes)[2],
                       const Wave8ByteExpansionLut &lut,
-                      u8 (&FL_RESTRICT_PARAM output)[2 * sizeof(Wave8Byte)]) {
+                      u8 (&FL_RESTRICT_PARAM output)[2 * sizeof(Wave8Byte)]) FL_NO_EXCEPT {
     Wave8Byte laneWaveformSymbols[2];
     detail::wave8_expand_byte(lanes[0], lut, &laneWaveformSymbols[0]);
     detail::wave8_expand_byte(lanes[1], lut, &laneWaveformSymbols[1]);
@@ -103,7 +104,7 @@ void wave8Transpose_2(const u8 (&FL_RESTRICT_PARAM lanes)[2],
 FL_OPTIMIZE_FUNCTION FL_IRAM
 void wave8Transpose_4(const u8 (&FL_RESTRICT_PARAM lanes)[4],
                       const Wave8ByteExpansionLut &lut,
-                      u8 (&FL_RESTRICT_PARAM output)[4 * sizeof(Wave8Byte)]) {
+                      u8 (&FL_RESTRICT_PARAM output)[4 * sizeof(Wave8Byte)]) FL_NO_EXCEPT {
     Wave8Byte laneWaveformSymbols[4];
     for (int lane = 0; lane < 4; lane++) {
         detail::wave8_expand_byte(lanes[lane], lut, &laneWaveformSymbols[lane]);
@@ -114,7 +115,7 @@ void wave8Transpose_4(const u8 (&FL_RESTRICT_PARAM lanes)[4],
 FL_OPTIMIZE_FUNCTION FL_IRAM
 void wave8Transpose_8(const u8 (&FL_RESTRICT_PARAM lanes)[8],
                       const Wave8ByteExpansionLut &lut,
-                      u8 (&FL_RESTRICT_PARAM output)[8 * sizeof(Wave8Byte)]) {
+                      u8 (&FL_RESTRICT_PARAM output)[8 * sizeof(Wave8Byte)]) FL_NO_EXCEPT {
     Wave8Byte laneWaveformSymbols[8];
     for (int lane = 0; lane < 8; lane++) {
         detail::wave8_expand_byte(lanes[lane], lut, &laneWaveformSymbols[lane]);
@@ -125,7 +126,7 @@ void wave8Transpose_8(const u8 (&FL_RESTRICT_PARAM lanes)[8],
 FL_OPTIMIZE_FUNCTION FL_IRAM
 void wave8Transpose_16(const u8 (&FL_RESTRICT_PARAM lanes)[16],
                        const Wave8ByteExpansionLut &lut,
-                       u8 (&FL_RESTRICT_PARAM output)[16 * sizeof(Wave8Byte)]) {
+                       u8 (&FL_RESTRICT_PARAM output)[16 * sizeof(Wave8Byte)]) FL_NO_EXCEPT {
     Wave8Byte laneWaveformSymbols[16];
     for (int lane = 0; lane < 16; lane++) {
         detail::wave8_expand_byte(lanes[lane], lut, &laneWaveformSymbols[lane]);
@@ -138,7 +139,7 @@ void wave8Transpose_16x2_pipe2(const u8 (&FL_RESTRICT_PARAM lanes_a)[16],
                                const u8 (&FL_RESTRICT_PARAM lanes_b)[16],
                                const Wave8ByteExpansionLut &lut,
                                u8 (&FL_RESTRICT_PARAM output_a)[16 * sizeof(Wave8Byte)],
-                               u8 (&FL_RESTRICT_PARAM output_b)[16 * sizeof(Wave8Byte)]) {
+                               u8 (&FL_RESTRICT_PARAM output_b)[16 * sizeof(Wave8Byte)]) FL_NO_EXCEPT {
     // Expand both positions independently — compiler can interleave the two
     // loops freely because they share no data.
     Wave8Byte laneWaveformsA[16];
@@ -159,7 +160,7 @@ void wave8Transpose_16x2_pipe2(const u8 (&FL_RESTRICT_PARAM lanes_a)[16],
 FL_OPTIMIZE_FUNCTION FL_IRAM
 void wave8Transpose_16_bf1(const u8 (&FL_RESTRICT_PARAM lanes)[16],
                            const Wave8ByteExpansionLut &lut,
-                           u8 (&FL_RESTRICT_PARAM output)[16 * sizeof(Wave8Byte)]) {
+                           u8 (&FL_RESTRICT_PARAM output)[16 * sizeof(Wave8Byte)]) FL_NO_EXCEPT {
     // Extract W0/W1 chipset constants from the lut.
     // byte_lut[0x00].symbols[0] = waveform for input bit 7 == 0 = W0
     // byte_lut[0xFF].symbols[0] = waveform for input bit 7 == 1 = W1
@@ -171,7 +172,7 @@ void wave8Transpose_16_bf1(const u8 (&FL_RESTRICT_PARAM lanes)[16],
 FL_OPTIMIZE_FUNCTION FL_IRAM
 void wave8Transpose_8_bf1(const u8 (&FL_RESTRICT_PARAM lanes)[8],
                           const Wave8ByteExpansionLut &lut,
-                          u8 (&FL_RESTRICT_PARAM output)[8 * sizeof(Wave8Byte)]) {
+                          u8 (&FL_RESTRICT_PARAM output)[8 * sizeof(Wave8Byte)]) FL_NO_EXCEPT {
     const u8 W0 = lut.lut[0x00].symbols[0].data;
     const u8 W1 = lut.lut[0xFF].symbols[0].data;
     detail::wave8_transpose_8_bf1(lanes, W0, W1, output);
@@ -180,7 +181,7 @@ void wave8Transpose_8_bf1(const u8 (&FL_RESTRICT_PARAM lanes)[8],
 FL_OPTIMIZE_FUNCTION FL_IRAM
 void wave8Transpose_4_bf1(const u8 (&FL_RESTRICT_PARAM lanes)[4],
                           const Wave8ByteExpansionLut &lut,
-                          u8 (&FL_RESTRICT_PARAM output)[4 * sizeof(Wave8Byte)]) {
+                          u8 (&FL_RESTRICT_PARAM output)[4 * sizeof(Wave8Byte)]) FL_NO_EXCEPT {
     const u8 W0 = lut.lut[0x00].symbols[0].data;
     const u8 W1 = lut.lut[0xFF].symbols[0].data;
     detail::wave8_transpose_4_bf1(lanes, W0, W1, output);
@@ -189,7 +190,7 @@ void wave8Transpose_4_bf1(const u8 (&FL_RESTRICT_PARAM lanes)[4],
 FL_OPTIMIZE_FUNCTION FL_IRAM
 void wave8Transpose_2_bf1(const u8 (&FL_RESTRICT_PARAM lanes)[2],
                           const Wave8ByteExpansionLut &lut,
-                          u8 (&FL_RESTRICT_PARAM output)[2 * sizeof(Wave8Byte)]) {
+                          u8 (&FL_RESTRICT_PARAM output)[2 * sizeof(Wave8Byte)]) FL_NO_EXCEPT {
     const u8 W0 = lut.lut[0x00].symbols[0].data;
     const u8 W1 = lut.lut[0xFF].symbols[0].data;
     detail::wave8_transpose_2_bf1(lanes, W0, W1, output);
@@ -204,7 +205,7 @@ void wave8Transpose_16x4_bf1_pipe4(const u8 (&FL_RESTRICT_PARAM lanes_a)[16],
                                    u8 (&FL_RESTRICT_PARAM output_a)[16 * sizeof(Wave8Byte)],
                                    u8 (&FL_RESTRICT_PARAM output_b)[16 * sizeof(Wave8Byte)],
                                    u8 (&FL_RESTRICT_PARAM output_c)[16 * sizeof(Wave8Byte)],
-                                   u8 (&FL_RESTRICT_PARAM output_d)[16 * sizeof(Wave8Byte)]) {
+                                   u8 (&FL_RESTRICT_PARAM output_d)[16 * sizeof(Wave8Byte)]) FL_NO_EXCEPT {
     const u8 W0 = lut.lut[0x00].symbols[0].data;
     const u8 W1 = lut.lut[0xFF].symbols[0].data;
     detail::wave8_transpose_16x4_bf1_pipe4(lanes_a, lanes_b, lanes_c, lanes_d,
@@ -221,7 +222,7 @@ void wave8Transpose_16x4_pipe4(const u8 (&FL_RESTRICT_PARAM lanes_a)[16],
                                u8 (&FL_RESTRICT_PARAM output_a)[16 * sizeof(Wave8Byte)],
                                u8 (&FL_RESTRICT_PARAM output_b)[16 * sizeof(Wave8Byte)],
                                u8 (&FL_RESTRICT_PARAM output_c)[16 * sizeof(Wave8Byte)],
-                               u8 (&FL_RESTRICT_PARAM output_d)[16 * sizeof(Wave8Byte)]) {
+                               u8 (&FL_RESTRICT_PARAM output_d)[16 * sizeof(Wave8Byte)]) FL_NO_EXCEPT {
     Wave8Byte laneWaveformsA[16];
     Wave8Byte laneWaveformsB[16];
     Wave8Byte laneWaveformsC[16];
@@ -248,7 +249,7 @@ void wave8Transpose_16x4_pipe4(const u8 (&FL_RESTRICT_PARAM lanes_a)[16],
 // Note: This is not designed to be called from ISR handlers.
 // ============================================================================
 FL_OPTIMIZE_FUNCTION
-Wave8BitExpansionLut buildWave8ExpansionLUT(const ChipsetTiming &timing) {
+Wave8BitExpansionLut buildWave8ExpansionLUT(const ChipsetTiming &timing) FL_NO_EXCEPT {
     Wave8BitExpansionLut lut;
 
     // Step 1: Calculate absolute times from ChipsetTiming format
@@ -323,7 +324,7 @@ void buildWave8ByteExpansionLUT(const Wave8BitExpansionLut &nibble,
     }
 }
 
-Wave8ByteExpansionLut buildWave8ByteExpansionLUT(const Wave8BitExpansionLut &nibble) {
+Wave8ByteExpansionLut buildWave8ByteExpansionLUT(const Wave8BitExpansionLut &nibble) FL_NO_EXCEPT {
     Wave8ByteExpansionLut out;
     buildWave8ByteExpansionLUT(nibble, out);
     return out;
@@ -335,7 +336,7 @@ Wave8ByteExpansionLut buildWave8ByteExpansionLUT(const Wave8BitExpansionLut &nib
 
 FL_OPTIMIZE_FUNCTION
 void wave8Untranspose_2(const u8 (&FL_RESTRICT_PARAM transposed)[2 * sizeof(Wave8Byte)],
-                        u8 (&FL_RESTRICT_PARAM output)[2 * sizeof(Wave8Byte)]) {
+                        u8 (&FL_RESTRICT_PARAM output)[2 * sizeof(Wave8Byte)]) FL_NO_EXCEPT {
     // Reverse the 2-lane transposition
     // Input: 16 bytes of interleaved data (2 bytes per symbol, 8 symbols)
     // Output: 2 Wave8Byte structures (16 bytes total, de-interleaved)
@@ -376,7 +377,7 @@ void wave8Untranspose_2(const u8 (&FL_RESTRICT_PARAM transposed)[2 * sizeof(Wave
 
 FL_OPTIMIZE_FUNCTION
 void wave8Untranspose_4(const u8 (&FL_RESTRICT_PARAM transposed)[4 * sizeof(Wave8Byte)],
-                        u8 (&FL_RESTRICT_PARAM output)[4 * sizeof(Wave8Byte)]) {
+                        u8 (&FL_RESTRICT_PARAM output)[4 * sizeof(Wave8Byte)]) FL_NO_EXCEPT {
     // Reverse the 4-lane transposition
     // Input: 32 bytes of interleaved data (4 bytes per symbol, 8 symbols)
     // Output: 4 Wave8Byte structures (32 bytes total, de-interleaved)
@@ -422,7 +423,7 @@ void wave8Untranspose_4(const u8 (&FL_RESTRICT_PARAM transposed)[4 * sizeof(Wave
 
 FL_OPTIMIZE_FUNCTION
 void wave8Untranspose_8(const u8 (&FL_RESTRICT_PARAM transposed)[8 * sizeof(Wave8Byte)],
-                        u8 (&FL_RESTRICT_PARAM output)[8 * sizeof(Wave8Byte)]) {
+                        u8 (&FL_RESTRICT_PARAM output)[8 * sizeof(Wave8Byte)]) FL_NO_EXCEPT {
     // Reverse the 8-lane transposition
     // Input: 64 bytes of interleaved data (8 bytes per symbol, 8 symbols)
     // Output: 8 Wave8Byte structures (64 bytes total, de-interleaved)
@@ -468,7 +469,7 @@ void wave8Untranspose_8(const u8 (&FL_RESTRICT_PARAM transposed)[8 * sizeof(Wave
 
 FL_OPTIMIZE_FUNCTION
 void wave8Untranspose_16(const u8 (&FL_RESTRICT_PARAM transposed)[16 * sizeof(Wave8Byte)],
-                         u8 (&FL_RESTRICT_PARAM output)[16 * sizeof(Wave8Byte)]) {
+                         u8 (&FL_RESTRICT_PARAM output)[16 * sizeof(Wave8Byte)]) FL_NO_EXCEPT {
     // Reverse the 16-lane transposition
     // Input: 128 bytes of interleaved data (16 bytes per symbol, 8 symbols)
     // Output: 16 Wave8Byte structures (128 bytes total, de-interleaved)

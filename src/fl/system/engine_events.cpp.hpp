@@ -17,11 +17,11 @@ EngineEvents::Listener *gFrameTaskListener = nullptr;
 }
 
 // Explicitly define constructor and destructor
-EngineEvents::EngineEvents() = default;
+EngineEvents::EngineEvents() FL_NO_EXCEPT = default;
 EngineEvents::~EngineEvents() FL_NO_EXCEPT = default;
 
 
-EngineEvents::Listener::Listener() {}
+EngineEvents::Listener::Listener() FL_NO_EXCEPT {}
 
 EngineEvents::Listener::~Listener() FL_NO_EXCEPT {
 #if FASTLED_HAS_ENGINE_EVENTS
@@ -64,13 +64,13 @@ void EngineEvents::onEndFrame() FL_NO_EXCEPT {
 }
 
 #if FASTLED_HAS_ENGINE_EVENTS
-EngineEvents *EngineEvents::getInstance() {
+EngineEvents *EngineEvents::getInstance() FL_NO_EXCEPT {
     return &Singleton<EngineEvents>::instance();
 }
 #endif
 
 #if FASTLED_HAS_ENGINE_EVENTS
-void EngineEvents::_onPlatformPreLoop() {
+void EngineEvents::_onPlatformPreLoop() FL_NO_EXCEPT {
     for (auto &item : mListeners) {
         auto listener = item.listener;
         listener->onPlatformPreLoop();
@@ -81,14 +81,14 @@ void EngineEvents::_onPlatformPreLoop() {
     }
 }
 
-bool EngineEvents::_hasListener(Listener *listener) {
+bool EngineEvents::_hasListener(Listener *listener) FL_NO_EXCEPT {
     auto predicate = [listener](const Pair &pair) {
         return pair.listener == listener;
     };
     return mListeners.find_if(predicate) != mListeners.end();
 }
 
-void EngineEvents::_addListener(Listener *listener, int priority) {
+void EngineEvents::_addListener(Listener *listener, int priority) FL_NO_EXCEPT {
     if (_hasListener(listener)) {
         return;
     }
@@ -104,7 +104,7 @@ void EngineEvents::_addListener(Listener *listener, int priority) {
     mListeners.push_back(pair);
 }
 
-void EngineEvents::_removeListener(Listener *listener) {
+void EngineEvents::_removeListener(Listener *listener) FL_NO_EXCEPT {
     auto predicate = [listener](const Pair &pair) {
         return pair.listener == listener;
     };
@@ -114,7 +114,7 @@ void EngineEvents::_removeListener(Listener *listener) {
     }
 }
 
-void EngineEvents::_onBeginFrame() {
+void EngineEvents::_onBeginFrame() FL_NO_EXCEPT {
     // Make the copy of the listener list to avoid issues with listeners being
     // added or removed during the loop.
     ListenerList copy = mListeners;
@@ -124,7 +124,7 @@ void EngineEvents::_onBeginFrame() {
     }
 }
 
-void EngineEvents::_onEndShowLeds() {
+void EngineEvents::_onEndShowLeds() FL_NO_EXCEPT {
     // Make the copy of the listener list to avoid issues with listeners being
     // added or removed during the loop.
     ListenerList copy = mListeners;
@@ -134,7 +134,7 @@ void EngineEvents::_onEndShowLeds() {
     }
 }
 
-void EngineEvents::_onEndFrame() {
+void EngineEvents::_onEndFrame() FL_NO_EXCEPT {
     // Make the copy of the listener list to avoid issues with listeners being
     // added or removed during the loop.
     ListenerList copy = mListeners;
@@ -144,7 +144,7 @@ void EngineEvents::_onEndFrame() {
     }
 }
 
-void EngineEvents::_onStripAdded(CLEDController *strip, fl::u32 num_leds) {
+void EngineEvents::_onStripAdded(CLEDController *strip, fl::u32 num_leds) FL_NO_EXCEPT {
     // Make the copy of the listener list to avoid issues with listeners being
     // added or removed during the loop.
     ListenerList copy = mListeners;
@@ -155,7 +155,7 @@ void EngineEvents::_onStripAdded(CLEDController *strip, fl::u32 num_leds) {
 }
 
 void EngineEvents::_onCanvasUiSet(CLEDController *strip,
-                                  const ScreenMap &screenmap) {
+                                  const ScreenMap &screenmap) FL_NO_EXCEPT {
     // Make the copy of the listener list to avoid issues with listeners being
     // added or removed during the loop.
     ListenerList copy = mListeners;
@@ -165,7 +165,7 @@ void EngineEvents::_onCanvasUiSet(CLEDController *strip,
     }
 }
 
-void EngineEvents::_onExit() {
+void EngineEvents::_onExit() FL_NO_EXCEPT {
     // Make the copy of the listener list to avoid issues with listeners being
     // added or removed during the loop.
     ListenerList copy = mListeners;

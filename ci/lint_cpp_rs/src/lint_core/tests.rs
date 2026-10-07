@@ -640,6 +640,21 @@ FL_WARN(\"still checked because remote files are always guarded\");\n",
     }
 
     #[test]
+    fn singleton_elision_ignores_annotated_multiline_function_declarations() {
+        let src = "namespace fl {\n\
+                   u8 bilinearInterpolate(u8 v00, u8 v10,\n\
+                       u16 dx, u16 dy) FL_NO_EXCEPT;\n\
+                   u8 otherInterpolate(u8 v00,\n\
+                       u8 dy) noexcept;\n\
+                   static Table global_state;\n\
+                   }\n";
+        let hits = singleton_elision_violations(src);
+        assert_eq!(hits.len(), 1, "function declarations must not become storage");
+        assert_eq!(hits[0].0, 6);
+        assert!(hits[0].1.contains("global_state"));
+    }
+
+    #[test]
     fn singleton_elision_accepts_suffixed_and_prefixed_literals() {
         // Rust's numeric parsers reject BOTH the `0x`/`0b` prefixes and the
         // C++ `u`/`l`/`f` suffixes, so a parse-based triviality test

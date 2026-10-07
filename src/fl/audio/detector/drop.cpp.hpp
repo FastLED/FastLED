@@ -11,7 +11,7 @@ namespace audio {
 namespace detector {
 
 DropDetector::DropDetector()
-    : mPrevRMS(0.0f)
+    FL_NO_EXCEPT : mPrevRMS(0.0f)
     , mPrevBassEnergy(0.0f)
     , mPrevMidEnergy(0.0f)
     , mPrevTrebleEnergy(0.0f)
@@ -27,7 +27,7 @@ DropDetector::DropDetector()
 
 DropDetector::~DropDetector() FL_NO_EXCEPT = default;
 
-void DropDetector::update(shared_ptr<Context> context) {
+void DropDetector::update(shared_ptr<Context> context) FL_NO_EXCEPT {
     if (!context) {
         // Null context - nothing to process
         return;
@@ -79,7 +79,7 @@ void DropDetector::update(shared_ptr<Context> context) {
     mPrevTrebleEnergy = trebleEnergy;
 }
 
-void DropDetector::fireCallbacks() {
+void DropDetector::fireCallbacks() FL_NO_EXCEPT {
     if (mDropDetectedThisFrame) {
         if (onDrop) {
             onDrop();
@@ -94,7 +94,7 @@ void DropDetector::fireCallbacks() {
     }
 }
 
-void DropDetector::reset() {
+void DropDetector::reset() FL_NO_EXCEPT {
     mLastDrop = Drop();
     mPrevRMS = 0.0f;
     mPrevBassEnergy = 0.0f;
@@ -104,7 +104,7 @@ void DropDetector::reset() {
     mBassBaseline = 0.0f;
 }
 
-float DropDetector::getBassEnergy(const fft::Bins& fft) const {
+float DropDetector::getBassEnergy(const fft::Bins& fft) const FL_NO_EXCEPT {
     // Bass = first 25% of bins (sub-bass and bass)
     int endBin = fl::max(1, static_cast<int>(fft.raw().size() / 4));
     float energy = 0.0f;
@@ -116,7 +116,7 @@ float DropDetector::getBassEnergy(const fft::Bins& fft) const {
     return energy / static_cast<float>(endBin);
 }
 
-float DropDetector::getMidEnergy(const fft::Bins& fft) const {
+float DropDetector::getMidEnergy(const fft::Bins& fft) const FL_NO_EXCEPT {
     // Mid = middle 50% of bins (midrange frequencies)
     int startBin = static_cast<int>(fft.raw().size() / 4);
     int endBin = static_cast<int>(fft.raw().size() * 3 / 4);
@@ -131,7 +131,7 @@ float DropDetector::getMidEnergy(const fft::Bins& fft) const {
     return (count > 0) ? energy / static_cast<float>(count) : 0.0f;
 }
 
-float DropDetector::getTrebleEnergy(const fft::Bins& fft) const {
+float DropDetector::getTrebleEnergy(const fft::Bins& fft) const FL_NO_EXCEPT {
     // Treble = top 25% of bins (high frequencies)
     int startBin = static_cast<int>(fft.raw().size() * 3 / 4);
     float energy = 0.0f;
@@ -145,7 +145,7 @@ float DropDetector::getTrebleEnergy(const fft::Bins& fft) const {
     return (count > 0) ? energy / static_cast<float>(count) : 0.0f;
 }
 
-float DropDetector::calculateSpectralNovelty(float bass, float mid, float treble) const {
+float DropDetector::calculateSpectralNovelty(float bass, float mid, float treble) const FL_NO_EXCEPT {
     // Calculate how much the spectrum changed from previous frame
     float bassChange = fl::abs(bass - mPrevBassEnergy);
     float midChange = fl::abs(mid - mPrevMidEnergy);
@@ -158,7 +158,7 @@ float DropDetector::calculateSpectralNovelty(float bass, float mid, float treble
     return fl::min(1.0f, novelty / 2.0f);
 }
 
-float DropDetector::calculateEnergyFlux(float currentRMS) const {
+float DropDetector::calculateEnergyFlux(float currentRMS) const FL_NO_EXCEPT {
     // Calculate how much energy increased from baseline
     if (mEnergyBaseline < 1e-6f) {
         return 0.0f;  // No baseline yet
@@ -171,7 +171,7 @@ float DropDetector::calculateEnergyFlux(float currentRMS) const {
     return fl::max(0.0f, fl::min(1.0f, ratio / 2.0f));
 }
 
-float DropDetector::calculateBassFlux(float currentBass) const {
+float DropDetector::calculateBassFlux(float currentBass) const FL_NO_EXCEPT {
     // Calculate how much bass increased from baseline
     if (mBassBaseline < 1e-6f) {
         return 0.0f;  // No baseline yet
@@ -184,7 +184,7 @@ float DropDetector::calculateBassFlux(float currentBass) const {
     return fl::max(0.0f, fl::min(1.0f, ratio / 2.0f));
 }
 
-float DropDetector::calculateDropImpact(float energyFlux, float bassFlux, float spectralNovelty, float rms) const {
+float DropDetector::calculateDropImpact(float energyFlux, float bassFlux, float spectralNovelty, float rms) const FL_NO_EXCEPT {
     // Drop impact is a weighted combination of:
     // - Energy flux (40%) - sudden energy burst
     // - Bass flux (35%) - bass impact
@@ -201,7 +201,7 @@ float DropDetector::calculateDropImpact(float energyFlux, float bassFlux, float 
     return fl::max(0.0f, fl::min(1.0f, impact));
 }
 
-bool DropDetector::shouldTriggerDrop(float impact, u32 timestamp) const {
+bool DropDetector::shouldTriggerDrop(float impact, u32 timestamp) const FL_NO_EXCEPT {
     // Don't trigger if:
     // 1. Impact below threshold
     if (impact < mImpactThreshold) {
@@ -229,7 +229,7 @@ bool DropDetector::shouldTriggerDrop(float impact, u32 timestamp) const {
     return true;
 }
 
-void DropDetector::updateBaselines(float rms, float bass) {
+void DropDetector::updateBaselines(float rms, float bass) FL_NO_EXCEPT {
     // Exponential moving average with alpha = 0.9 (slow adaptation)
     // This creates a "rolling baseline" of recent energy levels
     const float alpha = 0.9f;

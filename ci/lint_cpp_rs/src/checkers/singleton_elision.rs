@@ -289,9 +289,10 @@ fn scan_namespace_scope_decls(file_content: &FileContent) -> Vec<NamespaceScopeD
             continue;
         }
 
-        // Must NOT look like a function declaration / call: any `(` before
-        // the `;` is the safe cut.
-        if let Some(paren_pos) = code.find('(') {
+        // Must NOT look like a function declaration / call. A closing `)`
+        // also excludes continuation lines such as `u16 dy) FL_NO_EXCEPT;`
+        // whose opening parenthesis was on the previous line (#4773).
+        if let Some(paren_pos) = code.find('(').or_else(|| code.find(')')) {
             if let Some(semi_pos) = code.find(';') {
                 if paren_pos < semi_pos {
                     continue;

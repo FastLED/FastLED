@@ -5,10 +5,11 @@
 #include "fl/gfx/hsv16.h"
 #include "fl/math/math.h"
 #include "fl/gfx/noise/noise.h"
+#include "fl/stl/noexcept.h"
 
 // Forward declarations from src/noise.cpp
-fl::u16 inoise16(fl::u32 x, fl::u32 y, fl::u32 z, fl::u32 t);
-fl::u16 inoise16(fl::u32 x, fl::u32 y, fl::u32 z);
+fl::u16 inoise16(fl::u32 x, fl::u32 y, fl::u32 z, fl::u32 t) FL_NO_EXCEPT;
+fl::u16 inoise16(fl::u32 x, fl::u32 y, fl::u32 z) FL_NO_EXCEPT;
 
 
 
@@ -18,13 +19,13 @@ namespace fl {
 /// Curries in the global NOISE16_EXTENT_MIN/MAX extents for clean, reusable rescaling.
 /// @param raw_value Raw noise value from inoise16()
 /// @return Rescaled value spanning the full 16-bit range (0-65535)
-FASTLED_FORCE_INLINE u16 rescaleNoiseValue16(u16 raw_value) {
+FASTLED_FORCE_INLINE u16 rescaleNoiseValue16(u16 raw_value) FL_NO_EXCEPT {
   return fl::map_range_clamped(raw_value, fl::NOISE16_EXTENT_MIN, fl::NOISE16_EXTENT_MAX,
                                u16(0), u16(65535));
 }
 
 /// Ring noise functions - sample three z-slices for independent component evolution
-HSV16 noiseRingHSV16(float angle, u32 time, float radius) {
+HSV16 noiseRingHSV16(float angle, u32 time, float radius) FL_NO_EXCEPT {
   // Convert angle to cartesian coordinates
   float x = fl::cosf(angle);
   float y = fl::sinf(angle);
@@ -48,7 +49,7 @@ HSV16 noiseRingHSV16(float angle, u32 time, float radius) {
   return HSV16(h, s, v);
 }
 
-CHSV noiseRingHSV8(float angle, u32 time, float radius) {
+CHSV noiseRingHSV8(float angle, u32 time, float radius) FL_NO_EXCEPT {
   fl::HSV16 hsv16 = noiseRingHSV16(angle, time, radius);
 
   // Scale 16-bit components down to 8-bit using bit shift with rounding
@@ -60,7 +61,7 @@ CHSV noiseRingHSV8(float angle, u32 time, float radius) {
   return CHSV(h, s, v);
 }
 
-CRGB noiseRingCRGB(float angle, u32 time, float radius) {
+CRGB noiseRingCRGB(float angle, u32 time, float radius) FL_NO_EXCEPT {
   // Convert angle to cartesian coordinates
   float x = fl::cosf(angle);
   float y = fl::sinf(angle);
@@ -91,7 +92,7 @@ CRGB noiseRingCRGB(float angle, u32 time, float radius) {
 
 
 /// Sphere noise functions - sample three z-slices for independent component evolution
-HSV16 noiseSphereHSV16(float angle, float phi, u32 time, float radius) {
+HSV16 noiseSphereHSV16(float angle, float phi, u32 time, float radius) FL_NO_EXCEPT {
   // Convert spherical coordinates to cartesian
   // angle: azimuth (0 to 2π), phi: polar angle from north pole (0 to π)
   // x = sin(phi) * cos(angle)
@@ -118,7 +119,7 @@ HSV16 noiseSphereHSV16(float angle, float phi, u32 time, float radius) {
   return HSV16(h, s, v);
 }
 
-CHSV noiseSphereHSV8(float angle, float phi, u32 time, float radius) {
+CHSV noiseSphereHSV8(float angle, float phi, u32 time, float radius) FL_NO_EXCEPT {
   HSV16 hsv16 = noiseSphereHSV16(angle, phi, time, radius);
 
   // Scale 16-bit components down to 8-bit using bit shift with rounding
@@ -130,7 +131,7 @@ CHSV noiseSphereHSV8(float angle, float phi, u32 time, float radius) {
   return CHSV(h, s, v);
 }
 
-CRGB noiseSphereCRGB(float angle, float phi, u32 time, float radius) {
+CRGB noiseSphereCRGB(float angle, float phi, u32 time, float radius) FL_NO_EXCEPT {
   // Convert spherical coordinates to cartesian
   // angle: azimuth (0 to 2π), phi: polar angle from north pole (0 to π)
   // x = sin(phi) * cos(angle)
@@ -163,7 +164,7 @@ CRGB noiseSphereCRGB(float angle, float phi, u32 time, float radius) {
 
 
 /// Cylinder noise functions - sample three z-slices for independent component evolution
-HSV16 noiseCylinderHSV16(float angle, float height, u32 time, float radius) {
+HSV16 noiseCylinderHSV16(float angle, float height, u32 time, float radius) FL_NO_EXCEPT {
   // Convert cylindrical coordinates to cartesian
   // angle: azimuth around cylinder (0 to 2π)
   // height: vertical position (used directly)
@@ -193,7 +194,7 @@ HSV16 noiseCylinderHSV16(float angle, float height, u32 time, float radius) {
   return HSV16(h, s, v);
 }
 
-CHSV noiseCylinderHSV8(float angle, float height, u32 time, float radius) {
+CHSV noiseCylinderHSV8(float angle, float height, u32 time, float radius) FL_NO_EXCEPT {
   HSV16 hsv16 = noiseCylinderHSV16(angle, height, time, radius);
 
   // Scale 16-bit components down to 8-bit using bit shift with rounding
@@ -205,7 +206,7 @@ CHSV noiseCylinderHSV8(float angle, float height, u32 time, float radius) {
   return CHSV(h, s, v);
 }
 
-CRGB noiseCylinderCRGB(float angle, float height, u32 time, float radius) {
+CRGB noiseCylinderCRGB(float angle, float height, u32 time, float radius) FL_NO_EXCEPT {
   // Convert cylindrical coordinates to cartesian
   // angle: azimuth around cylinder (0 to 2π)
   // height: vertical position (used directly)

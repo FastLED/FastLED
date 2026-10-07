@@ -53,26 +53,26 @@ struct Key {
     Key() FL_NO_EXCEPT : rootNote(0), isMinor(false), confidence(0.0f), timestamp(0), duration(0) {}
 
     Key(u8 root, bool minor, float conf, u32 time)
-        : rootNote(root), isMinor(minor), confidence(conf), timestamp(time), duration(0) {}
+        FL_NO_EXCEPT : rootNote(root), isMinor(minor), confidence(conf), timestamp(time), duration(0) {}
 
     // Get key name (e.g., "C", "F#", "Bb")
-    const char* getRootName() const;
+    const char* getRootName() const FL_NO_EXCEPT;
 
     // Get quality name ("maj" or "min")
-    const char* getQuality() const { return isMinor ? "min" : "maj"; }
+    const char* getQuality() const FL_NO_EXCEPT { return isMinor ? "min" : "maj"; }
 
     // Get full key name (e.g., "C maj", "F# min")
-    void getKeyName(char* buffer, size_t bufferSize) const;
+    void getKeyName(char* buffer, size_t bufferSize) const FL_NO_EXCEPT;
 
     // Check if key is valid
-    bool isValid() const { return confidence > 0.0f; }
+    bool isValid() const FL_NO_EXCEPT { return confidence > 0.0f; }
 
     // Compare keys
-    bool operator==(const Key& other) const {
+    bool operator==(const Key& other) const FL_NO_EXCEPT {
         return rootNote == other.rootNote && isMinor == other.isMinor;
     }
 
-    bool operator!=(const Key& other) const {
+    bool operator!=(const Key& other) const FL_NO_EXCEPT {
         return !(*this == other);
     }
 };
@@ -84,11 +84,11 @@ public:
     ~KeyDetector() FL_NO_EXCEPT override;
 
     // Detector interface
-    void update(shared_ptr<Context> context) override;
-    void fireCallbacks() override;
-    bool needsFFT() const override { return true; }
-    const char* getName() const override { return "KeyDetector"; }
-    void reset() override;
+    void update(shared_ptr<Context> context) FL_NO_EXCEPT override;
+    void fireCallbacks() FL_NO_EXCEPT override;
+    bool needsFFT() const FL_NO_EXCEPT override { return true; }
+    const char* getName() const FL_NO_EXCEPT override { return "KeyDetector"; }
+    void reset() FL_NO_EXCEPT override;
 
     // Event callbacks (multiple listeners supported)
     function_list<void(const Key& key)> onKey;           // Every frame with current key
@@ -96,13 +96,13 @@ public:
     function_list<void()> onKeyEnd;                  // When key ends (confidence drops)
 
     // State access
-    const Key& getCurrentKey() const { return mCurrentKey; }
-    bool hasKey() const { return mCurrentKey.isValid(); }
+    const Key& getCurrentKey() const FL_NO_EXCEPT { return mCurrentKey; }
+    bool hasKey() const FL_NO_EXCEPT { return mCurrentKey.isValid(); }
 
     // Configuration
-    void setConfidenceThreshold(float threshold) { mConfidenceThreshold = threshold; }
-    void setMinDuration(u32 ms) { mMinKeyDuration = ms; }
-    void setAveragingFrames(int frames) { mAveragingFrames = frames; }
+    void setConfidenceThreshold(float threshold) FL_NO_EXCEPT { mConfidenceThreshold = threshold; }
+    void setMinDuration(u32 ms) FL_NO_EXCEPT { mMinKeyDuration = ms; }
+    void setAveragingFrames(int frames) FL_NO_EXCEPT { mAveragingFrames = frames; }
 
 private:
     // Current state
@@ -134,13 +134,13 @@ private:
     shared_ptr<const fft::Bins> mRetainedFFT;
 
     // Helper methods
-    void initializeProfileStats();  // Pre-compute profile statistics once
-    void extractChroma(const fft::Bins& fft, float* chroma);
-    void normalizeChroma(float* chroma);
-    void updateChromaHistory(const float* chroma);
-    void getAveragedChroma(float* chroma);
-    Key detectKey(const float* chroma, u32 timestamp);
-    float correlateWithProfile(const float* chroma, const float* profile, int rootNote);
+    void initializeProfileStats() FL_NO_EXCEPT;  // Pre-compute profile statistics once
+    void extractChroma(const fft::Bins& fft, float* chroma) FL_NO_EXCEPT;
+    void normalizeChroma(float* chroma) FL_NO_EXCEPT;
+    void updateChromaHistory(const float* chroma) FL_NO_EXCEPT;
+    void getAveragedChroma(float* chroma) FL_NO_EXCEPT;
+    Key detectKey(const float* chroma, u32 timestamp) FL_NO_EXCEPT;
+    float correlateWithProfile(const float* chroma, const float* profile, int rootNote) FL_NO_EXCEPT;
 
     // Pending callback flags
     bool mFireKeyChange = false;

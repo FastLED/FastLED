@@ -2,6 +2,7 @@
 /// @brief UCS7604 chipset global state
 
 #include "fl/chipsets/ucs7604.h"
+#include "fl/stl/noexcept.h"
 
 // Define FL_UCS7604_BRIGHTNESS if not already defined
 #ifndef FL_UCS7604_BRIGHTNESS
@@ -18,11 +19,11 @@ namespace detail {
     static CurrentControl g_current(FL_UCS7604_BRIGHTNESS);
 }  // namespace detail
 
-void set_brightness(CurrentControl current) {
+void set_brightness(CurrentControl current) FL_NO_EXCEPT {
     detail::g_current = current;
 }
 
-CurrentControl brightness() {
+CurrentControl brightness() FL_NO_EXCEPT {
     return detail::g_current;
 }
 

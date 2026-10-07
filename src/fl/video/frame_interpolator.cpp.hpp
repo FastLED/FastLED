@@ -7,6 +7,7 @@
 
 #include "fl/math/math.h"
 #include "fl/math/math.h"
+#include "fl/stl/noexcept.h"
 
 #define DBG FL_DBG
 
@@ -14,17 +15,17 @@ namespace fl {
 namespace video {
 
 FrameInterpolator::FrameInterpolator(size_t nframes, float fps)
-    : mFrameTracker(fps) {
+    FL_NO_EXCEPT : mFrameTracker(fps) {
     size_t capacity = fl::max(1, nframes);
     mFrames.reserve(capacity);
 }
 
-bool FrameInterpolator::draw(fl::u32 now, Frame *dst) {
+bool FrameInterpolator::draw(fl::u32 now, Frame *dst) FL_NO_EXCEPT {
     bool ok = draw(now, dst->rgb());
     return ok;
 }
 
-bool FrameInterpolator::draw(fl::u32 now, fl::span<CRGB> leds) {
+bool FrameInterpolator::draw(fl::u32 now, fl::span<CRGB> leds) FL_NO_EXCEPT {
     fl::u32 frameNumber, nextFrameNumber;
     u8 amountOfNextFrame;
     // DBG("now: " << now);

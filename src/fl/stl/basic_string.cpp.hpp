@@ -30,7 +30,7 @@ string_view::string_view(const basic_string& str) FL_NO_EXCEPT
 
 // ======= ACCESSORS =======
 
-const char* basic_string::c_str() const {
+const char* basic_string::c_str() const FL_NO_EXCEPT {
     if (mStorage.is<ConstView>()) {
         const ConstView& view = mStorage.get<ConstView>();
         if (view.data && view.length > 0 && view.data[view.length] != '\0') {
@@ -40,7 +40,7 @@ const char* basic_string::c_str() const {
     return constData();
 }
 
-char* basic_string::c_str_mutable() {
+char* basic_string::c_str_mutable() FL_NO_EXCEPT {
     // Inline mode — already mutable
     if (mStorage.empty()) {
         return inlineBufferPtr();
@@ -48,7 +48,7 @@ char* basic_string::c_str_mutable() {
     struct Visitor {
         basic_string* self;
         char* result;
-        void accept(NotNullStringHolderPtr& heap) {
+        void accept(NotNullStringHolderPtr& heap) FL_NO_EXCEPT {
             if (heap.get().use_count() > 1) {
                 // COW: detach from shared data before returning mutable pointer
                 self->mStorage = NotNullStringHolderPtr(
@@ -58,12 +58,12 @@ char* basic_string::c_str_mutable() {
                 result = heap->data();
             }
         }
-        void accept(ConstLiteral&) {
+        void accept(ConstLiteral&) FL_NO_EXCEPT {
             self->materialize();
             result = self->hasHeapData() ? self->heapData()->data()
                                          : self->inlineBufferPtr();
         }
-        void accept(ConstView&) {
+        void accept(ConstView&) FL_NO_EXCEPT {
             self->materialize();
             result = self->hasHeapData() ? self->heapData()->data()
                                          : self->inlineBufferPtr();
@@ -74,7 +74,7 @@ char* basic_string::c_str_mutable() {
     return v.result;
 }
 
-fl::size basic_string::capacity() const {
+fl::size basic_string::capacity() const FL_NO_EXCEPT {
     if (hasHeapData()) {
         return heapData()->capacity();
     } else if (isNonOwning()) {
@@ -85,14 +85,14 @@ fl::size basic_string::capacity() const {
 
 // ======= ELEMENT ACCESS =======
 
-char basic_string::operator[](fl::size index) const {
+char basic_string::operator[](fl::size index) const FL_NO_EXCEPT {
     if (index >= mLength) {
         return '\0';
     }
     return c_str()[index];
 }
 
-char& basic_string::operator[](fl::size index) {
+char& basic_string::operator[](fl::size index) FL_NO_EXCEPT {
     static char dummy = '\0';
     if (index >= mLength) {
         dummy = '\0';
@@ -101,7 +101,7 @@ char& basic_string::operator[](fl::size index) {
     return c_str_mutable()[index];
 }
 
-char& basic_string::at(fl::size pos) {
+char& basic_string::at(fl::size pos) FL_NO_EXCEPT {
     static char dummy = '\0';
     if (pos >= mLength) {
         dummy = '\0';
@@ -110,7 +110,7 @@ char& basic_string::at(fl::size pos) {
     return c_str_mutable()[pos];
 }
 
-const char& basic_string::at(fl::size pos) const {
+const char& basic_string::at(fl::size pos) const FL_NO_EXCEPT {
     static char dummy = '\0';
     if (pos >= mLength) {
         dummy = '\0';
@@ -119,36 +119,36 @@ const char& basic_string::at(fl::size pos) const {
     return c_str()[pos];
 }
 
-char basic_string::front() const {
+char basic_string::front() const FL_NO_EXCEPT {
     if (empty()) return '\0';
     return c_str()[0];
 }
 
-char basic_string::back() const {
+char basic_string::back() const FL_NO_EXCEPT {
     if (empty()) return '\0';
     return c_str()[mLength - 1];
 }
 
-char basic_string::charAt(fl::size index) const {
+char basic_string::charAt(fl::size index) const FL_NO_EXCEPT {
     if (index >= mLength) return '\0';
     return c_str()[index];
 }
 
 // ======= COMPARISON OPERATORS =======
 
-bool basic_string::operator==(const basic_string& other) const { return fl::strcmp(c_str(), other.c_str()) == 0; }
-bool basic_string::operator!=(const basic_string& other) const { return fl::strcmp(c_str(), other.c_str()) != 0; }
-bool basic_string::operator<(const basic_string& other) const { return fl::strcmp(c_str(), other.c_str()) < 0; }
-bool basic_string::operator>(const basic_string& other) const { return fl::strcmp(c_str(), other.c_str()) > 0; }
-bool basic_string::operator<=(const basic_string& other) const { return fl::strcmp(c_str(), other.c_str()) <= 0; }
-bool basic_string::operator>=(const basic_string& other) const { return fl::strcmp(c_str(), other.c_str()) >= 0; }
+bool basic_string::operator==(const basic_string& other) const FL_NO_EXCEPT { return fl::strcmp(c_str(), other.c_str()) == 0; }
+bool basic_string::operator!=(const basic_string& other) const FL_NO_EXCEPT { return fl::strcmp(c_str(), other.c_str()) != 0; }
+bool basic_string::operator<(const basic_string& other) const FL_NO_EXCEPT { return fl::strcmp(c_str(), other.c_str()) < 0; }
+bool basic_string::operator>(const basic_string& other) const FL_NO_EXCEPT { return fl::strcmp(c_str(), other.c_str()) > 0; }
+bool basic_string::operator<=(const basic_string& other) const FL_NO_EXCEPT { return fl::strcmp(c_str(), other.c_str()) <= 0; }
+bool basic_string::operator>=(const basic_string& other) const FL_NO_EXCEPT { return fl::strcmp(c_str(), other.c_str()) >= 0; }
 
-bool basic_string::operator==(const char* other) const { return fl::strcmp(c_str(), other ? other : "") == 0; }
-bool basic_string::operator!=(const char* other) const { return fl::strcmp(c_str(), other ? other : "") != 0; }
+bool basic_string::operator==(const char* other) const FL_NO_EXCEPT { return fl::strcmp(c_str(), other ? other : "") == 0; }
+bool basic_string::operator!=(const char* other) const FL_NO_EXCEPT { return fl::strcmp(c_str(), other ? other : "") != 0; }
 
 // ======= HELPER METHODS =======
 
-const char* basic_string::constData() const {
+const char* basic_string::constData() const FL_NO_EXCEPT {
     if (isInline()) {
         return inlineBufferPtr();
     } else if (mStorage.is<NotNullStringHolderPtr>()) {
@@ -161,7 +161,7 @@ const char* basic_string::constData() const {
     return "";
 }
 
-void basic_string::materialize() {
+void basic_string::materialize() FL_NO_EXCEPT {
     if (mStorage.is<ConstLiteral>()) {
         const char* data = mStorage.get<ConstLiteral>().data;
         if (!data) {
@@ -198,14 +198,14 @@ void basic_string::materialize() {
     }
 }
 
-NotNullStringHolderPtr& basic_string::heapData() {
+NotNullStringHolderPtr& basic_string::heapData() FL_NO_EXCEPT {
     if (!mStorage.is<NotNullStringHolderPtr>()) {
         mStorage = NotNullStringHolderPtr(fl::make_shared<StringHolder>(0));
     }
     return mStorage.get<NotNullStringHolderPtr>();
 }
 
-const NotNullStringHolderPtr& basic_string::heapData() const {
+const NotNullStringHolderPtr& basic_string::heapData() const FL_NO_EXCEPT {
     return mStorage.get<NotNullStringHolderPtr>();
 }
 
@@ -216,17 +216,17 @@ const NotNullStringHolderPtr& basic_string::heapData() const {
 // did, and dropping the verbose static_cast<void*> intermediate from
 // write(u8*) — shrinks each call site by a few bytes (#3122 B5 /
 // #2886 Stage 5).
-fl::size basic_string::write(const fl::u8* data, fl::size n) {
+fl::size basic_string::write(const fl::u8* data, fl::size n) FL_NO_EXCEPT {
     return write(fl::bit_cast_ptr<const char>(data), n);
 }
 
-fl::size basic_string::write(char c) { return write(&c, 1); }
+fl::size basic_string::write(char c) FL_NO_EXCEPT { return write(&c, 1); }
 
-fl::size basic_string::write(fl::u8 c) {
+fl::size basic_string::write(fl::u8 c) FL_NO_EXCEPT {
     return write(static_cast<char>(c));
 }
 
-fl::size basic_string::write(const char* str, fl::size n) {
+fl::size basic_string::write(const char* str, fl::size n) FL_NO_EXCEPT {
     fl::size newLen = mLength + n;
 
     // Handle non-owning storage
@@ -307,19 +307,19 @@ fl::size basic_string::write(const char* str, fl::size n) {
     return mLength;
 }
 
-fl::size basic_string::write(const fl::u16& n) {
+fl::size basic_string::write(const fl::u16& n) FL_NO_EXCEPT {
     char buf[64] = {0};
     int len = fl::utoa32(static_cast<fl::u32>(n), buf, 10);
     return write(buf, len);
 }
 
-fl::size basic_string::write(const fl::u32& val) {
+fl::size basic_string::write(const fl::u32& val) FL_NO_EXCEPT {
     char buf[64] = {0};
     int len = fl::utoa32(val, buf, 10);
     return write(buf, len);
 }
 
-fl::size basic_string::write(const u64& val) {
+fl::size basic_string::write(const u64& val) FL_NO_EXCEPT {
     char buf[64] = {0};
 #if FL_PLATFORM_HAS_LARGE_MEMORY
     int len = fl::utoa64(val, buf, 10);
@@ -334,7 +334,7 @@ fl::size basic_string::write(const u64& val) {
     return write(buf, len);
 }
 
-fl::size basic_string::write(const i64& val) {
+fl::size basic_string::write(const i64& val) FL_NO_EXCEPT {
     char buf[64] = {0};
 #if FL_PLATFORM_HAS_LARGE_MEMORY
     int len = fl::itoa64(val, buf, 10);
@@ -351,13 +351,13 @@ fl::size basic_string::write(const i64& val) {
     return write(buf, len);
 }
 
-fl::size basic_string::write(const fl::i32& val) {
+fl::size basic_string::write(const fl::i32& val) FL_NO_EXCEPT {
     char buf[64] = {0};
     int len = fl::itoa(val, buf, 10);
     return write(buf, len);
 }
 
-fl::size basic_string::write(const fl::i8 val) {
+fl::size basic_string::write(const fl::i8 val) FL_NO_EXCEPT {
     char buf[64] = {0};
     int len = fl::itoa(static_cast<fl::i32>(val), buf, 10);
     return write(buf, len);
@@ -365,7 +365,7 @@ fl::size basic_string::write(const fl::i8 val) {
 
 // ======= COPY =======
 
-void basic_string::copy(const char* str) {
+void basic_string::copy(const char* str) FL_NO_EXCEPT {
     fl::size len = fl::strlen(str);
     mLength = len;
     if (len + 1 <= mInlineCapacity) {
@@ -382,7 +382,7 @@ void basic_string::copy(const char* str) {
     }
 }
 
-void basic_string::copy(const char* str, fl::size len) {
+void basic_string::copy(const char* str, fl::size len) FL_NO_EXCEPT {
     mLength = len;
     if (len + 1 <= mInlineCapacity) {
         if (!isInline()) {
@@ -399,7 +399,7 @@ void basic_string::copy(const char* str, fl::size len) {
     }
 }
 
-void basic_string::copy(const basic_string& other) {
+void basic_string::copy(const basic_string& other) FL_NO_EXCEPT {
     fl::size len = other.size();
     if (other.hasHeapData()) {
         // Share the heap pointer
@@ -418,7 +418,7 @@ void basic_string::copy(const basic_string& other) {
     mLength = len;
 }
 
-fl::size basic_string::copy(char* dest, fl::size count, fl::size pos) const {
+fl::size basic_string::copy(char* dest, fl::size count, fl::size pos) const FL_NO_EXCEPT {
     if (!dest) return 0;
     if (pos >= mLength) return 0;
     fl::size actualCount = count;
@@ -433,7 +433,7 @@ fl::size basic_string::copy(char* dest, fl::size count, fl::size pos) const {
 
 // ======= ASSIGN =======
 
-void basic_string::assign(const char* str, fl::size len) {
+void basic_string::assign(const char* str, fl::size len) FL_NO_EXCEPT {
     mLength = len;
     if (len + 1 <= mInlineCapacity) {
         if (!isInline()) {
@@ -446,12 +446,12 @@ void basic_string::assign(const char* str, fl::size len) {
     }
 }
 
-basic_string& basic_string::assign(const basic_string& str) {
+basic_string& basic_string::assign(const basic_string& str) FL_NO_EXCEPT {
     copy(str);
     return *this;
 }
 
-basic_string& basic_string::assign(const basic_string& str, fl::size pos, fl::size count) {
+basic_string& basic_string::assign(const basic_string& str, fl::size pos, fl::size count) FL_NO_EXCEPT {
     if (pos >= str.size()) {
         clear();
         return *this;
@@ -464,7 +464,7 @@ basic_string& basic_string::assign(const basic_string& str, fl::size pos, fl::si
     return *this;
 }
 
-basic_string& basic_string::assign(fl::size count, char c) {
+basic_string& basic_string::assign(fl::size count, char c) FL_NO_EXCEPT {
     if (count == 0) {
         clear();
         return *this;
@@ -496,7 +496,7 @@ basic_string& basic_string::assign(basic_string&& str) FL_NO_EXCEPT {
 
 // ======= MEMORY MANAGEMENT =======
 
-void basic_string::reserve(fl::size newCapacity) {
+void basic_string::reserve(fl::size newCapacity) FL_NO_EXCEPT {
     if (newCapacity <= mLength) return;
     if (newCapacity + 1 <= mInlineCapacity) return;
     if (hasHeapData()) {
@@ -511,7 +511,7 @@ void basic_string::reserve(fl::size newCapacity) {
     mStorage = newData;
 }
 
-void basic_string::clear(bool freeMemory) {
+void basic_string::clear(bool freeMemory) FL_NO_EXCEPT {
     mLength = 0;
     if (isNonOwning() || (freeMemory && hasHeapData())) {
         mStorage.reset();
@@ -521,7 +521,7 @@ void basic_string::clear(bool freeMemory) {
     }
 }
 
-void basic_string::shrink_to_fit() {
+void basic_string::shrink_to_fit() FL_NO_EXCEPT {
     if (hasHeapData()) {
         NotNullStringHolderPtr& heap = heapData();
         if (heap.get().use_count() > 1) return;
@@ -539,14 +539,14 @@ void basic_string::shrink_to_fit() {
 
 // ======= FIND =======
 
-fl::size basic_string::find(const char& value) const {
+fl::size basic_string::find(const char& value) const FL_NO_EXCEPT {
     for (fl::size i = 0; i < mLength; ++i) {
         if (c_str()[i] == value) return i;
     }
     return npos;
 }
 
-fl::size basic_string::find(const char* substr) const {
+fl::size basic_string::find(const char* substr) const FL_NO_EXCEPT {
     if (!substr) return npos;
     auto begin_ptr = c_str();
     const char* found = fl::strstr(begin_ptr, substr);
@@ -554,7 +554,7 @@ fl::size basic_string::find(const char* substr) const {
     return npos;
 }
 
-fl::size basic_string::find(const char& value, fl::size start_pos) const {
+fl::size basic_string::find(const char& value, fl::size start_pos) const FL_NO_EXCEPT {
     if (start_pos >= mLength) return npos;
     for (fl::size i = start_pos; i < mLength; ++i) {
         if (c_str()[i] == value) return i;
@@ -562,7 +562,7 @@ fl::size basic_string::find(const char& value, fl::size start_pos) const {
     return npos;
 }
 
-fl::size basic_string::find(const char* substr, fl::size start_pos) const {
+fl::size basic_string::find(const char* substr, fl::size start_pos) const FL_NO_EXCEPT {
     if (!substr || start_pos >= mLength) return npos;
     auto begin_ptr = c_str() + start_pos;
     const char* found = fl::strstr(begin_ptr, substr);
@@ -570,12 +570,12 @@ fl::size basic_string::find(const char* substr, fl::size start_pos) const {
     return npos;
 }
 
-fl::size basic_string::find(const basic_string& other) const { return find(other.c_str()); }
-fl::size basic_string::find(const basic_string& other, fl::size start_pos) const { return find(other.c_str(), start_pos); }
+fl::size basic_string::find(const basic_string& other) const FL_NO_EXCEPT { return find(other.c_str()); }
+fl::size basic_string::find(const basic_string& other, fl::size start_pos) const FL_NO_EXCEPT { return find(other.c_str(), start_pos); }
 
 // ======= RFIND =======
 
-fl::size basic_string::rfind(char c, fl::size pos) const {
+fl::size basic_string::rfind(char c, fl::size pos) const FL_NO_EXCEPT {
     if (mLength == 0) return npos;
     fl::size searchPos = (pos >= mLength || pos == npos) ? (mLength - 1) : pos;
     const char* str = c_str();
@@ -585,7 +585,7 @@ fl::size basic_string::rfind(char c, fl::size pos) const {
     return npos;
 }
 
-fl::size basic_string::rfind(const char* s, fl::size pos, fl::size count) const {
+fl::size basic_string::rfind(const char* s, fl::size pos, fl::size count) const FL_NO_EXCEPT {
     if (!s || count == 0) {
         if (count == 0) return (pos > mLength) ? mLength : pos;
         return npos;
@@ -607,16 +607,16 @@ fl::size basic_string::rfind(const char* s, fl::size pos, fl::size count) const 
     return npos;
 }
 
-fl::size basic_string::rfind(const char* s, fl::size pos) const {
+fl::size basic_string::rfind(const char* s, fl::size pos) const FL_NO_EXCEPT {
     if (!s) return npos;
     return rfind(s, pos, fl::strlen(s));
 }
 
-fl::size basic_string::rfind(const basic_string& str, fl::size pos) const { return rfind(str.c_str(), pos, str.size()); }
+fl::size basic_string::rfind(const basic_string& str, fl::size pos) const FL_NO_EXCEPT { return rfind(str.c_str(), pos, str.size()); }
 
 // ======= FIND_FIRST_OF =======
 
-fl::size basic_string::find_first_of(const char* s, fl::size pos, fl::size count) const {
+fl::size basic_string::find_first_of(const char* s, fl::size pos, fl::size count) const FL_NO_EXCEPT {
     if (!s || count == 0) return npos;
     if (pos >= mLength) return npos;
     const char* str = c_str();
@@ -628,17 +628,17 @@ fl::size basic_string::find_first_of(const char* s, fl::size pos, fl::size count
     return npos;
 }
 
-fl::size basic_string::find_first_of(const char* s, fl::size pos) const {
+fl::size basic_string::find_first_of(const char* s, fl::size pos) const FL_NO_EXCEPT {
     if (!s) return npos;
     return find_first_of(s, pos, fl::strlen(s));
 }
 
-fl::size basic_string::find_first_of(char c, fl::size pos) const { return find(c, pos); }
-fl::size basic_string::find_first_of(const basic_string& str, fl::size pos) const { return find_first_of(str.c_str(), pos, str.size()); }
+fl::size basic_string::find_first_of(char c, fl::size pos) const FL_NO_EXCEPT { return find(c, pos); }
+fl::size basic_string::find_first_of(const basic_string& str, fl::size pos) const FL_NO_EXCEPT { return find_first_of(str.c_str(), pos, str.size()); }
 
 // ======= FIND_LAST_OF =======
 
-fl::size basic_string::find_last_of(const char* s, fl::size pos, fl::size count) const {
+fl::size basic_string::find_last_of(const char* s, fl::size pos, fl::size count) const FL_NO_EXCEPT {
     if (!s || count == 0) return npos;
     if (mLength == 0) return npos;
     fl::size searchPos = (pos >= mLength || pos == npos) ? (mLength - 1) : pos;
@@ -651,17 +651,17 @@ fl::size basic_string::find_last_of(const char* s, fl::size pos, fl::size count)
     return npos;
 }
 
-fl::size basic_string::find_last_of(const char* s, fl::size pos) const {
+fl::size basic_string::find_last_of(const char* s, fl::size pos) const FL_NO_EXCEPT {
     if (!s) return npos;
     return find_last_of(s, pos, fl::strlen(s));
 }
 
-fl::size basic_string::find_last_of(char c, fl::size pos) const { return rfind(c, pos); }
-fl::size basic_string::find_last_of(const basic_string& str, fl::size pos) const { return find_last_of(str.c_str(), pos, str.size()); }
+fl::size basic_string::find_last_of(char c, fl::size pos) const FL_NO_EXCEPT { return rfind(c, pos); }
+fl::size basic_string::find_last_of(const basic_string& str, fl::size pos) const FL_NO_EXCEPT { return find_last_of(str.c_str(), pos, str.size()); }
 
 // ======= FIND_FIRST_NOT_OF =======
 
-fl::size basic_string::find_first_not_of(char c, fl::size pos) const {
+fl::size basic_string::find_first_not_of(char c, fl::size pos) const FL_NO_EXCEPT {
     if (pos >= mLength) return npos;
     const char* str = c_str();
     for (fl::size i = pos; i < mLength; ++i) {
@@ -670,7 +670,7 @@ fl::size basic_string::find_first_not_of(char c, fl::size pos) const {
     return npos;
 }
 
-fl::size basic_string::find_first_not_of(const char* s, fl::size pos, fl::size count) const {
+fl::size basic_string::find_first_not_of(const char* s, fl::size pos, fl::size count) const FL_NO_EXCEPT {
     if (!s || count == 0) return (pos < mLength) ? pos : npos;
     if (pos >= mLength) return npos;
     const char* str = c_str();
@@ -684,16 +684,16 @@ fl::size basic_string::find_first_not_of(const char* s, fl::size pos, fl::size c
     return npos;
 }
 
-fl::size basic_string::find_first_not_of(const char* s, fl::size pos) const {
+fl::size basic_string::find_first_not_of(const char* s, fl::size pos) const FL_NO_EXCEPT {
     if (!s) return (pos < mLength) ? pos : npos;
     return find_first_not_of(s, pos, fl::strlen(s));
 }
 
-fl::size basic_string::find_first_not_of(const basic_string& str, fl::size pos) const { return find_first_not_of(str.c_str(), pos, str.size()); }
+fl::size basic_string::find_first_not_of(const basic_string& str, fl::size pos) const FL_NO_EXCEPT { return find_first_not_of(str.c_str(), pos, str.size()); }
 
 // ======= FIND_LAST_NOT_OF =======
 
-fl::size basic_string::find_last_not_of(char c, fl::size pos) const {
+fl::size basic_string::find_last_not_of(char c, fl::size pos) const FL_NO_EXCEPT {
     if (mLength == 0) return npos;
     fl::size searchPos = (pos >= mLength || pos == npos) ? (mLength - 1) : pos;
     const char* str = c_str();
@@ -703,7 +703,7 @@ fl::size basic_string::find_last_not_of(char c, fl::size pos) const {
     return npos;
 }
 
-fl::size basic_string::find_last_not_of(const char* s, fl::size pos, fl::size count) const {
+fl::size basic_string::find_last_not_of(const char* s, fl::size pos, fl::size count) const FL_NO_EXCEPT {
     if (!s || count == 0) {
         if (mLength == 0) return npos;
         fl::size searchPos = (pos >= mLength || pos == npos) ? (mLength - 1) : pos;
@@ -722,7 +722,7 @@ fl::size basic_string::find_last_not_of(const char* s, fl::size pos, fl::size co
     return npos;
 }
 
-fl::size basic_string::find_last_not_of(const char* s, fl::size pos) const {
+fl::size basic_string::find_last_not_of(const char* s, fl::size pos) const FL_NO_EXCEPT {
     if (!s) {
         if (mLength == 0) return npos;
         fl::size searchPos = (pos >= mLength || pos == npos) ? (mLength - 1) : pos;
@@ -731,43 +731,43 @@ fl::size basic_string::find_last_not_of(const char* s, fl::size pos) const {
     return find_last_not_of(s, pos, fl::strlen(s));
 }
 
-fl::size basic_string::find_last_not_of(const basic_string& str, fl::size pos) const { return find_last_not_of(str.c_str(), pos, str.size()); }
+fl::size basic_string::find_last_not_of(const basic_string& str, fl::size pos) const FL_NO_EXCEPT { return find_last_not_of(str.c_str(), pos, str.size()); }
 
 // ======= CONTAINS =======
 
-bool basic_string::contains(const char* substr) const { return find(substr) != npos; }
-bool basic_string::contains(char c) const { return find(c) != npos; }
-bool basic_string::contains(const basic_string& other) const { return find(other.c_str()) != npos; }
+bool basic_string::contains(const char* substr) const FL_NO_EXCEPT { return find(substr) != npos; }
+bool basic_string::contains(char c) const FL_NO_EXCEPT { return find(c) != npos; }
+bool basic_string::contains(const basic_string& other) const FL_NO_EXCEPT { return find(other.c_str()) != npos; }
 
 // ======= STARTS_WITH / ENDS_WITH =======
 
-bool basic_string::starts_with(const char* prefix) const {
+bool basic_string::starts_with(const char* prefix) const FL_NO_EXCEPT {
     if (!prefix) return true;
     fl::size prefix_len = fl::strlen(prefix);
     if (prefix_len > mLength) return false;
     return fl::strncmp(c_str(), prefix, prefix_len) == 0;
 }
 
-bool basic_string::ends_with(const char* suffix) const {
+bool basic_string::ends_with(const char* suffix) const FL_NO_EXCEPT {
     if (!suffix) return true;
     fl::size suffix_len = fl::strlen(suffix);
     if (suffix_len > mLength) return false;
     return fl::strncmp(c_str() + mLength - suffix_len, suffix, suffix_len) == 0;
 }
 
-bool basic_string::starts_with(char c) const { return mLength > 0 && c_str()[0] == c; }
-bool basic_string::starts_with(const basic_string& prefix) const { return starts_with(prefix.c_str()); }
-bool basic_string::ends_with(char c) const { return mLength > 0 && c_str()[mLength - 1] == c; }
-bool basic_string::ends_with(const basic_string& suffix) const { return ends_with(suffix.c_str()); }
+bool basic_string::starts_with(char c) const FL_NO_EXCEPT { return mLength > 0 && c_str()[0] == c; }
+bool basic_string::starts_with(const basic_string& prefix) const FL_NO_EXCEPT { return starts_with(prefix.c_str()); }
+bool basic_string::ends_with(char c) const FL_NO_EXCEPT { return mLength > 0 && c_str()[mLength - 1] == c; }
+bool basic_string::ends_with(const basic_string& suffix) const FL_NO_EXCEPT { return ends_with(suffix.c_str()); }
 
 // ======= STACK OPERATIONS =======
 
-void basic_string::push_back(char c) { write(c); }
-void basic_string::push_ascii(char c) { write(c); }
+void basic_string::push_back(char c) FL_NO_EXCEPT { write(c); }
+void basic_string::push_ascii(char c) FL_NO_EXCEPT { write(c); }
 
 // ======= POP_BACK =======
 
-void basic_string::pop_back() {
+void basic_string::pop_back() FL_NO_EXCEPT {
     if (mLength > 0) {
         mLength--;
         c_str_mutable()[mLength] = '\0';
@@ -776,7 +776,7 @@ void basic_string::pop_back() {
 
 // ======= INSERT =======
 
-basic_string& basic_string::insert(fl::size pos, fl::size count, char ch) {
+basic_string& basic_string::insert(fl::size pos, fl::size count, char ch) FL_NO_EXCEPT {
     if (pos > mLength) pos = mLength;
     if (count == 0) return *this;
 
@@ -837,16 +837,16 @@ basic_string& basic_string::insert(fl::size pos, fl::size count, char ch) {
     return *this;
 }
 
-basic_string& basic_string::insert(fl::size pos, const char* s) {
+basic_string& basic_string::insert(fl::size pos, const char* s) FL_NO_EXCEPT {
     if (!s) return *this;
     return insert(pos, s, fl::strlen(s));
 }
 
-basic_string& basic_string::insert(fl::size pos, const basic_string& str) {
+basic_string& basic_string::insert(fl::size pos, const basic_string& str) FL_NO_EXCEPT {
     return insert(pos, str.c_str(), str.size());
 }
 
-basic_string& basic_string::insert(fl::size pos, const basic_string& str, fl::size pos2, fl::size count) {
+basic_string& basic_string::insert(fl::size pos, const basic_string& str, fl::size pos2, fl::size count) FL_NO_EXCEPT {
     if (pos2 >= str.size()) return *this;
     fl::size actualCount = count;
     if (actualCount == npos || pos2 + actualCount > str.size()) {
@@ -855,7 +855,7 @@ basic_string& basic_string::insert(fl::size pos, const basic_string& str, fl::si
     return insert(pos, str.c_str() + pos2, actualCount);
 }
 
-basic_string& basic_string::insert(fl::size pos, const char* s, fl::size count) {
+basic_string& basic_string::insert(fl::size pos, const char* s, fl::size count) FL_NO_EXCEPT {
     if (pos > mLength) pos = mLength;
     if (!s || count == 0) return *this;
 
@@ -918,7 +918,7 @@ basic_string& basic_string::insert(fl::size pos, const char* s, fl::size count) 
 
 // ======= ERASE =======
 
-basic_string& basic_string::erase(fl::size pos, fl::size count) {
+basic_string& basic_string::erase(fl::size pos, fl::size count) FL_NO_EXCEPT {
     if (pos >= mLength) return *this;
 
     fl::size actualCount = count;
@@ -954,12 +954,12 @@ basic_string& basic_string::erase(fl::size pos, fl::size count) {
 
 // ======= REPLACE =======
 
-basic_string& basic_string::replace(fl::size pos, fl::size count, const basic_string& str) {
+basic_string& basic_string::replace(fl::size pos, fl::size count, const basic_string& str) FL_NO_EXCEPT {
     return replace(pos, count, str.c_str(), str.size());
 }
 
 basic_string& basic_string::replace(fl::size pos, fl::size count, const basic_string& str,
-                     fl::size pos2, fl::size count2) {
+                     fl::size pos2, fl::size count2) FL_NO_EXCEPT {
     if (pos2 >= str.size()) return erase(pos, count);
     fl::size actualCount2 = count2;
     if (actualCount2 == npos || pos2 + actualCount2 > str.size()) {
@@ -968,7 +968,7 @@ basic_string& basic_string::replace(fl::size pos, fl::size count, const basic_st
     return replace(pos, count, str.c_str() + pos2, actualCount2);
 }
 
-basic_string& basic_string::replace(fl::size pos, fl::size count, const char* s, fl::size count2) {
+basic_string& basic_string::replace(fl::size pos, fl::size count, const char* s, fl::size count2) FL_NO_EXCEPT {
     if (pos > mLength) return *this;
     if (!s) return erase(pos, count);
 
@@ -1047,12 +1047,12 @@ basic_string& basic_string::replace(fl::size pos, fl::size count, const char* s,
     return *this;
 }
 
-basic_string& basic_string::replace(fl::size pos, fl::size count, const char* s) {
+basic_string& basic_string::replace(fl::size pos, fl::size count, const char* s) FL_NO_EXCEPT {
     if (!s) return erase(pos, count);
     return replace(pos, count, s, fl::strlen(s));
 }
 
-basic_string& basic_string::replace(fl::size pos, fl::size count, fl::size count2, char ch) {
+basic_string& basic_string::replace(fl::size pos, fl::size count, fl::size count2, char ch) FL_NO_EXCEPT {
     if (pos > mLength) return *this;
 
     // Materialize non-owning storage before modifying
@@ -1132,9 +1132,9 @@ basic_string& basic_string::replace(fl::size pos, fl::size count, fl::size count
 
 // ======= COMPARE =======
 
-int basic_string::compare(const basic_string& str) const { return fl::strcmp(c_str(), str.c_str()); }
+int basic_string::compare(const basic_string& str) const FL_NO_EXCEPT { return fl::strcmp(c_str(), str.c_str()); }
 
-int basic_string::compare(fl::size pos1, fl::size count1, const basic_string& str) const {
+int basic_string::compare(fl::size pos1, fl::size count1, const basic_string& str) const FL_NO_EXCEPT {
     if (pos1 > mLength) {
         return str.empty() ? 0 : -1;
     }
@@ -1151,7 +1151,7 @@ int basic_string::compare(fl::size pos1, fl::size count1, const basic_string& st
 }
 
 int basic_string::compare(fl::size pos1, fl::size count1, const basic_string& str,
-                     fl::size pos2, fl::size count2) const {
+                     fl::size pos2, fl::size count2) const FL_NO_EXCEPT {
     if (pos1 > mLength || pos2 >= str.size()) {
         if (pos1 > mLength && pos2 >= str.size()) return 0;
         if (pos1 > mLength) return -1;
@@ -1173,12 +1173,12 @@ int basic_string::compare(fl::size pos1, fl::size count1, const basic_string& st
     return 0;
 }
 
-int basic_string::compare(const char* s) const {
+int basic_string::compare(const char* s) const FL_NO_EXCEPT {
     if (!s) return mLength > 0 ? 1 : 0;
     return fl::strcmp(c_str(), s);
 }
 
-int basic_string::compare(fl::size pos1, fl::size count1, const char* s) const {
+int basic_string::compare(fl::size pos1, fl::size count1, const char* s) const FL_NO_EXCEPT {
     if (!s) {
         if (pos1 >= mLength) return 0;
         fl::size actualCount1 = count1;
@@ -1201,7 +1201,7 @@ int basic_string::compare(fl::size pos1, fl::size count1, const char* s) const {
     return 0;
 }
 
-int basic_string::compare(fl::size pos1, fl::size count1, const char* s, fl::size count2) const {
+int basic_string::compare(fl::size pos1, fl::size count1, const char* s, fl::size count2) const FL_NO_EXCEPT {
     if (!s) {
         if (pos1 >= mLength) return (count2 == 0) ? 0 : -1;
         fl::size actualCount1 = count1;
@@ -1254,7 +1254,7 @@ void basic_string::moveAssign(basic_string&& other) FL_NO_EXCEPT {
     other.inlineBufferPtr()[0] = '\0';
 }
 
-void basic_string::swapWith(basic_string& other) {
+void basic_string::swapWith(basic_string& other) FL_NO_EXCEPT {
     if (this == &other) return;
 
     bool thisInline = isInline();
@@ -1321,21 +1321,21 @@ void basic_string::swapWith(basic_string& other) {
     }
 }
 
-void basic_string::setLiteral(const char* literal) {
+void basic_string::setLiteral(const char* literal) FL_NO_EXCEPT {
     if (literal) {
         mLength = fl::strlen(literal);
         mStorage = ConstLiteral(literal);
     }
 }
 
-void basic_string::setView(const char* data, fl::size len) {
+void basic_string::setView(const char* data, fl::size len) FL_NO_EXCEPT {
     if (data && len > 0) {
         mLength = len;
         mStorage = ConstView(data, len);
     }
 }
 
-void basic_string::setSharedHolder(const fl::shared_ptr<StringHolder>& holder) {
+void basic_string::setSharedHolder(const fl::shared_ptr<StringHolder>& holder) FL_NO_EXCEPT {
     if (!holder || holder->length() == 0) return;
     mLength = holder->length();
     mStorage = NotNullStringHolderPtr(holder);
@@ -1343,32 +1343,32 @@ void basic_string::setSharedHolder(const fl::shared_ptr<StringHolder>& holder) {
 
 // ======= APPEND =======
 
-basic_string& basic_string::append(const char* str) {
+basic_string& basic_string::append(const char* str) FL_NO_EXCEPT {
     write(str, fl::strlen(str));
     return *this;
 }
 
-basic_string& basic_string::append(const char* str, fl::size len) {
+basic_string& basic_string::append(const char* str, fl::size len) FL_NO_EXCEPT {
     write(str, len);
     return *this;
 }
 
-basic_string& basic_string::append(char c) {
+basic_string& basic_string::append(char c) FL_NO_EXCEPT {
     write(&c, 1);
     return *this;
 }
 
-basic_string& basic_string::append(const i8& val) {
+basic_string& basic_string::append(const i8& val) FL_NO_EXCEPT {
     write(val);
     return *this;
 }
 
-basic_string& basic_string::append(const u8& val) {
+basic_string& basic_string::append(const u8& val) FL_NO_EXCEPT {
     write(static_cast<fl::u16>(val));
     return *this;
 }
 
-basic_string& basic_string::append(const bool& val) {
+basic_string& basic_string::append(const bool& val) FL_NO_EXCEPT {
     if (val) {
         write("true", 4);
     } else {
@@ -1377,88 +1377,88 @@ basic_string& basic_string::append(const bool& val) {
     return *this;
 }
 
-basic_string& basic_string::append(const i16& val) {
+basic_string& basic_string::append(const i16& val) FL_NO_EXCEPT {
     write(static_cast<fl::i32>(val));
     return *this;
 }
 
-basic_string& basic_string::append(const u16& val) {
+basic_string& basic_string::append(const u16& val) FL_NO_EXCEPT {
     write(val);
     return *this;
 }
 
-basic_string& basic_string::append(const i32& val) {
+basic_string& basic_string::append(const i32& val) FL_NO_EXCEPT {
     write(val);
     return *this;
 }
 
-basic_string& basic_string::append(const u32& val) {
+basic_string& basic_string::append(const u32& val) FL_NO_EXCEPT {
     write(val);
     return *this;
 }
 
-basic_string& basic_string::append(const i64& val) {
+basic_string& basic_string::append(const i64& val) FL_NO_EXCEPT {
     write(val);
     return *this;
 }
 
-basic_string& basic_string::append(const u64& val) {
+basic_string& basic_string::append(const u64& val) FL_NO_EXCEPT {
     write(val);
     return *this;
 }
 
-basic_string& basic_string::append(const float& val) {
+basic_string& basic_string::append(const float& val) FL_NO_EXCEPT {
     char buf[64] = {0};
     fl::ftoa(val, buf, 2);
     write(buf, fl::strlen(buf));
     return *this;
 }
 
-basic_string& basic_string::append(const float& val, int precision) {
+basic_string& basic_string::append(const float& val, int precision) FL_NO_EXCEPT {
     char buf[64] = {0};
     fl::ftoa(val, buf, precision);
     write(buf, fl::strlen(buf));
     return *this;
 }
 
-basic_string& basic_string::append(const double& val) {
+basic_string& basic_string::append(const double& val) FL_NO_EXCEPT {
     return append(static_cast<float>(val));
 }
 
-basic_string& basic_string::append(const basic_string& str) {
+basic_string& basic_string::append(const basic_string& str) FL_NO_EXCEPT {
     write(str.c_str(), str.size());
     return *this;
 }
 
 // ======= HEX/OCT APPEND =======
 
-basic_string& basic_string::appendHex(i32 val) { char b[64]={0}; int l=fl::itoa(val,b,16); write(b,l); return *this; }
-basic_string& basic_string::appendHex(u32 val) { char b[64]={0}; int l=fl::utoa32(val,b,16); write(b,l); return *this; }
-basic_string& basic_string::appendHex(i64 val) { char b[64]={0}; int l=fl::itoa64(val,b,16); write(b,l); return *this; }
-basic_string& basic_string::appendHex(u64 val) { char b[64]={0}; int l=fl::utoa64(val,b,16); write(b,l); return *this; }
-basic_string& basic_string::appendHex(i16 val) { return appendHex(static_cast<i32>(val)); }
-basic_string& basic_string::appendHex(u16 val) { return appendHex(static_cast<u32>(val)); }
-basic_string& basic_string::appendHex(i8 val) { return appendHex(static_cast<i32>(val)); }
-basic_string& basic_string::appendHex(u8 val) { return appendHex(static_cast<u32>(val)); }
+basic_string& basic_string::appendHex(i32 val) FL_NO_EXCEPT { char b[64]={0}; int l=fl::itoa(val,b,16); write(b,l); return *this; }
+basic_string& basic_string::appendHex(u32 val) FL_NO_EXCEPT { char b[64]={0}; int l=fl::utoa32(val,b,16); write(b,l); return *this; }
+basic_string& basic_string::appendHex(i64 val) FL_NO_EXCEPT { char b[64]={0}; int l=fl::itoa64(val,b,16); write(b,l); return *this; }
+basic_string& basic_string::appendHex(u64 val) FL_NO_EXCEPT { char b[64]={0}; int l=fl::utoa64(val,b,16); write(b,l); return *this; }
+basic_string& basic_string::appendHex(i16 val) FL_NO_EXCEPT { return appendHex(static_cast<i32>(val)); }
+basic_string& basic_string::appendHex(u16 val) FL_NO_EXCEPT { return appendHex(static_cast<u32>(val)); }
+basic_string& basic_string::appendHex(i8 val) FL_NO_EXCEPT { return appendHex(static_cast<i32>(val)); }
+basic_string& basic_string::appendHex(u8 val) FL_NO_EXCEPT { return appendHex(static_cast<u32>(val)); }
 
-basic_string& basic_string::appendOct(i32 val) { char b[64]={0}; int l=fl::itoa(val,b,8); write(b,l); return *this; }
-basic_string& basic_string::appendOct(u32 val) { char b[64]={0}; int l=fl::utoa32(val,b,8); write(b,l); return *this; }
-basic_string& basic_string::appendOct(i64 val) { char b[64]={0}; int l=fl::itoa64(val,b,8); write(b,l); return *this; }
-basic_string& basic_string::appendOct(u64 val) { char b[64]={0}; int l=fl::utoa64(val,b,8); write(b,l); return *this; }
-basic_string& basic_string::appendOct(i16 val) { return appendOct(static_cast<i32>(val)); }
-basic_string& basic_string::appendOct(u16 val) { return appendOct(static_cast<u32>(val)); }
-basic_string& basic_string::appendOct(i8 val) { return appendOct(static_cast<i32>(val)); }
-basic_string& basic_string::appendOct(u8 val) { return appendOct(static_cast<u32>(val)); }
+basic_string& basic_string::appendOct(i32 val) FL_NO_EXCEPT { char b[64]={0}; int l=fl::itoa(val,b,8); write(b,l); return *this; }
+basic_string& basic_string::appendOct(u32 val) FL_NO_EXCEPT { char b[64]={0}; int l=fl::utoa32(val,b,8); write(b,l); return *this; }
+basic_string& basic_string::appendOct(i64 val) FL_NO_EXCEPT { char b[64]={0}; int l=fl::itoa64(val,b,8); write(b,l); return *this; }
+basic_string& basic_string::appendOct(u64 val) FL_NO_EXCEPT { char b[64]={0}; int l=fl::utoa64(val,b,8); write(b,l); return *this; }
+basic_string& basic_string::appendOct(i16 val) FL_NO_EXCEPT { return appendOct(static_cast<i32>(val)); }
+basic_string& basic_string::appendOct(u16 val) FL_NO_EXCEPT { return appendOct(static_cast<u32>(val)); }
+basic_string& basic_string::appendOct(i8 val) FL_NO_EXCEPT { return appendOct(static_cast<i32>(val)); }
+basic_string& basic_string::appendOct(u8 val) FL_NO_EXCEPT { return appendOct(static_cast<u32>(val)); }
 
 // ======= OTHER =======
 
-float basic_string::toFloat() const { return fl::parseFloat(c_str(), mLength); }
+float basic_string::toFloat() const FL_NO_EXCEPT { return fl::parseFloat(c_str(), mLength); }
 
 // ======= RESIZE =======
 
-void basic_string::resize(fl::size count) { resize(count, char()); }
+void basic_string::resize(fl::size count) FL_NO_EXCEPT { resize(count, char()); }
 
-void basic_string::resize(fl::size count, char ch) {
+void basic_string::resize(fl::size count, char ch) FL_NO_EXCEPT {
     if (count < mLength) {
         mLength = count;
         c_str_mutable()[mLength] = '\0';

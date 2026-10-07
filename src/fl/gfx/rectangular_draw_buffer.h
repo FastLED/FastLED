@@ -27,7 +27,7 @@ namespace fl {
 
 struct DrawItem {
     DrawItem() FL_NO_EXCEPT = default;
-    DrawItem(u8 pin, u16 numLeds, bool is_rgbw);
+    DrawItem(u8 pin, u16 numLeds, bool is_rgbw) FL_NO_EXCEPT;
     
     // Rule of 5 for POD data
     DrawItem(const DrawItem &other) FL_NO_EXCEPT = default;
@@ -38,7 +38,7 @@ struct DrawItem {
     u8 mPin = 0;
     u32 mNumBytes = 0;
     bool mIsRgbw = false;
-    bool operator!=(const DrawItem &other) const {
+    bool operator!=(const DrawItem &other) const FL_NO_EXCEPT {
         return mPin != other.mPin || mNumBytes != other.mNumBytes ||
                mIsRgbw != other.mIsRgbw;
     }
@@ -57,23 +57,23 @@ class RectangularDrawBuffer {
     ~RectangularDrawBuffer() FL_NO_EXCEPT = default;
 
     fl::span<u8> getLedsBufferBytesForPin(u8 pin,
-                                               bool clear_first = true);
+                                               bool clear_first = true) FL_NO_EXCEPT;
 
     // Safe to call multiple times before calling queue() once. Returns true on
     // the first call, false after.
-    bool onQueuingStart();
-    void queue(const DrawItem &item);
+    bool onQueuingStart() FL_NO_EXCEPT;
+    void queue(const DrawItem &item) FL_NO_EXCEPT;
 
     // Compiles the RectangularBuffer if necessary.
     // Safe to call multiple times before calling onQueueingStart() again.
     // Returns true on the first call, false after.
-    bool onQueuingDone();
+    bool onQueuingDone() FL_NO_EXCEPT;
 
     // Valid after onQueueDone:
-    u32 getMaxBytesInStrip() const;
-    u32 getTotalBytes() const;
+    u32 getMaxBytesInStrip() const FL_NO_EXCEPT;
+    u32 getTotalBytes() const FL_NO_EXCEPT;
     void getBlockInfo(u32 *num_strips, u32 *bytes_per_strip,
-                      u32 *total_bytes) const;
+                      u32 *total_bytes) const FL_NO_EXCEPT;
 
 // protected:
     typedef fl::vector<DrawItem> DrawList;

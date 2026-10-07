@@ -20,33 +20,33 @@ class Fx {
     // Alias so Fx::DrawContext keeps working in existing code.
     using DrawContext = ::fl::DrawContext;
 
-    Fx(u16 numLeds) : mNumLeds(numLeds) {}
+    Fx(u16 numLeds) FL_NO_EXCEPT : mNumLeds(numLeds) {}
 
     /// @param now The current time in milliseconds. Fx writers are encouraged
     /// to use this instead of millis() directly as this will more deterministic
     /// behavior.
     virtual void
-    draw(DrawContext context) = 0; // This is the only function that needs to be
+    draw(DrawContext context) FL_NO_EXCEPT = 0; // This is the only function that needs to be
                                    // implemented everything else is optional.
 
     // If true then this fx has a fixed frame rate and the fps parameter will be
     // set to the frame rate.
-    virtual bool hasFixedFrameRate(float *fps) const {
+    virtual bool hasFixedFrameRate(float *fps) const FL_NO_EXCEPT {
         FASTLED_UNUSED(fps);
         return false;
     }
 
     // Get the name of the current fx.
-    virtual fl::string fxName() const = 0;
+    virtual fl::string fxName() const FL_NO_EXCEPT = 0;
 
     // Called when the fx is paused, usually when a transition has finished.
-    virtual void pause(fl::u32 now) { FASTLED_UNUSED(now); }
-    virtual void resume(fl::u32 now) {
+    virtual void pause(fl::u32 now) FL_NO_EXCEPT { FASTLED_UNUSED(now); }
+    virtual void resume(fl::u32 now) FL_NO_EXCEPT {
         FASTLED_UNUSED(now);
     } // Called when the fx is resumed after a pause,
       // usually when a transition has started.
 
-    u16 getNumLeds() const { return mNumLeds; }
+    u16 getNumLeds() const FL_NO_EXCEPT { return mNumLeds; }
 
   protected:
     virtual ~Fx() FL_NO_EXCEPT {} // Protected destructor

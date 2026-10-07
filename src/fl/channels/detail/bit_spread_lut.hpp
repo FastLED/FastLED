@@ -15,6 +15,7 @@
 
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/int.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace detail {
@@ -32,15 +33,15 @@ constexpr u32 kSpreadNibble[16] = {
 };
 
 /// Pulses 7,6,5,4 of v (byte j = bit (7-j)). Depends only on the high nibble.
-FASTLED_FORCE_INLINE u32 spreadA(u8 v) { return kSpreadNibble[v >> 4]; }
+FASTLED_FORCE_INLINE u32 spreadA(u8 v) FL_NO_EXCEPT { return kSpreadNibble[v >> 4]; }
 /// Pulses 3,2,1,0 of v (byte j = bit (3-j)). Depends only on the low nibble.
-FASTLED_FORCE_INLINE u32 spreadB(u8 v) { return kSpreadNibble[v & 0x0Fu]; }
+FASTLED_FORCE_INLINE u32 spreadB(u8 v) FL_NO_EXCEPT { return kSpreadNibble[v & 0x0Fu]; }
 
 /// Transpose one symbol of 16 lanes (16 input bytes) into 16 output bytes:
 /// 8 pulses × 2 bytes, low byte = lanes 0-7, high byte = lanes 8-15, pulse
 /// order 7..0 (out[0] = pulse 7 low). Matches the naive layout.
 FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION
-void spread_transpose16_symbol(const u8 l[16], u8 out[16]) {
+void spread_transpose16_symbol(const u8 l[16], u8 out[16]) FL_NO_EXCEPT {
     const u32 aLo = spreadA(l[0]) | spreadA(l[1]) << 1 | spreadA(l[2]) << 2 | spreadA(l[3]) << 3 |
                     spreadA(l[4]) << 4 | spreadA(l[5]) << 5 | spreadA(l[6]) << 6 | spreadA(l[7]) << 7;
     const u32 bLo = spreadB(l[0]) | spreadB(l[1]) << 1 | spreadB(l[2]) << 2 | spreadB(l[3]) << 3 |
@@ -62,7 +63,7 @@ void spread_transpose16_symbol(const u8 l[16], u8 out[16]) {
 /// Transpose one symbol of 8 lanes (8 input bytes) into 8 output bytes:
 /// 8 pulses × 1 byte (bit L = lane L), pulse order 7..0 (out[0] = pulse 7).
 FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION
-void spread_transpose8_symbol(const u8 l[8], u8 out[8]) {
+void spread_transpose8_symbol(const u8 l[8], u8 out[8]) FL_NO_EXCEPT {
     const u32 a = spreadA(l[0]) | spreadA(l[1]) << 1 | spreadA(l[2]) << 2 | spreadA(l[3]) << 3 |
                   spreadA(l[4]) << 4 | spreadA(l[5]) << 5 | spreadA(l[6]) << 6 | spreadA(l[7]) << 7;
     const u32 b = spreadB(l[0]) | spreadB(l[1]) << 1 | spreadB(l[2]) << 2 | spreadB(l[3]) << 3 |

@@ -240,7 +240,7 @@ struct DriverTestResult {
     bool skipped;            ///< True if driver was skipped (e.g., failed to set exclusive)
 
     DriverTestResult(const char* name)
-        : driver_name(name)
+        FL_NO_EXCEPT : driver_name(name)
         , total_tests(0)
         , passed_tests(0)
         , skipped(false) {}
@@ -251,15 +251,15 @@ struct DriverTestResult {
         , skipped(false) {}
 
     /// @brief Check if all tests passed
-    bool allPassed() const { return !skipped && total_tests > 0 && passed_tests == total_tests; }
+    bool allPassed() const FL_NO_EXCEPT { return !skipped && total_tests > 0 && passed_tests == total_tests; }
 
     /// @brief Check if any tests failed
-    bool anyFailed() const { return !skipped && total_tests > 0 && passed_tests < total_tests; }
+    bool anyFailed() const FL_NO_EXCEPT { return !skipped && total_tests > 0 && passed_tests < total_tests; }
 };
 
 /// @brief Run a single stateless validation test
 /// @param config Test configuration
 /// @return Test result with pass/fail information
-SingleTestResult runSingleValidationTest(const SingleTestConfig& config);
+SingleTestResult runSingleValidationTest(const SingleTestConfig& config) FL_NO_EXCEPT;
 
 }  // namespace fl

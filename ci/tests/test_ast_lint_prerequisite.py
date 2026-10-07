@@ -1,5 +1,6 @@
 """Required clang-query AST lint must fail closed, including with warm caches."""
 
+import sys
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -7,6 +8,13 @@ import pytest
 
 from ci.lint_cpp import ast_cache, run_all_checkers
 from ci.tools import check_array_params, check_ast_combined, check_noexcept
+
+
+def test_subscript_operator_is_not_exempted_as_a_lambda() -> None:
+    assert not check_noexcept._signature_is_exempt(
+        "const int& Sample::operator[](size_t index) const {"
+    )
+    assert not check_noexcept._signature_is_exempt("auto fn = []() { return 1; };")
 
 
 def test_missing_ast_binary_is_fatal(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -109,3 +117,221 @@ def test_single_file_ast_error_is_fatal(
         check(
             str(run_all_checkers.PROJECT_ROOT / "src" / "fl" / "chipsets" / "hd108.h")
         )
+
+
+def _missing_hit() -> check_noexcept.NoexceptHit:
+    return check_noexcept.NoexceptHit(
+        path="src/fl/example.h",
+        line=10,
+        line_text="void foo();",
+        signature="void foo();",
+    )
+
+
+@pytest.mark.parametrize("extra_args", [[], ["--no-baseline"]])
+def test_historical_baseline_cannot_hide_missing_signature(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+    extra_args: list[str],
+) -> None:
+    hit = _missing_hit()
+    historical_baseline = tmp_path / "ci" / "tools" / "noexcept_baseline.txt"
+    historical_baseline.parent.mkdir(parents=True)
+    historical_baseline.write_text(hit.baseline_key + "\n")
+    monkeypatch.setattr(check_noexcept, "PROJECT_ROOT", tmp_path)
+    monkeypatch.setattr(check_noexcept, "find_missing_noexcept", lambda scope: [hit])
+    monkeypatch.setattr(sys, "argv", ["check_noexcept.py", *extra_args])
+
+    assert check_noexcept.main() == 1
+    assert "void foo();" in capsys.readouterr().out
+
+
+@pytest.mark.parametrize("option", ["--baseline", "--update-baseline"])
+def test_baseline_grandfathering_options_are_rejected(
+    monkeypatch: pytest.MonkeyPatch,
+    option: str,
+) -> None:
+    monkeypatch.setattr(sys, "argv", ["check_noexcept.py", option])
+    with pytest.raises(SystemExit) as failure:
+        check_noexcept.main()
+    assert failure.value.code == 2
+
+
+def test_single_file_lint_reports_historical_missing_signature(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    hit = _missing_hit()
+    monkeypatch.setattr(check_noexcept, "find_missing_noexcept", lambda scope: [hit])
+    monkeypatch.setattr(run_all_checkers, "_require_ast_tool", lambda: None)
+    results = run_all_checkers.run_noexcept_ast_check(
+        str(run_all_checkers.PROJECT_ROOT / hit.path)
+    )
+    assert results.has_violations()
+
+
+def test_all_scope_includes_existing_root_source_router() -> None:
+    assert ("src/fl/build/src.cpp", ".*src.[^/]+$") in check_noexcept._scope_tus("all")
+
+
+def test_single_file_lint_checks_root_source_scope(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    scopes: list[str] = []
+    hit = check_noexcept.NoexceptHit(
+        path="src/FastLED.h",
+        line=10,
+        line_text="void show();",
+        signature="void show();",
+    )
+
+    def find(scope: str) -> list[check_noexcept.NoexceptHit]:
+        scopes.append(scope)
+        return [hit]
+
+    monkeypatch.setattr(check_noexcept, "find_missing_noexcept", find)
+    monkeypatch.setattr(run_all_checkers, "_require_ast_tool", lambda: None)
+    results = run_all_checkers.run_noexcept_ast_check(
+        str(run_all_checkers.PROJECT_ROOT / hit.path)
+    )
+    assert scopes == ["root"]
+    assert results.has_violations()
+
+
+def test_combined_lint_reports_every_noexcept_hit(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    hit = _missing_hit()
+    monkeypatch.setattr(run_all_checkers, "_require_ast_tool", lambda: None)
+    monkeypatch.setattr(
+        check_ast_combined, "find_combined_hits", lambda scope: ([hit], [])
+    )
+    monkeypatch.setattr(
+        ast_cache, "cached_ast_check", lambda **options: options["runner"]()
+    )
+
+    noexcept_results, array_results = run_all_checkers.run_combined_ast_check()
+    assert noexcept_results.has_violations()
+    assert not array_results.has_violations()
+
+
+@pytest.mark.parametrize("combined", [False, True])
+def test_zero_exit_compiler_error_is_fatal(
+    monkeypatch: pytest.MonkeyPatch, combined: bool
+) -> None:
+    monkeypatch.setattr(
+        check_noexcept.RunningProcess,
+        "run",
+        lambda *args, **kwargs: SimpleNamespace(
+            returncode=0,
+            stdout="0 matches.\n",
+            stderr="src/probe.cpp:2:6: error: exception specification does not match\n",
+        ),
+    )
+    run = (
+        check_ast_combined._run_combined_clang_query
+        if combined
+        else check_noexcept._run_clang_query
+    )
+    with pytest.raises(check_noexcept.NoexceptCheckError, match="does not match"):
+        run(["clang-query"], "src/probe.cpp", ".*src.*")
+
+
+def test_parser_checks_real_contracts_without_changing_production_policy() -> None:
+    args = check_noexcept._COMPILER_ARGS
+    assert "-DFL_NO_EXCEPT=noexcept" in args
+    assert "-DFL_HAS_NOEXCEPT=1" in args
+    assert "-fexceptions" in args
+    assert "-fno-exceptions" not in args
+    assert check_ast_combined._COMPILER_ARGS is args
+
+
+@pytest.mark.parametrize("combined", [False, True])
+def test_missing_definition_specification_is_red_then_matching_is_green(
+    tmp_path: Path, combined: bool
+) -> None:
+    clang_query = check_noexcept._find_clang_query()
+    if not clang_query:
+        pytest.skip("compiler feature probe requires clang-query")
+    run = (
+        check_ast_combined._run_combined_clang_query
+        if combined
+        else check_noexcept._run_clang_query
+    )
+    fixture = tmp_path / "noexcept_contract.cpp"
+    fixture.write_text(
+        "void guaranteed() FL_NO_EXCEPT;\nvoid guaranteed() {}\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(check_noexcept.NoexceptCheckError):
+        run(clang_query, str(fixture), ".*")
+    fixture.write_text(
+        "void guaranteed() FL_NO_EXCEPT;\nvoid guaranteed() FL_NO_EXCEPT {}\n",
+        encoding="utf-8",
+    )
+    assert run(clang_query, str(fixture), ".*") == (([], []) if combined else [])
+
+
+def test_body_annotation_cannot_exempt_enclosing_function(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "src" / "fl" / "probe.h"
+    source.parent.mkdir(parents=True)
+    source.write_text("void outer() { auto callback = []() FL_NO_EXCEPT {}; }\n")
+    monkeypatch.setattr(check_noexcept, "PROJECT_ROOT", tmp_path)
+    _line, signature = check_noexcept._read_source_signature("src/fl/probe.h", 1)
+    assert signature == "void outer() {"
+    assert not check_noexcept._signature_is_exempt(signature)
+
+
+def test_multiline_template_definition_contract_is_checked(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "src" / "fl" / "probe.h"
+    source.parent.mkdir(parents=True)
+    source.write_text(
+        "template<typename T>\n"
+        "T transform(const T& input,\n"
+        "            int scale) { return input; }\n"
+    )
+    monkeypatch.setattr(check_noexcept, "PROJECT_ROOT", tmp_path)
+    _line, signature = check_noexcept._read_source_signature("src/fl/probe.h", 2)
+    assert not check_noexcept._signature_is_exempt(signature)
+
+
+def test_contract_specific_inline_suppression_remains_in_signature(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "src" / "fl" / "probe.h"
+    source.parent.mkdir(parents=True)
+    source.write_text("void vendor_bridge() { // ok no noexcept: vendor ABI\n}\n")
+    monkeypatch.setattr(check_noexcept, "PROJECT_ROOT", tmp_path)
+    _line, signature = check_noexcept._read_source_signature("src/fl/probe.h", 1)
+    assert check_noexcept._signature_is_exempt(signature)
+
+
+@pytest.mark.parametrize(
+    "signature",
+    [
+        "fl::function<void() FL_NO_EXCEPT> callback_factory();",
+        "void invoke(void (*callback)() FL_NO_EXCEPT);",
+        "void operation() noexcept(false);",
+        "void operation() FL_NO_EXCEPT;",
+    ],
+)
+def test_annotation_tokens_cannot_suppress_semantic_throwing_finding(
+    signature: str,
+) -> None:
+    # Annotated nothrow functions never reach this filter: the AST matcher has
+    # excluded them already. Every remaining hit still needs a real contract.
+    assert not check_noexcept._signature_is_exempt(signature)
+
+
+def test_default_argument_lambda_cannot_exempt_enclosing_function() -> None:
+    assert "isLambda()" in check_noexcept.build_query(".*src.fl.*")
+    assert not check_noexcept._signature_is_exempt(
+        "void outer(int value = []() { return 1; }());"
+    )

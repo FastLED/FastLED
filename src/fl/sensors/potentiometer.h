@@ -11,16 +11,16 @@ namespace fl {
 // This class provides raw hardware access without automatic updates.
 class PotentiometerLowLevel {
   public:
-    PotentiometerLowLevel(int pin);
+    PotentiometerLowLevel(int pin) FL_NO_EXCEPT;
     ~PotentiometerLowLevel() FL_NO_EXCEPT;
     PotentiometerLowLevel(const PotentiometerLowLevel &other) FL_NO_EXCEPT = default;
     PotentiometerLowLevel &operator=(const PotentiometerLowLevel &other) FL_NO_EXCEPT = delete;
     PotentiometerLowLevel(PotentiometerLowLevel &&other) FL_NO_EXCEPT = delete;
 
     // Read raw ADC value (0-1023 for 10-bit, 0-4095 for 12-bit ADC)
-    u16 read();
+    u16 read() FL_NO_EXCEPT;
 
-    int getPin() const { return mPin; }
+    int getPin() const FL_NO_EXCEPT { return mPin; }
 
   private:
     int mPin;
@@ -35,39 +35,39 @@ class Potentiometer {
     // Constructor
     // @param pin: Analog pin number
     // @param hysteresis: Minimum raw ADC change to trigger callbacks (0 = auto: 1% of calibrated range)
-    Potentiometer(int pin, u16 hysteresis = 0);
+    Potentiometer(int pin, u16 hysteresis = 0) FL_NO_EXCEPT;
 
     // ========================================================================
     // Value Accessors
     // ========================================================================
 
     // Get raw ADC value (0-1023 for 10-bit, 0-4095 for 12-bit ADC)
-    u16 raw() const { return mCurrentValue; }
+    u16 raw() const FL_NO_EXCEPT { return mCurrentValue; }
 
     // Get normalized float value (0.0f - 1.0f) based on calibration range
     // Maps mMinValue -> 0.0f and mMaxValue -> 1.0f
     // Values outside range are clamped to [0.0, 1.0]
-    float normalized() const;
+    float normalized() const FL_NO_EXCEPT;
 
     // Get fractional 16-bit value (0 - 65535) for high-precision integer math
     // Based on calibration range (mMinValue -> 0, mMaxValue -> 65535)
-    u16 fractional16() const;
+    u16 fractional16() const FL_NO_EXCEPT;
 
     // Check if value changed this frame (beyond hysteresis threshold)
-    bool hasChanged() const { return mChangedThisFrame; }
+    bool hasChanged() const FL_NO_EXCEPT { return mChangedThisFrame; }
 
     // ========================================================================
     // Callback Registration
     // ========================================================================
 
     // Register callback with Potentiometer reference (can access all value formats)
-    int onChange(fl::function<void(Potentiometer &)> callback);
+    int onChange(fl::function<void(Potentiometer &)> callback) FL_NO_EXCEPT;
 
     // Register callback with normalized float value (convenience overload)
-    int onChange(fl::function<void(float)> callback);
+    int onChange(fl::function<void(float)> callback) FL_NO_EXCEPT;
 
     // Remove callback by ID
-    void removeOnChange(int id) {
+    void removeOnChange(int id) FL_NO_EXCEPT {
         mOnChangeCallbacks.remove(id);
         mOnChangeNormalizedCallbacks.remove(id);
     }
@@ -77,14 +77,14 @@ class Potentiometer {
     // ========================================================================
 
     // Set hysteresis threshold in raw ADC units (e.g., 10 = must change by 10 ADC counts)
-    void setHysteresis(u16 threshold) { mHysteresis = threshold; }
+    void setHysteresis(u16 threshold) FL_NO_EXCEPT { mHysteresis = threshold; }
 
     // Set hysteresis as percentage of calibrated range (0.0-100.0)
     // Example: 1.0 = 1% of (mMaxValue - mMinValue)
-    void setHysteresisPercent(float percent);
+    void setHysteresisPercent(float percent) FL_NO_EXCEPT;
 
     // Get current hysteresis threshold in raw ADC units
-    u16 getHysteresis() const { return mHysteresis; }
+    u16 getHysteresis() const FL_NO_EXCEPT { return mHysteresis; }
 
     // ========================================================================
     // Calibration (Range Mapping)
@@ -94,22 +94,22 @@ class Potentiometer {
     // @param min: Raw ADC value that maps to 0.0 (default: 0)
     // @param max: Raw ADC value that maps to 1.0 (default: ADC max value)
     // Example: setRange(100, 900) maps 100->0.0, 900->1.0, values outside are clamped
-    void setRange(u16 min, u16 max);
+    void setRange(u16 min, u16 max) FL_NO_EXCEPT;
 
     // Get the minimum raw value (maps to 0.0 in normalized)
-    u16 getRangeMin() const { return mMinValue; }
+    u16 getRangeMin() const FL_NO_EXCEPT { return mMinValue; }
 
     // Get the maximum raw value (maps to 1.0 in normalized)
-    u16 getRangeMax() const { return mMaxValue; }
+    u16 getRangeMax() const FL_NO_EXCEPT { return mMaxValue; }
 
     // Calibrate to current position as minimum (0.0)
-    void calibrateMin() { mMinValue = mCurrentValue; }
+    void calibrateMin() FL_NO_EXCEPT { mMinValue = mCurrentValue; }
 
     // Calibrate to current position as maximum (1.0)
-    void calibrateMax() { mMaxValue = mCurrentValue; }
+    void calibrateMax() FL_NO_EXCEPT { mMaxValue = mCurrentValue; }
 
     // Reset calibration to full ADC range
-    void resetCalibration() {
+    void resetCalibration() FL_NO_EXCEPT {
         mMinValue = 0;
         mMaxValue = getAdcMaxValue();
     }
@@ -137,12 +137,12 @@ class Potentiometer {
 
   protected:
     struct Listener : public EngineEvents::Listener {
-        Listener(Potentiometer *owner);
+        Listener(Potentiometer *owner) FL_NO_EXCEPT;
         ~Listener() FL_NO_EXCEPT;
-        void addToEngineEventsOnce();
+        void addToEngineEventsOnce() FL_NO_EXCEPT;
 
         // Update on end frame (before next frame is drawn, matching Button behavior)
-        void onEndFrame() override;
+        void onEndFrame() FL_NO_EXCEPT override;
 
       private:
         Potentiometer *mOwner;
@@ -166,10 +166,10 @@ class Potentiometer {
     fl::function_list<void(float)> mOnChangeNormalizedCallbacks;
 
     // Get ADC resolution (10-bit = 1023, 12-bit = 4095)
-    u16 getAdcMaxValue() const;
+    u16 getAdcMaxValue() const FL_NO_EXCEPT;
 
     // Calculate default hysteresis (1% of calibrated range)
-    u16 calculateDefaultHysteresis() const;
+    u16 calculateDefaultHysteresis() const FL_NO_EXCEPT;
 };
 
 } // namespace fl

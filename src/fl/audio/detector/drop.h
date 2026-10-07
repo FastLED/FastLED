@@ -54,12 +54,12 @@ public:
     ~DropDetector() FL_NO_EXCEPT override;
 
     // Detector interface
-    void update(shared_ptr<Context> context) override;
-    void fireCallbacks() override;
-    bool needsFFT() const override { return true; }
-    bool needsFFTHistory() const override { return false; }
-    const char* getName() const override { return "DropDetector"; }
-    void reset() override;
+    void update(shared_ptr<Context> context) FL_NO_EXCEPT override;
+    void fireCallbacks() FL_NO_EXCEPT override;
+    bool needsFFT() const FL_NO_EXCEPT override { return true; }
+    bool needsFFTHistory() const FL_NO_EXCEPT override { return false; }
+    const char* getName() const FL_NO_EXCEPT override { return "DropDetector"; }
+    void reset() FL_NO_EXCEPT override;
 
     // Event callbacks (multiple listeners supported)
     function_list<void()> onDrop;                          // Fired when drop detected
@@ -67,16 +67,16 @@ public:
     function_list<void(float impact)> onDropImpact;               // Fired with impact strength
 
     // State access
-    const Drop& getLastDrop() const { return mLastDrop; }
-    u32 getTimeSinceLastDrop(u32 currentTime) const {
+    const Drop& getLastDrop() const FL_NO_EXCEPT { return mLastDrop; }
+    u32 getTimeSinceLastDrop(u32 currentTime) const FL_NO_EXCEPT {
         return currentTime - mLastDrop.timestamp;
     }
 
     // Configuration
-    void setImpactThreshold(float threshold) { mImpactThreshold = threshold; }
-    void setMinTimeBetweenDrops(u32 ms) { mMinTimeBetweenDrops = ms; }
-    void setBassThreshold(float threshold) { mBassThreshold = threshold; }
-    void setEnergyFluxThreshold(float threshold) { mEnergyFluxThreshold = threshold; }
+    void setImpactThreshold(float threshold) FL_NO_EXCEPT { mImpactThreshold = threshold; }
+    void setMinTimeBetweenDrops(u32 ms) FL_NO_EXCEPT { mMinTimeBetweenDrops = ms; }
+    void setBassThreshold(float threshold) FL_NO_EXCEPT { mBassThreshold = threshold; }
+    void setEnergyFluxThreshold(float threshold) FL_NO_EXCEPT { mEnergyFluxThreshold = threshold; }
 
 private:
     // Last drop event
@@ -102,15 +102,15 @@ private:
     shared_ptr<const fft::Bins> mRetainedFFT;
 
     // Analysis methods
-    float getBassEnergy(const fft::Bins& fft) const;
-    float getMidEnergy(const fft::Bins& fft) const;
-    float getTrebleEnergy(const fft::Bins& fft) const;
-    float calculateSpectralNovelty(float bass, float mid, float treble) const;
-    float calculateEnergyFlux(float currentRMS) const;
-    float calculateBassFlux(float currentBass) const;
-    float calculateDropImpact(float energyFlux, float bassFlux, float spectralNovelty, float rms) const;
-    bool shouldTriggerDrop(float impact, u32 timestamp) const;
-    void updateBaselines(float rms, float bass);
+    float getBassEnergy(const fft::Bins& fft) const FL_NO_EXCEPT;
+    float getMidEnergy(const fft::Bins& fft) const FL_NO_EXCEPT;
+    float getTrebleEnergy(const fft::Bins& fft) const FL_NO_EXCEPT;
+    float calculateSpectralNovelty(float bass, float mid, float treble) const FL_NO_EXCEPT;
+    float calculateEnergyFlux(float currentRMS) const FL_NO_EXCEPT;
+    float calculateBassFlux(float currentBass) const FL_NO_EXCEPT;
+    float calculateDropImpact(float energyFlux, float bassFlux, float spectralNovelty, float rms) const FL_NO_EXCEPT;
+    bool shouldTriggerDrop(float impact, u32 timestamp) const FL_NO_EXCEPT;
+    void updateBaselines(float rms, float bass) FL_NO_EXCEPT;
 };
 
 } // namespace detector

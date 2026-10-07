@@ -68,18 +68,18 @@ enum class ExecFlags : u8 {
     ALL        = (1 << 0) | (1 << 1) | (1 << 2)
 };
 
-inline ExecFlags operator|(ExecFlags a, ExecFlags b) {
+inline ExecFlags operator|(ExecFlags a, ExecFlags b) FL_NO_EXCEPT {
     return static_cast<ExecFlags>(static_cast<u8>(a) | static_cast<u8>(b));
 }
 
-inline bool operator&(ExecFlags a, ExecFlags b) {
+inline bool operator&(ExecFlags a, ExecFlags b) FL_NO_EXCEPT {
     return (static_cast<u8>(a) & static_cast<u8>(b)) != 0;
 }
 
 namespace detail {
 /// @brief Get reference to thread-local await recursion depth
 /// @return Reference to the thread-local await depth counter (internal implementation detail)
-int& await_depth_tls();
+int& await_depth_tls() FL_NO_EXCEPT;
 } // namespace detail
 
 /// @brief Generic task runner interface
@@ -88,34 +88,34 @@ public:
     virtual ~Runner() FL_NO_EXCEPT = default;
 
     /// Update this runner (called during task pumping)
-    virtual void update() = 0;
+    virtual void update() FL_NO_EXCEPT = 0;
 
     /// Check if this runner has active tasks
-    virtual bool has_active_tasks() const = 0;
+    virtual bool has_active_tasks() const FL_NO_EXCEPT = 0;
 
     /// Get number of active tasks (for debugging/monitoring)
-    virtual size_t active_task_count() const = 0;
+    virtual size_t active_task_count() const FL_NO_EXCEPT = 0;
 };
 
 /// @brief Task executor (singleton) — manages registered runners
 class Executor {
 public:
-    static Executor& instance();
+    static Executor& instance() FL_NO_EXCEPT;
 
     /// Register a runner
-    void register_runner(Runner* r);
+    void register_runner(Runner* r) FL_NO_EXCEPT;
 
     /// Unregister a runner
-    void unregister_runner(Runner* r);
+    void unregister_runner(Runner* r) FL_NO_EXCEPT;
 
     /// Update all registered runners
-    void update_all();
+    void update_all() FL_NO_EXCEPT;
 
     /// Check if there are any active tasks
-    bool has_active_tasks() const;
+    bool has_active_tasks() const FL_NO_EXCEPT;
 
     /// Get total number of active tasks across all runners
-    size_t total_active_tasks() const;
+    size_t total_active_tasks() const FL_NO_EXCEPT;
 
 private:
     fl::vector<Runner*> mRunners;
@@ -133,17 +133,17 @@ private:
 ///
 /// @param microseconds  Budget in microseconds (default 1000 = 1ms)
 /// @param flags         Which subsystems to pump (default ALL)
-void run(fl::u32 microseconds = 1000, ExecFlags flags = ExecFlags::ALL);
+void run(fl::u32 microseconds = 1000, ExecFlags flags = ExecFlags::ALL) FL_NO_EXCEPT;
 
 
 
 /// @brief Get the number of active tasks across all systems
 /// @return Total number of active tasks
-size_t active_tasks();
+size_t active_tasks() FL_NO_EXCEPT;
 
 /// @brief Check if any systems have active tasks
 /// @return True if any tasks are running
-bool has_tasks();
+bool has_tasks() FL_NO_EXCEPT;
 
 /// @brief Synchronously wait for a promise to complete (ONLY safe in top-level contexts)
 /// @tparam T The type of value the promise resolves to (automatically deduced)
@@ -181,7 +181,7 @@ bool has_tasks();
 /// }
 /// @endcode
 template<typename T>
-PromiseResult<T> await_top_level(Promise<T> p) {
+PromiseResult<T> await_top_level(Promise<T> p) FL_NO_EXCEPT {
     // Handle invalid promises
     if (!p.valid()) {
         return PromiseResult<T>(Error("Invalid promise"));

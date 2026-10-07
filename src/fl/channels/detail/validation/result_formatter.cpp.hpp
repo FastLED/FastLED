@@ -6,11 +6,12 @@
 #include "fl/channels/validation.h"
 #include "fl/stl/sstream.h"
 #include "fl/log/log.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace validation {
 
-string formatSummaryTable(const fl::vector<fl::DriverTestResult>& driver_results) {
+string formatSummaryTable(const fl::vector<fl::DriverTestResult>& driver_results) FL_NO_EXCEPT {
     fl::sstream ss;
     ss << "\n╔════════════════════════════════════════════════════════════════╗\n";
     ss << "║ DRIVER VALIDATION SUMMARY                                      ║\n";
@@ -72,7 +73,7 @@ string formatSummaryTable(const fl::vector<fl::DriverTestResult>& driver_results
     return ss.str();
 }
 
-void printSummaryTable(const fl::vector<fl::DriverTestResult>& driver_results) {
+void printSummaryTable(const fl::vector<fl::DriverTestResult>& driver_results) FL_NO_EXCEPT {
     FL_WARN(formatSummaryTable(driver_results).c_str());
 }
 

@@ -57,12 +57,12 @@ static const char* NOTE_NAMES[12] = {
 // Key struct methods
 //------------------------------------------------------------------------------
 
-const char* Key::getRootName() const {
+const char* Key::getRootName() const FL_NO_EXCEPT {
     if (rootNote >= 12) return "?";
     return NOTE_NAMES[rootNote];
 }
 
-void Key::getKeyName(char* buffer, size_t bufferSize) const {
+void Key::getKeyName(char* buffer, size_t bufferSize) const FL_NO_EXCEPT {
     if (bufferSize < 8) return;  // Need space for "C# min\0"
     const char* root = getRootName();
     const char* quality = getQuality();
@@ -74,7 +74,7 @@ void Key::getKeyName(char* buffer, size_t bufferSize) const {
 //------------------------------------------------------------------------------
 
 KeyDetector::KeyDetector()
-    : mCurrentKey()
+    FL_NO_EXCEPT : mCurrentKey()
     , mPreviousKey()
     , mKeyStartTime(0)
     , mKeyActive(false)
@@ -95,7 +95,7 @@ KeyDetector::KeyDetector()
 
 KeyDetector::~KeyDetector() FL_NO_EXCEPT = default;
 
-void KeyDetector::initializeProfileStats() {
+void KeyDetector::initializeProfileStats() FL_NO_EXCEPT {
     // Pre-compute statistics for MAJOR_PROFILE
     float majorSum = 0.0f, majorSqSum = 0.0f;
     for (int i = 0; i < 12; i++) {
@@ -115,7 +115,7 @@ void KeyDetector::initializeProfileStats() {
     mMinorProfileStdDev = fl::sqrtf(minorSqSum / 12.0f - mMinorProfileMean * mMinorProfileMean);
 }
 
-void KeyDetector::update(shared_ptr<Context> context) {
+void KeyDetector::update(shared_ptr<Context> context) FL_NO_EXCEPT {
     // Get fft::FFT data
     mRetainedFFT = context->getFFT(32);  // Use more bins for better pitch resolution
     const fft::Bins& fft = *mRetainedFFT;
@@ -186,7 +186,7 @@ void KeyDetector::update(shared_ptr<Context> context) {
     if (mKeyActive) mFireKey = true;
 }
 
-void KeyDetector::reset() {
+void KeyDetector::reset() FL_NO_EXCEPT {
     mCurrentKey = Key();
     mPreviousKey = Key();
     mKeyStartTime = 0;
@@ -204,7 +204,7 @@ void KeyDetector::reset() {
 // Chroma extraction and processing
 //------------------------------------------------------------------------------
 
-void KeyDetector::extractChroma(const fft::Bins& fft, float* chroma) {
+void KeyDetector::extractChroma(const fft::Bins& fft, float* chroma) FL_NO_EXCEPT {
     // Initialize chroma to zero
     for (int i = 0; i < 12; i++) {
         chroma[i] = 0.0f;
@@ -242,7 +242,7 @@ void KeyDetector::extractChroma(const fft::Bins& fft, float* chroma) {
     }
 }
 
-void KeyDetector::normalizeChroma(float* chroma) {
+void KeyDetector::normalizeChroma(float* chroma) FL_NO_EXCEPT {
     // Find maximum value
     float maxVal = 0.0f;
     for (int i = 0; i < 12; i++) {
@@ -259,7 +259,7 @@ void KeyDetector::normalizeChroma(float* chroma) {
     }
 }
 
-void KeyDetector::updateChromaHistory(const float* chroma) {
+void KeyDetector::updateChromaHistory(const float* chroma) FL_NO_EXCEPT {
     // Add current chroma to history (circular buffer)
     for (int i = 0; i < 12; i++) {
         if (static_cast<int>(mChromaHistory[i].size()) < mAveragingFrames) {
@@ -275,7 +275,7 @@ void KeyDetector::updateChromaHistory(const float* chroma) {
     }
 }
 
-void KeyDetector::getAveragedChroma(float* chroma) {
+void KeyDetector::getAveragedChroma(float* chroma) FL_NO_EXCEPT {
     if (mHistorySize == 0) {
         // No history yet, return zeros
         for (int i = 0; i < 12; i++) {
@@ -298,7 +298,7 @@ void KeyDetector::getAveragedChroma(float* chroma) {
 // Key detection using Krumhansl-Schmuckler algorithm
 //------------------------------------------------------------------------------
 
-Key KeyDetector::detectKey(const float* chroma, u32 timestamp) {
+Key KeyDetector::detectKey(const float* chroma, u32 timestamp) FL_NO_EXCEPT {
     float bestCorrelation = -1.0f;
     u8 bestRoot = 0;
     bool bestIsMinor = false;
@@ -330,7 +330,7 @@ Key KeyDetector::detectKey(const float* chroma, u32 timestamp) {
     return Key(bestRoot, bestIsMinor, confidence, timestamp);
 }
 
-float KeyDetector::correlateWithProfile(const float* chroma, const float* profile, int rootNote) {
+float KeyDetector::correlateWithProfile(const float* chroma, const float* profile, int rootNote) FL_NO_EXCEPT {
     // Pearson correlation coefficient between chroma and rotated profile
     // Uses pre-computed profile statistics (calculated once in constructor)
 
@@ -369,7 +369,7 @@ float KeyDetector::correlateWithProfile(const float* chroma, const float* profil
     return correlation;
 }
 
-void KeyDetector::fireCallbacks() {
+void KeyDetector::fireCallbacks() FL_NO_EXCEPT {
     if (mFireKeyEnd) {
         if (onKeyEnd) onKeyEnd();
         mFireKeyEnd = false;

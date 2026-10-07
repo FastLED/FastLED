@@ -37,7 +37,7 @@ class FxEngine {
      * @brief Constructs an FxEngine with the specified number of LEDs.
      * @param numLeds The number of LEDs in the strip.
      */
-    FxEngine(u16 numLeds, bool interpolate = true);
+    FxEngine(u16 numLeds, bool interpolate = true) FL_NO_EXCEPT;
 
     /**
      * @brief Destructor for FxEngine.
@@ -50,7 +50,7 @@ class FxEngine {
      * @return The index of the added effect, or -1 if the effect couldn't be
      * added.
      */
-    int addFx(FxPtr effect);
+    int addFx(FxPtr effect) FL_NO_EXCEPT;
 
     /**
      * @brief Adds a new effect to the engine. Allocate from static memory.
@@ -60,7 +60,7 @@ class FxEngine {
      *        object has been deleted. But if it's a static object that's
      *        then the object probably wasn't going to be deleted anyway.
      */
-    int addFx(Fx &effect) { return addFx(fl::make_shared_no_tracking(effect)); }
+    int addFx(Fx &effect) FL_NO_EXCEPT { return addFx(fl::make_shared_no_tracking(effect)); }
 
     /**
      * @brief Requests removal of an effect from the engine, which might not
@@ -69,30 +69,30 @@ class FxEngine {
      * @return A pointer to the removed effect, or nullptr if the index was
      * invalid.
      */
-    FxPtr removeFx(int index);
+    FxPtr removeFx(int index) FL_NO_EXCEPT;
 
     /**
      * @brief Retrieves an effect from the engine without removing it.
      * @param index The id of the effect to retrieve.
      * @return A pointer to the effect, or nullptr if the index was invalid.
      */
-    FxPtr getFx(int index);
+    FxPtr getFx(int index) FL_NO_EXCEPT;
 
-    int getCurrentFxId() const { return mCurrId; }
+    int getCurrentFxId() const FL_NO_EXCEPT { return mCurrId; }
 
     /**
      * @brief Renders the current effect or transition to the output buffer.
      * @param now The current time in milliseconds.
      * @param outputBuffer The buffer to render the effect into.
      */
-    bool draw(fl::u32 now, fl::span<CRGB> outputBuffer);
+    bool draw(fl::u32 now, fl::span<CRGB> outputBuffer) FL_NO_EXCEPT;
 
     /**
      * @brief Transitions to the next effect in the sequence.
      * @param duration The duration of the transition in milliseconds.
      * @return True if the transition was initiated, false otherwise.
      */
-    bool nextFx(u16 transition_ms = 500);
+    bool nextFx(u16 transition_ms = 500) FL_NO_EXCEPT;
 
     /**
      * @brief Sets the next effect to transition to.
@@ -100,9 +100,9 @@ class FxEngine {
      * @param duration The duration of the transition in milliseconds.
      * @return True if the transition was set, false if the index was invalid.
      */
-    bool setNextFx(int index, u16 duration);
+    bool setNextFx(int index, u16 duration) FL_NO_EXCEPT;
 
-    IntFxMap &_getEffects() { return mEffects; }
+    IntFxMap &_getEffects() FL_NO_EXCEPT { return mEffects; }
 
     /**
      * @brief Pushes an audio frame into the back buffer.
@@ -111,7 +111,7 @@ class FxEngine {
      * next draw(), all accumulated frames are frozen and delivered to
      * effects via DrawContext::audio.
      */
-    void pushAudioFrame(const AudioFrame &frame);
+    void pushAudioFrame(const AudioFrame &frame) FL_NO_EXCEPT;
 
     /**
      * @brief Connects an audio processor for automatic audio delivery.
@@ -119,15 +119,15 @@ class FxEngine {
      * Each draw() polls the processor's current levels and pushes one
      * AudioFrame. Wire once in setup(), forget about it.
      */
-    void setAudio(fl::shared_ptr<fl::audio::Processor> proc);
+    void setAudio(fl::shared_ptr<fl::audio::Processor> proc) FL_NO_EXCEPT;
 
     /**
      * @brief Sets the speed of the fx engine, which will impact the speed of
      * all effects.
      * @param timeScale The new time scale value.
      */
-    void setSpeed(float scale) { mTimeFunction.setSpeed(scale); }
-    float getSpeed() const { return mTimeFunction.scale(); }
+    void setSpeed(float scale) FL_NO_EXCEPT { mTimeFunction.setSpeed(scale); }
+    float getSpeed() const FL_NO_EXCEPT { return mTimeFunction.scale(); }
 
   private:
     int mCounter = 0;

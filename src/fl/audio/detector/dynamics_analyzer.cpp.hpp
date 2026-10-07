@@ -8,7 +8,7 @@ namespace audio {
 namespace detector {
 
 DynamicsAnalyzer::DynamicsAnalyzer()
-    : mHistorySize(86)  // ~2 seconds at 43fps
+    FL_NO_EXCEPT : mHistorySize(86)  // ~2 seconds at 43fps
     , mHistoryIndex(0)
     , mCurrentRMS(0.0f)
     , mAverageRMS(0.0f)
@@ -30,7 +30,7 @@ DynamicsAnalyzer::DynamicsAnalyzer()
 
 DynamicsAnalyzer::~DynamicsAnalyzer() FL_NO_EXCEPT = default;
 
-void DynamicsAnalyzer::update(shared_ptr<Context> context) {
+void DynamicsAnalyzer::update(shared_ptr<Context> context) FL_NO_EXCEPT {
     mCurrentRMS = context->getRMS();
     u32 timestamp = context->getTimestamp();
 
@@ -79,7 +79,7 @@ void DynamicsAnalyzer::update(shared_ptr<Context> context) {
     mLastUpdateTime = timestamp;
 }
 
-void DynamicsAnalyzer::fireCallbacks() {
+void DynamicsAnalyzer::fireCallbacks() FL_NO_EXCEPT {
     if (mIsCrescendo && !mPrevIsCrescendo && onCrescendo) {
         onCrescendo();
     }
@@ -94,7 +94,7 @@ void DynamicsAnalyzer::fireCallbacks() {
     }
 }
 
-void DynamicsAnalyzer::reset() {
+void DynamicsAnalyzer::reset() FL_NO_EXCEPT {
     mRMSHistory.clear();
     mHistoryIndex = 0;
     mCurrentRMS = 0.0f;
@@ -110,7 +110,7 @@ void DynamicsAnalyzer::reset() {
     mLastUpdateTime = 0;
 }
 
-float DynamicsAnalyzer::calculateTrend() {
+float DynamicsAnalyzer::calculateTrend() FL_NO_EXCEPT {
     if (mRMSHistory.size() < 10) {
         return 0.0f;  // Not enough data
     }
@@ -149,7 +149,7 @@ float DynamicsAnalyzer::calculateTrend() {
     return fl::max(-1.0f, fl::min(1.0f, rawTrend * 5.0f));
 }
 
-void DynamicsAnalyzer::updatePeak(float rms) {
+void DynamicsAnalyzer::updatePeak(float rms) FL_NO_EXCEPT {
     if (rms > mPeakRMS) {
         mPeakRMS = rms;
     } else {
@@ -158,7 +158,7 @@ void DynamicsAnalyzer::updatePeak(float rms) {
     }
 }
 
-void DynamicsAnalyzer::updateCompression() {
+void DynamicsAnalyzer::updateCompression() FL_NO_EXCEPT {
     // Calculate dynamic range compression ratio
     // Compression ratio = (peak - min) / peak
     // High compression (near 1.0) = small dynamic range
@@ -176,18 +176,18 @@ void DynamicsAnalyzer::updateCompression() {
     mCompressionRatio = fl::max(0.0f, fl::min(1.0f, mCompressionRatio));
 }
 
-void DynamicsAnalyzer::setHistorySize(fl::size size) {
+void DynamicsAnalyzer::setHistorySize(fl::size size) FL_NO_EXCEPT {
     mHistorySize = size;
     mRMSHistory.clear();
     mRMSHistory.reserve(size);
     mHistoryIndex = 0;
 }
 
-void DynamicsAnalyzer::setTrendThreshold(float threshold) {
+void DynamicsAnalyzer::setTrendThreshold(float threshold) FL_NO_EXCEPT {
     mTrendThreshold = threshold;
 }
 
-void DynamicsAnalyzer::setSmoothingFactor(float alpha) {
+void DynamicsAnalyzer::setSmoothingFactor(float alpha) FL_NO_EXCEPT {
     // Clamp to 0-1
     mSmoothingFactor = fl::max(0.0f, fl::min(1.0f, alpha));
 }

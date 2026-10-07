@@ -101,7 +101,7 @@ class HashMapLru {
     }
 
     // Access operator - creates entry if not exists
-    T &operator[](const Key &key) {
+    T &operator[](const Key &key) FL_NO_EXCEPT {
         // If we're at capacity and this is a new key, evict oldest
         auto curr = mCurrentTime++;
 

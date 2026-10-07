@@ -46,7 +46,7 @@ struct handle {
         , platform_id(0)
     {}
 
-    bool is_valid() const { return platform_handle != nullptr; }
+    bool is_valid() const FL_NO_EXCEPT { return platform_handle != nullptr; }
 };
 
 // Backward-compatible type aliases
@@ -55,40 +55,40 @@ using isr_config_t = config;
 using isr_handle_t = handle;
 
 /// Attach a timer-based ISR handler.
-int attach_timer_handler(const config& cfg, handle* out_handle = nullptr);
+int attach_timer_handler(const config& cfg, handle* out_handle = nullptr) FL_NO_EXCEPT;
 
 /// Attach an external interrupt handler (GPIO-based).
-int attach_external_handler(u8 pin, const config& cfg, handle* out_handle = nullptr);
+int attach_external_handler(u8 pin, const config& cfg, handle* out_handle = nullptr) FL_NO_EXCEPT;
 
 /// Detach an ISR handler.
-int detach_handler(handle& h);
+int detach_handler(handle& h) FL_NO_EXCEPT;
 
 /// Enable an ISR (after temporary disable).
-int enable_handler(handle& h);
+int enable_handler(handle& h) FL_NO_EXCEPT;
 
 /// Disable an ISR temporarily (without detaching).
-int disable_handler(handle& h);
+int disable_handler(handle& h) FL_NO_EXCEPT;
 
 /// Query if an ISR is currently enabled.
-bool is_handler_enabled(const handle& h);
+bool is_handler_enabled(const handle& h) FL_NO_EXCEPT;
 
 /// Get platform-specific error description.
-const char* get_error_string(int error_code);
+const char* get_error_string(int error_code) FL_NO_EXCEPT;
 
 /// Get the platform name.
-const char* get_platform_name();
+const char* get_platform_name() FL_NO_EXCEPT;
 
 /// Get the maximum timer frequency supported by this platform.
-u32 get_max_timer_frequency();
+u32 get_max_timer_frequency() FL_NO_EXCEPT;
 
 /// Get the minimum timer frequency supported by this platform.
-u32 get_min_timer_frequency();
+u32 get_min_timer_frequency() FL_NO_EXCEPT;
 
 /// Get the maximum priority level supported by this platform.
-u8 get_max_priority();
+u8 get_max_priority() FL_NO_EXCEPT;
 
 /// Check if assembly is required for a given priority level.
-bool requires_assembly_handler(u8 priority);
+bool requires_assembly_handler(u8 priority) FL_NO_EXCEPT;
 
 } // namespace isr
 } // namespace fl

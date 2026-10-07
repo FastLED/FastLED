@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fl/stl/int.h"
+#include "fl/stl/noexcept.h"
 
 /// @file heap.h
 /// Platform-abstracted heap memory query functions
@@ -18,10 +19,10 @@ struct HeapInfo {
     fl::size free_psram;  ///< Free PSRAM in bytes (external slower memory, 0 if not available)
 
     /// @brief Total free heap (SRAM + PSRAM)
-    fl::size total() const { return free_sram + free_psram; }
+    fl::size total() const FL_NO_EXCEPT { return free_sram + free_psram; }
 
     /// @brief Check if PSRAM is available
-    bool has_psram() const { return free_psram > 0; }
+    bool has_psram() const FL_NO_EXCEPT { return free_psram > 0; }
 };
 
 /// @brief Query available heap memory
@@ -46,6 +47,6 @@ struct HeapInfo {
 ///     // PSRAM is available
 /// }
 /// @endcode
-HeapInfo getFreeHeap();
+HeapInfo getFreeHeap() FL_NO_EXCEPT;
 
 } // namespace fl

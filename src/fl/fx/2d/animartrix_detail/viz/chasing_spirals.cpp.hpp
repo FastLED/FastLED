@@ -21,6 +21,7 @@
 #include "fl/math/simd.h"
 #include "fl/math/sin32_simd.h"
 #include "fl/fx/2d/animartrix_detail/viz/chasing_spirals.h"
+#include "fl/stl/noexcept.h"
 
 FL_FAST_MATH_BEGIN
 FL_OPTIMIZATION_LEVEL_O3_BEGIN
@@ -56,18 +57,18 @@ struct FrameSetup {
 };
 
 // Convert s16x16 angle (radians) to A24 format for sincos32
-FASTLED_FORCE_INLINE u32 radiansToA24(i32 base_s16x16, i32 offset_s16x16) {
+FASTLED_FORCE_INLINE u32 radiansToA24(i32 base_s16x16, i32 offset_s16x16) FL_NO_EXCEPT {
     constexpr i32 RAD_TO_A24 = 2670177;
     return static_cast<u32>((static_cast<i64>(base_s16x16 + offset_s16x16) * RAD_TO_A24) >> FP::FRAC_BITS);
 }
 
 // Compute Perlin coordinate from sincos result and distance
-FASTLED_FORCE_INLINE i32 perlinCoord(i32 sc_val, i32 dist_raw, i32 offset) {
+FASTLED_FORCE_INLINE i32 perlinCoord(i32 sc_val, i32 dist_raw, i32 offset) FL_NO_EXCEPT {
     return offset - static_cast<i32>((static_cast<i64>(sc_val) * dist_raw) >> 31);
 }
 
 // Clamp s16x16 value to [0, 1] and scale to [0, 255]
-FASTLED_FORCE_INLINE i32 clampAndScale255(i32 raw_s16x16) {
+FASTLED_FORCE_INLINE i32 clampAndScale255(i32 raw_s16x16) FL_NO_EXCEPT {
     constexpr i32 FP_ONE = static_cast<i32>(1) << FP::FRAC_BITS;
     if (raw_s16x16 < 0) raw_s16x16 = 0;
     if (raw_s16x16 > FP_ONE) raw_s16x16 = FP_ONE;
@@ -75,7 +76,7 @@ FASTLED_FORCE_INLINE i32 clampAndScale255(i32 raw_s16x16) {
 }
 
 // Apply radial filter to noise value and clamp to [0, 255]
-FASTLED_FORCE_INLINE i32 applyRadialFilter(i32 noise_255, i32 rf_raw) {
+FASTLED_FORCE_INLINE i32 applyRadialFilter(i32 noise_255, i32 rf_raw) FL_NO_EXCEPT {
     i32 result = static_cast<i32>((static_cast<i64>(noise_255) * rf_raw) >> (FP::FRAC_BITS * 2));
     if (result < 0) result = 0;
     if (result > 255) result = 255;
@@ -90,14 +91,14 @@ FASTLED_FORCE_INLINE i32 applyRadialFilter(i32 noise_255, i32 rf_raw) {
 // emit aligned SIMD loads (e.g. movaps/movdqa on x86) instead of unaligned ones
 // (movups/movdqu), which avoids a micro-op penalty on older cores and removes
 // a redundant alignment check on modern ones.
-FASTLED_FORCE_INLINE simd::simd_u32x4 loadAligned(const i32 *arr, int i) {
+FASTLED_FORCE_INLINE simd::simd_u32x4 loadAligned(const i32 *arr, int i) FL_NO_EXCEPT {
     return simd::load_u32_4_aligned(
         fl::assume_aligned<16>(reinterpret_cast<const u32*>(arr + i))); // ok reinterpret cast
 }
 
 // Write one pixel from per-channel SIMD registers at the given lane.
 FASTLED_FORCE_INLINE void scatterPixel(fl::span<CRGB> leds, u16 idx,
-    simd::simd_u32x4 r, simd::simd_u32x4 g, simd::simd_u32x4 b, int lane) {
+    simd::simd_u32x4 r, simd::simd_u32x4 g, simd::simd_u32x4 b, int lane) FL_NO_EXCEPT {
     leds[idx] = CRGB(static_cast<u8>(simd::extract_u32_4(r, lane)),
                      static_cast<u8>(simd::extract_u32_4(g, lane)),
                      static_cast<u8>(simd::extract_u32_4(b, lane)));
@@ -109,7 +110,7 @@ simd::simd_u32x4 simd4_processChannel(
     simd::simd_u32x4 base_vec, simd::simd_u32x4 dist_vec,
     i32 radial_offset, i32 linear_offset,
     const i32 *fade_lut, const u8 *perm, i32 cx_raw, i32 cy_raw,
-    simd::simd_u32x4 rf_vec) {
+    simd::simd_u32x4 rf_vec) FL_NO_EXCEPT {
 
     constexpr i32 RAD_TO_A24 = 2670177;
 
@@ -147,7 +148,7 @@ simd::simd_u32x4 simd4_processChannel(
 // Extract common frame setup logic shared by all variants.
 // Builds SoA geometry cache lazily (once when grid size changes).
 // state is the caller's per-instance ChasingSpiralState member (not a global).
-FrameSetup setupChasingSpiralFrame(Context &ctx, ChasingSpiralState &state) {
+FrameSetup setupChasingSpiralFrame(Context &ctx, ChasingSpiralState &state) FL_NO_EXCEPT {
     auto *e = ctx.mEngine.get();
     e->get_ready();
 
@@ -289,7 +290,7 @@ FrameSetup setupChasingSpiralFrame(Context &ctx, ChasingSpiralState &state) {
 // Float Implementation (original algorithm, uses v2 Engine)
 // ============================================================================
 
-void Chasing_Spirals_Float::draw(Context &ctx) {
+void Chasing_Spirals_Float::draw(Context &ctx) FL_NO_EXCEPT {
     auto *e = ctx.mEngine.get();
     e->get_ready();
 
@@ -359,7 +360,7 @@ void Chasing_Spirals_Float::draw(Context &ctx) {
 // Q31 Scalar Implementation (fixed-point, non-vectorized)
 // ============================================================================
 
-void Chasing_Spirals_Q31::draw(Context &ctx) {
+void Chasing_Spirals_Q31::draw(Context &ctx) FL_NO_EXCEPT {
     auto setup = setupChasingSpiralFrame(ctx, mState);
     const int total_pixels  = setup.total_pixels;
     const i32 *fade_lut     = setup.fade_lut;
@@ -413,7 +414,7 @@ void Chasing_Spirals_Q31::draw(Context &ctx) {
 // SIMD Implementation (vectorized 4-wide processing)
 // ============================================================================
 
-void Chasing_Spirals_Q31_SIMD::draw(Context &ctx) {
+void Chasing_Spirals_Q31_SIMD::draw(Context &ctx) FL_NO_EXCEPT {
     auto setup = setupChasingSpiralFrame(ctx, mState);
     const int   total_pixels  = setup.total_pixels;
     const i32  *base_angle    = setup.base_angle;

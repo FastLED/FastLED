@@ -19,7 +19,7 @@ namespace spi {
 // ============================================================================
 
 Device::Device(const Config& config)
-    : pImpl(fl::make_unique<Impl>(config)) {
+    FL_NO_EXCEPT : pImpl(fl::make_unique<Impl>(config)) {
     FL_LOG_SPI("SPI Device: Created with clock=" << config.clock_pin << " data_pins.size()=" << config.data_pins.size());
 }
 
@@ -41,7 +41,7 @@ Device::~Device() FL_NO_EXCEPT {
     FL_LOG_SPI("SPI Device: Destructor complete");
 }
 
-fl::optional<fl::task::Error> Device::begin() {
+fl::optional<fl::task::Error> Device::begin() FL_NO_EXCEPT {
     if (!pImpl) {
         return fl::task::Error("Device not initialized");
     }
@@ -122,7 +122,7 @@ fl::optional<fl::task::Error> Device::begin() {
     return fl::nullopt;
 }
 
-void Device::end() {
+void Device::end() FL_NO_EXCEPT {
     if (!pImpl || !pImpl->initialized) {
         return;
     }
@@ -147,7 +147,7 @@ void Device::end() {
     FL_LOG_SPI("SPI Device: Shutdown complete");
 }
 
-bool Device::isReady() const {
+bool Device::isReady() const FL_NO_EXCEPT {
     return pImpl && pImpl->initialized;
 }
 
@@ -179,7 +179,7 @@ bool Device::isReady() const {
 // Transaction API (Primary Interface)
 // ============================================================================
 
-Result<Transaction> Device::writeAsync(const u8* data, size_t size) {
+Result<Transaction> Device::writeAsync(const u8* data, size_t size) FL_NO_EXCEPT {
     if (!isReady()) {
         return Result<Transaction>::failure(SPIError::NOT_INITIALIZED, "Device not initialized");
     }
@@ -254,7 +254,7 @@ Result<Transaction> Device::writeAsync(const u8* data, size_t size) {
 //         "Async full-duplex transfer not supported - LED strips are TX-only. Use writeAsync() for transmission.");
 // }
 
-DMABuffer Device::acquireBuffer(size_t size) {
+DMABuffer Device::acquireBuffer(size_t size) FL_NO_EXCEPT {
     if (!isReady()) {
         return DMABuffer(SPIError::NOT_INITIALIZED);
     }
@@ -281,7 +281,7 @@ DMABuffer Device::acquireBuffer(size_t size) {
     return buffer;
 }
 
-fl::optional<fl::task::Error> Device::transmit(DMABuffer& buffer, bool async) {
+fl::optional<fl::task::Error> Device::transmit(DMABuffer& buffer, bool async) FL_NO_EXCEPT {
     if (!isReady()) {
         return fl::task::Error("Device not initialized");
     }
@@ -320,7 +320,7 @@ fl::optional<fl::task::Error> Device::transmit(DMABuffer& buffer, bool async) {
     return fl::nullopt;
 }
 
-bool Device::waitComplete(u32 timeout_ms) {
+bool Device::waitComplete(u32 timeout_ms) FL_NO_EXCEPT {
     if (!isReady()) {
         return false;
     }
@@ -337,7 +337,7 @@ bool Device::waitComplete(u32 timeout_ms) {
     return hw->waitComplete(timeout_ms);
 }
 
-bool Device::isBusy() const {
+bool Device::isBusy() const FL_NO_EXCEPT {
     if (!isReady()) {
         return false;
     }
@@ -353,7 +353,7 @@ bool Device::isBusy() const {
     return hw->isBusy();
 }
 
-fl::optional<fl::task::Error> Device::setClockSpeed(u32 speed_hz) {
+fl::optional<fl::task::Error> Device::setClockSpeed(u32 speed_hz) FL_NO_EXCEPT {
     if (!pImpl) {
         return fl::task::Error("Device not initialized");
     }
@@ -374,7 +374,7 @@ fl::optional<fl::task::Error> Device::setClockSpeed(u32 speed_hz) {
     return fl::nullopt;
 }
 
-const Config& Device::getConfig() const {
+const Config& Device::getConfig() const FL_NO_EXCEPT {
     // Note: Caller must ensure Device is valid
     return pImpl->config;
 }
@@ -383,7 +383,7 @@ const Config& Device::getConfig() const {
 // Transaction Implementation (Stub)
 // ============================================================================
 
-Transaction::Transaction() : pImpl(nullptr) {}
+Transaction::Transaction() FL_NO_EXCEPT : pImpl(nullptr) {}
 
 Transaction::Transaction(Transaction&& other) FL_NO_EXCEPT
     : pImpl(fl::move(other.pImpl)) {
@@ -405,7 +405,7 @@ Transaction::~Transaction() FL_NO_EXCEPT {
     }
 }
 
-bool Transaction::wait(u32 timeout_ms) {
+bool Transaction::wait(u32 timeout_ms) FL_NO_EXCEPT {
     if (!pImpl) {
         return true;  // Already completed (or invalid)
     }
@@ -459,15 +459,15 @@ bool Transaction::wait(u32 timeout_ms) {
     }
 }
 
-bool Transaction::isDone() const {
+bool Transaction::isDone() const FL_NO_EXCEPT {
     return pImpl ? pImpl->completed : true;
 }
 
-bool Transaction::isPending() const {
+bool Transaction::isPending() const FL_NO_EXCEPT {
     return pImpl ? !pImpl->completed : false;
 }
 
-bool Transaction::cancel() {
+bool Transaction::cancel() FL_NO_EXCEPT {
     if (!pImpl || pImpl->completed) {
         return false;  // Already completed or invalid
     }
@@ -489,7 +489,7 @@ bool Transaction::cancel() {
     return true;
 }
 
-fl::optional<fl::task::Error> Transaction::getResult() const {
+fl::optional<fl::task::Error> Transaction::getResult() const FL_NO_EXCEPT {
     if (!pImpl) {
         return fl::task::Error("Invalid transaction");
     }

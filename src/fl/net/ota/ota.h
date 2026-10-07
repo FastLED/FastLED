@@ -139,7 +139,7 @@ public:
     /// @return true if setup successful, false otherwise
     /// @note This function returns immediately and Wi-Fi connects asynchronously. Use isConnected() to check status.
     bool beginWiFi(const char* hostname, const char* password,
-                   const char* ssid, const char* wifi_pass);
+                   const char* ssid, const char* wifi_pass) FL_NO_EXCEPT;
 
     /// @brief Start OTA services only (network already configured)
     /// @param hostname Device hostname (used for mDNS)
@@ -147,7 +147,7 @@ public:
     /// @return true if setup successful, false otherwise
     /// @note Use this when you've already configured Wi-Fi or Ethernet yourself
     /// @note For Ethernet users: Call ETH.begin() first, then use this method
-    bool begin(const char* hostname, const char* password);
+    bool begin(const char* hostname, const char* password) FL_NO_EXCEPT;
 
     // ========== Optional Configuration ==========
 
@@ -156,7 +156,7 @@ public:
     /// @param ap_pass Access Point password (minimum 8 characters, use nullptr for open AP)
     /// @return true if parameters are valid, false if validation fails
     /// @note Must be called before beginWiFi(). Only applies to Wi-Fi mode.
-    bool enableApFallback(const char* ap_ssid, const char* ap_pass = nullptr);
+    bool enableApFallback(const char* ap_ssid, const char* ap_pass = nullptr) FL_NO_EXCEPT;
 
     // ========== Callback Registration ==========
 
@@ -175,35 +175,35 @@ public:
 
     /// @brief Set progress callback (called during firmware upload)
     /// @param callback Callback function (supports lambdas, function pointers, functors)
-    void onProgress(ProgressCallback callback);
+    void onProgress(ProgressCallback callback) FL_NO_EXCEPT;
 
     /// @brief Set error callback (called on OTA errors)
     /// @param callback Callback function (supports lambdas, function pointers, functors)
-    void onError(ErrorCallback callback);
+    void onError(ErrorCallback callback) FL_NO_EXCEPT;
 
     /// @brief Set state callback (called on state transitions)
     /// @param callback Callback function (supports lambdas, function pointers, functors)
-    void onState(StateCallback callback);
+    void onState(StateCallback callback) FL_NO_EXCEPT;
 
     /// @brief Set callback to be called before device reboots after OTA update
     /// @param callback Callback function to call (e.g., to save state, turn off LEDs)
     /// @note This callback is called after successful OTA update, before device reboots
-    void onBeforeReboot(void (*callback)());
+    void onBeforeReboot(void (*callback)()) FL_NO_EXCEPT;
 
     // ========== Runtime Methods ==========
 
     /// @brief Poll OTA handlers (must be called regularly in loop())
     /// @note Low overhead: ~10-73µs when idle. Web OTA runs in separate task (zero overhead).
-    void poll();
+    void poll() FL_NO_EXCEPT;
 
     /// @brief Check if WiFi is connected
     /// @return true if WiFi connection is established
-    bool isConnected() const;
+    bool isConnected() const FL_NO_EXCEPT;
 
     /// @brief Get bitmask of services that failed to initialize
     /// @return Bitfield of ota::Service flags indicating which services failed
     /// @note Check specific services with: (getFailedServices() & (uint8_t)ota::Service::MDNS_FAILED)
-    u8 getFailedServices() const;
+    u8 getFailedServices() const FL_NO_EXCEPT;
 
 private:
     // Platform-specific implementation (lazy initialized via shared_ptr)

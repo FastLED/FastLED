@@ -1,12 +1,24 @@
 #pragma once
 
-// FL_NO_EXCEPT: intentionally a noop on all platforms.
-// noexcept was causing too many platform compatibility issues (AVR, WASM, etc.)
-// so it is disabled everywhere until a robust cross-platform solution is found.
+// Load SDK target definitions before selecting the exception contract. This
+// also makes selection independent of whether FastLED.h was included first.
+#include "platforms/is_platform.h" // IWYU pragma: keep
 
 #ifndef FL_NO_EXCEPT
+#if defined(FL_IS_ESP)
+#define FL_NO_EXCEPT noexcept
+#define FL_HAS_NOEXCEPT 1
+#else
 #define FL_NO_EXCEPT
 #endif
+#endif
+
+// External overrides retain their existing caller-owned capability contract:
+// define FL_HAS_NOEXCEPT as 1 alongside an override that guarantees no throw.
+// Leave the flag absent for empty or potentially throwing overrides. When an
+// external override omits the flag, the library makes no capability claim.
+// Arbitrary conditional C++ noexcept expressions cannot be evaluated by the
+// preprocessor, so preserve them without attempting token-based classification.
 
 // Destructor-only exception specification. Destructors in ownership chains
 // that only release memory can opt in without re-enabling FL_NO_EXCEPT across
@@ -15,11 +27,5 @@
 #define FL_DTOR_NOEXCEPT noexcept
 #endif
 
-// FL_HAS_NOEXCEPT: defined (as 1) when FL_NO_EXCEPT actually expands to the
-// real noexcept keyword.  Currently FL_NO_EXCEPT is always a noop, so
-// FL_HAS_NOEXCEPT is never defined.  Code that checks whether noexcept is
-// in effect (e.g. static_assert(noexcept(...))) must be gated on this macro.
-//
-// When noexcept support is eventually re-enabled for a platform, add:
-//   #define FL_NO_EXCEPT noexcept
-//   #define FL_HAS_NOEXCEPT 1
+// FastLED assumes nonthrowing operations, including user callbacks. System
+// exception frames and crash diagnostics remain owned by the platform.

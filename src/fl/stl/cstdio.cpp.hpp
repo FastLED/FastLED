@@ -7,12 +7,13 @@
 // Platform-specific I/O function declarations
 // Each platform provides implementations in their .cpp.hpp files
 #include "platforms/io.h"
+#include "fl/stl/noexcept.h"
 
 // Forward declare delay to avoid Arduino conflict
 namespace fl {
-    void delayMicroseconds(u32 us);
+    void delayMicroseconds(u32 us) FL_NO_EXCEPT;
     namespace detail {
-        void delay_impl(u32 ms, bool run_async);
+        void delay_impl(u32 ms, bool run_async) FL_NO_EXCEPT;
     }
 }
 
@@ -25,11 +26,11 @@ namespace fl {
 // Default log level is DEBUG (all logging enabled)
 static u8 gLogLevel = static_cast<u8>(LogLevel::FL_LOG_LEVEL_DEBUG);
 
-u8 getLogLevel() {
+u8 getLogLevel() FL_NO_EXCEPT {
     return gLogLevel;
 }
 
-void setLogLevel(u8 level) {
+void setLogLevel(u8 level) FL_NO_EXCEPT {
     gLogLevel = level;
 }
 
@@ -43,38 +44,38 @@ namespace fl {
 
 #ifdef FASTLED_TESTING
 // Static storage for injected handlers using lazy initialization to avoid global constructors
-static print_handler_t& get_print_handler() {
+static print_handler_t& get_print_handler() FL_NO_EXCEPT {
     static print_handler_t handler;
     return handler;
 }
 
-static println_handler_t& get_println_handler() {
+static println_handler_t& get_println_handler() FL_NO_EXCEPT {
     static println_handler_t handler;
     return handler;
 }
 
-static available_handler_t& get_available_handler() {
+static available_handler_t& get_available_handler() FL_NO_EXCEPT {
     static available_handler_t handler;
     return handler;
 }
 
-static read_handler_t& get_read_handler() {
+static read_handler_t& get_read_handler() FL_NO_EXCEPT {
     static read_handler_t handler;
     return handler;
 }
 
-static flush_handler_t& get_flush_handler() {
+static flush_handler_t& get_flush_handler() FL_NO_EXCEPT {
     static flush_handler_t handler;
     return handler;
 }
 
-static write_bytes_handler_t& get_write_bytes_handler() {
+static write_bytes_handler_t& get_write_bytes_handler() FL_NO_EXCEPT {
     static write_bytes_handler_t handler;
     return handler;
 }
 #endif
 
-void print(const char* str) {
+void print(const char* str) FL_NO_EXCEPT {
     if (!str) return;
     // Check global log level - if NONE, suppress all output
     if (gLogLevel == static_cast<u8>(LogLevel::FL_LOG_LEVEL_NONE)) return;
@@ -91,7 +92,7 @@ void print(const char* str) {
     platforms::print(str);
 }
 
-void println(const char* str) {
+void println(const char* str) FL_NO_EXCEPT {
     if (!str) return;
     // Check global log level - if NONE, suppress all output
     if (gLogLevel == static_cast<u8>(LogLevel::FL_LOG_LEVEL_NONE)) return;
@@ -108,7 +109,7 @@ void println(const char* str) {
     platforms::println(str);
 }
 
-int available() {
+int available() FL_NO_EXCEPT {
 #ifdef FASTLED_TESTING
     // Check for injected handler first
     if (get_available_handler()) {
@@ -120,11 +121,11 @@ int available() {
     return platforms::available();
 }
 
-int peek() {
+int peek() FL_NO_EXCEPT {
     return platforms::peek();
 }
 
-int read() {
+int read() FL_NO_EXCEPT {
 #ifdef FASTLED_TESTING
     // Check for injected handler first
     if (get_read_handler()) {
@@ -136,7 +137,7 @@ int read() {
     return platforms::read();
 }
 
-bool readStringUntil(sstream& out, char delimiter, char skipChar, fl::optional<u32> timeoutMs) {
+bool readStringUntil(sstream& out, char delimiter, char skipChar, fl::optional<u32> timeoutMs) FL_NO_EXCEPT {
     // Follows Arduino Serial.readStringUntil() API - blocks until delimiter found
     u32 startTime = fl::millis();
 
@@ -182,7 +183,7 @@ bool readStringUntil(sstream& out, char delimiter, char skipChar, fl::optional<u
     return true;
 }
 
-fl::optional<fl::string> readLine(char delimiter, char skipChar, fl::optional<u32> timeoutMs) {
+fl::optional<fl::string> readLine(char delimiter, char skipChar, fl::optional<u32> timeoutMs) FL_NO_EXCEPT {
     // Try platform-native line reading first (e.g., Arduino's Serial.readStringUntil).
     // This is critical for USB CDC platforms (ESP32-C6/S3) where the native
     // implementation uses yield() (immediate context switch) instead of
@@ -205,7 +206,7 @@ fl::optional<fl::string> readLine(char delimiter, char skipChar, fl::optional<u3
     return fl::string(result.trim());
 }
 
-bool flush(u32 timeoutMs) {
+bool flush(u32 timeoutMs) FL_NO_EXCEPT {
 #ifdef FASTLED_TESTING
     if (get_flush_handler()) {
         return get_flush_handler()(timeoutMs);
@@ -214,7 +215,7 @@ bool flush(u32 timeoutMs) {
     return platforms::flush(timeoutMs);
 }
 
-size_t write_bytes(const u8* buffer, size_t size) {
+size_t write_bytes(const u8* buffer, size_t size) FL_NO_EXCEPT {
     if (!buffer || size == 0) return 0;
 #ifdef FASTLED_TESTING
     if (get_write_bytes_handler()) {
@@ -225,12 +226,12 @@ size_t write_bytes(const u8* buffer, size_t size) {
 }
 
 #if !FL_SERIAL_BEGIN_INLINE
-void serial_begin(u32 baudRate) {
+void serial_begin(u32 baudRate) FL_NO_EXCEPT {
     platforms::begin(baudRate);
 }
 #endif
 
-bool serial_ready() {
+bool serial_ready() FL_NO_EXCEPT {
     return platforms::serial_ready();
 }
 
@@ -243,32 +244,32 @@ bool serial_ready() {
 #ifdef FASTLED_TESTING
 
 // Inject function handlers for testing
-void inject_print_handler(const print_handler_t& handler) {
+void inject_print_handler(const print_handler_t& handler) FL_NO_EXCEPT {
     get_print_handler() = handler;
 }
 
-void inject_println_handler(const println_handler_t& handler) {
+void inject_println_handler(const println_handler_t& handler) FL_NO_EXCEPT {
     get_println_handler() = handler;
 }
 
-void inject_available_handler(const available_handler_t& handler) {
+void inject_available_handler(const available_handler_t& handler) FL_NO_EXCEPT {
     get_available_handler() = handler;
 }
 
-void inject_read_handler(const read_handler_t& handler) {
+void inject_read_handler(const read_handler_t& handler) FL_NO_EXCEPT {
     get_read_handler() = handler;
 }
 
-void inject_flush_handler(const flush_handler_t& handler) {
+void inject_flush_handler(const flush_handler_t& handler) FL_NO_EXCEPT {
     get_flush_handler() = handler;
 }
 
-void inject_write_bytes_handler(const write_bytes_handler_t& handler) {
+void inject_write_bytes_handler(const write_bytes_handler_t& handler) FL_NO_EXCEPT {
     get_write_bytes_handler() = handler;
 }
 
 // Clear all injected handlers (restores default behavior)
-void clear_io_handlers() {
+void clear_io_handlers() FL_NO_EXCEPT {
     get_print_handler() = print_handler_t{};
     get_println_handler() = println_handler_t{};
     get_available_handler() = available_handler_t{};
@@ -278,27 +279,27 @@ void clear_io_handlers() {
 }
 
 // Clear individual handlers
-void clear_print_handler() {
+void clear_print_handler() FL_NO_EXCEPT {
     get_print_handler() = print_handler_t{};
 }
 
-void clear_println_handler() {
+void clear_println_handler() FL_NO_EXCEPT {
     get_println_handler() = println_handler_t{};
 }
 
-void clear_available_handler() {
+void clear_available_handler() FL_NO_EXCEPT {
     get_available_handler() = available_handler_t{};
 }
 
-void clear_read_handler() {
+void clear_read_handler() FL_NO_EXCEPT {
     get_read_handler() = read_handler_t{};
 }
 
-void clear_flush_handler() {
+void clear_flush_handler() FL_NO_EXCEPT {
     get_flush_handler() = flush_handler_t{};
 }
 
-void clear_write_bytes_handler() {
+void clear_write_bytes_handler() FL_NO_EXCEPT {
     get_write_bytes_handler() = write_bytes_handler_t{};
 }
 
@@ -307,7 +308,7 @@ void clear_write_bytes_handler() {
 // objects may allocate memory during construction, and if the first
 // access happens during a memory allocation callback, we get recursion.
 namespace cstdio_init {
-    void init_io_handlers() {
+    void init_io_handlers() FL_NO_EXCEPT {
         // Touch each handler to force initialization during static construction
         (void)get_print_handler();
         (void)get_println_handler();

@@ -29,6 +29,7 @@
 #include "crgb.h"
 #include "fl/stl/variant.h"  // for PixelControllerAny.
 #include "fl/gfx/binary_dither.h"  // last: reads NO_DITHERING, like the code it replaced
+#include "fl/stl/noexcept.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_SIGN_CONVERSION
@@ -82,7 +83,7 @@ struct ColorAdjustment {
 
     /// Create a ColorAdjustment with no scaling or brightness adjustment
     /// Static functions are allowed without breaking POD compatibility
-    static ColorAdjustment noAdjustment() {
+    static ColorAdjustment noAdjustment() FL_NO_EXCEPT {
         ColorAdjustment adj;
         adj.premixed = CRGB(255, 255, 255);
         #if FASTLED_HD_COLOR_MIXING
@@ -120,11 +121,11 @@ struct PixelController {
     /// instantiation and permute at runtime (FastLED#4402).
     static constexpr EOrder kColorOrder = RGB_ORDER;
 
-    FASTLED_FORCE_INLINE fl::PixelIterator as_iterator(const Rgbw& rgbw) {
+    FASTLED_FORCE_INLINE fl::PixelIterator as_iterator(const Rgbw& rgbw) FL_NO_EXCEPT {
         return fl::PixelIterator(this, rgbw);
     }
 
-    void disableColorAdjustment() {
+    void disableColorAdjustment() FL_NO_EXCEPT {
         #if FASTLED_HD_COLOR_MIXING
         mColorAdjustment.premixed = CRGB(mColorAdjustment.brightness, mColorAdjustment.brightness, mColorAdjustment.brightness);
         mColorAdjustment.color = CRGB(0xff, 0xff, 0xff);
@@ -133,14 +134,14 @@ struct PixelController {
 
     /// Copy constructor
     /// @param other the object to copy 
-    PixelController(const PixelController & other) {
+    PixelController(const PixelController & other) FL_NO_EXCEPT {
         copy(other);
     }
 
     /// Copy assignment, through the same copy() as the copy constructor.
     /// The implicit one would copy mLenRemaining verbatim while the copy
     /// constructor rewinds it to mLen, so the two copy paths disagreed.
-    PixelController& operator=(const PixelController & other) {
+    PixelController& operator=(const PixelController & other) FL_NO_EXCEPT {
         if (this != &other) {
             copy(other);
         }
@@ -148,12 +149,12 @@ struct PixelController {
     }
 
     template<EOrder RGB_ORDER_OTHER>
-    PixelController(const PixelController<RGB_ORDER_OTHER, LANES, MASK> & other) {
+    PixelController(const PixelController<RGB_ORDER_OTHER, LANES, MASK> & other) FL_NO_EXCEPT {
         copy(other);
     }
 
     template<typename PixelControllerT>
-    void copy(const PixelControllerT& other) {
+    void copy(const PixelControllerT& other) FL_NO_EXCEPT {
         FL_STATIC_ASSERT(int(kLanes) == int(PixelControllerT::kLanes), "PixelController lanes must match or mOffsets will be wrong");
         FL_STATIC_ASSERT(int(kMask) == int(PixelControllerT::kMask), "PixelController mask must match or else one or the other controls different lanes");
         d[0] = other.d[0];
@@ -171,7 +172,7 @@ struct PixelController {
 
     /// Initialize the PixelController::mOffsets array based on the length of the strip
     /// @param len the number of LEDs in one lane of the strip
-    void initOffsets(int len) {
+    void initOffsets(int len) FL_NO_EXCEPT {
         int nOffset = 0;
         for(int i = 0; i < LANES; ++i) {
             mOffsets[i] = nOffset;
@@ -189,7 +190,7 @@ struct PixelController {
     PixelController(
             const fl::u8 *d, int len, ColorAdjustment color_adjustment,
             EDitherMode dither, bool advance, fl::u8 skip)
-                : mData(d), mLen(len), mLenRemaining(len), mColorAdjustment(color_adjustment) {
+                FL_NO_EXCEPT : mData(d), mLen(len), mLenRemaining(len), mColorAdjustment(color_adjustment) {
         enable_dithering(dither);
         mData += skip;
         mAdvance = (advance) ? 3+skip : 0;
@@ -204,7 +205,7 @@ struct PixelController {
     PixelController(
             const CRGB *d, int len, ColorAdjustment color_adjustment,
             EDitherMode dither)
-                : mData((const fl::u8*)d), mLen(len), mLenRemaining(len), mColorAdjustment(color_adjustment) {
+                FL_NO_EXCEPT : mData((const fl::u8*)d), mLen(len), mLenRemaining(len), mColorAdjustment(color_adjustment) {
         enable_dithering(dither);
         mAdvance = 3;
         initOffsets(len);
@@ -217,14 +218,14 @@ struct PixelController {
     /// @param dither dither setting for the LEDs
     PixelController(
             const CRGB &d, int len, ColorAdjustment color_adjustment, EDitherMode dither)
-                : mData((const fl::u8*)&d), mLen(len), mLenRemaining(len), mColorAdjustment(color_adjustment) {
+                FL_NO_EXCEPT : mData((const fl::u8*)&d), mLen(len), mLenRemaining(len), mColorAdjustment(color_adjustment) {
         enable_dithering(dither);
         mAdvance = 0;
         initOffsets(len);
     }
 
     #if FASTLED_HD_COLOR_MIXING
-    fl::u8 global_brightness() const {
+    fl::u8 global_brightness() const FL_NO_EXCEPT {
         return mColorAdjustment.brightness;
     }
     #endif
@@ -232,7 +233,7 @@ struct PixelController {
     /// Get read-only access to the current pixel data
     /// Used by encoders to access raw RGB values for HD processing
     /// @returns pointer to the current pixel's RGB data (3 bytes)
-    const fl::u8* getRawPixelData() const {
+    const fl::u8* getRawPixelData() const FL_NO_EXCEPT {
         return mData;
     }
 
@@ -246,7 +247,7 @@ struct PixelController {
     // ------------------------------------------------------------------------
 
     /// Set up the values for binary dithering from the shared frame phase.
-    void init_binary_dithering() {
+    void init_binary_dithering() FL_NO_EXCEPT {
         fl::u8 frame = 0;
         if (fl::Dither::kEnabled) {
 #if FL_PLATFORM_HAS_TINY_MEMORY
@@ -266,25 +267,25 @@ struct PixelController {
     /// offsets depend on the phase. `fl::Channel` keeps its own phase and
     /// advances it only when its driver accepts a frame, so a dropped
     /// submission does not consume one (#4347, R8).
-    void reseed_binary_dithering(fl::u8 R) {
+    void reseed_binary_dithering(fl::u8 R) FL_NO_EXCEPT {
         fl::Dither::reseed(d, e, R);
     }
 
     /// Is temporal dithering on for this frame? (any channel has a range)
-    FASTLED_FORCE_INLINE bool ditherActive() const {
+    FASTLED_FORCE_INLINE bool ditherActive() const FL_NO_EXCEPT {
         return fl::Dither::active(e);
     }
 
     /// Do we have n pixels left to process?
     /// @param n the number to check against
     /// @returns 'true' if there are more than n pixels left to process
-    FASTLED_FORCE_INLINE bool has(int n) {
+    FASTLED_FORCE_INLINE bool has(int n) FL_NO_EXCEPT {
         return mLenRemaining >= n;
     }
 
     /// Toggle dithering enable/disable
     /// @param dither BINARY_DITHER (on) or DISABLE_DITHER (off)
-    void enable_dithering(EDitherMode dither) {
+    void enable_dithering(EDitherMode dither) FL_NO_EXCEPT {
         switch(dither) {
             case BINARY_DITHER: init_binary_dithering(); break;  // Initialize dithering algorithm
             default: fl::Dither::clear(d, e); break;            // Clear dither values (disabled)
@@ -293,29 +294,29 @@ struct PixelController {
 
     /// Get the length of the LED strip
     /// @returns PixelController::mLen
-    FASTLED_FORCE_INLINE int size() const { return mLen; }
+    FASTLED_FORCE_INLINE int size() const FL_NO_EXCEPT { return mLen; }
 
     /// Get the number of lanes of the Controller
     /// @returns LANES from template
-    FASTLED_FORCE_INLINE int lanes() { return LANES; }
+    FASTLED_FORCE_INLINE int lanes() FL_NO_EXCEPT { return LANES; }
 
     /// Get the amount to advance the pointer by
     /// @returns PixelController::mAdvance
-    FASTLED_FORCE_INLINE int advanceBy() { return mAdvance; }
+    FASTLED_FORCE_INLINE int advanceBy() FL_NO_EXCEPT { return mAdvance; }
 
     /// Advance the data pointer forward, adjust position counter
-    FASTLED_FORCE_INLINE void advanceData() { mData += mAdvance; --mLenRemaining;}
+    FASTLED_FORCE_INLINE void advanceData() FL_NO_EXCEPT { mData += mAdvance; --mLenRemaining;}
 
     /// Step the dithering forward - creates triangular wave that toggles between pixels
     /// @note If updating here, be sure to update the asm version in clockless_avr.h!
-    FASTLED_FORCE_INLINE void stepDithering() {
+    FASTLED_FORCE_INLINE void stepDithering() FL_NO_EXCEPT {
             // Toggles d between two values: if d=2 and e=5, becomes 3, then back to 2, etc.
             // This spreads dithering spatially along the strip, preventing visible patterns
             fl::Dither::step(d, e);
     }
 
     /// Some chipsets pre-cycle the first byte, which means we want to cycle byte 0's dithering separately
-    FASTLED_FORCE_INLINE void preStepFirstByteDithering() {
+    FASTLED_FORCE_INLINE void preStepFirstByteDithering() FL_NO_EXCEPT {
         fl::Dither::stepChannel(d, e, RO(0));
     }
 
@@ -326,40 +327,40 @@ struct PixelController {
     /// Read a byte of LED data
     /// @tparam SLOT The data slot in the output stream. This is used to select which byte of the output stream is being processed.
     /// @param pc reference to the pixel controller
-    template<int SLOT>  FASTLED_FORCE_INLINE static fl::u8 loadByte(PixelController & pc) { return pc.mData[RO(SLOT)]; }
+    template<int SLOT>  FASTLED_FORCE_INLINE static fl::u8 loadByte(PixelController & pc) FL_NO_EXCEPT { return pc.mData[RO(SLOT)]; }
 
     /// Read a byte of LED data for parallel output
     /// @tparam SLOT The data slot in the output stream. This is used to select which byte of the output stream is being processed.
     /// @param pc reference to the pixel controller
     /// @param lane the parallel output lane to read the byte for
-    template<int SLOT>  FASTLED_FORCE_INLINE static fl::u8 loadByte(PixelController & pc, int lane) { return pc.mData[pc.mOffsets[lane] + RO(SLOT)]; }
+    template<int SLOT>  FASTLED_FORCE_INLINE static fl::u8 loadByte(PixelController & pc, int lane) FL_NO_EXCEPT { return pc.mData[pc.mOffsets[lane] + RO(SLOT)]; }
 
     /// Add dither offset to pixel value (BEFORE scaling). Black pixels not dithered.
     /// @tparam SLOT The data slot in the output stream
     /// @param pc reference to the pixel controller
     /// @param b the color byte to dither
     /// @returns b + dither offset, clamped to 255
-    template<int SLOT>  FASTLED_FORCE_INLINE static fl::u8 dither(PixelController & pc, fl::u8 b) { return fl::Dither::apply(b, pc.d[RO(SLOT)]); }
+    template<int SLOT>  FASTLED_FORCE_INLINE static fl::u8 dither(PixelController & pc, fl::u8 b) FL_NO_EXCEPT { return fl::Dither::apply(b, pc.d[RO(SLOT)]); }
 
     /// Add explicit dither offset to pixel value (BEFORE scaling). Black pixels not dithered.
     /// @tparam SLOT The data slot in the output stream
     /// @param b the color byte to dither
     /// @param d dither offset to add
     /// @returns b + d, clamped to 255
-    template<int SLOT>  FASTLED_FORCE_INLINE static fl::u8 dither(PixelController & , fl::u8 b, fl::u8 d) { return fl::Dither::apply(b, d); }
+    template<int SLOT>  FASTLED_FORCE_INLINE static fl::u8 dither(PixelController & , fl::u8 b, fl::u8 d) FL_NO_EXCEPT { return fl::Dither::apply(b, d); }
 
     /// Scale a value using the per-channel scale data
     /// @tparam SLOT The data slot in the output stream. This is used to select which byte of the output stream is being processed.
     /// @param pc reference to the pixel controller
     /// @param b the color byte to scale
     /// @see PixelController::mScale
-    template<int SLOT>  FASTLED_FORCE_INLINE static fl::u8 scale(PixelController & pc, fl::u8 b) { return fl::scale8(b, pc.mColorAdjustment.premixed.raw[RO(SLOT)]); }
+    template<int SLOT>  FASTLED_FORCE_INLINE static fl::u8 scale(PixelController & pc, fl::u8 b) FL_NO_EXCEPT { return fl::scale8(b, pc.mColorAdjustment.premixed.raw[RO(SLOT)]); }
     
     /// Scale a value
     /// @tparam SLOT The data slot in the output stream. This is used to select which byte of the output stream is being processed.
     /// @param b the byte to scale
     /// @param scale the scale value
-    template<int SLOT>  FASTLED_FORCE_INLINE static fl::u8 scale(PixelController & , fl::u8 b, fl::u8 scale) { return fl::scale8(b, scale); }
+    template<int SLOT>  FASTLED_FORCE_INLINE static fl::u8 scale(PixelController & , fl::u8 b, fl::u8 scale) FL_NO_EXCEPT { return fl::scale8(b, scale); }
 
     /// @name Composite shortcut functions for loading, dithering, and scaling
     /// These composite functions will load color data, dither it, and scale it
@@ -370,17 +371,17 @@ struct PixelController {
 
     /// Complete pipeline: load â†’ dither â†’ scale (THE MAGIC HAPPENS HERE!)
     /// Order is critical: pixel + dither FIRST, then scale by brightness
-    template<int SLOT>  FASTLED_FORCE_INLINE static fl::u8 loadAndScale(PixelController & pc) {
+    template<int SLOT>  FASTLED_FORCE_INLINE static fl::u8 loadAndScale(PixelController & pc) FL_NO_EXCEPT {
         return scale<SLOT>(pc, pc.dither<SLOT>(pc, pc.loadByte<SLOT>(pc)));
     }
 
     /// Complete pipeline: load â†’ dither â†’ scale (parallel output version)
-    template<int SLOT>  FASTLED_FORCE_INLINE static fl::u8 loadAndScale(PixelController & pc, int lane) {
+    template<int SLOT>  FASTLED_FORCE_INLINE static fl::u8 loadAndScale(PixelController & pc, int lane) FL_NO_EXCEPT {
         return scale<SLOT>(pc, pc.dither<SLOT>(pc, pc.loadByte<SLOT>(pc, lane)));
     }
 
     /// Complete pipeline: load â†’ dither â†’ scale (explicit dither/scale values)
-    template<int SLOT>  FASTLED_FORCE_INLINE static fl::u8 loadAndScale(PixelController & pc, int lane, fl::u8 d, fl::u8 scale) {
+    template<int SLOT>  FASTLED_FORCE_INLINE static fl::u8 loadAndScale(PixelController & pc, int lane, fl::u8 d, fl::u8 scale) FL_NO_EXCEPT {
         return fl::scale8(pc.dither<SLOT>(pc, pc.loadByte<SLOT>(pc, lane), d), scale);
     }
 
@@ -389,23 +390,23 @@ struct PixelController {
     /// @param pc reference to the pixel controller
     /// @param lane the parallel output lane to read the byte for
     /// @param scale the scale data for the byte
-    template<int SLOT>  FASTLED_FORCE_INLINE static fl::u8 loadAndScale(PixelController & pc, int lane, fl::u8 scale) { return fl::scale8(pc.loadByte<SLOT>(pc, lane), scale); }
+    template<int SLOT>  FASTLED_FORCE_INLINE static fl::u8 loadAndScale(PixelController & pc, int lane, fl::u8 scale) FL_NO_EXCEPT { return fl::scale8(pc.loadByte<SLOT>(pc, lane), scale); }
 
 
     /// A version of loadAndScale() that advances the output data pointer
     /// @param pc reference to the pixel controller
-    template<int SLOT>  FASTLED_FORCE_INLINE static fl::u8 advanceAndLoadAndScale(PixelController & pc) { pc.advanceData(); return pc.loadAndScale<SLOT>(pc); }
+    template<int SLOT>  FASTLED_FORCE_INLINE static fl::u8 advanceAndLoadAndScale(PixelController & pc) FL_NO_EXCEPT { pc.advanceData(); return pc.loadAndScale<SLOT>(pc); }
 
     /// A version of loadAndScale() that advances the output data pointer
     /// @param pc reference to the pixel controller
     /// @param lane the parallel output lane to read the byte for
-    template<int SLOT>  FASTLED_FORCE_INLINE static fl::u8 advanceAndLoadAndScale(PixelController & pc, int lane) { pc.advanceData(); return pc.loadAndScale<SLOT>(pc, lane); }
+    template<int SLOT>  FASTLED_FORCE_INLINE static fl::u8 advanceAndLoadAndScale(PixelController & pc, int lane) FL_NO_EXCEPT { pc.advanceData(); return pc.loadAndScale<SLOT>(pc, lane); }
 
     /// A version of loadAndScale() that advances the output data pointer without dithering
     /// @param pc reference to the pixel controller
     /// @param lane the parallel output lane to read the byte for
     /// @param scale the scale data for the byte
-    template<int SLOT>  FASTLED_FORCE_INLINE static fl::u8 advanceAndLoadAndScale(PixelController & pc, int lane, fl::u8 scale) { pc.advanceData(); return pc.loadAndScale<SLOT>(pc, lane, scale); }
+    template<int SLOT>  FASTLED_FORCE_INLINE static fl::u8 advanceAndLoadAndScale(PixelController & pc, int lane, fl::u8 scale) FL_NO_EXCEPT { pc.advanceData(); return pc.loadAndScale<SLOT>(pc, lane, scale); }
 
     /// @} Composite shortcut functions
 
@@ -420,14 +421,14 @@ struct PixelController {
     /// @param pc reference to the pixel controller
     /// @returns dithering data for the given channel
     /// @see PixelController::d
-    template<int SLOT>  FASTLED_FORCE_INLINE static fl::u8 getd(PixelController & pc) { return pc.d[RO(SLOT)]; }
+    template<int SLOT>  FASTLED_FORCE_INLINE static fl::u8 getd(PixelController & pc) FL_NO_EXCEPT { return pc.d[RO(SLOT)]; }
 
     /// Gets the scale data for the provided output slot
     /// @tparam SLOT The data slot in the output stream. This is used to select which byte of the output stream is being processed.
     /// @param pc reference to the pixel controller
     /// @returns scale data for the given channel
     /// @see PixelController::mScale
-    template<int SLOT>  FASTLED_FORCE_INLINE static fl::u8 getscale(PixelController & pc) { return pc.mColorAdjustment.premixed.raw[RO(SLOT)]; }
+    template<int SLOT>  FASTLED_FORCE_INLINE static fl::u8 getscale(PixelController & pc) FL_NO_EXCEPT { return pc.mColorAdjustment.premixed.raw[RO(SLOT)]; }
 
     /// @} Data retrieval functions
 
@@ -435,38 +436,38 @@ struct PixelController {
     /// @} Template'd static functions for output
 
     // Helper functions to get around gcc stupidities
-    FASTLED_FORCE_INLINE fl::u8 loadAndScale0(int lane, fl::u8 scale) { return loadAndScale<0>(*this, lane, scale); }  ///< non-template alias of loadAndScale<0>()
-    FASTLED_FORCE_INLINE fl::u8 loadAndScale1(int lane, fl::u8 scale) { return loadAndScale<1>(*this, lane, scale); }  ///< non-template alias of loadAndScale<1>()
-    FASTLED_FORCE_INLINE fl::u8 loadAndScale2(int lane, fl::u8 scale) { return loadAndScale<2>(*this, lane, scale); }  ///< non-template alias of loadAndScale<2>()
-    FASTLED_FORCE_INLINE fl::u8 advanceAndLoadAndScale0(int lane, fl::u8 scale) { return advanceAndLoadAndScale<0>(*this, lane, scale); }  ///< non-template alias of advanceAndLoadAndScale<0>()
-    FASTLED_FORCE_INLINE fl::u8 stepAdvanceAndLoadAndScale0(int lane, fl::u8 scale) { stepDithering(); return advanceAndLoadAndScale<0>(*this, lane, scale); }  ///< stepDithering() and advanceAndLoadAndScale0()
+    FASTLED_FORCE_INLINE fl::u8 loadAndScale0(int lane, fl::u8 scale) FL_NO_EXCEPT { return loadAndScale<0>(*this, lane, scale); }  ///< non-template alias of loadAndScale<0>()
+    FASTLED_FORCE_INLINE fl::u8 loadAndScale1(int lane, fl::u8 scale) FL_NO_EXCEPT { return loadAndScale<1>(*this, lane, scale); }  ///< non-template alias of loadAndScale<1>()
+    FASTLED_FORCE_INLINE fl::u8 loadAndScale2(int lane, fl::u8 scale) FL_NO_EXCEPT { return loadAndScale<2>(*this, lane, scale); }  ///< non-template alias of loadAndScale<2>()
+    FASTLED_FORCE_INLINE fl::u8 advanceAndLoadAndScale0(int lane, fl::u8 scale) FL_NO_EXCEPT { return advanceAndLoadAndScale<0>(*this, lane, scale); }  ///< non-template alias of advanceAndLoadAndScale<0>()
+    FASTLED_FORCE_INLINE fl::u8 stepAdvanceAndLoadAndScale0(int lane, fl::u8 scale) FL_NO_EXCEPT { stepDithering(); return advanceAndLoadAndScale<0>(*this, lane, scale); }  ///< stepDithering() and advanceAndLoadAndScale0()
 
-    FASTLED_FORCE_INLINE fl::u8 loadAndScale0(int lane) { return loadAndScale<0>(*this, lane); }  ///< @copydoc loadAndScale0(int, uint8_t)
-    FASTLED_FORCE_INLINE fl::u8 loadAndScale1(int lane) { return loadAndScale<1>(*this, lane); }  ///< @copydoc loadAndScale1(int, uint8_t)
-    FASTLED_FORCE_INLINE fl::u8 loadAndScale2(int lane) { return loadAndScale<2>(*this, lane); }  ///< @copydoc loadAndScale2(int, uint8_t)
-    FASTLED_FORCE_INLINE fl::u8 advanceAndLoadAndScale0(int lane) { return advanceAndLoadAndScale<0>(*this, lane); }  ///< @copydoc advanceAndLoadAndScale0(int, uint8_t)
-    FASTLED_FORCE_INLINE fl::u8 stepAdvanceAndLoadAndScale0(int lane) { stepDithering(); return advanceAndLoadAndScale<0>(*this, lane); }  ///< @copydoc stepAdvanceAndLoadAndScale0(int, uint8_t)
+    FASTLED_FORCE_INLINE fl::u8 loadAndScale0(int lane) FL_NO_EXCEPT { return loadAndScale<0>(*this, lane); }  ///< @copydoc loadAndScale0(int, uint8_t)
+    FASTLED_FORCE_INLINE fl::u8 loadAndScale1(int lane) FL_NO_EXCEPT { return loadAndScale<1>(*this, lane); }  ///< @copydoc loadAndScale1(int, uint8_t)
+    FASTLED_FORCE_INLINE fl::u8 loadAndScale2(int lane) FL_NO_EXCEPT { return loadAndScale<2>(*this, lane); }  ///< @copydoc loadAndScale2(int, uint8_t)
+    FASTLED_FORCE_INLINE fl::u8 advanceAndLoadAndScale0(int lane) FL_NO_EXCEPT { return advanceAndLoadAndScale<0>(*this, lane); }  ///< @copydoc advanceAndLoadAndScale0(int, uint8_t)
+    FASTLED_FORCE_INLINE fl::u8 stepAdvanceAndLoadAndScale0(int lane) FL_NO_EXCEPT { stepDithering(); return advanceAndLoadAndScale<0>(*this, lane); }  ///< @copydoc stepAdvanceAndLoadAndScale0(int, uint8_t)
 
     // LoadAndScale0 loads the pixel data in the order specified by RGB_ORDER and then scales it by the color correction values
     // For example in color order GRB, loadAndScale0() will return the green channel scaled by the color correction value for green.
-    FASTLED_FORCE_INLINE fl::u8 loadAndScale0() { return loadAndScale<0>(*this); }  ///< @copydoc loadAndScale0(int, uint8_t)
-    FASTLED_FORCE_INLINE fl::u8 loadAndScale1() { return loadAndScale<1>(*this); }  ///< @copydoc loadAndScale1(int, uint8_t)
-    FASTLED_FORCE_INLINE fl::u8 loadAndScale2() { return loadAndScale<2>(*this); }  ///< @copydoc loadAndScale2(int, uint8_t)
-    FASTLED_FORCE_INLINE fl::u8 advanceAndLoadAndScale0() { return advanceAndLoadAndScale<0>(*this); }  ///< @copydoc advanceAndLoadAndScale0(int, uint8_t)
-    FASTLED_FORCE_INLINE fl::u8 stepAdvanceAndLoadAndScale0() { stepDithering(); return advanceAndLoadAndScale<0>(*this); }  ///< @copydoc stepAdvanceAndLoadAndScale0(int, uint8_t)
+    FASTLED_FORCE_INLINE fl::u8 loadAndScale0() FL_NO_EXCEPT { return loadAndScale<0>(*this); }  ///< @copydoc loadAndScale0(int, uint8_t)
+    FASTLED_FORCE_INLINE fl::u8 loadAndScale1() FL_NO_EXCEPT { return loadAndScale<1>(*this); }  ///< @copydoc loadAndScale1(int, uint8_t)
+    FASTLED_FORCE_INLINE fl::u8 loadAndScale2() FL_NO_EXCEPT { return loadAndScale<2>(*this); }  ///< @copydoc loadAndScale2(int, uint8_t)
+    FASTLED_FORCE_INLINE fl::u8 advanceAndLoadAndScale0() FL_NO_EXCEPT { return advanceAndLoadAndScale<0>(*this); }  ///< @copydoc advanceAndLoadAndScale0(int, uint8_t)
+    FASTLED_FORCE_INLINE fl::u8 stepAdvanceAndLoadAndScale0() FL_NO_EXCEPT { stepDithering(); return advanceAndLoadAndScale<0>(*this); }  ///< @copydoc stepAdvanceAndLoadAndScale0(int, uint8_t)
 
-    FASTLED_FORCE_INLINE fl::u8 getScale0() { return getscale<0>(*this); }  ///< non-template alias of getscale<0>()
-    FASTLED_FORCE_INLINE fl::u8 getScale1() { return getscale<1>(*this); }  ///< non-template alias of getscale<1>()
-    FASTLED_FORCE_INLINE fl::u8 getScale2() { return getscale<2>(*this); }  ///< non-template alias of getscale<2>()
+    FASTLED_FORCE_INLINE fl::u8 getScale0() FL_NO_EXCEPT { return getscale<0>(*this); }  ///< non-template alias of getscale<0>()
+    FASTLED_FORCE_INLINE fl::u8 getScale1() FL_NO_EXCEPT { return getscale<1>(*this); }  ///< non-template alias of getscale<1>()
+    FASTLED_FORCE_INLINE fl::u8 getScale2() FL_NO_EXCEPT { return getscale<2>(*this); }  ///< non-template alias of getscale<2>()
 
     #if FASTLED_HD_COLOR_MIXING
-    template<int SLOT>  FASTLED_FORCE_INLINE static fl::u8 getScaleFullBrightness(PixelController & pc) { return pc.mColorAdjustment.color.raw[RO(SLOT)]; }
+    template<int SLOT>  FASTLED_FORCE_INLINE static fl::u8 getScaleFullBrightness(PixelController & pc) FL_NO_EXCEPT { return pc.mColorAdjustment.color.raw[RO(SLOT)]; }
 
     /// Gets the color correction and also the brightness as separate values.
     /// This is needed for the higher precision chipsets like the APA102.
     /// The RGB values returned are color-corrected but NOT scaled by brightness.
     /// Brightness is returned separately to preserve color fidelity for high-definition color mixing.
-    FASTLED_FORCE_INLINE void loadRGBScaleAndBrightness(fl::u8* c0, fl::u8* c1, fl::u8* c2, fl::u8* brightness) {
+    FASTLED_FORCE_INLINE void loadRGBScaleAndBrightness(fl::u8* c0, fl::u8* c1, fl::u8* c2, fl::u8* brightness) FL_NO_EXCEPT {
         *c0 = getScaleFullBrightness<0>(*this);
         *c1 = getScaleFullBrightness<1>(*this);
         *c2 = getScaleFullBrightness<2>(*this);
@@ -481,7 +482,7 @@ struct PixelController {
 
     /// Gets the brightness value from the ColorAdjustment
     /// @returns the brightness value (0-255)
-    FASTLED_FORCE_INLINE fl::u8 getBrightness() {
+    FASTLED_FORCE_INLINE fl::u8 getBrightness() FL_NO_EXCEPT {
         return mColorAdjustment.brightness;
     }
     #endif
@@ -490,7 +491,7 @@ struct PixelController {
     // Use fl::loadAndScale_APA102_HD<RGB_ORDER>(pixels, ...) instead
 
     FASTLED_FORCE_INLINE void loadAndScaleRGB(fl::u8 *b0_out, fl::u8 *b1_out,
-                                              fl::u8 *b2_out) {
+                                              fl::u8 *b2_out) FL_NO_EXCEPT {
         *b0_out = loadAndScale0();
         *b1_out = loadAndScale1();
         *b2_out = loadAndScale2();
@@ -504,7 +505,7 @@ struct PixelController {
     /// same tables: `d[c]` and `premixed.raw[c]` are indexed by source channel
     /// in both, which is what makes a colour order a pure permutation of these
     /// three values (FastLED#4402).
-    FASTLED_FORCE_INLINE fl::u8 loadAndScaleChannel(fl::u8 c) {
+    FASTLED_FORCE_INLINE fl::u8 loadAndScaleChannel(fl::u8 c) FL_NO_EXCEPT {
         const fl::u8 b = mData[c];
         return fl::scale8(fl::Dither::apply(b, d[c]), mColorAdjustment.premixed.raw[c]);
     }
@@ -515,7 +516,7 @@ struct PixelController {
     /// applies its own order (FastLED#4402).
     FASTLED_FORCE_INLINE void loadAndScaleRGBWUnordered(
         const Rgbw& rgbw, fl::u8 *r_out, fl::u8 *g_out, fl::u8 *b_out,
-        fl::u8 *w_out) {
+        fl::u8 *w_out) FL_NO_EXCEPT {
 #ifdef FL_IS_AVR
         FL_UNUSED(rgbw);
         // No RGBW conversion on AVR; W stays black, as in loadAndScaleRGBW.
@@ -536,7 +537,7 @@ struct PixelController {
     /// `loadAndScaleRGBWW` before its wire reorder. See loadAndScaleRGBWUnordered.
     FASTLED_FORCE_INLINE void loadAndScaleRGBWWUnordered(
         fl::Rgbww rgbww, fl::u8 *r_out, fl::u8 *g_out, fl::u8 *b_out,
-        fl::u8 *ww_out, fl::u8 *wc_out) {
+        fl::u8 *ww_out, fl::u8 *wc_out) FL_NO_EXCEPT {
 #ifdef FL_IS_AVR
         FL_UNUSED(rgbww);
         FL_WARN_ONCE("RGBWW colorimetric is not supported on AVR -- the warm "
@@ -562,7 +563,7 @@ struct PixelController {
 
     FASTLED_FORCE_INLINE void loadAndScaleRGBW(
         const Rgbw& rgbw, fl::u8 *b0_out, fl::u8 *b1_out,
-        fl::u8 *b2_out, fl::u8 *b3_out) {
+        fl::u8 *b2_out, fl::u8 *b3_out) FL_NO_EXCEPT {
 #ifdef FL_IS_AVR
         // Don't do RGBW conversion for AVR, just set the W pixel to black.
         fl::u8 out[4] = {
@@ -604,7 +605,7 @@ struct PixelController {
     FASTLED_FORCE_INLINE void loadAndScaleRGBWW(fl::Rgbww rgbww,
                                                 fl::u8 *b0_out, fl::u8 *b1_out,
                                                 fl::u8 *b2_out, fl::u8 *b3_out,
-                                                fl::u8 *b4_out) {
+                                                fl::u8 *b4_out) FL_NO_EXCEPT {
 #ifdef FL_IS_AVR
         // AVR: float colorimetric math is too expensive on the 8-bit core;
         // the strip will get RGB-only output with both white channels black.

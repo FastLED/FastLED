@@ -7,17 +7,18 @@
 #include "crgb.h"
 #include "fl/gfx/upscale.h"
 #include "fl/math/xymap.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
 u8 bilinearInterpolate(u8 v00, u8 v10, u8 v01, u8 v11,
-                            u16 dx, u16 dy);
+                            u16 dx, u16 dy) FL_NO_EXCEPT;
 
 u8 bilinearInterpolatePowerOf2(u8 v00, u8 v10, u8 v01,
-                                    u8 v11, u8 dx, u8 dy);
+                                    u8 v11, u8 dx, u8 dy) FL_NO_EXCEPT;
 
 void upscaleRectangular(const CRGB *input, CRGB *output, u16 inputWidth,
-                        u16 inputHeight, u16 outputWidth, u16 outputHeight) {
+                        u16 inputHeight, u16 outputWidth, u16 outputHeight) FL_NO_EXCEPT {
     const u16 scale_factor = 256; // Using 8 bits for the fractional part
 
     for (u16 y = 0; y < outputHeight; y++) {
@@ -60,7 +61,7 @@ void upscaleRectangular(const CRGB *input, CRGB *output, u16 inputWidth,
 }
 
 void upscaleRectangularPowerOf2(const CRGB *input, CRGB *output, u8 inputWidth,
-                                u8 inputHeight, u8 outputWidth, u8 outputHeight) {
+                                u8 inputHeight, u8 outputWidth, u8 outputHeight) FL_NO_EXCEPT {
     for (u8 y = 0; y < outputHeight; y++) {
         for (u8 x = 0; x < outputWidth; x++) {
             // Use 8-bit fixed-point arithmetic with 8 fractional bits
@@ -103,7 +104,7 @@ void upscaleRectangularPowerOf2(const CRGB *input, CRGB *output, u8 inputWidth,
 }
 
 void upscaleArbitrary(const CRGB *input, CRGB *output, u16 inputWidth,
-                      u16 inputHeight, const XYMap& xyMap) {
+                      u16 inputHeight, const XYMap& xyMap) FL_NO_EXCEPT {
     u16 n = xyMap.getTotal();
     u16 outputWidth = xyMap.getWidth();
     u16 outputHeight = xyMap.getHeight();
@@ -148,7 +149,7 @@ void upscaleArbitrary(const CRGB *input, CRGB *output, u16 inputWidth,
     }
 }
 u8 bilinearInterpolate(u8 v00, u8 v10, u8 v01, u8 v11,
-                            u16 dx, u16 dy) {
+                            u16 dx, u16 dy) FL_NO_EXCEPT {
     u16 dx_inv = 256 - dx;
     u16 dy_inv = 256 - dy;
 
@@ -167,7 +168,7 @@ u8 bilinearInterpolate(u8 v00, u8 v10, u8 v01, u8 v11,
 }
 
 void upscalePowerOf2(const CRGB *input, CRGB *output, u8 inputWidth,
-                     u8 inputHeight, const XYMap& xyMap) {
+                     u8 inputHeight, const XYMap& xyMap) FL_NO_EXCEPT {
     u8 width = xyMap.getWidth();
     u8 height = xyMap.getHeight();
     if (width != xyMap.getWidth() || height != xyMap.getHeight()) {
@@ -219,7 +220,7 @@ void upscalePowerOf2(const CRGB *input, CRGB *output, u8 inputWidth,
 }
 
 u8 bilinearInterpolatePowerOf2(u8 v00, u8 v10, u8 v01,
-                                    u8 v11, u8 dx, u8 dy) {
+                                    u8 v11, u8 dx, u8 dy) FL_NO_EXCEPT {
     u16 dx_inv = 256 - dx; // 0 to 256
     u16 dy_inv = 256 - dy; // 0 to 256
 
@@ -243,7 +244,7 @@ u8 bilinearInterpolatePowerOf2(u8 v00, u8 v10, u8 v01,
 
 // Floating-point version of bilinear interpolation
 u8 upscaleFloat(u8 v00, u8 v10, u8 v01,
-                                 u8 v11, float dx, float dy) {
+                                 u8 v11, float dx, float dy) FL_NO_EXCEPT {
     float dx_inv = 1.0f - dx;
     float dy_inv = 1.0f - dy;
 
@@ -264,7 +265,7 @@ u8 upscaleFloat(u8 v00, u8 v10, u8 v01,
 
 // Floating-point version for arbitrary grid sizes
 void upscaleArbitraryFloat(const CRGB *input, CRGB *output, u16 inputWidth,
-                           u16 inputHeight, const XYMap& xyMap) {
+                           u16 inputHeight, const XYMap& xyMap) FL_NO_EXCEPT {
     u16 n = xyMap.getTotal();
     u16 outputWidth = xyMap.getWidth();
     u16 outputHeight = xyMap.getHeight();
@@ -313,7 +314,7 @@ void upscaleArbitraryFloat(const CRGB *input, CRGB *output, u16 inputWidth,
 
 // Floating-point version for power-of-two grid sizes
 void upscaleFloat(const CRGB *input, CRGB *output, u8 inputWidth,
-                  u8 inputHeight, const XYMap& xyMap) {
+                  u8 inputHeight, const XYMap& xyMap) FL_NO_EXCEPT {
     u8 outputWidth = xyMap.getWidth();
     u8 outputHeight = xyMap.getHeight();
     if (outputWidth != xyMap.getWidth() || outputHeight != xyMap.getHeight()) {

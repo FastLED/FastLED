@@ -36,13 +36,13 @@ struct Chord {
 
     Chord() FL_NO_EXCEPT : rootNote(-1), type(ChordType::UNKNOWN), confidence(0.0f), timestamp(0) {}
     Chord(int root, ChordType t, float conf, u32 ts)
-        : rootNote(root), type(t), confidence(conf), timestamp(ts) {}
+        FL_NO_EXCEPT : rootNote(root), type(t), confidence(conf), timestamp(ts) {}
 
-    bool isValid() const { return rootNote >= 0 && rootNote < 12; }
+    bool isValid() const FL_NO_EXCEPT { return rootNote >= 0 && rootNote < 12; }
 
     // Declared here, defined in chord.cpp
-    const char* getRootName() const;
-    const char* getTypeName() const;
+    const char* getRootName() const FL_NO_EXCEPT;
+    const char* getTypeName() const FL_NO_EXCEPT;
 };
 
 class ChordDetector : public Detector {
@@ -50,12 +50,12 @@ public:
     ChordDetector() FL_NO_EXCEPT;
     ~ChordDetector() FL_NO_EXCEPT override;
 
-    void update(shared_ptr<Context> context) override;
-    void fireCallbacks() override;
-    bool needsFFT() const override { return true; }
-    bool needsFFTHistory() const override { return true; }
-    const char* getName() const override { return "ChordDetector"; }
-    void reset() override;
+    void update(shared_ptr<Context> context) FL_NO_EXCEPT override;
+    void fireCallbacks() FL_NO_EXCEPT override;
+    bool needsFFT() const FL_NO_EXCEPT override { return true; }
+    bool needsFFTHistory() const FL_NO_EXCEPT override { return true; }
+    const char* getName() const FL_NO_EXCEPT override { return "ChordDetector"; }
+    void reset() FL_NO_EXCEPT override;
 
     // Callbacks (multiple listeners supported)
     function_list<void(const Chord& chord)> onChord;
@@ -63,12 +63,12 @@ public:
     function_list<void()> onChordEnd;
 
     // State access
-    const Chord& getCurrentChord() const { return mCurrentChord; }
-    bool hasChord() const { return mCurrentChord.isValid(); }
+    const Chord& getCurrentChord() const FL_NO_EXCEPT { return mCurrentChord; }
+    bool hasChord() const FL_NO_EXCEPT { return mCurrentChord.isValid(); }
 
     // Configuration
-    void setConfidenceThreshold(float threshold) { mConfidenceThreshold = threshold; }
-    void setMinDuration(u32 ms) { mMinChordDuration = ms; }
+    void setConfidenceThreshold(float threshold) FL_NO_EXCEPT { mConfidenceThreshold = threshold; }
+    void setMinDuration(u32 ms) FL_NO_EXCEPT { mMinChordDuration = ms; }
 
 private:
     // Current state
@@ -96,15 +96,15 @@ private:
     shared_ptr<const fft::Bins> mRetainedFFT;
 
     // Detection methods
-    void initializeTemplateMap();  // Pre-compute template lookups
-    void calculateChroma(const fft::Bins& fft);
-    Chord detectChord(const float* chroma, u32 timestamp);
-    float matchChordPattern(const float* chroma, int root, ChordType type);
-    bool isSimilarChord(const Chord& a, const Chord& b);
+    void initializeTemplateMap() FL_NO_EXCEPT;  // Pre-compute template lookups
+    void calculateChroma(const fft::Bins& fft) FL_NO_EXCEPT;
+    Chord detectChord(const float* chroma, u32 timestamp) FL_NO_EXCEPT;
+    float matchChordPattern(const float* chroma, int root, ChordType type) FL_NO_EXCEPT;
+    bool isSimilarChord(const Chord& a, const Chord& b) FL_NO_EXCEPT;
 
     // Helper methods
-    void normalizeChroma(float* chroma);
-    float chromaDistance(const float* a, const float* b);
+    void normalizeChroma(float* chroma) FL_NO_EXCEPT;
+    float chromaDistance(const float* a, const float* b) FL_NO_EXCEPT;
 };
 
 } // namespace detector

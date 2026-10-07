@@ -277,7 +277,7 @@ EMSCRIPTEN_KEEPALIVE void fastled_declare_files(const char* jsonStr) {
 
 namespace fl {
 // Platforms eed to implement this to create an instance of the filesystem.
-FsImplPtr make_sdcard_filesystem(int cs_pin) { return fl::make_shared<FsImplWasm>(); }
+FsImplPtr make_sdcard_filesystem(int cs_pin) FL_NO_EXCEPT { return fl::make_shared<FsImplWasm>(); }
 } // namespace fl
 
 #endif // FL_IS_WASM

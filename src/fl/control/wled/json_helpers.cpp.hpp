@@ -2,12 +2,13 @@
 #include "fl/fx/wled/json_helpers.h"
 #include "fl/log/log.h"
 #include "fl/stl/cstdlib.h"  // For strtol
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace wled {
 
 // Helper function to parse hex color string to RGB
-bool parseHexColor(const fl::string& hexStr, u8& r, u8& g, u8& b) {
+bool parseHexColor(const fl::string& hexStr, u8& r, u8& g, u8& b) FL_NO_EXCEPT {
     fl::string hex = hexStr;
 
     // Strip leading '#' if present
@@ -44,7 +45,7 @@ bool parseHexColor(const fl::string& hexStr, u8& r, u8& g, u8& b) {
 }
 
 // Helper function to convert RGB to hex string
-fl::string rgbToHex(u8 r, u8 g, u8 b) {
+fl::string rgbToHex(u8 r, u8 g, u8 b) FL_NO_EXCEPT {
     fl::string hex;
     hex.reserve(6);
 
@@ -64,7 +65,7 @@ fl::string rgbToHex(u8 r, u8 g, u8 b) {
 }
 
 // Helper function to parse segment fields
-void parseSegmentFields(const fl::json& segJson, WLEDSegment& seg) {
+void parseSegmentFields(const fl::json& segJson, WLEDSegment& seg) FL_NO_EXCEPT {
     // Extract basic properties
     if (segJson.contains("start") && segJson["start"].is_int()) {
         i64 startInt = segJson["start"] | 0;
