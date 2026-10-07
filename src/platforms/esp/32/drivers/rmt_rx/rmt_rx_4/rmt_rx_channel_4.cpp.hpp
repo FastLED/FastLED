@@ -222,7 +222,7 @@ fl::result<u32, DecodeError> decodeRmtSymbols(const ChipsetTiming4Phase &timing,
         }
         if (bit < 0) {
             return fl::result<u32, DecodeError>::failure(
-                DecodeError::INVALID_SYMBOL);
+                DecodeError::HIGH_ERROR_RATE);
         }
         current_byte = static_cast<u8>((current_byte << 1) | (bit & 0x1));
         ++bit_index;
@@ -348,7 +348,11 @@ class RmtRxChannelImpl : public RmtRxChannel {
 
         // Resolve clock + buffer parameters from RxConfig (with the
         // documented FastLED defaults when the caller leaves them at 0).
-        mResolutionHz = (config.hz != 0) ? config.hz : 40000000u; // 40 MHz
+        mResolutionHz = config.hz.value_or(40000000u); // Default: 40 MHz
+        if (mResolutionHz == 0) {
+            FL_WARN("RX begin: Invalid zero clock resolution");
+            return false;
+        }
         mBufferSize = (config.buffer_size != 0) ? config.buffer_size : 1024;
 
         // RMT clock divider so the RMT tick rate matches the requested
@@ -376,7 +380,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
 
         esp_err_t err = rmt_config(&cfg);
         if (err != ESP_OK) {
-            FL_WARN("[RMT4 RX] rmt_config failed on channel " << mChannel << " pin " << (static_cast<int>(mPin)) << ", err=" << err);
+            FL_WARN("[RMT4 RX] rmt_config failed on channel " << mChannel << " pin " << (static_cast<fl::i32>(mPin)) << ", err=" << err);
             return false;
         }
 
@@ -413,7 +417,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
                           mPin);
 #endif
         if (err != ESP_OK) {
-            FL_WARN("[RMT4 RX] rmt_set_gpio/pin failed on channel " << mChannel << " pin " << (static_cast<int>(mPin)) << ", err=" << err);
+            FL_WARN("[RMT4 RX] rmt_set_gpio/pin failed on channel " << mChannel << " pin " << (static_cast<fl::i32>(mPin)) << ", err=" << err);
             rmt_driver_uninstall(static_cast<rmt_channel_t>(mChannel));
             mInstalled = false;
             return false;
@@ -529,6 +533,10 @@ class RmtRxChannelImpl : public RmtRxChannel {
 
     const char *name() const FL_NO_EXCEPT override { return "RMT"; }
 
+    int getPin() const FL_NO_EXCEPT override { return static_cast<fl::i32>(mPin); }
+
+    u32 getResolutionHz() const FL_NO_EXCEPT override { return mResolutionHz; }
+
     bool injectEdges(fl::span<const EdgeTime> edges) FL_NO_EXCEPT override {
         if (mResolutionHz == 0) {
             mResolutionHz = 40000000u;
@@ -626,7 +634,7 @@ fl::shared_ptr<RmtRxChannel> RmtRxChannel::create(int pin) FL_NO_EXCEPT {
         FL_WARN("[RMT4 RX] create() refused: pin " << pin << " is negative");
         return nullptr;
     }
-    return fl::shared_ptr<RmtRxChannel>(new RmtRxChannelImpl(pin)); // ok bare allocation — RmtRxChannelImpl is private, cannot construct externally via make_shared without exposing type
+    return fl::make_shared<RmtRxChannelImpl>(pin);
 }
 
 } // namespace fl

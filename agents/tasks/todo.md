@@ -180,7 +180,8 @@ with existing Blink to investigate the reported environment.
 - [x] Isolate audio registration/formatting, ESP-DSP and ASIO translation units.
 - [x] Finish native runner repair, integration gates and code review.
 - [x] Publish seventh pass and pin the exact hosted size measurement.
-- [ ] Confirm corrected hosted gate; continue reducing the remaining flash gap.
+- [x] Confirm corrected hosted gate (37594176693).
+- [ ] Continue reducing the remaining flash gap.
 
 Legacy espressif32 4.4.0 / Arduino 2.0.3 / IDF 4.4.1 / GCC 8.4.0:
 3.10.3 Blink 262,757 B flash / 17,272 B RAM; 3.10.6 686,661 B /
@@ -214,6 +215,32 @@ Eighth trial: independently compile xypath rendering, SPI/hardware-manager
 and semaphore implementations. Initial combined legacy image is 346,297 B
 (-3,280 B), S3 local 356,323 B (+8 B). Further isolate dynamic Channel
 construction and its FastLED config overloads, retaining every runtime API.
+
+Legacy measurement qualification: IDF 4.4.1 omits SOC_RMT_SUPPORTED. Earlier
+current-source measurements above selected a fallback driver. Derive the flag
+from the SDK's transmit-channel count and verify actual RMT4 linkage before
+publishing a new matching-driver comparison. The fix exposes stale RMT4 TX/RX
+interface implementations; those are restored, and legacy interrupt literal
+placement still needs a successful link. Issue and PR now carry this qualification.
+
+Eighth modern candidate after channel registration/RX/validation, shared SPI,
+path/corkscrew/noise isolation: Blink 304,575 B; gist 297,431 B; S3 356,227 B
+image_flash. SPI, multiple SPI buses and RX modern examples compile. All 418
+native sanitizer units/examples plus the separate full example runner pass.
+The capability gate has 20 passing SDK/version/override cases. An initial QEMU
+failure does not repeat in the isolated debug run. Full Python passes 1,773
+tests with one text contract still pointing to the moved ISR body; moving that
+contract to the implementation preserves its timing assertions, and focused
+capability/timing debug checks all pass.
+
+Corrected RMT4 candidate links with standard SDK flags: 364,301 B image_flash /
+17,648 B static DRAM. The map retains RMT4 enqueue and rmt_driver_install;
+SPI and RX examples also compile with IDF 4.4.1. GCC 8 put class-body-defined
+IRAM methods' COMDAT literal pools in flash; moving three unchanged definitions
+out of the class restores correct IRAM literal placement. No compiler flag or
+exception-support change is needed. 3.10.3 also retains real RMT; 3.10.6 has
+the capability bug. Corrected current saves 322,360 B versus 3.10.6, with a
+101,544 B gap to 3.10.3. Extra unwind tables account for 77,236 B of that gap.
 
 Use the default dynamic driver configuration. Keep scheduler pumping, network
 yielding, multiple strips, and reconfiguration available. Optimize symbol reachability

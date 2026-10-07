@@ -522,3 +522,9 @@
   allocation cases were excluded; compile the real allocator in an isolated TU.
 - Keep scratch worktree virtual environments separate. Sharing a `.venv` lets
   dependency resolution replace tools during another checkout's active build.
+- Verify the selected peripheral in the final linker map before claiming a
+  size reduction preserves that driver. IDF 4.4 exposes RMT transmit channel
+  counts without SOC_RMT_SUPPORTED; treating the missing flag as false silently
+  selected a fallback and hid stale RMT4 interfaces.
+- Use absolute source and destination paths when refreshing a scratch worktree
+  from a command whose working directory is that worktree.

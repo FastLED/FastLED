@@ -1335,51 +1335,58 @@ src/fl/channels/adapters/spi_channel_adapter.h|int selectControllerForClockPin(i
 src/fl/channels/adapters/spi_channel_adapter.h|static fl::shared_ptr<SpiChannelEngineAdapter> create( fl::vector<fl::shared_ptr<SpiHwBase>> hwControllers, fl::vector<int> priorities, fl::vector<const char*> names, const char* adapterName );
 src/fl/channels/adapters/spi_channel_adapter.h|void enqueue(ChannelDataPtr channelData) override;
 src/fl/channels/adapters/spi_channel_adapter.h|void show() override;
-src/fl/channels/channel.cpp.hpp|CRGB Channel::getCorrection() {
-src/fl/channels/channel.cpp.hpp|CRGB Channel::getTemperature() {
-src/fl/channels/channel.cpp.hpp|Channel& Channel::setGamma(float gamma) {
-src/fl/channels/channel.cpp.hpp|Channel& Channel::setScreenMap(const fl::ScreenMap& map) {
-src/fl/channels/channel.cpp.hpp|Channel& Channel::setScreenMap(const fl::XMap& map) {
-src/fl/channels/channel.cpp.hpp|Channel& Channel::setScreenMap(const fl::XYMap& map, float diameter) {
-src/fl/channels/channel.cpp.hpp|Channel& Channel::setScreenMap(fl::u16 width, fl::u16 height, float diameter) {
-src/fl/channels/channel.cpp.hpp|Channel::Channel(const ChipsetVariant& chipset, EOrder rgbOrder, RegistrationMode mode) : CPixelLEDController<RGB>(mode) , mChipset(chipset) , mRgbOrder(rgbOrder) , mDriver() , mBus(Bus::AUTO) , mId(nextId()) , mName(makeName(mId)) {
-src/fl/channels/channel.cpp.hpp|Channel::Channel(const ChipsetVariant& chipset, fl::span<CRGB> leds, EOrder rgbOrder, const ChannelOptions& options) : CPixelLEDController<RGB>(RegistrationMode::DeferRegister) , mChipset(chipset) , mRgbOrder(rgbOrder) , mDriver() , mBus(options.mBus) , mId(nextId()) , mName(makeName(mId)) {
-src/fl/channels/channel.cpp.hpp|Channel::Channel(int pin, const ChipsetTimingConfig& timing, fl::span<CRGB> leds, EOrder rgbOrder, const ChannelOptions& options) : CPixelLEDController<RGB>(RegistrationMode::DeferRegister) , mChipset(ClocklessChipset(pin, timing)) , mRgbOrder(rgbOrder) , mDriver() , mBus(options.mBus) , mId(nextId()) , mName(makeName(mId)) {
-src/fl/channels/channel.cpp.hpp|ChannelPtr Channel::create(const ChannelConfig &config) {
-src/fl/channels/channel.cpp.hpp|FL_NO_INLINE fl::shared_ptr<IChannelDriver> Channel::resolveDynamicDriver() {
-src/fl/channels/channel.cpp.hpp|IChannelDriver* getStubChannelEngine() {
-src/fl/channels/channel.cpp.hpp|PixelIterator& get() { return mPixelIterator.get(); }
-src/fl/channels/channel.cpp.hpp|ReorderingPixelIteratorAny( PixelController<RGB, 1, 0xFFFFFFFF>& pixels, const XYMap* addressing, EOrder rgbOrder, Rgbw rgbw, Rgbww rgbww, const fl::string& channelName) : mPixelIterator(pixels, rgbOrder, rgbw, rgbww) {
-src/fl/channels/channel.cpp.hpp|Rgbw Channel::getRgbw() const {
-src/fl/channels/channel.cpp.hpp|bool Channel::hasScreenMap() const {
-src/fl/channels/channel.cpp.hpp|bool Channel::isInDrawList() const {
-src/fl/channels/channel.cpp.hpp|const ChipsetTimingConfig& Channel::getTiming() const {
-src/fl/channels/channel.cpp.hpp|const PixelIterator& get() const { return mPixelIterator.get(); }
-src/fl/channels/channel.cpp.hpp|const fl::ScreenMap& Channel::getScreenMap() const {
-src/fl/channels/channel.cpp.hpp|fl::optional<float> Channel::getGamma() const {
-src/fl/channels/channel.cpp.hpp|fl::span<CRGB> Channel::leds() {
-src/fl/channels/channel.cpp.hpp|fl::span<const CRGB> Channel::leds() const {
-src/fl/channels/channel.cpp.hpp|fl::string Channel::getEngineName() const {
-src/fl/channels/channel.cpp.hpp|fl::string Channel::makeName(i32 id, const fl::optional<fl::string>& configName) {
-src/fl/channels/channel.cpp.hpp|i32 Channel::nextId() {
-src/fl/channels/channel.cpp.hpp|int Channel::getClockPin() const {
-src/fl/channels/channel.cpp.hpp|int Channel::getPin() const {
-src/fl/channels/channel.cpp.hpp|int Channel::size() const {
-src/fl/channels/channel.cpp.hpp|static fl::vector<CRGB>& getReorderBufferTLS() {
-src/fl/channels/channel.cpp.hpp|u8 Channel::getDither() {
-src/fl/channels/channel.cpp.hpp|virtual Capabilities getCapabilities() const override {
-src/fl/channels/channel.cpp.hpp|virtual DriverState poll() override {
-src/fl/channels/channel.cpp.hpp|virtual bool canHandle(const ChannelDataPtr& data) const override {
-src/fl/channels/channel.cpp.hpp|virtual fl::string getName() const override {
-src/fl/channels/channel.cpp.hpp|virtual void enqueue(ChannelDataPtr /*channelData*/) override {
-src/fl/channels/channel.cpp.hpp|virtual void show() override {
-src/fl/channels/channel.cpp.hpp|void Channel::addToDrawList() {
-src/fl/channels/channel.cpp.hpp|void Channel::applyConfig(const ChannelConfig& config) {
-src/fl/channels/channel.cpp.hpp|void Channel::init() {
-src/fl/channels/channel.cpp.hpp|void Channel::removeFromDrawList() {
-src/fl/channels/channel.cpp.hpp|void Channel::showLeds(u8 brightness) {
-src/fl/channels/channel.cpp.hpp|void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
-src/fl/channels/channel.cpp.hpp|void writeUCS7604(fl::vector_psram<u8>* data, PixelIterator& pixelIterator, ClocklessEncoder encoder, const ChannelOptions& settings, EOrder rgbOrder) {
+src/fl/channels/dynamic/cfastled.cpp.hpp|fl::ChannelPtr CFastLED::add(const fl::ChannelConfig& config) {
+src/fl/channels/dynamic/cfastled.cpp.hpp|fl::vector<fl::ChannelPtr> CFastLED::add(fl::span<const fl::ChannelConfig> configs) {
+src/fl/channels/dynamic/cfastled.cpp.hpp|fl::vector<fl::ChannelPtr> CFastLED::add(fl::initializer_list<fl::ChannelConfig> configs) {
+src/fl/channels/dynamic/cfastled.cpp.hpp|fl::vector<fl::ChannelPtr> CFastLED::add(const fl::MultiChannelConfig& multiConfig) {
+src/fl/channels/rx/fastled/cfastled.cpp.hpp|fl::RxChannelPtr CFastLED::addRx(const fl::RxChannelConfig& config) {
+src/fl/channels/dynamic/channel.cpp.hpp|CRGB Channel::getCorrection() {
+src/fl/channels/dynamic/channel.cpp.hpp|CRGB Channel::getTemperature() {
+src/fl/channels/dynamic/channel.cpp.hpp|Channel& Channel::setGamma(float gamma) {
+src/fl/channels/dynamic/channel.cpp.hpp|Channel& Channel::setScreenMap(const fl::ScreenMap& map) {
+src/fl/channels/dynamic/channel.cpp.hpp|Channel& Channel::setScreenMap(const fl::XMap& map) {
+src/fl/channels/dynamic/channel.cpp.hpp|Channel& Channel::setScreenMap(const fl::XYMap& map, float diameter) {
+src/fl/channels/dynamic/channel.cpp.hpp|Channel& Channel::setScreenMap(fl::u16 width, fl::u16 height, float diameter) {
+src/fl/channels/dynamic/channel.cpp.hpp|Channel::Channel(const ChipsetVariant& chipset, EOrder rgbOrder, RegistrationMode mode) : CPixelLEDController<RGB>(mode) , mChipset(chipset) , mRgbOrder(rgbOrder) , mDriver() , mBus(Bus::AUTO) , mId(nextId()) , mName(makeName(mId)) {
+src/fl/channels/dynamic/channel.cpp.hpp|Channel::Channel(const ChipsetVariant& chipset, fl::span<CRGB> leds, EOrder rgbOrder, const ChannelOptions& options) : CPixelLEDController<RGB>(RegistrationMode::DeferRegister) , mChipset(chipset) , mRgbOrder(rgbOrder) , mDriver() , mBus(options.mBus) , mId(nextId()) , mName(makeName(mId)) {
+src/fl/channels/dynamic/channel.cpp.hpp|Channel::Channel(int pin, const ChipsetTimingConfig& timing, fl::span<CRGB> leds, EOrder rgbOrder, const ChannelOptions& options) : CPixelLEDController<RGB>(RegistrationMode::DeferRegister) , mChipset(ClocklessChipset(pin, timing)) , mRgbOrder(rgbOrder) , mDriver() , mBus(options.mBus) , mId(nextId()) , mName(makeName(mId)) {
+src/fl/channels/dynamic/channel.cpp.hpp|ChannelPtr Channel::create(const ChannelConfig &config) {
+src/fl/channels/dynamic/channel.cpp.hpp|FL_NO_INLINE fl::shared_ptr<IChannelDriver> Channel::resolveDynamicDriver() {
+src/fl/channels/dynamic/channel.cpp.hpp|IChannelDriver* getStubChannelEngine() {
+src/fl/channels/dynamic/channel.cpp.hpp|PixelIterator& get() { return mPixelIterator.get(); }
+src/fl/channels/dynamic/channel.cpp.hpp|ReorderingPixelIteratorAny( PixelController<RGB, 1, 0xFFFFFFFF>& pixels, const XYMap* addressing, EOrder rgbOrder, Rgbw rgbw, Rgbww rgbww, const fl::string& channelName) : mPixelIterator(pixels, rgbOrder, rgbw, rgbww) {
+src/fl/channels/dynamic/channel.cpp.hpp|Rgbw Channel::getRgbw() const {
+src/fl/channels/dynamic/channel.cpp.hpp|bool Channel::hasScreenMap() const {
+src/fl/channels/dynamic/channel.cpp.hpp|bool Channel::isInDrawList() const {
+src/fl/channels/dynamic/channel.cpp.hpp|const ChipsetTimingConfig& Channel::getTiming() const {
+src/fl/channels/dynamic/channel.cpp.hpp|const PixelIterator& get() const { return mPixelIterator.get(); }
+src/fl/channels/dynamic/channel.cpp.hpp|const fl::ScreenMap& Channel::getScreenMap() const {
+src/fl/channels/dynamic/channel.cpp.hpp|fl::optional<float> Channel::getGamma() const {
+src/fl/channels/dynamic/channel.cpp.hpp|fl::span<CRGB> Channel::leds() {
+src/fl/channels/dynamic/channel.cpp.hpp|fl::span<const CRGB> Channel::leds() const {
+src/fl/channels/dynamic/channel.cpp.hpp|fl::string Channel::getEngineName() const {
+src/fl/channels/dynamic/channel.cpp.hpp|fl::string Channel::makeName(i32 id, const fl::optional<fl::string>& configName) {
+src/fl/channels/dynamic/channel.cpp.hpp|i32 Channel::nextId() {
+src/fl/channels/dynamic/channel.cpp.hpp|int Channel::getClockPin() const {
+src/fl/channels/dynamic/channel.cpp.hpp|int Channel::getPin() const {
+src/fl/channels/dynamic/channel.cpp.hpp|int Channel::size() const {
+src/fl/channels/dynamic/channel.cpp.hpp|static fl::vector<CRGB>& getReorderBufferTLS() {
+src/fl/channels/dynamic/channel.cpp.hpp|u8 Channel::getDither() {
+src/fl/channels/dynamic/channel.cpp.hpp|virtual Capabilities getCapabilities() const override {
+src/fl/channels/dynamic/channel.cpp.hpp|virtual DriverState poll() override {
+src/fl/channels/dynamic/channel.cpp.hpp|virtual bool canHandle(const ChannelDataPtr& data) const override {
+src/fl/channels/dynamic/channel.cpp.hpp|virtual fl::string getName() const override {
+src/fl/channels/dynamic/channel.cpp.hpp|virtual void enqueue(ChannelDataPtr /*channelData*/) override {
+src/fl/channels/dynamic/channel.cpp.hpp|virtual void show() override {
+src/fl/channels/registration/registration.cpp.hpp|void Channel::addToDrawList() {
+src/fl/channels/registration/registration.cpp.hpp|void CFastLED::add(fl::ChannelPtr channel) {
+src/fl/channels/registration/registration.cpp.hpp|void CFastLED::remove(fl::ChannelPtr channel) {
+src/fl/channels/dynamic/channel.cpp.hpp|void Channel::applyConfig(const ChannelConfig& config) {
+src/fl/channels/dynamic/channel.cpp.hpp|void Channel::init() {
+src/fl/channels/registration/registration.cpp.hpp|void Channel::removeFromDrawList() {
+src/fl/channels/dynamic/channel.cpp.hpp|void Channel::showLeds(u8 brightness) {
+src/fl/channels/dynamic/channel.cpp.hpp|void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
+src/fl/channels/dynamic/channel.cpp.hpp|void writeUCS7604(fl::vector_psram<u8>* data, PixelIterator& pixelIterator, ClocklessEncoder encoder, const ChannelOptions& settings, EOrder rgbOrder) {
 src/fl/channels/channel.h|CLEDController* asController() { return static_cast<CLEDController*>(this); }
 src/fl/channels/channel.h|CRGB getCorrection();
 src/fl/channels/channel.h|CRGB getTemperature();
@@ -3289,30 +3296,30 @@ src/fl/gfx/colorutils.cpp.hpp|void nblend(CRGB *existing, const CRGB *overlay, f
 src/fl/gfx/colorutils.cpp.hpp|void nblendPaletteTowardPalette(CRGBPalette16 &current, CRGBPalette16 &target, fl::u8 maxChanges) {
 src/fl/gfx/colorutils.cpp.hpp|void nscale8(CRGB *leds, fl::u16 num_leds, fl::u8 scale) {
 src/fl/gfx/colorutils.cpp.hpp|void nscale8_video(CRGB *leds, fl::u16 num_leds, fl::u8 scale) {
-src/fl/gfx/corkscrew.cpp.hpp|CRGB* Corkscrew::rawData() {
-src/fl/gfx/corkscrew.cpp.hpp|Corkscrew::Corkscrew(float totalTurns, fl::span<CRGB> dstPixels, bool invert, const Gap& gapParams) : mTotalTurns(totalTurns), mNumLeds(static_cast<fl::u16>(dstPixels.size())), mGapParams(gapParams), mInvert(invert) {
-src/fl/gfx/corkscrew.cpp.hpp|Corkscrew::Corkscrew(float totalTurns, fl::u16 numLeds, bool invert, const Gap& gapParams) : mTotalTurns(totalTurns), mNumLeds(numLeds), mGapParams(gapParams), mInvert(invert) {
-src/fl/gfx/corkscrew.cpp.hpp|Tile2x2_u8 Corkscrew::at_splat_extrapolate(float i) const {
-src/fl/gfx/corkscrew.cpp.hpp|Tile2x2_u8_wrap Corkscrew::at_wrap(float i) const {
-src/fl/gfx/corkscrew.cpp.hpp|Tile2x2_u8_wrap Corkscrew::calculateTileAtWrap(float i) const {
-src/fl/gfx/corkscrew.cpp.hpp|fl::Grid<CRGB>& Corkscrew::surface() {
-src/fl/gfx/corkscrew.cpp.hpp|fl::ScreenMap Corkscrew::toScreenMap(float diameter) const {
-src/fl/gfx/corkscrew.cpp.hpp|fl::shared_ptr<fl::Grid<CRGB>>& Corkscrew::getOrCreateInputSurface() {
-src/fl/gfx/corkscrew.cpp.hpp|fl::size Corkscrew::pixelCount() const {
-src/fl/gfx/corkscrew.cpp.hpp|fl::size Corkscrew::size() const { return mNumLeds; }
-src/fl/gfx/corkscrew.cpp.hpp|fl::span<CRGB> Corkscrew::data() {
-src/fl/gfx/corkscrew.cpp.hpp|vec2f Corkscrew::at_exact(fl::u16 i) const {
-src/fl/gfx/corkscrew.cpp.hpp|vec2f Corkscrew::at_no_wrap(fl::u16 i) const {
-src/fl/gfx/corkscrew.cpp.hpp|vec2f Corkscrew::iterator::operator*() const {
-src/fl/gfx/corkscrew.cpp.hpp|vec2f calculateLedPositionExtended(fl::u16 ledIndex, fl::u16 numLeds, float totalTurns, const Gap& gapParams, fl::u16 width, fl::u16 height) {
-src/fl/gfx/corkscrew.cpp.hpp|void Corkscrew::clear() {
-src/fl/gfx/corkscrew.cpp.hpp|void Corkscrew::draw(bool use_multi_sampling) {
-src/fl/gfx/corkscrew.cpp.hpp|void Corkscrew::fillInputSurface(const CRGB& color) {
-src/fl/gfx/corkscrew.cpp.hpp|void Corkscrew::initializeCache() const {
-src/fl/gfx/corkscrew.cpp.hpp|void Corkscrew::readFrom(const fl::Grid<CRGB>& source_grid, bool use_multi_sampling) {
-src/fl/gfx/corkscrew.cpp.hpp|void Corkscrew::readFromMulti(const fl::Grid<CRGB>& source_grid) const {
-src/fl/gfx/corkscrew.cpp.hpp|void Corkscrew::setCachingEnabled(bool enabled) {
-src/fl/gfx/corkscrew.cpp.hpp|void calculateDimensions(float totalTurns, fl::u16 numLeds, const Gap& gapParams, fl::u16 *width, fl::u16 *height) {
+src/fl/gfx/corkscrew/corkscrew.cpp.hpp|CRGB* Corkscrew::rawData() {
+src/fl/gfx/corkscrew/corkscrew.cpp.hpp|Corkscrew::Corkscrew(float totalTurns, fl::span<CRGB> dstPixels, bool invert, const Gap& gapParams) : mTotalTurns(totalTurns), mNumLeds(static_cast<fl::u16>(dstPixels.size())), mGapParams(gapParams), mInvert(invert) {
+src/fl/gfx/corkscrew/corkscrew.cpp.hpp|Corkscrew::Corkscrew(float totalTurns, fl::u16 numLeds, bool invert, const Gap& gapParams) : mTotalTurns(totalTurns), mNumLeds(numLeds), mGapParams(gapParams), mInvert(invert) {
+src/fl/gfx/corkscrew/corkscrew.cpp.hpp|Tile2x2_u8 Corkscrew::at_splat_extrapolate(float i) const {
+src/fl/gfx/corkscrew/corkscrew.cpp.hpp|Tile2x2_u8_wrap Corkscrew::at_wrap(float i) const {
+src/fl/gfx/corkscrew/corkscrew.cpp.hpp|Tile2x2_u8_wrap Corkscrew::calculateTileAtWrap(float i) const {
+src/fl/gfx/corkscrew/corkscrew.cpp.hpp|fl::Grid<CRGB>& Corkscrew::surface() {
+src/fl/gfx/corkscrew/corkscrew.cpp.hpp|fl::ScreenMap Corkscrew::toScreenMap(float diameter) const {
+src/fl/gfx/corkscrew/corkscrew.cpp.hpp|fl::shared_ptr<fl::Grid<CRGB>>& Corkscrew::getOrCreateInputSurface() {
+src/fl/gfx/corkscrew/corkscrew.cpp.hpp|fl::size Corkscrew::pixelCount() const {
+src/fl/gfx/corkscrew/corkscrew.cpp.hpp|fl::size Corkscrew::size() const { return mNumLeds; }
+src/fl/gfx/corkscrew/corkscrew.cpp.hpp|fl::span<CRGB> Corkscrew::data() {
+src/fl/gfx/corkscrew/corkscrew.cpp.hpp|vec2f Corkscrew::at_exact(fl::u16 i) const {
+src/fl/gfx/corkscrew/corkscrew.cpp.hpp|vec2f Corkscrew::at_no_wrap(fl::u16 i) const {
+src/fl/gfx/corkscrew/corkscrew.cpp.hpp|vec2f Corkscrew::iterator::operator*() const {
+src/fl/gfx/corkscrew/corkscrew.cpp.hpp|vec2f calculateLedPositionExtended(fl::u16 ledIndex, fl::u16 numLeds, float totalTurns, const Gap& gapParams, fl::u16 width, fl::u16 height) {
+src/fl/gfx/corkscrew/corkscrew.cpp.hpp|void Corkscrew::clear() {
+src/fl/gfx/corkscrew/corkscrew.cpp.hpp|void Corkscrew::draw(bool use_multi_sampling) {
+src/fl/gfx/corkscrew/corkscrew.cpp.hpp|void Corkscrew::fillInputSurface(const CRGB& color) {
+src/fl/gfx/corkscrew/corkscrew.cpp.hpp|void Corkscrew::initializeCache() const {
+src/fl/gfx/corkscrew/corkscrew.cpp.hpp|void Corkscrew::readFrom(const fl::Grid<CRGB>& source_grid, bool use_multi_sampling) {
+src/fl/gfx/corkscrew/corkscrew.cpp.hpp|void Corkscrew::readFromMulti(const fl::Grid<CRGB>& source_grid) const {
+src/fl/gfx/corkscrew/corkscrew.cpp.hpp|void Corkscrew::setCachingEnabled(bool enabled) {
+src/fl/gfx/corkscrew/corkscrew.cpp.hpp|void calculateDimensions(float totalTurns, fl::u16 numLeds, const Gap& gapParams, fl::u16 *width, fl::u16 *height) {
 src/fl/gfx/corkscrew.h|CRGB* rawData();
 src/fl/gfx/corkscrew.h|Corkscrew(float totalTurns, fl::span<CRGB> dstPixels, bool invert = false, const Gap& gapParams = Gap());
 src/fl/gfx/corkscrew.h|Corkscrew(float totalTurns, fl::u16 numLeds, bool invert = false, const Gap& gapParams = Gap());
@@ -3657,44 +3664,44 @@ src/fl/gfx/upscale.h|void upscaleFloat(const CRGB *input, CRGB *output, u8 input
 src/fl/gfx/upscale.h|void upscalePowerOf2(const CRGB *input, CRGB *output, u8 inputWidth, u8 inputHeight, const fl::XYMap& xyMap);
 src/fl/gfx/upscale.h|void upscaleRectangular(const CRGB *input, CRGB *output, u16 inputWidth, u16 inputHeight, u16 outputWidth, u16 outputHeight);
 src/fl/gfx/upscale.h|void upscaleRectangularPowerOf2(const CRGB *input, CRGB *output, u8 inputWidth, u8 inputHeight, u8 outputWidth, u8 outputHeight);
-src/fl/gfx/xypath.cpp.hpp|Tile2x2_u8 XYPath::at_subpixel(float alpha) {
-src/fl/gfx/xypath.cpp.hpp|TransformFloat &XYPath::transform() { return mPathRenderer->transform(); }
-src/fl/gfx/xypath.cpp.hpp|TransformFloat &XYPathRenderer::transform() { return mTransform; }
-src/fl/gfx/xypath.cpp.hpp|XYPath::XYPath(XYPathGeneratorPtr path, TransformFloat transform) : mPath(path) {
-src/fl/gfx/xypath.cpp.hpp|XYPathPtr XYPath::NewArchimedeanSpiralPath() {
-src/fl/gfx/xypath.cpp.hpp|XYPathPtr XYPath::NewArchimedeanSpiralPath(u16 width, u16 height) {
-src/fl/gfx/xypath.cpp.hpp|XYPathPtr XYPath::NewCatmullRomPath(u16 width, u16 height, const fl::shared_ptr<CatmullRomParams> &params) {
-src/fl/gfx/xypath.cpp.hpp|XYPathPtr XYPath::NewCirclePath() {
-src/fl/gfx/xypath.cpp.hpp|XYPathPtr XYPath::NewCirclePath(u16 width, u16 height) {
-src/fl/gfx/xypath.cpp.hpp|XYPathPtr XYPath::NewCustomPath(const fl::function<vec2f(float)> &f, const rect<i16> &drawbounds, const TransformFloat &transform, const char *name) {
-src/fl/gfx/xypath.cpp.hpp|XYPathPtr XYPath::NewGielisCurvePath(u16 width, u16 height, const fl::shared_ptr<GielisCurveParams> &params) {
-src/fl/gfx/xypath.cpp.hpp|XYPathPtr XYPath::NewHeartPath() {
-src/fl/gfx/xypath.cpp.hpp|XYPathPtr XYPath::NewHeartPath(u16 width, u16 height) {
-src/fl/gfx/xypath.cpp.hpp|XYPathPtr XYPath::NewLinePath(const fl::shared_ptr<LinePathParams> &params) {
-src/fl/gfx/xypath.cpp.hpp|XYPathPtr XYPath::NewLinePath(float x0, float y0, float x1, float y1) {
-src/fl/gfx/xypath.cpp.hpp|XYPathPtr XYPath::NewPhyllotaxisPath(u16 width, u16 height, const fl::shared_ptr<PhyllotaxisParams> &args) {
-src/fl/gfx/xypath.cpp.hpp|XYPathPtr XYPath::NewPointPath(float x, float y) {
-src/fl/gfx/xypath.cpp.hpp|XYPathPtr XYPath::NewRosePath(u16 width, u16 height, const fl::shared_ptr<RosePathParams> &params) {
-src/fl/gfx/xypath.cpp.hpp|XYRasterU8Sparse &get_tls_raster() {
-src/fl/gfx/xypath.cpp.hpp|bool XYPath::hasDrawBounds() const { return mPathRenderer->hasDrawBounds(); }
-src/fl/gfx/xypath.cpp.hpp|fl::string unique_missing_name(const char *prefix) {
-src/fl/gfx/xypath.cpp.hpp|int XYPath::calculateSteps(float from, float to) {
-src/fl/gfx/xypath.cpp.hpp|string XYPath::name() const { return mPath->name(); }
-src/fl/gfx/xypath.cpp.hpp|vec2f XYPath::at(float alpha) { return mPathRenderer->at(alpha); }
-src/fl/gfx/xypath.cpp.hpp|vec2f XYPath::at(float alpha, const TransformFloat &tx) {
-src/fl/gfx/xypath.cpp.hpp|vec2f XYPathRenderer::at(float alpha) { return at(alpha, mTransform); }
-src/fl/gfx/xypath.cpp.hpp|vec2f XYPathRenderer::at(float alpha, const TransformFloat &tx) {
-src/fl/gfx/xypath.cpp.hpp|vec2f XYPathRenderer::compute(float alpha) {
-src/fl/gfx/xypath.cpp.hpp|void XYPath::drawColor(const CRGB &color, float from, float to, Leds *leds, int steps) {
-src/fl/gfx/xypath.cpp.hpp|void XYPath::drawGradient(const Gradient &gradient, float from, float to, Leds *leds, int steps) {
-src/fl/gfx/xypath.cpp.hpp|void XYPath::rasterize(float from, float to, int steps, XYRasterU8Sparse &raster, XYPath::AlphaFunction *optional_alpha_gen) {
-src/fl/gfx/xypath.cpp.hpp|void XYPath::setDrawBounds(u16 width, u16 height) {
-src/fl/gfx/xypath.cpp.hpp|void XYPath::setScale(float scale) { mPathRenderer->setScale(scale); }
-src/fl/gfx/xypath.cpp.hpp|void XYPath::setTransform(const TransformFloat &transform) {
-src/fl/gfx/xypath.cpp.hpp|void XYPathRenderer::onTransformFloatChanged() {
-src/fl/gfx/xypath.cpp.hpp|void XYPathRenderer::rasterize( float from, float to, int steps, XYRaster &raster, fl::function<u8(float)> *optional_alpha_gen) {
-src/fl/gfx/xypath.cpp.hpp|void XYPathRenderer::setDrawBounds(u16 width, u16 height) {
-src/fl/gfx/xypath.cpp.hpp|void XYPathRenderer::setScale(float scale) {
+src/fl/gfx/paths/xypath.cpp.hpp|Tile2x2_u8 XYPath::at_subpixel(float alpha) {
+src/fl/gfx/paths/xypath.cpp.hpp|TransformFloat &XYPath::transform() { return mPathRenderer->transform(); }
+src/fl/gfx/paths/xypath.cpp.hpp|TransformFloat &XYPathRenderer::transform() { return mTransform; }
+src/fl/gfx/paths/xypath.cpp.hpp|XYPath::XYPath(XYPathGeneratorPtr path, TransformFloat transform) : mPath(path) {
+src/fl/gfx/paths/xypath.cpp.hpp|XYPathPtr XYPath::NewArchimedeanSpiralPath() {
+src/fl/gfx/paths/xypath.cpp.hpp|XYPathPtr XYPath::NewArchimedeanSpiralPath(u16 width, u16 height) {
+src/fl/gfx/paths/xypath.cpp.hpp|XYPathPtr XYPath::NewCatmullRomPath(u16 width, u16 height, const fl::shared_ptr<CatmullRomParams> &params) {
+src/fl/gfx/paths/xypath.cpp.hpp|XYPathPtr XYPath::NewCirclePath() {
+src/fl/gfx/paths/xypath.cpp.hpp|XYPathPtr XYPath::NewCirclePath(u16 width, u16 height) {
+src/fl/gfx/paths/xypath.cpp.hpp|XYPathPtr XYPath::NewCustomPath(const fl::function<vec2f(float)> &f, const rect<i16> &drawbounds, const TransformFloat &transform, const char *name) {
+src/fl/gfx/paths/xypath.cpp.hpp|XYPathPtr XYPath::NewGielisCurvePath(u16 width, u16 height, const fl::shared_ptr<GielisCurveParams> &params) {
+src/fl/gfx/paths/xypath.cpp.hpp|XYPathPtr XYPath::NewHeartPath() {
+src/fl/gfx/paths/xypath.cpp.hpp|XYPathPtr XYPath::NewHeartPath(u16 width, u16 height) {
+src/fl/gfx/paths/xypath.cpp.hpp|XYPathPtr XYPath::NewLinePath(const fl::shared_ptr<LinePathParams> &params) {
+src/fl/gfx/paths/xypath.cpp.hpp|XYPathPtr XYPath::NewLinePath(float x0, float y0, float x1, float y1) {
+src/fl/gfx/paths/xypath.cpp.hpp|XYPathPtr XYPath::NewPhyllotaxisPath(u16 width, u16 height, const fl::shared_ptr<PhyllotaxisParams> &args) {
+src/fl/gfx/paths/xypath.cpp.hpp|XYPathPtr XYPath::NewPointPath(float x, float y) {
+src/fl/gfx/paths/xypath.cpp.hpp|XYPathPtr XYPath::NewRosePath(u16 width, u16 height, const fl::shared_ptr<RosePathParams> &params) {
+src/fl/gfx/paths/xypath.cpp.hpp|XYRasterU8Sparse &get_tls_raster() {
+src/fl/gfx/paths/xypath.cpp.hpp|bool XYPath::hasDrawBounds() const { return mPathRenderer->hasDrawBounds(); }
+src/fl/gfx/paths/xypath.cpp.hpp|fl::string unique_missing_name(const char *prefix) {
+src/fl/gfx/paths/xypath.cpp.hpp|int XYPath::calculateSteps(float from, float to) {
+src/fl/gfx/paths/xypath.cpp.hpp|string XYPath::name() const { return mPath->name(); }
+src/fl/gfx/paths/xypath.cpp.hpp|vec2f XYPath::at(float alpha) { return mPathRenderer->at(alpha); }
+src/fl/gfx/paths/xypath.cpp.hpp|vec2f XYPath::at(float alpha, const TransformFloat &tx) {
+src/fl/gfx/paths/xypath.cpp.hpp|vec2f XYPathRenderer::at(float alpha) { return at(alpha, mTransform); }
+src/fl/gfx/paths/xypath.cpp.hpp|vec2f XYPathRenderer::at(float alpha, const TransformFloat &tx) {
+src/fl/gfx/paths/xypath.cpp.hpp|vec2f XYPathRenderer::compute(float alpha) {
+src/fl/gfx/paths/xypath.cpp.hpp|void XYPath::drawColor(const CRGB &color, float from, float to, Leds *leds, int steps) {
+src/fl/gfx/paths/xypath.cpp.hpp|void XYPath::drawGradient(const Gradient &gradient, float from, float to, Leds *leds, int steps) {
+src/fl/gfx/paths/xypath.cpp.hpp|void XYPath::rasterize(float from, float to, int steps, XYRasterU8Sparse &raster, XYPath::AlphaFunction *optional_alpha_gen) {
+src/fl/gfx/paths/xypath.cpp.hpp|void XYPath::setDrawBounds(u16 width, u16 height) {
+src/fl/gfx/paths/xypath.cpp.hpp|void XYPath::setScale(float scale) { mPathRenderer->setScale(scale); }
+src/fl/gfx/paths/xypath.cpp.hpp|void XYPath::setTransform(const TransformFloat &transform) {
+src/fl/gfx/paths/xypath.cpp.hpp|void XYPathRenderer::onTransformFloatChanged() {
+src/fl/gfx/paths/xypath.cpp.hpp|void XYPathRenderer::rasterize( float from, float to, int steps, XYRaster &raster, fl::function<u8(float)> *optional_alpha_gen) {
+src/fl/gfx/paths/xypath.cpp.hpp|void XYPathRenderer::setDrawBounds(u16 width, u16 height) {
+src/fl/gfx/paths/xypath.cpp.hpp|void XYPathRenderer::setScale(float scale) {
 src/fl/gfx/xypath.h|Tile2x2_u8 at_subpixel(float alpha);
 src/fl/gfx/xypath.h|TransformFloat &transform();
 src/fl/gfx/xypath.h|XYPath(XYPathGeneratorPtr path, TransformFloat transform = TransformFloat());
@@ -3732,65 +3739,65 @@ src/fl/gfx/xypath.h|void setName(const string &name) { mName = name; }
 src/fl/gfx/xypath.h|void setScale(float scale);
 src/fl/gfx/xypath.h|void setTransform(const TransformFloat &transform);
 src/fl/gfx/xypath.h|xy_brightness at_brightness(float alpha) {
-src/fl/gfx/xypath_impls.cpp.hpp|ArchimedeanSpiralPath::ArchimedeanSpiralPath(u8 turns, float radius) : mTurns(turns), mRadius(radius) {}
-src/fl/gfx/xypath_impls.cpp.hpp|CatmullRomParams &CatmullRomPath::params() { return *mParams; }
-src/fl/gfx/xypath_impls.cpp.hpp|CatmullRomPath::CatmullRomPath(const fl::shared_ptr<CatmullRomParams> &p) : mParams(p) {}
-src/fl/gfx/xypath_impls.cpp.hpp|CirclePath::CirclePath() {}
-src/fl/gfx/xypath_impls.cpp.hpp|GielisCurveParams &GielisCurvePath::params() { return *mParams; }
-src/fl/gfx/xypath_impls.cpp.hpp|GielisCurvePath::GielisCurvePath(const fl::shared_ptr<GielisCurveParams> &p) : mParams(p) {}
-src/fl/gfx/xypath_impls.cpp.hpp|HeartPath::HeartPath() {}
-src/fl/gfx/xypath_impls.cpp.hpp|LinePath::LinePath(const LinePathParamsPtr &params) : mParams(params) {}
-src/fl/gfx/xypath_impls.cpp.hpp|LinePath::LinePath(float x0, float y0, float x1, float y1) {
-src/fl/gfx/xypath_impls.cpp.hpp|LinePathParams &LinePath::params() { return *mParams; }
-src/fl/gfx/xypath_impls.cpp.hpp|PhyllotaxisParams &PhyllotaxisPath::params() { return *mParams; }
-src/fl/gfx/xypath_impls.cpp.hpp|PhyllotaxisPath::PhyllotaxisPath(const fl::shared_ptr<PhyllotaxisParams> &p) : mParams(p) {}
-src/fl/gfx/xypath_impls.cpp.hpp|PointPath::PointPath(float x, float y) : mPoint(x, y) {}
-src/fl/gfx/xypath_impls.cpp.hpp|PointPath::PointPath(vec2f p) : mPoint(p) {}
-src/fl/gfx/xypath_impls.cpp.hpp|RosePath::RosePath(const fl::shared_ptr<RosePathParams> &p) : mParams(p) {}
-src/fl/gfx/xypath_impls.cpp.hpp|RosePath::RosePath(u8 n, u8 d) {
-src/fl/gfx/xypath_impls.cpp.hpp|RosePathParams &RosePath::params() { return *mParams; }
-src/fl/gfx/xypath_impls.cpp.hpp|const CatmullRomParams &CatmullRomPath::params() const { return *mParams; }
-src/fl/gfx/xypath_impls.cpp.hpp|const GielisCurveParams &GielisCurvePath::params() const { return *mParams; }
-src/fl/gfx/xypath_impls.cpp.hpp|const LinePathParams &LinePath::params() const { return *mParams; }
-src/fl/gfx/xypath_impls.cpp.hpp|const PhyllotaxisParams &PhyllotaxisPath::params() const { return *mParams; }
-src/fl/gfx/xypath_impls.cpp.hpp|const RosePathParams &RosePath::params() const { return *mParams; }
-src/fl/gfx/xypath_impls.cpp.hpp|const string ArchimedeanSpiralPath::name() const {
-src/fl/gfx/xypath_impls.cpp.hpp|const string CatmullRomPath::name() const { return "CatmullRomPath"; }
-src/fl/gfx/xypath_impls.cpp.hpp|const string CirclePath::name() const { return "CirclePath"; }
-src/fl/gfx/xypath_impls.cpp.hpp|const string GielisCurvePath::name() const { return "GielisCurvePath"; }
-src/fl/gfx/xypath_impls.cpp.hpp|const string HeartPath::name() const { return "HeartPath"; }
-src/fl/gfx/xypath_impls.cpp.hpp|const string LinePath::name() const { return "LinePath"; }
-src/fl/gfx/xypath_impls.cpp.hpp|const string PhyllotaxisPath::name() const { return "PhyllotaxisPath"; }
-src/fl/gfx/xypath_impls.cpp.hpp|const string PointPath::name() const { return "PointPath"; }
-src/fl/gfx/xypath_impls.cpp.hpp|const string RosePath::name() const { return "RosePath"; }
-src/fl/gfx/xypath_impls.cpp.hpp|fl::size CatmullRomPath::size() const { return params().size(); }
-src/fl/gfx/xypath_impls.cpp.hpp|vec2f ArchimedeanSpiralPath::compute(float alpha) {
-src/fl/gfx/xypath_impls.cpp.hpp|vec2f CatmullRomPath::compute(float alpha) {
-src/fl/gfx/xypath_impls.cpp.hpp|vec2f CatmullRomPath::interpolate(const vec2f &p0, const vec2f &p1, const vec2f &p2, const vec2f &p3, float t) const {
-src/fl/gfx/xypath_impls.cpp.hpp|vec2f CirclePath::compute(float alpha) {
-src/fl/gfx/xypath_impls.cpp.hpp|vec2f GielisCurvePath::compute(float alpha) {
-src/fl/gfx/xypath_impls.cpp.hpp|vec2f HeartPath::compute(float alpha) {
-src/fl/gfx/xypath_impls.cpp.hpp|vec2f LinePath::compute(float alpha) {
-src/fl/gfx/xypath_impls.cpp.hpp|vec2f PhyllotaxisPath::compute(float alpha) {
-src/fl/gfx/xypath_impls.cpp.hpp|vec2f PointPath::compute(float alpha) {
-src/fl/gfx/xypath_impls.cpp.hpp|vec2f RosePath::compute(float alpha) {
-src/fl/gfx/xypath_impls.cpp.hpp|void ArchimedeanSpiralPath::setRadius(float radius) { mRadius = radius; }
-src/fl/gfx/xypath_impls.cpp.hpp|void ArchimedeanSpiralPath::setTurns(u8 turns) { mTurns = turns; }
-src/fl/gfx/xypath_impls.cpp.hpp|void CatmullRomPath::addPoint(float x, float y) { params().addPoint(x, y); }
-src/fl/gfx/xypath_impls.cpp.hpp|void CatmullRomPath::addPoint(vec2f p) { params().addPoint(p); }
-src/fl/gfx/xypath_impls.cpp.hpp|void CatmullRomPath::clear() { params().clear(); }
-src/fl/gfx/xypath_impls.cpp.hpp|void GielisCurvePath::setA(float a) { params().a = a; }
-src/fl/gfx/xypath_impls.cpp.hpp|void GielisCurvePath::setB(float b) { params().b = b; }
-src/fl/gfx/xypath_impls.cpp.hpp|void GielisCurvePath::setM(float m) { params().m = m; }
-src/fl/gfx/xypath_impls.cpp.hpp|void GielisCurvePath::setN1(float n1) { params().n1 = n1; }
-src/fl/gfx/xypath_impls.cpp.hpp|void GielisCurvePath::setN2(float n2) { params().n2 = n2; }
-src/fl/gfx/xypath_impls.cpp.hpp|void GielisCurvePath::setN3(float n3) { params().n3 = n3; }
-src/fl/gfx/xypath_impls.cpp.hpp|void LinePath::set(const LinePathParams &p) { params() = p; }
-src/fl/gfx/xypath_impls.cpp.hpp|void LinePath::set(float x0, float y0, float x1, float y1) {
-src/fl/gfx/xypath_impls.cpp.hpp|void PointPath::set(float x, float y) { set(vec2f(x, y)); }
-src/fl/gfx/xypath_impls.cpp.hpp|void PointPath::set(vec2f p) { mPoint = p; }
-src/fl/gfx/xypath_impls.cpp.hpp|void RosePath::setD(u8 d) { params().d = d; }
-src/fl/gfx/xypath_impls.cpp.hpp|void RosePath::setN(u8 n) { params().n = n; }
+src/fl/gfx/paths/xypath_impls.cpp.hpp|ArchimedeanSpiralPath::ArchimedeanSpiralPath(u8 turns, float radius) : mTurns(turns), mRadius(radius) {}
+src/fl/gfx/paths/xypath_impls.cpp.hpp|CatmullRomParams &CatmullRomPath::params() { return *mParams; }
+src/fl/gfx/paths/xypath_impls.cpp.hpp|CatmullRomPath::CatmullRomPath(const fl::shared_ptr<CatmullRomParams> &p) : mParams(p) {}
+src/fl/gfx/paths/xypath_impls.cpp.hpp|CirclePath::CirclePath() {}
+src/fl/gfx/paths/xypath_impls.cpp.hpp|GielisCurveParams &GielisCurvePath::params() { return *mParams; }
+src/fl/gfx/paths/xypath_impls.cpp.hpp|GielisCurvePath::GielisCurvePath(const fl::shared_ptr<GielisCurveParams> &p) : mParams(p) {}
+src/fl/gfx/paths/xypath_impls.cpp.hpp|HeartPath::HeartPath() {}
+src/fl/gfx/paths/xypath_impls.cpp.hpp|LinePath::LinePath(const LinePathParamsPtr &params) : mParams(params) {}
+src/fl/gfx/paths/xypath_impls.cpp.hpp|LinePath::LinePath(float x0, float y0, float x1, float y1) {
+src/fl/gfx/paths/xypath_impls.cpp.hpp|LinePathParams &LinePath::params() { return *mParams; }
+src/fl/gfx/paths/xypath_impls.cpp.hpp|PhyllotaxisParams &PhyllotaxisPath::params() { return *mParams; }
+src/fl/gfx/paths/xypath_impls.cpp.hpp|PhyllotaxisPath::PhyllotaxisPath(const fl::shared_ptr<PhyllotaxisParams> &p) : mParams(p) {}
+src/fl/gfx/paths/xypath_impls.cpp.hpp|PointPath::PointPath(float x, float y) : mPoint(x, y) {}
+src/fl/gfx/paths/xypath_impls.cpp.hpp|PointPath::PointPath(vec2f p) : mPoint(p) {}
+src/fl/gfx/paths/xypath_impls.cpp.hpp|RosePath::RosePath(const fl::shared_ptr<RosePathParams> &p) : mParams(p) {}
+src/fl/gfx/paths/xypath_impls.cpp.hpp|RosePath::RosePath(u8 n, u8 d) {
+src/fl/gfx/paths/xypath_impls.cpp.hpp|RosePathParams &RosePath::params() { return *mParams; }
+src/fl/gfx/paths/xypath_impls.cpp.hpp|const CatmullRomParams &CatmullRomPath::params() const { return *mParams; }
+src/fl/gfx/paths/xypath_impls.cpp.hpp|const GielisCurveParams &GielisCurvePath::params() const { return *mParams; }
+src/fl/gfx/paths/xypath_impls.cpp.hpp|const LinePathParams &LinePath::params() const { return *mParams; }
+src/fl/gfx/paths/xypath_impls.cpp.hpp|const PhyllotaxisParams &PhyllotaxisPath::params() const { return *mParams; }
+src/fl/gfx/paths/xypath_impls.cpp.hpp|const RosePathParams &RosePath::params() const { return *mParams; }
+src/fl/gfx/paths/xypath_impls.cpp.hpp|const string ArchimedeanSpiralPath::name() const {
+src/fl/gfx/paths/xypath_impls.cpp.hpp|const string CatmullRomPath::name() const { return "CatmullRomPath"; }
+src/fl/gfx/paths/xypath_impls.cpp.hpp|const string CirclePath::name() const { return "CirclePath"; }
+src/fl/gfx/paths/xypath_impls.cpp.hpp|const string GielisCurvePath::name() const { return "GielisCurvePath"; }
+src/fl/gfx/paths/xypath_impls.cpp.hpp|const string HeartPath::name() const { return "HeartPath"; }
+src/fl/gfx/paths/xypath_impls.cpp.hpp|const string LinePath::name() const { return "LinePath"; }
+src/fl/gfx/paths/xypath_impls.cpp.hpp|const string PhyllotaxisPath::name() const { return "PhyllotaxisPath"; }
+src/fl/gfx/paths/xypath_impls.cpp.hpp|const string PointPath::name() const { return "PointPath"; }
+src/fl/gfx/paths/xypath_impls.cpp.hpp|const string RosePath::name() const { return "RosePath"; }
+src/fl/gfx/paths/xypath_impls.cpp.hpp|fl::size CatmullRomPath::size() const { return params().size(); }
+src/fl/gfx/paths/xypath_impls.cpp.hpp|vec2f ArchimedeanSpiralPath::compute(float alpha) {
+src/fl/gfx/paths/xypath_impls.cpp.hpp|vec2f CatmullRomPath::compute(float alpha) {
+src/fl/gfx/paths/xypath_impls.cpp.hpp|vec2f CatmullRomPath::interpolate(const vec2f &p0, const vec2f &p1, const vec2f &p2, const vec2f &p3, float t) const {
+src/fl/gfx/paths/xypath_impls.cpp.hpp|vec2f CirclePath::compute(float alpha) {
+src/fl/gfx/paths/xypath_impls.cpp.hpp|vec2f GielisCurvePath::compute(float alpha) {
+src/fl/gfx/paths/xypath_impls.cpp.hpp|vec2f HeartPath::compute(float alpha) {
+src/fl/gfx/paths/xypath_impls.cpp.hpp|vec2f LinePath::compute(float alpha) {
+src/fl/gfx/paths/xypath_impls.cpp.hpp|vec2f PhyllotaxisPath::compute(float alpha) {
+src/fl/gfx/paths/xypath_impls.cpp.hpp|vec2f PointPath::compute(float alpha) {
+src/fl/gfx/paths/xypath_impls.cpp.hpp|vec2f RosePath::compute(float alpha) {
+src/fl/gfx/paths/xypath_impls.cpp.hpp|void ArchimedeanSpiralPath::setRadius(float radius) { mRadius = radius; }
+src/fl/gfx/paths/xypath_impls.cpp.hpp|void ArchimedeanSpiralPath::setTurns(u8 turns) { mTurns = turns; }
+src/fl/gfx/paths/xypath_impls.cpp.hpp|void CatmullRomPath::addPoint(float x, float y) { params().addPoint(x, y); }
+src/fl/gfx/paths/xypath_impls.cpp.hpp|void CatmullRomPath::addPoint(vec2f p) { params().addPoint(p); }
+src/fl/gfx/paths/xypath_impls.cpp.hpp|void CatmullRomPath::clear() { params().clear(); }
+src/fl/gfx/paths/xypath_impls.cpp.hpp|void GielisCurvePath::setA(float a) { params().a = a; }
+src/fl/gfx/paths/xypath_impls.cpp.hpp|void GielisCurvePath::setB(float b) { params().b = b; }
+src/fl/gfx/paths/xypath_impls.cpp.hpp|void GielisCurvePath::setM(float m) { params().m = m; }
+src/fl/gfx/paths/xypath_impls.cpp.hpp|void GielisCurvePath::setN1(float n1) { params().n1 = n1; }
+src/fl/gfx/paths/xypath_impls.cpp.hpp|void GielisCurvePath::setN2(float n2) { params().n2 = n2; }
+src/fl/gfx/paths/xypath_impls.cpp.hpp|void GielisCurvePath::setN3(float n3) { params().n3 = n3; }
+src/fl/gfx/paths/xypath_impls.cpp.hpp|void LinePath::set(const LinePathParams &p) { params() = p; }
+src/fl/gfx/paths/xypath_impls.cpp.hpp|void LinePath::set(float x0, float y0, float x1, float y1) {
+src/fl/gfx/paths/xypath_impls.cpp.hpp|void PointPath::set(float x, float y) { set(vec2f(x, y)); }
+src/fl/gfx/paths/xypath_impls.cpp.hpp|void PointPath::set(vec2f p) { mPoint = p; }
+src/fl/gfx/paths/xypath_impls.cpp.hpp|void RosePath::setD(u8 d) { params().d = d; }
+src/fl/gfx/paths/xypath_impls.cpp.hpp|void RosePath::setN(u8 n) { params().n = n; }
 src/fl/gfx/xypath_impls.h|ArchimedeanSpiralPath(u8 turns = 3, float radius = 1.0f);
 src/fl/gfx/xypath_impls.h|CatmullRomParams &params();
 src/fl/gfx/xypath_impls.h|CatmullRomPath(const fl::shared_ptr<CatmullRomParams> &p = fl::make_shared<CatmullRomParams>());
@@ -3855,9 +3862,9 @@ src/fl/gfx/xypath_impls.h|void setN2(float n2);
 src/fl/gfx/xypath_impls.h|void setN3(float n3);
 src/fl/gfx/xypath_impls.h|void setRadius(float radius);
 src/fl/gfx/xypath_impls.h|void setTurns(u8 turns);
-src/fl/gfx/xypath_renderer.cpp.hpp|Tile2x2_u8 XYPathRenderer::at_subpixel(float alpha) {
-src/fl/gfx/xypath_renderer.cpp.hpp|XYPathRenderer::XYPathRenderer(XYPathGeneratorPtr path, TransformFloat transform) : mPath(path), mTransform(transform) {}
-src/fl/gfx/xypath_renderer.cpp.hpp|vec2f XYPathRenderer::compute_float(float alpha, const TransformFloat &tx) {
+src/fl/gfx/paths/xypath_renderer.cpp.hpp|Tile2x2_u8 XYPathRenderer::at_subpixel(float alpha) {
+src/fl/gfx/paths/xypath_renderer.cpp.hpp|XYPathRenderer::XYPathRenderer(XYPathGeneratorPtr path, TransformFloat transform) : mPath(path), mTransform(transform) {}
+src/fl/gfx/paths/xypath_renderer.cpp.hpp|vec2f XYPathRenderer::compute_float(float alpha, const TransformFloat &tx) {
 src/fl/gfx/xypath_renderer.h|Tile2x2_u8 at_subpixel(float alpha);
 src/fl/gfx/xypath_renderer.h|TransformFloat &transform();
 src/fl/gfx/xypath_renderer.h|XYPathRenderer(XYPathGeneratorPtr path, TransformFloat transform = TransformFloat());

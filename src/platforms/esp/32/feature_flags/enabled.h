@@ -22,7 +22,13 @@ FL_EXTERN_C_END
 
 // Provide safe defaults for SoC capabilities if not defined
 #ifndef SOC_RMT_SUPPORTED
+// IDF 4.x describes RMT transmit channels but does not define the newer
+// support flag. Derive it from the SDK channel count, without guessing silicon.
+#if defined(SOC_RMT_TX_CANDIDATES_PER_GROUP) && SOC_RMT_TX_CANDIDATES_PER_GROUP > 0
+#define SOC_RMT_SUPPORTED 1
+#else
 #define SOC_RMT_SUPPORTED 0
+#endif
 #endif
 
 // SOC_CPU_CORES_NUM is defined in soc/soc_caps.h on IDF 4.0+. For IDF 3.x

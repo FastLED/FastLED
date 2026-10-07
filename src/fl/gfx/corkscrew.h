@@ -1,5 +1,7 @@
 #pragma once
 
+#include "fl/stl/iterator.h"
+
 /**
  * @file corkscrew.h
  * @brief Corkscrew LED strip projection and rendering

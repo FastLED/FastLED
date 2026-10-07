@@ -1,3 +1,4 @@
+// ok no header - public declaration remains in fl/gfx/xypath_impls.h
 
 #include "fl/gfx/xypath_impls.h"
 

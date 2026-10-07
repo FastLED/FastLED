@@ -1,3 +1,4 @@
+// ok no header - public declaration remains in fl/gfx/corkscrew.h
 #include "fl/gfx/corkscrew.h"
 #include "fl/stl/algorithm.h"
 #include "fl/stl/assert.h"

@@ -9,11 +9,6 @@
 // begin current directory includes
 #include "platforms/shared/coroutine_context.cpp.hpp"
 #include "platforms/shared/rx_device_native.cpp.hpp"
-#include "platforms/shared/spi_hw_1.cpp.hpp"
-#include "platforms/shared/spi_hw_16.cpp.hpp"
-#include "platforms/shared/spi_hw_2.cpp.hpp"
-#include "platforms/shared/spi_hw_4.cpp.hpp"
-#include "platforms/shared/spi_hw_8.cpp.hpp"
 #include "platforms/shared/spi_manager.cpp.hpp"
 #include "platforms/shared/spi_transposer.cpp.hpp"
 #include "platforms/shared/spi_types.cpp.hpp"
