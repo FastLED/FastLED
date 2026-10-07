@@ -88,8 +88,8 @@ namespace detail::objectfled_spi_internal {
 // Maximum input bytes per show(); APA102/SK9822 frames for typical LED
 // strips (start-frame + 4B/LED + end-frame) easily fit in 4 KB output.
 // 64 input bytes * 16 DMA words/byte * 4 bytes/word = 4096 bytes encoded.
-// Place in DMAMEM (OCRAM2) to match the clockless mode's bitdata buffer
-// location; DMAMEM is uncached on T4 so we avoid every-show cache flushes.
+// Place in DMAMEM (OCRAM2), the same RAM as the clockless mode's
+// heap-allocated bitdata buffer.
 // TODO(#3428): once the channel engine reports max-frame size, size this
 // from that instead of a hard 64.
 #ifndef FL_OBJECTFLED_SPI_MAX_BYTES
@@ -123,8 +123,8 @@ static volatile bool sSpiDmaComplete = true;  // FL_LINT_ALLOW_GLOBAL(DMA-ISR-sh
 static bool sSpiInitialized = false;  // FL_LINT_ALLOW_GLOBAL(DMA-ISR-shared driver state; single T4 peripheral instance)
 static ObjectFLEDSPIPinInfo sSpiCurrentPins{};
 
-// Pre-encoded DMA bit-pattern buffer. DMAMEM = OCRAM2 (uncached on T4),
-// matches dma.bitdata in ObjectFLEDDmaManager. 32-byte aligned so the
+// Pre-encoded DMA bit-pattern buffer in DMAMEM (OCRAM2), the same RAM as
+// dma.bitdata in ObjectFLEDDmaManager. 32-byte aligned so the
 // SADDR satisfies eDMA 32-bit beat alignment.
 FL_DMAMEM static u32 sSpiBitPattern[kSpiMaxOutputWords] __attribute__((aligned(32)));
 

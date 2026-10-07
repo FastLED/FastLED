@@ -7,6 +7,7 @@
 #include <Arduino.h>
 #include "DMAChannel.h"
 #include "platforms/arm/teensy/teensy4_common/dmamem.h"
+#include "ObjectFLEDBitdataSize.h"
 
 namespace fl {
 
@@ -19,7 +20,8 @@ namespace fl {
 // the residual 0->1 phantom bit flips clustered at 20-LED boundaries
 // observed in #3406. At BYTES_PER_DMA=120 the major loop runs 1200 us, so
 // the ISR has plenty of margin to refill before the next chunk starts.
-// Memory cost: bitdata grows from 15 KB to 30 KB in DMAMEM (OCRAM2).
+// Memory cost: bitdata is at most BYTES_PER_DMA*256 bytes (38,400 B at
+// 150), heap-allocated in OCRAM2 and sized to the frame (#4711).
 #ifndef BYTES_PER_DMA
 // EXPERIMENT: 150 makes our 100-LED test fit in a single major loop
 // (numbytes=300 <= BYTES_PER_DMA*2=300) so the ESG/ISR refill path is
@@ -36,6 +38,12 @@ namespace fl {
 static_assert(BYTES_PER_DMA >= 90,
               "BYTES_PER_DMA must be >= 90 to keep the ISR refill margin "
               "ahead of the DMA major-loop tick. See #3406 round-2 race.");
+
+// The ISR refills one BYTES_PER_DMA*32-word half of bitdata, which needs
+// the >2*BYTES_PER_DMA path to own the full double buffer.
+static_assert(objectfled::bitdataWordsFor(2 * BYTES_PER_DMA + 1, BYTES_PER_DMA) ==
+                  2 * BYTES_PER_DMA * 32,
+              "ObjectFLED ISR half-buffer refill needs a full double buffer");
 
 /// Singleton manager for shared ObjectFLED DMA resources
 ///
@@ -60,8 +68,25 @@ class ObjectFLEDDmaManager {
     DMAChannel dma3;
     DMASetting dma2next;
 
+    /// Ensure bitdata holds a frame of `numbytes` bytes per strip (#4711).
+    /// Grows (never shrinks) to min(numbytes, 2*BYTES_PER_DMA)*32 words.
+    /// Call only while the DMA is idle (after acquire()), since it may free
+    /// the buffer the ISR reads. Returns false if allocation fails.
+    bool ensureBitdata(uint32_t numbytes);
+
+    // DMA bit buffer, heap-allocated on first show() and sized to the
+    // largest frame seen instead of a fixed 38,400 B DMAMEM array (#4711).
+    // Teensy 4 malloc serves OCRAM2 (_heap_start = end of .bss.dma up to
+    // the end of RAM in imxrt1062*.ld), the same DMA-capable region as
+    // DMAMEM. The buffer is 32-byte aligned for arm_dcache_flush_delete.
+    //
+    // Raw owning pointer by design (cpp-standards "Long-Lived Pointers"):
+    // its only owner is this process-lifetime singleton, it is replaced
+    // only in ensureBitdata() while no DMA/ISR is running, and neither the
+    // ISR nor the DMA engine can hold a shared_ptr reference.
+    uint32_t* bitdata = nullptr;
+    uint32_t bitdataWords = 0;
     // DMAMEM buffers must be static to work with section attributes
-    static FL_DMAMEM uint32_t bitdata[BYTES_PER_DMA * 64] __attribute__((aligned(32)));
     static FL_DMAMEM uint32_t bitmask[4] __attribute__((aligned(32)));
 
     // Shared state for ISR. These are written once in showInternal()
@@ -85,6 +110,7 @@ class ObjectFLEDDmaManager {
     ObjectFLEDDmaManager& operator=(const ObjectFLEDDmaManager&) = delete;
 
     void* mCurrentOwner = nullptr;
+    void* mBitdataAlloc = nullptr;  // unaligned malloc() block behind bitdata
 };
 
 } // namespace fl
