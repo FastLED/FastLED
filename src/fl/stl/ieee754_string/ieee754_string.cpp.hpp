@@ -5,7 +5,7 @@
 // embedding into FastLED #3022 / #3029.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "fl/stl/ieee754_string.h"
+#include "fl/stl/ieee754_string.h" // ok no header - public declaration remains in parent directory.
 
 #include "fl/stl/string.h"
 #include "fl/stl/charconv.h"

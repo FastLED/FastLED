@@ -1,4 +1,5 @@
 #include "fl/task/task.h"
+#include "fl/task/detail/task_impl.h"
 #include "fl/stl/limits.h"
 #include "fl/task/scheduler.h"
 #include "fl/stl/sstream.h"
@@ -10,7 +11,7 @@
 namespace fl {
 namespace task {
 
-namespace {
+namespace detail {
 // Generate trace label from TracePoint
 string make_trace_label(const TracePoint& trace) {
     sstream ss;
@@ -23,89 +24,7 @@ int next_task_id() {
     static fl::atomic<int> id(0); // okay static in header
     return id.fetch_add(1) + 1;
 }
-} // namespace
-
-} // namespace task
-} // namespace fl
-
-namespace fl {
-namespace task {
-
-//=============================================================================
-// Coroutine - RAII wrapper around platform-specific implementation
-//=============================================================================
-
-class Coroutine {
-public:
-    using TaskFunction = fl::function<void()>;
-
-    Coroutine(fl::string name, TaskFunction function, size_t stack_size = 4096, u8 priority = 5, int core_id = -1)
-        : mImpl(platforms::createTaskCoroutine(fl::move(name), fl::move(function), stack_size, priority, core_id)) {
-    }
-
-    ~Coroutine() FL_NO_EXCEPT = default;
-
-    Coroutine(const Coroutine&) FL_NO_EXCEPT = delete;
-    Coroutine& operator=(const Coroutine&) FL_NO_EXCEPT = delete;
-    Coroutine(Coroutine&&) FL_NO_EXCEPT = delete;
-    Coroutine& operator=(Coroutine&&) FL_NO_EXCEPT = delete;
-
-    void stop() {
-        if (mImpl) {
-            mImpl->stop();
-        }
-    }
-
-    bool isRunning() const {
-        return mImpl ? mImpl->isRunning() : false;
-    }
-
-    static void exitCurrent() {
-        platforms::ICoroutineTask::exitCurrent();
-    }
-
-private:
-    platforms::TaskCoroutinePtr mImpl;
-};
-
-} // namespace task
-} // namespace fl
-
-namespace fl {
-namespace task {
-
-//=============================================================================
-// ITaskImpl - Virtual Interface
-//=============================================================================
-
-class ITaskImpl {
-public:
-    virtual ~ITaskImpl() FL_NO_EXCEPT = default;
-    virtual void set_then(function<void()> on_then) = 0;
-    virtual void set_catch(function<void(const Error&)> on_catch) = 0;
-    virtual void set_canceled() = 0;
-    virtual int id() const = 0;
-    virtual void set_id(int id) = 0;
-    virtual bool has_then() const = 0;
-    virtual bool has_catch() const = 0;
-    virtual string trace_label() const = 0;
-    virtual TaskType type() const = 0;
-    virtual int interval_ms() const = 0;
-    virtual void set_interval_ms(int interval_ms) = 0;
-    virtual u32 last_run_time() const = 0;
-    virtual void set_last_run_time(u32 time) = 0;
-    virtual bool ready_to_run(u32 current_time) const = 0;
-    virtual bool ready_to_run_frame_task(u32 current_time) const = 0;
-    virtual bool is_canceled() const = 0;
-    virtual bool is_auto_registered() const = 0;
-    virtual void execute_then() = 0;
-    virtual void execute_catch(const Error& error) = 0;
-    virtual void auto_register_with_scheduler() = 0;
-
-    // Coroutine methods (no-op for non-coroutine tasks)
-    virtual void stop() = 0;
-    virtual bool isRunning() const = 0;
-};
+} // namespace detail
 
 //=============================================================================
 // TimeTask - Time-based task implementation
@@ -114,10 +33,10 @@ public:
 class TimeTask : public ITaskImpl {
 public:
     TimeTask(TaskType type, int interval_ms, optional<TracePoint> trace = nullopt)
-        : mTaskId(next_task_id())
+        : mTaskId(detail::next_task_id())
         , mType(type)
         , mIntervalMs(interval_ms)
-        , mTraceLabel(trace ? make_unique<string>(make_trace_label(*trace)) : nullptr)
+        , mTraceLabel(trace ? make_unique<string>(detail::make_trace_label(*trace)) : nullptr)
         // Use (max)() to prevent macro expansion by Arduino.h's max macro
         , mLastRunTime((numeric_limits<u32>::max)()) {}
 
@@ -207,63 +126,6 @@ private:
     u32 mLastRunTime;
     function<void()> mThenCallback;
     function<void(const Error&)> mCatchCallback;
-};
-
-//=============================================================================
-// CoroutineTask - OS-level coroutine task
-//=============================================================================
-
-class CoroutineTask : public ITaskImpl {
-public:
-    CoroutineTask(const CoroutineConfig& config)
-        : mTaskId(next_task_id())
-        , mTraceLabel(config.trace ? make_unique<string>(make_trace_label(*config.trace)) : nullptr)
-        , mCoroutine(make_unique<Coroutine>(config.name, config.func, config.stack_size, config.priority,
-                                                 config.core_id.has_value() ? config.core_id.value() : -1)) {}
-
-    void set_then(function<void()>) override { /* Coroutine tasks don't use then */ }
-    void set_catch(function<void(const Error&)>) override { /* Coroutine tasks don't use catch */ }
-    void set_canceled() override { mCanceled = true; }
-
-    int id() const override { return mTaskId; }
-    void set_id(int id) override { mTaskId = id; }
-    bool has_then() const override { return false; }
-    bool has_catch() const override { return false; }
-    string trace_label() const override { return mTraceLabel ? *mTraceLabel : ""; }
-    TaskType type() const override { return TaskType::kCoroutine; }
-    int interval_ms() const override { return 0; }
-    void set_interval_ms(int) override { /* Coroutine tasks don't use intervals */ }
-    fl::u32 last_run_time() const override { return 0; }
-    void set_last_run_time(fl::u32) override {}
-    bool is_canceled() const override { return mCanceled; }
-    bool is_auto_registered() const override { return mAutoRegistered; }
-
-    bool ready_to_run(fl::u32) const override { return false; }
-    bool ready_to_run_frame_task(fl::u32) const override { return false; }
-
-    void execute_then() override {}
-    void execute_catch(const Error&) override {}
-
-    void auto_register_with_scheduler() override {
-        mAutoRegistered = true;
-    }
-
-    void stop() override {
-        if (mCoroutine) {
-            mCoroutine->stop();
-        }
-    }
-
-    bool isRunning() const override {
-        return mCoroutine ? mCoroutine->isRunning() : false;
-    }
-
-private:
-    int mTaskId;
-    bool mCanceled = false;
-    bool mAutoRegistered = false;
-    unique_ptr<string> mTraceLabel;
-    unique_ptr<Coroutine> mCoroutine;
 };
 
 //=============================================================================
@@ -360,13 +222,6 @@ Handle after_frame(function<void()> on_then, const TracePoint& trace) {
     t.then(fl::move(on_then));
     return t;
 }
-
-Handle coroutine(const CoroutineConfig& config) {
-    return Handle(fl::make_shared<CoroutineTask>(config));
-}
-
-// Static coroutine control
-void exit_current() { Coroutine::exitCurrent(); }
 
 // Internal methods for Scheduler (friend access only)
 void Handle::_set_id(int id) { if (mImpl) mImpl->set_id(id); }
