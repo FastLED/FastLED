@@ -18,13 +18,15 @@ FASTPIN = ROOT / "src" / "platforms" / "esp" / "32" / "core" / "fastpin_esp32.h"
 REMOTE = ROOT / "examples" / "AutoResearch" / "AutoResearchRemote.cpp"
 
 # Library mask: flash/PSRAM/flash-power (VDD_SPI) and native-USB pads.
+# C5 GPIO19 / C6 GPIO27 (VDD_SPI) are skipped AutoResearch-side only; whether
+# the library mask should list them is an open maintainer question.
 EXPECTED_LIBRARY_MASK = {
     "ESP_32DEV": {6, 7, 8, 9, 10, 11, 20},
     "ESP_32C3": {11, 12, 13, 14, 15, 16, 17},
     "ESP_32S2": {27, 28, 29, 30, 31, 32},
     "ESP_32S3": {19, 20, 27, 28, 29, 30, 31, 32},
-    "ESP_32C5": {13, 14, 15, 16, 17, 18, 19, 20, 21, 22},
-    "ESP_32C6": {12, 13, 24, 25, 26, 27, 28, 29, 30},
+    "ESP_32C5": {13, 14, 15, 16, 17, 18, 20, 21, 22},
+    "ESP_32C6": {12, 13, 24, 25, 26, 28, 29, 30},
     "ESP_32P4": {24, 25},
     "ESP_32H2": {15, 16, 17, 18, 19, 20, 21},
     "ESP_32C2": {11, 12, 13, 14, 15, 16, 17},
@@ -124,3 +126,12 @@ def test_discovery_applies_link_mask_and_console_mode() -> None:
     assert "CONFIG_ESPTOOLPY_OCT_FLASH" in source
     assert "unsafeReason(a)" in source
     assert "unsafeReason(b)" in source
+
+
+def test_vdd_spi_pins_skipped_by_autoresearch() -> None:
+    source = REMOTE.read_text(encoding="utf-8")
+    memory = source[source.index("fl::u64 autoResearchMemoryPinMask()") :]
+    memory = memory[: memory.index("\n}\n")]
+    assert "defined(FL_IS_ESP_32C5)" in memory and "linkPinBit(19)" in memory
+    assert "defined(FL_IS_ESP_32C6)" in memory and "linkPinBit(27)" in memory
+    assert "SOC_GPIO_VALID_GPIO_MASK" in source

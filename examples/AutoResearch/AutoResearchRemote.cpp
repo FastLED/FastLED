@@ -167,6 +167,17 @@ fl::u64 autoResearchMemoryPinMask() {
         }
     }
 #endif
+#if defined(FL_IS_ESP_32C5)
+    // ESP32-C5 DS pin overview: GPIO19 is VDD_SPI, the flash power supply by
+    // default; driving it browns out the flash. Kept out of the library mask
+    // pending maintainer decision (FastPin<19> users).
+    mask |= linkPinBit(19);
+#elif defined(FL_IS_ESP_32C6)
+    // ESP32-C6 DS "Restrictions for GPIOs": GPIO27 is VDD_SPI, the flash power
+    // supply by default; driving it browns out the flash. Kept out of the
+    // library mask pending maintainer decision (FastPin<27> users).
+    mask |= linkPinBit(27);
+#endif
     return mask;
 }
 }  // namespace
@@ -356,6 +367,14 @@ fl::json AutoResearchRemoteControl::findConnectedPinsImpl(const fl::json& args) 
     // nullptr. Console/PSRAM pins are a per-board runtime rule, kept out of
     // the library mask on purpose.
     auto unsafeReason = [&](int p) -> const char* {
+#if defined(FL_IS_ESP32)
+        // Not a GPIO on this SoC (e.g. classic ESP32 24, 28-31): never
+        // pinMode/digitalRead it, even as RX.
+        if (p < 0 || p >= 64 ||
+            (u64(SOC_GPIO_VALID_GPIO_MASK) & (1ULL << p)) == 0) {
+            return "not-a-gpio";
+        }
+#endif
         if (isFastLedReservedPin(p)) {
             return "reserved-by-FastLED";
         }

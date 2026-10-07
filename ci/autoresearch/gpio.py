@@ -445,7 +445,7 @@ async def run_pin_discovery(
 # are still tested.
 
 # Default segment plan for classic-ESP32: five overlapping 8-pin
-# windows covering 0..40. Each pair `(start, end)` matches
+# windows covering 0..40, then one full-range pass. Each pair `(start, end)` matches
 # `findConnectedPins` semantics \u2014 `start` inclusive, `end` exclusive
 # upper bound on the *pin* (so the loop tests pairs (start, start+1)
 # through (end-1, end)).
@@ -484,7 +484,9 @@ async def run_pin_discovery_segmented(
         segments: Iterable of ``(start_pin, end_pin)`` windows.
             Defaults to :data:`DEFAULT_PIN_DISCOVERY_SEGMENTS` which
             covers the full classic-ESP32 GPIO range in five
-            overlapping 8-pin windows.
+            overlapping 8-pin windows, followed by a final full-range
+            ``(0, 40)`` pass (run only when every window came up empty)
+            that finds jumpers whose ends fall in different windows.
         per_segment_timeout: Wall-clock budget per segment. The single
             window scan typically completes in <2 s, so 15 s leaves
             generous headroom for reset + handshake.
