@@ -202,7 +202,7 @@ const INT_TEMPLATE_ARG_BASELINE: &[(&str, usize)] = &[
     ("src/fl/fx/2d/flowfield.h", 3),
     ("src/fl/fx/2d/luminova.cpp.hpp", 6),
     ("src/fl/fx/fx_engine.h", 1),
-    ("src/fl/gfx/blur.cpp.hpp", 1),
+    ("src/fl/gfx/blur/blur.cpp.hpp", 1),
     ("src/fl/gfx/colorutils.h", 3),
     ("src/fl/gfx/corkscrew.h", 1),
     ("src/fl/gfx/crgb_json.cpp.hpp", 3),
