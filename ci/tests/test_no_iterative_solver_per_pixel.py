@@ -57,7 +57,7 @@ PER_PIXEL_STAGES = (
     "device_solve.cpp.hpp",
     "gamut_map.cpp.hpp",
     "white_allocation.cpp.hpp",
-    "flux_scalar.cpp.hpp",
+    "flux_scalar/flux_scalar.cpp.hpp",
 )
 
 # The iterative primitives themselves. Everything that can reach one of these

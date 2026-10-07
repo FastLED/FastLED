@@ -1,3 +1,6 @@
+// IWYU pragma: private
+// ok no header - public declarations remain in fl/gfx/flux_scalar.h.
+
 // ok no header - implementation for fl/gfx/flux_scalar.h
 
 #include "fl/gfx/flux_scalar.h"

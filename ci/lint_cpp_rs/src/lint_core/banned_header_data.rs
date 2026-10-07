@@ -280,7 +280,7 @@ const BANNED_HEADER_EXCEPTIONS: &[(&str, &str)] = &[
     ),
     ("malloc.h", "third_party/stb/stb_vorbis.cpp.hpp"),
     ("math.h", "fl/math/math.cpp"),
-    ("math.h", "fl/math/math.cpp.hpp"),
+    ("math.h", "fl/math/functions/math.cpp.hpp"),
     ("math.h", "fl/audio/audio_reactive.cpp"),
     ("math.h", "fl/colorutils.cpp"),
     ("math.h", "fl/transform.cpp"),

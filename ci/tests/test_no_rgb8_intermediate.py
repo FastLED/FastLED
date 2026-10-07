@@ -55,7 +55,7 @@ PER_PIXEL_STAGES = (
     "device_solve.cpp.hpp",
     "gamut_map.cpp.hpp",
     "white_allocation.cpp.hpp",
-    "flux_scalar.cpp.hpp",
+    "flux_scalar/flux_scalar.cpp.hpp",
 )
 
 # A declaration of one of these on the per-pixel path is the RGB8 round trip

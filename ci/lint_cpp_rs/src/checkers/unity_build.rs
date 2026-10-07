@@ -25,6 +25,8 @@ const UNITY_SECTION_SUB_DIR: &str = "// begin sub directory includes";
 const UNITY_REQUIRED_PRE_HEADERS: &[&str] = &["platforms/new.h", "fl/system/arduino.h"];
 
 const UNITY_EXPECTED_BUILD_FILES: &[&str] = &[
+    "fl/build/fl.gfx.flux_scalar+.cpp",
+    "fl/build/fl.gfx.pixel_conversion+.cpp",
     "fl/build/src.cpp",
     "fl/build/fl.asset+.cpp",
     "fl/build/fl.audio+.cpp",
@@ -57,7 +59,9 @@ const UNITY_EXPECTED_BUILD_FILES: &[&str] = &[
     "fl/build/fl.gfx.blur+.cpp",
     "fl/build/fl.gfx.paths+.cpp",
     "fl/build/fl.log+.cpp",
+    "fl/build/fl.log.async+.cpp",
     "fl/build/fl.math+.cpp",
+    "fl/build/fl.math.functions+.cpp",
     "fl/build/fl.math.operations+.cpp",
     "fl/build/fl.math.screenmap_json+.cpp",
     "fl/build/fl.math.noise+.cpp",
@@ -104,6 +108,7 @@ const UNITY_EXPECTED_BUILD_FILES: &[&str] = &[
     "fl/build/platforms.esp.32.condition_variable+.cpp",
     "fl/build/platforms.esp.32.coroutine_tasks+.cpp",
     "fl/build/platforms.esp.32.semaphore+.cpp",
+    "fl/build/platforms.esp.32.semaphore.counting+.cpp",
     "fl/build/platforms.esp.32.drivers.spi+.cpp",
     "fl/build/platforms.esp.32.drivers.i2s+.cpp",
     "fl/build/platforms.esp.32.drivers.i2s_spi+.cpp",
@@ -111,6 +116,7 @@ const UNITY_EXPECTED_BUILD_FILES: &[&str] = &[
     "fl/build/platforms.esp.32.drivers.i2s_rx+.cpp",
     "fl/build/platforms.esp.32.drivers.rmt_rx+.cpp",
     "fl/build/platforms.esp.32.drivers.gpio_isr_rx+.cpp",
+    "fl/build/platforms.esp.32.audio+.cpp",
     "fl/build/platforms.esp.32.audio.fft+.cpp",
     "fl/build/platforms.esp.32.net+.cpp",
     "fl/build/platforms.esp.32.ota+.cpp",

@@ -525,3 +525,21 @@
 - AST inventories must count a source declaration once across unity units,
   while retaining separate declarations on distinct lines. Moving a feature
   into its own unit must not multiply existing header debt.
+- Legacy ESP32 unwind relocations can extract archives for functions whose
+  text is later discarded. Follow every retained archive dependency in the
+  map before judging a unit split; moving one live function may leave other
+  unused delegates or formatters retaining the same archive.
+- Source moves must update the numerical pipeline guards and their actual
+  cross-compiler fixtures. Keep their function lists and assertions intact.
+- Moving root implementations under src/fl also brings them into AST lint
+  scope. Match existing public declaration markers rather than adding debt
+  allowances; FL_NO_EXCEPT remains the project's no-op marker.
+- Baseline path migrations must preserve existing ordering and comments.
+  Replace only the moved signatures; sorting the whole file creates unrelated
+  churn and can obscure whether the allowance multiset stayed unchanged.
+- A smaller RMT4 insertion path is insufficient evidence for changing channel
+  publication. An inert slot and failure rollback can still overlap unlocked
+  ISR traversal; preserve publication until that concurrency contract is proven.
+- Independent platform instantiation units must guard platform headers as
+  well as their definitions. ESP32 semaphore declarations include chrono;
+  including them on AVR or Arduino ARM can fail before the guarded body.

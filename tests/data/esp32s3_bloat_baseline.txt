@@ -1,3 +1,16 @@
+# 2026-10-07, issue #4707 twenty-third pass: hosted image_flash=355587 B,
+# run 37629278386 at 9102a03097; local 355571 B. Independent async
+# logging saves 2076 B on legacy RMT4, with a measured 12 B S3 cost.
+# Accept that measured tradeoff and record the exact hosted result.
+
+# 2026-10-07, issue #4707 twenty-first pass: hosted image_flash=355575 B,
+# run 37627443522 at 797cc2c2a4; local 355559 B. Independent ESP32
+# audio utilities save 4 B on S3. Record the measured hosted saving.
+
+# 2026-10-07, issue #4707 nineteenth pass: hosted image_flash=355579 B,
+# run 37622067492 at 19c53ff4fe; local 355563 B. Shared string append
+# saves 488 B on S3. Claim the exact hosted saving without headroom.
+
 # 2026-10-07, issue #4707 fifteenth pass: hosted image_flash=356067 B,
 # run 37611652044 at 45106bb223; local 356051 B. Independent string
 # operations and coroutine task creation save another 24 B on S3 and
@@ -408,4 +421,4 @@
 # the CI Blink report contains no ResponseLutsQ16 symbol. The local fbuild
 # symbol total remains ~4 KB higher for the same source (FastLED/fbuild#1456),
 # so this ratchet uses the CI measurement from PR #4511.
-356067
+355587
