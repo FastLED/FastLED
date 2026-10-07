@@ -45,33 +45,21 @@ char* basic_string::c_str_mutable() {
     if (mStorage.empty()) {
         return inlineBufferPtr();
     }
-    struct Visitor {
-        basic_string* self;
-        char* result;
-        void accept(NotNullStringHolderPtr& heap) {
-            if (heap.get().use_count() > 1) {
-                // COW: detach from shared data before returning mutable pointer
-                self->mStorage = NotNullStringHolderPtr(
-                    fl::make_shared<StringHolder>(heap->data(), self->mLength));
-                result = self->heapData()->data();
-            } else {
-                result = heap->data();
-            }
+    if (hasHeapData()) {
+        NotNullStringHolderPtr& heap = mStorage.get<NotNullStringHolderPtr>();
+        if (heap.get().use_count() > 1) {
+            // COW: detach from shared data before returning mutable pointer.
+            mStorage = NotNullStringHolderPtr(
+                fl::make_shared<StringHolder>(heap->data(), mLength));
+            return heapData()->data();
         }
-        void accept(ConstLiteral&) {
-            self->materialize();
-            result = self->hasHeapData() ? self->heapData()->data()
-                                         : self->inlineBufferPtr();
-        }
-        void accept(ConstView&) {
-            self->materialize();
-            result = self->hasHeapData() ? self->heapData()->data()
-                                         : self->inlineBufferPtr();
-        }
-    };
-    Visitor v{this, nullptr};
-    mStorage.visit(v);
-    return v.result;
+        return heap->data();
+    }
+    if (isNonOwning()) {
+        materialize();
+        return hasHeapData() ? heapData()->data() : inlineBufferPtr();
+    }
+    return nullptr;
 }
 
 fl::size basic_string::capacity() const {

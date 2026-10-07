@@ -246,6 +246,15 @@ class ChannelEngineRMT4Impl final : public ChannelEngineRMT4 {
         return Capabilities(true, false); // Clockless only, matching RMT5.
     }
 
+    // This final implementation publishes no declarative pin groups. Preserve
+    // the inherited result without rooting the general group/timing matcher
+    // through its vtable. The public base remains extensible.
+    HandleResult canMatch(const ChannelRequest& request) const FL_NO_EXCEPT override {
+        return request.protocol == Protocol::Clockless
+                   ? HandleResult::NoPin
+                   : HandleResult::NoProtocol;
+    }
+
     /// @brief Enqueue channel data for transmission
     void enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT override;
 

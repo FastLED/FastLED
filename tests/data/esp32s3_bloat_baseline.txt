@@ -441,4 +441,10 @@
 # rejected: it costs another 48 B legacy / 12 B S3, with no modern saving.
 # Final hosted default Blink report: run 37646351981 at
 # 71f9782b87 (local image_flash 355175 B). Public operations remain available.
-355191
+# -204 B (355191 -> 354987), #4707 pass 35: direct mutable string storage
+# dispatch replaces visitor thunks/table while preserving COW/materialization.
+# Legacy ESP32 saves 212 B; modern ESP32 costs 16 B. Hosted default Blink
+# report: run 37653272928 at 0e93c35046; local image_flash is 354971 B.
+# Pass 36's equivalent final RMT4 matcher saves another 944 B on legacy;
+# modern ESP32 and S3 remain unchanged in controlled builds.
+354987

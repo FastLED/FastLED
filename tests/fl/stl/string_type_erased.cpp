@@ -9,6 +9,70 @@ FL_TEST_FILE(FL_FILEPATH) {
 
 using namespace fl;
 
+FL_TEST_CASE("basic_string mutable storage ownership") {
+    FL_SUBCASE("Inline and unique heap retain their buffers") {
+        fl::string inline_string("hello");
+        const char* inline_buffer = inline_string.c_str();
+        FL_CHECK(inline_string.c_str_mutable() == inline_buffer);
+
+        fl::string heap_string(100, 'h');
+        const char* heap_buffer = heap_string.c_str();
+        char* writable = heap_string.c_str_mutable();
+        FL_REQUIRE(writable != nullptr);
+        FL_CHECK(writable == heap_buffer);
+        writable[0] = 'H';
+        FL_CHECK(heap_string.c_str()[0] == 'H');
+    }
+
+    FL_SUBCASE("Shared heap detaches before mutation") {
+        fl::string original(100, 's');
+        fl::string copy = original;
+        const char* original_buffer = original.c_str();
+        FL_REQUIRE(copy.c_str() == original_buffer);
+        char* writable = copy.c_str_mutable();
+        FL_REQUIRE(writable != nullptr);
+        FL_CHECK(writable != original_buffer);
+        writable[0] = 'C';
+        FL_CHECK(original.c_str()[0] == 's');
+        FL_CHECK(copy.c_str()[0] == 'C');
+        FL_CHECK(original.c_str() == original_buffer);
+    }
+
+    FL_SUBCASE("Borrowed short and long storage becomes independent") {
+        const char* literals[] = {
+            "short",
+            "This literal exceeds the inline buffer capacity and must become "
+            "independent heap storage before its first byte can be modified."
+        };
+        for (const char* literal : literals) {
+            fl::string borrowed = fl::string::from_literal(literal);
+            const fl::size length = borrowed.size();
+            char* writable = borrowed.c_str_mutable();
+            FL_REQUIRE(writable != nullptr);
+            FL_REQUIRE(writable != literal);
+            writable[0] = 'X';
+            FL_CHECK(literal[0] != 'X');
+            FL_CHECK(borrowed.size() == length);
+            FL_CHECK(writable[length] == '\0');
+        }
+        char backing[100];
+        for (char& value : backing) {
+            value = 'v';
+        }
+        const fl::size lengths[] = {5, 100};
+        for (fl::size length : lengths) {
+            fl::string borrowed = fl::string::from_view(backing, length);
+            char* writable = borrowed.c_str_mutable();
+            FL_REQUIRE(writable != nullptr);
+            FL_CHECK(writable != backing);
+            writable[0] = 'X';
+            FL_CHECK(backing[0] == 'v');
+            FL_CHECK(borrowed.size() == length);
+            FL_CHECK(writable[length] == '\0');
+        }
+    }
+}
+
 // SECTION: Type-erased basic_string optimization tests
 //=============================================================================
 
