@@ -118,9 +118,11 @@ FROZEN_THRESHOLDS: dict[str, dict[str, frozenset[int]]] = {
         # real ceiling — ATmega328P 32 KB flash. Apa102 was tightened
         # 12050 → 9300 in 7edaf80f0 and 9300 → 8500 in #4725 (weak AVR
         # `Serial`, Apa102 measured 4510 → 3682 B); real optimisations, not bumps.
+        # #4742 ratchets to measured Blink 5138 / Apa102 3650 B after exact
+        # adjustment arithmetic, compact RGBW selectors and flash banner storage.
         # `build` job: hard check. `build_no_forced_inline` job: -1 (no check).
-        "max_size": frozenset({11000, -1}),
-        "max_size_apa102": frozenset({8500, -1}),
+        "max_size": frozenset({5138, -1}),
+        "max_size_apa102": frozenset({3650, -1}),
     },
 }
 

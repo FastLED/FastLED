@@ -2,7 +2,7 @@
   "board": "esp32c3",
   "example": "Blink",
   "profile": "default",
-  "image_flash": 385596,
+  "image_flash": 385568,
   "total_ram": 25621,
-  "reference": "#4739: Arduino-ESP32 3.1.0 / IDF 5.3.2, fbuild 2.5.37; image_flash and attributed RAM, not board totals; #4744 compact configuration ratchet"
+  "reference": "#4739: Arduino-ESP32 3.1.0 / IDF 5.3.2, fbuild 2.5.37; image_flash and attributed RAM, not board totals; #4744 compact configuration ratchet; #4742 compact RGBW selectors/exact adjustment ratchet"
 }

@@ -62,6 +62,29 @@ FL_TEST_FILE(FL_FILEPATH) {
 #define DATA_PIN 2
 #define CLOCK_PIN 3
 
+FL_TEST_CASE("Color adjustment preserves exact correction and temperature rounding") {
+    const fl::u8 scales[] = {0, 1, 127, 254, 255};
+    for (unsigned correction = 0; correction < 256; ++correction) {
+        for (unsigned temperature = 0; temperature < 256; ++temperature) {
+            for (fl::u8 scale : scales) {
+                const CRGB actual = CRGB::computeAdjustment(scale,
+                    CRGB(correction, 0, 255), CRGB(temperature, 255, 0));
+#if defined(NO_CORRECTION) && (NO_CORRECTION == 1)
+                FL_CHECK_EQ(actual, CRGB(scale, scale, scale));
+#else
+                const fl::u64 numerator = (fl::u64(correction) + 1) *
+                    (fl::u64(temperature) + 1) * scale;
+                const unsigned expected = correction && temperature
+                    ? unsigned(numerator / 65536) : 0;
+                FL_CHECK_EQ(unsigned(actual.r), expected);
+                FL_CHECK_EQ(actual.g, 0);
+                FL_CHECK_EQ(actual.b, 0);
+#endif
+            }
+        }
+    }
+}
+
 FL_TEST_CASE("Simple") {
     static CRGB leds[NUM_LEDS];  // Use static to avoid global constructor warning
     FastLED.addLeds<APA102, DATA_PIN, CLOCK_PIN, BGR>(leds, NUM_LEDS);

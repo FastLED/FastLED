@@ -24,9 +24,15 @@ CRGB leds[NUM_LEDS];
 void setup() {
 #if !FL_PLATFORM_HAS_TINY_MEMORY
     Serial.begin(115200);
+#if defined(FL_IS_AVR)
+    Serial.println(F("\n==============================================\r\n"
+                     "   BLINK.INO - Simple LED Blink Example\r\n"
+                     "==============================================\n"));
+#else
     Serial.println("\n==============================================");
     Serial.println("   BLINK.INO - Simple LED Blink Example");
     Serial.println("==============================================\n");
+#endif
 #endif
 
     // Uncomment/edit one of the following lines for your leds arrangement.
@@ -34,7 +40,11 @@ void setup() {
     FastLED.addLeds<NEOPIXEL, PIN_DATA>(leds, NUM_LEDS);  // GRB ordering is assumed
 
 #if !FL_PLATFORM_HAS_TINY_MEMORY
-    Serial.println("✓ Blink setup complete - starting blink loop\n");
+#if defined(FL_IS_AVR)
+    Serial.println(F("\xE2\x9C\x93 Blink setup complete - starting blink loop\n"));
+#else
+    Serial.println("\xE2\x9C\x93 Blink setup complete - starting blink loop\n");
+#endif
 #endif
     // FastLED.addLeds<SM16824E, PIN_DATA, RGB>(leds, NUM_LEDS);  // RGB ordering (uses SM16824EController)
     // FastLED.addLeds<SM16703, PIN_DATA, RGB>(leds, NUM_LEDS);
