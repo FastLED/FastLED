@@ -399,6 +399,10 @@ fl::u8 calculate_max_brightness_for_power_vmA(const CRGB* ledbuffer, fl::u16 num
 /// but may be lower depending on the power limit.
 fl::u8  calculate_max_brightness_for_power_mW( fl::u8 target_brightness, fl::u32 max_power_mW);
 
+/// min(255, floor(255 * num / den)) for den > 0, computed in 32-bit
+/// arithmetic. The limiter's brightness ratio; declared for its tests.
+fl::u32 power_ratio_of_255(fl::u32 num, fl::u32 den) FL_NO_EXCEPT;
+
 /// @} PowerInternal
 
 

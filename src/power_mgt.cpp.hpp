@@ -13,6 +13,8 @@
 #include "fl/stl/array.h"
 #endif
 #include "fl/stl/int.h"           // fl::u32, fl::u8
+#include "fl/stl/type_traits.h"   // fl::conditional
+#include "fl/stl/static_assert.h"
 #include "power_mgt.h"        // Function declarations (to avoid redefinition errors)
 #include "fl/channels/pipeline_binding.h"  // colorPipelineHooks (#4344)
 #include "fl/channels/power_prepass.h"
@@ -46,7 +48,11 @@ static constexpr float kPowerScalingExponentEpsilon = 0.0001f;
 
 /// Global RGB power model (initialized to WS2812 @ 5V defaults, linear response)
 static PowerModelRGB& gPowerModel() {
-    return fl::Singleton<PowerModelRGB>::instance();
+    // Constant-initialized (constexpr constructor, trivial destructor), so it
+    // needs neither Singleton's lazy placement-new nor a guard: there is no
+    // initialization order to protect and nothing to destroy.
+    static PowerModelRGB model;
+    return model;
 }
 
 /// The white emitter's draw, when the caller declared one.
@@ -367,6 +373,33 @@ static fl::u32 fixed_power_mW(fl::u32 led_count) {
     return static_cast<fl::u32>(gPowerModel().dark_mW) * led_count;
 }
 
+// min(255, floor(255 * num / den)) for den > 0, in 32-bit arithmetic only.
+//
+// The product needs 40 bits, and on AVR a 64-bit divide links ~600 B of
+// libgcc helpers into every sketch that limits power. A quotient of 255 or
+// more is clamped by the only caller anyway, so only num < den matters:
+// eight restoring-division steps give q = floor(256 * num / den) with
+// remainder r, and since 256 * num = q * den + r, the 255 * num answer is
+// q when r >= num and q - 1 otherwise (0 < num - r <= num < den). The
+// doubling is written as a comparison so it cannot overflow for any den.
+fl::u32 power_ratio_of_255(fl::u32 num, fl::u32 den) FL_NO_EXCEPT {
+    if (num >= den) {
+        return 255;
+    }
+    fl::u32 q = 0;
+    fl::u32 r = num;
+    for (fl::u8 bit = 0; bit < 8; ++bit) {
+        q <<= 1;
+        if (r >= den - r) {
+            r -= den - r;
+            q |= 1;
+        } else {
+            r += r;
+        }
+    }
+    return r >= num ? q : q - 1;
+}
+
 // Largest brightness whose *total* demand -- baseline included -- stays inside
 // the budget. Zero when the baseline alone is already over it: no brightness
 // meets the budget then, and answering with a lit strip would promise a bound
@@ -400,8 +433,7 @@ static fl::u8 brightness_within_budget(fl::u32 fixed_mW, fl::u32 controllable_mW
     // argument is cheaper than depending on that.
     const fl::u32 headroom_mW = max_power_mW - fixed_mW;
     const fl::u8 target_scaled = map_power_value(target_brightness);
-    fl::u64 allowed_scaled =
-        (static_cast<fl::u64>(255) * headroom_mW) / controllable_mW;
+    fl::u32 allowed_scaled = power_ratio_of_255(headroom_mW, controllable_mW);
     if (allowed_scaled > target_scaled) {
         allowed_scaled = target_scaled;
     }
@@ -437,6 +469,18 @@ fl::u8 calculate_max_brightness_for_power_mW(const CRGB* ledbuffer, fl::u16 numL
 	                                max_power_mW);
 }
 
+// The RGBW estimate, once something has stored an Rgbw into a controller.
+// Reached through a pointer so that the conversion (~1 KB on AVR) links only
+// into sketches that configure RGBW; until then every stored white config is
+// absent, and the RGB estimate is the answer the overload would give.
+typedef fl::u32 (*rgbw_power_fn)(fl::span<const CRGB>, const fl::Rgbw&);
+// FL_LINT_ALLOW_GLOBAL(one zero-initialized pointer in .bss; a Singleton would add its init code to every limiter sketch)
+static rgbw_power_fn gRgbwPowerEstimate = nullptr;
+
+void fl::detail::enable_rgbw_power_estimate() FL_NO_EXCEPT {
+    gRgbwPowerEstimate = static_cast<rgbw_power_fn>(&calculate_unscaled_power_mW);
+}
+
 fl::u32 controller_unscaled_power_mW(const fl::CLEDController& controller) {
     const fl::span<const CRGB> leds(controller.leds(),
                                     static_cast<fl::size>(controller.size()));
@@ -459,7 +503,11 @@ fl::u32 controller_unscaled_power_mW(const fl::CLEDController& controller) {
 #endif
     // Below the large-memory tier only this is compiled: a managed channel
     // there is charged for its source (FL_COLOR_PIPELINE_SHARED).
-    return calculate_unscaled_power_mW(leds, controller.getRgbw());
+    // No stored Rgbw reads as RgbwInvalid, which the overload answers with the
+    // RGB estimate; asking for it directly skips copying the Rgbw value.
+    const fl::Rgbw* rgbw = controller.rgbwConfig();
+    return rgbw && gRgbwPowerEstimate ? gRgbwPowerEstimate(leds, *rgbw)
+                                      : calculate_unscaled_power_mW(leds);
 }
 
 // Two output codes: the most one `BINARY_DITHER` offset can lift a lit channel
@@ -482,6 +530,20 @@ fl::u32 controller_dither_reserve_mW(const fl::CLEDController& controller) {
     return 0;
 }
 #else
+// Wide enough for the reserve's worst case without 64-bit libgcc helpers on
+// targets where it provably fits: with a 16-bit `fl::size` at most 65535
+// pixels light a channel, each charged at most 255 mW, and below the large
+// tier `max_power_step()` is 1, so the sum is at most
+// 65535 * 3 * 255 * kDitherReserveCodes + 255 < 2^32.
+#if SKETCH_HAS_LARGE_MEMORY
+typedef fl::u64 dither_acc_t;
+#else
+typedef fl::conditional<sizeof(fl::size) <= 2, fl::u32, fl::u64>::type dither_acc_t;
+FL_STATIC_ASSERT(sizeof(fl::size) > 2 ||
+                  65535ull * 3u * 255u * kDitherReserveCodes + 255u <= 0xFFFFFFFFull,
+              "dither reserve must fit 32 bits on 16-bit-size targets");
+#endif
+
 fl::u32 dither_reserve_mW(fl::span<const CRGB> leds) {
     fl::u32 lit_r = 0, lit_g = 0, lit_b = 0;
     for (fl::size i = 0; i < leds.size(); ++i) {
@@ -491,14 +553,14 @@ fl::u32 dither_reserve_mW(fl::span<const CRGB> leds) {
         lit_b += leds[i].b != 0 ? 1u : 0u;
     }
     const PowerModelRGB& model = gPowerModel();
-    const fl::u64 per_code =
-        static_cast<fl::u64>(lit_r) * model.red_mW +
-        static_cast<fl::u64>(lit_g) * model.green_mW +
-        static_cast<fl::u64>(lit_b) * model.blue_mW;
+    const dither_acc_t per_code =
+        static_cast<dither_acc_t>(lit_r) * model.red_mW +
+        static_cast<dither_acc_t>(lit_g) * model.green_mW +
+        static_cast<dither_acc_t>(lit_b) * model.blue_mW;
     // Same >> 8 as the estimator, rounded up: this is a bound, and truncating
     // it would hand back the under-charge it exists to remove.
-    const fl::u64 scaled = per_code * kDitherReserveCodes * max_power_step();
-    const fl::u64 reserve = (scaled + 255) >> 8;
+    const dither_acc_t scaled = per_code * kDitherReserveCodes * max_power_step();
+    const dither_acc_t reserve = (scaled + 255) >> 8;
     // Saturate rather than wrap: an under-stated reserve is the failure this
     // exists to prevent.
     return reserve > 0xFFFFFFFFu ? 0xFFFFFFFFu : static_cast<fl::u32>(reserve);
