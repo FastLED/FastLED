@@ -19,7 +19,10 @@ namespace fl {
 /// @brief FlexPWM input-capture based RX device for Teensy 4.x
 ///
 /// Uses the i.MXRT1062's FlexPWM dual-edge capture hardware + eDMA to
-/// capture WS2812-like self-clocked waveforms with minimal CPU overhead.
+/// capture WS2812-like self-clocked waveforms. Captures stream through a
+/// small DMA ring and are decoded in the DMA ISR, so frame length is bounded
+/// only by the decoded-byte buffer (RxConfig::buffer_size / 8 + 1 bytes;
+/// buffer_size counts bits, one capture pair per bit).
 ///
 /// Supported pins (Teensy 4.0 + 4.1): 2, 4, 5, 6, 8, 22, 23, 29
 /// Additional pins (Teensy 4.1 only): 36, 49, 53, 54
@@ -48,6 +51,10 @@ class FlexPwmRxChannel : public RxDevice {
     /// Capture FlexPWM/DMA/IOMUX register snapshot for the active receiver.
     /// Diagnostics only — does not modify hardware state.
     static fl::json diagnosticsToJson(int requested_pin) FL_NO_EXCEPT;
+
+    /// Streaming-capture counters for the last frame plus since-boot peaks:
+    /// ISR count / max cycles, ring overruns. Cheap; safe on passing runs.
+    static fl::json streamStatsToJson() FL_NO_EXCEPT;
 
   protected:
     friend class fl::shared_ptr<FlexPwmRxChannel>;

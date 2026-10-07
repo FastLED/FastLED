@@ -3,3 +3,4 @@
 
 #include "fl/channels/rx/channel.cpp.hpp"
 #include "fl/channels/rx/decode_ws2812.cpp.hpp"
+#include "fl/channels/rx/ws2812_stream_decoder.cpp.hpp"

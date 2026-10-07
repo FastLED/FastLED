@@ -69,7 +69,8 @@ enum class DecodeError : u8 {
     OK = 0,                  ///< No error (not typically used)
     HIGH_ERROR_RATE,         ///< Symbol decode error rate too high (>10%)
     BUFFER_OVERFLOW,         ///< Output buffer overflow
-    INVALID_ARGUMENT         ///< Invalid input arguments
+    INVALID_ARGUMENT,        ///< Invalid input arguments
+    CAPTURE_OVERRUN          ///< Streaming capture lost data (ring overwritten before decode)
 };
 
 /**
@@ -248,8 +249,14 @@ struct RxConfig {
     // RmtMemoryManager::allocateDMA(). See issue #2254.
     bool use_dma = false;                   ///< Use DMA streaming for RX (RMT only, default: false)
 
+    // Streaming decode (Teensy 4.x FlexPWM). That backend decodes bits from a
+    // small DMA ring inside its ISR while the frame arrives, so it needs the
+    // decode thresholds before decode() is called. Pass the same timing you
+    // will give decode(). Unset: WS2812B defaults. Other backends ignore it.
+    fl::optional<ChipsetTiming4Phase> stream_timing;
+
     /// Default constructor with common WS2812B defaults
-    constexpr RxConfig() FL_NO_EXCEPT = default;
+    RxConfig() FL_NO_EXCEPT = default;
 };
 
 /**

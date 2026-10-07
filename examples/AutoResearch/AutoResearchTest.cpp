@@ -418,6 +418,108 @@ void collectRawEdgeDiagnostics(fl::shared_ptr<fl::RxChannel> rx_channel,
     diagnostics->rawEdgeSample = sample.str();
 }
 
+// Build the 4-phase RX decode thresholds for a TX driver's waveform.
+static fl::ChipsetTiming4Phase buildRxDecodeTiming(const fl::ChipsetTimingConfig& timing,
+                                                  const char* driver_name) {
+    // Create 4-phase RX timing from the TX timing
+    //
+    // Wave8 drivers (SPI, PARLIO, I2S) use 8-bit expansion encoding:
+    //   Bit 0: round(T1/(T1+T2+T3)*8) HIGH pulses, rest LOW
+    //   Bit 1: round((T1+T2)/(T1+T2+T3)*8) HIGH pulses, rest LOW
+    // The actual pulse widths are quantized to tick boundaries, so we must
+    // compute the exact wave8 timing for RX decode thresholds.
+    // Without this correction, the RX decoder may reject valid waveforms when
+    // the nominal timing period differs from the quantized 8-tick period.
+    // Example: WS2812_800KHZ has T0L=1000ns nominal but PARLIO wave8 produces 750ns.
+    //
+    // Clock sources differ by driver:
+    //   SPI/I2S: clock = 8/(T1+T2+T3) Hz, tick = (T1+T2+T3)/8 ns (variable)
+    //   PARLIO:  clock = 8 MHz fixed, tick = 125 ns (fixed)
+    bool is_spi_driver = (fl::strcmp(driver_name, "SPI") == 0);
+    bool is_parlio_driver = (fl::strcmp(driver_name, "PARLIO") == 0);
+    bool is_i2s_driver = (fl::strcmp(driver_name, "I2S") == 0);
+    // LCD_CLOCKLESS auto-selects wave3 vs wave8 based on canUseWave3() of the
+    // chipset timing. Compute the same eligibility check on the host side so
+    // the RX decoder reconstructs the correct quantized waveform.
+    bool is_lcd_clockless_driver = (fl::strcmp(driver_name, "LCD_CLOCKLESS") == 0);
+    bool lcd_clockless_uses_wave3 = false;
+    if (is_lcd_clockless_driver) {
+        fl::ChipsetTiming probe{timing.t1_ns, timing.t2_ns, timing.t3_ns, timing.reset_us, timing.name};
+        lcd_clockless_uses_wave3 = fl::canUseWave3(probe);
+    }
+    bool uses_wave8 = is_spi_driver || is_parlio_driver || is_i2s_driver
+                      || (is_lcd_clockless_driver && !lcd_clockless_uses_wave3);
+    bool uses_wave3 = is_lcd_clockless_driver && lcd_clockless_uses_wave3;
+    fl::ChipsetTiming tx_timing;
+    if (uses_wave8) {
+        // Compute actual wave8 timing from chipset timing
+        const uint32_t period = timing.t1_ns + timing.t2_ns + timing.t3_ns;
+        // PARLIO uses fixed 8MHz clock (125ns/tick), not derived from period
+        // SPI/I2S/LCD_CLOCKLESS derive clock from period: tick = period/8
+        const uint32_t tick_ns = is_parlio_driver ? 125 : (period / 8);
+        // Wave8 LUT computes: pulses = round(fraction * 8)
+        const uint32_t pulses_bit0 = static_cast<uint32_t>(
+            static_cast<float>(timing.t1_ns) / period * 8.0f + 0.5f);
+        const uint32_t pulses_bit1 = static_cast<uint32_t>(
+            static_cast<float>(timing.t1_ns + timing.t2_ns) / period * 8.0f + 0.5f);
+        // Convert back to 3-phase timing (T1=T0H, T2=T1H-T0H, T3=actual_period-T1H)
+        const uint32_t actual_t0h = pulses_bit0 * tick_ns;
+        const uint32_t actual_t1h = pulses_bit1 * tick_ns;
+        const uint32_t actual_period = 8 * tick_ns;
+        const char* wave8_name = is_spi_driver ? "SPI_wave8" :
+                                 is_parlio_driver ? "PARLIO_wave8" :
+                                 is_lcd_clockless_driver ? "LCD_CLOCKLESS_wave8" : "I2S_wave8";
+        tx_timing = fl::ChipsetTiming{
+            actual_t0h,                    // T1 = T0H
+            actual_t1h - actual_t0h,       // T2 = T1H - T0H
+            actual_period - actual_t1h,    // T3 = actual_period - T1H
+            timing.reset_us,
+            wave8_name
+        };
+        AR_FL_WARN("[RX TIMING] " << wave8_name << ": pulses_bit0=" << pulses_bit0
+                << " pulses_bit1=" << pulses_bit1
+                << " tick_ns=" << tick_ns
+                << " -> T1=" << tx_timing.T1 << " T2=" << tx_timing.T2
+                << " T3=" << tx_timing.T3);
+    } else if (uses_wave3) {
+        // Wave3 encoding: 3 ticks per LED bit, clock = 3/(T1+T2+T3) Hz
+        const uint32_t period = timing.t1_ns + timing.t2_ns + timing.t3_ns;
+        const uint32_t tick_ns = period / 3;
+        const uint32_t ticks_bit0 = static_cast<uint32_t>(
+            static_cast<float>(timing.t1_ns) / period * 3.0f + 0.5f);
+        const uint32_t ticks_bit1 = static_cast<uint32_t>(
+            static_cast<float>(timing.t1_ns + timing.t2_ns) / period * 3.0f + 0.5f);
+        const uint32_t actual_t0h = ticks_bit0 * tick_ns;
+        const uint32_t actual_t1h = ticks_bit1 * tick_ns;
+        const uint32_t actual_period = 3 * tick_ns;
+        tx_timing = fl::ChipsetTiming{
+            actual_t0h,
+            actual_t1h - actual_t0h,
+            actual_period - actual_t1h,
+            timing.reset_us,
+            "LCD_CLOCKLESS_wave3"
+        };
+        AR_FL_WARN("[RX TIMING] LCD_CLOCKLESS_wave3: ticks_bit0=" << ticks_bit0
+                << " ticks_bit1=" << ticks_bit1
+                << " tick_ns=" << tick_ns
+                << " -> T1=" << tx_timing.T1 << " T2=" << tx_timing.T2
+                << " T3=" << tx_timing.T3);
+    } else {
+        tx_timing = fl::ChipsetTiming{timing.t1_ns, timing.t2_ns, timing.t3_ns, timing.reset_us, timing.name};
+    }
+    // Wave8/wave3 encoding has timing jitter due to clock quantization and GPIO matrix latency
+    // Use wider tolerance (200ns) to accommodate clock rounding
+    const uint32_t tolerance = (uses_wave8 || uses_wave3) ? 200 : 170;
+    auto rx_timing = fl::make4PhaseTiming(tx_timing, tolerance);
+
+    // Enable gap tolerance for PARLIO/SPI DMA gaps
+    // PARLIO: ~20µs typical gaps during buffer transitions
+    // SPI: Can have longer inter-frame gaps due to software encoding timing
+    // Increased to 100µs to accommodate SPI driver timing variations
+    rx_timing.gap_tolerance_ns = 100000; // 100µs (was 30µs)
+    return rx_timing;
+}
+
 // Capture transmitted LED data via RX loopback
 // - rx_channel: Shared pointer to RX device (persistent across calls)
 // - rx_buffer: Buffer to store received bytes
@@ -467,6 +569,15 @@ size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel,
     bool is_object_fled_driver = (fl::strcmp(driver_name, "OBJECT_FLED") == 0);
     rx_config.edge_capacity = fl::validation::captureEdgeCapacity(
         rx_buffer.size(), expected_data_bytes, rx_channel->backend());
+#if defined(FL_IS_TEENSY_4X)
+    // Teensy 4.x FlexPWM RX streams captures through a small DMA ring and
+    // keeps only decoded bytes, so size it to this frame rather than to the
+    // shared result buffer. FlexIO RX still stores edges: leave it alone.
+    if (rx_channel->backend() != fl::RxBackend::FLEXIO) {
+        rx_config.edge_capacity = fl::validation::captureEdgeCapacity(
+            rx_buffer.size(), expected_data_bytes, fl::RxBackend::ISR);
+    }
+#endif
     if (rx_config.edge_capacity == 0) {
         FL_ERROR("[CAPTURE] RX edge-capacity overflow");
         return 0;
@@ -539,6 +650,10 @@ size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel,
     // PLATFORM_DEFAULT), which silently reverted rxBackend overrides
     // like I2S_RX back to RMT (FastLED#3576 Phase 3).
     rx_config.backend = rx_channel->backend();
+    // Backends that decode while capturing (Teensy 4.x FlexPWM) need the
+    // decode thresholds up front.
+    const fl::ChipsetTiming4Phase rx_timing = buildRxDecodeTiming(timing, driver_name);
+    rx_config.stream_timing = rx_timing;
     if (use_rmt_internal_loopback) {
         AR_FL_WARN("[CAPTURE] RMT TX -> RMT RX: Same-pin internal loopback enabled");
     } else {
@@ -780,103 +895,7 @@ dumpRawEdgeTiming(rx_channel, timing, fl::EdgeRange(0, 32));
         return decoded;
     }
 
-    // Decode received data directly into rx_buffer
-    // Create 4-phase RX timing from the TX timing
-    //
-    // Wave8 drivers (SPI, PARLIO, I2S) use 8-bit expansion encoding:
-    //   Bit 0: round(T1/(T1+T2+T3)*8) HIGH pulses, rest LOW
-    //   Bit 1: round((T1+T2)/(T1+T2+T3)*8) HIGH pulses, rest LOW
-    // The actual pulse widths are quantized to tick boundaries, so we must
-    // compute the exact wave8 timing for RX decode thresholds.
-    // Without this correction, the RX decoder may reject valid waveforms when
-    // the nominal timing period differs from the quantized 8-tick period.
-    // Example: WS2812_800KHZ has T0L=1000ns nominal but PARLIO wave8 produces 750ns.
-    //
-    // Clock sources differ by driver:
-    //   SPI/I2S: clock = 8/(T1+T2+T3) Hz, tick = (T1+T2+T3)/8 ns (variable)
-    //   PARLIO:  clock = 8 MHz fixed, tick = 125 ns (fixed)
-    bool is_spi_driver = (fl::strcmp(driver_name, "SPI") == 0);
-    bool is_parlio_driver = (fl::strcmp(driver_name, "PARLIO") == 0);
-    bool is_i2s_driver = (fl::strcmp(driver_name, "I2S") == 0);
-    // LCD_CLOCKLESS auto-selects wave3 vs wave8 based on canUseWave3() of the
-    // chipset timing. Compute the same eligibility check on the host side so
-    // the RX decoder reconstructs the correct quantized waveform.
-    bool is_lcd_clockless_driver = (fl::strcmp(driver_name, "LCD_CLOCKLESS") == 0);
-    bool lcd_clockless_uses_wave3 = false;
-    if (is_lcd_clockless_driver) {
-        fl::ChipsetTiming probe{timing.t1_ns, timing.t2_ns, timing.t3_ns, timing.reset_us, timing.name};
-        lcd_clockless_uses_wave3 = fl::canUseWave3(probe);
-    }
-    bool uses_wave8 = is_spi_driver || is_parlio_driver || is_i2s_driver
-                      || (is_lcd_clockless_driver && !lcd_clockless_uses_wave3);
-    bool uses_wave3 = is_lcd_clockless_driver && lcd_clockless_uses_wave3;
-    fl::ChipsetTiming tx_timing;
-    if (uses_wave8) {
-        // Compute actual wave8 timing from chipset timing
-        const uint32_t period = timing.t1_ns + timing.t2_ns + timing.t3_ns;
-        // PARLIO uses fixed 8MHz clock (125ns/tick), not derived from period
-        // SPI/I2S/LCD_CLOCKLESS derive clock from period: tick = period/8
-        const uint32_t tick_ns = is_parlio_driver ? 125 : (period / 8);
-        // Wave8 LUT computes: pulses = round(fraction * 8)
-        const uint32_t pulses_bit0 = static_cast<uint32_t>(
-            static_cast<float>(timing.t1_ns) / period * 8.0f + 0.5f);
-        const uint32_t pulses_bit1 = static_cast<uint32_t>(
-            static_cast<float>(timing.t1_ns + timing.t2_ns) / period * 8.0f + 0.5f);
-        // Convert back to 3-phase timing (T1=T0H, T2=T1H-T0H, T3=actual_period-T1H)
-        const uint32_t actual_t0h = pulses_bit0 * tick_ns;
-        const uint32_t actual_t1h = pulses_bit1 * tick_ns;
-        const uint32_t actual_period = 8 * tick_ns;
-        const char* wave8_name = is_spi_driver ? "SPI_wave8" :
-                                 is_parlio_driver ? "PARLIO_wave8" :
-                                 is_lcd_clockless_driver ? "LCD_CLOCKLESS_wave8" : "I2S_wave8";
-        tx_timing = fl::ChipsetTiming{
-            actual_t0h,                    // T1 = T0H
-            actual_t1h - actual_t0h,       // T2 = T1H - T0H
-            actual_period - actual_t1h,    // T3 = actual_period - T1H
-            timing.reset_us,
-            wave8_name
-        };
-        AR_FL_WARN("[RX TIMING] " << wave8_name << ": pulses_bit0=" << pulses_bit0
-                << " pulses_bit1=" << pulses_bit1
-                << " tick_ns=" << tick_ns
-                << " -> T1=" << tx_timing.T1 << " T2=" << tx_timing.T2
-                << " T3=" << tx_timing.T3);
-    } else if (uses_wave3) {
-        // Wave3 encoding: 3 ticks per LED bit, clock = 3/(T1+T2+T3) Hz
-        const uint32_t period = timing.t1_ns + timing.t2_ns + timing.t3_ns;
-        const uint32_t tick_ns = period / 3;
-        const uint32_t ticks_bit0 = static_cast<uint32_t>(
-            static_cast<float>(timing.t1_ns) / period * 3.0f + 0.5f);
-        const uint32_t ticks_bit1 = static_cast<uint32_t>(
-            static_cast<float>(timing.t1_ns + timing.t2_ns) / period * 3.0f + 0.5f);
-        const uint32_t actual_t0h = ticks_bit0 * tick_ns;
-        const uint32_t actual_t1h = ticks_bit1 * tick_ns;
-        const uint32_t actual_period = 3 * tick_ns;
-        tx_timing = fl::ChipsetTiming{
-            actual_t0h,
-            actual_t1h - actual_t0h,
-            actual_period - actual_t1h,
-            timing.reset_us,
-            "LCD_CLOCKLESS_wave3"
-        };
-        AR_FL_WARN("[RX TIMING] LCD_CLOCKLESS_wave3: ticks_bit0=" << ticks_bit0
-                << " ticks_bit1=" << ticks_bit1
-                << " tick_ns=" << tick_ns
-                << " -> T1=" << tx_timing.T1 << " T2=" << tx_timing.T2
-                << " T3=" << tx_timing.T3);
-    } else {
-        tx_timing = fl::ChipsetTiming{timing.t1_ns, timing.t2_ns, timing.t3_ns, timing.reset_us, timing.name};
-    }
-    // Wave8/wave3 encoding has timing jitter due to clock quantization and GPIO matrix latency
-    // Use wider tolerance (200ns) to accommodate clock rounding
-    const uint32_t tolerance = (uses_wave8 || uses_wave3) ? 200 : 170;
-    auto rx_timing = fl::make4PhaseTiming(tx_timing, tolerance);
-
-    // Enable gap tolerance for PARLIO/SPI DMA gaps
-    // PARLIO: ~20µs typical gaps during buffer transitions
-    // SPI: Can have longer inter-frame gaps due to software encoding timing
-    // Increased to 100µs to accommodate SPI driver timing variations
-    rx_timing.gap_tolerance_ns = 100000; // 100µs (was 30µs)
+    // Decode received data directly into rx_buffer (rx_timing built above).
 
     AR_FL_WARN("[CAPTURE] Decoding...");
     auto decode_result = rx_channel->decode(rx_timing, rx_buffer);
