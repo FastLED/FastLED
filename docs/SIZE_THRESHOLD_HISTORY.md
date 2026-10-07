@@ -22,7 +22,7 @@ This doc is paired with `ci/lint/check_size_thresholds.py` (the lockdown lint) a
 | teensy32 | `check_teensy32_size.yml` | 80000 | 65000 | real ceiling | — | MK20DX256 (Teensy 3.2) has 256 KB flash. Workflow created at current values. Never bumped. |
 | teensy35 | `check_teensy35_size.yml` | 100000 | 85000 | real ceiling | — | MK64FX512 (Teensy 3.5) has 512 KB flash. Workflow created at current values. Never bumped. |
 | teensy36 | `check_teensy36_size.yml` | 120000 | 100000 | real ceiling | — | MK66FX1M0 (Teensy 3.6) has 1 MB flash. Workflow created at current values. Never bumped. |
-| teensy41 | `check_teensy41_size.yml` | 120000 | **165000 (BAND-AID)** | apa102 is band-aid | #2802 | Blink (`max_size: 120000`) is a real ceiling. **Apa102 (165000) is a band-aid**, bumped from 88000 in PR #2804 (closes #2802) to unblock CI after the library legitimately grew past the budget (audio API, `fl::stl` additions, channel manager, `fl::AsyncLog*`, `fl::ifstream` linkage). The real ceiling is **88000** once #2802's over-link of `fl::ifstream` / `fl::posix_filebuf` / `fl::strerror` / `fl::AsyncLog*` into the Apa102 link is fixed. Current real size ≈148476 B. |
+| teensy41 | `check_teensy41_size.yml` | 120000 | 88000 | real ceiling | #2802, #2656 (fixed) | Blink (`max_size: 120000`) and Apa102 (`max_size_apa102: 88000`) are real ceilings. Apa102 was a 165000 band-aid from PR #2804 (#2802) until PR #4727 fixed the over-link tracked in #2656 (measured 49,152 B). |
 | teensylc | `check_teensylc_size.yml` | 35000 | 30000 | real ceiling | — | MKL26Z64 (Teensy LC) has 64 KB flash. Workflow created at current values in `f4317e954` (2025-06-25). Never bumped. |
 
 ## Historical bumps catalogued
@@ -54,7 +54,8 @@ These are the events the audit found in `git log --all --follow --patch -- .gith
 | 2025-04-25 | `e31a807ec` | `max_size`: 104000 → 107000 | "Increase max_size for Teensy 4.1 to 107000" | soft |
 | 2025-05-19 | `dc25e80e0` | `max_size_apa102`: 84000 → 88000 | "Update max_size_apa102 to 88000 in Teensy41 size check" | soft |
 | 2025-08-09 | `3e99118d3` | `max_size`: 107000 → 120000 | "fix teensy41 size check" — accommodating real growth | **current `max_size`** (real ceiling) |
-| 2026-06-05 | `ab67e3f1f` (PR #2804, closes #2802) | `max_size_apa102`: 88000 → 165000 | band-aid for `fl::ifstream` / `fl::AsyncLog*` over-link into Apa102 (current real ≈148476 B) | **band-aid (current)** — restore to 88000 once #2802 is fixed |
+| 2026-06-05 | `ab67e3f1f` (PR #2804, closes #2802) | `max_size_apa102`: 88000 → 165000 | band-aid for `fl::ifstream` / `fl::AsyncLog*` over-link into Apa102 (then real ≈148476 B) | **band-aid (reverted)** |
+| 2026-10-06 | PR #4727 (fixes #2656) | `max_size_apa102`: 165000 → 88000 | restore real ceiling; over-link fixed, Apa102 measured 49,152 B | **current `max_size_apa102`** (real ceiling) |
 
 ### Other boards
 
@@ -62,7 +63,7 @@ These are the events the audit found in `git log --all --follow --patch -- .gith
 
 ## Band-aid follow-up: how to restore the real ceiling
 
-### #2802 — teensy41 Apa102 over-link (band-aid: 165000, real: 88000)
+### #2802 — teensy41 Apa102 over-link (RESOLVED 2026-10-06: restored to 88000 in PR #4727; #2656 fixed, measured 49,152 B)
 
 The Apa102 link on teensy41 currently pulls in `fl::ifstream`, `fl::posix_filebuf`, `fl::strerror`, and `fl::AsyncLog*` even though Apa102 itself does not need filesystem I/O or async logging. Investigate the call chain from the Apa102 driver into these symbols, then either:
 
