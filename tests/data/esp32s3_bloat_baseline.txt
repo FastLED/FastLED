@@ -1,3 +1,10 @@
+# 2026-10-07, #4707: hosted image354987 ->354235 (-752 B).
+# Rebased onto a439902ac6; upstream changes and minimal Blink save288 B.
+# Isolate the mutable string heap accessor (-228 B) and share literal/view
+# materialization (-236 B). Observed at09edb30eea in run37661810048;
+# downloaded report/provenance agree. Local default image354219 B.
+# Supported runtime drivers and allocation/exception policies retained.
+
 # 2026-10-07, issue #4707 passes 27–28: hosted image_flash=355599 B,
 # run 37640353921 at 2a31733db0; local 355583 B. Independent task,
 # optional SDK I/O and string/input providers save 3276 B on legacy
@@ -447,4 +454,4 @@
 # report: run 37653272928 at 0e93c35046; local image_flash is 354971 B.
 # Pass 36's equivalent final RMT4 matcher saves another 944 B on legacy;
 # modern ESP32 and S3 remain unchanged in controlled builds.
-354987
+354235
