@@ -105,9 +105,21 @@ struct PwmStateData {
     PwmStateData() FL_NO_EXCEPT : isr_active(false) {}
 };
 
-// Access singleton state
+// Set the first time state() runs, which happens only on the paths that
+// allocate a channel (setPwmFrequency) or service one (the ISR). The
+// lookup paths taken by every sketch -- pinMode(), analogWrite(),
+// setPwm16() -- read this pointer instead of calling state(), so a sketch
+// that never calls setPwmFrequency() does not link the singleton storage.
+// A null pointer means no channel has ever been allocated. The target is
+// static storage, so the raw pointer can never dangle.
+// FL_LINT_ALLOW_GLOBAL(constant-initialized null pointer; see above)
+PwmStateData* g_state = nullptr;
+
+// Access singleton state (creates it on first use)
 inline PwmStateData& state() {
-    return fl::Singleton<PwmStateData>::instance();
+    PwmStateData& st = fl::Singleton<PwmStateData>::instance();
+    g_state = &st;
+    return st;
 }
 
 // ISR handler — services only ISR-backend entries
@@ -139,7 +151,8 @@ void FL_IRAM pwm_isr_handler(void* user_data) {
 
 // Find channel by pin number
 PwmPinState* findByPin(int pin) {
-    PwmStateData& st = state();
+    if (!g_state) return nullptr;  // No channel ever allocated.
+    PwmStateData& st = *g_state;
     for (u8 i = 0; i < MAX_PWM_CHANNELS; i++) {
         if (st.channels[i].pin == pin) {
             return &st.channels[i];
@@ -161,7 +174,8 @@ PwmPinState* allocate() {
 
 // Count active ISR-backend channels
 u8 countIsrChannels() {
-    PwmStateData& st = state();
+    if (!g_state) return 0;
+    PwmStateData& st = *g_state;
     u8 count = 0;
     for (u8 i = 0; i < MAX_PWM_CHANNELS; i++) {
         if (st.channels[i].pin >= 0 && st.channels[i].backend == PwmBackend::IsrSoftware) {
@@ -193,7 +207,8 @@ int ensureIsrActive() {
 
 // Shutdown ISR if no ISR-backend channels remain
 void maybeShutdownIsr() {
-    PwmStateData& st = state();
+    if (!g_state) return;  // ISR can only be active once state exists.
+    PwmStateData& st = *g_state;
     if (!st.isr_active) return;
     if (countIsrChannels() > 0) return;
 
