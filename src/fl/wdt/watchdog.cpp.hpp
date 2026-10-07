@@ -122,6 +122,21 @@ bool Watchdog::escapeToBootloaderIfLooping() FL_NO_EXCEPT {
     return rebootIntoBootloader();
 }
 
+// =============================================================================
+// Early-boot loop guard counter (fl/wdt/boot_guard.h)
+//
+// Storage is per-platform: defined in the watchdog dispatcher TU by the
+// platform impl, or by the no-op in platforms/watchdog.impl.cpp.hpp.
+// =============================================================================
+
+fl::u32 Watchdog::bootGuardCount() const FL_NO_EXCEPT {
+    return platforms::watchdogBootGuardRead();
+}
+
+void Watchdog::markBootHealthy() FL_NO_EXCEPT {
+    platforms::watchdogBootGuardWrite(0);
+}
+
 ResetInfo Watchdog::lastResetInfo() const FL_NO_EXCEPT {
     ResetInfo info{};
     info.cause = lastResetCause();

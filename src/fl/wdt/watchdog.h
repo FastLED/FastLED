@@ -195,6 +195,17 @@ public:
     /// unsupported we must not destroy the evidence that a loop is happening.
     bool escapeToBootloaderIfLooping() FL_NO_EXCEPT;
 
+    /// @brief Early-boot loop guard counter (see `fl/wdt/boot_guard.h`):
+    /// consecutive boots since the last `markBootHealthy()`, kept in
+    /// reset-persistent memory. 0 on platforms without boot-guard storage.
+    fl::u32 bootGuardCount() const FL_NO_EXCEPT;
+
+    /// @brief Tell the early-boot guard this boot is healthy, zeroing its
+    /// counter. Call once the firmware is known good (e.g. first `loop()`),
+    /// so later watchdog resets never accumulate toward a bootloader escape.
+    /// No-op on platforms without boot-guard storage.
+    void markBootHealthy() FL_NO_EXCEPT;
+
     FL_NO_RETURN void reboot() FL_NO_EXCEPT;
 
     // ========== Tier 1 — most platforms ==========
@@ -222,6 +233,13 @@ private:
     fl::u16 mSafeModeThreshold = 2;
     fl::u16 mBootloaderEscapeThreshold = 0;   // 0 = escape disabled
 };
+
+namespace platforms {
+/// Boot-guard counter storage, supplied by the platform watchdog impl (or
+/// the no-op). Backs Watchdog::bootGuardCount() / markBootHealthy().
+fl::u32 watchdogBootGuardRead() FL_NO_EXCEPT;
+void    watchdogBootGuardWrite(fl::u32 boots) FL_NO_EXCEPT;
+} // namespace platforms
 
 /// @brief RAII watchdog guard for the canonical `loop()`-top use case.
 ///
@@ -313,6 +331,8 @@ public:
 //   #define FL_WATCHDOG_HAS_WINDOW_MODE       // setWindow() honored
 //   #define FL_WATCHDOG_HAS_CRASH_REPORT      // hasCrashReport()/readCrashReport() honored
 //   #define FL_WATCHDOG_HAS_BOOTLOADER_REBOOT // rebootIntoBootloader() honored
+//   #define FL_WATCHDOG_HAS_BOOT_GUARD        // FL_WATCHDOG_BOOT_GUARD() early hook (fl/wdt/boot_guard.h)
+//   #define FL_WATCHDOG_HAS_BOOT_GUARD_STORAGE // bootGuardCount()/markBootHealthy() persist
 //   #define FL_WATCHDOG_MAX_TIMEOUT_MS N      // upper bound, in ms
 //
 // The Tier 0 surface is always callable; Tier 1/2 methods return false on

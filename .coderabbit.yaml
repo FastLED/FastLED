@@ -305,6 +305,34 @@ reviews:
         "`fl::span` for Callback Typedefs and Small Fixed-Size Arrays" and
         FastLED issue #3233.
 
+    - path: "examples/AutoResearch/**"
+      instructions: |
+        AutoResearch must stay platform neutral. BLOCKING: flag every line this
+        PR adds or changes under examples/AutoResearch/ that contains
+        platform-specific code, including:
+        - platform branches: `#if`/`#ifdef`/`#elif` on `FL_IS_*`,
+          `ARDUINO_*`, `FASTLED_ESP*`, `ESP32`, `__IMXRT1062__`, `__AVR__`,
+          `PICO_*`, `CONFIG_IDF_*`, or similar chip/core macros;
+        - register names or address literals (for example `WDOG3_CS`,
+          `CCM_CCGR5`, `IMXRT_*`, `0x2027FF60`, `*(volatile uint32_t*)0x...`);
+        - vendor SDK or core calls such as `esp_*()`, `_reboot_Teensyduino_()`,
+          Pico SDK `watchdog_*`/`reset_usb_boot()`, nRF/STM32 HAL calls, or
+          weak startup hooks like `startup_early_hook`;
+        - direct `#include` of `platforms/...` headers or vendor SDK headers
+          (`esp_*.h`, `driver/...`, `hardware/...`, `pico/...`, `imxrt.h`).
+        The fix is always the same: add a platform-neutral API in the core
+        (`src/fl/...`, e.g. on `FastLED.watchdog()`), delegate it to
+        `src/platforms/...` with a no-op fallback, and have AutoResearch call
+        only the neutral API. Example: the Teensy 4.x early-boot loop guard is
+        `FL_WATCHDOG_BOOT_GUARD()` (src/fl/wdt/boot_guard.h) plus
+        `FastLED.watchdog().markBootHealthy()`.
+        Exception: a line may stay only if it carries an explicit
+        `// ok platform specific - <reason>` marker whose reason explains why
+        no core API can serve (for example, a test that exists only for one
+        driver). Flag markers without a concrete reason. Pre-existing code is
+        tracked in FastLED/FastLED#4720; do not flag untouched lines.
+        Reference: `.claude/skills/code-review/review-rules.md` ->
+        "examples/AutoResearch/** changes - PLATFORM NEUTRALITY".
     - path: ".github/workflows/check_*_size.yml"
       instructions: |
         BINARY-SIZE THRESHOLD LOCKDOWN.

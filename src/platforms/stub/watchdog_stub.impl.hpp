@@ -32,6 +32,10 @@
 #include "fl/stl/thread.h"
 #include "platforms/stub/watchdog_stub.h"
 
+// Boot-guard counter kept in process memory, standing in for the
+// reset-persistent record real platforms use (fl/wdt/boot_guard.h).
+#define FL_WATCHDOG_HAS_BOOT_GUARD_STORAGE
+
 #define FL_WATCHDOG_HAS_HARDWARE
 #define FL_WATCHDOG_PERSIST_BYTES 16
 #define FL_WATCHDOG_MAX_TIMEOUT_MS 600000u
@@ -202,6 +206,14 @@ inline void stubWatchdogEnsureWorker() FL_NO_EXCEPT {
         s.worker = fl::thread(stubWatchdogTimerLoop);
     }
 }
+
+inline fl::atomic<fl::u32>& stubBootGuardBoots() FL_NO_EXCEPT {
+    static fl::atomic<fl::u32> boots(0);  // okay static in header — single-TU `.impl.hpp`
+    return boots;
+}
+
+fl::u32 watchdogBootGuardRead() FL_NO_EXCEPT { return stubBootGuardBoots().load(); }
+void watchdogBootGuardWrite(fl::u32 boots) FL_NO_EXCEPT { stubBootGuardBoots().store(boots); }
 
 } // namespace platforms
 

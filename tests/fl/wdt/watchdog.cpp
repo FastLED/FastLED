@@ -10,6 +10,7 @@
 #define FASTLED_STUB_WATCHDOG_NO_ABORT 1
 
 #include "fl/wdt/watchdog.h"
+#include "fl/wdt/boot_guard.h"
 #include "platforms/stub/watchdog_stub.h"
 #include "fl/stl/atomic.h"
 #include "fl/stl/chrono.h"
@@ -433,4 +434,50 @@ FL_TEST_CASE("fl::ScopedWatchdog — nesting detection counter") {
         FL_CHECK_EQ(ScopedWatchdog::activeScopeCount(), baseline + 1);
     }
     FL_CHECK_EQ(ScopedWatchdog::activeScopeCount(), baseline);
+}
+
+// ---------------------------------------------------------------------------
+// Early-boot loop guard (fl/wdt/boot_guard.h)
+// ---------------------------------------------------------------------------
+
+FL_TEST_CASE("fl::bootGuardOnBoot — counts up, escapes at the threshold, then restarts") {
+    fl::u32 stored = 0;
+    BootGuardDecision d = bootGuardOnBoot(stored, 3);
+    FL_CHECK_FALSE(d.escape);
+    FL_CHECK_EQ(d.boots, 1u);
+    d = bootGuardOnBoot(d.boots, 3);
+    FL_CHECK_FALSE(d.escape);
+    FL_CHECK_EQ(d.boots, 2u);
+    d = bootGuardOnBoot(d.boots, 3);
+    FL_CHECK(d.escape);
+    FL_CHECK_EQ(d.boots, 0u);  // flashed firmware gets a fresh budget
+    d = bootGuardOnBoot(d.boots, 3);
+    FL_CHECK_FALSE(d.escape);
+    FL_CHECK_EQ(d.boots, 1u);
+}
+
+FL_TEST_CASE("fl::bootGuardOnBoot — threshold 0 never escapes") {
+    BootGuardDecision d = bootGuardOnBoot(1000, 0);
+    FL_CHECK_FALSE(d.escape);
+    FL_CHECK_EQ(d.boots, 1001u);
+}
+
+FL_TEST_CASE("fl::BootGuardRecord — round-trips and rejects garbage") {
+    BootGuardRecord r{};
+    FL_CHECK_EQ(bootGuardDecode(r), 0u);  // all-zero RAM is not a record
+    bootGuardEncode(r, 2);
+    FL_CHECK_EQ(bootGuardDecode(r), 2u);
+    r.boots = 7;  // corrupted count without a matching check word
+    FL_CHECK_EQ(bootGuardDecode(r), 0u);
+    r.magic = 0xDEADBEEFu;
+    r.check = 0;
+    FL_CHECK_EQ(bootGuardDecode(r), 0u);
+}
+
+FL_TEST_CASE("fl::Watchdog — markBootHealthy zeroes the boot-guard count") {
+    Watchdog& dog = Watchdog::instance();
+    fl::platforms::watchdogBootGuardWrite(2);  // as if two boots never got healthy
+    FL_CHECK_EQ(dog.bootGuardCount(), 2u);
+    dog.markBootHealthy();
+    FL_CHECK_EQ(dog.bootGuardCount(), 0u);
 }

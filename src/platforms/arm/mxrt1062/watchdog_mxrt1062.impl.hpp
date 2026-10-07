@@ -33,6 +33,7 @@
 /// move it to the OCRAM2 retained region above `CrashReport` at `0x2027FF80`.
 
 #include "fl/wdt/watchdog.h"
+#include "fl/wdt/boot_guard.h"  // OCRAM boot-guard record, _reboot_Teensyduino_()
 
 // IWYU pragma: begin_keep
 #include <imxrt.h>   // ok include — RTWDOG / SRC register defines from Teensyduino core
@@ -41,6 +42,8 @@
 #define FL_WATCHDOG_HAS_HARDWARE
 #define FL_WATCHDOG_PERSIST_BYTES 16
 #define FL_WATCHDOG_MAX_TIMEOUT_MS 120000u
+#define FL_WATCHDOG_HAS_BOOTLOADER_REBOOT
+#define FL_WATCHDOG_HAS_BOOT_GUARD_STORAGE
 
 namespace fl {
 namespace platforms {
@@ -83,6 +86,23 @@ inline ResetCause translateSrcSrsr(fl::u32 srsr) {
     if (srsr & SRC_SRSR_IPP_USER_RESET_B)   return ResetCause::EXTERNAL_PIN;
     if (srsr & SRC_SRSR_IPP_RESET_B)        return ResetCause::POWER_ON;
     return ResetCause::UNKNOWN;
+}
+
+// Boot-guard counter (fl/wdt/boot_guard.h) in the reset-persistent OCRAM
+// record that FL_WATCHDOG_BOOT_GUARD's startup_early_hook maintains.
+fl::u32 watchdogBootGuardRead() FL_NO_EXCEPT {
+    return bootGuardDecode(mxrt1062BootGuardRecord());
+}
+
+void watchdogBootGuardWrite(fl::u32 boots) FL_NO_EXCEPT {
+    // Only touch the record when FL_WATCHDOG_BOOT_GUARD wrote one this boot
+    // (it always stores boots >= 1). Without the guard, this address may be
+    // live heap and must not be written.
+    if (bootGuardDecode(mxrt1062BootGuardRecord()) == 0) return;
+    bootGuardEncode(mxrt1062BootGuardRecord(), boots);
+    // OCRAM is write-back cached after configure_cache(); push the record
+    // out so a reset right after this still sees it.
+    arm_dcache_flush_delete(reinterpret_cast<void*>(kMxrt1062BootGuardAddr), 32);  // ok reinterpret cast - fixed OCRAM address
 }
 
 } // namespace platforms
@@ -242,8 +262,9 @@ void Watchdog::disable() FL_NO_EXCEPT {
     // long as CS.UPDATE was 1 in the previous config (which our begin()
     // always sets). Run the same unlock-then-CS pattern as begin() but
     // write CS with EN=0.
+    // Always reconfigure, even if begin() never ran: FL_WATCHDOG_BOOT_GUARD
+    // arms WDOG3 in startup_early_hook, before this state exists.
     auto& s = platforms::mxrt1062WatchdogState();
-    if (!s.armed) return;
 
     // Save+restore PRIMASK so callers that already had IRQs off aren't
     // surprised by them coming back on.
@@ -335,7 +356,17 @@ bool Watchdog::onTimeout(fl::function<void()>) FL_NO_EXCEPT { return false; }
 bool Watchdog::setPauseOnDebug(bool) FL_NO_EXCEPT { return false; }
 bool Watchdog::writeCrashLog(fl::span<const fl::u8>) FL_NO_EXCEPT { return false; }
 fl::size Watchdog::readCrashLog(fl::span<fl::u8>) const FL_NO_EXCEPT { return 0; }
-bool Watchdog::rebootIntoBootloader() FL_NO_EXCEPT { return false; }
+bool Watchdog::rebootIntoBootloader() FL_NO_EXCEPT {
+    // bkpt #251: the MKL02 bootloader chip sees the halt and starts HalfKay
+    // (16c0:0478). Leave the RTWDOG off so it cannot reset HalfKay. Use the
+    // unconditional reconfigure: disable() skips it when begin() never ran,
+    // but the boot guard may have armed WDOG3 in startup_early_hook.
+    __asm__ volatile ("cpsid i" ::: "memory");  // unlock window; never returns
+    platforms::mxrt1062BootGuardConfigureWdog3(false, 0);
+    platforms::mxrt1062WatchdogState().armed = false;
+    _reboot_Teensyduino_();
+    return false;  // unreachable: _reboot_Teensyduino_() does not return
+}
 
 bool Watchdog::setWindow(fl::u32, fl::u32) FL_NO_EXCEPT { return false; }
 bool Watchdog::hasCrashReport() const FL_NO_EXCEPT { return false; }

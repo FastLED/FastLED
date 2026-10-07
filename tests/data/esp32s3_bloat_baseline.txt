@@ -1,7 +1,8 @@
-# 2026-10-06, PR #4727: -80 B, 367735 -> 367655. fl::cin's istream buffer is
-# constant-initialized (no dynamic initializer) and the PWM lookup paths no
-# longer touch the PwmStateData singleton, so --gc-sections drops both from
-# Blink. Measured by CI run 37562351702 (bloat regression job).
+# 2026-10-06, PR #4719: +4 B, 367735 -> 367739. Link-layout drift only:
+# Blink does not install the boot guard (FL_WATCHDOG_BOOT_GUARD is opt-in and
+# a no-op off Teensy 4.x); the change is from the fl/wdt translation unit
+# gaining Watchdog::bootGuardCount()/markBootHealthy(). Measured by CI run
+# 37502121083 (bloat regression job).
 
 # 2026-10-06, PR #4717 (issue #4712): -24,284 B, 392019 -> 367735. Default
 # log level on non-NDEBUG builds is 1 (FL_ERROR only): FL_WARN / FL_INFO /
@@ -318,4 +319,4 @@
 # the CI Blink report contains no ResponseLutsQ16 symbol. The local fbuild
 # symbol total remains ~4 KB higher for the same source (FastLED/fbuild#1456),
 # so this ratchet uses the CI measurement from PR #4511.
-367655
+367739
