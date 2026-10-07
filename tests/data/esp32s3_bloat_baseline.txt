@@ -1,3 +1,9 @@
+# 2026-10-07, issue #4707 passes 27–28: hosted image_flash=355599 B,
+# run 37640353921 at 2a31733db0; local 355583 B. Independent task,
+# optional SDK I/O and string/input providers save 3276 B on legacy
+# RMT4 Blink, with a measured 12 B S3 cost. Accept that tradeoff
+# and pin the observed hosted result without extra headroom.
+
 # 2026-10-07, issue #4707 twenty-third pass: hosted image_flash=355587 B,
 # run 37629278386 at 9102a03097; local 355571 B. Independent async
 # logging saves 2076 B on legacy RMT4, with a measured 12 B S3 cost.
@@ -421,4 +427,4 @@
 # the CI Blink report contains no ResponseLutsQ16 symbol. The local fbuild
 # symbol total remains ~4 KB higher for the same source (FastLED/fbuild#1456),
 # so this ratchet uses the CI measurement from PR #4511.
-355587
+355599
