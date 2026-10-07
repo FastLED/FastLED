@@ -38,6 +38,8 @@ const UNITY_EXPECTED_BUILD_FILES: &[&str] = &[
     "fl/build/fl.channels.dynamic+.cpp",
     "fl/build/fl.channels.managed+.cpp",
     "fl/build/fl.channels.registration+.cpp",
+    "fl/build/fl.channels.id_tracking+.cpp",
+    "fl/build/fl.channels.utilities+.cpp",
     "fl/build/fl.channels.rx+.cpp",
     "fl/build/fl.channels.rx.factories+.cpp",
     "fl/build/fl.channels.rx.fastled+.cpp",

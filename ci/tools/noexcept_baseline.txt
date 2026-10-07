@@ -1485,27 +1485,27 @@ src/fl/channels/ichannel.h|virtual i32 id() const = 0;
 src/fl/channels/manager.cpp.hpp|ChannelManager& ChannelManager::instance() {
 src/fl/channels/manager.cpp.hpp|ChannelManager& channelManager() {
 src/fl/channels/manager.cpp.hpp|ChannelManager::ChannelManager() {
-src/fl/channels/manager.cpp.hpp|ChannelManager::DriverStatus ChannelManager::driverStatus(const fl::string& name) const {
+src/fl/channels/utilities/manager.cpp.hpp|ChannelManager::DriverStatus ChannelManager::driverStatus(const fl::string& name) const {
 src/fl/channels/manager.cpp.hpp|IChannelDriver::DriverState ChannelManager::poll() {
 src/fl/channels/manager.cpp.hpp|bool ChannelManager::isDriverEnabled(const char* name) const {
-src/fl/channels/manager.cpp.hpp|bool ChannelManager::removeDriver(fl::shared_ptr<IChannelDriver> driver) {
-src/fl/channels/manager.cpp.hpp|bool ChannelManager::setDriverPriority(const fl::string& name, int priority) {
+src/fl/channels/utilities/manager.cpp.hpp|bool ChannelManager::removeDriver(fl::shared_ptr<IChannelDriver> driver) {
+src/fl/channels/utilities/manager.cpp.hpp|bool ChannelManager::setDriverPriority(const fl::string& name, int priority) {
 src/fl/channels/manager.cpp.hpp|bool ChannelManager::setExclusiveDriver(Bus bus) {
-src/fl/channels/manager.cpp.hpp|bool ChannelManager::setExclusiveDriverByName(const char* name) {
+src/fl/channels/utilities/manager.cpp.hpp|bool ChannelManager::setExclusiveDriverByName(const char* name) {
 src/fl/channels/manager.cpp.hpp|bool ChannelManager::waitForCondition(Condition condition, u32 timeoutMs) {
 src/fl/channels/manager.cpp.hpp|bool ChannelManager::waitForReady(u32 timeoutMs) {
 src/fl/channels/manager.cpp.hpp|bool ChannelManager::waitForReadyOrDraining(u32 timeoutMs) {
-src/fl/channels/manager.cpp.hpp|fl::shared_ptr<IChannelDriver> ChannelManager::findDriverByName(const fl::string& name) const {
-src/fl/channels/manager.cpp.hpp|fl::shared_ptr<IChannelDriver> ChannelManager::getDriverByName(const fl::string& name) const {
-src/fl/channels/manager.cpp.hpp|fl::shared_ptr<IChannelDriver> ChannelManager::selectDriverForChannel(const ChannelDataPtr& data, const fl::string& affinity) {
-src/fl/channels/manager.cpp.hpp|fl::size ChannelManager::getDriverCount() const {
-src/fl/channels/manager.cpp.hpp|fl::span<const DriverInfo> ChannelManager::getDriverInfos() const {
+src/fl/channels/utilities/manager.cpp.hpp|fl::shared_ptr<IChannelDriver> ChannelManager::findDriverByName(const fl::string& name) const {
+src/fl/channels/utilities/manager.cpp.hpp|fl::shared_ptr<IChannelDriver> ChannelManager::getDriverByName(const fl::string& name) const {
+src/fl/channels/utilities/manager.cpp.hpp|fl::shared_ptr<IChannelDriver> ChannelManager::selectDriverForChannel(const ChannelDataPtr& data, const fl::string& affinity) {
+src/fl/channels/utilities/manager.cpp.hpp|fl::size ChannelManager::getDriverCount() const {
+src/fl/channels/utilities/manager.cpp.hpp|fl::span<const DriverInfo> ChannelManager::getDriverInfos() const {
 src/fl/channels/manager.cpp.hpp|void ChannelManager::addDriver(int priority, fl::shared_ptr<IChannelDriver> driver) {
 src/fl/channels/manager.cpp.hpp|void ChannelManager::clearAllDrivers() {
 src/fl/channels/manager.cpp.hpp|void ChannelManager::onBeginFrame() {
 src/fl/channels/manager.cpp.hpp|void ChannelManager::onEndFrame() {
 src/fl/channels/manager.cpp.hpp|void ChannelManager::reset() {
-src/fl/channels/manager.cpp.hpp|void ChannelManager::setDriverEnabled(const char* name, bool enabled) {
+src/fl/channels/utilities/manager.cpp.hpp|void ChannelManager::setDriverEnabled(const char* name, bool enabled) {
 src/fl/channels/spi.h|SPIError error() const { return error_code; }
 src/fl/channels/spi.h|Spi(int clock_pin, fl::span<const int> data_pins, spi_output_mode_t output_mode = spi_output_mode_t::SPI_HW, u32 clock_speed_hz = 0xffffffff);
 src/fl/channels/spi.h|WriteResult write(Spans&&... lanes) {

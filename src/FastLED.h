@@ -1614,7 +1614,7 @@ public:
 	/// @note Disabled drivers are skipped during selection
 	/// @note Changes take effect immediately on next LED update
 	/// @note On platforms without registered drivers, this is a safe no-op
-	void setDriverEnabled(const char* name, bool enabled);
+	void setDriverEnabled(const char* name, bool enabled) FL_NO_EXCEPT;
 
 	/// Register a single driver at a priority above the platform default
 	/// (compile-time TU-linking variant).
@@ -1656,7 +1656,7 @@ public:
 	///       custom third-party drivers, RPC-resolved names), use
 	///       `fl::ChannelManager::instance().setExclusiveDriverByName(name)`
 	///       directly.
-	bool setExclusiveDriver(fl::Bus bus, fl::u8 which = 0);
+	bool setExclusiveDriver(fl::Bus bus, fl::u8 which = 0) FL_NO_EXCEPT;
 
 	/// Check if a driver is enabled by name
 	/// @param name Driver name to query (case-sensitive)
@@ -1665,12 +1665,12 @@ public:
 
 	/// Get count of registered channel drivers
 	/// @return Total number of registered drivers (including unnamed ones)
-	fl::size getDriverCount() const;
+	fl::size getDriverCount() const FL_NO_EXCEPT;
 
 	/// Get full state of all registered channel drivers
 	/// @return Span of driver info (sorted by priority descending)
 	/// @note Returned span is valid until next call to any non-const method
-	fl::span<const fl::DriverInfo> getDriverInfos() const;
+	fl::span<const fl::DriverInfo> getDriverInfos() const FL_NO_EXCEPT;
 
 	/// @} Channel Bus Manager Controls
 
