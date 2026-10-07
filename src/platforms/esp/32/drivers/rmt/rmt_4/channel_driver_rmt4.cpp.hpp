@@ -135,50 +135,27 @@ bool ChannelEngineRMT4Impl::canHandle(const ChannelDataPtr &data) const
 // Timing Symbol Helpers
 // ═══════════════════════════════════════════════════════════════════════════
 
-rmt_item32_t ChannelEngineRMT4Impl::makeZeroSymbol(
-    const ChipsetTimingConfig &timing) FL_NO_EXCEPT {
-    // Zero bit timing: T0H (high) + T0L (low)
-    // For WS2812: T0H=400ns, T0L=850ns
-
-    u32 T1 = timing.t1_ns; // T0H in nanoseconds
-    u32 T2 = timing.t2_ns; // T0L (partial)
-    u32 T3 = timing.t3_ns; // T0L (remaining)
-
-    // Convert to CPU cycles, then to RMT cycles
-    u32 T1_cycles = NS_TO_ESP_CYCLES(T1);
-    u32 T2_cycles = NS_TO_ESP_CYCLES(T2);
-    u32 T3_cycles = NS_TO_ESP_CYCLES(T3);
+void ChannelEngineRMT4Impl::setTimingSymbols(
+    ChannelState &state, const ChipsetTimingConfig &timing) FL_NO_EXCEPT {
+    // Round each timing to CPU cycles before combining pulse durations.
+    const u32 T1_cycles = NS_TO_ESP_CYCLES(timing.t1_ns);
+    const u32 T2_cycles = NS_TO_ESP_CYCLES(timing.t2_ns);
+    const u32 T3_cycles = NS_TO_ESP_CYCLES(timing.t3_ns);
 
     rmt_item32_t zero;
-    zero.level0 = 1; // High during T0H
+    zero.level0 = 1;
     zero.duration0 = ESP_TO_RMT_CYCLES(T1_cycles);
-    zero.level1 = 0; // Low during T0L
+    zero.level1 = 0;
     zero.duration1 = ESP_TO_RMT_CYCLES(T2_cycles + T3_cycles);
 
-    return zero;
-}
-
-rmt_item32_t ChannelEngineRMT4Impl::makeOneSymbol(
-    const ChipsetTimingConfig &timing) FL_NO_EXCEPT {
-    // One bit timing: T1H (high) + T1L (low)
-    // For WS2812: T1H=850ns, T1L=400ns
-
-    u32 T1 = timing.t1_ns; // T1H (partial)
-    u32 T2 = timing.t2_ns; // T1H (remaining)
-    u32 T3 = timing.t3_ns; // T1L
-
-    // Convert to CPU cycles, then to RMT cycles
-    u32 T1_cycles = NS_TO_ESP_CYCLES(T1);
-    u32 T2_cycles = NS_TO_ESP_CYCLES(T2);
-    u32 T3_cycles = NS_TO_ESP_CYCLES(T3);
-
     rmt_item32_t one;
-    one.level0 = 1; // High during T1H
+    one.level0 = 1;
     one.duration0 = ESP_TO_RMT_CYCLES(T1_cycles + T2_cycles);
-    one.level1 = 0; // Low during T1L
+    one.level1 = 0;
     one.duration1 = ESP_TO_RMT_CYCLES(T3_cycles);
 
-    return one;
+    state.zero = zero;
+    state.one = one;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -206,8 +183,7 @@ ChannelEngineRMT4Impl::ChannelState *ChannelEngineRMT4Impl::acquireChannel(
         if (!state.inUse && state.pin == pin) {
             state.inUse = true;
             // Recalculate timing symbols in case timing changed
-            state.zero = makeZeroSymbol(timing);
-            state.one = makeOneSymbol(timing);
+            setTimingSymbols(state, timing);
 
             // Reset transmission state
             state.transmissionComplete.store(false, fl::memory_order_release);
@@ -352,8 +328,7 @@ bool ChannelEngineRMT4Impl::configureChannel(
 
     // Update state configuration
     state->pin = pin;
-    state->zero = makeZeroSymbol(timing);
-    state->one = makeOneSymbol(timing);
+    setTimingSymbols(*state, timing);
     state->transmissionComplete.store(false, fl::memory_order_release);
     state->resetWaitStarted = false;
     state->resetStartTimeUs = 0;

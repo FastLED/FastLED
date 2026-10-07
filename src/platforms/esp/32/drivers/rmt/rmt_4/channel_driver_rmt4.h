@@ -514,10 +514,8 @@ class ChannelEngineRMT4Impl final : public ChannelEngineRMT4 {
     // Helpers
     // ═══════════════════════════════════════════════════════════════════════════
 
-    static rmt_item32_t
-    makeZeroSymbol(const ChipsetTimingConfig &timing) FL_NO_EXCEPT;
-    static rmt_item32_t
-    makeOneSymbol(const ChipsetTimingConfig &timing) FL_NO_EXCEPT;
+    static void setTimingSymbols(ChannelState &state,
+                                 const ChipsetTimingConfig &timing) FL_NO_EXCEPT;
 };
 
 } // namespace fl
