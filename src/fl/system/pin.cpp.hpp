@@ -101,8 +101,9 @@ struct PwmStateData {
     PwmPinState channels[MAX_PWM_CHANNELS];
     fl::isr::handle isr_handle;
     bool isr_active;
+    int (*detach_isr)(fl::isr::handle&);
 
-    PwmStateData() FL_NO_EXCEPT : isr_active(false) {}
+    PwmStateData() FL_NO_EXCEPT : isr_active(false), detach_isr(nullptr) {}
 };
 
 // Set the first time state() runs, which happens only on the paths that
@@ -203,6 +204,9 @@ int ensureIsrActive() {
         FL_WARN("PWM: ISR attach failed: " << (fl::isr::get_error_string(result)));
         return result;
     }
+    // Install teardown only when the timer is attached, so ordinary GPIO
+    // calls do not retain the platform timer backend in the linked image.
+    st.detach_isr = fl::isr::detach_handler;
     st.isr_active = true;
     return 0;
 }
@@ -214,8 +218,9 @@ void maybeShutdownIsr() {
     if (!st.isr_active) return;
     if (countIsrChannels() > 0) return;
 
-    fl::isr::detach_handler(st.isr_handle);
+    st.detach_isr(st.isr_handle);
     st.isr_active = false;
+    st.detach_isr = nullptr;
 }
 
 // Release a channel and cleanup

@@ -1,3 +1,9 @@
+# 2026-10-06, issue #4707: -8404 B, 367407 -> 359003. Reduce RMT
+# queue/dispatch overhead, share driver wait loops, and make unused task,
+# PWM timer, HTTP, and SPI state removable by the linker. Default dynamic
+# drivers and runtime configuration remain enabled. Measured locally with
+# `bash bloat esp32s3 --build` (image_flash=359003 B), not by CI.
+
 # 2026-10-06, PR for issue #4726: -252 B, 367659 -> 367407. The ESP32
 # fl::net::wifi and OTA backends moved out of the always-linked platforms+
 # unity object into their own build units, so Blink no longer links
@@ -331,4 +337,4 @@
 # the CI Blink report contains no ResponseLutsQ16 symbol. The local fbuild
 # symbol total remains ~4 KB higher for the same source (FastLED/fbuild#1456),
 # so this ratchet uses the CI measurement from PR #4511.
-367407
+359003

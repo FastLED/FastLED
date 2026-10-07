@@ -46,9 +46,9 @@ FL_EXTERN_C_END
 /// - **FIRST channel created**: Uses DMA (if data size warrants it)
 /// - **ALL subsequent channels**: MUST use non-DMA (on-chip memory)
 ///
-/// The hardware limitation is enforced by tracking `mDMAChannelsInUse`:
-/// - When mDMAChannelsInUse == 0: First channel can attempt DMA
-/// - When mDMAChannelsInUse >= 1: All channels must use non-DMA
+/// RmtMemoryManager owns the shared TX/RX DMA allocation ledger:
+/// - When isDMAAvailable() is true: A channel can attempt DMA
+/// - When isDMAAvailable() is false: Channels must use non-DMA
 ///
 /// This is NOT a software limitation - it's a hardware constraint of the
 /// ESP32-S3 RMT peripheral. Attempting to create multiple DMA channels
@@ -58,7 +58,7 @@ FL_EXTERN_C_END
 /// @code
 /// #if FASTLED_RMT5_DMA_SUPPORTED
 ///     // Platform supports RMT DMA (currently only ESP32-S3)
-///     if (mDMAChannelsInUse == 0) {
+///     if (RmtMemoryManager::instance().isDMAAvailable()) {
 ///         // First channel - can use DMA
 ///     } else {
 ///         // Subsequent channels - must use non-DMA

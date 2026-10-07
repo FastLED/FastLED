@@ -137,6 +137,11 @@ public:
         mPaddingGenerator = fl::move(generator);
     }
 
+    /// @brief Whether writing to a TX buffer applies a custom transformation.
+    bool hasPaddingGenerator() const FL_NO_EXCEPT {
+        return static_cast<bool>(mPaddingGenerator);
+    }
+
     /// @brief Write encoded data with padding to destination buffer
     ///
     /// This method separates the concern of data preparation from memory format.

@@ -496,7 +496,7 @@ private:
     fl::vector_inlined<PendingChannel, 16> mPendingChannels;
 
     /// @brief SPI host usage tracking (static for global coordination)
-    static fl::vector_inlined<SpiHostTracking, 3> sSpiHostUsage;
+    static fl::vector_inlined<SpiHostTracking, 3>& spiHostUsage();
 
     /// @brief Track allocation failures to avoid hammering the driver
     bool mAllocationFailed;

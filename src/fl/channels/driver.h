@@ -177,10 +177,10 @@ public:
         fl::string error;   ///< Error message (only populated when state == ERROR)
 
         /// @brief Construct from state only (no error)
-        DriverState(Value v) FL_NO_EXCEPT : state(v), error() {}
+        DriverState(Value v) FL_NO_EXCEPT;
 
         /// @brief Construct from state and error message
-        DriverState(Value v, const fl::string& e) FL_NO_EXCEPT : state(v), error(e) {}
+        DriverState(Value v, const fl::string& e) FL_NO_EXCEPT;
 
         /// @brief Implicit conversion to Value for backward compatibility
         operator Value() const FL_NO_EXCEPT { return state; }
@@ -311,8 +311,7 @@ protected:
     IChannelDriver(IChannelDriver&&) FL_NO_EXCEPT = delete;
     IChannelDriver& operator=(IChannelDriver&&) FL_NO_EXCEPT = delete;
 
-    template<typename Condition>
-    bool waitForCondition(Condition condition, u32 timeoutMs = 1000) FL_NO_EXCEPT;
+    bool waitForState(bool allowDraining, u32 timeoutMs) FL_NO_EXCEPT;
 };
 
 }  // namespace fl

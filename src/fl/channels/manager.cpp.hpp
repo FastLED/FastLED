@@ -446,8 +446,12 @@ fl::shared_ptr<IChannelDriver> ChannelManager::selectDriverForChannel(const Chan
 }
 
 
-template<typename Condition>
-bool ChannelManager::waitForCondition(Condition condition, u32 timeoutMs) {
+bool ChannelManager::waitForState(bool allowDraining, u32 timeoutMs) FL_NO_EXCEPT {
+    const auto condition = [this, allowDraining]() {
+        const auto state = poll().state;
+        return state == IChannelDriver::DriverState::READY ||
+               (allowDraining && state == IChannelDriver::DriverState::DRAINING);
+    };
     const u32 startTime = timeoutMs > 0 ? millis() : 0;
 
     // Tier 1: instant non-blocking check (avoid micros() / millis() cost on
@@ -521,7 +525,7 @@ IChannelDriver::DriverState ChannelManager::poll() {
     // Priority order: ERROR > BUSY > DRAINING > READY
     bool anyBusy = false;
     bool anyDraining = false;
-    fl::string firstError;
+    IChannelDriver::DriverState aggregate(IChannelDriver::DriverState::READY);
 
     for (auto& entry : mDrivers) {
         IChannelDriver::DriverState result = entry.driver->poll();
@@ -531,29 +535,23 @@ IChannelDriver::DriverState ChannelManager::poll() {
             anyDraining = true;
         }
         // Capture first error encountered
-        if (result.state == IChannelDriver::DriverState::ERROR && firstError.empty()) {
-            firstError = result.error;
+        if (result.state == IChannelDriver::DriverState::ERROR && aggregate.error.empty()) {
+            aggregate.error = fl::move(result.error);
         }
     }
 
-    // Return error if any driver reported error
-    if (!firstError.empty()) {
-        return IChannelDriver::DriverState(IChannelDriver::DriverState::ERROR, firstError);
+    if (!aggregate.error.empty()) {
+        aggregate.state = IChannelDriver::DriverState::ERROR;
+    } else if (anyBusy) {
+        aggregate.state = IChannelDriver::DriverState::BUSY;
+    } else if (anyDraining) {
+        aggregate.state = IChannelDriver::DriverState::DRAINING;
     }
-
-    if (anyBusy) {
-        return IChannelDriver::DriverState(IChannelDriver::DriverState::BUSY);
-    }
-    if (anyDraining) {
-        return IChannelDriver::DriverState(IChannelDriver::DriverState::DRAINING);
-    }
-    return IChannelDriver::DriverState(IChannelDriver::DriverState::READY);
+    return aggregate;
 }
 
 bool ChannelManager::waitForReady(u32 timeoutMs) {
-    bool ok = waitForCondition([this]() {
-        return poll().state == IChannelDriver::DriverState::READY;
-    }, timeoutMs);
+    bool ok = waitForState(false, timeoutMs);
     if (!ok) {
         FL_ERROR("ChannelManager: Timeout occurred while waiting for READY state");
     }
@@ -561,14 +559,7 @@ bool ChannelManager::waitForReady(u32 timeoutMs) {
 }
 
 bool ChannelManager::waitForReadyOrDraining(u32 timeoutMs) {
-    bool ok = waitForCondition([this]() {
-        auto state = poll();
-        bool draining_or_done = (
-            state.state == IChannelDriver::DriverState::READY ||
-            state.state == IChannelDriver::DriverState::DRAINING
-        );
-        return draining_or_done;
-    }, timeoutMs);
+    bool ok = waitForState(true, timeoutMs);
     if (!ok) {
         FL_ERROR("ChannelManager: Timeout occurred while waiting for READY or DRAINING state");
     }

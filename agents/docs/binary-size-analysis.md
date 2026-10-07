@@ -90,7 +90,7 @@ These are the gotchas the wrapper handles for you. They are documented here so t
 
 5. **`--nm` is still required.** fbuild's `build_info.json` does not yet carry toolchain paths (`nm_path` / `cppfilt_path`). The wrapper resolves them from the toolchain fbuild installed. fbuild issue #428 tracks the migration to build-info-driven resolution; when that lands, drop the explicit `--nm` path in `ci/bloat.py::run_fbuild_symbols`.
 
-6. **Diff two builds with the existing diff script.** Save two `report.json` files and run `uv run python .claude/symbolaudit/diff.py <old.json> <new.json>` for a per-symbol delta table (added / removed / grew / shrunk). The wrapper does NOT do this automatically; ship a follow-up PR if you need it inline.
+6. **Compare saved reports.** Save each build's `report.json` and `report.md` before rebuilding. Compare `image_flash` for whole-image changes and the per-archive and per-symbol rows for attribution. The former `.claude/symbolaudit/diff.py` helper is no longer in the tree; the wrapper does not generate a delta report automatically.
 
 ## Don'ts
 

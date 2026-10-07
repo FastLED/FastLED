@@ -1,11 +1,12 @@
 #include "fl/task/executor.h"
+#include "fl/task/task_pump.h"
+#include "fl/stl/atomic.h"
 #include "fl/stl/functional.h"
 #include "fl/stl/singleton.h"
 #include "fl/stl/scope_exit.h"
 #include "fl/stl/algorithm.h"
 #include "fl/task/task.h"
 #include "fl/stl/chrono.h"
-#include "fl/log/log.h"
 #include "fl/log/log.h"
 
 #include "fl/stl/new.h"
@@ -17,6 +18,25 @@ namespace task {
 
 namespace detail {
 
+namespace {
+fl::atomic<TaskPump>& schedulerPump() FL_NO_EXCEPT {
+    static fl::atomic<TaskPump> pump(nullptr);
+    return pump;
+}
+
+fl::atomic<TaskPump>& executorPump() FL_NO_EXCEPT {
+    static fl::atomic<TaskPump> pump(nullptr);
+    return pump;
+}
+} // namespace
+
+void set_scheduler_pump(TaskPump pump) FL_NO_EXCEPT {
+    schedulerPump().store(pump, fl::memory_order_release);
+}
+
+void set_executor_pump(TaskPump pump) FL_NO_EXCEPT {
+    executorPump().store(pump, fl::memory_order_release);
+}
 
 /// @brief Get reference to thread-local await recursion depth
 /// @return Reference to the thread-local await depth counter
@@ -26,7 +46,11 @@ int& await_depth_tls() {
 } // namespace detail
 
 Executor& Executor::instance() {
-    return fl::Singleton<Executor>::instance();
+    Executor& executor = fl::Singleton<Executor>::instance();
+    detail::set_executor_pump([]() {
+        fl::Singleton<Executor>::instance().update_all();
+    });
+    return executor;
 }
 
 void Executor::register_runner(Runner* r) {
@@ -72,7 +96,19 @@ size_t Executor::total_active_tasks() const {
 
 // Public API functions
 
-void run(fl::u32 microseconds, ExecFlags flags) {
+namespace detail {
+
+void pump_tasks() FL_NO_EXCEPT {
+    if (auto pump = schedulerPump().load(fl::memory_order_acquire)) {
+        pump();
+    }
+    // A timer callback may have registered the first executor runner above.
+    if (auto pump = executorPump().load(fl::memory_order_acquire)) {
+        pump();
+    }
+}
+
+void run_impl(fl::u32 microseconds, ExecFlags flags, void (*pump)()) FL_NO_EXCEPT {
     // Re-entrancy guard: detect if run is called from within run
     bool& running = SingletonThreadLocal<bool>::instance();
     if (running) {
@@ -82,7 +118,6 @@ void run(fl::u32 microseconds, ExecFlags flags) {
     running = true;
     auto guard = fl::make_scope_exit([&running]() { running = false; });
 
-    const bool do_tasks = flags & ExecFlags::TASKS;
     const bool do_coroutines = flags & ExecFlags::COROUTINES;
     const bool do_system = flags & ExecFlags::SYSTEM;
 
@@ -110,9 +145,8 @@ void run(fl::u32 microseconds, ExecFlags flags) {
 
     do  {
         // TASKS: Scheduler (fl::task timers) + Executor (fetch, HTTP server, audio)
-        if (do_tasks) {
-            Scheduler::instance().update();
-            Executor::instance().update_all();
+        if (pump) {
+            pump();
         }
 
         // SYSTEM: OS-level yield.
@@ -167,6 +201,8 @@ void run(fl::u32 microseconds, ExecFlags flags) {
         }
     } while (!expired());
 }
+
+} // namespace detail
 
 size_t active_tasks() {
     return Executor::instance().total_active_tasks();

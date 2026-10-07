@@ -41,6 +41,7 @@
 #include "fl/task/executor.h"
 #include "fl/log/log.h"
 #include "fl/stl/chrono.h"
+#include "fl/stl/singleton.h"
 #include "platforms/esp/32/drivers/spi/spi_hw_base.h" // SPI host definitions (SPI2_HOST, SPI3_HOST)
 #include "platforms/esp/is_esp.h" // Platform detection (FL_IS_ESP_32C6, etc.)
 #include "fl/stl/noexcept.h"
@@ -84,9 +85,11 @@ FL_EXTERN_C_END
 
 namespace fl {
 
-// Static member initialization
-vector_inlined<ChannelEngineSpi::SpiHostTracking, 3>
-    ChannelEngineSpi::sSpiHostUsage;
+vector_inlined<ChannelEngineSpi::SpiHostTracking, 3>&
+ChannelEngineSpi::spiHostUsage() {
+    // Driver destructors may release hosts during static teardown.
+    return fl::Singleton<vector_inlined<SpiHostTracking, 3>>::instance();
+}
 
 namespace {
 
@@ -1152,7 +1155,7 @@ spi_host_device_t ChannelEngineSpi::acquireSpiHost() FL_NO_EXCEPT {
 
         // Find or create tracking entry
         SpiHostTracking *tracking = nullptr;
-        for (auto &entry : sSpiHostUsage) {
+        for (auto &entry : spiHostUsage()) {
             if (entry.host == host) {
                 tracking = &entry;
                 break;
@@ -1166,8 +1169,8 @@ spi_host_device_t ChannelEngineSpi::acquireSpiHost() FL_NO_EXCEPT {
             newTracking.refCount = 0;
             newTracking.initialized = false;
             newTracking.activeLanes = 0; // No lanes in use yet
-            sSpiHostUsage.push_back(newTracking);
-            tracking = &sSpiHostUsage.back();
+            spiHostUsage().push_back(newTracking);
+            tracking = &spiHostUsage().back();
         }
 
         // ESP32 SPI limitation: Each host can only have one bus configuration
@@ -1193,7 +1196,7 @@ spi_host_device_t ChannelEngineSpi::acquireSpiHost() FL_NO_EXCEPT {
 }
 
 void ChannelEngineSpi::releaseSpiHost(spi_host_device_t host) FL_NO_EXCEPT {
-    for (auto &entry : sSpiHostUsage) {
+    for (auto &entry : spiHostUsage()) {
         if (entry.host == host) {
             if (entry.refCount > 0) {
                 entry.refCount--;

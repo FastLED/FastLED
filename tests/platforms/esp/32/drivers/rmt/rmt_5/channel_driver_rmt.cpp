@@ -26,6 +26,9 @@
 #include "fl/channels/config.h"
 #include "fl/channels/driver.h"
 #include "fl/stl/vector.h"
+#include "fl/stl/bit_cast.h"
+#include "fl/stl/span.h"
+#include "fl/stl/weak_ptr.h"
 #include "test.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
@@ -97,6 +100,25 @@ void resetMock() {
     mock.reset();
 }
 
+// Downstream drivers can still derive from the public RMT interface and
+// publish pin groups for the inherited general capability matcher.
+class MetadataRmtDriver : public ChannelEngineRMT {
+public:
+    MetadataRmtDriver() FL_NO_EXCEPT {
+        mGroup.data_pins = PinSet::anyOutput();
+    }
+    bool canHandle(const ChannelDataPtr&) const FL_NO_EXCEPT override { return true; }
+    void enqueue(ChannelDataPtr) FL_NO_EXCEPT override {}
+    void show() FL_NO_EXCEPT override {}
+    DriverState poll() FL_NO_EXCEPT override { return DriverState::READY; }
+    void setPollNeededCallback(PollNeededCallback) FL_NO_EXCEPT override {}
+    fl::span<const PinGroup> getPinGroups() const FL_NO_EXCEPT override {
+        return fl::span<const PinGroup>(&mGroup, 1);
+    }
+private:
+    PinGroup mGroup;
+};
+
 } // anonymous namespace
 
 //=============================================================================
@@ -111,6 +133,25 @@ FL_TEST_CASE("RMT5 driver - create and destroy") {
 
     // Initial state should be READY
     FL_CHECK(driver->poll() == DriverState::READY);
+}
+
+FL_TEST_CASE("RMT5 factory matching preserves empty metadata and public extensions") {
+    resetMock();
+    auto driver = ChannelEngineRMT::create();
+    FL_REQUIRE(driver != nullptr);
+    const auto caps = driver->getDriverCapabilities();
+    FL_CHECK(caps.supports_clockless);
+    FL_CHECK_FALSE(caps.supports_spi);
+    FL_CHECK(driver->getPinGroups().empty());
+
+    const auto clockless = ChannelRequest::singlePin(Protocol::Clockless, 4, -1);
+    const auto spi = ChannelRequest::singlePin(Protocol::Spi, 4, 5);
+    FL_CHECK(driver->canMatch(clockless) == HandleResult::NoPin);
+    FL_CHECK(driver->canMatch(spi) == HandleResult::NoProtocol);
+
+    MetadataRmtDriver extension;
+    FL_CHECK(extension.canMatch(clockless) == HandleResult::Yes);
+    FL_CHECK(extension.canMatch(spi) == HandleResult::NoProtocol);
 }
 
 FL_TEST_CASE("RMT5 driver - single channel transmission") {
@@ -359,6 +400,46 @@ FL_TEST_CASE("RMT5 driver - failed strip setup does not drop a valid strip") {
     FL_CHECK(driver->poll() == DriverState::READY);
 }
 
+FL_TEST_CASE("RMT5 driver - repeated reconfiguration failures reuse empty slots") {
+    resetMock();
+    auto& mock = Rmt5PeripheralMock::instance();
+    mock.setMaxChannels(2);
+    auto driver = ChannelEngineRMT::create();
+    auto first = createChannelData(18, 10);
+    auto second = createChannelData(19, 5);
+    auto invalid = createChannelData(-1, 1);
+
+    // Each invalid-pin frame destroys an idle channel and leaves an empty
+    // state slot. Repeating this beyond the inline capacity must not move
+    // live channel states while their ISR callbacks still refer to them.
+    for (int frame = 0; frame < 24; ++frame) {
+        driver->enqueue(first);
+        driver->enqueue(second);
+        driver->show();
+        FL_CHECK_EQ(mock.getChannelCount(), 2u);
+        FL_CHECK_EQ(mock.getTransmissionCount(),
+                    static_cast<size_t>((frame + 1) * 2));
+
+        // The unaffected strip keeps its hardware handle; only the failed
+        // slot is recreated. Complete the handles actually used this frame.
+        const auto& history = mock.getTransmissionHistory();
+        mock.simulateTransmitDone(fl::int_to_ptr<void>(
+            history[frame * 2].channel_address));
+        mock.simulateTransmitDone(fl::int_to_ptr<void>(
+            history[frame * 2 + 1].channel_address));
+        FL_REQUIRE(driver->poll() == DriverState::READY);
+        FL_CHECK_FALSE(first->isInUse());
+        FL_CHECK_FALSE(second->isInUse());
+
+        driver->enqueue(invalid);
+        driver->show();
+        FL_REQUIRE(driver->poll() == DriverState::READY);
+        FL_CHECK_FALSE(invalid->isInUse());
+        FL_CHECK_EQ(mock.getChannelCount(), 1u);
+        FL_CHECK_EQ(mock.getEncoderCount(), 1u);
+    }
+}
+
 FL_TEST_CASE("RMT5 driver - strips beyond channel limit wait for a free channel") {
     resetMock();
     auto& mock = Rmt5PeripheralMock::instance();
@@ -391,29 +472,183 @@ FL_TEST_CASE("RMT5 driver - strips beyond channel limit wait for a free channel"
     mock.setMaxChannels(0);
 }
 
-// TODO: Re-enable after fixing driver failure handling
-// FL_TEST_CASE("RMT5 driver - handle transmission failure") {
-//     resetMock();
-//     auto& mock = Rmt5PeripheralMock::instance();
-//     auto driver = ChannelEngineRMT::create();
+FL_TEST_CASE("RMT5 driver - many logical strips spill and reuse one hardware channel") {
+    resetMock();
+    auto& mock = Rmt5PeripheralMock::instance();
+    mock.setMaxChannels(1);
+    auto driver = ChannelEngineRMT::create();
+    fl::vector<ChannelDataPtr> channels;
+    for (int pin = 18; pin < 38; ++pin) {
+        channels.push_back(createChannelData(pin, 1));
+        driver->enqueue(channels.back());
+    }
+    driver->show();
+    FL_CHECK_EQ(mock.getChannelCount(), 1u);
 
-//     // Inject failure
-//     mock.setTransmitFailure(true);
+    for (size_t handle = 1; handle <= channels.size(); ++handle) {
+        FL_CHECK_EQ(mock.getTransmissionCount(), handle);
+        mock.simulateTransmitDone(reinterpret_cast<void*>(handle));
+        const auto state = driver->poll();
+        FL_CHECK(state == (handle == channels.size() ?
+                           DriverState::READY : DriverState::BUSY));
+    }
+    FL_CHECK_EQ(mock.getTransmissionCount(), channels.size());
+    for (const auto& channel : channels) {
+        FL_CHECK_FALSE(channel->isInUse());
+    }
+    mock.setMaxChannels(0);
+}
 
-//     auto ch = createChannelData(18, 1);
-//     driver->enqueue(ch);
-//     driver->show();
+FL_TEST_CASE("RMT5 driver - direct and pooled sources survive until completion") {
+    for (int direct = 0; direct < 2; ++direct) {
+        resetMock();
+        auto& mock = Rmt5PeripheralMock::instance();
+        mock.setDirectTransmission(direct != 0);
+        auto driver = ChannelEngineRMT::create();
+        const uint8_t pixels[] = {10, 20, 30};
+        auto channel = createChannelData(18, 1, pixels);
+        fl::span<const u8> source = channel->getData();
+        const auto sourceAddress = fl::ptr_to_int(source.data());
+        fl::weak_ptr<ChannelData> lifetime(channel);
 
-//     // Engine should handle failure gracefully (no crash)
-//     auto state = driver->poll();
-//     (void)state; // May be READY or ERROR depending on implementation
+        driver->enqueue(channel);
+        driver->show();
+        FL_CHECK(channel->isInUse());
+        FL_REQUIRE_EQ(mock.getTransmissionCount(), 1u);
+        const auto& record = mock.getTransmissionHistory().back();
+        FL_REQUIRE_EQ(record.buffer_copy.size(), 3u);
+        if (direct) {
+            FL_CHECK_EQ(record.buffer_address, sourceAddress);
+        } else {
+            FL_CHECK_NE(record.buffer_address, sourceAddress);
+        }
+        FL_CHECK_EQ(record.buffer_copy[0], 20);
+        FL_CHECK_EQ(record.buffer_copy[1], 10);
+        FL_CHECK_EQ(record.buffer_copy[2], 30);
 
-//     // Disable failure for next test
-//     mock.setTransmitFailure(false);
+        // The engine must retain the original source after its caller lets go.
+        channel.reset();
+        FL_CHECK_FALSE(lifetime.expired());
+        mock.simulateTransmitDone(reinterpret_cast<void*>(1));
+        FL_REQUIRE(driver->poll() == DriverState::READY);
+        FL_CHECK(lifetime.expired());
+    }
+}
 
-//     // Note: The channel may be in an error state and stuck BUSY.
-//     // The driver destructor has a timeout to handle this gracefully.
-// }
+FL_TEST_CASE("RMT5 driver - custom padding generator retains pooled transformation") {
+    resetMock();
+    auto& mock = Rmt5PeripheralMock::instance();
+    mock.setDirectTransmission(true);
+    auto driver = ChannelEngineRMT::create();
+    const uint8_t pixels[] = {10, 20, 30};
+    auto channel = createChannelData(18, 1, pixels);
+    channel->setPaddingGenerator([](fl::span<const u8> src,
+                                    fl::span<u8> dst) FL_NO_EXCEPT {
+        for (size_t i = 0; i < src.size(); ++i) {
+            dst[i] = static_cast<u8>(src[i] ^ 0xff);
+        }
+    });
+    fl::span<const u8> source = channel->getData();
+    const auto sourceAddress = fl::ptr_to_int(source.data());
+    driver->enqueue(channel);
+    driver->show();
+    FL_REQUIRE_EQ(mock.getTransmissionCount(), 1u);
+    const auto& record = mock.getTransmissionHistory().back();
+    FL_REQUIRE_EQ(record.buffer_copy.size(), 3u);
+    FL_CHECK_NE(record.buffer_address, sourceAddress);
+    FL_CHECK_EQ(record.buffer_copy[0], 235);
+    FL_CHECK_EQ(record.buffer_copy[1], 245);
+    FL_CHECK_EQ(record.buffer_copy[2], 225);
+    mock.simulateTransmitDone(reinterpret_cast<void*>(1));
+    FL_CHECK(driver->poll() == DriverState::READY);
+    FL_CHECK_FALSE(channel->isInUse());
+}
+
+FL_TEST_CASE("RMT5 driver - direct and pooled failures release frame and retry") {
+    for (int direct = 0; direct < 2; ++direct) {
+        for (int failure = 0; failure < 3; ++failure) {
+            resetMock();
+            auto& mock = Rmt5PeripheralMock::instance();
+            mock.setDirectTransmission(direct != 0);
+            mock.setEnableFailure(failure == 0);
+            mock.setResetFailure(failure == 1);
+            mock.setTransmitFailure(failure == 2);
+            auto driver = ChannelEngineRMT::create();
+            auto channel = createChannelData(18, 1);
+            driver->enqueue(channel);
+            driver->show();
+            const auto state = driver->poll();
+            FL_CHECK(state == DriverState::READY);
+            FL_CHECK_FALSE(channel->isInUse());
+            FL_CHECK_EQ(mock.getTransmissionCount(), 0u);
+
+            mock.setEnableFailure(false);
+            mock.setResetFailure(false);
+            mock.setTransmitFailure(false);
+            // Do not enter show()'s wait loop if this regression is present.
+            if (state == DriverState::READY) {
+                driver->enqueue(channel);
+                driver->show();
+                FL_CHECK_EQ(mock.getTransmissionCount(), 1u);
+                mock.simulateTransmitDone(reinterpret_cast<void*>(1));
+                FL_CHECK(driver->poll() == DriverState::READY);
+                FL_CHECK_FALSE(channel->isInUse());
+            }
+        }
+    }
+}
+
+FL_TEST_CASE("RMT5 driver - same-pin encoder failure rolls back and retries") {
+    resetMock();
+    auto& mock = Rmt5PeripheralMock::instance();
+    auto driver = ChannelEngineRMT::create();
+    auto original = createChannelData(18, 1);
+    driver->enqueue(original);
+    driver->show();
+    mock.simulateTransmitDone(reinterpret_cast<void*>(1));
+    FL_REQUIRE(driver->poll() == DriverState::READY);
+
+    auto changed = ChannelData::create(
+        18, ChipsetTimingConfig(400, 450, 450, 50, "changed"));
+    changed->getData().resize(3);
+    mock.setEncoderFailure(true);
+    driver->enqueue(changed);
+    driver->show();
+    FL_CHECK(driver->poll() == DriverState::READY);
+    FL_CHECK_FALSE(changed->isInUse());
+    FL_CHECK_EQ(mock.getChannelCount(), 0u);
+    FL_CHECK_EQ(mock.getEncoderCount(), 0u);
+
+    mock.setEncoderFailure(false);
+    driver->enqueue(changed);
+    driver->show();
+    FL_CHECK_EQ(mock.getTransmissionCount(), 2u);
+    mock.simulateTransmitDone(reinterpret_cast<void*>(2));
+    FL_CHECK(driver->poll() == DriverState::READY);
+    FL_CHECK_FALSE(changed->isInUse());
+}
+
+FL_TEST_CASE("RMT5 driver - callback registration failure releases encoder") {
+    resetMock();
+    auto& mock = Rmt5PeripheralMock::instance();
+    auto driver = ChannelEngineRMT::create();
+    auto channel = createChannelData(18, 1);
+    mock.setCallbackFailure(true);
+    driver->enqueue(channel);
+    driver->show();
+    FL_CHECK(driver->poll() == DriverState::READY);
+    FL_CHECK_FALSE(channel->isInUse());
+    FL_CHECK_EQ(mock.getChannelCount(), 0u);
+    FL_CHECK_EQ(mock.getEncoderCount(), 0u);
+
+    mock.setCallbackFailure(false);
+    driver->enqueue(channel);
+    driver->show();
+    FL_CHECK_EQ(mock.getTransmissionCount(), 1u);
+    mock.simulateTransmitDone(reinterpret_cast<void*>(2));
+    FL_CHECK(driver->poll() == DriverState::READY);
+    FL_CHECK_FALSE(channel->isInUse());
+}
 
 //=============================================================================
 // Test Suite: Edge Cases

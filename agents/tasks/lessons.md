@@ -488,3 +488,6 @@
   follow-up was a Python cache test that assumed the new Linux linker
   environment variable was absent. Run cache tests with the CI environment
   set as well as locally with defaults.
+- Investigate library size regressions with existing minimal examples under identical
+  build settings. Do not require the reporter's full sketch before removing library
+  bloat; use a supplied minimal reproducer as additional validation.

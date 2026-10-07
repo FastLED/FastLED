@@ -6,6 +6,7 @@
 #include "fl/stl/asio/http/server.h"
 #include "fl/stl/stdio.h"  // fl::snprintf — avoids _svfprintf_r (#2773 item 1.1)
 #include "fl/stl/atomic.h"
+#include "fl/stl/singleton.h"
 #include "fl/task/executor.h"
 #include "platforms/esp/is_esp.h"  // ok platform headers - for FL_IS_ESP32  // IWYU pragma: keep
 
@@ -948,7 +949,10 @@ string Response::to_string() const {
 // members (mListenSocket, mClientSockets) are typed for POSIX sockets.
 // FL_LINT_ALLOW_GLOBAL(constant-initialized ESP-IDF server handle; Singleton<T> adds pointer storage and a branch without improving linker elision)
 static httpd_handle_t s_esp_httpd = nullptr;
-static fl::vector<fl::unique_ptr<EspRouteContext>> s_esp_route_contexts;
+static fl::vector<fl::unique_ptr<EspRouteContext>>& espRouteContexts() {
+    // Global servers may stop during static teardown, so keep storage alive.
+    return fl::Singleton<fl::vector<fl::unique_ptr<EspRouteContext>>>::instance();
+}
 
 Server::Server() {
     EngineEvents::addListener(this);
@@ -1023,12 +1027,12 @@ bool Server::start(int port) {
             FL_WARN("[HTTP] Failed to register route " << mRoutes[i].path.c_str() << ": " << esp_err_to_name(reg_err));
             httpd_stop(s_esp_httpd);
             s_esp_httpd = nullptr;
-            s_esp_route_contexts.clear();
+            espRouteContexts().clear();
             task::Executor::instance().unregister_runner(mAsyncRunner.get());
             mAsyncRunner.reset();
             return false;
         }
-        s_esp_route_contexts.push_back(fl::move(ctx));
+        espRouteContexts().push_back(fl::move(ctx));
     }
 
     mPort = port;
@@ -1055,7 +1059,7 @@ void Server::stop() {
     }
 
     // Clean up route contexts (unique_ptr auto-deletes on clear)
-    s_esp_route_contexts.clear();
+    espRouteContexts().clear();
 
     // Free route handlers
     mRoutes.clear();
@@ -1079,7 +1083,7 @@ void Server::route(const string& method, const string& path, RouteHandler handle
         uri_handler.user_ctx = ctx.get();
 
         httpd_register_uri_handler(s_esp_httpd, &uri_handler);
-        s_esp_route_contexts.push_back(fl::move(ctx));
+        espRouteContexts().push_back(fl::move(ctx));
     }
 }
 

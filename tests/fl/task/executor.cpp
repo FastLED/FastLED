@@ -79,6 +79,76 @@ FL_TEST_CASE("fl::task::Runner interface") {
     }
 }
 
+FL_TEST_CASE("fl::task::run preserves runtime subsystem selection") {
+    TestAsyncRunner runner;
+    Executor& executor = Executor::instance();
+    executor.register_runner(&runner);
+
+    // Exercise flags chosen at runtime as well as a SYSTEM-only call whose
+    // compile-time flags must not retain the task scheduler in firmware.
+    run(0, fl::task::ExecFlags::SYSTEM);
+    FL_CHECK_EQ(runner.update_count, 0);
+    void (*pump)(fl::u32, fl::task::ExecFlags) = &run;
+    int expected = 0;
+    for (fl::u8 bits = 0; bits < 8; ++bits) {
+        const auto flags = static_cast<fl::task::ExecFlags>(bits);
+        pump(0, flags);
+        if (flags & fl::task::ExecFlags::TASKS) {
+            ++expected;
+        }
+        FL_CHECK_EQ(runner.update_count, expected);
+    }
+    executor.unregister_runner(&runner);
+}
+
+FL_TEST_CASE("task pump sees runner registration during timer dispatch") {
+    Scheduler::instance().clear_all_tasks();
+    TestAsyncRunner runner;
+    auto timer = fl::task::every_ms(0).then([&runner]() {
+        Executor::instance().register_runner(&runner);
+    });
+
+    run(0, fl::task::ExecFlags::TASKS);
+    // Scheduler runs first, so the newly registered runner is pumped now.
+    FL_CHECK_EQ(runner.update_count, 1);
+
+    timer.cancel();
+    Scheduler::instance().clear_all_tasks();
+    Executor::instance().unregister_runner(&runner);
+}
+
+FL_TEST_CASE("task pump sees timer registration during runner dispatch") {
+    Scheduler::instance().clear_all_tasks();
+    int timer_count = 0;
+    fl::task::Handle timer;
+    class RegisteringRunner : public Runner {
+    public:
+        RegisteringRunner(fl::task::Handle& handle, int& count)
+            : mHandle(handle), mCount(count) {}
+        void update() override {
+            if (!mHandle.is_valid()) {
+                mHandle = fl::task::every_ms(0).then([this]() { ++mCount; });
+            }
+        }
+        bool has_active_tasks() const override { return true; }
+        size_t active_task_count() const override { return 1; }
+    private:
+        fl::task::Handle& mHandle;
+        int& mCount;
+    } runner(timer, timer_count);
+    Executor::instance().register_runner(&runner);
+
+    run(0, fl::task::ExecFlags::TASKS);
+    // Executor runs after Scheduler, so this timer starts on the next pump.
+    FL_CHECK_EQ(timer_count, 0);
+    run(0, fl::task::ExecFlags::TASKS);
+    FL_CHECK_EQ(timer_count, 1);
+
+    timer.cancel();
+    Scheduler::instance().clear_all_tasks();
+    Executor::instance().unregister_runner(&runner);
+}
+
 FL_TEST_CASE("fl::task::Executor") {
     FL_SUBCASE("singleton instance") {
         Executor& mgr1 = Executor::instance();

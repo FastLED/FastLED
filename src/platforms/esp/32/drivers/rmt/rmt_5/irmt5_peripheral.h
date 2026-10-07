@@ -50,6 +50,7 @@
 #include "fl/stl/stdint.h"
 #include "fl/stl/cstddef.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/span.h"
 
 namespace fl {
 
@@ -152,7 +153,7 @@ struct Rmt5ChannelConfig {
 ///
 /// // Start transmission
 /// peripheral.enableChannel(channel_handle);
-/// peripheral.transmit(channel_handle, encoder, buffer, size);
+/// peripheral.transmit(channel_handle, encoder, buffer);
 ///
 /// // Wait for completion
 /// peripheral.waitAllDone(channel_handle, timeout_ms);
@@ -229,7 +230,6 @@ public:
     /// @param channel_handle Channel handle from createTxChannel()
     /// @param encoder_handle Encoder handle from createEncoder()
     /// @param buffer Pixel data buffer (RGB/GRB bytes)
-    /// @param buffer_size Size of buffer in bytes
     /// @return true on success, false on error
     ///
     /// Maps to ESP-IDF: rmt_transmit()
@@ -241,7 +241,7 @@ public:
     /// The encoder performs the pixel-to-waveform conversion. The peripheral
     /// will trigger the TX done callback when transmission completes.
     virtual bool transmit(void* channel_handle, void* encoder_handle,
-                          const u8* buffer, size_t buffer_size) FL_NO_EXCEPT = 0;
+                          fl::span<const u8> buffer) FL_NO_EXCEPT = 0;
 
     /// @brief Wait for all queued transmissions to complete
     /// @param channel_handle Channel handle from createTxChannel()
@@ -358,7 +358,6 @@ public:
 
     /// @brief Synchronize CPU cache to memory for DMA buffer
     /// @param buffer Pointer to buffer to sync
-    /// @param size Size of buffer in bytes
     /// @return true on success, false on error
     ///
     /// Maps to ESP-IDF: esp_cache_msync() with memory barriers
@@ -374,7 +373,14 @@ public:
     ///
     /// Even if cache sync fails, memory barriers ensure write ordering.
     /// Errors are logged but non-fatal.
-    virtual bool syncCache(void* buffer, size_t size) FL_NO_EXCEPT = 0;
+    virtual bool syncCache(fl::span<u8> buffer) FL_NO_EXCEPT = 0;
+
+    /// @brief Whether a non-DMA TX can read this source without an internal copy.
+    /// Host peripherals default to the pooled-buffer path.
+    virtual bool canTransmitDirectly(const void* buffer) const FL_NO_EXCEPT {
+        (void)buffer;
+        return false;
+    }
 
     //=========================================================================
     // DMA Memory Management
