@@ -135,6 +135,7 @@ fl::u32 Watchdog::bootGuardCount() const FL_NO_EXCEPT {
 
 void Watchdog::markBootHealthy() FL_NO_EXCEPT {
     platforms::watchdogBootGuardWrite(0);
+    platforms::watchdogBootGuardReleaseEarlyTimer();
 }
 
 ResetInfo Watchdog::lastResetInfo() const FL_NO_EXCEPT {

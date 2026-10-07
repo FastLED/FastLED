@@ -12,6 +12,7 @@ namespace platforms {
 
 fl::u32 watchdogBootGuardRead() FL_NO_EXCEPT { return 0; }
 void    watchdogBootGuardWrite(fl::u32 /*boots*/) FL_NO_EXCEPT {}
+void    watchdogBootGuardReleaseEarlyTimer() FL_NO_EXCEPT {}
 
 } // namespace platforms
 } // namespace fl

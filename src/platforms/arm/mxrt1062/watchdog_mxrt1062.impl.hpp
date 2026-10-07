@@ -29,8 +29,9 @@
 /// (`CS.PRES`) so each TOVAL count is 8 ms. Max TOVAL is 0xFFFF → 524 sec
 /// ceiling. We clamp `FL_WATCHDOG_MAX_TIMEOUT_MS` to 120 s for sanity.
 ///
-/// Reset cause from `SRC_SRSR`. Persist storage is in-RAM only; Phase 3 can
-/// move it to the OCRAM2 retained region above `CrashReport` at `0x2027FF80`.
+/// Reset cause from `SRC_SRSR`. Persist storage is in-RAM only. The
+/// consecutive crash count and the boot-guard count live in the
+/// reset-persistent OCRAM record of `watchdog_boot_guard_mxrt1062.h`.
 
 #include "fl/wdt/watchdog.h"
 #include "fl/wdt/boot_guard.h"  // OCRAM boot-guard record, _reboot_Teensyduino_()
@@ -61,11 +62,12 @@ static constexpr fl::u32 kRtwdogRefreshKey = 0xB480A602u;
 
 struct Mxrt1062WatchdogState {
     fl::u8     persist[FL_WATCHDOG_PERSIST_BYTES] = {0};
-    fl::u16    crash_count = 0;
     bool       armed = false;
     fl::u32    armed_timeout_ms = 0;
     ResetCause cached_cause = ResetCause::UNKNOWN;
     bool       cause_cached = false;
+    fl::u32    image_key = 0;
+    bool       image_key_cached = false;
 };
 
 inline Mxrt1062WatchdogState& mxrt1062WatchdogState() {
@@ -88,21 +90,49 @@ inline ResetCause translateSrcSrsr(fl::u32 srsr) {
     return ResetCause::UNKNOWN;
 }
 
-// Boot-guard counter (fl/wdt/boot_guard.h) in the reset-persistent OCRAM
-// record that FL_WATCHDOG_BOOT_GUARD's startup_early_hook maintains.
-fl::u32 watchdogBootGuardRead() FL_NO_EXCEPT {
-    return bootGuardDecode(mxrt1062BootGuardRecord());
+inline fl::u32 mxrt1062ImageKey() {
+    auto& s = mxrt1062WatchdogState();
+    if (!s.image_key_cached) {
+        s.image_key = mxrt1062BootGuardImageKey();
+        s.image_key_cached = true;
+    }
+    return s.image_key;
 }
 
-void watchdogBootGuardWrite(fl::u32 boots) FL_NO_EXCEPT {
-    // Only touch the record when FL_WATCHDOG_BOOT_GUARD wrote one this boot
-    // (it always stores boots >= 1). Without the guard, this address may be
-    // live heap and must not be written.
-    if (bootGuardDecode(mxrt1062BootGuardRecord()) == 0) return;
-    bootGuardEncode(mxrt1062BootGuardRecord(), boots);
+// Store both counts in the reset-persistent OCRAM record, unless the heap has
+// grown over it (see kMxrt1062BootGuardAddr).
+inline void mxrt1062StoreRecord(fl::u32 boots, fl::u32 crashes) {
+    if (!mxrt1062BootGuardWritable()) return;
+    bootGuardStore(mxrt1062BootGuardRecord(), mxrt1062ImageKey(), boots, crashes);
     // OCRAM is write-back cached after configure_cache(); push the record
     // out so a reset right after this still sees it.
     arm_dcache_flush_delete(reinterpret_cast<void*>(kMxrt1062BootGuardAddr), 32);  // ok reinterpret cast - fixed OCRAM address
+}
+
+inline fl::u32 mxrt1062StoredCrashes() {
+    return bootGuardDecodeCrashes(mxrt1062BootGuardRecord(), mxrt1062ImageKey());
+}
+
+// Boot-guard counter (fl/wdt/boot_guard.h) in the reset-persistent OCRAM
+// record that FL_WATCHDOG_BOOT_GUARD's startup_early_hook maintains. Same
+// semantics as every platform: a write always stores (bootGuardEncode).
+fl::u32 watchdogBootGuardRead() FL_NO_EXCEPT {
+    return bootGuardDecode(mxrt1062BootGuardRecord(), mxrt1062ImageKey());
+}
+
+void watchdogBootGuardWrite(fl::u32 boots) FL_NO_EXCEPT {
+    mxrt1062StoreRecord(boots, mxrt1062StoredCrashes());
+}
+
+// WDOG3 runs with the sketch never having called begin(): the early timer
+// of FL_WATCHDOG_BOOT_GUARD. Turn it off. With the WDOG3 clock gate off,
+// nothing configured WDOG3 since reset (the ROM leaves it disabled), so
+// there is nothing to do and its registers must not be touched.
+void watchdogBootGuardReleaseEarlyTimer() FL_NO_EXCEPT {
+    if (mxrt1062WatchdogState().armed) return;  // the sketch owns it
+    if ((CCM_CCGR5 & CCM_CCGR5_WDOG3(3)) == 0) return;
+    if (!(WDOG3_CS & WDOG_CS_EN)) return;
+    Watchdog::instance().disable();
 }
 
 } // namespace platforms
@@ -127,6 +157,10 @@ inline void mxrt1062PrintBootDiagnosticOnce() {
     static bool sPrinted = false;  // okay static in header — single-TU `.impl.hpp`
     if (sPrinted) return;
     sPrinted = true;
+
+    // Latch the reset cause (and count a watchdog reset) before the W1C below
+    // clears SRC_SRSR, or lastResetCause() would only ever see UNKNOWN.
+    (void)Watchdog::instance().lastResetCause();
 
     const fl::u32 srsr = SRC_SRSR;
     Serial.print("[FastLED.watchdog] SRC_SRSR = 0x");  // ok serial - platform-specific boot diagnostic
@@ -258,45 +292,22 @@ void Watchdog::feed() FL_NO_EXCEPT {
 }
 
 void Watchdog::disable() FL_NO_EXCEPT {
-    // RTWDOG can be re-configured with CS.EN=0 via the unlock sequence as
-    // long as CS.UPDATE was 1 in the previous config (which our begin()
-    // always sets). Run the same unlock-then-CS pattern as begin() but
-    // write CS with EN=0.
     // Always reconfigure, even if begin() never ran: FL_WATCHDOG_BOOT_GUARD
-    // arms WDOG3 in startup_early_hook, before this state exists.
-    auto& s = platforms::mxrt1062WatchdogState();
-
-    // Save+restore PRIMASK so callers that already had IRQs off aren't
-    // surprised by them coming back on.
+    // arms WDOG3 in startup_early_hook, before this state exists. The helper
+    // enables the CCM_CCGR5 WDOG3 clock gate first, as begin() does: WDOG3
+    // register accesses with the gate off can bus-fault (imxrt.h: "WDOG3
+    // requires CCM_CCGR5_WDOG3"). RTWDOG accepts the EN=0 reconfigure because
+    // every config we write keeps CS.UPDATE set.
+    //
+    // Save+restore PRIMASK so the unlock window cannot be interrupted and
+    // callers that already had IRQs off aren't surprised by them coming on.
     fl::u32 primask;
     __asm__ volatile ("mrs %0, primask" : "=r" (primask));
     __asm__ volatile ("cpsid i" ::: "memory");
-
-    WDOG3_CNT = platforms::kRtwdogUnlockKey;
-    {
-        fl::u32 spin = 0;
-        while (!(WDOG3_CS & WDOG_CS_ULK)) {
-            if (++spin > 1000000u) {
-                __asm__ volatile ("msr primask, %0" :: "r" (primask) : "memory");
-                return;
-            }
-        }
-    }
-
-    WDOG3_TOVAL = 0xFFFFu;
-    WDOG3_WIN   = 0;
-    // EN = 0 → disable. Keep CMD32EN + UPDATE so a future begin() can re-arm.
-    WDOG3_CS = WDOG_CS_CMD32EN | WDOG_CS_UPDATE | WDOG_CS_CLK(1);
-
-    {
-        fl::u32 spin = 0;
-        while (!(WDOG3_CS & WDOG_CS_RCS)) {
-            if (++spin > 1000000u) break;
-        }
-    }
-
+    platforms::mxrt1062BootGuardConfigureWdog3(false, 0);
     __asm__ volatile ("msr primask, %0" :: "r" (primask) : "memory");
 
+    auto& s = platforms::mxrt1062WatchdogState();
     s.armed = false;
     s.armed_timeout_ms = 0;
 }
@@ -309,8 +320,12 @@ ResetCause Watchdog::lastResetCause() const FL_NO_EXCEPT {
         // boot only sees its own cause.
         SRC_SRSR = SRC_SRSR;
         s.cause_cached = true;
-        if (s.cached_cause == ResetCause::WATCHDOG && s.crash_count < 0xFFFF) {
-            s.crash_count++;
+        if (s.cached_cause == ResetCause::WATCHDOG) {
+            const fl::u32 crashes = platforms::mxrt1062StoredCrashes();
+            if (crashes < 0xFFFFu) {
+                platforms::mxrt1062StoreRecord(platforms::watchdogBootGuardRead(),
+                                               crashes + 1);
+            }
         }
     }
     return s.cached_cause;
@@ -332,11 +347,11 @@ void Watchdog::persistWrite(fl::size idx, fl::u8 v) FL_NO_EXCEPT {
 
 fl::u16 Watchdog::consecutiveCrashCount() const FL_NO_EXCEPT {
     (void)lastResetCause();
-    return platforms::mxrt1062WatchdogState().crash_count;
+    return static_cast<fl::u16>(platforms::mxrt1062StoredCrashes());
 }
 
 void Watchdog::markCleanShutdown() FL_NO_EXCEPT {
-    platforms::mxrt1062WatchdogState().crash_count = 0;
+    platforms::mxrt1062StoreRecord(platforms::watchdogBootGuardRead(), 0);
 }
 
 bool Watchdog::isInSafeMode() const FL_NO_EXCEPT {
@@ -358,9 +373,8 @@ bool Watchdog::writeCrashLog(fl::span<const fl::u8>) FL_NO_EXCEPT { return false
 fl::size Watchdog::readCrashLog(fl::span<fl::u8>) const FL_NO_EXCEPT { return 0; }
 bool Watchdog::rebootIntoBootloader() FL_NO_EXCEPT {
     // bkpt #251: the MKL02 bootloader chip sees the halt and starts HalfKay
-    // (16c0:0478). Leave the RTWDOG off so it cannot reset HalfKay. Use the
-    // unconditional reconfigure: disable() skips it when begin() never ran,
-    // but the boot guard may have armed WDOG3 in startup_early_hook.
+    // (16c0:0478). Leave the RTWDOG off (the boot guard may have armed it in
+    // startup_early_hook) so it cannot reset HalfKay.
     __asm__ volatile ("cpsid i" ::: "memory");  // unlock window; never returns
     platforms::mxrt1062BootGuardConfigureWdog3(false, 0);
     platforms::mxrt1062WatchdogState().armed = false;
