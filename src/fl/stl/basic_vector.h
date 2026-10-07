@@ -203,32 +203,73 @@ struct has_copy_ctor : fl::false_type {};
 template <typename T>
 struct has_copy_ctor<T, decltype(void(T(fl::declval<const T&>())))> : fl::true_type {};
 
+// Named thunks allow constant initialization on C++11 toolchains.
+template <typename T>
+void vector_default_construct(void* ptr) FL_NO_EXCEPT { new (ptr) T(); }
+
+template <typename T>
+void vector_copy_construct(void* dst, const void* src) FL_NO_EXCEPT {
+    new (dst) T(*static_cast<const T*>(src));
+}
+
+template <typename T>
+void vector_move_construct(void* dst, void* src) FL_NO_EXCEPT {
+    new (dst) T(static_cast<T&&>(*static_cast<T*>(src)));
+}
+
+template <typename T>
+void vector_swap_elements(void* a, void* b) FL_NO_EXCEPT {
+    T& ta = *static_cast<T*>(a);
+    T& tb = *static_cast<T*>(b);
+    T tmp(static_cast<T&&>(ta));
+    ta = static_cast<T&&>(tb);
+    tb = static_cast<T&&>(tmp);
+}
+
+template <typename T>
+void vector_uninitialized_move_n(void* dst, void* src, fl::size count) FL_NO_EXCEPT {
+    T* d = static_cast<T*>(dst);
+    T* s = static_cast<T*>(src);
+    for (fl::size i = 0; i < count; ++i) {
+        new (&d[i]) T(static_cast<T&&>(s[i]));
+    }
+}
+
+template <typename T>
+void vector_destroy(void* ptr) { static_cast<T*>(ptr)->~T(); }
+
+template <typename T>
+void vector_destroy_n(void* first, fl::size count) FL_NO_EXCEPT {
+    T* p = static_cast<T*>(first);
+    for (fl::size i = 0; i < count; ++i) {
+        p[i].~T();
+    }
+}
+
 // Default construct: available when T has default ctor
 template <typename T>
-typename fl::enable_if<has_default_ctor<T>::value, void(*)(void*) FL_NO_EXCEPT>::type
+constexpr typename fl::enable_if<has_default_ctor<T>::value, void(*)(void*) FL_NO_EXCEPT>::type
 get_default_construct_fn() FL_NO_EXCEPT {
-    return [](void* ptr) FL_NO_EXCEPT { new (ptr) T(); };
+    return &vector_default_construct<T>;
 }
 
 // Default construct: nullptr when T has no default ctor
 template <typename T>
-typename fl::enable_if<!has_default_ctor<T>::value, void(*)(void*) FL_NO_EXCEPT>::type
+constexpr typename fl::enable_if<!has_default_ctor<T>::value, void(*)(void*) FL_NO_EXCEPT>::type
 get_default_construct_fn() FL_NO_EXCEPT {
     return nullptr;
 }
 
 // Copy construct: available when T has copy ctor
 template <typename T>
-typename fl::enable_if<has_copy_ctor<T>::value, void(*)(void*, const void*) FL_NO_EXCEPT>::type
+constexpr typename fl::enable_if<has_copy_ctor<T>::value, void(*)(void*, const void*) FL_NO_EXCEPT>::type
 get_copy_construct_fn() FL_NO_EXCEPT {
-    return [](void* dst, const void* src) FL_NO_EXCEPT {
-        new (dst) T(*static_cast<const T*>(src));
-    };
+    return &vector_copy_construct<T>;
 }
 
 // Copy construct: nullptr when T is not copyable
 template <typename T>
-typename fl::enable_if<!has_copy_ctor<T>::value, void(*)(void*, const void*) FL_NO_EXCEPT>::type
+constexpr typename fl::enable_if<!has_copy_ctor<T>::value, void(*)(void*, const void*) FL_NO_EXCEPT>::type
 get_copy_construct_fn() FL_NO_EXCEPT {
     return nullptr;
 }
@@ -251,53 +292,39 @@ struct is_swappable<T, decltype(void(
 
 // Move construct: available
 template <typename T>
-typename fl::enable_if<has_move_ctor<T>::value, void(*)(void*, void*) FL_NO_EXCEPT>::type
+constexpr typename fl::enable_if<has_move_ctor<T>::value, void(*)(void*, void*) FL_NO_EXCEPT>::type
 get_move_construct_fn() FL_NO_EXCEPT {
-    return [](void* dst, void* src) FL_NO_EXCEPT {
-        new (dst) T(static_cast<T&&>(*static_cast<T*>(src)));
-    };
+    return &vector_move_construct<T>;
 }
 
 template <typename T>
-typename fl::enable_if<!has_move_ctor<T>::value, void(*)(void*, void*) FL_NO_EXCEPT>::type
+constexpr typename fl::enable_if<!has_move_ctor<T>::value, void(*)(void*, void*) FL_NO_EXCEPT>::type
 get_move_construct_fn() FL_NO_EXCEPT {
     return nullptr;
 }
 
 // Swap: available when swappable
 template <typename T>
-typename fl::enable_if<is_swappable<T>::value, void(*)(void*, void*) FL_NO_EXCEPT>::type
+constexpr typename fl::enable_if<is_swappable<T>::value, void(*)(void*, void*) FL_NO_EXCEPT>::type
 get_swap_fn() FL_NO_EXCEPT {
-    return [](void* a, void* b) FL_NO_EXCEPT {
-        T& ta = *static_cast<T*>(a);
-        T& tb = *static_cast<T*>(b);
-        T tmp(static_cast<T&&>(ta));
-        ta = static_cast<T&&>(tb);
-        tb = static_cast<T&&>(tmp);
-    };
+    return &vector_swap_elements<T>;
 }
 
 template <typename T>
-typename fl::enable_if<!is_swappable<T>::value, void(*)(void*, void*) FL_NO_EXCEPT>::type
+constexpr typename fl::enable_if<!is_swappable<T>::value, void(*)(void*, void*) FL_NO_EXCEPT>::type
 get_swap_fn() FL_NO_EXCEPT {
     return nullptr;
 }
 
 // Uninitialized move N: available when move-constructible
 template <typename T>
-typename fl::enable_if<has_move_ctor<T>::value, void(*)(void*, void*, fl::size) FL_NO_EXCEPT>::type
+constexpr typename fl::enable_if<has_move_ctor<T>::value, void(*)(void*, void*, fl::size) FL_NO_EXCEPT>::type
 get_uninitialized_move_n_fn() FL_NO_EXCEPT {
-    return [](void* dst, void* src, fl::size count) FL_NO_EXCEPT {
-        T* d = static_cast<T*>(dst);
-        T* s = static_cast<T*>(src);
-        for (fl::size i = 0; i < count; ++i) {
-            new (&d[i]) T(static_cast<T&&>(s[i]));
-        }
-    };
+    return &vector_uninitialized_move_n<T>;
 }
 
 template <typename T>
-typename fl::enable_if<!has_move_ctor<T>::value, void(*)(void*, void*, fl::size) FL_NO_EXCEPT>::type
+constexpr typename fl::enable_if<!has_move_ctor<T>::value, void(*)(void*, void*, fl::size) FL_NO_EXCEPT>::type
 get_uninitialized_move_n_fn() FL_NO_EXCEPT {
     return nullptr;
 }
@@ -315,20 +342,15 @@ const vector_element_ops* vector_element_ops_for() FL_NO_EXCEPT {
         return nullptr;
     }
 
-    static const vector_element_ops ops = {
+    static constexpr vector_element_ops ops = {
         detail::get_copy_construct_fn<T>(),       // copy_construct
         detail::get_move_construct_fn<T>(),       // move_construct
-        [](void* ptr) { static_cast<T*>(ptr)->~T(); }, // destroy
+        &detail::vector_destroy<T>,               // destroy
         detail::get_default_construct_fn<T>(),    // default_construct
         detail::get_swap_fn<T>(),                 // swap_elements
         detail::get_uninitialized_move_n_fn<T>(), // uninitialized_move_n
         // destroy_n
-        [](void* first, fl::size count) FL_NO_EXCEPT {
-            T* p = static_cast<T*>(first);
-            for (fl::size i = 0; i < count; ++i) {
-                p[i].~T();
-            }
-        }
+        &detail::vector_destroy_n<T>
     };
     return &ops;
 }
