@@ -1,3 +1,8 @@
+# 2026-10-06, PR #4727: -80 B, 367735 -> 367655. fl::cin's istream buffer is
+# constant-initialized (no dynamic initializer) and the PWM lookup paths no
+# longer touch the PwmStateData singleton, so --gc-sections drops both from
+# Blink. Measured by CI run 37562351702 (bloat regression job).
+
 # 2026-10-06, PR #4717 (issue #4712): -24,284 B, 392019 -> 367735. Default
 # log level on non-NDEBUG builds is 1 (FL_ERROR only): FL_WARN / FL_INFO /
 # FL_DBG compile out. Measured by CI run 37427203380 (bloat regression job);
@@ -313,4 +318,4 @@
 # the CI Blink report contains no ResponseLutsQ16 symbol. The local fbuild
 # symbol total remains ~4 KB higher for the same source (FastLED/fbuild#1456),
 # so this ratchet uses the CI measurement from PR #4511.
-367735
+367655
