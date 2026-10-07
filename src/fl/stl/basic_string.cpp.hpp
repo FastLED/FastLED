@@ -228,12 +228,11 @@ fl::size basic_string::write(const char* str, fl::size n) {
             // grow() uses realloc which can relocate the buffer.
             const char* bufStart = heap->data();
             fl::size grow_length = fl::max(3, newLen * 3 / 2);
-            if (str >= bufStart && str < bufStart + mLength + 1) {
-                fl::size offset = static_cast<fl::size>(str - bufStart);
-                heap->grow(grow_length);
+            const bool selfAlias = str >= bufStart && str < bufStart + mLength + 1;
+            const fl::size offset = selfAlias ? static_cast<fl::size>(str - bufStart) : 0;
+            heap->grow(grow_length);
+            if (selfAlias) {
                 str = heap->data() + offset; // update to new location
-            } else {
-                heap->grow(grow_length);
             }
         }
         fl::memcpy(heap->data() + mLength, str, n);
