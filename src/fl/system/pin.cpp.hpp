@@ -125,7 +125,9 @@ inline PwmStateData& state() {
 // ISR handler — services only ISR-backend entries
 void FL_IRAM pwm_isr_handler(void* user_data) {
     (void)user_data;
-    PwmStateData& st = state();
+    // The ISR is attached only after setPwmFrequency() has created the
+    // state, so read the singleton directly instead of republishing g_state.
+    PwmStateData& st = fl::Singleton<PwmStateData>::instance();
 
     for (u8 i = 0; i < MAX_PWM_CHANNELS; i++) {
         PwmPinState& ch = st.channels[i];
