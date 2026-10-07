@@ -729,6 +729,10 @@ def main() -> int:
         )
     if args.compare and not args.build:
         raise SystemExit("Bloat: --compare requires --build.")
+    if args.compare and args.budget is not None:
+        raise SystemExit(
+            "Bloat: --compare cannot be used with --budget; check each profile separately."
+        )
 
     assert_fbuild_has_symbols()
 

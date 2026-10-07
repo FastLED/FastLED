@@ -31,6 +31,7 @@ rejects missing measurements or growth above either ceiling. Its `image_flash`
 and `total_ram` ceilings refer to the bloat report's image flash and attributed
 RAM; they are not fbuild's board flash/RAM totals. The RMT allocation-record
 compile-time size assertion additionally guards the measured static RAM saving.
+Check each profile separately; `--compare --budget` is rejected before building.
 
 ### Slim ESP32-S3 profile (#4564)
 

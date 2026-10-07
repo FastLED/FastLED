@@ -396,9 +396,8 @@ private:
         bool is_tx;
         bool is_dma;  ///< DMA channels don't consume on-chip memory
 
-        ChannelAllocation() : words(0), channel_id(0), is_tx(false), is_dma(false) {}
-        ChannelAllocation(u8 id, size_t w, bool tx, bool dma)
-            : words(w), channel_id(id), is_tx(tx), is_dma(dma) {}
+        ChannelAllocation() FL_NO_EXCEPT;
+        ChannelAllocation(u8 id, size_t w, bool tx, bool dma) FL_NO_EXCEPT;
     };
     FL_STATIC_ASSERT(sizeof(ChannelAllocation) <= 2 * sizeof(size_t),
                      "RMT allocation records exceed two machine words");
