@@ -27,14 +27,8 @@
 
 // begin sub directory includes
 #include "platforms/esp/32/drivers/ble/_build.cpp.hpp"
-#include "platforms/esp/32/drivers/gpio_isr_rx/_build.cpp.hpp"
-#include "platforms/esp/32/drivers/i2s/_build.cpp.hpp"
-#include "platforms/esp/32/drivers/i2s_rx/_build.cpp.hpp"
-#include "platforms/esp/32/drivers/i2s_spi/_build.cpp.hpp"
 #include "platforms/esp/32/drivers/lcd_cam/_build.cpp.hpp"
 #include "platforms/esp/32/drivers/lcd_spi/_build.cpp.hpp"
 #include "platforms/esp/32/drivers/parlio/_build.cpp.hpp"
 #include "platforms/esp/32/drivers/parlio_rx/_build.cpp.hpp"
 #include "platforms/esp/32/drivers/rmt/_build.cpp.hpp"
-#include "platforms/esp/32/drivers/rmt_rx/_build.cpp.hpp"
-#include "platforms/esp/32/drivers/uart/_build.cpp.hpp"

@@ -1,6 +1,7 @@
 // Based on works and code by Shawn Silverman.
 
 #include "fl/stl/stdint.h"
+#include "fl/log/log.h"
 
 #include "fl/math/math.h"
 #include "fl/math/wave/wave_simulation_real.h"

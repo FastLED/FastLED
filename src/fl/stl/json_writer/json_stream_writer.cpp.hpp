@@ -1,3 +1,4 @@
+// ok no header - public declaration remains in fl/stl/json_stream_writer.h
 #pragma once
 
 // IWYU pragma: private

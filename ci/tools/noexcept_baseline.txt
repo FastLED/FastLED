@@ -1621,7 +1621,7 @@ src/fl/channels/spi/transaction.h|fl::optional<fl::task::Error> getResult() cons
 src/fl/channels/spi/write_result.h|explicit WriteResult(const char* err) : ok(false), error(err) {}
 src/fl/channels/spi/write_result.h|explicit WriteResult(const fl::string& err) : ok(false), error(err) {}
 src/fl/channels/spi/write_result.h|operator bool() const { return ok; }
-src/fl/channels/validation.cpp.hpp|SingleTestResult runSingleValidationTest(const SingleTestConfig& config) {
+src/fl/channels/detail/validation/validation.cpp.hpp|SingleTestResult runSingleValidationTest(const SingleTestConfig& config) {
 src/fl/channels/validation.h|DriverTestResult(const char* name) : driver_name(name) , total_tests(0) , passed_tests(0) , skipped(false) {}
 src/fl/channels/validation.h|SingleTestResult runSingleValidationTest(const SingleTestConfig& config);
 src/fl/channels/validation.h|bool allPassed() const { return !skipped && total_tests > 0 && passed_tests == total_tests; }
@@ -6255,27 +6255,27 @@ src/fl/stl/isr/memcpy.h|FL_OPTIMIZE_FUNCTION FL_IRAM FASTLED_FORCE_INLINE void m
 src/fl/stl/isr/memcpy.h|FL_OPTIMIZE_FUNCTION FL_IRAM FASTLED_FORCE_INLINE void memset_zero(u8* dest, size_t count) {
 src/fl/stl/isr/memcpy.h|FL_OPTIMIZE_FUNCTION FL_IRAM FASTLED_FORCE_INLINE void memset_zero_byte(u8* dest, size_t count) {
 src/fl/stl/isr/memcpy.h|FL_OPTIMIZE_FUNCTION FL_IRAM FASTLED_FORCE_INLINE void memset_zero_word(u8* dest, size_t count) {
-src/fl/stl/istream.cpp.hpp|bool istream_real::readLine() {
-src/fl/stl/istream.cpp.hpp|bool istream_real::readToken(string& token) {
-src/fl/stl/istream.cpp.hpp|bool parse_i32(const char* str, fl::i32& result) {
-src/fl/stl/istream.cpp.hpp|bool parse_u32(const char* str, fl::u32& result) {
-src/fl/stl/istream.cpp.hpp|inline bool isDigit(char c) {
-src/fl/stl/istream.cpp.hpp|inline bool isSpace(char c) {
-src/fl/stl/istream.cpp.hpp|int istream_real::get() {
-src/fl/stl/istream.cpp.hpp|int istream_real::peek() {
-src/fl/stl/istream.cpp.hpp|istream_real& cin_real() {
-src/fl/stl/istream.cpp.hpp|istream_real& istream_real::getline(string& str) {
-src/fl/stl/istream.cpp.hpp|istream_real& istream_real::operator>>(char& c) {
-src/fl/stl/istream.cpp.hpp|istream_real& istream_real::operator>>(double& d) {
-src/fl/stl/istream.cpp.hpp|istream_real& istream_real::operator>>(fl::i16& n) {
-src/fl/stl/istream.cpp.hpp|istream_real& istream_real::operator>>(fl::i32& n) {
-src/fl/stl/istream.cpp.hpp|istream_real& istream_real::operator>>(fl::i8& n) {
-src/fl/stl/istream.cpp.hpp|istream_real& istream_real::operator>>(fl::u32& n) {
-src/fl/stl/istream.cpp.hpp|istream_real& istream_real::operator>>(fl::u8& n) {
-src/fl/stl/istream.cpp.hpp|istream_real& istream_real::operator>>(float& f) {
-src/fl/stl/istream.cpp.hpp|istream_real& istream_real::operator>>(string& str) {
-src/fl/stl/istream.cpp.hpp|istream_real& istream_real::putback(char c) {
-src/fl/stl/istream.cpp.hpp|void istream_real::skipWhitespace() {
+src/fl/stl/stream_io/istream.cpp.hpp|bool istream_real::readLine() {
+src/fl/stl/stream_io/istream.cpp.hpp|bool istream_real::readToken(string& token) {
+src/fl/stl/stream_io/istream.cpp.hpp|bool parse_i32(const char* str, fl::i32& result) {
+src/fl/stl/stream_io/istream.cpp.hpp|bool parse_u32(const char* str, fl::u32& result) {
+src/fl/stl/stream_io/istream.cpp.hpp|inline bool isDigit(char c) {
+src/fl/stl/stream_io/istream.cpp.hpp|inline bool isSpace(char c) {
+src/fl/stl/stream_io/istream.cpp.hpp|int istream_real::get() {
+src/fl/stl/stream_io/istream.cpp.hpp|int istream_real::peek() {
+src/fl/stl/stream_io/istream.cpp.hpp|istream_real& cin_real() {
+src/fl/stl/stream_io/istream.cpp.hpp|istream_real& istream_real::getline(string& str) {
+src/fl/stl/stream_io/istream.cpp.hpp|istream_real& istream_real::operator>>(char& c) {
+src/fl/stl/stream_io/istream.cpp.hpp|istream_real& istream_real::operator>>(double& d) {
+src/fl/stl/stream_io/istream.cpp.hpp|istream_real& istream_real::operator>>(fl::i16& n) {
+src/fl/stl/stream_io/istream.cpp.hpp|istream_real& istream_real::operator>>(fl::i32& n) {
+src/fl/stl/stream_io/istream.cpp.hpp|istream_real& istream_real::operator>>(fl::i8& n) {
+src/fl/stl/stream_io/istream.cpp.hpp|istream_real& istream_real::operator>>(fl::u32& n) {
+src/fl/stl/stream_io/istream.cpp.hpp|istream_real& istream_real::operator>>(fl::u8& n) {
+src/fl/stl/stream_io/istream.cpp.hpp|istream_real& istream_real::operator>>(float& f) {
+src/fl/stl/stream_io/istream.cpp.hpp|istream_real& istream_real::operator>>(string& str) {
+src/fl/stl/stream_io/istream.cpp.hpp|istream_real& istream_real::putback(char c) {
+src/fl/stl/stream_io/istream.cpp.hpp|void istream_real::skipWhitespace() {
 src/fl/stl/istream.h|bool eof() const {
 src/fl/stl/istream.h|bool eof() const { return mPos >= mBufferLen && fl::available() == 0; }
 src/fl/stl/istream.h|bool fail() const {
@@ -6398,14 +6398,14 @@ src/fl/stl/memory_resource.cpp.hpp|void* do_allocate(fl::size bytes) override {
 src/fl/stl/memory_resource.cpp.hpp|void* do_reallocate(void* p, fl::size old_bytes, fl::size new_bytes) override {
 src/fl/stl/memory_resource.cpp.hpp|void* memory_resource::do_reallocate(void* p, fl::size old_bytes, fl::size new_bytes) {
 src/fl/stl/not_null.cpp.hpp|void not_null_assert_failed(const char* message) {
-src/fl/stl/ostream.cpp.hpp|ostream& operator<<(ostream& os, const dec_t&) {
-src/fl/stl/ostream.cpp.hpp|ostream& operator<<(ostream& os, const hex_t&) {
-src/fl/stl/ostream.cpp.hpp|ostream& operator<<(ostream& os, const oct_t&) {
-src/fl/stl/ostream.cpp.hpp|ostream& ostream::operator<<(fl::i16 n) {
-src/fl/stl/ostream.cpp.hpp|ostream& ostream::operator<<(fl::i32 n) {
-src/fl/stl/ostream.cpp.hpp|ostream& ostream::operator<<(fl::i8 n) {
-src/fl/stl/ostream.cpp.hpp|ostream& ostream::operator<<(fl::u32 n) {
-src/fl/stl/ostream.cpp.hpp|ostream& ostream::operator<<(fl::u8 n) {
+src/fl/stl/stream_io/ostream.cpp.hpp|ostream& operator<<(ostream& os, const dec_t&) {
+src/fl/stl/stream_io/ostream.cpp.hpp|ostream& operator<<(ostream& os, const hex_t&) {
+src/fl/stl/stream_io/ostream.cpp.hpp|ostream& operator<<(ostream& os, const oct_t&) {
+src/fl/stl/stream_io/ostream.cpp.hpp|ostream& ostream::operator<<(fl::i16 n) {
+src/fl/stl/stream_io/ostream.cpp.hpp|ostream& ostream::operator<<(fl::i32 n) {
+src/fl/stl/stream_io/ostream.cpp.hpp|ostream& ostream::operator<<(fl::i8 n) {
+src/fl/stl/stream_io/ostream.cpp.hpp|ostream& ostream::operator<<(fl::u32 n) {
+src/fl/stl/stream_io/ostream.cpp.hpp|ostream& ostream::operator<<(fl::u8 n) {
 src/fl/stl/priority_queue.h|PriorityQueue(const Compare &comp, memory_resource* resource) : _data(resource), _comp(comp) {}
 src/fl/stl/priority_queue.h|bool empty() const {
 src/fl/stl/priority_queue.h|bool empty() const { return _data.size() == 0; }

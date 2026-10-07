@@ -1,3 +1,4 @@
+// ok no header - public declaration remains in fl/stl/ostream.h
 #include "fl/stl/ostream.h"
 #include "fl/stl/charconv.h"
 #include "fl/gfx/crgb.h"
