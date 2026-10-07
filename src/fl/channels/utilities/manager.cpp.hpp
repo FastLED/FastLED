@@ -201,7 +201,7 @@ fl::shared_ptr<IChannelDriver> ChannelManager::selectDriverForChannel(const Chan
         }
         return driver;
     } while (false);
-    
+
 
     // No affinity: iterate drivers by priority (already sorted descending)
     for (const auto& entry : mDrivers) {
