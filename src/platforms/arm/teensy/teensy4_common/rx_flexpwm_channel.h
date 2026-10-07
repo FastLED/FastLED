@@ -21,7 +21,8 @@ namespace fl {
 /// Uses the i.MXRT1062's FlexPWM dual-edge capture hardware + eDMA to
 /// capture WS2812-like self-clocked waveforms. Captures stream through a
 /// small DMA ring and are decoded in the DMA ISR, so frame length is bounded
-/// only by the decoded-byte buffer (RxConfig::buffer_size / 16 bytes).
+/// only by the decoded-byte buffer (RxConfig::buffer_size / 8 + 1 bytes;
+/// buffer_size counts bits, one capture pair per bit).
 ///
 /// Supported pins (Teensy 4.0 + 4.1): 2, 4, 5, 6, 8, 22, 23, 29
 /// Additional pins (Teensy 4.1 only): 36, 49, 53, 54
