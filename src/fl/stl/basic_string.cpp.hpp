@@ -378,7 +378,7 @@ void basic_string::copy(const char* str) {
             heapData()->copy(str, len);
             return;
         }
-        mStorage = NotNullStringHolderPtr(fl::make_shared<StringHolder>(str));
+        mStorage = NotNullStringHolderPtr(fl::make_shared<StringHolder>(str, len));
     }
 }
 
@@ -413,7 +413,7 @@ void basic_string::copy(const basic_string& other) {
         char* dst = inlineBufferPtr();
         fl::memcpy(dst, src, len + 1);
     } else {
-        mStorage = NotNullStringHolderPtr(fl::make_shared<StringHolder>(other.c_str()));
+        mStorage = NotNullStringHolderPtr(fl::make_shared<StringHolder>(other.c_str(), len));
     }
     mLength = len;
 }

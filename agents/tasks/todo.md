@@ -140,7 +140,28 @@ Full native run passes 320 units + 95 examples. Focused debug manager and
 events runs pass with the new cases present in their modules. Fixed a second
 single-test cache shortcut in test.py that ignored --force; official clean
 verification caught and corrected a typo in the new callback test.
-Hosted fifth-pass size and exact ratchet are pending.
+Hosted fifth-pass run 37587043130 confirms image_flash 356,431 B (local
+356,415 B). The strict gate fails only because 260 B savings have not yet
+been claimed in the baseline. Fifth-pass full Python rerun passes (251 s).
+
+Sixth pass:
+- [x] Reuse known string lengths instead of retaining the char-only holder ctor.
+- [x] Reorder private RMT memory ID into existing padding before pooled span.
+- [ ] Complete validation, publish measurements and tighten hosted ratchet.
+
+Saved JSON image_flash: Blink 304,659 B, gist 297,555 B, S3 local 356,295 B.
+This pass saves 96/96/120 B flash, with unchanged static RAM. Private channel
+state shrinks 52 -> 48 B on ESP32: 32 B less heap payload on classic ESP32,
+16 B on S3. String type-erased and RMT driver sanitizer runs pass; C++ lint
+passes. Full native verification passes 320 units + 95 examples (200 s).
+A trial delegating the char-only
+copy body to the length overload increased flash 28/52 B and was reverted.
+
+Remaining classic ESP32 static RAM includes 1,312 B of vendor WiFi mode-query
+state (s_wifi_nvs + g_wifi_nvs). Weak references work correctly; Arduino
+startup independently extracts the vendor object and the detector query keeps
+its data alive. Public netif-state alternatives omit AP/configured-mode cases;
+retain exact detection semantics rather than add unsupported vendor shims.
 
 Use the default dynamic driver configuration. Keep scheduler pumping, network
 yielding, multiple strips, and reconfiguration available. Optimize symbol reachability
