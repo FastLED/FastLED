@@ -47,6 +47,19 @@
 
 ### Plan
 
+Third pass:
+- [x] Trial unified TX/RX accounting without changing global/shared pool limits.
+- [x] Exercise real global-pool allocation, reservations, rollback and reset natively.
+- [x] Validate retained test coverage and publish the measured rejection.
+
+Unified accounting saved 8 B static RAM but increased default image flash:
+Blink 306,119 -> 306,176 B (+57 B), S3 357,663 -> 357,712 B (+49 B).
+Reverted production changes; retain the actual-production global-pool test.
+Corrected hosted gate 37582254539 passed completely at cb41f69ebd.
+Retained test passes against the unchanged production allocator with sanitizers;
+`bash test --cpp` reruns its changed unit successfully (other units/examples
+use their prior passing fingerprints). C++ lint and code review pass.
+
 Use the default dynamic driver configuration. Keep scheduler pumping, network
 yielding, multiple strips, and reconfiguration available. Optimize symbol reachability
 and redundant state first, then use actual board images to decide further changes.

@@ -175,6 +175,56 @@ FL_TEST_CASE("Production RMT allocator TX fallback and exhaustion preserve accou
     planner.reset();
 }
 
+FL_TEST_CASE("Production RMT global pool shares TX RX reservations and recovery accounting") {
+    auto& planner = RmtMemoryManager::instance();
+    planner.reset();
+    planner.setMemoryBlockStrategy(2, 2);
+    RmtMemoryManager mgr(512, 999, true);
+    FL_CHECK_EQ(mgr.getTotalTxWords(), 512u);
+    FL_CHECK_EQ(mgr.getTotalRxWords(), 0u);
+    mgr.reserveExternalMemory(64, 32);
+    FL_CHECK_EQ(mgr.availableTxWords(), 416u);
+    FL_CHECK_EQ(mgr.availableRxWords(), 416u);
+
+    size_t words = 999;
+    FL_REQUIRE(mgr.tryAllocateTx(0, false, false, words));
+    FL_CHECK_EQ(words, 128u);
+    FL_REQUIRE(mgr.tryAllocateRx(0, 64, false, words));
+    FL_CHECK_EQ(mgr.getAllocatedTxWords(), 128u);
+    FL_CHECK_EQ(mgr.getAllocatedRxWords(), 64u);
+    FL_CHECK_EQ(mgr.availableTxWords(), 224u);
+    FL_CHECK_EQ(mgr.availableRxWords(), 224u);
+
+    // TX and RX may share an ID; freeing TX must retain the RX charge.
+    mgr.free(0, true);
+    FL_CHECK_EQ(mgr.getAllocatedTxWords(), 0u);
+    FL_CHECK_EQ(mgr.getAllocatedRxWords(), 64u);
+    FL_CHECK_EQ(mgr.availableTxWords(), 352u);
+    mgr.recordRecoveryAllocation(1, 96, true);
+    mgr.recordRecoveryAllocation(1, 96, true); // Duplicate recovery must not charge twice.
+    FL_CHECK_EQ(mgr.getAllocationCount(), 2u);
+    FL_CHECK_EQ(mgr.getAllocatedTxWords(), 96u);
+    FL_CHECK_EQ(mgr.availableRxWords(), 256u);
+    mgr.rollbackAllocation(0, false);
+    FL_CHECK_EQ(mgr.getAllocatedRxWords(), 0u);
+    FL_CHECK_EQ(mgr.availableTxWords(), 320u);
+
+    mgr.reset();
+    FL_CHECK_EQ(mgr.getAllocationCount(), 0u);
+    FL_CHECK_EQ(mgr.getAllocatedTxWords(), 0u);
+    FL_CHECK_EQ(mgr.getAllocatedRxWords(), 0u);
+    FL_CHECK_EQ(mgr.availableRxWords(), 416u); // Reset preserves external reservations.
+    mgr.reserveExternalMemory(600, 0);
+    FL_CHECK_EQ(mgr.availableTxWords(), 0u);
+    FL_CHECK_EQ(mgr.availableRxWords(), 0u);
+    words = 999;
+    FL_CHECK_FALSE(mgr.tryAllocateRx(0, 64, false, words));
+    FL_CHECK_EQ(words, 999u);
+    mgr.reserveExternalMemory(0, 0);
+    FL_CHECK_EQ(mgr.availableRxWords(), 512u);
+    planner.reset();
+}
+
 FL_TEST_CASE("Production RMT allocator non-S3 DMA outputs zero without charging pools") {
     auto& planner = RmtMemoryManager::instance();
     planner.reset();
