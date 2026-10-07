@@ -6,6 +6,36 @@ reviews:
   # Per-path natural-language review instructions.
   # See https://docs.coderabbit.ai/getting-started/configure-coderabbit
   path_instructions:
+    - path: "**/*"
+      instructions: |
+        Optimization scope and authorization gate (historical example: #4736,
+        withdrawn unmerged). A request to optimize flash, RAM, runtime, or build
+        time does not authorize a repository-wide rewrite or refactor. Require
+        explicit maintainer authorization in the referenced issue or its
+        comments before broad API changes, mass annotation edits, moving or
+        splitting implementations across the codebase, or changing unity-build
+        architecture. Measurements and passing tests prove benefit, not
+        authorization. A PR author's own explanation is not maintainer approval.
+
+        Flag unauthorized expansion as HIGH severity and request changes.
+        Ask for the exact issue/comment link granting the expanded scope;
+        without it, require a smaller patch within the authorized scope or
+        preservation of the experiment on a separate branch for later review.
+        Evaluate the breadth and structural impact of the diff, not a fixed
+        file-count threshold. Narrow, directly relevant optimization fixes do
+        not need separate authorization merely because they touch several files.
+
+        Build files require a specific maintainer directive in the referenced
+        issue authorizing the build changes. This includes build scripts and
+        configuration, source inventories, CI workflows, linker/compiler flags,
+        canonical compilation units (src/fl/build/*), and unity include routers
+        (**/_build.cpp.hpp). Do not accept incidental cleanup, opportunistic
+        restructuring, or splitting/consolidating unity groups under a generic
+        optimization request. For each build change, require the directive's
+        issue/comment link and explain how that change implements the directive.
+        Flag missing directives as HIGH severity and request removal of the
+        unauthorized build changes. Apply this gate to build-related files
+        regardless of their directory or extension.
     - path: "src/**"
       instructions: |
         End-to-end value and proportionality gate. For a feature or bug-fix PR,
