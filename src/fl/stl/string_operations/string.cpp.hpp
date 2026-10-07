@@ -9,6 +9,9 @@
 
 namespace fl {
 
+string::string(fl::size len, char c) FL_NO_EXCEPT
+    : string_n<FASTLED_STR_INLINED_SIZE>(len, c) {}
+
 string string::from_view(const char* data, fl::size len) FL_NO_EXCEPT {
     string result;
     result.setView(data, len);

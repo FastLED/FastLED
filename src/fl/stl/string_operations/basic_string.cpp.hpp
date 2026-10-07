@@ -685,4 +685,122 @@ int basic_string::compare(fl::size pos1, fl::size count1, const char* s, fl::siz
     return 0;
 }
 
+// Optional capacity management, resizing, and swapping.
+
+void basic_string::reserve(fl::size newCapacity) {
+    if (newCapacity <= mLength) return;
+    if (newCapacity + 1 <= mInlineCapacity) return;
+    if (hasHeapData()) {
+        const NotNullStringHolderPtr& heap = heapData();
+        if (heap.get().use_count() <= 1 && heap->hasCapacity(newCapacity)) {
+            return;
+        }
+    }
+    NotNullStringHolderPtr newData = NotNullStringHolderPtr(fl::make_shared<StringHolder>(newCapacity));
+    fl::memcpy(newData->data(), c_str(), mLength);
+    newData->data()[mLength] = '\0';
+    mStorage = newData;
+}
+
+void basic_string::shrink_to_fit() {
+    if (hasHeapData()) {
+        NotNullStringHolderPtr& heap = heapData();
+        if (heap.get().use_count() > 1) return;
+        if (heap->capacity() <= mLength + 1) return;
+        if (mLength + 1 <= mInlineCapacity) {
+            fl::memcpy(inlineBufferPtr(), heap->data(), mLength + 1);
+            mStorage.reset();
+            return;
+        }
+        NotNullStringHolderPtr newData = NotNullStringHolderPtr(fl::make_shared<StringHolder>(mLength));
+        fl::memcpy(newData->data(), heap->data(), mLength + 1);
+        mStorage = newData;
+    }
+}
+
+void basic_string::swapWith(basic_string& other) {
+    if (this == &other) return;
+
+    bool thisInline = isInline();
+    bool otherInline = other.isInline();
+
+    if (!thisInline && !otherInline) {
+        // Both non-inline: swap variant + length
+        fl::swap(mStorage, other.mStorage);
+        fl::swap(mLength, other.mLength);
+    } else if (thisInline && otherInline) {
+        // Both inline: check capacity before swapping
+        bool thisFits = other.mLength + 1 <= mInlineCapacity;
+        bool otherFits = mLength + 1 <= other.mInlineCapacity;
+        if (thisFits && otherFits) {
+            // Both fit: swap buffer contents directly
+            fl::size maxLen = fl::max(mLength, other.mLength);
+            for (fl::size i = 0; i <= maxLen; ++i) {
+                char tmp = inlineBufferPtr()[i];
+                inlineBufferPtr()[i] = other.inlineBufferPtr()[i];
+                other.inlineBufferPtr()[i] = tmp;
+            }
+            fl::swap(mLength, other.mLength);
+        } else {
+            // Capacity mismatch: promote to heap where needed
+            NotNullStringHolderPtr thisData(
+                fl::make_shared<StringHolder>(inlineBufferPtr(), mLength));
+            NotNullStringHolderPtr otherData(
+                fl::make_shared<StringHolder>(other.inlineBufferPtr(), other.mLength));
+            fl::size thisLen = mLength;
+            fl::size otherLen = other.mLength;
+            if (thisFits) {
+                mStorage.reset();
+                fl::memcpy(inlineBufferPtr(), otherData->data(), otherLen + 1);
+            } else {
+                mStorage = otherData;
+            }
+            mLength = otherLen;
+            if (otherFits) {
+                other.mStorage.reset();
+                fl::memcpy(other.inlineBufferPtr(), thisData->data(), thisLen + 1);
+            } else {
+                other.mStorage = thisData;
+            }
+            other.mLength = thisLen;
+        }
+    } else if (thisInline) {
+        // this inline, other non-inline
+        fl::size thisLen = mLength;
+        // Take other's non-inline storage
+        mStorage = fl::move(other.mStorage);
+        mLength = other.mLength;
+        // Put this's old inline data into other
+        other.mStorage.reset();
+        if (thisLen + 1 <= other.mInlineCapacity) {
+            fl::memcpy(other.inlineBufferPtr(), inlineBufferPtr(), thisLen + 1);
+        } else {
+            other.mStorage = NotNullStringHolderPtr(
+                fl::make_shared<StringHolder>(inlineBufferPtr(), thisLen));
+        }
+        other.mLength = thisLen;
+    } else {
+        // this non-inline, other inline — reverse
+        other.swapWith(*this);
+    }
+}
+
+void basic_string::resize(fl::size count) { resize(count, char()); }
+
+void basic_string::resize(fl::size count, char ch) {
+    if (count < mLength) {
+        mLength = count;
+        c_str_mutable()[mLength] = '\0';
+    } else if (count > mLength) {
+        fl::size additional_chars = count - mLength;
+        reserve(count);
+        char* data_ptr = c_str_mutable();
+        for (fl::size i = 0; i < additional_chars; ++i) {
+            data_ptr[mLength + i] = ch;
+        }
+        mLength = count;
+        data_ptr[mLength] = '\0';
+    }
+}
+
 } // namespace fl

@@ -44,9 +44,6 @@ string::string(const char* str) FL_NO_EXCEPT
 string::string(const char* str, fl::size len) FL_NO_EXCEPT
     : string_n<FASTLED_STR_INLINED_SIZE>(str, len) {}
 
-string::string(fl::size len, char c) FL_NO_EXCEPT
-    : string_n<FASTLED_STR_INLINED_SIZE>(len, c) {}
-
 string::string(const string& other) FL_NO_EXCEPT
     : string_n<FASTLED_STR_INLINED_SIZE>(static_cast<const string_n<FASTLED_STR_INLINED_SIZE>&>(other)) {}
 
