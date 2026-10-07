@@ -390,15 +390,18 @@ private:
 
     /// @brief Per-channel allocation record
     struct ChannelAllocation {
-        u8 channel_id;
+        // Group the byte fields after words to avoid per-record padding.
         size_t words;
+        u8 channel_id;
         bool is_tx;
         bool is_dma;  ///< DMA channels don't consume on-chip memory
 
-        ChannelAllocation() : channel_id(0), words(0), is_tx(false), is_dma(false) {}
+        ChannelAllocation() : words(0), channel_id(0), is_tx(false), is_dma(false) {}
         ChannelAllocation(u8 id, size_t w, bool tx, bool dma)
-            : channel_id(id), words(w), is_tx(tx), is_dma(dma) {}
+            : words(w), channel_id(id), is_tx(tx), is_dma(dma) {}
     };
+    FL_STATIC_ASSERT(sizeof(ChannelAllocation) <= 2 * sizeof(size_t),
+                     "RMT allocation records exceed two machine words");
 
 #if FL_RMT_STATIC_ALLOCATION
     // Static mode documents exactly one FastLED TX strip. Keep the one-record

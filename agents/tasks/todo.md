@@ -2,6 +2,21 @@
 
 <!-- Add tasks here as checkable items -->
 
+## Memory meta #4737: sequential local optimization
+
+- [ ] ESP32-C3 #4739: matched 3.10.3/master bloat, measured optimization, local checks and landed change.
+- [ ] ESP32-C6 #4740, then STM32 #4744, Uno #4742 and ATtiny85 #4743.
+- [ ] ESP32 #4738 and ESP32-S3 #4741.
+- [ ] Validate Teensy40 #4745, Teensy41 #4746 and RP2040 #4747.
+- [ ] Post cumulative performance diffs on #4737 when each child closes; leave the parent open.
+
+### Execution
+
+Use this checkout and its caches, without git worktrees. Build each platform
+locally and sequentially; never request CI Full. Preserve features while
+reducing logging and driver overhead. Record source provenance and reject stale
+ELFs before comparing sizes.
+
 ## ESP32-S3 binary-size Batch 3 (#2856)
 
 - [x] Audit every tracking item against current master and merged PR history.

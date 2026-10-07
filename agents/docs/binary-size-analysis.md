@@ -21,7 +21,16 @@ bash bloat esp32s3 --build
 
 # JSON + MD artifact only, no stdout table
 bash bloat esp32s3 --no-summary
+
+# Check committed image-flash / attributed-RAM ceilings
+bash bloat esp32c3 --budget tests/data/esp32c3_bloat_budget.json
 ```
+
+`--budget` requires matching board, example and profile in its JSON file and
+rejects missing measurements or growth above either ceiling. Its `image_flash`
+and `total_ram` ceilings refer to the bloat report's image flash and attributed
+RAM; they are not fbuild's board flash/RAM totals. The RMT allocation-record
+compile-time size assertion additionally guards the measured static RAM saving.
 
 ### Slim ESP32-S3 profile (#4564)
 
