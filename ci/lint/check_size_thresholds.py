@@ -104,11 +104,10 @@ FROZEN_THRESHOLDS: dict[str, dict[str, frozenset[int]]] = {
         "max_size_apa102": frozenset({100000}),
     },
     "check_teensy41_size.yml": {
-        # real ceiling — Teensy 4.1 (MIMXRT1062) Blink reflects real growth.
-        "max_size": frozenset({120000}),
-        # real ceiling — restored from the 165000 band-aid (#2802) in
-        # PR #4727 once #2656 was fixed (measured 49,152 B).
-        "max_size_apa102": frozenset({88000}),
+        # #4746: measured default Blink text+data; historical gains retained.
+        "max_size": frozenset({50176}),
+        # #4746: measured Apa102 after #4727 removed the #2656 over-link.
+        "max_size_apa102": frozenset({49152}),
     },
     "check_teensylc_size.yml": {
         # real ceiling — Teensy LC (MKL26Z64) 64 KB flash; never bumped.

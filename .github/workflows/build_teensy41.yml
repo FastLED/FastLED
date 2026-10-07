@@ -50,3 +50,4 @@ jobs:
       # SMOKE_SKETCHES.txt plus examples the PR changes); master compiles
       # every example (#4415).
       args: teensy41 all
+      bloat_budget: tests/data/teensy41_bloat_budget.json

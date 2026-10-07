@@ -1,0 +1,8 @@
+{
+  "board": "teensy41",
+  "example": "Blink",
+  "profile": "default",
+  "image_flash": 50176,
+  "total_ram": 23279,
+  "reference": "#4746: matched 3.10.3 image62464/attributedRAM28028 vs master8647a12f10 image50176/attributedRAM23279; physical board RAM32992 vs28384. fbuild2.5.37, Teensy framework1.160.0, ARM GCC11.3.1, Cortex-M7 600MHz, normal -Os/LTO flags. Preserves original master50176/28384. Attributed RAM differs from physical board RAM and controlled-workload attribution."
+}
