@@ -120,7 +120,7 @@ Neither a singleton migration nor splitting unity groups is required here.
   Tracked in [fbuild #1662](https://github.com/FastLED/fbuild/issues/1662).
 - The component profile uses Arduino plus IDF; it is not bare `app_main` proof.
 - Full Python passed: 1,836 passed, 25 skipped, 2 xfailed and 3,257 subtests.
-  The latest focused annotation/compiler fixture inventory passed 93 tests.
+  The latest focused annotation/compiler fixture inventory passed 96 tests.
   Full native debug passed 318 unit tests and 95 examples; the repaired coroutine
   handshake also passed its separate targeted debug run. Full portable lint and
   strict10 SDK QEMU passed. Exact-SHA complete CI remains required before merge.
@@ -134,7 +134,18 @@ Neither a singleton migration nor splitting unity groups is required here.
   Standalone and combined AST checks use the same profile. Corrected the installed
   query entrypoint name and removed misplaced annotation tokens from both Windows
   Sleep calls. An actual-header compiler probe instantiates both call paths with
-  real noexcept. Full portable lint and the 93-test focused suite passed.
+  real noexcept. Full portable lint and the focused suite passed.
+- Windows GNU parsing then exposed the unannotated inline errno helpers behind
+  the annotated socket interface. Their actual-header contract probe records
+  RED in `/tmp/fastled-4773-errno-red-debug.log` and GREEN after repair. Added a
+  lint-only public STL inventory covering errno, formatting, range access and
+  file-I/O headers; repaired 80 annotations including inactive AVR initializer
+  helpers. An actual AVR-target C++11 probe validates the fallback. Full portable
+  lint and 96 focused tests passed; review is clean.
+- Refreshed clean four-profile fbuild reports at96de698a89 reproduce all image
+  and static DRAM measurements above. Preserved `validated-*.json`, `.map` and
+  provenance in `.build/size-4773`. Wrapper provenance misidentifies the compiler
+  as host Clang; actual build logs record GCC8.4/GCC14.2/GCC13.2 as appropriate.
 - MP3 CPU audit compiler drift is tracked in FastLED#4779. Unchanged master and
   this PR both produce float dct32 instruction count47 with explicit GCC13.2;
   explicit GCC14.2 produces44, matching the baseline. Decoder and audit sources

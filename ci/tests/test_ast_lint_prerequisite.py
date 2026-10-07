@@ -482,6 +482,85 @@ def test_windows_sleep_branch_accepts_real_noexcept() -> None:
     assert result.returncode == 0, (result.stdout or "") + (result.stderr or "")
 
 
+def test_errno_helpers_match_nonthrowing_socket_contract() -> None:
+    import shutil
+
+    from running_process import RunningProcess
+
+    compiler = shutil.which("clang++")
+    if compiler is None:
+        pytest.skip("Clang required for compiler-feature fixture")
+    result = RunningProcess.run(
+        [
+            compiler,
+            "-std=c++17",
+            "-Isrc",
+            "-DFL_NO_EXCEPT=noexcept",
+            "-fsyntax-only",
+            "-x",
+            "c++",
+            "-",
+        ],
+        input=(
+            '#include "fl/stl/cerrno.h"\n'
+            "namespace fl { int get_errno() noexcept; }\n"
+            'static_assert(noexcept(fl::get_errno()), "get_errno contract");\n'
+            'static_assert(noexcept(fl::set_errno(0)), "set_errno contract");\n'
+            'static_assert(noexcept(fl::clear_errno()), "clear_errno contract");\n'
+        ),
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        timeout=120,
+    )
+    assert result.returncode == 0, (result.stdout or "") + (result.stderr or "")
+
+
+def test_avr_initializer_list_fallback_has_valid_cpp11_contracts() -> None:
+    import shutil
+
+    from running_process import RunningProcess
+
+    compiler = shutil.which("clang++")
+    if compiler is None:
+        pytest.skip("Clang required for AVR compiler-feature fixture")
+    result = RunningProcess.run(
+        [
+            compiler,
+            "--target=avr",
+            "-mmcu=atmega328p",
+            "-std=c++11",
+            "-Isrc",
+            "-DFL_NO_EXCEPT=noexcept",
+            "-fsyntax-only",
+            "-x",
+            "c++",
+            "-",
+        ],
+        input=(
+            '#include "fl/stl/initializer_list.h"\n'
+            "fl::initializer_list<int> values = {1, 2};\n"
+            'static_assert(noexcept(values.size()), "size contract");\n'
+            'static_assert(noexcept(values.empty()), "empty contract");\n'
+            'static_assert(noexcept(values.begin()), "begin contract");\n'
+            'static_assert(noexcept(values.end()), "end contract");\n'
+        ),
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        timeout=120,
+    )
+    assert result.returncode == 0, (result.stdout or "") + (result.stderr or "")
+
+
+def test_public_stl_headers_are_in_strict_lint_inventory() -> None:
+    entry = (check_noexcept._TU_STL_HEADERS, ".*src.fl.stl.*")
+    assert entry in check_noexcept._scope_tus("all")
+    assert entry in check_noexcept._scope_tus("fl")
+
+
 def test_ast_compiler_args_select_native_windows_gnu_profile(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

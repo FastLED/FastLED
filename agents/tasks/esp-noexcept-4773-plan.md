@@ -144,3 +144,9 @@ authorized. Unity layout, bodies and vendor linker policies remain unchanged.
   fallback name; removed misplaced tokens on both Sleep calls. The actual-header
   compiler probe and focused93 tests passed; full portable lint passed. The same
   reviewer checked these repairs. MP3 codegen compiler drift is tracked in#4779.
+- Refreshed four clean fbuild size reports at96de698a89 reproduce the same image
+  savings/static DRAM. Windows GNU strict AST then exposed missing errno helper
+  contracts. Compiler-feature RED->GREEN confirms the repair; public STL inventory
+  also covers formatting, range and file-I/O header-only entry points. Repaired80
+  annotations including AVR fallback, with an actual AVR C++11 compile probe.
+  Full portable lint and96 focused tests passed; review is clean.

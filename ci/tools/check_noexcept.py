@@ -32,6 +32,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 _TU_PLATFORMS = "ci/tools/_noexcept_check_platforms_tu.cpp"
 _TU_FL_ALL = "ci/tools/_noexcept_check_fl_tu.cpp"  # legacy fallback only
 _TU_FX_HEADERS = "ci/tools/_noexcept_check_fx_headers_tu.cpp"
+_TU_STL_HEADERS = "ci/tools/_noexcept_check_stl_headers_tu.cpp"
 _TU_THIRD_PARTY = "ci/tools/_noexcept_check_third_party_tu.cpp"  # legacy fallback only
 
 # Canonical per-subdir TU shims live in src/fl/build/ - the same files
@@ -94,6 +95,7 @@ def _scope_tus(scope: str) -> list[tuple[str, str]]:
         return [
             *_fl_subdir_tus(),
             (_TU_FX_HEADERS, ".*src.fl.fx.*"),
+            (_TU_STL_HEADERS, ".*src.fl.stl.*"),
             # Public controllers are included by FastLED.h in the root router.
             ("src/fl/build/src.cpp", ".*src.fl.*"),
         ]
@@ -103,6 +105,7 @@ def _scope_tus(scope: str) -> list[tuple[str, str]]:
             (platforms_tu, ".*src.platforms.*"),
             *_fl_subdir_tus(),
             (_TU_FX_HEADERS, ".*src.fl.fx.*"),
+            (_TU_STL_HEADERS, ".*src.fl.stl.*"),
             (third_party_tu, ".*src.third_party.*"),
         ]
     return _SCOPES[scope]
