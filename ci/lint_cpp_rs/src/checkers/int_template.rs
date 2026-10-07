@@ -219,7 +219,7 @@ const INT_TEMPLATE_ARG_BASELINE: &[(&str, usize)] = &[
     ("src/fl/math/fixed_point.h", 1),
     ("src/fl/math/fixed_point/traits.h", 1),
     ("src/fl/math/line_simplification.h", 2),
-    ("src/fl/math/math.cpp.hpp", 7),
+    ("src/fl/math/functions/math.cpp.hpp", 7),
     ("src/fl/math/math.h", 4),
     ("src/fl/math/screenmap_json/screenmap_json.cpp.hpp", 1),
     ("src/fl/math/soft_float.h", 2),

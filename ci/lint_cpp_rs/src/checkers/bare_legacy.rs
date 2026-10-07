@@ -133,7 +133,7 @@ impl FileContentChecker for BareSnprintfChecker {
 // Bans bare libm calls (sin/cos/sqrtf/atan2/ldexpf/...) in src/.
 // Origin: ci/lint_cpp/bare_libm_checker.py (FastLED #3002 / #3012).
 
-const BARE_LIBM_EXEMPT_SUFFIXES: &[&str] = &["fl/math/math.cpp.hpp", "fl/math/math.h"];
+const BARE_LIBM_EXEMPT_SUFFIXES: &[&str] = &["fl/math/functions/math.cpp.hpp", "fl/math/math.h"];
 
 const BARE_LIBM_EXEMPT_PREFIXES: &[&str] = &[
     "fl/audio/",

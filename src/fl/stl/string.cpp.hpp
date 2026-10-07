@@ -8,7 +8,6 @@
 #include "fl/gfx/crgb.h"                 // for CRGB
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/static_assert.h"
-#include "fl/math/xymap.h"
 // UI dependency moved to separate compilation unit to break dependency chain
 
 #if FL_STRING_NEEDS_ARDUINO_CONVERSION
@@ -228,15 +227,6 @@ string& string::operator+=(const string& other) FL_NO_EXCEPT {
     return *this;
 }
 
-
-string &string::append(const XYMap &map) {
-    append("XYMap(");
-    append(map.getWidth());
-    append(",");
-    append(map.getHeight());
-    append(")");
-    return *this;
-}
 
 void string::swap(string &other) {
     if (this == &other) return;

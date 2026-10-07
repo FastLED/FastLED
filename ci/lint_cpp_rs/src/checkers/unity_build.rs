@@ -60,6 +60,7 @@ const UNITY_EXPECTED_BUILD_FILES: &[&str] = &[
     "fl/build/fl.gfx.paths+.cpp",
     "fl/build/fl.log+.cpp",
     "fl/build/fl.math+.cpp",
+    "fl/build/fl.math.functions+.cpp",
     "fl/build/fl.math.operations+.cpp",
     "fl/build/fl.math.screenmap_json+.cpp",
     "fl/build/fl.math.noise+.cpp",

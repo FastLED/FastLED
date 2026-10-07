@@ -4335,46 +4335,46 @@ src/fl/math/line_simplification.h|void simplifyInplace(VectorType *polyLine) {
 src/fl/math/line_simplification.h|void simplifyInplace(fl::vector<Point> *polyline) {
 src/fl/math/line_simplification.h|void simplifyInternal(const fl::span<const Point> &polyLine) {
 src/fl/math/line_simplification.h|void simplifyT(const fl::span<const Point> &polyLine, VectorType *out) {
-src/fl/math/math.cpp.hpp|double acos_impl_double(double value) {
-src/fl/math/math.cpp.hpp|double asin_impl_double(double value) {
-src/fl/math/math.cpp.hpp|double atan2_impl_double(double y, double x) {
-src/fl/math/math.cpp.hpp|double atan_impl_double(double value) {
-src/fl/math/math.cpp.hpp|double ceil_impl_double(double value) {
-src/fl/math/math.cpp.hpp|double cos_impl_double(double value) {
-src/fl/math/math.cpp.hpp|double exp_impl_double(double value) {
-src/fl/math/math.cpp.hpp|double fabs_impl_double(double value) {
-src/fl/math/math.cpp.hpp|double floor_impl_double(double value) {
-src/fl/math/math.cpp.hpp|double fmod_impl_double(double x, double y) {
-src/fl/math/math.cpp.hpp|double hypot_impl_double(double x, double y) {
-src/fl/math/math.cpp.hpp|double ldexp_impl_double(double value, int exp) {
-src/fl/math/math.cpp.hpp|double log10_impl_double(double value) {
-src/fl/math/math.cpp.hpp|double log_impl_double(double value) {
-src/fl/math/math.cpp.hpp|double pow_impl_double(double base, double exponent) {
-src/fl/math/math.cpp.hpp|double round_impl_double(double value) {
-src/fl/math/math.cpp.hpp|double sin_impl_double(double value) {
-src/fl/math/math.cpp.hpp|double sqrt_impl_double(double value) {
-src/fl/math/math.cpp.hpp|double tan_impl_double(double value) {
-src/fl/math/math.cpp.hpp|float acos_impl_float(float value) {
-src/fl/math/math.cpp.hpp|float asin_impl_float(float value) {
-src/fl/math/math.cpp.hpp|float atan2_impl_float(float y, float x) {
-src/fl/math/math.cpp.hpp|float atan_impl_float(float value) {
-src/fl/math/math.cpp.hpp|float ceil_impl_float(float value) {
-src/fl/math/math.cpp.hpp|float cos_impl_float(float value) {
-src/fl/math/math.cpp.hpp|float exp_impl_float(float value) {
-src/fl/math/math.cpp.hpp|float fabs_impl_float(float value) {
-src/fl/math/math.cpp.hpp|float floor_impl_float(float value) {
-src/fl/math/math.cpp.hpp|float fmod_impl_float(float x, float y) {
-src/fl/math/math.cpp.hpp|float hypot_impl_float(float x, float y) {
-src/fl/math/math.cpp.hpp|float ldexp_impl_float(float value, int exp) {
-src/fl/math/math.cpp.hpp|float log10_impl_float(float value) {
-src/fl/math/math.cpp.hpp|float log_impl_float(float value) {
-src/fl/math/math.cpp.hpp|float pow_impl_float(float base, float exponent) {
-src/fl/math/math.cpp.hpp|float round_impl_float(float value) {
-src/fl/math/math.cpp.hpp|float sin_impl_float(float value) {
-src/fl/math/math.cpp.hpp|float sqrt_impl_float(float value) {
-src/fl/math/math.cpp.hpp|float tan_impl_float(float value) {
-src/fl/math/math.cpp.hpp|long lround_impl_double(double value) {
-src/fl/math/math.cpp.hpp|long lround_impl_float(float value) {
+src/fl/math/functions/math.cpp.hpp|double acos_impl_double(double value) {
+src/fl/math/functions/math.cpp.hpp|double asin_impl_double(double value) {
+src/fl/math/functions/math.cpp.hpp|double atan2_impl_double(double y, double x) {
+src/fl/math/functions/math.cpp.hpp|double atan_impl_double(double value) {
+src/fl/math/functions/math.cpp.hpp|double ceil_impl_double(double value) {
+src/fl/math/functions/math.cpp.hpp|double cos_impl_double(double value) {
+src/fl/math/functions/math.cpp.hpp|double exp_impl_double(double value) {
+src/fl/math/functions/math.cpp.hpp|double fabs_impl_double(double value) {
+src/fl/math/functions/math.cpp.hpp|double floor_impl_double(double value) {
+src/fl/math/functions/math.cpp.hpp|double fmod_impl_double(double x, double y) {
+src/fl/math/functions/math.cpp.hpp|double hypot_impl_double(double x, double y) {
+src/fl/math/functions/math.cpp.hpp|double ldexp_impl_double(double value, int exp) {
+src/fl/math/functions/math.cpp.hpp|double log10_impl_double(double value) {
+src/fl/math/functions/math.cpp.hpp|double log_impl_double(double value) {
+src/fl/math/functions/math.cpp.hpp|double pow_impl_double(double base, double exponent) {
+src/fl/math/functions/math.cpp.hpp|double round_impl_double(double value) {
+src/fl/math/functions/math.cpp.hpp|double sin_impl_double(double value) {
+src/fl/math/functions/math.cpp.hpp|double sqrt_impl_double(double value) {
+src/fl/math/functions/math.cpp.hpp|double tan_impl_double(double value) {
+src/fl/math/functions/math.cpp.hpp|float acos_impl_float(float value) {
+src/fl/math/functions/math.cpp.hpp|float asin_impl_float(float value) {
+src/fl/math/functions/math.cpp.hpp|float atan2_impl_float(float y, float x) {
+src/fl/math/functions/math.cpp.hpp|float atan_impl_float(float value) {
+src/fl/math/functions/math.cpp.hpp|float ceil_impl_float(float value) {
+src/fl/math/functions/math.cpp.hpp|float cos_impl_float(float value) {
+src/fl/math/functions/math.cpp.hpp|float exp_impl_float(float value) {
+src/fl/math/functions/math.cpp.hpp|float fabs_impl_float(float value) {
+src/fl/math/functions/math.cpp.hpp|float floor_impl_float(float value) {
+src/fl/math/functions/math.cpp.hpp|float fmod_impl_float(float x, float y) {
+src/fl/math/functions/math.cpp.hpp|float hypot_impl_float(float x, float y) {
+src/fl/math/functions/math.cpp.hpp|float ldexp_impl_float(float value, int exp) {
+src/fl/math/functions/math.cpp.hpp|float log10_impl_float(float value) {
+src/fl/math/functions/math.cpp.hpp|float log_impl_float(float value) {
+src/fl/math/functions/math.cpp.hpp|float pow_impl_float(float base, float exponent) {
+src/fl/math/functions/math.cpp.hpp|float round_impl_float(float value) {
+src/fl/math/functions/math.cpp.hpp|float sin_impl_float(float value) {
+src/fl/math/functions/math.cpp.hpp|float sqrt_impl_float(float value) {
+src/fl/math/functions/math.cpp.hpp|float tan_impl_float(float value) {
+src/fl/math/functions/math.cpp.hpp|long lround_impl_double(double value) {
+src/fl/math/functions/math.cpp.hpp|long lround_impl_float(float value) {
 src/fl/math/noise/noise_woryley.cpp.hpp|i32 q15_abs(i32 a) { return a < 0 ? -a : a; }
 src/fl/math/noise/noise_woryley.cpp.hpp|i32 worley_noise_2d_q15(i32 x, i32 y) {
 src/fl/math/noise/noise_woryley.cpp.hpp|u16 hash(i32 x, i32 y) {
@@ -6452,7 +6452,7 @@ src/fl/stl/singleton.cpp.hpp|void singleton_registry_set(const char* key, void* 
 src/fl/stl/singleton.cpp.hpp|void* singleton_registry_get(const char* key) {
 src/fl/stl/string.cpp.hpp|string &string::append(const CRGB &rgb) {
 src/fl/gfx/tile2x2_format.cpp.hpp|string &string::append(const Tile2x2_u8_wrap &tile) {
-src/fl/stl/string.cpp.hpp|string &string::append(const XYMap &map) {
+src/fl/math/xymap_format.cpp.hpp|string &string::append(const XYMap &map) {
 src/fl/stl/string.cpp.hpp|string &string::append(const audio::fft::Bins &str) {
 src/fl/stl/string.cpp.hpp|string &string::append(const json_value& val) {
 src/fl/stl/string.cpp.hpp|string &string::appendCRGB(const CRGB &rgb) {

@@ -534,3 +534,9 @@
 - Moving root implementations under src/fl also brings them into AST lint
   scope. Match existing public declaration markers rather than adding debt
   allowances; FL_NO_EXCEPT remains the project's no-op marker.
+- Baseline path migrations must preserve existing ordering and comments.
+  Replace only the moved signatures; sorting the whole file creates unrelated
+  churn and can obscure whether the allowance multiset stayed unchanged.
+- A smaller RMT4 insertion path is insufficient evidence for changing channel
+  publication. An inert slot and failure rollback can still overlap unlocked
+  ISR traversal; preserve publication until that concurrency contract is proven.
