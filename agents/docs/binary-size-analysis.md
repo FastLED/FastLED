@@ -41,9 +41,11 @@ GNU `size` includes it, and the read-only `.stack_dummy` reservation, in
 is removed and the reserved heap expands. Compare allocated `image_flash`
 from `bash bloat`, and keep the raw board summary separate.
 
-For #4747, removing an unused 38,416-byte RX pool reduced Blink's allocated
-image from 135,788 to 135,744 bytes and physical RAM from 59,980 to 21,564
-bytes. The new raw flash summary is 388,476 bytes: 135,744 image bytes plus
+For #4747, the SPI routing and unused RX pool optimizations reduced Blink's
+allocated image from 135,820 to 135,744 bytes and physical RAM from 59,980 to
+21,564 bytes. SPI routing saves 32 image bytes; the unused 38,416-byte RX pool
+and its constructor account for another 44 image bytes and the RAM saving.
+The new raw flash summary is 388,476 bytes: 135,744 image bytes plus
 250,684 reserved heap bytes and 2,048 reserved stack bytes. Those reservations
 are not programmed into flash. The scoped RP2040 budget enforces allocated
 image bytes and attributed RAM; neither metric includes the heap reservation.
