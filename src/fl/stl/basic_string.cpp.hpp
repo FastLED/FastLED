@@ -241,20 +241,9 @@ fl::size basic_string::write(const char* str, fl::size n) {
             inlineBufferPtr()[newLen] = '\0';
             mStorage.reset();
             mLength = newLen;
-        } else {
-            NotNullStringHolderPtr newData = NotNullStringHolderPtr(fl::make_shared<StringHolder>(newLen));
-            if (existingLen > 0 && existingData) {
-                fl::memcpy(newData->data(), existingData, existingLen);
-            }
-            fl::memcpy(newData->data() + existingLen, str, n);
-            newData->data()[newLen] = '\0';
-            mStorage = newData;
-            mLength = newLen;
+            return mLength;
         }
-        return mLength;
-    }
-
-    if (hasHeapData() && heapData().get().use_count() <= 1) {
+    } else if (hasHeapData() && heapData().get().use_count() <= 1) {
         NotNullStringHolderPtr& heap = heapData();
         if (!heap->hasCapacity(newLen)) {
             // Check if str points into our buffer (self-referential write).
@@ -273,20 +262,7 @@ fl::size basic_string::write(const char* str, fl::size n) {
         mLength = newLen;
         heap->data()[mLength] = '\0';
         return mLength;
-    } else if (hasHeapData()) {
-        // Copy-on-write
-        NotNullStringHolderPtr newData = NotNullStringHolderPtr(fl::make_shared<StringHolder>(newLen));
-        {
-            const NotNullStringHolderPtr& heap = heapData();
-            fl::memcpy(newData->data(), heap->data(), mLength);
-            fl::memcpy(newData->data() + mLength, str, n);
-            newData->data()[newLen] = '\0';
-            mStorage = newData;
-            mLength = newLen;
-        }
-        return mLength;
-    }
-    if (newLen + 1 <= mInlineCapacity) {
+    } else if (!hasHeapData() && newLen + 1 <= mInlineCapacity) {
         FL_DISABLE_WARNING_PUSH
         FL_DISABLE_WARNING(array-bounds)
         fl::memcpy(inlineBufferPtr() + mLength, str, n);
@@ -295,10 +271,15 @@ fl::size basic_string::write(const char* str, fl::size n) {
         inlineBufferPtr()[mLength] = '\0';
         return mLength;
     }
-    // Transition from inline to heap
+    // Materialize non-owning storage, detach shared storage, or grow inline
+    // storage through one allocation path. Keep the old storage alive until
+    // both copies finish so appending from our own data remains valid.
+    const char* existingData = constData();
     NotNullStringHolderPtr newData = NotNullStringHolderPtr(fl::make_shared<StringHolder>(newLen));
     {
-        fl::memcpy(newData->data(), inlineBufferPtr(), mLength);
+        if (mLength > 0 && existingData) {
+            fl::memcpy(newData->data(), existingData, mLength);
+        }
         fl::memcpy(newData->data() + mLength, str, n);
         newData->data()[newLen] = '\0';
         mStorage = newData;

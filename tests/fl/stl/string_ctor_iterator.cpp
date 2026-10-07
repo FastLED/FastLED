@@ -1,6 +1,7 @@
 // fl::string construction, assignment, and iterator high-risk scenario tests.
 // Extracted from string.cpp (sub-issue of #3131, meta #3127).
 
+#include "fl/stl/array.h"
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/iterator.h"
 #include "fl/stl/string.h"
@@ -542,6 +543,27 @@ FL_TEST_CASE("string - view to owning materialize via c_str") {
     FL_CHECK_EQ(sv.size(), 5u);
     FL_CHECK_EQ(cs[5], '\0');
     FL_CHECK_EQ(fl::strcmp(cs, "hello"), 0);
+}
+
+FL_TEST_CASE("string - append overlapping non-terminated view to heap") {
+    fl::array<char, FASTLED_STR_INLINED_SIZE + 8> backing;
+    backing.fill('v');
+    fl::string view = fl::string::from_view(backing.data(), backing.size());
+    FL_CHECK_TRUE(view.is_referencing());
+
+    // Use pointer+length: append(view) calls c_str() and materializes first.
+    view.append(backing.data(), backing.size());
+
+    FL_CHECK_EQ(view.size(), 2 * backing.size());
+    FL_CHECK_TRUE(view.is_owning());
+    FL_CHECK_FALSE(view.is_referencing());
+    for (fl::size i = 0; i < view.size(); ++i) {
+        FL_CHECK_EQ(view[i], 'v');
+    }
+    FL_CHECK_EQ(view.c_str()[view.size()], '\0');
+    for (char c : backing) {
+        FL_CHECK_EQ(c, 'v');
+    }
 }
 
 FL_TEST_CASE("string - cross-size assignment small to large forces heap") {

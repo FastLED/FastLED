@@ -104,6 +104,7 @@ const UNITY_EXPECTED_BUILD_FILES: &[&str] = &[
     "fl/build/platforms.esp.32.condition_variable+.cpp",
     "fl/build/platforms.esp.32.coroutine_tasks+.cpp",
     "fl/build/platforms.esp.32.semaphore+.cpp",
+    "fl/build/platforms.esp.32.semaphore.counting+.cpp",
     "fl/build/platforms.esp.32.drivers.spi+.cpp",
     "fl/build/platforms.esp.32.drivers.i2s+.cpp",
     "fl/build/platforms.esp.32.drivers.i2s_spi+.cpp",
