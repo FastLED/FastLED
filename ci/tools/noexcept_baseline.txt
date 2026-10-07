@@ -3236,66 +3236,66 @@ src/fl/gfx/blur/blur.cpp.hpp|void blurGaussian(CanvasMapped<RGB_T> &canvas, alph
 src/fl/gfx/blur/blur.cpp.hpp|void blurGaussian(CanvasMapped<RGB_T> &canvas, alpha8 dimFactor) {
 src/fl/gfx/blur/blur.cpp.hpp|void blurRows(Canvas<CRGB> &canvas, alpha8 blur_amount) {
 src/fl/gfx/blur/blur.cpp.hpp|void blurRows(fl::span<CRGB> leds, fl::u8 width, fl::u8 height, fract8 blur_amount, const XYMap &xyMap) {
-src/fl/gfx/colorutils.cpp.hpp|CHSV &nblend(CHSV &existing, const CHSV &overlay, fract8 amountOfOverlay, TGradientDirectionCode directionCode) {
-src/fl/gfx/colorutils.cpp.hpp|CHSV *blend(const CHSV *src1, const CHSV *src2, CHSV *dest, fl::u16 count, fract8 amountOfsrc2, TGradientDirectionCode directionCode) {
-src/fl/gfx/colorutils.cpp.hpp|CHSV ColorFromPalette(const CHSVPalette16 &pal, fl::u8 index, fl::u8 brightness, TBlendType blendType) {
-src/fl/gfx/colorutils.cpp.hpp|CHSV ColorFromPalette(const CHSVPalette256 &pal, fl::u8 index, fl::u8 brightness, TBlendType) {
-src/fl/gfx/colorutils.cpp.hpp|CHSV ColorFromPalette(const CHSVPalette32 &pal, fl::u8 index, fl::u8 brightness, TBlendType blendType) {
-src/fl/gfx/colorutils.cpp.hpp|CHSV blend(const CHSV &p1, const CHSV &p2, fract8 amountOfP2, TGradientDirectionCode directionCode) {
-src/fl/gfx/colorutils.cpp.hpp|CRGB &napplyGamma_video(CRGB &rgb, float gamma) {
-src/fl/gfx/colorutils.cpp.hpp|CRGB &napplyGamma_video(CRGB &rgb, float gammaR, float gammaG, float gammaB) {
-src/fl/gfx/colorutils.cpp.hpp|CRGB &nblend(CRGB &existing, const CRGB &overlay, fract8 amountOfOverlay) {
-src/fl/gfx/colorutils.cpp.hpp|CRGB *blend(const CRGB *src1, const CRGB *src2, CRGB *dest, fl::u16 count, fract8 amountOfsrc2) {
-src/fl/gfx/colorutils.cpp.hpp|CRGB ColorFromPalette(const CRGBPalette16 &pal, fl::u8 index, fl::u8 brightness, TBlendType blendType) {
-src/fl/gfx/colorutils.cpp.hpp|CRGB ColorFromPalette(const CRGBPalette256 &pal, fl::u8 index, fl::u8 brightness, TBlendType) {
-src/fl/gfx/colorutils.cpp.hpp|CRGB ColorFromPalette(const CRGBPalette32 &pal, fl::u8 index, fl::u8 brightness, TBlendType blendType) {
-src/fl/gfx/colorutils.cpp.hpp|CRGB ColorFromPalette(const TProgmemRGBPalette16 &pal, fl::u8 index, fl::u8 brightness, TBlendType blendType) {
-src/fl/gfx/colorutils.cpp.hpp|CRGB ColorFromPalette(const TProgmemRGBPalette32 &pal, fl::u8 index, fl::u8 brightness, TBlendType blendType) {
-src/fl/gfx/colorutils.cpp.hpp|CRGB ColorFromPaletteExtended(const CRGBPalette16 &pal, fl::u16 index, fl::u8 brightness, TBlendType blendType) {
-src/fl/gfx/colorutils.cpp.hpp|CRGB ColorFromPaletteExtended(const CRGBPalette256 &pal, fl::u16 index, fl::u8 brightness, TBlendType blendType) {
-src/fl/gfx/colorutils.cpp.hpp|CRGB ColorFromPaletteExtended(const CRGBPalette32 &pal, fl::u16 index, fl::u8 brightness, TBlendType blendType) {
-src/fl/gfx/colorutils.cpp.hpp|CRGB ColorFromPaletteExtended(const TProgmemRGBPalette16 &pal, fl::u16 index, fl::u8 brightness, TBlendType blendType) {
-src/fl/gfx/colorutils.cpp.hpp|CRGB ColorFromPaletteExtended(const TProgmemRGBPalette32 &pal, fl::u16 index, fl::u8 brightness, TBlendType blendType) {
-src/fl/gfx/colorutils.cpp.hpp|CRGB HeatColor(fl::u8 temperature) {
-src/fl/gfx/colorutils.cpp.hpp|CRGB applyGamma_video(const CRGB &orig, float gamma) {
-src/fl/gfx/colorutils.cpp.hpp|CRGB applyGamma_video(const CRGB &orig, float gammaR, float gammaG, float gammaB) {
-src/fl/gfx/colorutils.cpp.hpp|CRGB blend(const CRGB &p1, const CRGB &p2, fract8 amountOfP2) {
-src/fl/gfx/colorutils.cpp.hpp|CRGB read(fl::u8 index) const {
-src/fl/gfx/colorutils.cpp.hpp|CRGB read(fl::u8 index) const { return entries[index]; }
-src/fl/gfx/colorutils.cpp.hpp|CRGB16 ColorFromPaletteHD(const CRGBPalette16 &pal, fl::u16 index, fl::u8x8 brightness, TBlendType blendType) {
-src/fl/gfx/colorutils.cpp.hpp|CRGB16 ColorFromPaletteHD(const CRGBPalette256 &pal, fl::u16 index, fl::u8x8 brightness, TBlendType blendType) {
-src/fl/gfx/colorutils.cpp.hpp|CRGB16 ColorFromPaletteHD(const CRGBPalette32 &pal, fl::u16 index, fl::u8x8 brightness, TBlendType blendType) {
-src/fl/gfx/colorutils.cpp.hpp|CRGB16 ColorFromPaletteHD(const TProgmemRGBPalette16 &pal, fl::u16 index, fl::u8x8 brightness, TBlendType blendType) {
-src/fl/gfx/colorutils.cpp.hpp|CRGB16 ColorFromPaletteHD(const TProgmemRGBPalette32 &pal, fl::u16 index, fl::u8x8 brightness, TBlendType blendType) {
-src/fl/gfx/colorutils.cpp.hpp|CRGB16 ColorFromPaletteHDImpl(const Reader &reader, fl::u16 index, fl::u8x8 brightness, TBlendType blendType) {
-src/fl/gfx/colorutils.cpp.hpp|fl::u8 applyGamma_video(fl::u8 brightness, float gamma) {
-src/fl/gfx/colorutils.cpp.hpp|inline CRGB16 promote_rgb_to_hd(const CRGB &rgb) {
-src/fl/gfx/colorutils.cpp.hpp|inline fl::u16 lerp_channel_to_hd(fl::u8 a, fl::u8 b, fl::u16 frac, fl::u32 segment_size) {
-src/fl/gfx/colorutils.cpp.hpp|inline fl::u16 promote_channel_to_hd(fl::u8 channel) {
-src/fl/gfx/colorutils.cpp.hpp|inline fl::u16 scale_hd_channel(fl::u16 channel, fl::u8x8 scale) {
-src/fl/gfx/colorutils.cpp.hpp|inline fl::u8 lsrX4(fl::u8 dividend) __attribute__((always_inline));
-src/fl/gfx/colorutils.cpp.hpp|inline fl::u8 lsrX4(fl::u8 dividend) {
-src/fl/gfx/colorutils.cpp.hpp|inline void scale_rgb_hd(CRGB16 &rgb, fl::u8x8 brightness) {
-src/fl/gfx/colorutils.cpp.hpp|void UpscalePalette(const class CHSVPalette16 &srcpal16, class CHSVPalette256 &destpal256) {
-src/fl/gfx/colorutils.cpp.hpp|void UpscalePalette(const class CHSVPalette16 &srcpal16, class CHSVPalette32 &destpal32) {
-src/fl/gfx/colorutils.cpp.hpp|void UpscalePalette(const class CHSVPalette32 &srcpal32, class CHSVPalette256 &destpal256) {
-src/fl/gfx/colorutils.cpp.hpp|void UpscalePalette(const class CRGBPalette16 &srcpal16, class CRGBPalette256 &destpal256) {
-src/fl/gfx/colorutils.cpp.hpp|void UpscalePalette(const class CRGBPalette16 &srcpal16, class CRGBPalette32 &destpal32) {
-src/fl/gfx/colorutils.cpp.hpp|void UpscalePalette(const class CRGBPalette32 &srcpal32, class CRGBPalette256 &destpal256) {
-src/fl/gfx/colorutils.cpp.hpp|void UpscalePaletteInterpolated(const TSrcPalette &srcpal, TDestPalette &destpal) {
-src/fl/gfx/colorutils.cpp.hpp|void UpscalePaletteRepeat(const TSrcPalette &srcpal, TDestPalette &destpal) {
-src/fl/gfx/colorutils.cpp.hpp|void fadeLightBy(CRGB *leds, fl::u16 num_leds, fl::u8 fadeBy) {
-src/fl/gfx/colorutils.cpp.hpp|void fadeToBlackBy(CRGB *leds, fl::u16 num_leds, fl::u8 fadeBy) {
-src/fl/gfx/colorutils.cpp.hpp|void fadeUsingColor(CRGB *leds, fl::u16 numLeds, const CRGB &colormask) {
-src/fl/gfx/colorutils.cpp.hpp|void fade_raw(CRGB *leds, fl::u16 num_leds, fl::u8 fadeBy) {
-src/fl/gfx/colorutils.cpp.hpp|void fade_video(CRGB *leds, fl::u16 num_leds, fl::u8 fadeBy) {
-src/fl/gfx/colorutils.cpp.hpp|void napplyGamma_video(CRGB *rgbarray, fl::u16 count, float gamma) {
-src/fl/gfx/colorutils.cpp.hpp|void napplyGamma_video(CRGB *rgbarray, fl::u16 count, float gammaR, float gammaG, float gammaB) {
-src/fl/gfx/colorutils.cpp.hpp|void nblend(CHSV *existing, const CHSV *overlay, fl::u16 count, fract8 amountOfOverlay, TGradientDirectionCode directionCode) {
-src/fl/gfx/colorutils.cpp.hpp|void nblend(CRGB *existing, const CRGB *overlay, fl::u16 count, fract8 amountOfOverlay) {
-src/fl/gfx/colorutils.cpp.hpp|void nblendPaletteTowardPalette(CRGBPalette16 &current, CRGBPalette16 &target, fl::u8 maxChanges) {
-src/fl/gfx/colorutils.cpp.hpp|void nscale8(CRGB *leds, fl::u16 num_leds, fl::u8 scale) {
-src/fl/gfx/colorutils.cpp.hpp|void nscale8_video(CRGB *leds, fl::u16 num_leds, fl::u8 scale) {
+src/fl/gfx/effects/colorutils.cpp.hpp|CHSV &nblend(CHSV &existing, const CHSV &overlay, fract8 amountOfOverlay, TGradientDirectionCode directionCode) {
+src/fl/gfx/effects/colorutils.cpp.hpp|CHSV *blend(const CHSV *src1, const CHSV *src2, CHSV *dest, fl::u16 count, fract8 amountOfsrc2, TGradientDirectionCode directionCode) {
+src/fl/gfx/effects/colorutils.cpp.hpp|CHSV ColorFromPalette(const CHSVPalette16 &pal, fl::u8 index, fl::u8 brightness, TBlendType blendType) {
+src/fl/gfx/effects/colorutils.cpp.hpp|CHSV ColorFromPalette(const CHSVPalette256 &pal, fl::u8 index, fl::u8 brightness, TBlendType) {
+src/fl/gfx/effects/colorutils.cpp.hpp|CHSV ColorFromPalette(const CHSVPalette32 &pal, fl::u8 index, fl::u8 brightness, TBlendType blendType) {
+src/fl/gfx/effects/colorutils.cpp.hpp|CHSV blend(const CHSV &p1, const CHSV &p2, fract8 amountOfP2, TGradientDirectionCode directionCode) {
+src/fl/gfx/effects/colorutils.cpp.hpp|CRGB &napplyGamma_video(CRGB &rgb, float gamma) {
+src/fl/gfx/effects/colorutils.cpp.hpp|CRGB &napplyGamma_video(CRGB &rgb, float gammaR, float gammaG, float gammaB) {
+src/fl/gfx/effects/colorutils.cpp.hpp|CRGB &nblend(CRGB &existing, const CRGB &overlay, fract8 amountOfOverlay) {
+src/fl/gfx/effects/colorutils.cpp.hpp|CRGB *blend(const CRGB *src1, const CRGB *src2, CRGB *dest, fl::u16 count, fract8 amountOfsrc2) {
+src/fl/gfx/effects/colorutils.cpp.hpp|CRGB ColorFromPalette(const CRGBPalette16 &pal, fl::u8 index, fl::u8 brightness, TBlendType blendType) {
+src/fl/gfx/effects/colorutils.cpp.hpp|CRGB ColorFromPalette(const CRGBPalette256 &pal, fl::u8 index, fl::u8 brightness, TBlendType) {
+src/fl/gfx/effects/colorutils.cpp.hpp|CRGB ColorFromPalette(const CRGBPalette32 &pal, fl::u8 index, fl::u8 brightness, TBlendType blendType) {
+src/fl/gfx/effects/colorutils.cpp.hpp|CRGB ColorFromPalette(const TProgmemRGBPalette16 &pal, fl::u8 index, fl::u8 brightness, TBlendType blendType) {
+src/fl/gfx/effects/colorutils.cpp.hpp|CRGB ColorFromPalette(const TProgmemRGBPalette32 &pal, fl::u8 index, fl::u8 brightness, TBlendType blendType) {
+src/fl/gfx/effects/colorutils.cpp.hpp|CRGB ColorFromPaletteExtended(const CRGBPalette16 &pal, fl::u16 index, fl::u8 brightness, TBlendType blendType) {
+src/fl/gfx/effects/colorutils.cpp.hpp|CRGB ColorFromPaletteExtended(const CRGBPalette256 &pal, fl::u16 index, fl::u8 brightness, TBlendType blendType) {
+src/fl/gfx/effects/colorutils.cpp.hpp|CRGB ColorFromPaletteExtended(const CRGBPalette32 &pal, fl::u16 index, fl::u8 brightness, TBlendType blendType) {
+src/fl/gfx/effects/colorutils.cpp.hpp|CRGB ColorFromPaletteExtended(const TProgmemRGBPalette16 &pal, fl::u16 index, fl::u8 brightness, TBlendType blendType) {
+src/fl/gfx/effects/colorutils.cpp.hpp|CRGB ColorFromPaletteExtended(const TProgmemRGBPalette32 &pal, fl::u16 index, fl::u8 brightness, TBlendType blendType) {
+src/fl/gfx/effects/colorutils.cpp.hpp|CRGB HeatColor(fl::u8 temperature) {
+src/fl/gfx/effects/colorutils.cpp.hpp|CRGB applyGamma_video(const CRGB &orig, float gamma) {
+src/fl/gfx/effects/colorutils.cpp.hpp|CRGB applyGamma_video(const CRGB &orig, float gammaR, float gammaG, float gammaB) {
+src/fl/gfx/effects/colorutils.cpp.hpp|CRGB blend(const CRGB &p1, const CRGB &p2, fract8 amountOfP2) {
+src/fl/gfx/effects/colorutils.cpp.hpp|CRGB read(fl::u8 index) const {
+src/fl/gfx/effects/colorutils.cpp.hpp|CRGB read(fl::u8 index) const { return entries[index]; }
+src/fl/gfx/effects/colorutils.cpp.hpp|CRGB16 ColorFromPaletteHD(const CRGBPalette16 &pal, fl::u16 index, fl::u8x8 brightness, TBlendType blendType) {
+src/fl/gfx/effects/colorutils.cpp.hpp|CRGB16 ColorFromPaletteHD(const CRGBPalette256 &pal, fl::u16 index, fl::u8x8 brightness, TBlendType blendType) {
+src/fl/gfx/effects/colorutils.cpp.hpp|CRGB16 ColorFromPaletteHD(const CRGBPalette32 &pal, fl::u16 index, fl::u8x8 brightness, TBlendType blendType) {
+src/fl/gfx/effects/colorutils.cpp.hpp|CRGB16 ColorFromPaletteHD(const TProgmemRGBPalette16 &pal, fl::u16 index, fl::u8x8 brightness, TBlendType blendType) {
+src/fl/gfx/effects/colorutils.cpp.hpp|CRGB16 ColorFromPaletteHD(const TProgmemRGBPalette32 &pal, fl::u16 index, fl::u8x8 brightness, TBlendType blendType) {
+src/fl/gfx/effects/colorutils.cpp.hpp|CRGB16 ColorFromPaletteHDImpl(const Reader &reader, fl::u16 index, fl::u8x8 brightness, TBlendType blendType) {
+src/fl/gfx/effects/colorutils.cpp.hpp|fl::u8 applyGamma_video(fl::u8 brightness, float gamma) {
+src/fl/gfx/effects/colorutils.cpp.hpp|inline CRGB16 promote_rgb_to_hd(const CRGB &rgb) {
+src/fl/gfx/effects/colorutils.cpp.hpp|inline fl::u16 lerp_channel_to_hd(fl::u8 a, fl::u8 b, fl::u16 frac, fl::u32 segment_size) {
+src/fl/gfx/effects/colorutils.cpp.hpp|inline fl::u16 promote_channel_to_hd(fl::u8 channel) {
+src/fl/gfx/effects/colorutils.cpp.hpp|inline fl::u16 scale_hd_channel(fl::u16 channel, fl::u8x8 scale) {
+src/fl/gfx/effects/colorutils.cpp.hpp|inline fl::u8 lsrX4(fl::u8 dividend) __attribute__((always_inline));
+src/fl/gfx/effects/colorutils.cpp.hpp|inline fl::u8 lsrX4(fl::u8 dividend) {
+src/fl/gfx/effects/colorutils.cpp.hpp|inline void scale_rgb_hd(CRGB16 &rgb, fl::u8x8 brightness) {
+src/fl/gfx/effects/colorutils.cpp.hpp|void UpscalePalette(const class CHSVPalette16 &srcpal16, class CHSVPalette256 &destpal256) {
+src/fl/gfx/effects/colorutils.cpp.hpp|void UpscalePalette(const class CHSVPalette16 &srcpal16, class CHSVPalette32 &destpal32) {
+src/fl/gfx/effects/colorutils.cpp.hpp|void UpscalePalette(const class CHSVPalette32 &srcpal32, class CHSVPalette256 &destpal256) {
+src/fl/gfx/effects/colorutils.cpp.hpp|void UpscalePalette(const class CRGBPalette16 &srcpal16, class CRGBPalette256 &destpal256) {
+src/fl/gfx/effects/colorutils.cpp.hpp|void UpscalePalette(const class CRGBPalette16 &srcpal16, class CRGBPalette32 &destpal32) {
+src/fl/gfx/effects/colorutils.cpp.hpp|void UpscalePalette(const class CRGBPalette32 &srcpal32, class CRGBPalette256 &destpal256) {
+src/fl/gfx/effects/colorutils.cpp.hpp|void UpscalePaletteInterpolated(const TSrcPalette &srcpal, TDestPalette &destpal) {
+src/fl/gfx/effects/colorutils.cpp.hpp|void UpscalePaletteRepeat(const TSrcPalette &srcpal, TDestPalette &destpal) {
+src/fl/gfx/effects/colorutils.cpp.hpp|void fadeLightBy(CRGB *leds, fl::u16 num_leds, fl::u8 fadeBy) {
+src/fl/gfx/effects/colorutils.cpp.hpp|void fadeToBlackBy(CRGB *leds, fl::u16 num_leds, fl::u8 fadeBy) {
+src/fl/gfx/effects/colorutils.cpp.hpp|void fadeUsingColor(CRGB *leds, fl::u16 numLeds, const CRGB &colormask) {
+src/fl/gfx/effects/colorutils.cpp.hpp|void fade_raw(CRGB *leds, fl::u16 num_leds, fl::u8 fadeBy) {
+src/fl/gfx/effects/colorutils.cpp.hpp|void fade_video(CRGB *leds, fl::u16 num_leds, fl::u8 fadeBy) {
+src/fl/gfx/effects/colorutils.cpp.hpp|void napplyGamma_video(CRGB *rgbarray, fl::u16 count, float gamma) {
+src/fl/gfx/effects/colorutils.cpp.hpp|void napplyGamma_video(CRGB *rgbarray, fl::u16 count, float gammaR, float gammaG, float gammaB) {
+src/fl/gfx/effects/colorutils.cpp.hpp|void nblend(CHSV *existing, const CHSV *overlay, fl::u16 count, fract8 amountOfOverlay, TGradientDirectionCode directionCode) {
+src/fl/gfx/effects/colorutils.cpp.hpp|void nblend(CRGB *existing, const CRGB *overlay, fl::u16 count, fract8 amountOfOverlay) {
+src/fl/gfx/effects/colorutils.cpp.hpp|void nblendPaletteTowardPalette(CRGBPalette16 &current, CRGBPalette16 &target, fl::u8 maxChanges) {
+src/fl/gfx/effects/colorutils.cpp.hpp|void nscale8(CRGB *leds, fl::u16 num_leds, fl::u8 scale) {
+src/fl/gfx/effects/colorutils.cpp.hpp|void nscale8_video(CRGB *leds, fl::u16 num_leds, fl::u8 scale) {
 src/fl/gfx/corkscrew/corkscrew.cpp.hpp|CRGB* Corkscrew::rawData() {
 src/fl/gfx/corkscrew/corkscrew.cpp.hpp|Corkscrew::Corkscrew(float totalTurns, fl::span<CRGB> dstPixels, bool invert, const Gap& gapParams) : mTotalTurns(totalTurns), mNumLeds(static_cast<fl::u16>(dstPixels.size())), mGapParams(gapParams), mInvert(invert) {
 src/fl/gfx/corkscrew/corkscrew.cpp.hpp|Corkscrew::Corkscrew(float totalTurns, fl::u16 numLeds, bool invert, const Gap& gapParams) : mTotalTurns(totalTurns), mNumLeds(numLeds), mGapParams(gapParams), mInvert(invert) {
@@ -3385,16 +3385,16 @@ src/fl/gfx/draw_visitor.h|inline void XYDrawComposited::draw(const vec2<fl::u16>
 src/fl/gfx/draw_visitor.h|inline void XYDrawGradient::draw(const vec2<fl::u16> &pt, fl::u32 index, fl::u8 value) {
 src/fl/gfx/draw_visitor.h|void draw(const vec2<fl::u16> &pt, fl::u32 index, fl::u8 value);
 src/fl/gfx/draw_visitor.h|void draw(const vec2<fl::u16> &pt, fl::u32 index, fl::u8 value);
-src/fl/gfx/fill.cpp.hpp|void fill_gradient_RGB(CRGB *leds, u16 numLeds, const CRGB &c1, const CRGB &c2) {
-src/fl/gfx/fill.cpp.hpp|void fill_gradient_RGB(CRGB *leds, u16 numLeds, const CRGB &c1, const CRGB &c2, const CRGB &c3) {
-src/fl/gfx/fill.cpp.hpp|void fill_gradient_RGB(CRGB *leds, u16 numLeds, const CRGB &c1, const CRGB &c2, const CRGB &c3, const CRGB &c4) {
-src/fl/gfx/fill.cpp.hpp|void fill_gradient_RGB(CRGB *leds, u16 startpos, CRGB startcolor, u16 endpos, CRGB endcolor) {
-src/fl/gfx/fill.cpp.hpp|void fill_rainbow(CHSV *targetArray, int numToFill, u8 initialhue, u8 deltahue) {
-src/fl/gfx/fill.cpp.hpp|void fill_rainbow(CRGB *targetArray, int numToFill, u8 initialhue, u8 deltahue) {
-src/fl/gfx/fill.cpp.hpp|void fill_rainbow_circular(CHSV *targetArray, int numToFill, u8 initialhue, bool reversed) {
-src/fl/gfx/fill.cpp.hpp|void fill_rainbow_circular(CRGB *targetArray, int numToFill, u8 initialhue, bool reversed) {
-src/fl/gfx/fill.cpp.hpp|void fill_solid(CHSV *targetArray, int numToFill, const CHSV &color) {
-src/fl/gfx/fill.cpp.hpp|void fill_solid(CRGB *targetArray, int numToFill, const CRGB &color) {
+src/fl/gfx/effects/fill.cpp.hpp|void fill_gradient_RGB(CRGB *leds, u16 numLeds, const CRGB &c1, const CRGB &c2) {
+src/fl/gfx/effects/fill.cpp.hpp|void fill_gradient_RGB(CRGB *leds, u16 numLeds, const CRGB &c1, const CRGB &c2, const CRGB &c3) {
+src/fl/gfx/effects/fill.cpp.hpp|void fill_gradient_RGB(CRGB *leds, u16 numLeds, const CRGB &c1, const CRGB &c2, const CRGB &c3, const CRGB &c4) {
+src/fl/gfx/effects/fill.cpp.hpp|void fill_gradient_RGB(CRGB *leds, u16 startpos, CRGB startcolor, u16 endpos, CRGB endcolor) {
+src/fl/gfx/effects/fill.cpp.hpp|void fill_rainbow(CHSV *targetArray, int numToFill, u8 initialhue, u8 deltahue) {
+src/fl/gfx/effects/fill.cpp.hpp|void fill_rainbow(CRGB *targetArray, int numToFill, u8 initialhue, u8 deltahue) {
+src/fl/gfx/effects/fill.cpp.hpp|void fill_rainbow_circular(CHSV *targetArray, int numToFill, u8 initialhue, bool reversed) {
+src/fl/gfx/effects/fill.cpp.hpp|void fill_rainbow_circular(CRGB *targetArray, int numToFill, u8 initialhue, bool reversed) {
+src/fl/gfx/effects/fill.cpp.hpp|void fill_solid(CHSV *targetArray, int numToFill, const CHSV &color) {
+src/fl/gfx/effects/fill.cpp.hpp|void fill_solid(CRGB *targetArray, int numToFill, const CRGB &color) {
 src/fl/gfx/five_bit_hd_gamma.cpp.hpp|FL_ALWAYS_INLINE u16 gamma_lut_read(aligned_ptr<const u16, 64> lut, u8 idx) {
 src/fl/gfx/five_bit_hd_gamma.cpp.hpp|FL_ALWAYS_INLINE u16 scale16by8_nozero(u16 i, u16 scale_plus_one) {
 src/fl/gfx/five_bit_hd_gamma.cpp.hpp|FL_ALWAYS_INLINE void five_bit_pixel( u16 r16, u16 g16, u16 b16, u8 brightness, u16 bright_p1, bool apply_brightness, CRGB *out, u8 *out_power_5bit) {
@@ -5602,9 +5602,9 @@ src/fl/stl/basic_string.cpp.hpp|basic_string& basic_string::append(const basic_s
 src/fl/stl/basic_string.cpp.hpp|basic_string& basic_string::append(const bool& val) {
 src/fl/stl/basic_string.cpp.hpp|basic_string& basic_string::append(const char* str) {
 src/fl/stl/basic_string.cpp.hpp|basic_string& basic_string::append(const char* str, fl::size len) {
-src/fl/stl/basic_string.cpp.hpp|basic_string& basic_string::append(const double& val) {
-src/fl/stl/basic_string.cpp.hpp|basic_string& basic_string::append(const float& val) {
-src/fl/stl/basic_string.cpp.hpp|basic_string& basic_string::append(const float& val, int precision) {
+src/fl/stl/float_format/float_format.cpp.hpp|basic_string& basic_string::append(const double& val) {
+src/fl/stl/float_format/float_format.cpp.hpp|basic_string& basic_string::append(const float& val) {
+src/fl/stl/float_format/float_format.cpp.hpp|basic_string& basic_string::append(const float& val, int precision) {
 src/fl/stl/basic_string.cpp.hpp|basic_string& basic_string::append(const i16& val) {
 src/fl/stl/basic_string.cpp.hpp|basic_string& basic_string::append(const i32& val) {
 src/fl/stl/basic_string.cpp.hpp|basic_string& basic_string::append(const i64& val) {
@@ -5766,7 +5766,7 @@ src/fl/stl/charconv.cpp.hpp|int parseInt(const char *str) {
 src/fl/stl/charconv.cpp.hpp|int parseInt(const char *str, fl::size len) {
 src/fl/stl/charconv.cpp.hpp|int utoa32(u32 value, char *sp, int radix) {
 src/fl/stl/charconv.cpp.hpp|int utoa64(u64 value, char *sp, int radix) {
-src/fl/stl/charconv.cpp.hpp|void ftoa(float value, char *buffer, int precision) {
+src/fl/stl/float_format/float_format.cpp.hpp|void ftoa(float value, char *buffer, int precision) {
 src/fl/stl/chrono.cpp.hpp|Millis64State& get_millis64_state() {
 src/fl/stl/chrono.cpp.hpp|MockTimeProvider::MockTimeProvider(fl::u32 initial_time) : mCurrentTime(initial_time) {
 src/fl/stl/chrono.cpp.hpp|fl::mutex& get_time_mutex() {

@@ -1407,24 +1407,6 @@ basic_string& basic_string::append(const u64& val) {
     return *this;
 }
 
-basic_string& basic_string::append(const float& val) {
-    char buf[64] = {0};
-    fl::ftoa(val, buf, 2);
-    write(buf, fl::strlen(buf));
-    return *this;
-}
-
-basic_string& basic_string::append(const float& val, int precision) {
-    char buf[64] = {0};
-    fl::ftoa(val, buf, precision);
-    write(buf, fl::strlen(buf));
-    return *this;
-}
-
-basic_string& basic_string::append(const double& val) {
-    return append(static_cast<float>(val));
-}
-
 basic_string& basic_string::append(const basic_string& str) {
     write(str.c_str(), str.size());
     return *this;

@@ -546,7 +546,17 @@ void ChannelEngineRMT4Impl::startTransmission(
     FL_DBG("RMT4: Transmission started on channel " << state->channel << ", pin " << (static_cast<int>(state->pin)) << ", " << state->pixelDataSize << " bytes");
 }
 
-// Note: findChannelByNumber() is defined in the header.
+// Define outside the class so Xtensa literals stay in the IRAM section.
+FL_NO_INLINE IRAM_ATTR ChannelEngineRMT4Impl::ChannelState *
+ChannelEngineRMT4Impl::findChannelByNumber(int channelNum) FL_NO_EXCEPT {
+    // Linear search through active channels
+    for (auto &state : mChannels) {
+        if (state.inUse && state.channel == channelNum) {
+            return &state;
+        }
+    }
+    return nullptr;
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // IChannelDriver Interface Implementation

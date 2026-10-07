@@ -6,6 +6,7 @@ the validator catches anomalous cache/tool output before a runner loads it.
 """
 
 import concurrent.futures
+import json
 import os
 import threading
 import time
@@ -19,6 +20,7 @@ from unittest.mock import MagicMock, patch
 from ci.meson.streaming import (  # noqa: E402
     CompileOnlyResult,
     _wait_for_dll_touch,
+    registered_test_artifacts,
     stream_compile_and_run_tests,
     stream_compile_only,
 )
@@ -91,6 +93,22 @@ class TestValidateTestArtifact(unittest.TestCase):
             self.assertIn("Stale test artifact", result.output)
             self.assertIn(str(dll), result.output)
             self.assertIn("#3011", result.output)
+
+    def test_registered_cached_artifact_accepts_old_mtime_but_not_missing(self) -> None:
+        """A successful build permits unchanged artifacts, retaining existence checks."""
+        with TemporaryDirectory() as tmp:
+            artifact = Path(tmp) / "color_profile_tiny_layout"
+            artifact.write_bytes(b"cached probe")
+            build_start = artifact.stat().st_mtime + 100
+            self.assertIsNone(
+                validate_test_artifact(artifact, build_start, require_fresh=False)
+            )
+            self.assertIsNotNone(validate_test_artifact(artifact, build_start))
+            self.assertIsNotNone(
+                validate_test_artifact(
+                    Path(tmp) / "missing", build_start, require_fresh=False
+                )
+            )
 
     def test_exactly_at_build_start_is_accepted(self) -> None:
         """A DLL with mtime == build_start (no slop) passes the check.
@@ -176,6 +194,174 @@ class TestStreamingExecutionCoordination(unittest.TestCase):
         self.assertIn(
             "DLL mtime optimization timed out after 1.0s", result.compile_output
         )
+
+    def test_complete_inventory_runs_unchanged_standalone_probe(self) -> None:
+        """Full execution includes registered probes absent from Ninja output."""
+        with TemporaryDirectory() as tmp:
+            build_dir = Path(tmp)
+            linked = build_dir / "tests" / "changed.so"
+            cached = build_dir / "tests" / "color_profile_tiny_layout"
+            gate = build_dir / "ci" / "meson" / "compile-tests"
+            info = build_dir / "meson-info"
+            info.mkdir()
+            (info / "intro-tests.json").write_text(
+                json.dumps(
+                    [
+                        {
+                            "cmd": [
+                                "python",
+                                "test_wrapper.py",
+                                str(build_dir / "tests" / "runner"),
+                                str(linked),
+                                "20",
+                            ]
+                        },
+                        {"cmd": [str(cached)]},
+                        {"cmd": [str(gate)]},
+                    ]
+                ),
+                encoding="utf-8",
+            )
+            observed: list[Path] = []
+
+            def callback(path: Path) -> StreamingTestResult:
+                observed.append(path)
+                self.assertEqual(
+                    frozenset([cached, gate]),
+                    getattr(callback, "_cached_test_artifacts"),
+                )
+                return StreamingTestResult(success=True)
+
+            with (
+                patch(
+                    "ci.meson.streaming.stream_compile_only",
+                    return_value=CompileOnlyResult(
+                        success=True, compiled_tests=[linked]
+                    ),
+                ),
+                patch(
+                    "ci.meson.streaming.concurrent.futures.ThreadPoolExecutor",
+                    side_effect=_ImmediateExecutor,
+                ),
+            ):
+                result = stream_compile_and_run_tests(
+                    build_dir, callback, target="all-with-examples"
+                )
+            self.assertTrue(result.success)
+            self.assertEqual([linked, cached, gate], observed)
+            self.assertEqual(3, result.num_passed)
+            self.assertEqual(0, result.num_passed_examples)
+
+    def test_registered_inventory_preserves_alias_and_targeted_scope(self) -> None:
+        """Unit-only and example-only builds cannot execute unbuilt populations."""
+        with TemporaryDirectory() as tmp:
+            build_dir = Path(tmp)
+            unit = build_dir / "tests" / "color_profile_tiny_layout"
+            example = build_dir / "examples" / "Blink.so"
+            info = build_dir / "meson-info"
+            info.mkdir()
+            (info / "intro-tests.json").write_text(
+                json.dumps(
+                    [
+                        {"cmd": [str(unit)]},
+                        {"cmd": ["python", "test_wrapper.py", str(example)]},
+                    ]
+                ),
+                encoding="utf-8",
+            )
+            self.assertEqual([unit], registered_test_artifacts(build_dir, "all_tests"))
+            self.assertEqual(
+                [example], registered_test_artifacts(build_dir, "examples-host")
+            )
+            self.assertEqual(
+                [], registered_test_artifacts(build_dir, "tests/specific.so")
+            )
+            self.assertEqual([], registered_test_artifacts(build_dir, None))
+
+    def test_full_inventory_excludes_announced_and_cached_suite_artifacts(self) -> None:
+        """Suite exclusions apply even when Ninja announces the excluded gate."""
+        with TemporaryDirectory() as tmp:
+            build_dir = Path(tmp)
+            unit = build_dir / "tests" / "unit.so"
+            gate = build_dir / "ci" / "meson" / "compile-tests"
+            example = build_dir / "examples" / "Blink.so"
+            info = build_dir / "meson-info"
+            info.mkdir()
+            (info / "intro-tests.json").write_text(
+                json.dumps(
+                    [
+                        {"cmd": ["runner", str(unit)], "suite": ["fastled"]},
+                        {"cmd": [str(gate)], "suite": ["fastled:compile-tests"]},
+                        {
+                            "cmd": ["example_runner", str(example)],
+                            "suite": ["fastled:examples"],
+                        },
+                    ]
+                ),
+                encoding="utf-8",
+            )
+            for exclusion in ("compile-tests", "fastled:compile-tests"):
+                with self.subTest(exclusion=exclusion):
+                    observed: list[Path] = []
+
+                    def callback(path: Path) -> StreamingTestResult:
+                        observed.append(path)
+                        return StreamingTestResult(success=True)
+
+                    with (
+                        patch(
+                            "ci.meson.streaming.stream_compile_only",
+                            return_value=CompileOnlyResult(
+                                success=True, compiled_tests=[gate]
+                            ),
+                        ),
+                        patch(
+                            "ci.meson.streaming.concurrent.futures.ThreadPoolExecutor",
+                            side_effect=_ImmediateExecutor,
+                        ),
+                    ):
+                        result = stream_compile_and_run_tests(
+                            build_dir,
+                            callback,
+                            target="all_tests",
+                            exclude_suites=[exclusion],
+                        )
+                    self.assertTrue(result.success)
+                    self.assertEqual([unit], observed)
+                    self.assertEqual(1, result.num_passed)
+
+    def test_default_target_retains_only_selected_link_artifacts(self) -> None:
+        """The default build cannot add registered build-by-default:false probes."""
+        with TemporaryDirectory() as tmp:
+            build_dir = Path(tmp)
+            linked = build_dir / "tests" / "selected.so"
+            probe = build_dir / "tests" / "color_profile_tiny_layout"
+            info = build_dir / "meson-info"
+            info.mkdir()
+            (info / "intro-tests.json").write_text(
+                json.dumps([{"cmd": [str(probe)]}]), encoding="utf-8"
+            )
+            observed: list[Path] = []
+
+            def callback(path: Path) -> StreamingTestResult:
+                observed.append(path)
+                return StreamingTestResult(success=True)
+
+            with (
+                patch(
+                    "ci.meson.streaming.stream_compile_only",
+                    return_value=CompileOnlyResult(
+                        success=True, compiled_tests=[linked]
+                    ),
+                ),
+                patch(
+                    "ci.meson.streaming.concurrent.futures.ThreadPoolExecutor",
+                    side_effect=_ImmediateExecutor,
+                ),
+            ):
+                result = stream_compile_and_run_tests(build_dir, callback)
+            self.assertTrue(result.success)
+            self.assertEqual([linked], observed)
 
     def test_test_starts_after_compile_completes(self) -> None:
         """A pre-link status callback must not start a test process."""

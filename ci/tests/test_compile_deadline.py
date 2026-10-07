@@ -31,11 +31,13 @@ def test_silent_child_is_diagnosed_and_killed_before_deadline_returns(
         [
             sys.executable,
             "-c",
-            "import time; print('started', flush=True); time.sleep(10)",
+            "import time; time.sleep(10)",
         ],
         auto_run=True,
         check=False,
     )
+    # Keep the child silent: a delayed startup print resets the quiet timer
+    # and can produce a second warning or prevent a dump before the deadline.
     started = time.monotonic()
     with pytest.raises(compile_mod._CompileDeadlineExceeded):
         list(

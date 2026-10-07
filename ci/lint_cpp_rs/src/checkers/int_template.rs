@@ -189,7 +189,7 @@ const INT_TEMPLATE_ARG_BASELINE: &[(&str, usize)] = &[
     ("src/fl/channels/detail/validation/rx_test.cpp.hpp", 1),
     ("src/fl/channels/id_tracker.h", 1),
     ("src/fl/channels/spi/config.h", 1),
-    ("src/fl/channels/uart_wave_encoder.cpp.hpp", 3),
+    ("src/fl/channels/uart_waveform/uart_wave_encoder.cpp.hpp", 3),
     ("src/fl/channels/detail/validation/validation.cpp.hpp", 1),
     ("src/fl/channels/validation.h", 2),
     ("src/fl/chipsets/apa102.h", 3),
