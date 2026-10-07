@@ -1,3 +1,8 @@
+# 2026-10-07, issue #4707 fifteenth pass: hosted image_flash=356067 B,
+# run 37611652044 at 45106bb223; local 356051 B. Independent string
+# operations and coroutine task creation save another 24 B on S3 and
+# 2116 B on legacy real RMT4 Blink (309709 B). Claim exact saving.
+
 # 2026-10-07, issue #4707 fourteenth pass: hosted image_flash=356091 B,
 # run 37610187849 at 0812f1725f; local 356075 B. Independent engine,
 # system and executor/context units save 5236 B flash and 40 B static
@@ -403,4 +408,4 @@
 # the CI Blink report contains no ResponseLutsQ16 symbol. The local fbuild
 # symbol total remains ~4 KB higher for the same source (FastLED/fbuild#1456),
 # so this ratchet uses the CI measurement from PR #4511.
-356091
+356067

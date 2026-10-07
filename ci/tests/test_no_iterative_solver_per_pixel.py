@@ -50,7 +50,7 @@ GFX = PROJECT_ROOT / "src" / "fl" / "gfx"
 # Keep in step with `test_no_rgb8_intermediate.py`, which scans the same eight
 # and is where the missing three were noticed.
 PER_PIXEL_STAGES = (
-    "pipeline.cpp.hpp",
+    "pipeline/pipeline.cpp.hpp",
     "transfer.cpp.hpp",
     "source_xyz.cpp.hpp",
     "chromatic_adaptation.cpp.hpp",
@@ -162,7 +162,7 @@ MIN_PARSED_DEFINITIONS = 300
 def scanned_sources() -> "list[Path]":
     """The translation units the call graph is built from."""
 
-    return sorted(GFX.glob("*.cpp.hpp")) + sorted(GFX.glob("*.h"))
+    return sorted(GFX.rglob("*.cpp.hpp")) + sorted(GFX.rglob("*.h"))
 
 
 def strip_comments_and_literals(text: str) -> str:

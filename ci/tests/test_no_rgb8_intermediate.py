@@ -48,7 +48,7 @@ GFX = PROJECT_ROOT / "src" / "fl" / "gfx"
 # The composition, and the stages it runs per pixel. `pipeline.cpp.hpp` is
 # the one that would grow an intermediate buffer if anyone added one.
 PER_PIXEL_STAGES = (
-    "pipeline.cpp.hpp",
+    "pipeline/pipeline.cpp.hpp",
     "transfer.cpp.hpp",
     "source_xyz.cpp.hpp",
     "chromatic_adaptation.cpp.hpp",
