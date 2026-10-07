@@ -9,6 +9,36 @@ FL_TEST_FILE(FL_FILEPATH) {
 
 using namespace fl;
 
+namespace {
+class HeapAccessorString : public fl::string_n<8> {
+  public:
+    fl::StringHolderPtr ensureHeapHolder() { return heapData().get(); }
+};
+} // namespace
+
+FL_TEST_CASE("basic_string protected heap accessor") {
+    FL_SUBCASE("Empty inline storage promotes once") {
+        HeapAccessorString value;
+        auto first = value.ensureHeapHolder();
+        FL_REQUIRE(first != nullptr);
+        FL_REQUIRE(first->data() != nullptr);
+        FL_CHECK(first->length() == 0);
+        FL_CHECK(first->data()[0] == '\0');
+        auto second = value.ensureHeapHolder();
+        FL_CHECK(first.get() == second.get());
+    }
+    FL_SUBCASE("Existing heap storage is retained") {
+        HeapAccessorString value;
+        value.assign(100, 'h');
+        const char* original = value.c_str();
+        auto holder = value.ensureHeapHolder();
+        FL_REQUIRE(holder != nullptr);
+        FL_CHECK(holder->data() == original);
+        FL_CHECK(holder->length() == 100);
+        FL_CHECK(value.size() == 100);
+    }
+}
+
 FL_TEST_CASE("basic_string mutable storage ownership") {
     FL_SUBCASE("Inline and unique heap retain their buffers") {
         fl::string inline_string("hello");

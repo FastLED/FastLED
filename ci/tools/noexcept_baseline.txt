@@ -5596,7 +5596,7 @@ src/fl/stl/asio/ip/tcp.h|void close();
 src/fl/stl/asio/ip/tcp.h|void close_fd();
 src/fl/stl/asio/ip/tcp.h|void set_non_blocking(bool mode);
 src/fl/stl/asio/ip/tcp.h|void shutdown();
-src/fl/stl/basic_string.cpp.hpp|NotNullStringHolderPtr& basic_string::heapData() {
+src/fl/stl/string_operations/basic_string.cpp.hpp|NotNullStringHolderPtr& basic_string::heapData() {
 src/fl/stl/basic_string.cpp.hpp|basic_string& basic_string::append(char c) {
 src/fl/stl/basic_string.cpp.hpp|basic_string& basic_string::append(const basic_string& str) {
 src/fl/stl/basic_string.cpp.hpp|basic_string& basic_string::append(const bool& val) {

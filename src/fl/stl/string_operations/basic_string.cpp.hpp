@@ -4,6 +4,13 @@
 
 namespace fl {
 
+NotNullStringHolderPtr& basic_string::heapData() {
+    if (!mStorage.is<NotNullStringHolderPtr>()) {
+        mStorage = NotNullStringHolderPtr(fl::make_shared<StringHolder>(0));
+    }
+    return mStorage.get<NotNullStringHolderPtr>();
+}
+
 // ======= FIND =======
 
 fl::size basic_string::find(const char& value) const {

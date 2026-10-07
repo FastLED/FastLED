@@ -51,13 +51,14 @@ char* basic_string::c_str_mutable() {
             // COW: detach from shared data before returning mutable pointer.
             mStorage = NotNullStringHolderPtr(
                 fl::make_shared<StringHolder>(heap->data(), mLength));
-            return heapData()->data();
+            return mStorage.get<NotNullStringHolderPtr>()->data();
         }
         return heap->data();
     }
     if (isNonOwning()) {
         materialize();
-        return hasHeapData() ? heapData()->data() : inlineBufferPtr();
+        return hasHeapData() ? mStorage.get<NotNullStringHolderPtr>()->data()
+                             : inlineBufferPtr();
     }
     return nullptr;
 }
@@ -186,13 +187,6 @@ void basic_string::materialize() {
     }
 }
 
-NotNullStringHolderPtr& basic_string::heapData() {
-    if (!mStorage.is<NotNullStringHolderPtr>()) {
-        mStorage = NotNullStringHolderPtr(fl::make_shared<StringHolder>(0));
-    }
-    return mStorage.get<NotNullStringHolderPtr>();
-}
-
 const NotNullStringHolderPtr& basic_string::heapData() const {
     return mStorage.get<NotNullStringHolderPtr>();
 }
@@ -231,8 +225,9 @@ fl::size basic_string::write(const char* str, fl::size n) {
             mLength = newLen;
             return mLength;
         }
-    } else if (hasHeapData() && heapData().get().use_count() <= 1) {
-        NotNullStringHolderPtr& heap = heapData();
+    } else if (hasHeapData() &&
+               mStorage.get<NotNullStringHolderPtr>().get().use_count() <= 1) {
+        NotNullStringHolderPtr& heap = mStorage.get<NotNullStringHolderPtr>();
         if (!heap->hasCapacity(newLen)) {
             // Check if str points into our buffer (self-referential write).
             // grow() uses realloc which can relocate the buffer.
@@ -343,8 +338,9 @@ void basic_string::copy(const char* str) {
         }
         fl::memcpy(inlineBufferPtr(), str, len + 1);
     } else {
-        if (hasHeapData() && heapData().get().use_count() <= 1) {
-            heapData()->copy(str, len);
+        if (hasHeapData() &&
+            mStorage.get<NotNullStringHolderPtr>().get().use_count() <= 1) {
+            mStorage.get<NotNullStringHolderPtr>()->copy(str, len);
             return;
         }
         mStorage = NotNullStringHolderPtr(fl::make_shared<StringHolder>(str, len));
@@ -360,8 +356,9 @@ void basic_string::copy(const char* str, fl::size len) {
         fl::memcpy(inlineBufferPtr(), str, len);
         inlineBufferPtr()[len] = '\0';
     } else {
-        if (hasHeapData() && heapData().get().use_count() <= 1) {
-            heapData()->copy(str, len);
+        if (hasHeapData() &&
+            mStorage.get<NotNullStringHolderPtr>().get().use_count() <= 1) {
+            mStorage.get<NotNullStringHolderPtr>()->copy(str, len);
             return;
         }
         mStorage = NotNullStringHolderPtr(fl::make_shared<StringHolder>(str, len));
