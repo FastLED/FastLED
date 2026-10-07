@@ -1,3 +1,8 @@
+# #4741: local fbuild2.5.37 default image367407 ->366603. Matched original
+# master0c2e9f7300 image367279 ->366603 after shared RMT/HTTP/SPI and
+# configuration reductions; board407716/78216 ->407068/78008. Scoped
+# attributed RAM budget38323 is enforced by the existing regression gate.
+
 # 2026-10-06, PR for issue #4726: -252 B, 367659 -> 367407. The ESP32
 # fl::net::wifi and OTA backends moved out of the always-linked platforms+
 # unity object into their own build units, so Blink no longer links
@@ -331,4 +336,4 @@
 # the CI Blink report contains no ResponseLutsQ16 symbol. The local fbuild
 # symbol total remains ~4 KB higher for the same source (FastLED/fbuild#1456),
 # so this ratchet uses the CI measurement from PR #4511.
-367407
+366603
