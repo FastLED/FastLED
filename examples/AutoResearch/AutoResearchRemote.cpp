@@ -41,16 +41,7 @@
 #include "fl/stl/atomic.h"
 #include "fl/task/promise.h"
 
-// FastLED #3446: findConnectedPins consults FastLED's per-chip pin
-// validity table so the host scan sees the same forbidden-pin set the
-// rest of FastLED enforces (SPI flash pads, USB-JTAG, GPIO34-39
-// input-only, …). Pulling the platform's `fastpin_*.h` directly is the
-// cheapest way to reach `_FL_VALID_PIN_MASK` / `FASTLED_UNUSABLE_PIN_MASK`
-// at runtime.
-#if defined(FL_IS_ESP32)
-#include "platforms/esp/32/core/fastpin_esp32.h"  // for _FL_VALID_PIN_MASK et al.  // ok platform headers
-#include "sdkconfig.h"  // CONFIG_SPIRAM_MODE_OCT / CONFIG_ESPTOOLPY_OCT_FLASH
-#endif
+#include "fl/system/pin_probe.h"  // pin discovery skip rules (#3446)
 #include "fl/math/simd.h"
 #include "AutoResearchSimd.h"
 #include "AutoResearchAnimartrixBench.h"  // animartrixPerlinBench RPC (#2628 follow-up)
@@ -72,116 +63,6 @@
 #include "fl/stl/detail/memory_file_handle.h"
 #include "fl/fx/frame.h"
 
-#if defined(FL_IS_ESP32)
-namespace {
-// Pins this board's own runtime depends on, beyond FASTLED_UNUSABLE_PIN_MASK
-// (which stays the library-wide rule). Pin discovery drives every probed pin
-// OUTPUT and then leaves it in GPIO INPUT, which detaches whatever
-// peripheral the IO MUX had routed there. So it must skip:
-//   * the console pins: native USB D-/D+ always, UART0 TXD/RXD unless
-//     Serial is native USB (ARDUINO_USB_CDC_ON_BOOT); and
-//   * flash/PSRAM pins not already in the library mask, only when the
-//     module actually uses them (psramFound(), package, octal sdkconfig).
-// Strapping pins are sampled at reset only and are deliberately NOT here.
-// -1 = not applicable. Pin numbers from the Espressif chip datasheets'
-// pin-overview / IO MUX tables (FastLED/datasheets espressif/soc/<chip>).
-// ci/tests/test_autoresearch_pin_discovery_safety.py pins this table.
-struct AutoResearchLinkPins {
-    int uart0_tx;
-    int uart0_rx;
-    int usb_dm;
-    int usb_dp;
-    int psram_cs;
-    int psram_clk;
-};
-#if !ESP_IDF_VERSION_4_OR_HIGHER || defined(FL_IS_ESP_32DEV)
-// ESP32 DS v5.2 Table 2-6: off-package PSRAM CE# = GPIO16, SCLK = GPIO17.
-constexpr AutoResearchLinkPins kLinkPins = {1, 3, -1, -1, 16, 17};
-#elif defined(FL_IS_ESP_32C3)
-constexpr AutoResearchLinkPins kLinkPins = {21, 20, 18, 19, -1, -1};
-#elif defined(FL_IS_ESP_32S2)
-// SPICS1 (GPIO26) is the PSRAM chip select.
-constexpr AutoResearchLinkPins kLinkPins = {43, 44, 19, 20, 26, -1};
-#elif defined(FL_IS_ESP_32S3)
-// SPICS1 (GPIO26) is the PSRAM chip select.
-constexpr AutoResearchLinkPins kLinkPins = {43, 44, 19, 20, 26, -1};
-#elif defined(FL_IS_ESP_32C5)
-constexpr AutoResearchLinkPins kLinkPins = {11, 12, 13, 14, -1, -1};
-#elif defined(FL_IS_ESP_32C6)
-constexpr AutoResearchLinkPins kLinkPins = {16, 17, 12, 13, -1, -1};
-#elif defined(FL_IS_ESP_32P4)
-// USB Serial/JTAG on GPIO24/25 (USB1P1_N0/P0); PSRAM is on dedicated pads.
-constexpr AutoResearchLinkPins kLinkPins = {37, 38, 24, 25, -1, -1};
-#elif defined(FL_IS_ESP_32H2)
-constexpr AutoResearchLinkPins kLinkPins = {24, 23, 26, 27, -1, -1};
-#elif defined(FL_IS_ESP_32C2)
-constexpr AutoResearchLinkPins kLinkPins = {20, 19, -1, -1, -1, -1};
-#else
-constexpr AutoResearchLinkPins kLinkPins = {-1, -1, -1, -1, -1, -1};
-#endif
-
-constexpr fl::u64 linkPinBit(int p) {
-    return (p >= 0 && p < 64) ? (fl::u64(1) << p) : 0;
-}
-
-// Console pins. Native USB D-/D+ are always skipped: even when Serial is
-// UART0, the USB-Serial/JTAG port is how the host deploys and resets the
-// board, and detaching the PHY drops it until a power cycle.
-fl::u64 autoResearchConsolePinMask() {
-    fl::u64 mask = linkPinBit(kLinkPins.usb_dm) | linkPinBit(kLinkPins.usb_dp);
-#if !(defined(ARDUINO_USB_CDC_ON_BOOT) && ARDUINO_USB_CDC_ON_BOOT)
-    mask |= linkPinBit(kLinkPins.uart0_tx) | linkPinBit(kLinkPins.uart0_rx);
-#endif
-    return mask;
-}
-
-// Flash/PSRAM pins that depend on the module, not just the chip.
-fl::u64 autoResearchMemoryPinMask() {
-    fl::u64 mask = 0;
-    bool memory_on_psram_pins = psramFound();
-#if !ESP_IDF_VERSION_4_OR_HIGHER || defined(FL_IS_ESP_32DEV)
-    // ESP32 DS v5.2 Table 2-5: ESP32-U4WDH (and the PICO SiPs) wire their
-    // in-package flash/PSRAM CS/CLK to GPIO16/17 even without PSRAM.
-    const char* model = ESP.getChipModel();
-    if (model && (fl::strstr(model, "PICO") || fl::strstr(model, "U4WDH") ||
-                  fl::strstr(model, "D0WDR2"))) {
-        memory_on_psram_pins = true;
-    }
-#endif
-    if (memory_on_psram_pins) {
-        mask |= linkPinBit(kLinkPins.psram_cs) | linkPinBit(kLinkPins.psram_clk);
-    }
-#if defined(FL_IS_ESP_32S3)
-    // ESP32-S3 DS Table 2-4: GPIO33-37 carry SPIIO4-7/SPIDQS in octal (OPI)
-    // flash or PSRAM mode.
-#if defined(CONFIG_ESPTOOLPY_OCT_FLASH) && CONFIG_ESPTOOLPY_OCT_FLASH
-    const bool octal = true;
-#elif defined(CONFIG_SPIRAM_MODE_OCT) && CONFIG_SPIRAM_MODE_OCT
-    const bool octal = psramFound();
-#else
-    const bool octal = false;
-#endif
-    if (octal) {
-        for (int p = 33; p <= 37; ++p) {
-            mask |= linkPinBit(p);
-        }
-    }
-#endif
-#if defined(FL_IS_ESP_32C5)
-    // ESP32-C5 DS pin overview: GPIO19 is VDD_SPI, the flash power supply by
-    // default; driving it browns out the flash. Kept out of the library mask
-    // pending maintainer decision (FastPin<19> users).
-    mask |= linkPinBit(19);
-#elif defined(FL_IS_ESP_32C6)
-    // ESP32-C6 DS "Restrictions for GPIOs": GPIO27 is VDD_SPI, the flash power
-    // supply by default; driving it browns out the flash. Kept out of the
-    // library mask pending maintainer decision (FastPin<27> users).
-    mask |= linkPinBit(27);
-#endif
-    return mask;
-}
-}  // namespace
-#endif  // FL_IS_ESP32
 
 // ============================================================================
 // Raw Serial Output Functions (bypass fl::println and ScopedLogDisable)
@@ -302,98 +183,22 @@ fl::json AutoResearchRemoteControl::findConnectedPinsImpl(const fl::json& args) 
         response.set("message", "Pin range must be 0-48 with startPin < endPin");
         return response;
     }
-
-    // FastLED #3446: defer to FastLED's existing per-chip pin map
-    // (`FASTLED_UNUSABLE_PIN_MASK` + `SOC_GPIO_VALID_*_MASK`) rather
-    // than hard-coding pin numbers here. The mask already covers
-    // SPI-flash pads, USB-JTAG pads, and packaging-
-    // reserved gaps for every supported ESP32 variant, and is the
-    // single source of truth `_ESPPIN<P>::validpin()` uses too. Any
-    // pin not in `_FL_VALID_PIN_MASK` is unsafe to drive; any pin in
-    // `SOC_GPIO_VALID_GPIO_MASK` but NOT `SOC_GPIO_VALID_OUTPUT_GPIO_MASK`
-    // is input-only (drivable in the forward direction only).
+    // FastLED #3446: the platform owns the per-chip list of pins a probe
+    // must not touch (SPI flash / PSRAM pads, flash power, USB-JTAG, the
+    // console UART) and of pins it may read but not drive (input-only).
+    // See fl/system/pin_probe.h; platforms without such pins report none.
     //
     // We surface skipped pins in the response so the host log says
-    // exactly which pins were forbidden and why — turning silent
+    // exactly which pins were forbidden and why, turning silent
     // "no jumper found" into actionable "pins 6-11 are flash, 20 is
     // USB-JTAG, 34-39 are input-only".
-    //
-    // The fallthrough for non-ESP32 hosts is "allow everything" —
-    // platform-specific gating lives on those platforms' own
-    // `findConnectedPins` paths.
-    auto isFastLedValidOutputPin = [](int p) -> bool {
-#if defined(FL_IS_ESP32)
-        if (p < 0 || p >= 64) return false;
-        return (_FL_VALID_PIN_MASK & (1ULL << p)) != 0;
-#else
-        (void)p;
-        return true;
-#endif
-    };
-
-    auto isFastLedInputOnlyPin = [](int p) -> bool {
-#if defined(FL_IS_ESP32)
-        if (p < 0 || p >= 64) return false;
-        constexpr u64 inputOnlyMask =
-            u64(SOC_GPIO_VALID_GPIO_MASK) & ~u64(SOC_GPIO_VALID_OUTPUT_GPIO_MASK);
-        return (inputOnlyMask & (1ULL << p)) != 0;
-#else
-        (void)p;
-        return false;
-#endif
-    };
-
-    auto isFastLedReservedPin = [&](int p) -> bool {
-        // Reserved means "in FASTLED_UNUSABLE_PIN_MASK", i.e. flash /
-        // USB-JTAG pins (never pure strapping pins). Distinct from input-only (those are
-        // probe-as-RX-only, not "skip entirely").
-#if defined(FL_IS_ESP32)
-        if (p < 0 || p >= 64) return false;
-        return (FASTLED_UNUSABLE_PIN_MASK & (1ULL << p)) != 0;
-#else
-        (void)p;
-        return false;
-#endif
-    };
-
-#if defined(FL_IS_ESP32)
-    const fl::u64 console_pin_mask = autoResearchConsolePinMask();
-    const fl::u64 memory_pin_mask = autoResearchMemoryPinMask();
-#else
-    const fl::u64 console_pin_mask = 0;
-    const fl::u64 memory_pin_mask = 0;
-#endif
-    // Returns the skip reason for a pin discovery must not touch at all, or
-    // nullptr. Console/PSRAM pins are a per-board runtime rule, kept out of
-    // the library mask on purpose.
-    auto unsafeReason = [&](int p) -> const char* {
-#if defined(FL_IS_ESP32)
-        // Not a GPIO on this SoC (e.g. classic ESP32 24, 28-31): never
-        // pinMode/digitalRead it, even as RX.
-        if (p < 0 || p >= 64 ||
-            (u64(SOC_GPIO_VALID_GPIO_MASK) & (1ULL << p)) == 0) {
-            return "not-a-gpio";
-        }
-#endif
-        if (isFastLedReservedPin(p)) {
-            return "reserved-by-FastLED";
-        }
-        const fl::u64 bit = (p >= 0 && p < 64) ? (fl::u64(1) << p) : 0;
-        if (console_pin_mask & bit) {
-            return "console-link";
-        }
-        if (memory_pin_mask & bit) {
-            return "flash-or-psram";
-        }
-        return nullptr;
-    };
 
     fl::json skipped_pins = fl::json::array();
     // Each pin is recorded once: the all-pairs scan below visits a pin many
-    // times, and an unbounded array exhausts heap on ESP32 (see testedPairs).
+    // times, and an unbounded array exhausts heap on ESP32.
     fl::u64 skipped_mask = 0;
     auto recordSkip = [&](int p, const char* reason) {
-        const fl::u64 bit = (p >= 0 && p < 64) ? (fl::u64(1) << p) : 0;
+        const fl::u64 bit = fl::pinMaskBit(p);
         if (skipped_mask & bit) {
             return;
         }
@@ -433,12 +238,11 @@ fl::json AutoResearchRemoteControl::findConnectedPinsImpl(const fl::json& args) 
     // Cost: 2 probes x ~4 ms per pair; a 0-40 range is ~6 s.
     int found_tx = -1;
     int found_rx = -1;
-    fl::json tested_pairs = fl::json::array();
 
     // Drive `tx`, read `rx`; skips (and records) a driver that can't output.
     auto tryDirection = [&](int tx, int rx) -> bool {
-        if (!isFastLedValidOutputPin(tx)) {
-            recordSkip(tx, isFastLedInputOnlyPin(tx) ? "input-only" : "not-output-capable");
+        if (const char* why = fl::pinProbeDriveSkipReason(tx)) {
+            recordSkip(tx, why);
             return false;
         }
         return testPinPair(tx, rx);
@@ -448,13 +252,13 @@ fl::json AutoResearchRemoteControl::findConnectedPinsImpl(const fl::json& args) 
         // FastLED #3446: hands off the platform's reserved pads (SPI
         // flash 6-11, USB-JTAG, ...) -- driving them locks the chip up or
         // corrupts the live flash transaction -- and off this board's
-        // console and in-use PSRAM pins (autoResearchLinkPinMask).
-        if (const char* why = unsafeReason(a)) {
+        // console and in-use PSRAM pins (fl::pinProbeSkipReason).
+        if (const char* why = fl::pinProbeSkipReason(a)) {
             recordSkip(a, why);
             continue;
         }
         for (int b = a + 1; b <= end_pin; b++) {
-            if (const char* why = unsafeReason(b)) {
+            if (const char* why = fl::pinProbeSkipReason(b)) {
                 recordSkip(b, why);
                 continue;
             }
@@ -473,9 +277,6 @@ fl::json AutoResearchRemoteControl::findConnectedPinsImpl(const fl::json& args) 
         }
     }
 
-    // NOTE: testedPairs array omitted - causes heap exhaustion on ESP32 (21+ objects = ~1500 bytes)
-    // Validation script doesn't use this data, only needs {found, txPin, rxPin}
-    // response.set("testedPairs", tested_pairs);
     fl::json search_range = fl::json::array();
     search_range.push_back(static_cast<int64_t>(start_pin));
     search_range.push_back(static_cast<int64_t>(end_pin));
@@ -484,8 +285,7 @@ fl::json AutoResearchRemoteControl::findConnectedPinsImpl(const fl::json& args) 
     // FastLED #3446: surface every pin we declined to drive (and why)
     // so the host log can render "Skipped GPIO 6/7/8/9/10/11 (SPI flash),
     // 20 (USB-JTAG), 34-39 (input-only)". A small list — at most the
-    // bad-pin count for the platform — so this doesn't bloat the
-    // response heap budget the way `tested_pairs` did.
+    // bad-pin count for the platform.
     response.set("skippedPins", skipped_pins);
 
     if (found_tx >= 0 && found_rx >= 0) {

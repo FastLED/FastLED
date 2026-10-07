@@ -926,6 +926,17 @@ ObjectFLED::~ObjectFLED() {
 		while (micros() - update_begin_micros < numbytesLocal * 8 * TH_TL / 1000 + 5);
 		waitForDmaToFinish();
 	}
+	// The DMA manager caches the last instance's context (numbytes, pins,
+	// bitmask) keyed by its frame buffer address; showInternal() restores
+	// context only when that address differs. The next instance's buffer
+	// can be allocated at the same address, so it would run with this
+	// instance's byte count: a 101-LED frame after a 100-LED one sent 300
+	// data bytes while dma1/dma3 clocked 303, and the last LED went out as
+	// all ones. Drop the key so the next show() always restores.
+	auto& dma = ObjectFLEDDmaManager::getInstance();
+	if (dma.frameBuffer == frameBufferLocal) {
+		dma.frameBuffer = nullptr;
+	}
 	delete[] frameBufferLocal;
 }
 

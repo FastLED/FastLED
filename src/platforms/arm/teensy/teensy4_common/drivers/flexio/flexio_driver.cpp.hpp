@@ -144,9 +144,32 @@ static u8 sFlexIOPin = 0;  // FL_LINT_ALLOW_GLOBAL(DMA-ISR-shared driver state; 
 static u32 sLatchCycles = 0;  // FL_LINT_ALLOW_GLOBAL(DMA-ISR-shared driver state; single T4 peripheral instance)
 static FlexIOPinInfo sCurrentPinInfo{};
 
-static constexpr u32 kMaxPixelBytes = 4096;
-// +1: word 0 is the all-LOW preamble flexio_show() puts ahead of the data.
-FL_DMAMEM static u32 sPixelBuffer[kMaxPixelBytes / 4 + 1] __attribute__((aligned(32)));
+// TX streaming ring. Each WS2812 byte is one 32-bit FlexIO word (10 us on
+// the wire at 800 kHz). A frame that fits in the ring goes out as one DMA
+// major loop, as before. A longer frame streams: the DMA reads the ring in
+// circles and interrupts at each half; the ISR re-encodes the half it just
+// left from the caller's pixel bytes (the same refill-from-ISR scheme as
+// ObjectFLED's ESG double buffer). A 32-word half lasts 320 us, so the ISR
+// has ~320 us to refill it; encoding 32 bytes takes a few hundred cycles.
+// A refill that comes too late (the DMA is already re-reading that half) is
+// counted in sTxUnderruns.
+static constexpr u32 kTxHalfWords = 32;
+static constexpr u32 kTxRingWords = 2 * kTxHalfWords;
+FL_DMAMEM static u32 sTxRing[kTxRingWords] __attribute__((aligned(32)));
+FL_STATIC_ASSERT((kTxHalfWords * 4u) % 32u == 0, "ring halves must be whole cache lines");
+
+// Streaming state, owned by the DMA ISR while sTxStreaming is set.
+static const u8* sTxSrc = nullptr;  // FL_LINT_ALLOW_GLOBAL(DMA-ISR-shared driver state; single T4 peripheral instance)
+static u32 sTxSrcBytes = 0;  // FL_LINT_ALLOW_GLOBAL(DMA-ISR-shared driver state; single T4 peripheral instance)
+static u32 sTxTotalWords = 0;  // FL_LINT_ALLOW_GLOBAL(DMA-ISR-shared driver state; single T4 peripheral instance)
+static u32 sTxFillWord = 0;  // FL_LINT_ALLOW_GLOBAL(DMA-ISR-shared driver state; single T4 peripheral instance)
+static u32 sTxConsumedHalves = 0;  // FL_LINT_ALLOW_GLOBAL(DMA-ISR-shared driver state; single T4 peripheral instance)
+static volatile bool sTxStreaming = false;  // FL_LINT_ALLOW_GLOBAL(DMA-ISR-shared driver state; single T4 peripheral instance)
+static volatile u32 sTxUnderruns = 0;  // FL_LINT_ALLOW_GLOBAL(DMA-ISR-shared driver state; single T4 peripheral instance)
+static volatile u32 sTxIsrMaxCycles = 0;  // FL_LINT_ALLOW_GLOBAL(DMA-ISR-shared driver state; single T4 peripheral instance)
+static u32 sTxWaitTimeoutMs = 50;  // FL_LINT_ALLOW_GLOBAL(DMA-ISR-shared driver state; single T4 peripheral instance)
+
+static void flexio_tx_fill_half(u32 half);
 
 static volatile u32 sDmaErrorCount = 0;  // FL_LINT_ALLOW_GLOBAL(DMA-ISR-shared driver state; single T4 peripheral instance)
 static volatile u32 sLastDmaEs = 0;  // FL_LINT_ALLOW_GLOBAL(DMA-ISR-shared driver state; single T4 peripheral instance)
@@ -165,7 +188,41 @@ static void flexio_dma_isr() {
     // NVIC to immediately re-fire the same vector before the interrupt
     // status actually clears. Matches Teensyduino FlexSerial.cpp:512.
     asm volatile("dsb" ::: "memory");
-    sDmaComplete = true;
+    if (!sTxStreaming) {
+        sDmaComplete = true;
+        return;
+    }
+    const u32 t0 = ARM_DWT_CYCCNT;
+    // The DMA just finished reading half `done`.
+    const u32 done = sTxConsumedHalves & 1u;
+    ++sTxConsumedHalves;
+    if (sTxConsumedHalves * kTxHalfWords >= sTxTotalWords) {
+        // The last data word has been loaded into SHIFTBUF; anything the
+        // DMA reads after it is zero (LOW) padding. Stop.
+        sDmaChannel->disable();
+        sTxStreaming = false;
+        sDmaComplete = true;
+        return;
+    }
+    // The DMA should now be reading the other half. If it is already back
+    // in `done`, it re-sent stale words before this refill.
+    const u32 citer = sDmaChannel->TCD->CITER_ELINKNO;
+    const u32 read_word = (kTxRingWords - citer) % kTxRingWords;
+    if (read_word / kTxHalfWords == done) {
+        // Refill too late (or two half interrupts merged): the DMA is
+        // re-sending stale words. Stop the frame rather than keep going
+        // out of step with the ring.
+        ++sTxUnderruns;
+        sDmaChannel->disable();
+        sTxStreaming = false;
+        sDmaComplete = true;
+        return;
+    }
+    flexio_tx_fill_half(done);
+    const u32 cycles = ARM_DWT_CYCCNT - t0;
+    if (cycles > sTxIsrMaxCycles) {
+        sTxIsrMaxCycles = cycles;
+    }
 }
 
 // #3416 FX-HIGH-5: DMA_ES (eDMA Error Status) is now sampled in
@@ -467,6 +524,20 @@ static inline u32 flexio_encode_ws2812_byte(u8 b) {
     return result;
 }
 
+// Encode the next kTxHalfWords stream words into ring half `half`. Stream
+// word 0 is the all-LOW preamble, words 1..N are the pixel bytes, and
+// anything past them is LOW padding.
+static void flexio_tx_fill_half(u32 half) {
+    u32* dst = &sTxRing[half * kTxHalfWords];
+    for (u32 k = 0; k < kTxHalfWords; ++k) {
+        const u32 w = sTxFillWord++;
+        dst[k] = (w >= 1u && w <= sTxSrcBytes)
+                     ? flexio_encode_ws2812_byte(sTxSrc[w - 1u])
+                     : 0u;
+    }
+    arm_dcache_flush(dst, kTxHalfWords * 4u);
+}
+
 // FlexIO clock divider sized so each FlexIO shift bit is ~316 ns
 // (4 bits per WS2812 bit, ~1.27 us total per WS2812 bit). FlexIO2 base
 // clock is 120 MHz; with baud_div = 18 the shift period is
@@ -545,17 +616,13 @@ bool flexio_show(const u8* pixel_data, u32 num_bytes) {
     // ambiguous state right when park_low switches the mux to ALT5.
     asm volatile("dsb" ::: "memory");
 
-    // Each WS2812 byte expands to 4 FlexIO bytes (32 FlexIO bits, 4 per
-    // WS2812 bit). Cap to buffer.
-    const u32 kMaxInputBytes = kMaxPixelBytes / 4u;
-    if (num_bytes > kMaxInputBytes) {
-        // #3416 FX-MED-2: warn loudly so the user sees that their strip
-        // is being silently truncated rather than discovering tail LEDs
-        // are dark. kMaxInputBytes = 1024 bytes = 341 RGB LEDs.
-        FL_LOG_FLEXIO("FlexIO: strip truncated -- requested " << ((int)num_bytes) << " bytes exceeds buffer cap " << ((int)kMaxInputBytes) << " (~341 RGB LEDs max). Tail LEDs will not update.");
-        num_bytes = kMaxInputBytes;
-    }
-
+    // Each WS2812 byte expands to one 32-bit FlexIO word (4 FlexIO bits
+    // per WS2812 bit). There is no length cap: frames longer than the ring
+    // stream through it from the DMA ISR. `pixel_data` is borrowed, not
+    // stored past the frame: it must stay valid until flexio_wait() returns
+    // (ChannelEngineFlexIO calls wait() right after show(), and the next
+    // flexio_show() waits first), so a raw pointer is sufficient.
+    //
     // Word 0 is an all-LOW preamble. When the shifter starts, its first
     // output bit is held ~2 baud periods (~600 ns) longer than the rest.
     // Without the preamble that stretch lands on the first WS2812 bit's
@@ -563,14 +630,17 @@ bool flexio_show(const u8* pixel_data, u32 num_bytes) {
     // (bench loopback: every frame 0x55 -> 0xD5, 0x0F -> 0x8F). A zero
     // word moves the stretch onto ~10 us of idle LOW, which the strip
     // ignores.
-    sPixelBuffer[0] = 0;
-    // Pre-encode each pixel byte into a 32-bit FlexIO bit stream.
-    for (u32 i = 0; i < num_bytes; ++i) {
-        sPixelBuffer[i + 1] = flexio_encode_ws2812_byte(pixel_data[i]);
-    }
-
     const u32 num_words = num_bytes + 1;  // preamble + one u32 per byte
-    arm_dcache_flush_delete(sPixelBuffer, num_words * 4u);
+    const bool streaming = num_words > kTxRingWords;
+    sTxSrc = pixel_data;
+    sTxSrcBytes = num_bytes;
+    sTxTotalWords = num_words;
+    sTxFillWord = 0;
+    sTxConsumedHalves = 0;
+    flexio_tx_fill_half(0);
+    flexio_tx_fill_half(1);
+    // Frame time is 10 us per byte; allow 2x plus the old 50 ms floor.
+    sTxWaitTimeoutMs = 50u + (num_bytes * 20u) / 1000u;
 
     FLEXIO2_CTRL &= ~1u;
     FLEXIO2_SHIFTSTAT = 0xFFu;
@@ -594,20 +664,28 @@ bool flexio_show(const u8* pixel_data, u32 num_bytes) {
     // residual fix).
     flexio_pin_park_low(sCurrentPinInfo);
 
-    sDmaChannel->TCD->SADDR = sPixelBuffer;
+    // One-shot: one major loop over num_words, then stop (DREQ).
+    // Streaming: a major loop is one pass over the ring; SLAST rewinds to
+    // the ring start and the channel keeps running, interrupting at each
+    // half until the ISR stops it after the last data word.
+    const u32 loop_words = streaming ? kTxRingWords : num_words;
+    sDmaChannel->TCD->SADDR = sTxRing;
     sDmaChannel->TCD->SOFF = 4;
     sDmaChannel->TCD->ATTR = DMA_TCD_ATTR_SSIZE(2) | DMA_TCD_ATTR_DSIZE(2);
     sDmaChannel->TCD->NBYTES_MLNO = 4;
-    sDmaChannel->TCD->SLAST = -(i32)(num_words * 4u);
+    sDmaChannel->TCD->SLAST = -(i32)(loop_words * 4u);
     // Write to SHIFTBUF (not SHIFTBUFBIS): SHIFTBUFBIS would bit-swap the
     // word and break our MSB-first pre-encoding. The shifter naturally
     // shifts MSB-first from SHIFTBUF, which is what we want.
     sDmaChannel->TCD->DADDR = &FLEXIO2_SHIFTBUF[0];
     sDmaChannel->TCD->DOFF = 0;
-    sDmaChannel->TCD->CITER_ELINKNO = num_words;
-    sDmaChannel->TCD->BITER_ELINKNO = num_words;
+    sDmaChannel->TCD->CITER_ELINKNO = loop_words;
+    sDmaChannel->TCD->BITER_ELINKNO = loop_words;
     sDmaChannel->TCD->DLASTSGA = 0;
-    sDmaChannel->TCD->CSR = DMA_TCD_CSR_INTMAJOR | DMA_TCD_CSR_DREQ;
+    sDmaChannel->TCD->CSR = streaming
+        ? (DMA_TCD_CSR_INTMAJOR | DMA_TCD_CSR_INTHALF)
+        : (DMA_TCD_CSR_INTMAJOR | DMA_TCD_CSR_DREQ);
+    sTxStreaming = streaming;
     // #3416 FX-LOW-1: duplicate DADDR write removed (was set above
     // already). Editing artifact from the bring-up rounds.
 
@@ -646,7 +724,7 @@ bool flexio_show(const u8* pixel_data, u32 num_bytes) {
     // micros() timeout can spin forever if the DMA never loads.
     const u32 load_start = ARM_DWT_CYCCNT;
     const u32 load_timeout = (F_CPU_ACTUAL / 1000000u) * 5u;
-    while (sDmaChannel->TCD->CITER_ELINKNO >= num_words) {
+    while (sDmaChannel->TCD->CITER_ELINKNO >= loop_words) {
         if ((u32)(ARM_DWT_CYCCNT - load_start) >= load_timeout) {
             // Preamble never reached SHIFTBUF: handing the pad back now
             // could put FlexIO's idle HIGH on the wire. Abort the frame
@@ -654,6 +732,7 @@ bool flexio_show(const u8* pixel_data, u32 num_bytes) {
             FLEXIO2_SHIFTSDEN = 0;
             sDmaChannel->disable();
             FLEXIO2_CTRL &= ~1u;
+            sTxStreaming = false;
             sDmaComplete = true;
             if (!primask) interrupts();
             FL_LOG_FLEXIO("FlexIO: preamble load timed out; frame aborted");
@@ -676,7 +755,7 @@ void flexio_wait() {
     // plenty of headroom for any reasonable strip length while staying
     // well below the autoresearch 120 s RPC deadline.
     const u32 start = millis();
-    const u32 timeout_ms = 50;
+    const u32 timeout_ms = sTxWaitTimeoutMs;
     while (!sDmaComplete) {
         if ((u32)(millis() - start) >= timeout_ms) {
             // #3416 FX-MED-4: on timeout, force-recover instead of
@@ -690,6 +769,7 @@ void flexio_wait() {
                 sDmaChannel->clearComplete();
                 sDmaChannel->clearError();
             }
+            sTxStreaming = false;
             sDmaComplete = true;
             FL_LOG_FLEXIO("FlexIO: flexio_wait() timed out after " << ((unsigned)timeout_ms) << " ms -- recovering");
             return;
@@ -722,6 +802,9 @@ void flexio_read_diagnostics(FlexIODiagnostics* out) {
     out->ccm_cs1cdr = CCM_CS1CDR;
     out->initialized = sInitialized;
     out->dmaComplete = sDmaComplete;
+    out->txUnderruns = sTxUnderruns;
+    out->txIsrMaxCycles = sTxIsrMaxCycles;
+    out->txStreamedWords = sTxTotalWords > kTxRingWords ? sTxTotalWords : 0u;
     // FX-HIGH-5: eDMA error status snapshot. DMA_ES is a global register
     // shared across all eDMA channels; non-zero indicates SOMETHING
     // erred (not necessarily our channel), so consumers must cross-
@@ -781,6 +864,7 @@ void flexio_deinit() {
         delete to_delete;  // ok bare allocation
     }
     sInitialized = false;
+    sTxStreaming = false;
     sDmaComplete = true;
 }
 

@@ -1343,6 +1343,17 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
         response.set("standardGpioPadProbe", standard_gpio_pad_probe);
     }
 #if defined(FL_IS_TEENSY_4X)
+    // Streaming RX/TX counters (ISR cost, ring overruns/underruns). A handful
+    // of integers, emitted for every Teensy run so soaks can report them.
+    {
+        fl::json ts = fl::FlexPwmRxChannel::streamStatsToJson();
+        fl::FlexIODiagnostics sd{};
+        fl::flexio_read_diagnostics(&sd);
+        ts.set("txUnderruns", static_cast<int64_t>(sd.txUnderruns));
+        ts.set("txIsrMaxCycles", static_cast<int64_t>(sd.txIsrMaxCycles));
+        ts.set("txStreamedWords", static_cast<int64_t>(sd.txStreamedWords));
+        response.set("teensyStream", ts);
+    }
     // FlexPWM RX diagnostics: useful for ANY clockless TX routed through
     // pin 22. Skip for LPUART (LPUART has its own status path) AND for
     // FLEX_IO (PR #3421 framework-hang investigation found that the
@@ -1386,6 +1397,8 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
         fj.set("tcdCsr", static_cast<int64_t>(fd.tcd_csr));
         fj.set("initialized", fd.initialized);
         fj.set("dmaComplete", fd.dmaComplete);
+        fj.set("txUnderruns", static_cast<int64_t>(fd.txUnderruns));
+        fj.set("txIsrMaxCycles", static_cast<int64_t>(fd.txIsrMaxCycles));
         response.set("flexIoDiagnostics", fj);
     }
 #endif
