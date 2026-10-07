@@ -86,15 +86,15 @@ struct ChannelOptions {
     CRGB mCorrection = UncorrectedColor;
     CRGB mTemperature = UncorrectedTemperature;
     fl::u8 mDitherMode = BINARY_DITHER;
+    Bus mBus = Bus::AUTO;              // Typed driver selection
     /// White-channel selection (variant): Empty = plain RGB, Rgbw = 4-channel,
     /// Rgbww = 5-channel. Default-constructed = Empty.
     fl::variant<fl::Empty, Rgbw, Rgbww> mWhiteCfg;
-    Bus mBus = Bus::AUTO;              // Typed driver selection
-    fl::u8 mBusWhich = 0;              // Instance selector for portable buses
     fl::optional<float> mGamma;        // Gamma correction (nullopt = use default 2.8)
 #if FL_COLOR_PROFILE_RUNTIME
     ColorProfileBinding mColorProfile;
 #endif
+    fl::u8 mBusWhich = 0;              // Instance selector for portable buses
 
     bool setColorProfile(const EmitterProfile& profile) FL_NO_EXCEPT {
 #if FL_COLOR_PROFILE_RUNTIME

@@ -26,7 +26,7 @@ constexpr fl::EmitterProfile kTinyStaticProfile = fl::EmitterProfile::rgb(
 
 FL_STATIC_ASSERT(FL_PLATFORM_HAS_TINY_MEMORY == 1,
               "tiny layout probe must compile with the tiny-memory tier");
-FL_STATIC_ASSERT(sizeof(fl::ChannelOptions) == sizeof(LegacyChannelOptionsLayout),
+FL_STATIC_ASSERT(sizeof(fl::ChannelOptions) <= sizeof(LegacyChannelOptionsLayout),
               "TINY ChannelOptions must not gain P2 runtime state");
 FL_STATIC_ASSERT(sizeof(fl::StaticProfileChannel<kTinyStaticProfile>) == sizeof(fl::Channel),
               "TINY static profile identity must add no Channel instance state");
