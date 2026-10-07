@@ -19,6 +19,7 @@
 
 #include "fl/log/log.h"
 #include "fl/stl/move.h" // fl::move
+#include "fl/stl/new.h"
 #include "fl/stl/noexcept.h"
 #include "platforms/esp/32/drivers/rmt/rmt_4/channel_driver_rmt4.h"
 #include "platforms/esp/32/drivers/rmt/rmt_4/network_state_tracker_4.h"
@@ -55,8 +56,6 @@ ChannelEngineRMT4Impl::ChannelEngineRMT4Impl(
       mInitialized(false) {
     FL_WARN("ChannelEngineRMT4: Initializing RMT4 driver for IDF 4.x");
 
-    // Reserve space for channels (inlined vector, no heap allocation)
-    mChannels.reserve(FASTLED_RMT_MAX_CHANNELS);
     mEnqueuedChannels.reserve(16);
     mPendingChannels.reserve(16);
 
@@ -91,7 +90,7 @@ ChannelEngineRMT4Impl::~ChannelEngineRMT4Impl() {
     mRMT_intr_handle = nullptr;
 
     // Release all channels and uninstall RMT drivers via the peripheral.
-    for (auto &state : mChannels) {
+    for (auto &state : fl::span<ChannelState>(mChannels).first(mChannelCount)) {
         if (state.inUse) {
             if (mPeripheral) {
                 mPeripheral->setTxIntrEnable(static_cast<int>(state.channel),
@@ -107,7 +106,11 @@ ChannelEngineRMT4Impl::~ChannelEngineRMT4Impl() {
         }
     }
 
-    mChannels.clear();
+    // Match the reverse destruction order of the former fixed vector.
+    for (size_t i = mChannelCount; i > 0; --i) {
+        mChannels[i - 1].sourceData.reset();
+    }
+    mChannelCount = 0;
     mEnqueuedChannels.clear();
     mPendingChannels.clear();
     mInitialized = false;
@@ -199,7 +202,7 @@ ChannelEngineRMT4Impl::ChannelState *ChannelEngineRMT4Impl::acquireChannel(
 
     // Strategy 1: Find idle channel with matching pin (perfect match, no
     // reconfiguration)
-    for (auto &state : mChannels) {
+    for (auto &state : fl::span<ChannelState>(mChannels).first(mChannelCount)) {
         if (!state.inUse && state.pin == pin) {
             state.inUse = true;
             // Recalculate timing symbols in case timing changed
@@ -223,7 +226,7 @@ ChannelEngineRMT4Impl::ChannelState *ChannelEngineRMT4Impl::acquireChannel(
     }
 
     // Strategy 2: Find any idle channel and reconfigure it
-    for (auto &state : mChannels) {
+    for (auto &state : fl::span<ChannelState>(mChannels).first(mChannelCount)) {
         if (!state.inUse) {
             state.inUse = true;
 
@@ -240,41 +243,30 @@ ChannelEngineRMT4Impl::ChannelState *ChannelEngineRMT4Impl::acquireChannel(
     }
 
     // Strategy 3: Create new channel if hardware available
-    if (mChannels.size() >= FASTLED_RMT_MAX_CHANNELS) {
+    if (mChannelCount >= FASTLED_RMT_MAX_CHANNELS) {
         FL_WARN("acquireChannel: All " << FASTLED_RMT_MAX_CHANNELS << " RMT channels in use, time-multiplexing required");
         return nullptr;
     }
 
-    // Allocate new channel state
-    ChannelState newState;
-    newState.channel = static_cast<rmt_channel_t>(mChannels.size());
-    newState.inUse = true;
-    newState.transmissionComplete.store(false, fl::memory_order_release);
-    newState.resetWaitStarted = false;
-    newState.resetStartTimeUs = 0;
-    newState.resetDurationUs = 0;
-    newState.whichHalf = 0;
-    newState.memPtr = nullptr;
-    newState.memStart = nullptr;
-    newState.pixelData = nullptr;
-    newState.pixelDataSize = 0;
-    newState.pixelDataPos = 0;
-    newState.lastFill = 0;
-    newState.cyclesPerFill = 0;
-    newState.maxCyclesPerFill = 0;
-    newState.transmissionStartTime = 0;
+    // Configure a permanent slot outside the published prefix. Interrupts
+    // must not see this slot until configuration has succeeded.
+    auto slots = fl::span<ChannelState>(mChannels);
+    ChannelState *stablePtr = slots.data() + mChannelCount;
+    stablePtr->channel = static_cast<rmt_channel_t>(mChannelCount);
+    stablePtr->inUse = true;
 
-    // Configure the hardware
-    if (!configureChannel(&newState, pin, timing)) {
-        FL_WARN("acquireChannel: Failed to configure new channel " << newState.channel);
+    if (!configureChannel(stablePtr, pin, timing)) {
+        FL_WARN("acquireChannel: Failed to configure new channel " << stablePtr->channel);
+        // Restore the unpublished slot for the next attempt. Its lifetime
+        // cannot overlap an ISR scan because the count has not changed.
+        stablePtr->~ChannelState();
+        new (stablePtr) ChannelState();
         return nullptr;
     }
 
-    // Add to channels list
-    mChannels.push_back(newState);
-    ChannelState *stablePtr = &mChannels.back();
+    ++mChannelCount;
 
-    FL_WARN("acquireChannel: Created new channel " << stablePtr->channel << " for pin " << (static_cast<int>(pin)) << " (total: " << mChannels.size() << "/" << FASTLED_RMT_MAX_CHANNELS << ")");
+    FL_WARN("acquireChannel: Created new channel " << stablePtr->channel << " for pin " << (static_cast<int>(pin)) << " (total: " << mChannelCount << "/" << FASTLED_RMT_MAX_CHANNELS << ")");
 
     return stablePtr;
 }
@@ -550,7 +542,7 @@ void ChannelEngineRMT4Impl::startTransmission(
 FL_NO_INLINE IRAM_ATTR ChannelEngineRMT4Impl::ChannelState *
 ChannelEngineRMT4Impl::findChannelByNumber(int channelNum) FL_NO_EXCEPT {
     // Linear search through active channels
-    for (auto &state : mChannels) {
+    for (auto &state : fl::span<ChannelState>(mChannels).first(mChannelCount)) {
         if (state.inUse && state.channel == channelNum) {
             return &state;
         }
@@ -602,7 +594,7 @@ IChannelDriver::DriverState ChannelEngineRMT4Impl::poll() FL_NO_EXCEPT {
     bool anyTimeout = false;
 
     // Check all active channels for completion or timeout
-    for (auto &state : mChannels) {
+    for (auto &state : fl::span<ChannelState>(mChannels).first(mChannelCount)) {
         if (!state.inUse) {
             continue;
         }
