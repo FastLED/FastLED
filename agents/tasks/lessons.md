@@ -551,3 +551,6 @@
 - A smaller RMT4 insertion path is insufficient evidence for changing channel
   publication. An inert slot and failure rollback can still overlap unlocked
   ISR traversal; preserve publication until that concurrency contract is proven.
+- Independent platform instantiation units must guard platform headers as
+  well as their definitions. ESP32 semaphore declarations include chrono;
+  including them on AVR or Arduino ARM can fail before the guarded body.
