@@ -39,7 +39,9 @@
   passes its sanitizer run. Its native tests now execute real TX/RX allocation,
   fallback, exhaustion and error paths; earlier native cases were excluded.
 - Hosted first-pass image is 32 B above local. Pin the final ratchet to hosted
-  evidence when available. ATmega8 RGBW overflows reproduce unchanged at base.
+  evidence when available. Second-pass hosted run 37581805753 measures
+  357,679 B, 16 B above local; the ratchet now uses that exact result.
+  ATmega8 RGBW overflows reproduce unchanged at base.
 - Rejected native TLS guard: approximately 150 B flash savings would add
   16 B of task-stack use to every task in the current zero-TLS image.
 
