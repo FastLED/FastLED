@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "fl/stl/stdint.h"
+
 namespace fl {
 
 /// RGB color channel orderings, used when instantiating controllers to determine
@@ -20,7 +22,7 @@ enum class EOrder {
 };
 
 // After EOrder is applied this is where W is inserted for RGBW.
-enum class EOrderW {
+enum class EOrderW : u8 {
 	W3 = 0x3,  ///< White is fourth
 	W2 = 0x2,  ///< White is third
 	W1 = 0x1,  ///< White is second

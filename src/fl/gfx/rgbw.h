@@ -12,7 +12,8 @@
 
 namespace fl {
 
-enum class RGBW_MODE {
+// Defined mode ordinals fit in one byte, as with RGBWW_MODE.
+enum class RGBW_MODE : u8 {
     kRGBWInvalid,
     kRGBWNullWhitePixel,
     kRGBWExactColors,

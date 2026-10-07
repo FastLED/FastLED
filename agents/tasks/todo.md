@@ -6,7 +6,8 @@
 
 - [x] ESP32-C3 #4739: matched 3.10.3/master bloat, measured optimization, local checks and landed change (#4748, e60f4fcf7f; -152 B flash / -32 B RAM).
 - [x] ESP32-C6 #4740: matched bloat and controlled workload, local gates, landed #4749 at 8d6ed12ccb; -194 B flash / -96 B RAM. Parent perf #6033440937 posted.
-- [ ] STM32 #4744, then Uno #4742 and ATtiny85 #4743.
+- [x] STM32 #4744: landed #4750 at 28a41d619f; -12 B flash / -8 B RAM. Shared C3/C6 gains verified; parent perf #6033821040 posted.
+- [ ] Uno #4742, then ATtiny85 #4743.
 - [ ] ESP32 #4738 and ESP32-S3 #4741.
 - [ ] Validate Teensy40 #4745, Teensy41 #4746 and RP2040 #4747.
 - [ ] Post cumulative performance diffs on #4737 when each child closes; leave the parent open.
@@ -18,12 +19,12 @@ locally and sequentially; never request CI Full. Preserve features while
 reducing logging and driver overhead. Record source provenance and reject stale
 ELFs before comparing sizes.
 
-### Active platform: STM32F103C8 #4744
+### Active platform: Uno #4742 (Blink and Apa102)
 
-- [x] Build/bloat master and 3.10.3 sequentially in the cached STM32 project.
-- [x] Attribute linked controller/channel, GPIO and optional state; capture RED budget evidence.
-- [x] Reduce measured default flash/RAM without removing features (-12 B flash / -8 B RAM).
-- [x] Verify Blink and controlled RGB, local tests, lint and code review (319 units / 95 examples, 52 profile sanitizer cases).
+- [x] Build/bloat master and 3.10.3 sequentially for both published examples in the cached Uno project.
+- [x] Isolate Serial/banner costs with a controlled RGB workload and attribute controller/global storage (master control 3942/268 vs historical 3784/131).
+- [x] Capture focused RED evidence and candidate default savings: Blink 5158/629 → 5138/443; Apa102 3682/326 → 3650/324; controlled RGB 3942/268 → 3922/266. Reordered exact adjustment product passes exhaustive sanitizer reference checks; compact white selectors preserve ordinals; AVR banner bytes unchanged. Landing remains pending.
+- [x] Validate local tests (319 units / 95 host examples), sanitizer rounding, scoped RED/GREEN budgets, lint and manual code review. Shared published/control C3, C6 and STM builds preserve prior gains; budgets ratcheted.
 - [ ] Land the change, post cumulative parent diff and close only the child.
 
 ## ESP32-S3 binary-size Batch 3 (#2856)
