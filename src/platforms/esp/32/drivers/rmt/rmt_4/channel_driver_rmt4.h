@@ -30,6 +30,7 @@
 
 #include "fl/channels/data.h"
 #include "fl/channels/driver.h"
+#include "fl/stl/array.h"
 #include "fl/stl/atomic.h"
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/noexcept.h"
@@ -362,7 +363,9 @@ class ChannelEngineRMT4Impl final : public ChannelEngineRMT4 {
     // ═══════════════════════════════════════════════════════════════════════════
 
     // Physical channel states are bounded; logical strip queues remain dynamic.
-    fl::vector_fixed<ChannelState, FASTLED_RMT_MAX_CHANNELS> mChannels;
+    fl::array<ChannelState, FASTLED_RMT_MAX_CHANNELS> mChannels;
+    // Only successfully configured slots are visible to polling and the ISR.
+    size_t mChannelCount = 0;
     fl::vector_inlined<ChannelDataPtr, 16>
         mEnqueuedChannels; // Batched between enqueue() and show()
     fl::vector_inlined<ChannelDataPtr, 16>
