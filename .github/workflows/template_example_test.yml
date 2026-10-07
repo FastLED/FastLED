@@ -47,6 +47,56 @@ jobs:
         with:
           python-version: '3.10'
 
+      - name: Use verified reld PR 220 artifact (diagnostic only)
+        if: runner.os == 'Windows'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python - <<'PYTHON'
+          import hashlib
+          import io
+          import json
+          import os
+          import subprocess
+          import zipfile
+          from pathlib import Path
+
+          repository = "zackees/reld"
+          run_id = 37619545396
+          artifact_id = 11481282435
+          expected_sha = "23f7fb2c0da530c5f9eb5d56e7d3cb461313325f"
+          expected_digest = "d01703d2c297e03294b37e0f29a48f3ac0ccecf876fda99a066ac96ed43836fc"
+
+          def api(path):
+              return subprocess.run(["gh", "api", "--allow-escape-sequences", path],
+                                    check=True, capture_output=True).stdout
+
+          run = json.loads(api(f"repos/{repository}/actions/runs/{run_id}"))
+          if run["head_sha"] != expected_sha or run["conclusion"] != "success":
+              raise RuntimeError("Unexpected or unsuccessful external reld build")
+          artifact = json.loads(api(f"repos/{repository}/actions/artifacts/{artifact_id}"))
+          if (artifact["name"] != "reld-link-windows-x86_64" or artifact["expired"]
+                  or artifact["workflow_run"]["id"] != run_id
+                  or artifact["size_in_bytes"] > 128 * 1024 * 1024
+                  or artifact["digest"] != "sha256:" + expected_digest):
+              raise RuntimeError("External reld artifact provenance mismatch")
+          archive = api(f"repos/{repository}/actions/artifacts/{artifact_id}/zip")
+          if hashlib.sha256(archive).hexdigest() != expected_digest:
+              raise RuntimeError("External reld artifact archive digest mismatch")
+          destination = Path(os.environ["RUNNER_TEMP"]) / "reld-pr220-23f7fb2c"
+          destination.mkdir(exist_ok=True)
+          with zipfile.ZipFile(io.BytesIO(archive)) as source:
+              info = source.getinfo("reld-link.exe")
+              if info.file_size > 128 * 1024 * 1024:
+                  raise RuntimeError("Unexpected external reld executable size")
+              linker = destination / "reld.exe"
+              linker.write_bytes(source.read(info))
+          print(f"Diagnostic reld: {linker}; source={expected_sha}; artifact={artifact_id}")
+          print(f"Executable SHA256: {hashlib.sha256(linker.read_bytes()).hexdigest()}")
+          with Path(os.environ["GITHUB_ENV"]).open("a", encoding="utf-8") as output:
+              output.write(f"FASTLED_NATIVE_LINKER={linker.resolve()}\n")
+          PYTHON
+
       - name: Install uv
         uses: astral-sh/setup-uv@v6
         with:
