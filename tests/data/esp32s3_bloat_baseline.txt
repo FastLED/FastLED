@@ -1,3 +1,8 @@
+# 2026-10-07, #4707: avoid temporary strings in driver enabled lookup.
+# Hosted default image354235 ->353827 (-408 B), exact commit
+# 04c52a51dc1612ba595a75fb324f6779593a7707, run37667663392.
+# Downloaded report/provenance agree; local image353811 B. The later
+# RMT4-only timing consolidation leaves the S3 image unchanged.
 # 2026-10-07, #4707: hosted image354987 ->354235 (-752 B).
 # Rebased onto a439902ac6; upstream changes and minimal Blink save288 B.
 # Isolate the mutable string heap accessor (-228 B) and share literal/view
@@ -454,4 +459,4 @@
 # report: run 37653272928 at 0e93c35046; local image_flash is 354971 B.
 # Pass 36's equivalent final RMT4 matcher saves another 944 B on legacy;
 # modern ESP32 and S3 remain unchanged in controlled builds.
-354235
+353827
