@@ -33,9 +33,9 @@ from ci.tools.check_array_params import (
     _scope_tus as _array_scope_tus,
 )
 from ci.tools.check_noexcept import (
-    _COMPILER_ARGS,
     NoexceptCheckError,
     NoexceptHit,
+    _compiler_args,
     _find_clang_query,
     _raise_on_query_errors,
 )
@@ -99,7 +99,7 @@ def _run_combined_clang_query(
 ) -> tuple[list[NoexceptHit], list[ArrayParamHit]]:
     """Run a single clang-query session and route hits by binding name."""
     result = RunningProcess.run(
-        [*clang_query, tu, "--", *_COMPILER_ARGS],
+        [*clang_query, tu, "--", *_compiler_args()],
         input=_build_combined_query(file_regex),
         stdout=PIPE,
         stderr=PIPE,

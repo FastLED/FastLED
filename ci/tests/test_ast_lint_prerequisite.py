@@ -27,7 +27,7 @@ def test_unspawnable_uv_ast_wrapper_is_fatal(monkeypatch: pytest.MonkeyPatch) ->
     monkeypatch.setattr(
         check_noexcept,
         "_find_clang_query",
-        lambda: ["uv", "run", "clang-tool-chain-query"],
+        lambda: ["uv", "run", "clang-tool-chain-clang-query"],
     )
     monkeypatch.setattr(
         run_all_checkers.RunningProcess,
@@ -35,7 +35,7 @@ def test_unspawnable_uv_ast_wrapper_is_fatal(monkeypatch: pytest.MonkeyPatch) ->
         lambda *args, **kwargs: SimpleNamespace(
             returncode=1,
             stdout="",
-            stderr="Failed to spawn: clang-tool-chain-query",
+            stderr="Failed to spawn: clang-tool-chain-clang-query",
         ),
     )
     with pytest.raises(check_noexcept.NoexceptCheckError, match="Failed to spawn"):
@@ -243,7 +243,7 @@ def test_parser_checks_real_contracts_without_changing_production_policy() -> No
     assert "-DFL_HAS_NOEXCEPT=1" in args
     assert "-fexceptions" in args
     assert "-fno-exceptions" not in args
-    assert check_ast_combined._COMPILER_ARGS is args
+    assert check_ast_combined._compiler_args is check_noexcept._compiler_args
 
 
 @pytest.mark.parametrize("combined", [False, True])
@@ -434,3 +434,107 @@ int fl::policy() { return LOOKUP::channels(); }
         assert (result.returncode == 0) == succeeds, output
         if not succeeds:
             assert "incomplete type" in output
+
+
+def test_ast_compiler_args_preserve_non_windows_profile(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(check_noexcept.sys, "platform", "linux")
+    assert check_noexcept._compiler_args() == check_noexcept._COMPILER_ARGS
+    assert check_noexcept._compiler_args(["-std=c++11"]) == ["-std=c++11"]
+
+
+def test_windows_sleep_branch_accepts_real_noexcept() -> None:
+    # Validate the real Windows call bodies with host numeric types. Selecting
+    # Windows before those types would mix LLP64 declarations with a Linux SDK.
+    import shutil
+
+    from running_process import RunningProcess
+
+    compiler = shutil.which("clang++")
+    if compiler is None:
+        pytest.skip("Clang required for compiler-feature fixture")
+    result = RunningProcess.run(
+        [
+            compiler,
+            *check_noexcept._compiler_args(
+                ["-std=c++17", "-Isrc", "-DSTUB_PLATFORM", "-DFL_NO_EXCEPT=noexcept"]
+            ),
+            "-fms-extensions",
+            "-fsyntax-only",
+            "-x",
+            "c++",
+            "-",
+        ],
+        input=(
+            '#include "fl/stl/chrono.h"\n'
+            "#define FL_IS_WIN\n"
+            '#include "platforms/stub/thread_stub_stl.h"\n'
+            "void probe() { fl::platforms::detail::native_sleep_1ms(); "
+            "fl::platforms::detail::native_sleep(fl::chrono::milliseconds(1)); }\n"
+        ),
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        timeout=120,
+    )
+    assert result.returncode == 0, (result.stdout or "") + (result.stderr or "")
+
+
+def test_ast_compiler_args_select_native_windows_gnu_profile(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from clang_tool_chain.abi import windows_gnu
+    from clang_tool_chain.platform import detection
+
+    monkeypatch.setattr(check_noexcept.sys, "platform", "win32")
+    monkeypatch.setattr(detection, "get_platform_info", lambda: ("win", "x86_64"))
+    calls = []
+
+    def native_profile(platform_name, arch, args):
+        calls.append((platform_name, arch, args))
+        return ["--target=x86_64-w64-windows-gnu", "--sysroot=native", "-stdlib=libc++"]
+
+    monkeypatch.setattr(windows_gnu, "_get_gnu_target_args", native_profile)
+    assert check_noexcept._compiler_args(["-std=c++17"]) == [
+        "-std=c++17",
+        "--target=x86_64-w64-windows-gnu",
+        "--sysroot=native",
+        "-stdlib=libc++",
+    ]
+    assert calls == [("win", "x86_64", ["-std=c++17", "-c"])]
+
+
+@pytest.mark.parametrize("checker", [check_noexcept, check_array_params])
+def test_ast_discovery_uses_installed_query_entrypoint(
+    checker, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(Path, "exists", lambda path: False)
+    monkeypatch.setattr(
+        checker.shutil,
+        "which",
+        lambda name: (
+            "bundled-query" if name == "clang-tool-chain-clang-query" else None
+        ),
+    )
+    assert checker._find_clang_query() == ["bundled-query"]
+
+
+def test_windows_ast_profile_failure_is_not_silently_ignored(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from clang_tool_chain.abi import windows_gnu
+    from clang_tool_chain.platform import detection
+
+    monkeypatch.setattr(check_noexcept.sys, "platform", "win32")
+    monkeypatch.setattr(detection, "get_platform_info", lambda: ("win", "x86_64"))
+
+    def unavailable(*args):
+        raise RuntimeError("missing native sysroot")
+
+    monkeypatch.setattr(windows_gnu, "_get_gnu_target_args", unavailable)
+    with pytest.raises(
+        check_noexcept.NoexceptCheckError, match="missing native sysroot"
+    ):
+        check_noexcept._compiler_args()

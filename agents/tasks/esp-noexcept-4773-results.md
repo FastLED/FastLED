@@ -120,7 +120,7 @@ Neither a singleton migration nor splitting unity groups is required here.
   Tracked in [fbuild #1662](https://github.com/FastLED/fbuild/issues/1662).
 - The component profile uses Arduino plus IDF; it is not bare `app_main` proof.
 - Full Python passed: 1,836 passed, 25 skipped, 2 xfailed and 3,257 subtests.
-  The latest focused annotation/compiler fixture inventory passed 87 tests.
+  The latest focused annotation/compiler fixture inventory passed 93 tests.
   Full native debug passed 318 unit tests and 95 examples; the repaired coroutine
   handshake also passed its separate targeted debug run. Full portable lint and
   strict10 SDK QEMU passed. Exact-SHA complete CI remains required before merge.
@@ -128,6 +128,13 @@ Neither a singleton migration nor splitting unity groups is required here.
   `::CFastLED` selects the intended global class. A real Windows-mode Clang
   fixture reproduces failing lookup and passes after qualification. Final review
   found no remaining correctness or scope findings.
+- Subsequent Windows strict AST validation exposed an MSVC parser profile while
+  native builds use the bundled GNU Windows toolchain. Shared parser arguments
+  now use that native GNU target/sysroot/headers; missing tooling fails closed.
+  Standalone and combined AST checks use the same profile. Corrected the installed
+  query entrypoint name and removed misplaced annotation tokens from both Windows
+  Sleep calls. An actual-header compiler probe instantiates both call paths with
+  real noexcept. Full portable lint and the 93-test focused suite passed.
 - MP3 CPU audit compiler drift is tracked in FastLED#4779. Unchanged master and
   this PR both produce float dct32 instruction count47 with explicit GCC13.2;
   explicit GCC14.2 produces44, matching the baseline. Decoder and audit sources

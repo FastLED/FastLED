@@ -54,7 +54,7 @@ inline bool is_main_thread() FL_NO_EXCEPT {
 /// @brief Native sleep for 1ms
 inline void native_sleep_1ms() FL_NO_EXCEPT {
 #ifdef FL_IS_WIN
-    Sleep(1) FL_NO_EXCEPT;
+    Sleep(1);
 #else
     struct timespec ts;
     ts.tv_sec = 0;
@@ -79,7 +79,7 @@ inline void native_sleep(const fl::chrono::duration<Rep, Period>& sleep_duration
     // Windows: Sleep takes milliseconds
     // Convert nanoseconds to milliseconds (round up)
     unsigned long ms = static_cast<unsigned long>((ns + 999999) / 1000000);
-    Sleep(ms) FL_NO_EXCEPT;
+    Sleep(ms);
 #else
     // POSIX: Use nanosleep
     struct timespec ts;

@@ -135,5 +135,12 @@ authorized. Unity layout, bodies and vendor linker policies remain unchanged.
   coroutine phase race repaired with acknowledgement semaphore, targeteddebug
   passes; fullnative rerun pending. ATmega8A overflow is identical on unchanged
   master and is tracked in#4775; scope clarification is pending.
-- Previously measured clean size results predate the broad annotation cleanup.
-  Refresh measurements and acceptance gates before publishing the new PR.
+- Four clean final size reports record broad checkpoint001a0dc17e and reproduce
+  policy-only savings. Native debug rerun passed318 units and95 examples, with
+  coroutine separately passing its targeted debug run. Full Python passed1836
+  tests. Later public-header and Windows parser fixes require exact-SHA full CI.
+- Windows strict AST now receives the same GNU target/sysroot/header profile as
+  native builds, and tooling failures remain fatal. Corrected the installed query
+  fallback name; removed misplaced tokens on both Sleep calls. The actual-header
+  compiler probe and focused93 tests passed; full portable lint passed. The same
+  reviewer checked these repairs. MP3 codegen compiler drift is tracked in#4779.

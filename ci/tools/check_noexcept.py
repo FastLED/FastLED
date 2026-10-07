@@ -140,6 +140,26 @@ _COMPILER_ARGS = [
     "-fexceptions",
 ]
 
+
+def _compiler_args(base_args: list[str] | None = None) -> list[str]:
+    """Match the native Windows GNU header profile for AST parsing (#4773)."""
+    args = list(_COMPILER_ARGS if base_args is None else base_args)
+    if sys.platform != "win32":
+        return args
+    try:
+        from clang_tool_chain.abi.windows_gnu import _get_gnu_target_args
+        from clang_tool_chain.platform.detection import get_platform_info
+
+        platform_name, arch = get_platform_info()
+        # The helper's compile-only mode omits irrelevant linker options.
+        args.extend(_get_gnu_target_args(platform_name, arch, [*args, "-c"]))
+    except (ImportError, OSError, RuntimeError, ValueError) as error:
+        raise NoexceptCheckError(
+            f"Windows AST parsing requires the native GNU toolchain: {error}"
+        ) from error
+    return args
+
+
 _MATCH_OUTPUT_RE = re.compile(r"(src[\\/]\S+):(\d+):\d+: note: .root. binds here")
 _SUPPRESS_RE = re.compile(
     r"//\s*(?:ok\s+no\s+(?:noexcept|FL_NO_EXCEPT)|"
@@ -208,13 +228,13 @@ def _find_clang_query() -> list[str]:
     if found:
         return [found]
 
-    wrapper = shutil.which("clang-tool-chain-query")
+    wrapper = shutil.which("clang-tool-chain-clang-query")
     if wrapper:
         return [wrapper]
 
     uv = shutil.which("uv")
     if uv:
-        return [uv, "run", "clang-tool-chain-query"]
+        return [uv, "run", "clang-tool-chain-clang-query"]
 
     return []
 
@@ -298,7 +318,7 @@ def _run_clang_query(
 ) -> list[NoexceptHit]:
     """Run clang-query and return filtered missing-FL_NO_EXCEPT hits."""
     result = RunningProcess.run(
-        [*clang_query, tu, "--", *_COMPILER_ARGS],
+        [*clang_query, tu, "--", *_compiler_args()],
         input=build_query(file_regex),
         stdout=PIPE,
         stderr=PIPE,
