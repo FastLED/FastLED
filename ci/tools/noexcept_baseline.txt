@@ -5758,7 +5758,7 @@ src/fl/stl/bitset/bitset.cpp.hpp|void to_string(const fl::u16 *bit_data, fl::u32
 src/fl/stl/cerrno.h|inline int get_errno() {
 src/fl/stl/cerrno.h|inline void clear_errno() {
 src/fl/stl/cerrno.h|inline void set_errno(int value) {
-src/fl/stl/charconv.cpp.hpp|fl::string hex(u64 value, HexIntWidth width, bool is_negative, bool uppercase, bool pad_to_width) {
+src/fl/stl/stdio/charconv.cpp.hpp|fl::string hex(u64 value, HexIntWidth width, bool is_negative, bool uppercase, bool pad_to_width) {
 src/fl/stl/charconv.cpp.hpp|float parseFloat(const char *str, fl::size len) {
 src/fl/stl/charconv.cpp.hpp|int itoa(i32 value, char *sp, int radix) {
 src/fl/stl/charconv.cpp.hpp|int itoa64(i64 value, char *sp, int radix) {
