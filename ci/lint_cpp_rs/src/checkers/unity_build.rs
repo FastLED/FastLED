@@ -38,6 +38,7 @@ const UNITY_EXPECTED_BUILD_FILES: &[&str] = &[
     "fl/build/fl.log+.cpp",
     "fl/build/fl.math+.cpp",
     "fl/build/fl.net+.cpp",
+    "fl/build/fl.net.ota+.cpp",
     "fl/build/fl.control+.cpp",
     "fl/build/fl.remote+.cpp",
     "fl/build/fl.sensors+.cpp",
@@ -52,6 +53,8 @@ const UNITY_EXPECTED_BUILD_FILES: &[&str] = &[
     "fl/build/fl.video+.cpp",
     "fl/build/fl.wdt+.cpp",
     "fl/build/platforms+.cpp",
+    "fl/build/platforms.esp.32.net+.cpp",
+    "fl/build/platforms.esp.32.ota+.cpp",
     "fl/build/third_party+.cpp",
     "fl/build/extras+.cpp",
 ];

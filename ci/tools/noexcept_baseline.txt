@@ -4883,27 +4883,27 @@ src/fl/net/http/stream_transport.h|void setOnDisconnect(StateCallback callback);
 src/fl/net/http/stream_transport.h|void setTimeout(u32 timeoutMs);
 src/fl/net/http/stream_transport.h|void update(u32 currentTimeMs);
 src/fl/net/http/stream_transport.h|void writeResponse(const fl::json& response);
-src/fl/net/ota.cpp.hpp|OTA::OTA() : mImpl(nullptr) {
-src/fl/net/ota.cpp.hpp|bool OTA::begin(const char* hostname, const char* password) {
-src/fl/net/ota.cpp.hpp|bool OTA::beginWiFi(const char* hostname, const char* password, const char* ssid, const char* wifi_pass) {
-src/fl/net/ota.cpp.hpp|bool OTA::enableApFallback(const char* ap_ssid, const char* ap_pass) {
-src/fl/net/ota.cpp.hpp|bool OTA::isConnected() const {
-src/fl/net/ota.cpp.hpp|u8 OTA::getFailedServices() const {
-src/fl/net/ota.cpp.hpp|void OTA::onBeforeReboot(void (*callback)()) {
-src/fl/net/ota.cpp.hpp|void OTA::onError(ErrorCallback callback) {
-src/fl/net/ota.cpp.hpp|void OTA::onProgress(ProgressCallback callback) {
-src/fl/net/ota.cpp.hpp|void OTA::onState(StateCallback callback) {
-src/fl/net/ota.cpp.hpp|void OTA::poll() {
-src/fl/net/ota.h|bool begin(const char* hostname, const char* password);
-src/fl/net/ota.h|bool beginWiFi(const char* hostname, const char* password, const char* ssid, const char* wifi_pass);
-src/fl/net/ota.h|bool enableApFallback(const char* ap_ssid, const char* ap_pass = nullptr);
-src/fl/net/ota.h|bool isConnected() const;
-src/fl/net/ota.h|u8 getFailedServices() const;
-src/fl/net/ota.h|void onBeforeReboot(void (*callback)());
-src/fl/net/ota.h|void onError(ErrorCallback callback);
-src/fl/net/ota.h|void onProgress(ProgressCallback callback);
-src/fl/net/ota.h|void onState(StateCallback callback);
-src/fl/net/ota.h|void poll();
+src/fl/net/ota/ota.cpp.hpp|OTA::OTA() : mImpl(nullptr) {
+src/fl/net/ota/ota.cpp.hpp|bool OTA::begin(const char* hostname, const char* password) {
+src/fl/net/ota/ota.cpp.hpp|bool OTA::beginWiFi(const char* hostname, const char* password, const char* ssid, const char* wifi_pass) {
+src/fl/net/ota/ota.cpp.hpp|bool OTA::enableApFallback(const char* ap_ssid, const char* ap_pass) {
+src/fl/net/ota/ota.cpp.hpp|bool OTA::isConnected() const {
+src/fl/net/ota/ota.cpp.hpp|u8 OTA::getFailedServices() const {
+src/fl/net/ota/ota.cpp.hpp|void OTA::onBeforeReboot(void (*callback)()) {
+src/fl/net/ota/ota.cpp.hpp|void OTA::onError(ErrorCallback callback) {
+src/fl/net/ota/ota.cpp.hpp|void OTA::onProgress(ProgressCallback callback) {
+src/fl/net/ota/ota.cpp.hpp|void OTA::onState(StateCallback callback) {
+src/fl/net/ota/ota.cpp.hpp|void OTA::poll() {
+src/fl/net/ota/ota.h|bool begin(const char* hostname, const char* password);
+src/fl/net/ota/ota.h|bool beginWiFi(const char* hostname, const char* password, const char* ssid, const char* wifi_pass);
+src/fl/net/ota/ota.h|bool enableApFallback(const char* ap_ssid, const char* ap_pass = nullptr);
+src/fl/net/ota/ota.h|bool isConnected() const;
+src/fl/net/ota/ota.h|u8 getFailedServices() const;
+src/fl/net/ota/ota.h|void onBeforeReboot(void (*callback)());
+src/fl/net/ota/ota.h|void onError(ErrorCallback callback);
+src/fl/net/ota/ota.h|void onProgress(ProgressCallback callback);
+src/fl/net/ota/ota.h|void onState(StateCallback callback);
+src/fl/net/ota/ota.h|void poll();
 src/fl/net/rpc_scheduler.h|bool operator<(const ScheduledTask& other) const {
 src/fl/net/rpc_scheduler.h|size_t pendingCount() const {
 src/fl/net/rpc_scheduler.h|size_t tick(u32 currentTime) {
