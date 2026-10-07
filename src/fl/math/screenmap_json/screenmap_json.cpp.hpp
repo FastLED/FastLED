@@ -1,0 +1,483 @@
+// ok no header - ScreenMap is declared in fl/math/screenmap.h
+// IWYU pragma: private
+
+#include "fl/math/screenmap.h"
+#include "fl/stl/json.h"
+#include "fl/stl/string.h"
+#include "fl/stl/flat_map.h"
+#include "fl/stl/vector.h"
+#include "fl/stl/algorithm.h"
+#include "fl/stl/type_traits.h"
+#include "fl/stl/static_assert.h"
+#include "fl/stl/compiler_control.h"
+#include "fl/stl/move.h"
+#include "fl/stl/noexcept.h"
+#include "fl/log/log.h"
+
+namespace fl {
+
+// Helper function to extract a vector of floats from a JSON array
+fl::vector<float> jsonArrayToFloatVector(const fl::json& jsonArray) {
+    fl::vector<float> result;
+    
+    if (!jsonArray.has_value() || !jsonArray.is_array()) {
+        return result;
+    }
+    auto begin_float =  jsonArray.begin_array<float>();
+    auto end_float = jsonArray.end_array<float>();
+
+    using T = decltype(*begin_float);
+    FL_STATIC_ASSERT(fl::is_same<T, fl::parse_result<float>>::value, "Value type must be parse_result<float>");
+    
+    // Use explicit array iterator style as demonstrated in FEATURE.md
+    // DO NOT CHANGE THIS CODE. FIX THE IMPLIMENTATION IF NECESSARY.
+    for (auto it = begin_float; it != end_float; ++it) {
+        // assert that the value type is parse_result<float>
+
+        // get the name of the type
+        auto parseResult = *it;
+        if (!parseResult.has_error()) {
+            result.push_back(parseResult.get_value());
+        } else {
+            FL_WARN("jsonArrayToFloatVector: parse_result<float> has error: " << parseResult.get_error().message);
+        }
+    }
+    
+    return result;
+}
+
+// Helper: parse a v2 screenmap document into the flat segmentMaps.
+// v2 shape (see ledmapper #92):
+//   {
+//     "version": 2,                                  // optional, explicit
+//     "groups":   { "<name>": { "color": "...", ... } },  // optional, ignored by firmware
+//     "segments": [
+//       { "id": "<unique>", "pin": <int|str>, "group": "<name>",
+//         "x": [...], "y": [...], "z": [...],         // z optional
+//         "parent": "<id>", "offset": <int|null> }    // parent+offset on forks only
+//     ]
+//   }
+//
+// Flatten policy: each segment becomes one ScreenMap entry keyed by `id`.
+// `pin`, `group`, `parent`, `offset` are not represented in the firmware-side
+// flat_map; they're UI/wiring metadata the editor and video tools care about.
+// `z` is dropped (firmware-side ScreenMap is 2D today).
+static bool parseV2SegmentArray(const fl::json& segmentsArr,
+                                fl::flat_map<string, ScreenMap> *segmentMaps,
+                                string *err) FL_NO_EXCEPT {
+    if (!segmentsArr.has_value() || !segmentsArr.is_array()) {
+        *err = "v2 'segments' is not an array";
+        return false;
+    }
+
+    auto arrPtr = segmentsArr.as_array();
+    if (!arrPtr) {
+        *err = "v2 'segments' array could not be read";
+        return false;
+    }
+
+    for (const auto& elem : *arrPtr) {
+        if (!elem) {
+            *err = "v2 segment is null";
+            return false;
+        }
+        fl::json segVal(elem);
+        if (!segVal.has_value() || !segVal.is_object()) {
+            *err = "v2 segment is not an object";
+            return false;
+        }
+
+        // Required: id
+        if (!segVal.contains("id") || !segVal["id"].has_value()) {
+            *err = "v2 segment missing 'id'";
+            return false;
+        }
+        auto idOpt = segVal["id"].as_string();
+        if (!idOpt) {
+            *err = "v2 segment 'id' is not a string";
+            return false;
+        }
+        string id = *idOpt;
+
+        // Required: x
+        if (!segVal.contains("x") || !segVal["x"].has_value() || !segVal["x"].is_array()) {
+            *err = "v2 segment '" + id + "' missing or invalid 'x' array";
+            return false;
+        }
+        fl::vector<float> x_array = jsonArrayToFloatVector(segVal["x"]);
+
+        // Required: y
+        if (!segVal.contains("y") || !segVal["y"].has_value() || !segVal["y"].is_array()) {
+            *err = "v2 segment '" + id + "' missing or invalid 'y' array";
+            return false;
+        }
+        fl::vector<float> y_array = jsonArrayToFloatVector(segVal["y"]);
+
+        string type = "led_strip";
+        if (segVal.contains("type") && segVal["type"].has_value()) {
+            auto typeOpt = segVal["type"].as_string();
+            if (!typeOpt) { *err = "v2 segment '" + id + "' has invalid 'type'"; return false; }
+            type = *typeOpt;
+        }
+        const bool isWire = type == "el_wire";
+        const bool isPanel = type == "el_panel";
+        if (type != "led_strip" && !isWire && !isPanel) {
+            *err = "v2 segment '" + id + "' has unsupported type '" + type + "'";
+            return false;
+        }
+        if (x_array.size() != y_array.size()) {
+            *err = "v2 segment '" + id + "' has mismatched x/y lengths";
+            return false;
+        }
+        const size_t minVertices = isWire ? 2 : isPanel ? 3 : 0;
+        if ((isWire || isPanel) && x_array.size() < minVertices) {
+            *err = "v2 segment '" + id + "' has too few vertices";
+            return false;
+        }
+        float thickness = 0.0f;
+        if (isWire) {
+            if (!segVal.contains("thickness") || !segVal["thickness"].has_value()) {
+                *err = "v2 el_wire segment '" + id + "' missing thickness";
+                return false;
+            }
+            auto thicknessOpt = segVal["thickness"].as_float();
+            if (!thicknessOpt || *thicknessOpt <= 0.0f) {
+                *err = "v2 el_wire segment '" + id + "' requires positive thickness";
+                return false;
+            }
+            thickness = static_cast<float>(*thicknessOpt);
+        } else if (segVal.contains("thickness")) {
+            *err = "v2 segment '" + id + "' thickness is only valid for el_wire";
+            return false;
+        }
+
+        // Optional: diameter (not in canonical v2 but accepted as a backward-compat
+        // hint when present; otherwise the per-group `diameter` could be wired here
+        // in a future iteration).
+        float diameter = -1.0f;
+        if (segVal.contains("diameter") && segVal["diameter"].has_value()) {
+            auto diameterOpt = segVal["diameter"].as_float();
+            if (diameterOpt) {
+                diameter = static_cast<float>(*diameterOpt);
+            }
+        }
+
+        auto n = fl::min(x_array.size(), y_array.size());
+        ScreenMap segment_map(isWire || isPanel ? 1 : static_cast<u32>(n), diameter);
+        if (isWire || isPanel) {
+            fl::vector<vec2f> vertices;
+            vertices.reserve(n);
+            for (size_t i = 0; i < n; i++) vertices.push_back({x_array[i], y_array[i]});
+            segment_map.setShape(0, isWire ? ScreenMap::Shape::EL_WIRE : ScreenMap::Shape::EL_PANEL, vertices.data(), static_cast<u32>(n), thickness);
+        }
+        if (!isWire && !isPanel) {
+            for (size_t i = 0; i < n; i++) {
+                segment_map.set(static_cast<u16>(i), vec2f{x_array[i], y_array[i]});
+            }
+        }
+        (*segmentMaps)[id] = fl::move(segment_map);
+    }
+    return true;
+}
+
+bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
+                          fl::flat_map<string, ScreenMap> *segmentMaps, string *err) {
+
+#if FASTLED_NO_JSON
+    FL_UNUSED(jsonStrScreenMap);
+    FL_UNUSED(segmentMaps);
+    FL_UNUSED(err);
+    FL_WARN("ScreenMap::ParseJson called with FASTLED_NO_JSON");
+    if (err) {
+        *err = "JSON is not supported in this build";
+    }
+    return false;
+#else
+    //FL_WARN_SCREENMAP("ParseJson called with JSON: " << jsonStrScreenMap);
+
+    string _err;
+    if (!err) {
+        err = &_err;
+    }
+
+    auto jsonDoc = fl::json::parse(jsonStrScreenMap);
+    if (!jsonDoc.has_value()) {
+        *err = "Failed to parse JSON";
+        FL_WARN("Failed to parse JSON");
+        return false;
+    }
+
+    if (!jsonDoc.is_object()) {
+        *err = "JSON root is not an object";
+        FL_WARN("JSON root is not an object");
+        return false;
+    }
+
+    // ── v2 dispatch ──────────────────────────────────────────────────────
+    // v2 if: explicit "version": 2  OR  has top-level "segments" array.
+    // v1 if: explicit "version": 1  OR  has top-level "map" object.
+    bool explicitV2 = false;
+    bool explicitV1 = false;
+    if (jsonDoc.contains("version") && jsonDoc["version"].has_value()) {
+        auto versionOpt = jsonDoc["version"].as_int();
+        if (versionOpt) {
+            int v = static_cast<int>(*versionOpt);
+            if (v == 2) explicitV2 = true;
+            else if (v == 1) explicitV1 = true;
+        }
+    }
+    bool hasSegments = jsonDoc.contains("segments") && jsonDoc["segments"].has_value()
+                       && jsonDoc["segments"].is_array();
+    bool hasMap = jsonDoc.contains("map") && jsonDoc["map"].has_value()
+                  && jsonDoc["map"].is_object();
+
+    if (explicitV2 || (!explicitV1 && hasSegments && !hasMap)) {
+        return parseV2SegmentArray(jsonDoc["segments"], segmentMaps, err);
+    }
+
+    // Fall through to v1 path.
+    // Check if "map" key exists and is an object
+    if (!jsonDoc.contains("map")) {
+        *err = "Missing 'map' key in JSON";
+        FL_WARN("Missing 'map' key in JSON");
+        return false;
+    }
+    
+    // Get the map object
+    auto mapObj = jsonDoc["map"];
+    if (!mapObj.has_value() || !mapObj.is_object()) {
+        *err = "Invalid 'map' object in JSON";
+        FL_WARN("Invalid 'map' object in JSON");
+        return false;
+    }
+    
+    auto jsonMapPtr = mapObj.as_object();
+    if (!jsonMapPtr || jsonMapPtr->empty()) {
+        *err = "Failed to parse map from JSON or map is empty";
+        FL_WARN("Failed to parse map from JSON or map is empty");
+        return false;
+    }
+
+    auto& jsonMap = *jsonMapPtr;
+
+    
+    for (const auto& kv : jsonMap) {
+        auto name = kv.first;
+
+        
+        // Check that the value is not null before creating json object
+        if (!kv.second) {
+            *err = "Null value for segment " + name;
+            return false;
+        }
+        
+        // Create json object directly from shared_ptr
+        fl::json val(kv.second);
+        if (!val.has_value()) {
+            *err = "Invalid value for segment " + name;
+            return false;
+        }
+        
+        if (!val.is_object()) {
+            *err = "Segment value for " + name + " is not an object";
+            return false;
+        }
+        
+        // Check if x array exists and is actually an array
+        if (!val.contains("x")) {
+            *err = "Missing x array for " + name;
+            return false;
+        }
+        
+        if (!val["x"].has_value() || !val["x"].is_array()) {
+            *err = "Invalid x array for " + name;
+            return false;
+        }
+        
+        // Extract x array using our helper function
+        fl::vector<float> x_array = jsonArrayToFloatVector(val["x"]);
+        
+        // Check if y array exists and is actually an array
+        if (!val.contains("y")) {
+            *err = "Missing y array for " + name;
+            return false;
+        }
+        
+        if (!val["y"].has_value() || !val["y"].is_array()) {
+            *err = "Invalid y array for " + name;
+            return false;
+        }
+        
+        // Extract y array using our helper function
+        fl::vector<float> y_array = jsonArrayToFloatVector(val["y"]);
+        
+        // Get diameter (optional) with default value
+        float diameter = -1.0f; // default value
+        if (val.contains("diameter") && val["diameter"].has_value()) {
+                            auto diameterOpt = val["diameter"].as_float();
+            if (diameterOpt) {
+                diameter = static_cast<float>(*diameterOpt);
+            }
+        }
+
+        auto n = fl::min(x_array.size(), y_array.size());
+        if (n != x_array.size() || n != y_array.size()) {
+            if (n != x_array.size()) {
+            }
+            if (n != y_array.size()) {
+            }
+        }
+
+        ScreenMap segment_map(n, diameter);
+        for (size_t i = 0; i < n; i++) {
+            segment_map.set(i, vec2f{x_array[i], y_array[i]});
+        }
+        (*segmentMaps)[name] = fl::move(segment_map);
+    }
+    return true;
+#endif
+}
+
+bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
+                          const char *screenMapName, ScreenMap *screenmap,
+                          string *err) {
+
+    fl::flat_map<string, ScreenMap> segmentMaps;
+    bool ok = ParseJson(jsonStrScreenMap, &segmentMaps, err);
+    if (!ok) {
+        return false;
+    }
+    if (segmentMaps.size() == 0) {
+        return false;
+    }
+    if (segmentMaps.contains(screenMapName)) {
+        *screenmap = segmentMaps[screenMapName];
+        return true;
+    }
+    string _err = "ScreenMap not found: ";
+    _err.append(screenMapName);
+    if (err) {
+        *err = _err;
+    }
+    
+    return false;
+}
+
+void ScreenMap::toJson(const fl::flat_map<string, ScreenMap> &segmentMaps,
+                       fl::json *doc) {
+
+#if FASTLED_NO_JSON
+    FL_WARN("ScreenMap::toJson called with FASTLED_NO_JSON");
+    return;
+#else
+    if (!doc) {
+        FL_WARN("ScreenMap::toJson called with nullptr doc");
+        return;
+    }
+
+    // Emits the v2 screenmap shape (issue ledmapper#143):
+    //   { "version": 2,
+    //     "groups": { "<name>": { "color": "#hex" } },
+    //     "segments": [ { "id": "<name>", "group": "<name>",
+    //                     "x": [...], "y": [...], "diameter": ... } ] }
+    //
+    // `pin` is part of the v2 shape but is not emitted here -- see the note
+    // at the segment object below. Writing the example value from a comment
+    // as data is how it came to be there.
+    // Bilingual readers (`ScreenMap::ParseJson`, ledmapper) accept both v1
+    // and v2, so any existing on-disk v1 JSON keeps loading. v1 emission
+    // is no longer supported.
+    *doc = fl::json::object();
+
+    fl::json groupsObj = fl::json::object();
+    fl::json segmentsArr = fl::json::array();
+
+    // Distinct palette so each strip lights up differently in the editor
+    // preview without the user having to pick a colour. Cycle on overflow.
+    static const char *const kPalette[] = {
+        "#3b82f6", "#10b981", "#f59e0b", "#ef4444",
+        "#a855f7", "#06b6d4", "#ec4899", "#84cc16",
+    };
+    constexpr size_t kPaletteSize = sizeof(kPalette) / sizeof(kPalette[0]);
+
+    size_t idx = 0;
+    for (const auto& kv : segmentMaps) {
+        if (kv.second.getLength() == 0) {
+            FL_WARN("ScreenMap::toJson called with empty segment: " << (fl::string(kv.first)));
+            continue;
+        }
+
+        const auto& name = kv.first;
+        const auto& segment = kv.second;
+        const float diameter = segment.getDiameter();
+
+        fl::json xArray = fl::json::array();
+        for (u16 i = 0; i < segment.getLength(); i++) {
+            xArray.push_back(fl::json(segment[i].x));
+        }
+        fl::json yArray = fl::json::array();
+        for (u16 i = 0; i < segment.getLength(); i++) {
+            yArray.push_back(fl::json(segment[i].y));
+        }
+
+        fl::json groupObj = fl::json::object();
+        groupObj.set("color", fl::json(fl::string(kPalette[idx % kPaletteSize])));
+        groupsObj.set(name, groupObj);
+
+        fl::json segmentObj = fl::json::object();
+        segmentObj.set("id", fl::json(fl::string(name)));
+        // No `pin`. The v2 shape carries one and the parser above drops it --
+        // it is wiring metadata with nowhere to live on this side -- so there
+        // is nothing here to write. What used to be written was the literal
+        // `"pin1"` from the shape example in the comment above, copied into
+        // the emitter as data.
+        //
+        // That is worse than omitting it, because it is wrong rather than
+        // absent. A three-segment file wired to pin1/pin2/pin3 came back with
+        // all three on pin1, and a numeric `"pin": 7` came back as the string
+        // `"pin1"`. A consumer reading that mis-wires a strip and has no way
+        // to tell; a consumer reading a missing optional key can see that it
+        // is missing.
+        //
+        // Carrying the value through instead is FastLED #3322, which needs
+        // somewhere on `ScreenMap` to put it and a decision about the
+        // `<int|str>` union. Until then this loses the field visibly rather
+        // than rewriting it silently.
+        segmentObj.set("group", fl::json(fl::string(name)));
+        segmentObj.set("x", xArray);
+        segmentObj.set("y", yArray);
+        // Only when there is one. `mDiameter` defaults to -1 as a sentinel
+        // meaning "unset", and writing that out publishes an impossible
+        // physical size: no LED is -1 units across. The parser already reads
+        // an absent key back as -1 (both the v1 and v2 paths default it), so
+        // omitting round-trips to exactly the same value inside FastLED and
+        // stops a consumer from having to know the sentinel.
+        //
+        // The field's own comment in screenmap.h asked for this and had the
+        // sense inverted -- "Only serialized if it's not > 0.0f" -- which is
+        // presumably how the writer came to do the opposite.
+        if (diameter > 0.0f) {
+            segmentObj.set("diameter", fl::json(diameter));
+        }
+        segmentsArr.push_back(segmentObj);
+
+        idx++;
+    }
+
+    doc->set("version", fl::json(i64(2)));
+    doc->set("groups", groupsObj);
+    doc->set("segments", segmentsArr);
+
+    fl::string debugStr = doc->to_string();
+    FL_WARN("ScreenMap::toJson generated JSON: " << debugStr);
+#endif
+}
+
+void ScreenMap::toJsonStr(const fl::flat_map<string, ScreenMap> &segmentMaps,
+                          string *jsonBuffer) {
+    fl::json doc;
+    toJson(segmentMaps, &doc);
+    *jsonBuffer = doc.to_string();
+}
+
+} // namespace fl
