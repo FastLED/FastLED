@@ -1,3 +1,4 @@
+// ok no header: public declarations remain in fl/gfx.
 #define FASTLED_INTERNAL
 #define __PROG_TYPES_COMPAT__
 

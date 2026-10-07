@@ -477,16 +477,7 @@ class ChannelEngineRMT4Impl final : public ChannelEngineRMT4 {
     static void
     tx_start(ChannelState *state) FL_NO_EXCEPT;
 
-    FL_NO_INLINE IRAM_ATTR ChannelState *
-    findChannelByNumber(int channelNum) FL_NO_EXCEPT {
-        // Linear search through active channels
-        for (auto &state : mChannels) {
-            if (state.inUse && state.channel == channelNum) {
-                return &state;
-            }
-        }
-        return nullptr;
-    }
+    ChannelState *findChannelByNumber(int channelNum) FL_NO_EXCEPT;
 
     // ═══════════════════════════════════════════════════════════════════════════
     // Channel Management

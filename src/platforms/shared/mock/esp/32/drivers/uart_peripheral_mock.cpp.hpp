@@ -4,6 +4,7 @@
 /// @brief Mock UART peripheral implementation for unit testing
 
 #include "platforms/shared/mock/esp/32/drivers/uart_peripheral_mock.h"
+#include "fl/stl/chrono.h"
 #include "platforms/is_platform.h"
 
 #if defined(ARDUINO) || defined(FL_IS_ESP32)

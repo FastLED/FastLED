@@ -1,3 +1,4 @@
+// ok no header: public declarations remain in fl/channels.
 #pragma once
 
 // IWYU pragma: private

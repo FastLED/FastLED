@@ -11,6 +11,7 @@
 #if defined(FASTLED_STUB_IMPL) || (!defined(ARDUINO) && (defined(FL_IS_LINUX) || defined(FL_IS_APPLE) || defined(FL_IS_WIN)))
 
 #include "platforms/shared/mock/esp/32/drivers/spi_peripheral_mock.h"
+#include "fl/system/delay.h"
 #include "fl/log/log.h"
 #include "fl/stl/allocator.h"
 #include "fl/stl/cstring.h"

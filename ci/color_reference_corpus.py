@@ -87,7 +87,7 @@ def legacy_independent_gamma_video(
 ) -> tuple[int, int, int]:  # noqa: DCT002
     """Match FastLED ``applyGamma_video(CRGB, gammaR, gammaG, gammaB)``.
 
-    Provenance: ``src/fl/gfx/colorutils.cpp.hpp``. The CRGB overloads call the
+    Provenance: ``src/fl/gfx/effects/colorutils.cpp.hpp``. The CRGB overloads call the
     scalar ``applyGamma_video`` once per channel, so each channel is
     transformed independently of the other two, in the eight-bit code domain.
     The scalar path rounds half-up and refuses to take a positive code down to

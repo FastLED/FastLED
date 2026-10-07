@@ -1,6 +1,7 @@
 """Streaming compilation and test execution via Meson build system."""
 
 import concurrent.futures
+import json
 import os
 import re
 import sys
@@ -64,11 +65,9 @@ class StreamingResult:
     compile_output: str = ""
     failed_names: list[str] = field(default_factory=list)
     compile_sub_phases: dict[str, float] = field(default_factory=dict)
-    # Subset of the totals above contributed by example targets. Only
-    # artifacts Ninja relinked this run are executed, so a population whose
-    # binaries were already up to date silently contributes zero -- callers
-    # need the split to say so out loud rather than shrinking one total
-    # (#3779).
+    # Example contributions are reported separately from unit tests.
+    # Full-scope execution discovers registered cached artifacts as well as
+    # newly linked artifacts; targeted builds retain their selected population.
     num_passed_examples: int = 0
     num_failed_examples: int = 0
 
@@ -116,20 +115,64 @@ def collect_test_paths(output: str, build_dir: Path) -> list[Path]:
     return paths
 
 
+_FULL_TEST_TARGETS = ("all_tests", "all-with-examples", "examples-host")
+
+
+def registered_test_artifacts(
+    build_dir: Path, target: str | None, exclude_suites: list[str] | None = None
+) -> list[Path]:
+    """Discover the complete registered population built by a full-scope alias.
+
+    Targeted builds retain Ninja's selected artifacts. Full builds include
+    unchanged standalone executables and DLLs, even without a link status line.
+    Missing artifacts remain in the inventory so execution reports a failure.
+    """
+    if target not in _FULL_TEST_TARGETS:
+        return []
+    inventory = build_dir / "meson-info" / "intro-tests.json"
+    if not inventory.exists():
+        return []
+    tests = json.loads(inventory.read_text(encoding="utf-8"))
+    build_root = build_dir.resolve()
+    artifacts: list[Path] = []
+    excluded = {suite.rsplit(":", 1)[-1] for suite in exclude_suites or []}
+    for test in tests:
+        suites = {suite.rsplit(":", 1)[-1] for suite in test.get("suite", [])}
+        if excluded & suites:
+            continue
+        command = test["cmd"]
+        # DLL tests invoke Python + test_wrapper + runner + the test module;
+        # standalone probes and the compile gate invoke their binary directly.
+        modules = [
+            arg
+            for arg in command
+            if Path(arg).suffix.lower() in (".dll", ".so", ".dylib")
+        ]
+        artifact = Path(modules[-1] if modules else command[0])
+        if not artifact.is_absolute():
+            artifact = build_root / artifact
+        artifact = artifact.resolve()
+        if not artifact.is_relative_to(build_root):
+            continue
+        relative = artifact.relative_to(build_root)
+        example = relative.parts[0] == "examples"
+        if target == "all_tests" and example:
+            continue
+        if target == "examples-host" and not example:
+            continue
+        if artifact not in artifacts:
+            artifacts.append(artifact)
+    return artifacts
+
+
 def is_example_artifact(test_path: Path) -> bool:
     """True when a built artifact is an example rather than a unit test.
 
     The build lays unit-test binaries under ``<build>/tests/`` and example
     binaries under ``<build>/examples/``; that directory is the only surviving
     marker of which population an artifact belongs to.
-
-    Phrased as "not a unit test" so this stays the single discriminator: the
-    streaming runner calls it to choose between ``runner`` and
-    ``example_runner``, and counting an artifact as a unit test while handing
-    it to ``example_runner`` would let the two disagree -- exactly the kind of
-    silent miscount #3779 is about.
     """
-    return test_path.parent.name != "tests"
+    return test_path.parent.name == "examples"
 
 
 @dataclass
@@ -694,6 +737,7 @@ def stream_compile_and_run_tests(
     build_timer=None,
     max_failures: int = 10,
     defer_test_execution: bool = False,
+    exclude_suites: list[str] | None = None,
 ) -> StreamingResult:
     """
     Compile test artifacts, then execute them concurrently.
@@ -713,6 +757,7 @@ def stream_compile_and_run_tests(
         build_timer: Optional BuildTimer for recording test_execution_done checkpoint.
         max_failures: Maximum number of test failures before halting (default: 10, 0 = unlimited).
         defer_test_execution: Compile only, leaving complete-suite execution to Meson.
+        exclude_suites: Registered suites excluded from full-scope execution.
     """
     # Pass test file filter to the callback via an attribute so it can
     # inject it into the child-process environment (os.environ is stale after
@@ -775,6 +820,21 @@ def stream_compile_and_run_tests(
             compile_sub_phases=cr.compile_sub_phases,
         )
 
+    registered = registered_test_artifacts(build_dir, target, exclude_suites)
+    announced = {path.resolve() for path in cr.compiled_tests}
+    cached = frozenset(path for path in registered if path.resolve() not in announced)
+    setattr(test_callback, "_cached_test_artifacts", cached)
+    test_paths = list(cr.compiled_tests)
+    if (
+        target in _FULL_TEST_TARGETS
+        and (build_dir / "meson-info" / "intro-tests.json").exists()
+    ):
+        # The requested alias and suite exclusions apply to relinked artifacts
+        # too: compilation may build a dependency from an excluded population.
+        allowed = set(registered)
+        test_paths = [path for path in test_paths if path.resolve() in allowed]
+    test_paths.extend(path for path in registered if path.resolve() not in announced)
+
     # Do NOT use `with` for the executor — its __exit__ calls
     # shutdown(wait=True) which blocks until every running worker
     # finishes, making Ctrl+C unresponsive for up to 600s per test.
@@ -795,7 +855,7 @@ def stream_compile_and_run_tests(
         futures.append(future)
 
     try:
-        for test_path in cr.compiled_tests:
+        for test_path in test_paths:
             _submit_test(test_path)
     except KeyboardInterrupt as ki:
         halt_event.set()

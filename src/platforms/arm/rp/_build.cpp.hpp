@@ -16,4 +16,3 @@
 
 // begin sub directory includes
 #include "platforms/arm/rp/rp2040/_build.cpp.hpp"
-#include "platforms/arm/rp/rpcommon/_build.cpp.hpp"

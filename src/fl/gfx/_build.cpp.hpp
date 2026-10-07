@@ -6,12 +6,10 @@
 // begin current directory includes
 #include "fl/gfx/chromatic_adaptation.cpp.hpp"
 #include "fl/gfx/colorimetric_response.cpp.hpp"
-#include "fl/gfx/colorutils.cpp.hpp"
 #include "fl/gfx/crgb_extra.cpp.hpp"
 #include "fl/gfx/crgb_json.cpp.hpp"
 #include "fl/gfx/device_solve.cpp.hpp"
 #include "fl/gfx/downscale.cpp.hpp"
-#include "fl/gfx/fill.cpp.hpp"
 #include "fl/gfx/five_bit_hd_gamma.cpp.hpp"
 #include "fl/gfx/flux_scalar.cpp.hpp"
 #include "fl/gfx/gamma_lut.cpp.hpp"

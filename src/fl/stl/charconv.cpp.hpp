@@ -184,18 +184,6 @@ int utoa64(u64 value, char *sp, int radix) {
     return len;
 }
 
-void ftoa(float value, char *buffer, int precision) {
-    // Forward to printf_detail for now - implementation in str.cpp will be updated
-    // to use this function instead of duplicating the logic
-    fl::string result = fl::printf_detail::format_float(value, precision);
-    fl::size len = result.length();
-    if (len > 63) len = 63; // Leave room for null terminator
-    for (fl::size i = 0; i < len; ++i) {
-        buffer[i] = result[i];
-    }
-    buffer[len] = '\0';
-}
-
 // Parse functions - moved from StringFormatter
 float parseFloat(const char *str, fl::size len) {
     float result = 0.0f;   // The resulting number

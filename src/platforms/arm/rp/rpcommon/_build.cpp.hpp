@@ -4,6 +4,7 @@
 /// @brief Unity build header for platforms\arm\rp\rpcommon/ directory
 /// Includes all implementation files in alphabetical order
 
+// begin current directory includes
 #include "platforms/arm/rp/rpcommon/channel_engine_rp_bitbang.cpp.hpp"
 #include "platforms/arm/rp/rpcommon/channel_engine_rp_pio.cpp.hpp"
 #include "platforms/arm/rp/rpcommon/channel_engine_rp_spi.cpp.hpp"

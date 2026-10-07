@@ -91,7 +91,7 @@ def _wait_for_test_process(proc: RunningProcess) -> TestResult:
 
 
 def validate_test_artifact(
-    test_path: Path, build_start_time: float
+    test_path: Path, build_start_time: float, *, require_fresh: bool = True
 ) -> Optional[TestResult]:
     """Validate a test/example binary before running it.
 
@@ -104,6 +104,9 @@ def validate_test_artifact(
     ``[N/M] Linking <X>`` PRE-link announcement. Execution is deferred until
     the complete build succeeds (FastLED #3642), and this validator remains a
     defense against a missing or stale artifact left by tool/cache anomalies.
+    Registered artifacts absent from Ninja's relink announcements may be
+    unchanged after a successful build. For those, require_fresh=False keeps
+    existence validation while allowing an older modification time.
     """
     if not test_path.exists():
         return TestResult(
@@ -122,7 +125,7 @@ def validate_test_artifact(
         # stat() failure is non-fatal — let the child-process loader
         # surface whatever it actually sees on disk.
         return None
-    if dll_mtime < build_start_time:
+    if require_fresh and dll_mtime < build_start_time:
         return TestResult(
             success=False,
             output=(
@@ -342,7 +345,12 @@ def run_streaming_path(ctx: StreamingContext) -> MesonTestResult:
             # FastLED #3011 — refuse to run missing or stale artifacts.
             # Execution now waits for the full build (FastLED #3642), while
             # this check preserves defense against anomalous cache/tool output.
-            failure = validate_test_artifact(test_path, ctx.start_time)
+            cached = getattr(test_callback, "_cached_test_artifacts", frozenset())
+            failure = validate_test_artifact(
+                test_path,
+                ctx.start_time,
+                require_fresh=test_path.resolve() not in cached,
+            )
             if failure is not None:
                 return failure
 
@@ -443,6 +451,7 @@ def run_streaming_path(ctx: StreamingContext) -> MesonTestResult:
         test_file_filter=ctx.test_file_filter,
         build_timer=ctx.build_timer,
         defer_test_execution=ctx.force and not ctx.test_file_filter,
+        exclude_suites=ctx.exclude_suites,
     )
 
     # SELF-HEALING: stale-build recovery + retry once
@@ -472,6 +481,7 @@ def run_streaming_path(ctx: StreamingContext) -> MesonTestResult:
                     test_file_filter=ctx.test_file_filter,
                     build_timer=ctx.build_timer,
                     defer_test_execution=ctx.force and not ctx.test_file_filter,
+                    exclude_suites=ctx.exclude_suites,
                 )
 
     if sr.success and ctx.build_optimizer is not None:

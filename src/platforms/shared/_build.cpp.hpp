@@ -14,5 +14,4 @@
 
 // begin sub directory includes
 #include "platforms/shared/bitbang/_build.cpp.hpp"
-#include "platforms/shared/mock/_build.cpp.hpp"
 #include "platforms/shared/spi_bitbang/_build.cpp.hpp"
