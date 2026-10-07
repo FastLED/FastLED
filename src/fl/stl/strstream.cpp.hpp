@@ -83,7 +83,7 @@ void sstream::appendFormatted(fl::i64 val) {
         // For decimal, handle negative sign manually
         if (val < 0) {
             mStr.append("-", 1);
-            len = fl::utoa64(static_cast<u64>(-val), buf, mBase);
+            len = fl::utoa64(u64(0) - static_cast<u64>(val), buf, mBase);
         } else {
             len = fl::utoa64(static_cast<u64>(val), buf, mBase);
         }

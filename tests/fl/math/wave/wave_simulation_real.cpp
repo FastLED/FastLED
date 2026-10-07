@@ -14,6 +14,35 @@ FL_TEST_FILE(FL_FILEPATH) {
 
 using namespace fl;
 
+FL_TEST_CASE("Q15 wave conversion preserves signed amplitudes") {
+    FL_CHECK_EQ(wave_detail::float_to_fixed(-1.0f), -32768);
+    FL_CHECK_EQ(wave_detail::float_to_fixed(-0.5f), -16384);
+    FL_CHECK_EQ(wave_detail::float_to_fixed(0.0f), 0);
+    FL_CHECK_EQ(wave_detail::float_to_fixed(1.0f), 32767);
+    FL_CHECK_CLOSE(wave_detail::fixed_to_float(-32768), -1.0f, 0.0001f);
+    FL_CHECK_CLOSE(wave_detail::fixed_to_float(-16384), -0.5f, 0.0001f);
+
+    WaveSimulation1D_Real line(3);
+    line.set(0, -1.0f);
+    line.set(1, -0.5f);
+    line.set(2, 0.5f);
+    FL_CHECK_CLOSE(line.getf(0), -1.0f, 0.0001f);
+    FL_CHECK_CLOSE(line.getf(1), -0.5f, 0.0001f);
+    FL_CHECK_CLOSE(line.getf(2), 0.5f, 0.0001f);
+}
+
+FL_TEST_CASE("Q15 wave damping supports large exponents") {
+    FL_CHECK_EQ(wave_detail::compute_damp_decay_q15(32), 32767);
+    FL_CHECK_EQ(wave_detail::compute_damp_decay_q15(100), 32767);
+    WaveSimulation1D_Real line(3);
+    line.setDampening(100);
+    FL_CHECK_EQ(line.getDampenening(), 100);
+    line.set(1, 0.5f);
+    line.update();
+    FL_CHECK_GE(line.getf(1), -1.0f);
+    FL_CHECK_LE(line.getf(1), 1.0f);
+}
+
 FL_TEST_CASE("WaveSimulation2D_Real clamps speed to CFL bound [0, 0.5]") {
     // 2D CFL bound for the 5-point stencil is C^2 <= 0.5. Pre-fix the
     // setter accepted up to ~1.0, which is unstable and could overflow.
