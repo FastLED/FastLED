@@ -66,7 +66,7 @@ impl FileContentChecker for BareNoInlineChecker {
 
 const BARE_SNPRINTF_EXEMPT_SUFFIXES: &[&str] = &[
     "fl/stl/stdio.h",
-    "fl/stl/stdio.cpp.hpp",
+    "fl/stl/stdio/stdio.cpp.hpp",
     "fl/stl/cstdio.h",
     "fl/stl/cstdio.cpp.hpp",
 ];

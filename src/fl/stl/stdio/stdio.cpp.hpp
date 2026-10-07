@@ -1,3 +1,5 @@
+// ok no header - implements the existing public fl/stl/stdio.h API
+
 #include "fl/stl/stdio.h"
 #include "fl/stl/charconv.h"  // For fl::detail::hex, HexIntWidth
 
