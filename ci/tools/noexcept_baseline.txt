@@ -5835,9 +5835,9 @@ src/fl/stl/circular_buffer.h|void setFull(bool f) { mFull = f; }
 src/fl/stl/circular_buffer.h|void setHead(fl::size h) { mHead = h; }
 src/fl/stl/circular_buffer.h|void setTail(fl::size t) { mTail = t; }
 src/fl/stl/cstdio.cpp.hpp|bool flush(u32 timeoutMs) {
-src/fl/stl/cstdio.cpp.hpp|bool readStringUntil(sstream& out, char delimiter, char skipChar, fl::optional<u32> timeoutMs) {
+src/fl/stl/string_operations/cstdio.cpp.hpp|bool readStringUntil(sstream& out, char delimiter, char skipChar, fl::optional<u32> timeoutMs) {
 src/fl/stl/cstdio.cpp.hpp|bool serial_ready() {
-src/fl/stl/cstdio.cpp.hpp|fl::optional<fl::string> readLine(char delimiter, char skipChar, fl::optional<u32> timeoutMs) {
+src/fl/stl/string_operations/cstdio.cpp.hpp|fl::optional<fl::string> readLine(char delimiter, char skipChar, fl::optional<u32> timeoutMs) {
 src/fl/stl/cstdio.cpp.hpp|int available() {
 src/fl/stl/cstdio.cpp.hpp|int peek() {
 src/fl/stl/cstdio.cpp.hpp|int read() {
@@ -6450,15 +6450,15 @@ src/fl/stl/shared_ptr.cpp.hpp|bool ControlBlockBase::remove_shared_ref() {
 src/fl/stl/shared_ptr.cpp.hpp|void ControlBlockBase::add_shared_ref() {
 src/fl/stl/singleton.cpp.hpp|void singleton_registry_set(const char* key, void* value) {
 src/fl/stl/singleton.cpp.hpp|void* singleton_registry_get(const char* key) {
-src/fl/stl/string.cpp.hpp|string &string::append(const CRGB &rgb) {
+src/fl/stl/string_operations/string.cpp.hpp|string &string::append(const CRGB &rgb) {
 src/fl/gfx/tile2x2_format.cpp.hpp|string &string::append(const Tile2x2_u8_wrap &tile) {
 src/fl/math/xymap_format.cpp.hpp|string &string::append(const XYMap &map) {
 src/fl/stl/string.cpp.hpp|string &string::append(const audio::fft::Bins &str) {
-src/fl/stl/string.cpp.hpp|string &string::append(const json_value& val) {
-src/fl/stl/string.cpp.hpp|string &string::appendCRGB(const CRGB &rgb) {
+src/fl/stl/string_operations/string.cpp.hpp|string &string::append(const json_value& val) {
+src/fl/stl/string_operations/string.cpp.hpp|string &string::appendCRGB(const CRGB &rgb) {
 src/fl/stl/interner/string_intern.cpp.hpp|string& string::intern() {
 src/fl/stl/string.cpp.hpp|void string::compileTimeAssertions() {
-src/fl/stl/string.cpp.hpp|void string::swap(string &other) {
+src/fl/stl/string_operations/string.cpp.hpp|void string::swap(string &other) {
 src/fl/stl/interner/string_interner.cpp.hpp|StringInterner& global_interner() {
 src/fl/stl/interner/string_interner.cpp.hpp|StringInterner::StringInterner() {}
 src/fl/stl/interner/string_interner.cpp.hpp|bool StringInterner::contains(const char* str) const {
