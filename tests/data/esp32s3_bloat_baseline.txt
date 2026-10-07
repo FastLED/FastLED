@@ -1,3 +1,8 @@
+# 2026-10-07, #4707: hosted image353827 ->353607 (-220 B).
+# Heap growth and inline append consolidation (-80 B), portable bitbang
+# ownership (-4 B), constant vector operation tables (-136 B).
+# Observed at90fa0645b8b813477b9732f29b7632567491f136 in run37672955278;
+# downloaded default report/provenance agree. Local image353591 B.
 # 2026-10-07, #4707: avoid temporary strings in driver enabled lookup.
 # Hosted default image354235 ->353827 (-408 B), exact commit
 # 04c52a51dc1612ba595a75fb324f6779593a7707, run37667663392.
@@ -459,4 +464,4 @@
 # report: run 37653272928 at 0e93c35046; local image_flash is 354971 B.
 # Pass 36's equivalent final RMT4 matcher saves another 944 B on legacy;
 # modern ESP32 and S3 remain unchanged in controlled builds.
-353827
+353607
