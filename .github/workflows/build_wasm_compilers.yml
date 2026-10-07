@@ -81,19 +81,13 @@ jobs:
       run: uv run python ci/tests/verify_wasm_assets.py --timeout 45
 
     - name: Generate timestamp and random hex
-      if: always()
       id: generate_id
       run: |
         echo "timestamp=$(date +'%Y%m%d_%H%M%S')" >> $GITHUB_OUTPUT
         echo "random_hex=$(openssl rand -hex 3)" >> $GITHUB_OUTPUT
 
     - name: Upload Artifacts
-      if: always()
       uses: actions/upload-artifact@v4
       with:
         name: wasm-artifacts-${{ steps.generate_id.outputs.timestamp }}-${{ github.sha }}-${{ steps.generate_id.outputs.random_hex }}
-        include-hidden-files: true
-        path: |
-          examples/wasm/fastled_js/*
-          .build/meson-wasm-quick/ci/meson/wasm/libfastled.a
-          .build/meson-wasm-quick/build.ninja
+        path: examples/wasm/fastled_js/*
