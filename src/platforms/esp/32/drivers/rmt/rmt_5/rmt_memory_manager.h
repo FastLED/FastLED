@@ -20,11 +20,13 @@
 #include "fl/stl/static_assert.h"
 #include "platforms/esp/32/drivers/rmt/rmt_5/config.h"
 #include "platforms/is_platform.h"
+#if defined(FL_IS_ESP32) || (defined(FASTLED_STUB_IMPL) && defined(FL_RMT_MEMORY_MANAGER_TEST))
+
 #ifdef FL_IS_ESP32
-
 #include "platforms/esp/32/feature_flags/enabled.h"
+#endif
 
-#if FASTLED_RMT5
+#if defined(FASTLED_STUB_IMPL) || FASTLED_RMT5
 
 #include "fl/stl/stdint.h"
 #include "fl/stl/vector.h"
@@ -382,7 +384,14 @@ public:
 
 private:
     RmtMemoryManager() FL_NO_EXCEPT;
+#if defined(FASTLED_STUB_IMPL) && defined(FL_RMT_MEMORY_MANAGER_TEST)
+public:
+    // Local production-allocator fixtures need deterministic native teardown.
     ~RmtMemoryManager() = default;
+private:
+#else
+    ~RmtMemoryManager() = default;
+#endif
 
     // Prevent copying
     RmtMemoryManager(const RmtMemoryManager&) = delete;
@@ -488,15 +497,31 @@ private:
     /// @param is_tx true for TX pool, false for RX pool
     void freeWords(size_t words, bool is_tx) FL_NO_EXCEPT;
 
+    // The byte-sized internal status keeps ordinary driver allocation off the
+    // public result ABI. Error values match RmtMemoryError for lossless wrapping.
+    enum class AllocationStatus : u8 {
+        SUCCESS = 0,
+        INSUFFICIENT_TX_MEMORY = static_cast<u8>(RmtMemoryError::INSUFFICIENT_TX_MEMORY),
+        INSUFFICIENT_RX_MEMORY = static_cast<u8>(RmtMemoryError::INSUFFICIENT_RX_MEMORY),
+        CHANNEL_ALREADY_ALLOCATED = static_cast<u8>(RmtMemoryError::CHANNEL_ALREADY_ALLOCATED),
+        ALLOCATION_LEDGER_FULL = static_cast<u8>(RmtMemoryError::ALLOCATION_LEDGER_FULL),
+    };
+
+    // out_words changes only when allocation succeeds.
+    AllocationStatus allocateTxImpl(u8 channel_id, bool use_dma,
+                                    bool networkActive, size_t& out_words) FL_NO_EXCEPT;
+    AllocationStatus allocateRxImpl(u8 channel_id, size_t symbols,
+                                    bool use_dma, size_t& out_words) FL_NO_EXCEPT;
+
     /// @brief Cold-path fallback + diagnostic for failed TX allocations.
     /// Extracted from allocateTx so the hot path (initial tryAllocateWords
     /// succeeds — the common Blink boot case) doesn't inline the single-buffer
     /// retry block, the FL_WARN diagnostic strings, or the suggestion
-    /// messages. Returns the recovered allocation size on success, or a
-    /// failure result on hard failure. See #2773 item 2.5.
-    result<size_t, RmtMemoryError> handleAllocateTxFailure(
+    /// messages. Writes the recovered size on success and returns its status.
+    /// See #2773 item 2.5.
+    AllocationStatus handleAllocateTxFailure(
         u8 channel_id, size_t mem_blocks, size_t words_needed,
-        bool networkActive) FL_NO_EXCEPT;
+        bool networkActive, size_t& out_words) FL_NO_EXCEPT;
 };
 
 } // namespace fl

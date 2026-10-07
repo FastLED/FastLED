@@ -319,9 +319,9 @@ private:
     /// @note Each entry contains priority value and shared_ptr to driver
     fl::vector<EngineEntry> mDrivers;
 
-    /// @brief Cached driver info for getDriverInfos() to avoid allocations
-    /// @note Marked mutable to allow caching in const method
-    mutable fl::vector<DriverInfo> mCachedDriverInfo;
+    /// @brief Lazily created diagnostic cache, reused by getDriverInfos().
+    /// @note Ordinary transmission does not construct the diagnostic vector.
+    mutable fl::shared_ptr<fl::vector<DriverInfo>> mCachedDriverInfo;
 
     /// @brief Exclusive driver name (empty if no exclusive mode)
     /// @note When non-empty, new drivers are auto-disabled if name doesn't match.

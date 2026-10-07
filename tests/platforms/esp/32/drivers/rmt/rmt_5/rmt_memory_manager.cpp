@@ -115,12 +115,87 @@ FL_TEST_CASE("RMT fixed ledger rollback releases only its matching DMA slot") {
 
 } // FL_TEST_FILE
 
+#ifdef FASTLED_STUB_IMPL
+#include "platforms/shared/mock/esp/32/drivers/rmt_memory_manager_host.h"
+
+FL_TEST_FILE(FL_FILEPATH) {
+using namespace fl;
+
+FL_TEST_CASE("Production RMT allocator status APIs preserve outputs and detailed errors") {
+    auto& planner = RmtMemoryManager::instance();
+    planner.reset();
+    planner.setMemoryBlockStrategy(2, 2);
+    RmtMemoryManager mgr(256, 128, false);
+    size_t words = 999;
+    FL_REQUIRE(mgr.tryAllocateTx(0, false, false, words));
+    FL_CHECK_EQ(words, 128u);
+    FL_CHECK_EQ(mgr.getAllocatedTxWords(), 128u);
+    words = 999;
+    FL_CHECK_FALSE(mgr.tryAllocateTx(0, false, false, words));
+    FL_CHECK_EQ(words, 999u);
+    auto duplicate = mgr.allocateTx(0, false);
+    FL_REQUIRE_FALSE(duplicate.ok());
+    FL_CHECK(duplicate.error() == RmtMemoryError::CHANNEL_ALREADY_ALLOCATED);
+
+    FL_REQUIRE(mgr.tryAllocateRx(0, 64, false, words));
+    FL_CHECK_EQ(words, 64u);
+    words = 999;
+    FL_CHECK_FALSE(mgr.tryAllocateRx(0, 64, false, words));
+    FL_CHECK_EQ(words, 999u);
+    FL_CHECK_FALSE(mgr.tryAllocateRx(1, 128, false, words));
+    FL_CHECK_EQ(words, 999u);
+    auto exhausted = mgr.allocateRx(1, 128);
+    FL_REQUIRE_FALSE(exhausted.ok());
+    FL_CHECK(exhausted.error() == RmtMemoryError::INSUFFICIENT_RX_MEMORY);
+    FL_CHECK_EQ(mgr.getAllocatedRxWords(), 64u);
+    FL_CHECK_EQ(mgr.getAllocationCount(), 2u);
+    planner.reset();
+}
+
+FL_TEST_CASE("Production RMT allocator TX fallback and exhaustion preserve accounting") {
+    auto& planner = RmtMemoryManager::instance();
+    planner.reset();
+    planner.setMemoryBlockStrategy(2, 2);
+    FL_REQUIRE_EQ(RmtMemoryManager::calculateMemoryBlocks(false), 2u);
+    RmtMemoryManager mgr(64, 64, false);
+    size_t words = 999;
+    FL_REQUIRE(mgr.tryAllocateTx(0, false, false, words));
+    FL_CHECK_EQ(words, 64u); // Requested 128 words; recovered with one block.
+    FL_CHECK_EQ(mgr.getAllocatedTxWords(), 64u);
+    words = 999;
+    FL_CHECK_FALSE(mgr.tryAllocateTx(1, false, false, words));
+    FL_CHECK_EQ(words, 999u);
+    auto exhausted = mgr.allocateTx(1, false);
+    FL_REQUIRE_FALSE(exhausted.ok());
+    FL_CHECK(exhausted.error() == RmtMemoryError::INSUFFICIENT_TX_MEMORY);
+    FL_CHECK_EQ(mgr.getAllocationCount(), 1u);
+    mgr.free(0, true);
+    FL_CHECK_EQ(mgr.getAllocatedTxWords(), 0u);
+    FL_REQUIRE(mgr.allocateTx(0, false).ok());
+    planner.reset();
+}
+
+FL_TEST_CASE("Production RMT allocator non-S3 DMA outputs zero without charging pools") {
+    auto& planner = RmtMemoryManager::instance();
+    planner.reset();
+    planner.setMemoryBlockStrategy(2, 2);
+    RmtMemoryManager mgr(64, 64, false);
+    size_t words = 999;
+    FL_REQUIRE(mgr.tryAllocateTx(0, true, false, words));
+    FL_CHECK_EQ(words, 0u);
+    FL_REQUIRE(mgr.tryAllocateRx(0, 4096, true, words));
+    FL_CHECK_EQ(words, 0u);
+    FL_CHECK_EQ(mgr.getAllocatedTxWords(), 0u);
+    FL_CHECK_EQ(mgr.getAllocatedRxWords(), 0u);
+    FL_CHECK_EQ(mgr.getAllocationCount(), 2u);
+    planner.reset();
+}
+}
+#endif // FASTLED_STUB_IMPL
+
 #ifdef ESP32
-
 #include "platforms/esp/32/feature_flags/enabled.h"
-
 #if FASTLED_RMT5
-
 #include "platforms/esp/32/drivers/rmt/rmt_5/rmt_memory_manager.h"
 
 FL_TEST_FILE(FL_FILEPATH) {

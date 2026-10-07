@@ -365,20 +365,24 @@ fl::size ChannelManager::getDriverCount() const {
 }
 
 fl::span<const DriverInfo> ChannelManager::getDriverInfos() const {
-    // Update cache with current driver state
-    mCachedDriverInfo.clear();
-    mCachedDriverInfo.reserve(mDrivers.size());
+    if (!mCachedDriverInfo) {
+        mCachedDriverInfo = fl::make_shared<fl::vector<DriverInfo>>();
+    }
+    auto& cache = *mCachedDriverInfo;
+    // Update cache with current driver state.
+    cache.clear();
+    cache.reserve(mDrivers.size());
 
     for (const auto& entry : mDrivers) {
         // fl::string copy is cheap (shared pointer internally, no heap allocation)
-        mCachedDriverInfo.push_back({
+        cache.push_back({
             entry.name,
             entry.priority,
             entry.enabled
         });
     }
 
-    return mCachedDriverInfo;
+    return cache;
 }
 
 fl::shared_ptr<IChannelDriver> ChannelManager::findDriverByName(const fl::string& name) const {

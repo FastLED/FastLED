@@ -1427,10 +1427,10 @@ class ChannelEngineRMTImpl final : public ChannelEngineRMT {
 #ifdef FASTLED_STUB_IMPL
     fl::vector_inlined<ChannelState, 16> mChannels;
 #else
-    // Logical strips remain unbounded; only simultaneously allocated
-    // hardware channel states need inline storage here.
-    fl::vector_inlined<ChannelState,
-                       SOC_RMT_TX_CANDIDATES_PER_GROUP> mChannels;
+    // Logical strips remain dynamic. Hardware states never move once their
+    // ISR callback is registered, and cannot exceed the SoC TX channel count.
+    fl::vector_fixed<ChannelState,
+                     SOC_RMT_TX_CANDIDATES_PER_GROUP> mChannels;
 #endif
 
     // Most sketches use only a few strips. These queues spill dynamically
@@ -1522,6 +1522,16 @@ ChannelEngineRMTImpl::ChannelState *ChannelEngineRMTImpl::acquireChannel(
                    "next frame)");
         return nullptr;
     }
+
+#ifndef FASTLED_STUB_IMPL
+    // Empty failed-setup slots were reused above. At this point every state
+    // owns a hardware channel, so a full pool must wait for a TX completion.
+    // Check before allocation because vector_fixed::push_back cannot grow.
+    if (mChannels.size() == mChannels.capacity()) {
+        mAllocationFailed = true;
+        return nullptr;
+    }
+#endif
 
     ChannelState newCh = {};
     if (createChannel(&newCh, pin, timing, dataSize)) {

@@ -265,6 +265,13 @@ foreach test_name : test_names
   ]
   test_cpp_args = shared_test_cpp_args
 
+  # Compile the real RMT allocator in an isolated TU for its native tests.
+  # The usual platform amalgamation retains its independent peripheral mock.
+  if test_file == 'platforms/esp/32/drivers/rmt/rmt_5/rmt_memory_manager.cpp'
+    test_sources += files('../src/fl/build/platforms.esp.32.drivers.rmt.rmt_5+.cpp')
+    test_cpp_args += ['-DFL_RMT_MEMORY_MANAGER_HOST_TU=1']
+  endif
+
   # host_sim.cpp is now compiled as part of libfastled.a when STUB_PLATFORM is defined
   # No need to add it explicitly to individual tests anymore
 

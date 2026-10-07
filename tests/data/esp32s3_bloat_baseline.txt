@@ -1,3 +1,10 @@
+# 2026-10-06, issue #4707 second pass: local image_flash=357663 B,
+# another 1340 B below the first local measurement. Lazy diagnostics,
+# hardware-bounded RMT state, smaller encoders/iterator state, and status-code
+# allocation avoid unused container/result operations. First-pass hosted
+# run 37579432454 measured 359035 B (32 B above local); the final threshold
+# must be checked against hosted evidence, with no discretionary headroom.
+
 # 2026-10-06, issue #4707: -8404 B, 367407 -> 359003. Reduce RMT
 # queue/dispatch overhead, share driver wait loops, and make unused task,
 # PWM timer, HTTP, and SPI state removable by the linker. Default dynamic
@@ -337,4 +344,4 @@
 # the CI Blink report contains no ResponseLutsQ16 symbol. The local fbuild
 # symbol total remains ~4 KB higher for the same source (FastLED/fbuild#1456),
 # so this ratchet uses the CI measurement from PR #4511.
-359003
+357663

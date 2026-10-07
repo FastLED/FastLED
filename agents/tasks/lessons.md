@@ -502,3 +502,8 @@
 - Investigate library size regressions with existing minimal examples under identical
   build settings. Do not require the reporter's full sketch before removing library
   bloat; use a supplied minimal reproducer as additional validation.
+- Check preprocessor guards before citing peripheral test coverage. The native
+  RMT memory-manager module originally ran ledger helpers while its production
+  allocation cases were excluded; compile the real allocator in an isolated TU.
+- Keep scratch worktree virtual environments separate. Sharing a `.venv` lets
+  dependency resolution replace tools during another checkout's active build.
