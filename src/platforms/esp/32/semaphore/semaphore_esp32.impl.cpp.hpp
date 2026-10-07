@@ -1,10 +1,11 @@
 // IWYU pragma: private
 
 #include "platforms/esp/is_esp.h"
+
+#ifdef FL_IS_ESP32
 #include "platforms/esp/32/semaphore_esp32.h" // ok no header - public declaration remains in parent directory.
 #include "platforms/esp/32/semaphore/semaphore_esp32.impl.hpp"
 
-#ifdef FL_IS_ESP32
 namespace fl { namespace platforms {
 
 // Binary semaphore (max value = 1)
