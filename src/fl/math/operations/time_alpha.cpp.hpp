@@ -1,5 +1,5 @@
 
-#include "fl/math/time_alpha.h"
+#include "fl/math/time_alpha.h" // ok no header - public declaration remains in parent directory.
 #include "fl/log/log.h"
 #include "fl/math/math.h"
 #include "fl/stl/noexcept.h"

@@ -1,3 +1,5 @@
+// ok no header - public declarations remain in fl/gfx/hsv16.h
+
 #include "fl/gfx/hsv16.h"
 #include "fl/math/math.h"
 

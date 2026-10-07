@@ -1,7 +1,7 @@
 /// @file transposition.cpp
 /// @brief Implementation of bit transposition functions
 
-#include "fl/math/transposition.h"
+#include "fl/math/transposition.h" // ok no header - public declaration remains in parent directory.
 #include "fl/math/math.h"
 #include "fl/stl/vector.h"
 

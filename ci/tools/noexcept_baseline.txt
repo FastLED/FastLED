@@ -3362,13 +3362,13 @@ src/fl/gfx/corkscrew.h|void setCachingEnabled(bool enabled);
 src/fl/gfx/crgb16.h|CRGB16& nscale(u8x8 scale) {
 src/fl/gfx/crgb16.h|CRGB16& nscale8(u8 scale) {
 src/fl/gfx/crgb16.h|CRGB16& operator+=(const CRGB16& rhs) {
-src/fl/gfx/crgb_extra.cpp.hpp|CRGB CRGB::colorBoost(EaseType saturation_function, EaseType luminance_function) const {
-src/fl/gfx/crgb_extra.cpp.hpp|CRGB& CRGB::setHSV(u8 hue, u8 sat, u8 val) {
-src/fl/gfx/crgb_extra.cpp.hpp|CRGB& CRGB::setHue(u8 hue) {
-src/fl/gfx/crgb_extra.cpp.hpp|CRGB::CRGB(const HSV16& rhs) {
+src/fl/gfx/hsv16/crgb_extra.cpp.hpp|CRGB CRGB::colorBoost(EaseType saturation_function, EaseType luminance_function) const {
+src/fl/gfx/hsv16/crgb_extra.cpp.hpp|CRGB& CRGB::setHSV(u8 hue, u8 sat, u8 val) {
+src/fl/gfx/hsv16/crgb_extra.cpp.hpp|CRGB& CRGB::setHue(u8 hue) {
+src/fl/gfx/hsv16/crgb_extra.cpp.hpp|CRGB::CRGB(const HSV16& rhs) {
 src/fl/gfx/crgb_extra.cpp.hpp|CRGB::CRGB(const hsv8& rhs) {
-src/fl/gfx/crgb_extra.cpp.hpp|HSV16 CRGB::toHSV16() const {
-src/fl/gfx/crgb_extra.cpp.hpp|void CRGB::colorBoost(const CRGB* src, CRGB* dst, size_t count, EaseType saturation_function, EaseType luminance_function) {
+src/fl/gfx/hsv16/crgb_extra.cpp.hpp|HSV16 CRGB::toHSV16() const {
+src/fl/gfx/hsv16/crgb_extra.cpp.hpp|void CRGB::colorBoost(const CRGB* src, CRGB* dst, size_t count, EaseType saturation_function, EaseType luminance_function) {
 src/fl/gfx/downscale.cpp.hpp|void downscale(const CRGB *src, const XYMap &srcXY, CRGB *dst, const XYMap &dstXY) {
 src/fl/gfx/downscale.cpp.hpp|void downscaleArbitrary(const CRGB *src, const XYMap &srcXY, CRGB *dst, const XYMap &dstXY) {
 src/fl/gfx/downscale.cpp.hpp|void downscaleHalf(const CRGB *src, const XYMap &srcXY, CRGB *dst, const XYMap &dstXY) {
@@ -3446,12 +3446,12 @@ src/fl/gfx/gradient.h|void set(const CRGBPalette32 &palette) { mVariant = palett
 src/fl/gfx/gradient.h|void set(const CRGBPalette32 *palette);
 src/fl/gfx/gradient.h|void set(const GradientFunction &func) { mVariant = func; }
 src/fl/gfx/gradient.h|void set(const GradientFunction &func);
-src/fl/gfx/hsv16.cpp.hpp|CRGB HSV16::ToRGB() const {
-src/fl/gfx/hsv16.cpp.hpp|CRGB HSV16::colorBoost(EaseType saturation_function, EaseType luminance_function) const {
-src/fl/gfx/hsv16.cpp.hpp|HSV16::HSV16(const CRGB& rgb) {
-src/fl/gfx/hsv16.cpp.hpp|static CRGB HSV16toRGB(const HSV16& hsv) {
-src/fl/gfx/hsv16.cpp.hpp|static HSV16 RGBtoHSV16(const CRGB &rgb) {
-src/fl/gfx/hsv16.cpp.hpp|static inline u16 scale8_to_16_accurate(u8 x) {
+src/fl/gfx/hsv16/hsv16.cpp.hpp|CRGB HSV16::ToRGB() const {
+src/fl/gfx/hsv16/hsv16.cpp.hpp|CRGB HSV16::colorBoost(EaseType saturation_function, EaseType luminance_function) const {
+src/fl/gfx/hsv16/hsv16.cpp.hpp|HSV16::HSV16(const CRGB& rgb) {
+src/fl/gfx/hsv16/hsv16.cpp.hpp|static CRGB HSV16toRGB(const HSV16& hsv) {
+src/fl/gfx/hsv16/hsv16.cpp.hpp|static HSV16 RGBtoHSV16(const CRGB &rgb) {
+src/fl/gfx/hsv16/hsv16.cpp.hpp|static inline u16 scale8_to_16_accurate(u8 x) {
 src/fl/gfx/hsv16.h|CRGB ToRGB() const;
 src/fl/gfx/hsv16.h|CRGB colorBoost(EaseType saturation_function = EaseType::EASE_IN_QUAD, EaseType luminance_function = EaseType::EASE_NONE) const;
 src/fl/gfx/hsv16.h|operator CRGB() const { return ToRGB(); }
@@ -4429,14 +4429,14 @@ src/fl/math/screenmap.cpp.hpp|void ScreenMap::setDiameter(float diameter) { mDia
 src/fl/math/screenmap.cpp.hpp|void ScreenMap::setSourceXYMap(const fl::shared_ptr<XYMap>& xymap) {
 src/fl/math/screenmap_json/screenmap_json.cpp.hpp|void ScreenMap::toJson(const fl::flat_map<string, ScreenMap> &segmentMaps, fl::json *doc) {
 src/fl/math/screenmap_json/screenmap_json.cpp.hpp|void ScreenMap::toJsonStr(const fl::flat_map<string, ScreenMap> &segmentMaps, string *jsonBuffer) {
-src/fl/math/transform.cpp.hpp|Matrix3x3f TransformFloat::compile() const {
-src/fl/math/transform.cpp.hpp|Transform16 Transform16::ToBounds(alpha16 max_value) {
-src/fl/math/transform.cpp.hpp|Transform16 Transform16::ToBounds(const vec2<alpha16> &min, const vec2<alpha16> &max, alpha16 rotation) {
-src/fl/math/transform.cpp.hpp|bool TransformFloatImpl::is_identity() const {
-src/fl/math/transform.cpp.hpp|float TransformFloatImpl::scale() const { return fl::min(scale_x, scale_y); }
-src/fl/math/transform.cpp.hpp|vec2<alpha16> Transform16::transform(const vec2<alpha16> &xy) const {
-src/fl/math/transform.cpp.hpp|vec2f TransformFloatImpl::transform(const vec2f &xy) const {
-src/fl/math/transform.cpp.hpp|void TransformFloatImpl::set_scale(float scale) {
+src/fl/math/operations/transform.cpp.hpp|Matrix3x3f TransformFloat::compile() const {
+src/fl/math/operations/transform.cpp.hpp|Transform16 Transform16::ToBounds(alpha16 max_value) {
+src/fl/math/operations/transform.cpp.hpp|Transform16 Transform16::ToBounds(const vec2<alpha16> &min, const vec2<alpha16> &max, alpha16 rotation) {
+src/fl/math/operations/transform.cpp.hpp|bool TransformFloatImpl::is_identity() const {
+src/fl/math/operations/transform.cpp.hpp|float TransformFloatImpl::scale() const { return fl::min(scale_x, scale_y); }
+src/fl/math/operations/transform.cpp.hpp|vec2<alpha16> Transform16::transform(const vec2<alpha16> &xy) const {
+src/fl/math/operations/transform.cpp.hpp|vec2f TransformFloatImpl::transform(const vec2f &xy) const {
+src/fl/math/operations/transform.cpp.hpp|void TransformFloatImpl::set_scale(float scale) {
 src/fl/math/transform.h|Matrix3x3f compile() const;
 src/fl/math/transform.h|bool is_identity() const { return mImpl->is_identity(); }
 src/fl/math/transform.h|bool is_identity() const;
@@ -4464,12 +4464,12 @@ src/fl/math/transform.h|void set_scale(float scale) { mImpl->set_scale(scale); }
 src/fl/math/transform.h|void set_scale(float scale);
 src/fl/math/transform.h|void set_scale_x(float scale) { mImpl->scale_x = scale; }
 src/fl/math/transform.h|void set_scale_y(float scale) { mImpl->scale_y = scale; }
-src/fl/math/transposition.cpp.hpp|bool SPITransposer::transpose16(const fl::optional<LaneData> lanes[16], fl::span<u8> output, const char** error) {
-src/fl/math/transposition.cpp.hpp|bool SPITransposer::transpose2(const fl::optional<LaneData>& lane0, const fl::optional<LaneData>& lane1, fl::span<u8> output, const char** error) {
-src/fl/math/transposition.cpp.hpp|bool SPITransposer::transpose4(const fl::optional<LaneData>& lane0, const fl::optional<LaneData>& lane1, const fl::optional<LaneData>& lane2, const fl::optional<LaneData>& lane3, fl::span<u8> output, const char** error) {
-src/fl/math/transposition.cpp.hpp|bool SPITransposer::transpose8(const fl::optional<LaneData> lanes[8], fl::span<u8> output, const char** error) {
-src/fl/math/transposition.cpp.hpp|u8 SPITransposer::getLaneByte(const LaneData& lane, size_t byte_idx, size_t max_size) {
-src/fl/math/transposition.cpp.hpp|void FL_OPTIMIZE_FUNCTION FL_IRAM transpose8x1_noinline(unsigned char *A, unsigned char *B) {
+src/fl/math/operations/transposition.cpp.hpp|bool SPITransposer::transpose16(const fl::optional<LaneData> lanes[16], fl::span<u8> output, const char** error) {
+src/fl/math/operations/transposition.cpp.hpp|bool SPITransposer::transpose2(const fl::optional<LaneData>& lane0, const fl::optional<LaneData>& lane1, fl::span<u8> output, const char** error) {
+src/fl/math/operations/transposition.cpp.hpp|bool SPITransposer::transpose4(const fl::optional<LaneData>& lane0, const fl::optional<LaneData>& lane1, const fl::optional<LaneData>& lane2, const fl::optional<LaneData>& lane3, fl::span<u8> output, const char** error) {
+src/fl/math/operations/transposition.cpp.hpp|bool SPITransposer::transpose8(const fl::optional<LaneData> lanes[8], fl::span<u8> output, const char** error) {
+src/fl/math/operations/transposition.cpp.hpp|u8 SPITransposer::getLaneByte(const LaneData& lane, size_t byte_idx, size_t max_size) {
+src/fl/math/operations/transposition.cpp.hpp|void FL_OPTIMIZE_FUNCTION FL_IRAM transpose8x1_noinline(unsigned char *A, unsigned char *B) {
 src/fl/math/wave/wave_simulation.cpp.hpp|WaveSimulation1D::WaveSimulation1D(u32 length, SuperSample factor, float speed, int dampening) {
 src/fl/math/wave/wave_simulation.cpp.hpp|WaveSimulation2D::WaveSimulation2D(u32 W, u32 H, SuperSample factor, float speed, float dampening) {
 src/fl/math/wave/wave_simulation.cpp.hpp|bool WaveSimulation1D::geti16All(fl::size x, i16 *curr, i16 *prev, i16 *diff) const {
@@ -4617,15 +4617,15 @@ src/fl/math/wave/wave_simulation_real.h|void setf(fl::size x, fl::size y, float 
 src/fl/math/wave/wave_simulation_real.h|void seti16(fl::size x, fl::size y, i16 value);
 src/fl/math/wave/wave_simulation_real.h|void update();
 src/fl/math/wave/wave_simulation_real.h|void update();
-src/fl/math/xmap.cpp.hpp|XMap XMap::constructWithLookUpTable(u16 length, const u16 *lookUpTable, u16 offset) {
-src/fl/math/xmap.cpp.hpp|XMap XMap::constructWithUserFunction(u16 length, XFunction xFunction, u16 offset) {
-src/fl/math/xmap.cpp.hpp|XMap::Type XMap::getType() const { return type; }
-src/fl/math/xmap.cpp.hpp|XMap::XMap(const XMap &other) {
-src/fl/math/xmap.cpp.hpp|XMap::XMap(u16 length, Type type) : length(length), type(type), mOffset(0) {}
-src/fl/math/xmap.cpp.hpp|XMap::XMap(u16 length, bool is_reverse, u16 offset) {
-src/fl/math/xmap.cpp.hpp|u16 XMap::getLength() const { return length; }
-src/fl/math/xmap.cpp.hpp|u16 XMap::mapToIndex(u16 x) const {
-src/fl/math/xmap.cpp.hpp|void XMap::convertToLookUpTable() {
+src/fl/math/operations/xmap.cpp.hpp|XMap XMap::constructWithLookUpTable(u16 length, const u16 *lookUpTable, u16 offset) {
+src/fl/math/operations/xmap.cpp.hpp|XMap XMap::constructWithUserFunction(u16 length, XFunction xFunction, u16 offset) {
+src/fl/math/operations/xmap.cpp.hpp|XMap::Type XMap::getType() const { return type; }
+src/fl/math/operations/xmap.cpp.hpp|XMap::XMap(const XMap &other) {
+src/fl/math/operations/xmap.cpp.hpp|XMap::XMap(u16 length, Type type) : length(length), type(type), mOffset(0) {}
+src/fl/math/operations/xmap.cpp.hpp|XMap::XMap(u16 length, bool is_reverse, u16 offset) {
+src/fl/math/operations/xmap.cpp.hpp|u16 XMap::getLength() const { return length; }
+src/fl/math/operations/xmap.cpp.hpp|u16 XMap::mapToIndex(u16 x) const {
+src/fl/math/operations/xmap.cpp.hpp|void XMap::convertToLookUpTable() {
 src/fl/math/xmap.h|FASTLED_FORCE_INLINE u16 x_linear(u16 x, u16 length) {
 src/fl/math/xmap.h|FASTLED_FORCE_INLINE u16 x_reverse(u16 x, u16 length) {
 src/fl/math/xmap.h|Type getType() const;
@@ -4642,7 +4642,7 @@ src/fl/math/xymap.cpp.hpp|XYMap XYMap::constructRectangularGrid(u16 width, u16 h
 src/fl/math/xymap.cpp.hpp|XYMap XYMap::constructSerpentine(u16 width, u16 height, u16 offset) {
 src/fl/math/xymap.cpp.hpp|XYMap XYMap::constructWithLookUpTable(u16 width, u16 height, const u16 *lookUpTable, u16 offset) {
 src/fl/math/xymap.cpp.hpp|XYMap XYMap::constructWithUserFunction(u16 width, u16 height, XYFunction xyFunction, u16 offset) {
-src/fl/math/xymap.cpp.hpp|XYMap XYMap::fromXMap(const XMap& xmap) {
+src/fl/math/operations/xymap_bridge.cpp.hpp|XYMap XYMap::fromXMap(const XMap& xmap) {
 src/fl/math/xymap.cpp.hpp|XYMap::XYMap(u16 width, u16 height, XyMapType type) : type(type), width(width), height(height), mOffset(0) {}
 src/fl/math/xymap.cpp.hpp|XYMap::XYMap(u16 width, u16 height, bool is_serpentine, u16 offset) : type(is_serpentine ? kSerpentine : kLineByLine), width(width), height(height), mOffset(offset) {}
 src/fl/math/xymap.cpp.hpp|XYMap::XyMapType XYMap::getType() const { return type; }

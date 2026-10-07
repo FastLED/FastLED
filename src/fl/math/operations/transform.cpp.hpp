@@ -3,7 +3,7 @@
 
 #include "fl/math/lut.h"
 #include "fl/math/math.h"
-#include "fl/math/transform.h"
+#include "fl/math/transform.h" // ok no header - public declaration remains in parent directory.
 #include "fl/math/intmap.h"
 #include "fl/math/trig8.h"
 #include "fl/stl/compiler_control.h"

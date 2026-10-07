@@ -86,7 +86,7 @@ class TestPerPixelStageListsAgree(unittest.TestCase):
         listed = set(headers.kSelfContainedHeaders)
 
         for stage in rgb8.PER_PIXEL_STAGES:
-            header = "fl/gfx/" + stage.replace(".cpp.hpp", ".h")
+            header = "fl/gfx/" + Path(stage).name.replace(".cpp.hpp", ".h")
             with self.subTest(stage=stage, header=header):
                 self.assertIn(
                     header,
