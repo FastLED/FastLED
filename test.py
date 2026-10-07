@@ -355,6 +355,7 @@ def main() -> None:
         if (
             args.test
             and not getattr(args, "clean", False)
+            and not getattr(args, "force", False)
             and not getattr(args, "check", False)
             and not getattr(args, "no_fingerprint", False)
         ):

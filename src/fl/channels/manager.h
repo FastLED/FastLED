@@ -29,6 +29,7 @@
 #include "fl/system/engine_events.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/shared_ptr.h"
+#include "fl/stl/move.h"
 #include "fl/stl/noexcept.h"
 #include "fl/stl/compiler_control.h"
 #include "platforms/channel_poll_signal.h"
@@ -300,6 +301,17 @@ private:
         fl::shared_ptr<IChannelDriver> driver;
         fl::string name;  ///< Engine name for runtime identification (e.g., "RMT", "SPI")
         bool enabled;     ///< Runtime enable/disable flag
+
+        EngineEntry(int entryPriority,
+                    const fl::shared_ptr<IChannelDriver>& entryDriver,
+                    fl::string&& entryName, bool entryEnabled) FL_NO_EXCEPT
+            : priority(entryPriority), driver(entryDriver),
+              name(fl::move(entryName)), enabled(entryEnabled) {}
+
+        EngineEntry(const EngineEntry&) FL_NO_EXCEPT = delete;
+        EngineEntry& operator=(const EngineEntry&) FL_NO_EXCEPT = delete;
+        EngineEntry(EngineEntry&&) FL_NO_EXCEPT = default;
+        EngineEntry& operator=(EngineEntry&&) FL_NO_EXCEPT = default;
 
         /// @brief Sort by priority descending (higher numbers first)
         /// @note Higher priority values = higher precedence (e.g., 50 > 10)

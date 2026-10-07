@@ -166,7 +166,10 @@ void ChannelManager::addDriver(int priority, fl::shared_ptr<IChannelDriver> driv
         enabled = (engineName == mExclusiveDriver);  // Only enable if matches exclusive driver
     }
 
-    mDrivers.push_back({priority, driver, engineName, enabled});
+#if FASTLED_HAS_DBG
+    const fl::string debugEngineName = engineName;
+#endif
+    mDrivers.push_back({priority, driver, fl::move(engineName), enabled});
     driver->setPollNeededCallback(mPollNeededCallback);
 
     // Build capability string for debug output. Gate the entire block behind
@@ -190,7 +193,7 @@ void ChannelManager::addDriver(int priority, fl::shared_ptr<IChannelDriver> driv
         capStr = "NONE";
     }
 
-    FL_DBG("ChannelManager: Added driver '" << engineName.c_str() << "' (priority " << priority << ", caps: " << capStr.c_str() << ")");
+    FL_DBG("ChannelManager: Added driver '" << debugEngineName.c_str() << "' (priority " << priority << ", caps: " << capStr.c_str() << ")");
 #endif
 
     // Sort drivers by priority descending (higher values first) after each insertion
