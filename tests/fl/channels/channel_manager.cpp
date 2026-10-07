@@ -339,4 +339,39 @@ FL_TEST_CASE("ChannelManager - Span validity") {
     FL_CHECK(info2[1].name == "RMT");
 }
 
+
+FL_TEST_CASE("ChannelManager enabled lookup preserves exact C-string name matching") {
+    ChannelManager manager;
+    const char* longName =
+        "long_custom_driver_name_for_enabled_queries_beyond_inline_string_capacity";
+    auto shortDriver = fl::make_shared<FakeEngine>("RMT");
+    auto longDriver = fl::make_shared<FakeEngine>(longName);
+    class BinaryNameEngine : public FakeEngine {
+    public:
+        explicit BinaryNameEngine(fl::string name)
+            : FakeEngine("BINARY"), mName(fl::move(name)) {}
+        fl::string getName() const override { return mName; }
+    private:
+        fl::string mName;
+    };
+    const char binaryName[] = {'R', 'M', 'T', '\0', 'X'};
+    auto binaryDriver = fl::make_shared<BinaryNameEngine>(
+        fl::string(binaryName, sizeof(binaryName)));
+    manager.addDriver(10, shortDriver);
+    manager.addDriver(20, longDriver);
+    manager.addDriver(30, binaryDriver);
+
+    FL_CHECK_TRUE(manager.isDriverEnabled("RMT"));
+    FL_CHECK_TRUE(manager.isDriverEnabled(longName));
+    FL_CHECK_FALSE(manager.isDriverEnabled("rmt"));
+    FL_CHECK_FALSE(manager.isDriverEnabled("RM"));
+    FL_CHECK_FALSE(manager.isDriverEnabled(""));
+    FL_CHECK_FALSE(manager.isDriverEnabled(nullptr));
+    manager.setDriverEnabled("RMT", false);
+    FL_CHECK_FALSE(manager.isDriverEnabled("RMT"));
+    FL_CHECK_TRUE(manager.isDriverEnabled(longName));
+    manager.removeDriver(shortDriver);
+    FL_CHECK_FALSE(manager.isDriverEnabled("RMT"));
+}
+
 } // FL_TEST_FILE

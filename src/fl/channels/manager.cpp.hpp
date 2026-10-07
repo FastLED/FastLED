@@ -4,6 +4,7 @@
 #include "fl/channels/manager.h"
 #include "fl/channels/detail/wait_spin_budget.h"
 #include "fl/stl/singleton.h"
+#include "fl/stl/cstring.h"
 #include "fl/log/log.h"
 #include "fl/system/engine_events.h"
 #include "fl/stl/chrono.h"
@@ -234,8 +235,10 @@ bool ChannelManager::isDriverEnabled(const char* name) const {
         return false;
     }
 
+    const fl::size nameSize = fl::strlen(name);
     for (const auto& entry : mDrivers) {
-        if (entry.name == name) {
+        if (entry.name.size() == nameSize &&
+            fl::memcmp(entry.name.c_str(), name, nameSize) == 0) {
             return entry.enabled;
         }
     }
