@@ -31,3 +31,4 @@
 
 // begin sub directory includes
 #include "fl/stl/detail/_build.cpp.hpp"
+#include "fl/stl/string_operations/_build.cpp.hpp"

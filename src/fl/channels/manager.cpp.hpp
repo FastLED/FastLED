@@ -23,7 +23,7 @@ ChannelManager& ChannelManager::registry() FL_NO_EXCEPT {
     return Singleton<ChannelManager>::instance();
 }
 
-ChannelManager& ChannelManager::instance() {
+ChannelManager& ChannelManager::instance() FL_NO_EXCEPT {
     auto& out = registry();
     // Lazy initialization of platform-specific channel drivers
     // C++11 guarantees thread-safe static initialization
@@ -136,7 +136,7 @@ FL_NO_INLINE FL_COLD bool ChannelManager::addDriverSlow(
     return true;
 }
 
-void ChannelManager::addDriver(int priority, fl::shared_ptr<IChannelDriver> driver) {
+void ChannelManager::addDriver(int priority, fl::shared_ptr<IChannelDriver> driver) FL_NO_EXCEPT {
     if (!driver) {
         (void)addDriverSlow(priority, driver, nullptr, AddDriverSlowReason::NULL_DRIVER);
         return;
@@ -204,7 +204,7 @@ void ChannelManager::addDriver(int priority, fl::shared_ptr<IChannelDriver> driv
     fl::sort_small(mDrivers.begin(), mDrivers.end());
 }
 
-void ChannelManager::clearAllDrivers() {
+void ChannelManager::clearAllDrivers() FL_NO_EXCEPT {
     FL_DBG("ChannelManager: Waiting for all drivers to become READY before clearing");
 
     // Wait for all drivers to become READY before clearing
@@ -229,7 +229,7 @@ void ChannelManager::clearAllDrivers() {
     mExclusiveDriver.clear();
 }
 
-bool ChannelManager::isDriverEnabled(const char* name) const {
+bool ChannelManager::isDriverEnabled(const char* name) const FL_NO_EXCEPT {
     if (!name) {
         FL_ERROR("ChannelManager::isDriverEnabled() - Null driver name provided");
         return false;
@@ -321,7 +321,7 @@ bool ChannelManager::waitForState(bool allowDraining, u32 timeoutMs) FL_NO_EXCEP
     return true;  // Condition met
 }
 
-IChannelDriver::DriverState ChannelManager::poll() {
+IChannelDriver::DriverState ChannelManager::poll() FL_NO_EXCEPT {
     // Poll all registered drivers and return aggregate state
     // Priority order: ERROR > BUSY > DRAINING > READY
     bool anyBusy = false;
@@ -351,7 +351,7 @@ IChannelDriver::DriverState ChannelManager::poll() {
     return aggregate;
 }
 
-bool ChannelManager::waitForReady(u32 timeoutMs) {
+bool ChannelManager::waitForReady(u32 timeoutMs) FL_NO_EXCEPT {
     bool ok = waitForState(false, timeoutMs);
     if (!ok) {
         FL_ERROR("ChannelManager: Timeout occurred while waiting for READY state");
@@ -359,7 +359,7 @@ bool ChannelManager::waitForReady(u32 timeoutMs) {
     return ok;
 }
 
-bool ChannelManager::waitForReadyOrDraining(u32 timeoutMs) {
+bool ChannelManager::waitForReadyOrDraining(u32 timeoutMs) FL_NO_EXCEPT {
     bool ok = waitForState(true, timeoutMs);
     if (!ok) {
         FL_ERROR("ChannelManager: Timeout occurred while waiting for READY or DRAINING state");
@@ -367,11 +367,11 @@ bool ChannelManager::waitForReadyOrDraining(u32 timeoutMs) {
     return ok;
 }
 
-void ChannelManager::onBeginFrame() {
+void ChannelManager::onBeginFrame() FL_NO_EXCEPT {
     waitForReady();  // Wait for all drivers to become READY before clearing previous frame state.
 }
 
-void ChannelManager::onEndFrame() {
+void ChannelManager::onEndFrame() FL_NO_EXCEPT {
     // Call show() on all drivers to trigger transmission
     // Channels have enqueued data directly to drivers during showPixels()
     // Now we trigger transmission by calling show() on each driver
@@ -383,13 +383,13 @@ void ChannelManager::onEndFrame() {
     waitForReadyOrDraining();
 }
 
-void ChannelManager::reset() {
+void ChannelManager::reset() FL_NO_EXCEPT {
     // Allow all channel drivers to clean up
     waitForReady();
     FL_DBG("ChannelManager: reset() - all drivers ready");
 }
 
-ChannelManager& channelManager() {
+ChannelManager& channelManager() FL_NO_EXCEPT {
     return ChannelManager::instance();
 }
 

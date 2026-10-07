@@ -85,29 +85,29 @@ public:
     /// @param data Channel data to check
     /// @return true if data is true SPI chipset (APA102, SK9822, HD108)
     /// @note Rejects clockless chipsets (WS2812, SK6812, etc.)
-    bool canHandle(const ChannelDataPtr& data) const override;
+    bool canHandle(const ChannelDataPtr& data) const FL_NO_EXCEPT override;
 
     /// @brief Enqueue channel data for transmission
     /// @param channelData Channel data to transmit
     /// @note Batches multiple channels for later transmission
-    void enqueue(ChannelDataPtr channelData) override;
+    void enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT override;
 
     /// @brief Trigger transmission of enqueued data
     /// @note Groups channels by clock pin, acquires DMA buffers, calls transmit()
-    void show() override;
+    void show() FL_NO_EXCEPT override;
 
     /// @brief Query driver state and perform maintenance
     /// @return Current driver state (READY, BUSY, DRAINING, or ERROR)
     /// @note Checks isBusy(), releases buffers when complete
-    DriverState poll() override;
+    DriverState poll() FL_NO_EXCEPT override;
 
     /// @brief Get adapter name for debugging
     /// @return Engine name (e.g., "SPI_SINGLE")
-    fl::string getName() const override { return mName; }
+    fl::string getName() const FL_NO_EXCEPT override { return mName; }
 
     /// @brief Get driver capabilities (SPI protocols only)
     /// @return Capabilities with supportsSpi=true, supportsClockless=false
-    Capabilities getCapabilities() const override {
+    Capabilities getCapabilities() const FL_NO_EXCEPT override {
         return Capabilities(false, true);  // SPI only
     }
 

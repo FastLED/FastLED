@@ -28,7 +28,7 @@ namespace vb = third_party::vorbis;
 // for portability across platforms where int size may vary.
 
 // StbVorbisDecoder implementation
-StbVorbisDecoder::StbVorbisDecoder() : mVorbis(nullptr) {}
+StbVorbisDecoder::StbVorbisDecoder() FL_NO_EXCEPT : mVorbis(nullptr) {}
 
 StbVorbisDecoder::~StbVorbisDecoder() FL_NO_EXCEPT {
     close();
@@ -128,7 +128,7 @@ private:
     bool mEndOfStream;
 };
 
-VorbisDecoderImpl::VorbisDecoderImpl() : mPosition(0), mEndOfStream(false) {
+VorbisDecoderImpl::VorbisDecoderImpl() FL_NO_EXCEPT : mPosition(0), mEndOfStream(false) {
     mPcmBuffer.resize(FRAME_SIZE * 2);  // Stereo
 }
 
@@ -242,7 +242,7 @@ void VorbisDecoderImpl::reset() {
 }
 
 // VorbisDecoder public implementation
-VorbisDecoder::VorbisDecoder() : mImpl(fl::make_unique<VorbisDecoderImpl>()) {}
+VorbisDecoder::VorbisDecoder() FL_NO_EXCEPT : mImpl(fl::make_unique<VorbisDecoderImpl>()) {}
 VorbisDecoder::~VorbisDecoder() FL_NO_EXCEPT = default;
 
 bool VorbisDecoder::begin(fl::filebuf_ptr stream) { return mImpl->begin(stream); }

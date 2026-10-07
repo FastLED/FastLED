@@ -6,7 +6,7 @@ namespace fl {
 namespace audio {
 namespace detector {
 
-MultiBandBeat::MultiBandBeat() = default;
+MultiBandBeat::MultiBandBeat() FL_NO_EXCEPT = default;
 
 MultiBandBeat::MultiBandBeat(const MultiBandBeatDetectorConfig& config) {
     configure(config);

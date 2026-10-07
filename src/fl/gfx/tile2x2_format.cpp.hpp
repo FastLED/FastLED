@@ -10,7 +10,7 @@
 
 namespace fl {
 
-sstream &sstream::operator<<(const Tile2x2_u8 &subpixel) {
+sstream &sstream::operator<<(const Tile2x2_u8 &subpixel) FL_NO_EXCEPT {
     mStr.append("Tile2x2_u8(");
     mStr.append(subpixel.bounds());
     mStr.append(" => ");
@@ -26,12 +26,12 @@ sstream &sstream::operator<<(const Tile2x2_u8 &subpixel) {
 }
 
 // Tile2x2_u8_wrap support - delegates to fl::string::append which already knows how to format it
-sstream &sstream::operator<<(const Tile2x2_u8_wrap &tile) {
+sstream &sstream::operator<<(const Tile2x2_u8_wrap &tile) FL_NO_EXCEPT {
     mStr.append(tile);
     return *this;
 }
 
-string &string::append(const Tile2x2_u8_wrap &tile) {
+string &string::append(const Tile2x2_u8_wrap &tile) FL_NO_EXCEPT {
     Tile2x2_u8_wrap::Entry data[4] = {
         tile.at(0, 0),
         tile.at(0, 1),

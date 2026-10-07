@@ -1,0 +1,66 @@
+{
+  "checkpoint": "f29056fc189b42a297558106fc6f0c88b37469f9",
+  "example": "Blink",
+  "measurements": [
+    {
+      "case": "before-legacy",
+      "image_flash": 273173,
+      "static_dram": 17496
+    },
+    {
+      "case": "before-modern",
+      "image_flash": 289927,
+      "static_dram": 25036
+    },
+    {
+      "case": "before-s3",
+      "image_flash": 353571,
+      "static_dram": 23416
+    },
+    {
+      "case": "on-split-legacy",
+      "image_flash": 256613,
+      "static_dram": 17496
+    },
+    {
+      "case": "on-split-modern",
+      "image_flash": 289927,
+      "static_dram": 25036
+    },
+    {
+      "case": "on-split-s3",
+      "image_flash": 344691,
+      "static_dram": 23416
+    },
+    {
+      "case": "on-restored-legacy",
+      "image_flash": 256745,
+      "static_dram": 17496
+    },
+    {
+      "case": "off-restored-legacy",
+      "image_flash": 276133,
+      "static_dram": 17496
+    },
+    {
+      "case": "off-split-legacy",
+      "image_flash": 273173,
+      "static_dram": 17496
+    },
+    {
+      "case": "on-restored-modern",
+      "image_flash": 289975,
+      "static_dram": 25036
+    },
+    {
+      "case": "on-restored-s3",
+      "image_flash": 344763,
+      "static_dram": 23416
+    },
+    {
+      "case": "on-restored-final-legacy",
+      "image_flash": 256801,
+      "static_dram": 17496
+    }
+  ]
+}

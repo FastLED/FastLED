@@ -123,18 +123,18 @@ void ClearMallocFreeHook() {
 }
 #endif
 
-void SetPSRamAllocator(void *(*alloc)(fl::size), void (*free)(void *)) {
+void SetPSRamAllocator(void *(*alloc)(fl::size), void (*free)(void *)) FL_NO_EXCEPT {
     Alloc = alloc;
     Dealloc = free;
 }
 
-void *PSRamAllocate(fl::size size, bool zero) {
+void *PSRamAllocate(fl::size size, bool zero) FL_NO_EXCEPT {
 
     void *ptr = Alloc(size);
     if (ptr && zero) {
         fl::memset(ptr, 0, size);
     }
-    
+
 #if defined(FASTLED_TESTING)
     if (malloc_free_hook() && ptr) {
         MemoryGuard allows_hook;
@@ -143,11 +143,11 @@ void *PSRamAllocate(fl::size size, bool zero) {
         }
     }
 #endif
-    
+
     return ptr;
 }
 
-void PSRamDeallocate(void *ptr) {
+void PSRamDeallocate(void *ptr) FL_NO_EXCEPT {
 #if defined(FASTLED_TESTING)
     if (malloc_free_hook() && ptr) {
         // malloc_free_hook()->onFree(ptr);
@@ -157,26 +157,26 @@ void PSRamDeallocate(void *ptr) {
         }
     }
 #endif
-    
+
     Dealloc(ptr);
 }
 
-void* Malloc(fl::size size) { 
-    void* ptr = Alloc(size); 
-    
+void* Malloc(fl::size size) FL_NO_EXCEPT {
+    void* ptr = Alloc(size);
+
 #if defined(FASTLED_TESTING)
     if (malloc_free_hook() && ptr) {
-        MemoryGuard allows_hook;    
+        MemoryGuard allows_hook;
         if (allows_hook.enabled()) {
             malloc_free_hook()->onMalloc(ptr, size);
         }
     }
 #endif
-    
+
     return ptr;
 }
 
-void Free(void *ptr) {
+void Free(void *ptr) FL_NO_EXCEPT {
 #if defined(FASTLED_TESTING)
     if (malloc_free_hook() && ptr) {
         MemoryGuard allows_hook;
@@ -271,7 +271,7 @@ namespace {
     }
 } // anonymous namespace
 
-void* slab_allocator_registry_get(fl::size block_size, fl::size slab_size) {
+void* slab_allocator_registry_get(fl::size block_size, fl::size slab_size) FL_NO_EXCEPT {
     auto& s = slab_registry_state();
     for (int i = 0; i < s.count; i++) {
         if (s.entries[i].block_size == block_size &&
@@ -282,7 +282,7 @@ void* slab_allocator_registry_get(fl::size block_size, fl::size slab_size) {
     return nullptr;
 }
 
-void slab_allocator_registry_set(fl::size block_size, fl::size slab_size, void* allocator) {
+void slab_allocator_registry_set(fl::size block_size, fl::size slab_size, void* allocator) FL_NO_EXCEPT {
     auto& s = slab_registry_state();
     // Check if already registered (update)
     for (int i = 0; i < s.count; i++) {

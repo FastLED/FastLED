@@ -187,7 +187,7 @@ struct RequestOptions {
     fl::string body;
     int timeout_ms = 10000;  // 10 second default
     
-    RequestOptions() FL_NO_EXCEPT = default;
+    RequestOptions() = default;
     RequestOptions(const fl::string& method_name) : method(method_name) {}
 };
 

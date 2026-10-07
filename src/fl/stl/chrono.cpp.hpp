@@ -76,7 +76,7 @@ fl::u32 MockTimeProvider::operator()() const {
 
 ///////////////////// PUBLIC API //////////////////////////////////////
 
-fl::u32 millis() {
+fl::u32 millis() FL_NO_EXCEPT {
 #if FL_CHRONO_HAS_TEST_TIME_PROVIDER
     fl::u32 injected_millis = 0;
     if (get_injected_millis(&injected_millis)) {
@@ -88,7 +88,7 @@ fl::u32 millis() {
     return fl::platforms::millis();
 }
 
-fl::u32 micros() {
+fl::u32 micros() FL_NO_EXCEPT {
 #if FL_CHRONO_HAS_TEST_TIME_PROVIDER
     fl::u32 injected_millis = 0;
     if (get_injected_millis(&injected_millis)) {
@@ -169,7 +169,7 @@ void millis64_reset() {
     state.initialized = false;
 }
 
-fl::u64 millis64() {
+fl::u64 millis64() FL_NO_EXCEPT {
     Millis64State& state = get_millis64_state();
     fl::u32 current_millis = fl::millis();
     fl::lock_guard<fl::mutex> lock(state.mutex);

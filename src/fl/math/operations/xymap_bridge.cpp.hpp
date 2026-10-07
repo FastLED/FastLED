@@ -5,7 +5,7 @@
 
 namespace fl {
 
-XYMap XYMap::fromXMap(const XMap& xmap) {
+XYMap XYMap::fromXMap(const XMap& xmap) FL_NO_EXCEPT {
     // Create an XYMap with width=xmap.length and height=1
     // This treats the 1D strip as a 2D grid with height 1
     u16 length = xmap.getLength();

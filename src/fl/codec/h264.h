@@ -34,7 +34,7 @@ public:
     // Create an H.264 decoder for the current platform.
     // Returns NullDecoder on platforms without H.264 HW support.
     static IDecoderPtr createDecoder(const H264Config& config,
-                                     fl::string* error_message = nullptr);
+                                     fl::string* error_message = nullptr) FL_NO_EXCEPT;
 
     static IDecoderPtr createDecoder(fl::string* error_message = nullptr) {
         H264Config config;

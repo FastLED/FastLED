@@ -7,7 +7,7 @@ namespace fl {
 namespace audio {
 namespace detector {
 
-EnergyAnalyzer::EnergyAnalyzer()
+EnergyAnalyzer::EnergyAnalyzer() FL_NO_EXCEPT
     : mCurrentRMS(0.0f)
     , mPeak(0.0f)
     , mAverageEnergy(0.0f)
@@ -20,7 +20,7 @@ EnergyAnalyzer::EnergyAnalyzer()
 
 EnergyAnalyzer::~EnergyAnalyzer() FL_NO_EXCEPT = default;
 
-void EnergyAnalyzer::update(shared_ptr<Context> context) {
+void EnergyAnalyzer::update(shared_ptr<Context> context) FL_NO_EXCEPT {
     // Get RMS directly from Sample (no fft::FFT needed)
     mCurrentRMS = context->getRMS();
     u32 timestamp = context->getTimestamp();
@@ -48,7 +48,7 @@ void EnergyAnalyzer::update(shared_ptr<Context> context) {
     mNormalizedRMS = fl::min(1.0f, mCurrentRMS / runningMax);
 }
 
-void EnergyAnalyzer::fireCallbacks() {
+void EnergyAnalyzer::fireCallbacks() FL_NO_EXCEPT {
     if (onEnergy) {
         onEnergy(mCurrentRMS);
     }
@@ -63,7 +63,7 @@ void EnergyAnalyzer::fireCallbacks() {
     }
 }
 
-void EnergyAnalyzer::reset() {
+void EnergyAnalyzer::reset() FL_NO_EXCEPT {
     mCurrentRMS = 0.0f;
     mPeak = 0.0f;
     mAverageEnergy = 0.0f;

@@ -33,7 +33,7 @@ static const ChordTemplate kChordTemplates[] = {
 };
 static const int kNumChordTemplates = sizeof(kChordTemplates) / sizeof(ChordTemplate);
 
-ChordDetector::ChordDetector()
+ChordDetector::ChordDetector() FL_NO_EXCEPT
     : mChordStartTime(0)
     , mChordEndTime(0)
     , mConfidenceThreshold(0.6f)
@@ -58,7 +58,7 @@ void ChordDetector::initializeTemplateMap() {
     }
 }
 
-void ChordDetector::update(shared_ptr<Context> context) {
+void ChordDetector::update(shared_ptr<Context> context) FL_NO_EXCEPT {
     mRetainedFFT = context->getFFT(32);  // Higher resolution for pitch detection
     const fft::Bins& fft = *mRetainedFFT;
     u32 timestamp = context->getTimestamp();
@@ -110,7 +110,7 @@ void ChordDetector::update(shared_ptr<Context> context) {
     }
 }
 
-void ChordDetector::fireCallbacks() {
+void ChordDetector::fireCallbacks() FL_NO_EXCEPT {
     if (mFireChordEnd) {
         if (onChordEnd) onChordEnd();
         mFireChordEnd = false;
@@ -125,7 +125,7 @@ void ChordDetector::fireCallbacks() {
     }
 }
 
-void ChordDetector::reset() {
+void ChordDetector::reset() FL_NO_EXCEPT {
     mCurrentChord = Chord();
     mPreviousChord = Chord();
     mChordStartTime = 0;

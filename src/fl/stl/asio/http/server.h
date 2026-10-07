@@ -47,7 +47,7 @@ namespace http {
 /// HTTP request object (immutable, passed by const reference)
 class Request {
 public:
-    Request() FL_NO_EXCEPT = default;
+    Request() = default;
 
     /// Get HTTP method (e.g., "GET", "POST", "PUT", "DELETE")
     const string& method() const { return mMethod; }
@@ -227,7 +227,7 @@ public:
 
 private:
     // EngineEvents::Listener implementation
-    void onExit() override;
+    void onExit() FL_NO_EXCEPT override;
 
     // Forward declaration for async integration helper
     class ServerAsyncRunner;

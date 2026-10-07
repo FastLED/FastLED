@@ -383,7 +383,7 @@ const Config& Device::getConfig() const {
 // Transaction Implementation (Stub)
 // ============================================================================
 
-Transaction::Transaction() : pImpl(nullptr) {}
+Transaction::Transaction() FL_NO_EXCEPT : pImpl(nullptr) {}
 
 Transaction::Transaction(Transaction&& other) FL_NO_EXCEPT
     : pImpl(fl::move(other.pImpl)) {

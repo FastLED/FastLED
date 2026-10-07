@@ -143,12 +143,12 @@ struct default_value_visitor {
     // Generic overload for all other types
     template<typename U>
     typename fl::enable_if<
-        !(fl::is_integral<T>::value && fl::is_integral<U>::value) FL_NO_EXCEPT &&
+        !(fl::is_integral<T>::value && fl::is_integral<U>::value) &&
         !(fl::is_integral<T>::value && fl::is_floating_point<U>::value) &&
         !(fl::is_floating_point<T>::value && fl::is_integral<U>::value) &&
         !(fl::is_floating_point<T>::value && fl::is_floating_point<U>::value && !fl::is_same<T, U>::value),
         void>::type
-    operator()(const U&) {
+    operator()(const U&) FL_NO_EXCEPT {
         // Do nothing for other types
     }
     

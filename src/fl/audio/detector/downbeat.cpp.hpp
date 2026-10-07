@@ -27,7 +27,7 @@ Downbeat::Downbeat(shared_ptr<Beat> beatDetector)
 {
 }
 
-Downbeat::Downbeat()
+Downbeat::Downbeat() FL_NO_EXCEPT
     : Downbeat(make_shared<Beat>())
 {
     mOwnsBeatDetector = true;
@@ -35,7 +35,7 @@ Downbeat::Downbeat()
 
 Downbeat::~Downbeat() FL_NO_EXCEPT = default;
 
-void Downbeat::update(shared_ptr<Context> context) {
+void Downbeat::update(shared_ptr<Context> context) FL_NO_EXCEPT {
     // Update Beat if we own it
     if (mOwnsBeatDetector) {
         updateBeatDetector(context);
@@ -118,7 +118,7 @@ void Downbeat::update(shared_ptr<Context> context) {
     updateMeasurePhase(timestamp);
 }
 
-void Downbeat::fireCallbacks() {
+void Downbeat::fireCallbacks() FL_NO_EXCEPT {
     if (mFireDownbeat) {
         if (onDownbeat) onDownbeat();
         mFireDownbeat = false;
@@ -136,7 +136,7 @@ void Downbeat::fireCallbacks() {
     }
 }
 
-void Downbeat::reset() {
+void Downbeat::reset() FL_NO_EXCEPT {
     mDownbeatDetected = false;
     mCurrentBeat = 1;
     mBeatsPerMeasure = 4;

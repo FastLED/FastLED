@@ -7,7 +7,7 @@ namespace fl {
 namespace audio {
 namespace detector {
 
-Note::Note()
+Note::Note() FL_NO_EXCEPT
     : mPitchDetector(fl::make_shared<Pitch>())
     , mOwnsPitchDetector(true)
     , mCurrentNote(NO_NOTE)
@@ -45,7 +45,7 @@ Note::Note(shared_ptr<Pitch> pitchDetector)
 
 Note::~Note() FL_NO_EXCEPT = default;
 
-void Note::update(shared_ptr<Context> context) {
+void Note::update(shared_ptr<Context> context) FL_NO_EXCEPT {
     // Update pitch detector if we own it
     if (mOwnsPitchDetector && mPitchDetector) {
         mPitchDetector->update(context);
@@ -125,7 +125,7 @@ void Note::update(shared_ptr<Context> context) {
     }
 }
 
-void Note::fireCallbacks() {
+void Note::fireCallbacks() FL_NO_EXCEPT {
     if (mFireNoteOff) {
         if (onNoteOff) onNoteOff(mPendingOffNote);
         mFireNoteOff = false;
@@ -140,7 +140,7 @@ void Note::fireCallbacks() {
     }
 }
 
-void Note::reset() {
+void Note::reset() FL_NO_EXCEPT {
     mCurrentNote = NO_NOTE;
     mLastVelocity = 0;
     mNoteActive = false;

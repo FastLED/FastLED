@@ -18,7 +18,7 @@
 
 namespace fl {
 
-Video::Video() : Fx1d(0) {}
+Video::Video() FL_NO_EXCEPT : Fx1d(0) {}
 
 Video::Video(size_t pixelsPerFrame, float fps, size_t frame_history_count)
     : Fx1d(pixelsPerFrame) {
@@ -34,7 +34,7 @@ void Video::pause(fl::u32 now) { mImpl->pause(now); }
 void Video::resume(fl::u32 now) { mImpl->resume(now); }
 
 Video::~Video() FL_NO_EXCEPT = default;
-Video::Video(const Video &) = default;
+Video::Video(const Video &) FL_NO_EXCEPT = default;
 Video &Video::operator=(const Video &) FL_NO_EXCEPT = default;
 
 bool Video::begin(filebuf_ptr handle) {

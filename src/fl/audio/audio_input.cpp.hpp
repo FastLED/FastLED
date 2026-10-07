@@ -85,7 +85,7 @@ fl::shared_ptr<IInput> platform_create_audio_input(const Config &config, fl::str
 }
 #elif FASTLED_USES_ESP32_AUDIO_INPUT
 // ESP32 native implementation
-fl::shared_ptr<IInput> platform_create_audio_input(const Config &config, fl::string *error_message) {
+fl::shared_ptr<IInput> platform_create_audio_input(const Config &config, fl::string *error_message) FL_NO_EXCEPT {
     return esp32_create_audio_input(config, error_message);
 }
 #elif FASTLED_USES_WASM_AUDIO_INPUT
@@ -107,7 +107,7 @@ fl::shared_ptr<IInput> platform_create_audio_input(const Config &config, fl::str
 
 // Static method delegates to free function
 fl::shared_ptr<IInput>
-IInput::create(const Config &config, fl::string *error_message) {
+IInput::create(const Config &config, fl::string *error_message) FL_NO_EXCEPT {
     auto input = platform_create_audio_input(config, error_message);
     if (input) {
         input->setGain(config.getGain());

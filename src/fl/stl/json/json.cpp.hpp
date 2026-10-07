@@ -62,12 +62,12 @@ static inline bool float_bits_magnitude_exceeds_2_24(u32 bits) FL_NO_EXCEPT {
 }
 
 
-json_value& get_null_json_value() {
+json_value& get_null_json_value() FL_NO_EXCEPT {
     static json_value null_value;
     return null_value;
 }
 
-json_object& get_empty_json_obj() {
+json_object& get_empty_json_obj() FL_NO_EXCEPT {
     static json_object empty_object;
     return empty_object;
 }
@@ -1110,7 +1110,7 @@ public:
 }  // namespace
 
 // PARSE2 IMPLEMENTATION - Milestone 8: Two-phase parser with validation
-fl::shared_ptr<json_value> json_value::parse2(const fl::string& txt) {
+fl::shared_ptr<json_value> json_value::parse2(const fl::string& txt) FL_NO_EXCEPT {
     JsonTokenizer tokenizer;
 
     // Phase 1: Validate
@@ -1129,17 +1129,17 @@ fl::shared_ptr<json_value> json_value::parse2(const fl::string& txt) {
 }
 
 // Phase 1 validation only (for testing - MUST allocate zero heap memory)
-bool json_value::parse2_validate_only(const fl::string& txt) {
+bool json_value::parse2_validate_only(const fl::string& txt) FL_NO_EXCEPT {
     return parse2_validate_only(fl::string_view(txt.c_str(), txt.length()));
 }
 
-bool json_value::parse2_validate_only(fl::string_view txt) {
+bool json_value::parse2_validate_only(fl::string_view txt) FL_NO_EXCEPT {
     JsonTokenizer tokenizer;
     JsonValidator validator;
     return tokenizer.parse(txt, validator) && validator.is_valid();
 }
 
-fl::string json_value::to_string() const {
+fl::string json_value::to_string() const FL_NO_EXCEPT {
     // Parse the JSON value to a string, then parse it back to a json object,
     // and use the working to_string_native method
     // This is a workaround to avoid reimplementing the serialization logic
@@ -1302,7 +1302,7 @@ struct SerializerVisitor {
     }
 };
 
-fl::string json::to_string_native() const {
+fl::string json::to_string_native() const FL_NO_EXCEPT {
     if (!mValue) {
         return "null";
     }
@@ -1334,7 +1334,7 @@ fl::string json::to_string_native() const {
 fl::string serializeValue(const json_value& value);
 
 
-fl::string json::normalize_json_string(const char* jsonStr) {
+fl::string json::normalize_json_string(const char* jsonStr) FL_NO_EXCEPT {
     fl::string result;
     if (!jsonStr) {
         return result;

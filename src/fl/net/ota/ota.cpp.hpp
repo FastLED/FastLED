@@ -12,7 +12,7 @@ namespace net {
 // OTA Wrapper Implementation
 // ============================================================================
 
-OTA::OTA() : mImpl(nullptr) {
+OTA::OTA() FL_NO_EXCEPT : mImpl(nullptr) {
     // Lazy initialization - mImpl will be created on first method call
 }
 

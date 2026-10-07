@@ -888,7 +888,7 @@ optional<string> Request::query(const string& param) const {
 
 // ========== Response implementation ==========
 
-Response::Response() {
+Response::Response() FL_NO_EXCEPT {
     mHeaders["Content-Type"] = "text/plain";
 }
 
@@ -958,7 +958,7 @@ static EspRouteContexts& espRouteContexts() FL_NO_EXCEPT {
     return fl::Singleton<EspRouteContexts>::instance();
 }
 
-Server::Server() {
+Server::Server() FL_NO_EXCEPT {
     EngineEvents::addListener(this);
 }
 
@@ -967,7 +967,7 @@ Server::~Server() FL_NO_EXCEPT {
     stop();
 }
 
-void Server::onExit() {
+void Server::onExit() FL_NO_EXCEPT {
     stop();
 }
 

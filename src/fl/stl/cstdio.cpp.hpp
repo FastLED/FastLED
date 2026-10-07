@@ -10,9 +10,9 @@
 
 // Forward declare delay to avoid Arduino conflict
 namespace fl {
-    void delayMicroseconds(u32 us);
+    void delayMicroseconds(u32 us) FL_NO_EXCEPT;
     namespace detail {
-        void delay_impl(u32 ms, bool run_async);
+        void delay_impl(u32 ms, bool run_async) FL_NO_EXCEPT;
     }
 }
 
@@ -25,11 +25,11 @@ namespace fl {
 // Default log level is DEBUG (all logging enabled)
 static u8 gLogLevel = static_cast<u8>(LogLevel::FL_LOG_LEVEL_DEBUG);
 
-u8 getLogLevel() {
+u8 getLogLevel() FL_NO_EXCEPT {
     return gLogLevel;
 }
 
-void setLogLevel(u8 level) {
+void setLogLevel(u8 level) FL_NO_EXCEPT {
     gLogLevel = level;
 }
 
@@ -74,7 +74,7 @@ static write_bytes_handler_t& get_write_bytes_handler() {
 }
 #endif
 
-void print(const char* str) {
+void print(const char* str) FL_NO_EXCEPT {
     if (!str) return;
     // Check global log level - if NONE, suppress all output
     if (gLogLevel == static_cast<u8>(LogLevel::FL_LOG_LEVEL_NONE)) return;
@@ -91,7 +91,7 @@ void print(const char* str) {
     platforms::print(str);
 }
 
-void println(const char* str) {
+void println(const char* str) FL_NO_EXCEPT {
     if (!str) return;
     // Check global log level - if NONE, suppress all output
     if (gLogLevel == static_cast<u8>(LogLevel::FL_LOG_LEVEL_NONE)) return;
@@ -108,7 +108,7 @@ void println(const char* str) {
     platforms::println(str);
 }
 
-int available() {
+int available() FL_NO_EXCEPT {
 #ifdef FASTLED_TESTING
     // Check for injected handler first
     if (get_available_handler()) {
@@ -120,11 +120,11 @@ int available() {
     return platforms::available();
 }
 
-int peek() {
+int peek() FL_NO_EXCEPT {
     return platforms::peek();
 }
 
-int read() {
+int read() FL_NO_EXCEPT {
 #ifdef FASTLED_TESTING
     // Check for injected handler first
     if (get_read_handler()) {
@@ -136,7 +136,7 @@ int read() {
     return platforms::read();
 }
 
-bool flush(u32 timeoutMs) {
+bool flush(u32 timeoutMs) FL_NO_EXCEPT {
 #ifdef FASTLED_TESTING
     if (get_flush_handler()) {
         return get_flush_handler()(timeoutMs);
@@ -145,7 +145,7 @@ bool flush(u32 timeoutMs) {
     return platforms::flush(timeoutMs);
 }
 
-size_t write_bytes(const u8* buffer, size_t size) {
+size_t write_bytes(const u8* buffer, size_t size) FL_NO_EXCEPT {
     if (!buffer || size == 0) return 0;
 #ifdef FASTLED_TESTING
     if (get_write_bytes_handler()) {
@@ -156,12 +156,12 @@ size_t write_bytes(const u8* buffer, size_t size) {
 }
 
 #if !FL_SERIAL_BEGIN_INLINE
-void serial_begin(u32 baudRate) {
+void serial_begin(u32 baudRate) FL_NO_EXCEPT {
     platforms::begin(baudRate);
 }
 #endif
 
-bool serial_ready() {
+bool serial_ready() FL_NO_EXCEPT {
     return platforms::serial_ready();
 }
 

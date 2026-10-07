@@ -348,8 +348,8 @@ class PixelIterator {
       *c2 = c[mOrder[2]];
     }
 
-    FL_DEPRECATED("Use loadRGBScaleAndBrightness() instead") FL_NO_EXCEPT
-    void getHdScale(u8* c0, u8* c1, u8* c2, u8* brightness) {
+    FL_DEPRECATED("Use loadRGBScaleAndBrightness() instead")
+    void getHdScale(u8* c0, u8* c1, u8* c2, u8* brightness) FL_NO_EXCEPT {
       loadRGBScaleAndBrightness(c0, c1, c2, brightness);
     }
     #endif

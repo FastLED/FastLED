@@ -49,11 +49,11 @@ float normalizedDiameter(float diameter) FL_NO_EXCEPT {
 }  // namespace
 
 // Default constructor and destructor - must be in .cpp for proper smart_ptr handling
-ScreenMap::ScreenMap() = default;
+ScreenMap::ScreenMap() FL_NO_EXCEPT = default;
 ScreenMap::~ScreenMap() FL_NO_EXCEPT = default;
 
 ScreenMap ScreenMap::Circle(int numLeds, float cm_between_leds,
-                            float cm_led_diameter, float completion) {
+                            float cm_led_diameter, float completion) FL_NO_EXCEPT {
     ScreenMap screenMap(numLeds);
 
     // radius from LED spacing
@@ -83,7 +83,7 @@ ScreenMap ScreenMap::Circle(int numLeds, float cm_between_leds,
 }
 
 ScreenMap ScreenMap::DefaultStrip(int numLeds, float cm_between_leds,
-                                  float cm_led_diameter, float completion) {
+                                  float cm_led_diameter, float completion) FL_NO_EXCEPT {
     return Circle(numLeds, cm_between_leds, cm_led_diameter, completion);
 }
 
@@ -121,7 +121,7 @@ ScreenMap::ScreenMap(int count, float diameter, fl::function<void(int, vec2f& pt
     }
 }
 
-ScreenMap::ScreenMap(const ScreenMap &other) {
+ScreenMap::ScreenMap(const ScreenMap &other) FL_NO_EXCEPT {
     mDiameter = other.mDiameter;
     length = other.length;
     mLookUpTable = other.mLookUpTable;
@@ -129,7 +129,7 @@ ScreenMap::ScreenMap(const ScreenMap &other) {
     mShapes = other.mShapes;
 }
 
-ScreenMap::ScreenMap(ScreenMap&& other) {
+ScreenMap::ScreenMap(ScreenMap&& other) FL_NO_EXCEPT {
     mDiameter = other.mDiameter;
     length = other.length;
     fl::swap(mLookUpTable, other.mLookUpTable);
@@ -139,7 +139,7 @@ ScreenMap::ScreenMap(ScreenMap&& other) {
     other.mSourceXYMap.reset();
 }
 
-void ScreenMap::set(u16 index, const vec2f &p) {
+void ScreenMap::set(u16 index, const vec2f &p) FL_NO_EXCEPT {
     if (mLookUpTable) {
         LUTXYFLOAT &lut = *mLookUpTable.get();
         auto *data = lut.getDataMutable();
@@ -151,7 +151,7 @@ void ScreenMap::setDiameter(float diameter) FL_NO_EXCEPT {
     mDiameter = normalizedDiameter(diameter);
 }
 
-vec2f ScreenMap::mapToIndex(u32 x) const {
+vec2f ScreenMap::mapToIndex(u32 x) const FL_NO_EXCEPT {
     if (x >= length || !mLookUpTable) {
         return {0, 0};
     }
@@ -160,11 +160,11 @@ vec2f ScreenMap::mapToIndex(u32 x) const {
     return screen_coords;
 }
 
-u32 ScreenMap::getLength() const { return length; }
+u32 ScreenMap::getLength() const FL_NO_EXCEPT { return length; }
 
-float ScreenMap::getDiameter() const { return mDiameter; }
+float ScreenMap::getDiameter() const FL_NO_EXCEPT { return mDiameter; }
 
-vec2f ScreenMap::getBounds() const {
+vec2f ScreenMap::getBounds() const FL_NO_EXCEPT {
 
     if (length == 0 || !mLookUpTable) {
         return {0, 0};
@@ -217,12 +217,12 @@ const ScreenMap::Shape &ScreenMap::getShape(u32 index) const FL_NO_EXCEPT {
     return index < mShapes.size() ? mShapes[index] : emptyShape;
 }
 
-const vec2f &ScreenMap::empty() {
+const vec2f &ScreenMap::empty() FL_NO_EXCEPT {
     static const vec2f s_empty = vec2f(0, 0); // okay static in header
     return s_empty;
 }
 
-const vec2f &ScreenMap::operator[](u32 x) const {
+const vec2f &ScreenMap::operator[](u32 x) const FL_NO_EXCEPT {
     if (x >= length || !mLookUpTable) {
         return empty(); // better than crashing.
     }
@@ -230,7 +230,7 @@ const vec2f &ScreenMap::operator[](u32 x) const {
     return lut[x];
 }
 
-vec2f &ScreenMap::operator[](u32 x) {
+vec2f &ScreenMap::operator[](u32 x) FL_NO_EXCEPT {
     if (x >= length || !mLookUpTable) {
         return const_cast<vec2f &>(empty()); // better than crashing.
     }
@@ -263,23 +263,23 @@ ScreenMap &ScreenMap::operator=(ScreenMap &&other) FL_NO_EXCEPT {
     return *this;
 }
 
-void ScreenMap::setSourceXYMap(const fl::shared_ptr<XYMap>& xymap) {
+void ScreenMap::setSourceXYMap(const fl::shared_ptr<XYMap>& xymap) FL_NO_EXCEPT {
     mSourceXYMap = xymap;
 }
 
-const XYMapPtr& ScreenMap::getSourceXYMapPtr() const {
+const XYMapPtr& ScreenMap::getSourceXYMapPtr() const FL_NO_EXCEPT {
     return mSourceXYMap;
 }
 
-const XYMap* ScreenMap::getXYMap() const {
+const XYMap* ScreenMap::getXYMap() const FL_NO_EXCEPT {
     return mSourceXYMap.get();
 }
 
-bool ScreenMap::hasSourceXYMap() const {
+bool ScreenMap::hasSourceXYMap() const FL_NO_EXCEPT {
     return mSourceXYMap != nullptr;
 }
 
-void ScreenMap::addOffset(const vec2f &p) {
+void ScreenMap::addOffset(const vec2f &p) FL_NO_EXCEPT {
     vec2f *data = mLookUpTable->getDataMutable();
     for (u32 i = 0; i < length; i++) {
         vec2f &curr = data[i];
@@ -288,7 +288,7 @@ void ScreenMap::addOffset(const vec2f &p) {
     }
 }
 
-ScreenMap& ScreenMap::addOffsetX(float x) { addOffset({x, 0}); return *this; }
-ScreenMap& ScreenMap::addOffsetY(float y) { addOffset({0, y}); return *this; }
+ScreenMap& ScreenMap::addOffsetX(float x) FL_NO_EXCEPT { addOffset({x, 0}); return *this; }
+ScreenMap& ScreenMap::addOffsetY(float y) FL_NO_EXCEPT { addOffset({0, y}); return *this; }
 
 } // namespace fl

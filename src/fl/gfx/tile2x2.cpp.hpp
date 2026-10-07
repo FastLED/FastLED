@@ -23,7 +23,7 @@ static vec2<u16> wrap_x(const vec2<u16> &v, const u16 width) {
 }
 } // namespace
 
-Tile2x2_u8_wrap::Tile2x2_u8_wrap() {
+Tile2x2_u8_wrap::Tile2x2_u8_wrap() FL_NO_EXCEPT {
     mData[0][0] = {vec2<u16>(0, 0), 0};
     mData[0][1] = {vec2<u16>(0, 1), 0};
     mData[1][0] = {vec2<u16>(1, 0), 0};

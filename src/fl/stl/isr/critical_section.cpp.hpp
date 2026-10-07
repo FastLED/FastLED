@@ -17,7 +17,7 @@ void interrupt_enable() {
 
 namespace isr {
 
-critical_section::critical_section() {
+critical_section::critical_section() FL_NO_EXCEPT {
     fl::interrupt_disable();
 }
 

@@ -58,7 +58,7 @@ namespace detail {
 // AsyncLogger implementation using AsyncLogQueue backend (zero heap allocation)
 // ============================================================================
 
-AsyncLogger::AsyncLogger() : mQueue() {}
+AsyncLogger::AsyncLogger() FL_NO_EXCEPT : mQueue() {}
 
 void AsyncLogger::push(const fl::string& msg) {
     mQueue.push(msg);
@@ -204,7 +204,7 @@ bool AsyncLogger::isBackgroundFlushEnabled() const {
 // Background flush service function (call from main loop)
 // ============================================================================
 
-void async_log_service() {
+void async_log_service() FL_NO_EXCEPT {
     // Get background flush state
     detail::BackgroundFlushState& state = Singleton<detail::BackgroundFlushState>::instance();
 
@@ -235,7 +235,7 @@ AsyncLoggerServiceTask& AsyncLoggerServiceTask::instance() {
     return task;
 }
 
-AsyncLoggerServiceTask::AsyncLoggerServiceTask()
+AsyncLoggerServiceTask::AsyncLoggerServiceTask() FL_NO_EXCEPT
     : mIntervalMs(16)
     , mMessagesPerTick(5)
     , mTask()
@@ -277,7 +277,7 @@ void AsyncLoggerServiceTask::serviceLoggers() {
 // Public configuration API
 // ============================================================================
 
-void configureAsyncLogService(u32 interval_ms, fl::size messages_per_tick) {
+void configureAsyncLogService(u32 interval_ms, fl::size messages_per_tick) FL_NO_EXCEPT {
     detail::AsyncLoggerServiceTask::instance().setInterval(interval_ms);
     detail::AsyncLoggerServiceTask::instance().setMessagesPerTick(messages_per_tick);
 }

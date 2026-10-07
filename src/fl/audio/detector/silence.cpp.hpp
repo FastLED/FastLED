@@ -7,7 +7,7 @@ namespace fl {
 namespace audio {
 namespace detector {
 
-Silence::Silence()
+Silence::Silence() FL_NO_EXCEPT
     : mIsSilent(false)
     , mPreviousSilent(false)
     , mCurrentRMS(0.0f)
@@ -26,7 +26,7 @@ Silence::Silence()
 
 Silence::~Silence() FL_NO_EXCEPT = default;
 
-void Silence::update(shared_ptr<Context> context) {
+void Silence::update(shared_ptr<Context> context) FL_NO_EXCEPT {
     mCurrentRMS = context->getRMS();
     u32 timestamp = context->getTimestamp();
     mLastUpdateTime = timestamp;
@@ -82,7 +82,7 @@ void Silence::update(shared_ptr<Context> context) {
     }
 }
 
-void Silence::fireCallbacks() {
+void Silence::fireCallbacks() FL_NO_EXCEPT {
     switch (mPendingEvent) {
     case PendingSilenceEvent::kStart:
         if (onSilenceStart) onSilenceStart();
@@ -102,7 +102,7 @@ void Silence::fireCallbacks() {
     mPendingEvent = PendingSilenceEvent::kNone;
 }
 
-void Silence::reset() {
+void Silence::reset() FL_NO_EXCEPT {
     mIsSilent = false;
     mPreviousSilent = false;
     mCurrentRMS = 0.0f;

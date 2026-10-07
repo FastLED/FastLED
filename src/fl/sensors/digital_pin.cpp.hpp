@@ -55,7 +55,7 @@ DigitalPin::DigitalPin(int pin) {
     mImpl = fl::make_shared<DigitalPinImpl>(pin);
 }
 DigitalPin::~DigitalPin() FL_NO_EXCEPT = default;
-DigitalPin::DigitalPin(const DigitalPin &other) = default;
+DigitalPin::DigitalPin(const DigitalPin &other) FL_NO_EXCEPT = default;
 
 DigitalPin& DigitalPin::operator=(const DigitalPin &other) FL_NO_EXCEPT = default;
 

@@ -10,7 +10,7 @@ namespace fl {
 namespace audio {
 namespace detector {
 
-DropDetector::DropDetector()
+DropDetector::DropDetector() FL_NO_EXCEPT
     : mPrevRMS(0.0f)
     , mPrevBassEnergy(0.0f)
     , mPrevMidEnergy(0.0f)
@@ -27,7 +27,7 @@ DropDetector::DropDetector()
 
 DropDetector::~DropDetector() FL_NO_EXCEPT = default;
 
-void DropDetector::update(shared_ptr<Context> context) {
+void DropDetector::update(shared_ptr<Context> context) FL_NO_EXCEPT {
     if (!context) {
         // Null context - nothing to process
         return;
@@ -79,7 +79,7 @@ void DropDetector::update(shared_ptr<Context> context) {
     mPrevTrebleEnergy = trebleEnergy;
 }
 
-void DropDetector::fireCallbacks() {
+void DropDetector::fireCallbacks() FL_NO_EXCEPT {
     if (mDropDetectedThisFrame) {
         if (onDrop) {
             onDrop();
@@ -94,7 +94,7 @@ void DropDetector::fireCallbacks() {
     }
 }
 
-void DropDetector::reset() {
+void DropDetector::reset() FL_NO_EXCEPT {
     mLastDrop = Drop();
     mPrevRMS = 0.0f;
     mPrevBassEnergy = 0.0f;

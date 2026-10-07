@@ -654,7 +654,7 @@ public:
     }
 
     bool beginWiFi(const char* hostname, const char* password,
-                   const char* ssid, const char* wifi_pass) override {
+                   const char* ssid, const char* wifi_pass) FL_NO_EXCEPT override {
         // Stop any existing HTTP server to prevent leaks
         stopHttpServer();
 
@@ -694,7 +694,7 @@ public:
         return true;
     }
 
-    bool begin(const char* hostname, const char* password) override {
+    bool begin(const char* hostname, const char* password) FL_NO_EXCEPT override {
         // Stop any existing HTTP server to prevent leaks
         stopHttpServer();
 
@@ -728,7 +728,7 @@ public:
         return true;
     }
 
-    bool enableApFallback(const char* ap_ssid, const char* ap_pass) override {
+    bool enableApFallback(const char* ap_ssid, const char* ap_pass) FL_NO_EXCEPT override {
         // Validate SSID
         if (!ap_ssid || strlen(ap_ssid) == 0) {
             FL_WARN("AP SSID cannot be empty");
@@ -747,33 +747,33 @@ public:
         return true;
     }
 
-    void onProgress(fl::function<void(size_t, size_t)> callback) override {
+    void onProgress(fl::function<void(size_t, size_t)> callback) FL_NO_EXCEPT override {
         mProgressCb = callback;
     }
 
-    void onError(fl::function<void(const char*)> callback) override {
+    void onError(fl::function<void(const char*)> callback) FL_NO_EXCEPT override {
         mErrorCb = callback;
     }
 
-    void onState(fl::function<void(u8)> callback) override {
+    void onState(fl::function<void(u8)> callback) FL_NO_EXCEPT override {
         mStateCb = callback;
     }
 
-    void onBeforeReboot(void (*callback)()) override {
+    void onBeforeReboot(void (*callback)()) FL_NO_EXCEPT override {
         mBeforeRebootCb = callback;
     }
 
-    void poll() override {
+    void poll() FL_NO_EXCEPT override {
         // Custom OTA server runs in separate FreeRTOS task (zero polling overhead)
         // HTTP server also runs in separate FreeRTOS task
         // Nothing to poll
     }
 
-    bool isConnected() const override {
+    bool isConnected() const FL_NO_EXCEPT override {
         return mWifiConnected;
     }
 
-    u8 getFailedServices() const override {
+    u8 getFailedServices() const FL_NO_EXCEPT override {
         return mFailedServices;
     }
 
@@ -1429,7 +1429,7 @@ private:
 // Strong Override - ESP32 Factory
 // ============================================================================
 
-fl::shared_ptr<IOTA> platform_create_ota() {
+fl::shared_ptr<IOTA> platform_create_ota() FL_NO_EXCEPT {
     return fl::make_shared<ESP32OTA>();
 }
 

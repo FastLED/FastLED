@@ -4,7 +4,7 @@
 namespace fl {
 namespace audio {
 
-fl::size Context::hashFFTArgs(const fft::Args& args) {
+fl::size Context::hashFFTArgs(const fft::Args& args) FL_NO_EXCEPT {
     // Create a hash from fft::Args for O(1) cache lookup
     // Use simple hash combining of the integer fields
     fl::size hash = 0;
@@ -22,7 +22,7 @@ fl::size Context::hashFFTArgs(const fft::Args& args) {
     return hash;
 }
 
-Context::Context(const Sample& sample)
+Context::Context(const Sample& sample) FL_NO_EXCEPT
     : mSample(sample)
     , mFFTHistoryDepth(0)
     , mFFTHistoryIndex(0)
@@ -32,7 +32,7 @@ Context::Context(const Sample& sample)
 
 Context::~Context() FL_NO_EXCEPT = default;
 
-shared_ptr<const fft::Bins> Context::getFFT(int bands, float fmin, float fmax, fft::Mode mode, fft::Window window) {
+shared_ptr<const fft::Bins> Context::getFFT(int bands, float fmin, float fmax, fft::Mode mode, fft::Window window) FL_NO_EXCEPT {
     fft::Args args(mSample.size(), bands, fmin, fmax, mSampleRate, mode, window);
 
     // O(1) cache lookup using hash map
@@ -91,7 +91,7 @@ shared_ptr<const fft::Bins> Context::getFFT(int bands, float fmin, float fmax, f
     return bins;
 }
 
-BandEnergy Context::getBandEnergy() {
+BandEnergy Context::getBandEnergy() FL_NO_EXCEPT {
     auto fft = getFFT(3, 20.0f, 11025.0f);
     BandEnergy out;
     span<const float> lin = fft->linear();
@@ -103,12 +103,12 @@ BandEnergy Context::getBandEnergy() {
     return out;
 }
 
-shared_ptr<const fft::Bins> Context::getFFT16(fft::Mode mode, fft::Window window) {
+shared_ptr<const fft::Bins> Context::getFFT16(fft::Mode mode, fft::Window window) FL_NO_EXCEPT {
     return getFFT(16, fft::Args::DefaultMinFrequency(),
                   fft::Args::DefaultMaxFrequency(), mode, window);
 }
 
-void Context::setFFTHistoryDepth(int depth) {
+void Context::setFFTHistoryDepth(int depth) FL_NO_EXCEPT {
     if (mFFTHistoryDepth != depth) {
         mFFTHistory.clear();
         mFFTHistory.reserve(depth);
@@ -117,7 +117,7 @@ void Context::setFFTHistoryDepth(int depth) {
     }
 }
 
-const fft::Bins* Context::getHistoricalFFT(int framesBack) const {
+const fft::Bins* Context::getHistoricalFFT(int framesBack) const FL_NO_EXCEPT {
     if (framesBack < 0 || framesBack >= static_cast<int>(mFFTHistory.size())) {
         return nullptr;
     }
@@ -129,7 +129,7 @@ const fft::Bins* Context::getHistoricalFFT(int framesBack) const {
     return &mFFTHistory[index];
 }
 
-void Context::setSample(const Sample& sample) {
+void Context::setSample(const Sample& sample) FL_NO_EXCEPT {
     // Save current fft::FFT to history (use first cached entry if available)
     if (!mFFTCache.empty() && mFFTHistoryDepth > 0) {
         const shared_ptr<fft::Bins>& first = mFFTCache[0].bins;
@@ -161,7 +161,7 @@ void Context::setSample(const Sample& sample) {
     mIsSilent = false;
 }
 
-void Context::clearCache() {
+void Context::clearCache() FL_NO_EXCEPT {
     mFFTCache.clear();
     mFFTCacheMap.clear();
     mRecyclePool.clear();

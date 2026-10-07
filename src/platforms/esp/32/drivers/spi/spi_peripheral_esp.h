@@ -78,18 +78,18 @@ public:
     // ISpiPeripheral Interface Implementation
     //=========================================================================
 
-    bool initializeBus(const SpiBusConfig& config) override = 0;
-    bool addDevice(const SpiDeviceConfig& config) override = 0;
-    bool removeDevice() override = 0;
-    bool freeBus() override = 0;
-    bool isInitialized() const override = 0;
-    bool queueTransaction(const SpiTransaction& trans) override = 0;
-    bool pollTransaction(u32 timeout_ms) override = 0;
-    bool registerCallback(void* callback, void* user_ctx) override = 0;
-    u8* allocateDma(size_t size) override = 0;
-    void freeDma(u8* buffer) override = 0;
-    void delay(u32 ms) override = 0;
-    u64 getMicroseconds() override = 0;
+    bool initializeBus(const SpiBusConfig& config) FL_NO_EXCEPT override = 0;
+    bool addDevice(const SpiDeviceConfig& config) FL_NO_EXCEPT override = 0;
+    bool removeDevice() FL_NO_EXCEPT override = 0;
+    bool freeBus() FL_NO_EXCEPT override = 0;
+    bool isInitialized() const FL_NO_EXCEPT override = 0;
+    bool queueTransaction(const SpiTransaction& trans) FL_NO_EXCEPT override = 0;
+    bool pollTransaction(u32 timeout_ms) FL_NO_EXCEPT override = 0;
+    bool registerCallback(void* callback, void* user_ctx) FL_NO_EXCEPT override = 0;
+    u8* allocateDma(size_t size) FL_NO_EXCEPT override = 0;
+    void freeDma(u8* buffer) FL_NO_EXCEPT override = 0;
+    void delay(u32 ms) FL_NO_EXCEPT override = 0;
+    u64 getMicroseconds() FL_NO_EXCEPT override = 0;
 
 protected:
     /// @brief Protected constructor for singleton

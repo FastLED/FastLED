@@ -46,7 +46,7 @@ Backbeat::Backbeat(shared_ptr<Beat> beatDetector,
     mOwnsDownbeatDetector = false;
 }
 
-Backbeat::Backbeat()
+Backbeat::Backbeat() FL_NO_EXCEPT
     : Backbeat(make_shared<Beat>())
 {
     mOwnsBeatDetector = true;
@@ -54,7 +54,7 @@ Backbeat::Backbeat()
 
 Backbeat::~Backbeat() FL_NO_EXCEPT = default;
 
-void Backbeat::update(shared_ptr<Context> context) {
+void Backbeat::update(shared_ptr<Context> context) FL_NO_EXCEPT {
     // Update Beat if we own it
     if (mOwnsBeatDetector && mBeatDetector) {
         updateBeatDetector(context);
@@ -121,7 +121,7 @@ void Backbeat::update(shared_ptr<Context> context) {
     }
 }
 
-void Backbeat::fireCallbacks() {
+void Backbeat::fireCallbacks() FL_NO_EXCEPT {
     if (mBackbeatDetected) {
         if (onBackbeat) {
             onBackbeat(mCurrentBeat, mConfidence, mCurrentStrength);
@@ -129,7 +129,7 @@ void Backbeat::fireCallbacks() {
     }
 }
 
-void Backbeat::reset() {
+void Backbeat::reset() FL_NO_EXCEPT {
     mBackbeatDetected = false;
     mLastBackbeatNumber = 0;
     mConfidence = 0.0f;

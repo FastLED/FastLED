@@ -7,7 +7,7 @@
 
 namespace fl {
 
-Server::Server()
+Server::Server() FL_NO_EXCEPT
     : mRequestSource([]() { return fl::nullopt; })
     , mResponseSink([](const fl::json&) {})
 {}

@@ -42,7 +42,7 @@
 namespace fl {
 
 // Standalone floor implementation for float
-float floor_impl_float(float value) {
+float floor_impl_float(float value) FL_NO_EXCEPT {
     if (value >= 0.0f) {
         return static_cast<float>(static_cast<int>(value));
     }
@@ -51,7 +51,7 @@ float floor_impl_float(float value) {
 }
 
 // Standalone floor implementation for double
-double floor_impl_double(double value) {
+double floor_impl_double(double value) FL_NO_EXCEPT {
     if (value >= 0.0) {
         return static_cast<double>(static_cast<long long>(value));
     }
@@ -60,7 +60,7 @@ double floor_impl_double(double value) {
 }
 
 // Standalone ceil implementation for float
-float ceil_impl_float(float value) {
+float ceil_impl_float(float value) FL_NO_EXCEPT {
     if (value <= 0.0f) {
         return static_cast<float>(static_cast<int>(value));
     }
@@ -69,7 +69,7 @@ float ceil_impl_float(float value) {
 }
 
 // Standalone ceil implementation for double
-double ceil_impl_double(double value) {
+double ceil_impl_double(double value) FL_NO_EXCEPT {
     if (value <= 0.0) {
         return static_cast<double>(static_cast<long long>(value));
     }
@@ -320,7 +320,7 @@ inline F log_natural_(F value) FL_NO_EXCEPT {
 // Each impl below picks libm (Large-memory targets) or polynomial / Newton
 // (Low-memory targets — keeps libm out of the link).
 
-float sqrt_impl_float(float value) {
+float sqrt_impl_float(float value) FL_NO_EXCEPT {
 #if FL_MATH_USE_LIBM
     return ::sqrtf(value);
 #else
@@ -328,7 +328,7 @@ float sqrt_impl_float(float value) {
 #endif
 }
 
-double sqrt_impl_double(double value) {
+double sqrt_impl_double(double value) FL_NO_EXCEPT {
 #if FL_MATH_USE_LIBM
     return ::sqrt(value);
 #else
@@ -336,7 +336,7 @@ double sqrt_impl_double(double value) {
 #endif
 }
 
-float sin_impl_float(float value) {
+float sin_impl_float(float value) FL_NO_EXCEPT {
 #if FL_MATH_USE_LIBM
     return ::sinf(value);
 #else
@@ -344,7 +344,7 @@ float sin_impl_float(float value) {
 #endif
 }
 
-double sin_impl_double(double value) {
+double sin_impl_double(double value) FL_NO_EXCEPT {
 #if FL_MATH_USE_LIBM
     return ::sin(value);
 #else
@@ -352,7 +352,7 @@ double sin_impl_double(double value) {
 #endif
 }
 
-float cos_impl_float(float value) {
+float cos_impl_float(float value) FL_NO_EXCEPT {
 #if FL_MATH_USE_LIBM
     return ::cosf(value);
 #else
@@ -360,7 +360,7 @@ float cos_impl_float(float value) {
 #endif
 }
 
-double cos_impl_double(double value) {
+double cos_impl_double(double value) FL_NO_EXCEPT {
 #if FL_MATH_USE_LIBM
     return ::cos(value);
 #else
@@ -368,7 +368,7 @@ double cos_impl_double(double value) {
 #endif
 }
 
-float log_impl_float(float value) {
+float log_impl_float(float value) FL_NO_EXCEPT {
 #if FL_MATH_USE_LIBM
     return ::logf(value);
 #else
@@ -376,7 +376,7 @@ float log_impl_float(float value) {
 #endif
 }
 
-double log_impl_double(double value) {
+double log_impl_double(double value) FL_NO_EXCEPT {
 #if FL_MATH_USE_LIBM
     return ::log(value);
 #else
@@ -384,7 +384,7 @@ double log_impl_double(double value) {
 #endif
 }
 
-float log10_impl_float(float value) {
+float log10_impl_float(float value) FL_NO_EXCEPT {
 #if FL_MATH_USE_LIBM
     return ::log10f(value);
 #else
@@ -393,7 +393,7 @@ float log10_impl_float(float value) {
 #endif
 }
 
-double log10_impl_double(double value) {
+double log10_impl_double(double value) FL_NO_EXCEPT {
 #if FL_MATH_USE_LIBM
     return ::log10(value);
 #else
@@ -402,7 +402,7 @@ double log10_impl_double(double value) {
 #endif
 }
 
-float pow_impl_float(float base, float exponent) {
+float pow_impl_float(float base, float exponent) FL_NO_EXCEPT {
 #if FL_MATH_USE_LIBM
     return ::powf(base, exponent);
 #else
@@ -418,7 +418,7 @@ float pow_impl_float(float base, float exponent) {
 #endif
 }
 
-double pow_impl_double(double base, double exponent) {
+double pow_impl_double(double base, double exponent) FL_NO_EXCEPT {
 #if FL_MATH_USE_LIBM
     return ::pow(base, exponent);
 #else
@@ -435,15 +435,15 @@ double pow_impl_double(double base, double exponent) {
 }
 
 // Absolute value: pure arithmetic; libm path unnecessary, same on both.
-float fabs_impl_float(float value) {
+float fabs_impl_float(float value) FL_NO_EXCEPT {
     return value < 0.0f ? -value : value;
 }
 
-double fabs_impl_double(double value) {
+double fabs_impl_double(double value) FL_NO_EXCEPT {
     return value < 0.0 ? -value : value;
 }
 
-long lround_impl_float(float value) {
+long lround_impl_float(float value) FL_NO_EXCEPT {
 #if FL_MATH_USE_LIBM
     return ::lroundf(value);
 #else
@@ -452,7 +452,7 @@ long lround_impl_float(float value) {
 #endif
 }
 
-long lround_impl_double(double value) {
+long lround_impl_double(double value) FL_NO_EXCEPT {
 #if FL_MATH_USE_LIBM
     return ::lround(value);
 #else
@@ -464,7 +464,7 @@ long lround_impl_double(double value) {
 // Arduino.h defines `round` as a macro, so we temporarily hide it.
 #pragma push_macro("round")
 #undef round
-float round_impl_float(float value) {
+float round_impl_float(float value) FL_NO_EXCEPT {
 #if FL_MATH_USE_LIBM
     return ::roundf(value);
 #else
@@ -472,7 +472,7 @@ float round_impl_float(float value) {
 #endif
 }
 
-double round_impl_double(double value) {
+double round_impl_double(double value) FL_NO_EXCEPT {
 #if FL_MATH_USE_LIBM
     return ::round(value);
 #else
@@ -481,7 +481,7 @@ double round_impl_double(double value) {
 }
 #pragma pop_macro("round")
 
-float fmod_impl_float(float x, float y) {
+float fmod_impl_float(float x, float y) FL_NO_EXCEPT {
 #if FL_MATH_USE_LIBM
     return ::fmodf(x, y);
 #else
@@ -493,7 +493,7 @@ float fmod_impl_float(float x, float y) {
 #endif
 }
 
-double fmod_impl_double(double x, double y) {
+double fmod_impl_double(double x, double y) FL_NO_EXCEPT {
 #if FL_MATH_USE_LIBM
     return ::fmod(x, y);
 #else
@@ -576,7 +576,7 @@ inline F atan2_full_(F y, F x) FL_NO_EXCEPT {
 }
 }  // namespace detail
 
-float atan2_impl_float(float y, float x) {
+float atan2_impl_float(float y, float x) FL_NO_EXCEPT {
 #if FL_MATH_USE_LIBM
     return ::atan2f(y, x);
 #else
@@ -584,7 +584,7 @@ float atan2_impl_float(float y, float x) {
 #endif
 }
 
-double atan2_impl_double(double y, double x) {
+double atan2_impl_double(double y, double x) FL_NO_EXCEPT {
 #if FL_MATH_USE_LIBM
     return ::atan2(y, x);
 #else
@@ -592,7 +592,7 @@ double atan2_impl_double(double y, double x) {
 #endif
 }
 
-float hypot_impl_float(float x, float y) {
+float hypot_impl_float(float x, float y) FL_NO_EXCEPT {
 #if FL_MATH_USE_LIBM
     return ::hypotf(x, y);
 #else
@@ -600,7 +600,7 @@ float hypot_impl_float(float x, float y) {
 #endif
 }
 
-double hypot_impl_double(double x, double y) {
+double hypot_impl_double(double x, double y) FL_NO_EXCEPT {
 #if FL_MATH_USE_LIBM
     return ::hypot(x, y);
 #else
@@ -608,7 +608,7 @@ double hypot_impl_double(double x, double y) {
 #endif
 }
 
-float atan_impl_float(float value) {
+float atan_impl_float(float value) FL_NO_EXCEPT {
 #if FL_MATH_USE_LIBM
     return ::atanf(value);
 #else
@@ -616,7 +616,7 @@ float atan_impl_float(float value) {
 #endif
 }
 
-double atan_impl_double(double value) {
+double atan_impl_double(double value) FL_NO_EXCEPT {
 #if FL_MATH_USE_LIBM
     return ::atan(value);
 #else
@@ -624,7 +624,7 @@ double atan_impl_double(double value) {
 #endif
 }
 
-float asin_impl_float(float value) {
+float asin_impl_float(float value) FL_NO_EXCEPT {
 #if FL_MATH_USE_LIBM
     return ::asinf(value);
 #else
@@ -637,7 +637,7 @@ float asin_impl_float(float value) {
 #endif
 }
 
-double asin_impl_double(double value) {
+double asin_impl_double(double value) FL_NO_EXCEPT {
 #if FL_MATH_USE_LIBM
     return ::asin(value);
 #else
@@ -650,7 +650,7 @@ double asin_impl_double(double value) {
 #endif
 }
 
-float acos_impl_float(float value) {
+float acos_impl_float(float value) FL_NO_EXCEPT {
 #if FL_MATH_USE_LIBM
     return ::acosf(value);
 #else
@@ -659,7 +659,7 @@ float acos_impl_float(float value) {
 #endif
 }
 
-double acos_impl_double(double value) {
+double acos_impl_double(double value) FL_NO_EXCEPT {
 #if FL_MATH_USE_LIBM
     return ::acos(value);
 #else
@@ -668,7 +668,7 @@ double acos_impl_double(double value) {
 #endif
 }
 
-float tan_impl_float(float value) {
+float tan_impl_float(float value) FL_NO_EXCEPT {
 #if FL_MATH_USE_LIBM
     return ::tanf(value);
 #else
@@ -678,7 +678,7 @@ float tan_impl_float(float value) {
 #endif
 }
 
-double tan_impl_double(double value) {
+double tan_impl_double(double value) FL_NO_EXCEPT {
 #if FL_MATH_USE_LIBM
     return ::tan(value);
 #else
@@ -725,7 +725,7 @@ inline F ldexp_loop_(F value, int exp) FL_NO_EXCEPT {
 }
 }  // namespace detail
 
-float ldexp_impl_float(float value, int exp) {
+float ldexp_impl_float(float value, int exp) FL_NO_EXCEPT {
 #if FL_MATH_USE_LIBM
     return ::ldexpf(value, exp);
 #else
@@ -733,7 +733,7 @@ float ldexp_impl_float(float value, int exp) {
 #endif
 }
 
-double ldexp_impl_double(double value, int exp) {
+double ldexp_impl_double(double value, int exp) FL_NO_EXCEPT {
 #if FL_MATH_USE_LIBM
     return ::ldexp(value, exp);
 #else

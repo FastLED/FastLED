@@ -13,7 +13,7 @@ namespace fl {
 // Public API implementations for integer to string conversion
 // Moved from string_functions namespace in str.cpp for better organization
 
-int itoa(i32 value, char *sp, int radix) {
+int itoa(i32 value, char *sp, int radix) FL_NO_EXCEPT {
     char tmp[16]; // be careful with the length of the buffer
     char *tp = tmp;
     int i;
@@ -48,7 +48,7 @@ int itoa(i32 value, char *sp, int radix) {
     return len;
 }
 
-int itoa64(i64 value, char *sp, int radix) {
+int itoa64(i64 value, char *sp, int radix) FL_NO_EXCEPT {
     char tmp[32]; // Buffer for 64-bit integer (max 65 chars for base 2 + sign)
     char *tp = tmp;
     int i;
@@ -83,7 +83,7 @@ int itoa64(i64 value, char *sp, int radix) {
     return len;
 }
 
-int utoa32(u32 value, char *sp, int radix) {
+int utoa32(u32 value, char *sp, int radix) FL_NO_EXCEPT {
     char tmp[16]; // be careful with the length of the buffer
     char *tp = tmp;
     int i;
@@ -107,7 +107,7 @@ int utoa32(u32 value, char *sp, int radix) {
     return len;
 }
 
-int utoa64(u64 value, char *sp, int radix) {
+int utoa64(u64 value, char *sp, int radix) FL_NO_EXCEPT {
     char tmp[32]; // larger buffer for 64-bit values
     char *tp = tmp;
     int i;
@@ -132,7 +132,7 @@ int utoa64(u64 value, char *sp, int radix) {
 }
 
 // Parse functions - moved from StringFormatter
-float parseFloat(const char *str, fl::size len) {
+float parseFloat(const char *str, fl::size len) FL_NO_EXCEPT {
     float result = 0.0f;   // The resulting number
     float sign = 1.0f;     // Positive or negative
     float fraction = 0.0f; // Fractional part
@@ -186,7 +186,7 @@ float parseFloat(const char *str, fl::size len) {
     return sign * result;
 }
 
-int parseInt(const char *str, fl::size len) {
+int parseInt(const char *str, fl::size len) FL_NO_EXCEPT {
     unsigned int result = 0;
     int sign = 1;
     fl::size pos = 0;
@@ -233,7 +233,7 @@ int parseInt(const char *str, fl::size len) {
     return sign < 0 ? -magnitude : magnitude;
 }
 
-int parseInt(const char *str) {
+int parseInt(const char *str) FL_NO_EXCEPT {
     // Calculate length manually to avoid strlen dependency
     fl::size len = 0;
     while (str[len] != '\0') {

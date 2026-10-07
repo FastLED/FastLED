@@ -20,35 +20,35 @@ ostream& ostream::operator<<(const CRGB& rgb) FL_NO_EXCEPT {
 }
 
 // Numeric output operators with formatting support
-ostream& ostream::operator<<(fl::i8 n) {
+ostream& ostream::operator<<(fl::i8 n) FL_NO_EXCEPT {
     char buf[64] = {0};
     fl::itoa(static_cast<fl::i32>(n), buf, mBase);
     print(buf);
     return *this;
 }
 
-ostream& ostream::operator<<(fl::u8 n) {
+ostream& ostream::operator<<(fl::u8 n) FL_NO_EXCEPT {
     char buf[64] = {0};
     fl::utoa32(static_cast<fl::u32>(n), buf, mBase);
     print(buf);
     return *this;
 }
 
-ostream& ostream::operator<<(fl::i16 n) {
+ostream& ostream::operator<<(fl::i16 n) FL_NO_EXCEPT {
     char buf[64] = {0};
     fl::itoa(static_cast<fl::i32>(n), buf, mBase);
     print(buf);
     return *this;
 }
 
-ostream& ostream::operator<<(fl::i32 n) {
+ostream& ostream::operator<<(fl::i32 n) FL_NO_EXCEPT {
     char buf[64] = {0};
     fl::itoa(n, buf, mBase);
     print(buf);
     return *this;
 }
 
-ostream& ostream::operator<<(fl::u32 n) {
+ostream& ostream::operator<<(fl::u32 n) FL_NO_EXCEPT {
     char buf[64] = {0};
     fl::utoa32(n, buf, mBase);
     print(buf);
@@ -56,17 +56,17 @@ ostream& ostream::operator<<(fl::u32 n) {
 }
 
 // Manipulator operator implementations (declared as friends in ostream)
-ostream& operator<<(ostream& os, const hex_t&) {
+ostream& operator<<(ostream& os, const hex_t&) FL_NO_EXCEPT {
     os.mBase = 16;
     return os;
 }
 
-ostream& operator<<(ostream& os, const dec_t&) {
+ostream& operator<<(ostream& os, const dec_t&) FL_NO_EXCEPT {
     os.mBase = 10;
     return os;
 }
 
-ostream& operator<<(ostream& os, const oct_t&) {
+ostream& operator<<(ostream& os, const oct_t&) FL_NO_EXCEPT {
     os.mBase = 8;
     return os;
 }

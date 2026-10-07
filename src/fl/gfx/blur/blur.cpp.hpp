@@ -66,7 +66,7 @@ namespace gfx {
 //         calls to 'blur' will also result in the light fading,
 //         eventually all the way to black; this is by design so that
 //         it can be used to (slowly) clear the LEDs to black.
-void blur1d(fl::span<CRGB> leds, fract8 blur_amount) {
+void blur1d(fl::span<CRGB> leds, fract8 blur_amount) FL_NO_EXCEPT {
     const fl::u16 numLeds = static_cast<fl::u16>(leds.size());
     fl::u8 keep = 255 - blur_amount;
     fl::u8 seep = blur_amount >> 1;
@@ -85,12 +85,12 @@ void blur1d(fl::span<CRGB> leds, fract8 blur_amount) {
 }
 
 void blur2d(fl::span<CRGB> leds, fl::u8 width, fl::u8 height,
-            fract8 blur_amount, const XYMap &xymap) {
+            fract8 blur_amount, const XYMap &xymap) FL_NO_EXCEPT {
     gfx::blurRows(leds, width, height, blur_amount, xymap);
     gfx::blurColumns(leds, width, height, blur_amount, xymap);
 }
 
-void blur2d(CRGB *leds, fl::u8 width, fl::u8 height, fract8 blur_amount) {
+void blur2d(CRGB *leds, fl::u8 width, fl::u8 height, fract8 blur_amount) FL_NO_EXCEPT {
     // Legacy path: uses global XY() via XYMap for user-defined layouts.
     // Keeps its own blur algorithm copy because XYMap indexing differs from
     // the cache-coherent rectangular layout used by Canvas.
@@ -131,7 +131,7 @@ void blur2d(CRGB *leds, fl::u8 width, fl::u8 height, fract8 blur_amount) {
 }
 
 void blurRows(fl::span<CRGB> leds, fl::u8 width, fl::u8 height,
-              fract8 blur_amount, const XYMap &xyMap) {
+              fract8 blur_amount, const XYMap &xyMap) FL_NO_EXCEPT {
     CRGB *pixels = leds.data();
     fl::u8 keep = 255 - blur_amount;
     fl::u8 seep = blur_amount >> 1;
@@ -170,7 +170,7 @@ void blurRows(fl::span<CRGB> leds, fl::u8 width, fl::u8 height,
 }
 
 void blurColumns(fl::span<CRGB> leds, fl::u8 width, fl::u8 height,
-                 fract8 blur_amount, const XYMap &xyMap) {
+                 fract8 blur_amount, const XYMap &xyMap) FL_NO_EXCEPT {
     CRGB *pixels = leds.data();
     fl::u8 keep = 255 - blur_amount;
     fl::u8 seep = blur_amount >> 1;
@@ -207,7 +207,7 @@ void blurColumns(fl::span<CRGB> leds, fl::u8 width, fl::u8 height,
     }
 }
 
-void blurRows(Canvas<CRGB> &canvas, alpha8 blur_amount) {
+void blurRows(Canvas<CRGB> &canvas, alpha8 blur_amount) FL_NO_EXCEPT {
     const int w = canvas.width;
     const int h = canvas.height;
     CRGB *pixels = canvas.pixels;
@@ -230,7 +230,7 @@ void blurRows(Canvas<CRGB> &canvas, alpha8 blur_amount) {
     }
 }
 
-void blurColumns(Canvas<CRGB> &canvas, alpha8 blur_amount) {
+void blurColumns(Canvas<CRGB> &canvas, alpha8 blur_amount) FL_NO_EXCEPT {
     const int w = canvas.width;
     const int h = canvas.height;
     CRGB *pixels = canvas.pixels;
@@ -252,7 +252,7 @@ void blurColumns(Canvas<CRGB> &canvas, alpha8 blur_amount) {
     }
 }
 
-void blur2d(Canvas<CRGB> &canvas, alpha8 blur_amount) {
+void blur2d(Canvas<CRGB> &canvas, alpha8 blur_amount) FL_NO_EXCEPT {
     gfx::blurRows(canvas, blur_amount);
     gfx::blurColumns(canvas, blur_amount);
 }
@@ -1192,14 +1192,14 @@ void blurGaussianImpl(Canvas<RGB_T> &canvas, AlphaT alpha) {
 // ── alpha8 overload (UNORM8 dim) ─────────────────────────────────────────
 
 template <int hRadius, int vRadius, typename RGB_T>
-void blurGaussian(Canvas<RGB_T> &canvas, alpha8 dimFactor) {
+void blurGaussian(Canvas<RGB_T> &canvas, alpha8 dimFactor) FL_NO_EXCEPT {
     blurGaussianImpl<hRadius, vRadius>(canvas, dimFactor);
 }
 
 // ── alpha16 overload (UNORM16 dim — true 16-bit precision) ───────────────
 
 template <int hRadius, int vRadius, typename RGB_T>
-void blurGaussian(Canvas<RGB_T> &canvas, alpha16 dimFactor) {
+void blurGaussian(Canvas<RGB_T> &canvas, alpha16 dimFactor) FL_NO_EXCEPT {
     blurGaussianImpl<hRadius, vRadius>(canvas, dimFactor);
 }
 
@@ -1303,14 +1303,14 @@ void blurGaussianMappedImpl(CanvasMapped<RGB_T> &canvas, AlphaT alpha) {
 // ── CanvasMapped alpha8 overload ─────────────────────────────────────────
 
 template <int hRadius, int vRadius, typename RGB_T>
-void blurGaussian(CanvasMapped<RGB_T> &canvas, alpha8 dimFactor) {
+void blurGaussian(CanvasMapped<RGB_T> &canvas, alpha8 dimFactor) FL_NO_EXCEPT {
     blurGaussianMappedImpl<hRadius, vRadius>(canvas, dimFactor);
 }
 
 // ── CanvasMapped alpha16 overload ────────────────────────────────────────
 
 template <int hRadius, int vRadius, typename RGB_T>
-void blurGaussian(CanvasMapped<RGB_T> &canvas, alpha16 dimFactor) {
+void blurGaussian(CanvasMapped<RGB_T> &canvas, alpha16 dimFactor) FL_NO_EXCEPT {
     blurGaussianMappedImpl<hRadius, vRadius>(canvas, dimFactor);
 }
 

@@ -27,7 +27,7 @@ namespace spi {
 // Config Implementation (to avoid circular dependency with Spi class)
 // ============================================================================
 
-ParallelDevice::Config::Config()
+ParallelDevice::Config::Config() FL_NO_EXCEPT
     : clock_pin(0xFF)
     , mode(SpiParallelMode::AUTO)
     , timer_hz(1600000) {

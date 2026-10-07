@@ -193,7 +193,7 @@ bool SpiChannelEngineAdapter::initializeControllerIfNeeded(
     return true;
 }
 
-bool SpiChannelEngineAdapter::canHandle(const ChannelDataPtr& data) const {
+bool SpiChannelEngineAdapter::canHandle(const ChannelDataPtr& data) const FL_NO_EXCEPT {
     if (!data) {
         return false;
     }
@@ -210,7 +210,7 @@ bool SpiChannelEngineAdapter::canHandle(const ChannelDataPtr& data) const {
     return data->isSpi();
 }
 
-void SpiChannelEngineAdapter::enqueue(ChannelDataPtr channelData) {
+void SpiChannelEngineAdapter::enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT {
     if (!channelData) {
         FL_WARN("SpiChannelEngineAdapter: Null channel data passed to enqueue()");
         return;
@@ -226,7 +226,7 @@ void SpiChannelEngineAdapter::enqueue(ChannelDataPtr channelData) {
     FL_DBG("SpiChannelEngineAdapter: Enqueued channel (total: " << mEnqueuedChannels.size() << ")");
 }
 
-void SpiChannelEngineAdapter::show() {
+void SpiChannelEngineAdapter::show() FL_NO_EXCEPT {
     if (mEnqueuedChannels.empty()) {
         return;
     }
@@ -258,7 +258,7 @@ void SpiChannelEngineAdapter::show() {
     FL_DBG("SpiChannelEngineAdapter: show() complete");
 }
 
-IChannelDriver::DriverState SpiChannelEngineAdapter::poll() {
+IChannelDriver::DriverState SpiChannelEngineAdapter::poll() FL_NO_EXCEPT {
     // Check if ANY controller is busy
     bool anyBusy = false;
     for (const auto& ctrl : mControllers) {

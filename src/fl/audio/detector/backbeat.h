@@ -62,12 +62,12 @@ public:
 
     ~Backbeat() FL_NO_EXCEPT override;
 
-    void update(shared_ptr<Context> context) override;
-    void fireCallbacks() override;
-    bool needsFFT() const override { return true; }
-    bool needsFFTHistory() const override { return false; }
-    const char* getName() const override { return "Backbeat"; }
-    void reset() override;
+    void update(shared_ptr<Context> context) FL_NO_EXCEPT override;
+    void fireCallbacks() FL_NO_EXCEPT override;
+    bool needsFFT() const FL_NO_EXCEPT override { return true; }
+    bool needsFFTHistory() const FL_NO_EXCEPT override { return false; }
+    const char* getName() const FL_NO_EXCEPT override { return "Backbeat"; }
+    void reset() FL_NO_EXCEPT override;
 
     // ----- Callbacks (multiple listeners supported) -----
 

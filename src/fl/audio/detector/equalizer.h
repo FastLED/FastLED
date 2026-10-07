@@ -91,12 +91,12 @@ public:
     void configure(const EqualizerConfig& config);
 
     // Detector interface
-    void update(shared_ptr<Context> context) override;
-    void fireCallbacks() override;
-    bool needsFFT() const override { return true; }
-    const char* getName() const override { return "EqualizerDetector"; }
-    void reset() override;
-    void setSampleRate(int rate) override { mSampleRate = rate; }
+    void update(shared_ptr<Context> context) FL_NO_EXCEPT override;
+    void fireCallbacks() FL_NO_EXCEPT override;
+    bool needsFFT() const FL_NO_EXCEPT override { return true; }
+    const char* getName() const FL_NO_EXCEPT override { return "EqualizerDetector"; }
+    void reset() FL_NO_EXCEPT override;
+    void setSampleRate(int rate) FL_NO_EXCEPT override { mSampleRate = rate; }
 
     // WLED-compatible getters (all return 0.0-1.0)
     float getBass() const { return mBass; }

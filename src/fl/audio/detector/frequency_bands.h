@@ -16,12 +16,12 @@ public:
     FrequencyBands() FL_NO_EXCEPT;
     ~FrequencyBands() FL_NO_EXCEPT override;
 
-    void update(shared_ptr<Context> context) override;
-    void fireCallbacks() override;
-    bool needsFFT() const override { return true; }
-    const char* getName() const override { return "FrequencyBands"; }
-    void reset() override;
-    void setSampleRate(int sampleRate) override { mSampleRate = sampleRate; }
+    void update(shared_ptr<Context> context) FL_NO_EXCEPT override;
+    void fireCallbacks() FL_NO_EXCEPT override;
+    bool needsFFT() const FL_NO_EXCEPT override { return true; }
+    const char* getName() const FL_NO_EXCEPT override { return "FrequencyBands"; }
+    void reset() FL_NO_EXCEPT override;
+    void setSampleRate(int sampleRate) FL_NO_EXCEPT override { mSampleRate = sampleRate; }
 
     // Callbacks (multiple listeners supported)
     function_list<void(float bass, float mid, float treble)> onLevelsUpdate;

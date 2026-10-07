@@ -106,7 +106,7 @@ Fled FileSystem::loadFled(const char *path) FL_NO_EXCEPT {
     return Fled::load(*this, path);
 }
 
-FileSystem::FileSystem() : mFs() {}
+FileSystem::FileSystem() FL_NO_EXCEPT : mFs() {}
 
 void FileSystem::end() {
     if (mFs) {

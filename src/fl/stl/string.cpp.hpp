@@ -150,7 +150,7 @@ string& string::operator+=(const string& other) FL_NO_EXCEPT {
     return *this;
 }
 
-void string::compileTimeAssertions() {
+void string::compileTimeAssertions() FL_NO_EXCEPT {
     FL_STATIC_ASSERT(FASTLED_STR_INLINED_SIZE > 0,
                   "FASTLED_STR_INLINED_SIZE must be greater than 0");
     FL_STATIC_ASSERT(FASTLED_STR_INLINED_SIZE == kStrInlineSize,

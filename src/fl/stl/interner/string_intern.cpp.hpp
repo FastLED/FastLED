@@ -25,7 +25,7 @@ string string::interned(const string_view& sv) FL_NO_EXCEPT {
 }
 
 // String interning method implementation
-string& string::intern() {
+string& string::intern() FL_NO_EXCEPT {
     // Skip interning if using inline storage (SSO) - already efficient, no heap allocation
     if (isInline()) {
         return *this;

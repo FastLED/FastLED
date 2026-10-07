@@ -16,7 +16,7 @@ namespace fl {
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING(cast-align)
 
-void FL_OPTIMIZE_FUNCTION FL_IRAM transpose8x1_noinline(unsigned char *A, unsigned char *B) {
+void FL_OPTIMIZE_FUNCTION FL_IRAM transpose8x1_noinline(unsigned char *A, unsigned char *B) FL_NO_EXCEPT {
     u32 x, y, t;
 
     // Load the array and pack it into x and y.
@@ -53,7 +53,7 @@ FL_DISABLE_WARNING_POP
 bool SPITransposer::transpose2(const fl::optional<LaneData>& lane0,
                                 const fl::optional<LaneData>& lane1,
                                 fl::span<u8> output,
-                                const char** error) {
+                                const char** error) FL_NO_EXCEPT {
     // Validate output buffer size (must be divisible by 2)
     if (output.size() % 2 != 0) {
         if (error) {
@@ -116,7 +116,7 @@ bool SPITransposer::transpose4(const fl::optional<LaneData>& lane0,
                                 const fl::optional<LaneData>& lane2,
                                 const fl::optional<LaneData>& lane3,
                                 fl::span<u8> output,
-                                const char** error) {
+                                const char** error) FL_NO_EXCEPT {
     // Validate output buffer size (must be divisible by 4)
     if (output.size() % 4 != 0) {
         if (error) {
@@ -179,7 +179,7 @@ bool SPITransposer::transpose4(const fl::optional<LaneData>& lane0,
 
 bool SPITransposer::transpose8(const fl::optional<LaneData> lanes[8],
                                 fl::span<u8> output,
-                                const char** error) {
+                                const char** error) FL_NO_EXCEPT {
     // Validate output buffer size (must be divisible by 8)
     if (output.size() % 8 != 0) {
         if (error) {
@@ -239,7 +239,7 @@ bool SPITransposer::transpose8(const fl::optional<LaneData> lanes[8],
 
 bool SPITransposer::transpose16(const fl::optional<LaneData> lanes[16],
                                 fl::span<u8> output,
-                                const char** error) {
+                                const char** error) FL_NO_EXCEPT {
     // Validate output buffer size (must be divisible by 16)
     if (output.size() % 16 != 0) {
         if (error) {
@@ -297,7 +297,7 @@ bool SPITransposer::transpose16(const fl::optional<LaneData> lanes[16],
 // Common Helper Functions
 // ----------------------------------------------------------------------------
 
-u8 SPITransposer::getLaneByte(const LaneData& lane, size_t byte_idx, size_t max_size) {
+u8 SPITransposer::getLaneByte(const LaneData& lane, size_t byte_idx, size_t max_size) FL_NO_EXCEPT {
     // Calculate padding needed for this lane
     const size_t lane_size = lane.payload.size();
     const size_t padding_bytes = max_size - lane_size;

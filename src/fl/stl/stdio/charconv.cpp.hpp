@@ -6,7 +6,7 @@
 namespace fl {
 namespace detail {
 
-fl::string hex(u64 value, HexIntWidth width, bool is_negative, bool uppercase, bool pad_to_width) {
+fl::string hex(u64 value, HexIntWidth width, bool is_negative, bool uppercase, bool pad_to_width) FL_NO_EXCEPT {
     // Determine target width in hex characters based on integer bit width
     size_t target_width = 0;
     switch (width) {

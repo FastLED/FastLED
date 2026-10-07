@@ -82,7 +82,7 @@ FL_ALWAYS_INLINE void five_bit_pixel(
 FL_OPTIMIZE_FUNCTION
 void five_bit_hd_gamma_bitshift(
     fl::span<const CRGB> colors, CRGB colors_scale, u8 global_brightness,
-    fl::span<CRGB> out_colors, fl::span<u8> out_power_5bit) {
+    fl::span<CRGB> out_colors, fl::span<u8> out_power_5bit) FL_NO_EXCEPT {
 
     u16 n = static_cast<u16>(colors.size());
     if (out_colors.size() < n) n = static_cast<u16>(out_colors.size());
@@ -132,7 +132,7 @@ void five_bit_hd_gamma_bitshift(
 FL_OPTIMIZE_FUNCTION
 void five_bit_hd_gamma_bitshift(
     fl::span<const CRGB> colors, CRGB colors_scale, u8 global_brightness,
-    fl::span<CRGBA5> out) {
+    fl::span<CRGBA5> out) FL_NO_EXCEPT {
 
     u16 n = static_cast<u16>(colors.size());
     if (out.size() < n) n = static_cast<u16>(out.size());

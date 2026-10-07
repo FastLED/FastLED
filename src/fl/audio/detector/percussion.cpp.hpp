@@ -10,7 +10,7 @@ namespace fl {
 namespace audio {
 namespace detector {
 
-Percussion::Percussion()
+Percussion::Percussion() FL_NO_EXCEPT
     : mKickDetected(false)
     , mSnareDetected(false)
     , mHiHatDetected(false)
@@ -39,7 +39,7 @@ Percussion::Percussion()
 
 Percussion::~Percussion() FL_NO_EXCEPT = default;
 
-void Percussion::update(shared_ptr<Context> context) {
+void Percussion::update(shared_ptr<Context> context) FL_NO_EXCEPT {
     mRetainedFFT = context->getFFT16(fft::Mode::CQ_NAIVE);
     const fft::Bins& fft = *mRetainedFFT;
     u32 timestamp = context->getTimestamp();
@@ -97,7 +97,7 @@ void Percussion::update(shared_ptr<Context> context) {
     if (mTomDetected) mLastTomTime = timestamp;
 }
 
-void Percussion::fireCallbacks() {
+void Percussion::fireCallbacks() FL_NO_EXCEPT {
     if (mKickDetected) {
         if (onKick) onKick();
         if (onPercussionHit) onPercussionHit(PercussionType::Kick);
@@ -119,7 +119,7 @@ void Percussion::fireCallbacks() {
     }
 }
 
-void Percussion::reset() {
+void Percussion::reset() FL_NO_EXCEPT {
     mKickDetected = false;
     mSnareDetected = false;
     mHiHatDetected = false;

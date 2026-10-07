@@ -8,25 +8,25 @@
 
 namespace fl {
 
-basic_string& basic_string::append(const float& val) {
+basic_string& basic_string::append(const float& val) FL_NO_EXCEPT {
     char buf[64] = {0};
     fl::ftoa(val, buf, 2);
     write(buf, fl::strlen(buf));
     return *this;
 }
 
-basic_string& basic_string::append(const float& val, int precision) {
+basic_string& basic_string::append(const float& val, int precision) FL_NO_EXCEPT {
     char buf[64] = {0};
     fl::ftoa(val, buf, precision);
     write(buf, fl::strlen(buf));
     return *this;
 }
 
-basic_string& basic_string::append(const double& val) {
+basic_string& basic_string::append(const double& val) FL_NO_EXCEPT {
     return append(static_cast<float>(val));
 }
 
-void ftoa(float value, char *buffer, int precision) {
+void ftoa(float value, char *buffer, int precision) FL_NO_EXCEPT {
     // Forward to printf_detail for now - implementation in str.cpp will be updated
     // to use this function instead of duplicating the logic
     fl::string result = fl::printf_detail::format_float(value, precision);

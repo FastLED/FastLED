@@ -8,7 +8,7 @@
 namespace fl {
 namespace audio {
 
-AutoGain::AutoGain() {
+AutoGain::AutoGain() FL_NO_EXCEPT {
     configure(AutoGainConfig{});
 }
 

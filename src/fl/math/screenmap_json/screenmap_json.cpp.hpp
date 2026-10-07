@@ -181,7 +181,7 @@ static bool parseV2SegmentArray(const fl::json& segmentsArr,
 }
 
 bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
-                          fl::flat_map<string, ScreenMap> *segmentMaps, string *err) {
+                          fl::flat_map<string, ScreenMap> *segmentMaps, string *err) FL_NO_EXCEPT {
 
 #if FASTLED_NO_JSON
     FL_UNUSED(jsonStrScreenMap);
@@ -340,7 +340,7 @@ bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
 
 bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
                           const char *screenMapName, ScreenMap *screenmap,
-                          string *err) {
+                          string *err) FL_NO_EXCEPT {
 
     fl::flat_map<string, ScreenMap> segmentMaps;
     bool ok = ParseJson(jsonStrScreenMap, &segmentMaps, err);
@@ -364,7 +364,7 @@ bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
 }
 
 void ScreenMap::toJson(const fl::flat_map<string, ScreenMap> &segmentMaps,
-                       fl::json *doc) {
+                       fl::json *doc) FL_NO_EXCEPT {
 
 #if FASTLED_NO_JSON
     FL_WARN("ScreenMap::toJson called with FASTLED_NO_JSON");
@@ -474,7 +474,7 @@ void ScreenMap::toJson(const fl::flat_map<string, ScreenMap> &segmentMaps,
 }
 
 void ScreenMap::toJsonStr(const fl::flat_map<string, ScreenMap> &segmentMaps,
-                          string *jsonBuffer) {
+                          string *jsonBuffer) FL_NO_EXCEPT {
     fl::json doc;
     toJson(segmentMaps, &doc);
     *jsonBuffer = doc.to_string();

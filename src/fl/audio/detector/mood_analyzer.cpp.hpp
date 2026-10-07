@@ -10,7 +10,7 @@ namespace fl {
 namespace audio {
 namespace detector {
 
-MoodAnalyzer::MoodAnalyzer()
+MoodAnalyzer::MoodAnalyzer() FL_NO_EXCEPT
     : mConfidenceThreshold(0.5f)
     , mMinDuration(1500)  // 1.5 seconds minimum
     , mAveragingFrames(10)
@@ -27,7 +27,7 @@ MoodAnalyzer::MoodAnalyzer()
 
 MoodAnalyzer::~MoodAnalyzer() FL_NO_EXCEPT = default;
 
-void MoodAnalyzer::update(shared_ptr<Context> context) {
+void MoodAnalyzer::update(shared_ptr<Context> context) FL_NO_EXCEPT {
     mRetainedFFT = context->getFFT(32);  // Higher resolution for mood analysis
     const fft::Bins& fft = *mRetainedFFT;
     const fft::Bins* prevFFT = context->getHistoricalFFT(1);
@@ -83,7 +83,7 @@ void MoodAnalyzer::update(shared_ptr<Context> context) {
     mMoodChanged = shouldChangeMood(mCurrentMood);
 }
 
-void MoodAnalyzer::fireCallbacks() {
+void MoodAnalyzer::fireCallbacks() FL_NO_EXCEPT {
     if (onMood) {
         onMood(mCurrentMood);
     }
@@ -97,7 +97,7 @@ void MoodAnalyzer::fireCallbacks() {
     }
 }
 
-void MoodAnalyzer::reset() {
+void MoodAnalyzer::reset() FL_NO_EXCEPT {
     mCurrentMood = Mood();
     mPreviousMood = Mood();
     mSpectralCentroid = 0.0f;

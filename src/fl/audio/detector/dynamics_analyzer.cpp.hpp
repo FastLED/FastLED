@@ -7,7 +7,7 @@ namespace fl {
 namespace audio {
 namespace detector {
 
-DynamicsAnalyzer::DynamicsAnalyzer()
+DynamicsAnalyzer::DynamicsAnalyzer() FL_NO_EXCEPT
     : mHistorySize(86)  // ~2 seconds at 43fps
     , mHistoryIndex(0)
     , mCurrentRMS(0.0f)
@@ -30,7 +30,7 @@ DynamicsAnalyzer::DynamicsAnalyzer()
 
 DynamicsAnalyzer::~DynamicsAnalyzer() FL_NO_EXCEPT = default;
 
-void DynamicsAnalyzer::update(shared_ptr<Context> context) {
+void DynamicsAnalyzer::update(shared_ptr<Context> context) FL_NO_EXCEPT {
     mCurrentRMS = context->getRMS();
     u32 timestamp = context->getTimestamp();
 
@@ -79,7 +79,7 @@ void DynamicsAnalyzer::update(shared_ptr<Context> context) {
     mLastUpdateTime = timestamp;
 }
 
-void DynamicsAnalyzer::fireCallbacks() {
+void DynamicsAnalyzer::fireCallbacks() FL_NO_EXCEPT {
     if (mIsCrescendo && !mPrevIsCrescendo && onCrescendo) {
         onCrescendo();
     }
@@ -94,7 +94,7 @@ void DynamicsAnalyzer::fireCallbacks() {
     }
 }
 
-void DynamicsAnalyzer::reset() {
+void DynamicsAnalyzer::reset() FL_NO_EXCEPT {
     mRMSHistory.clear();
     mHistoryIndex = 0;
     mCurrentRMS = 0.0f;

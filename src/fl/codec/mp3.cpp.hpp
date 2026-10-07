@@ -588,7 +588,7 @@ bool Mp3StreamDecoderImpl::decodeNextFrame(audio::Sample* out_sample) {
 }  // namespace third_party
 
 // Mp3Decoder implementation
-Mp3Decoder::Mp3Decoder() : mImpl(fl::make_unique<third_party::Mp3StreamDecoderImpl>()) {}
+Mp3Decoder::Mp3Decoder() FL_NO_EXCEPT : mImpl(fl::make_unique<third_party::Mp3StreamDecoderImpl>()) {}
 
 Mp3Decoder::~Mp3Decoder() FL_NO_EXCEPT = default;
 

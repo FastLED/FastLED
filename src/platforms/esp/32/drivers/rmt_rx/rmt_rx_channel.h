@@ -120,13 +120,13 @@ public:
      * // Result: Only last 100 symbols captured in buffer
      * @endcode
      */
-    virtual bool begin(const RxConfig& config) override = 0;
+    virtual bool begin(const RxConfig& config) FL_NO_EXCEPT override = 0;
 
     /**
      * @brief Check if receive operation is complete
      * @return true if receive finished, false if still in progress
      */
-    virtual bool finished() const override = 0;
+    virtual bool finished() const FL_NO_EXCEPT override = 0;
 
     /**
      * @brief Wait for RMT symbols with timeout
@@ -168,7 +168,7 @@ public:
      * }
      * @endcode
      */
-    virtual RxWaitResult wait(u32 timeout_ms) override = 0;
+    virtual RxWaitResult wait(u32 timeout_ms) FL_NO_EXCEPT override = 0;
 
     /**
      * @brief Get the RMT clock resolution in Hz
@@ -205,7 +205,7 @@ public:
      * @endcode
      */
     virtual fl::result<u32, DecodeError> decode(const ChipsetTiming4Phase &timing,
-                                                       fl::span<u8> out) override = 0;
+                                                       fl::span<u8> out) FL_NO_EXCEPT override = 0;
 
     /**
      * @brief Get raw edge timings in universal format (for debugging)
@@ -232,13 +232,13 @@ public:
      * }
      * @endcode
      */
-    virtual size_t getRawEdgeTimes(fl::span<EdgeTime> out, size_t offset = 0) override = 0;
+    virtual size_t getRawEdgeTimes(fl::span<EdgeTime> out, size_t offset = 0) FL_NO_EXCEPT override = 0;
 
     /**
      * @brief Get device type name
      * @return "RMT" for RMT-based receiver
      */
-    virtual const char* name() const override = 0;
+    virtual const char* name() const FL_NO_EXCEPT override = 0;
 
     /**
      * @brief Manually inject edge timings for testing (Phase 1)
@@ -248,7 +248,7 @@ public:
      * Converts EdgeTime (nanosecond) to RMT symbols (ticks) and stores
      * in internal buffer. After injection, use decode() to process edges.
      */
-    virtual bool injectEdges(fl::span<const EdgeTime> edges) override = 0;
+    virtual bool injectEdges(fl::span<const EdgeTime> edges) FL_NO_EXCEPT override = 0;
 
 protected:
     RmtRxChannel() = default;

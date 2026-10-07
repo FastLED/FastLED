@@ -13,7 +13,7 @@ struct LockedRandom {
 
 } // namespace
 
-math::random& default_random() {
+math::random& default_random() FL_NO_EXCEPT {
     return Singleton<LockedRandom>::instance().rng;
 }
 

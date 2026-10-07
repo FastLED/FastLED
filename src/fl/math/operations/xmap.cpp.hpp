@@ -28,7 +28,7 @@ XMap::XMap(u16 length, bool is_reverse, u16 offset) {
     this->mOffset = offset;
 }
 
-XMap::XMap(const XMap &other) {
+XMap::XMap(const XMap &other) FL_NO_EXCEPT {
     type = other.type;
     length = other.length;
     xFunction = other.xFunction;

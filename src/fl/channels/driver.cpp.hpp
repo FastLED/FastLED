@@ -70,11 +70,11 @@ bool IChannelDriver::waitForState(bool allowDraining, u32 timeoutMs) FL_NO_EXCEP
     return true;  // Condition met
 }
 
-bool IChannelDriver::waitForReady(u32 timeoutMs) {
+bool IChannelDriver::waitForReady(u32 timeoutMs) FL_NO_EXCEPT {
     return waitForState(false, timeoutMs);
 }
 
-bool IChannelDriver::waitForReadyOrDraining(u32 timeoutMs) {
+bool IChannelDriver::waitForReadyOrDraining(u32 timeoutMs) FL_NO_EXCEPT {
     return waitForState(true, timeoutMs);
 }
 

@@ -44,7 +44,7 @@ namespace detail {
 
 // Function-pointer-with-context comparator: returns true iff *a < *b.
 using flat_map_less_thunk_t = bool (*)(const void* ctx,
-                                       const void* a, const void* b) FL_NO_EXCEPT;
+                                       const void* a, const void* b);
 
 struct flat_map_ops {
     flat_map_less_thunk_t less_fn;

@@ -14,7 +14,7 @@ namespace audio {
 constexpr float SpectralEqualizer::A_WEIGHTING_16BAND[16];
 constexpr float SpectralEqualizer::A_WEIGHTING_32BAND[32];
 
-SpectralEqualizer::SpectralEqualizer() {
+SpectralEqualizer::SpectralEqualizer() FL_NO_EXCEPT {
     configure(SpectralEqualizerConfig());
 }
 

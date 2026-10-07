@@ -7,7 +7,7 @@
 
 namespace fl {
 
-bool ChannelManager::removeDriver(fl::shared_ptr<IChannelDriver> driver) {
+bool ChannelManager::removeDriver(fl::shared_ptr<IChannelDriver> driver) FL_NO_EXCEPT {
     if (!driver) {
         FL_WARN("ChannelManager::removeDriver() - Null driver provided");
         return false;
@@ -31,7 +31,7 @@ bool ChannelManager::removeDriver(fl::shared_ptr<IChannelDriver> driver) {
     return false;
 }
 
-void ChannelManager::setDriverEnabled(const char* name, bool enabled) {
+void ChannelManager::setDriverEnabled(const char* name, bool enabled) FL_NO_EXCEPT {
     if (!name) {
         FL_ERROR("ChannelManager::setDriverEnabled() - Null driver name provided");
         return;
@@ -55,7 +55,7 @@ bool ChannelManager::setExclusiveDriver(Bus bus, fl::u8 which) FL_NO_EXCEPT {
     return setExclusiveDriverByName(busDriverName(bus, which));
 }
 
-bool ChannelManager::setExclusiveDriverByName(const char* name) {
+bool ChannelManager::setExclusiveDriverByName(const char* name) FL_NO_EXCEPT {
     // Handle null or empty name: disable everything.
     if (!name || !name[0]) {
         FL_ERROR("ChannelManager::setExclusiveDriverByName() - Null or empty driver name provided");
@@ -83,7 +83,7 @@ bool ChannelManager::setExclusiveDriverByName(const char* name) {
     return found;
 }
 
-bool ChannelManager::setDriverPriority(const fl::string& name, int priority) {
+bool ChannelManager::setDriverPriority(const fl::string& name, int priority) FL_NO_EXCEPT {
     if (name.empty()) {
         FL_ERROR("ChannelManager::setDriverPriority() - Empty driver name provided");
         return false;
@@ -113,7 +113,7 @@ bool ChannelManager::setDriverPriority(const fl::string& name, int priority) {
     return true;
 }
 
-ChannelManager::DriverStatus ChannelManager::driverStatus(const fl::string& name) const {
+ChannelManager::DriverStatus ChannelManager::driverStatus(const fl::string& name) const FL_NO_EXCEPT {
     if (name.empty()) {
         return DriverStatus::NOT_REGISTERED;
     }
@@ -126,11 +126,11 @@ ChannelManager::DriverStatus ChannelManager::driverStatus(const fl::string& name
     return DriverStatus::NOT_REGISTERED;
 }
 
-fl::size ChannelManager::getDriverCount() const {
+fl::size ChannelManager::getDriverCount() const FL_NO_EXCEPT {
     return mDrivers.size();
 }
 
-fl::span<const DriverInfo> ChannelManager::getDriverInfos() const {
+fl::span<const DriverInfo> ChannelManager::getDriverInfos() const FL_NO_EXCEPT {
     if (!mCachedDriverInfo) {
         mCachedDriverInfo = fl::make_shared<fl::vector<DriverInfo>>();
     }
@@ -151,7 +151,7 @@ fl::span<const DriverInfo> ChannelManager::getDriverInfos() const {
     return cache;
 }
 
-fl::shared_ptr<IChannelDriver> ChannelManager::findDriverByName(const fl::string& name) const {
+fl::shared_ptr<IChannelDriver> ChannelManager::findDriverByName(const fl::string& name) const FL_NO_EXCEPT {
     if (name.empty()) {
         return fl::shared_ptr<IChannelDriver>();
     }
@@ -163,7 +163,7 @@ fl::shared_ptr<IChannelDriver> ChannelManager::findDriverByName(const fl::string
     return fl::shared_ptr<IChannelDriver>();
 }
 
-fl::shared_ptr<IChannelDriver> ChannelManager::getDriverByName(const fl::string& name) const {
+fl::shared_ptr<IChannelDriver> ChannelManager::getDriverByName(const fl::string& name) const FL_NO_EXCEPT {
     if (name.empty()) {
         FL_ERROR("ChannelManager::getDriverByName() - Empty driver name provided");
         return fl::shared_ptr<IChannelDriver>();
@@ -175,7 +175,7 @@ fl::shared_ptr<IChannelDriver> ChannelManager::getDriverByName(const fl::string&
     return driver;
 }
 
-fl::shared_ptr<IChannelDriver> ChannelManager::selectDriverForChannel(const ChannelDataPtr& data, const fl::string& affinity) {
+fl::shared_ptr<IChannelDriver> ChannelManager::selectDriverForChannel(const ChannelDataPtr& data, const fl::string& affinity) FL_NO_EXCEPT {
     if (!data) {
         FL_ERROR("ChannelManager::selectDriverForChannel() - Null channel data");
         return fl::shared_ptr<IChannelDriver>();

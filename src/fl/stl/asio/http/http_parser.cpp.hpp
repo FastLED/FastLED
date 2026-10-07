@@ -58,7 +58,7 @@ bool parseInt(const fl::string& str, int& out) {
 // HttpRequestParser
 //==============================================================================
 
-HttpRequestParser::HttpRequestParser()
+HttpRequestParser::HttpRequestParser() FL_NO_EXCEPT
     : mState(READ_REQUEST_LINE)
     , mRequest(fl::make_shared<HttpRequest>())
     , mChunkedReader(fl::make_shared<net::http::ChunkedReader>())
@@ -286,7 +286,7 @@ fl::optional<fl::string> HttpRequestParser::getHeader(const char* name) const {
 // HttpResponseParser
 //==============================================================================
 
-HttpResponseParser::HttpResponseParser()
+HttpResponseParser::HttpResponseParser() FL_NO_EXCEPT
     : mState(READ_STATUS_LINE)
     , mResponse(fl::make_shared<HttpResponse>())
     , mChunkedReader(fl::make_shared<net::http::ChunkedReader>())

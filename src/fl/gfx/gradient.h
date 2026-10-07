@@ -21,7 +21,7 @@ class Gradient {
 
     template <typename T> Gradient(T *palette);
     Gradient(const Gradient &other) FL_NO_EXCEPT;
-    Gradient &operator=(const Gradient &other);
+    Gradient &operator=(const Gradient &other) FL_NO_EXCEPT;
 
     Gradient(Gradient &&other) FL_NO_EXCEPT;
 

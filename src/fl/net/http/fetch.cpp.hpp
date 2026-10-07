@@ -435,7 +435,7 @@ public:
         EngineEvents::removeListener(this);
     }
 
-    void onEndFrame() override {
+    void onEndFrame() FL_NO_EXCEPT override {
         // Update all async tasks (fetch, timers, etc.) at the end of each frame
         fl::task::run(0);
     }

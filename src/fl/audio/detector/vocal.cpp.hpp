@@ -12,7 +12,7 @@ namespace fl {
 namespace audio {
 namespace detector {
 
-Vocal::Vocal()
+Vocal::Vocal() FL_NO_EXCEPT
     : mVocalActive(false)
     , mPreviousVocalActive(false)
     , mConfidence(0.0f)
@@ -23,7 +23,7 @@ Vocal::Vocal()
 
 Vocal::~Vocal() FL_NO_EXCEPT = default;
 
-void Vocal::update(shared_ptr<Context> context) {
+void Vocal::update(shared_ptr<Context> context) FL_NO_EXCEPT {
     mSampleRate = context->getSampleRate();
     // Dual FFT: high-resolution formant analysis + broad spectral features.
     // Formant FFT: 64 CQ bins in 200-3500 Hz — concentrates resolution on
@@ -85,7 +85,7 @@ void Vocal::update(shared_ptr<Context> context) {
     mStateChanged = (mVocalActive != mPreviousVocalActive);
 }
 
-void Vocal::fireCallbacks() {
+void Vocal::fireCallbacks() FL_NO_EXCEPT {
     if (mStateChanged) {
         if (onVocal) onVocal(static_cast<u8>(mConfidenceSmoother.value() * 255.0f));
         if (mVocalActive && onVocalStart) onVocalStart();
@@ -95,7 +95,7 @@ void Vocal::fireCallbacks() {
     }
 }
 
-void Vocal::reset() {
+void Vocal::reset() FL_NO_EXCEPT {
     mVocalActive = false;
     mPreviousVocalActive = false;
     mConfidence = 0.0f;

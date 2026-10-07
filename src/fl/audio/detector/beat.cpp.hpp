@@ -8,7 +8,7 @@ namespace fl {
 namespace audio {
 namespace detector {
 
-Beat::Beat()
+Beat::Beat() FL_NO_EXCEPT
     : mBeatDetected(false)
     , mBPM(120.0f)
     , mPhase(0.0f)
@@ -25,7 +25,7 @@ Beat::Beat()
 
 Beat::~Beat() FL_NO_EXCEPT = default;
 
-void Beat::update(shared_ptr<Context> context) {
+void Beat::update(shared_ptr<Context> context) FL_NO_EXCEPT {
     // Use 30 Hz min frequency so bass bins actually cover sub-bass (20-60 Hz).
     // Default fmin (90 Hz) covers most bass but misses the deepest sub-bass.
     // CQ_NAIVE provides bass/treble discrimination via CQ kernels
@@ -64,7 +64,7 @@ void Beat::update(shared_ptr<Context> context) {
     }
 }
 
-void Beat::reset() {
+void Beat::reset() FL_NO_EXCEPT {
     mBeatDetected = false;
     mBPM = 120.0f;
     mPhase = 0.0f;
@@ -174,7 +174,7 @@ void Beat::updatePhase(u32 timestamp) {
     }
 }
 
-void Beat::fireCallbacks() {
+void Beat::fireCallbacks() FL_NO_EXCEPT {
     if (mBeatDetected) {
         onBeat();
         onOnset(mSpectralFlux);

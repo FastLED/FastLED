@@ -8,7 +8,7 @@ namespace fl {
 namespace audio {
 namespace detector {
 
-Transient::Transient()
+Transient::Transient() FL_NO_EXCEPT
     : mTransientDetected(false)
     , mStrength(0.0f)
     , mThreshold(1.5f)
@@ -24,7 +24,7 @@ Transient::Transient()
 
 Transient::~Transient() FL_NO_EXCEPT = default;
 
-void Transient::update(shared_ptr<Context> context) {
+void Transient::update(shared_ptr<Context> context) FL_NO_EXCEPT {
     mRetainedFFT = context->getFFT16();
     const fft::Bins& fft = *mRetainedFFT;
     u32 timestamp = context->getTimestamp();
@@ -56,7 +56,7 @@ void Transient::update(shared_ptr<Context> context) {
     mEnergyHistory.push_back(filteredEnergy);
 }
 
-void Transient::fireCallbacks() {
+void Transient::fireCallbacks() FL_NO_EXCEPT {
     if (mTransientDetected) {
         if (onTransient) {
             onTransient();
@@ -70,7 +70,7 @@ void Transient::fireCallbacks() {
     }
 }
 
-void Transient::reset() {
+void Transient::reset() FL_NO_EXCEPT {
     mTransientDetected = false;
     mStrength = 0.0f;
     mLastTransientTime = 0;

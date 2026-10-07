@@ -50,7 +50,7 @@ class FloatVectorPool {
     fl::vector<fl::vector<float>> mPool;
 };
 
-void Bins::clear() {
+void Bins::clear() FL_NO_EXCEPT {
     mBinsRaw.clear();
     mBinsLinear.clear();
     mNormFactors.clear();
@@ -58,11 +58,11 @@ void Bins::clear() {
     mDbDirty = true;
 }
 
-fl::size Bins::bands() const { return mBands; }
+fl::size Bins::bands() const FL_NO_EXCEPT { return mBands; }
 
-fl::span<const float> Bins::raw() const { return mBinsRaw; }
+fl::span<const float> Bins::raw() const FL_NO_EXCEPT { return mBinsRaw; }
 
-fl::span<const float> Bins::db() const {
+fl::span<const float> Bins::db() const FL_NO_EXCEPT {
     if (!mDbDirty) {
         return mBinsDb;
     }
@@ -78,7 +78,7 @@ fl::span<const float> Bins::db() const {
     return mBinsDb;
 }
 
-fl::span<const float> Bins::rawNormalized() const {
+fl::span<const float> Bins::rawNormalized() const FL_NO_EXCEPT {
     if (!mNormalizedDirty) {
         return mBinsRawNormalized;
     }
@@ -94,21 +94,21 @@ fl::span<const float> Bins::rawNormalized() const {
     return mBinsRawNormalized;
 }
 
-fl::span<const float> Bins::linear() const { return mBinsLinear; }
-float Bins::linearFmin() const { return mLinearFmin; }
-float Bins::linearFmax() const { return mLinearFmax; }
-float Bins::fmin() const { return mFmin; }
-float Bins::fmax() const { return mFmax; }
-int Bins::sampleRate() const { return mSampleRate; }
+fl::span<const float> Bins::linear() const FL_NO_EXCEPT { return mBinsLinear; }
+float Bins::linearFmin() const FL_NO_EXCEPT { return mLinearFmin; }
+float Bins::linearFmax() const FL_NO_EXCEPT { return mLinearFmax; }
+float Bins::fmin() const FL_NO_EXCEPT { return mFmin; }
+float Bins::fmax() const FL_NO_EXCEPT { return mFmax; }
+int Bins::sampleRate() const FL_NO_EXCEPT { return mSampleRate; }
 
-float Bins::binToFreq(int i) const {
+float Bins::binToFreq(int i) const FL_NO_EXCEPT {
     int nbands = static_cast<int>(mBinsRaw.size());
     if (nbands <= 1) return mFmin;
     float m = fl::logf(mFmax / mFmin);
     return mFmin * fl::expf(m * static_cast<float>(i) / static_cast<float>(nbands - 1));
 }
 
-int Bins::freqToBin(float freq) const {
+int Bins::freqToBin(float freq) const FL_NO_EXCEPT {
     int nbands = static_cast<int>(mBinsRaw.size());
     if (nbands <= 1) return 0;
     if (freq <= mFmin) return 0;
@@ -121,13 +121,13 @@ int Bins::freqToBin(float freq) const {
     return result;
 }
 
-float Bins::binBoundary(int i) const {
+float Bins::binBoundary(int i) const FL_NO_EXCEPT {
     float f_i = binToFreq(i);
     float f_next = binToFreq(i + 1);
     return fl::sqrtf(f_i * f_next);
 }
 
-fl::vector<float>& Bins::raw_mut() {
+fl::vector<float>& Bins::raw_mut() FL_NO_EXCEPT {
     if (mBinsRaw.capacity() == 0) {
         mBinsRaw = pool().acquire(mBands);
     }
@@ -136,25 +136,25 @@ fl::vector<float>& Bins::raw_mut() {
     return mBinsRaw;
 }
 
-fl::vector<float>& Bins::linear_mut() {
+fl::vector<float>& Bins::linear_mut() FL_NO_EXCEPT {
     if (mBinsLinear.capacity() == 0) {
         mBinsLinear = pool().acquire(mBands);
     }
     return mBinsLinear;
 }
 
-void Bins::setParams(float fmin, float fmax, int sampleRate) {
+void Bins::setParams(float fmin, float fmax, int sampleRate) FL_NO_EXCEPT {
     mFmin = fmin;
     mFmax = fmax;
     mSampleRate = sampleRate;
 }
 
-void Bins::setLinearParams(float linearFmin, float linearFmax) {
+void Bins::setLinearParams(float linearFmin, float linearFmax) FL_NO_EXCEPT {
     mLinearFmin = linearFmin;
     mLinearFmax = linearFmax;
 }
 
-void Bins::setNormFactors(const fl::vector<float>& factors) {
+void Bins::setNormFactors(const fl::vector<float>& factors) FL_NO_EXCEPT {
     if (mNormFactors.capacity() == 0) {
         mNormFactors = pool().acquire(mBands);
     }
@@ -165,11 +165,11 @@ void Bins::setNormFactors(const fl::vector<float>& factors) {
     mNormalizedDirty = true;
 }
 
-FloatVectorPool& Bins::pool() {
+FloatVectorPool& Bins::pool() FL_NO_EXCEPT {
     return Singleton<FloatVectorPool>::instance();
 }
 
-Bins::Bins(fl::size n)
+Bins::Bins(fl::size n) FL_NO_EXCEPT
     : mBands(n) {}
 
 Bins::~Bins() FL_NO_EXCEPT {
@@ -240,7 +240,7 @@ private:
     LruMap mMap;
 };
 
-FFT::ImplCache &FFT::globalCache() {
+FFT::ImplCache &FFT::globalCache() FL_NO_EXCEPT {
     // Global LRU cache with max 10 entries — shared by all FFT instances.
     // This avoids regenerating expensive CQ kernels when AudioContext is
     // recreated (each Impl with 128 CQ bins takes ~850ms to initialize).
@@ -248,7 +248,7 @@ FFT::ImplCache &FFT::globalCache() {
 }
 
 void FFT::run(const span<const fl::i16> &sample, Bins *out,
-              const Args &args) {
+              const Args &args) FL_NO_EXCEPT {
     Args args2 = args;
     args2.samples = sample.size();
     // Fetch cached impl (thread-safe), then run FFT outside the lock.
@@ -256,14 +256,14 @@ void FFT::run(const span<const fl::i16> &sample, Bins *out,
     impl->run(sample, out);
 }
 
-void FFT::clear() { globalCache().clear(); }
+void FFT::clear() FL_NO_EXCEPT { globalCache().clear(); }
 
-fl::size FFT::size() const { return globalCache().size(); }
+fl::size FFT::size() const FL_NO_EXCEPT { return globalCache().size(); }
 
-void FFT::setFFTCacheSize(fl::size size) { globalCache().setMaxSize(size); }
+void FFT::setFFTCacheSize(fl::size size) FL_NO_EXCEPT { globalCache().setMaxSize(size); }
 
 void Args::resolveModeEnums(Mode &mode, Window &window, int bands,
-                                int samples, float fmin, float fmax) {
+                                int samples, float fmin, float fmax) FL_NO_EXCEPT {
     // Resolve mode first
     if (mode == Mode::AUTO) {
         if (bands <= 32) {
@@ -306,7 +306,7 @@ void Args::resolveModeEnums(Mode &mode, Window &window, int bands,
     }
 }
 
-bool Args::operator==(const Args &other) const {
+bool Args::operator==(const Args &other) const FL_NO_EXCEPT {
     FL_DISABLE_WARNING_PUSH
     FL_DISABLE_WARNING(float-equal);
 

@@ -11,7 +11,7 @@ namespace fl {
 namespace audio {
 namespace detector {
 
-BuildupDetector::BuildupDetector()
+BuildupDetector::BuildupDetector() FL_NO_EXCEPT
     : mBuildupActive(false)
     , mPeakFired(false)
     , mEnergyHistoryIndex(0)
@@ -37,7 +37,7 @@ BuildupDetector::BuildupDetector()
 
 BuildupDetector::~BuildupDetector() FL_NO_EXCEPT = default;
 
-void BuildupDetector::update(shared_ptr<Context> context) {
+void BuildupDetector::update(shared_ptr<Context> context) FL_NO_EXCEPT {
     if (!context) {
         FL_WARN("BuildupDetector::update: null context");
         return;
@@ -116,7 +116,7 @@ void BuildupDetector::update(shared_ptr<Context> context) {
     mLastUpdateTime = timestamp;
 }
 
-void BuildupDetector::fireCallbacks() {
+void BuildupDetector::fireCallbacks() FL_NO_EXCEPT {
     if (mFireBuildupStart) {
         if (onBuildupStart) onBuildupStart();
         mFireBuildupStart = false;
@@ -139,7 +139,7 @@ void BuildupDetector::fireCallbacks() {
     }
 }
 
-void BuildupDetector::reset() {
+void BuildupDetector::reset() FL_NO_EXCEPT {
     mBuildupActive = false;
     mPeakFired = false;
     mEnergyHistoryIndex = 0;

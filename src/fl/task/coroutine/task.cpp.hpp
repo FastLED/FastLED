@@ -100,12 +100,12 @@ private:
     unique_ptr<Coroutine> mCoroutine;
 };
 
-Handle coroutine(const CoroutineConfig& config) {
+Handle coroutine(const CoroutineConfig& config) FL_NO_EXCEPT {
     return Handle(fl::make_shared<CoroutineTask>(config));
 }
 
 // Static coroutine control
-void exit_current() { Coroutine::exitCurrent(); }
+void exit_current() FL_NO_EXCEPT { Coroutine::exitCurrent(); }
 
 } // namespace task
 } // namespace fl

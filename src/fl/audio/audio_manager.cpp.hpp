@@ -7,15 +7,15 @@
 namespace fl {
 namespace audio {
 
-AudioManager &AudioManager::instance() {
+AudioManager &AudioManager::instance() FL_NO_EXCEPT {
     return Singleton<AudioManager>::instance();
 }
 
-shared_ptr<Processor> &AudioManager::processor() {
+shared_ptr<Processor> &AudioManager::processor() FL_NO_EXCEPT {
     return Singleton<shared_ptr<Processor>>::instance();
 }
 
-shared_ptr<Processor> AudioManager::add(const Config &config) {
+shared_ptr<Processor> AudioManager::add(const Config &config) FL_NO_EXCEPT {
 #if FASTLED_HAS_AUDIO_INPUT
     fl::string errorMsg;
     auto input = IInput::create(config, &errorMsg);
@@ -44,7 +44,7 @@ shared_ptr<Processor> AudioManager::add(const Config &config) {
 #endif
 }
 
-shared_ptr<Processor> AudioManager::add(shared_ptr<IInput> input) {
+shared_ptr<Processor> AudioManager::add(shared_ptr<IInput> input) FL_NO_EXCEPT {
     if (!input) {
         FL_WARN("Cannot add null audio input");
         return nullptr;
@@ -58,7 +58,7 @@ shared_ptr<Processor> AudioManager::add(shared_ptr<IInput> input) {
     return proc;
 }
 
-shared_ptr<Processor> AudioManager::add(UIAudio &uiAudio) {
+shared_ptr<Processor> AudioManager::add(UIAudio &uiAudio) FL_NO_EXCEPT {
     auto input = uiAudio.audioInput();
     if (input) {
         return add(fl::move(input));
@@ -73,7 +73,7 @@ shared_ptr<Processor> AudioManager::add(UIAudio &uiAudio) {
     return nullptr;
 }
 
-void AudioManager::remove(shared_ptr<Processor> proc) {
+void AudioManager::remove(shared_ptr<Processor> proc) FL_NO_EXCEPT {
     if (!proc) {
         return;
     }

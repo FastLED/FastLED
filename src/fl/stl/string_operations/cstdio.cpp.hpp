@@ -8,7 +8,7 @@
 
 namespace fl {
 
-bool readStringUntil(sstream& out, char delimiter, char skipChar, fl::optional<u32> timeoutMs) {
+bool readStringUntil(sstream& out, char delimiter, char skipChar, fl::optional<u32> timeoutMs) FL_NO_EXCEPT {
     // Follows Arduino Serial.readStringUntil() API - blocks until delimiter found
     u32 startTime = fl::millis();
 
@@ -54,7 +54,7 @@ bool readStringUntil(sstream& out, char delimiter, char skipChar, fl::optional<u
     return true;
 }
 
-fl::optional<fl::string> readLine(char delimiter, char skipChar, fl::optional<u32> timeoutMs) {
+fl::optional<fl::string> readLine(char delimiter, char skipChar, fl::optional<u32> timeoutMs) FL_NO_EXCEPT {
     // Try platform-native line reading first (e.g., Arduino's Serial.readStringUntil).
     // This is critical for USB CDC platforms (ESP32-C6/S3) where the native
     // implementation uses yield() (immediate context switch) instead of

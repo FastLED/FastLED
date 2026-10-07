@@ -8,14 +8,14 @@
 namespace fl {
 
 void fill_solid(CRGB *targetArray, int numToFill,
-                const CRGB &color) {
+                const CRGB &color) FL_NO_EXCEPT {
     for (int i = 0; i < numToFill; ++i) {
         targetArray[i] = color;
     }
 }
 
 void fill_solid(CHSV *targetArray, int numToFill,
-                const CHSV &color) {
+                const CHSV &color) FL_NO_EXCEPT {
     for (int i = 0; i < numToFill; ++i) {
         targetArray[i] = color;
     }
@@ -28,7 +28,7 @@ void fill_solid(CHSV *targetArray, int numToFill,
 // }
 
 void fill_rainbow(CRGB *targetArray, int numToFill, u8 initialhue,
-                  u8 deltahue) {
+                  u8 deltahue) FL_NO_EXCEPT {
     CHSV hsv;
     hsv.hue = initialhue;
     hsv.val = 255;
@@ -40,7 +40,7 @@ void fill_rainbow(CRGB *targetArray, int numToFill, u8 initialhue,
 }
 
 void fill_rainbow(CHSV *targetArray, int numToFill, u8 initialhue,
-                  u8 deltahue) {
+                  u8 deltahue) FL_NO_EXCEPT {
     CHSV hsv;
     hsv.hue = initialhue;
     hsv.val = 255;
@@ -52,7 +52,7 @@ void fill_rainbow(CHSV *targetArray, int numToFill, u8 initialhue,
 }
 
 void fill_rainbow_circular(CRGB *targetArray, int numToFill,
-                           u8 initialhue, bool reversed) {
+                           u8 initialhue, bool reversed) FL_NO_EXCEPT {
     if (numToFill == 0)
         return; // avoiding div/0
 
@@ -79,7 +79,7 @@ void fill_rainbow_circular(CRGB *targetArray, int numToFill,
 }
 
 void fill_rainbow_circular(CHSV *targetArray, int numToFill,
-                           u8 initialhue, bool reversed) {
+                           u8 initialhue, bool reversed) FL_NO_EXCEPT {
     if (numToFill == 0)
         return; // avoiding div/0
 
@@ -106,7 +106,7 @@ void fill_rainbow_circular(CHSV *targetArray, int numToFill,
 }
 
 void fill_gradient_RGB(CRGB *leds, u16 startpos, CRGB startcolor,
-                       u16 endpos, CRGB endcolor) {
+                       u16 endpos, CRGB endcolor) FL_NO_EXCEPT {
     // if the points are in the wrong order, straighten them
     if (endpos < startpos) {
         u16 t = endpos;
@@ -149,13 +149,13 @@ void fill_gradient_RGB(CRGB *leds, u16 startpos, CRGB startcolor,
 }
 
 void fill_gradient_RGB(CRGB *leds, u16 numLeds, const CRGB &c1,
-                       const CRGB &c2) {
+                       const CRGB &c2) FL_NO_EXCEPT {
     u16 last = numLeds - 1;
     fill_gradient_RGB(leds, 0, c1, last, c2);
 }
 
 void fill_gradient_RGB(CRGB *leds, u16 numLeds, const CRGB &c1,
-                       const CRGB &c2, const CRGB &c3) {
+                       const CRGB &c2, const CRGB &c3) FL_NO_EXCEPT {
     u16 half = (numLeds / 2);
     u16 last = numLeds - 1;
     fill_gradient_RGB(leds, 0, c1, half, c2);
@@ -163,7 +163,7 @@ void fill_gradient_RGB(CRGB *leds, u16 numLeds, const CRGB &c1,
 }
 
 void fill_gradient_RGB(CRGB *leds, u16 numLeds, const CRGB &c1,
-                       const CRGB &c2, const CRGB &c3, const CRGB &c4) {
+                       const CRGB &c2, const CRGB &c3, const CRGB &c4) FL_NO_EXCEPT {
     u16 onethird = (numLeds / 3);
     u16 twothirds = ((numLeds * 2) / 3);
     u16 last = numLeds - 1;

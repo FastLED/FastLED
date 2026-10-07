@@ -125,7 +125,7 @@ u16 Potentiometer::calculateDefaultHysteresis() const {
     return (one_percent > 10) ? one_percent : 10;
 }
 
-void Potentiometer::Listener::onEndFrame() {
+void Potentiometer::Listener::onEndFrame() FL_NO_EXCEPT {
     // Read current value
     u16 new_value = mOwner->mPot.read();
     mOwner->mCurrentValue = new_value;

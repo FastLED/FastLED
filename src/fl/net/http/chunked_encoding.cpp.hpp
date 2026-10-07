@@ -13,7 +13,7 @@ namespace http {
 
 // ChunkedReader implementation
 
-ChunkedReader::ChunkedReader()
+ChunkedReader::ChunkedReader() FL_NO_EXCEPT
     : mState(READ_SIZE), mChunkSize(0), mBytesRead(0) {
 }
 
@@ -172,7 +172,7 @@ void ChunkedReader::consume(size_t n) {
 
 // ChunkedWriter implementation
 
-ChunkedWriter::ChunkedWriter() {
+ChunkedWriter::ChunkedWriter() FL_NO_EXCEPT {
 }
 
 size_t ChunkedWriter::chunkOverhead(size_t dataLen) {

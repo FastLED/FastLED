@@ -6,7 +6,7 @@
 namespace fl {
 
 namespace detail {
-void to_string(const fl::u16 *bit_data, fl::u32 bit_count, string* dst) {
+void to_string(const fl::u16 *bit_data, fl::u32 bit_count, string* dst) FL_NO_EXCEPT {
     fl::string& result = *dst;
     constexpr fl::u32 bits_per_block = 8 * sizeof(fl::u16); // 16 bits per block
     
@@ -22,7 +22,7 @@ void to_string(const fl::u16 *bit_data, fl::u32 bit_count, string* dst) {
 } // namespace detail
 
 // Implementation for bitset_dynamic::to_string
-void bitset_dynamic::to_string(string* dst) const {
+void bitset_dynamic::to_string(string* dst) const FL_NO_EXCEPT {
     detail::to_string(_blocks.get(), _size, dst);
 }
 

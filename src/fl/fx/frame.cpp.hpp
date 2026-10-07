@@ -31,7 +31,7 @@ Frame::Frame(fl::u8* pixels, fl::u16 width, fl::u16 height, PixelFormat format, 
     }
 }
 
-Frame::Frame(const Frame& other)
+Frame::Frame(const Frame& other) FL_NO_EXCEPT
     : mPixelsCount(other.mPixelsCount), mRgb(),
       mWidth(other.mWidth), mHeight(other.mHeight), mFormat(other.mFormat),
       mTimestamp(other.mTimestamp), mIsFromCodec(other.mIsFromCodec) {

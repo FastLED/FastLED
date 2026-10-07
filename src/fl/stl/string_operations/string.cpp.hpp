@@ -84,14 +84,14 @@ string string::trim() const FL_NO_EXCEPT {
     return substring(start, end_pos);
 }
 
-void string::swap(string &other) {
+void string::swap(string &other) FL_NO_EXCEPT {
     if (this == &other) return;
     string tmp(fl::move(*this));
     *this = fl::move(other);
     other = fl::move(tmp);
 }
 
-string &string::append(const CRGB &rgb) {
+string &string::append(const CRGB &rgb) FL_NO_EXCEPT {
     append("CRGB(");
     append(rgb.r);
     append(",");
@@ -102,7 +102,7 @@ string &string::append(const CRGB &rgb) {
     return *this;
 }
 
-string &string::appendCRGB(const CRGB &rgb) {
+string &string::appendCRGB(const CRGB &rgb) FL_NO_EXCEPT {
     append("CRGB(");
     append(rgb.r);
     append(",");
@@ -113,7 +113,7 @@ string &string::appendCRGB(const CRGB &rgb) {
     return *this;
 }
 
-string &string::append(const json_value& val) {
+string &string::append(const json_value& val) FL_NO_EXCEPT {
     // Use the json_value's to_string method if available
     // For now, just append a placeholder to avoid compilation errors
     FL_UNUSED(val);

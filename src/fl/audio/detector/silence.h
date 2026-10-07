@@ -14,11 +14,11 @@ public:
     Silence() FL_NO_EXCEPT;
     ~Silence() FL_NO_EXCEPT override;
 
-    void update(shared_ptr<Context> context) override;
-    void fireCallbacks() override;
-    bool needsFFT() const override { return false; }  // Uses RMS from Sample
-    const char* getName() const override { return "Silence"; }
-    void reset() override;
+    void update(shared_ptr<Context> context) FL_NO_EXCEPT override;
+    void fireCallbacks() FL_NO_EXCEPT override;
+    bool needsFFT() const FL_NO_EXCEPT override { return false; }  // Uses RMS from Sample
+    const char* getName() const FL_NO_EXCEPT override { return "Silence"; }
+    void reset() FL_NO_EXCEPT override;
 
     // Callbacks (multiple listeners supported)
     function_list<void(u8 silent)> onSilence;

@@ -1024,7 +1024,7 @@ void Channel::submitFrame(const fl::shared_ptr<IChannelDriver>& driver) FL_NO_EX
     events.onChannelEnqueued(*this, driverName);
 }
 
-void Channel::init() {
+void Channel::init() FL_NO_EXCEPT {
     // TODO: Implement initialization
 }
 
@@ -1034,12 +1034,12 @@ class StubChannelEngine : public IChannelDriver {
 public:
     virtual ~StubChannelEngine() FL_NO_EXCEPT = default;
 
-    virtual bool canHandle(const ChannelDataPtr& data) const override {
+    virtual bool canHandle(const ChannelDataPtr& data) const FL_NO_EXCEPT override {
         (void)data;
         return true;  // Test driver accepts all channel types
     }
 
-    virtual void enqueue(ChannelDataPtr /*channelData*/) override {
+    virtual void enqueue(ChannelDataPtr /*channelData*/) FL_NO_EXCEPT override {
         // No-op: stub driver does nothing
         static bool warned = false;
         if (!warned) {
@@ -1048,19 +1048,19 @@ public:
         }
     }
 
-    virtual void show() override {
+    virtual void show() FL_NO_EXCEPT override {
         // No-op: no hardware to drive
     }
 
-    virtual DriverState poll() override {
+    virtual DriverState poll() FL_NO_EXCEPT override {
         return DriverState(DriverState::READY);  // Always "ready" (does nothing)
     }
 
-    virtual fl::string getName() const override {
+    virtual fl::string getName() const FL_NO_EXCEPT override {
         return fl::string::from_literal("STUB");
     }
 
-    virtual Capabilities getCapabilities() const override {
+    virtual Capabilities getCapabilities() const FL_NO_EXCEPT override {
         return Capabilities(true, true);  // Stub accepts both clockless and SPI
     }
 };
@@ -1072,11 +1072,11 @@ IChannelDriver* getStubChannelEngine() {
     return &instance;
 }
 
-int Channel::size() const {
+int Channel::size() const FL_NO_EXCEPT {
     return CPixelLEDController<RGB>::size();
 }
 
-void Channel::showLeds(u8 brightness) {
+void Channel::showLeds(u8 brightness) FL_NO_EXCEPT {
     CPixelLEDController<RGB>::showLeds(brightness);
 }
 

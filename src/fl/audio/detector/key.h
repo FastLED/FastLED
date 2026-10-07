@@ -84,11 +84,11 @@ public:
     ~KeyDetector() FL_NO_EXCEPT override;
 
     // Detector interface
-    void update(shared_ptr<Context> context) override;
-    void fireCallbacks() override;
-    bool needsFFT() const override { return true; }
-    const char* getName() const override { return "KeyDetector"; }
-    void reset() override;
+    void update(shared_ptr<Context> context) FL_NO_EXCEPT override;
+    void fireCallbacks() FL_NO_EXCEPT override;
+    bool needsFFT() const FL_NO_EXCEPT override { return true; }
+    const char* getName() const FL_NO_EXCEPT override { return "KeyDetector"; }
+    void reset() FL_NO_EXCEPT override;
 
     // Event callbacks (multiple listeners supported)
     function_list<void(const Key& key)> onKey;           // Every frame with current key

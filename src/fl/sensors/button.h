@@ -84,7 +84,7 @@ class Button : public IButtonInput {
         // used for all UI elements, so that the button state is updated before
         // the next frame is drawn. This seems like the only way to do this, or
         // by using platform pre loop, but not all platforms support that.
-        void onEndFrame() override;
+        void onEndFrame() FL_NO_EXCEPT override;
 
       private:
         Button *mOwner;

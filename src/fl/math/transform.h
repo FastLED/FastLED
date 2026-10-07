@@ -102,7 +102,7 @@ struct Matrix3x3f {
 // TransformFloat is a wrapper around the smart ptr. This version allows for
 // easy use and fast / well behaved copy.
 struct TransformFloat {
-    TransformFloat() FL_NO_EXCEPT = default;
+    TransformFloat() = default;
     float scale_x() const { return mImpl->scale_x; }
     float scale_y() const { return mImpl->scale_y; }
     float offset_x() const { return mImpl->offset_x; }

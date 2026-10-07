@@ -142,7 +142,7 @@ class Potentiometer {
         void addToEngineEventsOnce();
 
         // Update on end frame (before next frame is drawn, matching Button behavior)
-        void onEndFrame() override;
+        void onEndFrame() FL_NO_EXCEPT override;
 
       private:
         Potentiometer *mOwner;

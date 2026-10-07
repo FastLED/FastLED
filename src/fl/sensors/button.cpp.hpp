@@ -56,7 +56,7 @@ bool ButtonLowLevel::isPressed() {
 Button::Button(int pin, ButtonStrategy strategy)
     : mButton(pin, strategy), mListener(this), mPressedLastFrame(false), mClickedThisFrame(false) {}
 
-void Button::Listener::onEndFrame() {
+void Button::Listener::onEndFrame() FL_NO_EXCEPT {
     const bool pressed_curr_frame = mOwner->mButton.isPressed();
     const bool pressed_last_frame = mOwner->mPressedLastFrame;
     // Rising edge of isPressed() == one click event for this frame.

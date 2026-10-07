@@ -38,7 +38,7 @@ inline float applyScaling(float value, FFTScalingMode mode) {
 } // namespace
 
 EqualizerDetector::EqualizerDetector()
-{
+FL_NO_EXCEPT {
     mBinMaxFilters.reserve(kNumBins);
     mBinSmoothers.reserve(kNumBins);
     for (int i = 0; i < kNumBins; ++i) {
@@ -128,7 +128,7 @@ void EqualizerDetector::recomputePinkNoiseGains() {
     computePinkNoiseGains(binCenters, kNumBins, mPinkNoiseGains);
 }
 
-void EqualizerDetector::update(shared_ptr<Context> context) {
+void EqualizerDetector::update(shared_ptr<Context> context) FL_NO_EXCEPT {
     mSampleRate = context->getSampleRate();
 
     span<const i16> pcm = context->getPCM();
@@ -266,7 +266,7 @@ void EqualizerDetector::update(shared_ptr<Context> context) {
     }
 }
 
-void EqualizerDetector::fireCallbacks() {
+void EqualizerDetector::fireCallbacks() FL_NO_EXCEPT {
     if (onEqualizer) {
         Equalizer eq;
         eq.bass = mBass;
@@ -285,7 +285,7 @@ void EqualizerDetector::fireCallbacks() {
     }
 }
 
-void EqualizerDetector::reset() {
+void EqualizerDetector::reset() FL_NO_EXCEPT {
     for (int i = 0; i < kNumBins; ++i) {
         mBins[i] = 0.0f;
         mBinMaxFilters[i].reset(0.0f);

@@ -61,7 +61,7 @@ Wave3BitExpansionLut buildWave3ExpansionLUT(const ChipsetTiming& timing);
 // Forward declaration; implementation is out-of-line in detail/wave3.cpp.hpp
 void wave3(u8 lane,
            const Wave3BitExpansionLut& lut,
-           u8 (&FL_RESTRICT_PARAM output)[sizeof(Wave3Byte)]);
+           u8 (&FL_RESTRICT_PARAM output)[sizeof(Wave3Byte)]) FL_NO_EXCEPT;
 
 // Public transposition functions (implementations in wave3.cpp.hpp)
 void wave3Transpose_2(

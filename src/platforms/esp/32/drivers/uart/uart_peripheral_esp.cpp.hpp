@@ -52,7 +52,7 @@ namespace fl {
 // Constructor / Destructor
 //=============================================================================
 
-UartPeripheralEsp::UartPeripheralEsp()
+UartPeripheralEsp::UartPeripheralEsp() FL_NO_EXCEPT
     : mConfig(),
       mInitialized(false),
       mResetExpireTime(0) {

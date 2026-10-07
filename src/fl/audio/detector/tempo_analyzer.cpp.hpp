@@ -8,7 +8,7 @@ namespace fl {
 namespace audio {
 namespace detector {
 
-TempoAnalyzer::TempoAnalyzer()
+TempoAnalyzer::TempoAnalyzer() FL_NO_EXCEPT
     : mCurrentBPM(120.0f)
     , mConfidence(0.0f)
     , mIsStable(false)
@@ -34,7 +34,7 @@ TempoAnalyzer::TempoAnalyzer()
 
 TempoAnalyzer::~TempoAnalyzer() FL_NO_EXCEPT = default;
 
-void TempoAnalyzer::update(shared_ptr<Context> context) {
+void TempoAnalyzer::update(shared_ptr<Context> context) FL_NO_EXCEPT {
     mRetainedFFT = context->getFFT16();
     const fft::Bins& fft = *mRetainedFFT;
     u32 timestamp = context->getTimestamp();
@@ -92,7 +92,7 @@ void TempoAnalyzer::update(shared_ptr<Context> context) {
     mPreviousBPM = mCurrentBPM;
 }
 
-void TempoAnalyzer::fireCallbacks() {
+void TempoAnalyzer::fireCallbacks() FL_NO_EXCEPT {
     if (onTempo) {
         onTempo(mCurrentBPM);
     }
@@ -111,7 +111,7 @@ void TempoAnalyzer::fireCallbacks() {
     mWasStable = mIsStable;
 }
 
-void TempoAnalyzer::reset() {
+void TempoAnalyzer::reset() FL_NO_EXCEPT {
     mCurrentBPM = 120.0f;
     mConfidence = 0.0f;
     mIsStable = false;

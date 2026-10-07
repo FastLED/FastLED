@@ -6,7 +6,7 @@
 
 namespace fl {
 
-string &string::append(const XYMap &map) {
+string &string::append(const XYMap &map) FL_NO_EXCEPT {
     append("XYMap(");
     append(map.getWidth());
     append(",");

@@ -81,7 +81,6 @@ const UNITY_EXPECTED_BUILD_FILES: &[&str] = &[
     "fl/build/fl.stl.json_writer+.cpp",
     "fl/build/fl.stl.stdio+.cpp",
     "fl/build/fl.stl.stream_io+.cpp",
-    "fl/build/fl.stl.string_operations+.cpp",
     "fl/build/fl.stl.asio+.cpp",
     "fl/build/fl.system+.cpp",
     "fl/build/fl.system.gpio+.cpp",

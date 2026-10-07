@@ -73,7 +73,7 @@ void Key::getKeyName(char* buffer, size_t bufferSize) const {
 // KeyDetector implementation
 //------------------------------------------------------------------------------
 
-KeyDetector::KeyDetector()
+KeyDetector::KeyDetector() FL_NO_EXCEPT
     : mCurrentKey()
     , mPreviousKey()
     , mKeyStartTime(0)
@@ -115,7 +115,7 @@ void KeyDetector::initializeProfileStats() {
     mMinorProfileStdDev = fl::sqrtf(minorSqSum / 12.0f - mMinorProfileMean * mMinorProfileMean);
 }
 
-void KeyDetector::update(shared_ptr<Context> context) {
+void KeyDetector::update(shared_ptr<Context> context) FL_NO_EXCEPT {
     // Get fft::FFT data
     mRetainedFFT = context->getFFT(32);  // Use more bins for better pitch resolution
     const fft::Bins& fft = *mRetainedFFT;
@@ -186,7 +186,7 @@ void KeyDetector::update(shared_ptr<Context> context) {
     if (mKeyActive) mFireKey = true;
 }
 
-void KeyDetector::reset() {
+void KeyDetector::reset() FL_NO_EXCEPT {
     mCurrentKey = Key();
     mPreviousKey = Key();
     mKeyStartTime = 0;
@@ -369,7 +369,7 @@ float KeyDetector::correlateWithProfile(const float* chroma, const float* profil
     return correlation;
 }
 
-void KeyDetector::fireCallbacks() {
+void KeyDetector::fireCallbacks() FL_NO_EXCEPT {
     if (mFireKeyEnd) {
         if (onKeyEnd) onKeyEnd();
         mFireKeyEnd = false;

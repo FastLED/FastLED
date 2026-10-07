@@ -8,7 +8,7 @@ namespace fl {
 namespace audio {
 namespace detector {
 
-MusicalBeat::MusicalBeat() = default;
+MusicalBeat::MusicalBeat() FL_NO_EXCEPT = default;
 
 MusicalBeat::MusicalBeat(const MusicalBeatDetectorConfig& config) {
     configure(config);

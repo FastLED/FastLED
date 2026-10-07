@@ -7,7 +7,7 @@ namespace fl {
 namespace audio {
 namespace detector {
 
-Pitch::Pitch()
+Pitch::Pitch() FL_NO_EXCEPT
     : mCurrentPitch(0.0f)
     , mSmoothedPitch(0.0f)
     , mConfidence(0.0f)
@@ -29,7 +29,7 @@ Pitch::Pitch()
 
 Pitch::~Pitch() FL_NO_EXCEPT = default;
 
-void Pitch::update(shared_ptr<Context> context) {
+void Pitch::update(shared_ptr<Context> context) FL_NO_EXCEPT {
     // Get PCM data from context
     span<const i16> pcm = context->getPCM();
     size numSamples = pcm.size();
@@ -70,7 +70,7 @@ void Pitch::update(shared_ptr<Context> context) {
     mVoicedStateChanged = (mIsVoiced != mPreviousVoiced);
 }
 
-void Pitch::fireCallbacks() {
+void Pitch::fireCallbacks() FL_NO_EXCEPT {
     if (mFirePitch) {
         if (onPitch) onPitch(mSmoothedPitch);
         if (onPitchWithConfidence) onPitchWithConfidence(mSmoothedPitch, mConfidence);
@@ -87,7 +87,7 @@ void Pitch::fireCallbacks() {
     }
 }
 
-void Pitch::reset() {
+void Pitch::reset() FL_NO_EXCEPT {
     mCurrentPitch = 0.0f;
     mSmoothedPitch = 0.0f;
     mConfidence = 0.0f;

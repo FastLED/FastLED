@@ -145,7 +145,7 @@ public:
     void removeFromDrawList();
 
     /// @brief Get the number of LEDs in this channel
-    int size() const override;
+    int size() const FL_NO_EXCEPT override;
 
 #if FL_COLOR_PROFILE_RUNTIME
     /// How a channel stores the colour pipeline its binding describes.
@@ -170,7 +170,7 @@ public:
 #endif
 
     /// @brief Show the LEDs with optional brightness scaling
-    void showLeds(u8 brightness = 255) OVERRIDE_IF_NOT_AVR;
+    void showLeds(u8 brightness = 255) FL_NO_EXCEPT OVERRIDE_IF_NOT_AVR;
 
     /// @brief Check if this channel is in the controller draw list
     bool isInDrawList() const;
@@ -302,7 +302,7 @@ protected:
     // CPixelLEDController interface implementation - protected so subclass delegates
     // (e.g., UCS7604's DelegateController) can call through the base class chain.
     void showPixels(PixelController<RGB, 1, 0xFFFFFFFF>& pixels) override;
-    void init() override;
+    void init() FL_NO_EXCEPT override;
     using PixelEncoder = void (*)(Channel&, PixelIterator&, bool,
                                   fl::vector_psram<u8>&);
 

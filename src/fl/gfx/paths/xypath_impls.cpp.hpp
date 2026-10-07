@@ -47,9 +47,9 @@ vec2f CirclePath::compute(float alpha) {
     return vec2f(x, y);
 }
 
-CirclePath::CirclePath() {}
+CirclePath::CirclePath() FL_NO_EXCEPT {}
 
-HeartPath::HeartPath() {}
+HeartPath::HeartPath() FL_NO_EXCEPT {}
 
 vec2f HeartPath::compute(float alpha) {
     // Parametric equation for a heart shape

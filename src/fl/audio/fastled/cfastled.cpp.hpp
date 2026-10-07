@@ -17,22 +17,22 @@
 // ============================================================================
 
 FL_MAYBE_UNUSED
-fl::shared_ptr<fl::audio::Processor> CFastLED::add(const fl::audio::Config& config) FL_NO_EXCEPT {
+fl::shared_ptr<fl::audio::Processor> CFastLED::add(const fl::audio::Config& config) {
 	return fl::audio::AudioManager::instance().add(config);
 }
 
 FL_MAYBE_UNUSED
-fl::shared_ptr<fl::audio::Processor> CFastLED::add(fl::shared_ptr<fl::audio::IInput> input) FL_NO_EXCEPT {
+fl::shared_ptr<fl::audio::Processor> CFastLED::add(fl::shared_ptr<fl::audio::IInput> input) {
 	return fl::audio::AudioManager::instance().add(fl::move(input));
 }
 
 FL_MAYBE_UNUSED
-fl::shared_ptr<fl::audio::Processor> CFastLED::add(fl::UIAudio& uiAudio) FL_NO_EXCEPT {
+fl::shared_ptr<fl::audio::Processor> CFastLED::add(fl::UIAudio& uiAudio) {
 	return fl::audio::AudioManager::instance().add(uiAudio);
 }
 
 FL_MAYBE_UNUSED
-void CFastLED::remove(fl::shared_ptr<fl::audio::Processor> processor) FL_NO_EXCEPT {
+void CFastLED::remove(fl::shared_ptr<fl::audio::Processor> processor) {
 	fl::audio::AudioManager::instance().remove(fl::move(processor));
 }
 

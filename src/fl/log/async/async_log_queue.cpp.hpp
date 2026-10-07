@@ -18,7 +18,7 @@ namespace fl {
 // ============================================================================
 
 template <fl::size DescriptorCount, fl::size ArenaSize>
-AsyncLogQueue<DescriptorCount, ArenaSize>::Descriptor::Descriptor()
+AsyncLogQueue<DescriptorCount, ArenaSize>::Descriptor::Descriptor() FL_NO_EXCEPT
     : mStartIdx(0), mLength(0), mPadding(0) {}
 
 // ============================================================================
@@ -26,7 +26,7 @@ AsyncLogQueue<DescriptorCount, ArenaSize>::Descriptor::Descriptor()
 // ============================================================================
 
 template <fl::size DescriptorCount, fl::size ArenaSize>
-AsyncLogQueue<DescriptorCount, ArenaSize>::AsyncLogQueue()
+AsyncLogQueue<DescriptorCount, ArenaSize>::AsyncLogQueue() FL_NO_EXCEPT
     : mHead(0), mTail(0), mArenaHead(0), mArenaTail(0), mDropped(0) {
     // Initialize all descriptors to zero (optional, for debugging)
     for (fl::size i = 0; i < DescriptorCount; i++) {

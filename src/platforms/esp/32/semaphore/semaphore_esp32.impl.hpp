@@ -36,7 +36,7 @@ namespace platforms {
 //=============================================================================
 
 template<ptrdiff_t LeastMaxValue>
-CountingSemaphoreESP32<LeastMaxValue>::CountingSemaphoreESP32(ptrdiff_t desired)
+CountingSemaphoreESP32<LeastMaxValue>::CountingSemaphoreESP32(ptrdiff_t desired) FL_NO_EXCEPT
     : mHandle(nullptr) {
     FL_ASSERT(desired >= 0 && desired <= LeastMaxValue,
              "CountingSemaphoreESP32: initial count out of range");
@@ -64,7 +64,7 @@ CountingSemaphoreESP32<LeastMaxValue>::~CountingSemaphoreESP32() {
 }
 
 template<ptrdiff_t LeastMaxValue>
-void CountingSemaphoreESP32<LeastMaxValue>::release(ptrdiff_t update) {
+void CountingSemaphoreESP32<LeastMaxValue>::release(ptrdiff_t update) FL_NO_EXCEPT {
     FL_ASSERT(update >= 0, "CountingSemaphoreESP32: release update must be non-negative");
     FL_ASSERT(mHandle != nullptr, "CountingSemaphoreESP32::release() called on null semaphore");
 
@@ -92,7 +92,7 @@ void CountingSemaphoreESP32<LeastMaxValue>::release(ptrdiff_t update) {
 }
 
 template<ptrdiff_t LeastMaxValue>
-void CountingSemaphoreESP32<LeastMaxValue>::acquire() {
+void CountingSemaphoreESP32<LeastMaxValue>::acquire() FL_NO_EXCEPT {
     FL_ASSERT(mHandle != nullptr, "CountingSemaphoreESP32::acquire() called on null semaphore");
 
     SemaphoreHandle_t handle = static_cast<SemaphoreHandle_t>(mHandle);
@@ -104,7 +104,7 @@ void CountingSemaphoreESP32<LeastMaxValue>::acquire() {
 }
 
 template<ptrdiff_t LeastMaxValue>
-bool CountingSemaphoreESP32<LeastMaxValue>::try_acquire() {
+bool CountingSemaphoreESP32<LeastMaxValue>::try_acquire() FL_NO_EXCEPT {
     if (mHandle == nullptr) {
         return false;
     }
@@ -137,7 +137,7 @@ bool CountingSemaphoreESP32<LeastMaxValue>::try_acquire_for_ms(fl::u32 timeout_m
 template<ptrdiff_t LeastMaxValue>
 template<class Rep, class Period>
 bool CountingSemaphoreESP32<LeastMaxValue>::try_acquire_for(
-    const std::chrono::duration<Rep, Period>& rel_time) {  // okay std namespace
+    const std::chrono::duration<Rep, Period>& rel_time) FL_NO_EXCEPT {  // okay std namespace
 
     if (mHandle == nullptr) {
         return false;
@@ -162,7 +162,7 @@ bool CountingSemaphoreESP32<LeastMaxValue>::try_acquire_for(
 template<ptrdiff_t LeastMaxValue>
 template<class Clock, class Duration>
 bool CountingSemaphoreESP32<LeastMaxValue>::try_acquire_until(
-    const std::chrono::time_point<Clock, Duration>& abs_time) {  // okay std namespace
+    const std::chrono::time_point<Clock, Duration>& abs_time) FL_NO_EXCEPT {  // okay std namespace
 
     // Convert absolute time to relative duration
     auto now = Clock::now();

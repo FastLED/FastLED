@@ -17,11 +17,11 @@ public:
     ~DynamicsAnalyzer() FL_NO_EXCEPT override;
 
     // Detector interface
-    void update(shared_ptr<Context> context) override;
-    void fireCallbacks() override;
-    bool needsFFT() const override { return false; }
-    const char* getName() const override { return "DynamicsAnalyzer"; }
-    void reset() override;
+    void update(shared_ptr<Context> context) FL_NO_EXCEPT override;
+    void fireCallbacks() FL_NO_EXCEPT override;
+    bool needsFFT() const FL_NO_EXCEPT override { return false; }
+    const char* getName() const FL_NO_EXCEPT override { return "DynamicsAnalyzer"; }
+    void reset() FL_NO_EXCEPT override;
 
     // Callbacks (multiple listeners supported)
     function_list<void()> onCrescendo;          // Loudness increasing

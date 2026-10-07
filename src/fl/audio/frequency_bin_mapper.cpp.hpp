@@ -10,7 +10,7 @@
 namespace fl {
 namespace audio {
 
-FrequencyBinMapper::FrequencyBinMapper() {
+FrequencyBinMapper::FrequencyBinMapper() FL_NO_EXCEPT {
     configure(FrequencyBinMapperConfig());
 }
 

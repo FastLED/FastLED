@@ -7,7 +7,7 @@ namespace fl {
 
 // WLED Constructor and Stub Implementations
 
-WLED::WLED()
+WLED::WLED() FL_NO_EXCEPT
     : Remote(
         [this]() { return stubRequestSource(); },
         [this](const fl::json& response) { stubResponseSink(response); }

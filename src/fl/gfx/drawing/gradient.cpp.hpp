@@ -99,7 +99,7 @@ CRGB Gradient::colorAt(u8 index) const {
 
 template <typename T> Gradient::Gradient(T *palette) { set(palette); }
 
-Gradient::Gradient(const Gradient &other) : mVariant(other.mVariant) {}
+Gradient::Gradient(const Gradient &other) FL_NO_EXCEPT : mVariant(other.mVariant) {}
 
 Gradient::Gradient(Gradient &&other) FL_NO_EXCEPT
     : mVariant(move(other.mVariant)) {}

@@ -35,11 +35,11 @@ public:
     explicit Note(shared_ptr<Pitch> pitchDetector);
     ~Note() FL_NO_EXCEPT override;
 
-    void update(shared_ptr<Context> context) override;
-    void fireCallbacks() override;
-    bool needsFFT() const override { return false; }  // Uses pitch detection
-    const char* getName() const override { return "Note"; }
-    void reset() override;
+    void update(shared_ptr<Context> context) FL_NO_EXCEPT override;
+    void fireCallbacks() FL_NO_EXCEPT override;
+    bool needsFFT() const FL_NO_EXCEPT override { return false; }  // Uses pitch detection
+    const char* getName() const FL_NO_EXCEPT override { return "Note"; }
+    void reset() FL_NO_EXCEPT override;
 
     // Callbacks (multiple listeners supported)
     function_list<void(u8 note, u8 velocity)> onNoteOn;   // Note started

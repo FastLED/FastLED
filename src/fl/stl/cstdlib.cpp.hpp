@@ -18,7 +18,7 @@ namespace fl {
 // fl::aligned_alloc / fl::aligned_free
 // ============================================================================
 
-void *aligned_alloc(fl::size_t alignment, fl::size_t size) {
+void *aligned_alloc(fl::size_t alignment, fl::size_t size) FL_NO_EXCEPT {
 #if defined(FL_IS_AVR) || defined(FL_IS_ESP8266) || defined(FL_IS_ARM) || \
     defined(FL_IS_APOLLO3) || defined(FL_IS_CI13XX)
     // Many bare-metal toolchains (newlib-nano on STM32, nRF52, SAMD, RP2040,
@@ -42,7 +42,7 @@ void *aligned_alloc(fl::size_t alignment, fl::size_t size) {
 #endif
 }
 
-void aligned_free(void *ptr) {
+void aligned_free(void *ptr) FL_NO_EXCEPT {
 #if defined(FL_IS_AVR) || defined(FL_IS_ESP8266) || defined(FL_IS_ARM) || \
     defined(FL_IS_APOLLO3) || defined(FL_IS_CI13XX)
     ::free(ptr);
@@ -84,7 +84,7 @@ static int charToDigit(char c) {
     return 0;
 }
 
-long strtol(const char* str, char** endptr, int base) {
+long strtol(const char* str, char** endptr, int base) FL_NO_EXCEPT {
     if (!str) {
         if (endptr) {
             *endptr = const_cast<char*>(str);
@@ -157,7 +157,7 @@ long strtol(const char* str, char** endptr, int base) {
     return negative ? -result : result;
 }
 
-unsigned long strtoul(const char* str, char** endptr, int base) {
+unsigned long strtoul(const char* str, char** endptr, int base) FL_NO_EXCEPT {
     if (!str) {
         if (endptr) {
             *endptr = const_cast<char*>(str);
@@ -229,15 +229,15 @@ unsigned long strtoul(const char* str, char** endptr, int base) {
     return result;
 }
 
-int atoi(const char* str) {
+int atoi(const char* str) FL_NO_EXCEPT {
     return static_cast<int>(strtol(str, nullptr, 10));
 }
 
-long atol(const char* str) {
+long atol(const char* str) FL_NO_EXCEPT {
     return strtol(str, nullptr, 10);
 }
 
-double strtod(const char* str, char** endptr) {
+double strtod(const char* str, char** endptr) FL_NO_EXCEPT {
     if (!str) {
         if (endptr) {
             *endptr = const_cast<char*>(str);
@@ -439,7 +439,7 @@ void detail::qsort_impl(char* base, size_t nmemb, size_t size, qsort_compare_fn 
 }
 
 // qsort - Direct implementation without using fl::sort to avoid proxy iterator issues
-void qsort(void* base, size_t nmemb, size_t size, qsort_compare_fn compar) {
+void qsort(void* base, size_t nmemb, size_t size, qsort_compare_fn compar) FL_NO_EXCEPT {
     if (!base || nmemb <= 1 || size == 0 || !compar) {
         return;
     }
@@ -448,13 +448,13 @@ void qsort(void* base, size_t nmemb, size_t size, qsort_compare_fn compar) {
     detail::qsort_impl(arr, nmemb, size, compar);
 }
 
-u32 rand() {
+u32 rand() FL_NO_EXCEPT {
     return static_cast<u32>(::rand());
 }
 
 // Get the value of an environment variable
 // Only functional on FL_IS_STUB (stub platform), returns nullptr otherwise
-const char* getenv(const char* name) {
+const char* getenv(const char* name) FL_NO_EXCEPT {
 #ifdef FL_IS_STUB
     return ::getenv(name);
 #else

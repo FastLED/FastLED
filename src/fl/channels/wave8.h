@@ -88,7 +88,7 @@ void buildWave8ByteExpansionLUT(const Wave8BitExpansionLut &nibble,
 // Forward declaration; implementation is out-of-line in detail/wave8.cpp.hpp
 void wave8(u8 lane,
            const Wave8BitExpansionLut &lut,
-           u8 (&FL_RESTRICT_PARAM output)[sizeof(Wave8Byte)]);
+           u8 (&FL_RESTRICT_PARAM output)[sizeof(Wave8Byte)]) FL_NO_EXCEPT;
 
 // Public transposition functions (implementations in wave8.cpp)
 void wave8Transpose_2(
