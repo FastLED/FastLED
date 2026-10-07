@@ -8,7 +8,7 @@
 /// (isAvailable() == false) and create() returns nullptr.
 /// Platforms register via ICoroutinePlatform::setInstance().
 
-#include "platforms/coroutine_runtime.h"
+#include "platforms/coroutine_runtime.h" // ok no header - public declarations remain in platform runtime header.
 #include "fl/stl/singleton.h"
 #include "fl/log/log.h"
 #include "fl/stl/noexcept.h"

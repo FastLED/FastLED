@@ -1,4 +1,4 @@
-#include "fl/system/heap.h"
+#include "fl/system/heap.h" // ok no header - public declaration remains in parent directory.
 
 // Platform-specific headers
 #include "platforms/is_platform.h"  // IWYU pragma: keep (needed for FL_IS_* macros)

@@ -235,7 +235,7 @@ const INT_TEMPLATE_ARG_BASELINE: &[(&str, usize)] = &[
     ("src/fl/system/pins.cpp.hpp", 3),
     ("src/fl/system/static_constexpr_defs.cpp.hpp", 6),
     ("src/fl/system/trace.h", 1),
-    ("src/fl/task/executor.cpp.hpp", 1),
+    ("src/fl/task/runners/executor.cpp.hpp", 1),
     ("src/fl/task/promise.h", 3),
     ("src/fl/task/scheduler.h", 1),
     ("src/fl/task/task.cpp.hpp", 1),

@@ -1,3 +1,8 @@
+# 2026-10-07, issue #4707 thirteenth pass: hosted image_flash=356087 B,
+# run 37609021383 at 0fac22cb76; local 356071 B. Optional mock/RP,
+# effects and floating formatting units save another 4 B on S3 and
+# 2392 B on legacy real RMT4 Blink (317061 B). Pin the exact result.
+
 # 2026-10-07, issue #4707 twelfth pass: hosted image_flash=356091 B,
 # run 37606602152 at f00e266e57; local 356075 B. Optional drawing,
 # waveform and interner units save 136 B on S3 and 6920 B on
@@ -392,4 +397,4 @@
 # the CI Blink report contains no ResponseLutsQ16 symbol. The local fbuild
 # symbol total remains ~4 KB higher for the same source (FastLED/fbuild#1456),
 # so this ratchet uses the CI measurement from PR #4511.
-356091
+356087
