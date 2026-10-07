@@ -1,5 +1,10 @@
 # Lessons Learned
 
+- A forced single-test pass is not proof that a newly added case ran. Check
+  the compiled module when the build unexpectedly does no compilation; use
+  the official clean wrapper to regenerate it. Both early and main cache
+  shortcuts must honor --force (#4707 exposed the missing main guard).
+
 - For size trials, compare the same JSON `image_flash` field in both saved
   reports. The bloat wrapper's CLI `Firmware flash` line is a different metric;
   comparing it with an `image_flash` baseline incorrectly rejected two #4707

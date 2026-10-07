@@ -448,8 +448,8 @@ class ChannelEngineRMTImpl final : public ChannelEngineRMT {
               transmissionComplete(false),
               inUse(false),
               useDMA(false),
-              pooledBuffer(),
-              memoryChannelId(0) {}
+              memoryChannelId(0),
+              pooledBuffer() {}
 
         ChannelState(const ChannelState& other) FL_NO_EXCEPT
             : owner(other.owner),
@@ -460,8 +460,8 @@ class ChannelEngineRMTImpl final : public ChannelEngineRMT {
               transmissionComplete(other.transmissionComplete.load(fl::memory_order_acquire)),
               inUse(other.inUse),
               useDMA(other.useDMA),
-              pooledBuffer(other.pooledBuffer),
-              memoryChannelId(other.memoryChannelId) {}
+              memoryChannelId(other.memoryChannelId),
+              pooledBuffer(other.pooledBuffer) {}
 
         ChannelState& operator=(const ChannelState& other) FL_NO_EXCEPT {
             if (this != &other) {
@@ -496,10 +496,10 @@ class ChannelEngineRMTImpl final : public ChannelEngineRMT {
         fl::atomic_bool transmissionComplete;
         bool inUse;
         bool useDMA; // Whether this channel uses DMA
+        u8 memoryChannelId; // Virtual channel ID for memory manager
+                           // accounting (vector index)
         fl::span<u8> pooledBuffer; // Buffer acquired from pool (must be
                                         // released on complete)
-        u8 memoryChannelId;        // Virtual channel ID for memory manager
-                                        // accounting (vector index)
     };
 
     /// @brief Begin LED data transmission for all channels (internal)
