@@ -1,3 +1,5 @@
+// ok no header - public declarations remain in fl/log/async_log_queue.h.
+
 /// @file fl/log/async_log_queue.cpp
 /// @brief High-performance ISR-safe async logging queue implementation
 
