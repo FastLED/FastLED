@@ -60,7 +60,7 @@ class TestFileFiltering(unittest.TestCase):
     def test_cpp_hpp_skipped(self) -> None:
         self.assertFalse(
             NoexceptFunctionChecker().should_process_file(
-                "src/platforms/esp/32/condition_variable_esp32.cpp.hpp"
+                "src/platforms/esp/32/condition_variable/condition_variable_esp32.cpp.hpp"
             )
         )
 

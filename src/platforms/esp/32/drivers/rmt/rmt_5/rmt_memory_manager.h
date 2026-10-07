@@ -430,15 +430,11 @@ private:
     struct MemoryLedger {
         bool is_global_pool;        ///< true = global pool (ESP32/S2), false = dedicated pools (S3/C3/C6/H2)
 
-        // Global pool fields (used when is_global_pool = true)
-        size_t total_words;         ///< Total memory available (global pool only)
-        size_t allocated_words;     ///< Currently allocated memory (global pool only)
-
-        // Dedicated pool fields (used when is_global_pool = false)
-        size_t total_tx_words;      ///< Total TX memory available (dedicated pools only)
-        size_t total_rx_words;      ///< Total RX memory available (dedicated pools only)
-        size_t allocated_tx_words;  ///< Currently allocated TX memory (dedicated pools only)
-        size_t allocated_rx_words;  ///< Currently allocated RX memory (dedicated pools only)
+        // Global pools use total_tx_words as the shared capacity and total_rx_words = 0.
+        size_t total_tx_words;      ///< Shared capacity or dedicated TX capacity
+        size_t total_rx_words;      ///< Dedicated RX capacity; zero for a global pool
+        size_t allocated_tx_words;  ///< Currently allocated TX memory
+        size_t allocated_rx_words;  ///< Currently allocated RX memory
 
         // External reservation tracking (user-controlled accounting for non-FastLED RMT usage)
         size_t reserved_tx_words;   ///< TX words reserved for external RMT usage

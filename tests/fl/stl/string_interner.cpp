@@ -11,6 +11,21 @@
 
 FL_TEST_FILE(FL_FILEPATH) {
 
+FL_TEST_CASE("Global interner scoped locks release between public overloads") {
+    const char text[] =
+        "global_interner_scoped_lock_overloads_share_this_string_longer_than_the_sso_buffer";
+    fl::string from_chars = fl::intern(text);
+    fl::string from_view = fl::intern(fl::string_view(text));
+    fl::string input(text);
+    fl::string from_string = fl::intern(input);
+    fl::string from_span = fl::intern(fl::span<const char>(text, sizeof(text) - 1));
+
+    FL_CHECK_EQ(from_chars, input);
+    FL_CHECK_EQ(from_view.c_str(), from_chars.c_str());
+    FL_CHECK_EQ(from_string.c_str(), from_chars.c_str());
+    FL_CHECK_EQ(from_span.c_str(), from_chars.c_str());
+}
+
 FL_TEST_CASE("StringInterner - basic interning") {
     fl::StringInterner interner;
     // Use string > 64 bytes (SSO threshold) to trigger actual interning

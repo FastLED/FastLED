@@ -136,8 +136,6 @@ void RmtMemoryManager::initPlatformLimits(size_t& total_tx, size_t& total_rx) FL
 
 RmtMemoryManager::MemoryLedger::MemoryLedger() FL_NO_EXCEPT
     : is_global_pool(false)
-    , total_words(0)
-    , allocated_words(0)
     , total_tx_words(0)
     , total_rx_words(0)
     , allocated_tx_words(0)
@@ -148,18 +146,10 @@ RmtMemoryManager::MemoryLedger::MemoryLedger() FL_NO_EXCEPT
     size_t tx_limit = 0, rx_limit = 0;
     initPlatformLimits(tx_limit, rx_limit);
 
-#if defined(FL_IS_ESP_32DEV) || defined(FL_IS_ESP_32S2)
-    // Global pool platforms
-    is_global_pool = true;
-    total_words = tx_limit;  // tx_limit holds total pool size for global platforms
-    allocated_words = 0;
-#else
-    // Dedicated pool platforms
-    is_global_pool = false;
     total_tx_words = tx_limit;
     total_rx_words = rx_limit;
-    allocated_tx_words = 0;
-    allocated_rx_words = 0;
+#if defined(FL_IS_ESP_32DEV) || defined(FL_IS_ESP_32S2)
+    is_global_pool = true;
 #endif
 }
 
@@ -182,23 +172,9 @@ RmtMemoryManager::RmtMemoryManager(size_t total_tx, size_t total_rx, bool is_glo
     , mNetworkBlocks(3) {
 
     mLedger.is_global_pool = is_global;
-
-    if (is_global) {
-        // Global pool mode (ESP32, ESP32-S2)
-        mLedger.total_words = total_tx;  // total_tx holds global pool size
-        mLedger.allocated_words = 0;
-        mLedger.total_tx_words = 0;
-        mLedger.total_rx_words = 0;
-        FL_DBG("RMT Memory Manager (TEST): " << total_tx << " words GLOBAL POOL");
-    } else {
-        // Dedicated pool mode (ESP32-S3, C3, C6, H2)
-        mLedger.total_tx_words = total_tx;
-        mLedger.total_rx_words = total_rx;
-        mLedger.allocated_tx_words = 0;
-        mLedger.allocated_rx_words = 0;
-        mLedger.total_words = 0;
-        FL_DBG("RMT Memory Manager (TEST): TX=" << total_tx << " words, RX=" << total_rx << " words (DEDICATED pools)");
-    }
+    mLedger.total_tx_words = total_tx;
+    mLedger.total_rx_words = is_global ? 0 : total_rx;
+    FL_DBG("RMT Memory Manager (TEST): TX=" << total_tx << " words, RX=" << mLedger.total_rx_words << " words, global=" << is_global);
 }
 
 RmtMemoryManager& RmtMemoryManager::instance() FL_NO_EXCEPT {
@@ -261,8 +237,8 @@ size_t RmtMemoryManager::calculateMemoryBlocks(bool networkActive) FL_NO_EXCEPT 
     // Example ESP32-S3 (192 words total):
     // - Channel 0: 96 words (2 blocks) → 96 remaining → only 2 channels fit ✗
     // - With adaptive: Channel 0: 48 words → 144 remaining → 4 channels fit ✓
-    size_t total_memory = mgr.mLedger.is_global_pool ? mgr.mLedger.total_words : mgr.mLedger.total_tx_words;
-    size_t allocated_memory = mgr.mLedger.is_global_pool ? mgr.mLedger.allocated_words : mgr.mLedger.allocated_tx_words;
+    size_t total_memory = mgr.mLedger.total_tx_words;
+    size_t allocated_memory = mgr.mLedger.is_global_pool ? (mgr.mLedger.allocated_tx_words + mgr.mLedger.allocated_rx_words) : mgr.mLedger.allocated_tx_words;
     size_t available_memory = (total_memory > allocated_memory) ? (total_memory - allocated_memory) : 0;
 
     // Count ONLY TX channels (RX channels use separate pool on S3/C3/C6)
@@ -519,8 +495,8 @@ RmtMemoryManager::handleAllocateTxFailure(u8 channel_id, size_t mem_blocks,
     // bodies collapse to do-while-0, but the locals they feed (including
     // the getAvailableWords() call + 3 mLedger reads) still run. See #2956.
 #if FASTLED_LOG_RUNTIME_ENABLED
-    size_t total = mLedger.is_global_pool ? mLedger.total_words : mLedger.total_tx_words;
-    size_t allocated = mLedger.is_global_pool ? mLedger.allocated_words : mLedger.allocated_tx_words;
+    size_t total = mLedger.total_tx_words;
+    size_t allocated = mLedger.is_global_pool ? (mLedger.allocated_tx_words + mLedger.allocated_rx_words) : mLedger.allocated_tx_words;
     size_t reserved = mLedger.reserved_tx_words;
     size_t available = getAvailableWords(true);
 
@@ -556,8 +532,8 @@ RmtMemoryManager::AllocationStatus RmtMemoryManager::allocateRxImpl(u8 channel_i
     // Try to allocate from appropriate pool
     if (!tryAllocateWords(words_needed, false)) {
         // Calculate detailed memory breakdown for diagnostic message
-        size_t total = mLedger.is_global_pool ? mLedger.total_words : mLedger.total_rx_words;
-        size_t allocated = mLedger.is_global_pool ? mLedger.allocated_words : mLedger.allocated_rx_words;
+        size_t total = mLedger.is_global_pool ? mLedger.total_tx_words : mLedger.total_rx_words;
+        size_t allocated = mLedger.is_global_pool ? (mLedger.allocated_tx_words + mLedger.allocated_rx_words) : mLedger.allocated_rx_words;
         size_t reserved = mLedger.reserved_rx_words;
         size_t available = getAvailableWords(false);
 
@@ -687,16 +663,9 @@ void RmtMemoryManager::recordRecoveryAllocation(u8 channel_id, size_t words, boo
     }
     recordAllocation(ChannelAllocation(channel_id, words, is_tx, false));
 
-    // Update accounting (the memory is in use even though we didn't formally allocate it)
-    if (mLedger.is_global_pool) {
-        mLedger.allocated_words += words;
-    } else {
-        if (is_tx) {
-            mLedger.allocated_tx_words += words;
-        } else {
-            mLedger.allocated_rx_words += words;
-        }
-    }
+    // Recovery records consume the same directional accounting as normal allocations.
+    size_t& allocated = is_tx ? mLedger.allocated_tx_words : mLedger.allocated_rx_words;
+    allocated += words;
 
     FL_LOG_RMT("RMT " << ((is_tx ? "TX" : "RX")) << " channel " << (static_cast<int>(channel_id)) << " recovery allocation recorded: " << words << " words");
 }
@@ -733,13 +702,8 @@ size_t RmtMemoryManager::getAllocatedWords(u8 channel_id, bool is_tx) const FL_N
 void RmtMemoryManager::reset() FL_NO_EXCEPT {
     FL_LOG_RMT("RMT Memory Manager reset - clearing all allocations");
 
-    // Reset appropriate fields based on pool architecture
-    if (mLedger.is_global_pool) {
-        mLedger.allocated_words = 0;
-    } else {
-        mLedger.allocated_tx_words = 0;
-        mLedger.allocated_rx_words = 0;
-    }
+    mLedger.allocated_tx_words = 0;
+    mLedger.allocated_rx_words = 0;
 
     mLedger.allocations.clear();
     mDMAAllocation.allocated = false;
@@ -752,49 +716,19 @@ void RmtMemoryManager::reset() FL_NO_EXCEPT {
 // ============================================================================
 
 size_t RmtMemoryManager::getTotalTxWords() const FL_NO_EXCEPT {
-    if (mLedger.is_global_pool) {
-        return mLedger.total_words;  // Global pool total
-    } else {
-        return mLedger.total_tx_words;  // Dedicated TX pool
-    }
+    return mLedger.total_tx_words;
 }
 
 size_t RmtMemoryManager::getTotalRxWords() const FL_NO_EXCEPT {
-    if (mLedger.is_global_pool) {
-        return 0;  // Global pool doesn't have separate RX total
-    } else {
-        return mLedger.total_rx_words;  // Dedicated RX pool
-    }
+    return mLedger.total_rx_words;
 }
 
 size_t RmtMemoryManager::getAllocatedTxWords() const FL_NO_EXCEPT {
-    if (mLedger.is_global_pool) {
-        // For global pool, calculate TX words from allocations
-        size_t tx_words = 0;
-        for (const auto& alloc : mLedger.allocations) {
-            if (alloc.is_tx) {
-                tx_words += alloc.words;
-            }
-        }
-        return tx_words;
-    } else {
-        return mLedger.allocated_tx_words;
-    }
+    return mLedger.allocated_tx_words;
 }
 
 size_t RmtMemoryManager::getAllocatedRxWords() const FL_NO_EXCEPT {
-    if (mLedger.is_global_pool) {
-        // For global pool, calculate RX words from allocations
-        size_t rx_words = 0;
-        for (const auto& alloc : mLedger.allocations) {
-            if (!alloc.is_tx) {
-                rx_words += alloc.words;
-            }
-        }
-        return rx_words;
-    } else {
-        return mLedger.allocated_rx_words;
-    }
+    return mLedger.allocated_rx_words;
 }
 
 bool RmtMemoryManager::hasActiveRxChannels() const FL_NO_EXCEPT {
@@ -960,7 +894,7 @@ void RmtMemoryManager::reserveExternalMemory(size_t tx_words, size_t rx_words) F
     if (mLedger.is_global_pool) {
         size_t total_reserved = tx_words + rx_words;
         FL_DBG("RMT External Reservation (GLOBAL pool): " << total_reserved << " words (TX:" << tx_words << " + RX:" << rx_words << ")");
-        FL_DBG("  Available after reservation: " << ((mLedger.total_words > total_reserved ? mLedger.total_words - total_reserved : 0)) << "/" << mLedger.total_words << " words");
+        FL_DBG("  Available after reservation: " << ((mLedger.total_tx_words > total_reserved ? mLedger.total_tx_words - total_reserved : 0)) << "/" << mLedger.total_tx_words << " words");
     } else {
         FL_DBG("RMT External Reservation (DEDICATED pools):");
         FL_DBG("  TX: " << tx_words << " words reserved, " << ((mLedger.total_tx_words > tx_words ? mLedger.total_tx_words - tx_words : 0)) << "/" << mLedger.total_tx_words << " available");
@@ -978,53 +912,34 @@ void RmtMemoryManager::getReservedMemory(size_t& tx_words, size_t& rx_words) con
 // ============================================================================
 
 size_t RmtMemoryManager::getAvailableWords(bool is_tx) const FL_NO_EXCEPT {
+    size_t total;
+    size_t reserved;
+    size_t allocated;
     if (mLedger.is_global_pool) {
-        // Global pool: return total available (shared with TX/RX, minus reservations)
-        size_t total_reserved = mLedger.reserved_tx_words + mLedger.reserved_rx_words;
-        size_t total_available = (mLedger.total_words > total_reserved) ? (mLedger.total_words - total_reserved) : 0;
-        return (total_available > mLedger.allocated_words) ? (total_available - mLedger.allocated_words) : 0;
+        total = mLedger.total_tx_words;
+        reserved = mLedger.reserved_tx_words + mLedger.reserved_rx_words;
+        allocated = mLedger.allocated_tx_words + mLedger.allocated_rx_words;
     } else {
-        // Dedicated pools: return pool-specific available (minus reservations)
-        if (is_tx) {
-            size_t available_tx = (mLedger.total_tx_words > mLedger.reserved_tx_words) ?
-                                  (mLedger.total_tx_words - mLedger.reserved_tx_words) : 0;
-            return (available_tx > mLedger.allocated_tx_words) ? (available_tx - mLedger.allocated_tx_words) : 0;
-        } else {
-            size_t available_rx = (mLedger.total_rx_words > mLedger.reserved_rx_words) ?
-                                  (mLedger.total_rx_words - mLedger.reserved_rx_words) : 0;
-            return (available_rx > mLedger.allocated_rx_words) ? (available_rx - mLedger.allocated_rx_words) : 0;
-        }
+        total = is_tx ? mLedger.total_tx_words : mLedger.total_rx_words;
+        reserved = is_tx ? mLedger.reserved_tx_words : mLedger.reserved_rx_words;
+        allocated = is_tx ? mLedger.allocated_tx_words : mLedger.allocated_rx_words;
     }
+    size_t available = total > reserved ? total - reserved : 0;
+    return available > allocated ? available - allocated : 0;
 }
 
 bool RmtMemoryManager::tryAllocateWords(size_t words_needed, bool is_tx) FL_NO_EXCEPT {
     if (words_needed > getAvailableWords(is_tx)) {
         return false;
     }
-
-    if (mLedger.is_global_pool) {
-        mLedger.allocated_words += words_needed;
-    } else {
-        if (is_tx) {
-            mLedger.allocated_tx_words += words_needed;
-        } else {
-            mLedger.allocated_rx_words += words_needed;
-        }
-    }
-
+    size_t& allocated = is_tx ? mLedger.allocated_tx_words : mLedger.allocated_rx_words;
+    allocated += words_needed;
     return true;
 }
 
 void RmtMemoryManager::freeWords(size_t words, bool is_tx) FL_NO_EXCEPT {
-    if (mLedger.is_global_pool) {
-        mLedger.allocated_words -= words;
-    } else {
-        if (is_tx) {
-            mLedger.allocated_tx_words -= words;
-        } else {
-            mLedger.allocated_rx_words -= words;
-        }
-    }
+    size_t& allocated = is_tx ? mLedger.allocated_tx_words : mLedger.allocated_rx_words;
+    allocated -= words;
 }
 
 } // namespace fl

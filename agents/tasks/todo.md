@@ -52,13 +52,34 @@ Third pass:
 - [x] Exercise real global-pool allocation, reservations, rollback and reset natively.
 - [x] Validate retained test coverage and publish the measured rejection.
 
-Unified accounting saved 8 B static RAM but increased default image flash:
-Blink 306,119 -> 306,176 B (+57 B), S3 357,663 -> 357,712 B (+49 B).
-Reverted production changes; retain the actual-production global-pool test.
+Unified accounting saved 8 B static RAM and default image flash:
+Blink 306,119 -> 306,055 B (-64 B), S3 357,663 -> 357,591 B (-72 B).
+Initially rejected by mistakenly comparing the CLI Firmware flash line with
+the saved JSON image_flash baseline; reintegrating the measured reduction.
 Corrected hosted gate 37582254539 passed completely at cb41f69ebd.
 Retained test passes against the unchanged production allocator with sanitizers;
 `bash test --cpp` reruns its changed unit successfully (other units/examples
 use their prior passing fingerprints). C++ lint and code review pass.
+
+Fourth pass:
+- [x] Trial production constant-clock encoder specialization:
+  Blink 306,091 B (-28 B), S3 357,639 B (-24 B). Reintegrate after correcting
+  the same mixed-metric error.
+- [x] Remove unnecessary locale initialization roots from scoped locks and
+  isolate unused ESP32 condition-variable code without changing synchronization.
+- [ ] Measure matching default images, validate behavior/build routing, review,
+  and publish the retained changes and remaining regression.
+
+Fourth-pass local image_flash: Blink 305,127 B, gist 298,023 B, S3 356,675 B.
+Blink/gist total master savings 8,640 B / 8,252 B; remaining 3.10.3 gaps
+17,438 B / 23,102 B. Static RAM drops another 328 B to 25,276 B / 26,060 B.
+Four locale initializers (816 B attributed) disappear after all scoped interner/UI
+guards use lock_guard and ESP32 condition-variable code has its own unity entry.
+An explicit ESP32 condition-variable wait sketch still links; the implementation
+move is byte-for-byte unchanged. Global interner, UI and allocator sanitizer
+tests pass. Hosted ratchet tightening follows the measured final hosted image.
+Full forced native run passes 319/319 units and 95/95 examples in 147.33 s;
+current-tree C++ lint and the 18-file code review pass.
 
 Use the default dynamic driver configuration. Keep scheduler pumping, network
 yielding, multiple strips, and reconfiguration available. Optimize symbol reachability

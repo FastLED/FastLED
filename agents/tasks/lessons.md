@@ -1,5 +1,10 @@
 # Lessons Learned
 
+- For size trials, compare the same JSON `image_flash` field in both saved
+  reports. The bloat wrapper's CLI `Firmware flash` line is a different metric;
+  comparing it with an `image_flash` baseline incorrectly rejected two #4707
+  reductions. Inspect saved artifacts before accepting or reverting a trial.
+
 - A prerequisite abstraction is not progress toward a niche feature when no
   production path uses it. PR #4534 added hundreds of lines of optional
   presentation-timing API, but no built-in driver produced measured events and

@@ -7,7 +7,6 @@
 // Root directory implementations (alphabetical order)
 
 // begin current directory includes
-#include "platforms/esp/32/condition_variable_esp32.cpp.hpp"
 #include "platforms/esp/32/init_esp32.cpp.hpp"
 #include "platforms/esp/32/io_esp.cpp.hpp"
 #include "platforms/esp/32/lwip_hooks.cpp.hpp"

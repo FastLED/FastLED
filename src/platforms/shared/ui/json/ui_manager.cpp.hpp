@@ -40,7 +40,7 @@ JsonUiManager::~JsonUiManager() {
 
 void JsonUiManager::addComponent(fl::weak_ptr<JsonUiInternal> component) FL_NO_EXCEPT {
     //FL_WARN("*** JsonUiManager::addComponent ENTRY ***");
-    fl::unique_lock<fl::mutex> lock(mMutex);
+    fl::lock_guard<fl::mutex> lock(mMutex);
     mComponents.insert(component);
     mItemsAdded = true;
     
@@ -52,7 +52,7 @@ void JsonUiManager::addComponent(fl::weak_ptr<JsonUiInternal> component) FL_NO_E
 }
 
 void JsonUiManager::removeComponent(fl::weak_ptr<JsonUiInternal> component) FL_NO_EXCEPT {
-    fl::unique_lock<fl::mutex> lock(mMutex);
+    fl::lock_guard<fl::mutex> lock(mMutex);
     mComponents.erase(component);
 }
 
@@ -68,7 +68,7 @@ void JsonUiManager::processPendingUpdates() FL_NO_EXCEPT {
 
     bool shouldUpdate = false;
     {
-        fl::unique_lock<fl::mutex> lock(mMutex);
+        fl::lock_guard<fl::mutex> lock(mMutex);
         // Check if new components were added
         shouldUpdate = mItemsAdded;
         mItemsAdded = false;
@@ -94,7 +94,7 @@ void JsonUiManager::processPendingUpdates() FL_NO_EXCEPT {
         mUpdateJs(jsonStr.c_str());
 
         // Clear the changed flag for all components after sending the update
-        fl::unique_lock<fl::mutex> lock(mMutex); // Acquire lock again for modifying mComponents
+        fl::lock_guard<fl::mutex> lock(mMutex); // Acquire lock again for modifying mComponents
         for (auto &componentRef : mComponents) {
             if (auto component = componentRef.lock()) {
                 component->clearChanged();
@@ -110,7 +110,7 @@ void JsonUiManager::processPendingUpdates() FL_NO_EXCEPT {
 }
 
 fl::vector<JsonUiInternalPtr> JsonUiManager::getComponents() FL_NO_EXCEPT {
-    fl::unique_lock<fl::mutex> lock(mMutex);
+    fl::lock_guard<fl::mutex> lock(mMutex);
     fl::vector<JsonUiInternalPtr> out;
     for (auto &component : mComponents) {
         if (auto ptr = component.lock()) {

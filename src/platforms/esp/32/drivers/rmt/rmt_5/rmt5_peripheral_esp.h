@@ -87,8 +87,8 @@ public:
     bool transmit(void* channel_handle, void* encoder_handle,
                   fl::span<const u8> buffer) FL_NO_EXCEPT;
     bool waitAllDone(void* channel_handle, u32 timeout_ms) FL_NO_EXCEPT;
-    void* createEncoder(const ChipsetTiming& timing,
-                        u32 resolution_hz) FL_NO_EXCEPT;
+    // Uses the same configured clock as the RMT channel.
+    void* createEncoder(const ChipsetTiming& timing) FL_NO_EXCEPT;
     void deleteEncoder(void* encoder_handle) FL_NO_EXCEPT;
     bool resetEncoder(void* encoder_handle) FL_NO_EXCEPT;
     bool registerTxCallback(void* channel_handle,
