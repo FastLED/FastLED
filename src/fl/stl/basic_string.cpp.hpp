@@ -151,39 +151,34 @@ const char* basic_string::constData() const {
 }
 
 void basic_string::materialize() {
+    const char* data;
+    fl::size len;
     if (mStorage.is<ConstLiteral>()) {
-        const char* data = mStorage.get<ConstLiteral>().data;
-        if (!data) {
-            mLength = 0;
-            mStorage.reset();
-            inlineBufferPtr()[0] = '\0';
-            return;
-        }
-        fl::size len = mLength;
-        if (len + 1 <= mInlineCapacity) {
-            fl::memcpy(inlineBufferPtr(), data, len);
-            inlineBufferPtr()[len] = '\0';
-            mStorage.reset();
-        } else {
-            mStorage = NotNullStringHolderPtr(fl::make_shared<StringHolder>(data, len));
-        }
+        data = mStorage.get<ConstLiteral>().data;
+        len = mLength;
     } else if (mStorage.is<ConstView>()) {
         const ConstView& view = mStorage.get<ConstView>();
-        if (!view.data) {
-            mLength = 0;
-            mStorage.reset();
-            inlineBufferPtr()[0] = '\0';
-            return;
+        data = view.data;
+        len = view.length;
+        if (data) {
+            mLength = len;
         }
-        fl::size len = view.length;
-        mLength = len;
-        if (len + 1 <= mInlineCapacity) {
-            fl::memcpy(inlineBufferPtr(), view.data, len);
-            inlineBufferPtr()[len] = '\0';
-            mStorage.reset();
-        } else {
-            mStorage = NotNullStringHolderPtr(fl::make_shared<StringHolder>(view.data, len));
-        }
+    } else {
+        return;
+    }
+
+    if (!data) {
+        mLength = 0;
+        mStorage.reset();
+        inlineBufferPtr()[0] = '\0';
+        return;
+    }
+    if (len + 1 <= mInlineCapacity) {
+        fl::memcpy(inlineBufferPtr(), data, len);
+        inlineBufferPtr()[len] = '\0';
+        mStorage.reset();
+    } else {
+        mStorage = NotNullStringHolderPtr(fl::make_shared<StringHolder>(data, len));
     }
 }
 
