@@ -124,6 +124,13 @@ void RmtMemoryManager::initPlatformLimits(size_t& total_tx, size_t& total_rx) FL
 // MemoryLedger Implementation
 // ============================================================================
 
+RmtMemoryManager::ChannelAllocation::ChannelAllocation() FL_NO_EXCEPT
+    : words(0), channel_id(0), is_tx(false), is_dma(false) {}
+
+RmtMemoryManager::ChannelAllocation::ChannelAllocation(
+    u8 id, size_t w, bool tx, bool dma) FL_NO_EXCEPT
+    : words(w), channel_id(id), is_tx(tx), is_dma(dma) {}
+
 RmtMemoryManager::MemoryLedger::MemoryLedger() FL_NO_EXCEPT
     : is_global_pool(false)
     , total_words(0)
