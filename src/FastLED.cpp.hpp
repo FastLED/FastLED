@@ -51,7 +51,6 @@
 volatile fl::u32 fuckit;
 #endif
 
-
 #ifndef FASTLED_NO_ATEXIT
 #define FASTLED_NO_ATEXIT 0
 #endif
@@ -206,7 +205,6 @@ void CFastLED::clear(ClearFlags flags) {
 		return false;
 	};
 
-
 	// Reset POWER_SETTINGS - reset power management to defaults
 	if (clearFlag(ClearFlags::POWER_SETTINGS)) {
 		FastLED.mPPowerFunc = nullptr;      // No power limiting function
@@ -343,7 +341,6 @@ FL_KEEP_ALIVE void CFastLED::show(fl::u8 scale) {
 		scale = (*mPPowerFunc)(scale, mNPowerData);
 	}
 	mLastShownScale = scale;
-
 
 	int length = 0;
 	CLEDController *pCur = CLEDController::head();
@@ -634,7 +631,6 @@ fl::u32 CFastLED::getEstimatedPowerInMilliWatts(bool apply_limiter) const {
 // 	transpose8<1,2>(in.bytes + 8, out.bytes + 1);
 // }
 
-
 /// Unused value
 /// @todo Remove?
 extern int noise_min;
@@ -673,7 +669,6 @@ void CFastLED::setMaxRefreshRate(fl::u16 refresh, bool constrain) {
 	}
 }
 
-
 fl::u8 get_brightness() {
 	return FastLED.getBrightness();
 }
@@ -710,29 +705,9 @@ void delay_at_max_brightness_for_power(fl::u16 ms)
 // Channel Bus Manager Controls
 // ============================================================================
 
-void CFastLED::setDriverEnabled(const char* name, bool enabled) {
-	fl::ChannelManager& manager = fl::channelManager();
-	manager.setDriverEnabled(name, enabled);
-}
-
-bool CFastLED::setExclusiveDriver(fl::Bus bus, fl::u8 which) {
-	fl::ChannelManager& manager = fl::channelManager();
-	return manager.setExclusiveDriver(bus, which);
-}
-
 bool CFastLED::isDriverEnabled(const char* name) const {
 	fl::ChannelManager& manager = fl::channelManager();
 	return manager.isDriverEnabled(name);
-}
-
-fl::size CFastLED::getDriverCount() const {
-	fl::ChannelManager& manager = fl::channelManager();
-	return manager.getDriverCount();
-}
-
-fl::span<const fl::DriverInfo> CFastLED::getDriverInfos() const {
-	fl::ChannelManager& manager = fl::channelManager();
-	return manager.getDriverInfos();
 }
 
 // ============================================================================
@@ -800,11 +775,9 @@ namespace __cxxabiv1
 }
 #endif
 
-
 void CFastLED::onBeginFrame() {
 	fl::EngineEvents::onBeginFrame();
 }
-
 
 void CFastLED::onEndShowLeds() {
 	#if FASTLED_HAS_ENGINE_EVENTS
