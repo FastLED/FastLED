@@ -62,9 +62,6 @@ string::string(const fl::span<const char>& s) FL_NO_EXCEPT
 string::string(const fl::span<char>& s) FL_NO_EXCEPT
     : string_n<FASTLED_STR_INLINED_SIZE>(s) {}
 
-string::string(const fl::shared_ptr<StringHolder>& holder) FL_NO_EXCEPT
-    : string_n<FASTLED_STR_INLINED_SIZE>(holder) {}
-
 // ======= ASSIGNMENT =======
 
 string& string::operator=(const string& other) FL_NO_EXCEPT {
