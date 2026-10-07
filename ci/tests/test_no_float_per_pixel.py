@@ -37,7 +37,7 @@ PER_PIXEL_FUNCTIONS: dict[str, tuple[str, ...]] = {
     "source_xyz.cpp.hpp": ("linearRgbToXyzQ16",),
     "chromatic_adaptation.cpp.hpp": ("adaptXyzQ16",),
     "device_solve.cpp.hpp": ("solveRgbDrivesQ16",),
-    "flux_scalar.cpp.hpp": ("applyFluxScalar",),
+    "flux_scalar/flux_scalar.cpp.hpp": ("applyFluxScalar",),
     "oklab_q16.cpp.hpp": ("xyzToOklabQ16", "oklabToXyzQ16"),
     "gamut_map.cpp.hpp": (
         "mapAndSolveDrivesQ16",

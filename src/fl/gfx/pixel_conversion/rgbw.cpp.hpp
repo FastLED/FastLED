@@ -1,3 +1,6 @@
+// IWYU pragma: private
+// ok no header - public declarations remain in fl/gfx/rgbw.h.
+
 /// @file rgbw.cpp
 /// Functions for red, green, blue, white (RGBW) output
 

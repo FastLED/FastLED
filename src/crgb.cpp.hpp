@@ -4,10 +4,6 @@
 #define FASTLED_INTERNAL
 #include "crgb.h"
 #include "fl/system/fastled.h"
-#include "fl/math/xymap.h"
-
-#include "fl/gfx/upscale.h"
-#include "fl/gfx/downscale.h"
 #include "fl/math/math8.h"
 
 #include "fl/stl/int.h"
@@ -70,19 +66,6 @@ CRGB CRGB::blendAlphaMaxChannel(const CRGB &upper, const CRGB &lower) {
     return CRGB::blend(upper, lower, amountOf2);
 }
 
-void CRGB::downscale(const CRGB *src, const fl::XYMap &srcXY, CRGB *dst,
-                     const fl::XYMap &dstXY) {
-    fl::downscale(src, srcXY, dst, dstXY);
-}
-
-void CRGB::upscale(const CRGB *src, const fl::XYMap &srcXY, CRGB *dst,
-                   const fl::XYMap &dstXY) {
-    FL_WARN_IF(srcXY.getType() != fl::XYMap::kLineByLine, "Upscaling only works with a src matrix that is rectangular");
-    fl::u16 w = srcXY.getWidth();
-    fl::u16 h = srcXY.getHeight();
-    fl::upscale(src, dst, w, h, dstXY);
-}
-
 CRGB &CRGB::nscale8(fl::u8 scaledown) {
     nscale8x3(r, g, b, scaledown);
     return *this;
@@ -110,4 +93,3 @@ CRGB &CRGB::fadeToBlackBy(fl::u8 fadefactor) {
     nscale8x3(r, g, b, 255 - fadefactor);
     return *this;
 }
-

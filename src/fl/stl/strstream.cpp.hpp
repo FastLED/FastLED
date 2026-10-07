@@ -1,33 +1,11 @@
 #include "fl/stl/strstream.h"
 #include "crgb.h"
-#include "fl/gfx/tile2x2.h"
 #include "fl/stl/string.h"
 #include "fl/stl/ios.h"
 #include "fl/stl/charconv.h"
 
 namespace fl {
 
-
-sstream &sstream::operator<<(const Tile2x2_u8 &subpixel) {
-    mStr.append("Tile2x2_u8(");
-    mStr.append(subpixel.bounds());
-    mStr.append(" => ");
-    mStr.append(subpixel.at(0, 0));
-    mStr.append(",");
-    mStr.append(subpixel.at(0, 1));
-    mStr.append(",");
-    mStr.append(subpixel.at(1, 0));
-    mStr.append(",");
-    mStr.append(subpixel.at(1, 1));
-    mStr.append(")");
-    return *this;
-}
-
-// Tile2x2_u8_wrap support - delegates to fl::string::append which already knows how to format it
-sstream &sstream::operator<<(const Tile2x2_u8_wrap &tile) {
-    mStr.append(tile);
-    return *this;
-}
 
 // Manipulator operator implementations (declared as friends in sstream)
 sstream& operator<<(sstream& ss, const hex_t&) {

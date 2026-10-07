@@ -1,4 +1,5 @@
-// ok no header
+// IWYU pragma: private
+// ok no header - public CRGB declarations remain in crgb.h.
 /// @file crgb_extra.cpp
 /// HSV-dependent methods for CRGB - consolidated implementations
 ///

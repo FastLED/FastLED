@@ -1,3 +1,7 @@
+# 2026-10-07, issue #4707 nineteenth pass: hosted image_flash=355579 B,
+# run 37622067492 at 19c53ff4fe; local 355563 B. Shared string append
+# saves 488 B on S3. Claim the exact hosted saving without headroom.
+
 # 2026-10-07, issue #4707 fifteenth pass: hosted image_flash=356067 B,
 # run 37611652044 at 45106bb223; local 356051 B. Independent string
 # operations and coroutine task creation save another 24 B on S3 and
@@ -408,4 +412,4 @@
 # the CI Blink report contains no ResponseLutsQ16 symbol. The local fbuild
 # symbol total remains ~4 KB higher for the same source (FastLED/fbuild#1456),
 # so this ratchet uses the CI measurement from PR #4511.
-356067
+355579
