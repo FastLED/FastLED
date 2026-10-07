@@ -224,9 +224,11 @@ size_t write_bytes(const u8* buffer, size_t size) {
     return platforms::write_bytes(buffer, size);
 }
 
+#if !FL_SERIAL_BEGIN_INLINE
 void serial_begin(u32 baudRate) {
     platforms::begin(baudRate);
 }
+#endif
 
 bool serial_ready() {
     return platforms::serial_ready();

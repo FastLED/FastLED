@@ -14,7 +14,7 @@ This doc is paired with `ci/lint/check_size_thresholds.py` (the lockdown lint) a
 
 | Board | Workflow file | Frozen `max_size` | Frozen `max_size_apa102` | Status | Tracking issue | Notes |
 |---|---|---:|---:|---|---|---|
-| uno | `check_uno_size.yml` | 11000 / -1 | 9300 / -1 | real ceiling | — | AVR ATmega328P has 32 KB flash. The `-1` second value is the `build_no_forced_inline` job's "no check" sentinel. Apa102 was tightened from 12050 → 9300 in `7edaf80f0` (a real optimisation, not a bump). |
+| uno | `check_uno_size.yml` | 11000 / -1 | 8500 / -1 | real ceiling | — | AVR ATmega328P has 32 KB flash. The `-1` second value is the `build_no_forced_inline` job's "no check" sentinel. Apa102 was tightened from 12050 → 9300 in `7edaf80f0` and 9300 → 8500 in #4725 (Arduino `Serial` stopped linking into sketches that never print; Apa102 measured 4510 → 3682 B). Both real optimisations, not bumps. |
 | bluepill | `check_bluepill_size.yml` | 55000 | 45000 | real ceiling | — | STM32F103C8 has 64 KB flash. Workflow created at current values in `bf76a0319` (2025-06-25). Never bumped. |
 | esp32dev | `check_esp32_size.yml` | 340000 | 330000 | real ceilings | #3870 | #3870 found that the 402252-byte Blink result came from a silent legacy-backend fallback: build metadata exposes the fbuild size tool as `aliases.size`, while `compiled_size` looked only for `size_path`. The corrected fbuild measurement is 337355 B with Arduino-ESP32 3.3.11, so Blink received a narrow 10 KB framework rebaseline. Apa102 stays at 330000 after its templated `addLeds` path stopped enrolling every ESP32 driver; it measures 321275 B. |
 | teensy30 | `check_teensy30_size.yml` | 60000 | 50000 | real ceiling | — | MK20DX128 (Teensy 3.0) has 128 KB flash. Workflow created at current values in `f4317e954` (2025-06-25). Never bumped. |
@@ -58,7 +58,7 @@ These are the events the audit found in `git log --all --follow --patch -- .gith
 
 ### Other boards
 
-`check_uno_size.yml`, `check_bluepill_size.yml`, `check_teensy30/31/32/35/36/lc_size.yml`: created at their current values and never bumped after creation (apart from uno's apa102 12050 → 9300 *tightening* in `7edaf80f0`). All flagged **real ceiling**.
+`check_uno_size.yml`, `check_bluepill_size.yml`, `check_teensy30/31/32/35/36/lc_size.yml`: created at their current values and never bumped after creation (apart from uno's apa102 *tightenings*, 12050 → 9300 in `7edaf80f0` and 9300 → 8500 in #4725). All flagged **real ceiling**.
 
 ## Band-aid follow-up: how to restore the real ceiling
 
