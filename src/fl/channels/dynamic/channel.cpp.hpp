@@ -1,5 +1,6 @@
 ﻿/// @file channel.cpp
 /// @brief LED channel implementation
+// ok no header - public Channel is declared in fl/channels/channel.h
 
 #include "platforms/is_platform.h"
 #include "fl/channels/channel.h"
@@ -1069,32 +1070,6 @@ public:
 IChannelDriver* getStubChannelEngine() {
     static StubChannelEngine instance;
     return &instance;
-}
-
-// Re-exposed protected base class methods
-void Channel::addToDrawList() {
-    if (isInList()) {
-        FL_WARN("Channel '" << mName << "': Skipping addToDrawList() - already in draw list");
-        return;
-    }
-    CPixelLEDController<RGB>::addToList();
-    // Fire event after adding to draw list (detectable even if user bypasses FastLED.add())
-    auto& events = ChannelEvents::instance();
-    events.onChannelAdded(*this);
-}
-
-void Channel::removeFromDrawList() {
-    if (!isInList()) {
-        FL_WARN("Channel '" << mName << "': Skipping removeFromDrawList() - not in draw list");
-        return;
-    }
-    CPixelLEDController<RGB>::removeFromDrawList();
-    // Fire event after removing from draw list (detectable even if user bypasses FastLED.remove())
-    auto& events = ChannelEvents::instance();
-    events.onChannelRemoved(*this);
-
-    // Clear driver weak_ptr when removed from draw list
-    mDriver.reset();
 }
 
 int Channel::size() const {

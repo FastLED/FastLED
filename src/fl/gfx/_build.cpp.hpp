@@ -8,7 +8,6 @@
 #include "fl/gfx/chromatic_adaptation.cpp.hpp"
 #include "fl/gfx/colorimetric_response.cpp.hpp"
 #include "fl/gfx/colorutils.cpp.hpp"
-#include "fl/gfx/corkscrew.cpp.hpp"
 #include "fl/gfx/crgb_extra.cpp.hpp"
 #include "fl/gfx/crgb_json.cpp.hpp"
 #include "fl/gfx/device_solve.cpp.hpp"
@@ -35,10 +34,6 @@
 #include "fl/gfx/transfer.cpp.hpp"
 #include "fl/gfx/upscale.cpp.hpp"
 #include "fl/gfx/white_allocation.cpp.hpp"
-#include "fl/gfx/xypath.cpp.hpp"
-#include "fl/gfx/xypath_impls.cpp.hpp"
-#include "fl/gfx/xypath_renderer.cpp.hpp"
 
 // begin sub directory includes
 #include "fl/gfx/detail/_build.cpp.hpp"
-#include "fl/gfx/noise/_build.cpp.hpp"

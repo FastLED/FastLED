@@ -22,10 +22,10 @@ CLOCKLESS = HEADER.parent / "idf4_clockless_rmt_esp32.h"
 def test_rmt4_keeps_idle_low_until_chipset_reset_time_elapses() -> None:
     header = HEADER.read_text(encoding="utf-8")
     implementation = IMPLEMENTATION.read_text(encoding="utf-8")
-    tx_done = header[
-        header.index("FL_NO_INLINE IRAM_ATTR void onTxDoneInterrupt") : header.index(
-            "FL_NO_INLINE IRAM_ATTR void fillNextBuffer"
-        )
+    tx_done = implementation[
+        implementation.index(
+            "void ChannelEngineRMT4Impl::onTxDoneInterrupt"
+        ) : implementation.index("ChannelEngineRMT4Impl::tx_start")
     ]
 
     assert "resetStartTimeUs" in header

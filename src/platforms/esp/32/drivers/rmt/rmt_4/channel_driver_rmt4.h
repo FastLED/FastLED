@@ -2,8 +2,7 @@
 /// @brief RMT4 interface for ChannelEngine (ESP32 IDF 4.x)
 ///
 /// This header defines both the public interface and implementation for RMT4
-/// ChannelEngine. IRAM_ATTR functions are inlined here to avoid duplicate
-/// attribute warnings.
+/// ChannelEngine. IRAM attributes are applied once, on each function definition.
 
 #pragma once
 
@@ -240,6 +239,12 @@ class ChannelEngineRMT4Impl final : public ChannelEngineRMT4 {
 
     ~ChannelEngineRMT4Impl() override;
 
+    bool canHandle(const ChannelDataPtr &data) const FL_NO_EXCEPT override;
+
+    Capabilities getCapabilities() const FL_NO_EXCEPT override {
+        return Capabilities(true, false); // Clockless only, matching RMT5.
+    }
+
     /// @brief Enqueue channel data for transmission
     void enqueue(ChannelDataPtr channelData) FL_NO_EXCEPT override;
 
@@ -373,53 +378,7 @@ class ChannelEngineRMT4Impl final : public ChannelEngineRMT4 {
     // reordering on Xtensa (l32r: literal placed after use)
     // ═══════════════════════════════════════════════════════════════════════════
 
-    static FL_NO_INLINE IRAM_ATTR void handleInterrupt(void *arg) FL_NO_EXCEPT {
-        // Main ISR dispatcher
-        auto *driver = static_cast<ChannelEngineRMT4Impl *>(arg);
-
-        // Enter critical section and read interrupt status
-        portENTER_CRITICAL_ISR(&driver->mRmtSpinlock);
-        u32 intr_st = RMT.int_st.val;
-        portEXIT_CRITICAL_ISR(&driver->mRmtSpinlock);
-
-        // Check each channel for interrupts
-        for (u8 channel = 0; channel < FASTLED_RMT_MAX_CHANNELS; channel++) {
-#if defined(FL_IS_ESP_32S2)
-            int tx_done_bit = channel * 3;
-            int tx_next_bit = channel + 12;
-#elif defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C3)
-            int tx_done_bit = channel;
-            int tx_next_bit = channel + 8;
-#elif defined(FL_IS_ESP_32H2)
-            int tx_done_bit = channel;
-            int tx_next_bit = channel + 8;
-#elif defined(FL_IS_ESP_32C6)
-            int tx_done_bit = channel;
-            int tx_next_bit = channel + 8;
-#elif defined(FL_IS_ESP_32DEV)
-            int tx_done_bit = channel * 3;
-            int tx_next_bit = channel + 24;
-#else
-#error "Unknown ESP32 target for RMT interrupt bit positions"
-#endif
-
-            // Check if this channel is active
-            ChannelState *state = driver->findChannelByNumber(channel);
-            if (state != nullptr && state->inUse) {
-                // Handle threshold interrupt (half-buffer empty, needs refill)
-                if (intr_st & BIT(tx_next_bit)) {
-                    driver->onThresholdInterrupt(channel);
-                    RMT.int_clr.val = BIT(tx_next_bit);
-                }
-
-                // Handle TX done interrupt (transmission complete)
-                if (intr_st & BIT(tx_done_bit)) {
-                    driver->onTxDoneInterrupt(channel);
-                    RMT.int_clr.val = BIT(tx_done_bit);
-                }
-            }
-        }
-    }
+    static void handleInterrupt(void *arg) FL_NO_EXCEPT;
 
     FL_NO_INLINE IRAM_ATTR void
     onThresholdInterrupt(int channelNum) FL_NO_EXCEPT {
@@ -433,35 +392,7 @@ class ChannelEngineRMT4Impl final : public ChannelEngineRMT4 {
         fillNextBuffer(state, true);
     }
 
-    FL_NO_INLINE IRAM_ATTR void onTxDoneInterrupt(int channelNum) FL_NO_EXCEPT {
-        // TX done interrupt: Transmission is complete on this channel
-        ChannelState *state = findChannelByNumber(channelNum);
-        if (state == nullptr || !state->inUse) {
-            return;
-        }
-
-        // Disable TX interrupts for this channel (platform-specific)
-#if defined(FL_IS_ESP_32C3)
-        RMT.int_ena.val &= ~(1 << channelNum);
-#elif defined(FL_IS_ESP_32H2)
-        RMT.int_ena.val &= ~(1 << channelNum);
-#elif defined(FL_IS_ESP_32S3)
-        RMT.int_ena.val &= ~(1 << channelNum);
-#elif defined(FL_IS_ESP_32C6)
-        RMT.int_ena.val &= ~(1 << channelNum);
-#elif defined(FL_IS_ESP_32S2)
-        RMT.int_ena.val &= ~(1 << (channelNum * 3));
-#elif defined(FL_IS_ESP_32DEV)
-        RMT.int_ena.val &= ~(1 << (channelNum * 3));
-#else
-#error "Unknown ESP32 target for RMT interrupt disable"
-#endif
-
-        // Keep the RMT signal connected after TX-done. The channel is
-        // configured idle-low, so poll() can enforce the chipset reset time
-        // before disconnecting and releasing this hardware channel.
-        state->transmissionComplete.store(true, fl::memory_order_release);
-    }
+    void onTxDoneInterrupt(int channelNum) FL_NO_EXCEPT;
 
     FL_NO_INLINE IRAM_ATTR void fillNextBuffer(ChannelState *state,
                                                bool checkTime) FL_NO_EXCEPT {
@@ -543,87 +474,8 @@ class ChannelEngineRMT4Impl final : public ChannelEngineRMT4 {
         pItem[7].val = tmp[7];
     }
 
-    static FL_NO_INLINE IRAM_ATTR void
-    tx_start(ChannelState *state) FL_NO_EXCEPT {
-        // Start RMT transmission by setting hardware flag
-        if (!state) {
-            return;
-        }
-
-        rmt_channel_t channel = state->channel;
-
-        // Platform-specific register access
-#if defined(FL_IS_ESP_32C3)
-        RMT.tx_conf[channel].mem_rd_rst = 1;
-        RMT.tx_conf[channel].mem_rd_rst = 0;
-        RMT.tx_conf[channel].mem_rst = 1;
-        RMT.tx_conf[channel].mem_rst = 0;
-        RMT.int_clr.val = (1 << channel);
-        RMT.int_ena.val |= (1 << channel);
-        RMT.tx_conf[channel].conf_update = 1;
-        RMT.tx_conf[channel].tx_start = 1;
-
-#elif defined(FL_IS_ESP_32H2)
-        RMT.chnconf0[channel].mem_rd_rst_chn = 1;
-        RMT.chnconf0[channel].mem_rd_rst_chn = 0;
-        RMT.chnconf0[channel].apb_mem_rst_chn = 1;
-        RMT.chnconf0[channel].apb_mem_rst_chn = 0;
-        RMT.int_clr.val = (1 << channel);
-        RMT.int_ena.val |= (1 << channel);
-        RMT.chnconf0[channel].conf_update_chn = 1;
-        RMT.chnconf0[channel].tx_start_chn = 1;
-
-#elif defined(FL_IS_ESP_32S3)
-#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
-        RMT.chnconf0[channel].mem_rd_rst_chn = 1;
-        RMT.chnconf0[channel].mem_rd_rst_chn = 0;
-        RMT.chnconf0[channel].apb_mem_rst_chn = 1;
-        RMT.chnconf0[channel].apb_mem_rst_chn = 0;
-        RMT.int_clr.val = (1 << channel);
-        RMT.int_ena.val |= (1 << channel);
-        RMT.chnconf0[channel].conf_update_chn = 1;
-        RMT.chnconf0[channel].tx_start_chn = 1;
-#else
-        RMT.chnconf0[channel].mem_rd_rst_n = 1;
-        RMT.chnconf0[channel].mem_rd_rst_n = 0;
-        RMT.chnconf0[channel].apb_mem_rst_n = 1;
-        RMT.chnconf0[channel].apb_mem_rst_n = 0;
-        RMT.int_clr.val = (1 << channel);
-        RMT.int_ena.val |= (1 << channel);
-        RMT.chnconf0[channel].conf_update_n = 1;
-        RMT.chnconf0[channel].tx_start_n = 1;
-#endif
-
-#elif defined(FL_IS_ESP_32C6)
-        RMT.chnconf0[channel].mem_rd_rst_chn = 1;
-        RMT.chnconf0[channel].mem_rd_rst_chn = 0;
-        RMT.chnconf0[channel].apb_mem_rst_chn = 1;
-        RMT.chnconf0[channel].apb_mem_rst_chn = 0;
-        RMT.int_clr.val = (1 << channel);
-        RMT.int_ena.val |= (1 << channel);
-        RMT.chnconf0[channel].conf_update_chn = 1;
-        RMT.chnconf0[channel].tx_start_chn = 1;
-
-#elif defined(FL_IS_ESP_32S2)
-        RMT.conf_ch[channel].conf1.mem_rd_rst = 1;
-        RMT.conf_ch[channel].conf1.mem_rd_rst = 0;
-        RMT.conf_ch[channel].conf1.apb_mem_rst = 1;
-        RMT.conf_ch[channel].conf1.apb_mem_rst = 0;
-        RMT.int_clr.val = (1 << (channel * 3));
-        RMT.int_ena.val |= (1 << (channel * 3));
-        RMT.conf_ch[channel].conf1.tx_start = 1;
-
-#else
-        // ESP32 (original)
-        RMT.conf_ch[channel].conf1.mem_rd_rst = 1;
-        RMT.conf_ch[channel].conf1.mem_rd_rst = 0;
-        RMT.conf_ch[channel].conf1.apb_mem_rst = 1;
-        RMT.conf_ch[channel].conf1.apb_mem_rst = 0;
-        RMT.int_clr.val = (1 << (channel * 3));
-        RMT.int_ena.val |= (1 << (channel * 3));
-        RMT.conf_ch[channel].conf1.tx_start = 1;
-#endif
-    }
+    static void
+    tx_start(ChannelState *state) FL_NO_EXCEPT;
 
     FL_NO_INLINE IRAM_ATTR ChannelState *
     findChannelByNumber(int channelNum) FL_NO_EXCEPT {

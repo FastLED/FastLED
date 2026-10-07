@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fl/gfx/colorutils_misc.h"
+#include "chsv.h"
 #include "fl/stl/int.h"
 #include "fl/stl/span.h"
 
