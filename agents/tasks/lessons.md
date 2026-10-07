@@ -496,3 +496,5 @@
 - ESP32 SPI probes: booting QEMU and compiling the real SDK do not prove peripheral operations complete. A recovery probe stopped after host acquisition inside SPI bus initialization; repeat with verbose diagnostics and the unchanged implementation before attributing the timeout to a storage optimization. Keep compilation, accounting, HTTP loopback and physical waveform evidence distinct.
 
 - Native sanitizer verification: debug mode can report UBSan errors and still return success under recovery defaults. Use UBSAN_OPTIONS=halt_on_error=1:print_stacktrace=1 for the acceptance gate; compare named test inventories before describing cached results. The memory audit exposed integer minimum, negative-shift and signed Q15 defects that ordinary debug runs had masked.
+
+- Blink must remain a minimal LED example with no Serial initialization or banner prints. Serial links the AVR UART object and its RX/TX buffers even when only transmitting; keep example-induced overhead separate from library regressions and do not preserve accidental banner functionality as a requirement.

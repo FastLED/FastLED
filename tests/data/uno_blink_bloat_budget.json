@@ -2,7 +2,7 @@
   "board": "uno",
   "example": "Blink",
   "profile": "default",
-  "image_flash": 5130,
-  "total_ram": 438,
-  "reference": "#4742: fbuild 2.5.37, AVR GCC 7.3.0-atmel3.6.1-arduino7, Arduino AVR core 5.4.0; image flash and attributed RAM, not board RAM. Compact RGBW selectors and exact reordered adjustment; Blink retains its Serial banner in flash; #4743 bounded 16-bit-target show index ratchet"
+  "image_flash": 3922,
+  "total_ram": 260,
+  "reference": "#4742/#4743 storage reductions retained; Blink Serial initialization/banner removed per maintainer correction. fbuild 2.5.37, AVR GCC 7.3.0-atmel3.6.1-arduino7, Arduino AVR core 5.4.0; default image3922 /attributedRAM260, physicalRAM266. Previous published Blink5130/443; removal saves1208 flash/177 physical RAM. Serial object and UART symbols absent."
 }
