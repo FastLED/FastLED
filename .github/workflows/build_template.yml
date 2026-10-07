@@ -29,6 +29,11 @@ on:
         type: boolean
         required: false
         default: false
+      bloat_budget:
+        description: Optional default Blink flash and RAM budget for this board.
+        type: string
+        required: false
+        default: ""
 
 permissions:
   contents: read
@@ -181,6 +186,14 @@ jobs:
         env:
           PYTHONUNBUFFERED: "1"
           FBUILD_FROM_SETUP: ${{ inputs.prefer_setup_fbuild }}
+
+      - name: Check default Blink bloat budget
+        if: inputs.bloat_budget != ''
+        shell: bash
+        env:
+          BLOAT_BOARD: ${{ steps.fbuild_board.outputs.name }}
+          BLOAT_BUDGET: ${{ inputs.bloat_budget }}
+        run: bash bloat "$BLOAT_BOARD" --example Blink --build --budget "$BLOAT_BUDGET"
 
       - name: Build summary and failure logs
         if: failure()

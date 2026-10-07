@@ -46,3 +46,4 @@ jobs:
     uses: ./.github/workflows/build_template.yml
     with:
       args: teensy40 all
+      bloat_budget: tests/data/teensy40_bloat_budget.json
