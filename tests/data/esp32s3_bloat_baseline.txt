@@ -1,3 +1,9 @@
+# 2026-10-07, issue #4707 seventh pass: CI image_flash=356331 B,
+# hosted run 37593627529, local 356315 B. Independent audio/SDK/network
+# units cost 20 B on this default S3 profile while removing 313488 B from
+# legacy IDF4 Blink versus the sixth pass, with exceptions preserved.
+# Pin the measured intentional cost exactly; no discretionary headroom.
+
 # 2026-10-07, issue #4707 fifth/sixth passes: CI image_flash=356311 B,
 # 11096 B below the original 367407 B baseline. Smaller listener storage,
 # move-only private driver entries, known string lengths, and packed RMT
@@ -358,4 +364,4 @@
 # the CI Blink report contains no ResponseLutsQ16 symbol. The local fbuild
 # symbol total remains ~4 KB higher for the same source (FastLED/fbuild#1456),
 # so this ratchet uses the CI measurement from PR #4511.
-356311
+356331

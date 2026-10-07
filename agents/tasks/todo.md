@@ -179,7 +179,8 @@ with existing Blink to investigate the reported environment.
 - [x] Remove FFT umbrella/iostream and scope-only unique_lock roots.
 - [x] Isolate audio registration/formatting, ESP-DSP and ASIO translation units.
 - [x] Finish native runner repair, integration gates and code review.
-- [ ] Publish seventh pass and pin the exact hosted size measurement.
+- [x] Publish seventh pass and pin the exact hosted size measurement.
+- [ ] Confirm corrected hosted gate; continue reducing the remaining flash gap.
 
 Legacy espressif32 4.4.0 / Arduino 2.0.3 / IDF 4.4.1 / GCC 8.4.0:
 3.10.3 Blink 262,757 B flash / 17,272 B RAM; 3.10.6 686,661 B /
@@ -202,6 +203,17 @@ Sanitizers also exposed existing signed arithmetic errors in parsing,
 formatting, gradients and wave conversion/update. Those are corrected with
 boundary coverage; focused wave and executor sanitizer runs pass. Uno Blink
 and WASM Blink compile successfully.
+
+Seventh source published at 6d89aafd1b. Hosted run 37593627529 measures
+356,331 B image_flash (local +16 B); its only failure is the intentional
+20 B increase over the prior S3 pin. Independent TU boundaries remove
+313,488 B from legacy Blink versus sixth pass, preserving exceptions.
+Pin this exact S3 cost; total hosted saving versus original is 11,076 B.
+
+Eighth trial: independently compile xypath rendering, SPI/hardware-manager
+and semaphore implementations. Initial combined legacy image is 346,297 B
+(-3,280 B), S3 local 356,323 B (+8 B). Further isolate dynamic Channel
+construction and its FastLED config overloads, retaining every runtime API.
 
 Use the default dynamic driver configuration. Keep scheduler pumping, network
 yielding, multiple strips, and reconfiguration available. Optimize symbol reachability
