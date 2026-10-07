@@ -99,8 +99,9 @@
     // AVR (8-bit): No alignment required, make it a no-op to save RAM
     #define FL_ALIGN_AS_T(expr) /* nothing */
 #elif defined(__EMSCRIPTEN__)
-    // Emscripten/WASM: No-op to avoid alignment issues in WASM builds
-    #define FL_ALIGN_AS_T(expr) /* nothing */
+    // WASM atomic operations require natural alignment even though ordinary
+    // loads allow unaligned storage. Honor the contained type's requirement.
+    #define FL_ALIGN_AS_T(expr) alignas(expr)
 #elif defined(ESP8266)
     // ESP8266: Cap at 4 bytes (see FL_ALIGNAS above for rationale)
     #define FL_ALIGN_AS_T(expr) __attribute__((aligned(4)))
