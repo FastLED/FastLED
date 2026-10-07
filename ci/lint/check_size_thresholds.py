@@ -105,11 +105,9 @@ FROZEN_THRESHOLDS: dict[str, dict[str, frozenset[int]]] = {
     "check_teensy41_size.yml": {
         # real ceiling — Teensy 4.1 (MIMXRT1062) Blink reflects real growth.
         "max_size": frozenset({120000}),
-        # band-aid (#2802) — bumped from 88000 in PR #2804 to clear CI
-        # after fl::ifstream / fl::posix_filebuf / fl::strerror /
-        # fl::AsyncLog* over-linked into the Apa102 build. Real ceiling is
-        # 88000 once #2802 is fixed; current real size ≈148476 B.
-        "max_size_apa102": frozenset({165000}),
+        # real ceiling — restored from the 165000 band-aid (#2802) in
+        # PR #4727 once #2656 was fixed (measured 49,152 B).
+        "max_size_apa102": frozenset({88000}),
     },
     "check_teensylc_size.yml": {
         # real ceiling — Teensy LC (MKL26Z64) 64 KB flash; never bumped.

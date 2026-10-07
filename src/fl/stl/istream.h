@@ -23,7 +23,12 @@ namespace fl {
 class istream_real {
 private:
     static const fl::size BUFFER_SIZE = 256;
-    char mBuffer[BUFFER_SIZE];
+    // Every member has an initializer so the defaulted constructor is
+    // constexpr: the global `fl::cin` (which embeds one of these) is then
+    // constant-initialized in .bss with no dynamic initializer, and
+    // --gc-sections drops its 256-byte buffer from sketches that never
+    // read from it.
+    char mBuffer[BUFFER_SIZE] = {};
     fl::size mBufferLen = 0;
     fl::size mPos = 0;
     bool mFailed = false;
