@@ -4,7 +4,7 @@
 
 ## Memory meta #4737: sequential local optimization
 
-- [ ] ESP32-C3 #4739: matched 3.10.3/master bloat, measured optimization, local checks and landed change.
+- [x] ESP32-C3 #4739: matched 3.10.3/master bloat, measured optimization, local checks and landed change (#4748, e60f4fcf7f; -152 B flash / -32 B RAM).
 - [ ] ESP32-C6 #4740, then STM32 #4744, Uno #4742 and ATtiny85 #4743.
 - [ ] ESP32 #4738 and ESP32-S3 #4741.
 - [ ] Validate Teensy40 #4745, Teensy41 #4746 and RP2040 #4747.
@@ -16,6 +16,14 @@ Use this checkout and its caches, without git worktrees. Build each platform
 locally and sequentially; never request CI Full. Preserve features while
 reducing logging and driver overhead. Record source provenance and reject stale
 ELFs before comparing sizes.
+
+### Active platform: ESP32-C6 #4740
+
+- [x] Build/bloat master and 3.10.3 sequentially in the cached C6 project.
+- [x] Attribute PARLIO buffers, static state and linked diagnostics; reproduce a focused budget failure.
+- [x] Preserve PARLIO and driver features while reducing measured default costs (candidate: -194 B flash / -96 B board RAM; mode-switch sanitizer regression passed).
+- [ ] Validate published Blink and an equivalent RGB workload, local checks and budgets.
+- [ ] Land the change, publish the parent performance diff and close only the child.
 
 ## ESP32-S3 binary-size Batch 3 (#2856)
 
