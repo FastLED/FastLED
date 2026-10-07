@@ -114,6 +114,7 @@ const UNITY_EXPECTED_BUILD_FILES: &[&str] = &[
     "fl/build/platforms.esp.32.drivers.i2s_rx+.cpp",
     "fl/build/platforms.esp.32.drivers.rmt_rx+.cpp",
     "fl/build/platforms.esp.32.drivers.gpio_isr_rx+.cpp",
+    "fl/build/platforms.esp.32.audio+.cpp",
     "fl/build/platforms.esp.32.audio.fft+.cpp",
     "fl/build/platforms.esp.32.net+.cpp",
     "fl/build/platforms.esp.32.ota+.cpp",
