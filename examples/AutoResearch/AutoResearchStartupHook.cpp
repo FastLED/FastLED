@@ -11,6 +11,12 @@
 // before USB on every boot; it must come back in its bootloader by itself.
 
 #include "FastLED.h"
+#include "fl/system/sketch_macros.h"
+
+// Only the full sketch marks the boot healthy at the end of setup(); the
+// low-memory surface (AutoResearchLowMemory.h) never does, so it must not arm
+// a guard that would count its successful warm boots toward the escape.
+#if FL_PLATFORM_HAS_LARGE_MEMORY
 #include "fl/wdt/boot_guard.h"
 
 #ifndef AUTORESEARCH_BOOT_GUARD_ESCAPE_BOOTS
@@ -25,3 +31,5 @@
 
 FL_WATCHDOG_BOOT_GUARD(AUTORESEARCH_BOOT_GUARD_ESCAPE_BOOTS,
                        AUTORESEARCH_BOOT_GUARD_TIMEOUT_MS);
+
+#endif  // FL_PLATFORM_HAS_LARGE_MEMORY
