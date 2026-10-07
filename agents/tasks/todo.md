@@ -9,7 +9,7 @@
 - [x] Post a cumulative parent performance diff on each child closure; all ten comments verified.
 - [x] Run the final eleven-row local matrix sequentially at `41a6c284fcbbc8c6cb0a379bd994b98d017f78d1`. All budgets pass; every row verifies 2,394 tracked staged source files and its staged sketch against that commit.
 - [x] Publish the final three-version scorecard, matched savings, remaining gaps, source pins and metric limits: https://github.com/FastLED/FastLED/issues/4737#issuecomment-6041460246.
-- [ ] Finish the parent acceptance audit and documentation reconciliation; keep #4737 open.
+- [x] Publish the parent acceptance audit and reconcile this tracker; keep #4737 open. Audit: https://github.com/FastLED/FastLED/issues/4737#issuecomment-6041492984.
 
 ### Results and execution
 
