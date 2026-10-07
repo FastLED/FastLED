@@ -14,6 +14,7 @@
 #if FASTLED_RMT5
 
 #include "platforms/esp/32/drivers/rmt/rmt_5/rmt5_peripheral_esp.h"
+#include "platforms/esp/32/drivers/rmt/rmt_5/common.h"
 #include "platforms/memory_barrier.h"
 #include "fl/chipsets/led_timing.h"
 #include "fl/system/delay.h"
@@ -672,9 +673,8 @@ private:
 // Encoder Management Implementation
 //=============================================================================
 
-void* Rmt5PeripheralESP::createEncoder(const ChipsetTiming& timing,
-                                            u32 resolution_hz) FL_NO_EXCEPT {
-    Rmt5EncoderImpl* encoder = Rmt5EncoderImpl::create(timing, resolution_hz);
+void* Rmt5PeripheralESP::createEncoder(const ChipsetTiming& timing) FL_NO_EXCEPT {
+    Rmt5EncoderImpl* encoder = Rmt5EncoderImpl::create(timing, FASTLED_RMT5_CLOCK_HZ);
     if (encoder == nullptr) {
         FL_WARN("Rmt5PeripheralESP: Failed to create encoder");
         return nullptr;

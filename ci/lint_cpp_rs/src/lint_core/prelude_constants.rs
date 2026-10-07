@@ -188,7 +188,7 @@ const STD_BRIDGE_FILE_WHITELIST: &[&str] = &[
     "platforms/arm/nrf52/mutex_nrf52.h",
     "platforms/stub/condition_variable_stub.h",
     "platforms/esp/32/condition_variable_esp32.h",
-    "platforms/esp/32/condition_variable_esp32.cpp.hpp",
+    "platforms/esp/32/condition_variable/condition_variable_esp32.cpp.hpp",
     "platforms/stub/thread_stub_stl.h",
     "platforms/stub/thread_stub_noop.h",
     "platforms/stub/semaphore_stub_stl.h",

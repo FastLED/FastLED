@@ -111,22 +111,22 @@ StringInterner& global_interner() {
 
 // Convenience functions for global interning (thread-safe via mutex)
 fl::string intern(const string_view& sv) {
-    fl::unique_lock<fl::mutex> lock(global_interner_mutex());
+    fl::lock_guard<fl::mutex> lock(global_interner_mutex());
     return global_interner().intern(sv);
 }
 
 fl::string intern(const fl::string& str) {
-    fl::unique_lock<fl::mutex> lock(global_interner_mutex());
+    fl::lock_guard<fl::mutex> lock(global_interner_mutex());
     return global_interner().intern(str);
 }
 
 fl::string intern(const char* str) {
-    fl::unique_lock<fl::mutex> lock(global_interner_mutex());
+    fl::lock_guard<fl::mutex> lock(global_interner_mutex());
     return global_interner().intern(str);
 }
 
 fl::string intern(const fl::span<const char>& sp) {
-    fl::unique_lock<fl::mutex> lock(global_interner_mutex());
+    fl::lock_guard<fl::mutex> lock(global_interner_mutex());
     return global_interner().intern(sp);
 }
 

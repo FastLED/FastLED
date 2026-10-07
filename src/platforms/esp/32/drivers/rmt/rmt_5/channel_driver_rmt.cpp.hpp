@@ -429,6 +429,14 @@ class ChannelEngineRMTImpl final : public ChannelEngineRMT {
     }
 
   private:
+    void* createEncoder(const ChipsetTiming& timing) FL_NO_EXCEPT {
+#ifdef FASTLED_STUB_IMPL
+        return mPeripheral.createEncoder(timing, FASTLED_RMT5_CLOCK_HZ);
+#else
+        return mPeripheral.createEncoder(timing);
+#endif
+    }
+
     /// @brief RMT channel state (replaces RmtWorkerSimple)
     struct ChannelState {
         ChannelState() FL_NO_EXCEPT
@@ -821,7 +829,7 @@ class ChannelEngineRMTImpl final : public ChannelEngineRMT {
                 state->transmissionComplete.store(false, fl::memory_order_release);
 
                 // Create encoder for this DMA channel
-                state->encoder = mPeripheral.createEncoder(timing, FASTLED_RMT5_CLOCK_HZ);
+                state->encoder = createEncoder(timing);
                 if (!state->encoder) {
 #if FL_HAS_WARN
                     emitRmtChannelWarning(
@@ -945,7 +953,7 @@ class ChannelEngineRMTImpl final : public ChannelEngineRMT {
         state->transmissionComplete.store(false, fl::memory_order_release);
 
         // Create encoder for this channel
-        state->encoder = mPeripheral.createEncoder(timing, FASTLED_RMT5_CLOCK_HZ);
+        state->encoder = createEncoder(timing);
         if (!state->encoder) {
 #if FL_HAS_WARN
             emitRmtChannelWarning(
@@ -1023,7 +1031,7 @@ class ChannelEngineRMTImpl final : public ChannelEngineRMT {
             }
 
             // Create new encoder with updated timing
-            state->encoder = mPeripheral.createEncoder(timing, FASTLED_RMT5_CLOCK_HZ);
+            state->encoder = createEncoder(timing);
             if (!state->encoder) {
                 FL_WARN("Failed to recreate encoder with new timing");
                 // Channel is still valid but encoder is broken - mark channel

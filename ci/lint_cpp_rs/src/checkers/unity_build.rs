@@ -53,6 +53,7 @@ const UNITY_EXPECTED_BUILD_FILES: &[&str] = &[
     "fl/build/fl.video+.cpp",
     "fl/build/fl.wdt+.cpp",
     "fl/build/platforms+.cpp",
+    "fl/build/platforms.esp.32.condition_variable+.cpp",
     "fl/build/platforms.esp.32.net+.cpp",
     "fl/build/platforms.esp.32.ota+.cpp",
     "fl/build/platforms.esp.32.drivers.rmt.rmt_5+.cpp",
