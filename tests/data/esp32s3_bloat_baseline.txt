@@ -427,4 +427,18 @@
 # the CI Blink report contains no ResponseLutsQ16 symbol. The local fbuild
 # symbol total remains ~4 KB higher for the same source (FastLED/fbuild#1456),
 # so this ratchet uses the CI measurement from PR #4511.
-355599
+# -428 B (355599 -> 355171), #4707 passes 29–30: isolate optional
+# channel ID tracking/driver controls and printf formatting providers.
+# Hosted default Blink report: run 37643133924 at
+# c7787e716d002831f27e8a64377fbfbf0f1aa523; local image_flash is 355155 B.
+# Public operations remain available and were explicitly compiled with ESP32.
+# +20 B (355171 -> 355191), #4707 passes 31–33: optional hex conversion,
+# string capacity management, and string assignment/holder construction.
+# These unchanged-body archive splits save 544 B on legacy ESP32 Blink.
+# Hosted pass 32 measured 355091 B (-80 B); pass 33 adds 100 B on S3 due
+# to changed inlining of existing COW/string helpers, while saving 212 B
+# more on legacy ESP32. Retaining fill-assignment in core was measured and
+# rejected: it costs another 48 B legacy / 12 B S3, with no modern saving.
+# Final hosted default Blink report: run 37646351981 at
+# 71f9782b87 (local image_flash 355175 B). Public operations remain available.
+355191
