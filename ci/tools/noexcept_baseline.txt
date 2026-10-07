@@ -5629,9 +5629,9 @@ src/fl/stl/basic_string.cpp.hpp|basic_string& basic_string::appendOct(u16 val) {
 src/fl/stl/basic_string.cpp.hpp|basic_string& basic_string::appendOct(u32 val) { char b[64]={0}; int l=fl::utoa32(val,b,8); write(b,l); return *this; }
 src/fl/stl/basic_string.cpp.hpp|basic_string& basic_string::appendOct(u64 val) { char b[64]={0}; int l=fl::utoa64(val,b,8); write(b,l); return *this; }
 src/fl/stl/basic_string.cpp.hpp|basic_string& basic_string::appendOct(u8 val) { return appendOct(static_cast<u32>(val)); }
-src/fl/stl/basic_string.cpp.hpp|basic_string& basic_string::assign(const basic_string& str) {
-src/fl/stl/basic_string.cpp.hpp|basic_string& basic_string::assign(const basic_string& str, fl::size pos, fl::size count) {
-src/fl/stl/basic_string.cpp.hpp|basic_string& basic_string::assign(fl::size count, char c) {
+src/fl/stl/string_operations/basic_string.cpp.hpp|basic_string& basic_string::assign(const basic_string& str) {
+src/fl/stl/string_operations/basic_string.cpp.hpp|basic_string& basic_string::assign(const basic_string& str, fl::size pos, fl::size count) {
+src/fl/stl/string_operations/basic_string.cpp.hpp|basic_string& basic_string::assign(fl::size count, char c) {
 src/fl/stl/string_operations/basic_string.cpp.hpp|basic_string& basic_string::erase(fl::size pos, fl::size count) {
 src/fl/stl/string_operations/basic_string.cpp.hpp|basic_string& basic_string::insert(fl::size pos, const basic_string& str) {
 src/fl/stl/string_operations/basic_string.cpp.hpp|basic_string& basic_string::insert(fl::size pos, const basic_string& str, fl::size pos2, fl::size count) {
@@ -5717,7 +5717,7 @@ src/fl/stl/string_operations/basic_string.cpp.hpp|int basic_string::compare(fl::
 src/fl/stl/basic_string.cpp.hpp|void accept(ConstLiteral&) {
 src/fl/stl/basic_string.cpp.hpp|void accept(ConstView&) {
 src/fl/stl/basic_string.cpp.hpp|void accept(NotNullStringHolderPtr& heap) {
-src/fl/stl/basic_string.cpp.hpp|void basic_string::assign(const char* str, fl::size len) {
+src/fl/stl/string_operations/basic_string.cpp.hpp|void basic_string::assign(const char* str, fl::size len) {
 src/fl/stl/basic_string.cpp.hpp|void basic_string::clear(bool freeMemory) {
 src/fl/stl/basic_string.cpp.hpp|void basic_string::copy(const basic_string& other) {
 src/fl/stl/basic_string.cpp.hpp|void basic_string::copy(const char* str) {
@@ -5730,7 +5730,7 @@ src/fl/stl/string_operations/basic_string.cpp.hpp|void basic_string::reserve(fl:
 src/fl/stl/string_operations/basic_string.cpp.hpp|void basic_string::resize(fl::size count) { resize(count, char()); }
 src/fl/stl/string_operations/basic_string.cpp.hpp|void basic_string::resize(fl::size count, char ch) {
 src/fl/stl/basic_string.cpp.hpp|void basic_string::setLiteral(const char* literal) {
-src/fl/stl/basic_string.cpp.hpp|void basic_string::setSharedHolder(const fl::shared_ptr<StringHolder>& holder) {
+src/fl/stl/string_operations/basic_string.cpp.hpp|void basic_string::setSharedHolder(const fl::shared_ptr<StringHolder>& holder) {
 src/fl/stl/basic_string.cpp.hpp|void basic_string::setView(const char* data, fl::size len) {
 src/fl/stl/string_operations/basic_string.cpp.hpp|void basic_string::shrink_to_fit() {
 src/fl/stl/string_operations/basic_string.cpp.hpp|void basic_string::swapWith(basic_string& other) {

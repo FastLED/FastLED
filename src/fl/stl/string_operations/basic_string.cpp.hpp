@@ -803,4 +803,73 @@ void basic_string::resize(fl::size count, char ch) {
     }
 }
 
+// Optional assignment and shared-holder binding.
+
+void basic_string::assign(const char* str, fl::size len) {
+    mLength = len;
+    if (len + 1 <= mInlineCapacity) {
+        if (!isInline()) {
+            mStorage.reset();
+        }
+        fl::memcpy(inlineBufferPtr(), str, len);
+        inlineBufferPtr()[len] = '\0';
+    } else {
+        mStorage = NotNullStringHolderPtr(fl::make_shared<StringHolder>(str, len));
+    }
+}
+
+basic_string& basic_string::assign(const basic_string& str) {
+    copy(str);
+    return *this;
+}
+
+basic_string& basic_string::assign(const basic_string& str, fl::size pos, fl::size count) {
+    if (pos >= str.size()) {
+        clear();
+        return *this;
+    }
+    fl::size actualCount = count;
+    if (actualCount == npos || pos + actualCount > str.size()) {
+        actualCount = str.size() - pos;
+    }
+    copy(str.c_str() + pos, actualCount);
+    return *this;
+}
+
+basic_string& basic_string::assign(fl::size count, char c) {
+    if (count == 0) {
+        clear();
+        return *this;
+    }
+    mLength = count;
+    if (count + 1 <= mInlineCapacity) {
+        if (!isInline()) {
+            mStorage.reset();
+        }
+        for (fl::size i = 0; i < count; ++i) {
+            inlineBufferPtr()[i] = c;
+        }
+        inlineBufferPtr()[count] = '\0';
+    } else {
+        mStorage = NotNullStringHolderPtr(fl::make_shared<StringHolder>(count));
+        NotNullStringHolderPtr& ptr = heapData();
+        for (fl::size i = 0; i < count; ++i) {
+            ptr->data()[i] = c;
+        }
+        ptr->data()[count] = '\0';
+    }
+    return *this;
+}
+
+basic_string& basic_string::assign(basic_string&& str) FL_NO_EXCEPT {
+    moveAssign(fl::move(str));
+    return *this;
+}
+
+void basic_string::setSharedHolder(const fl::shared_ptr<StringHolder>& holder) {
+    if (!holder || holder->length() == 0) return;
+    mLength = holder->length();
+    mStorage = NotNullStringHolderPtr(holder);
+}
+
 } // namespace fl
