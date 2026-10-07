@@ -228,7 +228,7 @@ async def run_pin_discovery(
     timeout: float = 15.0,
     serial_interface: SerialInterface | None = None,
 ) -> PinDiscoveryResult:
-    """Auto-discover connected pin pairs by probing adjacent GPIO pins
+    """Auto-discover a connected pin pair by probing every GPIO pair
     in a single window.
 
     Calls the `findConnectedPins` RPC with the given range. Defaults to
@@ -322,7 +322,7 @@ async def run_pin_discovery(
         print("=" * 60)
         print("PIN DISCOVERY")
         print("=" * 60)
-        print("  Probing adjacent pin pairs for jumper wire connection...")
+        print("  Probing pin pairs for jumper wire connection...")
 
         response = await client.send_and_match(
             "findConnectedPins",
@@ -349,7 +349,7 @@ async def run_pin_discovery(
                     f"GPIO {p} ({reason})" for p, reason in sorted(unique_pins.items())
                 )
                 print(
-                    f"   {Fore.CYAN}Skipped per FastLED pin-validity map: "
+                    f"   {Fore.CYAN}Skipped (pin-validity map, console link, or flash/PSRAM): "
                     f"{summary}{Style.RESET_ALL}"
                 )
 
@@ -445,7 +445,7 @@ async def run_pin_discovery(
 # are still tested.
 
 # Default segment plan for classic-ESP32: five overlapping 8-pin
-# windows covering 0..40. Each pair `(start, end)` matches
+# windows covering 0..40, then one full-range pass. Each pair `(start, end)` matches
 # `findConnectedPins` semantics \u2014 `start` inclusive, `end` exclusive
 # upper bound on the *pin* (so the loop tests pairs (start, start+1)
 # through (end-1, end)).
@@ -455,6 +455,11 @@ DEFAULT_PIN_DISCOVERY_SEGMENTS: tuple[tuple[int, int], ...] = (
     (16, 24),
     (24, 32),
     (32, 40),
+    # Firmware tests every pair inside a window, so a jumper whose two ends
+    # fall in different windows (e.g. GPIO 5 <-> 14) is only found by a
+    # full-range pass. It runs last, only when every window above came up
+    # empty, so a hazardous pad still fails in its own narrow window first.
+    (0, 40),
 )
 
 
@@ -464,7 +469,7 @@ async def run_pin_discovery_segmented(
     per_segment_timeout: float = 15.0,
     serial_interface: SerialInterface | None = None,
 ) -> PinDiscoveryResult:
-    """Sweep adjacent-pair pin discovery across multiple GPIO segments.
+    """Sweep pin-pair discovery across multiple GPIO segments.
 
     Iterates ``segments`` in order, issuing one ``findConnectedPins``
     RPC per (start, end) window. The first segment that returns
@@ -479,7 +484,9 @@ async def run_pin_discovery_segmented(
         segments: Iterable of ``(start_pin, end_pin)`` windows.
             Defaults to :data:`DEFAULT_PIN_DISCOVERY_SEGMENTS` which
             covers the full classic-ESP32 GPIO range in five
-            overlapping 8-pin windows.
+            overlapping 8-pin windows, followed by a final full-range
+            ``(0, 40)`` pass (run only when every window came up empty)
+            that finds jumpers whose ends fall in different windows.
         per_segment_timeout: Wall-clock budget per segment. The single
             window scan typically completes in <2 s, so 15 s leaves
             generous headroom for reset + handshake.
