@@ -33,6 +33,21 @@ RAM; they are not fbuild's board flash/RAM totals. The RMT allocation-record
 compile-time size assertion additionally guards the measured static RAM saving.
 Check each profile separately; `--compare --budget` is rejected before building.
 
+### RP2040 reserved heap is not programmed flash
+
+Arduino-Pico's ELF contains a read-only `SHT_NOBITS` `.heap` reservation.
+GNU `size` includes it, and the read-only `.stack_dummy` reservation, in
+`text`; fbuild 2.5.37's board flash summary therefore grows when unused BSS
+is removed and the reserved heap expands. Compare allocated `image_flash`
+from `bash bloat`, and keep the raw board summary separate.
+
+For #4747, removing an unused 38,416-byte RX pool reduced Blink's allocated
+image from 135,788 to 135,744 bytes and physical RAM from 59,980 to 21,564
+bytes. The new raw flash summary is 388,476 bytes: 135,744 image bytes plus
+250,684 reserved heap bytes and 2,048 reserved stack bytes. Those reservations
+are not programmed into flash. The scoped RP2040 budget enforces allocated
+image bytes and attributed RAM; neither metric includes the heap reservation.
+
 ### Slim ESP32-S3 profile (#4564)
 
 ```bash
@@ -98,15 +113,15 @@ These are the gotchas the wrapper handles for you. They are documented here so t
 
    Worth knowing what the old behaviour looked like, because it was silent: two `--build --top 200` runs across a real code change produced **byte-identical** `report.json` files, `total_flash` included, and the local total did not match CI's for the same board and example because they described different binaries. The failure mode was plausible output and an inverted conclusion, not an error.
 
-5. **`--nm` is still required.** fbuild's `build_info.json` does not yet carry toolchain paths (`nm_path` / `cppfilt_path`). The wrapper resolves them from the toolchain fbuild installed. fbuild issue #428 tracks the migration to build-info-driven resolution; when that lands, drop the explicit `--nm` path in `ci/bloat.py::run_fbuild_symbols`.
+5. **Toolchain resolution belongs to fbuild.** The current wrapper calls `fbuild symbols` without an explicit `--nm` path. fbuild resolves the installed toolchain from the board build metadata; do not reintroduce a hardcoded cross-toolchain path.
 
-6. **Diff two builds with the existing diff script.** Save two `report.json` files and run `uv run python .claude/symbolaudit/diff.py <old.json> <new.json>` for a per-symbol delta table (added / removed / grew / shrunk). The wrapper does NOT do this automatically; ship a follow-up PR if you need it inline.
+6. **Preserve both reports before comparing builds.** Each run overwrites the board's `report.json`. Save both reports and compare image/RAM totals and affected symbol rows, including their object, section, region and attribution source. Symbol aliases and map-derived rows can overlap, so do not equate a sum of name-only deltas with an image saving. The previously documented `.claude/symbolaudit/diff.py` helper is no longer present; the wrapper does not automatically produce a before/after diff.
 
 ## Don'ts
 
 - **Don't run `xtensa-esp32s3-elf-nm` or `xtensa-esp32s3-elf-size` directly.** The wrapper subsumes both. Direct toolchain invocations have caused every prior bloat audit to wire up nm/c++filt/map by hand and miss the map-derived synthesis pass.
 - **Don't shell out to `fbuild symbols` with a hardcoded ELF path.** Use the wrapper — it discovers the latest ELF, picks the right toolchain, defaults the output directory, and prints the summary table in one call.
-- **Don't write a new Python aggregator under `.claude/symbolaudit/`.** The wrapper's `_AggBucket` summary plus the existing `diff.py` cover the per-symbol and per-archive views needed for both "what's in this build" and "what changed between two builds". Extend `ci/bloat.py` if a new view is required.
+- **Don't write a new Python aggregator under `.claude/symbolaudit/`.** Use the wrapper's report for per-symbol and per-archive attribution. Extend `ci/bloat.py` if a reusable comparison view is required.
 
 ## Related
 
