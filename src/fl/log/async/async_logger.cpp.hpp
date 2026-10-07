@@ -1,3 +1,5 @@
+// ok no header - public declarations remain in fl/log/async_logger.h.
+
 /// @file fl/log/async_logger.cpp
 /// @brief Async logger implementation using SPSC queue backend
 

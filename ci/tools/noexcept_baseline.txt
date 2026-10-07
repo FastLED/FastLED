@@ -3878,38 +3878,38 @@ src/fl/gfx/xypath_renderer.h|void rasterize(float from, float to, int steps, XYR
 src/fl/gfx/xypath_renderer.h|void setDrawBounds(u16 width, u16 height);
 src/fl/gfx/xypath_renderer.h|void setScale(float scale);
 src/fl/gfx/xypath_renderer.h|void setTransform(const TransformFloat &transform) {
-src/fl/log/async_log_queue.cpp.hpp|AsyncLogQueue<DescriptorCount, ArenaSize>::AsyncLogQueue() : mHead(0), mTail(0), mArenaHead(0), mArenaTail(0), mDropped(0) {
-src/fl/log/async_log_queue.cpp.hpp|AsyncLogQueue<DescriptorCount, ArenaSize>::Descriptor::Descriptor() : mStartIdx(0), mLength(0), mPadding(0) {}
-src/fl/log/async_log_queue.cpp.hpp|bool AsyncLogQueue<DescriptorCount, ArenaSize>::arenaHasSpace(fl::u32 aHead, fl::u32 aTail, fl::u16 len) const {
-src/fl/log/async_log_queue.cpp.hpp|bool AsyncLogQueue<DescriptorCount, ArenaSize>::empty() const {
-src/fl/log/async_log_queue.cpp.hpp|bool AsyncLogQueue<DescriptorCount, ArenaSize>::push(const char* str) {
-src/fl/log/async_log_queue.cpp.hpp|bool AsyncLogQueue<DescriptorCount, ArenaSize>::push(const char* str, fl::u16 len) {
-src/fl/log/async_log_queue.cpp.hpp|bool AsyncLogQueue<DescriptorCount, ArenaSize>::push(const fl::string& msg) {
-src/fl/log/async_log_queue.cpp.hpp|bool AsyncLogQueue<DescriptorCount, ArenaSize>::tryPop(const char** outPtr, fl::u16* outLen) {
-src/fl/log/async_log_queue.cpp.hpp|fl::size AsyncLogQueue<DescriptorCount, ArenaSize>::size() const {
-src/fl/log/async_log_queue.cpp.hpp|fl::u16 AsyncLogQueue<DescriptorCount, ArenaSize>::boundedStrlen(const char* str, fl::u16 maxLen) {
-src/fl/log/async_log_queue.cpp.hpp|fl::u32 AsyncLogQueue<DescriptorCount, ArenaSize>::droppedCount() const {
-src/fl/log/async_log_queue.cpp.hpp|fl::u32 AsyncLogQueue<DescriptorCount, ArenaSize>::loadArenaTail() const {
-src/fl/log/async_log_queue.cpp.hpp|fl::u32 AsyncLogQueue<DescriptorCount, ArenaSize>::loadHead() const {
-src/fl/log/async_log_queue.cpp.hpp|fl::u32 AsyncLogQueue<DescriptorCount, ArenaSize>::loadTail() const {
-src/fl/log/async_log_queue.cpp.hpp|template <fl::size DescriptorCount, fl::size ArenaSize> AsyncLogQueue<DescriptorCount, ArenaSize>::AsyncLogQueue() : mHead(0), mTail(0), mArenaHead(0), mArenaTail(0), mDropped(0) {
-src/fl/log/async_log_queue.cpp.hpp|template <fl::size DescriptorCount, fl::size ArenaSize> AsyncLogQueue<DescriptorCount, ArenaSize>::Descriptor::Descriptor() : mStartIdx(0), mLength(0), mPadding(0) {}
-src/fl/log/async_log_queue.cpp.hpp|template <fl::size DescriptorCount, fl::size ArenaSize> bool AsyncLogQueue<DescriptorCount, ArenaSize>::arenaHasSpace(fl::u32 aHead, fl::u32 aTail, fl::u16 len) const {
-src/fl/log/async_log_queue.cpp.hpp|template <fl::size DescriptorCount, fl::size ArenaSize> bool AsyncLogQueue<DescriptorCount, ArenaSize>::empty() const {
-src/fl/log/async_log_queue.cpp.hpp|template <fl::size DescriptorCount, fl::size ArenaSize> bool AsyncLogQueue<DescriptorCount, ArenaSize>::push(const char* str) {
-src/fl/log/async_log_queue.cpp.hpp|template <fl::size DescriptorCount, fl::size ArenaSize> bool AsyncLogQueue<DescriptorCount, ArenaSize>::push(const char* str, fl::u16 len) {
-src/fl/log/async_log_queue.cpp.hpp|template <fl::size DescriptorCount, fl::size ArenaSize> bool AsyncLogQueue<DescriptorCount, ArenaSize>::push(const fl::string& msg) {
-src/fl/log/async_log_queue.cpp.hpp|template <fl::size DescriptorCount, fl::size ArenaSize> bool AsyncLogQueue<DescriptorCount, ArenaSize>::tryPop(const char** outPtr, fl::u16* outLen) {
-src/fl/log/async_log_queue.cpp.hpp|template <fl::size DescriptorCount, fl::size ArenaSize> fl::size AsyncLogQueue<DescriptorCount, ArenaSize>::size() const {
-src/fl/log/async_log_queue.cpp.hpp|template <fl::size DescriptorCount, fl::size ArenaSize> fl::u16 AsyncLogQueue<DescriptorCount, ArenaSize>::boundedStrlen(const char* str, fl::u16 maxLen) {
-src/fl/log/async_log_queue.cpp.hpp|template <fl::size DescriptorCount, fl::size ArenaSize> fl::u32 AsyncLogQueue<DescriptorCount, ArenaSize>::droppedCount() const {
-src/fl/log/async_log_queue.cpp.hpp|template <fl::size DescriptorCount, fl::size ArenaSize> fl::u32 AsyncLogQueue<DescriptorCount, ArenaSize>::loadArenaTail() const {
-src/fl/log/async_log_queue.cpp.hpp|template <fl::size DescriptorCount, fl::size ArenaSize> fl::u32 AsyncLogQueue<DescriptorCount, ArenaSize>::loadHead() const {
-src/fl/log/async_log_queue.cpp.hpp|template <fl::size DescriptorCount, fl::size ArenaSize> fl::u32 AsyncLogQueue<DescriptorCount, ArenaSize>::loadTail() const {
-src/fl/log/async_log_queue.cpp.hpp|template <fl::size DescriptorCount, fl::size ArenaSize> void AsyncLogQueue<DescriptorCount, ArenaSize>::atomicIncDropped() {
-src/fl/log/async_log_queue.cpp.hpp|template <fl::size DescriptorCount, fl::size ArenaSize> void AsyncLogQueue<DescriptorCount, ArenaSize>::commit() {
-src/fl/log/async_log_queue.cpp.hpp|void AsyncLogQueue<DescriptorCount, ArenaSize>::atomicIncDropped() {
-src/fl/log/async_log_queue.cpp.hpp|void AsyncLogQueue<DescriptorCount, ArenaSize>::commit() {
+src/fl/log/async/async_log_queue.cpp.hpp|AsyncLogQueue<DescriptorCount, ArenaSize>::AsyncLogQueue() : mHead(0), mTail(0), mArenaHead(0), mArenaTail(0), mDropped(0) {
+src/fl/log/async/async_log_queue.cpp.hpp|AsyncLogQueue<DescriptorCount, ArenaSize>::Descriptor::Descriptor() : mStartIdx(0), mLength(0), mPadding(0) {}
+src/fl/log/async/async_log_queue.cpp.hpp|bool AsyncLogQueue<DescriptorCount, ArenaSize>::arenaHasSpace(fl::u32 aHead, fl::u32 aTail, fl::u16 len) const {
+src/fl/log/async/async_log_queue.cpp.hpp|bool AsyncLogQueue<DescriptorCount, ArenaSize>::empty() const {
+src/fl/log/async/async_log_queue.cpp.hpp|bool AsyncLogQueue<DescriptorCount, ArenaSize>::push(const char* str) {
+src/fl/log/async/async_log_queue.cpp.hpp|bool AsyncLogQueue<DescriptorCount, ArenaSize>::push(const char* str, fl::u16 len) {
+src/fl/log/async/async_log_queue.cpp.hpp|bool AsyncLogQueue<DescriptorCount, ArenaSize>::push(const fl::string& msg) {
+src/fl/log/async/async_log_queue.cpp.hpp|bool AsyncLogQueue<DescriptorCount, ArenaSize>::tryPop(const char** outPtr, fl::u16* outLen) {
+src/fl/log/async/async_log_queue.cpp.hpp|fl::size AsyncLogQueue<DescriptorCount, ArenaSize>::size() const {
+src/fl/log/async/async_log_queue.cpp.hpp|fl::u16 AsyncLogQueue<DescriptorCount, ArenaSize>::boundedStrlen(const char* str, fl::u16 maxLen) {
+src/fl/log/async/async_log_queue.cpp.hpp|fl::u32 AsyncLogQueue<DescriptorCount, ArenaSize>::droppedCount() const {
+src/fl/log/async/async_log_queue.cpp.hpp|fl::u32 AsyncLogQueue<DescriptorCount, ArenaSize>::loadArenaTail() const {
+src/fl/log/async/async_log_queue.cpp.hpp|fl::u32 AsyncLogQueue<DescriptorCount, ArenaSize>::loadHead() const {
+src/fl/log/async/async_log_queue.cpp.hpp|fl::u32 AsyncLogQueue<DescriptorCount, ArenaSize>::loadTail() const {
+src/fl/log/async/async_log_queue.cpp.hpp|template <fl::size DescriptorCount, fl::size ArenaSize> AsyncLogQueue<DescriptorCount, ArenaSize>::AsyncLogQueue() : mHead(0), mTail(0), mArenaHead(0), mArenaTail(0), mDropped(0) {
+src/fl/log/async/async_log_queue.cpp.hpp|template <fl::size DescriptorCount, fl::size ArenaSize> AsyncLogQueue<DescriptorCount, ArenaSize>::Descriptor::Descriptor() : mStartIdx(0), mLength(0), mPadding(0) {}
+src/fl/log/async/async_log_queue.cpp.hpp|template <fl::size DescriptorCount, fl::size ArenaSize> bool AsyncLogQueue<DescriptorCount, ArenaSize>::arenaHasSpace(fl::u32 aHead, fl::u32 aTail, fl::u16 len) const {
+src/fl/log/async/async_log_queue.cpp.hpp|template <fl::size DescriptorCount, fl::size ArenaSize> bool AsyncLogQueue<DescriptorCount, ArenaSize>::empty() const {
+src/fl/log/async/async_log_queue.cpp.hpp|template <fl::size DescriptorCount, fl::size ArenaSize> bool AsyncLogQueue<DescriptorCount, ArenaSize>::push(const char* str) {
+src/fl/log/async/async_log_queue.cpp.hpp|template <fl::size DescriptorCount, fl::size ArenaSize> bool AsyncLogQueue<DescriptorCount, ArenaSize>::push(const char* str, fl::u16 len) {
+src/fl/log/async/async_log_queue.cpp.hpp|template <fl::size DescriptorCount, fl::size ArenaSize> bool AsyncLogQueue<DescriptorCount, ArenaSize>::push(const fl::string& msg) {
+src/fl/log/async/async_log_queue.cpp.hpp|template <fl::size DescriptorCount, fl::size ArenaSize> bool AsyncLogQueue<DescriptorCount, ArenaSize>::tryPop(const char** outPtr, fl::u16* outLen) {
+src/fl/log/async/async_log_queue.cpp.hpp|template <fl::size DescriptorCount, fl::size ArenaSize> fl::size AsyncLogQueue<DescriptorCount, ArenaSize>::size() const {
+src/fl/log/async/async_log_queue.cpp.hpp|template <fl::size DescriptorCount, fl::size ArenaSize> fl::u16 AsyncLogQueue<DescriptorCount, ArenaSize>::boundedStrlen(const char* str, fl::u16 maxLen) {
+src/fl/log/async/async_log_queue.cpp.hpp|template <fl::size DescriptorCount, fl::size ArenaSize> fl::u32 AsyncLogQueue<DescriptorCount, ArenaSize>::droppedCount() const {
+src/fl/log/async/async_log_queue.cpp.hpp|template <fl::size DescriptorCount, fl::size ArenaSize> fl::u32 AsyncLogQueue<DescriptorCount, ArenaSize>::loadArenaTail() const {
+src/fl/log/async/async_log_queue.cpp.hpp|template <fl::size DescriptorCount, fl::size ArenaSize> fl::u32 AsyncLogQueue<DescriptorCount, ArenaSize>::loadHead() const {
+src/fl/log/async/async_log_queue.cpp.hpp|template <fl::size DescriptorCount, fl::size ArenaSize> fl::u32 AsyncLogQueue<DescriptorCount, ArenaSize>::loadTail() const {
+src/fl/log/async/async_log_queue.cpp.hpp|template <fl::size DescriptorCount, fl::size ArenaSize> void AsyncLogQueue<DescriptorCount, ArenaSize>::atomicIncDropped() {
+src/fl/log/async/async_log_queue.cpp.hpp|template <fl::size DescriptorCount, fl::size ArenaSize> void AsyncLogQueue<DescriptorCount, ArenaSize>::commit() {
+src/fl/log/async/async_log_queue.cpp.hpp|void AsyncLogQueue<DescriptorCount, ArenaSize>::atomicIncDropped() {
+src/fl/log/async/async_log_queue.cpp.hpp|void AsyncLogQueue<DescriptorCount, ArenaSize>::commit() {
 src/fl/log/async_log_queue.h|bool arenaHasSpace(fl::u32 aHead, fl::u32 aTail, fl::u16 len) const;
 src/fl/log/async_log_queue.h|bool empty() const;
 src/fl/log/async_log_queue.h|bool push(const char* str);
@@ -3925,27 +3925,27 @@ src/fl/log/async_log_queue.h|fl::u32 loadTail() const;
 src/fl/log/async_log_queue.h|static fl::u16 boundedStrlen(const char* str, fl::u16 maxLen);
 src/fl/log/async_log_queue.h|void atomicIncDropped();
 src/fl/log/async_log_queue.h|void commit();
-src/fl/log/async_logger.cpp.hpp|AsyncLogger::AsyncLogger() : mQueue() {}
-src/fl/log/async_logger.cpp.hpp|AsyncLoggerServiceTask& AsyncLoggerServiceTask::instance() {
-src/fl/log/async_logger.cpp.hpp|AsyncLoggerServiceTask::AsyncLoggerServiceTask() : mIntervalMs(16) , mMessagesPerTick(5) , mTask() {
-src/fl/log/async_logger.cpp.hpp|bool AsyncLogger::empty() const {
-src/fl/log/async_logger.cpp.hpp|bool AsyncLogger::enableBackgroundFlush(fl::u32 interval_ms, fl::size messages_per_tick) {
-src/fl/log/async_logger.cpp.hpp|bool AsyncLogger::isBackgroundFlushEnabled() const {
-src/fl/log/async_logger.cpp.hpp|fl::size AsyncLogger::flushN(fl::size maxMessages) {
-src/fl/log/async_logger.cpp.hpp|fl::size AsyncLogger::size() const {
-src/fl/log/async_logger.cpp.hpp|fl::u32 AsyncLogger::droppedCount() const {
-src/fl/log/async_logger.cpp.hpp|void AsyncLogger::clear() {
-src/fl/log/async_logger.cpp.hpp|void AsyncLogger::disableBackgroundFlush() {
-src/fl/log/async_logger.cpp.hpp|void AsyncLogger::flush() {
-src/fl/log/async_logger.cpp.hpp|void AsyncLogger::push(const char* msg) {
-src/fl/log/async_logger.cpp.hpp|void AsyncLogger::push(const fl::string& msg) {
-src/fl/log/async_logger.cpp.hpp|void AsyncLoggerServiceTask::serviceLoggers() {
-src/fl/log/async_logger.cpp.hpp|void AsyncLoggerServiceTask::setInterval(u32 interval_ms) {
-src/fl/log/async_logger.cpp.hpp|void AsyncLoggerServiceTask::setMessagesPerTick(fl::size messages_per_tick) {
-src/fl/log/async_logger.cpp.hpp|void FL_IRAM async_log_flush_timer_isr(void* user_data) {
-src/fl/log/async_logger.cpp.hpp|void async_log_service() {
-src/fl/log/async_logger.cpp.hpp|void configureAsyncLogService(u32 interval_ms, fl::size messages_per_tick) {
-src/fl/log/async_logger.cpp.hpp|void printLoggerDisabledError(const char* category_name, const char* define_name) {
+src/fl/log/async/async_logger.cpp.hpp|AsyncLogger::AsyncLogger() : mQueue() {}
+src/fl/log/async/async_logger.cpp.hpp|AsyncLoggerServiceTask& AsyncLoggerServiceTask::instance() {
+src/fl/log/async/async_logger.cpp.hpp|AsyncLoggerServiceTask::AsyncLoggerServiceTask() : mIntervalMs(16) , mMessagesPerTick(5) , mTask() {
+src/fl/log/async/async_logger.cpp.hpp|bool AsyncLogger::empty() const {
+src/fl/log/async/async_logger.cpp.hpp|bool AsyncLogger::enableBackgroundFlush(fl::u32 interval_ms, fl::size messages_per_tick) {
+src/fl/log/async/async_logger.cpp.hpp|bool AsyncLogger::isBackgroundFlushEnabled() const {
+src/fl/log/async/async_logger.cpp.hpp|fl::size AsyncLogger::flushN(fl::size maxMessages) {
+src/fl/log/async/async_logger.cpp.hpp|fl::size AsyncLogger::size() const {
+src/fl/log/async/async_logger.cpp.hpp|fl::u32 AsyncLogger::droppedCount() const {
+src/fl/log/async/async_logger.cpp.hpp|void AsyncLogger::clear() {
+src/fl/log/async/async_logger.cpp.hpp|void AsyncLogger::disableBackgroundFlush() {
+src/fl/log/async/async_logger.cpp.hpp|void AsyncLogger::flush() {
+src/fl/log/async/async_logger.cpp.hpp|void AsyncLogger::push(const char* msg) {
+src/fl/log/async/async_logger.cpp.hpp|void AsyncLogger::push(const fl::string& msg) {
+src/fl/log/async/async_logger.cpp.hpp|void AsyncLoggerServiceTask::serviceLoggers() {
+src/fl/log/async/async_logger.cpp.hpp|void AsyncLoggerServiceTask::setInterval(u32 interval_ms) {
+src/fl/log/async/async_logger.cpp.hpp|void AsyncLoggerServiceTask::setMessagesPerTick(fl::size messages_per_tick) {
+src/fl/log/async/async_logger.cpp.hpp|void FL_IRAM async_log_flush_timer_isr(void* user_data) {
+src/fl/log/async/async_logger.cpp.hpp|void async_log_service() {
+src/fl/log/async/async_logger.cpp.hpp|void configureAsyncLogService(u32 interval_ms, fl::size messages_per_tick) {
+src/fl/log/async/async_logger.cpp.hpp|void printLoggerDisabledError(const char* category_name, const char* define_name) {
 src/fl/log/async_logger.h|bool empty() const;
 src/fl/log/async_logger.h|bool enableBackgroundFlush(fl::u32 interval_ms, fl::size messages_per_tick = 5);
 src/fl/log/async_logger.h|bool isBackgroundFlushEnabled() const;
