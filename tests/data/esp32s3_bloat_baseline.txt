@@ -427,4 +427,9 @@
 # the CI Blink report contains no ResponseLutsQ16 symbol. The local fbuild
 # symbol total remains ~4 KB higher for the same source (FastLED/fbuild#1456),
 # so this ratchet uses the CI measurement from PR #4511.
-355599
+# -428 B (355599 -> 355171), #4707 passes 29–30: isolate optional
+# channel ID tracking/driver controls and printf formatting providers.
+# Hosted default Blink report: run 37643133924 at
+# c7787e716d002831f27e8a64377fbfbf0f1aa523; local image_flash is 355155 B.
+# Public operations remain available and were explicitly compiled with ESP32.
+355171
