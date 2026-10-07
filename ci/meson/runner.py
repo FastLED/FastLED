@@ -85,6 +85,7 @@ def run_meson_build_and_test(
     exclude_suites: Optional[list[str]] = None,
     test_file_filter: Optional[str] = None,
     log_failures: Optional[Path] = None,
+    force: bool = False,
 ) -> MesonTestResult:
     """
     Complete Meson build and test workflow.
@@ -101,6 +102,7 @@ def run_meson_build_and_test(
         exclude_suites: Optional list of test suites to exclude (e.g., ['examples'])
         test_file_filter: Optional .hpp filename to filter test execution (e.g., "backbeat.hpp")
         log_failures: Optional directory to write per-test failure logs (<name>_compile.log, <name>_run.log)
+        force: Execute the entire selected suite even when artifacts are cached.
 
     Returns:
         MesonTestResult with success status, duration, and test counts
@@ -210,6 +212,7 @@ def run_meson_build_and_test(
                     start_time=start_time,
                     build_timer=build_timer,
                     build_optimizer=build_optimizer,
+                    force=force or clean,
                 )
                 return run_streaming_path(ctx)
 

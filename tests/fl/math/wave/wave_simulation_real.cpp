@@ -8,6 +8,7 @@
 // These tests cover both halves of the fix.
 
 #include "fl/math/wave/wave_simulation_real.h"
+#include "fl/math/math.h"
 #include "test.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
@@ -41,6 +42,22 @@ FL_TEST_CASE("Q15 wave damping supports large exponents") {
     line.update();
     FL_CHECK_GE(line.getf(1), -1.0f);
     FL_CHECK_LE(line.getf(1), 1.0f);
+}
+
+FL_TEST_CASE("WaveSimulation real Q15 conversion preserves signed amplitude and saturation") {
+    WaveSimulation1D_Real line(1);
+    WaveSimulation2D_Real grid(1, 1);
+    const float amplitudes[] = {-2.0f, -1.0f, -0.5f, 0.0f, 0.5f, 1.0f, 2.0f};
+    const i16 fixed[] = {-32768, -32768, -16384, 0, 16383, 32767, 32767};
+    for (fl::size i = 0; i < 7; ++i) {
+        line.set(0, amplitudes[i]);
+        grid.setf(0, 0, amplitudes[i]);
+        FL_CHECK_EQ(line.geti16(0), fixed[i]);
+        FL_CHECK_EQ(grid.geti16(0, 0), fixed[i]);
+        const float expected = fl::clamp(amplitudes[i], -1.0f, 1.0f);
+        FL_CHECK_CLOSE(line.getf(0), expected, 0.0001f);
+        FL_CHECK_CLOSE(grid.getf(0, 0), expected, 0.0001f);
+    }
 }
 
 FL_TEST_CASE("WaveSimulation2D_Real clamps speed to CFL bound [0, 0.5]") {

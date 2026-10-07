@@ -101,7 +101,7 @@ def run_meson_test(
     exclude_suites: Optional[list[str]] = None,
 ) -> MesonTestResult:
     """
-    Run tests using Meson.
+    Run tests using Meson after the caller has compiled the selected targets.
 
     Args:
         build_dir: Meson build directory
@@ -119,12 +119,15 @@ def run_meson_test(
     # PermissionError (FastLED#4205).
     restore_executable_bits(build_dir)
 
+    # Compilation already finished in the streaming/sequential runner. A second
+    # build could restore non-executable cache artifacts after the repair above.
     cmd = [
         get_meson_executable(),
         "test",
         "-C",
         str(build_dir),
         "--print-errorlogs",
+        "--no-rebuild",
     ]
 
     if verbose:

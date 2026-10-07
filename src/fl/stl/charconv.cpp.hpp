@@ -5,6 +5,7 @@
 #include "fl/stl/charconv.h"
 #include "fl/stl/string.h"
 #include "fl/stl/stdio.h"
+#include "fl/stl/limits.h"
 
 namespace fl {
 namespace detail {
@@ -251,7 +252,6 @@ float parseFloat(const char *str, fl::size len) {
 }
 
 int parseInt(const char *str, fl::size len) {
-    // Unsigned magnitude can represent abs(INT_MIN) without signed overflow.
     unsigned int result = 0;
     int sign = 1;
     fl::size pos = 0;
@@ -276,13 +276,26 @@ int parseInt(const char *str, fl::size len) {
         pos++;
     }
 
-    // Parse digits
+    const unsigned int positiveLimit =
+        static_cast<unsigned int>(fl::numeric_limits<int>::max());
+    const unsigned int limit = positiveLimit + (sign < 0 ? 1u : 0u);
+
+    // Accumulate a magnitude, saturating inputs outside the int range.
     while (pos < len && str[pos] >= '0' && str[pos] <= '9') {
-        result = result * 10u + static_cast<unsigned int>(str[pos] - '0');
+        const unsigned int digit = static_cast<unsigned int>(str[pos] - '0');
+        if (result > (limit - digit) / 10u) {
+            return sign < 0 ? fl::numeric_limits<int>::min()
+                            : fl::numeric_limits<int>::max();
+        }
+        result = result * 10u + digit;
         pos++;
     }
 
-    return static_cast<int>(sign < 0 ? 0u - result : result);
+    if (sign < 0 && result == positiveLimit + 1u) {
+        return fl::numeric_limits<int>::min();
+    }
+    const int magnitude = static_cast<int>(result);
+    return sign < 0 ? -magnitude : magnitude;
 }
 
 int parseInt(const char *str) {

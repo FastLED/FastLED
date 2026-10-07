@@ -114,9 +114,11 @@ if not is_wasm_build
     # Stub variables for when unit tests are disabled
     all_test_dlls = []
     all_test_runners = []
+    standalone_test_executables = []
   endif
 
   # Build examples subdirectory (provides meson targets for example compilation)
+  compile_test_executables = []
   # Can be disabled with -Denable_examples=false to speed up Meson setup for unit tests only
   if get_option('enable_examples')
     if get_option('enable_full_examples')
@@ -126,10 +128,19 @@ if not is_wasm_build
       example_dlls = []
     endif
     subdir('ci/meson/compile_tests')
+    compile_test_executables = [compile_tests_exe]
   else
     # Stub variables for when examples are disabled
     example_executables = []
     example_dlls = []
+  endif
+
+  # Build every registered unit target and the optional public-API compile gate
+  # before test execution runs with --no-rebuild.
+  if get_option('enable_unit_tests')
+    alias_target('all_tests',
+      all_test_dlls + all_test_runners + standalone_test_executables +
+      compile_test_executables)
   endif
 
   # Combined alias: builds all test DLLs + example DLLs + both runner executables
@@ -139,7 +150,8 @@ if not is_wasm_build
   # This saves ~10s on Windows (86 file copies at ~1.5s each / 16 parallel jobs).
   if get_option('enable_unit_tests') and get_option('enable_examples') and example_dlls.length() > 0
     alias_target('all-with-examples',
-      all_test_dlls + example_dlls + [runner_exe, example_runner_exe])
+      all_test_dlls + standalone_test_executables + example_dlls +
+      [runner_exe, example_runner_exe, compile_tests_exe])
   endif
 else
   # WASM build: emscripten cross-compilation with different flags and targets

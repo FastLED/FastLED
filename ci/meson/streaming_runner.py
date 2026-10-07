@@ -156,6 +156,7 @@ class StreamingContext:
     start_time: float
     build_timer: BuildTimer
     build_optimizer: Optional[BuildOptimizer]
+    force: bool = False
 
 
 def _make_streaming_env(
@@ -426,7 +427,7 @@ def run_streaming_path(ctx: StreamingContext) -> MesonTestResult:
     compile_timeout = 1800 if ctx.use_debug else 600
 
     include_examples = examples_are_included(ctx.exclude_suites)
-    compile_target = "all-with-examples" if include_examples else None
+    compile_target = "all-with-examples" if include_examples else "all_tests"
 
     if compile_target == "all-with-examples":
         _check_all_with_examples_target(ctx)
@@ -441,6 +442,7 @@ def run_streaming_path(ctx: StreamingContext) -> MesonTestResult:
         build_optimizer=ctx.build_optimizer,
         test_file_filter=ctx.test_file_filter,
         build_timer=ctx.build_timer,
+        defer_test_execution=ctx.force and not ctx.test_file_filter,
     )
 
     # SELF-HEALING: stale-build recovery + retry once
@@ -469,6 +471,7 @@ def run_streaming_path(ctx: StreamingContext) -> MesonTestResult:
                     build_optimizer=ctx.build_optimizer,
                     test_file_filter=ctx.test_file_filter,
                     build_timer=ctx.build_timer,
+                    defer_test_execution=ctx.force and not ctx.test_file_filter,
                 )
 
     if sr.success and ctx.build_optimizer is not None:

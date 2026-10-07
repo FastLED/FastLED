@@ -21,7 +21,7 @@ i16 float_to_fixed(float f) {
     if (f < 0.0f) {
         return static_cast<i16>(f * 32768.0f);
     } else {
-        return (i16)(f * INT16_POS); // Round to nearest
+        return static_cast<i16>(f * INT16_POS); // Truncate toward zero.
     }
 }
 

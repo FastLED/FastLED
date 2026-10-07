@@ -4,7 +4,6 @@
 #include "fl/stl/type_traits.h"      // for swap
 #include "fl/stl/variant.h"          // for variant
 
-#include "fl/audio/fft/fft.h"
 #include "fl/math/geometry.h"             // for vec2
 #include "fl/stl/int.h"                  // for size, u16, u8
 #include "fl/stl/json.h"
@@ -251,15 +250,6 @@ string& string::operator+=(const string& other) FL_NO_EXCEPT {
     return *this;
 }
 
-string &string::append(const audio::fft::Bins &str) {
-    append("\n Impl Bins:\n  ");
-    append(str.raw());
-    append("\n");
-    append(" Impl Bins DB:\n  ");
-    append(str.db());
-    append("\n");
-    return *this;
-}
 
 string &string::append(const XYMap &map) {
     append("XYMap(");

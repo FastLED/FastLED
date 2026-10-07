@@ -22,7 +22,9 @@ from pathlib import Path
 import pytest
 from typeguard import typechecked
 
+import ci.meson.test_execution as native_runner_module
 import ci.util.meson_example_runner as example_runner_module
+from ci.meson.test_execution import run_meson_test
 from ci.util.meson_example_runner import run_examples
 
 
@@ -85,6 +87,39 @@ def test_run_examples_does_not_rebuild_after_repairing_runner(
     )
 
     result = run_examples(build_dir, examples=["Blink"], timeout=30)
+
+    assert result.success
+    assert runner.stat().st_mode & stat.S_IXUSR
+
+
+@pytest.mark.skipif(os.name == "nt", reason="POSIX mode bits")
+@typechecked
+def test_run_native_suite_does_not_rebuild_after_repairing_runner(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    build_dir = tmp_path / "meson-debug"
+    original = _stub_example_runner(build_dir)
+    tests_dir = build_dir / "tests"
+    tests_dir.mkdir()
+    runner = original.rename(tests_dir / "color_profile_tiny_layout")
+    fake_meson = tmp_path / "fake-meson"
+    fake_meson.write_text(
+        f"#!{sys.executable}\n"
+        "import os\n"
+        "import sys\n"
+        f"runner = {str(runner)!r}\n"
+        "if '--no-rebuild' not in sys.argv:\n"
+        "    os.chmod(runner, 0o644)\n"
+        "    sys.exit(13)\n"
+        "sys.exit(0 if os.access(runner, os.X_OK) else 13)\n",
+        encoding="utf-8",
+    )
+    fake_meson.chmod(0o755)
+    monkeypatch.setattr(
+        native_runner_module, "get_meson_executable", lambda: str(fake_meson)
+    )
+
+    result = run_meson_test(build_dir)
 
     assert result.success
     assert runner.stat().st_mode & stat.S_IXUSR
