@@ -10,7 +10,7 @@
 
 #include "platforms/ota.h"
 #include "platforms/esp/esp_version.h"
-#include "fl/net/ota.h"  // For OTAService enum
+#include "fl/net/ota/ota.h"  // For OTAService enum
 
 // OTA support detection flag
 // OTA requires IDF 4.0+ for HTTP server and OTA APIs
@@ -1431,6 +1431,13 @@ private:
 
 fl::shared_ptr<IOTA> platform_create_ota() {
     return fl::make_shared<ESP32OTA>();
+}
+
+// Defined here rather than in platforms/ota.cpp.hpp so the only strong
+// reference into this translation unit comes from fl::net::OTA: a sketch
+// that never uses OTA does not link the WiFi stack (FastLED #4726).
+fl::shared_ptr<IOTA> IOTA::create() FL_NO_EXCEPT {
+    return platform_create_ota();
 }
 
 }  // namespace platforms

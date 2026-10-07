@@ -1,7 +1,7 @@
-/// @file fl/net/ota.cpp.hpp
+/// @file fl/net/ota/ota.cpp.hpp
 /// OTA (Over-The-Air) update implementation - wrapper around platform interface
 
-#include "fl/net/ota.h"
+#include "fl/net/ota/ota.h"
 #include "platforms/ota.h"
 #include "fl/stl/noexcept.h"
 

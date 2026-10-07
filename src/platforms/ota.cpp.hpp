@@ -8,10 +8,14 @@
 #include "fl/log/log.h"
 #include "fl/stl/noexcept.h"
 
-// Skip null stub when the real ESP32 OTA implementation will be compiled.
-// In unity builds both files end up in the same TU, so FL_LINK_WEAK cannot
-// resolve the duplicate; we guard the null factory out instead.
-#if defined(FL_IS_ESP32) && defined(ESP_IDF_VERSION_4_OR_HIGHER) && \
+// Skip the null stub and the factory when the real ESP32 OTA implementation
+// is compiled (platforms/esp/32/ota/ota_impl.cpp.hpp, which defines both).
+// Must match FL_ESP_OTA_SUPPORTED there. The ESP32 backend lives in its own
+// translation unit (fl/build/platforms.esp.32.ota+.cpp) so the WiFi stack it
+// references links only when a sketch uses fl::net::OTA (FastLED #4726);
+// IOTA::create() is the strong reference that pulls that unit in.
+#if defined(FL_IS_ESP32) && ESP_IDF_VERSION_4_OR_HIGHER && \
+    !ESP_IDF_VERSION_6_OR_HIGHER && \
     !defined(FL_IS_ESP_32H2) && !defined(FL_IS_ESP_32P4)
 #define FL_OTA_HAS_PLATFORM_IMPL 1
 #else
@@ -97,9 +101,11 @@ fl::shared_ptr<IOTA> platform_create_ota() FL_NO_EXCEPT {
 // Factory Method Implementation
 // ============================================================================
 
+#if !FL_OTA_HAS_PLATFORM_IMPL
 fl::shared_ptr<IOTA> IOTA::create() FL_NO_EXCEPT {
     return platform_create_ota();
 }
+#endif
 
 }  // namespace platforms
 }  // namespace fl

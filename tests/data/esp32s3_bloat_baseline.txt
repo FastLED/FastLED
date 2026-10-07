@@ -1,3 +1,10 @@
+# 2026-10-06, PR for issue #4726: -252 B, 367659 -> 367407. The ESP32
+# fl::net::wifi and OTA backends moved out of the always-linked platforms+
+# unity object into their own build units, so Blink no longer links
+# esp_wifi_init / s_wifi_nvs / net80211 (Blink firmware 408200 -> 407844 B,
+# RAM 79544 -> 78216 B). Measured locally with `bash bloat esp32s3 --build`
+# (image_flash=367407 B), not by CI.
+
 # 2026-10-06, PR #4727: -80 B, 367739 -> 367659. fl::cin's istream buffer is
 # constant-initialized (no dynamic initializer) and the PWM lookup paths no
 # longer touch the PwmStateData singleton, so --gc-sections drops both from
