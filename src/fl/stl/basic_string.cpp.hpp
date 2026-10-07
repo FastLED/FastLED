@@ -206,22 +206,30 @@ fl::size basic_string::write(fl::u8 c) {
 fl::size basic_string::write(const char* str, fl::size n) {
     fl::size newLen = mLength + n;
 
-    // Handle non-owning storage
-    if (isNonOwning()) {
-        const char* existingData = constData();
-        fl::size existingLen = mLength;
-        if (newLen + 1 <= mInlineCapacity) {
-            if (existingLen > 0 && existingData) {
-                fl::memcpy(inlineBufferPtr(), existingData, existingLen);
+    if (!hasHeapData() && newLen + 1 <= mInlineCapacity) {
+        const bool nonOwning = isNonOwning();
+        if (nonOwning) {
+            const char* existingData = constData();
+            if (mLength > 0 && existingData) {
+                fl::memcpy(inlineBufferPtr(), existingData, mLength);
             }
-            fl::memcpy(inlineBufferPtr() + existingLen, str, n);
+        }
+        FL_DISABLE_WARNING_PUSH
+        FL_DISABLE_WARNING(array-bounds)
+        fl::memcpy(inlineBufferPtr() + mLength, str, n);
+        FL_DISABLE_WARNING_POP
+        if (nonOwning) {
             inlineBufferPtr()[newLen] = '\0';
             mStorage.reset();
             mLength = newLen;
-            return mLength;
+        } else {
+            mLength = newLen;
+            inlineBufferPtr()[mLength] = '\0';
         }
-    } else if (hasHeapData() &&
-               mStorage.get<NotNullStringHolderPtr>().get().use_count() <= 1) {
+        return mLength;
+    }
+    if (hasHeapData() &&
+        mStorage.get<NotNullStringHolderPtr>().get().use_count() <= 1) {
         NotNullStringHolderPtr& heap = mStorage.get<NotNullStringHolderPtr>();
         if (!heap->hasCapacity(newLen)) {
             // Check if str points into our buffer (self-referential write).
@@ -238,14 +246,6 @@ fl::size basic_string::write(const char* str, fl::size n) {
         fl::memcpy(heap->data() + mLength, str, n);
         mLength = newLen;
         heap->data()[mLength] = '\0';
-        return mLength;
-    } else if (!hasHeapData() && newLen + 1 <= mInlineCapacity) {
-        FL_DISABLE_WARNING_PUSH
-        FL_DISABLE_WARNING(array-bounds)
-        fl::memcpy(inlineBufferPtr() + mLength, str, n);
-        FL_DISABLE_WARNING_POP
-        mLength = newLen;
-        inlineBufferPtr()[mLength] = '\0';
         return mLength;
     }
     // Materialize non-owning storage, detach shared storage, or grow inline
