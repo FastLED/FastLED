@@ -119,9 +119,20 @@ Neither a singleton migration nor splitting unity groups is required here.
 - Requested `esp32dev_idf6` resolved SDK 5.5.5, so it is not IDF6 evidence.
   Tracked in [fbuild #1662](https://github.com/FastLED/fbuild/issues/1662).
 - The component profile uses Arduino plus IDF; it is not bare `app_main` proof.
-- Native, release ESP family/feature, AVR and WASM checks passed as recorded in
-  the plan. Full Python/debug QEMU, final lint and exact-SHA CI are pending.
-  Pre-push review found no remaining correctness/scope findings; final additional
-  definition matches still require validation.
+- Full Python passed: 1,836 passed, 25 skipped, 2 xfailed and 3,257 subtests.
+  The latest focused annotation/compiler fixture inventory passed 87 tests.
+  Full native debug passed 318 unit tests and 95 examples; the repaired coroutine
+  handshake also passed its separate targeted debug run. Full portable lint and
+  strict10 SDK QEMU passed. Exact-SHA complete CI remains required before merge.
+- Windows CI exposed namespace friend lookup of `fl::CFastLED`; explicit
+  `::CFastLED` selects the intended global class. A real Windows-mode Clang
+  fixture reproduces failing lookup and passes after qualification. Final review
+  found no remaining correctness or scope findings.
+- MP3 CPU audit compiler drift is tracked in FastLED#4779. Unchanged master and
+  this PR both produce float dct32 instruction count47 with explicit GCC13.2;
+  explicit GCC14.2 produces44, matching the baseline. Decoder and audit sources
+  are identical before/after; no audit threshold or workflow changes are included.
+- Ordinary example sketches have no annotation edits. AutoResearch is explicitly
+  exempt under the maintainer's clarification and retains its testing macros.
 - PR #4736 stays closed and unmerged. Production unity routers, compilation
   units and vendor linker scripts are unchanged.

@@ -161,7 +161,7 @@ fl::vector<fl::ChannelPtr>& CFastLED::channels() FL_NO_EXCEPT {
 fl::PowerCodecPolicy fl::powerChannelCodecPolicy(
     const fl::CLEDController& controller) FL_NO_EXCEPT {
     PowerCodecPolicy policy;
-    const fl::vector<fl::ChannelPtr>& registered = CFastLED::channels();
+    const fl::vector<fl::ChannelPtr>& registered = ::CFastLED::channels();
     for (fl::size i = 0; i < registered.size(); ++i) {
         const fl::Channel* channel = registered[i].get();
         if (channel != &controller) continue;

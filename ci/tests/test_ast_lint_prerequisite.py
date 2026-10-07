@@ -390,3 +390,47 @@ def test_combined_inventory_deduplicates_physical_hits_across_tus(
     noexcept_hits, array_hits = check_ast_combined.find_combined_hits("all")
     assert noexcept_hits == [first, second]
     assert array_hits == [array_first, array_second]
+
+
+def test_windows_friend_lookup_requires_global_fastled_qualification() -> None:
+    import shutil
+
+    from running_process import RunningProcess
+
+    compiler = shutil.which("clang++")
+    if compiler is None:
+        pytest.skip("Clang required for Windows compiler-feature fixture")
+    # Match the public global class and namespace friend introduced by the
+    # controller header. MS lookup exposes the incomplete namespace friend.
+    source = """
+namespace fl {
+class Controller { friend class CFastLED; };
+int policy();
+}
+class CFastLED { public: static int channels(); };
+int fl::policy() { return LOOKUP::channels(); }
+"""
+    for lookup, succeeds in (("CFastLED", False), ("::CFastLED", True)):
+        result = RunningProcess.run(
+            [
+                compiler,
+                "--target=x86_64-pc-windows-msvc",
+                "-std=c++17",
+                "-fms-extensions",
+                "-fms-compatibility",
+                "-fsyntax-only",
+                "-x",
+                "c++",
+                "-",
+            ],
+            input=source.replace("LOOKUP", lookup),
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=120,
+        )
+        output = (result.stdout or "") + (result.stderr or "")
+        assert (result.returncode == 0) == succeeds, output
+        if not succeeds:
+            assert "incomplete type" in output
