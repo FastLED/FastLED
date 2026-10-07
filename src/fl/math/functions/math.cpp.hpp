@@ -1,3 +1,5 @@
+// ok no header - public declarations remain in fl/math/math.h.
+
 #include "fl/math/math.h"
 #include "fl/system/sketch_macros.h"  // SKETCH_HAS_LARGE_MEMORY
 
