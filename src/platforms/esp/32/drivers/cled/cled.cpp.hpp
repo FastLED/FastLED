@@ -1,3 +1,5 @@
+// ok no header - public declarations remain in platforms/esp/32/drivers/cled.h
+
 // IWYU pragma: private
 
 /// @file platforms/esp/32/drivers/cled.cpp
