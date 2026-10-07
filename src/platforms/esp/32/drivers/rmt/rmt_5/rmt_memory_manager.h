@@ -430,8 +430,6 @@ private:
     /// - Global Pool (ESP32, ESP32-S2): Single shared pool for TX and RX
     /// - Dedicated Pools (ESP32-S3, C3, C6, H2): Separate TX and RX pools
     struct MemoryLedger {
-        bool is_global_pool;        ///< true = global pool (ESP32/S2), false = dedicated pools (S3/C3/C6/H2)
-
         // Global pools use total_tx_words as the shared capacity and total_rx_words = 0.
         size_t total_tx_words;      ///< Shared capacity or dedicated TX capacity
         size_t total_rx_words;      ///< Dedicated RX capacity; zero for a global pool

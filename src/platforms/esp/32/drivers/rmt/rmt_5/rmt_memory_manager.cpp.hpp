@@ -142,8 +142,7 @@ RmtMemoryManager::ChannelAllocation::ChannelAllocation(
     : words(w), channel_id(id), is_tx(tx), is_dma(dma) {}
 
 RmtMemoryManager::MemoryLedger::MemoryLedger() FL_NO_EXCEPT
-    : is_global_pool(false)
-    , total_tx_words(0)
+    : total_tx_words(0)
     , total_rx_words(0)
     , allocated_tx_words(0)
     , allocated_rx_words(0)
@@ -155,9 +154,6 @@ RmtMemoryManager::MemoryLedger::MemoryLedger() FL_NO_EXCEPT
 
     total_tx_words = tx_limit;
     total_rx_words = rx_limit;
-#if defined(FL_IS_ESP_32DEV) || defined(FL_IS_ESP_32S2)
-    is_global_pool = true;
-#endif
 }
 
 // ============================================================================
@@ -180,7 +176,6 @@ RmtMemoryManager::RmtMemoryManager(size_t total_tx, size_t total_rx, bool is_glo
     , mIdleBlocks(2)
     , mNetworkBlocks(3) {
 
-    mLedger.is_global_pool = is_global;
     mLedger.total_tx_words = total_tx;
     mLedger.total_rx_words = is_global ? 0 : total_rx;
     FL_DBG("RMT Memory Manager (TEST): TX=" << total_tx << " words, RX=" << mLedger.total_rx_words << " words, global=" << is_global);
@@ -247,7 +242,7 @@ size_t RmtMemoryManager::calculateMemoryBlocks(bool networkActive) FL_NO_EXCEPT 
     // - Channel 0: 96 words (2 blocks) → 96 remaining → only 2 channels fit ✗
     // - With adaptive: Channel 0: 48 words → 144 remaining → 4 channels fit ✓
     size_t total_memory = mgr.mLedger.total_tx_words;
-    size_t allocated_memory = mgr.mLedger.is_global_pool ? (mgr.mLedger.allocated_tx_words + mgr.mLedger.allocated_rx_words) : mgr.mLedger.allocated_tx_words;
+    size_t allocated_memory = mgr.mIsGlobalPool ? (mgr.mLedger.allocated_tx_words + mgr.mLedger.allocated_rx_words) : mgr.mLedger.allocated_tx_words;
     size_t available_memory = (total_memory > allocated_memory) ? (total_memory - allocated_memory) : 0;
 
     // Count ONLY TX channels (RX channels use separate pool on S3/C3/C6)
@@ -505,7 +500,7 @@ RmtMemoryManager::handleAllocateTxFailure(u8 channel_id, size_t mem_blocks,
     // the getAvailableWords() call + 3 mLedger reads) still run. See #2956.
 #if FASTLED_LOG_RUNTIME_ENABLED
     size_t total = mLedger.total_tx_words;
-    size_t allocated = mLedger.is_global_pool ? (mLedger.allocated_tx_words + mLedger.allocated_rx_words) : mLedger.allocated_tx_words;
+    size_t allocated = mIsGlobalPool ? (mLedger.allocated_tx_words + mLedger.allocated_rx_words) : mLedger.allocated_tx_words;
     size_t reserved = mLedger.reserved_tx_words;
     size_t available = getAvailableWords(true);
 
@@ -541,8 +536,8 @@ RmtMemoryManager::AllocationStatus RmtMemoryManager::allocateRxImpl(u8 channel_i
     // Try to allocate from appropriate pool
     if (!tryAllocateWords(words_needed, false)) {
         // Calculate detailed memory breakdown for diagnostic message
-        size_t total = mLedger.is_global_pool ? mLedger.total_tx_words : mLedger.total_rx_words;
-        size_t allocated = mLedger.is_global_pool ? (mLedger.allocated_tx_words + mLedger.allocated_rx_words) : mLedger.allocated_rx_words;
+        size_t total = mIsGlobalPool ? mLedger.total_tx_words : mLedger.total_rx_words;
+        size_t allocated = mIsGlobalPool ? (mLedger.allocated_tx_words + mLedger.allocated_rx_words) : mLedger.allocated_rx_words;
         size_t reserved = mLedger.reserved_rx_words;
         size_t available = getAvailableWords(false);
 
@@ -924,7 +919,7 @@ size_t RmtMemoryManager::getAvailableWords(bool is_tx) const FL_NO_EXCEPT {
     size_t total;
     size_t reserved;
     size_t allocated;
-    if (mLedger.is_global_pool) {
+    if (mIsGlobalPool) {
         total = mLedger.total_tx_words;
         reserved = mLedger.reserved_tx_words + mLedger.reserved_rx_words;
         allocated = mLedger.allocated_tx_words + mLedger.allocated_rx_words;
