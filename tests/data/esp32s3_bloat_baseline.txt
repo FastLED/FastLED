@@ -1,3 +1,8 @@
+# 2026-10-07, issue #4707 tenth pass: hosted image_flash=356187 B,
+# run 37603441257 at ccd2853fba; local 356171 B. Optional dispatcher,
+# JSON and UI units save another 36 B on S3; verified legacy RMT4
+# Blink is 340757 B locally. Claim the exact measured hosted saving.
+
 # 2026-10-07, issue #4707 ninth pass: hosted image_flash=356223 B,
 # run 37602445886 at 442efc18f4; local 356207 B. Independent optional
 # driver, utility and SPI operation units save another 20 B on S3.
@@ -376,4 +381,4 @@
 # the CI Blink report contains no ResponseLutsQ16 symbol. The local fbuild
 # symbol total remains ~4 KB higher for the same source (FastLED/fbuild#1456),
 # so this ratchet uses the CI measurement from PR #4511.
-356223
+356187

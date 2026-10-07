@@ -233,7 +233,7 @@ Tenth pass plan:
 - [x] Isolate JSON/string formatting and ScreenMap JSON bridges.
 - [x] Isolate shared UI implementations while preserving explicit feature use.
 - [x] Measure matching legacy/modern Blink, gist and S3 images; verify RMT4.
-- [ ] Run integrated lint, sanitizer/native examples, Python and SDK examples;
+- [x] Run integrated lint, sanitizer/native examples, Python and SDK examples;
   review and publish measured results.
 
 Tenth local measurements: legacy real-RMT4 Blink 340,757 B / 17,648 B
@@ -242,10 +242,29 @@ S3 356,171 B. RAM unchanged. Unwind tables drop by 15,776 B; extra
 FastLED unwind tables versus 3.10.3 are now 52,896 B of the 78,000 B gap.
 Integrated lint, all 322 sanitizer units/96 examples, full Python (301.70 s),
 and legacy/modern SPI/RX builds pass. Root code review is clean. The separate
-full example wrapper has completed examples and is finishing its slow Python
-selection. Source is ready for feature-branch publication; hosted gate pending.
+full example wrapper passes examples (11.87 s) and slow Python (281.29 s),
+including QEMU. Source published at ccd2853fba; hosted run 37603441257 passes at 356,187 B (local +16 B).
+The baseline claims that exact measured saving.
 JSON remains retained by optional ActiveStripData in the platform unity unit;
 its independent subtree is the next concrete closure after this validation.
+
+Eleventh pass plan:
+- [x] Isolate ActiveStripData so Blink can omit the JSON archive.
+- [x] Isolate blur while preserving legacy XY and lazy SIMD buffers.
+- [x] Separate managed-profile implementation from its shared hook state.
+- [x] Measure matching profiles and verify full feature tests/SDK examples;
+  review and publish the measured result.
+
+Eleventh local images: legacy real-RMT4 Blink 326,373 B / 17,648 B DRAM
+(-14,384 B), modern Blink 304,603 B (+56), gist 297,455 B (+56), S3
+356,211 B (+40). RAM unchanged. JSON archive is omitted. FastLED unwind
+sections fall to 51,024 B (-14,408 B). The matching 3.10.3 gap is now
+63,616 B flash / 376 B DRAM; extra FastLED unwind tables are 38,488 B.
+Lint initially required a moved blur implementation header-location comment;
+that is fixed and full lint passes. Existing legacy multiple SPI/RX and modern
+SPI/RX compile. All 322 native sanitizer units and 96 examples pass; full
+Python passes (351.98 s); root code review passes. No physical hardware
+test claimed. Source is ready to publish and measure in hosted CI.
 
 Use the default dynamic driver configuration. Keep scheduler pumping, network
 yielding, multiple strips, and reconfiguration available. Optimize symbol reachability

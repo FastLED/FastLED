@@ -4,7 +4,6 @@
 #pragma once
 
 // begin current directory includes
-#include "fl/gfx/blur.cpp.hpp"
 #include "fl/gfx/chromatic_adaptation.cpp.hpp"
 #include "fl/gfx/colorimetric_response.cpp.hpp"
 #include "fl/gfx/colorutils.cpp.hpp"

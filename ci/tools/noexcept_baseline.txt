@@ -3175,67 +3175,67 @@ src/fl/fx/wled/ifastled.h|virtual void show(u8 brightness) = 0;
 src/fl/fx/wled/json_helpers.h|bool parseHexColor(const fl::string& hexStr, u8& r, u8& g, u8& b);
 src/fl/fx/wled/json_helpers.h|fl::string rgbToHex(u8 r, u8 g, u8 b);
 src/fl/fx/wled/json_helpers.h|void parseSegmentFields(const fl::json& segJson, WLEDSegment& seg);
-src/fl/gfx/blur.cpp.hpp|FL_ALWAYS_INLINE CRGB make(u16 r, u16 g, u16 b) {
-src/fl/gfx/blur.cpp.hpp|FL_ALWAYS_INLINE CRGB make(u16 r, u16 g, u16 b, alpha16 a) {
-src/fl/gfx/blur.cpp.hpp|FL_ALWAYS_INLINE CRGB make(u16 r, u16 g, u16 b, alpha8 a) {
-src/fl/gfx/blur.cpp.hpp|FL_ALWAYS_INLINE CRGB zero() { return CRGB(0, 0, 0); }
-src/fl/gfx/blur.cpp.hpp|FL_ALWAYS_INLINE CRGB16 make(u32 r, u32 g, u32 b) {
-src/fl/gfx/blur.cpp.hpp|FL_ALWAYS_INLINE CRGB16 make(u32 r, u32 g, u32 b, alpha16 a) {
-src/fl/gfx/blur.cpp.hpp|FL_ALWAYS_INLINE CRGB16 make(u32 r, u32 g, u32 b, alpha8 a) {
-src/fl/gfx/blur.cpp.hpp|FL_ALWAYS_INLINE CRGB16 zero() { return CRGB16(u8x8(0), u8x8(0), u8x8(0)); }
-src/fl/gfx/blur.cpp.hpp|FL_ALWAYS_INLINE u16 ch(u8 v) { return v; }
-src/fl/gfx/blur.cpp.hpp|FL_ALWAYS_INLINE u32 ch(u8x8 v) { return v.raw(); }
-src/fl/gfx/blur.cpp.hpp|FL_ALWAYS_INLINE void apply(RGB_T **bufs, const RGB_T **, int x, acc_t &r, acc_t &g, acc_t &b) {
-src/fl/gfx/blur.cpp.hpp|FL_ALWAYS_INLINE void apply(RGB_T **bufs, const RGB_T **fwd, int x, acc_t &r, acc_t &g, acc_t &b) {
-src/fl/gfx/blur.cpp.hpp|FL_ALWAYS_INLINE void apply(RGB_T **bufs, const RGB_T **fwd, int x, acc_t &r, acc_t &g, acc_t &b) {
-src/fl/gfx/blur.cpp.hpp|FL_ALWAYS_INLINE void apply(RGB_T **bufs, const RGB_T **fwd, int x, acc_t &r, acc_t &g, acc_t &b) {
-src/fl/gfx/blur.cpp.hpp|FL_ALWAYS_INLINE void apply(RGB_T **bufs, const RGB_T **fwd, int x, acc_t &r, acc_t &g, acc_t &b) {
-src/fl/gfx/blur.cpp.hpp|FL_ALWAYS_INLINE void apply(const RGB_T *row, int x, acc_t &r, acc_t &g, acc_t &b) {
-src/fl/gfx/blur.cpp.hpp|FL_ALWAYS_INLINE void apply(const RGB_T *row, int x, acc_t &r, acc_t &g, acc_t &b) {
-src/fl/gfx/blur.cpp.hpp|FL_ALWAYS_INLINE void apply(const RGB_T *row, int x, acc_t &r, acc_t &g, acc_t &b) {
-src/fl/gfx/blur.cpp.hpp|FL_ALWAYS_INLINE void apply(const RGB_T *row, int x, acc_t &r, acc_t &g, acc_t &b) {
-src/fl/gfx/blur.cpp.hpp|FL_ALWAYS_INLINE void apply(const RGB_T *row, int x, acc_t &r, acc_t &g, acc_t &b) {
-src/fl/gfx/blur.cpp.hpp|FL_ALWAYS_INLINE void hpass_row(RGB_T *pad, RGB_T *out, int w, AlphaT alpha) {
-src/fl/gfx/blur.cpp.hpp|FL_LINK_WEAK fl::u16 XY(fl::u8 x, fl::u8 y) {
-src/fl/gfx/blur.cpp.hpp|FL_NO_INLINE_IF_AVR FL_OPTIMIZE_FUNCTION static void apply_pass(const RGB_T *pad, RGB_T *out, int count, int stride) {
-src/fl/gfx/blur.cpp.hpp|FL_NO_INLINE_IF_AVR FL_OPTIMIZE_FUNCTION static void apply_pass_alpha(const RGB_T *pad, RGB_T *out, int count, int stride, AlphaT alpha) {
-src/fl/gfx/blur.cpp.hpp|FL_OPTIMIZE_FUNCTION static void vpass_rowmajor_impl( RGB_T *pixels, int w, int h, RGB_T *scratch, AlphaT alpha) {
-src/fl/gfx/blur.cpp.hpp|FL_OPTIMIZE_FUNCTION void blurGaussianImpl(Canvas<RGB_T> &canvas, AlphaT alpha) {
-src/fl/gfx/blur.cpp.hpp|FL_OPTIMIZE_FUNCTION void blurGaussianMappedImpl(CanvasMapped<RGB_T> &canvas, AlphaT alpha) {
-src/fl/gfx/blur.cpp.hpp|fl::u16 XY(fl::u8 x, fl::u8 y) FL_LINK_WEAK;
-src/fl/gfx/blur.cpp.hpp|fl::u16 xy_legacy_wrapper(fl::u16 x, fl::u16 y, fl::u16 width, fl::u16 height) {
-src/fl/gfx/blur.cpp.hpp|static fl::span<RGB_T> get_padbuf(int minSize) {
-src/fl/gfx/blur.cpp.hpp|static int compute_pad_size(int w, int h) {
-src/fl/gfx/blur.cpp.hpp|static void apply(RGB_T **bufs, const RGB_T **, u8 *out, int nbytes) {
-src/fl/gfx/blur.cpp.hpp|static void apply(RGB_T **bufs, const RGB_T **fwd, u8 *out, int nbytes) {
-src/fl/gfx/blur.cpp.hpp|static void apply(RGB_T **bufs, const RGB_T **fwd, u8 *out, int nbytes) {
-src/fl/gfx/blur.cpp.hpp|static void apply(RGB_T **bufs, const RGB_T **fwd, u8 *out, int nbytes) {
-src/fl/gfx/blur.cpp.hpp|static void apply(RGB_T **bufs, const RGB_T **fwd, u8 *out, int nbytes) {
-src/fl/gfx/blur.cpp.hpp|static void apply(const u8 *pb, int S, u8 *ob, int nbytes, u8 *, int) {
-src/fl/gfx/blur.cpp.hpp|static void apply(const u8 *pb, int S, u8 *ob, int nbytes, u8 *, int) {
-src/fl/gfx/blur.cpp.hpp|static void apply(const u8 *pb, int S, u8 *ob, int nbytes, u8 *, int) {
-src/fl/gfx/blur.cpp.hpp|static void apply(const u8 *pb, int S, u8 *ob, int nbytes, u8 *, int) {
-src/fl/gfx/blur.cpp.hpp|static void apply(const u8 *pb, int, u8 *ob, int nbytes, u8 *, int) {
-src/fl/gfx/blur.cpp.hpp|static void simd_conv_121(const u8 * FL_RESTRICT_PARAM a, const u8 * FL_RESTRICT_PARAM b, const u8 * FL_RESTRICT_PARAM c, u8 * FL_RESTRICT_PARAM out, int nbytes) {
-src/fl/gfx/blur.cpp.hpp|static void simd_conv_14641(const u8 *p0, const u8 *p1, const u8 *p2, const u8 *p3, const u8 *p4, u8 *out, int nbytes) {
-src/fl/gfx/blur.cpp.hpp|static void simd_conv_r3(const u8 *p0, const u8 *p1, const u8 *p2, const u8 *p3, const u8 *p4, const u8 *p5, const u8 *p6, u8 *out, int nbytes) {
-src/fl/gfx/blur.cpp.hpp|static void simd_conv_r4(const u8 *p0, const u8 *p1, const u8 *p2, const u8 *p3, const u8 *p4, const u8 *p5, const u8 *p6, const u8 *p7, const u8 *p8, u8 *out, int nbytes) {
-src/fl/gfx/blur.cpp.hpp|static void vpass_full(RGB_T *pixels, int w, int h, RGB_T *scratch, AlphaT alpha) {
-src/fl/gfx/blur.cpp.hpp|template <> constexpr alpha16 alpha_identity<alpha16>() { return alpha16(65535); }
-src/fl/gfx/blur.cpp.hpp|template <> constexpr alpha8 alpha_identity<alpha8>() { return alpha8(255); }
-src/fl/gfx/blur.cpp.hpp|template <typename AlphaT> constexpr AlphaT alpha_identity();
-src/fl/gfx/blur.cpp.hpp|void blur1d(fl::span<CRGB> leds, fract8 blur_amount) {
-src/fl/gfx/blur.cpp.hpp|void blur2d(CRGB *leds, fl::u8 width, fl::u8 height, fract8 blur_amount) {
-src/fl/gfx/blur.cpp.hpp|void blur2d(Canvas<CRGB> &canvas, alpha8 blur_amount) {
-src/fl/gfx/blur.cpp.hpp|void blur2d(fl::span<CRGB> leds, fl::u8 width, fl::u8 height, fract8 blur_amount, const XYMap &xymap) {
-src/fl/gfx/blur.cpp.hpp|void blurColumns(Canvas<CRGB> &canvas, alpha8 blur_amount) {
-src/fl/gfx/blur.cpp.hpp|void blurColumns(fl::span<CRGB> leds, fl::u8 width, fl::u8 height, fract8 blur_amount, const XYMap &xyMap) {
-src/fl/gfx/blur.cpp.hpp|void blurGaussian(Canvas<RGB_T> &canvas, alpha16 dimFactor) {
-src/fl/gfx/blur.cpp.hpp|void blurGaussian(Canvas<RGB_T> &canvas, alpha8 dimFactor) {
-src/fl/gfx/blur.cpp.hpp|void blurGaussian(CanvasMapped<RGB_T> &canvas, alpha16 dimFactor) {
-src/fl/gfx/blur.cpp.hpp|void blurGaussian(CanvasMapped<RGB_T> &canvas, alpha8 dimFactor) {
-src/fl/gfx/blur.cpp.hpp|void blurRows(Canvas<CRGB> &canvas, alpha8 blur_amount) {
-src/fl/gfx/blur.cpp.hpp|void blurRows(fl::span<CRGB> leds, fl::u8 width, fl::u8 height, fract8 blur_amount, const XYMap &xyMap) {
+src/fl/gfx/blur/blur.cpp.hpp|FL_ALWAYS_INLINE CRGB make(u16 r, u16 g, u16 b) {
+src/fl/gfx/blur/blur.cpp.hpp|FL_ALWAYS_INLINE CRGB make(u16 r, u16 g, u16 b, alpha16 a) {
+src/fl/gfx/blur/blur.cpp.hpp|FL_ALWAYS_INLINE CRGB make(u16 r, u16 g, u16 b, alpha8 a) {
+src/fl/gfx/blur/blur.cpp.hpp|FL_ALWAYS_INLINE CRGB zero() { return CRGB(0, 0, 0); }
+src/fl/gfx/blur/blur.cpp.hpp|FL_ALWAYS_INLINE CRGB16 make(u32 r, u32 g, u32 b) {
+src/fl/gfx/blur/blur.cpp.hpp|FL_ALWAYS_INLINE CRGB16 make(u32 r, u32 g, u32 b, alpha16 a) {
+src/fl/gfx/blur/blur.cpp.hpp|FL_ALWAYS_INLINE CRGB16 make(u32 r, u32 g, u32 b, alpha8 a) {
+src/fl/gfx/blur/blur.cpp.hpp|FL_ALWAYS_INLINE CRGB16 zero() { return CRGB16(u8x8(0), u8x8(0), u8x8(0)); }
+src/fl/gfx/blur/blur.cpp.hpp|FL_ALWAYS_INLINE u16 ch(u8 v) { return v; }
+src/fl/gfx/blur/blur.cpp.hpp|FL_ALWAYS_INLINE u32 ch(u8x8 v) { return v.raw(); }
+src/fl/gfx/blur/blur.cpp.hpp|FL_ALWAYS_INLINE void apply(RGB_T **bufs, const RGB_T **, int x, acc_t &r, acc_t &g, acc_t &b) {
+src/fl/gfx/blur/blur.cpp.hpp|FL_ALWAYS_INLINE void apply(RGB_T **bufs, const RGB_T **fwd, int x, acc_t &r, acc_t &g, acc_t &b) {
+src/fl/gfx/blur/blur.cpp.hpp|FL_ALWAYS_INLINE void apply(RGB_T **bufs, const RGB_T **fwd, int x, acc_t &r, acc_t &g, acc_t &b) {
+src/fl/gfx/blur/blur.cpp.hpp|FL_ALWAYS_INLINE void apply(RGB_T **bufs, const RGB_T **fwd, int x, acc_t &r, acc_t &g, acc_t &b) {
+src/fl/gfx/blur/blur.cpp.hpp|FL_ALWAYS_INLINE void apply(RGB_T **bufs, const RGB_T **fwd, int x, acc_t &r, acc_t &g, acc_t &b) {
+src/fl/gfx/blur/blur.cpp.hpp|FL_ALWAYS_INLINE void apply(const RGB_T *row, int x, acc_t &r, acc_t &g, acc_t &b) {
+src/fl/gfx/blur/blur.cpp.hpp|FL_ALWAYS_INLINE void apply(const RGB_T *row, int x, acc_t &r, acc_t &g, acc_t &b) {
+src/fl/gfx/blur/blur.cpp.hpp|FL_ALWAYS_INLINE void apply(const RGB_T *row, int x, acc_t &r, acc_t &g, acc_t &b) {
+src/fl/gfx/blur/blur.cpp.hpp|FL_ALWAYS_INLINE void apply(const RGB_T *row, int x, acc_t &r, acc_t &g, acc_t &b) {
+src/fl/gfx/blur/blur.cpp.hpp|FL_ALWAYS_INLINE void apply(const RGB_T *row, int x, acc_t &r, acc_t &g, acc_t &b) {
+src/fl/gfx/blur/blur.cpp.hpp|FL_ALWAYS_INLINE void hpass_row(RGB_T *pad, RGB_T *out, int w, AlphaT alpha) {
+src/fl/gfx/blur/blur.cpp.hpp|FL_LINK_WEAK fl::u16 XY(fl::u8 x, fl::u8 y) {
+src/fl/gfx/blur/blur.cpp.hpp|FL_NO_INLINE_IF_AVR FL_OPTIMIZE_FUNCTION static void apply_pass(const RGB_T *pad, RGB_T *out, int count, int stride) {
+src/fl/gfx/blur/blur.cpp.hpp|FL_NO_INLINE_IF_AVR FL_OPTIMIZE_FUNCTION static void apply_pass_alpha(const RGB_T *pad, RGB_T *out, int count, int stride, AlphaT alpha) {
+src/fl/gfx/blur/blur.cpp.hpp|FL_OPTIMIZE_FUNCTION static void vpass_rowmajor_impl( RGB_T *pixels, int w, int h, RGB_T *scratch, AlphaT alpha) {
+src/fl/gfx/blur/blur.cpp.hpp|FL_OPTIMIZE_FUNCTION void blurGaussianImpl(Canvas<RGB_T> &canvas, AlphaT alpha) {
+src/fl/gfx/blur/blur.cpp.hpp|FL_OPTIMIZE_FUNCTION void blurGaussianMappedImpl(CanvasMapped<RGB_T> &canvas, AlphaT alpha) {
+src/fl/gfx/blur/blur.cpp.hpp|fl::u16 XY(fl::u8 x, fl::u8 y) FL_LINK_WEAK;
+src/fl/gfx/blur/blur.cpp.hpp|fl::u16 xy_legacy_wrapper(fl::u16 x, fl::u16 y, fl::u16 width, fl::u16 height) {
+src/fl/gfx/blur/blur.cpp.hpp|static fl::span<RGB_T> get_padbuf(int minSize) {
+src/fl/gfx/blur/blur.cpp.hpp|static int compute_pad_size(int w, int h) {
+src/fl/gfx/blur/blur.cpp.hpp|static void apply(RGB_T **bufs, const RGB_T **, u8 *out, int nbytes) {
+src/fl/gfx/blur/blur.cpp.hpp|static void apply(RGB_T **bufs, const RGB_T **fwd, u8 *out, int nbytes) {
+src/fl/gfx/blur/blur.cpp.hpp|static void apply(RGB_T **bufs, const RGB_T **fwd, u8 *out, int nbytes) {
+src/fl/gfx/blur/blur.cpp.hpp|static void apply(RGB_T **bufs, const RGB_T **fwd, u8 *out, int nbytes) {
+src/fl/gfx/blur/blur.cpp.hpp|static void apply(RGB_T **bufs, const RGB_T **fwd, u8 *out, int nbytes) {
+src/fl/gfx/blur/blur.cpp.hpp|static void apply(const u8 *pb, int S, u8 *ob, int nbytes, u8 *, int) {
+src/fl/gfx/blur/blur.cpp.hpp|static void apply(const u8 *pb, int S, u8 *ob, int nbytes, u8 *, int) {
+src/fl/gfx/blur/blur.cpp.hpp|static void apply(const u8 *pb, int S, u8 *ob, int nbytes, u8 *, int) {
+src/fl/gfx/blur/blur.cpp.hpp|static void apply(const u8 *pb, int S, u8 *ob, int nbytes, u8 *, int) {
+src/fl/gfx/blur/blur.cpp.hpp|static void apply(const u8 *pb, int, u8 *ob, int nbytes, u8 *, int) {
+src/fl/gfx/blur/blur.cpp.hpp|static void simd_conv_121(const u8 * FL_RESTRICT_PARAM a, const u8 * FL_RESTRICT_PARAM b, const u8 * FL_RESTRICT_PARAM c, u8 * FL_RESTRICT_PARAM out, int nbytes) {
+src/fl/gfx/blur/blur.cpp.hpp|static void simd_conv_14641(const u8 *p0, const u8 *p1, const u8 *p2, const u8 *p3, const u8 *p4, u8 *out, int nbytes) {
+src/fl/gfx/blur/blur.cpp.hpp|static void simd_conv_r3(const u8 *p0, const u8 *p1, const u8 *p2, const u8 *p3, const u8 *p4, const u8 *p5, const u8 *p6, u8 *out, int nbytes) {
+src/fl/gfx/blur/blur.cpp.hpp|static void simd_conv_r4(const u8 *p0, const u8 *p1, const u8 *p2, const u8 *p3, const u8 *p4, const u8 *p5, const u8 *p6, const u8 *p7, const u8 *p8, u8 *out, int nbytes) {
+src/fl/gfx/blur/blur.cpp.hpp|static void vpass_full(RGB_T *pixels, int w, int h, RGB_T *scratch, AlphaT alpha) {
+src/fl/gfx/blur/blur.cpp.hpp|template <> constexpr alpha16 alpha_identity<alpha16>() { return alpha16(65535); }
+src/fl/gfx/blur/blur.cpp.hpp|template <> constexpr alpha8 alpha_identity<alpha8>() { return alpha8(255); }
+src/fl/gfx/blur/blur.cpp.hpp|template <typename AlphaT> constexpr AlphaT alpha_identity();
+src/fl/gfx/blur/blur.cpp.hpp|void blur1d(fl::span<CRGB> leds, fract8 blur_amount) {
+src/fl/gfx/blur/blur.cpp.hpp|void blur2d(CRGB *leds, fl::u8 width, fl::u8 height, fract8 blur_amount) {
+src/fl/gfx/blur/blur.cpp.hpp|void blur2d(Canvas<CRGB> &canvas, alpha8 blur_amount) {
+src/fl/gfx/blur/blur.cpp.hpp|void blur2d(fl::span<CRGB> leds, fl::u8 width, fl::u8 height, fract8 blur_amount, const XYMap &xymap) {
+src/fl/gfx/blur/blur.cpp.hpp|void blurColumns(Canvas<CRGB> &canvas, alpha8 blur_amount) {
+src/fl/gfx/blur/blur.cpp.hpp|void blurColumns(fl::span<CRGB> leds, fl::u8 width, fl::u8 height, fract8 blur_amount, const XYMap &xyMap) {
+src/fl/gfx/blur/blur.cpp.hpp|void blurGaussian(Canvas<RGB_T> &canvas, alpha16 dimFactor) {
+src/fl/gfx/blur/blur.cpp.hpp|void blurGaussian(Canvas<RGB_T> &canvas, alpha8 dimFactor) {
+src/fl/gfx/blur/blur.cpp.hpp|void blurGaussian(CanvasMapped<RGB_T> &canvas, alpha16 dimFactor) {
+src/fl/gfx/blur/blur.cpp.hpp|void blurGaussian(CanvasMapped<RGB_T> &canvas, alpha8 dimFactor) {
+src/fl/gfx/blur/blur.cpp.hpp|void blurRows(Canvas<CRGB> &canvas, alpha8 blur_amount) {
+src/fl/gfx/blur/blur.cpp.hpp|void blurRows(fl::span<CRGB> leds, fl::u8 width, fl::u8 height, fract8 blur_amount, const XYMap &xyMap) {
 src/fl/gfx/colorutils.cpp.hpp|CHSV &nblend(CHSV &existing, const CHSV &overlay, fract8 amountOfOverlay, TGradientDirectionCode directionCode) {
 src/fl/gfx/colorutils.cpp.hpp|CHSV *blend(const CHSV *src1, const CHSV *src2, CHSV *dest, fl::u16 count, fract8 amountOfsrc2, TGradientDirectionCode directionCode) {
 src/fl/gfx/colorutils.cpp.hpp|CHSV ColorFromPalette(const CHSVPalette16 &pal, fl::u8 index, fl::u8 brightness, TBlendType blendType) {
