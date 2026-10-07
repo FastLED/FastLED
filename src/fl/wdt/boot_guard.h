@@ -18,8 +18,12 @@
 ///   4. the sketch calls `FastLED.watchdog().markBootHealthy()` once it is
 ///      healthy (e.g. at the end of `setup()`), which zeroes the counter.
 ///
-/// The early watchdog stays armed: the sketch must take it over with
-/// `FastLED.watchdog().begin()`/`feed()`, or call `disable()`.
+/// The counter is keyed to the firmware image, so a reflash (a warm reset)
+/// starts the new firmware from 0 instead of inheriting the old count.
+///
+/// The early watchdog stays armed until the sketch takes it over with
+/// `FastLED.watchdog().begin()`/`feed()` or calls `disable()`. If the sketch
+/// never called `begin()`, `markBootHealthy()` disables it.
 ///
 /// Opt in by placing the macro once, at file scope, in a sketch `.cpp` file
 /// (not a `.ino`: Arduino prototype generation can give C-linkage startup
@@ -30,8 +34,9 @@
 /// @endcode
 ///
 /// Platforms that support it define `FL_WATCHDOG_HAS_BOOT_GUARD` (Teensy 4.x
-/// today). Everywhere else the macro expands to nothing,
-/// `bootGuardCount()` returns 0 and `markBootHealthy()` does nothing.
+/// today). Everywhere else the macro generates no code -- it expands to a
+/// static assertion that only checks its arguments -- `bootGuardCount()`
+/// returns 0 and `markBootHealthy()` does nothing.
 ///
 /// **Hardware test option:** build with `-DFL_WATCHDOG_DEBUG_EARLY_HANG` to
 /// make the guard hang forever right after arming, every boot. A supported
@@ -49,7 +54,7 @@
 #define FL_WATCHDOG_BOOT_GUARD(escape_boots, early_timeout_ms) \
     FL_WATCHDOG_BOOT_GUARD_IMPL(escape_boots, early_timeout_ms)
 #else
-// Documented no-op where the platform has no early-boot hook.
+// No early-boot hook here: generate no code, only check the arguments.
 #define FL_WATCHDOG_BOOT_GUARD(escape_boots, early_timeout_ms) \
     FL_STATIC_ASSERT((escape_boots) >= 0 && (early_timeout_ms) >= 0, "")
 #endif

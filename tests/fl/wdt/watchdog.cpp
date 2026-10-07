@@ -463,15 +463,39 @@ FL_TEST_CASE("fl::bootGuardOnBoot — threshold 0 never escapes") {
 }
 
 FL_TEST_CASE("fl::BootGuardRecord — round-trips and rejects garbage") {
+    const fl::u32 image = 0x1234u;
     BootGuardRecord r{};
-    FL_CHECK_EQ(bootGuardDecode(r), 0u);  // all-zero RAM is not a record
-    bootGuardEncode(r, 2);
-    FL_CHECK_EQ(bootGuardDecode(r), 2u);
+    FL_CHECK_EQ(bootGuardDecode(r, image), 0u);  // all-zero RAM is not a record
+    bootGuardEncode(r, image, 2);
+    FL_CHECK_EQ(bootGuardDecode(r, image), 2u);
     r.boots = 7;  // corrupted count without a matching check word
-    FL_CHECK_EQ(bootGuardDecode(r), 0u);
+    FL_CHECK_EQ(bootGuardDecode(r, image), 0u);
     r.magic = 0xDEADBEEFu;
     r.check = 0;
-    FL_CHECK_EQ(bootGuardDecode(r), 0u);
+    FL_CHECK_EQ(bootGuardDecode(r, image), 0u);
+}
+
+// Defect 1: a reflash is a warm reset, so the record survives it.
+FL_TEST_CASE("fl::BootGuardRecord — a record of another image reads as 0") {
+    BootGuardRecord r{};
+    bootGuardStore(r, 0xAAAAu, 2, 5);
+    FL_CHECK_EQ(bootGuardDecode(r, 0xAAAAu), 2u);
+    FL_CHECK_EQ(bootGuardDecode(r, 0xBBBBu), 0u);
+    FL_CHECK_EQ(bootGuardDecodeCrashes(r, 0xBBBBu), 0u);
+}
+
+// Defect 4: the crash count shares the reset-persistent record.
+FL_TEST_CASE("fl::BootGuardRecord — boot and crash counts are independent") {
+    BootGuardRecord r{};
+    bootGuardEncodeCrashes(r, 1, 3);
+    bootGuardEncode(r, 1, 2);
+    FL_CHECK_EQ(bootGuardDecodeCrashes(r, 1), 3u);  // writing boots keeps crashes
+    FL_CHECK_EQ(bootGuardDecode(r, 1), 2u);
+    bootGuardEncodeCrashes(r, 1, 0);
+    FL_CHECK_EQ(bootGuardDecode(r, 1), 2u);         // and vice versa
+    bootGuardEncodeCrashes(r, 2, 1);                // new image: boots restart
+    FL_CHECK_EQ(bootGuardDecode(r, 2), 0u);
+    FL_CHECK_EQ(bootGuardDecodeCrashes(r, 2), 1u);
 }
 
 FL_TEST_CASE("fl::Watchdog — markBootHealthy zeroes the boot-guard count") {
@@ -480,4 +504,57 @@ FL_TEST_CASE("fl::Watchdog — markBootHealthy zeroes the boot-guard count") {
     FL_CHECK_EQ(dog.bootGuardCount(), 2u);
     dog.markBootHealthy();
     FL_CHECK_EQ(dog.bootGuardCount(), 0u);
+}
+
+// Defect 5: every platform's write stores, including over a count of 0
+// (the Teensy 4 write used to drop it).
+FL_TEST_CASE("fl::Watchdog — boot-guard write stores even when the count is 0") {
+    Watchdog& dog = Watchdog::instance();
+    dog.markBootHealthy();
+    FL_REQUIRE_EQ(dog.bootGuardCount(), 0u);
+    fl::platforms::watchdogBootGuardWrite(4);
+    FL_CHECK_EQ(dog.bootGuardCount(), 4u);
+    dog.markBootHealthy();
+}
+
+// Defect 1, end to end: reflashing after two failed boots must not inherit
+// them and escape on the new firmware's first boot.
+FL_TEST_CASE("fl::Watchdog — boot guard: a reflash starts the count from 0") {
+    using namespace fl::platforms;
+    Watchdog& dog = Watchdog::instance();
+    setStubBootGuardImageForTesting(0x0101u);
+    dog.markBootHealthy();
+    FL_CHECK_FALSE(stubBootGuardEarlyBootForTesting(3, 60000));
+    FL_CHECK_FALSE(stubBootGuardEarlyBootForTesting(3, 60000));
+    FL_CHECK_EQ(dog.bootGuardCount(), 2u);
+    setStubBootGuardImageForTesting(0x0202u);  // reflash
+    FL_CHECK_EQ(dog.bootGuardCount(), 0u);
+    FL_CHECK_FALSE(stubBootGuardEarlyBootForTesting(3, 60000));
+    FL_CHECK_EQ(dog.bootGuardCount(), 1u);
+    FL_CHECK_FALSE(stubBootGuardEarlyBootForTesting(3, 60000));
+    FL_CHECK(stubBootGuardEarlyBootForTesting(3, 60000));  // third bad boot
+    dog.disable();
+    dog.markBootHealthy();
+    setStubBootGuardImageForTesting(0);
+}
+
+// Defect 6: the early timer must not outlive a healthy boot when the sketch
+// never took the watchdog over.
+FL_TEST_CASE("fl::Watchdog — markBootHealthy disables an unclaimed early timer") {
+    using namespace fl::platforms;
+    Watchdog& dog = Watchdog::instance();
+    FL_CHECK_FALSE(stubBootGuardEarlyBootForTesting(0, 60000));
+    FL_REQUIRE(stubWatchdogEnabledForTesting());
+    dog.markBootHealthy();
+    FL_CHECK_FALSE(stubWatchdogEnabledForTesting());
+}
+
+FL_TEST_CASE("fl::Watchdog — markBootHealthy keeps a watchdog the sketch armed") {
+    using namespace fl::platforms;
+    Watchdog& dog = Watchdog::instance();
+    FL_CHECK_FALSE(stubBootGuardEarlyBootForTesting(0, 60000));
+    dog.begin(60000);  // sketch takes it over
+    dog.markBootHealthy();
+    FL_CHECK(stubWatchdogEnabledForTesting());
+    dog.disable();
 }
