@@ -60,6 +60,23 @@ had no built-in producer or dither consumer, so the PR was withdrawn.
    - If questionable quality: Ask user
    - If acceptable: Keep and note it passed
 
+## examples/AutoResearch/** changes - PLATFORM NEUTRALITY
+AutoResearch must stay platform neutral. Any added or changed line under
+`examples/AutoResearch/` with platform-specific code is a **blocking** finding:
+1. Platform branches: `#if`/`#ifdef`/`#elif` on `FL_IS_*`, `ARDUINO_*`,
+   `FASTLED_ESP*`, `ESP32`, `__IMXRT1062__`, `__AVR__`, `PICO_*`, `CONFIG_IDF_*`, etc.
+2. Register names or address literals (`WDOG3_CS`, `CCM_*`, `IMXRT_*`, `0x2027FF60`, ...).
+3. Vendor SDK/core calls (`esp_*()`, `_reboot_Teensyduino_()`, Pico SDK, nRF/STM32 HAL)
+   or weak startup hooks such as `startup_early_hook`.
+4. Direct `#include` of `platforms/...` or vendor SDK headers.
+
+Fix: add a platform-neutral API in the core (`src/fl/...`), delegate it to
+`src/platforms/...` with a no-op fallback, and call only the neutral API from
+AutoResearch (e.g. `FL_WATCHDOG_BOOT_GUARD()` in `src/fl/wdt/boot_guard.h` and
+`FastLED.watchdog().markBootHealthy()`). Exception: the line carries
+`// ok platform specific - <reason>` with a concrete reason no core API can
+serve. Pre-existing code is tracked in FastLED/FastLED#4720; don't flag untouched lines.
+
 ## ci/**.py changes - TYPE SAFETY & INTERRUPT HANDLING
 1. **KeyboardInterrupt Handling**:
    - ANY try-except catching general exceptions MUST also handle `KeyboardInterrupt`
