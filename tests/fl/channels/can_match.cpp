@@ -137,6 +137,17 @@ FL_TEST_CASE("canMatch: empty groups yields NoPin even when protocol matches") {
     fl::span<const PinGroup> empty_groups;
     auto req = ChannelRequest::singlePin(Protocol::Clockless, 4, -1, makeWs2812Timing());
     FL_REQUIRE(fl::canMatch(caps, empty_groups, req) == HandleResult::NoPin);
+
+    // An unsupported protocol is rejected before the empty-group check.
+    req.protocol = Protocol::Spi;
+    FL_REQUIRE(fl::canMatch(caps, empty_groups, req) == HandleResult::NoProtocol);
+
+    // Without groups, other request constraints cannot change the result.
+    req = makeBulkClocklessRequest(0, 16);
+    FL_REQUIRE(fl::canMatch(caps, empty_groups, req) == HandleResult::NoPin);
+    req = ChannelRequest();
+    req.protocol = Protocol::Clockless;
+    FL_REQUIRE(fl::canMatch(caps, empty_groups, req) == HandleResult::NoPin);
 }
 
 FL_TEST_CASE("canMatch: empty data_pins bitset yields NoPin") {
