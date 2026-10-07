@@ -440,8 +440,23 @@ FL_TEST_CASE("RP FLEX_IO defers native SPI pin pairs to the hardware driver") {
     ChannelEngineRpPio engine(createTxMockPeripheral(), createSpiMockPeripheral());
     fl::vector_psram<u8> bytes;
     bytes.push_back(0x01);
-    FL_CHECK_FALSE(engine.canHandle(makeSpiChannel(3, 2, 4000000, bytes)));
-    FL_CHECK(engine.canHandle(makeSpiChannel(5, 9, 4000000, bytes)));
+    // Preserve every native mux pair and reject invalid GPIOs while allowing
+    // arbitrary distinct pin pairs to use PIO.
+    const int native_pairs[][2] = {
+        {3, 2}, {7, 6}, {19, 18}, {23, 22}, {11, 10}, {15, 14}, {27, 26}
+    };
+    for (int mosi = -1; mosi <= 30; ++mosi) {
+        for (int sck = -1; sck <= 30; ++sck) {
+            bool native = false;
+            for (const auto& pair : native_pairs) {
+                native |= mosi == pair[0] && sck == pair[1];
+            }
+            const bool expected = mosi >= 0 && mosi <= 29 && sck >= 0 &&
+                                  sck <= 29 && mosi != sck && !native;
+            FL_CHECK_EQ(engine.canHandle(makeSpiChannel(mosi, sck, 4000000, bytes)),
+                        expected);
+        }
+    }
 }
 
 }  // FL_TEST_FILE
