@@ -123,7 +123,7 @@ are resolved. Full platform CI remains a separate gate before merging.
 Fifth pass:
 - [x] Measure smaller listener inline storage and verify spillover/mutation.
 - [x] Audit retained string/vector callback costs for a further safe flash cut.
-- [ ] Validate retained changes, publish measurements and tighten hosted ratchet.
+- [x] Validate retained changes, publish measurements and tighten hosted ratchet.
 
 Private EngineEvents listener inline capacity 16 -> 4 saves 96 B singleton
 RAM and 96 B per snapshot stack frame on ESP32. More than four listeners now
@@ -147,7 +147,7 @@ been claimed in the baseline. Fifth-pass full Python rerun passes (251 s).
 Sixth pass:
 - [x] Reuse known string lengths instead of retaining the char-only holder ctor.
 - [x] Reorder private RMT memory ID into existing padding before pooled span.
-- [ ] Complete validation, publish measurements and tighten hosted ratchet.
+- [x] Complete validation, publish measurements and tighten hosted ratchet.
 
 Saved JSON image_flash: Blink 304,659 B, gist 297,555 B, S3 local 356,295 B.
 This pass saves 96/96/120 B flash, with unchanged static RAM. Private channel
@@ -162,6 +162,19 @@ state (s_wifi_nvs + g_wifi_nvs). Weak references work correctly; Arduino
 startup independently extracts the vendor object and the detector query keeps
 its data alive. Public netif-state alternatives omit AP/configured-mode cases;
 retain exact detection semantics rather than add unsupported vendor shims.
+
+Hosted sixth-pass image_flash is 356,311 B (run 37587891982); baseline pinned
+at dee98ca500. Corrected gate 37588394479 passes completely, including slim
+smoke. Total hosted reduction: 11,096 B flash / 920 B static RAM.
+
+Controlled 3.10.6 Blink (ebf8c2823c) with the same modern framework/compiler
+measures 313,963 B / 26,532 B RAM in the release profile. Changing only
+-DNDEBUG -> -UNDEBUG produces 343,671 B / 26,564 B: default older logging
+costs 29,708 B. This does not reproduce the user's full 459 KB increase.
+An IDF4.4 / Arduino2 comparison of 3.10.3, 3.10.6 and current source is
+running to investigate the PlatformIO-style environment with existing Blink.
+Further candidate: share identical private encoder cleanup sequences while
+preserving every wait duration, deletion order and failure rollback boundary.
 
 Use the default dynamic driver configuration. Keep scheduler pumping, network
 yielding, multiple strips, and reconfiguration available. Optimize symbol reachability
