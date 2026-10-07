@@ -120,9 +120,11 @@ void fill_gradient_RGB(CRGB *leds, u16 startpos, CRGB startcolor,
     saccum87 gdistance87;
     saccum87 bdistance87;
 
-    rdistance87 = (endcolor.r - startcolor.r) << 7;
-    gdistance87 = (endcolor.g - startcolor.g) << 7;
-    bdistance87 = (endcolor.b - startcolor.b) << 7;
+    // Differences range from -255 to 255; multiplying by 128 fits signed
+    // 16-bit arithmetic and also defines descending gradients (unlike shifting).
+    rdistance87 = (endcolor.r - startcolor.r) * 128;
+    gdistance87 = (endcolor.g - startcolor.g) * 128;
+    bdistance87 = (endcolor.b - startcolor.b) * 128;
 
     u16 pixeldistance = endpos - startpos;
     i16 divisor = pixeldistance ? pixeldistance : 1;

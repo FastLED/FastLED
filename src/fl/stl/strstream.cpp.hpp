@@ -1,7 +1,6 @@
 #include "fl/stl/strstream.h"
 #include "crgb.h"
 #include "fl/gfx/tile2x2.h"
-#include "fl/audio/fft/fft.h"
 #include "fl/stl/string.h"
 #include "fl/stl/ios.h"
 #include "fl/stl/charconv.h"
@@ -20,18 +19,6 @@ sstream &sstream::operator<<(const Tile2x2_u8 &subpixel) {
     mStr.append(subpixel.at(1, 0));
     mStr.append(",");
     mStr.append(subpixel.at(1, 1));
-    mStr.append(")");
-    return *this;
-}
-
-// Bins support - show both raw and db bins  
-sstream &sstream::operator<<(const audio::fft::Bins &bins) {
-    mStr.append("Bins(bands=");
-    mStr.append(bins.bands());
-    mStr.append(", raw=");
-    (*this) << bins.raw();
-    mStr.append(", db=");
-    (*this) << bins.db();
     mStr.append(")");
     return *this;
 }
@@ -83,7 +70,7 @@ void sstream::appendFormatted(fl::i64 val) {
         // For decimal, handle negative sign manually
         if (val < 0) {
             mStr.append("-", 1);
-            len = fl::utoa64(static_cast<u64>(-val), buf, mBase);
+            len = fl::utoa64(u64(0) - static_cast<u64>(val), buf, mBase);
         } else {
             len = fl::utoa64(static_cast<u64>(val), buf, mBase);
         }

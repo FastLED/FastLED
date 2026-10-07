@@ -19,7 +19,7 @@ namespace {
 struct GuardedFFT {
     void run(fl::span<const fl::i16> sample, fft::Bins *out,
              const fft::Args &args) {
-        fl::unique_lock<fl::mutex> lock(mtx);
+        fl::lock_guard<fl::mutex> lock(mtx);
         fft.run(sample, out, args);
     }
 
@@ -34,7 +34,7 @@ struct AudioSamplePool {
     void put(SampleImplPtr&& impl) {
         if (impl.unique()) {
             // There is no more shared_ptr to this object, so we can recycle it.
-            fl::unique_lock<fl::mutex> lock(mutex);
+            fl::lock_guard<fl::mutex> lock(mutex);
             if (impl && pool.size() < MAX_POOL_SIZE) {
                 // Reset the impl for reuse (clear internal state)
                 impl->reset();
@@ -47,7 +47,7 @@ struct AudioSamplePool {
     }
     SampleImplPtr getOrCreate() {
         {
-            fl::unique_lock<fl::mutex> lock(mutex);
+            fl::lock_guard<fl::mutex> lock(mutex);
             if (!pool.empty()) {
                 SampleImplPtr impl = pool.back();
                 pool.pop_back();

@@ -24,8 +24,6 @@
 #endif
 #include "fl/log/log.h"  // for FL_WARN
 #include "fl/stl/assert.h"  // for FL_ASSERT
-#include "fl/audio/audio_manager.h"  // for AudioManager
-#include "fl/ui/audio.h"  // for UIAudio (CFastLED::add(UIAudio&))
 #include "hsv2rgb.h"  // for CRGB
 #include "fl/stl/int.h"  // for u32, u16
 #include "platforms/init.h"  // IWYU pragma: keep
@@ -921,28 +919,4 @@ fl::ChannelEvents& CFastLED::channelEvents() {
 
 fl::Watchdog& CFastLED::watchdog() {
 	return fl::Watchdog::instance();
-}
-
-// ============================================================================
-// CFastLED audio method implementations - thin trampolines to AudioManager
-// ============================================================================
-
-FL_MAYBE_UNUSED
-fl::shared_ptr<fl::audio::Processor> CFastLED::add(const fl::audio::Config& config) {
-	return fl::audio::AudioManager::instance().add(config);
-}
-
-FL_MAYBE_UNUSED
-fl::shared_ptr<fl::audio::Processor> CFastLED::add(fl::shared_ptr<fl::audio::IInput> input) {
-	return fl::audio::AudioManager::instance().add(fl::move(input));
-}
-
-FL_MAYBE_UNUSED
-fl::shared_ptr<fl::audio::Processor> CFastLED::add(fl::UIAudio& uiAudio) {
-	return fl::audio::AudioManager::instance().add(uiAudio);
-}
-
-FL_MAYBE_UNUSED
-void CFastLED::remove(fl::shared_ptr<fl::audio::Processor> processor) {
-	fl::audio::AudioManager::instance().remove(fl::move(processor));
 }

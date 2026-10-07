@@ -1,5 +1,10 @@
 # Lessons Learned
 
+- Forced native verification must execute every registered selected test, even
+  when only a few artifacts relink. Compile aliases must include standalone
+  probes, and Meson execution must use --no-rebuild after execute-bit repair;
+  a second cache restore can otherwise undo that repair.
+
 - A forced single-test pass is not proof that a newly added case ran. Check
   the compiled module when the build unexpectedly does no compilation; use
   the official clean wrapper to regenerate it. Both early and main cache

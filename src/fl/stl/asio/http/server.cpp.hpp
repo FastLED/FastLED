@@ -6,6 +6,7 @@
 #include "fl/stl/asio/http/server.h"
 #include "fl/stl/stdio.h"  // fl::snprintf — avoids _svfprintf_r (#2773 item 1.1)
 #include "fl/stl/atomic.h"
+#include "fl/stl/json.h"
 #include "fl/stl/singleton.h"
 #include "fl/task/executor.h"
 #include "platforms/esp/is_esp.h"  // ok platform headers - for FL_IS_ESP32  // IWYU pragma: keep

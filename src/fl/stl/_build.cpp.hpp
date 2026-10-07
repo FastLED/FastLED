@@ -34,7 +34,9 @@
 #include "fl/stl/type_traits.cpp.hpp"
 #include "fl/stl/unordered_map_basic.cpp.hpp"
 
+// Networking is compiled independently by fl.stl.asio+.cpp so ordinary
+// containers do not extract its HTTP and socket dependencies from the archive.
+
 // begin sub directory includes
-#include "fl/stl/asio/_build.cpp.hpp"
 #include "fl/stl/detail/_build.cpp.hpp"
 #include "fl/stl/isr/_build.cpp.hpp"

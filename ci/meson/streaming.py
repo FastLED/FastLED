@@ -693,6 +693,7 @@ def stream_compile_and_run_tests(
     test_file_filter: Optional[str] = None,
     build_timer=None,
     max_failures: int = 10,
+    defer_test_execution: bool = False,
 ) -> StreamingResult:
     """
     Compile test artifacts, then execute them concurrently.
@@ -711,6 +712,7 @@ def stream_compile_and_run_tests(
         test_file_filter: Optional .hpp filename to filter test execution (e.g., "backbeat.hpp")
         build_timer: Optional BuildTimer for recording test_execution_done checkpoint.
         max_failures: Maximum number of test failures before halting (default: 10, 0 = unlimited).
+        defer_test_execution: Compile only, leaving complete-suite execution to Meson.
     """
     # Pass test file filter to the callback via an attribute so it can
     # inject it into the child-process environment (os.environ is stale after
@@ -762,6 +764,13 @@ def stream_compile_and_run_tests(
     if not cr.success:
         return StreamingResult(
             success=False,
+            compile_output=cr.compile_output,
+            compile_sub_phases=cr.compile_sub_phases,
+        )
+
+    if defer_test_execution:
+        return StreamingResult(
+            success=True,
             compile_output=cr.compile_output,
             compile_sub_phases=cr.compile_sub_phases,
         )

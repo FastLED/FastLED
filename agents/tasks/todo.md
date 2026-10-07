@@ -139,10 +139,37 @@ Controlled 3.10.6 Blink (ebf8c2823c) with the same modern framework/compiler
 measures 313,963 B / 26,532 B RAM in the release profile. Changing only
 -DNDEBUG -> -UNDEBUG produces 343,671 B / 26,564 B: default older logging
 costs 29,708 B. This does not reproduce the user's full 459 KB increase.
-An IDF4.4 / Arduino2 comparison of 3.10.3, 3.10.6 and current source is
-running to investigate the PlatformIO-style environment with existing Blink.
-Further candidate: share identical private encoder cleanup sequences while
-preserving every wait duration, deletion order and failure rollback boundary.
+An IDF4.4 / Arduino2 comparison uses an equivalent legacy fbuild profile
+with existing Blink to investigate the reported environment.
+### Seventh pass: reproduce and remove legacy framework bloat
+
+- [x] Compare exact 3.10.3, 3.10.6 and current Blink on one legacy SDK.
+- [x] Remove FFT umbrella/iostream and scope-only unique_lock roots.
+- [x] Isolate audio registration/formatting, ESP-DSP and ASIO translation units.
+- [x] Finish native runner repair, integration gates and code review.
+- [ ] Publish seventh pass and pin the exact hosted size measurement.
+
+Legacy espressif32 4.4.0 / Arduino 2.0.3 / IDF 4.4.1 / GCC 8.4.0:
+3.10.3 Blink 262,757 B flash / 17,272 B RAM; 3.10.6 686,661 B /
+25,124 B; sixth pass 663,065 B / 24,252 B. Seventh candidate is
+349,577 B / 17,216 B, saving 337,084 B versus 3.10.6. Exceptions remain
+enabled; remaining flash gap is 86,820 B. Final map confirms unused audio,
+net, codec, third-party and FX archives are absent from Blink.
+
+Modern controlled profile: Blink 304,607 B, gist 297,499 B, S3 local
+356,315 B. Static RAM unchanged. Saved reports and legacy ELF/map are under
+.build/size-4707/seventh-verified-*. AudioReactive and AudioFftParity link with
+the legacy SDK; AudioFftParity also links with the modern S3 SDK. FFT math
+and dispatcher are unchanged. Full lint passes; full Python passes 1,754
+tests, and 34 runner-focused tests pass after the final alias changes. Native
+execution now avoids rebuilding after executable permission repair, and both
+full/unit compile aliases include registered standalone probes. All 418
+regular native tests passed; final full sanitizer verification passes all
+418 registered units/examples (68.40 s, four execution workers).
+Sanitizers also exposed existing signed arithmetic errors in parsing,
+formatting, gradients and wave conversion/update. Those are corrected with
+boundary coverage; focused wave and executor sanitizer runs pass. Uno Blink
+and WASM Blink compile successfully.
 
 Use the default dynamic driver configuration. Keep scheduler pumping, network
 yielding, multiple strips, and reconfiguration available. Optimize symbol reachability

@@ -19,9 +19,9 @@ namespace wave_detail { // Anonymous namespace for internal linkage
 i16 float_to_fixed(float f) {
     f = fl::clamp(f, -1.0f, 1.0f);
     if (f < 0.0f) {
-        return (i16)(f * INT16_NEG);
+        return static_cast<i16>(f * -INT16_NEG);
     } else {
-        return (i16)(f * INT16_POS); // Round to nearest
+        return static_cast<i16>(f * INT16_POS); // Truncate toward zero.
     }
 }
 
@@ -29,7 +29,7 @@ i16 float_to_fixed(float f) {
 float fixed_to_float(i16 f) {
     // return ((float)f) / FIXED_SCALE;
     if (f < 0) {
-        return ((float)f) / INT16_NEG; // Negative values
+        return static_cast<float>(f) / -INT16_NEG; // Preserve the negative amplitude.
     } else {
         return ((float)f) / INT16_POS; // Positive values
     }
@@ -144,7 +144,7 @@ void WaveSimulation1D_Real::update() {
         // Compute the 1D Laplacian:
         // lap = curr[i+1] - 2 * curr[i] + curr[i-1]
         i32 lap =
-            (i32)curr[i + 1] - ((i32)curr[i] << 1) + curr[i - 1];
+            (i32)curr[i + 1] - (i32)curr[i] * 2 + curr[i - 1];
 
         // Multiply the Laplacian by the simulation speed using Q15 arithmetic.
         // Promote to i64 before the multiply. With the 1D CFL clamp at 1.0,
@@ -158,7 +158,7 @@ void WaveSimulation1D_Real::update() {
 
         // Compute the new value:
         // f = -next[i] + 2 * curr[i] + term
-        i32 f = -(i32)next[i] + ((i32)curr[i] << 1) + term;
+        i32 f = -(i32)next[i] + (i32)curr[i] * 2 + term;
 
         // Apply damping: use a precomputed Q15 multiplier in place of the
         // arithmetic shift. Functionally equivalent for power-of-two damp
@@ -332,11 +332,11 @@ void WaveSimulation2D_Real::update() {
                                  row_below[i - 1] + row_below[i + 1];
                 const i32 nbr  = (i32)row_above[i] + row_below[i] +
                                  row_curr[i - 1] + row_curr[i + 1];
-                laplacian = diag + (nbr << 2) - 20 * c;
+                laplacian = diag + nbr * 4 - 20 * c;
             } else {
                 // Standard 5-point Laplacian: N + S + E + W - 4*C.
                 laplacian = (i32)row_curr[i + 1] + row_curr[i - 1] +
-                            row_above[i] + row_below[i] - (c << 2);
+                            row_above[i] + row_below[i] - c * 4;
             }
             // Promote to i64 before the multiply. With the 2D CFL clamp at
             // 0.5, the 5-point worst case product is ~4.3e9 and the
@@ -356,7 +356,7 @@ void WaveSimulation2D_Real::update() {
                 term = static_cast<i32>(product >> 15);
             }
             // f = -next[index] + 2 * curr[index] + mCourantSq * laplacian.
-            i32 f = -(i32)row_next[i] + (c << 1) + term;
+            i32 f = -(i32)row_next[i] + c * 2 + term;
 
             // Apply damping with the precomputed Q15 decay multiplier —
             // see the 1D update for the rationale.

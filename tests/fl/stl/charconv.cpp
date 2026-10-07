@@ -9,10 +9,29 @@
 #include "fl/stl/stdint.h"
 #include "test.h"
 #include "fl/stl/string.h"
+#include "fl/stl/charconv.h"
+#include "fl/stl/limits.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
 
 using namespace fl;
+
+FL_TEST_CASE("parseInt signed boundaries and overflow") {
+    const int maximum = fl::numeric_limits<int>::max();
+    const int minimum = fl::numeric_limits<int>::min();
+    fl::string positive;
+    positive.append(maximum);
+    fl::string negative;
+    negative.append(minimum);
+    FL_CHECK_EQ(fl::parseInt(positive.c_str()), maximum);
+    FL_CHECK_EQ(fl::parseInt(negative.c_str()), minimum);
+    positive.append("0");
+    negative.append("0");
+    FL_CHECK_EQ(fl::parseInt(positive.c_str()), maximum);
+    FL_CHECK_EQ(fl::parseInt(negative.c_str()), minimum);
+    FL_CHECK_EQ(fl::parseInt("  -12tail"), -12);
+    FL_CHECK_EQ(fl::parseInt("+0"), 0);
+}
 
 // ============================================================================
 // Hexadecimal Conversion Tests

@@ -30,7 +30,7 @@ namespace {
 
     bool get_injected_millis(fl::u32* value) FL_NO_EXCEPT {
         TimeProviderState& state = get_time_provider_state();
-        fl::unique_lock<fl::mutex> lock(state.mutex);
+        fl::lock_guard<fl::mutex> lock(state.mutex);
         if (!state.provider) {
             return false;
         }
@@ -41,13 +41,13 @@ namespace {
 
 void inject_time_provider(const time_provider_t& provider) {
     TimeProviderState& state = get_time_provider_state();
-    fl::unique_lock<fl::mutex> lock(state.mutex);
+    fl::lock_guard<fl::mutex> lock(state.mutex);
     state.provider = provider;
 }
 
 void clear_time_provider() {
     TimeProviderState& state = get_time_provider_state();
-    fl::unique_lock<fl::mutex> lock(state.mutex);
+    fl::lock_guard<fl::mutex> lock(state.mutex);
     state.provider = time_provider_t{}; // Clear the function
 }
 
@@ -116,7 +116,7 @@ namespace {
 #if FL_CHRONO_HAS_TEST_TIME_PROVIDER
 void micros64_reset() FL_NO_EXCEPT {
     Micros64State& state = get_micros64_state();
-    fl::unique_lock<fl::mutex> lock(state.mutex);
+    fl::lock_guard<fl::mutex> lock(state.mutex);
     state.accumulated = 0;
     state.last_micros = 0;
     state.initialized = false;
@@ -125,7 +125,7 @@ void micros64_reset() FL_NO_EXCEPT {
 
 fl::u64 micros64() FL_NO_EXCEPT {
     Micros64State& state = get_micros64_state();
-    fl::unique_lock<fl::mutex> lock(state.mutex);
+    fl::lock_guard<fl::mutex> lock(state.mutex);
     const fl::u32 current = fl::micros();
     if (!state.initialized) {
         state.accumulated = current;
@@ -163,7 +163,7 @@ namespace {
 
 void millis64_reset() {
     Millis64State& state = get_millis64_state();
-    fl::unique_lock<fl::mutex> lock(state.mutex);
+    fl::lock_guard<fl::mutex> lock(state.mutex);
     state.accumulated = 0;
     state.last_millis = 0;
     state.initialized = false;
@@ -172,7 +172,7 @@ void millis64_reset() {
 fl::u64 millis64() {
     Millis64State& state = get_millis64_state();
     fl::u32 current_millis = fl::millis();
-    fl::unique_lock<fl::mutex> lock(state.mutex);
+    fl::lock_guard<fl::mutex> lock(state.mutex);
 
     if (!state.initialized) {
         // First call, set initial value

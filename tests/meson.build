@@ -244,6 +244,9 @@ color_profile_tiny_runtime = executable('color_profile_tiny_runtime',
 )
 test('color_profile_tiny_runtime', color_profile_tiny_runtime)
 
+# Registered standalone probes must be built before Meson runs with --no-rebuild.
+standalone_test_executables = [color_profile_tiny_layout, color_profile_tiny_runtime]
+
 # Build each test as a DLL with shared PCH
 foreach test_name : test_names
   # Get test file path from dynamic map (for subdirectories) or default to test_name.cpp
@@ -406,9 +409,6 @@ foreach test_name : test_names
     )
   endif
 endforeach
-
-# Create alias target that builds all test DLLs and runners
-alias_target('all_tests', all_test_dlls + all_test_runners)
 
 message('Individual test DLL build enabled: ' + test_names.length().to_string() + ' test DLLs + runners')
 
