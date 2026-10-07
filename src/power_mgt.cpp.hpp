@@ -373,10 +373,6 @@ static fl::u32 fixed_power_mW(fl::u32 led_count) {
     return static_cast<fl::u32>(gPowerModel().dark_mW) * led_count;
 }
 
-// Largest brightness whose *total* demand -- baseline included -- stays inside
-// the budget. Zero when the baseline alone is already over it: no brightness
-// meets the budget then, and answering with a lit strip would promise a bound
-// that cannot be held at any setting.
 // min(255, floor(255 * num / den)) for den > 0, in 32-bit arithmetic only.
 //
 // The product needs 40 bits, and on AVR a 64-bit divide links ~600 B of
@@ -404,6 +400,10 @@ fl::u32 power_ratio_of_255(fl::u32 num, fl::u32 den) FL_NO_EXCEPT {
     return r >= num ? q : q - 1;
 }
 
+// Largest brightness whose *total* demand -- baseline included -- stays inside
+// the budget. Zero when the baseline alone is already over it: no brightness
+// meets the budget then, and answering with a lit strip would promise a bound
+// that cannot be held at any setting.
 static fl::u8 brightness_within_budget(fl::u32 fixed_mW, fl::u32 controllable_mW,
                                        fl::u8 target_brightness,
                                        fl::u32 max_power_mW) {
@@ -544,8 +544,6 @@ FL_STATIC_ASSERT(sizeof(fl::size) > 2 ||
               "dither reserve must fit 32 bits on 16-bit-size targets");
 #endif
 
-#ifdef FL_IS_AVR
-#endif
 fl::u32 dither_reserve_mW(fl::span<const CRGB> leds) {
     fl::u32 lit_r = 0, lit_g = 0, lit_b = 0;
     for (fl::size i = 0; i < leds.size(); ++i) {

@@ -140,7 +140,8 @@ FL_ALWAYS_INLINE u32 scale32by8(u32 i, fract8 scale) FL_NO_EXCEPT {
 #else
     const u32 m = scale;
 #endif
-    return (i >> 8) * m + (((i & 0xFFu) * m) >> 8);
+    return (i >> 8) * m +
+           ((static_cast<unsigned>(i & 0xFFu) * static_cast<unsigned>(m)) >> 8);
 }
 
 /// @} Scaling_ATtiny
