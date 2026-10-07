@@ -34,6 +34,15 @@
 
 namespace fl {
 
+namespace detail {
+/// Lets the power limiter charge a controller's RGBW conversion. Called by
+/// CLEDController::applyRgbw -- the one path in-tree that stores an Rgbw into
+/// a controller -- and by Channel when its options carry one, so a sketch
+/// that never configures RGBW does not link the conversion into the limiter.
+/// Defined in power_mgt.cpp.hpp.
+void enable_rgbw_power_estimate() FL_NO_EXCEPT;
+}  // namespace detail
+
 struct StreamingPipelineQ16;  // fl/gfx/pipeline.h; only a shared_ptr is named here
 
 class CLEDController {
@@ -71,6 +80,7 @@ protected:
             mSettings.mWhiteCfg.reset();
         } else {
             prepare_rgbw_colorimetric(arg);
+            detail::enable_rgbw_power_estimate();
             mSettings.mWhiteCfg = arg;
         }
     }
@@ -222,6 +232,15 @@ public:
     /// otherwise RgbwInvalid::value(). Backward-compatible with the pre-#2558
     /// API: callers that don't know about Rgbww see the same shape as before.
     Rgbw getRgbw() const FL_NO_EXCEPT { return mSettings.rgbw(); }
+
+    /// @return The stored Rgbw configuration, or nullptr when the channel
+    /// holds none. Unlike getRgbw() it does not copy the value, so a caller
+    /// on the show path does not take and drop a reference on its profile.
+    /// A subclass that writes mSettings.mWhiteCfg itself must also call
+    /// detail::enable_rgbw_power_estimate(), or the limiter charges it as RGB.
+    const Rgbw* rgbwConfig() const FL_NO_EXCEPT {
+        return mSettings.mWhiteCfg.ptr<Rgbw>();
+    }
 
     /// @return The Rgbww configuration if this channel is in 5-channel mode,
     /// otherwise RgbwwInvalid::value().

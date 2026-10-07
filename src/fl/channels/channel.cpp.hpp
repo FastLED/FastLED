@@ -39,6 +39,9 @@ inline void applyWhiteCfg(CLEDController& ctrl,
     if (auto* p = options.mWhiteCfg.ptr<Rgbww>()) {
         ctrl.setRgbww(*p);
     } else if (auto* p = options.mWhiteCfg.ptr<Rgbw>()) {
+        // The caller has already copied the options wholesale, so the Rgbw
+        // is stored even when a fixed-white chipset rejects setRgbw().
+        fl::detail::enable_rgbw_power_estimate();
         ctrl.setRgbw(*p);
     } else {
         // Empty alternative (or default-constructed) â†’ plain RGB.
