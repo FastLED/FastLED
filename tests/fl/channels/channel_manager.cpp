@@ -132,6 +132,47 @@ ChannelDataPtr createDummyChannelData(int pin = 1) {
 
 
 
+FL_TEST_CASE("ChannelManager registration retains ownership across a clearing callback") {
+    ChannelManager manager;
+    bool destroyed = false;
+    bool callbackReturned = false;
+    class ClearingEngine : public FakeEngine {
+    public:
+        ClearingEngine(ChannelManager& registry,
+                       fl::shared_ptr<ClearingEngine>& owner,
+                       bool& destroyed, bool& returned)
+            : FakeEngine("CLEARING"), mRegistry(registry), mOwner(owner),
+              mDestroyed(destroyed), mReturned(returned),
+              mName("custom_driver_with_a_heap_backed_name_longer_than_the_inline_string_buffer_for_registration") {}
+        ~ClearingEngine() override { mDestroyed = true; }
+        fl::string getName() const override { return mName; }
+        void setPollNeededCallback(PollNeededCallback callback) override {
+            IChannelDriver::setPollNeededCallback(callback);
+            if (callback && !mCleared) {
+                mCleared = true;
+                mRegistry.clearAllDrivers();
+                mOwner.reset();
+                FL_CHECK_FALSE(mDestroyed);
+                mReturned = true;
+            }
+        }
+    private:
+        ChannelManager& mRegistry;
+        fl::shared_ptr<ClearingEngine>& mOwner;
+        bool& mDestroyed;
+        bool& mReturned;
+        fl::string mName;
+        bool mCleared = false;
+    };
+    fl::shared_ptr<ClearingEngine> owner;
+    owner = fl::make_shared<ClearingEngine>(manager, owner, destroyed, callbackReturned);
+    manager.addDriver(10, owner);
+    FL_CHECK(callbackReturned);
+    FL_CHECK(destroyed);
+    FL_CHECK_FALSE(owner);
+    FL_CHECK_EQ(manager.getDriverCount(), 0u);
+}
+
 FL_TEST_CASE("ChannelManager - poll() returns aggregate state") {
     ChannelManager manager;
 

@@ -120,10 +120,27 @@ repairs a stale include-path cache; WASM Blink also builds. Corrected hosted
 gate 37584819636 passed completely at 0c3a21114e. Both prior review threads
 are resolved. Full platform CI remains a separate gate before merging.
 
-Next candidate: private EngineEvents listener inline capacity 16 -> 4 would
-save 96 B singleton RAM and 96 B per snapshot stack frame on ESP32 while
-preserving unlimited spillover. Investigate allocation/per-frame costs and
-cover more than 16 listeners, priority and snapshot mutation before retaining.
+Fifth pass:
+- [x] Measure smaller listener inline storage and verify spillover/mutation.
+- [x] Audit retained string/vector callback costs for a further safe flash cut.
+- [ ] Validate retained changes, publish measurements and tighten hosted ratchet.
+
+Private EngineEvents listener inline capacity 16 -> 4 saves 96 B singleton
+RAM and 96 B per snapshot stack frame on ESP32. More than four listeners now
+allocate registry/snapshot storage; listener count remains unlimited. Tests
+cover stable priorities, duplicates, and mutation during snapshots with
+20–39 listeners. Move-only ChannelManager entries remove unused copy
+callbacks; registration keeps its local driver owner and debug name across
+reentrant registry clearing (sanitizer test passes).
+
+Saved JSON image_flash: Blink 304,755 B, gist 297,651 B, S3 local 356,415 B.
+This pass saves 372/372/260 B flash and 96 B static RAM per target.
+Static RAM: Blink 25,180 B, gist 25,964 B, S3 77,296 B.
+Full native run passes 320 units + 95 examples. Focused debug manager and
+events runs pass with the new cases present in their modules. Fixed a second
+single-test cache shortcut in test.py that ignored --force; official clean
+verification caught and corrected a typo in the new callback test.
+Hosted fifth-pass size and exact ratchet are pending.
 
 Use the default dynamic driver configuration. Keep scheduler pumping, network
 yielding, multiple strips, and reconfiguration available. Optimize symbol reachability

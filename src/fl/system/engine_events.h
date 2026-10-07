@@ -144,7 +144,8 @@ class EngineEvents {
             : listener(listener), priority(priority) {}
     };
 
-    typedef fl::vector_inlined<Pair, 16> ListenerList;
+    // Keep ordinary frame dispatch inline; larger listener sets spill to heap.
+    typedef fl::vector_inlined<Pair, 4> ListenerList;
     ListenerList mListeners;
 
 
