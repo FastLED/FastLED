@@ -15,10 +15,11 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 FASTPIN = ROOT / "src" / "platforms" / "esp" / "32" / "core" / "fastpin_esp32.h"
+PROBE = ROOT / "src" / "platforms" / "esp" / "32" / "pin_probe_esp32.hpp"
 REMOTE = ROOT / "examples" / "AutoResearch" / "AutoResearchRemote.cpp"
 
 # Library mask: flash/PSRAM/flash-power (VDD_SPI) and native-USB pads.
-# C5 GPIO19 / C6 GPIO27 (VDD_SPI) are skipped AutoResearch-side only; whether
+# C5 GPIO19 / C6 GPIO27 (VDD_SPI) are skipped by the pin-probe table only; whether
 # the library mask should list them is an open maintainer question.
 EXPECTED_LIBRARY_MASK = {
     "ESP_32DEV": {6, 7, 8, 9, 10, 11, 20},
@@ -77,11 +78,11 @@ def _library_masks() -> dict[str, set[int]]:
 
 
 def _link_pins() -> dict[str, tuple[int, ...]]:
-    source = REMOTE.read_text(encoding="utf-8")
+    source = PROBE.read_text(encoding="utf-8")
     table: dict[str, tuple[int, ...]] = {}
     for cond, body in re.findall(
         r"#(?:el)?if ([^\n]*)\n(?://[^\n]*\n)*"
-        r"constexpr AutoResearchLinkPins kLinkPins = \{([^}]*)\};",
+        r"constexpr PinProbeLinkPins kLinkPins = \{([^}]*)\};",
         source,
     ):
         chip = _CHIP.search(cond)
@@ -110,28 +111,37 @@ def test_strapping_pins_are_never_skipped() -> None:
 
 
 def test_discovery_applies_link_mask_and_console_mode() -> None:
-    source = REMOTE.read_text(encoding="utf-8")
+    source = PROBE.read_text(encoding="utf-8")
     assert (
         "#if !(defined(ARDUINO_USB_CDC_ON_BOOT) && ARDUINO_USB_CDC_ON_BOOT)" in source
     )
     # USB D-/D+ are masked unconditionally (deploy/reset link), UART0 only
     # when Serial is not native USB.
-    console = source[source.index("fl::u64 autoResearchConsolePinMask()") :]
+    console = source[source.index("inline u64 consolePinMask()") :]
     console = console[: console.index("\n}\n")]
     usb = console.index("kLinkPins.usb_dm")
     assert usb < console.index("#if !(defined(ARDUINO_USB_CDC_ON_BOOT)")
-    assert '"PICO"' in source and '"U4WDH"' in source
-    assert "psramFound()" in source
+    # ESP32 package codes 4-7 (U4WDH/PICO/D0WDR2) put flash/PSRAM on 16/17.
+    assert "pkg >= 4" in source
+    assert "psramPresent()" in source
     assert "CONFIG_SPIRAM_MODE_OCT" in source
     assert "CONFIG_ESPTOOLPY_OCT_FLASH" in source
-    assert "unsafeReason(a)" in source
-    assert "unsafeReason(b)" in source
+    remote = REMOTE.read_text(encoding="utf-8")
+    assert "fl::pinProbeSkipReason(a)" in remote
+    assert "fl::pinProbeSkipReason(b)" in remote
+    assert "fl::pinProbeDriveSkipReason(tx)" in remote
 
 
-def test_vdd_spi_pins_skipped_by_autoresearch() -> None:
-    source = REMOTE.read_text(encoding="utf-8")
-    memory = source[source.index("fl::u64 autoResearchMemoryPinMask()") :]
+def test_vdd_spi_pins_skipped_by_probe_table() -> None:
+    source = PROBE.read_text(encoding="utf-8")
+    memory = source[source.index("inline u64 memoryPinMask()") :]
     memory = memory[: memory.index("\n}\n")]
-    assert "defined(FL_IS_ESP_32C5)" in memory and "linkPinBit(19)" in memory
-    assert "defined(FL_IS_ESP_32C6)" in memory and "linkPinBit(27)" in memory
+    assert "defined(FL_IS_ESP_32C5)" in memory and "pinMaskBit(19)" in memory
+    assert "defined(FL_IS_ESP_32C6)" in memory and "pinMaskBit(27)" in memory
     assert "SOC_GPIO_VALID_GPIO_MASK" in source
+
+
+def test_autoresearch_pin_discovery_is_platform_neutral() -> None:
+    remote = REMOTE.read_text(encoding="utf-8")
+    for banned in ("sdkconfig", "psramFound", "getChipModel", "fastpin_esp32"):
+        assert banned not in remote, banned
