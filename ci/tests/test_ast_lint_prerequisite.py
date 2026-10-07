@@ -171,7 +171,7 @@ def test_single_file_lint_reports_historical_missing_signature(
 
 
 def test_all_scope_includes_existing_root_source_router() -> None:
-    assert ("src/fl/build/src.cpp", ".*src.[^/]+$") in check_noexcept._scope_tus("all")
+    assert ("src/fl/build/src.cpp", ".*src.*") in check_noexcept._scope_tus("all")
 
 
 def test_single_file_lint_checks_root_source_scope(
@@ -335,3 +335,58 @@ def test_default_argument_lambda_cannot_exempt_enclosing_function() -> None:
     assert not check_noexcept._signature_is_exempt(
         "void outer(int value = []() { return 1; }());"
     )
+
+
+def test_public_fx_headers_have_dedicated_lint_inventory() -> None:
+    inventory = ("ci/tools/_noexcept_check_fx_headers_tu.cpp", ".*src.fl.fx.*")
+    assert inventory in check_noexcept._scope_tus("fl")
+    assert inventory in check_noexcept._scope_tus("all")
+    source = (check_noexcept.PROJECT_ROOT / inventory[0]).read_text()
+    for directory in ("1d", "2d"):
+        for header in (check_noexcept.PROJECT_ROOT / "src/fl/fx" / directory).glob(
+            "*.h"
+        ):
+            if header.name == "animartrix_detail.h":
+                continue  # private implementation is reached through public Animartrix
+            assert (
+                f'#include "{header.relative_to(check_noexcept.PROJECT_ROOT / "src").as_posix()}"'
+                in source
+            )
+    assert '#include "fl/fx/2d/animartrix.hpp"' in source
+
+
+def test_public_chipsets_reuse_existing_root_lint_inventory() -> None:
+    assert ("src/fl/build/src.cpp", ".*src.fl.*") in check_noexcept._scope_tus("fl")
+    assert ("src/fl/build/src.cpp", ".*src.*") in check_noexcept._scope_tus("all")
+    assert all(
+        "chipset_headers_tu" not in path for path, _ in check_noexcept._scope_tus("all")
+    )
+
+
+def test_combined_inventory_deduplicates_physical_hits_across_tus(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from ci.tools import check_ast_combined
+    from ci.tools.check_array_params import ArrayParamHit
+
+    tus = [("first.cpp", ".*"), ("second.cpp", ".*")]
+    for filename, _ in tus:
+        (tmp_path / filename).write_text("")
+    monkeypatch.setattr(check_ast_combined, "PROJECT_ROOT", tmp_path)
+    monkeypatch.setattr(
+        check_ast_combined, "_find_clang_query", lambda: ["clang-query"]
+    )
+    monkeypatch.setattr(check_ast_combined, "_noexcept_scope_tus", lambda scope: tus)
+    monkeypatch.setattr(check_ast_combined, "_array_scope_tus", lambda scope: tus)
+    first = check_noexcept.NoexceptHit("src/shared.h", 10, "void f();", "void f();")
+    second = check_noexcept.NoexceptHit("src/shared.h", 20, "void f();", "void f();")
+    array_first = ArrayParamHit("src/shared.h", 30, "", "void g(int a[]);", ())
+    array_second = ArrayParamHit("src/shared.h", 40, "", "void g(int a[]);", ())
+    monkeypatch.setattr(
+        check_ast_combined,
+        "_run_combined_clang_query",
+        lambda *args: ([first, second], [array_first, array_second]),
+    )
+    noexcept_hits, array_hits = check_ast_combined.find_combined_hits("all")
+    assert noexcept_hits == [first, second]
+    assert array_hits == [array_first, array_second]

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "fl/stl/noexcept.h"
+
 #include "fl/stl/string.h"
 #include "fl/fx/fx1d.h"
 
@@ -110,7 +112,7 @@ class TwinkleFox : public Fx1d {
     CRGBPalette16 targetPalette;
     CRGBPalette16 currentPalette;
 
-    TwinkleFox(u16 num_leds)
+    TwinkleFox(u16 num_leds) FL_NO_EXCEPT
         : Fx1d(num_leds), backgroundColor(CRGB::Black),
           twinkleSpeed(TWINKLE_SPEED), twinkleDensity(TWINKLE_DENSITY),
           coolLikeIncandescent(COOL_LIKE_INCANDESCENT),
@@ -118,15 +120,15 @@ class TwinkleFox : public Fx1d {
         chooseNextColorPalette(targetPalette);
     }
 
-    void draw(DrawContext context) override {
+    void draw(DrawContext context) FL_NO_EXCEPT override {
         EVERY_N_MILLISECONDS(10) {
             nblendPaletteTowardPalette(currentPalette, targetPalette, 12);
         }
         drawTwinkleFox(context.leds);
     }
 
-    void chooseNextColorPalette(CRGBPalette16 &pal);
-    fl::string fxName() const override { return "TwinkleFox"; }
+    void chooseNextColorPalette(CRGBPalette16 &pal) FL_NO_EXCEPT;
+    fl::string fxName() const FL_NO_EXCEPT override { return "TwinkleFox"; }
 
   private:
     CRGB backgroundColor;
@@ -135,7 +137,7 @@ class TwinkleFox : public Fx1d {
     bool coolLikeIncandescent;
     bool autoSelectBackgroundColor;
 
-    void drawTwinkleFox(fl::span<CRGB> leds) {
+    void drawTwinkleFox(fl::span<CRGB> leds) FL_NO_EXCEPT {
         // "PRNG16" is the pseudorandom number generator
         // It MUST be reset to the same starting value each time
         // this function is called, so that the sequence of 'random'
@@ -184,7 +186,7 @@ class TwinkleFox : public Fx1d {
         }
     }
 
-    CRGB computeOneTwinkle(fl::u32 ms, u8 salt) {
+    CRGB computeOneTwinkle(fl::u32 ms, u8 salt) FL_NO_EXCEPT {
         u16 ticks = ms >> (8 - twinkleSpeed);
         u8 fastcycle8 = ticks;
         u16 slowcycle16 = (ticks >> 8) + salt;
@@ -210,7 +212,7 @@ class TwinkleFox : public Fx1d {
         return c;
     }
 
-    u8 attackDecayWave8(u8 i) {
+    u8 attackDecayWave8(u8 i) FL_NO_EXCEPT {
         if (i < 86) {
             return i * 3;
         } else {
@@ -219,7 +221,7 @@ class TwinkleFox : public Fx1d {
         }
     }
 
-    void coolLikeIncandescentFunction(CRGB &c, u8 phase) {
+    void coolLikeIncandescentFunction(CRGB &c, u8 phase) FL_NO_EXCEPT {
         if (phase < 128)
             return;
 
@@ -293,7 +295,7 @@ const TProgmemRGBPalette16 *ActivePaletteList[] = {
     &RedGreenWhite_p, &PartyColors_p, &RedWhite_p,      &Snow_p,
     &Holly_p,         &Ice_p};
 
-void TwinkleFox::chooseNextColorPalette(CRGBPalette16 &pal) {
+void TwinkleFox::chooseNextColorPalette(CRGBPalette16 &pal) FL_NO_EXCEPT {
     const u8 numberOfPalettes =
         sizeof(ActivePaletteList) / sizeof(ActivePaletteList[0]);
     static u8 whichPalette = -1;  // okay static in header

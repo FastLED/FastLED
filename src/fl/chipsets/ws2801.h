@@ -37,7 +37,7 @@ public:
 	#endif
 
 	/// Initialize the controller
-	virtual void init() {
+	virtual void init() FL_NO_EXCEPT {
 		mSPI.init();
 	  mWaitDelay.mark();
 	}
@@ -45,7 +45,7 @@ public:
 protected:
 
 	/// @copydoc CPixelLEDController::showPixels()
-	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
+	virtual void showPixels(PixelController<RGB_ORDER> & pixels) FL_NO_EXCEPT {
 		mWaitDelay.wait();
 		fl::writePixelsToSPI<0, DATA_NOP, RGB_ORDER>(pixels, mSPI, nullptr);
 		mWaitDelay.mark();
@@ -55,12 +55,12 @@ public:
 	/// Get the protocol-safe padding byte for WS2801
 	/// Used for quad-SPI lane padding when strips have different lengths
 	/// @returns 0x00 (no protocol state)
-	static constexpr fl::u8 getPaddingByte() { return 0x00; }
+	static constexpr fl::u8 getPaddingByte() FL_NO_EXCEPT { return 0x00; }
 
 	/// Get a black LED frame for synchronized latching
 	/// Used for quad-SPI lane padding to ensure all strips latch simultaneously
 	/// @returns Black LED frame (invisible LED: RGB all zero)
-	static fl::span<const fl::u8> getPaddingLEDFrame() {  // okay static in header
+	static fl::span<const fl::u8> getPaddingLEDFrame() FL_NO_EXCEPT {  // okay static in header
 		static const fl::u8 frame[] = {  // okay static in header
 			0x00,  // Red = 0
 			0x00,  // Green = 0
@@ -71,7 +71,7 @@ public:
 
 	/// Get the size of the padding LED frame in bytes
 	/// @returns 3 bytes per LED for WS2801
-	static constexpr size_t getPaddingLEDFrameSize() {
+	static constexpr size_t getPaddingLEDFrameSize() FL_NO_EXCEPT {
 		return 3;
 	}
 
@@ -79,7 +79,7 @@ public:
 	/// Used for quad-SPI buffer pre-allocation
 	/// @param num_leds Number of LEDs in the strip
 	/// @returns Total bytes needed (RGB data only, no overhead)
-	static constexpr size_t calculateBytes(size_t num_leds) {
+	static constexpr size_t calculateBytes(size_t num_leds) FL_NO_EXCEPT {
 		// WS2801 protocol:
 		// - LED data: 3 bytes per LED (RGB)
 		// - No frame overhead (latch is timing-based, not data-based)

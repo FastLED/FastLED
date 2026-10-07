@@ -3,8 +3,9 @@
 Issue: [FastLED #4773](https://github.com/FastLED/FastLED/issues/4773).
 Implementation branch: `fix/esp-noexcept-4773`, baseline `61d6ccffeb`.
 This is a working evidence record; exact-SHA validation gates are pending.
-The clean size measurements below predate the subsequent codebase-wide
-annotation migration and require a fresh build before final reporting.
+Fresh clean measurements of checkpoint 001a0dc17e reproduced the four image
+results below after the broad migration. Subsequent public-header coverage
+repairs and final exact-SHA CI gates are tracked in PR #4774.
 
 ## Contract
 
@@ -16,8 +17,13 @@ declaration and inactive-platform repairs. Unity assembly and function bodies
 are preserved. The semantic AST check expands the macro to real noexcept,
 enables compiler exceptions to expose mismatches, and fails on parser errors;
 annotation text in callback types or lambdas cannot suppress an outer function.
-Full lint and 83 focused tests passed. ESP32 QEMU strict10 passed. Full native
-and Python suites and refreshed measurements remain pending at this checkpoint.
+Full lint and 86 focused tests passed. ESP32 QEMU strict10 passed. Full Python
+passed 1,836 tests and 3,257 subtests (25 skips, two expected failures). Native
+debug passed 318/319 units and 95/95 examples, exposing a test-only semaphore
+phase-observation race; explicit acknowledgement replaced its timing assumption,
+and targeted debug verification passed. Full native verification is running again.
+Ordinary examples do not use the library annotation macro. AutoResearch is an
+explicit maintainer-approved exception for testing requirements.
 
 FastLED assumes no throw and neither throws nor catches, including callbacks.
 `FL_NO_EXCEPT` expands to `noexcept` on ESP in both release and debug modes.
@@ -80,8 +86,10 @@ Clean Blink rebuilds reproduced the same allocated image measurements:
 | ESP32-C3 SDK 5.3.2 | 368,202 | 337,294 | 30,908 | 14,108 | 14,100 |
 
 Maps and bloat reports are preserved under `.build/size-4773`, prefixed
-`before-`, `policy-only-` and `clean-after-`. These are working-tree candidate
-measurements; final commit and CI provenance must be recorded before merge.
+`before-`, `policy-only-`, `clean-after-` and `final-`. Fresh `final-` reports
+record checkpoint 001a0dc17e. CI run37699074987 measured S3 image350383 against
+its pinned366603 baseline (16220 B saving); this is within16 B of the local
+350367 result. The CI ratchet is lowered to350383 to claim that saving.
 Raw board flash/RAM summaries can include IRAM and must not replace allocated
 image/static DRAM measurements.
 
@@ -95,6 +103,15 @@ it does not prevent the compiler emitting EH metadata or override linker KEEP.
 Neither a singleton migration nor splitting unity groups is required here.
 
 ## Validation limits
+
+- Complete CI caught public FX/SPI controller headers absent from canonical
+  implementation routers. Added a lint-only FX header inventory and reused the
+  existing root router with broader source matching. Global physical-location
+  deduplication prevents repeated TU findings from falsely consuming an array
+  baseline entry twice. Production unity layout is unchanged.
+- Full ATmega8A CI fails RGBW/RGBWEmulated by874/530 flash bytes. A detached
+  unchanged origin/master61d6ccffeb worktree reproduces identical overflows.
+  This is tracked separately in FastLED#4775; no workflow thresholds are changed.
 
 - Debug-compatible SDK compilation is mandatory: disabling exceptions can
   suppress mismatched exception-specification diagnostics. The QEMU SDK build

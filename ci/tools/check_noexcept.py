@@ -3,8 +3,8 @@
 
 The check uses clang-query to find function declarations/definitions in
 root src files, src/fl/**, src/platforms/**, and src/third_party/** whose parsed AST is not
-nothrow, then filters source signatures that are already annotated with
-FL_NO_EXCEPT/noexcept or have an explicit suppression comment.
+nothrow, then filters documented source suppressions and non-actionable
+constructs. Contract and lambda exclusions are determined by the AST.
 
 Every non-exempt finding fails the check. Historical baselines cannot suppress
 missing annotations or be regenerated to grandfather existing findings.
@@ -31,6 +31,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 
 _TU_PLATFORMS = "ci/tools/_noexcept_check_platforms_tu.cpp"
 _TU_FL_ALL = "ci/tools/_noexcept_check_fl_tu.cpp"  # legacy fallback only
+_TU_FX_HEADERS = "ci/tools/_noexcept_check_fx_headers_tu.cpp"
 _TU_THIRD_PARTY = "ci/tools/_noexcept_check_third_party_tu.cpp"  # legacy fallback only
 
 # Canonical per-subdir TU shims live in src/fl/build/ - the same files
@@ -90,12 +91,18 @@ def _scope_tus(scope: str) -> list[tuple[str, str]]:
     if scope == "third_party":
         return [(third_party_tu, ".*src.third_party.*")]
     if scope == "fl":
-        return _fl_subdir_tus()
+        return [
+            *_fl_subdir_tus(),
+            (_TU_FX_HEADERS, ".*src.fl.fx.*"),
+            # Public controllers are included by FastLED.h in the root router.
+            ("src/fl/build/src.cpp", ".*src.fl.*"),
+        ]
     if scope == "all":
         return [
-            *_SCOPES["root"],
+            ("src/fl/build/src.cpp", ".*src.*"),
             (platforms_tu, ".*src.platforms.*"),
             *_fl_subdir_tus(),
+            (_TU_FX_HEADERS, ".*src.fl.fx.*"),
             (third_party_tu, ".*src.third_party.*"),
         ]
     return _SCOPES[scope]

@@ -58,14 +58,15 @@ FL_TEST_CASE("coroutine - binary semaphore thread handoff") {
 
 FL_TEST_CASE("coroutine - counting semaphore two-phase handoff") {
     fl::counting_semaphore<2> sem(0);
+    fl::counting_semaphore<1> started_ack(0);
     fl::atomic<int> phase(0);
 
     fl::thread t([&]() {
         phase.store(1);
         sem.release();  // Signal "started"
 
-        // Simulate work
-        fl::this_thread::sleep_for(fl::chrono::milliseconds(5)); // ok sleep for
+        // Wait until the first phase has been observed before advancing it.
+        started_ack.acquire();
 
         phase.store(2);
         sem.release();  // Signal "done"
@@ -73,6 +74,7 @@ FL_TEST_CASE("coroutine - counting semaphore two-phase handoff") {
 
     sem.acquire();  // Wait for "started"
     FL_CHECK_EQ(phase.load(), 1);
+    started_ack.release();
 
     sem.acquire();  // Wait for "done"
     FL_CHECK_EQ(phase.load(), 2);

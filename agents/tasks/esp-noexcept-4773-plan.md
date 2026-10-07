@@ -123,5 +123,17 @@ authorized. Unity layout, bodies and vendor linker policies remain unchanged.
 - Modern ESP32 Blink passed, then was restaged after the last platform-only
   audio repairs for final measurement. Remote fetch confirms origin/master
   remains the existing base; origin's default branch is master.
+- Checkpoint001a0dc17e pushed in draft PR#4774 with ci-full. Four fresh clean
+  Blink measurements reproduce prior values; full Python passes1836 tests.
+- Complete CI exposes public FX/SPI header gaps; repaired named signatures and
+  broadened lint-only inventory without changing production unity routers.
+  Global AST location dedup fixes duplicate array baseline consumption.
+  Full lint publicheaders2 and86 focused tests pass; same reviewer is clean.
+- Ordinary examples remain free of FL_NO_EXCEPT. AutoResearch is explicitly
+  exempt and its existing testing annotations are preserved.
+- CI bloat ratchet lowered366603->350383 per run37699074987. Native test-only
+  coroutine phase race repaired with acknowledgement semaphore, targeteddebug
+  passes; fullnative rerun pending. ATmega8A overflow is identical on unchanged
+  master and is tracked in#4775; scope clarification is pending.
 - Previously measured clean size results predate the broad annotation cleanup.
   Refresh measurements and acceptance gates before publishing the new PR.

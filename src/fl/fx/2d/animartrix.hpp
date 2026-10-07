@@ -97,7 +97,7 @@ struct AnimartrixEntry {
 
 // Factory helper: creates a heap-allocated instance of any IAnimartrix2Viz subclass.
 template<typename T>
-static IAnimartrix2Viz* makeViz() { return new T(); }  // ok bare allocation
+static IAnimartrix2Viz* makeViz() FL_NO_EXCEPT { return new T(); }  // ok bare allocation
 
 // Select between floating-point and fixed-point animartrix visualizers.
 // Define FL_ANIMARTRIX_USE_FIXED_POINT=0 to force floating-point, or =1 to force fixed-point.
@@ -184,18 +184,18 @@ struct AnimartrixAnimInfo {
     const char* name;
 };
 
-inline fl::string getAnimartrixName(int animation) {
+inline fl::string getAnimartrixName(int animation) FL_NO_EXCEPT {
     if (animation < 0 || animation >= static_cast<int>(AnimartrixAnim::NUM_ANIMATIONS)) {
         return "UNKNOWN";
     }
     return ANIMATION_TABLE[animation].name;
 }
 
-inline int getAnimartrixCount() {
+inline int getAnimartrixCount() FL_NO_EXCEPT {
     return static_cast<int>(AnimartrixAnim::NUM_ANIMATIONS);
 }
 
-inline AnimartrixAnimInfo getAnimartrixInfo(int index) {
+inline AnimartrixAnimInfo getAnimartrixInfo(int index) FL_NO_EXCEPT {
     if (index < 0 || index >= static_cast<int>(AnimartrixAnim::NUM_ANIMATIONS)) {
         return {-1, "UNKNOWN"};
     }
@@ -204,14 +204,14 @@ inline AnimartrixAnimInfo getAnimartrixInfo(int index) {
 }
 
 // XYMap callback adapter
-inline u16 xyMapCallbackAdapter(u16 x, u16 y, void *userData) {
+inline u16 xyMapCallbackAdapter(u16 x, u16 y, void *userData) FL_NO_EXCEPT {
     Fx2d *self = static_cast<Fx2d *>(userData);
     return self->xyMap(x, y);
 }
 
 class Animartrix : public Fx2d {
   public:
-    Animartrix(const XYMap &xyMap, AnimartrixAnim which_animation)
+    Animartrix(const XYMap &xyMap, AnimartrixAnim which_animation) FL_NO_EXCEPT
         : Fx2d(xyMap) {
         mCurrentAnimation = which_animation;
         // convertToLookUpTable() is deferred to draw() to avoid
@@ -220,7 +220,7 @@ class Animartrix : public Fx2d {
 
     Animartrix(const Animartrix &) FL_NO_EXCEPT = delete;
 
-    void draw(DrawContext ctx) override {
+    void draw(DrawContext ctx) FL_NO_EXCEPT override {
         if (!mXyMap.isLUT()) {
             mXyMap.convertToLookUpTable();
         }
@@ -269,9 +269,9 @@ class Animartrix : public Fx2d {
         mCtx.leds = fl::span<CRGB>();
     }
 
-    int fxNum() const { return static_cast<int>(AnimartrixAnim::NUM_ANIMATIONS); }
+    int fxNum() const FL_NO_EXCEPT { return static_cast<int>(AnimartrixAnim::NUM_ANIMATIONS); }
 
-    void fxSet(int fx) {
+    void fxSet(int fx) FL_NO_EXCEPT {
         int curr = fxGet();
         if (fx < 0) {
             fx = curr + fx;
@@ -284,21 +284,21 @@ class Animartrix : public Fx2d {
         FL_DBG("Setting animation to " << (getAnimartrixName(static_cast<int>(mCurrentAnimation))));
     }
 
-    int fxGet() const { return static_cast<int>(mCurrentAnimation); }
+    int fxGet() const FL_NO_EXCEPT { return static_cast<int>(mCurrentAnimation); }
 
-    fl::string fxName() const override { return "Animartrix:"; }
+    fl::string fxName() const FL_NO_EXCEPT override { return "Animartrix:"; }
 
-    void fxNext(int fx = 1) { fxSet(fxGet() + fx); }
+    void fxNext(int fx = 1) FL_NO_EXCEPT { fxSet(fxGet() + fx); }
 
-    void setColorOrder(EOrder order) { mColorOrder = order; }
-    EOrder getColorOrder() const { return mColorOrder; }
+    void setColorOrder(EOrder order) FL_NO_EXCEPT { mColorOrder = order; }
+    EOrder getColorOrder() const FL_NO_EXCEPT { return mColorOrder; }
 
     /// Override the factory for a specific built-in animation enum.
     /// The factory will be used instead of the default ANIMATION_TABLE entry
     /// when the given animation is selected. Pass nullptr to revert to default.
     /// Example: replace RGB_BLOBS with a custom implementation:
     ///   animartrix.setVizFactory(AnimartrixAnim::RGB_BLOBS, &makeViz<MyCustomBlobs>);
-    void setVizFactory(AnimartrixAnim anim, AnimartrixVizFactory factory) {
+    void setVizFactory(AnimartrixAnim anim, AnimartrixVizFactory factory) FL_NO_EXCEPT {
         // Search for existing override
         for (auto &ovr : mFactoryOverrides) {
             if (ovr.first == anim) {
@@ -318,12 +318,12 @@ class Animartrix : public Fx2d {
     /// When set, this viz is used for all draw() calls regardless of which
     /// animation enum is selected. Pass nullptr to revert to enum-based dispatch.
     /// This is intended for external/user-provided animartrix implementations.
-    void setCustomViz(IAnimartrix2Viz *viz) {
+    void setCustomViz(IAnimartrix2Viz *viz) FL_NO_EXCEPT {
         mCustomViz.reset(viz);
         mViz.reset();
     }
 
-    static fl::vector<fl::pair<int, fl::string>> getAnimationList() {
+    static fl::vector<fl::pair<int, fl::string>> getAnimationList() FL_NO_EXCEPT {
         fl::vector<fl::pair<int, fl::string>> list;
         for (int i = 0; i < static_cast<int>(AnimartrixAnim::NUM_ANIMATIONS); i++) {
             AnimartrixAnimInfo info = getAnimartrixInfo(i);
@@ -334,7 +334,7 @@ class Animartrix : public Fx2d {
 
   private:
     // Create a viz instance for the given animation, checking overrides first.
-    IAnimartrix2Viz *createViz(AnimartrixAnim anim) {
+    IAnimartrix2Viz *createViz(AnimartrixAnim anim) FL_NO_EXCEPT {
         // Custom viz takes precedence over everything
         if (mCustomViz) {
             // Return a non-owning "alias" — mCustomViz owns the lifetime.

@@ -32,8 +32,8 @@ class LPD8806Controller : public CPixelLEDController<RGB_ORDER> {
 	class LPD8806_ADJUST {
 	public:
 		// LPD8806 spec wants the high bit of every rgb data byte sent out to be set.
-		FASTLED_FORCE_INLINE static fl::u8 adjust(FASTLED_REGISTER fl::u8 data) { return ((data>>1) | 0x80) + ((data && (data<254)) & 0x01); }
-		FASTLED_FORCE_INLINE static void postBlock(int len, void* context = nullptr) {
+		FASTLED_FORCE_INLINE static fl::u8 adjust(FASTLED_REGISTER fl::u8 data) FL_NO_EXCEPT { return ((data>>1) | 0x80) + ((data && (data<254)) & 0x01); }
+		FASTLED_FORCE_INLINE static void postBlock(int len, void* context = nullptr) FL_NO_EXCEPT {
 			SPI* pSPI = static_cast<SPI*>(context);
 			pSPI->writeBytesValueRaw(0, ((len*3+63)>>6));
 		}
@@ -50,14 +50,14 @@ public:
 		return *this;
 	}
 	#endif
-	virtual void init() {
+	virtual void init() FL_NO_EXCEPT {
 		mSPI.init();
 	}
 
 protected:
 
 	/// @copydoc CPixelLEDController::showPixels()
-	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
+	virtual void showPixels(PixelController<RGB_ORDER> & pixels) FL_NO_EXCEPT {
 		fl::writePixelsToSPI<0, LPD8806_ADJUST, RGB_ORDER>(pixels, mSPI, &mSPI);
 	}
 
@@ -65,12 +65,12 @@ public:
 	/// Get the protocol-safe padding byte for LPD8806
 	/// Used for quad-SPI lane padding when strips have different lengths
 	/// @returns 0x00 (latch continuation byte)
-	static constexpr fl::u8 getPaddingByte() { return 0x00; }
+	static constexpr fl::u8 getPaddingByte() FL_NO_EXCEPT { return 0x00; }
 
 	/// Get a black LED frame for synchronized latching
 	/// Used for quad-SPI lane padding to ensure all strips latch simultaneously
 	/// @returns Black LED frame (invisible LED: GRB with MSB set)
-	static fl::span<const fl::u8> getPaddingLEDFrame() {  // okay static in header
+	static fl::span<const fl::u8> getPaddingLEDFrame() FL_NO_EXCEPT {  // okay static in header
 		static const fl::u8 frame[] = {  // okay static in header
 			0x80,  // Green = 0 (with MSB=1)
 			0x80,  // Red = 0 (with MSB=1)
@@ -81,7 +81,7 @@ public:
 
 	/// Get the size of the padding LED frame in bytes
 	/// @returns 3 bytes per LED for LPD8806
-	static constexpr size_t getPaddingLEDFrameSize() {
+	static constexpr size_t getPaddingLEDFrameSize() FL_NO_EXCEPT {
 		return 3;
 	}
 
@@ -89,7 +89,7 @@ public:
 	/// Used for quad-SPI buffer pre-allocation
 	/// @param num_leds Number of LEDs in the strip
 	/// @returns Total bytes needed (RGB data + latch bytes)
-	static constexpr size_t calculateBytes(size_t num_leds) {
+	static constexpr size_t calculateBytes(size_t num_leds) FL_NO_EXCEPT {
 		// LPD8806 protocol:
 		// - LED data: 3 bytes per LED (GRB with high bit set)
 		// - Latch: ((num_leds * 3 + 63) / 64) bytes of 0x00
@@ -110,8 +110,8 @@ class LPD6803Controller : public CPixelLEDController<RGB_ORDER> {
 	typedef fl::SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
 	SPI mSPI;
 
-	void startBoundary() { mSPI.writeByte(0); mSPI.writeByte(0); mSPI.writeByte(0); mSPI.writeByte(0); }
-	void endBoundary(int nLeds) { int nDWords = (nLeds/32); do { mSPI.writeByte(0xFF); mSPI.writeByte(0x00); mSPI.writeByte(0x00); mSPI.writeByte(0x00); } while(nDWords--); }
+	void startBoundary() FL_NO_EXCEPT { mSPI.writeByte(0); mSPI.writeByte(0); mSPI.writeByte(0); mSPI.writeByte(0); }
+	void endBoundary(int nLeds) FL_NO_EXCEPT { int nDWords = (nLeds/32); do { mSPI.writeByte(0xFF); mSPI.writeByte(0x00); mSPI.writeByte(0x00); mSPI.writeByte(0x00); } while(nDWords--); }
 
 public:
 	LPD6803Controller() FL_NO_EXCEPT {}
@@ -122,13 +122,13 @@ public:
 	}
 	#endif
 
-	virtual void init() {
+	virtual void init() FL_NO_EXCEPT {
 		mSPI.init();
 	}
 
 protected:
 	/// @copydoc CPixelLEDController::showPixels()
-	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
+	virtual void showPixels(PixelController<RGB_ORDER> & pixels) FL_NO_EXCEPT {
 		mSPI.select();
 
 		startBoundary();

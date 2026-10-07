@@ -26,7 +26,7 @@ class SM16716Controller : public CPixelLEDController<RGB_ORDER> {
 	typedef fl::SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
 	SPI mSPI;
 
-	void writeHeader() {
+	void writeHeader() FL_NO_EXCEPT {
 		// Write out 50 zeros to the spi line (6 blocks of 8 followed by two single bit writes)
 		mSPI.select();
 		mSPI.template writeBit<0>(0);
@@ -52,13 +52,13 @@ public:
 	}
 	#endif
 
-	virtual void init() {
+	virtual void init() FL_NO_EXCEPT {
 		mSPI.init();
 	}
 
 protected:
 	/// @copydoc CPixelLEDController::showPixels()
-	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
+	virtual void showPixels(PixelController<RGB_ORDER> & pixels) FL_NO_EXCEPT {
 		// Make sure the FLAG_START_BIT flag is set to ensure that an extra 1 bit is sent at the start
 		// of each triplet of bytes for rgb data
 		// writeHeader();

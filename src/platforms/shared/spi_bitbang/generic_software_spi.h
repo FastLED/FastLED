@@ -52,13 +52,13 @@ class GenericSoftwareSPIOutput {
 
 public:
 	/// Default constructor
-	GenericSoftwareSPIOutput() { mPSelect = nullptr; }
+	GenericSoftwareSPIOutput() FL_NO_EXCEPT { mPSelect = nullptr; }
 	/// Constructor with selectable for SPI chip select
-	GenericSoftwareSPIOutput(Selectable *pSelect) { mPSelect = pSelect; }
+	GenericSoftwareSPIOutput(Selectable *pSelect) FL_NO_EXCEPT { mPSelect = pSelect; }
 
 	/// Set the pointer for the SPI chip select
 	/// @param pSelect pointer to chip select control
-	void setSelect(Selectable *pSelect) { mPSelect = pSelect; }
+	void setSelect(Selectable *pSelect) FL_NO_EXCEPT { mPSelect = pSelect; }
 
 	/// Set the clock/data pins to output and make sure the chip select is released.
 	void init() FL_NO_EXCEPT {
@@ -71,21 +71,21 @@ public:
 
 	/// Stop the SPI output.
 	/// Pretty much a NOP with software, as there's no registers to kick
-	static void stop() { }
+	static void stop() FL_NO_EXCEPT { }
 
 	/// Wait until the SPI subsystem is ready for more data to write.
 	/// A NOP when bitbanging.
-	static void wait() __attribute__((always_inline)) { }
+	static void wait() FL_NO_EXCEPT __attribute__((always_inline)) { }
 	/// @copydoc GenericSoftwareSPIOutput::wait()
-	static void waitFully() __attribute__((always_inline)) { wait(); }
+	static void waitFully() FL_NO_EXCEPT __attribute__((always_inline)) { wait(); }
 
 	/// Write a single byte over SPI without waiting.
-	static void writeByteNoWait(u8 b) __attribute__((always_inline)) { writeByte(b); }
+	static void writeByteNoWait(u8 b) FL_NO_EXCEPT __attribute__((always_inline)) { writeByte(b); }
 	/// Write a single byte over SPI and wait afterwards.
-	static void writeBytePostWait(u8 b) __attribute__((always_inline)) { writeByte(b); wait(); }
+	static void writeBytePostWait(u8 b) FL_NO_EXCEPT __attribute__((always_inline)) { writeByte(b); wait(); }
 
 	/// Write a word (two bytes) over SPI.
-	static void writeWord(u16 w) __attribute__((always_inline)) { writeByte(w>>8); writeByte(w&0xFF); }
+	static void writeWord(u16 w) FL_NO_EXCEPT __attribute__((always_inline)) { writeByte(w>>8); writeByte(w&0xFF); }
 
 	/// Write a single byte over SPI.
 	/// Naive implelentation, simply calls writeBit() on the 8 bits in the byte.
@@ -269,10 +269,10 @@ public:
 	/// @par
 	/// @todo Move select responsibility out of the SPI classes entirely,
 	///       make it up to the caller to remember to lock/select the line?
-	void select() { if(mPSelect != nullptr) { mPSelect->select(); } } // fl::FastPin<SELECT_PIN>::hi(); }
+	void select() FL_NO_EXCEPT { if(mPSelect != nullptr) { mPSelect->select(); } } // fl::FastPin<SELECT_PIN>::hi(); }
 
 	/// Release the SPI chip select line
-	void release() { if(mPSelect != nullptr) { mPSelect->release(); } } // fl::FastPin<SELECT_PIN>::lo(); }
+	void release() FL_NO_EXCEPT { if(mPSelect != nullptr) { mPSelect->release(); } } // fl::FastPin<SELECT_PIN>::lo(); }
 
 	void endTransaction() FL_NO_EXCEPT {
 		waitFully();
@@ -380,12 +380,12 @@ public:
 	/// Write an array of data to the SPI interface.
 	/// @param data pointer to data to write
 	/// @param len number of bytes to write
-	void writeBytes(FASTLED_REGISTER fl::u8 *data, int len) { writeBytes<DATA_NOP>(data, len); }
+	void writeBytes(FASTLED_REGISTER fl::u8 *data, int len) FL_NO_EXCEPT { writeBytes<DATA_NOP>(data, len); }
 
 	/// Finalize transmission (no-op for software SPI)
 	/// This method exists for compatibility with hardware SPI implementations
 	/// that may need to flush buffers or perform post-transmission operations
-	static void finalizeTransmission() { }
+	static void finalizeTransmission() FL_NO_EXCEPT { }
 
 	/// Write LED pixel data to the SPI interface.
 	/// Data is written in groups of three, re-ordered per the RGB_ORDER.

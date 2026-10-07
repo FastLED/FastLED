@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include "fl/stl/noexcept.h"
+
 #include "fl/fx/fx2d.h"
 
 namespace fl {
@@ -11,12 +13,12 @@ FASTLED_SHARED_PTR(RedSquare);
 class RedSquare : public Fx2d {
   public:
     struct Math {
-        template <typename T> static T Min(T a, T b) { return a < b ? a : b; }
+        template <typename T> static T Min(T a, T b) FL_NO_EXCEPT { return a < b ? a : b; }
     };
 
-    RedSquare(const XYMap& xymap) : Fx2d(xymap) {}
+    RedSquare(const XYMap& xymap) FL_NO_EXCEPT : Fx2d(xymap) {}
 
-    void draw(DrawContext context) override {
+    void draw(DrawContext context) FL_NO_EXCEPT override {
         u16 width = getWidth();
         u16 height = getHeight();
         u16 square_size = Math::Min(width, height) / 2;
@@ -38,7 +40,7 @@ class RedSquare : public Fx2d {
         }
     }
 
-    fl::string fxName() const override { return "red_square"; }
+    fl::string fxName() const FL_NO_EXCEPT override { return "red_square"; }
 };
 
 } // namespace fl

@@ -210,4 +210,9 @@ def find_combined_hits(
             noexcept_hits, array_param_hits = future.result()
             all_noexcept.extend(noexcept_hits)
             all_array_param.extend(array_param_hits)
-    return all_noexcept, all_array_param
+    # Public headers can be parsed through several canonical routers. Baseline
+    # multiplicity represents physical declarations, not how many TUs see them.
+    return (
+        list({(hit.path, hit.line): hit for hit in all_noexcept}.values()),
+        list({(hit.path, hit.line): hit for hit in all_array_param}.values()),
+    )
