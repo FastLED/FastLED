@@ -1,3 +1,10 @@
+# 2026-10-07, issue #4707 fourth pass: CI image_flash=356691 B,
+# 10716 B below the original 367407 B baseline, another 988 B reduction.
+# Scoped interner/UI guards plus isolated condition-variable code remove
+# unused locale initialization; unified accounting and constant-clock encoder
+# calculations trim RMT overhead. Hosted run 37584376133; local image_flash
+# is 356675 B. Use the exact hosted result, with no discretionary headroom.
+
 # 2026-10-06, issue #4707 second pass: CI image_flash=357679 B,
 # 9728 B below the original 367407 B baseline. Lazy diagnostics,
 # hardware-bounded RMT state, smaller encoders/iterator state, and status-code
@@ -345,4 +352,4 @@
 # the CI Blink report contains no ResponseLutsQ16 symbol. The local fbuild
 # symbol total remains ~4 KB higher for the same source (FastLED/fbuild#1456),
 # so this ratchet uses the CI measurement from PR #4511.
-357679
+356691
