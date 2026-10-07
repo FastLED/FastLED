@@ -35,9 +35,10 @@ CRGB CRGB::computeAdjustment(fl::u8 scale, const CRGB &colorCorrection,
             if (cc > 0 && ct > 0) {
                 // Optimized for AVR size. This function is only called very
                 // infrequently so size matters more than speed.
-                fl::u32 work = (((fl::u16)cc) + 1);
-                work *= (((fl::u16)ct) + 1);
-                work *= scale;
+                // (cc + 1) * scale is at most 65280, so it fits in
+                // 16 bits. Reordering the exact product avoids a wide multiply.
+                const fl::u16 scaledCorrection = (fl::u16(cc) + 1U) * scale;
+                fl::u32 work = fl::u32(scaledCorrection) * (fl::u16(ct) + 1U);
                 work /= 0x10000L;
                 adj.raw[i] = work & 0xFF;
             }

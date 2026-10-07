@@ -12,14 +12,10 @@ namespace {
 // Keep native PL022 SPI preferred whenever the selected pair has a legal
 // hardware mux. FLEX_IO owns the remaining arbitrary PIO pin pairs.
 bool isNativeSpiPinPair(const SpiChipsetConfig& config) FL_NO_EXCEPT {
-    static constexpr u8 kMosi[] = {3, 7, 19, 23, 11, 15, 27};
-    static constexpr u8 kSck[] = {2, 6, 18, 22, 10, 14, 26};
-    for (size_t index = 0; index < sizeof(kMosi) / sizeof(kMosi[0]); ++index) {
-        if (config.dataPin == kMosi[index] && config.clockPin == kSck[index]) {
-            return true;
-        }
-    }
-    return false;
+    // The seven legal SCK pins are 2, 6, 10, 14, 18, 22 and 26;
+    // each pairs with the immediately following MOSI pin.
+    return config.clockPin >= 2 && config.clockPin <= 26 &&
+           (config.clockPin & 3) == 2 && config.dataPin == config.clockPin + 1;
 }
 
 }  // namespace

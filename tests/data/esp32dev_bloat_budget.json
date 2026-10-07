@@ -1,0 +1,8 @@
+{
+  "board": "esp32dev",
+  "example": "Blink",
+  "profile": "default",
+  "image_flash": 313231,
+  "total_ram": 34489,
+  "reference": "#4738: fbuild 2.5.37, Arduino-ESP32 3.3.11 / IDF 5.5.5 / Xtensa GCC 14.2.0. Shared RMT counters/packed pool flag and HTTP route ownership initialized on actual use, plus constant-initialized SPI host tracking save 452 B image flash / 148 B attributed RAM (144 B board RAM) versus starting 313683/34637. Published Blink uses 310428/25892 board bytes. Both pool modes, per-direction queries, reservations and HTTP routes/lifecycle retained; static backing storage, no new heap owner."
+}

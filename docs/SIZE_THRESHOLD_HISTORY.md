@@ -14,15 +14,15 @@ This doc is paired with `ci/lint/check_size_thresholds.py` (the lockdown lint) a
 
 | Board | Workflow file | Frozen `max_size` | Frozen `max_size_apa102` | Status | Tracking issue | Notes |
 |---|---|---:|---:|---|---|---|
-| uno | `check_uno_size.yml` | 11000 / -1 | 8500 / -1 | real ceiling | — | AVR ATmega328P has 32 KB flash. The `-1` second value is the `build_no_forced_inline` job's "no check" sentinel. Apa102 was tightened from 12050 → 9300 in `7edaf80f0` and 9300 → 8500 in #4725 (Arduino `Serial` stopped linking into sketches that never print; Apa102 measured 4510 → 3682 B). Both real optimisations, not bumps. |
+| uno | `check_uno_size.yml` | 5130 / -1 | 3642 / -1 | real ceiling | — | AVR ATmega328P has 32 KB flash. The `-1` second value is the `build_no_forced_inline` job's "no check" sentinel. Apa102 was tightened from 12050 → 9300 in `7edaf80f0` and 9300 → 8500 in #4725 (Arduino `Serial` stopped linking into sketches that never print; Apa102 measured 4510 → 3682 B). Both real optimisations, not bumps. #4742 ratchets Blink 11000 → 5138 and Apa102 8500 → 3650 to measured default image flash after exact adjustment arithmetic, compact RGBW selectors and AVR flash banner storage. Dedicated bloat budgets additionally enforce attributed RAM (Blink 438 B, Apa102 290 B). #4743 narrows bounded controller indices on 16-bit-int targets, ratcheting another 8 B each to 5130 / 3642. |
 | bluepill | `check_bluepill_size.yml` | 55000 | 45000 | real ceiling | — | STM32F103C8 has 64 KB flash. Workflow created at current values in `bf76a0319` (2025-06-25). Never bumped. |
-| esp32dev | `check_esp32_size.yml` | 340000 | 330000 | real ceilings | #3870 | #3870 found that the 402252-byte Blink result came from a silent legacy-backend fallback: build metadata exposes the fbuild size tool as `aliases.size`, while `compiled_size` looked only for `size_path`. The corrected fbuild measurement is 337355 B with Arduino-ESP32 3.3.11, so Blink received a narrow 10 KB framework rebaseline. Apa102 stays at 330000 after its templated `addLeds` path stopped enrolling every ESP32 driver; it measures 321275 B. |
+| esp32dev | `check_esp32_size.yml` | 313231 | 330000 | real ceilings | #3870 | #3870 found that the 402252-byte Blink result came from a silent legacy-backend fallback: build metadata exposes the fbuild size tool as `aliases.size`, while `compiled_size` looked only for `size_path`. The corrected fbuild measurement is 337355 B with Arduino-ESP32 3.3.11, so Blink received a narrow 10 KB framework rebaseline. Apa102 stays at 330000 after its templated `addLeds` path stopped enrolling every ESP32 driver; it measures 321275 B. #4738 ratchets Blink to 313231 B measured ELF text+data after RMT state packing, initialization of HTTP route ownership on actual use, and constant-initialized SPI host tracking; default board totals 310428/25892 B and scoped attributed RAM 34489 B. |
 | teensy30 | `check_teensy30_size.yml` | 60000 | 50000 | real ceiling | — | MK20DX128 (Teensy 3.0) has 128 KB flash. Workflow created at current values in `f4317e954` (2025-06-25). Never bumped. |
 | teensy31 | `check_teensy31_size.yml` | 80000 | 65000 | real ceiling | — | MK20DX256 (Teensy 3.1) has 256 KB flash. Workflow created at current values in `f4317e954` (2025-06-25). Never bumped. |
 | teensy32 | `check_teensy32_size.yml` | 80000 | 65000 | real ceiling | — | MK20DX256 (Teensy 3.2) has 256 KB flash. Workflow created at current values. Never bumped. |
 | teensy35 | `check_teensy35_size.yml` | 100000 | 85000 | real ceiling | — | MK64FX512 (Teensy 3.5) has 512 KB flash. Workflow created at current values. Never bumped. |
 | teensy36 | `check_teensy36_size.yml` | 120000 | 100000 | real ceiling | — | MK66FX1M0 (Teensy 3.6) has 1 MB flash. Workflow created at current values. Never bumped. |
-| teensy41 | `check_teensy41_size.yml` | 120000 | 88000 | real ceiling | #2802, #2656 (fixed) | Blink (`max_size: 120000`) and Apa102 (`max_size_apa102: 88000`) are real ceilings. Apa102 was a 165000 band-aid from PR #2804 (#2802) until PR #4727 fixed the over-link tracked in #2656 (measured 49,152 B). |
+| teensy41 | `check_teensy41_size.yml` | 50176 | 49152 | real ceiling | #2802, #2656 (fixed), #4746 | Apa102 was a 165000 band-aid until #4727 fixed the over-link. #4746 ratchets Blink 120000 → 50176 and Apa102 88000 → 49152 to locally measured ELF text+data. Matched 3.10.3/current Blink remains 62464/32992 → 50176/28384 physical board bytes. The existing build workflow additionally enforces image 50176 and attributed RAM 23279 using its scoped budget. |
 | teensylc | `check_teensylc_size.yml` | 35000 | 30000 | real ceiling | — | MKL26Z64 (Teensy LC) has 64 KB flash. Workflow created at current values in `f4317e954` (2025-06-25). Never bumped. |
 
 ## Historical bumps catalogued
@@ -53,13 +53,18 @@ These are the events the audit found in `git log --all --follow --patch -- .gith
 | 2025-01-21 | `ab92dc115` | `max_size`: 80000 → 104000 | "build: increase max size limit for teensy41" | soft |
 | 2025-04-25 | `e31a807ec` | `max_size`: 104000 → 107000 | "Increase max_size for Teensy 4.1 to 107000" | soft |
 | 2025-05-19 | `dc25e80e0` | `max_size_apa102`: 84000 → 88000 | "Update max_size_apa102 to 88000 in Teensy41 size check" | soft |
-| 2025-08-09 | `3e99118d3` | `max_size`: 107000 → 120000 | "fix teensy41 size check" — accommodating real growth | **current `max_size`** (real ceiling) |
+| 2025-08-09 | `3e99118d3` | `max_size`: 107000 → 120000 | "fix teensy41 size check" — accommodating real growth | superseded by #4746 (real ceiling) |
 | 2026-06-05 | `ab67e3f1f` (PR #2804, closes #2802) | `max_size_apa102`: 88000 → 165000 | band-aid for `fl::ifstream` / `fl::AsyncLog*` over-link into Apa102 (then real ≈148476 B) | **band-aid (reverted)** |
-| 2026-10-06 | PR #4727 (fixes #2656) | `max_size_apa102`: 165000 → 88000 | restore real ceiling; over-link fixed, Apa102 measured 49,152 B | **current `max_size_apa102`** (real ceiling) |
+| 2026-10-06 | PR #4727 (fixes #2656) | `max_size_apa102`: 165000 → 88000 | restore real ceiling; over-link fixed, Apa102 measured 49,152 B | superseded by #4746 (real ceiling) |
+| 2026-10-07 | #4746 | `max_size`: 120000 → 50176; `max_size_apa102`: 88000 → 49152 | matched local default builds, plus attributed-RAM budget 23279 | **current ceilings** |
 
 ### Other boards
 
-`check_uno_size.yml`, `check_bluepill_size.yml`, `check_teensy30/31/32/35/36/lc_size.yml`: created at their current values and never bumped after creation (apart from uno's apa102 *tightenings*, 12050 → 9300 in `7edaf80f0` and 9300 → 8500 in #4725). All flagged **real ceiling**.
+`check_uno_size.yml`, `check_bluepill_size.yml`, `check_teensy30/31/32/35/36/lc_size.yml`: created at their current values and never bumped after creation (apart from Uno's *tightenings*: Apa102 12050 → 9300 in `7edaf80f0`, 9300 → 8500 in #4725, and #4742's measured Blink 11000 → 5138 / Apa102 8500 → 3650). All flagged **real ceiling**.
+
+### ATtiny85 legacy workflow
+
+#4743 tightens `check_attiny85.yml` Blink from 9500 to the measured 2628 B image flash. Its existing Apa102 and no-forced-inline limits are unchanged. This legacy filename is outside the `check_*_size.yml` frozen registry. `tests/data/attiny85_bloat_budget.json` additionally enforces 189 B attributed RAM; physical board RAM is 161 B because symbol attribution counts aliased vtables separately. Measurements use fbuild 2.5.37, AVR GCC 7.3.0-atmel3.6.1-arduino7, ATTinyCore 1.5.2 and 8 MHz.
 
 ## Band-aid follow-up: how to restore the real ceiling
 

@@ -49,7 +49,8 @@ jobs:
       # here without updating the frozen-list constant in that script will
       # fail `bash lint`. Fix the regression instead.
       #
-      # NOTE on apa102 (88000): restored from the 165000 band-aid (#2802)
+      # Previous Apa102 ceiling 88000 was restored from the 165000 band-aid (#2802)
       # in PR #4727 after #2656's over-link fix; measured 49,152 B.
-      max_size: 120000
-      max_size_apa102: 88000
+      # #4746: matched local default Blink and Apa102 text+data.
+      max_size: 50176
+      max_size_apa102: 49152

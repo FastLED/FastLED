@@ -399,15 +399,17 @@ private:
 
     /// @brief Per-channel allocation record
     struct ChannelAllocation {
-        u8 channel_id;
+        // Group the byte fields after words to avoid per-record padding.
         size_t words;
+        u8 channel_id;
         bool is_tx;
         bool is_dma;  ///< DMA channels don't consume on-chip memory
 
-        ChannelAllocation() : channel_id(0), words(0), is_tx(false), is_dma(false) {}
-        ChannelAllocation(u8 id, size_t w, bool tx, bool dma)
-            : channel_id(id), words(w), is_tx(tx), is_dma(dma) {}
+        ChannelAllocation() FL_NO_EXCEPT;
+        ChannelAllocation(u8 id, size_t w, bool tx, bool dma) FL_NO_EXCEPT;
     };
+    FL_STATIC_ASSERT(sizeof(ChannelAllocation) <= 2 * sizeof(size_t),
+                     "RMT allocation records exceed two machine words");
 
 #if FL_RMT_STATIC_ALLOCATION
     // Static mode documents exactly one FastLED TX strip. Keep the one-record
@@ -428,8 +430,6 @@ private:
     /// - Global Pool (ESP32, ESP32-S2): Single shared pool for TX and RX
     /// - Dedicated Pools (ESP32-S3, C3, C6, H2): Separate TX and RX pools
     struct MemoryLedger {
-        bool is_global_pool;        ///< true = global pool (ESP32/S2), false = dedicated pools (S3/C3/C6/H2)
-
         // Global pools use total_tx_words as the shared capacity and total_rx_words = 0.
         size_t total_tx_words;      ///< Shared capacity or dedicated TX capacity
         size_t total_rx_words;      ///< Dedicated RX capacity; zero for a global pool
@@ -454,6 +454,8 @@ private:
 
     MemoryLedger mLedger;
     DMAAllocation mDMAAllocation;  ///< Single DMA channel tracking
+    // Fill the DMA record's trailing byte instead of padding the word counters.
+    bool mIsGlobalPool;  ///< Shared ESP32/S2 pool, or dedicated TX/RX pools
 
     // Memory block strategy configuration (Phase 1A: New API)
     size_t mIdleBlocks;        ///< Number of memory blocks when network is inactive

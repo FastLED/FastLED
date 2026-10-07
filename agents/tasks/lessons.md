@@ -503,6 +503,17 @@
   follow-up was a Python cache test that assumed the new Linux linker
   environment variable was absent. Run cache tests with the CI environment
   set as well as locally with defaults.
+
+- For matched firmware comparisons, copy the saved controlled sketch verbatim, including delay constants; do not reconstruct it from memory. Recreated Uno 500-ms controls were replaced by the exact historical 1000-ms sketch before final acceptance (same 3914/266 result). Also wait for an fbuild session to become terminal before bloat; otherwise the report can silently describe the preceding example's ELF.
+- GitHub closing-keyword parsing ignores negation: “Do not auto-close #4737” in PR #4752 created a closing reference and closed the parent on merge. Reopened it immediately, changed the body to “Parent #4737 must remain open,” and verified closingIssuesReferences. Use Refs for non-closing links; inspect that field before merging every memory PR.
+- In ESP32 HTTP lifecycle probes, assert the numeric status code and body: the current SDK response path emits numeric `200` without an `OK` reason phrase. Initialize the ESP-IDF default event loop alongside esp_netif; the old/new lifecycle probe then passes actual loopback requests, route additions, restart and registration-failure cleanup.
+
+- ESP32 SPI probes: booting QEMU and compiling the real SDK do not prove peripheral operations complete. A recovery probe stopped after host acquisition inside SPI bus initialization; repeat with verbose diagnostics and the unchanged implementation before attributing the timeout to a storage optimization. Keep compilation, accounting, HTTP loopback and physical waveform evidence distinct.
+
+- Native sanitizer verification: debug mode can report UBSan errors and still return success under recovery defaults. Use UBSAN_OPTIONS=halt_on_error=1:print_stacktrace=1 for the acceptance gate; compare named test inventories before describing cached results. The memory audit exposed integer minimum, negative-shift and signed Q15 defects that ordinary debug runs had masked.
+
+- Blink must remain a minimal LED example with no Serial initialization or banner prints. Serial links the AVR UART object and its RX/TX buffers even when only transmitting; keep example-induced overhead separate from library regressions and do not preserve accidental banner functionality as a requirement.
+
 - Investigate library size regressions with existing minimal examples under identical
   build settings. Do not require the reporter's full sketch before removing library
   bloat; use a supplied minimal reproducer as additional validation.

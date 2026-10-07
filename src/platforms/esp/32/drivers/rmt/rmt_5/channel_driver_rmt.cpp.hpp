@@ -558,17 +558,9 @@ class ChannelEngineRMTImpl final : public ChannelEngineRMT {
     FL_NO_INLINE void emitRecoveryWarning(
         size_t original_symbols, size_t reduced_symbols,
         size_t external_words) FL_NO_EXCEPT {
-        // Gate the entire body on FL_HAS_WARN. When FL_WARN is
-        // compiled out (FL_LOG_LEVEL < 2, the default since #4712) the
-        // FL_WARN(msg.str()) call at the bottom is a no-op, but the
-        // `fl::sstream msg;` construction and 15 `operator<<` chain calls
-        // above happen unconditionally - they have observable side effects
-        // on msg's internal buffer that the optimizer can't prove away.
-        // Gating collapses the FL_NO_INLINE helper to an effectively-empty
-        // function in release (~5 B vs ~410 B). See #2917 / #2886.
-#if FL_HAS_WARN
-        fl::sstream msg;
-        msg << "\n========================================\n"
+        // Recovery diagnostics are opt-in RMT logging; build the message once.
+#if FL_HAS_RMT_LOG
+        FL_LOG_RMT("\n========================================\n"
             << "RMT ALLOCATION RECOVERY - ACTION REQUIRED\n"
             << "========================================\n"
             << "FastLED detected external RMT memory usage!\n"
@@ -584,8 +576,7 @@ class ChannelEngineRMTImpl final : public ChannelEngineRMT {
             << "\n"
             << "FastLED will continue with reduced buffer size.\n"
             << "Performance may be degraded during WiFi/network activity.\n"
-            << "========================================";
-        FL_WARN(msg.str());
+            << "========================================");
 #else
         (void)original_symbols;
         (void)reduced_symbols;
@@ -607,8 +598,8 @@ class ChannelEngineRMTImpl final : public ChannelEngineRMT {
         fl::size &mem_block_symbols) FL_NO_EXCEPT {
         auto &memMgr = RmtMemoryManager::instance();
 
-        FL_WARN("RMT channel allocation failed (initial request: " << mem_block_symbols << " symbols)");
-        FL_WARN("Attempting progressive memory reduction recovery...");
+        FL_LOG_RMT("RMT channel allocation failed (initial request: " << mem_block_symbols << " symbols)");
+        FL_LOG_RMT("Attempting progressive memory reduction recovery...");
 
         size_t original_symbols = mem_block_symbols;
         size_t retry_count = 0;
@@ -668,7 +659,7 @@ class ChannelEngineRMTImpl final : public ChannelEngineRMT {
     FL_NO_INLINE void emitAllocationFailureError(
         size_t retry_count, size_t original_symbols, size_t min_symbols,
         int pin) FL_NO_EXCEPT {
-        // Same gating rationale as emitRecoveryWarning above - see #2917.
+        // Keep formatting inside the log gate and build the message once.
 #if FASTLED_LOG_RUNTIME_ENABLED
         FL_ERROR("RMT allocation failed: pin " << pin << " on " << CONFIG_IDF_TARGET
                  << ", requested " << original_symbols << " symbols, minimum "

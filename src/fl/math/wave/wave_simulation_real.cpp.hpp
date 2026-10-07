@@ -20,7 +20,7 @@ namespace wave_detail { // Anonymous namespace for internal linkage
 i16 float_to_fixed(float f) {
     f = fl::clamp(f, -1.0f, 1.0f);
     if (f < 0.0f) {
-        return static_cast<i16>(f * -INT16_NEG);
+        return static_cast<i16>(f * 32768.0f);
     } else {
         return static_cast<i16>(f * INT16_POS); // Truncate toward zero.
     }
@@ -30,7 +30,7 @@ i16 float_to_fixed(float f) {
 float fixed_to_float(i16 f) {
     // return ((float)f) / FIXED_SCALE;
     if (f < 0) {
-        return static_cast<float>(f) / -INT16_NEG; // Preserve the negative amplitude.
+        return static_cast<float>(f) / 32768.0f; // Negative values
     } else {
         return ((float)f) / INT16_POS; // Positive values
     }
@@ -49,7 +49,9 @@ float fixed_to_float(i16 f) {
 // needs it (today it's still int-only). damp <= 0 means no decay.
 i16 compute_damp_decay_q15(int damp) FL_NO_EXCEPT {
     if (damp <= 0) return INT16_POS;  // ~1.0 — no decay
-    const float decay = 1.0f - 1.0f / static_cast<float>(1 << damp);
+    // At this exponent the decay rounds to 1.0f; avoid an oversized shift.
+    if (damp >= 32) return INT16_POS;
+    const float decay = 1.0f - 1.0f / static_cast<float>(u32(1) << damp);
     return float_to_fixed(decay);
 }
 } // namespace wave_detail

@@ -2,6 +2,38 @@
 
 <!-- Add tasks here as checkable items -->
 
+## Memory meta #4737: sequential local optimization
+
+- [x] Complete all ten native platform children: C3 #4739, C6 #4740, STM32 #4744, Uno #4742, ATtiny85 #4743, ESP32 #4738, S3 #4741, Teensy40 #4745, Teensy41 #4746, RP2040 #4747.
+- [x] Land reductions and existing-budget ratchets through PRs #4748–#4757, with matched 3.10.3/master fbuild bloat, published examples and controlled RGB evidence.
+- [x] Post a cumulative parent performance diff on each child closure; all ten comments verified.
+- [x] Run the final eleven-row local matrix sequentially at `41a6c284fcbbc8c6cb0a379bd994b98d017f78d1`. All budgets pass; every row verifies 2,394 tracked staged source files and its staged sketch against that commit.
+- [x] Publish the final three-version scorecard, matched savings, remaining gaps, source pins and metric limits: https://github.com/FastLED/FastLED/issues/4737#issuecomment-6041460246.
+- [x] Publish the parent acceptance audit and reconcile this tracker; keep #4737 open. Audit: https://github.com/FastLED/FastLED/issues/4737#issuecomment-6041492984.
+
+### Results and execution
+
+Eleven published rows save 2,868 B flash and 39,422 B physical RAM versus
+matched implementation anchors. RP2040 uses allocated image flash; other rows
+retain their board flash metric. This sum spans separate targets. Historical
+Teensy gains and frozen-to-matched baseline differences are excluded. Remaining
+3.10.3 gaps are explicit in the scorecard; exact parity is not claimed.
+
+RP2040 saves 76 B allocated image and 38,416 B physical RAM while preserving
+explicit RX capacity and SPI pin routing. GNU/fbuild raw flash includes reserved
+NOBITS heap/stack: final 388,476 raw versus 135,744 allocated image bytes. The
+scoped budget guards the allocated image and attributed RAM.
+
+Work used this checkout without git worktrees. Platform builds/tests ran locally
+and sequentially, never CI Full. Caches were retained; stale artifacts were
+rejected with source/flags checks and focused rebuilds. Logging, RMT/PARLIO,
+controller/settings storage and unused initialization were audited and trimmed.
+No fl::printf calls remain in ESP32/RP/Teensy4 platform trees; failure warnings
+and some legacy FL_WARN diagnostics remain. Features were retained. Strict native
+validation passed 417/417 unit/example jobs after the final source changes.
+Host/SDK/QEMU evidence does not claim physical waveforms; SPI SDK initialization
+timed out on both versions while direct ownership accounting passed.
+
 ## ESP32 flash and RAM regression (#4707)
 
 - [x] Reopen the issue and record controlled 3.10.3 versus master evidence.

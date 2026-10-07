@@ -1,0 +1,8 @@
+{
+  "board": "rp2040",
+  "example": "Blink",
+  "profile": "default",
+  "image_flash": 135744,
+  "total_ram": 8697,
+  "reference": "#4747: starting master 893216fb2c image 135820 / attributed RAM 47113, physical RAM 59980; optimized image 135744 / attributed RAM 8697, physical RAM 21564. fbuild 2.5.37, Arduino-Pico 5.7.0, ARM GCC 14.2.0, Cortex-M0+ 133MHz. GNU text+data also counts readonly NOBITS heap/stack reservations as flash, so enforce allocated image bytes. Explicit RX retains the full 38416-byte static pool; TX-only Blink discards it. Matched 3.10.3 requires identical SDK SdFat defines; current metrics are unchanged by them."
+}

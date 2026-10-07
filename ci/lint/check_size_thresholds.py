@@ -74,7 +74,8 @@ FROZEN_THRESHOLDS: dict[str, dict[str, frozenset[int]]] = {
         # Real ceilings. #3870 corrected the fbuild measurement path and
         # deliberately re-baselined Blink for Arduino-ESP32 3.3.11. Apa102
         # stayed at 330 KB after its all-driver over-link was removed.
-        "max_size": frozenset({340000}),
+        # #4738: measured text+data after RMT/HTTP/SPI storage reductions.
+        "max_size": frozenset({313231}),
         "max_size_apa102": frozenset({330000}),
     },
     "check_teensy30_size.yml": {
@@ -103,11 +104,10 @@ FROZEN_THRESHOLDS: dict[str, dict[str, frozenset[int]]] = {
         "max_size_apa102": frozenset({100000}),
     },
     "check_teensy41_size.yml": {
-        # real ceiling — Teensy 4.1 (MIMXRT1062) Blink reflects real growth.
-        "max_size": frozenset({120000}),
-        # real ceiling — restored from the 165000 band-aid (#2802) in
-        # PR #4727 once #2656 was fixed (measured 49,152 B).
-        "max_size_apa102": frozenset({88000}),
+        # #4746: measured default Blink text+data; historical gains retained.
+        "max_size": frozenset({50176}),
+        # #4746: measured Apa102 after #4727 removed the #2656 over-link.
+        "max_size_apa102": frozenset({49152}),
     },
     "check_teensylc_size.yml": {
         # real ceiling — Teensy LC (MKL26Z64) 64 KB flash; never bumped.
@@ -118,9 +118,12 @@ FROZEN_THRESHOLDS: dict[str, dict[str, frozenset[int]]] = {
         # real ceiling — ATmega328P 32 KB flash. Apa102 was tightened
         # 12050 → 9300 in 7edaf80f0 and 9300 → 8500 in #4725 (weak AVR
         # `Serial`, Apa102 measured 4510 → 3682 B); real optimisations, not bumps.
+        # #4742 ratchets to measured Blink 5138 / Apa102 3650 B after exact
+        # adjustment arithmetic, compact RGBW selectors and flash banner storage.
+        # #4743 narrows bounded 16-bit-int controller indices: another 8 B each.
         # `build` job: hard check. `build_no_forced_inline` job: -1 (no check).
-        "max_size": frozenset({11000, -1}),
-        "max_size_apa102": frozenset({8500, -1}),
+        "max_size": frozenset({5130, -1}),
+        "max_size_apa102": frozenset({3642, -1}),
     },
 }
 

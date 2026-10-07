@@ -22,6 +22,7 @@
 // Requires IDF 4.0+ for HTTPD_500_INTERNAL_SERVER_ERROR, httpd_resp_send_err, etc.
 #include "platforms/esp/esp_version.h"  // ok platform headers  // IWYU pragma: keep
 #if defined(FL_IS_ESP32) && !defined(FASTLED_HAS_NETWORKING) && ESP_IDF_VERSION_4_OR_HIGHER
+#include "fl/stl/singleton.h"  // for Singleton
 // IWYU pragma: begin_keep
 #include <esp_http_server.h>
 // IWYU pragma: end_keep
@@ -950,9 +951,11 @@ string Response::to_string() const {
 // members (mListenSocket, mClientSockets) are typed for POSIX sockets.
 // FL_LINT_ALLOW_GLOBAL(constant-initialized ESP-IDF server handle; Singleton<T> adds pointer storage and a branch without improving linker elision)
 static httpd_handle_t s_esp_httpd = nullptr;
-static fl::vector<fl::unique_ptr<EspRouteContext>>& espRouteContexts() {
-    // Global servers may stop during static teardown, so keep storage alive.
-    return fl::Singleton<fl::vector<fl::unique_ptr<EspRouteContext>>>::instance();
+using EspRouteContexts = fl::vector<fl::unique_ptr<EspRouteContext>>;
+
+// Initialize ownership only when HTTP is used; retain static backing storage.
+static EspRouteContexts& espRouteContexts() FL_NO_EXCEPT {
+    return fl::Singleton<EspRouteContexts>::instance();
 }
 
 Server::Server() {

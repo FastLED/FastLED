@@ -1,0 +1,8 @@
+{
+  "board": "stm32f103c8",
+  "example": "Blink",
+  "profile": "default",
+  "image_flash": 26324,
+  "total_ram": 1924,
+  "reference": "#4744: fbuild 2.5.37, STM32duino 2.9.0, GCC 15.2.1. Image flash and attributed RAM; board totals measured separately. Compact options preserve all fields/features.; #4742 compact RGBW selectors/exact adjustment ratchet"
+}

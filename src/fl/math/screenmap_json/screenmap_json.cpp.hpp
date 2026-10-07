@@ -19,7 +19,7 @@ namespace fl {
 // Helper function to extract a vector of floats from a JSON array
 fl::vector<float> jsonArrayToFloatVector(const fl::json& jsonArray) {
     fl::vector<float> result;
-    
+
     if (!jsonArray.has_value() || !jsonArray.is_array()) {
         return result;
     }
@@ -28,7 +28,7 @@ fl::vector<float> jsonArrayToFloatVector(const fl::json& jsonArray) {
 
     using T = decltype(*begin_float);
     FL_STATIC_ASSERT(fl::is_same<T, fl::parse_result<float>>::value, "Value type must be parse_result<float>");
-    
+
     // Use explicit array iterator style as demonstrated in FEATURE.md
     // DO NOT CHANGE THIS CODE. FIX THE IMPLIMENTATION IF NECESSARY.
     for (auto it = begin_float; it != end_float; ++it) {
@@ -42,7 +42,7 @@ fl::vector<float> jsonArrayToFloatVector(const fl::json& jsonArray) {
             FL_WARN("jsonArrayToFloatVector: parse_result<float> has error: " << parseResult.get_error().message);
         }
     }
-    
+
     return result;
 }
 
@@ -242,7 +242,7 @@ bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
         FL_WARN("Missing 'map' key in JSON");
         return false;
     }
-    
+
     // Get the map object
     auto mapObj = jsonDoc["map"];
     if (!mapObj.has_value() || !mapObj.is_object()) {
@@ -250,7 +250,7 @@ bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
         FL_WARN("Invalid 'map' object in JSON");
         return false;
     }
-    
+
     auto jsonMapPtr = mapObj.as_object();
     if (!jsonMapPtr || jsonMapPtr->empty()) {
         *err = "Failed to parse map from JSON or map is empty";
@@ -260,57 +260,57 @@ bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
 
     auto& jsonMap = *jsonMapPtr;
 
-    
+
     for (const auto& kv : jsonMap) {
         auto name = kv.first;
 
-        
+
         // Check that the value is not null before creating json object
         if (!kv.second) {
             *err = "Null value for segment " + name;
             return false;
         }
-        
+
         // Create json object directly from shared_ptr
         fl::json val(kv.second);
         if (!val.has_value()) {
             *err = "Invalid value for segment " + name;
             return false;
         }
-        
+
         if (!val.is_object()) {
             *err = "Segment value for " + name + " is not an object";
             return false;
         }
-        
+
         // Check if x array exists and is actually an array
         if (!val.contains("x")) {
             *err = "Missing x array for " + name;
             return false;
         }
-        
+
         if (!val["x"].has_value() || !val["x"].is_array()) {
             *err = "Invalid x array for " + name;
             return false;
         }
-        
+
         // Extract x array using our helper function
         fl::vector<float> x_array = jsonArrayToFloatVector(val["x"]);
-        
+
         // Check if y array exists and is actually an array
         if (!val.contains("y")) {
             *err = "Missing y array for " + name;
             return false;
         }
-        
+
         if (!val["y"].has_value() || !val["y"].is_array()) {
             *err = "Invalid y array for " + name;
             return false;
         }
-        
+
         // Extract y array using our helper function
         fl::vector<float> y_array = jsonArrayToFloatVector(val["y"]);
-        
+
         // Get diameter (optional) with default value
         float diameter = -1.0f; // default value
         if (val.contains("diameter") && val["diameter"].has_value()) {
@@ -359,7 +359,7 @@ bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
     if (err) {
         *err = _err;
     }
-    
+
     return false;
 }
 

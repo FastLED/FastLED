@@ -501,6 +501,23 @@ def symbols_dir(build_root: Path, board: str, profile: str) -> Path:
     return build_root / "symbols" / name
 
 
+def verify_budget(report: dict[str, Any], budget: dict[str, Any]) -> list[str]:
+    """Check image flash and attributed RAM ceilings without mixing metrics."""
+    failures: list[str] = []
+    for metric in ("image_flash", "total_ram"):
+        ceiling = budget.get(metric)
+        measured = report.get(metric)
+        if type(ceiling) is not int or ceiling < 0:
+            failures.append(f"Invalid {metric} budget: {ceiling!r}")
+        elif type(measured) is not int or measured < 0:
+            failures.append(f"Missing or invalid {metric} measurement: {measured!r}")
+        elif measured > ceiling:
+            failures.append(
+                f"{metric}: {measured} B exceeds {ceiling} B by {measured - ceiling} B"
+            )
+    return failures
+
+
 def run_profile(args: argparse.Namespace, profile: str) -> dict[str, Any]:
     """Build (optionally), analyse, and verify one profile; return provenance."""
     build_root = Path(args.build_root)
@@ -557,6 +574,22 @@ def run_profile(args: argparse.Namespace, profile: str) -> dict[str, Any]:
 
     report_json = out_dir / "report.json"
     report = cast(dict[str, Any], json.loads(report_json.read_text(encoding="utf-8")))
+    budget_path = getattr(args, "budget", None)
+    if budget_path is not None:
+        budget = json.loads(Path(budget_path).read_text(encoding="utf-8"))
+        if not isinstance(budget, dict):
+            raise SystemExit("Bloat: budget must be a JSON object")
+        for name, expected in (
+            ("board", args.board),
+            ("example", args.example),
+            ("profile", profile),
+        ):
+            if budget.get(name) != expected:
+                raise SystemExit(f"Bloat: budget {name} must match {expected!r}")
+        failures = verify_budget(report, budget)
+        if failures:
+            raise SystemExit("Bloat: budget FAILED:\n  " + "\n  ".join(failures))
+        print(f"Bloat: budget passed ({budget_path})")
     provenance: dict[str, Any] = {
         "profile": profile,
         "board": args.board,
@@ -647,6 +680,11 @@ def main() -> int:
         help="Skip the stdout summary; just write the JSON + MD artifacts.",
     )
     parser.add_argument(
+        "--budget",
+        type=Path,
+        help="JSON ceilings for image_flash and attributed total_ram, scoped to board/example/profile.",
+    )
+    parser.add_argument(
         "--build",
         action="store_true",
         help="Run `bash compile <board> --examples <example>` first to "
@@ -691,6 +729,10 @@ def main() -> int:
         )
     if args.compare and not args.build:
         raise SystemExit("Bloat: --compare requires --build.")
+    if args.compare and args.budget is not None:
+        raise SystemExit(
+            "Bloat: --compare cannot be used with --budget; check each profile separately."
+        )
 
     assert_fbuild_has_symbols()
 
