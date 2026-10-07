@@ -5613,22 +5613,22 @@ src/fl/stl/basic_string.cpp.hpp|basic_string& basic_string::append(const u16& va
 src/fl/stl/basic_string.cpp.hpp|basic_string& basic_string::append(const u32& val) {
 src/fl/stl/basic_string.cpp.hpp|basic_string& basic_string::append(const u64& val) {
 src/fl/stl/basic_string.cpp.hpp|basic_string& basic_string::append(const u8& val) {
-src/fl/stl/basic_string.cpp.hpp|basic_string& basic_string::appendHex(i16 val) { return appendHex(static_cast<i32>(val)); }
-src/fl/stl/basic_string.cpp.hpp|basic_string& basic_string::appendHex(i32 val) { char b[64]={0}; int l=fl::itoa(val,b,16); write(b,l); return *this; }
-src/fl/stl/basic_string.cpp.hpp|basic_string& basic_string::appendHex(i64 val) { char b[64]={0}; int l=fl::itoa64(val,b,16); write(b,l); return *this; }
-src/fl/stl/basic_string.cpp.hpp|basic_string& basic_string::appendHex(i8 val) { return appendHex(static_cast<i32>(val)); }
-src/fl/stl/basic_string.cpp.hpp|basic_string& basic_string::appendHex(u16 val) { return appendHex(static_cast<u32>(val)); }
-src/fl/stl/basic_string.cpp.hpp|basic_string& basic_string::appendHex(u32 val) { char b[64]={0}; int l=fl::utoa32(val,b,16); write(b,l); return *this; }
-src/fl/stl/basic_string.cpp.hpp|basic_string& basic_string::appendHex(u64 val) { char b[64]={0}; int l=fl::utoa64(val,b,16); write(b,l); return *this; }
-src/fl/stl/basic_string.cpp.hpp|basic_string& basic_string::appendHex(u8 val) { return appendHex(static_cast<u32>(val)); }
-src/fl/stl/basic_string.cpp.hpp|basic_string& basic_string::appendOct(i16 val) { return appendOct(static_cast<i32>(val)); }
-src/fl/stl/basic_string.cpp.hpp|basic_string& basic_string::appendOct(i32 val) { char b[64]={0}; int l=fl::itoa(val,b,8); write(b,l); return *this; }
-src/fl/stl/basic_string.cpp.hpp|basic_string& basic_string::appendOct(i64 val) { char b[64]={0}; int l=fl::itoa64(val,b,8); write(b,l); return *this; }
-src/fl/stl/basic_string.cpp.hpp|basic_string& basic_string::appendOct(i8 val) { return appendOct(static_cast<i32>(val)); }
-src/fl/stl/basic_string.cpp.hpp|basic_string& basic_string::appendOct(u16 val) { return appendOct(static_cast<u32>(val)); }
-src/fl/stl/basic_string.cpp.hpp|basic_string& basic_string::appendOct(u32 val) { char b[64]={0}; int l=fl::utoa32(val,b,8); write(b,l); return *this; }
-src/fl/stl/basic_string.cpp.hpp|basic_string& basic_string::appendOct(u64 val) { char b[64]={0}; int l=fl::utoa64(val,b,8); write(b,l); return *this; }
-src/fl/stl/basic_string.cpp.hpp|basic_string& basic_string::appendOct(u8 val) { return appendOct(static_cast<u32>(val)); }
+src/fl/stl/string_operations/basic_string.cpp.hpp|basic_string& basic_string::appendHex(i16 val) { return appendHex(static_cast<i32>(val)); }
+src/fl/stl/string_operations/basic_string.cpp.hpp|basic_string& basic_string::appendHex(i32 val) { char b[64]={0}; int l=fl::itoa(val,b,16); write(b,l); return *this; }
+src/fl/stl/string_operations/basic_string.cpp.hpp|basic_string& basic_string::appendHex(i64 val) { char b[64]={0}; int l=fl::itoa64(val,b,16); write(b,l); return *this; }
+src/fl/stl/string_operations/basic_string.cpp.hpp|basic_string& basic_string::appendHex(i8 val) { return appendHex(static_cast<i32>(val)); }
+src/fl/stl/string_operations/basic_string.cpp.hpp|basic_string& basic_string::appendHex(u16 val) { return appendHex(static_cast<u32>(val)); }
+src/fl/stl/string_operations/basic_string.cpp.hpp|basic_string& basic_string::appendHex(u32 val) { char b[64]={0}; int l=fl::utoa32(val,b,16); write(b,l); return *this; }
+src/fl/stl/string_operations/basic_string.cpp.hpp|basic_string& basic_string::appendHex(u64 val) { char b[64]={0}; int l=fl::utoa64(val,b,16); write(b,l); return *this; }
+src/fl/stl/string_operations/basic_string.cpp.hpp|basic_string& basic_string::appendHex(u8 val) { return appendHex(static_cast<u32>(val)); }
+src/fl/stl/string_operations/basic_string.cpp.hpp|basic_string& basic_string::appendOct(i16 val) { return appendOct(static_cast<i32>(val)); }
+src/fl/stl/string_operations/basic_string.cpp.hpp|basic_string& basic_string::appendOct(i32 val) { char b[64]={0}; int l=fl::itoa(val,b,8); write(b,l); return *this; }
+src/fl/stl/string_operations/basic_string.cpp.hpp|basic_string& basic_string::appendOct(i64 val) { char b[64]={0}; int l=fl::itoa64(val,b,8); write(b,l); return *this; }
+src/fl/stl/string_operations/basic_string.cpp.hpp|basic_string& basic_string::appendOct(i8 val) { return appendOct(static_cast<i32>(val)); }
+src/fl/stl/string_operations/basic_string.cpp.hpp|basic_string& basic_string::appendOct(u16 val) { return appendOct(static_cast<u32>(val)); }
+src/fl/stl/string_operations/basic_string.cpp.hpp|basic_string& basic_string::appendOct(u32 val) { char b[64]={0}; int l=fl::utoa32(val,b,8); write(b,l); return *this; }
+src/fl/stl/string_operations/basic_string.cpp.hpp|basic_string& basic_string::appendOct(u64 val) { char b[64]={0}; int l=fl::utoa64(val,b,8); write(b,l); return *this; }
+src/fl/stl/string_operations/basic_string.cpp.hpp|basic_string& basic_string::appendOct(u8 val) { return appendOct(static_cast<u32>(val)); }
 src/fl/stl/string_operations/basic_string.cpp.hpp|basic_string& basic_string::assign(const basic_string& str) {
 src/fl/stl/string_operations/basic_string.cpp.hpp|basic_string& basic_string::assign(const basic_string& str, fl::size pos, fl::size count) {
 src/fl/stl/string_operations/basic_string.cpp.hpp|basic_string& basic_string::assign(fl::size count, char c) {
