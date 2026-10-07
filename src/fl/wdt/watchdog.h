@@ -203,6 +203,8 @@ public:
     /// @brief Tell the early-boot guard this boot is healthy, zeroing its
     /// counter. Call once the firmware is known good (e.g. first `loop()`),
     /// so later watchdog resets never accumulate toward a bootloader escape.
+    /// If the sketch never took over the watchdog with `begin()`, this also
+    /// disables the guard's early timer, so it cannot reset a healthy sketch.
     /// No-op on platforms without boot-guard storage.
     void markBootHealthy() FL_NO_EXCEPT;
 
@@ -239,6 +241,9 @@ namespace platforms {
 /// the no-op). Backs Watchdog::bootGuardCount() / markBootHealthy().
 fl::u32 watchdogBootGuardRead() FL_NO_EXCEPT;
 void    watchdogBootGuardWrite(fl::u32 boots) FL_NO_EXCEPT;
+/// Disable the boot guard's early watchdog timer if it is still running and
+/// the sketch never armed the watchdog itself. Called by markBootHealthy().
+void    watchdogBootGuardReleaseEarlyTimer() FL_NO_EXCEPT;
 } // namespace platforms
 
 /// @brief RAII watchdog guard for the canonical `loop()`-top use case.

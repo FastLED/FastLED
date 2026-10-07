@@ -25,6 +25,7 @@
 /// false; `rebootIntoBootloader()` returns false.
 
 #include "fl/wdt/watchdog.h"
+#include "fl/wdt/boot_guard_record.h"
 #include "fl/stl/atomic.h"
 #include "fl/stl/chrono.h"
 #include "fl/stl/cstring.h"
@@ -207,13 +208,59 @@ inline void stubWatchdogEnsureWorker() FL_NO_EXCEPT {
     }
 }
 
-inline fl::atomic<fl::u32>& stubBootGuardBoots() FL_NO_EXCEPT {
-    static fl::atomic<fl::u32> boots(0);  // okay static in header — single-TU `.impl.hpp`
-    return boots;
+// Boot-guard record in process memory, standing in for the reset-persistent
+// record real platforms keep. It goes through the same fl/wdt/boot_guard_record.h
+// helpers as the hardware platforms, so the read/write semantics match them.
+// Only the test thread touches it.
+struct StubBootGuard {
+    BootGuardRecord record;
+    fl::u32 image;         // stands in for the firmware image key
+    bool    early_armed;   // the simulated early hook armed the timer
+    bool    sketch_armed;  // begin() ran since then
+};
+
+inline StubBootGuard& stubBootGuard() FL_NO_EXCEPT {
+    static StubBootGuard g{};  // okay static in header — single-TU `.impl.hpp`
+    return g;
 }
 
-fl::u32 watchdogBootGuardRead() FL_NO_EXCEPT { return stubBootGuardBoots().load(); }
-void watchdogBootGuardWrite(fl::u32 boots) FL_NO_EXCEPT { stubBootGuardBoots().store(boots); }
+fl::u32 watchdogBootGuardRead() FL_NO_EXCEPT {
+    StubBootGuard& g = stubBootGuard();
+    return bootGuardDecode(g.record, g.image);
+}
+
+void watchdogBootGuardWrite(fl::u32 boots) FL_NO_EXCEPT {
+    StubBootGuard& g = stubBootGuard();
+    bootGuardEncode(g.record, g.image, boots);
+}
+
+void watchdogBootGuardReleaseEarlyTimer() FL_NO_EXCEPT {
+    StubBootGuard& g = stubBootGuard();
+    if (g.early_armed && !g.sketch_armed) {
+        Watchdog::instance().disable();
+    }
+}
+
+void setStubBootGuardImageForTesting(fl::u32 image) FL_NO_EXCEPT {
+    stubBootGuard().image = image;
+}
+
+bool stubBootGuardEarlyBootForTesting(fl::u32 escape_boots,
+                                      fl::u32 early_timeout_ms) FL_NO_EXCEPT {
+    StubBootGuard& g = stubBootGuard();
+    const BootGuardDecision d =
+        bootGuardOnBoot(bootGuardDecode(g.record, g.image), escape_boots);
+    bootGuardEncode(g.record, g.image, d.boots);
+    if (d.escape) return true;
+    Watchdog::instance().begin(early_timeout_ms);
+    g.early_armed = true;
+    g.sketch_armed = false;
+    return false;
+}
+
+bool stubWatchdogEnabledForTesting() FL_NO_EXCEPT {
+    return stubWatchdogState().enabled.load();
+}
 
 } // namespace platforms
 
@@ -236,6 +283,7 @@ void Watchdog::begin(fl::u32 timeout_ms) FL_NO_EXCEPT {
     s.timeout_ms.store(timeout_ms);
     s.deadline = platforms::stubWatchdogNow() + fl::chrono::milliseconds(timeout_ms);
     s.enabled.store(true);
+    platforms::stubBootGuard().sketch_armed = true;
 }
 
 void Watchdog::feed() FL_NO_EXCEPT {
@@ -248,6 +296,8 @@ void Watchdog::feed() FL_NO_EXCEPT {
 void Watchdog::disable() FL_NO_EXCEPT {
     auto& s = platforms::stubWatchdogState();
     s.enabled.store(false);
+    platforms::stubBootGuard().early_armed = false;
+    platforms::stubBootGuard().sketch_armed = false;
 }
 
 ResetCause Watchdog::lastResetCause() const FL_NO_EXCEPT {
