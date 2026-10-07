@@ -1,5 +1,6 @@
 #pragma once
 
+#include "fl/stl/noexcept.h"
 #include "fl/stl/thread_config.h"  // For FASTLED_MULTITHREADED (no circular deps)
 #include "fl/stl/int.h"
 
@@ -10,7 +11,6 @@
 #if FASTLED_MULTITHREADED || defined(FL_IS_ESP32)
 #define FASTLED_USE_REAL_ATOMICS 1
 #include "platforms/atomic.h"  // IWYU pragma: keep
-#include "fl/stl/noexcept.h"
 #else
 #define FASTLED_USE_REAL_ATOMICS 0
 #endif

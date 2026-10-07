@@ -32,6 +32,11 @@ def setup_sanitizer_env(source_dir: Path, verbose: bool) -> None:
         options.append("detect_leaks=0")
         sanitizer_env["ASAN_OPTIONS"] = ":".join(options)
 
+    if sys.platform == "win32":
+        # Meson supplies -shared-libasan explicitly. Keep the launcher from
+        # injecting shared-library sanitizer linker flags into COFF links.
+        sanitizer_env["CLANG_TOOL_CHAIN_NO_SHARED_ASAN"] = "1"
+
     os.environ.update(sanitizer_env)
 
     lsan_suppressions = source_dir / "tests" / "lsan_suppressions.txt"

@@ -1,3 +1,4 @@
+// ok no header - public declaration remains in parent directory.
 ///////////////////////////////////////////////////////////////////////////////
 // fl::ieee754_string -- integer-only IEEE 754 single-precision codec.
 //
@@ -5,7 +6,7 @@
 // embedding into FastLED #3022 / #3029.
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "fl/stl/ieee754_string.h" // ok no header - public declaration remains in parent directory.
+#include "fl/stl/ieee754_string.h"
 
 #include "fl/stl/string.h"
 #include "fl/stl/charconv.h"

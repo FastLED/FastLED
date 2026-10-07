@@ -206,6 +206,7 @@ def find_combined_hits(
 
     max_workers = max(len(tus), os.cpu_count() or len(tus))
     all_noexcept: list[NoexceptHit] = []
+    noexcept_locations: set[tuple[str, int]] = set()
     all_array_param: list[ArrayParamHit] = []
     with ThreadPoolExecutor(max_workers=max_workers) as pool:
         futures = [
@@ -214,6 +215,13 @@ def find_combined_hits(
         ]
         for future in futures:
             noexcept_hits, array_param_hits = future.result()
-            all_noexcept.extend(noexcept_hits)
+            # A shared header can be parsed by several independent unity
+            # units. Count its source declaration once, retaining distinct
+            # declarations on different lines for the counted baseline.
+            for hit in noexcept_hits:
+                location = (hit.path, hit.line)
+                if location not in noexcept_locations:
+                    noexcept_locations.add(location)
+                    all_noexcept.append(hit)
             all_array_param.extend(array_param_hits)
     return all_noexcept, all_array_param

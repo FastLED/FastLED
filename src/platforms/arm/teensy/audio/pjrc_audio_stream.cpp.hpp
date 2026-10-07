@@ -36,6 +36,7 @@
 // IWYU pragma: end_keep
 #include "platforms/arm/teensy/audio/pjrc_audio_stream.h"
 #include "fl/stl/cstring.h"
+#include "fl/stl/singleton.h"
 
 namespace fl { namespace platforms { namespace teensy {
 

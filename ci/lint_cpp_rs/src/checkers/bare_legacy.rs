@@ -142,7 +142,7 @@ const BARE_LIBM_EXEMPT_PREFIXES: &[&str] = &[
     "fl/math/fixed_point",
     "fl/math/line_simplification",
     "fl/math/screenmap",
-    "fl/math/transform",
+    "fl/math/operations/transform",
     "platforms/esp/",
     "platforms/wasm/",
 ];

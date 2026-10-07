@@ -37,9 +37,11 @@ FL_EXTERN_C_BEGIN
 #include "esp_heap_caps.h"
 #include "fl/stl/noexcept.h"
 // IWYU pragma: end_keep
+#if ESP_IDF_VERSION_4_OR_HIGHER
 // IWYU pragma: begin_keep
 #include "soc/soc_caps.h"
 // IWYU pragma: end_keep
+#endif
 FL_EXTERN_C_END
 
 namespace fl {

@@ -25,8 +25,12 @@
 #include "platforms/is_platform.h"
 #ifdef FL_IS_ESP32
 
+#include "platforms/esp/esp_version.h"
+
 // Check if this SoC has MCPWM hardware (ESP32-C3/C2 do not)
+#if ESP_IDF_VERSION_4_OR_HIGHER
 #include "soc/soc_caps.h"  // IWYU pragma: keep
+#endif
 #if defined(SOC_MCPWM_SUPPORTED) && SOC_MCPWM_SUPPORTED
 
 #include "platforms/esp/32/drivers/gpio_isr_rx/dual_isr_context.h"
