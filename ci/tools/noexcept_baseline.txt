@@ -6693,24 +6693,24 @@ src/fl/system/diagnostics/heap.cpp.hpp|HeapInfo getFreeHeap() {
 src/fl/system/heap.h|HeapInfo getFreeHeap();
 src/fl/system/heap.h|bool has_psram() const { return free_psram > 0; }
 src/fl/system/heap.h|fl::size total() const { return free_sram + free_psram; }
-src/fl/system/pin.cpp.hpp|PinValue digitalRead(int pin) {
-src/fl/system/pin.cpp.hpp|PwmPinState* allocate() {
-src/fl/system/pin.cpp.hpp|PwmPinState* findByPin(int pin) {
-src/fl/system/pin.cpp.hpp|inline PwmStateData& state() {
-src/fl/system/pin.cpp.hpp|int ensureIsrActive() {
-src/fl/system/pin.cpp.hpp|int pwmEnd(int pin) {
-src/fl/system/pin.cpp.hpp|int setPwmFrequency(int pin, u32 frequency_hz) {
-src/fl/system/pin.cpp.hpp|u16 analogRead(int pin) {
-src/fl/system/pin.cpp.hpp|u32 getPwmFrequency(int pin) {
-src/fl/system/pin.cpp.hpp|u8 countIsrChannels() {
-src/fl/system/pin.cpp.hpp|void FL_IRAM pwm_isr_handler(void* user_data) {
-src/fl/system/pin.cpp.hpp|void analogWrite(int pin, u16 val) {
-src/fl/system/pin.cpp.hpp|void digitalWrite(int pin, PinValue val) {
-src/fl/system/pin.cpp.hpp|void maybeShutdownIsr() {
-src/fl/system/pin.cpp.hpp|void pinMode(int pin, PinMode mode) {
-src/fl/system/pin.cpp.hpp|void releaseChannel(PwmPinState* ch) {
-src/fl/system/pin.cpp.hpp|void setAdcRange(AdcRange range) {
-src/fl/system/pin.cpp.hpp|void setPwm16(int pin, u16 val) {
+src/fl/system/gpio/pin.cpp.hpp|PinValue digitalRead(int pin) {
+src/fl/system/gpio/pin.cpp.hpp|PwmPinState* allocate() {
+src/fl/system/gpio/pin.cpp.hpp|PwmPinState* findByPin(int pin) {
+src/fl/system/gpio/pin.cpp.hpp|inline PwmStateData& state() {
+src/fl/system/gpio/pin.cpp.hpp|int ensureIsrActive() {
+src/fl/system/gpio/pin.cpp.hpp|int pwmEnd(int pin) {
+src/fl/system/gpio/pin.cpp.hpp|int setPwmFrequency(int pin, u32 frequency_hz) {
+src/fl/system/gpio/pin.cpp.hpp|u16 analogRead(int pin) {
+src/fl/system/gpio/pin.cpp.hpp|u32 getPwmFrequency(int pin) {
+src/fl/system/gpio/pin.cpp.hpp|u8 countIsrChannels() {
+src/fl/system/gpio/pin.cpp.hpp|void FL_IRAM pwm_isr_handler(void* user_data) {
+src/fl/system/gpio/pin.cpp.hpp|void analogWrite(int pin, u16 val) {
+src/fl/system/gpio/pin.cpp.hpp|void digitalWrite(int pin, PinValue val) {
+src/fl/system/gpio/pin.cpp.hpp|void maybeShutdownIsr() {
+src/fl/system/gpio/pin.cpp.hpp|void pinMode(int pin, PinMode mode) {
+src/fl/system/gpio/pin.cpp.hpp|void releaseChannel(PwmPinState* ch) {
+src/fl/system/gpio/pin.cpp.hpp|void setAdcRange(AdcRange range) {
+src/fl/system/gpio/pin.cpp.hpp|void setPwm16(int pin, u16 val) {
 src/fl/system/pin.h|PinValue digitalRead(int pin);
 src/fl/system/pin.h|inline void analogWrite16(int pin, u16 val) {
 src/fl/system/pin.h|int pwmEnd(int pin);
@@ -6722,24 +6722,24 @@ src/fl/system/pin.h|void digitalWrite(int pin, PinValue val);
 src/fl/system/pin.h|void pinMode(int pin, PinMode mode);
 src/fl/system/pin.h|void setAdcRange(AdcRange range);
 src/fl/system/pin.h|void setPwm16(int pin, u16 val);
-src/fl/system/pins.cpp.hpp|bool DigitalMultiWrite16::allSamePort() const {
-src/fl/system/pins.cpp.hpp|bool DigitalMultiWrite8::allSamePort() const {
-src/fl/system/pins.cpp.hpp|inline bool allPortsNull() {
-src/fl/system/pins.cpp.hpp|inline const port_ptr_t* portTable() {
-src/fl/system/pins.cpp.hpp|inline port_ptr_t getPortPtr(int pin) {
-src/fl/system/pins.cpp.hpp|int pinToPort(int pin) {
-src/fl/system/pins.cpp.hpp|static port_ptr_t get() { return FastPin<static_cast<u8>(N)>::port(); }
-src/fl/system/pins.cpp.hpp|void DigitalMultiWrite16::applyNibble(const PinList &set, const PinList &clr) {
-src/fl/system/pins.cpp.hpp|void DigitalMultiWrite16::buildNibbleLut(u8 bit_offset, PinList (&set_lut)[16], PinList (&clr_lut)[16]) {
-src/fl/system/pins.cpp.hpp|void DigitalMultiWrite16::init(const Pins16& pins) {
-src/fl/system/pins.cpp.hpp|void DigitalMultiWrite16::write(fl::span<const u16> pin_data) const {
-src/fl/system/pins.cpp.hpp|void DigitalMultiWrite8::applyNibble(const PinList &set, const PinList &clr) {
-src/fl/system/pins.cpp.hpp|void DigitalMultiWrite8::buildNibbleLut(u8 bit_offset, PinList (&set_lut)[16], PinList (&clr_lut)[16]) {
-src/fl/system/pins.cpp.hpp|void DigitalMultiWrite8::init(const Pins8& pins) {
-src/fl/system/pins.cpp.hpp|void DigitalMultiWrite8::write(fl::span<const u8> pin_data) const {
-src/fl/system/pins.cpp.hpp|void digitalMultiWrite16(const Pins16& pins, fl::span<const u16> pin_data) {
-src/fl/system/pins.cpp.hpp|void digitalMultiWrite8(const Pins8& pins, fl::span<const u8> pin_data) {
-src/fl/system/pins.cpp.hpp|void pinMap(fl::span<PinInfo> pins) {
+src/fl/system/gpio/pins.cpp.hpp|bool DigitalMultiWrite16::allSamePort() const {
+src/fl/system/gpio/pins.cpp.hpp|bool DigitalMultiWrite8::allSamePort() const {
+src/fl/system/gpio/pins.cpp.hpp|inline bool allPortsNull() {
+src/fl/system/gpio/pins.cpp.hpp|inline const port_ptr_t* portTable() {
+src/fl/system/gpio/pins.cpp.hpp|inline port_ptr_t getPortPtr(int pin) {
+src/fl/system/gpio/pins.cpp.hpp|int pinToPort(int pin) {
+src/fl/system/gpio/pins.cpp.hpp|static port_ptr_t get() { return FastPin<static_cast<u8>(N)>::port(); }
+src/fl/system/gpio/pins.cpp.hpp|void DigitalMultiWrite16::applyNibble(const PinList &set, const PinList &clr) {
+src/fl/system/gpio/pins.cpp.hpp|void DigitalMultiWrite16::buildNibbleLut(u8 bit_offset, PinList (&set_lut)[16], PinList (&clr_lut)[16]) {
+src/fl/system/gpio/pins.cpp.hpp|void DigitalMultiWrite16::init(const Pins16& pins) {
+src/fl/system/gpio/pins.cpp.hpp|void DigitalMultiWrite16::write(fl::span<const u16> pin_data) const {
+src/fl/system/gpio/pins.cpp.hpp|void DigitalMultiWrite8::applyNibble(const PinList &set, const PinList &clr) {
+src/fl/system/gpio/pins.cpp.hpp|void DigitalMultiWrite8::buildNibbleLut(u8 bit_offset, PinList (&set_lut)[16], PinList (&clr_lut)[16]) {
+src/fl/system/gpio/pins.cpp.hpp|void DigitalMultiWrite8::init(const Pins8& pins) {
+src/fl/system/gpio/pins.cpp.hpp|void DigitalMultiWrite8::write(fl::span<const u8> pin_data) const {
+src/fl/system/gpio/pins.cpp.hpp|void digitalMultiWrite16(const Pins16& pins, fl::span<const u16> pin_data) {
+src/fl/system/gpio/pins.cpp.hpp|void digitalMultiWrite8(const Pins8& pins, fl::span<const u8> pin_data) {
+src/fl/system/gpio/pins.cpp.hpp|void pinMap(fl::span<PinInfo> pins) {
 src/fl/system/pins.h|bool allSamePort() const;
 src/fl/system/pins.h|bool allSamePort() const;
 src/fl/system/pins.h|int pinToPort(int pin);
@@ -7092,3 +7092,6 @@ src/fl/video/video_impl.h|void setTimeScale(float timeScale);
 src/fl/channels/dynamic/cfastled.cpp.hpp|void CFastLED::enableAllDrivers() {
 src/fl/task/detail/task_impl.h|int next_task_id();
 src/fl/task/detail/task_impl.h|string make_trace_label(const TracePoint& trace);
+
+# Existing public setter moved from root power_mgt.cpp.hpp; preserve its declared exception signature.
+src/fl/system/gpio/power_indicator.cpp.hpp|void set_max_power_indicator_LED( fl::u8 pinNumber) {

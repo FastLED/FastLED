@@ -3,6 +3,7 @@
 
 #include "FastLED.h"
 #include "power_mgt.h"
+#include "fl/system/gpio/power_indicator.h"
 #include "fl/gfx/pipeline.h"
 #include "fl/gfx/colorimetric_response.h"
 #include "fl/stl/stdint.h"
@@ -10,6 +11,56 @@
 #include "hsv2rgb.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
+
+FL_TEST_CASE("power indicator dispatch preserves pin and budget decisions") {
+    struct ResetIndicator {
+        fl::u8 previousPin;
+        ~ResetIndicator() { set_max_power_indicator_LED(previousPin); }
+    } reset{fl::detail::powerIndicatorPin};
+    static fl::u8 observedPin = 0;
+    static bool observedOverLimit = false;
+    static fl::u32 writes = 0;
+    writes = 0;
+    auto observe = +[](fl::u8 pin, bool overLimit) {
+        observedPin = pin;
+        observedOverLimit = overLimit;
+        ++writes;
+    };
+
+    set_max_power_indicator_LED(17);
+    FL_REQUIRE(fl::detail::powerIndicatorWrite != nullptr);
+    const auto installedWrite = fl::detail::powerIndicatorWrite;
+    fl::detail::powerIndicatorWrite = observe;
+    calculate_max_brightness_for_power_mW(255, 0xffffffffu);
+    FL_CHECK_EQ(writes, 1u);
+    FL_CHECK_EQ(observedPin, 17u);
+    FL_CHECK_FALSE(observedOverLimit);
+    calculate_max_brightness_for_power_mW(255, 0);
+    FL_CHECK_EQ(writes, 2u);
+    FL_CHECK_TRUE(observedOverLimit);
+
+    set_max_power_indicator_LED(18);
+    FL_CHECK_TRUE(fl::detail::powerIndicatorWrite == installedWrite);
+    fl::detail::powerIndicatorWrite = observe;
+    calculate_max_brightness_for_power_mW(255, 0xffffffffu);
+    FL_CHECK_EQ(writes, 3u);
+    FL_CHECK_EQ(observedPin, 18u);
+    FL_CHECK_FALSE(observedOverLimit);
+
+    set_max_power_indicator_LED(0);
+    FL_CHECK_TRUE(fl::detail::powerIndicatorWrite == nullptr);
+    calculate_max_brightness_for_power_mW(255, 0xffffffffu);
+    calculate_max_brightness_for_power_mW(255, 0);
+    FL_CHECK_EQ(writes, 3u);
+
+    set_max_power_indicator_LED(17);
+    FL_CHECK_TRUE(fl::detail::powerIndicatorWrite == installedWrite);
+    fl::detail::powerIndicatorWrite = observe;
+    calculate_max_brightness_for_power_mW(255, 0);
+    FL_CHECK_EQ(writes, 4u);
+    FL_CHECK_EQ(observedPin, 17u);
+    FL_CHECK_TRUE(observedOverLimit);
+}
 
 struct ScopedPowerScalingExponent {
     explicit ScopedPowerScalingExponent(float exponent)

@@ -5,7 +5,7 @@
 #include "led_sysdefs.h"      // Must be included first (required by lib8tion.h)
 #include "pixeltypes.h"       // CRGB
 #include "controller.h"       // CLEDController
-#include "fastpin.h"          // Pin
+#include "fl/system/gpio/power_indicator.h"
 #include "fl/system/sketch_macros.h"
 #include "fl/stl/compiler_control.h"  // FL_UNUSED
 #if SKETCH_HAS_LARGE_MEMORY
@@ -240,7 +240,12 @@ fl::u32 scale_power_for_brightness(fl::u32 total_mW, fl::u8 brightness) {
 // Power consumed by the MCU
 static const fl::u8 gMCU_mW  =  25 * 5; // 25mA @ 5v = 125 mW
 
-static fl::u8  gMaxPowerIndicatorLEDPinNumber = 0; // default = Arduino onboard LED pin.  set to zero to skip this.
+namespace fl {
+namespace detail {
+fl::u8 powerIndicatorPin = 0;
+void (*powerIndicatorWrite)(fl::u8 pin, bool overLimit) = nullptr;
+} // namespace detail
+} // namespace fl
 
 
 // Span-based version (primary implementation)
@@ -927,8 +932,8 @@ fl::u8 calculate_max_brightness_for_power_mW( fl::u8 target_brightness, fl::u32 
 
     if( requested_power_mW <= max_power_mW) {
 #if POWER_LED > 0
-        if( gMaxPowerIndicatorLEDPinNumber ) {
-            Pin(gMaxPowerIndicatorLEDPinNumber).lo(); // turn the LED off
+        if (fl::detail::powerIndicatorWrite) {
+            fl::detail::powerIndicatorWrite(fl::detail::powerIndicatorPin, false);
         }
 #endif
 #if POWER_DEBUG_PRINT == 1
@@ -952,18 +957,14 @@ fl::u8 calculate_max_brightness_for_power_mW( fl::u8 target_brightness, fl::u32 
 #endif
 
 #if POWER_LED > 0
-    if( gMaxPowerIndicatorLEDPinNumber ) {
-        Pin(gMaxPowerIndicatorLEDPinNumber).hi(); // turn the LED on
+    if (fl::detail::powerIndicatorWrite) {
+        fl::detail::powerIndicatorWrite(fl::detail::powerIndicatorPin, true);
     }
 #endif
 
     return recommended_brightness;
 }
 
-void set_max_power_indicator_LED( fl::u8 pinNumber)
-{
-    gMaxPowerIndicatorLEDPinNumber = pinNumber;
-}
 
 // The RGB half of installing a model. Split out because the white emitter's
 // lifetime is not the same as the RGB model's: declaring an RGB model retracts

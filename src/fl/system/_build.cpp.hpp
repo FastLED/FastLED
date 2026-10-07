@@ -4,7 +4,5 @@
 #include "fl/system/delay.cpp.hpp"
 #include "fl/system/engine_events.cpp.hpp"
 #include "fl/system/fastled_internal.cpp.hpp"
-#include "fl/system/pin.cpp.hpp"
-#include "fl/system/pins.cpp.hpp"
 #include "fl/system/static_constexpr_defs.cpp.hpp"
 #include "fl/system/yield.cpp.hpp"

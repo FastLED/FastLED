@@ -23,4 +23,6 @@
 #include "fl/gfx/white_allocation.cpp.hpp"
 
 // begin sub directory includes
+#include "fl/gfx/corkscrew/_build.cpp.hpp"
 #include "fl/gfx/detail/_build.cpp.hpp"
+#include "fl/gfx/noise/_build.cpp.hpp"

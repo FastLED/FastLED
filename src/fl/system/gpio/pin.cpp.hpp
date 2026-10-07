@@ -1,3 +1,4 @@
+// ok no header - public declaration remains in fl/system/pin.h.
 /// @file fl/pin.cpp
 /// Compilation boundary for platform-independent pin API
 ///
@@ -20,7 +21,7 @@
 ///   → Split into Arduino path (#ifdef ARDUINO) and non-Arduino path
 ///
 /// Why this matters:
-/// - Users can safely `#include "fl/system/pin.h"` without pulling in Arduino.h
+/// - Users can safely `#include "fl/system/pin.h" // ok no header - public declaration remains in parent directory.` without pulling in Arduino.h
 /// - Platform detection and implementation selection happens at this boundary
 /// - Clean separation between interface and implementation
 

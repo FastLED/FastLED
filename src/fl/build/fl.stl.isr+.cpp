@@ -1,9 +1,8 @@
-/// @brief Isolate optional geometric noise from core color conversion.
+/// @brief Optional runtime implementation, linked when explicitly used.
 
 #include "platforms/new.h"
-
 // IWYU pragma: begin_keep
 #include "fl/system/arduino.h"
 // IWYU pragma: end_keep
 
-#include "fl/gfx/noise/_build.cpp.hpp"
+#include "fl/stl/isr/_build.cpp.hpp"
