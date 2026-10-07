@@ -4,28 +4,35 @@
 
 ## Memory meta #4737: sequential local optimization
 
-- [x] ESP32-C3 #4739: matched 3.10.3/master bloat, measured optimization, local checks and landed change (#4748, e60f4fcf7f; -152 B flash / -32 B RAM).
-- [x] ESP32-C6 #4740: matched bloat and controlled workload, local gates, landed #4749 at 8d6ed12ccb; -194 B flash / -96 B RAM. Parent perf #6033440937 posted.
-- [x] STM32 #4744: landed #4750 at 28a41d619f; -12 B flash / -8 B RAM. Shared C3/C6 gains verified; parent perf #6033821040 posted.
-- [x] Uno #4742: landed #4751 at d9cc468d5c; Blink -20/-186 B, Apa102 -32/-2 B, controlled -20/-2 B. Shared savings measured; parent perf #6035037581 posted.
-- [x] ATtiny85 #4743: landed #4752 at 8d8207f391; default 2628/161 B, inherited 2 B RAM saving preserved and another 12 B flash saved. Parent perf #6036277742 posted.
-- [ ] ESP32 #4738 and ESP32-S3 #4741.
-- [ ] Validate Teensy40 #4745, Teensy41 #4746 and RP2040 #4747.
-- [ ] Post cumulative performance diffs on #4737 when each child closes; leave the parent open.
+- [x] Complete all ten native platform children: C3 #4739, C6 #4740, STM32 #4744, Uno #4742, ATtiny85 #4743, ESP32 #4738, S3 #4741, Teensy40 #4745, Teensy41 #4746, RP2040 #4747.
+- [x] Land reductions and existing-budget ratchets through PRs #4748–#4757, with matched 3.10.3/master fbuild bloat, published examples and controlled RGB evidence.
+- [x] Post a cumulative parent performance diff on each child closure; all ten comments verified.
+- [x] Run the final eleven-row local matrix sequentially at `41a6c284fcbbc8c6cb0a379bd994b98d017f78d1`. All budgets pass; every row verifies 2,394 tracked staged source files and its staged sketch against that commit.
+- [x] Publish the final three-version scorecard, matched savings, remaining gaps, source pins and metric limits: https://github.com/FastLED/FastLED/issues/4737#issuecomment-6041460246.
+- [x] Publish the parent acceptance audit and reconcile this tracker; keep #4737 open. Audit: https://github.com/FastLED/FastLED/issues/4737#issuecomment-6041492984.
 
-### Execution
+### Results and execution
 
-Use this checkout and its caches, without git worktrees. Build each platform
-locally and sequentially; never request CI Full. Preserve features while
-reducing logging and driver overhead. Record source provenance and reject stale
-ELFs before comparing sizes.
+Eleven published rows save 2,868 B flash and 39,422 B physical RAM versus
+matched implementation anchors. RP2040 uses allocated image flash; other rows
+retain their board flash metric. This sum spans separate targets. Historical
+Teensy gains and frozen-to-matched baseline differences are excluded. Remaining
+3.10.3 gaps are explicit in the scorecard; exact parity is not claimed.
 
-### Active platform: ESP32 #4738
+RP2040 saves 76 B allocated image and 38,416 B physical RAM while preserving
+explicit RX capacity and SPI pin routing. GNU/fbuild raw flash includes reserved
+NOBITS heap/stack: final 388,476 raw versus 135,744 allocated image bytes. The
+scoped budget guards the allocated image and attributed RAM.
 
-- [x] Reproduce published and controlled master/3.10.3 builds and fbuild bloat in the cached ESP32 project; record framework, flags and valid ELF provenance.
-- [x] Audit RMT counters/logging and capture focused RED budget (313683 image flash /34637 attributed RAM). Candidate RMT packing saves52 B flash/16 B board RAM. Removing unused HTTP route initialization brings total savings to356 B flash/72 B RAM. Constant-initialized SPI host tracking adds96 B flash/72 B RAM, for provisional published savings452 B flash/144 B RAM (default310428/25892); original/candidate SPI accounting probes pass via a staged test adapter; real original/candidate accounting and HTTP lifecycle QEMU probes pass. ESP controlled fresh296140/25884 B saves444/144 B. Shared published C3/C6/S3 builds pass; C3/C6 lower budgets pass. Strict native acceptance passes315 rerun units plus four cached strict target results and95 host examples; lint passes. Four preexisting sanitizer defects were fixed, with signed Q15 and large-exponent regressions added; default ESP memory results are unchanged. Shared controlled source equality checks pass. C6 controlled savings are584/136 B versus prior landed360168/18596; fresh starting-HEAD rebuild reproduces baseline exactly, so report published and controlled savings separately. Fresh S3/STM/Uno Blink/Apa102 checks preserve landed sizes. All18-file review completed; landing remains pending. Public SPI recovery QEMU times out inside SDK initialization on both original/candidate; direct ownership accounting passes on both. Physical waveforms are not claimed.
-- [x] Implement RMT/HTTP/SPI storage reductions, retaining runtime driver choice; focused accounting and HTTP lifecycle probes pass. SPI recovery and final shared verification remain open.
-- [ ] Verify local gates and shared effects, ratchet budgets, review/land, publish cumulative parent diff and close only the child.
+Work used this checkout without git worktrees. Platform builds/tests ran locally
+and sequentially, never CI Full. Caches were retained; stale artifacts were
+rejected with source/flags checks and focused rebuilds. Logging, RMT/PARLIO,
+controller/settings storage and unused initialization were audited and trimmed.
+No fl::printf calls remain in ESP32/RP/Teensy4 platform trees; failure warnings
+and some legacy FL_WARN diagnostics remain. Features were retained. Strict native
+validation passed 417/417 unit/example jobs after the final source changes.
+Host/SDK/QEMU evidence does not claim physical waveforms; SPI SDK initialization
+timed out on both versions while direct ownership accounting passed.
 
 ## ESP32-S3 binary-size Batch 3 (#2856)
 
