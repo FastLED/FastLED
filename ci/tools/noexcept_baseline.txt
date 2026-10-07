@@ -5632,23 +5632,23 @@ src/fl/stl/basic_string.cpp.hpp|basic_string& basic_string::appendOct(u8 val) { 
 src/fl/stl/basic_string.cpp.hpp|basic_string& basic_string::assign(const basic_string& str) {
 src/fl/stl/basic_string.cpp.hpp|basic_string& basic_string::assign(const basic_string& str, fl::size pos, fl::size count) {
 src/fl/stl/basic_string.cpp.hpp|basic_string& basic_string::assign(fl::size count, char c) {
-src/fl/stl/basic_string.cpp.hpp|basic_string& basic_string::erase(fl::size pos, fl::size count) {
-src/fl/stl/basic_string.cpp.hpp|basic_string& basic_string::insert(fl::size pos, const basic_string& str) {
-src/fl/stl/basic_string.cpp.hpp|basic_string& basic_string::insert(fl::size pos, const basic_string& str, fl::size pos2, fl::size count) {
-src/fl/stl/basic_string.cpp.hpp|basic_string& basic_string::insert(fl::size pos, const char* s) {
-src/fl/stl/basic_string.cpp.hpp|basic_string& basic_string::insert(fl::size pos, const char* s, fl::size count) {
-src/fl/stl/basic_string.cpp.hpp|basic_string& basic_string::insert(fl::size pos, fl::size count, char ch) {
-src/fl/stl/basic_string.cpp.hpp|basic_string& basic_string::replace(fl::size pos, fl::size count, const basic_string& str) {
-src/fl/stl/basic_string.cpp.hpp|basic_string& basic_string::replace(fl::size pos, fl::size count, const basic_string& str, fl::size pos2, fl::size count2) {
-src/fl/stl/basic_string.cpp.hpp|basic_string& basic_string::replace(fl::size pos, fl::size count, const char* s) {
-src/fl/stl/basic_string.cpp.hpp|basic_string& basic_string::replace(fl::size pos, fl::size count, const char* s, fl::size count2) {
-src/fl/stl/basic_string.cpp.hpp|basic_string& basic_string::replace(fl::size pos, fl::size count, fl::size count2, char ch) {
-src/fl/stl/basic_string.cpp.hpp|bool basic_string::contains(char c) const { return find(c) != npos; }
-src/fl/stl/basic_string.cpp.hpp|bool basic_string::contains(const basic_string& other) const { return find(other.c_str()) != npos; }
-src/fl/stl/basic_string.cpp.hpp|bool basic_string::contains(const char* substr) const { return find(substr) != npos; }
-src/fl/stl/basic_string.cpp.hpp|bool basic_string::ends_with(char c) const { return mLength > 0 && c_str()[mLength - 1] == c; }
-src/fl/stl/basic_string.cpp.hpp|bool basic_string::ends_with(const basic_string& suffix) const { return ends_with(suffix.c_str()); }
-src/fl/stl/basic_string.cpp.hpp|bool basic_string::ends_with(const char* suffix) const {
+src/fl/stl/string_operations/basic_string.cpp.hpp|basic_string& basic_string::erase(fl::size pos, fl::size count) {
+src/fl/stl/string_operations/basic_string.cpp.hpp|basic_string& basic_string::insert(fl::size pos, const basic_string& str) {
+src/fl/stl/string_operations/basic_string.cpp.hpp|basic_string& basic_string::insert(fl::size pos, const basic_string& str, fl::size pos2, fl::size count) {
+src/fl/stl/string_operations/basic_string.cpp.hpp|basic_string& basic_string::insert(fl::size pos, const char* s) {
+src/fl/stl/string_operations/basic_string.cpp.hpp|basic_string& basic_string::insert(fl::size pos, const char* s, fl::size count) {
+src/fl/stl/string_operations/basic_string.cpp.hpp|basic_string& basic_string::insert(fl::size pos, fl::size count, char ch) {
+src/fl/stl/string_operations/basic_string.cpp.hpp|basic_string& basic_string::replace(fl::size pos, fl::size count, const basic_string& str) {
+src/fl/stl/string_operations/basic_string.cpp.hpp|basic_string& basic_string::replace(fl::size pos, fl::size count, const basic_string& str, fl::size pos2, fl::size count2) {
+src/fl/stl/string_operations/basic_string.cpp.hpp|basic_string& basic_string::replace(fl::size pos, fl::size count, const char* s) {
+src/fl/stl/string_operations/basic_string.cpp.hpp|basic_string& basic_string::replace(fl::size pos, fl::size count, const char* s, fl::size count2) {
+src/fl/stl/string_operations/basic_string.cpp.hpp|basic_string& basic_string::replace(fl::size pos, fl::size count, fl::size count2, char ch) {
+src/fl/stl/string_operations/basic_string.cpp.hpp|bool basic_string::contains(char c) const { return find(c) != npos; }
+src/fl/stl/string_operations/basic_string.cpp.hpp|bool basic_string::contains(const basic_string& other) const { return find(other.c_str()) != npos; }
+src/fl/stl/string_operations/basic_string.cpp.hpp|bool basic_string::contains(const char* substr) const { return find(substr) != npos; }
+src/fl/stl/string_operations/basic_string.cpp.hpp|bool basic_string::ends_with(char c) const { return mLength > 0 && c_str()[mLength - 1] == c; }
+src/fl/stl/string_operations/basic_string.cpp.hpp|bool basic_string::ends_with(const basic_string& suffix) const { return ends_with(suffix.c_str()); }
+src/fl/stl/string_operations/basic_string.cpp.hpp|bool basic_string::ends_with(const char* suffix) const {
 src/fl/stl/basic_string.cpp.hpp|bool basic_string::operator!=(const basic_string& other) const { return fl::strcmp(c_str(), other.c_str()) != 0; }
 src/fl/stl/basic_string.cpp.hpp|bool basic_string::operator!=(const char* other) const { return fl::strcmp(c_str(), other ? other : "") != 0; }
 src/fl/stl/basic_string.cpp.hpp|bool basic_string::operator<(const basic_string& other) const { return fl::strcmp(c_str(), other.c_str()) < 0; }
@@ -5657,9 +5657,9 @@ src/fl/stl/basic_string.cpp.hpp|bool basic_string::operator==(const basic_string
 src/fl/stl/basic_string.cpp.hpp|bool basic_string::operator==(const char* other) const { return fl::strcmp(c_str(), other ? other : "") == 0; }
 src/fl/stl/basic_string.cpp.hpp|bool basic_string::operator>(const basic_string& other) const { return fl::strcmp(c_str(), other.c_str()) > 0; }
 src/fl/stl/basic_string.cpp.hpp|bool basic_string::operator>=(const basic_string& other) const { return fl::strcmp(c_str(), other.c_str()) >= 0; }
-src/fl/stl/basic_string.cpp.hpp|bool basic_string::starts_with(char c) const { return mLength > 0 && c_str()[0] == c; }
-src/fl/stl/basic_string.cpp.hpp|bool basic_string::starts_with(const basic_string& prefix) const { return starts_with(prefix.c_str()); }
-src/fl/stl/basic_string.cpp.hpp|bool basic_string::starts_with(const char* prefix) const {
+src/fl/stl/string_operations/basic_string.cpp.hpp|bool basic_string::starts_with(char c) const { return mLength > 0 && c_str()[0] == c; }
+src/fl/stl/string_operations/basic_string.cpp.hpp|bool basic_string::starts_with(const basic_string& prefix) const { return starts_with(prefix.c_str()); }
+src/fl/stl/string_operations/basic_string.cpp.hpp|bool basic_string::starts_with(const char* prefix) const {
 src/fl/stl/basic_string.cpp.hpp|char basic_string::back() const {
 src/fl/stl/basic_string.cpp.hpp|char basic_string::charAt(fl::size index) const {
 src/fl/stl/basic_string.cpp.hpp|char basic_string::front() const {
@@ -5671,32 +5671,32 @@ src/fl/stl/basic_string.cpp.hpp|const char* basic_string::c_str() const {
 src/fl/stl/basic_string.cpp.hpp|const char* basic_string::constData() const {
 src/fl/stl/basic_string.cpp.hpp|fl::size basic_string::capacity() const {
 src/fl/stl/basic_string.cpp.hpp|fl::size basic_string::copy(char* dest, fl::size count, fl::size pos) const {
-src/fl/stl/basic_string.cpp.hpp|fl::size basic_string::find(const basic_string& other) const { return find(other.c_str()); }
-src/fl/stl/basic_string.cpp.hpp|fl::size basic_string::find(const basic_string& other, fl::size start_pos) const { return find(other.c_str(), start_pos); }
-src/fl/stl/basic_string.cpp.hpp|fl::size basic_string::find(const char& value) const {
-src/fl/stl/basic_string.cpp.hpp|fl::size basic_string::find(const char& value, fl::size start_pos) const {
-src/fl/stl/basic_string.cpp.hpp|fl::size basic_string::find(const char* substr) const {
-src/fl/stl/basic_string.cpp.hpp|fl::size basic_string::find(const char* substr, fl::size start_pos) const {
-src/fl/stl/basic_string.cpp.hpp|fl::size basic_string::find_first_not_of(char c, fl::size pos) const {
-src/fl/stl/basic_string.cpp.hpp|fl::size basic_string::find_first_not_of(const basic_string& str, fl::size pos) const { return find_first_not_of(str.c_str(), pos, str.size()); }
-src/fl/stl/basic_string.cpp.hpp|fl::size basic_string::find_first_not_of(const char* s, fl::size pos) const {
-src/fl/stl/basic_string.cpp.hpp|fl::size basic_string::find_first_not_of(const char* s, fl::size pos, fl::size count) const {
-src/fl/stl/basic_string.cpp.hpp|fl::size basic_string::find_first_of(char c, fl::size pos) const { return find(c, pos); }
-src/fl/stl/basic_string.cpp.hpp|fl::size basic_string::find_first_of(const basic_string& str, fl::size pos) const { return find_first_of(str.c_str(), pos, str.size()); }
-src/fl/stl/basic_string.cpp.hpp|fl::size basic_string::find_first_of(const char* s, fl::size pos) const {
-src/fl/stl/basic_string.cpp.hpp|fl::size basic_string::find_first_of(const char* s, fl::size pos, fl::size count) const {
-src/fl/stl/basic_string.cpp.hpp|fl::size basic_string::find_last_not_of(char c, fl::size pos) const {
-src/fl/stl/basic_string.cpp.hpp|fl::size basic_string::find_last_not_of(const basic_string& str, fl::size pos) const { return find_last_not_of(str.c_str(), pos, str.size()); }
-src/fl/stl/basic_string.cpp.hpp|fl::size basic_string::find_last_not_of(const char* s, fl::size pos) const {
-src/fl/stl/basic_string.cpp.hpp|fl::size basic_string::find_last_not_of(const char* s, fl::size pos, fl::size count) const {
-src/fl/stl/basic_string.cpp.hpp|fl::size basic_string::find_last_of(char c, fl::size pos) const { return rfind(c, pos); }
-src/fl/stl/basic_string.cpp.hpp|fl::size basic_string::find_last_of(const basic_string& str, fl::size pos) const { return find_last_of(str.c_str(), pos, str.size()); }
-src/fl/stl/basic_string.cpp.hpp|fl::size basic_string::find_last_of(const char* s, fl::size pos) const {
-src/fl/stl/basic_string.cpp.hpp|fl::size basic_string::find_last_of(const char* s, fl::size pos, fl::size count) const {
-src/fl/stl/basic_string.cpp.hpp|fl::size basic_string::rfind(char c, fl::size pos) const {
-src/fl/stl/basic_string.cpp.hpp|fl::size basic_string::rfind(const basic_string& str, fl::size pos) const { return rfind(str.c_str(), pos, str.size()); }
-src/fl/stl/basic_string.cpp.hpp|fl::size basic_string::rfind(const char* s, fl::size pos) const {
-src/fl/stl/basic_string.cpp.hpp|fl::size basic_string::rfind(const char* s, fl::size pos, fl::size count) const {
+src/fl/stl/string_operations/basic_string.cpp.hpp|fl::size basic_string::find(const basic_string& other) const { return find(other.c_str()); }
+src/fl/stl/string_operations/basic_string.cpp.hpp|fl::size basic_string::find(const basic_string& other, fl::size start_pos) const { return find(other.c_str(), start_pos); }
+src/fl/stl/string_operations/basic_string.cpp.hpp|fl::size basic_string::find(const char& value) const {
+src/fl/stl/string_operations/basic_string.cpp.hpp|fl::size basic_string::find(const char& value, fl::size start_pos) const {
+src/fl/stl/string_operations/basic_string.cpp.hpp|fl::size basic_string::find(const char* substr) const {
+src/fl/stl/string_operations/basic_string.cpp.hpp|fl::size basic_string::find(const char* substr, fl::size start_pos) const {
+src/fl/stl/string_operations/basic_string.cpp.hpp|fl::size basic_string::find_first_not_of(char c, fl::size pos) const {
+src/fl/stl/string_operations/basic_string.cpp.hpp|fl::size basic_string::find_first_not_of(const basic_string& str, fl::size pos) const { return find_first_not_of(str.c_str(), pos, str.size()); }
+src/fl/stl/string_operations/basic_string.cpp.hpp|fl::size basic_string::find_first_not_of(const char* s, fl::size pos) const {
+src/fl/stl/string_operations/basic_string.cpp.hpp|fl::size basic_string::find_first_not_of(const char* s, fl::size pos, fl::size count) const {
+src/fl/stl/string_operations/basic_string.cpp.hpp|fl::size basic_string::find_first_of(char c, fl::size pos) const { return find(c, pos); }
+src/fl/stl/string_operations/basic_string.cpp.hpp|fl::size basic_string::find_first_of(const basic_string& str, fl::size pos) const { return find_first_of(str.c_str(), pos, str.size()); }
+src/fl/stl/string_operations/basic_string.cpp.hpp|fl::size basic_string::find_first_of(const char* s, fl::size pos) const {
+src/fl/stl/string_operations/basic_string.cpp.hpp|fl::size basic_string::find_first_of(const char* s, fl::size pos, fl::size count) const {
+src/fl/stl/string_operations/basic_string.cpp.hpp|fl::size basic_string::find_last_not_of(char c, fl::size pos) const {
+src/fl/stl/string_operations/basic_string.cpp.hpp|fl::size basic_string::find_last_not_of(const basic_string& str, fl::size pos) const { return find_last_not_of(str.c_str(), pos, str.size()); }
+src/fl/stl/string_operations/basic_string.cpp.hpp|fl::size basic_string::find_last_not_of(const char* s, fl::size pos) const {
+src/fl/stl/string_operations/basic_string.cpp.hpp|fl::size basic_string::find_last_not_of(const char* s, fl::size pos, fl::size count) const {
+src/fl/stl/string_operations/basic_string.cpp.hpp|fl::size basic_string::find_last_of(char c, fl::size pos) const { return rfind(c, pos); }
+src/fl/stl/string_operations/basic_string.cpp.hpp|fl::size basic_string::find_last_of(const basic_string& str, fl::size pos) const { return find_last_of(str.c_str(), pos, str.size()); }
+src/fl/stl/string_operations/basic_string.cpp.hpp|fl::size basic_string::find_last_of(const char* s, fl::size pos) const {
+src/fl/stl/string_operations/basic_string.cpp.hpp|fl::size basic_string::find_last_of(const char* s, fl::size pos, fl::size count) const {
+src/fl/stl/string_operations/basic_string.cpp.hpp|fl::size basic_string::rfind(char c, fl::size pos) const {
+src/fl/stl/string_operations/basic_string.cpp.hpp|fl::size basic_string::rfind(const basic_string& str, fl::size pos) const { return rfind(str.c_str(), pos, str.size()); }
+src/fl/stl/string_operations/basic_string.cpp.hpp|fl::size basic_string::rfind(const char* s, fl::size pos) const {
+src/fl/stl/string_operations/basic_string.cpp.hpp|fl::size basic_string::rfind(const char* s, fl::size pos, fl::size count) const {
 src/fl/stl/basic_string.cpp.hpp|fl::size basic_string::write(char c) { return write(&c, 1); }
 src/fl/stl/basic_string.cpp.hpp|fl::size basic_string::write(const char* str, fl::size n) {
 src/fl/stl/basic_string.cpp.hpp|fl::size basic_string::write(const fl::i32& val) {
@@ -5708,12 +5708,12 @@ src/fl/stl/basic_string.cpp.hpp|fl::size basic_string::write(const i64& val) {
 src/fl/stl/basic_string.cpp.hpp|fl::size basic_string::write(const u64& val) {
 src/fl/stl/basic_string.cpp.hpp|fl::size basic_string::write(fl::u8 c) {
 src/fl/stl/basic_string.cpp.hpp|float basic_string::toFloat() const { return fl::parseFloat(c_str(), mLength); }
-src/fl/stl/basic_string.cpp.hpp|int basic_string::compare(const basic_string& str) const { return fl::strcmp(c_str(), str.c_str()); }
-src/fl/stl/basic_string.cpp.hpp|int basic_string::compare(const char* s) const {
-src/fl/stl/basic_string.cpp.hpp|int basic_string::compare(fl::size pos1, fl::size count1, const basic_string& str) const {
-src/fl/stl/basic_string.cpp.hpp|int basic_string::compare(fl::size pos1, fl::size count1, const basic_string& str, fl::size pos2, fl::size count2) const {
-src/fl/stl/basic_string.cpp.hpp|int basic_string::compare(fl::size pos1, fl::size count1, const char* s) const {
-src/fl/stl/basic_string.cpp.hpp|int basic_string::compare(fl::size pos1, fl::size count1, const char* s, fl::size count2) const {
+src/fl/stl/string_operations/basic_string.cpp.hpp|int basic_string::compare(const basic_string& str) const { return fl::strcmp(c_str(), str.c_str()); }
+src/fl/stl/string_operations/basic_string.cpp.hpp|int basic_string::compare(const char* s) const {
+src/fl/stl/string_operations/basic_string.cpp.hpp|int basic_string::compare(fl::size pos1, fl::size count1, const basic_string& str) const {
+src/fl/stl/string_operations/basic_string.cpp.hpp|int basic_string::compare(fl::size pos1, fl::size count1, const basic_string& str, fl::size pos2, fl::size count2) const {
+src/fl/stl/string_operations/basic_string.cpp.hpp|int basic_string::compare(fl::size pos1, fl::size count1, const char* s) const {
+src/fl/stl/string_operations/basic_string.cpp.hpp|int basic_string::compare(fl::size pos1, fl::size count1, const char* s, fl::size count2) const {
 src/fl/stl/basic_string.cpp.hpp|void accept(ConstLiteral&) {
 src/fl/stl/basic_string.cpp.hpp|void accept(ConstView&) {
 src/fl/stl/basic_string.cpp.hpp|void accept(NotNullStringHolderPtr& heap) {
@@ -5723,7 +5723,7 @@ src/fl/stl/basic_string.cpp.hpp|void basic_string::copy(const basic_string& othe
 src/fl/stl/basic_string.cpp.hpp|void basic_string::copy(const char* str) {
 src/fl/stl/basic_string.cpp.hpp|void basic_string::copy(const char* str, fl::size len) {
 src/fl/stl/basic_string.cpp.hpp|void basic_string::materialize() {
-src/fl/stl/basic_string.cpp.hpp|void basic_string::pop_back() {
+src/fl/stl/string_operations/basic_string.cpp.hpp|void basic_string::pop_back() {
 src/fl/stl/basic_string.cpp.hpp|void basic_string::push_ascii(char c) { write(c); }
 src/fl/stl/basic_string.cpp.hpp|void basic_string::push_back(char c) { write(c); }
 src/fl/stl/basic_string.cpp.hpp|void basic_string::reserve(fl::size newCapacity) {
@@ -5753,8 +5753,8 @@ src/fl/stl/basic_vector.cpp.hpp|void vector_basic::trivial_copy(void* dst, const
 src/fl/stl/basic_vector.cpp.hpp|void vector_basic::trivial_default_construct(void* ptr, fl::size count) const {
 src/fl/stl/basic_vector.cpp.hpp|void vector_basic::trivial_move_left(void* dst, const void* src, fl::size count) const {
 src/fl/stl/basic_vector.cpp.hpp|void vector_basic::trivial_swap(void* a, void* b) const {
-src/fl/stl/bitset.cpp.hpp|void bitset_dynamic::to_string(string* dst) const {
-src/fl/stl/bitset.cpp.hpp|void to_string(const fl::u16 *bit_data, fl::u32 bit_count, string* dst) {
+src/fl/stl/bitset/bitset.cpp.hpp|void bitset_dynamic::to_string(string* dst) const {
+src/fl/stl/bitset/bitset.cpp.hpp|void to_string(const fl::u16 *bit_data, fl::u32 bit_count, string* dst) {
 src/fl/stl/cerrno.h|inline int get_errno() {
 src/fl/stl/cerrno.h|inline void clear_errno() {
 src/fl/stl/cerrno.h|inline void set_errno(int value) {
@@ -6871,8 +6871,8 @@ src/fl/task/scheduler.h|void update_before_frame_tasks();
 src/fl/task/scheduler.h|void update_tasks_of_type(TaskType task_type);
 src/fl/task/scheduler.h|void warn_no_catch(int task_id, const fl::string& trace_label, const Error& error);
 src/fl/task/scheduler.h|void warn_no_then(int task_id, const fl::string& trace_label);
-src/fl/task/task.cpp.hpp|Coroutine(fl::string name, TaskFunction function, size_t stack_size = 4096, u8 priority = 5, int core_id = -1) : mImpl(platforms::createTaskCoroutine(fl::move(name), fl::move(function), stack_size, priority, core_id)) {
-src/fl/task/task.cpp.hpp|CoroutineTask(const CoroutineConfig& config) : mTaskId(next_task_id()) , mTraceLabel(config.trace ? make_unique<string>(make_trace_label(*config.trace)) : nullptr) , mCoroutine(make_unique<Coroutine>(config.name, config.func, config.stack_size, config.priority, config.core_id.has_value() ? config.core_id.value() : -1)) {}
+src/fl/task/coroutine/task.cpp.hpp|Coroutine(fl::string name, TaskFunction function, size_t stack_size = 4096, u8 priority = 5, int core_id = -1) : mImpl(platforms::createTaskCoroutine(fl::move(name), fl::move(function), stack_size, priority, core_id)) {
+src/fl/task/coroutine/task.cpp.hpp|CoroutineTask(const CoroutineConfig& config) : mTaskId(detail::next_task_id()) , mTraceLabel(config.trace ? make_unique<string>(detail::make_trace_label(*config.trace)) : nullptr) , mCoroutine(make_unique<Coroutine>(config.name, config.func, config.stack_size, config.priority, config.core_id.has_value() ? config.core_id.value() : -1)) {}
 src/fl/task/task.cpp.hpp|Handle after_frame() {
 src/fl/task/task.cpp.hpp|Handle after_frame(const TracePoint& trace) {
 src/fl/task/task.cpp.hpp|Handle after_frame(function<void()> on_then) {
@@ -6881,7 +6881,7 @@ src/fl/task/task.cpp.hpp|Handle at_framerate(int fps) {
 src/fl/task/task.cpp.hpp|Handle at_framerate(int fps, const TracePoint& trace) {
 src/fl/task/task.cpp.hpp|Handle before_frame() {
 src/fl/task/task.cpp.hpp|Handle before_frame(const TracePoint& trace) {
-src/fl/task/task.cpp.hpp|Handle coroutine(const CoroutineConfig& config) {
+src/fl/task/coroutine/task.cpp.hpp|Handle coroutine(const CoroutineConfig& config) {
 src/fl/task/task.cpp.hpp|Handle every_ms(int interval_ms) {
 src/fl/task/task.cpp.hpp|Handle every_ms(int interval_ms, const TracePoint& trace) {
 src/fl/task/task.cpp.hpp|Handle& Handle::cancel() {
@@ -6890,9 +6890,9 @@ src/fl/task/task.cpp.hpp|Handle& Handle::then(function<void()> on_then) {
 src/fl/task/task.cpp.hpp|Handle::Handle(shared_ptr<ITaskImpl> impl) : mImpl(fl::move(impl)) {}
 src/fl/task/task.cpp.hpp|TaskType Handle::_type() const { return mImpl ? mImpl->type() : TaskType::kEveryMs; }
 src/fl/task/task.cpp.hpp|TaskType Handle::type() const { return mImpl ? mImpl->type() : TaskType::kEveryMs; }
-src/fl/task/task.cpp.hpp|TaskType type() const override { return TaskType::kCoroutine; }
+src/fl/task/coroutine/task.cpp.hpp|TaskType type() const override { return TaskType::kCoroutine; }
 src/fl/task/task.cpp.hpp|TaskType type() const override { return mType; }
-src/fl/task/task.cpp.hpp|TimeTask(TaskType type, int interval_ms, optional<TracePoint> trace = nullopt) : mTaskId(next_task_id()) , mType(type) , mIntervalMs(interval_ms) , mTraceLabel(trace ? make_unique<string>(make_trace_label(*trace)) : nullptr) , mLastRunTime((numeric_limits<u32>::max)()) {}
+src/fl/task/task.cpp.hpp|TimeTask(TaskType type, int interval_ms, optional<TracePoint> trace = nullopt) : mTaskId(detail::next_task_id()) , mType(type) , mIntervalMs(interval_ms) , mTraceLabel(trace ? make_unique<string>(detail::make_trace_label(*trace)) : nullptr) , mLastRunTime((numeric_limits<u32>::max)()) {}
 src/fl/task/task.cpp.hpp|bool Handle::_has_then() const { return mImpl ? mImpl->has_then() : false; }
 src/fl/task/task.cpp.hpp|bool Handle::_is_canceled() const { return mImpl ? mImpl->is_canceled() : true; }
 src/fl/task/task.cpp.hpp|bool Handle::_ready_to_run(fl::u32 current_time) const { return mImpl ? mImpl->ready_to_run(current_time) : false; }
@@ -6903,60 +6903,60 @@ src/fl/task/task.cpp.hpp|bool Handle::isCoroutine() const { return mImpl && mImp
 src/fl/task/task.cpp.hpp|bool Handle::isRunning() const { return mImpl ? mImpl->isRunning() : false; }
 src/fl/task/task.cpp.hpp|bool Handle::is_valid() const { return mImpl != nullptr; }
 src/fl/task/task.cpp.hpp|bool Handle::ready_to_run(fl::u32 current_time) const { return mImpl ? mImpl->ready_to_run(current_time) : false; }
-src/fl/task/task.cpp.hpp|bool has_catch() const override { return false; }
+src/fl/task/coroutine/task.cpp.hpp|bool has_catch() const override { return false; }
 src/fl/task/task.cpp.hpp|bool has_catch() const override { return mHasCatch; }
-src/fl/task/task.cpp.hpp|bool has_then() const override { return false; }
+src/fl/task/coroutine/task.cpp.hpp|bool has_then() const override { return false; }
 src/fl/task/task.cpp.hpp|bool has_then() const override { return mHasThen; }
+src/fl/task/coroutine/task.cpp.hpp|bool isRunning() const override {
 src/fl/task/task.cpp.hpp|bool isRunning() const override {
-src/fl/task/task.cpp.hpp|bool isRunning() const override {
-src/fl/task/task.cpp.hpp|bool isRunning() const {
+src/fl/task/coroutine/task.cpp.hpp|bool isRunning() const {
+src/fl/task/coroutine/task.cpp.hpp|bool is_auto_registered() const override { return mAutoRegistered; }
 src/fl/task/task.cpp.hpp|bool is_auto_registered() const override { return mAutoRegistered; }
-src/fl/task/task.cpp.hpp|bool is_auto_registered() const override { return mAutoRegistered; }
+src/fl/task/coroutine/task.cpp.hpp|bool is_canceled() const override { return mCanceled; }
 src/fl/task/task.cpp.hpp|bool is_canceled() const override { return mCanceled; }
-src/fl/task/task.cpp.hpp|bool is_canceled() const override { return mCanceled; }
-src/fl/task/task.cpp.hpp|bool ready_to_run(fl::u32) const override { return false; }
+src/fl/task/coroutine/task.cpp.hpp|bool ready_to_run(fl::u32) const override { return false; }
 src/fl/task/task.cpp.hpp|bool ready_to_run(u32 current_time) const override {
-src/fl/task/task.cpp.hpp|bool ready_to_run_frame_task(fl::u32) const override { return false; }
+src/fl/task/coroutine/task.cpp.hpp|bool ready_to_run_frame_task(fl::u32) const override { return false; }
 src/fl/task/task.cpp.hpp|bool ready_to_run_frame_task(u32 /*current_time*/) const override {
 src/fl/task/task.cpp.hpp|fl::u32 Handle::last_run_time() const { return mImpl ? mImpl->last_run_time() : 0; }
-src/fl/task/task.cpp.hpp|fl::u32 last_run_time() const override { return 0; }
+src/fl/task/coroutine/task.cpp.hpp|fl::u32 last_run_time() const override { return 0; }
 src/fl/task/task.cpp.hpp|int Handle::_id() const { return mImpl ? mImpl->id() : 0; }
 src/fl/task/task.cpp.hpp|int Handle::id() const { return mImpl ? mImpl->id() : 0; }
 src/fl/task/task.cpp.hpp|int Handle::interval_ms() const { return mImpl ? mImpl->interval_ms() : 0; }
+src/fl/task/coroutine/task.cpp.hpp|int id() const override { return mTaskId; }
 src/fl/task/task.cpp.hpp|int id() const override { return mTaskId; }
-src/fl/task/task.cpp.hpp|int id() const override { return mTaskId; }
-src/fl/task/task.cpp.hpp|int interval_ms() const override { return 0; }
+src/fl/task/coroutine/task.cpp.hpp|int interval_ms() const override { return 0; }
 src/fl/task/task.cpp.hpp|int interval_ms() const override { return mIntervalMs; }
 src/fl/task/task.cpp.hpp|int next_task_id() {
-src/fl/task/task.cpp.hpp|static void exitCurrent() {
+src/fl/task/coroutine/task.cpp.hpp|static void exitCurrent() {
 src/fl/task/task.cpp.hpp|string Handle::_trace_label() const { return mImpl ? mImpl->trace_label() : ""; }
 src/fl/task/task.cpp.hpp|string Handle::trace_label() const { return mImpl ? mImpl->trace_label() : ""; }
 src/fl/task/task.cpp.hpp|string make_trace_label(const TracePoint& trace) {
-src/fl/task/task.cpp.hpp|string trace_label() const override { return mTraceLabel ? *mTraceLabel : ""; }
+src/fl/task/coroutine/task.cpp.hpp|string trace_label() const override { return mTraceLabel ? *mTraceLabel : ""; }
 src/fl/task/task.cpp.hpp|string trace_label() const override { return mTraceLabel ? *mTraceLabel : ""; }
 src/fl/task/task.cpp.hpp|u32 last_run_time() const override { return mLastRunTime; }
-src/fl/task/task.cpp.hpp|virtual TaskType type() const = 0;
-src/fl/task/task.cpp.hpp|virtual bool has_catch() const = 0;
-src/fl/task/task.cpp.hpp|virtual bool has_then() const = 0;
-src/fl/task/task.cpp.hpp|virtual bool isRunning() const = 0;
-src/fl/task/task.cpp.hpp|virtual bool is_auto_registered() const = 0;
-src/fl/task/task.cpp.hpp|virtual bool is_canceled() const = 0;
-src/fl/task/task.cpp.hpp|virtual bool ready_to_run(u32 current_time) const = 0;
-src/fl/task/task.cpp.hpp|virtual bool ready_to_run_frame_task(u32 current_time) const = 0;
-src/fl/task/task.cpp.hpp|virtual int id() const = 0;
-src/fl/task/task.cpp.hpp|virtual int interval_ms() const = 0;
-src/fl/task/task.cpp.hpp|virtual string trace_label() const = 0;
-src/fl/task/task.cpp.hpp|virtual u32 last_run_time() const = 0;
-src/fl/task/task.cpp.hpp|virtual void auto_register_with_scheduler() = 0;
-src/fl/task/task.cpp.hpp|virtual void execute_catch(const Error& error) = 0;
-src/fl/task/task.cpp.hpp|virtual void execute_then() = 0;
-src/fl/task/task.cpp.hpp|virtual void set_canceled() = 0;
-src/fl/task/task.cpp.hpp|virtual void set_catch(function<void(const Error&)> on_catch) = 0;
-src/fl/task/task.cpp.hpp|virtual void set_id(int id) = 0;
-src/fl/task/task.cpp.hpp|virtual void set_interval_ms(int interval_ms) = 0;
-src/fl/task/task.cpp.hpp|virtual void set_last_run_time(u32 time) = 0;
-src/fl/task/task.cpp.hpp|virtual void set_then(function<void()> on_then) = 0;
-src/fl/task/task.cpp.hpp|virtual void stop() = 0;
+src/fl/task/detail/task_impl.h|virtual TaskType type() const = 0;
+src/fl/task/detail/task_impl.h|virtual bool has_catch() const = 0;
+src/fl/task/detail/task_impl.h|virtual bool has_then() const = 0;
+src/fl/task/detail/task_impl.h|virtual bool isRunning() const = 0;
+src/fl/task/detail/task_impl.h|virtual bool is_auto_registered() const = 0;
+src/fl/task/detail/task_impl.h|virtual bool is_canceled() const = 0;
+src/fl/task/detail/task_impl.h|virtual bool ready_to_run(u32 current_time) const = 0;
+src/fl/task/detail/task_impl.h|virtual bool ready_to_run_frame_task(u32 current_time) const = 0;
+src/fl/task/detail/task_impl.h|virtual int id() const = 0;
+src/fl/task/detail/task_impl.h|virtual int interval_ms() const = 0;
+src/fl/task/detail/task_impl.h|virtual string trace_label() const = 0;
+src/fl/task/detail/task_impl.h|virtual u32 last_run_time() const = 0;
+src/fl/task/detail/task_impl.h|virtual void auto_register_with_scheduler() = 0;
+src/fl/task/detail/task_impl.h|virtual void execute_catch(const Error& error) = 0;
+src/fl/task/detail/task_impl.h|virtual void execute_then() = 0;
+src/fl/task/detail/task_impl.h|virtual void set_canceled() = 0;
+src/fl/task/detail/task_impl.h|virtual void set_catch(function<void(const Error&)> on_catch) = 0;
+src/fl/task/detail/task_impl.h|virtual void set_id(int id) = 0;
+src/fl/task/detail/task_impl.h|virtual void set_interval_ms(int interval_ms) = 0;
+src/fl/task/detail/task_impl.h|virtual void set_last_run_time(u32 time) = 0;
+src/fl/task/detail/task_impl.h|virtual void set_then(function<void()> on_then) = 0;
+src/fl/task/detail/task_impl.h|virtual void stop() = 0;
 src/fl/task/task.cpp.hpp|void Handle::_execute_catch(const Error& error) { if (mImpl) mImpl->execute_catch(error); }
 src/fl/task/task.cpp.hpp|void Handle::_execute_then() { if (mImpl) mImpl->execute_then(); }
 src/fl/task/task.cpp.hpp|void Handle::_set_id(int id) { if (mImpl) mImpl->set_id(id); }
@@ -6964,28 +6964,28 @@ src/fl/task/task.cpp.hpp|void Handle::_set_last_run_time(fl::u32 time) { if (mIm
 src/fl/task/task.cpp.hpp|void Handle::set_interval_ms(int interval_ms) { if (mImpl) mImpl->set_interval_ms(interval_ms); }
 src/fl/task/task.cpp.hpp|void Handle::set_last_run_time(fl::u32 time) { if (mImpl) mImpl->set_last_run_time(time); }
 src/fl/task/task.cpp.hpp|void Handle::stop() { if (mImpl) mImpl->stop(); }
-src/fl/task/task.cpp.hpp|void auto_register_with_scheduler() override {
+src/fl/task/coroutine/task.cpp.hpp|void auto_register_with_scheduler() override {
 src/fl/task/task.cpp.hpp|void auto_register_with_scheduler() override {
 src/fl/task/task.cpp.hpp|void execute_catch(const Error& error) override {
-src/fl/task/task.cpp.hpp|void execute_catch(const Error&) override {}
-src/fl/task/task.cpp.hpp|void execute_then() override {
-src/fl/task/task.cpp.hpp|void execute_then() override {}
-src/fl/task/task.cpp.hpp|void exit_current() { Coroutine::exitCurrent(); }
-src/fl/task/task.cpp.hpp|void set_canceled() override {
-src/fl/task/task.cpp.hpp|void set_canceled() override { mCanceled = true; }
+src/fl/task/coroutine/task.cpp.hpp|void execute_catch(const Error&) override {}
+src/fl/task/coroutine/task.cpp.hpp|void execute_then() override {
+src/fl/task/coroutine/task.cpp.hpp|void execute_then() override {}
+src/fl/task/coroutine/task.cpp.hpp|void exit_current() { Coroutine::exitCurrent(); }
+src/fl/task/coroutine/task.cpp.hpp|void set_canceled() override {
+src/fl/task/coroutine/task.cpp.hpp|void set_canceled() override { mCanceled = true; }
 src/fl/task/task.cpp.hpp|void set_catch(function<void(const Error&)> on_catch) override {
-src/fl/task/task.cpp.hpp|void set_catch(function<void(const Error&)>) override { /* Coroutine tasks don't use catch */ }
-src/fl/task/task.cpp.hpp|void set_id(int id) override { mTaskId = id; }
+src/fl/task/coroutine/task.cpp.hpp|void set_catch(function<void(const Error&)>) override { /* Coroutine tasks don't use catch */ }
+src/fl/task/coroutine/task.cpp.hpp|void set_id(int id) override { mTaskId = id; }
 src/fl/task/task.cpp.hpp|void set_id(int id) override { mTaskId = id; }
 src/fl/task/task.cpp.hpp|void set_interval_ms(int interval_ms) override { mIntervalMs = interval_ms; }
-src/fl/task/task.cpp.hpp|void set_interval_ms(int) override { /* Coroutine tasks don't use intervals */ }
-src/fl/task/task.cpp.hpp|void set_last_run_time(fl::u32) override {}
+src/fl/task/coroutine/task.cpp.hpp|void set_interval_ms(int) override { /* Coroutine tasks don't use intervals */ }
+src/fl/task/coroutine/task.cpp.hpp|void set_last_run_time(fl::u32) override {}
 src/fl/task/task.cpp.hpp|void set_last_run_time(u32 time) override { mLastRunTime = time; }
 src/fl/task/task.cpp.hpp|void set_then(function<void()> on_then) override {
-src/fl/task/task.cpp.hpp|void set_then(function<void()>) override { /* Coroutine tasks don't use then */ }
+src/fl/task/coroutine/task.cpp.hpp|void set_then(function<void()>) override { /* Coroutine tasks don't use then */ }
+src/fl/task/coroutine/task.cpp.hpp|void stop() override {
 src/fl/task/task.cpp.hpp|void stop() override {
-src/fl/task/task.cpp.hpp|void stop() override {
-src/fl/task/task.cpp.hpp|void stop() {
+src/fl/task/coroutine/task.cpp.hpp|void stop() {
 src/fl/test/fltest.cpp.hpp|TestContext::TestContext() {
 src/fl/video/frame_interpolator.cpp.hpp|FrameInterpolator::FrameInterpolator(size_t nframes, float fps) : mFrameTracker(fps) {
 src/fl/video/frame_interpolator.cpp.hpp|bool FrameInterpolator::draw(fl::u32 now, Frame *dst) {
@@ -7090,3 +7090,5 @@ src/fl/video/video_impl.h|void setTimeScale(float timeScale);
 # Known missing FL_NO_EXCEPT signatures for ci/tools/check_noexcept.py.
 # New entries fail the default unified C++ linter.
 src/fl/channels/dynamic/cfastled.cpp.hpp|void CFastLED::enableAllDrivers() {
+src/fl/task/detail/task_impl.h|int next_task_id();
+src/fl/task/detail/task_impl.h|string make_trace_label(const TracePoint& trace);
