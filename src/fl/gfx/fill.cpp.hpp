@@ -120,9 +120,10 @@ void fill_gradient_RGB(CRGB *leds, u16 startpos, CRGB startcolor,
     saccum87 gdistance87;
     saccum87 bdistance87;
 
-    rdistance87 = (endcolor.r - startcolor.r) << 7;
-    gdistance87 = (endcolor.g - startcolor.g) << 7;
-    bdistance87 = (endcolor.b - startcolor.b) << 7;
+    // Each difference is in [-255, 255], so scaling fits signed Q8.7.
+    rdistance87 = (endcolor.r - startcolor.r) * 128;
+    gdistance87 = (endcolor.g - startcolor.g) * 128;
+    bdistance87 = (endcolor.b - startcolor.b) * 128;
 
     u16 pixeldistance = endpos - startpos;
     i16 divisor = pixeldistance ? pixeldistance : 1;

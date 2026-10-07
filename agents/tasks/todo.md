@@ -8,7 +8,7 @@
 - [x] ESP32-C6 #4740: matched bloat and controlled workload, local gates, landed #4749 at 8d6ed12ccb; -194 B flash / -96 B RAM. Parent perf #6033440937 posted.
 - [x] STM32 #4744: landed #4750 at 28a41d619f; -12 B flash / -8 B RAM. Shared C3/C6 gains verified; parent perf #6033821040 posted.
 - [x] Uno #4742: landed #4751 at d9cc468d5c; Blink -20/-186 B, Apa102 -32/-2 B, controlled -20/-2 B. Shared savings measured; parent perf #6035037581 posted.
-- [ ] ATtiny85 #4743.
+- [x] ATtiny85 #4743: landed #4752 at 8d8207f391; default 2628/161 B, inherited 2 B RAM saving preserved and another 12 B flash saved. Parent perf #6036277742 posted.
 - [ ] ESP32 #4738 and ESP32-S3 #4741.
 - [ ] Validate Teensy40 #4745, Teensy41 #4746 and RP2040 #4747.
 - [ ] Post cumulative performance diffs on #4737 when each child closes; leave the parent open.
@@ -20,12 +20,12 @@ locally and sequentially; never request CI Full. Preserve features while
 reducing logging and driver overhead. Record source provenance and reject stale
 ELFs before comparing sizes.
 
-### Active platform: ATtiny85 #4743
+### Active platform: ESP32 #4738
 
-- [x] Build/bloat current master and 3.10.3 in the same cached ATtiny85 project, including controlled RGB workload.
-- [x] Attribute the remaining RAM gap, verify shared AVR gains, and capture a focused failing budget before any further implementation.
-- [x] Preserve inherited 2 B RAM savings; bounded 16-bit-int show index saves another 12 B flash (2628/161). Default tiny link checks and explicit correction/dither/RGBW/RGBWW/power build pass; remaining 30 B RAM gap is fully attributed.
-- [ ] Ratchet budgets, lint/review, land, post the cumulative parent diff and close only the child.
+- [x] Reproduce published and controlled master/3.10.3 builds and fbuild bloat in the cached ESP32 project; record framework, flags and valid ELF provenance.
+- [x] Audit RMT counters/logging and capture focused RED budget (313683 image flash /34637 attributed RAM). Candidate RMT packing saves52 B flash/16 B board RAM. Removing unused HTTP route initialization brings total savings to356 B flash/72 B RAM. Constant-initialized SPI host tracking adds96 B flash/72 B RAM, for provisional published savings452 B flash/144 B RAM (default310428/25892); original/candidate SPI accounting probes pass via a staged test adapter; real original/candidate accounting and HTTP lifecycle QEMU probes pass. ESP controlled fresh296140/25884 B saves444/144 B. Shared published C3/C6/S3 builds pass; C3/C6 lower budgets pass. Strict native acceptance passes315 rerun units plus four cached strict target results and95 host examples; lint passes. Four preexisting sanitizer defects were fixed, with signed Q15 and large-exponent regressions added; default ESP memory results are unchanged. Shared controlled source equality checks pass. C6 controlled savings are584/136 B versus prior landed360168/18596; fresh starting-HEAD rebuild reproduces baseline exactly, so report published and controlled savings separately. Fresh S3/STM/Uno Blink/Apa102 checks preserve landed sizes. All18-file review completed; landing remains pending. Public SPI recovery QEMU times out inside SDK initialization on both original/candidate; direct ownership accounting passes on both. Physical waveforms are not claimed.
+- [x] Implement RMT/HTTP/SPI storage reductions, retaining runtime driver choice; focused accounting and HTTP lifecycle probes pass. SPI recovery and final shared verification remain open.
+- [ ] Verify local gates and shared effects, ratchet budgets, review/land, publish cumulative parent diff and close only the child.
 
 ## ESP32-S3 binary-size Batch 3 (#2856)
 

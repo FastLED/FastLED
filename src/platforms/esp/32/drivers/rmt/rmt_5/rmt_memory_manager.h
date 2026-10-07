@@ -421,16 +421,10 @@ private:
     /// - Global Pool (ESP32, ESP32-S2): Single shared pool for TX and RX
     /// - Dedicated Pools (ESP32-S3, C3, C6, H2): Separate TX and RX pools
     struct MemoryLedger {
-        bool is_global_pool;        ///< true = global pool (ESP32/S2), false = dedicated pools (S3/C3/C6/H2)
-
-        // Global pool fields (used when is_global_pool = true)
-        size_t total_words;         ///< Total memory available (global pool only)
-        size_t allocated_words;     ///< Currently allocated memory (global pool only)
-
-        // Dedicated pool fields (used when is_global_pool = false)
-        size_t total_tx_words;      ///< Total TX memory available (dedicated pools only)
+        // TX counters also hold combined TX/RX totals on global-pool platforms.
+        size_t total_tx_words;      ///< Total TX memory, or shared global pool size
         size_t total_rx_words;      ///< Total RX memory available (dedicated pools only)
-        size_t allocated_tx_words;  ///< Currently allocated TX memory (dedicated pools only)
+        size_t allocated_tx_words;  ///< Allocated TX memory, or combined global usage
         size_t allocated_rx_words;  ///< Currently allocated RX memory (dedicated pools only)
 
         // External reservation tracking (user-controlled accounting for non-FastLED RMT usage)
@@ -451,6 +445,8 @@ private:
 
     MemoryLedger mLedger;
     DMAAllocation mDMAAllocation;  ///< Single DMA channel tracking
+    // Fill the DMA record's trailing byte instead of padding the word counters.
+    bool mIsGlobalPool;  ///< Shared ESP32/S2 pool, or dedicated TX/RX pools
 
     // Memory block strategy configuration (Phase 1A: New API)
     size_t mIdleBlocks;        ///< Number of memory blocks when network is inactive

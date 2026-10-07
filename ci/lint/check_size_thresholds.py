@@ -74,7 +74,8 @@ FROZEN_THRESHOLDS: dict[str, dict[str, frozenset[int]]] = {
         # Real ceilings. #3870 corrected the fbuild measurement path and
         # deliberately re-baselined Blink for Arduino-ESP32 3.3.11. Apa102
         # stayed at 330 KB after its all-driver over-link was removed.
-        "max_size": frozenset({340000}),
+        # #4738: measured text+data after RMT/HTTP/SPI storage reductions.
+        "max_size": frozenset({313231}),
         "max_size_apa102": frozenset({330000}),
     },
     "check_teensy30_size.yml": {

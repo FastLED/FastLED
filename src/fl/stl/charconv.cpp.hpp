@@ -251,7 +251,8 @@ float parseFloat(const char *str, fl::size len) {
 }
 
 int parseInt(const char *str, fl::size len) {
-    int result = 0;
+    // Unsigned magnitude can represent abs(INT_MIN) without signed overflow.
+    unsigned int result = 0;
     int sign = 1;
     fl::size pos = 0;
 
@@ -277,11 +278,11 @@ int parseInt(const char *str, fl::size len) {
 
     // Parse digits
     while (pos < len && str[pos] >= '0' && str[pos] <= '9') {
-        result = result * 10 + (str[pos] - '0');
+        result = result * 10u + static_cast<unsigned int>(str[pos] - '0');
         pos++;
     }
 
-    return sign * result;
+    return static_cast<int>(sign < 0 ? 0u - result : result);
 }
 
 int parseInt(const char *str) {
