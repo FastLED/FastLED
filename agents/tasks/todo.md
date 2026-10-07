@@ -22,6 +22,27 @@
   sanitizer runs, lint, and ESP32/ESP32-S3 board builds pass. Physical hardware
   behavior and hosted full CI remain unverified.
 
+### Further reductions after PR #4736
+
+- [x] Measure lazy diagnostic cache linkage: Blink image flash 307,031 ->
+  306,683 B, static RAM 25,692 -> 25,628 B with the same configuration.
+- [x] Remove unused iterator state and trial hardware-bounded RMT state storage.
+- [x] Check encoder allocation failures and remove redundant encoder state.
+- [x] Measure the combined default configuration, run behavior gates and review,
+  then publish the additional evidence without closing the remaining regression.
+
+- Second-pass flash: Blink 306,119 B, gist 299,015 B, ESP32-S3 357,663 B
+  locally. Total savings versus original master are 7,648 B / 7,260 B;
+  S3 is 9,744 B below its original ratchet. Blink/gist static RAM is
+  25,604 B / 26,388 B. Remaining 3.10.3 flash gaps are 18,430 B / 24,094 B.
+- Full native run passes 414/414; the final isolated production allocator TU
+  passes its sanitizer run. Its native tests now execute real TX/RX allocation,
+  fallback, exhaustion and error paths; earlier native cases were excluded.
+- Hosted first-pass image is 32 B above local. Pin the final ratchet to hosted
+  evidence when available. ATmega8 RGBW overflows reproduce unchanged at base.
+- Rejected native TLS guard: approximately 150 B flash savings would add
+  16 B of task-stack use to every task in the current zero-TLS image.
+
 ### Plan
 
 Use the default dynamic driver configuration. Keep scheduler pumping, network

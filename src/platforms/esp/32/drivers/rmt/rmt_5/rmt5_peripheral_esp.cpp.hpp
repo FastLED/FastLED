@@ -479,22 +479,16 @@ struct Rmt5EncoderImpl {
     // Reset pulse symbol (low signal for RESET microseconds)
     rmt_symbol_word_t mResetCode;
 
-    // Timing configuration (stored for debugging)
-    u32 mBit0HighTicks;
-    u32 mBit0LowTicks;
-    u32 mBit1HighTicks;
-    u32 mBit1LowTicks;
-    u32 mResetTicks;
-
     // Factory method to create encoder instance
     static Rmt5EncoderImpl* create(const ChipsetTiming& timing, u32 resolution_hz) FL_NO_EXCEPT {
-        Rmt5EncoderImpl* impl = new Rmt5EncoderImpl(timing, resolution_hz);  // ok bare allocation
+        Rmt5EncoderImpl* impl = new Rmt5EncoderImpl();  // ok bare allocation
         if (impl == nullptr) {
             FL_WARN("Rmt5EncoderImpl::create: Failed to allocate encoder");
             return nullptr;
         }
-        if (impl->getHandle() == nullptr) {
-            FL_WARN("Rmt5EncoderImpl::create: Encoder initialization failed");
+        const esp_err_t ret = impl->initialize(timing, resolution_hz);
+        if (ret != ESP_OK) {
+            FL_WARN("Rmt5EncoderImpl::create: Initialization failed: " << esp_err_to_name(ret));
             delete impl;  // ok bare allocation
             return nullptr;
         }
@@ -513,23 +507,12 @@ struct Rmt5EncoderImpl {
 
 private:
     // Private constructor - use create() factory method
-    Rmt5EncoderImpl(const ChipsetTiming& timing, u32 resolution_hz) FL_NO_EXCEPT
-        : mBytesEncoder(nullptr), mCopyEncoder(nullptr), mState(0),
-          mBit0HighTicks(0), mBit0LowTicks(0), mBit1HighTicks(0),
-          mBit1LowTicks(0), mResetTicks(0) {
+    Rmt5EncoderImpl() FL_NO_EXCEPT
+        : base{}, mBytesEncoder(nullptr), mCopyEncoder(nullptr), mState(0),
+          mResetCode{} {
         base.encode = Rmt5EncoderImpl::encodeCallback;
         base.reset = Rmt5EncoderImpl::resetCallback;
         base.del = Rmt5EncoderImpl::delCallback;
-
-        mResetCode.duration0 = 0;
-        mResetCode.level0 = 0;
-        mResetCode.duration1 = 0;
-        mResetCode.level1 = 0;
-
-        esp_err_t ret = initialize(timing, resolution_hz);
-        if (ret != ESP_OK) {
-            FL_WARN("Rmt5EncoderImpl: Initialization failed: " << esp_err_to_name(ret));
-        }
     }
 
     // Private methods
@@ -610,26 +593,26 @@ private:
         // WS2812 3-phase to 4-phase conversion:
         // Bit 0: T0H = T1 (high), T0L = T2 + T3 (low)
         // Bit 1: T1H = T1 + T2 (high), T1L = T3 (low)
-        mBit0HighTicks = static_cast<u32>((timing.T1 + half_ns_per_tick) / ns_per_tick);
-        mBit0LowTicks = static_cast<u32>((timing.T2 + timing.T3 + half_ns_per_tick) / ns_per_tick);
-        mBit1HighTicks = static_cast<u32>((timing.T1 + timing.T2 + half_ns_per_tick) / ns_per_tick);
-        mBit1LowTicks = static_cast<u32>((timing.T3 + half_ns_per_tick) / ns_per_tick);
-        mResetTicks = static_cast<u32>((timing.RESET * 1000ULL + half_ns_per_tick) / ns_per_tick);
+        const u32 bit0HighTicks = static_cast<u32>((timing.T1 + half_ns_per_tick) / ns_per_tick);
+        const u32 bit0LowTicks = static_cast<u32>((timing.T2 + timing.T3 + half_ns_per_tick) / ns_per_tick);
+        const u32 bit1HighTicks = static_cast<u32>((timing.T1 + timing.T2 + half_ns_per_tick) / ns_per_tick);
+        const u32 bit1LowTicks = static_cast<u32>((timing.T3 + half_ns_per_tick) / ns_per_tick);
+        const u32 resetTicks = static_cast<u32>((timing.RESET * 1000ULL + half_ns_per_tick) / ns_per_tick);
 
         FL_DBG("[RMT5_ENCODER] Timing config: resolution=" << resolution_hz << "Hz, ns_per_tick=" << ns_per_tick);
-        FL_DBG("[RMT5_ENCODER] Bit0: high=" << mBit0HighTicks << " ticks, low=" << mBit0LowTicks << " ticks");
-        FL_DBG("[RMT5_ENCODER] Bit1: high=" << mBit1HighTicks << " ticks, low=" << mBit1LowTicks << " ticks");
-        FL_DBG("[RMT5_ENCODER] Reset: " << mResetTicks << " ticks");
+        FL_DBG("[RMT5_ENCODER] Bit0: high=" << bit0HighTicks << " ticks, low=" << bit0LowTicks << " ticks");
+        FL_DBG("[RMT5_ENCODER] Bit1: high=" << bit1HighTicks << " ticks, low=" << bit1LowTicks << " ticks");
+        FL_DBG("[RMT5_ENCODER] Reset: " << resetTicks << " ticks");
 
         rmt_bytes_encoder_config_t bytes_config = {};
         bytes_config.bit0.level0 = 1;
-        bytes_config.bit0.duration0 = mBit0HighTicks;
+        bytes_config.bit0.duration0 = bit0HighTicks;
         bytes_config.bit0.level1 = 0;
-        bytes_config.bit0.duration1 = mBit0LowTicks;
+        bytes_config.bit0.duration1 = bit0LowTicks;
         bytes_config.bit1.level0 = 1;
-        bytes_config.bit1.duration0 = mBit1HighTicks;
+        bytes_config.bit1.duration0 = bit1HighTicks;
         bytes_config.bit1.level1 = 0;
-        bytes_config.bit1.duration1 = mBit1LowTicks;
+        bytes_config.bit1.duration1 = bit1LowTicks;
         bytes_config.flags.msb_first = 1;  // WS2812B requires MSB-first transmission
 
         esp_err_t ret = rmt_new_bytes_encoder(&bytes_config, &mBytesEncoder);
@@ -651,7 +634,7 @@ private:
             return ret;
         }
 
-        mResetCode.duration0 = mResetTicks;
+        mResetCode.duration0 = resetTicks;
         mResetCode.level0 = 0;
         mResetCode.duration1 = 0;
         mResetCode.level1 = 0;

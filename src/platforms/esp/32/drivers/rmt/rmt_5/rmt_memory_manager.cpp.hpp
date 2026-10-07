@@ -3,15 +3,20 @@
 /// @file rmt_memory_manager.cpp
 /// @brief RMT memory allocation manager implementation
 
+#include "platforms/is_platform.h"
+#ifdef FL_IS_ESP32
+#include "platforms/esp/32/feature_flags/enabled.h"
+#endif
+#if (defined(FL_IS_ESP32) && FASTLED_RMT5) || \
+    (defined(FASTLED_STUB_IMPL) && defined(FL_RMT_MEMORY_MANAGER_TEST))
+
 #include "platforms/esp/32/drivers/rmt/rmt_5/rmt_memory_manager.h"
 #include "platforms/esp/32/drivers/rmt/rmt_5/rmt_allocation_ledger.h"
-
-#include "platforms/is_platform.h"
-#if defined(FL_IS_ESP32) && FASTLED_RMT5
 
 #include "fl/log/log.h"
 #include "fl/stl/noexcept.h"
 #include "fl/stl/static_assert.h"
+#ifndef FASTLED_STUB_IMPL
 #include "platforms/esp/32/drivers/rmt/rmt_5/common.h"
 
 FL_EXTERN_C_BEGIN
@@ -19,6 +24,7 @@ FL_EXTERN_C_BEGIN
 #include "soc/soc_caps.h"
 // IWYU pragma: end_keep
 FL_EXTERN_C_END
+#endif
 
 namespace fl {
 
@@ -87,7 +93,11 @@ FL_NO_INLINE FL_COLD void emitAllocTxFailureDiagnostic(
 /// - ESP32/S2: Global pool (single shared memory for TX and RX)
 /// - ESP32-S3/C3/C6/H2: Dedicated pools (separate TX and RX memory)
 void RmtMemoryManager::initPlatformLimits(size_t& total_tx, size_t& total_rx) FL_NO_EXCEPT {
-#if defined(FL_IS_ESP_32DEV)
+#if defined(FASTLED_STUB_IMPL)
+    // The explicitly included native test supplies its SoC capability profile.
+    total_tx = SOC_RMT_TX_CANDIDATES_PER_GROUP * SOC_RMT_MEM_WORDS_PER_CHANNEL;
+    total_rx = total_tx;
+#elif defined(FL_IS_ESP_32DEV)
     // ESP32: 8 flexible channels × 64 words = 512 words SHARED global pool
     total_tx = 8 * SOC_RMT_MEM_WORDS_PER_CHANNEL;  // 512 words (global pool)
     total_rx = 0;  // Not used for global pool
@@ -398,15 +408,14 @@ void RmtMemoryManager::getMemoryBlockStrategy(size_t& idleBlocks, size_t& networ
     networkBlocks = mNetworkBlocks;
 }
 
-result<size_t, RmtMemoryError> RmtMemoryManager::allocateTx(u8 channel_id, bool use_dma, bool networkActive) FL_NO_EXCEPT {
+RmtMemoryManager::AllocationStatus RmtMemoryManager::allocateTxImpl(u8 channel_id, bool use_dma, bool networkActive, size_t& out_words) FL_NO_EXCEPT {
     // Check if channel already allocated
     if (findAllocation(channel_id, true) != nullptr) {
         FL_WARN("RMT TX channel " << (static_cast<int>(channel_id)) << " already allocated");
-        return result<size_t, RmtMemoryError>::failure(RmtMemoryError::CHANNEL_ALREADY_ALLOCATED);
+        return AllocationStatus::CHANNEL_ALREADY_ALLOCATED;
     }
     if (!hasAllocationCapacity()) {
-        return result<size_t, RmtMemoryError>::failure(
-            RmtMemoryError::ALLOCATION_LEDGER_FULL);
+        return AllocationStatus::ALLOCATION_LEDGER_FULL;
     }
 
     // DMA channels on ESP32-S3 still consume one memory block from on-chip RMT memory
@@ -426,16 +435,18 @@ result<size_t, RmtMemoryError> RmtMemoryManager::allocateTx(u8 channel_id, bool 
             FL_WARN("RMT TX DMA allocation failed for channel " << (static_cast<int>(channel_id)) << " - insufficient on-chip memory");
             FL_WARN("  Requested: " << dma_words << " words (1 block for DMA descriptor)");
             FL_WARN("  Available: " << getAvailableWords(true) << " words");
-            return result<size_t, RmtMemoryError>::failure(RmtMemoryError::INSUFFICIENT_TX_MEMORY);
+            return AllocationStatus::INSUFFICIENT_TX_MEMORY;
         }
         recordAllocation(ChannelAllocation(channel_id, dma_words, true, true));
         FL_LOG_RMT("RMT TX channel " << (static_cast<int>(channel_id)) << " allocated (DMA, " << dma_words << " words for descriptor)");
-        return result<size_t, RmtMemoryError>::success(dma_words);
+        out_words = dma_words;
+        return AllocationStatus::SUCCESS;
 #else
         // Other platforms (if DMA supported): Assume DMA bypasses on-chip memory
         recordAllocation(ChannelAllocation(channel_id, 0, true, true));
         FL_LOG_RMT("RMT TX channel " << (static_cast<int>(channel_id)) << " allocated (DMA, bypasses on-chip memory)");
-        return result<size_t, RmtMemoryError>::success(0);
+        out_words = 0;
+        return AllocationStatus::SUCCESS;
 #endif
     }
 
@@ -449,20 +460,22 @@ result<size_t, RmtMemoryError> RmtMemoryManager::allocateTx(u8 channel_id, bool 
     // #2773 item 2.5.
     if (!tryAllocateWords(words_needed, true)) {
         return handleAllocateTxFailure(channel_id, mem_blocks, words_needed,
-                                       networkActive);
+                                       networkActive, out_words);
     }
 
     recordAllocation(ChannelAllocation(channel_id, words_needed, true, false));
 
     FL_LOG_RMT("RMT TX channel " << (static_cast<int>(channel_id)) << " allocated: " << words_needed << " words (" << mem_blocks << "× buffer" << ((networkActive ? ", Network mode" : "")) << ")");
 
-    return result<size_t, RmtMemoryError>::success(words_needed);
+    out_words = words_needed;
+
+    return AllocationStatus::SUCCESS;
 }
 
-FL_NO_INLINE result<size_t, RmtMemoryError>
+FL_NO_INLINE RmtMemoryManager::AllocationStatus
 RmtMemoryManager::handleAllocateTxFailure(u8 channel_id, size_t mem_blocks,
                                           size_t words_needed,
-                                          bool networkActive) FL_NO_EXCEPT {
+                                          bool networkActive, size_t& out_words) FL_NO_EXCEPT {
     // ITERATION 2 FIX: Progressive fallback for multi-channel scenarios.
     // When double-buffering (2 blocks) fails, try single-buffering (1 block)
     // so more channels can coexist on memory-constrained platforms like
@@ -490,7 +503,8 @@ RmtMemoryManager::handleAllocateTxFailure(u8 channel_id, size_t mem_blocks,
             emitAllocTxFallbackLog(AllocTxFallbackLog::SUCCESS, channel_id,
                                    mem_blocks, words_needed, fallback_words);
 #endif
-            return result<size_t, RmtMemoryError>::success(fallback_words);
+            out_words = fallback_words;
+            return AllocationStatus::SUCCESS;
         }
 
 #if defined(FASTLED_LOG_RMT_ENABLED) && FASTLED_LOG_RUNTIME_ENABLED
@@ -515,25 +529,25 @@ RmtMemoryManager::handleAllocateTxFailure(u8 channel_id, size_t mem_blocks,
                                  available);
 #endif
 
-    return result<size_t, RmtMemoryError>::failure(RmtMemoryError::INSUFFICIENT_TX_MEMORY);
+    return AllocationStatus::INSUFFICIENT_TX_MEMORY;
 }
 
-result<size_t, RmtMemoryError> RmtMemoryManager::allocateRx(u8 channel_id, size_t symbols, bool use_dma) FL_NO_EXCEPT {
+RmtMemoryManager::AllocationStatus RmtMemoryManager::allocateRxImpl(u8 channel_id, size_t symbols, bool use_dma, size_t& out_words) FL_NO_EXCEPT {
     // Check if channel already allocated
     if (findAllocation(channel_id, false) != nullptr) {
         FL_WARN("RMT RX channel " << (static_cast<int>(channel_id)) << " already allocated");
-        return result<size_t, RmtMemoryError>::failure(RmtMemoryError::CHANNEL_ALREADY_ALLOCATED);
+        return AllocationStatus::CHANNEL_ALREADY_ALLOCATED;
     }
     if (!hasAllocationCapacity()) {
-        return result<size_t, RmtMemoryError>::failure(
-            RmtMemoryError::ALLOCATION_LEDGER_FULL);
+        return AllocationStatus::ALLOCATION_LEDGER_FULL;
     }
 
     // DMA channels bypass on-chip memory (use DRAM instead)
     if (use_dma) {
         recordAllocation(ChannelAllocation(channel_id, 0, false, true));
         FL_LOG_RMT("RMT RX channel " << (static_cast<int>(channel_id)) << " allocated (DMA, bypasses on-chip memory, uses DRAM buffer)");
-        return result<size_t, RmtMemoryError>::success(0);
+        out_words = 0;
+        return AllocationStatus::SUCCESS;
     }
 
     // RX symbols = words (1 symbol = 1 word = 4 bytes)
@@ -562,34 +576,46 @@ result<size_t, RmtMemoryError> RmtMemoryManager::allocateRx(u8 channel_id, size_
             FL_WARN("              Consider reducing symbol count or using fewer channels");
         }
 
-        return result<size_t, RmtMemoryError>::failure(RmtMemoryError::INSUFFICIENT_RX_MEMORY);
+        return AllocationStatus::INSUFFICIENT_RX_MEMORY;
     }
 
     recordAllocation(ChannelAllocation(channel_id, words_needed, false, false));
 
     FL_LOG_RMT("RMT RX channel " << (static_cast<int>(channel_id)) << " allocated: " << words_needed << " words (" << symbols << " symbols)");
 
-    return result<size_t, RmtMemoryError>::success(words_needed);
+    out_words = words_needed;
+
+    return AllocationStatus::SUCCESS;
+}
+
+result<size_t, RmtMemoryError> RmtMemoryManager::allocateTx(
+    u8 channel_id, bool use_dma, bool networkActive) FL_NO_EXCEPT {
+    size_t words = 0;
+    const auto status = allocateTxImpl(channel_id, use_dma, networkActive, words);
+    if (status == AllocationStatus::SUCCESS) {
+        return result<size_t, RmtMemoryError>::success(words);
+    }
+    return result<size_t, RmtMemoryError>::failure(static_cast<RmtMemoryError>(status));
+}
+
+result<size_t, RmtMemoryError> RmtMemoryManager::allocateRx(
+    u8 channel_id, size_t symbols, bool use_dma) FL_NO_EXCEPT {
+    size_t words = 0;
+    const auto status = allocateRxImpl(channel_id, symbols, use_dma, words);
+    if (status == AllocationStatus::SUCCESS) {
+        return result<size_t, RmtMemoryError>::success(words);
+    }
+    return result<size_t, RmtMemoryError>::failure(static_cast<RmtMemoryError>(status));
 }
 
 bool RmtMemoryManager::tryAllocateTx(u8 channel_id, bool use_dma, bool networkActive,
                                       size_t& out_words) FL_NO_EXCEPT {
-    auto r = allocateTx(channel_id, use_dma, networkActive);
-    if (r.ok()) {
-        out_words = r.value();
-        return true;
-    }
-    return false;
+    return allocateTxImpl(channel_id, use_dma, networkActive, out_words) == AllocationStatus::SUCCESS;
 }
 
 bool RmtMemoryManager::tryAllocateRx(u8 channel_id, size_t symbols, bool use_dma,
                                       size_t& out_words) FL_NO_EXCEPT {
-    auto r = allocateRx(channel_id, symbols, use_dma);
-    if (r.ok()) {
-        out_words = r.value();
-        return true;
-    }
-    return false;
+    return allocateRxImpl(channel_id, symbols, use_dma, out_words) == AllocationStatus::SUCCESS;
 }
 
 void RmtMemoryManager::free(u8 channel_id, bool is_tx) FL_NO_EXCEPT {

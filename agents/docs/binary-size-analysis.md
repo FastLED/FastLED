@@ -96,7 +96,7 @@ These are the gotchas the wrapper handles for you. They are documented here so t
 
 - **Don't run `xtensa-esp32s3-elf-nm` or `xtensa-esp32s3-elf-size` directly.** The wrapper subsumes both. Direct toolchain invocations have caused every prior bloat audit to wire up nm/c++filt/map by hand and miss the map-derived synthesis pass.
 - **Don't shell out to `fbuild symbols` with a hardcoded ELF path.** Use the wrapper — it discovers the latest ELF, picks the right toolchain, defaults the output directory, and prints the summary table in one call.
-- **Don't write a new Python aggregator under `.claude/symbolaudit/`.** The wrapper's `_AggBucket` summary plus the existing `diff.py` cover the per-symbol and per-archive views needed for both "what's in this build" and "what changed between two builds". Extend `ci/bloat.py` if a new view is required.
+- **Don't write a new Python aggregator under `.claude/symbolaudit/`.** Use the wrapper's summary and saved `report.json` rows for per-symbol and per-archive comparisons. Extend `ci/bloat.py` if a new view is required.
 
 ## Related
 

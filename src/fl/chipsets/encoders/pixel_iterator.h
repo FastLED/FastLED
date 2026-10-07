@@ -254,7 +254,6 @@ class PixelIterator {
       mHas = &Vtable::has;
       #if FASTLED_HD_COLOR_MIXING
       mLoadRGBScaleAndBrightness = &Vtable::loadRGBScaleAndBrightness;
-      mGetHdScale = &Vtable::getHdScale;
       #endif
     }
 
@@ -719,7 +718,6 @@ class PixelIterator {
     hasFunction mHas = nullptr;
     #if FASTLED_HD_COLOR_MIXING
     loadRGBScaleAndBrightnessFunction mLoadRGBScaleAndBrightness = nullptr;
-    getHdScaleFunction mGetHdScale = nullptr;
     #endif
 };
 
