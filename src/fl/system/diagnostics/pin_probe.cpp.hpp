@@ -2,7 +2,7 @@
 /// Compilation boundary for fl/system/pin_probe.h: the platform table is
 /// pulled in here only.
 
-#include "fl/system/pin_probe.h"
+#include "fl/system/pin_probe.h" // ok no header - public declaration remains in parent directory.
 #include "platforms/pin_probe.h"
 
 namespace fl {

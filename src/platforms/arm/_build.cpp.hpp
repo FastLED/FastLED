@@ -15,4 +15,3 @@
 #include "platforms/arm/sam/_build.cpp.hpp"
 #include "platforms/arm/same53/_build.cpp.hpp"
 #include "platforms/arm/stm32/_build.cpp.hpp"
-#include "platforms/arm/teensy/_build.cpp.hpp"

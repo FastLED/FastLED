@@ -361,7 +361,8 @@ class ChannelEngineRMT4Impl final : public ChannelEngineRMT4 {
     // Member Variables
     // ═══════════════════════════════════════════════════════════════════════════
 
-    fl::vector_inlined<ChannelState, FASTLED_RMT_MAX_CHANNELS> mChannels;
+    // Physical channel states are bounded; logical strip queues remain dynamic.
+    fl::vector_fixed<ChannelState, FASTLED_RMT_MAX_CHANNELS> mChannels;
     fl::vector_inlined<ChannelDataPtr, 16>
         mEnqueuedChannels; // Batched between enqueue() and show()
     fl::vector_inlined<ChannelDataPtr, 16>

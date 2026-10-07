@@ -38,61 +38,7 @@ void set_executor_pump(TaskPump pump) FL_NO_EXCEPT {
     executorPump().store(pump, fl::memory_order_release);
 }
 
-/// @brief Get reference to thread-local await recursion depth
-/// @return Reference to the thread-local await depth counter
-int& await_depth_tls() {
-    return SingletonThreadLocal<int>::instance();
-}
 } // namespace detail
-
-Executor& Executor::instance() {
-    Executor& executor = fl::Singleton<Executor>::instance();
-    detail::set_executor_pump([]() {
-        fl::Singleton<Executor>::instance().update_all();
-    });
-    return executor;
-}
-
-void Executor::register_runner(Runner* r) {
-    if (r && fl::find(mRunners.begin(), mRunners.end(), r) == mRunners.end()) {
-        mRunners.push_back(r);
-    }
-}
-
-void Executor::unregister_runner(Runner* r) {
-    auto it = fl::find(mRunners.begin(), mRunners.end(), r);
-    if (it != mRunners.end()) {
-        mRunners.erase(it);
-    }
-}
-
-void Executor::update_all() {
-    // Update all registered runners
-    for (auto* r : mRunners) {
-        if (r) {
-            r->update();
-        }
-    }
-}
-
-bool Executor::has_active_tasks() const {
-    for (const auto* r : mRunners) {
-        if (r && r->has_active_tasks()) {
-            return true;
-        }
-    }
-    return false;
-}
-
-size_t Executor::total_active_tasks() const {
-    size_t total = 0;
-    for (const auto* r : mRunners) {
-        if (r) {
-            total += r->active_task_count();
-        }
-    }
-    return total;
-}
 
 // Public API functions
 
@@ -203,15 +149,6 @@ void run_impl(fl::u32 microseconds, ExecFlags flags, void (*pump)()) FL_NO_EXCEP
 }
 
 } // namespace detail
-
-size_t active_tasks() {
-    return Executor::instance().total_active_tasks();
-}
-
-bool has_tasks() {
-    return Executor::instance().has_active_tasks();
-}
-
 
 } // namespace task
 } // namespace fl

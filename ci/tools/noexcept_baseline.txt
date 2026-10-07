@@ -6689,7 +6689,7 @@ src/fl/system/engine_events.cpp.hpp|void EngineEvents::_onExit() {
 src/fl/system/engine_events.cpp.hpp|void EngineEvents::_onPlatformPreLoop() {
 src/fl/system/engine_events.cpp.hpp|void EngineEvents::_onStripAdded(CLEDController *strip, fl::u32 num_leds) {
 src/fl/system/engine_events.cpp.hpp|void EngineEvents::_removeListener(Listener *listener) {
-src/fl/system/heap.cpp.hpp|HeapInfo getFreeHeap() {
+src/fl/system/diagnostics/heap.cpp.hpp|HeapInfo getFreeHeap() {
 src/fl/system/heap.h|HeapInfo getFreeHeap();
 src/fl/system/heap.h|bool has_psram() const { return free_psram > 0; }
 src/fl/system/heap.h|fl::size total() const { return free_sram + free_psram; }
@@ -6755,31 +6755,31 @@ src/fl/system/pins.h|void pinMap(fl::span<PinInfo> pins);
 src/fl/system/pins.h|void write(fl::span<const u16> pin_data) const;
 src/fl/system/pins.h|void write(fl::span<const u8> pin_data) const;
 src/fl/system/pins.h|void writeByte(u8 byte) const {
-src/fl/system/serial.cpp.hpp|SerialPort::operator bool() const {
-src/fl/system/serial.cpp.hpp|bool SerialPort::flush(u32 timeoutMs) {
-src/fl/system/serial.cpp.hpp|fl::string SerialPort::readString() {
-src/fl/system/serial.cpp.hpp|fl::string SerialPort::readStringUntil(char delimiter) {
-src/fl/system/serial.cpp.hpp|float SerialPort::parseFloat() {
-src/fl/system/serial.cpp.hpp|inline typename fl::enable_if<fl::is_multi_byte_integer<T>::value && !fl::is_signed<T>::value, size_t>::type SerialPort::print(T value) {
-src/fl/system/serial.cpp.hpp|inline typename fl::enable_if<fl::is_multi_byte_integer<T>::value && !fl::is_signed<T>::value, size_t>::type SerialPort::println(T value) {
-src/fl/system/serial.cpp.hpp|int SerialPort::available() {
-src/fl/system/serial.cpp.hpp|int SerialPort::peek() {
-src/fl/system/serial.cpp.hpp|int SerialPort::read() {
-src/fl/system/serial.cpp.hpp|long SerialPort::parseInt() {
-src/fl/system/serial.cpp.hpp|size_t SerialPort::print(const char* str) {
-src/fl/system/serial.cpp.hpp|size_t SerialPort::print(int value) {
-src/fl/system/serial.cpp.hpp|size_t SerialPort::print(long value) {
-src/fl/system/serial.cpp.hpp|size_t SerialPort::println() {
-src/fl/system/serial.cpp.hpp|size_t SerialPort::println(const char* str) {
-src/fl/system/serial.cpp.hpp|size_t SerialPort::println(int value) {
-src/fl/system/serial.cpp.hpp|size_t SerialPort::println(long value) {
-src/fl/system/serial.cpp.hpp|size_t SerialPort::readBytes(u8* buffer, size_t length) {
-src/fl/system/serial.cpp.hpp|size_t SerialPort::readBytesUntil(char delimiter, u8* buffer, size_t length) {
-src/fl/system/serial.cpp.hpp|size_t SerialPort::write(const u8* buffer, size_t size) {
-src/fl/system/serial.cpp.hpp|size_t SerialPort::write(u8 byte) {
-src/fl/system/serial.cpp.hpp|void SerialPort::begin(u32 baudRate) {
-src/fl/system/serial.cpp.hpp|void SerialPort::end() {
-src/fl/system/serial.cpp.hpp|void SerialPort::setTimeout(u32 timeoutMs) {
+src/fl/system/serial/serial.cpp.hpp|SerialPort::operator bool() const {
+src/fl/system/serial/serial.cpp.hpp|bool SerialPort::flush(u32 timeoutMs) {
+src/fl/system/serial/serial.cpp.hpp|fl::string SerialPort::readString() {
+src/fl/system/serial/serial.cpp.hpp|fl::string SerialPort::readStringUntil(char delimiter) {
+src/fl/system/serial/serial.cpp.hpp|float SerialPort::parseFloat() {
+src/fl/system/serial/serial.cpp.hpp|inline typename fl::enable_if<fl::is_multi_byte_integer<T>::value && !fl::is_signed<T>::value, size_t>::type SerialPort::print(T value) {
+src/fl/system/serial/serial.cpp.hpp|inline typename fl::enable_if<fl::is_multi_byte_integer<T>::value && !fl::is_signed<T>::value, size_t>::type SerialPort::println(T value) {
+src/fl/system/serial/serial.cpp.hpp|int SerialPort::available() {
+src/fl/system/serial/serial.cpp.hpp|int SerialPort::peek() {
+src/fl/system/serial/serial.cpp.hpp|int SerialPort::read() {
+src/fl/system/serial/serial.cpp.hpp|long SerialPort::parseInt() {
+src/fl/system/serial/serial.cpp.hpp|size_t SerialPort::print(const char* str) {
+src/fl/system/serial/serial.cpp.hpp|size_t SerialPort::print(int value) {
+src/fl/system/serial/serial.cpp.hpp|size_t SerialPort::print(long value) {
+src/fl/system/serial/serial.cpp.hpp|size_t SerialPort::println() {
+src/fl/system/serial/serial.cpp.hpp|size_t SerialPort::println(const char* str) {
+src/fl/system/serial/serial.cpp.hpp|size_t SerialPort::println(int value) {
+src/fl/system/serial/serial.cpp.hpp|size_t SerialPort::println(long value) {
+src/fl/system/serial/serial.cpp.hpp|size_t SerialPort::readBytes(u8* buffer, size_t length) {
+src/fl/system/serial/serial.cpp.hpp|size_t SerialPort::readBytesUntil(char delimiter, u8* buffer, size_t length) {
+src/fl/system/serial/serial.cpp.hpp|size_t SerialPort::write(const u8* buffer, size_t size) {
+src/fl/system/serial/serial.cpp.hpp|size_t SerialPort::write(u8 byte) {
+src/fl/system/serial/serial.cpp.hpp|void SerialPort::begin(u32 baudRate) {
+src/fl/system/serial/serial.cpp.hpp|void SerialPort::end() {
+src/fl/system/serial/serial.cpp.hpp|void SerialPort::setTimeout(u32 timeoutMs) {
 src/fl/system/serial.h|bool flush(u32 timeoutMs = 1000);
 src/fl/system/serial.h|explicit operator bool() const;
 src/fl/system/serial.h|fl::string readString();
@@ -6810,15 +6810,15 @@ src/fl/system/serial.h|void setTimeout(u32 timeoutMs);
 src/fl/system/yield.cpp.hpp|static void sys_yield() {
 src/fl/system/yield.cpp.hpp|void yield() {
 src/fl/system/yield.h|void yield();
-src/fl/task/executor.cpp.hpp|Executor& Executor::instance() {
-src/fl/task/executor.cpp.hpp|bool Executor::has_active_tasks() const {
-src/fl/task/executor.cpp.hpp|bool has_tasks() {
-src/fl/task/executor.cpp.hpp|int& await_depth_tls() {
-src/fl/task/executor.cpp.hpp|size_t Executor::total_active_tasks() const {
-src/fl/task/executor.cpp.hpp|size_t active_tasks() {
-src/fl/task/executor.cpp.hpp|void Executor::register_runner(Runner* r) {
-src/fl/task/executor.cpp.hpp|void Executor::unregister_runner(Runner* r) {
-src/fl/task/executor.cpp.hpp|void Executor::update_all() {
+src/fl/task/runners/executor.cpp.hpp|Executor& Executor::instance() {
+src/fl/task/runners/executor.cpp.hpp|bool Executor::has_active_tasks() const {
+src/fl/task/runners/executor.cpp.hpp|bool has_tasks() {
+src/fl/task/runners/executor.cpp.hpp|int& await_depth_tls() {
+src/fl/task/runners/executor.cpp.hpp|size_t Executor::total_active_tasks() const {
+src/fl/task/runners/executor.cpp.hpp|size_t active_tasks() {
+src/fl/task/runners/executor.cpp.hpp|void Executor::register_runner(Runner* r) {
+src/fl/task/runners/executor.cpp.hpp|void Executor::unregister_runner(Runner* r) {
+src/fl/task/runners/executor.cpp.hpp|void Executor::update_all() {
 src/fl/task/executor.cpp.hpp|void run(fl::u32 microseconds, ExecFlags flags) {
 src/fl/task/executor.h|PromiseResult<T> await_top_level(Promise<T> p) {
 src/fl/task/executor.h|bool has_active_tasks() const;
