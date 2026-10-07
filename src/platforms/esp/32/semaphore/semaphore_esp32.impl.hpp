@@ -1,4 +1,5 @@
 // IWYU pragma: private
+#pragma once
 
 /// @file semaphore_esp32.cpp
 /// @brief ESP32 FreeRTOS semaphore platform implementation
@@ -173,30 +174,6 @@ bool CountingSemaphoreESP32<LeastMaxValue>::try_acquire_until(
     auto rel_time = abs_time - now;
     return try_acquire_for(rel_time);
 }
-
-//=============================================================================
-// Explicit template instantiations for common values
-//=============================================================================
-
-// Binary semaphore (max value = 1)
-template class CountingSemaphoreESP32<1>;
-
-// Common counting semaphore values
-template class CountingSemaphoreESP32<2>;
-template class CountingSemaphoreESP32<5>;
-template class CountingSemaphoreESP32<10>;
-template class CountingSemaphoreESP32<100>;
-template class CountingSemaphoreESP32<1000>;
-
-// Explicit instantiation of try_acquire_for for common duration types
-template bool CountingSemaphoreESP32<1>::try_acquire_for(const std::chrono::duration<long long, std::milli>&);  // okay std namespace
-template bool CountingSemaphoreESP32<1>::try_acquire_for(const std::chrono::duration<long long, std::micro>&);  // okay std namespace
-template bool CountingSemaphoreESP32<1>::try_acquire_for(const std::chrono::duration<long long, std::nano>&);  // okay std namespace
-template bool CountingSemaphoreESP32<1>::try_acquire_for(const std::chrono::duration<long long, std::ratio<1>>&);  // okay std namespace
-
-// Explicit instantiation of try_acquire_until for common clock types
-template bool CountingSemaphoreESP32<1>::try_acquire_until(const std::chrono::time_point<std::chrono::steady_clock, std::chrono::duration<long long, std::nano>>&);  // okay std namespace
-template bool CountingSemaphoreESP32<1>::try_acquire_until(const std::chrono::time_point<std::chrono::system_clock, std::chrono::duration<long long, std::nano>>&);  // okay std namespace
 
 } // namespace platforms
 } // namespace fl
