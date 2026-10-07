@@ -14,7 +14,7 @@ This doc is paired with `ci/lint/check_size_thresholds.py` (the lockdown lint) a
 
 | Board | Workflow file | Frozen `max_size` | Frozen `max_size_apa102` | Status | Tracking issue | Notes |
 |---|---|---:|---:|---|---|---|
-| uno | `check_uno_size.yml` | 5138 / -1 | 3650 / -1 | real ceiling | — | AVR ATmega328P has 32 KB flash. The `-1` second value is the `build_no_forced_inline` job's "no check" sentinel. Apa102 was tightened from 12050 → 9300 in `7edaf80f0` and 9300 → 8500 in #4725 (Arduino `Serial` stopped linking into sketches that never print; Apa102 measured 4510 → 3682 B). Both real optimisations, not bumps. #4742 ratchets Blink 11000 → 5138 and Apa102 8500 → 3650 to measured default image flash after exact adjustment arithmetic, compact RGBW selectors and AVR flash banner storage. Dedicated bloat budgets additionally enforce attributed RAM (Blink 438 B, Apa102 290 B). |
+| uno | `check_uno_size.yml` | 5130 / -1 | 3642 / -1 | real ceiling | — | AVR ATmega328P has 32 KB flash. The `-1` second value is the `build_no_forced_inline` job's "no check" sentinel. Apa102 was tightened from 12050 → 9300 in `7edaf80f0` and 9300 → 8500 in #4725 (Arduino `Serial` stopped linking into sketches that never print; Apa102 measured 4510 → 3682 B). Both real optimisations, not bumps. #4742 ratchets Blink 11000 → 5138 and Apa102 8500 → 3650 to measured default image flash after exact adjustment arithmetic, compact RGBW selectors and AVR flash banner storage. Dedicated bloat budgets additionally enforce attributed RAM (Blink 438 B, Apa102 290 B). #4743 narrows bounded controller indices on 16-bit-int targets, ratcheting another 8 B each to 5130 / 3642. |
 | bluepill | `check_bluepill_size.yml` | 55000 | 45000 | real ceiling | — | STM32F103C8 has 64 KB flash. Workflow created at current values in `bf76a0319` (2025-06-25). Never bumped. |
 | esp32dev | `check_esp32_size.yml` | 340000 | 330000 | real ceilings | #3870 | #3870 found that the 402252-byte Blink result came from a silent legacy-backend fallback: build metadata exposes the fbuild size tool as `aliases.size`, while `compiled_size` looked only for `size_path`. The corrected fbuild measurement is 337355 B with Arduino-ESP32 3.3.11, so Blink received a narrow 10 KB framework rebaseline. Apa102 stays at 330000 after its templated `addLeds` path stopped enrolling every ESP32 driver; it measures 321275 B. |
 | teensy30 | `check_teensy30_size.yml` | 60000 | 50000 | real ceiling | — | MK20DX128 (Teensy 3.0) has 128 KB flash. Workflow created at current values in `f4317e954` (2025-06-25). Never bumped. |
@@ -60,6 +60,10 @@ These are the events the audit found in `git log --all --follow --patch -- .gith
 ### Other boards
 
 `check_uno_size.yml`, `check_bluepill_size.yml`, `check_teensy30/31/32/35/36/lc_size.yml`: created at their current values and never bumped after creation (apart from Uno's *tightenings*: Apa102 12050 → 9300 in `7edaf80f0`, 9300 → 8500 in #4725, and #4742's measured Blink 11000 → 5138 / Apa102 8500 → 3650). All flagged **real ceiling**.
+
+### ATtiny85 legacy workflow
+
+#4743 tightens `check_attiny85.yml` Blink from 9500 to the measured 2628 B image flash. Its existing Apa102 and no-forced-inline limits are unchanged. This legacy filename is outside the `check_*_size.yml` frozen registry. `tests/data/attiny85_bloat_budget.json` additionally enforces 189 B attributed RAM; physical board RAM is 161 B because symbol attribution counts aliased vtables separately. Measurements use fbuild 2.5.37, AVR GCC 7.3.0-atmel3.6.1-arduino7, ATTinyCore 1.5.2 and 8 MHz.
 
 ## Band-aid follow-up: how to restore the real ceiling
 

@@ -28,6 +28,7 @@
 #include "fl/ui/audio.h"  // for UIAudio (CFastLED::add(UIAudio&))
 #include "hsv2rgb.h"  // for CRGB
 #include "fl/stl/int.h"  // for u32, u16
+#include "fl/stl/type_traits.h"  // for conditional_t
 #include "platforms/init.h"  // IWYU pragma: keep
 #include "fl/channels/config.h"  // for ChannelConfig
 #include "fl/stl/singleton.h"  // for fl::Singleton
@@ -373,7 +374,10 @@ FL_KEEP_ALIVE void CFastLED::show(fl::u8 scale) {
 	mLastShownScale = scale;
 
 
-	int length = 0;
+	// A byte index saves bookkeeping on 16-bit-int targets; retain wider limits.
+	using ControllerIndex = fl::conditional_t<
+		(sizeof(int) == 2 && MAX_CLED_CONTROLLERS <= 255), fl::u8, int>;
+	ControllerIndex length = 0;
 	CLEDController *pCur = CLEDController::head();
 
 	while(pCur && length < MAX_CLED_CONTROLLERS) {
