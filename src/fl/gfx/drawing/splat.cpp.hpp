@@ -1,3 +1,4 @@
+// ok no header: public declarations remain in fl/gfx.
 
 #include "fl/gfx/tile2x2.h"
 #include "fl/gfx/splat.h"

@@ -1431,18 +1431,18 @@ src/fl/channels/channel.h|void showLeds(u8 brightness = 255) OVERRIDE_IF_NOT_AVR
 src/fl/channels/channel.h|void showPixels(PixelController<RGB, 1, 0xFFFFFFFF>& pixels) override;
 src/fl/channels/channel_events.cpp.hpp|ChannelEvents& ChannelEvents::instance() {
 src/fl/channels/channel_events.h|static ChannelEvents& instance();
-src/fl/channels/config.cpp.hpp|ChannelConfig::ChannelConfig(ChannelConfig&& other) : chipset(fl::move(other.chipset)) , mLeds(other.mLeds) , rgb_order(other.rgb_order) , options(fl::move(other.options)) , mScreenMap(fl::move(other.mScreenMap)) , mName(fl::move(other.mName)) {}
-src/fl/channels/config.cpp.hpp|ChannelConfig::ChannelConfig(const ChannelConfig& other) : chipset(other.chipset) , mLeds(other.mLeds) , rgb_order(other.rgb_order) , options(other.options) , mScreenMap(other.mScreenMap) , mName(other.mName) {}
-src/fl/channels/config.cpp.hpp|ChannelConfig::ChannelConfig(const ChipsetVariant& chipset, fl::span<CRGB> leds, EOrder rgbOrder, const ChannelOptions& options) : chipset(chipset) , mLeds(leds) , rgb_order(rgbOrder) , options(options) {}
-src/fl/channels/config.cpp.hpp|ChannelConfig::ChannelConfig(const ClocklessChipset& clockless, fl::span<CRGB> leds, EOrder rgbOrder, const ChannelOptions& options) : chipset(clockless) , mLeds(leds) , rgb_order(rgbOrder) , options(options) {}
-src/fl/channels/config.cpp.hpp|ChannelConfig::ChannelConfig(const SpiChipsetConfig& spi, fl::span<CRGB> leds, EOrder rgbOrder, const ChannelOptions& options) : chipset(spi) , mLeds(leds) , rgb_order(rgbOrder) , options(options) {}
-src/fl/channels/config.cpp.hpp|ChannelConfig::ChannelConfig(const fl::string& name, const ChipsetVariant& chipset, fl::span<CRGB> leds, EOrder rgbOrder, const ChannelOptions& options) : ChannelConfig(chipset, leds, rgbOrder, options) {
-src/fl/channels/config.cpp.hpp|ChannelConfig::ChannelConfig(int pin, const ChipsetTimingConfig& timing, fl::span<CRGB> leds, EOrder rgbOrder, const ChannelOptions& options) : chipset(ClocklessChipset(pin, timing)) , mLeds(leds) , rgb_order(rgbOrder) , options(options) {}
-src/fl/channels/config.cpp.hpp|MultiChannelConfig& MultiChannelConfig::add(ChannelConfigPtr channel) {
-src/fl/channels/config.cpp.hpp|MultiChannelConfig::MultiChannelConfig(fl::initializer_list<ChannelConfig> channels) {
-src/fl/channels/config.cpp.hpp|MultiChannelConfig::MultiChannelConfig(fl::span<ChannelConfig> channels) {
-src/fl/channels/config.cpp.hpp|int ChannelConfig::getClockPin() const {
-src/fl/channels/config.cpp.hpp|int ChannelConfig::getDataPin() const {
+src/fl/channels/configuration/config.cpp.hpp|ChannelConfig::ChannelConfig(ChannelConfig&& other) : chipset(fl::move(other.chipset)) , mLeds(other.mLeds) , rgb_order(other.rgb_order) , options(fl::move(other.options)) , mScreenMap(fl::move(other.mScreenMap)) , mName(fl::move(other.mName)) {}
+src/fl/channels/configuration/config.cpp.hpp|ChannelConfig::ChannelConfig(const ChannelConfig& other) : chipset(other.chipset) , mLeds(other.mLeds) , rgb_order(other.rgb_order) , options(other.options) , mScreenMap(other.mScreenMap) , mName(other.mName) {}
+src/fl/channels/configuration/config.cpp.hpp|ChannelConfig::ChannelConfig(const ChipsetVariant& chipset, fl::span<CRGB> leds, EOrder rgbOrder, const ChannelOptions& options) : chipset(chipset) , mLeds(leds) , rgb_order(rgbOrder) , options(options) {}
+src/fl/channels/configuration/config.cpp.hpp|ChannelConfig::ChannelConfig(const ClocklessChipset& clockless, fl::span<CRGB> leds, EOrder rgbOrder, const ChannelOptions& options) : chipset(clockless) , mLeds(leds) , rgb_order(rgbOrder) , options(options) {}
+src/fl/channels/configuration/config.cpp.hpp|ChannelConfig::ChannelConfig(const SpiChipsetConfig& spi, fl::span<CRGB> leds, EOrder rgbOrder, const ChannelOptions& options) : chipset(spi) , mLeds(leds) , rgb_order(rgbOrder) , options(options) {}
+src/fl/channels/configuration/config.cpp.hpp|ChannelConfig::ChannelConfig(const fl::string& name, const ChipsetVariant& chipset, fl::span<CRGB> leds, EOrder rgbOrder, const ChannelOptions& options) : ChannelConfig(chipset, leds, rgbOrder, options) {
+src/fl/channels/configuration/config.cpp.hpp|ChannelConfig::ChannelConfig(int pin, const ChipsetTimingConfig& timing, fl::span<CRGB> leds, EOrder rgbOrder, const ChannelOptions& options) : chipset(ClocklessChipset(pin, timing)) , mLeds(leds) , rgb_order(rgbOrder) , options(options) {}
+src/fl/channels/configuration/config.cpp.hpp|MultiChannelConfig& MultiChannelConfig::add(ChannelConfigPtr channel) {
+src/fl/channels/configuration/config.cpp.hpp|MultiChannelConfig::MultiChannelConfig(fl::initializer_list<ChannelConfig> channels) {
+src/fl/channels/configuration/config.cpp.hpp|MultiChannelConfig::MultiChannelConfig(fl::span<ChannelConfig> channels) {
+src/fl/channels/configuration/config.cpp.hpp|int ChannelConfig::getClockPin() const {
+src/fl/channels/configuration/config.cpp.hpp|int ChannelConfig::getDataPin() const {
 src/fl/channels/detail/bit_spread_lut.hpp|FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION void spread_transpose16_symbol(const u8 l[16], u8 out[16]) {
 src/fl/channels/detail/bit_spread_lut.hpp|FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION void spread_transpose8_symbol(const u8 l[8], u8 out[8]) {
 src/fl/channels/detail/bit_spread_lut.hpp|FASTLED_FORCE_INLINE u32 spreadA(u8 v) { return kSpreadNibble[v >> 4]; }
@@ -1626,17 +1626,17 @@ src/fl/channels/validation.h|DriverTestResult(const char* name) : driver_name(na
 src/fl/channels/validation.h|SingleTestResult runSingleValidationTest(const SingleTestConfig& config);
 src/fl/channels/validation.h|bool allPassed() const { return !skipped && total_tests > 0 && passed_tests == total_tests; }
 src/fl/channels/validation.h|bool anyFailed() const { return !skipped && total_tests > 0 && passed_tests < total_tests; }
-src/fl/channels/wave3.cpp.hpp|FL_OPTIMIZE_FUNCTION FL_IRAM void wave3Transpose_16(const u8 (&FL_RESTRICT_PARAM lanes)[16], const Wave3BitExpansionLut& lut, u8 (&FL_RESTRICT_PARAM output)[16 * sizeof(Wave3Byte)]) {
-src/fl/channels/wave3.cpp.hpp|FL_OPTIMIZE_FUNCTION FL_IRAM void wave3Transpose_2(const u8 (&FL_RESTRICT_PARAM lanes)[2], const Wave3BitExpansionLut& lut, u8 (&FL_RESTRICT_PARAM output)[2 * sizeof(Wave3Byte)]) {
-src/fl/channels/wave3.cpp.hpp|FL_OPTIMIZE_FUNCTION FL_IRAM void wave3Transpose_4(const u8 (&FL_RESTRICT_PARAM lanes)[4], const Wave3BitExpansionLut& lut, u8 (&FL_RESTRICT_PARAM output)[4 * sizeof(Wave3Byte)]) {
-src/fl/channels/wave3.cpp.hpp|FL_OPTIMIZE_FUNCTION FL_IRAM void wave3Transpose_8(const u8 (&FL_RESTRICT_PARAM lanes)[8], const Wave3BitExpansionLut& lut, u8 (&FL_RESTRICT_PARAM output)[8 * sizeof(Wave3Byte)]) {
-src/fl/channels/wave3.cpp.hpp|FL_OPTIMIZE_FUNCTION Wave3BitExpansionLut buildWave3ExpansionLUT(const ChipsetTiming& timing) {
-src/fl/channels/wave3.cpp.hpp|FL_OPTIMIZE_FUNCTION bool canUseWave3(const ChipsetTiming& timing) {
-src/fl/channels/wave3.cpp.hpp|FL_OPTIMIZE_FUNCTION u32 wave3ClockFrequencyHz(const ChipsetTiming& timing) {
-src/fl/channels/wave3.cpp.hpp|FL_OPTIMIZE_FUNCTION void wave3Untranspose_16(const u8 (&FL_RESTRICT_PARAM transposed)[16 * sizeof(Wave3Byte)], u8 (&FL_RESTRICT_PARAM output)[16 * sizeof(Wave3Byte)]) {
-src/fl/channels/wave3.cpp.hpp|FL_OPTIMIZE_FUNCTION void wave3Untranspose_2(const u8 (&FL_RESTRICT_PARAM transposed)[2 * sizeof(Wave3Byte)], u8 (&FL_RESTRICT_PARAM output)[2 * sizeof(Wave3Byte)]) {
-src/fl/channels/wave3.cpp.hpp|FL_OPTIMIZE_FUNCTION void wave3Untranspose_4(const u8 (&FL_RESTRICT_PARAM transposed)[4 * sizeof(Wave3Byte)], u8 (&FL_RESTRICT_PARAM output)[4 * sizeof(Wave3Byte)]) {
-src/fl/channels/wave3.cpp.hpp|FL_OPTIMIZE_FUNCTION void wave3Untranspose_8(const u8 (&FL_RESTRICT_PARAM transposed)[8 * sizeof(Wave3Byte)], u8 (&FL_RESTRICT_PARAM output)[8 * sizeof(Wave3Byte)]) {
+src/fl/channels/waveform/wave3.cpp.hpp|FL_OPTIMIZE_FUNCTION FL_IRAM void wave3Transpose_16(const u8 (&FL_RESTRICT_PARAM lanes)[16], const Wave3BitExpansionLut& lut, u8 (&FL_RESTRICT_PARAM output)[16 * sizeof(Wave3Byte)]) {
+src/fl/channels/waveform/wave3.cpp.hpp|FL_OPTIMIZE_FUNCTION FL_IRAM void wave3Transpose_2(const u8 (&FL_RESTRICT_PARAM lanes)[2], const Wave3BitExpansionLut& lut, u8 (&FL_RESTRICT_PARAM output)[2 * sizeof(Wave3Byte)]) {
+src/fl/channels/waveform/wave3.cpp.hpp|FL_OPTIMIZE_FUNCTION FL_IRAM void wave3Transpose_4(const u8 (&FL_RESTRICT_PARAM lanes)[4], const Wave3BitExpansionLut& lut, u8 (&FL_RESTRICT_PARAM output)[4 * sizeof(Wave3Byte)]) {
+src/fl/channels/waveform/wave3.cpp.hpp|FL_OPTIMIZE_FUNCTION FL_IRAM void wave3Transpose_8(const u8 (&FL_RESTRICT_PARAM lanes)[8], const Wave3BitExpansionLut& lut, u8 (&FL_RESTRICT_PARAM output)[8 * sizeof(Wave3Byte)]) {
+src/fl/channels/waveform/wave3.cpp.hpp|FL_OPTIMIZE_FUNCTION Wave3BitExpansionLut buildWave3ExpansionLUT(const ChipsetTiming& timing) {
+src/fl/channels/waveform/wave3.cpp.hpp|FL_OPTIMIZE_FUNCTION bool canUseWave3(const ChipsetTiming& timing) {
+src/fl/channels/waveform/wave3.cpp.hpp|FL_OPTIMIZE_FUNCTION u32 wave3ClockFrequencyHz(const ChipsetTiming& timing) {
+src/fl/channels/waveform/wave3.cpp.hpp|FL_OPTIMIZE_FUNCTION void wave3Untranspose_16(const u8 (&FL_RESTRICT_PARAM transposed)[16 * sizeof(Wave3Byte)], u8 (&FL_RESTRICT_PARAM output)[16 * sizeof(Wave3Byte)]) {
+src/fl/channels/waveform/wave3.cpp.hpp|FL_OPTIMIZE_FUNCTION void wave3Untranspose_2(const u8 (&FL_RESTRICT_PARAM transposed)[2 * sizeof(Wave3Byte)], u8 (&FL_RESTRICT_PARAM output)[2 * sizeof(Wave3Byte)]) {
+src/fl/channels/waveform/wave3.cpp.hpp|FL_OPTIMIZE_FUNCTION void wave3Untranspose_4(const u8 (&FL_RESTRICT_PARAM transposed)[4 * sizeof(Wave3Byte)], u8 (&FL_RESTRICT_PARAM output)[4 * sizeof(Wave3Byte)]) {
+src/fl/channels/waveform/wave3.cpp.hpp|FL_OPTIMIZE_FUNCTION void wave3Untranspose_8(const u8 (&FL_RESTRICT_PARAM transposed)[8 * sizeof(Wave3Byte)], u8 (&FL_RESTRICT_PARAM output)[8 * sizeof(Wave3Byte)]) {
 src/fl/channels/wave3.h|Wave3BitExpansionLut buildWave3ExpansionLUT(const ChipsetTiming& timing);
 src/fl/channels/wave3.h|bool canUseWave3(const ChipsetTiming& timing);
 src/fl/channels/wave3.h|u32 wave3ClockFrequencyHz(const ChipsetTiming& timing);
@@ -1649,27 +1649,27 @@ src/fl/channels/wave3.h|void wave3Untranspose_16( const u8 (&FL_RESTRICT_PARAM t
 src/fl/channels/wave3.h|void wave3Untranspose_2( const u8 (&FL_RESTRICT_PARAM transposed)[2 * sizeof(Wave3Byte)], u8 (&FL_RESTRICT_PARAM output)[2 * sizeof(Wave3Byte)]);
 src/fl/channels/wave3.h|void wave3Untranspose_4( const u8 (&FL_RESTRICT_PARAM transposed)[4 * sizeof(Wave3Byte)], u8 (&FL_RESTRICT_PARAM output)[4 * sizeof(Wave3Byte)]);
 src/fl/channels/wave3.h|void wave3Untranspose_8( const u8 (&FL_RESTRICT_PARAM transposed)[8 * sizeof(Wave3Byte)], u8 (&FL_RESTRICT_PARAM output)[8 * sizeof(Wave3Byte)]);
-src/fl/channels/wave8.cpp.hpp|FL_OPTIMIZE_FUNCTION FL_IRAM void wave8Transpose_16(const u8 (&FL_RESTRICT_PARAM lanes)[16], const Wave8BitExpansionLut &lut, u8 (&FL_RESTRICT_PARAM output)[16 * sizeof(Wave8Byte)]) {
-src/fl/channels/wave8.cpp.hpp|FL_OPTIMIZE_FUNCTION FL_IRAM void wave8Transpose_16(const u8 (&FL_RESTRICT_PARAM lanes)[16], const Wave8ByteExpansionLut &lut, u8 (&FL_RESTRICT_PARAM output)[16 * sizeof(Wave8Byte)]) {
-src/fl/channels/wave8.cpp.hpp|FL_OPTIMIZE_FUNCTION FL_IRAM void wave8Transpose_16_bf1(const u8 (&FL_RESTRICT_PARAM lanes)[16], const Wave8ByteExpansionLut &lut, u8 (&FL_RESTRICT_PARAM output)[16 * sizeof(Wave8Byte)]) {
-src/fl/channels/wave8.cpp.hpp|FL_OPTIMIZE_FUNCTION FL_IRAM void wave8Transpose_16x2_pipe2(const u8 (&FL_RESTRICT_PARAM lanes_a)[16], const u8 (&FL_RESTRICT_PARAM lanes_b)[16], const Wave8ByteExpansionLut &lut, u8 (&FL_RESTRICT_PARAM output_a)[16 * sizeof(Wave8Byte)], u8 (&FL_RESTRICT_PARAM output_b)[16 * sizeof(Wave8Byte)]) {
-src/fl/channels/wave8.cpp.hpp|FL_OPTIMIZE_FUNCTION FL_IRAM void wave8Transpose_16x4_bf1_pipe4(const u8 (&FL_RESTRICT_PARAM lanes_a)[16], const u8 (&FL_RESTRICT_PARAM lanes_b)[16], const u8 (&FL_RESTRICT_PARAM lanes_c)[16], const u8 (&FL_RESTRICT_PARAM lanes_d)[16], const Wave8ByteExpansionLut &lut, u8 (&FL_RESTRICT_PARAM output_a)[16 * sizeof(Wave8Byte)], u8 (&FL_RESTRICT_PARAM output_b)[16 * sizeof(Wave8Byte)], u8 (&FL_RESTRICT_PARAM output_c)[16 * sizeof(Wave8Byte)], u8 (&FL_RESTRICT_PARAM output_d)[16 * sizeof(Wave8Byte)]) {
-src/fl/channels/wave8.cpp.hpp|FL_OPTIMIZE_FUNCTION FL_IRAM void wave8Transpose_16x4_pipe4(const u8 (&FL_RESTRICT_PARAM lanes_a)[16], const u8 (&FL_RESTRICT_PARAM lanes_b)[16], const u8 (&FL_RESTRICT_PARAM lanes_c)[16], const u8 (&FL_RESTRICT_PARAM lanes_d)[16], const Wave8ByteExpansionLut &lut, u8 (&FL_RESTRICT_PARAM output_a)[16 * sizeof(Wave8Byte)], u8 (&FL_RESTRICT_PARAM output_b)[16 * sizeof(Wave8Byte)], u8 (&FL_RESTRICT_PARAM output_c)[16 * sizeof(Wave8Byte)], u8 (&FL_RESTRICT_PARAM output_d)[16 * sizeof(Wave8Byte)]) {
-src/fl/channels/wave8.cpp.hpp|FL_OPTIMIZE_FUNCTION FL_IRAM void wave8Transpose_2(const u8 (&FL_RESTRICT_PARAM lanes)[2], const Wave8BitExpansionLut &lut, u8 (&FL_RESTRICT_PARAM output)[2 * sizeof(Wave8Byte)]) {
-src/fl/channels/wave8.cpp.hpp|FL_OPTIMIZE_FUNCTION FL_IRAM void wave8Transpose_2(const u8 (&FL_RESTRICT_PARAM lanes)[2], const Wave8ByteExpansionLut &lut, u8 (&FL_RESTRICT_PARAM output)[2 * sizeof(Wave8Byte)]) {
-src/fl/channels/wave8.cpp.hpp|FL_OPTIMIZE_FUNCTION FL_IRAM void wave8Transpose_2_bf1(const u8 (&FL_RESTRICT_PARAM lanes)[2], const Wave8ByteExpansionLut &lut, u8 (&FL_RESTRICT_PARAM output)[2 * sizeof(Wave8Byte)]) {
-src/fl/channels/wave8.cpp.hpp|FL_OPTIMIZE_FUNCTION FL_IRAM void wave8Transpose_4(const u8 (&FL_RESTRICT_PARAM lanes)[4], const Wave8BitExpansionLut &lut, u8 (&FL_RESTRICT_PARAM output)[4 * sizeof(Wave8Byte)]) {
-src/fl/channels/wave8.cpp.hpp|FL_OPTIMIZE_FUNCTION FL_IRAM void wave8Transpose_4(const u8 (&FL_RESTRICT_PARAM lanes)[4], const Wave8ByteExpansionLut &lut, u8 (&FL_RESTRICT_PARAM output)[4 * sizeof(Wave8Byte)]) {
-src/fl/channels/wave8.cpp.hpp|FL_OPTIMIZE_FUNCTION FL_IRAM void wave8Transpose_4_bf1(const u8 (&FL_RESTRICT_PARAM lanes)[4], const Wave8ByteExpansionLut &lut, u8 (&FL_RESTRICT_PARAM output)[4 * sizeof(Wave8Byte)]) {
-src/fl/channels/wave8.cpp.hpp|FL_OPTIMIZE_FUNCTION FL_IRAM void wave8Transpose_8(const u8 (&FL_RESTRICT_PARAM lanes)[8], const Wave8BitExpansionLut &lut, u8 (&FL_RESTRICT_PARAM output)[8 * sizeof(Wave8Byte)]) {
-src/fl/channels/wave8.cpp.hpp|FL_OPTIMIZE_FUNCTION FL_IRAM void wave8Transpose_8(const u8 (&FL_RESTRICT_PARAM lanes)[8], const Wave8ByteExpansionLut &lut, u8 (&FL_RESTRICT_PARAM output)[8 * sizeof(Wave8Byte)]) {
-src/fl/channels/wave8.cpp.hpp|FL_OPTIMIZE_FUNCTION FL_IRAM void wave8Transpose_8_bf1(const u8 (&FL_RESTRICT_PARAM lanes)[8], const Wave8ByteExpansionLut &lut, u8 (&FL_RESTRICT_PARAM output)[8 * sizeof(Wave8Byte)]) {
-src/fl/channels/wave8.cpp.hpp|FL_OPTIMIZE_FUNCTION Wave8BitExpansionLut buildWave8ExpansionLUT(const ChipsetTiming &timing) {
-src/fl/channels/wave8.cpp.hpp|FL_OPTIMIZE_FUNCTION void wave8Untranspose_16(const u8 (&FL_RESTRICT_PARAM transposed)[16 * sizeof(Wave8Byte)], u8 (&FL_RESTRICT_PARAM output)[16 * sizeof(Wave8Byte)]) {
-src/fl/channels/wave8.cpp.hpp|FL_OPTIMIZE_FUNCTION void wave8Untranspose_2(const u8 (&FL_RESTRICT_PARAM transposed)[2 * sizeof(Wave8Byte)], u8 (&FL_RESTRICT_PARAM output)[2 * sizeof(Wave8Byte)]) {
-src/fl/channels/wave8.cpp.hpp|FL_OPTIMIZE_FUNCTION void wave8Untranspose_4(const u8 (&FL_RESTRICT_PARAM transposed)[4 * sizeof(Wave8Byte)], u8 (&FL_RESTRICT_PARAM output)[4 * sizeof(Wave8Byte)]) {
-src/fl/channels/wave8.cpp.hpp|FL_OPTIMIZE_FUNCTION void wave8Untranspose_8(const u8 (&FL_RESTRICT_PARAM transposed)[8 * sizeof(Wave8Byte)], u8 (&FL_RESTRICT_PARAM output)[8 * sizeof(Wave8Byte)]) {
-src/fl/channels/wave8.cpp.hpp|Wave8ByteExpansionLut buildWave8ByteExpansionLUT(const Wave8BitExpansionLut &nibble) {
+src/fl/channels/waveform/wave8.cpp.hpp|FL_OPTIMIZE_FUNCTION FL_IRAM void wave8Transpose_16(const u8 (&FL_RESTRICT_PARAM lanes)[16], const Wave8BitExpansionLut &lut, u8 (&FL_RESTRICT_PARAM output)[16 * sizeof(Wave8Byte)]) {
+src/fl/channels/waveform/wave8.cpp.hpp|FL_OPTIMIZE_FUNCTION FL_IRAM void wave8Transpose_16(const u8 (&FL_RESTRICT_PARAM lanes)[16], const Wave8ByteExpansionLut &lut, u8 (&FL_RESTRICT_PARAM output)[16 * sizeof(Wave8Byte)]) {
+src/fl/channels/waveform/wave8.cpp.hpp|FL_OPTIMIZE_FUNCTION FL_IRAM void wave8Transpose_16_bf1(const u8 (&FL_RESTRICT_PARAM lanes)[16], const Wave8ByteExpansionLut &lut, u8 (&FL_RESTRICT_PARAM output)[16 * sizeof(Wave8Byte)]) {
+src/fl/channels/waveform/wave8.cpp.hpp|FL_OPTIMIZE_FUNCTION FL_IRAM void wave8Transpose_16x2_pipe2(const u8 (&FL_RESTRICT_PARAM lanes_a)[16], const u8 (&FL_RESTRICT_PARAM lanes_b)[16], const Wave8ByteExpansionLut &lut, u8 (&FL_RESTRICT_PARAM output_a)[16 * sizeof(Wave8Byte)], u8 (&FL_RESTRICT_PARAM output_b)[16 * sizeof(Wave8Byte)]) {
+src/fl/channels/waveform/wave8.cpp.hpp|FL_OPTIMIZE_FUNCTION FL_IRAM void wave8Transpose_16x4_bf1_pipe4(const u8 (&FL_RESTRICT_PARAM lanes_a)[16], const u8 (&FL_RESTRICT_PARAM lanes_b)[16], const u8 (&FL_RESTRICT_PARAM lanes_c)[16], const u8 (&FL_RESTRICT_PARAM lanes_d)[16], const Wave8ByteExpansionLut &lut, u8 (&FL_RESTRICT_PARAM output_a)[16 * sizeof(Wave8Byte)], u8 (&FL_RESTRICT_PARAM output_b)[16 * sizeof(Wave8Byte)], u8 (&FL_RESTRICT_PARAM output_c)[16 * sizeof(Wave8Byte)], u8 (&FL_RESTRICT_PARAM output_d)[16 * sizeof(Wave8Byte)]) {
+src/fl/channels/waveform/wave8.cpp.hpp|FL_OPTIMIZE_FUNCTION FL_IRAM void wave8Transpose_16x4_pipe4(const u8 (&FL_RESTRICT_PARAM lanes_a)[16], const u8 (&FL_RESTRICT_PARAM lanes_b)[16], const u8 (&FL_RESTRICT_PARAM lanes_c)[16], const u8 (&FL_RESTRICT_PARAM lanes_d)[16], const Wave8ByteExpansionLut &lut, u8 (&FL_RESTRICT_PARAM output_a)[16 * sizeof(Wave8Byte)], u8 (&FL_RESTRICT_PARAM output_b)[16 * sizeof(Wave8Byte)], u8 (&FL_RESTRICT_PARAM output_c)[16 * sizeof(Wave8Byte)], u8 (&FL_RESTRICT_PARAM output_d)[16 * sizeof(Wave8Byte)]) {
+src/fl/channels/waveform/wave8.cpp.hpp|FL_OPTIMIZE_FUNCTION FL_IRAM void wave8Transpose_2(const u8 (&FL_RESTRICT_PARAM lanes)[2], const Wave8BitExpansionLut &lut, u8 (&FL_RESTRICT_PARAM output)[2 * sizeof(Wave8Byte)]) {
+src/fl/channels/waveform/wave8.cpp.hpp|FL_OPTIMIZE_FUNCTION FL_IRAM void wave8Transpose_2(const u8 (&FL_RESTRICT_PARAM lanes)[2], const Wave8ByteExpansionLut &lut, u8 (&FL_RESTRICT_PARAM output)[2 * sizeof(Wave8Byte)]) {
+src/fl/channels/waveform/wave8.cpp.hpp|FL_OPTIMIZE_FUNCTION FL_IRAM void wave8Transpose_2_bf1(const u8 (&FL_RESTRICT_PARAM lanes)[2], const Wave8ByteExpansionLut &lut, u8 (&FL_RESTRICT_PARAM output)[2 * sizeof(Wave8Byte)]) {
+src/fl/channels/waveform/wave8.cpp.hpp|FL_OPTIMIZE_FUNCTION FL_IRAM void wave8Transpose_4(const u8 (&FL_RESTRICT_PARAM lanes)[4], const Wave8BitExpansionLut &lut, u8 (&FL_RESTRICT_PARAM output)[4 * sizeof(Wave8Byte)]) {
+src/fl/channels/waveform/wave8.cpp.hpp|FL_OPTIMIZE_FUNCTION FL_IRAM void wave8Transpose_4(const u8 (&FL_RESTRICT_PARAM lanes)[4], const Wave8ByteExpansionLut &lut, u8 (&FL_RESTRICT_PARAM output)[4 * sizeof(Wave8Byte)]) {
+src/fl/channels/waveform/wave8.cpp.hpp|FL_OPTIMIZE_FUNCTION FL_IRAM void wave8Transpose_4_bf1(const u8 (&FL_RESTRICT_PARAM lanes)[4], const Wave8ByteExpansionLut &lut, u8 (&FL_RESTRICT_PARAM output)[4 * sizeof(Wave8Byte)]) {
+src/fl/channels/waveform/wave8.cpp.hpp|FL_OPTIMIZE_FUNCTION FL_IRAM void wave8Transpose_8(const u8 (&FL_RESTRICT_PARAM lanes)[8], const Wave8BitExpansionLut &lut, u8 (&FL_RESTRICT_PARAM output)[8 * sizeof(Wave8Byte)]) {
+src/fl/channels/waveform/wave8.cpp.hpp|FL_OPTIMIZE_FUNCTION FL_IRAM void wave8Transpose_8(const u8 (&FL_RESTRICT_PARAM lanes)[8], const Wave8ByteExpansionLut &lut, u8 (&FL_RESTRICT_PARAM output)[8 * sizeof(Wave8Byte)]) {
+src/fl/channels/waveform/wave8.cpp.hpp|FL_OPTIMIZE_FUNCTION FL_IRAM void wave8Transpose_8_bf1(const u8 (&FL_RESTRICT_PARAM lanes)[8], const Wave8ByteExpansionLut &lut, u8 (&FL_RESTRICT_PARAM output)[8 * sizeof(Wave8Byte)]) {
+src/fl/channels/waveform/wave8.cpp.hpp|FL_OPTIMIZE_FUNCTION Wave8BitExpansionLut buildWave8ExpansionLUT(const ChipsetTiming &timing) {
+src/fl/channels/waveform/wave8.cpp.hpp|FL_OPTIMIZE_FUNCTION void wave8Untranspose_16(const u8 (&FL_RESTRICT_PARAM transposed)[16 * sizeof(Wave8Byte)], u8 (&FL_RESTRICT_PARAM output)[16 * sizeof(Wave8Byte)]) {
+src/fl/channels/waveform/wave8.cpp.hpp|FL_OPTIMIZE_FUNCTION void wave8Untranspose_2(const u8 (&FL_RESTRICT_PARAM transposed)[2 * sizeof(Wave8Byte)], u8 (&FL_RESTRICT_PARAM output)[2 * sizeof(Wave8Byte)]) {
+src/fl/channels/waveform/wave8.cpp.hpp|FL_OPTIMIZE_FUNCTION void wave8Untranspose_4(const u8 (&FL_RESTRICT_PARAM transposed)[4 * sizeof(Wave8Byte)], u8 (&FL_RESTRICT_PARAM output)[4 * sizeof(Wave8Byte)]) {
+src/fl/channels/waveform/wave8.cpp.hpp|FL_OPTIMIZE_FUNCTION void wave8Untranspose_8(const u8 (&FL_RESTRICT_PARAM transposed)[8 * sizeof(Wave8Byte)], u8 (&FL_RESTRICT_PARAM output)[8 * sizeof(Wave8Byte)]) {
+src/fl/channels/waveform/wave8.cpp.hpp|Wave8ByteExpansionLut buildWave8ByteExpansionLUT(const Wave8BitExpansionLut &nibble) {
 src/fl/channels/wave8.h|Wave8BitExpansionLut buildWave8ExpansionLUT(const ChipsetTiming &timing);
 src/fl/channels/wave8.h|Wave8ByteExpansionLut buildWave8ByteExpansionLUT(const Wave8BitExpansionLut &nibble);
 src/fl/channels/wave8.h|void wave8(u8 lane, const Wave8BitExpansionLut &lut, u8 (&FL_RESTRICT_PARAM output)[sizeof(Wave8Byte)]);
@@ -3400,34 +3400,34 @@ src/fl/gfx/five_bit_hd_gamma.cpp.hpp|FL_ALWAYS_INLINE u16 scale16by8_nozero(u16 
 src/fl/gfx/five_bit_hd_gamma.cpp.hpp|FL_ALWAYS_INLINE void five_bit_pixel( u16 r16, u16 g16, u16 b16, u8 brightness, u16 bright_p1, bool apply_brightness, CRGB *out, u8 *out_power_5bit) {
 src/fl/gfx/five_bit_hd_gamma.cpp.hpp|FL_OPTIMIZE_FUNCTION void five_bit_hd_gamma_bitshift( fl::span<const CRGB> colors, CRGB colors_scale, u8 global_brightness, fl::span<CRGB> out_colors, fl::span<u8> out_power_5bit) {
 src/fl/gfx/five_bit_hd_gamma.cpp.hpp|FL_OPTIMIZE_FUNCTION void five_bit_hd_gamma_bitshift( fl::span<const CRGB> colors, CRGB colors_scale, u8 global_brightness, fl::span<CRGBA5> out) {
-src/fl/gfx/gradient.cpp.hpp|CRGB Gradient::colorAt(u8 index) const {
-src/fl/gfx/gradient.cpp.hpp|CRGB GradientInlined::colorAt(u8 index) const {
-src/fl/gfx/gradient.cpp.hpp|Copy(Gradient &owner) : mOwner(owner) {}
-src/fl/gfx/gradient.cpp.hpp|Gradient::Gradient(const Gradient &other) : mVariant(other.mVariant) {}
-src/fl/gfx/gradient.cpp.hpp|Gradient::Gradient(const GradientInlined &other) {
-src/fl/gfx/gradient.cpp.hpp|Visitor(u8 index) : index(index) {}
-src/fl/gfx/gradient.cpp.hpp|VisitorFill(span<const u8> indices, span<CRGB> output) : output(output), indices(indices) {
-src/fl/gfx/gradient.cpp.hpp|template <typename T> Gradient::Gradient(T *palette) { set(palette); }
-src/fl/gfx/gradient.cpp.hpp|template <typename T> void accept(const T &obj) {
-src/fl/gfx/gradient.cpp.hpp|template <typename T> void accept(const T &obj) {
-src/fl/gfx/gradient.cpp.hpp|void Gradient::fill(span<const u8> input, span<CRGB> output) const {
-src/fl/gfx/gradient.cpp.hpp|void Gradient::set(const CRGBPalette16 *palette) { mVariant = palette; }
-src/fl/gfx/gradient.cpp.hpp|void Gradient::set(const CRGBPalette256 *palette) { mVariant = palette; }
-src/fl/gfx/gradient.cpp.hpp|void Gradient::set(const CRGBPalette32 *palette) { mVariant = palette; }
-src/fl/gfx/gradient.cpp.hpp|void Gradient::set(const GradientFunction &func) { mVariant = func; }
-src/fl/gfx/gradient.cpp.hpp|void GradientInlined::fill(span<const u8> input, span<CRGB> output) const {
-src/fl/gfx/gradient.cpp.hpp|void accept(const CRGBPalette16 &palette) { mOwner.set(&palette); }
-src/fl/gfx/gradient.cpp.hpp|void accept(const CRGBPalette16 *palette) {
-src/fl/gfx/gradient.cpp.hpp|void accept(const CRGBPalette16 *palette) {
-src/fl/gfx/gradient.cpp.hpp|void accept(const CRGBPalette256 &palette) { mOwner.set(&palette); }
-src/fl/gfx/gradient.cpp.hpp|void accept(const CRGBPalette256 *palette) {
-src/fl/gfx/gradient.cpp.hpp|void accept(const CRGBPalette256 *palette) {
-src/fl/gfx/gradient.cpp.hpp|void accept(const CRGBPalette32 &palette) { mOwner.set(&palette); }
-src/fl/gfx/gradient.cpp.hpp|void accept(const CRGBPalette32 *palette) {
-src/fl/gfx/gradient.cpp.hpp|void accept(const CRGBPalette32 *palette) {
-src/fl/gfx/gradient.cpp.hpp|void accept(const Gradient::GradientFunction &func) {
-src/fl/gfx/gradient.cpp.hpp|void accept(const Gradient::GradientFunction &func) {
-src/fl/gfx/gradient.cpp.hpp|void accept(const GradientFunction &func) { mOwner.set(func); }
+src/fl/gfx/drawing/gradient.cpp.hpp|CRGB Gradient::colorAt(u8 index) const {
+src/fl/gfx/drawing/gradient.cpp.hpp|CRGB GradientInlined::colorAt(u8 index) const {
+src/fl/gfx/drawing/gradient.cpp.hpp|Copy(Gradient &owner) : mOwner(owner) {}
+src/fl/gfx/drawing/gradient.cpp.hpp|Gradient::Gradient(const Gradient &other) : mVariant(other.mVariant) {}
+src/fl/gfx/drawing/gradient.cpp.hpp|Gradient::Gradient(const GradientInlined &other) {
+src/fl/gfx/drawing/gradient.cpp.hpp|Visitor(u8 index) : index(index) {}
+src/fl/gfx/drawing/gradient.cpp.hpp|VisitorFill(span<const u8> indices, span<CRGB> output) : output(output), indices(indices) {
+src/fl/gfx/drawing/gradient.cpp.hpp|template <typename T> Gradient::Gradient(T *palette) { set(palette); }
+src/fl/gfx/drawing/gradient.cpp.hpp|template <typename T> void accept(const T &obj) {
+src/fl/gfx/drawing/gradient.cpp.hpp|template <typename T> void accept(const T &obj) {
+src/fl/gfx/drawing/gradient.cpp.hpp|void Gradient::fill(span<const u8> input, span<CRGB> output) const {
+src/fl/gfx/drawing/gradient.cpp.hpp|void Gradient::set(const CRGBPalette16 *palette) { mVariant = palette; }
+src/fl/gfx/drawing/gradient.cpp.hpp|void Gradient::set(const CRGBPalette256 *palette) { mVariant = palette; }
+src/fl/gfx/drawing/gradient.cpp.hpp|void Gradient::set(const CRGBPalette32 *palette) { mVariant = palette; }
+src/fl/gfx/drawing/gradient.cpp.hpp|void Gradient::set(const GradientFunction &func) { mVariant = func; }
+src/fl/gfx/drawing/gradient.cpp.hpp|void GradientInlined::fill(span<const u8> input, span<CRGB> output) const {
+src/fl/gfx/drawing/gradient.cpp.hpp|void accept(const CRGBPalette16 &palette) { mOwner.set(&palette); }
+src/fl/gfx/drawing/gradient.cpp.hpp|void accept(const CRGBPalette16 *palette) {
+src/fl/gfx/drawing/gradient.cpp.hpp|void accept(const CRGBPalette16 *palette) {
+src/fl/gfx/drawing/gradient.cpp.hpp|void accept(const CRGBPalette256 &palette) { mOwner.set(&palette); }
+src/fl/gfx/drawing/gradient.cpp.hpp|void accept(const CRGBPalette256 *palette) {
+src/fl/gfx/drawing/gradient.cpp.hpp|void accept(const CRGBPalette256 *palette) {
+src/fl/gfx/drawing/gradient.cpp.hpp|void accept(const CRGBPalette32 &palette) { mOwner.set(&palette); }
+src/fl/gfx/drawing/gradient.cpp.hpp|void accept(const CRGBPalette32 *palette) {
+src/fl/gfx/drawing/gradient.cpp.hpp|void accept(const CRGBPalette32 *palette) {
+src/fl/gfx/drawing/gradient.cpp.hpp|void accept(const Gradient::GradientFunction &func) {
+src/fl/gfx/drawing/gradient.cpp.hpp|void accept(const Gradient::GradientFunction &func) {
+src/fl/gfx/drawing/gradient.cpp.hpp|void accept(const GradientFunction &func) { mOwner.set(func); }
 src/fl/gfx/gradient.h|CRGB colorAt(u8 index) const;
 src/fl/gfx/gradient.h|CRGB colorAt(u8 index) const;
 src/fl/gfx/gradient.h|Gradient &operator=(const Gradient &other);
@@ -3455,11 +3455,11 @@ src/fl/gfx/hsv16.cpp.hpp|static inline u16 scale8_to_16_accurate(u8 x) {
 src/fl/gfx/hsv16.h|CRGB ToRGB() const;
 src/fl/gfx/hsv16.h|CRGB colorBoost(EaseType saturation_function = EaseType::EASE_IN_QUAD, EaseType luminance_function = EaseType::EASE_NONE) const;
 src/fl/gfx/hsv16.h|operator CRGB() const { return ToRGB(); }
-src/fl/gfx/leds.cpp.hpp|CRGB &Leds::empty() {
-src/fl/gfx/leds.cpp.hpp|CRGB &Leds::operator()(int x, int y) {
-src/fl/gfx/leds.cpp.hpp|Leds::Leds(CRGB *leds, const XYMap &xymap) : mXyMap(xymap), mLeds(leds, xymap.getTotal()) {}
-src/fl/gfx/leds.cpp.hpp|Leds::Leds(CRGB *leds, u16 width, u16 height) : Leds(leds, XYMap::constructRectangularGrid(width, height)) {}
-src/fl/gfx/leds.cpp.hpp|const CRGB &Leds::operator()(int x, int y) const {
+src/fl/gfx/drawing/leds.cpp.hpp|CRGB &Leds::empty() {
+src/fl/gfx/drawing/leds.cpp.hpp|CRGB &Leds::operator()(int x, int y) {
+src/fl/gfx/drawing/leds.cpp.hpp|Leds::Leds(CRGB *leds, const XYMap &xymap) : mXyMap(xymap), mLeds(leds, xymap.getTotal()) {}
+src/fl/gfx/drawing/leds.cpp.hpp|Leds::Leds(CRGB *leds, u16 width, u16 height) : Leds(leds, XYMap::constructRectangularGrid(width, height)) {}
+src/fl/gfx/drawing/leds.cpp.hpp|const CRGB &Leds::operator()(int x, int y) const {
 src/fl/gfx/leds.h|CRGB &at(int x, int y) { return (*this)(x, y); }
 src/fl/gfx/leds.h|CRGB &operator()(int x, int y);
 src/fl/gfx/leds.h|Leds(CRGB *leds, const XYMap &xymap);
@@ -3513,14 +3513,14 @@ src/fl/gfx/pixel_iterator_any.h|void accept(PixelController<RBG>& controller) {
 src/fl/gfx/pixel_iterator_any.h|void accept(PixelController<RGB>& controller) {
 src/fl/gfx/pixel_iterator_any.h|void init(PixelController<RGB> &controller, EOrder newOrder) {
 src/fl/gfx/pixel_iterator_any.h|void setXYMap(const fl::shared_ptr<const XYMap>& xymap) {
-src/fl/gfx/raster_sparse.cpp.hpp|void XYRasterU8Sparse::draw(const CRGB &color, Leds *leds) {
-src/fl/gfx/raster_sparse.cpp.hpp|void XYRasterU8Sparse::draw(const CRGB &color, const XYMap &xymap, fl::span<CRGB> out) {
-src/fl/gfx/raster_sparse.cpp.hpp|void XYRasterU8Sparse::drawGradient(const Gradient &gradient, Leds *leds) {
-src/fl/gfx/raster_sparse.cpp.hpp|void XYRasterU8Sparse::drawGradient(const Gradient &gradient, const XYMap &xymap, fl::span<CRGB> out) {
-src/fl/gfx/raster_sparse.cpp.hpp|void XYRasterU8Sparse::rasterize(const span<const Tile2x2_u8> &tiles) {
-src/fl/gfx/raster_sparse.cpp.hpp|void XYRasterU8Sparse::rasterize_internal(const Tile2x2_u8 &tile, const rect<u16> *optional_bounds) {
-src/fl/gfx/raster_sparse.cpp.hpp|void fl::XYRasterSparse_RGB8::draw(Leds *leds) {
-src/fl/gfx/raster_sparse.cpp.hpp|void fl::XYRasterSparse_RGB8::draw(const XYMap &xymap, fl::span<CRGB> out) {
+src/fl/gfx/drawing/raster_sparse.cpp.hpp|void XYRasterU8Sparse::draw(const CRGB &color, Leds *leds) {
+src/fl/gfx/drawing/raster_sparse.cpp.hpp|void XYRasterU8Sparse::draw(const CRGB &color, const XYMap &xymap, fl::span<CRGB> out) {
+src/fl/gfx/drawing/raster_sparse.cpp.hpp|void XYRasterU8Sparse::drawGradient(const Gradient &gradient, Leds *leds) {
+src/fl/gfx/drawing/raster_sparse.cpp.hpp|void XYRasterU8Sparse::drawGradient(const Gradient &gradient, const XYMap &xymap, fl::span<CRGB> out) {
+src/fl/gfx/drawing/raster_sparse.cpp.hpp|void XYRasterU8Sparse::rasterize(const span<const Tile2x2_u8> &tiles) {
+src/fl/gfx/drawing/raster_sparse.cpp.hpp|void XYRasterU8Sparse::rasterize_internal(const Tile2x2_u8 &tile, const rect<u16> *optional_bounds) {
+src/fl/gfx/drawing/raster_sparse.cpp.hpp|void fl::XYRasterSparse_RGB8::draw(Leds *leds) {
+src/fl/gfx/drawing/raster_sparse.cpp.hpp|void fl::XYRasterSparse_RGB8::draw(const XYMap &xymap, fl::span<CRGB> out) {
 src/fl/gfx/raster_sparse.h|XYRasterSparse_RGB8 &clear() { return reset(); }
 src/fl/gfx/raster_sparse.h|XYRasterSparse_RGB8 &reset() {
 src/fl/gfx/raster_sparse.h|XYRasterSparse_RGB8(u16 width, u16 height) {
@@ -3568,14 +3568,14 @@ src/fl/gfx/raster_sparse.h|void setSize(u16 width, u16 height) {
 src/fl/gfx/raster_sparse.h|void setSize(u16 width, u16 height) {
 src/fl/gfx/raster_sparse.h|void write(const vec2<u16> &pt, const CRGB &color) {
 src/fl/gfx/raster_sparse.h|void write(const vec2<u16> &pt, u8 value) {
-src/fl/gfx/rectangular_draw_buffer.cpp.hpp|DrawItem::DrawItem(u8 pin, u16 numLeds, bool is_rgbw) : mPin(pin), mIsRgbw(is_rgbw) {
-src/fl/gfx/rectangular_draw_buffer.cpp.hpp|bool RectangularDrawBuffer::onQueuingDone() {
-src/fl/gfx/rectangular_draw_buffer.cpp.hpp|bool RectangularDrawBuffer::onQueuingStart() {
-src/fl/gfx/rectangular_draw_buffer.cpp.hpp|span<u8> RectangularDrawBuffer::getLedsBufferBytesForPin(u8 pin, bool clear_first) {
-src/fl/gfx/rectangular_draw_buffer.cpp.hpp|u32 RectangularDrawBuffer::getMaxBytesInStrip() const {
-src/fl/gfx/rectangular_draw_buffer.cpp.hpp|u32 RectangularDrawBuffer::getTotalBytes() const {
-src/fl/gfx/rectangular_draw_buffer.cpp.hpp|void RectangularDrawBuffer::getBlockInfo(u32 *num_strips, u32 *bytes_per_strip, u32 *total_bytes) const {
-src/fl/gfx/rectangular_draw_buffer.cpp.hpp|void RectangularDrawBuffer::queue(const DrawItem &item) {
+src/fl/gfx/drawing/rectangular_draw_buffer.cpp.hpp|DrawItem::DrawItem(u8 pin, u16 numLeds, bool is_rgbw) : mPin(pin), mIsRgbw(is_rgbw) {
+src/fl/gfx/drawing/rectangular_draw_buffer.cpp.hpp|bool RectangularDrawBuffer::onQueuingDone() {
+src/fl/gfx/drawing/rectangular_draw_buffer.cpp.hpp|bool RectangularDrawBuffer::onQueuingStart() {
+src/fl/gfx/drawing/rectangular_draw_buffer.cpp.hpp|span<u8> RectangularDrawBuffer::getLedsBufferBytesForPin(u8 pin, bool clear_first) {
+src/fl/gfx/drawing/rectangular_draw_buffer.cpp.hpp|u32 RectangularDrawBuffer::getMaxBytesInStrip() const {
+src/fl/gfx/drawing/rectangular_draw_buffer.cpp.hpp|u32 RectangularDrawBuffer::getTotalBytes() const {
+src/fl/gfx/drawing/rectangular_draw_buffer.cpp.hpp|void RectangularDrawBuffer::getBlockInfo(u32 *num_strips, u32 *bytes_per_strip, u32 *total_bytes) const {
+src/fl/gfx/drawing/rectangular_draw_buffer.cpp.hpp|void RectangularDrawBuffer::queue(const DrawItem &item) {
 src/fl/gfx/rectangular_draw_buffer.h|DrawItem(u8 pin, u16 numLeds, bool is_rgbw);
 src/fl/gfx/rectangular_draw_buffer.h|bool onQueuingDone();
 src/fl/gfx/rectangular_draw_buffer.h|bool onQueuingStart();
@@ -3594,14 +3594,14 @@ src/fl/gfx/rgbw.cpp.hpp|void rgb_2_rgbw_user_function(u16 w_color_temperature, u
 src/fl/gfx/rgbw.cpp.hpp|void rgb_2_rgbw_white_boosted(u16 w_color_temperature, u8 r, u8 g, u8 b, u8 r_scale, u8 g_scale, u8 b_scale, u8 *out_r, u8 *out_g, u8 *out_b, u8 *out_w) {
 src/fl/gfx/rgbw.cpp.hpp|void rgbw_partial_reorder(EOrderW w_placement, u8 b0, u8 b1, u8 b2, u8 w, u8 *out_b0, u8 *out_b1, u8 *out_b2, u8 *out_b3) {
 src/fl/gfx/rgbw.cpp.hpp|void set_rgb_2_rgbw_function(rgb_2_rgbw_function func) {
-src/fl/gfx/sample.cpp.hpp|CRGB sample(const CRGB *grid, const XYMap &xyMap, float x, float y, SampleMode mode) {
-src/fl/gfx/sample.cpp.hpp|CRGB sampleBilinear(const CRGB *grid, const XYMap &xyMap, float x, float y) {
-src/fl/gfx/sample.cpp.hpp|CRGB sampleNearest(const CRGB *grid, const XYMap &xyMap, float x, float y) {
+src/fl/gfx/drawing/sample.cpp.hpp|CRGB sample(const CRGB *grid, const XYMap &xyMap, float x, float y, SampleMode mode) {
+src/fl/gfx/drawing/sample.cpp.hpp|CRGB sampleBilinear(const CRGB *grid, const XYMap &xyMap, float x, float y) {
+src/fl/gfx/drawing/sample.cpp.hpp|CRGB sampleNearest(const CRGB *grid, const XYMap &xyMap, float x, float y) {
 src/fl/gfx/sample.h|CRGB sample(const CRGB *grid, const XYMap &xyMap, float x, float y, SampleMode mode = SampleMode::SAMPLE_BILINEAR);
 src/fl/gfx/sample.h|CRGB sampleBilinear(const CRGB *grid, const XYMap &xyMap, float x, float y);
 src/fl/gfx/sample.h|CRGB sampleNearest(const CRGB *grid, const XYMap &xyMap, float x, float y);
-src/fl/gfx/splat.cpp.hpp|Tile2x2_u8 splat(vec2f xy) {
-src/fl/gfx/splat.cpp.hpp|static u8 to_uint8(float f) {
+src/fl/gfx/drawing/splat.cpp.hpp|Tile2x2_u8 splat(vec2f xy) {
+src/fl/gfx/drawing/splat.cpp.hpp|static u8 to_uint8(float f) {
 src/fl/gfx/splat.h|Tile2x2_u8 splat(vec2f xy);
 src/fl/gfx/tile2x2.cpp.hpp|Tile2x2_u8 Tile2x2_u8::MaxTile(const Tile2x2_u8 &a, const Tile2x2_u8 &b) {
 src/fl/gfx/tile2x2.cpp.hpp|Tile2x2_u8_wrap::Entry &Tile2x2_u8_wrap::at(u16 x, u16 y) {
@@ -3615,7 +3615,7 @@ src/fl/gfx/tile2x2.cpp.hpp|rect<u16> Tile2x2_u8::bounds() const {
 src/fl/gfx/tile2x2.cpp.hpp|static vec2<u16> wrap(const vec2<u16> &v, const vec2<u16> &size) {
 src/fl/gfx/tile2x2.cpp.hpp|static vec2<u16> wrap_x(const vec2<u16> &v, const u16 width) {
 src/fl/gfx/tile2x2.cpp.hpp|u8 Tile2x2_u8::maxValue() const {
-src/fl/gfx/tile2x2.cpp.hpp|void Tile2x2_u8::Rasterize(const span<const Tile2x2_u8> &tiles, XYRasterU8Sparse *out_raster) {
+src/fl/gfx/drawing/tile2x2_raster.cpp.hpp|void Tile2x2_u8::Rasterize(const span<const Tile2x2_u8> &tiles, XYRasterU8Sparse *out_raster) {
 src/fl/gfx/tile2x2.cpp.hpp|void Tile2x2_u8::draw(const CRGB &color, const XYMap &xymap, fl::span<CRGB> out) const {
 src/fl/gfx/tile2x2.cpp.hpp|void Tile2x2_u8::scale(u8 scale) {
 src/fl/gfx/tile2x2.h|Entry &at(u16 x, u16 y);
@@ -6456,26 +6456,26 @@ src/fl/stl/string.cpp.hpp|string &string::append(const XYMap &map) {
 src/fl/stl/string.cpp.hpp|string &string::append(const audio::fft::Bins &str) {
 src/fl/stl/string.cpp.hpp|string &string::append(const json_value& val) {
 src/fl/stl/string.cpp.hpp|string &string::appendCRGB(const CRGB &rgb) {
-src/fl/stl/string.cpp.hpp|string& string::intern() {
+src/fl/stl/interner/string_intern.cpp.hpp|string& string::intern() {
 src/fl/stl/string.cpp.hpp|void string::compileTimeAssertions() {
 src/fl/stl/string.cpp.hpp|void string::swap(string &other) {
-src/fl/stl/string_interner.cpp.hpp|StringInterner& global_interner() {
-src/fl/stl/string_interner.cpp.hpp|StringInterner::StringInterner() {}
-src/fl/stl/string_interner.cpp.hpp|bool StringInterner::contains(const char* str) const {
-src/fl/stl/string_interner.cpp.hpp|bool StringInterner::contains(const string_view& sv) const {
-src/fl/stl/string_interner.cpp.hpp|bool StringInterner::empty() const {
-src/fl/stl/string_interner.cpp.hpp|fl::size StringInterner::size() const {
-src/fl/stl/string_interner.cpp.hpp|fl::string StringInterner::intern(const char* str) {
-src/fl/stl/string_interner.cpp.hpp|fl::string StringInterner::intern(const fl::span<const char>& sp) {
-src/fl/stl/string_interner.cpp.hpp|fl::string StringInterner::intern(const fl::string& str) {
-src/fl/stl/string_interner.cpp.hpp|fl::string StringInterner::intern(const string_view& sv) {
-src/fl/stl/string_interner.cpp.hpp|fl::string intern(const char* str) {
-src/fl/stl/string_interner.cpp.hpp|fl::string intern(const fl::span<const char>& sp) {
-src/fl/stl/string_interner.cpp.hpp|fl::string intern(const fl::string& str) {
-src/fl/stl/string_interner.cpp.hpp|fl::string intern(const string_view& sv) {
-src/fl/stl/string_interner.cpp.hpp|static fl::mutex& global_interner_mutex() {
-src/fl/stl/string_interner.cpp.hpp|void StringInterner::clear() {
-src/fl/stl/string_interner.cpp.hpp|void StringInterner::reserve(fl::size count) {
+src/fl/stl/interner/string_interner.cpp.hpp|StringInterner& global_interner() {
+src/fl/stl/interner/string_interner.cpp.hpp|StringInterner::StringInterner() {}
+src/fl/stl/interner/string_interner.cpp.hpp|bool StringInterner::contains(const char* str) const {
+src/fl/stl/interner/string_interner.cpp.hpp|bool StringInterner::contains(const string_view& sv) const {
+src/fl/stl/interner/string_interner.cpp.hpp|bool StringInterner::empty() const {
+src/fl/stl/interner/string_interner.cpp.hpp|fl::size StringInterner::size() const {
+src/fl/stl/interner/string_interner.cpp.hpp|fl::string StringInterner::intern(const char* str) {
+src/fl/stl/interner/string_interner.cpp.hpp|fl::string StringInterner::intern(const fl::span<const char>& sp) {
+src/fl/stl/interner/string_interner.cpp.hpp|fl::string StringInterner::intern(const fl::string& str) {
+src/fl/stl/interner/string_interner.cpp.hpp|fl::string StringInterner::intern(const string_view& sv) {
+src/fl/stl/interner/string_interner.cpp.hpp|fl::string intern(const char* str) {
+src/fl/stl/interner/string_interner.cpp.hpp|fl::string intern(const fl::span<const char>& sp) {
+src/fl/stl/interner/string_interner.cpp.hpp|fl::string intern(const fl::string& str) {
+src/fl/stl/interner/string_interner.cpp.hpp|fl::string intern(const string_view& sv) {
+src/fl/stl/interner/string_interner.cpp.hpp|static fl::mutex& global_interner_mutex() {
+src/fl/stl/interner/string_interner.cpp.hpp|void StringInterner::clear() {
+src/fl/stl/interner/string_interner.cpp.hpp|void StringInterner::reserve(fl::size count) {
 src/fl/stl/string_interner.h|StringInterner& global_interner();
 src/fl/stl/string_interner.h|bool contains(const char* str) const;
 src/fl/stl/string_interner.h|bool contains(const string_view& sv) const;

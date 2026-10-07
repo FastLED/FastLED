@@ -296,13 +296,34 @@ Lint initially required a moved blur implementation header-location comment;
 that is fixed and full lint passes. Existing legacy multiple SPI/RX and modern
 SPI/RX compile. All 322 native sanitizer units and 96 examples pass; full
 Python passes (351.98 s); root code review passes. No physical hardware
-test claimed. Source is ready to publish and measure in hosted CI.
+test claimed. Source published at 9dbea6ec07; hosted run 37604777484 measures 356,227 B, matching the local +16 B
+relationship. Its gate flags the measured 40 B cost over the tenth-pass
+baseline; the baseline now records that exact intentional cost.
 
 Use the default dynamic driver configuration. Keep scheduler pumping, network
 yielding, multiple strips, and reconfiguration available. Optimize symbol reachability
 and redundant state first, then use actual board images to decide further changes.
 The original reporter's build and the controlled fbuild comparison are separate
 measurements; only compare matching examples, flags, and frameworks.
+
+Twelfth pass plan:
+- [x] Isolate closed drawing implementation and its Tile2x2 raster bridge.
+- [x] Isolate configuration and waveform groups with strong driver callers.
+- [x] Isolate interner and four string entrypoints, keeping lazy state/locking.
+- [x] Measure all matching profiles, verify RMT4 and SDK examples; run
+  integrated lint/full suites, review and publish measured results.
+
+Twelfth final-source images: legacy real-RMT4 319,453 B / 17,648 B DRAM
+(-6,920 B); modern Blink 304,539 B, gist 297,391 B, S3 356,075 B.
+RAM unchanged; allocated FastLED unwind tables 44,164 B (-6,860 B),
+remaining same-profile 3.10.3 gap 56,696 B flash / 376 B DRAM. Full Python
+passes (290.13 s); native executes 321 units/96 examples successfully, but
+audit finds one cached standalone probe omitted versus 418 registered tests.
+The omitted layout probe passes in its direct debug run, giving coverage of
+all 322 units and 96 examples; runner discovery will be fixed
+to include cached registered probes. Interner source-order targeted rerun
+passes; final lint and modern ColorProfile SDK build pass. Other SDK
+SPI/RX builds pass. Root review passes; C++ source is ready to publish. Artifacts: twelfth-combined-*.
 
 ## ESP32-S3 binary-size Batch 3 (#2856)
 

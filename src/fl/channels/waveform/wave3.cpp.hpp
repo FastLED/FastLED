@@ -1,3 +1,5 @@
+// ok no header - public declarations remain in fl/channels/wave3.h
+
 /// @file wave3.cpp.hpp
 /// @brief Wave3 waveform generation and transposition implementation
 ///

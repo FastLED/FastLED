@@ -1,3 +1,4 @@
+// ok no header: public declarations remain in fl/gfx.
 #include "fl/stl/stdint.h"
 
 #include "fl/gfx/draw_visitor.h"

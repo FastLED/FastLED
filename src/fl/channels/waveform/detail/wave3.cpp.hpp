@@ -1,3 +1,5 @@
+// ok no header - public declarations remain in fl/channels/detail/wave3.h
+
 /// @file wave3.cpp.hpp
 /// @brief Out-of-line definitions for wave3 transposition internals.
 ///

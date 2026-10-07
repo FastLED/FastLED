@@ -1,4 +1,4 @@
-#include "fl/stl/string_interner.h"
+#include "fl/stl/string_interner.h" // ok no header - public declaration remains in parent directory.
 #include "fl/stl/singleton.h"
 #include "fl/stl/int.h"
 #include "fl/stl/string.h"
