@@ -112,6 +112,9 @@ move is byte-for-byte unchanged. Global interner, UI and allocator sanitizer
 tests pass. Hosted ratchet tightening follows the measured final hosted image.
 Full forced native run passes 319/319 units and 95/95 examples in 147.33 s;
 current-tree C++ lint and the 18-file code review pass.
+Hosted run 37584376133 measures image_flash 356,691 B, 16 B above local,
+and static RAM 77,392 B. Pin this exact value; its first gate failed only
+because the additional 988 B saving had not yet been claimed in the ratchet.
 
 Use the default dynamic driver configuration. Keep scheduler pumping, network
 yielding, multiple strips, and reconfiguration available. Optimize symbol reachability
