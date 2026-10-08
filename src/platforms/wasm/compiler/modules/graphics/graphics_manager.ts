@@ -547,9 +547,8 @@ export class GraphicsManager {
       const stripData = screenMap.strips[strip_id];
       const pixelCount = data.length / 3;
       const { map } = stripData;
-      const bounds = screenMap._cachedBounds || computeScreenMapBounds(screenMap);
-      const min_x = bounds.absMin[0];
-      const min_y = bounds.absMin[1];
+      const min_x = this._cachedGlobalBounds.minX;
+      const min_y = this._cachedGlobalBounds.minY;
       const x_array = map.x;
       const y_array = map.y;
       const len = Math.min(x_array.length, y_array.length);
