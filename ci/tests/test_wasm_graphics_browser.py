@@ -31,7 +31,11 @@ def graphics_page() -> Iterator[Page]:
             path = urlparse(route.request.url).path.lstrip("/")
             if not path:
                 route.fulfill(
-                    content_type="text/html", body="<canvas id='canvas'></canvas>"
+                    content_type="text/html",
+                    body="""<script type="importmap">{"imports": {
+                        "@fastled/gfx/core": "/node_modules/@fastled/gfx/dist/core.js",
+                        "three": "/node_modules/three/build/three.module.js"
+                    }}</script><canvas id='canvas'></canvas>""",
                 )
             else:
                 route.fulfill(
@@ -123,3 +127,67 @@ def test_strips_share_coordinates(graphics_page: Page, offscreen: bool) -> None:
             "corner": [0, 0, 255, 255],
             "error": 0,
         }
+
+
+@pytest.mark.parametrize("offscreen", [False, True])
+@pytest.mark.parametrize("diameter", [-1, 1])
+@pytest.mark.parametrize("dimensions", [(3, 48), (48, 3)])
+def test_default_renderer_fits_extreme_aspect_ratio(
+    graphics_page: Page, offscreen: bool, diameter: float, dimensions: tuple[int, int]
+) -> None:
+    result = graphics_page.evaluate(
+        """async ({offscreen, diameter, dimensions: [width, height]}) => {
+        const { GraphicsManagerGfx } = await import('/modules/graphics/graphics_manager_gfx.ts');
+        const canvas = offscreen ? new OffscreenCanvas(1, 1) : document.createElement('canvas');
+        const manager = new GraphicsManagerGfx({canvas});
+        const x = [], y = [];
+        for (let row = 0; row < height; row++) {
+            for (let col = 0; col < width; col++) { x.push(col); y.push(row); }
+        }
+        manager.updateScreenMap({0: {strips: {0: {map: {x, y}, diameter}}}});
+        manager.updateCanvas([{strip_id: 0, pixel_data: x.flatMap(() => [255, 0, 0])}]);
+        const gl = canvas.getContext('webgl2');
+        const result = await new Promise((resolve, reject) => {
+            let request;
+            const timeout = setTimeout(() => {
+                cancelAnimationFrame(request);
+                manager.dispose();
+                gl.getExtension('WEBGL_lose_context').loseContext();
+                reject(new Error('Default renderer produced no frame within 5 seconds'));
+            }, 5000);
+            function sample() {
+                if (manager.core.getStats().framesRendered === 0) {
+                    request = requestAnimationFrame(sample);
+                    return;
+                }
+                const pixels = new Uint8Array(gl.drawingBufferWidth * gl.drawingBufferHeight * 4);
+                gl.readPixels(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight,
+                              gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+                let lit = 0;
+                for (let i = 0; i < pixels.length; i += 4) { if (pixels[i] > 100) lit++; }
+                clearTimeout(timeout);
+                resolve({width: canvas.width, height: canvas.height,
+                    bufferWidth: gl.drawingBufferWidth, bufferHeight: gl.drawingBufferHeight,
+                    maxTexture: gl.getParameter(gl.MAX_TEXTURE_SIZE),
+                    maxRenderbuffer: gl.getParameter(gl.MAX_RENDERBUFFER_SIZE),
+                    viewport: Array.from(gl.getParameter(gl.MAX_VIEWPORT_DIMS)),
+                    lit, error: gl.getError()});
+            }
+            request = requestAnimationFrame(sample);
+        });
+        manager.dispose();
+        gl.getExtension('WEBGL_lose_context').loseContext();
+        return result;
+    }""",
+        {"offscreen": offscreen, "diameter": diameter, "dimensions": dimensions},
+    )
+    assert result["error"] == 0
+    assert result["lit"] > 0
+    assert result["width"] == result["bufferWidth"]
+    assert result["height"] == result["bufferHeight"]
+    assert result["width"] <= min(
+        result["maxTexture"], result["maxRenderbuffer"], result["viewport"][0]
+    )
+    assert result["height"] <= min(
+        result["maxTexture"], result["maxRenderbuffer"], result["viewport"][1]
+    )

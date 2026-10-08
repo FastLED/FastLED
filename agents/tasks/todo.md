@@ -6,7 +6,7 @@
 
 - [x] #4776: reproduce unset diameter in Chromium, fix the fallback, validate and publish a focused PR.
 - [x] #4777: reproduce separate strip coordinates in Chromium, use shared bounds, validate and publish a focused PR.
-- [ ] #4778: reproduce oversized 3D rendering, cap drawing buffer to context limits, validate and publish a focused PR.
+- [x] #4778: reproduce legacy oversized rendering, verify the current bounded renderer, add regressions and publish a focused PR.
 
 ### #4776 validation
 
@@ -32,6 +32,41 @@ All 14 browser tests pass with
 `bash lint` and the WASM example compile pass. The compiled unmodified
 WasmScreenCoords page shows both colors (535 red and 463 blue screenshot pixels).
 Code review found no blocking findings. PR #4781 supplies the preceding diameter fix.
+
+### #4778 validation
+
+The historical renderer from the parent of `0c7bb67e3c` reproduces the exact
+1280×30080 canvas for a 3×48 map. Chromium clamps its drawing buffer to
+1280×8192 on this machine (both texture and renderbuffer limits are 8192).
+PR #3621 already removed that renderer and selected `GraphicsManagerGfx`
+for the default main-thread and worker paths. The pinned gfx 0.1.1 core fits
+coordinates into a square and renders at 2048×2048, independent of layout
+aspect ratio. Its canvas and drawing buffer match and stay within context limits.
+Added eight real WebGL regressions for 3×48 and 48×3, diameters -1 and 1,
+and HTMLCanvas/OffscreenCanvas; each requires visible red pixels, matching
+canvas/buffer dimensions, no GL error and dimensions within texture,
+renderbuffer and viewport limits. All 22 browser cases and `bash lint` pass.
+No production change is needed for this issue on current master. The new
+tests require frontend dependencies (installed by `bash compile wasm`) and
+Playwright Chromium, and run through the same focused command above.
+Code review found no blocking findings; the browser wait has a five-second timeout.
+
+### Follow-up: compiled app screenshots
+
+Compiled six app snapshots and ran nine full-page/worker scenarios in Chromium.
+Before/after #4776 screenshots change from zero colored LED pixels to 1,050.
+Before/after #4777 screenshots change from 535 red / zero blue pixels to 535
+red / 487 blue, with the two colors centered at 25% / 73% of the canvas width.
+The exact 144-LED 3×48 rainbow sketch renders and animates in the default
+renderer on desktop and phone viewport emulation, with both unset and explicit
+diameters. Its canvas is 2048×2048. The same unset-diameter sketch also renders
+and animates at `?gfx=0` (42×672 canvas). All nine scenarios have zero browser
+errors; screenshots were visually inspected. Software WebGL and phone viewport
+emulation do not establish physical Android performance or device behavior.
+Local evidence: `.build/wasm-manual-validation/REPORT.md`, PNG screenshots,
+`screenshot-results.json`, exact scratch sketches and compile logs. Temporary
+source changes were restored after compilation; the AutoResearch fixture asset
+was staged in the served app snapshots.
 
 
 ## Memory meta #4737: sequential local optimization
