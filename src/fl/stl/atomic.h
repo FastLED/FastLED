@@ -47,8 +47,10 @@ enum memory_order { // ok plain enum
 
 template <typename T> class AtomicFake {
   public:
-    AtomicFake() FL_NO_EXCEPT : mValue{} {}
-    explicit AtomicFake(T value) FL_NO_EXCEPT : mValue(value) {}
+    // constexpr so namespace-scope atomics are constant-initialized instead
+    // of retaining a startup constructor (#4788).
+    constexpr AtomicFake() FL_NO_EXCEPT : mValue{} {}
+    constexpr explicit AtomicFake(T value) FL_NO_EXCEPT : mValue(value) {}
 
     // Non-copyable and non-movable
     AtomicFake(const AtomicFake&) FL_NO_EXCEPT = delete;

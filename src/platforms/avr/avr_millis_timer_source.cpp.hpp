@@ -14,7 +14,11 @@
 #else
 
 #ifndef FASTLED_DEFINE_TIMER_WEAK_SYMBOL
-#if !defined(MILLIS_USE_TIMERA0) \
+#if defined(FL_IS_AVR_ATMEGA)
+// Classic ATmega cores export timer0_millis (or timer0_millis_count on
+// Teensy) and MS_COUNTER binds to it, so timer_millis is never used (#4788).
+#define FASTLED_DEFINE_TIMER_WEAK_SYMBOL 0
+#elif !defined(MILLIS_USE_TIMERA0) \
     || defined(MILLIS_USE_TIMERD0) \
     || defined(__AVR_ATtinyxy6__) || defined(ARDUINO_attinyxy6) \
     || defined(__AVR_ATtinyxy7__) || defined(ARDUINO_attinyxy7) \

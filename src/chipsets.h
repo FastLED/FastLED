@@ -498,11 +498,6 @@ class WS2814Controller
     void init() FL_NO_EXCEPT override {
         Base::init();
     }
-
-  protected:
-    const char* fixedWhiteChannelChipset() const FL_NO_EXCEPT override {
-        return "WS2814";
-    }
 };
 
 /// WS2818 RGB controller with backup data input.
@@ -626,11 +621,6 @@ class LC8816EController
 
     void init() FL_NO_EXCEPT override {
         Base::init();
-    }
-
-  protected:
-    const char* fixedWhiteChannelChipset() const FL_NO_EXCEPT override {
-        return "LC8816E";
     }
 };
 

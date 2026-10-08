@@ -21,11 +21,13 @@ CLEDController::~CLEDController() FL_NO_EXCEPT {
 }
 
 /// Create an led controller object, add it to the chain of controllers
-CLEDController::CLEDController() FL_NO_EXCEPT : mLeds(), mLegacySettings() {
+CLEDController::CLEDController() FL_NO_EXCEPT : mLeds(), mLegacySettings(),
+      mEnabled(true), mFixedWhiteChannel(false) {
     addToList();
 }
 
-CLEDController::CLEDController(RegistrationMode mode) FL_NO_EXCEPT : mLeds(), mLegacySettings() {
+CLEDController::CLEDController(RegistrationMode mode) FL_NO_EXCEPT : mLeds(), mLegacySettings(),
+      mEnabled(true), mFixedWhiteChannel(false) {
     if (mode == RegistrationMode::AutoRegister) {
         addToList();
     }
