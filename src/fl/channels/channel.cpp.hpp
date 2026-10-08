@@ -964,9 +964,11 @@ void Channel::encodeFrame(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) FL_NO_EXC
     // Encode pixels with the writer selected once from the immutable chipset.
     auto& data = mChannelData->getData();
     data.clear();
-    if (getRgbww().active()) {
+    const auto* rgbww = mLegacySettings.mWhiteCfg.ptr<Rgbww>();
+    const auto* rgbw = mLegacySettings.mWhiteCfg.ptr<Rgbw>();
+    if (rgbww != nullptr && rgbww->active()) {
         mChannelData->setPixelFormat(ChannelPixelFormat::RGBWW);
-    } else if (getRgbw().active()) {
+    } else if (rgbw != nullptr && rgbw->active()) {
         mChannelData->setPixelFormat(ChannelPixelFormat::RGBW);
     } else {
         mChannelData->setPixelFormat(ChannelPixelFormat::RGB);
