@@ -2,10 +2,11 @@
 
 Issue: [FastLED #4773](https://github.com/FastLED/FastLED/issues/4773).
 Implementation branch: `fix/esp-noexcept-4773`, baseline `61d6ccffeb`.
-This is a working evidence record; exact-SHA validation gates are pending.
-Fresh clean measurements of checkpoint 001a0dc17e reproduced the four image
-results below after the broad migration. Subsequent public-header coverage
-repairs and final exact-SHA CI gates are tracked in PR #4774.
+This record preserves local measurements and coverage boundaries. Exact-SHA
+CI conclusions and the merge decision are published on
+[PR #4774](https://github.com/FastLED/FastLED/pull/4774).
+Fresh measurements at source checkpoint bea5017753 reproduce the four image
+results below after the annotation and public-header repairs.
 
 ## Contract
 
@@ -21,7 +22,8 @@ Full lint and 86 focused tests passed. ESP32 QEMU strict10 passed. Full Python
 passed 1,836 tests and 3,257 subtests (25 skips, two expected failures). Native
 debug passed 318/319 units and 95/95 examples, exposing a test-only semaphore
 phase-observation race; explicit acknowledgement replaced its timing assumption,
-and targeted debug verification passed. Full native verification is running again.
+and targeted debug verification passed. Subsequent full native debug verification
+passed 318 units and 95 examples.
 Ordinary examples do not use the library annotation macro. AutoResearch is an
 explicit maintainer-approved exception for testing requirements.
 
@@ -70,6 +72,22 @@ input sections. This proves retained metadata; proving each individual code
 symbol is rooted specifically by its frame requires relocation inspection.
 Do not conflate retained frames with a complete relocation graph of all code.
 
+One concrete archive selection path in the preserved before map is:
+
+```text
+src_bbc1.o -> AudioManager::instance() -> extracts fl.audio+_8e53.o
+                                          |
+                         function text is discarded by section GC
+                                          |
+                         audio .eh_frame remains allocated: 29,556 B
+                         because SDK KEEP retains frame metadata
+```
+
+Before-map lines27–28 record extraction, lines37774–37775 discarded text,
+line131839 the allocated frame input, and line169062 the cross-reference.
+The original before ELF/FDE relocations were not preserved, so this is an
+object/section graph rather than a complete symbol-to-FDE graph.
+
 ## What the measurements establish
 
 Allocated flash savings for legacy ESP32, S3 and C3 were reproduced
@@ -86,8 +104,9 @@ Clean Blink rebuilds reproduced the same allocated image measurements:
 | ESP32-C3 SDK 5.3.2 | 368,202 | 337,294 | 30,908 | 14,108 | 14,100 |
 
 Maps and bloat reports are preserved under `.build/size-4773`, prefixed
-`before-`, `policy-only-`, `clean-after-` and `final-`. Fresh `final-` reports
-record checkpoint 001a0dc17e. CI run37699074987 measured S3 image350383 against
+`before-`, `policy-only-`, `clean-after-`, `final-`, `head-` and
+`merged-candidate-`. The latter records source checkpoint bea5017753.
+CI run37699074987 measured S3 image350383 against
 its pinned366603 baseline (16220 B saving); this is within16 B of the local
 350367 result. The CI ratchet is lowered to350383 to claim that saving.
 Raw board flash/RAM summaries can include IRAM and must not replace allocated
@@ -102,6 +121,49 @@ This change does not claim to remove all system exception support.
 `fl::Singleton` can address independently rooted global initialization/storage;
 it does not prevent the compiler emitting EH metadata or override linker KEEP.
 Neither a singleton migration nor splitting unity groups is required here.
+
+## ESP compile inventory
+
+The local family matrix and feature logs establish these resolved profiles.
+Final exact-SHA hosted results are linked from PR #4774; earlier local feature
+checks are checkpoint evidence and are not relabeled as final-SHA executions.
+Every release profile's recorded C++ flags end with effective `-fno-exceptions`.
+ESP32 profiles can inherit earlier `-fexceptions`; the final flag wins.
+
+| Board profile | Architecture | Arduino framework | SDK | GCC |
+|---|---|---|---|---|
+| esp8266 | Xtensa LX106 | 3.1.2 | NONOSDK22x_190703 | 10.3.0 |
+| esp32dev_idf44 | Xtensa LX6 | 2.0.3 (package3.20003.220626) | IDF4.4.1 | 8.4.0 |
+| esp32dev | Xtensa LX6 | 3.3.11 | IDF5.5.5 | 14.2.0 |
+| esp32s2 | Xtensa LX7 | 3.1.0 | IDF5.3.2 | 13.2.0 |
+| esp32s3 | Xtensa LX7 | 3.3.11 | IDF5.5.5 | 14.2.0 |
+| esp32c2 | RISC-V | 3.2.0 | resolved IDF5.3.2 | 14.2.0 |
+| esp32c3 | RISC-V | 3.1.0 | IDF5.3.2 | 13.2.0 |
+| esp32c5 | RISC-V | 3.3.5 | IDF5.5.1 | 14.2.0 |
+| esp32c6 | RISC-V | 3.3.5 | IDF5.5.1 | 14.2.0 |
+| esp32h2 | RISC-V | 3.1.0 | IDF5.3.2 | 13.2.0 |
+| esp32p4 | RISC-V | 3.3.5 | IDF5.5.1 | 14.2.0 |
+
+Compiler versions come from actual fbuild build logs, not the wrapper's host
+Clang field or cache-selected alias paths. C2's resolved SDK5.3.2 is confirmed
+by its include-farm `esp_idf_version.h`, despite the Arduino3.2.0 profile name.
+`build_info_Blink.json` records flag ordering for each staged profile.
+
+Representative feature builds passed: S3 Json/Codec/Audio/NoisePlusPalette,
+C6 SpecialDrivers/ESP/DriverTest, legacy MultipleEsp32SpiBuses/NoisePlusPalette,
+and ESP8266 Esp8266Uart. ESP8266 NoisePlusPalette was filtered out and is not
+claimed as compiled. AVR and WASM Blink compiled with existing non-ESP behavior.
+
+The initial legacy ESP compiler probe failed against unchanged baseline
+61d6ccffeb: missing `FL_HAS_NOEXCEPT`, false `noexcept(esp_noexcept_probe())`,
+and false `noexcept(fl::move(...))`. The same probe passed after enabling the
+macro. Logs are `/tmp/fastled-4773-red-probe.log` and
+`/tmp/fastled-4773-green-probe.log`; collected tests in
+`ci/tests/test_esp_noexcept.py` preserve capability, override and include-order
+assertions. SDK strict10 QEMU additionally compiles with `-fexceptions` and real
+annotations to expose mismatches; it does not authorize FastLED throw/catch.
+SDK diagnostics preservation is static/configuration evidence; no physical
+panic/backtrace hardware execution was performed.
 
 ## Validation limits
 

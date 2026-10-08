@@ -61,7 +61,8 @@ target. Issue #4773 updated to supersede the earlier debug opt-in interpretation
   Arduino plus IDF; it is not standalone app_main coverage.
 - Feature builds passed: S3 Json/Codec/Audio/NoisePlusPalette, C6 DriverTest,
   legacy ESP32 MultipleEsp32SpiBuses/NoisePlusPalette, ESP8266
-  Esp8266Uart/NoisePlusPalette. Non-ESP AVR Blink and WASM Blink passed.
+  Esp8266Uart. ESP8266 NoisePlusPalette was filtered out by its large-memory
+  requirement and is not compile evidence. Non-ESP AVR Blink and WASM Blink passed.
 - Clean legacy Blink passed via documented fbuild fallback (`--clean` is absent
   from the compile wrapper). Final four-profile size measurements remain pending.
 - Full Python has one failing QEMU test. The real SDK compile enables exceptions
