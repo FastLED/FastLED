@@ -1,5 +1,10 @@
 # Lessons Learned
 
+- For WASM viewer fixes, run the compiled reproducer through the actual page
+  and worker, then retain and inspect before/after screenshots. Module-level
+  WebGL pixel tests do not verify app startup, asset staging or the worker
+  integration. Distinguish phone viewport emulation from a physical phone test.
+
 - A prerequisite abstraction is not progress toward a niche feature when no
   production path uses it. PR #4534 added hundreds of lines of optional
   presentation-timing API, but no built-in driver produced measured events and
