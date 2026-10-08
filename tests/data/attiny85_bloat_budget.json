@@ -2,7 +2,7 @@
   "board": "attiny85",
   "example": "Blink",
   "profile": "default",
-  "image_flash": 2476,
+  "image_flash": 2460,
   "total_ram": 136,
-  "reference": "#4743: fbuild 2.5.37, AVR GCC 7.3.0-atmel3.6.1-arduino7, ATTinyCore 1.5.2, F_CPU=8000000L; image flash and attributed RAM. Board RAM measured independently. Preserve recorded 2638-byte flash ceiling and compact RGBW selector gains from #4751. One-byte show index on 16-bit-int targets; larger configured limits retain int.; #4788 tightened to observed 2574/160 after removing unused AVR vtable slots and startup state; #4788 follow-up: AVR non-virtual size/begin/endShowLeds, no tail pointer, 16-bit FPS timestamp and Hz refresh cap -> 2476/136"
+  "reference": "#4743: fbuild 2.5.37, AVR GCC 7.3.0-atmel3.6.1-arduino7, ATTinyCore 1.5.2, F_CPU=8000000L; image flash and attributed RAM. Board RAM measured independently. Preserve recorded 2638-byte flash ceiling and compact RGBW selector gains from #4751. One-byte show index on 16-bit-int targets; larger configured limits retain int.; #4788 tightened to observed 2574/160 after removing unused AVR vtable slots and startup state; #4788 follow-up: AVR non-virtual size/begin/endShowLeds, no tail pointer, 16-bit FPS timestamp and Hz refresh cap -> 2460/136"
 }

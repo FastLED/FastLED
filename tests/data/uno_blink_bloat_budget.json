@@ -2,7 +2,7 @@
   "board": "uno",
   "example": "Blink",
   "profile": "default",
-  "image_flash": 3620,
+  "image_flash": 3600,
   "total_ram": 134,
-  "reference": "#4788: 8 controller slots on Uno, no ESP32-only/fixed-white vtable slots, constant-initialized wait budget, no unused timer_millis. fbuild 2.5.37, AVR GCC 7.3.0-atmel3.6.1-arduino7, Arduino AVR core 5.4.0. Dashboard sketch separately measures flash 3730 / physical RAM 136 (3.10.3: 3784/131). Image flash and attributed RAM (aliased vtables included), not physical RAM.; #4788 follow-up: AVR non-virtual size/begin/endShowLeds, no tail pointer, 16-bit FPS timestamp and Hz refresh cap -> 3620/134"
+  "reference": "#4788: 8 controller slots on Uno, no ESP32-only/fixed-white vtable slots, constant-initialized wait budget, no unused timer_millis. fbuild 2.5.37, AVR GCC 7.3.0-atmel3.6.1-arduino7, Arduino AVR core 5.4.0. Dashboard sketch separately measures flash 3730 / physical RAM 136 (3.10.3: 3784/131). Image flash and attributed RAM (aliased vtables included), not physical RAM.; #4788 follow-up: AVR non-virtual size/begin/endShowLeds, no tail pointer, 16-bit FPS timestamp and Hz refresh cap -> 3600/134"
 }

@@ -696,14 +696,14 @@ void CFastLED::countFPS(int nFrames) FL_NO_EXCEPT {
 	static frame_ms_t lastframe = 0; // fl::millis();
 
 	if(br++ >= nFrames) {
-		frame_ms_t now = static_cast<frame_ms_t>(fl::millis());
-		now -= lastframe;
+		const frame_ms_t sample = static_cast<frame_ms_t>(fl::millis());
+		frame_ms_t now = static_cast<frame_ms_t>(sample - lastframe);
 		if(now == 0) {
 			now = 1; // prevent division by zero below
 		}
 		mNFPS = static_cast<fl::u16>((static_cast<fl::u32>(br) * 1000) / now);
 		br = 0;
-		lastframe = fl::millis();
+		lastframe = sample;
 	}
 }
 

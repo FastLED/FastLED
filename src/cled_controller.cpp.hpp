@@ -47,13 +47,19 @@ void CLEDController::addToList() FL_NO_EXCEPT {
         mPHead = this;
         return;
     }
+    // The walk also catches a repeat registration, which would otherwise
+    // create a cycle (AVR skips the isInList() check above).
     CLEDController* last = mPHead;
-    while (last->mPNext != nullptr) {
+    while (true) {
+        if (last == this) {
+            return;
+        }
+        if (last->mPNext == nullptr) {
+            break;
+        }
         last = last->mPNext;
     }
-    if (last != this) {
-        last->mPNext = this;
-    }
+    last->mPNext = this;
 }
 
 bool CLEDController::isInList() const FL_NO_EXCEPT {

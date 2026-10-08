@@ -54,7 +54,7 @@ differ from repository Blink; measure both when claiming parity.
 next to `mEnabled` instead of a virtual (8 B over two vtables), `constexpr`
 `AtomicFake` so the wait-spin budget has no startup constructor (4 B), and
 no weak `timer_millis` on classic ATmega (4 B). A follow-up reached 118 B /
-3612 B flash, below 3.10.3: `size`, `beginShowLeds` and `endShowLeds` are not
+3592 B flash, below 3.10.3: `size`, `beginShowLeds` and `endShowLeds` are not
 virtual on AVR (12 B), no list tail pointer (2 B), a 16-bit FPS timestamp
 (2 B) and the refresh cap stored in Hz (2 B).
 

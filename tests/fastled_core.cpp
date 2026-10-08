@@ -762,8 +762,20 @@ FL_TEST_CASE("FastLED.clear() with REFRESH_RATE flag resets refresh rate") {
     // Reset only refresh rate
     FastLED.clear(ClearFlags::REFRESH_RATE);
 
-    // Refresh rate should be unlimited (0 microseconds minimum)
-    // Can't directly test mNMinMicros, but reset should work without error
+    // Refresh rate should be unlimited; mMaxRefreshHz is private, so this
+    // only checks that the reset runs.
+}
+
+FL_TEST_CASE("setMaxRefreshRate constrain keeps the lower cap") {
+    // 100 Hz cap, then a constrained request for 1000 Hz must not raise it.
+    FastLED.setMaxRefreshRate(100, false);
+    FastLED.setMaxRefreshRate(1000, true);
+    FastLED.show();
+    const fl::u32 start = fl::micros();
+    FastLED.show();  // throttled to >= 10 ms after the previous show
+    const fl::u32 elapsed = fl::micros() - start;
+    FastLED.setMaxRefreshRate(0, false);
+    FL_CHECK_GE(elapsed, 9000u);
 }
 
 FL_TEST_CASE("FastLED.clear() with FPS_COUNTER flag resets FPS tracking") {

@@ -402,8 +402,10 @@ public:
     /// @return the currently set dithering option (CLEDController::mLegacySettings.mDitherMode)
     inline fl::u8 getDither() const FL_NO_EXCEPT { return mLegacySettings.mDitherMode; }
 
-    // Not virtual on AVR (#4788): AVR's only overrides are wrappers whose
-    // inner controller is off the show list, so the base version is equivalent.
+    // Not virtual on AVR (#4788). Its only overrides are the RGBW/WS2816
+    // wrappers, which forward to a disabled inner controller; on AVR the base
+    // version saves and restores the wrapper's own dither instead. Custom AVR
+    // controllers cannot hook these, or size().
     VIRTUAL_IF_NOT_AVR void* beginShowLeds(int size) FL_NO_EXCEPT {
         FASTLED_UNUSED(size);
         // By default, emit an integer. This integer will, by default, be passed back.
