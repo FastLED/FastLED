@@ -227,11 +227,11 @@ class RGBWEmulatedController
     /// @brief Destructor - cleans up the internal RGBW buffer
     ~RGBWEmulatedController() = default;
 
-	virtual void *beginShowLeds(int size) FL_NO_EXCEPT override {
+	VIRTUAL_IF_NOT_AVR void *beginShowLeds(int size) FL_NO_EXCEPT OVERRIDE_IF_NOT_AVR {
 		return mController.callBeginShowLeds(Rgbw::size_as_rgb(size));
 	}
 
-	virtual void endShowLeds(void *data) FL_NO_EXCEPT override {
+	VIRTUAL_IF_NOT_AVR void endShowLeds(void *data) FL_NO_EXCEPT OVERRIDE_IF_NOT_AVR {
 		return mController.callEndShowLeds(data);
 	}
 
@@ -691,14 +691,14 @@ public:
         mController.setLeds(nullptr, 0);
     }
 
-    virtual void *beginShowLeds(int size) FL_NO_EXCEPT override {
+    VIRTUAL_IF_NOT_AVR void *beginShowLeds(int size) FL_NO_EXCEPT OVERRIDE_IF_NOT_AVR {
         mController.setEnabled(true);
 		void *result = mController.callBeginShowLeds(2 * size);
         mController.setEnabled(false);
         return result;
     }
 
-    virtual void endShowLeds(void *data) FL_NO_EXCEPT override {
+    VIRTUAL_IF_NOT_AVR void endShowLeds(void *data) FL_NO_EXCEPT OVERRIDE_IF_NOT_AVR {
         mController.setEnabled(true);
 		mController.callEndShowLeds(data);
         mController.setEnabled(false);

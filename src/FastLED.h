@@ -726,7 +726,7 @@ class CFastLED {
 	// int m_nControllers;
 	fl::u8  mScale;         ///< the current global brightness scale setting
 	        fl::u16 mNFPS;          ///< tracking for current frames per second (FPS) value
-	fl::u32 mNMinMicros;    ///< minimum µs between frames, used for capping frame rates
+	fl::u16 mMaxRefreshHz;  ///< frame-rate cap in Hz, 0 = unlimited (u16 saves 2 B over micros, #4788)
 	fl::u32 mNPowerData;    ///< max power use parameter
 	power_func mPPowerFunc;  ///< function for overriding brightness when using FastLED.show();
 	fl::u8  mLastRequestedScale;  ///< brightness the last show()/showColor() was asked for
