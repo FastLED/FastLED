@@ -231,9 +231,13 @@ public:
 #endif
     }
     const EmitterProfile* emitterProfile() const FL_NO_EXCEPT {
+#ifdef FL_IS_AVR
+        return nullptr;
+#else
         const EmitterProfile* profile = staticEmitterProfile();
         return profile != nullptr && !mStaticProfileCleared
             ? profile : mSettings.emitterProfile();
+#endif
     }
     const SourceProfile& sourceProfile() const FL_NO_EXCEPT {
 #if FL_COLOR_PROFILE_RUNTIME
@@ -453,12 +457,14 @@ private:
     ChannelDataPtr mChannelData;
     fl::ScreenMap mScreenMap;        // Screen map for JS canvas visualization
     ChannelOptions mSettings;
+#ifndef FL_IS_AVR
     bool mStaticProfileCleared = false;
+#endif
     void syncLegacySettings() FL_NO_EXCEPT;
 #ifndef FL_IS_AVR
     void onSettingsChanged(SettingsChange change) FL_NO_EXCEPT override;
-#endif
     virtual const EmitterProfile* staticEmitterProfile() const FL_NO_EXCEPT { return nullptr; }
+#endif
 
 #if FL_COLOR_PROFILE_RUNTIME
     // Recompute the color-profile verdict from the current mSettings and
@@ -490,9 +496,14 @@ template<const EmitterProfile& Profile>
 class StaticProfileChannel final : public Channel {
 public:
     explicit StaticProfileChannel(const ChannelConfig& config) FL_NO_EXCEPT
-        : Channel(config.chipset, config.mLeds, config.rgb_order, config.options) {}
+        : Channel(config.chipset, config.mLeds, config.rgb_order, config.options) {
+#ifdef FL_IS_AVR
+        FL_STATIC_ASSERT(&Profile == nullptr, "Color profiles are unsupported on AVR");
+#endif
+    }
 
 protected:
+#ifndef FL_IS_AVR
     const EmitterProfile* staticEmitterProfile() const FL_NO_EXCEPT override {
 #if FL_COLOR_PROFILE_RUNTIME
         return nullptr;
@@ -500,6 +511,7 @@ protected:
         return &Profile;
 #endif
     }
+#endif
 };
 
 /// @brief Get stub channel driver for testing or unsupported platforms

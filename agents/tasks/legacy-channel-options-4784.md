@@ -7,8 +7,8 @@ to belong exclusively to Channels. Legacy addLeds remains the compact API.
 - [x] Reproduce matched dashboard Uno Blink: 3914 bytes flash, 266 bytes RAM.
 - [x] Record RED legacy layout regressions on host and real AVR compiler.
 - [x] Restore compact legacy settings and move options/profile ownership to Channel.
-- [ ] Preserve base/global setters, mixed managed power, and legacy white/gamma output.
-- [ ] Verify focused sanitizer tests, full native tests, lint, and independent review.
+- [x] Preserve base/global setters, mixed managed power, and legacy white/gamma output.
+- [x] Verify focused sanitizer tests, full native tests, lint, and independent review.
 - [x] Measure Uno Blink ELF with identical sketch, flags, and toolchain (repeat after final commit).
 - [ ] Push a PR, complete required hosted validation, merge, and verify merged sizes.
 
@@ -59,8 +59,27 @@ An AVR production-header assertion enforces the <=32-byte base layout.
 
 Dashboard source revision: 954622d26efe511ca1234431c7dd0c204fa84173.
 Baseline ELF SHA-256: 77612cc96afff5fc20b60bbdecc7383f45a6acd94408e4dd28c946bcf80767fb.
-Candidate ELF SHA-256: f2507a488843569fe7627581b61dc209837a863823d269b386a0239e90229371.
+Candidate ELF SHA-256: c3447048ec669ecefbadbe0c8fba8af5542b074f9ee2b528639ec551499920e6.
 
 Review: one primary reviewer checked C++ source/tests, documentation and size
 budget configuration against repository rules; final verdict clean. Focused
 standalone managed power sanitizer regression passes after the identity fix.
+
+Final compatibility checks explicitly run both non-AVR TINY targets through
+`bash test --unit color_profile_tiny_runtime --debug` and
+`bash test --unit color_profile_tiny_layout --debug`. Applying a legacy
+configuration must clear a static profile: the added runtime probe fails at
+exit 9 before correction and passes afterwards. AVR also excludes the Channel
+static identity flag/virtual and rejects direct specialized construction.
+
+Full sanitizer pass: 318 unit targets and 95 examples. The full Python suite
+passes; repository lint and focused power/TINY probes pass. ESP32-S3 CI
+run 37742672330 measures image350151 /attributedRAM38323, saving232 bytes
+flash with RAM unchanged; its existing ratchet and budget are tightened to
+claim this observed saving.
+
+ATmega8 CI reports existing example capacity failures. An isolated original
+0b3edcd800 RGBW build overflows 8 KB by874 bytes, versus838 in PR CI. Clean
+RGBWColorimetric builds measure7322/656 before and7264/645 after; the CI
+sequence discrepancy is checked with a base-commit dispatch, run37745117666.
+This issue does not change unrelated examples, drivers, or board selection.

@@ -527,6 +527,11 @@ void Channel::applyConfig(const ChannelConfig& config) FL_NO_EXCEPT {
     setLeds(config.mLeds);
     // Replace Channel-owned options and synchronize the base rendering fields.
     mSettings = config.options;
+#if !FL_COLOR_PROFILE_RUNTIME && !defined(FL_IS_AVR)
+    // Tiny options cannot carry a replacement profile; applying them is a
+    // legacy transition, just like the base correction/temperature setters.
+    mStaticProfileCleared = true;
+#endif
     mBus = config.options.mBus;
     mBusWhich = config.options.mBusWhich;
     syncLegacySettings();

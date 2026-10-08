@@ -23,6 +23,14 @@ int main() {
     channel->setCorrection(UncorrectedColor);
     if (channel->emitterProfile() != nullptr) return 6;
 
+    // Applying a legacy configuration also withdraws the static profile.
+    fl::ChannelPtr reconfigured = fl::Channel::create<kTinyProfile>(config);
+    if (reconfigured == nullptr || reconfigured->emitterProfile() == nullptr) return 8;
+    config.options.mCorrection = CRGB(255, 128, 64);
+    reconfigured->applyConfig(config);
+    if (reconfigured->emitterProfile() != nullptr) return 9;
+    if (reconfigured->getCorrection() != config.options.mCorrection) return 10;
+
     // TINY supports only the compile-time Channel::create<Profile>() path.
     // Runtime profile, source, gamut, and target-white requests must report
     // that they were not admitted rather than allocating hidden controller
