@@ -2,6 +2,8 @@
 /// Unit tests for PowerModel API (RGB, RGBW, RGBWW)
 
 #include "FastLED.h"
+#include "fl/channels/channel.h"
+#include "fl/stl/scope_exit.h"
 #include "power_mgt.h"
 #include "fl/gfx/pipeline.h"
 #include "fl/gfx/colorimetric_response.h"
@@ -542,21 +544,6 @@ class RegisteredController : public CLEDController {
     void init() FL_NO_EXCEPT override {}
 };
 
-#if FL_COLOR_PIPELINE_SHARED && !FL_PLATFORM_HAS_TINY_MEMORY
-class ManagedRegisteredController : public RegisteredController {
-  public:
-    ManagedRegisteredController()
-        : pipeline(fl::make_shared<fl::StreamingPipelineQ16>()) {}
-
-    fl::shared_ptr<fl::StreamingPipelineQ16> colorPipeline() const FL_NO_EXCEPT override {
-        return pipeline;
-    }
-
-  private:
-    fl::shared_ptr<fl::StreamingPipelineQ16> pipeline;
-};
-#endif
-
 } // namespace
 
 #if FL_COLOR_PIPELINE_SHARED && !FL_PLATFORM_HAS_TINY_MEMORY
@@ -566,17 +553,35 @@ FL_TEST_CASE("Managed wide dither reserves every physical emitter") {
     for (auto& led : leds) {
         led = CRGB(1, 1, 1);
     }
-    ManagedRegisteredController controller;
-    controller.setLeds(leds, 16);
-    controller.setDither(BINARY_DITHER);
-    controller.setRgbw(fl::RgbwDefault::value());
-    FL_CHECK_EQ(controller_dither_reserve_mW(controller),
-                static_cast<fl::u32>((16u * (10u + 20u + 30u + 80u) + 255u) >> 8));
+    const fl::EmitterProfile profiles[] = {
+        fl::EmitterProfile::rgbw(
+            "reserve/rgbw", fl::Chromaticity(.64f, .33f),
+            fl::Chromaticity(.30f, .60f), fl::Chromaticity(.15f, .06f),
+            fl::Chromaticity(.3127f, .3290f), 1, 1, 1, 1),
+        fl::EmitterProfile::rgbww(
+            "reserve/rgbww", fl::Chromaticity(.64f, .33f),
+            fl::Chromaticity(.30f, .60f), fl::Chromaticity(.15f, .06f),
+            fl::Chromaticity(.3457f, .3585f), fl::Chromaticity(.3127f, .3290f),
+            1, 1, 1, 1, 1),
+    };
+    for (int topology = 0; topology < 2; ++topology) {
+        fl::ChannelOptions options;
+        if (topology == 0) options.mWhiteCfg = fl::RgbwDefault::value();
+        else options.mWhiteCfg = fl::RgbwwDefault::value();
+        FL_REQUIRE(options.setColorProfile(profiles[topology]));
+        options.mDitherMode = BINARY_DITHER;
+        fl::ChannelConfig config(fl::ClocklessChipset(), leds, RGB, options);
+        fl::ChannelPtr channel = fl::Channel::create(config);
+        FL_REQUIRE(channel != nullptr);
+        FL_REQUIRE(channel->isColorManaged());
+        FastLED.add(channel);
+        auto cleanup = fl::make_scope_exit([&]() { FastLED.remove(channel); });
+        if (topology == 1) set_power_model(PowerModelRGBWW(10, 20, 30, 40, 80, 5));
+        const fl::u32 weights = topology == 0 ? 140u : 180u;
+        FL_CHECK_EQ(controller_dither_reserve_mW(*channel),
+                    static_cast<fl::u32>((16u * weights + 255u) >> 8));
+    }
 
-    set_power_model(PowerModelRGBWW(10, 20, 30, 40, 80, 5));
-    controller.setRgbww(fl::RgbwwDefault::value());
-    FL_CHECK_EQ(controller_dither_reserve_mW(controller),
-                static_cast<fl::u32>((16u * (10u + 20u + 30u + 80u + 40u) + 255u) >> 8));
 }
 #endif
 

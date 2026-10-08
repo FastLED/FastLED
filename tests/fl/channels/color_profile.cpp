@@ -1,6 +1,7 @@
 // Profile binding API coverage for color pipeline P2 (#4036).
 
 #include "FastLED.h"
+#include "fl/stl/scope_exit.h"
 #include "fl/channels/channel.h"
 #include "fl/channels/color_profile.h"
 #include "fl/gfx/pipeline.h"
@@ -713,13 +714,6 @@ FL_TEST_CASE("Legacy and profile transitions emit one warning event per directio
     FL_CHECK_EQ(events[1].warning, ColorProfileWarning::LegacyClearedByProfile);
 }
 
-FL_TEST_CASE("FastLED add enum sugar binds static profile without controller-owned allocation") {
-    CRGB leds[1] = {};
-    CLEDController& controller = FastLED.addLeds<ProfileId::WS2812B, WS2812, 1, GRB>(leds, 1);
-    FL_CHECK_EQ(controller.emitterProfile(), &profiles::WS2812B);
-    FastLED.clear(ClearFlags::CHANNELS);
-}
-
 FL_TEST_CASE("FastLED add enum sugar preserves ChannelConfig and binds its static profile") {
     CRGB leds[1] = {};
     ChannelOptions options;
@@ -748,14 +742,48 @@ FL_TEST_CASE("Static profile binding clears on legacy transition and yields to r
     FL_CHECK_EQ(fl::string(options.emitterProfile()->id), fl::string("fixture/runtime-r2"));
 }
 
-FL_TEST_CASE("Static Channel factory identity is visible through ChannelPtr and base controller") {
+FL_TEST_CASE("Standalone Channel profile clears through the legacy base settings API") {
     CRGB leds[1] = {};
     ChannelConfig config(ClocklessChipset(), leds, RGB);
     ChannelPtr channel = Channel::create<kFixtureProfile>(config);
     FL_REQUIRE(channel != nullptr);
     FL_CHECK_EQ(channel->emitterProfile(), &kFixtureProfile);
     CLEDController& base = *channel;
-    FL_CHECK_EQ(base.emitterProfile(), &kFixtureProfile);
+#if FL_COLOR_PIPELINE_SHARED
+    const auto retained = channel->colorPipeline();
+    FL_REQUIRE(retained != nullptr);
+    base.setDither(DISABLE_DITHER);
+    FL_CHECK_EQ(channel->colorPipeline(), retained);
+    base.setDither(BINARY_DITHER);
+    FL_CHECK_EQ(channel->colorPipeline(), retained);
+    fl::i32 before[3];
+    processPixelQ16(*retained, 100, 80, 60, before);
+#endif
+    base.setCorrection(UncorrectedColor);
+    FL_CHECK_EQ(channel->emitterProfile(), nullptr);
+    FL_CHECK_FALSE(channel->isColorManaged());
+    base.setTemperature(UncorrectedTemperature);
+    FL_CHECK_EQ(channel->emitterProfile(), nullptr);
+#if FL_COLOR_PIPELINE_SHARED
+    FL_CHECK_FALSE(channel->colorPipeline());
+    fl::i32 after[3];
+    processPixelQ16(*retained, 100, 80, 60, after);
+    for (int i = 0; i < 3; ++i) FL_CHECK_EQ(after[i], before[i]);
+#endif
+}
+
+FL_TEST_CASE("Global legacy temperature clears a registered Channel profile") {
+    CRGB leds[1] = {};
+    ChannelConfig config(ClocklessChipset(), leds, RGB);
+    ChannelPtr channel = Channel::create<kFixtureProfile>(config);
+    FL_REQUIRE(channel != nullptr);
+    FastLED.add(channel);
+    auto cleanup = fl::make_scope_exit([&]() { FastLED.remove(channel); });
+    FL_REQUIRE(channel->emitterProfile() != nullptr);
+    FastLED.setTemperature(UncorrectedTemperature);
+    FL_CHECK_EQ(channel->emitterProfile(), nullptr);
+    FL_CHECK_FALSE(channel->isColorManaged());
+    FL_CHECK_EQ(channel->getTemperature(), CRGB(UncorrectedTemperature));
 }
 
 // applyConfig() replaces mSettings wholesale. Without reconciliation it keeps

@@ -158,6 +158,15 @@ fl::vector<fl::ChannelPtr>& CFastLED::channels() FL_NO_EXCEPT {
 	return fl::Singleton<fl::vector<fl::ChannelPtr>>::instance();
 }
 
+#if FL_COLOR_PIPELINE_SHARED
+fl::shared_ptr<fl::StreamingPipelineQ16> fl::channelColorPipeline(
+    const fl::CLEDController& controller) FL_NO_EXCEPT {
+    const fl::Channel* channel = controller.asChannel();
+    return channel != nullptr ? channel->colorPipeline()
+                              : fl::shared_ptr<fl::StreamingPipelineQ16>();
+}
+#endif
+
 fl::PowerCodecPolicy fl::powerChannelCodecPolicy(
     const fl::CLEDController& controller) FL_NO_EXCEPT {
     PowerCodecPolicy policy;
@@ -563,7 +572,7 @@ fl::u32 CFastLED::getEstimatedPowerInMilliWatts(bool apply_limiter) const FL_NO_
 	if (apply_limiter && mPPowerFunc && fl::activeFramePowerDispatch()) {
 		bool managed = false;
 		for (CLEDController* p = CLEDController::head(); p; p = p->next()) {
-			if (p->getEnabled() && p->colorPipeline()) {
+			if (p->getEnabled() && fl::channelColorPipeline(*p)) {
 				managed = true;
 				break;
 			}

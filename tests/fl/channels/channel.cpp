@@ -28,6 +28,12 @@
 
 using namespace fl;
 
+FL_TEST_CASE("Legacy controller does not carry Channels configuration") {
+    // An independent ceiling prevents future ChannelOptions additions from
+    // weakening this ownership regression. The old host controller was 168 B.
+    FL_CHECK_LE(sizeof(CLEDController), 128u);
+}
+
 FL_TEST_FILE(FL_FILEPATH) {
 
 // ============ Channel + Addressing Integration Tests ============

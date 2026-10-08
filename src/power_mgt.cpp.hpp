@@ -491,7 +491,7 @@ fl::u32 controller_unscaled_power_mW(const fl::CLEDController& controller) FL_NO
     // limit power but never bind a profile. `pipeline` is this estimate's own
     // reference, so reconfiguring the controller mid-pass cannot free the
     // pipeline it is walking (#4440).
-    const fl::shared_ptr<fl::StreamingPipelineQ16> pipeline = controller.colorPipeline();
+    const fl::shared_ptr<fl::StreamingPipelineQ16> pipeline = fl::channelColorPipeline(controller);
     const fl::ColorPipelineHooks& hooks = fl::colorPipelineHooks();
     if (pipeline && hooks.unscaledPowerMilliwatts != nullptr) {
         // The callback charges already-solved physical emitter bytes. In
@@ -578,7 +578,7 @@ fl::u32 controller_dither_reserve_mW(const fl::CLEDController& controller) FL_NO
     // above the rounded code its estimate charges. The solve can light a
     // channel the source left dark, so every channel of every lit pixel is
     // reserved one code.
-    if (controller.colorPipeline()) {
+    if (fl::channelColorPipeline(controller)) {
         const fl::span<const CRGB> leds(controller.leds(),
                                         static_cast<fl::size>(controller.size()));
         fl::u32 lit = 0;
@@ -677,7 +677,7 @@ bool captureFramePowerSnapshot(FramePowerSnapshot* snapshot) FL_NO_EXCEPT {
     for (fl::CLEDController* controller = fl::CLEDController::head();
          controller != nullptr; controller = controller->next()) {
         if (!controller->getEnabled()) continue;
-        if (controller->colorPipeline() && hooks.buildPowerHistogram) {
+        if (fl::channelColorPipeline(*controller) && hooks.buildPowerHistogram) {
             ++managed_count;
         } else {
             ++legacy_count;
@@ -695,7 +695,7 @@ bool captureFramePowerSnapshot(FramePowerSnapshot* snapshot) FL_NO_EXCEPT {
          controller != nullptr; controller = controller->next()) {
         if (!controller->getEnabled()) continue;
         const fl::shared_ptr<fl::StreamingPipelineQ16> pipeline =
-            controller->colorPipeline();
+            fl::channelColorPipeline(*controller);
         if (pipeline && hooks.buildPowerHistogram != nullptr) {
             if (managed_index >= managed_count) return false;
             ManagedFramePower& entry = snapshot->managed[managed_index++];
@@ -802,7 +802,7 @@ fl::u32 fl::framePowerMCUBaselineMilliwatts() FL_NO_EXCEPT {
 namespace {
 bool hasManagedPowerChannel() FL_NO_EXCEPT {
     for (CLEDController* p = CLEDController::head(); p; p = p->next()) {
-        if (p->getEnabled() && p->colorPipeline()) {
+        if (p->getEnabled() && fl::channelColorPipeline(*p)) {
             return true;
         }
     }

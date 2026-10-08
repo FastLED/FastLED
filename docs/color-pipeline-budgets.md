@@ -81,7 +81,9 @@ avr-nm firmware.elf    | grep -E '__(add|sub|mul|div)sf3|__fix|__float|__gesf2|_
 | attiny85 (TINY) | none | none |
 | uno (low tier) | none | none |
 
-The one name the pattern matches is `CLEDController::staticEmitterProfile()`. It is a 6-byte virtual that returns null, and it is the only trace of the profile API in a sketch that does not use it. No per-controller state is added on TINY: the profile binding in `ChannelOptions` exists only under `FL_COLOR_PROFILE_RUNTIME`.
+Since #4784, legacy `CLEDController` owns compact `LegacySettings` rather than `ChannelOptions`, and has no profile-specific virtual hooks. New emitter/source profiles belong exclusively to Channels; AVR disables runtime profiles regardless of its memory tier. The newer profile-specific legacy `addLeds()` overload is removed. On supported non-AVR platforms, migrate to `Channel::create<Profile>()` or `FastLED.add<Profile>(ChannelConfig)`. Traditional correction and temperature enums, dithering, and legacy white-channel output remain supported.
+
+Matched dashboard Uno Blink (fbuild 2.5.37, AVR GCC 7.3.0, Arduino AVR core 5.4.0) decreases from 3,914 to 3,762 bytes flash and from 266 to 168 bytes physical static RAM. Its concrete NEOPIXEL controller decreases from 87 to 27 bytes. These physical totals differ from symbol attribution, which counts aliased vtables.
 
 ## What this does not cover
 

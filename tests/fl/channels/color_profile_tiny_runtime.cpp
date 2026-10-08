@@ -13,15 +13,23 @@ int main() {
     fl::ChannelConfig config("tiny-static", fl::ClocklessChipset(), leds, RGB);
     fl::ChannelPtr channel = fl::Channel::create<kTinyProfile>(config);
     if (channel == nullptr || channel->emitterProfile() != &kTinyProfile) return 1;
-    const fl::CLEDController& base = *channel;
-    if (base.emitterProfile() != &kTinyProfile || channel->name() != "tiny-static") return 2;
+    fl::CLEDController& base = *channel;
+    if (channel->name() != "tiny-static") return 2;
     // TINY retains compile-time profile identity without an instance pointer,
     // but legacy correction remains mutually exclusive: it must clear the
     // static binding and never resurrect it on a later legacy update.
-    channel->setCorrection(CRGB(255, 128, 64));
+    base.setCorrection(CRGB(255, 128, 64));
     if (channel->emitterProfile() != nullptr) return 4;
     channel->setCorrection(UncorrectedColor);
     if (channel->emitterProfile() != nullptr) return 6;
+
+    // Applying a legacy configuration also withdraws the static profile.
+    fl::ChannelPtr reconfigured = fl::Channel::create<kTinyProfile>(config);
+    if (reconfigured == nullptr || reconfigured->emitterProfile() == nullptr) return 8;
+    config.options.mCorrection = CRGB(255, 128, 64);
+    reconfigured->applyConfig(config);
+    if (reconfigured->emitterProfile() != nullptr) return 9;
+    if (reconfigured->getCorrection() != config.options.mCorrection) return 10;
 
     // TINY supports only the compile-time Channel::create<Profile>() path.
     // Runtime profile, source, gamut, and target-white requests must report
@@ -41,10 +49,5 @@ int main() {
     fl::ChannelEvents::instance().onChannelCreated.remove(listener);
     if (ordinary == nullptr || ordinary->name() != "tiny-ordinary" || !created) return 3;
 
-    // The legacy CFastLED factory must not silently discard its profile
-    // template argument on TINY; it needs the same zero-state static identity
-    // as Channel::create<Profile>().
-    CLEDController& legacy = FastLED.addLeds<fl::ProfileId::WS2812B, WS2812, 1, GRB>(leds, 1);
-    if (legacy.emitterProfile() != &fl::profiles::WS2812B) return 7;
     return 0;
 }

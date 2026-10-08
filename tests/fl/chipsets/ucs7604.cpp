@@ -186,9 +186,6 @@ public:
         return idata->data();
     }
 
-    // Set gamma override (accesses protected mSettings directly)
-    void setGamma(float gamma) { this->mSettings.mGamma = gamma; }
-    void clearGamma() { this->mSettings.mGamma.reset(); }
 };
 
 /// Test wrapper that exposes protected showPixels method and provides access to captured bytes
@@ -215,9 +212,6 @@ public:
         return idata->data();
     }
 
-    // Set gamma override (accesses protected mSettings directly)
-    void setGamma(float gamma) { this->mSettings.mGamma = gamma; }
-    void clearGamma() { this->mSettings.mGamma.reset(); }
 };
 
 

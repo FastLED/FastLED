@@ -17,10 +17,9 @@
 namespace fl {
 
 // Declared rather than included. Every path that binds a profile has to
-// install these -- there are four, and three of them do not go through
+// install these -- there are three, and two of them do not go through
 // setColorProfile: Channel::create<Profile>,
-// ChannelOptions::withColorProfile<Profile> and
-// CLEDController::bindStaticEmitterProfile all set mStaticProfile directly.
+// ChannelOptions::withColorProfile<Profile> both set mStaticProfile directly.
 // Missing one leaves that channel silently on the legacy path, which is the
 // exact bug this whole change exists to fix.
 //
@@ -38,7 +37,15 @@ void notifyColorProfileClearedByLegacy() FL_NO_EXCEPT;
 
 
 #ifndef FL_COLOR_PROFILE_RUNTIME
+#if defined(FL_IS_AVR)
+#define FL_COLOR_PROFILE_RUNTIME 0
+#else
 #define FL_COLOR_PROFILE_RUNTIME (!FL_PLATFORM_HAS_TINY_MEMORY)
+#endif
+#endif
+
+#if defined(FL_IS_AVR) && FL_COLOR_PROFILE_RUNTIME
+#error "Runtime color profiles are unsupported on AVR"
 #endif
 
 /// Shared ownership of a channel's colour pipeline, the controller accessor
@@ -266,6 +273,9 @@ struct ChannelOptions {
 
     template<const EmitterProfile& Profile>
     static ChannelOptions withColorProfile() FL_NO_EXCEPT {
+#ifdef FL_IS_AVR
+        FL_STATIC_ASSERT(&Profile == nullptr, "Color profiles require the Channels API on a supported non-AVR platform");
+#endif
         ChannelOptions options;
 #if FL_COLOR_PROFILE_RUNTIME
         installColorPipelineHooks();
