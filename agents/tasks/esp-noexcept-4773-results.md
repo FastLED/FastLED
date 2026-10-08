@@ -13,8 +13,8 @@ The maintainer explicitly authorized codebase-wide annotation cleanup and
 removal of the 7,078-entry grandfathered lint baseline in
 [the scope directive](https://github.com/FastLED/FastLED/issues/4773#issuecomment-6048066130).
 The bulk pass added 6,137 annotations across 476 files, followed by matching
-declaration and inactive-platform repairs. Unity assembly and function bodies
-are preserved. The semantic AST check expands the macro to real noexcept,
+declaration and inactive-platform repairs. Unity assembly is preserved; the
+optional NeoPixelBus adapter's two owned catch wrappers are removed. The semantic AST check expands the macro to real noexcept,
 enables compiler exceptions to expose mismatches, and fails on parser errors;
 annotation text in callback types or lambdas cannot suppress an outer function.
 Full lint and 86 focused tests passed. ESP32 QEMU strict10 passed. Full Python
@@ -93,8 +93,9 @@ its pinned366603 baseline (16220 B saving); this is within16 B of the local
 Raw board flash/RAM summaries can include IRAM and must not replace allocated
 image/static DRAM measurements.
 
-The preliminary legacy map retained 49 FastLED EH input rows totaling 171,195
-bytes; those rows disappeared in the release candidate. SDK/libstdc++ symbols
+The legacy map retained 18 FastLED `.eh_frame` inputs (170,704 bytes) and
+31 `.gcc_except_table*` inputs (491 bytes), totaling 171,195 bytes. Both sets
+disappeared in the release candidate. SDK/libstdc++ symbols
 including `__gxx_personality_v0`, `__cxa_throw` and `std::terminate` remained.
 This change does not claim to remove all system exception support.
 
@@ -118,7 +119,10 @@ Neither a singleton migration nor splitting unity groups is required here.
   enables `-fexceptions` while retaining real FastLED annotations.
 - Requested `esp32dev_idf6` resolved SDK 5.5.5, so it is not IDF6 evidence.
   Tracked in [fbuild #1662](https://github.com/FastLED/fbuild/issues/1662).
-- The component profile uses Arduino plus IDF; it is not bare `app_main` proof.
+- The component-named profile is another Arduino-backed SDK build. fbuild
+  ignores the requested component integration and does not invoke CMake
+  `idf_component_register`; neither component nor bare `app_main` integration
+  is validated. Tracked in [fbuild #1664](https://github.com/FastLED/fbuild/issues/1664).
 - Full Python passed: 1,836 passed, 25 skipped, 2 xfailed and 3,257 subtests.
   The latest focused annotation/compiler fixture inventory passed 96 tests.
   Full native debug passed 318 unit tests and 95 examples; the repaired coroutine
@@ -154,3 +158,16 @@ Neither a singleton migration nor splitting unity groups is required here.
   exempt under the maintainer's clarification and retains its testing macros.
 - PR #4736 stays closed and unmerged. Production unity routers, compilation
   units and vendor linker scripts are unchanged.
+- Fresh four-profile builds at79f51bfa12 reproduce the table; `head-*.json`,
+  maps and provenance are preserved under `.build/size-4773`.
+- Final runtime audit removed two catch wrappers from the optional NeoPixelBus
+  adapter and repaired two constructors and two invalid local annotation tokens.
+  A collected guard scans owned runtime code, including inactive platforms,
+  for exception keywords after stripping comments and strings; vendor code and
+  the nonproduction assertion framework retain their independent contracts.
+  All39 targeted ESP policy tests passed in debug mode.
+- Actual NeoPixelBus2.8.4 adapter RGB/RGBW template instantiations compile against
+  ESP32 SDK4.4.1 with exceptions disabled when a test-only macro isolates the
+  adapter's existing `ClocklessController` name collision. Ordinary inclusion
+  fails that collision; this is not passing end-to-end adapter integration.
+  Integration is tracked separately in [FastLED #4780](https://github.com/FastLED/FastLED/issues/4780).

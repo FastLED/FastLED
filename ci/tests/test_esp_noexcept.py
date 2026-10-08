@@ -4,11 +4,14 @@ These isolated compiler-feature probes avoid the native PCH, which has already
 selected the host contract. Actual ESP SDK/driver builds are verified by fbuild.
 """
 
+import re
 import shutil
 from pathlib import Path
 
 import pytest
 from running_process import RunningProcess
+
+from ci.tests.test_no_rgb8_intermediate import strip_comments_and_strings
 
 
 SRC = Path(__file__).resolve().parents[2] / "src"
@@ -130,4 +133,26 @@ def test_external_override_without_capability_makes_no_claim(
         f"#define FL_NO_EXCEPT {spec}\n"
         '#include "fl/stl/noexcept.h"\n' + _probe(real, advertised=False),
         ["-DARDUINO_ARCH_ESP32=1"],
+    )
+
+
+def test_owned_runtime_sources_do_not_use_cpp_exception_keywords() -> None:
+    """#4773: enforce the no-exception policy even in inactive platform code."""
+    suffixes = {".h", ".hh", ".hpp", ".hxx", ".c", ".cc", ".cpp", ".cxx"}
+    violations: list[str] = []
+    for path in sorted(SRC.rglob("*")):
+        if not path.is_file() or path.suffix not in suffixes:
+            continue
+        relative = path.relative_to(SRC)
+        # Vendor code has its own contracts; the assertion framework supports
+        # exception tests and is not FastLED's production runtime.
+        if relative.parts[0] == "third_party" or relative.parts[:2] == ("fl", "test"):
+            continue
+        code = strip_comments_and_strings(
+            path.read_text(encoding="utf-8", errors="replace")
+        )
+        for match in re.finditer(r"\b(?:try|catch|throw)\b", code):
+            violations.append(f"src/{relative.as_posix()}: {match.group()}")
+    assert not violations, (
+        "Unsupported C++ exception syntax in runtime sources:\n" + "\n".join(violations)
     )
