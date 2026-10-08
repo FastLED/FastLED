@@ -21,11 +21,11 @@ CLEDController::~CLEDController() FL_NO_EXCEPT {
 }
 
 /// Create an led controller object, add it to the chain of controllers
-CLEDController::CLEDController() FL_NO_EXCEPT : mLeds(), mSettings() {
+CLEDController::CLEDController() FL_NO_EXCEPT : mLeds(), mLegacySettings() {
     addToList();
 }
 
-CLEDController::CLEDController(RegistrationMode mode) FL_NO_EXCEPT : mLeds(), mSettings() {
+CLEDController::CLEDController(RegistrationMode mode) FL_NO_EXCEPT : mLeds(), mLegacySettings() {
     if (mode == RegistrationMode::AutoRegister) {
         addToList();
     }
@@ -114,12 +114,6 @@ void CLEDController::removeFromList(CLEDController* controller) FL_NO_EXCEPT {
         curr = curr->mPNext;
     }
 }
-
-#if FL_COLOR_PIPELINE_SHARED
-fl::shared_ptr<fl::StreamingPipelineQ16> CLEDController::colorPipeline() const FL_NO_EXCEPT {
-    return fl::shared_ptr<fl::StreamingPipelineQ16>();
-}
-#endif
 
 ColorAdjustment CLEDController::getAdjustmentData(fl::u8 brightness) FL_NO_EXCEPT {
     // *premixed = getAdjustment(brightness);

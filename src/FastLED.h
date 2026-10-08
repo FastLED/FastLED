@@ -1374,17 +1374,6 @@ public:
 		return addLedsImpl(&c, data, nLedsOrOffset, nLedsIfOffset);
 	}
 
-	template<fl::ProfileId PROFILE, template<fl::u8, fl::EOrder> class CHIPSET,
-	         fl::u8 DATA_PIN, fl::EOrder RGB_ORDER, fl::Bus B = fl::Bus::AUTO>
-	static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) FL_NO_EXCEPT {
-		FL_STATIC_ASSERT(PROFILE == fl::ProfileId::WS2812B, "Unsupported color profile");
-		fl::busKeepAlive<B>();
-		using Controller = fl::StaticProfileClocklessController<fl::profiles::WS2812B,
-			CHIPSET, DATA_PIN, RGB_ORDER>;
-		static Controller controller;
-		return addLedsImpl(&controller, data, nLedsOrOffset, nLedsIfOffset);
-	}
-
 	/// Add a clockless based CLEDController instance to the world.
 	template<template<fl::u8, fl::EOrder> class CHIPSET, fl::u8 DATA_PIN, fl::Bus B = fl::Bus::AUTO>
 	static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) FL_NO_EXCEPT {

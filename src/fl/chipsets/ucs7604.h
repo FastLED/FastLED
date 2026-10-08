@@ -104,10 +104,14 @@ private:
 
     // Reusable byte buffer (uses PSRAM on ESP32, regular heap elsewhere)
     // Cleared each frame but memory is reused (no reallocation after first use)
+    float mGamma = 2.8f;
     fl::vector_psram<u8> mByteBuffer;
 
 public:
     UCS7604ControllerT() FL_NO_EXCEPT {}
+
+    void setGamma(float gamma) FL_NO_EXCEPT { mGamma = gamma; }
+    void clearGamma() FL_NO_EXCEPT { mGamma = 2.8f; }
 
     virtual void init() FL_NO_EXCEPT override {
         mDelegate.init();
@@ -161,7 +165,7 @@ protected:
         fl::UCS7604CurrentControl wire_current(r_current, g_current, b_current, w_current);
 
         // Get gamma LUT: per-controller override or default 2.8
-        float gamma = this->mSettings.mGamma.value_or(2.8f);
+        float gamma = mGamma;
         fl::shared_ptr<const Gamma8> gamma8 = Gamma8::getOrCreate(gamma);
 
         // UCS7604 is always RGBW — override any user setting.

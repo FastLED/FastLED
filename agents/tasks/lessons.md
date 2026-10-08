@@ -503,6 +503,7 @@
 - Native sanitizer verification: debug mode can report UBSan errors and still return success under recovery defaults. Use UBSAN_OPTIONS=halt_on_error=1:print_stacktrace=1 for the acceptance gate; compare named test inventories before describing cached results. The memory audit exposed integer minimum, negative-shift and signed Q15 defects that ordinary debug runs had masked.
 
 - Blink must remain a minimal LED example with no Serial initialization or banner prints. Serial links the AVR UART object and its RX/TX buffers even when only transmitting; keep example-induced overhead separate from library regressions and do not preserve accidental banner functionality as a requirement.
+- ChannelOptions and new emitter/source color profiles belong to the Channels API. Never store them in the legacy CLEDController base: legacy addLeds is the memory-conscious path, including on AVR Uno, which is not classified as the <=1 KB tiny-memory tier. Enforce the API boundary with legacy layout tests rather than protecting only a memory-tier macro.
 
 - ESP crash handlers and CPU faults do not imply supported C++ throw/catch paths
   in FastLED. Verify compiler policy and maintainer contracts before adding

@@ -102,8 +102,7 @@ class ByteCapturingMockEngine : public IChannelDriver {
     fl::string mName;
 };
 
-/// The smallest concrete `CLEDController`, so `bindStaticEmitterProfile`
-/// can be called on a real one.
+/// A legacy controller used to check unmanaged settings.
 class StubController : public CLEDController {
   public:
     StubController(CRGB* leds, int count) { setLeds(leds, count); }
@@ -741,16 +740,8 @@ FL_TEST_CASE("two channels keep their own profiles") {
 
 #if FL_COLOR_PROFILE_RUNTIME
 FL_TEST_CASE("Every static binding path installs the pipeline seam") {
-    // Regression. Four call sites bind a colour profile and only one of them
-    // is `setColorProfile`: `Channel::create<Profile>`,
-    // `ChannelOptions::withColorProfile<Profile>` and
-    // `CLEDController::bindStaticEmitterProfile` set `mStaticProfile`
-    // directly. The seam that keeps the pipeline linker-elidable installs
-    // its hooks from the binding call, so a path that forgets to install
-    // leaves that channel silently on the legacy path -- the exact
-    // "settable but inert" bug this change exists to fix, reintroduced by
-    // the fix.
-    //
+    // Channel::create<Profile> and ChannelOptions::withColorProfile<Profile>
+    // bind without setColorProfile; each must install the rendering hooks.
     // The hooks are one process-wide struct, so a sibling test that binds a
     // profile would install them and make a naive assertion here vacuous.
     // Each leg therefore clears them first; that is what makes this a test
@@ -792,25 +783,16 @@ FL_TEST_CASE("Every static binding path installs the pipeline seam") {
         FL_CHECK(colorPipelineHooks().makeIterator != nullptr);
     }
 
+    // Ordinary legacy settings must leave the profile machinery uninstalled.
     {
         colorPipelineHooks() = kCleared;
         CRGB leds[2] = {};
         StubController controller(leds, 2);
-        controller.bindStaticEmitterProfile(&kStaticProfile);
-        FL_REQUIRE(controller.emitterProfile() == &kStaticProfile);
-        FL_CHECK(colorPipelineHooks().build != nullptr);
-        FL_CHECK(colorPipelineHooks().makeIterator != nullptr);
-    }
-
-    // Unbinding must not install: a null profile means the legacy path, and
-    // paying for the pipeline there is the regression the seam prevents.
-    {
-        colorPipelineHooks() = kCleared;
-        CRGB leds[2] = {};
-        StubController controller(leds, 2);
-        controller.bindStaticEmitterProfile(nullptr);
+        controller.setCorrection(TypicalLEDStrip);
+        controller.setTemperature(UncorrectedTemperature);
         FL_CHECK(colorPipelineHooks().build == nullptr);
     }
+
 }
 #endif
 
@@ -1372,7 +1354,9 @@ FL_TEST_CASE("[#4457] a managed non-HD APA102/SK9822 holds its field at 31") {
     FL_REQUIRE(hooks.encodeManagedSpi != nullptr);
     const StreamingPipelineQ16 pipeline = makePipeline();
     CRGB leds[2] = {CRGB(200, 40, 10), CRGB(10, 180, 90)};
-    StubController stub(leds, 2);
+    ChannelConfig config(ClocklessChipset(), leds, RGB);
+    ChannelPtr channel = Channel::create(config);
+    FL_REQUIRE(channel != nullptr);
 
     const SpiChipset chips[] = {SpiChipset::APA102, SpiChipset::DOTSTAR,
                                 SpiChipset::HD107, SpiChipset::SK9822};
@@ -1382,7 +1366,7 @@ FL_TEST_CASE("[#4457] a managed non-HD APA102/SK9822 holds its field at 31") {
         ColorManagedPixelSource source(controller, RGB, pipeline);
         PixelIterator iterator(&source, Rgbw(), Rgbww());
         fl::vector_psram<u8> out;
-        FL_REQUIRE(hooks.encodeManagedSpi(iterator, &out, chip, stub));
+        FL_REQUIRE(hooks.encodeManagedSpi(iterator, &out, chip, *channel));
         FL_REQUIRE_GE(out.size(), 12u);
         for (int led = 0; led < 2; ++led) {
             i32 drives[3];

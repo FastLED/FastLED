@@ -31,24 +31,6 @@ namespace fl {
 
 namespace {
 
-/// @brief Apply the white-channel selection from ChannelOptions to a
-/// CLEDController. The variant alternative chooses RGB-only / RGBW / RGBWW
-/// without forcing every call site to duplicate the dispatch.
-inline void applyWhiteCfg(CLEDController& ctrl,
-                          const ChannelOptions& options) FL_NO_EXCEPT {
-    if (auto* p = options.mWhiteCfg.ptr<Rgbww>()) {
-        ctrl.setRgbww(*p);
-    } else if (auto* p = options.mWhiteCfg.ptr<Rgbw>()) {
-        // The caller has already copied the options wholesale, so the Rgbw
-        // is stored even when a fixed-white chipset rejects setRgbw().
-        fl::detail::enable_rgbw_power_estimate();
-        ctrl.setRgbw(*p);
-    } else {
-        // Empty alternative (or default-constructed) â†’ plain RGB.
-        ctrl.clearWhiteChannel();
-    }
-}
-
 /// @brief Encapsulates pixel iterator construction with optional XYMap reordering
 class ReorderingPixelIteratorAny {
   private:
@@ -362,15 +344,12 @@ Channel::Channel(const ChipsetVariant& chipset, fl::span<CRGB> leds,
     // Set the LED data array
     setLeds(leds);
 
-    // Initialize the inherited per-channel controller settings so mWhiteCfg
-    // and future ChannelOptions fields survive to showPixels(). The setter
-    // calls below are idempotent overlays on the same data.
-    CLEDController::mSettings = options;
+    // Channels owns its options; copy only the legacy rendering fields into
+    // the base controller.
+    mSettings = options;
 
     // Set color correction/temperature/dither/rgbw from ChannelOptions
-    if (!options.hasColorProfile()) { setCorrection(options.mCorrection); setTemperature(options.mTemperature); }
-    setDither(options.mDitherMode);
-    applyWhiteCfg(*this, options);
+    syncLegacySettings();
 
     // Create ChannelData during construction with chipset variant
     mChannelData = ChannelData::create(mChipset);
@@ -394,14 +373,11 @@ Channel::Channel(int pin, const ChipsetTimingConfig& timing, fl::span<CRGB> leds
     // Set the LED data array
     setLeds(leds);
 
-    // Initialize the inherited per-channel controller settings so mWhiteCfg
-    // survives to showPixels(). See the sibling constructor for rationale.
-    CLEDController::mSettings = options;
+    // Channels owns its options; synchronize the base rendering fields.
+    mSettings = options;
 
     // Set color correction/temperature/dither/rgbw from ChannelOptions
-    if (!options.hasColorProfile()) { setCorrection(options.mCorrection); setTemperature(options.mTemperature); }
-    setDither(options.mDitherMode);
-    applyWhiteCfg(*this, options);
+    syncLegacySettings();
 
     // Create ChannelData during construction
     mChannelData = ChannelData::create(mChipset);
@@ -411,6 +387,38 @@ Channel::~Channel() FL_NO_EXCEPT {
     auto& events = ChannelEvents::instance();
     events.onChannelBeginDestroy(*this);
 }
+
+void Channel::syncLegacySettings() FL_NO_EXCEPT {
+    mLegacySettings.mCorrection = mSettings.mCorrection;
+    mLegacySettings.mTemperature = mSettings.mTemperature;
+    mLegacySettings.mDitherMode = mSettings.mDitherMode;
+    mLegacySettings.mWhiteCfg = mSettings.mWhiteCfg;
+    if (const auto* rgbw = mSettings.mWhiteCfg.ptr<Rgbw>()) {
+        prepare_rgbw_colorimetric(*rgbw);
+        detail::enable_rgbw_power_estimate();
+    }
+}
+
+#ifndef FL_IS_AVR
+void Channel::onSettingsChanged(SettingsChange change) FL_NO_EXCEPT {
+    // Frame completion restores dithering through the base setter. Dithering
+    // does not change pipeline coefficients and must not rebuild the pipeline.
+    mSettings.mDitherMode = mLegacySettings.mDitherMode;
+    if (change == SettingsChange::Dither) return;
+    mSettings.mWhiteCfg = mLegacySettings.mWhiteCfg;
+    if (change == SettingsChange::Correction || change == SettingsChange::Temperature) {
+        mStaticProfileCleared = true;
+        if (change == SettingsChange::Correction) {
+            mSettings.setLegacyCorrection(mLegacySettings.mCorrection);
+        } else {
+            mSettings.setLegacyTemperature(mLegacySettings.mTemperature);
+        }
+    }
+#if FL_COLOR_PROFILE_RUNTIME
+    reconcileColorProfile(mSettings);
+#endif
+}
+#endif
 
 #if FL_COLOR_PROFILE_RUNTIME
 void Channel::raiseColorProfileFallback(const char* reason) FL_NO_EXCEPT {
@@ -517,14 +525,11 @@ void Channel::applyConfig(const ChannelConfig& config) FL_NO_EXCEPT {
         mName = config.mName.value();
     }
     setLeds(config.mLeds);
-    // Replace the inherited per-channel controller settings so mWhiteCfg and
-    // future options survive to showPixels(). Setters below are idempotent.
-    CLEDController::mSettings = config.options;
+    // Replace Channel-owned options and synchronize the base rendering fields.
+    mSettings = config.options;
     mBus = config.options.mBus;
     mBusWhich = config.options.mBusWhich;
-    if (!config.options.hasColorProfile()) { setCorrection(config.options.mCorrection); setTemperature(config.options.mTemperature); }
-    setDither(config.options.mDitherMode);
-    applyWhiteCfg(*this, config.options);
+    syncLegacySettings();
     auto& events = ChannelEvents::instance();
 #if FL_COLOR_PROFILE_RUNTIME
     if (reconcileColorProfile(config.options)) {
