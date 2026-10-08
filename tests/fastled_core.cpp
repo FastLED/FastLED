@@ -770,8 +770,10 @@ FL_TEST_CASE("setMaxRefreshRate constrain keeps the lower cap") {
     // 100 Hz cap, then a constrained request for 1000 Hz must not raise it.
     FastLED.setMaxRefreshRate(100, false);
     FastLED.setMaxRefreshRate(1000, true);
-    FastLED.show();
+    // show() records lastshow during the first call, so timing from before
+    // it bounds the throttled second call from below.
     const fl::u32 start = fl::micros();
+    FastLED.show();
     FastLED.show();  // throttled to >= 10 ms after the previous show
     const fl::u32 elapsed = fl::micros() - start;
     FastLED.setMaxRefreshRate(0, false);
