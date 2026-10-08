@@ -40,9 +40,9 @@
 
 #ifndef MAX_CLED_CONTROLLERS
 #ifdef FL_IS_AVR
-// Mega and Leonardo allow more controllers. Uno and other small ATmega parts
-// keep 8 slots to save RAM; define MAX_CLED_CONTROLLERS to override (#4788).
-#if defined(FL_IS_AVR_ATMEGA_2560) || defined(__AVR_ATmega32U4__)
+// Uno/Nano-class (328P family) parts keep 8 slots to save RAM, as in 3.10.3;
+// larger ATmegas allow 16. Define MAX_CLED_CONTROLLERS to override (#4788).
+#if defined(FL_IS_AVR_ATMEGA) && !defined(FL_IS_AVR_ATMEGA_328P)
 #define MAX_CLED_CONTROLLERS 16
 #else
 #define MAX_CLED_CONTROLLERS 8
