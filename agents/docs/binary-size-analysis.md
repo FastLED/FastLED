@@ -53,10 +53,16 @@ differ from repository Blink; measure both when claiming parity.
 (16 B), `setSpiBus` virtual only on ESP32 and the fixed-white policy as a bit
 next to `mEnabled` instead of a virtual (8 B over two vtables), `constexpr`
 `AtomicFake` so the wait-spin budget has no startup constructor (4 B), and
-no weak `timer_millis` on classic ATmega (4 B). The remaining 5 B are
-supported features: the RGBW/RGBWW white variant with its diode-profile
-pointer (+3 B per controller) and `getLastShowBrightness()`/`isPowerLimited()`
-state (+2 B in `FastLED`).
+no weak `timer_millis` on classic ATmega (4 B). A follow-up reached 118 B /
+3592 B flash, below 3.10.3: `size`, `beginShowLeds` and `endShowLeds` are not
+virtual on AVR (12 B), no list tail pointer (2 B), a 16-bit FPS timestamp
+(2 B) and the refresh cap stored in Hz (2 B).
+
+Rejected because flash cost outweighed RAM: replacing the `addLeds` static
+guard with a placement-new flag (-7 B RAM, +116 B flash, since the compiler
+loses the controller's dynamic type and divides at runtime) and a power-limit
+flag instead of `mPPowerFunc` (-1 B RAM, +1.6 KB flash, since it links the
+limiter unconditionally). Always check flash alongside RAM.
 
 ### RP2040 reserved heap is not programmed flash
 

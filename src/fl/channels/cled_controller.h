@@ -71,7 +71,6 @@ protected:
 #endif
     }
     static CLEDController *mPHead;  ///< pointer to the first LED controller in the linked list
-    static CLEDController *mPTail;  ///< pointer to the last LED controller in the linked list
 
     /// @brief Registration mode for constructor
     enum class RegistrationMode {
@@ -350,7 +349,8 @@ public:
 
     /// How many LEDs does this controller manage?
     /// @returns CLEDController::mLeds.size()
-    virtual int size() const FL_NO_EXCEPT { return mLeds.size(); }
+    // Not virtual on AVR: no AVR controller overrides it (#4788).
+    VIRTUAL_IF_NOT_AVR int size() const FL_NO_EXCEPT { return mLeds.size(); }
 
     /// How many Lanes does this controller manage?
     /// @returns 1 for a non-Parallel controller
@@ -402,7 +402,11 @@ public:
     /// @return the currently set dithering option (CLEDController::mLegacySettings.mDitherMode)
     inline fl::u8 getDither() const FL_NO_EXCEPT { return mLegacySettings.mDitherMode; }
 
-    virtual void* beginShowLeds(int size) FL_NO_EXCEPT {
+    // Not virtual on AVR (#4788). Its only overrides are the RGBW/WS2816
+    // wrappers, which forward to a disabled inner controller; on AVR the base
+    // version saves and restores the wrapper's own dither instead. Custom AVR
+    // controllers cannot hook these, or size().
+    VIRTUAL_IF_NOT_AVR void* beginShowLeds(int size) FL_NO_EXCEPT {
         FASTLED_UNUSED(size);
         // By default, emit an integer. This integer will, by default, be passed back.
         // If you override beginShowLeds() then
@@ -421,7 +425,7 @@ public:
         return out;
     }
 
-    virtual void endShowLeds(void* data) FL_NO_EXCEPT {
+    VIRTUAL_IF_NOT_AVR void endShowLeds(void* data) FL_NO_EXCEPT {
         // By default recieves the integer that beginShowLeds() emitted.
         //For async controllers this should be used to signal the controller
         // to begin transmitting the current frame to the leds.

@@ -95,7 +95,6 @@ CFastLED FastLED;  // global constructor allowed in this case.
 FL_DISABLE_WARNING_POP
 
 CLEDController *CLEDController::mPHead = nullptr;
-CLEDController *CLEDController::mPTail = nullptr;
 static fl::u32 lastshow = 0;
 
 /// Global frame counter, used for debugging ESP implementations
@@ -117,7 +116,7 @@ CFastLED::CFastLED() FL_NO_EXCEPT {
 	mNPowerData = 0xFFFFFFFF;
 	mLastRequestedScale = 255;
 	mLastShownScale = 255;
-	mNMinMicros = 0;
+	mMaxRefreshHz = 0;
 }
 
 #if FL_COLOR_PIPELINE_SHARED
@@ -262,7 +261,7 @@ void CFastLED::clear(ClearFlags flags) FL_NO_EXCEPT {
 
 	// Reset REFRESH_RATE - reset refresh rate limiting to unlimited
 	if (clearFlag(ClearFlags::REFRESH_RATE)) {
-		FastLED.mNMinMicros = 0;  // No minimum delay between frames
+		FastLED.mMaxRefreshHz = 0;  // No minimum delay between frames
 	}
 
 	// Reset FPS_COUNTER - reset FPS tracking counter to 0
@@ -374,7 +373,7 @@ bool CFastLED::isPowerLimited() const FL_NO_EXCEPT {
 FL_KEEP_ALIVE void CFastLED::show(fl::u8 scale) FL_NO_EXCEPT {
 	FL_SCOPED_TRACE;
 	onBeginFrame();
-	throttleToMaxRefreshRate(mNMinMicros);
+	throttleToMaxRefreshRate(mMaxRefreshHz ? 1000000UL / mMaxRefreshHz : 0);
 	lastshow = fl::micros();
 
 	mLastRequestedScale = scale;
@@ -453,7 +452,7 @@ CLEDController & CFastLED::operator[](int x) FL_NO_EXCEPT {
 
 void CFastLED::showColor(const CRGB & color, fl::u8 scale) FL_NO_EXCEPT {
 	onBeginFrame();
-	throttleToMaxRefreshRate(mNMinMicros);
+	throttleToMaxRefreshRate(mMaxRefreshHz ? 1000000UL / mMaxRefreshHz : 0);
 	lastshow = fl::micros();
 
 	mLastRequestedScale = scale;
@@ -688,31 +687,34 @@ extern int noise_max;
 
 void CFastLED::countFPS(int nFrames) FL_NO_EXCEPT {
 	static int br = 0;
-	static fl::u32 lastframe = 0; // fl::millis();
+#if SKETCH_HAS_LARGE_MEMORY
+	typedef fl::u32 frame_ms_t;
+#else
+	// Wrapping 16-bit millis saves 2 B RAM; nFrames frames must take < 65 s (#4788).
+	typedef fl::u16 frame_ms_t;
+#endif
+	static frame_ms_t lastframe = 0; // fl::millis();
 
 	if(br++ >= nFrames) {
-		fl::u32 now = fl::millis();
-		now -= lastframe;
+		const frame_ms_t sample = static_cast<frame_ms_t>(fl::millis());
+		frame_ms_t now = static_cast<frame_ms_t>(sample - lastframe);
 		if(now == 0) {
 			now = 1; // prevent division by zero below
 		}
-		mNFPS = (br * 1000) / now;
+		mNFPS = static_cast<fl::u16>((static_cast<fl::u32>(br) * 1000) / now);
 		br = 0;
-		lastframe = fl::millis();
+		lastframe = sample;
 	}
 }
 
 void CFastLED::setMaxRefreshRate(fl::u16 refresh, bool constrain) FL_NO_EXCEPT {
 	if(constrain) {
-		// if we're constraining, the new value of mNMinMicros _must_ be higher than previously (because we're only
-		// allowed to slow things down if constraining)
-		if(refresh > 0) {
-			mNMinMicros = ((1000000 / refresh) > mNMinMicros) ? (1000000 / refresh) : mNMinMicros;
+		// When constraining we may only slow things down: keep the lower cap.
+		if(refresh > 0 && (mMaxRefreshHz == 0 || refresh < mMaxRefreshHz)) {
+			mMaxRefreshHz = refresh;
 		}
-	} else if(refresh > 0) {
-		mNMinMicros = 1000000 / refresh;
 	} else {
-		mNMinMicros = 0;
+		mMaxRefreshHz = refresh;  // 0 = unlimited
 	}
 }
 

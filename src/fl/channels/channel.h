@@ -158,7 +158,7 @@ public:
     void removeFromDrawList() FL_NO_EXCEPT;
 
     /// @brief Get the number of LEDs in this channel
-    int size() const FL_NO_EXCEPT override;
+    int size() const FL_NO_EXCEPT OVERRIDE_IF_NOT_AVR;
 
 #if FL_COLOR_PROFILE_RUNTIME
     /// How a channel stores the colour pipeline its binding describes.

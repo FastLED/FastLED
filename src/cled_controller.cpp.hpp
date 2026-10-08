@@ -41,10 +41,25 @@ void CLEDController::addToList() FL_NO_EXCEPT {
     }
     #endif
 
-    // Add to linked list
-    if(mPHead==nullptr) { mPHead = this; }
-    if(mPTail != nullptr) { mPTail->mPNext = this; }
-    mPTail = this;
+    // Append by walking from the head: registration is rare and lists are
+    // short, so no tail pointer is stored (#4788).
+    if (mPHead == nullptr) {
+        mPHead = this;
+        return;
+    }
+    // The walk also catches a repeat registration, which would otherwise
+    // create a cycle (AVR skips the isInList() check above).
+    CLEDController* last = mPHead;
+    while (true) {
+        if (last == this) {
+            return;
+        }
+        if (last->mPNext == nullptr) {
+            break;
+        }
+        last = last->mPNext;
+    }
+    last->mPNext = this;
 }
 
 bool CLEDController::isInList() const FL_NO_EXCEPT {
@@ -95,17 +110,9 @@ void CLEDController::removeFromList(CLEDController* controller) FL_NO_EXCEPT {
             if (prev == nullptr) {
                 // Removing head
                 mPHead = controller->mPNext;
-                if (mPHead == nullptr) {
-                    // List is now empty
-                    mPTail = nullptr;
-                }
             } else {
                 // Removing from middle or end
                 prev->mPNext = controller->mPNext;
-                if (controller->mPNext == nullptr) {
-                    // Removing tail
-                    mPTail = prev;
-                }
             }
 
             // Clear the controller's next pointer
