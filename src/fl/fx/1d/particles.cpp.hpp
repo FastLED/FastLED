@@ -6,7 +6,7 @@
 namespace fl {
 
 Particles1d::Particles1d(u16 num_leds, u8 max_particles, u8 fade_rate)
-    : Fx1d(num_leds),
+    FL_NO_EXCEPT : Fx1d(num_leds),
       mFadeRate(fade_rate),
       mOverdrawCount(20),
       mSpeedMultiplier(1.0f),
@@ -16,7 +16,7 @@ Particles1d::Particles1d(u16 num_leds, u8 max_particles, u8 fade_rate)
 
 Particles1d::~Particles1d() FL_NO_EXCEPT = default;
 
-void Particles1d::draw(DrawContext context) {
+void Particles1d::draw(DrawContext context) FL_NO_EXCEPT {
     if (context.leds.empty() || mNumLeds == 0) return;
 
     u32 now = context.now;
@@ -39,7 +39,7 @@ void Particles1d::draw(DrawContext context) {
     blur1d(context.leds, 64);
 }
 
-void Particles1d::spawnRandomParticle() {
+void Particles1d::spawnRandomParticle() FL_NO_EXCEPT {
     // First, try to find an inactive particle
     for (size_t i = 0; i < mParticles.size(); i++) {
         if (!mParticles[i].active) {
@@ -60,40 +60,40 @@ void Particles1d::spawnRandomParticle() {
     mParticles[oldestIdx].spawn(mNumLeds);
 }
 
-void Particles1d::setLifetime(u16 lifetime_ms) {
+void Particles1d::setLifetime(u16 lifetime_ms) FL_NO_EXCEPT {
     mLifetimeMs = lifetime_ms;
 }
 
-void Particles1d::setOverdrawCount(u8 count) {
+void Particles1d::setOverdrawCount(u8 count) FL_NO_EXCEPT {
     mOverdrawCount = count;
 }
 
-void Particles1d::setSpeed(float speed) {
+void Particles1d::setSpeed(float speed) FL_NO_EXCEPT {
     mSpeedMultiplier = speed;
 }
 
-void Particles1d::setFadeRate(u8 fade_rate) {
+void Particles1d::setFadeRate(u8 fade_rate) FL_NO_EXCEPT {
     mFadeRate = fade_rate;
 }
 
-void Particles1d::setCyclical(bool cyclical) {
+void Particles1d::setCyclical(bool cyclical) FL_NO_EXCEPT {
     mCyclical = cyclical;
 }
 
-fl::string Particles1d::fxName() const {
+fl::string Particles1d::fxName() const FL_NO_EXCEPT {
     return "Particles1d";
 }
 
 // Particle methods
-Particles1d::Particle::Particle() : pos(0), baseVel(0), birthTime(0), lifetime(0), active(false) {}
+Particles1d::Particle::Particle() FL_NO_EXCEPT : pos(0), baseVel(0), birthTime(0), lifetime(0), active(false) {}
 
-float Particles1d::Particle::getPower(u32 now) const {
+float Particles1d::Particle::getPower(u32 now) const FL_NO_EXCEPT {
     if (!active || !lifetime) return 0.0f;
     float power = 1.0f - (float)(now - birthTime) / lifetime;
     return fl::clamp(power, 0.0f, 1.0f);
 }
 
-void Particles1d::Particle::spawn(u16 numLeds) {
+void Particles1d::Particle::spawn(u16 numLeds) FL_NO_EXCEPT {
     pos = random16(numLeds);
     float speed = 0.02f + (random16(1000) / 1000.0f) * 0.13f;
     baseVel = random8(2) ? speed : -speed;
@@ -103,7 +103,7 @@ void Particles1d::Particle::spawn(u16 numLeds) {
     active = true;
 }
 
-void Particles1d::Particle::spawn(float pos, float baseVel, CHSV baseColor, u32 lifetime) {
+void Particles1d::Particle::spawn(float pos, float baseVel, CHSV baseColor, u32 lifetime) FL_NO_EXCEPT {
     this->pos = pos;
     this->baseVel = baseVel;
     this->baseColor = baseColor;
@@ -112,7 +112,7 @@ void Particles1d::Particle::spawn(float pos, float baseVel, CHSV baseColor, u32 
     this->active = true;
 }
 
-void Particles1d::Particle::update(u32 now, u16 numLeds, float speedMultiplier, bool cyclical) {
+void Particles1d::Particle::update(u32 now, u16 numLeds, float speedMultiplier, bool cyclical) FL_NO_EXCEPT {
     if (!active) return;
     float power = getPower(now);
     if (power <= 0.0f) {
@@ -134,7 +134,7 @@ void Particles1d::Particle::update(u32 now, u16 numLeds, float speedMultiplier, 
     }
 }
 
-void Particles1d::Particle::draw(fl::span<CRGB> leds, u32 now, u16 numLeds) {
+void Particles1d::Particle::draw(fl::span<CRGB> leds, u32 now, u16 numLeds) FL_NO_EXCEPT {
     if (!active) return;
     float power = getPower(now);
     if (power <= 0.0f) return;

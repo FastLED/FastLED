@@ -7,6 +7,7 @@
 #include "fl/stl/charconv.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/chrono.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -14,34 +15,34 @@ namespace fl {
 // SerialPort Implementation
 // ============================================================================
 
-void SerialPort::end() {
+void SerialPort::end() FL_NO_EXCEPT {
     // Most platforms don't need explicit end() call
     // Serial is always available for debugging
 }
 
-int SerialPort::available() {
+int SerialPort::available() FL_NO_EXCEPT {
     return fl::available();
 }
 
-int SerialPort::read() {
+int SerialPort::read() FL_NO_EXCEPT {
     return fl::read();
 }
 
-int SerialPort::peek() {
+int SerialPort::peek() FL_NO_EXCEPT {
     return fl::peek();
 }
 
-size_t SerialPort::write(u8 byte) {
+size_t SerialPort::write(u8 byte) FL_NO_EXCEPT {
     char str[2] = {static_cast<char>(byte), '\0'};
     fl::print(str);
     return 1;
 }
 
-size_t SerialPort::write(const u8* buffer, size_t size) {
+size_t SerialPort::write(const u8* buffer, size_t size) FL_NO_EXCEPT {
     return fl::write_bytes(buffer, size);
 }
 
-size_t SerialPort::print(const char* str) {
+size_t SerialPort::print(const char* str) FL_NO_EXCEPT {
     if (!str) {
         return 0;
     }
@@ -50,13 +51,13 @@ size_t SerialPort::print(const char* str) {
     return fl::strlen(str);
 }
 
-size_t SerialPort::print(int value) {
+size_t SerialPort::print(int value) FL_NO_EXCEPT {
     char buffer[12];  // Enough for "-2147483648" + null
     fl::itoa(value, buffer, 10);  // Base 10
     return print(buffer);
 }
 
-size_t SerialPort::print(long value) {
+size_t SerialPort::print(long value) FL_NO_EXCEPT {
     char buffer[21];  // Enough for 64-bit values
     fl::itoa64(value, buffer, 10);  // Base 10
     return print(buffer);
@@ -68,7 +69,7 @@ template<typename T>
 inline typename fl::enable_if<fl::is_multi_byte_integer<T>::value &&
                           !fl::is_signed<T>::value,
                           size_t>::type
-SerialPort::print(T value) {
+SerialPort::print(T value) FL_NO_EXCEPT {
     char buffer[21];  // Enough for 64-bit values
 
     // Use utoa64 for all types - it handles both 32-bit and 64-bit values
@@ -78,7 +79,7 @@ SerialPort::print(T value) {
     return print(buffer);
 }
 
-size_t SerialPort::println(const char* str) {
+size_t SerialPort::println(const char* str) FL_NO_EXCEPT {
     if (!str) {
         return println();
     }
@@ -87,18 +88,18 @@ size_t SerialPort::println(const char* str) {
     return fl::strlen(str) + 1;  // +1 for newline
 }
 
-size_t SerialPort::println() {
+size_t SerialPort::println() FL_NO_EXCEPT {
     fl::println("");
     return 1;  // Just the newline
 }
 
-size_t SerialPort::println(int value) {
+size_t SerialPort::println(int value) FL_NO_EXCEPT {
     char buffer[12];
     fl::itoa(value, buffer, 10);
     return println(buffer);
 }
 
-size_t SerialPort::println(long value) {
+size_t SerialPort::println(long value) FL_NO_EXCEPT {
     char buffer[21];
     fl::itoa64(value, buffer, 10);
     return println(buffer);
@@ -110,7 +111,7 @@ template<typename T>
 inline typename fl::enable_if<fl::is_multi_byte_integer<T>::value &&
                           !fl::is_signed<T>::value,
                           size_t>::type
-SerialPort::println(T value) {
+SerialPort::println(T value) FL_NO_EXCEPT {
     char buffer[21];  // Enough for 64-bit values
 
     // Use utoa64 for all types - it handles both 32-bit and 64-bit values
@@ -122,19 +123,19 @@ SerialPort::println(T value) {
 
 // Note: printf() is now implemented as an inline template in serial.h
 
-bool SerialPort::flush(u32 timeoutMs) {
+bool SerialPort::flush(u32 timeoutMs) FL_NO_EXCEPT {
     return fl::flush(timeoutMs);
 }
 
-SerialPort::operator bool() const {
+SerialPort::operator bool() const FL_NO_EXCEPT {
     return fl::serial_ready();
 }
 
-void SerialPort::setTimeout(u32 timeoutMs) {
+void SerialPort::setTimeout(u32 timeoutMs) FL_NO_EXCEPT {
     mTimeoutMs = timeoutMs;
 }
 
-fl::string SerialPort::readString() {
+fl::string SerialPort::readString() FL_NO_EXCEPT {
     fl::string result;
     u32 startTime = fl::millis();
 
@@ -151,7 +152,7 @@ fl::string SerialPort::readString() {
     return result;
 }
 
-fl::string SerialPort::readStringUntil(char delimiter) {
+fl::string SerialPort::readStringUntil(char delimiter) FL_NO_EXCEPT {
     fl::string result;
     u32 startTime = fl::millis();
 
@@ -172,7 +173,7 @@ fl::string SerialPort::readStringUntil(char delimiter) {
     return result;
 }
 
-size_t SerialPort::readBytes(u8* buffer, size_t length) {
+size_t SerialPort::readBytes(u8* buffer, size_t length) FL_NO_EXCEPT {
     if (!buffer || length == 0) {
         return 0;
     }
@@ -193,7 +194,7 @@ size_t SerialPort::readBytes(u8* buffer, size_t length) {
     return count;
 }
 
-size_t SerialPort::readBytesUntil(char delimiter, u8* buffer, size_t length) {
+size_t SerialPort::readBytesUntil(char delimiter, u8* buffer, size_t length) FL_NO_EXCEPT {
     if (!buffer || length == 0) {
         return 0;
     }
@@ -218,7 +219,7 @@ size_t SerialPort::readBytesUntil(char delimiter, u8* buffer, size_t length) {
     return count;
 }
 
-long SerialPort::parseInt() {
+long SerialPort::parseInt() FL_NO_EXCEPT {
     bool negative = false;
     long value = 0;
     bool foundDigit = false;
@@ -272,7 +273,7 @@ long SerialPort::parseInt() {
     return foundDigit ? (negative ? -value : value) : 0;
 }
 
-float SerialPort::parseFloat() {
+float SerialPort::parseFloat() FL_NO_EXCEPT {
     bool negative = false;
     long intPart = 0;
     long fracPart = 0;

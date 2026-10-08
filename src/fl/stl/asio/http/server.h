@@ -47,38 +47,38 @@ namespace http {
 /// HTTP request object (immutable, passed by const reference)
 class Request {
 public:
-    Request() FL_NO_EXCEPT = default;
+    Request() = default; // ok no noexcept: infer member exception contracts (#4773)
 
     /// Get HTTP method (e.g., "GET", "POST", "PUT", "DELETE")
-    const string& method() const { return mMethod; }
+    const string& method() const FL_NO_EXCEPT { return mMethod; }
 
     /// Get request path (e.g., "/", "/api/status")
-    const string& path() const { return mPath; }
+    const string& path() const FL_NO_EXCEPT { return mPath; }
 
     /// Get request body (for POST/PUT requests)
-    const string& body() const { return mBody; }
+    const string& body() const FL_NO_EXCEPT { return mBody; }
 
     /// Get HTTP version (e.g., "HTTP/1.1")
-    const string& http_version() const { return mHttpVersion; }
+    const string& http_version() const FL_NO_EXCEPT { return mHttpVersion; }
 
     /// Get header value by name (case-insensitive)
     /// @param name Header name (e.g., "Content-Type")
     /// @return Header value if present, otherwise nullopt
-    optional<string> header(const string& name) const;
+    optional<string> header(const string& name) const FL_NO_EXCEPT;
 
     /// Get query parameter value by name
     /// @param param Parameter name (e.g., "id" for "/?id=123")
     /// @return Parameter value if present, otherwise nullopt
-    optional<string> query(const string& param) const;
+    optional<string> query(const string& param) const FL_NO_EXCEPT;
 
     /// Check if request is GET
-    bool is_get() const { return mMethod == "GET"; }
+    bool is_get() const FL_NO_EXCEPT { return mMethod == "GET"; }
 
     /// Check if request is POST
-    bool is_post() const { return mMethod == "POST"; }
+    bool is_post() const FL_NO_EXCEPT { return mMethod == "POST"; }
 
     /// Check if request has a body
-    bool has_body() const { return !mBody.empty(); }
+    bool has_body() const FL_NO_EXCEPT { return !mBody.empty(); }
 
 private:
     friend class Server;
@@ -99,42 +99,42 @@ public:
     /// Set HTTP status code
     /// @param code Status code (e.g., 200, 404, 500)
     /// @return Reference to this for chaining
-    Response& status(int code);
+    Response& status(int code) FL_NO_EXCEPT;
 
     /// Add HTTP header
     /// @param name Header name
     /// @param value Header value
     /// @return Reference to this for chaining
-    Response& header(const string& name, const string& value);
+    Response& header(const string& name, const string& value) FL_NO_EXCEPT;
 
     /// Set response body
     /// @param content Body content
     /// @return Reference to this for chaining
-    Response& body(const string& content);
+    Response& body(const string& content) FL_NO_EXCEPT;
 
     /// Set JSON response body with automatic Content-Type header
     /// @param data JSON object to serialize
     /// @return Reference to this for chaining
-    Response& json(const class json& data);
+    Response& json(const class json& data) FL_NO_EXCEPT;
 
     /// Factory method for 200 OK response
     /// @param body Optional body content
     /// @return Response with status 200
-    static Response ok(const string& body = "");
+    static Response ok(const string& body = "") FL_NO_EXCEPT;
 
     /// Factory method for 404 Not Found response
     /// @return Response with status 404
-    static Response not_found();
+    static Response not_found() FL_NO_EXCEPT;
 
     /// Factory method for 400 Bad Request response
     /// @param message Error message
     /// @return Response with status 400
-    static Response bad_request(const string& message);
+    static Response bad_request(const string& message) FL_NO_EXCEPT;
 
     /// Factory method for 500 Internal Server Error response
     /// @param message Error message
     /// @return Response with status 500
-    static Response internal_error(const string& message);
+    static Response internal_error(const string& message) FL_NO_EXCEPT;
 
 private:
     friend class Server;
@@ -143,7 +143,7 @@ private:
     string mBody;
     map<string, string> mHeaders;
 
-    string to_string() const;
+    string to_string() const FL_NO_EXCEPT;
 };
 
 /// Route handler function signature
@@ -179,55 +179,55 @@ public:
     /// Start server on specified port
     /// @param port Port to listen on (default: 8080)
     /// @return true if started successfully, false otherwise
-    bool start(int port = 8080);
+    bool start(int port = 8080) FL_NO_EXCEPT;
 
     /// Stop server and close all connections
-    void stop();
+    void stop() FL_NO_EXCEPT;
 
     /// Register route handler using fl::function
     /// @param method HTTP method ("GET", "POST", "PUT", "DELETE")
     /// @param path URL path ("/", "/api/status", etc.)
     /// @param handler Route handler function (fl::function)
-    void route(const string& method, const string& path, RouteHandler handler);
+    void route(const string& method, const string& path, RouteHandler handler) FL_NO_EXCEPT;
 
     /// Convenience method for GET routes
     /// @param path URL path
     /// @param handler Route handler function
-    void get(const string& path, RouteHandler handler);
+    void get(const string& path, RouteHandler handler) FL_NO_EXCEPT;
 
     /// Convenience method for POST routes
     /// @param path URL path
     /// @param handler Route handler function
-    void post(const string& path, RouteHandler handler);
+    void post(const string& path, RouteHandler handler) FL_NO_EXCEPT;
 
     /// Convenience method for PUT routes
     /// @param path URL path
     /// @param handler Route handler function
-    void put(const string& path, RouteHandler handler);
+    void put(const string& path, RouteHandler handler) FL_NO_EXCEPT;
 
     /// Convenience method for DELETE routes
     /// @param path URL path
     /// @param handler Route handler function
-    void del(const string& path, RouteHandler handler);
+    void del(const string& path, RouteHandler handler) FL_NO_EXCEPT;
 
     /// Update server (process pending requests non-blocking)
     /// @note This is called automatically by the async system when the server is running.
     /// You can still call it manually in loop() if needed for explicit control.
     /// @return Number of requests processed this update
-    size_t update();
+    size_t update() FL_NO_EXCEPT;
 
     /// Check if server is running
-    bool is_running() const { return mRunning; }
+    bool is_running() const FL_NO_EXCEPT { return mRunning; }
 
     /// Get server port
-    int port() const { return mPort; }
+    int port() const FL_NO_EXCEPT { return mPort; }
 
     /// Get last error message
-    string last_error() const { return mLastError; }
+    string last_error() const FL_NO_EXCEPT { return mLastError; }
 
 private:
     // EngineEvents::Listener implementation
-    void onExit() override;
+    void onExit() FL_NO_EXCEPT override;
 
     // Forward declaration for async integration helper
     class ServerAsyncRunner;
@@ -254,21 +254,21 @@ private:
     // Async system integration
     fl::unique_ptr<ServerAsyncRunner> mAsyncRunner;
 
-    bool setup_listen_socket(int port);
-    void accept_connections();
-    size_t process_requests();
-    optional<Request> read_request(ClientConnection& client);
-    bool send_response(int client_fd, const Response& response);
-    optional<RouteHandler> find_handler(const string& method, const string& path) const;
-    void close_client(size_t index);
-    void cleanup_stale_connections();
+    bool setup_listen_socket(int port) FL_NO_EXCEPT;
+    void accept_connections() FL_NO_EXCEPT;
+    size_t process_requests() FL_NO_EXCEPT;
+    optional<Request> read_request(ClientConnection& client) FL_NO_EXCEPT;
+    bool send_response(int client_fd, const Response& response) FL_NO_EXCEPT;
+    optional<RouteHandler> find_handler(const string& method, const string& path) const FL_NO_EXCEPT;
+    void close_client(size_t index) FL_NO_EXCEPT;
+    void cleanup_stale_connections() FL_NO_EXCEPT;
 
 #ifdef FL_IS_ESP32
 public:
     // ESP32: Static handler bridging esp_http_server callbacks to RouteHandlers.
     // Declared public so the C callback wrapper can call it.
     // Parameter is httpd_req_t* cast to void* to avoid ESP-IDF header dependency.
-    static int handle_esp_request(void* req);
+    static int handle_esp_request(void* req) FL_NO_EXCEPT;
 #endif
 };
 

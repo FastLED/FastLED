@@ -35,7 +35,7 @@ struct CallableHolderBase {
 template<typename Sig>
 struct TypedCallableHolder : CallableHolderBase {
     fl::function<Sig> mFn;
-    TypedCallableHolder(fl::function<Sig> fn) : mFn(fn) {}
+    TypedCallableHolder(fl::function<Sig> fn) FL_NO_EXCEPT : mFn(fn) {}
 };
 
 // =============================================================================
@@ -66,7 +66,7 @@ struct RpcEntry {
 // makeJsonRpcError - Helper to create JSON-RPC error responses
 // =============================================================================
 
-inline json makeJsonRpcError(int code, const fl::string& message, const json& id) {
+inline json makeJsonRpcError(int code, const fl::string& message, const json& id) FL_NO_EXCEPT {
     json response = json::object();
     response.set("jsonrpc", "2.0");
 

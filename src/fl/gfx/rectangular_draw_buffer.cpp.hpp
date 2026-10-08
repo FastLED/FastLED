@@ -4,11 +4,12 @@
 #include "fl/gfx/rgbw.h"
 #include "fl/stl/string.h"
 #include "fl/stl/cstring.h"  // for fl::memset()
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
 DrawItem::DrawItem(u8 pin, u16 numLeds, bool is_rgbw)
-    : mPin(pin), mIsRgbw(is_rgbw) {
+    FL_NO_EXCEPT : mPin(pin), mIsRgbw(is_rgbw) {
     if (is_rgbw) {
         numLeds = Rgbw::size_as_rgb(numLeds);
     }
@@ -16,7 +17,7 @@ DrawItem::DrawItem(u8 pin, u16 numLeds, bool is_rgbw)
 }
 
 span<u8>
-RectangularDrawBuffer::getLedsBufferBytesForPin(u8 pin, bool clear_first) {
+RectangularDrawBuffer::getLedsBufferBytesForPin(u8 pin, bool clear_first) FL_NO_EXCEPT {
     auto it = mPinToLedSegment.find(pin);
     if (it == mPinToLedSegment.end()) {
         FASTLED_ASSERT(false, "Pin not found in RectangularDrawBuffer");
@@ -29,7 +30,7 @@ RectangularDrawBuffer::getLedsBufferBytesForPin(u8 pin, bool clear_first) {
     return slice;
 }
 
-bool RectangularDrawBuffer::onQueuingStart() {
+bool RectangularDrawBuffer::onQueuingStart() FL_NO_EXCEPT {
     if (mQueueState == QUEUEING) {
         return false;
     }
@@ -43,11 +44,11 @@ bool RectangularDrawBuffer::onQueuingStart() {
     return true;
 }
 
-void RectangularDrawBuffer::queue(const DrawItem &item) {
+void RectangularDrawBuffer::queue(const DrawItem &item) FL_NO_EXCEPT {
     mDrawList.push_back(item);
 }
 
-bool RectangularDrawBuffer::onQueuingDone() {
+bool RectangularDrawBuffer::onQueuingDone() FL_NO_EXCEPT {
     if (mQueueState == QUEUE_DONE) {
         return false;
     }
@@ -77,7 +78,7 @@ bool RectangularDrawBuffer::onQueuingDone() {
     return true;
 }
 
-u32 RectangularDrawBuffer::getMaxBytesInStrip() const {
+u32 RectangularDrawBuffer::getMaxBytesInStrip() const FL_NO_EXCEPT {
     u32 max_bytes = 0;
     for (auto it = mDrawList.begin(); it != mDrawList.end(); ++it) {
         max_bytes = fl::max(max_bytes, it->mNumBytes);
@@ -85,7 +86,7 @@ u32 RectangularDrawBuffer::getMaxBytesInStrip() const {
     return max_bytes;
 }
 
-u32 RectangularDrawBuffer::getTotalBytes() const {
+u32 RectangularDrawBuffer::getTotalBytes() const FL_NO_EXCEPT {
     u32 num_strips = mDrawList.size();
     u32 max_bytes = getMaxBytesInStrip();
     return num_strips * max_bytes;
@@ -93,7 +94,7 @@ u32 RectangularDrawBuffer::getTotalBytes() const {
 
 void RectangularDrawBuffer::getBlockInfo(u32 *num_strips,
                                          u32 *bytes_per_strip,
-                                         u32 *total_bytes) const {
+                                         u32 *total_bytes) const FL_NO_EXCEPT {
     *num_strips = mDrawList.size();
     *bytes_per_strip = getMaxBytesInStrip();
     *total_bytes = (*num_strips) * (*bytes_per_strip);

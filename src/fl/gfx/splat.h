@@ -9,6 +9,7 @@ Each of the four pixels in the tile is a fl::u8 value in the range
 */
 
 #include "fl/math/geometry.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -19,6 +20,6 @@ namespace fl {
 /// [0..255] that represents the intensity of the pixel at that point.
 /// Tile2x2_u8 splat(vec2f xy);
 
-Tile2x2_u8 splat(vec2f xy);
+Tile2x2_u8 splat(vec2f xy) FL_NO_EXCEPT;
 
 } // namespace fl

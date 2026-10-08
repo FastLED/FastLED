@@ -48,11 +48,11 @@ class ScreenMap;
 template<typename T> class Grid;
 
 // Simple constexpr functions for compile-time corkscrew dimension calculation
-constexpr fl::u16 calculateCorkscrewWidth(float totalTurns, fl::u16 numLeds) {
+constexpr fl::u16 calculateCorkscrewWidth(float totalTurns, fl::u16 numLeds) FL_NO_EXCEPT {
     return static_cast<fl::u16>(ceil_constexpr(static_cast<float>(numLeds) / totalTurns));
 }
 
-constexpr fl::u16 calculateCorkscrewHeight(float totalTurns, fl::u16 numLeds) {
+constexpr fl::u16 calculateCorkscrewHeight(float totalTurns, fl::u16 numLeds) FL_NO_EXCEPT {
     return (calculateCorkscrewWidth(totalTurns, numLeds) * static_cast<int>(ceil_constexpr(totalTurns)) > numLeds) ?
         static_cast<fl::u16>(ceil_constexpr(static_cast<float>(numLeds) / static_cast<float>(calculateCorkscrewWidth(totalTurns, numLeds)))) :
         static_cast<fl::u16>(ceil_constexpr(totalTurns));
@@ -66,8 +66,8 @@ struct Gap {
     float gap = 0.0f;   // Gap value from 0 to 1, represents percentage of width unit to add
     
     Gap() FL_NO_EXCEPT = default;
-    Gap(float g) : num_leds(0), gap(g) {} // Backwards compatibility constructor
-    Gap(int n, float g) : num_leds(n), gap(g) {} // New constructor with num_leds
+    Gap(float g) FL_NO_EXCEPT : num_leds(0), gap(g) {} // Backwards compatibility constructor
+    Gap(int n, float g) FL_NO_EXCEPT : num_leds(n), gap(g) {} // New constructor with num_leds
     
     // Rule of 5 for POD data
     Gap(const Gap &other) FL_NO_EXCEPT = default;
@@ -94,41 +94,41 @@ class Corkscrew {
         using iterator_category = fl::bidirectional_iterator_tag;
 
         iterator(const Corkscrew *corkscrew, fl::size position)
-            : mCorkscrew(corkscrew), mPosition(position) {}
+            FL_NO_EXCEPT : mCorkscrew(corkscrew), mPosition(position) {}
 
-        vec2f operator*() const;
+        vec2f operator*() const FL_NO_EXCEPT;
 
-        iterator &operator++() {
+        iterator &operator++() FL_NO_EXCEPT {
             ++mPosition;
             return *this;
         }
 
-        iterator operator++(int) {
+        iterator operator++(int) FL_NO_EXCEPT {
             iterator temp = *this;
             ++mPosition;
             return temp;
         }
 
-        iterator &operator--() {
+        iterator &operator--() FL_NO_EXCEPT {
             --mPosition;
             return *this;
         }
 
-        iterator operator--(int) {
+        iterator operator--(int) FL_NO_EXCEPT {
             iterator temp = *this;
             --mPosition;
             return temp;
         }
 
-        bool operator==(const iterator &other) const {
+        bool operator==(const iterator &other) const FL_NO_EXCEPT {
             return mPosition == other.mPosition;
         }
 
-        bool operator!=(const iterator &other) const {
+        bool operator!=(const iterator &other) const FL_NO_EXCEPT {
             return mPosition != other.mPosition;
         }
 
-        difference_type operator-(const iterator &other) const {
+        difference_type operator-(const iterator &other) const FL_NO_EXCEPT {
             return static_cast<difference_type>(mPosition) -
                    static_cast<difference_type>(other.mPosition);
         }
@@ -140,83 +140,83 @@ class Corkscrew {
 
     // Constructors that integrate input parameters directly
     // Primary constructor with default values for invert and gapParams
-    Corkscrew(float totalTurns, fl::u16 numLeds, bool invert = false, const Gap& gapParams = Gap());
+    Corkscrew(float totalTurns, fl::u16 numLeds, bool invert = false, const Gap& gapParams = Gap()) FL_NO_EXCEPT;
     
     // Constructor with external pixel buffer - these pixels will be drawn to directly
-    Corkscrew(float totalTurns, fl::span<CRGB> dstPixels, bool invert = false, const Gap& gapParams = Gap());
+    Corkscrew(float totalTurns, fl::span<CRGB> dstPixels, bool invert = false, const Gap& gapParams = Gap()) FL_NO_EXCEPT;
     
     Corkscrew(const Corkscrew &) FL_NO_EXCEPT = default;
     Corkscrew(Corkscrew &&) FL_NO_EXCEPT = default;
 
     // Caching control
-    void setCachingEnabled(bool enabled);
+    void setCachingEnabled(bool enabled) FL_NO_EXCEPT;
 
     // Essential API - Core functionality
-    fl::u16 cylinderWidth() const { return mWidth; }
-    fl::u16 cylinderHeight() const { return mHeight; }
+    fl::u16 cylinderWidth() const FL_NO_EXCEPT { return mWidth; }
+    fl::u16 cylinderHeight() const FL_NO_EXCEPT { return mHeight; }
 
     // Enhanced surface handling with shared_ptr
     // Note: Input surface will be created on first call
-    fl::shared_ptr<fl::Grid<CRGB>>& getOrCreateInputSurface();
+    fl::shared_ptr<fl::Grid<CRGB>>& getOrCreateInputSurface() FL_NO_EXCEPT;
     
     // Draw like a regular rectangle surface - access input surface directly
-    fl::Grid<CRGB>& surface();
+    fl::Grid<CRGB>& surface() FL_NO_EXCEPT;
 
     // Draw the corkscrew by reading from the internal surface and populating LED pixels
-    void draw(bool use_multi_sampling = true);
+    void draw(bool use_multi_sampling = true) FL_NO_EXCEPT;
 
     // Pixel storage access - works with both external and owned pixels
     // This represents the pixels that will be drawn after draw() is called
-    CRGB* rawData();
+    CRGB* rawData() FL_NO_EXCEPT;
     
     // Returns span of pixels that will be written to when draw() is called
-    fl::span<CRGB> data();
+    fl::span<CRGB> data() FL_NO_EXCEPT;
     
-    fl::size pixelCount() const;
+    fl::size pixelCount() const FL_NO_EXCEPT;
     // Create and return a fully constructed ScreenMap for this corkscrew
     // Each LED index will be mapped to its exact position on the cylindrical surface
-    fl::ScreenMap toScreenMap(float diameter = 0.5f) const;
+    fl::ScreenMap toScreenMap(float diameter = 0.5f) const FL_NO_EXCEPT;
 
     // STL-style container interface
-    fl::size size() const;
-    iterator begin() { return iterator(this, 0); }
-    iterator end() { return iterator(this, size()); }
+    fl::size size() const FL_NO_EXCEPT;
+    iterator begin() FL_NO_EXCEPT { return iterator(this, 0); }
+    iterator end() FL_NO_EXCEPT { return iterator(this, size()); }
 
     // Non-essential API - Lower level access
-    vec2f at_no_wrap(fl::u16 i) const;
-    vec2f at_exact(fl::u16 i) const;
-    Tile2x2_u8_wrap at_wrap(float i) const;
+    vec2f at_no_wrap(fl::u16 i) const FL_NO_EXCEPT;
+    vec2f at_exact(fl::u16 i) const FL_NO_EXCEPT;
+    Tile2x2_u8_wrap at_wrap(float i) const FL_NO_EXCEPT;
 
     // Clear all buffers and free memory
-    void clear();
+    void clear() FL_NO_EXCEPT;
     
     // Fill the input surface with a color
-    void fillInputSurface(const CRGB& color);
+    void fillInputSurface(const CRGB& color) FL_NO_EXCEPT;
 
   private:
     // For internal use. Splats the pixel on the surface which
     // extends past the width. This extended Tile2x2 is designed
     // to be wrapped around with a Tile2x2_u8_wrap.
-    Tile2x2_u8 at_splat_extrapolate(float i) const;
+    Tile2x2_u8 at_splat_extrapolate(float i) const FL_NO_EXCEPT;
 
     // Read from fl::Grid<CRGB> object and populate our internal rectangular buffer
     // by sampling from the XY coordinates mapped to each corkscrew LED position
     // use_multi_sampling = true will use multi-sampling to sample from the source grid,
     // this will give a little bit better accuracy and the screenmap will be more accurate.
-    void readFrom(const fl::Grid<CRGB>& source_grid, bool use_multi_sampling = true);
+    void readFrom(const fl::Grid<CRGB>& source_grid, bool use_multi_sampling = true) FL_NO_EXCEPT;
     
     // Read from rectangular buffer using multi-sampling and store in target grid
     // Uses Tile2x2_u8_wrap for sub-pixel accurate sampling with proper blending
-    void readFromMulti(const fl::Grid<CRGB>& target_grid) const;
+    void readFromMulti(const fl::Grid<CRGB>& target_grid) const FL_NO_EXCEPT;
     
     // Initialize the rectangular buffer if not already done
-    void initializeBuffer() const;
+    void initializeBuffer() const FL_NO_EXCEPT;
     
     // Initialize the cache if not already done and caching is enabled
-    void initializeCache() const;
+    void initializeCache() const FL_NO_EXCEPT;
     
     // Calculate the tile at position i without using cache
-    Tile2x2_u8_wrap calculateTileAtWrap(float i) const;
+    Tile2x2_u8_wrap calculateTileAtWrap(float i) const FL_NO_EXCEPT;
 
     // Core corkscrew parameters (moved from CorkscrewInput)
     float mTotalTurns = 19.0f;   // Total turns of the corkscrew

@@ -14,7 +14,7 @@ namespace net {
 namespace http {
 
 HttpStreamServer::HttpStreamServer(u16 port, u32 heartbeatIntervalMs)
-    : HttpStreamTransport("0.0.0.0", port, heartbeatIntervalMs)
+    FL_NO_EXCEPT : HttpStreamTransport("0.0.0.0", port, heartbeatIntervalMs)
     , mPort(port)
     , mLastProcessedClientId(0) {
     // Create native server with default connection config
@@ -29,7 +29,7 @@ HttpStreamServer::~HttpStreamServer() FL_NO_EXCEPT {
     disconnect();
 }
 
-bool HttpStreamServer::connect() {
+bool HttpStreamServer::connect() FL_NO_EXCEPT {
     // If already listening, return true
     if (isConnected()) {
         return true;
@@ -46,7 +46,7 @@ bool HttpStreamServer::connect() {
     return true;
 }
 
-void HttpStreamServer::disconnect() {
+void HttpStreamServer::disconnect() FL_NO_EXCEPT {
     if (mNativeServer) {
         mNativeServer->stop();
     }
@@ -54,15 +54,15 @@ void HttpStreamServer::disconnect() {
     mConnection.onDisconnected();
 }
 
-bool HttpStreamServer::isConnected() const {
+bool HttpStreamServer::isConnected() const FL_NO_EXCEPT {
     return mNativeServer && mNativeServer->isListening();
 }
 
-u16 HttpStreamServer::port() const {
+u16 HttpStreamServer::port() const FL_NO_EXCEPT {
     return mNativeServer ? mNativeServer->port() : 0;
 }
 
-void HttpStreamServer::acceptClients() {
+void HttpStreamServer::acceptClients() FL_NO_EXCEPT {
     if (!isConnected()) {
         return;
     }
@@ -115,22 +115,22 @@ void HttpStreamServer::acceptClients() {
     }
 }
 
-size_t HttpStreamServer::getClientCount() const {
+size_t HttpStreamServer::getClientCount() const FL_NO_EXCEPT {
     return mNativeServer ? mNativeServer->getClientCount() : 0;
 }
 
-void HttpStreamServer::disconnectClient(u32 clientId) {
+void HttpStreamServer::disconnectClient(u32 clientId) FL_NO_EXCEPT {
     if (mNativeServer) {
         mNativeServer->disconnectClient(clientId);
     }
     removeClientState(clientId);
 }
 
-fl::vector<u32> HttpStreamServer::getClientIds() const {
+fl::vector<u32> HttpStreamServer::getClientIds() const FL_NO_EXCEPT {
     return mNativeServer ? mNativeServer->getClientIds() : fl::vector<u32>();
 }
 
-int HttpStreamServer::sendData(fl::span<const u8> data) {
+int HttpStreamServer::sendData(fl::span<const u8> data) FL_NO_EXCEPT {
     if (!isConnected()) {
         return -1;
     }
@@ -140,7 +140,7 @@ int HttpStreamServer::sendData(fl::span<const u8> data) {
     return static_cast<int>(data.size());
 }
 
-int HttpStreamServer::recvData(fl::span<u8> buffer) {
+int HttpStreamServer::recvData(fl::span<u8> buffer) FL_NO_EXCEPT {
     if (!isConnected()) {
         return -1;
     }
@@ -182,13 +182,13 @@ int HttpStreamServer::recvData(fl::span<u8> buffer) {
     return 0;  // No data available from any client
 }
 
-void HttpStreamServer::triggerReconnect() {
+void HttpStreamServer::triggerReconnect() FL_NO_EXCEPT {
     // For server: disconnect all clients and restart
     disconnect();
     connect();
 }
 
-bool HttpStreamServer::readHttpRequestHeader(u32 clientId) {
+bool HttpStreamServer::readHttpRequestHeader(u32 clientId) FL_NO_EXCEPT {
     ClientState* state = getOrCreateClientState(clientId);
     if (!state) {
         return false;
@@ -250,7 +250,7 @@ bool HttpStreamServer::readHttpRequestHeader(u32 clientId) {
     return true;
 }
 
-bool HttpStreamServer::sendHttpResponseHeader(u32 clientId) {
+bool HttpStreamServer::sendHttpResponseHeader(u32 clientId) FL_NO_EXCEPT {
     ClientState* state = getOrCreateClientState(clientId);
     if (!state) {
         return false;
@@ -278,7 +278,7 @@ bool HttpStreamServer::sendHttpResponseHeader(u32 clientId) {
     return true;
 }
 
-HttpStreamServer::ClientState* HttpStreamServer::getOrCreateClientState(u32 clientId) {
+HttpStreamServer::ClientState* HttpStreamServer::getOrCreateClientState(u32 clientId) FL_NO_EXCEPT {
     // Check if state already exists
     auto it = mClientStates.find(clientId);
     if (it != mClientStates.end()) {
@@ -297,7 +297,7 @@ HttpStreamServer::ClientState* HttpStreamServer::getOrCreateClientState(u32 clie
     return nullptr;
 }
 
-void HttpStreamServer::removeClientState(u32 clientId) {
+void HttpStreamServer::removeClientState(u32 clientId) FL_NO_EXCEPT {
     auto it = mClientStates.find(clientId);
     if (it != mClientStates.end()) {
         mClientStates.erase(it);

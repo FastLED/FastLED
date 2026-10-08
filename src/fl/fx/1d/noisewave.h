@@ -1,5 +1,7 @@
 #pragma once
 
+#include "fl/stl/noexcept.h"
+
 #include "fl/fx/fx1d.h"
 #include "noisegen.h"
 
@@ -9,11 +11,11 @@ FASTLED_SHARED_PTR(NoiseWave);
 
 class NoiseWave : public Fx1d {
   public:
-    NoiseWave(u16 num_leds)
+    NoiseWave(u16 num_leds) FL_NO_EXCEPT
         : Fx1d(num_leds), noiseGeneratorRed(500, 14),
           noiseGeneratorBlue(500, 10) {}
 
-    void draw(DrawContext context) override {
+    void draw(DrawContext context) FL_NO_EXCEPT override {
         if (context.leds.empty() || mNumLeds == 0) {
             return;
         }
@@ -31,7 +33,7 @@ class NoiseWave : public Fx1d {
         }
     }
 
-    fl::string fxName() const override { return "NoiseWave"; }
+    fl::string fxName() const FL_NO_EXCEPT override { return "NoiseWave"; }
 
   private:
     NoiseGenerator noiseGeneratorRed;

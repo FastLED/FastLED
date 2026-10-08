@@ -27,7 +27,7 @@ struct WasmAudioInputHolder {
 };
 }  // namespace
 
-WasmAudioInput::WasmAudioInput()
+WasmAudioInput::WasmAudioInput() FL_NO_EXCEPT
     : mHead(0)
     , mTail(0)
     , mRunning(false)
@@ -47,7 +47,7 @@ WasmAudioInput::WasmAudioInput()
     FL_DBG("WasmAudioInput created - ring buffer: " << RING_BUFFER_SLOTS << " slots x " << BLOCK_SIZE << " samples");
 }
 
-WasmAudioInput::~WasmAudioInput() {
+WasmAudioInput::~WasmAudioInput() FL_NO_EXCEPT {
     stop();
     WasmAudioInputHolder& holder = fl::Singleton<WasmAudioInputHolder>::instance();
     if (holder.ptr == this) {
@@ -55,7 +55,7 @@ WasmAudioInput::~WasmAudioInput() {
     }
 }
 
-void WasmAudioInput::start() {
+void WasmAudioInput::start() FL_NO_EXCEPT {
     if (mRunning) {
         FL_DBG("WasmAudioInput already running - skipping start");
         return;  // Already running, don't re-initialize
@@ -67,7 +67,7 @@ void WasmAudioInput::start() {
     FL_DBG("WasmAudioInput started");
 }
 
-void WasmAudioInput::stop() {
+void WasmAudioInput::stop() FL_NO_EXCEPT {
     mRunning = false;
     // Clear ring buffer
     mHead = 0;
@@ -78,14 +78,14 @@ void WasmAudioInput::stop() {
     FL_DBG("WasmAudioInput stopped");
 }
 
-bool WasmAudioInput::error(fl::string* msg) {
+bool WasmAudioInput::error(fl::string* msg) FL_NO_EXCEPT {
     if (msg && mHasError) {
         *msg = mErrorMessage;
     }
     return mHasError;
 }
 
-audio::Sample WasmAudioInput::read() {
+audio::Sample WasmAudioInput::read() FL_NO_EXCEPT {
     if (!mRunning || isEmpty()) {
         return audio::Sample();  // Return invalid sample
     }
@@ -114,7 +114,7 @@ audio::Sample WasmAudioInput::read() {
     return result;
 }
 
-void WasmAudioInput::pushSamples(const fl::i16* samples, int count, fl::u32 timestamp) {
+void WasmAudioInput::pushSamples(const fl::i16* samples, int count, fl::u32 timestamp) FL_NO_EXCEPT {
     if (!mRunning) {
         static bool warned = false;
         if (!warned) {
@@ -149,7 +149,7 @@ void WasmAudioInput::pushSamples(const fl::i16* samples, int count, fl::u32 time
     }
 }
 
-void WasmAudioInput::flushAccumBuffer() {
+void WasmAudioInput::flushAccumBuffer() FL_NO_EXCEPT {
     if (isFull()) {
         mDroppedBlocks++;
         if (mDroppedBlocks % 100 == 1) {
@@ -178,19 +178,19 @@ void WasmAudioInput::flushAccumBuffer() {
     }
 }
 
-bool WasmAudioInput::isFull() const {
+bool WasmAudioInput::isFull() const FL_NO_EXCEPT {
     return nextIndex(mHead) == mTail;
 }
 
-bool WasmAudioInput::isEmpty() const {
+bool WasmAudioInput::isEmpty() const FL_NO_EXCEPT {
     return mHead == mTail && !mRingBuffer[mTail].valid;
 }
 
-int WasmAudioInput::nextIndex(int index) const {
+int WasmAudioInput::nextIndex(int index) const FL_NO_EXCEPT {
     return (index + 1) % RING_BUFFER_SLOTS;
 }
 
-fl::shared_ptr<audio::IInput> wasm_create_audio_input(const audio::Config& config, fl::string* error_message) {
+fl::shared_ptr<audio::IInput> wasm_create_audio_input(const audio::Config& config, fl::string* error_message) FL_NO_EXCEPT {
     // Config is ignored for WASM - audio comes from JavaScript
     (void)config;
 
@@ -204,7 +204,7 @@ fl::shared_ptr<audio::IInput> wasm_create_audio_input(const audio::Config& confi
     return input;
 }
 
-WasmAudioInput* wasm_get_audio_input() {
+WasmAudioInput* wasm_get_audio_input() FL_NO_EXCEPT {
     return fl::Singleton<WasmAudioInputHolder>::instance().ptr;
 }
 

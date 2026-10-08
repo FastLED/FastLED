@@ -674,17 +674,17 @@ enum class ClearFlags : fl::u32 {
 };
 
 /// Enable bitwise OR for ClearFlags
-inline ClearFlags operator|(ClearFlags a, ClearFlags b) {
+inline ClearFlags operator|(ClearFlags a, ClearFlags b) FL_NO_EXCEPT {
 	return static_cast<ClearFlags>(static_cast<fl::u32>(a) | static_cast<fl::u32>(b));
 }
 
 /// Enable bitwise AND for ClearFlags
-inline ClearFlags operator&(ClearFlags a, ClearFlags b) {
+inline ClearFlags operator&(ClearFlags a, ClearFlags b) FL_NO_EXCEPT {
 	return static_cast<ClearFlags>(static_cast<fl::u32>(a) & static_cast<fl::u32>(b));
 }
 
 /// Enable bitwise OR assignment for ClearFlags
-inline ClearFlags& operator|=(ClearFlags& a, ClearFlags b) {
+inline ClearFlags& operator|=(ClearFlags& a, ClearFlags b) FL_NO_EXCEPT {
 	a = a | b;
 	return a;
 }
@@ -731,10 +731,10 @@ class CFastLED {
 	power_func mPPowerFunc;  ///< function for overriding brightness when using FastLED.show();
 	fl::u8  mLastRequestedScale;  ///< brightness the last show()/showColor() was asked for
 	fl::u8  mLastShownScale;      ///< brightness the last show()/showColor() applied, after the power limiter
-	static fl::vector<fl::ChannelPtr>& channels(); ///< stored ChannelPtrs to keep them alive
+	static fl::vector<fl::ChannelPtr>& channels() FL_NO_EXCEPT; ///< stored ChannelPtrs to keep them alive
 
 public:
-	CFastLED();
+	CFastLED() FL_NO_EXCEPT;
 
 	/// Initialize platform-specific subsystems
 	///
@@ -747,12 +747,12 @@ public:
 	/// Platform-specific initialization:
 	/// - ESP32: Initializes channel bus manager (PARLIO/SPI/RMT/UART) and SPI bus manager
 	/// - Other platforms: No-op (no initialization required)
-	void init();
+	void init() FL_NO_EXCEPT;
 
 	// Useful when you want to know when an event like onFrameBegin or onFrameEnd is happening.
 	// This is disabled on AVR to save space.
-	void addListener(fl::EngineEvents::Listener *listener) { fl::EngineEvents::addListener(listener); }
-	void removeListener(fl::EngineEvents::Listener *listener) { fl::EngineEvents::removeListener(listener); }
+	void addListener(fl::EngineEvents::Listener *listener) FL_NO_EXCEPT { fl::EngineEvents::addListener(listener); }
+	void removeListener(fl::EngineEvents::Listener *listener) FL_NO_EXCEPT { fl::EngineEvents::removeListener(listener); }
 
 	/// @brief Access the channel event system
 	/// @return Reference to the ChannelEvents singleton
@@ -760,7 +760,7 @@ public:
 	/// @code
 	/// int id = FastLED.channelEvents().onChannelCreated.add([](const fl::IChannel& ch) { ... });
 	/// @endcode
-	static fl::ChannelEvents& channelEvents();
+	static fl::ChannelEvents& channelEvents() FL_NO_EXCEPT;
 
 	/// @brief Access the unified cross-platform watchdog timer.
 	/// @return Reference to the Watchdog singleton
@@ -776,7 +776,7 @@ public:
 	///     FastLED.watchdog().markCleanShutdown();
 	/// }
 	/// @endcode
-	static fl::Watchdog& watchdog();
+	static fl::Watchdog& watchdog() FL_NO_EXCEPT;
 
 	/// @name Manual Engine Events
 	/// When FASTLED_MANUAL_ENGINE_EVENTS is defined, these methods allow manual control of engine events.
@@ -785,11 +785,11 @@ public:
 	
 	/// Manually trigger the begin frame event
 	/// @note This is called automatically by show() unless FASTLED_MANUAL_ENGINE_EVENTS is defined
-	void onBeginFrame() ;
+	void onBeginFrame() FL_NO_EXCEPT;
 	
 	/// Manually trigger the end show LEDs event
 	/// @note This is called automatically by show() unless FASTLED_MANUAL_ENGINE_EVENTS is defined
-	void onEndShowLeds() ;
+	void onEndShowLeds() FL_NO_EXCEPT;
 	
 	/// @} Manual Engine Events
 
@@ -804,7 +804,7 @@ public:
 	/// @param nLedsOrOffset number of leds (3 argument version) or offset into the data array
 	/// @param nLedsIfOffset number of leds (4 argument version)
 	/// @returns a reference to the added controller
-	static ::CLEDController &addLeds(::CLEDController *pLed, CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0);
+	static ::CLEDController &addLeds(::CLEDController *pLed, CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) FL_NO_EXCEPT;
 
 	/// @name Channel API
 	/// @{
@@ -823,7 +823,7 @@ public:
 	/// fl::ChannelPtr channel = fl::Channel::create(config);
 	/// FastLED.add(channel);
 	/// @endcode
-	static void add(fl::ChannelPtr channel);
+	static void add(fl::ChannelPtr channel) FL_NO_EXCEPT;
 
 	/// @brief Add LED channel with runtime configuration (from ChannelConfig)
 	///
@@ -844,10 +844,10 @@ public:
 	/// FastLED.show();
 	/// FastLED.remove(channel);  // Unregister and release FastLED's reference
 	/// @endcode
-	static fl::ChannelPtr add(const fl::ChannelConfig& config);
+	static fl::ChannelPtr add(const fl::ChannelConfig& config) FL_NO_EXCEPT;
 
 	template<fl::ProfileId Profile>
-	static fl::ChannelPtr add(const fl::ChannelConfig& config) {
+	static fl::ChannelPtr add(const fl::ChannelConfig& config) FL_NO_EXCEPT {
 		fl::ChannelPtr channel = fl::Channel::create<Profile>(config);
 		if (channel != nullptr) add(channel);
 		return channel;
@@ -872,7 +872,7 @@ public:
 	/// };
 	/// auto channels = FastLED.add(fl::span<const fl::ChannelConfig>(configs, 2));
 	/// @endcode
-	static fl::vector<fl::ChannelPtr> add(fl::span<const fl::ChannelConfig> configs);
+	static fl::vector<fl::ChannelPtr> add(fl::span<const fl::ChannelConfig> configs) FL_NO_EXCEPT;
 
 	/// @brief Add multiple LED channels from an initializer list
 	///
@@ -891,7 +891,7 @@ public:
 	///     fl::ChannelConfig(PIN2, timing, leds2, RGB)
 	/// });
 	/// @endcode
-	static fl::vector<fl::ChannelPtr> add(fl::initializer_list<fl::ChannelConfig> configs);
+	static fl::vector<fl::ChannelPtr> add(fl::initializer_list<fl::ChannelConfig> configs) FL_NO_EXCEPT;
 
 	/// @brief Add multiple LED channels from a MultiChannelConfig
 	///
@@ -912,7 +912,7 @@ public:
 	/// };
 	/// auto channels = FastLED.add(multiConfig);
 	/// @endcode
-	static fl::vector<fl::ChannelPtr> add(const fl::MultiChannelConfig& multiConfig);
+	static fl::vector<fl::ChannelPtr> add(const fl::MultiChannelConfig& multiConfig) FL_NO_EXCEPT;
 
 	/// @brief Add an RX channel with runtime configuration
 	///
@@ -922,7 +922,7 @@ public:
 	///
 	/// @param config RX channel configuration (pin, backend, capture settings)
 	/// @returns Shared pointer to RxChannel
-	static fl::RxChannelPtr addRx(const fl::RxChannelConfig& config);
+	static fl::RxChannelPtr addRx(const fl::RxChannelConfig& config) FL_NO_EXCEPT;
 
 	/// @brief Add an audio input and return an auto-pumped Processor
 	///
@@ -944,7 +944,7 @@ public:
 	/// audio->setGain(2.0f);  // Optional: amplify input
 	/// audio->onBeat([]{ /* pulse leds */ });
 	/// @endcode
-	static fl::shared_ptr<fl::audio::Processor> add(const fl::audio::Config& config);
+	static fl::shared_ptr<fl::audio::Processor> add(const fl::audio::Config& config) FL_NO_EXCEPT;
 
 	/// @brief Add a pre-created audio input and return an auto-pumped Processor
 	///
@@ -961,7 +961,7 @@ public:
 	/// auto audio = FastLED.add(fakeInput);
 	/// audio->onBeat([]{ /* test callback */ });
 	/// @endcode
-	static fl::shared_ptr<fl::audio::Processor> add(fl::shared_ptr<fl::audio::IInput> input);
+	static fl::shared_ptr<fl::audio::Processor> add(fl::shared_ptr<fl::audio::IInput> input) FL_NO_EXCEPT;
 
 	/// @brief Add a UIAudio element and return an auto-pumped Processor
 	///
@@ -976,7 +976,7 @@ public:
 	/// auto audio = FastLED.add(audio_ui);
 	/// audio->onBeat([]{ /* pulse leds */ });
 	/// @endcode
-	static fl::shared_ptr<fl::audio::Processor> add(fl::UIAudio& uiAudio);
+	static fl::shared_ptr<fl::audio::Processor> add(fl::UIAudio& uiAudio) FL_NO_EXCEPT;
 
 	/// @brief Enroll every channel driver available on this platform with `ChannelManager`.
 	///
@@ -1002,7 +1002,7 @@ public:
 	///     FastLED.add(fl::ChannelConfig(..., opts));
 	/// }
 	/// @endcode
-	static void enableAllDrivers();
+	static void enableAllDrivers() FL_NO_EXCEPT;
 
 	/// @brief Remove a channel from the LED controller list
 	///
@@ -1020,7 +1020,7 @@ public:
 	/// // ... use channel ...
 	/// FastLED.remove(channel);  // Remove from controller list
 	/// @endcode
-	static void remove(fl::ChannelPtr channel);
+	static void remove(fl::ChannelPtr channel) FL_NO_EXCEPT;
 
 	/// @brief Remove the audio processor
 	///
@@ -1030,7 +1030,7 @@ public:
 	///
 	/// @param processor Shared pointer to an Processor instance
 	/// @note Safe to call multiple times - no-op if processor doesn't match
-	static void remove(fl::shared_ptr<fl::audio::Processor> processor);
+	static void remove(fl::shared_ptr<fl::audio::Processor> processor) FL_NO_EXCEPT;
 
 	/// @}
 
@@ -1049,7 +1049,7 @@ public:
 	template<template<fl::u8, fl::u8, fl::u8> class CHIPSET,
 	         fl::u8 RED_PIN, fl::u8 GREEN_PIN, fl::u8 BLUE_PIN>
 	static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset,
-	                                  int nLedsIfOffset = 0) {
+	                                  int nLedsIfOffset = 0) FL_NO_EXCEPT {
 		static CHIPSET<RED_PIN, GREEN_PIN, BLUE_PIN> controller;
 		return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset);
 	}
@@ -1178,7 +1178,7 @@ public:
 	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::u32 RATE, int VARIANT,
 	         fl::EOrder RGB_ORDER, fl::Bus B, fl::u8 B_WHICH>
 	static ::CLEDController &addLedsSpiDispatch(CRGB *data, int nLedsOrOffset, int nLedsIfOffset,
-	                                             const fl::SpiChipsetConfig &spiCfg, fl::true_type /*useSlim*/) {
+	                                             const fl::SpiChipsetConfig &spiCfg, fl::true_type /*useSlim*/) FL_NO_EXCEPT {
 		static fl::SlimSpiBridgeController<static_cast<fl::SpiChipset>(CHIPSET), RGB_ORDER, B, B_WHICH> sCtrl(spiCfg);
 		return addLeds(&sCtrl, data, nLedsOrOffset, nLedsIfOffset);
 	}
@@ -1186,7 +1186,7 @@ public:
 	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::u32 RATE, int VARIANT,
 	         fl::EOrder RGB_ORDER, fl::Bus B, fl::u8 B_WHICH>
 	static ::CLEDController &addLedsSpiDispatch(CRGB *data, int nLedsOrOffset, int nLedsIfOffset,
-	                                             const fl::SpiChipsetConfig &spiCfg, fl::false_type /*isMY9221 -> bit-bang*/) {
+	                                             const fl::SpiChipsetConfig &spiCfg, fl::false_type /*isMY9221 -> bit-bang*/) FL_NO_EXCEPT {
 		(void)spiCfg;
 		static MY9221Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, (RATE ? RATE : DATA_RATE_MHZ(1))> sCtrl;
 		// Register (and bind the LED buffer) only once per specialization; a
@@ -1201,7 +1201,7 @@ public:
 
 	/// Add an SPI based CLEDController via Channel API.
 	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::EOrder RGB_ORDER, fl::u32 SPI_DATA_RATE, fl::Bus B = fl::Bus::AUTO, fl::u8 B_WHICH = 0>
-	::CLEDController &addLedsSpiChannel(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+	::CLEDController &addLedsSpiChannel(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) FL_NO_EXCEPT {
 		fl::SpiEncoder encoder = fl::SpiEncoder::spiEncoderForChipset(
 			static_cast<fl::SpiChipset>(CHIPSET), SPI_DATA_RATE);
 		fl::SpiChipsetConfig spiCfg(DATA_PIN, CLOCK_PIN, encoder);
@@ -1211,7 +1211,7 @@ public:
 
 	/// Add an SPI controller with an explicit ESP-IDF SPI host.
 	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::EOrder RGB_ORDER, fl::u32 SPI_DATA_RATE, fl::Bus B = fl::Bus::AUTO, fl::u8 B_WHICH = 0>
-	::CLEDController &addLedsSpiChannel(CRGB *data, int nLeds, fl::Esp32SpiBus spiBus) {
+	::CLEDController &addLedsSpiChannel(CRGB *data, int nLeds, fl::Esp32SpiBus spiBus) FL_NO_EXCEPT {
 		fl::SpiEncoder encoder = fl::SpiEncoder::spiEncoderForChipset(
 			static_cast<fl::SpiChipset>(CHIPSET), SPI_DATA_RATE);
 		fl::SpiChipsetConfig spiCfg(DATA_PIN, CLOCK_PIN, encoder, spiBus);
@@ -1221,7 +1221,7 @@ public:
 
 	/// Add an SPI based CLEDController via Channel API (default RGB order and speed).
 	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::Bus B = fl::Bus::AUTO, fl::u8 B_WHICH = 0>
-	static ::CLEDController &addLedsSpiChannel(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+	static ::CLEDController &addLedsSpiChannel(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) FL_NO_EXCEPT {
 		fl::SpiEncoder encoder = fl::SpiEncoder::spiEncoderForChipset(
 			static_cast<fl::SpiChipset>(CHIPSET));
 		fl::SpiChipsetConfig spiCfg(DATA_PIN, CLOCK_PIN, encoder);
@@ -1235,7 +1235,7 @@ public:
 
 	/// Add an SPI based CLEDController via Channel API (default speed).
 	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::EOrder RGB_ORDER, fl::Bus B = fl::Bus::AUTO, fl::u8 B_WHICH = 0>
-	::CLEDController& addLedsSpiChannel(CRGB* data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+	::CLEDController& addLedsSpiChannel(CRGB* data, int nLedsOrOffset, int nLedsIfOffset = 0) FL_NO_EXCEPT {
 		fl::SpiEncoder encoder = fl::SpiEncoder::spiEncoderForChipset(
 			static_cast<fl::SpiChipset>(CHIPSET));
 		fl::SpiChipsetConfig spiCfg(DATA_PIN, CLOCK_PIN, encoder);
@@ -1274,7 +1274,7 @@ public:
 	#else
 
 	/// Add an SPI based CLEDController instance to the world (legacy path).
-	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::EOrder RGB_ORDER, fl::u32 SPI_DATA_RATE, fl::Bus B = fl::Bus::AUTO> ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::EOrder RGB_ORDER, fl::u32 SPI_DATA_RATE, fl::Bus B = fl::Bus::AUTO> ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) FL_NO_EXCEPT {
 		fl::busKeepAlive<B>();
 		// Instantiate the controller using ClockedChipsetHelper
 		typedef ClockedChipsetHelper<CHIPSET, DATA_PIN, CLOCK_PIN> CHIP;
@@ -1287,7 +1287,7 @@ public:
 	/// Add an SPI controller on a selected ESP-IDF host.
 	/// @note SPI1 is reserved for flash/PSRAM; use SPI2 or SPI3.
 	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::EOrder RGB_ORDER, fl::u32 SPI_DATA_RATE, fl::Bus B = fl::Bus::AUTO>
-	::CLEDController &addLeds(CRGB *data, int nLeds, fl::Esp32SpiBus spiBus) {
+	::CLEDController &addLeds(CRGB *data, int nLeds, fl::Esp32SpiBus spiBus) FL_NO_EXCEPT {
 		fl::busKeepAlive<B>();
 		typedef ClockedChipsetHelper<CHIPSET, DATA_PIN, CLOCK_PIN> CHIP;
 		FL_STATIC_ASSERT(CHIP::IS_VALID, "Unsupported chipset");
@@ -1298,7 +1298,7 @@ public:
 	}
 
 	/// Add an SPI based CLEDController instance to the world (legacy path).
-	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::Bus B = fl::Bus::AUTO> static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::Bus B = fl::Bus::AUTO> static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) FL_NO_EXCEPT {
 		fl::busKeepAlive<B>();
 		typedef ClockedChipsetHelper<CHIPSET, DATA_PIN, CLOCK_PIN> CHIP;
 		FL_STATIC_ASSERT(CHIP::IS_VALID, "Unsupported chipset");
@@ -1309,7 +1309,7 @@ public:
 
 	/// Add an SPI based CLEDController instance to the world (legacy path).
 	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::EOrder RGB_ORDER, fl::Bus B = fl::Bus::AUTO>
-	::CLEDController& addLeds(CRGB* data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+	::CLEDController& addLeds(CRGB* data, int nLedsOrOffset, int nLedsIfOffset = 0) FL_NO_EXCEPT {
 		fl::busKeepAlive<B>();
 		typedef ClockedChipsetHelper<CHIPSET, DATA_PIN, CLOCK_PIN> CHIP;
 		FL_STATIC_ASSERT(CHIP::IS_VALID, "Unsupported chipset");
@@ -1341,7 +1341,7 @@ public:
 	/// This explicit helper function aids AVR GCC with template-dependent type resolution
 	/// during two-phase name lookup, solving compilation issues on older compiler versions.
 	template<typename ControllerType>
-	static inline ::CLEDController& addLedsImpl(ControllerType* controller, CRGB *data, int nLedsOrOffset, int nLedsIfOffset) {
+	static inline ::CLEDController& addLedsImpl(ControllerType* controller, CRGB *data, int nLedsOrOffset, int nLedsIfOffset) FL_NO_EXCEPT {
 		::CLEDController* pLed = static_cast<::CLEDController*>(controller);
 		return addLeds(pLed, data, nLedsOrOffset, nLedsIfOffset);
 	}
@@ -1368,7 +1368,7 @@ public:
 
 	/// Add a clockless based CLEDController instance to the world.
 	template<template<fl::u8, fl::EOrder> class CHIPSET, fl::u8 DATA_PIN, fl::EOrder RGB_ORDER, fl::Bus B = fl::Bus::AUTO>
-	static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+	static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) FL_NO_EXCEPT {
 		fl::busKeepAlive<B>();
 		static CHIPSET<DATA_PIN, RGB_ORDER> c;
 		return addLedsImpl(&c, data, nLedsOrOffset, nLedsIfOffset);
@@ -1376,7 +1376,7 @@ public:
 
 	template<fl::ProfileId PROFILE, template<fl::u8, fl::EOrder> class CHIPSET,
 	         fl::u8 DATA_PIN, fl::EOrder RGB_ORDER, fl::Bus B = fl::Bus::AUTO>
-	static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+	static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) FL_NO_EXCEPT {
 		FL_STATIC_ASSERT(PROFILE == fl::ProfileId::WS2812B, "Unsupported color profile");
 		fl::busKeepAlive<B>();
 		using Controller = fl::StaticProfileClocklessController<fl::profiles::WS2812B,
@@ -1387,7 +1387,7 @@ public:
 
 	/// Add a clockless based CLEDController instance to the world.
 	template<template<fl::u8, fl::EOrder> class CHIPSET, fl::u8 DATA_PIN, fl::Bus B = fl::Bus::AUTO>
-	static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+	static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) FL_NO_EXCEPT {
 		fl::busKeepAlive<B>();
 		static CHIPSET<DATA_PIN, RGB> c;
 		return addLedsImpl(&c, data, nLedsOrOffset, nLedsIfOffset);
@@ -1395,14 +1395,14 @@ public:
 
 	/// Add a clockless based CLEDController instance to the world.
 	template<template<fl::u8> class CHIPSET, fl::u8 DATA_PIN, fl::Bus B = fl::Bus::AUTO>
-	static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+	static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) FL_NO_EXCEPT {
 		fl::busKeepAlive<B>();
 		static CHIPSET<DATA_PIN> c;
 		return addLedsImpl(&c, data, nLedsOrOffset, nLedsIfOffset);
 	}
 
 	template<template<fl::u8> class CHIPSET, fl::u8 DATA_PIN, fl::Bus B = fl::Bus::AUTO>
-	static ::CLEDController &addLeds(fl::Leds& leds, int nLedsOrOffset, int nLedsIfOffset = 0) {
+	static ::CLEDController &addLeds(fl::Leds& leds, int nLedsOrOffset, int nLedsIfOffset = 0) FL_NO_EXCEPT {
 		CRGB* rgb = leds;
 		return addLeds<CHIPSET, DATA_PIN, B>(rgb, nLedsOrOffset, nLedsIfOffset);
 	}
@@ -1452,7 +1452,7 @@ public:
 
 	/// Add a 3rd party library based CLEDController instance to the world.
 	template<template<fl::EOrder RGB_ORDER> class CHIPSET, fl::EOrder RGB_ORDER, fl::Bus B = fl::Bus::AUTO>
-	static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+	static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) FL_NO_EXCEPT {
 		fl::busKeepAlive<B>();
 		static CHIPSET<RGB_ORDER> c;
 		return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset);
@@ -1460,7 +1460,7 @@ public:
 
 	/// Add a 3rd party library based CLEDController instance to the world.
 	template<template<fl::EOrder RGB_ORDER> class CHIPSET, fl::Bus B = fl::Bus::AUTO>
-	static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+	static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) FL_NO_EXCEPT {
 		fl::busKeepAlive<B>();
 		static CHIPSET<RGB> c;
 		return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset);
@@ -1598,11 +1598,11 @@ public:
 
 	/// Set the global brightness scaling
 	/// @param scale a 0-255 value for how much to scale all leds before writing them out
-	void setBrightness(fl::u8 scale) { mScale = scale; }
+	void setBrightness(fl::u8 scale) FL_NO_EXCEPT { mScale = scale; }
 
 	/// Get the current global brightness setting
 	/// @returns the current global brightness value
-	fl::u8 getBrightness() { return mScale; }
+	fl::u8 getBrightness() FL_NO_EXCEPT { return mScale; }
 
 	/// @name Channel Bus Manager Controls
 	/// Configure platform-specific channel bus drivers
@@ -1614,7 +1614,7 @@ public:
 	/// @note Disabled drivers are skipped during selection
 	/// @note Changes take effect immediately on next LED update
 	/// @note On platforms without registered drivers, this is a safe no-op
-	void setDriverEnabled(const char* name, bool enabled);
+	void setDriverEnabled(const char* name, bool enabled) FL_NO_EXCEPT;
 
 	/// Register a single driver at a priority above the platform default
 	/// (compile-time TU-linking variant).
@@ -1656,21 +1656,21 @@ public:
 	///       custom third-party drivers, RPC-resolved names), use
 	///       `fl::ChannelManager::instance().setExclusiveDriverByName(name)`
 	///       directly.
-	bool setExclusiveDriver(fl::Bus bus, fl::u8 which = 0);
+	bool setExclusiveDriver(fl::Bus bus, fl::u8 which = 0) FL_NO_EXCEPT;
 
 	/// Check if a driver is enabled by name
 	/// @param name Driver name to query (case-sensitive)
 	/// @return true if enabled, false if disabled or not registered
-	bool isDriverEnabled(const char* name) const;
+	bool isDriverEnabled(const char* name) const FL_NO_EXCEPT;
 
 	/// Get count of registered channel drivers
 	/// @return Total number of registered drivers (including unnamed ones)
-	fl::size getDriverCount() const;
+	fl::size getDriverCount() const FL_NO_EXCEPT;
 
 	/// Get full state of all registered channel drivers
 	/// @return Span of driver info (sorted by priority descending)
 	/// @note Returned span is valid until next call to any non-const method
-	fl::span<const fl::DriverInfo> getDriverInfos() const;
+	fl::span<const fl::DriverInfo> getDriverInfos() const FL_NO_EXCEPT;
 
 	/// @} Channel Bus Manager Controls
 
@@ -1680,21 +1680,21 @@ public:
 	/// @note This overload waits indefinitely while cooperatively running system
 	/// work. Use wait(timeout_ms) when the caller needs a bounded wait.
 	/// @note Safe to call on all platforms (no-op on platforms without channel bus).
-	void wait();
+	void wait() FL_NO_EXCEPT;
 
 	/// Wait for all channel bus transmissions to complete with timeout.
 	/// @param timeout_ms Maximum milliseconds to wait (0 = wait forever).
 	/// @return true if all drivers became READY, false if the timeout elapsed.
-	bool wait(fl::u32 timeout_ms);
+	bool wait(fl::u32 timeout_ms) FL_NO_EXCEPT;
 
 	/// Set the maximum power to be used, given in volts and milliamps.
 	/// @param volts how many volts the leds are being driven at (usually 5)
 	/// @param milliamps the maximum milliamps of power draw you want
-	inline void setMaxPowerInVoltsAndMilliamps(fl::u8 volts, fl::u32 milliamps) { setMaxPowerInMilliWatts(volts * milliamps); }
+	inline void setMaxPowerInVoltsAndMilliamps(fl::u8 volts, fl::u32 milliamps) FL_NO_EXCEPT { setMaxPowerInMilliWatts(volts * milliamps); }
 
 	/// Set the maximum power to be used, given in milliwatts
 	/// @param milliwatts the max power draw desired, in milliwatts
-	inline void setMaxPowerInMilliWatts(fl::u32 milliwatts) {
+	inline void setMaxPowerInMilliWatts(fl::u32 milliwatts) FL_NO_EXCEPT {
 		mNPowerData = milliwatts;
 #if FL_COLOR_PIPELINE_SHARED
 		fl::activeFramePowerDispatch() = fl::framePowerDispatch();
@@ -1712,20 +1712,20 @@ public:
 	/// to 1..31. SK9822-HD and chips without documented field semantics keep
 	/// the field fixed whatever this says. Affects only channels bound to a
 	/// colour profile.
-	void setHdFieldFloor(fl::u8 min_field);
+	void setHdFieldFloor(fl::u8 min_field) FL_NO_EXCEPT;
 	/// @see setHdFieldFloor()
-	fl::u8 getHdFieldFloor() const;
+	fl::u8 getHdFieldFloor() const FL_NO_EXCEPT;
 
 	/// Brightness the most recent show() / showColor() actually applied,
 	/// after the power limiter set by setMaxPowerInMilliWatts(). Equal to the
 	/// requested brightness when no limit is set or the limit did not bind.
 	/// 255 before the first frame.
-	fl::u8 getLastShowBrightness() const;
+	fl::u8 getLastShowBrightness() const FL_NO_EXCEPT;
 
 	/// True if the power limiter lowered the brightness of the most recent
 	/// show() / showColor() below what it was asked for. Lets a sketch with no
 	/// serial console react to hitting its power budget.
-	bool isPowerLimited() const;
+	bool isPowerLimited() const FL_NO_EXCEPT;
 
 	/// @name Power Model Configuration
 	/// Configure LED power consumption for accurate power management
@@ -1739,7 +1739,7 @@ public:
 	///        FastLED.setPowerModel(PowerModelRGB(40, 40, 40, 2, 0.87f));
 	///        @endcode
 	/// @example FastLED.setPowerModel(PowerModelRGB(40, 40, 40, 2));
-	inline void setPowerModel(const PowerModelRGB& model) {
+	inline void setPowerModel(const PowerModelRGB& model) FL_NO_EXCEPT {
 		set_power_model(model);
 	}
 
@@ -1752,14 +1752,14 @@ public:
 	///       (identity tables), ignoring the supplied value.
 	/// @note This affects power estimation and limiting only, not rendered brightness.
 	/// @note Only enabled when `SKETCH_HAS_LARGE_MEMORY==1`; smaller-memory targets keep legacy linear behavior.
-	inline void setPowerScalingExponent(float exponent) {
+	inline void setPowerScalingExponent(float exponent) FL_NO_EXCEPT {
 		set_power_scaling_exponent(exponent);
 	}
 
 	/// Get the configured brightness-to-power response exponent
 	/// @returns the current exponent. Defaults to 1.0 for linear scaling.
 	/// @note Returns 1.0 when `SKETCH_HAS_LARGE_MEMORY==0`.
-	inline float getPowerScalingExponent() const {
+	inline float getPowerScalingExponent() const FL_NO_EXCEPT {
 		return get_power_scaling_exponent();
 	}
 
@@ -1798,7 +1798,7 @@ public:
 	/// @param model RGBW power consumption model
 	/// @note Future API enhancement - currently uses RGB components only
 	/// @example FastLED.setPowerModel(PowerModelRGBW(90, 70, 90, 100, 5));
-	inline void setPowerModel(const PowerModelRGBW& model) {
+	inline void setPowerModel(const PowerModelRGBW& model) FL_NO_EXCEPT {
 		set_power_model(model);
 	}
 
@@ -1806,13 +1806,13 @@ public:
 	/// @param model RGBWW power consumption model
 	/// @note Future API enhancement - currently uses RGB components only
 	/// @example FastLED.setPowerModel(PowerModelRGBWW(85, 65, 85, 95, 95, 5));
-	inline void setPowerModel(const PowerModelRGBWW& model) {
+	inline void setPowerModel(const PowerModelRGBWW& model) FL_NO_EXCEPT {
 		set_power_model(model);
 	}
 
 	/// Get current RGB power model
 	/// @returns Current RGB power consumption model
-	inline PowerModelRGB getPowerModel() const {
+	inline PowerModelRGB getPowerModel() const FL_NO_EXCEPT {
 		return get_power_model();
 	}
 
@@ -1854,7 +1854,7 @@ public:
 	/// @see setMaxPowerInMilliWatts()
 	/// @see setPowerModel()
 	/// @see setPowerScalingExponent()
-	fl::u32 getEstimatedPowerInMilliWatts(bool apply_limiter = true) const;
+	fl::u32 getEstimatedPowerInMilliWatts(bool apply_limiter = true) const FL_NO_EXCEPT;
 
 	/// @} Power Model Configuration
 
@@ -1898,19 +1898,19 @@ public:
 	/// interrupt service routine (ISR). On ESP32, doing so can deadlock or trigger
 	/// an interrupt-watchdog panic. Have the ISR set a flag, then call show() from
 	/// loop() or a normal task after leaving the interrupt context.
-	void show(fl::u8 scale);
+	void show(fl::u8 scale) FL_NO_EXCEPT;
 
 	/// Update all our controllers with the current led colors
 	/// @warning This function is not interrupt-safe. See show(fl::u8).
-	void show() { show(mScale); }
+	void show() FL_NO_EXCEPT { show(mScale); }
 
 	// Called automatically at the end of show().
-	void onEndFrame();
+	void onEndFrame() FL_NO_EXCEPT;
 
 	/// Clear the leds, wiping the local array of data. Optionally you can also
 	/// send the cleared data to the LEDs.
 	/// @param writeData whether or not to write out to the leds as well
-	void clear(bool writeData = false);
+	void clear(bool writeData = false) FL_NO_EXCEPT;
 
 	/// Clear/reset FastLED state based on the provided flags.
 	///
@@ -1933,40 +1933,40 @@ public:
 	/// // Clear power settings and brightness
 	/// FastLED.clear(ClearFlags::POWER_SETTINGS | ClearFlags::BRIGHTNESS);
 	/// @endcode
-	static void clear(ClearFlags flags);
+	static void clear(ClearFlags flags) FL_NO_EXCEPT;
 
 	/// Clear out the local data array
-	void clearData();
+	void clearData() FL_NO_EXCEPT;
 
 	/// Set all leds on all controllers to the given color/scale.
 	/// @param color what color to set the leds to
 	/// @param scale what brightness scale to show at
-	void showColor(const CRGB & color, fl::u8 scale);
+	void showColor(const CRGB & color, fl::u8 scale) FL_NO_EXCEPT;
 
 	/// Set all leds on all controllers to the given color
 	/// @param color what color to set the leds to
-	void showColor(const CRGB & color) { showColor(color, mScale); }
+	void showColor(const CRGB & color) FL_NO_EXCEPT { showColor(color, mScale); }
 
 	/// Delay for the given number of milliseconds.  Provided to allow the library to be used on platforms
 	/// that don't have a delay function (to allow code to be more portable). 
 	/// @note This will call show() constantly to drive the dithering engine (and will call show() at least once).
 	/// @param ms the number of milliseconds to pause for
-	void delay(unsigned long ms);
+	void delay(unsigned long ms) FL_NO_EXCEPT;
 
 	/// Set a global color temperature.  Sets the color temperature for all added led strips,
 	/// overriding whatever previous color temperature those controllers may have had.
 	/// @param temp A CRGB structure describing the color temperature
-	void setTemperature(const CRGB & temp);
+	void setTemperature(const CRGB & temp) FL_NO_EXCEPT;
 
 	/// Set a global color correction.  Sets the color correction for all added led strips,
 	/// overriding whatever previous color correction those controllers may have had.
 	/// @param correction A CRGB structure describin the color correction.
-	void setCorrection(const CRGB & correction);
+	void setCorrection(const CRGB & correction) FL_NO_EXCEPT;
 
 	/// Set the dithering mode.  Sets the dithering mode for all added led strips, overriding
 	/// whatever previous dithering option those controllers may have had.
 	/// @param ditherMode what type of dithering to use, either BINARY_DITHER or DISABLE_DITHER
-	void setDither(fl::u8 ditherMode = BINARY_DITHER);
+	void setDither(fl::u8 ditherMode = BINARY_DITHER) FL_NO_EXCEPT;
 
 	/// In strict mode a channel that requests color management without an
 	/// emitter profile reports a rejected binding instead of silent fallback.
@@ -1990,33 +1990,33 @@ public:
 	/// adding all of your leds.
 	/// @param refresh maximum refresh rate in hz
 	/// @param constrain constrain refresh rate to the slowest speed yet set
-	        void setMaxRefreshRate(fl::u16 refresh, bool constrain=false);
+	        void setMaxRefreshRate(fl::u16 refresh, bool constrain=false) FL_NO_EXCEPT;
 
 	/// For debugging, this will keep track of time between calls to countFPS(). Every
 	/// `nFrames` calls, it will update an internal counter for the current FPS.
 	/// @todo Make this a rolling counter
 	/// @param nFrames how many frames to time for determining FPS
-	void countFPS(int nFrames=25);
+	void countFPS(int nFrames=25) FL_NO_EXCEPT;
 
 	/// Get the number of frames/second being written out
 	/// @returns the most recently computed FPS value
-	        fl::u16 getFPS() { return mNFPS; }
+	        fl::u16 getFPS() FL_NO_EXCEPT { return mNFPS; }
 
 	/// Get how many controllers have been registered
 	/// @returns the number of controllers (strips) that have been added with addLeds()
-	int count();
+	int count() FL_NO_EXCEPT;
 
 	/// Get a reference to a registered controller
 	/// @returns a reference to the Nth controller
-	CLEDController & operator[](int x);
+	CLEDController & operator[](int x) FL_NO_EXCEPT;
 
 	/// Get the number of leds in the first controller
 	/// @returns the number of LEDs in the first controller
-	int size();
+	int size() FL_NO_EXCEPT;
 
 	/// Get a pointer to led data for the first controller
 	/// @returns pointer to the CRGB buffer for the first controller
-	CRGB *leds();
+	CRGB *leds() FL_NO_EXCEPT;
 };
 
 /// Alias of the FastLED instance for legacy purposes
@@ -2085,6 +2085,7 @@ extern CFastLED FastLED;
 #include "fl/channels/spi.h"  // SPI device and multi-lane SPI support (1-16 lanes)
 
 #include "fl/ui/ui.h"  // Provides UIButton, UISlider, UICheckbox, UINumberField and UITitle, UIDescription, UIHelp, UIGroup.
+#include "fl/stl/noexcept.h"
 using fl::UITitle;
 using fl::UIDescription;
 using fl::UIHelp;

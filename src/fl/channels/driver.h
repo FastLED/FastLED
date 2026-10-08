@@ -59,7 +59,7 @@ public:
     /// means the manager should wake and poll. Drivers that do not have such a
     /// signal leave this unused; the manager's timed wait slice is the fallback.
     struct PollNeededCallback {
-        using Callback = void (*)(void*) FL_NO_EXCEPT;
+        using Callback = void (*)(void*);
 
         Callback callback = nullptr;
         void* context = nullptr;

@@ -10,13 +10,14 @@
 #include "fl/fx/wled/adapter.h"
 #include "FastLED.h"  // ok include - WLED adapter needs global FastLED object
 #include "fl/stl/memory.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
 // FastLEDAdapter implementation
 
 FastLEDAdapter::FastLEDAdapter(u8 controllerIndex)
-    : mControllerIndex(controllerIndex)
+    FL_NO_EXCEPT : mControllerIndex(controllerIndex)
     , mSegmentStart(0)
     , mSegmentEnd(0)
     , mHasSegment(false)
@@ -26,7 +27,7 @@ FastLEDAdapter::FastLEDAdapter(u8 controllerIndex)
     mSegmentEnd = controller.size();
 }
 
-fl::span<CRGB> FastLEDAdapter::getLEDs() {
+fl::span<CRGB> FastLEDAdapter::getLEDs() FL_NO_EXCEPT {
     CLEDController& controller = FastLED[mControllerIndex];
     CRGB* leds = controller.leds();
     if (!leds) {
@@ -39,7 +40,7 @@ fl::span<CRGB> FastLEDAdapter::getLEDs() {
     return fl::span<CRGB>(leds, controller.size());
 }
 
-size_t FastLEDAdapter::getNumLEDs() const {
+size_t FastLEDAdapter::getNumLEDs() const FL_NO_EXCEPT {
     if (mHasSegment) {
         return mSegmentEnd - mSegmentStart;
     }
@@ -48,15 +49,15 @@ size_t FastLEDAdapter::getNumLEDs() const {
     return controller.size();
 }
 
-void FastLEDAdapter::show() {
+void FastLEDAdapter::show() FL_NO_EXCEPT {
     FastLED.show();
 }
 
-void FastLEDAdapter::show(u8 brightness) {
+void FastLEDAdapter::show(u8 brightness) FL_NO_EXCEPT {
     FastLED.show(brightness);
 }
 
-void FastLEDAdapter::clear(bool writeToStrip) {
+void FastLEDAdapter::clear(bool writeToStrip) FL_NO_EXCEPT {
     CLEDController& controller = FastLED[mControllerIndex];
     CRGB* leds = controller.leds();
     if (!leds) {
@@ -81,37 +82,37 @@ void FastLEDAdapter::clear(bool writeToStrip) {
     }
 }
 
-void FastLEDAdapter::setBrightness(u8 brightness) {
+void FastLEDAdapter::setBrightness(u8 brightness) FL_NO_EXCEPT {
     FastLED.setBrightness(brightness);
 }
 
-u8 FastLEDAdapter::getBrightness() const {
+u8 FastLEDAdapter::getBrightness() const FL_NO_EXCEPT {
     return FastLED.getBrightness();
 }
 
-void FastLEDAdapter::setCorrection(CRGB correction) {
+void FastLEDAdapter::setCorrection(CRGB correction) FL_NO_EXCEPT {
     FastLED.setCorrection(correction);
 }
 
-void FastLEDAdapter::setTemperature(CRGB temperature) {
+void FastLEDAdapter::setTemperature(CRGB temperature) FL_NO_EXCEPT {
     FastLED.setTemperature(temperature);
 }
 
-void FastLEDAdapter::delay(unsigned long ms) {
+void FastLEDAdapter::delay(unsigned long ms) FL_NO_EXCEPT {
     FastLED.delay(ms);
 }
 
-void FastLEDAdapter::setMaxRefreshRate(u16 fps) {
+void FastLEDAdapter::setMaxRefreshRate(u16 fps) FL_NO_EXCEPT {
     FastLED.setMaxRefreshRate(fps);
 }
 
-u16 FastLEDAdapter::getMaxRefreshRate() const {
+u16 FastLEDAdapter::getMaxRefreshRate() const FL_NO_EXCEPT {
     // CFastLED doesn't expose the max refresh rate setting
     // Return 0 to indicate no limit
     return 0;
 }
 
-void FastLEDAdapter::setSegment(size_t start, size_t end) {
+void FastLEDAdapter::setSegment(size_t start, size_t end) FL_NO_EXCEPT {
     CLEDController& controller = FastLED[mControllerIndex];
     size_t numLeds = controller.size();
 
@@ -135,7 +136,7 @@ void FastLEDAdapter::setSegment(size_t start, size_t end) {
     mHasSegment = true;
 }
 
-void FastLEDAdapter::clearSegment() {
+void FastLEDAdapter::clearSegment() FL_NO_EXCEPT {
     CLEDController& controller = FastLED[mControllerIndex];
     mSegmentEnd = controller.size();
     mSegmentStart = 0;
@@ -143,7 +144,7 @@ void FastLEDAdapter::clearSegment() {
 }
 
 // Helper function implementation
-fl::shared_ptr<IFastLED> createFastLEDController(u8 controllerIndex) {
+fl::shared_ptr<IFastLED> createFastLEDController(u8 controllerIndex) FL_NO_EXCEPT {
     return fl::make_shared<FastLEDAdapter>(controllerIndex);
 }
 

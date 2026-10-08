@@ -2,19 +2,20 @@
 #include "fl/stl/cstring.h"
 // IWYU pragma: begin_keep
 #include <stdlib.h>
+#include "fl/stl/noexcept.h"
 // IWYU pragma: end_keep
 
 namespace fl {
     // Provide C standard library malloc/free/realloc functions
-    void* malloc(size_t size) {
+    void* malloc(size_t size) FL_NO_EXCEPT {
         return ::malloc(size);
     }
 
-    void free(void* ptr) {
+    void free(void* ptr) FL_NO_EXCEPT {
         ::free(ptr);
     }
 
-    void* calloc(size_t nmemb, size_t size) {
+    void* calloc(size_t nmemb, size_t size) FL_NO_EXCEPT {
         size_t total_size = nmemb * size;
         void* ptr = malloc(total_size);
         if (ptr != nullptr) {
@@ -23,7 +24,7 @@ namespace fl {
         return ptr;
     }
 
-    void* realloc(void* ptr, size_t new_size) {
+    void* realloc(void* ptr, size_t new_size) FL_NO_EXCEPT {
         return ::realloc(ptr, new_size);
     }
 
@@ -31,7 +32,7 @@ namespace fl {
     // Arduino.h defines abs as a macro, so we need to temporarily hide it
     #pragma push_macro("abs")
     #undef abs
-    int abs(int x) {
+    int abs(int x) FL_NO_EXCEPT {
         return ::abs(x);
     }
     #pragma pop_macro("abs")

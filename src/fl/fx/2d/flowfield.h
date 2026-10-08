@@ -36,7 +36,7 @@ class NoiseBias1D {
     /// @param attackTau Attack time constant in seconds (fast rise).
     /// @param decayTau  Decay time constant in seconds (slow fall).
     NoiseBias1D(u16 size, float attackTau, float decayTau)
-        : mSize(size) {
+        FL_NO_EXCEPT : mSize(size) {
         mFilters.reserve(size);
         for (u16 i = 0; i < size; ++i) {
             mFilters.push_back(
@@ -50,7 +50,7 @@ class NoiseBias1D {
 
     /// Inject a shaped bump. Multiple triggers per frame accumulate additively.
     void trigger(float center, float width, float amplitude,
-                 BumpShape shape = BumpShape::HalfSine) {
+                 BumpShape shape = BumpShape::HalfSine) FL_NO_EXCEPT {
         if (width <= 0.0f || amplitude == 0.0f || mSize == 0) {
             return;
         }
@@ -77,17 +77,17 @@ class NoiseBias1D {
     }
 
     /// Advance all filters by dt seconds.
-    void update(float dtSeconds) {
+    void update(float dtSeconds) FL_NO_EXCEPT {
         for (u16 i = 0; i < mSize; ++i) {
             mFilters[i].update(mPending[i], dtSeconds);
             mPending[i] = 0.0f;
         }
     }
 
-    float get(u16 i) const { return mFilters[i].value(); }
-    u16 size() const { return mSize; }
+    float get(u16 i) const FL_NO_EXCEPT { return mFilters[i].value(); }
+    u16 size() const FL_NO_EXCEPT { return mSize; }
 
-    void reset() {
+    void reset() FL_NO_EXCEPT {
         for (u16 i = 0; i < mSize; ++i) {
             mFilters[i].reset(0.0f);
             mPending[i] = 0.0f;
@@ -104,37 +104,37 @@ class NoiseBias1D {
 class NoiseBias2D {
   public:
     NoiseBias2D(u16 width, u16 height, float attackTau, float decayTau)
-        : mXBias(width, attackTau, decayTau),
+        FL_NO_EXCEPT : mXBias(width, attackTau, decayTau),
           mYBias(height, attackTau, decayTau) {}
 
     void triggerX(float center, float width, float amplitude,
-                  BumpShape shape = BumpShape::HalfSine) {
+                  BumpShape shape = BumpShape::HalfSine) FL_NO_EXCEPT {
         mXBias.trigger(center, width, amplitude, shape);
     }
 
     void triggerY(float center, float width, float amplitude,
-                  BumpShape shape = BumpShape::HalfSine) {
+                  BumpShape shape = BumpShape::HalfSine) FL_NO_EXCEPT {
         mYBias.trigger(center, width, amplitude, shape);
     }
 
-    void update(float dtSeconds) {
+    void update(float dtSeconds) FL_NO_EXCEPT {
         mXBias.update(dtSeconds);
         mYBias.update(dtSeconds);
     }
 
-    float getX(u16 x) const { return mXBias.get(x); }
-    float getY(u16 y) const { return mYBias.get(y); }
-    float get(u16 x, u16 y) const { return mXBias.get(x) + mYBias.get(y); }
+    float getX(u16 x) const FL_NO_EXCEPT { return mXBias.get(x); }
+    float getY(u16 y) const FL_NO_EXCEPT { return mYBias.get(y); }
+    float get(u16 x, u16 y) const FL_NO_EXCEPT { return mXBias.get(x) + mYBias.get(y); }
 
-    NoiseBias1D &x() { return mXBias; }
-    const NoiseBias1D &x() const { return mXBias; }
-    NoiseBias1D &y() { return mYBias; }
-    const NoiseBias1D &y() const { return mYBias; }
+    NoiseBias1D &x() FL_NO_EXCEPT { return mXBias; }
+    const NoiseBias1D &x() const FL_NO_EXCEPT { return mXBias; }
+    NoiseBias1D &y() FL_NO_EXCEPT { return mYBias; }
+    const NoiseBias1D &y() const FL_NO_EXCEPT { return mYBias; }
 
-    u16 width() const { return mXBias.size(); }
-    u16 height() const { return mYBias.size(); }
+    u16 width() const FL_NO_EXCEPT { return mXBias.size(); }
+    u16 height() const FL_NO_EXCEPT { return mYBias.size(); }
 
-    void reset() {
+    void reset() FL_NO_EXCEPT {
         mXBias.reset();
         mYBias.reset();
     }
@@ -169,7 +169,7 @@ struct FlowFieldFPState {
 
     FlowFieldFPState() FL_NO_EXCEPT {}
 
-    void init(int w, int h) {
+    void init(int w, int h) FL_NO_EXCEPT {
         width = w;
         height = h;
         count = (w * h + 3) & ~3;  // Pad to multiple of 4
@@ -231,57 +231,57 @@ class FlowField : public Fx2d {
 
     /// Handles timing, then delegates to drawImpl().
     /// Caps dt to prevent huge jumps when effect was inactive.
-    void draw(DrawContext context) override;
+    void draw(DrawContext context) FL_NO_EXCEPT override;
 
     // Parameter setters.
-    void setPersistence(float halfLife) { mParams.persistence = halfLife; }
-    void setColorShift(float speed) { mParams.color_shift = speed; }
-    void setFlowAmplitudeX(float amp) { mParams.flow_amp_x = amp; }
-    void setFlowAmplitudeY(float amp) { mParams.flow_amp_y = amp; }
-    void setFlowShift(float shift) { mParams.flow_shift = shift; }
-    void setFlowSpeedX(float speed) { mParams.flow_speed_x = speed; }
-    void setFlowSpeedY(float speed) { mParams.flow_speed_y = speed; }
-    void setNoiseFrequencyX(float freq) { mParams.noise_freq_x = freq; }
-    void setNoiseFrequencyY(float freq) { mParams.noise_freq_y = freq; }
-    void setNoiseFrequency(float freq) {
+    void setPersistence(float halfLife) FL_NO_EXCEPT { mParams.persistence = halfLife; }
+    void setColorShift(float speed) FL_NO_EXCEPT { mParams.color_shift = speed; }
+    void setFlowAmplitudeX(float amp) FL_NO_EXCEPT { mParams.flow_amp_x = amp; }
+    void setFlowAmplitudeY(float amp) FL_NO_EXCEPT { mParams.flow_amp_y = amp; }
+    void setFlowShift(float shift) FL_NO_EXCEPT { mParams.flow_shift = shift; }
+    void setFlowSpeedX(float speed) FL_NO_EXCEPT { mParams.flow_speed_x = speed; }
+    void setFlowSpeedY(float speed) FL_NO_EXCEPT { mParams.flow_speed_y = speed; }
+    void setNoiseFrequencyX(float freq) FL_NO_EXCEPT { mParams.noise_freq_x = freq; }
+    void setNoiseFrequencyY(float freq) FL_NO_EXCEPT { mParams.noise_freq_y = freq; }
+    void setNoiseFrequency(float freq) FL_NO_EXCEPT {
         mParams.noise_freq_x = freq;
         mParams.noise_freq_y = freq;
     }
-    void setDotCount(int count) { mParams.dot_count = count; }
-    void setEmitterMode(int mode) { mParams.emitter_mode = mode; }
-    void setEndpointSpeed(float speed) { mParams.endpoint_speed = speed; }
-    void setReverseXProfile(bool rev) { mParams.reverse_x_profile = rev; }
-    void setShowFlowVectors(bool show) { mParams.show_flow_vectors = show; }
+    void setDotCount(int count) FL_NO_EXCEPT { mParams.dot_count = count; }
+    void setEmitterMode(int mode) FL_NO_EXCEPT { mParams.emitter_mode = mode; }
+    void setEndpointSpeed(float speed) FL_NO_EXCEPT { mParams.endpoint_speed = speed; }
+    void setReverseXProfile(bool rev) FL_NO_EXCEPT { mParams.reverse_x_profile = rev; }
+    void setShowFlowVectors(bool show) FL_NO_EXCEPT { mParams.show_flow_vectors = show; }
 
     /// Set time speed/scale (1.0 = normal, 0.5 = half speed, etc.)
-    void setSpeed(float speed) { mTimeWarp.setSpeed(speed); }
-    float speed() const { return mTimeWarp.scale(); }
+    void setSpeed(float speed) FL_NO_EXCEPT { mTimeWarp.setSpeed(speed); }
+    float speed() const FL_NO_EXCEPT { return mTimeWarp.scale(); }
 
     /// Trigger a noise punch on both axes at center with proportional width.
     void noisePunch(float amplitude = 1.0f,
-                    BumpShape shape = BumpShape::HalfSine);
+                    BumpShape shape = BumpShape::HalfSine) FL_NO_EXCEPT;
 
     /// Trigger a noise punch on the X axis (columns).
     void noisePunchX(float center, float width, float amplitude = 1.0f,
-                     BumpShape shape = BumpShape::HalfSine);
+                     BumpShape shape = BumpShape::HalfSine) FL_NO_EXCEPT;
 
     /// Trigger a noise punch on the Y axis (rows).
     void noisePunchY(float center, float width, float amplitude = 1.0f,
-                     BumpShape shape = BumpShape::HalfSine);
+                     BumpShape shape = BumpShape::HalfSine) FL_NO_EXCEPT;
 
-    NoiseBias2D &noiseBias() { return mNoiseBias; }
-    const NoiseBias2D &noiseBias() const { return mNoiseBias; }
+    NoiseBias2D &noiseBias() FL_NO_EXCEPT { return mNoiseBias; }
+    const NoiseBias2D &noiseBias() const FL_NO_EXCEPT { return mNoiseBias; }
 
-    Params &getParams() { return mParams; }
-    const Params &getParams() const { return mParams; }
+    Params &getParams() FL_NO_EXCEPT { return mParams; }
+    const Params &getParams() const FL_NO_EXCEPT { return mParams; }
 
   protected:
-    explicit FlowField(const XYMap &xyMap, const Params &params = Params());
+    explicit FlowField(const XYMap &xyMap, const Params &params = Params()) FL_NO_EXCEPT;
 
     /// Subclasses implement rendering given the time delta and total time.
     /// @param dt_ms  Milliseconds since last draw (capped to prevent huge jumps).
     /// @param t_ms   Milliseconds since first draw.
-    virtual void drawImpl(DrawContext context, u32 dt_ms, u32 t_ms) = 0;
+    virtual void drawImpl(DrawContext context, u32 dt_ms, u32 t_ms) FL_NO_EXCEPT = 0;
 
     Params mParams;
     NoiseBias2D mNoiseBias;
@@ -294,53 +294,53 @@ class FlowField : public Fx2d {
 /// @brief Float-precision flow field implementation.
 class FlowFieldFloat : public FlowField {
   public:
-    explicit FlowFieldFloat(const XYMap &xyMap, const Params &params = Params());
+    explicit FlowFieldFloat(const XYMap &xyMap, const Params &params = Params()) FL_NO_EXCEPT;
 
-    fl::string fxName() const override { return "FlowFieldFloat"; }
+    fl::string fxName() const FL_NO_EXCEPT override { return "FlowFieldFloat"; }
 
   protected:
-    void drawImpl(DrawContext context, u32 dt_ms, u32 t_ms) override;
+    void drawImpl(DrawContext context, u32 dt_ms, u32 t_ms) FL_NO_EXCEPT override;
 
   private:
     // Seeded 2D Perlin noise generator.
     class Perlin2D {
       public:
-        void init(u32 seed);
-        float noise(float x, float y) const;
+        void init(u32 seed) FL_NO_EXCEPT;
+        float noise(float x, float y) const FL_NO_EXCEPT;
 
       private:
         u8 perm[512];
-        static float fade(float t) {
+        static float fade(float t) FL_NO_EXCEPT {
             return t * t * t * (t * (t * 6.0f - 15.0f) + 10.0f);
         }
-        static float lerp(float a, float b, float t) {
+        static float lerp(float a, float b, float t) FL_NO_EXCEPT {
             return a + t * (b - a);
         }
-        static float grad(int h, float x, float y);
+        static float grad(int h, float x, float y) FL_NO_EXCEPT;
     };
 
     // Grid access helpers (row-major layout).
-    int idx(int y, int x) const {
+    int idx(int y, int x) const FL_NO_EXCEPT {
         return y * (int)getWidth() + x;
     }
 
     // Helpers.
-    static float fmodPos(float x, float m);
-    static float clampf(float v, float lo, float hi);
-    static u8 f2u8(float v);
-    static CRGB rainbow(float t, float speed, float phase);
+    static float fmodPos(float x, float m) FL_NO_EXCEPT;
+    static float clampf(float v, float lo, float hi) FL_NO_EXCEPT;
+    static u8 f2u8(float v) FL_NO_EXCEPT;
+    static CRGB rainbow(float t, float speed, float phase) FL_NO_EXCEPT;
 
     // Sub-steps called from drawImpl().
-    void flowPrepare(float t);
-    void emitOrbitalDots(float t);
-    void flowAdvect(float dt);
+    void flowPrepare(float t) FL_NO_EXCEPT;
+    void emitOrbitalDots(float t) FL_NO_EXCEPT;
+    void flowAdvect(float dt) FL_NO_EXCEPT;
     void drawDot(float cx, float cy, float diam,
-                 u8 cr, u8 cg, u8 cb);
+                 u8 cr, u8 cg, u8 cb) FL_NO_EXCEPT;
     void drawAALine(float x0, float y0, float x1, float y1,
-                    float t, float colorShift);
-    void emitLissajousLine(float t);
+                    float t, float colorShift) FL_NO_EXCEPT;
+    void emitLissajousLine(float t) FL_NO_EXCEPT;
 
-    void drawFlowVectors(fl::span<CRGB> leds);
+    void drawFlowVectors(fl::span<CRGB> leds) FL_NO_EXCEPT;
 
     // Float-precision RGB grids (main + temp for advection).
     fl::vector<float> mR, mG, mB;
@@ -359,43 +359,43 @@ class FlowFieldFloat : public FlowField {
 /// are converted to s16x16 before each draw.
 class FlowFieldFP : public FlowField {
   public:
-    explicit FlowFieldFP(const XYMap &xyMap, const Params &params = Params());
+    explicit FlowFieldFP(const XYMap &xyMap, const Params &params = Params()) FL_NO_EXCEPT;
 
-    fl::string fxName() const override { return "FlowFieldFP"; }
+    fl::string fxName() const FL_NO_EXCEPT override { return "FlowFieldFP"; }
 
   protected:
-    void drawImpl(DrawContext context, u32 dt_ms, u32 t_ms) override;
+    void drawImpl(DrawContext context, u32 dt_ms, u32 t_ms) FL_NO_EXCEPT override;
 
   private:
     friend struct FlowFieldFPProfiler;  // For per-phase profiling
 
     // Grid access helpers (row-major layout).
-    int idx(int y, int x) const {
+    int idx(int y, int x) const FL_NO_EXCEPT {
         return y * mState.width + x;
     }
 
     // Helpers.
-    static i32 clamp_q16(i32 v, i32 lo, i32 hi);
-    static u8 q16_to_u8(i32 v);
-    static CRGB rainbow(s16x16 t, s16x16 speed, s16x16 phase);
+    static i32 clamp_q16(i32 v, i32 lo, i32 hi) FL_NO_EXCEPT;
+    static u8 q16_to_u8(i32 v) FL_NO_EXCEPT;
+    static CRGB rainbow(s16x16 t, s16x16 speed, s16x16 phase) FL_NO_EXCEPT;
 
     // Sub-steps — all pure fixed-point.
-    void flowPrepare(s16x16 t);
-    void emitOrbitalDots(s16x16 t);
-    void flowAdvect(i32 dt_raw);
+    void flowPrepare(s16x16 t) FL_NO_EXCEPT;
+    void emitOrbitalDots(s16x16 t) FL_NO_EXCEPT;
+    void flowAdvect(i32 dt_raw) FL_NO_EXCEPT;
     void drawDot(s16x16 cx, s16x16 cy, s16x16 diam,
-                 u8 cr, u8 cg, u8 cb);
+                 u8 cr, u8 cg, u8 cb) FL_NO_EXCEPT;
     void drawAALine(s16x16 x0, s16x16 y0, s16x16 x1, s16x16 y1,
-                    s16x16 t, s16x16 colorShift);
-    void emitLissajousLine(s16x16 t);
+                    s16x16 t, s16x16 colorShift) FL_NO_EXCEPT;
+    void emitLissajousLine(s16x16 t) FL_NO_EXCEPT;
 
-    void drawFlowVectors(fl::span<CRGB> leds);
+    void drawFlowVectors(fl::span<CRGB> leds) FL_NO_EXCEPT;
 
     // Convert float params to cached s16x16 values.
-    void syncParams();
+    void syncParams() FL_NO_EXCEPT;
 
     // Perm table initialization (Fisher-Yates shuffle).
-    static void initPerm256(u8 *perm, u32 seed);
+    static void initPerm256(u8 *perm, u32 seed) FL_NO_EXCEPT;
 
     FlowFieldFPState mState;
     u8 mPermX[256] = {};

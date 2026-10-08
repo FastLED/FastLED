@@ -6,6 +6,7 @@
 #include "fl/stl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros  // IWYU pragma: keep
 #include "fl/stl/shared_ptr.h"  // For shared_ptr  // IWYU pragma: keep
 #include "fl/fx/fx2d.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -27,18 +28,18 @@ class Luminova : public Fx2d {
   public:
     using Params = LuminovaParams;
 
-    explicit Luminova(const XYMap &xyMap, const Params &params = Params());
+    explicit Luminova(const XYMap &xyMap, const Params &params = Params()) FL_NO_EXCEPT;
 
-    void draw(DrawContext context) override;
+    void draw(DrawContext context) FL_NO_EXCEPT override;
 
-    fl::string fxName() const override { return "Luminova"; }
+    fl::string fxName() const FL_NO_EXCEPT override { return "Luminova"; }
 
-    void setFadeAmount(u8 fade_amount) { mParams.fade_amount = fade_amount; }
-    void setBlurAmount(u8 blur_amount) { mParams.blur_amount = blur_amount; }
-    void setPointGain(u8 point_gain) { mParams.point_gain = point_gain; }
+    void setFadeAmount(u8 fade_amount) FL_NO_EXCEPT { mParams.fade_amount = fade_amount; }
+    void setBlurAmount(u8 blur_amount) FL_NO_EXCEPT { mParams.blur_amount = blur_amount; }
+    void setPointGain(u8 point_gain) FL_NO_EXCEPT { mParams.point_gain = point_gain; }
 
     // Adjust maximum particle slots (reinitializes pool if size changes)
-    void setMaxParticles(int max_particles);
+    void setMaxParticles(int max_particles) FL_NO_EXCEPT;
 
   private:
     struct Particle {
@@ -51,9 +52,9 @@ class Luminova : public Fx2d {
         bool alive = false;
     };
 
-    void resetParticle(Particle &p, fl::u32 tick);
-    void plotDot(fl::span<CRGB> leds, int x, int y, u8 v) const;
-    void plotSoftDot(fl::span<CRGB> leds, float fx, float fy, float s) const;
+    void resetParticle(Particle &p, fl::u32 tick) FL_NO_EXCEPT;
+    void plotDot(fl::span<CRGB> leds, int x, int y, u8 v) const FL_NO_EXCEPT;
+    void plotSoftDot(fl::span<CRGB> leds, float fx, float fy, float s) const FL_NO_EXCEPT;
 
     Params mParams;
     fl::u32 mTick = 0;

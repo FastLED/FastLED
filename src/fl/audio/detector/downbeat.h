@@ -35,7 +35,7 @@ public:
     /**
      * @brief Construct with shared Beat (recommended)
      */
-    explicit Downbeat(shared_ptr<Beat> beatDetector);
+    explicit Downbeat(shared_ptr<Beat> beatDetector) FL_NO_EXCEPT;
 
     /**
      * @brief Construct with standalone Beat
@@ -44,12 +44,12 @@ public:
 
     ~Downbeat() FL_NO_EXCEPT override;
 
-    void update(shared_ptr<Context> context) override;
-    void fireCallbacks() override;
-    bool needsFFT() const override { return true; }
-    bool needsFFTHistory() const override { return false; }
-    const char* getName() const override { return "Downbeat"; }
-    void reset() override;
+    void update(shared_ptr<Context> context) FL_NO_EXCEPT override;
+    void fireCallbacks() FL_NO_EXCEPT override;
+    bool needsFFT() const FL_NO_EXCEPT override { return true; }
+    bool needsFFTHistory() const FL_NO_EXCEPT override { return false; }
+    const char* getName() const FL_NO_EXCEPT override { return "Downbeat"; }
+    void reset() FL_NO_EXCEPT override;
 
     // ----- Callbacks (multiple listeners supported) -----
 
@@ -68,36 +68,36 @@ public:
     // ----- State Access -----
 
     /** Returns true if downbeat was detected this frame */
-    bool isDownbeat() const { return mDownbeatDetected; }
+    bool isDownbeat() const FL_NO_EXCEPT { return mDownbeatDetected; }
 
     /** Returns current beat number within measure (1-based, 1 = downbeat) */
-    u8 getCurrentBeat() const { return mCurrentBeat; }
+    u8 getCurrentBeat() const FL_NO_EXCEPT { return mCurrentBeat; }
 
     /** Returns detected beats per measure (time signature numerator) */
-    u8 getBeatsPerMeasure() const { return mBeatsPerMeasure; }
+    u8 getBeatsPerMeasure() const FL_NO_EXCEPT { return mBeatsPerMeasure; }
 
     /** Returns measure phase (0-1, 0 = downbeat) */
-    float getMeasurePhase() const { return mMeasurePhase; }
+    float getMeasurePhase() const FL_NO_EXCEPT { return mMeasurePhase; }
 
     /** Returns downbeat detection confidence (0-1) */
-    float getConfidence() const { return mConfidence; }
+    float getConfidence() const FL_NO_EXCEPT { return mConfidence; }
 
     // ----- Configuration -----
 
     /** Set minimum confidence for downbeat detection (default: 0.6) */
-    void setConfidenceThreshold(float threshold) { mConfidenceThreshold = threshold; }
+    void setConfidenceThreshold(float threshold) FL_NO_EXCEPT { mConfidenceThreshold = threshold; }
 
     /** Set accent detection threshold (default: 1.2) */
-    void setAccentThreshold(float threshold) { mAccentThreshold = threshold; }
+    void setAccentThreshold(float threshold) FL_NO_EXCEPT { mAccentThreshold = threshold; }
 
     /** Enable/disable automatic meter detection (default: true) */
-    void setAutoMeterDetection(bool enable) { mAutoMeterDetection = enable; }
+    void setAutoMeterDetection(bool enable) FL_NO_EXCEPT { mAutoMeterDetection = enable; }
 
     /** Manually set time signature (disables auto-detection) */
-    void setTimeSignature(u8 beatsPerMeasure);
+    void setTimeSignature(u8 beatsPerMeasure) FL_NO_EXCEPT;
 
     /** Share an external Beat instance */
-    void setBeatDetector(shared_ptr<Beat> beatDetector);
+    void setBeatDetector(shared_ptr<Beat> beatDetector) FL_NO_EXCEPT;
 
 private:
     // ----- Beat Management -----
@@ -141,12 +141,12 @@ private:
     shared_ptr<const fft::Bins> mRetainedFFT;
 
     // ----- Helper Methods -----
-    void updateBeatDetector(shared_ptr<Context> context);
-    float calculateBeatAccent(const fft::Bins& fft, float bassEnergy);
-    bool detectDownbeat(u32 timestamp, float accent);
-    void detectMeter();
-    void updateMeasurePhase(u32 timestamp);
-    u8 findMostCommonMeter() const;
+    void updateBeatDetector(shared_ptr<Context> context) FL_NO_EXCEPT;
+    float calculateBeatAccent(const fft::Bins& fft, float bassEnergy) FL_NO_EXCEPT;
+    bool detectDownbeat(u32 timestamp, float accent) FL_NO_EXCEPT;
+    void detectMeter() FL_NO_EXCEPT;
+    void updateMeasurePhase(u32 timestamp) FL_NO_EXCEPT;
+    u8 findMostCommonMeter() const FL_NO_EXCEPT;
 };
 
 } // namespace detector

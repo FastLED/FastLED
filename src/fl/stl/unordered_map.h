@@ -41,7 +41,7 @@ namespace fl {
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_NULL_DEREFERENCE
 template <typename T> struct EqualTo {
-    bool operator()(const T &a, const T &b) const { return a == b; }
+    bool operator()(const T &a, const T &b) const FL_NO_EXCEPT { return a == b; }
 };
 FL_DISABLE_WARNING_POP
 
@@ -59,10 +59,10 @@ template <typename Key, typename T, typename Hash = Hash<Key>,
 class FL_ALIGN unordered_map {
   public:
     unordered_map() FL_NO_EXCEPT : unordered_map(FASTLED_HASHMAP_INLINED_COUNT, 0.7f) {}
-    unordered_map(fl::size initial_capacity) : unordered_map(initial_capacity, 0.7f) {}
+    unordered_map(fl::size initial_capacity) FL_NO_EXCEPT : unordered_map(initial_capacity, 0.7f) {}
 
     explicit unordered_map(memory_resource* resource)
-        : _buckets(resource), _size(0),
+        FL_NO_EXCEPT : _buckets(resource), _size(0),
           _tombstones(0), _occupied(next_power_of_two(FASTLED_HASHMAP_INLINED_COUNT)),
           _deleted(next_power_of_two(FASTLED_HASHMAP_INLINED_COUNT)) {
         _buckets.resize(next_power_of_two(FASTLED_HASHMAP_INLINED_COUNT));
@@ -70,7 +70,7 @@ class FL_ALIGN unordered_map {
     }
 
     unordered_map(fl::size initial_capacity, float max_load)
-        : _buckets(next_power_of_two(initial_capacity)), _size(0),
+        FL_NO_EXCEPT : _buckets(next_power_of_two(initial_capacity)), _size(0),
           _tombstones(0), _occupied(next_power_of_two(initial_capacity)),
           _deleted(next_power_of_two(initial_capacity)) {
         setLoadFactor(max_load);
@@ -103,19 +103,19 @@ class FL_ALIGN unordered_map {
     // Range constructor
     template<typename InputIt>
     unordered_map(InputIt first, InputIt last)
-        : unordered_map(FASTLED_HASHMAP_INLINED_COUNT, 0.7f) {
+        FL_NO_EXCEPT : unordered_map(FASTLED_HASHMAP_INLINED_COUNT, 0.7f) {
         insert(first, last);
     }
 
     // Initializer list constructor
     unordered_map(fl::initializer_list<pair<Key, T>> init)
-        : unordered_map(FASTLED_HASHMAP_INLINED_COUNT, 0.7f) {
+        FL_NO_EXCEPT : unordered_map(FASTLED_HASHMAP_INLINED_COUNT, 0.7f) {
         insert(init);
     }
 
     // Constructor with hash/equal/allocator parameters
     unordered_map(fl::size n, const Hash& hf, const KeyEqual& eq)
-        : _buckets(next_power_of_two(n)), _size(0), _tombstones(0),
+        FL_NO_EXCEPT : _buckets(next_power_of_two(n)), _size(0), _tombstones(0),
           _occupied(next_power_of_two(n)), _deleted(next_power_of_two(n)),
           _hash(hf), _equal(eq) {
         setLoadFactor(0.7f);
@@ -179,7 +179,7 @@ class FL_ALIGN unordered_map {
         return *this;
     }
 
-    void setLoadFactor(float f) {
+    void setLoadFactor(float f) FL_NO_EXCEPT {
         f = fl::clamp(f, 0.f, 1.f);
         mLoadFactor = fl::map_range<float, u8>(f, 0.f, 1.f, 0, 255);
     }
@@ -194,39 +194,39 @@ class FL_ALIGN unordered_map {
         using iterator_category = fl::forward_iterator_tag;
 
         iterator() FL_NO_EXCEPT : _map(nullptr), _idx(0) {}
-        iterator(unordered_map *m, fl::size idx) : _map(m), _idx(idx) {
+        iterator(unordered_map *m, fl::size idx) FL_NO_EXCEPT : _map(m), _idx(idx) {
             advance_to_occupied();
         }
 
-        reference operator*() const {
+        reference operator*() const FL_NO_EXCEPT {
             auto &e = _map->_buckets[_idx];
             // Entry and pair<const Key, T> have the same memory layout
             // Safe to reinterpret since we only add const to Key
             return *fl::bit_cast<value_type*>(&e);
         }
 
-        pointer operator->() const {
+        pointer operator->() const FL_NO_EXCEPT {
             return &(operator*());
         }
 
-        iterator &operator++() {
+        iterator &operator++() FL_NO_EXCEPT {
             ++_idx;
             advance_to_occupied();
             return *this;
         }
 
-        iterator operator++(int) {
+        iterator operator++(int) FL_NO_EXCEPT {
             iterator tmp = *this;
             ++(*this);
             return tmp;
         }
 
-        bool operator==(const iterator &o) const {
+        bool operator==(const iterator &o) const FL_NO_EXCEPT {
             return _map == o._map && _idx == o._idx;
         }
-        bool operator!=(const iterator &o) const { return !(*this == o); }
+        bool operator!=(const iterator &o) const FL_NO_EXCEPT { return !(*this == o); }
 
-        void advance_to_occupied() {
+        void advance_to_occupied() FL_NO_EXCEPT {
             if (!_map)
                 return;
             fl::size cap = _map->_buckets.size();
@@ -249,40 +249,40 @@ class FL_ALIGN unordered_map {
         using iterator_category = fl::forward_iterator_tag;
 
         const_iterator() FL_NO_EXCEPT : _map(nullptr), _idx(0) {}
-        const_iterator(const unordered_map *m, fl::size idx) : _map(m), _idx(idx) {
+        const_iterator(const unordered_map *m, fl::size idx) FL_NO_EXCEPT : _map(m), _idx(idx) {
             advance_to_occupied();
         }
-        const_iterator(const iterator &it) : _map(it._map), _idx(it._idx) {}
+        const_iterator(const iterator &it) FL_NO_EXCEPT : _map(it._map), _idx(it._idx) {}
 
-        reference operator*() const {
+        reference operator*() const FL_NO_EXCEPT {
             auto &e = _map->_buckets[_idx];
             // Entry and pair<const Key, T> have the same memory layout
             // Safe to reinterpret since we only add const to Key
             return *fl::bit_cast<const value_type*>(&e);
         }
 
-        pointer operator->() const {
+        pointer operator->() const FL_NO_EXCEPT {
             return &(operator*());
         }
 
-        const_iterator &operator++() {
+        const_iterator &operator++() FL_NO_EXCEPT {
             ++_idx;
             advance_to_occupied();
             return *this;
         }
 
-        const_iterator operator++(int) {
+        const_iterator operator++(int) FL_NO_EXCEPT {
             const_iterator tmp = *this;
             ++(*this);
             return tmp;
         }
 
-        bool operator==(const const_iterator &o) const {
+        bool operator==(const const_iterator &o) const FL_NO_EXCEPT {
             return _map == o._map && _idx == o._idx;
         }
-        bool operator!=(const const_iterator &o) const { return !(*this == o); }
+        bool operator!=(const const_iterator &o) const FL_NO_EXCEPT { return !(*this == o); }
 
-        void advance_to_occupied() {
+        void advance_to_occupied() FL_NO_EXCEPT {
             if (!_map)
                 return;
             fl::size cap = _map->_buckets.size();
@@ -297,17 +297,17 @@ class FL_ALIGN unordered_map {
         fl::size _idx;
     };
 
-    iterator begin() { return iterator(this, 0); }
-    iterator end() { return iterator(this, _buckets.size()); }
-    const_iterator begin() const { return const_iterator(this, 0); }
-    const_iterator end() const { return const_iterator(this, _buckets.size()); }
-    const_iterator cbegin() const { return const_iterator(this, 0); }
-    const_iterator cend() const {
+    iterator begin() FL_NO_EXCEPT { return iterator(this, 0); }
+    iterator end() FL_NO_EXCEPT { return iterator(this, _buckets.size()); }
+    const_iterator begin() const FL_NO_EXCEPT { return const_iterator(this, 0); }
+    const_iterator end() const FL_NO_EXCEPT { return const_iterator(this, _buckets.size()); }
+    const_iterator cbegin() const FL_NO_EXCEPT { return const_iterator(this, 0); }
+    const_iterator cend() const FL_NO_EXCEPT {
         return const_iterator(this, _buckets.size());
     }
 
     static bool NeedsRehash(fl::size size, fl::size bucket_size, fl::size tombstones,
-                            u8 load_factor) {
+                            u8 load_factor) FL_NO_EXCEPT {
         // (size + tombstones) << 8   : multiply numerator by 256
         // capacity * max_load : denominator * threshold
         u32 lhs = (size + tombstones) << 8;
@@ -316,13 +316,13 @@ class FL_ALIGN unordered_map {
     }
 
     // returns true if (size + tombs)/capacity > _max_load/256
-    bool needs_rehash() const {
+    bool needs_rehash() const FL_NO_EXCEPT {
         return NeedsRehash(_size, _buckets.size(), _tombstones, mLoadFactor);
     }
 
     // insert or overwrite - returns pair<iterator, bool>
     // iterator points to element, bool is true if inserted, false if updated
-    pair<iterator, bool> insert(const Key &key, const T &value) {
+    pair<iterator, bool> insert(const Key &key, const T &value) FL_NO_EXCEPT {
         const bool will_rehash = needs_rehash();
         if (will_rehash) {
             // if half the buckets are tombstones, rehash inline to prevent
@@ -352,7 +352,7 @@ class FL_ALIGN unordered_map {
 
     // Move version of insert - returns pair<iterator, bool>
     // iterator points to element, bool is true if inserted, false if updated
-    pair<iterator, bool> insert(Key &&key, T &&value) {
+    pair<iterator, bool> insert(Key &&key, T &&value) FL_NO_EXCEPT {
         const bool will_rehash = needs_rehash();
         if (will_rehash) {
             // if half the buckets are tombstones, rehash inline to prevent
@@ -382,20 +382,20 @@ class FL_ALIGN unordered_map {
 
     // Pair-based insert (const) - std::unordered_map compatible
     // Insert a pair<const Key, T> or pair<Key, T>
-    pair<iterator, bool> insert(const pair<Key, T> &kv) {
+    pair<iterator, bool> insert(const pair<Key, T> &kv) FL_NO_EXCEPT {
         return insert(kv.first, kv.second);
     }
 
     // Pair-based insert (move) - std::unordered_map compatible
     // Insert a pair<const Key, T> or pair<Key, T> with move semantics
-    pair<iterator, bool> insert(pair<Key, T> &&kv) {
+    pair<iterator, bool> insert(pair<Key, T> &&kv) FL_NO_EXCEPT {
         return insert(fl::move(kv.first), fl::move(kv.second));
     }
 
     // Range insert - insert elements from iterator range [first, last)
     // std::unordered_map compatible
     template<typename InputIt>
-    void insert(InputIt first, InputIt last) {
+    void insert(InputIt first, InputIt last) FL_NO_EXCEPT {
         for (; first != last; ++first) {
             insert(*first);  // Uses pair-based insert
         }
@@ -403,7 +403,7 @@ class FL_ALIGN unordered_map {
 
     // Initializer list insert - std::unordered_map compatible
     // Insert elements from an initializer list like: m.insert({{1, "a"}, {2, "b"}})
-    void insert(fl::initializer_list<pair<Key, T>> init) {
+    void insert(fl::initializer_list<pair<Key, T>> init) FL_NO_EXCEPT {
         for (const auto& kv : init) {
             insert(kv);  // Uses pair-based insert
         }
@@ -411,7 +411,7 @@ class FL_ALIGN unordered_map {
 
     // insert_or_assign() - C++17: insert new element or update existing
     // Returns pair<iterator, bool> where bool is true if inserted, false if updated
-    pair<iterator, bool> insert_or_assign(const Key &key, T &&value) {
+    pair<iterator, bool> insert_or_assign(const Key &key, T &&value) FL_NO_EXCEPT {
         const bool will_rehash = needs_rehash();
         if (will_rehash) {
             if (_tombstones > _size) {
@@ -438,7 +438,7 @@ class FL_ALIGN unordered_map {
     }
 
     // insert_or_assign() with move key - C++17
-    pair<iterator, bool> insert_or_assign(Key &&key, T &&value) {
+    pair<iterator, bool> insert_or_assign(Key &&key, T &&value) FL_NO_EXCEPT {
         const bool will_rehash = needs_rehash();
         if (will_rehash) {
             if (_tombstones > _size) {
@@ -467,7 +467,7 @@ class FL_ALIGN unordered_map {
     // emplace() - construct element in-place from arguments
     // For pairs, accepts (key, value) arguments to construct pair<Key, T>
     template<typename... Args>
-    pair<iterator, bool> emplace(Args&&... args) {
+    pair<iterator, bool> emplace(Args&&... args) FL_NO_EXCEPT {
         // Construct a pair from the arguments
         pair<Key, T> kv(fl::forward<Args>(args)...);
         // Use move-based insert since we just constructed this pair
@@ -477,7 +477,7 @@ class FL_ALIGN unordered_map {
     // emplace_hint() - construct element in-place with hint
     // Hint is ignored for hash maps (no spatial locality benefits)
     template<typename... Args>
-    iterator emplace_hint(const_iterator hint, Args&&... args) {
+    iterator emplace_hint(const_iterator hint, Args&&... args) FL_NO_EXCEPT {
         (void)hint;  // Hint is ignored in hash maps
         return emplace(fl::forward<Args>(args)...).first;
     }
@@ -485,7 +485,7 @@ class FL_ALIGN unordered_map {
     // try_emplace() - C++17: emplace only if key doesn't exist
     // Advantage: doesn't move key if element already exists
     template<typename... Args>
-    pair<iterator, bool> try_emplace(const Key& k, Args&&... args) {
+    pair<iterator, bool> try_emplace(const Key& k, Args&&... args) FL_NO_EXCEPT {
         const bool will_rehash = needs_rehash();
         if (will_rehash) {
             if (_tombstones > _size) {
@@ -512,7 +512,7 @@ class FL_ALIGN unordered_map {
 
     // try_emplace() with move key - C++17
     template<typename... Args>
-    pair<iterator, bool> try_emplace(Key&& k, Args&&... args) {
+    pair<iterator, bool> try_emplace(Key&& k, Args&&... args) FL_NO_EXCEPT {
         const bool will_rehash = needs_rehash();
         if (will_rehash) {
             if (_tombstones > _size) {
@@ -538,7 +538,7 @@ class FL_ALIGN unordered_map {
     }
 
     // remove key; returns true if removed
-    bool remove(const Key &key) {
+    bool remove(const Key &key) FL_NO_EXCEPT {
         auto idx = find_index(key);
         if (idx == npos())
             return false;
@@ -548,10 +548,10 @@ class FL_ALIGN unordered_map {
         return true;
     }
 
-    bool erase(const Key &key) { return remove(key); }
+    bool erase(const Key &key) FL_NO_EXCEPT { return remove(key); }
 
     // Iterator-based erase - more efficient when you already have the iterator position
-    iterator erase(iterator it) {
+    iterator erase(iterator it) FL_NO_EXCEPT {
         if (it == end() || it._map != this) {
             return end(); // Invalid iterator
         }
@@ -568,7 +568,7 @@ class FL_ALIGN unordered_map {
     }
 
     // Range erase - erase elements in range [first, last)
-    iterator erase(const_iterator first, const_iterator last) {
+    iterator erase(const_iterator first, const_iterator last) FL_NO_EXCEPT {
         if (first._map != this || last._map != this) {
             return end(); // Invalid iterators
         }
@@ -592,7 +592,7 @@ class FL_ALIGN unordered_map {
         return current;
     }
 
-    void clear() {
+    void clear() FL_NO_EXCEPT {
         _buckets.assign(_buckets.size(), Entry{});
         _occupied.reset();
         _deleted.reset();
@@ -600,7 +600,7 @@ class FL_ALIGN unordered_map {
     }
 
     // swap() - swap contents with another unordered_map
-    void swap(unordered_map& other) {
+    void swap(unordered_map& other) FL_NO_EXCEPT {
         // Swap all member variables
         _buckets.swap(other._buckets);
         fl::swap(_size, other._size);
@@ -613,51 +613,51 @@ class FL_ALIGN unordered_map {
     }
 
     // find pointer to value or nullptr
-    T *find_value(const Key &key) {
+    T *find_value(const Key &key) FL_NO_EXCEPT {
         auto idx = find_index(key);
         return idx == npos() ? nullptr : &_buckets[idx].value;
     }
 
-    const T *find_value(const Key &key) const {
+    const T *find_value(const Key &key) const FL_NO_EXCEPT {
         auto idx = find_index(key);
         return idx == npos() ? nullptr : &_buckets[idx].value;
     }
 
-    iterator find(const Key &key) {
+    iterator find(const Key &key) FL_NO_EXCEPT {
         auto idx = find_index(key);
         return idx == npos() ? end() : iterator(this, idx);
     }
 
-    const_iterator find(const Key &key) const {
+    const_iterator find(const Key &key) const FL_NO_EXCEPT {
         auto idx = find_index(key);
         return idx == npos() ? end() : const_iterator(this, idx);
     }
 
-    bool contains(const Key &key) const {
+    bool contains(const Key &key) const FL_NO_EXCEPT {
         auto idx = find_index(key);
         return idx != npos();
     }
 
     // at() - bounds-checked access, asserts if key not found
-    T &at(const Key &key) {
+    T &at(const Key &key) FL_NO_EXCEPT {
         T* value = find_value(key);
         FASTLED_ASSERT(value != nullptr, "unordered_map::at: key not found");
         return *value;
     }
 
-    const T &at(const Key &key) const {
+    const T &at(const Key &key) const FL_NO_EXCEPT {
         const T* value = find_value(key);
         FASTLED_ASSERT(value != nullptr, "unordered_map::at: key not found");
         return *value;
     }
 
     // count() - returns 0 or 1 (unordered_map has unique keys)
-    fl::size count(const Key &key) const {
+    fl::size count(const Key &key) const FL_NO_EXCEPT {
         return contains(key) ? 1 : 0;
     }
 
     // equal_range() - returns pair of iterators [it, it+1) or [end, end)
-    pair<iterator, iterator> equal_range(const Key &key) {
+    pair<iterator, iterator> equal_range(const Key &key) FL_NO_EXCEPT {
         iterator it = find(key);
         if (it == end()) {
             return {end(), end()};
@@ -667,7 +667,7 @@ class FL_ALIGN unordered_map {
         return {it, next};
     }
 
-    pair<const_iterator, const_iterator> equal_range(const Key &key) const {
+    pair<const_iterator, const_iterator> equal_range(const Key &key) const FL_NO_EXCEPT {
         const_iterator it = find(key);
         if (it == end()) {
             return {end(), end()};
@@ -678,7 +678,7 @@ class FL_ALIGN unordered_map {
     }
 
     // access or default-construct
-    T &operator[](const Key &key) {
+    T &operator[](const Key &key) FL_NO_EXCEPT {
         fl::size idx;
         bool is_new;
 
@@ -725,27 +725,27 @@ class FL_ALIGN unordered_map {
         return _buckets[idx].value;
     }
 
-    fl::size size() const { return _size; }
-    bool empty() const { return _size == 0; }
-    fl::size capacity() const { return _buckets.size(); }
+    fl::size size() const FL_NO_EXCEPT { return _size; }
+    bool empty() const FL_NO_EXCEPT { return _size == 0; }
+    fl::size capacity() const FL_NO_EXCEPT { return _buckets.size(); }
 
     // max_size() - theoretical maximum size
-    fl::size max_size() const {
+    fl::size max_size() const FL_NO_EXCEPT {
         // Return the maximum value that fl::size can hold, divided by the size of Entry
         // to be conservative about memory limits
         return static_cast<fl::size>(-1) / sizeof(Entry);
     }
 
     // hash_function() - return the hash functor
-    Hash hash_function() const { return _hash; }
+    Hash hash_function() const FL_NO_EXCEPT { return _hash; }
 
     // key_eq() - return the key equality predicate
-    KeyEqual key_eq() const { return _equal; }
+    KeyEqual key_eq() const FL_NO_EXCEPT { return _equal; }
 
     // Hash Policy Interface
 
     // load_factor() - current load factor (size / bucket_count)
-    float load_factor() const {
+    float load_factor() const FL_NO_EXCEPT {
         if (_buckets.size() == 0) {
             return 0.0f;
         }
@@ -753,23 +753,23 @@ class FL_ALIGN unordered_map {
     }
 
     // max_load_factor() - get maximum load factor
-    float max_load_factor() const {
+    float max_load_factor() const FL_NO_EXCEPT {
         // mLoadFactor is stored as u8 (0-255) representing 0.0-1.0
         return static_cast<float>(mLoadFactor) / 255.0f;
     }
 
     // max_load_factor(float ml) - set maximum load factor
-    void max_load_factor(float ml) {
+    void max_load_factor(float ml) FL_NO_EXCEPT {
         setLoadFactor(ml);
     }
 
     // bucket_count() - number of buckets
-    fl::size bucket_count() const {
+    fl::size bucket_count() const FL_NO_EXCEPT {
         return _buckets.size();
     }
 
     // rehash(size_type n) - change number of buckets to at least n
-    void rehash(fl::size n) {
+    void rehash(fl::size n) FL_NO_EXCEPT {
         // Ensure n is at least as large as the current number of elements
         fl::size min_buckets = _size;
         if (n < min_buckets) {
@@ -784,7 +784,7 @@ class FL_ALIGN unordered_map {
     }
 
     // reserve(size_type n) - reserve capacity for at least n elements
-    void reserve(fl::size n) {
+    void reserve(fl::size n) FL_NO_EXCEPT {
         // Calculate required buckets to hold n elements without exceeding load factor
         float max_lf = max_load_factor();
         if (max_lf <= 0.0f) {
@@ -800,30 +800,30 @@ class FL_ALIGN unordered_map {
     }
 
   private:
-    static fl::size npos() {
+    static fl::size npos() FL_NO_EXCEPT {
         return static_cast<fl::size>(-1);
     }
 
     // Helper methods to check entry state
-    bool is_occupied(fl::size idx) const { return _occupied.test(idx); }
+    bool is_occupied(fl::size idx) const FL_NO_EXCEPT { return _occupied.test(idx); }
 
-    bool is_deleted(fl::size idx) const { return _deleted.test(idx); }
+    bool is_deleted(fl::size idx) const FL_NO_EXCEPT { return _deleted.test(idx); }
 
-    bool is_empty(fl::size idx) const {
+    bool is_empty(fl::size idx) const FL_NO_EXCEPT {
         return !is_occupied(idx) && !is_deleted(idx);
     }
 
-    void mark_occupied(fl::size idx) {
+    void mark_occupied(fl::size idx) FL_NO_EXCEPT {
         _occupied.set(idx);
         _deleted.reset(idx);
     }
 
-    void mark_deleted(fl::size idx) {
+    void mark_deleted(fl::size idx) FL_NO_EXCEPT {
         _occupied.reset(idx);
         _deleted.set(idx);
     }
 
-    void mark_empty(fl::size idx) {
+    void mark_empty(fl::size idx) FL_NO_EXCEPT {
         _occupied.reset(idx);
         _deleted.reset(idx);
     }
@@ -832,20 +832,20 @@ class FL_ALIGN unordered_map {
     struct FL_ALIGN_AS_T(EntryAlign::value) Entry {
         Key key;
         T value;
-        void swap(Entry &other) {
+        void swap(Entry &other) FL_NO_EXCEPT {
             fl::swap(key, other.key);
             fl::swap(value, other.value);
         }
     };
 
-    static fl::size next_power_of_two(fl::size n) {
+    static fl::size next_power_of_two(fl::size n) FL_NO_EXCEPT {
         fl::size p = 1;
         while (p < n)
             p <<= 1;
         return p;
     }
 
-    pair<fl::size, bool> find_slot(const Key &key) const {
+    pair<fl::size, bool> find_slot(const Key &key) const FL_NO_EXCEPT {
         const fl::size cap = _buckets.size();
         const fl::size mask = cap - 1;
         const fl::size h = _hash(key) & mask;
@@ -878,7 +878,7 @@ class FL_ALIGN unordered_map {
         kQuadraticProbingTries  = detail::kUnorderedMapQuadraticProbingTries,
     };
 
-    fl::size find_index(const Key &key) const {
+    fl::size find_index(const Key &key) const FL_NO_EXCEPT {
         const fl::size cap = _buckets.size();
         const fl::size mask = cap - 1;
         const fl::size h = _hash(key) & mask;
@@ -896,7 +896,7 @@ class FL_ALIGN unordered_map {
     }
 
     fl::size find_unoccupied_index_using_bitset(
-        const Key &key, const fl::bitset<1024> &occupied_set) const {
+        const Key &key, const fl::bitset<1024> &occupied_set) const FL_NO_EXCEPT {
         const fl::size cap = _buckets.size();
         const fl::size mask = cap - 1;
         const fl::size h = _hash(key) & mask;
@@ -911,7 +911,7 @@ class FL_ALIGN unordered_map {
         return npos();
     }
 
-    void rehash_internal(fl::size new_cap) {
+    void rehash_internal(fl::size new_cap) FL_NO_EXCEPT {
         new_cap = next_power_of_two(new_cap);
         fl::vector_inlined<Entry, INLINED_COUNT> old(_buckets.get_resource());
         fl::bitset<1024> old_occupied = _occupied;
@@ -936,7 +936,7 @@ class FL_ALIGN unordered_map {
     // Rehash the inline buckets without resizing
     FL_DISABLE_WARNING_PUSH
     FL_DISABLE_WARNING_NULL_DEREFERENCE
-    void rehash_inline_no_resize() {
+    void rehash_inline_no_resize() FL_NO_EXCEPT {
         // filter out tombstones and compact
         fl::size cap = _buckets.size();
         fl::size pos = 0;
@@ -1025,7 +1025,7 @@ class FL_ALIGN unordered_map {
 
   public:
     /// Equality comparison (map equality: same key-value pairs, order-independent)
-    bool operator==(const unordered_map& other) const {
+    bool operator==(const unordered_map& other) const FL_NO_EXCEPT {
         if (size() != other.size()) return false;
         for (const auto& kv : *this) {
             auto it = other.find(kv.first);
@@ -1035,11 +1035,11 @@ class FL_ALIGN unordered_map {
     }
 
     /// Inequality comparison
-    bool operator!=(const unordered_map& other) const {
+    bool operator!=(const unordered_map& other) const FL_NO_EXCEPT {
         return !(*this == other);
     }
 
-    memory_resource* get_memory_resource() const { return _buckets.get_resource(); }
+    memory_resource* get_memory_resource() const FL_NO_EXCEPT { return _buckets.get_resource(); }
 
   private:
     fl::vector_inlined<Entry, INLINED_COUNT> _buckets;

@@ -9,7 +9,7 @@
 namespace fl {
 
 
-sstream &sstream::operator<<(const Tile2x2_u8 &subpixel) {
+sstream &sstream::operator<<(const Tile2x2_u8 &subpixel) FL_NO_EXCEPT {
     mStr.append("Tile2x2_u8(");
     mStr.append(subpixel.bounds());
     mStr.append(" => ");
@@ -25,7 +25,7 @@ sstream &sstream::operator<<(const Tile2x2_u8 &subpixel) {
 }
 
 // Bins support - show both raw and db bins  
-sstream &sstream::operator<<(const audio::fft::Bins &bins) {
+sstream &sstream::operator<<(const audio::fft::Bins &bins) FL_NO_EXCEPT {
     mStr.append("Bins(bands=");
     mStr.append(bins.bands());
     mStr.append(", raw=");
@@ -37,43 +37,43 @@ sstream &sstream::operator<<(const audio::fft::Bins &bins) {
 }
 
 // Tile2x2_u8_wrap support - delegates to fl::string::append which already knows how to format it
-sstream &sstream::operator<<(const Tile2x2_u8_wrap &tile) {
+sstream &sstream::operator<<(const Tile2x2_u8_wrap &tile) FL_NO_EXCEPT {
     mStr.append(tile);
     return *this;
 }
 
 // Manipulator operator implementations (declared as friends in sstream)
-sstream& operator<<(sstream& ss, const hex_t&) {
+sstream& operator<<(sstream& ss, const hex_t&) FL_NO_EXCEPT {
     ss.mBase = 16;
     return ss;
 }
 
-sstream& operator<<(sstream& ss, const dec_t&) {
+sstream& operator<<(sstream& ss, const dec_t&) FL_NO_EXCEPT {
     ss.mBase = 10;
     return ss;
 }
 
-sstream& operator<<(sstream& ss, const oct_t&) {
+sstream& operator<<(sstream& ss, const oct_t&) FL_NO_EXCEPT {
     ss.mBase = 8;
     return ss;
 }
 
 // Helper method implementations for formatted integer output
-void sstream::appendFormatted(fl::i8 val) {
+void sstream::appendFormatted(fl::i8 val) FL_NO_EXCEPT {
     appendFormatted(fl::i16(val));
 }
 
-void sstream::appendFormatted(fl::i16 val) {
+void sstream::appendFormatted(fl::i16 val) FL_NO_EXCEPT {
     appendFormatted(fl::i32(val));
 }
 
-void sstream::appendFormatted(fl::i32 val) {
+void sstream::appendFormatted(fl::i32 val) FL_NO_EXCEPT {
     char buf[64] = {0};
     int len = fl::itoa(val, buf, mBase);
     mStr.append(buf, len);
 }
 
-void sstream::appendFormatted(fl::i64 val) {
+void sstream::appendFormatted(fl::i64 val) FL_NO_EXCEPT {
     char buf[64] = {0};
     int len;
     if (mBase == 16 || mBase == 8) {
@@ -91,17 +91,17 @@ void sstream::appendFormatted(fl::i64 val) {
     mStr.append(buf, len);
 }
 
-void sstream::appendFormatted(fl::u16 val) {
+void sstream::appendFormatted(fl::u16 val) FL_NO_EXCEPT {
     appendFormatted(fl::u32(val));
 }
 
-void sstream::appendFormatted(fl::u32 val) {
+void sstream::appendFormatted(fl::u32 val) FL_NO_EXCEPT {
     char buf[64] = {0};
     int len = fl::utoa32(val, buf, mBase);
     mStr.append(buf, len);
 }
 
-void sstream::appendFormatted(fl::u64 val) {
+void sstream::appendFormatted(fl::u64 val) FL_NO_EXCEPT {
     char buf[64] = {0};
     int len = fl::utoa64(val, buf, mBase);
     mStr.append(buf, len);

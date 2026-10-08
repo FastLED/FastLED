@@ -2,16 +2,17 @@
 #include "fl/gfx/tile2x2.h"
 #include "fl/gfx/splat.h"
 #include "fl/math/math.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
-static u8 to_uint8(float f) {
+static u8 to_uint8(float f) FL_NO_EXCEPT {
     // convert to [0..255] range
     u8 i = static_cast<u8>(f * 255.0f + .5f);
     return fl::min(i, 255);
 }
 
-Tile2x2_u8 splat(vec2f xy) {
+Tile2x2_u8 splat(vec2f xy) FL_NO_EXCEPT {
     // 1) collect values.
     float x = xy.x;
     float y = xy.y;

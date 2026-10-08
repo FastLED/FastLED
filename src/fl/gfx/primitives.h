@@ -1,5 +1,7 @@
 #pragma once
 
+#include "fl/stl/noexcept.h"
+
 #include "fl/gfx/canvas.h"  // IWYU pragma: keep
 #include "fl/gfx/draw_mode.h"
 #include "fl/math/distance_lut.h"  // IWYU pragma: keep
@@ -21,31 +23,31 @@ namespace gfx {
 /// Uses integer arithmetic for fixed-point types; float for float/double.
 /// Generic: for fixed-point types (those with .to_int())
 template<typename T>
-inline fl::u8 coordToU8(T alpha) {
+inline fl::u8 coordToU8(T alpha) FL_NO_EXCEPT {
     return (fl::u8)fl::clamp((alpha * T(255.0f) + T(0.5f)).to_int(), 0, 255);
 }
 
 // Specialization for float
 template<>
-inline fl::u8 coordToU8<float>(float alpha) {
+inline fl::u8 coordToU8<float>(float alpha) FL_NO_EXCEPT {
     return (fl::u8)fl::round(alpha * 255.0f);
 }
 
 // Specialization for double
 template<>
-inline fl::u8 coordToU8<double>(double alpha) {
+inline fl::u8 coordToU8<double>(double alpha) FL_NO_EXCEPT {
     return (fl::u8)fl::round(alpha * 255.0);
 }
 
 // Specialization for int
 template<>
-inline fl::u8 coordToU8<int>(int alpha) {
+inline fl::u8 coordToU8<int>(int alpha) FL_NO_EXCEPT {
     return (fl::u8)fl::clamp(alpha, 0, 255);
 }
 
 // Specialization for s16x16: uses from_raw, no float at all
 template<>
-inline fl::u8 coordToU8<fl::s16x16>(fl::s16x16 alpha) {
+inline fl::u8 coordToU8<fl::s16x16>(fl::s16x16 alpha) FL_NO_EXCEPT {
     constexpr fl::s16x16 c255 = fl::s16x16::from_raw(255 * fl::s16x16::SCALE);
     constexpr fl::s16x16 half = fl::s16x16::from_raw(1 << 15);
     return (fl::u8)fl::clamp((alpha * c255 + half).to_int(), (fl::i32)0, (fl::i32)255);
@@ -54,30 +56,30 @@ inline fl::u8 coordToU8<fl::s16x16>(fl::s16x16 alpha) {
 /// Convert an integer to Coord without float intermediate.
 /// For s16x16: uses from_raw (pure integer shift). For float: implicit cast.
 template<typename T>
-inline T fromInt(int n) { return T(static_cast<float>(n)); }
+inline T fromInt(int n) FL_NO_EXCEPT { return T(static_cast<float>(n)); }
 
 template<>
-inline fl::s16x16 fromInt<fl::s16x16>(int n) {
+inline fl::s16x16 fromInt<fl::s16x16>(int n) FL_NO_EXCEPT {
     return fl::s16x16::from_raw(n * fl::s16x16::SCALE);
 }
 
 /// Convert rational p/q to Coord without float.
 /// For s16x16: integer multiply+divide. For float: float divide.
 template<typename T>
-inline T fromFrac(int p, int q) { return T(static_cast<float>(p) / static_cast<float>(q)); }
+inline T fromFrac(int p, int q) FL_NO_EXCEPT { return T(static_cast<float>(p) / static_cast<float>(q)); }
 
 template<>
-inline fl::s16x16 fromFrac<fl::s16x16>(int p, int q) {
+inline fl::s16x16 fromFrac<fl::s16x16>(int p, int q) FL_NO_EXCEPT {
     return fl::s16x16::from_raw((p * fl::s16x16::SCALE) / q);
 }
 
 /// Divide Coord by 2 using shift (avoids expensive division on embedded).
 /// s16x16: raw right-shift (1 instruction). float: multiply by 0.5.
 template<typename T>
-inline T halfOf(T val) { return val / fromInt<T>(2); }
+inline T halfOf(T val) FL_NO_EXCEPT { return val / fromInt<T>(2); }
 
 template<>
-inline fl::s16x16 halfOf<fl::s16x16>(fl::s16x16 val) {
+inline fl::s16x16 halfOf<fl::s16x16>(fl::s16x16 val) FL_NO_EXCEPT {
     return fl::s16x16::from_raw(val.raw() >> 1);
 }
 
@@ -88,30 +90,30 @@ template<>
 inline double halfOf<double>(double val) { return val * 0.5; }
 
 template<>
-inline int halfOf<int>(int val) { return val >> 1; }
+inline int halfOf<int>(int val) FL_NO_EXCEPT { return val >> 1; }
 
 /// Helper to convert any coordinate type to int
 /// Supports: s16x16 (via to_int()), float, int, and other arithmetic types
 template<typename T>
-inline int toInt(const T& val) {
+inline int toInt(const T& val) FL_NO_EXCEPT {
     return val.to_int();  // For s16x16 and similar
 }
 
 // Specialization for float
 template<>
-inline int toInt<float>(const float& val) {
+inline int toInt<float>(const float& val) FL_NO_EXCEPT {
     return static_cast<int>(val);
 }
 
 // Specialization for int (passthrough)
 template<>
-inline int toInt<int>(const int& val) {
+inline int toInt<int>(const int& val) FL_NO_EXCEPT {
     return val;
 }
 
 // Specialization for double
 template<>
-inline int toInt<double>(const double& val) {
+inline int toInt<double>(const double& val) FL_NO_EXCEPT {
     return static_cast<int>(val);
 }
 
@@ -120,7 +122,7 @@ inline int toInt<double>(const double& val) {
 /// Templated on Overwrite for compile-time dispatch (no per-pixel branch).
 template<typename PixelT, bool Overwrite>
 inline void addPixelToBuffer(PixelT* pixels, int width, int height,
-                              int x, int y, const PixelT& color) {
+                              int x, int y, const PixelT& color) FL_NO_EXCEPT {
     if (x >= 0 && x < width && y >= 0 && y < height) {
         if (Overwrite)
             pixels[y * width + x] = color;
@@ -147,13 +149,13 @@ struct needs_division<Coord,
 
 // Tag-dispatch: high precision → multiply by precomputed reciprocal
 template<typename Coord>
-inline Coord aaRatioDispatch(Coord num, Coord, Coord inv_denom, fl::false_type) {
+inline Coord aaRatioDispatch(Coord num, Coord, Coord inv_denom, fl::false_type) FL_NO_EXCEPT {
     return num * inv_denom;
 }
 
 // Tag-dispatch: low precision → direct division (more accurate)
 template<typename Coord>
-inline Coord aaRatioDispatch(Coord num, Coord denom, Coord, fl::true_type) {
+inline Coord aaRatioDispatch(Coord num, Coord denom, Coord, fl::true_type) FL_NO_EXCEPT {
     return num / denom;
 }
 
@@ -163,7 +165,7 @@ inline Coord aaRatioDispatch(Coord num, Coord denom, Coord, fl::true_type) {
 /// - float, s16x16, s8x24 (FRAC_BITS >= 16): multiply by precomputed reciprocal
 /// - s8x8, s12x4, s24x8 (FRAC_BITS < 16): direct division
 template<typename Coord>
-inline Coord aaRatio(Coord num, Coord denom, Coord inv_denom) {
+inline Coord aaRatio(Coord num, Coord denom, Coord inv_denom) FL_NO_EXCEPT {
     return detail::aaRatioDispatch(num, denom, inv_denom,
         typename detail::needs_division<Coord>::type());
 }
@@ -177,27 +179,27 @@ namespace detail {
 /// Convert any Coord type to 8.8 fixed-point (fl::i32).
 /// Generic fallback: use to_float() conversion.
 template<typename Coord>
-inline fl::i32 toFixed8(Coord val) {
+inline fl::i32 toFixed8(Coord val) FL_NO_EXCEPT {
     return static_cast<fl::i32>(val.to_float() * 256.0f);
 }
 
 template<>
-inline fl::i32 toFixed8<float>(float val) {
+inline fl::i32 toFixed8<float>(float val) FL_NO_EXCEPT {
     return static_cast<fl::i32>(val * 256.0f);
 }
 
 template<>
-inline fl::i32 toFixed8<double>(double val) {
+inline fl::i32 toFixed8<double>(double val) FL_NO_EXCEPT {
     return static_cast<fl::i32>(val * 256.0);
 }
 
 template<>
-inline fl::i32 toFixed8<int>(int val) {
+inline fl::i32 toFixed8<int>(int val) FL_NO_EXCEPT {
     return static_cast<fl::i32>(static_cast<fl::u32>(val) << 8);
 }
 
 template<>
-inline fl::i32 toFixed8<fl::s16x16>(fl::s16x16 val) {
+inline fl::i32 toFixed8<fl::s16x16>(fl::s16x16 val) FL_NO_EXCEPT {
     // Q16.16 → Q8.8: shift right by 8
     return static_cast<fl::i32>(val.raw() >> 8);
 }
@@ -206,7 +208,7 @@ inline fl::i32 toFixed8<fl::s16x16>(fl::s16x16 val) {
 /// Converts 32-bit AA division: (diff * 255u) / band  (~60 cycles on AVR)
 /// into a multiply-by-reciprocal: ((diff >> shift) * inv) >> 8  (~14 cycles on AVR)
 /// where inv = round(255 * 256 / scaled).
-inline void computeBandShift(fl::i32 band, fl::u8 &shift_out, fl::u16 &inv_out) {
+inline void computeBandShift(fl::i32 band, fl::u8 &shift_out, fl::u16 &inv_out) FL_NO_EXCEPT {
     fl::u8 sh = 0;
     fl::u32 tmp = static_cast<fl::u32>(band);
     while (tmp > 255u) { tmp >>= 1; ++sh; }
@@ -220,27 +222,27 @@ inline void computeBandShift(fl::i32 band, fl::u8 &shift_out, fl::u16 &inv_out) 
 /// s16x16: direct raw access (already Q16.16, zero overhead).
 /// float/double: multiply by 65536. int: shift left by 16.
 template<typename Coord>
-inline fl::i32 toQ16(Coord val) {
+inline fl::i32 toQ16(Coord val) FL_NO_EXCEPT {
     return static_cast<fl::i32>(val.to_float() * 65536.0f);
 }
 
 template<>
-inline fl::i32 toQ16<float>(float val) {
+inline fl::i32 toQ16<float>(float val) FL_NO_EXCEPT {
     return static_cast<fl::i32>(val * 65536.0f);
 }
 
 template<>
-inline fl::i32 toQ16<double>(double val) {
+inline fl::i32 toQ16<double>(double val) FL_NO_EXCEPT {
     return static_cast<fl::i32>(val * 65536.0);
 }
 
 template<>
-inline fl::i32 toQ16<int>(int val) {
+inline fl::i32 toQ16<int>(int val) FL_NO_EXCEPT {
     return static_cast<fl::i32>(val) << 16;
 }
 
 template<>
-inline fl::i32 toQ16<fl::s16x16>(fl::s16x16 val) {
+inline fl::i32 toQ16<fl::s16x16>(fl::s16x16 val) FL_NO_EXCEPT {
     return val.raw();
 }
 
@@ -277,7 +279,7 @@ struct RingCtx {
 template<typename PixelT, bool Overwrite>
 inline void renderDiscRow(PixelT* buf, int w, int py,
                           fl::i32 d2_row,
-                          const DiscCtx<PixelT>& f) {
+                          const DiscCtx<PixelT>& f) FL_NO_EXCEPT {
     PixelT* ptr = &buf[py * w + f.xmin];
     fl::i32 d2 = d2_row;
     fl::i32 xd = f.xdelta0;
@@ -316,7 +318,7 @@ inline void renderDiscRow(PixelT* buf, int w, int py,
 template<typename PixelT, bool Overwrite>
 inline void renderRingRow(PixelT* buf, int w, int py,
                           fl::i32 d2_row,
-                          const RingCtx<PixelT>& g) {
+                          const RingCtx<PixelT>& g) FL_NO_EXCEPT {
     PixelT* ptr = &buf[py * w + g.xmin];
     fl::i32 d2 = d2_row;
     fl::i32 xd = g.xdelta0;
@@ -400,7 +402,7 @@ struct StrokeCtx {
 template<typename PixelT, bool Overwrite>
 inline void renderStrokeRow(PixelT* buf, int w, int py,
                             fl::i32 cross_start, fl::i32 dot_start,
-                            const StrokeCtx<PixelT>& sc) {
+                            const StrokeCtx<PixelT>& sc) FL_NO_EXCEPT {
     PixelT* ptr = &buf[py * w + sc.xmin];
     fl::i32 cross = cross_start;
     fl::i32 dot = dot_start;
@@ -495,22 +497,22 @@ inline void renderStrokeRow(PixelT* buf, int w, int py,
 template<typename PixelT, typename Coord>
 void drawLine(Canvas<PixelT>& canvas, const PixelT& color,
               Coord x0, Coord y0, Coord x1, Coord y1,
-              fl::DrawMode mode);
+              fl::DrawMode mode) FL_NO_EXCEPT;
 
 template<typename PixelT, typename Coord>
 void drawDisc(Canvas<PixelT>& canvas, const PixelT& color,
               Coord cx, Coord cy, Coord r,
-              fl::DrawMode mode);
+              fl::DrawMode mode) FL_NO_EXCEPT;
 
 template<typename PixelT, typename Coord>
 void drawRing(Canvas<PixelT>& canvas, const PixelT& color,
               Coord cx, Coord cy, Coord r, Coord thickness,
-              fl::DrawMode mode);
+              fl::DrawMode mode) FL_NO_EXCEPT;
 
 template<typename PixelT, typename Coord>
 void drawStrokeLine(Canvas<PixelT>& canvas, const PixelT& color,
                     Coord x0, Coord y0, Coord x1, Coord y1, Coord thickness,
-                    LineCap cap, fl::DrawMode mode);
+                    LineCap cap, fl::DrawMode mode) FL_NO_EXCEPT;
 
 /// ============================================================================
 /// LEGACY RASTERTARGET API (Deprecated - for backward compatibility)
@@ -528,7 +530,7 @@ namespace detail {
 
 template<typename PixelT, typename Coord, bool Overwrite>
 inline void drawLineCore(Canvas<PixelT>& canvas, const PixelT& color,
-                         Coord x0, Coord y0, Coord x1, Coord y1) {
+                         Coord x0, Coord y0, Coord x1, Coord y1) FL_NO_EXCEPT {
     PixelT* pixels = canvas.pixels;
     int width = canvas.width;
     int height = canvas.height;
@@ -626,23 +628,23 @@ inline void drawLineCore(Canvas<PixelT>& canvas, const PixelT& color,
 
 template<typename PixelT, typename Coord, bool Overwrite>
 inline void drawDiscCore(Canvas<PixelT>& canvas, const PixelT& color,
-                         Coord cx, Coord cy, Coord r);
+                         Coord cx, Coord cy, Coord r) FL_NO_EXCEPT;
 
 template<typename PixelT, typename Coord, bool Overwrite>
 inline void drawRingCore(Canvas<PixelT>& canvas, const PixelT& color,
-                         Coord cx, Coord cy, Coord r, Coord thickness);
+                         Coord cx, Coord cy, Coord r, Coord thickness) FL_NO_EXCEPT;
 
 template<typename PixelT, typename Coord, bool Overwrite>
 inline void drawStrokeLineCore(Canvas<PixelT>& canvas, const PixelT& color,
                                Coord x0, Coord y0, Coord x1, Coord y1,
-                               Coord thickness, LineCap cap);
+                               Coord thickness, LineCap cap) FL_NO_EXCEPT;
 
 }  // namespace detail
 
 template<typename PixelT, typename Coord>
 inline void drawLine(Canvas<PixelT>& canvas, const PixelT& color,
                      Coord x0, Coord y0, Coord x1, Coord y1,
-                     fl::DrawMode mode) {
+                     fl::DrawMode mode) FL_NO_EXCEPT {
     if (mode == fl::DrawMode::DRAW_MODE_OVERWRITE)
         detail::drawLineCore<PixelT, Coord, true>(canvas, color, x0, y0, x1, y1);
     else
@@ -654,7 +656,7 @@ inline void drawLine(Canvas<PixelT>& canvas, const PixelT& color,
 // ---------------------------------------------------------------------------
 template<typename PixelT, typename Coord, bool Overwrite>
 inline void detail::drawDiscCore(Canvas<PixelT>& canvas, const PixelT& color,
-                                 Coord cx, Coord cy, Coord r) {
+                                 Coord cx, Coord cy, Coord r) FL_NO_EXCEPT {
     PixelT* pixels = canvas.pixels;
     int width = canvas.width;
     int height = canvas.height;
@@ -718,7 +720,7 @@ inline void detail::drawDiscCore(Canvas<PixelT>& canvas, const PixelT& color,
 template<typename PixelT, typename Coord>
 inline void drawDisc(Canvas<PixelT>& canvas, const PixelT& color,
                      Coord cx, Coord cy, Coord r,
-                     fl::DrawMode mode) {
+                     fl::DrawMode mode) FL_NO_EXCEPT {
     if (mode == fl::DrawMode::DRAW_MODE_OVERWRITE)
         detail::drawDiscCore<PixelT, Coord, true>(canvas, color, cx, cy, r);
     else
@@ -730,7 +732,7 @@ inline void drawDisc(Canvas<PixelT>& canvas, const PixelT& color,
 // ---------------------------------------------------------------------------
 template<typename PixelT, typename Coord, bool Overwrite>
 inline void detail::drawRingCore(Canvas<PixelT>& canvas, const PixelT& color,
-                                 Coord cx, Coord cy, Coord r, Coord thickness) {
+                                 Coord cx, Coord cy, Coord r, Coord thickness) FL_NO_EXCEPT {
     PixelT* pixels = canvas.pixels;
     int width = canvas.width;
     int height = canvas.height;
@@ -806,7 +808,7 @@ inline void detail::drawRingCore(Canvas<PixelT>& canvas, const PixelT& color,
 template<typename PixelT, typename Coord>
 inline void drawRing(Canvas<PixelT>& canvas, const PixelT& color,
                      Coord cx, Coord cy, Coord r, Coord thickness,
-                     fl::DrawMode mode) {
+                     fl::DrawMode mode) FL_NO_EXCEPT {
     if (mode == fl::DrawMode::DRAW_MODE_OVERWRITE)
         detail::drawRingCore<PixelT, Coord, true>(canvas, color, cx, cy, r, thickness);
     else
@@ -819,7 +821,7 @@ inline void drawRing(Canvas<PixelT>& canvas, const PixelT& color,
 template<typename PixelT, typename Coord, bool Overwrite>
 inline void detail::drawStrokeLineCore(Canvas<PixelT>& canvas, const PixelT& color,
                                        Coord x0, Coord y0, Coord x1, Coord y1,
-                                       Coord thickness, LineCap cap) {
+                                       Coord thickness, LineCap cap) FL_NO_EXCEPT {
     PixelT* pixels = canvas.pixels;
     int width = canvas.width;
     int height = canvas.height;
@@ -895,7 +897,7 @@ inline void detail::drawStrokeLineCore(Canvas<PixelT>& canvas, const PixelT& col
 template<typename PixelT, typename Coord>
 inline void drawStrokeLine(Canvas<PixelT>& canvas, const PixelT& color,
                            Coord x0, Coord y0, Coord x1, Coord y1, Coord thickness,
-                           LineCap cap, fl::DrawMode mode) {
+                           LineCap cap, fl::DrawMode mode) FL_NO_EXCEPT {
     if (mode == fl::DrawMode::DRAW_MODE_OVERWRITE)
         detail::drawStrokeLineCore<PixelT, Coord, true>(canvas, color, x0, y0, x1, y1, thickness, cap);
     else

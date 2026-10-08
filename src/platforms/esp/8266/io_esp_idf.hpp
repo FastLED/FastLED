@@ -7,7 +7,7 @@
 
 // ESP8266 ROM UART functions
 extern "C" {
-    void ets_putc(char c) FL_NO_EXCEPT;
+    void ets_putc(char c);
 }
 
 namespace fl {

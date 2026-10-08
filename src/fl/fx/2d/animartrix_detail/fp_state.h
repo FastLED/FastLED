@@ -10,6 +10,7 @@
 #include "fl/fx/2d/animartrix_detail/engine.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/vector.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -27,11 +28,11 @@ struct FL_ALIGNAS(16) FPVizState {
     FL_ALIGNAS(16) fl::i32 fade_lut[257];
     bool fade_lut_initialized = false;
 
-    FPVizState() : fade_lut{}, fade_lut_initialized(false) {}
+    FPVizState() FL_NO_EXCEPT : fade_lut{}, fade_lut_initialized(false) {}
 
     // Rebuild per-pixel cache when grid changes.
     // Called once per frame; rebuilds only if pixel count changed.
-    void ensureCache(Engine *e) {
+    void ensureCache(Engine *e) FL_NO_EXCEPT {
         const int num_x = e->num_x;
         const int num_y = e->num_y;
         const int total_pixels = num_x * num_y;

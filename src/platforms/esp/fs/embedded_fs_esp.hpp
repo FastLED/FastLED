@@ -31,6 +31,7 @@
 
 #include "fl/fs/file_handle.h"
 #include "fl/stl/memory.h"
+#include "fl/stl/noexcept.h"
 #include "fl/stl/string.h"
 
 namespace fl {
@@ -45,7 +46,7 @@ class LittleFsFileHandle : public filebuf {
     string _path;
 
   public:
-    LittleFsFileHandle(File file, const char *path)
+    LittleFsFileHandle(File file, const char *path) FL_NO_EXCEPT
         : _file(file), _path(path) {}
 
     ~LittleFsFileHandle() FL_NO_EXCEPT override {
@@ -112,10 +113,10 @@ class LittleFsFileHandle : public filebuf {
         return f.available() <= 0;
     }
 
-    bool has_error() const override { return false; }
-    void clear_error() override {}
-    int error_code() const override { return 0; }
-    const char *error_message() const override { return "No error"; }
+    bool has_error() const FL_NO_EXCEPT override { return false; }
+    void clear_error() FL_NO_EXCEPT override {}
+    int error_code() const FL_NO_EXCEPT override { return 0; }
+    const char *error_message() const FL_NO_EXCEPT override { return "No error"; }
 };
 
 class FsLittleFs : public FsImpl {
@@ -123,7 +124,7 @@ class FsLittleFs : public FsImpl {
     bool _format_on_fail;
 
   public:
-    explicit FsLittleFs(bool format_on_fail)
+    explicit FsLittleFs(bool format_on_fail) FL_NO_EXCEPT
         : _format_on_fail(format_on_fail) {}
 
     bool begin() FL_NO_EXCEPT override {

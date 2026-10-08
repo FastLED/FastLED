@@ -33,10 +33,11 @@ from ci.tools.check_array_params import (
     _scope_tus as _array_scope_tus,
 )
 from ci.tools.check_noexcept import (
-    _COMPILER_ARGS,
     NoexceptCheckError,
     NoexceptHit,
+    _compiler_args,
     _find_clang_query,
+    _raise_on_query_errors,
 )
 from ci.tools.check_noexcept import (
     _read_source_signature as _noexcept_read_source_signature,
@@ -98,7 +99,7 @@ def _run_combined_clang_query(
 ) -> tuple[list[NoexceptHit], list[ArrayParamHit]]:
     """Run a single clang-query session and route hits by binding name."""
     result = RunningProcess.run(
-        [*clang_query, tu, "--", *_COMPILER_ARGS],
+        [*clang_query, tu, "--", *_compiler_args()],
         input=_build_combined_query(file_regex),
         stdout=PIPE,
         stderr=PIPE,
@@ -109,14 +110,7 @@ def _run_combined_clang_query(
         errors="replace",
     )
     output = result.stdout + "\n" + result.stderr
-    if result.returncode != 0:
-        raise NoexceptCheckError(output.strip() or "clang-query failed")
-    if (
-        "Error parsing argument" in output
-        or "Error parsing matcher" in output
-        or "Matcher not found" in output
-    ):
-        raise NoexceptCheckError(output.strip())
+    _raise_on_query_errors(result.returncode, output)
 
     noexcept_hits: list[NoexceptHit] = []
     array_param_hits: list[ArrayParamHit] = []
@@ -216,4 +210,9 @@ def find_combined_hits(
             noexcept_hits, array_param_hits = future.result()
             all_noexcept.extend(noexcept_hits)
             all_array_param.extend(array_param_hits)
-    return all_noexcept, all_array_param
+    # Public headers can be parsed through several canonical routers. Baseline
+    # multiplicity represents physical declarations, not how many TUs see them.
+    return (
+        list({(hit.path, hit.line): hit for hit in all_noexcept}.values()),
+        list({(hit.path, hit.line): hit for hit in all_array_param}.values()),
+    )

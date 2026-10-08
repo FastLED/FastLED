@@ -11,6 +11,7 @@
 #include "fl/stl/align.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/vector.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -37,7 +38,7 @@ struct FL_ALIGNAS(16) ChasingSpiralState {
     FL_ALIGNAS(16) fl::i32 fade_lut[257];
     bool fade_lut_initialized = false;
 
-    ChasingSpiralState() : fade_lut{}, fade_lut_initialized(false) {}
+    ChasingSpiralState() FL_NO_EXCEPT : fade_lut{}, fade_lut_initialized(false) {}
 };
 
 }  // namespace fl

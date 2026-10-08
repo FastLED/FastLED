@@ -20,9 +20,9 @@ extern u32 _retry_cnt;
 #endif
 
 // Info on reading cycle counter from https://github.com/kbeckmann/nodemcu-firmware/blob/ws2812-dual/app/modules/ws2812.c
-__attribute__ ((always_inline)) inline static u32 __clock_cycles() {
+__attribute__ ((always_inline)) inline static u32 __clock_cycles() FL_NO_EXCEPT {
   u32 cyc;
-  __asm__ __volatile__ ("rsr %0,ccount":"=a" (cyc)) FL_NO_EXCEPT;
+  __asm__ __volatile__ ("rsr %0,ccount":"=a" (cyc));
   return cyc;
 }
 
@@ -58,7 +58,7 @@ public:
 		mPort = FastPin<DATA_PIN>::port();
 	}
 
-	virtual u16 getMaxRefreshRate() const { return 400; }
+	virtual u16 getMaxRefreshRate() const FL_NO_EXCEPT { return 400; }
 
 protected:
 

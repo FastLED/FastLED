@@ -61,12 +61,12 @@ static inline bool float_bits_magnitude_exceeds_2_24(u32 bits) FL_NO_EXCEPT {
 }
 
 
-json_value& get_null_json_value() {
+json_value& get_null_json_value() FL_NO_EXCEPT {
     static json_value null_value;
     return null_value;
 }
 
-json_object& get_empty_json_obj() {
+json_object& get_empty_json_obj() FL_NO_EXCEPT {
     static json_object empty_object;
     return empty_object;
 }
@@ -113,7 +113,7 @@ enum class ParseState : u8 { KEEP_GOING = 0, ERROR = 1 };
 // Base visitor interface
 class JsonVisitor {
 public:
-    virtual ParseState on_token(JsonToken token, const fl::span<const char>& value) = 0;
+    virtual ParseState on_token(JsonToken token, const fl::span<const char>& value) FL_NO_EXCEPT = 0;
     virtual ~JsonVisitor() FL_NO_EXCEPT = default;
 };
 
@@ -125,7 +125,7 @@ private:
     size_t mPos;
     bool mEnableLookahead;
 
-    void skip_whitespace() {
+    void skip_whitespace() FL_NO_EXCEPT {
         while (mPos < mLen && (mInput[mPos] == ' ' || mInput[mPos] == '\t' ||
                                mInput[mPos] == '\n' || mInput[mPos] == '\r')) {
             mPos++;
@@ -135,7 +135,7 @@ private:
     // Array lookahead scanner - scans array to determine if it can be optimized
     // Returns specialized token (ARRAY_UINT8, etc.) or LBRACKET for slow path
     // Assumes mPos is positioned after '[' character
-    JsonToken scan_array_lookahead(fl::span<const char>& out_span) {
+    JsonToken scan_array_lookahead(fl::span<const char>& out_span) FL_NO_EXCEPT {
         if (!mEnableLookahead) {
             return JsonToken::LBRACKET;  // Lookahead disabled
         }
@@ -310,7 +310,7 @@ private:
         return JsonToken::LBRACKET;
     }
 
-    JsonToken next_token(fl::span<const char>& out_value) {
+    JsonToken next_token(fl::span<const char>& out_value) FL_NO_EXCEPT {
         skip_whitespace();
         if (mPos >= mLen) {
             out_value = fl::span<const char>();
@@ -484,13 +484,13 @@ private:
     }
 
 public:
-    JsonTokenizer(bool enable_lookahead = true) : mInput(nullptr), mLen(0), mPos(0), mEnableLookahead(enable_lookahead) {}
+    JsonTokenizer(bool enable_lookahead = true) FL_NO_EXCEPT : mInput(nullptr), mLen(0), mPos(0), mEnableLookahead(enable_lookahead) {}
 
-    bool parse(const fl::string& input, JsonVisitor& visitor) {
+    bool parse(const fl::string& input, JsonVisitor& visitor) FL_NO_EXCEPT {
         return parse(fl::string_view(input.c_str(), input.length()), visitor);
     }
 
-    bool parse(fl::string_view input, JsonVisitor& visitor) {
+    bool parse(fl::string_view input, JsonVisitor& visitor) FL_NO_EXCEPT {
         mInput = input.data();
         mLen = input.size();
         mPos = 0;
@@ -529,7 +529,7 @@ private:
 public:
     JsonValidator() FL_NO_EXCEPT : mExpectKey(false), mExpectValue(false), mExpectColon(false), mDepth(0) {}
 
-    ParseState on_token(JsonToken token, const fl::span<const char>& value) override {
+    ParseState on_token(JsonToken token, const fl::span<const char>& value) FL_NO_EXCEPT override {
         (void)value;  // Suppress unused parameter warning
 
         // Recursion depth check
@@ -624,13 +624,13 @@ public:
         }
     }
 
-    bool is_valid() const {
+    bool is_valid() const FL_NO_EXCEPT {
         return mBracketStack.empty() && !mExpectColon && !mExpectKey;
     }
 };
 
 // Helper: Check if string contains escape sequences
-bool has_escape_sequences(const fl::span<const char>& span) {
+bool has_escape_sequences(const fl::span<const char>& span) FL_NO_EXCEPT {
     for (size_t i = 0; i < span.size(); i++) {
         if (span[i] == '\\') {
             return true;
@@ -640,7 +640,7 @@ bool has_escape_sequences(const fl::span<const char>& span) {
 }
 
 // Helper: Unescape JSON string (only call if has_escape_sequences() returns true)
-fl::string unescape_string(const fl::span<const char>& span) {
+fl::string unescape_string(const fl::span<const char>& span) FL_NO_EXCEPT {
     fl::string result;
     result.reserve(span.size());
 
@@ -669,7 +669,7 @@ fl::string unescape_string(const fl::span<const char>& span) {
 // Array optimization helpers (Milestone 9)
 enum ArrayType { ALL_UINT8, ALL_INT16, ALL_FLOATS, GENERIC_ARRAY };
 
-ArrayType classify_array(const json_array& arr) {
+ArrayType classify_array(const json_array& arr) FL_NO_EXCEPT {
     if (arr.empty()) return GENERIC_ARRAY;
 
     bool all_numeric = true;
@@ -742,7 +742,7 @@ ArrayType classify_array(const json_array& arr) {
     return GENERIC_ARRAY;
 }
 
-fl::shared_ptr<json_value> optimize_array(fl::shared_ptr<json_value> array_val) {
+fl::shared_ptr<json_value> optimize_array(fl::shared_ptr<json_value> array_val) FL_NO_EXCEPT {
     auto arr = array_val->data.ptr<json_array>();
     if (!arr) return array_val;
 
@@ -814,7 +814,7 @@ private:
 
     // Parse integer array directly from span into vector (zero allocations)
     template<typename T>
-    bool parse_int_array(const fl::span<const char>& span, fl::vector<T>& out_vec) {
+    bool parse_int_array(const fl::span<const char>& span, fl::vector<T>& out_vec) FL_NO_EXCEPT {
         const char* p = span.data();
         const char* end = p + span.size();
 
@@ -843,7 +843,7 @@ private:
 
     // Parse float array directly from span into vector (zero allocations)
     template<typename T>
-    bool parse_float_array(const fl::span<const char>& span, fl::vector<T>& out_vec) {
+    bool parse_float_array(const fl::span<const char>& span, fl::vector<T>& out_vec) FL_NO_EXCEPT {
         const char* p = span.data();
         const char* end = p + span.size();
 
@@ -902,7 +902,7 @@ private:
         return true;
     }
 
-    void push_value(const fl::shared_ptr<json_value>& val) {
+    void push_value(const fl::shared_ptr<json_value>& val) FL_NO_EXCEPT {
         if (mStack.empty()) {
             mRoot = val;
         } else {
@@ -928,7 +928,7 @@ private:
 public:
     JsonBuilder() FL_NO_EXCEPT : mRoot(), mDepth(0) {}
 
-    ParseState on_token(JsonToken token, const fl::span<const char>& value) override {
+    ParseState on_token(JsonToken token, const fl::span<const char>& value) FL_NO_EXCEPT override {
         // Recursion depth check
         if (mDepth > MAX_JSON_DEPTH) {
             FL_ERROR("JSON parser: FATAL - recursion depth exceeded " << MAX_JSON_DEPTH);
@@ -1101,7 +1101,7 @@ public:
         }
     }
 
-    fl::shared_ptr<json_value> get_result() {
+    fl::shared_ptr<json_value> get_result() FL_NO_EXCEPT {
         return mRoot ? mRoot : fl::make_shared<json_value>(nullptr);
     }
 };
@@ -1109,7 +1109,7 @@ public:
 }  // namespace
 
 // PARSE2 IMPLEMENTATION - Milestone 8: Two-phase parser with validation
-fl::shared_ptr<json_value> json_value::parse2(const fl::string& txt) {
+fl::shared_ptr<json_value> json_value::parse2(const fl::string& txt) FL_NO_EXCEPT {
     JsonTokenizer tokenizer;
 
     // Phase 1: Validate
@@ -1128,17 +1128,17 @@ fl::shared_ptr<json_value> json_value::parse2(const fl::string& txt) {
 }
 
 // Phase 1 validation only (for testing - MUST allocate zero heap memory)
-bool json_value::parse2_validate_only(const fl::string& txt) {
+bool json_value::parse2_validate_only(const fl::string& txt) FL_NO_EXCEPT {
     return parse2_validate_only(fl::string_view(txt.c_str(), txt.length()));
 }
 
-bool json_value::parse2_validate_only(fl::string_view txt) {
+bool json_value::parse2_validate_only(fl::string_view txt) FL_NO_EXCEPT {
     JsonTokenizer tokenizer;
     JsonValidator validator;
     return tokenizer.parse(txt, validator) && validator.is_valid();
 }
 
-fl::string json_value::to_string() const {
+fl::string json_value::to_string() const FL_NO_EXCEPT {
     // Parse the JSON value to a string, then parse it back to a json object,
     // and use the working to_string_native method
     // This is a workaround to avoid reimplementing the serialization logic
@@ -1156,17 +1156,17 @@ fl::string json_value::to_string() const {
 struct SerializerVisitor {
     fl::deque<char>& out;
 
-    void append(const char* str) {
+    void append(const char* str) FL_NO_EXCEPT {
         while (*str) { out.push_back(*str++); }
     }
 
-    void append_str(const fl::string& str) {
+    void append_str(const fl::string& str) FL_NO_EXCEPT {
         for (size_t i = 0; i < str.size(); ++i) {
             out.push_back(str[i]);
         }
     }
 
-    void append_escaped(const fl::string& str) {
+    void append_escaped(const fl::string& str) FL_NO_EXCEPT {
         out.push_back('"');
         for (size_t i = 0; i < str.size(); ++i) {
             char c = str[i];
@@ -1185,7 +1185,7 @@ struct SerializerVisitor {
     }
 
     // Serialize a json_value recursively
-    void serialize_value(const json_value* value) {
+    void serialize_value(const json_value* value) FL_NO_EXCEPT {
         if (!value) {
             append("null");
             return;
@@ -1194,17 +1194,17 @@ struct SerializerVisitor {
     }
 
     // accept() overloads - called by variant::visit() with direct references
-    void accept(const fl::nullptr_t&) { append("null"); }
+    void accept(const fl::nullptr_t&) FL_NO_EXCEPT { append("null"); }
 
-    void accept(const bool& b) { append(b ? "true" : "false"); }
+    void accept(const bool& b) FL_NO_EXCEPT { append(b ? "true" : "false"); }
 
-    void accept(const i64& i) {
+    void accept(const i64& i) FL_NO_EXCEPT {
         fl::string num_str;
         num_str.append(i);
         append_str(num_str);
     }
 
-    void accept(const float& f) {
+    void accept(const float& f) FL_NO_EXCEPT {
 #if FL_PLATFORM_HAS_LARGE_MEMORY
         // Integer-only bits -> decimal (FastLED #3022 phase 2). Default 3-digit
         // precision matches the previous `num_str.append(f, 3)` contract.
@@ -1221,9 +1221,9 @@ struct SerializerVisitor {
 #endif
     }
 
-    void accept(const fl::string& s) { append_escaped(s); }
+    void accept(const fl::string& s) FL_NO_EXCEPT { append_escaped(s); }
 
-    void accept(const json_array& arr) {
+    void accept(const json_array& arr) FL_NO_EXCEPT {
         if (arr.empty()) {
             append("[]");
             return;
@@ -1238,7 +1238,7 @@ struct SerializerVisitor {
         out.push_back(']');
     }
 
-    void accept(const json_object& obj) {
+    void accept(const json_object& obj) FL_NO_EXCEPT {
         if (obj.empty()) {
             append("{}");
             return;
@@ -1255,7 +1255,7 @@ struct SerializerVisitor {
         out.push_back('}');
     }
 
-    void accept(const fl::vector<i16>& audio) {
+    void accept(const fl::vector<i16>& audio) FL_NO_EXCEPT {
         out.push_back('[');
         bool first = true;
         for (const auto& item : audio) {
@@ -1268,7 +1268,7 @@ struct SerializerVisitor {
         out.push_back(']');
     }
 
-    void accept(const fl::vector<u8>& bytes) {
+    void accept(const fl::vector<u8>& bytes) FL_NO_EXCEPT {
         out.push_back('[');
         bool first = true;
         for (const auto& item : bytes) {
@@ -1281,7 +1281,7 @@ struct SerializerVisitor {
         out.push_back(']');
     }
 
-    void accept(const fl::vector<float>& floats) {
+    void accept(const fl::vector<float>& floats) FL_NO_EXCEPT {
         out.push_back('[');
         bool first = true;
         for (const auto& item : floats) {
@@ -1301,7 +1301,7 @@ struct SerializerVisitor {
     }
 };
 
-fl::string json::to_string_native() const {
+fl::string json::to_string_native() const FL_NO_EXCEPT {
     if (!mValue) {
         return "null";
     }
@@ -1330,10 +1330,10 @@ fl::string json::to_string_native() const {
 }
 
 // Forward declaration for the serializeValue function
-fl::string serializeValue(const json_value& value);
+fl::string serializeValue(const json_value& value) FL_NO_EXCEPT;
 
 
-fl::string json::normalize_json_string(const char* jsonStr) {
+fl::string json::normalize_json_string(const char* jsonStr) FL_NO_EXCEPT {
     fl::string result;
     if (!jsonStr) {
         return result;

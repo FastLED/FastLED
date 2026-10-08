@@ -8,6 +8,7 @@
 #include "fl/log/log.h"
 #include "fl/system/delay.h"
 #include "fl/stl/vector.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace validation {
@@ -17,7 +18,7 @@ bool testRxChannel(
     int pin_tx,
     int pin_rx,
     u32 hz,
-    size_t buffer_size) {
+    size_t buffer_size) FL_NO_EXCEPT {
 
     FL_WARN("[RX TEST] Testing RX channel with manual GPIO toggle on PIN " << pin_tx);
 

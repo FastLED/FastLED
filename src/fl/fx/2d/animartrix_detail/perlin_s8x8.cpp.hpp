@@ -6,12 +6,13 @@
 
 #include "fl/stl/compiler_control.h"
 #include "fl/fx/2d/animartrix_detail/perlin_s8x8.h"
+#include "fl/stl/noexcept.h"
 
 FL_OPTIMIZATION_LEVEL_O3_BEGIN
 
 namespace fl {
 
-void perlin_s8x8::init_fade_lut(fl::i32 *table) {
+void perlin_s8x8::init_fade_lut(fl::i32 *table) FL_NO_EXCEPT {
     for (int i = 0; i <= 256; i++) {
         fl::i16 t = static_cast<fl::i16>((i * HP_ONE) / 256);
         fl::i16 t2 = static_cast<fl::i16>((static_cast<fl::i32>(t) * t) >> HP_BITS);
@@ -26,14 +27,14 @@ void perlin_s8x8::init_fade_lut(fl::i32 *table) {
 
 fl::s16x16 perlin_s8x8::pnoise2d(fl::s16x16 fx, fl::s16x16 fy,
                                       const fl::i32 *fade_lut,
-                                      const fl::u8 *perm) {
+                                      const fl::u8 *perm) FL_NO_EXCEPT {
     return fl::s16x16::from_raw(
         pnoise2d_raw(fx.raw(), fy.raw(), fade_lut, perm));
 }
 
 fl::i32 perlin_s8x8::pnoise2d_raw(fl::i32 fx_raw, fl::i32 fy_raw,
                                         const fl::i32 *fade_lut,
-                                        const fl::u8 *perm) {
+                                        const fl::u8 *perm) FL_NO_EXCEPT {
     int X, Y;
     fl::i16 x, y;
     floor_frac(fx_raw, X, x);
@@ -62,27 +63,27 @@ fl::i32 perlin_s8x8::pnoise2d_raw(fl::i32 fx_raw, fl::i32 fy_raw,
 }
 
 FASTLED_FORCE_INLINE void perlin_s8x8::floor_frac(fl::i32 fp16, int &ifloor,
-                                            fl::i16 &frac8) {
+                                            fl::i16 &frac8) FL_NO_EXCEPT {
     ifloor = fp16 >> FP_BITS;
     fl::i32 frac16 = fp16 & (FP_ONE - 1);
     // Shift from 16 frac bits to 8 frac bits
     frac8 = static_cast<fl::i16>(frac16 >> (FP_BITS - HP_BITS));
 }
 
-FASTLED_FORCE_INLINE fl::i16 perlin_s8x8::fade(fl::i16 t, const fl::i32 *table) {
+FASTLED_FORCE_INLINE fl::i16 perlin_s8x8::fade(fl::i16 t, const fl::i32 *table) FL_NO_EXCEPT {
     // t is Q8 (0-255 range), use directly as index
     fl::u8 idx = static_cast<fl::u8>(t);
     // Return LUT value, convert from i32 to i16 (values fit in Q8 range)
     return static_cast<fl::i16>(table[idx]);
 }
 
-FASTLED_FORCE_INLINE fl::i16 perlin_s8x8::lerp(fl::i16 t, fl::i16 a, fl::i16 b) {
+FASTLED_FORCE_INLINE fl::i16 perlin_s8x8::lerp(fl::i16 t, fl::i16 a, fl::i16 b) FL_NO_EXCEPT {
     // All values in Q8, result stays Q8
     return static_cast<fl::i16>(
         a + (((static_cast<fl::i32>(t) * (b - a)) >> HP_BITS)));
 }
 
-FASTLED_FORCE_INLINE fl::i16 perlin_s8x8::grad(int hash, fl::i16 x, fl::i16 y) {
+FASTLED_FORCE_INLINE fl::i16 perlin_s8x8::grad(int hash, fl::i16 x, fl::i16 y) FL_NO_EXCEPT {
     struct GradCoeff { fl::i8 cx; fl::i8 cy; };
     constexpr GradCoeff lut[16] = {
         { 1,  1}, {-1,  1}, { 1, -1}, {-1, -1},

@@ -45,7 +45,7 @@ public:
      * @param source Function that returns next JSON-RPC request (or nullopt if none)
      * @param sink Function that handles outgoing JSON-RPC responses
      */
-    Server(RequestSource source, ResponseSink sink);
+    Server(RequestSource source, ResponseSink sink) FL_NO_EXCEPT;
 
     virtual ~Server() FL_NO_EXCEPT = default;
 
@@ -59,17 +59,17 @@ public:
      * @brief Set request handler
      * @param handler Function that processes JSON-RPC requests and returns responses
      */
-    void setRequestHandler(RequestHandler handler);
+    void setRequestHandler(RequestHandler handler) FL_NO_EXCEPT;
 
     /**
      * @brief Set request source callback
      */
-    void setRequestSource(RequestSource source);
+    void setRequestSource(RequestSource source) FL_NO_EXCEPT;
 
     /**
      * @brief Set response sink callback
      */
-    void setResponseSink(ResponseSink sink);
+    void setResponseSink(ResponseSink sink) FL_NO_EXCEPT;
 
     /**
      * @brief Set streaming response sink callback
@@ -82,17 +82,17 @@ public:
     /**
      * @brief Main update: pull + push
      */
-    size_t update();
+    size_t update() FL_NO_EXCEPT;
 
     /**
      * @brief Pull requests from source, process, queue responses
      */
-    size_t pull();
+    size_t pull() FL_NO_EXCEPT;
 
     /**
      * @brief Push queued responses to sink
      */
-    size_t push();
+    size_t push() FL_NO_EXCEPT;
 
 protected:
     RequestSource mRequestSource;

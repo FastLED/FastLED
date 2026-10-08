@@ -6,22 +6,23 @@
 // We implement custom integer parsing functions instead
 
 #include "fl/math/math.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
 namespace {
     // Helper function to check if a character is a digit
-    inline bool isDigit(char c) {
+    inline bool isDigit(char c) FL_NO_EXCEPT {
         return c >= '0' && c <= '9';
     }
     
     // Helper function to check if a character is whitespace
-    inline bool isSpace(char c) {
+    inline bool isSpace(char c) FL_NO_EXCEPT {
         return c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == '\f' || c == '\v';
     }
     
     // Custom integer parsing function for signed 32-bit integers
-    bool parse_i32(const char* str, fl::i32& result) {
+    bool parse_i32(const char* str, fl::i32& result) FL_NO_EXCEPT {
         if (!str) return false;
         
         // Skip leading whitespace
@@ -78,7 +79,7 @@ namespace {
     }
     
     // Custom integer parsing function for unsigned 32-bit integers
-    bool parse_u32(const char* str, fl::u32& result) {
+    bool parse_u32(const char* str, fl::u32& result) FL_NO_EXCEPT {
         if (!str) return false;
         
         // Skip leading whitespace
@@ -127,14 +128,14 @@ FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS
 istream cin;
 
 // Function to get singleton instance of istream_real (for better linker elimination)
-istream_real& cin_real() {
+istream_real& cin_real() FL_NO_EXCEPT {
     // Local static instance - only constructed when first called
     // This allows the linker to eliminate it if never referenced
     static istream_real instance;
     return instance;
 }
 
-bool istream_real::readLine() {
+bool istream_real::readLine() FL_NO_EXCEPT {
     // If we have no more data available and no buffered data, we're at EOF
     if (mPos >= mBufferLen && fl::available() == 0) {
         return false;
@@ -156,7 +157,7 @@ bool istream_real::readLine() {
     return true;
 }
 
-void istream_real::skipWhitespace() {
+void istream_real::skipWhitespace() FL_NO_EXCEPT {
     while (mPos < mBufferLen && 
            (mBuffer[mPos] == ' ' || mBuffer[mPos] == '\t' || 
             mBuffer[mPos] == '\n' || mBuffer[mPos] == '\r')) {
@@ -171,7 +172,7 @@ void istream_real::skipWhitespace() {
     }
 }
 
-bool istream_real::readToken(string& token) {
+bool istream_real::readToken(string& token) FL_NO_EXCEPT {
     skipWhitespace();
     
     if (mPos >= mBufferLen && fl::available() == 0) {
@@ -202,14 +203,14 @@ bool istream_real::readToken(string& token) {
     return !token.empty();
 }
 
-istream_real& istream_real::operator>>(string& str) {
+istream_real& istream_real::operator>>(string& str) FL_NO_EXCEPT {
     if (!readToken(str)) {
         mFailed = true;
     }
     return *this;
 }
 
-istream_real& istream_real::operator>>(char& c) {
+istream_real& istream_real::operator>>(char& c) FL_NO_EXCEPT {
     skipWhitespace();
     
     if (mPos >= mBufferLen && fl::available() > 0) {
@@ -229,7 +230,7 @@ istream_real& istream_real::operator>>(char& c) {
     return *this;
 }
 
-istream_real& istream_real::operator>>(fl::i8& n) {
+istream_real& istream_real::operator>>(fl::i8& n) FL_NO_EXCEPT {
     string token;
     if (readToken(token)) {
         fl::i32 temp;
@@ -244,7 +245,7 @@ istream_real& istream_real::operator>>(fl::i8& n) {
     return *this;
 }
 
-istream_real& istream_real::operator>>(fl::u8& n) {
+istream_real& istream_real::operator>>(fl::u8& n) FL_NO_EXCEPT {
     string token;
     if (readToken(token)) {
         fl::u32 temp;
@@ -259,7 +260,7 @@ istream_real& istream_real::operator>>(fl::u8& n) {
     return *this;
 }
 
-istream_real& istream_real::operator>>(fl::i16& n) {
+istream_real& istream_real::operator>>(fl::i16& n) FL_NO_EXCEPT {
     string token;
     if (readToken(token)) {
         fl::i32 temp;
@@ -276,7 +277,7 @@ istream_real& istream_real::operator>>(fl::i16& n) {
 
 // u16 operator>> removed - now handled by template in header
 
-istream_real& istream_real::operator>>(fl::i32& n) {
+istream_real& istream_real::operator>>(fl::i32& n) FL_NO_EXCEPT {
     string token;
     if (readToken(token)) {
         if (!parse_i32(token.c_str(), n)) {
@@ -288,7 +289,7 @@ istream_real& istream_real::operator>>(fl::i32& n) {
     return *this;
 }
 
-istream_real& istream_real::operator>>(fl::u32& n) {
+istream_real& istream_real::operator>>(fl::u32& n) FL_NO_EXCEPT {
     string token;
     if (readToken(token)) {
         if (!parse_u32(token.c_str(), n)) {
@@ -300,7 +301,7 @@ istream_real& istream_real::operator>>(fl::u32& n) {
     return *this;
 }
 
-istream_real& istream_real::operator>>(float& f) {
+istream_real& istream_real::operator>>(float& f) FL_NO_EXCEPT {
     string token;
     if (readToken(token)) {
         // Use the existing toFloat() method
@@ -317,7 +318,7 @@ istream_real& istream_real::operator>>(float& f) {
     return *this;
 }
 
-istream_real& istream_real::operator>>(double& d) {
+istream_real& istream_real::operator>>(double& d) FL_NO_EXCEPT {
     string token;
     if (readToken(token)) {
         // Use the existing toFloat() method
@@ -335,7 +336,7 @@ istream_real& istream_real::operator>>(double& d) {
 
 // fl::size operator>> removed - now handled by template in header
 
-istream_real& istream_real::getline(string& str) {
+istream_real& istream_real::getline(string& str) FL_NO_EXCEPT {
     str.clear();
     
     // Read from current buffer position to end
@@ -367,7 +368,7 @@ istream_real& istream_real::getline(string& str) {
     return *this;
 }
 
-int istream_real::get() {
+int istream_real::get() FL_NO_EXCEPT {
     if (mPos >= mBufferLen && fl::available() > 0) {
         if (!readLine()) {
             return -1;
@@ -382,7 +383,7 @@ int istream_real::get() {
     return fl::read();
 }
 
-istream_real& istream_real::putback(char c) {
+istream_real& istream_real::putback(char c) FL_NO_EXCEPT {
     if (mPos > 0) {
         mPos--;
         mBuffer[mPos] = c;
@@ -400,7 +401,7 @@ istream_real& istream_real::putback(char c) {
     return *this;
 }
 
-int istream_real::peek() {
+int istream_real::peek() FL_NO_EXCEPT {
     if (mPos >= mBufferLen && fl::available() > 0) {
         if (!readLine()) {
             return -1;

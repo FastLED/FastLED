@@ -12,15 +12,15 @@ struct BitReader {
     fl::size bytePos = 0;
     fl::u8 bitPos = 0; // 0-7, MSB first
 
-    BitReader(fl::span<const fl::u8> d) : data(d) {}
+    BitReader(fl::span<const fl::u8> d) FL_NO_EXCEPT : data(d) {}
 
-    bool hasBits(fl::size n) const {
+    bool hasBits(fl::size n) const FL_NO_EXCEPT {
         fl::size totalBits = data.size() * 8;
         fl::size currentBit = bytePos * 8 + bitPos;
         return currentBit + n <= totalBits;
     }
 
-    fl::u32 readBits(fl::u8 n) {
+    fl::u32 readBits(fl::u8 n) FL_NO_EXCEPT {
         fl::u32 val = 0;
         for (fl::u8 i = 0; i < n; i++) {
             if (bytePos >= data.size()) return val;
@@ -35,7 +35,7 @@ struct BitReader {
     }
 
     // Read unsigned Exp-Golomb coded value (ue(v))
-    fl::u32 readUE() {
+    fl::u32 readUE() FL_NO_EXCEPT {
         int leadingZeros = 0;
         while (hasBits(1) && readBits(1) == 0) {
             leadingZeros++;
@@ -47,7 +47,7 @@ struct BitReader {
     }
 
     // Read signed Exp-Golomb coded value (se(v))
-    fl::i32 readSE() {
+    fl::i32 readSE() FL_NO_EXCEPT {
         fl::u32 val = readUE();
         if (val & 1) {
             return fl::i32((val + 1) / 2);
@@ -56,7 +56,7 @@ struct BitReader {
         }
     }
 
-    void skipBits(fl::size n) {
+    void skipBits(fl::size n) FL_NO_EXCEPT {
         for (fl::size i = 0; i < n; i++) {
             bitPos++;
             if (bitPos == 8) {
@@ -68,7 +68,7 @@ struct BitReader {
 };
 
 // Parse scaling list (skip it — we only need dimensions).
-void skipScalingList(BitReader& br, int size) {
+void skipScalingList(BitReader& br, int size) FL_NO_EXCEPT {
     int lastScale = 8;
     int nextScale = 8;
     for (int j = 0; j < size; j++) {
@@ -82,7 +82,7 @@ void skipScalingList(BitReader& br, int size) {
 
 } // namespace
 
-H264Info H264::parseSPS(fl::span<const fl::u8> spsData, fl::string* error_message) {
+H264Info H264::parseSPS(fl::span<const fl::u8> spsData, fl::string* error_message) FL_NO_EXCEPT {
     H264Info info;
 
     if (spsData.size() < 4) {
@@ -193,7 +193,7 @@ H264Info H264::parseSPS(fl::span<const fl::u8> spsData, fl::string* error_messag
     return info;
 }
 
-H264Info H264::parseH264Info(fl::span<const fl::u8> mp4Data, fl::string* error_message) {
+H264Info H264::parseH264Info(fl::span<const fl::u8> mp4Data, fl::string* error_message) FL_NO_EXCEPT {
     H264Info info;
 
     Mp4TrackInfo track = parseMp4(mp4Data, error_message);
@@ -233,5 +233,6 @@ H264Info H264::parseH264Info(fl::span<const fl::u8> mp4Data, fl::string* error_m
 #include "platforms/esp/32/codec/h264_hw_decoder.hpp" // ok platform headers
 #else
 #include "platforms/shared/codec/h264_noop.hpp" // ok platform headers
+#include "fl/stl/noexcept.h"
 #endif
 // IWYU pragma: end_keep

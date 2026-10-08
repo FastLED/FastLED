@@ -10,6 +10,7 @@
 #include "fl/stl/assert.h"
 #include "fl/stl/singleton.h"
 #include "fl/sensors/pir.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -21,7 +22,7 @@ struct PirNameCounter {
     int value = 0;
 };
 
-string getButtonName(const char *button_name) {
+string getButtonName(const char *button_name) FL_NO_EXCEPT {
     if (button_name) {
         return string(button_name);
     }
@@ -35,24 +36,24 @@ string getButtonName(const char *button_name) {
 }
 } // namespace
 
-PirLowLevel::PirLowLevel(int pin): mPin(pin) {
+PirLowLevel::PirLowLevel(int pin) FL_NO_EXCEPT : mPin(pin) {
     mPin.setPinMode(DigitalPin::kInput);
 }
 
-bool PirLowLevel::detect() {
+bool PirLowLevel::detect() FL_NO_EXCEPT {
     return mPin.high();
 }
 
 
 Pir::Pir(int pin, u32 latchMs, u32 risingTime,
                          u32 fallingTime, const char* button_name)
-    : mPir(pin), mRamp(risingTime, latchMs, fallingTime), mButton(getButtonName(button_name).c_str()) {
+    FL_NO_EXCEPT : mPir(pin), mRamp(risingTime, latchMs, fallingTime), mButton(getButtonName(button_name).c_str()) {
     mButton.onChanged([this](UIButton&) {
         this->mRamp.trigger(fl::millis());
     });
 }
 
-bool Pir::detect(u32 now) {
+bool Pir::detect(u32 now) FL_NO_EXCEPT {
     bool currentState = mPir.detect();
     if (currentState && !mLastState) {
         // Use smart retrigger to avoid resetting brightness when already active
@@ -62,7 +63,7 @@ bool Pir::detect(u32 now) {
     return mRamp.isActive(now);
 }
 
-u8 Pir::transition(u32 now) {
+u8 Pir::transition(u32 now) FL_NO_EXCEPT {
     // ensure detect() logic runs so we trigger on edges
     detect(now);
     return mRamp.update8(now);

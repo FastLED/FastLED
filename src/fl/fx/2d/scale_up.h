@@ -14,6 +14,7 @@
 
 #include "fl/math/xymap.h"       // Needed for constructor parameter  // IWYU pragma: keep
 #include "fl/fx/fx2d.h"
+#include "fl/stl/noexcept.h"
 
 /// @name ScaleUp Precision Modes
 /// @{
@@ -70,13 +71,13 @@ class ScaleUp : public Fx2d {
     /// @brief Construct a ScaleUp effect wrapper
     /// @param xymap The XYMap defining the low-resolution render target
     /// @param fx The delegate effect to render at lower resolution
-    ScaleUp(const XYMap& xymap, Fx2dPtr fx);
+    ScaleUp(const XYMap& xymap, Fx2dPtr fx) FL_NO_EXCEPT;
 
     /// @brief Render the effect by drawing delegate at low-res and scaling up
     /// @param context Drawing context containing the target XYMap and frame buffer
-    void draw(DrawContext context) override;
+    void draw(DrawContext context) FL_NO_EXCEPT override;
 
-    fl::string fxName() const override { return "scale_up"; }
+    fl::string fxName() const FL_NO_EXCEPT override { return "scale_up"; }
 
     /// @brief Expand a low-resolution buffer to high-resolution using bilinear interpolation
     ///
@@ -100,7 +101,7 @@ class ScaleUp : public Fx2d {
     /// @param height Height of the low-resolution input buffer
     /// @param mXyMap The target high-resolution XYMap defining output dimensions and layout
     void expand(fl::span<const CRGB> input, fl::span<CRGB> output, u16 width,
-                u16 height, const XYMap& mXyMap);
+                u16 height, const XYMap& mXyMap) FL_NO_EXCEPT;
 
   private:
     /// @brief Direct copy without expansion (used when resolutions match)
@@ -109,7 +110,7 @@ class ScaleUp : public Fx2d {
     /// @param width Buffer width
     /// @param height Buffer height
     void noExpand(fl::span<const CRGB> input, fl::span<CRGB> output, u16 width,
-                  u16 height);
+                  u16 height) FL_NO_EXCEPT;
 
     Fx2dPtr mDelegate;  ///< The wrapped effect that renders at low resolution
     fl::vector_psram<CRGB> mSurface;  ///< Low-resolution render buffer

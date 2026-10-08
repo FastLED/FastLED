@@ -182,9 +182,9 @@ enum class log_kind : fl::u8 {
     INFO  = 2,
 };
 
-const char* log_kind_name(log_kind kind) FL_NO_INLINE FL_NO_EXCEPT;
-void log_emit_prefix(log_kind kind, const char* file, int line) FL_NO_INLINE FL_NO_EXCEPT;
-void log_emit_newline() FL_NO_INLINE FL_NO_EXCEPT;
+const char* log_kind_name(log_kind kind) FL_NO_EXCEPT FL_NO_INLINE;
+void log_emit_prefix(log_kind kind, const char* file, int line) FL_NO_EXCEPT FL_NO_INLINE;
+void log_emit_newline() FL_NO_EXCEPT FL_NO_INLINE;
 
 // Takes `body` by non-const lvalue reference (not `&&`) because the
 // macro's `fl::sstream() << X` expression has type `sstream&` (the
@@ -199,9 +199,9 @@ void log_emit_newline() FL_NO_INLINE FL_NO_EXCEPT;
 // site - defeating the whole point of moving the prefix chain
 // out-of-line. The noinline attribute is what makes this proposal
 // actually win bytes; bare centralisation alone isn't enough.
-void log_emit(log_kind kind, const char* file, int line, fl::sstream& body) FL_NO_INLINE FL_NO_EXCEPT;
+void log_emit(log_kind kind, const char* file, int line, fl::sstream& body) FL_NO_EXCEPT FL_NO_INLINE;
 void log_emit_literal(log_kind kind, const char* file, int line,
-                      const char* body) FL_NO_INLINE FL_NO_EXCEPT;
+                      const char* body) FL_NO_EXCEPT FL_NO_INLINE;
 
 // A one-argument log macro cannot distinguish `"literal"` from
 // `"prefix" << value` by argument count. log_seed makes that distinction in

@@ -1,5 +1,6 @@
 #include "fl/math/noise/noise_woryley.h"
 #include "fl/stl/limits.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace {
@@ -13,17 +14,17 @@ constexpr i32 Q15_ONE = 32768; // 1.0 in Q15
 // }
 
 // Helper: absolute difference
-i32 q15_abs(i32 a) { return a < 0 ? -a : a; }
+i32 q15_abs(i32 a) FL_NO_EXCEPT { return a < 0 ? -a : a; }
 
 // Pseudo-random hash based on grid coordinates
-u16 hash(i32 x, i32 y) {
+u16 hash(i32 x, i32 y) FL_NO_EXCEPT {
     u32 n = (u32)(x * 374761393 + y * 668265263);
     n = (n ^ (n >> 13)) * 1274126177;
     return (u16)((n ^ (n >> 16)) & 0xFFFF);
 }
 
 // Get fractional feature point inside a grid cell
-void feature_point(i32 gx, i32 gy, i32 &fx, i32 &fy) {
+void feature_point(i32 gx, i32 gy, i32 &fx, i32 &fy) FL_NO_EXCEPT {
     u16 h = hash(gx, gy);
     fx = (h & 0xFF) * 128; // scale to Q15 (0–32767)
     fy = ((h >> 8) & 0xFF) * 128;
@@ -31,7 +32,7 @@ void feature_point(i32 gx, i32 gy, i32 &fx, i32 &fy) {
 } // namespace
 
 // Compute 2D Worley noise at (x, y) in Q15
-i32 worley_noise_2d_q15(i32 x, i32 y) {
+i32 worley_noise_2d_q15(i32 x, i32 y) FL_NO_EXCEPT {
     i32 cell_x = x >> 15;
     i32 cell_y = y >> 15;
 

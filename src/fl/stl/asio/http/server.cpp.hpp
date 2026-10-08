@@ -53,19 +53,19 @@ namespace http {
 /// with the runner interface (which requires void update())
 class Server::ServerAsyncRunner : public task::Runner {
 public:
-    explicit ServerAsyncRunner(Server* server) : mServer(server) {}
+    explicit ServerAsyncRunner(Server* server) FL_NO_EXCEPT : mServer(server) {}
 
-    void update() override {
+    void update() FL_NO_EXCEPT override {
         if (mServer) {
             mServer->update();  // Call server's update() and discard return value
         }
     }
 
-    bool has_active_tasks() const override {
+    bool has_active_tasks() const FL_NO_EXCEPT override {
         return mServer && mServer->is_running();
     }
 
-    size_t active_task_count() const override {
+    size_t active_task_count() const FL_NO_EXCEPT override {
         return (mServer && mServer->is_running()) ? mServer->mClientSockets.size() : 0;
     }
 
@@ -79,7 +79,7 @@ namespace {
 constexpr u32 CONNECTION_TIMEOUT_MS = 30000;
 
 // Helper: Case-insensitive string comparison
-bool iequals(const string& a, const string& b) {
+bool iequals(const string& a, const string& b) FL_NO_EXCEPT {
     if (a.size() != b.size()) return false;
     for (size_t i = 0; i < a.size(); ++i) {
         if (fl::tolower(a[i]) != fl::tolower(b[i])) return false;
@@ -88,7 +88,7 @@ bool iequals(const string& a, const string& b) {
 }
 
 // Helper: Trim whitespace from string
-string trim(const string& s) {
+string trim(const string& s) FL_NO_EXCEPT {
     size_t start = 0;
     while (start < s.size() && fl::isspace(s[start])) ++start;
     size_t end = s.size();
@@ -97,7 +97,7 @@ string trim(const string& s) {
 }
 
 // Helper: Split string by delimiter
-vector<string> split(const string& s, char delimiter) {
+vector<string> split(const string& s, char delimiter) FL_NO_EXCEPT {
     vector<string> tokens;
     size_t start = 0;
     size_t end = s.find(delimiter);
@@ -111,7 +111,7 @@ vector<string> split(const string& s, char delimiter) {
 }
 
 // Helper: Parse query string (e.g., "?id=123&name=test")
-map<string, string> parse_query_string(const string& query) {
+map<string, string> parse_query_string(const string& query) FL_NO_EXCEPT {
     map<string, string> params;
     if (query.empty() || query[0] != '?') return params;
 
@@ -128,7 +128,7 @@ map<string, string> parse_query_string(const string& query) {
 }
 
 // Helper: Get HTTP status text
-const char* status_text(int code) {
+const char* status_text(int code) FL_NO_EXCEPT {
     switch (code) {
         case 200: return "OK";
         case 400: return "Bad Request";
@@ -139,7 +139,7 @@ const char* status_text(int code) {
 }
 
 // Helper: Set socket to non-blocking mode
-bool set_nonblocking(int fd) {
+bool set_nonblocking(int fd) FL_NO_EXCEPT {
 #ifdef FL_IS_WIN
     u_long mode = 1;
     return ioctlsocket(fd, FIONBIO, &mode) == 0;
@@ -156,7 +156,7 @@ bool set_nonblocking(int fd) {
 // Request implementation
 //==============================================================================
 
-optional<string> Request::header(const string& name) const {
+optional<string> Request::header(const string& name) const FL_NO_EXCEPT {
     for (auto it = mHeaders.begin(); it != mHeaders.end(); ++it) {
         if (iequals(it->first, name)) {
             return it->second;
@@ -165,7 +165,7 @@ optional<string> Request::header(const string& name) const {
     return nullopt;
 }
 
-optional<string> Request::query(const string& param) const {
+optional<string> Request::query(const string& param) const FL_NO_EXCEPT {
     auto it = mQuery.find(param);
     if (it != mQuery.end()) {
         return it->second;
@@ -177,56 +177,56 @@ optional<string> Request::query(const string& param) const {
 // Response implementation
 //==============================================================================
 
-Response::Response() {
+Response::Response() FL_NO_EXCEPT {
     mHeaders["Content-Type"] = "text/plain";
 }
 
-Response& Response::status(int code) {
+Response& Response::status(int code) FL_NO_EXCEPT {
     mStatusCode = code;
     return *this;
 }
 
-Response& Response::header(const string& name, const string& value) {
+Response& Response::header(const string& name, const string& value) FL_NO_EXCEPT {
     mHeaders[name] = value;
     return *this;
 }
 
-Response& Response::body(const string& content) {
+Response& Response::body(const string& content) FL_NO_EXCEPT {
     mBody = content;
     return *this;
 }
 
-Response& Response::json(const class json& data) {
+Response& Response::json(const class json& data) FL_NO_EXCEPT {
     mBody = data.to_string();
     mHeaders["Content-Type"] = "application/json";
     return *this;
 }
 
-Response Response::ok(const string& body) {
+Response Response::ok(const string& body) FL_NO_EXCEPT {
     Response resp;
     resp.status(200).body(body);
     return resp;
 }
 
-Response Response::not_found() {
+Response Response::not_found() FL_NO_EXCEPT {
     Response resp;
     resp.status(404).body("Not Found\n");
     return resp;
 }
 
-Response Response::bad_request(const string& message) {
+Response Response::bad_request(const string& message) FL_NO_EXCEPT {
     Response resp;
     resp.status(400).body(message + "\n");
     return resp;
 }
 
-Response Response::internal_error(const string& message) {
+Response Response::internal_error(const string& message) FL_NO_EXCEPT {
     Response resp;
     resp.status(500).body(message + "\n");
     return resp;
 }
 
-string Response::to_string() const {
+string Response::to_string() const FL_NO_EXCEPT {
     string result;
 
     // Status line
@@ -257,7 +257,7 @@ string Response::to_string() const {
 // HttpServer implementation
 //==============================================================================
 
-Server::Server() {
+Server::Server() FL_NO_EXCEPT {
     // Register as engine event listener for automatic cleanup on exit
     EngineEvents::addListener(this);
 }
@@ -268,12 +268,12 @@ Server::~Server() FL_NO_EXCEPT {
     stop();
 }
 
-void Server::onExit() {
+void Server::onExit() FL_NO_EXCEPT {
     // Automatically stop server on engine shutdown
     stop();
 }
 
-bool Server::start(int port) {
+bool Server::start(int port) FL_NO_EXCEPT {
     if (mRunning) {
         mLastError = "Server already running";
         return false;
@@ -296,7 +296,7 @@ bool Server::start(int port) {
     return true;
 }
 
-void Server::stop() {
+void Server::stop() FL_NO_EXCEPT {
     if (!mRunning) return;
 
     // Unregister from async system
@@ -326,27 +326,27 @@ void Server::stop() {
     mRunning = false;
 }
 
-void Server::route(const string& method, const string& path, RouteHandler handler) {
+void Server::route(const string& method, const string& path, RouteHandler handler) FL_NO_EXCEPT {
     mRoutes.push_back({method, path, handler});
 }
 
-void Server::get(const string& path, RouteHandler handler) {
+void Server::get(const string& path, RouteHandler handler) FL_NO_EXCEPT {
     route("GET", path, handler);
 }
 
-void Server::post(const string& path, RouteHandler handler) {
+void Server::post(const string& path, RouteHandler handler) FL_NO_EXCEPT {
     route("POST", path, handler);
 }
 
-void Server::put(const string& path, RouteHandler handler) {
+void Server::put(const string& path, RouteHandler handler) FL_NO_EXCEPT {
     route("PUT", path, handler);
 }
 
-void Server::del(const string& path, RouteHandler handler) {
+void Server::del(const string& path, RouteHandler handler) FL_NO_EXCEPT {
     route("DELETE", path, handler);
 }
 
-size_t Server::update() {
+size_t Server::update() FL_NO_EXCEPT {
     if (!mRunning) return 0;
 
     accept_connections();
@@ -354,7 +354,7 @@ size_t Server::update() {
     return process_requests();
 }
 
-bool Server::setup_listen_socket(int port) {
+bool Server::setup_listen_socket(int port) FL_NO_EXCEPT {
     // Create socket (initialization handled by socket wrapper)
     mListenSocket = socket(AF_INET, SOCK_STREAM, 0);
     if (mListenSocket < 0) {
@@ -404,7 +404,7 @@ bool Server::setup_listen_socket(int port) {
     return true;
 }
 
-void Server::accept_connections() {
+void Server::accept_connections() FL_NO_EXCEPT {
     sockaddr_in client_addr{};
     socklen_t addr_len = sizeof(client_addr);
 
@@ -438,7 +438,7 @@ void Server::accept_connections() {
     }
 }
 
-size_t Server::process_requests() {
+size_t Server::process_requests() FL_NO_EXCEPT {
     size_t requests_processed = 0;
 
     // Process all clients (iterate backwards to allow removal)
@@ -476,7 +476,7 @@ size_t Server::process_requests() {
     return requests_processed;
 }
 
-optional<Request> Server::read_request(ClientConnection& client) {
+optional<Request> Server::read_request(ClientConnection& client) FL_NO_EXCEPT {
     // Read data from socket
     char buffer[4096];
 
@@ -570,7 +570,7 @@ optional<Request> Server::read_request(ClientConnection& client) {
     return req;
 }
 
-bool Server::send_response(int client_fd, const Response& response) {
+bool Server::send_response(int client_fd, const Response& response) FL_NO_EXCEPT {
     string data = response.to_string();
     const char* ptr = data.c_str();
     size_t remaining = data.size();
@@ -593,7 +593,7 @@ bool Server::send_response(int client_fd, const Response& response) {
     return true;
 }
 
-optional<RouteHandler> Server::find_handler(const string& method, const string& path) const {
+optional<RouteHandler> Server::find_handler(const string& method, const string& path) const FL_NO_EXCEPT {
     for (const auto& entry : mRoutes) {
         if (entry.method == method && entry.path == path) {
             return entry.handler;
@@ -602,14 +602,14 @@ optional<RouteHandler> Server::find_handler(const string& method, const string& 
     return nullopt;
 }
 
-void Server::close_client(size_t index) {
+void Server::close_client(size_t index) FL_NO_EXCEPT {
     if (index >= mClientSockets.size()) return;
 
     close(mClientSockets[index].fd);
     mClientSockets.erase(mClientSockets.begin() + static_cast<ptrdiff_t>(index));
 }
 
-void Server::cleanup_stale_connections() {
+void Server::cleanup_stale_connections() FL_NO_EXCEPT {
     u32 now = fl::platforms::millis();
 
     for (size_t i = mClientSockets.size(); i > 0; --i) {
@@ -689,7 +689,7 @@ class Server::ServerAsyncRunner : public task::Runner {
 public:
     explicit ServerAsyncRunner(Server* server) : mServer(server) {}
 
-    void update() override {
+    void update() FL_NO_EXCEPT override {
         if (!s_esp_request_queue) {
             return;
         }
@@ -723,11 +723,11 @@ public:
         }
     }
 
-    bool has_active_tasks() const override {
+    bool has_active_tasks() const FL_NO_EXCEPT override {
         return mServer && mServer->is_running();
     }
 
-    size_t active_task_count() const override {
+    size_t active_task_count() const FL_NO_EXCEPT override {
         return (mServer && mServer->is_running()) ? 1 : 0;
     }
 
@@ -755,14 +755,14 @@ struct EspRouteContext {
 };
 
 // Forward declaration - implemented as Server static method for private access
-esp_err_t esp_route_handler(httpd_req_t* req);
+esp_err_t esp_route_handler(httpd_req_t* req) FL_NO_EXCEPT;
 
 } // anonymous namespace
 
 // Static method on Server - has access to private members of Request/Response.
 // Signature uses void* to avoid ESP-IDF types in header; cast to httpd_req_t* here.
 // This is called from the ESP-IDF HTTP server task.
-int Server::handle_esp_request(void* raw_req) {
+int Server::handle_esp_request(void* raw_req) FL_NO_EXCEPT {
     // Runs on the esp_http_server task. NO fl:: objects here - only
     // plain C extraction; the fl:: handler executes on the main task
     // (see ServerAsyncRunner::update, FastLED#3588).
@@ -859,7 +859,7 @@ int Server::handle_esp_request(void* raw_req) {
 namespace {
 
 // ESP-IDF URI handler callback - delegates to Server::handle_esp_request
-esp_err_t esp_route_handler(httpd_req_t* req) {
+esp_err_t esp_route_handler(httpd_req_t* req) FL_NO_EXCEPT {
     return static_cast<esp_err_t>(Server::handle_esp_request(static_cast<void*>(req)));
 }
 
@@ -867,7 +867,7 @@ esp_err_t esp_route_handler(httpd_req_t* req) {
 
 // ========== Request implementation ==========
 
-optional<string> Request::header(const string& name) const {
+optional<string> Request::header(const string& name) const FL_NO_EXCEPT {
     for (auto it = mHeaders.begin(); it != mHeaders.end(); ++it) {
         if (it->first == name) {
             return it->second;
@@ -876,7 +876,7 @@ optional<string> Request::header(const string& name) const {
     return nullopt;
 }
 
-optional<string> Request::query(const string& param) const {
+optional<string> Request::query(const string& param) const FL_NO_EXCEPT {
     auto it = mQuery.find(param);
     if (it != mQuery.end()) {
         return it->second;
@@ -886,56 +886,56 @@ optional<string> Request::query(const string& param) const {
 
 // ========== Response implementation ==========
 
-Response::Response() {
+Response::Response() FL_NO_EXCEPT {
     mHeaders["Content-Type"] = "text/plain";
 }
 
-Response& Response::status(int code) {
+Response& Response::status(int code) FL_NO_EXCEPT {
     mStatusCode = code;
     return *this;
 }
 
-Response& Response::header(const string& name, const string& value) {
+Response& Response::header(const string& name, const string& value) FL_NO_EXCEPT {
     mHeaders[name] = value;
     return *this;
 }
 
-Response& Response::body(const string& content) {
+Response& Response::body(const string& content) FL_NO_EXCEPT {
     mBody = content;
     return *this;
 }
 
-Response& Response::json(const class json& data) {
+Response& Response::json(const class json& data) FL_NO_EXCEPT {
     mBody = data.to_string();
     mHeaders["Content-Type"] = "application/json";
     return *this;
 }
 
-Response Response::ok(const string& body) {
+Response Response::ok(const string& body) FL_NO_EXCEPT {
     Response resp;
     resp.status(200).body(body);
     return resp;
 }
 
-Response Response::not_found() {
+Response Response::not_found() FL_NO_EXCEPT {
     Response resp;
     resp.status(404).body("Not Found\n");
     return resp;
 }
 
-Response Response::bad_request(const string& message) {
+Response Response::bad_request(const string& message) FL_NO_EXCEPT {
     Response resp;
     resp.status(400).body(message + "\n");
     return resp;
 }
 
-Response Response::internal_error(const string& message) {
+Response Response::internal_error(const string& message) FL_NO_EXCEPT {
     Response resp;
     resp.status(500).body(message + "\n");
     return resp;
 }
 
-string Response::to_string() const {
+string Response::to_string() const FL_NO_EXCEPT {
     // Not used on ESP32 (responses sent via httpd_resp_send)
     return mBody;
 }
@@ -956,7 +956,7 @@ static EspRouteContexts& espRouteContexts() FL_NO_EXCEPT {
     return fl::Singleton<EspRouteContexts>::instance();
 }
 
-Server::Server() {
+Server::Server() FL_NO_EXCEPT {
     EngineEvents::addListener(this);
 }
 
@@ -965,11 +965,11 @@ Server::~Server() FL_NO_EXCEPT {
     stop();
 }
 
-void Server::onExit() {
+void Server::onExit() FL_NO_EXCEPT {
     stop();
 }
 
-bool Server::start(int port) {
+bool Server::start(int port) FL_NO_EXCEPT {
     if (mRunning) {
         mLastError = "Server already running";
         return false;
@@ -1045,7 +1045,7 @@ bool Server::start(int port) {
     return true;
 }
 
-void Server::stop() {
+void Server::stop() FL_NO_EXCEPT {
     if (!mRunning) return;
 
     // Stop the httpd first so no request can be queued mid-teardown,
@@ -1070,7 +1070,7 @@ void Server::stop() {
     FL_WARN("[HTTP] Server stopped");
 }
 
-void Server::route(const string& method, const string& path, RouteHandler handler) {
+void Server::route(const string& method, const string& path, RouteHandler handler) FL_NO_EXCEPT {
     mRoutes.push_back({method, path, handler});
 
     // If server is already running, register the route immediately
@@ -1089,23 +1089,23 @@ void Server::route(const string& method, const string& path, RouteHandler handle
     }
 }
 
-void Server::get(const string& path, RouteHandler handler) {
+void Server::get(const string& path, RouteHandler handler) FL_NO_EXCEPT {
     route("GET", path, handler);
 }
 
-void Server::post(const string& path, RouteHandler handler) {
+void Server::post(const string& path, RouteHandler handler) FL_NO_EXCEPT {
     route("POST", path, handler);
 }
 
-void Server::put(const string& path, RouteHandler handler) {
+void Server::put(const string& path, RouteHandler handler) FL_NO_EXCEPT {
     route("PUT", path, handler);
 }
 
-void Server::del(const string& path, RouteHandler handler) {
+void Server::del(const string& path, RouteHandler handler) FL_NO_EXCEPT {
     route("DELETE", path, handler);
 }
 
-size_t Server::update() {
+size_t Server::update() FL_NO_EXCEPT {
     // ESP-IDF HTTP server runs in its own task, no polling needed
     return 0;
 }
@@ -1124,33 +1124,33 @@ namespace http {
 // Minimal definition for unique_ptr<ServerAsyncRunner> destruction
 class Server::ServerAsyncRunner {};
 
-optional<string> Request::header(const string&) const { return nullopt; }
-optional<string> Request::query(const string&) const { return nullopt; }
+optional<string> Request::header(const string&) const FL_NO_EXCEPT { return nullopt; }
+optional<string> Request::query(const string&) const FL_NO_EXCEPT { return nullopt; }
 
-Response::Response() = default;
-Response& Response::status(int) { return *this; }
-Response& Response::header(const string&, const string&) { return *this; }
-Response& Response::body(const string&) { return *this; }
-Response& Response::json(const class json&) { return *this; }
+Response::Response() FL_NO_EXCEPT = default;
+Response& Response::status(int) FL_NO_EXCEPT { return *this; }
+Response& Response::header(const string&, const string&) FL_NO_EXCEPT { return *this; }
+Response& Response::body(const string&) FL_NO_EXCEPT { return *this; }
+Response& Response::json(const class json&) FL_NO_EXCEPT { return *this; }
 
-Response Response::ok(const string&) { return Response(); }
-Response Response::not_found() { return Response(); }
-Response Response::bad_request(const string&) { return Response(); }
-Response Response::internal_error(const string&) { return Response(); }
+Response Response::ok(const string&) FL_NO_EXCEPT { return Response(); }
+Response Response::not_found() FL_NO_EXCEPT { return Response(); }
+Response Response::bad_request(const string&) FL_NO_EXCEPT { return Response(); }
+Response Response::internal_error(const string&) FL_NO_EXCEPT { return Response(); }
 
-string Response::to_string() const { return ""; }
+string Response::to_string() const FL_NO_EXCEPT { return ""; }
 
-Server::Server() {}
+Server::Server() FL_NO_EXCEPT {}
 Server::~Server() FL_NO_EXCEPT = default;
-void Server::onExit() {}
-bool Server::start(int) { return false; }
-void Server::stop() {}
-void Server::route(const string&, const string&, RouteHandler) {}
-void Server::get(const string&, RouteHandler) {}
-void Server::post(const string&, RouteHandler) {}
-void Server::put(const string&, RouteHandler) {}
-void Server::del(const string&, RouteHandler) {}
-size_t Server::update() { return 0; }
+void Server::onExit() FL_NO_EXCEPT {}
+bool Server::start(int) FL_NO_EXCEPT { return false; }
+void Server::stop() FL_NO_EXCEPT {}
+void Server::route(const string&, const string&, RouteHandler) FL_NO_EXCEPT {}
+void Server::get(const string&, RouteHandler) FL_NO_EXCEPT {}
+void Server::post(const string&, RouteHandler) FL_NO_EXCEPT {}
+void Server::put(const string&, RouteHandler) FL_NO_EXCEPT {}
+void Server::del(const string&, RouteHandler) FL_NO_EXCEPT {}
+size_t Server::update() FL_NO_EXCEPT { return 0; }
 
 } // namespace http
 } // namespace asio

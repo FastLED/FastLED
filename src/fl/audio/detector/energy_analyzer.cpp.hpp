@@ -8,7 +8,7 @@ namespace audio {
 namespace detector {
 
 EnergyAnalyzer::EnergyAnalyzer()
-    : mCurrentRMS(0.0f)
+    FL_NO_EXCEPT : mCurrentRMS(0.0f)
     , mPeak(0.0f)
     , mAverageEnergy(0.0f)
     , mMinEnergy(1e6f)
@@ -20,7 +20,7 @@ EnergyAnalyzer::EnergyAnalyzer()
 
 EnergyAnalyzer::~EnergyAnalyzer() FL_NO_EXCEPT = default;
 
-void EnergyAnalyzer::update(shared_ptr<Context> context) {
+void EnergyAnalyzer::update(shared_ptr<Context> context) FL_NO_EXCEPT {
     // Get RMS directly from Sample (no fft::FFT needed)
     mCurrentRMS = context->getRMS();
     u32 timestamp = context->getTimestamp();
@@ -48,7 +48,7 @@ void EnergyAnalyzer::update(shared_ptr<Context> context) {
     mNormalizedRMS = fl::min(1.0f, mCurrentRMS / runningMax);
 }
 
-void EnergyAnalyzer::fireCallbacks() {
+void EnergyAnalyzer::fireCallbacks() FL_NO_EXCEPT {
     if (onEnergy) {
         onEnergy(mCurrentRMS);
     }
@@ -63,7 +63,7 @@ void EnergyAnalyzer::fireCallbacks() {
     }
 }
 
-void EnergyAnalyzer::reset() {
+void EnergyAnalyzer::reset() FL_NO_EXCEPT {
     mCurrentRMS = 0.0f;
     mPeak = 0.0f;
     mAverageEnergy = 0.0f;
@@ -75,11 +75,11 @@ void EnergyAnalyzer::reset() {
     mEnergyAvg.reset();
 }
 
-void EnergyAnalyzer::setHistorySize(int size) {
+void EnergyAnalyzer::setHistorySize(int size) FL_NO_EXCEPT {
     mEnergyAvg.resize(static_cast<fl::size>(size));
 }
 
-void EnergyAnalyzer::updatePeak(float energy, u32 timestamp) {
+void EnergyAnalyzer::updatePeak(float energy, u32 timestamp) FL_NO_EXCEPT {
     // Check if we should decay the peak
     u32 timeSincePeak = timestamp - mLastPeakTime;
 
@@ -99,7 +99,7 @@ void EnergyAnalyzer::updatePeak(float energy, u32 timestamp) {
     }
 }
 
-void EnergyAnalyzer::updateAverage(float energy) {
+void EnergyAnalyzer::updateAverage(float energy) FL_NO_EXCEPT {
     mEnergyAvg.update(energy);
     mAverageEnergy = mEnergyAvg.value();
 }

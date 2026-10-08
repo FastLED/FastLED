@@ -7,21 +7,22 @@
 #include "fl/gfx/xypath.h"
 #include "fl/gfx/xypath_renderer.h"
 #include "fl/gfx/splat.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
 XYPathRenderer::XYPathRenderer(XYPathGeneratorPtr path,
                                TransformFloat transform)
-    : mPath(path), mTransform(transform) {}
+    FL_NO_EXCEPT : mPath(path), mTransform(transform) {}
 
-vec2f XYPathRenderer::compute_float(float alpha, const TransformFloat &tx) {
+vec2f XYPathRenderer::compute_float(float alpha, const TransformFloat &tx) FL_NO_EXCEPT {
     vec2f xy = mPath->compute(alpha);
     vec2f out = tx.transform(xy);
     out = mGridTransform.transform(out);
     return out;
 }
 
-Tile2x2_u8 XYPathRenderer::at_subpixel(float alpha) {
+Tile2x2_u8 XYPathRenderer::at_subpixel(float alpha) FL_NO_EXCEPT {
     // 1) continuous point, in “pixel‐centers” coordinates [0.5 … W–0.5]
     if (!mDrawBoundsSet) {
         FL_WARN("XYPathRenderer::at_subpixel: draw bounds not set");

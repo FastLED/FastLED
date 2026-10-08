@@ -32,12 +32,12 @@ template <typename Key, typename Value, fl::size N> class unsorted_map_fixed {
     // Constructor
     constexpr unsorted_map_fixed() FL_NO_EXCEPT = default;
 
-    iterator begin() { return data.begin(); }
-    iterator end() { return data.end(); }
-    const_iterator begin() const { return data.begin(); }
-    const_iterator end() const { return data.end(); }
+    iterator begin() FL_NO_EXCEPT { return data.begin(); }
+    iterator end() FL_NO_EXCEPT { return data.end(); }
+    const_iterator begin() const FL_NO_EXCEPT { return data.begin(); }
+    const_iterator end() const FL_NO_EXCEPT { return data.end(); }
 
-    iterator find(const Key &key) {
+    iterator find(const Key &key) FL_NO_EXCEPT {
         for (auto it = begin(); it != end(); ++it) {
             if (it->first == key) {
                 return it;
@@ -46,7 +46,7 @@ template <typename Key, typename Value, fl::size N> class unsorted_map_fixed {
         return end();
     }
 
-    const_iterator find(const Key &key) const {
+    const_iterator find(const Key &key) const FL_NO_EXCEPT {
         for (auto it = begin(); it != end(); ++it) {
             if (it->first == key) {
                 return it;
@@ -55,7 +55,7 @@ template <typename Key, typename Value, fl::size N> class unsorted_map_fixed {
         return end();
     }
 
-    template <typename Less> iterator lowest(Less less_than = Less()) {
+    template <typename Less> iterator lowest(Less less_than = Less()) FL_NO_EXCEPT {
         iterator lowest = end();
         for (iterator it = begin(); it != end(); ++it) {
             if (lowest == end() || less_than(it->first, lowest->first)) {
@@ -66,7 +66,7 @@ template <typename Key, typename Value, fl::size N> class unsorted_map_fixed {
     }
 
     template <typename Less>
-    const_iterator lowest(Less less_than = Less()) const {
+    const_iterator lowest(Less less_than = Less()) const FL_NO_EXCEPT {
         const_iterator lowest = end();
         for (const_iterator it = begin(); it != end(); ++it) {
             if (lowest == end() || less_than(it->first, lowest->first)) {
@@ -76,7 +76,7 @@ template <typename Key, typename Value, fl::size N> class unsorted_map_fixed {
         return lowest;
     }
 
-    template <typename Less> iterator highest(Less less_than = Less()) {
+    template <typename Less> iterator highest(Less less_than = Less()) FL_NO_EXCEPT {
         iterator highest = end();
         for (iterator it = begin(); it != end(); ++it) {
             if (highest == end() || less_than(highest->first, it->first)) {
@@ -87,7 +87,7 @@ template <typename Key, typename Value, fl::size N> class unsorted_map_fixed {
     }
 
     template <typename Less>
-    const_iterator highest(Less less_than = Less()) const {
+    const_iterator highest(Less less_than = Less()) const FL_NO_EXCEPT {
         const_iterator highest = end();
         for (const_iterator it = begin(); it != end(); ++it) {
             if (highest == end() || less_than(highest->first, it->first)) {
@@ -99,7 +99,7 @@ template <typename Key, typename Value, fl::size N> class unsorted_map_fixed {
 
     // We differ from the std standard here so that we don't allow
     // dereferencing the end iterator.
-    bool get(const Key &key, Value *value) const {
+    bool get(const Key &key, Value *value) const FL_NO_EXCEPT {
         const_iterator it = find(key);
         if (it != end()) {
             *value = it->second;
@@ -108,7 +108,7 @@ template <typename Key, typename Value, fl::size N> class unsorted_map_fixed {
         return false;
     }
 
-    Value get(const Key &key, bool *has = nullptr) const {
+    Value get(const Key &key, bool *has = nullptr) const FL_NO_EXCEPT {
         const_iterator it = find(key);
         if (it != end()) {
             if (has) {
@@ -123,7 +123,7 @@ template <typename Key, typename Value, fl::size N> class unsorted_map_fixed {
     }
 
     pair<bool, iterator> insert(const Key &key, const Value &value,
-                                insert_result *result = nullptr) {
+                                insert_result *result = nullptr) FL_NO_EXCEPT {
         iterator it = find(key);
         if (it != end()) {
             if (result) {
@@ -145,7 +145,7 @@ template <typename Key, typename Value, fl::size N> class unsorted_map_fixed {
     }
 
     pair<bool, iterator> insert(Key &&key, Value &&value,
-                                insert_result *result = nullptr) {
+                                insert_result *result = nullptr) FL_NO_EXCEPT {
         iterator it = find(key);
         if (it != end()) {
             if (result) {
@@ -167,7 +167,7 @@ template <typename Key, typename Value, fl::size N> class unsorted_map_fixed {
     }
 
     bool update(const Key &key, const Value &value,
-                bool insert_if_missing = true) {
+                bool insert_if_missing = true) FL_NO_EXCEPT {
         iterator it = find(key);
         if (it != end()) {
             it->second = value;
@@ -180,7 +180,7 @@ template <typename Key, typename Value, fl::size N> class unsorted_map_fixed {
 
     // Move version of update
     bool update(const Key &key, Value &&value,
-                bool insert_if_missing = true) {
+                bool insert_if_missing = true) FL_NO_EXCEPT {
         iterator it = find(key);
         if (it != end()) {
             it->second = fl::move(value);
@@ -191,7 +191,7 @@ template <typename Key, typename Value, fl::size N> class unsorted_map_fixed {
         return false;
     }
 
-    Value &operator[](const Key &key) {
+    Value &operator[](const Key &key) FL_NO_EXCEPT {
         iterator it = find(key);
         if (it != end()) {
             return it->second;
@@ -200,7 +200,7 @@ template <typename Key, typename Value, fl::size N> class unsorted_map_fixed {
         return data.back().second;
     }
 
-    const Value &operator[](const Key &key) const {
+    const Value &operator[](const Key &key) const FL_NO_EXCEPT {
         const_iterator it = find(key);
         if (it != end()) {
             return it->second;
@@ -210,7 +210,7 @@ template <typename Key, typename Value, fl::size N> class unsorted_map_fixed {
     }
 
     bool next(const Key &key, Key *next_key,
-              bool allow_rollover = false) const {
+              bool allow_rollover = false) const FL_NO_EXCEPT {
         const_iterator it = find(key);
         if (it != end()) {
             ++it;
@@ -226,7 +226,7 @@ template <typename Key, typename Value, fl::size N> class unsorted_map_fixed {
     }
 
     bool prev(const Key &key, Key *prev_key,
-              bool allow_rollover = false) const {
+              bool allow_rollover = false) const FL_NO_EXCEPT {
         const_iterator it = find(key);
         if (it != end()) {
             if (it != begin()) {
@@ -242,22 +242,22 @@ template <typename Key, typename Value, fl::size N> class unsorted_map_fixed {
     }
 
     // Get the current size of the vector
-    constexpr fl::size size() const { return data.size(); }
+    constexpr fl::size size() const FL_NO_EXCEPT { return data.size(); }
 
-    constexpr bool empty() const { return data.empty(); }
+    constexpr bool empty() const FL_NO_EXCEPT { return data.empty(); }
 
     // Get the capacity of the vector
-    constexpr fl::size capacity() const { return N; }
+    constexpr fl::size capacity() const FL_NO_EXCEPT { return N; }
 
     // Clear the vector
-    void clear() { data.clear(); }
+    void clear() FL_NO_EXCEPT { data.clear(); }
 
-    bool has(const Key &it) const { return find(it) != end(); }
+    bool has(const Key &it) const FL_NO_EXCEPT { return find(it) != end(); }
 
-    bool contains(const Key &key) const { return has(key); }
+    bool contains(const Key &key) const FL_NO_EXCEPT { return has(key); }
 
     // Erase element by key
-    fl::size erase(const Key &key) {
+    fl::size erase(const Key &key) FL_NO_EXCEPT {
         iterator it = find(key);
         if (it != end()) {
             data.erase(it);

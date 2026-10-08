@@ -17,7 +17,7 @@ namespace detail {
     /// @brief Print error message for disabled logger (non-template helper)
     /// Called from checkLoggerEnabled template function
     /// IMPORTANT: This must NOT be inline - needs external linkage for cross-TU calls
-    void printLoggerDisabledError(const char* category_name, const char* define_name) {
+    void printLoggerDisabledError(const char* category_name, const char* define_name) FL_NO_EXCEPT {
         FL_UNUSED(category_name);  // only consumed by FL_ERROR, a no-op on small platforms
         FL_UNUSED(define_name);
         FL_ERROR(category_name << " ASYNC LOGGING NOT ENABLED. Add '#define " << define_name << "' before including FastLED.h");
@@ -43,7 +43,7 @@ namespace detail {
             , mEnabled(false) {}
     };
 
-    void FL_IRAM async_log_flush_timer_isr(void* user_data) {
+    void FL_IRAM async_log_flush_timer_isr(void* user_data) FL_NO_EXCEPT {
         BackgroundFlushState* state = static_cast<BackgroundFlushState*>(user_data);
         state->mNeedsFlush = true;
         // Debug: Toggle a counter to verify ISR is firing (visible in debugger)
@@ -56,17 +56,17 @@ namespace detail {
 // AsyncLogger implementation using AsyncLogQueue backend (zero heap allocation)
 // ============================================================================
 
-AsyncLogger::AsyncLogger() : mQueue() {}
+AsyncLogger::AsyncLogger() FL_NO_EXCEPT : mQueue() {}
 
-void AsyncLogger::push(const fl::string& msg) {
+void AsyncLogger::push(const fl::string& msg) FL_NO_EXCEPT {
     mQueue.push(msg);
 }
 
-void AsyncLogger::push(const char* msg) {
+void AsyncLogger::push(const char* msg) FL_NO_EXCEPT {
     mQueue.push(msg);
 }
 
-void AsyncLogger::flush() {
+void AsyncLogger::flush() FL_NO_EXCEPT {
     const char* msg;
     fl::u16 len;
 
@@ -98,15 +98,15 @@ void AsyncLogger::flush() {
     }
 }
 
-fl::size AsyncLogger::size() const {
+fl::size AsyncLogger::size() const FL_NO_EXCEPT {
     return mQueue.size();
 }
 
-bool AsyncLogger::empty() const {
+bool AsyncLogger::empty() const FL_NO_EXCEPT {
     return mQueue.empty();
 }
 
-void AsyncLogger::clear() {
+void AsyncLogger::clear() FL_NO_EXCEPT {
     // Drain queue without printing
     const char* msg;
     fl::u16 len;
@@ -115,11 +115,11 @@ void AsyncLogger::clear() {
     }
 }
 
-fl::u32 AsyncLogger::droppedCount() const {
+fl::u32 AsyncLogger::droppedCount() const FL_NO_EXCEPT {
     return mQueue.droppedCount();
 }
 
-fl::size AsyncLogger::flushN(fl::size maxMessages) {
+fl::size AsyncLogger::flushN(fl::size maxMessages) FL_NO_EXCEPT {
     fl::size flushed = 0;
     const char* msg;
     fl::u16 len;
@@ -155,7 +155,7 @@ fl::size AsyncLogger::flushN(fl::size maxMessages) {
     return flushed;
 }
 
-bool AsyncLogger::enableBackgroundFlush(fl::u32 interval_ms, fl::size messages_per_tick) {
+bool AsyncLogger::enableBackgroundFlush(fl::u32 interval_ms, fl::size messages_per_tick) FL_NO_EXCEPT {
     detail::BackgroundFlushState& state = Singleton<detail::BackgroundFlushState>::instance();
 
     // If already enabled, disable first
@@ -183,7 +183,7 @@ bool AsyncLogger::enableBackgroundFlush(fl::u32 interval_ms, fl::size messages_p
     return true;
 }
 
-void AsyncLogger::disableBackgroundFlush() {
+void AsyncLogger::disableBackgroundFlush() FL_NO_EXCEPT {
     detail::BackgroundFlushState& state = Singleton<detail::BackgroundFlushState>::instance();
 
     if (state.mEnabled && state.mTimerHandle.is_valid()) {
@@ -194,7 +194,7 @@ void AsyncLogger::disableBackgroundFlush() {
     }
 }
 
-bool AsyncLogger::isBackgroundFlushEnabled() const {
+bool AsyncLogger::isBackgroundFlushEnabled() const FL_NO_EXCEPT {
     return Singleton<detail::BackgroundFlushState>::instance().mEnabled;
 }
 
@@ -202,7 +202,7 @@ bool AsyncLogger::isBackgroundFlushEnabled() const {
 // Background flush service function (call from main loop)
 // ============================================================================
 
-void async_log_service() {
+void async_log_service() FL_NO_EXCEPT {
     // Get background flush state
     detail::BackgroundFlushState& state = Singleton<detail::BackgroundFlushState>::instance();
 
@@ -228,12 +228,12 @@ void async_log_service() {
 
 namespace detail {
 
-AsyncLoggerServiceTask& AsyncLoggerServiceTask::instance() {
+AsyncLoggerServiceTask& AsyncLoggerServiceTask::instance() FL_NO_EXCEPT {
     static AsyncLoggerServiceTask task;
     return task;
 }
 
-AsyncLoggerServiceTask::AsyncLoggerServiceTask()
+AsyncLoggerServiceTask::AsyncLoggerServiceTask() FL_NO_EXCEPT
     : mIntervalMs(16)
     , mMessagesPerTick(5)
     , mTask()
@@ -249,7 +249,7 @@ AsyncLoggerServiceTask::AsyncLoggerServiceTask()
     fl::task::Scheduler::instance().add_task(mTask);
 }
 
-void AsyncLoggerServiceTask::setInterval(u32 interval_ms) {
+void AsyncLoggerServiceTask::setInterval(u32 interval_ms) FL_NO_EXCEPT {
     mIntervalMs = interval_ms;
 
     // Dynamically update task interval if task exists
@@ -258,11 +258,11 @@ void AsyncLoggerServiceTask::setInterval(u32 interval_ms) {
     }
 }
 
-void AsyncLoggerServiceTask::setMessagesPerTick(fl::size messages_per_tick) {
+void AsyncLoggerServiceTask::setMessagesPerTick(fl::size messages_per_tick) FL_NO_EXCEPT {
     mMessagesPerTick = messages_per_tick;
 }
 
-void AsyncLoggerServiceTask::serviceLoggers() {
+void AsyncLoggerServiceTask::serviceLoggers() FL_NO_EXCEPT {
     // Flush N messages from all registered loggers
     detail::ActiveLoggerRegistry::instance().forEach([this](AsyncLogger& logger) {
         logger.flushN(mMessagesPerTick);
@@ -275,7 +275,7 @@ void AsyncLoggerServiceTask::serviceLoggers() {
 // Public configuration API
 // ============================================================================
 
-void configureAsyncLogService(u32 interval_ms, fl::size messages_per_tick) {
+void configureAsyncLogService(u32 interval_ms, fl::size messages_per_tick) FL_NO_EXCEPT {
     detail::AsyncLoggerServiceTask::instance().setInterval(interval_ms);
     detail::AsyncLoggerServiceTask::instance().setMessagesPerTick(messages_per_tick);
 }

@@ -8,7 +8,7 @@ namespace fl {
 namespace {
 // Clamp a float to [0, 255] before casting to u8, avoiding UB from
 // out-of-range float-to-integer conversion.
-inline u8 clamp_u8(float v) {
+inline u8 clamp_u8(float v) FL_NO_EXCEPT {
     if (v <= 0.0f) return 0;
     if (v >= 255.0f) return 255;
     return u8(v);
@@ -37,7 +37,7 @@ struct PerlinParticlePunch::MeteorParticle {
     u8 maxDebris = 5;
     u8 frameCounter = 0;
 
-    float tailLength() const {
+    float tailLength() const FL_NO_EXCEPT {
         float len = velocity * 3.0f;
         if (len < 5.0f)
             len = 5.0f;
@@ -46,7 +46,7 @@ struct PerlinParticlePunch::MeteorParticle {
         return len;
     }
 
-    bool shouldSpawnDebris() const {
+    bool shouldSpawnDebris() const FL_NO_EXCEPT {
         return alive && debrisSpawned < maxDebris && frameCounter > 2 &&
                (frameCounter % 5 == 0);
     }
@@ -64,7 +64,7 @@ struct PerlinParticlePunch::DebrisParticle {
 // Construction
 // ---------------------------------------------------------------------------
 
-PerlinParticlePunch::PerlinParticlePunch(u16 num_leds) : Fx1d(num_leds) {
+PerlinParticlePunch::PerlinParticlePunch(u16 num_leds) FL_NO_EXCEPT : Fx1d(num_leds) {
     mAmbientParticles.resize(50);
     mMeteorParticles.resize(5);
     mDebrisParticles.resize(50);
@@ -79,7 +79,7 @@ PerlinParticlePunch::PerlinParticlePunch(u16 num_leds) : Fx1d(num_leds) {
 
 PerlinParticlePunch::~PerlinParticlePunch() FL_NO_EXCEPT = default;
 
-fl::string PerlinParticlePunch::fxName() const {
+fl::string PerlinParticlePunch::fxName() const FL_NO_EXCEPT {
     return "PerlinParticlePunch";
 }
 
@@ -87,26 +87,26 @@ fl::string PerlinParticlePunch::fxName() const {
 // Setters
 // ---------------------------------------------------------------------------
 
-void PerlinParticlePunch::setTimeMultiplier(float mult) {
+void PerlinParticlePunch::setTimeMultiplier(float mult) FL_NO_EXCEPT {
     mTimeMultiplier = mult;
 }
 
-void PerlinParticlePunch::setNoisePalette(const CRGBPalette16 &palette) {
+void PerlinParticlePunch::setNoisePalette(const CRGBPalette16 &palette) FL_NO_EXCEPT {
     mNoisePalette = palette;
 }
 
-void PerlinParticlePunch::setAmbientPalette(const CRGBPalette16 &palette) {
+void PerlinParticlePunch::setAmbientPalette(const CRGBPalette16 &palette) FL_NO_EXCEPT {
     mAmbientPalette = palette;
 }
 
 void PerlinParticlePunch::setMeteorGradient(CRGB headColor, CRGB midColor,
-                                             CRGB tailColor) {
+                                             CRGB tailColor) FL_NO_EXCEPT {
     mMeteorHeadColor = headColor;
     mMeteorMidColor = midColor;
     mMeteorTailColor = tailColor;
 }
 
-void PerlinParticlePunch::setDrag(float drag) {
+void PerlinParticlePunch::setDrag(float drag) FL_NO_EXCEPT {
     mDrag = drag;
     // Meteor drag is slightly heavier than ambient.
     // Scale the difference from 1.0, not the value itself.
@@ -117,29 +117,29 @@ void PerlinParticlePunch::setDrag(float drag) {
         mMeteorDrag = 0.0f;
 }
 
-void PerlinParticlePunch::setSpeed(float speed) { mSpeed = speed; }
+void PerlinParticlePunch::setSpeed(float speed) FL_NO_EXCEPT { mSpeed = speed; }
 
-void PerlinParticlePunch::setAmbientTrailIntensity(u8 intensity) {
+void PerlinParticlePunch::setAmbientTrailIntensity(u8 intensity) FL_NO_EXCEPT {
     mAmbientTrailIntensity = intensity;
 }
 
-void PerlinParticlePunch::setMeteorTrailIntensity(u8 intensity) {
+void PerlinParticlePunch::setMeteorTrailIntensity(u8 intensity) FL_NO_EXCEPT {
     mMeteorTrailIntensity = intensity;
 }
 
-void PerlinParticlePunch::setAmbientBrightnessDecay(float decay) {
+void PerlinParticlePunch::setAmbientBrightnessDecay(float decay) FL_NO_EXCEPT {
     mAmbientBrightnessDecay = decay;
 }
 
-void PerlinParticlePunch::setMinVelocity(float minVel) {
+void PerlinParticlePunch::setMinVelocity(float minVel) FL_NO_EXCEPT {
     mMinVelocity = minVel;
 }
 
-void PerlinParticlePunch::setDebrisBrightnessDecay(float decay) {
+void PerlinParticlePunch::setDebrisBrightnessDecay(float decay) FL_NO_EXCEPT {
     mDebrisBrightnessDecay = decay;
 }
 
-void PerlinParticlePunch::setDebrisVelocityDecay(float decay) {
+void PerlinParticlePunch::setDebrisVelocityDecay(float decay) FL_NO_EXCEPT {
     mDebrisVelocityDecay = decay;
 }
 
@@ -147,7 +147,7 @@ void PerlinParticlePunch::setDebrisVelocityDecay(float decay) {
 // Spawning
 // ---------------------------------------------------------------------------
 
-void PerlinParticlePunch::spawnAmbient(float intensity) {
+void PerlinParticlePunch::spawnAmbient(float intensity) FL_NO_EXCEPT {
     AmbientParticle *p = tryAllocateAmbient();
     if (!p)
         return;
@@ -160,7 +160,7 @@ void PerlinParticlePunch::spawnAmbient(float intensity) {
     p->headWidth = 3 + random8(3); // 3, 4, or 5
 }
 
-void PerlinParticlePunch::spawnMeteor(float intensity) {
+void PerlinParticlePunch::spawnMeteor(float intensity) FL_NO_EXCEPT {
     MeteorParticle *m = tryAllocateMeteor();
     if (!m)
         return;
@@ -182,7 +182,7 @@ void PerlinParticlePunch::spawnMeteor(float intensity) {
 // ---------------------------------------------------------------------------
 
 PerlinParticlePunch::AmbientParticle *
-PerlinParticlePunch::tryAllocateAmbient() {
+PerlinParticlePunch::tryAllocateAmbient() FL_NO_EXCEPT {
     u16 n = (u16)mAmbientParticles.size();
     for (u16 i = 0; i < n; ++i) {
         if (!mAmbientParticles[i].alive) {
@@ -194,7 +194,7 @@ PerlinParticlePunch::tryAllocateAmbient() {
 }
 
 PerlinParticlePunch::MeteorParticle *
-PerlinParticlePunch::tryAllocateMeteor() {
+PerlinParticlePunch::tryAllocateMeteor() FL_NO_EXCEPT {
     u16 n = (u16)mMeteorParticles.size();
     for (u16 i = 0; i < n; ++i) {
         if (!mMeteorParticles[i].alive) {
@@ -206,7 +206,7 @@ PerlinParticlePunch::tryAllocateMeteor() {
 }
 
 PerlinParticlePunch::DebrisParticle *
-PerlinParticlePunch::tryAllocateDebris() {
+PerlinParticlePunch::tryAllocateDebris() FL_NO_EXCEPT {
     u16 n = (u16)mDebrisParticles.size();
     for (u16 i = 0; i < n; ++i) {
         if (!mDebrisParticles[i].alive) {
@@ -222,13 +222,13 @@ PerlinParticlePunch::tryAllocateDebris() {
 // ---------------------------------------------------------------------------
 
 s16x16 PerlinParticlePunch::mapf(s16x16 x, s16x16 in_min, s16x16 in_max,
-                                  s16x16 out_min, s16x16 out_max) {
+                                  s16x16 out_min, s16x16 out_max) FL_NO_EXCEPT {
     // Divide first to avoid s16x16 overflow on large intermediate products.
     // e.g. (223 * 255) exceeds s16x16 max (~32767), but 223/223 * 255 = 255 fits.
     return (x - in_min) / (in_max - in_min) * (out_max - out_min) + out_min;
 }
 
-s16x16 PerlinParticlePunch::circleNoiseGen(u32 now, s16x16 theta) const {
+s16x16 PerlinParticlePunch::circleNoiseGen(u32 now, s16x16 theta) const FL_NO_EXCEPT {
     s16x16 sin_val, cos_val;
     s16x16::sincos(theta, sin_val, cos_val);
     u32 x =
@@ -249,7 +249,7 @@ s16x16 PerlinParticlePunch::circleNoiseGen(u32 now, s16x16 theta) const {
     return tmp;
 }
 
-void PerlinParticlePunch::noiseCircleDraw(u32 now, fl::span<CRGB> dst) {
+void PerlinParticlePunch::noiseCircleDraw(u32 now, fl::span<CRGB> dst) FL_NO_EXCEPT {
     // Apply time-warp to rotation speed — this is the visible acceleration
     u32 warped_now = u32(float(now) * mTimeMultiplier);
     s16x16 time_factor = s16x16::from_raw(static_cast<i32>(warped_now * 32u));
@@ -277,7 +277,7 @@ void PerlinParticlePunch::noiseCircleDraw(u32 now, fl::span<CRGB> dst) {
 // Rendering helpers
 // ---------------------------------------------------------------------------
 
-void PerlinParticlePunch::writeMax(CRGB &dst, const CRGB &src) {
+void PerlinParticlePunch::writeMax(CRGB &dst, const CRGB &src) FL_NO_EXCEPT {
     if (src.r > dst.r)
         dst.r = src.r;
     if (src.g > dst.g)
@@ -286,7 +286,7 @@ void PerlinParticlePunch::writeMax(CRGB &dst, const CRGB &src) {
         dst.b = src.b;
 }
 
-void PerlinParticlePunch::renderAmbient(const AmbientParticle &p) {
+void PerlinParticlePunch::renderAmbient(const AmbientParticle &p) FL_NO_EXCEPT {
     int center = int(p.position);
     float frac = p.position - float(center);
     u8 bri = clamp_u8(p.brightness);
@@ -318,7 +318,7 @@ void PerlinParticlePunch::renderAmbient(const AmbientParticle &p) {
     }
 }
 
-void PerlinParticlePunch::renderMeteor(const MeteorParticle &m) {
+void PerlinParticlePunch::renderMeteor(const MeteorParticle &m) FL_NO_EXCEPT {
     int center = int(m.position);
 
     // --- Head: 5-pixel gaussian kernel ---
@@ -357,7 +357,7 @@ void PerlinParticlePunch::renderMeteor(const MeteorParticle &m) {
     }
 }
 
-void PerlinParticlePunch::renderDebris(const DebrisParticle &d) {
+void PerlinParticlePunch::renderDebris(const DebrisParticle &d) FL_NO_EXCEPT {
     int idx = int(d.position);
     float frac = d.position - float(idx);
     u8 bri = clamp_u8(d.brightness);
@@ -377,7 +377,7 @@ void PerlinParticlePunch::renderDebris(const DebrisParticle &d) {
     }
 }
 
-void PerlinParticlePunch::spawnDebrisFromMeteor(MeteorParticle &m, u32) {
+void PerlinParticlePunch::spawnDebrisFromMeteor(MeteorParticle &m, u32) FL_NO_EXCEPT {
     DebrisParticle *d = tryAllocateDebris();
     if (!d)
         return;
@@ -410,7 +410,7 @@ void PerlinParticlePunch::spawnDebrisFromMeteor(MeteorParticle &m, u32) {
 // Main draw
 // ---------------------------------------------------------------------------
 
-void PerlinParticlePunch::draw(DrawContext context) {
+void PerlinParticlePunch::draw(DrawContext context) FL_NO_EXCEPT {
     fl::span<CRGB> leds = context.leds;
     if (leds.empty() || mNumLeds == 0) {
         return;

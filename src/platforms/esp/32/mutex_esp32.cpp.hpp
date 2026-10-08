@@ -27,7 +27,7 @@ namespace platforms {
 // MutexESP32 Implementation
 //=============================================================================
 
-MutexESP32::MutexESP32() : mHandle(nullptr) {
+MutexESP32::MutexESP32() FL_NO_EXCEPT : mHandle(nullptr) {
     // Create a FreeRTOS mutex (implemented as a binary semaphore)
     SemaphoreHandle_t handle = xSemaphoreCreateMutex();
 
@@ -46,7 +46,7 @@ MutexESP32::~MutexESP32() {
     }
 }
 
-void MutexESP32::lock() {
+void MutexESP32::lock() FL_NO_EXCEPT {
     FL_ASSERT(mHandle != nullptr, "MutexESP32::lock() called on null mutex");
 
     SemaphoreHandle_t handle = static_cast<SemaphoreHandle_t>(mHandle);
@@ -57,7 +57,7 @@ void MutexESP32::lock() {
     FL_ASSERT(result == pdTRUE, "MutexESP32::lock() failed to acquire mutex");
 }
 
-void MutexESP32::unlock() {
+void MutexESP32::unlock() FL_NO_EXCEPT {
     FL_ASSERT(mHandle != nullptr, "MutexESP32::unlock() called on null mutex");
 
     SemaphoreHandle_t handle = static_cast<SemaphoreHandle_t>(mHandle);
@@ -67,7 +67,7 @@ void MutexESP32::unlock() {
     FL_ASSERT(result == pdTRUE, "MutexESP32::unlock() failed to release mutex");
 }
 
-bool MutexESP32::try_lock() {
+bool MutexESP32::try_lock() FL_NO_EXCEPT {
     if (mHandle == nullptr) {
         return false;
     }
@@ -84,7 +84,7 @@ bool MutexESP32::try_lock() {
 // RecursiveMutexESP32 Implementation
 //=============================================================================
 
-RecursiveMutexESP32::RecursiveMutexESP32() : mHandle(nullptr) {
+RecursiveMutexESP32::RecursiveMutexESP32() FL_NO_EXCEPT : mHandle(nullptr) {
     // Create a FreeRTOS recursive mutex
     SemaphoreHandle_t handle = xSemaphoreCreateRecursiveMutex();
 
@@ -103,7 +103,7 @@ RecursiveMutexESP32::~RecursiveMutexESP32() {
     }
 }
 
-void RecursiveMutexESP32::lock() {
+void RecursiveMutexESP32::lock() FL_NO_EXCEPT {
     FL_ASSERT(mHandle != nullptr, "RecursiveMutexESP32::lock() called on null mutex");
 
     SemaphoreHandle_t handle = static_cast<SemaphoreHandle_t>(mHandle);
@@ -114,7 +114,7 @@ void RecursiveMutexESP32::lock() {
     FL_ASSERT(result == pdTRUE, "RecursiveMutexESP32::lock() failed to acquire mutex");
 }
 
-void RecursiveMutexESP32::unlock() {
+void RecursiveMutexESP32::unlock() FL_NO_EXCEPT {
     FL_ASSERT(mHandle != nullptr, "RecursiveMutexESP32::unlock() called on null mutex");
 
     SemaphoreHandle_t handle = static_cast<SemaphoreHandle_t>(mHandle);
@@ -124,7 +124,7 @@ void RecursiveMutexESP32::unlock() {
     FL_ASSERT(result == pdTRUE, "RecursiveMutexESP32::unlock() failed to release mutex");
 }
 
-bool RecursiveMutexESP32::try_lock() {
+bool RecursiveMutexESP32::try_lock() FL_NO_EXCEPT {
     if (mHandle == nullptr) {
         return false;
     }

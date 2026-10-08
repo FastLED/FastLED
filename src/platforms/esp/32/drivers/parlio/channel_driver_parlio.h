@@ -199,7 +199,7 @@ struct parlio_tx_unit_t;
 typedef struct parlio_tx_unit_t *parlio_tx_unit_handle_t;
 
 // Forward declaration for heap_caps_free (defined in esp_heap_caps.h)
-extern "C" void heap_caps_free(void *ptr) FL_NO_EXCEPT;
+extern "C" void heap_caps_free(void *ptr);
 
 //=============================================================================
 // Hardware Capability Constants

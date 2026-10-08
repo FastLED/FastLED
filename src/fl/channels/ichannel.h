@@ -25,10 +25,10 @@ public:
     virtual ~IChannel() FL_NO_EXCEPT = default;
 
     /// @brief Stable monotonically-assigned identifier (starts at 0).
-    virtual i32 id() const = 0;
+    virtual i32 id() const FL_NO_EXCEPT = 0;
 
     /// @brief User-specified or auto-generated name (e.g. "Channel_3").
-    virtual const fl::string& name() const = 0;
+    virtual const fl::string& name() const FL_NO_EXCEPT = 0;
 
 protected:
     IChannel() FL_NO_EXCEPT = default;

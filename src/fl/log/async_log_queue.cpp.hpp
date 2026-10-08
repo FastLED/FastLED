@@ -6,6 +6,7 @@
 #include "fl/stl/isr/critical_section.h"
 #include "fl/stl/string.h"
 #include "fl/math/math.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -16,7 +17,7 @@ namespace fl {
 // ============================================================================
 
 template <fl::size DescriptorCount, fl::size ArenaSize>
-AsyncLogQueue<DescriptorCount, ArenaSize>::Descriptor::Descriptor()
+AsyncLogQueue<DescriptorCount, ArenaSize>::Descriptor::Descriptor() FL_NO_EXCEPT
     : mStartIdx(0), mLength(0), mPadding(0) {}
 
 // ============================================================================
@@ -24,7 +25,7 @@ AsyncLogQueue<DescriptorCount, ArenaSize>::Descriptor::Descriptor()
 // ============================================================================
 
 template <fl::size DescriptorCount, fl::size ArenaSize>
-AsyncLogQueue<DescriptorCount, ArenaSize>::AsyncLogQueue()
+AsyncLogQueue<DescriptorCount, ArenaSize>::AsyncLogQueue() FL_NO_EXCEPT
     : mHead(0), mTail(0), mArenaHead(0), mArenaTail(0), mDropped(0) {
     // Initialize all descriptors to zero (optional, for debugging)
     for (fl::size i = 0; i < DescriptorCount; i++) {
@@ -33,7 +34,7 @@ AsyncLogQueue<DescriptorCount, ArenaSize>::AsyncLogQueue()
 }
 
 template <fl::size DescriptorCount, fl::size ArenaSize>
-bool AsyncLogQueue<DescriptorCount, ArenaSize>::push(const fl::string& msg) {
+bool AsyncLogQueue<DescriptorCount, ArenaSize>::push(const fl::string& msg) FL_NO_EXCEPT {
     fl::size len = msg.length();
     if (len > MAX_MESSAGE_LENGTH) {
         len = MAX_MESSAGE_LENGTH;
@@ -42,13 +43,13 @@ bool AsyncLogQueue<DescriptorCount, ArenaSize>::push(const fl::string& msg) {
 }
 
 template <fl::size DescriptorCount, fl::size ArenaSize>
-bool AsyncLogQueue<DescriptorCount, ArenaSize>::push(const char* str) {
+bool AsyncLogQueue<DescriptorCount, ArenaSize>::push(const char* str) FL_NO_EXCEPT {
     fl::u16 len = boundedStrlen(str, MAX_MESSAGE_LENGTH);
     return push(str, len);
 }
 
 template <fl::size DescriptorCount, fl::size ArenaSize>
-bool AsyncLogQueue<DescriptorCount, ArenaSize>::tryPop(const char** outPtr, fl::u16* outLen) {
+bool AsyncLogQueue<DescriptorCount, ArenaSize>::tryPop(const char** outPtr, fl::u16* outLen) FL_NO_EXCEPT {
     // Read head with memory barrier (acquire semantics)
     fl::u32 head = loadHead();
     fl::u32 tail = mTail;
@@ -68,7 +69,7 @@ bool AsyncLogQueue<DescriptorCount, ArenaSize>::tryPop(const char** outPtr, fl::
 }
 
 template <fl::size DescriptorCount, fl::size ArenaSize>
-void AsyncLogQueue<DescriptorCount, ArenaSize>::commit() {
+void AsyncLogQueue<DescriptorCount, ArenaSize>::commit() FL_NO_EXCEPT {
     fl::u32 tail = mTail;
     const Descriptor& desc = mDescriptors[tail];
 
@@ -93,19 +94,19 @@ void AsyncLogQueue<DescriptorCount, ArenaSize>::commit() {
 }
 
 template <fl::size DescriptorCount, fl::size ArenaSize>
-fl::u32 AsyncLogQueue<DescriptorCount, ArenaSize>::droppedCount() const {
+fl::u32 AsyncLogQueue<DescriptorCount, ArenaSize>::droppedCount() const FL_NO_EXCEPT {
     return mDropped;
 }
 
 template <fl::size DescriptorCount, fl::size ArenaSize>
-fl::size AsyncLogQueue<DescriptorCount, ArenaSize>::size() const {
+fl::size AsyncLogQueue<DescriptorCount, ArenaSize>::size() const FL_NO_EXCEPT {
     fl::u32 head = loadHead();
     fl::u32 tail = mTail;
     return (head - tail) & (DescriptorCount - 1);
 }
 
 template <fl::size DescriptorCount, fl::size ArenaSize>
-bool AsyncLogQueue<DescriptorCount, ArenaSize>::empty() const {
+bool AsyncLogQueue<DescriptorCount, ArenaSize>::empty() const FL_NO_EXCEPT {
     return loadHead() == mTail;
 }
 
@@ -114,7 +115,7 @@ bool AsyncLogQueue<DescriptorCount, ArenaSize>::empty() const {
 // ============================================================================
 
 template <fl::size DescriptorCount, fl::size ArenaSize>
-bool AsyncLogQueue<DescriptorCount, ArenaSize>::push(const char* str, fl::u16 len) {
+bool AsyncLogQueue<DescriptorCount, ArenaSize>::push(const char* str, fl::u16 len) FL_NO_EXCEPT {
     if (len == 0) {
         return true;  // Empty message, accept but don't store
     }
@@ -185,7 +186,7 @@ bool AsyncLogQueue<DescriptorCount, ArenaSize>::push(const char* str, fl::u16 le
 }
 
 template <fl::size DescriptorCount, fl::size ArenaSize>
-fl::u16 AsyncLogQueue<DescriptorCount, ArenaSize>::boundedStrlen(const char* str, fl::u16 maxLen) {
+fl::u16 AsyncLogQueue<DescriptorCount, ArenaSize>::boundedStrlen(const char* str, fl::u16 maxLen) FL_NO_EXCEPT {
     fl::u16 len = 0;
     while (len < maxLen && str[len] != '\0') {
         len++;
@@ -194,7 +195,7 @@ fl::u16 AsyncLogQueue<DescriptorCount, ArenaSize>::boundedStrlen(const char* str
 }
 
 template <fl::size DescriptorCount, fl::size ArenaSize>
-bool AsyncLogQueue<DescriptorCount, ArenaSize>::arenaHasSpace(fl::u32 aHead, fl::u32 aTail, fl::u16 len) const {
+bool AsyncLogQueue<DescriptorCount, ArenaSize>::arenaHasSpace(fl::u32 aHead, fl::u32 aTail, fl::u16 len) const FL_NO_EXCEPT {
     // Calculate free space in ring buffer
     fl::u32 used = (aHead - aTail) & (ArenaSize - 1);
     fl::u32 free = ArenaSize - used - 1;  // Reserve 1 byte to distinguish full/empty
@@ -203,25 +204,25 @@ bool AsyncLogQueue<DescriptorCount, ArenaSize>::arenaHasSpace(fl::u32 aHead, fl:
 }
 
 template <fl::size DescriptorCount, fl::size ArenaSize>
-fl::u32 AsyncLogQueue<DescriptorCount, ArenaSize>::loadHead() const {
+fl::u32 AsyncLogQueue<DescriptorCount, ArenaSize>::loadHead() const FL_NO_EXCEPT {
     fl::isr::critical_section cs;
     return mHead;
 }
 
 template <fl::size DescriptorCount, fl::size ArenaSize>
-fl::u32 AsyncLogQueue<DescriptorCount, ArenaSize>::loadTail() const {
+fl::u32 AsyncLogQueue<DescriptorCount, ArenaSize>::loadTail() const FL_NO_EXCEPT {
     fl::isr::critical_section cs;
     return mTail;
 }
 
 template <fl::size DescriptorCount, fl::size ArenaSize>
-fl::u32 AsyncLogQueue<DescriptorCount, ArenaSize>::loadArenaTail() const {
+fl::u32 AsyncLogQueue<DescriptorCount, ArenaSize>::loadArenaTail() const FL_NO_EXCEPT {
     fl::isr::critical_section cs;
     return mArenaTail;
 }
 
 template <fl::size DescriptorCount, fl::size ArenaSize>
-void AsyncLogQueue<DescriptorCount, ArenaSize>::atomicIncDropped() {
+void AsyncLogQueue<DescriptorCount, ArenaSize>::atomicIncDropped() FL_NO_EXCEPT {
     fl::isr::critical_section cs;
     mDropped = mDropped + 1;  // C++20-compliant volatile increment
 }

@@ -17,7 +17,7 @@ namespace fl {
 class FontImpl : public Font {
 public:
     FontImpl(fl::span<const u8> fontData, i32 fontIndex = 0)
-        : mFontData(fontData.begin(), fontData.end()) {
+        FL_NO_EXCEPT : mFontData(fontData.begin(), fontData.end()) {
         mValid = third_party::truetype::stbtt_InitFont(
             &mFontInfo,
             mFontData.data(),
@@ -27,13 +27,13 @@ public:
 
     ~FontImpl() FL_NO_EXCEPT override = default;
 
-    bool isValid() const { return mValid; }
+    bool isValid() const FL_NO_EXCEPT { return mValid; }
 
-    i32 getNumFonts() const override {
+    i32 getNumFonts() const FL_NO_EXCEPT override {
         return third_party::truetype::stbtt_GetNumberOfFonts(mFontData.data());
     }
 
-    FontMetrics getMetrics() const override {
+    FontMetrics getMetrics() const FL_NO_EXCEPT override {
         FontMetrics metrics = {};
         if (!mValid) return metrics;
 
@@ -51,12 +51,12 @@ public:
         return metrics;
     }
 
-    float getScaleForPixelHeight(float pixelHeight) const override {
+    float getScaleForPixelHeight(float pixelHeight) const FL_NO_EXCEPT override {
         if (!mValid) return 0.0f;
         return third_party::truetype::stbtt_ScaleForPixelHeight(&mFontInfo, pixelHeight);
     }
 
-    GlyphMetrics getGlyphMetrics(i32 codepoint) const override {
+    GlyphMetrics getGlyphMetrics(i32 codepoint) const FL_NO_EXCEPT override {
         GlyphMetrics metrics = {};
         if (!mValid) return metrics;
 
@@ -76,17 +76,17 @@ public:
         return metrics;
     }
 
-    i32 getKerning(i32 codepoint1, i32 codepoint2) const override {
+    i32 getKerning(i32 codepoint1, i32 codepoint2) const FL_NO_EXCEPT override {
         if (!mValid) return 0;
         return third_party::truetype::stbtt_GetCodepointKernAdvance(&mFontInfo, codepoint1, codepoint2);
     }
 
-    GlyphBitmap renderGlyph(i32 codepoint, float scale) const override {
+    GlyphBitmap renderGlyph(i32 codepoint, float scale) const FL_NO_EXCEPT override {
         return renderGlyph(codepoint, scale, 1, 1);
     }
 
     GlyphBitmap renderGlyph(i32 codepoint, float scale,
-                            i32 oversampleX, i32 oversampleY) const override {
+                            i32 oversampleX, i32 oversampleY) const FL_NO_EXCEPT override {
         GlyphBitmap result;
         if (!mValid) return result;
 
@@ -163,7 +163,7 @@ public:
         return result;
     }
 
-    const third_party::truetype::stbtt_fontinfo& getFontInfo() const { return mFontInfo; }
+    const third_party::truetype::stbtt_fontinfo& getFontInfo() const FL_NO_EXCEPT { return mFontInfo; }
 
 private:
     fl::vector<u8> mFontData;
@@ -172,15 +172,15 @@ private:
 };
 
 // Font static factory methods
-fl::shared_ptr<Font> Font::loadDefault() {
+fl::shared_ptr<Font> Font::loadDefault() FL_NO_EXCEPT {
     return load(ttf::covenant5x5(), 0);
 }
 
-fl::shared_ptr<Font> Font::load(fl::span<const u8> fontData) {
+fl::shared_ptr<Font> Font::load(fl::span<const u8> fontData) FL_NO_EXCEPT {
     return load(fontData, 0);
 }
 
-fl::shared_ptr<Font> Font::load(fl::span<const u8> fontData, i32 fontIndex) {
+fl::shared_ptr<Font> Font::load(fl::span<const u8> fontData, i32 fontIndex) FL_NO_EXCEPT {
     auto impl = fl::make_shared<FontImpl>(fontData, fontIndex);
     if (!impl->isValid()) {
         return nullptr;
@@ -190,14 +190,14 @@ fl::shared_ptr<Font> Font::load(fl::span<const u8> fontData, i32 fontIndex) {
 
 // FontRenderer implementation
 FontRenderer::FontRenderer(FontPtr font, float pixelHeight)
-    : mFont(font)
+    FL_NO_EXCEPT : mFont(font)
     , mPixelHeight(pixelHeight)
     , mScale(font ? font->getScaleForPixelHeight(pixelHeight) : 0.0f) {
 }
 
 FontRenderer::~FontRenderer() FL_NO_EXCEPT = default;
 
-FontRenderer::ScaledMetrics FontRenderer::getScaledMetrics() const {
+FontRenderer::ScaledMetrics FontRenderer::getScaledMetrics() const FL_NO_EXCEPT {
     ScaledMetrics result = {};
     if (!mFont) return result;
 
@@ -208,37 +208,37 @@ FontRenderer::ScaledMetrics FontRenderer::getScaledMetrics() const {
     return result;
 }
 
-GlyphBitmap FontRenderer::render(i32 codepoint) const {
+GlyphBitmap FontRenderer::render(i32 codepoint) const FL_NO_EXCEPT {
     // Use 2x2 oversampling by default for LED displays
     return render(codepoint, 2, 2);
 }
 
-GlyphBitmap FontRenderer::render(i32 codepoint, i32 oversampleX, i32 oversampleY) const {
+GlyphBitmap FontRenderer::render(i32 codepoint, i32 oversampleX, i32 oversampleY) const FL_NO_EXCEPT {
     if (!mFont) return GlyphBitmap();
     return mFont->renderGlyph(codepoint, mScale, oversampleX, oversampleY);
 }
 
-GlyphBitmap FontRenderer::renderNoAA(i32 codepoint) const {
+GlyphBitmap FontRenderer::renderNoAA(i32 codepoint) const FL_NO_EXCEPT {
     return render(codepoint, 1, 1);
 }
 
-float FontRenderer::getAdvance(i32 codepoint) const {
+float FontRenderer::getAdvance(i32 codepoint) const FL_NO_EXCEPT {
     if (!mFont) return 0.0f;
     GlyphMetrics metrics = mFont->getGlyphMetrics(codepoint);
     return static_cast<float>(metrics.advanceWidth) * mScale;
 }
 
-float FontRenderer::getKerning(i32 codepoint1, i32 codepoint2) const {
+float FontRenderer::getKerning(i32 codepoint1, i32 codepoint2) const FL_NO_EXCEPT {
     if (!mFont) return 0.0f;
     return static_cast<float>(mFont->getKerning(codepoint1, codepoint2)) * mScale;
 }
 
-float FontRenderer::measureString(const char* str) const {
+float FontRenderer::measureString(const char* str) const FL_NO_EXCEPT {
     if (!str || !mFont) return 0.0f;
     return measureString(fl::span<const char>(str, strlen(str)));
 }
 
-float FontRenderer::measureString(fl::span<const char> str) const {
+float FontRenderer::measureString(fl::span<const char> str) const FL_NO_EXCEPT {
     if (str.empty() || !mFont) return 0.0f;
 
     float width = 0.0f;

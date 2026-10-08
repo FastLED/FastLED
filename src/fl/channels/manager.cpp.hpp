@@ -22,7 +22,7 @@ ChannelManager& ChannelManager::registry() FL_NO_EXCEPT {
     return Singleton<ChannelManager>::instance();
 }
 
-ChannelManager& ChannelManager::instance() {
+ChannelManager& ChannelManager::instance() FL_NO_EXCEPT {
     auto& out = registry();
     // Lazy initialization of platform-specific channel drivers
     // C++11 guarantees thread-safe static initialization
@@ -135,7 +135,7 @@ FL_NO_INLINE FL_COLD bool ChannelManager::addDriverSlow(
     return true;
 }
 
-void ChannelManager::addDriver(int priority, fl::shared_ptr<IChannelDriver> driver) {
+void ChannelManager::addDriver(int priority, fl::shared_ptr<IChannelDriver> driver) FL_NO_EXCEPT {
     if (!driver) {
         (void)addDriverSlow(priority, driver, nullptr, AddDriverSlowReason::NULL_DRIVER);
         return;
@@ -200,7 +200,7 @@ void ChannelManager::addDriver(int priority, fl::shared_ptr<IChannelDriver> driv
     fl::sort_small(mDrivers.begin(), mDrivers.end());
 }
 
-bool ChannelManager::removeDriver(fl::shared_ptr<IChannelDriver> driver) {
+bool ChannelManager::removeDriver(fl::shared_ptr<IChannelDriver> driver) FL_NO_EXCEPT {
     if (!driver) {
         FL_WARN("ChannelManager::removeDriver() - Null driver provided");
         return false;
@@ -224,7 +224,7 @@ bool ChannelManager::removeDriver(fl::shared_ptr<IChannelDriver> driver) {
     return false;
 }
 
-void ChannelManager::clearAllDrivers() {
+void ChannelManager::clearAllDrivers() FL_NO_EXCEPT {
     FL_DBG("ChannelManager: Waiting for all drivers to become READY before clearing");
 
     // Wait for all drivers to become READY before clearing
@@ -249,7 +249,7 @@ void ChannelManager::clearAllDrivers() {
     mExclusiveDriver.clear();
 }
 
-void ChannelManager::setDriverEnabled(const char* name, bool enabled) {
+void ChannelManager::setDriverEnabled(const char* name, bool enabled) FL_NO_EXCEPT {
     if (!name) {
         FL_ERROR("ChannelManager::setDriverEnabled() - Null driver name provided");
         return;
@@ -273,7 +273,7 @@ bool ChannelManager::setExclusiveDriver(Bus bus, fl::u8 which) FL_NO_EXCEPT {
     return setExclusiveDriverByName(busDriverName(bus, which));
 }
 
-bool ChannelManager::setExclusiveDriverByName(const char* name) {
+bool ChannelManager::setExclusiveDriverByName(const char* name) FL_NO_EXCEPT {
     // Handle null or empty name: disable everything.
     if (!name || !name[0]) {
         FL_ERROR("ChannelManager::setExclusiveDriverByName() - Null or empty driver name provided");
@@ -301,7 +301,7 @@ bool ChannelManager::setExclusiveDriverByName(const char* name) {
     return found;
 }
 
-bool ChannelManager::setDriverPriority(const fl::string& name, int priority) {
+bool ChannelManager::setDriverPriority(const fl::string& name, int priority) FL_NO_EXCEPT {
     if (name.empty()) {
         FL_ERROR("ChannelManager::setDriverPriority() - Empty driver name provided");
         return false;
@@ -331,7 +331,7 @@ bool ChannelManager::setDriverPriority(const fl::string& name, int priority) {
     return true;
 }
 
-bool ChannelManager::isDriverEnabled(const char* name) const {
+bool ChannelManager::isDriverEnabled(const char* name) const FL_NO_EXCEPT {
     if (!name) {
         FL_ERROR("ChannelManager::isDriverEnabled() - Null driver name provided");
         return false;
@@ -347,7 +347,7 @@ bool ChannelManager::isDriverEnabled(const char* name) const {
     return false;
 }
 
-ChannelManager::DriverStatus ChannelManager::driverStatus(const fl::string& name) const {
+ChannelManager::DriverStatus ChannelManager::driverStatus(const fl::string& name) const FL_NO_EXCEPT {
     if (name.empty()) {
         return DriverStatus::NOT_REGISTERED;
     }
@@ -360,11 +360,11 @@ ChannelManager::DriverStatus ChannelManager::driverStatus(const fl::string& name
     return DriverStatus::NOT_REGISTERED;
 }
 
-fl::size ChannelManager::getDriverCount() const {
+fl::size ChannelManager::getDriverCount() const FL_NO_EXCEPT {
     return mDrivers.size();
 }
 
-fl::span<const DriverInfo> ChannelManager::getDriverInfos() const {
+fl::span<const DriverInfo> ChannelManager::getDriverInfos() const FL_NO_EXCEPT {
     // Update cache with current driver state
     mCachedDriverInfo.clear();
     mCachedDriverInfo.reserve(mDrivers.size());
@@ -381,7 +381,7 @@ fl::span<const DriverInfo> ChannelManager::getDriverInfos() const {
     return mCachedDriverInfo;
 }
 
-fl::shared_ptr<IChannelDriver> ChannelManager::findDriverByName(const fl::string& name) const {
+fl::shared_ptr<IChannelDriver> ChannelManager::findDriverByName(const fl::string& name) const FL_NO_EXCEPT {
     if (name.empty()) {
         return fl::shared_ptr<IChannelDriver>();
     }
@@ -393,7 +393,7 @@ fl::shared_ptr<IChannelDriver> ChannelManager::findDriverByName(const fl::string
     return fl::shared_ptr<IChannelDriver>();
 }
 
-fl::shared_ptr<IChannelDriver> ChannelManager::getDriverByName(const fl::string& name) const {
+fl::shared_ptr<IChannelDriver> ChannelManager::getDriverByName(const fl::string& name) const FL_NO_EXCEPT {
     if (name.empty()) {
         FL_ERROR("ChannelManager::getDriverByName() - Empty driver name provided");
         return fl::shared_ptr<IChannelDriver>();
@@ -405,7 +405,7 @@ fl::shared_ptr<IChannelDriver> ChannelManager::getDriverByName(const fl::string&
     return driver;
 }
 
-fl::shared_ptr<IChannelDriver> ChannelManager::selectDriverForChannel(const ChannelDataPtr& data, const fl::string& affinity) {
+fl::shared_ptr<IChannelDriver> ChannelManager::selectDriverForChannel(const ChannelDataPtr& data, const fl::string& affinity) FL_NO_EXCEPT {
     if (!data) {
         FL_ERROR("ChannelManager::selectDriverForChannel() - Null channel data");
         return fl::shared_ptr<IChannelDriver>();
@@ -447,7 +447,7 @@ fl::shared_ptr<IChannelDriver> ChannelManager::selectDriverForChannel(const Chan
 
 
 template<typename Condition>
-bool ChannelManager::waitForCondition(Condition condition, u32 timeoutMs) {
+bool ChannelManager::waitForCondition(Condition condition, u32 timeoutMs) FL_NO_EXCEPT {
     const u32 startTime = timeoutMs > 0 ? millis() : 0;
 
     // Tier 1: instant non-blocking check (avoid micros() / millis() cost on
@@ -516,7 +516,7 @@ bool ChannelManager::waitForCondition(Condition condition, u32 timeoutMs) {
     return true;  // Condition met
 }
 
-IChannelDriver::DriverState ChannelManager::poll() {
+IChannelDriver::DriverState ChannelManager::poll() FL_NO_EXCEPT {
     // Poll all registered drivers and return aggregate state
     // Priority order: ERROR > BUSY > DRAINING > READY
     bool anyBusy = false;
@@ -550,7 +550,7 @@ IChannelDriver::DriverState ChannelManager::poll() {
     return IChannelDriver::DriverState(IChannelDriver::DriverState::READY);
 }
 
-bool ChannelManager::waitForReady(u32 timeoutMs) {
+bool ChannelManager::waitForReady(u32 timeoutMs) FL_NO_EXCEPT {
     bool ok = waitForCondition([this]() {
         return poll().state == IChannelDriver::DriverState::READY;
     }, timeoutMs);
@@ -560,7 +560,7 @@ bool ChannelManager::waitForReady(u32 timeoutMs) {
     return ok;
 }
 
-bool ChannelManager::waitForReadyOrDraining(u32 timeoutMs) {
+bool ChannelManager::waitForReadyOrDraining(u32 timeoutMs) FL_NO_EXCEPT {
     bool ok = waitForCondition([this]() {
         auto state = poll();
         bool draining_or_done = (
@@ -576,11 +576,11 @@ bool ChannelManager::waitForReadyOrDraining(u32 timeoutMs) {
 }
 
 
-void ChannelManager::onBeginFrame() {
+void ChannelManager::onBeginFrame() FL_NO_EXCEPT {
     waitForReady();  // Wait for all drivers to become READY before clearing previous frame state.
 }
 
-void ChannelManager::onEndFrame() {
+void ChannelManager::onEndFrame() FL_NO_EXCEPT {
     // Call show() on all drivers to trigger transmission
     // Channels have enqueued data directly to drivers during showPixels()
     // Now we trigger transmission by calling show() on each driver
@@ -592,13 +592,13 @@ void ChannelManager::onEndFrame() {
     waitForReadyOrDraining();
 }
 
-void ChannelManager::reset() {
+void ChannelManager::reset() FL_NO_EXCEPT {
     // Allow all channel drivers to clean up
     waitForReady();
     FL_DBG("ChannelManager: reset() - all drivers ready");
 }
 
-ChannelManager& channelManager() {
+ChannelManager& channelManager() FL_NO_EXCEPT {
     return ChannelManager::instance();
 }
 

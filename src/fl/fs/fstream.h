@@ -53,7 +53,7 @@ private:
     bool mEof;
     bool mFail;
 
-    void updateState() {
+    void updateState() FL_NO_EXCEPT {
         if (mHandle && mHandle->is_open()) {
             mEof = mHandle->is_eof();
             mFail = mHandle->has_error();
@@ -68,9 +68,9 @@ private:
 public:
     ifstream() FL_NO_EXCEPT : mLastRead(0), mGood(false), mEof(false), mFail(true) {}
 
-    explicit ifstream(const char* path, ios::openmode mode = ios::in);
+    explicit ifstream(const char* path, ios::openmode mode = ios::in) FL_NO_EXCEPT;
 
-    explicit ifstream(filebuf_ptr handle);
+    explicit ifstream(filebuf_ptr handle) FL_NO_EXCEPT;
 
     ~ifstream() FL_NO_EXCEPT;
 
@@ -106,93 +106,93 @@ public:
         return *this;
     }
 
-    void open(const char* path, ios::openmode mode = ios::in);
+    void open(const char* path, ios::openmode mode = ios::in) FL_NO_EXCEPT;
 
-    bool is_open() const {
+    bool is_open() const FL_NO_EXCEPT {
         return mHandle && mHandle->is_open();
     }
 
-    void close();
+    void close() FL_NO_EXCEPT;
 
-    ifstream& read(char* buffer, fl::size_t count);
+    ifstream& read(char* buffer, fl::size_t count) FL_NO_EXCEPT;
 
-    fl::size_t gcount() const {
+    fl::size_t gcount() const FL_NO_EXCEPT {
         return mLastRead;
     }
 
-    fl::size_t tellg();
+    fl::size_t tellg() FL_NO_EXCEPT;
 
-    ifstream& seekg(fl::size_t pos, ios::seekdir dir = ios::seekdir::beg);
+    ifstream& seekg(fl::size_t pos, ios::seekdir dir = ios::seekdir::beg) FL_NO_EXCEPT;
 
-    bool good() const { return mGood; }
-    bool eof() const { return mEof; }
-    bool fail() const { return mFail; }
+    bool good() const FL_NO_EXCEPT { return mGood; }
+    bool eof() const FL_NO_EXCEPT { return mEof; }
+    bool fail() const FL_NO_EXCEPT { return mFail; }
 
     // Get last error code (0 if no error)
-    int error() const;
+    int error() const FL_NO_EXCEPT;
 
     // Get human-readable error message
-    const char* error_message() const;
+    const char* error_message() const FL_NO_EXCEPT;
 
     // Manually clear error state (for retry scenarios)
-    void clear_error();
+    void clear_error() FL_NO_EXCEPT;
 
     // --- Enriched API (forwarded from filebuf) ---
 
     // Access the underlying buffer (like std::ifstream::rdbuf())
-    filebuf_ptr rdbuf() const { return mHandle; }
+    filebuf_ptr rdbuf() const FL_NO_EXCEPT { return mHandle; }
 
     // Total file size in bytes
-    fl::size_t size() const {
+    fl::size_t size() const FL_NO_EXCEPT {
         return mHandle ? mHandle->size() : 0;
     }
 
     // Bytes remaining from current position to end
-    fl::size_t bytes_left() const {
+    fl::size_t bytes_left() const FL_NO_EXCEPT {
         return mHandle ? mHandle->bytes_left() : 0;
     }
 
     // File path (or description for non-file buffers)
-    const char* path() const {
+    const char* path() const FL_NO_EXCEPT {
         return mHandle ? mHandle->path() : "";
     }
 
     // Check if data is available for reading
-    bool available() const {
+    bool available() const FL_NO_EXCEPT {
         return mHandle ? mHandle->available() : false;
     }
 
     // Check if at least n bytes are available
-    bool available(fl::size_t n) const {
+    bool available(fl::size_t n) const FL_NO_EXCEPT {
         return mHandle ? mHandle->available(n) : false;
     }
 
     // Convenience: read into u8 buffer
-    fl::size_t read(fl::u8* dst, fl::size_t n) {
+    fl::size_t read(fl::u8* dst, fl::size_t n) FL_NO_EXCEPT {
         read(fl::reinterpret_cast_<char*>(dst), n);
         return mLastRead;
     }
 
     // Convenience: read into u8 span
-    fl::size_t read(fl::span<fl::u8> dst) {
+    fl::size_t read(fl::span<fl::u8> dst) FL_NO_EXCEPT {
         return read(dst.data(), dst.size());
     }
 
     // Convenience: read RGB8 pixels (3 bytes per pixel)
-    fl::size_t readRGB8(fl::span<CRGB> dst) {
+    fl::size_t readRGB8(fl::span<CRGB> dst) FL_NO_EXCEPT {
         read(fl::reinterpret_cast_<char*>(dst.data()), dst.size() * 3);
         return mLastRead / 3;
     }
 
     // Backward-compat aliases
-    bool valid() const { return is_open(); }
-    fl::size_t pos() const { return mHandle ? mHandle->pos() : 0; }
-    fl::size_t bytesLeft() const { return bytes_left(); }
-    bool seek(fl::size_t p) {
+    bool valid() const FL_NO_EXCEPT { return is_open(); }
+    fl::size_t pos() const FL_NO_EXCEPT { return mHandle ? mHandle->pos() : 0; }
+    fl::size_t bytesLeft() const FL_NO_EXCEPT { return bytes_left(); }
+    bool seek(fl::size_t p) FL_NO_EXCEPT {
         seekg(p, ios::seekdir::beg);
         return good();
     }
-    bool seek(fl::size_t p, seek_dir dir) {
+    bool seek(fl::size_t p, seek_dir dir) FL_NO_EXCEPT {
         ios::seekdir d = (dir == seek_dir::beg) ? ios::seekdir::beg :
                          (dir == seek_dir::cur) ? ios::seekdir::cur : ios::seekdir::end;
         seekg(p, d);
@@ -212,7 +212,7 @@ private:
     bool mFail;
     int mLocalError;
 
-    void updateState() {
+    void updateState() FL_NO_EXCEPT {
         if (mHandle && mHandle->is_open()) {
             mEof = mHandle->is_eof();
             mFail = mHandle->has_error() || (mLocalError != 0);
@@ -227,9 +227,9 @@ private:
 public:
     ofstream() FL_NO_EXCEPT : mGood(false), mEof(false), mFail(true), mLocalError(0) {}
 
-    explicit ofstream(const char* path, ios::openmode mode = ios::out);
+    explicit ofstream(const char* path, ios::openmode mode = ios::out) FL_NO_EXCEPT;
 
-    explicit ofstream(filebuf_ptr handle);
+    explicit ofstream(filebuf_ptr handle) FL_NO_EXCEPT;
 
     ~ofstream() FL_NO_EXCEPT;
 
@@ -265,31 +265,31 @@ public:
         return *this;
     }
 
-    void open(const char* path, ios::openmode mode = ios::out);
+    void open(const char* path, ios::openmode mode = ios::out) FL_NO_EXCEPT;
 
-    bool is_open() const {
+    bool is_open() const FL_NO_EXCEPT {
         return mHandle && mHandle->is_open();
     }
 
-    void close();
+    void close() FL_NO_EXCEPT;
 
-    ofstream& write(const char* data, fl::size_t count);
+    ofstream& write(const char* data, fl::size_t count) FL_NO_EXCEPT;
 
-    bool good() const { return mGood; }
-    bool eof() const { return mEof; }
-    bool fail() const { return mFail; }
+    bool good() const FL_NO_EXCEPT { return mGood; }
+    bool eof() const FL_NO_EXCEPT { return mEof; }
+    bool fail() const FL_NO_EXCEPT { return mFail; }
 
     // Get last error code (0 if no error)
-    int error() const;
+    int error() const FL_NO_EXCEPT;
 
     // Get human-readable error message
-    const char* error_message() const;
+    const char* error_message() const FL_NO_EXCEPT;
 
     // Manually clear error state (for retry scenarios)
-    void clear_error();
+    void clear_error() FL_NO_EXCEPT;
 
     // Access the underlying buffer
-    filebuf_ptr rdbuf() const { return mHandle; }
+    filebuf_ptr rdbuf() const FL_NO_EXCEPT { return mHandle; }
 };
 
 // ============================================================================
@@ -305,7 +305,7 @@ private:
     bool mFail;
     int mLocalError;
 
-    void updateState() {
+    void updateState() FL_NO_EXCEPT {
         if (mHandle && mHandle->is_open()) {
             mEof = mHandle->is_eof();
             mFail = mHandle->has_error() || (mLocalError != 0);
@@ -320,9 +320,9 @@ private:
 public:
     fstream() FL_NO_EXCEPT : mLastRead(0), mGood(false), mEof(false), mFail(true), mLocalError(0) {}
 
-    explicit fstream(const char* path, ios::openmode mode = ios::in | ios::out);
+    explicit fstream(const char* path, ios::openmode mode = ios::in | ios::out) FL_NO_EXCEPT;
 
-    explicit fstream(filebuf_ptr handle);
+    explicit fstream(filebuf_ptr handle) FL_NO_EXCEPT;
 
     ~fstream() FL_NO_EXCEPT;
 
@@ -362,41 +362,41 @@ public:
         return *this;
     }
 
-    void open(const char* path, ios::openmode mode = ios::in | ios::out);
+    void open(const char* path, ios::openmode mode = ios::in | ios::out) FL_NO_EXCEPT;
 
-    bool is_open() const {
+    bool is_open() const FL_NO_EXCEPT {
         return mHandle && mHandle->is_open();
     }
 
-    void close();
+    void close() FL_NO_EXCEPT;
 
-    fstream& read(char* buffer, fl::size_t count);
+    fstream& read(char* buffer, fl::size_t count) FL_NO_EXCEPT;
 
-    fl::size_t gcount() const {
+    fl::size_t gcount() const FL_NO_EXCEPT {
         return mLastRead;
     }
 
-    fstream& write(const char* data, fl::size_t count);
+    fstream& write(const char* data, fl::size_t count) FL_NO_EXCEPT;
 
-    fl::size_t tellg();
+    fl::size_t tellg() FL_NO_EXCEPT;
 
-    fstream& seekg(fl::size_t pos, ios::seekdir dir = ios::seekdir::beg);
+    fstream& seekg(fl::size_t pos, ios::seekdir dir = ios::seekdir::beg) FL_NO_EXCEPT;
 
-    bool good() const { return mGood; }
-    bool eof() const { return mEof; }
-    bool fail() const { return mFail; }
+    bool good() const FL_NO_EXCEPT { return mGood; }
+    bool eof() const FL_NO_EXCEPT { return mEof; }
+    bool fail() const FL_NO_EXCEPT { return mFail; }
 
     // Get last error code (0 if no error)
-    int error() const;
+    int error() const FL_NO_EXCEPT;
 
     // Get human-readable error message
-    const char* error_message() const;
+    const char* error_message() const FL_NO_EXCEPT;
 
     // Manually clear error state (for retry scenarios)
-    void clear_error();
+    void clear_error() FL_NO_EXCEPT;
 
     // Access the underlying buffer
-    filebuf_ptr rdbuf() const { return mHandle; }
+    filebuf_ptr rdbuf() const FL_NO_EXCEPT { return mHandle; }
 };
 
 } // namespace fl

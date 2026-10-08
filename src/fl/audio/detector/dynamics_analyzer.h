@@ -17,11 +17,11 @@ public:
     ~DynamicsAnalyzer() FL_NO_EXCEPT override;
 
     // Detector interface
-    void update(shared_ptr<Context> context) override;
-    void fireCallbacks() override;
-    bool needsFFT() const override { return false; }
-    const char* getName() const override { return "DynamicsAnalyzer"; }
-    void reset() override;
+    void update(shared_ptr<Context> context) FL_NO_EXCEPT override;
+    void fireCallbacks() FL_NO_EXCEPT override;
+    bool needsFFT() const FL_NO_EXCEPT override { return false; }
+    const char* getName() const FL_NO_EXCEPT override { return "DynamicsAnalyzer"; }
+    void reset() FL_NO_EXCEPT override;
 
     // Callbacks (multiple listeners supported)
     function_list<void()> onCrescendo;          // Loudness increasing
@@ -30,18 +30,18 @@ public:
     function_list<void(float compression)> onCompressionRatio;  // Dynamic range compression
 
     // Configuration
-    void setHistorySize(fl::size size);
-    void setTrendThreshold(float threshold);
-    void setSmoothingFactor(float alpha);
+    void setHistorySize(fl::size size) FL_NO_EXCEPT;
+    void setTrendThreshold(float threshold) FL_NO_EXCEPT;
+    void setSmoothingFactor(float alpha) FL_NO_EXCEPT;
 
     // State access
-    float getDynamicTrend() const { return mTrend; }
-    float getCurrentRMS() const { return mCurrentRMS; }
-    float getAverageRMS() const { return mAverageRMS; }
-    float getPeakRMS() const { return mPeakRMS; }
-    float getCompressionRatio() const { return mCompressionRatio; }
-    bool isCrescendo() const { return mIsCrescendo; }
-    bool isDiminuendo() const { return mIsDiminuendo; }
+    float getDynamicTrend() const FL_NO_EXCEPT { return mTrend; }
+    float getCurrentRMS() const FL_NO_EXCEPT { return mCurrentRMS; }
+    float getAverageRMS() const FL_NO_EXCEPT { return mAverageRMS; }
+    float getPeakRMS() const FL_NO_EXCEPT { return mPeakRMS; }
+    float getCompressionRatio() const FL_NO_EXCEPT { return mCompressionRatio; }
+    bool isCrescendo() const FL_NO_EXCEPT { return mIsCrescendo; }
+    bool isDiminuendo() const FL_NO_EXCEPT { return mIsDiminuendo; }
 
 private:
     vector<float> mRMSHistory;
@@ -65,9 +65,9 @@ private:
 
     u32 mLastUpdateTime;
 
-    float calculateTrend();
-    void updatePeak(float rms);
-    void updateCompression();
+    float calculateTrend() FL_NO_EXCEPT;
+    void updatePeak(float rms) FL_NO_EXCEPT;
+    void updateCompression() FL_NO_EXCEPT;
 };
 
 } // namespace detector

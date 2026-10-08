@@ -30,20 +30,20 @@ class Blend2d : public Fx2d {
     using Params = Blend2dParams;
     // Note that if this xymap is non rectangular then it's recommended that the
     // Fx2d layers that are added should be rectangular.
-    Blend2d(const XYMap &xymap);
-    fl::string fxName() const override;
-    void add(Fx2dPtr layer, const Params &p = Params());
-    void add(Fx2d &layer, const Params &p = Params());
-    void draw(DrawContext context) override;
-    void clear();
-    void setGlobalBlurAmount(u8 blur_amount) {
+    Blend2d(const XYMap &xymap) FL_NO_EXCEPT;
+    fl::string fxName() const FL_NO_EXCEPT override;
+    void add(Fx2dPtr layer, const Params &p = Params()) FL_NO_EXCEPT;
+    void add(Fx2d &layer, const Params &p = Params()) FL_NO_EXCEPT;
+    void draw(DrawContext context) FL_NO_EXCEPT override;
+    void clear() FL_NO_EXCEPT;
+    void setGlobalBlurAmount(u8 blur_amount) FL_NO_EXCEPT {
         mGlobalBlurAmount = blur_amount;
     }
-    void setGlobalBlurPasses(u8 blur_passes) {
+    void setGlobalBlurPasses(u8 blur_passes) FL_NO_EXCEPT {
         mGlobalBlurPasses = blur_passes;
     }
-    bool setParams(Fx2dPtr fx, const Params &p);
-    bool setParams(Fx2d &fx, const Params &p);
+    bool setParams(Fx2dPtr fx, const Params &p) FL_NO_EXCEPT;
+    bool setParams(Fx2d &fx, const Params &p) FL_NO_EXCEPT;
 
   protected:
     struct Entry {
@@ -52,7 +52,7 @@ class Blend2d : public Fx2d {
         u8 blur_passes = 1;
         Entry() FL_NO_EXCEPT = default;
         Entry(Fx2dPtr fx, u8 blur_amount, u8 blur_passes)
-            : fx(fx), blur_amount(blur_amount), blur_passes(blur_passes) {}
+            FL_NO_EXCEPT : fx(fx), blur_amount(blur_amount), blur_passes(blur_passes) {}
     };
     vector<Entry> mLayers;
     fl::shared_ptr<Frame> mFrame;

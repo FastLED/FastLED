@@ -23,11 +23,11 @@ public:
     Transient() FL_NO_EXCEPT;
     ~Transient() FL_NO_EXCEPT override;
 
-    void update(shared_ptr<Context> context) override;
-    void fireCallbacks() override;
-    bool needsFFT() const override { return true; }
-    const char* getName() const override { return "Transient"; }
-    void reset() override;
+    void update(shared_ptr<Context> context) FL_NO_EXCEPT override;
+    void fireCallbacks() FL_NO_EXCEPT override;
+    bool needsFFT() const FL_NO_EXCEPT override { return true; }
+    const char* getName() const FL_NO_EXCEPT override { return "Transient"; }
+    void reset() FL_NO_EXCEPT override;
 
     // Callbacks (multiple listeners supported)
     function_list<void()> onTransient;
@@ -35,14 +35,14 @@ public:
     function_list<void(float strength)> onAttack;
 
     // State access
-    bool isTransient() const { return mTransientDetected; }
-    float getStrength() const { return mStrength; }
-    float getAttackTime() const { return mAttackTime; }
+    bool isTransient() const FL_NO_EXCEPT { return mTransientDetected; }
+    float getStrength() const FL_NO_EXCEPT { return mStrength; }
+    float getAttackTime() const FL_NO_EXCEPT { return mAttackTime; }
 
     // Configuration
-    void setThreshold(float threshold) { mThreshold = threshold; }
-    void setSensitivity(float sensitivity) { mSensitivity = sensitivity; }
-    void setMinInterval(u32 intervalMs) { mMinIntervalMs = intervalMs; }
+    void setThreshold(float threshold) FL_NO_EXCEPT { mThreshold = threshold; }
+    void setSensitivity(float sensitivity) FL_NO_EXCEPT { mSensitivity = sensitivity; }
+    void setMinInterval(u32 intervalMs) FL_NO_EXCEPT { mMinIntervalMs = intervalMs; }
 
 private:
     bool mTransientDetected;
@@ -67,10 +67,10 @@ private:
 
     shared_ptr<const fft::Bins> mRetainedFFT;
 
-    float calculateHighFreqEnergy(const fft::Bins& fft);
-    float calculateEnergyFlux(float currentEnergy);
-    bool detectTransient(float flux, u32 timestamp);
-    void updateAttackTime(float flux);
+    float calculateHighFreqEnergy(const fft::Bins& fft) FL_NO_EXCEPT;
+    float calculateEnergyFlux(float currentEnergy) FL_NO_EXCEPT;
+    bool detectTransient(float flux, u32 timestamp) FL_NO_EXCEPT;
+    void updateAttackTime(float flux) FL_NO_EXCEPT;
 };
 
 } // namespace detector

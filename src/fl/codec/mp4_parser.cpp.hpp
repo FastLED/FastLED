@@ -1,4 +1,5 @@
 #include "fl/codec/mp4_parser.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -6,7 +7,7 @@ namespace {
 
 // Read a big-endian uint32 from a byte span at offset.
 // Returns 0 and sets ok=false if out of bounds.
-inline fl::u32 readU32BE(fl::span<const fl::u8> data, fl::size offset, bool& ok) {
+inline fl::u32 readU32BE(fl::span<const fl::u8> data, fl::size offset, bool& ok) FL_NO_EXCEPT {
     if (offset + 4 > data.size()) { ok = false; return 0; }
     return (fl::u32(data[offset]) << 24) |
            (fl::u32(data[offset + 1]) << 16) |
@@ -14,13 +15,13 @@ inline fl::u32 readU32BE(fl::span<const fl::u8> data, fl::size offset, bool& ok)
             fl::u32(data[offset + 3]);
 }
 
-inline fl::u16 readU16BE(fl::span<const fl::u8> data, fl::size offset, bool& ok) {
+inline fl::u16 readU16BE(fl::span<const fl::u8> data, fl::size offset, bool& ok) FL_NO_EXCEPT {
     if (offset + 2 > data.size()) { ok = false; return 0; }
     return (fl::u16(data[offset]) << 8) | fl::u16(data[offset + 1]);
 }
 
 // 4-char box type comparison
-inline bool boxIs(fl::span<const fl::u8> data, fl::size offset, const char* type) {
+inline bool boxIs(fl::span<const fl::u8> data, fl::size offset, const char* type) FL_NO_EXCEPT {
     if (offset + 4 > data.size()) return false;
     return data[offset] == fl::u8(type[0]) &&
            data[offset + 1] == fl::u8(type[1]) &&
@@ -29,7 +30,7 @@ inline bool boxIs(fl::span<const fl::u8> data, fl::size offset, const char* type
 }
 
 // Find a top-level box by type within a range. Returns offset of box start, or ~0 if not found.
-fl::size findBox(fl::span<const fl::u8> data, fl::size start, fl::size end, const char* type) {
+fl::size findBox(fl::span<const fl::u8> data, fl::size start, fl::size end, const char* type) FL_NO_EXCEPT {
     fl::size pos = start;
     while (pos + 8 <= end) {
         bool ok = true;
@@ -44,7 +45,7 @@ fl::size findBox(fl::span<const fl::u8> data, fl::size start, fl::size end, cons
 // Parse avcC (AVC Decoder Configuration Record) at given offset.
 // ISO 14496-15 section 5.2.4.1
 bool parseAvcC(fl::span<const fl::u8> data, fl::size offset, fl::size boxEnd,
-               Mp4TrackInfo& info) {
+               Mp4TrackInfo& info) FL_NO_EXCEPT {
     // avcC box: 8 bytes header, then:
     //   u8 configVersion (1)
     //   u8 profile_idc
@@ -103,7 +104,7 @@ bool parseAvcC(fl::span<const fl::u8> data, fl::size offset, fl::size boxEnd,
 
 } // namespace
 
-Mp4TrackInfo parseMp4(fl::span<const fl::u8> data, fl::string* error) {
+Mp4TrackInfo parseMp4(fl::span<const fl::u8> data, fl::string* error) FL_NO_EXCEPT {
     Mp4TrackInfo info;
 
     if (data.size() < 8) {
@@ -282,7 +283,7 @@ Mp4TrackInfo parseMp4(fl::span<const fl::u8> data, fl::string* error) {
 
 fl::vector<fl::u8> extractH264NalUnits(fl::span<const fl::u8> data,
                                         const Mp4TrackInfo& track,
-                                        fl::string* error) {
+                                        fl::string* error) FL_NO_EXCEPT {
     fl::vector<fl::u8> annexB;
 
     if (!track.isValid) {

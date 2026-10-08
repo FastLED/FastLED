@@ -10,17 +10,17 @@
 namespace fl {
 namespace audio {
 
-FrequencyBinMapper::FrequencyBinMapper() {
+FrequencyBinMapper::FrequencyBinMapper() FL_NO_EXCEPT {
     configure(FrequencyBinMapperConfig());
 }
 
-FrequencyBinMapper::FrequencyBinMapper(const FrequencyBinMapperConfig& config) {
+FrequencyBinMapper::FrequencyBinMapper(const FrequencyBinMapperConfig& config) FL_NO_EXCEPT {
     configure(config);
 }
 
 FrequencyBinMapper::~FrequencyBinMapper() FL_NO_EXCEPT = default;
 
-void FrequencyBinMapper::configure(const FrequencyBinMapperConfig& config) {
+void FrequencyBinMapper::configure(const FrequencyBinMapperConfig& config) FL_NO_EXCEPT {
     mConfig = config;
 
     // Reset stats
@@ -33,7 +33,7 @@ void FrequencyBinMapper::configure(const FrequencyBinMapperConfig& config) {
     calculateBinMappings();
 }
 
-void FrequencyBinMapper::calculateBinBoundaries() {
+void FrequencyBinMapper::calculateBinBoundaries() FL_NO_EXCEPT {
     const size numBins = static_cast<size>(mConfig.mode);
 
     // Allocate space for bin boundaries (numBins + 1 edges)
@@ -47,7 +47,7 @@ void FrequencyBinMapper::calculateBinBoundaries() {
     }
 }
 
-void FrequencyBinMapper::calculateLogFrequencies() {
+void FrequencyBinMapper::calculateLogFrequencies() FL_NO_EXCEPT {
     const size numBins = static_cast<size>(mConfig.mode);
     const float logMin = fl::logf(mConfig.minFrequency);
     const float logMax = fl::logf(mConfig.maxFrequency);
@@ -61,7 +61,7 @@ void FrequencyBinMapper::calculateLogFrequencies() {
     }
 }
 
-void FrequencyBinMapper::calculateLinearFrequencies() {
+void FrequencyBinMapper::calculateLinearFrequencies() FL_NO_EXCEPT {
     const size numBins = static_cast<size>(mConfig.mode);
     const float step = (mConfig.maxFrequency - mConfig.minFrequency) / static_cast<float>(numBins);
 
@@ -72,7 +72,7 @@ void FrequencyBinMapper::calculateLinearFrequencies() {
     }
 }
 
-void FrequencyBinMapper::calculateBinMappings() {
+void FrequencyBinMapper::calculateBinMappings() FL_NO_EXCEPT {
     const size numBins = static_cast<size>(mConfig.mode);
 
     mBinMappings.clear();
@@ -111,14 +111,14 @@ void FrequencyBinMapper::calculateBinMappings() {
     }
 }
 
-float FrequencyBinMapper::frequencyToFFTBin(float frequency) const {
+float FrequencyBinMapper::frequencyToFFTBin(float frequency) const FL_NO_EXCEPT {
     // fft::FFT bin index = (frequency / sampleRate) * fftSize
     // fftSize = fftBinCount * 2 (fft::FFT produces fftSize/2 bins)
     const float fftSize = static_cast<float>(mConfig.fftBinCount) * 2.0f;
     return (frequency / static_cast<float>(mConfig.sampleRate)) * fftSize;
 }
 
-void FrequencyBinMapper::mapBins(span<const float> fftBins, span<float> outputBins) const {
+void FrequencyBinMapper::mapBins(span<const float> fftBins, span<float> outputBins) const FL_NO_EXCEPT {
     const size numBins = static_cast<size>(mConfig.mode);
 
     // Validate output buffer size
@@ -163,7 +163,7 @@ void FrequencyBinMapper::mapBins(span<const float> fftBins, span<float> outputBi
     const_cast<FrequencyBinMapper*>(this)->mStats.maxMagnitude = maxMag;
 }
 
-float FrequencyBinMapper::getBassEnergy(span<const float> frequencyBins) const {
+float FrequencyBinMapper::getBassEnergy(span<const float> frequencyBins) const FL_NO_EXCEPT {
     if (frequencyBins.size() < BASS_BIN_END) {
         return 0.0f;
     }
@@ -176,7 +176,7 @@ float FrequencyBinMapper::getBassEnergy(span<const float> frequencyBins) const {
     return sum / static_cast<float>(BASS_BIN_END - BASS_BIN_START);
 }
 
-float FrequencyBinMapper::getMidEnergy(span<const float> frequencyBins) const {
+float FrequencyBinMapper::getMidEnergy(span<const float> frequencyBins) const FL_NO_EXCEPT {
     if (frequencyBins.size() < MID_BIN_END) {
         return 0.0f;
     }
@@ -189,7 +189,7 @@ float FrequencyBinMapper::getMidEnergy(span<const float> frequencyBins) const {
     return sum / static_cast<float>(MID_BIN_END - MID_BIN_START);
 }
 
-float FrequencyBinMapper::getTrebleEnergy(span<const float> frequencyBins) const {
+float FrequencyBinMapper::getTrebleEnergy(span<const float> frequencyBins) const FL_NO_EXCEPT {
     if (frequencyBins.size() < TREBLE_BIN_END) {
         return 0.0f;
     }
@@ -202,7 +202,7 @@ float FrequencyBinMapper::getTrebleEnergy(span<const float> frequencyBins) const
     return sum / static_cast<float>(TREBLE_BIN_END - TREBLE_BIN_START);
 }
 
-FrequencyBinMapper::FrequencyRange FrequencyBinMapper::getBinFrequencyRange(size binIndex) const {
+FrequencyBinMapper::FrequencyRange FrequencyBinMapper::getBinFrequencyRange(size binIndex) const FL_NO_EXCEPT {
     FrequencyRange range = {0.0f, 0.0f};
 
     if (binIndex >= mBinFrequencies.size() - 1) {

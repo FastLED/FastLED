@@ -70,35 +70,35 @@ struct MusicalBeatDetectorConfig {
 class MusicalBeat {
 public:
     MusicalBeat() FL_NO_EXCEPT;
-    explicit MusicalBeat(const MusicalBeatDetectorConfig& config);
+    explicit MusicalBeat(const MusicalBeatDetectorConfig& config) FL_NO_EXCEPT;
     ~MusicalBeat() FL_NO_EXCEPT;
 
     /// Configure the beat detector
-    void configure(const MusicalBeatDetectorConfig& config);
+    void configure(const MusicalBeatDetectorConfig& config) FL_NO_EXCEPT;
 
     /// Process one audio frame
     /// @param onsetDetected True if onset detector triggered
     /// @param onsetStrength Onset magnitude (spectral flux value)
-    void processSample(bool onsetDetected, float onsetStrength);
+    void processSample(bool onsetDetected, float onsetStrength) FL_NO_EXCEPT;
 
     /// Check if a musical beat was detected in the last frame
     /// @return True if a beat with sufficient confidence was detected
-    bool isBeat() const;
+    bool isBeat() const FL_NO_EXCEPT;
 
     /// Get current BPM estimate
     /// @return Estimated tempo in beats per minute (50-250 BPM)
-    float getBPM() const;
+    float getBPM() const FL_NO_EXCEPT;
 
     /// Get beat confidence for the last detected beat
     /// @return Confidence score (0.0-1.0), higher = more rhythmic consistency
-    float getBeatConfidence() const;
+    float getBeatConfidence() const FL_NO_EXCEPT;
 
     /// Get inter-beat interval (IBI) statistics
     /// @return Average IBI in seconds (time between beats)
-    float getAverageIBI() const;
+    float getAverageIBI() const FL_NO_EXCEPT;
 
     /// Reset internal state (clear history, reset BPM)
-    void reset();
+    void reset() FL_NO_EXCEPT;
 
     /// Get statistics (for debugging/monitoring)
     struct Stats {
@@ -110,30 +110,30 @@ public:
         u32 ibiCount = 0;           // Number of IBIs in history
     };
 
-    const Stats& getStats() const { return mStats; }
+    const Stats& getStats() const FL_NO_EXCEPT { return mStats; }
 
 private:
     /// Validate if an onset is a true musical beat
     /// @param onsetStrength Onset magnitude
     /// @return True if onset matches expected beat timing
-    bool validateBeat(float onsetStrength);
+    bool validateBeat(float onsetStrength) FL_NO_EXCEPT;
 
     /// Calculate beat confidence based on rhythmic consistency
     /// @param currentIBI Current inter-beat interval
     /// @return Confidence score (0.0-1.0)
-    float calculateBeatConfidence(float currentIBI);
+    float calculateBeatConfidence(float currentIBI) FL_NO_EXCEPT;
 
     /// Update BPM estimate from inter-beat intervals
-    void updateBPMEstimate();
+    void updateBPMEstimate() FL_NO_EXCEPT;
 
     /// Check if IBI is within valid BPM range
     /// @param ibi Inter-beat interval in seconds
     /// @return True if IBI corresponds to valid BPM (minBPM-maxBPM)
-    bool isValidIBI(float ibi) const;
+    bool isValidIBI(float ibi) const FL_NO_EXCEPT;
 
     /// Calculate standard deviation of IBI history
     /// @return Standard deviation in seconds (lower = more consistent tempo)
-    float calculateIBIStdDev() const;
+    float calculateIBIStdDev() const FL_NO_EXCEPT;
 
     MusicalBeatDetectorConfig mConfig;
     Stats mStats;

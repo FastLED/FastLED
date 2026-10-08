@@ -11,10 +11,11 @@
 #include "fl/gfx/raster.h"
 
 #include "fl/gfx/xypath_renderer.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
-LinePath::LinePath(float x0, float y0, float x1, float y1) {
+LinePath::LinePath(float x0, float y0, float x1, float y1) FL_NO_EXCEPT {
     mParams = fl::make_shared<LinePathParams>();
     params().x0 = x0;
     params().y0 = y0;
@@ -22,23 +23,23 @@ LinePath::LinePath(float x0, float y0, float x1, float y1) {
     params().y1 = y1;
 }
 
-vec2f LinePath::compute(float alpha) {
+vec2f LinePath::compute(float alpha) FL_NO_EXCEPT {
     // α in [0,1] → (x,y) on the line
     float x = params().x0 + alpha * (params().x1 - params().x0);
     float y = params().y0 + alpha * (params().y1 - params().y0);
     return {x, y};
 }
 
-void LinePath::set(float x0, float y0, float x1, float y1) {
+void LinePath::set(float x0, float y0, float x1, float y1) FL_NO_EXCEPT {
     params().x0 = x0;
     params().y0 = y0;
     params().x1 = x1;
     params().y1 = y1;
 }
 
-void LinePath::set(const LinePathParams &p) { params() = p; }
+void LinePath::set(const LinePathParams &p) FL_NO_EXCEPT { params() = p; }
 
-vec2f CirclePath::compute(float alpha) {
+vec2f CirclePath::compute(float alpha) FL_NO_EXCEPT {
     // α in [0,1] → (x,y) on the unit circle [-1, 1]
     float t = alpha * 2.0f * FL_PI;
     float x = cosf(t);
@@ -46,11 +47,11 @@ vec2f CirclePath::compute(float alpha) {
     return vec2f(x, y);
 }
 
-CirclePath::CirclePath() {}
+CirclePath::CirclePath() FL_NO_EXCEPT {}
 
-HeartPath::HeartPath() {}
+HeartPath::HeartPath() FL_NO_EXCEPT {}
 
-vec2f HeartPath::compute(float alpha) {
+vec2f HeartPath::compute(float alpha) FL_NO_EXCEPT {
     // Parametric equation for a heart shape
     // α in [0,1] → (x,y) on the heart curve
     float t = alpha * 2.0f * FL_PI;
@@ -80,9 +81,9 @@ vec2f HeartPath::compute(float alpha) {
 }
 
 ArchimedeanSpiralPath::ArchimedeanSpiralPath(u8 turns, float radius)
-    : mTurns(turns), mRadius(radius) {}
+    FL_NO_EXCEPT : mTurns(turns), mRadius(radius) {}
 
-vec2f ArchimedeanSpiralPath::compute(float alpha) {
+vec2f ArchimedeanSpiralPath::compute(float alpha) FL_NO_EXCEPT {
     // Parametric equation for an Archimedean spiral
     // α in [0,1] → (x,y) on the spiral curve
 
@@ -103,13 +104,13 @@ vec2f ArchimedeanSpiralPath::compute(float alpha) {
     return vec2f(x, y);
 }
 
-RosePath::RosePath(u8 n, u8 d) {
+RosePath::RosePath(u8 n, u8 d) FL_NO_EXCEPT {
     mParams = fl::make_shared<RosePathParams>();
     params().n = n;
     params().d = d;
 }
 
-vec2f RosePath::compute(float alpha) {
+vec2f RosePath::compute(float alpha) FL_NO_EXCEPT {
     // Parametric equation for a rose curve (rhodonea)
     // α in [0,1] → (x,y) on the rose curve
 
@@ -136,7 +137,7 @@ vec2f RosePath::compute(float alpha) {
     return vec2f(x, y);
 }
 
-vec2f PhyllotaxisPath::compute(float alpha) {
+vec2f PhyllotaxisPath::compute(float alpha) FL_NO_EXCEPT {
     // total number of points you want in the pattern
     const float N = static_cast<float>(params().c);
 
@@ -160,7 +161,7 @@ vec2f PhyllotaxisPath::compute(float alpha) {
     return vec2f{x, y};
 }
 
-vec2f GielisCurvePath::compute(float alpha) {
+vec2f GielisCurvePath::compute(float alpha) FL_NO_EXCEPT {
     // 1) map alpha to angle θ ∈ [0 … 2π)
     constexpr float kTwoPi = 6.283185307179586f;
     float theta = alpha * kTwoPi;
@@ -189,90 +190,90 @@ vec2f GielisCurvePath::compute(float alpha) {
     return vec2f{x, y};
 }
 
-const string CirclePath::name() const { return "CirclePath"; }
+const string CirclePath::name() const FL_NO_EXCEPT { return "CirclePath"; }
 
-vec2f PointPath::compute(float alpha) {
+vec2f PointPath::compute(float alpha) FL_NO_EXCEPT {
     FASTLED_UNUSED(alpha);
     return mPoint;
 }
 
-const string PointPath::name() const { return "PointPath"; }
+const string PointPath::name() const FL_NO_EXCEPT { return "PointPath"; }
 
-void PointPath::set(float x, float y) { set(vec2f(x, y)); }
+void PointPath::set(float x, float y) FL_NO_EXCEPT { set(vec2f(x, y)); }
 
-void PointPath::set(vec2f p) { mPoint = p; }
+void PointPath::set(vec2f p) FL_NO_EXCEPT { mPoint = p; }
 
-PointPath::PointPath(float x, float y) : mPoint(x, y) {}
+PointPath::PointPath(float x, float y) FL_NO_EXCEPT : mPoint(x, y) {}
 
-PointPath::PointPath(vec2f p) : mPoint(p) {}
+PointPath::PointPath(vec2f p) FL_NO_EXCEPT : mPoint(p) {}
 
-const string LinePath::name() const { return "LinePath"; }
+const string LinePath::name() const FL_NO_EXCEPT { return "LinePath"; }
 
-LinePathParams &LinePath::params() { return *mParams; }
+LinePathParams &LinePath::params() FL_NO_EXCEPT { return *mParams; }
 
-const LinePathParams &LinePath::params() const { return *mParams; }
+const LinePathParams &LinePath::params() const FL_NO_EXCEPT { return *mParams; }
 
-LinePath::LinePath(const LinePathParamsPtr &params) : mParams(params) {}
+LinePath::LinePath(const LinePathParamsPtr &params) FL_NO_EXCEPT : mParams(params) {}
 
-const string HeartPath::name() const { return "HeartPath"; }
+const string HeartPath::name() const FL_NO_EXCEPT { return "HeartPath"; }
 
-const string ArchimedeanSpiralPath::name() const {
+const string ArchimedeanSpiralPath::name() const FL_NO_EXCEPT {
     return "ArchimedeanSpiralPath";
 }
 
-void ArchimedeanSpiralPath::setTurns(u8 turns) { mTurns = turns; }
+void ArchimedeanSpiralPath::setTurns(u8 turns) FL_NO_EXCEPT { mTurns = turns; }
 
-void ArchimedeanSpiralPath::setRadius(float radius) { mRadius = radius; }
+void ArchimedeanSpiralPath::setRadius(float radius) FL_NO_EXCEPT { mRadius = radius; }
 
-const string RosePath::name() const { return "RosePath"; }
+const string RosePath::name() const FL_NO_EXCEPT { return "RosePath"; }
 
-void RosePath::setN(u8 n) { params().n = n; }
+void RosePath::setN(u8 n) FL_NO_EXCEPT { params().n = n; }
 
-void RosePath::setD(u8 d) { params().d = d; }
+void RosePath::setD(u8 d) FL_NO_EXCEPT { params().d = d; }
 
-RosePath::RosePath(const fl::shared_ptr<RosePathParams> &p) : mParams(p) {}
+RosePath::RosePath(const fl::shared_ptr<RosePathParams> &p) FL_NO_EXCEPT : mParams(p) {}
 
-RosePathParams &RosePath::params() { return *mParams; }
+RosePathParams &RosePath::params() FL_NO_EXCEPT { return *mParams; }
 
-const RosePathParams &RosePath::params() const { return *mParams; }
+const RosePathParams &RosePath::params() const FL_NO_EXCEPT { return *mParams; }
 
-const string PhyllotaxisPath::name() const { return "PhyllotaxisPath"; }
+const string PhyllotaxisPath::name() const FL_NO_EXCEPT { return "PhyllotaxisPath"; }
 
 PhyllotaxisPath::PhyllotaxisPath(const fl::shared_ptr<PhyllotaxisParams> &p)
-    : mParams(p) {}
+    FL_NO_EXCEPT : mParams(p) {}
 
-PhyllotaxisParams &PhyllotaxisPath::params() { return *mParams; }
+PhyllotaxisParams &PhyllotaxisPath::params() FL_NO_EXCEPT { return *mParams; }
 
-const PhyllotaxisParams &PhyllotaxisPath::params() const { return *mParams; }
+const PhyllotaxisParams &PhyllotaxisPath::params() const FL_NO_EXCEPT { return *mParams; }
 
 GielisCurvePath::GielisCurvePath(const fl::shared_ptr<GielisCurveParams> &p)
-    : mParams(p) {}
+    FL_NO_EXCEPT : mParams(p) {}
 
-const string GielisCurvePath::name() const { return "GielisCurvePath"; }
-void GielisCurvePath::setA(float a) { params().a = a; }
-void GielisCurvePath::setB(float b) { params().b = b; }
-void GielisCurvePath::setM(float m) { params().m = m; }
-void GielisCurvePath::setN1(float n1) { params().n1 = n1; }
-void GielisCurvePath::setN2(float n2) { params().n2 = n2; }
-void GielisCurvePath::setN3(float n3) { params().n3 = n3; }
-GielisCurveParams &GielisCurvePath::params() { return *mParams; }
-const GielisCurveParams &GielisCurvePath::params() const { return *mParams; }
+const string GielisCurvePath::name() const FL_NO_EXCEPT { return "GielisCurvePath"; }
+void GielisCurvePath::setA(float a) FL_NO_EXCEPT { params().a = a; }
+void GielisCurvePath::setB(float b) FL_NO_EXCEPT { params().b = b; }
+void GielisCurvePath::setM(float m) FL_NO_EXCEPT { params().m = m; }
+void GielisCurvePath::setN1(float n1) FL_NO_EXCEPT { params().n1 = n1; }
+void GielisCurvePath::setN2(float n2) FL_NO_EXCEPT { params().n2 = n2; }
+void GielisCurvePath::setN3(float n3) FL_NO_EXCEPT { params().n3 = n3; }
+GielisCurveParams &GielisCurvePath::params() FL_NO_EXCEPT { return *mParams; }
+const GielisCurveParams &GielisCurvePath::params() const FL_NO_EXCEPT { return *mParams; }
 
-CatmullRomPath::CatmullRomPath(const fl::shared_ptr<CatmullRomParams> &p) : mParams(p) {}
+CatmullRomPath::CatmullRomPath(const fl::shared_ptr<CatmullRomParams> &p) FL_NO_EXCEPT : mParams(p) {}
 
-void CatmullRomPath::addPoint(vec2f p) { params().addPoint(p); }
+void CatmullRomPath::addPoint(vec2f p) FL_NO_EXCEPT { params().addPoint(p); }
 
-void CatmullRomPath::addPoint(float x, float y) { params().addPoint(x, y); }
+void CatmullRomPath::addPoint(float x, float y) FL_NO_EXCEPT { params().addPoint(x, y); }
 
-void CatmullRomPath::clear() { params().clear(); }
+void CatmullRomPath::clear() FL_NO_EXCEPT { params().clear(); }
 
-fl::size CatmullRomPath::size() const { return params().size(); }
+fl::size CatmullRomPath::size() const FL_NO_EXCEPT { return params().size(); }
 
-CatmullRomParams &CatmullRomPath::params() { return *mParams; }
+CatmullRomParams &CatmullRomPath::params() FL_NO_EXCEPT { return *mParams; }
 
-const CatmullRomParams &CatmullRomPath::params() const { return *mParams; }
+const CatmullRomParams &CatmullRomPath::params() const FL_NO_EXCEPT { return *mParams; }
 
-vec2f CatmullRomPath::compute(float alpha) {
+vec2f CatmullRomPath::compute(float alpha) FL_NO_EXCEPT {
     const auto &points = params().points;
 
     // Need at least 2 points to define a path
@@ -334,7 +335,7 @@ vec2f CatmullRomPath::compute(float alpha) {
 
 vec2f CatmullRomPath::interpolate(const vec2f &p0, const vec2f &p1,
                                   const vec2f &p2, const vec2f &p3,
-                                  float t) const {
+                                  float t) const FL_NO_EXCEPT {
 
     // Catmull-Rom interpolation formula
     // Using alpha=0.5 for the "tension" parameter (standard Catmull-Rom)
@@ -359,6 +360,6 @@ vec2f CatmullRomPath::interpolate(const vec2f &p0, const vec2f &p1,
     return vec2f(x, y);
 }
 
-const string CatmullRomPath::name() const { return "CatmullRomPath"; }
+const string CatmullRomPath::name() const FL_NO_EXCEPT { return "CatmullRomPath"; }
 
 } // namespace fl

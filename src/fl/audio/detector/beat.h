@@ -15,12 +15,12 @@ public:
     Beat() FL_NO_EXCEPT;
     ~Beat() FL_NO_EXCEPT override;
 
-    void update(shared_ptr<Context> context) override;
-    void fireCallbacks() override;
-    bool needsFFT() const override { return true; }
-    bool needsFFTHistory() const override { return true; }
-    const char* getName() const override { return "Beat"; }
-    void reset() override;
+    void update(shared_ptr<Context> context) FL_NO_EXCEPT override;
+    void fireCallbacks() FL_NO_EXCEPT override;
+    bool needsFFT() const FL_NO_EXCEPT override { return true; }
+    bool needsFFTHistory() const FL_NO_EXCEPT override { return true; }
+    const char* getName() const FL_NO_EXCEPT override { return "Beat"; }
+    void reset() FL_NO_EXCEPT override;
 
     // Callbacks (multiple listeners supported)
     function_list<void()> onBeat;
@@ -29,14 +29,14 @@ public:
     function_list<void(float bpm, float confidence)> onTempoChange;
 
     // State access
-    bool isBeat() const { return mBeatDetected; }
-    float getBPM() const { return mBPM; }
-    float getPhase() const { return mPhase; }
-    float getConfidence() const { return mConfidence; }
+    bool isBeat() const FL_NO_EXCEPT { return mBeatDetected; }
+    float getBPM() const FL_NO_EXCEPT { return mBPM; }
+    float getPhase() const FL_NO_EXCEPT { return mPhase; }
+    float getConfidence() const FL_NO_EXCEPT { return mConfidence; }
 
     // Configuration
-    void setThreshold(float threshold) { mThreshold = threshold; }
-    void setSensitivity(float sensitivity) { mSensitivity = sensitivity; }
+    void setThreshold(float threshold) FL_NO_EXCEPT { mThreshold = threshold; }
+    void setSensitivity(float sensitivity) FL_NO_EXCEPT { mSensitivity = sensitivity; }
 
 private:
     bool mBeatDetected;
@@ -64,11 +64,11 @@ private:
 
     shared_ptr<const fft::Bins> mRetainedFFT;
 
-    float calculateSpectralFlux(const fft::Bins& fft);
-    void updateAdaptiveThreshold();
-    bool detectBeat(u32 timestamp);
-    void updateTempo(u32 timestamp);
-    void updatePhase(u32 timestamp);
+    float calculateSpectralFlux(const fft::Bins& fft) FL_NO_EXCEPT;
+    void updateAdaptiveThreshold() FL_NO_EXCEPT;
+    bool detectBeat(u32 timestamp) FL_NO_EXCEPT;
+    void updateTempo(u32 timestamp) FL_NO_EXCEPT;
+    void updatePhase(u32 timestamp) FL_NO_EXCEPT;
 };
 
 } // namespace detector

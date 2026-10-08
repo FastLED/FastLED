@@ -21,7 +21,7 @@ namespace fl {
 // ============================================================================
 
 /// Constructor from hsv8 - converts HSV color to RGB
-CRGB::CRGB(const hsv8& rhs) {
+CRGB::CRGB(const hsv8& rhs) FL_NO_EXCEPT {
     CHSV hsv_color(rhs.h, rhs.s, rhs.v);
     CRGB rgb_result;
     hsv2rgb_rainbow(hsv_color, rgb_result);
@@ -46,14 +46,14 @@ CRGB& CRGB::operator=(const hsv8& rhs) FL_NO_EXCEPT {
 // ============================================================================
 
 /// Set HSV values and convert to RGB
-CRGB& CRGB::setHSV(u8 hue, u8 sat, u8 val) {
+CRGB& CRGB::setHSV(u8 hue, u8 sat, u8 val) FL_NO_EXCEPT {
     CHSV hsv_color(hue, sat, val);
     hsv2rgb_rainbow(hsv_color, *this);
     return *this;
 }
 
 /// Set hue only (saturation and value set to max) and convert to RGB
-CRGB& CRGB::setHue(u8 hue) {
+CRGB& CRGB::setHue(u8 hue) FL_NO_EXCEPT {
     CHSV hsv_color(hue, 255, 255);
     hsv2rgb_rainbow(hsv_color, *this);
     return *this;
@@ -63,23 +63,23 @@ CRGB& CRGB::setHue(u8 hue) {
 // HSV16 Methods
 // ============================================================================
 
-CRGB CRGB::colorBoost(EaseType saturation_function, EaseType luminance_function) const {
+CRGB CRGB::colorBoost(EaseType saturation_function, EaseType luminance_function) const FL_NO_EXCEPT {
     HSV16 hsv(*this);
     return hsv.colorBoost(saturation_function, luminance_function);
 }
 
-void CRGB::colorBoost(const CRGB* src, CRGB* dst, size_t count, EaseType saturation_function, EaseType luminance_function) {
+void CRGB::colorBoost(const CRGB* src, CRGB* dst, size_t count, EaseType saturation_function, EaseType luminance_function) FL_NO_EXCEPT {
     for (size_t i = 0; i < count; i++) {
         dst[i] = src[i].colorBoost(saturation_function, luminance_function);
     }
 }
 
-HSV16 CRGB::toHSV16() const {
+HSV16 CRGB::toHSV16() const FL_NO_EXCEPT {
     return HSV16(*this);
 }
 
 // Constructor implementation for HSV16 -> CRGB automatic conversion
-CRGB::CRGB(const HSV16& rhs) {
+CRGB::CRGB(const HSV16& rhs) FL_NO_EXCEPT {
     *this = rhs.ToRGB();
 }
 

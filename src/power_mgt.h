@@ -5,6 +5,7 @@
 #include "pixeltypes.h"
 #include "fl/gfx/rgbw.h"
 #include "fl/channels/cled_controller.h"  // IWYU pragma: keep  (controller_unscaled_power_mW)
+#include "fl/stl/noexcept.h"
 
 /// @file power_mgt.h
 /// Functions to limit the power used by FastLED
@@ -35,7 +36,7 @@ struct PowerModelRGB {
 
     /// Default constructor - WS2812 @ 5V (16mA/11mA/15mA @ 5V), linear response
     constexpr PowerModelRGB()
-        : red_mW(5 * 16), green_mW(5 * 11), blue_mW(5 * 15), dark_mW(5 * 1),
+        FL_NO_EXCEPT : red_mW(5 * 16), green_mW(5 * 11), blue_mW(5 * 15), dark_mW(5 * 1),
           exponent(1.0f) {}
 
     /// Custom RGB power model
@@ -49,7 +50,7 @@ struct PowerModelRGB {
     ///          near-1.0 values fall back to linear. Only honored on large-memory
     ///          targets; ignored where `SKETCH_HAS_LARGE_MEMORY==0`.
     constexpr PowerModelRGB(fl::u8 r, fl::u8 g, fl::u8 b, fl::u8 d, float e = 1.0f)
-        : red_mW(r), green_mW(g), blue_mW(b), dark_mW(d), exponent(e) {}
+        FL_NO_EXCEPT : red_mW(r), green_mW(g), blue_mW(b), dark_mW(d), exponent(e) {}
 };
 
 /// RGBW LED power consumption model
@@ -64,7 +65,7 @@ struct PowerModelRGBW {
 
     /// Default constructor - SK6812 RGBW @ 5V estimate, linear response
     constexpr PowerModelRGBW()
-        : red_mW(90), green_mW(70), blue_mW(90), white_mW(100), dark_mW(5),
+        FL_NO_EXCEPT : red_mW(90), green_mW(70), blue_mW(90), white_mW(100), dark_mW(5),
           exponent(1.0f) {}
 
     /// Custom RGBW power model
@@ -76,7 +77,7 @@ struct PowerModelRGBW {
     /// @param e Brightness-to-power response exponent. See PowerModelRGB for details.
     constexpr PowerModelRGBW(fl::u8 r, fl::u8 g, fl::u8 b, fl::u8 w, fl::u8 d,
                              float e = 1.0f)
-        : red_mW(r), green_mW(g), blue_mW(b), white_mW(w), dark_mW(d),
+        FL_NO_EXCEPT : red_mW(r), green_mW(g), blue_mW(b), white_mW(w), dark_mW(d),
           exponent(e) {}
 
     /// The RGB emitters alone, without the white one.
@@ -87,7 +88,7 @@ struct PowerModelRGBW {
     /// the API and then discarded. Kept because callers who genuinely want
     /// the RGB subset -- driving the same strip as plain RGB, say -- have
     /// no other way to ask for it.
-    constexpr PowerModelRGB toRGB() const {
+    constexpr PowerModelRGB toRGB() const FL_NO_EXCEPT {
         return PowerModelRGB(red_mW, green_mW, blue_mW, dark_mW, exponent);
     }
 };
@@ -106,7 +107,7 @@ struct PowerModelRGBWW {
 
     /// Default constructor - Hypothetical RGBWW @ 5V estimate, linear response
     constexpr PowerModelRGBWW()
-        : red_mW(85), green_mW(65), blue_mW(85),
+        FL_NO_EXCEPT : red_mW(85), green_mW(65), blue_mW(85),
           white_mW(95), warm_white_mW(95), dark_mW(5),
           exponent(1.0f) {}
 
@@ -121,7 +122,7 @@ struct PowerModelRGBWW {
     constexpr PowerModelRGBWW(fl::u8 r, fl::u8 g, fl::u8 b,
                               fl::u8 w, fl::u8 ww, fl::u8 d,
                               float e = 1.0f)
-        : red_mW(r), green_mW(g), blue_mW(b),
+        FL_NO_EXCEPT : red_mW(r), green_mW(g), blue_mW(b),
           white_mW(w), warm_white_mW(ww), dark_mW(d),
           exponent(e) {}
 
@@ -138,7 +139,7 @@ struct PowerModelRGBWW {
     ///   - accepts that a fully RGBWW-aware brightness limiter (per-channel
     ///     accounting using all 5 mW values directly) is the right long-term
     ///     fix — see Phase G in issue #2558.
-    constexpr PowerModelRGB toRGB() const {
+    constexpr PowerModelRGB toRGB() const FL_NO_EXCEPT {
         // Distribute white-channel mW evenly across R/G/B. Clamp to 255 (u8
         // max) on overflow — a wrapping static_cast<u8> here would make the
         // brightness limiter *less* conservative on the highest-draw configs
@@ -166,7 +167,7 @@ struct PowerModelRGBWW {
 ///        curve in a single call.
 /// @note `exponent <= 0` or values within 1e-4 of 1.0 fall back to linear
 ///       (identity tables) rather than rebuilding with a degenerate curve.
-void set_power_model(const PowerModelRGB& model);
+void set_power_model(const PowerModelRGB& model) FL_NO_EXCEPT;
 
 /// Set a non-linear brightness-to-power response exponent
 /// @param exponent 1.0 = linear (default), values below 1.0 model higher-than-linear
@@ -179,12 +180,12 @@ void set_power_model(const PowerModelRGB& model);
 ///       (identity tables) rather than rebuilding with a degenerate curve.
 /// @note Only enabled on platforms where `SKETCH_HAS_LARGE_MEMORY==1`.
 ///       Smaller-memory targets keep the legacy linear behavior and ignore this setting.
-void set_power_scaling_exponent(float exponent);
+void set_power_scaling_exponent(float exponent) FL_NO_EXCEPT;
 
 /// Get the current brightness-to-power response exponent
 /// @returns the configured exponent. Defaults to 1.0 for linear scaling.
 /// @note Returns 1.0 on platforms where `SKETCH_HAS_LARGE_MEMORY==0`.
-float get_power_scaling_exponent();
+float get_power_scaling_exponent() FL_NO_EXCEPT;
 
 /// Set custom RGBW LED power consumption model
 /// @param model RGBW power consumption model
@@ -199,31 +200,31 @@ float get_power_scaling_exponent();
 ///
 /// The white emitter is charged only for controllers actually in RGBW mode;
 /// see `calculate_unscaled_power_mW(span, const Rgbw&)`.
-void set_power_model(const PowerModelRGBW& model);
+void set_power_model(const PowerModelRGBW& model) FL_NO_EXCEPT;
 
 /// Set custom RGBWW LED power consumption model
 /// @param model RGBWW power consumption model
 ///
 /// The folded model remains active for legacy RGBWW output. Managed output
 /// also retains the original five weights for its physical emitted codes.
-void set_power_model(const PowerModelRGBWW& model);
+void set_power_model(const PowerModelRGBWW& model) FL_NO_EXCEPT;
 
 /// Get current RGB power model
 /// @returns Current RGB power consumption model
-PowerModelRGB get_power_model();
+PowerModelRGB get_power_model() FL_NO_EXCEPT;
 
 /// The white-emitter draw the caller declared, or zero if they declared only
 /// an RGB model.
 ///
 /// Zero is the "not declared" reading rather than "declared as free": no
 /// emitter costs nothing, so the two cannot be confused.
-fl::u8 get_white_emitter_mW();
+fl::u8 get_white_emitter_mW() FL_NO_EXCEPT;
 
 /// Charge already-solved physical output bytes in source emitter order:
 /// RGB, RGBW, or RGB + warm white + cool white. Used by the managed pipeline's
 /// power hook; it must not apply legacy RGB-to-RGBW conversion a second time.
 fl::u32 calculate_unscaled_emitter_power_mW(fl::span<const fl::u8> codes,
-                                            fl::u8 emitter_count);
+                                            fl::u8 emitter_count) FL_NO_EXCEPT;
 
 /// @} PowerModel
 
@@ -234,16 +235,16 @@ fl::u32 calculate_unscaled_emitter_power_mW(fl::span<const fl::u8> codes,
 
 /// Set the maximum power used in milliamps for a given voltage
 /// @deprecated Use CFastLED::setMaxPowerInVoltsAndMilliamps()
-void set_max_power_in_volts_and_milliamps( fl::u8 volts, fl::u32 milliamps);
+void set_max_power_in_volts_and_milliamps( fl::u8 volts, fl::u32 milliamps) FL_NO_EXCEPT;
 
 /// Set the maximum power used in watts
 /// @deprecated Use CFastLED::setMaxPowerInMilliWatts
-void set_max_power_in_milliwatts( fl::u32 powerInmW);
+void set_max_power_in_milliwatts( fl::u32 powerInmW) FL_NO_EXCEPT;
 
 /// Select a pin with an LED that will be flashed to indicate that power management
 /// is pulling down the brightness
 /// @param pinNumber output pin. Zero is "no indicator LED".
-void set_max_power_indicator_LED( fl::u8 pinNumber); // zero = no indicator LED
+void set_max_power_indicator_LED( fl::u8 pinNumber) FL_NO_EXCEPT; // zero = no indicator LED
 
 /// @} PowerSetup
 
@@ -261,11 +262,11 @@ void set_max_power_indicator_LED( fl::u8 pinNumber); // zero = no indicator LED
 /// Similar to CFastLED::show(), but pre-adjusts brightness to keep
 /// below the power threshold.
 /// @deprecated This is now a part of CFastLED::show()
-void show_at_max_brightness_for_power();
+void show_at_max_brightness_for_power() FL_NO_EXCEPT;
 /// Similar to CFastLED::delay(), but pre-adjusts brightness to keep below the power
 /// threshold.
 /// @deprecated This is now a part of CFastLED::delay()
-void delay_at_max_brightness_for_power( fl::u16 ms);
+void delay_at_max_brightness_for_power( fl::u16 ms) FL_NO_EXCEPT;
 
 /// @} PowerShowDelay
 
@@ -279,11 +280,11 @@ void delay_at_max_brightness_for_power( fl::u16 ms);
 /// @param ledbuffer the LED data to check
 /// @param numLeds the number of LEDs in the data array
 /// @returns the number of milliwatts the LED data would consume at max brightness
-fl::u32 calculate_unscaled_power_mW( const CRGB* ledbuffer, fl::u16 numLeds);
+fl::u32 calculate_unscaled_power_mW( const CRGB* ledbuffer, fl::u16 numLeds) FL_NO_EXCEPT;
 
 /// @copydoc calculate_unscaled_power_mW(const CRGB*, uint16_t)
 /// @param leds span of LED data to check
-fl::u32 calculate_unscaled_power_mW(fl::span<const CRGB> leds);
+fl::u32 calculate_unscaled_power_mW(fl::span<const CRGB> leds) FL_NO_EXCEPT;
 
 /// Same, for a strip driven through the RGBW conversion.
 ///
@@ -304,7 +305,7 @@ fl::u32 calculate_unscaled_power_mW(fl::span<const CRGB> leds);
 /// @param leds span of LED data to check
 /// @param rgbw the controller's RGBW setting; an inactive one delegates to
 ///        the three-emitter overload
-fl::u32 calculate_unscaled_power_mW(fl::span<const CRGB> leds, const fl::Rgbw& rgbw);
+fl::u32 calculate_unscaled_power_mW(fl::span<const CRGB> leds, const fl::Rgbw& rgbw) FL_NO_EXCEPT;
 
 /// One controller's demand at full brightness, in mW, including idle draw --
 /// the quantity the limiter sums and scales.
@@ -313,7 +314,7 @@ fl::u32 calculate_unscaled_power_mW(fl::span<const CRGB> leds, const fl::Rgbw& r
 /// drives the pipeline solves, not for its source pixels: the two differ in
 /// either direction, by up to 4.45x on dim emitters (#4344, #4156 R3). Any
 /// other controller is charged through its RGBW conversion, as before.
-fl::u32 controller_unscaled_power_mW(const fl::CLEDController& controller);
+fl::u32 controller_unscaled_power_mW(const fl::CLEDController& controller) FL_NO_EXCEPT;
 
 /// The most `BINARY_DITHER` can add to one latched frame of `leds`, in mW
 /// (#4342, contract R4: "quantization reserve").
@@ -325,7 +326,7 @@ fl::u32 controller_unscaled_power_mW(const fl::CLEDController& controller);
 /// codes on every lit channel, at the power model's steepest single-code step,
 /// rounded up. It does not scale with brightness, which is why the limiter
 /// adds it to the fixed part of the demand rather than the scaled part.
-fl::u32 dither_reserve_mW(fl::span<const CRGB> leds);
+fl::u32 dither_reserve_mW(fl::span<const CRGB> leds) FL_NO_EXCEPT;
 
 /// `dither_reserve_mW()` for a controller that dithers, and zero for one that
 /// does not: a mode other than `BINARY_DITHER`, or an active RGBW/RGBWW
@@ -338,7 +339,7 @@ fl::u32 dither_reserve_mW(fl::span<const CRGB> leds);
 /// compiled out and the reserve is zero: the 64-bit arithmetic the bound needs
 /// costs 468 B of an ATtiny85's 8 KiB, which is what pushed `TwinkleFox` over
 /// the flash region (#4478). Every tier that can afford it keeps the reserve.
-fl::u32 controller_dither_reserve_mW(const fl::CLEDController& controller);
+fl::u32 controller_dither_reserve_mW(const fl::CLEDController& controller) FL_NO_EXCEPT;
 
 /// Applies the configured power-scaling response to a total power value.
 ///
@@ -349,7 +350,7 @@ fl::u32 controller_dither_reserve_mW(const fl::CLEDController& controller);
 /// @param total_mW unscaled total power at full brightness
 /// @param brightness requested brightness in FastLED's 0-255 brightness space
 /// @returns estimated power after applying the configured brightness-to-power response
-fl::u32 scale_power_for_brightness(fl::u32 total_mW, fl::u8 brightness);
+fl::u32 scale_power_for_brightness(fl::u32 total_mW, fl::u8 brightness) FL_NO_EXCEPT;
 
 /// Determines the highest brightness level you can use and still stay under
 /// the specified power budget for a given set of LEDs.
@@ -376,7 +377,7 @@ fl::u32 scale_power_for_brightness(fl::u32 total_mW, fl::u8 brightness);
 /// @returns a limited brightness value. No higher than the target brightness,
 /// but may be lower depending on the power limit. Zero when the budget is at
 /// or below the unscalable baseline.
-fl::u8 calculate_max_brightness_for_power_mW(const CRGB* ledbuffer, fl::u16 numLeds, fl::u8 target_brightness, fl::u32 max_power_mW);
+fl::u8 calculate_max_brightness_for_power_mW(const CRGB* ledbuffer, fl::u16 numLeds, fl::u8 target_brightness, fl::u32 max_power_mW) FL_NO_EXCEPT;
 
 /// @copybrief calculate_max_brightness_for_power_mW()
 /// @param ledbuffer the LED data to check
@@ -386,7 +387,7 @@ fl::u8 calculate_max_brightness_for_power_mW(const CRGB* ledbuffer, fl::u16 numL
 /// @param max_power_mA the max power in milliamps
 /// @returns a limited brightness value. No higher than the target brightness,
 /// but may be lower depending on the power limit.
-fl::u8 calculate_max_brightness_for_power_vmA(const CRGB* ledbuffer, fl::u16 numLeds, fl::u8 target_brightness, fl::u32 max_power_V, fl::u32 max_power_mA);
+fl::u8 calculate_max_brightness_for_power_vmA(const CRGB* ledbuffer, fl::u16 numLeds, fl::u8 target_brightness, fl::u32 max_power_V, fl::u32 max_power_mA) FL_NO_EXCEPT;
 
 /// Determines the highest brightness level you can use and still stay under
 /// the specified power budget for all sets of LEDs. 
@@ -397,7 +398,7 @@ fl::u8 calculate_max_brightness_for_power_vmA(const CRGB* ledbuffer, fl::u16 num
 /// @param max_power_mW the max power draw desired, in milliwatts
 /// @returns a limited brightness value. No higher than the target brightness,
 /// but may be lower depending on the power limit.
-fl::u8  calculate_max_brightness_for_power_mW( fl::u8 target_brightness, fl::u32 max_power_mW);
+fl::u8  calculate_max_brightness_for_power_mW( fl::u8 target_brightness, fl::u32 max_power_mW) FL_NO_EXCEPT;
 
 /// min(255, floor(255 * num / den)) for den > 0, computed in 32-bit
 /// arithmetic. The limiter's brightness ratio; declared for its tests.

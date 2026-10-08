@@ -85,19 +85,19 @@ struct AutoGainConfig {
 class AutoGain {
 public:
     AutoGain() FL_NO_EXCEPT;
-    explicit AutoGain(const AutoGainConfig& config);
+    explicit AutoGain(const AutoGainConfig& config) FL_NO_EXCEPT;
     ~AutoGain() FL_NO_EXCEPT;
 
     /// Configure the auto gain controller
-    void configure(const AutoGainConfig& config);
+    void configure(const AutoGainConfig& config) FL_NO_EXCEPT;
 
     /// Process audio sample with automatic gain adjustment
     /// @param sample Input audio sample
     /// @return Gain-adjusted audio sample
-    Sample process(const Sample& sample);
+    Sample process(const Sample& sample) FL_NO_EXCEPT;
 
     /// Reset internal state
-    void reset();
+    void reset() FL_NO_EXCEPT;
 
     /// Get current statistics (for monitoring/debugging)
     struct Stats {
@@ -110,32 +110,32 @@ public:
         u32 samplesProcessed = 0;           // Total samples processed
     };
 
-    const Stats& getStats() const { return mStats; }
+    const Stats& getStats() const FL_NO_EXCEPT { return mStats; }
 
     /// Get current gain multiplier
-    float getGain() const { return mStats.currentGain; }
+    float getGain() const FL_NO_EXCEPT { return mStats.currentGain; }
 
     /// Set sample rate for dt computation
-    void setSampleRate(int sampleRate) { mSampleRate = sampleRate; }
+    void setSampleRate(int sampleRate) FL_NO_EXCEPT { mSampleRate = sampleRate; }
 
 private:
     /// Resolve preset enum into concrete PI tuning parameters
-    void resolvePreset();
+    void resolvePreset() FL_NO_EXCEPT;
 
     /// Compute target gain from peak envelope
-    float computeTargetGain();
+    float computeTargetGain() FL_NO_EXCEPT;
 
     /// Update PI controller toward target gain
     /// @param targetGain Desired gain
     /// @param dt Time step in seconds
     /// @return Smoothed gain output
-    float updatePIController(float targetGain, float dt);
+    float updatePIController(float targetGain, float dt) FL_NO_EXCEPT;
 
     /// Apply gain to audio samples
     /// @param input Input PCM samples
     /// @param gain Gain multiplier
     /// @param output Output buffer
-    void applyGain(const vector<i16>& input, float gain, vector<i16>& output);
+    void applyGain(const vector<i16>& input, float gain, vector<i16>& output) FL_NO_EXCEPT;
 
     AutoGainConfig mConfig;
     Stats mStats;

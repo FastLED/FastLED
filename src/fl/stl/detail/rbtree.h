@@ -49,11 +49,11 @@ private:
         RBNode* parent;
 
         RBNode(const value_type& val, Color c = Color::kRed, RBNode* p = nullptr)
-            : data(val), color(c), left(nullptr), right(nullptr), parent(p) {}
+            FL_NO_EXCEPT : data(val), color(c), left(nullptr), right(nullptr), parent(p) {}
         
         template<typename... Args>
         RBNode(Color c, RBNode* p, Args&&... args)
-            : data(fl::forward<Args>(args)...), color(c), left(nullptr), right(nullptr), parent(p) {}
+            FL_NO_EXCEPT : data(fl::forward<Args>(args)...), color(c), left(nullptr), right(nullptr), parent(p) {}
     };
 
     using NodeAllocator = typename Allocator::template rebind<RBNode>::other;
@@ -64,7 +64,7 @@ private:
     NodeAllocator mAlloc;
 
     // Helper methods
-    void rotateLeft(RBNode* x) {
+    void rotateLeft(RBNode* x) FL_NO_EXCEPT {
         RBNode* y = x->right;
         x->right = y->left;
         if (y->left != nullptr) {
@@ -82,7 +82,7 @@ private:
         x->parent = y;
     }
 
-    void rotateRight(RBNode* x) {
+    void rotateRight(RBNode* x) FL_NO_EXCEPT {
         RBNode* y = x->left;
         x->left = y->right;
         if (y->right != nullptr) {
@@ -100,7 +100,7 @@ private:
         x->parent = y;
     }
 
-    void insertFixup(RBNode* z) {
+    void insertFixup(RBNode* z) FL_NO_EXCEPT {
         while (z->parent != nullptr && z->parent->parent != nullptr && z->parent->color == Color::kRed) {
             if (z->parent == z->parent->parent->left) {
                 RBNode* y = z->parent->parent->right;
@@ -139,7 +139,7 @@ private:
         mRoot->color = Color::kBlack;
     }
 
-    void transplant(RBNode* u, RBNode* v) {
+    void transplant(RBNode* u, RBNode* v) FL_NO_EXCEPT {
         if (u->parent == nullptr) {
             mRoot = v;
         } else if (u == u->parent->left) {
@@ -152,14 +152,14 @@ private:
         }
     }
 
-    RBNode* minimum(RBNode* x) const {
+    RBNode* minimum(RBNode* x) const FL_NO_EXCEPT {
         while (x->left != nullptr) {
             x = x->left;
         }
         return x;
     }
 
-    RBNode* maximum(RBNode* x) const {
+    RBNode* maximum(RBNode* x) const FL_NO_EXCEPT {
         while (x->right != nullptr) {
             x = x->right;
         }
@@ -167,7 +167,7 @@ private:
     }
 
     // Fixed to properly use xParent when x is nullptr; removes unused parameter warning and centralizes erase fixup
-    void deleteFixup(RBNode* x, RBNode* xParent) {
+    void deleteFixup(RBNode* x, RBNode* xParent) FL_NO_EXCEPT {
         while ((x != mRoot) && (x == nullptr || x->color == Color::kBlack)) {
             if (x == (xParent ? xParent->left : nullptr)) {
                 RBNode* w = xParent ? xParent->right : nullptr;
@@ -224,7 +224,7 @@ private:
         if (x) x->color = Color::kBlack;
     }
 
-    RBNode* findNode(const value_type& value) const {
+    RBNode* findNode(const value_type& value) const FL_NO_EXCEPT {
         RBNode* current = mRoot;
         while (current != nullptr) {
             if (mComp(value, current->data)) {
@@ -238,7 +238,7 @@ private:
         return nullptr;
     }
 
-    void destroyTree(RBNode* node) {
+    void destroyTree(RBNode* node) FL_NO_EXCEPT {
         if (node != nullptr) {
             destroyTree(node->left);
             destroyTree(node->right);
@@ -247,7 +247,7 @@ private:
         }
     }
 
-    RBNode* copyTree(RBNode* node, RBNode* parent = nullptr) {
+    RBNode* copyTree(RBNode* node, RBNode* parent = nullptr) FL_NO_EXCEPT {
         if (node == nullptr) return nullptr;
 
         RBNode* newNode = mAlloc.allocate(1);
@@ -263,7 +263,7 @@ private:
 
     // Shared insert implementation to reduce duplication
     template <typename U>
-    fl::pair<iterator, bool> insertImpl(U&& value) {
+    fl::pair<iterator, bool> insertImpl(U&& value) FL_NO_EXCEPT {
         RBNode* parent = nullptr;
         RBNode* current = mRoot;
         
@@ -300,7 +300,7 @@ private:
     }
 
     // Bound helpers to avoid duplication between const/non-const
-    RBNode* lowerBoundNode(const value_type& value) const {
+    RBNode* lowerBoundNode(const value_type& value) const FL_NO_EXCEPT {
         RBNode* current = mRoot;
         RBNode* result = nullptr;
         while (current != nullptr) {
@@ -314,7 +314,7 @@ private:
         return result;
     }
 
-    RBNode* upperBoundNode(const value_type& value) const {
+    RBNode* upperBoundNode(const value_type& value) const FL_NO_EXCEPT {
         RBNode* current = mRoot;
         RBNode* result = nullptr;
         while (current != nullptr) {
@@ -340,7 +340,7 @@ public:
         RBNode* mNode;
         const RedBlackTree* mTree;
 
-        RBNode* successor(RBNode* x) const {
+        RBNode* successor(RBNode* x) const FL_NO_EXCEPT {
             if (x == nullptr) return nullptr;
             if (x->right != nullptr) {
                 return mTree->minimum(x->right);
@@ -353,7 +353,7 @@ public:
             return y;
         }
 
-        RBNode* predecessor(RBNode* x) const {
+        RBNode* predecessor(RBNode* x) const FL_NO_EXCEPT {
             if (x == nullptr) return nullptr;
             if (x->left != nullptr) {
                 return mTree->maximum(x->left);
@@ -368,31 +368,31 @@ public:
 
     public:
         iterator() FL_NO_EXCEPT : mNode(nullptr), mTree(nullptr) {}
-        iterator(RBNode* n, const RedBlackTree* t) : mNode(n), mTree(t) {}
+        iterator(RBNode* n, const RedBlackTree* t) FL_NO_EXCEPT : mNode(n), mTree(t) {}
 
-        value_type& operator*() const { 
+        value_type& operator*() const FL_NO_EXCEPT {
             FASTLED_ASSERT(mNode != nullptr, "RedBlackTree::iterator: dereferencing end iterator");
             return mNode->data; 
         }
-        value_type* operator->() const { 
+        value_type* operator->() const FL_NO_EXCEPT {
             FASTLED_ASSERT(mNode != nullptr, "RedBlackTree::iterator: dereferencing end iterator");
             return &(mNode->data); 
         }
 
-        iterator& operator++() {
+        iterator& operator++() FL_NO_EXCEPT {
             if (mNode) {
                 mNode = successor(mNode);
             }
             return *this;
         }
 
-        iterator operator++(int) {
+        iterator operator++(int) FL_NO_EXCEPT {
             iterator temp = *this;
             ++(*this);
             return temp;
         }
 
-        iterator& operator--() {
+        iterator& operator--() FL_NO_EXCEPT {
             if (mNode) {
                 mNode = predecessor(mNode);
             } else if (mTree && mTree->mRoot) {
@@ -401,17 +401,17 @@ public:
             return *this;
         }
 
-        iterator operator--(int) {
+        iterator operator--(int) FL_NO_EXCEPT {
             iterator temp = *this;
             --(*this);
             return temp;
         }
 
-        bool operator==(const iterator& other) const {
+        bool operator==(const iterator& other) const FL_NO_EXCEPT {
             return mNode == other.mNode;
         }
 
-        bool operator!=(const iterator& other) const {
+        bool operator!=(const iterator& other) const FL_NO_EXCEPT {
             return mNode != other.mNode;
         }
     };
@@ -423,7 +423,7 @@ public:
         const RBNode* mNode;
         const RedBlackTree* mTree;
 
-        const RBNode* successor(const RBNode* x) const {
+        const RBNode* successor(const RBNode* x) const FL_NO_EXCEPT {
             if (x == nullptr) return nullptr;
             if (x->right != nullptr) {
                 return mTree->minimum(x->right);
@@ -436,7 +436,7 @@ public:
             return y;
         }
 
-        const RBNode* predecessor(const RBNode* x) const {
+        const RBNode* predecessor(const RBNode* x) const FL_NO_EXCEPT {
             if (x == nullptr) return nullptr;
             if (x->left != nullptr) {
                 return mTree->maximum(x->left);
@@ -454,32 +454,32 @@ public:
         using iterator_category = fl::bidirectional_iterator_tag;
 
         const_iterator() FL_NO_EXCEPT : mNode(nullptr), mTree(nullptr) {}
-        const_iterator(const RBNode* n, const RedBlackTree* t) : mNode(n), mTree(t) {}
-        const_iterator(const iterator& it) : mNode(it.mNode), mTree(it.mTree) {}
+        const_iterator(const RBNode* n, const RedBlackTree* t) FL_NO_EXCEPT : mNode(n), mTree(t) {}
+        const_iterator(const iterator& it) FL_NO_EXCEPT : mNode(it.mNode), mTree(it.mTree) {}
 
-        const value_type& operator*() const { 
+        const value_type& operator*() const FL_NO_EXCEPT {
             FASTLED_ASSERT(mNode != nullptr, "RedBlackTree::iterator: dereferencing end iterator");
             return mNode->data; 
         }
-        const value_type* operator->() const { 
+        const value_type* operator->() const FL_NO_EXCEPT {
             FASTLED_ASSERT(mNode != nullptr, "RedBlackTree::iterator: dereferencing end iterator");
             return &(mNode->data); 
         }
 
-        const_iterator& operator++() {
+        const_iterator& operator++() FL_NO_EXCEPT {
             if (mNode) {
                 mNode = successor(mNode);
             }
             return *this;
         }
 
-        const_iterator operator++(int) {
+        const_iterator operator++(int) FL_NO_EXCEPT {
             const_iterator temp = *this;
             ++(*this);
             return temp;
         }
 
-        const_iterator& operator--() {
+        const_iterator& operator--() FL_NO_EXCEPT {
             if (mNode) {
                 mNode = predecessor(mNode);
             } else if (mTree && mTree->mRoot) {
@@ -489,35 +489,35 @@ public:
             return *this;
         }
 
-        const_iterator operator--(int) {
+        const_iterator operator--(int) FL_NO_EXCEPT {
             const_iterator temp = *this;
             --(*this);
             return temp;
         }
 
-        bool operator==(const const_iterator& other) const {
+        bool operator==(const const_iterator& other) const FL_NO_EXCEPT {
             return mNode == other.mNode;
         }
 
-        bool operator!=(const const_iterator& other) const {
+        bool operator!=(const const_iterator& other) const FL_NO_EXCEPT {
             return mNode != other.mNode;
         }
 
         // Cross-type comparison: const_iterator with iterator
-        bool operator==(const iterator& other) const {
+        bool operator==(const iterator& other) const FL_NO_EXCEPT {
             return mNode == other.mNode;
         }
 
-        bool operator!=(const iterator& other) const {
+        bool operator!=(const iterator& other) const FL_NO_EXCEPT {
             return mNode != other.mNode;
         }
 
         // Friend functions for cross-type comparison (iterator with const_iterator)
-        friend bool operator==(const iterator& lhs, const const_iterator& rhs) {
+        friend bool operator==(const iterator& lhs, const const_iterator& rhs) FL_NO_EXCEPT {
             return lhs.mNode == rhs.mNode;
         }
 
-        friend bool operator!=(const iterator& lhs, const const_iterator& rhs) {
+        friend bool operator!=(const iterator& lhs, const const_iterator& rhs) FL_NO_EXCEPT {
             return lhs.mNode != rhs.mNode;
         }
     };
@@ -530,7 +530,7 @@ public:
         RBNode* mNode;
         const RedBlackTree* mTree;
 
-        RBNode* successor(RBNode* x) const {
+        RBNode* successor(RBNode* x) const FL_NO_EXCEPT {
             if (x == nullptr) return nullptr;
             if (x->right != nullptr) {
                 return mTree->minimum(x->right);
@@ -543,7 +543,7 @@ public:
             return y;
         }
 
-        RBNode* predecessor(RBNode* x) const {
+        RBNode* predecessor(RBNode* x) const FL_NO_EXCEPT {
             if (x == nullptr) return nullptr;
             if (x->left != nullptr) {
                 return mTree->maximum(x->left);
@@ -561,33 +561,33 @@ public:
         using iterator_category = fl::bidirectional_iterator_tag;
 
         reverse_iterator() FL_NO_EXCEPT : mNode(nullptr), mTree(nullptr) {}
-        reverse_iterator(RBNode* n, const RedBlackTree* t) : mNode(n), mTree(t) {}
+        reverse_iterator(RBNode* n, const RedBlackTree* t) FL_NO_EXCEPT : mNode(n), mTree(t) {}
 
-        value_type& operator*() const {
+        value_type& operator*() const FL_NO_EXCEPT {
             FASTLED_ASSERT(mNode != nullptr, "RedBlackTree::reverse_iterator: dereferencing end iterator");
             return mNode->data;
         }
-        value_type* operator->() const {
+        value_type* operator->() const FL_NO_EXCEPT {
             FASTLED_ASSERT(mNode != nullptr, "RedBlackTree::reverse_iterator: dereferencing end iterator");
             return &(mNode->data);
         }
 
         // Increment goes backward (predecessor)
-        reverse_iterator& operator++() {
+        reverse_iterator& operator++() FL_NO_EXCEPT {
             if (mNode) {
                 mNode = predecessor(mNode);
             }
             return *this;
         }
 
-        reverse_iterator operator++(int) {
+        reverse_iterator operator++(int) FL_NO_EXCEPT {
             reverse_iterator temp = *this;
             ++(*this);
             return temp;
         }
 
         // Decrement goes forward (successor)
-        reverse_iterator& operator--() {
+        reverse_iterator& operator--() FL_NO_EXCEPT {
             if (mNode) {
                 mNode = successor(mNode);
             } else if (mTree && mTree->mRoot) {
@@ -597,17 +597,17 @@ public:
             return *this;
         }
 
-        reverse_iterator operator--(int) {
+        reverse_iterator operator--(int) FL_NO_EXCEPT {
             reverse_iterator temp = *this;
             --(*this);
             return temp;
         }
 
-        bool operator==(const reverse_iterator& other) const {
+        bool operator==(const reverse_iterator& other) const FL_NO_EXCEPT {
             return mNode == other.mNode;
         }
 
-        bool operator!=(const reverse_iterator& other) const {
+        bool operator!=(const reverse_iterator& other) const FL_NO_EXCEPT {
             return mNode != other.mNode;
         }
     };
@@ -619,7 +619,7 @@ public:
         const RBNode* mNode;
         const RedBlackTree* mTree;
 
-        const RBNode* successor(const RBNode* x) const {
+        const RBNode* successor(const RBNode* x) const FL_NO_EXCEPT {
             if (x == nullptr) return nullptr;
             if (x->right != nullptr) {
                 return mTree->minimum(x->right);
@@ -632,7 +632,7 @@ public:
             return y;
         }
 
-        const RBNode* predecessor(const RBNode* x) const {
+        const RBNode* predecessor(const RBNode* x) const FL_NO_EXCEPT {
             if (x == nullptr) return nullptr;
             if (x->left != nullptr) {
                 return mTree->maximum(x->left);
@@ -650,34 +650,34 @@ public:
         using iterator_category = fl::bidirectional_iterator_tag;
 
         const_reverse_iterator() FL_NO_EXCEPT : mNode(nullptr), mTree(nullptr) {}
-        const_reverse_iterator(const RBNode* n, const RedBlackTree* t) : mNode(n), mTree(t) {}
-        const_reverse_iterator(const reverse_iterator& it) : mNode(it.mNode), mTree(it.mTree) {}
+        const_reverse_iterator(const RBNode* n, const RedBlackTree* t) FL_NO_EXCEPT : mNode(n), mTree(t) {}
+        const_reverse_iterator(const reverse_iterator& it) FL_NO_EXCEPT : mNode(it.mNode), mTree(it.mTree) {}
 
-        const value_type& operator*() const {
+        const value_type& operator*() const FL_NO_EXCEPT {
             FASTLED_ASSERT(mNode != nullptr, "RedBlackTree::const_reverse_iterator: dereferencing end iterator");
             return mNode->data;
         }
-        const value_type* operator->() const {
+        const value_type* operator->() const FL_NO_EXCEPT {
             FASTLED_ASSERT(mNode != nullptr, "RedBlackTree::const_reverse_iterator: dereferencing end iterator");
             return &(mNode->data);
         }
 
         // Increment goes backward (predecessor)
-        const_reverse_iterator& operator++() {
+        const_reverse_iterator& operator++() FL_NO_EXCEPT {
             if (mNode) {
                 mNode = predecessor(mNode);
             }
             return *this;
         }
 
-        const_reverse_iterator operator++(int) {
+        const_reverse_iterator operator++(int) FL_NO_EXCEPT {
             const_reverse_iterator temp = *this;
             ++(*this);
             return temp;
         }
 
         // Decrement goes forward (successor)
-        const_reverse_iterator& operator--() {
+        const_reverse_iterator& operator--() FL_NO_EXCEPT {
             if (mNode) {
                 mNode = successor(mNode);
             } else if (mTree && mTree->mRoot) {
@@ -687,24 +687,24 @@ public:
             return *this;
         }
 
-        const_reverse_iterator operator--(int) {
+        const_reverse_iterator operator--(int) FL_NO_EXCEPT {
             const_reverse_iterator temp = *this;
             --(*this);
             return temp;
         }
 
-        bool operator==(const const_reverse_iterator& other) const {
+        bool operator==(const const_reverse_iterator& other) const FL_NO_EXCEPT {
             return mNode == other.mNode;
         }
 
-        bool operator!=(const const_reverse_iterator& other) const {
+        bool operator!=(const const_reverse_iterator& other) const FL_NO_EXCEPT {
             return mNode != other.mNode;
         }
     };
 
     // Constructors and destructor
     RedBlackTree(const Compare& comp = Compare(), const Allocator& alloc = Allocator())
-        : mRoot(nullptr), mSize(0), mComp(comp), mAlloc(alloc) {}
+        FL_NO_EXCEPT : mRoot(nullptr), mSize(0), mComp(comp), mAlloc(alloc) {}
 
     RedBlackTree(const RedBlackTree& other) FL_NO_EXCEPT
         : mRoot(nullptr), mSize(other.mSize), mComp(other.mComp), mAlloc(other.mAlloc) {
@@ -752,86 +752,86 @@ public:
     }
 
     // Iterators
-    iterator begin() {
+    iterator begin() FL_NO_EXCEPT {
         if (mRoot == nullptr) return iterator(nullptr, this);
         return iterator(minimum(mRoot), this);
     }
 
-    const_iterator begin() const {
+    const_iterator begin() const FL_NO_EXCEPT {
         if (mRoot == nullptr) return const_iterator(nullptr, this);
         return const_iterator(minimum(mRoot), this);
     }
 
-    const_iterator cbegin() const {
+    const_iterator cbegin() const FL_NO_EXCEPT {
         return begin();
     }
 
-    iterator end() {
+    iterator end() FL_NO_EXCEPT {
         return iterator(nullptr, this);
     }
 
-    const_iterator end() const {
+    const_iterator end() const FL_NO_EXCEPT {
         return const_iterator(nullptr, this);
     }
 
-    const_iterator cend() const {
+    const_iterator cend() const FL_NO_EXCEPT {
         return end();
     }
 
     // Reverse iterators
-    reverse_iterator rbegin() {
+    reverse_iterator rbegin() FL_NO_EXCEPT {
         if (mRoot == nullptr) return reverse_iterator(nullptr, this);
         return reverse_iterator(maximum(mRoot), this);
     }
 
-    reverse_iterator rend() {
+    reverse_iterator rend() FL_NO_EXCEPT {
         return reverse_iterator(nullptr, this);
     }
 
-    const_reverse_iterator rbegin() const {
+    const_reverse_iterator rbegin() const FL_NO_EXCEPT {
         if (mRoot == nullptr) return const_reverse_iterator(nullptr, this);
         return const_reverse_iterator(maximum(mRoot), this);
     }
 
-    const_reverse_iterator rend() const {
+    const_reverse_iterator rend() const FL_NO_EXCEPT {
         return const_reverse_iterator(nullptr, this);
     }
 
-    const_reverse_iterator crbegin() const {
+    const_reverse_iterator crbegin() const FL_NO_EXCEPT {
         return rbegin();
     }
 
-    const_reverse_iterator crend() const {
+    const_reverse_iterator crend() const FL_NO_EXCEPT {
         return rend();
     }
 
     // Capacity
-    bool empty() const { return mSize == 0; }
-    fl::size size() const { return mSize; }
-    fl::size max_size() const { return fl::size(-1); }
+    bool empty() const FL_NO_EXCEPT { return mSize == 0; }
+    fl::size size() const FL_NO_EXCEPT { return mSize; }
+    fl::size max_size() const FL_NO_EXCEPT { return fl::size(-1); }
 
     // Modifiers
-    void clear() {
+    void clear() FL_NO_EXCEPT {
         destroyTree(mRoot);
         mRoot = nullptr;
         mSize = 0;
     }
 
-    fl::pair<iterator, bool> insert(const value_type& value) {
+    fl::pair<iterator, bool> insert(const value_type& value) FL_NO_EXCEPT {
         return insertImpl(value);
     }
 
-    fl::pair<iterator, bool> insert(value_type&& value) {
+    fl::pair<iterator, bool> insert(value_type&& value) FL_NO_EXCEPT {
         return insertImpl(fl::move(value));
     }
 
     template<typename... Args>
-    fl::pair<iterator, bool> emplace(Args&&... args) {
+    fl::pair<iterator, bool> emplace(Args&&... args) FL_NO_EXCEPT {
         value_type value(fl::forward<Args>(args)...);
         return insert(fl::move(value));
     }
 
-    iterator erase(const_iterator pos) {
+    iterator erase(const_iterator pos) FL_NO_EXCEPT {
         if (pos.mNode == nullptr) return end();
         
         RBNode* nodeToDelete = const_cast<RBNode*>(pos.mNode);
@@ -893,7 +893,7 @@ public:
         return iterator(successor, this);
     }
 
-    fl::size erase(const value_type& value) {
+    fl::size erase(const value_type& value) FL_NO_EXCEPT {
         RBNode* node = findNode(value);
         if (node == nullptr) return 0;
         
@@ -901,7 +901,7 @@ public:
         return 1;
     }
 
-    void swap(RedBlackTree& other) {
+    void swap(RedBlackTree& other) FL_NO_EXCEPT {
         fl::swap(mRoot, other.mRoot);
         fl::swap(mSize, other.mSize);
         fl::swap(mComp, other.mComp);
@@ -909,68 +909,68 @@ public:
     }
 
     // Lookup
-    fl::size count(const value_type& value) const {
+    fl::size count(const value_type& value) const FL_NO_EXCEPT {
         return findNode(value) != nullptr ? 1 : 0;
     }
 
-    iterator find(const value_type& value) {
+    iterator find(const value_type& value) FL_NO_EXCEPT {
         RBNode* node = findNode(value);
         return node ? iterator(node, this) : end();
     }
 
-    const_iterator find(const value_type& value) const {
+    const_iterator find(const value_type& value) const FL_NO_EXCEPT {
         RBNode* node = findNode(value);
         return node ? const_iterator(node, this) : end();
     }
 
-    bool contains(const value_type& value) const {
+    bool contains(const value_type& value) const FL_NO_EXCEPT {
         return findNode(value) != nullptr;
     }
 
-    fl::pair<iterator, iterator> equal_range(const value_type& value) {
+    fl::pair<iterator, iterator> equal_range(const value_type& value) FL_NO_EXCEPT {
         iterator lower = lower_bound(value);
         iterator upper = upper_bound(value);
         return fl::pair<iterator, iterator>(lower, upper);
     }
 
-    fl::pair<const_iterator, const_iterator> equal_range(const value_type& value) const {
+    fl::pair<const_iterator, const_iterator> equal_range(const value_type& value) const FL_NO_EXCEPT {
         const_iterator lower = lower_bound(value);
         const_iterator upper = upper_bound(value);
         return fl::pair<const_iterator, const_iterator>(lower, upper);
     }
 
-    iterator lower_bound(const value_type& value) {
+    iterator lower_bound(const value_type& value) FL_NO_EXCEPT {
         RBNode* n = lowerBoundNode(value);
         return n ? iterator(n, this) : end();
     }
 
-    const_iterator lower_bound(const value_type& value) const {
+    const_iterator lower_bound(const value_type& value) const FL_NO_EXCEPT {
         RBNode* n = lowerBoundNode(value);
         return n ? const_iterator(n, this) : end();
     }
 
-    iterator upper_bound(const value_type& value) {
+    iterator upper_bound(const value_type& value) FL_NO_EXCEPT {
         RBNode* n = upperBoundNode(value);
         return n ? iterator(n, this) : end();
     }
 
-    const_iterator upper_bound(const value_type& value) const {
+    const_iterator upper_bound(const value_type& value) const FL_NO_EXCEPT {
         RBNode* n = upperBoundNode(value);
         return n ? const_iterator(n, this) : end();
     }
 
     // Observers
-    compare_type value_comp() const {
+    compare_type value_comp() const FL_NO_EXCEPT {
         return mComp;
     }
 
     // Returns a copy of the allocator object associated with the tree
-    allocator_type get_allocator() const {
+    allocator_type get_allocator() const FL_NO_EXCEPT {
         return allocator_type(mAlloc);
     }
 
     // Comparison operators
-    bool operator==(const RedBlackTree& other) const {
+    bool operator==(const RedBlackTree& other) const FL_NO_EXCEPT {
         if (mSize != other.mSize) return false;
         
         const_iterator it1 = begin();
@@ -988,7 +988,7 @@ public:
         return it1 == end() && it2 == other.end();
     }
 
-    bool operator!=(const RedBlackTree& other) const {
+    bool operator!=(const RedBlackTree& other) const FL_NO_EXCEPT {
         return !(*this == other);
     }
 };
@@ -1014,9 +1014,9 @@ private:
     struct PairCompare {
         Compare mComp;
 
-        PairCompare(const Compare& comp = Compare()) : mComp(comp) {}
+        PairCompare(const Compare& comp = Compare()) FL_NO_EXCEPT : mComp(comp) {}
 
-        bool operator()(const value_type& a, const value_type& b) const {
+        bool operator()(const value_type& a, const value_type& b) const FL_NO_EXCEPT {
             return mComp(a.first, b.first);
         }
     };
@@ -1029,9 +1029,9 @@ public:
     class value_compare {
         friend class MapRedBlackTree;
         Compare mComp;
-        value_compare(Compare c) : mComp(c) {}
+        value_compare(Compare c) FL_NO_EXCEPT : mComp(c) {}
     public:
-        bool operator()(const value_type& x, const value_type& y) const {
+        bool operator()(const value_type& x, const value_type& y) const FL_NO_EXCEPT {
             return mComp(x.first, y.first);
         }
     };
@@ -1046,7 +1046,7 @@ public:
 
     // Constructors and destructor
     MapRedBlackTree(const Compare& comp = Compare(), const Allocator& alloc = Allocator())
-        : mTree(PairCompare(comp), alloc) {}
+        FL_NO_EXCEPT : mTree(PairCompare(comp), alloc) {}
 
     MapRedBlackTree(const MapRedBlackTree& other) FL_NO_EXCEPT = default;
     MapRedBlackTree& operator=(const MapRedBlackTree& other) FL_NO_EXCEPT = default;
@@ -1074,7 +1074,7 @@ public:
     MapRedBlackTree(InputIt first, InputIt last,
                     const Compare& comp = Compare(),
                     const Allocator& alloc = Allocator())
-        : mTree(PairCompare(comp), alloc) {
+        FL_NO_EXCEPT : mTree(PairCompare(comp), alloc) {
         // Insert all elements from the range
         for (InputIt it = first; it != last; ++it) {
             mTree.insert(*it);
@@ -1087,7 +1087,7 @@ public:
     MapRedBlackTree(fl::initializer_list<value_type> init,
                     const Compare& comp = Compare(),
                     const Allocator& alloc = Allocator())
-        : mTree(PairCompare(comp), alloc) {
+        FL_NO_EXCEPT : mTree(PairCompare(comp), alloc) {
         // Insert all elements from the initializer list
         for (const auto& value : init) {
             mTree.insert(value);
@@ -1097,64 +1097,64 @@ public:
     ~MapRedBlackTree() FL_NO_EXCEPT = default;
 
     // Iterators
-    iterator begin() { return mTree.begin(); }
-    const_iterator begin() const { return mTree.begin(); }
-    const_iterator cbegin() const { return mTree.cbegin(); }
-    iterator end() { return mTree.end(); }
-    const_iterator end() const { return mTree.end(); }
-    const_iterator cend() const { return mTree.cend(); }
+    iterator begin() FL_NO_EXCEPT { return mTree.begin(); }
+    const_iterator begin() const FL_NO_EXCEPT { return mTree.begin(); }
+    const_iterator cbegin() const FL_NO_EXCEPT { return mTree.cbegin(); }
+    iterator end() FL_NO_EXCEPT { return mTree.end(); }
+    const_iterator end() const FL_NO_EXCEPT { return mTree.end(); }
+    const_iterator cend() const FL_NO_EXCEPT { return mTree.cend(); }
 
     // Reverse iterators
-    reverse_iterator rbegin() { return mTree.rbegin(); }
-    reverse_iterator rend() { return mTree.rend(); }
-    const_reverse_iterator rbegin() const { return mTree.rbegin(); }
-    const_reverse_iterator rend() const { return mTree.rend(); }
-    const_reverse_iterator crbegin() const { return mTree.crbegin(); }
-    const_reverse_iterator crend() const { return mTree.crend(); }
+    reverse_iterator rbegin() FL_NO_EXCEPT { return mTree.rbegin(); }
+    reverse_iterator rend() FL_NO_EXCEPT { return mTree.rend(); }
+    const_reverse_iterator rbegin() const FL_NO_EXCEPT { return mTree.rbegin(); }
+    const_reverse_iterator rend() const FL_NO_EXCEPT { return mTree.rend(); }
+    const_reverse_iterator crbegin() const FL_NO_EXCEPT { return mTree.crbegin(); }
+    const_reverse_iterator crend() const FL_NO_EXCEPT { return mTree.crend(); }
 
     // Capacity
-    bool empty() const { return mTree.empty(); }
-    fl::size size() const { return mTree.size(); }
-    fl::size max_size() const { return mTree.max_size(); }
+    bool empty() const FL_NO_EXCEPT { return mTree.empty(); }
+    fl::size size() const FL_NO_EXCEPT { return mTree.size(); }
+    fl::size max_size() const FL_NO_EXCEPT { return mTree.max_size(); }
 
     // Element access
-    Value& operator[](const Key& key) {
+    Value& operator[](const Key& key) FL_NO_EXCEPT {
         auto result = mTree.insert(value_type(key, Value()));
         return result.first->second;
     }
 
-    Value& at(const Key& key) {
+    Value& at(const Key& key) FL_NO_EXCEPT {
         auto it = mTree.find(value_type(key, Value()));
         FASTLED_ASSERT(it != mTree.end(), "MapRedBlackTree::at: key not found");
         return it->second;
     }
 
-    const Value& at(const Key& key) const {
+    const Value& at(const Key& key) const FL_NO_EXCEPT {
         auto it = mTree.find(value_type(key, Value()));
         FASTLED_ASSERT(it != mTree.end(), "MapRedBlackTree::at: key not found");
         return it->second;
     }
 
     // Modifiers
-    void clear() { mTree.clear(); }
+    void clear() FL_NO_EXCEPT { mTree.clear(); }
 
-    fl::pair<iterator, bool> insert(const value_type& value) {
+    fl::pair<iterator, bool> insert(const value_type& value) FL_NO_EXCEPT {
         return mTree.insert(value);
     }
 
-    fl::pair<iterator, bool> insert(value_type&& value) {
+    fl::pair<iterator, bool> insert(value_type&& value) FL_NO_EXCEPT {
         return mTree.insert(fl::move(value));
     }
 
     template<typename... Args>
-    fl::pair<iterator, bool> emplace(Args&&... args) {
+    fl::pair<iterator, bool> emplace(Args&&... args) FL_NO_EXCEPT {
         return mTree.emplace(fl::forward<Args>(args)...);
     }
 
     // Range insert - insert elements from range [first, last)
     // Duplicates are ignored (existing keys are not overwritten)
     template <typename InputIt>
-    void insert(InputIt first, InputIt last) {
+    void insert(InputIt first, InputIt last) FL_NO_EXCEPT {
         for (InputIt it = first; it != last; ++it) {
             mTree.insert(*it);
         }
@@ -1162,7 +1162,7 @@ public:
 
     // Initializer list insert - insert elements from initializer list
     // Duplicates are ignored (existing keys are not overwritten)
-    void insert(fl::initializer_list<value_type> ilist) {
+    void insert(fl::initializer_list<value_type> ilist) FL_NO_EXCEPT {
         for (const auto& value : ilist) {
             mTree.insert(value);
         }
@@ -1171,13 +1171,13 @@ public:
     // Hint-based insert - insert with iterator hint for potential optimization
     // Returns iterator to inserted element or existing element if key already exists
     // Note: Current implementation ignores hint parameter; optimization can be added later
-    iterator insert(const_iterator hint, const value_type& value) {
+    iterator insert(const_iterator hint, const value_type& value) FL_NO_EXCEPT {
         (void)hint; // Hint parameter not currently used in implementation
         auto result = mTree.insert(value);
         return result.first;
     }
 
-    iterator insert(const_iterator hint, value_type&& value) {
+    iterator insert(const_iterator hint, value_type&& value) FL_NO_EXCEPT {
         (void)hint; // Hint parameter not currently used in implementation
         auto result = mTree.insert(fl::move(value));
         return result.first;
@@ -1187,7 +1187,7 @@ public:
     // Returns iterator to emplaced element or existing element if key already exists
     // Note: Current implementation ignores hint parameter; optimization can be added later
     template<typename... Args>
-    iterator emplace_hint(const_iterator hint, Args&&... args) {
+    iterator emplace_hint(const_iterator hint, Args&&... args) FL_NO_EXCEPT {
         (void)hint; // Hint parameter not currently used in implementation
         auto result = mTree.emplace(fl::forward<Args>(args)...);
         return result.first;
@@ -1196,7 +1196,7 @@ public:
     // Insert or assign - insert if key doesn't exist, assign if it does
     // Returns pair<iterator, bool> where bool indicates if insertion took place
     template <typename M>
-    fl::pair<iterator, bool> insert_or_assign(const Key& key, M&& obj) {
+    fl::pair<iterator, bool> insert_or_assign(const Key& key, M&& obj) FL_NO_EXCEPT {
         auto it = mTree.find(value_type(key, Value()));
         if (it != mTree.end()) {
             // Key exists, assign new value
@@ -1209,7 +1209,7 @@ public:
     }
 
     template <typename M>
-    fl::pair<iterator, bool> insert_or_assign(Key&& key, M&& obj) {
+    fl::pair<iterator, bool> insert_or_assign(Key&& key, M&& obj) FL_NO_EXCEPT {
         auto it = mTree.find(value_type(key, Value()));
         if (it != mTree.end()) {
             // Key exists, assign new value
@@ -1223,14 +1223,14 @@ public:
 
     // Hint-based insert_or_assign (hint parameter currently ignored, same as non-hint version)
     template <typename M>
-    iterator insert_or_assign(const_iterator hint, const Key& key, M&& obj) {
+    iterator insert_or_assign(const_iterator hint, const Key& key, M&& obj) FL_NO_EXCEPT {
         (void)hint; // Hint parameter not currently used in implementation
         auto result = insert_or_assign(key, fl::forward<M>(obj));
         return result.first;
     }
 
     template <typename M>
-    iterator insert_or_assign(const_iterator hint, Key&& key, M&& obj) {
+    iterator insert_or_assign(const_iterator hint, Key&& key, M&& obj) FL_NO_EXCEPT {
         (void)hint; // Hint parameter not currently used in implementation
         auto result = insert_or_assign(fl::move(key), fl::forward<M>(obj));
         return result.first;
@@ -1248,7 +1248,7 @@ public:
     // but does NOT construct the actual value from args... if the key already exists.
     // This is still more efficient than insert_or_assign when args... is expensive.
     template <typename... Args>
-    fl::pair<iterator, bool> try_emplace(const Key& key, Args&&... args) {
+    fl::pair<iterator, bool> try_emplace(const Key& key, Args&&... args) FL_NO_EXCEPT {
         // Use lower_bound to find position (constructs Value() once for search)
         auto it = mTree.lower_bound(value_type(key, Value()));
 
@@ -1263,7 +1263,7 @@ public:
     }
 
     template <typename... Args>
-    fl::pair<iterator, bool> try_emplace(Key&& key, Args&&... args) {
+    fl::pair<iterator, bool> try_emplace(Key&& key, Args&&... args) FL_NO_EXCEPT {
         // Use lower_bound to find position
         auto it = mTree.lower_bound(value_type(key, Value()));
 
@@ -1279,30 +1279,30 @@ public:
 
     // Hint-based try_emplace (hint parameter currently ignored, same as non-hint version)
     template <typename... Args>
-    iterator try_emplace(const_iterator hint, const Key& key, Args&&... args) {
+    iterator try_emplace(const_iterator hint, const Key& key, Args&&... args) FL_NO_EXCEPT {
         (void)hint; // Hint parameter not currently used in implementation
         auto result = try_emplace(key, fl::forward<Args>(args)...);
         return result.first;
     }
 
     template <typename... Args>
-    iterator try_emplace(const_iterator hint, Key&& key, Args&&... args) {
+    iterator try_emplace(const_iterator hint, Key&& key, Args&&... args) FL_NO_EXCEPT {
         (void)hint; // Hint parameter not currently used in implementation
         auto result = try_emplace(fl::move(key), fl::forward<Args>(args)...);
         return result.first;
     }
 
-    iterator erase(const_iterator pos) {
+    iterator erase(const_iterator pos) FL_NO_EXCEPT {
         return mTree.erase(pos);
     }
 
-    fl::size erase(const Key& key) {
+    fl::size erase(const Key& key) FL_NO_EXCEPT {
         return mTree.erase(value_type(key, Value()));
     }
 
     // Range erase - erase all elements in range [first, last)
     // Returns iterator following the last removed element
-    iterator erase(const_iterator first, const_iterator last) {
+    iterator erase(const_iterator first, const_iterator last) FL_NO_EXCEPT {
         // Handle empty range case
         if (first == last) {
             // Convert const_iterator to iterator for empty range
@@ -1329,67 +1329,67 @@ public:
         return current;
     }
 
-    void swap(MapRedBlackTree& other) {
+    void swap(MapRedBlackTree& other) FL_NO_EXCEPT {
         mTree.swap(other.mTree);
     }
 
     // Lookup
-    fl::size count(const Key& key) const {
+    fl::size count(const Key& key) const FL_NO_EXCEPT {
         return mTree.count(value_type(key, Value()));
     }
 
-    iterator find(const Key& key) {
+    iterator find(const Key& key) FL_NO_EXCEPT {
         return mTree.find(value_type(key, Value()));
     }
 
-    const_iterator find(const Key& key) const {
+    const_iterator find(const Key& key) const FL_NO_EXCEPT {
         return mTree.find(value_type(key, Value()));
     }
 
-    bool contains(const Key& key) const {
+    bool contains(const Key& key) const FL_NO_EXCEPT {
         return mTree.contains(value_type(key, Value()));
     }
 
-    fl::pair<iterator, iterator> equal_range(const Key& key) {
+    fl::pair<iterator, iterator> equal_range(const Key& key) FL_NO_EXCEPT {
         return mTree.equal_range(value_type(key, Value()));
     }
 
-    fl::pair<const_iterator, const_iterator> equal_range(const Key& key) const {
+    fl::pair<const_iterator, const_iterator> equal_range(const Key& key) const FL_NO_EXCEPT {
         return mTree.equal_range(value_type(key, Value()));
     }
 
-    iterator lower_bound(const Key& key) {
+    iterator lower_bound(const Key& key) FL_NO_EXCEPT {
         return mTree.lower_bound(value_type(key, Value()));
     }
 
-    const_iterator lower_bound(const Key& key) const {
+    const_iterator lower_bound(const Key& key) const FL_NO_EXCEPT {
         return mTree.lower_bound(value_type(key, Value()));
     }
 
-    iterator upper_bound(const Key& key) {
+    iterator upper_bound(const Key& key) FL_NO_EXCEPT {
         return mTree.upper_bound(value_type(key, Value()));
     }
 
-    const_iterator upper_bound(const Key& key) const {
+    const_iterator upper_bound(const Key& key) const FL_NO_EXCEPT {
         return mTree.upper_bound(value_type(key, Value()));
     }
 
     // Observers
-    key_compare key_comp() const {
+    key_compare key_comp() const FL_NO_EXCEPT {
         return mTree.value_comp().mComp;
     }
 
-    value_compare value_comp() const {
+    value_compare value_comp() const FL_NO_EXCEPT {
         return value_compare(key_comp());
     }
 
     // Returns a copy of the allocator object associated with the map
-    allocator_type get_allocator() const {
+    allocator_type get_allocator() const FL_NO_EXCEPT {
         return mTree.get_allocator();
     }
 
     // Comparison operators
-    bool operator==(const MapRedBlackTree& other) const {
+    bool operator==(const MapRedBlackTree& other) const FL_NO_EXCEPT {
         if (mTree.size() != other.mTree.size()) return false;
 
         auto it1 = mTree.begin();
@@ -1407,30 +1407,30 @@ public:
         return it1 == mTree.end() && it2 == other.mTree.end();
     }
 
-    bool operator!=(const MapRedBlackTree& other) const {
+    bool operator!=(const MapRedBlackTree& other) const FL_NO_EXCEPT {
         return !(*this == other);
     }
 
     // Lexicographic comparison operators
     // Compare maps element by element in sorted order
     // Returns true if this map is lexicographically less than other
-    bool operator<(const MapRedBlackTree& other) const {
+    bool operator<(const MapRedBlackTree& other) const FL_NO_EXCEPT {
         return fl::lexicographical_compare(mTree.begin(), mTree.end(),
                                           other.mTree.begin(), other.mTree.end());
     }
 
     // Returns true if this map is lexicographically less than or equal to other
-    bool operator<=(const MapRedBlackTree& other) const {
+    bool operator<=(const MapRedBlackTree& other) const FL_NO_EXCEPT {
         return !(other < *this);
     }
 
     // Returns true if this map is lexicographically greater than other
-    bool operator>(const MapRedBlackTree& other) const {
+    bool operator>(const MapRedBlackTree& other) const FL_NO_EXCEPT {
         return other < *this;
     }
 
     // Returns true if this map is lexicographically greater than or equal to other
-    bool operator>=(const MapRedBlackTree& other) const {
+    bool operator>=(const MapRedBlackTree& other) const FL_NO_EXCEPT {
         return !(*this < other);
     }
 };
@@ -1462,7 +1462,7 @@ public:
 
     // Constructors and destructor
     SetRedBlackTree(const Compare& comp = Compare(), const Allocator& alloc = Allocator()) 
-        : mTree(comp, alloc) {}
+        FL_NO_EXCEPT : mTree(comp, alloc) {}
 
     SetRedBlackTree(const SetRedBlackTree& other) FL_NO_EXCEPT = default;
     SetRedBlackTree(SetRedBlackTree&& other) FL_NO_EXCEPT = default;
@@ -1471,90 +1471,90 @@ public:
     ~SetRedBlackTree() FL_NO_EXCEPT = default;
 
     // Iterators
-    const_iterator begin() const { return mTree.begin(); }
-    const_iterator cbegin() const { return mTree.cbegin(); }
-    const_iterator end() const { return mTree.end(); }
-    const_iterator cend() const { return mTree.cend(); }
+    const_iterator begin() const FL_NO_EXCEPT { return mTree.begin(); }
+    const_iterator cbegin() const FL_NO_EXCEPT { return mTree.cbegin(); }
+    const_iterator end() const FL_NO_EXCEPT { return mTree.end(); }
+    const_iterator cend() const FL_NO_EXCEPT { return mTree.cend(); }
 
     // Reverse iterators
-    const_reverse_iterator rbegin() const { return mTree.rbegin(); }
-    const_reverse_iterator rend() const { return mTree.rend(); }
+    const_reverse_iterator rbegin() const FL_NO_EXCEPT { return mTree.rbegin(); }
+    const_reverse_iterator rend() const FL_NO_EXCEPT { return mTree.rend(); }
 
     // Capacity
-    bool empty() const { return mTree.empty(); }
-    fl::size size() const { return mTree.size(); }
-    fl::size max_size() const { return mTree.max_size(); }
+    bool empty() const FL_NO_EXCEPT { return mTree.empty(); }
+    fl::size size() const FL_NO_EXCEPT { return mTree.size(); }
+    fl::size max_size() const FL_NO_EXCEPT { return mTree.max_size(); }
 
     // Allocator
-    allocator_type get_allocator() const { return mTree.get_allocator(); }
+    allocator_type get_allocator() const FL_NO_EXCEPT { return mTree.get_allocator(); }
 
     // Modifiers
-    void clear() { mTree.clear(); }
+    void clear() FL_NO_EXCEPT { mTree.clear(); }
 
-    fl::pair<const_iterator, bool> insert(const value_type& value) {
+    fl::pair<const_iterator, bool> insert(const value_type& value) FL_NO_EXCEPT {
         auto result = mTree.insert(value);
         return fl::pair<const_iterator, bool>(result.first, result.second);
     }
 
-    fl::pair<const_iterator, bool> insert(value_type&& value) {
+    fl::pair<const_iterator, bool> insert(value_type&& value) FL_NO_EXCEPT {
         auto result = mTree.insert(fl::move(value));
         return fl::pair<const_iterator, bool>(result.first, result.second);
     }
 
     template<typename... Args>
-    fl::pair<const_iterator, bool> emplace(Args&&... args) {
+    fl::pair<const_iterator, bool> emplace(Args&&... args) FL_NO_EXCEPT {
         auto result = mTree.emplace(fl::forward<Args>(args)...);
         return fl::pair<const_iterator, bool>(result.first, result.second);
     }
 
-    const_iterator erase(const_iterator pos) {
+    const_iterator erase(const_iterator pos) FL_NO_EXCEPT {
         return mTree.erase(pos);
     }
 
-    fl::size erase(const Key& key) {
+    fl::size erase(const Key& key) FL_NO_EXCEPT {
         return mTree.erase(key);
     }
 
-    void swap(SetRedBlackTree& other) {
+    void swap(SetRedBlackTree& other) FL_NO_EXCEPT {
         mTree.swap(other.mTree);
     }
 
     // Lookup
-    fl::size count(const Key& key) const {
+    fl::size count(const Key& key) const FL_NO_EXCEPT {
         return mTree.count(key);
     }
 
-    const_iterator find(const Key& key) const {
+    const_iterator find(const Key& key) const FL_NO_EXCEPT {
         return mTree.find(key);
     }
 
-    bool contains(const Key& key) const {
+    bool contains(const Key& key) const FL_NO_EXCEPT {
         return mTree.contains(key);
     }
 
-    fl::pair<const_iterator, const_iterator> equal_range(const Key& key) const {
+    fl::pair<const_iterator, const_iterator> equal_range(const Key& key) const FL_NO_EXCEPT {
         return mTree.equal_range(key);
     }
 
-    const_iterator lower_bound(const Key& key) const {
+    const_iterator lower_bound(const Key& key) const FL_NO_EXCEPT {
         return mTree.lower_bound(key);
     }
 
-    const_iterator upper_bound(const Key& key) const {
+    const_iterator upper_bound(const Key& key) const FL_NO_EXCEPT {
         return mTree.upper_bound(key);
     }
 
     // Observers
-    key_compare key_comp() const {
+    key_compare key_comp() const FL_NO_EXCEPT {
         return mTree.value_comp();
     }
 
     // Comparison operators
-    bool operator==(const SetRedBlackTree& other) const {
+    bool operator==(const SetRedBlackTree& other) const FL_NO_EXCEPT {
         return mTree == other.mTree;
     }
 
-    bool operator!=(const SetRedBlackTree& other) const {
+    bool operator!=(const SetRedBlackTree& other) const FL_NO_EXCEPT {
         return mTree != other.mTree;
     }
 };

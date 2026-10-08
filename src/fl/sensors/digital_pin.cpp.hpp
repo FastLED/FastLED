@@ -14,10 +14,10 @@ namespace fl {
 
 class DigitalPinImpl {
   public:
-    DigitalPinImpl(int pin) : mPin(pin) {}
+    DigitalPinImpl(int pin) FL_NO_EXCEPT : mPin(pin) {}
     ~DigitalPinImpl() FL_NO_EXCEPT = default;
 
-    void setPinMode(DigitalPin::Mode mode) {
+    void setPinMode(DigitalPin::Mode mode) FL_NO_EXCEPT {
         fl::PinMode pinMode;
         switch (mode) {
             case DigitalPin::kInput:
@@ -38,11 +38,11 @@ class DigitalPinImpl {
         fl::pinMode(mPin, pinMode);
     }
 
-    bool high() {
+    bool high() FL_NO_EXCEPT {
         return fl::digitalRead(mPin) == fl::PinValue::High;
     }
 
-    void write(bool value) {
+    void write(bool value) FL_NO_EXCEPT {
         fl::digitalWrite(mPin, value ? fl::PinValue::High : fl::PinValue::Low);
     }
 
@@ -51,23 +51,23 @@ class DigitalPinImpl {
 };
 
 
-DigitalPin::DigitalPin(int pin) {
+DigitalPin::DigitalPin(int pin) FL_NO_EXCEPT {
     mImpl = fl::make_shared<DigitalPinImpl>(pin);
 }
 DigitalPin::~DigitalPin() FL_NO_EXCEPT = default;
-DigitalPin::DigitalPin(const DigitalPin &other) = default;
+DigitalPin::DigitalPin(const DigitalPin &other) FL_NO_EXCEPT = default;
 
 DigitalPin& DigitalPin::operator=(const DigitalPin &other) FL_NO_EXCEPT = default;
 
-void DigitalPin::setPinMode(Mode mode) {
+void DigitalPin::setPinMode(Mode mode) FL_NO_EXCEPT {
     mImpl->setPinMode(mode);
 }
 
-bool DigitalPin::high() const {
+bool DigitalPin::high() const FL_NO_EXCEPT {
     return mImpl->high();
 }
 
-void DigitalPin::write(bool is_high) {
+void DigitalPin::write(bool is_high) FL_NO_EXCEPT {
     mImpl->write(is_high);
 }
 

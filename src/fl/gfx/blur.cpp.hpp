@@ -22,6 +22,7 @@
 // Platform-neutral SIMD for blur kernels (SSE2, NEON, Xtensa PIE, scalar).
 #if !defined(FL_IS_AVR)
 #include "fl/math/simd.h"
+#include "fl/stl/noexcept.h"
 #endif
 
 // Force O3 even in debug builds so blur benchmarks don't hit watchdog timeouts.
@@ -30,9 +31,9 @@ FL_OPTIMIZATION_LEVEL_O3_BEGIN
 // Legacy XY function. This is a weak symbol that can be overridden by the user.
 // IMPORTANT: This MUST be in the global namespace (not fl::) for backward compatibility
 // with user code from FastLED 3.7.6 that defines: uint16_t XY(uint8_t x, uint8_t y)
-fl::u16 XY(fl::u8 x, fl::u8 y) FL_LINK_WEAK;
+fl::u16 XY(fl::u8 x, fl::u8 y) FL_NO_EXCEPT FL_LINK_WEAK;
 
-FL_LINK_WEAK fl::u16 XY(fl::u8 x, fl::u8 y) {
+FL_LINK_WEAK fl::u16 XY(fl::u8 x, fl::u8 y) FL_NO_EXCEPT {
     FASTLED_UNUSED(x);
     FASTLED_UNUSED(y);
     FL_ERROR("XY function not provided - using default [0][0]. Use blur2d with XYMap instead");
@@ -44,7 +45,7 @@ namespace fl {
 // make this a weak symbol
 namespace {
 fl::u16 xy_legacy_wrapper(fl::u16 x, fl::u16 y, fl::u16 width,
-                           fl::u16 height) {
+                           fl::u16 height) FL_NO_EXCEPT {
     FASTLED_UNUSED(width);
     FASTLED_UNUSED(height);
     return ::XY(x, y);  // Call global namespace XY
@@ -66,7 +67,7 @@ namespace gfx {
 //         calls to 'blur' will also result in the light fading,
 //         eventually all the way to black; this is by design so that
 //         it can be used to (slowly) clear the LEDs to black.
-void blur1d(fl::span<CRGB> leds, fract8 blur_amount) {
+void blur1d(fl::span<CRGB> leds, fract8 blur_amount) FL_NO_EXCEPT {
     const fl::u16 numLeds = static_cast<fl::u16>(leds.size());
     fl::u8 keep = 255 - blur_amount;
     fl::u8 seep = blur_amount >> 1;
@@ -85,12 +86,12 @@ void blur1d(fl::span<CRGB> leds, fract8 blur_amount) {
 }
 
 void blur2d(fl::span<CRGB> leds, fl::u8 width, fl::u8 height,
-            fract8 blur_amount, const XYMap &xymap) {
+            fract8 blur_amount, const XYMap &xymap) FL_NO_EXCEPT {
     gfx::blurRows(leds, width, height, blur_amount, xymap);
     gfx::blurColumns(leds, width, height, blur_amount, xymap);
 }
 
-void blur2d(CRGB *leds, fl::u8 width, fl::u8 height, fract8 blur_amount) {
+void blur2d(CRGB *leds, fl::u8 width, fl::u8 height, fract8 blur_amount) FL_NO_EXCEPT {
     // Legacy path: uses global XY() via XYMap for user-defined layouts.
     // Keeps its own blur algorithm copy because XYMap indexing differs from
     // the cache-coherent rectangular layout used by Canvas.
@@ -131,7 +132,7 @@ void blur2d(CRGB *leds, fl::u8 width, fl::u8 height, fract8 blur_amount) {
 }
 
 void blurRows(fl::span<CRGB> leds, fl::u8 width, fl::u8 height,
-              fract8 blur_amount, const XYMap &xyMap) {
+              fract8 blur_amount, const XYMap &xyMap) FL_NO_EXCEPT {
     CRGB *pixels = leds.data();
     fl::u8 keep = 255 - blur_amount;
     fl::u8 seep = blur_amount >> 1;
@@ -170,7 +171,7 @@ void blurRows(fl::span<CRGB> leds, fl::u8 width, fl::u8 height,
 }
 
 void blurColumns(fl::span<CRGB> leds, fl::u8 width, fl::u8 height,
-                 fract8 blur_amount, const XYMap &xyMap) {
+                 fract8 blur_amount, const XYMap &xyMap) FL_NO_EXCEPT {
     CRGB *pixels = leds.data();
     fl::u8 keep = 255 - blur_amount;
     fl::u8 seep = blur_amount >> 1;
@@ -207,7 +208,7 @@ void blurColumns(fl::span<CRGB> leds, fl::u8 width, fl::u8 height,
     }
 }
 
-void blurRows(Canvas<CRGB> &canvas, alpha8 blur_amount) {
+void blurRows(Canvas<CRGB> &canvas, alpha8 blur_amount) FL_NO_EXCEPT {
     const int w = canvas.width;
     const int h = canvas.height;
     CRGB *pixels = canvas.pixels;
@@ -230,7 +231,7 @@ void blurRows(Canvas<CRGB> &canvas, alpha8 blur_amount) {
     }
 }
 
-void blurColumns(Canvas<CRGB> &canvas, alpha8 blur_amount) {
+void blurColumns(Canvas<CRGB> &canvas, alpha8 blur_amount) FL_NO_EXCEPT {
     const int w = canvas.width;
     const int h = canvas.height;
     CRGB *pixels = canvas.pixels;
@@ -252,7 +253,7 @@ void blurColumns(Canvas<CRGB> &canvas, alpha8 blur_amount) {
     }
 }
 
-void blur2d(Canvas<CRGB> &canvas, alpha8 blur_amount) {
+void blur2d(Canvas<CRGB> &canvas, alpha8 blur_amount) FL_NO_EXCEPT {
     gfx::blurRows(canvas, blur_amount);
     gfx::blurColumns(canvas, blur_amount);
 }
@@ -285,9 +286,9 @@ namespace gfx {
 namespace blur_detail {
 
 // Identity alpha value for each type (no dimming).
-template <typename AlphaT> constexpr AlphaT alpha_identity();
-template <> constexpr alpha8 alpha_identity<alpha8>() { return alpha8(255); }
-template <> constexpr alpha16 alpha_identity<alpha16>() { return alpha16(65535); }
+template <typename AlphaT> constexpr AlphaT alpha_identity() FL_NO_EXCEPT;
+template <> constexpr alpha8 alpha_identity<alpha8>() FL_NO_EXCEPT { return alpha8(255); }
+template <> constexpr alpha16 alpha_identity<alpha16>() FL_NO_EXCEPT { return alpha16(65535); }
 
 // Channel extraction and alpha-scaled pixel construction.
 template <typename RGB_T>
@@ -295,15 +296,15 @@ struct pixel_ops;
 
 template <>
 struct pixel_ops<CRGB> {
-    FL_ALWAYS_INLINE u16 ch(u8 v) { return v; }
-    FL_ALWAYS_INLINE CRGB zero() { return CRGB(0, 0, 0); }
+    FL_ALWAYS_INLINE u16 ch(u8 v) FL_NO_EXCEPT { return v; }
+    FL_ALWAYS_INLINE CRGB zero() FL_NO_EXCEPT { return CRGB(0, 0, 0); }
 
-    FL_ALWAYS_INLINE CRGB make(u16 r, u16 g, u16 b) {
+    FL_ALWAYS_INLINE CRGB make(u16 r, u16 g, u16 b) FL_NO_EXCEPT {
         return CRGB(static_cast<u8>(r), static_cast<u8>(g),
                     static_cast<u8>(b));
     }
 
-    FL_ALWAYS_INLINE CRGB make(u16 r, u16 g, u16 b, alpha8 a) {
+    FL_ALWAYS_INLINE CRGB make(u16 r, u16 g, u16 b, alpha8 a) FL_NO_EXCEPT {
         if (a.value == 255) return make(r, g, b);
         u16 a1 = static_cast<u16>(a.value) + 1;
         return CRGB(static_cast<u8>((r * a1) >> 8),
@@ -311,7 +312,7 @@ struct pixel_ops<CRGB> {
                     static_cast<u8>((b * a1) >> 8));
     }
 
-    FL_ALWAYS_INLINE CRGB make(u16 r, u16 g, u16 b, alpha16 a) {
+    FL_ALWAYS_INLINE CRGB make(u16 r, u16 g, u16 b, alpha16 a) FL_NO_EXCEPT {
         if (a.value >= 65535) return make(r, g, b);
         u32 a1 = static_cast<u32>(a.value) + 1;
         return CRGB(static_cast<u8>((r * a1) >> 16),
@@ -322,22 +323,22 @@ struct pixel_ops<CRGB> {
 
 template <>
 struct pixel_ops<CRGB16> {
-    FL_ALWAYS_INLINE u32 ch(u8x8 v) { return v.raw(); }
-    FL_ALWAYS_INLINE CRGB16 zero() { return CRGB16(u8x8(0), u8x8(0), u8x8(0)); }
+    FL_ALWAYS_INLINE u32 ch(u8x8 v) FL_NO_EXCEPT { return v.raw(); }
+    FL_ALWAYS_INLINE CRGB16 zero() FL_NO_EXCEPT { return CRGB16(u8x8(0), u8x8(0), u8x8(0)); }
 
-    FL_ALWAYS_INLINE CRGB16 make(u32 r, u32 g, u32 b) {
+    FL_ALWAYS_INLINE CRGB16 make(u32 r, u32 g, u32 b) FL_NO_EXCEPT {
         return CRGB16(u8x8::from_raw(static_cast<u16>(r)),
                       u8x8::from_raw(static_cast<u16>(g)),
                       u8x8::from_raw(static_cast<u16>(b)));
     }
 
-    FL_ALWAYS_INLINE CRGB16 make(u32 r, u32 g, u32 b, alpha8 a) {
+    FL_ALWAYS_INLINE CRGB16 make(u32 r, u32 g, u32 b, alpha8 a) FL_NO_EXCEPT {
         if (a.value == 255) return make(r, g, b);
         u32 a1 = static_cast<u32>(a.value) + 1;
         return make((r * a1) >> 8, (g * a1) >> 8, (b * a1) >> 8);
     }
 
-    FL_ALWAYS_INLINE CRGB16 make(u32 r, u32 g, u32 b, alpha16 a) {
+    FL_ALWAYS_INLINE CRGB16 make(u32 r, u32 g, u32 b, alpha16 a) FL_NO_EXCEPT {
         if (a.value >= 65535) return make(r, g, b);
         u32 a1 = static_cast<u32>(a.value) + 1;
         return make((r * a1) >> 16, (g * a1) >> 16, (b * a1) >> 16);
@@ -346,7 +347,7 @@ struct pixel_ops<CRGB16> {
 
 // Thread-local padded pixel buffer for zero-padding approach.
 template <typename RGB_T>
-static fl::span<RGB_T> get_padbuf(int minSize) {
+static fl::span<RGB_T> get_padbuf(int minSize) FL_NO_EXCEPT {
     fl::vector<RGB_T> &buf = SingletonThreadLocal<fl::vector<RGB_T>>::instance();
     if (static_cast<int>(buf.size()) < minSize) {
         buf.resize(minSize);
@@ -363,7 +364,7 @@ struct interior_row;
 template <typename RGB_T, typename acc_t>
 struct interior_row<0, RGB_T, acc_t> {
     FL_ALWAYS_INLINE void apply(const RGB_T *row, int x,
-                             acc_t &r, acc_t &g, acc_t &b) {
+                             acc_t &r, acc_t &g, acc_t &b) FL_NO_EXCEPT {
         using P = pixel_ops<RGB_T>;
         r = P::ch(row[x].r); g = P::ch(row[x].g); b = P::ch(row[x].b);
     }
@@ -372,7 +373,7 @@ struct interior_row<0, RGB_T, acc_t> {
 template <typename RGB_T, typename acc_t>
 struct interior_row<1, RGB_T, acc_t> {
     FL_ALWAYS_INLINE void apply(const RGB_T *row, int x,
-                             acc_t &r, acc_t &g, acc_t &b) {
+                             acc_t &r, acc_t &g, acc_t &b) FL_NO_EXCEPT {
         using P = pixel_ops<RGB_T>;
         P p;
         r = 0; g = 0; b = 0;
@@ -385,7 +386,7 @@ struct interior_row<1, RGB_T, acc_t> {
 template <typename RGB_T, typename acc_t>
 struct interior_row<2, RGB_T, acc_t> {
     FL_ALWAYS_INLINE void apply(const RGB_T *row, int x,
-                             acc_t &r, acc_t &g, acc_t &b) {
+                             acc_t &r, acc_t &g, acc_t &b) FL_NO_EXCEPT {
         using P = pixel_ops<RGB_T>;
         P p;
         // [1, 4, 6, 4, 1] — symmetric: (e0+e4) + 4*(e1+e3) + 6*e2
@@ -402,7 +403,7 @@ struct interior_row<2, RGB_T, acc_t> {
 template <typename RGB_T, typename acc_t>
 struct interior_row<3, RGB_T, acc_t> {
     FL_ALWAYS_INLINE void apply(const RGB_T *row, int x,
-                             acc_t &r, acc_t &g, acc_t &b) {
+                             acc_t &r, acc_t &g, acc_t &b) FL_NO_EXCEPT {
         using P = pixel_ops<RGB_T>;
         P p;
         // [1, 6, 15, 20, 15, 6, 1] — symmetric: (e0+e6) + 6*(e1+e5) + 15*(e2+e4) + 20*e3
@@ -420,7 +421,7 @@ struct interior_row<3, RGB_T, acc_t> {
 template <typename RGB_T, typename acc_t>
 struct interior_row<4, RGB_T, acc_t> {
     FL_ALWAYS_INLINE void apply(const RGB_T *row, int x,
-                             acc_t &r, acc_t &g, acc_t &b) {
+                             acc_t &r, acc_t &g, acc_t &b) FL_NO_EXCEPT {
         using P = pixel_ops<RGB_T>;
         P p;
         // [1, 8, 28, 56, 70, 56, 28, 8, 1] — symmetric: (e0+e8) + 8*(e1+e7) + 28*(e2+e6) + 56*(e3+e5) + 70*e4
@@ -560,7 +561,7 @@ static void apply_pass_alpha_1ch(const CRGB *pad, CRGB *out, int count,
 // simultaneously using the interior_row kernel.
 template <int R, typename RGB_T, typename acc_t>
 FL_NO_INLINE_IF_AVR FL_OPTIMIZE_FUNCTION
-static void apply_pass(const RGB_T *pad, RGB_T *out, int count, int stride) {
+static void apply_pass(const RGB_T *pad, RGB_T *out, int count, int stride) FL_NO_EXCEPT {
     constexpr int shift = 2 * R;
     using P = pixel_ops<RGB_T>;
     for (int i = 0; i < count; ++i) {
@@ -576,7 +577,7 @@ static void apply_pass(const RGB_T *pad, RGB_T *out, int count, int stride) {
 template <int R, typename RGB_T, typename acc_t, typename AlphaT>
 FL_NO_INLINE_IF_AVR FL_OPTIMIZE_FUNCTION
 static void apply_pass_alpha(const RGB_T *pad, RGB_T *out, int count,
-                             int stride, AlphaT alpha) {
+                             int stride, AlphaT alpha) FL_NO_EXCEPT {
     constexpr int shift = 2 * R;
     using P = pixel_ops<RGB_T>;
     for (int i = 0; i < count; ++i) {
@@ -605,7 +606,7 @@ static void apply_pass_alpha(const RGB_T *pad, RGB_T *out, int count,
 static void simd_conv_121(const u8 * FL_RESTRICT_PARAM a,
                            const u8 * FL_RESTRICT_PARAM b,
                            const u8 * FL_RESTRICT_PARAM c,
-                           u8 * FL_RESTRICT_PARAM out, int nbytes) {
+                           u8 * FL_RESTRICT_PARAM out, int nbytes) FL_NO_EXCEPT {
     namespace fsimd = fl::simd; // ok bare using
     int i = 0;
     for (; i + 63 < nbytes; i += 64) {
@@ -632,7 +633,7 @@ static void simd_conv_121(const u8 * FL_RESTRICT_PARAM a,
 // Kernel: [1, 4, 6, 4, 1] >> 4
 static void simd_conv_14641(const u8 *p0, const u8 *p1, const u8 *p2,
                             const u8 *p3, const u8 *p4,
-                            u8 *out, int nbytes) {
+                            u8 *out, int nbytes) FL_NO_EXCEPT {
     namespace fsimd = fl::simd; // ok bare using
     const auto w4w = fsimd::set1_u16_16(4), w6w = fsimd::set1_u16_16(6);
     const auto w4 = fsimd::set1_u16_8(4), w6 = fsimd::set1_u16_8(6);
@@ -673,7 +674,7 @@ static void simd_conv_14641(const u8 *p0, const u8 *p1, const u8 *p2,
 // Kernel: [1, 6, 15, 20, 15, 6, 1] >> 6
 static void simd_conv_r3(const u8 *p0, const u8 *p1, const u8 *p2,
                           const u8 *p3, const u8 *p4, const u8 *p5,
-                          const u8 *p6, u8 *out, int nbytes) {
+                          const u8 *p6, u8 *out, int nbytes) FL_NO_EXCEPT {
     namespace fsimd = fl::simd; // ok bare using
     const auto w6w = fsimd::set1_u16_16(6), w15w = fsimd::set1_u16_16(15), w20w = fsimd::set1_u16_16(20);
     const auto w6 = fsimd::set1_u16_8(6), w15 = fsimd::set1_u16_8(15), w20 = fsimd::set1_u16_8(20);
@@ -723,7 +724,7 @@ static void simd_conv_r3(const u8 *p0, const u8 *p1, const u8 *p2,
 // Kernel: [1, 8, 28, 56, 70, 56, 28, 8, 1] >> 8
 static void simd_conv_r4(const u8 *p0, const u8 *p1, const u8 *p2, const u8 *p3,
                           const u8 *p4, const u8 *p5, const u8 *p6, const u8 *p7,
-                          const u8 *p8, u8 *out, int nbytes) {
+                          const u8 *p8, u8 *out, int nbytes) FL_NO_EXCEPT {
     namespace fsimd = fl::simd; // ok bare using
     const auto w8w = fsimd::set1_u16_16(8), w28w = fsimd::set1_u16_16(28);
     const auto w56w = fsimd::set1_u16_16(56), w70w = fsimd::set1_u16_16(70);
@@ -787,14 +788,14 @@ template <int R> struct simd_vconv_dispatch;
 
 template <> struct simd_vconv_dispatch<0> {
     template <typename RGB_T>
-    static void apply(RGB_T **bufs, const RGB_T **, u8 *out, int nbytes) {
+    static void apply(RGB_T **bufs, const RGB_T **, u8 *out, int nbytes) FL_NO_EXCEPT {
         FL_BUILTIN_MEMCPY(out, (const u8*)bufs[0], nbytes);
     }
 };
 
 template <> struct simd_vconv_dispatch<1> {
     template <typename RGB_T>
-    static void apply(RGB_T **bufs, const RGB_T **fwd, u8 *out, int nbytes) {
+    static void apply(RGB_T **bufs, const RGB_T **fwd, u8 *out, int nbytes) FL_NO_EXCEPT {
         simd_conv_121((const u8*)bufs[0], (const u8*)bufs[1],
                       (const u8*)fwd[0], out, nbytes);
     }
@@ -802,7 +803,7 @@ template <> struct simd_vconv_dispatch<1> {
 
 template <> struct simd_vconv_dispatch<2> {
     template <typename RGB_T>
-    static void apply(RGB_T **bufs, const RGB_T **fwd, u8 *out, int nbytes) {
+    static void apply(RGB_T **bufs, const RGB_T **fwd, u8 *out, int nbytes) FL_NO_EXCEPT {
         simd_conv_14641((const u8*)bufs[0], (const u8*)bufs[1],
                         (const u8*)bufs[2], (const u8*)fwd[0],
                         (const u8*)fwd[1], out, nbytes);
@@ -811,7 +812,7 @@ template <> struct simd_vconv_dispatch<2> {
 
 template <> struct simd_vconv_dispatch<3> {
     template <typename RGB_T>
-    static void apply(RGB_T **bufs, const RGB_T **fwd, u8 *out, int nbytes) {
+    static void apply(RGB_T **bufs, const RGB_T **fwd, u8 *out, int nbytes) FL_NO_EXCEPT {
         simd_conv_r3((const u8*)bufs[0], (const u8*)bufs[1],
                      (const u8*)bufs[2], (const u8*)bufs[3],
                      (const u8*)fwd[0], (const u8*)fwd[1],
@@ -821,7 +822,7 @@ template <> struct simd_vconv_dispatch<3> {
 
 template <> struct simd_vconv_dispatch<4> {
     template <typename RGB_T>
-    static void apply(RGB_T **bufs, const RGB_T **fwd, u8 *out, int nbytes) {
+    static void apply(RGB_T **bufs, const RGB_T **fwd, u8 *out, int nbytes) FL_NO_EXCEPT {
         simd_conv_r4((const u8*)bufs[0], (const u8*)bufs[1],
                      (const u8*)bufs[2], (const u8*)bufs[3],
                      (const u8*)bufs[4], (const u8*)fwd[0],
@@ -834,19 +835,19 @@ template <> struct simd_vconv_dispatch<4> {
 template <int R> struct simd_hconv_dispatch;
 
 template <> struct simd_hconv_dispatch<0> {
-    static void apply(const u8 *pb, int, u8 *ob, int nbytes, u8 *, int) {
+    static void apply(const u8 *pb, int, u8 *ob, int nbytes, u8 *, int) FL_NO_EXCEPT {
         FL_BUILTIN_MEMCPY(ob, pb, nbytes);
     }
 };
 
 template <> struct simd_hconv_dispatch<1> {
-    static void apply(const u8 *pb, int S, u8 *ob, int nbytes, u8 *, int) {
+    static void apply(const u8 *pb, int S, u8 *ob, int nbytes, u8 *, int) FL_NO_EXCEPT {
         simd_conv_121(pb, pb + S, pb + 2*S, ob, nbytes);
     }
 };
 
 template <> struct simd_hconv_dispatch<2> {
-    static void apply(const u8 *pb, int S, u8 *ob, int nbytes, u8 *, int) {
+    static void apply(const u8 *pb, int S, u8 *ob, int nbytes, u8 *, int) FL_NO_EXCEPT {
         // Direct [1,4,6,4,1] kernel — exact u16 multiply+shift, no cascaded
         // avg_round rounding. Slightly more SIMD ops than cascaded R=1 but
         // produces bit-exact results matching the scalar interior_row path.
@@ -855,13 +856,13 @@ template <> struct simd_hconv_dispatch<2> {
 };
 
 template <> struct simd_hconv_dispatch<3> {
-    static void apply(const u8 *pb, int S, u8 *ob, int nbytes, u8 *, int) {
+    static void apply(const u8 *pb, int S, u8 *ob, int nbytes, u8 *, int) FL_NO_EXCEPT {
         simd_conv_r3(pb, pb+S, pb+2*S, pb+3*S, pb+4*S, pb+5*S, pb+6*S, ob, nbytes);
     }
 };
 
 template <> struct simd_hconv_dispatch<4> {
-    static void apply(const u8 *pb, int S, u8 *ob, int nbytes, u8 *, int) {
+    static void apply(const u8 *pb, int S, u8 *ob, int nbytes, u8 *, int) FL_NO_EXCEPT {
         simd_conv_r4(pb, pb+S, pb+2*S, pb+3*S, pb+4*S, pb+5*S, pb+6*S, pb+7*S, pb+8*S, ob, nbytes);
     }
 };
@@ -873,7 +874,7 @@ template <int R, typename RGB_T, typename acc_t> struct vpass_pixel_kernel;
 template <typename RGB_T, typename acc_t>
 struct vpass_pixel_kernel<0, RGB_T, acc_t> {
     FL_ALWAYS_INLINE void apply(RGB_T **bufs, const RGB_T **, int x,
-                                        acc_t &r, acc_t &g, acc_t &b) {
+                                        acc_t &r, acc_t &g, acc_t &b) FL_NO_EXCEPT {
         pixel_ops<RGB_T> p;
         r = p.ch(bufs[0][x].r);
         g = p.ch(bufs[0][x].g);
@@ -884,7 +885,7 @@ struct vpass_pixel_kernel<0, RGB_T, acc_t> {
 template <typename RGB_T, typename acc_t>
 struct vpass_pixel_kernel<1, RGB_T, acc_t> {
     FL_ALWAYS_INLINE void apply(RGB_T **bufs, const RGB_T **fwd, int x,
-                                        acc_t &r, acc_t &g, acc_t &b) {
+                                        acc_t &r, acc_t &g, acc_t &b) FL_NO_EXCEPT {
         pixel_ops<RGB_T> p;
         r = (p.ch(bufs[0][x].r) + p.ch(fwd[0][x].r)) + (p.ch(bufs[1][x].r) << 1);
         g = (p.ch(bufs[0][x].g) + p.ch(fwd[0][x].g)) + (p.ch(bufs[1][x].g) << 1);
@@ -895,7 +896,7 @@ struct vpass_pixel_kernel<1, RGB_T, acc_t> {
 template <typename RGB_T, typename acc_t>
 struct vpass_pixel_kernel<2, RGB_T, acc_t> {
     FL_ALWAYS_INLINE void apply(RGB_T **bufs, const RGB_T **fwd, int x,
-                                        acc_t &r, acc_t &g, acc_t &b) {
+                                        acc_t &r, acc_t &g, acc_t &b) FL_NO_EXCEPT {
         pixel_ops<RGB_T> p;
         const acc_t sr04 = p.ch(bufs[0][x].r) + p.ch(fwd[1][x].r);
         const acc_t sg04 = p.ch(bufs[0][x].g) + p.ch(fwd[1][x].g);
@@ -912,7 +913,7 @@ struct vpass_pixel_kernel<2, RGB_T, acc_t> {
 template <typename RGB_T, typename acc_t>
 struct vpass_pixel_kernel<3, RGB_T, acc_t> {
     FL_ALWAYS_INLINE void apply(RGB_T **bufs, const RGB_T **fwd, int x,
-                                        acc_t &r, acc_t &g, acc_t &b) {
+                                        acc_t &r, acc_t &g, acc_t &b) FL_NO_EXCEPT {
         pixel_ops<RGB_T> p;
         const acc_t sr06 = p.ch(bufs[0][x].r) + p.ch(fwd[2][x].r);
         const acc_t sg06 = p.ch(bufs[0][x].g) + p.ch(fwd[2][x].g);
@@ -932,7 +933,7 @@ struct vpass_pixel_kernel<3, RGB_T, acc_t> {
 template <typename RGB_T, typename acc_t>
 struct vpass_pixel_kernel<4, RGB_T, acc_t> {
     FL_ALWAYS_INLINE void apply(RGB_T **bufs, const RGB_T **fwd, int x,
-                                        acc_t &r, acc_t &g, acc_t &b) {
+                                        acc_t &r, acc_t &g, acc_t &b) FL_NO_EXCEPT {
         pixel_ops<RGB_T> p;
         const acc_t sr08 = p.ch(bufs[0][x].r) + p.ch(fwd[3][x].r);
         const acc_t sg08 = p.ch(bufs[0][x].g) + p.ch(fwd[3][x].g);
@@ -967,7 +968,7 @@ FL_OPTIMIZE_FUNCTION
 static void vpass_rowmajor_impl(
     RGB_T *pixels, int w, int h,
     RGB_T *scratch, AlphaT alpha)
-{
+FL_NO_EXCEPT {
     constexpr int shift = 2 * R;
     using P = pixel_ops<RGB_T>;
 
@@ -1046,7 +1047,7 @@ static void vpass_rowmajor_impl(
 
 // ── Helper: pad buffer size calculation ─────────────────────────────────
 template <int hR, int vR, typename RGB_T>
-static int compute_pad_size(int w, int h) {
+static int compute_pad_size(int w, int h) FL_NO_EXCEPT {
     int hPad = 2 * hR + w;
 #if defined(FL_IS_AVR)
     int vPad = 2 * vR + h;
@@ -1060,7 +1061,7 @@ static int compute_pad_size(int w, int h) {
 // Dispatches to the appropriate kernel based on platform and pixel type.
 template <int R, typename RGB_T, typename acc_t, bool ApplyAlpha, typename AlphaT>
 FL_ALWAYS_INLINE
-void hpass_row(RGB_T *pad, RGB_T *out, int w, AlphaT alpha) {
+void hpass_row(RGB_T *pad, RGB_T *out, int w, AlphaT alpha) FL_NO_EXCEPT {
 #if defined(FL_IS_AVR)
     if (ApplyAlpha)
         apply_pass_alpha_1ch<R>(pad, out, w, 1, alpha);
@@ -1085,7 +1086,7 @@ void hpass_row(RGB_T *pad, RGB_T *out, int w, AlphaT alpha) {
 
 // ── Helper: vertical pass over entire image ─────────────────────────────
 template <int R, typename RGB_T, typename acc_t, bool ApplyAlpha, typename AlphaT>
-static void vpass_full(RGB_T *pixels, int w, int h, RGB_T *scratch, AlphaT alpha) {
+static void vpass_full(RGB_T *pixels, int w, int h, RGB_T *scratch, AlphaT alpha) FL_NO_EXCEPT {
 #if defined(FL_IS_AVR)
     // AVR: column-by-column with per-channel noinline + O3.
     FL_BUILTIN_MEMSET(scratch, 0, R * sizeof(RGB_T));
@@ -1128,7 +1129,7 @@ static void vpass_full(RGB_T *pixels, int w, int h, RGB_T *scratch, AlphaT alpha
 // Dim (alpha) is applied once at the final output.
 template <int hRadius, int vRadius, typename RGB_T, typename AlphaT>
 FL_OPTIMIZE_FUNCTION
-void blurGaussianImpl(Canvas<RGB_T> &canvas, AlphaT alpha) {
+void blurGaussianImpl(Canvas<RGB_T> &canvas, AlphaT alpha) FL_NO_EXCEPT {
     const int w = canvas.width;
     const int h = canvas.height;
     if (w <= 0 || h <= 0)
@@ -1192,14 +1193,14 @@ void blurGaussianImpl(Canvas<RGB_T> &canvas, AlphaT alpha) {
 // ── alpha8 overload (UNORM8 dim) ─────────────────────────────────────────
 
 template <int hRadius, int vRadius, typename RGB_T>
-void blurGaussian(Canvas<RGB_T> &canvas, alpha8 dimFactor) {
+void blurGaussian(Canvas<RGB_T> &canvas, alpha8 dimFactor) FL_NO_EXCEPT {
     blurGaussianImpl<hRadius, vRadius>(canvas, dimFactor);
 }
 
 // ── alpha16 overload (UNORM16 dim — true 16-bit precision) ───────────────
 
 template <int hRadius, int vRadius, typename RGB_T>
-void blurGaussian(Canvas<RGB_T> &canvas, alpha16 dimFactor) {
+void blurGaussian(Canvas<RGB_T> &canvas, alpha16 dimFactor) FL_NO_EXCEPT {
     blurGaussianImpl<hRadius, vRadius>(canvas, dimFactor);
 }
 
@@ -1208,7 +1209,7 @@ void blurGaussian(Canvas<RGB_T> &canvas, alpha16 dimFactor) {
 // Falls back to per-pixel gather/scatter through XYMap otherwise.
 template <int hRadius, int vRadius, typename RGB_T, typename AlphaT>
 FL_OPTIMIZE_FUNCTION
-void blurGaussianMappedImpl(CanvasMapped<RGB_T> &canvas, AlphaT alpha) {
+void blurGaussianMappedImpl(CanvasMapped<RGB_T> &canvas, AlphaT alpha) FL_NO_EXCEPT {
     const int w = canvas.width;
     const int h = canvas.height;
     if (w <= 0 || h <= 0)
@@ -1303,14 +1304,14 @@ void blurGaussianMappedImpl(CanvasMapped<RGB_T> &canvas, AlphaT alpha) {
 // ── CanvasMapped alpha8 overload ─────────────────────────────────────────
 
 template <int hRadius, int vRadius, typename RGB_T>
-void blurGaussian(CanvasMapped<RGB_T> &canvas, alpha8 dimFactor) {
+void blurGaussian(CanvasMapped<RGB_T> &canvas, alpha8 dimFactor) FL_NO_EXCEPT {
     blurGaussianMappedImpl<hRadius, vRadius>(canvas, dimFactor);
 }
 
 // ── CanvasMapped alpha16 overload ────────────────────────────────────────
 
 template <int hRadius, int vRadius, typename RGB_T>
-void blurGaussian(CanvasMapped<RGB_T> &canvas, alpha16 dimFactor) {
+void blurGaussian(CanvasMapped<RGB_T> &canvas, alpha16 dimFactor) FL_NO_EXCEPT {
     blurGaussianMappedImpl<hRadius, vRadius>(canvas, dimFactor);
 }
 

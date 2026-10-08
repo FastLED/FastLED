@@ -11,6 +11,7 @@
 #include "fl/stl/new.h"
 #include "fl/system/yield.h"
 #include "platforms/coroutine_runtime.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace task {
@@ -20,29 +21,29 @@ namespace detail {
 
 /// @brief Get reference to thread-local await recursion depth
 /// @return Reference to the thread-local await depth counter
-int& await_depth_tls() {
+int& await_depth_tls() FL_NO_EXCEPT {
     return SingletonThreadLocal<int>::instance();
 }
 } // namespace detail
 
-Executor& Executor::instance() {
+Executor& Executor::instance() FL_NO_EXCEPT {
     return fl::Singleton<Executor>::instance();
 }
 
-void Executor::register_runner(Runner* r) {
+void Executor::register_runner(Runner* r) FL_NO_EXCEPT {
     if (r && fl::find(mRunners.begin(), mRunners.end(), r) == mRunners.end()) {
         mRunners.push_back(r);
     }
 }
 
-void Executor::unregister_runner(Runner* r) {
+void Executor::unregister_runner(Runner* r) FL_NO_EXCEPT {
     auto it = fl::find(mRunners.begin(), mRunners.end(), r);
     if (it != mRunners.end()) {
         mRunners.erase(it);
     }
 }
 
-void Executor::update_all() {
+void Executor::update_all() FL_NO_EXCEPT {
     // Update all registered runners
     for (auto* r : mRunners) {
         if (r) {
@@ -51,7 +52,7 @@ void Executor::update_all() {
     }
 }
 
-bool Executor::has_active_tasks() const {
+bool Executor::has_active_tasks() const FL_NO_EXCEPT {
     for (const auto* r : mRunners) {
         if (r && r->has_active_tasks()) {
             return true;
@@ -60,7 +61,7 @@ bool Executor::has_active_tasks() const {
     return false;
 }
 
-size_t Executor::total_active_tasks() const {
+size_t Executor::total_active_tasks() const FL_NO_EXCEPT {
     size_t total = 0;
     for (const auto* r : mRunners) {
         if (r) {
@@ -72,7 +73,7 @@ size_t Executor::total_active_tasks() const {
 
 // Public API functions
 
-void run(fl::u32 microseconds, ExecFlags flags) {
+void run(fl::u32 microseconds, ExecFlags flags) FL_NO_EXCEPT {
     // Re-entrancy guard: detect if run is called from within run
     bool& running = SingletonThreadLocal<bool>::instance();
     if (running) {
@@ -168,11 +169,11 @@ void run(fl::u32 microseconds, ExecFlags flags) {
     } while (!expired());
 }
 
-size_t active_tasks() {
+size_t active_tasks() FL_NO_EXCEPT {
     return Executor::instance().total_active_tasks();
 }
 
-bool has_tasks() {
+bool has_tasks() FL_NO_EXCEPT {
     return Executor::instance().has_active_tasks();
 }
 

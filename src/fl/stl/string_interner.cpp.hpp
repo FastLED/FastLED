@@ -13,20 +13,20 @@
 namespace fl {
 
 // Mutex for global interner only (instance interners are single-threaded)
-static fl::mutex& global_interner_mutex() {
+static fl::mutex& global_interner_mutex() FL_NO_EXCEPT {
     static fl::mutex mtx;
     return mtx;
 }
 
 // StringInterner member function implementations
 
-StringInterner::StringInterner() {}
+StringInterner::StringInterner() FL_NO_EXCEPT {}
 
 StringInterner::~StringInterner() FL_NO_EXCEPT {
     clear();
 }
 
-fl::string StringInterner::intern(const string_view& sv) {
+fl::string StringInterner::intern(const string_view& sv) FL_NO_EXCEPT {
     if (sv.empty()) return fl::string();
 
     // SSO optimization: strings that fit in the inline buffer don't benefit from interning
@@ -58,45 +58,45 @@ fl::string StringInterner::intern(const string_view& sv) {
     return fl::string(holder);
 }
 
-fl::string StringInterner::intern(const fl::string& str) {
+fl::string StringInterner::intern(const fl::string& str) FL_NO_EXCEPT {
     // Convert to string_view and delegate
     return intern(string_view(str.c_str(), str.size()));
 }
 
-fl::string StringInterner::intern(const char* str) {
+fl::string StringInterner::intern(const char* str) FL_NO_EXCEPT {
     if (!str) return fl::string();
     // Convert to string_view and delegate
     return intern(string_view(str));
 }
 
-fl::string StringInterner::intern(const fl::span<const char>& sp) {
+fl::string StringInterner::intern(const fl::span<const char>& sp) FL_NO_EXCEPT {
     if (sp.empty()) return fl::string();
     // Convert to string_view and delegate
     return intern(string_view(sp.data(), sp.size()));
 }
 
-bool StringInterner::contains(const string_view& sv) const {
+bool StringInterner::contains(const string_view& sv) const FL_NO_EXCEPT {
     return mEntries.find(sv) != mEntries.end();
 }
 
-bool StringInterner::contains(const char* str) const {
+bool StringInterner::contains(const char* str) const FL_NO_EXCEPT {
     if (!str) return false;
     return contains(string_view(str));
 }
 
-fl::size StringInterner::size() const {
+fl::size StringInterner::size() const FL_NO_EXCEPT {
     return mEntries.size();
 }
 
-bool StringInterner::empty() const {
+bool StringInterner::empty() const FL_NO_EXCEPT {
     return mEntries.empty();
 }
 
-void StringInterner::clear() {
+void StringInterner::clear() FL_NO_EXCEPT {
     mEntries.clear();
 }
 
-void StringInterner::reserve(fl::size count) {
+void StringInterner::reserve(fl::size count) FL_NO_EXCEPT {
     // unordered_map doesn't have reserve(), but we can set the bucket count
     // This pre-allocates buckets to avoid rehashing
     if (count > 0) {
@@ -105,27 +105,27 @@ void StringInterner::reserve(fl::size count) {
 }
 
 // Global string interner singleton implementation
-StringInterner& global_interner() {
+StringInterner& global_interner() FL_NO_EXCEPT {
     return Singleton<StringInterner>::instance();
 }
 
 // Convenience functions for global interning (thread-safe via mutex)
-fl::string intern(const string_view& sv) {
+fl::string intern(const string_view& sv) FL_NO_EXCEPT {
     fl::unique_lock<fl::mutex> lock(global_interner_mutex());
     return global_interner().intern(sv);
 }
 
-fl::string intern(const fl::string& str) {
+fl::string intern(const fl::string& str) FL_NO_EXCEPT {
     fl::unique_lock<fl::mutex> lock(global_interner_mutex());
     return global_interner().intern(str);
 }
 
-fl::string intern(const char* str) {
+fl::string intern(const char* str) FL_NO_EXCEPT {
     fl::unique_lock<fl::mutex> lock(global_interner_mutex());
     return global_interner().intern(str);
 }
 
-fl::string intern(const fl::span<const char>& sp) {
+fl::string intern(const fl::span<const char>& sp) FL_NO_EXCEPT {
     fl::unique_lock<fl::mutex> lock(global_interner_mutex());
     return global_interner().intern(sp);
 }

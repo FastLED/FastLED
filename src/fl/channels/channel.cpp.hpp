@@ -54,7 +54,7 @@ class ReorderingPixelIteratorAny {
   private:
     /// @brief Get thread-local buffer for addressing transformation
     /// @return Reference to thread-local CRGB vector (reused across calls)
-    static fl::vector<CRGB>& getReorderBufferTLS() {
+    static fl::vector<CRGB>& getReorderBufferTLS() FL_NO_EXCEPT {
         return SingletonThreadLocal<fl::vector<CRGB>>::instance();
     }
     fl::optional<PixelController<RGB, 1, 0xFFFFFFFF>> mAddressedController;
@@ -281,12 +281,12 @@ Channel::selectPixelEncoder(const ChipsetVariant& chipset) FL_NO_EXCEPT {
     return nullptr;
 }
 
-i32 Channel::nextId() {
+i32 Channel::nextId() FL_NO_EXCEPT {
     static fl::atomic<i32> gNextChannelId(0); // okay static in header
     return gNextChannelId.fetch_add(1);
 }
 
-fl::string Channel::makeName(i32 id, const fl::optional<fl::string>& configName) {
+fl::string Channel::makeName(i32 id, const fl::optional<fl::string>& configName) FL_NO_EXCEPT {
     if (configName.has_value()) {
         return configName.value();
     }
@@ -304,7 +304,7 @@ fl::string Channel::makeName(i32 id, const fl::optional<fl::string>& configName)
 #endif
 }
 
-ChannelPtr Channel::create(const ChannelConfig &config) {
+ChannelPtr Channel::create(const ChannelConfig &config) FL_NO_EXCEPT {
     // Late binding strategy: Always create with empty driver
     // Engine binding happens on first showPixels() call:
     // - Affinity channels: Look up by name and cache
@@ -324,7 +324,7 @@ ChannelPtr Channel::create(const ChannelConfig &config) {
     return channel;
 }
 
-int Channel::getPin() const {
+int Channel::getPin() const FL_NO_EXCEPT {
     if (const ClocklessChipset* cs = mChipset.ptr<ClocklessChipset>()) {
         return cs->pin;
     }
@@ -334,7 +334,7 @@ int Channel::getPin() const {
     return -1;
 }
 
-const ChipsetTimingConfig& Channel::getTiming() const {
+const ChipsetTimingConfig& Channel::getTiming() const FL_NO_EXCEPT {
     if (const ClocklessChipset* cs = mChipset.ptr<ClocklessChipset>()) {
         return cs->timing;
     }
@@ -511,7 +511,7 @@ bool Channel::reconcileColorProfile(const ChannelOptions& options) FL_NO_EXCEPT 
 }
 #endif
 
-void Channel::applyConfig(const ChannelConfig& config) {
+void Channel::applyConfig(const ChannelConfig& config) FL_NO_EXCEPT {
     mRgbOrder = config.rgb_order;
     if (config.mName.has_value()) {
         mName = config.mName.value();
@@ -534,7 +534,7 @@ void Channel::applyConfig(const ChannelConfig& config) {
     events.onChannelConfigured(*this, config);
 }
 
-int Channel::getClockPin() const {
+int Channel::getClockPin() const FL_NO_EXCEPT {
     if (const SpiChipsetConfig* spi = mChipset.ptr<SpiChipsetConfig>()) {
         return spi->clockPin;
     }
@@ -804,7 +804,7 @@ void Channel::encodeMY9221(Channel& channel, PixelIterator& pixels,
 /// Marked `noinline` (via `FL_NO_INLINE`) so the compiler doesn't fold the
 /// cold body back into `showPixels`.
 FL_NO_INLINE
-fl::shared_ptr<IChannelDriver> Channel::resolveDynamicDriver() {
+fl::shared_ptr<IChannelDriver> Channel::resolveDynamicDriver() FL_NO_EXCEPT {
 #if defined(FASTLED_DISABLE_DYNAMIC_DRIVER) && FASTLED_DISABLE_DYNAMIC_DRIVER
     // Body excluded via FASTLED_DISABLE_DYNAMIC_DRIVER (#2926). The
     // showPixels call site is also gated so this is unreachable; the
@@ -875,7 +875,7 @@ bool Channel::waitForInUseBuffer() FL_NO_EXCEPT {
 // showPixels() is only a dispatcher (#4566): in-use wait, driver resolution,
 // encodeFrame(), submitFrame(). Each helper is FL_NO_INLINE so the entry
 // point stays small and the bodies exist exactly once.
-void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
+void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) FL_NO_EXCEPT {
     FL_SCOPED_TRACE;
 
     // Safety check: don't modify buffer if driver is currently transmitting it
@@ -1023,7 +1023,7 @@ void Channel::submitFrame(const fl::shared_ptr<IChannelDriver>& driver) FL_NO_EX
     events.onChannelEnqueued(*this, driverName);
 }
 
-void Channel::init() {
+void Channel::init() FL_NO_EXCEPT {
     // TODO: Implement initialization
 }
 
@@ -1033,12 +1033,12 @@ class StubChannelEngine : public IChannelDriver {
 public:
     virtual ~StubChannelEngine() FL_NO_EXCEPT = default;
 
-    virtual bool canHandle(const ChannelDataPtr& data) const override {
+    virtual bool canHandle(const ChannelDataPtr& data) const FL_NO_EXCEPT override {
         (void)data;
         return true;  // Test driver accepts all channel types
     }
 
-    virtual void enqueue(ChannelDataPtr /*channelData*/) override {
+    virtual void enqueue(ChannelDataPtr /*channelData*/) FL_NO_EXCEPT override {
         // No-op: stub driver does nothing
         static bool warned = false;
         if (!warned) {
@@ -1047,32 +1047,32 @@ public:
         }
     }
 
-    virtual void show() override {
+    virtual void show() FL_NO_EXCEPT override {
         // No-op: no hardware to drive
     }
 
-    virtual DriverState poll() override {
+    virtual DriverState poll() FL_NO_EXCEPT override {
         return DriverState(DriverState::READY);  // Always "ready" (does nothing)
     }
 
-    virtual fl::string getName() const override {
+    virtual fl::string getName() const FL_NO_EXCEPT override {
         return fl::string::from_literal("STUB");
     }
 
-    virtual Capabilities getCapabilities() const override {
+    virtual Capabilities getCapabilities() const FL_NO_EXCEPT override {
         return Capabilities(true, true);  // Stub accepts both clockless and SPI
     }
 };
 
 } // anonymous namespace
 
-IChannelDriver* getStubChannelEngine() {
+IChannelDriver* getStubChannelEngine() FL_NO_EXCEPT {
     static StubChannelEngine instance;
     return &instance;
 }
 
 // Re-exposed protected base class methods
-void Channel::addToDrawList() {
+void Channel::addToDrawList() FL_NO_EXCEPT {
     if (isInList()) {
         FL_WARN("Channel '" << mName << "': Skipping addToDrawList() - already in draw list");
         return;
@@ -1083,7 +1083,7 @@ void Channel::addToDrawList() {
     events.onChannelAdded(*this);
 }
 
-void Channel::removeFromDrawList() {
+void Channel::removeFromDrawList() FL_NO_EXCEPT {
     if (!isInList()) {
         FL_WARN("Channel '" << mName << "': Skipping removeFromDrawList() - not in draw list");
         return;
@@ -1097,11 +1097,11 @@ void Channel::removeFromDrawList() {
     mDriver.reset();
 }
 
-int Channel::size() const {
+int Channel::size() const FL_NO_EXCEPT {
     return CPixelLEDController<RGB>::size();
 }
 
-void Channel::showLeds(u8 brightness) {
+void Channel::showLeds(u8 brightness) FL_NO_EXCEPT {
     CPixelLEDController<RGB>::showLeds(brightness);
 }
 
@@ -1109,27 +1109,27 @@ u8 Channel::ditherPhase() const FL_NO_EXCEPT {
     return mDitherPhase;
 }
 
-bool Channel::isInDrawList() const {
+bool Channel::isInDrawList() const FL_NO_EXCEPT {
     return CPixelLEDController<RGB>::isInList();
 }
 
-fl::span<CRGB> Channel::leds() {
+fl::span<CRGB> Channel::leds() FL_NO_EXCEPT {
     return fl::span<CRGB>(CPixelLEDController<RGB>::leds(), CPixelLEDController<RGB>::size());
 }
 
-fl::span<const CRGB> Channel::leds() const {
+fl::span<const CRGB> Channel::leds() const FL_NO_EXCEPT {
     return fl::span<const CRGB>(CPixelLEDController<RGB>::leds(), CPixelLEDController<RGB>::size());
 }
 
-CRGB Channel::getCorrection() {
+CRGB Channel::getCorrection() FL_NO_EXCEPT {
     return CPixelLEDController<RGB>::getCorrection();
 }
 
-CRGB Channel::getTemperature() {
+CRGB Channel::getTemperature() FL_NO_EXCEPT {
     return CPixelLEDController<RGB>::getTemperature();
 }
 
-u8 Channel::getDither() {
+u8 Channel::getDither() FL_NO_EXCEPT {
     return CPixelLEDController<RGB>::getDither();
 }
 
@@ -1139,20 +1139,20 @@ fl::shared_ptr<StreamingPipelineQ16> Channel::colorPipeline() const FL_NO_EXCEPT
 }
 #endif
 
-Rgbw Channel::getRgbw() const {
+Rgbw Channel::getRgbw() const FL_NO_EXCEPT {
     return CPixelLEDController<RGB>::getRgbw();
 }
 
-Channel& Channel::setGamma(float gamma) {
+Channel& Channel::setGamma(float gamma) FL_NO_EXCEPT {
     mSettings.mGamma = gamma;
     return *this;
 }
 
-fl::optional<float> Channel::getGamma() const {
+fl::optional<float> Channel::getGamma() const FL_NO_EXCEPT {
     return mSettings.mGamma;
 }
 
-fl::string Channel::getEngineName() const {
+fl::string Channel::getEngineName() const FL_NO_EXCEPT {
     // Lock the weak_ptr to get a shared_ptr
     auto driver = mDriver.lock();
     if (driver) {
@@ -1161,7 +1161,7 @@ fl::string Channel::getEngineName() const {
     return fl::string();  // Return empty string if no driver bound
 }
 
-Channel& Channel::setScreenMap(const fl::XYMap& map, float diameter) {
+Channel& Channel::setScreenMap(const fl::XYMap& map, float diameter) FL_NO_EXCEPT {
     fl::ScreenMap screenmap = map.toScreenMap();
     if (diameter <= 0.0f) {
         screenmap.setDiameter(.15f);  // Default diameter for small matrices
@@ -1173,28 +1173,28 @@ Channel& Channel::setScreenMap(const fl::XYMap& map, float diameter) {
     return *this;
 }
 
-Channel& Channel::setScreenMap(const fl::ScreenMap& map) {
+Channel& Channel::setScreenMap(const fl::ScreenMap& map) FL_NO_EXCEPT {
     mScreenMap = map;
     fl::EngineEvents::onCanvasUiSet(asController(), map);
     return *this;
 }
 
-Channel& Channel::setScreenMap(fl::u16 width, fl::u16 height, float diameter) {
+Channel& Channel::setScreenMap(fl::u16 width, fl::u16 height, float diameter) FL_NO_EXCEPT {
     fl::XYMap xymap = fl::XYMap::constructRectangularGrid(width, height);
     return setScreenMap(xymap, diameter);
 }
 
-Channel& Channel::setScreenMap(const fl::XMap& map) {
+Channel& Channel::setScreenMap(const fl::XMap& map) FL_NO_EXCEPT {
     // Convert 1D XMap to 2D XYMap (width=length, height=1) and reuse existing logic
     fl::XYMap xymap = fl::XYMap::fromXMap(map);
     return setScreenMap(xymap, .15f);  // Use default diameter for 1D strips
 }
 
-const fl::ScreenMap& Channel::getScreenMap() const {
+const fl::ScreenMap& Channel::getScreenMap() const FL_NO_EXCEPT {
     return mScreenMap;
 }
 
-bool Channel::hasScreenMap() const {
+bool Channel::hasScreenMap() const FL_NO_EXCEPT {
     return mScreenMap.getLength() > 0;
 }
 

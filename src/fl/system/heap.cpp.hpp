@@ -1,4 +1,5 @@
 #include "fl/system/heap.h"
+#include "fl/stl/noexcept.h"
 
 // Platform-specific headers
 #include "platforms/is_platform.h"  // IWYU pragma: keep (needed for FL_IS_* macros)
@@ -22,7 +23,7 @@ namespace fl {
 
 #ifdef FL_IS_ESP32
 // ESP32 implementation - report both SRAM and PSRAM
-HeapInfo getFreeHeap() {
+HeapInfo getFreeHeap() FL_NO_EXCEPT {
     HeapInfo info;
 
     // MALLOC_CAP_INTERNAL: Internal SRAM (fast, always available)
@@ -37,7 +38,7 @@ HeapInfo getFreeHeap() {
 
 #elif defined(FL_IS_ESP8266)
 // ESP8266 implementation - SRAM only (no PSRAM support)
-HeapInfo getFreeHeap() {
+HeapInfo getFreeHeap() FL_NO_EXCEPT {
     HeapInfo info;
     info.free_sram = static_cast<fl::size>(ESP.getFreeHeap());
     info.free_psram = 0;  // No PSRAM on ESP8266
@@ -46,7 +47,7 @@ HeapInfo getFreeHeap() {
 
 #elif defined(FL_IS_AVR)
 // AVR implementation - compute free RAM between heap and stack (SRAM only)
-HeapInfo getFreeHeap() {
+HeapInfo getFreeHeap() FL_NO_EXCEPT {
     HeapInfo info;
 
     // Stack grows downward from top of RAM, heap grows upward
@@ -64,7 +65,7 @@ HeapInfo getFreeHeap() {
 #else
 // Default implementation for platforms without heap introspection
 // (Native/Stub, WASM, ARM variants without malloc_stats, etc.)
-HeapInfo getFreeHeap() {
+HeapInfo getFreeHeap() FL_NO_EXCEPT {
     HeapInfo info;
     info.free_sram = 0;   // Not available
     info.free_psram = 0;  // Not available

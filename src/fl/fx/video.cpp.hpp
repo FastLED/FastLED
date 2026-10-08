@@ -18,26 +18,26 @@
 
 namespace fl {
 
-Video::Video() : Fx1d(0) {}
+Video::Video() FL_NO_EXCEPT : Fx1d(0) {}
 
 Video::Video(size_t pixelsPerFrame, float fps, size_t frame_history_count)
-    : Fx1d(pixelsPerFrame) {
+    FL_NO_EXCEPT : Fx1d(pixelsPerFrame) {
     mImpl = fl::make_shared<VideoImpl>(pixelsPerFrame, fps, frame_history_count);
 }
 
-void Video::setFade(fl::u32 fadeInTime, fl::u32 fadeOutTime) {
+void Video::setFade(fl::u32 fadeInTime, fl::u32 fadeOutTime) FL_NO_EXCEPT {
     mImpl->setFade(fadeInTime, fadeOutTime);
 }
 
-void Video::pause(fl::u32 now) { mImpl->pause(now); }
+void Video::pause(fl::u32 now) FL_NO_EXCEPT { mImpl->pause(now); }
 
-void Video::resume(fl::u32 now) { mImpl->resume(now); }
+void Video::resume(fl::u32 now) FL_NO_EXCEPT { mImpl->resume(now); }
 
 Video::~Video() FL_NO_EXCEPT = default;
-Video::Video(const Video &) = default;
+Video::Video(const Video &) FL_NO_EXCEPT = default;
 Video &Video::operator=(const Video &) FL_NO_EXCEPT = default;
 
-bool Video::begin(filebuf_ptr handle) {
+bool Video::begin(filebuf_ptr handle) FL_NO_EXCEPT {
     if (!mImpl) {
         FL_WARN("Video::begin: mImpl is null, manually constructed videos "
                      "must include full parameters.");
@@ -66,7 +66,7 @@ bool Video::begin(filebuf_ptr handle) {
     return true;
 }
 
-bool Video::draw(fl::u32 now, fl::span<CRGB> leds) {
+bool Video::draw(fl::u32 now, fl::span<CRGB> leds) FL_NO_EXCEPT {
     if (!mError.empty()) {
         for (fl::size_t i = 0; i < leds.size(); ++i) {
             leds[i] = CRGB::Black;
@@ -85,47 +85,47 @@ bool Video::draw(fl::u32 now, fl::span<CRGB> leds) {
     return ok;
 }
 
-void Video::draw(DrawContext context) {
+void Video::draw(DrawContext context) FL_NO_EXCEPT {
     draw(context.now, context.leds);
 }
 
-i32 Video::durationMicros() const {
+i32 Video::durationMicros() const FL_NO_EXCEPT {
     if (!mImpl) {
         return -1;
     }
     return mImpl->durationMicros();
 }
 
-string Video::fxName() const { return "Video"; }
+string Video::fxName() const FL_NO_EXCEPT { return "Video"; }
 
-bool Video::draw(fl::u32 now, Frame *frame) {
+bool Video::draw(fl::u32 now, Frame *frame) FL_NO_EXCEPT {
     if (!frame) {
         return false;
     }
     return draw(now, frame->rgb());
 }
 
-void Video::end() {
+void Video::end() FL_NO_EXCEPT {
     if (mImpl) {
         mImpl->end();
     }
 }
 
-void Video::setTimeScale(float timeScale) {
+void Video::setTimeScale(float timeScale) FL_NO_EXCEPT {
     if (!mImpl) {
         return;
     }
     mImpl->setTimeScale(timeScale);
 }
 
-float Video::timeScale() const {
+float Video::timeScale() const FL_NO_EXCEPT {
     if (!mImpl) {
         return 1.0f;
     }
     return mImpl->timeScale();
 }
 
-string Video::error() const { return mError; }
+string Video::error() const FL_NO_EXCEPT { return mError; }
 
 bool Video::sourceProfile(SourceProfile *out) const FL_NO_EXCEPT {
     fled::VideoColor color;
@@ -151,7 +151,7 @@ void Video::setFledPlaybackMode(FledPlaybackMode mode) FL_NO_EXCEPT {
     }
 }
 
-size_t Video::pixelsPerFrame() const {
+size_t Video::pixelsPerFrame() const FL_NO_EXCEPT {
     if (!mImpl) {
         return 0;
     }
@@ -169,21 +169,21 @@ const fl::string &Video::embeddedScreenMapJson() const FL_NO_EXCEPT {
     return mImpl->embeddedScreenMapJson();
 }
 
-bool Video::finished() {
+bool Video::finished() FL_NO_EXCEPT {
     if (!mImpl) {
         return true;
     }
     return mFinished;
 }
 
-bool Video::rewind() {
+bool Video::rewind() FL_NO_EXCEPT {
     if (!mImpl) {
         return false;
     }
     return mImpl->rewind();
 }
 
-VideoFxWrapper::VideoFxWrapper(fl::shared_ptr<Fx> fx) : Fx1d(fx->getNumLeds()), mFx(fx) {
+VideoFxWrapper::VideoFxWrapper(fl::shared_ptr<Fx> fx) FL_NO_EXCEPT : Fx1d(fx->getNumLeds()), mFx(fx) {
     if (!mFx->hasFixedFrameRate(&mFps)) {
         FL_WARN("VideoFxWrapper: Fx does not have a fixed frame rate, "
                      "assuming 30fps.");
@@ -196,13 +196,13 @@ VideoFxWrapper::VideoFxWrapper(fl::shared_ptr<Fx> fx) : Fx1d(fx->getNumLeds()), 
 
 VideoFxWrapper::~VideoFxWrapper() FL_NO_EXCEPT = default;
 
-string VideoFxWrapper::fxName() const {
+string VideoFxWrapper::fxName() const FL_NO_EXCEPT {
     string out = "video_fx_wrapper: ";
     out.append(mFx->fxName());
     return out;
 }
 
-void VideoFxWrapper::draw(DrawContext context) {
+void VideoFxWrapper::draw(DrawContext context) FL_NO_EXCEPT {
     if (mVideo->needsFrame(context.now)) {
         mFx->draw(context); // use the leds in the context as a tmp buffer.
         mByteStream->writeCRGB(
@@ -215,7 +215,7 @@ void VideoFxWrapper::draw(DrawContext context) {
     }
 }
 
-void VideoFxWrapper::setFade(fl::u32 fadeInTime, fl::u32 fadeOutTime) {
+void VideoFxWrapper::setFade(fl::u32 fadeInTime, fl::u32 fadeOutTime) FL_NO_EXCEPT {
     mVideo->setFade(fadeInTime, fadeOutTime);
 }
 

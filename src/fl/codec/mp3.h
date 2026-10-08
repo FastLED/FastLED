@@ -28,7 +28,7 @@ struct Mp3Info {
 
     // Constructor for easy initialization
     Mp3Info(fl::u32 rate, fl::u8 ch, fl::u32 br)
-        : sampleRate(rate), channels(ch), bitrate(br), isValid(true) {}
+        FL_NO_EXCEPT : sampleRate(rate), channels(ch), bitrate(br), isValid(true) {}
 };
 
 namespace third_party {
@@ -140,29 +140,29 @@ public:
 
     // Initialize the decoder with a byte stream
     // Returns true on success, false on failure
-    bool begin(fl::filebuf_ptr stream);
+    bool begin(fl::filebuf_ptr stream) FL_NO_EXCEPT;
 
     // Clean up decoder resources
-    void end();
+    void end() FL_NO_EXCEPT;
 
     // Check if decoder is ready to use
-    bool isReady() const;
+    bool isReady() const FL_NO_EXCEPT;
 
     // Check for errors
-    bool hasError(fl::string* msg = nullptr) const;
+    bool hasError(fl::string* msg = nullptr) const FL_NO_EXCEPT;
 
     // Decode the next audio frame from the stream
     // Returns true if a frame was decoded, false if end of stream or error
-    bool decodeNextFrame(audio::Sample* out_sample);
+    bool decodeNextFrame(audio::Sample* out_sample) FL_NO_EXCEPT;
 
     // Get current stream position in bytes
-    fl::size getPosition() const;
+    fl::size getPosition() const FL_NO_EXCEPT;
 
     // Reset decoder state (but keep stream)
-    void reset();
+    void reset() FL_NO_EXCEPT;
 
     // Get MP3 stream information (only available after decoding first frame)
-    Mp3Info getInfo() const;
+    Mp3Info getInfo() const FL_NO_EXCEPT;
 
 private:
     fl::unique_ptr<fl::third_party::Mp3StreamDecoderImpl> mImpl;
@@ -196,14 +196,14 @@ FASTLED_SHARED_PTR(Mp3Decoder);
 class Mp3 {
 public:
     // Create an MP3 decoder for streaming playback
-    static Mp3DecoderPtr createDecoder(fl::string* error_message = nullptr);
+    static Mp3DecoderPtr createDecoder(fl::string* error_message = nullptr) FL_NO_EXCEPT;
 
     // Check if MP3 decoding is supported on this platform
-    static bool isSupported();
+    static bool isSupported() FL_NO_EXCEPT;
 
     // Parse MP3 metadata from byte data without creating a decoder
     // This is a fast, lightweight operation that only reads the first MP3 frame header
-    static Mp3Info parseMp3Info(fl::span<const fl::u8> data, fl::string* error_message = nullptr);
+    static Mp3Info parseMp3Info(fl::span<const fl::u8> data, fl::string* error_message = nullptr) FL_NO_EXCEPT;
 };
 
 } // namespace fl

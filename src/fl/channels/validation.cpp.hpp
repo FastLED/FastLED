@@ -7,10 +7,11 @@
 #include "fl/stl/unique_ptr.h"
 #include "fl/stl/sstream.h"
 #include "fl/log/log.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
-SingleTestResult runSingleValidationTest(const SingleTestConfig& config) {
+SingleTestResult runSingleValidationTest(const SingleTestConfig& config) FL_NO_EXCEPT {
     SingleTestResult result;
     result.driver = config.driver_name;
     result.lane_count = static_cast<int>(config.lane_sizes.size());

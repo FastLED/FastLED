@@ -10,6 +10,7 @@
 #include "fl/stl/cstdio.h"  // for fl::serial_begin
 #include "fl/stl/stdio.h"  // for fl::snprintf
 #include "fl/stl/type_traits.h"  // for enable_if and is_multi_byte_integer
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -55,13 +56,13 @@ public:
      *
      * Note: On many platforms, this is a no-op as serial is always available.
      */
-    void end();
+    void end() FL_NO_EXCEPT;
 
     /**
      * @brief Check how many bytes are available to read
      * @return Number of bytes available in receive buffer
      */
-    int available();
+    int available() FL_NO_EXCEPT;
 
     /**
      * @brief Read next byte from serial input
@@ -69,7 +70,7 @@ public:
      *
      * This is a non-blocking read. If no data is available, returns -1.
      */
-    int read();
+    int read() FL_NO_EXCEPT;
 
     /**
      * @brief Peek at next byte without removing it from buffer
@@ -77,14 +78,14 @@ public:
      *
      * Note: Not all platforms support peek(). May return -1 always.
      */
-    int peek();
+    int peek() FL_NO_EXCEPT;
 
     /**
      * @brief Write single byte to serial output
      * @param byte Byte to write
      * @return Number of bytes written (1 on success, 0 on failure)
      */
-    size_t write(u8 byte);
+    size_t write(u8 byte) FL_NO_EXCEPT;
 
     /**
      * @brief Write buffer to serial output
@@ -92,28 +93,28 @@ public:
      * @param size Number of bytes to write
      * @return Number of bytes written
      */
-    size_t write(const u8* buffer, size_t size);
+    size_t write(const u8* buffer, size_t size) FL_NO_EXCEPT;
 
     /**
      * @brief Print string to serial output
      * @param str Null-terminated string
      * @return Number of bytes written
      */
-    size_t print(const char* str);
+    size_t print(const char* str) FL_NO_EXCEPT;
 
     /**
      * @brief Print integer to serial output
      * @param value Integer value to print
      * @return Number of bytes written
      */
-    size_t print(int value);
+    size_t print(int value) FL_NO_EXCEPT;
 
     /**
      * @brief Print long integer to serial output
      * @param value Long integer value to print
      * @return Number of bytes written
      */
-    size_t print(long value);
+    size_t print(long value) FL_NO_EXCEPT;
 
     /**
      * @brief Print generic unsigned integer via SFINAE template
@@ -125,34 +126,34 @@ public:
     typename fl::enable_if<fl::is_multi_byte_integer<T>::value &&
                           !fl::is_signed<T>::value,
                           size_t>::type
-    print(T value);
+    print(T value) FL_NO_EXCEPT;
 
     /**
      * @brief Print string with newline to serial output
      * @param str Null-terminated string
      * @return Number of bytes written
      */
-    size_t println(const char* str);
+    size_t println(const char* str) FL_NO_EXCEPT;
 
     /**
      * @brief Print newline only
      * @return Number of bytes written
      */
-    size_t println();
+    size_t println() FL_NO_EXCEPT;
 
     /**
      * @brief Print integer with newline to serial output
      * @param value Integer value to print
      * @return Number of bytes written
      */
-    size_t println(int value);
+    size_t println(int value) FL_NO_EXCEPT;
 
     /**
      * @brief Print long integer with newline to serial output
      * @param value Long integer value to print
      * @return Number of bytes written
      */
-    size_t println(long value);
+    size_t println(long value) FL_NO_EXCEPT;
 
     /**
      * @brief Print generic unsigned integer with newline via SFINAE template
@@ -164,7 +165,7 @@ public:
     typename fl::enable_if<fl::is_multi_byte_integer<T>::value &&
                           !fl::is_signed<T>::value,
                           size_t>::type
-    println(T value);
+    println(T value) FL_NO_EXCEPT;
 
     /**
      * @brief Print formatted string to serial output (printf-style)
@@ -181,7 +182,7 @@ public:
      * Note: Maximum formatted string length is 256 characters.
      */
     template<typename... Args>
-    size_t printf(const char* format, Args... args);  // ok snprintf — method routes through fl::snprintf at line 284
+    size_t printf(const char* format, Args... args) FL_NO_EXCEPT;  // ok snprintf — method routes through fl::snprintf at line 284
 
     /**
      * @brief Wait for serial output to complete
@@ -191,7 +192,7 @@ public:
      * Blocks until all buffered data is transmitted.
      * Note: On platforms without buffering, this returns immediately.
      */
-    bool flush(u32 timeoutMs = 1000);
+    bool flush(u32 timeoutMs = 1000) FL_NO_EXCEPT;
 
     /**
      * @brief Check if serial port is ready for I/O
@@ -199,7 +200,7 @@ public:
      *
      * On most platforms, this always returns true.
      */
-    explicit operator bool() const;
+    explicit operator bool() const FL_NO_EXCEPT;
 
     /**
      * @brief Set timeout for read operations
@@ -207,7 +208,7 @@ public:
      *
      * This affects readString(), readStringUntil(), readBytes(), and readBytesUntil().
      */
-    void setTimeout(u32 timeoutMs);
+    void setTimeout(u32 timeoutMs) FL_NO_EXCEPT;
 
     /**
      * @brief Read all available bytes into a string
@@ -215,7 +216,7 @@ public:
      *
      * Reads characters from serial until no more data is available or timeout expires.
      */
-    fl::string readString();
+    fl::string readString() FL_NO_EXCEPT;
 
     /**
      * @brief Read characters until delimiter is found
@@ -225,7 +226,7 @@ public:
      * Reads characters from serial until delimiter is found or timeout expires.
      * The delimiter character is discarded (not included in the returned string).
      */
-    fl::string readStringUntil(char delimiter);
+    fl::string readStringUntil(char delimiter) FL_NO_EXCEPT;
 
     /**
      * @brief Read fixed number of bytes into buffer
@@ -235,7 +236,7 @@ public:
      *
      * Reads up to length bytes from serial. May return fewer bytes if timeout occurs.
      */
-    size_t readBytes(u8* buffer, size_t length);
+    size_t readBytes(u8* buffer, size_t length) FL_NO_EXCEPT;
 
     /**
      * @brief Read bytes until delimiter is found
@@ -247,7 +248,7 @@ public:
      * Reads bytes from serial until delimiter is found, timeout occurs, or buffer is full.
      * The delimiter character is discarded (not included in the buffer).
      */
-    size_t readBytesUntil(char delimiter, u8* buffer, size_t length);
+    size_t readBytesUntil(char delimiter, u8* buffer, size_t length) FL_NO_EXCEPT;
 
     /**
      * @brief Parse integer from serial input
@@ -256,7 +257,7 @@ public:
      * Skips non-numeric characters until a number is found, then parses it.
      * Stops at first non-numeric character after the number.
      */
-    long parseInt();
+    long parseInt() FL_NO_EXCEPT;
 
     /**
      * @brief Parse floating-point number from serial input
@@ -265,7 +266,7 @@ public:
      * Skips non-numeric characters until a number is found, then parses it.
      * Stops at first non-numeric character after the number.
      */
-    float parseFloat();
+    float parseFloat() FL_NO_EXCEPT;
 
 private:
     u32 mTimeoutMs = 1000;  // Default 1 second timeout
@@ -278,7 +279,7 @@ private:
 
 
 template<typename... Args>
-inline size_t SerialPort::printf(const char* format, Args... args) {
+inline size_t SerialPort::printf(const char* format, Args... args) FL_NO_EXCEPT {
     if (!format) {
         return 0;
     }

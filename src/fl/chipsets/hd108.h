@@ -51,10 +51,10 @@ public:
 	}
 	#endif
 
-	void init() override { mSPI.init(); }
+	void init() FL_NO_EXCEPT override { mSPI.init(); }
 
 protected:
-void showPixels(PixelController<RGB_ORDER> &pixels) override {
+void showPixels(PixelController<RGB_ORDER> &pixels) FL_NO_EXCEPT override {
     mSPI.select();
 
     // ---- Start frame: 64 bits of 0 ----

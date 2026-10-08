@@ -204,11 +204,11 @@ class RGBWEmulatedController
 	typedef CONTROLLER ControllerBaseT;
     class ControllerT : public CONTROLLER {
         friend class RGBWEmulatedController<CONTROLLER, RGB_ORDER>;
-        void *callBeginShowLeds(int size) { return ControllerBaseT::beginShowLeds(size); }
-        void callShow(CRGB *data, int nLeds, fl::u8 brightness) {
+        void *callBeginShowLeds(int size) FL_NO_EXCEPT { return ControllerBaseT::beginShowLeds(size); }
+        void callShow(CRGB *data, int nLeds, fl::u8 brightness) FL_NO_EXCEPT {
             ControllerBaseT::show(data, nLeds, brightness);
         }
-        void callEndShowLeds(void *data) { ControllerBaseT::endShowLeds(data); }
+        void callEndShowLeds(void *data) FL_NO_EXCEPT { ControllerBaseT::endShowLeds(data); }
     };
 
 
@@ -220,18 +220,18 @@ class RGBWEmulatedController
 
     /// @brief Constructor with optional RGBW configuration
     /// @param rgbw Configuration for RGBW color conversion (defaults to kRGBWExactColors mode)
-    RGBWEmulatedController(const Rgbw& rgbw = RgbwDefault()) {
+    RGBWEmulatedController(const Rgbw& rgbw = RgbwDefault()) FL_NO_EXCEPT {
         this->setRgbw(rgbw);
     };
 
     /// @brief Destructor - cleans up the internal RGBW buffer
     ~RGBWEmulatedController() = default;
 
-	virtual void *beginShowLeds(int size) override {
+	virtual void *beginShowLeds(int size) FL_NO_EXCEPT override {
 		return mController.callBeginShowLeds(Rgbw::size_as_rgb(size));
 	}
 
-	virtual void endShowLeds(void *data) override {
+	virtual void endShowLeds(void *data) FL_NO_EXCEPT override {
 		return mController.callEndShowLeds(data);
 	}
 
@@ -242,7 +242,7 @@ class RGBWEmulatedController
     /// 3. Temporarily bypasses color correction/temperature on the base controller
     /// 4. Sends the packed data to the physical LED strip
     /// @param pixels The pixel controller containing RGB data to be converted
-    virtual void showPixels(PixelController<RGB_ORDER, LANES, MASK> &pixels) override {
+    virtual void showPixels(PixelController<RGB_ORDER, LANES, MASK> &pixels) FL_NO_EXCEPT override {
         // Ensure buffer is large enough
         ensureBuffer(pixels.size());
 		Rgbw rgbw = this->getRgbw();
@@ -276,7 +276,7 @@ class RGBWEmulatedController
     /// @brief Initialize the controller and disable the base controller
     /// @details The base controller is kept disabled to prevent it from
     /// refreshing with its own settings. We only enable it temporarily during show().
-    void init() override {
+    void init() FL_NO_EXCEPT override {
 		mController.init();
 		mController.setEnabled(false);
 	}
@@ -285,7 +285,7 @@ class RGBWEmulatedController
     /// @param num_leds Number of RGB LEDs to convert to RGBW
     /// @details Reallocates the buffer if needed, accounting for the 4:3 byte ratio
     /// when packing RGBW data into RGB format
-    void ensureBuffer(fl::i32 num_leds) {
+    void ensureBuffer(fl::i32 num_leds) FL_NO_EXCEPT {
         if (num_leds != mNumRGBLeds) {
             mNumRGBLeds = num_leds;
             // The delegate controller expects the raw pixel byte data in multiples of 3.
@@ -686,35 +686,35 @@ public:
 	typedef WS2812Controller800Khz<DATA_PIN, RGB> ControllerBaseT;
 	class ControllerT : public ControllerBaseT {
 		friend class WS2816Controller<DATA_PIN, RGB_ORDER>;
-		void *callBeginShowLeds(int size) { return ControllerBaseT::beginShowLeds(size); }
-		void callShow(CRGB *data, int nLeds, fl::u8 brightness) {
+		void *callBeginShowLeds(int size) FL_NO_EXCEPT { return ControllerBaseT::beginShowLeds(size); }
+		void callShow(CRGB *data, int nLeds, fl::u8 brightness) FL_NO_EXCEPT {
 			ControllerBaseT::show(data, nLeds, brightness);
 		}
-		void callEndShowLeds(void *data) { ControllerBaseT::endShowLeds(data); }
+		void callEndShowLeds(void *data) FL_NO_EXCEPT { ControllerBaseT::endShowLeds(data); }
 	};
 
     static const int LANES = ControllerT::LANES_VALUE;
     static const fl::u32 MASK = ControllerT::MASK_VALUE;
 
-    WS2816Controller() {}
+    WS2816Controller() FL_NO_EXCEPT {}
     ~WS2816Controller() {
         mController.setLeds(nullptr, 0);
     }
 
-    virtual void *beginShowLeds(int size) override {
+    virtual void *beginShowLeds(int size) FL_NO_EXCEPT override {
         mController.setEnabled(true);
 		void *result = mController.callBeginShowLeds(2 * size);
         mController.setEnabled(false);
         return result;
     }
 
-    virtual void endShowLeds(void *data) override {
+    virtual void endShowLeds(void *data) FL_NO_EXCEPT override {
         mController.setEnabled(true);
 		mController.callEndShowLeds(data);
         mController.setEnabled(false);
     }
 
-    virtual void showPixels(PixelController<RGB_ORDER, LANES, MASK> &pixels) override {
+    virtual void showPixels(PixelController<RGB_ORDER, LANES, MASK> &pixels) FL_NO_EXCEPT override {
         // Ensure buffer is large enough
         ensureBuffer(pixels.size());
 
@@ -739,12 +739,12 @@ public:
     }
 
 private:
-    void init() override {
+    void init() FL_NO_EXCEPT override {
         mController.init();
         mController.setEnabled(false);
     }
 
-    void ensureBuffer(int size_8bit) {
+    void ensureBuffer(int size_8bit) FL_NO_EXCEPT {
         int size_16bit = 2 * size_8bit;
         if (mController.size() != size_16bit) {
             
@@ -793,6 +793,7 @@ using EZWS2812_GPIO = fl::ClocklessController_ezWS2812_GPIO_Auto<DATA_PIN, RGB_O
 #ifdef FASTLED_USES_EZWS2812_SPI
 
 #include "platforms/arm/mgm240/clockless_ezws2812_spi.h"  // ok platform headers
+#include "fl/stl/noexcept.h"
 
 /// Silicon Labs ezWS2812 SPI controller (requires FASTLED_USES_EZWS2812_SPI)
 /// @tparam RGB_ORDER the RGB ordering for these LEDs (typically GRB for WS2812)

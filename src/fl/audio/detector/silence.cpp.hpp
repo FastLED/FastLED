@@ -8,7 +8,7 @@ namespace audio {
 namespace detector {
 
 Silence::Silence()
-    : mIsSilent(false)
+    FL_NO_EXCEPT : mIsSilent(false)
     , mPreviousSilent(false)
     , mCurrentRMS(0.0f)
     , mSilenceThreshold(DEFAULT_SILENCE_THRESHOLD)
@@ -26,7 +26,7 @@ Silence::Silence()
 
 Silence::~Silence() FL_NO_EXCEPT = default;
 
-void Silence::update(shared_ptr<Context> context) {
+void Silence::update(shared_ptr<Context> context) FL_NO_EXCEPT {
     mCurrentRMS = context->getRMS();
     u32 timestamp = context->getTimestamp();
     mLastUpdateTime = timestamp;
@@ -82,7 +82,7 @@ void Silence::update(shared_ptr<Context> context) {
     }
 }
 
-void Silence::fireCallbacks() {
+void Silence::fireCallbacks() FL_NO_EXCEPT {
     switch (mPendingEvent) {
     case PendingSilenceEvent::kStart:
         if (onSilenceStart) onSilenceStart();
@@ -102,7 +102,7 @@ void Silence::fireCallbacks() {
     mPendingEvent = PendingSilenceEvent::kNone;
 }
 
-void Silence::reset() {
+void Silence::reset() FL_NO_EXCEPT {
     mIsSilent = false;
     mPreviousSilent = false;
     mCurrentRMS = 0.0f;
@@ -113,7 +113,7 @@ void Silence::reset() {
     mHistoryIndex = 0;
 }
 
-float Silence::getSmoothedRMS() {
+float Silence::getSmoothedRMS() FL_NO_EXCEPT {
     if (mRMSHistory.empty()) {
         return 0.0f;
     }
@@ -125,7 +125,7 @@ float Silence::getSmoothedRMS() {
     return sum / static_cast<float>(mRMSHistory.size());
 }
 
-bool Silence::checkSilenceCondition(float smoothedRMS) {
+bool Silence::checkSilenceCondition(float smoothedRMS) FL_NO_EXCEPT {
     // Use hysteresis to prevent rapid toggling
     // When currently silent, use a higher threshold to exit
     // When not silent, use a lower threshold to enter
@@ -140,7 +140,7 @@ bool Silence::checkSilenceCondition(float smoothedRMS) {
     }
 }
 
-u32 Silence::getSilenceDuration() const {
+u32 Silence::getSilenceDuration() const FL_NO_EXCEPT {
     if (!mIsSilent || mSilenceStartTime == 0) {
         return 0;
     }

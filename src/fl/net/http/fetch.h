@@ -78,24 +78,24 @@ class Response;
 class Response {
 public:
     Response() FL_NO_EXCEPT : mStatusCode(200), mStatusText("OK") {}
-    Response(int status_code) : mStatusCode(status_code), mStatusText(get_default_status_text(status_code)) {}
+    Response(int status_code) FL_NO_EXCEPT : mStatusCode(status_code), mStatusText(get_default_status_text(status_code)) {}
     Response(int status_code, const fl::string& status_text)
-        : mStatusCode(status_code), mStatusText(status_text) {}
+        FL_NO_EXCEPT : mStatusCode(status_code), mStatusText(status_text) {}
     
     /// HTTP status code (like JavaScript response.status)
-    int status() const { return mStatusCode; }
+    int status() const FL_NO_EXCEPT { return mStatusCode; }
     
     /// HTTP status text (like JavaScript response.statusText)
-    const fl::string& status_text() const { return mStatusText; }
+    const fl::string& status_text() const FL_NO_EXCEPT { return mStatusText; }
     
     /// Check if response is successful (like JavaScript response.ok)
-    bool ok() const { return mStatusCode >= 200 && mStatusCode < 300; }
+    bool ok() const FL_NO_EXCEPT { return mStatusCode >= 200 && mStatusCode < 300; }
     
     /// Response body as text (like JavaScript response.text())
-    const fl::string& text() const { return mBody; }
+    const fl::string& text() const FL_NO_EXCEPT { return mBody; }
     
     /// Get header value (like JavaScript response.headers.get())
-    fl::optional<fl::string> get_header(const fl::string& name) const {
+    fl::optional<fl::string> get_header(const fl::string& name) const FL_NO_EXCEPT {
         auto it = mHeaders.find(name);
         if (it != mHeaders.end()) {
             return fl::make_optional(it->second);
@@ -104,22 +104,22 @@ public:
     }
     
     /// Get content type convenience method
-    fl::optional<fl::string> get_content_type() const {
+    fl::optional<fl::string> get_content_type() const FL_NO_EXCEPT {
         return get_header("content-type");
     }
     
     /// Response body as text (alternative to text())
-    const fl::string& get_body_text() const { return mBody; }
+    const fl::string& get_body_text() const FL_NO_EXCEPT { return mBody; }
     
     /// Response body parsed as JSON (JavaScript-like API)
     /// @return fl::json object for safe, ergonomic access
     /// @note Automatically parses JSON on first call, caches result
     /// @note Returns null JSON object for non-JSON or malformed content
-    fl::json json() const;
+    fl::json json() const FL_NO_EXCEPT;
     
     /// Check if response appears to contain JSON content
     /// @return true if Content-Type header indicates JSON or body contains JSON markers
-    bool is_json() const {
+    bool is_json() const FL_NO_EXCEPT {
         auto content_type = get_content_type();
         if (content_type.has_value()) {
             fl::string ct = *content_type;
@@ -130,11 +130,11 @@ public:
     }
     
     /// Set methods (internal use)
-    void set_status(int status_code) { mStatusCode = status_code; }
-    void set_status_text(const fl::string& status_text) { mStatusText = status_text; }
-    void set_text(const fl::string& body) { mBody = body; }  // Backward compatibility
-    void set_body(const fl::string& body) { mBody = body; }
-    void set_header(const fl::string& name, const fl::string& value) {
+    void set_status(int status_code) FL_NO_EXCEPT { mStatusCode = status_code; }
+    void set_status_text(const fl::string& status_text) FL_NO_EXCEPT { mStatusText = status_text; }
+    void set_text(const fl::string& body) FL_NO_EXCEPT { mBody = body; }  // Backward compatibility
+    void set_body(const fl::string& body) FL_NO_EXCEPT { mBody = body; }
+    void set_header(const fl::string& name, const fl::string& value) FL_NO_EXCEPT {
         mHeaders[name] = value;
     }
 
@@ -149,7 +149,7 @@ private:
     mutable bool mJsonParsed = false;            // Track parsing attempts
     
     /// Parse JSON from response body with error handling
-    fl::json parse_json_body() const {
+    fl::json parse_json_body() const FL_NO_EXCEPT {
         fl::json parsed = fl::json::parse(mBody);
         if (parsed.is_null() && (!mBody.empty())) {
             // If parsing failed but we have content, return null JSON
@@ -159,7 +159,7 @@ private:
         return parsed;
     }
     
-    static fl::string get_default_status_text(int status) {  // okay static in header
+    static fl::string get_default_status_text(int status) FL_NO_EXCEPT {  // okay static in header
         switch (status) {
             case 200: return "OK";
             case 400: return "Bad Request";
@@ -187,53 +187,53 @@ struct RequestOptions {
     fl::string body;
     int timeout_ms = 10000;  // 10 second default
     
-    RequestOptions() FL_NO_EXCEPT = default;
-    RequestOptions(const fl::string& method_name) : method(method_name) {}
+    RequestOptions() = default; // ok no noexcept: infer member exception contracts (#4773)
+    RequestOptions(const fl::string& method_name) FL_NO_EXCEPT : method(method_name) {}
 };
 
 /// Fetch options builder (fluent interface)
 class FetchOptions {
 public:
-    explicit FetchOptions(const fl::string& url) : mUrl(url) {}
+    explicit FetchOptions(const fl::string& url) FL_NO_EXCEPT : mUrl(url) {}
     FetchOptions(const fl::string& url, const RequestOptions& options)
-        : mUrl(url), mOptions(options) {}
+        FL_NO_EXCEPT : mUrl(url), mOptions(options) {}
 
     /// Set HTTP method
-    FetchOptions& method(const fl::string& http_method) {
+    FetchOptions& method(const fl::string& http_method) FL_NO_EXCEPT {
         mOptions.method = http_method;
         return *this;
     }
 
     /// Add header
-    FetchOptions& header(const fl::string& name, const fl::string& value) {
+    FetchOptions& header(const fl::string& name, const fl::string& value) FL_NO_EXCEPT {
         mOptions.headers[name] = value;
         return *this;
     }
 
     /// Set request body
-    FetchOptions& body(const fl::string& data) {
+    FetchOptions& body(const fl::string& data) FL_NO_EXCEPT {
         mOptions.body = data;
         return *this;
     }
 
     /// Set JSON body with proper content type
-    FetchOptions& json(const fl::string& json_data) {
+    FetchOptions& json(const fl::string& json_data) FL_NO_EXCEPT {
         mOptions.body = json_data;
         mOptions.headers["Content-Type"] = "application/json";
         return *this;
     }
 
     /// Set timeout in milliseconds
-    FetchOptions& timeout(int timeout_ms) {
+    FetchOptions& timeout(int timeout_ms) FL_NO_EXCEPT {
         mOptions.timeout_ms = timeout_ms;
         return *this;
     }
     
     /// Get the URL for this request
-    const fl::string& url() const { return mUrl; }
+    const fl::string& url() const FL_NO_EXCEPT { return mUrl; }
     
     /// Get the options for this request  
-    const RequestOptions& options() const { return mOptions; }
+    const RequestOptions& options() const FL_NO_EXCEPT { return mOptions; }
 
 private:
     fl::string mUrl;
@@ -247,18 +247,18 @@ class FetchEngineListener;
 /// Internal fetch manager for promise tracking
 class FetchManager : public task::Runner {
 public:
-    static FetchManager& instance();
+    static FetchManager& instance() FL_NO_EXCEPT;
     
-    void register_promise(const fl::task::Promise<Response>& promise);
+    void register_promise(const fl::task::Promise<Response>& promise) FL_NO_EXCEPT;
     
     // task::Runner interface
-    void update() override;
-    bool has_active_tasks() const override;
-    size_t active_task_count() const override;
+    void update() FL_NO_EXCEPT override;
+    bool has_active_tasks() const FL_NO_EXCEPT override;
+    size_t active_task_count() const FL_NO_EXCEPT override;
     
     // Legacy API
-    fl::size active_requests() const;
-    void cleanup_completed_promises();
+    fl::size active_requests() const FL_NO_EXCEPT;
+    void cleanup_completed_promises() FL_NO_EXCEPT;
     
 private:
     fl::vector<fl::task::Promise<Response>> mActivePromises;
@@ -273,50 +273,50 @@ private:
 /// 
 /// On WASM/browser platforms: Uses native JavaScript fetch() API
 /// On Arduino/embedded platforms: Immediately calls callback with error response
-void fetch(const fl::string& url, const FetchCallback& callback);
+void fetch(const fl::string& url, const FetchCallback& callback) FL_NO_EXCEPT;
 
 /// @brief Make an HTTP GET request with URL string literal (cross-platform)
 /// @param url The URL to fetch (C-string)  
 /// @param callback Function to call with the response
-inline void fetch(const char* url, const FetchCallback& callback) {
+inline void fetch(const char* url, const FetchCallback& callback) FL_NO_EXCEPT {
     fetch(fl::string(url), callback);
 }
 
 // ========== Promise-Based API (JavaScript-like) ==========
 
 /// HTTP GET request
-fl::task::Promise<Response> fetch_get(const fl::string& url, const FetchOptions& request = FetchOptions(""));
+fl::task::Promise<Response> fetch_get(const fl::string& url, const FetchOptions& request = FetchOptions("")) FL_NO_EXCEPT;
 
 /// HTTP POST request
-fl::task::Promise<Response> fetch_post(const fl::string& url, const FetchOptions& request = FetchOptions(""));
+fl::task::Promise<Response> fetch_post(const fl::string& url, const FetchOptions& request = FetchOptions("")) FL_NO_EXCEPT;
 
 /// HTTP PUT request
-fl::task::Promise<Response> fetch_put(const fl::string& url, const FetchOptions& request = FetchOptions(""));
+fl::task::Promise<Response> fetch_put(const fl::string& url, const FetchOptions& request = FetchOptions("")) FL_NO_EXCEPT;
 
 /// HTTP DELETE request
-fl::task::Promise<Response> fetch_delete(const fl::string& url, const FetchOptions& request = FetchOptions(""));
+fl::task::Promise<Response> fetch_delete(const fl::string& url, const FetchOptions& request = FetchOptions("")) FL_NO_EXCEPT;
 
 /// HTTP HEAD request
-fl::task::Promise<Response> fetch_head(const fl::string& url, const FetchOptions& request = FetchOptions(""));
+fl::task::Promise<Response> fetch_head(const fl::string& url, const FetchOptions& request = FetchOptions("")) FL_NO_EXCEPT;
 
 /// HTTP OPTIONS request
-fl::task::Promise<Response> fetch_http_options(const fl::string& url, const FetchOptions& request = FetchOptions(""));
+fl::task::Promise<Response> fetch_http_options(const fl::string& url, const FetchOptions& request = FetchOptions("")) FL_NO_EXCEPT;
 
 /// HTTP PATCH request
-fl::task::Promise<Response> fetch_patch(const fl::string& url, const FetchOptions& request = FetchOptions(""));
+fl::task::Promise<Response> fetch_patch(const fl::string& url, const FetchOptions& request = FetchOptions("")) FL_NO_EXCEPT;
 
 /// Generic request with options (like fetch(url, options))
-fl::task::Promise<Response> fetch_request(const fl::string& url, const RequestOptions& options = RequestOptions());
+fl::task::Promise<Response> fetch_request(const fl::string& url, const RequestOptions& options = RequestOptions()) FL_NO_EXCEPT;
 
 /// Legacy manual update for fetch promises (use fl::task::run() for new code)
 /// @deprecated Use fl::task::run() instead - this calls task::run() internally
-void fetch_update();
+void fetch_update() FL_NO_EXCEPT;
 
 /// Get number of active requests
-fl::size fetch_active_requests();
+fl::size fetch_active_requests() FL_NO_EXCEPT;
 
 /// Internal helper to execute a fetch request and return a promise
-fl::task::Promise<Response> execute_fetch_request(const fl::string& url, const FetchOptions& request);
+fl::task::Promise<Response> execute_fetch_request(const fl::string& url, const FetchOptions& request) FL_NO_EXCEPT;
 
 } // namespace http
 } // namespace net

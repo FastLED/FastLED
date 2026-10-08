@@ -5,6 +5,7 @@
 #include "fl/system/fastpin.h"
 #include "fl/log/log.h"
 #include "fl/stl/type_traits.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -30,10 +31,10 @@ constexpr int TABLE_SIZE = 64;
 using port_ptr_t = typename FastPin<0>::port_ptr_t;
 
 template <int N> struct PortEntry {
-    static port_ptr_t get() { return FastPin<static_cast<u8>(N)>::port(); }
+    static port_ptr_t get() FL_NO_EXCEPT { return FastPin<static_cast<u8>(N)>::port(); }
 };
 
-inline const port_ptr_t* portTable() {
+inline const port_ptr_t* portTable() FL_NO_EXCEPT {
     static port_ptr_t table[TABLE_SIZE] = {
         PortEntry<0>::get(),  PortEntry<1>::get(),  PortEntry<2>::get(),  PortEntry<3>::get(),
         PortEntry<4>::get(),  PortEntry<5>::get(),  PortEntry<6>::get(),  PortEntry<7>::get(),
@@ -55,12 +56,12 @@ inline const port_ptr_t* portTable() {
     return table;
 }
 
-inline port_ptr_t getPortPtr(int pin) {
+inline port_ptr_t getPortPtr(int pin) FL_NO_EXCEPT {
     if (pin < 0 || pin >= TABLE_SIZE) return nullptr;
     return portTable()[pin];
 }
 
-inline bool allPortsNull() {
+inline bool allPortsNull() FL_NO_EXCEPT {
     const port_ptr_t* table = portTable();
     for (int i = 0; i < TABLE_SIZE; ++i) {
         if (table[i] != nullptr) return false;
@@ -70,7 +71,7 @@ inline bool allPortsNull() {
 
 } // namespace pin_port_table
 
-int pinToPort(int pin) {
+int pinToPort(int pin) FL_NO_EXCEPT {
     if (pin < 0) return -1;
 
     if (!pin_port_table::allPortsNull()) {
@@ -104,7 +105,7 @@ int pinToPort(int pin) {
 // Platforms that define FASTLED_NO_PINMAP (Apollo3, Renesas, Giga, NRF51,
 // STM32, RP2040) don't provide digitalPinToPort(). Fall back to grouping
 // pins by blocks of 32.
-int pinToPort(int pin) {
+int pinToPort(int pin) FL_NO_EXCEPT {
     if (pin < 0) return -1;
     return pin / 32;
 }
@@ -114,10 +115,10 @@ int pinToPort(int pin) {
 namespace {
 // Convert digitalPinToPort() result to int. Most platforms return integers;
 // SAM3X8E returns Pio* which needs mapping to sequential port IDs.
-inline int portValueToId(unsigned char v) { return v; }
-inline int portValueToId(unsigned short v) { return static_cast<int>(v); }
-inline int portValueToId(int v) { return v; }
-inline int portValueToId(long v) { return static_cast<int>(v); }
+inline int portValueToId(unsigned char v) FL_NO_EXCEPT { return v; }
+inline int portValueToId(unsigned short v) FL_NO_EXCEPT { return static_cast<int>(v); }
+inline int portValueToId(int v) FL_NO_EXCEPT { return v; }
+inline int portValueToId(long v) FL_NO_EXCEPT { return static_cast<int>(v); }
 
 // Template overload for unsigned multi-byte integers (handles both u32 and unsigned long)
 // Uses enable_if to avoid duplicate overloads on platforms where they're the same type
@@ -125,14 +126,14 @@ template<typename T>
 typename fl::enable_if<fl::is_multi_byte_integer<T>::value &&
                       !fl::is_signed<T>::value,
                       int>::type
-portValueToId(T v) {
+portValueToId(T v) FL_NO_EXCEPT {
     return static_cast<int>(v);
 }
 
 // Pointer overload for SAM and similar platforms where digitalPinToPort
 // returns a peripheral struct pointer (e.g. Pio*).
 template <typename T>
-int portValueToId(T* ptr) {
+int portValueToId(T* ptr) FL_NO_EXCEPT {
     if (!ptr) return -1;
     static T* seen[8] = {};
     static int n = 0;
@@ -147,14 +148,14 @@ int portValueToId(T* ptr) {
 }
 } // namespace
 
-int pinToPort(int pin) {
+int pinToPort(int pin) FL_NO_EXCEPT {
     if (pin < 0) return -1;
     return portValueToId(digitalPinToPort(pin));
 }
 
 #endif // FASTLED_ALL_PINS_VALID
 
-void DigitalMultiWrite8::init(const Pins8& pins) {
+void DigitalMultiWrite8::init(const Pins8& pins) FL_NO_EXCEPT {
     for (u8 i = 0; i < 8; ++i) {
         mPins[i] = pins.pins[i];
     }
@@ -203,7 +204,7 @@ void DigitalMultiWrite8::init(const Pins8& pins) {
     buildNibbleLut(4, mSetHi, mClrHi); // bits 4-7
 }
 
-void DigitalMultiWrite8::write(fl::span<const u8> pin_data) const {
+void DigitalMultiWrite8::write(fl::span<const u8> pin_data) const FL_NO_EXCEPT {
     for (fl::size i = 0; i < pin_data.size(); ++i) {
         const u8 byte = pin_data[i];
         const u8 lo_nib = byte & 0x0F;
@@ -213,7 +214,7 @@ void DigitalMultiWrite8::write(fl::span<const u8> pin_data) const {
     }
 }
 
-bool DigitalMultiWrite8::allSamePort() const {
+bool DigitalMultiWrite8::allSamePort() const FL_NO_EXCEPT {
     int first_port = -1;
     for (u8 i = 0; i < 8; ++i) {
         if (mPins[i] < 0) {
@@ -230,7 +231,7 @@ bool DigitalMultiWrite8::allSamePort() const {
 }
 
 void DigitalMultiWrite8::buildNibbleLut(u8 bit_offset, PinList (&set_lut)[16],
-                                        PinList (&clr_lut)[16]) {
+                                        PinList (&clr_lut)[16]) FL_NO_EXCEPT {
     for (u16 nib = 0; nib < 16; ++nib) {
         PinList &s = set_lut[nib];
         PinList &c = clr_lut[nib];
@@ -250,7 +251,7 @@ void DigitalMultiWrite8::buildNibbleLut(u8 bit_offset, PinList (&set_lut)[16],
     }
 }
 
-void DigitalMultiWrite8::applyNibble(const PinList &set, const PinList &clr) {
+void DigitalMultiWrite8::applyNibble(const PinList &set, const PinList &clr) FL_NO_EXCEPT {
     for (u8 i = 0; i < set.count; ++i) {
         fl::digitalWrite(set.pins[i], PinValue::High);
     }
@@ -259,7 +260,7 @@ void DigitalMultiWrite8::applyNibble(const PinList &set, const PinList &clr) {
     }
 }
 
-void digitalMultiWrite8(const Pins8& pins, fl::span<const u8> pin_data) {
+void digitalMultiWrite8(const Pins8& pins, fl::span<const u8> pin_data) FL_NO_EXCEPT {
     DigitalMultiWrite8 writer;
     writer.init(pins);
     writer.write(pin_data);
@@ -269,7 +270,7 @@ void digitalMultiWrite8(const Pins8& pins, fl::span<const u8> pin_data) {
 // DigitalMultiWrite16
 // ============================================================================
 
-void DigitalMultiWrite16::init(const Pins16& pins) {
+void DigitalMultiWrite16::init(const Pins16& pins) FL_NO_EXCEPT {
     for (u8 i = 0; i < 16; ++i) {
         mPins[i] = pins.pins[i];
     }
@@ -319,7 +320,7 @@ void DigitalMultiWrite16::init(const Pins16& pins) {
     }
 }
 
-void DigitalMultiWrite16::write(fl::span<const u16> pin_data) const {
+void DigitalMultiWrite16::write(fl::span<const u16> pin_data) const FL_NO_EXCEPT {
     for (fl::size i = 0; i < pin_data.size(); ++i) {
         const u16 word = pin_data[i];
         for (u8 n = 0; n < 4; ++n) {
@@ -329,7 +330,7 @@ void DigitalMultiWrite16::write(fl::span<const u16> pin_data) const {
     }
 }
 
-bool DigitalMultiWrite16::allSamePort() const {
+bool DigitalMultiWrite16::allSamePort() const FL_NO_EXCEPT {
     int first_port = -1;
     for (u8 i = 0; i < 16; ++i) {
         if (mPins[i] < 0) {
@@ -347,7 +348,7 @@ bool DigitalMultiWrite16::allSamePort() const {
 
 void DigitalMultiWrite16::buildNibbleLut(u8 bit_offset,
                                           PinList (&set_lut)[16],
-                                          PinList (&clr_lut)[16]) {
+                                          PinList (&clr_lut)[16]) FL_NO_EXCEPT {
     for (u16 nib = 0; nib < 16; ++nib) {
         PinList &s = set_lut[nib];
         PinList &c = clr_lut[nib];
@@ -367,7 +368,7 @@ void DigitalMultiWrite16::buildNibbleLut(u8 bit_offset,
     }
 }
 
-void DigitalMultiWrite16::applyNibble(const PinList &set, const PinList &clr) {
+void DigitalMultiWrite16::applyNibble(const PinList &set, const PinList &clr) FL_NO_EXCEPT {
     for (u8 i = 0; i < set.count; ++i) {
         fl::digitalWrite(set.pins[i], PinValue::High);
     }
@@ -376,7 +377,7 @@ void DigitalMultiWrite16::applyNibble(const PinList &set, const PinList &clr) {
     }
 }
 
-void digitalMultiWrite16(const Pins16& pins, fl::span<const u16> pin_data) {
+void digitalMultiWrite16(const Pins16& pins, fl::span<const u16> pin_data) FL_NO_EXCEPT {
     DigitalMultiWrite16 writer;
     writer.init(pins);
     writer.write(pin_data);
@@ -386,7 +387,7 @@ void digitalMultiWrite16(const Pins16& pins, fl::span<const u16> pin_data) {
 // pinMap
 // ============================================================================
 
-void pinMap(fl::span<PinInfo> pins) {
+void pinMap(fl::span<PinInfo> pins) FL_NO_EXCEPT {
     for (fl::size i = 0; i < pins.size(); ++i) {
         if (pins[i].pin >= 0) {
             pins[i].port = pinToPort(pins[i].pin);

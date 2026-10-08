@@ -54,13 +54,13 @@ class Particles1d : public Fx1d {
     /// @param num_leds Number of LEDs in the strip
     /// @param max_particles Maximum number of simultaneous particles (default: 10)
     /// @param fade_rate Fade amount per frame for trails (0-255, default: 2)
-    Particles1d(u16 num_leds, u8 max_particles = 10, u8 fade_rate = 2);
+    Particles1d(u16 num_leds, u8 max_particles = 10, u8 fade_rate = 2) FL_NO_EXCEPT;
 
     ~Particles1d() FL_NO_EXCEPT;
 
     /// @brief Update and render all particles with overdraw technique
     /// @param context Draw context containing current time and LED buffer
-    void draw(DrawContext context) override;
+    void draw(DrawContext context) FL_NO_EXCEPT override;
 
     /// @brief Spawn a particle with random position, velocity, color, and lifetime
     ///
@@ -70,29 +70,29 @@ class Particles1d : public Fx1d {
     ///
     /// @note Call this from your loop() based on desired spawn rate (e.g., every 2 seconds)
     /// @note Spawn control is intentionally external for flexibility (music-reactive, triggers, etc.)
-    void spawnRandomParticle();
+    void spawnRandomParticle() FL_NO_EXCEPT;
 
     /// @brief Set average particle lifetime in milliseconds
     /// @param lifetime_ms Lifetime in milliseconds (default: 4000)
-    void setLifetime(u16 lifetime_ms);
+    void setLifetime(u16 lifetime_ms) FL_NO_EXCEPT;
 
     /// @brief Set overdraw count (higher = smoother trails, more CPU)
     /// @param count Number of update/draw cycles per frame (default: 20)
-    void setOverdrawCount(u8 count);
+    void setOverdrawCount(u8 count) FL_NO_EXCEPT;
 
     /// @brief Set speed multiplier (1.0 = normal, >1.0 = faster, <1.0 = slower)
     /// @param speed Speed multiplier applied to all particles (default: 1.0)
-    void setSpeed(float speed);
+    void setSpeed(float speed) FL_NO_EXCEPT;
 
     /// @brief Set fade rate for trails (0-255, higher = shorter trails)
     /// @param fade_rate Fade amount per frame (default: 2)
-    void setFadeRate(u8 fade_rate);
+    void setFadeRate(u8 fade_rate) FL_NO_EXCEPT;
 
     /// @brief Set cyclical mode (true = wrap around, false = stop at edges)
     /// @param cyclical Wrap mode - perfect for LED rings (default: true)
-    void setCyclical(bool cyclical);
+    void setCyclical(bool cyclical) FL_NO_EXCEPT;
 
-    fl::string fxName() const override;
+    fl::string fxName() const FL_NO_EXCEPT override;
 
   private:
     /// @brief Individual particle with power-based lifecycle
@@ -110,23 +110,23 @@ class Particles1d : public Fx1d {
         Particle() FL_NO_EXCEPT;
 
         /// @return Power level from 1.0 (birth) to 0.0 (death)
-        float getPower(u32 now) const;
+        float getPower(u32 now) const FL_NO_EXCEPT;
 
         /// @brief Spawn with random position, velocity, color, and lifetime
-        void spawn(u16 numLeds);
+        void spawn(u16 numLeds) FL_NO_EXCEPT;
 
         /// @brief Spawn with specific parameters
         /// @param pos Initial position
         /// @param baseVel Base velocity (positive = forward, negative = backward)
         /// @param baseColor Initial HSV color
         /// @param lifetime Lifespan in milliseconds
-        void spawn(float pos, float baseVel, CHSV baseColor, u32 lifetime);
+        void spawn(float pos, float baseVel, CHSV baseColor, u32 lifetime) FL_NO_EXCEPT;
 
         /// @brief Update position based on velocity × power
-        void update(u32 now, u16 numLeds, float speedMultiplier, bool cyclical);
+        void update(u32 now, u16 numLeds, float speedMultiplier, bool cyclical) FL_NO_EXCEPT;
 
         /// @brief Render particle with sub-pixel accuracy and power-modulated color
-        void draw(fl::span<CRGB> leds, u32 now, u16 numLeds);
+        void draw(fl::span<CRGB> leds, u32 now, u16 numLeds) FL_NO_EXCEPT;
     };
 
     u8 mFadeRate;                    ///< Fade amount per frame (0-255, higher = shorter trails)

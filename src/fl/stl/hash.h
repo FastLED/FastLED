@@ -20,7 +20,7 @@ template <typename T> struct vec2;
 // Based on the public‐domain implementation by Austin Appleby:
 // https://github.com/aappleby/smhasher/blob/master/src/MurmurHash3.cpp
 static inline u32 MurmurHash3_x86_32(const void *key, fl::size len,
-                                          u32 seed = 0) {
+                                          u32 seed = 0) FL_NO_EXCEPT {
 
     FL_DISABLE_WARNING_PUSH;
     FL_DISABLE_WARNING_IMPLICIT_FALLTHROUGH;

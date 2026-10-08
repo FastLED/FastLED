@@ -34,7 +34,7 @@ static const ChordTemplate kChordTemplates[] = {
 static const int kNumChordTemplates = sizeof(kChordTemplates) / sizeof(ChordTemplate);
 
 ChordDetector::ChordDetector()
-    : mChordStartTime(0)
+    FL_NO_EXCEPT : mChordStartTime(0)
     , mChordEndTime(0)
     , mConfidenceThreshold(0.6f)
     , mMinChordDuration(200)  // 200ms minimum chord duration
@@ -50,7 +50,7 @@ ChordDetector::ChordDetector()
 
 ChordDetector::~ChordDetector() FL_NO_EXCEPT = default;
 
-void ChordDetector::initializeTemplateMap() {
+void ChordDetector::initializeTemplateMap() FL_NO_EXCEPT {
     // Pre-compute lookup map from ChordType to ChordTemplate*
     // Avoids linear search through kChordTemplates (9 searches per frame)
     for (int i = 0; i < kNumChordTemplates; i++) {
@@ -58,7 +58,7 @@ void ChordDetector::initializeTemplateMap() {
     }
 }
 
-void ChordDetector::update(shared_ptr<Context> context) {
+void ChordDetector::update(shared_ptr<Context> context) FL_NO_EXCEPT {
     mRetainedFFT = context->getFFT(32);  // Higher resolution for pitch detection
     const fft::Bins& fft = *mRetainedFFT;
     u32 timestamp = context->getTimestamp();
@@ -110,7 +110,7 @@ void ChordDetector::update(shared_ptr<Context> context) {
     }
 }
 
-void ChordDetector::fireCallbacks() {
+void ChordDetector::fireCallbacks() FL_NO_EXCEPT {
     if (mFireChordEnd) {
         if (onChordEnd) onChordEnd();
         mFireChordEnd = false;
@@ -125,7 +125,7 @@ void ChordDetector::fireCallbacks() {
     }
 }
 
-void ChordDetector::reset() {
+void ChordDetector::reset() FL_NO_EXCEPT {
     mCurrentChord = Chord();
     mPreviousChord = Chord();
     mChordStartTime = 0;
@@ -136,7 +136,7 @@ void ChordDetector::reset() {
     }
 }
 
-void ChordDetector::calculateChroma(const fft::Bins& fft) {
+void ChordDetector::calculateChroma(const fft::Bins& fft) FL_NO_EXCEPT {
     // Clear chroma
     for (int i = 0; i < 12; i++) {
         mChroma[i] = 0.0f;
@@ -175,7 +175,7 @@ void ChordDetector::calculateChroma(const fft::Bins& fft) {
     normalizeChroma(mChroma);
 }
 
-Chord ChordDetector::detectChord(const float* chroma, u32 timestamp) {
+Chord ChordDetector::detectChord(const float* chroma, u32 timestamp) FL_NO_EXCEPT {
     float bestScore = 0.0f;
     int bestRoot = -1;
     ChordType bestType = ChordType::UNKNOWN;
@@ -201,7 +201,7 @@ Chord ChordDetector::detectChord(const float* chroma, u32 timestamp) {
     return Chord(bestRoot, bestType, bestScore, timestamp);
 }
 
-float ChordDetector::matchChordPattern(const float* chroma, int root, ChordType type) {
+float ChordDetector::matchChordPattern(const float* chroma, int root, ChordType type) FL_NO_EXCEPT {
     // Find the matching template using pre-computed lookup (O(1) vs O(n) linear search)
     auto it = mTemplateMap.find(static_cast<int>(type));
     if (it == mTemplateMap.end()) return 0.0f;
@@ -240,7 +240,7 @@ float ChordDetector::matchChordPattern(const float* chroma, int root, ChordType 
     return score;
 }
 
-bool ChordDetector::isSimilarChord(const Chord& a, const Chord& b) {
+bool ChordDetector::isSimilarChord(const Chord& a, const Chord& b) FL_NO_EXCEPT {
     if (!a.isValid() || !b.isValid()) return false;
 
     // Same root and type = similar
@@ -253,7 +253,7 @@ bool ChordDetector::isSimilarChord(const Chord& a, const Chord& b) {
     return false;
 }
 
-void ChordDetector::normalizeChroma(float* chroma) {
+void ChordDetector::normalizeChroma(float* chroma) FL_NO_EXCEPT {
     // Find max value
     float maxVal = 0.0f;
     for (int i = 0; i < 12; i++) {
@@ -270,7 +270,7 @@ void ChordDetector::normalizeChroma(float* chroma) {
     }
 }
 
-float ChordDetector::chromaDistance(const float* a, const float* b) {
+float ChordDetector::chromaDistance(const float* a, const float* b) FL_NO_EXCEPT {
     float dist = 0.0f;
     for (int i = 0; i < 12; i++) {
         float diff = a[i] - b[i];
@@ -280,14 +280,14 @@ float ChordDetector::chromaDistance(const float* a, const float* b) {
 }
 
 // Out-of-line definitions for Chord methods (needed for linking with unity builds)
-const char* Chord::getRootName() const {
+const char* Chord::getRootName() const FL_NO_EXCEPT {
     static const char* noteNames[] = {
         "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"
     };
     return (rootNote >= 0 && rootNote < 12) ? noteNames[rootNote] : "?";
 }
 
-const char* Chord::getTypeName() const {
+const char* Chord::getTypeName() const FL_NO_EXCEPT {
     switch (type) {
         case ChordType::MAJOR: return "maj";
         case ChordType::MINOR: return "min";

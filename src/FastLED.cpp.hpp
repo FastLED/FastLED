@@ -33,6 +33,7 @@
 #include "fl/channels/config.h"  // for ChannelConfig
 #include "fl/stl/singleton.h"  // for fl::Singleton
 #include "platforms/is_platform.h"
+#include "fl/stl/noexcept.h"
 
 /// @file FastLED.cpp
 /// Central source file for FastLED, implements the CFastLED class/object
@@ -69,7 +70,7 @@ extern "C" void yield(void) { }
 
 // Implementation of cled_contoller_size() moved to src/fl/fastled_internal.cpp
 
-fl::u8 get_brightness();
+fl::u8 get_brightness() FL_NO_EXCEPT;
 
 #if !FL_PLATFORM_HAS_TINY_MEMORY
 // FL_LINT_ALLOW_GLOBAL(shared dither phase is required once per logical frame)
@@ -106,7 +107,7 @@ fl::u32 _retry_cnt=0;
 
 // uint32_t CRGB::Squant = ((uint32_t)((__TIME__[4]-'0') * 28))<<16 | ((__TIME__[6]-'0')*50)<<8 | ((__TIME__[7]-'0')*28);
 
-CFastLED::CFastLED() {
+CFastLED::CFastLED() FL_NO_EXCEPT {
 	// clear out the array of led controllers
 	// m_nControllers = 0;
 	mScale = 255;
@@ -125,24 +126,24 @@ const fl::FramePowerDispatch*& fl::activeFramePowerDispatch() FL_NO_EXCEPT {
 }
 #endif
 
-void CFastLED::init() {
+void CFastLED::init() FL_NO_EXCEPT {
 	// Call platform-specific initialization once
 	// Uses the trampoline pattern: platforms/init.h dispatches to platform-specific headers
 	// FL_RUN_ONCE ensures this is only called once, even if init() is called multiple times
 	FL_RUN_ONCE(fl::platforms::init());
 }
 
-int CFastLED::size() {
+int CFastLED::size() FL_NO_EXCEPT {
 	return (*this)[0].size();
 }
 
-CRGB* CFastLED::leds() {
+CRGB* CFastLED::leds() FL_NO_EXCEPT {
 	return (*this)[0].leds();
 }
 
 CLEDController &CFastLED::addLeds(CLEDController *pLed,
 								  CRGB *data,
-								  int nLedsOrOffset, int nLedsIfOffset) {
+								  int nLedsOrOffset, int nLedsIfOffset) FL_NO_EXCEPT {
 	int nOffset = (nLedsIfOffset > 0) ? nLedsOrOffset : 0;
 	int nLeds = (nLedsIfOffset > 0) ? nLedsIfOffset : nLedsOrOffset;
 
@@ -153,14 +154,14 @@ CLEDController &CFastLED::addLeds(CLEDController *pLed,
 	return *pLed;
 }
 
-fl::vector<fl::ChannelPtr>& CFastLED::channels() {
+fl::vector<fl::ChannelPtr>& CFastLED::channels() FL_NO_EXCEPT {
 	return fl::Singleton<fl::vector<fl::ChannelPtr>>::instance();
 }
 
 fl::PowerCodecPolicy fl::powerChannelCodecPolicy(
     const fl::CLEDController& controller) FL_NO_EXCEPT {
     PowerCodecPolicy policy;
-    const fl::vector<fl::ChannelPtr>& registered = CFastLED::channels();
+    const fl::vector<fl::ChannelPtr>& registered = ::CFastLED::channels();
     for (fl::size i = 0; i < registered.size(); ++i) {
         const fl::Channel* channel = registered[i].get();
         if (channel != &controller) continue;
@@ -199,7 +200,7 @@ fl::PowerCodecPolicy fl::powerChannelCodecPolicy(
     return policy;
 }
 
-void CFastLED::add(fl::ChannelPtr channel) {
+void CFastLED::add(fl::ChannelPtr channel) FL_NO_EXCEPT {
 	if (!channel) {
 		return;
 	}
@@ -215,7 +216,7 @@ void CFastLED::add(fl::ChannelPtr channel) {
 	channel->addToDrawList();
 }
 
-void CFastLED::remove(fl::ChannelPtr channel) {
+void CFastLED::remove(fl::ChannelPtr channel) FL_NO_EXCEPT {
 	if (!channel) {
 		return;
 	}
@@ -225,7 +226,7 @@ void CFastLED::remove(fl::ChannelPtr channel) {
 	channels().erase(channel);
 }
 
-void CFastLED::clear(ClearFlags flags) {
+void CFastLED::clear(ClearFlags flags) FL_NO_EXCEPT {
 	// Lambda to check if flag is set, clear it, and return true if it was set
 	auto clearFlag = [&flags](ClearFlags flag) -> bool {
 		if ((flags & flag) != ClearFlags::NONE) {
@@ -352,15 +353,15 @@ static void throttleToMaxRefreshRate(fl::u32 minMicros) FL_NO_EXCEPT {
 	}
 }
 
-fl::u8 CFastLED::getLastShowBrightness() const {
+fl::u8 CFastLED::getLastShowBrightness() const FL_NO_EXCEPT {
 	return mLastShownScale;
 }
 
-bool CFastLED::isPowerLimited() const {
+bool CFastLED::isPowerLimited() const FL_NO_EXCEPT {
 	return mLastShownScale < mLastRequestedScale;
 }
 
-FL_KEEP_ALIVE void CFastLED::show(fl::u8 scale) {
+FL_KEEP_ALIVE void CFastLED::show(fl::u8 scale) FL_NO_EXCEPT {
 	FL_SCOPED_TRACE;
 	onBeginFrame();
 	throttleToMaxRefreshRate(mNMinMicros);
@@ -414,11 +415,11 @@ FL_KEEP_ALIVE void CFastLED::show(fl::u8 scale) {
 	onEndShowLeds();
 }
 
-void CFastLED::onEndFrame() {
+void CFastLED::onEndFrame() FL_NO_EXCEPT {
 	fl::EngineEvents::onEndFrame();
 }
 
-int CFastLED::count() {
+int CFastLED::count() FL_NO_EXCEPT {
     int x = 0;
 	CLEDController *pCur = CLEDController::head();
 	while( pCur) {
@@ -428,7 +429,7 @@ int CFastLED::count() {
     return x;
 }
 
-CLEDController & CFastLED::operator[](int x) {
+CLEDController & CFastLED::operator[](int x) FL_NO_EXCEPT {
 	CLEDController *pCur = CLEDController::head();
 	while(x-- && pCur) {
 		pCur = pCur->next();
@@ -440,7 +441,7 @@ CLEDController & CFastLED::operator[](int x) {
 	}
 }
 
-void CFastLED::showColor(const CRGB & color, fl::u8 scale) {
+void CFastLED::showColor(const CRGB & color, fl::u8 scale) FL_NO_EXCEPT {
 	onBeginFrame();
 	throttleToMaxRefreshRate(mNMinMicros);
 	lastshow = fl::micros();
@@ -495,14 +496,14 @@ void CFastLED::showColor(const CRGB & color, fl::u8 scale) {
 	onEndShowLeds();
 }
 
-void CFastLED::clear(bool writeData) {
+void CFastLED::clear(bool writeData) FL_NO_EXCEPT {
 	if(writeData) {
 		showColor(CRGB(0,0,0), 0);
 	}
     clearData();
 }
 
-void CFastLED::clearData() {
+void CFastLED::clearData() FL_NO_EXCEPT {
 	CLEDController *pCur = CLEDController::head();
 	while(pCur) {
 		pCur->clearLedDataInternal();
@@ -510,7 +511,7 @@ void CFastLED::clearData() {
 	}
 }
 
-void CFastLED::delay(unsigned long ms) {
+void CFastLED::delay(unsigned long ms) FL_NO_EXCEPT {
 	unsigned long start = fl::millis();
         do {
 #ifndef FASTLED_ACCURATE_CLOCK
@@ -524,7 +525,7 @@ void CFastLED::delay(unsigned long ms) {
 	while((fl::millis()-start) < ms);
 }
 
-void CFastLED::setTemperature(const CRGB & temp) {
+void CFastLED::setTemperature(const CRGB & temp) FL_NO_EXCEPT {
 	CLEDController *pCur = CLEDController::head();
 	while(pCur) {
 		pCur->setTemperature(temp);
@@ -532,7 +533,7 @@ void CFastLED::setTemperature(const CRGB & temp) {
 	}
 }
 
-void CFastLED::setCorrection(const CRGB & correction) {
+void CFastLED::setCorrection(const CRGB & correction) FL_NO_EXCEPT {
 	CLEDController *pCur = CLEDController::head();
 	while(pCur) {
 		pCur->setCorrection(correction);
@@ -540,7 +541,7 @@ void CFastLED::setCorrection(const CRGB & correction) {
 	}
 }
 
-void CFastLED::setDither(fl::u8 ditherMode)  {
+void CFastLED::setDither(fl::u8 ditherMode) FL_NO_EXCEPT {
 	CLEDController *pCur = CLEDController::head();
 	while(pCur) {
 		pCur->setDither(ditherMode);
@@ -548,16 +549,16 @@ void CFastLED::setDither(fl::u8 ditherMode)  {
 	}
 }
 
-void CFastLED::setHdFieldFloor(fl::u8 min_field) {
+void CFastLED::setHdFieldFloor(fl::u8 min_field) FL_NO_EXCEPT {
 	fl::detail::hdFieldFloor() =
 		min_field < 1 ? 1 : (min_field > 31 ? 31 : min_field);
 }
 
-fl::u8 CFastLED::getHdFieldFloor() const {
+fl::u8 CFastLED::getHdFieldFloor() const FL_NO_EXCEPT {
 	return fl::detail::hdFieldFloor();
 }
 
-fl::u32 CFastLED::getEstimatedPowerInMilliWatts(bool apply_limiter) const {
+fl::u32 CFastLED::getEstimatedPowerInMilliWatts(bool apply_limiter) const FL_NO_EXCEPT {
 #if FL_COLOR_PIPELINE_SHARED
 	if (apply_limiter && mPPowerFunc && fl::activeFramePowerDispatch()) {
 		bool managed = false;
@@ -675,7 +676,7 @@ extern int noise_min;
 /// @todo Remove?
 extern int noise_max;
 
-void CFastLED::countFPS(int nFrames) {
+void CFastLED::countFPS(int nFrames) FL_NO_EXCEPT {
 	static int br = 0;
 	static fl::u32 lastframe = 0; // fl::millis();
 
@@ -691,7 +692,7 @@ void CFastLED::countFPS(int nFrames) {
 	}
 }
 
-void CFastLED::setMaxRefreshRate(fl::u16 refresh, bool constrain) {
+void CFastLED::setMaxRefreshRate(fl::u16 refresh, bool constrain) FL_NO_EXCEPT {
 	if(constrain) {
 		// if we're constraining, the new value of mNMinMicros _must_ be higher than previously (because we're only
 		// allowed to slow things down if constraining)
@@ -706,7 +707,7 @@ void CFastLED::setMaxRefreshRate(fl::u16 refresh, bool constrain) {
 }
 
 
-fl::u8 get_brightness() {
+fl::u8 get_brightness() FL_NO_EXCEPT {
 	return FastLED.getBrightness();
 }
 
@@ -718,23 +719,23 @@ fl::u8 get_brightness() {
 // circular dependencies (power_mgt.cpp should not include FastLED.h).
 
 void set_max_power_in_volts_and_milliamps(fl::u8 volts, fl::u32 milliamps)
-{
+FL_NO_EXCEPT {
 	FastLED.setMaxPowerInVoltsAndMilliamps(volts, milliamps);
 }
 
 void set_max_power_in_milliwatts(fl::u32 powerInmW)
-{
+FL_NO_EXCEPT {
 	FastLED.setMaxPowerInMilliWatts(powerInmW);
 }
 
 void show_at_max_brightness_for_power()
-{
+FL_NO_EXCEPT {
 	// power management usage is now in FastLED.show, no need for this function
 	FastLED.show();
 }
 
 void delay_at_max_brightness_for_power(fl::u16 ms)
-{
+FL_NO_EXCEPT {
 	FastLED.delay(ms);
 }
 
@@ -742,31 +743,31 @@ void delay_at_max_brightness_for_power(fl::u16 ms)
 // Channel Bus Manager Controls
 // ============================================================================
 
-void CFastLED::enableAllDrivers() {
+void CFastLED::enableAllDrivers() FL_NO_EXCEPT {
 	fl::enableAllDrivers();
 }
 
-void CFastLED::setDriverEnabled(const char* name, bool enabled) {
+void CFastLED::setDriverEnabled(const char* name, bool enabled) FL_NO_EXCEPT {
 	fl::ChannelManager& manager = fl::channelManager();
 	manager.setDriverEnabled(name, enabled);
 }
 
-bool CFastLED::setExclusiveDriver(fl::Bus bus, fl::u8 which) {
+bool CFastLED::setExclusiveDriver(fl::Bus bus, fl::u8 which) FL_NO_EXCEPT {
 	fl::ChannelManager& manager = fl::channelManager();
 	return manager.setExclusiveDriver(bus, which);
 }
 
-bool CFastLED::isDriverEnabled(const char* name) const {
+bool CFastLED::isDriverEnabled(const char* name) const FL_NO_EXCEPT {
 	fl::ChannelManager& manager = fl::channelManager();
 	return manager.isDriverEnabled(name);
 }
 
-fl::size CFastLED::getDriverCount() const {
+fl::size CFastLED::getDriverCount() const FL_NO_EXCEPT {
 	fl::ChannelManager& manager = fl::channelManager();
 	return manager.getDriverCount();
 }
 
-fl::span<const fl::DriverInfo> CFastLED::getDriverInfos() const {
+fl::span<const fl::DriverInfo> CFastLED::getDriverInfos() const FL_NO_EXCEPT {
 	fl::ChannelManager& manager = fl::channelManager();
 	return manager.getDriverInfos();
 }
@@ -775,14 +776,14 @@ fl::span<const fl::DriverInfo> CFastLED::getDriverInfos() const {
 // Wait for channel bus transmissions
 // ============================================================================
 
-void CFastLED::wait() {
+void CFastLED::wait() FL_NO_EXCEPT {
 	fl::ChannelManager& manager = fl::channelManager();
 	// A zero timeout means wait indefinitely. The void API cannot report a
 	// timeout, so returning early would violate its completion contract.
 	manager.waitForReady(0);
 }
 
-bool CFastLED::wait(fl::u32 timeout_ms) {
+bool CFastLED::wait(fl::u32 timeout_ms) FL_NO_EXCEPT {
 	fl::ChannelManager& manager = fl::channelManager();
 	return manager.waitForReady(timeout_ms);
 }
@@ -801,7 +802,7 @@ fl::u32 CFastLED::_getWaitSpinBudgetUs() FL_NO_EXCEPT {
 // Runtime Channel API Implementation
 // ============================================================================
 
-fl::ChannelPtr CFastLED::add(const fl::ChannelConfig& config) {
+fl::ChannelPtr CFastLED::add(const fl::ChannelConfig& config) FL_NO_EXCEPT {
     // Issue #2459: the non-template `FastLED.add(cfg)` path is the runtime-
     // selection mode. To make sure `cfg.options.mBus` (or priority dispatch
     // when `mBus == Bus::AUTO`) can actually find the requested driver at
@@ -833,7 +834,7 @@ fl::ChannelPtr CFastLED::add(const fl::ChannelConfig& config) {
     return channel;
 }
 
-fl::vector<fl::ChannelPtr> CFastLED::add(fl::span<const fl::ChannelConfig> configs) {
+fl::vector<fl::ChannelPtr> CFastLED::add(fl::span<const fl::ChannelConfig> configs) FL_NO_EXCEPT {
     fl::vector<fl::ChannelPtr> channels;
     channels.reserve(configs.size());
 
@@ -844,7 +845,7 @@ fl::vector<fl::ChannelPtr> CFastLED::add(fl::span<const fl::ChannelConfig> confi
     return channels;
 }
 
-fl::vector<fl::ChannelPtr> CFastLED::add(fl::initializer_list<fl::ChannelConfig> configs) {
+fl::vector<fl::ChannelPtr> CFastLED::add(fl::initializer_list<fl::ChannelConfig> configs) FL_NO_EXCEPT {
     fl::vector<fl::ChannelPtr> channels;
     channels.reserve(configs.size());
 
@@ -855,7 +856,7 @@ fl::vector<fl::ChannelPtr> CFastLED::add(fl::initializer_list<fl::ChannelConfig>
     return channels;
 }
 
-fl::vector<fl::ChannelPtr> CFastLED::add(const fl::MultiChannelConfig& multiConfig) {
+fl::vector<fl::ChannelPtr> CFastLED::add(const fl::MultiChannelConfig& multiConfig) FL_NO_EXCEPT {
     fl::vector<fl::ChannelPtr> channels;
     channels.reserve(multiConfig.mChannels.size());
 
@@ -868,7 +869,7 @@ fl::vector<fl::ChannelPtr> CFastLED::add(const fl::MultiChannelConfig& multiConf
     return channels;
 }
 
-fl::RxChannelPtr CFastLED::addRx(const fl::RxChannelConfig& config) {
+fl::RxChannelPtr CFastLED::addRx(const fl::RxChannelConfig& config) FL_NO_EXCEPT {
     return fl::RxChannel::create(config);
 }
 
@@ -908,22 +909,22 @@ namespace __cxxabiv1
 #endif
 
 
-void CFastLED::onBeginFrame() {
+void CFastLED::onBeginFrame() FL_NO_EXCEPT {
 	fl::EngineEvents::onBeginFrame();
 }
 
 
-void CFastLED::onEndShowLeds() {
+void CFastLED::onEndShowLeds() FL_NO_EXCEPT {
 	#if FASTLED_HAS_ENGINE_EVENTS
 	fl::EngineEvents::onEndShowLeds();
 	#endif
 }
 
-fl::ChannelEvents& CFastLED::channelEvents() {
+fl::ChannelEvents& CFastLED::channelEvents() FL_NO_EXCEPT {
 	return fl::ChannelEvents::instance();
 }
 
-fl::Watchdog& CFastLED::watchdog() {
+fl::Watchdog& CFastLED::watchdog() FL_NO_EXCEPT {
 	return fl::Watchdog::instance();
 }
 
@@ -932,21 +933,21 @@ fl::Watchdog& CFastLED::watchdog() {
 // ============================================================================
 
 FL_MAYBE_UNUSED
-fl::shared_ptr<fl::audio::Processor> CFastLED::add(const fl::audio::Config& config) {
+fl::shared_ptr<fl::audio::Processor> CFastLED::add(const fl::audio::Config& config) FL_NO_EXCEPT {
 	return fl::audio::AudioManager::instance().add(config);
 }
 
 FL_MAYBE_UNUSED
-fl::shared_ptr<fl::audio::Processor> CFastLED::add(fl::shared_ptr<fl::audio::IInput> input) {
+fl::shared_ptr<fl::audio::Processor> CFastLED::add(fl::shared_ptr<fl::audio::IInput> input) FL_NO_EXCEPT {
 	return fl::audio::AudioManager::instance().add(fl::move(input));
 }
 
 FL_MAYBE_UNUSED
-fl::shared_ptr<fl::audio::Processor> CFastLED::add(fl::UIAudio& uiAudio) {
+fl::shared_ptr<fl::audio::Processor> CFastLED::add(fl::UIAudio& uiAudio) FL_NO_EXCEPT {
 	return fl::audio::AudioManager::instance().add(uiAudio);
 }
 
 FL_MAYBE_UNUSED
-void CFastLED::remove(fl::shared_ptr<fl::audio::Processor> processor) {
+void CFastLED::remove(fl::shared_ptr<fl::audio::Processor> processor) FL_NO_EXCEPT {
 	fl::audio::AudioManager::instance().remove(fl::move(processor));
 }

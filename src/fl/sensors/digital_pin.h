@@ -19,16 +19,16 @@ class DigitalPin {
         kInputPulldown,
     };
 
-    DigitalPin(int pin);
+    DigitalPin(int pin) FL_NO_EXCEPT;
     ~DigitalPin() FL_NO_EXCEPT;
     DigitalPin(const DigitalPin &other) FL_NO_EXCEPT;
     DigitalPin &operator=(const DigitalPin &other) FL_NO_EXCEPT;
 
     DigitalPin(DigitalPin &&other) FL_NO_EXCEPT = delete;
 
-    void setPinMode(Mode mode);
-    bool high() const;  // true if high, false if low
-    void write(bool is_high);
+    void setPinMode(Mode mode) FL_NO_EXCEPT;
+    bool high() const FL_NO_EXCEPT;  // true if high, false if low
+    void write(bool is_high) FL_NO_EXCEPT;
   private:
     DigitalPinImplPtr mImpl;
 };

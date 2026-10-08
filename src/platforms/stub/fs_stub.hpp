@@ -248,7 +248,7 @@ public:
         removeFile(path.c_str());
 
         // Create new file with explicit truncate mode
-        fl::ofstream ofs(path.c_str(), fl::ios::binary | fl::ios::trunc) FL_NO_EXCEPT;
+        fl::ofstream ofs(path.c_str(), fl::ios::binary | fl::ios::trunc);
         if (!ofs.is_open()) {
             return false;
         }

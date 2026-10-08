@@ -25,7 +25,7 @@ struct MultiLaneDevice::Impl : public DeviceImplBase {
     u8 backend_type;  // 1, 2, 4, or 8 (number of lanes supported by backend)
 
     Impl(const Config& cfg)
-        : DeviceImplBase()
+        FL_NO_EXCEPT : DeviceImplBase()
         , config(cfg)
         , backend_type(0) {
 
@@ -42,7 +42,7 @@ struct MultiLaneDevice::Impl : public DeviceImplBase {
         }
     }
 
-    void releaseBackend() {
+    void releaseBackend() FL_NO_EXCEPT {
         if (!backend) return;
 
         // Use polymorphic interface - no casting needed!
@@ -57,7 +57,7 @@ struct MultiLaneDevice::Impl : public DeviceImplBase {
 // ============================================================================
 
 MultiLaneDevice::MultiLaneDevice(const Config& config)
-    : pImpl(fl::make_unique<Impl>(config)) {
+    FL_NO_EXCEPT : pImpl(fl::make_unique<Impl>(config)) {
 
     // Validate configuration
     size_t num_lanes = config.data_pins.size();
@@ -74,7 +74,7 @@ MultiLaneDevice::~MultiLaneDevice() FL_NO_EXCEPT {
     }
 }
 
-fl::optional<fl::task::Error> MultiLaneDevice::begin() {
+fl::optional<fl::task::Error> MultiLaneDevice::begin() FL_NO_EXCEPT {
     if (!pImpl) {
         return fl::task::Error("Device not initialized");
     }
@@ -260,7 +260,7 @@ fl::optional<fl::task::Error> MultiLaneDevice::begin() {
     return fl::nullopt;
 }
 
-void MultiLaneDevice::end() {
+void MultiLaneDevice::end() FL_NO_EXCEPT {
     if (!pImpl || !pImpl->initialized) {
         return;
     }
@@ -279,11 +279,11 @@ void MultiLaneDevice::end() {
     FL_DBG("MultiLaneDevice: Shutdown complete");
 }
 
-bool MultiLaneDevice::isReady() const {
+bool MultiLaneDevice::isReady() const FL_NO_EXCEPT {
     return pImpl && pImpl->isReady();
 }
 
-Lane& MultiLaneDevice::lane(size_t lane_id) {
+Lane& MultiLaneDevice::lane(size_t lane_id) FL_NO_EXCEPT {
     if (!pImpl || lane_id >= pImpl->lanes.size()) {
         FL_WARN("MultiLaneDevice: Invalid lane ID " << lane_id);
         // Return first lane as fallback (avoid crash)
@@ -293,11 +293,11 @@ Lane& MultiLaneDevice::lane(size_t lane_id) {
     return pImpl->lanes[lane_id];
 }
 
-size_t MultiLaneDevice::numLanes() const {
+size_t MultiLaneDevice::numLanes() const FL_NO_EXCEPT {
     return pImpl ? pImpl->lanes.size() : 0;
 }
 
-Result<void> MultiLaneDevice::flush() {
+Result<void> MultiLaneDevice::flush() FL_NO_EXCEPT {
     if (!isReady()) {
         return Result<void>::failure(SPIError::NOT_INITIALIZED,
             "Device not initialized");
@@ -440,7 +440,7 @@ Result<void> MultiLaneDevice::flush() {
     return Result<void>::success();
 }
 
-bool MultiLaneDevice::waitComplete(u32 timeout_ms) {
+bool MultiLaneDevice::waitComplete(u32 timeout_ms) FL_NO_EXCEPT {
     if (!isReady()) {
         return false;
     }
@@ -449,7 +449,7 @@ bool MultiLaneDevice::waitComplete(u32 timeout_ms) {
     return pImpl->backend->waitComplete(timeout_ms);
 }
 
-bool MultiLaneDevice::isBusy() const {
+bool MultiLaneDevice::isBusy() const FL_NO_EXCEPT {
     if (!isReady()) {
         return false;
     }
@@ -458,7 +458,7 @@ bool MultiLaneDevice::isBusy() const {
     return pImpl->backend->isBusy();
 }
 
-WriteResult MultiLaneDevice::writeImpl(fl::span<const fl::span<const u8>> lane_data) {
+WriteResult MultiLaneDevice::writeImpl(fl::span<const fl::span<const u8>> lane_data) FL_NO_EXCEPT {
     if (!isReady()) {
         FL_WARN("MultiLaneDevice: Not ready for write");
         return WriteResult("Device not ready");
@@ -501,7 +501,7 @@ WriteResult MultiLaneDevice::writeImpl(fl::span<const fl::span<const u8>> lane_d
     return WriteResult();
 }
 
-const MultiLaneDevice::Config& MultiLaneDevice::getConfig() const {
+const MultiLaneDevice::Config& MultiLaneDevice::getConfig() const FL_NO_EXCEPT {
     static const Config empty_config;
     return pImpl ? pImpl->config : empty_config;
 }

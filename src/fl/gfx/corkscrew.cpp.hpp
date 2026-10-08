@@ -13,6 +13,7 @@
 #include "fl/math/screenmap.h"
 #include "fl/stl/shared_ptr.h"  // For shared_ptr
 #include "fl/stl/int.h"
+#include "fl/stl/noexcept.h"
 
 
 
@@ -22,7 +23,7 @@ namespace fl {
 namespace {
 
 // New helper function to calculate individual LED position
-vec2f calculateLedPositionExtended(fl::u16 ledIndex, fl::u16 numLeds, float totalTurns, const Gap& gapParams, fl::u16 width, fl::u16 height) {
+vec2f calculateLedPositionExtended(fl::u16 ledIndex, fl::u16 numLeds, float totalTurns, const Gap& gapParams, fl::u16 width, fl::u16 height) FL_NO_EXCEPT {
     FL_UNUSED(height);
     FL_UNUSED(totalTurns);
 
@@ -53,7 +54,7 @@ vec2f calculateLedPositionExtended(fl::u16 ledIndex, fl::u16 numLeds, float tota
     return vec2f(width_pos, height_pos);
 }
 
-void calculateDimensions(float totalTurns, fl::u16 numLeds, const Gap& gapParams, fl::u16 *width, fl::u16 *height) {
+void calculateDimensions(float totalTurns, fl::u16 numLeds, const Gap& gapParams, fl::u16 *width, fl::u16 *height) FL_NO_EXCEPT {
     FL_UNUSED(gapParams);
     
     // Calculate optimal width and height
@@ -79,14 +80,14 @@ void calculateDimensions(float totalTurns, fl::u16 numLeds, const Gap& gapParams
 
 // New primary constructor
 Corkscrew::Corkscrew(float totalTurns, fl::u16 numLeds, bool invert, const Gap& gapParams)
-    : mTotalTurns(totalTurns), mNumLeds(numLeds), mGapParams(gapParams), mInvert(invert) {
+    FL_NO_EXCEPT : mTotalTurns(totalTurns), mNumLeds(numLeds), mGapParams(gapParams), mInvert(invert) {
     fl::calculateDimensions(mTotalTurns, mNumLeds, mGapParams, &mWidth, &mHeight);
     mOwnsPixels = false;
 }
 
 // Constructor with external pixel buffer
 Corkscrew::Corkscrew(float totalTurns, fl::span<CRGB> dstPixels, bool invert, const Gap& gapParams)
-    : mTotalTurns(totalTurns), mNumLeds(static_cast<fl::u16>(dstPixels.size())), 
+    FL_NO_EXCEPT : mTotalTurns(totalTurns), mNumLeds(static_cast<fl::u16>(dstPixels.size())),
       mGapParams(gapParams), mInvert(invert) {
     fl::calculateDimensions(mTotalTurns, mNumLeds, mGapParams, &mWidth, &mHeight);
     mPixelStorage = dstPixels;
@@ -95,7 +96,7 @@ Corkscrew::Corkscrew(float totalTurns, fl::span<CRGB> dstPixels, bool invert, co
 
 
 
-vec2f Corkscrew::at_no_wrap(fl::u16 i) const {
+vec2f Corkscrew::at_no_wrap(fl::u16 i) const FL_NO_EXCEPT {
     if (i >= mNumLeds) {
         // Handle out-of-bounds access, possibly by returning a default value
         return vec2f(0, 0);
@@ -118,7 +119,7 @@ vec2f Corkscrew::at_no_wrap(fl::u16 i) const {
     return position;
 }
 
-vec2f Corkscrew::at_exact(fl::u16 i) const {
+vec2f Corkscrew::at_exact(fl::u16 i) const FL_NO_EXCEPT {
     // Get the unwrapped position
     vec2f position = at_no_wrap(i);
     
@@ -129,7 +130,7 @@ vec2f Corkscrew::at_exact(fl::u16 i) const {
 }
 
 
-Tile2x2_u8 Corkscrew::at_splat_extrapolate(float i) const {
+Tile2x2_u8 Corkscrew::at_splat_extrapolate(float i) const FL_NO_EXCEPT {
     if (i >= mNumLeds) {
         // Handle out-of-bounds access, possibly by returning a default
         // Tile2x2_u8
@@ -154,10 +155,10 @@ Tile2x2_u8 Corkscrew::at_splat_extrapolate(float i) const {
     }
 }
 
-fl::size Corkscrew::size() const { return mNumLeds; }
+fl::size Corkscrew::size() const FL_NO_EXCEPT { return mNumLeds; }
 
 
-Tile2x2_u8_wrap Corkscrew::at_wrap(float i) const {
+Tile2x2_u8_wrap Corkscrew::at_wrap(float i) const FL_NO_EXCEPT {
     if (mCachingEnabled) {
         // Use cache if enabled
         initializeCache();
@@ -173,7 +174,7 @@ Tile2x2_u8_wrap Corkscrew::at_wrap(float i) const {
     return calculateTileAtWrap(i);
 }
 
-Tile2x2_u8_wrap Corkscrew::calculateTileAtWrap(float i) const {
+Tile2x2_u8_wrap Corkscrew::calculateTileAtWrap(float i) const FL_NO_EXCEPT {
     // This is a splatted pixel, but wrapped around the cylinder.
     // This is useful for rendering the corkscrew in a cylindrical way.
     Tile2x2_u8 tile = at_splat_extrapolate(i);
@@ -192,7 +193,7 @@ Tile2x2_u8_wrap Corkscrew::calculateTileAtWrap(float i) const {
     return Tile2x2_u8_wrap(data);
 }
 
-void Corkscrew::setCachingEnabled(bool enabled) {
+void Corkscrew::setCachingEnabled(bool enabled) FL_NO_EXCEPT {
     if (!enabled && mCachingEnabled) {
         // Caching was enabled, now disabling - clear the cache
         mTileCache.clear();
@@ -201,7 +202,7 @@ void Corkscrew::setCachingEnabled(bool enabled) {
     mCachingEnabled = enabled;
 }
 
-void Corkscrew::initializeCache() const {
+void Corkscrew::initializeCache() const FL_NO_EXCEPT {
     if (!mCacheInitialized && mCachingEnabled) {
         // Initialize cache with tiles for each LED position
         mTileCache.resize(mNumLeds);
@@ -215,7 +216,7 @@ void Corkscrew::initializeCache() const {
     }
 }
 
-CRGB* Corkscrew::rawData() {
+CRGB* Corkscrew::rawData() FL_NO_EXCEPT {
     // Use variant storage if available, otherwise fall back to input surface
     if (!mPixelStorage.empty()) {
         if (mPixelStorage.template is<fl::span<CRGB>>()) {
@@ -230,7 +231,7 @@ CRGB* Corkscrew::rawData() {
     return surface->span().data();
 }
 
-fl::span<CRGB> Corkscrew::data() {
+fl::span<CRGB> Corkscrew::data() FL_NO_EXCEPT {
     // Use variant storage if available, otherwise fall back to input surface
     if (!mPixelStorage.empty()) {
         if (mPixelStorage.template is<fl::span<CRGB>>()) {
@@ -247,7 +248,7 @@ fl::span<CRGB> Corkscrew::data() {
 }
 
 
-void Corkscrew::readFrom(const fl::Grid<CRGB>& source_grid, bool use_multi_sampling) {
+void Corkscrew::readFrom(const fl::Grid<CRGB>& source_grid, bool use_multi_sampling) FL_NO_EXCEPT {
 
     if (use_multi_sampling) {
         readFromMulti(source_grid);
@@ -283,7 +284,7 @@ void Corkscrew::readFrom(const fl::Grid<CRGB>& source_grid, bool use_multi_sampl
     }
 }
 
-void Corkscrew::clear() {
+void Corkscrew::clear() FL_NO_EXCEPT {
     // Clear input surface if it exists
     if (mInputSurface) {
         mInputSurface->clear();
@@ -307,14 +308,14 @@ void Corkscrew::clear() {
     mCacheInitialized = false;
 }
 
-void Corkscrew::fillInputSurface(const CRGB& color) {
+void Corkscrew::fillInputSurface(const CRGB& color) FL_NO_EXCEPT {
     auto target_surface = getOrCreateInputSurface();
     for (fl::size i = 0; i < target_surface->size(); ++i) {
         target_surface->span()[i] = color;
     }
 }
 
-void Corkscrew::draw(bool use_multi_sampling) {
+void Corkscrew::draw(bool use_multi_sampling) FL_NO_EXCEPT {
     // The draw method should map from the rectangular surface to the LED pixel data
     // This is the reverse of readFrom - we read from our surface and populate LED data
     auto source_surface = getOrCreateInputSurface();
@@ -393,7 +394,7 @@ void Corkscrew::draw(bool use_multi_sampling) {
     }
 }
 
-void Corkscrew::readFromMulti(const fl::Grid<CRGB>& source_grid) const {
+void Corkscrew::readFromMulti(const fl::Grid<CRGB>& source_grid) const FL_NO_EXCEPT {
     // Get the target surface and clear it
     auto target_surface = const_cast<Corkscrew*>(this)->getOrCreateInputSurface();
     target_surface->clear();
@@ -448,11 +449,11 @@ void Corkscrew::readFromMulti(const fl::Grid<CRGB>& source_grid) const {
 }
 
 // Iterator implementation
-vec2f Corkscrew::iterator::operator*() const {
+vec2f Corkscrew::iterator::operator*() const FL_NO_EXCEPT {
     return mCorkscrew->at_no_wrap(static_cast<fl::u16>(mPosition));
 }
 
-fl::ScreenMap Corkscrew::toScreenMap(float diameter) const {
+fl::ScreenMap Corkscrew::toScreenMap(float diameter) const FL_NO_EXCEPT {
     // Create a ScreenMap with the correct number of LEDs
     fl::ScreenMap screenMap(mNumLeds, diameter);
     
@@ -469,7 +470,7 @@ fl::ScreenMap Corkscrew::toScreenMap(float diameter) const {
 }
 
 // Enhanced surface handling methods  
-fl::shared_ptr<fl::Grid<CRGB>>& Corkscrew::getOrCreateInputSurface() {
+fl::shared_ptr<fl::Grid<CRGB>>& Corkscrew::getOrCreateInputSurface() FL_NO_EXCEPT {
     if (!mInputSurface) {
         // Create a new Grid with cylinder dimensions using PSRAM allocation
         mInputSurface = fl::make_shared<fl::Grid<CRGB>>(mWidth, mHeight);
@@ -477,12 +478,12 @@ fl::shared_ptr<fl::Grid<CRGB>>& Corkscrew::getOrCreateInputSurface() {
     return mInputSurface;
 }
 
-fl::Grid<CRGB>& Corkscrew::surface() {
+fl::Grid<CRGB>& Corkscrew::surface() FL_NO_EXCEPT {
     return *getOrCreateInputSurface();
 }
 
 
-fl::size Corkscrew::pixelCount() const {
+fl::size Corkscrew::pixelCount() const FL_NO_EXCEPT {
     // Use variant storage if available, otherwise fall back to legacy buffer size
     if (!mPixelStorage.empty()) {
         if (mPixelStorage.template is<fl::span<CRGB>>()) {

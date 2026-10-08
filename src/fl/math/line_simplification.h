@@ -40,29 +40,29 @@ template <typename NumberT = float> class LineSimplifier {
     LineSimplifier(LineSimplifier &&other) FL_NO_EXCEPT = default;
     LineSimplifier &operator=(LineSimplifier &&other) FL_NO_EXCEPT = default;
 
-    explicit LineSimplifier(NumberT e) : mMinDistance(e) {}
-    void setMinimumDistance(NumberT eps) { mMinDistance = eps; }
+    explicit LineSimplifier(NumberT e) FL_NO_EXCEPT : mMinDistance(e) {}
+    void setMinimumDistance(NumberT eps) FL_NO_EXCEPT { mMinDistance = eps; }
 
     // simplifyInPlace.
-    void simplifyInplace(fl::vector<Point> *polyline) {
+    void simplifyInplace(fl::vector<Point> *polyline) FL_NO_EXCEPT {
         simplifyInplaceT(polyline);
     }
-    template <typename VectorType> void simplifyInplace(VectorType *polyLine) {
+    template <typename VectorType> void simplifyInplace(VectorType *polyLine) FL_NO_EXCEPT {
         simplifyInplaceT(polyLine);
     }
 
     // simplify to the output vector.
     void simplify(const fl::span<const Point> &polyLine,
-                  fl::vector<Point> *out) {
+                  fl::vector<Point> *out) FL_NO_EXCEPT {
         simplifyT(polyLine, out);
     }
     template <typename VectorType>
-    void simplify(const fl::span<Point> &polyLine, VectorType *out) {
+    void simplify(const fl::span<Point> &polyLine, VectorType *out) FL_NO_EXCEPT {
         simplifyT(polyLine, out);
     }
 
     template <typename VectorType>
-    static void removeOneLeastError(VectorType *_poly) {
+    static void removeOneLeastError(VectorType *_poly) FL_NO_EXCEPT {
         bitset<256> keep;
         VectorType &poly = *_poly;
         keep.assign(poly.size(), 1);
@@ -111,14 +111,14 @@ template <typename NumberT = float> class LineSimplifier {
     }
 
   private:
-    template <typename VectorType> void simplifyInplaceT(VectorType *polyLine) {
+    template <typename VectorType> void simplifyInplaceT(VectorType *polyLine) FL_NO_EXCEPT {
         // run the simplification algorithm
         span<Point> slice(polyLine->data(), polyLine->size());
         simplifyT(slice, polyLine);
     }
 
     template <typename VectorType>
-    void simplifyT(const fl::span<const Point> &polyLine, VectorType *out) {
+    void simplifyT(const fl::span<const Point> &polyLine, VectorType *out) FL_NO_EXCEPT {
         // run the simplification algorithm
         simplifyInternal(polyLine);
 
@@ -127,7 +127,7 @@ template <typename NumberT = float> class LineSimplifier {
     }
     // Runs in O(n) allocations: one bool‐array + one index stack + one output
     // vector
-    void simplifyInternal(const fl::span<const Point> &polyLine) {
+    void simplifyInternal(const fl::span<const Point> &polyLine) FL_NO_EXCEPT {
         mSimplified.clear();
         int n = polyLine.size();
         if (n < 2) {
@@ -211,7 +211,7 @@ template <typename NumberT = float> class LineSimplifier {
     VectorPoint mSimplified; // output buffer
 
     static NumberT PerpendicularDistance2(const Point &pt, const Point &a,
-                                          const Point &b) {
+                                          const Point &b) FL_NO_EXCEPT {
         // vector AB
         NumberT dx = b.x - a.x;
         NumberT dy = b.y - a.y;
@@ -238,17 +238,17 @@ template <typename NumberT = float> class LineSimplifierExact {
     LineSimplifierExact() FL_NO_EXCEPT = default;
     using Point = vec2<NumberT>;
 
-    LineSimplifierExact(int count) : mCount(count) {}
+    LineSimplifierExact(int count) FL_NO_EXCEPT : mCount(count) {}
 
-    void setCount(u32 count) { mCount = count; }
+    void setCount(u32 count) FL_NO_EXCEPT { mCount = count; }
 
     template <typename VectorType = fl::vector<Point>>
-    void simplifyInplace(VectorType *polyLine) {
+    void simplifyInplace(VectorType *polyLine) FL_NO_EXCEPT {
         return simplify(*polyLine, polyLine);
     }
 
     template <typename VectorType = fl::vector<Point>>
-    void simplify(const fl::span<const Point> &polyLine, VectorType *out) {
+    void simplify(const fl::span<const Point> &polyLine, VectorType *out) FL_NO_EXCEPT {
         if (mCount > polyLine.size()) {
             safeCopy(polyLine, out);
             return;
@@ -317,7 +317,7 @@ template <typename NumberT = float> class LineSimplifierExact {
     }
 
   private:
-    static NumberT estimateMaxDistance(const fl::span<const Point> &polyLine) {
+    static NumberT estimateMaxDistance(const fl::span<const Point> &polyLine) FL_NO_EXCEPT {
         // Rough guess: max distance between endpoints
         if (polyLine.size() < 2)
             return 0;
@@ -330,7 +330,7 @@ template <typename NumberT = float> class LineSimplifierExact {
     }
 
     template <typename VectorType>
-    void safeCopy(const fl::span<const Point> &polyLine, VectorType *out) {
+    void safeCopy(const fl::span<const Point> &polyLine, VectorType *out) FL_NO_EXCEPT {
         auto *first_out = out->data();
         // auto* last_out = first_out + mCount;
         auto *other_first_out = polyLine.data();

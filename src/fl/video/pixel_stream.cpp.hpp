@@ -170,7 +170,7 @@ bool PixelStream::begin(filebuf_ptr h) FL_NO_EXCEPT {
     return true;
 }
 
-void PixelStream::close() {
+void PixelStream::close() FL_NO_EXCEPT {
     mHandle.reset();
     mbytesPerFrame = mBaseBytesPerFrame;
     mPayloadOffset = 0;
@@ -210,9 +210,9 @@ bool PixelStream::probeStreamingMagic() const FL_NO_EXCEPT {
     return true;
 }
 
-i32 PixelStream::bytesPerFrame() { return mbytesPerFrame; }
+i32 PixelStream::bytesPerFrame() FL_NO_EXCEPT { return mbytesPerFrame; }
 
-bool PixelStream::readPixel(CRGB *dst) {
+bool PixelStream::readPixel(CRGB *dst) FL_NO_EXCEPT {
     if (!mHandle || !dst) {
         return false;
     }
@@ -247,7 +247,7 @@ bool PixelStream::readSample(PixelSample *out) FL_NO_EXCEPT {
     return true;
 }
 
-bool PixelStream::available() const {
+bool PixelStream::available() const FL_NO_EXCEPT {
     if (!mHandle) {
         return false;
     }
@@ -261,7 +261,7 @@ bool PixelStream::available() const {
     return mHandle->available();
 }
 
-bool PixelStream::atEnd() const {
+bool PixelStream::atEnd() const FL_NO_EXCEPT {
     if (!mHandle) {
         return true;
     }
@@ -271,7 +271,7 @@ bool PixelStream::atEnd() const {
     return !mHandle->available();
 }
 
-bool PixelStream::readFrame(Frame *frame) {
+bool PixelStream::readFrame(Frame *frame) FL_NO_EXCEPT {
     if (!mHandle || !frame) {
         return false;
     }
@@ -292,7 +292,7 @@ bool PixelStream::readFrame(Frame *frame) {
     return n * 3 == size_t(mbytesPerFrame);
 }
 
-bool PixelStream::hasFrame(fl::u32 frameNumber) {
+bool PixelStream::hasFrame(fl::u32 frameNumber) FL_NO_EXCEPT {
     if (!mHandle) {
         return false;
     }
@@ -310,7 +310,7 @@ bool PixelStream::hasFrame(fl::u32 frameNumber) {
     return target < total_bytes;
 }
 
-bool PixelStream::readFrameAt(fl::u32 frameNumber, Frame *frame) {
+bool PixelStream::readFrameAt(fl::u32 frameNumber, Frame *frame) FL_NO_EXCEPT {
     if (!mHandle || !frame || mType == kStreaming) {
         // Streaming handle doesn't support seeking
         FL_DBG("Streaming handle doesn't support seeking");
@@ -337,7 +337,7 @@ bool PixelStream::readFrameAt(fl::u32 frameNumber, Frame *frame) {
     return ok;
 }
 
-i32 PixelStream::framesRemaining() const {
+i32 PixelStream::framesRemaining() const FL_NO_EXCEPT {
     if (mbytesPerFrame == 0)
         return 0;
     i32 bytes_left = bytesRemaining();
@@ -347,7 +347,7 @@ i32 PixelStream::framesRemaining() const {
     return bytes_left / mbytesPerFrame;
 }
 
-i32 PixelStream::framesDisplayed() const {
+i32 PixelStream::framesDisplayed() const FL_NO_EXCEPT {
     if (!mHandle) {
         return 0;
     }
@@ -362,7 +362,7 @@ i32 PixelStream::framesDisplayed() const {
     return static_cast<i32>((pos - mPayloadOffset) / mbytesPerFrame);
 }
 
-i32 PixelStream::bytesRemaining() const {
+i32 PixelStream::bytesRemaining() const FL_NO_EXCEPT {
     if (!mHandle) {
         return 0;
     }
@@ -373,14 +373,14 @@ i32 PixelStream::bytesRemaining() const {
     return mHandle->bytesLeft();
 }
 
-i32 PixelStream::bytesRemainingInFrame() const {
+i32 PixelStream::bytesRemainingInFrame() const FL_NO_EXCEPT {
     if (mbytesPerFrame == 0) {
         return 0;
     }
     return bytesRemaining() % mbytesPerFrame;
 }
 
-bool PixelStream::rewind() {
+bool PixelStream::rewind() FL_NO_EXCEPT {
     if (!mHandle || mType == kStreaming) {
         return false;
     }
@@ -390,7 +390,7 @@ bool PixelStream::rewind() {
     return true;
 }
 
-PixelStream::Type PixelStream::getType() const {
+PixelStream::Type PixelStream::getType() const FL_NO_EXCEPT {
     return mType;
 }
 
@@ -420,7 +420,7 @@ bool PixelStream::isRgb8Playback() const FL_NO_EXCEPT {
         mFledPixelFormat == static_cast<fl::u8>(fled::PixelFormat::Rgb8);
 }
 
-size_t PixelStream::readBytes(u8 *dst, size_t len) {
+size_t PixelStream::readBytes(u8 *dst, size_t len) FL_NO_EXCEPT {
     if (!mHandle || !dst) {
         return 0;
     }

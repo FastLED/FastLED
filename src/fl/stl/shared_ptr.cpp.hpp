@@ -25,7 +25,7 @@ namespace detail {
 ControlBlockBase::~ControlBlockBase() FL_DTOR_NOEXCEPT = default;
 
 // Reference count increment - must be out-of-line to prevent cross-binary vtable issues.
-void ControlBlockBase::add_shared_ref() {
+void ControlBlockBase::add_shared_ref() FL_NO_EXCEPT {
     if (shared_count != NO_TRACKING_VALUE) {
         ++shared_count;
     }
@@ -33,7 +33,7 @@ void ControlBlockBase::add_shared_ref() {
 
 // Reference count decrement - must be out-of-line to prevent cross-binary vtable issues.
 // Returns true if the reference count reached zero (object should be destroyed).
-bool ControlBlockBase::remove_shared_ref() {
+bool ControlBlockBase::remove_shared_ref() FL_NO_EXCEPT {
     if (shared_count == NO_TRACKING_VALUE) {
         return false;  // Never destroy in no-tracking mode
     }
@@ -41,7 +41,7 @@ bool ControlBlockBase::remove_shared_ref() {
 }
 
 // Check if this control block is in no-tracking mode.
-bool ControlBlockBase::is_no_tracking() const {
+bool ControlBlockBase::is_no_tracking() const FL_NO_EXCEPT {
     return shared_count == NO_TRACKING_VALUE;
 }
 

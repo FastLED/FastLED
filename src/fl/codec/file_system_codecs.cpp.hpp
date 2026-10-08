@@ -13,6 +13,7 @@
 #include "fl/math/math.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/cstring.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -26,7 +27,7 @@ private:
     fl::string mPath;
     bool mHasValidFrame;
 
-    bool decodeNextFrameIfNeeded() {
+    bool decodeNextFrameIfNeeded() FL_NO_EXCEPT {
         if (mCurrentPos >= mFrameSize || !mHasValidFrame) {
             if (!mDecoder->hasMoreFrames()) { mHasValidFrame = false; return false; }
             DecodeResult result = mDecoder->decode();
@@ -41,11 +42,11 @@ private:
 
 public:
     Mpeg1FileHandle(IDecoderPtr decoder, fl::size pixelsPerFrame, const char* path)
-        : mDecoder(decoder), mCurrentFrame(nullptr), mFrameSize(pixelsPerFrame * 3),
+        FL_NO_EXCEPT : mDecoder(decoder), mCurrentFrame(nullptr), mFrameSize(pixelsPerFrame * 3),
           mCurrentPos(0), mPath(path), mHasValidFrame(false) { decodeNextFrameIfNeeded(); }
-    bool is_open() const override { return mDecoder != nullptr; }
-    void close() override { if (mDecoder) mDecoder->end(); }
-    fl::size_t read(char* dst, fl::size_t bytesToRead) override {
+    bool is_open() const FL_NO_EXCEPT override { return mDecoder != nullptr; }
+    void close() FL_NO_EXCEPT override { if (mDecoder) mDecoder->end(); }
+    fl::size_t read(char* dst, fl::size_t bytesToRead) FL_NO_EXCEPT override {
         if (!mDecoder || !mHasValidFrame) return 0;
         fl::size totalRead = 0;
         while (bytesToRead > 0 && mHasValidFrame) {
@@ -60,26 +61,26 @@ public:
         return totalRead;
     }
     using filebuf::read;
-    fl::size_t write(const char*, fl::size_t) override { return 0; }
-    fl::size_t tell() override { return 0; }
-    bool seek(fl::size_t, seek_dir) override { return false; }
+    fl::size_t write(const char*, fl::size_t) FL_NO_EXCEPT override { return 0; }
+    fl::size_t tell() FL_NO_EXCEPT override { return 0; }
+    bool seek(fl::size_t, seek_dir) FL_NO_EXCEPT override { return false; }
     using filebuf::seek;
-    fl::size_t size() const override { return 0; }
-    const char* path() const override { return mPath.c_str(); }
-    bool is_eof() const override { return !mHasValidFrame && !mDecoder->hasMoreFrames(); }
-    bool has_error() const override { return false; }
-    void clear_error() override {}
-    int error_code() const override { return 0; }
-    const char* error_message() const override { return "No error"; }
-    bool available() const override { return mHasValidFrame || mDecoder->hasMoreFrames(); }
-    fl::size_t bytes_left() const override {
+    fl::size_t size() const FL_NO_EXCEPT override { return 0; }
+    const char* path() const FL_NO_EXCEPT override { return mPath.c_str(); }
+    bool is_eof() const FL_NO_EXCEPT override { return !mHasValidFrame && !mDecoder->hasMoreFrames(); }
+    bool has_error() const FL_NO_EXCEPT override { return false; }
+    void clear_error() FL_NO_EXCEPT override {}
+    int error_code() const FL_NO_EXCEPT override { return 0; }
+    const char* error_message() const FL_NO_EXCEPT override { return "No error"; }
+    bool available() const FL_NO_EXCEPT override { return mHasValidFrame || mDecoder->hasMoreFrames(); }
+    fl::size_t bytes_left() const FL_NO_EXCEPT override {
         if (!mHasValidFrame) return 0;
         return (mCurrentPos < mFrameSize) ? (mFrameSize - mCurrentPos) : 0;
     }
 };
 
 Video FileSystem::openMpeg1Video(const char *path, fl::size pixelsPerFrame, float fps,
-                                 fl::size nFrameHistory) {
+                                 fl::size nFrameHistory) FL_NO_EXCEPT {
     Video video(pixelsPerFrame, fps, nFrameHistory);
     fl::ifstream file = openRead(path);
     if (!file.is_open()) { video.setError(fl::string("Could not open MPEG1 file: ").append(path)); return video; }
@@ -101,7 +102,7 @@ Video FileSystem::openMpeg1Video(const char *path, fl::size pixelsPerFrame, floa
 }
 
 FramePtr FileSystem::loadJpeg(const char *path, const JpegConfig &config,
-                               fl::string *error_message) {
+                               fl::string *error_message) FL_NO_EXCEPT {
     fl::ifstream file = openRead(path);
     if (!file.is_open()) {
         if (error_message) { *error_message = "Failed to open file: "; error_message->append(path); }
@@ -139,7 +140,7 @@ FramePtr FileSystem::loadJpeg(const char *path, const JpegConfig &config,
     return frame;
 }
 
-fl::Mp3DecoderPtr FileSystem::openMp3(const char *path, fl::string *error_message) {
+fl::Mp3DecoderPtr FileSystem::openMp3(const char *path, fl::string *error_message) FL_NO_EXCEPT {
     fl::ifstream file = openRead(path);
     if (!file.is_open()) {
         if (error_message) { *error_message = "Failed to open file: "; error_message->append(path); }

@@ -33,18 +33,18 @@ struct error_code {
     fl::string message; // optional human-readable detail
 
     error_code() FL_NO_EXCEPT : code(errc::success) {}
-    error_code(errc c) : code(c) {}
-    error_code(errc c, const fl::string &msg) : code(c), message(msg) {}
-    error_code(errc c, const char *msg) : code(c), message(msg) {}
+    error_code(errc c) FL_NO_EXCEPT : code(c) {}
+    error_code(errc c, const fl::string &msg) FL_NO_EXCEPT : code(c), message(msg) {}
+    error_code(errc c, const char *msg) FL_NO_EXCEPT : code(c), message(msg) {}
 
     /// Asio-style: true if error, false if success.
-    explicit operator bool() const { return code != errc::success; }
+    explicit operator bool() const FL_NO_EXCEPT { return code != errc::success; }
 
     /// Convenience: true if no error.
-    bool ok() const { return code == errc::success; }
+    bool ok() const FL_NO_EXCEPT { return code == errc::success; }
 
     /// Convert from fl::task::Error for interop with existing FastLED code.
-    static error_code from_error(const fl::task::Error &e) {
+    static error_code from_error(const fl::task::Error &e) FL_NO_EXCEPT {
         if (e.is_empty()) {
             return error_code();
         }
@@ -52,7 +52,7 @@ struct error_code {
     }
 
     /// Convert to fl::task::Error for interop with existing FastLED code.
-    fl::task::Error to_error() const {
+    fl::task::Error to_error() const FL_NO_EXCEPT {
         if (ok()) {
             return fl::task::Error();
         }
@@ -60,10 +60,10 @@ struct error_code {
     }
 
     /// Convert from platform errno value.
-    static error_code from_errno(int platform_errno);
+    static error_code from_errno(int platform_errno) FL_NO_EXCEPT;
 
-    bool operator==(const error_code &o) const { return code == o.code; }
-    bool operator!=(const error_code &o) const { return code != o.code; }
+    bool operator==(const error_code &o) const FL_NO_EXCEPT { return code == o.code; }
+    bool operator!=(const error_code &o) const FL_NO_EXCEPT { return code != o.code; }
 };
 
 } // namespace asio

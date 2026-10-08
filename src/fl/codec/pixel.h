@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fl/stl/int.h"
+#include "fl/stl/noexcept.h"
 namespace fl {
 
 // Color formats for decoded output
@@ -16,7 +17,7 @@ enum class PixelFormat {
 };
 
 // Calculate bytes per pixel for given format
-inline fl::u8 getBytesPerPixel(PixelFormat format) {
+inline fl::u8 getBytesPerPixel(PixelFormat format) FL_NO_EXCEPT {
     switch (format) {
         case PixelFormat::RGB565: return 2;
         case PixelFormat::RGB888: return 3;
@@ -28,10 +29,10 @@ inline fl::u8 getBytesPerPixel(PixelFormat format) {
 }
 
 // Convert RGB565 to RGB888 with proper scaling to full 8-bit range using lookup tables
-void rgb565ToRgb888(fl::u16 rgb565, fl::u8& r, fl::u8& g, fl::u8& b);
+void rgb565ToRgb888(fl::u16 rgb565, fl::u8& r, fl::u8& g, fl::u8& b) FL_NO_EXCEPT;
 
 // Convert RGB888 to RGB565
-inline fl::u16 rgb888ToRgb565(fl::u8 r, fl::u8 g, fl::u8 b) {
+inline fl::u16 rgb888ToRgb565(fl::u8 r, fl::u8 g, fl::u8 b) FL_NO_EXCEPT {
     return ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3);
 }
 

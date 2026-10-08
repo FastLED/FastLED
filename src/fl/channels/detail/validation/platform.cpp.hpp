@@ -8,16 +8,17 @@
 #include "fl/channels/manager.h"
 #include "fl/stl/compiler_control.h"
 #include "fl/log/log.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace validation {
 
-bool validateExpectedEngines() {
+bool validateExpectedEngines() FL_NO_EXCEPT {
     auto infos = channelManager().getDriverInfos();
     return !infos.empty();
 }
 
-void printEngineValidation() {
+void printEngineValidation() FL_NO_EXCEPT {
     auto infos = channelManager().getDriverInfos();
 
     if (infos.empty()) {

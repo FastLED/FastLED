@@ -30,51 +30,51 @@ public:
     virtual ~filebuf() FL_NO_EXCEPT = default;
 
     // Core file operations (pure virtual)
-    virtual bool is_open() const = 0;
-    virtual void close() = 0;
-    virtual fl::size_t read(char* buffer, fl::size_t count) = 0;
-    virtual fl::size_t write(const char* data, fl::size_t count) = 0;
-    virtual fl::size_t tell() = 0;
-    virtual bool seek(fl::size_t pos, seek_dir dir) = 0;
+    virtual bool is_open() const FL_NO_EXCEPT = 0;
+    virtual void close() FL_NO_EXCEPT = 0;
+    virtual fl::size_t read(char* buffer, fl::size_t count) FL_NO_EXCEPT = 0;
+    virtual fl::size_t write(const char* data, fl::size_t count) FL_NO_EXCEPT = 0;
+    virtual fl::size_t tell() FL_NO_EXCEPT = 0;
+    virtual bool seek(fl::size_t pos, seek_dir dir) FL_NO_EXCEPT = 0;
 
     // Size and path (pure virtual)
-    virtual fl::size_t size() const = 0;
-    virtual const char* path() const = 0;
+    virtual fl::size_t size() const FL_NO_EXCEPT = 0;
+    virtual const char* path() const FL_NO_EXCEPT = 0;
 
     // State queries (pure virtual)
-    virtual bool is_eof() const = 0;
-    virtual bool has_error() const = 0;
-    virtual void clear_error() = 0;
+    virtual bool is_eof() const FL_NO_EXCEPT = 0;
+    virtual bool has_error() const FL_NO_EXCEPT = 0;
+    virtual void clear_error() FL_NO_EXCEPT = 0;
 
     // Error reporting (pure virtual)
-    virtual int error_code() const = 0;
-    virtual const char* error_message() const = 0;
+    virtual int error_code() const FL_NO_EXCEPT = 0;
+    virtual const char* error_message() const FL_NO_EXCEPT = 0;
 
     // Default implementations (can be overridden)
-    virtual bool available() const { return is_open() && !is_eof(); }
-    virtual fl::size_t bytes_left() const;
+    virtual bool available() const FL_NO_EXCEPT { return is_open() && !is_eof(); }
+    virtual fl::size_t bytes_left() const FL_NO_EXCEPT;
 
     // Convenience: read into u8 buffer
-    fl::size_t read(fl::u8* dst, fl::size_t n) {
+    fl::size_t read(fl::u8* dst, fl::size_t n) FL_NO_EXCEPT {
         return read(reinterpret_cast<char*>(dst), n); // ok reinterpret cast
     }
-    fl::size_t read(fl::span<fl::u8> dst) {
+    fl::size_t read(fl::span<fl::u8> dst) FL_NO_EXCEPT {
         return read(dst.data(), dst.size());
     }
 
     // Convenience: read RGB8 pixels (3 bytes per pixel)
-    fl::size_t readRGB8(fl::span<CRGB> dst) {
+    fl::size_t readRGB8(fl::span<CRGB> dst) FL_NO_EXCEPT {
         return read(reinterpret_cast<char*>(dst.data()), dst.size() * 3) / 3; // ok reinterpret cast
     }
 
     // Convenience: check if n bytes are available
-    bool available(fl::size_t n) const { return bytes_left() >= n; }
+    bool available(fl::size_t n) const FL_NO_EXCEPT { return bytes_left() >= n; }
 
     // Backward-compatibility methods (non-virtual, call through to new API)
-    bool valid() const { return is_open(); }
-    fl::size_t pos() const;
-    bool seek(fl::size_t p) { return seek(p, seek_dir::beg); }
-    fl::size_t bytesLeft() const { return bytes_left(); }
+    bool valid() const FL_NO_EXCEPT { return is_open(); }
+    fl::size_t pos() const FL_NO_EXCEPT;
+    bool seek(fl::size_t p) FL_NO_EXCEPT { return seek(p, seek_dir::beg); }
+    fl::size_t bytesLeft() const FL_NO_EXCEPT { return bytes_left(); }
 };
 
 // Owning handle to a filebuf. Declared here, beside the type it points at,
@@ -95,13 +95,13 @@ private:
     int mLastError;
     fl::string mPath;
 
-    void captureError();
-    void clearErrorState();
+    void captureError() FL_NO_EXCEPT;
+    void clearErrorState() FL_NO_EXCEPT;
 
 public:
     posix_filebuf() FL_NO_EXCEPT : mFile(nullptr), mLastError(0) {}
 
-    explicit posix_filebuf(const char* path, const char* mode);
+    explicit posix_filebuf(const char* path, const char* mode) FL_NO_EXCEPT;
 
     ~posix_filebuf() FL_NO_EXCEPT override;
 
@@ -114,33 +114,33 @@ public:
 
     posix_filebuf& operator=(posix_filebuf&& other) FL_NO_EXCEPT;
 
-    bool is_open() const override;
+    bool is_open() const FL_NO_EXCEPT override;
 
-    void close() override;
+    void close() FL_NO_EXCEPT override;
 
-    fl::size_t read(char* buffer, fl::size_t count) override;
+    fl::size_t read(char* buffer, fl::size_t count) FL_NO_EXCEPT override;
     using filebuf::read; // Pull in u8 overload
 
-    fl::size_t write(const char* data, fl::size_t count) override;
+    fl::size_t write(const char* data, fl::size_t count) FL_NO_EXCEPT override;
 
-    fl::size_t tell() override;
+    fl::size_t tell() FL_NO_EXCEPT override;
 
-    bool seek(fl::size_t pos, seek_dir dir) override;
+    bool seek(fl::size_t pos, seek_dir dir) FL_NO_EXCEPT override;
     using filebuf::seek; // Pull in single-arg overload
 
-    fl::size_t size() const override;
+    fl::size_t size() const FL_NO_EXCEPT override;
 
-    const char* path() const override;
+    const char* path() const FL_NO_EXCEPT override;
 
-    bool is_eof() const override;
+    bool is_eof() const FL_NO_EXCEPT override;
 
-    bool has_error() const override;
+    bool has_error() const FL_NO_EXCEPT override;
 
-    void clear_error() override;
+    void clear_error() FL_NO_EXCEPT override;
 
-    int error_code() const override;
+    int error_code() const FL_NO_EXCEPT override;
 
-    const char* error_message() const override;
+    const char* error_message() const FL_NO_EXCEPT override;
 };
 
 } // namespace detail

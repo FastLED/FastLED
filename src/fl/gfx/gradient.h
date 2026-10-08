@@ -17,22 +17,22 @@ class Gradient {
   public:
     using GradientFunction = fl::function<CRGB(u8 index)>;
     Gradient() FL_NO_EXCEPT = default;
-    Gradient(const GradientInlined &other);
+    Gradient(const GradientInlined &other) FL_NO_EXCEPT;
 
-    template <typename T> Gradient(T *palette);
+    template <typename T> Gradient(T *palette) FL_NO_EXCEPT;
     Gradient(const Gradient &other) FL_NO_EXCEPT;
-    Gradient &operator=(const Gradient &other);
+    Gradient &operator=(const Gradient &other) FL_NO_EXCEPT;
 
     Gradient(Gradient &&other) FL_NO_EXCEPT;
 
     // non template allows carefull control of what can be set.
-    void set(const CRGBPalette16 *palette);
-    void set(const CRGBPalette32 *palette);
-    void set(const CRGBPalette256 *palette);
-    void set(const GradientFunction &func);
+    void set(const CRGBPalette16 *palette) FL_NO_EXCEPT;
+    void set(const CRGBPalette32 *palette) FL_NO_EXCEPT;
+    void set(const CRGBPalette256 *palette) FL_NO_EXCEPT;
+    void set(const GradientFunction &func) FL_NO_EXCEPT;
 
-    CRGB colorAt(u8 index) const;
-    void fill(span<const u8> input, span<CRGB> output) const;
+    CRGB colorAt(u8 index) const FL_NO_EXCEPT;
+    void fill(span<const u8> input, span<CRGB> output) const FL_NO_EXCEPT;
 
   private:
     using GradientVariant =
@@ -48,21 +48,21 @@ class GradientInlined {
         variant<CRGBPalette16, CRGBPalette32, CRGBPalette256, GradientFunction>;
     GradientInlined() FL_NO_EXCEPT = default;
 
-    template <typename T> GradientInlined(const T &palette) { set(palette); }
+    template <typename T> GradientInlined(const T &palette) FL_NO_EXCEPT { set(palette); }
 
     GradientInlined(const GradientInlined &other) FL_NO_EXCEPT = default;
     GradientInlined &operator=(const GradientInlined &other) FL_NO_EXCEPT = default;
 
-    void set(const CRGBPalette16 &palette) { mVariant = palette; }
-    void set(const CRGBPalette32 &palette) { mVariant = palette; }
-    void set(const CRGBPalette256 &palette) { mVariant = palette; }
-    void set(const GradientFunction &func) { mVariant = func; }
+    void set(const CRGBPalette16 &palette) FL_NO_EXCEPT { mVariant = palette; }
+    void set(const CRGBPalette32 &palette) FL_NO_EXCEPT { mVariant = palette; }
+    void set(const CRGBPalette256 &palette) FL_NO_EXCEPT { mVariant = palette; }
+    void set(const GradientFunction &func) FL_NO_EXCEPT { mVariant = func; }
 
-    CRGB colorAt(u8 index) const;
-    void fill(span<const u8> input, span<CRGB> output) const;
+    CRGB colorAt(u8 index) const FL_NO_EXCEPT;
+    void fill(span<const u8> input, span<CRGB> output) const FL_NO_EXCEPT;
 
-    GradientVariant &getVariant() { return mVariant; }
-    const GradientVariant &getVariant() const { return mVariant; }
+    GradientVariant &getVariant() FL_NO_EXCEPT { return mVariant; }
+    const GradientVariant &getVariant() const FL_NO_EXCEPT { return mVariant; }
 
   private:
     GradientVariant mVariant;

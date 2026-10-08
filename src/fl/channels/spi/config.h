@@ -46,7 +46,7 @@ struct SpiConfig {
 
     /// @brief Construct single-lane SPI config
     SpiConfig(int clk, int data, u32 speed_hz = 0xffffffff, spi_output_mode_t output_mode = spi_output_mode_t::SPI_AUTO, u8 spi_mode = 0)
-        : clock_pin(clk)
+        FL_NO_EXCEPT : clock_pin(clk)
         , clock_speed_hz(speed_hz)
         , output_mode(output_mode)
         , spi_mode(spi_mode) {
@@ -55,7 +55,7 @@ struct SpiConfig {
 
     /// @brief Construct multi-lane SPI config
     SpiConfig(int clk, fl::span<const int> pins, u32 speed_hz = 0xffffffff, spi_output_mode_t output_mode = spi_output_mode_t::SPI_AUTO, u8 spi_mode = 0)
-        : clock_pin(clk)
+        FL_NO_EXCEPT : clock_pin(clk)
         , clock_speed_hz(speed_hz)
         , output_mode(output_mode)
         , spi_mode(spi_mode) {
@@ -66,7 +66,7 @@ struct SpiConfig {
     }
 
     /// @brief Check if this is a multi-lane configuration
-    bool isMultiLane() const { return data_pins.size() > 1; }
+    bool isMultiLane() const FL_NO_EXCEPT { return data_pins.size() > 1; }
 
     int clock_pin;                          ///< SCK pin number
     fl::vector<int> data_pins;              ///< Data pins (1 = single-lane, 2-8 = multi-lane)

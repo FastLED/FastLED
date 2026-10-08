@@ -34,35 +34,35 @@ private:
     bool mFailed = false;
     
     // Helper to read a line from input
-    bool readLine();
+    bool readLine() FL_NO_EXCEPT;
     
     // Helper to skip whitespace
-    void skipWhitespace();
+    void skipWhitespace() FL_NO_EXCEPT;
     
     // Helper to read until whitespace or end
-    bool readToken(string& token);
+    bool readToken(string& token) FL_NO_EXCEPT;
     
 public:
     istream_real() FL_NO_EXCEPT = default;
     
     // Check if stream is in good state
-    bool good() const { return !mFailed; }
-    bool fail() const { return mFailed; }
-    bool eof() const { return mPos >= mBufferLen && fl::available() == 0; }
+    bool good() const FL_NO_EXCEPT { return !mFailed; }
+    bool fail() const FL_NO_EXCEPT { return mFailed; }
+    bool eof() const FL_NO_EXCEPT { return mPos >= mBufferLen && fl::available() == 0; }
     
     // Clear error state
-    void clear() { mFailed = false; }
+    void clear() FL_NO_EXCEPT { mFailed = false; }
     
     // Stream input operators
-    istream_real& operator>>(string& str);
-    istream_real& operator>>(char& c);
-    istream_real& operator>>(fl::i8& n);
-    istream_real& operator>>(fl::u8& n);
-    istream_real& operator>>(fl::i16& n);
-    istream_real& operator>>(fl::i32& n);
-    istream_real& operator>>(fl::u32& n);
-    istream_real& operator>>(float& f);
-    istream_real& operator>>(double& d);
+    istream_real& operator>>(string& str) FL_NO_EXCEPT;
+    istream_real& operator>>(char& c) FL_NO_EXCEPT;
+    istream_real& operator>>(fl::i8& n) FL_NO_EXCEPT;
+    istream_real& operator>>(fl::u8& n) FL_NO_EXCEPT;
+    istream_real& operator>>(fl::i16& n) FL_NO_EXCEPT;
+    istream_real& operator>>(fl::i32& n) FL_NO_EXCEPT;
+    istream_real& operator>>(fl::u32& n) FL_NO_EXCEPT;
+    istream_real& operator>>(float& f) FL_NO_EXCEPT;
+    istream_real& operator>>(double& d) FL_NO_EXCEPT;
     
     // Unified handler for fl:: namespace size-like unsigned integer types to avoid conflicts
     // This only handles fl::size and fl::u16 from the fl:: namespace
@@ -71,23 +71,23 @@ public:
         fl::is_same<T, fl::size>::value ||
         fl::is_same<T, fl::u16>::value,
         istream_real&
-    >::type operator>>(T& n);
+    >::type operator>>(T& n) FL_NO_EXCEPT;
     
     // Get a line from input
-    istream_real& getline(string& str);
+    istream_real& getline(string& str) FL_NO_EXCEPT;
     
     // Get next character
-    int get();
+    int get() FL_NO_EXCEPT;
     
     // Put back a character
-    istream_real& putback(char c);
+    istream_real& putback(char c) FL_NO_EXCEPT;
     
     // Peek at next character without consuming it
-    int peek();
+    int peek() FL_NO_EXCEPT;
 };
 
 // Function to get singleton instance of istream_real (for better linker elimination)
-istream_real& cin_real();
+istream_real& cin_real() FL_NO_EXCEPT;
 
 // Stub istream class that conditionally delegates to istream_real
 class istream {
@@ -100,7 +100,7 @@ public:
     istream() FL_NO_EXCEPT = default;
     
     // Check if stream is in good state
-    bool good() const { 
+    bool good() const FL_NO_EXCEPT {
 #if SKETCH_HAS_LARGE_MEMORY
         return mRealStream.good();
 #else
@@ -108,7 +108,7 @@ public:
 #endif
     }
     
-    bool fail() const { 
+    bool fail() const FL_NO_EXCEPT {
 #if SKETCH_HAS_LARGE_MEMORY
         return mRealStream.fail();
 #else
@@ -116,7 +116,7 @@ public:
 #endif
     }
     
-    bool eof() const { 
+    bool eof() const FL_NO_EXCEPT {
 #if SKETCH_HAS_LARGE_MEMORY
         return mRealStream.eof();
 #else
@@ -125,14 +125,14 @@ public:
     }
     
     // Clear error state
-    void clear() { 
+    void clear() FL_NO_EXCEPT {
 #if SKETCH_HAS_LARGE_MEMORY
         mRealStream.clear();
 #endif
     }
     
     // Stream input operators
-    istream& operator>>(string& str) {
+    istream& operator>>(string& str) FL_NO_EXCEPT {
 #if SKETCH_HAS_LARGE_MEMORY
         mRealStream >> str;
 #else
@@ -142,7 +142,7 @@ public:
         return *this;
     }
     
-    istream& operator>>(char& c) {
+    istream& operator>>(char& c) FL_NO_EXCEPT {
 #if SKETCH_HAS_LARGE_MEMORY
         mRealStream >> c;
 #else
@@ -152,7 +152,7 @@ public:
         return *this;
     }
     
-    istream& operator>>(fl::i8& n) {
+    istream& operator>>(fl::i8& n) FL_NO_EXCEPT {
 #if SKETCH_HAS_LARGE_MEMORY
         mRealStream >> n;
 #else
@@ -162,7 +162,7 @@ public:
         return *this;
     }
     
-    istream& operator>>(fl::u8& n) {
+    istream& operator>>(fl::u8& n) FL_NO_EXCEPT {
 #if SKETCH_HAS_LARGE_MEMORY
         mRealStream >> n;
 #else
@@ -172,7 +172,7 @@ public:
         return *this;
     }
     
-    istream& operator>>(fl::i16& n) {
+    istream& operator>>(fl::i16& n) FL_NO_EXCEPT {
 #if SKETCH_HAS_LARGE_MEMORY
         mRealStream >> n;
 #else
@@ -182,7 +182,7 @@ public:
         return *this;
     }
     
-    istream& operator>>(fl::i32& n) {
+    istream& operator>>(fl::i32& n) FL_NO_EXCEPT {
 #if SKETCH_HAS_LARGE_MEMORY
         mRealStream >> n;
 #else
@@ -192,7 +192,7 @@ public:
         return *this;
     }
     
-    istream& operator>>(fl::u32& n) {
+    istream& operator>>(fl::u32& n) FL_NO_EXCEPT {
 #if SKETCH_HAS_LARGE_MEMORY
         mRealStream >> n;
 #else
@@ -202,7 +202,7 @@ public:
         return *this;
     }
     
-    istream& operator>>(float& f) {
+    istream& operator>>(float& f) FL_NO_EXCEPT {
 #if SKETCH_HAS_LARGE_MEMORY
         mRealStream >> f;
 #else
@@ -212,7 +212,7 @@ public:
         return *this;
     }
     
-    istream& operator>>(double& d) {
+    istream& operator>>(double& d) FL_NO_EXCEPT {
 #if SKETCH_HAS_LARGE_MEMORY
         mRealStream >> d;
 #else
@@ -228,7 +228,7 @@ public:
         fl::is_same<T, fl::size>::value ||
         fl::is_same<T, fl::u16>::value,
         istream&
-    >::type operator>>(T& n) {
+    >::type operator>>(T& n) FL_NO_EXCEPT {
 #if SKETCH_HAS_LARGE_MEMORY
         mRealStream >> n;
 #else
@@ -239,7 +239,7 @@ public:
     }
     
     // Get a line from input
-    istream& getline(string& str) {
+    istream& getline(string& str) FL_NO_EXCEPT {
 #if SKETCH_HAS_LARGE_MEMORY
         mRealStream.getline(str);
 #else
@@ -250,7 +250,7 @@ public:
     }
     
     // Get next character
-    int get() {
+    int get() FL_NO_EXCEPT {
 #if SKETCH_HAS_LARGE_MEMORY
         return mRealStream.get();
 #else
@@ -260,7 +260,7 @@ public:
     }
     
     // Put back a character
-    istream& putback(char c) {
+    istream& putback(char c) FL_NO_EXCEPT {
 #if SKETCH_HAS_LARGE_MEMORY
         mRealStream.putback(c);
 #else
@@ -270,7 +270,7 @@ public:
     }
     
     // Peek at next character without consuming it
-    int peek() {
+    int peek() FL_NO_EXCEPT {
 #if SKETCH_HAS_LARGE_MEMORY
         return mRealStream.peek();
 #else
@@ -289,7 +289,7 @@ typename fl::enable_if<
     fl::is_same<T, fl::size>::value ||
     fl::is_same<T, fl::u16>::value,
     istream_real&
->::type istream_real::operator>>(T& n) {
+>::type istream_real::operator>>(T& n) FL_NO_EXCEPT {
     // Use existing fl::u32 parsing logic for both fl::size and fl::u16
     // since they're both unsigned integer types that fit in fl::u32
     fl::u32 temp;

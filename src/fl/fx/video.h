@@ -40,7 +40,7 @@ enum class FledPlaybackMode : fl::u8 {
 // to begin() — streaming vs seekable is auto-detected.
 class Video : public Fx1d { // Fx1d because video can be irregular.
   public:
-    static size_t DefaultFrameHistoryCount() {
+    static size_t DefaultFrameHistoryCount() FL_NO_EXCEPT {
 #ifdef FL_IS_AVR
         return 1;
 #else
@@ -56,26 +56,26 @@ class Video : public Fx1d { // Fx1d because video can be irregular.
     Video() FL_NO_EXCEPT;
     Video(size_t pixelsPerFrame, float fps = 30.0f,
           size_t frameHistoryCount =
-              DefaultFrameHistoryCount()); // Please use FileSytem to construct
+              DefaultFrameHistoryCount()) FL_NO_EXCEPT; // Please use FileSytem to construct
                                            // a Video.
     ~Video() FL_NO_EXCEPT;
     Video(const Video &) FL_NO_EXCEPT;
     Video &operator=(const Video &) FL_NO_EXCEPT;
 
     // Fx Api
-    void draw(DrawContext context) override;
-    string fxName() const override;
+    void draw(DrawContext context) FL_NO_EXCEPT override;
+    string fxName() const FL_NO_EXCEPT override;
 
     // Api
-    bool begin(fl::filebuf_ptr h);
-    bool draw(fl::u32 now, fl::span<CRGB> leds);
-    bool draw(fl::u32 now, Frame *frame);
-    void end();
-    bool finished();
-    bool rewind();
-    void setTimeScale(float timeScale);
-    float timeScale() const;
-    string error() const;
+    bool begin(fl::filebuf_ptr h) FL_NO_EXCEPT;
+    bool draw(fl::u32 now, fl::span<CRGB> leds) FL_NO_EXCEPT;
+    bool draw(fl::u32 now, Frame *frame) FL_NO_EXCEPT;
+    void end() FL_NO_EXCEPT;
+    bool finished() FL_NO_EXCEPT;
+    bool rewind() FL_NO_EXCEPT;
+    void setTimeScale(float timeScale) FL_NO_EXCEPT;
+    float timeScale() const FL_NO_EXCEPT;
+    string error() const FL_NO_EXCEPT;
     // A caller-supplied error is persistent: it blocks admission until the
     // caller clears it. Admission errors recorded by begin() are not -- see
     // mAdmissionError.
@@ -83,7 +83,7 @@ class Video : public Fx1d { // Fx1d because video can be irregular.
         mError = error;
         mAdmissionError = false;
     }
-    size_t pixelsPerFrame() const;
+    size_t pixelsPerFrame() const FL_NO_EXCEPT;
 
     // FLED v1 container (issue #3072): true / non-empty only when begin()
     // opened a FLED-formatted file (12-byte "FLED" magic header). Legacy
@@ -102,13 +102,13 @@ class Video : public Fx1d { // Fx1d because video can be irregular.
     bool pixelStorage(fled::PixelStorage *out) const FL_NO_EXCEPT;
     bool readSample(video::PixelSample *out) FL_NO_EXCEPT;
     void setFledPlaybackMode(FledPlaybackMode mode) FL_NO_EXCEPT;
-    void pause(fl::u32 now) override;
-    void resume(fl::u32 now) override;
-    void setFade(fl::u32 fadeInTime, fl::u32 fadeOutTime);
-    i32 durationMicros() const; // -1 if this is a stream.
+    void pause(fl::u32 now) FL_NO_EXCEPT override;
+    void resume(fl::u32 now) FL_NO_EXCEPT override;
+    void setFade(fl::u32 fadeInTime, fl::u32 fadeOutTime) FL_NO_EXCEPT;
+    i32 durationMicros() const FL_NO_EXCEPT; // -1 if this is a stream.
 
     // make compatible with if statements
-    operator bool() const { return mImpl.get(); }
+    operator bool() const FL_NO_EXCEPT { return mImpl.get(); }
 
   private:
     // True when mError was recorded by a failed begin() rather than by
@@ -133,11 +133,11 @@ class Video : public Fx1d { // Fx1d because video can be irregular.
 // for example NoisePalette.
 class VideoFxWrapper : public Fx1d {
   public:
-    VideoFxWrapper(FxPtr fx);
+    VideoFxWrapper(FxPtr fx) FL_NO_EXCEPT;
     ~VideoFxWrapper() FL_NO_EXCEPT override;
-    void draw(DrawContext context) override;
-    string fxName() const override;
-    void setFade(fl::u32 fadeInTime, fl::u32 fadeOutTime);
+    void draw(DrawContext context) FL_NO_EXCEPT override;
+    string fxName() const FL_NO_EXCEPT override;
+    void setFade(fl::u32 fadeInTime, fl::u32 fadeOutTime) FL_NO_EXCEPT;
 
   private:
     FxPtr mFx;

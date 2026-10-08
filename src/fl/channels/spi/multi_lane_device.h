@@ -62,7 +62,7 @@ public:
 
     /// @brief Construct multi-lane device
     /// @param config Configuration with 1-8 data pins
-    explicit MultiLaneDevice(const Config& config);
+    explicit MultiLaneDevice(const Config& config) FL_NO_EXCEPT;
 
     /// @brief Destructor - releases hardware resources
     ~MultiLaneDevice() FL_NO_EXCEPT;
@@ -78,15 +78,15 @@ public:
     /// @brief Initialize hardware
     /// @returns Optional error (nullopt on success)
     /// @note Auto-selects SpiHw1/2/4/8 based on number of data pins
-    fl::optional<fl::task::Error> begin();
+    fl::optional<fl::task::Error> begin() FL_NO_EXCEPT;
 
     /// @brief Shutdown hardware and release resources
     /// @note Waits for pending transmissions to complete
-    void end();
+    void end() FL_NO_EXCEPT;
 
     /// @brief Check if device is initialized
     /// @returns true if initialized and ready
-    bool isReady() const;
+    bool isReady() const FL_NO_EXCEPT;
 
     // ========== Lane Access ==========
 
@@ -94,11 +94,11 @@ public:
     /// @param lane_id Lane index (0 to numLanes()-1)
     /// @returns Reference to Lane object
     /// @note Panics if lane_id is out of range
-    Lane& lane(size_t lane_id);
+    Lane& lane(size_t lane_id) FL_NO_EXCEPT;
 
     /// @brief Get number of lanes
     /// @returns Number of data pins (2-8)
-    size_t numLanes() const;
+    size_t numLanes() const FL_NO_EXCEPT;
 
     // ========== Transmission ==========
 
@@ -109,21 +109,21 @@ public:
     /// @note All non-empty lanes MUST have identical sizes - operation fails with error if sizes differ
     /// @note Zero-padding is NOT performed - size validation prevents unreliable chipset-specific padding issues
     /// @note Transaction API not yet implemented - call waitComplete() manually after flush()
-    Result<void> flush();
+    Result<void> flush() FL_NO_EXCEPT;
 
     /// @brief Wait for pending transmission to complete
     /// @param timeout_ms Maximum time to wait (default: forever)
     /// @returns true if completed, false on timeout
-    bool waitComplete(u32 timeout_ms = (fl::numeric_limits<u32>::max)());
+    bool waitComplete(u32 timeout_ms = (fl::numeric_limits<u32>::max)()) FL_NO_EXCEPT;
 
     /// @brief Convenience method - wait for transmission to complete
     /// @returns true if completed, false on timeout
     /// @note Alias for waitComplete() with infinite timeout
-    bool wait() { return waitComplete(); }
+    bool wait() FL_NO_EXCEPT { return waitComplete(); }
 
     /// @brief Check if transmission is in progress
     /// @returns true if busy, false if idle
-    bool isBusy() const;
+    bool isBusy() const FL_NO_EXCEPT;
 
     // ========== High-Level Write API ==========
     // This method provides a simple, type-safe way to write to multiple lanes
@@ -166,7 +166,7 @@ public:
     /// spi->wait();  // Block until done
     /// @endcode
     template<typename... Spans>
-    WriteResult write(Spans&&... lanes) {
+    WriteResult write(Spans&&... lanes) FL_NO_EXCEPT {
         // Unpack variadic template into stack-allocated FixedVector
         fl::span<const u8> lane_spans[] = {fl::forward<Spans>(lanes)...};
         fl::FixedVector<fl::span<const u8>, MAX_SPI_LANES> lane_vec;
@@ -184,14 +184,14 @@ public:
 
     /// @brief Get current configuration
     /// @returns Reference to config
-    const Config& getConfig() const;
+    const Config& getConfig() const FL_NO_EXCEPT;
 
 private:
     /// @brief Internal implementation - write all lanes atomically
     /// @param lane_data Span of spans containing lane data
     /// @note Waits for previous transmission, writes all lanes, then flushes
     /// @returns WriteResult with ok=true on success, or ok=false with error message
-    WriteResult writeImpl(fl::span<const fl::span<const u8>> lane_data);
+    WriteResult writeImpl(fl::span<const fl::span<const u8>> lane_data) FL_NO_EXCEPT;
 
     struct Impl;
     fl::unique_ptr<Impl> pImpl;

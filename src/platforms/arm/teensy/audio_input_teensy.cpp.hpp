@@ -14,18 +14,18 @@ namespace teensy {
 
 // TeensyAudioRecorder implementation
 
-TeensyAudioRecorder::TeensyAudioRecorder() : AudioStream(2, inputQueueArray) {
+TeensyAudioRecorder::TeensyAudioRecorder() FL_NO_EXCEPT : AudioStream(2, inputQueueArray) {
     // 2 inputs: Left (0) and Right (1) channels
     reset();
 }
 
-void TeensyAudioRecorder::reset() {
+void TeensyAudioRecorder::reset() FL_NO_EXCEPT {
     mBlockQueue.clear();
     mTotalBlocksReceived = 0;
     mTotalBlocksDropped = 0;
 }
 
-void TeensyAudioRecorder::update() {
+void TeensyAudioRecorder::update() FL_NO_EXCEPT {
     audio_block_t* leftBlock = receiveReadOnly(0);   // Left channel
     audio_block_t* rightBlock = receiveReadOnly(1);  // Right channel
 
@@ -43,7 +43,7 @@ void TeensyAudioRecorder::update() {
     }
 }
 
-bool TeensyAudioRecorder::queueBlock(const audio_block_t* block, u8 channel) {
+bool TeensyAudioRecorder::queueBlock(const audio_block_t* block, u8 channel) FL_NO_EXCEPT {
     if (!block) return false;
 
     // Limit queue size to prevent unbounded memory growth
@@ -66,7 +66,7 @@ bool TeensyAudioRecorder::queueBlock(const audio_block_t* block, u8 channel) {
     return true;
 }
 
-bool TeensyAudioRecorder::dequeueBlock(fl::vector<fl::i16>& samples, u8& channel, u32& timestamp) {
+bool TeensyAudioRecorder::dequeueBlock(fl::vector<fl::i16>& samples, u8& channel, u32& timestamp) FL_NO_EXCEPT {
     if (mBlockQueue.empty()) {
         return false;
     }
@@ -88,7 +88,7 @@ bool TeensyAudioRecorder::dequeueBlock(fl::vector<fl::i16>& samples, u8& channel
 
 // Teensy_I2S_Audio implementation
 
-Teensy_I2S_Audio::Teensy_I2S_Audio(const audio::ConfigI2S& config)
+Teensy_I2S_Audio::Teensy_I2S_Audio(const audio::ConfigI2S& config) FL_NO_EXCEPT
     : mConfig(config), mHasError(false), mTotalSamplesRead(0), mInitialized(false) {
 
     // Validate sample rate (Teensy Audio Library defaults to 44.1kHz)
@@ -143,11 +143,11 @@ Teensy_I2S_Audio::Teensy_I2S_Audio(const audio::ConfigI2S& config)
     }
 }
 
-Teensy_I2S_Audio::~Teensy_I2S_Audio() {
+Teensy_I2S_Audio::~Teensy_I2S_Audio() FL_NO_EXCEPT {
     stop();
 }
 
-void Teensy_I2S_Audio::start() {
+void Teensy_I2S_Audio::start() FL_NO_EXCEPT {
     if (mHasError) {
         FL_WARN("Cannot start Teensy I2S audio - initialization error occurred");
         return;
@@ -185,7 +185,7 @@ void Teensy_I2S_Audio::start() {
                               (mConfig.mAudioChannel == audio::AudioChannel::Right) ? "Right" : "Both (downmixed)"));
 }
 
-void Teensy_I2S_Audio::stop() {
+void Teensy_I2S_Audio::stop() FL_NO_EXCEPT {
     if (!mInitialized) {
         return;
     }
@@ -203,14 +203,14 @@ void Teensy_I2S_Audio::stop() {
     FL_WARN("Teensy I2S audio input stopped");
 }
 
-bool Teensy_I2S_Audio::error(fl::string* msg) {
+bool Teensy_I2S_Audio::error(fl::string* msg) FL_NO_EXCEPT {
     if (msg && mHasError) {
         *msg = mErrorMessage;
     }
     return mHasError;
 }
 
-audio::Sample Teensy_I2S_Audio::read() {
+audio::Sample Teensy_I2S_Audio::read() FL_NO_EXCEPT {
     if (mHasError || !mInitialized || !mRecorder) {
         return audio::Sample();  // Invalid sample
     }
@@ -303,7 +303,7 @@ audio::Sample Teensy_I2S_Audio::read() {
 fl::shared_ptr<audio::IInput> teensy_create_audio_input(
     const audio::Config& config,
     fl::string* error_message
-) {
+) FL_NO_EXCEPT {
     if (config.is<audio::ConfigI2S>()) {
         FL_WARN("Creating Teensy I2S audio source");
         audio::ConfigI2S i2s_config = config.get<audio::ConfigI2S>();

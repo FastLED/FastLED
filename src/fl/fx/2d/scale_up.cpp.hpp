@@ -9,6 +9,7 @@
 #include "fl/stl/vector.h"
 #include "fl/stl/allocator.h"
 #include "fl/fx/fx2d.h"
+#include "fl/stl/noexcept.h"
 
 // Optimized for 2^n grid sizes in terms of both memory and performance.
 // If you are somehow running this on AVR then you probably want this if
@@ -31,14 +32,14 @@
 
 namespace fl {
 
-ScaleUp::ScaleUp(const XYMap& xymap, Fx2dPtr fx) : Fx2d(xymap), mDelegate(fx) {
+ScaleUp::ScaleUp(const XYMap& xymap, Fx2dPtr fx) FL_NO_EXCEPT : Fx2d(xymap), mDelegate(fx) {
     // Turn off re-mapping of the delegate's XYMap, since bilinearExpand needs
     // to work in screen coordinates. The final mapping will for this class will
     // still be performed.
     mDelegate->getXYMap().setRectangularGrid();
 }
 
-void ScaleUp::draw(DrawContext context) {
+void ScaleUp::draw(DrawContext context) FL_NO_EXCEPT {
     if (mSurface.empty()) {
         mSurface.resize(mDelegate->getNumLeds());
     }
@@ -59,7 +60,7 @@ void ScaleUp::draw(DrawContext context) {
 }
 
 void ScaleUp::expand(fl::span<const CRGB> input, fl::span<CRGB> output, u16 width,
-                     u16 height, const XYMap& mXyMap) {
+                     u16 height, const XYMap& mXyMap) FL_NO_EXCEPT {
 #if FASTLED_SCALE_UP == FASTLED_SCALE_UP_ALWAYS_POWER_OF_2
     fl::upscalePowerOf2(input.data(), output.data(), static_cast<u8>(width), static_cast<u8>(height), mXyMap);
 #elif FASTLED_SCALE_UP == FASTLED_SCALE_UP_HIGH_PRECISION
@@ -74,7 +75,7 @@ void ScaleUp::expand(fl::span<const CRGB> input, fl::span<CRGB> output, u16 widt
 }
 
 void ScaleUp::noExpand(fl::span<const CRGB> input, fl::span<CRGB> output, u16 width,
-                       u16 height) {
+                       u16 height) FL_NO_EXCEPT {
     u16 n = mXyMap.getTotal();
     for (u16 w = 0; w < width; w++) {
         for (u16 h = 0; h < height; h++) {

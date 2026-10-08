@@ -7,10 +7,10 @@
 namespace fl {
 
 /// Disable global interrupts (platform-specific).
-void interrupt_disable();
+void interrupt_disable() FL_NO_EXCEPT;
 
 /// Enable global interrupts (platform-specific).
-void interrupt_enable();
+void interrupt_enable() FL_NO_EXCEPT;
 
 namespace isr {
 

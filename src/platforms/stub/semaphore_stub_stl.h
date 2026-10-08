@@ -66,7 +66,7 @@ namespace platforms {
 
         void release(ptrdiff_t update = 1) FL_NO_EXCEPT {
             FL_ASSERT(update >= 0, "CountingSemaphoreReal: release update must be non-negative");
-            fl::unique_lock<fl::mutex> lock(mMutex) FL_NO_EXCEPT;
+            fl::unique_lock<fl::mutex> lock(mMutex);
             FL_ASSERT(mCount + update <= LeastMaxValue,
                      "CountingSemaphoreReal: release would exceed max value");
             mCount += update;
@@ -78,13 +78,13 @@ namespace platforms {
         }
 
         void acquire() FL_NO_EXCEPT {
-            fl::unique_lock<fl::mutex> lock(mMutex) FL_NO_EXCEPT;
+            fl::unique_lock<fl::mutex> lock(mMutex);
             mCv.wait(lock, [this]{ return mCount > 0; });
             --mCount;
         }
 
         bool try_acquire() FL_NO_EXCEPT {
-            fl::unique_lock<fl::mutex> lock(mMutex) FL_NO_EXCEPT;
+            fl::unique_lock<fl::mutex> lock(mMutex);
             if (mCount > 0) {
                 --mCount;
                 return true;
@@ -94,7 +94,7 @@ namespace platforms {
 
         template<class Rep, class Period>
         bool try_acquire_for(const std::chrono::duration<Rep, Period>& rel_time) FL_NO_EXCEPT {  // okay std namespace
-            fl::unique_lock<fl::mutex> lock(mMutex) FL_NO_EXCEPT;
+            fl::unique_lock<fl::mutex> lock(mMutex);
             if (mCv.wait_for(lock, rel_time, [this]{ return mCount > 0; })) {
                 --mCount;
                 return true;
@@ -104,7 +104,7 @@ namespace platforms {
 
         template<class Clock, class Duration>
         bool try_acquire_until(const std::chrono::time_point<Clock, Duration>& abs_time) FL_NO_EXCEPT {  // okay std namespace
-            fl::unique_lock<fl::mutex> lock(mMutex) FL_NO_EXCEPT;
+            fl::unique_lock<fl::mutex> lock(mMutex);
             if (mCv.wait_until(lock, abs_time, [this]{ return mCount > 0; })) {
                 --mCount;
                 return true;

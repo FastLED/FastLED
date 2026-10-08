@@ -5,6 +5,7 @@
 
 #include "fl/stl/pair.h"
 #include "fl/stl/vector.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -20,7 +21,7 @@ struct BatchDraw {
     /// @param leds LED array to write colors to
     /// @param grad Gradient to use for color mapping
     BatchDraw(fl::span<CRGB> leds, WaveCrgbGradientMap::Gradient *grad)
-        : mLeds(leds), mGradient(grad) {
+        FL_NO_EXCEPT : mLeds(leds), mGradient(grad) {
         mIndices.reserve(kMaxBatchSize); // Should be a no op for FixedVector.
         mAlphas.reserve(kMaxBatchSize);
     }
@@ -30,7 +31,7 @@ struct BatchDraw {
     /// @param alpha Wave amplitude (0-255) for gradient lookup
     ///
     /// If the batch is full, automatically flushes before adding.
-    void push(fl::u32 index, u8 alpha) {
+    void push(fl::u32 index, u8 alpha) FL_NO_EXCEPT {
         if (isFull()) {
             flush();
         }
@@ -40,14 +41,14 @@ struct BatchDraw {
 
     /// @brief Check if batch is full
     /// @return True if batch has reached maximum size
-    bool isFull() { return mIndices.size() >= kMaxBatchSize; }
+    bool isFull() FL_NO_EXCEPT { return mIndices.size() >= kMaxBatchSize; }
 
     /// @brief Process all accumulated entries and update LEDs
     ///
     /// Performs a single gradient fill operation for all accumulated
     /// alphas, then writes the resulting colors to their corresponding LEDs.
     /// Clears the batch after processing.
-    void flush() {
+    void flush() FL_NO_EXCEPT {
         span<const u8> alphas(mAlphas);
         CRGB rgb[kMaxBatchSize] = {};
         mGradient->fill(mAlphas, rgb);
@@ -69,7 +70,7 @@ struct BatchDraw {
 } // namespace
 
 void WaveCrgbGradientMap::mapWaveToLEDs(const XYMap &xymap,
-                                        WaveSimulation2D &waveSim, fl::span<CRGB> leds) {
+                                        WaveSimulation2D &waveSim, fl::span<CRGB> leds) FL_NO_EXCEPT {
     BatchDraw batch(leds, &mGradient);
     const fl::u32 width = waveSim.getWidth();
     const fl::u32 height = waveSim.getHeight();
