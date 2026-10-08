@@ -921,9 +921,9 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) FL_NO_EXCE
 // fire onChannelDataEncoded (#4566: out of line from showPixels()).
 void Channel::encodeFrame(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) FL_NO_EXCEPT {
     // Build pixel iterator with optional addressing transformation
-    // (#2558) Pass both Rgbw and Rgbww from the channel options; the iterator
+    // (#2558) Pass both Rgbw and Rgbww from the legacy rendering settings; the iterator
     // carries both, and the encoder dispatch below picks the right path based
-    // on which variant alternative ChannelOptions::mWhiteCfg holds.
+    // on which white-channel variant the controller currently holds.
 #if FL_COLOR_PROFILE_RUNTIME
     // Brightness reaches the pipeline as C4's flux scalar and nowhere else.
     // `premixed` is the brightness on this path: binding a profile sets
@@ -956,7 +956,7 @@ void Channel::encodeFrame(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) FL_NO_EXC
         pixels.reseed_binary_dithering(mDitherPhase);
     }
     ReorderingPixelIteratorAny iterator(pixels, mScreenMap.getXYMap(), mRgbOrder,
-                                        mSettings.rgbw(), mSettings.rgbww(),
+                                        getRgbw(), getRgbww(),
                                         mName, pipeline, mDitherPhase,
                                         pixels.mColorAdjustment.premixed.r);
     PixelIterator& pixelIterator = iterator.get();
@@ -964,9 +964,9 @@ void Channel::encodeFrame(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) FL_NO_EXC
     // Encode pixels with the writer selected once from the immutable chipset.
     auto& data = mChannelData->getData();
     data.clear();
-    if (mSettings.isRgbww()) {
+    if (getRgbww().active()) {
         mChannelData->setPixelFormat(ChannelPixelFormat::RGBWW);
-    } else if (mSettings.isRgbw()) {
+    } else if (getRgbw().active()) {
         mChannelData->setPixelFormat(ChannelPixelFormat::RGBW);
     } else {
         mChannelData->setPixelFormat(ChannelPixelFormat::RGB);
