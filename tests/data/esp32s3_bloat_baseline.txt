@@ -1,3 +1,7 @@
+# #4784 / PR #4785: CI run37742672330 measures image350151, down232 B
+# from350383 after separating legacy settings from Channels profile state.
+# Attributed RAM stays38323 B. Claim the measured saving.
+
 # #4773 / PR #4774: CI run37699074987 measures image350383, down16220 B
 # from366603. ESP release staging disables FastLED exception generation;
 # unity builds remain intact. Local clean image350367 is within64 B tolerance.
@@ -341,4 +345,4 @@
 # the CI Blink report contains no ResponseLutsQ16 symbol. The local fbuild
 # symbol total remains ~4 KB higher for the same source (FastLED/fbuild#1456),
 # so this ratchet uses the CI measurement from PR #4511.
-350383
+350151

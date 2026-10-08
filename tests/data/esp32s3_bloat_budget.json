@@ -2,7 +2,7 @@
   "board": "esp32s3",
   "example": "Blink",
   "profile": "default",
-  "image_flash": 366603,
+  "image_flash": 350151,
   "total_ram": 38323,
-  "reference": "#4741: fbuild2.5.37, Arduino-ESP32 3.3.11 / IDF5.5.5 / Xtensa GCC14.2.0, default Blink. Matched original master0c2e9f7300 image367279/attributedRAM38503 to landed003083fa28 image366603/attributedRAM38323; board407716/78216 to407068/78008. Shared RMT/HTTP/SPI/configuration reductions retained. Attributed RAM is not physical board RAM."
+  "reference": "#4784 / PR #4785: CI run37742672330 on de8bfc1b55 measures image350151 /attributedRAM38323 after legacy/Channels settings isolation. fbuild2.5.37, Arduino-ESP32 3.3.11 /IDF5.5.5 /Xtensa GCC14.2.0. Image saves232B from350383 baseline; attributed RAM unchanged. Attributed RAM is not physical board RAM."
 }
