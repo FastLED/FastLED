@@ -2,6 +2,26 @@
 
 <!-- Add tasks here as checkable items -->
 
+## WASM viewer issues #4776–#4778 (sequential)
+
+- [x] #4776: reproduce unset diameter in Chromium, fix the fallback, validate and publish a focused PR.
+- [ ] #4777: reproduce separate strip coordinates in Chromium, use shared bounds, validate and publish a focused PR.
+- [ ] #4778: reproduce oversized 3D rendering, cap drawing buffer to context limits, validate and publish a focused PR.
+
+### #4776 validation
+
+Chromium WebGL reproduced black pixels for diameter -1 on HTMLCanvas and
+OffscreenCanvas; the fix passes all 12 diameter cases (unset, -1, zero, 0.1,
+1 and 3). `bash lint`, `bash lint --js`, `bash test --cpp` (319 unit tests,
+95 examples), and `bash compile wasm --examples WasmScreenCoords` pass.
+The compiled example renders colored pixels with `?gfx=0` (1,362 bright
+pixels in the visible canvas screenshot). Browser tests require installed
+Playwright Chromium and run with
+`PYTEST_ADDOPTS='-k test_diameter_renders_led --runslow' bash test test_wasm_graphics_browser --debug`.
+Reviewed the source and browser test against `.claude/skills/code-review/review-rules.md`;
+no blocking findings.
+
+
 ## Memory meta #4737: sequential local optimization
 
 - [x] Complete all ten native platform children: C3 #4739, C6 #4740, STM32 #4744, Uno #4742, ATtiny85 #4743, ESP32 #4738, S3 #4741, Teensy40 #4745, Teensy41 #4746, RP2040 #4747.
