@@ -14,6 +14,7 @@
 #include "fl/stl/bit_cast.h"
 #include "fl/channels/legacy_settings.h"
 #include "fl/log/log.h"
+#include "platforms/is_platform.h"  // for FL_IS_ESP32, FL_IS_AVR
 #include "fl/stl/span.h"
 #include "fl/stl/noexcept.h"
 #include "fl/spi_bus.h"
@@ -49,7 +50,10 @@ protected:
     fl::span<CRGB> mLeds;     ///< span of LED data used by this controller
     CLEDController *mPNext = nullptr;   ///< pointer to the next LED controller in the linked list
     LegacySettings mLegacySettings;
-    bool mEnabled = true;
+    // Bit-fields share one byte; a fixed-white flag costs no RAM and no
+    // vtable slot on AVR (#4788).
+    bool mEnabled : 1;
+    bool mFixedWhiteChannel : 1;  ///< chipset wire format owns the white policy
 
     enum class SettingsChange : u8 { Correction, Temperature, Dither, White };
 #ifndef FL_IS_AVR
@@ -96,21 +100,15 @@ protected:
     /// setters cannot replace.
     void setFixedRgbw(const Rgbw& arg) FL_NO_EXCEPT {
         applyRgbw(arg);
-    }
-
-    /// Return the name of a chipset whose wire format owns its white-channel
-    /// policy. Overriding this virtual avoids per-controller policy storage.
-    virtual const char* fixedWhiteChannelChipset() const FL_NO_EXCEPT {
-        return nullptr;
+        mFixedWhiteChannel = true;
     }
 
     bool rejectFixedWhiteChannelChange(const char* operation) const FL_NO_EXCEPT {
         FL_UNUSED(operation);  // only consumed by FL_WARN, a no-op on small platforms
-        const char* chipset = fixedWhiteChannelChipset();
-        if (chipset == nullptr) {
+        if (!mFixedWhiteChannel) {
             return false;
         }
-        FL_WARN(chipset << " has fixed R,G,B,W output; " << operation << " is unsupported and was ignored");
+        FL_WARN("Chipset has fixed R,G,B,W output; " << operation << " is unsupported and was ignored");
         return true;
     }
 
@@ -121,8 +119,12 @@ public:
     virtual const Channel* asChannel() const FL_NO_EXCEPT { return nullptr; }
 #endif
     /// Select an ESP-IDF SPI host for this clocked controller before init().
-    /// Non-ESP32 and non-SPI controllers ignore this setting.
-    virtual CLEDController &setSpiBus(Esp32SpiBus bus) FL_NO_EXCEPT {
+    /// Non-ESP32 and non-SPI controllers ignore this setting. Only ESP32 SPI
+    /// controllers override it, so other platforms carry no vtable slot (#4788).
+#if defined(FL_IS_ESP32)
+    virtual
+#endif
+    CLEDController &setSpiBus(Esp32SpiBus bus) FL_NO_EXCEPT {
         (void)bus;
         return *this;
     }

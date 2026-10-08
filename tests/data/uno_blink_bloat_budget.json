@@ -2,7 +2,7 @@
   "board": "uno",
   "example": "Blink",
   "profile": "default",
-  "image_flash": 3770,
-  "total_ram": 194,
-  "reference": "#4784 separates legacy settings from ChannelOptions and removes new profile state/hooks from legacy addLeds. Measured repository Blink with fbuild 2.5.37, AVR GCC 7.3.0-atmel3.6.1-arduino7, Arduino AVR core 5.4.0. Dashboard sketch separately measures flash3762 / physicalRAM168; NEOPIXEL controller27B versus87B. This budget uses image flash and attributed RAM (aliased vtables included), not physical RAM."
+  "image_flash": 3738,
+  "total_ram": 158,
+  "reference": "#4788: 8 controller slots on Uno, no ESP32-only/fixed-white vtable slots, constant-initialized wait budget, no unused timer_millis. fbuild 2.5.37, AVR GCC 7.3.0-atmel3.6.1-arduino7, Arduino AVR core 5.4.0. Dashboard sketch separately measures flash 3730 / physical RAM 136 (3.10.3: 3784/131). Image flash and attributed RAM (aliased vtables included), not physical RAM."
 }

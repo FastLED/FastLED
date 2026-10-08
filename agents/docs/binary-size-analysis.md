@@ -33,6 +33,31 @@ RAM; they are not fbuild's board flash/RAM totals. The RMT allocation-record
 compile-time size assertion additionally guards the measured static RAM saving.
 Check each profile separately; `--compare --budget` is rejected before building.
 
+### AVR RAM regressions: use `bash bloat`, count physical bytes once
+
+For "Uno uses more RAM than 3.10.3" reports (dashboard, #4760/#4764), run
+`bash bloat uno --build --budget tests/data/uno_blink_bloat_budget.json` and
+read the `.data`/`.bss` rows in `.build/symbols/uno/report.json`. Its
+`total_ram` is *attributed* RAM: a concrete controller vtable is listed once
+per alias (e.g. `ClocklessController<...>` and `NEOPIXEL<3>` share one
+address), so it overstates physical RAM. Physical static RAM is the
+`build succeeded (... ram: N bytes)` line from fbuild. To diff two builds,
+compare rows by address and size, never by summing name-only deltas.
+
+The dashboard's matched sketch (FastLED/dashboard `benchmark/Blink.ino`,
+`benchmark/config/uno.ini`) has a weak `main()` and no Serial, so its numbers
+differ from repository Blink; measure both when claiming parity.
+
+#4788 removed 32 B physical RAM from matched Uno Blink (168 -> 136; flash
+3762 -> 3730; 3.10.3 is 131 / 3784): 8 controller slots on Uno instead of 16
+(16 B), `setSpiBus` virtual only on ESP32 and the fixed-white policy as a bit
+next to `mEnabled` instead of a virtual (8 B over two vtables), `constexpr`
+`AtomicFake` so the wait-spin budget has no startup constructor (4 B), and
+no weak `timer_millis` on classic ATmega (4 B). The remaining 5 B are
+supported features: the RGBW/RGBWW white variant with its diode-profile
+pointer (+3 B per controller) and `getLastShowBrightness()`/`isPowerLimited()`
+state (+2 B in `FastLED`).
+
 ### RP2040 reserved heap is not programmed flash
 
 Arduino-Pico's ELF contains a read-only `SHT_NOBITS` `.heap` reservation.
