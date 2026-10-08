@@ -921,7 +921,7 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) FL_NO_EXCE
 // fire onChannelDataEncoded (#4566: out of line from showPixels()).
 void Channel::encodeFrame(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) FL_NO_EXCEPT {
     // Build pixel iterator with optional addressing transformation
-    // (#2558) Pass both Rgbw and Rgbww from the legacy rendering settings; the iterator
+    // (#2558) Pass both Rgbw and Rgbww from the current rendering settings; the iterator
     // carries both, and the encoder dispatch below picks the right path based
     // on which white-channel variant the controller currently holds.
 #if FL_COLOR_PROFILE_RUNTIME
@@ -955,8 +955,14 @@ void Channel::encodeFrame(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) FL_NO_EXC
     if (pixels.ditherActive()) {
         pixels.reseed_binary_dithering(mDitherPhase);
     }
+#ifdef FL_IS_AVR
+    // AVR omits base settings notifications, so base setters are authoritative.
+    const auto& whiteSettings = mLegacySettings;
+#else
+    const auto& whiteSettings = mSettings;
+#endif
     ReorderingPixelIteratorAny iterator(pixels, mScreenMap.getXYMap(), mRgbOrder,
-                                        getRgbw(), getRgbww(),
+                                        whiteSettings.rgbw(), whiteSettings.rgbww(),
                                         mName, pipeline, mDitherPhase,
                                         pixels.mColorAdjustment.premixed.r);
     PixelIterator& pixelIterator = iterator.get();
@@ -964,8 +970,8 @@ void Channel::encodeFrame(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) FL_NO_EXC
     // Encode pixels with the writer selected once from the immutable chipset.
     auto& data = mChannelData->getData();
     data.clear();
-    const auto* rgbww = mLegacySettings.mWhiteCfg.ptr<Rgbww>();
-    const auto* rgbw = mLegacySettings.mWhiteCfg.ptr<Rgbw>();
+    const auto* rgbww = whiteSettings.mWhiteCfg.ptr<Rgbww>();
+    const auto* rgbw = whiteSettings.mWhiteCfg.ptr<Rgbw>();
     if (rgbww != nullptr && rgbww->active()) {
         mChannelData->setPixelFormat(ChannelPixelFormat::RGBWW);
     } else if (rgbw != nullptr && rgbw->active()) {
