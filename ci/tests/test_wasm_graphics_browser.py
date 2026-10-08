@@ -76,3 +76,50 @@ def test_diameter_renders_led(
     assert result["error"] == 0
     assert result["pixel"] == [255, 0, 0, 255]
     assert result["lit"] == (9 if diameter == 3 else 1)
+
+
+@pytest.mark.parametrize("offscreen", [False, True])
+def test_strips_share_coordinates(graphics_page: Page, offscreen: bool) -> None:
+    result = graphics_page.evaluate(
+        """(offscreen) => {
+        const canvas = offscreen ? new OffscreenCanvas(1, 1) : document.createElement('canvas');
+        const manager = new GraphicsManager({canvas});
+        const positive = Array.from({length: 256}, (_, i) => i);
+        const negative = positive.map(i => -i);
+        const frames = [
+            {strip_id: 0, pixel_data: positive.flatMap(() => [0, 0, 255])},
+            {strip_id: 1, pixel_data: negative.flatMap(() => [255, 0, 0])}
+        ];
+        const results = [];
+        // Repeat with a translated layout to exercise bounds invalidation.
+        for (const origin of [0, -300]) {
+            manager.updateScreenMap({
+                0: {strips: {0: {diameter: 1, map: {
+                    x: positive.map(x => x + origin), y: positive.map(y => y + origin)}}}},
+                1: {strips: {1: {diameter: 1, map: {
+                    x: negative.map(x => x + origin), y: negative.map(y => y + origin)}}}}
+            });
+            manager.updateCanvas(frames);
+            const gl = manager.gl;
+            const pixel = new Uint8Array(4);
+            gl.readPixels(canvas.width - 1, canvas.height - 1, 1, 1,
+                          gl.RGBA, gl.UNSIGNED_BYTE, pixel);
+            results.push({width: manager.gridWidth, height: manager.gridHeight,
+                red: manager.texData.filter((v, i) => i % 3 === 0 && v === 255).length,
+                blue: manager.texData.filter((v, i) => i % 3 === 2 && v === 255).length,
+                corner: Array.from(pixel), error: gl.getError()});
+        }
+        manager.gl.getExtension('WEBGL_lose_context').loseContext();
+        return results;
+    }""",
+        offscreen,
+    )
+    for frame in result:
+        assert frame == {
+            "width": 511,
+            "height": 511,
+            "red": 256,
+            "blue": 255,
+            "corner": [0, 0, 255, 255],
+            "error": 0,
+        }

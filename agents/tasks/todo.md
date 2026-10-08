@@ -5,7 +5,7 @@
 ## WASM viewer issues #4776–#4778 (sequential)
 
 - [x] #4776: reproduce unset diameter in Chromium, fix the fallback, validate and publish a focused PR.
-- [ ] #4777: reproduce separate strip coordinates in Chromium, use shared bounds, validate and publish a focused PR.
+- [x] #4777: reproduce separate strip coordinates in Chromium, use shared bounds, validate and publish a focused PR.
 - [ ] #4778: reproduce oversized 3D rendering, cap drawing buffer to context limits, validate and publish a focused PR.
 
 ### #4776 validation
@@ -20,6 +20,18 @@ Playwright Chromium and run with
 `PYTEST_ADDOPTS='-k test_diameter_renders_led --runslow' bash test test_wasm_graphics_browser --debug`.
 Reviewed the source and browser test against `.claude/skills/code-review/review-rules.md`;
 no blocking findings.
+
+### #4777 validation
+
+Before the fix, both HTMLCanvas and OffscreenCanvas tests lose all 256 blue
+LEDs and leave the upper corner black. After subtracting the cached global
+minimum, the 511×511 grid retains 255 blue and 256 red LEDs (only the shared
+origin overlaps), including after screenmap translation and cache invalidation.
+All 14 browser tests pass with
+`PYTEST_ADDOPTS='-k test_wasm_graphics_browser --runslow' bash test test_wasm_graphics_browser --debug`.
+`bash lint` and the WASM example compile pass. The compiled unmodified
+WasmScreenCoords page shows both colors (535 red and 463 blue screenshot pixels).
+Code review found no blocking findings. PR #4781 supplies the preceding diameter fix.
 
 
 ## Memory meta #4737: sequential local optimization
