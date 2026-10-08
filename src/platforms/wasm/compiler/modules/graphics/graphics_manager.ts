@@ -579,7 +579,9 @@ export class GraphicsManager {
           continue;
         }
         // log(x, y);
-        const diameter = stripData.diameter || 1.0;
+        // ScreenMap serializes -1 when no diameter was set.
+        const diameter = Number.isFinite(stripData.diameter) && stripData.diameter > 0
+          ? stripData.diameter : 1.0;
         const radius = Math.floor(diameter / 2);
 
         // Draw a filled square for each LED
