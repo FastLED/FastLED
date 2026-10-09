@@ -187,7 +187,7 @@ def assert_fbuild_has_symbols() -> None:
         )
 
 
-def explicit_symbol_tools(elf: Path) -> list[str]:
+def explicit_symbol_tools(elf: Path, example: str | None = None) -> list[str]:
     """`--nm/--cppfilt` from the nearest single-env `build_info.json`.
 
     fbuild >= 2.5.38 matches the ELF to a `build_info` environment by
@@ -196,9 +196,12 @@ def explicit_symbol_tools(elf: Path) -> list[str]:
     ELF". Passing the cross tools explicitly, as the dashboard benchmark
     does, skips that lookup (FastLED#4813).
     """
+    names = ([f"build_info_{example}.json"] if example else []) + ["build_info.json"]
     for directory in [elf.parent, *elf.parents]:
-        info = directory / "build_info.json"
-        if not info.is_file():
+        info = next(
+            (directory / name for name in names if (directory / name).is_file()), None
+        )
+        if info is None:
             continue
         try:
             data = json.loads(info.read_text(encoding="utf-8"))
@@ -220,7 +223,9 @@ def explicit_symbol_tools(elf: Path) -> list[str]:
     return []
 
 
-def run_fbuild_symbols(location: ElfLocation, out_dir: Path, top: int) -> None:
+def run_fbuild_symbols(
+    location: ElfLocation, out_dir: Path, top: int, example: str | None = None
+) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
     cmd = [
         "fbuild",
@@ -230,7 +235,7 @@ def run_fbuild_symbols(location: ElfLocation, out_dir: Path, top: int) -> None:
         str(out_dir),
         "--top",
         str(top),
-        *explicit_symbol_tools(location.elf),
+        *explicit_symbol_tools(location.elf, example),
     ]
     print(f"$ {' '.join(cmd)}")
     try:
@@ -604,7 +609,9 @@ def run_profile(args: argparse.Namespace, profile: str) -> dict[str, Any]:
     print(f"Toolchain: {toolchain}")
     print()
 
-    run_fbuild_symbols(location=location, out_dir=out_dir, top=args.top)
+    run_fbuild_symbols(
+        location=location, out_dir=out_dir, top=args.top, example=args.example
+    )
 
     report_json = out_dir / "report.json"
     report = cast(dict[str, Any], json.loads(report_json.read_text(encoding="utf-8")))
