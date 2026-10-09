@@ -688,7 +688,7 @@ FL_TEST_CASE("my test") {
 1. In the diff, check if deleted code was the only reader of a variable that remains declared
 2. If the variable is now write-only or unreferenced: Remove it and report
 
-### src/** changes - DMA/POLL WAIT LOOPS MUST YIELD VIA fl::task::run()
+### src/** changes - DMA/POLL WAIT LOOPS MUST YIELD VIA fl::task::yield_system()
 
 **Core Principle**: Any busy-wait loop that polls for hardware completion (DMA, SPI, I2S, etc.) must yield to the OS scheduler using `fl::task::yield_system()` (or `fl::task::run()` when tasks/coroutines must also be pumped). Never use bare `fl::yield()`, `vTaskDelay()`, `taskYIELD()`, or spin without yielding.
 
@@ -703,12 +703,12 @@ FL_TEST_CASE("my test") {
 4. ✅ **Use `ExecFlags::ALL`** for longer waits where pumping coroutines/tasks is beneficial
 5. ✅ **Include `fl/task/executor.h`** for `fl::task::yield_system()`, `fl::task::run()` and `ExecFlags`
 
-**Rationale**: On ESP32 (FreeRTOS), spinning without yield starves WiFi/BT/system tasks and triggers the task watchdog timer (TWDT). `fl::task::run()` calls `vTaskDelay(0)` on ESP32 and `std::this_thread::yield()` on host platforms.
+**Rationale**: On ESP32 (FreeRTOS), spinning without yield starves WiFi/BT/system tasks and triggers the task watchdog timer (TWDT). `fl::task::yield_system(us)` deep-yields at least one FreeRTOS tick on ESP32 for any non-zero budget. On host it pumps the stub coroutine runner, which returns immediately when idle, so a host wait loop spins until its budget expires rather than sleeping (same as `run(us, SYSTEM)`).
 
 **Check Process**:
 1. Scan for `while (` loops in driver/peripheral code that contain `poll()`, `isBusy()`, or similar status checks
-2. Verify the loop body includes `fl::task::run(...)` or equivalent
-3. Scan for bare `fl::yield()`, `vTaskDelay(`, `taskYIELD()` — should be `fl::task::run()`
+2. Verify the loop body includes `fl::task::yield_system(...)` (or `fl::task::run(...)` when tasks/coroutines must also be pumped)
+3. Scan for bare `fl::yield()`, `vTaskDelay(`, `taskYIELD()` — should be `fl::task::yield_system()`
 4. If found: Report violation and fix
 
 ### src/** changes - PERFORMANCE ATTRIBUTES ON HOT-PATH FUNCTIONS

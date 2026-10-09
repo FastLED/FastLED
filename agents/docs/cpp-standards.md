@@ -393,7 +393,7 @@ Tracking issue for the per-platform audit: **#4018**.
 
 ## Channel Engine DMA Wait Pattern
 - **`onBeginFrame()` / `show()` must wait for `poll() == READY` before starting a new frame** — use a simple `while (poll() != READY)` loop
-- **Yield in wait loops with `fl::task::yield_system()`** — never busy-spin without yielding. Use `fl::task::yield_system(250)` inside wait loops to yield to the OS scheduler (FreeRTOS `vTaskDelay(0)` on ESP32, `std::this_thread::yield()` on host). This prevents watchdog timeouts and starvation of WiFi/BT/system tasks. Include `fl/task/executor.h`.
+- **Yield in wait loops with `fl::task::yield_system()`** — never busy-spin without yielding. Use `fl::task::yield_system(250)` inside wait loops to yield to the OS scheduler (at least one FreeRTOS tick on ESP32; on host it only pumps the stub coroutine runner and spins out the budget when idle, exactly like `run(us, SYSTEM)`). This prevents watchdog timeouts and starvation of WiFi/BT/system tasks. Include `fl/task/executor.h`.
   - **Do NOT use** bare `fl::yield()`, `vTaskDelay()`, or `taskYIELD()` — the `fl::task` entry points are the unified API
   - For tight DMA polling use `fl::task::yield_system(us)` (OS yield only). It behaves exactly like `fl::task::run(us, ExecFlags::SYSTEM)`, but `run()` dispatches on its flags at runtime, so even a SYSTEM-only call links the task Scheduler and Executor into every sketch (~1.8 KB flash, ~200 B RAM on ESP32, #4797)
   - For longer waits use `ExecFlags::ALL` (also pumps coroutines and scheduled tasks)
