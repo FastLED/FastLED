@@ -602,8 +602,8 @@ Provides zero-cost network activity detection (WiFi, Ethernet, or Bluetooth) usi
 class NetworkDetector {
 public:
     // Individual network types
-    static bool isAnyNetworkActive();         // network mode != NULL
-    static bool isWiFiConnected();      // Connected to AP
+    static bool isWiFiActive();         // Wi-Fi STA/AP netif exists (esp_netif, weak-linked)
+    static bool isWiFiConnected();      // STA netif up with an IP address
     static bool isEthernetActive();     // Ethernet interface up
     static bool isEthernetConnected();  // Ethernet has IP address
     static bool isBluetoothActive();    // BT controller enabled
