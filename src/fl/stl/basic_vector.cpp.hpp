@@ -11,6 +11,19 @@
 
 namespace fl {
 
+// Shared move-n loop over the per-type move_construct thunk, so each element
+// type does not need its own uninitialized_move_n thunk (#4794).
+void vector_basic::uninitialized_move_n_impl(void* dst, void* src,
+                                             fl::size count) const FL_NO_EXCEPT {
+    FASTLED_ASSERT(mOps->move_construct != nullptr,
+                   "vector: element type is not move-constructible");
+    fl::u8* d = static_cast<fl::u8*>(dst);
+    fl::u8* sp = static_cast<fl::u8*>(src);
+    for (fl::size i = 0; i < count; ++i) {
+        mOps->move_construct(d + i * mElementSize, sp + i * mElementSize);
+    }
+}
+
 // ======= TRIVIAL ELEMENT HELPERS =======
 
 void vector_basic::trivial_copy(void* dst, const void* src, fl::size count) const FL_NO_EXCEPT {
@@ -78,7 +91,7 @@ void vector_basic::grow_to(fl::size new_capacity) FL_NO_EXCEPT {
     // Move existing elements to new buffer
     if (mSize > 0 && mArray) {
         if (mOps) {
-            mOps->uninitialized_move_n(new_buf, mArray, mSize);
+            uninitialized_move_n_impl(new_buf, mArray, mSize);
             mOps->destroy_n(mArray, mSize);
         } else {
             trivial_copy(new_buf, mArray, mSize);
@@ -119,7 +132,7 @@ void vector_basic::shrink_to_fit_impl() FL_NO_EXCEPT {
     if (hasInlineBuffer() && !isInline() && mSize <= mInlineCapacity) {
         void* inline_buf = inlineBufferPtr();
         if (mOps) {
-            mOps->uninitialized_move_n(inline_buf, mArray, mSize);
+            uninitialized_move_n_impl(inline_buf, mArray, mSize);
             mOps->destroy_n(mArray, mSize);
         } else {
             trivial_copy(inline_buf, mArray, mSize);
@@ -135,7 +148,7 @@ void vector_basic::shrink_to_fit_impl() FL_NO_EXCEPT {
         void* new_buf = mResource->allocate(mSize * mElementSize);
         if (new_buf) {
             if (mOps) {
-                mOps->uninitialized_move_n(new_buf, mArray, mSize);
+                uninitialized_move_n_impl(new_buf, mArray, mSize);
                 mOps->destroy_n(mArray, mSize);
             } else {
                 trivial_copy(new_buf, mArray, mSize);
@@ -178,7 +191,7 @@ void vector_basic::pop_back_impl() FL_NO_EXCEPT {
     if (mSize == 0) return;
     --mSize;
     if (mOps) {
-        mOps->destroy(element_ptr(mSize));
+        mOps->destroy_n(element_ptr(mSize), 1);
     }
     // For trivial types, nothing to destroy
 }
@@ -212,15 +225,13 @@ void vector_basic::erase_range_impl(fl::size first_index, fl::size count) FL_NO_
 
     if (mOps) {
         // Destroy erased elements
-        for (fl::size i = 0; i < count; ++i) {
-            mOps->destroy(element_ptr(first_index + i));
-        }
+        mOps->destroy_n(element_ptr(first_index), count);
         // Shift remaining elements left one at a time
         for (fl::size i = 0; i < remaining; ++i) {
             void* dst = element_ptr(first_index + i);
             void* src = element_ptr(first_index + count + i);
             mOps->move_construct(dst, src);
-            mOps->destroy(src);
+            mOps->destroy_n(src, 1);
         }
     } else {
         // Trivial: memmove the remaining elements left
@@ -248,11 +259,11 @@ void vector_basic::insert_copy_impl(fl::size index, const void* element) FL_NO_E
             // Move-assign backwards for the rest
             for (fl::size i = mSize - 1; i > index; --i) {
                 // Destroy dst, then move-construct from src
-                mOps->destroy(element_ptr(i));
+                mOps->destroy_n(element_ptr(i), 1);
                 mOps->move_construct(element_ptr(i), element_ptr(i - 1));
             }
             // Destroy the slot and copy-construct the new element
-            mOps->destroy(element_ptr(index));
+            mOps->destroy_n(element_ptr(index), 1);
         }
         mOps->copy_construct(element_ptr(index), element);
     } else {
@@ -276,10 +287,10 @@ void vector_basic::insert_move_impl(fl::size index, void* element) FL_NO_EXCEPT 
         if (mSize > index) {
             mOps->move_construct(element_ptr(mSize), element_ptr(mSize - 1));
             for (fl::size i = mSize - 1; i > index; --i) {
-                mOps->destroy(element_ptr(i));
+                mOps->destroy_n(element_ptr(i), 1);
                 mOps->move_construct(element_ptr(i), element_ptr(i - 1));
             }
-            mOps->destroy(element_ptr(index));
+            mOps->destroy_n(element_ptr(index), 1);
         }
         mOps->move_construct(element_ptr(index), element);
     } else {
@@ -300,9 +311,7 @@ void vector_basic::resize_impl(fl::size n) FL_NO_EXCEPT {
     if (n < mSize) {
         // Shrink: destroy excess elements
         if (mOps) {
-            for (fl::size i = n; i < mSize; ++i) {
-                mOps->destroy(element_ptr(i));
-            }
+            mOps->destroy_n(element_ptr(n), mSize - n);
         }
         mSize = n;
         return;
@@ -332,9 +341,7 @@ void vector_basic::resize_value_impl(fl::size n, const void* value) FL_NO_EXCEPT
 
     if (n < mSize) {
         if (mOps) {
-            for (fl::size i = n; i < mSize; ++i) {
-                mOps->destroy(element_ptr(i));
-            }
+            mOps->destroy_n(element_ptr(n), mSize - n);
         }
         mSize = n;
         return;
@@ -389,7 +396,7 @@ void vector_basic::swap_impl(vector_basic& other) FL_NO_EXCEPT {
                 // Move this[i] to other[i], destroy this[i]
                 if (mOps) {
                     mOps->move_construct(other.element_ptr(i), element_ptr(i));
-                    mOps->destroy(element_ptr(i));
+                    mOps->destroy_n(element_ptr(i), 1);
                 } else {
                     fl::memcpy(other.element_ptr(i), element_ptr(i), mElementSize);
                 }
@@ -397,7 +404,7 @@ void vector_basic::swap_impl(vector_basic& other) FL_NO_EXCEPT {
                 // Move other[i] to this[i], destroy other[i]
                 if (mOps) {
                     mOps->move_construct(element_ptr(i), other.element_ptr(i));
-                    mOps->destroy(other.element_ptr(i));
+                    mOps->destroy_n(other.element_ptr(i), 1);
                 } else {
                     fl::memcpy(element_ptr(i), other.element_ptr(i), mElementSize);
                 }
@@ -415,7 +422,7 @@ void vector_basic::swap_impl(vector_basic& other) FL_NO_EXCEPT {
             other.mArray = other.inlineBufferPtr();
             other.mCapacity = other.mInlineCapacity;
             if (mOps) {
-                mOps->uninitialized_move_n(other.mArray, mArray, mSize);
+                uninitialized_move_n_impl(other.mArray, mArray, mSize);
                 mOps->destroy_n(mArray, mSize);
             } else {
                 if (mSize > 0) trivial_copy(other.mArray, mArray, mSize);
@@ -425,7 +432,7 @@ void vector_basic::swap_impl(vector_basic& other) FL_NO_EXCEPT {
             other.mArray = other.mResource->allocate(mSize * mElementSize);
             other.mCapacity = mSize;
             if (mOps) {
-                mOps->uninitialized_move_n(other.mArray, mArray, mSize);
+                uninitialized_move_n_impl(other.mArray, mArray, mSize);
                 mOps->destroy_n(mArray, mSize);
             } else {
                 if (mSize > 0) trivial_copy(other.mArray, mArray, mSize);
@@ -476,7 +483,7 @@ void vector_basic::move_from(vector_basic& other) FL_NO_EXCEPT {
         // Can't steal inline buffer — must move elements
         reserve_impl(other.mSize);
         if (mOps) {
-            mOps->uninitialized_move_n(mArray, other.mArray, other.mSize);
+            uninitialized_move_n_impl(mArray, other.mArray, other.mSize);
         } else {
             if (other.mSize > 0) {
                 trivial_copy(mArray, other.mArray, other.mSize);

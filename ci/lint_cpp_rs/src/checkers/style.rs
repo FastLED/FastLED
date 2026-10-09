@@ -173,6 +173,84 @@ impl FileContentChecker for RawNoexceptChecker {
     }
 }
 
+/// Bans raw `alignas(...)` in `src/`; use the macros in `fl/stl/align.h`.
+///
+/// Raw `alignas` has broken real builds: GCC 4.8.3 (Roger Clark STM32 core)
+/// mishandles it, ESP8266 over-aligned types call a missing `memalign()` at
+/// link time, and AVR pays RAM for alignment it never needs. `FL_ALIGNAS(N)`,
+/// `FL_ALIGN_AS(T)`, `FL_ALIGN_AS_T(expr)` and `FL_ALIGN_MAX` encode those
+/// per-platform workarounds.
+struct RawAlignasChecker;
+
+impl FileContentChecker for RawAlignasChecker {
+    fn name(&self) -> &'static str {
+        "RawAlignasChecker"
+    }
+
+    fn should_process_file(&self, file_path: &str, project_root: &Path) -> bool {
+        if !is_under_project_subpath(file_path, project_root, "src") {
+            return false;
+        }
+        if !ends_with_any(file_path, &[".h", ".hpp", ".cpp", ".cpp.hpp"]) {
+            return false;
+        }
+        let normalized = normalize_path(file_path);
+        !normalized.ends_with("fl/stl/align.h") && !is_under_dir(&normalized, "third_party")
+    }
+
+    fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        if !file_content.content.contains("alignas") {
+            return Vec::new();
+        }
+
+        let mut violations = Vec::new();
+        let mut lexical_state = CommentScanState::default();
+
+        for (index, line) in file_content.lines.iter().enumerate() {
+            let stripped = line.trim();
+            // Mask comments and string/char literals so code before or after a
+            // `/* ... */` on the same line is still checked (and text inside
+            // comments or literals never is).
+            let line_start_state = lexical_state.clone();
+            let visible = mask_macro_prefix_literals_and_comments(line, &mut lexical_state);
+            if !regex_raw_alignas().is_match(&visible) {
+                continue;
+            }
+            if alignas_suppressed_by_line_comment(line, &line_start_state) {
+                continue;
+            }
+
+            violations.push((
+                index + 1,
+                format!(
+                    "Raw 'alignas' -- use FL_ALIGNAS(N), FL_ALIGN_AS(T), FL_ALIGN_AS_T(expr) or FL_ALIGN_MAX from fl/stl/align.h (raw alignas breaks GCC 4.8 STM32, ESP8266 memalign and wastes AVR RAM); suppress with '// ok alignas' only with a reason: {stripped}"
+                ),
+            ));
+        }
+
+        violations
+    }
+}
+
+/// True when `// ok alignas` begins a real line comment, not text inside a
+/// block comment or a string literal. A sentinel appended just before the
+/// marker survives masking only if that position is code.
+fn alignas_suppressed_by_line_comment(line: &str, start_state: &CommentScanState) -> bool {
+    const MARKER: &str = "// ok alignas";
+    let mut search_from = 0;
+    while let Some(rel) = line[search_from..].find(MARKER) {
+        let idx = search_from + rel;
+        let probe = format!("{}\u{1}", &line[..idx]);
+        let mut state = start_state.clone();
+        let masked = mask_macro_prefix_literals_and_comments(&probe, &mut state);
+        if masked.ends_with('\u{1}') {
+            return true;
+        }
+        search_from = idx + MARKER.len();
+    }
+    false
+}
+
 struct SingletonInHeadersChecker;
 
 impl FileContentChecker for SingletonInHeadersChecker {
