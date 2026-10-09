@@ -89,8 +89,12 @@ template<> struct BusTraits<Bus::FLEX_IO, 0> {
     /// (an SPI controller may have registered this bus first).
     static void enableClockless() FL_NO_EXCEPT {
         detail::enableLcdClockless();
-        if (const auto& clockless = detail::lcd_cam_bus_holder().clocklessPtr()) {
-            ChannelManager::registry().addDriver(default_bus_priority(Bus::FLEX_IO, 0), clockless);
+        const auto& clockless = detail::lcd_cam_bus_holder().clocklessPtr();
+        auto& registry = ChannelManager::registry();
+        // Register only when absent: addDriver() replaces a same-name entry,
+        // which would discard a platform/forced priority set earlier.
+        if (clockless && !registry.findDriverByName(clockless->getName())) {
+            registry.addDriver(default_bus_priority(Bus::FLEX_IO, 0), clockless);
         }
     }
 
