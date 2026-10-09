@@ -2,7 +2,7 @@
   "board": "esp32s3",
   "example": "Blink",
   "profile": "default",
-  "image_flash": 342099,
+  "image_flash": 340811,
   "total_ram": 40016,
   "reference": "#4813 / PR #4814: fbuild 2.5.37 -> 2.5.39 re-base. CI run 37896461345 on the 2.5.39 pin measures image342099 /attributedRAM40016 for master c97d72154c; the same firmware measured image342083 /attributedRAM37844 on fbuild2.5.37. The +2172 B attributed RAM is accounting only (fbuild#1663 attributes weak vtable owners; the dashboard on 2.5.38 reports 40016 for the same SHA) while section RAM fell 77936 -> 77200 B over #4801. Re-base authorized by the maintainer. Arduino-ESP32 3.3.11 /IDF5.5.5 /Xtensa GCC14.2.0. Attributed RAM is not physical board RAM."
 }

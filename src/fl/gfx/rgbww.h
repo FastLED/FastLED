@@ -57,6 +57,20 @@ enum {
 
 /// Per-strip RGBWW configuration. Parallels fl::Rgbw but carries the two
 /// reference CCTs the layered solver needs (warm-W and cool-W).
+struct Rgbww;
+
+namespace detail {
+/// Tag for constructing an inactive Rgbww without linking the RGBWW encoder.
+struct RgbwwNoEncoder {};
+/// Installs the RGBWW pixel conversion (see enable_rgbw_conversion, #4795).
+void enable_rgbww_conversion() FL_NO_EXCEPT;
+using RgbwwConvertFn = void (*)(const Rgbww& rgbww, const fl::u8 (&raw)[3],
+                                const fl::u8 (&premix)[3], const fl::u8 (&order)[3],
+                                fl::u8* b0, fl::u8* b1, fl::u8* b2,
+                                fl::u8* b3, fl::u8* b4);
+RgbwwConvertFn rgbww_conversion() FL_NO_EXCEPT;
+}  // namespace detail
+
 struct Rgbww {
     explicit Rgbww(fl::u16 warm = kRGBWWDefaultWarmCct,
                    fl::u16 cool = kRGBWWDefaultCoolCct,
@@ -64,6 +78,13 @@ struct Rgbww {
                    EOrderWW placement = EOrderWW::WWDefault) FL_NO_EXCEPT
         : warm_cct(warm), cool_cct(cool),
           rgbww_mode(mode), w_placement(placement),
+          profile(nullptr) {
+        detail::enable_rgbww_conversion();
+    }
+    /// Inactive value that does not link the RGBWW encoder (RgbwwInvalid).
+    explicit Rgbww(detail::RgbwwNoEncoder) FL_NO_EXCEPT
+        : warm_cct(kRGBWWDefaultWarmCct), cool_cct(kRGBWWDefaultCoolCct),
+          rgbww_mode(RGBWW_MODE::kRGBWWInvalid), w_placement(EOrderWW::WWDefault),
           profile(nullptr) {}
 
     fl::u16 warm_cct;
@@ -84,7 +105,7 @@ struct Rgbww {
 /// Sentinel: disables RGBWW (variant should hold fl::Empty instead, but this
 /// is kept for symmetry with RgbwInvalid).
 struct RgbwwInvalid : public Rgbww {
-    RgbwwInvalid() FL_NO_EXCEPT : Rgbww() {
+    RgbwwInvalid() FL_NO_EXCEPT : Rgbww(detail::RgbwwNoEncoder()) {
         rgbww_mode = RGBWW_MODE::kRGBWWInvalid;
     }
     static Rgbww value() FL_NO_EXCEPT { return RgbwwInvalid(); }

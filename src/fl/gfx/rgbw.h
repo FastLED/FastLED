@@ -206,6 +206,24 @@ enum {
     kRGBWDefaultColorTemp = 6000,
 };
 
+struct Rgbw;
+
+namespace detail {
+/// Tag for constructing an inactive Rgbw without linking the RGBW encoder.
+struct RgbwNoEncoder {};
+/// Installs the RGBW pixel conversion used by PixelIterator. Called from the
+/// active Rgbw constructors, so a program that never builds an active Rgbw
+/// never links the conversion code (#4795).
+void enable_rgbw_conversion() FL_NO_EXCEPT;
+/// Per-pixel RGBW conversion: raw source-order RGB + premixed scale ->
+/// 4 wire bytes. `order[i]` is the source channel of wire RGB byte i.
+using RgbwConvertFn = void (*)(const Rgbw& rgbw, const u8 (&raw)[3],
+                               const u8 (&premix)[3], const u8 (&order)[3],
+                               u8* b0, u8* b1, u8* b2, u8* b3);
+/// Null until enable_rgbw_conversion() has run.
+RgbwConvertFn rgbw_conversion() FL_NO_EXCEPT;
+}  // namespace detail
+
 struct Rgbw {
     explicit Rgbw(u16 white_color_temp = fl::kRGBWDefaultColorTemp,
                   fl::RGBW_MODE rgbw_mode = fl::RGBW_MODE::kRGBWExactColors,
@@ -213,7 +231,9 @@ struct Rgbw {
                   fl::shared_ptr<const DiodeProfile> _profile =
                       fl::shared_ptr<const DiodeProfile>())
  FL_NO_EXCEPT : white_color_temp(white_color_temp), w_placement(_w_placement),
-          rgbw_mode(rgbw_mode), profile(_profile) {}
+          rgbw_mode(rgbw_mode), profile(_profile) {
+        detail::enable_rgbw_conversion();
+    }
     explicit Rgbw(u16 white_color_temp,
                   fl::RGBW_MODE rgbw_mode,
                   fl::EOrderW _w_placement,
@@ -221,7 +241,12 @@ struct Rgbw {
                   fl::InputGamut input_gamut) FL_NO_EXCEPT
         : white_color_temp(white_color_temp), w_placement(_w_placement),
           rgbw_mode(rgbw_mode),
-          profile(fl::make_diode_profile(_profile, input_gamut)) {}
+          profile(fl::make_diode_profile(_profile, input_gamut)) {
+        detail::enable_rgbw_conversion();
+    }
+    /// Inactive value that does not link the RGBW encoder (RgbwInvalid).
+    explicit Rgbw(detail::RgbwNoEncoder) FL_NO_EXCEPT
+        : rgbw_mode(RGBW_MODE::kRGBWInvalid) {}
     u16 white_color_temp = kRGBWDefaultColorTemp;
     fl::EOrderW w_placement = EOrderW::WDefault;
     RGBW_MODE rgbw_mode = RGBW_MODE::kRGBWExactColors;
@@ -247,7 +272,7 @@ struct Rgbw {
 };
 
 struct RgbwInvalid : public Rgbw {
-    RgbwInvalid() FL_NO_EXCEPT {
+    RgbwInvalid() FL_NO_EXCEPT : Rgbw(detail::RgbwNoEncoder()) {
         white_color_temp = kRGBWDefaultColorTemp;
         rgbw_mode = RGBW_MODE::kRGBWInvalid;
     }

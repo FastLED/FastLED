@@ -708,4 +708,29 @@ void rgbw_partial_reorder(EOrderW w_placement, u8 b0, u8 b1,
     *out_b3 = out[3];
 }
 
+namespace detail {
+namespace {
+RgbwConvertFn& rgbw_convert_slot() FL_NO_EXCEPT {
+    static RgbwConvertFn slot = nullptr;  // zero-initialised before any ctor
+    return slot;
+}
+
+void rgbw_convert_pixel(const Rgbw& rgbw, const u8 (&raw)[3],
+                        const u8 (&premix)[3], const u8 (&order)[3], u8* b0, u8* b1, u8* b2,
+                        u8* b3) FL_NO_EXCEPT {
+    // Same steps as PixelController::loadAndScaleRGBW: source-order RGB plus
+    // W from the raw pixel and premixed scale, then the wire reorder.
+    u8 c[3];
+    u8 w = 0;
+    rgb_2_rgbw(rgbw, raw[0], raw[1], raw[2], premix[0], premix[1], premix[2],
+               &c[0], &c[1], &c[2], &w);
+    rgbw_partial_reorder(rgbw.w_placement, c[order[0]], c[order[1]],
+                         c[order[2]], w, b0, b1, b2, b3);
+}
+}  // namespace
+
+void enable_rgbw_conversion() FL_NO_EXCEPT { rgbw_convert_slot() = &rgbw_convert_pixel; }
+RgbwConvertFn rgbw_conversion() FL_NO_EXCEPT { return rgbw_convert_slot(); }
+}  // namespace detail
+
 } // namespace fl

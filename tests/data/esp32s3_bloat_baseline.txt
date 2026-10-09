@@ -1,3 +1,7 @@
+# #4795 / RGBW type-erased + link-on-use: local image 340795 (down 1288 B
+# from 342083 local); CI has measured +16 B vs local on this board (342099
+# vs 342083), so the CI baseline is 340811. Claim the measured saving.
+
 # #4813 / PR #4814: fbuild 2.5.37 -> 2.5.39 measures the same firmware at
 # image 342099 (+16 B vs 342083 on 2.5.37; toolchain/accounting, no source
 # change). CI run 37896461345. Re-based with the RAM budget.
@@ -354,4 +358,4 @@
 # the CI Blink report contains no ResponseLutsQ16 symbol. The local fbuild
 # symbol total remains ~4 KB higher for the same source (FastLED/fbuild#1456),
 # so this ratchet uses the CI measurement from PR #4511.
-342099
+340811
