@@ -82,7 +82,11 @@ def should_skip_for_stub(filter_str: str) -> tuple[bool, str]:
         return False, ""
 
     # Board filters don't exclude STUB builds
-    if re.search(r"\(\s*board\s+is\s+(not\s+)?\w+\s*\)", filter_str, re.IGNORECASE):
+    # Values may carry glob wildcards (e.g. `atmega8*`); `\w+` alone missed
+    # them and silently dropped such examples from host builds (#4805).
+    if re.search(
+        r"\(\s*board\s+is\s+(not\s+)?[\w*?.\-]+\s*\)", filter_str, re.IGNORECASE
+    ):
         return False, ""
 
     # Default: if we don't recognize the filter and it doesn't mention STUB, skip it
