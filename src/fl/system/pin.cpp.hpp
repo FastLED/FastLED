@@ -56,9 +56,8 @@ PinValue digitalRead(int pin) FL_NO_EXCEPT {
     return platforms::digitalRead(pin);
 }
 
-u16 analogRead(int pin) FL_NO_EXCEPT {
-    return platforms::analogRead(pin);
-}
+// analogRead() lives in fl/system/analog/analog_read.cpp.hpp, its own unity
+// object, so the platform ADC driver links only when it is used (#4796).
 
 void setAdcRange(AdcRange range) FL_NO_EXCEPT {
     platforms::setAdcRange(range);
