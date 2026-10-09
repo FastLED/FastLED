@@ -690,18 +690,18 @@ FL_TEST_CASE("my test") {
 
 ### src/** changes - DMA/POLL WAIT LOOPS MUST YIELD VIA fl::task::run()
 
-**Core Principle**: Any busy-wait loop that polls for hardware completion (DMA, SPI, I2S, etc.) must yield to the OS scheduler using `fl::task::run()`. Never use bare `fl::yield()`, `vTaskDelay()`, `taskYIELD()`, or spin without yielding.
+**Core Principle**: Any busy-wait loop that polls for hardware completion (DMA, SPI, I2S, etc.) must yield to the OS scheduler using `fl::task::yield_system()` (or `fl::task::run()` when tasks/coroutines must also be pumped). Never use bare `fl::yield()`, `vTaskDelay()`, `taskYIELD()`, or spin without yielding.
 
 **Rules**:
 1. ❌ **NEVER spin without yielding**
    - ❌ Bad: `while (mBusy) { poll(); }`
-   - ✅ Good: `while (mBusy) { poll(); fl::task::run(250, fl::task::ExecFlags::SYSTEM); }`
-2. ❌ **NEVER use bare OS yield primitives** — `fl::task::run()` is the unified API
+   - ✅ Good: `while (mBusy) { poll(); fl::task::yield_system(250); }`
+2. ❌ **NEVER use bare OS yield primitives** — the `fl::task` entry points are the unified API
    - ❌ Bad: `fl::yield();`, `vTaskDelay(0);`, `taskYIELD();`
-   - ✅ Good: `fl::task::run(250, fl::task::ExecFlags::SYSTEM);`
-3. ✅ **Use `ExecFlags::SYSTEM`** for tight DMA polling (minimal overhead, OS yield only)
+   - ✅ Good: `fl::task::yield_system(250);`
+3. ✅ **Use `fl::task::yield_system(us)`** for tight DMA polling (OS yield only). It equals `fl::task::run(us, ExecFlags::SYSTEM)` but does not link the task Scheduler/Executor (#4797); flag `run(..., ExecFlags::SYSTEM)` in new driver code
 4. ✅ **Use `ExecFlags::ALL`** for longer waits where pumping coroutines/tasks is beneficial
-5. ✅ **Include `fl/task/executor.h`** for `fl::task::run()` and `ExecFlags`
+5. ✅ **Include `fl/task/executor.h`** for `fl::task::yield_system()`, `fl::task::run()` and `ExecFlags`
 
 **Rationale**: On ESP32 (FreeRTOS), spinning without yield starves WiFi/BT/system tasks and triggers the task watchdog timer (TWDT). `fl::task::run()` calls `vTaskDelay(0)` on ESP32 and `std::this_thread::yield()` on host platforms.
 
