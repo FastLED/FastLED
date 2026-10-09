@@ -23,6 +23,13 @@ namespace fl {
 
 void *aligned_alloc(fl::size_t alignment, fl::size_t size) FL_NO_EXCEPT;
 
+namespace detail {
+/// Portable over-allocate-and-align used by aligned_alloc on bare-metal
+/// targets; free only with aligned_free_via_malloc (#4817).
+void *aligned_alloc_via_malloc(fl::size_t alignment, fl::size_t size) FL_NO_EXCEPT;
+void aligned_free_via_malloc(void *ptr) FL_NO_EXCEPT;
+}  // namespace detail
+
 // Portable free for memory obtained from fl::aligned_alloc.
 // On POSIX, std::free suffices; on Windows, _aligned_free is required.
 void aligned_free(void *ptr) FL_NO_EXCEPT;

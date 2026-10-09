@@ -1,5 +1,7 @@
 #include "fl/stl/cstdlib.h"
 #include "test.h"
+#include "fl/stl/cstring.h"
+#include "fl/stl/bit_cast.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
 
@@ -251,4 +253,17 @@ FL_TEST_CASE("fl::qsort - stress test") {
     }
 }
 
+FL_TEST_CASE("aligned_alloc_via_malloc honours alignment (#4817)") {
+    for (fl::size_t align : {8u, 16u, 32u, 64u, 128u}) {
+        for (fl::size_t size : {1u, 31u, 512u}) {
+            void* p = fl::detail::aligned_alloc_via_malloc(align, size);
+            FL_REQUIRE(p != nullptr);
+            FL_CHECK_EQ(fl::reinterpret_cast_<fl::uptr>(p) % align, 0u);
+            fl::memset(p, 0xA5, size);  // whole block writable (ASAN-checked)
+            fl::detail::aligned_free_via_malloc(p);
+        }
+    }
+    FL_CHECK(fl::detail::aligned_alloc_via_malloc(24, 16) == nullptr);  // not a power of two
+    fl::detail::aligned_free_via_malloc(nullptr);  // no-op
+}
 } // FL_TEST_FILE
