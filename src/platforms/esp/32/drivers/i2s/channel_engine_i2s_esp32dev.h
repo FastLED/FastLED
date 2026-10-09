@@ -114,7 +114,8 @@ class ChannelEngineI2sEsp32Dev : public IChannelDriver {
     // Introspection (test-only public accessors)
     //=========================================================================
 
-    /// @brief The peripheral this engine was constructed with. Tests
+    /// @brief The peripheral in use: the injected one (tests), or on ESP32 the
+    /// one acquired on the first clockless batch (null before that, #4809). Tests
     ///        use this to reach into the mock without going through
     ///        the singleton.
     fl::shared_ptr<II2sPeripheralEsp32Dev> peripheral() const FL_NO_EXCEPT {
@@ -136,6 +137,9 @@ class ChannelEngineI2sEsp32Dev : public IChannelDriver {
   private:
     /// Clockless half of show(): peripheral init, wave8 encode, transmit.
     void showClocklessBatch() FL_NO_EXCEPT;
+    /// Acquire the peripheral on first clockless use (ESP32), #4809.
+    bool ensurePeripheral() FL_NO_EXCEPT;
+    void registerPeripheralCallback() FL_NO_EXCEPT;
 #if defined(FL_IS_ESP32)
     static void (ChannelEngineI2sEsp32Dev::*sClocklessBatch)();
 #endif
