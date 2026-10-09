@@ -41,7 +41,7 @@ ChannelEngineUART::ChannelEngineUART(fl::shared_ptr<IUartPeripheral> peripheral,
 ChannelEngineUART::~ChannelEngineUART() {
     // Wait for any active transmissions to complete
     while (poll() == DriverState::BUSY || poll() == DriverState::DRAINING) {
-        task::run(250, task::ExecFlags::SYSTEM);
+        task::yield_system(250);
     }
 
     // Deinitialize peripheral

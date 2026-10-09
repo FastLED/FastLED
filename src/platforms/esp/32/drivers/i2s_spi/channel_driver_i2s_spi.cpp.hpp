@@ -86,7 +86,7 @@ void ChannelDriverI2sSpi::show() FL_NO_EXCEPT {
     int iterations = 0;
     while (mBusy && iterations++ < kMaxIterations) {
         poll();
-        fl::task::run(250, fl::task::ExecFlags::SYSTEM);
+        fl::task::yield_system(250);
     }
     if (mBusy) {
         FL_WARN("ChannelDriverI2sSpi: DMA hung — forcing release");

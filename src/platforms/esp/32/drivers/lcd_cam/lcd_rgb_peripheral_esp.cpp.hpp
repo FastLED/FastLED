@@ -270,7 +270,7 @@ bool LcdRgbPeripheralEsp::waitFrameDone(u32 timeout_ms) FL_NO_EXCEPT {
                 return false;  // Timeout
             }
         }
-        task::run(250, task::ExecFlags::SYSTEM);  // OS yield
+        task::yield_system(250);  // OS yield
     }
     return true;
 }

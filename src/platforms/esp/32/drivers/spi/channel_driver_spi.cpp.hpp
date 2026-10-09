@@ -538,7 +538,7 @@ void ChannelEngineSpi::beginBatchedTransmission(
                     break;
                 }
                 // OS yield only while waiting for DMA
-                task::run(250, task::ExecFlags::SYSTEM);
+                task::yield_system(250);
             }
 
             // Insert reset delay between batches (critical for LED protocol compliance)

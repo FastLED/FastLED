@@ -76,7 +76,7 @@ void loop() {
 |------|--------|
 | `run()` | Pump everything, then yield for 1 ms (the default) |
 | `run(0)` | Pump everything, no yield |
-| `run(250, ExecFlags::SYSTEM)` | OS-level yield only — for driver/DMA wait loops |
+| `yield_system(250)` | OS-level yield only — for driver/DMA wait loops (same as `run(250, ExecFlags::SYSTEM)` without linking the Scheduler) |
 | `run(1000, ExecFlags::TASKS \| ExecFlags::COROUTINES)` | Pump tasks and coroutines, skip the OS yield |
 
 `ExecFlags` selects which subsystems get pumped:

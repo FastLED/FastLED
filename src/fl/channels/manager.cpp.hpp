@@ -506,10 +506,10 @@ bool ChannelManager::waitForCondition(Condition condition, u32 timeoutMs) FL_NO_
         // without losing the WiFi-friendly behavior when a radio is active.
         if (fl::NetworkDetector::isAnyNetworkActive()) {
             // Radio active: keep WiFi/lwIP/BT alive with the deep yield.
-            task::run(250, task::ExecFlags::SYSTEM);
+            task::yield_system(250);
         } else {
             // No radio: fast yield, no FreeRTOS tick floor.
-            task::run(0, task::ExecFlags::SYSTEM);
+            task::yield_system(0);
         }
     }
 
