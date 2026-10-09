@@ -3,6 +3,6 @@
   "example": "Blink",
   "profile": "default",
   "image_flash": 313231,
-  "total_ram": 34489,
-  "reference": "#4738: fbuild 2.5.37, Arduino-ESP32 3.3.11 / IDF 5.5.5 / Xtensa GCC 14.2.0. Shared RMT counters/packed pool flag and HTTP route ownership initialized on actual use, plus constant-initialized SPI host tracking save 452 B image flash / 148 B attributed RAM (144 B board RAM) versus starting 313683/34637. Published Blink uses 310428/25892 board bytes. Both pool modes, per-direction queries, reservations and HTTP routes/lifecycle retained; static backing storage, no new heap owner."
+  "total_ram": 34734,
+  "reference": "#4813 / PR #4814: fbuild 2.5.37 -> 2.5.39 attribution re-base. Local sweep: the same esp32dev Blink ELF measures attributed RAM 32618 B on fbuild 2.5.37 (under the previous 34489 B budget) and 34734 B on 2.5.39 (fbuild#1663 attributes weak vtable owners); image size identical. Re-base authorized by the maintainer. Previous reference: #4738: fbuild 2.5.37, Arduino-ESP32 3.3.11 / IDF 5.5.5 / Xtensa GCC 14.2.0. Shared RMT counters/packed pool flag and HTTP route ownership initialized on actual use, plus constant-initialized SPI host tracking save 452 B image flash / 148 B attributed RAM (144 B board RAM) versus starting 313683/34637. Published Blink uses 310428/25892 board bytes. Both pool modes, per-direction queries, reservations and HTTP routes/lifecycle retained; static backing storage, no new heap owner."
 }
