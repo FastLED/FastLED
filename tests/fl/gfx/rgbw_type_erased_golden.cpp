@@ -55,15 +55,21 @@ void checkRgbwwOrder(const Rgbww& rgbww) {
     PixelController<O> reference(kLeds, 6, adjustment(), DISABLE_DITHER);
     PixelController<O> source(kLeds, 6, adjustment(), DISABLE_DITHER);
     PixelIterator it(&source, RgbwInvalid::value(), rgbww);
+    PixelController<RGB> rgbSource(kLeds, 6, adjustment(), DISABLE_DITHER);
+    PixelIterator reordered(&rgbSource, RgbwInvalid::value(), rgbww);
+    reordered.setColorOrder(O);
     for (int i = 0; i < 6; ++i) {
-        u8 e[5], a[5];
+        u8 e[5], a[5], r[5];
         reference.loadAndScaleRGBWW(rgbww, &e[0], &e[1], &e[2], &e[3], &e[4]);
         it.loadAndScaleRGBWW(&a[0], &a[1], &a[2], &a[3], &a[4]);
+        reordered.loadAndScaleRGBWW(&r[0], &r[1], &r[2], &r[3], &r[4]);
         for (int k = 0; k < 5; ++k) {
             FL_CHECK_EQ(static_cast<int>(a[k]), static_cast<int>(e[k]));
+            FL_CHECK_EQ(static_cast<int>(r[k]), static_cast<int>(e[k]));
         }
         reference.advanceData();
         it.advanceData();
+        reordered.advanceData();
     }
 }
 
@@ -87,14 +93,36 @@ FL_TEST_CASE("type-erased RGBW matches PixelController for all orders/modes/plac
     }
 }
 
-FL_TEST_CASE("type-erased RGBWW matches PixelController for all orders (#4795)") {
-    const Rgbww rgbww;
-    checkRgbwwOrder<RGB>(rgbww);
-    checkRgbwwOrder<RBG>(rgbww);
-    checkRgbwwOrder<GRB>(rgbww);
-    checkRgbwwOrder<GBR>(rgbww);
-    checkRgbwwOrder<BRG>(rgbww);
-    checkRgbwwOrder<BGR>(rgbww);
+FL_TEST_CASE("type-erased RGBWW matches PixelController for all orders/placements (#4795)") {
+    const EOrderWW placements[] = {EOrderWW::WwWcEnd, EOrderWW::WcWwEnd,
+                                   EOrderWW::WwWcStart, EOrderWW::WcWwStart};
+    const RGBWW_MODE modes[] = {RGBWW_MODE::kRGBWWColorimetric,
+                                RGBWW_MODE::kRGBWWColorimetricBoosted,
+                                RGBWW_MODE::kRGBWWInvalid};
+    for (RGBWW_MODE mode : modes) {
+        for (EOrderWW placement : placements) {
+            const Rgbww rgbww(kRGBWWDefaultWarmCct, kRGBWWDefaultCoolCct, mode, placement);
+            checkRgbwwOrder<RGB>(rgbww);
+            checkRgbwwOrder<RBG>(rgbww);
+            checkRgbwwOrder<GRB>(rgbww);
+            checkRgbwwOrder<GBR>(rgbww);
+            checkRgbwwOrder<BRG>(rgbww);
+            checkRgbwwOrder<BGR>(rgbww);
+        }
+    }
+}
+
+FL_TEST_CASE("inactive Rgbw takes the null-white fallback with the old bytes (#4795)") {
+    // An inactive Rgbw never caches a conversion, so this exercises the
+    // fallback regardless of other active Rgbw values in the process.
+    const EOrderW placements[] = {EOrderW::W0, EOrderW::W1, EOrderW::W2, EOrderW::W3};
+    for (EOrderW placement : placements) {
+        Rgbw invalid = RgbwInvalid::value();
+        invalid.w_placement = placement;
+        checkRgbwOrder<RGB>(invalid);
+        checkRgbwOrder<GRB>(invalid);
+        checkRgbwOrder<BGR>(invalid);
+    }
 }
 
 }  // FL_TEST_FILE

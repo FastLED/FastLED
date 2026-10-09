@@ -447,8 +447,13 @@ FASTLED_FORCE_INLINE void
 rgb_2_rgbw(RGBW_MODE mode, u16 w_color_temperature, u8 r, u8 g,
            u8 b, u8 r_scale, u8 g_scale, u8 b_scale,
            u8 *out_r, u8 *out_g, u8 *out_b, u8 *out_w) FL_NO_EXCEPT {
-    rgb_2_rgbw(Rgbw(w_color_temperature, mode), r, g, b, r_scale, g_scale,
-               b_scale, out_r, out_g, out_b, out_w);
+    // Plain value: this overload converts directly, it must not install the
+    // PixelIterator hook (or pay its call) per pixel (#4795).
+    Rgbw cfg{detail::RgbwNoEncoder()};
+    cfg.white_color_temp = w_color_temperature;
+    cfg.rgbw_mode = mode;
+    rgb_2_rgbw(cfg, r, g, b, r_scale, g_scale, b_scale, out_r, out_g, out_b,
+               out_w);
 }
 
 // @brief Converts RGB to RGBW using one of the functions.

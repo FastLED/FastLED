@@ -415,7 +415,11 @@ void rgbww_convert_pixel(const Rgbww& rgbww, const fl::u8 (&raw)[3],
 }
 }  // namespace
 
-void enable_rgbww_conversion() FL_NO_EXCEPT { rgbww_convert_slot() = &rgbww_convert_pixel; }
+void enable_rgbww_conversion() FL_NO_EXCEPT {
+#if !defined(FL_IS_AVR)
+    rgbww_convert_slot() = &rgbww_convert_pixel;
+#endif
+}
 RgbwwConvertFn rgbww_conversion() FL_NO_EXCEPT { return rgbww_convert_slot(); }
 }  // namespace detail
 

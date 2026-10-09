@@ -709,7 +709,7 @@ public:
         ensureBuffer(pixels.size());
 
         // Create PixelIterator from PixelController (WS2816 is RGB-only, no W channel)
-        fl::PixelIterator pixel_iter = pixels.as_iterator(fl::Rgbw());
+        fl::PixelIterator pixel_iter = pixels.as_iterator(fl::RgbwInvalid::value());
 
         // Create 16-bit RGB iterator range (handles RGB reordering, scaling, brightness)
         auto rgb16_range = fl::makeScaledPixelRangeRGB16(&pixel_iter);

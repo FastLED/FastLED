@@ -729,7 +729,12 @@ void rgbw_convert_pixel(const Rgbw& rgbw, const u8 (&raw)[3],
 }
 }  // namespace
 
-void enable_rgbw_conversion() FL_NO_EXCEPT { rgbw_convert_slot() = &rgbw_convert_pixel; }
+void enable_rgbw_conversion() FL_NO_EXCEPT {
+#if !defined(FL_IS_AVR)
+    // AVR's PixelIterator keeps its own thunk and never reads the slot.
+    rgbw_convert_slot() = &rgbw_convert_pixel;
+#endif
+}
 RgbwConvertFn rgbw_conversion() FL_NO_EXCEPT { return rgbw_convert_slot(); }
 }  // namespace detail
 
