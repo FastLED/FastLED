@@ -91,6 +91,8 @@ namespace fl {
 FL_EXTERN_C_BEGIN
 
 FL_LINK_WEAK esp_netif_t* esp_netif_get_handle_from_ifkey(const char* if_key);
+FL_LINK_WEAK esp_netif_t* esp_netif_next(esp_netif_t* netif);
+FL_LINK_WEAK const char* esp_netif_get_desc(esp_netif_t* esp_netif);
 FL_LINK_WEAK bool esp_netif_is_netif_up(esp_netif_t* esp_netif);
 FL_LINK_WEAK esp_err_t esp_netif_get_ip_info(esp_netif_t* esp_netif, esp_netif_ip_info_t* ip_info);
 
@@ -103,15 +105,35 @@ esp_netif_t* wifiNetif(const char* key) FL_NO_EXCEPT {
     }
     return esp_netif_get_handle_from_ifkey(key);
 }
+
+/// Any interface that is not Ethernet: covers Wi-Fi on a custom (non-default)
+/// netif. May also count PPP/Thread interfaces, which is harmless because
+/// callers only use this to pick the network-safe configuration.
+bool anyNonEthernetNetif() FL_NO_EXCEPT {
+    if (esp_netif_next == nullptr || esp_netif_get_desc == nullptr) {
+        return false;
+    }
+    for (esp_netif_t* n = esp_netif_next(nullptr); n != nullptr;
+         n = esp_netif_next(n)) {
+        const char* desc = esp_netif_get_desc(n);
+        if (desc == nullptr || (fl::strstr(desc, "eth") == nullptr &&
+                                fl::strstr(desc, "ETH") == nullptr)) {
+            return true;
+        }
+    }
+    return false;
+}
 }  // namespace
 
 bool NetworkDetector::isWiFiActive() FL_NO_EXCEPT {
     // A default Wi-Fi STA or AP interface exists once Wi-Fi has been
     // initialized (Arduino WiFi, fl::wifi and IDF default handlers all create
-    // one). Conservative by design: reporting "active" only selects the
-    // network-safe RMT configuration.
+    // one); custom Wi-Fi netifs are caught by the non-Ethernet scan.
+    // Conservative by design: reporting "active" only selects the
+    // network-safe RMT configuration. Limitation: raw esp_wifi_start() with
+    // no netif at all (e.g. bare-IDF ESP-NOW) is not detected.
     return wifiNetif("WIFI_STA_DEF") != nullptr ||
-           wifiNetif("WIFI_AP_DEF") != nullptr;
+           wifiNetif("WIFI_AP_DEF") != nullptr || anyNonEthernetNetif();
 }
 
 bool NetworkDetector::isWiFiConnected() FL_NO_EXCEPT {
