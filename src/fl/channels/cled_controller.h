@@ -158,6 +158,10 @@ public:
         // "setRgbw(RgbwInvalid::value()) → disable" semantics are preserved
         // by translating an inactive Rgbw into Empty so observers see the
         // same "no white channel" state they did before the variant migration.
+        if (arg.active()) {
+            // Covers an Rgbw made active by assigning rgbw_mode (#4795).
+            detail::enable_rgbw_conversion();
+        }
         applyRgbw(arg);
         settingsChanged(SettingsChange::White);
         return *this;  // builder pattern.
@@ -175,6 +179,7 @@ public:
         if (!arg.active()) {
             mLegacySettings.mWhiteCfg.reset();
         } else {
+            detail::enable_rgbww_conversion();  // see setRgbw (#4795)
             mLegacySettings.mWhiteCfg = arg;
         }
         settingsChanged(SettingsChange::White);

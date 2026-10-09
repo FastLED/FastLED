@@ -75,6 +75,19 @@ struct PixelControllerVtable {
     pc->loadAndScaleRGBWWUnordered(rgbww, r_out, g_out, b_out, ww_out, wc_out);
   }
 
+  /// Raw source-order pixel plus premixed scale: everything the RGBW/RGBWW
+  /// conversion reads, so one small thunk replaces the per-type RGBW/RGBWW
+  /// thunks and the conversion itself stays type-erased and link-on-use
+  /// (#4795).
+  static void loadRawPremixed(void* pixel_controller, u8* raw, u8* premix) FL_NO_EXCEPT {
+    PixelControllerT* pc = static_cast<PixelControllerT*>(pixel_controller);
+    raw[0] = pc->mData[0];
+    raw[1] = pc->mData[1];
+    raw[2] = pc->mData[2];
+    premix[0] = pc->mColorAdjustment.premixed.r;
+    premix[1] = pc->mColorAdjustment.premixed.g;
+    premix[2] = pc->mColorAdjustment.premixed.b;
+  }
   static void loadAndScaleRGB(void* pixel_controller, u8* r_out, u8* g_out, u8* b_out) FL_NO_EXCEPT {
     PixelControllerT* pc = static_cast<PixelControllerT*>(pixel_controller);
     pc->loadAndScaleRGB(r_out, g_out, b_out);
@@ -160,6 +173,7 @@ struct WideLoadBinder<T, decltype(static_cast<void>(
 // NOTE: loadAndScale_APA102_HDFunction removed - use fl::loadAndScale_APA102_HD<RGB_ORDER>() from apa102.h encoder
 // NOTE: loadAndScale_WS2816_HDFunction removed - use fl::loadAndScale_WS2816_HD<RGB_ORDER>() from ws2816.h encoder
 typedef void (*loadAndScaleRGBWUnorderedFunction)(void* pixel_controller, const Rgbw& rgbw, u8* r_out, u8* g_out, u8* b_out, u8* w_out);
+typedef void (*loadRawPremixedFunction)(void* pixel_controller, u8* raw, u8* premix);
 typedef void (*loadAndScaleRGBWWUnorderedFunction)(void* pixel_controller, Rgbww rgbww, u8* r_out, u8* g_out, u8* b_out, u8* ww_out, u8* wc_out);
 
 namespace detail {
@@ -169,14 +183,14 @@ template <bool B> struct OnlyIf {};
 template <> struct OnlyIf<true> { typedef void type; };
 }  // namespace detail
 
-/// Binds exactly one RGBW thunk and one RGBWW thunk per source type, and
-/// names only that one, so the other is never linked for that instantiation.
+/// Per-type RGBW/RGBWW thunks.
 ///
-/// A `PixelController<RGB>` gets the order-free pair: PixelIterator permutes
-/// their output itself, which is how one instantiation serves all six colour
-/// orders. Anything else -- another order, used directly by a templated
-/// driver, or a colour-managed source with no `kColorOrder` at all -- keeps
-/// the fully ordered thunks it always had, and its bytes are untouched.
+/// Off AVR, every `PixelController` (anything with `kColorOrder`) binds none:
+/// RawPremixBinder supplies the raw pixel and the type-erased, link-on-use
+/// conversion does the rest, applying the source order and this iterator's
+/// order (#4795). Colour-managed sources (no `kColorOrder`) keep the fully
+/// ordered thunks. On AVR, `PixelController<RGB>` gets the order-free pair
+/// and other orders keep the ordered thunks, as before.
 template <typename T, typename = void>
 struct RgbwLoadBinder {
     static loadAndScaleRGBWFunction ordered() FL_NO_EXCEPT { return &PixelControllerVtable<T>::loadAndScaleRGBW; }
@@ -184,6 +198,7 @@ struct RgbwLoadBinder {
     static loadAndScaleRGBWUnorderedFunction unordered() FL_NO_EXCEPT { return nullptr; }
     static loadAndScaleRGBWWUnorderedFunction unorderedWW() FL_NO_EXCEPT { return nullptr; }
 };
+#if defined(FL_IS_AVR)
 template <typename T>
 struct RgbwLoadBinder<T, typename detail::OnlyIf<(T::kColorOrder == RGB)>::type> {
     static loadAndScaleRGBWFunction ordered() FL_NO_EXCEPT { return nullptr; }
@@ -191,6 +206,34 @@ struct RgbwLoadBinder<T, typename detail::OnlyIf<(T::kColorOrder == RGB)>::type>
     static loadAndScaleRGBWUnorderedFunction unordered() FL_NO_EXCEPT { return &PixelControllerVtable<T>::loadAndScaleRGBWUnordered; }
     static loadAndScaleRGBWWUnorderedFunction unorderedWW() FL_NO_EXCEPT { return &PixelControllerVtable<T>::loadAndScaleRGBWWUnordered; }
 };
+#else
+/// Any PixelController (it has kColorOrder): no per-type RGBW/RGBWW thunk at
+/// all; RawPremixBinder below supplies the raw pixel and the type-erased
+/// conversion does the rest (#4795).
+template <typename T>
+struct RgbwLoadBinder<T, typename detail::OnlyIf<(T::kColorOrder == T::kColorOrder)>::type> {
+    static loadAndScaleRGBWFunction ordered() FL_NO_EXCEPT { return nullptr; }
+    static loadAndScaleRGBWWFunction orderedWW() FL_NO_EXCEPT { return nullptr; }
+    static loadAndScaleRGBWUnorderedFunction unordered() FL_NO_EXCEPT { return nullptr; }
+    static loadAndScaleRGBWWUnorderedFunction unorderedWW() FL_NO_EXCEPT { return nullptr; }
+};
+#endif
+
+/// Raw-pixel thunk + the source's own colour order, for PixelController
+/// sources on non-AVR targets. Colour-managed sources (no kColorOrder) and
+/// AVR (no RGBW conversion) keep the thunks above.
+template <typename T, typename = void>
+struct RawPremixBinder {
+    static loadRawPremixedFunction get() FL_NO_EXCEPT { return nullptr; }
+    static EOrder order() FL_NO_EXCEPT { return RGB; }
+};
+#if !defined(FL_IS_AVR)
+template <typename T>
+struct RawPremixBinder<T, typename detail::OnlyIf<(T::kColorOrder == T::kColorOrder)>::type> {
+    static loadRawPremixedFunction get() FL_NO_EXCEPT { return &PixelControllerVtable<T>::loadRawPremixed; }
+    static EOrder order() FL_NO_EXCEPT { return T::kColorOrder; }
+};
+#endif
 
 typedef void (*stepDitheringFunction)(void* pixel_controller);
 typedef void (*advanceDataFunction)(void* pixel_controller);
@@ -242,6 +285,13 @@ class PixelIterator {
       mLoadAndScaleRGBWW = RgbwLoadBinder<PixelControllerT>::orderedWW();
       mLoadAndScaleRGBWUnordered = RgbwLoadBinder<PixelControllerT>::unordered();
       mLoadAndScaleRGBWWUnordered = RgbwLoadBinder<PixelControllerT>::unorderedWW();
+      mLoadRawPremixed = RawPremixBinder<PixelControllerT>::get();
+      mSourceOrder = RawPremixBinder<PixelControllerT>::order();
+      if (mLoadRawPremixed != nullptr) {
+        mRgbwConvert = mRgbw.active() ? detail::rgbw_conversion() : nullptr;
+        mRgbwwConvert = mRgbww.active() ? detail::rgbww_conversion() : nullptr;
+        refreshWireOrder();
+      }
       mLoadAndScaleRGB = &Vtable::loadAndScaleRGB;
 #if !FL_PLATFORM_HAS_TINY_MEMORY
       mLoadAndScaleRGB16 = WideLoadBinder<PixelControllerT>::get();
@@ -268,9 +318,48 @@ class PixelIterator {
       for (int i = 0; i < 3; ++i) {
         mOrder[i] = static_cast<u8>((static_cast<int>(order) >> (3 * (2 - i))) & 0x3);
       }
+      refreshWireOrder();
     }
 
+  private:
+    /// Recompute the cached source channel of each wire RGB byte: this
+    /// iterator's order on top of the source's own (identity for
+    /// PixelController<RGB>). Loop-invariant, so done here, not per pixel.
+    void refreshWireOrder() FL_NO_EXCEPT {
+      for (int i = 0; i < 3; ++i) {
+        mWireOrder[i] = static_cast<u8>(
+            (static_cast<fl::i32>(mSourceOrder) >> (3 * (2 - mOrder[i]))) & 0x3);
+      }
+    }
+
+  public:
+
     void loadAndScaleRGBW(u8 *b0_out, u8 *b1_out, u8 *b2_out, u8 *w_out) FL_NO_EXCEPT {
+      if (mLoadRawPremixed != nullptr) {
+        // Type-erased RGBW: the conversion is installed by active Rgbw
+        // construction / setRgbw(), so RGB-only programs never link it
+        // (#4795). Cached at construction (the Rgbw already exists then).
+        u8 raw[3];
+        u8 premix[3];
+        mLoadRawPremixed(mPixelController, raw, premix);
+        if (mRgbwConvert != nullptr) {
+          mRgbwConvert(mRgbw, raw, premix, mWireOrder, b0_out, b1_out, b2_out, w_out);
+          return;
+        }
+        // Not installed: only an inactive Rgbw can reach here. Exactly what
+        // rgb_2_rgbw(kRGBWInvalid) produced: premix-scaled RGB, white off,
+        // then the W placement.
+        u8 c[3];
+        u8 w = 0;
+        rgb_2_rgbw_null_white_pixel(mRgbw.white_color_temp, raw[0], raw[1], raw[2],
+                                    premix[0], premix[1], premix[2],
+                                    &c[0], &c[1], &c[2], &w);
+        rgbw_partial_reorder(mRgbw.w_placement, c[mWireOrder[0]], c[mWireOrder[1]],
+                             c[mWireOrder[2]], w, b0_out, b1_out, b2_out, w_out);
+        return;
+      }
+#if defined(FL_IS_AVR)
+      // AVR keeps the order-free thunk (no type-erased conversion there).
       if (mLoadAndScaleRGBWUnordered != nullptr) {
         // Source-order RGB plus W, then the same two steps the templated
         // `loadAndScaleRGBW` takes: permute RGB, place W.
@@ -281,10 +370,26 @@ class PixelIterator {
                              b0_out, b1_out, b2_out, w_out);
         return;
       }
+#endif
       mLoadAndScaleRGBW(mPixelController, mRgbw, b0_out, b1_out, b2_out, w_out);
     }
     void loadAndScaleRGBWW(u8 *b0_out, u8 *b1_out, u8 *b2_out,
                            u8 *b3_out, u8 *b4_out) FL_NO_EXCEPT {
+      if (mLoadRawPremixed != nullptr) {
+        if (mRgbwwConvert != nullptr) {
+          u8 raw[3];
+          u8 premix[3];
+          mLoadRawPremixed(mPixelController, raw, premix);
+          mRgbwwConvert(mRgbww, raw, premix, mWireOrder, b0_out, b1_out, b2_out,
+                        b3_out, b4_out);
+          return;
+        }
+        // Not installed: only an inactive Rgbww can reach here, and
+        // rgb_2_rgbww(kRGBWWInvalid) emits zeros on all five channels.
+        *b0_out = *b1_out = *b2_out = *b3_out = *b4_out = 0;
+        return;
+      }
+#if defined(FL_IS_AVR)
       if (mLoadAndScaleRGBWWUnordered != nullptr) {
         u8 c[3];
         u8 ww = 0;
@@ -294,6 +399,7 @@ class PixelIterator {
                               b0_out, b1_out, b2_out, b3_out, b4_out);
         return;
       }
+#endif
       mLoadAndScaleRGBWW(mPixelController, mRgbww, b0_out, b1_out, b2_out, b3_out, b4_out);
     }
     void loadAndScaleRGB(u8 *r_out, u8 *g_out, u8 *b_out) FL_NO_EXCEPT {
@@ -333,10 +439,20 @@ class PixelIterator {
     void advanceData() FL_NO_EXCEPT { mAdvanceData(mPixelController); }
     int size() FL_NO_EXCEPT { return mSize(mPixelController); }
 
-    void set_rgbw(const Rgbw& rgbw) FL_NO_EXCEPT { mRgbw = rgbw; }
+    void set_rgbw(const Rgbw& rgbw) FL_NO_EXCEPT {
+      mRgbw = rgbw;
+      if (mLoadRawPremixed != nullptr) {
+        mRgbwConvert = mRgbw.active() ? detail::rgbw_conversion() : nullptr;
+      }
+    }
     Rgbw get_rgbw() const FL_NO_EXCEPT { return mRgbw; }
 
-    void set_rgbww(Rgbww rgbww) FL_NO_EXCEPT { mRgbww = rgbww; }
+    void set_rgbww(Rgbww rgbww) FL_NO_EXCEPT {
+      mRgbww = rgbww;
+      if (mLoadRawPremixed != nullptr) {
+        mRgbwwConvert = mRgbww.active() ? detail::rgbww_conversion() : nullptr;
+      }
+    }
     Rgbww get_rgbww() const FL_NO_EXCEPT { return mRgbww; }
 
     #if FASTLED_HD_COLOR_MIXING
@@ -705,6 +821,11 @@ class PixelIterator {
     loadAndScaleRGBFunction mLoadAndScaleRGB = nullptr;
     loadAndScaleRGBWUnorderedFunction mLoadAndScaleRGBWUnordered = nullptr;
     loadAndScaleRGBWWUnorderedFunction mLoadAndScaleRGBWWUnordered = nullptr;
+    loadRawPremixedFunction mLoadRawPremixed = nullptr;
+    EOrder mSourceOrder = RGB;
+    detail::RgbwConvertFn mRgbwConvert = nullptr;
+    detail::RgbwwConvertFn mRgbwwConvert = nullptr;
+    u8 mWireOrder[3] = {0, 1, 2};
 #if !FL_PLATFORM_HAS_TINY_MEMORY
     loadAndScaleRGB16Function mLoadAndScaleRGB16 = nullptr;
 #endif
