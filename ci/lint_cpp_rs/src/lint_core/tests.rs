@@ -24,14 +24,17 @@ mod tests {
              alignas(16) char dma[64]; /* dma */\n\
              alignas(8) int x; /* start of block\n\
              alignas(2) still in comment */ int y;\n\
-             const char* s = \"alignas(2)\";\n",
+             const char* s = \"alignas(2)\";\n\
+             alignas(16) int v; /* // ok alignas */\n\
+             alignas(16) int w; const char* t = \"// ok alignas\";\n\
+             /* x */ alignas(16) char b[8];\n",
         );
         let lines: Vec<usize> = checker
             .check_file_content(&src)
             .into_iter()
             .map(|(line, _)| line)
             .collect();
-        assert_eq!(lines, vec![1, 5, 7, 8]);
+        assert_eq!(lines, vec![1, 5, 7, 8, 11, 12, 13]);
     }
 
     #[test]

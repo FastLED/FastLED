@@ -211,11 +211,12 @@ impl FileContentChecker for RawAlignasChecker {
             // Mask comments and string/char literals so code before or after a
             // `/* ... */` on the same line is still checked (and text inside
             // comments or literals never is).
+            let line_start_state = lexical_state.clone();
             let visible = mask_macro_prefix_literals_and_comments(line, &mut lexical_state);
             if !regex_raw_alignas().is_match(&visible) {
                 continue;
             }
-            if line.contains("// ok alignas") {
+            if alignas_suppressed_by_line_comment(line, &line_start_state) {
                 continue;
             }
 
@@ -229,6 +230,25 @@ impl FileContentChecker for RawAlignasChecker {
 
         violations
     }
+}
+
+/// True when `// ok alignas` begins a real line comment, not text inside a
+/// block comment or a string literal. A sentinel appended just before the
+/// marker survives masking only if that position is code.
+fn alignas_suppressed_by_line_comment(line: &str, start_state: &CommentScanState) -> bool {
+    const MARKER: &str = "// ok alignas";
+    let mut search_from = 0;
+    while let Some(rel) = line[search_from..].find(MARKER) {
+        let idx = search_from + rel;
+        let probe = format!("{}\u{1}", &line[..idx]);
+        let mut state = start_state.clone();
+        let masked = mask_macro_prefix_literals_and_comments(&probe, &mut state);
+        if masked.ends_with('\u{1}') {
+            return true;
+        }
+        search_from = idx + MARKER.len();
+    }
+    false
 }
 
 struct SingletonInHeadersChecker;
