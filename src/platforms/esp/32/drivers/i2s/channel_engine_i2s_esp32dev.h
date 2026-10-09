@@ -136,8 +136,13 @@ class ChannelEngineI2sEsp32Dev : public IChannelDriver {
   private:
     /// Clockless half of show(): peripheral init, wave8 encode, transmit.
     void showClocklessBatch() FL_NO_EXCEPT;
+    /// Acquire the peripheral on first clockless use (ESP32), #4809.
+    bool ensurePeripheral() FL_NO_EXCEPT;
+    void registerPeripheralCallback() FL_NO_EXCEPT;
 #if defined(FL_IS_ESP32)
+    using PeripheralFactory = fl::shared_ptr<II2sPeripheralEsp32Dev> (*)(u8 port);
     static void (ChannelEngineI2sEsp32Dev::*sClocklessBatch)();
+    static PeripheralFactory sPeripheralFactory;
 #endif
     /// @brief Ensure the scratch buffer is at least `required` bytes.
     ///        Reallocates via the peripheral if the current buffer

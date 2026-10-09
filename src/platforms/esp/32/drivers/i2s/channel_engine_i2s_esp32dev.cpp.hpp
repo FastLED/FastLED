@@ -51,15 +51,34 @@ ChannelEngineI2sEsp32Dev::ChannelEngineI2sEsp32Dev(
       mCachedT3(0),
       mWave8LutValid(false),
       mI2sPort(i2s_port) {
-    if (!mPeripheral) {
-        FL_WARN("ChannelEngineI2sEsp32Dev: null peripheral injected — inert");
-        return;
+    // A null peripheral is normal on ESP32: it is acquired on the first
+    // clockless batch (ensurePeripheral) so SPI-only programs never link the
+    // I2S clockless peripheral (#4809).
+    if (mPeripheral) {
+        registerPeripheralCallback();
     }
-    // Register our completion callback up front. Real hardware fires
-    // it from the DMA-done ISR; the mock fires it from
+}
+
+void ChannelEngineI2sEsp32Dev::registerPeripheralCallback() FL_NO_EXCEPT {
+    // Real hardware fires it from the DMA-done ISR; the mock fires it from
     // `simulateTransmitDone()` on the test thread.
     (void)mPeripheral->registerTransmitCallback(
         &ChannelEngineI2sEsp32Dev::onTransmitDoneTrampoline, this);
+}
+
+bool ChannelEngineI2sEsp32Dev::ensurePeripheral() FL_NO_EXCEPT {
+    if (mPeripheral) {
+        return true;
+    }
+#if defined(FL_IS_ESP32)
+    if (sPeripheralFactory) {
+        mPeripheral = sPeripheralFactory(mI2sPort);
+        if (mPeripheral) {
+            registerPeripheralCallback();
+        }
+    }
+#endif
+    return mPeripheral != nullptr;
 }
 
 ChannelEngineI2sEsp32Dev::~ChannelEngineI2sEsp32Dev() {
@@ -139,7 +158,7 @@ void ChannelEngineI2sEsp32Dev::enqueue(ChannelDataPtr data) FL_NO_EXCEPT {
 }
 
 void ChannelEngineI2sEsp32Dev::show() FL_NO_EXCEPT {
-    if (!mPeripheral || mEnqueuedChannels.empty()) {
+    if (mEnqueuedChannels.empty()) {
         // Nothing to do — release any pending in-use marks and stay
         // in READY.
         for (auto &data : mEnqueuedChannels) {
@@ -155,7 +174,7 @@ void ChannelEngineI2sEsp32Dev::show() FL_NO_EXCEPT {
     // If a prior clockless transmit is still in flight, wait for it
     // before we potentially reconfigure the peripheral. Callers who care
     // about throughput can pump `poll()` first.
-    if (mPeripheralInitialized && mPeripheral->isBusy()) {
+    if (mPeripheralInitialized && mPeripheral && mPeripheral->isBusy()) {
         (void)mPeripheral->waitTransmitDone(/*timeout_ms=*/500);
     }
 
@@ -266,13 +285,47 @@ void ChannelEngineI2sEsp32Dev::show() FL_NO_EXCEPT {
 
 #if defined(FL_IS_ESP32)
 void (ChannelEngineI2sEsp32Dev::*ChannelEngineI2sEsp32Dev::sClocklessBatch)() = nullptr;
+ChannelEngineI2sEsp32Dev::PeripheralFactory ChannelEngineI2sEsp32Dev::sPeripheralFactory = nullptr;
+
+namespace {
+fl::shared_ptr<II2sPeripheralEsp32Dev> makeI2sEsp32DevPeripheral(u8 port) FL_NO_EXCEPT {
+#if defined(FL_IS_ESP_32DEV) && FASTLED_ESP32_HAS_I2S
+    // FastLED#3576 Phase 1 — one peripheral singleton PER I2S BLOCK
+    // (`fl::Singleton<T, N>` tag = port). Process-lifetime, never
+    // destroyed; cross-driver hardware arbitration (vs the clocked-SPI
+    // driver on I2S0) happens in `initialize()` via the port-claim
+    // registry. Wrap in a `shared_ptr` via `make_shared_no_tracking` —
+    // no control block, no delete, zero-overhead non-owning handle.
+    return (port == 0)
+               ? fl::make_shared_no_tracking<II2sPeripheralEsp32Dev>(
+                     fl::Singleton<I2sPeripheralEsp32DevEsp, 0>::instance())
+               : fl::make_shared_no_tracking<II2sPeripheralEsp32Dev>(
+                     fl::Singleton<I2sPeripheralEsp32DevEsp, 1>::instance());
+#else
+    (void)port;
+    return nullptr;
+#endif
+}
+}  // namespace
 
 void ChannelEngineI2sEsp32Dev::enableClockless() FL_NO_EXCEPT {
+    sPeripheralFactory = &makeI2sEsp32DevPeripheral;
     sClocklessBatch = &ChannelEngineI2sEsp32Dev::showClocklessBatch;
 }
 #endif
 
 void ChannelEngineI2sEsp32Dev::showClocklessBatch() FL_NO_EXCEPT {
+    if (!ensurePeripheral()) {
+        FL_WARN("ChannelEngineI2sEsp32Dev: no I2S peripheral for clockless batch");
+        for (auto &data : mInFlightChannels) {
+            if (data) {
+                data->setInUse(false);
+            }
+        }
+        mInFlightChannels.clear();
+        mState = DriverState::ERROR;
+        return;
+    }
     // Clockless batch — lazy-initialize the peripheral now (postponed
     // from the show() prologue so a SPI-only batch doesn't waste
     // an I2S1 claim that the SPI delegate would immediately race with).
@@ -636,13 +689,10 @@ fl::shared_ptr<IChannelDriver> createI2sEsp32DevEngine(u8 port) FL_NO_EXCEPT {
     if (port > 1) {
         return nullptr;
     }
-    fl::shared_ptr<II2sPeripheralEsp32Dev> peripheral =
-        (port == 0)
-            ? fl::make_shared_no_tracking<II2sPeripheralEsp32Dev>(
-                  fl::Singleton<I2sPeripheralEsp32DevEsp, 0>::instance())
-            : fl::make_shared_no_tracking<II2sPeripheralEsp32Dev>(
-                  fl::Singleton<I2sPeripheralEsp32DevEsp, 1>::instance());
-    return fl::make_shared<ChannelEngineI2sEsp32Dev>(peripheral, port);
+    // The I2S clockless peripheral is acquired lazily on the first clockless
+    // batch (#4809); SPI batches go to the separate I2S-SPI delegate.
+    return fl::make_shared<ChannelEngineI2sEsp32Dev>(
+        fl::shared_ptr<II2sPeripheralEsp32Dev>(), port);
 #else
     (void)port;
     return nullptr;
