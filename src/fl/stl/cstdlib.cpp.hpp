@@ -1,4 +1,5 @@
 #include "fl/stl/cstdlib.h"
+#include "fl/stl/bit_cast.h"  // fl::reinterpret_cast_
 #include "fl/stl/cstring.h"
 #include "platforms/is_platform.h"  // IWYU pragma: keep
 
@@ -15,6 +16,44 @@
 
 namespace fl {
 
+namespace detail {
+
+// Over-allocate with plain malloc and align by hand, stashing the original
+// pointer just before the aligned block for aligned_free_via_malloc(). Used
+// where newlib's aligned_alloc would need posix_memalign (#4817: returning
+// bare malloc silently ignored `alignment`, e.g. a 32-byte DMA/cache-line
+// request got 8-byte storage on Cortex-M). Built on every platform so host
+// tests cover it.
+void *aligned_alloc_via_malloc(fl::size_t alignment, fl::size_t size) FL_NO_EXCEPT {
+    if (alignment < sizeof(void *)) {
+        alignment = sizeof(void *);
+    }
+    if ((alignment & (alignment - 1)) != 0) {
+        return nullptr;  // alignment must be a power of two
+    }
+    const fl::size_t overhead = alignment - 1 + sizeof(void *);
+    if (size > static_cast<fl::size_t>(-1) - overhead) {
+        return nullptr;  // size + overhead would wrap
+    }
+    void *raw = ::malloc(size + overhead);
+    if (raw == nullptr) {
+        return nullptr;
+    }
+    const fl::uptr start = fl::reinterpret_cast_<fl::uptr>(raw) + sizeof(void *);
+    const fl::uptr aligned = (start + alignment - 1) & ~(fl::uptr(alignment) - 1);
+    void **slot = fl::reinterpret_cast_<void **>(aligned);
+    slot[-1] = raw;
+    return slot;
+}
+
+void aligned_free_via_malloc(void *ptr) FL_NO_EXCEPT {
+    if (ptr != nullptr) {
+        ::free(static_cast<void **>(ptr)[-1]);  // original malloc block
+    }
+}
+
+}  // namespace detail
+
 // ============================================================================
 // fl::aligned_alloc / fl::aligned_free
 // ============================================================================
@@ -26,10 +65,7 @@ void *aligned_alloc(fl::size_t alignment, fl::size_t size) FL_NO_EXCEPT {
     // Teensy, etc.) ship an aligned_alloc that internally calls
     // posix_memalign, which doesn't exist on bare-metal and causes an
     // "undefined reference to `posix_memalign'" link error.
-    // Fall back to plain malloc — sufficient for the alignments FastLED
-    // actually requests on these constrained targets.
-    (void)alignment;
-    return ::malloc(size);
+    return detail::aligned_alloc_via_malloc(alignment, size);
 #elif defined(FL_IS_WIN)
     return ::_aligned_malloc(size, alignment);
 #elif defined(FL_IS_ESP32) && !ESP_IDF_VERSION_4_OR_HIGHER
@@ -46,7 +82,7 @@ void *aligned_alloc(fl::size_t alignment, fl::size_t size) FL_NO_EXCEPT {
 void aligned_free(void *ptr) FL_NO_EXCEPT {
 #if defined(FL_IS_AVR) || defined(FL_IS_ESP8266) || defined(FL_IS_ARM) || \
     defined(FL_IS_APOLLO3) || defined(FL_IS_CI13XX)
-    ::free(ptr);
+    detail::aligned_free_via_malloc(ptr);
 #elif defined(FL_IS_WIN)
     ::_aligned_free(ptr);
 #else
