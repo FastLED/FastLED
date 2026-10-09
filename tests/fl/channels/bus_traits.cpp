@@ -150,4 +150,26 @@ FL_TEST_CASE("SPI chipsets instantiate across the data-rate range (#974, #976)")
     (void)a; (void)b; (void)c; (void)d;
 }
 
+namespace {
+struct TraitsWithClocklessHook {
+    static int calls;
+    static void enableClockless() FL_NO_EXCEPT { ++calls; }
+};
+int TraitsWithClocklessHook::calls = 0;
+struct TraitsWithoutClocklessHook {};
+}  // namespace
+
+FL_TEST_CASE("enable_clockless calls the hook only when a bus provides it (#4793)") {
+    TraitsWithClocklessHook::calls = 0;
+    fl::detail::enable_clockless<TraitsWithClocklessHook>();
+    FL_CHECK_EQ(TraitsWithClocklessHook::calls, 1);
+    fl::detail::enable_clockless<TraitsWithoutClocklessHook>();  // no-op, compiles
+
+    // Only the clockless chipset family names the hook.
+    fl::detail::enable_clockless_for<fl::SpiChipsetConfig, TraitsWithClocklessHook>::apply();
+    FL_CHECK_EQ(TraitsWithClocklessHook::calls, 1);
+    fl::detail::enable_clockless_for<fl::ClocklessChipset, TraitsWithClocklessHook>::apply();
+    FL_CHECK_EQ(TraitsWithClocklessHook::calls, 2);
+}
+
 }  // FL_TEST_FILE

@@ -29,6 +29,7 @@
 #ifdef FL_IS_ESP32
 
 #include "fl/channels/bus.h"
+#include "fl/channels/clockless_encoders.h"
 #include "fl/channels/bus_traits.h"
 #include "fl/channels/manager.h"
 #include "fl/log/log.h"
@@ -355,6 +356,22 @@ namespace platforms {
 void initChannelDrivers() FL_NO_EXCEPT {
     // Intentionally empty. See `fl::enableDrivers<>()` / `enableAllDrivers()`
     // for the opt-in registration path.
+}
+
+/// @brief Install the clockless pipelines of the unified parallel-IO engines.
+///
+/// Called from every clockless channel construction (see
+/// fl/channels/clockless_encoders.h). On classic ESP32 and ESP32-S3 the
+/// unified FLEX_IO engine is also the default SPI bus; until this runs, SPI-only
+/// programs never reference the clockless encode path and the linker drops
+/// it (#4793).
+void enableClocklessEncoders() FL_NO_EXCEPT {
+#if FASTLED_ESP32_HAS_I2S
+    ChannelEngineI2sEsp32Dev::enableClockless();
+#endif
+#if FASTLED_ESP32_HAS_LCD_SPI
+    detail::enableLcdClockless();
+#endif
 }
 
 } // namespace platforms

@@ -108,6 +108,13 @@ bool ChannelEngineI2sEsp32Dev::canHandle(const ChannelDataPtr &data) const
     if (data->isSpi()) {
         return true; // SPI batches delegate — no lane cap here
     }
+#if defined(FL_IS_ESP32)
+    // Clockless pipeline not linked/enabled (#4793): decline so automatic
+    // selection falls through to the next driver (RMT) instead of dropping.
+    if (!sClocklessBatch) {
+        return false;
+    }
+#endif
     // FastLED#3576 Phase 1 — 16-lane clockless capacity. Channels bind
     // to drivers lazily inside their first show, AFTER earlier channels
     // enqueued this frame, so refusing the 17th here overflows it to
@@ -236,6 +243,36 @@ void ChannelEngineI2sEsp32Dev::show() FL_NO_EXCEPT {
         return;
 #endif
     }
+    // Clockless batch. On ESP32 the pipeline is reached only through
+    // sClocklessBatch, installed by enableClockless() from every clockless
+    // channel construction, so SPI-only programs never link it (#4793).
+#if defined(FL_IS_ESP32)
+    if (!sClocklessBatch) {
+        FL_WARN("ChannelEngineI2sEsp32Dev: clockless pipeline not enabled");
+        for (auto &data : mInFlightChannels) {
+            if (data) {
+                data->setInUse(false);
+            }
+        }
+        mInFlightChannels.clear();
+        mState = DriverState::ERROR;
+        return;
+    }
+    (this->*sClocklessBatch)();
+#else
+    showClocklessBatch();
+#endif
+}
+
+#if defined(FL_IS_ESP32)
+void (ChannelEngineI2sEsp32Dev::*ChannelEngineI2sEsp32Dev::sClocklessBatch)() = nullptr;
+
+void ChannelEngineI2sEsp32Dev::enableClockless() FL_NO_EXCEPT {
+    sClocklessBatch = &ChannelEngineI2sEsp32Dev::showClocklessBatch;
+}
+#endif
+
+void ChannelEngineI2sEsp32Dev::showClocklessBatch() FL_NO_EXCEPT {
     // Clockless batch — lazy-initialize the peripheral now (postponed
     // from the show() prologue so a SPI-only batch doesn't waste
     // an I2S1 claim that the SPI delegate would immediately race with).
