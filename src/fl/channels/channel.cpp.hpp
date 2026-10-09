@@ -393,6 +393,18 @@ void Channel::syncLegacySettings() FL_NO_EXCEPT {
     mLegacySettings.mTemperature = mSettings.mTemperature;
     mLegacySettings.mDitherMode = mSettings.mDitherMode;
     mLegacySettings.mWhiteCfg = mSettings.mWhiteCfg;
+    // Active white config assigned straight into ChannelOptions.mWhiteCfg
+    // never passed through setRgbw()/setRgbww(): install its conversion here
+    // (#4795).
+    if (const Rgbw* rgbw = mLegacySettings.mWhiteCfg.ptr<Rgbw>()) {
+        if (rgbw->active()) {
+            detail::enable_rgbw_conversion();
+        }
+    } else if (const Rgbww* rgbww = mLegacySettings.mWhiteCfg.ptr<Rgbww>()) {
+        if (rgbww->active()) {
+            detail::enable_rgbww_conversion();
+        }
+    }
     if (const auto* rgbw = mSettings.mWhiteCfg.ptr<Rgbw>()) {
         prepare_rgbw_colorimetric(*rgbw);
         detail::enable_rgbw_power_estimate();
