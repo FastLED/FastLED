@@ -327,10 +327,20 @@ class CompilationArgumentParser:
         """
         # Track if 'all' was used for auto-discovery
 
+        # `--examples A B C` parses A as the option value and B C as
+        # positionals; merge both (order-preserving, de-duplicated) instead of
+        # letting the positionals silently drop the --examples value (#4805).
+        requested: list[str] = []
+        if args.examples:
+            requested.extend(ex for ex in args.examples.split(",") if ex)
         if args.positional_examples:
-            examples = [self._normalize_example(ex) for ex in args.positional_examples]
-        elif args.examples:
-            examples = [self._normalize_example(ex) for ex in args.examples.split(",")]
+            requested.extend(args.positional_examples)
+        if requested:
+            examples = []
+            for ex in requested:
+                normalized = self._normalize_example(ex)
+                if normalized not in examples:
+                    examples.append(normalized)
         else:
             # Default to Blink if no examples specified
             examples = ["Blink"]
