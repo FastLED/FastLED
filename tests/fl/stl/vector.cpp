@@ -815,7 +815,7 @@ FL_TEST_CASE("is_trivially_copyable trait") {
 }
 
 namespace {
-struct BigNonTrivial {  // > 64 bytes: exercises the swap heap temporary
+struct BigNonTrivial {  // > 64 bytes
     fl::string name;
     char pad[96];
     explicit BigNonTrivial(const char* n = "") : name(n) { pad[0] = 0; }
@@ -836,7 +836,15 @@ FL_TEST_CASE("VectorN swap of inline non-trivial elements (#4794)") {
         FL_CHECK(b[1] == "a1");
         FL_CHECK(b[2] == "a2");
     }
-    FL_SUBCASE("elements larger than the stack temporary") {
+    FL_SUBCASE("self-swap leaves contents intact") {
+        fl::VectorN<fl::string, 4> a;
+        a.push_back("x"); a.push_back("y");
+        a.swap(a);
+        FL_REQUIRE_EQ(a.size(), 2u);
+        FL_CHECK(a[0] == "x");
+        FL_CHECK(a[1] == "y");
+    }
+    FL_SUBCASE("large elements") {
         fl::VectorN<BigNonTrivial, 2> a;
         fl::VectorN<BigNonTrivial, 2> b;
         a.push_back(BigNonTrivial("first"));

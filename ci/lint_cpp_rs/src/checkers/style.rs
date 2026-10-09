@@ -204,24 +204,15 @@ impl FileContentChecker for RawAlignasChecker {
         }
 
         let mut violations = Vec::new();
-        let mut in_multiline_comment = false;
+        let mut lexical_state = CommentScanState::default();
 
         for (index, line) in file_content.lines.iter().enumerate() {
             let stripped = line.trim();
-
-            if line.contains("/*") {
-                in_multiline_comment = true;
-            }
-            if line.contains("*/") {
-                in_multiline_comment = false;
-                continue;
-            }
-            if in_multiline_comment || stripped.starts_with("//") {
-                continue;
-            }
-
-            let code = split_line_comment(stripped).trim();
-            if code.is_empty() || !regex_raw_alignas().is_match(code) {
+            // Mask comments and string/char literals so code before or after a
+            // `/* ... */` on the same line is still checked (and text inside
+            // comments or literals never is).
+            let visible = mask_macro_prefix_literals_and_comments(line, &mut lexical_state);
+            if !regex_raw_alignas().is_match(&visible) {
                 continue;
             }
             if line.contains("// ok alignas") {

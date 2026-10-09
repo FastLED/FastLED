@@ -5,7 +5,6 @@
 /// Included from exactly one translation unit (fl.stl+.cpp via _build.cpp.hpp).
 
 #include "fl/stl/basic_vector.h"
-#include "fl/stl/align.h"  // FL_ALIGN_MAX
 #include "fl/stl/cstring.h"  // fl::memcpy, fl::memmove, fl::memset
 #include "platforms/assert_defs.h"  // FASTLED_ASSERT
 #include "fl/stl/noexcept.h"
@@ -16,6 +15,8 @@ namespace fl {
 // type does not need its own uninitialized_move_n thunk (#4794).
 void vector_basic::uninitialized_move_n_impl(void* dst, void* src,
                                              fl::size count) const FL_NO_EXCEPT {
+    FASTLED_ASSERT(mOps->move_construct != nullptr,
+                   "vector: element type is not move-constructible");
     fl::u8* d = static_cast<fl::u8*>(dst);
     fl::u8* sp = static_cast<fl::u8*>(src);
     for (fl::size i = 0; i < count; ++i) {
@@ -224,9 +225,7 @@ void vector_basic::erase_range_impl(fl::size first_index, fl::size count) FL_NO_
 
     if (mOps) {
         // Destroy erased elements
-        for (fl::size i = 0; i < count; ++i) {
-            mOps->destroy_n(element_ptr(first_index + i), 1);
-        }
+        mOps->destroy_n(element_ptr(first_index), count);
         // Shift remaining elements left one at a time
         for (fl::size i = 0; i < remaining; ++i) {
             void* dst = element_ptr(first_index + i);
@@ -312,9 +311,7 @@ void vector_basic::resize_impl(fl::size n) FL_NO_EXCEPT {
     if (n < mSize) {
         // Shrink: destroy excess elements
         if (mOps) {
-            for (fl::size i = n; i < mSize; ++i) {
-                mOps->destroy_n(element_ptr(i), 1);
-            }
+            mOps->destroy_n(element_ptr(n), mSize - n);
         }
         mSize = n;
         return;
@@ -344,9 +341,7 @@ void vector_basic::resize_value_impl(fl::size n, const void* value) FL_NO_EXCEPT
 
     if (n < mSize) {
         if (mOps) {
-            for (fl::size i = n; i < mSize; ++i) {
-                mOps->destroy_n(element_ptr(i), 1);
-            }
+            mOps->destroy_n(element_ptr(n), mSize - n);
         }
         mSize = n;
         return;
@@ -388,31 +383,12 @@ void vector_basic::swap_impl(vector_basic& other) FL_NO_EXCEPT {
         mCapacity = other.mCapacity;
         other.mCapacity = tmp_cap;
     } else if (this_inline && other_inline) {
-        // Both inline: swap element data in-place. Non-trivial elements are
-        // swapped through one temporary with move_construct + destroy_n, so
-        // the ops table needs no per-type swap thunk (#4794).
-        FL_ALIGN_MAX fl::u8 stack_tmp[64];
-        void* tmp = nullptr;
-        fl::size common = mSize < other.mSize ? mSize : other.mSize;
-        if (mOps && common > 0) {
-            tmp = mElementSize <= sizeof(stack_tmp)
-                      ? static_cast<void*>(stack_tmp)
-                      : mResource->allocate(mElementSize);
-            FASTLED_ASSERT(tmp != nullptr, "vector swap: temporary allocation failed");
-            if (!tmp) return;
-        }
+        // Both inline: swap element data in-place
         fl::size max_size = mSize > other.mSize ? mSize : other.mSize;
         for (fl::size i = 0; i < max_size; ++i) {
             if (i < mSize && i < other.mSize) {
                 if (mOps) {
-                    void* a = element_ptr(i);
-                    void* b = other.element_ptr(i);
-                    mOps->move_construct(tmp, a);
-                    mOps->destroy_n(a, 1);
-                    mOps->move_construct(a, b);
-                    mOps->destroy_n(b, 1);
-                    mOps->move_construct(b, tmp);
-                    mOps->destroy_n(tmp, 1);
+                    mOps->swap_elements(element_ptr(i), other.element_ptr(i));
                 } else {
                     trivial_swap(element_ptr(i), other.element_ptr(i));
                 }
@@ -433,9 +409,6 @@ void vector_basic::swap_impl(vector_basic& other) FL_NO_EXCEPT {
                     fl::memcpy(element_ptr(i), other.element_ptr(i), mElementSize);
                 }
             }
-        }
-        if (tmp && tmp != static_cast<void*>(stack_tmp)) {
-            mResource->deallocate(tmp, mElementSize);
         }
     } else if (this_inline) {
         // this is inline, other is on heap

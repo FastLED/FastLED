@@ -22,6 +22,7 @@ struct vector_element_ops {
     void (*copy_construct)(void* dst, const void* src);
     void (*move_construct)(void* dst, void* src);
     void (*default_construct)(void* ptr);
+    void (*swap_elements)(void* a, void* b);
 
     /// Destroy count elements starting at first (count == 1 for a single
     /// element: one destroy thunk per type instead of two, #4794).
@@ -237,6 +238,15 @@ struct has_move_ctor : fl::false_type {};
 template <typename T>
 struct has_move_ctor<T, decltype(void(T(fl::declval<T&&>())))> : fl::true_type {};
 
+// SFINAE: detect if T is swappable (needs move-constructible + move-assignable)
+template <typename T, typename = void>
+struct is_swappable : fl::false_type {};
+
+template <typename T>
+struct is_swappable<T, decltype(void(
+    fl::declval<T&>() = fl::declval<T&&>()
+))> : has_move_ctor<T> {};
+
 // Move construct: available
 template <typename T>
 typename fl::enable_if<has_move_ctor<T>::value, void(*)(void*, void*)>::type
@@ -249,6 +259,25 @@ get_move_construct_fn() FL_NO_EXCEPT {
 template <typename T>
 typename fl::enable_if<!has_move_ctor<T>::value, void(*)(void*, void*)>::type
 get_move_construct_fn() FL_NO_EXCEPT {
+    return nullptr;
+}
+
+// Swap: available when swappable
+template <typename T>
+typename fl::enable_if<is_swappable<T>::value, void(*)(void*, void*)>::type
+get_swap_fn() FL_NO_EXCEPT {
+    return [](void* a, void* b) FL_NO_EXCEPT {
+        T& ta = *static_cast<T*>(a);
+        T& tb = *static_cast<T*>(b);
+        T tmp(static_cast<T&&>(ta));
+        ta = static_cast<T&&>(tb);
+        tb = static_cast<T&&>(tmp);
+    };
+}
+
+template <typename T>
+typename fl::enable_if<!is_swappable<T>::value, void(*)(void*, void*)>::type
+get_swap_fn() FL_NO_EXCEPT {
     return nullptr;
 }
 
@@ -269,6 +298,7 @@ const vector_element_ops* vector_element_ops_for() FL_NO_EXCEPT {
         detail::get_copy_construct_fn<T>(),       // copy_construct
         detail::get_move_construct_fn<T>(),       // move_construct
         detail::get_default_construct_fn<T>(),    // default_construct
+        detail::get_swap_fn<T>(),                 // swap_elements
         // destroy_n
         [](void* first, fl::size count) FL_NO_EXCEPT {
             T* p = static_cast<T*>(first);

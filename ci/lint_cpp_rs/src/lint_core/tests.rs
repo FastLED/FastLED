@@ -20,14 +20,18 @@ mod tests {
              // alignas(8) in a comment\n\
              /* alignas(4) */\n\
              struct alignas (8) S {};\n\
-             alignas(4) int k; // ok alignas: test fixture\n",
+             alignas(4) int k; // ok alignas: test fixture\n\
+             alignas(16) char dma[64]; /* dma */\n\
+             alignas(8) int x; /* start of block\n\
+             alignas(2) still in comment */ int y;\n\
+             const char* s = \"alignas(2)\";\n",
         );
         let lines: Vec<usize> = checker
             .check_file_content(&src)
             .into_iter()
             .map(|(line, _)| line)
             .collect();
-        assert_eq!(lines, vec![1, 5]);
+        assert_eq!(lines, vec![1, 5, 7, 8]);
     }
 
     #[test]
