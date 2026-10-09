@@ -173,6 +173,73 @@ impl FileContentChecker for RawNoexceptChecker {
     }
 }
 
+/// Bans raw `alignas(...)` in `src/`; use the macros in `fl/stl/align.h`.
+///
+/// Raw `alignas` has broken real builds: GCC 4.8.3 (Roger Clark STM32 core)
+/// mishandles it, ESP8266 over-aligned types call a missing `memalign()` at
+/// link time, and AVR pays RAM for alignment it never needs. `FL_ALIGNAS(N)`,
+/// `FL_ALIGN_AS(T)`, `FL_ALIGN_AS_T(expr)` and `FL_ALIGN_MAX` encode those
+/// per-platform workarounds.
+struct RawAlignasChecker;
+
+impl FileContentChecker for RawAlignasChecker {
+    fn name(&self) -> &'static str {
+        "RawAlignasChecker"
+    }
+
+    fn should_process_file(&self, file_path: &str, project_root: &Path) -> bool {
+        if !is_under_project_subpath(file_path, project_root, "src") {
+            return false;
+        }
+        if !ends_with_any(file_path, &[".h", ".hpp", ".cpp", ".cpp.hpp"]) {
+            return false;
+        }
+        let normalized = normalize_path(file_path);
+        !normalized.ends_with("fl/stl/align.h") && !is_under_dir(&normalized, "third_party")
+    }
+
+    fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        if !file_content.content.contains("alignas") {
+            return Vec::new();
+        }
+
+        let mut violations = Vec::new();
+        let mut in_multiline_comment = false;
+
+        for (index, line) in file_content.lines.iter().enumerate() {
+            let stripped = line.trim();
+
+            if line.contains("/*") {
+                in_multiline_comment = true;
+            }
+            if line.contains("*/") {
+                in_multiline_comment = false;
+                continue;
+            }
+            if in_multiline_comment || stripped.starts_with("//") {
+                continue;
+            }
+
+            let code = split_line_comment(stripped).trim();
+            if code.is_empty() || !regex_raw_alignas().is_match(code) {
+                continue;
+            }
+            if line.contains("// ok alignas") {
+                continue;
+            }
+
+            violations.push((
+                index + 1,
+                format!(
+                    "Raw 'alignas' -- use FL_ALIGNAS(N), FL_ALIGN_AS(T), FL_ALIGN_AS_T(expr) or FL_ALIGN_MAX from fl/stl/align.h (raw alignas breaks GCC 4.8 STM32, ESP8266 memalign and wastes AVR RAM); suppress with '// ok alignas' only with a reason: {stripped}"
+                ),
+            ));
+        }
+
+        violations
+    }
+}
+
 struct SingletonInHeadersChecker;
 
 impl FileContentChecker for SingletonInHeadersChecker {

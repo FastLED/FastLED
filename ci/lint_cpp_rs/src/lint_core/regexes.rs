@@ -443,6 +443,11 @@ fn regex_raw_pragma() -> &'static Regex {
     VALUE.get_or_init(|| Regex::new(r"\b_Pragma\s*\(").unwrap())
 }
 
+fn regex_raw_alignas() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r"\balignas\s*\(").unwrap())
+}
+
 fn regex_raw_noexcept() -> &'static Regex {
     static VALUE: OnceLock<Regex> = OnceLock::new();
     VALUE.get_or_init(|| Regex::new(r"\bnoexcept\b").unwrap())

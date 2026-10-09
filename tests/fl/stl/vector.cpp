@@ -2,6 +2,7 @@
 
 
 #include "fl/stl/vector.h"
+#include "fl/stl/string.h"
 #include "fl/stl/span.h"  // For fl::span
 #include "fl/stl/cstddef.h"
 #include "fl/stl/new.h"
@@ -810,6 +811,43 @@ FL_TEST_CASE("is_trivially_copyable trait") {
             ~NonTriviallyCopyable() { delete ptr; }  // ok bare allocation
         };
         FL_CHECK_FALSE(fl::is_trivially_copyable<NonTriviallyCopyable>::value);
+    }
+}
+
+namespace {
+struct BigNonTrivial {  // > 64 bytes: exercises the swap heap temporary
+    fl::string name;
+    char pad[96];
+    explicit BigNonTrivial(const char* n = "") : name(n) { pad[0] = 0; }
+};
+}  // namespace
+
+FL_TEST_CASE("VectorN swap of inline non-trivial elements (#4794)") {
+    FL_SUBCASE("unequal sizes, small elements") {
+        fl::VectorN<fl::string, 4> a;
+        fl::VectorN<fl::string, 4> b;
+        a.push_back("a0"); a.push_back("a1"); a.push_back("a2");
+        b.push_back("b0");
+        a.swap(b);
+        FL_REQUIRE_EQ(a.size(), 1u);
+        FL_REQUIRE_EQ(b.size(), 3u);
+        FL_CHECK(a[0] == "b0");
+        FL_CHECK(b[0] == "a0");
+        FL_CHECK(b[1] == "a1");
+        FL_CHECK(b[2] == "a2");
+    }
+    FL_SUBCASE("elements larger than the stack temporary") {
+        fl::VectorN<BigNonTrivial, 2> a;
+        fl::VectorN<BigNonTrivial, 2> b;
+        a.push_back(BigNonTrivial("first"));
+        b.push_back(BigNonTrivial("second"));
+        b.push_back(BigNonTrivial("third"));
+        a.swap(b);
+        FL_REQUIRE_EQ(a.size(), 2u);
+        FL_REQUIRE_EQ(b.size(), 1u);
+        FL_CHECK(a[0].name == "second");
+        FL_CHECK(a[1].name == "third");
+        FL_CHECK(b[0].name == "first");
     }
 }
 

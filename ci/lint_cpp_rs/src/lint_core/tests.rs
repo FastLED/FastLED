@@ -10,6 +10,35 @@ mod tests {
         }
     }
 
+    #[test]
+    fn raw_alignas_flags_code_but_not_macros_or_comments() {
+        let checker = RawAlignasChecker;
+        let src = file(
+            "src/fl/x.cpp.hpp",
+            "alignas(16) fl::u8 buf[64];\n\
+             FL_ALIGN_MAX fl::u8 ok[64];\n\
+             // alignas(8) in a comment\n\
+             /* alignas(4) */\n\
+             struct alignas (8) S {};\n\
+             alignas(4) int k; // ok alignas: test fixture\n",
+        );
+        let lines: Vec<usize> = checker
+            .check_file_content(&src)
+            .into_iter()
+            .map(|(line, _)| line)
+            .collect();
+        assert_eq!(lines, vec![1, 5]);
+    }
+
+    #[test]
+    fn raw_alignas_skips_align_header_and_non_src() {
+        let checker = RawAlignasChecker;
+        let root = Path::new("/repo");
+        assert!(!checker.should_process_file("/repo/src/fl/stl/align.h", root));
+        assert!(!checker.should_process_file("/repo/tests/fl/x.cpp", root));
+        assert!(checker.should_process_file("/repo/src/fl/stl/vector.h", root));
+    }
+
     fn legal_header(last_updated: &str, holders: &[&str]) -> String {
         let holders_yaml = if holders.is_empty() {
             "//   holders: []".to_string()
