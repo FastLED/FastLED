@@ -331,6 +331,16 @@ bool ChannelManager::setDriverPriority(const fl::string& name, int priority) FL_
     return true;
 }
 
+bool ChannelManager::isDriverEnabled(const IChannelDriver& driver) const FL_NO_EXCEPT {
+    for (const auto& entry : mDrivers) {
+        if (entry.driver.get() == &driver) {
+            return entry.enabled;
+        }
+    }
+    // Not registered by instance (e.g. replaced by a same-name driver).
+    return isDriverEnabled(driver.getName().c_str());
+}
+
 bool ChannelManager::isDriverEnabled(const char* name) const FL_NO_EXCEPT {
     if (!name) {
         FL_ERROR("ChannelManager::isDriverEnabled() - Null driver name provided");

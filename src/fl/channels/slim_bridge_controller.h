@@ -48,7 +48,7 @@ struct SlimBridgeShowPolicy<false> {
     template <typename DriverTraits>
     static void attach() FL_NO_EXCEPT { DriverTraits::registerWithManager(); }
     static bool enabled(IChannelDriver& driver) FL_NO_EXCEPT {
-        return ChannelManager::registry().isDriverEnabled(driver.getName().c_str());
+        return ChannelManager::registry().isDriverEnabled(driver);
     }
     static void afterEnqueue(IChannelDriver&) FL_NO_EXCEPT {}
 };

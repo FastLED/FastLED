@@ -75,7 +75,7 @@ protected:
             return;
         }
         IChannelDriver& driver = Traits::instance();
-        if (!ChannelManager::registry().isDriverEnabled(driver.getName().c_str())) {
+        if (!ChannelManager::registry().isDriverEnabled(driver)) {
             FL_WARN_ONCE("FlexibleInlineBlockClocklessController: driver '" << driver.getName()
                          << "' is disabled - dropping frame");
             return;
