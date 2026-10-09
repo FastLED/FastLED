@@ -10,11 +10,26 @@
 #include <DMAChannel.h>
 // IWYU pragma: end_keep
 #include "platforms/assert_defs.h"  // FASTLED_ASSERT
-#include "fl/stl/cstdlib.h"  // fl::aligned_alloc
+#include "fl/stl/malloc.h"  // fl::malloc
+#include "fl/stl/bit_cast.h"  // fl::reinterpret_cast_
 
 namespace fl {
 namespace platforms {
 namespace teensy {
+
+/// Process-lifetime, 32-byte (cache-line) aligned allocation for DMA
+/// buffers that are never freed. fl::aligned_alloc ignores the alignment on
+/// ARM (plain malloc, 8-byte aligned), which would let arm_dcache_delete
+/// spill onto neighbouring heap data, so over-allocate and align here.
+inline void* alloc_dma_line_aligned(fl::size_t size) FL_NO_EXCEPT {
+    constexpr fl::uptr kLine = 32;
+    void* raw = fl::malloc(size + kLine - 1);
+    if (raw == nullptr) {
+        return nullptr;
+    }
+    const fl::uptr addr = fl::reinterpret_cast_<fl::uptr>(raw);
+    return fl::reinterpret_cast_<void*>((addr + kLine - 1) & ~(kLine - 1));
+}
 
 #if !defined(KINETISL)
 
@@ -29,7 +44,7 @@ struct I2sRxBuffer {
 // DMAMEM; 32-byte alignment keeps the arm_dcache_* range ops line-exact.
 I2sRxBuffer& i2s_rx_buffer() {
     static I2sRxBuffer* buffer =
-        static_cast<I2sRxBuffer*>(fl::aligned_alloc(32, sizeof(I2sRxBuffer)));
+        static_cast<I2sRxBuffer*>(alloc_dma_line_aligned(sizeof(I2sRxBuffer)));
     FASTLED_ASSERT(buffer != nullptr, "I2S RX buffer allocation failed");
     return *buffer;
 }

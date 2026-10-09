@@ -11,7 +11,6 @@
 #include <DMAChannel.h>
 // IWYU pragma: end_keep
 #include "platforms/assert_defs.h"  // FASTLED_ASSERT
-#include "fl/stl/cstdlib.h"  // fl::aligned_alloc
 
 namespace fl {
 namespace platforms {
@@ -27,7 +26,7 @@ struct I2S2RxBuffer {
 // region; 32-byte alignment keeps the cache maintenance line-exact.
 inline fl::u32* i2s2_rx_buffer() {
     static I2S2RxBuffer* buffer =
-        static_cast<I2S2RxBuffer*>(fl::aligned_alloc(32, sizeof(I2S2RxBuffer)));
+        static_cast<I2S2RxBuffer*>(alloc_dma_line_aligned(sizeof(I2S2RxBuffer)));
     FASTLED_ASSERT(buffer != nullptr, "I2S2 RX buffer allocation failed");
     return buffer->data;
 }
