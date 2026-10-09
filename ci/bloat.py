@@ -187,6 +187,39 @@ def assert_fbuild_has_symbols() -> None:
         )
 
 
+def explicit_symbol_tools(elf: Path) -> list[str]:
+    """`--nm/--cppfilt` from the nearest single-env `build_info.json`.
+
+    fbuild >= 2.5.38 matches the ELF to a `build_info` environment by
+    `prog_path`; boards whose `prog_path` names the flashed image (Teensy:
+    `firmware.hex`) then fail with "no unambiguous environment matches the
+    ELF". Passing the cross tools explicitly, as the dashboard benchmark
+    does, skips that lookup (FastLED#4813).
+    """
+    for directory in [elf.parent, *elf.parents]:
+        info = directory / "build_info.json"
+        if not info.is_file():
+            continue
+        try:
+            data = json.loads(info.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            return []
+        envs = [v for v in data.values() if isinstance(v, dict)]
+        if len(envs) != 1:
+            return []
+        aliases = envs[0].get("aliases") or {}
+        nm, cppfilt = aliases.get("nm"), aliases.get("c++filt")
+        if (
+            isinstance(nm, str)
+            and isinstance(cppfilt, str)
+            and Path(nm).is_file()
+            and Path(cppfilt).is_file()
+        ):
+            return ["--nm", nm, "--cppfilt", cppfilt]
+        return []
+    return []
+
+
 def run_fbuild_symbols(location: ElfLocation, out_dir: Path, top: int) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
     cmd = [
@@ -197,6 +230,7 @@ def run_fbuild_symbols(location: ElfLocation, out_dir: Path, top: int) -> None:
         str(out_dir),
         "--top",
         str(top),
+        *explicit_symbol_tools(location.elf),
     ]
     print(f"$ {' '.join(cmd)}")
     try:
