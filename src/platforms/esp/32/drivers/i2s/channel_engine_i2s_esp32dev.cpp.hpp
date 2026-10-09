@@ -34,6 +34,27 @@ namespace fl {
 // Ctor / dtor
 //=============================================================================
 
+namespace {
+fl::shared_ptr<II2sPeripheralEsp32Dev> makeI2sEsp32DevPeripheral(u8 port) FL_NO_EXCEPT {
+#if defined(FL_IS_ESP_32DEV) && FASTLED_ESP32_HAS_I2S
+    // FastLED#3576 Phase 1 — one peripheral singleton PER I2S BLOCK
+    // (`fl::Singleton<T, N>` tag = port). Process-lifetime, never
+    // destroyed; cross-driver hardware arbitration (vs the clocked-SPI
+    // driver on I2S0) happens in `initialize()` via the port-claim
+    // registry. Wrap in a `shared_ptr` via `make_shared_no_tracking` —
+    // no control block, no delete, zero-overhead non-owning handle.
+    return (port == 0)
+               ? fl::make_shared_no_tracking<II2sPeripheralEsp32Dev>(
+                     fl::Singleton<I2sPeripheralEsp32DevEsp, 0>::instance())
+               : fl::make_shared_no_tracking<II2sPeripheralEsp32Dev>(
+                     fl::Singleton<I2sPeripheralEsp32DevEsp, 1>::instance());
+#else
+    (void)port;
+    return nullptr;
+#endif
+}
+}  // namespace
+
 ChannelEngineI2sEsp32Dev::ChannelEngineI2sEsp32Dev(
     fl::shared_ptr<II2sPeripheralEsp32Dev> peripheral,
     u8 i2s_port) FL_NO_EXCEPT
@@ -70,14 +91,13 @@ bool ChannelEngineI2sEsp32Dev::ensurePeripheral() FL_NO_EXCEPT {
     if (mPeripheral) {
         return true;
     }
-#if defined(FL_IS_ESP32)
-    if (sPeripheralFactory) {
-        mPeripheral = sPeripheralFactory(mI2sPort);
-        if (mPeripheral) {
-            registerPeripheralCallback();
-        }
+    // Only reachable from showClocklessBatch(), which on ESP32 is itself only
+    // reachable through sClocklessBatch, so naming the maker here keeps the
+    // peripheral out of SPI-only programs.
+    mPeripheral = makeI2sEsp32DevPeripheral(mI2sPort);
+    if (mPeripheral) {
+        registerPeripheralCallback();
     }
-#endif
     return mPeripheral != nullptr;
 }
 
@@ -174,7 +194,7 @@ void ChannelEngineI2sEsp32Dev::show() FL_NO_EXCEPT {
     // If a prior clockless transmit is still in flight, wait for it
     // before we potentially reconfigure the peripheral. Callers who care
     // about throughput can pump `poll()` first.
-    if (mPeripheralInitialized && mPeripheral && mPeripheral->isBusy()) {
+    if (mPeripheralInitialized && mPeripheral->isBusy()) {  // initialized implies non-null
         (void)mPeripheral->waitTransmitDone(/*timeout_ms=*/500);
     }
 
@@ -285,45 +305,25 @@ void ChannelEngineI2sEsp32Dev::show() FL_NO_EXCEPT {
 
 #if defined(FL_IS_ESP32)
 void (ChannelEngineI2sEsp32Dev::*ChannelEngineI2sEsp32Dev::sClocklessBatch)() = nullptr;
-ChannelEngineI2sEsp32Dev::PeripheralFactory ChannelEngineI2sEsp32Dev::sPeripheralFactory = nullptr;
 
-namespace {
-fl::shared_ptr<II2sPeripheralEsp32Dev> makeI2sEsp32DevPeripheral(u8 port) FL_NO_EXCEPT {
-#if defined(FL_IS_ESP_32DEV) && FASTLED_ESP32_HAS_I2S
-    // FastLED#3576 Phase 1 — one peripheral singleton PER I2S BLOCK
-    // (`fl::Singleton<T, N>` tag = port). Process-lifetime, never
-    // destroyed; cross-driver hardware arbitration (vs the clocked-SPI
-    // driver on I2S0) happens in `initialize()` via the port-claim
-    // registry. Wrap in a `shared_ptr` via `make_shared_no_tracking` —
-    // no control block, no delete, zero-overhead non-owning handle.
-    return (port == 0)
-               ? fl::make_shared_no_tracking<II2sPeripheralEsp32Dev>(
-                     fl::Singleton<I2sPeripheralEsp32DevEsp, 0>::instance())
-               : fl::make_shared_no_tracking<II2sPeripheralEsp32Dev>(
-                     fl::Singleton<I2sPeripheralEsp32DevEsp, 1>::instance());
-#else
-    (void)port;
-    return nullptr;
-#endif
-}
-}  // namespace
 
 void ChannelEngineI2sEsp32Dev::enableClockless() FL_NO_EXCEPT {
-    sPeripheralFactory = &makeI2sEsp32DevPeripheral;
     sClocklessBatch = &ChannelEngineI2sEsp32Dev::showClocklessBatch;
 }
 #endif
 
 void ChannelEngineI2sEsp32Dev::showClocklessBatch() FL_NO_EXCEPT {
     if (!ensurePeripheral()) {
-        FL_WARN("ChannelEngineI2sEsp32Dev: no I2S peripheral for clockless batch");
+        // No peripheral on this target: stay inert and READY, as an engine
+        // built with a null peripheral always has (and as poll() reports).
+        FL_WARN_ONCE("ChannelEngineI2sEsp32Dev: no I2S peripheral — inert");
         for (auto &data : mInFlightChannels) {
             if (data) {
                 data->setInUse(false);
             }
         }
         mInFlightChannels.clear();
-        mState = DriverState::ERROR;
+        mState = DriverState::READY;
         return;
     }
     // Clockless batch — lazy-initialize the peripheral now (postponed
@@ -680,12 +680,6 @@ fl::shared_ptr<IChannelDriver> createI2sEsp32DevEngine() FL_NO_EXCEPT {
 
 fl::shared_ptr<IChannelDriver> createI2sEsp32DevEngine(u8 port) FL_NO_EXCEPT {
 #if defined(FL_IS_ESP_32DEV) && FASTLED_ESP32_HAS_I2S
-    // FastLED#3576 Phase 1 — one peripheral singleton PER I2S BLOCK
-    // (`fl::Singleton<T, N>` tag = port). Process-lifetime, never
-    // destroyed; cross-driver hardware arbitration (vs the clocked-SPI
-    // driver on I2S0) happens in `initialize()` via the port-claim
-    // registry. Wrap in a `shared_ptr` via `make_shared_no_tracking` —
-    // no control block, no delete, zero-overhead non-owning handle.
     if (port > 1) {
         return nullptr;
     }
