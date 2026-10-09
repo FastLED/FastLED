@@ -260,13 +260,14 @@ public:
     }
 
     /// @brief Predicate: can this driver match a (single- or multi-pin) request?
-    /// @note Base default delegates to free fl::canMatch on the
-    ///       published capability data. Drivers should NOT override
-    ///       unless they have dynamic constraints unrepresentable in
-    ///       static data.
+    /// @note Delegates to free fl::canMatch on the published capability
+    ///       data (getDriverCapabilities / getPinGroups, which drivers
+    ///       override). Non-virtual on purpose: as a virtual it sat in
+    ///       every driver vtable, so the whole matcher linked into every
+    ///       sketch even though nothing calls it (#4800).
     /// @note A single-pin request has exactly one bit set in
     ///       request.data_pins (use ChannelRequest::singlePin() factory).
-    virtual HandleResult canMatch(const ChannelRequest& request) const FL_NO_EXCEPT {
+    HandleResult canMatch(const ChannelRequest& request) const FL_NO_EXCEPT {
         return fl::canMatch(getDriverCapabilities(), getPinGroups(), request);
     }
 
