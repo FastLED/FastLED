@@ -31,7 +31,11 @@ void *aligned_alloc_via_malloc(fl::size_t alignment, fl::size_t size) FL_NO_EXCE
     if ((alignment & (alignment - 1)) != 0) {
         return nullptr;  // alignment must be a power of two
     }
-    void *raw = ::malloc(size + alignment - 1 + sizeof(void *));
+    const fl::size_t overhead = alignment - 1 + sizeof(void *);
+    if (size > static_cast<fl::size_t>(-1) - overhead) {
+        return nullptr;  // size + overhead would wrap
+    }
+    void *raw = ::malloc(size + overhead);
     if (raw == nullptr) {
         return nullptr;
     }

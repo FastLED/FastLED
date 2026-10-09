@@ -265,5 +265,7 @@ FL_TEST_CASE("aligned_alloc_via_malloc honours alignment (#4817)") {
     }
     FL_CHECK(fl::detail::aligned_alloc_via_malloc(24, 16) == nullptr);  // not a power of two
     fl::detail::aligned_free_via_malloc(nullptr);  // no-op
+    // size + alignment overhead would wrap: must fail, not under-allocate
+    FL_CHECK(fl::detail::aligned_alloc_via_malloc(64, static_cast<fl::size_t>(-1) - 8) == nullptr);
 }
 } // FL_TEST_FILE
