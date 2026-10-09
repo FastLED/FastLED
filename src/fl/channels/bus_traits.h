@@ -51,8 +51,27 @@ namespace detail {
 /// @brief Helper used by `enableDrivers<Bus...>()` to expand the parameter pack.
 /// Each call ODR-uses `BusTraits<B>::registerWithManager()`, which lazily
 /// constructs the driver singleton AND registers it with `ChannelManager`.
+/// @brief Call `Traits::enableClockless()` when the bus provides one.
+///
+/// Unified parallel-IO buses (FLEX_IO on classic ESP32 / ESP32-S3) keep their
+/// clockless pipeline unlinked until something that can route clockless data
+/// to them names this hook (#4793). Buses without the member are a no-op.
+template<typename Traits>
+inline auto enable_clockless_impl(int) FL_NO_EXCEPT
+    -> decltype(Traits::enableClockless(), void()) {
+    Traits::enableClockless();
+}
+template<typename Traits>
+inline void enable_clockless_impl(long) FL_NO_EXCEPT {}
+template<typename Traits>
+inline void enable_clockless() FL_NO_EXCEPT {
+    enable_clockless_impl<Traits>(0);
+}
+
 template<Bus B, fl::u8 Which = 0>
 inline int bus_register_one() FL_NO_EXCEPT {
+    // Explicitly enabling a bus makes it eligible for clockless channels too.
+    enable_clockless<BusTraits<B, Which>>();
     BusTraits<B, Which>::registerWithManager();
     return 0;
 }

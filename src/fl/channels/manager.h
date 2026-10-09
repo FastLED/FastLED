@@ -357,6 +357,7 @@ inline void ChannelManager::setExclusiveDriver() FL_NO_EXCEPT {
     // Priority above any platform default — see `bus_priorities.h` for the
     // default-priority constants (highest there is ~10 for native LCD/I2S SPI).
     constexpr int kExclusivePriority = 10000;
+    fl::detail::enable_clockless<fl::BusTraits<B, Which>>();  // #4793
     addDriver(kExclusivePriority, fl::BusTraits<B, Which>::instancePtr());
 }
 

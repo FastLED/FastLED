@@ -114,6 +114,9 @@ public:
         if (WAIT_TIME > 0 && static_cast<u32>(WAIT_TIME) > timing.reset_us) {
             timing.reset_us = static_cast<u32>(WAIT_TIME);
         }
+        // A clockless controller bound to a unified parallel-IO bus needs
+        // that engine's clockless pipeline linked (#4793).
+        detail::enable_clockless<DriverTraits>();
         mData = ChannelData::create(DATA_PIN, timing, fl::vector_psram<u8>(),
                                      ChannelPixelFormat::RGB);
         FL_STATIC_ASSERT(XTRA0 >= 0 && XTRA0 <= 32, "XTRA0 out of range");
