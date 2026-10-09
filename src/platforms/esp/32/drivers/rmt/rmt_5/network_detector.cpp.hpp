@@ -54,7 +54,7 @@ FL_EXTERN_C_END
 #if FASTLED_RMT_WIFI_CAPABLE_PLATFORM
 FL_EXTERN_C_BEGIN
 #include "esp_err.h"
-#include "esp_wifi.h"
+#include "esp_netif.h"
 FL_EXTERN_C_END
 #endif
 
@@ -78,42 +78,51 @@ namespace fl {
 
 #if FASTLED_RMT_WIFI_CAPABLE_PLATFORM
 
-// Weak symbol declarations for WiFi functions
+// Weak symbol declarations for the esp_netif functions used to detect Wi-Fi.
+//
+// Wi-Fi is detected through esp_netif, never through esp_wifi_* (#4791). On
+// classic ESP32 Arduino the core's Bluetooth/PHY init already extracts
+// libnet80211's ieee80211_api.o, so a weak esp_wifi_get_mode reference always
+// resolves; merely referencing it keeps ~1.3 KB of Wi-Fi BSS (s_wifi_nvs) and
+// its call chain alive in every sketch. libesp_netif's objects are only
+// extracted when the application brings up a network stack (Arduino WiFi,
+// fl::wifi, IDF esp_netif_create_default_wifi_*), so these stay null and cost
+// nothing in sketches without networking.
 FL_EXTERN_C_BEGIN
 
-FL_LINK_WEAK esp_err_t esp_wifi_get_mode(wifi_mode_t *mode);
-FL_LINK_WEAK esp_err_t esp_wifi_sta_get_ap_info(wifi_ap_record_t *ap_info);
+FL_LINK_WEAK esp_netif_t* esp_netif_get_handle_from_ifkey(const char* if_key);
+FL_LINK_WEAK bool esp_netif_is_netif_up(esp_netif_t* esp_netif);
+FL_LINK_WEAK esp_err_t esp_netif_get_ip_info(esp_netif_t* esp_netif, esp_netif_ip_info_t* ip_info);
 
 FL_EXTERN_C_END
 
+namespace {
+esp_netif_t* wifiNetif(const char* key) FL_NO_EXCEPT {
+    if (esp_netif_get_handle_from_ifkey == nullptr) {
+        return nullptr;  // esp_netif component not linked
+    }
+    return esp_netif_get_handle_from_ifkey(key);
+}
+}  // namespace
+
 bool NetworkDetector::isWiFiActive() FL_NO_EXCEPT {
-    // Check if WiFi function is linked (weak symbol resolution)
-    if (esp_wifi_get_mode == nullptr) {
-        return false;  // WiFi component not linked
-    }
-
-    wifi_mode_t mode;
-    esp_err_t err = esp_wifi_get_mode(&mode);
-
-    if (err != ESP_OK) {
-        return false;  // WiFi not initialized or query failed
-    }
-
-    // WiFi is active if mode is not NULL
-    return (mode != WIFI_MODE_NULL);
+    // A default Wi-Fi STA or AP interface exists once Wi-Fi has been
+    // initialized (Arduino WiFi, fl::wifi and IDF default handlers all create
+    // one). Conservative by design: reporting "active" only selects the
+    // network-safe RMT configuration.
+    return wifiNetif("WIFI_STA_DEF") != nullptr ||
+           wifiNetif("WIFI_AP_DEF") != nullptr;
 }
 
 bool NetworkDetector::isWiFiConnected() FL_NO_EXCEPT {
-    // Check if WiFi function is linked (weak symbol resolution)
-    if (esp_wifi_sta_get_ap_info == nullptr) {
-        return false;  // WiFi component not linked
+    esp_netif_t* sta = wifiNetif("WIFI_STA_DEF");
+    if (sta == nullptr || esp_netif_is_netif_up == nullptr ||
+        esp_netif_get_ip_info == nullptr || !esp_netif_is_netif_up(sta)) {
+        return false;
     }
-
-    wifi_ap_record_t ap_info;
-    esp_err_t err = esp_wifi_sta_get_ap_info(&ap_info);
-
-    // ESP_OK means connected to AP
-    return (err == ESP_OK);
+    esp_netif_ip_info_t ip_info;
+    return esp_netif_get_ip_info(sta, &ip_info) == ESP_OK &&
+           ip_info.ip.addr != 0;
 }
 
 #else  // !FASTLED_RMT_WIFI_CAPABLE_PLATFORM
