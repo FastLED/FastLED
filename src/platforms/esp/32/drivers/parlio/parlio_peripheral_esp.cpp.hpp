@@ -466,7 +466,7 @@ void ParlioPeripheralESPImpl::delay(u32 ms) FL_NO_EXCEPT {
 }
 
 void ParlioPeripheralESPImpl::delayMicroseconds(u32 us) FL_NO_EXCEPT {
-    task::run(us, task::ExecFlags::SYSTEM);
+    task::yield_system(us);
 }
 
 u32 ParlioPeripheralESPImpl::millis() FL_NO_EXCEPT {

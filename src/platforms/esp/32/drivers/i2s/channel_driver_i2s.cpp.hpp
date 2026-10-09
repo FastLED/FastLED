@@ -339,7 +339,7 @@ bool ChannelEngineI2S::beginTransmission(fl::span<const ChannelDataPtr> channelD
         // since we need to free/reallocate buffers that DMA may be reading.
         while (mPeripheral->isBusy()) {
             // Wait for in-flight DMA to complete before touching buffers
-            task::run(250, task::ExecFlags::SYSTEM);
+            task::yield_system(250);
         }
         mBusy.store(false, fl::memory_order_release);
 
@@ -465,7 +465,7 @@ bool ChannelEngineI2S::beginTransmission(fl::span<const ChannelDataPtr> channelD
     // Encoding has already been done above, so this wait is the only blocking time.
     while (mPeripheral->isBusy()) {
         // Wait for previous DMA to finish
-        task::run(250, task::ExecFlags::SYSTEM);
+        task::yield_system(250);
     }
     mBusy.store(false, fl::memory_order_release);
 

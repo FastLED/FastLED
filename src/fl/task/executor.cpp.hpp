@@ -169,6 +169,22 @@ void run(fl::u32 microseconds, ExecFlags flags) FL_NO_EXCEPT {
     } while (!expired());
 }
 
+void yield_system(fl::u32 microseconds) FL_NO_EXCEPT {
+    // Mirrors the SYSTEM branch of run() without naming Scheduler/Executor.
+    const fl::u32 begin_time = fl::micros();
+    do {
+        if (microseconds > 0) {
+            const fl::u32 e = fl::micros() - begin_time;
+            if (e < microseconds) {
+                fl::platforms::ICoroutineRuntime::instance().pumpCoroutines(
+                    fl::min(1000u, microseconds - e));
+            }
+        } else {
+            fl::yield();
+        }
+    } while (fl::micros() - begin_time < microseconds);
+}
+
 size_t active_tasks() FL_NO_EXCEPT {
     return Executor::instance().total_active_tasks();
 }

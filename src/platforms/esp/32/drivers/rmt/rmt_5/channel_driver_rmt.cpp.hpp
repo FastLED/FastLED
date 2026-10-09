@@ -261,7 +261,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         int timeout_iterations = 100000; // 10 seconds at 100us per iteration
         DriverState state = poll();
         while (state.state != DriverState::READY && state.state != DriverState::ERROR && timeout_iterations > 0) {
-            task::run(250, task::ExecFlags::SYSTEM);
+            task::yield_system(250);
             timeout_iterations--;
             state = poll();
         }

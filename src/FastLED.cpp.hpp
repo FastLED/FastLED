@@ -352,11 +352,11 @@ static void throttleToMaxRefreshRate(fl::u32 minMicros) FL_NO_EXCEPT {
 		// budget left to burn. Once inside the budget we spin, because a deep
 		// yield costs a whole tick and would overshoot the deadline.
 		if (remaining > spinBudget && fl::NetworkDetector::isAnyNetworkActive()) {
-			fl::task::run(250, fl::task::ExecFlags::SYSTEM);
+			fl::task::yield_system(250);
 		} else {
 			// taskYIELD()-equivalent: equal-priority tasks still get CPU, but
 			// there is no FreeRTOS tick floor, so this stays sub-microsecond.
-			fl::task::run(0, fl::task::ExecFlags::SYSTEM);
+			fl::task::yield_system(0);
 		}
 #endif
 	}

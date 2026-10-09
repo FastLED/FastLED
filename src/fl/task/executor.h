@@ -128,12 +128,21 @@ private:
 /// Usage:
 /// - `run()` — pump ALL + yield for 1ms (default)
 /// - `run(0)` — pump ALL, no yield
-/// - `run(250, ExecFlags::SYSTEM)` — OS yield only (for DMA wait loops)
+/// - `run(250, ExecFlags::SYSTEM)` — OS yield only; prefer `yield_system(250)`
 /// - `run(1000, ExecFlags::TASKS | ExecFlags::COROUTINES)` — skip OS yield
 ///
 /// @param microseconds  Budget in microseconds (default 1000 = 1ms)
 /// @param flags         Which subsystems to pump (default ALL)
 void run(fl::u32 microseconds = 1000, ExecFlags flags = ExecFlags::ALL) FL_NO_EXCEPT;
+
+/// @brief OS-level yield only: same behavior as `run(us, ExecFlags::SYSTEM)`.
+///
+/// Prefer this in driver/DMA wait loops. `run()` dispatches on its flags at
+/// runtime, so even a SYSTEM-only call links the task Scheduler and Executor
+/// into every sketch; this entry point references neither (#4797).
+/// `microseconds > 0` deep-yields (>= 1 FreeRTOS tick on ESP32) until the
+/// budget is spent; `0` is a single lightweight `fl::yield()`.
+void yield_system(fl::u32 microseconds) FL_NO_EXCEPT;
 
 
 
