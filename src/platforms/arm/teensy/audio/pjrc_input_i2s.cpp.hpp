@@ -9,6 +9,8 @@
 // IWYU pragma: begin_keep
 #include <DMAChannel.h>
 // IWYU pragma: end_keep
+#include "platforms/assert_defs.h"  // FASTLED_ASSERT
+#include "fl/stl/cstdlib.h"  // fl::aligned_alloc
 
 namespace fl {
 namespace platforms {
@@ -20,9 +22,16 @@ struct I2sRxBuffer {
     fl::u32 data[AUDIO_BLOCK_SAMPLES] __attribute__((aligned(32)));
 };
 
+// Allocated on first audio-input use, not as a DMAMEM static: every DMAMEM
+// object in a unity TU shares one `.dmabuffers` input section, so a single
+// live DMA buffer elsewhere kept this one linked into LED-only sketches
+// (#4792). On Teensy 4 the heap lives in RAM2 (OCRAM), the same region as
+// DMAMEM; 32-byte alignment keeps the arm_dcache_* range ops line-exact.
 I2sRxBuffer& i2s_rx_buffer() {
-    static DMAMEM I2sRxBuffer buffer;
-    return buffer;
+    static I2sRxBuffer* buffer =
+        static_cast<I2sRxBuffer*>(fl::aligned_alloc(32, sizeof(I2sRxBuffer)));
+    FASTLED_ASSERT(buffer != nullptr, "I2S RX buffer allocation failed");
+    return *buffer;
 }
 
 struct I2sInputState {

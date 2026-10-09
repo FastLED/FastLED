@@ -10,6 +10,8 @@
 // IWYU pragma: begin_keep
 #include <DMAChannel.h>
 // IWYU pragma: end_keep
+#include "platforms/assert_defs.h"  // FASTLED_ASSERT
+#include "fl/stl/cstdlib.h"  // fl::aligned_alloc
 
 namespace fl {
 namespace platforms {
@@ -19,11 +21,15 @@ struct I2S2RxBuffer {
     fl::u32 data[AUDIO_BLOCK_SAMPLES];
 };
 
-// FL_LINT_ALLOW_GLOBAL(DMAMEM placement requires static storage)
-DMAMEM static I2S2RxBuffer gI2S2RxBuffer __attribute__((aligned(32)));
-
+// Heap-allocated on first use rather than a DMAMEM static (#4792): DMAMEM
+// objects in a unity TU share one `.dmabuffers` section, so this buffer was
+// linked into every Teensy 4 sketch. The Teensy 4 heap is in RAM2, the DMAMEM
+// region; 32-byte alignment keeps the cache maintenance line-exact.
 inline fl::u32* i2s2_rx_buffer() {
-    return gI2S2RxBuffer.data;
+    static I2S2RxBuffer* buffer =
+        static_cast<I2S2RxBuffer*>(fl::aligned_alloc(32, sizeof(I2S2RxBuffer)));
+    FASTLED_ASSERT(buffer != nullptr, "I2S2 RX buffer allocation failed");
+    return buffer->data;
 }
 
 struct I2S2InputState {
