@@ -108,6 +108,13 @@ bool ChannelEngineI2sEsp32Dev::canHandle(const ChannelDataPtr &data) const
     if (data->isSpi()) {
         return true; // SPI batches delegate — no lane cap here
     }
+#if defined(FL_IS_ESP32)
+    // Clockless pipeline not linked/enabled (#4793): decline so automatic
+    // selection falls through to the next driver (RMT) instead of dropping.
+    if (!sClocklessBatch) {
+        return false;
+    }
+#endif
     // FastLED#3576 Phase 1 — 16-lane clockless capacity. Channels bind
     // to drivers lazily inside their first show, AFTER earlier channels
     // enqueued this frame, so refusing the 17th here overflows it to

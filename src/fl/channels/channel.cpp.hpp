@@ -4,7 +4,6 @@
 #include "platforms/is_platform.h"
 #include "fl/channels/channel.h"
 #include "fl/channels/channel_events.h"
-#include "fl/channels/clockless_encoders.h"
 #include "fl/channels/config.h"
 #include "fl/channels/data.h"
 #include "fl/channels/driver.h"
@@ -353,9 +352,6 @@ Channel::Channel(const ChipsetVariant& chipset, fl::span<CRGB> leds,
     syncLegacySettings();
 
     // Create ChannelData during construction with chipset variant
-    if (mChipset.is<ClocklessChipset>()) {
-        platforms::enableClocklessEncoders();  // #4793
-    }
     mChannelData = ChannelData::create(mChipset);
 }
 
@@ -384,7 +380,6 @@ Channel::Channel(int pin, const ChipsetTimingConfig& timing, fl::span<CRGB> leds
     syncLegacySettings();
 
     // Create ChannelData during construction
-    platforms::enableClocklessEncoders();  // #4793: always clockless
     mChannelData = ChannelData::create(mChipset);
 }
 

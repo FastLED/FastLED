@@ -48,9 +48,6 @@ struct BusSupports : fl::false_type {};
 
 namespace detail {
 
-/// @brief Helper used by `enableDrivers<Bus...>()` to expand the parameter pack.
-/// Each call ODR-uses `BusTraits<B>::registerWithManager()`, which lazily
-/// constructs the driver singleton AND registers it with `ChannelManager`.
 /// @brief Call `Traits::enableClockless()` when the bus provides one.
 ///
 /// Unified parallel-IO buses (FLEX_IO on classic ESP32 / ESP32-S3) keep their
@@ -67,6 +64,21 @@ template<typename Traits>
 inline void enable_clockless() FL_NO_EXCEPT {
     enable_clockless_impl<Traits>(0);
 }
+
+/// @brief `enable_clockless<Traits>()` only for the clockless chipset family.
+/// Resolved at compile time, so SPI instantiations never name the hook.
+template<typename Chipset, typename Traits>
+struct enable_clockless_for {
+    static void apply() FL_NO_EXCEPT {}
+};
+template<typename Traits>
+struct enable_clockless_for<ClocklessChipset, Traits> {
+    static void apply() FL_NO_EXCEPT { enable_clockless<Traits>(); }
+};
+
+/// @brief Helper used by `enableDrivers<Bus...>()` to expand the parameter pack.
+/// Each call ODR-uses `BusTraits<B>::registerWithManager()`, which lazily
+/// constructs the driver singleton AND registers it with `ChannelManager`.
 
 template<Bus B, fl::u8 Which = 0>
 inline int bus_register_one() FL_NO_EXCEPT {

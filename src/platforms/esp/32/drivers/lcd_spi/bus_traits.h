@@ -83,9 +83,16 @@ template<> struct BusTraits<Bus::FLEX_IO, 0> {
 
     static Driver& instance() FL_NO_EXCEPT { return *instancePtr(); }
 
-    /// Clockless channels may route here: create the LCD_CAM clockless
-    /// driver on demand (#4793).
-    static void enableClockless() FL_NO_EXCEPT { detail::enableLcdClockless(); }
+    /// Clockless channels may route here: create and register the LCD_CAM
+    /// clockless driver on demand (#4793). Registering here, not only in
+    /// registerWithManager(), keeps it independent of construction order
+    /// (an SPI controller may have registered this bus first).
+    static void enableClockless() FL_NO_EXCEPT {
+        detail::enableLcdClockless();
+        if (const auto& clockless = detail::lcd_cam_bus_holder().clocklessPtr()) {
+            ChannelManager::registry().addDriver(default_bus_priority(Bus::FLEX_IO, 0), clockless);
+        }
+    }
 
     static void registerWithManager() FL_NO_EXCEPT {
         auto& holder = detail::lcd_cam_bus_holder();
