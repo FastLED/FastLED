@@ -15,6 +15,7 @@ Key features:
 
 import datetime
 import os
+import time
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -104,6 +105,33 @@ def get_port_serial_number(port: str) -> str | None:
     except Exception:
         return None
     return None
+
+
+def find_port_by_serial(
+    serial_number: str, exclude: str | None = None, wait_s: float = 5.0
+) -> str | None:
+    """Return the device path currently carrying ``serial_number``.
+
+    Used to follow a USB-JTAG board that re-enumerates under a new ``/dev``
+    name after the post-flash reset. Polls for up to ``wait_s`` seconds
+    because the new node appears a moment after the old one disappears.
+    """
+    deadline = time.monotonic() + wait_s
+    while True:
+        try:
+            for candidate in serial.tools.list_ports.comports():
+                if candidate.serial_number == serial_number and (
+                    exclude is None or candidate.device != exclude
+                ):
+                    return candidate.device
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
+            raise
+        except Exception:
+            return None
+        if time.monotonic() >= deadline:
+            return None
+        time.sleep(0.25)
 
 
 def auto_detect_upload_port(

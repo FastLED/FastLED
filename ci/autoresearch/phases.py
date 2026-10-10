@@ -56,6 +56,7 @@ from ci.util.port_utils import (
     auto_detect_upload_port,
     detect_attached_chip,
     environment_has_wifi,
+    find_port_by_serial,
     get_port_serial_number,
     kill_port_users,
     port_exists,
@@ -1746,6 +1747,15 @@ async def _run_build_deploy(ctx: RunContext, qctx: QuietContext) -> int | None:
 
     print(f"\U0001f4e6 Using {build_driver.name}")
 
+    # USB-JTAG boards (ESP32-C3/C6/P4/S3 native USB) re-enumerate on the reset
+    # after flashing, often under a new /dev name. Remember the USB serial so
+    # the session can follow the board if fbuild does not report the new port.
+    pre_deploy_serial = (
+        get_port_serial_number(upload_port)
+        if upload_port and not upload_port.startswith("ser=")
+        else None
+    )
+
     deploy_result = build_driver.deploy(
         build_dir,
         environment=build_environment,
@@ -1764,6 +1774,15 @@ async def _run_build_deploy(ctx: RunContext, qctx: QuietContext) -> int | None:
         ctx.upload_port = deploy_result.port
         upload_port = deploy_result.port
         print(f"✅ fbuild returned application port: {deploy_result.port}")
+    elif deploy_success and upload_port and pre_deploy_serial:
+        followed = find_port_by_serial(pre_deploy_serial, exclude=None)
+        if followed and followed != upload_port:
+            print(
+                f"↪ {upload_port} re-enumerated as {followed} after flashing "
+                f"(USB serial {pre_deploy_serial}); following it."
+            )
+            ctx.upload_port = followed
+            upload_port = followed
     if not deploy_success:
         qctx.emit("BUILD+FLASH FAIL")
         qctx.emit_log_path()

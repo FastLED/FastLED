@@ -148,7 +148,7 @@ badge before, so the breakage was not visible from this page.
 
 **ESP32 Classic:** [![esp32dev](https://github.com/FastLED/FastLED/actions/workflows/build_esp32dev.yml/badge.svg?event=push)](https://github.com/FastLED/FastLED/actions/workflows/build_esp32dev.yml) [![esp32wroom](https://github.com/FastLED/FastLED/actions/workflows/build_esp32wroom.yml/badge.svg?event=push)](https://github.com/FastLED/FastLED/actions/workflows/build_esp32wroom.yml)
 
-**ESP32 S-Series:** [![esp32s2](https://github.com/FastLED/FastLED/actions/workflows/build_esp32s2.yml/badge.svg?event=push)](https://github.com/FastLED/FastLED/actions/workflows/build_esp32s2.yml) [![esp32s3](https://github.com/FastLED/FastLED/actions/workflows/build_esp32s3.yml/badge.svg?event=push)](https://github.com/FastLED/FastLED/actions/workflows/build_esp32s3.yml)
+**ESP32 S-Series:** [![esp32s2](https://github.com/FastLED/FastLED/actions/workflows/build_esp32s2.yml/badge.svg?event=push)](https://github.com/FastLED/FastLED/actions/workflows/build_esp32s2.yml) [![esp32s3](https://github.com/FastLED/FastLED/actions/workflows/build_esp32s3.yml/badge.svg?branch=master&event=workflow_dispatch)](https://github.com/FastLED/FastLED/actions/workflows/build_esp32s3.yml)
 
 **ESP32 C-Series:** [![esp32c2](https://github.com/FastLED/FastLED/actions/workflows/build_esp32c2.yml/badge.svg?event=push)](https://github.com/FastLED/FastLED/actions/workflows/build_esp32c2.yml) [![esp32c3](https://github.com/FastLED/FastLED/actions/workflows/build_esp32c3.yml/badge.svg?event=push)](https://github.com/FastLED/FastLED/actions/workflows/build_esp32c3.yml) [![esp32c5](https://github.com/FastLED/FastLED/actions/workflows/build_esp32c5.yml/badge.svg?event=push)](https://github.com/FastLED/FastLED/actions/workflows/build_esp32c5.yml) [![esp32c6](https://github.com/FastLED/FastLED/actions/workflows/build_esp32c6.yml/badge.svg?event=push)](https://github.com/FastLED/FastLED/actions/workflows/build_esp32c6.yml)
 
@@ -167,7 +167,7 @@ badge before, so the breakage was not visible from this page.
 ### Specialty Platforms
 **x86:** [![linux_native](https://github.com/FastLED/FastLED/actions/workflows/build_linux.yml/badge.svg?event=push)](https://github.com/FastLED/FastLED/actions/workflows/build_linux.yml)
 
-**WebAssembly:** [![wasm](https://github.com/FastLED/FastLED/actions/workflows/build_wasm.yml/badge.svg?event=push)](https://github.com/FastLED/FastLED/actions/workflows/build_wasm.yml) [![wasm_compile_test](https://github.com/FastLED/FastLED/actions/workflows/build_wasm_compilers.yml/badge.svg?event=push)](https://github.com/FastLED/FastLED/actions/workflows/build_wasm_compilers.yml)
+**WebAssembly:** [![wasm](https://github.com/FastLED/FastLED/actions/workflows/build_wasm.yml/badge.svg?event=push)](https://github.com/FastLED/FastLED/actions/workflows/build_wasm.yml) [![wasm_compile_test](https://github.com/FastLED/FastLED/actions/workflows/build_wasm_compilers.yml/badge.svg?branch=master&event=workflow_dispatch)](https://github.com/FastLED/FastLED/actions/workflows/build_wasm_compilers.yml)
 
 ### Library Size Validation
 **STM32:** [![check_bluepill_size](https://github.com/FastLED/FastLED/actions/workflows/check_bluepill_size.yml/badge.svg?event=push)](https://github.com/FastLED/FastLED/actions/workflows/check_bluepill_size.yml)
