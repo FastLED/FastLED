@@ -1,6 +1,30 @@
 
 
 
+FastLED 3.10.7 (Next Release)
+=============================
+  * **Smaller builds: memory and flash regressions since 3.10.3 cut back (#4801)**
+    * Code that a sketch can never use is no longer linked in: the FLEX_IO clockless pipeline in SPI-only sketches, the I2S clockless peripheral on esp32dev, the ADC driver unless `fl::analogRead` is used, the task Scheduler in driver wait loops (new `fl::task::yield_system()`), RGBW/RGBWW conversion in RGB-only sketches, and libstdc++ locale init.
+    * Wi-Fi is detected through `esp_netif`, so ESP32 sketches without networking drop 1.3 KB of Wi-Fi RAM.
+    * Teensy I2S audio-input buffers are allocated on first use (−1 KB RAM in LED-only sketches).
+    * Uno Blink static RAM is down to 118 B, below 3.10.3.
+    * Dashboard deltas vs 3.10.6-era master: esp32dev Blink −5.2 KB flash / −1.9 KB RAM, esp32dev APA102 −15.9 KB / −2.2 KB, esp32s3 Blink −9.2 KB / −0.7 KB, esp32s3 APA102 −16.6 KB / −0.7 KB.
+  * **Drivers and platforms**
+    * Teensy 4: ISR-streamed FlexPWM RX + FlexIO TX ring (1000-LED loopback); fixed WS2812 loopback decode mismatches; ObjectFLED DMA buffer sized to the frame.
+    * Platform-neutral early-boot watchdog loop guard (Teensy 4.x self-recovers before USB).
+    * ESP32: compact RMT allocation records; PARLIO shares mutually exclusive waveform lookup storage; Wi-Fi/OTA linked only when a sketch uses `fl::net`.
+    * AVR: Arduino `Serial` linked only when used; the power limiter drops 64-bit math; legacy white settings preserved during encoding.
+  * **Fixes**
+    * `fl::aligned_alloc` now honours the requested alignment on bare-metal targets (AVR/ESP8266/ARM).
+    * ESP32 SPI bulk-transfer path builds again (stray exception specifier).
+    * WASM: strips placed relative to shared screen bounds; screen maps with unset diameter render.
+    * In-place upgrades over 3.10.5 link (tombstoned `fl.system.sd+.cpp`).
+  * **API and tooling**
+    * No-throw annotations enforced (`FL_NO_EXCEPT`) with an ESP release exception policy.
+    * Non-release builds default to errors-only logging.
+    * New lints: raw `alignas` banned in `src/` (use `fl/stl/align.h`).
+    * fbuild pinned to 2.5.39.
+
 FastLED 3.10.6
 ==============
   * **MP3 decoder: minimp3 is now the only backend, and it decodes in fixed point**
