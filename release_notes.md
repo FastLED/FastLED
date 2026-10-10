@@ -1,7 +1,7 @@
 
 
 
-FastLED 3.10.7 (Next Release)
+FastLED 3.10.7
 =============================
   * **Smaller builds: memory and flash regressions since 3.10.3 cut back (#4801)**
     * Code that a sketch can never use is no longer linked in: the FLEX_IO clockless pipeline in SPI-only sketches, the I2S clockless peripheral on esp32dev, the ADC driver unless `fl::analogRead` is used, the task Scheduler in driver wait loops (new `fl::task::yield_system()`), RGBW/RGBWW conversion in RGB-only sketches, and libstdc++ locale init.
