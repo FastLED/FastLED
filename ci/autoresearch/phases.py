@@ -1774,8 +1774,15 @@ async def _run_build_deploy(ctx: RunContext, qctx: QuietContext) -> int | None:
         ctx.upload_port = deploy_result.port
         upload_port = deploy_result.port
         print(f"✅ fbuild returned application port: {deploy_result.port}")
-    elif deploy_success and upload_port and pre_deploy_serial:
-        followed = find_port_by_serial(pre_deploy_serial, exclude=None)
+    elif (
+        deploy_success
+        and upload_port
+        and pre_deploy_serial
+        and not port_exists(upload_port)
+    ):
+        # Only when the original node is gone: no wait in the common case,
+        # and never "follow" back onto the stale path.
+        followed = find_port_by_serial(pre_deploy_serial, exclude=upload_port)
         if followed and followed != upload_port:
             print(
                 f"↪ {upload_port} re-enumerated as {followed} after flashing "
