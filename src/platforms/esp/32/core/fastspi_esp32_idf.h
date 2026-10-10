@@ -307,7 +307,7 @@ public:
                 D::adjust(pixels.loadAndScale0()),
                 D::adjust(pixels.loadAndScale1()),
                 D::adjust(pixels.loadAndScale2())
-            ) FL_NO_EXCEPT;
+            );
             data_block[data_block_index++] = rgb;
             pixels.advanceData();
             pixels.stepDithering();
