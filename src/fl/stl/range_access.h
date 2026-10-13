@@ -1,10 +1,12 @@
 #pragma once
 
+#include "fl/stl/adl_barrier.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/noexcept.h"
 
 namespace fl {
 
+namespace adl_barrier {  // see fl/stl/adl_barrier.h
 // fl::begin for arrays
 template <typename T, fl::size N>
 constexpr T* begin(T (&array)[N]) FL_NO_EXCEPT {
@@ -40,5 +42,7 @@ template <typename Container>
 constexpr auto end(const Container& c) FL_NO_EXCEPT -> decltype(c.end()) {
     return c.end();
 }
+}  // namespace adl_barrier
+
 
 } // namespace fl

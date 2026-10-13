@@ -18,13 +18,9 @@ ESP32_IDF_5_4_PIOARDUINO = "https://github.com/pioarduino/platform-espressif32/r
 ESP32_IDF_5_5_PIOARDUINO = "https://github.com/pioarduino/platform-espressif32/releases/download/55.03.34/platform-espressif32.zip"
 ESP32_IDF_5_5_1_PIOARDUINO = "https://github.com/pioarduino/platform-espressif32/releases/download/55.03.35/platform-espressif32.zip"
 ESP32_IDF_5_5_5_PIOARDUINO = "https://github.com/pioarduino/platform-espressif32/releases/download/55.03.311/platform-espressif32.zip"
-# IDF 6.0 preview via pioarduino prep_IDF6 branch (commit 98230ad4aa, 2026-05-25).
-# platform.json in this branch pins framework-arduinoespressif32 to
-# arduino-esp32/archive/master.zip — arduino-esp32 master built on ESP-IDF v6.0.1+.
-# Moves to a release tag when pioarduino cuts one. See FastLED#3516.
-ESP32_IDF_6_PIOARDUINO = (
-    "https://github.com/pioarduino/platform-espressif32.git#prep_IDF6"
-)
+# Arduino 4 on ESP-IDF 6: pioarduino 61.04.00-RC1 release (FastLED#4827,
+# FastLED#3516). Bump to the final 61.04.x tag when pioarduino cuts it.
+ESP32_IDF_6_PIOARDUINO = "https://github.com/pioarduino/platform-espressif32/releases/download/61.04.00-RC1/platform-espressif32.zip"
 ESP32_IDF_LATEST_PIOARDUINO = ESP32_IDF_5_5_1_PIOARDUINO
 
 ESP32_IDF_LATEST_PIOARDUINO = (
@@ -826,8 +822,8 @@ ESP32DEV_IDF4_4 = Board(
 )
 
 # IDF 6.0 target for the classic-ESP32 I2S parallel-out driver bring-up
-# (FastLED#3515). Uses pioarduino's prep_IDF6 branch until an IDF6 release
-# tag ships. No FASTLED_ESP32_I2S selector — the driver auto-compiles via
+# (FastLED#3515). Uses the pioarduino 61.04.00-RC1 release (Arduino core
+# 4.0.0-RC1 on ESP-IDF 6.1, FastLED#4827). No FASTLED_ESP32_I2S selector — the driver auto-compiles via
 # FASTLED_ESP32_HAS_I2S (feature flag) and gc-sections elides it when
 # unused. Users select the I2S driver at runtime via
 # `FastLED.enableDriver<fl::Bus::FLEX_IO, 0>()` or

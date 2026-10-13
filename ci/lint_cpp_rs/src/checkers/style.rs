@@ -696,6 +696,13 @@ impl FileContentChecker for UsingNamespaceChecker {
             if regex_define_using_namespace().is_match(&line_clean) {
                 continue;
             }
+            // fl/stl/adl_barrier.h: this directive hides fl's generic templates
+            // from ADL while keeping them reachable as fl::name (FastLED#4827).
+            if line_clean.trim() == "using namespace adl_barrier;"
+                && normalize_path(&file_content.path).ends_with("src/fl/stl/adl_barrier.h")
+            {
+                continue;
+            }
 
             let mut is_conditional = false;
             for previous_index in index.saturating_sub(5)..index {

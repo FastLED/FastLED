@@ -28,3 +28,15 @@ jobs:
     uses: ./.github/workflows/build_template.yml
     with:
       args: esp32s3 --examples AutoResearch
+
+  arduino4_idf6:
+    # Nightly Arduino 4 / ESP-IDF 6 board build (FastLED#4827). Test.ino carries
+    # the legacy unqualified memset/memcpy/free-on-CRGB* regression.
+    uses: ./.github/workflows/build_template.yml
+    with:
+      args: esp32dev_idf6 --examples Blink,Test,Audio,AudioInput
+
+  arduino3_esp32dev:
+    uses: ./.github/workflows/build_template.yml
+    with:
+      args: esp32dev --examples Blink,Test

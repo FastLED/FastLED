@@ -78,11 +78,19 @@ template <typename T, typename U> constexpr inline common_type_t<T, U> max(T a, 
 
 FL_DISABLE_WARNING_POP
 
-template <typename T> FASTLED_FORCE_INLINE T clamp(T value, T lo, T hi) FL_NO_EXCEPT {
+// lo/hi are their own template parameters, constrained to T, so this generic
+// clamp is less specialized than C++17 std::clamp(const T&, ...). Under
+// `using namespace std` an unqualified clamp on an fl type picks std::clamp
+// instead of tying (FastLED#4827); fl's fixed-point clamp overloads stay
+// more specialized than this one.
+template <typename T, typename L, typename H>
+FASTLED_FORCE_INLINE enable_if_t<is_same<T, L>::value && is_same<T, H>::value, T>
+clamp(T value, L lo, H hi) FL_NO_EXCEPT {
     if (value < lo) return lo;
     if (value > hi) return hi;
     return value;
 }
+
 
 // ===== Approximate equality ===================================================
 

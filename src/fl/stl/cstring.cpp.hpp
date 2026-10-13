@@ -31,23 +31,23 @@ namespace fl {
 // Standard String Functions
 // ============================================================================
 
-size_t strlen(const char* s) FL_NO_EXCEPT {
+size_t libc_impl::strlen(const char* s) FL_NO_EXCEPT {
     return ::strlen(s);
 }
 
-int strcmp(const char* s1, const char* s2) FL_NO_EXCEPT {
+int libc_impl::strcmp(const char* s1, const char* s2) FL_NO_EXCEPT {
     return ::strcmp(s1, s2);
 }
 
-int strncmp(const char* s1, const char* s2, size_t n) FL_NO_EXCEPT {
+int libc_impl::strncmp(const char* s1, const char* s2, size_t n) FL_NO_EXCEPT {
     return ::strncmp(s1, s2, n);
 }
 
-char* strcpy(char* dest, const char* src) FL_NO_EXCEPT {
+char* libc_impl::strcpy(char* dest, const char* src) FL_NO_EXCEPT {
     return ::strcpy(dest, src);
 }
 
-char* strncpy(char* dest, const char* src, size_t n) FL_NO_EXCEPT {
+char* libc_impl::strncpy(char* dest, const char* src, size_t n) FL_NO_EXCEPT {
     // Unlike ::strncpy, this ALWAYS null-terminates: it copies at most n
     // characters from src, then writes a terminator at dest[copied]
     // (copied <= n). Callers pass n = capacity - 1 (dest sized >= n+1),
@@ -69,55 +69,55 @@ char* strncpy(char* dest, const char* src, size_t n) FL_NO_EXCEPT {
     return dest;
 }
 
-char* strcat(char* dest, const char* src) FL_NO_EXCEPT {
+char* libc_impl::strcat(char* dest, const char* src) FL_NO_EXCEPT {
     return ::strcat(dest, src);
 }
 
-char* strncat(char* dest, const char* src, size_t n) FL_NO_EXCEPT {
+char* libc_impl::strncat(char* dest, const char* src, size_t n) FL_NO_EXCEPT {
     return ::strncat(dest, src, n);
 }
 
-const char* strstr(const char* haystack, const char* needle) FL_NO_EXCEPT {
+const char* libc_impl::strstr(const char* haystack, const char* needle) FL_NO_EXCEPT {
     return ::strstr(haystack, needle);
 }
 
-char* strchr(char* s, int c) FL_NO_EXCEPT {
+char* libc_impl::strchr(char* s, int c) FL_NO_EXCEPT {
     return ::strchr(s, c);
 }
 
-const char* strchr(const char* s, int c) FL_NO_EXCEPT {
+const char* libc_impl::strchr(const char* s, int c) FL_NO_EXCEPT {
     return ::strchr(s, c);
 }
 
-char* strrchr(char* s, int c) FL_NO_EXCEPT {
+char* libc_impl::strrchr(char* s, int c) FL_NO_EXCEPT {
     return ::strrchr(s, c);
 }
 
-const char* strrchr(const char* s, int c) FL_NO_EXCEPT {
+const char* libc_impl::strrchr(const char* s, int c) FL_NO_EXCEPT {
     return ::strrchr(s, c);
 }
 
-size_t strspn(const char* s1, const char* s2) FL_NO_EXCEPT {
+size_t libc_impl::strspn(const char* s1, const char* s2) FL_NO_EXCEPT {
     return ::strspn(s1, s2);
 }
 
-size_t strcspn(const char* s1, const char* s2) FL_NO_EXCEPT {
+size_t libc_impl::strcspn(const char* s1, const char* s2) FL_NO_EXCEPT {
     return ::strcspn(s1, s2);
 }
 
-char* strpbrk(char* s1, const char* s2) FL_NO_EXCEPT {
+char* libc_impl::strpbrk(char* s1, const char* s2) FL_NO_EXCEPT {
     return ::strpbrk(s1, s2);
 }
 
-const char* strpbrk(const char* s1, const char* s2) FL_NO_EXCEPT {
+const char* libc_impl::strpbrk(const char* s1, const char* s2) FL_NO_EXCEPT {
     return ::strpbrk(s1, s2);
 }
 
-char* strtok(char* s1, const char* s2) FL_NO_EXCEPT {
+char* libc_impl::strtok(char* s1, const char* s2) FL_NO_EXCEPT {
     return ::strtok(s1, s2);
 }
 
-char* strerror(int errnum) FL_NO_EXCEPT {
+char* libc_impl::strerror(int errnum) FL_NO_EXCEPT {
     return ::strerror(errnum);
 }
 
@@ -125,32 +125,32 @@ char* strerror(int errnum) FL_NO_EXCEPT {
 // Memory Functions
 // ============================================================================
 
-void* memcpy(void* dest, const void* src, size_t n) FL_NO_EXCEPT {
+void* libc_impl::memcpy(void* dest, const void* src, size_t n) FL_NO_EXCEPT {
     if (n == 0) return dest;
     return ::memcpy(dest, src, n);
 }
 
-int memcmp(const void* s1, const void* s2, size_t n) FL_NO_EXCEPT {
+int libc_impl::memcmp(const void* s1, const void* s2, size_t n) FL_NO_EXCEPT {
     if (n == 0) return 0;
     return ::memcmp(s1, s2, n);
 }
 
-void* memmove(void* dest, const void* src, size_t n) FL_NO_EXCEPT {
+void* libc_impl::memmove(void* dest, const void* src, size_t n) FL_NO_EXCEPT {
     if (n == 0) return dest;
     return ::memmove(dest, src, n);
 }
 
-void* memset(void* s, int c, size_t n) FL_NO_EXCEPT {
+void* libc_impl::memset(void* s, int c, size_t n) FL_NO_EXCEPT {
     if (n == 0) return s;
     return ::memset(s, c, n);
 }
 
-void* memchr(void* s, int c, size_t n) FL_NO_EXCEPT {
+void* libc_impl::memchr(void* s, int c, size_t n) FL_NO_EXCEPT {
     if (n == 0) return nullptr;
     return ::memchr(s, c, n);
 }
 
-const void* memchr(const void* s, int c, size_t n) FL_NO_EXCEPT {
+const void* libc_impl::memchr(const void* s, int c, size_t n) FL_NO_EXCEPT {
     if (n == 0) return nullptr;
     return ::memchr(s, c, n);
 }

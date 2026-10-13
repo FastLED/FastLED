@@ -12,7 +12,16 @@
 #define ARDUINO 1
 #endif
 
-// FastLED headers only - NO stdlib headers
+// Real Arduino cores include the C library from Arduino.h, and sketches call
+// memset/memcpy/malloc/free without including anything else. This shim
+// mirrors that so unmodified sketches build on host and WASM (FastLED#4827).
+// These are the only stdlib headers here (allowlisted in the C++ linter).
+// IWYU pragma: begin_keep
+#include <stdlib.h>
+#include <string.h>
+// IWYU pragma: end_keep
+
+// Everything else: FastLED headers only
 #include "fl/stl/string.h"
 #include "fl/stl/stddef.h"
 #include "fl/stl/stdint.h"

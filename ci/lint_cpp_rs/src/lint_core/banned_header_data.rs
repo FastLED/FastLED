@@ -230,6 +230,11 @@ const BANNED_HEADER_EXCEPTIONS: &[(&str, &str)] = &[
         "third_party/object_fled/src/ObjectFLEDDmaManager.h",
     ),
     ("Arduino.h", "platforms/wasm/compiler/Arduino.h"),
+    // The host/WASM Arduino.h shim must expose the C library the way every
+    // real Arduino core does, so unmodified sketches calling memset/free
+    // compile (FastLED#4827).
+    ("string.h", "platforms/stub/Arduino.h"),
+    ("stdlib.h", "platforms/stub/Arduino.h"),
     ("Arduino.h", "platforms/wasm/led_sysdefs_wasm.h"),
     ("pthread.h", "fl/stl/thread_local.h"),
     ("mutex", "fl/stl/mutex.h"),

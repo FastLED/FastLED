@@ -4,6 +4,7 @@
 Provides eanble_if and is_derived for compilers before C++14.
 */
 
+#include "fl/stl/adl_barrier.h"
 #include "fl/stl/move.h"
 #include "fl/stl/int.h"
 #include "fl/stl/noexcept.h"
@@ -229,6 +230,7 @@ template <> struct is_void<void> {
     enum : bool { value = true };
 };
 
+namespace adl_barrier {  // see fl/stl/adl_barrier.h
 // Implementation of forward
 template <typename T>
 constexpr T &&forward(typename remove_reference<T>::type &t) FL_NO_EXCEPT {
@@ -242,6 +244,8 @@ constexpr T &&forward(typename remove_reference<T>::type &&t) FL_NO_EXCEPT {
                   "Cannot forward an rvalue as an lvalue");
     return static_cast<T &&>(t);
 }
+}  // namespace adl_barrier
+
 
 // Define remove_cv trait
 template <typename T> struct remove_cv {
@@ -874,11 +878,20 @@ template <typename T> struct swap_impl<T, true> {
 };
 
 // single entry‑point
-template <typename T> void swap(T &a, T &b) FL_NO_EXCEPT {
+//
+// Unlike the other generic templates (see fl/stl/adl_barrier.h), swap stays
+// directly in fl so unqualified `swap(a, b)` on fl types keeps finding it via
+// ADL. `b` is its own template parameter, constrained to the same type, which
+// makes this overload less specialized than std::swap(T&, T&). When std::swap
+// is visible (e.g. inside std::reverse / std::sort on CRGB, FastLED#4827) std
+// wins instead of the call being ambiguous; otherwise this one is used.
+template <typename T, typename U>
+enable_if_t<is_same<T, U>::value> swap(T &a, U &b) FL_NO_EXCEPT {
     // if T is a POD, use use a simple data copy swap.
     // if T is not a POD, use the T::Swap method.
     swap_impl<T>::apply(a, b);
 }
+
 
 template <typename T> void swap_by_copy(T &a, T &b) FL_NO_EXCEPT {
     // Force copy semantics (for cases where move might not be safe)

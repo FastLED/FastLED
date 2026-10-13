@@ -1,11 +1,14 @@
 #pragma once
 
+#include "fl/stl/adl_barrier.h"
 #include "fl/stl/type_traits.h"
 #include "fl/stl/move.h"
 #include "fl/math/random.h"
 #include "fl/stl/noexcept.h"
 
 namespace fl {
+
+namespace adl_barrier {  // see fl/stl/adl_barrier.h
 
 template <typename Iterator>
 void reverse(Iterator first, Iterator last) FL_NO_EXCEPT {
@@ -291,6 +294,8 @@ Iterator remove_if(Iterator first, Iterator last, UnaryPredicate pred) FL_NO_EXC
     return result;
 }
 
+}  // namespace adl_barrier
+
 namespace detail {
 
 // Insertion sort implementation for small arrays
@@ -546,6 +551,8 @@ void mergesort_impl(Iterator first, Iterator last, Compare comp) FL_NO_EXCEPT {
 
 } // namespace detail
 
+namespace adl_barrier {  // see fl/stl/adl_barrier.h
+
 // Lower bound: find first position in sorted [first, last) where value could be inserted.
 template <typename Iterator, typename T, typename Compare>
 Iterator lower_bound(Iterator first, Iterator last, const T& value, Compare comp) FL_NO_EXCEPT {
@@ -662,5 +669,7 @@ template <typename Iterator>
 void shuffle(Iterator first, Iterator last) FL_NO_EXCEPT {
     shuffle(first, last, default_random());
 }
+
+}  // namespace adl_barrier
 
 } // namespace fl
