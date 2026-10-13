@@ -536,3 +536,8 @@
   in the SD translation unit and verify actual map and image changes, alongside
   an example that still uses SD. Optional SDK objects also need archive extraction
   in the build backend; conservative discovery alone cannot prevent retention.
+- Full SDK inventories are expensive on hosted Intel Macs. Batch cold cache
+  publications behind one complete final content/availability audit; never
+  remove per-job availability checks while still publishing immediately. Test
+  that a failed audit cannot poison an existing native key, even after inputs
+  are restored. Normalize repeated diagnostic paths within each parse only.

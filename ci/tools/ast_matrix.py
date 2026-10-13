@@ -535,7 +535,7 @@ def run_matrix(
             memory_budget_mb=memory_budget_mb,
             worker_memory_mb=worker_memory_mb,
         )
-        snapshot = AstInputSnapshot()
+        snapshot = AstInputSnapshot(defer_publication=True)
         with ThreadPoolExecutor(max_workers=workers) as pool:
             futures = {
                 pool.submit(_run_job, job, snapshot): index

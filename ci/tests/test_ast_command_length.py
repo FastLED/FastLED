@@ -106,3 +106,39 @@ def test_long_profile_arguments_use_temporary_compilation_database(
 
     assert len(databases) == 1
     assert not databases[0].parent.exists(), "temporary compiler arguments leaked"
+
+
+def test_repeated_diagnostic_paths_are_resolved_once_per_parse(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    query = check_noexcept._find_clang_query()
+    assert query
+    monkeypatch.setattr(check_ast_combined, "PROJECT_ROOT", tmp_path)
+    source_dir = tmp_path / "src"
+    source_dir.mkdir()
+    header = source_dir / "declarations.h"
+    header.write_text(
+        "\n".join(
+            f"inline void fn{index}(int* p) noexcept {{}}" for index in range(64)
+        ),
+        encoding="utf-8",
+    )
+    source = source_dir / "unit.cpp"
+    source.write_text('#include "declarations.h"\n', encoding="utf-8")
+    original = Path.resolve
+    resolutions: list[Path] = []
+
+    def resolve(path: Path, strict: bool = False) -> Path:
+        if path.name == header.name:
+            resolutions.append(path)
+        return original(path, strict=strict)
+
+    monkeypatch.setattr(Path, "resolve", resolve)
+    result = check_ast_combined.analyze_translation_unit(
+        query, str(source), ".*", ["-std=c++17"]
+    )
+    assert len(result.coverage) == 64
+    assert not result.noexcept_hits
+    assert not result.array_param_hits
+    assert header in result.dependencies
+    assert len(resolutions) <= 2

@@ -168,7 +168,14 @@ Windows reparse points. Ordinary children inherit their parent's resolved path.
 This avoids repeated ancestor lookups across large SDK trees while preserving
 the inventory digest, external header tracking, and cycle detection. Candidate
 file contents are prepared once per invocation; each cold parse still checks
-its observed inputs and include availability, followed by the final audit.
+its observed input bytes and rejects dependencies outside the declared roots.
+Matrix results and dependency manifests remain provisional until one final full
+content and include-availability audit succeeds. A failed audit discards all
+pending publications. This avoids rescanning an entire SDK after every TU
+without publishing results under an unverified cache key. Standalone cache
+calls retain their immediate content and availability checks. Inputs must remain
+unchanged throughout an invocation. Diagnostic paths are normalized once per
+distinct path within each parse; subsequent parses resolve them independently.
 
 `memory_measurement` records aggregate sampled RSS for the current process and
 its descendants, using a 100 millisecond polling interval with a final sample at shutdown.

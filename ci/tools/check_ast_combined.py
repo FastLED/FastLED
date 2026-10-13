@@ -218,8 +218,8 @@ def analyze_translation_unit(
     _raise_on_query_errors(result.returncode, output)
     dependencies = {Path(tu).resolve()}
     dependencies.update(
-        Path(match.group(1)).resolve()
-        for match in re.finditer(r"^\.+ (.+)$", result.stderr, re.MULTILINE)
+        Path(path).resolve()
+        for path in set(re.findall(r"^\.+ (.+)$", result.stderr, re.MULTILINE))
     )
     for dependency in dependencies:
         if not dependency.is_file():
@@ -234,12 +234,26 @@ def analyze_translation_unit(
         raise NoexceptCheckError(
             f"{tu}: expected backend definitions missing: {', '.join(missing)}"
         )
+    # A header can emit thousands of locations across the three matchers.
+    # Resolve its symlinks and normalize its owned path once in THIS parse;
+    # later parses must observe any changed filesystem layout independently.
+    diagnostic_paths: dict[str, str | None] = {}
+
+    def owned_path(raw: str) -> str | None:
+        if raw not in diagnostic_paths:
+            path = Path(raw).resolve()
+            diagnostic_paths[raw] = (
+                path.relative_to(PROJECT_ROOT).as_posix()
+                if path.is_relative_to(PROJECT_ROOT / "src")
+                else None
+            )
+        return diagnostic_paths[raw]
+
     coverage: set[DeclarationLocation] = set()
     for location in _COVERAGE_OUTPUT_RE.finditer(output):
-        path = Path(location.group(1)).resolve()
-        if not path.is_relative_to(PROJECT_ROOT / "src"):
+        normalized = owned_path(location.group(1))
+        if normalized is None:
             continue
-        normalized = path.relative_to(PROJECT_ROOT).as_posix()
         coverage.add(
             DeclarationLocation(
                 normalized, int(location.group(2)), int(location.group(3))
@@ -252,10 +266,9 @@ def analyze_translation_unit(
     array_seen: set[tuple[str, int]] = set()
 
     for match in _COMBINED_OUTPUT_RE.finditer(output):
-        source_path = Path(match.group(1)).resolve()
-        if not source_path.is_relative_to(PROJECT_ROOT / "src"):
+        filepath = owned_path(match.group(1))
+        if filepath is None:
             continue
-        filepath = source_path.relative_to(PROJECT_ROOT).as_posix()
         line_num = int(match.group(2))
         bind = match.group(3)
         key = (filepath, line_num)

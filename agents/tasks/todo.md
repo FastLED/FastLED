@@ -602,6 +602,17 @@ Real source-built fbuild 2.5.41 checks pass the unchanged RP2040 image/RAM budge
 (103,328/8,636 bytes) and Teensy 4.1 budget (47,104/21,734 bytes), with real Pico
 FxSdCard and Teensy OctoWS2811 builds passing. The dependency is not published yet.
 
+Intel Mac then reached the unchanged 900-second lint deadline after 46 jobs.
+Profiling found repeated full SDK inventories and repeated diagnostic path
+normalization. Matrix cache publication now waits for one complete final input
+audit, with actual dependency bytes still checked after each parse; failed
+audits discard pending results. Per-parse path normalization retains all matches.
+New native-cache poisoning and real Clang path-work regressions fail before the
+fix and pass afterward. All 39 focused tests pass (one Windows-only skip), and
+normal lint passes 138 fresh parses, 21,894 declarations and a verified snapshot
+in 211.41 seconds, with 1,707.0 MiB sampled peak RSS. Review is clean. Actual
+Intel hosted validation is still required; no deadlines or profiles were relaxed.
+
 PR #4831 carries the implementation and dependency pin. Its exact-head
 `ci-full` checks are the authoritative final cross-platform validation record;
 require them to pass before marking the PR ready. Preserve ordinary SDK/build

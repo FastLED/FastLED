@@ -437,3 +437,93 @@ def test_shared_warm_snapshot_rejects_mutation_before_reporting(
     with pytest.raises(ValueError, match="changed during analysis"):
         snapshot.verify_final()
     assert len(calls) == 1
+
+
+def test_batch_cache_publishes_only_after_one_complete_audit(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    includes = tmp_path / "include"
+    includes.mkdir()
+    header = includes / "header.h"
+    header.write_text("header", encoding="utf-8")
+    scans: list[Path] = []
+    original = AstInputSnapshot.inventory
+
+    def inventory(snapshot: AstInputSnapshot, root: Path) -> str:
+        if root not in snapshot._inventories:
+            scans.append(root)
+        return original(snapshot, root)
+
+    monkeypatch.setattr(AstInputSnapshot, "inventory", inventory)
+    calls: list[int] = []
+    snapshot = AstInputSnapshot(defer_publication=True)
+
+    def run(index: int, active: AstInputSnapshot | None) -> bool:
+        def parse() -> AstUnitResult:
+            calls.append(index)
+            return AstUnitResult({"violations": ["required finding"]}, (header,))
+
+        result = cached_ast_unit(
+            "batch",
+            identity={"unit": index},
+            input_files=[],
+            include_roots=[includes],
+            runner=parse,
+            cache_dir=tmp_path / "cache",
+            snapshot=active,
+        )
+        assert result.payload == {"violations": ["required finding"]}
+        return result.cache_hit
+
+    for index in range(3):
+        assert not run(index, snapshot)
+    assert not (tmp_path / "cache").exists()
+    snapshot.verify_final()
+    assert scans == [includes, includes]
+    assert len(list((tmp_path / "cache").glob("*.json"))) == 3
+    for index in range(3):
+        assert run(index, None)
+    assert calls == [0, 1, 2]
+
+
+def test_failed_batch_audit_cannot_poison_existing_native_cache_key(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "unit.cpp"
+    source.write_text("old", encoding="utf-8")
+    includes = tmp_path / "include"
+    includes.mkdir()
+    optional = includes / "optional.h"
+    calls: list[str] = []
+
+    def parse() -> AstUnitResult:
+        calls.append("clean")
+        return AstUnitResult({"branch": "without optional header"}, (source,))
+
+    kwargs: CacheCall = dict(
+        identity={},
+        input_files=[source],
+        include_roots=[includes],
+        runner=parse,
+        cache_dir=tmp_path / "cache",
+    )
+    cached_ast_unit("batch-race", **kwargs)
+    source.write_text("new", encoding="utf-8")
+
+    def changed_parse() -> AstUnitResult:
+        # Models __has_include changing a branch without including that file.
+        optional.write_text("new header", encoding="utf-8")
+        return AstUnitResult({"branch": "poisoned"}, (source,))
+
+    snapshot = AstInputSnapshot(defer_publication=True)
+    cached_ast_unit(
+        "batch-race", **{**kwargs, "runner": changed_parse}, snapshot=snapshot
+    )
+    with pytest.raises(ValueError, match="availability changed during analysis"):
+        snapshot.verify_final()
+    optional.rename(tmp_path / "removed-header")
+    snapshot.verify_final()  # A failed batch must have been discarded entirely.
+    result = cached_ast_unit("batch-race", **kwargs)
+    assert not result.cache_hit
+    assert result.payload == {"branch": "without optional header"}
+    assert calls == ["clean", "clean"]

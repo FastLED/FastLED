@@ -79,6 +79,8 @@ class AstInputSnapshot:
     must not mutate inputs while the matrix runs, just as with compilation.
     """
 
+    defer_publication: bool = False
+    _publications: list[Callable[[], None]] = field(default_factory=list)
     _contents: dict[Path, str] = field(default_factory=dict)
     _inventories: dict[Path, str] = field(default_factory=dict)
     _available_files: dict[Path, set[Path]] = field(default_factory=dict)
@@ -201,11 +203,20 @@ class AstInputSnapshot:
                 )
             if before != after.content(resolved):
                 raise ValueError(f"AST input changed during analysis; retry: {path}")
-        for root in roots:
-            if self.inventory(root) != after.inventory(root):
-                raise ValueError(
-                    f"AST include availability changed during analysis; retry: {root}"
-                )
+        if not self.defer_publication:
+            for root in roots:
+                if self.inventory(root) != after.inventory(root):
+                    raise ValueError(
+                        f"AST include availability changed during analysis; retry: {root}"
+                    )
+
+    def publish_after_audit(self, publication: Callable[[], None]) -> None:
+        """Keep cold matrix results provisional until the full input audit."""
+        if self.defer_publication:
+            with self._lock:
+                self._publications.append(publication)
+        else:
+            publication()
 
     def verify_final(self) -> None:
         """Validate shared lookup hashes before reporting any matrix result.
@@ -217,6 +228,9 @@ class AstInputSnapshot:
         with self._lock:
             contents = dict(self._contents)
             inventories = dict(self._inventories)
+            # A failed audit discards the entire batch, even if callers later
+            # restore inputs and attempt another audit on this object.
+            publications, self._publications = self._publications, []
         after = AstInputSnapshot()
         for path, before in contents.items():
             if after.content(path) != before:
@@ -226,6 +240,11 @@ class AstInputSnapshot:
                 raise ValueError(
                     f"AST include availability changed during analysis; retry: {root}"
                 )
+        # No stable result or dependency manifest is published before EVERY
+        # content and availability check passes. This avoids walking a large
+        # SDK once per TU while retaining a complete invocation-wide audit.
+        for publication in publications:
+            publication()
 
 
 def _unit_json(value: object) -> bytes:
@@ -248,6 +267,10 @@ def _unit_manifest_write(path: Path, dependencies: list[str]) -> None:
         json.dump({"dependencies": dependencies}, stream)
         temporary = Path(stream.name)
     os.replace(temporary, path)
+
+
+class _AstCacheMiss(Exception):
+    """Abort a native lookup callback without storing provisional bytes."""
 
 
 def cached_ast_unit(
@@ -356,7 +379,17 @@ def cached_ast_unit(
         # A key without discovered dependencies must never be reused if the
         # manifest is missing, corrupted, or concurrent discovery is underway.
         initial_key += uuid.uuid4().hex.encode("ascii")
-    encoded = execute(initial_key, run)
+    if active_snapshot.defer_publication:
+
+        def miss() -> bytes:
+            raise _AstCacheMiss
+
+        try:
+            encoded = execute(initial_key, miss) if manifest_valid else run()
+        except _AstCacheMiss:
+            encoded = run()
+    else:
+        encoded = execute(initial_key, run)
     try:
         result = json.loads(encoded)
         if (
@@ -375,14 +408,24 @@ def cached_ast_unit(
         return AstUnitCacheResult(result["payload"], False)
 
     discovered = result["dependencies"]
-    if parsed is not None and (discovered != dependencies or not manifest_valid):
-        # Initial dependency discovery gets a second store, not a second parse.
-        # Future warm calls use this complete dependency key immediately.
-        execute(key_for(discovered), lambda: encoded)
-    try:
-        _unit_manifest_write(manifest, discovered)
-    except OSError as exc:
-        print(f"warning: AST dependency manifest write failed: {exc}", file=sys.stderr)
+    complete_key = key_for(discovered)
+
+    def publish() -> None:
+        if parsed is not None and (
+            active_snapshot.defer_publication
+            or discovered != dependencies
+            or not manifest_valid
+        ):
+            # Publish the complete dependency key without a second parse.
+            execute(complete_key, lambda: encoded)
+        try:
+            _unit_manifest_write(manifest, discovered)
+        except OSError as exc:
+            print(
+                f"warning: AST dependency manifest write failed: {exc}", file=sys.stderr
+            )
+
+    active_snapshot.publish_after_audit(publish)
     return AstUnitCacheResult(result["payload"], parsed is None)
 
 
