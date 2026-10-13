@@ -874,7 +874,11 @@ template <typename T> struct swap_impl<T, true> {
 };
 
 // single entry‑point
-template <typename T> void swap(T &a, T &b) FL_NO_EXCEPT {
+// `b` is its own (same-typed) template parameter so this generic swap is less
+// specialized than std::swap. Otherwise ADL on fl types (e.g. CRGB) makes
+// std::reverse / std::sort / std::swap ambiguous (FastLED#4827).
+template <typename T, typename U>
+enable_if_t<is_same<T, U>::value> swap(T &a, U &b) FL_NO_EXCEPT {
     // if T is a POD, use use a simple data copy swap.
     // if T is not a POD, use the T::Swap method.
     swap_impl<T>::apply(a, b);

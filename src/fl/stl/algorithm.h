@@ -7,15 +7,22 @@
 
 namespace fl {
 
-template <typename Iterator>
-void reverse(Iterator first, Iterator last) FL_NO_EXCEPT {
+// ADL note (FastLED#4827): fl::CRGB lives in namespace fl, so an unqualified
+// call such as `sort(leds, leds + n)` under `using namespace std` (or libstdc++
+// internals calling `swap`) also finds these templates via ADL. Each public
+// algorithm takes `last` as its own template parameter, constrained to equal
+// the `first` type. That makes it less specialized than the std:: overload,
+// so std wins the tie when it is visible and fl is used when it is not.
+
+template <typename Iterator, typename IteratorLast>
+fl::enable_if_t<fl::is_same<Iterator, IteratorLast>::value, void> reverse(Iterator first, IteratorLast last) FL_NO_EXCEPT {
     while ((first != last) && (first != --last)) {
         swap(*first++, *last);
     }
 }
 
-template <typename Iterator>
-Iterator max_element(Iterator first, Iterator last) FL_NO_EXCEPT {
+template <typename Iterator, typename IteratorLast>
+fl::enable_if_t<fl::is_same<Iterator, IteratorLast>::value, Iterator> max_element(Iterator first, IteratorLast last) FL_NO_EXCEPT {
     if (first == last) {
         return last;
     }
@@ -33,8 +40,8 @@ Iterator max_element(Iterator first, Iterator last) FL_NO_EXCEPT {
     return max_iter;
 }
 
-template <typename Iterator, typename Compare>
-Iterator max_element(Iterator first, Iterator last, Compare comp) FL_NO_EXCEPT {
+template <typename Iterator, typename Compare, typename IteratorLast>
+fl::enable_if_t<fl::is_same<Iterator, IteratorLast>::value, Iterator> max_element(Iterator first, IteratorLast last, Compare comp) FL_NO_EXCEPT {
     if (first == last) {
         return last;
     }
@@ -52,8 +59,8 @@ Iterator max_element(Iterator first, Iterator last, Compare comp) FL_NO_EXCEPT {
     return max_iter;
 }
 
-template <typename Iterator>
-Iterator min_element(Iterator first, Iterator last) FL_NO_EXCEPT {
+template <typename Iterator, typename IteratorLast>
+fl::enable_if_t<fl::is_same<Iterator, IteratorLast>::value, Iterator> min_element(Iterator first, IteratorLast last) FL_NO_EXCEPT {
     if (first == last) {
         return last;
     }
@@ -71,8 +78,8 @@ Iterator min_element(Iterator first, Iterator last) FL_NO_EXCEPT {
     return min_iter;
 }
 
-template <typename Iterator, typename Compare>
-Iterator min_element(Iterator first, Iterator last, Compare comp) FL_NO_EXCEPT {
+template <typename Iterator, typename Compare, typename IteratorLast>
+fl::enable_if_t<fl::is_same<Iterator, IteratorLast>::value, Iterator> min_element(Iterator first, IteratorLast last, Compare comp) FL_NO_EXCEPT {
     if (first == last) {
         return last;
     }
@@ -92,8 +99,8 @@ Iterator min_element(Iterator first, Iterator last, Compare comp) FL_NO_EXCEPT {
 
 
 
-template <typename Iterator1, typename Iterator2>
-bool equal(Iterator1 first1, Iterator1 last1, Iterator2 first2) FL_NO_EXCEPT {
+template <typename Iterator1, typename Iterator2, typename Iterator1Last>
+fl::enable_if_t<fl::is_same<Iterator1, Iterator1Last>::value, bool> equal(Iterator1 first1, Iterator1Last last1, Iterator2 first2) FL_NO_EXCEPT {
     while (first1 != last1) {
         if (*first1 != *first2) {
             return false;
@@ -104,8 +111,8 @@ bool equal(Iterator1 first1, Iterator1 last1, Iterator2 first2) FL_NO_EXCEPT {
     return true;
 }
 
-template <typename Iterator1, typename Iterator2, typename BinaryPredicate>
-bool equal(Iterator1 first1, Iterator1 last1, Iterator2 first2, BinaryPredicate pred) FL_NO_EXCEPT {
+template <typename Iterator1, typename Iterator2, typename BinaryPredicate, typename Iterator1Last>
+fl::enable_if_t<fl::is_same<Iterator1, Iterator1Last>::value, bool> equal(Iterator1 first1, Iterator1Last last1, Iterator2 first2, BinaryPredicate pred) FL_NO_EXCEPT {
     while (first1 != last1) {
         if (!pred(*first1, *first2)) {
             return false;
@@ -116,8 +123,8 @@ bool equal(Iterator1 first1, Iterator1 last1, Iterator2 first2, BinaryPredicate 
     return true;
 }
 
-template <typename Iterator1, typename Iterator2>
-bool equal(Iterator1 first1, Iterator1 last1, Iterator2 first2, Iterator2 last2) FL_NO_EXCEPT {
+template <typename Iterator1, typename Iterator2, typename Iterator1Last>
+fl::enable_if_t<fl::is_same<Iterator1, Iterator1Last>::value, bool> equal(Iterator1 first1, Iterator1Last last1, Iterator2 first2, Iterator2 last2) FL_NO_EXCEPT {
     while (first1 != last1 && first2 != last2) {
         if (*first1 != *first2) {
             return false;
@@ -128,8 +135,8 @@ bool equal(Iterator1 first1, Iterator1 last1, Iterator2 first2, Iterator2 last2)
     return first1 == last1 && first2 == last2;
 }
 
-template <typename Iterator1, typename Iterator2, typename BinaryPredicate>
-bool equal(Iterator1 first1, Iterator1 last1, Iterator2 first2, Iterator2 last2, BinaryPredicate pred) FL_NO_EXCEPT {
+template <typename Iterator1, typename Iterator2, typename BinaryPredicate, typename Iterator1Last>
+fl::enable_if_t<fl::is_same<Iterator1, Iterator1Last>::value, bool> equal(Iterator1 first1, Iterator1Last last1, Iterator2 first2, Iterator2 last2, BinaryPredicate pred) FL_NO_EXCEPT {
     while (first1 != last1 && first2 != last2) {
         if (!pred(*first1, *first2)) {
             return false;
@@ -142,8 +149,8 @@ bool equal(Iterator1 first1, Iterator1 last1, Iterator2 first2, Iterator2 last2,
 
 // Lexicographical comparison - compares two ranges element by element
 // Returns true if the first range is lexicographically less than the second
-template <typename Iterator1, typename Iterator2>
-bool lexicographical_compare(Iterator1 first1, Iterator1 last1, Iterator2 first2, Iterator2 last2) FL_NO_EXCEPT {
+template <typename Iterator1, typename Iterator2, typename Iterator1Last>
+fl::enable_if_t<fl::is_same<Iterator1, Iterator1Last>::value, bool> lexicographical_compare(Iterator1 first1, Iterator1Last last1, Iterator2 first2, Iterator2 last2) FL_NO_EXCEPT {
     while (first1 != last1 && first2 != last2) {
         if (*first1 < *first2) {
             return true;
@@ -161,8 +168,8 @@ bool lexicographical_compare(Iterator1 first1, Iterator1 last1, Iterator2 first2
 }
 
 // Lexicographical comparison with custom comparator
-template <typename Iterator1, typename Iterator2, typename Compare>
-bool lexicographical_compare(Iterator1 first1, Iterator1 last1, Iterator2 first2, Iterator2 last2, Compare comp) FL_NO_EXCEPT {
+template <typename Iterator1, typename Iterator2, typename Compare, typename Iterator1Last>
+fl::enable_if_t<fl::is_same<Iterator1, Iterator1Last>::value, bool> lexicographical_compare(Iterator1 first1, Iterator1Last last1, Iterator2 first2, Iterator2 last2, Compare comp) FL_NO_EXCEPT {
     while (first1 != last1 && first2 != last2) {
         if (comp(*first1, *first2)) {
             return true;
@@ -186,7 +193,7 @@ bool equal_container(const Container1& c1, const Container2& c2) FL_NO_EXCEPT {
     if (size1 != size2) {
         return false;
     }
-    return equal(c1.begin(), c1.end(), c2.begin(), c2.end());
+    return fl::equal(c1.begin(), c1.end(), c2.begin(), c2.end());
 }
 
 template <typename Container1, typename Container2, typename BinaryPredicate>
@@ -196,20 +203,20 @@ bool equal_container(const Container1& c1, const Container2& c2, BinaryPredicate
     if (size1 != size2) {
         return false;
     }
-    return equal(c1.begin(), c1.end(), c2.begin(), c2.end(), pred);
+    return fl::equal(c1.begin(), c1.end(), c2.begin(), c2.end(), pred);
 }
 
 
-template <typename Iterator, typename T>
-void fill(Iterator first, Iterator last, const T& value) FL_NO_EXCEPT {
+template <typename Iterator, typename T, typename IteratorLast>
+fl::enable_if_t<fl::is_same<Iterator, IteratorLast>::value, void> fill(Iterator first, IteratorLast last, const T& value) FL_NO_EXCEPT {
     while (first != last) {
         *first = value;
         ++first;
     }
 }
 
-template <typename Iterator, typename T>
-Iterator find(Iterator first, Iterator last, const T& value) FL_NO_EXCEPT {
+template <typename Iterator, typename T, typename IteratorLast>
+fl::enable_if_t<fl::is_same<Iterator, IteratorLast>::value, Iterator> find(Iterator first, IteratorLast last, const T& value) FL_NO_EXCEPT {
     while (first != last) {
         if (*first == value) {
             return first;
@@ -219,8 +226,8 @@ Iterator find(Iterator first, Iterator last, const T& value) FL_NO_EXCEPT {
     return last;
 }
 
-template <typename Iterator, typename UnaryPredicate>
-Iterator find_if(Iterator first, Iterator last, UnaryPredicate pred) FL_NO_EXCEPT {
+template <typename Iterator, typename UnaryPredicate, typename IteratorLast>
+fl::enable_if_t<fl::is_same<Iterator, IteratorLast>::value, Iterator> find_if(Iterator first, IteratorLast last, UnaryPredicate pred) FL_NO_EXCEPT {
     while (first != last) {
         if (pred(*first)) {
             return first;
@@ -230,8 +237,8 @@ Iterator find_if(Iterator first, Iterator last, UnaryPredicate pred) FL_NO_EXCEP
     return last;
 }
 
-template <typename Iterator, typename UnaryPredicate>
-Iterator find_if_not(Iterator first, Iterator last, UnaryPredicate pred) FL_NO_EXCEPT {
+template <typename Iterator, typename UnaryPredicate, typename IteratorLast>
+fl::enable_if_t<fl::is_same<Iterator, IteratorLast>::value, Iterator> find_if_not(Iterator first, IteratorLast last, UnaryPredicate pred) FL_NO_EXCEPT {
     while (first != last) {
         if (!pred(*first)) {
             return first;
@@ -241,8 +248,8 @@ Iterator find_if_not(Iterator first, Iterator last, UnaryPredicate pred) FL_NO_E
     return last;
 }
 
-template <typename Iterator, typename T>
-void replace(Iterator first, Iterator last, const T& old_value, const T& new_value) FL_NO_EXCEPT {
+template <typename Iterator, typename T, typename IteratorLast>
+fl::enable_if_t<fl::is_same<Iterator, IteratorLast>::value, void> replace(Iterator first, IteratorLast last, const T& old_value, const T& new_value) FL_NO_EXCEPT {
     while (first != last) {
         if (*first == old_value) {
             *first = new_value;
@@ -251,8 +258,8 @@ void replace(Iterator first, Iterator last, const T& old_value, const T& new_val
     }
 }
 
-template <typename Iterator, typename UnaryPredicate, typename T>
-void replace_if(Iterator first, Iterator last, UnaryPredicate pred, const T& new_value) FL_NO_EXCEPT {
+template <typename Iterator, typename UnaryPredicate, typename T, typename IteratorLast>
+fl::enable_if_t<fl::is_same<Iterator, IteratorLast>::value, void> replace_if(Iterator first, IteratorLast last, UnaryPredicate pred, const T& new_value) FL_NO_EXCEPT {
     while (first != last) {
         if (pred(*first)) {
             *first = new_value;
@@ -261,8 +268,8 @@ void replace_if(Iterator first, Iterator last, UnaryPredicate pred, const T& new
     }
 }
 
-template <typename Iterator, typename T>
-Iterator remove(Iterator first, Iterator last, const T& value) FL_NO_EXCEPT {
+template <typename Iterator, typename T, typename IteratorLast>
+fl::enable_if_t<fl::is_same<Iterator, IteratorLast>::value, Iterator> remove(Iterator first, IteratorLast last, const T& value) FL_NO_EXCEPT {
     Iterator result = first;
     while (first != last) {
         if (!(*first == value)) {
@@ -276,8 +283,8 @@ Iterator remove(Iterator first, Iterator last, const T& value) FL_NO_EXCEPT {
     return result;
 }
 
-template <typename Iterator, typename UnaryPredicate>
-Iterator remove_if(Iterator first, Iterator last, UnaryPredicate pred) FL_NO_EXCEPT {
+template <typename Iterator, typename UnaryPredicate, typename IteratorLast>
+fl::enable_if_t<fl::is_same<Iterator, IteratorLast>::value, Iterator> remove_if(Iterator first, IteratorLast last, UnaryPredicate pred) FL_NO_EXCEPT {
     Iterator result = first;
     while (first != last) {
         if (!pred(*first)) {
@@ -414,7 +421,7 @@ void quicksort_impl(Iterator first, Iterator last, Compare comp) FL_NO_EXCEPT {
         return;
     }
     
-    Iterator pivot = partition(first, last, comp);
+    Iterator pivot = detail::partition(first, last, comp);
     quicksort_impl(first, pivot, comp);
     quicksort_impl(pivot + 1, last, comp);
 }
@@ -547,21 +554,21 @@ void mergesort_impl(Iterator first, Iterator last, Compare comp) FL_NO_EXCEPT {
 } // namespace detail
 
 // Lower bound: find first position in sorted [first, last) where value could be inserted.
-template <typename Iterator, typename T, typename Compare>
-Iterator lower_bound(Iterator first, Iterator last, const T& value, Compare comp) FL_NO_EXCEPT {
+template <typename Iterator, typename T, typename Compare, typename IteratorLast>
+fl::enable_if_t<fl::is_same<Iterator, IteratorLast>::value, Iterator> lower_bound(Iterator first, IteratorLast last, const T& value, Compare comp) FL_NO_EXCEPT {
     return detail::lower_bound_impl(first, last, value, comp);
 }
 
-template <typename Iterator, typename T>
-Iterator lower_bound(Iterator first, Iterator last, const T& value) FL_NO_EXCEPT {
+template <typename Iterator, typename T, typename IteratorLast>
+fl::enable_if_t<fl::is_same<Iterator, IteratorLast>::value, Iterator> lower_bound(Iterator first, IteratorLast last, const T& value) FL_NO_EXCEPT {
     typedef typename fl::remove_reference<decltype(*first)>::type value_type;
     return detail::lower_bound_impl(first, last, value,
         [](const value_type& a, const T& b) { return a < b; });
 }
 
 // Sort function with custom comparator (using quicksort)
-template <typename Iterator, typename Compare>
-void sort(Iterator first, Iterator last, Compare comp) FL_NO_EXCEPT {
+template <typename Iterator, typename Compare, typename IteratorLast>
+fl::enable_if_t<fl::is_same<Iterator, IteratorLast>::value, void> sort(Iterator first, IteratorLast last, Compare comp) FL_NO_EXCEPT {
     if (first == last || first + 1 == last) {
         return;  // Already sorted or empty
     }
@@ -570,16 +577,16 @@ void sort(Iterator first, Iterator last, Compare comp) FL_NO_EXCEPT {
 }
 
 // Sort function with default comparator
-template <typename Iterator>
-void sort(Iterator first, Iterator last) FL_NO_EXCEPT {
+template <typename Iterator, typename IteratorLast>
+fl::enable_if_t<fl::is_same<Iterator, IteratorLast>::value, void> sort(Iterator first, IteratorLast last) FL_NO_EXCEPT {
     // Use explicit template parameter to avoid C++14 auto in lambda
     typedef typename fl::remove_reference<decltype(*first)>::type value_type;
-    sort(first, last, [](const value_type& a, const value_type& b) { return a < b; });
+    fl::sort(first, last, [](const value_type& a, const value_type& b) { return a < b; });
 }
 
 // Stable sort function with custom comparator (using merge sort)
-template <typename Iterator, typename Compare>
-void stable_sort(Iterator first, Iterator last, Compare comp) FL_NO_EXCEPT {
+template <typename Iterator, typename Compare, typename IteratorLast>
+fl::enable_if_t<fl::is_same<Iterator, IteratorLast>::value, void> stable_sort(Iterator first, IteratorLast last, Compare comp) FL_NO_EXCEPT {
     if (first == last || first + 1 == last) {
         return;  // Already sorted or empty
     }
@@ -588,11 +595,11 @@ void stable_sort(Iterator first, Iterator last, Compare comp) FL_NO_EXCEPT {
 }
 
 // Stable sort function with default comparator
-template <typename Iterator>
-void stable_sort(Iterator first, Iterator last) FL_NO_EXCEPT {
+template <typename Iterator, typename IteratorLast>
+fl::enable_if_t<fl::is_same<Iterator, IteratorLast>::value, void> stable_sort(Iterator first, IteratorLast last) FL_NO_EXCEPT {
     // Use explicit template parameter to avoid C++14 auto in lambda
     typedef typename fl::remove_reference<decltype(*first)>::type value_type;
-    stable_sort(first, last, [](const value_type& a, const value_type& b) { return a < b; });
+    fl::stable_sort(first, last, [](const value_type& a, const value_type& b) { return a < b; });
 }
 
 // Direct call to insertion sort — meant for call sites with statically
@@ -624,8 +631,8 @@ void sort_small(Iterator first, Iterator last) FL_NO_EXCEPT {
 }
 
 // Shuffle function with custom random generator (Fisher-Yates shuffle)
-template <typename Iterator, typename RandomGenerator>
-void shuffle(Iterator first, Iterator last, RandomGenerator& g) FL_NO_EXCEPT {
+template <typename Iterator, typename RandomGenerator, typename IteratorLast>
+fl::enable_if_t<fl::is_same<Iterator, IteratorLast>::value, void> shuffle(Iterator first, IteratorLast last, RandomGenerator& g) FL_NO_EXCEPT {
     if (first == last) {
         return;  // Empty range, nothing to shuffle
     }
@@ -641,8 +648,8 @@ void shuffle(Iterator first, Iterator last, RandomGenerator& g) FL_NO_EXCEPT {
 }
 
 // Shuffle function with fl::math::random instance
-template <typename Iterator>
-void shuffle(Iterator first, Iterator last, math::random& rng) FL_NO_EXCEPT {
+template <typename Iterator, typename IteratorLast>
+fl::enable_if_t<fl::is_same<Iterator, IteratorLast>::value, void> shuffle(Iterator first, IteratorLast last, math::random& rng) FL_NO_EXCEPT {
     if (first == last) {
         return;  // Empty range, nothing to shuffle
     }
@@ -658,9 +665,9 @@ void shuffle(Iterator first, Iterator last, math::random& rng) FL_NO_EXCEPT {
 }
 
 // Shuffle function with default random generator
-template <typename Iterator>
-void shuffle(Iterator first, Iterator last) FL_NO_EXCEPT {
-    shuffle(first, last, default_random());
+template <typename Iterator, typename IteratorLast>
+fl::enable_if_t<fl::is_same<Iterator, IteratorLast>::value, void> shuffle(Iterator first, IteratorLast last) FL_NO_EXCEPT {
+    fl::shuffle(first, last, default_random());
 }
 
 } // namespace fl
