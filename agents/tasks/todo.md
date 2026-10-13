@@ -565,5 +565,10 @@ awaiting Windows execution). A synthetic 10,000-file Linux SDK inventory probe
 measured 2.54x faster verification; hosted end-to-end validation remains required.
 Normal `bash lint` passes after the optimization: 138 fresh parses, zero failures,
 21,894 declarations, 434.04 seconds analysis and 1,479 MiB sampled peak RSS.
+Hosted Mac ARM lint passes in 619 seconds within the unchanged deadline. Its
+native tests also pass. Linux exposed reuse of deterministic pytest paths against
+restored native cache results; two local runs reproduced eight failures on the
+second invocation. Unique per-test directories preserve real cache behavior and
+make both repeated runs pass (24 passed, one Windows-only skip each).
 Complete dependent fixes/release, update the pin, repeat platform validation,
 finish review, and remove task scratch before marking the PR ready.

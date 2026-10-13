@@ -2,6 +2,7 @@
 
 import hashlib
 import os
+import uuid
 from pathlib import Path
 from typing import Callable, TypedDict
 
@@ -9,6 +10,19 @@ import pytest
 from running_process import RunningProcess
 
 from ci.lint_cpp.ast_cache import AstInputSnapshot, AstUnitResult, cached_ast_unit
+
+
+@pytest.fixture
+def tmp_path(tmp_path: Path) -> Path:
+    """Isolate real daemon entries across repeated CI temporary path reuse.
+
+    The daemon persists results beyond pytest's directory cleanup. A unique
+    child keeps mutation keys fresh across invocations while all calls within
+    a test still use the same paths and exercise normal cache hits.
+    """
+    isolated = tmp_path / uuid.uuid4().hex
+    isolated.mkdir()
+    return isolated
 
 
 class CachePaths(TypedDict):

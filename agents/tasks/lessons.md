@@ -519,3 +519,7 @@
   an unchanged-source fingerprint cannot prove that tooling is still present.
   Verify the normal wrapper with a warmed cache and a temporarily missing SDK,
   restore exact inputs, and remove task scratch files after publishing evidence.
+
+- Cache tests need a unique filesystem identity per invocation when the backing
+  store survives CI runs. Keep paths stable inside each cold/warm/mutation test,
+  retain the real cache, and verify two runs against the same pytest base path.
