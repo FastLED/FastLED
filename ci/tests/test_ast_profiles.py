@@ -152,6 +152,62 @@ def test_missing_host_profile_is_actionable(tmp_path: Path) -> None:
         load_host_profile(tmp_path)
 
 
+def test_host_sdk_metadata_is_snapshotted_outside_include_paths(tmp_path: Path) -> None:
+    from ci.lint_cpp.ast_cache import AstInputSnapshot
+    from ci.tools import ast_profiles
+
+    # Filesystem dependency fixture; no SDK declarations or compiler stand-ins.
+    # Real macOS CI Clang -H reports SDKSettings.json outside usr/include.
+    sdk = tmp_path / "Developer Tools" / "MacOSX15.5.sdk"
+    headers = sdk / "usr" / "include"
+    frameworks = sdk / "System" / "Library" / "Frameworks"
+    headers.mkdir(parents=True)
+    frameworks.mkdir(parents=True)
+    metadata = sdk / "SDKSettings.json"
+    metadata.write_text('{"Version":"15.5"}', encoding="utf-8")
+    other_headers = tmp_path / "ordinary-headers"
+    other_headers.mkdir()
+    roots = ast_profiles.host_dependency_roots((headers, frameworks, other_headers))
+    assert roots == (sdk.resolve(),)
+    snapshot = AstInputSnapshot()
+    snapshot.prepare_parse(list(roots), [])
+    snapshot.verify_parse(list(roots), [metadata])
+
+    stat = metadata.stat()
+    metadata.write_text('{"Version":"15.6"}', encoding="utf-8")
+    os.utime(metadata, ns=(stat.st_atime_ns, stat.st_mtime_ns))
+    with pytest.raises(ValueError, match="changed during analysis"):
+        snapshot.verify_parse(list(roots), [metadata])
+
+
+def test_host_sdk_dependency_roots_reach_matrix_without_search_flags(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from ci.tools import ast_matrix, ast_profiles
+
+    sdk = tmp_path / "MacOSX.sdk"
+    sdk.mkdir()
+    headers = sdk / "usr" / "include"
+    headers.mkdir(parents=True)
+    host = ast_profiles.HostEnvironment(
+        query=("clang-query",),
+        version="test host description",
+        arguments=("-std=c++17",),
+        include_paths=(headers,),
+        identity_files=(),
+        dependency_roots=(sdk,),
+    )
+    monkeypatch.setattr(ast_matrix, "load_host_profile", lambda: host)
+    monkeypatch.setattr(
+        ast_matrix, "_scope_tus", lambda _: [("src/fl/build/src.cpp", "src/.*")]
+    )
+    jobs = ast_matrix.build_jobs(profile_names=())
+    assert len(jobs) == 1
+    assert jobs[0].dependency_roots == (sdk,)
+    assert jobs[0].arguments == host.arguments
+    assert sdk not in jobs[0].include_roots
+
+
 @pytest.mark.parametrize(
     "changed", ["database", "response", "compiler", "predefines", "adapter"]
 )

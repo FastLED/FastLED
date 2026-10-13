@@ -281,6 +281,7 @@ def build_jobs(
                 dict.fromkeys((*_include_roots(arguments), *host.include_paths))
             ),
             metadata={"query_version": host.version, "target": "host"},
+            dependency_roots=host.dependency_roots,
         )
         for source, regex in _scope_tus(scope)
     ]

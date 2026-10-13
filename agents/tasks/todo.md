@@ -542,7 +542,7 @@ timed out on both versions while direct ownership accounting passed.
 - [x] Add coverage report, globally bounded scheduling, deduplicated profile findings.
 - [x] Demonstrate original SD and ESP-only defects fail, including warm cache cases.
 - [x] Fix actual ESP violations; enforce matrix in normal lint and existing CI.
-- [ ] Measure cold/warm/source/header edits and memory; document setup and limits.
+- [x] Measure cold/warm/source/header edits and memory; document setup and limits.
 - [ ] Full tests, lint, code review, validated pushed PR, and workspace cleanup.
 
 Current evidence: the 138-job matrix passes with 21,894 declaration locations;
@@ -550,5 +550,13 @@ normal `bash lint` validates all profiles with 138 cache hits and zero parses.
 Full native debug validation passed 320 units and 96 examples. Full Python
 validation passed 1,939 tests (47 skipped, 2 xfailed), with subsequent focused
 ABI, SDK, cache and outer-wrapper regressions passing. Independent source and
-orchestration reviews found no blocking issues. Final performance measurements,
-published PR and scratch cleanup remain pending.
+orchestration reviews found no blocking issues. Reference measurements at
+887cfe2f01: cold 701.73s/138 parses; warm 17.98s/0; source edit 70.66s/7;
+common-header edit 542.06s/131. All edits restored and reports passed final audits.
+
+Draft PR #4831 is pushed. Full Linux CI passed. Other hosts/boards exposed
+fbuild Windows launcher, Intel wheel packaging, and RP SD library discovery
+failures, tracked in FastLED/fbuild#1675. macOS host SDK metadata also needs
+explicit dependency roots; focused RED tests reproduced the missing tracking.
+Complete dependent fixes/release, update the pin, repeat platform validation,
+finish review, and remove task scratch before marking the PR ready.

@@ -127,10 +127,13 @@ include injection variables from their process environment. Host queries retain
 their configured environment. Unknown flags remain visible to Clang and can
 fail the analysis instead of being silently discarded.
 
-`dependency_roots` records SDK header-tree ancestors needed for quoted relative
-includes into sibling components. These roots come from fbuild package receipts.
-They expand dependency validation without adding compiler search directories or
-changing include precedence.
+`dependency_roots` records SDK ancestors needed for quoted relative includes
+into sibling components and SDK metadata. Target roots come from fbuild package
+receipts. Host roots include resolved `.sdk` ancestors of the compiler's actual
+include paths, covering inputs such as macOS `SDKSettings.json` outside
+`usr/include`. These files enter the snapshot before parsing and their contents
+are validated like header dependencies. The roots do not add compiler search
+directories or change include precedence.
 
 ## Reports, caching, and measurement
 
@@ -175,6 +178,59 @@ state for the cold run through zccache's supported cache configuration. Restore
 edits before drawing final coverage conclusions. Record the edit paths and cache
 state alongside the JSON artifacts; a prior exploratory run does not establish
 the final performance budget.
+
+## Measured reference budget
+
+Reference implementation: `887cfe2f01edea011f1645d2dc7513f6cfcf282b`, measured
+2026-10-13 on Linux 6.18.48 x86_64, AMD Ryzen 7 3700X (8 cores / 16 logical
+CPUs), 125.72 GiB RAM, Python 3.14.7 and zccache 1.13.21. The target query was
+LLVM 21.1.5; the configured host query was LLVM 21.1.8. All runs used two workers.
+This was a shared development machine, with one observation per scenario and
+no other builds from this task running during each timed measurement.
+
+| Scenario | CLI wall (s) | Analysis (s) | Parses | Cache hits | Sampled peak RSS (MiB) | Unique locations |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Empty analysis cache | 701.73 | 695.53 | 138 | 0 / 138 | 1515.2 | 21894 |
+| Unchanged warm | 17.98 | 13.42 | 0 | 138 / 138 | 339.5 | 21894 |
+| One source edit | 70.66 | 65.22 | 7 | 131 / 138 | 661.8 | 21894 |
+| Common header edit | 542.06 | 538.34 | 131 | 7 / 138 | 1432.8 | 21894 |
+
+The reference budgets are **900 seconds** for cold/common-header analysis,
+**60 seconds** for an unchanged warm CLI, **120 seconds** for this source-edit
+CLI, and **4096 MiB** sampled process-tree RSS. These are regression targets for
+this setup, not guarantees for every machine. The normal checker has a
+900-second deadline and the outer C++ stage allows 1200 seconds for the checker
+and remaining stage work. Whole-source fingerprints never skip the required
+profile validation.
+
+The cold run used an empty, dedicated zccache daemon namespace and an empty
+dependency-manifest directory. SDKs were already provisioned; OS page cache was
+not flushed. A temporary runner called the production `ast_matrix.main()` and
+changed only `ast_cache._CACHE_DIR` to the isolated manifest directory. The
+supported `ZCCACHE_CACHE_DIR` and `ZCCACHE_DAEMON_NAMESPACE` settings isolated
+native results; inherited endpoint/state/staging overrides were unset. Each
+invocation used `UV_OFFLINE=1`, `uv run --no-sync`, `--workers 2` and a separate
+JSON report. GNU time measured complete CLI wall time outside Python.
+
+The source case appended a comment to `src/fl/build/fl.fs.sd+.cpp`; the header
+case appended a comment to `src/fl/stl/noexcept.h`. Each file's exact bytes and
+timestamps were restored before the next scenario. All reports had zero
+failures and a successful final input audit. Memory samples had no unavailable
+process observations in the first three runs and three in the header run;
+processes can exit between enumeration and sampling. The reported RSS is the
+sampler's aggregate, not GNU time's single-process maximum.
+
+A separate, untimed `strace -f -e trace=execve` warm verification recorded only
+uv and Python executions: no compiler, fbuild, build, or download subprocess.
+It reported 138 cache hits and zero parses. The normal wrapper was also checked
+with a warm cache: temporarily removing the IDF 5 environment manifest made
+`bash lint --cpp` fail; restoring it made the same command pass.
+
+Hosted Linux at the reference revision independently passed normal C++ lint:
+138 cold parses, zero failures, 539.85 seconds analysis and 1348.2 MiB sampled
+peak RSS. Its LLVM/platform configuration observed 21895 locations. Declaration
+counts can differ between host environments; they are not a fixed percentage
+or a substitute for required backend assertions.
 
 ## Troubleshooting
 

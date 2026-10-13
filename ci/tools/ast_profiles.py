@@ -60,6 +60,24 @@ class HostEnvironment:
     arguments: tuple[str, ...]
     include_paths: tuple[Path, ...]
     identity_files: tuple[Path, ...]
+    dependency_roots: tuple[Path, ...] = ()
+
+
+def host_dependency_roots(include_paths: tuple[Path, ...]) -> tuple[Path, ...]:
+    """Track complete SDK inputs without widening compiler header searches.
+
+    Clang reads SDK metadata such as SDKSettings.json outside the SDK's
+    usr/include and Frameworks directories. Use the SDK ancestor of actual
+    compiler-discovered paths so these inputs enter the pre-parse snapshot.
+    """
+    roots: set[Path] = set()
+    for path in include_paths:
+        resolved = path.resolve()
+        for parent in (resolved, *resolved.parents):
+            if parent.suffix == ".sdk":
+                roots.add(parent)
+                break
+    return tuple(sorted(roots))
 
 
 def target_process_environment() -> dict[str, str]:
@@ -127,6 +145,7 @@ def provision_host_profile(root: Path = PROFILE_ROOT) -> HostEnvironment:
     output = _run([*query, str(source), "--", *arguments, "-v"], PROJECT_ROOT)
     _raise_on_query_errors(0, output)
     paths = parse_implicit_includes(output)
+    dependencies = host_dependency_roots(paths)
     query_version = _run([*query, "--version"], PROJECT_ROOT)
     executable = Path(shutil.which(query[0]) or query[0]).resolve()
     manifest = root / HOST_MANIFEST_NAME
@@ -143,6 +162,7 @@ def provision_host_profile(root: Path = PROFILE_ROOT) -> HostEnvironment:
         "version": query_version,
         "arguments": list(arguments),
         "include_paths": [str(path) for path in paths],
+        "dependency_roots": [str(path) for path in dependencies],
         "executable": str(executable),
         "query_files": [str(path) for path in query_files],
         "environment": _include_environment(),
@@ -150,7 +170,12 @@ def provision_host_profile(root: Path = PROFILE_ROOT) -> HostEnvironment:
     }
     manifest.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
     return HostEnvironment(
-        tuple(query), query_version, arguments, paths, (manifest, *query_files)
+        tuple(query),
+        query_version,
+        arguments,
+        paths,
+        (manifest, *query_files),
+        dependencies,
     )
 
 
@@ -176,6 +201,9 @@ def load_host_profile(root: Path = PROFILE_ROOT) -> HostEnvironment:
     ):
         raise ProfileError("Host AST environment changed; run ast_profiles --provision")
     paths = tuple(Path(path) for path in cast(list[str], payload["include_paths"]))
+    dependencies = tuple(
+        Path(path) for path in cast(list[str], payload.get("dependency_roots", []))
+    )
     query_files = tuple(
         Path(path) for path in cast(list[str], payload.get("query_files", []))
     )
@@ -183,8 +211,17 @@ def load_host_profile(root: Path = PROFILE_ROOT) -> HostEnvironment:
         raise ProfileError("Host query implementation missing; provision again")
     if any(not path.is_dir() for path in paths):
         raise ProfileError("Host compiler include directory missing; provision again")
+    if dependencies != host_dependency_roots(paths) or any(
+        not path.is_dir() for path in dependencies
+    ):
+        raise ProfileError("Host SDK dependency roots changed; provision again")
     return HostEnvironment(
-        query, str(payload["version"]), arguments, paths, (manifest, *query_files)
+        query,
+        str(payload["version"]),
+        arguments,
+        paths,
+        (manifest, *query_files),
+        dependencies,
     )
 
 
