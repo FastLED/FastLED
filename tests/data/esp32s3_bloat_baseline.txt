@@ -1,3 +1,8 @@
+# #4827 / PR #4830: CI run 38469509794 measures image 341131. Local
+# builds of the same tree: master f09d68cc5 = 341283, this PR = 341115
+# (PR is -168 B); master had already drifted past 341047. Re-base to the
+# measured CI image.
+
 # #4795 / RGBW type-erased + link-on-use: local image 341031 (down 1052 B
 # from 342083 local); CI has measured +16 B vs local on this board (342099
 # vs 342083), so the CI baseline is 341047. Claim the measured saving.
@@ -358,4 +363,4 @@
 # the CI Blink report contains no ResponseLutsQ16 symbol. The local fbuild
 # symbol total remains ~4 KB higher for the same source (FastLED/fbuild#1456),
 # so this ratchet uses the CI measurement from PR #4511.
-341047
+341131
