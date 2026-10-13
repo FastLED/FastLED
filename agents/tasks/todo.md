@@ -613,6 +613,15 @@ normal lint passes 138 fresh parses, 21,894 declarations and a verified snapshot
 in 211.41 seconds, with 1,707.0 MiB sampled peak RSS. Review is clean. Actual
 Intel hosted validation is still required; no deadlines or profiles were relaxed.
 
+Hosted optimized AST validation now passes all 138 fresh jobs on both Macs:
+ARM 223.66 seconds (previously 574.33), Intel 539.23 seconds, verified snapshots
+and zero failures. ARM's whole unit job passed. Intel subsequently failed before
+tests began when `xcrun --find clang++` exceeded its separate ten-second setup
+timeout. Xcode tool/SDK discovery now has a bounded 60-second allowance; selected
+compiler, AST deadline, and test limits are unchanged. A real 11-second child
+reproduced RED; all 14 toolchain tests and 22 subtests pass after the fix,
+including fatal nonzero/empty/timeout cases. Review and normal lint pass.
+
 PR #4831 carries the implementation and dependency pin. Its exact-head
 `ci-full` checks are the authoritative final cross-platform validation record;
 require them to pass before marking the PR ready. Preserve ordinary SDK/build

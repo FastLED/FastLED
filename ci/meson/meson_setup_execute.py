@@ -52,6 +52,9 @@ from ci.util.timestamp_print import ts_print as _ts_print
 
 
 _RELD_NAMES = frozenset({"reld", "reld.exe"})
+# Hosted Intel Macs can need more than ten seconds for the first Xcode lookup.
+# This bounds tool discovery only; compiler selection and test limits are unchanged.
+_XCRUN_DISCOVERY_TIMEOUT_SECONDS = 60
 
 
 def _sha256_file(path: Path) -> str:
@@ -121,7 +124,7 @@ def _resolve_xcode_tool(tool: str) -> str:
             text=True,
             encoding="utf-8",
             errors="replace",
-            timeout=10,
+            timeout=_XCRUN_DISCOVERY_TIMEOUT_SECONDS,
             check=False,
         )
     except KeyboardInterrupt as ki:
@@ -149,7 +152,7 @@ def _resolve_xcode_sdk_root() -> str:
             text=True,
             encoding="utf-8",
             errors="replace",
-            timeout=10,
+            timeout=_XCRUN_DISCOVERY_TIMEOUT_SECONDS,
             check=False,
         )
     except KeyboardInterrupt as ki:

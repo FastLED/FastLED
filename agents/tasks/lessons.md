@@ -541,3 +541,7 @@
   remove per-job availability checks while still publishing immediately. Test
   that a failed audit cannot poison an existing native key, even after inputs
   are restored. Normalize repeated diagnostic paths within each parse only.
+- Distinguish semantic-analysis deadlines from tool-discovery timeouts. Hosted
+  Intel Xcode lookup exceeded ten seconds before tests began. Keep the selected
+  toolchain and fail-closed behavior; test a real delayed child and bound discovery
+  separately instead of weakening AST checks or retrying failed assertions.
