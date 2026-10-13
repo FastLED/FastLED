@@ -595,6 +595,16 @@ FL_TEST_CASE("unqualified algorithms on CRGB with using namespace std") {
     (void)remove(a, a + 4, CRGB(9,0,0));
     (void)begin(a); (void)end(a);
     swap(a, b);
+#if defined(__clang__)
+    FL_DISABLE_WARNING_PUSH
+    FL_DISABLE_WARNING(unknown-warning-option)
+    FL_DISABLE_WARNING(unqualified-std-cast-call)
+#endif
+    CRGB m = move(a[0]); (void)m;
+    CRGB& fr = forward<CRGB&>(a[0]); (void)fr;
+#if defined(__clang__)
+    FL_DISABLE_WARNING_POP
+#endif
     copy(a, a + 4, b);
     copy_n(a, 4, b);
     (void)count(a, a + 4, CRGB(1,0,0));

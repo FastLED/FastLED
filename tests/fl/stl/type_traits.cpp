@@ -261,13 +261,13 @@ FL_TEST_CASE("fl::is_void") {
 FL_TEST_CASE("fl::forward") {
     FL_SUBCASE("lvalue forward") {
         int x = 42;
-        int& ref = forward<int&>(x);
+        int& ref = fl::forward<int&>(x);
         FL_CHECK_EQ(ref, 42);
     }
 
     FL_SUBCASE("rvalue forward") {
         int temp = 42;
-        int&& rref = forward<int&&>(fl::move(temp));
+        int&& rref = fl::forward<int&&>(fl::move(temp));
         FL_CHECK_EQ(rref, 42);
     }
 }

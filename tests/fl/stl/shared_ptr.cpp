@@ -5,6 +5,12 @@
 #include "fl/stl/move.h"
 #include "fl/stl/vector.h"
 
+#if defined(__clang__)
+// fl::move is std::move where <utility> exists (FastLED#4827); these tests
+// move on purpose, so allow clang's std::move diagnostics.
+FL_DISABLE_WARNING(self-move)
+#endif
+
 FL_TEST_FILE(FL_FILEPATH) {
 
 namespace shared_ptr_test {

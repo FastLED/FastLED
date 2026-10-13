@@ -229,6 +229,10 @@ template <> struct is_void<void> {
     enum : bool { value = true };
 };
 
+#if FL_MOVE_FORWARD_IS_STD
+// See fl/stl/move.h (FastLED#4827).
+using std::forward;  // okay std namespace // ok bare using
+#else
 // Implementation of forward
 template <typename T>
 constexpr T &&forward(typename remove_reference<T>::type &t) FL_NO_EXCEPT {
@@ -242,6 +246,7 @@ constexpr T &&forward(typename remove_reference<T>::type &&t) FL_NO_EXCEPT {
                   "Cannot forward an rvalue as an lvalue");
     return static_cast<T &&>(t);
 }
+#endif
 
 // Define remove_cv trait
 template <typename T> struct remove_cv {
