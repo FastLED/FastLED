@@ -6,9 +6,9 @@
 #include "fl/stl/type_traits.h"
 #include "fl/stl/int.h"
 #include "fl/stl/noexcept.h"
-#include "fl/gfx/pixel_fwd.h"
 
 namespace fl {
+struct CRGB;  // Forward declaration
 class ScreenMap;
 class XMap;   // Forward declaration
 

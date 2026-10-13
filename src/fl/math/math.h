@@ -14,6 +14,7 @@
 // Backward-compatible headers fl/math_macros.h and fl/clamp.h still exist
 // and forward here.
 
+#include "fl/stl/adl_barrier.h"
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/int.h"
 #include "fl/stl/type_traits.h"
@@ -78,11 +79,14 @@ template <typename T, typename U> constexpr inline common_type_t<T, U> max(T a, 
 
 FL_DISABLE_WARNING_POP
 
+namespace adl_barrier {  // see fl/stl/adl_barrier.h
 template <typename T> FASTLED_FORCE_INLINE T clamp(T value, T lo, T hi) FL_NO_EXCEPT {
     if (value < lo) return lo;
     if (value > hi) return hi;
     return value;
 }
+}  // namespace adl_barrier
+
 
 // ===== Approximate equality ===================================================
 

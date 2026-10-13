@@ -6,6 +6,7 @@
 // IWYU pragma: end_keep
 
 namespace fl {
+    namespace adl_barrier {  // see fl/stl/adl_barrier.h
     // Provide C standard library malloc/free/realloc functions
     void* malloc(size_t size) FL_NO_EXCEPT {
         return ::malloc(size);
@@ -27,6 +28,8 @@ namespace fl {
     void* realloc(void* ptr, size_t new_size) FL_NO_EXCEPT {
         return ::realloc(ptr, new_size);
     }
+
+    }  // namespace adl_barrier
 
     // Provide abs function
     // Arduino.h defines abs as a macro, so we need to temporarily hide it

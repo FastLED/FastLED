@@ -6,7 +6,6 @@
 #include "fl/stl/span.h"
 #include "fl/stl/string.h"
 #include "fl/stl/noexcept.h"
-#include "fl/gfx/pixel_fwd.h"
 
 // Unified file buffer abstraction (streambuf-style backend)
 // This provides a platform-agnostic interface for file I/O operations.
@@ -15,6 +14,7 @@
 
 namespace fl {
 
+struct CRGB; // Forward declaration for readRGB8
 
 // Seek direction constants (match std::ios seekdir)
 enum class seek_dir {

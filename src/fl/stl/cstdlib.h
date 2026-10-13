@@ -7,6 +7,7 @@
 // expects standard C library functions like malloc, free, exit, etc.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "fl/stl/adl_barrier.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/cstddef.h"
 #include "fl/stl/noexcept.h"
@@ -53,9 +54,12 @@ double strtod(const char* str, char** endptr) FL_NO_EXCEPT;
 // C-style comparison function type for qsort
 typedef int (*qsort_compare_fn)(const void*, const void*);
 
+namespace adl_barrier {  // see fl/stl/adl_barrier.h
 // qsort - Quick sort function compatible with C stdlib qsort
 // Sorts an array of elements using the provided comparison function
 void qsort(void* base, size_t nmemb, size_t size, qsort_compare_fn compar) FL_NO_EXCEPT;
+}  // namespace adl_barrier
+
 
 // Pseudo-random number generator (mirrors ::rand()).
 // Returns u32 — values are always non-negative [0, RAND_MAX].

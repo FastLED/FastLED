@@ -10,6 +10,7 @@
 // Implementations are in cstring.cpp
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "fl/stl/adl_barrier.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/noexcept.h"
 
@@ -81,6 +82,7 @@ char* strerror(int errnum) FL_NO_EXCEPT;
 // Memory Functions
 // ============================================================================
 
+namespace adl_barrier {  // see fl/stl/adl_barrier.h
 // fl::memcpy - wrapper for memcpy
 void* memcpy(void* dest, const void* src, size_t n) FL_NO_EXCEPT;
 
@@ -98,6 +100,8 @@ void* memchr(void* s, int c, size_t n) FL_NO_EXCEPT;
 
 // fl::memchr - const version wrapper for memchr
 const void* memchr(const void* s, int c, size_t n) FL_NO_EXCEPT;
+}  // namespace adl_barrier
+
 
 // ============================================================================
 // Legacy compatibility functions (aliases)

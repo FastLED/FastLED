@@ -1,7 +1,8 @@
-// Tests for fl/gfx/pixel_fwd.h: CRGB and CHSV live in fl::pixel so that
-// argument-dependent lookup never drags fl's generic templates (fl::swap,
-// fl::sort, fl::move, fl::memcpy, ...) into calls on pixel types. Every call
-// below was ambiguous when CRGB lived directly in namespace fl (FastLED#4827).
+// Tests for fl/stl/adl_barrier.h: fl's generic templates and libc wrappers
+// (fl::swap, fl::sort, fl::move, fl::memcpy, ...) live behind a using-directive
+// so argument-dependent lookup on fl types (CRGB, CHSV, palettes, containers)
+// never drags them into user calls. Every unqualified call below used to be
+// ambiguous between the libc/std function and its fl:: twin (FastLED#4827).
 //
 // This file deliberately does NOT say `using namespace fl;`.
 
@@ -14,7 +15,11 @@
 #include <utility>  // ok include
 
 #include "FastLED.h"
-#include "fl/gfx/pixel_fwd.h"
+#include "fl/stl/adl_barrier.h"
+#include "fl/stl/vector.h"
+#include "fl/stl/list.h"
+#include "fl/stl/string.h"
+#include "fl/gfx/downscale.h"
 #include "fl/stl/algorithm.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/malloc.h"
@@ -23,14 +28,61 @@
 
 FL_TEST_FILE(FL_FILEPATH) {
 
-FL_TEST_CASE("pixel types live in fl::pixel and are re-exported") {
-    FL_CHECK((fl::is_same<fl::CRGB, fl::pixel::CRGB>::value));
-    FL_CHECK((fl::is_same<CRGB, fl::pixel::CRGB>::value));
-    FL_CHECK((fl::is_same<CHSV, fl::pixel::hsv8>::value));
-    CRGB a(1, 2, 3);
-    CRGB b(1, 2, 3);
-    FL_CHECK(a == b);          // operators found via ADL in fl::pixel
-    FL_CHECK((a + b) == CRGB(2, 4, 6));
+FL_TEST_CASE("fl API still reachable: qualified, unqualified-in-fl, and ADL") {
+    // Pixel types stay in fl, so fl functions on them are still found by ADL.
+    FL_CHECK((fl::is_same<CRGB, fl::CRGB>::value));
+    CRGB src[4] = {CRGB(4, 4, 4), CRGB(4, 4, 4), CRGB(4, 4, 4), CRGB(4, 4, 4)};
+    CRGB dst[1];
+    downscaleHalf(src, 2, 2, dst);  // ADL into fl, no fl:: prefix
+    FL_CHECK(dst[0] == CRGB(4, 4, 4));
+    // Qualified calls into the barrier keep working.
+    int x = 1, y = 2;
+    fl::swap(x, y);
+    FL_CHECK(x == 2);
+    char buf[4] = {};
+    fl::memset(buf, 'a', 3);
+    FL_CHECK(fl::memcmp(buf, "aaa", 3) == 0);
+    int v[3] = {3, 1, 2};
+    fl::sort(v, v + 3);
+    FL_CHECK(v[0] == 1);
+    FL_CHECK(fl::clamp(5, 0, 3) == 3);
+    int m = fl::move(x);
+    FL_CHECK(m == 2);
+    // swap stays in fl, so unqualified swap on fl containers still works.
+    fl::vector<int> a1, a2;
+    a1.push_back(1);
+    swap(a1, a2);
+    FL_CHECK(a2.size() == 1u);
+    fl::list<int> l1, l2;
+    l1.push_back(7);
+    swap(l1, l2);
+    FL_CHECK(l2.size() == 1u);
+}
+
+FL_TEST_CASE("libc and std on other fl types: palettes, containers") {
+#if defined(__clang__)
+    // Legacy sketches memcpy palettes; clang warns because the type is not
+    // trivially copyable, which is unrelated to the lookup under test.
+    FL_DISABLE_WARNING_PUSH
+    FL_DISABLE_WARNING(unknown-warning-option)
+    FL_DISABLE_WARNING(nontrivial-memcall)
+#endif
+    CRGBPalette16 p1(CRGB::Red);
+    CRGBPalette16 p2(CRGB::Blue);
+    memcpy(&p1, &p2, sizeof(p1));  // ok ctype
+    FL_CHECK(p1[0] == p2[0]);
+    memset(&p1, 0, sizeof(p1));  // ok ctype
+#if defined(__clang__)
+    FL_DISABLE_WARNING_POP
+#endif
+    fl::vector<fl::string> names;
+    names.push_back("b");
+    names.push_back("a");
+    std::sort(names.begin(), names.end());  // okay std namespace
+    FL_CHECK(names[0] == "a");
+    fl::string s1("x"), s2("y");
+    std::swap(s1, s2);  // okay std namespace
+    FL_CHECK(s1 == "y");
 }
 
 // FastLED#4827: unqualified libc calls on CRGB* must not be ambiguous

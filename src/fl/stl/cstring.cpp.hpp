@@ -125,6 +125,7 @@ char* strerror(int errnum) FL_NO_EXCEPT {
 // Memory Functions
 // ============================================================================
 
+namespace adl_barrier {  // see fl/stl/adl_barrier.h
 void* memcpy(void* dest, const void* src, size_t n) FL_NO_EXCEPT {
     if (n == 0) return dest;
     return ::memcpy(dest, src, n);
@@ -154,6 +155,8 @@ const void* memchr(const void* s, int c, size_t n) FL_NO_EXCEPT {
     if (n == 0) return nullptr;
     return ::memchr(s, c, n);
 }
+}  // namespace adl_barrier
+
 
 // ============================================================================
 // Arduino PROGMEM String Functions (platform-specific _P variants)

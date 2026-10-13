@@ -177,7 +177,6 @@ FASTLED_FORCE_INLINE CRGB CRGB::lerp16( const CRGB& other, fract16 frac) const F
 
 
 namespace fl {
-namespace pixel {  // see fl/gfx/pixel_fwd.h
 
 /// @copydoc CRGB::operator+=
 FASTLED_FORCE_INLINE CRGB operator+( const CRGB& p1, const CRGB& p2) FL_NO_EXCEPT
@@ -211,7 +210,6 @@ FASTLED_FORCE_INLINE CRGB operator%( const CRGB& p1, u8 d) FL_NO_EXCEPT
     return retval;
 }
 
-}  // namespace pixel
 }  // namespace fl
 
 

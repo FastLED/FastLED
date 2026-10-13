@@ -476,6 +476,7 @@ void detail::qsort_impl(char* base, size_t nmemb, size_t size, qsort_compare_fn 
 }
 
 // qsort - Direct implementation without using fl::sort to avoid proxy iterator issues
+namespace adl_barrier {  // see fl/stl/adl_barrier.h
 void qsort(void* base, size_t nmemb, size_t size, qsort_compare_fn compar) FL_NO_EXCEPT {
     if (!base || nmemb <= 1 || size == 0 || !compar) {
         return;
@@ -484,6 +485,7 @@ void qsort(void* base, size_t nmemb, size_t size, qsort_compare_fn compar) FL_NO
     char* arr = static_cast<char*>(base);
     detail::qsort_impl(arr, nmemb, size, compar);
 }
+}  // namespace adl_barrier
 
 u32 rand() FL_NO_EXCEPT {
     return static_cast<u32>(::rand());

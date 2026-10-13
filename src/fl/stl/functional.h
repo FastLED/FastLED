@@ -1,4 +1,5 @@
 #pragma once
+#include "fl/stl/adl_barrier.h"
 #include "fl/stl/type_traits.h"
 #include "fl/stl/noexcept.h"
 
@@ -36,6 +37,7 @@ struct use_pointer_syntax : is_pointer_like<typename remove_reference<T>::type> 
 
 } // namespace detail
 
+namespace adl_barrier {  // see fl/stl/adl_barrier.h
 // Main invoke function overloads
 
 // 1a. Member function pointer with object reference
@@ -87,5 +89,6 @@ auto invoke(F&& f, Args&&... args) FL_NO_EXCEPT
 {
     return fl::forward<F>(f)(fl::forward<Args>(args)...);
 }
+}  // namespace adl_barrier
 
 } // namespace fl
