@@ -13,7 +13,7 @@
 // Compile-time regression for FastLED#4827: legacy sketches call libc memory
 // functions unqualified on CRGB*. These must stay unambiguous on every board.
 static void legacyLibcOnCrgb() {
-    CRGB src[4];
+    CRGB src[4] = {};
     CRGB* dst = static_cast<CRGB*>(malloc(sizeof(CRGB) * 4));  // ok bare allocation
     if (!dst) {
         return;
