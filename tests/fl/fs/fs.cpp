@@ -69,6 +69,17 @@ private:
     }
 };
 
+FL_TEST_CASE("SD JPEG convenience API reports a missing file") {
+    const fl::string test_dir = "test_sd_jpeg_temp";
+    TestDirGuard guard(test_dir);
+    fl::setTestFileSystemRoot(test_dir.c_str());
+
+    fl::string error;
+    const auto frame = fl::loadJpegFromSD(5, "missing.jpg", fl::JpegConfig(), &error);
+    FL_CHECK_FALSE(frame);
+    FL_CHECK_FALSE(error.empty());
+}
+
 FL_TEST_CASE("FileSystem test with real hard drive") {
     // Create a temporary test directory and file
     fl::string test_dir = "test_filesystem_temp";

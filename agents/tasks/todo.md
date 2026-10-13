@@ -545,7 +545,7 @@ timed out on both versions while direct ownership accounting passed.
 - [x] Measure cold/warm/source/header edits and memory; document setup and limits.
 - [x] Full local tests, normal lint, and independent code review.
 - [x] Publish dependent fixes, update the fbuild pin, and reprovision all SDKs.
-- [x] Remove investigation scratch and the temporary dependency checkout.
+- [ ] Remove final integration scratch and the recreated dependency checkout.
 
 Validation evidence: full native debug validation passed 320 units and 96
 examples. Full Python validation passed 1,939 tests (47 skipped, 2 xfailed),
@@ -575,7 +575,21 @@ real Windows legacy ESP installation/recheck and both Mac installed-wheel smoke
 tests. Continued-include scanning and library-cache invalidation were verified
 RED -> GREEN, including real Pico SDK library selection.
 
-PR #4831 carries the implementation and final dependency pin. Its exact-head
+Full board CI then exposed Windows' command-line limit, optional binary-inspector
+metadata, and unused SD linkage. The query runner now uses an automatically
+removed compilation database with exact arguments (three RED -> GREEN tests).
+The inspector preserves ELF/map diagnostics without legacy conversion tools
+(six failures reproduced, all seven cases pass). Moving the unchanged SD JPEG
+helper into the SD translation unit reduced the local default ESP32-S3 image
+from 360,755 to 341,011 bytes and attributed RAM from 40,677 to 40,008 bytes,
+passing the unchanged budget; the real FxSdCard example still builds.
+Native debug validation passed all 320 units and 96 examples again. Full Python
+validation now passes 1,962 tests (48 skipped, two xfailed). Normal lint passed
+all 138 fresh AST parses in 445.23 seconds, with 1,608.1 MiB sampled peak RSS.
+FastLED/fbuild#1677 tracks the remaining real Pico SDK flag and Teensy archive
+fixes; their published dependency integration and final hosted sweep remain pending.
+
+PR #4831 carries the implementation and dependency pin. Its exact-head
 `ci-full` checks are the authoritative final cross-platform validation record;
 require them to pass before marking the PR ready. Preserve ordinary SDK/build
 caches and the pre-existing `.clud/` directory during cleanup.

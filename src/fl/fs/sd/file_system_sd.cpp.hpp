@@ -4,13 +4,13 @@
 /// `FileSystem::beginSd()`.
 ///
 /// Mechanism: this TU is compiled into its own `.o` file
-/// (`fl.system.sd+.cpp.o`, via `src/fl/build/fl.system.sd+.cpp`).
-/// `FileSystem::beginSd(int)` and `make_sdcard_filesystem(int)` are the
-/// only symbols this TU defines. The linker only pulls the `.o` into
-/// the final binary when one of those symbols is referenced — i.e.
-/// when the user's sketch actually calls `fs.beginSd(cs_pin)`. Sketches
+/// (`fl.fs.sd+.cpp.o`, via `src/fl/build/fl.fs.sd+.cpp`).
+/// SD entrypoints, including `FileSystem::beginSd(int)`, `FileSystem::sd()`,
+/// `make_sdcard_filesystem(int)` and `loadJpegFromSD()`, live together here.
+/// The linker only pulls the `.o` into the final binary when an SD
+/// entrypoint is referenced, such as `fs.beginSd(cs_pin)`. Sketches
 /// that only use `FileSystem::begin(platform_filesystem)` (or that
-/// don't touch `FileSystem` at all) see `fl.system.sd+.cpp.o` dropped
+/// don't touch `FileSystem` at all) see `fl.fs.sd+.cpp.o` dropped
 /// outright, taking `libSD.a` / `libFS.a` / Arduino's `VFSImpl` chain
 /// (~16 KB on ESP32-S3 NEOPIXEL Blink) with it.
 ///
@@ -98,6 +98,23 @@ FileSystem FileSystem::sd(int cs_pin) FL_NO_EXCEPT {
     FileSystem fs;
     fs.beginSd(cs_pin);
     return fs;
+}
+
+// Keep SD convenience APIs in this optional archive member as well. A reference
+// from the generic filesystem TU would extract this member and the SDK's SD
+// global constructor before dead-section elimination, even in non-SD sketches.
+FramePtr loadJpegFromSD(int cs_pin, const char *filepath,
+                        const JpegConfig &config,
+                        fl::string *error_message) FL_NO_EXCEPT {
+    FileSystem fs;
+    if (!fs.beginSd(cs_pin)) {
+        if (error_message) {
+            *error_message = "Failed to initialize SD card on CS pin ";
+            error_message->append(static_cast<fl::u32>(cs_pin));
+        }
+        return FramePtr();
+    }
+    return fs.loadJpeg(filepath, config, error_message);
 }
 
 } // namespace fl

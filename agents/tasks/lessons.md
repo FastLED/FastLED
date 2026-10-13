@@ -523,3 +523,12 @@
 - Cache tests need a unique filesystem identity per invocation when the backing
   store survives CI runs. Keep paths stable inside each cold/warm/mutation test,
   retain the real cache, and verify two runs against the same pytest base path.
+
+- Real SDK argument lists can exceed Windows process limits. Preserve exact
+  arguments in a temporary compilation database and test cleanup on both parse
+  and spawn failures; shortening include lists weakens the analysis.
+- A convenience function in a generic filesystem object can extract an SD
+  object whose constructor survives section garbage collection. Keep SD callers
+  in the SD translation unit and verify actual map and image changes, alongside
+  an example that still uses SD. Optional SDK objects also need archive extraction
+  in the build backend; conservative discovery alone cannot prevent retention.

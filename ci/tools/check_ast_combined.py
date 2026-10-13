@@ -24,6 +24,7 @@ import sys
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from pathlib import Path
+from tempfile import TemporaryDirectory
 
 from running_process import PIPE, RunningProcess
 
@@ -161,18 +162,43 @@ def analyze_translation_unit(
     process_env: dict[str, str] | None = None,
 ) -> TranslationUnitAnalysis:
     """Run checks, declaration inventory, and presence assertions in one parse."""
-    result = RunningProcess.run(
-        [*clang_query, tu, "--", *compiler_args, "-H", "-fshow-skipped-includes"],
-        input=_build_combined_query(file_regex, expected_records),
-        stdout=PIPE,
-        stderr=PIPE,
-        text=True,
-        cwd=str(PROJECT_ROOT),
-        env=process_env,
-        timeout=300,
-        encoding="utf-8",
-        errors="replace",
-    )
+    # Real SDK include lists exceed Windows' process command-line limit. A
+    # compilation database carries exact argv tokens without shell/response
+    # quoting rules. clang-tool matches FixedCompilationDatabase's synthetic
+    # driver used by the previous `clang-query tu -- args` invocation.
+    source = str((PROJECT_ROOT / tu).resolve())
+    with TemporaryDirectory(prefix="fastled-ast-") as database_dir:
+        database = Path(database_dir) / "compile_commands.json"
+        database.write_text(
+            json.dumps(
+                [
+                    {
+                        "directory": str(PROJECT_ROOT),
+                        "file": source,
+                        "arguments": [
+                            "clang-tool",
+                            *compiler_args,
+                            "-H",
+                            "-fshow-skipped-includes",
+                            source,
+                        ],
+                    }
+                ]
+            ),
+            encoding="utf-8",
+        )
+        result = RunningProcess.run(
+            [*clang_query, source, "-p", database_dir],
+            input=_build_combined_query(file_regex, expected_records),
+            stdout=PIPE,
+            stderr=PIPE,
+            text=True,
+            cwd=str(PROJECT_ROOT),
+            env=process_env,
+            timeout=300,
+            encoding="utf-8",
+            errors="replace",
+        )
     output = result.stdout + "\n" + result.stderr
     _raise_on_query_errors(result.returncode, output)
     dependencies = {Path(tu).resolve()}
