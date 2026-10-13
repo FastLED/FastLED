@@ -20,6 +20,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import shutil
 import sys
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
@@ -152,6 +153,20 @@ def _run_combined_clang_query(
     return result.noexcept_hits, result.array_param_hits
 
 
+def _clang_tool_driver(clang_query: list[str]) -> str:
+    """Preserve FixedCompilationDatabase's driver-relative header discovery."""
+    if any("clang-tool-chain-clang-query" in part for part in clang_query):
+        from clang_tool_chain.execution.clang_extra import find_clang_extra_tool
+
+        executable = find_clang_extra_tool("clang-query").resolve()
+    else:
+        executable = Path(shutil.which(clang_query[0]) or clang_query[0]).resolve()
+        unwrapped = executable.with_name("clang-query-unwrapped")
+        if unwrapped.is_file():
+            executable = unwrapped.resolve()
+    return str(executable.with_name("clang-tool"))
+
+
 def analyze_translation_unit(
     clang_query: list[str],
     tu: str,
@@ -164,8 +179,8 @@ def analyze_translation_unit(
     """Run checks, declaration inventory, and presence assertions in one parse."""
     # Real SDK include lists exceed Windows' process command-line limit. A
     # compilation database carries exact argv tokens without shell/response
-    # quoting rules. clang-tool matches FixedCompilationDatabase's synthetic
-    # driver used by the previous `clang-query tu -- args` invocation.
+    # quoting rules. LLVM's FixedCompilationDatabase uses an absolute sibling
+    # clang-tool driver; macOS needs its directory to locate libc++ headers.
     source = str((PROJECT_ROOT / tu).resolve())
     with TemporaryDirectory(prefix="fastled-ast-") as database_dir:
         database = Path(database_dir) / "compile_commands.json"
@@ -176,7 +191,7 @@ def analyze_translation_unit(
                         "directory": str(PROJECT_ROOT),
                         "file": source,
                         "arguments": [
-                            "clang-tool",
+                            _clang_tool_driver(clang_query),
                             *compiler_args,
                             "-H",
                             "-fshow-skipped-includes",

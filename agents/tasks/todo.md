@@ -589,6 +589,19 @@ all 138 fresh AST parses in 445.23 seconds, with 1,608.1 MiB sampled peak RSS.
 FastLED/fbuild#1677 tracks the remaining real Pico SDK flag and Teensy archive
 fixes; their published dependency integration and final hosted sweep remain pending.
 
+Subsequent native validation passed the previously failing Windows IDF4/IDF5
+ABI probes, then exposed a missing C6 esptool Windows binary. The dependent
+fix selects the published source archive and adds a real cold/warm Windows
+installation check. Mac stub lint exposed a separate invocation regression:
+LLVM's synthetic driver must retain its absolute installation directory for
+libc++ discovery. The three command-length tests now parse `<initializer_list>`
+and pass with that context restored; hosted validation remains required.
+Normal lint with the restored driver context passed all 138 fresh parses in
+470.54 seconds, with 1,415.2 MiB sampled peak RSS and a verified input snapshot.
+Real source-built fbuild 2.5.41 checks pass the unchanged RP2040 image/RAM budget
+(103,328/8,636 bytes) and Teensy 4.1 budget (47,104/21,734 bytes), with real Pico
+FxSdCard and Teensy OctoWS2811 builds passing. The dependency is not published yet.
+
 PR #4831 carries the implementation and dependency pin. Its exact-head
 `ci-full` checks are the authoritative final cross-platform validation record;
 require them to pass before marking the PR ready. Preserve ordinary SDK/build

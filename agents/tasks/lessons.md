@@ -527,6 +527,10 @@
 - Real SDK argument lists can exceed Windows process limits. Preserve exact
   arguments in a temporary compilation database and test cleanup on both parse
   and spawn failures; shortening include lists weakens the analysis.
+- Compilation database argv[0] carries compiler installation context. LLVM's
+  fixed database uses an absolute sibling `clang-tool` path; a bare name loses
+  macOS libc++ discovery even when every flag is identical. Include a real
+  standard-library header in the command-length regression and verify native CI.
 - A convenience function in a generic filesystem object can extract an SD
   object whose constructor survives section garbage collection. Keep SD callers
   in the SD translation unit and verify actual map and image changes, alongside
