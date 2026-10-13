@@ -156,3 +156,29 @@ def test_owned_runtime_sources_do_not_use_cpp_exception_keywords() -> None:
     assert not violations, (
         "Unsupported C++ exception syntax in runtime sources:\n" + "\n".join(violations)
     )
+
+
+@pytest.mark.parametrize("backend", ["SDFileHandle", "SdFatFileHandle"])
+def test_sd_file_overrides_match_filebuf_exception_contract(backend: str) -> None:
+    """#4826: compile the actual override declarations against the real base.
+
+    Native filesystem tests select the host backend, while Arduino SDK headers
+    are unavailable in ordinary Python CI. Extract just these declarations so
+    both optional SD branches get their exception contracts checked there too.
+    Target builds separately validate the SDK-dependent bodies and selection.
+    """
+    source = (SRC / "fl/fs/sd/fs_sdcard_arduino.cpp.hpp").read_text(encoding="utf-8")
+    match = re.search(
+        rf"class {backend} : public filebuf \{{(.*?)\n\}};", source, re.DOTALL
+    )
+    assert match is not None, f"SD backend {backend} not found"
+    declarations = re.findall(r"^\s*([^\n{}]+\boverride)\b", match[1], re.MULTILINE)
+    assert declarations, f"No overrides found in {backend}"
+    _compile(
+        '#include "fl/fs/file_handle.h"\n'
+        f"namespace fl {{ class {backend} : public filebuf {{ public:\n"
+        + ";\n".join(declarations)
+        + ";\n}; }\n"
+        + f"fl::{backend} complete_backend;\n",
+        ["-DFL_NO_EXCEPT=noexcept"],
+    )
