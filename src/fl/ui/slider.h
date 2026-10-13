@@ -22,27 +22,27 @@ class UISliderImpl {
     // If step is -1, it will be calculated as (max - min) / 100
     UISliderImpl(const char *name, float value = 128.0f, float min = 1,
                  float max = 255, float step = -1.f)
-        : mMin(fl::min(min, max)),
+        FL_NO_EXCEPT : mMin(fl::min(min, max)),
           mMax(fl::max(min, max)),
           mValue(fl::max(mMin, fl::min(mMax, value))) {
         FASTLED_UNUSED(name);
         FASTLED_UNUSED(step);
     }
     ~UISliderImpl() FL_NO_EXCEPT {}
-    float value() const { return mValue; }
-    float getMax() const { return mMax; }
-    float getMin() const { return mMin; }
-    void setValue(float value) { mValue = fl::max(mMin, fl::min(mMax, value)); }
-    operator float() const { return mValue; }
-    operator u8() const { return static_cast<u8>(mValue); }
-    operator u16() const { return static_cast<u16>(mValue); }
-    operator int() const { return static_cast<int>(mValue); }
-    template <typename T> T as() const { return static_cast<T>(mValue); }
+    float value() const FL_NO_EXCEPT { return mValue; }
+    float getMax() const FL_NO_EXCEPT { return mMax; }
+    float getMin() const FL_NO_EXCEPT { return mMin; }
+    void setValue(float value) FL_NO_EXCEPT { mValue = fl::max(mMin, fl::min(mMax, value)); }
+    operator float() const FL_NO_EXCEPT { return mValue; }
+    operator u8() const FL_NO_EXCEPT { return static_cast<u8>(mValue); }
+    operator u16() const FL_NO_EXCEPT { return static_cast<u16>(mValue); }
+    operator int() const FL_NO_EXCEPT { return static_cast<int>(mValue); }
+    template <typename T> T as() const FL_NO_EXCEPT { return static_cast<T>(mValue); }
 
-    int as_int() const { return static_cast<int>(mValue); }
+    int as_int() const FL_NO_EXCEPT { return static_cast<int>(mValue); }
 
     // Stub method for group setting (does nothing on non-WASM platforms)
-    void setGroup(const fl::string& groupName) { FASTLED_UNUSED(groupName); }
+    void setGroup(const fl::string& groupName) FL_NO_EXCEPT { FASTLED_UNUSED(groupName); }
 
     UISliderImpl &operator=(float value) FL_NO_EXCEPT {
         setValue(value);

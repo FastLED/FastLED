@@ -15,14 +15,14 @@ namespace fl {
 #if !FASTLED_HAS_UI_HELP
 class UIHelpImpl {
   public:
-    UIHelpImpl(const char *markdownContent) : mContent(markdownContent) { FASTLED_UNUSED(markdownContent); }
+    UIHelpImpl(const char *markdownContent) FL_NO_EXCEPT : mContent(markdownContent) { FASTLED_UNUSED(markdownContent); }
     ~UIHelpImpl() FL_NO_EXCEPT {}
 
     // Stub method for group setting (does nothing on non-WASM platforms)
-    void setGroup(const fl::string& groupName) { FASTLED_UNUSED(groupName); }
+    void setGroup(const fl::string& groupName) FL_NO_EXCEPT { FASTLED_UNUSED(groupName); }
 
     // Stub method for accessing markdown content
-    const fl::string& markdownContent() const { return mContent; }
+    const fl::string& markdownContent() const FL_NO_EXCEPT { return mContent; }
 
   private:
     fl::string mContent;

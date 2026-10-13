@@ -531,3 +531,24 @@ timed out on both versions while direct ownership accounting passed.
   paths and sources because fbuild omitted that dependency. No Windows execution
   or physical hardware run is claimed. Logs and scripts: `.build/4826/`.
 - Repository code review found no blocking issues.
+
+## #4829 — required stub and ESP AST coverage
+
+- [x] Start feature branch from current master and confirm full issue scope.
+- [x] RED → GREEN: explicit compiler arguments, shared coverage query, required backend definition.
+- [x] Provision pinned IDF4, IDF5, and representative RISC-V SDK profiles reproducibly.
+- [x] Enumerate owned TUs and explicit real SD/SdFat variants; correct SDK guards.
+- [x] Integrate per-TU zccache storage, dependencies, and negative include invalidation.
+- [x] Add coverage report, globally bounded scheduling, deduplicated profile findings.
+- [x] Demonstrate original SD and ESP-only defects fail, including warm cache cases.
+- [x] Fix actual ESP violations; enforce matrix in normal lint and existing CI.
+- [ ] Measure cold/warm/source/header edits and memory; document setup and limits.
+- [ ] Full tests, lint, code review, validated pushed PR, and workspace cleanup.
+
+Current evidence: the 138-job matrix passes with 21,894 declaration locations;
+normal `bash lint` validates all profiles with 138 cache hits and zero parses.
+Full native debug validation passed 320 units and 96 examples. Full Python
+validation passed 1,939 tests (47 skipped, 2 xfailed), with subsequent focused
+ABI, SDK, cache and outer-wrapper regressions passing. Independent source and
+orchestration reviews found no blocking issues. Final performance measurements,
+published PR and scratch cleanup remain pending.

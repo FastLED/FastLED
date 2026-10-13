@@ -19,6 +19,7 @@
 ///
 /// **Tier 2** — not implemented; tracked in #2731.
 
+#include "fl/stl/noexcept.h"
 #include "fl/wdt/watchdog.h"
 #include "platforms/esp/32/watchdog_esp32.h"
 
@@ -58,23 +59,23 @@ struct Esp32WatchdogState {
     ResetCause cached_cause = ResetCause::UNKNOWN;
     bool       cause_cached = false;
 
-    fl::u16 load_crash_count() const {
+    fl::u16 load_crash_count() const FL_NO_EXCEPT {
         // Little-endian read from the tail of persist[].
         return static_cast<fl::u16>(persist[kUserBytes])
              | (static_cast<fl::u16>(persist[kUserBytes + 1]) << 8);
     }
-    void store_crash_count(fl::u16 v) {
+    void store_crash_count(fl::u16 v) FL_NO_EXCEPT {
         persist[kUserBytes]     = static_cast<fl::u8>(v & 0xFF);
         persist[kUserBytes + 1] = static_cast<fl::u8>((v >> 8) & 0xFF);
     }
 };
 
-inline Esp32WatchdogState& esp32WatchdogState() {
+inline Esp32WatchdogState& esp32WatchdogState() FL_NO_EXCEPT {
     static Esp32WatchdogState s{};  // okay static in header — this `.impl.hpp` is included from exactly one TU (the dispatcher)
     return s;
 }
 
-inline ResetCause translateEsp32ResetReason(esp_reset_reason_t r) {
+inline ResetCause translateEsp32ResetReason(esp_reset_reason_t r) FL_NO_EXCEPT {
     switch (r) {
         case ESP_RST_POWERON:  return ResetCause::POWER_ON;
         case ESP_RST_EXT:      return ResetCause::EXTERNAL_PIN;
@@ -90,11 +91,11 @@ inline ResetCause translateEsp32ResetReason(esp_reset_reason_t r) {
     }
 }
 
-inline TaskHandle_t esp32MonitoredTask() {
+inline TaskHandle_t esp32MonitoredTask() FL_NO_EXCEPT {
     return static_cast<TaskHandle_t>(esp32WatchdogState().monitored_task);
 }
 
-inline bool esp32SubscribeCurrentTask() {
+inline bool esp32SubscribeCurrentTask() FL_NO_EXCEPT {
     if (xTaskGetSchedulerState() != taskSCHEDULER_RUNNING) {
         return false;
     }
@@ -139,7 +140,7 @@ inline bool esp32SubscribeCurrentTask() {
     return true;
 }
 
-inline void esp32ResetMonitoredTask() {
+inline void esp32ResetMonitoredTask() FL_NO_EXCEPT {
     auto& s = esp32WatchdogState();
     if (!s.armed || s.monitored_task == nullptr) {
         return;
@@ -153,7 +154,7 @@ inline void esp32ResetMonitoredTask() {
     (void)esp_task_wdt_reset();
 }
 
-inline bool esp32UnsubscribeMonitoredTask() {
+inline bool esp32UnsubscribeMonitoredTask() FL_NO_EXCEPT {
     auto& s = esp32WatchdogState();
     if (s.monitored_task != nullptr && s.monitored_task_added) {
         esp_err_t err = esp_task_wdt_delete(esp32MonitoredTask());

@@ -155,7 +155,7 @@ public:
      * Returns edges captured since the last begin() call.
      * The span remains valid until the next begin() call.
      */
-    virtual fl::span<const EdgeTimestamp> getEdges() const = 0;
+    virtual fl::span<const EdgeTimestamp> getEdges() const FL_NO_EXCEPT = 0;
 
     /**
      * @brief Decode captured edges to bytes into a span

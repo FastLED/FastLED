@@ -60,7 +60,8 @@ SdFatState &sdfat_state() FL_NO_EXCEPT {
 
 #define FASTLED_HAS_SDCARD_IMPL 1
 
-#elif FL_HAS_INCLUDE(<SD.h>) && FL_HAS_INCLUDE(<fs.h>)
+#elif FL_HAS_INCLUDE(<SD.h>) && \
+    (FL_HAS_INCLUDE(<FS.h>) || FL_HAS_INCLUDE(<fs.h>)) && FL_HAS_INCLUDE(<SPI.h>)
 // Arduino SD library is on the include path. `fs_sdcard_arduino.cpp.hpp`
 // provides an `inline` `make_sdcard_filesystem` definition that uses
 // the real Arduino `SD`/`FS` libraries. Pulling those into

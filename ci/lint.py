@@ -225,7 +225,7 @@ def create_stages(args: LintArgs) -> list[LintStage]:
                 name="cpp_linting",
                 display_name="C++ LINTING",
                 run_fn=run_cpp_and_iwyu,
-                timeout=600.0,  # Combined timeout for C++ + IWYU + clang-tidy
+                timeout=1200.0,  # Nested checker gets 900s; reserve 300s for other stages
             )
         )
 

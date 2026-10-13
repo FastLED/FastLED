@@ -22,32 +22,32 @@ namespace fl {
 #if !FASTLED_HAS_UI_AUDIO
 class UIAudioImpl {
   public:
-    UIAudioImpl(const fl::string& name) { FASTLED_UNUSED(name); }
-    UIAudioImpl(const fl::string& name, const fl::url& url) {
+    UIAudioImpl(const fl::string& name) FL_NO_EXCEPT { FASTLED_UNUSED(name); }
+    UIAudioImpl(const fl::string& name, const fl::url& url) FL_NO_EXCEPT {
         FASTLED_UNUSED(name);
         FASTLED_UNUSED(url);
     }
-    UIAudioImpl(const fl::string& name, const fl::audio::Config& config) {
+    UIAudioImpl(const fl::string& name, const fl::audio::Config& config) FL_NO_EXCEPT {
         FASTLED_UNUSED(name);
         FASTLED_UNUSED(config);
     }
     ~UIAudioImpl() FL_NO_EXCEPT {}
 
-    audio::Sample next() {
+    audio::Sample next() FL_NO_EXCEPT {
         FL_WARN("Audio sample not implemented");
         return audio::Sample();
     }
 
-    bool hasNext() {
+    bool hasNext() FL_NO_EXCEPT {
         FL_WARN("Audio sample not implemented");
         return false;
     }
 
     // Stub method for group setting (does nothing on non-WASM platforms)
-    void setGroup(const fl::string& groupName) { FASTLED_UNUSED(groupName); }
+    void setGroup(const fl::string& groupName) FL_NO_EXCEPT { FASTLED_UNUSED(groupName); }
 
     // Stub: no underlying audio input on non-WASM platforms
-    fl::shared_ptr<audio::IInput> audioInput() { return nullptr; }
+    fl::shared_ptr<audio::IInput> audioInput() FL_NO_EXCEPT { return nullptr; }
 };
 #endif
 

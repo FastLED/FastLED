@@ -19,17 +19,17 @@ namespace fl {
 
 class UIButtonImpl {
   public:
-    UIButtonImpl(const char *name) : mName(name ? name : "") {}
+    UIButtonImpl(const char *name) FL_NO_EXCEPT : mName(name ? name : "") {}
     ~UIButtonImpl() FL_NO_EXCEPT {}
-    bool isPressed() const { return false; }
-    bool clicked() const { return false; }
-    int clickedCount() const { return 0; }
-    operator bool() const { return false; }
-    void click() {}
-    fl::string name() const { return mName; }
+    bool isPressed() const FL_NO_EXCEPT { return false; }
+    bool clicked() const FL_NO_EXCEPT { return false; }
+    int clickedCount() const FL_NO_EXCEPT { return 0; }
+    operator bool() const FL_NO_EXCEPT { return false; }
+    void click() FL_NO_EXCEPT {}
+    fl::string name() const FL_NO_EXCEPT { return mName; }
 
     // Stub method for group setting (does nothing on non-WASM platforms)
-    void setGroup(const fl::string& groupName) { FASTLED_UNUSED(groupName); }
+    void setGroup(const fl::string& groupName) FL_NO_EXCEPT { FASTLED_UNUSED(groupName); }
 
   private:
     fl::string mName;

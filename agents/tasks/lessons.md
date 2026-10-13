@@ -514,3 +514,8 @@
   inside return types, default-argument lambdas, or same-line bodies cannot
   excuse an unannotated enclosing function. After deleting a regex exemption,
   verify its remaining call sites as well as the added regression test.
+
+- Required platform lint must validate SDK prerequisites on every invocation;
+  an unchanged-source fingerprint cannot prove that tooling is still present.
+  Verify the normal wrapper with a warmed cache and a temporarily missing SDK,
+  restore exact inputs, and remove task scratch files after publishing evidence.

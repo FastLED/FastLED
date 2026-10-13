@@ -186,11 +186,11 @@ template <typename T = float>
 class ExponentialSmoother {
   public:
     explicit ExponentialSmoother(T tau_seconds, T initial = T(0))
-        : mImpl(tau_seconds, initial) {}
-    FASTLED_FORCE_INLINE T update(T input, T dt_seconds) { return mImpl.update(input, dt_seconds); }
-    FASTLED_FORCE_INLINE T value() const { return mImpl.value(); }
-    FASTLED_FORCE_INLINE void reset(T initial = T(0)) { mImpl.reset(initial); }
-    FASTLED_FORCE_INLINE void setTau(T tau_seconds) { mImpl.setTau(tau_seconds); }
+        FL_NO_EXCEPT : mImpl(tau_seconds, initial) {}
+    FASTLED_FORCE_INLINE T update(T input, T dt_seconds) FL_NO_EXCEPT { return mImpl.update(input, dt_seconds); }
+    FASTLED_FORCE_INLINE T value() const FL_NO_EXCEPT { return mImpl.value(); }
+    FASTLED_FORCE_INLINE void reset(T initial = T(0)) FL_NO_EXCEPT { mImpl.reset(initial); }
+    FASTLED_FORCE_INLINE void setTau(T tau_seconds) FL_NO_EXCEPT { mImpl.setTau(tau_seconds); }
   private:
     detail::ExponentialSmootherImpl<T> mImpl;
 };
@@ -213,12 +213,12 @@ template <typename T = float>
 class AttackDecayFilter {
   public:
     AttackDecayFilter(T attack_tau, T decay_tau, T initial = T(0))
-        : mImpl(attack_tau, decay_tau, initial) {}
-    FASTLED_FORCE_INLINE T update(T input, T dt_seconds) { return mImpl.update(input, dt_seconds); }
-    FASTLED_FORCE_INLINE T value() const { return mImpl.value(); }
-    FASTLED_FORCE_INLINE void reset(T initial = T(0)) { mImpl.reset(initial); }
-    FASTLED_FORCE_INLINE void setAttackTau(T tau_seconds) { mImpl.setAttackTau(tau_seconds); }
-    FASTLED_FORCE_INLINE void setDecayTau(T tau_seconds) { mImpl.setDecayTau(tau_seconds); }
+        FL_NO_EXCEPT : mImpl(attack_tau, decay_tau, initial) {}
+    FASTLED_FORCE_INLINE T update(T input, T dt_seconds) FL_NO_EXCEPT { return mImpl.update(input, dt_seconds); }
+    FASTLED_FORCE_INLINE T value() const FL_NO_EXCEPT { return mImpl.value(); }
+    FASTLED_FORCE_INLINE void reset(T initial = T(0)) FL_NO_EXCEPT { mImpl.reset(initial); }
+    FASTLED_FORCE_INLINE void setAttackTau(T tau_seconds) FL_NO_EXCEPT { mImpl.setAttackTau(tau_seconds); }
+    FASTLED_FORCE_INLINE void setDecayTau(T tau_seconds) FL_NO_EXCEPT { mImpl.setDecayTau(tau_seconds); }
   private:
     detail::AttackDecayFilterImpl<T> mImpl;
 };
@@ -239,11 +239,11 @@ class AttackDecayFilter {
 template <typename T = float>
 class DCBlocker {
   public:
-    explicit DCBlocker(T r = T(0.995f)) : mImpl(r) {}
-    FASTLED_FORCE_INLINE T update(T input) { return mImpl.update(input); }
-    FASTLED_FORCE_INLINE T value() const { return mImpl.value(); }
-    FASTLED_FORCE_INLINE void reset() { mImpl.reset(); }
-    FASTLED_FORCE_INLINE void setR(T r) { mImpl.setR(r); }
+    explicit DCBlocker(T r = T(0.995f)) FL_NO_EXCEPT : mImpl(r) {}
+    FASTLED_FORCE_INLINE T update(T input) FL_NO_EXCEPT { return mImpl.update(input); }
+    FASTLED_FORCE_INLINE T value() const FL_NO_EXCEPT { return mImpl.value(); }
+    FASTLED_FORCE_INLINE void reset() FL_NO_EXCEPT { mImpl.reset(); }
+    FASTLED_FORCE_INLINE void setR(T r) FL_NO_EXCEPT { mImpl.setR(r); }
   private:
     detail::DCBlockerImpl<T> mImpl;
 };
@@ -263,10 +263,10 @@ template <typename T = float, int K = 2>
 class LeakyIntegrator {
   public:
     LeakyIntegrator() FL_NO_EXCEPT = default;
-    explicit LeakyIntegrator(T initial) : mImpl(initial) {}
-    FASTLED_FORCE_INLINE T update(T input) { return mImpl.update(input); }
-    FASTLED_FORCE_INLINE T value() const { return mImpl.value(); }
-    FASTLED_FORCE_INLINE void reset(T initial = T(0)) { mImpl.reset(initial); }
+    explicit LeakyIntegrator(T initial) FL_NO_EXCEPT : mImpl(initial) {}
+    FASTLED_FORCE_INLINE T update(T input) FL_NO_EXCEPT { return mImpl.update(input); }
+    FASTLED_FORCE_INLINE T value() const FL_NO_EXCEPT { return mImpl.value(); }
+    FASTLED_FORCE_INLINE void reset(T initial = T(0)) FL_NO_EXCEPT { mImpl.reset(initial); }
   private:
     detail::LeakyIntegratorImpl<T, K> mImpl;
 };
@@ -290,11 +290,11 @@ template <typename T = float, int Stages = 2>
 class CascadedEMA {
   public:
     explicit CascadedEMA(T tau_seconds, T initial = T(0))
-        : mImpl(tau_seconds, initial) {}
-    FASTLED_FORCE_INLINE T update(T input, T dt_seconds) { return mImpl.update(input, dt_seconds); }
-    FASTLED_FORCE_INLINE T value() const { return mImpl.value(); }
-    FASTLED_FORCE_INLINE void reset(T initial = T(0)) { mImpl.reset(initial); }
-    FASTLED_FORCE_INLINE void setTau(T tau_seconds) { mImpl.setTau(tau_seconds); }
+        FL_NO_EXCEPT : mImpl(tau_seconds, initial) {}
+    FASTLED_FORCE_INLINE T update(T input, T dt_seconds) FL_NO_EXCEPT { return mImpl.update(input, dt_seconds); }
+    FASTLED_FORCE_INLINE T value() const FL_NO_EXCEPT { return mImpl.value(); }
+    FASTLED_FORCE_INLINE void reset(T initial = T(0)) FL_NO_EXCEPT { mImpl.reset(initial); }
+    FASTLED_FORCE_INLINE void setTau(T tau_seconds) FL_NO_EXCEPT { mImpl.setTau(tau_seconds); }
   private:
     detail::CascadedEMAImpl<T, Stages> mImpl;
 };
@@ -317,27 +317,27 @@ class CascadedEMA {
 template <typename T = float>
 class BiquadFilter {
     using Impl = detail::BiquadFilterImpl<T>;
-    BiquadFilter(const Impl& impl) : mImpl(impl) {}
+    BiquadFilter(const Impl& impl) FL_NO_EXCEPT : mImpl(impl) {}
   public:
     BiquadFilter(T b0, T b1, T b2, T a1, T a2)
-        : mImpl(b0, b1, b2, a1, a2) {}
-    static BiquadFilter butterworth(float cutoff_hz, float sample_rate) {
+        FL_NO_EXCEPT : mImpl(b0, b1, b2, a1, a2) {}
+    static BiquadFilter butterworth(float cutoff_hz, float sample_rate) FL_NO_EXCEPT {
         return BiquadFilter(Impl::butterworth(cutoff_hz, sample_rate));
     }
-    static BiquadFilter highpass(float cutoff_hz, float sample_rate) {
+    static BiquadFilter highpass(float cutoff_hz, float sample_rate) FL_NO_EXCEPT {
         return BiquadFilter(Impl::highpass(cutoff_hz, sample_rate));
     }
     static BiquadFilter bandpass(float center_hz, float sample_rate,
-                                  float q = 1.0f) {
+                                  float q = 1.0f) FL_NO_EXCEPT {
         return BiquadFilter(Impl::bandpass(center_hz, sample_rate, q));
     }
     static BiquadFilter notch(float center_hz, float sample_rate,
-                               float q = 1.0f) {
+                               float q = 1.0f) FL_NO_EXCEPT {
         return BiquadFilter(Impl::notch(center_hz, sample_rate, q));
     }
-    FASTLED_FORCE_INLINE T update(T input) { return mImpl.update(input); }
-    FASTLED_FORCE_INLINE T value() const { return mImpl.value(); }
-    FASTLED_FORCE_INLINE void reset() { mImpl.reset(); }
+    FASTLED_FORCE_INLINE T update(T input) FL_NO_EXCEPT { return mImpl.update(input); }
+    FASTLED_FORCE_INLINE T value() const FL_NO_EXCEPT { return mImpl.value(); }
+    FASTLED_FORCE_INLINE void reset() FL_NO_EXCEPT { mImpl.reset(); }
   private:
     Impl mImpl;
 };
@@ -360,10 +360,10 @@ template <typename T = float>
 class KalmanFilter {
   public:
     KalmanFilter(T process_noise, T measurement_noise, T initial = T(0))
-        : mImpl(process_noise, measurement_noise, initial) {}
-    FASTLED_FORCE_INLINE T update(T measurement) { return mImpl.update(measurement); }
-    FASTLED_FORCE_INLINE T value() const { return mImpl.value(); }
-    FASTLED_FORCE_INLINE void reset(T initial = T(0)) { mImpl.reset(initial); }
+        FL_NO_EXCEPT : mImpl(process_noise, measurement_noise, initial) {}
+    FASTLED_FORCE_INLINE T update(T measurement) FL_NO_EXCEPT { return mImpl.update(measurement); }
+    FASTLED_FORCE_INLINE T value() const FL_NO_EXCEPT { return mImpl.value(); }
+    FASTLED_FORCE_INLINE void reset(T initial = T(0)) FL_NO_EXCEPT { mImpl.reset(initial); }
   private:
     detail::KalmanFilterImpl<T> mImpl;
 };
@@ -385,10 +385,10 @@ template <typename T = float>
 class OneEuroFilter {
   public:
     OneEuroFilter(T min_cutoff, T beta, T d_cutoff = T(1.0f))
-        : mImpl(min_cutoff, beta, d_cutoff) {}
-    FASTLED_FORCE_INLINE T update(T input, T dt) { return mImpl.update(input, dt); }
-    FASTLED_FORCE_INLINE T value() const { return mImpl.value(); }
-    FASTLED_FORCE_INLINE void reset(T initial = T(0)) { mImpl.reset(initial); }
+        FL_NO_EXCEPT : mImpl(min_cutoff, beta, d_cutoff) {}
+    FASTLED_FORCE_INLINE T update(T input, T dt) FL_NO_EXCEPT { return mImpl.update(input, dt); }
+    FASTLED_FORCE_INLINE T value() const FL_NO_EXCEPT { return mImpl.value(); }
+    FASTLED_FORCE_INLINE void reset(T initial = T(0)) FL_NO_EXCEPT { mImpl.reset(initial); }
   private:
     detail::OneEuroFilterImpl<T> mImpl;
 };
@@ -422,14 +422,14 @@ template <typename T = float, fl::size N = 8>
 class MovingAverage {
   public:
     MovingAverage() FL_NO_EXCEPT = default;
-    explicit MovingAverage(fl::size capacity) : mImpl(capacity) {}
-    FASTLED_FORCE_INLINE T update(T input) { return mImpl.update(input); }
-    FASTLED_FORCE_INLINE T value() const { return mImpl.value(); }
-    FASTLED_FORCE_INLINE void reset() { mImpl.reset(); }
-    FASTLED_FORCE_INLINE bool full() const { return mImpl.full(); }
-    FASTLED_FORCE_INLINE fl::size size() const { return mImpl.size(); }
-    FASTLED_FORCE_INLINE fl::size capacity() const { return mImpl.capacity(); }
-    FASTLED_FORCE_INLINE void resize(fl::size new_capacity) { mImpl.resize(new_capacity); }
+    explicit MovingAverage(fl::size capacity) FL_NO_EXCEPT : mImpl(capacity) {}
+    FASTLED_FORCE_INLINE T update(T input) FL_NO_EXCEPT { return mImpl.update(input); }
+    FASTLED_FORCE_INLINE T value() const FL_NO_EXCEPT { return mImpl.value(); }
+    FASTLED_FORCE_INLINE void reset() FL_NO_EXCEPT { mImpl.reset(); }
+    FASTLED_FORCE_INLINE bool full() const FL_NO_EXCEPT { return mImpl.full(); }
+    FASTLED_FORCE_INLINE fl::size size() const FL_NO_EXCEPT { return mImpl.size(); }
+    FASTLED_FORCE_INLINE fl::size capacity() const FL_NO_EXCEPT { return mImpl.capacity(); }
+    FASTLED_FORCE_INLINE void resize(fl::size new_capacity) FL_NO_EXCEPT { mImpl.resize(new_capacity); }
   private:
     detail::MovingAverageImpl<T, N> mImpl;
 };
@@ -457,14 +457,14 @@ template <typename T = float, fl::size N = 5>
 class MedianFilter {
   public:
     MedianFilter() FL_NO_EXCEPT = default;
-    explicit MedianFilter(fl::size capacity) : mImpl(capacity) {}
-    FASTLED_FORCE_INLINE T update(T input) { return mImpl.update(input); }
-    FASTLED_FORCE_INLINE T update(fl::span<const T> values) { return mImpl.update(values); }
-    FASTLED_FORCE_INLINE T value() const { return mImpl.value(); }
-    FASTLED_FORCE_INLINE void reset() { mImpl.reset(); }
-    FASTLED_FORCE_INLINE fl::size size() const { return mImpl.size(); }
-    FASTLED_FORCE_INLINE fl::size capacity() const { return mImpl.capacity(); }
-    FASTLED_FORCE_INLINE void resize(fl::size new_capacity) { mImpl.resize(new_capacity); }
+    explicit MedianFilter(fl::size capacity) FL_NO_EXCEPT : mImpl(capacity) {}
+    FASTLED_FORCE_INLINE T update(T input) FL_NO_EXCEPT { return mImpl.update(input); }
+    FASTLED_FORCE_INLINE T update(fl::span<const T> values) FL_NO_EXCEPT { return mImpl.update(values); }
+    FASTLED_FORCE_INLINE T value() const FL_NO_EXCEPT { return mImpl.value(); }
+    FASTLED_FORCE_INLINE void reset() FL_NO_EXCEPT { mImpl.reset(); }
+    FASTLED_FORCE_INLINE fl::size size() const FL_NO_EXCEPT { return mImpl.size(); }
+    FASTLED_FORCE_INLINE fl::size capacity() const FL_NO_EXCEPT { return mImpl.capacity(); }
+    FASTLED_FORCE_INLINE void resize(fl::size new_capacity) FL_NO_EXCEPT { mImpl.resize(new_capacity); }
   private:
     detail::MedianFilterImpl<T, N> mImpl;
 };
@@ -490,15 +490,15 @@ template <typename T = float, fl::size N = 8>
 class WeightedMovingAverage {
   public:
     WeightedMovingAverage() FL_NO_EXCEPT = default;
-    explicit WeightedMovingAverage(fl::size capacity) : mImpl(capacity) {}
-    FASTLED_FORCE_INLINE T update(T input) { return mImpl.update(input); }
-    FASTLED_FORCE_INLINE T update(fl::span<const T> values) { return mImpl.update(values); }
-    FASTLED_FORCE_INLINE T value() const { return mImpl.value(); }
-    FASTLED_FORCE_INLINE void reset() { mImpl.reset(); }
-    FASTLED_FORCE_INLINE bool full() const { return mImpl.full(); }
-    FASTLED_FORCE_INLINE fl::size size() const { return mImpl.size(); }
-    FASTLED_FORCE_INLINE fl::size capacity() const { return mImpl.capacity(); }
-    FASTLED_FORCE_INLINE void resize(fl::size new_capacity) { mImpl.resize(new_capacity); }
+    explicit WeightedMovingAverage(fl::size capacity) FL_NO_EXCEPT : mImpl(capacity) {}
+    FASTLED_FORCE_INLINE T update(T input) FL_NO_EXCEPT { return mImpl.update(input); }
+    FASTLED_FORCE_INLINE T update(fl::span<const T> values) FL_NO_EXCEPT { return mImpl.update(values); }
+    FASTLED_FORCE_INLINE T value() const FL_NO_EXCEPT { return mImpl.value(); }
+    FASTLED_FORCE_INLINE void reset() FL_NO_EXCEPT { mImpl.reset(); }
+    FASTLED_FORCE_INLINE bool full() const FL_NO_EXCEPT { return mImpl.full(); }
+    FASTLED_FORCE_INLINE fl::size size() const FL_NO_EXCEPT { return mImpl.size(); }
+    FASTLED_FORCE_INLINE fl::size capacity() const FL_NO_EXCEPT { return mImpl.capacity(); }
+    FASTLED_FORCE_INLINE void resize(fl::size new_capacity) FL_NO_EXCEPT { mImpl.resize(new_capacity); }
   private:
     detail::WeightedMovingAverageImpl<T, N> mImpl;
 };
@@ -525,15 +525,15 @@ template <typename T = float, fl::size N = 7>
 class TriangularFilter {
   public:
     TriangularFilter() FL_NO_EXCEPT = default;
-    explicit TriangularFilter(fl::size capacity) : mImpl(capacity) {}
-    FASTLED_FORCE_INLINE T update(T input) { return mImpl.update(input); }
-    FASTLED_FORCE_INLINE T update(fl::span<const T> values) { return mImpl.update(values); }
-    FASTLED_FORCE_INLINE T value() const { return mImpl.value(); }
-    FASTLED_FORCE_INLINE void reset() { mImpl.reset(); }
-    FASTLED_FORCE_INLINE bool full() const { return mImpl.full(); }
-    FASTLED_FORCE_INLINE fl::size size() const { return mImpl.size(); }
-    FASTLED_FORCE_INLINE fl::size capacity() const { return mImpl.capacity(); }
-    FASTLED_FORCE_INLINE void resize(fl::size new_capacity) { mImpl.resize(new_capacity); }
+    explicit TriangularFilter(fl::size capacity) FL_NO_EXCEPT : mImpl(capacity) {}
+    FASTLED_FORCE_INLINE T update(T input) FL_NO_EXCEPT { return mImpl.update(input); }
+    FASTLED_FORCE_INLINE T update(fl::span<const T> values) FL_NO_EXCEPT { return mImpl.update(values); }
+    FASTLED_FORCE_INLINE T value() const FL_NO_EXCEPT { return mImpl.value(); }
+    FASTLED_FORCE_INLINE void reset() FL_NO_EXCEPT { mImpl.reset(); }
+    FASTLED_FORCE_INLINE bool full() const FL_NO_EXCEPT { return mImpl.full(); }
+    FASTLED_FORCE_INLINE fl::size size() const FL_NO_EXCEPT { return mImpl.size(); }
+    FASTLED_FORCE_INLINE fl::size capacity() const FL_NO_EXCEPT { return mImpl.capacity(); }
+    FASTLED_FORCE_INLINE void resize(fl::size new_capacity) FL_NO_EXCEPT { mImpl.resize(new_capacity); }
   private:
     detail::TriangularFilterImpl<T, N> mImpl;
 };
@@ -559,15 +559,15 @@ template <typename T = float, fl::size N = 5>
 class GaussianFilter {
   public:
     GaussianFilter() FL_NO_EXCEPT = default;
-    explicit GaussianFilter(fl::size capacity) : mImpl(capacity) {}
-    FASTLED_FORCE_INLINE T update(T input) { return mImpl.update(input); }
-    FASTLED_FORCE_INLINE T update(fl::span<const T> values) { return mImpl.update(values); }
-    FASTLED_FORCE_INLINE T value() const { return mImpl.value(); }
-    FASTLED_FORCE_INLINE void reset() { mImpl.reset(); }
-    FASTLED_FORCE_INLINE bool full() const { return mImpl.full(); }
-    FASTLED_FORCE_INLINE fl::size size() const { return mImpl.size(); }
-    FASTLED_FORCE_INLINE fl::size capacity() const { return mImpl.capacity(); }
-    FASTLED_FORCE_INLINE void resize(fl::size new_capacity) { mImpl.resize(new_capacity); }
+    explicit GaussianFilter(fl::size capacity) FL_NO_EXCEPT : mImpl(capacity) {}
+    FASTLED_FORCE_INLINE T update(T input) FL_NO_EXCEPT { return mImpl.update(input); }
+    FASTLED_FORCE_INLINE T update(fl::span<const T> values) FL_NO_EXCEPT { return mImpl.update(values); }
+    FASTLED_FORCE_INLINE T value() const FL_NO_EXCEPT { return mImpl.value(); }
+    FASTLED_FORCE_INLINE void reset() FL_NO_EXCEPT { mImpl.reset(); }
+    FASTLED_FORCE_INLINE bool full() const FL_NO_EXCEPT { return mImpl.full(); }
+    FASTLED_FORCE_INLINE fl::size size() const FL_NO_EXCEPT { return mImpl.size(); }
+    FASTLED_FORCE_INLINE fl::size capacity() const FL_NO_EXCEPT { return mImpl.capacity(); }
+    FASTLED_FORCE_INLINE void resize(fl::size new_capacity) FL_NO_EXCEPT { mImpl.resize(new_capacity); }
   private:
     detail::GaussianFilterImpl<T, N> mImpl;
 };
@@ -594,15 +594,15 @@ class GaussianFilter {
 template <typename T = float, fl::size N = 7>
 class AlphaTrimmedMean {
   public:
-    explicit AlphaTrimmedMean(fl::size trim_count = 1) : mImpl(trim_count) {}
-    AlphaTrimmedMean(fl::size capacity, fl::size trim_count) : mImpl(capacity, trim_count) {}
-    FASTLED_FORCE_INLINE T update(T input) { return mImpl.update(input); }
-    FASTLED_FORCE_INLINE T update(fl::span<const T> values) { return mImpl.update(values); }
-    FASTLED_FORCE_INLINE T value() const { return mImpl.value(); }
-    FASTLED_FORCE_INLINE void reset() { mImpl.reset(); }
-    FASTLED_FORCE_INLINE fl::size size() const { return mImpl.size(); }
-    FASTLED_FORCE_INLINE fl::size capacity() const { return mImpl.capacity(); }
-    FASTLED_FORCE_INLINE void resize(fl::size new_capacity, fl::size trim_count) { mImpl.resize(new_capacity, trim_count); }
+    explicit AlphaTrimmedMean(fl::size trim_count = 1) FL_NO_EXCEPT : mImpl(trim_count) {}
+    AlphaTrimmedMean(fl::size capacity, fl::size trim_count) FL_NO_EXCEPT : mImpl(capacity, trim_count) {}
+    FASTLED_FORCE_INLINE T update(T input) FL_NO_EXCEPT { return mImpl.update(input); }
+    FASTLED_FORCE_INLINE T update(fl::span<const T> values) FL_NO_EXCEPT { return mImpl.update(values); }
+    FASTLED_FORCE_INLINE T value() const FL_NO_EXCEPT { return mImpl.value(); }
+    FASTLED_FORCE_INLINE void reset() FL_NO_EXCEPT { mImpl.reset(); }
+    FASTLED_FORCE_INLINE fl::size size() const FL_NO_EXCEPT { return mImpl.size(); }
+    FASTLED_FORCE_INLINE fl::size capacity() const FL_NO_EXCEPT { return mImpl.capacity(); }
+    FASTLED_FORCE_INLINE void resize(fl::size new_capacity, fl::size trim_count) FL_NO_EXCEPT { mImpl.resize(new_capacity, trim_count); }
   private:
     detail::AlphaTrimmedMeanImpl<T, N> mImpl;
 };
@@ -622,15 +622,15 @@ class AlphaTrimmedMean {
 template <typename T = float, fl::size N = 5>
 class HampelFilter {
   public:
-    explicit HampelFilter(T threshold = T(3.0f)) : mImpl(threshold) {}
-    HampelFilter(fl::size capacity, T threshold) : mImpl(capacity, threshold) {}
-    FASTLED_FORCE_INLINE T update(T input) { return mImpl.update(input); }
-    FASTLED_FORCE_INLINE T update(fl::span<const T> values) { return mImpl.update(values); }
-    FASTLED_FORCE_INLINE T value() const { return mImpl.value(); }
-    FASTLED_FORCE_INLINE void reset() { mImpl.reset(); }
-    FASTLED_FORCE_INLINE fl::size size() const { return mImpl.size(); }
-    FASTLED_FORCE_INLINE fl::size capacity() const { return mImpl.capacity(); }
-    FASTLED_FORCE_INLINE void resize(fl::size new_capacity) { mImpl.resize(new_capacity); }
+    explicit HampelFilter(T threshold = T(3.0f)) FL_NO_EXCEPT : mImpl(threshold) {}
+    HampelFilter(fl::size capacity, T threshold) FL_NO_EXCEPT : mImpl(capacity, threshold) {}
+    FASTLED_FORCE_INLINE T update(T input) FL_NO_EXCEPT { return mImpl.update(input); }
+    FASTLED_FORCE_INLINE T update(fl::span<const T> values) FL_NO_EXCEPT { return mImpl.update(values); }
+    FASTLED_FORCE_INLINE T value() const FL_NO_EXCEPT { return mImpl.value(); }
+    FASTLED_FORCE_INLINE void reset() FL_NO_EXCEPT { mImpl.reset(); }
+    FASTLED_FORCE_INLINE fl::size size() const FL_NO_EXCEPT { return mImpl.size(); }
+    FASTLED_FORCE_INLINE fl::size capacity() const FL_NO_EXCEPT { return mImpl.capacity(); }
+    FASTLED_FORCE_INLINE void resize(fl::size new_capacity) FL_NO_EXCEPT { mImpl.resize(new_capacity); }
   private:
     detail::HampelFilterImpl<T, N> mImpl;
 };
@@ -658,15 +658,15 @@ template <typename T = float, fl::size N = 5>
 class SavitzkyGolayFilter {
   public:
     SavitzkyGolayFilter() FL_NO_EXCEPT = default;
-    explicit SavitzkyGolayFilter(fl::size capacity) : mImpl(capacity) {}
-    FASTLED_FORCE_INLINE T update(T input) { return mImpl.update(input); }
-    FASTLED_FORCE_INLINE T update(fl::span<const T> values) { return mImpl.update(values); }
-    FASTLED_FORCE_INLINE T value() const { return mImpl.value(); }
-    FASTLED_FORCE_INLINE void reset() { mImpl.reset(); }
-    FASTLED_FORCE_INLINE bool full() const { return mImpl.full(); }
-    FASTLED_FORCE_INLINE fl::size size() const { return mImpl.size(); }
-    FASTLED_FORCE_INLINE fl::size capacity() const { return mImpl.capacity(); }
-    FASTLED_FORCE_INLINE void resize(fl::size new_capacity) { mImpl.resize(new_capacity); }
+    explicit SavitzkyGolayFilter(fl::size capacity) FL_NO_EXCEPT : mImpl(capacity) {}
+    FASTLED_FORCE_INLINE T update(T input) FL_NO_EXCEPT { return mImpl.update(input); }
+    FASTLED_FORCE_INLINE T update(fl::span<const T> values) FL_NO_EXCEPT { return mImpl.update(values); }
+    FASTLED_FORCE_INLINE T value() const FL_NO_EXCEPT { return mImpl.value(); }
+    FASTLED_FORCE_INLINE void reset() FL_NO_EXCEPT { mImpl.reset(); }
+    FASTLED_FORCE_INLINE bool full() const FL_NO_EXCEPT { return mImpl.full(); }
+    FASTLED_FORCE_INLINE fl::size size() const FL_NO_EXCEPT { return mImpl.size(); }
+    FASTLED_FORCE_INLINE fl::size capacity() const FL_NO_EXCEPT { return mImpl.capacity(); }
+    FASTLED_FORCE_INLINE void resize(fl::size new_capacity) FL_NO_EXCEPT { mImpl.resize(new_capacity); }
   private:
     detail::SavitzkyGolayFilterImpl<T, N> mImpl;
 };
@@ -688,16 +688,16 @@ class SavitzkyGolayFilter {
 template <typename T = float, fl::size N = 5>
 class BilateralFilter {
   public:
-    explicit BilateralFilter(T sigma_range = T(1.0f)) : mImpl(sigma_range) {}
-    BilateralFilter(fl::size capacity, T sigma_range) : mImpl(capacity, sigma_range) {}
-    FASTLED_FORCE_INLINE T update(T input) { return mImpl.update(input); }
-    FASTLED_FORCE_INLINE T update(fl::span<const T> values) { return mImpl.update(values); }
-    FASTLED_FORCE_INLINE T value() const { return mImpl.value(); }
-    FASTLED_FORCE_INLINE void reset() { mImpl.reset(); }
-    FASTLED_FORCE_INLINE bool full() const { return mImpl.full(); }
-    FASTLED_FORCE_INLINE fl::size size() const { return mImpl.size(); }
-    FASTLED_FORCE_INLINE fl::size capacity() const { return mImpl.capacity(); }
-    FASTLED_FORCE_INLINE void resize(fl::size new_capacity) { mImpl.resize(new_capacity); }
+    explicit BilateralFilter(T sigma_range = T(1.0f)) FL_NO_EXCEPT : mImpl(sigma_range) {}
+    BilateralFilter(fl::size capacity, T sigma_range) FL_NO_EXCEPT : mImpl(capacity, sigma_range) {}
+    FASTLED_FORCE_INLINE T update(T input) FL_NO_EXCEPT { return mImpl.update(input); }
+    FASTLED_FORCE_INLINE T update(fl::span<const T> values) FL_NO_EXCEPT { return mImpl.update(values); }
+    FASTLED_FORCE_INLINE T value() const FL_NO_EXCEPT { return mImpl.value(); }
+    FASTLED_FORCE_INLINE void reset() FL_NO_EXCEPT { mImpl.reset(); }
+    FASTLED_FORCE_INLINE bool full() const FL_NO_EXCEPT { return mImpl.full(); }
+    FASTLED_FORCE_INLINE fl::size size() const FL_NO_EXCEPT { return mImpl.size(); }
+    FASTLED_FORCE_INLINE fl::size capacity() const FL_NO_EXCEPT { return mImpl.capacity(); }
+    FASTLED_FORCE_INLINE void resize(fl::size new_capacity) FL_NO_EXCEPT { mImpl.resize(new_capacity); }
   private:
     detail::BilateralFilterImpl<T, N> mImpl;
 };
@@ -729,13 +729,13 @@ template <typename T = float>
 class SpectralVariance {
   public:
     explicit SpectralVariance(T alpha = T(0.2f), T floor = T(1e-4f))
-        : mImpl(alpha, floor) {}
-    FASTLED_FORCE_INLINE T update(fl::span<const T> bins) { return mImpl.update(bins); }
-    FASTLED_FORCE_INLINE T value() const { return mImpl.value(); }
-    FASTLED_FORCE_INLINE void reset() { mImpl.reset(); }
-    FASTLED_FORCE_INLINE void setAlpha(T alpha) { mImpl.setAlpha(alpha); }
-    FASTLED_FORCE_INLINE void setFloor(T floor) { mImpl.setFloor(floor); }
-    FASTLED_FORCE_INLINE fl::size size() const { return mImpl.size(); }
+        FL_NO_EXCEPT : mImpl(alpha, floor) {}
+    FASTLED_FORCE_INLINE T update(fl::span<const T> bins) FL_NO_EXCEPT { return mImpl.update(bins); }
+    FASTLED_FORCE_INLINE T value() const FL_NO_EXCEPT { return mImpl.value(); }
+    FASTLED_FORCE_INLINE void reset() FL_NO_EXCEPT { mImpl.reset(); }
+    FASTLED_FORCE_INLINE void setAlpha(T alpha) FL_NO_EXCEPT { mImpl.setAlpha(alpha); }
+    FASTLED_FORCE_INLINE void setFloor(T floor) FL_NO_EXCEPT { mImpl.setFloor(floor); }
+    FASTLED_FORCE_INLINE fl::size size() const FL_NO_EXCEPT { return mImpl.size(); }
   private:
     detail::SpectralVarianceImpl<T> mImpl;
 };

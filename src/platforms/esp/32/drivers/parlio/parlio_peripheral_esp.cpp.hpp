@@ -61,7 +61,7 @@ namespace detail {
 /// This class contains all ESP-IDF-specific implementation details.
 class ParlioPeripheralESPImpl : public ParlioPeripheralESP {
 public:
-    ParlioPeripheralESPImpl();
+    ParlioPeripheralESPImpl() FL_NO_EXCEPT;
     ~ParlioPeripheralESPImpl() override;
 
     // IParlioPeripheral Interface Implementation
@@ -110,7 +110,7 @@ ParlioPeripheralESP::~ParlioPeripheralESP() {
 // Constructor / Destructor (implementation)
 //=============================================================================
 
-ParlioPeripheralESPImpl::ParlioPeripheralESPImpl()
+ParlioPeripheralESPImpl::ParlioPeripheralESPImpl() FL_NO_EXCEPT
     : mTxUnit(nullptr),
       mEnabled(false),
       mPreferPsram(true) {

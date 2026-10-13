@@ -102,7 +102,7 @@ typedef struct {
 } McpwmState;
 
 // Global MCPWM state via Singleton for safe initialization
-static McpwmState& g_mcpwm_state() {
+static McpwmState& g_mcpwm_state() FL_NO_EXCEPT {
     return fl::Singleton<McpwmState>::instance();
 }
 

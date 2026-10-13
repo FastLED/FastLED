@@ -22,7 +22,7 @@ namespace fl {
  */
 class DummyRxDevice : public RxDevice {
 public:
-    explicit DummyRxDevice(const char* reason)
+    explicit DummyRxDevice(const char* reason) FL_NO_EXCEPT
         : mReason(reason)
         , mWarned(false) {
     }
