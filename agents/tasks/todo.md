@@ -543,32 +543,39 @@ timed out on both versions while direct ownership accounting passed.
 - [x] Demonstrate original SD and ESP-only defects fail, including warm cache cases.
 - [x] Fix actual ESP violations; enforce matrix in normal lint and existing CI.
 - [x] Measure cold/warm/source/header edits and memory; document setup and limits.
-- [ ] Full tests, lint, code review, validated pushed PR, and workspace cleanup.
+- [x] Full local tests, normal lint, and independent code review.
+- [x] Publish dependent fixes, update the fbuild pin, and reprovision all SDKs.
+- [x] Remove investigation scratch and the temporary dependency checkout.
 
-Current evidence: the 138-job matrix passes with 21,894 declaration locations;
-normal `bash lint` validates all profiles with 138 cache hits and zero parses.
-Full native debug validation passed 320 units and 96 examples. Full Python
-validation passed 1,939 tests (47 skipped, 2 xfailed), with subsequent focused
-ABI, SDK, cache and outer-wrapper regressions passing. Independent source and
-orchestration reviews found no blocking issues. Reference measurements at
-887cfe2f01: cold 701.73s/138 parses; warm 17.98s/0; source edit 70.66s/7;
-common-header edit 542.06s/131. All edits restored and reports passed final audits.
+Validation evidence: full native debug validation passed 320 units and 96
+examples. Full Python validation passed 1,939 tests (47 skipped, 2 xfailed),
+with subsequent focused ABI, SDK, cache and outer-wrapper regressions passing.
+The final fbuild 2.5.40 integration passed 59 focused tests (one Windows-only
+skip on Linux) and normal `bash lint`: 138 jobs, 105 fresh ESP parses, 33 stub
+cache hits, 21,894 declaration locations, zero failures, 340.51 seconds analysis,
+and 1,432 MiB sampled peak RSS. The unchanged C++ lint run passed with 138 cache
+hits, zero parses, 7.84 seconds analysis, and a verified final input snapshot.
+Independent source, orchestration, and final
+pin reviews found no blocking issues.
 
-Draft PR #4831 is pushed. Full Linux CI passed. Other hosts/boards exposed
-fbuild Windows launcher, Intel wheel packaging, and RP SD library discovery
-failures, tracked in FastLED/fbuild#1675. macOS host SDK metadata tracking is
-fixed with explicit dependency roots. The follow-up Mac run parsed 107 jobs
-successfully before the 900-second deadline. SDK inventory traversal now avoids
-repeated ordinary-path resolution, preserving exact fingerprints and all input
-audits; focused regressions pass (59 passed, one Windows-only junction test
-awaiting Windows execution). A synthetic 10,000-file Linux SDK inventory probe
-measured 2.54x faster verification; hosted end-to-end validation remains required.
-Normal `bash lint` passes after the optimization: 138 fresh parses, zero failures,
-21,894 declarations, 434.04 seconds analysis and 1,479 MiB sampled peak RSS.
-Hosted Mac ARM lint passes in 619 seconds within the unchanged deadline. Its
-native tests also pass. Linux exposed reuse of deterministic pytest paths against
-restored native cache results; two local runs reproduced eight failures on the
-second invocation. Unique per-test directories preserve real cache behavior and
-make both repeated runs pass (24 passed, one Windows-only skip each).
-Complete dependent fixes/release, update the pin, repeat platform validation,
-finish review, and remove task scratch before marking the PR ready.
+Reference measurements at 887cfe2f01: cold 701.73s/138 parses; warm 17.98s/0;
+source edit 70.66s/7; common-header edit 542.06s/131. All experimental edits
+were restored and reports passed final input audits. Setup, methodology,
+coverage limits, budgets, and cache behavior are in `docs/AST_LINT_PROFILES.md`.
+
+Hosted validation exposed and drove fixes for Mac SDK metadata dependencies,
+SDK traversal cost, and persistent-cache test isolation. Mac ARM lint passed
+in 619 seconds within the unchanged deadline. Repeated local cache tests first
+reproduced eight failures on the second invocation; unique per-test directories
+made both repeated runs pass while retaining the real native cache.
+
+FastLED/fbuild#1676 is merged and fbuild 2.5.40 is published. Its exact candidate
+passed full PR checks, a release dry run, and publication validation, including
+real Windows legacy ESP installation/recheck and both Mac installed-wheel smoke
+tests. Continued-include scanning and library-cache invalidation were verified
+RED -> GREEN, including real Pico SDK library selection.
+
+PR #4831 carries the implementation and final dependency pin. Its exact-head
+`ci-full` checks are the authoritative final cross-platform validation record;
+require them to pass before marking the PR ready. Preserve ordinary SDK/build
+caches and the pre-existing `.clud/` directory during cleanup.

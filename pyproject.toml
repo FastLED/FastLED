@@ -5,10 +5,13 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    # Pin to fbuild 2.5.39 so the ESP32-S3 QEMU deploy works without the ADC
-    # calibration constructor (FastLED#4813).
+    # Pin to fbuild 2.5.40 for ESP AST provisioning on Windows and Intel Mac
+    # and correct continued-include library discovery (FastLED#4829).
     #
     # Pin history:
+    #   2.5.40 -- fixes the Windows legacy esptool launcher, ships native
+    #              Intel/ARM Mac wheels, and tracks continued includes and
+    #              library-cache dependencies (FastLED/fbuild#1676).
     #   2.5.39 -- the ESP32-S3 QEMU ADC-calibration patch is skipped when
     #              adc_hw_calibration is not linked (FastLED/fbuild#1665,
     #              FastLED#4813); also carries 2.5.38's exact linked-reference
@@ -299,7 +302,7 @@ dependencies = [
     # primitive (FastLED/fbuild#532, #577/#580), and an
     # http-connect-timeout fix on the managed-zccache client
     # (FastLED/fbuild#573).
-    "fbuild==2.5.39",
+    "fbuild==2.5.40",
     # Decodes the FastLED/boards `usb-vids.proto.zstd` registry artifact in
     # ci/util/audit_usb_registry.py. Declared explicitly rather than relied on
     # transitively (clang-tool-chain-bins pulls it in today) so the documented
