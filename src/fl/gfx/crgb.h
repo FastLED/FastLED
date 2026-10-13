@@ -11,16 +11,17 @@
 // These are needed for constexpr constructors and can't be forward-declared
 #include "color.h"
 #include "fl/stl/noexcept.h"
+#include "fl/gfx/pixel_fwd.h"
 
 // Forward declarations
 namespace fl {
     class string;
     class XYMap;
     struct HSV16;
-    struct hsv8;
 }
 
 namespace fl {
+namespace pixel {  // see fl/gfx/pixel_fwd.h
 
 /// Representation of an 8-bit RGB pixel (Red, Green, Blue)
 ///
@@ -898,4 +899,5 @@ FASTLED_FORCE_INLINE CRGB operator%( const CRGB& p1, u8 d) FL_NO_EXCEPT;
 /// Use bulk operations when processing 10+ pixels with the same operation.
 /// For small ranges or single updates, inline is fine.
 
+}  // namespace pixel
 }  // namespace fl

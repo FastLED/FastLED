@@ -92,7 +92,7 @@ FL_TEST_CASE("fl::tuple - get by index") {
 
     FL_SUBCASE("rvalue reference") {
         auto t = make_tuple(1, 2.0f, 3.0);
-        auto value = get<0>(fl::move(t));
+        auto value = get<0>(move(t));
         FL_CHECK_EQ(1, value);
     }
 }
@@ -144,7 +144,7 @@ FL_TEST_CASE("fl::tuple - tuple_element") {
 FL_TEST_CASE("fl::tuple - move semantics") {
     FL_SUBCASE("move construction") {
         auto t1 = make_tuple(42, string("test"));
-        auto t2 = fl::move(t1);
+        auto t2 = move(t1);
 
         FL_CHECK_EQ(42, get<0>(t2));
         FL_CHECK_EQ(string("test"), get<1>(t2));
@@ -152,7 +152,7 @@ FL_TEST_CASE("fl::tuple - move semantics") {
 
     FL_SUBCASE("get with move") {
         auto t = make_tuple(string("hello"), string("world"));
-        auto s1 = get<0>(fl::move(t));
+        auto s1 = get<0>(move(t));
         FL_CHECK_EQ(string("hello"), s1);
     }
 }

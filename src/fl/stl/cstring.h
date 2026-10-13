@@ -99,32 +99,6 @@ void* memchr(void* s, int c, size_t n) FL_NO_EXCEPT;
 // fl::memchr - const version wrapper for memchr
 const void* memchr(const void* s, int c, size_t n) FL_NO_EXCEPT;
 
-// Typed-pointer overloads. fl::CRGB lives in namespace fl, so an unqualified
-// libc call such as `memset(leds, 0, n)` finds both ::memset (normal lookup)
-// and fl::memset (ADL). Both need a CRGB* -> void* conversion, which makes the
-// call ambiguous. These templates bind the pointer exactly, so they win
-// overload resolution and forward to the void* versions. Calls that already
-// pass void* still pick the non-template functions above.
-template <typename T, typename U>
-inline void* memcpy(T* dest, const U* src, size_t n) FL_NO_EXCEPT {
-    return memcpy(static_cast<void*>(dest), static_cast<const void*>(src), n);
-}
-
-template <typename T, typename U>
-inline int memcmp(const T* s1, const U* s2, size_t n) FL_NO_EXCEPT {
-    return memcmp(static_cast<const void*>(s1), static_cast<const void*>(s2), n);
-}
-
-template <typename T, typename U>
-inline void* memmove(T* dest, const U* src, size_t n) FL_NO_EXCEPT {
-    return memmove(static_cast<void*>(dest), static_cast<const void*>(src), n);
-}
-
-template <typename T>
-inline void* memset(T* s, int c, size_t n) FL_NO_EXCEPT {
-    return memset(static_cast<void*>(s), c, n);
-}
-
 // ============================================================================
 // Legacy compatibility functions (aliases)
 // ============================================================================

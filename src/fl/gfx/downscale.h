@@ -3,6 +3,7 @@
 
 #include "fl/stl/int.h"
 #include "fl/stl/noexcept.h"
+#include "fl/gfx/pixel_fwd.h"
 
 /*
 Experimental bilinearn downscaling algorithm. Not tested yet and completely
@@ -14,7 +15,6 @@ If you use this and find an issue then please report it.
 
 namespace fl {
 
-struct CRGB;
 class XYMap;
 
 void downscale(const CRGB *src, const XYMap &srcXY, CRGB *dst,

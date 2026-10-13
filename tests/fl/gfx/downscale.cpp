@@ -20,7 +20,7 @@ FL_TEST_CASE("downscale 2x2 to 1x1") {
 
     FL_SUBCASE("downscaleHalf from 2x2 to 1x1") {
         CRGB dst[1];
-        downscaleHalf(src, 2, 2, dst);
+        fl::downscaleHalf(src, 2, 2, dst);
         FL_CHECK(dst[0].r == 128);
         FL_CHECK(dst[0].g == 0);
         FL_CHECK(dst[0].b == 0);
@@ -31,7 +31,7 @@ FL_TEST_CASE("downscale 2x2 to 1x1") {
         fl::XYMap srcMap = fl::XYMap::constructRectangularGrid(2, 2);
         fl::XYMap dstMap = fl::XYMap::constructRectangularGrid(1, 1);
 
-        downscale(src, srcMap, dst, dstMap);
+        fl::downscale(src, srcMap, dst, dstMap);
         FL_CHECK(dst[0].r == 128);
         FL_CHECK(dst[0].g == 0);
         FL_CHECK(dst[0].b == 0);
@@ -52,7 +52,7 @@ FL_TEST_CASE("downscale 2x2 to 1x1") {
         fl::XYMap srcMap = fl::XYMap::constructRectangularGrid(4, 4);
         fl::XYMap dstMap = fl::XYMap::constructSerpentine(2, 2);
 
-        downscale(src, srcMap, dst, dstMap);
+        fl::downscale(src, srcMap, dst, dstMap);
 
         CRGB lowerLeft = dst[dstMap.mapToIndex(0, 0)];
         CRGB lowerRight = dst[dstMap.mapToIndex(1, 0)];
@@ -88,7 +88,7 @@ FL_TEST_CASE("downscale 3x3 to 2x2") {
     fl::XYMap srcMap = fl::XYMap::constructRectangularGrid(3, 3);
     fl::XYMap dstMap = fl::XYMap::constructRectangularGrid(2, 2);
 
-    downscale(src, srcMap, dst, dstMap);
+    fl::downscale(src, srcMap, dst, dstMap);
 
     for (int i = 0; i < 4; ++i) {
         FL_DINFO("Dst[" << i << "]: " << dst[i]);
@@ -112,7 +112,7 @@ FL_TEST_CASE("downscale 11x11 to 2x2") {
     fl::XYMap srcMap = fl::XYMap::constructRectangularGrid(11, 11);
     fl::XYMap dstMap = fl::XYMap::constructRectangularGrid(2, 2);
 
-    downscale(src, srcMap, dst, dstMap);
+    fl::downscale(src, srcMap, dst, dstMap);
 
     for (int i = 0; i < 4; ++i) {
         FL_DINFO("Dst[" << i << "]: " << dst[i]);

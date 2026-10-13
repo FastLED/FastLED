@@ -27,6 +27,7 @@
 #include "fl/stl/bitset.h"
 #include "fl/stl/move.h"
 #include "fl/stl/noexcept.h"
+#include "fl/gfx/pixel_fwd.h"
 
 // Inline (SSO) buffer size for fl::string, in bytes. Every fl::string
 // object carries this buffer, and — because fl::json_value's variant is
@@ -72,7 +73,6 @@ template <typename Key, typename Hash, typename KeyEqual> class HashSet;
 class XYMap;
 
 namespace audio { namespace fft { class Bins; } }
-struct CRGB;
 
 } // namespace fl
 

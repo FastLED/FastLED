@@ -30,14 +30,6 @@
 #include "fl/stl/bitset.h"
 #include "fl/stl/static_assert.h"
 
-// These tests move temporaries, return locals and self-move on purpose to
-// exercise move semantics. fl::move is std::move where <utility> exists
-// (FastLED#4827), which turns on clang's std::move diagnostics for them.
-#if defined(__clang__)
-FL_DISABLE_WARNING(pessimizing-move)
-FL_DISABLE_WARNING(self-move)
-#endif
-
 FL_TEST_FILE(FL_FILEPATH) {
 
 using namespace fl;

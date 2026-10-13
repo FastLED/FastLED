@@ -9,12 +9,12 @@
 #include "fl/fx/fx1d.h"
 #include "fl/video/pixel_sample.h"
 #include "fl/stl/noexcept.h"
+#include "fl/gfx/pixel_fwd.h"
 
 namespace fl {
 
 struct SourceProfile;  // fl/gfx/color_profile.h
 
-struct CRGB;
 using CRGB = fl::CRGB;  // CRGB is now a typedef
 
 // Forward declare classes

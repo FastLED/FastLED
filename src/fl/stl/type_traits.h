@@ -229,10 +229,6 @@ template <> struct is_void<void> {
     enum : bool { value = true };
 };
 
-#if FL_MOVE_FORWARD_IS_STD
-// See fl/stl/move.h (FastLED#4827).
-using std::forward;  // okay std namespace // ok bare using
-#else
 // Implementation of forward
 template <typename T>
 constexpr T &&forward(typename remove_reference<T>::type &t) FL_NO_EXCEPT {
@@ -246,7 +242,6 @@ constexpr T &&forward(typename remove_reference<T>::type &&t) FL_NO_EXCEPT {
                   "Cannot forward an rvalue as an lvalue");
     return static_cast<T &&>(t);
 }
-#endif
 
 // Define remove_cv trait
 template <typename T> struct remove_cv {
@@ -879,11 +874,7 @@ template <typename T> struct swap_impl<T, true> {
 };
 
 // single entry‑point
-// `b` is its own (same-typed) template parameter so this generic swap is less
-// specialized than std::swap. Otherwise ADL on fl types (e.g. CRGB) makes
-// std::reverse / std::sort / std::swap ambiguous (FastLED#4827).
-template <typename T, typename U>
-enable_if_t<is_same<T, U>::value> swap(T &a, U &b) FL_NO_EXCEPT {
+template <typename T> void swap(T &a, T &b) FL_NO_EXCEPT {
     // if T is a POD, use use a simple data copy swap.
     // if T is not a POD, use the T::Swap method.
     swap_impl<T>::apply(a, b);

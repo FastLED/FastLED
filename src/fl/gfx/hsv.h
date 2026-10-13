@@ -7,12 +7,15 @@
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/noexcept.h"
 
+#include "fl/gfx/pixel_fwd.h"
+
 namespace fl {
 
 /// @addtogroup PixelTypes Pixel Data Types (CRGB/CHSV)
 /// @{
 
 /// Representation of an HSV pixel (hue, saturation, value (aka brightness)).
+namespace pixel {  // see fl/gfx/pixel_fwd.h
 struct hsv8 {
     union {
         struct {
@@ -118,6 +121,7 @@ struct hsv8 {
         return *this;
     }
 };
+}  // namespace pixel
 
 /// Pre-defined hue values for hsv8 objects
 typedef enum {

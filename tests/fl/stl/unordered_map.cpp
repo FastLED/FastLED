@@ -19,12 +19,6 @@
 #include "initializer_list"
 #include "fl/stl/int.h"
 
-#if defined(__clang__)
-// fl::move is std::move where <utility> exists (FastLED#4827); these tests
-// move on purpose, so allow clang's std::move diagnostics.
-FL_DISABLE_WARNING(self-move)
-#endif
-
 FL_TEST_FILE(FL_FILEPATH) {
 
 using namespace fl;

@@ -9,10 +9,10 @@
 // Include cstdio for print function
 #include "fl/stl/cstdio.h"
 #include "fl/stl/noexcept.h"
+#include "fl/gfx/pixel_fwd.h"
 
 namespace fl {
 
-struct CRGB;
 
 class ostream {
 public:
