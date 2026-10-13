@@ -79,7 +79,7 @@ public:
 
 private:
     template<typename T, typename... Args>
-    friend fl::shared_ptr<T> fl::make_shared(Args&&... args) FL_NO_EXCEPT;
+    friend fl::shared_ptr<T> fl::adl_barrier::make_shared(Args&&... args) FL_NO_EXCEPT;
 
     explicit NativeRxDevice(int pin) FL_NO_EXCEPT;
 

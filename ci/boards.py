@@ -822,8 +822,8 @@ ESP32DEV_IDF4_4 = Board(
 )
 
 # IDF 6.0 target for the classic-ESP32 I2S parallel-out driver bring-up
-# (FastLED#3515). Uses pioarduino's prep_IDF6 branch until an IDF6 release
-# tag ships. No FASTLED_ESP32_I2S selector — the driver auto-compiles via
+# (FastLED#3515). Uses the pioarduino 61.04.00-RC1 release (Arduino core
+# 4.0.0-RC1 on ESP-IDF 6.1, FastLED#4827). No FASTLED_ESP32_I2S selector — the driver auto-compiles via
 # FASTLED_ESP32_HAS_I2S (feature flag) and gc-sections elides it when
 # unused. Users select the I2S driver at runtime via
 # `FastLED.enableDriver<fl::Bus::FLEX_IO, 0>()` or

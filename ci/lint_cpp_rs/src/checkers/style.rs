@@ -698,7 +698,9 @@ impl FileContentChecker for UsingNamespaceChecker {
             }
             // fl/stl/adl_barrier.h: this directive hides fl's generic templates
             // from ADL while keeping them reachable as fl::name (FastLED#4827).
-            if line_clean.trim() == "using namespace adl_barrier;" {
+            if line_clean.trim() == "using namespace adl_barrier;"
+                && normalize_path(&file_content.path).ends_with("src/fl/stl/adl_barrier.h")
+            {
                 continue;
             }
 

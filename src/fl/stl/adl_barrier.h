@@ -1,8 +1,7 @@
 #pragma once
 
 /// @file adl_barrier.h
-/// Keeps fl's generic templates and libc wrappers out of argument-dependent
-/// lookup (ADL).
+/// Keeps fl's generic templates out of argument-dependent lookup (ADL).
 ///
 /// Every fl type (CRGB, CHSV, palettes, containers, ...) lives in namespace
 /// fl, so an unqualified call on one of them searches fl. If fl declared
@@ -21,9 +20,14 @@
 /// - Put every namespace-scope overload of a barrier name in the barrier.
 ///   Qualified `fl::name` lookup stops at fl and skips the directive if fl
 ///   declares any `name` itself.
-/// - swap is the exception: it stays directly in fl so `swap(a, b)` on fl
-///   types still works via ADL, and its generic overload is written to be
-///   less specialized than std::swap so std wins ties (see type_traits.h).
+/// - The C library mirrors (fl::memcpy, fl::free, fl::strlen, ...) use a
+///   different fix, see fl/stl/cstring.h: they are templates with an unused
+///   defaulted parameter, so the non-template ::memcpy wins any tie, including
+///   under a using-directive for fl, which a using-directive cannot help with.
+/// - swap and clamp are exceptions: it stays directly in fl so `swap(a, b)` on fl
+///   types still works via ADL; their generic overloads are written to be
+///   less specialized than std::swap / std::clamp so std wins ties (see
+///   type_traits.h and fl/math/math.h).
 /// - Before 3.10.4 CRGB was a global type, so none of these names were
 ///   reachable through ADL on a pixel; the barrier restores that behaviour.
 

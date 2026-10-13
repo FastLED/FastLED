@@ -33,7 +33,6 @@
 //
 // numeric_limits specializations in fl/stl/limits.h
 
-#include "fl/stl/adl_barrier.h"
 #include "fl/math/fixed_point/s0x32.h"
 #include "fl/math/fixed_point/s4x12.h"
 #include "fl/math/fixed_point/s8x8.h"
@@ -537,12 +536,10 @@ template <typename T>
 inline constexpr typename enable_if<is_fixed_point<T>::value, T>::type
 lerp(T a, T b, T t) FL_NO_EXCEPT { return T::lerp(a, b, t); }
 
-namespace adl_barrier {  // see fl/stl/adl_barrier.h (clamp lives there)
 // Clamp to range: fl::clamp(FP(5.0f), FP(0.0f), FP(3.0f)) → 3.0
 template <typename T>
 inline constexpr typename enable_if<is_fixed_point<T>::value, T>::type
 clamp(T x, T lo, T hi) FL_NO_EXCEPT { return T::clamp(x, lo, hi); }
-}  // namespace adl_barrier
 
 // Step: fl::step(FP(0.5f), FP(0.7f)) → 1.0
 template <typename T>

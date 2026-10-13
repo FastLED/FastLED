@@ -19,6 +19,11 @@
 #include "fl/stl/vector.h"
 #include "fl/stl/list.h"
 #include "fl/stl/string.h"
+#include "fl/stl/functional.h"
+#include "fl/stl/shared_ptr.h"
+#include "fl/stl/unique_ptr.h"
+#include "fl/stl/tuple.h"
+#include "fl/stl/pair.h"
 #include "fl/gfx/downscale.h"
 #include "fl/stl/algorithm.h"
 #include "fl/stl/cstring.h"
@@ -60,21 +65,21 @@ FL_TEST_CASE("fl API still reachable: qualified, unqualified-in-fl, and ADL") {
 }
 
 FL_TEST_CASE("libc and std on other fl types: palettes, containers") {
-#if defined(__clang__)
-    // Legacy sketches memcpy palettes; clang warns because the type is not
+    // Legacy sketches memcpy palettes; compilers warn because the type is not
     // trivially copyable, which is unrelated to the lookup under test.
     FL_DISABLE_WARNING_PUSH
+#if defined(__clang__)
     FL_DISABLE_WARNING(unknown-warning-option)
     FL_DISABLE_WARNING(nontrivial-memcall)
+#elif defined(__GNUC__)
+    FL_DISABLE_WARNING(class-memaccess)
 #endif
     CRGBPalette16 p1(CRGB::Red);
     CRGBPalette16 p2(CRGB::Blue);
     memcpy(&p1, &p2, sizeof(p1));  // ok ctype
     FL_CHECK(p1[0] == p2[0]);
     memset(&p1, 0, sizeof(p1));  // ok ctype
-#if defined(__clang__)
     FL_DISABLE_WARNING_POP
-#endif
     fl::vector<fl::string> names;
     names.push_back("b");
     names.push_back("a");
@@ -200,6 +205,61 @@ FL_TEST_CASE("unqualified algorithms on CRGB with using namespace std") {
     FL_CHECK(c[0] == CRGB(1,0,0));
     FL_CHECK(c[2] == CRGB(3,0,0));
 }
+}
+
+// 3.10.3 had no fl::memset etc., so `using namespace fl;` sketches calling
+// libc unqualified compiled. fl's libc mirrors are templates that lose ties
+// to the C library, so this must keep compiling.
+FL_TEST_CASE("using namespace fl keeps libc calls unambiguous") {
+    using namespace fl;
+    char buf[8];
+    memset(buf, 0, sizeof(buf));  // ok ctype
+    memcpy(buf, "abc", 4);  // ok ctype
+    FL_CHECK(strlen(buf) == 3u);  // ok ctype
+    FL_CHECK(strcmp(buf, "abc") == 0);  // ok ctype
+    void* p = malloc(4);  // ok bare allocation
+    p = realloc(p, 8);  // ok bare allocation
+    free(p);  // ok bare allocation
+    CRGB leds[2];
+    memset(leds, 0, sizeof(leds));  // ok ctype
+    FL_CHECK(atoi("42") == 42);
+}
+
+// Qualified fl::name must still reach every function behind the barrier. If a
+// future header declares one of these names directly in fl, qualified lookup
+// stops there and this stops compiling (see fl/stl/adl_barrier.h).
+FL_TEST_CASE("every adl_barrier name is reachable as fl::name") {
+    int v[4] = {4, 3, 2, 1};
+    int w[4] = {1, 2, 3, 4};
+    fl::reverse(v, v + 4);
+    FL_CHECK(fl::equal(v, v + 4, w));
+    FL_CHECK(fl::equal(v, v + 4, w, w + 4));
+    FL_CHECK(!fl::lexicographical_compare(v, v + 4, w, w + 4));
+    FL_CHECK(*fl::max_element(v, v + 4) == 4);
+    FL_CHECK(*fl::min_element(v, v + 4) == 1);
+    FL_CHECK(fl::find(v, v + 4, 3) == v + 2);
+    FL_CHECK(fl::find_if(v, v + 4, [](int x) { return x > 2; }) == v + 2);
+    FL_CHECK(fl::find_if_not(v, v + 4, [](int x) { return x < 2; }) == v + 1);
+    FL_CHECK(fl::lower_bound(v, v + 4, 3) == v + 2);
+    fl::replace(v, v + 4, 4, 5);
+    fl::replace_if(v, v + 4, [](int x) { return x == 5; }, 4);
+    FL_CHECK(fl::remove(v, v + 4, 9) == v + 4);
+    FL_CHECK(fl::remove_if(v, v + 4, [](int) { return false; }) == v + 4);
+    fl::sort(v, v + 4, [](int a, int b) { return a > b; });
+    fl::stable_sort(v, v + 4);
+    fl::shuffle(v, v + 4);
+    fl::fill(v, v + 4, 7);
+    FL_CHECK(fl::begin(v) == v);
+    FL_CHECK(fl::end(v) == v + 4);
+    int m = fl::move(v[0]);
+    FL_CHECK(fl::forward<int&>(m) == 7);
+    FL_CHECK(fl::make_pair(1, 2).second == 2);
+    FL_CHECK(fl::get<1>(fl::make_tuple(1, 2)) == 2);
+    FL_CHECK(fl::invoke([](int x) { return x + 1; }, 1) == 2);
+    FL_CHECK(*fl::make_shared<int>(3) == 3);
+    FL_CHECK(*fl::allocate_shared<int>(fl::allocator<int>(), 4) == 4);
+    FL_CHECK(*fl::make_unique<int>(5) == 5);
+    FL_CHECK(fl::clamp(5, 0, 3) == 3);
 }
 
 } // FL_TEST_FILE
