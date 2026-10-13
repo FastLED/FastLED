@@ -93,10 +93,10 @@ public:
         auto f = const_cast<SdFatFileHandle*>(this);
         return f->_file.available() <= 0;
     }
-    bool has_error() const override { return false; }
-    void clear_error() override {}
-    int error_code() const override { return 0; }
-    const char* error_message() const override { return "No error"; }
+    bool has_error() const FL_NO_EXCEPT override { return false; }
+    void clear_error() FL_NO_EXCEPT override {}
+    int error_code() const FL_NO_EXCEPT override { return 0; }
+    const char* error_message() const FL_NO_EXCEPT override { return "No error"; }
 };
 #else
 class SDFileHandle : public filebuf {
@@ -159,10 +159,10 @@ public:
         auto f = const_cast<File&>(_file);
         return f.available() <= 0;
     }
-    bool has_error() const override { return false; }
-    void clear_error() override {}
-    int error_code() const override { return 0; }
-    const char* error_message() const override { return "No error"; }
+    bool has_error() const FL_NO_EXCEPT override { return false; }
+    void clear_error() FL_NO_EXCEPT override {}
+    int error_code() const FL_NO_EXCEPT override { return 0; }
+    const char* error_message() const FL_NO_EXCEPT override { return "No error"; }
 };
 #endif
 

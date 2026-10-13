@@ -503,3 +503,31 @@ timed out on both versions while direct ownership accounting passed.
 - User subsequently chose upstream Wild Linux-only because Windows GNU uses special linker/DLL injection and macOS linker behavior is uncertain. The installer targets publisher-checksummed Wild 0.10.0 Linux GNU; macOS and Windows retain their existing linkers. A hosted full Linux debug-thin unit run at `636b0e4` passed 311/311 units but took 746.29s in the test step (659.62s compilation, including 306.40s reported unit linking, and 82.44s execution; 0/346 zccache hits). Its total job was 20m39s including 6m50s Python tests, so it does not show an end-to-end improvement against the earlier different-SHA LLD baseline.
 - Investigation corrected an earlier claim that no Python runs per wrapped link: `ci/meson/runner_helpers.py` set `ZCCACHE_LINK_DEPLOY_CMD=clang-tool-chain-libdeploy` on Linux, causing a Python runtime-deployment process after every cache-miss test/example link; `--deploy-dependencies` also reached core and runner links. The user confirmed this deployment is needed only for Windows. A RED→GREEN regression now confines both mechanisms to Windows, while Linux/macOS rely on their linked runtime search paths. The 12-test toolchain suite and local lint pass; a fresh hosted run is still needed to exclude stale local sanitizer sidecars.
 - Local same-revision debug-thin 410-link comparison with compiled objects reused: LLD with the old deploy hook took 442.95s wall (419.38s reported test linking); after disabling Unix deployment, Wild took 77.16s (56.96s linking) and LLD took 84.98s (65.21s linking). All three runs passed 311 units plus 95 examples. Thus removing deployment is the dominant improvement; with deployment equally disabled, Wild saved 7.82s (9.2%) wall and 8.25s (12.7%) reported linking versus bundled LLD. A subsequent Wild pass took 20.24s because its link outputs were warm in zccache; it is not a cold comparison. Host load and local cache state limit generalization until hosted validation.
+
+## ESP32 SD compile regression (#4826)
+
+- [x] Reproduce the SD/SdFat override exception mismatch before changing production code.
+- [x] Restore the base class exception contract on all eight affected overrides.
+- [x] Verify real ESP32 SDK compilation and the reporter's sketch, plus regression tests and lint.
+- [x] Review the fix and prepare the PR with root cause and validation evidence.
+
+### Validation
+
+- #4774 (`ce225edab6`) enabled real ESP `noexcept` and annotated `filebuf`, but
+  missed four error overrides in each Arduino SD implementation. Native tests
+  use the host filesystem, and the AST check lacks the optional SDK headers.
+- Both new compiler regression cases failed on the original declarations and
+  pass with the fix. The complete `test_esp_noexcept` module and `bash lint` pass;
+  `bash test --cpp` passes all 320 unit tests and 96 host examples.
+- Real SD and SdFat SDK branches fail before and pass after on GCC 8.4 / Arduino
+  ESP32 2.0.3 and GCC 14.2 / Arduino ESP32 3.3.11. Each probe requires the actual
+  backend type to be present, preventing a disabled preprocessor branch from passing.
+- The reporter's unchanged sketch builds and links for `lolin_d32` using
+  espressif32 6.13.0, Arduino ESP32 2.0.17 and GCC 8.4 patch5 via fbuild. Restoring
+  the original SD header reproduces all four reported errors; restoring the fix
+  builds the firmware again (522806 B flash, 30392 B RAM).
+- Linux validation supplies a scratch `fs.h` forwarding to SDK `FS.h` to emulate
+  Windows header lookup. The scratch project explicitly supplies SDK FS include
+  paths and sources because fbuild omitted that dependency. No Windows execution
+  or physical hardware run is claimed. Logs and scripts: `.build/4826/`.
+- Repository code review found no blocking issues.
