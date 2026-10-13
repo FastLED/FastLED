@@ -22,9 +22,7 @@ ESP32_IDF_5_5_5_PIOARDUINO = "https://github.com/pioarduino/platform-espressif32
 # platform.json in this branch pins framework-arduinoespressif32 to
 # arduino-esp32/archive/master.zip — arduino-esp32 master built on ESP-IDF v6.0.1+.
 # Moves to a release tag when pioarduino cuts one. See FastLED#3516.
-ESP32_IDF_6_PIOARDUINO = (
-    "https://github.com/pioarduino/platform-espressif32.git#prep_IDF6"
-)
+ESP32_IDF_6_PIOARDUINO = "https://github.com/pioarduino/platform-espressif32/releases/download/61.04.00-RC1/platform-espressif32.zip"
 ESP32_IDF_LATEST_PIOARDUINO = ESP32_IDF_5_5_1_PIOARDUINO
 
 ESP32_IDF_LATEST_PIOARDUINO = (
