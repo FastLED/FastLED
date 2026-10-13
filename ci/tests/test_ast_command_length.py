@@ -9,6 +9,36 @@ import pytest
 from ci.tools import check_ast_combined, check_noexcept
 
 
+def test_relative_translation_unit_is_resolved_from_project_root(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    query = check_noexcept._find_clang_query()
+    assert query
+    project = tmp_path / "project"
+    source_dir = project / "src"
+    source_dir.mkdir(parents=True)
+    source = source_dir / "unit.cpp"
+    header = source_dir / "header.h"
+    header.write_text("void in_header() noexcept {}\n", encoding="utf-8")
+    source.write_text(
+        "#include <header.h>\nvoid checked() noexcept {}\n", encoding="utf-8"
+    )
+    monkeypatch.setattr(check_ast_combined, "PROJECT_ROOT", project)
+    monkeypatch.chdir(tmp_path)
+
+    result = check_ast_combined.analyze_translation_unit(
+        query, "src/unit.cpp", ".*", ["-std=c++17", "-Isrc"]
+    )
+
+    assert source in result.dependencies
+    assert header in result.dependencies
+    assert {location.path for location in result.coverage} == {
+        "src/unit.cpp",
+        "src/header.h",
+    }
+    assert not result.noexcept_hits
+
+
 @pytest.mark.parametrize("failure", [None, "compiler", "spawn"])
 def test_long_profile_arguments_use_temporary_compilation_database(
     tmp_path: Path,

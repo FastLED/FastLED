@@ -98,8 +98,7 @@ bool FileSystem::begin(FsImplPtr platform_filesystem) FL_NO_EXCEPT {
     if (!mFs) {
         return false;
     }
-    mFs->begin();
-    return true;
+    return mFs->begin();
 }
 
 Fled FileSystem::loadFled(const char *path) FL_NO_EXCEPT {

@@ -216,9 +216,9 @@ def analyze_translation_unit(
         )
     output = result.stdout + "\n" + result.stderr
     _raise_on_query_errors(result.returncode, output)
-    dependencies = {Path(tu).resolve()}
+    dependencies = {Path(source)}
     dependencies.update(
-        Path(path).resolve()
+        (PROJECT_ROOT / path).resolve()
         for path in set(re.findall(r"^\.+ (.+)$", result.stderr, re.MULTILINE))
     )
     for dependency in dependencies:
@@ -241,7 +241,7 @@ def analyze_translation_unit(
 
     def owned_path(raw: str) -> str | None:
         if raw not in diagnostic_paths:
-            path = Path(raw).resolve()
+            path = (PROJECT_ROOT / raw).resolve()
             diagnostic_paths[raw] = (
                 path.relative_to(PROJECT_ROOT).as_posix()
                 if path.is_relative_to(PROJECT_ROOT / "src")

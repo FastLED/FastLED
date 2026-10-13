@@ -554,3 +554,11 @@
   ESP32 QEMU's unimplemented RMT cannot produce completion interrupts; use an
   existing GPIO software driver for build/boot smoke and state that hardware
   completion and waveform fidelity remain hardware-test responsibilities.
+
+## Resolve compiler output from the compiler working directory
+
+- Relative source, include-trace, and diagnostic paths must use the compiler's
+  working directory, not the caller's. Exercise a real relative include from
+  outside the project and check both dependencies and declaration coverage.
+- Filesystem mount wrappers must return the backend's initialization result.
+  Share the generic mount path with SD so missing media cannot report success.

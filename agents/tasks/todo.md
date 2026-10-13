@@ -652,3 +652,20 @@ PR #4831 carries the implementation and dependency pin. Its exact-head
 `ci-full` checks are the authoritative final cross-platform validation record;
 require them to pass before marking the PR ready. Preserve ordinary SDK/build
 caches and the pre-existing `.clud/` directory during cleanup.
+
+Pre-review head 651868a467 passed all 121 checks across 98 `ci-full` workflows,
+including Windows, both Macs, all board builds and unchanged size gates.
+FastLED/fbuild#1678 is merged and #1677 is closed. The dependent checkout,
+gate containers/state and integration scratch were removed.
+
+Review follow-up reproduces and fixes relative AST source/header paths from a
+caller outside the project, including real Clang dependency and coverage output.
+It also reproduces backend mount failure being reported as success; generic
+mount now propagates the result and SD delegates to that same path. Focused
+RED -> GREEN tests and independent review pass. Full native debug validation
+passes 320 unit targets and 96 examples. Normal lint passes all 138 fresh parses,
+21,894 declarations, zero failures, 211.89 seconds and 1,611.4 MiB sampled peak
+RSS. Full Python passes 1,968 tests and 3,263 subtests (48 skipped, two xfailed)
+in 334.14 seconds. New hosted validation remains pending at this snapshot.
+CodeRabbit withdrew the SD relocation scope objection; its request for an
+issue-recorded maintainer directive for Xcode discovery remains open.
