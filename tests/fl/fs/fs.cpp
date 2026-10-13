@@ -20,6 +20,7 @@
 #include "test.h"
 
 #include "fl/fs/fs.h"
+#include "fl/fs/backend.h"
 #ifdef FASTLED_TESTING
 #include "platforms/stub/fs_stub.hpp"
 #include "fl/stl/stdint.h"
@@ -68,6 +69,46 @@ private:
         fl::StubFileSystem::forceRemoveDirectory(mDir.c_str());
     }
 };
+
+class MountResultFileSystem : public fl::FsImpl {
+public:
+    explicit MountResultFileSystem(bool result) FL_NO_EXCEPT : mResult(result) {}
+    bool begin() FL_NO_EXCEPT override {
+        ++beginCalls;
+        return mResult;
+    }
+    void end() FL_NO_EXCEPT override {}
+    fl::filebuf_ptr openRead(const char *) FL_NO_EXCEPT override {
+        return fl::filebuf_ptr();
+    }
+    int beginCalls = 0;
+private:
+    bool mResult;
+};
+
+FL_TEST_CASE("FileSystem reports backend mount results") {
+    fl::FileSystem fs;
+    FL_CHECK_FALSE(fs.begin(fl::FsImplPtr()));
+
+    auto failed = fl::make_shared<MountResultFileSystem>(false);
+    FL_CHECK_FALSE(fs.begin(failed));
+    FL_CHECK_EQ(failed->beginCalls, 1);
+
+    auto mounted = fl::make_shared<MountResultFileSystem>(true);
+    FL_CHECK_TRUE(fs.begin(mounted));
+    FL_CHECK_EQ(mounted->beginCalls, 1);
+}
+
+FL_TEST_CASE("SD JPEG convenience API reports a missing file") {
+    const fl::string test_dir = "test_sd_jpeg_temp";
+    TestDirGuard guard(test_dir);
+    fl::setTestFileSystemRoot(test_dir.c_str());
+
+    fl::string error;
+    const auto frame = fl::loadJpegFromSD(5, "missing.jpg", fl::JpegConfig(), &error);
+    FL_CHECK_FALSE(frame);
+    FL_CHECK_FALSE(error.empty());
+}
 
 FL_TEST_CASE("FileSystem test with real hard drive") {
     // Create a temporary test directory and file

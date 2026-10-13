@@ -12,14 +12,14 @@ class WeightedMovingAverageImpl {
   public:
     WeightedMovingAverageImpl() FL_NO_EXCEPT : mLastValue(T(0)) {}
     explicit WeightedMovingAverageImpl(fl::size capacity)
-        : mBuf(capacity), mLastValue(T(0)) {}
+        FL_NO_EXCEPT : mBuf(capacity), mLastValue(T(0)) {}
 
-    T update(T input) {
+    T update(T input) FL_NO_EXCEPT {
         mBuf.push_back(input);
         return recompute();
     }
 
-    T update(fl::span<const T> values) {
+    T update(fl::span<const T> values) FL_NO_EXCEPT {
         if (values.size() == 0) return mLastValue;
         for (fl::size i = 0; i < values.size(); ++i) {
             mBuf.push_back(values[i]);
@@ -27,19 +27,19 @@ class WeightedMovingAverageImpl {
         return recompute();
     }
 
-    T value() const { return mLastValue; }
-    void reset() { mBuf.clear(); mLastValue = T(0); }
-    bool full() const { return mBuf.full(); }
-    fl::size size() const { return mBuf.size(); }
-    fl::size capacity() const { return mBuf.capacity(); }
+    T value() const FL_NO_EXCEPT { return mLastValue; }
+    void reset() FL_NO_EXCEPT { mBuf.clear(); mLastValue = T(0); }
+    bool full() const FL_NO_EXCEPT { return mBuf.full(); }
+    fl::size size() const FL_NO_EXCEPT { return mBuf.size(); }
+    fl::size capacity() const FL_NO_EXCEPT { return mBuf.capacity(); }
 
-    void resize(fl::size new_capacity) {
+    void resize(fl::size new_capacity) FL_NO_EXCEPT {
         mBuf = circular_buffer<T, N>(new_capacity);
         mLastValue = T(0);
     }
 
   private:
-    T recompute() {
+    T recompute() FL_NO_EXCEPT {
         fl::size n = mBuf.size();
         T weighted_sum = T(0);
         T weight_total = T(0);

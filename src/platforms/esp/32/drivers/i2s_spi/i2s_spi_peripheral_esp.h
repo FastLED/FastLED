@@ -81,7 +81,7 @@ class I2sSpiPeripheralEsp : public II2sSpiPeripheral {
     void transposeToI2sBuffer(const u8 *src, size_t srcSize) FL_NO_EXCEPT;
 
     // ISR callback (must be friend for IRAM_ATTR access)
-    static void IRAM_ATTR isrHandler(void *arg);
+    static void IRAM_ATTR isrHandler(void *arg) FL_NO_EXCEPT;
 
     // I2S hardware
     i2s_dev_t *mI2s;

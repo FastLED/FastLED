@@ -91,8 +91,7 @@ When running a single stage (e.g., `bash lint --js`):
 
 ## Fingerprint Caching
 
-Stages use fingerprint caching to skip unchanged files:
-- **C++ linting**: `ci.cpp_lint_cache.py`
+Python and JavaScript stages use fingerprint caching to skip unchanged files:
 - **Python linting** (pyright): `ci.python_lint_cache.py`
 - **JavaScript linting**: `ci.js_lint_cache.py`
 
@@ -100,7 +99,12 @@ Cache behavior:
 - `check_*_files_changed()` → True if linting needed
 - `mark_*_lint_success()` → Mark cache success
 - `invalidate_*_cache()` → Invalidate on failure
-- `--no-fingerprint` bypasses all caches
+- `--no-fingerprint` bypasses these stage fingerprints
+
+C++ always enters the unified checker and validates the required stub and ESP
+prerequisites. Completed AST results use the per-translation-unit cache in
+`ci/lint_cpp/ast_cache.py`; a source-only stage fingerprint cannot establish
+that SDKs and tools remain available. See [AST profiles](../../docs/AST_LINT_PROFILES.md).
 
 ## Error Handling
 

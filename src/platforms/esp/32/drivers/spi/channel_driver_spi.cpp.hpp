@@ -159,7 +159,7 @@ constexpr size_t WAVE8_BYTES_PER_COLOR_BYTE = 8;
 /// @brief Calculate SPI clock frequency for wave8 encoding from chipset timing
 /// @param total_period_ns Total LED bit period (T1+T2+T3) in nanoseconds
 /// @return SPI clock frequency in Hz (8 pulses per LED bit period)
-constexpr u32 calculateWave8SpiClockHz(u32 total_period_ns) {
+constexpr u32 calculateWave8SpiClockHz(u32 total_period_ns) FL_NO_EXCEPT {
     // Wave8 expands each LED bit to 8 SPI bits
     // Pulse period = total_period_ns / 8
     // Clock frequency = 1e9 / pulse_period_ns = 8e9 / total_period_ns

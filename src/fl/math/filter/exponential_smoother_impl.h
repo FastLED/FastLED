@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fl/math/math.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace detail {
@@ -9,9 +10,9 @@ template <typename T>
 class ExponentialSmootherImpl {
   public:
     explicit ExponentialSmootherImpl(T tau_seconds, T initial = T(0))
-        : mTau(tau_seconds), mY(initial) {}
+        FL_NO_EXCEPT : mTau(tau_seconds), mY(initial) {}
 
-    T update(T input, T dt_seconds) {
+    T update(T input, T dt_seconds) FL_NO_EXCEPT {
         if (mTau <= T(0)) {
             mY = input;  // No smoothing when tau <= 0
             return mY;
@@ -21,9 +22,9 @@ class ExponentialSmootherImpl {
         return mY;
     }
 
-    void setTau(T tau_seconds) { mTau = tau_seconds; }
-    T value() const { return mY; }
-    void reset(T initial = T(0)) { mY = initial; }
+    void setTau(T tau_seconds) FL_NO_EXCEPT { mTau = tau_seconds; }
+    T value() const FL_NO_EXCEPT { return mY; }
+    void reset(T initial = T(0)) FL_NO_EXCEPT { mY = initial; }
 
   private:
     T mTau;

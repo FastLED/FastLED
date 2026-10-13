@@ -25,7 +25,7 @@ public:
   typedef volatile u32 * port_ptr_t;
   typedef u32 port_t;
 
-  static constexpr bool validpin() { return VALIDPIN; }
+  static constexpr bool validpin() FL_NO_EXCEPT { return VALIDPIN; }
 
 #ifndef GPIO_OUT1_REG
   static constexpr u32 GPIO_REG = GPIO_OUT_REG;
@@ -41,7 +41,7 @@ public:
       FL_STATIC_ASSERT(validpin(), "This pin has been marked as an invalid pin, common reasons includes it being a ground pin, read only, or too noisy (e.g. hooked up to the uart).");
       pinMode(PIN, PinMode::Output);
   }
-  inline static void setInput() { pinMode(PIN, PinMode::Input); }
+  inline static void setInput() FL_NO_EXCEPT { pinMode(PIN, PinMode::Input); }
 
   inline static void hi() FL_NO_EXCEPT __attribute__ ((always_inline)) {
       *sport() = MASK;
@@ -55,7 +55,7 @@ public:
       *port() = val;
   }
 
-  inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
+  inline static void strobe() FL_NO_EXCEPT __attribute__ ((always_inline)) { toggle(); toggle(); }
 
   inline static void toggle() FL_NO_EXCEPT __attribute__ ((always_inline)) {
       // Never read-modify-write GPIO_OUT: a concurrent GPIO update could be
@@ -67,9 +67,9 @@ public:
       }
   }
 
-  inline static void hi(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { hi(); }
-  inline static void lo(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { lo(); }
-  inline static void fastset(FASTLED_REGISTER port_ptr_t port, FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) { *port = val; }
+  inline static void hi(FASTLED_REGISTER port_ptr_t port) FL_NO_EXCEPT __attribute__ ((always_inline)) { hi(); }
+  inline static void lo(FASTLED_REGISTER port_ptr_t port) FL_NO_EXCEPT __attribute__ ((always_inline)) { lo(); }
+  inline static void fastset(FASTLED_REGISTER port_ptr_t port, FASTLED_REGISTER port_t val) FL_NO_EXCEPT __attribute__ ((always_inline)) { *port = val; }
 
   inline static port_t hival() FL_NO_EXCEPT __attribute__ ((always_inline)) {
       return (*port()) | MASK;
@@ -91,7 +91,7 @@ public:
       return (port_ptr_t)GPIO_BIT_CLEAR_REG;
   }
 
-  inline static port_t mask() __attribute__ ((always_inline)) { return MASK; }
+  inline static port_t mask() FL_NO_EXCEPT __attribute__ ((always_inline)) { return MASK; }
 
   inline static bool isset() FL_NO_EXCEPT __attribute__ ((always_inline)) {
       return (*port()) & MASK;

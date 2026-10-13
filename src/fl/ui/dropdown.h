@@ -23,10 +23,10 @@ class UIDropdownImpl {
   public:
     template<fl::size N>
     UIDropdownImpl(const fl::string &name, const fl::string (&options)[N])
-        : UIDropdownImpl(name, options, N) {}
+        FL_NO_EXCEPT : UIDropdownImpl(name, options, N) {}
 
     UIDropdownImpl(const fl::string &name, const fl::vector<fl::string>& options)
-        : mSelectedIndex(0) {
+        FL_NO_EXCEPT : mSelectedIndex(0) {
         FASTLED_UNUSED(name);
         for (fl::size i = 0; i < options.size(); ++i) {
             mOptions.push_back(options[i]);
@@ -38,7 +38,7 @@ class UIDropdownImpl {
 
     template<typename Iterator>
     UIDropdownImpl(const fl::string &name, Iterator begin, Iterator end)
-        : mSelectedIndex(0) {
+        FL_NO_EXCEPT : mSelectedIndex(0) {
         FASTLED_UNUSED(name);
         for (Iterator it = begin; it != end; ++it) {
             mOptions.push_back(*it);
@@ -49,7 +49,7 @@ class UIDropdownImpl {
     }
 
     UIDropdownImpl(const fl::string &name, fl::span<fl::string> options)
-        : mSelectedIndex(0) {
+        FL_NO_EXCEPT : mSelectedIndex(0) {
         FASTLED_UNUSED(name);
         for (fl::size i = 0; i < options.size(); ++i) {
             mOptions.push_back(options[i]);
@@ -60,7 +60,7 @@ class UIDropdownImpl {
     }
 
     UIDropdownImpl(const fl::string &name, fl::initializer_list<fl::string> options)
-        : mSelectedIndex(0) {
+        FL_NO_EXCEPT : mSelectedIndex(0) {
         FASTLED_UNUSED(name);
         for (const auto& option : options) {
             mOptions.push_back(option);
@@ -72,23 +72,23 @@ class UIDropdownImpl {
 
     ~UIDropdownImpl() FL_NO_EXCEPT {}
 
-    fl::string value() const {
+    fl::string value() const FL_NO_EXCEPT {
         if (mSelectedIndex < mOptions.size()) {
             return mOptions[mSelectedIndex];
         }
         return fl::string("Invalid");
     }
 
-    int value_int() const { return static_cast<int>(mSelectedIndex); }
+    int value_int() const FL_NO_EXCEPT { return static_cast<int>(mSelectedIndex); }
 
-    void setSelectedIndex(int index) {
+    void setSelectedIndex(int index) FL_NO_EXCEPT {
         if (index >= 0 && index < static_cast<int>(mOptions.size())) {
             mSelectedIndex = static_cast<fl::size>(index);
         }
     }
 
-    fl::size getOptionCount() const { return mOptions.size(); }
-    fl::string getOption(fl::size index) const {
+    fl::size getOptionCount() const FL_NO_EXCEPT { return mOptions.size(); }
+    fl::string getOption(fl::size index) const FL_NO_EXCEPT {
         if (index < mOptions.size()) {
             return mOptions[index];
         }
@@ -96,11 +96,11 @@ class UIDropdownImpl {
     }
 
     // Stub method for group setting (does nothing on non-WASM platforms)
-    void setGroup(const fl::string& groupName) { FASTLED_UNUSED(groupName); }
+    void setGroup(const fl::string& groupName) FL_NO_EXCEPT { FASTLED_UNUSED(groupName); }
 
   private:
     UIDropdownImpl(const fl::string &name, const fl::string* options, fl::size count)
-        : mSelectedIndex(0) {
+        FL_NO_EXCEPT : mSelectedIndex(0) {
         FASTLED_UNUSED(name);
         for (fl::size i = 0; i < count; ++i) {
             mOptions.push_back(options[i]);

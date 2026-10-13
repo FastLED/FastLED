@@ -55,7 +55,7 @@ FBUILD = _fbuild_executable()
 SUCCESS_MARKER = "FBUILD-QEMU-TEST-OK"
 ERROR_PATTERN = (
     r"Guru Meditation|abort\(\)|Backtrace:|TEST_SUITE_COMPLETE: FAIL|"
-    r"QEMU_LCD_CLOCKLESS_REGISTRATION: FAIL"
+    r"QEMU_LCD_CLOCKLESS_REGISTRATION: FAIL|ChannelManager: Timeout"
 )
 # fbuild 2.5.18 caps daemon-side long operations at 30 minutes. Keep the
 # process wrapper slightly longer so fbuild can return its structured result.

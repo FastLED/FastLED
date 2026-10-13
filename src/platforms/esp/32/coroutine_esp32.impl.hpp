@@ -85,7 +85,7 @@ public:
 
 /// @brief Custom deleter for heap_caps_malloc'd memory (internal RAM)
 struct HeapCapsDeleter {
-    void operator()(void* ptr) const {
+    void operator()(void* ptr) const FL_NO_EXCEPT {
         if (ptr) heap_caps_free(ptr);
     }
 };

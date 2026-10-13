@@ -385,7 +385,7 @@ fl::result<u32, DecodeError> decodeEdgeTimestamps(const ChipsetTiming4Phase &tim
  */
 class GpioIsrRxMcpwm : public GpioIsrRx {
 public:
-    GpioIsrRxMcpwm(int pin)
+    GpioIsrRxMcpwm(int pin) FL_NO_EXCEPT
         : mPin(static_cast<gpio_num_t>(pin))
         , mBufferSize(0)
         , mOutputBufferSize(0)

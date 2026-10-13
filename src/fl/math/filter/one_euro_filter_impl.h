@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fl/math/math.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace detail {
@@ -9,10 +10,10 @@ template <typename T>
 class OneEuroFilterImpl {
   public:
     OneEuroFilterImpl(T min_cutoff, T beta, T d_cutoff = T(1.0f))
-        : mMinCutoff(min_cutoff), mBeta(beta), mDCutoff(d_cutoff),
+        FL_NO_EXCEPT : mMinCutoff(min_cutoff), mBeta(beta), mDCutoff(d_cutoff),
           mX(T(0)), mDX(T(0)), mFirst(true), mLastValue(T(0)) {}
 
-    T update(T input, T dt) {
+    T update(T input, T dt) FL_NO_EXCEPT {
         if (mFirst) {
             mX = input;
             mDX = T(0);
@@ -33,9 +34,9 @@ class OneEuroFilterImpl {
         return mX;
     }
 
-    T value() const { return mLastValue; }
+    T value() const FL_NO_EXCEPT { return mLastValue; }
 
-    void reset(T initial = T(0)) {
+    void reset(T initial = T(0)) FL_NO_EXCEPT {
         mX = initial;
         mDX = T(0);
         mFirst = true;
@@ -43,7 +44,7 @@ class OneEuroFilterImpl {
     }
 
   private:
-    static T computeAlpha(T cutoff, T dt) {
+    static T computeAlpha(T cutoff, T dt) FL_NO_EXCEPT {
         T tau = T(static_cast<float>(2.0 * FL_PI)) * cutoff * dt;
         return tau / (T(1.0f) + tau);
     }

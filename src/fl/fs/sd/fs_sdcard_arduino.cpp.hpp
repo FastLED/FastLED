@@ -6,14 +6,11 @@
 #include "fl/fs/sd/fs_sdcard_arduino.h"
 #include "platforms/is_platform.h"
 
-// <SPI.h> is probed alongside the others because this block includes it
-// unconditionally below. ESP8266 satisfied the SD.h/fs.h half of this guard --
-// its core ships an unrelated <fs.h> for the flash filesystem -- while SPI was
-// not on the include path, so the platform failed to build at all with
-// "fatal error: SPI.h: No such file or directory". Every header this block
-// needs has to be in the condition that admits it.
-#if !defined(FL_IS_TEENSY) && FL_HAS_INCLUDE(<SD.h>) && FL_HAS_INCLUDE(<fs.h>) &&      \
-    FL_HAS_INCLUDE(<SPI.h>)
+// ESP32 ships FS.h; accept legacy lowercase fs.h as well. SPI.h must also
+// exist because it is included below. Keep this condition in sync with
+// file_system_sd.cpp.hpp so the factory fallback matches this implementation.
+#if !defined(FL_IS_TEENSY) && FL_HAS_INCLUDE(<SD.h>) && \
+    (FL_HAS_INCLUDE(<FS.h>) || FL_HAS_INCLUDE(<fs.h>)) && FL_HAS_INCLUDE(<SPI.h>)
 
 // IWYU pragma: begin_keep
 #include <SPI.h>
@@ -47,7 +44,7 @@ private:
     string _path;
 
 public:
-    SdFatFileHandle(SdFile file, const char* path) : _file(fl::move(file)), _path(path) {}
+    SdFatFileHandle(SdFile file, const char* path) FL_NO_EXCEPT : _file(fl::move(file)), _path(path) {}
     ~SdFatFileHandle() FL_NO_EXCEPT override {
         if (_file.isOpen()) {
             _file.close();
@@ -105,7 +102,7 @@ private:
     string _path;
 
 public:
-    SDFileHandle(File file, const char* path) : _file(file), _path(path) {}
+    SDFileHandle(File file, const char* path) FL_NO_EXCEPT : _file(file), _path(path) {}
     ~SDFileHandle() FL_NO_EXCEPT override {
         if (_file) {
             _file.close();
@@ -174,7 +171,7 @@ private:
 #endif
 
 public:
-    FsArduino(int cs_pin) : _cs_pin(cs_pin) {}
+    FsArduino(int cs_pin) FL_NO_EXCEPT : _cs_pin(cs_pin) {}
 
     bool begin() FL_NO_EXCEPT override {
 #ifdef USE_SDFAT
@@ -218,4 +215,4 @@ inline FsImplPtr make_sdcard_filesystem(int cs_pin) FL_NO_EXCEPT {
 
 #define FASTLED_HAS_SDCARD_ARDUINO_IMPL 1
 
-#endif  // !defined(FL_IS_TEENSY) && FL_HAS_INCLUDE(<SD.h>) && FL_HAS_INCLUDE(<fs.h>)
+#endif  // Arduino SD, filesystem, and SPI headers are available; not Teensy.
