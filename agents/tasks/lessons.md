@@ -545,3 +545,12 @@
   Intel Xcode lookup exceeded ten seconds before tests began. Keep the selected
   toolchain and fail-closed behavior; test a real delayed child and bound discovery
   separately instead of weakening AST checks or retrying failed assertions.
+## Emulator smoke success must follow supported work
+
+- A success marker after `FastLED.show()` is insufficient when the selected
+  hardware peripheral is absent from the emulator: a driver can time out and
+  return. Treat driver timeout diagnostics as failures.
+- Check the exact emulator implementation before claiming peripheral coverage.
+  ESP32 QEMU's unimplemented RMT cannot produce completion interrupts; use an
+  existing GPIO software driver for build/boot smoke and state that hardware
+  completion and waveform fidelity remain hardware-test responsibilities.

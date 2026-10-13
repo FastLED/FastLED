@@ -622,6 +622,32 @@ compiler, AST deadline, and test limits are unchanged. A real 11-second child
 reproduced RED; all 14 toolchain tests and 22 subtests pass after the fix,
 including fatal nonzero/empty/timeout cases. Review and normal lint pass.
 
+Both native Mac jobs now pass lint and all unit tests at 1a3b4cbb56
+(Actions run 38429850436), confirming the Xcode discovery correction on Intel.
+Published fbuild 2.5.41 comes from b40617fe62 (FastLED/fbuild#1678): full
+candidate CI, release dry run 38427262256, and publication 38429178951 passed.
+Its tracked editable-package lock metadata is corrected separately without
+changing release code. The installed PyPI wheel provisions all three ESP AST
+SDKs and passes normal lint: 138 jobs, 70 fresh parses, 68 cache hits, 21,894
+declarations, zero failures, 127.63 seconds and a verified final snapshot.
+Manual Blink builds and unchanged image/RAM budgets pass for RP2040
+(103,328/8,636 bytes), Teensy 4.1 (47,104/21,734), and ESP32-S3
+(341,011/40,008).
+
+The first published-wheel Python sweep failed its QEMU smoke deadline; the
+focused debug rerun and full confirmation passed unchanged (1,967 tests,
+48 skipped, two xfailed, 3,263 subtests). This is not evidence of a fix:
+inspection found the sketch printed success after an RMT completion timeout.
+The installed QEMU leaves ESP32 RMT unimplemented. The smoke fixture now uses
+the existing MY9221 GPIO software driver and rejects ChannelManager timeouts.
+The stricter old fixture reproduced RED at the unchanged ten-second deadline;
+the corrected fixture completed real `show()` at 1.91 seconds without timeout
+diagnostics. Review is clean. This is boot/software execution evidence, not
+RMT or physical waveform validation.
+The final published-wheel full Python sweep passes all 1,967 tests, with
+48 skipped, two xfailed and 3,263 passing subtests in 301 seconds. Final normal
+lint passes all 138 cached AST jobs with zero failures in 10.76 seconds.
+
 PR #4831 carries the implementation and dependency pin. Its exact-head
 `ci-full` checks are the authoritative final cross-platform validation record;
 require them to pass before marking the PR ready. Preserve ordinary SDK/build

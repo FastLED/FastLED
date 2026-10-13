@@ -21,6 +21,7 @@
 
 #define NUM_LEDS 1
 #define PIN_DATA 5
+#define PIN_CLOCK 18
 
 CRGB leds[NUM_LEDS];
 
@@ -28,7 +29,10 @@ void setup() {
     Serial.begin(115200);
     Serial.println("FBUILD-QEMU-TEST-BOOT");
 
-    FastLED.addLeds<WS2812, PIN_DATA, GRB>(leds, NUM_LEDS);
+    // QEMU models GPIO but leaves ESP32 RMT unimplemented. Exercise the
+    // existing software GPIO driver instead of waiting for an RMT interrupt
+    // that cannot arrive. This is a build/boot smoke, not a waveform test.
+    FastLED.addLeds<MY9221, PIN_DATA, PIN_CLOCK, RGB>(leds, NUM_LEDS);
     leds[0] = CRGB::Red;
     FastLED.show();
 
