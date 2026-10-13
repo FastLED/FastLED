@@ -556,7 +556,14 @@ common-header edit 542.06s/131. All edits restored and reports passed final audi
 
 Draft PR #4831 is pushed. Full Linux CI passed. Other hosts/boards exposed
 fbuild Windows launcher, Intel wheel packaging, and RP SD library discovery
-failures, tracked in FastLED/fbuild#1675. macOS host SDK metadata also needs
-explicit dependency roots; focused RED tests reproduced the missing tracking.
+failures, tracked in FastLED/fbuild#1675. macOS host SDK metadata tracking is
+fixed with explicit dependency roots. The follow-up Mac run parsed 107 jobs
+successfully before the 900-second deadline. SDK inventory traversal now avoids
+repeated ordinary-path resolution, preserving exact fingerprints and all input
+audits; focused regressions pass (59 passed, one Windows-only junction test
+awaiting Windows execution). A synthetic 10,000-file Linux SDK inventory probe
+measured 2.54x faster verification; hosted end-to-end validation remains required.
+Normal `bash lint` passes after the optimization: 138 fresh parses, zero failures,
+21,894 declarations, 434.04 seconds analysis and 1,479 MiB sampled peak RSS.
 Complete dependent fixes/release, update the pin, repeat platform validation,
 finish review, and remove task scratch before marking the PR ready.

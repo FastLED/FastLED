@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Callable, TypedDict
 
 import pytest
+from running_process import RunningProcess
 
 from ci.lint_cpp.ast_cache import AstInputSnapshot, AstUnitResult, cached_ast_unit
 
@@ -26,6 +27,117 @@ class CacheCall(CacheInputs):
 
 class ProfileCall(CachePaths):
     runner: Callable[[], AstUnitResult]
+
+
+def test_inventory_resolves_roots_not_every_ordinary_sdk_entry(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    root = tmp_path / "sdk"
+    for index in range(30):
+        header = root / "include" / f"component{index}" / "detail" / "header"
+        header.parent.mkdir(parents=True)
+        header.write_text("header", encoding="utf-8")
+    original = Path.resolve
+    resolved: list[Path] = []
+
+    def resolve(path: Path, strict: bool = False) -> Path:
+        resolved.append(path)
+        return original(path, strict=strict)
+
+    monkeypatch.setattr(Path, "resolve", resolve)
+    snapshot = AstInputSnapshot()
+    snapshot.inventory(root)
+    assert len(snapshot._available_files[root]) == 30
+    assert len(resolved) <= 2
+
+
+def test_inventory_preserves_reference_digest_and_external_symlink_cycles(
+    tmp_path: Path,
+) -> None:
+    root = tmp_path / "sdk"
+    root.mkdir()
+    outside = tmp_path / "external"
+    outside.mkdir()
+    (outside / "extensionless").write_text("outside", encoding="utf-8")
+    (root / "SDKSettings.json").write_text("metadata", encoding="utf-8")
+    (root / "external").symlink_to(outside, target_is_directory=True)
+    (outside / "cycle").symlink_to(root, target_is_directory=True)
+    (root / "missing").symlink_to(tmp_path / "absent")
+    digest = hashlib.sha256()
+    available: set[Path] = set()
+
+    def reference(path: Path, ancestors: frozenset[Path]) -> None:
+        resolved = path.resolve()
+        digest.update(str(path).encode() + b"\0" + str(resolved).encode() + b"\0")
+        if not path.exists():
+            digest.update(b"missing\0")
+        elif path.is_dir():
+            digest.update(b"dir\0")
+            if resolved not in ancestors:
+                for child in sorted(path.iterdir()):
+                    reference(child, ancestors | {resolved})
+        else:
+            digest.update(b"file\0")
+            if path.is_file():
+                available.add(resolved)
+
+    reference(root, frozenset())
+    snapshot = AstInputSnapshot()
+    assert snapshot.inventory(root) == digest.hexdigest()
+    assert snapshot._available_files[root] == available
+
+
+def test_prepare_parse_hashes_sdk_candidate_set_once_per_snapshot(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    root = tmp_path / "sdk"
+    root.mkdir()
+    for index in range(20):
+        (root / f"header{index}").write_text("header", encoding="utf-8")
+    calls: list[Path] = []
+    original = AstInputSnapshot.content
+
+    def content(snapshot: AstInputSnapshot, path: Path) -> str:
+        calls.append(path)
+        return original(snapshot, path)
+
+    monkeypatch.setattr(AstInputSnapshot, "content", content)
+    snapshot = AstInputSnapshot()
+    snapshot.prepare_parse([root], [])
+    snapshot.prepare_parse([root], [])
+    assert len(calls) == 20
+
+
+@pytest.mark.skipif(os.name != "nt", reason="requires real Windows directory junctions")
+def test_inventory_resolves_windows_junction_and_detects_external_content(
+    tmp_path: Path,
+) -> None:
+    root = tmp_path / "sdk"
+    outside = tmp_path / "external"
+    root.mkdir()
+    outside.mkdir()
+    header = outside / "header.h"
+    header.write_text("old", encoding="utf-8")
+    junction = root / "headers"
+    for link, target in ((junction, outside), (outside / "cycle", root)):
+        result = RunningProcess.run(
+            ["cmd", "/d", "/c", "mklink", "/J", str(link), str(target)],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=30,
+        )
+        assert result.returncode == 0, result.stdout
+    snapshot = AstInputSnapshot()
+    snapshot.prepare_parse([root], [])
+    assert header.resolve() in snapshot._available_files[root]
+    snapshot.verify_parse([root], [header])
+    stat = header.stat()
+    header.write_text("new", encoding="utf-8")
+    os.utime(header, ns=(stat.st_atime_ns, stat.st_mtime_ns))
+    with pytest.raises(ValueError, match="changed during analysis"):
+        snapshot.verify_parse([root], [header])
 
 
 def test_content_hash_supports_python_310(

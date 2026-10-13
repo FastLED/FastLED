@@ -23,6 +23,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import stat
 import sys
 import tempfile
 import threading
@@ -81,6 +82,7 @@ class AstInputSnapshot:
     _contents: dict[Path, str] = field(default_factory=dict)
     _inventories: dict[Path, str] = field(default_factory=dict)
     _available_files: dict[Path, set[Path]] = field(default_factory=dict)
+    _prepared_roots: set[Path] = field(default_factory=set)
     _lock: threading.RLock = field(default_factory=threading.RLock)
 
     def content(self, path: Path) -> str:
@@ -110,25 +112,66 @@ class AstInputSnapshot:
             digest = hashlib.sha256()
             available: set[Path] = set()
 
-            def visit(path: Path, ancestors: frozenset[Path]) -> None:
-                resolved = path.resolve()
+            def visit(
+                path: Path,
+                resolved: Path,
+                ancestors: frozenset[Path],
+                exists: bool,
+                directory: bool,
+                regular: bool,
+            ) -> None:
                 digest.update(str(path).encode("utf-8"))
                 digest.update(b"\0")
                 digest.update(str(resolved).encode("utf-8"))
                 digest.update(b"\0")
-                if not path.exists():
+                if not exists:
                     digest.update(b"missing\0")
-                elif path.is_dir():
+                elif directory:
                     digest.update(b"dir\0")
                     if resolved not in ancestors:
-                        for child in sorted(path.iterdir()):
-                            visit(child, ancestors | {resolved})
+                        with os.scandir(path) as entries:
+                            children = sorted(
+                                entries, key=lambda entry: Path(entry.name)
+                            )
+                        for entry in children:
+                            child = path / entry.name
+                            symlink = entry.is_symlink()
+                            if os.name == "nt":
+                                # Junctions are reparse points but are not
+                                # reported as symlinks (including Python 3.10).
+                                symlink = symlink or bool(
+                                    getattr(
+                                        entry.stat(follow_symlinks=False),
+                                        "st_file_attributes",
+                                    )
+                                    & stat.FILE_ATTRIBUTE_REPARSE_POINT
+                                )
+                            # Ordinary children share their parent's resolved
+                            # ancestry; links/reparse points need resolution.
+                            child_resolved = (
+                                child.resolve() if symlink else resolved / entry.name
+                            )
+                            visit(
+                                child,
+                                child_resolved,
+                                ancestors | {resolved},
+                                child.exists() if symlink else True,
+                                entry.is_dir(),
+                                entry.is_file(),
+                            )
                 else:
                     digest.update(b"file\0")
-                    if path.is_file():
+                    if regular:
                         available.add(resolved)
 
-            visit(root, frozenset())
+            visit(
+                root,
+                root.resolve(),
+                frozenset(),
+                root.exists(),
+                root.is_dir(),
+                root.is_file(),
+            )
             value = digest.hexdigest()
             self._inventories[root] = value
             self._available_files[root] = available
@@ -138,9 +181,11 @@ class AstInputSnapshot:
         """Snapshot possible newly discovered dependencies before a cold parse."""
         with self._lock:
             for root in roots:
-                self.inventory(root)
-                for path in self._available_files[root]:
-                    self.content(path)
+                if root not in self._prepared_roots:
+                    self.inventory(root)
+                    for path in self._available_files[root]:
+                        self.content(path)
+                    self._prepared_roots.add(root)
             for path in files:
                 self.content(path.resolve())
 

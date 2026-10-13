@@ -163,6 +163,13 @@ profiles. Cached violations remain violations. Failed or incomplete parses are
 not stored as successful results. An unchanged warm invocation should report
 zero parses and performs no downloads or firmware builds.
 
+SDK inventories use directory-entry metadata and resolve roots, symlinks, and
+Windows reparse points. Ordinary children inherit their parent's resolved path.
+This avoids repeated ancestor lookups across large SDK trees while preserving
+the inventory digest, external header tracking, and cycle detection. Candidate
+file contents are prepared once per invocation; each cold parse still checks
+its observed inputs and include availability, followed by the final audit.
+
 `memory_measurement` records aggregate sampled RSS for the current process and
 its descendants, using a 100 millisecond polling interval with a final sample at shutdown.
 The peak includes overlapping workers and the parent Python process. It excludes
