@@ -11,6 +11,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "fl/stl/stdint.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/stl/noexcept.h"
 
 namespace fl {
@@ -52,19 +53,19 @@ const void* memchr(const void* s, int c, size_t n) FL_NO_EXCEPT;
 
 // fl::strlen - wrapper for strlen
 template <typename FlLibcTag = void>
-inline size_t strlen(const char* s) FL_NO_EXCEPT { return libc_impl::strlen(s); }
+FASTLED_FORCE_INLINE size_t strlen(const char* s) FL_NO_EXCEPT { return libc_impl::strlen(s); }
 
 // fl::strcmp - wrapper for strcmp
 template <typename FlLibcTag = void>
-inline int strcmp(const char* s1, const char* s2) FL_NO_EXCEPT { return libc_impl::strcmp(s1, s2); }
+FASTLED_FORCE_INLINE int strcmp(const char* s1, const char* s2) FL_NO_EXCEPT { return libc_impl::strcmp(s1, s2); }
 
 // fl::strncmp - wrapper for strncmp
 template <typename FlLibcTag = void>
-inline int strncmp(const char* s1, const char* s2, size_t n) FL_NO_EXCEPT { return libc_impl::strncmp(s1, s2, n); }
+FASTLED_FORCE_INLINE int strncmp(const char* s1, const char* s2, size_t n) FL_NO_EXCEPT { return libc_impl::strncmp(s1, s2, n); }
 
 // fl::strcpy - wrapper for strcpy (use with caution - prefer strncpy)
 template <typename FlLibcTag = void>
-inline char* strcpy(char* dest, const char* src) FL_NO_EXCEPT { return libc_impl::strcpy(dest, src); }
+FASTLED_FORCE_INLINE char* strcpy(char* dest, const char* src) FL_NO_EXCEPT { return libc_impl::strcpy(dest, src); }
 
 // fl::strncpy - bounded string copy that ALWAYS null-terminates.
 // Copies at most n chars from src, then writes a terminator at
@@ -72,59 +73,59 @@ inline char* strcpy(char* dest, const char* src) FL_NO_EXCEPT { return libc_impl
 // Differs from ::strncpy, which leaves dest unterminated when
 // strlen(src) >= n. Remaining destination bytes up to n are zero-padded.
 template <typename FlLibcTag = void>
-inline char* strncpy(char* dest, const char* src, size_t n) FL_NO_EXCEPT { return libc_impl::strncpy(dest, src, n); }
+FASTLED_FORCE_INLINE char* strncpy(char* dest, const char* src, size_t n) FL_NO_EXCEPT { return libc_impl::strncpy(dest, src, n); }
 
 // fl::strcat - wrapper for strcat (use with caution - prefer strncat)
 template <typename FlLibcTag = void>
-inline char* strcat(char* dest, const char* src) FL_NO_EXCEPT { return libc_impl::strcat(dest, src); }
+FASTLED_FORCE_INLINE char* strcat(char* dest, const char* src) FL_NO_EXCEPT { return libc_impl::strcat(dest, src); }
 
 // fl::strncat - wrapper for strncat
 template <typename FlLibcTag = void>
-inline char* strncat(char* dest, const char* src, size_t n) FL_NO_EXCEPT { return libc_impl::strncat(dest, src, n); }
+FASTLED_FORCE_INLINE char* strncat(char* dest, const char* src, size_t n) FL_NO_EXCEPT { return libc_impl::strncat(dest, src, n); }
 
 // fl::strstr - wrapper for strstr
 template <typename FlLibcTag = void>
-inline const char* strstr(const char* haystack, const char* needle) FL_NO_EXCEPT { return libc_impl::strstr(haystack, needle); }
+FASTLED_FORCE_INLINE const char* strstr(const char* haystack, const char* needle) FL_NO_EXCEPT { return libc_impl::strstr(haystack, needle); }
 
 // fl::strchr - wrapper for strchr (find first occurrence of character)
 template <typename FlLibcTag = void>
-inline char* strchr(char* s, int c) FL_NO_EXCEPT { return libc_impl::strchr(s, c); }
+FASTLED_FORCE_INLINE char* strchr(char* s, int c) FL_NO_EXCEPT { return libc_impl::strchr(s, c); }
 
 // fl::strchr - const version wrapper for strchr
 template <typename FlLibcTag = void>
-inline const char* strchr(const char* s, int c) FL_NO_EXCEPT { return libc_impl::strchr(s, c); }
+FASTLED_FORCE_INLINE const char* strchr(const char* s, int c) FL_NO_EXCEPT { return libc_impl::strchr(s, c); }
 
 // fl::strrchr - wrapper for strrchr (find last occurrence of character)
 template <typename FlLibcTag = void>
-inline char* strrchr(char* s, int c) FL_NO_EXCEPT { return libc_impl::strrchr(s, c); }
+FASTLED_FORCE_INLINE char* strrchr(char* s, int c) FL_NO_EXCEPT { return libc_impl::strrchr(s, c); }
 
 // fl::strrchr - const version wrapper for strrchr
 template <typename FlLibcTag = void>
-inline const char* strrchr(const char* s, int c) FL_NO_EXCEPT { return libc_impl::strrchr(s, c); }
+FASTLED_FORCE_INLINE const char* strrchr(const char* s, int c) FL_NO_EXCEPT { return libc_impl::strrchr(s, c); }
 
 // fl::strspn - wrapper for strspn (length of initial segment matching characters)
 template <typename FlLibcTag = void>
-inline size_t strspn(const char* s1, const char* s2) FL_NO_EXCEPT { return libc_impl::strspn(s1, s2); }
+FASTLED_FORCE_INLINE size_t strspn(const char* s1, const char* s2) FL_NO_EXCEPT { return libc_impl::strspn(s1, s2); }
 
 // fl::strcspn - wrapper for strcspn (length of initial segment not matching characters)
 template <typename FlLibcTag = void>
-inline size_t strcspn(const char* s1, const char* s2) FL_NO_EXCEPT { return libc_impl::strcspn(s1, s2); }
+FASTLED_FORCE_INLINE size_t strcspn(const char* s1, const char* s2) FL_NO_EXCEPT { return libc_impl::strcspn(s1, s2); }
 
 // fl::strpbrk - wrapper for strpbrk (find first occurrence of any character from set)
 template <typename FlLibcTag = void>
-inline char* strpbrk(char* s1, const char* s2) FL_NO_EXCEPT { return libc_impl::strpbrk(s1, s2); }
+FASTLED_FORCE_INLINE char* strpbrk(char* s1, const char* s2) FL_NO_EXCEPT { return libc_impl::strpbrk(s1, s2); }
 
 // fl::strpbrk - const version wrapper for strpbrk
 template <typename FlLibcTag = void>
-inline const char* strpbrk(const char* s1, const char* s2) FL_NO_EXCEPT { return libc_impl::strpbrk(s1, s2); }
+FASTLED_FORCE_INLINE const char* strpbrk(const char* s1, const char* s2) FL_NO_EXCEPT { return libc_impl::strpbrk(s1, s2); }
 
 // fl::strtok - wrapper for strtok (tokenize string, note: not thread-safe)
 template <typename FlLibcTag = void>
-inline char* strtok(char* s1, const char* s2) FL_NO_EXCEPT { return libc_impl::strtok(s1, s2); }
+FASTLED_FORCE_INLINE char* strtok(char* s1, const char* s2) FL_NO_EXCEPT { return libc_impl::strtok(s1, s2); }
 
 // fl::strerror - wrapper for strerror (convert error number to string)
 template <typename FlLibcTag = void>
-inline char* strerror(int errnum) FL_NO_EXCEPT { return libc_impl::strerror(errnum); }
+FASTLED_FORCE_INLINE char* strerror(int errnum) FL_NO_EXCEPT { return libc_impl::strerror(errnum); }
 
 // ============================================================================
 // Memory Functions
@@ -132,27 +133,27 @@ inline char* strerror(int errnum) FL_NO_EXCEPT { return libc_impl::strerror(errn
 
 // fl::memcpy - wrapper for memcpy
 template <typename FlLibcTag = void>
-inline void* memcpy(void* dest, const void* src, size_t n) FL_NO_EXCEPT { return libc_impl::memcpy(dest, src, n); }
+FASTLED_FORCE_INLINE void* memcpy(void* dest, const void* src, size_t n) FL_NO_EXCEPT { return libc_impl::memcpy(dest, src, n); }
 
 // fl::memcmp - wrapper for memcmp
 template <typename FlLibcTag = void>
-inline int memcmp(const void* s1, const void* s2, size_t n) FL_NO_EXCEPT { return libc_impl::memcmp(s1, s2, n); }
+FASTLED_FORCE_INLINE int memcmp(const void* s1, const void* s2, size_t n) FL_NO_EXCEPT { return libc_impl::memcmp(s1, s2, n); }
 
 // fl::memmove - wrapper for memmove (handles overlapping memory)
 template <typename FlLibcTag = void>
-inline void* memmove(void* dest, const void* src, size_t n) FL_NO_EXCEPT { return libc_impl::memmove(dest, src, n); }
+FASTLED_FORCE_INLINE void* memmove(void* dest, const void* src, size_t n) FL_NO_EXCEPT { return libc_impl::memmove(dest, src, n); }
 
 // fl::memset - wrapper for memset
 template <typename FlLibcTag = void>
-inline void* memset(void* s, int c, size_t n) FL_NO_EXCEPT { return libc_impl::memset(s, c, n); }
+FASTLED_FORCE_INLINE void* memset(void* s, int c, size_t n) FL_NO_EXCEPT { return libc_impl::memset(s, c, n); }
 
 // fl::memchr - wrapper for memchr
 template <typename FlLibcTag = void>
-inline void* memchr(void* s, int c, size_t n) FL_NO_EXCEPT { return libc_impl::memchr(s, c, n); }
+FASTLED_FORCE_INLINE void* memchr(void* s, int c, size_t n) FL_NO_EXCEPT { return libc_impl::memchr(s, c, n); }
 
 // fl::memchr - const version wrapper for memchr
 template <typename FlLibcTag = void>
-inline const void* memchr(const void* s, int c, size_t n) FL_NO_EXCEPT { return libc_impl::memchr(s, c, n); }
+FASTLED_FORCE_INLINE const void* memchr(const void* s, int c, size_t n) FL_NO_EXCEPT { return libc_impl::memchr(s, c, n); }
 
 // ============================================================================
 // Legacy compatibility functions (aliases)

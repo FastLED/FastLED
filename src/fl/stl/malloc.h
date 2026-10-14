@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fl/stl/stdint.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/stl/noexcept.h"
 
 namespace fl {
@@ -17,11 +18,11 @@ namespace fl {
 
     // Function declarations for memory management
     template <typename FlLibcTag = void>
-    inline void* malloc(size_t size) FL_NO_EXCEPT { return libc_impl::malloc(size); }
+    FASTLED_FORCE_INLINE void* malloc(size_t size) FL_NO_EXCEPT { return libc_impl::malloc(size); }
     template <typename FlLibcTag = void>
-    inline void free(void* ptr) FL_NO_EXCEPT { return libc_impl::free(ptr); }
+    FASTLED_FORCE_INLINE void free(void* ptr) FL_NO_EXCEPT { return libc_impl::free(ptr); }
     template <typename FlLibcTag = void>
-    inline void* calloc(size_t nmemb, size_t size) FL_NO_EXCEPT { return libc_impl::calloc(nmemb, size); }
+    FASTLED_FORCE_INLINE void* calloc(size_t nmemb, size_t size) FL_NO_EXCEPT { return libc_impl::calloc(nmemb, size); }
     template <typename FlLibcTag = void>
-    inline void* realloc(void* ptr, size_t new_size) FL_NO_EXCEPT { return libc_impl::realloc(ptr, new_size); }
+    FASTLED_FORCE_INLINE void* realloc(void* ptr, size_t new_size) FL_NO_EXCEPT { return libc_impl::realloc(ptr, new_size); }
 } // namespace fl

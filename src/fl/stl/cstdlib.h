@@ -9,6 +9,7 @@
 
 #include "fl/stl/stdint.h"
 #include "fl/stl/cstddef.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/stl/noexcept.h"
 
 namespace fl {
@@ -41,7 +42,7 @@ const char* getenv(const char* name) FL_NO_EXCEPT;
 // Defined in cstdlib.cpp.hpp.
 
 template <typename FlLibcTag = void>
-inline void *aligned_alloc(fl::size_t alignment, fl::size_t size) FL_NO_EXCEPT { return libc_impl::aligned_alloc(alignment, size); }
+FASTLED_FORCE_INLINE void *aligned_alloc(fl::size_t alignment, fl::size_t size) FL_NO_EXCEPT { return libc_impl::aligned_alloc(alignment, size); }
 
 namespace detail {
 /// Portable over-allocate-and-align used by aligned_alloc on bare-metal
@@ -57,40 +58,40 @@ void aligned_free(void *ptr) FL_NO_EXCEPT;
 // Convert string to long integer
 // Similar to standard strtol but without locale support
 template <typename FlLibcTag = void>
-inline long strtol(const char* str, char** endptr, int base) FL_NO_EXCEPT { return libc_impl::strtol(str, endptr, base); }
+FASTLED_FORCE_INLINE long strtol(const char* str, char** endptr, int base) FL_NO_EXCEPT { return libc_impl::strtol(str, endptr, base); }
 
 // Convert string to unsigned long integer
 template <typename FlLibcTag = void>
-inline unsigned long strtoul(const char* str, char** endptr, int base) FL_NO_EXCEPT { return libc_impl::strtoul(str, endptr, base); }
+FASTLED_FORCE_INLINE unsigned long strtoul(const char* str, char** endptr, int base) FL_NO_EXCEPT { return libc_impl::strtoul(str, endptr, base); }
 
 // Convert string to integer
 template <typename FlLibcTag = void>
-inline int atoi(const char* str) FL_NO_EXCEPT { return libc_impl::atoi(str); }
+FASTLED_FORCE_INLINE int atoi(const char* str) FL_NO_EXCEPT { return libc_impl::atoi(str); }
 
 // Convert string to long
 template <typename FlLibcTag = void>
-inline long atol(const char* str) FL_NO_EXCEPT { return libc_impl::atol(str); }
+FASTLED_FORCE_INLINE long atol(const char* str) FL_NO_EXCEPT { return libc_impl::atol(str); }
 
 // Convert string to double
 template <typename FlLibcTag = void>
-inline double strtod(const char* str, char** endptr) FL_NO_EXCEPT { return libc_impl::strtod(str, endptr); }
+FASTLED_FORCE_INLINE double strtod(const char* str, char** endptr) FL_NO_EXCEPT { return libc_impl::strtod(str, endptr); }
 
 
 // qsort - Quick sort function compatible with C stdlib qsort
 // Sorts an array of elements using the provided comparison function
 template <typename FlLibcTag = void>
-inline void qsort(void* base, size_t nmemb, size_t size, qsort_compare_fn compar) FL_NO_EXCEPT { return libc_impl::qsort(base, nmemb, size, compar); }
+FASTLED_FORCE_INLINE void qsort(void* base, size_t nmemb, size_t size, qsort_compare_fn compar) FL_NO_EXCEPT { return libc_impl::qsort(base, nmemb, size, compar); }
 
 // Pseudo-random number generator (mirrors ::rand()).
 // Returns u32 — values are always non-negative [0, RAND_MAX].
 // Fixed-width avoids AVR's 16-bit int truncation.
 template <typename FlLibcTag = void>
-inline u32 rand() FL_NO_EXCEPT { return libc_impl::rand(); }
+FASTLED_FORCE_INLINE u32 rand() FL_NO_EXCEPT { return libc_impl::rand(); }
 
 // Get the value of an environment variable
 // Only functional on FASTLED_TESTING (stub platform), returns nullptr otherwise
 // This avoids std:: namespace dependencies on embedded platforms
 template <typename FlLibcTag = void>
-inline const char* getenv(const char* name) FL_NO_EXCEPT { return libc_impl::getenv(name); }
+FASTLED_FORCE_INLINE const char* getenv(const char* name) FL_NO_EXCEPT { return libc_impl::getenv(name); }
 
 } // namespace fl
