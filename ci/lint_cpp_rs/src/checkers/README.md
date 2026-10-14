@@ -29,3 +29,7 @@ grouped by related policy area:
   enum-class, platform namespace, and logging-in-IRAM checks.
 - `container_ptr.rs`: raw pointers into `fl::` containers (FastLED#3287) --
   hard-fail on non-contiguous containers, warn-only on contiguous ones.
+- `libc_mirror.rs`: any function in `namespace fl` (or a sub-namespace) with a
+  libc name must be a `template <typename FlLibcTag = void>` +
+  `FASTLED_FORCE_INLINE` wrapper, so unqualified libc calls on fl types stay
+  unambiguous (FastLED#4834).

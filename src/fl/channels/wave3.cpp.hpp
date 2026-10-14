@@ -189,8 +189,8 @@ void wave3Untranspose_2(const u8 (&FL_RESTRICT_PARAM transposed)[2 * sizeof(Wave
         lane_waves[1].data[symbol_idx] = lane1_bits;
     }
 
-    fl::isr::memcpy(output, &lane_waves[0], sizeof(Wave3Byte));
-    fl::isr::memcpy(output + sizeof(Wave3Byte), &lane_waves[1], sizeof(Wave3Byte));
+    fl::isr::memcopy(output, &lane_waves[0], sizeof(Wave3Byte));
+    fl::isr::memcopy(output + sizeof(Wave3Byte), &lane_waves[1], sizeof(Wave3Byte));
 }
 
 FL_OPTIMIZE_FUNCTION
@@ -221,7 +221,7 @@ void wave3Untranspose_4(const u8 (&FL_RESTRICT_PARAM transposed)[4 * sizeof(Wave
     }
 
     for (int lane = 0; lane < 4; lane++) {
-        fl::isr::memcpy(output + lane * sizeof(Wave3Byte), &lane_waves[lane], sizeof(Wave3Byte));
+        fl::isr::memcopy(output + lane * sizeof(Wave3Byte), &lane_waves[lane], sizeof(Wave3Byte));
     }
 }
 
@@ -252,7 +252,7 @@ void wave3Untranspose_8(const u8 (&FL_RESTRICT_PARAM transposed)[8 * sizeof(Wave
     }
 
     for (int lane = 0; lane < 8; lane++) {
-        fl::isr::memcpy(output + lane * sizeof(Wave3Byte), &lane_waves[lane], sizeof(Wave3Byte));
+        fl::isr::memcopy(output + lane * sizeof(Wave3Byte), &lane_waves[lane], sizeof(Wave3Byte));
     }
 }
 
@@ -282,7 +282,7 @@ void wave3Untranspose_16(const u8 (&FL_RESTRICT_PARAM transposed)[16 * sizeof(Wa
     }
 
     for (int lane = 0; lane < 16; lane++) {
-        fl::isr::memcpy(output + lane * sizeof(Wave3Byte), &lane_waves[lane], sizeof(Wave3Byte));
+        fl::isr::memcopy(output + lane * sizeof(Wave3Byte), &lane_waves[lane], sizeof(Wave3Byte));
     }
 }
 

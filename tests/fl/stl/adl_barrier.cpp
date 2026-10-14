@@ -28,6 +28,8 @@
 #include "fl/stl/algorithm.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/malloc.h"
+#include "fl/stl/cstdlib.h"
+#include "fl/system/exit.h"
 #include "fl/stl/range_access.h"
 #include "test.h"
 
@@ -224,6 +226,76 @@ FL_TEST_CASE("using namespace fl keeps libc calls unambiguous") {
     memset(leds, 0, sizeof(leds));  // ok ctype
     FL_CHECK(atoi("42") == 42);
 }
+
+// FastLED#4834: compile-time back-stop for the libc_mirror lint rule. Every
+// wrapper in fl/stl/{cstring,malloc,cstdlib}.h and fl/system/exit.h is called
+// unqualified in an unevaluated context, both with fl-typed (CRGB*) arguments
+// and no using-directive (the ADL path) and under `using namespace fl`. A
+// mirror that ties with libc makes one of these lines ambiguous.
+namespace libc_every_adl {
+FL_TEST_CASE("every pointer-taking libc wrapper is unambiguous on CRGB*") {
+    CRGB* p = nullptr;
+    const CRGB* cp = nullptr;
+    FL_STATIC_ASSERT(sizeof(decltype(memcpy(p, cp, 1))*) > 0, "");  // ok ctype
+    FL_STATIC_ASSERT(sizeof(decltype(memmove(p, cp, 1))*) > 0, "");  // ok ctype
+    FL_STATIC_ASSERT(sizeof(decltype(memset(p, 0, 1))*) > 0, "");  // ok ctype
+    FL_STATIC_ASSERT(sizeof(decltype(memcmp(cp, cp, 1))*) > 0, "");  // ok ctype
+    FL_STATIC_ASSERT(sizeof(decltype(memchr(p, 0, 1))*) > 0, "");  // ok ctype
+    FL_STATIC_ASSERT(sizeof(decltype(memchr(cp, 0, 1))*) > 0, "");  // ok ctype
+    FL_STATIC_ASSERT(sizeof(decltype(free(p))*) > 0, "");  // ok bare allocation
+    FL_STATIC_ASSERT(sizeof(decltype(realloc(p, 1))*) > 0, "");  // ok bare allocation
+    FL_STATIC_ASSERT(sizeof(decltype(qsort(p, 1, 1, nullptr))*) > 0, "");
+    FL_CHECK(true);
+}
+}  // namespace libc_every_adl
+
+namespace libc_every_using_fl {
+FL_TEST_CASE("every libc wrapper is unambiguous under using namespace fl") {
+    using namespace fl;
+    char* s = nullptr;
+    const char* cs = nullptr;
+    char** end = nullptr;
+    void* v = nullptr;
+    FL_STATIC_ASSERT(sizeof(decltype(strlen(cs))*) > 0, "");  // ok ctype
+    FL_STATIC_ASSERT(sizeof(decltype(strcmp(cs, cs))*) > 0, "");  // ok ctype
+    FL_STATIC_ASSERT(sizeof(decltype(strncmp(cs, cs, 1))*) > 0, "");  // ok ctype
+    FL_STATIC_ASSERT(sizeof(decltype(strcpy(s, cs))*) > 0, "");  // ok ctype
+    FL_STATIC_ASSERT(sizeof(decltype(strncpy(s, cs, 1))*) > 0, "");  // ok ctype
+    FL_STATIC_ASSERT(sizeof(decltype(strcat(s, cs))*) > 0, "");  // ok ctype
+    FL_STATIC_ASSERT(sizeof(decltype(strncat(s, cs, 1))*) > 0, "");  // ok ctype
+    FL_STATIC_ASSERT(sizeof(decltype(strstr(cs, cs))*) > 0, "");  // ok ctype
+    FL_STATIC_ASSERT(sizeof(decltype(strchr(s, 'a'))*) > 0, "");  // ok ctype
+    FL_STATIC_ASSERT(sizeof(decltype(strchr(cs, 'a'))*) > 0, "");  // ok ctype
+    FL_STATIC_ASSERT(sizeof(decltype(strrchr(s, 'a'))*) > 0, "");  // ok ctype
+    FL_STATIC_ASSERT(sizeof(decltype(strrchr(cs, 'a'))*) > 0, "");  // ok ctype
+    FL_STATIC_ASSERT(sizeof(decltype(strspn(cs, cs))*) > 0, "");  // ok ctype
+    FL_STATIC_ASSERT(sizeof(decltype(strcspn(cs, cs))*) > 0, "");  // ok ctype
+    FL_STATIC_ASSERT(sizeof(decltype(strpbrk(s, cs))*) > 0, "");  // ok ctype
+    FL_STATIC_ASSERT(sizeof(decltype(strpbrk(cs, cs))*) > 0, "");  // ok ctype
+    FL_STATIC_ASSERT(sizeof(decltype(strtok(s, cs))*) > 0, "");  // ok ctype
+    FL_STATIC_ASSERT(sizeof(decltype(strerror(0))*) > 0, "");  // ok ctype
+    FL_STATIC_ASSERT(sizeof(decltype(memcpy(v, v, 1))*) > 0, "");  // ok ctype
+    FL_STATIC_ASSERT(sizeof(decltype(memmove(v, v, 1))*) > 0, "");  // ok ctype
+    FL_STATIC_ASSERT(sizeof(decltype(memset(v, 0, 1))*) > 0, "");  // ok ctype
+    FL_STATIC_ASSERT(sizeof(decltype(memcmp(v, v, 1))*) > 0, "");  // ok ctype
+    FL_STATIC_ASSERT(sizeof(decltype(memchr(v, 0, 1))*) > 0, "");  // ok ctype
+    FL_STATIC_ASSERT(sizeof(decltype(malloc(1))*) > 0, "");  // ok bare allocation
+    FL_STATIC_ASSERT(sizeof(decltype(calloc(1, 1))*) > 0, "");  // ok bare allocation
+    FL_STATIC_ASSERT(sizeof(decltype(realloc(v, 1))*) > 0, "");  // ok bare allocation
+    FL_STATIC_ASSERT(sizeof(decltype(free(v))*) > 0, "");  // ok bare allocation
+    FL_STATIC_ASSERT(sizeof(decltype(aligned_alloc(8, 8))*) > 0, "");  // ok bare allocation
+    FL_STATIC_ASSERT(sizeof(decltype(strtol(cs, end, 10))*) > 0, "");
+    FL_STATIC_ASSERT(sizeof(decltype(strtoul(cs, end, 10))*) > 0, "");
+    FL_STATIC_ASSERT(sizeof(decltype(atoi(cs))*) > 0, "");
+    FL_STATIC_ASSERT(sizeof(decltype(atol(cs))*) > 0, "");
+    FL_STATIC_ASSERT(sizeof(decltype(strtod(cs, end))*) > 0, "");
+    FL_STATIC_ASSERT(sizeof(decltype(qsort(v, 1, 1, nullptr))*) > 0, "");
+    FL_STATIC_ASSERT(sizeof(decltype(rand())*) > 0, "");
+    FL_STATIC_ASSERT(sizeof(decltype(getenv(cs))*) > 0, "");
+    FL_STATIC_ASSERT(sizeof(decltype(exit(0))*) > 0, "");
+    FL_CHECK(true);
+}
+}  // namespace libc_every_using_fl
 
 // Qualified fl::name must still reach every function behind the barrier. If a
 // future header declares one of these names directly in fl, qualified lookup
