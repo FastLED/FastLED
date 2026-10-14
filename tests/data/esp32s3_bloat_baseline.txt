@@ -1,7 +1,12 @@
-# #4827 / PR #4830: CI run 38469509794 measures image 341131. Local
-# builds of the same tree: master f09d68cc5 = 341283, this PR = 341115
-# (PR is -168 B); master had already drifted past 341047. Re-base to the
-# measured CI image.
+# #4827 follow-up: force-inline the fl:: libc wrapper templates. Local
+# image 341039 (-76 B). Pinned to the expected CI image; re-pinned to the
+# measured CI value below if it differs.
+
+# CORRECTION to the #4827 / PR #4830 note this replaces: master was NOT
+# over budget. CI measured 341027 on a branch off master f09d68cc5; the
+# 341283 figure was a local build, which does not match CI. PR #4830 itself
+# added ~104 B: GCC emitted out-of-line clones of the fl::memcpy/memset/
+# memmove<void> wrappers (+42 +42 +14 B). CI run 38469509794 measured 341131.
 
 # #4795 / RGBW type-erased + link-on-use: local image 341031 (down 1052 B
 # from 342083 local); CI has measured +16 B vs local on this board (342099
@@ -363,4 +368,4 @@
 # the CI Blink report contains no ResponseLutsQ16 symbol. The local fbuild
 # symbol total remains ~4 KB higher for the same source (FastLED/fbuild#1456),
 # so this ratchet uses the CI measurement from PR #4511.
-341131
+341055
