@@ -155,7 +155,10 @@ fn libc_backstop_violations(wrappers: &[(String, bool)], test_src: &str) -> Vec<
     for (block_name, block) in [(LIBC_BACKSTOP_ADL_BLOCK, adl), (LIBC_BACKSTOP_USING_BLOCK, using_fl)] {
         let mut stale: Vec<&str> = block
             .iter()
-            .filter(|(t, n)| n == "(" && LIBC_RESERVED_NAMES.contains(&t.as_str()))
+            .filter(|(t, n)| {
+                n == "("
+                    && (LIBC_RESERVED_NAMES.contains(&t.as_str()) || LIBC_ARITHMETIC_NAMES.contains(&t.as_str()))
+            })
             .map(|(t, _)| t.as_str())
             .filter(|t| !wrappers.iter().any(|(w, _)| w == t))
             .collect();
@@ -242,6 +245,14 @@ mod libc_backstop_tests {
         let v = libc_backstop_violations(&[("memcpy".to_string(), true)], TEST_SRC);
         assert_eq!(v.len(), 1, "{v:?}");
         assert!(v[0].contains("`atoi`, which is no longer"));
+    }
+
+    #[test]
+    fn removed_arithmetic_wrapper_is_stale() {
+        let src = TEST_SRC.replace("atoi(cs);", "atoi(cs); div(1, 2);");
+        let v = libc_backstop_violations(&wrappers(), &src);
+        assert_eq!(v.len(), 1, "{v:?}");
+        assert!(v[0].contains("`div`, which is no longer"));
     }
 
     #[test]
