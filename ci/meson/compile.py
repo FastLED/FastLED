@@ -13,6 +13,7 @@ from typing import Optional, cast
 
 from running_process import RunningProcess, terminate_process_tree
 
+from ci.compile_pch import is_pch_redefinition_error, purge_pch_artifacts
 from ci.meson.cache_utils import (
     check_ninja_skip,
     save_ninja_skip_state,
@@ -971,6 +972,46 @@ def compile_meson(
                 describe=_describe_zccache,
                 before_retry=None,
                 label="zccache",
+                started=compile_started,
+                deadline_seconds=_COMPILE_HARD_TIMEOUT_SECONDS,
+                env=None,
+                output_formatter=TimestampFormatter(),
+            )
+            returncode = _outcome.returncode
+            output = _outcome.output
+            latest_output = _outcome.latest
+
+        # Stale-PCH fail-safe. A stale PCH makes clang re-parse a #pragma once
+        # header on top of its PCH copy ("redefinition of ..."). The checks in
+        # ci/compile_pch.py should prevent that; if one is ever missed, drop
+        # only the PCHs and retry once instead of making the developer --clean.
+        if returncode != 0 and is_pch_redefinition_error(latest_output, build_dir):
+
+            def _describe_pch(_latest: str, _attempt: int) -> str:
+                return (
+                    "STALE PCH DETECTED: redefinition errors in a header that is "
+                    "in a precompiled header. Purging PCHs and retrying once. "
+                    "This is a bug in the PCH staleness checks (ci/compile_pch.py)"
+                    " -- please report it."
+                )
+
+            def _before_pch_retry() -> None:
+                removed = purge_pch_artifacts(build_dir)
+                _ts_print(
+                    f"[MESON] 🗑️  Purged {removed} PCH artifact(s)", file=sys.stderr
+                )
+
+            _outcome = _retry_ninja(
+                cmd,
+                output,
+                max_retries=1,
+                backoff_seconds=0.0,
+                still_transient=lambda latest: is_pch_redefinition_error(
+                    latest, build_dir
+                ),
+                describe=_describe_pch,
+                before_retry=_before_pch_retry,
+                label="Stale-PCH",
                 started=compile_started,
                 deadline_seconds=_COMPILE_HARD_TIMEOUT_SECONDS,
                 env=None,

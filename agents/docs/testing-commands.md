@@ -76,6 +76,48 @@ rm -rf .build && bash test                 # WRONG - use bash test --clean
 
 **The build system is self-healing and revalidates automatically. Manual cache deletion is highly discouraged.** See `agents/docs/build-system.md` for details.
 
+## Precompiled Header Invariant
+
+**Rule: a PCH is rebuilt whenever any of its inputs is newer than the PCH file,
+or when its content hash or compile flags changed.** A content-hash match
+alone is never enough to reuse a PCH.
+
+Why: FastLED builds and uses PCHs with `-fpch-validate-input-files-content`.
+With that flag, clang (seen on 21.1.x) accepts a PCH whose input header is
+byte-identical but has a newer mtime. It then fails to match that header to
+the copy inside the PCH, so `#pragma once` lets it be parsed a second time.
+Every TU that recompiles fails with `redefinition of ...` or `template
+parameter redefines default argument`. Touching a header (`git checkout`,
+editing a line and then reverting it, or a formatter) is enough to trigger it.
+
+Minimal repro, no FastLED needed:
+
+```bash
+printf '#pragma once\ntemplate<class T=int> T f(T x){return x;}\n' > a.h
+echo '#include "a.h"' > pch.h
+printf '#include "a.h"\nint main(){return f(0);}\n' > t.cpp
+F="-Werror=invalid-pch -fpch-validate-input-files-content"
+clang++ -x c++-header pch.h -o pch.h.pch $F
+clang++ -include-pch pch.h.pch $F -c t.cpp   # OK
+touch a.h
+clang++ -include-pch pch.h.pch $F -c t.cpp   # error: redefinition of 'f'
+```
+
+Where it is enforced:
+- `ci/compile_pch.py`: `inputs_newer_than()` is checked in the wrapper's
+  skip path and in `invalidate_stale_pch()`, which runs before every native
+  compile. Flag changes are tracked by `.flags_hash`. A compiler version
+  change wipes the build in `ci/meson/build_config.py`.
+- WASM: `ci/wasm_compile_pch.py` (`check_dependencies_changed`, the order- and
+  root-sensitive `compute_flags_hash`) and `ci/wasm_compile_native.py`
+  (an object older than the PCH is recompiled).
+- Fail-safe: if a compile still fails with this signature in a header that is
+  in a PCH, `ci/meson/compile.py` and `ci/meson/streaming_runner.py` delete
+  only the PCHs (`purge_pch_artifacts`), retry once, and print a loud
+  `STALE PCH DETECTED` warning. If you see that warning, report it as a bug.
+- Regression tests: `ci/tests/test_pch_e2e.py`, which uses the real
+  toolchain, also covers WASM, and is in the routine CI Python smoke list.
+
 ## Performance: Never Disable Fingerprint Caching
 
 **DO NOT use `--no-fingerprint`. This flag disables critical performance optimizations and makes builds 10-100x slower.**

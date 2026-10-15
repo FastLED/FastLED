@@ -34,6 +34,7 @@ The script expects:
 """
 
 import hashlib
+import re
 import shutil
 import sys
 from pathlib import Path
@@ -307,6 +308,65 @@ def invalidate_stale_pch(pch_file: Path) -> None:
         print(f"WARNING: PCH staleness check failed: {e}", file=sys.stderr)
 
 
+# Sidecars compile_pch.py writes next to a PCH. Removing them together with
+# the .pch forces a clean rebuild of that PCH and nothing else.
+PCH_SIDECAR_SUFFIXES = (".pch.input_hash", ".pch.flags_hash")
+
+# The clang failure a stale PCH produces: the header is parsed a second time
+# on top of the PCH copy because #pragma once no longer recognises it.
+_PCH_REDEFINITION_RE = re.compile(
+    r"(\S+?):\d+:\d+: error: "
+    r"(?:redefinition of|template parameter redefines default argument)"
+)
+
+
+def pch_input_headers(build_dir: Path) -> set[Path]:
+    """Every header any PCH under ``build_dir`` was built from (resolved)."""
+    headers: set[Path] = set()
+    for saved in build_dir.rglob("*.d.cache"):
+        try:
+            for dep in parse_depfile_inputs(saved):
+                headers.add(dep.resolve())
+        except OSError:
+            continue
+    return headers
+
+
+def is_pch_redefinition_error(output: str, build_dir: Path) -> bool:
+    """True if ``output`` shows a redefinition error in a header that is in a PCH.
+
+    That signature means the PCH is stale (see ``inputs_newer_than``). A
+    redefinition in a header that is not in any PCH is an ordinary bug and is
+    not matched.
+    """
+    matches = _PCH_REDEFINITION_RE.findall(output)
+    if not matches:
+        return False
+    headers = pch_input_headers(build_dir)
+    for raw in matches:
+        try:
+            if Path(raw).resolve() in headers:
+                return True
+        except (OSError, ValueError):
+            continue
+    return False
+
+
+def purge_pch_artifacts(build_dir: Path) -> int:
+    """Delete every PCH under ``build_dir`` plus its sidecars. Returns the count."""
+    removed = 0
+    for pch in list(build_dir.rglob("*.pch")):
+        targets = [pch, pch.with_name(pch.name.replace(".pch", ".d.cache"))]
+        targets += [Path(str(pch) + s[len(".pch") :]) for s in PCH_SIDECAR_SUFFIXES]
+        for t in targets:
+            try:
+                t.unlink()
+                removed += 1
+            except FileNotFoundError:
+                continue
+    return removed
+
+
 def main() -> int:
     if len(sys.argv) < 2:
         print("Usage: compile_pch.py <compiler> <args...>", file=sys.stderr)
@@ -341,6 +401,10 @@ def main() -> int:
         and hash_file
         and flags_file
         and pch_output.exists()
+        # Only a PCH may be skipped on a hash match. wasm_build_library.py
+        # also routes ordinary .o compiles through this wrapper; skipping one
+        # of those would keep an object built against an older PCH.
+        and pch_output.suffix == ".pch"
     ):
         if saved_depfile.exists() and hash_file.exists() and flags_file.exists():
             try:
