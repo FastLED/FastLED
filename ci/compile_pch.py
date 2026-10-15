@@ -22,6 +22,8 @@ Solution 2: Hash all input files listed in the saved depfile from the previous
 build. If the input hash matches, skip compilation entirely. The ninja rule uses
 `restat = 1`, so unchanged output triggers no downstream rebuilds. The depfile
 is saved as `.d.cache` since ninja deletes the original after reading it.
+The skip is only taken when no input is newer than the PCH: clang breaks
+`#pragma once` for inputs whose mtime moved (see `inputs_newer_than`).
 
 Usage:
     python compile_pch.py <compiler> <args...>
@@ -230,6 +232,28 @@ def hash_compile_flags(args: list[str]) -> str:
     return h.hexdigest()
 
 
+def inputs_newer_than(files: list[Path], pch_file: Path) -> bool:
+    """Return True if any input file has an mtime newer than ``pch_file``.
+
+    A content-hash match is NOT enough to reuse a PCH. Clang records each
+    input's mtime in the PCH, and with ``-fpch-validate-input-files-content``
+    it accepts a PCH whose inputs are byte-identical but have a newer mtime --
+    yet it then fails to associate those headers with the PCH copies, so
+    ``#pragma once`` no longer dedupes them. Every consumer TU that includes
+    such a header again dies with "redefinition of ..." (reproduced on clang
+    21.1.8). Touching a header without changing it is enough to trigger this,
+    so a touched input must force a real PCH rebuild.
+    """
+    pch_mtime = pch_file.stat().st_mtime_ns
+    for f in files:
+        try:
+            if f.stat().st_mtime_ns > pch_mtime:
+                return True
+        except OSError:
+            return True  # Missing input: cannot trust the PCH
+    return False
+
+
 def invalidate_stale_pch(pch_file: Path) -> None:
     """Delete a PCH file if its input files have changed since it was built.
 
@@ -269,7 +293,7 @@ def invalidate_stale_pch(pch_file: Path) -> None:
             return
         current_hash = hash_input_files(input_files)
         stored_hash = hash_file.read_text(encoding="utf-8").strip()
-        if current_hash != stored_hash:
+        if current_hash != stored_hash or inputs_newer_than(input_files, pch_file):
             print(
                 f"PCH inputs changed — removing stale {pch_file.name} to force rebuild",
                 file=sys.stderr,
@@ -335,6 +359,13 @@ def main() -> int:
                     ):
                         print(
                             "PCH compiler flags changed - rebuilding",
+                            file=sys.stderr,
+                        )
+                    elif current_hash == stored_hash and inputs_newer_than(
+                        input_files, pch_output
+                    ):
+                        print(
+                            "PCH inputs touched (mtime newer, content same) - rebuilding",
                             file=sys.stderr,
                         )
                     elif current_hash == stored_hash:

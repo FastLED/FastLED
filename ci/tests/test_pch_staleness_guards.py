@@ -7,11 +7,12 @@ once`` fails to dedupe, and the build dies with "redefinition of ...".
 
 from __future__ import annotations
 
+import os
 import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from ci.compile_pch import hash_compile_flags
+from ci.compile_pch import hash_compile_flags, inputs_newer_than
 from ci.meson.path_normalization import find_ninja_strict_path_violations
 
 
@@ -55,6 +56,35 @@ class TestCompileFlagsHash(unittest.TestCase):
             hash_compile_flags(["-IC:/a", "-IC:/b"]),
             hash_compile_flags(["-IC:/a-IC:/b"]),
         )
+
+
+class TestInputsNewerThan(unittest.TestCase):
+    """A touched-but-identical header must still force a PCH rebuild."""
+
+    def _setup(self, tmp: str) -> tuple[Path, Path]:
+        header = Path(tmp) / "a.h"
+        pch = Path(tmp) / "a.h.pch"
+        header.write_text("#pragma once\n", encoding="utf-8")
+        pch.write_bytes(b"pch")
+        os.utime(header, ns=(1_000_000_000, 1_000_000_000))
+        os.utime(pch, ns=(2_000_000_000, 2_000_000_000))
+        return header, pch
+
+    def test_untouched_inputs_are_fresh(self) -> None:
+        with TemporaryDirectory() as tmp:
+            header, pch = self._setup(tmp)
+            self.assertFalse(inputs_newer_than([header], pch))
+
+    def test_touched_input_is_stale(self) -> None:
+        with TemporaryDirectory() as tmp:
+            header, pch = self._setup(tmp)
+            os.utime(header, ns=(3_000_000_000, 3_000_000_000))
+            self.assertTrue(inputs_newer_than([header], pch))
+
+    def test_missing_input_is_stale(self) -> None:
+        with TemporaryDirectory() as tmp:
+            _, pch = self._setup(tmp)
+            self.assertTrue(inputs_newer_than([Path(tmp) / "gone.h"], pch))
 
 
 class TestNinjaStrictPathViolations(unittest.TestCase):
