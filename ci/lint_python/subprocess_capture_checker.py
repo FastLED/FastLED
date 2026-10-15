@@ -82,6 +82,9 @@ DEFAULT_EXCLUDES = (
     "node_modules",
     "__pycache__",
     "ci/tmp",
+    # Nested agent checkouts (gitignored): each is linted in its own tree.
+    ".claude/worktrees",
+    ".worktrees",
     "third_party",
 )
 
