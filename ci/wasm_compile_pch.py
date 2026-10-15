@@ -93,8 +93,11 @@ def compute_content_hash(file_path: Path) -> str:
 def compute_flags_hash(flags: dict[str, list[str]]) -> str:
     """Compute hash of compilation flags for change detection."""
     # Combine all flags into a single sorted string for consistent hashing
-    all_flags = sorted(flags["defines"] + flags["compiler_flags"])
-    flags_str = " ".join(all_flags)
+    # Order matters (later -D / -I win) and so do the include roots, which
+    # embed PROJECT_ROOT: a PCH built under another checkout path must not
+    # be reused. NUL-separated so argument boundaries stay unambiguous.
+    all_flags = [*flags["defines"], *flags["compiler_flags"], str(PROJECT_ROOT)]
+    flags_str = "\0".join(all_flags)
     return hashlib.sha256(flags_str.encode()).hexdigest()
 
 
@@ -225,12 +228,11 @@ def check_dependencies_changed(depfile: Path, pch_output: Path) -> tuple[bool, s
 
     # Get PCH output modification time
     pch_mtime = pch_output.stat().st_mtime
-    depfile_mtime = depfile.stat().st_mtime
 
-    # If depfile is older than PCH, it's stale - ignore it
-    # (This can happen after PCH is rebuilt but before depfile is regenerated)
-    if depfile_mtime < pch_mtime:
-        return False, ""  # Stale depfile, rely on other checks
+    # The depfile is always written before the PCH finishes, so it is normally
+    # OLDER than the PCH. A former "ignore a depfile older than the PCH" guard
+    # therefore disabled this check on every build, and a touched or edited
+    # transitive header never rebuilt the WASM PCH.
 
     # Parse dependencies
     deps = parse_dependency_file(depfile)

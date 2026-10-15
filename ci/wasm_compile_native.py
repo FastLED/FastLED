@@ -155,8 +155,13 @@ def needs_compilation(source_file: Path, output_object: Path) -> bool:
 
     source_mtime = source_file.stat().st_mtime
     object_mtime = output_object.stat().st_mtime
+    if source_mtime > object_mtime:
+        return True
 
-    return source_mtime > object_mtime
+    # An object built against an older PCH is stale even if its own source
+    # did not change.
+    pch_file = BUILD_DIR / "wasm_pch.h.pch"
+    return pch_file.exists() and pch_file.stat().st_mtime > object_mtime
 
 
 def compile_object(

@@ -22,6 +22,7 @@ from typing import Optional
 
 from running_process import RunningProcess
 
+from ci.compile_pch import is_pch_redefinition_error, purge_pch_artifacts
 from ci.meson.build_config import setup_meson_build
 from ci.meson.build_optimizer import BuildOptimizer
 from ci.meson.build_timer import BuildTimer
@@ -470,6 +471,35 @@ def run_streaming_path(ctx: StreamingContext) -> MesonTestResult:
                     test_file_filter=ctx.test_file_filter,
                     build_timer=ctx.build_timer,
                 )
+
+    # FAIL-SAFE: a stale PCH makes clang re-parse a #pragma once header on top
+    # of the PCH copy ("redefinition of ..."). The staleness checks in
+    # ci/compile_pch.py should prevent that; if one is ever missed, drop the
+    # PCHs (only them, not the whole build) and retry once instead of making
+    # the developer run --clean.
+    if not sr.success and is_pch_redefinition_error(sr.compile_output, ctx.build_dir):
+        removed = purge_pch_artifacts(ctx.build_dir)
+        _ts_print("=" * 80, file=sys.stderr)
+        _ts_print(
+            "[MESON] ⚠️  STALE PCH DETECTED: redefinition errors in a header that "
+            f"is in a precompiled header. Purged {removed} PCH file(s) and "
+            "retrying once. This is a bug in the PCH staleness checks "
+            "(ci/compile_pch.py) -- please report it.",
+            file=sys.stderr,
+        )
+        _ts_print("=" * 80, file=sys.stderr)
+        remaining = compile_timeout - (time.monotonic() - compile_started)
+        if remaining > 0:
+            sr = stream_compile_and_run_tests(
+                build_dir=ctx.build_dir,
+                test_callback=test_callback,
+                target=compile_target,
+                verbose=ctx.verbose,
+                compile_timeout=max(1, math.ceil(remaining)),
+                build_optimizer=ctx.build_optimizer,
+                test_file_filter=ctx.test_file_filter,
+                build_timer=ctx.build_timer,
+            )
 
     if sr.success and ctx.build_optimizer is not None:
         ctx.build_optimizer.save_fingerprints(ctx.build_dir)
