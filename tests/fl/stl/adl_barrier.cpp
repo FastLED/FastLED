@@ -232,6 +232,9 @@ FL_TEST_CASE("using namespace fl keeps libc calls unambiguous") {
 // unqualified in an unevaluated context, both with fl-typed (CRGB*) arguments
 // and no using-directive (the ADL path) and under `using namespace fl`. A
 // mirror that ties with libc makes one of these lines ambiguous.
+// The LibcBackstopChecker lint pass (FastLED#4838) fails if a wrapper under src/
+// is missing from `libc_every_using_fl`, if a wrapper with a void* parameter is
+// missing from `libc_every_adl`, or if either block calls a removed wrapper.
 namespace libc_every_adl {
 FL_TEST_CASE("every pointer-taking libc wrapper is unambiguous on CRGB*") {
     CRGB* p = nullptr;

@@ -32,4 +32,13 @@ grouped by related policy area:
 - `libc_mirror.rs`: any function in `namespace fl` (or a sub-namespace) with a
   libc name must be a `template <typename FlLibcTag = void>` +
   `FASTLED_FORCE_INLINE` wrapper, so unqualified libc calls on fl types stay
-  unambiguous (FastLED#4834).
+  unambiguous (FastLED#4834). Hidden friends count; arithmetic-only libc
+  names (`abs`, `div`, ...) only need to be templates; variables, types and
+  unscoped enumerators directly in `fl` may not use a libc name; only
+  `fl::libc_impl` is exempt and it may not define types (FastLED#4838). The
+  name tables live in `lint_core/libc_reserved_names.rs`.
+- `libc_backstop.rs`: structural pass. Every `FlLibcTag` wrapper under `src/`
+  must be called unqualified in `tests/fl/stl/adl_barrier.cpp`'s
+  `libc_every_using_fl` block, and every wrapper with a `void*` parameter also
+  in `libc_every_adl`; calls to names that are no longer wrappers fail
+  (FastLED#4838).

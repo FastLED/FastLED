@@ -16,37 +16,12 @@
 // clones of the forwarders (+98 B on ESP32-S3, #4833).
 //
 // The implementations live in `fl::libc_impl`, which is exempt. Class members
-// are not checked (ADL never finds them). The name list is the full C11
+// are not checked (ADL never finds them). The name list
+// (`LIBC_RESERVED_NAMES`, lint_core/libc_reserved_names.rs) is the full C11
 // <string.h>/<stdlib.h> plus <strings.h> and the POSIX / newlib / glibc
 // extensions, not the names fl happens to mirror today, so a new mirror is
 // caught the day it is added.
 
-/// libc functions that take a pointer argument (or none), so an fl-typed
-/// argument can drag `fl` into ADL. Purely arithmetic functions (`abs`, `labs`,
-/// `llabs`, `div`, `ldiv`, `lldiv`, `ffs`) are left out on purpose: ADL never
-/// reaches `fl` for them, and `fl::abs` is a generic math overload set.
-const LIBC_RESERVED_NAMES: &[&str] = &[
-    // C11 <string.h>
-    "memchr", "memcmp", "memcpy", "memmove", "memset", "strcat", "strchr",
-    "strcmp", "strcoll", "strcpy", "strcspn", "strerror", "strlen", "strncat",
-    "strncmp", "strncpy", "strpbrk", "strrchr", "strspn", "strstr", "strtok",
-    "strxfrm",
-    // C11 <stdlib.h>
-    "atof", "atoi", "atol", "atoll", "strtod", "strtof", "strtold", "strtol",
-    "strtoll", "strtoul", "strtoull", "rand", "srand", "aligned_alloc",
-    "calloc", "free", "malloc", "realloc", "abort", "atexit", "at_quick_exit",
-    "exit", "_Exit", "quick_exit", "getenv", "system", "bsearch", "qsort",
-    "mblen", "mbtowc", "wctomb", "mbstowcs", "wcstombs",
-    // <strings.h>
-    "bcmp", "bcopy", "bzero", "index", "rindex", "strcasecmp", "strncasecmp",
-    // POSIX / newlib / glibc / BSD extensions
-    "strdup", "strndup", "strnlen", "memccpy", "mempcpy", "memmem", "memrchr",
-    "strlcpy", "strlcat", "strtok_r", "strerror_r", "strsep", "stpcpy",
-    "stpncpy", "strsignal", "strcasestr", "strchrnul", "posix_memalign",
-    "memalign", "valloc", "pvalloc", "reallocarray", "setenv", "unsetenv",
-    "putenv", "random", "srandom", "rand_r", "mkstemp", "mkdtemp", "realpath",
-    "qsort_r", "explicit_bzero",
-];
 
 const LIBC_MIRROR_TEMPLATE_HEAD: &str = "template < typename FlLibcTag = void >";
 
@@ -82,7 +57,12 @@ enum LibcScope {
     Namespace(Vec<String>),
     /// `extern "C" { ... }`: still namespace scope.
     Transparent,
-    /// Class, enum, function body, initializer, ...
+    /// Class / struct / union body: only `friend` functions are checked
+    /// (hidden friends are found by ADL).
+    Class,
+    /// Unscoped `enum` body: its enumerators land in the enclosing namespace.
+    UnscopedEnum,
+    /// Function body, initializer, scoped enum, ...
     Other,
 }
 
@@ -259,25 +239,105 @@ fn libc_mirror_after_templates(stmt: &[&LibcTok]) -> usize {
     i
 }
 
+fn libc_mirror_message(name: &str, problem: &str) -> String {
+    format!(
+        "fl::{name} has the libc name `{name}` but {problem}. An unqualified `{name}(...)` on an fl \
+         type (ADL) or under `using namespace fl;` then becomes ambiguous with ::{name}. Declare it as \
+         `template <typename FlLibcTag = void> FASTLED_FORCE_INLINE` forwarding to \
+         fl::libc_impl::{name}, or rename it (FastLED #4834)."
+    )
+}
+
+/// True while `stmt` is still inside an unclosed `template <...>` parameter list.
+fn libc_mirror_in_template_head(stmt: &[&LibcTok]) -> bool {
+    let mut depth = 0i32;
+    let mut in_head = false;
+    for (k, t) in stmt.iter().enumerate() {
+        match t.text.as_str() {
+            "<" if k > 0 && stmt[k - 1].text == "template" => {
+                in_head = true;
+                depth += 1;
+            }
+            "<" if in_head => depth += 1,
+            ">" if in_head => {
+                depth -= 1;
+                if depth == 0 {
+                    in_head = false;
+                }
+            }
+            _ => {}
+        }
+    }
+    in_head
+}
+
+/// Scope facts that only change when the scope stack changes.
+struct LibcScopeFacts {
+    ns_level: bool,
+    member_level: bool,
+    in_fl: bool,
+    in_impl: bool,
+    /// Names here are exposed by `using namespace fl;` (anonymous and inline
+    /// namespaces included). Non-functions only matter here, because ADL never
+    /// finds variables or types.
+    directly_in_fl: bool,
+    /// The innermost scope is an unscoped enum whose enclosing scopes are all
+    /// namespaces, so its enumerators are namespace members.
+    enum_at_ns_level: bool,
+}
+
+fn libc_scope_facts(scopes: &[LibcScope]) -> LibcScopeFacts {
+    let is_ns = |s: &LibcScope| matches!(s, LibcScope::Namespace(_) | LibcScope::Transparent);
+    let namespaces: Vec<&str> = scopes
+        .iter()
+        .filter_map(|s| match s {
+            LibcScope::Namespace(names) => Some(names.iter().map(String::as_str)),
+            _ => None,
+        })
+        .flatten()
+        .collect();
+    let in_fl = namespaces.first() == Some(&"fl");
+    let enum_at_ns_level = matches!(scopes.last(), Some(LibcScope::UnscopedEnum))
+        && scopes[..scopes.len() - 1].iter().all(is_ns);
+    LibcScopeFacts {
+        ns_level: scopes.iter().all(is_ns),
+        member_level: matches!(scopes.last(), Some(LibcScope::Class)),
+        in_fl,
+        // Only the implementation namespace itself, `fl::libc_impl`, is exempt.
+        in_impl: in_fl && namespaces.get(1) == Some(&"libc_impl"),
+        directly_in_fl: in_fl && namespaces[1..].iter().all(|n| n.is_empty()),
+        enum_at_ns_level,
+    }
+}
+
 fn libc_mirror_violations(src: &str) -> Vec<(usize, String)> {
     let masked = libc_mirror_mask(src);
     let toks = libc_mirror_tokens(&masked);
     let mut violations = Vec::new();
     let mut scopes: Vec<LibcScope> = Vec::new();
+    let mut facts = libc_scope_facts(&scopes);
     let mut stmt: Vec<&LibcTok> = Vec::new();
     let mut paren_depth = 0usize;
+    let is_libc_name = |t: &str| LIBC_RESERVED_NAMES.contains(&t) || LIBC_ARITHMETIC_NAMES.contains(&t);
     let mut i = 0;
     while i < toks.len() {
         let tok = &toks[i];
-        let at_namespace_scope = scopes.iter().all(|s| !matches!(s, LibcScope::Other));
+        let prev = if i > 0 { toks[i - 1].text.as_str() } else { "" };
+        let next = toks.get(i + 1).map_or("", |t| t.text.as_str());
         match tok.text.as_str() {
-            "namespace" if at_namespace_scope => {
-                // namespace a::b {   |   namespace {   |   namespace x = y;
+            "namespace" if facts.ns_level => {
+                // namespace a::b {  |  namespace {  |  inline namespace v1 {  |  namespace x = y;
+                // Inline and anonymous namespaces are recorded as "": their
+                // members are members of the enclosing namespace.
                 let mut names = Vec::new();
+                let mut inline_next = prev == "inline";
                 let mut j = i + 1;
                 while j < toks.len() && (toks[j].kind == LibcTokKind::Ident || toks[j].text == "::") {
-                    if toks[j].kind == LibcTokKind::Ident && toks[j].text != "inline" {
-                        names.push(toks[j].text.clone());
+                    if toks[j].text == "inline" {
+                        inline_next = true;
+                    } else if toks[j].kind == LibcTokKind::Ident {
+                        names.push(if inline_next { String::new() } else { toks[j].text.clone() });
+                        inline_next = false;
                     }
                     j += 1;
                 }
@@ -286,22 +346,47 @@ fn libc_mirror_violations(src: &str) -> Vec<(usize, String)> {
                         names.push(String::new());
                     }
                     scopes.push(LibcScope::Namespace(names));
+                    facts = libc_scope_facts(&scopes);
                     stmt.clear();
                     i = j + 1;
                     continue;
                 }
             }
             "{" => {
-                let transparent = at_namespace_scope
-                    && paren_depth == 0
-                    && stmt.last().is_some_and(|t| t.text == "extern");
-                scopes.push(if transparent { LibcScope::Transparent } else { LibcScope::Other });
+                let decl_level = (facts.ns_level || facts.member_level) && paren_depth == 0;
+                let body = &stmt[libc_mirror_after_templates(&stmt)..];
+                let has = |kw: &str| body.iter().any(|t| t.text == kw);
+                let no_call = !has("(") && !has("=");
+                let scope = if facts.ns_level && paren_depth == 0 && stmt.last().is_some_and(|t| t.text == "extern") {
+                    LibcScope::Transparent
+                } else if decl_level && no_call && has("enum") {
+                    if has("class") || has("struct") {
+                        LibcScope::Other
+                    } else {
+                        LibcScope::UnscopedEnum
+                    }
+                } else if decl_level && no_call && (has("class") || has("struct") || has("union")) {
+                    LibcScope::Class
+                } else {
+                    LibcScope::Other
+                };
+                if facts.in_impl && facts.ns_level && matches!(scope, LibcScope::Class | LibcScope::UnscopedEnum) {
+                    violations.push((
+                        tok.line,
+                        "fl::libc_impl must not define types: a type there makes ADL reach the \
+                         exempt plain libc_impl functions (FastLED #4838)."
+                            .to_string(),
+                    ));
+                }
+                scopes.push(scope);
+                facts = libc_scope_facts(&scopes);
                 stmt.clear();
                 i += 1;
                 continue;
             }
             "}" => {
                 scopes.pop();
+                facts = libc_scope_facts(&scopes);
                 stmt.clear();
                 paren_depth = 0;
                 i += 1;
@@ -309,7 +394,11 @@ fn libc_mirror_violations(src: &str) -> Vec<(usize, String)> {
             }
             _ => {}
         }
-        if !at_namespace_scope {
+        // Enumerators of an unscoped enum at namespace scope are namespace members.
+        if facts.enum_at_ns_level && facts.directly_in_fl && matches!(prev, "{" | ",") && is_libc_name(&tok.text) {
+            violations.push((tok.line, libc_mirror_message(&tok.text, "is an enumerator, not a function")));
+        }
+        if !(facts.ns_level || facts.member_level) {
             i += 1;
             continue;
         }
@@ -319,49 +408,65 @@ fn libc_mirror_violations(src: &str) -> Vec<(usize, String)> {
                 i += 1;
                 continue;
             }
+            ":" if facts.member_level
+                && stmt.len() == 1
+                && matches!(stmt[0].text.as_str(), "public" | "private" | "protected") =>
+            {
+                stmt.clear();
+                i += 1;
+                continue;
+            }
             "(" => paren_depth += 1,
             ")" => paren_depth = paren_depth.saturating_sub(1),
             _ => {}
         }
-        let namespaces: Vec<&str> = scopes
-            .iter()
-            .filter_map(|s| match s {
-                LibcScope::Namespace(names) => Some(names.iter().map(String::as_str)),
-                _ => None,
-            })
-            .flatten()
-            .collect();
-        let in_fl = namespaces.first() == Some(&"fl");
-        let in_impl = namespaces.contains(&"libc_impl");
-        let is_candidate = in_fl
-            && !in_impl
+        // Cheap token test first; the statement scans below run only for libc names.
+        let named = tok.kind == LibcTokKind::Ident
             && paren_depth == 0
-            && tok.kind == LibcTokKind::Ident
-            && LIBC_RESERVED_NAMES.contains(&tok.text.as_str())
-            && toks.get(i + 1).is_some_and(|t| t.text == "(")
-            && !stmt.last().is_some_and(|t| matches!(t.text.as_str(), "::" | "." | "->"));
-        if is_candidate {
+            && is_libc_name(&tok.text)
+            && facts.in_fl
+            && !facts.in_impl
+            && !matches!(prev, "::" | "." | "->" | "~" | "operator")
+            // `using ::strlen;` re-declares libc's own function; `using strdup = T;` is an alias.
+            && !(prev == "using" && next != "=");
+        if named && !libc_mirror_in_template_head(&stmt) {
+            let name = tok.text.as_str();
             let body_start = libc_mirror_after_templates(&stmt);
             let is_initializer = stmt[body_start..].iter().any(|t| t.text == "=");
-            if !is_initializer {
-                let head: Vec<&str> = stmt[..body_start].iter().map(|t| t.text.as_str()).collect();
-                let has_template = head.join(" ").contains(LIBC_MIRROR_TEMPLATE_HEAD);
-                let has_force_inline = stmt.iter().any(|t| t.text == "FASTLED_FORCE_INLINE");
-                if !(has_template && has_force_inline) {
-                    let missing = match (has_template, has_force_inline) {
-                        (false, false) => "`template <typename FlLibcTag = void>` and `FASTLED_FORCE_INLINE`",
-                        (false, true) => "`template <typename FlLibcTag = void>`",
-                        _ => "`FASTLED_FORCE_INLINE`",
+            let is_friend = stmt.iter().any(|t| t.text == "friend");
+            if !is_initializer && (facts.ns_level || is_friend) {
+                if next == "(" {
+                    let has_template = stmt[..body_start]
+                        .iter()
+                        .map(|t| t.text.as_str())
+                        .collect::<Vec<_>>()
+                        .join(" ")
+                        .contains(LIBC_MIRROR_TEMPLATE_HEAD);
+                    let has_force_inline = stmt.iter().any(|t| t.text == "FASTLED_FORCE_INLINE");
+                    let missing = if LIBC_ARITHMETIC_NAMES.contains(&name) {
+                        // Arithmetic-only names: any template loses the tie with libc.
+                        (body_start == 0).then_some("is not a template")
+                    } else {
+                        match (has_template, has_force_inline) {
+                            (true, true) => None,
+                            (false, false) => Some(
+                                "is missing `template <typename FlLibcTag = void>` and `FASTLED_FORCE_INLINE`",
+                            ),
+                            (false, true) => Some("is missing `template <typename FlLibcTag = void>`"),
+                            (true, false) => Some("is missing `FASTLED_FORCE_INLINE`"),
+                        }
                     };
+                    if let Some(problem) = missing {
+                        violations.push((tok.line, libc_mirror_message(name, problem)));
+                    }
+                } else if facts.ns_level
+                    && facts.directly_in_fl
+                    && (matches!(next, ";" | "=" | "{" | "[" | ",")
+                        || matches!(prev, "struct" | "class" | "union" | "enum" | "using"))
+                {
                     violations.push((
                         tok.line,
-                        format!(
-                            "fl::{name} has the libc name `{name}` but is missing {missing}. An unqualified \
-                             `{name}(...)` on an fl type finds it through ADL and becomes ambiguous with \
-                             ::{name}. Declare it as `template <typename FlLibcTag = void> FASTLED_FORCE_INLINE` \
-                             forwarding to fl::libc_impl::{name}, or rename it (FastLED #4834).",
-                            name = tok.text
-                        ),
+                        libc_mirror_message(name, "is a variable or type, not a template function"),
                     ));
                 }
             }
@@ -470,7 +575,76 @@ mod libc_mirror_tests {
     #[test]
     fn non_reserved_names_are_ignored() {
         let src = "namespace fl {\ninline void* memcopy(void* d, const void* s, size_t n) { return d; }\n\
-                   inline int abs(int v) { return v; }\nvoid aligned_free(void* p);\n}\n";
+                   void aligned_free(void* p);\n}\n";
         assert!(lines(src).is_empty());
+    }
+
+    #[test]
+    fn hidden_friend_mirror_fails_and_template_friend_passes() {
+        let src = "namespace fl {\nstruct Buf {\npublic:\n    friend void* memcpy(Buf* d, const Buf* s, size_t n) { return d; }\n\
+                   template <typename FlLibcTag = void>\n    friend FASTLED_FORCE_INLINE void free(Buf* p) {}\n\
+                   void* malloc(size_t n);\n};\n}\n";
+        assert_eq!(lines(src), vec![4]);
+    }
+
+    #[test]
+    fn arithmetic_names_must_be_templates() {
+        let src = "namespace fl {\nint abs(int x) { return x; }\ntemplate <typename T> constexpr inline T abs(T v) { return v; }\n\
+                   div_t div(int a, int b);\n}\n";
+        assert_eq!(lines(src), vec![2, 4]);
+    }
+
+    #[test]
+    fn variables_types_and_enumerators_with_libc_names_fail() {
+        let src = "namespace fl {\nextern int rand;\nstruct strdup { int x; };\nenum Mode { free, keep = 2, malloc };\n\
+                   enum class Scoped { memcpy };\nusing ::strlen;\nint (*memset_fn)(void*) = nullptr;\n\
+                   namespace math { class random { random(); }; }\n}\n";
+        assert_eq!(lines(src), vec![2, 3, 4, 4]);
+    }
+
+    #[test]
+    fn only_fl_libc_impl_is_exempt_and_it_defines_no_types() {
+        let src = "namespace fl {\nnamespace detail { namespace libc_impl { void* memcpy(void* d, const void* s, size_t n); } }\n\
+                   namespace libc_impl {\nstruct Arena { int x; };\nvoid free(void* p);\n}\n}\n";
+        assert_eq!(lines(src), vec![2, 4]);
+    }
+
+    /// The real tree passes, and is not vacuously passing: breaking one real
+    /// wrapper in cstring.h is caught.
+    #[test]
+    fn real_tree_passes_and_mutation_is_caught() {
+        let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../src");
+        let mut checked = 0;
+        for entry in WalkDir::new(&root).into_iter().filter_map(Result::ok) {
+            let path = path_to_string(entry.path());
+            if entry.file_type().is_file() && ends_with_any(&path, &[".cpp", ".h", ".hpp"]) {
+                let content = std::fs::read_to_string(entry.path()).unwrap_or_default();
+                let v = libc_mirror_violations(&content);
+                assert!(v.is_empty(), "{path}: {v:?}");
+                checked += 1;
+            }
+        }
+        assert!(checked > 1000, "only {checked} files checked");
+        let cstring = std::fs::read_to_string(root.join("fl/stl/cstring.h")).unwrap();
+        assert!(libc_mirror_violations(&cstring).is_empty());
+        let mutated = cstring.replacen("FASTLED_FORCE_INLINE", "inline", 1);
+        assert_eq!(libc_mirror_violations(&mutated).len(), 1);
+        let malloc_impl = std::fs::read_to_string(root.join("fl/stl/malloc.cpp.hpp")).unwrap();
+        let mutated = malloc_impl.replacen("libc_impl::realloc(", "realloc(", 1);
+        assert_eq!(libc_mirror_violations(&mutated).len(), 1);
+    }
+
+    #[test]
+    fn class_nested_enum_and_template_parameters_are_not_namespace_names() {
+        let src = "namespace fl {\nstruct Pool { enum Mode { free, keep }; };\n\
+                   template <int index, typename T> struct Get;\ntemplate <size_t random = 0> void f();\n}\n";
+        assert!(lines(src).is_empty(), "{:?}", libc_mirror_violations(src));
+    }
+
+    #[test]
+    fn using_alias_and_inline_namespace_members_fail() {
+        let src = "namespace fl {\nusing strdup = int;\ninline namespace v1 {\nextern int rand;\n}\n}\n\
+                   namespace fl::inline v2 {\nenum E { free };\n}\n";
+        assert_eq!(lines(src), vec![2, 4, 8]);
     }
 }

@@ -1399,6 +1399,13 @@ UNO = Board(
     framework="arduino",
 )
 
+ATMEGA2560_MEGA = Board(
+    board_name="mega",
+    real_board_name="megaatmega2560",
+    platform="atmelavr",
+    framework="arduino",
+)
+
 ATMEGA32U4_LEONARDO = Board(
     board_name="leonardo",
     real_board_name="leonardo",

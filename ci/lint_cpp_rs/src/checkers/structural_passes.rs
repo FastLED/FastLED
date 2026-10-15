@@ -14,6 +14,7 @@ pub(crate) fn run_structural_passes(project_root: &Path) -> Vec<LintViolation> {
     pch_file_pass(project_root, &mut violations);
     test_aggregation_pass(project_root, &mut violations);
     unity_build_pass(project_root, &mut violations);
+    libc_backstop_pass(project_root, &mut violations);
     violations
 }
 
