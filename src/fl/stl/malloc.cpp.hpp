@@ -27,13 +27,4 @@ namespace fl {
     void* libc_impl::realloc(void* ptr, size_t new_size) FL_NO_EXCEPT {
         return ::realloc(ptr, new_size);
     }
-
-    // Provide abs function
-    // Arduino.h defines abs as a macro, so we need to temporarily hide it
-    #pragma push_macro("abs")
-    #undef abs
-    int abs(int x) FL_NO_EXCEPT {
-        return ::abs(x);
-    }
-    #pragma pop_macro("abs")
 } // namespace fl
