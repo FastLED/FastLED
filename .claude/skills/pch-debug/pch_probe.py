@@ -182,14 +182,20 @@ def cmd_inputs(a: argparse.Namespace) -> int:
     print(f"same file recorded under two spellings: {len(dups)}")
     for x, y in dups[: a.limit]:
         print(f"  {x}\n    == {y}")
-    missing = [i for i in inputs if not Path(i).exists()]
+
+    # A recorded path is relative to the PCH build's working directory (the
+    # build dir), never to wherever this script runs.
+    def on_disk(i: str) -> Path:
+        return Path(i) if Path(i).is_absolute() else build_dir / i
+
+    missing = [i for i in inputs if not on_disk(i).exists()]
     recorded = bcanalyzer_inputs(pch)
     if recorded:
         # clang's own check: current size/mtime against what the PCH recorded.
         newer = []
         for i, (size, mtime) in recorded.items():
-            if Path(i).exists():
-                st = Path(i).stat()
+            if on_disk(i).exists():
+                st = on_disk(i).stat()
                 if st.st_size != size or int(st.st_mtime) != mtime:
                     newer.append(i)
                     print(
@@ -206,7 +212,7 @@ def cmd_inputs(a: argparse.Namespace) -> int:
         newer = [
             i
             for i in inputs
-            if Path(i).exists() and Path(i).stat().st_mtime_ns > pch_mtime
+            if on_disk(i).exists() and on_disk(i).stat().st_mtime_ns > pch_mtime
         ]
         print(f"inputs newer than the PCH (stale): {len(newer)}")
         for i in newer[: a.limit]:
