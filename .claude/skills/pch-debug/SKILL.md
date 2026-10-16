@@ -55,10 +55,23 @@ Run from the repo root, against the build dir that failed (`--build-dir
    uv run python .claude/skills/pch-debug/pch_probe.py inputs
    ```
    This reports odd spellings in `src/` or `tests/`, files recorded under two
-   spellings, inputs newer than the PCH, and missing inputs. If clang refuses
-   to load the PCH, the probe prints the refusal. That line names the stale
-   input and both mtimes (`mtime changed (was A, now B)`), which is often the
-   whole answer. The paths are then recovered from the PCH bytes.
+   spellings, stale inputs and missing inputs. It reads the PCH with
+   `llvm-bcanalyzer -dump` when available (on PATH, or `LLVM_BCANALYZER=`;
+   on NixOS it comes with `llvmPackages.llvm`). That gives every input's
+   recorded spelling, **size and mtime**, the exact values clang validates
+   against, without clang's validation, which refuses the very PCH you are
+   debugging. Same size with a different mtime is the "touched, content
+   identical" signature.
+
+   Without the tool it falls back to `clang -module-file-info`, which fails on
+   a stale PCH. The probe then prints clang's refusal (it names the stale
+   input and `mtime changed (was A, now B)`) and recovers the paths from the
+   PCH bytes.
+
+   To read the records by hand:
+   `llvm-bcanalyzer -dump <pch> | grep -A1 'INPUT_FILE '`. In each
+   `<INPUT_FILE ... op1=SIZE op2=MTIME .../> blob data = 'PATH'`, the blob is
+   the spelling the PCH recorded.
 
 2. **Probe the failing TU exactly as the build compiles it:**
    ```bash

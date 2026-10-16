@@ -21,6 +21,7 @@ import json
 import os
 import re
 import shlex
+import shutil
 import sys
 from pathlib import Path
 
@@ -37,6 +38,17 @@ def canon(path: str, cwd: Path) -> str:
     if not p.is_absolute():
         p = cwd / p
     return os.path.normcase(os.path.realpath(p)).replace("\\", "/")
+
+
+# The repo root, from this script's location (.claude/skills/pch-debug/), so it
+# does not depend on where --build-dir points.
+REPO_ROOT = Path(__file__).resolve().parents[3]
+
+
+def is_project_header(path: str, cwd: Path) -> bool:
+    """True for a file under the repo's src/ or tests/, however it is spelled."""
+    root = canon(str(REPO_ROOT), cwd)
+    return canon(path, cwd).startswith((root + "/src/", root + "/tests/"))
 
 
 def odd_spelling(path: str) -> str | None:
@@ -81,7 +93,31 @@ def run(args: list[str], cwd: Path) -> tuple[int, str]:
     return proc.returncode, (proc.stdout or "") + (proc.stderr or "")
 
 
+def bcanalyzer_inputs(pch: Path) -> dict[str, tuple[int, int]] | None:
+    """Recorded inputs as {path: (size, mtime_seconds)}, read with llvm-bcanalyzer.
+
+    These are the exact values clang compares against when it validates the
+    PCH, and llvm-bcanalyzer reads them without validating, so it also works
+    on the stale PCH clang refuses to load. None if the tool is not installed.
+    """
+    tool = os.environ.get("LLVM_BCANALYZER") or shutil.which("llvm-bcanalyzer")
+    if not tool:
+        return None
+    rc, out = run([tool, "-dump", str(pch)], pch.parent)
+    if rc != 0:
+        return None
+    recorded: dict[str, tuple[int, int]] = {}
+    for m in re.finditer(
+        r"<INPUT_FILE [^>]*op1=(\d+) op2=(\d+)[^>]*/> blob data = '([^']*)'", out
+    ):
+        recorded.setdefault(m.group(3), (int(m.group(1)), int(m.group(2))))
+    return recorded or None
+
+
 def pch_inputs(build_dir: Path, pch: Path) -> list[str]:
+    recorded = bcanalyzer_inputs(pch)
+    if recorded:
+        return list(recorded)
     rc, out = run(
         native_cpp(build_dir)
         + [
@@ -131,11 +167,8 @@ def cmd_inputs(a: argparse.Namespace) -> int:
     pch_mtime = pch.stat().st_mtime_ns
     print(f"PCH: {pch}\nrecorded inputs: {len(inputs)}")
     odd = [(i, odd_spelling(i)) for i in inputs if odd_spelling(i)]
-    project_odd = [
-        (i, w)
-        for i, w in odd
-        if "/src/" in i.replace("\\", "/") or "/tests/" in i.replace("\\", "/")
-    ]
+    # Relative entries resolve against the build dir, where the PCH was built.
+    project_odd = [(i, w) for i, w in odd if is_project_header(i, build_dir)]
     print(f"odd spellings: {len(odd)} total, {len(project_odd)} in src/ or tests/")
     for i, why in project_odd[: a.limit]:
         print(f"  [{why}] {i}")
@@ -149,13 +182,35 @@ def cmd_inputs(a: argparse.Namespace) -> int:
     print(f"same file recorded under two spellings: {len(dups)}")
     for x, y in dups[: a.limit]:
         print(f"  {x}\n    == {y}")
-    newer = [
-        i for i in inputs if Path(i).exists() and Path(i).stat().st_mtime_ns > pch_mtime
-    ]
     missing = [i for i in inputs if not Path(i).exists()]
-    print(f"inputs newer than the PCH (stale): {len(newer)}")
-    for i in newer[: a.limit]:
-        print(f"  {i}")
+    recorded = bcanalyzer_inputs(pch)
+    if recorded:
+        # clang's own check: current size/mtime against what the PCH recorded.
+        newer = []
+        for i, (size, mtime) in recorded.items():
+            if Path(i).exists():
+                st = Path(i).stat()
+                if st.st_size != size or int(st.st_mtime) != mtime:
+                    newer.append(i)
+                    print(
+                        f"  changed since PCH: {i}\n"
+                        f"    recorded size={size} mtime={mtime}, now size={st.st_size} mtime={int(st.st_mtime)}"
+                    )
+        print(
+            f"inputs whose size/mtime differ from the PCH record (stale): {len(newer)}"
+        )
+    else:
+        print(
+            "(llvm-bcanalyzer not on PATH: falling back to 'newer than the PCH file')"
+        )
+        newer = [
+            i
+            for i in inputs
+            if Path(i).exists() and Path(i).stat().st_mtime_ns > pch_mtime
+        ]
+        print(f"inputs newer than the PCH (stale): {len(newer)}")
+        for i in newer[: a.limit]:
+            print(f"  {i}")
     print(f"inputs that no longer exist: {len(missing)}")
     for i in missing[: a.limit]:
         print(f"  {i}")
@@ -203,7 +258,6 @@ def cmd_tu(a: argparse.Namespace) -> int:
     # disk means clang did not match it to the PCH copy. System headers such
     # as <stddef.h> and bits/version.h are built to be entered repeatedly, so
     # they are only counted.
-    project_root = canon(str(build_dir.parent.parent), cwd)
     reopened: dict[str, tuple[str, str]] = {}
     system_reopens = 0
     for line in out.splitlines():
@@ -213,8 +267,7 @@ def cmd_tu(a: argparse.Namespace) -> int:
         c = canon(m.group(1), cwd)
         if c not in in_pch:
             continue
-        rel = c[len(project_root) :] if c.startswith(project_root + "/") else ""
-        if rel.startswith(("/src/", "/tests/")):
+        if is_project_header(m.group(1), cwd):
             reopened.setdefault(c, (m.group(1), in_pch[c]))
         else:
             system_reopens += 1
