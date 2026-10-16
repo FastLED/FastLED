@@ -4,7 +4,13 @@ A tier entry with no Board definition is silently dead: `bash compile <name>`
 fails with "unsupported platform" and the tier never applies.
 """
 
-from ci.boards import ALL, HUGE_MEMORY_BOARDS, LOW_MEMORY_BOARDS, TINY_MEMORY_BOARDS
+from ci.boards import (
+    ALL,
+    HUGE_MEMORY_BOARDS,
+    LOW_MEMORY_BOARDS,
+    TINY_MEMORY_BOARDS,
+    Board,
+)
 
 
 # Host pseudo-boards that are classified by name but are not fbuild targets.
@@ -24,3 +30,13 @@ def test_new_avr_and_renesas_boards_are_low_memory() -> None:
     by_name = {board.board_name: board for board in ALL}
     for name in ("nano", "uno", "mega"):
         assert by_name[name].memory_class == "low", name
+
+
+def test_renesas_platform_fallback_is_low_memory() -> None:
+    # uno_r4_minima is deliberately not in LOW_MEMORY_BOARDS: the renesas-ra
+    # platform fallback is what classifies it.
+    assert "uno_r4_minima" not in LOW_MEMORY_BOARDS
+    board = Board(
+        board_name="uno_r4_minima", platform="renesas-ra", add_board_to_all=False
+    )
+    assert board.memory_class == "low"
