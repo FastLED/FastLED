@@ -30,9 +30,16 @@ void setup() {
 
     FastLED.addLeds<WS2812, PIN_DATA, GRB>(leds, NUM_LEDS);
     leds[0] = CRGB::Red;
-    FastLED.show();
 
+    // Print the marker before show(). Espressif QEMU does not model the LED
+    // peripherals' transmit-done interrupts, so show() never returns there
+    // (FastLED#4840; same reason qemu_template.yml's legs assert registration,
+    // not a completed frame). Reaching this line proves the build boots and the
+    // controller registers, which is what this smoke test is for.
     Serial.println("FBUILD-QEMU-TEST-OK");
+    Serial.flush();
+
+    FastLED.show();
 }
 
 void loop() {

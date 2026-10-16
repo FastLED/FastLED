@@ -59,6 +59,9 @@ ERROR_PATTERN = (
 )
 # fbuild 2.5.18 caps daemon-side long operations at 30 minutes. Keep the
 # process wrapper slightly longer so fbuild can return its structured result.
+# Emulated run time after boot. Matches qemu_template.yml's --timeout: 10 s only
+# reached the second-stage bootloader on a loaded host (FastLED#4840).
+QEMU_RUN_TIMEOUT_SECONDS = 120
 FBUILD_DAEMON_LONG_OPERATION_TIMEOUT_SECONDS = 30 * 60
 FBUILD_TEST_EMU_PROCESS_TIMEOUT_SECONDS = (
     FBUILD_DAEMON_LONG_OPERATION_TIMEOUT_SECONDS + 60
@@ -164,7 +167,7 @@ def test_fbuild_test_emu_esp32dev() -> None:
         "--emulator",
         "qemu",
         "--timeout",
-        "10",
+        str(QEMU_RUN_TIMEOUT_SECONDS),
         "--halt-on-success",
         SUCCESS_MARKER,
         "--halt-on-error",
