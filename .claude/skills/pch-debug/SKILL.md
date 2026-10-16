@@ -35,33 +35,82 @@ an exemption to make a PCH error or a lint failure go away.
 
 The test PCH (`.build/meson-<mode>/tests/test_pch.h.pch`) already contains
 FastLED.h and everything it includes. A consumer TU fails with
-`redefinition of 'X'` / `redefines default argument` **only if clang opened a
-header from disk although the PCH already holds it**: clang failed to match the
-on-disk file to the PCH copy, so the header was ingested twice.
+`redefinition of 'X'` / `redefines default argument` **only if clang included
+a header from disk although the PCH already holds it**.
 
-- `#pragma once` dedupes by **file identity**. If identity matching fails, the
-  second copy is parsed, and the first redefinition stops the build. This is
-  the early warning; it is doing its job.
-- An `#ifndef` include guard dedupes by **macro**. The macro is defined in the
-  PCH, so the second copy is still read from disk but its body is skipped.
-  The build passes, but the identity bug is hidden. **Never "fix" a PCH
-  redefinition by adding include guards** (see #2325, where that masked a
+### How clang decides (clang 21.x, `clang/lib/Serialization/ASTReader.cpp`)
+
+For every input header, the PCH records **spelling, size, mtime** and an
+**xxh3 content hash** (`INPUT_FILE` / `INPUT_FILE_HASH` records; see them with
+`llvm-bcanalyzer`). The mtime that matters is **the header's mtime as recorded
+inside the PCH**, compared with the header's mtime now. The PCH file's own
+mtime plays no part. Clang uses the pair in **two independent places**:
+
+1. **"Is the PCH valid?"** (`ASTReader::getInputFile`). Compare each input's
+   current size and mtime with the record:
+   - size differs: invalid, `has been modified ... size changed`;
+   - mtime differs: invalid, `mtime changed (was A, now B)`. **But with
+     `-fpch-validate-input-files-content`**, clang then hashes the file and
+     compares it with the stored xxh3. If they match, the change is forgiven
+     and the PCH is accepted.
+2. **"Have I already included this header?"** (`HeaderFileInfoTrait`). When
+   the preprocessor reaches `#include "fl/stl/malloc.h"`, it looks up that
+   header's saved state in the PCH (included, `#pragma once`). The lookup key
+   is the file's **current** `(size, mtime)`: `ComputeHash` hashes exactly
+   those two, and `EqualKey` rejects on a size or mtime mismatch. Only then
+   does it compare names: an identical absolute name, or both names
+   resolving to the same file through clang's FileManager.
+
+The content flag relaxes check 1 and **not** check 2. A byte-identical header
+whose mtime no longer equals the recorded one is therefore half-accepted: the
+PCH loads, the lookup misses, clang no longer knows the header is `#pragma
+once` and already included, and it parses it again. Hence the redefinition.
+
+| Case | Check 1 (valid?) | Check 2 (lookup) | Result |
+|---|---|---|---|
+| fresh PCH | pass | hit | OK |
+| header mtime ≠ recorded, content identical, strict flags (no content flag) | fail | (n/a) | clear "mtime changed" error |
+| same, **with** `-fpch-validate-input-files-content` (FastLED today) | pass (hash) | **miss** (mtime) | `redefinition` |
+| same, plus an `#ifndef` guard | pass | miss | "works": the guard macro from the PCH skips the body, so the bug is **hidden** |
+| same, but the **PCH file** touched newer | pass | **miss** | `redefinition`: the PCH's own mtime is in neither check |
+| content edited | fail | (n/a) | clear "content/size changed" error |
+| spelling the consumer cannot resolve to the recorded file | pass | **miss** (names don't resolve to one file) | `redefinition` |
+
+So:
+- `#pragma once` failing is the early warning; it is doing its job. An
+  `#ifndef` include guard dedupes by macro and **hides** the problem. **Never
+  "fix" a PCH redefinition by adding include guards** (as #2325 did, masking a
   Windows spelling problem).
+- **The trigger is always a header whose current `(size, mtime)` or
+  resolvable name differs from what the PCH recorded for it.** Not "newer
+  than the PCH": an mtime moved **backwards** (a restore, `touch -d`, an
+  archive extract) breaks the lookup just the same.
+- **Touching the PCH file fixes nothing** (it is in neither check), and it
+  makes the stale PCH look fresh to the build tool and our guards. Don't.
+- **Valid fixes** make the header match the record again: rebuild the PCH
+  whenever any input's mtime differs from the recorded one, or restore the
+  **header's** mtime to the recorded value after confirming its content hash
+  (zccache's content-verified mtime replay; see zccache#1952). Disabling
+  timestamps would also "work", by skipping check 2's mtime, and is **banned**
+  (see the rules above).
 
-So the question is always: *why did clang fail to match this header to its PCH
-copy?* In FastLED's history there are two answers.
+### Mechanisms in FastLED's history
 
 | Mechanism | How it looks in the probe | Past cases |
 |---|---|---|
-| **Path spelling drift.** The PCH recorded `.../src/fl/x.h`; the TU opened `...\src\fl/x.h`, `src/fl/../fl/x.h`, a different case or a different root. | `tu` shows the header re-opened with **DIFFERENT spelling** | #2685 / zccache#619 (Windows: clang joined an `-I` root and an include with `\`); #3813 (spelling changed but the PCH cache key could not see it) |
-| **Stale PCH accepted.** An input's mtime is newer than the PCH (touch, `git checkout`, formatter, revert-an-edit, cache or snapshot restore). With `-fpch-validate-input-files-content`, clang accepts the PCH because the content matches, but then fails to match the file. | `inputs` lists the header under "newer than the PCH", and `tu` shows it re-opened with the **same spelling** | #4839 / #4843 (touched header); #2995 / zccache#710 (meson snapshot restore resurrected a stale PCH); #4437 (staleness check skipped on header edits) |
+| **Header mtime differs from the record.** Touch, `git checkout`, formatter, edit-and-revert, a cache or snapshot restore. | `inputs` lists it under "size/mtime differ from the PCH record", usually **same size, different mtime**; `tu` shows it re-opened under the **same spelling** | #4839 / #4843 (touched header); #2995 / zccache#710 (snapshot restore); #4437 (staleness check skipped on header edits) |
+| **Path spelling drift.** The PCH recorded one spelling and the consumer's spelling does not resolve to the same file (seen on Windows: `src\fl/stl/cstdio.h`). | `tu` shows the header re-opened with **DIFFERENT spelling** | #2685 / zccache#619; #3813 (the PCH cache key could not see a changed spelling) |
 
-Both mechanisms land in the same place: a staleness guard in `ci/compile_pch.py`
-or the build plumbing that is **blind to one kind of change**. Previous misses
-were content-hash only (#3813, #4839), no compiler flags in the key (#3813),
-checks gated on `build.ninja` mtime (#4437), and snapshot restores (#2995). When
-you find a new case, the fix is almost always "make the guard see this kind of
-change", not "turn validation off".
+Both land in the same place: a staleness guard in `ci/compile_pch.py` or the
+build plumbing that is **blind to one kind of change**. Previous misses were
+content-hash only (#3813, #4839), no compiler flags in the key (#3813), checks
+gated on the build file's mtime (#4437), and snapshot restores (#2995). Known
+remaining gap: `inputs_newer_than()` compares inputs with the PCH file's
+mtime, so it catches *newer* inputs only. An input whose mtime moved
+backwards with identical content is not caught. The exact rule is "any input's
+mtime differs from the PCH's record", which `pch_probe.py inputs` checks. When
+you find a new case, make the guard see that change; never turn validation
+off.
 
 ## Procedure
 
@@ -79,7 +128,8 @@ Run from the repo root, against the build dir that failed (`--build-dir
    recorded spelling, **size and mtime**, the exact values clang validates
    against, without clang's validation, which refuses the very PCH you are
    debugging. Same size with a different mtime is the "touched, content
-   identical" signature.
+   identical" signature, which breaks check 2 above. The probe reports any
+   difference from the record, whether the mtime moved forwards or backwards.
 
    Without the tool it falls back to `clang -module-file-info`, which fails on
    a stale PCH. The probe then prints clang's refusal (it names the stale
@@ -105,10 +155,28 @@ Run from the repo root, against the build dir that failed (`--build-dir
 3. **Classify** using the table above. DIFFERENT spelling means trace where
    that spelling is produced (`-I` flags in `build.ninja` /
    `compile_commands.json`, `ci/meson/path_normalization.py`, meson `/` joins,
-   which emit `\` on Windows, see #2685). Same spelling plus stale means find
-   which guard should have rebuilt the PCH and didn't.
+   which emit `\` on Windows, see #2685). Same spelling with a size/mtime
+   mismatch means find which guard should have rebuilt the PCH and didn't, or
+   what moved the header's mtime (including backwards).
 
-4. **Only now** clean (`bash test --clean`) and confirm the failure is gone.
+4. **Recover without cleaning** when the header's content is unchanged. If
+   `inputs` reports **same size, different mtime**, and the file is
+   byte-identical to what the PCH saw (`git diff --quiet -- <file>` for a
+   tracked file you didn't edit, or an xxh3 match against the PCH's
+   `INPUT_FILE_HASH`), set the header's mtime back to the value the PCH
+   recorded:
+   ```bash
+   llvm-bcanalyzer -dump <pch> | grep "<file>'"   # read op2=<recorded mtime>
+   touch -d @<recorded mtime> <file>
+   ```
+   That satisfies both of clang's checks and the build works again, with no
+   rebuild and no `--clean`. Verified: a touched header gives `redefines default
+   argument`, and after `touch -d @<recorded>` the same compile returns rc=0.
+   **Only when the content is identical.** If the content changed, the PCH
+   must be rebuilt. This sets the *header's* mtime; setting the PCH file's
+   mtime does nothing. Then still find the guard that let the mtime drift.
+
+5. **Only now** clean (`bash test --clean`) and confirm the failure is gone.
    Then reproduce it deliberately (for example `touch` the header and rerun the
    probe) to prove you found the trigger. Restore the mtime afterwards
    (`touch -d "<original stat time>" <file>`).
