@@ -35,7 +35,10 @@ grouped by related policy area:
   unambiguous (FastLED#4834). Hidden friends count; arithmetic-only libc
   names (`abs`, `div`, ...) only need to be templates; variables, types and
   unscoped enumerators directly in `fl` may not use a libc name; only
-  `fl::libc_impl` is exempt and it may not define types (FastLED#4838). The
+  `fl::libc_impl` is exempt and it may not define types (FastLED#4838). A
+  function-like macro that starts a declaration in `fl` may not take a libc
+  name as an argument, since its expansion is invisible to the scan
+  (FastLED#4850). The
   name tables live in `lint_core/libc_reserved_names.rs`.
 - `libc_backstop.rs`: structural pass. Every `FlLibcTag` wrapper under `src/`
   must be called unqualified in `tests/fl/stl/adl_barrier.cpp`'s
