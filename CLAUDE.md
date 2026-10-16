@@ -33,6 +33,7 @@
 | Hardware autoresearch / `bash autoresearch` | `agents/docs/hardware-autoresearch.md` |
 | Hardware driver bring-up evidence or postmortems | `agents/docs/driver-bringup-postmortems.md` |
 | Debugging a C++ crash | `agents/docs/debugging.md` |
+| PCH failures: `redefinition of` / `redefines default argument` in a PCH header, stale `test_pch.h.pch`, tests that only pass after `--clean` | `/pch-debug` skill (probe before cleaning; never add include guards to hide it) |
 | Investigating binary size / flash bloat | `agents/docs/binary-size-analysis.md` |
 | Checking or ingesting colour-profile artifacts | `agents/docs/color-profile-artifacts.md` (freshness findings are **status, not errors** — exempt from the fix-immediately policy; ingest only on explicit maintainer request) |
 | Changing the MP3 decoder, or profiling it | `agents/docs/mp3-decoder-performance.md` (one command measures a change: `bash mp3measure`. Edit `src/third_party/minimp3/minimp3_synth_fixed.h` for the synthesis back-end and `src/third_party/minimp3/minimp3.h` for the IMDCT and the shared arithmetic helpers; profile scalar with `-DMINIMP3_NO_SIMD`; minimp3-fixed is 1.13x Helix on an ESP32-C6, and host and device have disagreed in both direction and magnitude -- quote the device number) |
