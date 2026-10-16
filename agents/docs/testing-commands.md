@@ -78,6 +78,10 @@ rm -rf .build && bash test                 # WRONG - use bash test --clean
 
 ## Precompiled Header Invariant
 
+Debugging a PCH failure? Use the `/pch-debug` skill
+(`.claude/skills/pch-debug/`). Its `pch_probe.py` shows which header was
+ingested twice and why, before anything is cleaned.
+
 **Rule: a PCH is rebuilt whenever any of its inputs is newer than the PCH file,
 or when its content hash or compile flags changed.** A content-hash match
 alone is never enough to reuse a PCH.
