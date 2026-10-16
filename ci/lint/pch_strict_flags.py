@@ -74,11 +74,24 @@ def _missing(kind: str, present: set[str], required: tuple[str, ...]) -> str | N
     return f"PCH {kind} is missing {', '.join(lacking)}"
 
 
+def _strip_meson_comment(line: str) -> str:
+    """Drop a Meson ``#`` comment, keeping ``#`` inside '...' strings."""
+    in_string = False
+    for i, ch in enumerate(line):
+        if ch == "\\" and in_string:
+            continue
+        if ch == "'" and (i == 0 or line[i - 1] != "\\"):
+            in_string = not in_string
+        elif ch == "#" and not in_string:
+            return line[:i]
+    return line
+
+
 def check_meson(text: str) -> list[tuple[int, str]]:
     """Check every top-level bracketed list in a Meson file."""
     hits: list[tuple[int, str]] = []
     # Strip comments so a flag mentioned in a comment does not count.
-    code = "\n".join(re.sub(r"#.*", "", line) for line in text.splitlines())
+    code = "\n".join(_strip_meson_comment(line) for line in text.splitlines())
     depth, start = 0, 0
     for i, ch in enumerate(code):
         if ch == "[":

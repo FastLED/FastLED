@@ -74,6 +74,17 @@ class TestMeson(unittest.TestCase):
         self.assertEqual(len(check_meson(text)), 1)
 
 
+class TestMesonComments(unittest.TestCase):
+    def test_hash_inside_a_string_is_not_a_comment(self) -> None:
+        hits = check_meson("args = ['-DREV=#42', '-include-pch', 'x.pch']\n")
+        self.assertEqual(len(hits), 1)
+        self.assertIn("consumer", hits[0][1])
+
+    def test_trailing_comment_after_strings_is_stripped(self) -> None:
+        text = "args = ['-include-pch', 'x.pch', '-Werror=invalid-pch'] # '-fpch-validate-input-files-content'\n"
+        self.assertEqual(len(check_meson(text)), 1)
+
+
 class TestPython(unittest.TestCase):
     def test_strict_consumer_passes(self) -> None:
         self.assertEqual(check_python(PY_CONSUMER), [])
