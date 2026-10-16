@@ -86,6 +86,12 @@ ingested twice and why, before anything is cleaned.
 or when its content hash or compile flags changed.** A content-hash match
 alone is never enough to reuse a PCH.
 
+**Never disable PCH timestamps: `-fno-pch-timestamp` is banned, permanently.**
+It makes clang stop checking input mtimes, so a stale PCH stops failing. That
+is unsafe and it masks the real problem, the staleness guard that missed a
+change. FastLED keeps strict PCH settings (`-Werror=invalid-pch`,
+`-verify-pch`, timestamps on). Fix the guard; never relax the validation.
+
 Why: FastLED builds and uses PCHs with `-fpch-validate-input-files-content`.
 With that flag, clang (seen on 21.1.x) accepts a PCH whose input header is
 byte-identical but has a newer mtime. It then fails to match that header to

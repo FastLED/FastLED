@@ -8,10 +8,21 @@ argument-hint: [failing test or TU path, optional]
 
 Arguments: $ARGUMENTS
 
-## The one rule
+## The rules
 
 **Do not run `bash test --clean` first.** It destroys the stale PCH, the
 sidecars and the mtimes, which are the only evidence. Probe first, then clean.
+
+**Never disable PCH timestamps. `-fno-pch-timestamp` (or `-Xclang
+-fno-pch-timestamp`) is banned in FastLED, permanently.** It makes the PCH
+record mtime 0, so clang stops checking input timestamps. A touched or
+restored header then no longer fails, which looks like a fix, but it is unsafe
+and it masks problems: the staleness guard that should have rebuilt the PCH is
+still broken, and you have only silenced the signal that told you so. FastLED
+keeps strict PCH settings (`-Werror=invalid-pch`, `-verify-pch`, timestamps
+on). Fix the guard that missed the change; never weaken the validation. The
+same goes for anything else that relaxes PCH validation to make an error go
+away.
 
 ## What the symptom means
 
