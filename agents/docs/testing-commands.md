@@ -103,6 +103,11 @@ touch a.h
 clang++ -include-pch pch.h.pch $F -c t.cpp   # error: redefinition of 'f'
 ```
 
+Reported upstream as
+[llvm/llvm-project#232564](https://github.com/llvm/llvm-project/issues/232564)
+(FastLED#4849). Keep the mtime rule even if a clang release fixes it: the
+toolchain is not always the fixed one.
+
 Where it is enforced:
 - `ci/compile_pch.py`: `inputs_newer_than()` is checked in the wrapper's
   skip path and in `invalidate_stale_pch()`, which runs before every native
