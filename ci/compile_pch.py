@@ -243,7 +243,8 @@ def inputs_newer_than(files: list[Path], pch_file: Path) -> bool:
     ``#pragma once`` no longer dedupes them. Every consumer TU that includes
     such a header again dies with "redefinition of ..." (reproduced on clang
     21.1.8). Touching a header without changing it is enough to trigger this,
-    so a touched input must force a real PCH rebuild.
+    so a touched input must force a real PCH rebuild. Upstream:
+    https://github.com/llvm/llvm-project/issues/232564 (FastLED#4849).
     """
     pch_mtime = pch_file.stat().st_mtime_ns
     for f in files:
