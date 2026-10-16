@@ -41,5 +41,14 @@ void loop() {
     EVERY_N_MILLIS(1000) {
         Serial.println("Test loop!");
     }
-    delay(1);  // Prevent watchdog timeout on ESP32 qemu tests.
+#if defined(FASTLED_ESP32_IS_QEMU)
+    // Busy-wait under Espressif QEMU. delay() sleeps in vTaskDelay until a
+    // timer-alarm tick wakes the task; on a loaded host the emulator
+    // sometimes never delivers that wake-up and loop() stalls for good
+    // (FastLED#4845: ~1 s into the run, every local repro on esp32c3). The
+    // EVERY_N_MILLIS above still exercises millis().
+    delayMicroseconds(1000);
+#else
+    delay(1);  // Yield to the idle task (feeds the task watchdog).
+#endif
 }
