@@ -30,4 +30,5 @@ include!("checkers/file_legal.rs");
 include!("checkers/int_template.rs");
 include!("checkers/libc_mirror.rs");
 include!("checkers/libc_backstop.rs");
+include!("checkers/adl_barrier.rs");
 include!("lint_core/tests.rs");

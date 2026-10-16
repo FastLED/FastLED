@@ -20,6 +20,9 @@
 /// - Put every namespace-scope overload of a barrier name in the barrier.
 ///   Qualified `fl::name` lookup stops at fl and skips the directive if fl
 ///   declares any `name` itself.
+///   Lint enforces this (AdlBarrierChecker, FastLED#4851), and also requires
+///   each barrier function to be called as `fl::name` in
+///   tests/fl/stl/adl_barrier.cpp.
 /// - The C library mirrors (fl::memcpy, fl::free, fl::strlen, ...) use a
 ///   different fix, see fl/stl/cstring.h: they are templates with an unused
 ///   defaulted parameter, so the non-template ::memcpy wins any tie, including
