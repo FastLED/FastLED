@@ -303,12 +303,20 @@ FL_TEST_CASE("every libc wrapper is unambiguous under using namespace fl") {
 // Qualified fl::name must still reach every function behind the barrier. If a
 // future header declares one of these names directly in fl, qualified lookup
 // stops there and this stops compiling (see fl/stl/adl_barrier.h).
+// The AdlBarrierChecker lint pass (FastLED#4851) fails if a function declared in
+// fl::adl_barrier is not called here as fl::name, or if any overload of a
+// barrier name is declared directly in fl.
 FL_TEST_CASE("every adl_barrier name is reachable as fl::name") {
     int v[4] = {4, 3, 2, 1};
     int w[4] = {1, 2, 3, 4};
     fl::reverse(v, v + 4);
     FL_CHECK(fl::equal(v, v + 4, w));
     FL_CHECK(fl::equal(v, v + 4, w, w + 4));
+    fl::vector<int> c1;
+    c1.push_back(1);
+    fl::vector<int> c2 = c1;
+    FL_CHECK(fl::equal_container(c1, c2));
+    FL_CHECK(fl::equal_container(c1, c2, [](int a, int b) { return a == b; }));
     FL_CHECK(!fl::lexicographical_compare(v, v + 4, w, w + 4));
     FL_CHECK(*fl::max_element(v, v + 4) == 4);
     FL_CHECK(*fl::min_element(v, v + 4) == 1);
@@ -322,6 +330,8 @@ FL_TEST_CASE("every adl_barrier name is reachable as fl::name") {
     FL_CHECK(fl::remove_if(v, v + 4, [](int) { return false; }) == v + 4);
     fl::sort(v, v + 4, [](int a, int b) { return a > b; });
     fl::stable_sort(v, v + 4);
+    fl::sort_small(v, v + 4);
+    fl::sort_small(v, v + 4, [](int a, int b) { return a > b; });
     fl::shuffle(v, v + 4);
     fl::fill(v, v + 4, 7);
     FL_CHECK(fl::begin(v) == v);

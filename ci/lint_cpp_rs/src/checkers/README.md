@@ -45,3 +45,7 @@ grouped by related policy area:
   `libc_every_using_fl` block, and every wrapper with a `void*` parameter also
   in `libc_every_adl`; calls to names that are no longer wrappers fail
   (FastLED#4838).
+- `adl_barrier.rs`: structural pass. No function may be declared directly in
+  `fl` with the name of a function in `fl::adl_barrier`, and every barrier
+  function must be called as `fl::name` in the "every adl_barrier name is
+  reachable as fl::name" case of `tests/fl/stl/adl_barrier.cpp` (FastLED#4851).
