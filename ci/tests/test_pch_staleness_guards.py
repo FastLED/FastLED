@@ -25,6 +25,10 @@ BASE_ARGS = [
     "-o",
     "tests/test_pch.h.pch",
     "-IC:/x/src",
+    # Strict validation, as on the real PCH build (ci/lint/pch_strict_flags.py).
+    "-Werror=invalid-pch",
+    "-verify-pch",
+    "-fpch-validate-input-files-content",
 ]
 
 

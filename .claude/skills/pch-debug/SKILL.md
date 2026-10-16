@@ -24,6 +24,13 @@ on). Fix the guard that missed the change; never weaken the validation. The
 same goes for anything else that relaxes PCH validation to make an error go
 away.
 
+`bash lint` enforces this (`ci/lint/pch_strict_flags.py`):
+`-fno-pch-timestamp` may not appear anywhere in the build surface. Every PCH
+producer must pass `-Werror=invalid-pch`, `-verify-pch` and
+`-fpch-validate-input-files-content`, and every `-include-pch` consumer must
+pass `-Werror=invalid-pch` and `-fpch-validate-input-files-content`. Do not add
+an exemption to make a PCH error or a lint failure go away.
+
 ## What the symptom means
 
 The test PCH (`.build/meson-<mode>/tests/test_pch.h.pch`) already contains

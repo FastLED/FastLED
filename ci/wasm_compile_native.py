@@ -219,6 +219,8 @@ def compile_object(
             str(output_object),
             "-include-pch",
             str(pch_file),
+            "-Werror=invalid-pch",  # Error if PCH is invalid
+            "-fpch-validate-input-files-content",  # Strict PCH validation (pch_strict_flags lint)
         ]
     )
     cmd += includes + flags["defines"] + flags["compiler_flags"]

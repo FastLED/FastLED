@@ -17,6 +17,7 @@ from ci.lint.banned_linkers import run_banned_linkers_lint
 from ci.lint.check_size_thresholds import run as run_size_thresholds_check
 from ci.lint.duration_tracker import DurationTracker
 from ci.lint.orchestrator import LintOrchestrator
+from ci.lint.pch_strict_flags import run_pch_strict_flags_lint
 from ci.lint.root_project_ini_lockdown import (
     _warn_only_from_env as _root_ini_warn_only_from_env,
 )
@@ -272,6 +273,17 @@ def create_stages(args: LintArgs) -> list[LintStage]:
                 name="banned_linkers",
                 display_name="BANNED LINKERS (RELD ONLY)",
                 run_fn=lambda: run_banned_linkers_lint(),
+                timeout=60.0,
+            )
+        )
+        # Strict PCH validation: every PCH producer keeps -Werror=invalid-pch,
+        # -verify-pch and -fpch-validate-input-files-content, every consumer the
+        # first and last, and PCH timestamps are never disabled (/pch-debug skill).
+        stages.append(
+            LintStage(
+                name="pch_strict_flags",
+                display_name="PCH STRICT FLAGS",
+                run_fn=lambda: run_pch_strict_flags_lint(),
                 timeout=60.0,
             )
         )
