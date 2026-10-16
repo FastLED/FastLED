@@ -271,6 +271,25 @@ fn libc_mirror_in_template_head(stmt: &[&LibcTok]) -> bool {
     in_head
 }
 
+/// True when `stmt` holds nothing but declaration prefixes: template heads,
+/// specifiers, `[[attributes]]` and all-caps macros (`FASTLED_FORCE_INLINE`).
+fn libc_mirror_is_decl_prefix(stmt: &[&LibcTok]) -> bool {
+    let mut attr_depth = 0usize;
+    stmt[libc_mirror_after_templates(stmt)..].iter().all(|t| match t.text.as_str() {
+        "[" => {
+            attr_depth += 1;
+            true
+        }
+        "]" => {
+            attr_depth = attr_depth.saturating_sub(1);
+            true
+        }
+        _ if attr_depth > 0 => true,
+        "static" | "inline" | "constexpr" | "extern" | "friend" | "virtual" | "explicit" => true,
+        text => t.kind == LibcTokKind::Ident && text.chars().all(|c| c.is_ascii_uppercase() || c.is_ascii_digit() || c == '_'),
+    })
+}
+
 /// Scope facts that only change when the scope stack changes.
 struct LibcScopeFacts {
     ns_level: bool,
@@ -478,9 +497,16 @@ fn libc_mirror_violations(src: &str) -> Vec<(usize, String)> {
         let macro_like = tok.kind == LibcTokKind::Ident
             && tok.text.chars().all(|c| c.is_ascii_uppercase() || c.is_ascii_digit() || c == '_')
             && tok.text.chars().any(|c| c.is_ascii_uppercase());
-        // Only at the start of a declaration: `using F = fl::function<CRGB(u8 index)>;`
+        // Only at the start of a declaration (after template heads, specifiers,
+        // attributes or other macros): `using F = fl::function<CRGB(u8 index)>;`
         // names a function type, not a macro.
-        if macro_like && next == "(" && stmt.is_empty() && paren_depth == 0 && facts.in_fl && !facts.in_impl {
+        if macro_like
+            && next == "("
+            && libc_mirror_is_decl_prefix(&stmt)
+            && paren_depth == 0
+            && facts.in_fl
+            && !facts.in_impl
+        {
             let mut depth = 0usize;
             let mut k = i + 1;
             while k < toks.len() {
@@ -510,8 +536,9 @@ fn libc_mirror_violations(src: &str) -> Vec<(usize, String)> {
                 }
                 k += 1;
             }
-            // The invocation is a unit of its own (declaration macros often end
-            // without `;`), so what follows starts a fresh statement.
+            // The invocation is skipped as a unit and not pushed onto `stmt`:
+            // declaration macros often end without `;`, so the next one must
+            // still look like a declaration start.
             i = k + 1;
             continue;
         }
@@ -695,10 +722,10 @@ mod libc_mirror_tests {
     #[test]
     fn macro_invocation_with_libc_name_argument_fails() {
         let src = "namespace fl {\n#define FL_DECL(n) void* n(void* p) { return p; }\nFL_DECL(memcpy)\n\
-                   FL_DECL(\n    strdup)\nFL_DECL(memcopy)\nFL_STATIC_ASSERT(sizeof(::memcpy) > 0, \"\");\n\
+                   FL_DECL(\n    strdup)\nFL_DECL(memcopy)\ntemplate <typename T> static FL_DECL(free)\n[[nodiscard]] inline FL_DECL(malloc)\nFL_STATIC_ASSERT(sizeof(::memcpy) > 0, \"\");\n\
                    inline void f() { FL_CHECK(memcpy(0, 0, 0)); }\n\
                    struct G { using F = fl::function<CRGB(u8 index)>; };\nusing H = fl::function<CRGB(u8 index)>;\n\
                    namespace libc_impl { FL_DECL(free) }\n}\nFL_DECL(malloc)\n";
-        assert_eq!(lines(src), vec![3, 5], "{:?}", libc_mirror_violations(src));
+        assert_eq!(lines(src), vec![3, 5, 7, 8], "{:?}", libc_mirror_violations(src));
     }
 }
