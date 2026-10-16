@@ -25,6 +25,7 @@ KNOWN_UNBADGED_ALL_BOARD_ALIASES = {
     "esp32dev_qemu",
     "esp32rmt_51",
     "mega",
+    "nano",
     "nice_nano_nrf52840",
     "nrfmicro_nrf52840",
     "nucleo_g070rb",
