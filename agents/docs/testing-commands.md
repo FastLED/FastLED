@@ -82,10 +82,11 @@ Debugging a PCH failure? Use the `/pch-debug` skill
 (`.claude/skills/pch-debug/`). Its `pch_probe.py` shows which header was
 ingested twice and why, before anything is cleaned.
 
-**Rule: restore a byte-identical input's recorded mtime before reusing a
-PCH. Rebuild on content, size or compile flag changes, or when input
-tracking is missing or cannot be repaired.** Forward and backward mtime drift
-both matter; the PCH file's own mtime cannot detect either reliably.
+**Rule: shared source headers keep their timestamps.** zccache supplies
+private, content-verified header snapshots with the timestamps recorded by
+the PCH. Every PCH producer and consumer must run through zccache. Rebuild
+on real content or compiler flag changes; identical content can reuse the PCH
+without changing the source tree.
 
 **Never disable PCH timestamps: `-fno-pch-timestamp` is banned, permanently.**
 It makes clang stop checking input mtimes, so a stale PCH stops failing. That
@@ -118,36 +119,27 @@ The earlier upstream report was retracted. Do not file upstream bugs without
 the maintainer's approval; diagnose the actual build plumbing first.
 
 Where it is enforced:
-- `ci/compile_pch.py`: `reconcile_pch_inputs()` is checked in the wrapper's
-  skip path and in `invalidate_stale_pch()`, which runs before every native
-  compile. `.inputs.json` records input sizes, hashes and mtimes; unchanged
-  content gets its recorded mtime restored. Both native PCH producers use
-  zccache 1.15.5 or newer, which also repairs inputs before cache restore and
-  consumer compilation. Flag changes are tracked by `.flags_hash`. A compiler version
-  change wipes the build in `ci/meson/build_config.py`.
-- WASM: `ci/wasm_compile_pch.py` (`check_dependencies_changed` uses the same
-  input manifest and mtime repair; `compute_flags_hash` tracks flag order and
-  project root) and `ci/wasm_compile_native.py`
-  (an object older than the PCH is recompiled).
-- Fail-safe: if a compile still fails with this signature in a header that is
-  in a PCH, `ci/meson/compile.py` and `ci/meson/streaming_runner.py` delete
-  only the PCHs (`purge_pch_artifacts`), retry once, and print a loud
-  `STALE PCH DETECTED` warning. If you see that warning, report it as a bug.
+- `ci/compile_pch.py`: content and compiler flag hashes control PCH reuse.
+  `invalidate_stale_pch()` runs before every native compile and rejects real
+  input changes. Native and WASM producers and consumers run through zccache,
+  which supplies private input snapshots rather than restoring source mtimes.
+  A compiler version change wipes the build in `ci/meson/build_config.py`.
+- WASM: `ci/wasm_compile_pch.py` compares dependency content hashes;
+  `compute_flags_hash` tracks flag order and project root.
+  `ci/wasm_compile_native.py` recompiles an object older than its PCH.
+- Fail-safe: Clang redefinitions in a recorded PCH header and zccache
+  rebuild refusals naming a PCH in this build trigger `purge_pch_artifacts`.
+  Both native runners retry once within the original deadline and print
+  `STALE PCH DETECTED`. This also migrates legacy chained PCHs that lack
+  zccache import provenance; repeated refusals remain visible failures.
 - Regression tests: `ci/tests/test_pch_e2e.py`, which uses the real
   toolchain, also covers WASM, and is in the routine CI Python smoke list.
 
-Restoring a shared header's mtime can hide a real edit from another build
-directory's ordinary objects. `ci/meson/native_input_guard.py` records each
-native build's source content and object identities in `.native-inputs.json`.
-Before Ninja runs, it discards objects whose changed inputs are hidden by old
-timestamps. Newer edits retain Ninja's dependency-directed rebuilds; partial
-builds retain pending changes for untouched objects. Missing or corrupt tracking
-requires an initial ordinary-object rebuild, while a verified PCH remains reusable.
-
-Early test-result, fingerprint and Ninja skip caches also verify source content,
-including `src/fl/build/`. Their source signatures are captured before the work
-they certify; restoring mtimes cannot make a cached result for different bytes
-look current. These checks preserve fingerprint caching and PCH reuse.
+Source timestamps are never replayed, so ordinary Ninja dependencies remain
+valid across build directories. The native input guard still invalidates objects
+after real content changes hidden by preserved timestamps; it never changes source mtimes.
+Early test-result, fingerprint and Ninja skip caches still verify source
+content, including `src/fl/build/`, to detect edits that preserve timestamps.
 
 ## Performance: Never Disable Fingerprint Caching
 

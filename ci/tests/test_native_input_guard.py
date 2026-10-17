@@ -1,18 +1,16 @@
-"""Native objects must survive PCH timestamp replay without hiding real edits."""
+"""Native objects must rebuild after real edits hidden by preserved timestamps."""
 
 import os
 import shutil
-import sys
 import tempfile
 import unittest
 from pathlib import Path
 
 from running_process import PIPE, RunningProcess
 
-from ci.compile_pch import reconcile_pch_inputs
 from ci.meson.cache_utils import check_ninja_skip, save_ninja_skip_state
 from ci.meson.native_input_guard import prepare_native_inputs, save_native_inputs
-from ci.tests.test_pch_e2e import COMPILE_PCH, CXX, PCH_BUILD_FLAGS
+from ci.tests.test_pch_e2e import CXX
 
 
 @unittest.skipUnless(
@@ -26,7 +24,7 @@ class NativeInputGuardTest(unittest.TestCase):
         self.run_command(["git", "init", "-q", str(self.root)])
         (self.root / "src").mkdir()
         self.header = self.root / "src" / "value.h"
-        self.source = self.root / "src" / "value.cpp"
+        self.source = self.root / "src" / "ordinary.cpp"
         self.header.write_text("#pragma once\n#define VALUE 1\n")
         self.source.write_text('#include "value.h"\nint main() { return VALUE; }\n')
         self.a = self.root / "build-a"
@@ -60,32 +58,23 @@ class NativeInputGuardTest(unittest.TestCase):
         self.run_command(["ninja", "-C", str(build)])
         save_native_inputs(state)
 
-    def test_other_build_rebuilds_objects_after_unchanged_pch_replay(self) -> None:
-        pch = self.a / "value.h.pch"
-        self.run_command(
-            [
-                sys.executable,
-                str(COMPILE_PCH),
-                str(CXX),
-                *PCH_BUILD_FLAGS,
-                str(self.header),
-                "-o",
-                str(pch),
-                "-MD",
-                "-MF",
-                str(self.a / "value.h.d"),
-            ]
-        )
-        pch_stat = pch.stat().st_mtime_ns
-        self.compile(self.a)
-        self.header.write_text("#pragma once\n#define VALUE 2\n")
-        self.compile(self.b)
-        self.run_command([str(self.b / "value.exe")], expected=2)
-        self.header.write_text("#pragma once\n#define VALUE 1\n")
-        self.assertTrue(reconcile_pch_inputs(pch))
+    def test_same_size_source_edit_with_preserved_mtime_rebuilds(self) -> None:
+        self.source.write_text("int main() { return 1; }\n", encoding="utf-8")
         self.compile(self.b)
         self.run_command([str(self.b / "value.exe")], expected=1)
-        self.assertEqual(pch.stat().st_mtime_ns, pch_stat)
+        recorded = self.source.stat()
+        self.source.write_text("int main() { return 2; }\n", encoding="utf-8")
+        os.utime(self.source, ns=(recorded.st_atime_ns, recorded.st_mtime_ns))
+        self.assertEqual(self.source.stat().st_size, recorded.st_size)
+        # Plain Ninja cannot observe this edit, independently of PCH use.
+        self.run_command(["ninja", "-C", str(self.b)])
+        self.run_command([str(self.b / "value.exe")], expected=1)
+        state = prepare_native_inputs(self.b, self.root)
+        self.assertEqual(state.invalidated, 1)
+        self.run_command(["ninja", "-C", str(self.b)])
+        save_native_inputs(state)
+        self.run_command([str(self.b / "value.exe")], expected=2)
+        self.assertEqual(self.source.stat().st_mtime_ns, recorded.st_mtime_ns)
 
     def test_unchanged_content_preserves_ordinary_objects(self) -> None:
         self.compile(self.b)
@@ -184,8 +173,8 @@ class NativeInputGuardTest(unittest.TestCase):
             os.chdir(original_cwd)
         self.assertEqual(pending.invalidated, 0)
         updated_object = (self.b / "value.o").stat().st_mtime_ns
-        # Another build's byte-identical PCH restores the same header's old
-        # timestamp. The untouched object still contains VALUE=1.
+        # An archive restore can preserve the changed header's old timestamp.
+        # The untouched object still contains VALUE=1.
         os.utime(self.header, ns=(original_mtime, original_mtime))
         state = prepare_native_inputs(self.b, self.root)
         self.assertEqual(state.invalidated, 1)

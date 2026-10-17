@@ -1,4 +1,4 @@
-"""Keep ordinary native objects safe when PCH reuse restores header mtimes."""
+"""Invalidate native objects when changed source content keeps an old mtime."""
 
 import hashlib
 import json

@@ -229,7 +229,9 @@ def compile_object(
         print(f"Compiling {source_file.name}...")
         print(f"Command: {list2cmdline(cmd)}")
 
-    result = RunningProcess.run(cmd, cwd=PROJECT_ROOT)
+    from ci.meson.native_launchers import wrap_compiler_with_zccache
+
+    result = RunningProcess.run(wrap_compiler_with_zccache(cmd), cwd=PROJECT_ROOT)
     return result.returncode == 0
 
 

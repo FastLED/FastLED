@@ -13,7 +13,7 @@ from typing import Optional, cast
 
 from running_process import RunningProcess, terminate_process_tree
 
-from ci.compile_pch import is_pch_redefinition_error, purge_pch_artifacts
+from ci.compile_pch import is_stale_pch_error, purge_pch_artifacts
 from ci.early_exit_cache import native_source_content_hash
 from ci.meson.cache_utils import (
     check_ninja_skip,
@@ -390,9 +390,8 @@ def _run_precompile_passes(build_dir: Path) -> NativeInputState:
     if native_inputs.invalidated:
         _ts_print(
             f"[MESON] Invalidated {native_inputs.invalidated} ordinary objects "
-            "whose header content cannot be verified by timestamps"
+            "whose changed input content is hidden by timestamps"
         )
-
     if _precompile_passes_can_be_skipped(build_dir):
         return native_inputs
 
@@ -997,18 +996,15 @@ def compile_meson(
             output = _outcome.output
             latest_output = _outcome.latest
 
-        # Stale-PCH fail-safe. A stale PCH makes clang re-parse a #pragma once
-        # header on top of its PCH copy ("redefinition of ..."). The checks in
-        # ci/compile_pch.py should prevent that; if one is ever missed, drop
-        # only the PCHs and retry once instead of making the developer --clean.
-        if returncode != 0 and is_pch_redefinition_error(latest_output, build_dir):
+        # Recover from Clang stale-header errors and explicit zccache rebuild
+        # refusals, including legacy chained PCHs without import provenance.
+        # Drop only PCH artifacts and retry once within the original deadline.
+        if returncode != 0 and is_stale_pch_error(latest_output, build_dir):
 
             def _describe_pch(_latest: str, _attempt: int) -> str:
                 return (
-                    "STALE PCH DETECTED: redefinition errors in a header that is "
-                    "in a precompiled header. Purging PCHs and retrying once. "
-                    "This is a bug in the PCH staleness checks (ci/compile_pch.py)"
-                    " -- please report it."
+                    "STALE PCH DETECTED: compiler or zccache rejected a "
+                    "precompiled header. Purging PCHs and retrying once."
                 )
 
             def _before_pch_retry() -> None:
@@ -1022,9 +1018,7 @@ def compile_meson(
                 output,
                 max_retries=1,
                 backoff_seconds=0.0,
-                still_transient=lambda latest: is_pch_redefinition_error(
-                    latest, build_dir
-                ),
+                still_transient=lambda latest: is_stale_pch_error(latest, build_dir),
                 describe=_describe_pch,
                 before_retry=_before_pch_retry,
                 label="Stale-PCH",

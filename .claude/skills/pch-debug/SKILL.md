@@ -87,12 +87,11 @@ So:
   archive extract) breaks the lookup just the same.
 - **Touching the PCH file fixes nothing** (it is in neither check), and it
   makes the stale PCH look fresh to the build tool and our guards. Don't.
-- **Valid fixes** make the header match the record again: rebuild the PCH
-  whenever any input's mtime differs from the recorded one, or restore the
-  **header's** mtime to the recorded value after confirming its content hash
-  (zccache's content-verified mtime replay; see zccache#1952). Disabling
-  timestamps would also "work", by skipping check 2's mtime, and is **banned**
-  (see the rules above).
+- **Valid fixes** rebuild the PCH on content changes or supply unchanged
+  headers through zccache's private VFS snapshots with the recorded timestamps.
+  Never restore a shared source header's timestamp: this can hide a real edit
+  from another build directory's ordinary objects. Every PCH producer and
+  consumer must run through zccache. Disabling timestamps remains banned.
 
 ### Mechanisms in FastLED's history
 
@@ -105,12 +104,10 @@ Both land in the same place: a staleness guard in `ci/compile_pch.py` or the
 build plumbing that is **blind to one kind of change**. Previous misses were
 content-hash only (#3813, #4839), no compiler flags in the key (#3813), checks
 gated on the build file's mtime (#4437), and snapshot restores (#2995). The
-current guard, `reconcile_pch_inputs()`, compares inputs with the `.inputs.json`
-manifest recorded after compilation and repairs identical content whose mtime
-moved in either direction. The exact rule is "any input's
-mtime differs from the PCH's record", which `pch_probe.py inputs` checks. When
-you find a new case, make the guard see that change; never turn validation
-off.
+current guard compares dependency content and compiler flags before reuse.
+zccache supplies the recorded input metadata through private snapshots. When
+you find a new case, check that the consumer actually runs through zccache and
+that the snapshot content still matches the source; never turn validation off.
 
 ## Procedure
 
@@ -159,27 +156,16 @@ Run from the repo root, against the build dir that failed (`--build-dir
    mismatch means find which guard should have rebuilt the PCH and didn't, or
    what moved the header's mtime (including backwards).
 
-4. **Recover without cleaning** when the header's content is unchanged. If
-   `inputs` reports **same size, different mtime**, and the file is
-   byte-identical to what the PCH saw (`git diff --quiet -- <file>` for a
-   tracked file you didn't edit, or an xxh3 match against the PCH's
-   `INPUT_FILE_HASH`), set the header's mtime back to the value the PCH
-   recorded:
-   ```bash
-   llvm-bcanalyzer -dump <pch> | grep "<file>'"   # read op2=<recorded mtime>
-   touch -d @<recorded mtime> <file>
-   ```
-   That satisfies both of clang's checks and the build works again, with no
-   rebuild and no `--clean`. Verified: a touched header gives `redefines default
-   argument`, and after `touch -d @<recorded>` the same compile returns rc=0.
-   **Only when the content is identical.** If the content changed, the PCH
-   must be rebuilt. This sets the *header's* mtime; setting the PCH file's
-   mtime does nothing. Then still find the guard that let the mtime drift.
+4. **Recover without changing source timestamps.** Confirm the consumer
+   runs through the pinned zccache. Its private input snapshots preserve the
+   size and timestamp the PCH recorded while validating current source content.
+   If that path fails, capture zccache diagnostics and rebuild the affected PCH.
+   Never use `touch -d` on shared headers to make a PCH load: it can hide real
+   edits from ordinary objects in other build directories.
 
 5. **Only now** clean (`bash test --clean`) and confirm the failure is gone.
-   Then reproduce it deliberately (for example `touch` the header and rerun the
-   probe) to prove you found the trigger. Restore the mtime afterwards
-   (`touch -d "<original stat time>" <file>`).
+   Then reproduce it deliberately on a temporary fixture to prove you found the
+   trigger without modifying shared source timestamps.
 
 ## Where things live (Linux/macOS host build)
 
@@ -188,23 +174,23 @@ Run from the repo root, against the build dir that failed (`--build-dir
   FastLED PCH producer. The flags include `-Werror=invalid-pch -verify-pch
   -fpch-validate-input-files-content -fpch-instantiate-templates`.
 - **Consumers:** the `cpp_COMPILER` rule is prefixed with zccache by
-  `inject_zccache_wrapping` (`ci/meson/meson_markers.py`). On **Windows** the
-  wrapping is stripped (`_ZCCACHE_WINDOWS_TARGET_RULES = ()`, #3126), so
-  Windows host compiles do not go through zccache.
-- **Guards:** `ci/compile_pch.py` (`invalidate_stale_pch`, `reconcile_pch_inputs`,
-  `.pch.inputs.json`, `.pch.input_hash`, `.pch.flags_hash`, `.d.cache`), run before every compile
-  (#4437). There is a fail-safe that purges and retries once on this error
-  signature (#4843), and it prints `STALE PCH DETECTED`. If you see that line,
-  a guard missed something: find it rather than relying on the retry.
+  `inject_zccache_wrapping` (`ci/meson/meson_markers.py`) on every native host. Windows link rules
+  remain bare because of daemon IPC failures during parallel DLL links (#3126).
+- **Guards:** `ci/compile_pch.py` (`invalidate_stale_pch`, `.pch.input_hash`,
+  `.pch.flags_hash`, `.d.cache`), run before every compile
+  (#4437). A bounded fail-safe purges and retries once on Clang redefinitions
+  or an explicit zccache rebuild refusal naming a PCH in this build. It prints
+  `STALE PCH DETECTED` and also migrates legacy chains missing zccache import
+  provenance. Repeated failures need investigation.
 - **Recorded deps:** ninja keeps the PCH depfile in its own database. Read it
   with `FL_AGENT_ALLOW_ALL_CMDS=1 bash -c 'cd .build/meson-quick && ninja -t
   deps tests/test_pch.h.pch'` (read-only). `tests/test_pch.h.d.cache` is
   `compile_pch.py`'s copy.
-- **Ordinary native objects:** `.native-inputs.json` tracks source content and
-  per-object pending changes. After timestamp replay, the precompile pass
-  discards ordinary objects whose real input changes Ninja cannot see. This
-  protects other build modes without rebuilding an unchanged PCH. Source-content
-  signatures also guard early test-result, fingerprint and Ninja skip caches.
+- **Ordinary native objects:** Ninja sees source timestamps unchanged by
+  zccache. Source-content signatures additionally guard early test-result,
+  fingerprint and Ninja skip caches against timestamp-preserving edits.
+  The native input guard invalidates objects when changed content is hidden
+  by preserved timestamps, including partial builds; it never rewrites sources.
 
 ## Minimal repros: what they can and cannot prove
 
@@ -229,7 +215,7 @@ clang merely exposed.
 
 - Machine load (load average over 100) turns 20 s test watchdogs into fake
   failures. That is not a PCH problem; the probe's rc=0 tells them apart.
-- A temporary `touch` or edit-and-revert of a PCH header is itself the stale
-  trigger. Restore the mtime, or expect one PCH rebuild.
+- A temporary `touch` or edit-and-revert tests snapshot handling. Verify the
+  source timestamp stays as the edit left it and the zccache consumer compiles.
 - `-fsyntax-only` with the clang-tool-chain config leaves `-Wl,` flags unused.
   Pass `-Wno-unused-command-line-argument`, as the PCH build does.
