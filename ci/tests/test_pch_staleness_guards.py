@@ -12,7 +12,11 @@ import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from ci.compile_pch import hash_compile_flags, inputs_newer_than
+from ci.compile_pch import (
+    hash_compile_flags,
+    reconcile_pch_inputs,
+    write_pch_input_manifest,
+)
 from ci.meson.path_normalization import find_ninja_strict_path_violations
 
 
@@ -62,33 +66,72 @@ class TestCompileFlagsHash(unittest.TestCase):
         )
 
 
-class TestInputsNewerThan(unittest.TestCase):
-    """A touched-but-identical header must still force a PCH rebuild."""
+class TestReconcilePchInputs(unittest.TestCase):
+    """Unchanged content with a drifted mtime is repaired, never rebuilt; real changes rebuild."""
+
+    RECORDED_NS = 1_000_000_000
 
     def _setup(self, tmp: str) -> tuple[Path, Path]:
         header = Path(tmp) / "a.h"
         pch = Path(tmp) / "a.h.pch"
-        header.write_text("#pragma once\n", encoding="utf-8")
+        header.write_text("#pragma once\nint x;\n", encoding="utf-8")
         pch.write_bytes(b"pch")
-        os.utime(header, ns=(1_000_000_000, 1_000_000_000))
-        os.utime(pch, ns=(2_000_000_000, 2_000_000_000))
+        os.utime(header, ns=(self.RECORDED_NS, self.RECORDED_NS))
+        write_pch_input_manifest(pch, [header])
         return header, pch
 
-    def test_untouched_inputs_are_fresh(self) -> None:
+    def test_untouched_inputs_are_reusable(self) -> None:
         with TemporaryDirectory() as tmp:
-            header, pch = self._setup(tmp)
-            self.assertFalse(inputs_newer_than([header], pch))
+            _, pch = self._setup(tmp)
+            self.assertTrue(reconcile_pch_inputs(pch))
 
-    def test_touched_input_is_stale(self) -> None:
+    def test_touched_identical_input_gets_recorded_mtime_back(self) -> None:
         with TemporaryDirectory() as tmp:
             header, pch = self._setup(tmp)
             os.utime(header, ns=(3_000_000_000, 3_000_000_000))
-            self.assertTrue(inputs_newer_than([header], pch))
+            self.assertTrue(reconcile_pch_inputs(pch))
+            self.assertEqual(header.stat().st_mtime_ns, self.RECORDED_NS)
 
-    def test_missing_input_is_stale(self) -> None:
+    def test_backwards_mtime_is_repaired_too(self) -> None:
+        """The old newer-than-the-PCH check missed this direction."""
+        with TemporaryDirectory() as tmp:
+            header, pch = self._setup(tmp)
+            os.utime(header, ns=(500_000_000, 500_000_000))
+            self.assertTrue(reconcile_pch_inputs(pch))
+            self.assertEqual(header.stat().st_mtime_ns, self.RECORDED_NS)
+
+    def test_same_size_content_change_rebuilds(self) -> None:
+        with TemporaryDirectory() as tmp:
+            header, pch = self._setup(tmp)
+            header.write_text("#pragma once\nint y;\n", encoding="utf-8")
+            os.utime(header, ns=(self.RECORDED_NS, self.RECORDED_NS))
+            # Same size and same mtime: only the content hash can tell.
+            self.assertFalse(reconcile_pch_inputs(pch))
+
+    def test_size_change_rebuilds(self) -> None:
+        with TemporaryDirectory() as tmp:
+            header, pch = self._setup(tmp)
+            header.write_text("#pragma once\nint xy;\n", encoding="utf-8")
+            self.assertFalse(reconcile_pch_inputs(pch))
+
+    def test_corrupt_manifest_rebuilds(self) -> None:
         with TemporaryDirectory() as tmp:
             _, pch = self._setup(tmp)
-            self.assertTrue(inputs_newer_than([Path(tmp) / "gone.h"], pch))
+            manifest = Path(str(pch) + ".inputs.json")
+            for contents in ("null", "{}", "[]", '[{"path": "a.h"}]'):
+                with self.subTest(contents=contents):
+                    manifest.write_text(contents, encoding="utf-8")
+                    self.assertFalse(reconcile_pch_inputs(pch))
+
+    def test_missing_input_or_manifest_rebuilds(self) -> None:
+        with TemporaryDirectory() as tmp:
+            header, pch = self._setup(tmp)
+            header.unlink()
+            self.assertFalse(reconcile_pch_inputs(pch))
+        with TemporaryDirectory() as tmp:
+            pch = Path(tmp) / "no_manifest.pch"
+            pch.write_bytes(b"pch")
+            self.assertFalse(reconcile_pch_inputs(pch))
 
 
 class TestNinjaStrictPathViolations(unittest.TestCase):

@@ -2,6 +2,19 @@
 
 <!-- Add tasks here as checkable items -->
 
+## PCH mtime replay and OBS cache integration
+
+- [x] Read both attached agent chats and inspect paused FastLED changes.
+- [x] Raise FastLED zccache floor to 1.15.5 and wrap native PCH producers.
+- [x] Verify identical-header replay and real-edit invalidation with real Clang.
+- [ ] Upgrade OBS standalone zccache and soldr's embedded dependency.
+- [ ] Run lint, native checks and code review; publish scoped feature PRs.
+
+Validation: 58 focused PCH/cache tests pass, including real Clang forward and
+backward timestamp repair, unchanged PCH bytes/mtime, and real-edit rebuilds.
+`bash lint` passes and `bash test --cpp` passes all 321 unit tests and 96
+examples. Code review found no blocking findings. OBS PR: obs-rust/obs-studio#1265.
+
 ## WASM viewer issues #4776–#4778 (sequential)
 
 - [x] #4776: reproduce unset diameter in Chromium, fix the fallback, validate and publish a focused PR.

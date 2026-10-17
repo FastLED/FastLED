@@ -82,9 +82,10 @@ Debugging a PCH failure? Use the `/pch-debug` skill
 (`.claude/skills/pch-debug/`). Its `pch_probe.py` shows which header was
 ingested twice and why, before anything is cleaned.
 
-**Rule: a PCH is rebuilt whenever any of its inputs is newer than the PCH file,
-or when its content hash or compile flags changed.** A content-hash match
-alone is never enough to reuse a PCH.
+**Rule: restore a byte-identical input's recorded mtime before reusing a
+native PCH. Rebuild on content, size or compile flag changes, or when input
+tracking is missing or cannot be repaired.** Forward and backward mtime drift
+both matter; the PCH file's own mtime cannot detect either reliably.
 
 **Never disable PCH timestamps: `-fno-pch-timestamp` is banned, permanently.**
 It makes clang stop checking input mtimes, so a stale PCH stops failing. That
@@ -113,15 +114,16 @@ touch a.h
 clang++ -include-pch pch.h.pch $F -c t.cpp   # error: redefinition of 'f'
 ```
 
-Reported upstream as
-[llvm/llvm-project#232564](https://github.com/llvm/llvm-project/issues/232564)
-(FastLED#4849). Keep the mtime rule even if a clang release fixes it: the
-toolchain is not always the fixed one.
+The earlier upstream report was retracted. Do not file upstream bugs without
+the maintainer's approval; diagnose the actual build plumbing first.
 
 Where it is enforced:
-- `ci/compile_pch.py`: `inputs_newer_than()` is checked in the wrapper's
+- `ci/compile_pch.py`: `reconcile_pch_inputs()` is checked in the wrapper's
   skip path and in `invalidate_stale_pch()`, which runs before every native
-  compile. Flag changes are tracked by `.flags_hash`. A compiler version
+  compile. `.inputs.json` records input sizes, hashes and mtimes; unchanged
+  content gets its recorded mtime restored. Both native PCH producers use
+  zccache 1.15.5 or newer, which also repairs inputs before cache restore and
+  consumer compilation. Flag changes are tracked by `.flags_hash`. A compiler version
   change wipes the build in `ci/meson/build_config.py`.
 - WASM: `ci/wasm_compile_pch.py` (`check_dependencies_changed`, the order- and
   root-sensitive `compute_flags_hash`) and `ci/wasm_compile_native.py`

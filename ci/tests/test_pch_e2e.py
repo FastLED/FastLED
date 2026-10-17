@@ -7,8 +7,8 @@ compile a consumer TU exactly the way the test/example builds do. No mocks.
 The bug they pin down: clang, given ``-fpch-validate-input-files-content``,
 accepts a PCH whose input header is byte-identical but has a newer mtime --
 and then fails to tie that header to its PCH copy, so ``#pragma once`` lets it
-be parsed a second time ("redefinition of ..."). A PCH must therefore be
-rebuilt whenever any input is newer than it, not only when content changed.
+be parsed a second time ("redefinition of ..."). Identical inputs must regain
+their recorded mtime; changed inputs must rebuild the PCH.
 See agents/docs/testing-commands.md -> "Precompiled Header Invariant".
 """
 
@@ -162,17 +162,42 @@ class TestPchEndToEnd(unittest.TestCase):
 
     # -- the reported bug ---------------------------------------------------
 
-    def test_touched_header_rebuilds_pch_via_wrapper(self) -> None:
-        """Same content, newer mtime: the wrapper's skip path must rebuild."""
+    def test_touched_header_reuses_pch_via_wrapper(self) -> None:
+        """Same content: repair the header without changing the PCH."""
+        before = (self.pch.stat().st_mtime_ns, self.pch.read_bytes())
+        recorded = self.header.stat().st_mtime_ns
         _bump_mtime(self.header)
-        self._build_pch()
+        self.assertIn("skipping compilation", self._build_pch())
+        self.assertEqual(self.header.stat().st_mtime_ns, recorded)
+        self.assertEqual(before, (self.pch.stat().st_mtime_ns, self.pch.read_bytes()))
         self._assert_compiles()
 
-    def test_touched_header_invalidated_by_precompile_pass(self) -> None:
+    def test_touched_header_repaired_by_precompile_pass(self) -> None:
         """Same, through compile.py's pre-ninja invalidate_stale_pch pass."""
         _bump_mtime(self.header)
         invalidate_stale_pch(self.pch)
-        self.assertFalse(self.pch.exists(), "touched input must invalidate the PCH")
+        self.assertTrue(self.pch.exists(), "identical input must preserve the PCH")
+        self._build_pch()
+        self._assert_compiles()
+
+    def test_backwards_mtime_reuses_pch(self) -> None:
+        before = (self.pch.stat().st_mtime_ns, self.pch.read_bytes())
+        recorded = self.header.stat().st_mtime_ns
+        _bump_mtime(self.header, seconds=-10)
+        invalidate_stale_pch(self.pch)
+        self.assertEqual(self.header.stat().st_mtime_ns, recorded)
+        self.assertIn("skipping compilation", self._build_pch())
+        self.assertEqual(before, (self.pch.stat().st_mtime_ns, self.pch.read_bytes()))
+        self._assert_compiles()
+
+    def test_same_size_edit_with_restored_mtime_rebuilds(self) -> None:
+        recorded = self.header.stat().st_mtime_ns
+        self.header.write_text(
+            HEADER_V1.replace("return x;", "return 7;"), encoding="utf-8"
+        )
+        os.utime(self.header, ns=(recorded, recorded))
+        invalidate_stale_pch(self.pch)
+        self.assertFalse(self.pch.exists())
         self._build_pch()
         self._assert_compiles()
 
