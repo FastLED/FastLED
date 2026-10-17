@@ -162,13 +162,11 @@ def prepare_native_inputs(build_dir: Path, project_root: Path) -> NativeInputSta
             state.invalidated += 1
         else:
             state.objects[name] = ObjectInputState(signature, digest, pending)
-    # A target shortcut must not bypass Ninja while any untouched object's
-    # source changes still need its dependency-directed rebuild.
-    state.changed = (
-        state.changed
-        or bool(state.invalidated)
-        or any(record.pending for record in state.objects.values())
-    )
+    # Pending entries can belong to unrelated or nondefault objects. A target
+    # shortcut has its own successful-build content hash, so those entries
+    # must not globally disable it. A hidden edit still invalidates its object
+    # above, which blocks the shortcut before Ninja can miss that edit.
+    state.changed = state.changed or bool(state.invalidated)
     return state
 
 

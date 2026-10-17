@@ -40,6 +40,13 @@ after `bash test --cpp` passes 321 unit tests and 96 examples. A repeat uses the
 fingerprint cache in 0.33 seconds. Missing object tracking causes one initial
 ordinary-object rebuild; verified PCHs and byte-identical input reuse remain intact.
 
+Second review followup: cached-only refreshes carry the original native content
+signature, and pending unrelated objects no longer disable content-validated
+target shortcuts. Their pending input history remains available to invalidate
+stale objects after a later timestamp rewind, including nondefault targets.
+Both findings have RED -> GREEN regressions. Combined focused checks pass;
+lint passes, and the native rerun passes all 321 units (96 examples cached).
+
 ## WASM viewer issues #4776–#4778 (sequential)
 
 - [x] #4776: reproduce unset diameter in Chromium, fix the fallback, validate and publish a focused PR.

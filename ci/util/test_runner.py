@@ -2056,6 +2056,7 @@ def runner(
                                     "tests_max_file_mtime",
                                     "examples_max_file_mtime",
                                     "meson_max_file_mtime",
+                                    "native_source_hash",
                                 )
                                 # Only refresh when the whole watermark set
                                 # survives. A partial carry (e.g. a cache file

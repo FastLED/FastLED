@@ -573,7 +573,7 @@ def check_full_run_cache(
 
 # The full set of source-tree watermarks a full-run cache entry is gated on.
 # Persisting a partial set would leave an ungated directory, so writes require
-# all four.
+# every mtime and the native content signature.
 _WATERMARK_KEYS = frozenset(
     {
         "src_max_file_mtime",

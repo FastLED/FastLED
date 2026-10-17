@@ -10,6 +10,7 @@ from pathlib import Path
 from running_process import PIPE, RunningProcess
 
 from ci.compile_pch import reconcile_pch_inputs
+from ci.meson.cache_utils import check_ninja_skip, save_ninja_skip_state
 from ci.meson.native_input_guard import prepare_native_inputs, save_native_inputs
 from ci.tests.test_pch_e2e import COMPILE_PCH, CXX, PCH_BUILD_FLAGS
 
@@ -166,9 +167,21 @@ class NativeInputGuardTest(unittest.TestCase):
         save_native_inputs(state)
         self.assertEqual((self.b / "other.o").stat().st_mtime_ns, other_before)
         pending = prepare_native_inputs(self.b, self.root)
-        self.assertTrue(
-            pending.changed
-        )  # Pending objects must bypass target shortcuts.
+        self.assertTrue(pending.objects["other.o"].pending)
+        # This target was successfully rebuilt with the current content.
+        # Unvisited objects still need protection, but must not globally
+        # disable a valid content-aware target cache.
+        outputs = self.b / "tests"
+        outputs.mkdir()
+        shutil.copy2(self.b / "value.exe", outputs / "value.exe")
+        original_cwd = Path.cwd()
+        try:
+            os.chdir(self.root)
+            save_ninja_skip_state(self.b, "value")
+            self.assertTrue(check_ninja_skip(self.b, "value"))
+            self.assertFalse(pending.changed)
+        finally:
+            os.chdir(original_cwd)
         self.assertEqual(pending.invalidated, 0)
         updated_object = (self.b / "value.o").stat().st_mtime_ns
         # Another build's byte-identical PCH restores the same header's old
@@ -176,5 +189,6 @@ class NativeInputGuardTest(unittest.TestCase):
         os.utime(self.header, ns=(original_mtime, original_mtime))
         state = prepare_native_inputs(self.b, self.root)
         self.assertEqual(state.invalidated, 1)
+        self.assertTrue(state.changed)
         self.assertFalse((self.b / "other.o").exists())
         self.assertEqual((self.b / "value.o").stat().st_mtime_ns, updated_object)
