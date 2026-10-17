@@ -200,6 +200,11 @@ Run from the repo root, against the build dir that failed (`--build-dir
   with `FL_AGENT_ALLOW_ALL_CMDS=1 bash -c 'cd .build/meson-quick && ninja -t
   deps tests/test_pch.h.pch'` (read-only). `tests/test_pch.h.d.cache` is
   `compile_pch.py`'s copy.
+- **Ordinary native objects:** `.native-inputs.json` tracks source content and
+  per-object pending changes. After timestamp replay, the precompile pass
+  discards ordinary objects whose real input changes Ninja cannot see. This
+  protects other build modes without rebuilding an unchanged PCH. Source-content
+  signatures also guard early test-result, fingerprint and Ninja skip caches.
 
 ## Minimal repros: what they can and cannot prove
 

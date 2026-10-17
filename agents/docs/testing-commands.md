@@ -136,6 +136,19 @@ Where it is enforced:
 - Regression tests: `ci/tests/test_pch_e2e.py`, which uses the real
   toolchain, also covers WASM, and is in the routine CI Python smoke list.
 
+Restoring a shared header's mtime can hide a real edit from another build
+directory's ordinary objects. `ci/meson/native_input_guard.py` records each
+native build's source content and object identities in `.native-inputs.json`.
+Before Ninja runs, it discards objects whose changed inputs are hidden by old
+timestamps. Newer edits retain Ninja's dependency-directed rebuilds; partial
+builds retain pending changes for untouched objects. Missing or corrupt tracking
+requires an initial ordinary-object rebuild, while a verified PCH remains reusable.
+
+Early test-result, fingerprint and Ninja skip caches also verify source content,
+including `src/fl/build/`. Their source signatures are captured before the work
+they certify; restoring mtimes cannot make a cached result for different bytes
+look current. These checks preserve fingerprint caching and PCH reuse.
+
 ## Performance: Never Disable Fingerprint Caching
 
 **DO NOT use `--no-fingerprint`. This flag disables critical performance optimizations and makes builds 10-100x slower.**

@@ -22,6 +22,24 @@ zackees/soldr#3849. Soldr passes locked daemon compilation, full lint and all
 The optional broad Python run was stopped after it entered unrelated QEMU
 coverage; the focused Python tests and complete native suite above are green.
 
+### CodeRabbit followup
+
+- [x] Restrict PCH input manifests to `.pch` outputs; real-object regression RED -> GREEN.
+- [x] Explain the direct user directive for the scoped build configuration changes.
+- [x] Reproduce stale ordinary objects across build directories with real Clang/Ninja.
+- [x] Preserve unchanged PCH reuse while tracking ordinary object content through partial builds.
+- [x] Verify source bytes in outer result/fingerprint/Ninja caches after timestamp rewind.
+- [x] Complete combined validation and publish review replies.
+- [ ] Finish OBS/soldr CI followups in their delegated worktrees.
+
+Review followup validation: 163 focused Python tests and six subtests pass,
+including real Clang/Ninja stale-object recovery, partial builds, hardlink
+metadata changes, content-aware early/fingerprint caches and pre-run signatures.
+`bash lint` passes. The production streaming path records 476 ordinary objects
+after `bash test --cpp` passes 321 unit tests and 96 examples. A repeat uses the
+fingerprint cache in 0.33 seconds. Missing object tracking causes one initial
+ordinary-object rebuild; verified PCHs and byte-identical input reuse remain intact.
+
 ## WASM viewer issues #4776–#4778 (sequential)
 
 - [x] #4776: reproduce unset diameter in Chromium, fix the fallback, validate and publish a focused PR.

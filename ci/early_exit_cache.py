@@ -40,7 +40,86 @@ SKIP_DIR_PREFIXES = (".build", "build", "builddir", ".")
 CPP_EXTS = frozenset([".cpp", ".h", ".hpp", ".c", ".ino"])
 PY_EXTS = frozenset([".py"])
 WASM_EXTS = CPP_EXTS | frozenset([".js", ".html"])
-FINGERPRINT_VALIDATION_VERSION = 3
+FINGERPRINT_VALIDATION_VERSION = 4
+
+NATIVE_SOURCE_EXTS = frozenset(
+    [
+        ".h",
+        ".hpp",
+        ".hh",
+        ".hxx",
+        ".c",
+        ".cpp",
+        ".cc",
+        ".cxx",
+        ".inc",
+        ".ino",
+        ".inl",
+        ".tpp",
+        ".s",
+        ".asm",
+        ".m",
+        ".mm",
+    ]
+)
+
+NATIVE_BUILD_DRIVERS = (
+    "ci/compile_pch.py",
+    "ci/meson/compile.py",
+    "ci/meson/native_input_guard.py",
+    "ci/meson/streaming.py",
+    "ci/meson/cache_utils.py",
+    "ci/early_exit_cache.py",
+    "ci/util/test_runner.py",
+    "ci/util/fingerprint.py",
+)
+
+
+def native_source_content_hash(root: Path = Path(".")) -> str:
+    """Verify native source bytes even when a cache restores their mtimes.
+
+    Shared by early and ordinary skip gates. Never memoize by metadata: PCH
+    replay deliberately rewinds timestamps. An unreadable input raises so the
+    caller misses its cache rather than certifying an incomplete tree.
+    """
+    import hashlib  # noqa: PLC0415 - keep non-cache startup lightweight
+
+    digest = hashlib.sha256()
+    files: list[tuple[str, str]] = []
+    for source in ("src", "tests", "examples"):
+        start = root / source
+        if not start.exists():
+            continue
+        stack = [start]
+        while stack:
+            directory = stack.pop()
+            with os.scandir(directory) as entries:
+                for entry in entries:
+                    path = Path(entry.path)
+                    if entry.is_dir(follow_symlinks=False):
+                        relative = path.relative_to(root).as_posix()
+                        if relative == "src/fl/build" or not (
+                            entry.name in SKIP_DIR_NAMES
+                            or entry.name.startswith(SKIP_DIR_PREFIXES)
+                        ):
+                            stack.append(path)
+                    elif entry.is_file() and path.suffix.lower() in NATIVE_SOURCE_EXTS:
+                        files.append((path.relative_to(root).as_posix(), entry.path))
+    for relative, filename in sorted(files):
+        digest.update(relative.encode("utf-8") + b"\0")
+        with open(filename, "rb") as source_file:
+            digest.update(hashlib.sha256(source_file.read()).digest())
+    # A cached pass also certifies the build logic that produced its binaries.
+    # Track only this fixed inventory so unrelated tooling does not evict it.
+    for relative in NATIVE_BUILD_DRIVERS:
+        digest.update(relative.encode("utf-8") + b"\0")
+        path = root / relative
+        try:
+            digest.update(b"1" + hashlib.sha256(path.read_bytes()).digest())
+        except FileNotFoundError:
+            digest.update(b"0")
+    return digest.hexdigest()
+
 
 # Inputs hashed by the corresponding calculate_* function outside its source
 # directories. Keep this stdlib-only so the ultra-early paths can verify them.
@@ -76,6 +155,8 @@ def fingerprint_aux_hash(name: str, root: Path = Path(".")) -> str | None:
 
     digest = hashlib.sha256()
     try:
+        if name in ("cpp_test", "examples", "wasm", "all"):
+            digest.update(native_source_content_hash(root).encode("ascii"))
         for relative in FINGERPRINT_AUX_INPUTS.get(name, ()):
             path = root / relative
             digest.update(relative.encode("utf-8") + b"\0")
@@ -224,6 +305,8 @@ def ninja_skip(
     try:
         with open(state_file, "r", encoding="utf-8") as f:
             saved = json.load(f)
+        if saved.get("native_source_hash") != native_source_content_hash():
+            return False
         build_ninja = build_dir / "build.ninja"
         if not build_ninja.exists():
             return False
@@ -407,6 +490,8 @@ def full_run_cache(
     try:
         with open(cache_file, "r", encoding="utf-8") as f:
             saved = json.load(f)
+        if saved.get("native_source_hash") != native_source_content_hash():
+            return None
         if saved.get("result") != "pass":
             return None
         build_ninja = build_dir / "build.ninja"

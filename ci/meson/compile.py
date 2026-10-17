@@ -14,6 +14,7 @@ from typing import Optional, cast
 from running_process import RunningProcess, terminate_process_tree
 
 from ci.compile_pch import is_pch_redefinition_error, purge_pch_artifacts
+from ci.early_exit_cache import native_source_content_hash
 from ci.meson.cache_utils import (
     check_ninja_skip,
     save_ninja_skip_state,
@@ -22,6 +23,11 @@ from ci.meson.compiler import get_meson_executable
 from ci.meson.link_retry import (
     is_link_permission_denied_error,
     kill_stale_runner_processes,
+)
+from ci.meson.native_input_guard import (
+    NativeInputState,
+    prepare_native_inputs,
+    save_native_inputs,
 )
 from ci.meson.output import print_banner
 from ci.meson.zccache_retry import (
@@ -359,7 +365,7 @@ class _RetryOutcome:
     latest: str
 
 
-def _run_precompile_passes(build_dir: Path) -> None:
+def _run_precompile_passes(build_dir: Path) -> NativeInputState:
     """Run the passes that must happen before Ninja is invoked.
 
     The PCH staleness check runs on **every** compile. A PCH is stale when a
@@ -378,9 +384,17 @@ def _run_precompile_passes(build_dir: Path) -> None:
     # emit absolute backslash paths in depfiles which Ninja may fail to
     # track correctly, leaving the PCH stale even though headers changed.
     _invalidate_stale_pchs(build_dir)
+    native_inputs = prepare_native_inputs(
+        build_dir, Path(__file__).resolve().parents[2]
+    )
+    if native_inputs.invalidated:
+        _ts_print(
+            f"[MESON] Invalidated {native_inputs.invalidated} ordinary objects "
+            "whose header content cannot be verified by timestamps"
+        )
 
     if _precompile_passes_can_be_skipped(build_dir):
-        return
+        return native_inputs
 
     # Re-normalize strict-path include flags before every compile (#2378).
     # Meson setup already normalizes once, but ninja can regenerate
@@ -417,6 +431,7 @@ def _run_precompile_passes(build_dir: Path) -> None:
             _write_precompile_mtime_marker(build_dir, build_ninja.stat().st_mtime)
         except OSError:
             pass
+    return native_inputs
 
 
 def _retry_ninja(
@@ -557,17 +572,18 @@ def compile_meson(
     #
     # Only applied to specific targets (not all-build).
     # Overhead: ~20-50ms (os.scandir over tests/ source files). Savings: ~2-3s.
-    if target and check_ninja_skip(build_dir, target):
+    native_inputs = _run_precompile_passes(build_dir)
+    native_source_hash = native_source_content_hash() if target else None
+    if target and not native_inputs.changed and check_ninja_skip(build_dir, target):
         if not quiet:
             _ts_print(f"[BUILD] ✓ Target up-to-date (ninja skipped)")
+        save_native_inputs(native_inputs)
         return CompileResult(
             success=True,
             error_output="",
             suppressed_errors=[],
             error_log_file=None,
         )
-
-    _run_precompile_passes(build_dir)
 
     if target:
         cmd.append(target)
@@ -1084,7 +1100,8 @@ def compile_meson(
 
         # Save ninja skip state so the next run can bypass ninja for this target.
         if target:
-            save_ninja_skip_state(build_dir, target)
+            save_ninja_skip_state(build_dir, target, source_hash=native_source_hash)
+        save_native_inputs(native_inputs)
 
         return CompileResult(
             success=True,
