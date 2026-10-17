@@ -187,6 +187,33 @@ class TestNarrowedRunsAreNeverCachedAsFullPasses(unittest.TestCase):
 
 
 class TestFullRunCacheRoundTrip(unittest.TestCase):
+    def test_cached_refresh_carries_every_saved_watermark(self) -> None:
+        assignments = [
+            node
+            for node in ast.walk(_runner_ast())
+            if isinstance(node, ast.Assign)
+            and any(
+                isinstance(target, ast.Name) and target.id == "_keys"
+                for target in node.targets
+            )
+        ]
+        self.assertEqual(len(assignments), 1)
+        keys = ast.literal_eval(assignments[0].value)
+        with tempfile.TemporaryDirectory() as tmp:
+            build_dir = Path(tmp)
+            (build_dir / "build.ninja").write_text("", encoding="utf-8")
+            saved = {key: 0.0 for key in _WATERMARK_KEYS}
+            saved["native_source_hash"] = "original-tested-content"
+            save_full_run_result(
+                build_dir,
+                1,
+                1,
+                0.1,
+                watermarks={key: saved[key] for key in keys},
+            )
+            refreshed = json.loads(get_full_run_cache_file(build_dir).read_text())
+            self.assertEqual(refreshed["native_source_hash"], "original-tested-content")
+
     def _write(self, build_dir: Path, **kw: object) -> None:
         marks = {k: 0.0 for k in _WATERMARK_KEYS}
         (build_dir / "build.ninja").write_text("", encoding="utf-8")

@@ -10,6 +10,7 @@ from running_process import RunningProcess
 
 from ci.meson import compile as compile_mod
 from ci.meson import sequential_runner, streaming, streaming_runner
+from ci.meson.native_input_guard import NativeInputState
 
 
 def _short_thresholds(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -87,7 +88,11 @@ def test_compile_timeout_is_a_nonretryable_failure(
     build_dir = tmp_path / "meson-quick"
     build_dir.mkdir()
     monkeypatch.setattr(compile_mod, "check_ninja_skip", lambda *_: False)
-    monkeypatch.setattr(compile_mod, "_run_precompile_passes", lambda *_: None)
+    monkeypatch.setattr(
+        compile_mod,
+        "_run_precompile_passes",
+        lambda *_: NativeInputState(build_dir, {}, changed=False),
+    )
     monkeypatch.setattr(compile_mod, "kill_stale_runner_processes", lambda *_: 0)
     real_process = RunningProcess
 
@@ -141,7 +146,11 @@ def test_retry_deadline_after_tee_closes_returns_timeout(
     build_dir = tmp_path / "meson-quick"
     build_dir.mkdir()
     monkeypatch.setattr(compile_mod, "check_ninja_skip", lambda *_: False)
-    monkeypatch.setattr(compile_mod, "_run_precompile_passes", lambda *_: None)
+    monkeypatch.setattr(
+        compile_mod,
+        "_run_precompile_passes",
+        lambda *_: NativeInputState(build_dir, {}, changed=False),
+    )
     monkeypatch.setattr(compile_mod, "kill_stale_runner_processes", lambda *_: 0)
     real_process = RunningProcess
 

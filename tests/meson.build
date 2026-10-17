@@ -39,7 +39,7 @@ test_pch = custom_target('test_pch',
   command: [
     uv, 'run', 'python',
     meson.project_source_root() / 'ci/compile_pch.py',
-    cpp_compiler.cmd_array(),
+    native_pch_compiler,
     '-c',                          # Suppress linker step (MinGW driver adds link job without -c)
     '-Wno-unused-command-line-argument',  # ...so drivers that add no link job report -c as unused
     '-x', 'c++-header',           # Treat input as C++ header

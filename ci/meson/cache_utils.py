@@ -1,6 +1,6 @@
 """Lightweight cache/state helpers for Meson build system.
 
-This module intentionally imports ONLY stdlib modules (json, os, platform, Path)
+This module uses stdlib modules and the stdlib-only early cache helpers
 so that it can be imported cheaply (< 5ms) inside ultra-early exit fast-paths
 in test.py without loading heavy dependencies (rich, typeguard, running_process, etc.).
 
@@ -14,6 +14,8 @@ import os
 import platform
 from pathlib import Path
 from typing import Iterable, Optional
+
+from ci.early_exit_cache import native_source_content_hash
 
 
 # ---------------------------------------------------------------------------
@@ -232,6 +234,8 @@ def check_ninja_skip(build_dir: Path, target: str) -> bool:
     try:
         with open(state_file, "r", encoding="utf-8") as f:
             saved = json.load(f)
+        if saved.get("native_source_hash") != native_source_content_hash():
+            return False
 
         # 1. Check build.ninja mtime (detects meson reconfiguration)
         build_ninja = build_dir / "build.ninja"
@@ -290,7 +294,9 @@ def check_ninja_skip(build_dir: Path, target: str) -> bool:
         return False
 
 
-def save_ninja_skip_state(build_dir: Path, target: str) -> None:
+def save_ninja_skip_state(
+    build_dir: Path, target: str, source_hash: str | None = None
+) -> None:
     """Save build state after successful ninja run to enable skip on next run.
 
     Stores:
@@ -300,6 +306,8 @@ def save_ninja_skip_state(build_dir: Path, target: str) -> None:
     - Per-target: output file path + mtime (sanity gate)
 
     Called only after a successful compilation, so overhead (~30-50ms) is acceptable.
+    Production builds pass source_hash captured before Ninja starts, so a
+    source edit during compilation cannot be certified as built afterward.
     """
     try:
         # Derive the output file path from the target name.
@@ -333,6 +341,12 @@ def save_ninja_skip_state(build_dir: Path, target: str) -> None:
         existing["build_ninja_mtime"] = (
             build_ninja.stat().st_mtime if build_ninja.exists() else 0.0
         )
+        observed_hash = (
+            source_hash if source_hash is not None else native_source_content_hash(cwd)
+        )
+        if existing.get("native_source_hash") != observed_hash:
+            existing["targets"] = {}
+        existing["native_source_hash"] = observed_hash
 
         # src/ max source file mtime: detects src/ code changes directly.
         # Previously used libfastled.a as a proxy, but file-level scanning
@@ -501,6 +515,8 @@ def check_full_run_cache(
     try:
         with open(cache_file, "r", encoding="utf-8") as f:
             saved = json.load(f)
+        if saved.get("native_source_hash") != native_source_content_hash():
+            return None
 
         if saved.get("result") != "pass":
             return None
@@ -557,13 +573,14 @@ def check_full_run_cache(
 
 # The full set of source-tree watermarks a full-run cache entry is gated on.
 # Persisting a partial set would leave an ungated directory, so writes require
-# all four.
+# every mtime and the native content signature.
 _WATERMARK_KEYS = frozenset(
     {
         "src_max_file_mtime",
         "tests_max_file_mtime",
         "examples_max_file_mtime",
         "meson_max_file_mtime",
+        "native_source_hash",
     }
 )
 
@@ -605,7 +622,7 @@ def _max_meson_build_mtime(root: Path) -> float:
     return max_mtime
 
 
-def capture_source_watermarks(cwd: Optional[Path] = None) -> "dict[str, float]":
+def capture_source_watermarks(cwd: Optional[Path] = None) -> "dict[str, float | str]":
     """Snapshot source-tree mtimes to gate a test run that is about to start.
 
     Must be called BEFORE the run whose result it will describe. Scanning at
@@ -623,6 +640,7 @@ def capture_source_watermarks(cwd: Optional[Path] = None) -> "dict[str, float]":
     """
     root = cwd if cwd is not None else Path.cwd()
     return {
+        "native_source_hash": native_source_content_hash(root),
         "src_max_file_mtime": _get_max_source_file_mtime(root / "src"),
         "tests_max_file_mtime": _get_max_source_file_mtime(root / "tests"),
         "examples_max_file_mtime": _get_max_source_file_mtime(root / "examples"),
@@ -635,7 +653,7 @@ def save_full_run_result(
     num_passed: int,
     num_tests: int,
     duration: float,
-    watermarks: "Optional[dict[str, float]]" = None,
+    watermarks: "Optional[dict[str, float | str]]" = None,
     num_examples_passed: "Optional[int]" = None,
     num_examples_run: "Optional[int]" = None,
     examples_included: "Optional[bool]" = None,

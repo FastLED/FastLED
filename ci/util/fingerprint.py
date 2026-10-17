@@ -164,11 +164,20 @@ class FingerprintManager:
         self._prev_fingerprints[name] = prev_fingerprint
 
         fingerprint_data = calculator()
+        current_aux_hash = self._observed_aux_hash.get(name)
+        if current_aux_hash is None:
+            current_aux_hash = fingerprint_aux_hash(name)
+        fingerprint_data.aux_hash = current_aux_hash
         self._fingerprints[name] = fingerprint_data
 
         needs_run = prev_fingerprint is None or not prev_fingerprint.should_skip(
             fingerprint_data
         )
+        if current_aux_hash is None or (
+            prev_fingerprint is not None
+            and prev_fingerprint.aux_hash != current_aux_hash
+        ):
+            needs_run = True
         self._needs_run[name] = needs_run
         return needs_run
 

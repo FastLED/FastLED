@@ -22,8 +22,10 @@ Solution 2: Hash all input files listed in the saved depfile from the previous
 build. If the input hash matches, skip compilation entirely. The ninja rule uses
 `restat = 1`, so unchanged output triggers no downstream rebuilds. The depfile
 is saved as `.d.cache` since ninja deletes the original after reading it.
-The skip is only taken when no input is newer than the PCH: clang breaks
-`#pragma once` for inputs whose mtime moved (see `inputs_newer_than`).
+The skip is only taken when every input still matches the size, mtime and
+content the PCH recorded. Clang breaks `#pragma once` for inputs whose mtime
+moved, so an input with unchanged content but a different mtime gets its
+recorded mtime restored (see `reconcile_pch_inputs`); any real change rebuilds.
 
 Usage:
     python compile_pch.py <compiler> <args...>
@@ -34,6 +36,8 @@ The script expects:
 """
 
 import hashlib
+import json
+import os
 import re
 import shutil
 import sys
@@ -233,27 +237,103 @@ def hash_compile_flags(args: list[str]) -> str:
     return h.hexdigest()
 
 
-def inputs_newer_than(files: list[Path], pch_file: Path) -> bool:
-    """Return True if any input file has an mtime newer than ``pch_file``.
+def _manifest_path(pch_file: Path) -> Path:
+    return Path(str(pch_file) + ".inputs.json")
 
-    A content-hash match is NOT enough to reuse a PCH. Clang records each
-    input's mtime in the PCH, and with ``-fpch-validate-input-files-content``
-    it accepts a PCH whose inputs are byte-identical but have a newer mtime --
-    yet it then fails to associate those headers with the PCH copies, so
-    ``#pragma once`` no longer dedupes them. Every consumer TU that includes
-    such a header again dies with "redefinition of ..." (reproduced on clang
-    21.1.8). Touching a header without changing it is enough to trigger this,
-    so a touched input must force a real PCH rebuild. Upstream:
-    https://github.com/llvm/llvm-project/issues/232564 (FastLED#4849).
+
+def _sha256_file(path: Path) -> str:
+    h = hashlib.sha256()
+    with open(path, "rb") as fh:
+        for chunk in iter(lambda: fh.read(65536), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def write_pch_input_manifest(pch_file: Path, files: list[Path]) -> None:
+    """Record each input's size, mtime and content hash right after a PCH build.
+
+    Clang stores each input's size and mtime inside the PCH and keys its
+    "already included / #pragma once" lookup on them (``HeaderFileInfoTrait``
+    in clang's ``ASTReader.cpp``). This manifest holds the same values, so
+    :func:`reconcile_pch_inputs` can tell "content unchanged, mtime drifted"
+    (put the mtime back) apart from a real change (rebuild).
     """
-    pch_mtime = pch_file.stat().st_mtime_ns
+    entries: list[dict[str, str | int]] = []
     for f in files:
+        st = f.stat()
+        entries.append(
+            {
+                "path": str(f),
+                "size": st.st_size,
+                "mtime_ns": st.st_mtime_ns,
+                "sha256": _sha256_file(f),
+            }
+        )
+    _manifest_path(pch_file).write_text(json.dumps(entries), encoding="utf-8")
+
+
+def reconcile_pch_inputs(pch_file: Path) -> bool:
+    """Make a PCH's inputs match what it recorded, or report that it must be rebuilt.
+
+    Returns True when the PCH can be reused. For every recorded input:
+
+    - missing, or size or content changed: return False (rebuild);
+    - content identical but mtime different (touch, ``git checkout``, an
+      edit-and-revert, a cache or snapshot restore; forwards **or backwards**):
+      set the file's mtime back to the recorded value.
+
+    A byte-identical header whose mtime no longer matches the PCH's record
+    passes clang's validity check under ``-fpch-validate-input-files-content``
+    but misses the ``#pragma once`` lookup, so it is parsed twice and the build
+    fails with "redefinition of ...". Restoring the recorded mtime satisfies
+    both checks without a rebuild. The PCH file's own mtime plays no part, and
+    timestamps are never disabled (see the /pch-debug skill).
+    """
+    manifest = _manifest_path(pch_file)
+    if not manifest.exists():
+        return False
+    try:
+        entries = json.loads(manifest.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return False
+    if not isinstance(entries, list) or not entries:
+        return False
+    drifted: list[tuple[Path, int]] = []
+    for entry in entries:
+        if not isinstance(entry, dict) or not all(
+            isinstance(entry.get(key), kind)
+            for key, kind in (
+                ("path", str),
+                ("size", int),
+                ("mtime_ns", int),
+                ("sha256", str),
+            )
+        ):
+            return False
+        path = Path(entry["path"])
         try:
-            if f.stat().st_mtime_ns > pch_mtime:
-                return True
+            st = path.stat()
+            if st.st_size != entry["size"] or _sha256_file(path) != entry["sha256"]:
+                return False
         except OSError:
-            return True  # Missing input: cannot trust the PCH
-    return False
+            return False
+        if st.st_mtime_ns != entry["mtime_ns"]:
+            drifted.append((path, entry["mtime_ns"]))
+    for path, mtime_ns in drifted:
+        try:
+            os.utime(path, ns=(path.stat().st_atime_ns, mtime_ns))
+        except OSError as e:
+            print(
+                f"PCH input {path}: could not restore mtime ({e}) - rebuilding",
+                file=sys.stderr,
+            )
+            return False
+        print(
+            f"PCH input {path.name}: content unchanged, mtime restored to the "
+            f"value {pch_file.name} recorded",
+            file=sys.stderr,
+        )
+    return True
 
 
 def invalidate_stale_pch(pch_file: Path) -> None:
@@ -292,10 +372,18 @@ def invalidate_stale_pch(pch_file: Path) -> None:
     try:
         input_files = parse_depfile_inputs(saved_depfile)
         if not input_files:
+            print(
+                f"PCH dependency tracking invalid — removing {pch_file.name} to force rebuild",
+                file=sys.stderr,
+            )
+            pch_file.unlink(missing_ok=True)
+            hash_file.unlink(missing_ok=True)
             return
         current_hash = hash_input_files(input_files)
         stored_hash = hash_file.read_text(encoding="utf-8").strip()
-        if current_hash != stored_hash or inputs_newer_than(input_files, pch_file):
+        # Content unchanged: put any drifted input mtimes back to the values
+        # the PCH recorded instead of rebuilding. Anything else rebuilds.
+        if current_hash != stored_hash or not reconcile_pch_inputs(pch_file):
             print(
                 f"PCH inputs changed — removing stale {pch_file.name} to force rebuild",
                 file=sys.stderr,
@@ -311,7 +399,7 @@ def invalidate_stale_pch(pch_file: Path) -> None:
 
 # Sidecars compile_pch.py writes next to a PCH. Removing them together with
 # the .pch forces a clean rebuild of that PCH and nothing else.
-PCH_SIDECAR_SUFFIXES = (".pch.input_hash", ".pch.flags_hash")
+PCH_SIDECAR_SUFFIXES = (".pch.input_hash", ".pch.flags_hash", ".pch.inputs.json")
 
 # The clang failure a stale PCH produces: the header is parsed a second time
 # on top of the PCH copy because #pragma once no longer recognises it.
@@ -336,7 +424,7 @@ def pch_input_headers(build_dir: Path) -> set[Path]:
 def is_pch_redefinition_error(output: str, build_dir: Path) -> bool:
     """True if ``output`` shows a redefinition error in a header that is in a PCH.
 
-    That signature means the PCH is stale (see ``inputs_newer_than``). A
+    That signature means the PCH is stale (see ``reconcile_pch_inputs``). A
     redefinition in a header that is not in any PCH is an ordinary bug and is
     not matched.
     """
@@ -426,11 +514,11 @@ def main() -> int:
                             "PCH compiler flags changed - rebuilding",
                             file=sys.stderr,
                         )
-                    elif current_hash == stored_hash and inputs_newer_than(
-                        input_files, pch_output
+                    elif current_hash == stored_hash and not reconcile_pch_inputs(
+                        pch_output
                     ):
                         print(
-                            "PCH inputs touched (mtime newer, content same) - rebuilding",
+                            "PCH inputs changed or not reconcilable - rebuilding",
                             file=sys.stderr,
                         )
                     elif current_hash == stored_hash:
@@ -473,6 +561,10 @@ def main() -> int:
                 shutil.copy2(str(depfile), str(saved_depfile))
                 input_files = parse_depfile_inputs(saved_depfile)
                 if input_files:
+                    # Manifest first: an input hash without a manifest makes
+                    # reconcile_pch_inputs() report "rebuild", never "reuse".
+                    if pch_output.suffix == ".pch":
+                        write_pch_input_manifest(pch_output, input_files)
                     current_hash = hash_input_files(input_files)
                     hash_file.write_text(current_hash, encoding="utf-8")
             except KeyboardInterrupt as ki:

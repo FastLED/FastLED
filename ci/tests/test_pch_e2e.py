@@ -7,8 +7,8 @@ compile a consumer TU exactly the way the test/example builds do. No mocks.
 The bug they pin down: clang, given ``-fpch-validate-input-files-content``,
 accepts a PCH whose input header is byte-identical but has a newer mtime --
 and then fails to tie that header to its PCH copy, so ``#pragma once`` lets it
-be parsed a second time ("redefinition of ..."). A PCH must therefore be
-rebuilt whenever any input is newer than it, not only when content changed.
+be parsed a second time ("redefinition of ..."). Identical inputs must regain
+their recorded mtime; changed inputs must rebuild the PCH.
 See agents/docs/testing-commands.md -> "Precompiled Header Invariant".
 """
 
@@ -30,6 +30,7 @@ from ci.compile_pch import (
     invalidate_stale_pch,
     is_pch_redefinition_error,
     purge_pch_artifacts,
+    write_pch_input_manifest,
 )
 from ci.wasm_compile_pch import check_dependencies_changed, compute_flags_hash
 
@@ -162,17 +163,42 @@ class TestPchEndToEnd(unittest.TestCase):
 
     # -- the reported bug ---------------------------------------------------
 
-    def test_touched_header_rebuilds_pch_via_wrapper(self) -> None:
-        """Same content, newer mtime: the wrapper's skip path must rebuild."""
+    def test_touched_header_reuses_pch_via_wrapper(self) -> None:
+        """Same content: repair the header without changing the PCH."""
+        before = (self.pch.stat().st_mtime_ns, self.pch.read_bytes())
+        recorded = self.header.stat().st_mtime_ns
         _bump_mtime(self.header)
-        self._build_pch()
+        self.assertIn("skipping compilation", self._build_pch())
+        self.assertEqual(self.header.stat().st_mtime_ns, recorded)
+        self.assertEqual(before, (self.pch.stat().st_mtime_ns, self.pch.read_bytes()))
         self._assert_compiles()
 
-    def test_touched_header_invalidated_by_precompile_pass(self) -> None:
+    def test_touched_header_repaired_by_precompile_pass(self) -> None:
         """Same, through compile.py's pre-ninja invalidate_stale_pch pass."""
         _bump_mtime(self.header)
         invalidate_stale_pch(self.pch)
-        self.assertFalse(self.pch.exists(), "touched input must invalidate the PCH")
+        self.assertTrue(self.pch.exists(), "identical input must preserve the PCH")
+        self._build_pch()
+        self._assert_compiles()
+
+    def test_backwards_mtime_reuses_pch(self) -> None:
+        before = (self.pch.stat().st_mtime_ns, self.pch.read_bytes())
+        recorded = self.header.stat().st_mtime_ns
+        _bump_mtime(self.header, seconds=-10)
+        invalidate_stale_pch(self.pch)
+        self.assertEqual(self.header.stat().st_mtime_ns, recorded)
+        self.assertIn("skipping compilation", self._build_pch())
+        self.assertEqual(before, (self.pch.stat().st_mtime_ns, self.pch.read_bytes()))
+        self._assert_compiles()
+
+    def test_same_size_edit_with_restored_mtime_rebuilds(self) -> None:
+        recorded = self.header.stat().st_mtime_ns
+        self.header.write_text(
+            HEADER_V1.replace("return x;", "return 7;"), encoding="utf-8"
+        )
+        os.utime(self.header, ns=(recorded, recorded))
+        invalidate_stale_pch(self.pch)
+        self.assertFalse(self.pch.exists())
         self._build_pch()
         self._assert_compiles()
 
@@ -195,6 +221,15 @@ class TestPchEndToEnd(unittest.TestCase):
         self.assertEqual(before, (self.pch.stat().st_mtime_ns, self.pch.read_bytes()))
         self._assert_compiles()
 
+    def test_invalid_dependency_tracking_rebuilds(self) -> None:
+        Path(str(self.depfile) + ".cache").write_text(
+            "invalid depfile", encoding="utf-8"
+        )
+        invalidate_stale_pch(self.pch)
+        self.assertFalse(self.pch.exists())
+        self._build_pch()
+        self._assert_compiles()
+
     def test_flag_change_rebuilds_pch(self) -> None:
         before = self.pch.stat().st_mtime_ns
         PCH_BUILD_FLAGS.append("-DFL_PCH_E2E_FLAG=1")
@@ -211,7 +246,7 @@ class TestPchEndToEnd(unittest.TestCase):
         env = dict(os.environ, PYTHONPATH=str(ROOT))
         tu = self.dir / "obj.cpp"
         tu.write_text(f'#include "{self.header}"\nint f() {{ return 1; }}\n')
-        obj = self.dir / "obj.o"
+        obj = self.dir / "obj.obj"
         cmd = [
             sys.executable,
             str(COMPILE_PCH),
@@ -229,6 +264,8 @@ class TestPchEndToEnd(unittest.TestCase):
             r = _run(cmd, cwd=ROOT, env=env)
             self.assertEqual(r.returncode, 0, r.stderr)
             self.assertNotIn("skipping compilation", r.stderr)
+            self.assertTrue(Path(str(obj) + ".input_hash").exists())
+            self.assertFalse(Path(str(obj) + ".inputs.json").exists())
 
     # -- fail-safe detection ------------------------------------------------
 
@@ -268,12 +305,31 @@ class TestWasmPchDependencies(unittest.TestCase):
         _set_mtime(header, 1)
         _set_mtime(depfile, 2)
         _set_mtime(pch, 3)
+        write_pch_input_manifest(pch, [header])
         self.header, self.depfile, self.pch = header, depfile, pch
 
-    def test_touched_dependency_rebuilds_even_with_older_depfile(self) -> None:
+    def test_touched_dependency_is_repaired_even_with_older_depfile(self) -> None:
         with TemporaryDirectory() as tmp:
             self._setup(tmp)
             _set_mtime(self.header, 4)
+            changed, reason = check_dependencies_changed(self.depfile, self.pch)
+            self.assertFalse(changed, reason)
+            self.assertEqual(self.header.stat().st_mtime_ns, 1_000_000_000)
+
+    def test_backwards_dependency_mtime_is_repaired(self) -> None:
+        with TemporaryDirectory() as tmp:
+            self._setup(tmp)
+            _set_mtime(self.header, 0)
+            self.assertEqual(
+                check_dependencies_changed(self.depfile, self.pch), (False, "")
+            )
+            self.assertEqual(self.header.stat().st_mtime_ns, 1_000_000_000)
+
+    def test_real_dependency_edit_with_old_mtime_rebuilds(self) -> None:
+        with TemporaryDirectory() as tmp:
+            self._setup(tmp)
+            self.header.write_text("#pragma once\nint edited;\n", encoding="utf-8")
+            _set_mtime(self.header, 1)
             changed, reason = check_dependencies_changed(self.depfile, self.pch)
             self.assertTrue(changed, reason)
 

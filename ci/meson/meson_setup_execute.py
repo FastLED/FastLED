@@ -730,7 +730,13 @@ def build_meson_setup_cmd(
 
 
 _ZCCACHE_MESON_HIT_MARKER = "[zccache-meson] hit"
-_PCH_ARTIFACT_SUFFIXES = (".pch", ".pch.input_hash", ".pch.flags_hash", ".d.cache")
+_PCH_ARTIFACT_SUFFIXES = (
+    ".pch",
+    ".pch.input_hash",
+    ".pch.flags_hash",
+    ".pch.inputs.json",
+    ".d.cache",
+)
 
 
 def _migrate_native_linker_option(

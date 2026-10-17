@@ -2,6 +2,51 @@
 
 <!-- Add tasks here as checkable items -->
 
+## PCH mtime replay and OBS cache integration
+
+- [x] Read both attached agent chats and inspect paused FastLED changes.
+- [x] Raise FastLED zccache floor to 1.15.5 and wrap native PCH producers.
+- [x] Verify identical-header replay and real-edit invalidation with real Clang.
+- [x] Upgrade OBS standalone zccache and soldr's embedded dependency.
+- [x] Run lint, native checks and code review; publish scoped feature PRs.
+
+Validation: 61 focused PCH/cache tests pass, including real Clang forward and
+backward timestamp repair, unchanged PCH bytes/mtime, and real-edit rebuilds.
+`bash lint` passes and `bash test --cpp` passes all 321 unit tests and 96
+examples. A real Emscripten PCH build passed; moving its input header mtime
+forward and backward preserves the PCH bytes/mtime and repairs the input.
+`bash compile wasm --examples Blink` passes (warm build). Code review found no
+blocking findings. PRs: FastLED/FastLED#4865, obs-rust/obs-studio#1265,
+zackees/soldr#3849. Soldr passes locked daemon compilation, full lint and all
+33 static gates. OBS passes 12 focused tests and real Clang PCH replay.
+The optional broad Python run was stopped after it entered unrelated QEMU
+coverage; the focused Python tests and complete native suite above are green.
+
+### CodeRabbit followup
+
+- [x] Restrict PCH input manifests to `.pch` outputs; real-object regression RED -> GREEN.
+- [x] Explain the direct user directive for the scoped build configuration changes.
+- [x] Reproduce stale ordinary objects across build directories with real Clang/Ninja.
+- [x] Preserve unchanged PCH reuse while tracking ordinary object content through partial builds.
+- [x] Verify source bytes in outer result/fingerprint/Ninja caches after timestamp rewind.
+- [x] Complete combined validation and publish review replies.
+- [ ] Finish OBS/soldr CI followups in their delegated worktrees.
+
+Review followup validation: 163 focused Python tests and six subtests pass,
+including real Clang/Ninja stale-object recovery, partial builds, hardlink
+metadata changes, content-aware early/fingerprint caches and pre-run signatures.
+`bash lint` passes. The production streaming path records 476 ordinary objects
+after `bash test --cpp` passes 321 unit tests and 96 examples. A repeat uses the
+fingerprint cache in 0.33 seconds. Missing object tracking causes one initial
+ordinary-object rebuild; verified PCHs and byte-identical input reuse remain intact.
+
+Second review followup: cached-only refreshes carry the original native content
+signature, and pending unrelated objects no longer disable content-validated
+target shortcuts. Their pending input history remains available to invalidate
+stale objects after a later timestamp rewind, including nondefault targets.
+Both findings have RED -> GREEN regressions. Combined focused checks pass;
+lint passes, and the native rerun passes all 321 units (96 examples cached).
+
 ## WASM viewer issues #4776–#4778 (sequential)
 
 - [x] #4776: reproduce unset diameter in Chromium, fix the fallback, validate and publish a focused PR.

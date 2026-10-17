@@ -104,10 +104,10 @@ So:
 Both land in the same place: a staleness guard in `ci/compile_pch.py` or the
 build plumbing that is **blind to one kind of change**. Previous misses were
 content-hash only (#3813, #4839), no compiler flags in the key (#3813), checks
-gated on the build file's mtime (#4437), and snapshot restores (#2995). Known
-remaining gap: `inputs_newer_than()` compares inputs with the PCH file's
-mtime, so it catches *newer* inputs only. An input whose mtime moved
-backwards with identical content is not caught. The exact rule is "any input's
+gated on the build file's mtime (#4437), and snapshot restores (#2995). The
+current guard, `reconcile_pch_inputs()`, compares inputs with the `.inputs.json`
+manifest recorded after compilation and repairs identical content whose mtime
+moved in either direction. The exact rule is "any input's
 mtime differs from the PCH's record", which `pch_probe.py inputs` checks. When
 you find a new case, make the guard see that change; never turn validation
 off.
@@ -184,15 +184,15 @@ Run from the repo root, against the build dir that failed (`--build-dir
 ## Where things live (Linux/macOS host build)
 
 - **PCH build:** the ninja `CUSTOM_COMMAND_DEP` `tests/test_pch.h.pch` runs
-  `ci/compile_pch.py` with `ctc-clang++` directly. It is **not** wrapped by
-  zccache. The flags include `-Werror=invalid-pch -verify-pch
+  `ci/compile_pch.py` with zccache wrapping `ctc-clang++`, as does the
+  FastLED PCH producer. The flags include `-Werror=invalid-pch -verify-pch
   -fpch-validate-input-files-content -fpch-instantiate-templates`.
 - **Consumers:** the `cpp_COMPILER` rule is prefixed with zccache by
   `inject_zccache_wrapping` (`ci/meson/meson_markers.py`). On **Windows** the
   wrapping is stripped (`_ZCCACHE_WINDOWS_TARGET_RULES = ()`, #3126), so
   Windows host compiles do not go through zccache.
-- **Guards:** `ci/compile_pch.py` (`invalidate_stale_pch`, `inputs_newer_than`,
-  `.pch.input_hash`, `.pch.flags_hash`, `.d.cache`), run before every compile
+- **Guards:** `ci/compile_pch.py` (`invalidate_stale_pch`, `reconcile_pch_inputs`,
+  `.pch.inputs.json`, `.pch.input_hash`, `.pch.flags_hash`, `.d.cache`), run before every compile
   (#4437). There is a fail-safe that purges and retries once on this error
   signature (#4843), and it prints `STALE PCH DETECTED`. If you see that line,
   a guard missed something: find it rather than relying on the retry.
@@ -200,6 +200,11 @@ Run from the repo root, against the build dir that failed (`--build-dir
   with `FL_AGENT_ALLOW_ALL_CMDS=1 bash -c 'cd .build/meson-quick && ninja -t
   deps tests/test_pch.h.pch'` (read-only). `tests/test_pch.h.d.cache` is
   `compile_pch.py`'s copy.
+- **Ordinary native objects:** `.native-inputs.json` tracks source content and
+  per-object pending changes. After timestamp replay, the precompile pass
+  discards ordinary objects whose real input changes Ninja cannot see. This
+  protects other build modes without rebuilding an unchanged PCH. Source-content
+  signatures also guard early test-result, fingerprint and Ninja skip caches.
 
 ## Minimal repros: what they can and cannot prove
 
