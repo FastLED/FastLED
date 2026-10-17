@@ -7,13 +7,20 @@
 - [x] Read both attached agent chats and inspect paused FastLED changes.
 - [x] Raise FastLED zccache floor to 1.15.5 and wrap native PCH producers.
 - [x] Verify identical-header replay and real-edit invalidation with real Clang.
-- [ ] Upgrade OBS standalone zccache and soldr's embedded dependency.
-- [ ] Run lint, native checks and code review; publish scoped feature PRs.
+- [x] Upgrade OBS standalone zccache and soldr's embedded dependency.
+- [x] Run lint, native checks and code review; publish scoped feature PRs.
 
-Validation: 58 focused PCH/cache tests pass, including real Clang forward and
+Validation: 60 focused PCH/cache tests pass, including real Clang forward and
 backward timestamp repair, unchanged PCH bytes/mtime, and real-edit rebuilds.
 `bash lint` passes and `bash test --cpp` passes all 321 unit tests and 96
-examples. Code review found no blocking findings. OBS PR: obs-rust/obs-studio#1265.
+examples. A real Emscripten PCH build passed; moving its input header mtime
+forward and backward preserves the PCH bytes/mtime and repairs the input.
+`bash compile wasm --examples Blink` passes (warm build). Code review found no
+blocking findings. PRs: FastLED/FastLED#4865, obs-rust/obs-studio#1265,
+zackees/soldr#3849. Soldr passes locked daemon compilation, full lint and all
+33 static gates. OBS passes 12 focused tests and real Clang PCH replay.
+The optional broad Python run was stopped after it entered unrelated QEMU
+coverage; the focused Python tests and complete native suite above are green.
 
 ## WASM viewer issues #4776–#4778 (sequential)
 

@@ -83,7 +83,7 @@ Debugging a PCH failure? Use the `/pch-debug` skill
 ingested twice and why, before anything is cleaned.
 
 **Rule: restore a byte-identical input's recorded mtime before reusing a
-native PCH. Rebuild on content, size or compile flag changes, or when input
+PCH. Rebuild on content, size or compile flag changes, or when input
 tracking is missing or cannot be repaired.** Forward and backward mtime drift
 both matter; the PCH file's own mtime cannot detect either reliably.
 
@@ -125,8 +125,9 @@ Where it is enforced:
   zccache 1.15.5 or newer, which also repairs inputs before cache restore and
   consumer compilation. Flag changes are tracked by `.flags_hash`. A compiler version
   change wipes the build in `ci/meson/build_config.py`.
-- WASM: `ci/wasm_compile_pch.py` (`check_dependencies_changed`, the order- and
-  root-sensitive `compute_flags_hash`) and `ci/wasm_compile_native.py`
+- WASM: `ci/wasm_compile_pch.py` (`check_dependencies_changed` uses the same
+  input manifest and mtime repair; `compute_flags_hash` tracks flag order and
+  project root) and `ci/wasm_compile_native.py`
   (an object older than the PCH is recompiled).
 - Fail-safe: if a compile still fails with this signature in a header that is
   in a PCH, `ci/meson/compile.py` and `ci/meson/streaming_runner.py` delete

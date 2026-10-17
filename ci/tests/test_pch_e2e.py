@@ -30,6 +30,7 @@ from ci.compile_pch import (
     invalidate_stale_pch,
     is_pch_redefinition_error,
     purge_pch_artifacts,
+    write_pch_input_manifest,
 )
 from ci.wasm_compile_pch import check_dependencies_changed, compute_flags_hash
 
@@ -293,12 +294,31 @@ class TestWasmPchDependencies(unittest.TestCase):
         _set_mtime(header, 1)
         _set_mtime(depfile, 2)
         _set_mtime(pch, 3)
+        write_pch_input_manifest(pch, [header])
         self.header, self.depfile, self.pch = header, depfile, pch
 
-    def test_touched_dependency_rebuilds_even_with_older_depfile(self) -> None:
+    def test_touched_dependency_is_repaired_even_with_older_depfile(self) -> None:
         with TemporaryDirectory() as tmp:
             self._setup(tmp)
             _set_mtime(self.header, 4)
+            changed, reason = check_dependencies_changed(self.depfile, self.pch)
+            self.assertFalse(changed, reason)
+            self.assertEqual(self.header.stat().st_mtime_ns, 1_000_000_000)
+
+    def test_backwards_dependency_mtime_is_repaired(self) -> None:
+        with TemporaryDirectory() as tmp:
+            self._setup(tmp)
+            _set_mtime(self.header, 0)
+            self.assertEqual(
+                check_dependencies_changed(self.depfile, self.pch), (False, "")
+            )
+            self.assertEqual(self.header.stat().st_mtime_ns, 1_000_000_000)
+
+    def test_real_dependency_edit_with_old_mtime_rebuilds(self) -> None:
+        with TemporaryDirectory() as tmp:
+            self._setup(tmp)
+            self.header.write_text("#pragma once\nint edited;\n", encoding="utf-8")
+            _set_mtime(self.header, 1)
             changed, reason = check_dependencies_changed(self.depfile, self.pch)
             self.assertTrue(changed, reason)
 

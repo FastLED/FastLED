@@ -41,6 +41,7 @@ from pathlib import Path
 
 from running_process import PIPE, RunningProcess
 
+from ci.compile_pch import reconcile_pch_inputs
 from ci.wasm_flags import get_lib_compile_flags_dict
 from ci.wasm_tools import get_emcc
 
@@ -211,7 +212,7 @@ def parse_dependency_file(depfile: Path) -> list[Path]:
 
 def check_dependencies_changed(depfile: Path, pch_output: Path) -> tuple[bool, str]:
     """
-    Check if any PCH dependencies are newer than the PCH output.
+    Repair identical inputs' mtimes; rebuild when dependencies cannot be reused.
 
     Args:
         depfile: Path to .d dependency file
@@ -221,23 +222,15 @@ def check_dependencies_changed(depfile: Path, pch_output: Path) -> tuple[bool, s
         (changed, reason) tuple
     """
     if not depfile.exists():
-        return False, ""  # No depfile, can't check dependencies
+        return True, "PCH dependency tracking missing"
 
     if not pch_output.exists():
         return True, "PCH output does not exist"
 
-    # Get PCH output modification time
-    pch_mtime = pch_output.stat().st_mtime
-
-    # The depfile is always written before the PCH finishes, so it is normally
-    # OLDER than the PCH. A former "ignore a depfile older than the PCH" guard
-    # therefore disabled this check on every build, and a touched or edited
-    # transitive header never rebuilt the WASM PCH.
-
     # Parse dependencies
     deps = parse_dependency_file(depfile)
     if not deps:
-        return False, ""  # Empty or unparseable depfile
+        return True, "PCH dependency tracking empty or invalid"
 
     # Check each dependency
     for dep in deps:
@@ -246,12 +239,12 @@ def check_dependencies_changed(depfile: Path, pch_output: Path) -> tuple[bool, s
             # Note: This is expected during initial builds or after clean
             return True, f"dependency missing: {dep.name}"
 
-        dep_mtime = dep.stat().st_mtime
-        if dep_mtime > pch_mtime:
-            # Dependency is newer than PCH - rebuild needed
-            return True, f"dependency changed: {dep.name}"
-
-    return False, ""
+    # compile_pch.py writes the manifest for this PCH too. Do not compare with
+    # the PCH file's own mtime: a backwards restore breaks #pragma once just
+    # as a touch does, while a real edit can retain its original timestamp.
+    if reconcile_pch_inputs(pch_output):
+        return False, ""
+    return True, "PCH inputs changed or cannot be repaired"
 
 
 def needs_rebuild(
