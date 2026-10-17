@@ -735,6 +735,7 @@ _PCH_ARTIFACT_SUFFIXES = (
     ".pch.input_hash",
     ".pch.flags_hash",
     ".pch.inputs.json",
+    ".pch.zccache-imports.json",
     ".d.cache",
 )
 

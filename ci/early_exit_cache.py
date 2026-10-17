@@ -66,7 +66,6 @@ NATIVE_SOURCE_EXTS = frozenset(
 NATIVE_BUILD_DRIVERS = (
     "ci/compile_pch.py",
     "ci/meson/compile.py",
-    "ci/meson/native_input_guard.py",
     "ci/meson/streaming.py",
     "ci/meson/cache_utils.py",
     "ci/early_exit_cache.py",
@@ -76,10 +75,10 @@ NATIVE_BUILD_DRIVERS = (
 
 
 def native_source_content_hash(root: Path = Path(".")) -> str:
-    """Verify native source bytes even when a cache restores their mtimes.
+    """Verify native source bytes even when an edit preserves its timestamp.
 
-    Shared by early and ordinary skip gates. Never memoize by metadata: PCH
-    replay deliberately rewinds timestamps. An unreadable input raises so the
+    Shared by early and ordinary skip gates. Never memoize by metadata: source
+    content can change independently of timestamps. An unreadable input raises so the
     caller misses its cache rather than certifying an incomplete tree.
     """
     import hashlib  # noqa: PLC0415 - keep non-cache startup lightweight

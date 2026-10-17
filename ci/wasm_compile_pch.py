@@ -41,7 +41,7 @@ from pathlib import Path
 
 from running_process import PIPE, RunningProcess
 
-from ci.compile_pch import reconcile_pch_inputs
+from ci.compile_pch import hash_input_files
 from ci.wasm_flags import get_lib_compile_flags_dict
 from ci.wasm_tools import get_emcc
 
@@ -194,7 +194,7 @@ def parse_dependency_file(depfile: Path) -> list[Path]:
             try:
                 dep_path = Path(dep).resolve()
                 # Filter out the target itself (shouldn't be in deps, but be safe)
-                if dep_path != target and dep_path.exists():
+                if dep_path != target:
                     dep_paths.append(dep_path)
             except (ValueError, OSError):
                 # Skip invalid paths
@@ -212,7 +212,7 @@ def parse_dependency_file(depfile: Path) -> list[Path]:
 
 def check_dependencies_changed(depfile: Path, pch_output: Path) -> tuple[bool, str]:
     """
-    Repair identical inputs' mtimes; rebuild when dependencies cannot be reused.
+    Compare dependency contents without modifying shared source timestamps.
 
     Args:
         depfile: Path to .d dependency file
@@ -239,12 +239,16 @@ def check_dependencies_changed(depfile: Path, pch_output: Path) -> tuple[bool, s
             # Note: This is expected during initial builds or after clean
             return True, f"dependency missing: {dep.name}"
 
-    # compile_pch.py writes the manifest for this PCH too. Do not compare with
-    # the PCH file's own mtime: a backwards restore breaks #pragma once just
-    # as a touch does, while a real edit can retain its original timestamp.
-    if reconcile_pch_inputs(pch_output):
-        return False, ""
-    return True, "PCH inputs changed or cannot be repaired"
+    # Compare content without changing shared source timestamps. Consumers
+    # receive the PCH's recorded timestamps through zccache's private overlay.
+    hash_file = Path(str(pch_output) + ".input_hash")
+    try:
+        stored = hash_file.read_text(encoding="utf-8").strip()
+    except OSError:
+        return True, "PCH input hash missing"
+    if hash_input_files(deps) != stored:
+        return True, "PCH input content changed"
+    return False, ""
 
 
 def needs_rebuild(

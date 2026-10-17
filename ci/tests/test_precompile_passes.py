@@ -21,7 +21,7 @@ from pathlib import Path
 
 from typeguard import typechecked
 
-from ci.compile_pch import hash_input_files, write_pch_input_manifest
+from ci.compile_pch import hash_input_files
 from ci.meson.compile import (
     _precompile_passes_can_be_skipped,
     _run_precompile_passes,
@@ -56,7 +56,6 @@ def _build_dir_with_pch(root: Path) -> _PchLayout:
         hash_input_files([header]), encoding="utf-8"
     )
     Path(str(pch) + ".flags_hash").write_text("flags", encoding="utf-8")
-    write_pch_input_manifest(pch, [header])
 
     _write_precompile_mtime_marker(build_dir, build_ninja.stat().st_mtime)
     return _PchLayout(build_dir, pch, header)

@@ -7,16 +7,11 @@ once`` fails to dedupe, and the build dies with "redefinition of ...".
 
 from __future__ import annotations
 
-import os
 import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from ci.compile_pch import (
-    hash_compile_flags,
-    reconcile_pch_inputs,
-    write_pch_input_manifest,
-)
+from ci.compile_pch import hash_compile_flags, is_stale_pch_error
 from ci.meson.path_normalization import find_ninja_strict_path_violations
 
 
@@ -66,72 +61,37 @@ class TestCompileFlagsHash(unittest.TestCase):
         )
 
 
-class TestReconcilePchInputs(unittest.TestCase):
-    """Unchanged content with a drifted mtime is repaired, never rebuilt; real changes rebuild."""
-
-    RECORDED_NS = 1_000_000_000
-
-    def _setup(self, tmp: str) -> tuple[Path, Path]:
-        header = Path(tmp) / "a.h"
-        pch = Path(tmp) / "a.h.pch"
-        header.write_text("#pragma once\nint x;\n", encoding="utf-8")
-        pch.write_bytes(b"pch")
-        os.utime(header, ns=(self.RECORDED_NS, self.RECORDED_NS))
-        write_pch_input_manifest(pch, [header])
-        return header, pch
-
-    def test_untouched_inputs_are_reusable(self) -> None:
+class TestStalePchDiagnostics(unittest.TestCase):
+    def test_zccache_refusal_must_name_a_pch_in_this_build(self) -> None:
         with TemporaryDirectory() as tmp:
-            _, pch = self._setup(tmp)
-            self.assertTrue(reconcile_pch_inputs(pch))
-
-    def test_touched_identical_input_gets_recorded_mtime_back(self) -> None:
-        with TemporaryDirectory() as tmp:
-            header, pch = self._setup(tmp)
-            os.utime(header, ns=(3_000_000_000, 3_000_000_000))
-            self.assertTrue(reconcile_pch_inputs(pch))
-            self.assertEqual(header.stat().st_mtime_ns, self.RECORDED_NS)
-
-    def test_backwards_mtime_is_repaired_too(self) -> None:
-        """The old newer-than-the-PCH check missed this direction."""
-        with TemporaryDirectory() as tmp:
-            header, pch = self._setup(tmp)
-            os.utime(header, ns=(500_000_000, 500_000_000))
-            self.assertTrue(reconcile_pch_inputs(pch))
-            self.assertEqual(header.stat().st_mtime_ns, self.RECORDED_NS)
-
-    def test_same_size_content_change_rebuilds(self) -> None:
-        with TemporaryDirectory() as tmp:
-            header, pch = self._setup(tmp)
-            header.write_text("#pragma once\nint y;\n", encoding="utf-8")
-            os.utime(header, ns=(self.RECORDED_NS, self.RECORDED_NS))
-            # Same size and same mtime: only the content hash can tell.
-            self.assertFalse(reconcile_pch_inputs(pch))
-
-    def test_size_change_rebuilds(self) -> None:
-        with TemporaryDirectory() as tmp:
-            header, pch = self._setup(tmp)
-            header.write_text("#pragma once\nint xy;\n", encoding="utf-8")
-            self.assertFalse(reconcile_pch_inputs(pch))
-
-    def test_corrupt_manifest_rebuilds(self) -> None:
-        with TemporaryDirectory() as tmp:
-            _, pch = self._setup(tmp)
-            manifest = Path(str(pch) + ".inputs.json")
-            for contents in ("null", "{}", "[]", '[{"path": "a.h"}]'):
-                with self.subTest(contents=contents):
-                    manifest.write_text(contents, encoding="utf-8")
-                    self.assertFalse(reconcile_pch_inputs(pch))
-
-    def test_missing_input_or_manifest_rebuilds(self) -> None:
-        with TemporaryDirectory() as tmp:
-            header, pch = self._setup(tmp)
-            header.unlink()
-            self.assertFalse(reconcile_pch_inputs(pch))
-        with TemporaryDirectory() as tmp:
-            pch = Path(tmp) / "no_manifest.pch"
+            build = Path(tmp)
+            pch = build / "test.h.pch"
             pch.write_bytes(b"pch")
-            self.assertFalse(reconcile_pch_inputs(pch))
+            prefix = (
+                "zccache[err][R]: daemon response failure (daemon-error): "
+                "PCH input validation failed; rebuild the PCH: "
+            )
+            self.assertTrue(
+                is_stale_pch_error(prefix + str(pch) + ": unreadable", build)
+            )
+            self.assertFalse(
+                is_stale_pch_error(
+                    prefix + str(build / "other.pch") + ": unreadable", build
+                )
+            )
+            self.assertFalse(
+                is_stale_pch_error(prefix + str(pch) + ".other: error", build)
+            )
+            self.assertFalse(
+                is_stale_pch_error(
+                    'source.cpp:1: error: "' + prefix + str(pch) + ':"', build
+                )
+            )
+            self.assertFalse(
+                is_stale_pch_error(
+                    "zccache[err][R]: compiler failed: syntax error", build
+                )
+            )
 
 
 class TestNinjaStrictPathViolations(unittest.TestCase):

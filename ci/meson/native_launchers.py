@@ -257,6 +257,16 @@ def _find_zccache_binary() -> Optional[str]:
     return None
 
 
+def wrap_compiler_with_zccache(command: list[str]) -> list[str]:
+    """Route PCH producers and consumers through zccache's private input view."""
+    if not command or Path(command[0]).stem.lower() == "zccache":
+        return command
+    cache = _find_zccache_binary()
+    if cache is None:
+        raise RuntimeError("zccache is required for safe PCH compilation")
+    return [cache, *command]
+
+
 def get_zccache_version(zccache_path: Optional[str] = None) -> str:
     """
     Get zccache version string for cache invalidation.
