@@ -246,7 +246,7 @@ class TestPchEndToEnd(unittest.TestCase):
         env = dict(os.environ, PYTHONPATH=str(ROOT))
         tu = self.dir / "obj.cpp"
         tu.write_text(f'#include "{self.header}"\nint f() {{ return 1; }}\n')
-        obj = self.dir / "obj.o"
+        obj = self.dir / "obj.obj"
         cmd = [
             sys.executable,
             str(COMPILE_PCH),
@@ -264,6 +264,8 @@ class TestPchEndToEnd(unittest.TestCase):
             r = _run(cmd, cwd=ROOT, env=env)
             self.assertEqual(r.returncode, 0, r.stderr)
             self.assertNotIn("skipping compilation", r.stderr)
+            self.assertTrue(Path(str(obj) + ".input_hash").exists())
+            self.assertFalse(Path(str(obj) + ".inputs.json").exists())
 
     # -- fail-safe detection ------------------------------------------------
 

@@ -563,7 +563,8 @@ def main() -> int:
                 if input_files:
                     # Manifest first: an input hash without a manifest makes
                     # reconcile_pch_inputs() report "rebuild", never "reuse".
-                    write_pch_input_manifest(pch_output, input_files)
+                    if pch_output.suffix == ".pch":
+                        write_pch_input_manifest(pch_output, input_files)
                     current_hash = hash_input_files(input_files)
                     hash_file.write_text(current_hash, encoding="utf-8")
             except KeyboardInterrupt as ki:
