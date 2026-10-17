@@ -10,7 +10,7 @@
 - [x] Upgrade OBS standalone zccache and soldr's embedded dependency.
 - [x] Run lint, native checks and code review; publish scoped feature PRs.
 
-Validation: 60 focused PCH/cache tests pass, including real Clang forward and
+Validation: 61 focused PCH/cache tests pass, including real Clang forward and
 backward timestamp repair, unchanged PCH bytes/mtime, and real-edit rebuilds.
 `bash lint` passes and `bash test --cpp` passes all 321 unit tests and 96
 examples. A real Emscripten PCH build passed; moving its input header mtime

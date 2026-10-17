@@ -372,6 +372,12 @@ def invalidate_stale_pch(pch_file: Path) -> None:
     try:
         input_files = parse_depfile_inputs(saved_depfile)
         if not input_files:
+            print(
+                f"PCH dependency tracking invalid — removing {pch_file.name} to force rebuild",
+                file=sys.stderr,
+            )
+            pch_file.unlink(missing_ok=True)
+            hash_file.unlink(missing_ok=True)
             return
         current_hash = hash_input_files(input_files)
         stored_hash = hash_file.read_text(encoding="utf-8").strip()

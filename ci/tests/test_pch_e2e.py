@@ -221,6 +221,15 @@ class TestPchEndToEnd(unittest.TestCase):
         self.assertEqual(before, (self.pch.stat().st_mtime_ns, self.pch.read_bytes()))
         self._assert_compiles()
 
+    def test_invalid_dependency_tracking_rebuilds(self) -> None:
+        Path(str(self.depfile) + ".cache").write_text(
+            "invalid depfile", encoding="utf-8"
+        )
+        invalidate_stale_pch(self.pch)
+        self.assertFalse(self.pch.exists())
+        self._build_pch()
+        self._assert_compiles()
+
     def test_flag_change_rebuilds_pch(self) -> None:
         before = self.pch.stat().st_mtime_ns
         PCH_BUILD_FLAGS.append("-DFL_PCH_E2E_FLAG=1")
