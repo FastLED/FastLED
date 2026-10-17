@@ -49,6 +49,22 @@ class TestMesonNativeToolchain(unittest.TestCase):
                     build_mode="quick",
                 )
 
+    def test_old_or_unknown_zccache_fails_during_setup(self) -> None:
+        for version in ("zccache 1.15.5", "", "unknown"):
+            with self.subTest(version=version), TemporaryDirectory() as temp_dir:
+                markers = MarkerPaths.for_build_dir(Path(temp_dir))
+                markers.zccache_version.write_text("zccache 1.15.6", encoding="utf-8")
+                with patch(
+                    "ci.meson.meson_setup_execute.get_zccache_version",
+                    return_value=version,
+                ):
+                    with self.assertRaisesRegex(RuntimeError, "1.15.6"):
+                        detect_compiler_and_cache(
+                            markers,
+                            verbose=False,
+                            build_mode="quick",
+                        )
+
     @staticmethod
     def _compiler() -> CompilerDetection:
         return CompilerDetection(
