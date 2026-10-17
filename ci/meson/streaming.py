@@ -33,6 +33,7 @@ from ci.meson.mtime_stabilizer import (
     restore_executable_bits,
     stabilize_dll_mtimes,
 )
+from ci.meson.native_input_guard import save_native_inputs
 from ci.meson.output import print_error, print_success
 from ci.meson.phase_tracker import PhaseTracker
 from ci.meson.zccache_retry import (
@@ -185,7 +186,7 @@ def stream_compile_only(
         build_optimizer: Optional BuildOptimizer for DLL relink suppression.
         build_timer: Optional BuildTimer for recording compile_done checkpoint.
     """
-    _run_precompile_passes(build_dir)
+    native_inputs = _run_precompile_passes(build_dir)
     cmd = [get_meson_executable(), "compile", "-C", str(build_dir)]
 
     # Determine build mode from build directory name
@@ -676,6 +677,7 @@ def stream_compile_only(
         # Same cache-restore defect, different attribute: cached link results
         # come back without the executable bit (FastLED#4205).
         restore_executable_bits(build_dir, verbose=verbose)
+        save_native_inputs(native_inputs)
 
     return CompileOnlyResult(
         success=not compilation_failed,

@@ -189,6 +189,8 @@ Run from the repo root, against the build dir that failed (`--build-dir
 - **Ordinary native objects:** Ninja sees source timestamps unchanged by
   zccache. Source-content signatures additionally guard early test-result,
   fingerprint and Ninja skip caches against timestamp-preserving edits.
+  The native input guard invalidates objects when changed content is hidden
+  by preserved timestamps, including partial builds; it never rewrites sources.
 
 ## Minimal repros: what they can and cannot prove
 

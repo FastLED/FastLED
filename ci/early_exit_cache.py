@@ -66,6 +66,7 @@ NATIVE_SOURCE_EXTS = frozenset(
 NATIVE_BUILD_DRIVERS = (
     "ci/compile_pch.py",
     "ci/meson/compile.py",
+    "ci/meson/native_input_guard.py",
     "ci/meson/streaming.py",
     "ci/meson/cache_utils.py",
     "ci/early_exit_cache.py",

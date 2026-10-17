@@ -136,7 +136,8 @@ Where it is enforced:
   toolchain, also covers WASM, and is in the routine CI Python smoke list.
 
 Source timestamps are never replayed, so ordinary Ninja dependencies remain
-valid across build directories. No per-object timestamp-repair guard is needed.
+valid across build directories. The native input guard still invalidates objects
+after real content changes hidden by preserved timestamps; it never changes source mtimes.
 Early test-result, fingerprint and Ninja skip caches still verify source
 content, including `src/fl/build/`, to detect edits that preserve timestamps.
 

@@ -176,21 +176,14 @@ def detect_compiler_and_cache(
     Caches the compiler and zccache version strings via marker mtimes so we
     skip the ~3.6s probe process unless the binary itself has changed.
     """
-    in_docker = os.environ.get("FASTLED_DOCKER", "0") == "1"
-
-    cache_binary: Optional[str] = None
-    cache_name: Optional[str] = None
-    if not in_docker:
-        zccache_binary = _find_zccache_binary()
-        if zccache_binary:
-            cache_binary = zccache_binary
-            cache_name = "zccache"
-        else:
-            _ts_print(
-                "[MESON] zccache not found, compilation will proceed without caching. To install, run: bash ./install"
-            )
-    else:
-        _ts_print("[MESON] Skipping compiler cache in Docker (startup delay too long)")
+    # Private PCH inputs require the same wrapper for producers and consumers,
+    # including Docker. Reject an incomplete installation during setup.
+    cache_binary = _find_zccache_binary()
+    if cache_binary is None:
+        raise RuntimeError(
+            "zccache is required for safe PCH compilation; run: bash ./install"
+        )
+    cache_name = "zccache"
 
     clang_wrapper = shutil.which("clang-tool-chain-c")
     clangxx_wrapper = shutil.which("clang-tool-chain-cpp")
@@ -260,10 +253,7 @@ def detect_compiler_and_cache(
             current_zccache_version = get_zccache_version(cache_binary)
 
     if verbose:
-        if cache_name:
-            print(f"Toolchain: {current_compiler_version} + {cache_name}")
-        else:
-            print(f"Toolchain: {current_compiler_version}")
+        print(f"Toolchain: {current_compiler_version} + {cache_name}")
 
     return CompilerDetection(
         clang_wrapper=clang_wrapper,

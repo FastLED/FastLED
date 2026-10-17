@@ -369,7 +369,7 @@ class TestWasmPchDependencies(unittest.TestCase):
         _set_mtime(depfile, 2)
         _set_mtime(pch, 3)
         Path(str(pch) + ".input_hash").write_text(
-            hash_input_files([header]), encoding="utf-8"
+            hash_input_files([header.resolve()]), encoding="utf-8"
         )
         self.header, self.depfile, self.pch = header, depfile, pch
 
