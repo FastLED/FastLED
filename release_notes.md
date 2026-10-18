@@ -1,5 +1,15 @@
-
-
+FastLED 3.10.8
+=============================
+  * **Compatibility with C library and standard C++ calls on FastLED types (#4827)**
+    * Unqualified `memset`, `memcpy`, `memmove`, `free`, and other libc calls on `CRGB` pointers compile again. Standard algorithms such as `std::sort` and `std::reverse` no longer collide with FastLED's generic functions.
+    * The public `fl::sort` and `fl::move` calls remain available. Bare calls that previously found FastLED's generic algorithms only through argument-dependent lookup should use the explicit `fl::` qualifier.
+    * Lint and compile tests guard the libc wrappers and the algorithm lookup rules against regressions (#4833, #4835, #4841, #4853, #4854).
+  * **Platform and build fixes**
+    * The ESP32 Arduino 4 / ESP-IDF 6 release candidate builds the Test example; its board build is included in CI (#4830).
+    * SD file error overrides match their `noexcept` contract on ESP32 (#4828).
+    * Native, Windows, and WASM builds use zccache 1.15.6 or newer to validate precompiled-header inputs in private snapshots while leaving shared source timestamps unchanged. Real content and compiler-setting changes still invalidate stale outputs (#4839, #4843, #4865, #4866).
+    * Mega (ATmega2560) joins the board build matrix; fbuild is pinned to 2.5.42 (#4858, #4859).
+    * QEMU smoke tests and the Test example avoid the ESP32 emulator timing failures (#4856, #4857).
 
 FastLED 3.10.7
 =============================
