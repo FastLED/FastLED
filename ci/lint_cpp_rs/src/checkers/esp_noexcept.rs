@@ -23,9 +23,11 @@ impl FileContentChecker for EspNoexceptChecker {
     }
 
     fn should_process_file(&self, path: &str, root: &Path) -> bool {
-        ends_with_any(path, &[".h", ".hpp", ".cpp"])
-            && is_under_project_subpath(&normalize_path(path), root, "src/platforms/esp")
-            && !normalize_path(path).contains("/third_party/")
+        let path = normalize_path(path);
+        ends_with_any(&path, &[".h", ".hpp", ".cpp"])
+            && (is_under_project_subpath(&path, root, "src/platforms/esp")
+                || is_under_project_subpath(&path, root, "src/fl/fs/sd"))
+            && !path.contains("/third_party/")
     }
 
     fn check_file_content(&self, file: &FileContent) -> Vec<(usize, String)> {
@@ -685,6 +687,24 @@ mod esp_noexcept_tests {
     }
 
     #[test]
+    fn esp_noexcept_checks_both_optional_sd_backend_branches() {
+        let source = include_str!("../../../../src/fl/fs/sd/fs_sdcard_arduino.cpp.hpp");
+        assert!(check(source).is_empty(), "{:?}", check(source));
+        let mut broken = source.to_owned();
+        for signature in [
+            "has_error() const",
+            "clear_error()",
+            "error_code() const",
+            "error_message() const",
+        ] {
+            broken = broken.replace(&format!("{signature} FL_NO_EXCEPT"), signature);
+        }
+        let hits = check(&broken);
+        assert_eq!(hits.len(), 8, "{hits:?}");
+        assert!(hits.iter().all(|hit| hit.1.starts_with("Missing")));
+    }
+
+    #[test]
     fn esp_noexcept_scopes_all_esp_source_extensions() {
         let checker = EspNoexceptChecker;
         for path in [
@@ -692,6 +712,7 @@ mod esp_noexcept_tests {
             "src/platforms/esp/32/foo.hpp",
             "src/platforms/esp/32/foo.cpp.hpp",
             "src/platforms/esp/8266/foo.cpp",
+            "src/fl/fs/sd/fs_sdcard_arduino.cpp.hpp",
         ] {
             assert!(checker.should_process_file(path, Path::new(".")));
         }

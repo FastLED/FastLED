@@ -241,6 +241,8 @@ Cache modules are in `ci/*_lint_cache.py`:
 `./lint` and single-file lint. It needs no ESP SDK provisioning or separate CI
 workflow. The checker parses source under `src/platforms/esp/` before
 preprocessing, so inactive branches and implementation files are checked too.
+The optional SD adapters in `src/fl/fs/sd/` are included as well, covering
+both Arduino SD and SdFat exception contracts from #4826.
 
 Add `FL_NO_EXCEPT` to matching declarations and definitions. Destructors,
 defaulted/deleted functions, function pointer types, and external C declarations

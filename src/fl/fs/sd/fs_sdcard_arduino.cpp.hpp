@@ -47,7 +47,7 @@ private:
     string _path;
 
 public:
-    SdFatFileHandle(SdFile file, const char* path) : _file(fl::move(file)), _path(path) {}
+    SdFatFileHandle(SdFile file, const char* path) FL_NO_EXCEPT : _file(fl::move(file)), _path(path) {}
     ~SdFatFileHandle() FL_NO_EXCEPT override {
         if (_file.isOpen()) {
             _file.close();
@@ -105,7 +105,7 @@ private:
     string _path;
 
 public:
-    SDFileHandle(File file, const char* path) : _file(file), _path(path) {}
+    SDFileHandle(File file, const char* path) FL_NO_EXCEPT : _file(file), _path(path) {}
     ~SDFileHandle() FL_NO_EXCEPT override {
         if (_file) {
             _file.close();
@@ -174,7 +174,7 @@ private:
 #endif
 
 public:
-    FsArduino(int cs_pin) : _cs_pin(cs_pin) {}
+    FsArduino(int cs_pin) FL_NO_EXCEPT : _cs_pin(cs_pin) {}
 
     bool begin() FL_NO_EXCEPT override {
 #ifdef USE_SDFAT

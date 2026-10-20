@@ -19,7 +19,7 @@ grouped by related policy area:
   checks plus attribute, `FL_IS_*`, and numeric limit macro checks.
 - `style.rs`: platform/raw pragma, raw noexcept, singleton, `std::`,
   example serial, namespace-after-include, and namespace declaration checks.
-- `esp_noexcept.rs`: parse ESP source with tree-sitter C++ and require
+- `esp_noexcept.rs`: parse ESP source and SD adapters with tree-sitter C++ and require
   `FL_NO_EXCEPT` on function declarations and definitions, including inactive
   conditional branches and signature-generating macro bodies. Unparsed syntax
   fails rather than silently skipping a function.
