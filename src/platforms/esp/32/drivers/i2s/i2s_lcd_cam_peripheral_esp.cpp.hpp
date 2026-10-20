@@ -49,7 +49,7 @@ namespace detail {
 bool IRAM_ATTR i2s_lcd_cam_flush_ready(
     esp_lcd_panel_io_handle_t panel_io,
     esp_lcd_panel_io_event_data_t* edata,
-    void* user_ctx) { // ok no noexcept — matches friend decl in header
+    void* user_ctx) FL_NO_EXCEPT { // ok no noexcept — matches friend decl in header
 
     I2sLcdCamPeripheralEsp* self = static_cast<I2sLcdCamPeripheralEsp*>(user_ctx);
 

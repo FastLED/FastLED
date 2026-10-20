@@ -46,7 +46,7 @@ constexpr size_t platformPoolWords() FL_NO_EXCEPT {
 RmtMemoryManager4 &RmtMemoryManager4::instance() FL_NO_EXCEPT {
     // Function-local static: single global manager, constructed on
     // first use with the platform's pool size baked in.
-    static RmtMemoryManager4 sInstance(platformPoolWords());
+    static RmtMemoryManager4 sInstance{platformPoolWords()};
     return sInstance;
 }
 

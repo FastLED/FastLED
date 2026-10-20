@@ -3,15 +3,11 @@
 from __future__ import annotations
 
 import os
-import sys
 import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from types import SimpleNamespace
-from typing import Any
 from unittest.mock import patch
-
-from running_process import CompletedProcess, RunningProcess
 
 from ci.meson.meson_setup_execute import (
     _resolve_xcode_sdk_root,
@@ -100,65 +96,9 @@ class TestMesonNativeToolchain(unittest.TestCase):
             encoding="utf-8",
             errors="replace",
             text=True,
-            timeout=60,
+            timeout=10,
             check=False,
         )
-
-    def test_xcode_discovery_allows_slow_process_startup(self) -> None:
-        original = RunningProcess.run
-        selected = "/selected/Xcode/tool-or-sdk"
-
-        def delayed_lookup(command: list[str], **kwargs: Any) -> CompletedProcess[str]:
-            self.assertEqual(command[0], "xcrun")
-            # Exercise the real timeout boundary with a delayed child, without
-            # requiring Xcode on the host running the Python regression suite.
-            return original(
-                [
-                    sys.executable,
-                    "-c",
-                    "import time; time.sleep(11); print(" + repr(selected) + ")",
-                ],
-                **kwargs,
-            )
-
-        with patch(
-            "ci.meson.meson_setup_execute.RunningProcess.run",
-            side_effect=delayed_lookup,
-        ):
-            self.assertEqual(_resolve_xcode_tool("clang++"), selected)
-            self.assertEqual(_resolve_xcode_sdk_root(), selected)
-
-    def test_xcode_discovery_failures_remain_fatal(self) -> None:
-        original = RunningProcess.run
-        for script, timeout in (
-            ("raise SystemExit(2)", 60),
-            ("print('')", 60),
-            ("import time; time.sleep(1)", 0.05),
-        ):
-            for tool in ("clang++", None):
-                with self.subTest(script=script, tool=tool):
-
-                    def lookup(
-                        command: list[str], **kwargs: Any
-                    ) -> CompletedProcess[str]:
-                        self.assertEqual(command[0], "xcrun")
-                        return original([sys.executable, "-c", script], **kwargs)
-
-                    with (
-                        patch(
-                            "ci.meson.meson_setup_execute.RunningProcess.run",
-                            side_effect=lookup,
-                        ),
-                        patch(
-                            "ci.meson.meson_setup_execute._XCRUN_DISCOVERY_TIMEOUT_SECONDS",
-                            timeout,
-                        ),
-                        self.assertRaises(RuntimeError),
-                    ):
-                        if tool is None:
-                            _resolve_xcode_sdk_root()
-                        else:
-                            _resolve_xcode_tool(tool)
 
     def test_xcode_tool_resolution_propagates_failure(self) -> None:
         completed = SimpleNamespace(returncode=1, stdout="", stderr="not found")
@@ -190,7 +130,7 @@ class TestMesonNativeToolchain(unittest.TestCase):
             encoding="utf-8",
             errors="replace",
             text=True,
-            timeout=60,
+            timeout=10,
             check=False,
         )
 

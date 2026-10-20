@@ -766,23 +766,23 @@ public: \
     TIMETYPE mPrevTrigger;  \
     TIMETYPE mPeriod;   \
     \
-    NAME() FL_NO_EXCEPT { reset(); mPeriod = 1; }; \
-    NAME(TIMETYPE period) FL_NO_EXCEPT { reset(); setPeriod(period); };    \
-    void setPeriod( TIMETYPE period) FL_NO_EXCEPT { mPeriod = period; }; \
-    TIMETYPE getTime() FL_NO_EXCEPT { return (TIMETYPE)(TIMEGETTER()); };    \
-    TIMETYPE getPeriod() FL_NO_EXCEPT { return mPeriod; };   \
-    TIMETYPE getElapsed() FL_NO_EXCEPT { return getTime() - mPrevTrigger; }  \
-    TIMETYPE getRemaining() FL_NO_EXCEPT { return mPeriod - getElapsed(); }  \
-    TIMETYPE getLastTriggerTime() FL_NO_EXCEPT { return mPrevTrigger; }  \
-    bool ready() FL_NO_EXCEPT { \
+    NAME() { reset(); mPeriod = 1; }; \
+    NAME(TIMETYPE period) { reset(); setPeriod(period); };    \
+    void setPeriod( TIMETYPE period) { mPeriod = period; }; \
+    TIMETYPE getTime() { return (TIMETYPE)(TIMEGETTER()); };    \
+    TIMETYPE getPeriod() { return mPeriod; };   \
+    TIMETYPE getElapsed() { return getTime() - mPrevTrigger; }  \
+    TIMETYPE getRemaining() { return mPeriod - getElapsed(); }  \
+    TIMETYPE getLastTriggerTime() { return mPrevTrigger; }  \
+    bool ready() { \
         bool isReady = (getElapsed() >= mPeriod);   \
         if( isReady ) { reset(); }  \
         return isReady; \
     }   \
-    void reset() FL_NO_EXCEPT { mPrevTrigger = getTime(); }; \
-    void trigger() FL_NO_EXCEPT { mPrevTrigger = getTime() - mPeriod; }; \
+    void reset() { mPrevTrigger = getTime(); }; \
+    void trigger() { mPrevTrigger = getTime() - mPeriod; }; \
         \
-    operator bool() FL_NO_EXCEPT { return ready(); } \
+    operator bool() { return ready(); } \
 };
 
 /// @name CEveryNTime Base Classes

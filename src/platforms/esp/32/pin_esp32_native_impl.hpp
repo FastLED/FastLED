@@ -218,6 +218,7 @@ struct LedcPinAlloc {
 };
 
 // okay static in header
+#if FL_LEDC_MAX_CHANNELS >= 8
 static LedcPinAlloc g_ledc_alloc[FL_LEDC_MAX_CHANNELS] = {
     {-1, LEDC_CHANNEL_0, LEDC_TIMER_0, 0, 0},
     {-1, LEDC_CHANNEL_1, LEDC_TIMER_0, 0, 0},
@@ -225,11 +226,19 @@ static LedcPinAlloc g_ledc_alloc[FL_LEDC_MAX_CHANNELS] = {
     {-1, LEDC_CHANNEL_3, LEDC_TIMER_1, 0, 0},
     {-1, LEDC_CHANNEL_4, LEDC_TIMER_2, 0, 0},
     {-1, LEDC_CHANNEL_5, LEDC_TIMER_2, 0, 0},
-#if FL_LEDC_MAX_CHANNELS >= 8
     {-1, LEDC_CHANNEL_6, LEDC_TIMER_3, 0, 0},
     {-1, LEDC_CHANNEL_7, LEDC_TIMER_3, 0, 0},
-#endif
 };
+#else
+static LedcPinAlloc g_ledc_alloc[FL_LEDC_MAX_CHANNELS] = {
+    {-1, LEDC_CHANNEL_0, LEDC_TIMER_0, 0, 0},
+    {-1, LEDC_CHANNEL_1, LEDC_TIMER_0, 0, 0},
+    {-1, LEDC_CHANNEL_2, LEDC_TIMER_1, 0, 0},
+    {-1, LEDC_CHANNEL_3, LEDC_TIMER_1, 0, 0},
+    {-1, LEDC_CHANNEL_4, LEDC_TIMER_2, 0, 0},
+    {-1, LEDC_CHANNEL_5, LEDC_TIMER_2, 0, 0},
+};
+#endif
 
 inline bool needsPwmIsrFallback(int /*pin*/, u32 frequency_hz) FL_NO_EXCEPT {
     // LEDC peripheral supports roughly 10 Hz to 40 MHz.

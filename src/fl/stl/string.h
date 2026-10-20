@@ -266,9 +266,9 @@ class string : public string_n<FASTLED_STR_INLINED_SIZE> {
 #endif
 
 #if FL_STRING_NEEDS_ARDUINO_CONVERSION
-    string(const ::String& str) FL_NO_EXCEPT;
+    string(const ::String& str);
     string& operator=(const ::String& str) FL_NO_EXCEPT;
-    string& append(const ::String& str) FL_NO_EXCEPT;
+    string& append(const ::String& str);
 #endif
 
 

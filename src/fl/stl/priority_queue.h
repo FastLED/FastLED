@@ -12,7 +12,7 @@ namespace fl {
 
 // Custom heap operations
 template <typename Iterator, typename Compare>
-void sift_down(Iterator first, Iterator last, Iterator start, Compare comp) FL_NO_EXCEPT {
+void sift_down(Iterator first, Iterator last, Iterator start, Compare comp) {
     auto root = start;
     auto child = first + 2 * (root - first) + 1;
 
@@ -35,7 +35,7 @@ void sift_down(Iterator first, Iterator last, Iterator start, Compare comp) FL_N
 }
 
 template <typename Iterator, typename Compare>
-void push_heap(Iterator first, Iterator last, Compare comp) FL_NO_EXCEPT {
+void push_heap(Iterator first, Iterator last, Compare comp) {
     auto pos = last - 1;
     auto parent = first + ((pos - first) - 1) / 2;
 
@@ -49,13 +49,13 @@ void push_heap(Iterator first, Iterator last, Compare comp) FL_NO_EXCEPT {
     }
 }
 
-template <typename Iterator> void push_heap(Iterator first, Iterator last) FL_NO_EXCEPT {
+template <typename Iterator> void push_heap(Iterator first, Iterator last) {
     using value_type = typename fl::remove_reference<decltype(*first)>::type;
     push_heap(first, last, [](const value_type &a, const value_type &b) { return a < b; });
 }
 
 template <typename Iterator, typename Compare>
-void pop_heap(Iterator first, Iterator last, Compare comp) FL_NO_EXCEPT {
+void pop_heap(Iterator first, Iterator last, Compare comp) {
     --last;
     auto tmp = *first;
     *first = *last;
@@ -64,7 +64,7 @@ void pop_heap(Iterator first, Iterator last, Compare comp) FL_NO_EXCEPT {
     sift_down(first, last, first, comp);
 }
 
-template <typename Iterator> void pop_heap(Iterator first, Iterator last) FL_NO_EXCEPT {
+template <typename Iterator> void pop_heap(Iterator first, Iterator last) {
     using value_type = typename fl::remove_reference<decltype(*first)>::type;
     pop_heap(first, last, [](const value_type &a, const value_type &b) { return a < b; });
 }
@@ -78,66 +78,66 @@ class PriorityQueue {
     using compare_type = Compare;
 
     PriorityQueue() FL_NO_EXCEPT = default;
-    explicit PriorityQueue(memory_resource* resource) FL_NO_EXCEPT : _data(resource) {}
-    explicit PriorityQueue(const Compare &comp) FL_NO_EXCEPT : _comp(comp) {}
-    PriorityQueue(const Compare &comp, memory_resource* resource) FL_NO_EXCEPT : _data(resource), _comp(comp) {}
+    explicit PriorityQueue(memory_resource* resource) : _data(resource) {}
+    explicit PriorityQueue(const Compare &comp) : _comp(comp) {}
+    PriorityQueue(const Compare &comp, memory_resource* resource) : _data(resource), _comp(comp) {}
 
-    void push(const T &value) FL_NO_EXCEPT {
+    void push(const T &value) {
         _data.push_back(value);
         push_heap(_data.begin(), _data.end(), _comp);
     }
 
-    void push(T &&value) FL_NO_EXCEPT {
+    void push(T &&value) {
         _data.push_back(fl::move(value));
         push_heap(_data.begin(), _data.end(), _comp);
     }
 
     template<typename... Args>
-    void emplace(Args&&... args) FL_NO_EXCEPT {
+    void emplace(Args&&... args) {
         _data.emplace_back(fl::forward<Args>(args)...);
         push_heap(_data.begin(), _data.end(), _comp);
     }
 
-    void pop() FL_NO_EXCEPT {
+    void pop() {
         pop_heap(_data.begin(), _data.end(), _comp);
         _data.pop_back();
     }
 
-    const T &top() const FL_NO_EXCEPT { return _data.front(); }
+    const T &top() const { return _data.front(); }
 
-    bool empty() const FL_NO_EXCEPT { return _data.size() == 0; }
-    fl::size size() const FL_NO_EXCEPT { return _data.size(); }
+    bool empty() const { return _data.size() == 0; }
+    fl::size size() const { return _data.size(); }
 
-    const Compare &compare() const FL_NO_EXCEPT { return _comp; }
-    memory_resource* get_memory_resource() const FL_NO_EXCEPT { return _data.get_resource(); }
+    const Compare &compare() const { return _comp; }
+    memory_resource* get_memory_resource() const { return _data.get_resource(); }
 
     /// Equality comparison
-    bool operator==(const PriorityQueue& other) const FL_NO_EXCEPT {
+    bool operator==(const PriorityQueue& other) const {
         return _data == other._data;
     }
 
     /// Inequality comparison
-    bool operator!=(const PriorityQueue& other) const FL_NO_EXCEPT {
+    bool operator!=(const PriorityQueue& other) const {
         return _data != other._data;
     }
 
     /// Lexicographic comparison
-    bool operator<(const PriorityQueue& other) const FL_NO_EXCEPT {
+    bool operator<(const PriorityQueue& other) const {
         return _data < other._data;
     }
 
     /// Less-than-or-equal comparison
-    bool operator<=(const PriorityQueue& other) const FL_NO_EXCEPT {
+    bool operator<=(const PriorityQueue& other) const {
         return _data <= other._data;
     }
 
     /// Greater-than comparison
-    bool operator>(const PriorityQueue& other) const FL_NO_EXCEPT {
+    bool operator>(const PriorityQueue& other) const {
         return _data > other._data;
     }
 
     /// Greater-than-or-equal comparison
-    bool operator>=(const PriorityQueue& other) const FL_NO_EXCEPT {
+    bool operator>=(const PriorityQueue& other) const {
         return _data >= other._data;
     }
 
@@ -184,7 +184,7 @@ private:
         u64 mSequence;
 
         // Comparison: primary by value, secondary by sequence (FIFO)
-        bool operator<(const StableElement& other) const FL_NO_EXCEPT {
+        bool operator<(const StableElement& other) const {
             Compare comp;
             // Use the Compare function to determine ordering
             if (comp(mValue, other.mValue)) return true;
@@ -205,12 +205,12 @@ public:
      * @brief Push an element into the priority queue
      * @param value Element to insert
      */
-    void push(const T& value) FL_NO_EXCEPT {
+    void push(const T& value) {
         mQueue.push({value, mNextSequence++});
     }
 
     template<typename... Args>
-    void emplace(Args&&... args) FL_NO_EXCEPT {
+    void emplace(Args&&... args) {
         mQueue.push({T(fl::forward<Args>(args)...), mNextSequence++});
     }
 
@@ -219,7 +219,7 @@ public:
      *
      * Precondition: !empty()
      */
-    void pop() FL_NO_EXCEPT {
+    void pop() {
         mQueue.pop();
     }
 
@@ -229,7 +229,7 @@ public:
      *
      * Precondition: !empty()
      */
-    const T& top() const FL_NO_EXCEPT {
+    const T& top() const {
         return mQueue.top().mValue;
     }
 
@@ -237,7 +237,7 @@ public:
      * @brief Check if the queue is empty
      * @return true if empty, false otherwise
      */
-    bool empty() const FL_NO_EXCEPT {
+    bool empty() const {
         return mQueue.empty();
     }
 
@@ -245,14 +245,14 @@ public:
      * @brief Get the number of elements in the queue
      * @return Number of elements
      */
-    fl::size size() const FL_NO_EXCEPT {
+    fl::size size() const {
         return mQueue.size();
     }
 
     /**
      * @brief Clear all elements from the queue
      */
-    void clear() FL_NO_EXCEPT {
+    void clear() {
         while (!empty()) {
             pop();
         }
@@ -260,32 +260,32 @@ public:
     }
 
     /// Equality comparison
-    bool operator==(const priority_queue_stable& other) const FL_NO_EXCEPT {
+    bool operator==(const priority_queue_stable& other) const {
         return mQueue == other.mQueue;
     }
 
     /// Inequality comparison
-    bool operator!=(const priority_queue_stable& other) const FL_NO_EXCEPT {
+    bool operator!=(const priority_queue_stable& other) const {
         return mQueue != other.mQueue;
     }
 
     /// Lexicographic comparison
-    bool operator<(const priority_queue_stable& other) const FL_NO_EXCEPT {
+    bool operator<(const priority_queue_stable& other) const {
         return mQueue < other.mQueue;
     }
 
     /// Less-than-or-equal comparison
-    bool operator<=(const priority_queue_stable& other) const FL_NO_EXCEPT {
+    bool operator<=(const priority_queue_stable& other) const {
         return mQueue <= other.mQueue;
     }
 
     /// Greater-than comparison
-    bool operator>(const priority_queue_stable& other) const FL_NO_EXCEPT {
+    bool operator>(const priority_queue_stable& other) const {
         return mQueue > other.mQueue;
     }
 
     /// Greater-than-or-equal comparison
-    bool operator>=(const priority_queue_stable& other) const FL_NO_EXCEPT {
+    bool operator>=(const priority_queue_stable& other) const {
         return mQueue >= other.mQueue;
     }
 

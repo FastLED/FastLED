@@ -90,7 +90,7 @@ class I2S_Audio : public audio::IInput {
         // Update total samples counter
         mTotalSamplesRead += samples_read;
 
-        fl::span<const i16> data(buf, samples_read);
+        fl::span<const i16> data{buf, static_cast<fl::size>(samples_read)};
         
         // Create audio::Sample with pooled audio::SampleImpl (pooling handled internally)
         return audio::Sample(data, timestamp_ms);

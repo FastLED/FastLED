@@ -250,7 +250,10 @@ def main() -> int:
                 print(f"Error: Binary file not found for '{elf_path}'")
                 return 1
     cpp_filt_path = Path(board_info["aliases"]["c++filt"])
+    ld_path = Path(board_info["aliases"]["ld"])
+    as_path = Path(board_info["aliases"]["as"])
     nm_path = Path(board_info["aliases"]["nm"])
+    objcopy_path = Path(board_info["aliases"]["objcopy"])
 
     # Get readelf path (derive from nm path if not in aliases)
     if "readelf" in board_info["aliases"]:
@@ -303,11 +306,6 @@ def main() -> int:
     # Legacy analysis: bin-to-elf conversion (for compatibility)
     # ========================================================================
     try:
-        # Raw fbuild metadata may omit these legacy-only tools. Resolve them
-        # here so unavailable conversion cannot prevent ELF or map diagnostics.
-        ld_path = Path(board_info["aliases"]["ld"])
-        as_path = Path(board_info["aliases"]["as"])
-        objcopy_path = Path(board_info["aliases"]["objcopy"])
         with TemporaryDirectory() as temp_dir:
             temp_dir_path = Path(temp_dir)
             output_elf = bin_to_elf(

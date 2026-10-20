@@ -450,7 +450,7 @@ FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS
 
   #define FL_INIT(wrapper_name, func) \
     namespace static_init { \
-      static void wrapper_name() FL_NO_EXCEPT { func(); } \
+      static void wrapper_name() { func(); } \
       __declspec(allocate(".CRT$XCU")) \
       static void (*wrapper_name##_ptr)(void) = wrapper_name; \
     }
@@ -459,7 +459,7 @@ FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS
   #define FL_INIT(wrapper_name, func) \
     namespace static_init { \
       FL_CONSTRUCTOR FL_KEEP_ALIVE \
-      void wrapper_name() FL_NO_EXCEPT { func(); } \
+      void wrapper_name() { func(); } \
     }
 
 #else

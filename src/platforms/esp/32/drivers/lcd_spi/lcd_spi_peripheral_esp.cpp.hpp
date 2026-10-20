@@ -58,7 +58,7 @@ namespace detail {
 bool IRAM_ATTR lcd_spi_flush_ready(
     esp_lcd_panel_io_handle_t panel_io,
     esp_lcd_panel_io_event_data_t *edata,
-    void *user_ctx) { // ok no noexcept â€” matches friend decl
+    void *user_ctx) FL_NO_EXCEPT { // ok no noexcept â€” matches friend decl
     LcdSpiPeripheralEsp *self =
         static_cast<LcdSpiPeripheralEsp *>(user_ctx);
     if (self->mPendingTransmits > 0) {

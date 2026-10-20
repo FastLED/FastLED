@@ -531,7 +531,7 @@ void ChannelEngineSpi::beginBatchedTransmission(
             //
             // Critical: Early versions only checked BUSY, missing DRAINING state.
             //           This caused batches to overlap incorrectly.
-            DriverState state(DriverState::BUSY);
+            DriverState state{DriverState::BUSY};
             while ((state = pollChannels()) != DriverState::READY) {
                 if (state == DriverState::ERROR) {
                     FL_WARN_EVERY(10, "ChannelEngineSpi: Error during batch transmission");

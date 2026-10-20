@@ -32,7 +32,7 @@ fl::vector<fl::vector<fl::u8>> untransposeParlioBitstreamInternal(
     size_t num_pins,
     fl::detail::ParlioBitPackOrder packing) FL_NO_EXCEPT {
 
-    fl::vector<fl::vector<fl::u8>> per_pin_data(num_pins);
+    auto per_pin_data = fl::vector<fl::vector<fl::u8>>(num_pins);
 
     size_t bits_per_pin = bit_count / num_pins;
     size_t bytes_per_pin = (bits_per_pin + 7) / 8;

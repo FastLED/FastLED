@@ -2,6 +2,21 @@
 
 <!-- Add tasks here as checkable items -->
 
+## ESP FL_NO_EXCEPT lint
+
+- [x] Retain the ESP exception specification fixes with FL_NO_EXCEPT enabled.
+- [x] Remove SDK provisioning/matrix/cache additions and GitHub Actions edits.
+- [x] Add a Rust source parser to normal `./lint`, checking inactive branches.
+- [x] Verify original RISC-V regression, parser errors, and function signatures.
+- [x] Fix genuine ESP findings and pass lint/tests/review.
+- [ ] Push and merge the simplified PR.
+
+Validation: plain `./lint` passes; 163 Rust tests and 82 exception-policy/AST
+prerequisite tests pass. Native validation passes 321 unit targets and 96
+examples. ESP32-C6 Blink builds successfully. A temporary inactive-branch
+probe fails normal single-file `./lint` with exactly one annotation error,
+then passes after adding FL_NO_EXCEPT. Probe removed; no GHA diff.
+
 ## PCH mtime replay and OBS cache integration
 
 - [x] Read both attached agent chats and inspect paused FastLED changes.
@@ -576,155 +591,3 @@ timed out on both versions while direct ownership accounting passed.
   paths and sources because fbuild omitted that dependency. No Windows execution
   or physical hardware run is claimed. Logs and scripts: `.build/4826/`.
 - Repository code review found no blocking issues.
-
-## #4829 — required stub and ESP AST coverage
-
-- [x] Start feature branch from current master and confirm full issue scope.
-- [x] RED → GREEN: explicit compiler arguments, shared coverage query, required backend definition.
-- [x] Provision pinned IDF4, IDF5, and representative RISC-V SDK profiles reproducibly.
-- [x] Enumerate owned TUs and explicit real SD/SdFat variants; correct SDK guards.
-- [x] Integrate per-TU zccache storage, dependencies, and negative include invalidation.
-- [x] Add coverage report, globally bounded scheduling, deduplicated profile findings.
-- [x] Demonstrate original SD and ESP-only defects fail, including warm cache cases.
-- [x] Fix actual ESP violations; enforce matrix in normal lint and existing CI.
-- [x] Measure cold/warm/source/header edits and memory; document setup and limits.
-- [x] Full local tests, normal lint, and independent code review.
-- [x] Publish dependent fixes, update the fbuild pin, and reprovision all SDKs.
-- [ ] Remove final integration scratch and the recreated dependency checkout.
-
-Validation evidence: full native debug validation passed 320 units and 96
-examples. Full Python validation passed 1,939 tests (47 skipped, 2 xfailed),
-with subsequent focused ABI, SDK, cache and outer-wrapper regressions passing.
-The final fbuild 2.5.40 integration passed 59 focused tests (one Windows-only
-skip on Linux) and normal `bash lint`: 138 jobs, 105 fresh ESP parses, 33 stub
-cache hits, 21,894 declaration locations, zero failures, 340.51 seconds analysis,
-and 1,432 MiB sampled peak RSS. The unchanged C++ lint run passed with 138 cache
-hits, zero parses, 7.84 seconds analysis, and a verified final input snapshot.
-Independent source, orchestration, and final
-pin reviews found no blocking issues.
-
-Reference measurements at 887cfe2f01: cold 701.73s/138 parses; warm 17.98s/0;
-source edit 70.66s/7; common-header edit 542.06s/131. All experimental edits
-were restored and reports passed final input audits. Setup, methodology,
-coverage limits, budgets, and cache behavior are in `docs/AST_LINT_PROFILES.md`.
-
-Hosted validation exposed and drove fixes for Mac SDK metadata dependencies,
-SDK traversal cost, and persistent-cache test isolation. Mac ARM lint passed
-in 619 seconds within the unchanged deadline. Repeated local cache tests first
-reproduced eight failures on the second invocation; unique per-test directories
-made both repeated runs pass while retaining the real native cache.
-
-FastLED/fbuild#1676 is merged and fbuild 2.5.40 is published. Its exact candidate
-passed full PR checks, a release dry run, and publication validation, including
-real Windows legacy ESP installation/recheck and both Mac installed-wheel smoke
-tests. Continued-include scanning and library-cache invalidation were verified
-RED -> GREEN, including real Pico SDK library selection.
-
-Full board CI then exposed Windows' command-line limit, optional binary-inspector
-metadata, and unused SD linkage. The query runner now uses an automatically
-removed compilation database with exact arguments (three RED -> GREEN tests).
-The inspector preserves ELF/map diagnostics without legacy conversion tools
-(six failures reproduced, all seven cases pass). Moving the unchanged SD JPEG
-helper into the SD translation unit reduced the local default ESP32-S3 image
-from 360,755 to 341,011 bytes and attributed RAM from 40,677 to 40,008 bytes,
-passing the unchanged budget; the real FxSdCard example still builds.
-Native debug validation passed all 320 units and 96 examples again. Full Python
-validation now passes 1,962 tests (48 skipped, two xfailed). Normal lint passed
-all 138 fresh AST parses in 445.23 seconds, with 1,608.1 MiB sampled peak RSS.
-FastLED/fbuild#1677 tracks the remaining real Pico SDK flag and Teensy archive
-fixes; their published dependency integration and final hosted sweep remain pending.
-
-Subsequent native validation passed the previously failing Windows IDF4/IDF5
-ABI probes, then exposed a missing C6 esptool Windows binary. The dependent
-fix selects the published source archive and adds a real cold/warm Windows
-installation check. Mac stub lint exposed a separate invocation regression:
-LLVM's synthetic driver must retain its absolute installation directory for
-libc++ discovery. The three command-length tests now parse `<initializer_list>`
-and pass with that context restored; hosted validation remains required.
-Normal lint with the restored driver context passed all 138 fresh parses in
-470.54 seconds, with 1,415.2 MiB sampled peak RSS and a verified input snapshot.
-Real source-built fbuild 2.5.41 checks pass the unchanged RP2040 image/RAM budget
-(103,328/8,636 bytes) and Teensy 4.1 budget (47,104/21,734 bytes), with real Pico
-FxSdCard and Teensy OctoWS2811 builds passing. The dependency is not published yet.
-
-Intel Mac then reached the unchanged 900-second lint deadline after 46 jobs.
-Profiling found repeated full SDK inventories and repeated diagnostic path
-normalization. Matrix cache publication now waits for one complete final input
-audit, with actual dependency bytes still checked after each parse; failed
-audits discard pending results. Per-parse path normalization retains all matches.
-New native-cache poisoning and real Clang path-work regressions fail before the
-fix and pass afterward. All 39 focused tests pass (one Windows-only skip), and
-normal lint passes 138 fresh parses, 21,894 declarations and a verified snapshot
-in 211.41 seconds, with 1,707.0 MiB sampled peak RSS. Review is clean. Actual
-Intel hosted validation is still required; no deadlines or profiles were relaxed.
-
-Hosted optimized AST validation now passes all 138 fresh jobs on both Macs:
-ARM 223.66 seconds (previously 574.33), Intel 539.23 seconds, verified snapshots
-and zero failures. ARM's whole unit job passed. Intel subsequently failed before
-tests began when `xcrun --find clang++` exceeded its separate ten-second setup
-timeout. Xcode tool/SDK discovery now has a bounded 60-second allowance; selected
-compiler, AST deadline, and test limits are unchanged. A real 11-second child
-reproduced RED; all 14 toolchain tests and 22 subtests pass after the fix,
-including fatal nonzero/empty/timeout cases. Review and normal lint pass.
-
-Both native Mac jobs now pass lint and all unit tests at 1a3b4cbb56
-(Actions run 38429850436), confirming the Xcode discovery correction on Intel.
-Published fbuild 2.5.41 comes from b40617fe62 (FastLED/fbuild#1678): full
-candidate CI, release dry run 38427262256, and publication 38429178951 passed.
-Its tracked editable-package lock metadata is corrected separately without
-changing release code. The installed PyPI wheel provisions all three ESP AST
-SDKs and passes normal lint: 138 jobs, 70 fresh parses, 68 cache hits, 21,894
-declarations, zero failures, 127.63 seconds and a verified final snapshot.
-Manual Blink builds and unchanged image/RAM budgets pass for RP2040
-(103,328/8,636 bytes), Teensy 4.1 (47,104/21,734), and ESP32-S3
-(341,011/40,008).
-
-The first published-wheel Python sweep failed its QEMU smoke deadline; the
-focused debug rerun and full confirmation passed unchanged (1,967 tests,
-48 skipped, two xfailed, 3,263 subtests). This is not evidence of a fix:
-inspection found the sketch printed success after an RMT completion timeout.
-The installed QEMU leaves ESP32 RMT unimplemented. The smoke fixture now uses
-the existing MY9221 GPIO software driver and rejects ChannelManager timeouts.
-The stricter old fixture reproduced RED at the unchanged ten-second deadline;
-the corrected fixture completed real `show()` at 1.91 seconds without timeout
-diagnostics. Review is clean. This is boot/software execution evidence, not
-RMT or physical waveform validation.
-The final published-wheel full Python sweep passes all 1,967 tests, with
-48 skipped, two xfailed and 3,263 passing subtests in 301 seconds. Final normal
-lint passes all 138 cached AST jobs with zero failures in 10.76 seconds.
-
-PR #4831 carries the implementation and dependency pin. Its exact-head
-`ci-full` checks are the authoritative final cross-platform validation record;
-require them to pass before marking the PR ready. Preserve ordinary SDK/build
-caches and the pre-existing `.clud/` directory during cleanup.
-
-Pre-review head 651868a467 passed all 121 checks across 98 `ci-full` workflows,
-including Windows, both Macs, all board builds and unchanged size gates.
-FastLED/fbuild#1678 is merged and #1677 is closed. The dependent checkout,
-gate containers/state and integration scratch were removed.
-
-Review follow-up reproduces and fixes relative AST source/header paths from a
-caller outside the project, including real Clang dependency and coverage output.
-It also reproduces backend mount failure being reported as success; generic
-mount now propagates the result and SD delegates to that same path. Focused
-RED -> GREEN tests and independent review pass. Full native debug validation
-passes 320 unit targets and 96 examples. Normal lint passes all 138 fresh parses,
-21,894 declarations, zero failures, 211.89 seconds and 1,611.4 MiB sampled peak
-RSS. Full Python passes 1,968 tests and 3,263 subtests (48 skipped, two xfailed)
-in 334.14 seconds. New hosted validation remains pending at this snapshot.
-CodeRabbit withdrew the SD relocation scope objection. On 2026-10-20 the
-address-reviews helper reports zero open review threads.
-
-## FL_NO_EXCEPT completion, 2026-10-20
-
-- [x] Integrate current master into #4831, retaining fbuild 2.5.42 and libc fixes.
-- [x] Keep real ESP noexcept enabled and retain the nine RISC-V definition fixes.
-- [x] Require all nine RISC-V interrupt definitions in the C6 semantic profile.
-- [x] Add a real SDK regression reproducing #4869 by removing an annotation.
-- [x] Provision the three real SDK environments on this checkout.
-- [ ] Pass normal C++ lint, SDK regressions, native tests and code review.
-- [ ] Push, validate exact-head full CI, and merge #4831.
-
-Focused prerequisite tests: 46 passed. Cache tests: 26 passed, one skipped
-after starting the required daemon. SDK regressions, normal lint and native
-tests are running; their results supersede historical pre-merge evidence above.

@@ -17,6 +17,7 @@ include!("checkers/platform_trampoline.rs");
 include!("checkers/types_and_tests.rs");
 include!("checkers/test_structure.rs");
 include!("checkers/platform_policy.rs");
+include!("checkers/esp_noexcept.rs");
 include!("checkers/bare_legacy.rs");
 include!("checkers/public_settings.rs");
 include!("checkers/unity_build.rs");

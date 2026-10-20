@@ -365,15 +365,15 @@ inline void setAdcRange(AdcRange range) FL_NO_EXCEPT {
 // PWM Frequency Control
 // ============================================================================
 
-inline bool needsPwmIsrFallback(int /*pin*/, u32 /*frequency_hz*/) {
+inline bool needsPwmIsrFallback(int /*pin*/, u32 /*frequency_hz*/) FL_NO_EXCEPT {
     return true;
 }
 
-inline int setPwmFrequencyNative(int /*pin*/, u32 /*frequency_hz*/) {
+inline int setPwmFrequencyNative(int /*pin*/, u32 /*frequency_hz*/) FL_NO_EXCEPT {
     return -4;
 }
 
-inline u32 getPwmFrequencyNative(int /*pin*/) {
+inline u32 getPwmFrequencyNative(int /*pin*/) FL_NO_EXCEPT {
     return 0;
 }
 

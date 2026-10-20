@@ -11,9 +11,9 @@ template <typename T, fl::size N = 0>
 class MovingAverageImpl {
   public:
     MovingAverageImpl() FL_NO_EXCEPT : mSum(T(0)) {}
-    explicit MovingAverageImpl(fl::size capacity) FL_NO_EXCEPT : mBuf(capacity), mSum(T(0)) {}
+    explicit MovingAverageImpl(fl::size capacity) : mBuf(capacity), mSum(T(0)) {}
 
-    T update(T input) FL_NO_EXCEPT {
+    T update(T input) {
         if (mBuf.full()) {
             mSum = mSum - mBuf.front();
         }
@@ -22,7 +22,7 @@ class MovingAverageImpl {
         return value();
     }
 
-    T value() const FL_NO_EXCEPT {
+    T value() const {
         fl::size count = mBuf.size();
         if (count == 0) {
             return T(0);
@@ -30,16 +30,16 @@ class MovingAverageImpl {
         return divByCount(mSum, count);
     }
 
-    void reset() FL_NO_EXCEPT {
+    void reset() {
         mBuf.clear();
         mSum = T(0);
     }
 
-    bool full() const FL_NO_EXCEPT { return mBuf.full(); }
-    fl::size size() const FL_NO_EXCEPT { return mBuf.size(); }
-    fl::size capacity() const FL_NO_EXCEPT { return mBuf.capacity(); }
+    bool full() const { return mBuf.full(); }
+    fl::size size() const { return mBuf.size(); }
+    fl::size capacity() const { return mBuf.capacity(); }
 
-    void resize(fl::size new_capacity) FL_NO_EXCEPT {
+    void resize(fl::size new_capacity) {
         mBuf = circular_buffer<T, N>(new_capacity);
         mSum = T(0);
     }
@@ -47,20 +47,20 @@ class MovingAverageImpl {
   private:
     template <typename U = T>
     static typename fl::enable_if<fl::is_floating_point<U>::value, U>::type
-    divByCount(U sum, fl::size count) FL_NO_EXCEPT {
+    divByCount(U sum, fl::size count) {
         return sum / static_cast<U>(count);
     }
 
     template <typename U = T>
     static typename fl::enable_if<fl::is_integral<U>::value, U>::type
-    divByCount(U sum, fl::size count) FL_NO_EXCEPT {
+    divByCount(U sum, fl::size count) {
         return sum / static_cast<U>(count);
     }
 
     template <typename U = T>
     static typename fl::enable_if<!fl::is_floating_point<U>::value &&
                                   !fl::is_integral<U>::value, U>::type
-    divByCount(U sum, fl::size count) FL_NO_EXCEPT {
+    divByCount(U sum, fl::size count) {
         return sum / U(static_cast<float>(count));
     }
 

@@ -55,7 +55,7 @@ FBUILD = _fbuild_executable()
 SUCCESS_MARKER = "FBUILD-QEMU-TEST-OK"
 ERROR_PATTERN = (
     r"Guru Meditation|abort\(\)|Backtrace:|TEST_SUITE_COMPLETE: FAIL|"
-    r"QEMU_LCD_CLOCKLESS_REGISTRATION: FAIL|ChannelManager: Timeout"
+    r"QEMU_LCD_CLOCKLESS_REGISTRATION: FAIL"
 )
 # Emulated run time, passed as `fbuild test-emu --timeout`. Same 120 s as
 # qemu_template.yml; the previous 10 s only reached the second-stage

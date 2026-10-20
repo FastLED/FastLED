@@ -36,7 +36,7 @@ class InlineBlockClocklessController : public CPixelLEDController<RGB_ORDER, LAN
 	typedef typename FastPin<FIRST_PIN>::port_ptr_t data_ptr_t;
 	typedef typename FastPin<FIRST_PIN>::port_t data_t;
 
-	enum : u32 {
+	enum Timings : u32 {
 		T1 = TIMING::T1,
 		T2 = TIMING::T2,
 		T3 = TIMING::T3,
@@ -81,7 +81,7 @@ public:
 		}
 	}
 
-	virtual u16 getMaxRefreshRate() const { return 400; }
+	virtual u16 getMaxRefreshRate() const FL_NO_EXCEPT { return 400; }
 
 	typedef union {
 		u8 bytes[8];

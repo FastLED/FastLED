@@ -303,8 +303,8 @@ FL_EXTERN_C_BEGIN
  *   typedef void (*nmi_handler_t)(void);
  *
  *   // Define handler functions
- *   extern "C" void FL_IRAM nmi_handler_default(void) { /* ... */ }
- *   extern "C" void FL_IRAM nmi_handler_alternate(void) { /* ... */ }
+ *   extern "C" void FL_IRAM nmi_handler_default(void) { ... }
+ *   extern "C" void FL_IRAM nmi_handler_alternate(void) { ... }
  *
  *   // Declare function pointer in DRAM
  *   nmi_handler_t DRAM_ATTR g_nmi_handler = &nmi_handler_default;

@@ -1148,7 +1148,7 @@ public:
 
 	// The addLeds function using ChipsetHelper
 	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::EOrder RGB_ORDER, fl::Bus B = fl::Bus::AUTO>
-	::CLEDController& addLeds(CRGB* data, int nLedsOrOffset, int nLedsIfOffset = 0) FL_NO_EXCEPT {
+	::CLEDController& addLeds(CRGB* data, int nLedsOrOffset, int nLedsIfOffset = 0) {
 		// Always USE WS2812 clockless controller since it's the common path.
 		return addLeds<WS2812, DATA_PIN, RGB_ORDER, B>(data, nLedsOrOffset, nLedsIfOffset);
 	}
@@ -1249,25 +1249,25 @@ public:
 
 	/// Add an SPI based CLEDController via Channel API.
 	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::EOrder RGB_ORDER, fl::u32 SPI_DATA_RATE, fl::Bus B = fl::Bus::AUTO, fl::u8 B_WHICH = 0>
-	::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) FL_NO_EXCEPT {
+	::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
 		return addLedsSpiChannel<CHIPSET, DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_DATA_RATE, B, B_WHICH>(data, nLedsOrOffset, nLedsIfOffset);
 	}
 
 	/// Add an SPI controller with an explicit ESP-IDF SPI host.
 	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::EOrder RGB_ORDER, fl::u32 SPI_DATA_RATE, fl::Bus B = fl::Bus::AUTO, fl::u8 B_WHICH = 0>
-	::CLEDController &addLeds(CRGB *data, int nLeds, fl::Esp32SpiBus spiBus) FL_NO_EXCEPT {
+	::CLEDController &addLeds(CRGB *data, int nLeds, fl::Esp32SpiBus spiBus) {
 		return addLedsSpiChannel<CHIPSET, DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_DATA_RATE, B, B_WHICH>(data, nLeds, spiBus);
 	}
 
 	/// Add an SPI based CLEDController via Channel API (default RGB order and speed).
 	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::Bus B = fl::Bus::AUTO, fl::u8 B_WHICH = 0>
-	static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) FL_NO_EXCEPT {
+	static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
 		return addLedsSpiChannel<CHIPSET, DATA_PIN, CLOCK_PIN, B, B_WHICH>(data, nLedsOrOffset, nLedsIfOffset);
 	}
 
 	/// Add an SPI based CLEDController via Channel API (default speed).
 	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::EOrder RGB_ORDER, fl::Bus B = fl::Bus::AUTO, fl::u8 B_WHICH = 0>
-	::CLEDController& addLeds(CRGB* data, int nLedsOrOffset, int nLedsIfOffset = 0) FL_NO_EXCEPT {
+	::CLEDController& addLeds(CRGB* data, int nLedsOrOffset, int nLedsIfOffset = 0) {
 		return addLedsSpiChannel<CHIPSET, DATA_PIN, CLOCK_PIN, RGB_ORDER, B, B_WHICH>(data, nLedsOrOffset, nLedsIfOffset);
 	}
 

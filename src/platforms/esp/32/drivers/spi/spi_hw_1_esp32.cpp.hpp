@@ -108,15 +108,16 @@ bool SPISingleESP32::begin(const SpiHw1::Config& config) FL_NO_EXCEPT {
     u8 bus_num = (mBusId != -1) ? static_cast<u8>(mBusId) : config.bus_num;
 
     // Convert platform-agnostic bus_num to ESP32 SPI host
-    if (bus_num == 2) {
+    switch (bus_num) {
+    case 2:
         mHost = SPI2_HOST;
-    }
+        break;
 #if SOC_SPI_PERIPH_NUM > 2
-    else if (bus_num == 3) {
+    case 3:
         mHost = SPI3_HOST;
-    }
+        break;
 #endif
-    else {
+    default:
         return false;  // Invalid bus number
     }
 

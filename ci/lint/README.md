@@ -91,7 +91,8 @@ When running a single stage (e.g., `bash lint --js`):
 
 ## Fingerprint Caching
 
-Python and JavaScript stages use fingerprint caching to skip unchanged files:
+Stages use fingerprint caching to skip unchanged files:
+- **C++ linting**: `ci.cpp_lint_cache.py`
 - **Python linting** (pyright): `ci.python_lint_cache.py`
 - **JavaScript linting**: `ci.js_lint_cache.py`
 
@@ -99,12 +100,7 @@ Cache behavior:
 - `check_*_files_changed()` → True if linting needed
 - `mark_*_lint_success()` → Mark cache success
 - `invalidate_*_cache()` → Invalidate on failure
-- `--no-fingerprint` bypasses these stage fingerprints
-
-C++ always enters the unified checker and validates the required stub and ESP
-prerequisites. Completed AST results use the per-translation-unit cache in
-`ci/lint_cpp/ast_cache.py`; a source-only stage fingerprint cannot establish
-that SDKs and tools remain available. See [AST profiles](../../docs/AST_LINT_PROFILES.md).
+- `--no-fingerprint` bypasses all caches
 
 ## Error Handling
 
@@ -239,3 +235,20 @@ Cache modules are in `ci/*_lint_cache.py`:
 - Module: `ci/lint/`
 - Tests: `tests/ci/lint/`
 - Similar pattern: `test.py` (test suite trampoline)
+# ESP exception annotations
+
+`./lint --cpp` includes the Rust `EspNoexceptChecker`; it also runs with normal
+`./lint` and single-file lint. It needs no ESP SDK provisioning or separate CI
+workflow. The checker parses source under `src/platforms/esp/` before
+preprocessing, so inactive branches and implementation files are checked too.
+
+Add `FL_NO_EXCEPT` to matching declarations and definitions. Destructors,
+defaulted/deleted functions, function pointer types, and external C declarations
+are excluded. A necessary exception requires a signature comment such as
+`// ok no noexcept: vendor override contract` with a concrete reason.
+Unrecognized syntax is an error; extend the parser's explicit macro
+normalization rather than adding a file exemption. Prefer brace initialization
+for local objects whose parenthesized syntax resembles a function declaration.
+
+This enforces source annotations. The existing host AST checks and target
+compiler builds still validate exception specification compatibility and types.

@@ -108,7 +108,7 @@ class PDM_Audio : public audio::IInput {
                                             mPdmConfig.mSampleRate);
         mTotalSamplesRead += samples_read;
 
-        fl::span<const i16> data(buf, samples_read);
+        fl::span<const i16> data{buf, static_cast<fl::size>(samples_read)};
         return audio::Sample(data, timestamp_ms);
     }
 

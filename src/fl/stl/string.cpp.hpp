@@ -12,13 +12,13 @@
 #include "fl/gfx/tile2x2.h"
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/static_assert.h"
-#include "fl/stl/noexcept.h"
 #include "fl/math/xymap.h"
 // UI dependency moved to separate compilation unit to break dependency chain
 
 #if FL_STRING_NEEDS_ARDUINO_CONVERSION
 // IWYU pragma: begin_keep
 #include "fl/system/arduino.h"
+#include "fl/stl/noexcept.h"
 // IWYU pragma: end_keep  // ok header
 #endif
 
@@ -357,7 +357,7 @@ string &string::append(const json& val) FL_NO_EXCEPT {
 }
 
 #if FL_STRING_NEEDS_ARDUINO_CONVERSION
-string::string(const ::String &str) FL_NO_EXCEPT
+string::string(const ::String &str)
     : string_n<FASTLED_STR_INLINED_SIZE>() {
     copy(str.c_str(), strlen(str.c_str()));
 }
@@ -367,7 +367,7 @@ string &string::operator=(const ::String &str) FL_NO_EXCEPT {
     return *this;
 }
 
-string &string::append(const ::String &str) FL_NO_EXCEPT {
+string &string::append(const ::String &str) {
     write(str.c_str(), strlen(str.c_str()));
     return *this;
 }

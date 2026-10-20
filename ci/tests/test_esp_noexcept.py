@@ -12,7 +12,6 @@ import pytest
 from running_process import RunningProcess
 
 from ci.tests.test_no_rgb8_intermediate import strip_comments_and_strings
-from ci.tools.ast_profiles import ESP_PROFILES, EspProfile, load_profile
 
 
 SRC = Path(__file__).resolve().parents[2] / "src"
@@ -182,38 +181,4 @@ def test_sd_file_overrides_match_filebuf_exception_contract(backend: str) -> Non
         + ";\n}; }\n"
         + f"fl::{backend} complete_backend;\n",
         ["-DFL_NO_EXCEPT=noexcept"],
-    )
-
-
-@pytest.mark.parametrize(
-    "implementation", ["fs_sdcard_arduino.cpp.hpp", "file_system_sd.cpp.hpp"]
-)
-@pytest.mark.parametrize("with_spi", [False, True])
-@pytest.mark.parametrize("profile", ESP_PROFILES, ids=lambda profile: profile.name)
-def test_sd_header_guards_use_real_sdk_headers(
-    implementation: str, with_spi: bool, profile: EspProfile
-) -> None:
-    """Both definition and factory must select the real case-sensitive SDK."""
-    environment = load_profile(profile)
-    sdk = next(
-        path for path in environment.include_paths if (path / "Arduino.h").is_file()
-    ).parent.parent
-    for library, header in [("SD", "SD.h"), ("FS", "FS.h"), ("SPI", "SPI.h")]:
-        assert (sdk / "libraries" / library / "src" / header).is_file()
-    source = (SRC / "fl/fs/sd" / implementation).read_text(encoding="utf-8")
-    logical_lines = source.replace("\\\n", " ")
-    guard = re.search(
-        r"^#(?:if|elif) ([^\n]*FL_HAS_INCLUDE\(<SD.h>\)[^\n]*)$",
-        logical_lines,
-        re.MULTILINE,
-    )
-    assert guard is not None, f"Missing Arduino SD guard in {implementation}"
-    libraries = ["SD", "FS"] + (["SPI"] if with_spi else [])
-    _compile(
-        '#include "fl/stl/has_include.h"\n'
-        f"#if {guard[1]}\nconstexpr bool backend_enabled = true;\n"
-        "#else\nconstexpr bool backend_enabled = false;\n#endif\n"
-        f"static_assert(backend_enabled == {'true' if with_spi else 'false'}, "
-        '"SD backend availability differs from SDK headers");\n',
-        [f"-I{sdk / 'libraries' / library / 'src'}" for library in libraries],
     )

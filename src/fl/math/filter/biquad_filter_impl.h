@@ -1,7 +1,6 @@
 #pragma once
 
 #include "fl/math/math.h"
-#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace detail {
@@ -10,11 +9,11 @@ template <typename T>
 class BiquadFilterImpl {
   public:
     BiquadFilterImpl(T b0, T b1, T b2, T a1, T a2)
-        FL_NO_EXCEPT : mB0(b0), mB1(b1), mB2(b2), mA1(a1), mA2(a2),
+        : mB0(b0), mB1(b1), mB2(b2), mA1(a1), mA2(a2),
           mX1(T(0)), mX2(T(0)), mY1(T(0)), mY2(T(0)), mLastValue(T(0)) {}
 
     // Butterworth low-pass: -12 dB/octave roll-off above cutoff_hz.
-    static BiquadFilterImpl butterworth(float cutoff_hz, float sample_rate) FL_NO_EXCEPT {
+    static BiquadFilterImpl butterworth(float cutoff_hz, float sample_rate) {
         float omega = 2.0f * static_cast<float>(FL_PI) * cutoff_hz / sample_rate;
         float sn = fl::sinf(omega);
         float cs = fl::cosf(omega);
@@ -29,7 +28,7 @@ class BiquadFilterImpl {
     }
 
     // Butterworth high-pass: -12 dB/octave roll-off below cutoff_hz.
-    static BiquadFilterImpl highpass(float cutoff_hz, float sample_rate) FL_NO_EXCEPT {
+    static BiquadFilterImpl highpass(float cutoff_hz, float sample_rate) {
         float omega = 2.0f * static_cast<float>(FL_PI) * cutoff_hz / sample_rate;
         float sn = fl::sinf(omega);
         float cs = fl::cosf(omega);
@@ -46,7 +45,7 @@ class BiquadFilterImpl {
     // Band-pass filter centered at center_hz with given Q factor.
     // Q controls bandwidth: higher Q = narrower band. Q=0.707 is broadband.
     static BiquadFilterImpl bandpass(float center_hz, float sample_rate,
-                                     float q = 1.0f) FL_NO_EXCEPT {
+                                     float q = 1.0f) {
         float omega = 2.0f * static_cast<float>(FL_PI) * center_hz / sample_rate;
         float sn = fl::sinf(omega);
         float cs = fl::cosf(omega);
@@ -63,7 +62,7 @@ class BiquadFilterImpl {
     // Notch (band-reject) filter at center_hz with given Q factor.
     // Removes a narrow frequency band. Q=30 is good for 50/60 Hz hum.
     static BiquadFilterImpl notch(float center_hz, float sample_rate,
-                                   float q = 1.0f) FL_NO_EXCEPT {
+                                   float q = 1.0f) {
         float omega = 2.0f * static_cast<float>(FL_PI) * center_hz / sample_rate;
         float sn = fl::sinf(omega);
         float cs = fl::cosf(omega);
@@ -77,7 +76,7 @@ class BiquadFilterImpl {
         return BiquadFilterImpl(T(b0f), T(b1f), T(b2f), T(a1f), T(a2f));
     }
 
-    T update(T input) FL_NO_EXCEPT {
+    T update(T input) {
         T output = mB0 * input + mB1 * mX1 + mB2 * mX2
                  - mA1 * mY1 - mA2 * mY2;
         mX2 = mX1;
@@ -88,9 +87,9 @@ class BiquadFilterImpl {
         return output;
     }
 
-    T value() const FL_NO_EXCEPT { return mLastValue; }
+    T value() const { return mLastValue; }
 
-    void reset() FL_NO_EXCEPT {
+    void reset() {
         mX1 = mX2 = mY1 = mY2 = mLastValue = T(0);
     }
 

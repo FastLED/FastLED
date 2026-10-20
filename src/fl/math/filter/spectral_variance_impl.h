@@ -2,7 +2,6 @@
 
 #include "fl/stl/span.h"
 #include "fl/stl/vector.h"
-#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace detail {
@@ -30,11 +29,11 @@ template <typename T = float>
 class SpectralVarianceImpl {
   public:
     explicit SpectralVarianceImpl(T alpha = T(0.2f), T floor = T(1e-4f))
-        FL_NO_EXCEPT : mAlpha(alpha), mFloor(floor), mVariance(T(0)) {}
+        : mAlpha(alpha), mFloor(floor), mVariance(T(0)) {}
 
     /// Feed a new frame of multi-channel data. Returns mean relative deviation.
     /// First call initializes internal state and returns 0.
-    T update(fl::span<const T> bins) FL_NO_EXCEPT {
+    T update(fl::span<const T> bins) {
         const int n = static_cast<int>(bins.size());
         if (n == 0) return T(0);
 
@@ -74,22 +73,22 @@ class SpectralVarianceImpl {
     }
 
     /// Get the last computed variance without updating.
-    T value() const FL_NO_EXCEPT { return mVariance; }
+    T value() const { return mVariance; }
 
     /// Reset all internal state.
-    void reset() FL_NO_EXCEPT {
+    void reset() {
         mSmoothed.clear();
         mVariance = T(0);
     }
 
     /// Change the EMA alpha (tracking speed).
-    void setAlpha(T alpha) FL_NO_EXCEPT { mAlpha = alpha; }
+    void setAlpha(T alpha) { mAlpha = alpha; }
 
     /// Change the floor threshold for active channel detection.
-    void setFloor(T floor) FL_NO_EXCEPT { mFloor = floor; }
+    void setFloor(T floor) { mFloor = floor; }
 
     /// Get the number of channels being tracked.
-    fl::size size() const FL_NO_EXCEPT { return mSmoothed.size(); }
+    fl::size size() const { return mSmoothed.size(); }
 
   private:
     T mAlpha;

@@ -21,16 +21,16 @@ class UINumberFieldImpl {
   public:
     UINumberFieldImpl(const char *name, double value, double min = 0,
                       double max = 100)
-        FL_NO_EXCEPT : mMin(fl::min(min, max)),
+        : mMin(fl::min(min, max)),
           mMax(fl::max(min, max)),
           mValue(fl::max(mMin, fl::min(mMax, value))) {
         FASTLED_UNUSED(name);
     }
     ~UINumberFieldImpl() FL_NO_EXCEPT {}
-    double value() const FL_NO_EXCEPT { return mValue; }
-    void setValue(double value) FL_NO_EXCEPT { mValue = fl::max(mMin, fl::min(mMax, value)); }
-    operator double() const FL_NO_EXCEPT { return mValue; }
-    operator int() const FL_NO_EXCEPT { return static_cast<int>(mValue); }
+    double value() const { return mValue; }
+    void setValue(double value) { mValue = fl::max(mMin, fl::min(mMax, value)); }
+    operator double() const { return mValue; }
+    operator int() const { return static_cast<int>(mValue); }
     UINumberFieldImpl &operator=(double value) FL_NO_EXCEPT {
         setValue(value);
         return *this;
@@ -41,7 +41,7 @@ class UINumberFieldImpl {
     }
 
     // Stub method for group setting (does nothing on non-WASM platforms)
-    void setGroup(const fl::string& groupName) FL_NO_EXCEPT { FASTLED_UNUSED(groupName); }
+    void setGroup(const fl::string& groupName) { FASTLED_UNUSED(groupName); }
 
   private:
     double mMin;

@@ -75,9 +75,9 @@ class LcdSpiPeripheralEsp : public ILcdSpiPeripheral {
     template <typename T, int N>
     friend class ::fl::Singleton;
 
-    friend bool lcd_spi_flush_ready( // ok no noexcept
+    friend bool lcd_spi_flush_ready(
         esp_lcd_panel_io_handle_t panel_io,
-        esp_lcd_panel_io_event_data_t *edata, void *user_ctx);
+        esp_lcd_panel_io_event_data_t *edata, void *user_ctx) FL_NO_EXCEPT;
 
     LcdSpiPeripheralEsp() FL_NO_EXCEPT;
 

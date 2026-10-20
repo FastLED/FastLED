@@ -10,24 +10,24 @@ template <typename T, int K = 2>
 class LeakyIntegratorImpl {
   public:
     LeakyIntegratorImpl() FL_NO_EXCEPT : mY(T(0)) {}
-    explicit LeakyIntegratorImpl(T initial) FL_NO_EXCEPT : mY(initial) {}
+    explicit LeakyIntegratorImpl(T initial) : mY(initial) {}
 
-    T update(T input) FL_NO_EXCEPT {
+    T update(T input) {
         mY = mY + shift_right(input - mY);
         return mY;
     }
 
-    T value() const FL_NO_EXCEPT { return mY; }
-    void reset(T initial = T(0)) FL_NO_EXCEPT { mY = initial; }
+    T value() const { return mY; }
+    void reset(T initial = T(0)) { mY = initial; }
 
   private:
     template <typename U = T>
     static typename fl::enable_if<fl::is_floating_point<U>::value, U>::type
-    shift_right(U val) FL_NO_EXCEPT { return val / static_cast<U>(1 << K); }
+    shift_right(U val) { return val / static_cast<U>(1 << K); }
 
     template <typename U = T>
     static typename fl::enable_if<!fl::is_floating_point<U>::value, U>::type
-    shift_right(U val) FL_NO_EXCEPT { return val >> K; }
+    shift_right(U val) { return val >> K; }
 
     T mY;
 };

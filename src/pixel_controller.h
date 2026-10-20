@@ -476,7 +476,7 @@ struct PixelController {
 
     /// @deprecated Use loadRGBScaleAndBrightness() instead - name better reflects that RGB scale and brightness are separate
     FL_DEPRECATED("Use loadRGBScaleAndBrightness() instead")
-    FASTLED_FORCE_INLINE void getHdScale(fl::u8* c0, fl::u8* c1, fl::u8* c2, fl::u8* brightness) FL_NO_EXCEPT {
+    FASTLED_FORCE_INLINE void getHdScale(fl::u8* c0, fl::u8* c1, fl::u8* c2, fl::u8* brightness) {
         loadRGBScaleAndBrightness(c0, c1, c2, brightness);
     }
 

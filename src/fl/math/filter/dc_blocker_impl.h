@@ -1,5 +1,4 @@
 #pragma once
-#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace detail {
@@ -12,18 +11,18 @@ template <typename T>
 class DCBlockerImpl {
   public:
     explicit DCBlockerImpl(T r = T(0.995f))
-        FL_NO_EXCEPT : mR(r), mX1(T(0)), mY(T(0)) {}
+        : mR(r), mX1(T(0)), mY(T(0)) {}
 
-    T update(T input) FL_NO_EXCEPT {
+    T update(T input) {
         T output = input - mX1 + mR * mY;
         mX1 = input;
         mY = output;
         return output;
     }
 
-    void setR(T r) FL_NO_EXCEPT { mR = r; }
-    T value() const FL_NO_EXCEPT { return mY; }
-    void reset() FL_NO_EXCEPT { mX1 = mY = T(0); }
+    void setR(T r) { mR = r; }
+    T value() const { return mY; }
+    void reset() { mX1 = mY = T(0); }
 
   private:
     T mR;

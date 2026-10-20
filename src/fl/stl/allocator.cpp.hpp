@@ -7,13 +7,13 @@
 #include "fl/stl/string.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/compiler_control.h"
-#include "fl/stl/noexcept.h"
 
 #ifdef FL_IS_ESP32
 #include "esp_heap_caps.h"
 #include "esp_system.h"
 // IWYU pragma: begin_keep
 #include "platforms/esp/esp_version.h"  // ok platform headers
+#include "fl/stl/noexcept.h"
 // IWYU pragma: end_keep // ok platform headers
 #endif
 
@@ -37,7 +37,7 @@ namespace {
 
 #ifdef FL_IS_ESP32
 // On esp32, attempt to always allocate in psram first.
-void *DefaultAlloc(fl::size size) FL_NO_EXCEPT {
+void *DefaultAlloc(fl::size size) {
 #ifdef FL_VECTOR_PSRAM_ALWAYS_SRAM
     // FL_VECTOR_PSRAM_ALWAYS_SRAM: skip PSRAM, use default (SRAM) only.
     void *out = heap_caps_malloc(size, MALLOC_CAP_DEFAULT);
@@ -50,7 +50,7 @@ void *DefaultAlloc(fl::size size) FL_NO_EXCEPT {
 #endif
     return out;
 }
-void DefaultFree(void *ptr) FL_NO_EXCEPT { heap_caps_free(ptr); }
+void DefaultFree(void *ptr) { heap_caps_free(ptr); }
 #else
 void *DefaultAlloc(fl::size size) FL_NO_EXCEPT { return malloc(size); }
 void DefaultFree(void *ptr) FL_NO_EXCEPT { free(ptr); }
@@ -193,7 +193,7 @@ void Free(void *ptr) FL_NO_EXCEPT {
 // ESP32-specific memory allocation for RMT buffer pooling
 // These functions provide direct access to specific memory regions for performance
 
-void* InternalAlloc(fl::size size) FL_NO_EXCEPT {
+void* InternalAlloc(fl::size size) {
     // MALLOC_CAP_INTERNAL: Internal DRAM (fast, not in PSRAM)
     // MALLOC_CAP_8BIT: Ensure byte-accessible memory
     void* ptr = heap_caps_malloc(size, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
@@ -203,7 +203,7 @@ void* InternalAlloc(fl::size size) FL_NO_EXCEPT {
     return ptr;
 }
 
-void* InternalRealloc(void* ptr, fl::size size) FL_NO_EXCEPT {
+void* InternalRealloc(void* ptr, fl::size size) {
     // Realloc in internal DRAM - may relocate or expand in-place
     void* new_ptr = heap_caps_realloc(ptr, size, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
 
@@ -215,11 +215,11 @@ void* InternalRealloc(void* ptr, fl::size size) FL_NO_EXCEPT {
     return new_ptr;
 }
 
-void InternalFree(void* ptr) FL_NO_EXCEPT {
+void InternalFree(void* ptr) {
     heap_caps_free(ptr);
 }
 
-void* DMAAlloc(fl::size size) FL_NO_EXCEPT {
+void* DMAAlloc(fl::size size) {
     // MALLOC_CAP_DMA: DMA-capable memory (limited on ESP32)
     // MALLOC_CAP_INTERNAL: Must be in internal SRAM (not PSRAM) for most DMA
     //
@@ -244,7 +244,7 @@ void* DMAAlloc(fl::size size) FL_NO_EXCEPT {
     return ptr;
 }
 
-void DMAFree(void* ptr) FL_NO_EXCEPT {
+void DMAFree(void* ptr) {
     heap_caps_free(ptr);
 }
 #endif

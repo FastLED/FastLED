@@ -6,6 +6,7 @@
 #include "fl/system/fastpin_base.h"
 #include "fl/system/pin.h"  // For PinMode, PinValue enums
 #include "fl/stl/compiler_control.h"
+#include "fl/stl/noexcept.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER
@@ -24,31 +25,31 @@ public:
     typedef volatile u32 * port_ptr_t;
     typedef u32 port_t;
 
-    inline static void setOutput() { pinMode(PIN, PinMode::Output); }
-    inline static void setInput() { pinMode(PIN, PinMode::Input); }
+    inline static void setOutput() FL_NO_EXCEPT { pinMode(PIN, PinMode::Output); }
+    inline static void setInput() FL_NO_EXCEPT { pinMode(PIN, PinMode::Input); }
 
-    inline static void hi() __attribute__ ((always_inline)) { if(PIN < 16) { _GPB._GPOS = MASK; } else { GP16O = 1; } }
-    inline static void lo() __attribute__ ((always_inline)) { if(PIN < 16) { _GPB._GPOC = MASK; } else { GP16O = 0; } }
-    inline static void set(FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) { if(PIN < 16) { _GPB._GPO = val; } else { GP16O = val; }}
+    inline static void hi() FL_NO_EXCEPT __attribute__ ((always_inline)) { if(PIN < 16) { _GPB._GPOS = MASK; } else { GP16O = 1; } }
+    inline static void lo() FL_NO_EXCEPT __attribute__ ((always_inline)) { if(PIN < 16) { _GPB._GPOC = MASK; } else { GP16O = 0; } }
+    inline static void set(FASTLED_REGISTER port_t val) FL_NO_EXCEPT __attribute__ ((always_inline)) { if(PIN < 16) { _GPB._GPO = val; } else { GP16O = val; }}
 
-    inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
+    inline static void strobe() FL_NO_EXCEPT __attribute__ ((always_inline)) { toggle(); toggle(); }
 
-    inline static void toggle() __attribute__ ((always_inline)) { if(PIN < 16) { _GPB._GPO ^= MASK; } else { GP16O ^= MASK; } }
+    inline static void toggle() FL_NO_EXCEPT __attribute__ ((always_inline)) { if(PIN < 16) { _GPB._GPO ^= MASK; } else { GP16O ^= MASK; } }
 
-    inline static void hi(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { hi(); }
-    inline static void lo(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { lo(); }
-    inline static void fastset(FASTLED_REGISTER port_ptr_t port, FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) { *port = val; }
+    inline static void hi(FASTLED_REGISTER port_ptr_t port) FL_NO_EXCEPT __attribute__ ((always_inline)) { hi(); }
+    inline static void lo(FASTLED_REGISTER port_ptr_t port) FL_NO_EXCEPT __attribute__ ((always_inline)) { lo(); }
+    inline static void fastset(FASTLED_REGISTER port_ptr_t port, FASTLED_REGISTER port_t val) FL_NO_EXCEPT __attribute__ ((always_inline)) { *port = val; }
 
-    inline static port_t hival() __attribute__ ((always_inline)) { if (PIN<16) { return GPO | MASK;  } else { return GP16O | MASK; } }
-    inline static port_t loval() __attribute__ ((always_inline)) { if (PIN<16) { return GPO & ~MASK; } else { return GP16O & ~MASK; } }
-    inline static port_ptr_t port() __attribute__ ((always_inline)) { if(PIN<16) { return &_GPB._GPO; } else { return &GP16O; } }
-    inline static port_ptr_t sport() __attribute__ ((always_inline)) { return &_GPB._GPOS; } // there is no GP160 support for this
-    inline static port_ptr_t cport() __attribute__ ((always_inline)) { return &_GPB._GPOC; }
-    inline static port_t mask() __attribute__ ((always_inline)) { return MASK; }
+    inline static port_t hival() FL_NO_EXCEPT __attribute__ ((always_inline)) { if (PIN<16) { return GPO | MASK;  } else { return GP16O | MASK; } }
+    inline static port_t loval() FL_NO_EXCEPT __attribute__ ((always_inline)) { if (PIN<16) { return GPO & ~MASK; } else { return GP16O & ~MASK; } }
+    inline static port_ptr_t port() FL_NO_EXCEPT __attribute__ ((always_inline)) { if(PIN<16) { return &_GPB._GPO; } else { return &GP16O; } }
+    inline static port_ptr_t sport() FL_NO_EXCEPT __attribute__ ((always_inline)) { return &_GPB._GPOS; } // there is no GP160 support for this
+    inline static port_ptr_t cport() FL_NO_EXCEPT __attribute__ ((always_inline)) { return &_GPB._GPOC; }
+    inline static port_t mask() FL_NO_EXCEPT __attribute__ ((always_inline)) { return MASK; }
 
-    inline static bool isset() __attribute__ ((always_inline)) { return (PIN < 16) ? (GPO & MASK) : (GP16O & MASK); }
+    inline static bool isset() FL_NO_EXCEPT __attribute__ ((always_inline)) { return (PIN < 16) ? (GPO & MASK) : (GP16O & MASK); }
 
-    inline static constexpr bool validpin() { return true; }
+    inline static constexpr bool validpin() FL_NO_EXCEPT { return true; }
 };
 
 // Forward declaration of FastPin template

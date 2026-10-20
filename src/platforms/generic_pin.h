@@ -50,7 +50,7 @@ class Pin : public Selectable {
 public:
 	/// Constructor
 	/// @param pin Arduino digital pin number
-	Pin(int pin) FL_NO_EXCEPT : mPin(pin) { _init(); }
+	Pin(int pin) : mPin(pin) { _init(); }
 	#ifndef __AVR__
 	virtual ~Pin() {}  // Shut up the compiler warning, but don't steal bytes from AVR.
 	#endif
@@ -59,12 +59,12 @@ public:
 	typedef typename fl::remove_cv<RwReg>::type port_t;  ///< type for a pin read/write register, non-volatile
 
 	/// Set the pin mode as `OUTPUT`
-	inline void setOutput() FL_NO_EXCEPT { pinMode(mPin, PinMode::Output); }
+	inline void setOutput() { pinMode(mPin, PinMode::Output); }
 
 	/// Set the pin mode as `INPUT`
-	inline void setInput() FL_NO_EXCEPT { pinMode(mPin, PinMode::Input); }
+	inline void setInput() { pinMode(mPin, PinMode::Input); }
 
-	inline void setInputPullup() FL_NO_EXCEPT { pinMode(mPin, PinMode::InputPullup); }
+	inline void setInputPullup() { pinMode(mPin, PinMode::InputPullup); }
 
 	/// Set the pin state to `HIGH`
 	FL_DISABLE_WARNING_PUSH
@@ -82,7 +82,7 @@ public:
 	FL_DISABLE_WARNING_POP
 
 	/// Toggle the pin twice to create a short pulse
-	inline void strobe() FL_NO_EXCEPT __attribute__ ((always_inline)) { toggle(); toggle(); }
+	inline void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
 	/// Toggle the pin.
 	/// If the pin was high, set it low. If was low, set it high.
 	inline void toggle() FL_NO_EXCEPT __attribute__ ((always_inline)) {
@@ -97,22 +97,22 @@ public:
 	/// @param port the port to modify
 	FL_DISABLE_WARNING_PUSH
 	FL_DISABLE_WARNING_VOLATILE
-	inline void hi(FASTLED_REGISTER port_ptr_t port) FL_NO_EXCEPT __attribute__ ((always_inline)) { *port |= mPinMask; }
+	inline void hi(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { *port |= mPinMask; }
 	/// Set the same pin on another port to `LOW`
 	/// @param port the port to modify
-	inline void lo(FASTLED_REGISTER port_ptr_t port) FL_NO_EXCEPT __attribute__ ((always_inline)) { *port &= ~mPinMask; }
+	inline void lo(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { *port &= ~mPinMask; }
 	FL_DISABLE_WARNING_POP
 	/// Set the state of the output register
 	/// @param val the state to set the output register to
 	/// @note This function is not limited to the current pin! It modifies the entire register.
 	FL_DISABLE_WARNING_PUSH
 	FL_DISABLE_WARNING_VOLATILE
-	inline void set(FASTLED_REGISTER port_t val) FL_NO_EXCEPT __attribute__ ((always_inline)) { *mPort = val; }
+	inline void set(FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) { *mPort = val; }
 
 	/// Set the state of a port
 	/// @param port the port to modify
 	/// @param val the state to set the port to
-	inline void fastset(FASTLED_REGISTER port_ptr_t port, FASTLED_REGISTER port_t val) FL_NO_EXCEPT __attribute__ ((always_inline)) { *port  = val; }
+	inline void fastset(FASTLED_REGISTER port_ptr_t port, FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) { *port  = val; }
 
 	/// Gets the state of the port with this pin `HIGH`
 	FL_DISABLE_WARNING_PUSH
@@ -131,11 +131,11 @@ public:
 	}
 	FL_DISABLE_WARNING_POP
 	/// Get the output state of the port
-	port_ptr_t  port() FL_NO_EXCEPT __attribute__ ((always_inline)) { return mPort; }
+	port_ptr_t  port() __attribute__ ((always_inline)) { return mPort; }
 	/// Get the pin mask
 	FL_DISABLE_WARNING_PUSH
 	FL_DISABLE_WARNING_VOLATILE
-	port_t mask() FL_NO_EXCEPT __attribute__ ((always_inline)) { return mPinMask; }
+	port_t mask() __attribute__ ((always_inline)) { return mPinMask; }
 	FL_DISABLE_WARNING_POP
 	FL_DISABLE_WARNING_POP
 
@@ -154,14 +154,14 @@ public:
 class OutputPin : public Pin {
 public:
 	/// @copydoc Pin::Pin(int)
-	OutputPin(int pin) FL_NO_EXCEPT : Pin(pin) { setOutput(); }
+	OutputPin(int pin) : Pin(pin) { setOutput(); }
 };
 
 /// I/O pin initially set to INPUT
 class InputPin : public Pin {
 public:
 	/// @copydoc Pin::Pin(int)
-	InputPin(int pin) FL_NO_EXCEPT : Pin(pin) { setInput(); }
+	InputPin(int pin) : Pin(pin) { setInput(); }
 };
 
 } // namespace fl

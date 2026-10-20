@@ -158,15 +158,16 @@ static u32 mcpwm_get_capture_reg_addr(int group_id, int cap_channel) FL_NO_EXCEP
     // Each MCPWM group has a hardware register base address
     mcpwm_dev_t* mcpwm_dev = nullptr;
 
-    if (group_id == 0) {
+    switch (group_id) {
+    case 0:
         mcpwm_dev = &MCPWM0;
-    }
+        break;
     #if defined(SOC_MCPWM_GROUPS_PER_CHIP) && SOC_MCPWM_GROUPS_PER_CHIP > 1
-    else if (group_id == 1) {
+    case 1:
         mcpwm_dev = &MCPWM1;
-    }
+        break;
     #endif
-    else {
+    default:
         ESP_LOGE(MCPWM_TIMER_TAG, "Unsupported MCPWM group: %d", group_id);
         return 0;
     }
@@ -256,14 +257,7 @@ int mcpwm_timer_init(DualIsrContext* ctx, int gpio_pin) FL_NO_EXCEPT {
         .flags = {
             .pos_edge = 1,  // Capture on positive edges
             .neg_edge = 1,  // Capture on negative edges
-#if !ESP_IDF_VERSION_6_OR_HIGHER
-            .pull_up = 0,   // No internal pull-up
-            .pull_down = 0, // No internal pull-down
-#endif
             .invert_cap_signal = 0,  // No inversion
-#if !ESP_IDF_VERSION_6_OR_HIGHER
-            .io_loop_back = 0,       // No loopback
-#endif
         }
     };
 

@@ -440,7 +440,7 @@ void FL_IRAM fastled_riscv_rmt_experimental_handler(void *arg) FL_NO_EXCEPT;
 #define FASTLED_ESP_RISCV_INTERRUPT_TRAMPOLINE(new_function_name, function_pointer) \
     __attribute__((section(".iram1"))) \
     __attribute__((used)) \
-    void new_function_name(void* arg) { \
+    void new_function_name(void* arg) FL_NO_EXCEPT { \
         /* RISC-V can call C functions directly from interrupt context */ \
         /* Simple C trampoline - no assembly required unlike Xtensa */ \
         function_pointer(arg); \

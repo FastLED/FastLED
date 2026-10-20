@@ -7,6 +7,11 @@ from pathlib import Path
 
 from running_process import RunningProcess
 
+from ci.cpp_lint_cache import (
+    check_cpp_files_changed,
+    invalidate_cpp_cache,
+    mark_cpp_lint_success,
+)
 from ci.js_lint_cache import check_js_files_changed
 from ci.python_lint_cache import (
     check_python_files_changed,
@@ -153,10 +158,10 @@ def run_cpp_lint(
     use_rust_cpp_lint: bool,
 ) -> bool:
     """
-    Run required C++ checks, using the unified checker's per-unit cache.
+    Run C++ linting stage.
 
     Args:
-        no_fingerprint: Retained for CLI compatibility; never bypass required checks
+        no_fingerprint: Skip fingerprint cache
         run_full: Run full linting including IWYU
         run_iwyu: Run IWYU only
 
@@ -170,71 +175,90 @@ def run_cpp_lint(
     # Set clang-format style
     os.environ["CLANG_FORMAT_STYLE"] = "{SortIncludes: false}"
 
-    # Source-only fingerprints cannot prove SDK/tool prerequisites still exist.
-    # Always enter the unified checker; its per-unit AST cache owns reuse.
-    # Run clang-format on folders (currently empty list in bash script)
-    folders: list[str] = [
-        # "src/lib8tion",
-        # "src/platforms/stub",
-        # "src/platforms/apollo3",  # clang-format breaks apollo3
-        # "src/platforms/esp/8266",  # clang-format breaks esp8266
-        # "src/platforms/arm",  # clang-format breaks arm
-        # "src/fx",
-        # "src/fl",
-        # "src/platforms/wasm",
-    ]
+    # Check if linting is needed
+    needs_cpp_lint = False
+    skipped = False
 
-    for folder in folders:
-        print(f"Running clang-format on {folder}")
-        result = RunningProcess.run(
-            ["uv", "run", "ci/run-clang-format.py", "-i", "-r", folder],
-            capture_output=False,
-        )
-        if result.returncode != 0:
-            # Retry once (as bash script does)
+    if no_fingerprint:
+        print("Running C++ linting (--no-fingerprint flag set)")
+        needs_cpp_lint = True
+    else:
+        if check_cpp_files_changed():
+            needs_cpp_lint = True
+        else:
+            needs_cpp_lint = False
+
+    if needs_cpp_lint:
+        # Run clang-format on folders (currently empty list in bash script)
+        folders: list[str] = [
+            # "src/lib8tion",
+            # "src/platforms/stub",
+            # "src/platforms/apollo3",  # clang-format breaks apollo3
+            # "src/platforms/esp/8266",  # clang-format breaks esp8266
+            # "src/platforms/arm",  # clang-format breaks arm
+            # "src/fx",
+            # "src/fl",
+            # "src/platforms/wasm",
+        ]
+
+        for folder in folders:
+            print(f"Running clang-format on {folder}")
             result = RunningProcess.run(
                 ["uv", "run", "ci/run-clang-format.py", "-i", "-r", folder],
                 capture_output=False,
             )
+            if result.returncode != 0:
+                # Retry once (as bash script does)
+                result = RunningProcess.run(
+                    ["uv", "run", "ci/run-clang-format.py", "-i", "-r", folder],
+                    capture_output=False,
+                )
 
-    # Run unified C++ checker
-    print("")
-    print("🔍 C++ CUSTOM LINTERS (UNIFIED)")
-    print("-------------------------------")
-    print(
-        "Running unified C++ checker (all linters + unity build + cpp_lint in one pass)"
-    )
-
-    cmd = ["uv", "run", "python", "ci/lint_cpp/run_all_checkers.py"]
-    if use_rust_cpp_lint:
-        cmd.append("--rust")
-    else:
-        cmd.append("--no-rust")
-
-    # 900s (15 min) covers cold CI runners that must `cargo install`
-    # the zccache binary from source — happens on macOS when soldr's
-    # GitHub release fetch hits the per-IP API rate limit and falls
-    # back to cargo. The outer stage allows another 300s for overhead.
-    result = RunningProcess.run(
-        cmd,
-        cwd=None,
-        check=False,
-        timeout=900,
-    )
-    if result.stdout:
-        print(result.stdout, end="" if result.stdout.endswith("\n") else "\n")
-    if result.stderr:
+        # Run unified C++ checker
+        print("")
+        print("🔍 C++ CUSTOM LINTERS (UNIFIED)")
+        print("-------------------------------")
         print(
-            result.stderr,
-            file=sys.stderr,
-            end="" if result.stderr.endswith("\n") else "\n",
+            "Running unified C++ checker (all linters + unity build + cpp_lint in one pass)"
         )
 
-    if result.returncode == 0:
-        print("✅ C++ linting passed")
+        cmd = ["uv", "run", "python", "ci/lint_cpp/run_all_checkers.py"]
+        if use_rust_cpp_lint:
+            cmd.append("--rust")
+        else:
+            cmd.append("--no-rust")
+
+        # 900s (15 min) covers cold CI runners that must `cargo install`
+        # the zccache binary from source — happens on macOS when soldr's
+        # GitHub release fetch hits the per-IP API rate limit and falls
+        # back to cargo. Well under the workflow's 30-min cap.
+        result = RunningProcess.run(
+            cmd,
+            cwd=None,
+            check=False,
+            timeout=900,
+        )
+        if result.stdout:
+            print(result.stdout, end="" if result.stdout.endswith("\n") else "\n")
+        if result.stderr:
+            print(
+                result.stderr,
+                file=sys.stderr,
+                end="" if result.stderr.endswith("\n") else "\n",
+            )
+
+        if result.returncode == 0:
+            if not no_fingerprint:
+                mark_cpp_lint_success()
+            print("✅ C++ linting passed")
+        else:
+            if not no_fingerprint:
+                invalidate_cpp_cache()
+            print("❌ Unified C++ linter failed")
+            return False
     else:
-        print("❌ Unified C++ linter failed")
-        return False
+        skipped = True
+        print("⏭️  C++ linting skipped (no changes)")
 
     return True
 

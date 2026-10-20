@@ -1,5 +1,10 @@
 # Lessons Learned
 
+- Keep annotation enforcement in the existing `./lint` path. Before adding
+  SDK provisioning, a CI matrix, or a cache subsystem, test whether a small
+  source parser can reject missing annotations across inactive branches.
+  User requested this simpler approach for FL_NO_EXCEPT on 2026-10-20.
+
 - For WASM viewer fixes, run the compiled reproducer through the actual page
   and worker, then retain and inspect before/after screenshots. Module-level
   WebGL pixel tests do not verify app startup, asset staging or the worker
@@ -514,51 +519,3 @@
   inside return types, default-argument lambdas, or same-line bodies cannot
   excuse an unannotated enclosing function. After deleting a regex exemption,
   verify its remaining call sites as well as the added regression test.
-
-- Required platform lint must validate SDK prerequisites on every invocation;
-  an unchanged-source fingerprint cannot prove that tooling is still present.
-  Verify the normal wrapper with a warmed cache and a temporarily missing SDK,
-  restore exact inputs, and remove task scratch files after publishing evidence.
-
-- Cache tests need a unique filesystem identity per invocation when the backing
-  store survives CI runs. Keep paths stable inside each cold/warm/mutation test,
-  retain the real cache, and verify two runs against the same pytest base path.
-
-- Real SDK argument lists can exceed Windows process limits. Preserve exact
-  arguments in a temporary compilation database and test cleanup on both parse
-  and spawn failures; shortening include lists weakens the analysis.
-- Compilation database argv[0] carries compiler installation context. LLVM's
-  fixed database uses an absolute sibling `clang-tool` path; a bare name loses
-  macOS libc++ discovery even when every flag is identical. Include a real
-  standard-library header in the command-length regression and verify native CI.
-- A convenience function in a generic filesystem object can extract an SD
-  object whose constructor survives section garbage collection. Keep SD callers
-  in the SD translation unit and verify actual map and image changes, alongside
-  an example that still uses SD. Optional SDK objects also need archive extraction
-  in the build backend; conservative discovery alone cannot prevent retention.
-- Full SDK inventories are expensive on hosted Intel Macs. Batch cold cache
-  publications behind one complete final content/availability audit; never
-  remove per-job availability checks while still publishing immediately. Test
-  that a failed audit cannot poison an existing native key, even after inputs
-  are restored. Normalize repeated diagnostic paths within each parse only.
-- Distinguish semantic-analysis deadlines from tool-discovery timeouts. Hosted
-  Intel Xcode lookup exceeded ten seconds before tests began. Keep the selected
-  toolchain and fail-closed behavior; test a real delayed child and bound discovery
-  separately instead of weakening AST checks or retrying failed assertions.
-## Emulator smoke success must follow supported work
-
-- A success marker after `FastLED.show()` is insufficient when the selected
-  hardware peripheral is absent from the emulator: a driver can time out and
-  return. Treat driver timeout diagnostics as failures.
-- Check the exact emulator implementation before claiming peripheral coverage.
-  ESP32 QEMU's unimplemented RMT cannot produce completion interrupts; use an
-  existing GPIO software driver for build/boot smoke and state that hardware
-  completion and waveform fidelity remain hardware-test responsibilities.
-
-## Resolve compiler output from the compiler working directory
-
-- Relative source, include-trace, and diagnostic paths must use the compiler's
-  working directory, not the caller's. Exercise a real relative include from
-  outside the project and check both dependencies and declaration coverage.
-- Filesystem mount wrappers must return the backend's initialization result.
-  Share the generic mount path with SD so missing media cannot report success.

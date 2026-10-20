@@ -135,7 +135,7 @@ template<fl::u8 PIN> class FastPin {
 #ifdef FASTLED_ALL_PINS_VALID
 	constexpr static bool validpin() FL_NO_EXCEPT { return true; }
 #else
-	constexpr static bool validpin() FL_NO_EXCEPT { return false; }
+	constexpr static bool validpin() { return false; }
 #endif
 	constexpr static bool LowSpeedOnlyRecommended() FL_NO_EXCEPT {  // Some implementations assume this exists.
         // Caller must always determine if high speed use if allowed on a given pin,

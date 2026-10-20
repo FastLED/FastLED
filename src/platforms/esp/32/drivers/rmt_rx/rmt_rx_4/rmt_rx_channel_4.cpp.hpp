@@ -106,10 +106,10 @@ namespace {
 // helpers. Same algorithm, substitutes rmt_symbol_word_t -> rmt_item32_t.
 //=============================================================================
 
-inline u32 ticksToNs(u32 ticks, u32 ns_per_tick) { return ticks * ns_per_tick; }
+inline u32 ticksToNs(u32 ticks, u32 ns_per_tick) FL_NO_EXCEPT { return ticks * ns_per_tick; }
 
 inline bool isResetPulse(RmtSymbol symbol, const ChipsetTiming4Phase &timing,
-                         u32 ns_per_tick) {
+                         u32 ns_per_tick) FL_NO_EXCEPT {
     const auto item = fl::bit_cast<rmt_item32_t>(symbol);
     u32 duration0_ns = ticksToNs(item.duration0, ns_per_tick);
     u32 duration1_ns = ticksToNs(item.duration1, ns_per_tick);
@@ -124,7 +124,7 @@ inline bool isResetPulse(RmtSymbol symbol, const ChipsetTiming4Phase &timing,
 }
 
 inline bool isGapPulse(RmtSymbol symbol, const ChipsetTiming4Phase &timing,
-                       u32 ns_per_tick) {
+                       u32 ns_per_tick) FL_NO_EXCEPT {
     if (timing.gap_tolerance_ns == 0) {
         return false;
     }
@@ -154,7 +154,7 @@ inline bool isGapPulse(RmtSymbol symbol, const ChipsetTiming4Phase &timing,
  * the frame by one bit (LCD_RGB on ESP32-P4, FastLED#4669).
  */
 inline int decodeGapBit(RmtSymbol symbol, const ChipsetTiming4Phase &timing,
-                        u32 ns_per_tick) {
+                        u32 ns_per_tick) FL_NO_EXCEPT {
     const auto item = fl::bit_cast<rmt_item32_t>(symbol);
     if (item.level0 != 1 || item.level1 != 0) {
         return -1;
@@ -170,7 +170,7 @@ inline int decodeGapBit(RmtSymbol symbol, const ChipsetTiming4Phase &timing,
 }
 
 inline int decodeBit(RmtSymbol symbol, const ChipsetTiming4Phase &timing,
-                     u32 ns_per_tick) {
+                     u32 ns_per_tick) FL_NO_EXCEPT {
     const auto item = fl::bit_cast<rmt_item32_t>(symbol);
     u32 high_ns = ticksToNs(item.duration0, ns_per_tick);
     u32 low_ns = ticksToNs(item.duration1, ns_per_tick);
@@ -197,7 +197,7 @@ inline int decodeBit(RmtSymbol symbol, const ChipsetTiming4Phase &timing,
 fl::result<u32, DecodeError> decodeRmtSymbols(const ChipsetTiming4Phase &timing,
                                               u32 resolution_hz,
                                               fl::span<const RmtSymbol> symbols,
-                                              fl::span<u8> bytes_out) {
+                                              fl::span<u8> bytes_out) FL_NO_EXCEPT {
     if (symbols.empty() || bytes_out.empty()) {
         return fl::result<u32, DecodeError>::failure(
             DecodeError::INVALID_ARGUMENT);

@@ -68,7 +68,7 @@ class s16x16 {
 #if defined(__riscv) && (__riscv_xlen == 32)
     // RV32: Use mul+mulh inline asm to avoid expensive 64-bit widening multiply.
     // Extracts bits [47:16] of the 64-bit product for Q16.16 fixed-point.
-    FASTLED_FORCE_INLINE s16x16 operator*(s16x16 b) const FL_NO_EXCEPT {
+    FASTLED_FORCE_INLINE s16x16 operator*(s16x16 b) const {
         i32 lo, hi;
         asm("mul  %0, %2, %3\n\t"
             "mulh %1, %2, %3"
@@ -178,7 +178,7 @@ class s16x16 {
     }
 
 #if defined(__riscv) && (__riscv_xlen == 32)
-    static FASTLED_FORCE_INLINE s16x16 lerp(s16x16 a, s16x16 b, s16x16 t) FL_NO_EXCEPT {
+    static FASTLED_FORCE_INLINE s16x16 lerp(s16x16 a, s16x16 b, s16x16 t) {
 #else
     static constexpr FASTLED_FORCE_INLINE s16x16 lerp(s16x16 a, s16x16 b, s16x16 t) FL_NO_EXCEPT {
 #endif

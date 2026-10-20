@@ -17,7 +17,7 @@ class MedianFilterImpl {
   public:
     MedianFilterImpl() FL_NO_EXCEPT : mSortedCount(0), mLastMedian(T(0)) {}
     explicit MedianFilterImpl(fl::size capacity)
-        FL_NO_EXCEPT : mRing(capacity), mSorted(capacity),
+        : mRing(capacity), mSorted(capacity),
           mSortedCount(0), mLastMedian(T(0)) {
         if (capacity % 2 == 0) {
             FL_ERROR("MedianFilter: capacity should be odd, adding 1");
@@ -26,7 +26,7 @@ class MedianFilterImpl {
         }
     }
 
-    T update(fl::span<const T> values) FL_NO_EXCEPT {
+    T update(fl::span<const T> values) {
         if (values.size() == 0) return mLastMedian;
         for (fl::size i = 0; i < values.size(); ++i) {
             mRing.push_back(values[i]);
@@ -41,7 +41,7 @@ class MedianFilterImpl {
         return mLastMedian;
     }
 
-    T update(T input) FL_NO_EXCEPT {
+    T update(T input) {
         if (!mRing.full()) {
             T* base = &mSorted[0];
             T* pos = fl::lower_bound(base, base + mSortedCount, input);
@@ -73,18 +73,18 @@ class MedianFilterImpl {
         return mLastMedian;
     }
 
-    T value() const FL_NO_EXCEPT { return mLastMedian; }
+    T value() const { return mLastMedian; }
 
-    void reset() FL_NO_EXCEPT {
+    void reset() {
         mRing.clear();
         mSortedCount = 0;
         mLastMedian = T(0);
     }
 
-    fl::size size() const FL_NO_EXCEPT { return mRing.size(); }
-    fl::size capacity() const FL_NO_EXCEPT { return mRing.capacity(); }
+    fl::size size() const { return mRing.size(); }
+    fl::size capacity() const { return mRing.capacity(); }
 
-    void resize(fl::size new_capacity) FL_NO_EXCEPT {
+    void resize(fl::size new_capacity) {
         if (new_capacity % 2 == 0) {
             FL_ERROR("MedianFilter: capacity should be odd, adding 1");
             new_capacity += 1;

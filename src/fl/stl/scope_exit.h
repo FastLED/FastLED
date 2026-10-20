@@ -18,7 +18,7 @@ class scope_exit {
 public:
     template <typename EFP>
     explicit scope_exit(EFP &&f)
-        FL_NO_EXCEPT : mExitFunction(fl::forward<EFP>(f)), mActive(true) {}
+        : mExitFunction(fl::forward<EFP>(f)), mActive(true) {}
 
     scope_exit(scope_exit &&rhs) FL_NO_EXCEPT
         : mExitFunction(fl::move(rhs.mExitFunction)), mActive(rhs.mActive) {
@@ -45,7 +45,7 @@ private:
 /// Factory for C++11/14 (no CTAD). Usage:
 ///   auto guard = fl::make_scope_exit([&]{ cleanup(); });
 template <typename EF>
-scope_exit<decay_t<EF>> make_scope_exit(EF &&f) FL_NO_EXCEPT {
+scope_exit<decay_t<EF>> make_scope_exit(EF &&f) {
     return scope_exit<decay_t<EF>>(fl::forward<EF>(f));
 }
 
