@@ -236,6 +236,21 @@ def esp_jobs(environment: ProfileEnvironment) -> list[AstJob]:
             )
             if source.name == "platforms+.cpp":
                 expected = ("fl::SPISingleESP32",)
+                if environment.profile.name == "esp32c6-idf5":
+                    expected += tuple(
+                        name + "()"
+                        for name in (
+                            "fastled_riscv_install_interrupt",
+                            "fastled_riscv_install_official_interrupt",
+                            "fastled_riscv_install_experimental_interrupt",
+                            "fastled_riscv_official_handler",
+                            "fastled_riscv_experimental_handler",
+                            "fastled_riscv_rmt_init_official",
+                            "fastled_riscv_rmt_init_experimental",
+                            "fastled_riscv_rmt_official_handler",
+                            "fastled_riscv_rmt_experimental_handler",
+                        )
+                    )
             jobs.append(
                 AstJob(
                     environment.profile.name + ("-sdfat" if backend == "sdfat" else ""),

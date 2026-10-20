@@ -720,3 +720,14 @@ def test_matrix_prerequisite_does_not_discover_or_download_query(
     monkeypatch.setattr(ast_profiles, "load_host_profile", missing)
     with pytest.raises(check_noexcept.NoexceptCheckError, match="provision"):
         run_all_checkers._require_ast_tool(provisioned=True)
+
+
+def test_required_function_definition_query() -> None:
+    query = check_ast_combined._build_combined_query(
+        ".*src.*", ("fl::Backend", "fastled_riscv_install_interrupt()")
+    )
+    assert 'cxxRecordDecl(isDefinition(), hasName("fl::Backend"))' in query
+    assert (
+        'functionDecl(isDefinition(), hasName("fastled_riscv_install_interrupt"))'
+        in query
+    )

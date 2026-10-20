@@ -712,5 +712,19 @@ passes 320 unit targets and 96 examples. Normal lint passes all 138 fresh parses
 21,894 declarations, zero failures, 211.89 seconds and 1,611.4 MiB sampled peak
 RSS. Full Python passes 1,968 tests and 3,263 subtests (48 skipped, two xfailed)
 in 334.14 seconds. New hosted validation remains pending at this snapshot.
-CodeRabbit withdrew the SD relocation scope objection; its request for an
-issue-recorded maintainer directive for Xcode discovery remains open.
+CodeRabbit withdrew the SD relocation scope objection. On 2026-10-20 the
+address-reviews helper reports zero open review threads.
+
+## FL_NO_EXCEPT completion, 2026-10-20
+
+- [x] Integrate current master into #4831, retaining fbuild 2.5.42 and libc fixes.
+- [x] Keep real ESP noexcept enabled and retain the nine RISC-V definition fixes.
+- [x] Require all nine RISC-V interrupt definitions in the C6 semantic profile.
+- [x] Add a real SDK regression reproducing #4869 by removing an annotation.
+- [x] Provision the three real SDK environments on this checkout.
+- [ ] Pass normal C++ lint, SDK regressions, native tests and code review.
+- [ ] Push, validate exact-head full CI, and merge #4831.
+
+Focused prerequisite tests: 46 passed. Cache tests: 26 passed, one skipped
+after starting the required daemon. SDK regressions, normal lint and native
+tests are running; their results supersede historical pre-merge evidence above.

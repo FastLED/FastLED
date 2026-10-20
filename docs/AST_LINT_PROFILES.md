@@ -65,7 +65,11 @@ The required profiles are declared in `ci/tools/ast_profiles.py`:
 | `esp32c6-idf5` | `esp32-c6-devkitc-1` | pioarduino `55.03.35`, Arduino 3.3.5 / IDF 5 | `riscv32-esp-elf` |
 
 The C6 profile exercises RISC-V platform selection alongside the classic
-Xtensa ESP32. These three SDK environments support separate Arduino SD and
+Xtensa ESP32. Its platform router must expose definitions for all nine
+`fastled_riscv_*` interrupt helpers; disappearing implementations fail lint.
+The real SDK regression removes an implementation annotation to reproduce
+the exception specification mismatch from #4869, then verifies the shipped fix.
+These three SDK environments support separate Arduino SD and
 SdFat analysis configurations. SdFat is pinned to registry package
 `greiman/SdFat@2.3.1`. SD, FS, and SPI come from the selected Arduino SDK;
 they must not be declared as independent registry packages.
@@ -146,7 +150,7 @@ uv run python -m ci.tools.ast_matrix --workers 2 --report .build/ast-warm.json
 ```
 
 The report lists exact jobs, profile versions and arguments, expected backend
-definitions, findings with profile attribution, declaration locations, missing
+definitions (function expectations use a trailing `()`), findings with profile attribution, declaration locations, missing
 expectations, parse failures, and known uncovered configurations. It records
 analysis time, parse count, cache hits and hit rate, and coverage per profile and
 union. `elapsed_seconds` excludes report aggregation and writing; measure the

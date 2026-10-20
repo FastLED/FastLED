@@ -10,6 +10,41 @@ from ci.tools.ast_profiles import ESP_PROFILES, EspProfile, load_profile
 from ci.util.paths import PROJECT_ROOT
 
 
+def test_riscv_interrupt_definition_requires_matching_noexcept(tmp_path: Path) -> None:
+    """Reproduce #4869 with the real C6 SDK and the shipped implementation."""
+    from ci.tools.ast_matrix import target_clang_query
+
+    profile = next(p for p in ESP_PROFILES if p.name == "esp32c6-idf5")
+    environment = load_profile(profile)
+    source = PROJECT_ROOT / "src/platforms/esp/32/interrupts/riscv.cpp.hpp"
+    original = source.read_text(encoding="utf-8")
+    assert original.count(") FL_NO_EXCEPT {") >= 1
+    overlay = tmp_path / "riscv.cpp.hpp"
+    probe = tmp_path / "probe.cpp"
+    probe.write_text(f'#include "{overlay.as_posix()}"\n', encoding="utf-8")
+    expected = ("fastled_riscv_install_interrupt()",)
+    overlay.write_text(original.replace(") FL_NO_EXCEPT {", ") {", 1), encoding="utf-8")
+    with pytest.raises(
+        check_noexcept.NoexceptCheckError, match="exception specification"
+    ):
+        check_ast_combined.analyze_translation_unit(
+            target_clang_query(),
+            str(probe),
+            ".*",
+            list(environment.arguments),
+            expected_records=expected,
+        )
+    overlay.write_text(original, encoding="utf-8")
+    result = check_ast_combined.analyze_translation_unit(
+        target_clang_query(),
+        str(probe),
+        ".*",
+        list(environment.arguments),
+        expected_records=expected,
+    )
+    assert result.present_records == list(expected)
+
+
 def test_absent_real_spi_dependency_cannot_pass_as_sd_coverage() -> None:
     from ci.tools.ast_matrix import target_clang_query
 

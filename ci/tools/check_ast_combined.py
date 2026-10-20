@@ -130,7 +130,10 @@ def _build_combined_query(
         f'isExpansionInFileMatching({json.dumps(file_regex)})).bind("coverage")'
     )
     assertions = [
-        f"match cxxRecordDecl(isDefinition(), hasName({json.dumps(name)}))"
+        # A trailing () identifies a required function definition rather than
+        # a backend class. Both must survive preprocessing in this profile.
+        f"match {'functionDecl' if name.endswith('()') else 'cxxRecordDecl'}"
+        f"(isDefinition(), hasName({json.dumps(name.removesuffix('()'))}))"
         f'.bind("expected_{index}")'
         for index, name in enumerate(expected_records)
     ]
