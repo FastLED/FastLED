@@ -203,7 +203,7 @@ private:
 
     // Constructor: initialize the single chosen driver.
     EspIO()
-        : mDriver(defaultConfig()),
+        FL_NO_EXCEPT : mDriver(defaultConfig()),
           mPeekByte(-1),
           mHasPeek(false),
           mDiagnosticsReported(false) {}

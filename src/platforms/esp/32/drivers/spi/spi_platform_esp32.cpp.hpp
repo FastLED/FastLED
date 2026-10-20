@@ -22,6 +22,7 @@ FL_EXTERN_C_BEGIN
 FL_EXTERN_C_END
 
 #include "platforms/shared/spi_bitbang/spi_isr_engine.h"
+#include "fl/stl/noexcept.h"
 
 #define PARALLEL_SPI_TAG "parallel_spi_c3"
 
@@ -32,7 +33,7 @@ static fl::isr::handle s_isr_handle;
  * Timer alarm callback - calls the ISR
  * This runs in ISR context and must be IRAM-safe
  */
-static void FL_IRAM spi_isr_wrapper(void* user_ctx) {
+static void FL_IRAM spi_isr_wrapper(void* user_ctx) FL_NO_EXCEPT {
     (void)user_ctx;
 
     // Call the actual SPI ISR
@@ -44,7 +45,7 @@ static void FL_IRAM spi_isr_wrapper(void* user_ctx) {
  * @param timer_hz Timer frequency in Hz (should be 2× target SPI bit rate)
  * @return 0 on success, error code on failure
  */
-FL_EXTERN_C int fl_spi_platform_isr_start(fl::u32 timer_hz) {
+FL_EXTERN_C int fl_spi_platform_isr_start(fl::u32 timer_hz) FL_NO_EXCEPT {
     if (s_isr_handle.is_valid()) {
         ESP_LOGW(PARALLEL_SPI_TAG, "Timer already initialized");
         return -1;
@@ -71,7 +72,7 @@ FL_EXTERN_C int fl_spi_platform_isr_start(fl::u32 timer_hz) {
 /**
  * Stop ISR and timer
  */
-FL_EXTERN_C void fl_spi_platform_isr_stop(void) {
+FL_EXTERN_C void fl_spi_platform_isr_stop(void) FL_NO_EXCEPT {
     if (s_isr_handle.is_valid()) {
         int result = fl::isr::detach_handler(s_isr_handle);
         if (result == 0) {

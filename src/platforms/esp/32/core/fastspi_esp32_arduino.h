@@ -128,13 +128,13 @@ public:
 	FL_STATIC_ASSERT(FastPin<DATA_PIN>::validpin(), "Invalid data pin specified");
 	FL_STATIC_ASSERT(FastPin<CLOCK_PIN>::validpin(), "Invalid clock pin specified");
 
-	ESP32SPIOutput() :
+	ESP32SPIOutput() FL_NO_EXCEPT :
 	  mLedSPI(FASTLED_ESP32_SPI_BUS),
 	  mPSelect(nullptr) {}
-	ESP32SPIOutput(Selectable *pSelect) :
+	ESP32SPIOutput(Selectable *pSelect) FL_NO_EXCEPT :
 	  mLedSPI(FASTLED_ESP32_SPI_BUS),
 	  mPSelect(pSelect) {}
-	void setSelect(Selectable *pSelect) { mPSelect = pSelect; }
+	void setSelect(Selectable *pSelect) FL_NO_EXCEPT { mPSelect = pSelect; }
 
 	void init() FL_NO_EXCEPT {
 		// set the pins to output and make sure the select is released (which apparently means hi?  This is a bit
@@ -144,14 +144,14 @@ public:
 	}
 
 	// stop the SPI output.  Pretty much a NOP with software, as there's no registers to kick
-	static void stop() { }
+	static void stop() FL_NO_EXCEPT { }
 
 	// wait until the SPI subsystem is ready for more data to write.  A NOP when bitbanging
-	static void wait() __attribute__((always_inline)) { }
-	static void waitFully() __attribute__((always_inline)) { wait(); }
+	static void wait() FL_NO_EXCEPT __attribute__((always_inline)) { }
+	static void waitFully() FL_NO_EXCEPT __attribute__((always_inline)) { wait(); }
 
-	void writeByteNoWait(u8 b) __attribute__((always_inline)) { writeByte(b); }
-	void writeBytePostWait(u8 b) __attribute__((always_inline)) { writeByte(b); wait(); }
+	void writeByteNoWait(u8 b) FL_NO_EXCEPT __attribute__((always_inline)) { writeByte(b); }
+	void writeBytePostWait(u8 b) FL_NO_EXCEPT __attribute__((always_inline)) { writeByte(b); wait(); }
 
 	void writeWord(u16 w) FL_NO_EXCEPT __attribute__((always_inline)) {
 		writeByte(static_cast<u8>(w>>8));
@@ -215,12 +215,12 @@ public:
 	}
 
 	// default version of writing a block of data out to the SPI port, with no data modifications being made
-	void writeBytes(FASTLED_REGISTER u8 *data, int len) { writeBytes<DATA_NOP>(data, len); }
+	void writeBytes(FASTLED_REGISTER u8 *data, int len) FL_NO_EXCEPT { writeBytes<DATA_NOP>(data, len); }
 
 	/// Finalize transmission (no-op for standard ESP32 SPI)
 	/// This method exists for compatibility with Quad-SPI implementations
 	/// For standard single-line SPI, no additional operations are needed
-	static void finalizeTransmission() { }
+	static void finalizeTransmission() FL_NO_EXCEPT { }
 
 	// write a single bit out, which bit from the passed in byte is determined by template parameter
 	template <u8 BIT> inline void writeBit(u8 b) FL_NO_EXCEPT {
@@ -251,7 +251,7 @@ public:
 				D::adjust(pixels.loadAndScale0()),
 				D::adjust(pixels.loadAndScale1()),
 				D::adjust(pixels.loadAndScale2())
-			) FL_NO_EXCEPT;
+			);
 			data_block[data_block_index++] = rgb;
 			pixels.advanceData();
 			pixels.stepDithering();

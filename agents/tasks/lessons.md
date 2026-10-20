@@ -1,5 +1,10 @@
 # Lessons Learned
 
+- Keep annotation enforcement in the existing `./lint` path. Before adding
+  SDK provisioning, a CI matrix, or a cache subsystem, test whether a small
+  source parser can reject missing annotations across inactive branches.
+  User requested this simpler approach for FL_NO_EXCEPT on 2026-10-20.
+
 - For WASM viewer fixes, run the compiled reproducer through the actual page
   and worker, then retain and inspect before/after screenshots. Module-level
   WebGL pixel tests do not verify app startup, asset staging or the worker

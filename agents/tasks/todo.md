@@ -2,6 +2,23 @@
 
 <!-- Add tasks here as checkable items -->
 
+## ESP FL_NO_EXCEPT lint
+
+- [x] Retain the ESP exception specification fixes with FL_NO_EXCEPT enabled.
+- [x] Remove SDK provisioning/matrix/cache additions and GitHub Actions edits.
+- [x] Add a Rust source parser to normal `./lint`, checking inactive branches.
+- [x] Verify original RISC-V regression, parser errors, and function signatures.
+- [x] Fix genuine ESP findings and pass lint/tests/review.
+- [ ] Push and merge the simplified PR.
+
+Validation: plain `./lint` passes; 164 Rust tests and 82 exception-policy/AST
+prerequisite tests pass. Native validation passes 321 unit targets and 96
+examples. ESP32-C6 Blink builds successfully. A temporary inactive-branch
+probe fails normal single-file `./lint` with exactly one annotation error,
+then passes after adding FL_NO_EXCEPT. Probe removed; no GHA diff.
+The source rule also checks both optional SD adapters; removing the original
+eight override annotations produces eight errors without loading either SDK.
+
 ## PCH mtime replay and OBS cache integration
 
 - [x] Read both attached agent chats and inspect paused FastLED changes.

@@ -113,7 +113,7 @@ struct H264HwDecoder::Impl {
     esp_h264_dec_handle_t decoder = nullptr;
 };
 
-H264HwDecoder::H264HwDecoder() : mImpl(fl::make_unique<Impl>()) {}
+H264HwDecoder::H264HwDecoder() FL_NO_EXCEPT : mImpl(fl::make_unique<Impl>()) {}
 
 H264HwDecoder::~H264HwDecoder() {
     end();
@@ -258,7 +258,7 @@ DecodeResult H264HwDecoder::decode() FL_NO_EXCEPT {
             const fl::u8* uPlane = out_frame.outbuf + pixelCount;
             const fl::u8* vPlane = uPlane + pixelCount / 4;
 
-            fl::vector<fl::u8> rgbBuf(pixelCount * 3) FL_NO_EXCEPT;
+            fl::vector<fl::u8> rgbBuf(pixelCount * 3);
             fl::u8* dst = rgbBuf.data();
 
             for (fl::u16 row = 0; row < h; row++) {
@@ -312,20 +312,20 @@ struct H264HwDecoder::Impl {
     Frame currentFrame{0};
 };
 
-H264HwDecoder::H264HwDecoder() : mImpl(fl::make_unique<Impl>()) {}
+H264HwDecoder::H264HwDecoder() FL_NO_EXCEPT : mImpl(fl::make_unique<Impl>()) {}
 H264HwDecoder::~H264HwDecoder() { end(); }
 
-bool H264HwDecoder::begin(fl::filebuf_ptr) { return false; }
-void H264HwDecoder::end() { mImpl->ready = false; mImpl->stream = nullptr; }
-bool H264HwDecoder::isReady() const { return false; }
+bool H264HwDecoder::begin(fl::filebuf_ptr) FL_NO_EXCEPT { return false; }
+void H264HwDecoder::end() FL_NO_EXCEPT { mImpl->ready = false; mImpl->stream = nullptr; }
+bool H264HwDecoder::isReady() const FL_NO_EXCEPT { return false; }
 bool H264HwDecoder::hasError(fl::string* msg) const FL_NO_EXCEPT {
     if (msg) *msg = "esp_h264 component not installed. "
                      "Add espressif/esp_h264 to idf_component.yml";
     return true;
 }
-DecodeResult H264HwDecoder::decode() { return DecodeResult::UnsupportedFormat; }
-Frame H264HwDecoder::getCurrentFrame() { return mImpl->currentFrame; }
-bool H264HwDecoder::hasMoreFrames() const { return false; }
+DecodeResult H264HwDecoder::decode() FL_NO_EXCEPT { return DecodeResult::UnsupportedFormat; }
+Frame H264HwDecoder::getCurrentFrame() FL_NO_EXCEPT { return mImpl->currentFrame; }
+bool H264HwDecoder::hasMoreFrames() const FL_NO_EXCEPT { return false; }
 
 #endif // FL_H264_HW_AVAILABLE
 

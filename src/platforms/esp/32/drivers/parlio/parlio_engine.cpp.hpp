@@ -220,7 +220,7 @@ calculateBufferByteCount(const BufferPopulationParams& params) FL_NO_EXCEPT {
     constexpr size_t MIN_INPUT_BYTES_PER_BUFFER = 20;  // Increased from 15 to test glitch hypothesis
 
     // Calculate buffer sizing parameters (used throughout function)
-    ParlioBufferCalculator calc(params.dataWidth, params.useWave3, params.clockFreqHz); // ok no noexcept
+    ParlioBufferCalculator calc{params.dataWidth, params.useWave3, params.clockFreqHz};
     size_t expansionFactor = calc.outputBytesPerInputByte();
 
     // Calculate effective ring count to ensure minimum buffer size
@@ -851,7 +851,7 @@ ParlioEngine::populateDmaBuffer(u8* outputBuffer,
     size_t byteOffset = 0;
 
     // Use calculator for padding and transpose block size
-    ParlioBufferCalculator calc(mDataWidth, mUseWave3, mClockFreqHz); // ok no noexcept
+    ParlioBufferCalculator calc{mDataWidth, mUseWave3, mClockFreqHz};
     size_t blockSize = calc.transposeBlockSize();
 
     // ═══════════════════════════════════════════════════════════════
@@ -1360,7 +1360,7 @@ bool ParlioEngine::initialize(size_t dataWidth,
             FL_LOG_PARLIO("PARLIO_INIT: Config matches but maxLeds increased from " << mMaxLedsPerChannel << " to " << maxLedsPerChannel << " - reallocating ring buffers");
 
             // Recalculate ring buffer capacity for larger LED count
-            ParlioBufferCalculator calc(mDataWidth, mUseWave3, mClockFreqHz); // ok no noexcept
+            ParlioBufferCalculator calc{mDataWidth, mUseWave3, mClockFreqHz};
             const bool psram_cap_available = parlioDmaPsramAvailable();
             size_t raw_capacity = calc.calculateRingBufferCapacity(
                 maxLedsPerChannel, mResetUs, ParlioRingBuffer3::RING_BUFFER_COUNT,
@@ -1399,16 +1399,17 @@ bool ParlioEngine::initialize(size_t dataWidth,
         mPeripheral->deinitialize();
         mTxUnitEnabled = false;
 
+#if PARLIO_FORCE_LSB_MODE
+        constexpr auto packing = ParlioBitPackOrder::FL_PARLIO_LSB;
+#else
+        constexpr auto packing = ParlioBitPackOrder::FL_PARLIO_MSB;
+#endif
         ParlioPeripheralConfig config(
             pins,
             mClockFreqHz,
             FL_ESP_PARLIO_HARDWARE_QUEUE_DEPTH,
             65534,
-            #if PARLIO_FORCE_LSB_MODE
-            ParlioBitPackOrder::FL_PARLIO_LSB,
-            #else
-            ParlioBitPackOrder::FL_PARLIO_MSB,
-            #endif
+            packing,
             parlioDmaPsramAvailable()
         );
         if (!mPeripheral->initialize(config)) {
@@ -1525,16 +1526,17 @@ bool ParlioEngine::initialize(size_t dataWidth,
         #define PARLIO_FORCE_LSB_MODE 0  // Default: use MSB (correct mode)
     #endif
 
+#if PARLIO_FORCE_LSB_MODE
+    constexpr auto packing = ParlioBitPackOrder::FL_PARLIO_LSB;
+#else
+    constexpr auto packing = ParlioBitPackOrder::FL_PARLIO_MSB;
+#endif
     ParlioPeripheralConfig config(
         pins,  // Uses actual pin vector (size = dataWidth)
         mClockFreqHz,
         FL_ESP_PARLIO_HARDWARE_QUEUE_DEPTH,
         65534,
-        #if PARLIO_FORCE_LSB_MODE
-        ParlioBitPackOrder::FL_PARLIO_LSB,  // DIAGNOSTIC: LSB mode for waveform inspection
-        #else
-        ParlioBitPackOrder::FL_PARLIO_MSB,  // MSB packing required - Wave8 data is MSB-ordered
-        #endif
+        packing,
         psram_cap_available  // prefer_psram only when DMA-capable PSRAM exists
     );
     FL_LOG_PARLIO("PARLIO_INIT: Config - clock=" << mClockFreqHz << " queue_depth=" << FL_ESP_PARLIO_HARDWARE_QUEUE_DEPTH);
@@ -1569,7 +1571,7 @@ bool ParlioEngine::initialize(size_t dataWidth,
 
     // Calculate ring buffer capacity. Use the PSRAM cap only when a DMA-capable
     // PSRAM heap exists; C6 has no PSRAM and should go straight to the SRAM cap.
-    ParlioBufferCalculator calc(mDataWidth, mUseWave3, mClockFreqHz);
+    ParlioBufferCalculator calc{mDataWidth, mUseWave3, mClockFreqHz};
     size_t raw_capacity = calc.calculateRingBufferCapacity(
         maxLedsPerChannel, mResetUs, ParlioRingBuffer3::RING_BUFFER_COUNT,
         psram_cap_available ? FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES_PSRAM

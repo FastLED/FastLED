@@ -68,10 +68,10 @@ private:
     friend class ::fl::Singleton;
 
     // Allow ISR callback to access members
-    friend bool i2s_lcd_cam_flush_ready( // ok no noexcept
+    friend bool i2s_lcd_cam_flush_ready(
         esp_lcd_panel_io_handle_t panel_io,
         esp_lcd_panel_io_event_data_t* edata,
-        void* user_ctx);
+        void* user_ctx) FL_NO_EXCEPT;
 
     I2sLcdCamPeripheralEsp() FL_NO_EXCEPT;
 

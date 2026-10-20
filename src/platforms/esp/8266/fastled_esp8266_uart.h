@@ -37,11 +37,11 @@ template<EOrder RGB_ORDER = GRB>
 class UARTController_ESP8266 : public CPixelLEDController<RGB_ORDER> {
 public:
     UARTController_ESP8266(int dataPin = 2 /* GPIO2 TX only */)
-        : mDataPin(dataPin), mBaud(FASTLED_ESP8266_UART_BAUD) {}
+        FL_NO_EXCEPT : mDataPin(dataPin), mBaud(FASTLED_ESP8266_UART_BAUD) {}
 
     // Optional: allow runtime override of baud/reset.
-    void setBaud(u32 baud) { mBaud = baud; }
-    void setResetTimeUs(u16 us) { mResetUs = us; }
+    void setBaud(u32 baud) FL_NO_EXCEPT { mBaud = baud; }
+    void setResetTimeUs(u16 us) FL_NO_EXCEPT { mResetUs = us; }
 
     virtual void init() FL_NO_EXCEPT override;
     virtual void clearLeds(int nLeds) FL_NO_EXCEPT override;

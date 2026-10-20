@@ -239,6 +239,7 @@ impl Default for MultiCheckerFileProcessor {
 
 pub fn supported_checker_names() -> &'static [&'static str] {
     &[
+        "esp_noexcept",
         "arduino_macro_usage",
         "asm_js_location",
         "attribute",
@@ -324,6 +325,7 @@ pub fn supported_checker_names() -> &'static [&'static str] {
 
 pub fn supported_python_checker_names() -> &'static [&'static str] {
     &[
+        "EspNoexceptChecker",
         "ArduinoMacroUsageChecker",
         "AsmJsLocationChecker",
         "AttributeChecker",
@@ -411,6 +413,7 @@ pub fn create_checkers(
     selected: Option<&HashSet<String>>,
 ) -> Result<Vec<Box<dyn FileContentChecker>>, DynError> {
     let mut checkers: Vec<(&'static str, Box<dyn FileContentChecker>)> = vec![
+        ("esp_noexcept", Box::new(EspNoexceptChecker)),
         ("arduino_macro_usage", Box::new(ArduinoMacroUsageChecker)),
         ("asm_js_location", Box::new(AsmJsLocationChecker)),
         ("attribute", Box::new(AttributeChecker)),

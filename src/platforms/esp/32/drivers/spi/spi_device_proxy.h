@@ -53,7 +53,7 @@ private:
 
 public:
     /// Constructor - just stores pins, actual setup happens in init()
-    SPIDeviceProxy()
+    SPIDeviceProxy() FL_NO_EXCEPT
         : mHandle()
         , mBusManager(nullptr)
         , mInitialized(false)

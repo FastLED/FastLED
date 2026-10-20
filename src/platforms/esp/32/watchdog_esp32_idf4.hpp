@@ -195,7 +195,7 @@ bool watchdog_disable() FL_NO_EXCEPT {
 // Overrides weak symbol in esp-idf/components/esp_system/panic.c
 // IMPORTANT: Must qualify with fl::detail:: to access function in detail namespace
 // NOTE: Marked as weak to avoid multiple definition conflicts with ESP-IDF
-extern "C" FL_LINK_WEAK void esp_panic_handler_reconfigure_wdts(void) {
+extern "C" FL_LINK_WEAK void esp_panic_handler_reconfigure_wdts(void) FL_NO_EXCEPT {
     fl::detail::handle_system_reset("PANIC FastLED idfv4");
 }
 

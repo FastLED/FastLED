@@ -235,3 +235,22 @@ Cache modules are in `ci/*_lint_cache.py`:
 - Module: `ci/lint/`
 - Tests: `tests/ci/lint/`
 - Similar pattern: `test.py` (test suite trampoline)
+# ESP exception annotations
+
+`./lint --cpp` includes the Rust `EspNoexceptChecker`; it also runs with normal
+`./lint` and single-file lint. It needs no ESP SDK provisioning or separate CI
+workflow. The checker parses source under `src/platforms/esp/` before
+preprocessing, so inactive branches and implementation files are checked too.
+The optional SD adapters in `src/fl/fs/sd/` are included as well, covering
+both Arduino SD and SdFat exception contracts from #4826.
+
+Add `FL_NO_EXCEPT` to matching declarations and definitions. Destructors,
+defaulted/deleted functions, function pointer types, and external C declarations
+are excluded. A necessary exception requires a signature comment such as
+`// ok no noexcept: vendor override contract` with a concrete reason.
+Unrecognized syntax is an error; extend the parser's explicit macro
+normalization rather than adding a file exemption. Prefer brace initialization
+for local objects whose parenthesized syntax resembles a function declaration.
+
+This enforces source annotations. The existing host AST checks and target
+compiler builds still validate exception specification compatibility and types.

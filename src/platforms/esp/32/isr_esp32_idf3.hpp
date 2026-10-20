@@ -73,7 +73,7 @@ struct esp32_idf3_isr_handle_data {
     intr_handle_t intr_handle;       // ESP-IDF interrupt handle (for timer ISR)
 
     esp32_idf3_isr_handle_data()
-        : timer_group(TIMER_GROUP_0)
+        FL_NO_EXCEPT : timer_group(TIMER_GROUP_0)
         , timer_idx(TIMER_0)
         , is_timer(false)
         , is_enabled(true)
@@ -134,7 +134,7 @@ static void free_timer(timer_group_t group, timer_idx_t idx) FL_NO_EXCEPT {
  * Note: ESP-IDF 3.x timer ISR signature is void(*)(void*)
  */
 static void FL_IRAM timer_isr_wrapper_idf3(void* user_ctx)
-{
+FL_NO_EXCEPT {
     esp32_idf3_isr_handle_data* handle_data = static_cast<esp32_idf3_isr_handle_data*>(user_ctx);
     if (handle_data && handle_data->user_handler) {
         // Clear interrupt status
@@ -170,7 +170,7 @@ static void FL_IRAM timer_isr_wrapper_idf3(void* user_ctx)
  * This runs in ISR context
  */
 static void FL_IRAM gpio_isr_wrapper_idf3(void* arg)
-{
+FL_NO_EXCEPT {
     esp32_idf3_isr_handle_data* handle_data = static_cast<esp32_idf3_isr_handle_data*>(arg);
     if (handle_data && handle_data->user_handler) {
         handle_data->user_handler(handle_data->user_data);

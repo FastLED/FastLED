@@ -3,6 +3,7 @@
 /// @file platforms/esp/32/ota/ota_impl.cpp
 /// ESP32-specific OTA implementation
 
+#include "fl/stl/noexcept.h"
 #include "fl/stl/charconv.h"  // fl::to_hex
 #include "platforms/esp/is_esp.h"
 
@@ -69,7 +70,7 @@ namespace {
 /// @brief Initialize mDNS service with hostname
 /// @param hostname Device hostname (without .local suffix)
 /// @return true if successful, false otherwise
-bool initMDNS(const char* hostname) {
+bool initMDNS(const char* hostname) FL_NO_EXCEPT {
     esp_err_t err = mdns_init();
     if (err != ESP_OK) {
         return false;
@@ -88,7 +89,7 @@ bool initMDNS(const char* hostname) {
 
 /// @brief HTML content for the OTA upload page
 /// @return Pointer to static HTML string
-const char* getOtaHtmlPage() {
+const char* getOtaHtmlPage() FL_NO_EXCEPT {
     return R"html(
 <!DOCTYPE html>
 <html>
@@ -285,7 +286,7 @@ const char* getOtaHtmlPage() {
 /// @param output Output buffer (must be at least (inputLen * 3 / 4) + 1 bytes)
 /// @param max_output_len Maximum size of output buffer
 /// @return Length of decoded data, or -1 on error
-int decodeBase64(const char* input, char* output, size_t max_output_len) {
+int decodeBase64(const char* input, char* output, size_t max_output_len) FL_NO_EXCEPT {
     static const char base64_chars[] =
         "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
@@ -355,7 +356,7 @@ int decodeBase64(const char* input, char* output, size_t max_output_len) {
 /// @param req HTTP request handle
 /// @param password Expected password
 /// @return true if authentication successful, false otherwise
-bool checkBasicAuth(httpd_req_t *req, const char* password) {
+bool checkBasicAuth(httpd_req_t *req, const char* password) FL_NO_EXCEPT {
     // Check Basic Auth
     size_t auth_len = httpd_req_get_hdr_value_len(req, "Authorization");
     if (auth_len == 0) {
@@ -425,7 +426,7 @@ bool checkBasicAuth(httpd_req_t *req, const char* password) {
 /// @param data Pointer to firmware data (at least 24 bytes)
 /// @param len Length of firmware data
 /// @return true if firmware header is valid, false otherwise
-bool validateESP32Firmware(const u8* data, size_t len) {
+bool validateESP32Firmware(const u8* data, size_t len) FL_NO_EXCEPT {
     // Need at least 24 bytes for ESP32 image header
     if (len < 24) {
         FL_WARN("Firmware validation: header too small (" << len << " bytes)");
@@ -452,7 +453,7 @@ bool validateESP32Firmware(const u8* data, size_t len) {
 /// @brief HTTP handler for GET requests to root path (serves upload page)
 /// @param req HTTP request handle
 /// @return ESP_OK on success
-esp_err_t otaHttpGetHandler(httpd_req_t *req) {
+esp_err_t otaHttpGetHandler(httpd_req_t *req) FL_NO_EXCEPT {
     // Get HTTP context from user context
     OTAHttpContext* ctx = (OTAHttpContext*)req->user_ctx;
     const char* password = ctx->password;
@@ -471,7 +472,7 @@ esp_err_t otaHttpGetHandler(httpd_req_t *req) {
 /// @brief HTTP handler for POST requests to /update (firmware upload)
 /// @param req HTTP request handle
 /// @return ESP_OK on success
-esp_err_t otaHttpPostHandler(httpd_req_t *req) {
+esp_err_t otaHttpPostHandler(httpd_req_t *req) FL_NO_EXCEPT {
     // Get HTTP context from user context
     OTAHttpContext* ctx = (OTAHttpContext*)req->user_ctx;
 
@@ -596,7 +597,7 @@ esp_err_t otaHttpPostHandler(httpd_req_t *req) {
 /// @brief Start HTTP server for Web OTA
 /// @param ctx HTTP context (password and callbacks)
 /// @return httpd_handle_t on success, nullptr on failure
-httpd_handle_t startHttpServer(OTAHttpContext* ctx) {
+httpd_handle_t startHttpServer(OTAHttpContext* ctx) FL_NO_EXCEPT {
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
     config.server_port = 80;
     config.ctrl_port = 32768;  // Control port for stopping server
@@ -637,7 +638,7 @@ httpd_handle_t startHttpServer(OTAHttpContext* ctx) {
 
 class ESP32OTA : public IOTA {
 public:
-    ESP32OTA()
+    ESP32OTA() FL_NO_EXCEPT
         : mApFallbackEnabled(false)
         , mWifiConnected(false)
         , mHttpServer(nullptr)
@@ -784,7 +785,7 @@ private:
     /// @param event_id Event ID (e.g., WIFI_EVENT_STA_CONNECTED)
     /// @param event_data Event-specific data
     static void wifiEventHandler(void* arg, esp_event_base_t event_base,
-                                  i32 event_id, void* event_data) {
+                                  i32 event_id, void* event_data) FL_NO_EXCEPT {
         ESP32OTA* self = static_cast<ESP32OTA*>(arg);
 
         if (event_base == WIFI_EVENT) {
@@ -811,7 +812,7 @@ private:
     /// @param ssid WiFi SSID
     /// @param password WiFi password
     /// @return true if initialization successful, false otherwise
-    bool initEspIdfWifi(const char* ssid, const char* password) {
+    bool initEspIdfWifi(const char* ssid, const char* password) FL_NO_EXCEPT {
         // Initialize network interface (if not already initialized)
         // Note: This is safe to call multiple times
         esp_err_t err = esp_netif_init();
@@ -913,7 +914,7 @@ private:
 
     /// @brief Generate authentication nonce for OTA
     /// @param nonce Output buffer for nonce (64 characters for SHA256)
-    static void generateNonce(char* nonce, size_t len) {
+    static void generateNonce(char* nonce, size_t len) FL_NO_EXCEPT {
         // Generate nonce from timestamp and random data
         unsigned char hash[32];
         mbedtls_sha256_context ctx;
@@ -942,7 +943,7 @@ private:
     /// @param response Client response to verify
     /// @return true if authentication successful
     static bool verifyAuth(const char* password, const char* nonce,
-                          const char* cnonce, const char* response) {
+                          const char* cnonce, const char* response) FL_NO_EXCEPT {
         // Compute password hash (SHA256)
         unsigned char pass_hash[32];
         mbedtls_sha256((unsigned char*)password, strlen(password), pass_hash, 0);
@@ -993,7 +994,7 @@ private:
     /// @param expected_md5 Expected MD5 hash (32-char hex string)
     /// @param cmd OTA command (0=FLASH, 100=SPIFFS, etc.)
     void handleFirmwareUpload(struct sockaddr_in* client_addr, int port,
-                             int expected_size, const char* expected_md5, int cmd) {
+                             int expected_size, const char* expected_md5, int cmd) FL_NO_EXCEPT {
         // Only handle FLASH command (0) for now
         if (cmd != 0) {
             FL_WARN("OTA: Unsupported command " << cmd << " (only FLASH supported)");
@@ -1209,7 +1210,7 @@ private:
 
     /// @brief OTA UDP server task - handles OTA invitations and protocol
     /// @param pvParameters Pointer to ESP32OTA instance
-    static void otaServerTask(void* pvParameters) {
+    static void otaServerTask(void* pvParameters) FL_NO_EXCEPT {
         ESP32OTA* self = static_cast<ESP32OTA*>(pvParameters);
 
         // Create UDP socket
@@ -1331,7 +1332,7 @@ private:
         vTaskDelete(nullptr);
     }
 
-    void setupArduinoOTA() {
+    void setupArduinoOTA() FL_NO_EXCEPT {
         // Start custom OTA server (replaces ArduinoOTA)
         if (mOtaRunning) {
             FL_WARN("OTA: Server already running");
@@ -1359,14 +1360,14 @@ private:
         }
     }
 
-    void stopHttpServer() {
+    void stopHttpServer() FL_NO_EXCEPT {
         if (mHttpServer) {
             httpd_stop(mHttpServer);
             mHttpServer = nullptr;
         }
     }
 
-    void cleanup() {
+    void cleanup() FL_NO_EXCEPT {
         stopHttpServer();
 
         // Stop custom OTA server

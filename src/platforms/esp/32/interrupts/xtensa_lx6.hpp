@@ -349,7 +349,7 @@ esp_err_t fastled_esp32_rmt_init_custom(
     __attribute__((section(".iram1"))) \
     __attribute__((used)) \
     __attribute__((naked)) \
-    void new_function_name(void* arg) { \
+    void new_function_name(void* arg) FL_NO_EXCEPT { \
         __asm__ volatile ( \
             ".align 4\n" \
             /* Create stack frame (16-byte aligned) */ \

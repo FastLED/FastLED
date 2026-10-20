@@ -83,7 +83,7 @@ struct MultiLanePinConfig {
     gpio_num_t data3_pin;  ///< Data3/HD pin for quad mode (-1 if unused, ESP32/S2/S3 only)
 
     /// @brief Default constructor (single-lane mode)
-    constexpr MultiLanePinConfig()
+    constexpr MultiLanePinConfig() FL_NO_EXCEPT
         : data0_pin(static_cast<gpio_num_t>(-1))
         , data1_pin(static_cast<gpio_num_t>(-1))
         , data2_pin(static_cast<gpio_num_t>(-1))
@@ -91,7 +91,7 @@ struct MultiLanePinConfig {
     {}
 
     /// @brief Single-lane constructor
-    constexpr explicit MultiLanePinConfig(gpio_num_t data0)
+    constexpr explicit MultiLanePinConfig(gpio_num_t data0) FL_NO_EXCEPT
         : data0_pin(data0)
         , data1_pin(static_cast<gpio_num_t>(-1))
         , data2_pin(static_cast<gpio_num_t>(-1))
@@ -99,7 +99,7 @@ struct MultiLanePinConfig {
     {}
 
     /// @brief Dual-lane constructor
-    constexpr MultiLanePinConfig(gpio_num_t data0, gpio_num_t data1)
+    constexpr MultiLanePinConfig(gpio_num_t data0, gpio_num_t data1) FL_NO_EXCEPT
         : data0_pin(data0)
         , data1_pin(data1)
         , data2_pin(static_cast<gpio_num_t>(-1))
@@ -108,7 +108,7 @@ struct MultiLanePinConfig {
 
     /// @brief Quad-lane constructor (ESP32/S2/S3 only)
     constexpr MultiLanePinConfig(gpio_num_t data0, gpio_num_t data1,
-                                  gpio_num_t data2, gpio_num_t data3)
+                                  gpio_num_t data2, gpio_num_t data3) FL_NO_EXCEPT
         : data0_pin(data0)
         , data1_pin(data1)
         , data2_pin(data2)
@@ -330,7 +330,7 @@ private:
         u32 mResetDelayStartUs;
         u32 mResetDelayDurationUs;
 
-        DmaPipelineState()
+        DmaPipelineState() FL_NO_EXCEPT
             : mPhase(IDLE)
             , mActiveChannel(nullptr)
             , mEncodeIdx(0)
@@ -353,10 +353,10 @@ private:
     void startFirstDma() FL_NO_EXCEPT;
 
     /// @brief SPI post-transaction callback (ISR context)
-    static void IRAM_ATTR spiPostTransactionCallback(spi_transaction_t *trans);
+    static void IRAM_ATTR spiPostTransactionCallback(spi_transaction_t *trans) FL_NO_EXCEPT;
 
     /// @brief Timer encoding ISR callback
-    static void IRAM_ATTR timerEncodingISR(void *user_data);
+    static void IRAM_ATTR timerEncodingISR(void *user_data) FL_NO_EXCEPT;
 
     /// @brief Poll channel states for cleanup
     DriverState pollChannels() FL_NO_EXCEPT;

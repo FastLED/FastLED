@@ -16,6 +16,8 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 serde_yaml = "0.9"
 walkdir = "2.5"
+tree-sitter = "0.26"
+tree-sitter-cpp = "0.23"
 
 # FastLED#4557: warnings in THIS crate are errors, so an unused binding or a
 # dead assignment fails the lint build (and the C++ lint CI job) instead of

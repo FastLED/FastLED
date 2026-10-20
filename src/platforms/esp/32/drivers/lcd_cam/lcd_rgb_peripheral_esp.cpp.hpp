@@ -50,7 +50,7 @@ LcdRgbPeripheralEsp& LcdRgbPeripheralEsp::instance() FL_NO_EXCEPT {
 //=============================================================================
 
 LcdRgbPeripheralEsp::LcdRgbPeripheralEsp()
-    : mInitialized(false),
+    FL_NO_EXCEPT : mInitialized(false),
       mConfig(),
       mPanelHandle(nullptr),
       mCallback(nullptr),
@@ -295,10 +295,10 @@ struct VsyncCallbackData {
 static VsyncCallbackData s_vsync_cb_data;
 
 // VSYNC ISR callback - must be in IRAM for ESP-IDF
-static bool IRAM_ATTR vsyncIsrCallback( // ok no noexcept
+static bool IRAM_ATTR vsyncIsrCallback(
         esp_lcd_panel_handle_t panel,
         const esp_lcd_rgb_panel_event_data_t* edata,
-        void* ctx) {
+        void* ctx) FL_NO_EXCEPT {
     VsyncCallbackData* data = static_cast<VsyncCallbackData*>(ctx);
     data->self->clearBusy();
 

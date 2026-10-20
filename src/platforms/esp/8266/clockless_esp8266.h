@@ -40,7 +40,7 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER> {
 	// Convert nanoseconds to CPU cycles (compile-time)
 	// Formula: cycles = (ns * (F_CPU / 1MHz) + 500) / 1000
 	// +500 for rounding to nearest cycle
-	static constexpr u32 NS_TO_CYCLES(u32 ns) {
+	static constexpr u32 NS_TO_CYCLES(u32 ns) FL_NO_EXCEPT {
 		return (ns * (F_CPU / 1000000UL) + 500) / 1000;
 	}
 

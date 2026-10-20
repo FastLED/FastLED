@@ -28,21 +28,19 @@ namespace fl {
 namespace platforms {
 
 inline void enableAllChannelDrivers() FL_NO_EXCEPT {
-    fl::enableDrivers<
-        fl::Bus::BIT_BANG
+    fl::enableDriver<fl::Bus::BIT_BANG>();
 #if FASTLED_ESP32_HAS_RMT
-        , fl::Bus::RMT
+    fl::enableDriver<fl::Bus::RMT>();
 #endif
 #if FASTLED_ESP32_HAS_CLOCKLESS_SPI
-        , fl::Bus::SPI
+    fl::enableDriver<fl::Bus::SPI>();
 #endif
 #if FASTLED_ESP32_HAS_PARLIO || FASTLED_ESP32_HAS_I2S || FASTLED_ESP32_HAS_LCD_SPI
-        , fl::Bus::FLEX_IO
+    fl::enableDriver<fl::Bus::FLEX_IO>();
 #endif
 #if FASTLED_ESP32_HAS_UART
-        , fl::Bus::UART
+    fl::enableDriver<fl::Bus::UART>();
 #endif
-    >();
 #if FASTLED_ESP32_HAS_LCD_RGB
     fl::enableDriver<fl::Bus::FLEX_IO, 1>();
 #endif

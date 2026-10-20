@@ -87,7 +87,7 @@ private:
         fl::size capacity; // Allocated size in bytes
         bool inUse;        // Whether buffer is currently acquired
 
-        BufferSlot() : data(nullptr), capacity(0), inUse(false) {}
+        BufferSlot() FL_NO_EXCEPT : data(nullptr), capacity(0), inUse(false) {}
     };
 
     /// DMA buffer (separate from internal pool due to hardware limitations)
@@ -96,7 +96,7 @@ private:
         fl::size capacity; // Allocated size in bytes
         bool inUse;        // Whether buffer is currently acquired
 
-        DMABuffer() : data(nullptr), capacity(0), inUse(false) {}
+        DMABuffer() FL_NO_EXCEPT : data(nullptr), capacity(0), inUse(false) {}
     };
 
     fl::vector<BufferSlot> mInternalBuffers; // Pool of internal DRAM buffers
