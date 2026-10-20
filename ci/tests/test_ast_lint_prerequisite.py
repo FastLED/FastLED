@@ -7,7 +7,88 @@ from types import SimpleNamespace
 import pytest
 
 from ci.lint_cpp import ast_cache, run_all_checkers
-from ci.tools import check_array_params, check_ast_combined, check_noexcept
+from ci.tools import ast_matrix, check_array_params, check_ast_combined, check_noexcept
+
+
+def test_normal_lint_requires_esp_matrix(monkeypatch: pytest.MonkeyPatch) -> None:
+    from ci.tools import ast_matrix
+
+    monkeypatch.setattr(run_all_checkers, "_require_ast_tool", lambda **kwargs: None)
+    monkeypatch.setattr(
+        check_ast_combined, "find_combined_hits", lambda scope: ([], [])
+    )
+    monkeypatch.setattr(
+        ast_cache, "cached_ast_check", lambda **options: options["runner"]()
+    )
+
+    def missing_profile(*args, **kwargs):
+        raise check_noexcept.NoexceptCheckError("required ESP SDK missing")
+
+    monkeypatch.setattr(ast_matrix, "run_matrix", missing_profile)
+    with pytest.raises(check_noexcept.NoexceptCheckError, match="required ESP SDK"):
+        run_all_checkers.run_combined_ast_check()
+
+
+def test_single_file_matrix_keeps_esp_diagnostics(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    esp = check_noexcept.NoexceptHit(
+        "src/platforms/esp/only.h", 3, "void f();", "void f();"
+    )
+    unrelated = check_noexcept.NoexceptHit(
+        "src/fl/unrelated.h", 7, "void g();", "void g();"
+    )
+    monkeypatch.setattr(
+        run_all_checkers, "_require_ast_tool", lambda *args, **kwargs: None
+    )
+    monkeypatch.setattr(
+        ast_matrix,
+        "run_matrix",
+        lambda scope: ast_matrix.MatrixResult([unrelated], [], [esp], [], {}, True),
+    )
+    selected = str(run_all_checkers.PROJECT_ROOT / esp.path)
+    noexcept, arrays = run_all_checkers.run_combined_ast_check(selected)
+    assert set(noexcept.violations) == {selected}
+    assert not arrays.has_violations()
+
+
+def test_explicit_profile_collects_coverage_and_requires_backend(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    query = check_noexcept._find_clang_query()
+    assert query, "required clang-query is unavailable"
+    monkeypatch.setattr(check_ast_combined, "PROJECT_ROOT", tmp_path)
+    (tmp_path / "src").mkdir()
+    source = tmp_path / "src/profile.cpp"
+    header = tmp_path / "src/backend.h"
+    header.write_text(
+        "namespace fl { struct SDFileHandle { void error() noexcept {} }; }\n",
+        encoding="utf-8",
+    )
+    source.write_text(
+        '#ifdef ESP_PROFILE\n#include "backend.h"\n#endif\n',
+        encoding="utf-8",
+    )
+    result = check_ast_combined.analyze_translation_unit(
+        query,
+        str(source),
+        ".*",
+        ["-std=c++17", "-DESP_PROFILE"],
+        expected_records=("fl::SDFileHandle",),
+    )
+    assert result.coverage
+    assert set(result.dependencies) == {source, header}
+    assert "fl::SDFileHandle" in result.present_records
+    assert not result.noexcept_hits
+    with pytest.raises(check_noexcept.NoexceptCheckError, match="SDFileHandle"):
+        check_ast_combined.analyze_translation_unit(
+            query,
+            str(source),
+            ".*",
+            ["-std=c++17"],
+            expected_records=("fl::SDFileHandle",),
+        )
 
 
 def test_subscript_operator_is_not_exempted_as_a_lambda() -> None:
@@ -42,28 +123,31 @@ def test_unspawnable_uv_ast_wrapper_is_fatal(monkeypatch: pytest.MonkeyPatch) ->
         run_all_checkers._require_ast_tool()
 
 
-def test_combined_ast_checks_tool_before_warm_cache(
+def test_combined_ast_checks_tool_before_matrix(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     calls: list[str] = []
     monkeypatch.setattr(ast_cache, "_CACHE_DIR", tmp_path)
     monkeypatch.setattr(ast_cache, "_compute_fingerprint", lambda *args: "fixed")
 
-    def probe() -> None:
+    def probe(**kwargs) -> None:
         calls.append("probe")
         if len(calls) == 2:
             raise check_noexcept.NoexceptCheckError("clang-query missing")
 
     monkeypatch.setattr(run_all_checkers, "_require_ast_tool", probe)
     monkeypatch.setattr(
-        check_ast_combined, "find_combined_hits", lambda scope: ([], [])
+        ast_matrix,
+        "run_matrix",
+        lambda scope: ast_matrix.MatrixResult([], [], [], [], {}, True),
     )
 
     first = run_all_checkers.run_combined_ast_check()
     assert not first[0].has_violations()
     assert not first[1].has_violations()
-    assert (tmp_path / "noexcept_ast.fingerprint").exists()
-    assert (tmp_path / "array_param_ast.fingerprint").exists()
+    assert not list(tmp_path.iterdir()), (
+        "no whole-scope cache may bypass profile validation"
+    )
 
     with pytest.raises(check_noexcept.NoexceptCheckError, match="missing"):
         run_all_checkers.run_combined_ast_check()
@@ -75,12 +159,12 @@ def test_combined_ast_error_is_not_cached(
 ) -> None:
     monkeypatch.setattr(ast_cache, "_CACHE_DIR", tmp_path)
     monkeypatch.setattr(ast_cache, "_compute_fingerprint", lambda *args: "fixed")
-    monkeypatch.setattr(run_all_checkers, "_require_ast_tool", lambda: None)
+    monkeypatch.setattr(run_all_checkers, "_require_ast_tool", lambda **kwargs: None)
 
     def fail(scope: str) -> tuple[list[object], list[object]]:
         raise check_noexcept.NoexceptCheckError("clang-query failed")
 
-    monkeypatch.setattr(check_ast_combined, "find_combined_hits", fail)
+    monkeypatch.setattr(ast_matrix, "run_matrix", fail)
     with pytest.raises(check_noexcept.NoexceptCheckError, match="failed"):
         run_all_checkers.run_combined_ast_check()
     assert not list(tmp_path.iterdir())
@@ -93,7 +177,7 @@ def test_combined_ast_error_is_not_cached(
 def test_single_file_ast_error_is_fatal(
     monkeypatch: pytest.MonkeyPatch, check_name: str
 ) -> None:
-    monkeypatch.setattr(run_all_checkers, "_require_ast_tool", lambda: None)
+    monkeypatch.setattr(run_all_checkers, "_require_ast_tool", lambda **kwargs: None)
 
     def fail(scope: str) -> list[object]:
         raise check_noexcept.NoexceptCheckError("clang-query failed")
@@ -163,7 +247,7 @@ def test_single_file_lint_reports_historical_missing_signature(
 ) -> None:
     hit = _missing_hit()
     monkeypatch.setattr(check_noexcept, "find_missing_noexcept", lambda scope: [hit])
-    monkeypatch.setattr(run_all_checkers, "_require_ast_tool", lambda: None)
+    monkeypatch.setattr(run_all_checkers, "_require_ast_tool", lambda **kwargs: None)
     results = run_all_checkers.run_noexcept_ast_check(
         str(run_all_checkers.PROJECT_ROOT / hit.path)
     )
@@ -190,7 +274,7 @@ def test_single_file_lint_checks_root_source_scope(
         return [hit]
 
     monkeypatch.setattr(check_noexcept, "find_missing_noexcept", find)
-    monkeypatch.setattr(run_all_checkers, "_require_ast_tool", lambda: None)
+    monkeypatch.setattr(run_all_checkers, "_require_ast_tool", lambda **kwargs: None)
     results = run_all_checkers.run_noexcept_ast_check(
         str(run_all_checkers.PROJECT_ROOT / hit.path)
     )
@@ -202,9 +286,11 @@ def test_combined_lint_reports_every_noexcept_hit(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     hit = _missing_hit()
-    monkeypatch.setattr(run_all_checkers, "_require_ast_tool", lambda: None)
+    monkeypatch.setattr(run_all_checkers, "_require_ast_tool", lambda **kwargs: None)
     monkeypatch.setattr(
-        check_ast_combined, "find_combined_hits", lambda scope: ([hit], [])
+        ast_matrix,
+        "run_matrix",
+        lambda scope: ast_matrix.MatrixResult([], [], [hit], [], {}, True),
     )
     monkeypatch.setattr(
         ast_cache, "cached_ast_check", lambda **options: options["runner"]()
@@ -617,3 +703,20 @@ def test_windows_ast_profile_failure_is_not_silently_ignored(
         check_noexcept.NoexceptCheckError, match="missing native sysroot"
     ):
         check_noexcept._compiler_args()
+
+
+def test_matrix_prerequisite_does_not_discover_or_download_query(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from ci.tools import ast_profiles
+
+    def forbidden():
+        pytest.fail("warm matrix must not discover or download tools")
+
+    def missing():
+        raise ast_profiles.ProfileError("provision the host environment")
+
+    monkeypatch.setattr(check_noexcept, "_find_clang_query", forbidden)
+    monkeypatch.setattr(ast_profiles, "load_host_profile", missing)
+    with pytest.raises(check_noexcept.NoexceptCheckError, match="provision"):
+        run_all_checkers._require_ast_tool(provisioned=True)

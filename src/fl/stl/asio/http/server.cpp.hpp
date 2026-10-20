@@ -665,7 +665,7 @@ struct EspPendingRequest {
     fl::atomic<int> state;
 };
 
-void espRequestCleanup(EspPendingRequest* item) {
+void espRequestCleanup(EspPendingRequest* item) FL_NO_EXCEPT {
     if (!item) return;
     if (item->response) {
         delete item->response; // ok bare allocation - see marshaling protocol
@@ -687,7 +687,7 @@ QueueHandle_t s_esp_request_queue = nullptr;
 /// Runner pumped from the main task: executes queued route handlers.
 class Server::ServerAsyncRunner : public task::Runner {
 public:
-    explicit ServerAsyncRunner(Server* server) : mServer(server) {}
+    explicit ServerAsyncRunner(Server* server) FL_NO_EXCEPT : mServer(server) {}
 
     void update() FL_NO_EXCEPT override {
         if (!s_esp_request_queue) {
@@ -740,7 +740,7 @@ private:
 namespace {
 
 // Map method string to httpd_method_t
-httpd_method_t to_httpd_method(const string& method) {
+httpd_method_t to_httpd_method(const string& method) FL_NO_EXCEPT {
     if (method == "GET") return HTTP_GET;
     if (method == "POST") return HTTP_POST;
     if (method == "PUT") return HTTP_PUT;

@@ -8,6 +8,64 @@
 #include "fl/stl/move.h"
 #include "fl/stl/string.h"
 
+FL_TEST_CASE("HashMapLRU shrinking capacity evicts least recently used entries") {
+    fl::HashMapLru<int, int> lru(4);
+    lru.insert(1, 100);
+    lru.insert(2, 200);
+    lru.insert(3, 300);
+    lru.insert(4, 400);
+    FL_REQUIRE(lru.find_value(1) != nullptr);
+
+    lru.setMaxSize(2);
+
+    FL_CHECK(lru.capacity() == 2);
+    FL_CHECK(lru.size() == 2);
+    const auto &view = lru;
+    FL_CHECK(view.find_value(2) == nullptr);
+    FL_CHECK(view.find_value(3) == nullptr);
+    FL_REQUIRE(view.find_value(1) != nullptr);
+    FL_REQUIRE(view.find_value(4) != nullptr);
+    FL_CHECK(*view.find_value(1) == 100);
+    FL_CHECK(*view.find_value(4) == 400);
+}
+
+FL_TEST_CASE("HashMapLRU increasing capacity preserves entries") {
+    fl::HashMapLru<int, int> lru(1);
+    lru.insert(1, 100);
+
+    lru.setMaxSize(3);
+    lru.insert(2, 200);
+    lru.insert(3, 300);
+
+    FL_CHECK(lru.capacity() == 3);
+    FL_CHECK(lru.size() == 3);
+    const auto &view = lru;
+    FL_REQUIRE(view.find_value(1) != nullptr);
+    FL_REQUIRE(view.find_value(2) != nullptr);
+    FL_REQUIRE(view.find_value(3) != nullptr);
+    FL_CHECK(*view.find_value(1) == 100);
+    FL_CHECK(*view.find_value(2) == 200);
+    FL_CHECK(*view.find_value(3) == 300);
+}
+
+FL_TEST_CASE("HashMapLRU zero capacity retains the constructor minimum") {
+    fl::HashMapLru<int, int> lru(2);
+    lru.insert(1, 100);
+    lru.insert(2, 200);
+
+    lru.setMaxSize(0);
+
+    FL_CHECK(lru.capacity() == 1);
+    FL_CHECK(lru.size() == 1);
+    FL_CHECK(lru.find_value(1) == nullptr);
+    FL_REQUIRE(lru.find_value(2) != nullptr);
+    FL_CHECK(*lru.find_value(2) == 200);
+    lru.insert(3, 300);
+    FL_CHECK(lru.size() == 1);
+    FL_CHECK(lru.find_value(2) == nullptr);
+    FL_REQUIRE(lru.find_value(3) != nullptr);
+}
+
 
 FL_TEST_CASE("Test HashMapLRU") {
     FL_SUBCASE("Basic operations") {

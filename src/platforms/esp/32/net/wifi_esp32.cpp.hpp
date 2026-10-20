@@ -49,11 +49,11 @@ struct WifiState {
     int retries = 0;
 };
 
-WifiState& wifiState() {
+WifiState& wifiState() FL_NO_EXCEPT {
     return fl::Singleton<WifiState>::instance();
 }
 
-void wifiEventHandler(void *, esp_event_base_t base, i32 id, void *) {
+void wifiEventHandler(void *, esp_event_base_t base, i32 id, void *) FL_NO_EXCEPT {
     WifiState& state = wifiState();
     if (base == WIFI_EVENT) {
         if (id == WIFI_EVENT_STA_START) {

@@ -29,7 +29,7 @@ public:
     i16 operator*(i16 v) FL_NO_EXCEPT { return (v*i) + ((v*f)>>F); }
 #if (defined(FL_IS_ARM) || defined(FASTLED_RISCV) || defined(FASTLED_APOLLO3)) && !defined(ARDUINO_ARCH_ZEPHYR)
     /// @copydoc operator*(uint32_t)
-    int operator*(int v) { return (v*i) + ((v*f)>>F); }
+    int operator*(int v) FL_NO_EXCEPT { return (v*i) + ((v*f)>>F); }
 #endif
 };
 
@@ -38,7 +38,7 @@ template<class T, int F, int I> static u16 operator*(u16 v, qfx<T,F,I> & q) FL_N
 template<class T, int F, int I> static i32 operator*(i32 v, qfx<T,F,I> & q) FL_NO_EXCEPT { return q * v; }
 template<class T, int F, int I> static i16 operator*(i16 v, qfx<T,F,I> & q) FL_NO_EXCEPT { return q * v; }
 #if (defined(FL_IS_ARM) || defined(FASTLED_RISCV) || defined(FASTLED_APOLLO3)) && !defined(ARDUINO_ARCH_ZEPHYR)
-template<class T, int F, int I> static int operator*(int v, qfx<T,F,I> & q) { return q * v; }
+template<class T, int F, int I> static int operator*(int v, qfx<T,F,I> & q) FL_NO_EXCEPT { return q * v; }
 #endif
 
 /// A 4.4 integer (4 bits integer, 4 bits fraction)

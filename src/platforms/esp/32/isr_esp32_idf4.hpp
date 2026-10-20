@@ -74,7 +74,7 @@ struct esp32_idf4_isr_handle_data {
     void* user_data;                 // User context
     u8 gpio_pin;                // GPIO pin number (0xFF if not GPIO)
 
-    esp32_idf4_isr_handle_data()
+    esp32_idf4_isr_handle_data() FL_NO_EXCEPT
         : timer_group(TIMER_GROUP_0)
         , timer_idx(TIMER_0)
         , is_timer(false)
@@ -134,7 +134,7 @@ static void free_timer(timer_group_t group, timer_idx_t idx) FL_NO_EXCEPT {
  *
  * Note: ESP-IDF 4.x timer_isr_t returns bool indicating whether to yield
  */
-static bool FL_IRAM timer_isr_callback_idf4(void* user_ctx)
+static bool FL_IRAM timer_isr_callback_idf4(void* user_ctx) FL_NO_EXCEPT
 {
     esp32_idf4_isr_handle_data* handle_data = static_cast<esp32_idf4_isr_handle_data*>(user_ctx);
     if (handle_data && handle_data->user_handler) {
@@ -151,7 +151,7 @@ static bool FL_IRAM timer_isr_callback_idf4(void* user_ctx)
  * GPIO interrupt handler - calls user handler
  * This runs in ISR context
  */
-static void FL_IRAM gpio_isr_wrapper_idf4(void* arg)
+static void FL_IRAM gpio_isr_wrapper_idf4(void* arg) FL_NO_EXCEPT
 {
     esp32_idf4_isr_handle_data* handle_data = static_cast<esp32_idf4_isr_handle_data*>(arg);
     if (handle_data && handle_data->user_handler) {

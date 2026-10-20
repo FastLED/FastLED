@@ -174,7 +174,7 @@ private:
 
     /// Send raw pixel data with precise timing
     FASTLED_FORCE_INLINE static void
-    sendPixelData(const fl::vector<u8>& encoded)
+    sendPixelData(const fl::vector<u8>& encoded) FL_NO_EXCEPT
     {
         for (fl::size i = 0; i < encoded.size(); ++i) {
             sendByte(encoded[i]);
@@ -187,7 +187,7 @@ private:
     }
 
     /// Send a single byte with bit-by-bit timing
-    FASTLED_FORCE_INLINE static void sendByte(u8 byte)
+    FASTLED_FORCE_INLINE static void sendByte(u8 byte) FL_NO_EXCEPT
     {
         // Send bits MSB first (standard for most LED protocols)
         for (int bit = 7; bit >= 0; --bit) {
@@ -203,7 +203,7 @@ private:
 
     /// Send a '1' bit with correct WS2812 timing
     /// T1H (high time for 1-bit) = T1+T2, T1L (low time) = T3
-    FASTLED_FORCE_INLINE static void sendBit1()
+    FASTLED_FORCE_INLINE static void sendBit1() FL_NO_EXCEPT
     {
         // Set line HIGH
         fl::FastPin<DATA_PIN>::hi();
@@ -218,7 +218,7 @@ private:
 
     /// Send a '0' bit with correct WS2812 timing
     /// T0H (high time for 0-bit) = T1, T0L (low time) = T2+T3
-    FASTLED_FORCE_INLINE static void sendBit0()
+    FASTLED_FORCE_INLINE static void sendBit0() FL_NO_EXCEPT
     {
         // Set line HIGH
         fl::FastPin<DATA_PIN>::hi();

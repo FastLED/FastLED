@@ -125,7 +125,7 @@ constexpr u32 kDmaRxSymbols = 14336;
  * @param ns_per_tick Cached nanoseconds per tick
  * @return Duration in nanoseconds
  */
-inline u32 ticksToNs(u32 ticks, u32 ns_per_tick) {
+inline u32 ticksToNs(u32 ticks, u32 ns_per_tick) FL_NO_EXCEPT {
     // Convert RMT ticks to nanoseconds
     // Example: 16 ticks Ã— 25 ns/tick = 400ns
     return ticks * ns_per_tick;
@@ -139,7 +139,7 @@ inline u32 ticksToNs(u32 ticks, u32 ns_per_tick) {
  * @return true if symbol is reset pulse (long low duration)
  */
 inline bool isResetPulse(RmtSymbol symbol, const ChipsetTiming4Phase &timing,
-                         u32 ns_per_tick) {
+                         u32 ns_per_tick) FL_NO_EXCEPT {
     // Cast RmtSymbol to rmt_symbol_word_t to access bitfields
     const auto rmt_sym = fl::bit_cast<rmt_symbol_word_t>(symbol);
 
@@ -181,7 +181,7 @@ inline bool isResetPulse(RmtSymbol symbol, const ChipsetTiming4Phase &timing,
  * errors. Common in PARLIO TX due to DMA transfer gaps (~20us).
  */
 inline bool isGapPulse(RmtSymbol symbol, const ChipsetTiming4Phase &timing,
-                       u32 ns_per_tick) {
+                       u32 ns_per_tick) FL_NO_EXCEPT {
     // No gap tolerance configured - treat as error
     if (timing.gap_tolerance_ns == 0) {
         return false;
@@ -232,7 +232,7 @@ inline bool isGapPulse(RmtSymbol symbol, const ChipsetTiming4Phase &timing,
  * the frame by one bit (LCD_RGB on ESP32-P4, FastLED#4669).
  */
 inline int decodeGapBit(RmtSymbol symbol, const ChipsetTiming4Phase &timing,
-                        u32 ns_per_tick) {
+                        u32 ns_per_tick) FL_NO_EXCEPT {
     const auto rmt_sym = fl::bit_cast<rmt_symbol_word_t>(symbol);
     if (rmt_sym.level0 != 1 || rmt_sym.level1 != 0) {
         return -1;
@@ -258,7 +258,7 @@ inline int decodeGapBit(RmtSymbol symbol, const ChipsetTiming4Phase &timing,
  * Returns -1 if timing doesn't match either bit pattern.
  */
 inline int decodeBit(RmtSymbol symbol, const ChipsetTiming4Phase &timing,
-                     u32 ns_per_tick) {
+                     u32 ns_per_tick) FL_NO_EXCEPT {
     // Cast RmtSymbol to rmt_symbol_word_t to access bitfields
     const auto rmt_sym = fl::bit_cast<rmt_symbol_word_t>(symbol);
 
@@ -315,7 +315,7 @@ inline int decodeBit(RmtSymbol symbol, const ChipsetTiming4Phase &timing,
 fl::result<u32, DecodeError>
 decodeRmtSymbols(const ChipsetTiming4Phase &timing, u32 resolution_hz,
                  fl::span<const RmtSymbol> symbols, fl::span<u8> bytes_out,
-                 bool start_low = true) {
+                 bool start_low = true) FL_NO_EXCEPT {
     if (symbols.empty()) {
         FL_WARN("decodeRmtSymbols: symbols span is empty");
         return fl::result<u32, DecodeError>::failure(
@@ -569,7 +569,7 @@ template <typename OutputIteratorUint8>
 fl::result<u32, DecodeError>
 decodeRmtSymbols(const ChipsetTiming4Phase &timing, u32 resolution_hz,
                  fl::span<const RmtSymbol> symbols, OutputIteratorUint8 out,
-                 bool start_low = true) {
+                 bool start_low = true) FL_NO_EXCEPT {
     // Chunk size for decoding
     constexpr size_t MAX_CHUNK_SIZE = 256;
 

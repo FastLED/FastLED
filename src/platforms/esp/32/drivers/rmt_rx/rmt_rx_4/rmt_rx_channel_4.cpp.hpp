@@ -550,7 +550,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
     }
 
   protected:
-    fl::span<const RmtSymbol> getReceivedSymbols() const override {
+    fl::span<const RmtSymbol> getReceivedSymbols() const FL_NO_EXCEPT override {
         return fl::span<const RmtSymbol>(mInternalBuffer.data(),
                                          mInternalBuffer.size());
     }

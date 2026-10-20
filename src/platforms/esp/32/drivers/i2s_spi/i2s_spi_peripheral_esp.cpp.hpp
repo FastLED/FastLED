@@ -78,7 +78,7 @@ namespace detail {
 // ISR Handler
 //=============================================================================
 
-void IRAM_ATTR I2sSpiPeripheralEsp::isrHandler(void *arg) {
+void IRAM_ATTR I2sSpiPeripheralEsp::isrHandler(void *arg) FL_NO_EXCEPT {
     I2sSpiPeripheralEsp *self = static_cast<I2sSpiPeripheralEsp *>(arg);
     i2s_dev_t *i2s = self->mI2s;
 

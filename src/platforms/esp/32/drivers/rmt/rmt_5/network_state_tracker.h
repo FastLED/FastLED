@@ -65,7 +65,7 @@ public:
 private:
     friend class Singleton<NetworkStateTracker>;
 
-    NetworkStateTracker() : mLastKnownState(false) {}
+    NetworkStateTracker() FL_NO_EXCEPT : mLastKnownState(false) {}
     ~NetworkStateTracker() = default;
 
     // Non-copyable, non-movable

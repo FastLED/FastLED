@@ -6,6 +6,7 @@
 #include "fl/stl/span.h"
 #include "fl/math/filter/div_by_count.h"
 #include "fl/stl/static_assert.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace detail {
@@ -16,9 +17,9 @@ class HampelFilterImpl {
                   "HampelFilter: N must be odd for an unambiguous median");
   public:
     explicit HampelFilterImpl(T threshold = T(3.0f))
-        : mSortedCount(0), mThreshold(threshold), mLastValue(T(0)) {}
+        FL_NO_EXCEPT : mSortedCount(0), mThreshold(threshold), mLastValue(T(0)) {}
     explicit HampelFilterImpl(fl::size capacity, T threshold = T(3.0f))
-        : mRing(capacity), mSorted(capacity),
+        FL_NO_EXCEPT : mRing(capacity), mSorted(capacity),
           mSortedCount(0), mThreshold(threshold), mLastValue(T(0)) {
         if (capacity % 2 == 0) {
             FL_ERROR("HampelFilter: capacity should be odd, adding 1");
@@ -27,7 +28,7 @@ class HampelFilterImpl {
         }
     }
 
-    T update(fl::span<const T> values) {
+    T update(fl::span<const T> values) FL_NO_EXCEPT {
         if (values.size() == 0) return mLastValue;
         T result = mLastValue;
         for (fl::size i = 0; i < values.size(); ++i) {
@@ -36,7 +37,7 @@ class HampelFilterImpl {
         return result;
     }
 
-    T update(T input) {
+    T update(T input) FL_NO_EXCEPT {
         T output = input;
 
         if (mSortedCount > 0) {
@@ -86,18 +87,18 @@ class HampelFilterImpl {
         return mLastValue;
     }
 
-    T value() const { return mLastValue; }
+    T value() const FL_NO_EXCEPT { return mLastValue; }
 
-    void reset() {
+    void reset() FL_NO_EXCEPT {
         mRing.clear();
         mSortedCount = 0;
         mLastValue = T(0);
     }
 
-    fl::size size() const { return mRing.size(); }
-    fl::size capacity() const { return mRing.capacity(); }
+    fl::size size() const FL_NO_EXCEPT { return mRing.size(); }
+    fl::size capacity() const FL_NO_EXCEPT { return mRing.capacity(); }
 
-    void resize(fl::size new_capacity) {
+    void resize(fl::size new_capacity) FL_NO_EXCEPT {
         if (new_capacity % 2 == 0) {
             FL_ERROR("HampelFilter: capacity should be odd, adding 1");
             new_capacity += 1;

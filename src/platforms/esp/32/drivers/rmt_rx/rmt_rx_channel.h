@@ -174,7 +174,7 @@ public:
      * @brief Get the RMT clock resolution in Hz
      * @return Resolution in Hz (e.g., 40000000 for 40MHz)
      */
-    virtual u32 getResolutionHz() const = 0;
+    virtual u32 getResolutionHz() const FL_NO_EXCEPT = 0;
 
     /**
      * @brief Decode received RMT symbols to bytes into a span
@@ -257,7 +257,7 @@ protected:
      * @brief Get received symbols as a span (internal method for decode())
      * @return Span of const RmtSymbol containing received data
      */
-    virtual fl::span<const RmtSymbol> getReceivedSymbols() const = 0;
+    virtual fl::span<const RmtSymbol> getReceivedSymbols() const FL_NO_EXCEPT = 0;
 };
 
 } // namespace fl

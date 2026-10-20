@@ -9,6 +9,7 @@
 #include "fl/stl/bit_cast.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/cstddef.h"
+#include "fl/stl/noexcept.h"
 
 FL_OPTIMIZATION_LEVEL_O3_BEGIN
 
@@ -19,7 +20,7 @@ namespace isr {
 /// @param ptr Pointer to check
 /// @param alignment Alignment requirement in bytes (must be power of 2)
 /// @return true if aligned, false otherwise
-FASTLED_FORCE_INLINE bool is_aligned(const void* ptr, size_t alignment) {
+FASTLED_FORCE_INLINE bool is_aligned(const void* ptr, size_t alignment) FL_NO_EXCEPT {
     return (fl::ptr_to_int(ptr) & (alignment - 1)) == 0;
 }
 
@@ -31,7 +32,7 @@ FASTLED_FORCE_INLINE bool is_aligned(const void* ptr, size_t alignment) {
 FL_OPTIMIZE_FUNCTION FL_IRAM FASTLED_FORCE_INLINE
 void memcpy_32(u32* FL_RESTRICT_PARAM dst,
                const u32* FL_RESTRICT_PARAM src,
-               size_t count) {
+               size_t count) FL_NO_EXCEPT {
     for (size_t i = 0; i < count; i++) {
         dst[i] = src[i];
     }
@@ -45,7 +46,7 @@ void memcpy_32(u32* FL_RESTRICT_PARAM dst,
 FL_OPTIMIZE_FUNCTION FL_IRAM FASTLED_FORCE_INLINE
 void memcpy_16(u16* FL_RESTRICT_PARAM dst,
                const u16* FL_RESTRICT_PARAM src,
-               size_t count) {
+               size_t count) FL_NO_EXCEPT {
     for (size_t i = 0; i < count; i++) {
         dst[i] = src[i];
     }
@@ -59,7 +60,7 @@ void memcpy_16(u16* FL_RESTRICT_PARAM dst,
 FL_OPTIMIZE_FUNCTION FL_IRAM FASTLED_FORCE_INLINE
 void memcpy_byte(u8* FL_RESTRICT_PARAM dst,
                  const u8* FL_RESTRICT_PARAM src,
-                 size_t count) {
+                 size_t count) FL_NO_EXCEPT {
     for (size_t i = 0; i < count; i++) {
         dst[i] = src[i];
     }
@@ -74,7 +75,7 @@ void memcpy_byte(u8* FL_RESTRICT_PARAM dst,
 FL_OPTIMIZE_FUNCTION FL_IRAM FASTLED_FORCE_INLINE
 void memcopy(void* FL_RESTRICT_PARAM dst,
              const void* FL_RESTRICT_PARAM src,
-             size_t num_bytes) {
+             size_t num_bytes) FL_NO_EXCEPT {
     uintptr_t dst_addr = fl::ptr_to_int(dst);
     uintptr_t src_addr = fl::ptr_to_int(src);
 
@@ -107,7 +108,7 @@ void memcopy(void* FL_RESTRICT_PARAM dst,
 /// @param dest Destination pointer
 /// @param count Number of bytes to zero
 FL_OPTIMIZE_FUNCTION FL_IRAM FASTLED_FORCE_INLINE
-void memset_zero_byte(u8* dest, size_t count) {
+void memset_zero_byte(u8* dest, size_t count) FL_NO_EXCEPT {
     for (size_t i = 0; i < count; i++) {
         dest[i] = 0x0;
     }
@@ -118,7 +119,7 @@ void memset_zero_byte(u8* dest, size_t count) {
 /// @param count Number of bytes to zero (will process in 4-byte chunks)
 /// @note Handles remainder bytes using byte writes
 FL_OPTIMIZE_FUNCTION FL_IRAM FASTLED_FORCE_INLINE
-void memset_zero_word(u8* dest, size_t count) {
+void memset_zero_word(u8* dest, size_t count) FL_NO_EXCEPT {
     u32* dest32 = fl::bit_cast<u32*>(dest);
     size_t count32 = count / 4;
     size_t remainder = count % 4;
@@ -138,7 +139,7 @@ void memset_zero_word(u8* dest, size_t count) {
 /// @param count Number of bytes to zero
 /// @note Automatically selects word or byte writes based on alignment
 FL_OPTIMIZE_FUNCTION FL_IRAM FASTLED_FORCE_INLINE
-void memset_zero(u8* dest, size_t count) {
+void memset_zero(u8* dest, size_t count) FL_NO_EXCEPT {
     uintptr_t address = fl::ptr_to_int(dest);
 
     if ((address % 4 == 0) && (count >= 4)) {

@@ -3,6 +3,7 @@
 // IWYU pragma: private
 
 #define FASTLED_INTERNAL  
+#include "fl/stl/noexcept.h"
 #include "FastLED.h"
 
 namespace fl {
@@ -67,7 +68,7 @@ void esp8266_compile_tests() {
 #endif // FL_IS_ESP8266
 
 #ifdef ESP32
-void esp32_compile_tests() {
+void esp32_compile_tests() FL_NO_EXCEPT {
 #ifndef ESP32
 #error "ESP32 should be defined for ESP32 platforms"
 #endif

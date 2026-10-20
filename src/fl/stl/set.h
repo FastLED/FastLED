@@ -38,12 +38,12 @@ template <typename Key, size N> class VectorSetFixed {
     // Constructor
     constexpr VectorSetFixed() FL_NO_EXCEPT = default;
 
-    iterator begin() { return data.begin(); }
-    iterator end() { return data.end(); }
-    const_iterator begin() const { return data.begin(); }
-    const_iterator end() const { return data.end(); }
+    iterator begin() FL_NO_EXCEPT { return data.begin(); }
+    iterator end() FL_NO_EXCEPT { return data.end(); }
+    const_iterator begin() const FL_NO_EXCEPT { return data.begin(); }
+    const_iterator end() const FL_NO_EXCEPT { return data.end(); }
 
-    iterator find(const Key &key) {
+    iterator find(const Key &key) FL_NO_EXCEPT {
         for (auto it = begin(); it != end(); ++it) {
             if (*it == key) {
                 return it;
@@ -52,7 +52,7 @@ template <typename Key, size N> class VectorSetFixed {
         return end();
     }
 
-    const_iterator find(const Key &key) const {
+    const_iterator find(const Key &key) const FL_NO_EXCEPT {
         for (auto it = begin(); it != end(); ++it) {
             if (*it == key) {
                 return it;
@@ -61,7 +61,7 @@ template <typename Key, size N> class VectorSetFixed {
         return end();
     }
 
-    bool insert(const Key &key) {
+    bool insert(const Key &key) FL_NO_EXCEPT {
         if (data.size() < N) {
             auto it = find(key);
             if (it == end()) {
@@ -73,7 +73,7 @@ template <typename Key, size N> class VectorSetFixed {
     }
 
     // Move version of insert
-    bool insert(Key &&key) {
+    bool insert(Key &&key) FL_NO_EXCEPT {
         if (data.size() < N) {
             auto it = find(key);
             if (it == end()) {
@@ -86,7 +86,7 @@ template <typename Key, size N> class VectorSetFixed {
 
     // Emplace - construct in place with perfect forwarding
     template<typename... Args>
-    bool emplace(Args&&... args) {
+    bool emplace(Args&&... args) FL_NO_EXCEPT {
         if (data.size() < N) {
             // Create a temporary to check if it already exists
             Key temp_key(fl::forward<Args>(args)...);
@@ -99,7 +99,7 @@ template <typename Key, size N> class VectorSetFixed {
         return false;
     }
 
-    bool erase(const Key &key) {
+    bool erase(const Key &key) FL_NO_EXCEPT {
         auto it = find(key);
         if (it != end()) {
             data.erase(it);
@@ -108,7 +108,7 @@ template <typename Key, size N> class VectorSetFixed {
         return false;
     }
 
-    bool erase(iterator pos) {
+    bool erase(iterator pos) FL_NO_EXCEPT {
         if (pos != end()) {
             data.erase(pos);
             return true;
@@ -117,7 +117,7 @@ template <typename Key, size N> class VectorSetFixed {
     }
 
     bool next(const Key &key, Key *next_key,
-              bool allow_rollover = false) const {
+              bool allow_rollover = false) const FL_NO_EXCEPT {
         const_iterator it = find(key);
         if (it != end()) {
             ++it;
@@ -133,7 +133,7 @@ template <typename Key, size N> class VectorSetFixed {
     }
 
     bool prev(const Key &key, Key *prev_key,
-              bool allow_rollover = false) const {
+              bool allow_rollover = false) const FL_NO_EXCEPT {
         const_iterator it = find(key);
         if (it != end()) {
             if (it != begin()) {
@@ -149,51 +149,51 @@ template <typename Key, size N> class VectorSetFixed {
     }
 
     // Get the current size of the set
-    constexpr fl::size size() const { return data.size(); }
+    constexpr fl::size size() const FL_NO_EXCEPT { return data.size(); }
 
-    constexpr bool empty() const { return data.empty(); }
+    constexpr bool empty() const FL_NO_EXCEPT { return data.empty(); }
 
     // Get the capacity of the set
-    constexpr fl::size capacity() const { return N; }
+    constexpr fl::size capacity() const FL_NO_EXCEPT { return N; }
 
     // Clear the set
-    void clear() { data.clear(); }
+    void clear() FL_NO_EXCEPT { data.clear(); }
 
-    bool has(const Key &key) const { return find(key) != end(); }
+    bool has(const Key &key) const FL_NO_EXCEPT { return find(key) != end(); }
 
     // Return the first element of the set
-    const Key &front() const { return data.front(); }
+    const Key &front() const FL_NO_EXCEPT { return data.front(); }
 
     // Return the last element of the set
-    const Key &back() const { return data.back(); }
+    const Key &back() const FL_NO_EXCEPT { return data.back(); }
 
     /// Equality comparison
-    bool operator==(const VectorSetFixed& other) const {
+    bool operator==(const VectorSetFixed& other) const FL_NO_EXCEPT {
         return data == other.data;
     }
 
     /// Inequality comparison
-    bool operator!=(const VectorSetFixed& other) const {
+    bool operator!=(const VectorSetFixed& other) const FL_NO_EXCEPT {
         return data != other.data;
     }
 
     /// Lexicographic comparison
-    bool operator<(const VectorSetFixed& other) const {
+    bool operator<(const VectorSetFixed& other) const FL_NO_EXCEPT {
         return data < other.data;
     }
 
     /// Less-than-or-equal comparison
-    bool operator<=(const VectorSetFixed& other) const {
+    bool operator<=(const VectorSetFixed& other) const FL_NO_EXCEPT {
         return data <= other.data;
     }
 
     /// Greater-than comparison
-    bool operator>(const VectorSetFixed& other) const {
+    bool operator>(const VectorSetFixed& other) const FL_NO_EXCEPT {
         return data > other.data;
     }
 
     /// Greater-than-or-equal comparison
-    bool operator>=(const VectorSetFixed& other) const {
+    bool operator>=(const VectorSetFixed& other) const FL_NO_EXCEPT {
         return data >= other.data;
     }
 
@@ -212,7 +212,7 @@ template <typename Key> class VectorSet {
     constexpr VectorSet() FL_NO_EXCEPT = default;
 
     // Copy constructor
-    VectorSet(const VectorSet &other) : data(other.data) {}
+    VectorSet(const VectorSet &other) FL_NO_EXCEPT : data(other.data) {}
 
     // Move constructor
     VectorSet(VectorSet &&other) FL_NO_EXCEPT
@@ -234,15 +234,15 @@ template <typename Key> class VectorSet {
         return *this;
     }
 
-    iterator begin() { return data.begin(); }
-    iterator end() { return data.end(); }
-    const_iterator begin() const { return data.begin(); }
-    const_iterator end() const { return data.end(); }
+    iterator begin() FL_NO_EXCEPT { return data.begin(); }
+    iterator end() FL_NO_EXCEPT { return data.end(); }
+    const_iterator begin() const FL_NO_EXCEPT { return data.begin(); }
+    const_iterator end() const FL_NO_EXCEPT { return data.end(); }
 
-    reverse_iterator rbegin() { return data.rbegin(); }
-    reverse_iterator rend() { return data.rend(); }
+    reverse_iterator rbegin() FL_NO_EXCEPT { return data.rbegin(); }
+    reverse_iterator rend() FL_NO_EXCEPT { return data.rend(); }
 
-    iterator find(const Key &key) {
+    iterator find(const Key &key) FL_NO_EXCEPT {
         for (auto it = begin(); it != end(); ++it) {
             if (*it == key) {
                 return it;
@@ -251,7 +251,7 @@ template <typename Key> class VectorSet {
         return end();
     }
 
-    const_iterator find(const Key &key) const {
+    const_iterator find(const Key &key) const FL_NO_EXCEPT {
         for (auto it = begin(); it != end(); ++it) {
             if (*it == key) {
                 return it;
@@ -260,7 +260,7 @@ template <typename Key> class VectorSet {
         return end();
     }
 
-    bool insert(const Key &key) {
+    bool insert(const Key &key) FL_NO_EXCEPT {
         auto it = find(key);
         if (it == end()) {
             data.push_back(key);
@@ -270,7 +270,7 @@ template <typename Key> class VectorSet {
     }
 
     // Move version of insert
-    bool insert(Key &&key) {
+    bool insert(Key &&key) FL_NO_EXCEPT {
         auto it = find(key);
         if (it == end()) {
             data.push_back(fl::move(key));
@@ -281,7 +281,7 @@ template <typename Key> class VectorSet {
 
     // Emplace - construct in place with perfect forwarding
     template<typename... Args>
-    bool emplace(Args&&... args) {
+    bool emplace(Args&&... args) FL_NO_EXCEPT {
         // Create a temporary to check if it already exists
         Key temp_key(fl::forward<Args>(args)...);
         auto it = find(temp_key);
@@ -292,7 +292,7 @@ template <typename Key> class VectorSet {
         return false;
     }
 
-    bool erase(const Key &key) {
+    bool erase(const Key &key) FL_NO_EXCEPT {
         auto it = find(key);
         if (it != end()) {
             data.erase(it);
@@ -301,7 +301,7 @@ template <typename Key> class VectorSet {
         return false;
     }
 
-    bool erase(iterator pos) {
+    bool erase(iterator pos) FL_NO_EXCEPT {
         if (pos != end()) {
             data.erase(pos);
             return true;
@@ -310,51 +310,51 @@ template <typename Key> class VectorSet {
     }
 
     // Get the current size of the set
-    constexpr fl::size size() const { return data.size(); }
+    constexpr fl::size size() const FL_NO_EXCEPT { return data.size(); }
 
-    constexpr bool empty() const { return data.empty(); }
+    constexpr bool empty() const FL_NO_EXCEPT { return data.empty(); }
 
     // Get the capacity of the set
-    constexpr fl::size capacity() const { return data.capacity(); }
+    constexpr fl::size capacity() const FL_NO_EXCEPT { return data.capacity(); }
 
     // Clear the set
-    void clear() { data.clear(); }
+    void clear() FL_NO_EXCEPT { data.clear(); }
 
-    bool has(const Key &key) const { return find(key) != end(); }
+    bool has(const Key &key) const FL_NO_EXCEPT { return find(key) != end(); }
 
     // Return the first element of the set
-    const Key &front() const { return data.front(); }
+    const Key &front() const FL_NO_EXCEPT { return data.front(); }
 
     // Return the last element of the set
-    const Key &back() const { return data.back(); }
+    const Key &back() const FL_NO_EXCEPT { return data.back(); }
 
     /// Equality comparison
-    bool operator==(const VectorSet& other) const {
+    bool operator==(const VectorSet& other) const FL_NO_EXCEPT {
         return data == other.data;
     }
 
     /// Inequality comparison
-    bool operator!=(const VectorSet& other) const {
+    bool operator!=(const VectorSet& other) const FL_NO_EXCEPT {
         return data != other.data;
     }
 
     /// Lexicographic comparison
-    bool operator<(const VectorSet& other) const {
+    bool operator<(const VectorSet& other) const FL_NO_EXCEPT {
         return data < other.data;
     }
 
     /// Less-than-or-equal comparison
-    bool operator<=(const VectorSet& other) const {
+    bool operator<=(const VectorSet& other) const FL_NO_EXCEPT {
         return data <= other.data;
     }
 
     /// Greater-than comparison
-    bool operator>(const VectorSet& other) const {
+    bool operator>(const VectorSet& other) const FL_NO_EXCEPT {
         return data > other.data;
     }
 
     /// Greater-than-or-equal comparison
-    bool operator>=(const VectorSet& other) const {
+    bool operator>=(const VectorSet& other) const FL_NO_EXCEPT {
         return data >= other.data;
     }
 
@@ -389,14 +389,14 @@ template <typename Key, typename Allocator = fl::allocator_slab<Key>> class set 
 
     // Constructors
     set() FL_NO_EXCEPT = default;
-    explicit set(const Allocator& alloc) : mTree(fl::less<Key>(), alloc) {}
+    explicit set(const Allocator& alloc) FL_NO_EXCEPT : mTree(fl::less<Key>(), alloc) {}
     set(const set& other) FL_NO_EXCEPT = default;
     set(set&& other) FL_NO_EXCEPT = default;
     set& operator=(const set& other) FL_NO_EXCEPT = default;
     set& operator=(set&& other) FL_NO_EXCEPT = default;
 
     // Initializer list constructor
-    set(fl::initializer_list<Key> init) {
+    set(fl::initializer_list<Key> init) FL_NO_EXCEPT {
         for (const auto& elem : init) {
             insert(elem);
         }
@@ -412,106 +412,106 @@ template <typename Key, typename Allocator = fl::allocator_slab<Key>> class set 
     }
     
     // Iterators
-    const_iterator begin() const { return mTree.begin(); }
-    const_iterator end() const { return mTree.end(); }
-    const_iterator cbegin() const { return mTree.cbegin(); }
-    const_iterator cend() const { return mTree.cend(); }
+    const_iterator begin() const FL_NO_EXCEPT { return mTree.begin(); }
+    const_iterator end() const FL_NO_EXCEPT { return mTree.end(); }
+    const_iterator cbegin() const FL_NO_EXCEPT { return mTree.cbegin(); }
+    const_iterator cend() const FL_NO_EXCEPT { return mTree.cend(); }
 
     // Reverse iterators
-    const_reverse_iterator rbegin() const { return mTree.rbegin(); }
-    const_reverse_iterator rend() const { return mTree.rend(); }
+    const_reverse_iterator rbegin() const FL_NO_EXCEPT { return mTree.rbegin(); }
+    const_reverse_iterator rend() const FL_NO_EXCEPT { return mTree.rend(); }
     
     // Capacity
-    bool empty() const { return mTree.empty(); }
-    size_type size() const { return mTree.size(); }
-    size_type max_size() const { return mTree.max_size(); }
-    allocator_type get_allocator() const { return mTree.get_allocator(); }
+    bool empty() const FL_NO_EXCEPT { return mTree.empty(); }
+    size_type size() const FL_NO_EXCEPT { return mTree.size(); }
+    size_type max_size() const FL_NO_EXCEPT { return mTree.max_size(); }
+    allocator_type get_allocator() const FL_NO_EXCEPT { return mTree.get_allocator(); }
 
     // Modifiers
-    void clear() { mTree.clear(); }
+    void clear() FL_NO_EXCEPT { mTree.clear(); }
     
-    fl::pair<const_iterator, bool> insert(const Key& key) {
+    fl::pair<const_iterator, bool> insert(const Key& key) FL_NO_EXCEPT {
         return mTree.insert(key);
     }
     
-    fl::pair<const_iterator, bool> insert(Key&& key) {
+    fl::pair<const_iterator, bool> insert(Key&& key) FL_NO_EXCEPT {
         return mTree.insert(fl::move(key));
     }
     
     template<typename... Args>
-    fl::pair<const_iterator, bool> emplace(Args&&... args) {
+    fl::pair<const_iterator, bool> emplace(Args&&... args) FL_NO_EXCEPT {
         return mTree.emplace(fl::forward<Args>(args)...);
     }
     
-    const_iterator erase(const_iterator pos) {
+    const_iterator erase(const_iterator pos) FL_NO_EXCEPT {
         return mTree.erase(pos);
     }
     
-    size_type erase(const Key& key) {
+    size_type erase(const Key& key) FL_NO_EXCEPT {
         return mTree.erase(key);
     }
     
-    void swap(set& other) {
+    void swap(set& other) FL_NO_EXCEPT {
         mTree.swap(other.mTree);
     }
     
     // Lookup
-    size_type count(const Key& key) const {
+    size_type count(const Key& key) const FL_NO_EXCEPT {
         return mTree.count(key);
     }
     
-    const_iterator find(const Key& key) const {
+    const_iterator find(const Key& key) const FL_NO_EXCEPT {
         return mTree.find(key);
     }
     
-    bool contains(const Key& key) const {
+    bool contains(const Key& key) const FL_NO_EXCEPT {
         return mTree.contains(key);
     }
     
-    bool has(const Key& key) const {
+    bool has(const Key& key) const FL_NO_EXCEPT {
         return contains(key);
     }
     
-    fl::pair<const_iterator, const_iterator> equal_range(const Key& key) const {
+    fl::pair<const_iterator, const_iterator> equal_range(const Key& key) const FL_NO_EXCEPT {
         return mTree.equal_range(key);
     }
     
-    const_iterator lower_bound(const Key& key) const {
+    const_iterator lower_bound(const Key& key) const FL_NO_EXCEPT {
         return mTree.lower_bound(key);
     }
     
-    const_iterator upper_bound(const Key& key) const {
+    const_iterator upper_bound(const Key& key) const FL_NO_EXCEPT {
         return mTree.upper_bound(key);
     }
 
     /// Equality comparison
-    bool operator==(const set& other) const {
+    bool operator==(const set& other) const FL_NO_EXCEPT {
         if (size() != other.size()) return false;
         return fl::equal(begin(), end(), other.begin());
     }
 
     /// Inequality comparison
-    bool operator!=(const set& other) const {
+    bool operator!=(const set& other) const FL_NO_EXCEPT {
         return !(*this == other);
     }
 
     /// Lexicographic comparison
-    bool operator<(const set& other) const {
+    bool operator<(const set& other) const FL_NO_EXCEPT {
         return fl::lexicographical_compare(begin(), end(), other.begin(), other.end());
     }
 
     /// Less-than-or-equal comparison
-    bool operator<=(const set& other) const {
+    bool operator<=(const set& other) const FL_NO_EXCEPT {
         return *this < other || *this == other;
     }
 
     /// Greater-than comparison
-    bool operator>(const set& other) const {
+    bool operator>(const set& other) const FL_NO_EXCEPT {
         return other < *this;
     }
 
     /// Greater-than-or-equal comparison
-    bool operator>=(const set& other) const {
+    bool operator>=(const set& other) const FL_NO_EXCEPT {
         return other <= *this;
     }
 };

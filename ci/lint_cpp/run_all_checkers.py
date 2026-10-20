@@ -387,7 +387,7 @@ def format_and_print_results(
         return 0
 
 
-def _require_ast_tool() -> None:
+def _require_ast_tool(*, provisioned: bool = False) -> None:
     """Verify clang-query before consulting cached AST results.
 
     A cached successful run must not make a required CI lint green when the
@@ -396,7 +396,15 @@ def _require_ast_tool() -> None:
     """
     from ci.tools.check_noexcept import NoexceptCheckError, _find_clang_query
 
-    command = _find_clang_query()
+    if provisioned:
+        from ci.tools.ast_profiles import ProfileError, load_host_profile
+
+        try:
+            command = list(load_host_profile().query)
+        except ProfileError as exc:
+            raise NoexceptCheckError(str(exc)) from exc
+    else:
+        command = _find_clang_query()
     if not command:
         raise NoexceptCheckError(
             "clang-query not found. Install LLVM or the clang-tool-chain package."
@@ -481,21 +489,11 @@ def run_noexcept_ast_check(file_path: str | None = None) -> CheckerResults:
     )
 
 
-def run_combined_ast_check() -> tuple[CheckerResults, CheckerResults]:
-    """Run noexcept + array-param matchers in ONE clang-query session per TU.
-
-    Returns (noexcept_results, array_param_results) so the orchestrator can
-    bucket them under their separate checker names.
-
-    The combined dispatch halves the peak clang-query process count
-    (~50 -> ~25 for the "all" scope) by sharing the parsed AST between
-    the two matchers per TU. Each result is still individually cached
-    via cached_ast_check so a warm run skips clang-query entirely.
-
-    Single-file mode is NOT handled here - the caller falls back to the
-    per-check run_*_ast_check functions when a file_path is supplied.
-    """
-    from ci.lint_cpp.ast_cache import cached_ast_check
+def run_combined_ast_check(
+    file_path: str | None = None,
+) -> tuple[CheckerResults, CheckerResults]:
+    """Enforce the complete required stub/ESP matrix through the normal linter."""
+    from ci.tools.ast_matrix import run_matrix
     from ci.tools.check_array_params import (
         DEFAULT_BASELINE as ARRAY_BASELINE,
     )
@@ -508,70 +506,68 @@ def run_combined_ast_check() -> tuple[CheckerResults, CheckerResults]:
     from ci.tools.check_array_params import (
         load_baseline as load_array_baseline,
     )
-    from ci.tools.check_ast_combined import find_combined_hits
+    from ci.tools.check_noexcept import NoexceptCheckError
 
-    _require_ast_tool()
-
-    def _shape() -> tuple[CheckerResults, CheckerResults]:
-        noexcept_results = CheckerResults()
-        array_param_results = CheckerResults()
-        noexcept_hits, array_param_hits = find_combined_hits("all")
-
-        for hit in noexcept_hits:
-            abs_path = str(PROJECT_ROOT / hit.path)
-            noexcept_results.add_violation(
-                abs_path, hit.line, f"Missing FL_NO_EXCEPT: {hit.line_text}"
-            )
-
-        new_array, _stale_a = array_diff(
-            array_param_hits, load_array_baseline(ARRAY_BASELINE)
+    rel_file = None
+    if file_path is not None:
+        rel_file = os.path.relpath(Path(file_path).resolve(), PROJECT_ROOT).replace(
+            "\\", "/"
         )
-        for hit in new_array:
-            abs_path = str(PROJECT_ROOT / hit.path)
-            array_param_results.add_violation(
-                abs_path, hit.line, _diagnostic_for_hit(hit)
-            )
-        print("✅ Combined clang-query AST checks ran successfully")
-        return noexcept_results, array_param_results
+        if not rel_file.startswith("src/"):
+            return CheckerResults(), CheckerResults()
 
-    # Cache wrapper. Fingerprint over the same inputs both checks share
-    # (all src files, tool sources, and the array-param baseline). cached_ast_check stores ONE CheckerResults at a time,
-    # so we wrap each direction separately around the same _shape()
-    # call - first hit populates both caches, subsequent hits replay
-    # without re-running clang-query.
-    cache: dict[str, tuple[CheckerResults, CheckerResults]] = {}
+    _require_ast_tool(provisioned=True)
+    matrix = run_matrix("all")
+    if not matrix.success:
+        failures = matrix.report.get("failures", [])
+        raise NoexceptCheckError(
+            "Required AST matrix did not parse completely; "
+            f"see .build/ast-coverage.json: {failures}"
+        )
 
-    def _runner_noexcept() -> CheckerResults:
-        if "value" not in cache:
-            cache["value"] = _shape()
-        return cache["value"][0]
+    noexcept_results = CheckerResults()
+    array_results = CheckerResults()
+    attribution = {
+        (str(item["check"]), str(item["path"]), int(str(item["line"]))): cast(
+            list[str], item["profiles"]
+        )
+        for item in cast(list[dict[str, object]], matrix.report.get("diagnostics", []))
+    }
+    noexcept_hits = {
+        (hit.path, hit.line): hit
+        for hit in [*matrix.stub_noexcept, *matrix.esp_noexcept]
+    }
+    for hit in noexcept_hits.values():
+        if rel_file is not None and hit.path != rel_file:
+            continue
+        profiles = attribution.get(("noexcept", hit.path, hit.line), [])
+        noexcept_results.add_violation(
+            str(PROJECT_ROOT / hit.path),
+            hit.line,
+            f"Missing FL_NO_EXCEPT [{', '.join(profiles)}]: {hit.line_text}",
+        )
 
-    def _runner_array_param() -> CheckerResults:
-        if "value" not in cache:
-            cache["value"] = _shape()
-        return cache["value"][1]
-
-    tool_sources = [
-        PROJECT_ROOT / "ci" / "lint_cpp" / "run_all_checkers.py",
-        PROJECT_ROOT / "ci" / "tools" / "check_noexcept.py",
-        PROJECT_ROOT / "ci" / "tools" / "check_array_params.py",
-        PROJECT_ROOT / "ci" / "tools" / "check_ast_combined.py",
-    ]
-    noexcept_cached = cached_ast_check(
-        name="noexcept_ast",
-        scope="all",
-        tool_sources=tool_sources,
-        baseline_path=None,
-        runner=_runner_noexcept,
+    # The existing array baseline identifies source signatures, not platforms.
+    # Reuse it for identical target declarations without adding exemptions.
+    new_stub_array, _stale = array_diff(
+        matrix.stub_array_params, load_array_baseline(ARRAY_BASELINE)
     )
-    array_param_cached = cached_ast_check(
-        name="array_param_ast",
-        scope="all",
-        tool_sources=tool_sources,
-        baseline_path=PROJECT_ROOT / ARRAY_BASELINE if ARRAY_BASELINE else None,
-        runner=_runner_array_param,
+    new_esp_array, _ = array_diff(
+        matrix.esp_array_params, load_array_baseline(ARRAY_BASELINE)
     )
-    return noexcept_cached, array_param_cached
+    array_hits = {
+        (hit.path, hit.line): hit for hit in [*new_stub_array, *new_esp_array]
+    }
+    for hit in array_hits.values():
+        if rel_file is not None and hit.path != rel_file:
+            continue
+        profiles = attribution.get(("array_params", hit.path, hit.line), [])
+        array_results.add_violation(
+            str(PROJECT_ROOT / hit.path),
+            hit.line,
+            f"{_diagnostic_for_hit(hit)} [{', '.join(profiles)}]",
+        )
+    return noexcept_results, array_results
 
 
 def run_array_param_ast_check(file_path: str | None = None) -> CheckerResults:
@@ -900,11 +896,10 @@ def main() -> int:
         # (ci/lint_cpp_rs/src/checkers/test_structure.rs); its violations
         # arrive via the merge_checker_results step above.
 
-        noexcept_results = run_noexcept_ast_check(str(file_path))
+        noexcept_results, array_param_results = run_combined_ast_check(str(file_path))
         if noexcept_results.has_violations():
             results["NoexceptAstChecker"] = noexcept_results
 
-        array_param_results = run_array_param_ast_check(str(file_path))
         if array_param_results.has_violations():
             results["ArrayParamAstChecker"] = array_param_results
 

@@ -108,11 +108,11 @@ namespace detail {
 
 #ifdef FL_IS_ESP32
 // ESP32-specific memory allocation functions for RMT buffer pooling
-void* InternalAlloc(fl::size size);      // MALLOC_CAP_INTERNAL - fast DRAM
-void* InternalRealloc(void* ptr, fl::size size);  // Realloc for DRAM
-void InternalFree(void* ptr);
-void* DMAAlloc(fl::size size);           // MALLOC_CAP_DMA - DMA-capable memory
-void DMAFree(void* ptr);
+void* InternalAlloc(fl::size size) FL_NO_EXCEPT;      // MALLOC_CAP_INTERNAL - fast DRAM
+void* InternalRealloc(void* ptr, fl::size size) FL_NO_EXCEPT;  // Realloc for DRAM
+void InternalFree(void* ptr) FL_NO_EXCEPT;
+void* DMAAlloc(fl::size size) FL_NO_EXCEPT;           // MALLOC_CAP_DMA - DMA-capable memory
+void DMAFree(void* ptr) FL_NO_EXCEPT;
 #endif
 
 template <typename T> class PSRamAllocator {

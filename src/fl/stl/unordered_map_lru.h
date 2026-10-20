@@ -28,38 +28,41 @@ class HashMapLru {
 
         ValueWithTimestamp() FL_NO_EXCEPT : last_access_time(0) {}
         ValueWithTimestamp(const T &v, u32 time)
-            : value(v), last_access_time(time) {}
+            FL_NO_EXCEPT : value(v), last_access_time(time) {}
     };
 
   public:
-    HashMapLru(fl::size max_size) : mMaxSize(max_size), mCurrentTime(0) {
+    HashMapLru(fl::size max_size) FL_NO_EXCEPT : mMaxSize(max_size), mCurrentTime(0) {
         // Ensure max size is at least 1
         if (mMaxSize < 1)
             mMaxSize = 1;
     }
 
     HashMapLru(fl::size max_size, memory_resource* resource)
-        : mMap(resource), mMaxSize(max_size), mCurrentTime(0) {
+        FL_NO_EXCEPT : mMap(resource), mMaxSize(max_size), mCurrentTime(0) {
         if (mMaxSize < 1)
             mMaxSize = 1;
     }
 
-    void setMaxSize(fl::size max_size) {
-        while (mMaxSize < max_size) {
+    void setMaxSize(fl::size max_size) FL_NO_EXCEPT {
+        if (max_size < 1) {
+            max_size = 1;
+        }
+        while (mMap.size() > max_size) {
             // Evict oldest items until we reach the new max size
             evictOldest();
         }
         mMaxSize = max_size;
     }
 
-    void swap(HashMapLru &other) {
+    void swap(HashMapLru &other) FL_NO_EXCEPT {
         fl::swap(mMap, other.mMap);
         fl::swap(mMaxSize, other.mMaxSize);
         fl::swap(mCurrentTime, other.mCurrentTime);
     }
 
     // Insert or update a key-value pair
-    void insert(const Key &key, const T &value) {
+    void insert(const Key &key, const T &value) FL_NO_EXCEPT {
         // Only evict if we're at capacity AND this is a new key
         const ValueWithTimestamp *existing = mMap.find_value(key);
 
@@ -83,7 +86,7 @@ class HashMapLru {
     }
 
     // Get value for key, returns nullptr if not found
-    T *find_value(const Key &key) {
+    T *find_value(const Key &key) FL_NO_EXCEPT {
         ValueWithTimestamp *vwt = mMap.find_value(key);
         if (vwt) {
             // Update access time
@@ -95,7 +98,7 @@ class HashMapLru {
     }
 
     // Get value for key, returns nullptr if not found (const version)
-    const T *find_value(const Key &key) const {
+    const T *find_value(const Key &key) const FL_NO_EXCEPT {
         const ValueWithTimestamp *vwt = mMap.find_value(key);
         return vwt ? &vwt->value : nullptr;
     }
@@ -124,23 +127,23 @@ class HashMapLru {
     }
 
     // Remove a key
-    bool remove(const Key &key) { return mMap.remove(key); }
+    bool remove(const Key &key) FL_NO_EXCEPT { return mMap.remove(key); }
 
     // Clear the map
-    void clear() {
+    void clear() FL_NO_EXCEPT {
         mMap.clear();
         mCurrentTime = 0;
     }
 
     // Size accessors
-    fl::size size() const { return mMap.size(); }
-    bool empty() const { return mMap.empty(); }
-    fl::size capacity() const { return mMaxSize; }
-    memory_resource* get_memory_resource() const { return mMap.get_memory_resource(); }
+    fl::size size() const FL_NO_EXCEPT { return mMap.size(); }
+    bool empty() const FL_NO_EXCEPT { return mMap.empty(); }
+    fl::size capacity() const FL_NO_EXCEPT { return mMaxSize; }
+    memory_resource* get_memory_resource() const FL_NO_EXCEPT { return mMap.get_memory_resource(); }
 
   private:
     // Evict the least recently used item
-    void evictOldest() {
+    void evictOldest() FL_NO_EXCEPT {
         if (mMap.empty())
             return;
 

@@ -23,7 +23,12 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import stat
 import sys
+import tempfile
+import threading
+import uuid
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable, Iterable
 
@@ -49,6 +54,379 @@ _TRACKED_EXTENSIONS = (".h", ".hpp", ".cpp", ".cc", ".cxx", ".cpp.hpp")
 # Cost: ~100 extra files vs the previous scope-narrow walk (~2000 ->
 # ~2100). Fingerprint is per-file os.stat (mtime+size); ~50ms total.
 _SRC_ROOT = "src"
+
+
+@dataclass(frozen=True)
+class AstUnitResult:
+    """A completed semantic parse and the headers observed by that parse."""
+
+    payload: dict[str, object]
+    dependencies: tuple[Path, ...]
+    complete: bool = True
+
+
+@dataclass(frozen=True)
+class AstUnitCacheResult:
+    payload: dict[str, object]
+    cache_hit: bool
+
+
+@dataclass
+class AstInputSnapshot:
+    """Share byte hashing across jobs in ONE invocation, never across runs.
+
+    Instantiate after provisioning/generated-input staging is complete. Callers
+    must not mutate inputs while the matrix runs, just as with compilation.
+    """
+
+    defer_publication: bool = False
+    _publications: list[Callable[[], None]] = field(default_factory=list)
+    _contents: dict[Path, str] = field(default_factory=dict)
+    _inventories: dict[Path, str] = field(default_factory=dict)
+    _available_files: dict[Path, set[Path]] = field(default_factory=dict)
+    _prepared_roots: set[Path] = field(default_factory=set)
+    _lock: threading.RLock = field(default_factory=threading.RLock)
+
+    def content(self, path: Path) -> str:
+        with self._lock:
+            if path not in self._contents:
+                try:
+                    with path.open("rb") as stream:
+                        hasher = hashlib.sha256()
+                        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+                            hasher.update(chunk)
+                        digest = hasher.hexdigest()
+                except FileNotFoundError:
+                    digest = "missing"
+                self._contents[path] = digest
+            return self._contents[path]
+
+    def inventory(self, root: Path) -> str:
+        """Fingerprint names and symlink targets, including extensionless files.
+
+        Included-file bytes are tracked separately per TU. Header appearance,
+        disappearance, search-path shadowing, and symlink retargeting invalidate
+        affected profiles even when no previous include trace mentions them.
+        """
+        with self._lock:
+            if root in self._inventories:
+                return self._inventories[root]
+            digest = hashlib.sha256()
+            available: set[Path] = set()
+
+            def visit(
+                path: Path,
+                resolved: Path,
+                ancestors: frozenset[Path],
+                exists: bool,
+                directory: bool,
+                regular: bool,
+            ) -> None:
+                digest.update(str(path).encode("utf-8"))
+                digest.update(b"\0")
+                digest.update(str(resolved).encode("utf-8"))
+                digest.update(b"\0")
+                if not exists:
+                    digest.update(b"missing\0")
+                elif directory:
+                    digest.update(b"dir\0")
+                    if resolved not in ancestors:
+                        with os.scandir(path) as entries:
+                            children = sorted(
+                                entries, key=lambda entry: Path(entry.name)
+                            )
+                        for entry in children:
+                            child = path / entry.name
+                            symlink = entry.is_symlink()
+                            if os.name == "nt":
+                                # Junctions are reparse points but are not
+                                # reported as symlinks (including Python 3.10).
+                                symlink = symlink or bool(
+                                    getattr(
+                                        entry.stat(follow_symlinks=False),
+                                        "st_file_attributes",
+                                    )
+                                    & stat.FILE_ATTRIBUTE_REPARSE_POINT
+                                )
+                            # Ordinary children share their parent's resolved
+                            # ancestry; links/reparse points need resolution.
+                            child_resolved = (
+                                child.resolve() if symlink else resolved / entry.name
+                            )
+                            visit(
+                                child,
+                                child_resolved,
+                                ancestors | {resolved},
+                                child.exists() if symlink else True,
+                                entry.is_dir(),
+                                entry.is_file(),
+                            )
+                else:
+                    digest.update(b"file\0")
+                    if regular:
+                        available.add(resolved)
+
+            visit(
+                root,
+                root.resolve(),
+                frozenset(),
+                root.exists(),
+                root.is_dir(),
+                root.is_file(),
+            )
+            value = digest.hexdigest()
+            self._inventories[root] = value
+            self._available_files[root] = available
+            return value
+
+    def prepare_parse(self, roots: list[Path], files: list[Path]) -> None:
+        """Snapshot possible newly discovered dependencies before a cold parse."""
+        with self._lock:
+            for root in roots:
+                if root not in self._prepared_roots:
+                    self.inventory(root)
+                    for path in self._available_files[root]:
+                        self.content(path)
+                    self._prepared_roots.add(root)
+            for path in files:
+                self.content(path.resolve())
+
+    def verify_parse(self, roots: list[Path], paths: list[Path]) -> None:
+        """Refuse results if inputs changed while parsing or were not declared."""
+        after = AstInputSnapshot()
+        for path in paths:
+            resolved = path.resolve()
+            before = self._contents.get(resolved)
+            if before is None:
+                raise ValueError(
+                    f"AST dependency outside declared include roots: {path}"
+                )
+            if before != after.content(resolved):
+                raise ValueError(f"AST input changed during analysis; retry: {path}")
+        if not self.defer_publication:
+            for root in roots:
+                if self.inventory(root) != after.inventory(root):
+                    raise ValueError(
+                        f"AST include availability changed during analysis; retry: {root}"
+                    )
+
+    def publish_after_audit(self, publication: Callable[[], None]) -> None:
+        """Keep cold matrix results provisional until the full input audit."""
+        if self.defer_publication:
+            with self._lock:
+                self._publications.append(publication)
+        else:
+            publication()
+
+    def verify_final(self) -> None:
+        """Validate shared lookup hashes before reporting any matrix result.
+
+        Cache hits bypass ``verify_parse``. Recheck the invocation's complete
+        content and availability snapshot so edits after an earlier job cannot
+        turn a later cached result into stale successful evidence.
+        """
+        with self._lock:
+            contents = dict(self._contents)
+            inventories = dict(self._inventories)
+            # A failed audit discards the entire batch, even if callers later
+            # restore inputs and attempt another audit on this object.
+            publications, self._publications = self._publications, []
+        after = AstInputSnapshot()
+        for path, before in contents.items():
+            if after.content(path) != before:
+                raise ValueError(f"AST input changed during analysis; retry: {path}")
+        for root, before in inventories.items():
+            if after.inventory(root) != before:
+                raise ValueError(
+                    f"AST include availability changed during analysis; retry: {root}"
+                )
+        # No stable result or dependency manifest is published before EVERY
+        # content and availability check passes. This avoids walking a large
+        # SDK once per TU while retaining a complete invocation-wide audit.
+        for publication in publications:
+            publication()
+
+
+def _unit_json(value: object) -> bytes:
+    return json.dumps(
+        value, sort_keys=True, separators=(",", ":"), allow_nan=False
+    ).encode("utf-8")
+
+
+def _unit_manifest_write(path: Path, dependencies: list[str]) -> None:
+    """One atomic dependency record; result storage belongs to zccache (#3338)."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.NamedTemporaryFile(
+        mode="w",
+        encoding="utf-8",
+        dir=path.parent,
+        prefix=path.name,
+        suffix=".tmp",
+        delete=False,
+    ) as stream:
+        json.dump({"dependencies": dependencies}, stream)
+        temporary = Path(stream.name)
+    os.replace(temporary, path)
+
+
+class _AstCacheMiss(Exception):
+    """Abort a native lookup callback without storing provisional bytes."""
+
+
+def cached_ast_unit(
+    name: str,
+    *,
+    identity: dict[str, object],
+    input_files: Iterable[Path],
+    include_roots: Iterable[Path],
+    runner: Callable[[], AstUnitResult],
+    cache_dir: Path | None = None,
+    snapshot: AstInputSnapshot | None = None,
+) -> AstUnitCacheResult:
+    """Reuse a complete TU/profile parse through zccache's native binding.
+
+    ``identity`` must describe the full argument vector, target, SDK, matcher
+    and expected-declaration contract. ``input_files`` must include the TU,
+    compiler binary, tool sources and generated configuration. ``include_roots``
+    must include every search root, including compiler resources and quoted
+    include directories. The runner supplies transitive dependencies obtained
+    from the SAME successful parse (for example Clang's -H trace).
+
+    The tiny local manifest discovers the previous dependency list. All cached
+    analysis bytes live in zccache; this extends #3338's intended integration
+    instead of creating another result store. Explicit byte digests also guard
+    against same-size edits with restored timestamps. Parse failures propagate;
+    violations in a complete parse are cached verbatim.
+    """
+    from zccache import exec_cached
+
+    active_snapshot = snapshot if snapshot is not None else AstInputSnapshot()
+    files = sorted({Path(os.path.abspath(path)) for path in input_files})
+    roots = sorted({Path(os.path.abspath(path)) for path in include_roots})
+    descriptor = {
+        "schema": 1,
+        "name": name,
+        "identity": identity,
+        "files": [str(path) for path in files],
+        "roots": [str(path) for path in roots],
+    }
+    descriptor_bytes = _unit_json(descriptor)
+    manifest = (cache_dir or _CACHE_DIR / "units") / (
+        hashlib.sha256(descriptor_bytes).hexdigest() + ".json"
+    )
+    dependencies: list[str] = []
+    manifest_valid = False
+    try:
+        stored = json.loads(manifest.read_text(encoding="utf-8"))
+        candidate = stored["dependencies"]
+        if isinstance(candidate, list) and all(
+            isinstance(path, str) for path in candidate
+        ):
+            dependencies = candidate
+            manifest_valid = True
+    except (OSError, ValueError, KeyError, TypeError):
+        pass
+
+    inventories = [(str(root), active_snapshot.inventory(root)) for root in roots]
+
+    def key_for(paths: list[str]) -> bytes:
+        contents = [
+            (str(path), active_snapshot.content(path))
+            for path in sorted(set(files) | {Path(path) for path in paths})
+        ]
+        return _unit_json(
+            {
+                "descriptor": descriptor,
+                "contents": contents,
+                "availability": inventories,
+            }
+        )
+
+    parsed: AstUnitResult | None = None
+
+    def run() -> bytes:
+        nonlocal parsed
+        active_snapshot.prepare_parse(roots, files)
+        parsed = runner()
+        if not parsed.complete:
+            raise ValueError("Cannot cache an incomplete AST parse")
+        if not isinstance(parsed.payload, dict):
+            raise ValueError("AST payload must be a JSON object")
+        active_snapshot.verify_parse(roots, [*files, *parsed.dependencies])
+        return _unit_json(
+            {
+                "payload": parsed.payload,
+                "dependencies": sorted(
+                    {str(path.resolve()) for path in parsed.dependencies}
+                ),
+                "complete": True,
+            }
+        )
+
+    def execute(key: bytes, callback: Callable[[], bytes]) -> bytes:
+        # Content digests in extra_key validate input bytes regardless of daemon
+        # stat-cache shortcuts. No path list is serialized onto a command line.
+        return exec_cached(
+            name="fastled_ast_unit",
+            input_files=[],
+            input_env={},
+            extra_key=key,
+            runner=callback,
+        )
+
+    initial_key = key_for(dependencies)
+    if not manifest_valid:
+        # A key without discovered dependencies must never be reused if the
+        # manifest is missing, corrupted, or concurrent discovery is underway.
+        initial_key += uuid.uuid4().hex.encode("ascii")
+    if active_snapshot.defer_publication:
+
+        def miss() -> bytes:
+            raise _AstCacheMiss
+
+        try:
+            encoded = execute(initial_key, miss) if manifest_valid else run()
+        except _AstCacheMiss:
+            encoded = run()
+    else:
+        encoded = execute(initial_key, run)
+    try:
+        result = json.loads(encoded)
+        if (
+            not isinstance(result, dict)
+            or result.get("complete") is not True
+            or not isinstance(result.get("payload"), dict)
+            or not isinstance(result.get("dependencies"), list)
+            or not all(isinstance(path, str) for path in result["dependencies"])
+        ):
+            raise ValueError("Invalid cached AST result")
+        # Reject non-JSON numbers, accepted by Python's permissive decoder.
+        _unit_json(result)
+    except (ValueError, TypeError, KeyError):
+        result = json.loads(run())
+        # A malformed cached value is never reported as a hit or success.
+        return AstUnitCacheResult(result["payload"], False)
+
+    discovered = result["dependencies"]
+    complete_key = key_for(discovered)
+
+    def publish() -> None:
+        if parsed is not None and (
+            active_snapshot.defer_publication
+            or discovered != dependencies
+            or not manifest_valid
+        ):
+            # Publish the complete dependency key without a second parse.
+            execute(complete_key, lambda: encoded)
+        try:
+            _unit_manifest_write(manifest, discovered)
+        except OSError as exc:
+            print(
+                f"warning: AST dependency manifest write failed: {exc}", file=sys.stderr
+            )
+
+    active_snapshot.publish_after_audit(publish)
+    return AstUnitCacheResult(result["payload"], parsed is None)
 
 
 def _iter_scope_files(scope: str) -> Iterable[Path]:

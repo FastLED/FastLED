@@ -1,4 +1,5 @@
 #pragma once
+#include "fl/stl/noexcept.h"
 
 #include "fl/stl/compiler_control.h"
 
@@ -9,7 +10,7 @@ namespace fl {
 /// so this is a placeholder that does nothing.
 /// A template so an unqualified `exit(...)` always picks ::exit (FastLED #4834).
 template <typename FlLibcTag = void>
-FASTLED_FORCE_INLINE void exit(int code) {
+FASTLED_FORCE_INLINE void exit(int code) FL_NO_EXCEPT {
     (void)code;  // Suppress unused parameter warning
     // No-op: intentionally does nothing
 }

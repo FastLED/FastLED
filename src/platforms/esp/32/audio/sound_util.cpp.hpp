@@ -2,6 +2,7 @@
 
 
 
+#include "fl/stl/noexcept.h"
 #include "platforms/is_platform.h"
 #ifdef FL_IS_ESP32
 
@@ -15,7 +16,7 @@
 namespace fl {
 
 namespace {
-    float inmp441_rms_to_dB(float rms_loudness) {
+    float inmp441_rms_to_dB(float rms_loudness) FL_NO_EXCEPT {
         // This is a rough approximation of the loudness to dB scale.
         // The data was taken from the following video featuring brown
         // noise: https://www.youtube.com/watch?v=hXetO_bYcMo

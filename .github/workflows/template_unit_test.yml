@@ -59,6 +59,31 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libunwind-dev
 
+      - name: Cache semantic lint SDKs and tools
+        uses: actions/cache@v4
+        with:
+          path: |
+            .cache/ast-sdk
+            ~/.clang-tool-chain/clang
+            ~/.clang-tool-chain/clang_extra
+            .build/ast-profiles
+          key: ast-sdk-v2-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ci/tools/ast_profiles.py', 'pyproject.toml') }}
+          restore-keys: |
+            ast-sdk-v2-${{ runner.os }}-${{ runner.arch }}-
+
+      - name: Cache semantic lint results
+        # Restore before Install can start a daemon. ExecProbe values are
+        # self-contained files; no daemon socket, PID, lock, or index is needed.
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.zccache/*/kv/exec-probe-v1
+            .cache/ast_lint/units
+          key: ast-results-v2-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ci/tools/ast_profiles.py', 'pyproject.toml') }}-${{ github.sha }}
+          restore-keys: |
+            ast-results-v2-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ci/tools/ast_profiles.py', 'pyproject.toml') }}-
+            ast-results-v2-${{ runner.os }}-${{ runner.arch }}-
+
       - name: Install
         run: ./install
         shell: bash
@@ -134,6 +159,18 @@ jobs:
           clang-query --version
         shell: bash
 
+      - name: Provision required stub and ESP semantic profiles
+        # Installation/database generation is explicit. The lint step below
+        # only reads provisioned SDKs and never builds firmware or downloads.
+        run: uv run python -m ci.tools.ast_profiles --provision
+        env:
+          FBUILD_CACHE_DIR: ${{ github.workspace }}/.cache/ast-sdk
+        shell: bash
+
+      - name: Start semantic result cache daemon
+        run: uv run zccache start
+        shell: bash
+
       - name: C++ lint (Rust path)
         # Exercises the Rust C++ linter (`fastled-lint`) end-to-end via the
         # default `bash lint --cpp` path on every PR. The binary is rebuilt
@@ -142,6 +179,14 @@ jobs:
         run: |
           bash lint --cpp
         shell: bash
+
+      - name: Upload semantic coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ast-coverage-${{ inputs.os }}-${{ inputs.build-mode }}
+          path: .build/ast-coverage.json
+          if-no-files-found: warn
 
       - name: Python tests (ci/tests)
         # Complete ~1,500-test suite for ci-full/release. A deterministic
@@ -189,6 +234,13 @@ jobs:
           uv run pytest -q --tb=short \
             ci/tests/test_setup_js_linting_fast.py \
             ci/tests/test_ast_lint_prerequisite.py \
+            ci/tests/test_cpp_lint_stage.py \
+            ci/tests/test_ast_profiles.py \
+            ci/tests/test_ast_profile_cache.py \
+            ci/tests/test_ast_matrix.py \
+            ci/tests/test_ast_esp_integration.py \
+            ci/tests/test_ast_error_attributes.py \
+            ci/tests/test_ast_target_abi.py \
             ci/tests/test_compile_deadline.py
         shell: bash
 

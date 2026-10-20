@@ -18,12 +18,12 @@ namespace fl {
 
 class UICheckboxImpl {
   public:
-    UICheckboxImpl(const char *name, bool value = false) : mValue(value) {
+    UICheckboxImpl(const char *name, bool value = false) FL_NO_EXCEPT : mValue(value) {
         FASTLED_UNUSED(name);
     }
     ~UICheckboxImpl() FL_NO_EXCEPT {}
-    operator bool() const { return mValue; }
-    explicit operator int() const { return mValue ? 1 : 0; }
+    operator bool() const FL_NO_EXCEPT { return mValue; }
+    explicit operator int() const FL_NO_EXCEPT { return mValue ? 1 : 0; }
     UICheckboxImpl &operator=(bool value) FL_NO_EXCEPT {
         setValue(value);
         return *this;
@@ -32,13 +32,13 @@ class UICheckboxImpl {
         setValue(value != 0);
         return *this;
     }
-    bool value() const { return mValue; }
+    bool value() const FL_NO_EXCEPT { return mValue; }
 
     // Stub method for group setting (does nothing on non-WASM platforms)
-    void setGroup(const fl::string& groupName) { FASTLED_UNUSED(groupName); }
+    void setGroup(const fl::string& groupName) FL_NO_EXCEPT { FASTLED_UNUSED(groupName); }
 
   private:
-    void setValue(bool value) { mValue = value; }
+    void setValue(bool value) FL_NO_EXCEPT { mValue = value; }
     bool mValue;
 };
 

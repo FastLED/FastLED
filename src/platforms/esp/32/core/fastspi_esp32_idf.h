@@ -63,7 +63,7 @@ public:
     FL_STATIC_ASSERT(FastPin<DATA_PIN>::validpin(), "Invalid data pin specified");
     FL_STATIC_ASSERT(FastPin<CLOCK_PIN>::validpin(), "Invalid clock pin specified");
 
-    ESP32SPIOutput()
+    ESP32SPIOutput() FL_NO_EXCEPT
         : mSPIHandle(nullptr)
         , mHost(defaultHost())
         , mPSelect(nullptr)
@@ -73,7 +73,7 @@ public:
         fl::memset(&mTransaction, 0, sizeof(mTransaction));
     }
 
-    ESP32SPIOutput(Selectable* pSelect)
+    ESP32SPIOutput(Selectable* pSelect) FL_NO_EXCEPT
         : mSPIHandle(nullptr)
         , mHost(defaultHost())
         , mPSelect(pSelect)
@@ -173,9 +173,9 @@ public:
         mInitialized = true;
     }
 
-    static void stop() {}
-    static void wait() {}
-    static void waitFully() {}
+    static void stop() FL_NO_EXCEPT {}
+    static void wait() FL_NO_EXCEPT {}
+    static void waitFully() FL_NO_EXCEPT {}
 
     void writeByteNoWait(u8 b) FL_NO_EXCEPT __attribute__((always_inline)) {
         writeByte(b);
@@ -279,7 +279,7 @@ public:
         writeBytes<DATA_NOP>(data, len);
     }
 
-    static void finalizeTransmission() {}
+    static void finalizeTransmission() FL_NO_EXCEPT {}
 
     template <u8 BIT>
     inline void writeBit(u8 b) FL_NO_EXCEPT {
@@ -288,7 +288,7 @@ public:
     }
 
     template <u8 FLAGS, class D, EOrder RGB_ORDER>
-    FL_NO_INLINE void writePixels(PixelController<RGB_ORDER> pixels, void* context) {
+    FL_NO_INLINE void writePixels(PixelController<RGB_ORDER> pixels, void* context) FL_NO_EXCEPT {
         #if FASTLED_ESP32_SPI_BULK_TRANSFER
         select();
         int len = pixels.mLen;

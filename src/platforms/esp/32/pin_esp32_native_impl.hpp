@@ -231,7 +231,7 @@ static LedcPinAlloc g_ledc_alloc[FL_LEDC_MAX_CHANNELS] = {
 #endif
 };
 
-inline bool needsPwmIsrFallback(int /*pin*/, u32 frequency_hz) {
+inline bool needsPwmIsrFallback(int /*pin*/, u32 frequency_hz) FL_NO_EXCEPT {
     // LEDC peripheral supports roughly 10 Hz to 40 MHz.
     // Anything outside that range needs the ISR software fallback.
     if (frequency_hz < 10 || frequency_hz > 40000000UL) {

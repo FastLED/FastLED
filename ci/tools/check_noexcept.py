@@ -170,7 +170,6 @@ _SUPPRESS_RE = re.compile(
     re.IGNORECASE,
 )
 _DESTRUCTOR_SOURCE_RE = re.compile(r"(?:^|[^\w:])~\w+\s*\(")
-_MACRO_INVOCATION_RE = re.compile(r"^\s*[A-Z][A-Z0-9_]*\s*\(")
 
 
 class NoexceptCheckError(RuntimeError):
@@ -199,6 +198,9 @@ def build_query(file_regex: str) -> str:
         "unless(isDeleted()), "
         "unless(isDefaulted()), "
         "unless(isImplicit()), "
+        # Error-attributed declarations are compiler diagnostics: reaching a
+        # call is itself a compile error, so they have no runtime contract.
+        'unless(hasAttr("attr::Error")), '
         "unless(cxxDestructorDecl()), "
         "unless(cxxMethodDecl(ofClass(cxxRecordDecl(isLambda())))), "
         "unless(hasParent(linkageSpecDecl())), "
@@ -292,8 +294,6 @@ def _signature_is_exempt(signature: str) -> bool:
     # Tokens in return/callback types, or noexcept(false), cannot excuse an AST
     # finding for this function (#4773).
     if _DESTRUCTOR_SOURCE_RE.search(code):
-        return True
-    if _MACRO_INVOCATION_RE.match(code):
         return True
     if 'extern "C"' in code:
         return True
