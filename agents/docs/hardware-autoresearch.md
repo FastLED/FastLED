@@ -333,6 +333,39 @@ output, commit/PR URL, and issue URL. Stale chat comments, CI compile-only
 results, and old serial buffers do not close hardware issues when a board can
 be tested locally.
 
+### ESP32 two-host APA102 check with one jumper
+
+For a registration-order bug involving explicit `Esp32SpiBus::HOST2` and
+`HOST3`, a second LED strip is unnecessary on ESP32 boards with both hosts.
+Choose pins appropriate for the board. On the tested ESP32-S3 board, connect
+GPIO 1 (measured APA102 data) to GPIO 2 (AutoResearch RX). GPIO 3 is its SPI clock. The unmeasured
+channel uses GPIO 4 for data and GPIO 5 for clock; leave those pins unconnected.
+Run GPIO-only AutoResearch on the S3 first to build, deploy, and verify the
+jumper. Then call the firmware's `dualSpiHostLoopback` RPC method with
+`activeHost` set to 2 or 3 and `dummyFirst` set to true or false. Run all four
+combinations, resetting the board between calls because the public `addLeds`
+controllers remain registered for the lifetime of a firmware boot. The method
+registers both explicit hosts, sends APA102 frames, and reconstructs the first
+eight measured LED frames from raw RX edges. It compares the APA102 brightness
+headers and RGB bytes with the sent pattern. Use `ci.rpc_client.RpcClient`
+with `create_serial_interface`; never open the serial port with raw pyserial.
+The measured channel must pass in both registration orders for each host. After
+flashing with `bash autoresearch <environment> --upload-port <port>`, run all four
+cases with:
+
+```bash
+uv run python ci/autoresearch/dual_spi_hosts.py --port <port> --environment <environment>
+```
+
+The runner resets the board between cases through `fbuild reset` and exits
+nonzero if any measured frame fails.
+
+`--spi` tests clockless output over SPI, and `--lcd-spi` tests the LCD_CAM
+APA102 backend. Neither exercises explicit `HOST2`/`HOST3` selection, so neither
+is evidence for this particular regression. If a generic AutoResearch mode
+panics, decode its backtrace against the freshly built firmware ELF and keep
+that failure separate from the explicit-host result.
+
 ### Driver Development and New Modes
 
 Add new AutoResearch functionality in the harness, not as a one-off sketch or
