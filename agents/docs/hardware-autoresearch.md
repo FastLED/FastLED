@@ -816,7 +816,7 @@ configuration, baud, encoding, or DMA-start cause.
 | `wave8ExpandBenchmark` | `[]` | Wave8 expansion ns/byte micro-bench (#2526) |
 | `parlioEncodeBenchmark` | `[]` | Full PARLIO encode_us bench (#2539) |
 | `parlioStreamValidate` | `[...]` | PARLIO stream validation against reference |
-| `dualSpiHostLoopback` | `[{activeHost:2|3, dummyFirst:bool}]` | On ESP32 boards with two SPI hosts, register a measured APA102 output and a dummy output, then verify eight measured frames |
+| `dualSpiHostLoopback` | `[{activeHost:2 or 3, dummyFirst:bool}]` | On ESP32 boards with two SPI hosts, register a measured APA102 output and a dummy output, then verify eight measured frames |
 | `testAsync` | `[]` | Async framework smoke test |
 | `testNoSerial` | `[]` | Minimal RPC plumbing check (no Serial writes) |
 
