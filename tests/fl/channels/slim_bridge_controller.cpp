@@ -43,6 +43,8 @@ public:
     int enqueueCount = 0;
     int showCount = 0;
     int pollCount = 0;
+    int enqueuedAtFirstShow = 0;
+    int busyPolls = 0;
     DriverState::Value mState = DriverState::READY;
 
     fl::vector<u8> lastBytes;
@@ -71,10 +73,19 @@ public:
         lastCapacity = bytes.capacity();
     }
 
-    void show() FL_NO_EXCEPT override { ++showCount; }
+    void show() FL_NO_EXCEPT override {
+        if (showCount == 0) {
+            enqueuedAtFirstShow = enqueueCount;
+        }
+        ++showCount;
+    }
 
     DriverState poll() FL_NO_EXCEPT override {
         ++pollCount;
+        if (busyPolls > 0) {
+            --busyPolls;
+            return DriverState(DriverState::BUSY);
+        }
         return DriverState(mState);
     }
 
@@ -388,6 +399,92 @@ FL_TEST_CASE("Direct-show bridge enqueues and shows the frame itself") {
     FL_CHECK_EQ(driver.showCount, 1);
     // GRB order, same bytes as the manager-backed golden test.
     FL_CHECK_EQ(driver.lastBytes, fl::vector<u8>({0x00, 0xFF, 0x00, 0xFF, 0x00, 0x00}));
+}
+
+FL_TEST_CASE("Immediate direct bridge preserves one strip per show") {
+    auto& driver = directDriverInstance();
+    driver.enqueueCount = 0;
+    driver.showCount = 0;
+    driver.pollCount = 0;
+    driver.enqueuedAtFirstShow = 0;
+    driver.mState = DriverState::READY;
+    CRGB first[1] = {CRGB::Red};
+    CRGB second[1] = {CRGB::Blue};
+    DirectController firstController;
+    SlimBridgeController<8, TIMING_WS2812_800KHZ, GRB, 280,
+                         DirectDriverTraits, 0, true> secondController;
+    FastLED.addLeds(&firstController, first, 1);
+    FastLED.addLeds(&secondController, second, 1);
+    auto cleanup = fl::make_scope_exit([&]() { FastLED.clear(true); });
+
+    FastLED.show();
+    FL_CHECK_EQ(driver.enqueuedAtFirstShow, 1);
+    FL_CHECK_EQ(driver.showCount, 2);
+    FL_CHECK_EQ(driver.pollCount, 0);
+}
+
+using BatchedDirectController = SlimBridgeController<7, TIMING_WS2812_800KHZ, GRB, 280,
+                                                     DirectDriverTraits, 0, true, true>;
+
+FL_TEST_CASE("Direct-show bridge batches legacy strips before flushing") {
+    auto& driver = directDriverInstance();
+    driver.enqueueCount = 0;
+    driver.showCount = 0;
+    driver.pollCount = 0;
+    driver.enqueuedAtFirstShow = 0;
+    driver.mState = DriverState::READY;
+    CRGB first[1] = {CRGB::Red};
+    CRGB second[1] = {CRGB::Blue};
+    BatchedDirectController firstController;
+    SlimBridgeController<8, TIMING_WS2812_800KHZ, GRB, 280,
+                         DirectDriverTraits, 0, true, true> secondController;
+    FastLED.addLeds(&firstController, first, 1);
+    FastLED.addLeds(&secondController, second, 1);
+    auto cleanup = fl::make_scope_exit([&]() { FastLED.clear(true); });
+
+    FastLED.show();
+    FL_CHECK_EQ(driver.enqueuedAtFirstShow, 2);
+    FL_CHECK_GT(driver.pollCount, 0);
+}
+
+FL_TEST_CASE("Direct-show bridge polls completion for standalone showLeds") {
+    auto& driver = directDriverInstance();
+    driver.enqueueCount = 0;
+    driver.showCount = 0;
+    driver.pollCount = 0;
+    driver.mState = DriverState::READY;
+    CRGB leds[1] = {CRGB::Green};
+    BatchedDirectController controller;
+    controller.setLeds(leds, 1);
+
+    driver.busyPolls = 3;
+    controller.setDither(BINARY_DITHER);
+    controller.showLeds(255);
+    FL_CHECK_EQ(driver.enqueueCount, 1);
+    FL_CHECK_EQ(driver.showCount, 1);
+    FL_CHECK_GE(driver.pollCount, 4);
+    FL_CHECK_EQ(controller.getDither(), BINARY_DITHER);
+}
+
+FL_TEST_CASE("Direct-show bridge respects legacy controller enable state") {
+    auto& driver = directDriverInstance();
+    driver.enqueueCount = 0;
+    driver.showCount = 0;
+    driver.pollCount = 0;
+    driver.mState = DriverState::READY;
+    CRGB leds[1] = {CRGB::Red};
+    BatchedDirectController controller;
+    FastLED.addLeds(&controller, leds, 1);
+    auto cleanup = fl::make_scope_exit([&]() { FastLED.clear(true); });
+
+    controller.setEnabled(false);
+    FastLED.show();
+    FL_CHECK_EQ(driver.enqueueCount, 0);
+    FL_CHECK_EQ(driver.showCount, 0);
+    controller.setEnabled(true);
+    FastLED.show();
+    FL_CHECK_EQ(driver.enqueueCount, 1);
+    FL_CHECK_EQ(driver.showCount, 1);
 }
 
 }  // FL_TEST_FILE

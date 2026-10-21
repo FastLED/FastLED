@@ -42,12 +42,12 @@
 
 namespace fl {
 
-// Thin bridge (issue #4584): registration with ChannelManager happens in
-// SlimBridgeController's constructor via DriverTraits::registerWithManager(),
-// which is the only path that makes ChannelManager::onEndFrame() aware of
-// this driver so it actually gets its show() called.
+// Legacy addLeds batches directly through the RMT driver. It does not need
+// ChannelManager's runtime registry. FL_SLIM_BRIDGE_DIRECT_SHOW=0 restores
+// managed registration for sketches using runtime channel-driver controls.
 template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 5>
-class ClocklessIdf4 : public SlimBridgeController<DATA_PIN, TIMING, RGB_ORDER, WAIT_TIME, BusTraits<Bus::RMT>>
+class ClocklessIdf4 : public SlimBridgeController<DATA_PIN, TIMING, RGB_ORDER, WAIT_TIME, BusTraits<Bus::RMT>, 0,
+                                                 SlimBridgeDirectShow<true>::value, true>
 {
 private:
     // -- Verify that the pin is valid

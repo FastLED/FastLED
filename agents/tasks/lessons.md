@@ -538,3 +538,12 @@
   verify its remaining call sites as well as the added regression test.
 
 - A native-console hardware test must use the selected backend for both directions. AutoResearch formerly read through fl I/O but replied through Arduino Serial; raw RPC output must use fl::write_bytes to bypass log filtering while honoring console selection. Compare failing hardware behavior with a selective revert before attributing it to an optimization.
+
+- "Legacy-only" means sketches using `FastLED.addLeds<>()`, not
+  `FastLED.add()`. Select the smaller bridge at that API boundary; do not
+  infer legacy use from the ESP32 memory tier or remove Channel API behavior.
+
+- Before changing a shared direct-driver flush policy, audit whether every
+  backend consumes a queue or only its first strip. LPC SCT requires immediate
+  per-strip flushing; opt RMT4 into batched completion with a separate template
+  policy and test both lifecycles.
