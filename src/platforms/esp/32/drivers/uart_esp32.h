@@ -13,6 +13,9 @@ namespace fl {
 
 // Forward declarations (no ESP-IDF headers in this file)
 struct UartConfig;
+namespace platforms {
+class EspIO;
+}
 
 /**
  * @brief UART port identifiers (platform-agnostic)
@@ -446,13 +449,18 @@ public:
     u32 getBaudRate() const FL_NO_EXCEPT { return mConfig.baudRate; }
 
 private:
+    // Fixed console configuration; other callers retain the configured API.
+    UartEsp32() FL_NO_EXCEPT;
+    friend class platforms::EspIO;
+
     UartConfig mConfig;     // Configuration parameters
     int mPortInt;           // ESP-IDF uart_port_t (stored as int to avoid including driver/uart.h)
     bool mBuffered;         // true if driver installed, false if using ROM fallback
     void* mEventQueue;      // FreeRTOS queue handle (if event queue configured)
 
     // Helper: Initialize UART driver (called by constructor)
-    bool initDriver() FL_NO_EXCEPT;
+    void initialize(const UartConfig& config) FL_NO_EXCEPT;
+    bool initDriver(const UartConfig& config) FL_NO_EXCEPT;
 };
 
 } // namespace fl

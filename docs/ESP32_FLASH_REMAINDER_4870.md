@@ -125,3 +125,78 @@ The linker reports, build logs and experimental scripts are retained under
 `.build/4870-evidence/`, `.build/symbols/4870-lolin-*` and
 `.build/4870_measure.py`. No production runtime changes or new workflows were
 made during this follow-up investigation.
+
+
+## Native IDF console optimization
+
+The earlier native-console measurement retained generic UART configuration
+branches even though `EspIO` always selects `UartConfig::reliable(UART0)`.
+A private console constructor now passes that fixed configuration through the
+same inline initialization helpers as the public configurable constructor.
+The compiler can discard impossible pin-routing, inversion and conversion
+branches from console-only images. The public configured UART constructor and
+its runtime options remain available.
+
+Matched unchanged reporter sketch, Lolin D32, Arduino ESP32 2.0.17 / IDF 4.4.7 /
+GCC 8.4 patch5, controls pinned to `f1efdf028`, with native Serial selected by
+`FL_ESP_USE_IDF_SERIAL=1`:
+
+| Console | Board flash bytes | Physical static RAM bytes |
+| --- | ---: | ---: |
+| Arduino control | 272,434 | 23,292 |
+| Native IDF before | 277,366 | 23,052 |
+| Native IDF specialized | 274,842 | 23,052 |
+
+The native image saves **2,524 bytes flash** with unchanged physical static
+RAM. It remains **2,408 bytes larger** than the Arduino control. Default console
+selection is unchanged. These figures do not include the separate #4873 cleanup;
+its savings must not be added without measuring the combined image.
+
+The map-section changes are chiefly UART driver (-1,116 bytes), GPIO driver
+(-865), FastLED platform code (-343) and UART HAL (-250), with small opposing
+alignment/other changes. `uart_set_pin` and `uart_set_line_inverse` disappear
+from the console-only ELF, while a real SDK consumer using runtime UART1 baud,
+pins, inversion and an event queue still retains both functions and the public
+configured constructor. SDK ring-buffer creation and UART installation remain:
+those support the existing buffered console behavior.
+
+The optimization preserves configuration values, 256-byte RX/TX buffers,
+requested LEVEL3/IRAM flags, existing-driver detection, installation delay,
+ROM fallback, diagnostics and USB-JTAG selection. Actual ISR placement remains
+controlled by the SDK build, as before; the SDK normalizes the IRAM flag to
+`CONFIG_UART_ISR_IN_IRAM`.
+
+### Hardware validation and harness corrections
+
+The connected CP2104 device at `/dev/ttyUSB0` (USB serial `0254E5B6`) probes as
+classic ESP32. On Arduino ESP32 2.0.3 / IDF 4.4.1, pin-free AutoResearch RPC
+smoke passes with **both Arduino and optimized native consoles**: discovery
+(83 methods), help, repeated ping, nested payload echo, status, task-context
+response and structured missing-method errors. This validates console transport;
+it is not an RS485, GPIO loopback or flash-cache stress test.
+
+Two existing harness problems were found and corrected during that validation:
+
+- The edge probe used a cycle-counter API absent in IDF 4.4. It now uses Arduino's
+  SDK-compatible cycle-counter wrapper, preserving the cycle arithmetic.
+- RPC input honored the selected console, while responses bypassed it through
+  Arduino `Serial`. Both original and optimized native firmware failed the RPC
+  probe before this correction. Raw responses now use `fl::write_bytes`, keeping
+  CRLF framing, streamed byte lengths, flush placement and log-filter bypass.
+
+Deployment remains through fbuild. Its native flashing transport timed out and
+held the port during fallback; the supported settings
+`FBUILD_USE_ESPFLASH_VERIFY=0 FBUILD_USE_ESPFLASH_WRITE=0` enabled fbuild's alternate
+transport and both completed tests. The temporary native test define in
+`ci/boards.py` was restored; no board defaults or new workflows are committed.
+
+Final validation also passes 321 native debug unit tests and 95 examples,
+repository lint, modern ESP32 native-console compilation, and ESP32-S3
+AutoResearch compilation with the native USB-JTAG console. A clean native test
+build resolved a stale cached-artifact timestamp rejection before test execution.
+Read-only review found no blocking issues.
+
+Evidence: `.build/4870-evidence/native-*`,
+`.build/symbols/4870-serial-native-baseline/`,
+`.build/symbols/4870-native-candidate/` and
+`.build/symbols/4870-native-feature/`.
